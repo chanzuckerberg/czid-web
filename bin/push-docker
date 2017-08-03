@@ -2,14 +2,21 @@
 
 set -e
 
-BRANCH=shift
-COMMIT=shift
+BRANCH=$1
+COMMIT=$2
+BUILD_NUMBER=$3
 
-export REPO=chanzuckerberb/idseq-web
+
+export REPO=chanzuckerberg/idseq-web
 export TAG=`if [ "$BRANCH" == "master" ]; then echo "latest"; else echo $BRANCH; fi`
 
-docker build -t $REPO:$TAG .
-docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+echo $BRANCH
+echo $COMMIT
+echo $REPO
+echo $TAG
+echo '--'
+docker build -t $REPO:$COMMIT .
+docker login -u $DOCKER_USER -p $DOCKER_PASS
 docker tag $REPO:$COMMIT $REPO:$TAG
-docker tag $REPO:$COMMIT $REPO:$TRAVIS_BUILD_NUMBER
+docker tag $REPO:$COMMIT $REPO:$BUILD_NUMBER
 docker push $REPO
