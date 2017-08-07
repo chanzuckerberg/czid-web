@@ -16,6 +16,8 @@ test:
 
 staging:
   <<: *default
+  host: <%= ENV['RDS_ADDRESS'] %>
 
 production:
   <<: *default
+  host: <%= ENV['RDS_ADDRESS'] %>
