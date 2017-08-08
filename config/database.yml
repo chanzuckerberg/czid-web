@@ -5,6 +5,7 @@ default: &default
   username: postgres
   password:
   pool: 5
+  database: idseq_<%= Rails.env %>
 
 development:
   <<: *default
@@ -16,7 +17,9 @@ test:
 
 staging:
   <<: *default
+  username: idseqmaster
   host: <%= ENV['RDS_ADDRESS'] %>
+  password: <%= ENV['DB_PASSWORD'] %>
 
 production:
   <<: *default

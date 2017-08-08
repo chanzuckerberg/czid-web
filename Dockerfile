@@ -23,7 +23,7 @@ COPY . ./
 
 # Expose port 3000 to the Docker host, so we can access it
 # from the outside.
-EXPOSE 80
+EXPOSE 3000
 
 # Configure an entry point, so we don't need to specify
 # "bundle exec" for each of our commands.
@@ -32,4 +32,4 @@ ENTRYPOINT ["bundle", "exec"]
 # The main command to run when the container starts. Also
 # tell the Rails dev server to bind to all interfaces by
 # default.
-CMD ["rails", "server", "-b", "0.0.0.0", "-p", "80"]
+CMD ["rails", "server", "-b", "0.0.0.0", "-p", "3000"]
