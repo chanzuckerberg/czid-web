@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -e
+
+ENV=$1
+TAG=$2
+
+if [ -z $ENV ] || [ -z $TAG ] ; then
+    echo "usage: ./bin/deploy ENV TAG";
+    exit
+fi
+
+#TODO run migrations
+
+./bin/ecs-deploy -c $ENV -n idseq-web -i chanzuckerberg/idseq-web:$TAG
