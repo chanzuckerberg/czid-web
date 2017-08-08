@@ -18,6 +18,7 @@ staging:
   <<: *default
   host: <%= ENV['RDS_ADDRESS'] %>
   username: idseqmaster
+  database: idseqdev
   password: <%= ENV['DB_PASSWORD'] %>
 
 production:
