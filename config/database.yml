@@ -17,6 +17,7 @@ test:
 staging:
   <<: *default
   host: <%= ENV['RDS_ADDRESS'] %>
+  password: <%= ENV['DB_PASSWORD'] %>
 
 production:
   <<: *default
