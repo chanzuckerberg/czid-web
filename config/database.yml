@@ -1,18 +1,19 @@
 default: &default
   adapter: postgresql
   encoding: unicode
-  host: db
   username: postgres
-  password:
+  password: pass
   pool: 5
   database: idseq_<%= Rails.env %>
 
 development:
   <<: *default
+  host: <%= ENV.include?("DOCKER") ? "db" : "localhost" %>
   database: idseq_development
 
 test:
   <<: *default
+  host: localhost
   database: idseq_test
 
 staging:
