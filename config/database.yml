@@ -2,7 +2,7 @@ default: &default
   adapter: postgresql
   encoding: unicode
   username: postgres
-  password: pass
+  password:
   pool: 5
   database: idseq_<%= Rails.env %>
 

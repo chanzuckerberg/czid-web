@@ -1,6 +1,12 @@
 language: ruby
 rvm:
 - 2.4
+services:
+  - postgresql
+addons:
+  postgresql: "9.6"
+before_script:
+  - psql -c 'create database idseq_test;' -U postgres
 before_install:
   - pip install --user awscli
   - export PATH=$PATH:$HOME/.local/bin
