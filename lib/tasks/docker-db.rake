@@ -5,7 +5,7 @@ namespace :db do
     if o.include?("postgres")
       puts "posgres already running"
     else
-      `docker run --rm --name postgres -e POSTGRES_PASSWORD=pass  -p 5432:5432 -d postgres`
+      `docker run --rm --name postgres -p 5432:5432 -d postgres:9.6`
     end
   end
 
