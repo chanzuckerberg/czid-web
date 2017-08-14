@@ -16,6 +16,12 @@ test:
   host: localhost
   database: idseq_test
 
+dev:
+  <<: *default
+  username: idseqmaster
+  host: <%= ENV['RDS_ADDRESS'] %>
+  password: <%= ENV['DB_PASSWORD'] %>
+
 staging:
   <<: *default
   username: idseqmaster
