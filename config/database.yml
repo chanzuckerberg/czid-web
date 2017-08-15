@@ -12,8 +12,7 @@ development:
 
 test:
   <<: *default
-  username: <%= ENV.include?("CI") ? "travis" : "root" %>
-  host: <%= ENV.include?("CI") ? "localhost" : "127.0.0.1" %>
+  port: <%= ENV.include?("CI") ? "3306" : "6603" %>
 
 dev:
   <<: *default
