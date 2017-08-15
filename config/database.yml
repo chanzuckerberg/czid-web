@@ -1,20 +1,17 @@
 default: &default
-  adapter: postgresql
-  encoding: unicode
-  username: postgres
-  password:
-  pool: 5
+  adapter: mysql2
+  encoding: utf8
+  username: root
+  host: 127.0.0.1
+  port: 6033
   database: idseq_<%= Rails.env %>
 
 development:
   <<: *default
-  host: <%= ENV.include?("DOCKER") ? "db" : "localhost" %>
-  database: idseq_development
+  host: <%= ENV.include?("DOCKER") ? "db" : "127.0.0.1" %>
 
 test:
   <<: *default
-  host: localhost
-  database: idseq_test
 
 dev:
   <<: *default

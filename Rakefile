@@ -6,5 +6,5 @@ require_relative 'config/application'
 Rails.application.load_tasks
 
 task :setup do
-  exec("brew install postgresql")
+  exec("brew install mysql")
 end
