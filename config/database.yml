@@ -12,6 +12,8 @@ development:
 
 test:
   <<: *default
+  username: <%= ENV.include?("CI") ? "travis" : "root" %>
+  host: <%= ENV.include?("CI") ? "localhost" : "127.0.0.1" %>
 
 dev:
   <<: *default

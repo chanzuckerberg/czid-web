@@ -1,4 +1,6 @@
 language: ruby
+env:
+  CI: yes
 rvm:
 - 2.4
 services:
