@@ -2,14 +2,14 @@ namespace :db do
 
   task :start do
     o = `docker ps`
-    if o.include?("postgres")
+    if o.include?("mysql")
       puts "posgres already running"
     else
-      `docker run --rm --name postgres -p 5432:5432 -d postgres:9.6`
+      `docker run --rm --name mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=1 -e MYSQL_DATABASE=idseq_development -p 6033:3306 -d mysql:5.7`
     end
   end
 
   task :stop do
-    `docker stop postgres`
+    `docker stop mysql`
   end
 end

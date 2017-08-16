@@ -12,4 +12,4 @@ fi
 
 #TODO run migrations
 
-./bin/ecs-deploy -c $ENV -n idseq-web -i chanzuckerberg/idseq-web:$TAG
+./bin/ecs-deploy -c $ENV -n idseq-web-dev -i chanzuckerberg/idseq-web:$TAG
