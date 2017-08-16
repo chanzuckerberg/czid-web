@@ -12,7 +12,6 @@ development:
 
 test:
   <<: *default
-  port: <%= ENV.include?("CI") ? "3306" : "6603" %>
 
 dev:
   <<: *default
