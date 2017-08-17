@@ -3,6 +3,7 @@ require 'test_helper'
 class SamplesControllerTest < ActionDispatch::IntegrationTest
   setup do
     @sample = samples(:one)
+    @project = projects(:one)
   end
 
   test "should get index" do
@@ -17,7 +18,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
 
   test "should create sample" do
     assert_difference('Sample.count') do
-      post samples_url, params: { sample: { name: @sample.name } }
+      post samples_url, params: { sample: { name: "new sample", project_id: @project.id } }
     end
 
     assert_redirected_to sample_url(Sample.last)
@@ -34,7 +35,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update sample" do
-    patch sample_url(@sample), params: { sample: { name: @sample.name } }
+    patch sample_url(@sample), params: { sample: { name: @sample.name + " asdf"} }
     assert_redirected_to sample_url(@sample)
   end
 

@@ -41,7 +41,7 @@ class SamplesController < ApplicationController
   # PATCH/PUT /samples/1.json
   def update
     respond_to do |format|
-      if @sample.update(sample_params)
+      if @sample.update!(sample_params)
         format.html { redirect_to @sample, notice: 'Sample was successfully updated.' }
         format.json { render :show, status: :ok, location: @sample }
       else
@@ -62,13 +62,13 @@ class SamplesController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_sample
-      @sample = Sample.find(params[:id])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_sample
+    @sample = Sample.find(params[:id])
+  end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def sample_params
-      params.require(:sample).permit(:name)
-    end
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def sample_params
+    params.require(:sample).permit(:name, :project_id)
+  end
 end
