@@ -1,0 +1,19 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Sample:</strong>
+  <%= @pipeline_output.sample %>
+</p>
+
+<p>
+  <strong>Total reads:</strong>
+  <%= @pipeline_output.total_reads %>
+</p>
+
+<p>
+  <strong>Remaining reads:</strong>
+  <%= @pipeline_output.remaining_reads %>
+</p>
+
+<%= link_to 'Edit', edit_pipeline_output_path(@pipeline_output) %> |
+<%= link_to 'Back', pipeline_outputs_path %>

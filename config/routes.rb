@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :pipeline_outputs
   devise_for :users
   resources :samples
   resources :projects
