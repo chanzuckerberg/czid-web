@@ -1,0 +1,10 @@
+{
+  "pipeline_output": {
+    "total_reads": 1,
+    "remaining_reads": 1,
+    "sample_id": 1,
+    "taxon_counts_attributes": [
+        {"tax_id": 1, "tax_level": 5, "count": 10}
+    ]
+  }
+}
