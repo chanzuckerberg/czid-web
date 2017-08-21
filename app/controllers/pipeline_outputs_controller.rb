@@ -1,5 +1,6 @@
 class PipelineOutputsController < ApplicationController
   before_action :set_pipeline_output, only: [:show, :edit, :update, :destroy]
+  protect_from_forgery unless: -> { request.format.json? }
 
   # GET /pipeline_outputs
   # GET /pipeline_outputs.json
@@ -62,13 +63,13 @@ class PipelineOutputsController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_pipeline_output
-      @pipeline_output = PipelineOutput.find(params[:id])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_pipeline_output
+    @pipeline_output = PipelineOutput.find(params[:id])
+  end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def pipeline_output_params
-      params.require(:pipeline_output).permit(:sample_id, :total_reads, :remaining_reads)
-    end
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def pipeline_output_params
+    params.require(:pipeline_output).permit(:sample_id, :total_reads, :remaining_reads, taxon_counts_attributes: [:tax_id, :tax_level, :count])
+  end
 end
