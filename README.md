@@ -1,24 +1,27 @@
-# README
+# ID Portal
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+This app stores and analyzes the output from the infectious disease pipeline.
 
-Things you may want to cover:
+## Setup
 
-* Ruby version
+Everything you need to get started should be in `./bin/setup`.  If there's anything missing, please edit and submit a pull request.
 
-* System dependencies
+To get a local instance running, just do:
 
-* Configuration
+1. `bin/setup`
+1. `docker-compose up --build`
+1. `open http://localhost:3000 #in another terminal`
 
-* Database creation
+## Running Tests
 
-* Database initialization
+`rails test`
 
-* How to run the test suite
+## Deployment
 
-* Services (job queues, cache servers, search engines, etc.)
+TODO, for now ask RK.
 
-* Deployment instructions
+## Upload data
 
-* ...
+There is an example of the JSON for uploading pipeline results in `test/output.json`. To test locally you can run:
+
+>curl': curl -H "Accept: application/json" -H "Content-type: application/json" -X POST -d @output.json http://localhost:3000/pipeline_outputs.json
