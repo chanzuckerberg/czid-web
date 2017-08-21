@@ -9,6 +9,7 @@ default: &default
 development:
   <<: *default
   host: <%= ENV.include?("DOCKER") ? "db" : "127.0.0.1" %>
+  port: <%= ENV.include?("DOCKER") ? "3306" : 6033 %>
 
 test:
   <<: *default
