@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170818230705) do
+ActiveRecord::Schema.define(version: 20170821184026) do
 
   create_table "pipeline_outputs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.bigint "sample_id", null: false
@@ -42,6 +42,16 @@ ActiveRecord::Schema.define(version: 20170818230705) do
     t.index ["project_id"], name: "index_samples_on_project_id"
   end
 
+  create_table "taxon_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.bigint "pipeline_output_id"
+    t.integer "tax_id"
+    t.integer "tax_level"
+    t.integer "count"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pipeline_output_id"], name: "index_taxon_counts_on_pipeline_output_id"
+  end
+
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "email", default: "", null: false
     t.string "password_digest"
@@ -62,4 +72,5 @@ ActiveRecord::Schema.define(version: 20170818230705) do
   end
 
   add_foreign_key "pipeline_outputs", "samples"
+  add_foreign_key "taxon_counts", "pipeline_outputs"
 end
