@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  sample: one
+  total_reads: 1
+  remaining_reads: 1
+
+two:
+  sample: two
+  total_reads: 1
+  remaining_reads: 1

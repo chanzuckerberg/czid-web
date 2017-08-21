@@ -1,0 +1,2 @@
+module PipelineOutputsHelper
+end
