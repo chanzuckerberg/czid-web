@@ -17,16 +17,21 @@ test:
 
 dev:
   <<: *default
-  username: idseqmaster
   host: <%= ENV['RDS_ADDRESS'] %>
   password: <%= ENV['DB_PASSWORD'] %>
+  port: <%= ENV['DB_PORT'] %>
+  username: <%= ENV['DB_USERNAME']
 
 staging:
   <<: *default
-  username: idseqmaster
   host: <%= ENV['RDS_ADDRESS'] %>
   password: <%= ENV['DB_PASSWORD'] %>
+  port: <%= ENV['DB_PORT'] %>
+  username: <%= ENV['DB_USERNAME']
 
 production:
   <<: *default
   host: <%= ENV['RDS_ADDRESS'] %>
+  password: <%= ENV['DB_PASSWORD'] %>
+  port: <%= ENV['DB_PORT'] %>
+  username: <%= ENV['DB_USERNAME']

@@ -29,10 +29,7 @@ One of the following is required:
     -d | --task-definition  Name of task definition to deploy
 
 Required arguments:
-    -k | --aws-access-key        AWS Access Key ID. May also be set as environment variable AWS_ACCESS_KEY_ID
-    -s | --aws-secret-key        AWS Secret Access Key. May also be set as environment variable AWS_SECRET_ACCESS_KEY
     -r | --region                AWS Region Name. May also be set as environment variable AWS_DEFAULT_REGION
-    -p | --profile               AWS Profile to use - If you set this aws-access-key, aws-secret-key and region are needed
     -c | --cluster               Name of ECS cluster
     -i | --image                 Name of Docker image to run, ex: repo/image:latest
                                  Format: [domain][:port][/repo][/][image][:tag]
@@ -94,20 +91,6 @@ function require() {
 
 # Check that all required variables/combinations are set
 function assertRequiredArgumentsSet() {
-
-    # AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION and AWS_PROFILE can be set as environment variables
-    if [ -z ${AWS_ACCESS_KEY_ID+x} ]; then unset AWS_ACCESS_KEY_ID; fi
-    if [ -z ${AWS_SECRET_ACCESS_KEY+x} ]; then unset AWS_SECRET_ACCESS_KEY; fi
-    if [ -z ${AWS_DEFAULT_REGION+x} ];
-      then unset AWS_DEFAULT_REGION
-      else
-              AWS_ECS="$AWS_ECS --region $AWS_DEFAULT_REGION"
-    fi
-    if [ -z ${AWS_PROFILE+x} ];
-      then unset AWS_PROFILE
-      else
-              AWS_ECS="$AWS_ECS --profile $AWS_PROFILE"
-    fi
 
     if [ $SERVICE == false ] && [ $TASK_DEFINITION == false ]; then
         echo "One of SERVICE or TASK DEFINITON is required. You can pass the value using -n / --service-name for a service, or -d / --task-definition for a task"
@@ -428,25 +411,9 @@ if [ "$BASH_SOURCE" == "$0" ]; then
         key="$1"
 
         case $key in
-            -k|--aws-access-key)
-                AWS_ACCESS_KEY_ID="$2"
-                shift # past argument
-                ;;
-            -s|--aws-secret-key)
-                AWS_SECRET_ACCESS_KEY="$2"
-                shift # past argument
-                ;;
             -r|--region)
                 AWS_DEFAULT_REGION="$2"
                 shift # past argument
-                ;;
-            -p|--profile)
-                AWS_PROFILE="$2"
-                shift # past argument
-                ;;
-            --aws-instance-profile)
-                echo "--aws-instance-profile is not yet in use"
-                AWS_IAM_ROLE=true
                 ;;
             -c|--cluster)
                 CLUSTER="$2"
