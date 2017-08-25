@@ -29,8 +29,6 @@ chdir APP_ROOT do
   # end
 
   puts "\n== Preparing database =="
-  system! 'bin/rails db:start'
-  system! 'bin/rails db:drop'
-  system! 'bin/rails db:create'
-  system! 'bin/rails db:migrate'
+  system! 'docker-compose up -d'
+  system! 'docker-compose run web rake db:migrate --trace'
 end
