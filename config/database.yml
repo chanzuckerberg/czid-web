@@ -2,12 +2,13 @@ default: &default
   adapter: mysql2
   encoding: utf8
   username: root
-  host: "mysql"
+  host: 127.0.0.1
   port: 3306
   database: idseq_<%= Rails.env %>
 
 development:
   <<: *default
+  host: "mysql"
 
 test:
   <<: *default
