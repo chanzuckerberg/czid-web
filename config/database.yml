@@ -9,6 +9,9 @@ default: &default
 development:
   <<: *default
 
+test:
+  <<: *default
+
 dev:
   <<: *default
   host: <%= ENV['RDS_ADDRESS'] %>
