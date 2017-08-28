@@ -8,7 +8,6 @@ default: &default
 
 development:
   <<: *default
-  host: "mysql"
 
 test:
   <<: *default

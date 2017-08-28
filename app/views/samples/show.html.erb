@@ -5,5 +5,23 @@
   <%= @sample.name %>
 </p>
 
-<%= link_to 'Edit', edit_sample_path(@sample) %> |
-<%= link_to 'Back', samples_path %>
+<table class="table table-condensed">
+      <thead>
+        <tr>
+          <th>Remaining reads</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @sample.pipeline_outputs.each do |pipeline_output| %>
+          <tr>
+            <td><%= pipeline_output.remaining_reads %></td>
+            <td><%= link_to 'Show', pipeline_output %></td>
+         </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+<p>
+  <%= link_to 'Back', samples_path %>
+</p>
+
