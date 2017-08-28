@@ -10,12 +10,12 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170822205255) do
+ActiveRecord::Schema.define(version: 20170828221152) do
 
   create_table "pipeline_outputs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.bigint "sample_id", null: false
-    t.integer "total_reads", null: false
-    t.integer "remaining_reads", null: false
+    t.bigint "total_reads", null: false
+    t.bigint "remaining_reads", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["sample_id"], name: "index_pipeline_outputs_on_sample_id"
