@@ -5,5 +5,15 @@
   <%= @sample.name %>
 </p>
 
-<%= link_to 'Edit', edit_sample_path(@sample) %> |
-<%= link_to 'Back', samples_path %>
+<p>
+  <strong>Pipeline runs (# remaining reads):</strong>
+</p>
+
+<% @sample.pipeline_outputs.each do |pipeline_output| %>
+  <li><%= pipeline_output.total_reads %> | <%= link_to 'Show', pipeline_output %></li>
+<% end %>
+
+<p>
+  <%= link_to 'Back', samples_path %>
+</p>
+

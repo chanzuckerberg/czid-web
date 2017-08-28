@@ -15,5 +15,24 @@
   <%= @pipeline_output.remaining_reads %>
 </p>
 
+<table class="table table-condensed">
+      <thead>
+        <tr>
+          <th>Taxon ID</th>
+          <th>Taxon Level</th>
+          <th>Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @pipeline_output.taxon_counts.sort_by(&:count).reverse!.each do |element| %>
+          <tr>
+            <td><%= element.tax_id %></td>
+            <td><%= element.tax_level %></td>
+            <td><%= element.count %></td>
+         </tr>
+        <% end %>
+      </tbody>
+    </table>
+
 <%= link_to 'Edit', edit_pipeline_output_path(@pipeline_output) %> |
 <%= link_to 'Back', pipeline_outputs_path %>

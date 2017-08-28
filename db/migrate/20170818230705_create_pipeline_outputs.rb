@@ -4,8 +4,8 @@ class CreatePipelineOutputs < ActiveRecord::Migration[5.1]
       t.belongs_to :sample, foreign_key: true, null: false
       t.integer :total_reads, null: false
       t.integer :remaining_reads, null: false
-
-      t.timestamps
+ 
+     t.timestamps
     end
   end
 end
