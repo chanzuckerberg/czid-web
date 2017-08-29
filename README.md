@@ -24,4 +24,4 @@ TODO, for now ask RK.
 
 There is an example of the JSON for uploading pipeline results in `test/output.json`. To test locally you can run:
 
->curl': curl -H "Accept: application/json" -H "Content-type: application/json" -X POST -d @output.json http://localhost:3000/pipeline_outputs.json
+>curl -H "Accept: application/json" -H "Content-type: application/json" -X POST -d @output.json http://localhost:3000/pipeline_outputs.json
