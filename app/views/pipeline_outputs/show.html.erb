@@ -2,7 +2,7 @@
 
 <p>
   <strong>Sample:</strong>
-  <%= @pipeline_output.sample %>
+  <%= @pipeline_output.sample.name %>
 </p>
 
 <p>
@@ -19,6 +19,7 @@
       <thead>
         <tr>
           <th>Taxon ID</th>
+          <th>Taxon Name</th>
           <th>Taxon Level</th>
           <th>Count</th>
         </tr>
@@ -27,6 +28,7 @@
         <% @pipeline_output.taxon_counts.sort_by(&:count).reverse.each do |element| %>
           <tr>
             <td><%= element.tax_id %></td>
+            <td><%= element.name %></td>
             <td><%= element.tax_level %></td>
             <td><%= element.count %></td>
          </tr>
