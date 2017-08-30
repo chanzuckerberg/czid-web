@@ -1,5 +1,8 @@
 class HomeController < ApplicationController
-  def home
-    render :text => "Hello world"
+  def index
+    @users = User.all
+    @projects = Project.all
+    @samples = Sample.all
+    @pipeline_outputs = PipelineOutput.all
   end
 end
