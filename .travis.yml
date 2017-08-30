@@ -1,16 +1,17 @@
 language: ruby
+sudo: required
 env:
   CI: yes
 rvm:
 - 2.4
 services:
-  - mysql
-addons:
-  mysql: "5.7"
+  - docker
 before_install:
-  - pip install --user awscli
-  - export PATH=$PATH:$HOME/.local/bin
-  - mysql -e 'CREATE DATABASE idseq_test;'
+  - docker-compose build
+  - docker-compose up -d db
+  - sleep 10
+  - docker-compose run web rake db:create
+script: docker-compose run web rails test
 env:
   global:
   - secure: l6JImOInd+PoLwf9hbAl6QmjXE4mShlG7SEkasSKk6XzT4npNTUqqYVVpNewr1f58U97SdHShv6WgxKIiUpX+adIBp9b59CsI7SCKxt1aSp9egyZE6F1ZIoqjmfH6o9U4dUkE32TJdG4Tn/QMd0fj3nCqathFIWFhato6ovqXmJpklJHH9BGbK330bEYG1LoUU3u/hIhBc8bAuNIO15eih1vMltYiSw5ScQxBMjcCskAjEeb8EA7i82pEpyD9iBWcIomw5Mrro0IInjJbudIQ5RukNZtI3zZXiSbR8m8VWzK8A8ixihHKRbBoLXn3X719s13FIJKL2Pn1utxMx4zrLLUx4iMafey2e8iG9C3JYyHu6UoR/E5hcSCdhHDmwiCiIQF8cHt2sZNVE33rEGdEkhsPgwlH16O6kBJmVOqaaihPN/yjzIyjxDoyknPfswpkiRiuqaa9XDXh5dgU0xHDfKic6ioAJvRMn0Ngbo7Ogi90rTaxksFFo7UAL9mChQaB+qtJk+tU0I7PFTR52ie62KcIAfqU3PFOo1jchmw7uEu/k8yNpZM4gar2gnl8gqe5dIVqkTDfNWBTlYX17dTqeHB7ZqCRKZzYcEZK8SVmw9fs/JTouwQK2nXgwEnp7dJdofvZgXhLZ4/ZhNniLn0ObDQauzYKPKgk819CtIb968=
