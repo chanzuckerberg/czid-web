@@ -12,6 +12,7 @@ development:
 
 test:
   <<: *default
+  host: db
 
 dev:
   <<: *default
