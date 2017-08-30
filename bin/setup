@@ -33,5 +33,6 @@ chdir APP_ROOT do
   system! 'docker-compose up -d db'
   sleep(10)
   system! 'docker-compose run web rake db:drop db:create db:migrate db:seed'
+  system! 'docker-compose run -e RAILS_ENV=test web rake db:drop db:create'
   system! 'docker-compose up -d web'
 end
