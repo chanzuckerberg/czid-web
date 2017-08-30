@@ -5,9 +5,25 @@
   <%= @project.name %>
 </p>
 
-<% @project.samples.each do |sample| %>
-  <li><%= sample.name %> | <%= link_to 'Show', sample %> | <%= link_to 'Edit', edit_project_path(@project) %></li>
-<% end %>
+<table class="table table-condensed">
+  <thead>
+    <tr>
+      <th>Samples</th>
+      <th>Pipeline runs</th>
+      <th colspan="2"></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @project.samples.each do |sample| %>
+      <tr>
+        <td><%= sample.name %></td>
+        <td><%= sample.pipeline_outputs.count %></td>
+        <td><%= link_to 'Show', sample %></td>
+        <td><%= link_to 'Edit', edit_project_path(@project) %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
 
 <p>
   <%= link_to 'Back', projects_path %>
