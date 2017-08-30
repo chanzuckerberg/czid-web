@@ -7,6 +7,8 @@
     <tr>
       <th>Name</th>
       <th>User(s)</th>
+      <th>Number of samples</th>
+      <th>Date created</th>
       <th colspan="3"></th>
     </tr>
   </thead>
@@ -16,6 +18,8 @@
       <tr>
         <td><%= project.name %></td>
         <td><%= project.users.collect.map(&:name).join(", ") %></td>
+        <td><%= project.samples.count %></td>
+        <td><%= project.created_at %></td>
         <td><%= link_to 'Show', project %></td>
         <td><%= link_to 'Edit', edit_project_path(project) %></td>
         <td><%= link_to 'Destroy', project, method: :delete, data: { confirm: 'Are you sure?' } %></td>
@@ -27,3 +31,7 @@
 <br>
 
 <%= link_to 'New Project', new_project_path %>
+
+<p>
+  <%= link_to 'Back', root_path %>
+</p>

@@ -8,6 +8,7 @@
       <th>Email</th>
       <th>Name</th>
       <th>Projects</th>
+      <th>Date joined</th>
       <th colspan="3"></th>
     </tr>
   </thead>
@@ -22,6 +23,7 @@
             <% end %>
             <%= link_to user.projects.last.name, user.projects.last if user.projects.last %>
         </td>
+        <td><%= user.created_at %></td>
         <td><%= link_to 'Show', user %></td>
         <td><%= link_to 'Edit', edit_user_path(user) %></td>
         <td><%= link_to 'Destroy', user, method: :delete, data: { confirm: 'Are you sure?' } %></td>
@@ -33,3 +35,7 @@
 <br>
 
 <%= link_to 'New User', new_user_path %>
+
+<p>
+  <%= link_to 'Back', root_path %>
+</p>
