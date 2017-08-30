@@ -19,8 +19,5 @@ env:
 notifications:
   slack:
     secure: ToieN3tJjRDoLTqOuoWQ5mFWTl9Pm4eNgDYDLar7AKp0YteDSsUBdqbTzdV8s4Gjmbb8/q5Lj9/FM1oZnW1n8RPxLKV1i8mCVfrQVl6c9ynLZCfs/FGYgsspe2NwaIPcDzeIFwwbmL9DzEGPR+1WkuYZe4Iiq0GnI0otajqx0VfBjUjbDNUVXZtZV26K24fykJ18+U+2OHUPAmoHHeUGKRnW1CLeyqvZQWommlo6aULHHi1cFc4HdiR0LR44mrk7wuZrQJwbvrWSYGl6QVBcDj/g6MjZKkS5HKmiCfw/quT32/YS8pDdK11g71aw+4svzfHkGsxhVBADI6EOkiqKfFkAjn2nARjey966Q8X6yit2BVASWD+T7r8COC31aVDwZtg5tNsYjmmhD+7NlXZswqeazz9cHi+4wJTBU4QyUzqYsyZZJIdORDAnLUOre+5eqzIT84dKU2JtAzqkHF9x/FrBJ3+km0ocbsRn746/Yk4htvL9HAo8ovnYy4NYnmNAEtc704mgnx60pytQAc97DxD4bvG4gujkv6mqrNrwm2GqavrmicW7OW6NZ+yCoR0qrFRUmElAlnFdafw/2x1HbZVf+scn6PJMTjIjjOPxrHwidU9ARkGTt8or+zbPmUK6l15QkZGEpXzVKJQ7rt92hywWSldh6StZNpP1wUpTnfQ=
-script:
-  - bundle exec rake
-  - docker-compose up && curl localhost:3000/
 after_success:
   - bin/push-docker $TRAVIS_BRANCH ${TRAVIS_COMMIT::8} $TRAVIS_BUILD_NUMBER
