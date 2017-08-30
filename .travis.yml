@@ -10,7 +10,7 @@ before_install:
   - docker-compose build
   - docker-compose up -d db
   - sleep 10
-  - docker-compose run web rake db:create
+  - docker-compose run -e RAILS_ENV=test web rake db:create
 script: docker-compose run web rails test
 env:
   global:
