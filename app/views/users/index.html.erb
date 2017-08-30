@@ -18,9 +18,9 @@
         <td><%= user.email %></td>
         <td><%= user.name %></td>
         <td><% user.projects[0...-1].each do |p| %>
-              <%= link_to p.name, p %>, 
+              <%= link_to p.name, p if p %>, 
             <% end %>
-            <%= link_to user.projects.last.name, user.projects.last %>
+            <%= link_to user.projects.last.name, user.projects.last if user.projects.last %>
         </td>
         <td><%= link_to 'Show', user %></td>
         <td><%= link_to 'Edit', edit_user_path(user) %></td>
