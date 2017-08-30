@@ -9,11 +9,11 @@ Everything you need to get started should be in `./bin/setup`.  If there's anyth
 To get a local instance running, just do:
 
 1. `bin/setup`
-1. `open http://localhost:3000 #in another terminal`
+1. `open http://localhost:3000 in your browser`
 
 ## Running Tests
 
-`rails test`
+`docker-compose run web rails test`
 
 ## Deployment
 

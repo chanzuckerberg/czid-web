@@ -8,6 +8,7 @@
       <th>Sample</th>
       <th>Total reads</th>
       <th>Remaining reads</th>
+      <th>Date created</th>
       <th colspan="3"></th>
     </tr>
   </thead>
@@ -15,9 +16,10 @@
   <tbody>
     <% @pipeline_outputs.each do |pipeline_output| %>
       <tr>
-        <td><%= pipeline_output.sample %></td>
+        <td><%= pipeline_output.sample.name %></td>
         <td><%= pipeline_output.total_reads %></td>
         <td><%= pipeline_output.remaining_reads %></td>
+        <td><%= pipeline_output.created_at %></td>
         <td><%= link_to 'Show', pipeline_output %></td>
         <td><%= link_to 'Edit', edit_pipeline_output_path(pipeline_output) %></td>
         <td><%= link_to 'Destroy', pipeline_output, method: :delete, data: { confirm: 'Are you sure?' } %></td>
