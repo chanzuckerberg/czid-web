@@ -1,5 +1,7 @@
 class HomeController < ApplicationController
-  def index
+ before_action :set_project, only: [:show, :edit, :update, :destroy]
+
+ def index
     @users = User.all
     @projects = Project.all
     @samples = Sample.all
