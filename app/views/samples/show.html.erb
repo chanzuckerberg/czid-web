@@ -9,14 +9,16 @@
       <thead>
         <tr>
           <th>Remaining reads</th>
+          <th>Date created</th>
         </tr>
       </thead>
       <tbody>
         <% @sample.pipeline_outputs.each do |pipeline_output| %>
           <tr>
             <td><%= pipeline_output.remaining_reads %></td>
+            <td><%= pipeline_output.created_at %></td>
             <td><%= link_to 'Show', pipeline_output %></td>
-         </tr>
+          </tr>
         <% end %>
       </tbody>
     </table>
