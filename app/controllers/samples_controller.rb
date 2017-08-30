@@ -1,5 +1,6 @@
 class SamplesController < ApplicationController
   before_action :set_sample, only: [:show, :edit, :update, :destroy]
+  acts_as_token_authentication_handler_for User, only: [:create, :update, :destroy, :upsert]
 
   # GET /samples
   # GET /samples.json
@@ -15,6 +16,17 @@ class SamplesController < ApplicationController
   # GET /samples/new
   def new
     @sample = Sample.new
+  end
+
+  # GET /samples/upsert
+  def upsert
+    respond_to do |format|
+      format.html {
+        @sample = Sample.new
+        render :new
+      }
+      format.json { render json: {"key":"Yes it works;"} }
+    end
   end
 
   # GET /samples/1/edit
