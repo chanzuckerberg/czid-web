@@ -12,13 +12,18 @@
   <% end %>
 
   <div class="field">
-    <%= form.label :sample_name %>
-    <%= form.text_field :sample_name, id: :pipeline_output_sample_name %>
+    <%= form.label :sample_id %>
+    <%= form.text_field :sample_id, id: :pipeline_output_sample_id %>
   </div>
 
   <div class="field">
-    <%= form.label :pipeline_output %>
-    <%= form.file_field :pipeline_output, id: :pipeline_output %>
+    <%= form.label :total_reads %>
+    <%= form.number_field :total_reads, id: :pipeline_output_total_reads %>
+  </div>
+
+  <div class="field">
+    <%= form.label :remaining_reads %>
+    <%= form.number_field :remaining_reads, id: :pipeline_output_remaining_reads %>
   </div>
 
   <div class="actions">
