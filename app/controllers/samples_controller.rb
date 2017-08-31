@@ -33,7 +33,7 @@ class SamplesController < ApplicationController
         # TODO: kick off the airflow pipeline here
 
         format.json do
-          render json: { sample_id: @sample.id, project_id: @project.id}
+          render json: { sample_id: @sample.id, project_id: @project.id }
         end
         format.html do
           output_str = 'Project Id:' + @project.id.to_s + '<br>'
