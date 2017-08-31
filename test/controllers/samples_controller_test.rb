@@ -28,13 +28,19 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "upsert with token authentication via query params" do
-    get upsert_samples_url, params: { user_email: @user.email, user_token: @user.authentication_token }
+    parameters = { user_email: @user.email,
+                   user_token: @user.authentication_token,
+                   sample_name: "test_sample",
+                   project_name: "test_project"}
+    get upsert_samples_url, params: parameters
     assert_response :success
   end
 
   test "upsert with token authentication via request headers" do
-    get upsert_samples_url, headers: { 'X-User-Email' => @user.email,
-                                       'X-User-Token' => @user.authentication_token }
+    req_headers = { 'X-User-Email' => @user.email,
+                    'X-User-Token' => @user.authentication_token }
+    parameters = {sample_name: "test_sample", project_name: "test_project"}
+    get upsert_samples_url, params: parameters, headers: req_headers
     assert_response :success
   end
 

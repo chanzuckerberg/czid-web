@@ -3,6 +3,7 @@ Rails.application.routes.draw do
   devise_for :users
   resources :samples do
     get :upsert, on: :collection
+    get :initiate_run, on: :member
   end
   resources :projects
   resources :users

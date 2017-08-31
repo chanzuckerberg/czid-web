@@ -1,6 +1,6 @@
 class SamplesController < ApplicationController
   before_action :set_sample, only: [:show, :edit, :update, :destroy]
-  acts_as_token_authentication_handler_for User, only: [:upsert] #[:create, :update, :destroy, :upsert]
+  acts_as_token_authentication_handler_for User, only: [:upsert, :initiate_run]
 
   # GET /samples
   # GET /samples.json
@@ -20,12 +20,40 @@ class SamplesController < ApplicationController
 
   # GET /samples/upsert
   def upsert
+    params.require([:sample_name,:project_name])
+    @project = Project.find_by_name(params[:project_name]) || Project.new(:name => params[:project_name])
+    @project.save
+    @sample  = Sample.find_by_name_and_project_id(params[:sample_name], @project.id) || Sample.new(:name => params[:sample_name])
+    @sample.project = @project
+
     respond_to do |format|
-      format.html {
-        @sample = Sample.new
-        render :new
+      if @sample.save
+        format.json {
+          render json: {sample_id: @sample.id, project_id: @project.id}
+        }
+        format.html {
+          output_str = 'Project Id:' + @project.id.to_s + '<br>' + 'Sample Id:' + @sample.id.to_s
+          render inline: output_str
+        }
+      else
+        format.json { render json: {status: "Error"}, status: 403 }
+        format.html { render inline: "Error saving sample or project", status: 403}
+      end
+    end
+  end
+
+  # GET /samples/:id/initiate_run
+  def initiate_run
+    params.require(:s3_input_path)
+    @sample = Sample.find(params[:id])
+    # TODO: kick off the airflow pipeline here
+    respond_to do |format|
+      format.json {
+        render json: { status: "OK!" }
       }
-      format.json { render json: {"key":"Yes it works;"} }
+      format.html {
+        render inline: "Success"
+      }
     end
   end
 
