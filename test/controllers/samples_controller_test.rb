@@ -45,8 +45,6 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-
-
   test "should show sample" do
     get sample_url(@sample)
     assert_response :success
