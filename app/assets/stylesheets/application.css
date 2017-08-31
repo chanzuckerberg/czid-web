@@ -17,3 +17,7 @@
 .checkbox-list input[type="checkbox"] + label {
   display: inline-block;
 }
+
+.radiobutton-list input[type="radio"] + label {
+  display: inline-block;
+}

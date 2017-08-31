@@ -17,7 +17,7 @@
     <% @samples.each do |sample| %>
       <tr>
         <td><%= sample.name %></td>
-        <td><%= link_to sample.project.name, sample.project %></td>
+        <td><%= link_to sample.project.name, sample.project if sample.project if sample.project %></td>
         <td><%= sample.pipeline_outputs.count %></td>
         <td><%= sample.created_at %></td>
         <td><%= link_to 'Show', sample %></td>
