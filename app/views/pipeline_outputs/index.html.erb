@@ -6,6 +6,7 @@
   <thead>
     <tr>
       <th>Sample</th>
+      <th>Project</th>
       <th>Total reads</th>
       <th>Remaining reads</th>
       <th>Date created</th>
@@ -17,6 +18,7 @@
     <% @pipeline_outputs.each do |pipeline_output| %>
       <tr>
         <td><%= pipeline_output.sample.name %></td>
+        <td><%= pipeline_output.sample.project.name %></td>
         <td><%= pipeline_output.total_reads %></td>
         <td><%= pipeline_output.remaining_reads %></td>
         <td><%= pipeline_output.created_at %></td>
@@ -31,3 +33,7 @@
 <br>
 
 <%= link_to 'New Pipeline Output', new_pipeline_output_path %>
+
+<p>
+  <%= link_to 'Back', root_path %>
+</p>

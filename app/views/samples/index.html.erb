@@ -6,6 +6,9 @@
   <thead>
     <tr>
       <th>Name</th>
+      <th>Project</th>
+      <th>Pipeline runs</th>
+      <th>Date created</th>
       <th colspan="3"></th>
     </tr>
   </thead>
@@ -14,6 +17,9 @@
     <% @samples.each do |sample| %>
       <tr>
         <td><%= sample.name %></td>
+        <td><%= sample.project.name %></td>
+        <td><%= sample.pipeline_outputs.count %></td>
+        <td><%= sample.created_at %></td>
         <td><%= link_to 'Show', sample %></td>
         <td><%= link_to 'Edit', edit_sample_path(sample) %></td>
         <td><%= link_to 'Destroy', sample, method: :delete, data: { confirm: 'Are you sure?' } %></td>
@@ -25,3 +31,7 @@
 <br>
 
 <%= link_to 'New Sample', new_sample_path %>
+
+<p>
+  <%= link_to 'Back', root_path %>
+</p>
