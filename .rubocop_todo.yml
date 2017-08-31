@@ -1,4 +1,6 @@
 AllCops:
+  Include:
+    - 'app/**/*'
   Exclude:
     - 'db/**/*'
 
