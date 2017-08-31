@@ -17,7 +17,7 @@
     <% @samples.each do |sample| %>
       <tr>
         <td><%= sample.name %></td>
-        <td><%= sample.project.name %></td>
+        <td><%= link_to sample.project.name, sample.project %></td>
         <td><%= sample.pipeline_outputs.count %></td>
         <td><%= sample.created_at %></td>
         <td><%= link_to 'Show', sample %></td>
@@ -28,10 +28,7 @@
   </tbody>
 </table>
 
-<br>
-
-<%= link_to 'New Sample', new_sample_path %>
-
 <p>
-  <%= link_to 'Back', root_path %>
+<%= link_to 'New Sample', new_sample_path %> |
+<%= link_to 'Front portal', root_path %>
 </p>

@@ -7,7 +7,7 @@
 
 <p>
   <strong>Project:</strong>
-  <%= @sample.project.name %>
+  <%= link_to @sample.project.name, @sample.project %>
 </p>
 
 <p>
@@ -38,6 +38,7 @@
     </table>
 
 <p>
-  <%= link_to 'Back', samples_path %>
+<%= link_to 'Edit', edit_sample_path(@sample) %> |
+<%= link_to 'See all samples', samples_path %> |
+<%= link_to 'Front portal', root_path %>
 </p>
-

@@ -17,8 +17,8 @@
   <tbody>
     <% @pipeline_outputs.each do |pipeline_output| %>
       <tr>
-        <td><%= pipeline_output.sample.name %></td>
-        <td><%= pipeline_output.sample.project.name %></td>
+        <td><%= link_to pipeline_output.sample.name, pipeline_output.sample %></td>
+        <td><%= link_to pipeline_output.sample.project.name, pipeline_output.sample.project %></td>
         <td><%= pipeline_output.total_reads %></td>
         <td><%= pipeline_output.remaining_reads %></td>
         <td><%= pipeline_output.created_at %></td>
@@ -30,10 +30,7 @@
   </tbody>
 </table>
 
-<br>
-
-<%= link_to 'New Pipeline Output', new_pipeline_output_path %>
-
 <p>
-  <%= link_to 'Back', root_path %>
+<%= link_to 'New Pipeline Output', new_pipeline_output_path %> |
+<%= link_to 'Front portal', root_path %>
 </p>

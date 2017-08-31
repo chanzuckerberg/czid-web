@@ -7,7 +7,7 @@
 
 <p>
   <strong>Project:</strong>
-  <%= @pipeline_output.sample.project.name %>
+  <%= link_to @pipeline_output.sample.project.name, @pipeline_output.sample.project %>
 </p>
 
 <p>
@@ -46,5 +46,8 @@
       </tbody>
     </table>
 
+<p>
 <%= link_to 'Edit', edit_pipeline_output_path(@pipeline_output) %> |
-<%= link_to 'Back', pipeline_outputs_path %>
+<%= link_to 'See all pipeline runs', pipeline_outputs_path %> |
+<%= link_to 'Front portal', root_path %>
+</p>

@@ -33,7 +33,7 @@
   <tbody>
     <% @project.samples.each do |sample| %>
       <tr>
-        <td><%= sample.name %></td>
+        <td><%= link_to sample.name, sample %></td>
         <td><%= sample.pipeline_outputs.count %></td>
         <td><%= link_to 'Show', sample %></td>
         <td><%= link_to 'Edit', edit_project_path(@project) %></td>
@@ -43,5 +43,7 @@
 </table>
 
 <p>
-  <%= link_to 'Back', projects_path %>
+<%= link_to 'Edit', edit_project_path(@project) %> |
+<%= link_to 'See all projects', projects_path %> |
+<%= link_to 'Front portal', root_path %>
 </p>
