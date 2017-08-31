@@ -2,8 +2,7 @@ Rails.application.routes.draw do
   resources :pipeline_outputs
   devise_for :users
   resources :samples do
-    get :upsert, on: :collection
-    get :initiate_run, on: :member
+    get :insert, on: :collection
   end
   resources :projects
   resources :users

@@ -1,6 +1,6 @@
 class SamplesController < ApplicationController
   before_action :set_sample, only: [:show, :edit, :update, :destroy]
-  acts_as_token_authentication_handler_for User, only: [:upsert, :initiate_run]
+  acts_as_token_authentication_handler_for User, only: [:insert]
 
   # GET /samples
   # GET /samples.json
@@ -18,16 +18,19 @@ class SamplesController < ApplicationController
     @sample = Sample.new
   end
 
-  # GET /samples/upsert
-  def upsert
-    params.require([:sample_name,:project_name])
+  # GET /samples/insert
+  def insert
+    # TODO: merge create and insert somehow
+    params.require([:sample_name,:project_name, :s3_input_path])
     @project = Project.find_by_name(params[:project_name]) || Project.new(:name => params[:project_name])
     @project.save
-    @sample  = Sample.find_by_name_and_project_id(params[:sample_name], @project.id) || Sample.new(:name => params[:sample_name])
+    @sample  = Sample.new(:name => params[:sample_name])
     @sample.project = @project
 
     respond_to do |format|
       if @sample.save
+        # TODO: kick off the airflow pipeline here
+
         format.json {
           render json: {sample_id: @sample.id, project_id: @project.id}
         }
@@ -36,24 +39,9 @@ class SamplesController < ApplicationController
           render inline: output_str
         }
       else
-        format.json { render json: {status: "Error"}, status: 403 }
-        format.html { render inline: "Error saving sample or project", status: 403}
+        format.json { render json: @sample.errors.full_messages, status: 403 }
+        format.html { render inline: @sample.errors.full_messages.to_s, status: 403}
       end
-    end
-  end
-
-  # GET /samples/:id/initiate_run
-  def initiate_run
-    params.require(:s3_input_path)
-    @sample = Sample.find(params[:id])
-    # TODO: kick off the airflow pipeline here
-    respond_to do |format|
-      format.json {
-        render json: { status: "OK!" }
-      }
-      format.html {
-        render inline: "Success"
-      }
     end
   end
 
