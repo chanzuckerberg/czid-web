@@ -6,8 +6,6 @@ services:
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=1
       - MYSQL_DATABASE=idseq_development
-    ports:
-      - "3306:3306"
   web:
     build: .
     volumes:
