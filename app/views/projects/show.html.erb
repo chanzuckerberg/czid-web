@@ -5,10 +5,27 @@
   <%= @project.name %>
 </p>
 
+<p>
+  <strong>User(s):</strong>
+  <% @project.users[0...-1].each do |u| %>
+    <%= link_to u.name, u if u%>, 
+  <% end %>
+  <%= link_to @project.users.last.name, @project.users.last if @project.users.last %>
+</p>
+
+<p>
+  <strong>Date created:</strong>
+  <%= @project.created_at %>
+</p>
+
+<p>
+  <strong>Samples:</strong>
+</p>
+
 <table class="table table-condensed">
   <thead>
     <tr>
-      <th>Samples</th>
+      <th>Sample</th>
       <th>Pipeline runs</th>
       <th colspan="2"></th>
     </tr>

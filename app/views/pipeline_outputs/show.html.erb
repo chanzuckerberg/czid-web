@@ -6,6 +6,11 @@
 </p>
 
 <p>
+  <strong>Project:</strong>
+  <%= @pipeline_output.sample.project.name %>
+</p>
+
+<p>
   <strong>Total reads:</strong>
   <%= @pipeline_output.total_reads %>
 </p>
@@ -13,6 +18,11 @@
 <p>
   <strong>Remaining reads:</strong>
   <%= @pipeline_output.remaining_reads %>
+</p>
+
+<p>
+  <strong>Date created:</strong>
+  <%= @pipeline_output.created_at %>
 </p>
 
 <table class="table table-condensed">
