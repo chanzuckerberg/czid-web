@@ -33,10 +33,8 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "upsert with token authentication via request headers" do
-    @request.headers['X-User-Email'] = @user.email
-    @request.headers['X-User-Token'] = @user.authentication_token
-
-    get upsert_samples_url
+    get upsert_samples_url, headers: { 'X-User-Email' => @user.email,
+                                       'X-User-Token' => @user.authentication_token }
     assert_response :success
   end
 
