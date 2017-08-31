@@ -1,6 +1,6 @@
 class SamplesController < ApplicationController
   before_action :set_sample, only: [:show, :edit, :update, :destroy]
-  acts_as_token_authentication_handler_for User, only: [:create, :update, :destroy, :upsert]
+  acts_as_token_authentication_handler_for User, only: [:upsert] #[:create, :update, :destroy, :upsert]
 
   # GET /samples
   # GET /samples.json

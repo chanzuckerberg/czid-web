@@ -4,6 +4,9 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   setup do
     @sample = samples(:one)
     @project = projects(:one)
+    @user = users(:one)
+    @user.authentication_token = "sdfsdfsdff"
+    @user.save
   end
 
   test "should get index" do
@@ -23,6 +26,21 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to sample_url(Sample.last)
   end
+
+  test "upsert with token authentication via query params" do
+    get upsert_samples_url, params: { user_email: @user.email, user_token: @user.authentication_token }
+    assert_response :success
+  end
+
+  test "upsert with token authentication via request headers" do
+    @request.headers['X-User-Email'] = @user.email
+    @request.headers['X-User-Token'] = @user.authentication_token
+
+    get upsert_samples_url
+    assert_response :success
+  end
+
+
 
   test "should show sample" do
     get sample_url(@sample)
