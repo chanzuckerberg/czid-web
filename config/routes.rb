@@ -1,7 +1,9 @@
 Rails.application.routes.draw do
   resources :pipeline_outputs
   devise_for :users
-  resources :samples
+  resources :samples do
+    get :insert, on: :collection
+  end
   resources :projects
   resources :users
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
