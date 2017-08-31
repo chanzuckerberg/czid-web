@@ -16,6 +16,11 @@
     <%= form.text_field :name, id: :project_name %>
   </div>
 
+  <div class="field checkbox-list">
+    <%= form.label :users %>
+    <%= form.collection_check_boxes :user_ids, User.all, :id, :name %>
+  </div>
+
   <div class="actions">
     <%= form.submit %>
   </div>

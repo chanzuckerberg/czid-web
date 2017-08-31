@@ -17,7 +17,7 @@
     <% @users.each do |user| %>
       <tr>
         <td><%= user.email %></td>
-        <td><%= user.name %></td>
+        <td><%= link_to user.name, user %></td>
         <td><% user.projects[0...-1].each do |p| %>
               <%= link_to p.name, p if p %>, 
             <% end %>
@@ -32,10 +32,7 @@
   </tbody>
 </table>
 
-<br>
-
-<%= link_to 'New User', new_user_path %>
-
 <p>
-  <%= link_to 'Back', root_path %>
+<%= link_to 'New User', new_user_path %> |
+<%= link_to 'Front portal', root_path %>
 </p>
