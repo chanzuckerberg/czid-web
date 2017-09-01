@@ -1,0 +1,37 @@
+default: &default
+  protocol: http
+  host: 127.0.0.1
+  port: 8081
+  uri: /admin/rest_api/api
+  dag_api: trigger_dag
+  dag_id: sample_run
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+
+dev:
+  <<: *default
+  protocol: https
+  host: <%= ENV['AIRFLOW_WEB_ADDRESS'] %>
+  port: <%= ENV['AIRFLOW_WEB_PORT'] %>
+  dag_api: <%= ENV['AIRFLOW_DAG_API'] %>
+  dag_id: <%= ENV['AIRFLOW_DAG_ID'] %>
+
+staging:
+  <<: *default
+  protocol: https
+  host: <%= ENV['AIRFLOW_WEB_ADDRESS'] %>
+  port: <%= ENV['AIRFLOW_WEB_PORT'] %>
+  dag_api: <%= ENV['AIRFLOW_DAG_API'] %>
+  dag_id: <%= ENV['AIRFLOW_DAG_ID'] %>
+
+production:
+  <<: *default
+  protocol: https
+  host: <%= ENV['AIRFLOW_WEB_ADDRESS'] %>
+  port: <%= ENV['AIRFLOW_WEB_PORT'] %>
+  dag_api: <%= ENV['AIRFLOW_DAG_API'] %>
+  dag_id: <%= ENV['AIRFLOW_DAG_ID'] %>
