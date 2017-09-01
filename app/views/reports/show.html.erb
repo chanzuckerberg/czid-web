@@ -35,7 +35,7 @@
         </tr>
       </thead>
       <tbody>
-        <% @pipeline_output.taxon_zscores.sort_by(&:count).reverse.each do |element| %>
+        <% @report.taxon_zscores.sort_by(&:count).reverse.each do |element| %>
           <tr>
             <td><%= element.tax_id %></td>
             <td><%= element.name %></td>

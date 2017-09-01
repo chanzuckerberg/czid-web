@@ -27,7 +27,7 @@
     <tr>
       <th>Sample</th>
       <th>Pipeline runs</th>
-      <th colspan="2"></th>
+      <th colspan="1"></th>
     </tr>
   </thead>
   <tbody>
@@ -36,7 +36,6 @@
         <td><%= link_to sample.name, sample %></td>
         <td><%= sample.pipeline_outputs.count %></td>
         <td><%= link_to 'Show', sample %></td>
-        <td><%= link_to 'Edit', edit_sample_path(@sample) %></td>
       </tr>
     <% end %>
   </tbody>

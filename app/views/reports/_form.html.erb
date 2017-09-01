@@ -21,6 +21,11 @@
     <%= form.text_field :pipeline_output_id, id: :report_pipeline_output_id %>
   </div>
 
+  <div class="field radiobutton-list">
+    <%= form.label :background %>
+    <%= form.collection_radio_buttons :background_id, Background.all, :id, :name %>
+  </div>
+
   <div class="actions">
     <%= form.submit %>
   </div>

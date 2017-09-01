@@ -19,7 +19,7 @@
     <% @reports.each do |report| %>
       <tr>
         <td><%= report.name %></td>
-        <td><%= report.pipeline_output %></td>
+        <td><%= link_to report.pipeline_output %></td>
         <td><%= link_to report.pipeline_output.sample.name, report.pipeline_output.sample %></td>
         <td><%= link_to report.pipeline_output.sample.project.name, report.pipeline_output.sample.project %></td>
         <td><%= report.created_at %></td>

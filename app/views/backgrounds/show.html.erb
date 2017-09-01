@@ -15,7 +15,7 @@
 
 <p>
   <strong>Date created:</strong>
-  <%= @project.created_at %>
+  <%= @background.created_at %>
 </p>
 
 <p>
@@ -26,25 +26,20 @@
   <thead>
     <tr>
       <th>Sample</th>
-      <th colspan="2"></th>
+      <th colspan="1"></th>
     </tr>
   </thead>
   <tbody>
-    <% @project.samples.each do |sample| %>
+    <% @background.samples.each do |sample| %>
       <tr>
         <td><%= link_to sample.name, sample %></td>
         <td><%= link_to 'Show', sample %></td>
-        <td><%= link_to 'Edit', edit_sample_path(@sample) %></td>
       </tr>
     <% end %>
   </tbody>
 </table>
 
 <p>
-  <strong>Reports:</strong>
-</p>
-<
-p>
 <%= link_to 'Edit', edit_background_path(@background) %> |
 <%= link_to 'See all backgrounds', backgrounds_path %> |
 <%= link_to 'Front portal', root_path %>
