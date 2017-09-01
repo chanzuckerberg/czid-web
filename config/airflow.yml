@@ -1,7 +1,7 @@
 default: &default
   protocol: http
   host: 127.0.0.1
-  port: 8081
+  port: 8080
   uri: /admin/rest_api/api
   dag_api: trigger_dag
   dag_id: sample_run
