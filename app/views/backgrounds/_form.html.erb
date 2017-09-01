@@ -21,11 +21,6 @@
     <%= form.collection_check_boxes :sample_ids, Sample.all, :id, :name %>
   </div>
 
-  <div class="field checkbox-list">
-    <%= form.label :reports %>
-    <%= form.collection_check_boxes :report_ids, Report.all, :id, :name %>
-  </div>
-
   <div class="actions">
     <%= form.submit %>
   </div>
