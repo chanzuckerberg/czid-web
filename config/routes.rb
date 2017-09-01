@@ -1,3 +1,5 @@
+require 'resque/server'
+
 Rails.application.routes.draw do
   resources :pipeline_outputs
   devise_for :users
@@ -6,6 +8,7 @@ Rails.application.routes.draw do
   end
   resources :projects
   resources :users
+  mount Resque::Server.new, at: '/resque'
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
-  root to: "home#home"
+  root to: 'home#home'
 end

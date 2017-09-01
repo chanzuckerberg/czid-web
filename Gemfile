@@ -33,6 +33,9 @@ gem 'bcrypt', '~> 3.1.7'
 gem 'devise', '4.3.0'
 gem 'simple_token_authentication', '~> 1.0' # see semver.org
 
+# Worker/Scheduler management
+gem 'resque'
+
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
 
