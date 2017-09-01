@@ -1,0 +1,23 @@
+#!/usr/bin/env ruby
+
+require 'pathname'
+require 'fileutils'
+require 'rubygems/version'
+include FileUtils
+
+APP_ROOT = Pathname.new File.expand_path('../../', __FILE__)
+
+def system!(cmd, err = nil)
+  system(cmd) || abort("\n== Command #{cmd} failed ==\n\n#{err}\n\n====")
+end
+
+DOCKER = "docker-compose run web ".freeze
+
+chdir APP_ROOT do
+  # make sure we're not on master
+  system!(DOCKER + "rake rubocop:auto_correct")
+  system!("git diff-index --quiet HEAD", "commit changes before re-running")
+  system!(DOCKER + "rake test")
+  system!("git push")
+  system!("hub pull-request -o")
+end

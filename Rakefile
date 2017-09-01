@@ -5,6 +5,11 @@ require_relative 'config/application'
 
 Rails.application.load_tasks
 
-task :setup do
-  exec("brew install mysql")
+require 'rubocop/rake_task'
+
+RuboCop::RakeTask.new do |t|
+  t.options = ['-R', '--config', '.rubocop_todo.yml']
 end
+
+task(:default).clear
+task default: [:rubocop, :test]
