@@ -1,4 +1,4 @@
-# ID Portal
+# ID Portal ![travis ci build status](https://travis-ci.org/chanzuckerberg/idseq-web.svg?branch=master)
 
 This app stores and analyzes the output from the infectious disease pipeline.
 
