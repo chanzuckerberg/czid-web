@@ -16,6 +16,11 @@
     <%= form.text_field :name, id: :sample_name %>
   </div>
 
+  <div class="field radiobutton-list">
+    <%= form.label :project %>
+    <%= form.collection_radio_buttons :project_id, Project.all, :id, :name %>
+  </div>
+
   <div class="actions">
     <%= form.submit %>
   </div>
