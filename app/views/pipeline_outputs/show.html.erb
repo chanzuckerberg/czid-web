@@ -6,6 +6,11 @@
 </p>
 
 <p>
+  <strong>Project:</strong>
+  <%= link_to @pipeline_output.sample.project.name, @pipeline_output.sample.project %>
+</p>
+
+<p>
   <strong>Total reads:</strong>
   <%= @pipeline_output.total_reads %>
 </p>
@@ -13,6 +18,11 @@
 <p>
   <strong>Remaining reads:</strong>
   <%= @pipeline_output.remaining_reads %>
+</p>
+
+<p>
+  <strong>Date created:</strong>
+  <%= @pipeline_output.created_at %>
 </p>
 
 <table class="table table-condensed">
@@ -36,5 +46,8 @@
       </tbody>
     </table>
 
+<p>
 <%= link_to 'Edit', edit_pipeline_output_path(@pipeline_output) %> |
-<%= link_to 'Back', pipeline_outputs_path %>
+<%= link_to 'See all pipeline runs', pipeline_outputs_path %> |
+<%= link_to 'Front portal', root_path %>
+</p>

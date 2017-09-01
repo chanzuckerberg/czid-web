@@ -7,6 +7,8 @@
     <tr>
       <th>Email</th>
       <th>Name</th>
+      <th>Projects</th>
+      <th>Date joined</th>
       <th colspan="3"></th>
     </tr>
   </thead>
@@ -15,7 +17,13 @@
     <% @users.each do |user| %>
       <tr>
         <td><%= user.email %></td>
-        <td><%= user.name %></td>
+        <td><%= link_to user.name, user %></td>
+        <td><% user.projects[0...-1].each do |p| %>
+              <%= link_to p.name, p if p %>, 
+            <% end %>
+            <%= link_to user.projects.last.name, user.projects.last if user.projects.last %>
+        </td>
+        <td><%= user.created_at %></td>
         <td><%= link_to 'Show', user %></td>
         <td><%= link_to 'Edit', edit_user_path(user) %></td>
         <td><%= link_to 'Destroy', user, method: :delete, data: { confirm: 'Are you sure?' } %></td>
@@ -24,6 +32,7 @@
   </tbody>
 </table>
 
-<br>
-
-<%= link_to 'New User', new_user_path %>
+<p>
+<%= link_to 'New User', new_user_path %> |
+<%= link_to 'Front portal', root_path %>
+</p>

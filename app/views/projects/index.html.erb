@@ -6,7 +6,9 @@
   <thead>
     <tr>
       <th>Name</th>
-      <th>User</th>
+      <th>User(s)</th>
+      <th>Number of samples</th>
+      <th>Date created</th>
       <th colspan="3"></th>
     </tr>
   </thead>
@@ -15,7 +17,13 @@
     <% @projects.each do |project| %>
       <tr>
         <td><%= project.name %></td>
-        <td><%= project.users.collect.map(&:name).join(", ") %></td>
+        <td><% project.users[0...-1].each do |u| %>
+          <%= link_to u.name, u if u %>,
+        <% end %>
+        <%= link_to project.users.last.name, project.users.last if project.users.last %>
+        </td>
+        <td><%= project.samples.count %></td>
+        <td><%= project.created_at %></td>
         <td><%= link_to 'Show', project %></td>
         <td><%= link_to 'Edit', edit_project_path(project) %></td>
         <td><%= link_to 'Destroy', project, method: :delete, data: { confirm: 'Are you sure?' } %></td>
@@ -24,6 +32,7 @@
   </tbody>
 </table>
 
-<br>
-
-<%= link_to 'New Project', new_project_path %>
+<p>
+<%= link_to 'New Project', new_project_path %> |
+<%= link_to 'Front portal', root_path %>
+</p>
