@@ -6,6 +6,13 @@ services:
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=1
       - MYSQL_DATABASE=idseq_development
+  redis:
+    image: redis:3.0.5
+    container_name: redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - ./redis-data:/var/lib/redis/data
   web:
     build: .
     volumes:
@@ -14,3 +21,12 @@ services:
       - "3000:3000"
     depends_on:
       - db
+      - redis
+  resque:
+    build: .
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - redis
+    command: bundle exec "QUEUE=* COUNT=5 rake resque:workers"

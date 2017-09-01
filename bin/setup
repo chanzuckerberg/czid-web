@@ -15,7 +15,7 @@ chdir APP_ROOT do
   # Add necessary setup steps to this file.
 
   puts '== Installing dependencies =='
-  system('brew help 1>/dev/null') || system!('brew install mysql') 
+  system('brew help 1>/dev/null') || system!('brew install mysql')
   system! 'gem install bundler --conservative'
   # system('bundle check') || system!('bundle install')
 
