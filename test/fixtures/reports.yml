@@ -3,6 +3,8 @@
 one:
   name: MyString
   pipeline_output: one
+  background: one
+  
 
 two:
   name: MyString

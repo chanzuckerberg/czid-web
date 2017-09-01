@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170901203121) do
+ActiveRecord::Schema.define(version: 20170901205814) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -49,6 +49,8 @@ ActiveRecord::Schema.define(version: 20170901203121) do
     t.bigint "pipeline_output_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "background_id"
+    t.index ["background_id"], name: "index_reports_on_background_id"
     t.index ["pipeline_output_id"], name: "index_reports_on_pipeline_output_id"
   end
 
@@ -102,6 +104,7 @@ ActiveRecord::Schema.define(version: 20170901203121) do
   end
 
   add_foreign_key "pipeline_outputs", "samples"
+  add_foreign_key "reports", "backgrounds"
   add_foreign_key "reports", "pipeline_outputs"
   add_foreign_key "taxon_counts", "pipeline_outputs"
   add_foreign_key "taxon_zscores", "reports"
