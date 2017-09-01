@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170830221654) do
+ActiveRecord::Schema.define(version: 20170831210913) do
 
   create_table "pipeline_outputs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "sample_id", null: false
@@ -38,8 +38,7 @@ ActiveRecord::Schema.define(version: 20170830221654) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "project_id"
-    t.index ["name"], name: "index_samples_on_name", unique: true
-    t.index ["project_id"], name: "index_samples_on_project_id"
+    t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
   end
 
   create_table "taxon_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -67,6 +66,8 @@ ActiveRecord::Schema.define(version: 20170830221654) do
     t.datetime "last_sign_in_at"
     t.string "current_sign_in_ip", collation: "utf8_general_ci"
     t.string "last_sign_in_ip", collation: "utf8_general_ci"
+    t.string "authentication_token", limit: 30, collation: "utf8_general_ci"
+    t.index ["authentication_token"], name: "index_users_on_authentication_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end

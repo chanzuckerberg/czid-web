@@ -10,4 +10,4 @@ project = Project.create!(name: "Awesome Project")
   output = PipelineOutput.create!(sample: sample, total_reads: 1_000, remaining_reads: 500, taxon_counts: taxon_counts)
 end
 
-user = User.create!(email: "fake@example.com", name: "Fake User", password: "password", password_confirmation: "password")
+user = User.create!(email: "fake@example.com", name: "Fake User", password: "password", password_confirmation: "password", authentication_token: "idseq1234")
