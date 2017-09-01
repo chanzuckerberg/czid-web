@@ -1,15 +1,120 @@
-#!/bin/bash
+#!/usr/bin/env ruby
 
-set -e
+require 'rubygems'
+require 'bundler/setup'
+require 'aws-sdk-ecs'
+require 'pp'
 
-ENV=$1
-TAG=$2
+env, image = ARGV.shift, ARGV.shift
 
-if [ -z $ENV ] || [ -z $TAG ] ; then
-    echo "usage: ./bin/deploy ENV TAG";
-    exit
-fi
+if !env || !image
+  puts "Usage: ./bin/deploy ENV IMAGE_TAG"
+  abort
+end
+puts "deploying #{image} to #{env}"
 
-#TODO run migrations
 
-./bin/ecs-deploy -c $ENV -n idseq-web-dev -i chanzuckerberg/idseq-web:$TAG
+CLUSTER = "dev"
+SERVICE = "idseq-web-#{env}"
+REPO = "chanzuckerberg/idseq-web"
+
+client = Aws::ECS::Client.new
+
+resp = client.describe_services({
+  cluster: CLUSTER,
+  services: [SERVICE]
+})
+
+service = resp.services.first
+
+resp2 = client.describe_task_definition({
+  task_definition: service.task_definition
+})
+
+puts "current task is revision #{resp2.task_definition.revision}"
+task_def =  resp2.task_definition.to_h
+
+task_def.delete(:task_definition_arn)
+task_def.delete(:revision)
+task_def.delete(:status)
+task_def.delete(:requires_attributes)
+task_def[:container_definitions][0][:image] = "#{REPO}:#{image}"
+
+resp3 = client.register_task_definition(task_def)
+
+new_task = resp3.task_definition
+puts "created new task definition #{new_task.revision}"
+
+puts "running migrations"
+
+resp4 = client.run_task({
+  cluster: CLUSTER,
+  task_definition: "#{SERVICE}:#{new_task.revision}",
+  overrides: {
+    container_overrides: [
+      {
+        name: "rails",
+        command: ["rails", "db:migrate"]
+      }
+    ]
+  }
+})
+
+migrate_task = resp4.tasks[0].task_arn
+
+loop do
+  resp5 = client.describe_tasks({
+    cluster: CLUSTER,
+    tasks: [
+      migrate_task 
+    ], 
+  })
+
+  print "migration task: #{resp5.tasks[0].last_status}\r"
+  if resp5.tasks[0].last_status == "STOPPED"
+    puts 
+    if resp5.tasks[0].containers[0].exit_code == 0
+      puts "migration(s) successful"
+      break
+    else
+      puts "migration(s) failed, see logs"
+      exit
+    end
+  end
+  sleep(5)
+end
+
+resp6 = client.update_service({
+  cluster: CLUSTER,
+  service: SERVICE, 
+  task_definition: "idseq-web-dev:#{new_task.revision}", 
+})
+
+loop do 
+  resp7 = client.describe_services({
+    cluster: CLUSTER,
+    services: [
+      SERVICE
+    ]
+  })
+
+  puts "=" * 80
+  service = resp7.services[0]
+
+  puts "desired: #{service.desired_count} running: #{service.running_count} pending #{service.pending_count}"
+  puts "deployments:\t task_definition\tdesired\trunning\tpending"
+  service.deployments.each do |deployment|
+    puts "\t\t#{deployment.task_definition.split('/').last}\t#{deployment.desired_count}\t#{deployment.running_count}\t#{deployment.pending_count}"
+  end
+  puts "events"
+  service.events[(0..5)].each do |event|
+    puts "#{printf('%4d', (Time.now - event.created_at).to_i)} seconds ago:\t#{event.message}"
+  end
+
+  if service.deployments.count == 1
+    puts "deployment complete"
+    break
+  end
+  sleep 5
+end
+
