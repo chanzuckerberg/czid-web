@@ -65,7 +65,7 @@ loop do
   print "migration task: #{resp5.tasks[0].last_status}\r"
   if resp5.tasks[0].last_status == "STOPPED"
     puts
-    if resp5.tasks[0].containers[0].exit_code == 0
+    if resp5.tasks[0].containers[0].exit_code.zero?
       puts "migration(s) successful"
       break
     else
@@ -76,9 +76,9 @@ loop do
   sleep(5)
 end
 
-resp6 = client.update_service(cluster: CLUSTER,
-                              service: SERVICE,
-                              task_definition: "idseq-web-dev:#{new_task.revision}")
+client.update_service(cluster: CLUSTER,
+                      service: SERVICE,
+                      task_definition: "idseq-web-dev:#{new_task.revision}")
 
 loop do
   resp7 = client.describe_services(cluster: CLUSTER,
@@ -96,7 +96,7 @@ loop do
   end
   puts "events"
   service.events[(0..5)].each do |event|
-    puts "#{printf('%4d', (Time.now - event.created_at).to_i)} seconds ago:\t#{event.message}"
+    puts "#{printf('%4d', (Time.zone.now - event.created_at).to_i)} seconds ago:\t#{event.message}"
   end
 
   if service.deployments.count == 1
