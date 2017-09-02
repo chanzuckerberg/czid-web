@@ -13,7 +13,7 @@ end
 
 chdir APP_ROOT do
   puts '== Installing dependencies =='
-  system('brew help 1>/dev/null') || (puts "install homebrew from directions at https://brew.sh/")
+  system('brew help 1>/dev/null') || abort("install homebrew from directions at https://brew.sh/")
 
   if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.4.1')
     system!("brew install ruby")
