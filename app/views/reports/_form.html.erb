@@ -16,9 +16,9 @@
     <%= form.text_field :name, id: :report_name %>
   </div>
 
-  <div class="field">
+  <div class="field radiobutton-list">
     <%= form.label :pipeline_output_id %>
-    <%= form.text_field :pipeline_output_id, id: :report_pipeline_output_id %>
+    <%= form.collection_radio_buttons :pipeline_output_id, PipelineOutput.all, :id, :remaining_reads %>
   </div>
 
   <div class="field radiobutton-list">
