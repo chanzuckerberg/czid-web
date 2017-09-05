@@ -23,7 +23,7 @@
         <td><%= link_to report.pipeline_output.sample.name, report.pipeline_output.sample %></td>
         <td><%= link_to report.pipeline_output.sample.project.name, report.pipeline_output.sample.project %></td>
         <td><%= report.created_at %></td>
-        <td><%= link_to report.background.name, report.background %></td>
+        <td><%= link_to report.background.name, report.background if report.background %></td>
         <td><%= link_to 'Show', report %></td>
         <td><%= link_to 'Edit', edit_report_path(report) %></td>
         <td><%= link_to 'Destroy', report, method: :delete, data: { confirm: 'Are you sure?' } %></td>

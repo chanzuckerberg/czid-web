@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170901205814) do
+ActiveRecord::Schema.define(version: 20170905173124) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -80,6 +80,7 @@ ActiveRecord::Schema.define(version: 20170901205814) do
     t.integer "nt_zscore"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "name"
     t.index ["report_id"], name: "index_taxon_zscores_on_report_id"
   end
 
