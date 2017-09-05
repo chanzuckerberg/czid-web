@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170905173124) do
+ActiveRecord::Schema.define(version: 20170905222332) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -77,7 +77,7 @@ ActiveRecord::Schema.define(version: 20170905173124) do
     t.bigint "report_id"
     t.integer "tax_id"
     t.integer "tax_level"
-    t.integer "nt_zscore"
+    t.float "nt_zscore", limit: 24
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "name"

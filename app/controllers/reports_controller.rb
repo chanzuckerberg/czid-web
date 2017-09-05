@@ -44,8 +44,12 @@ class ReportsController < ApplicationController
         n = n+1
       end
       mean = sum.to_f/n
-      stdev = (sum_sq.to_f - sum**2/n)/(n-1)
-      a[:nt_zscore] = (taxon_count.count-mean)/stdev
+      stdev = Math.sqrt((sum_sq.to_f - sum**2/n)/(n-1))
+      if stdev != 0
+        a[:nt_zscore] = (taxon_count.count-mean)/stdev
+      else 
+        a[:nt_zscore] = 0 
+      end
       @report.taxon_zscores.new(a)
     end
 
