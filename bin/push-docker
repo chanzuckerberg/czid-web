@@ -1,14 +1,11 @@
 #!/bin/bash
-
 set -e
 
-BRANCH=$1
-COMMIT=$2
-BUILD_NUMBER=$3
-
-
 export REPO=chanzuckerberg/idseq-web
-export TAG=`if [ "$BRANCH" == "master" ]; then echo "latest"; else echo $BRANCH; fi`
+
+BRANCH="branch-$1"
+COMMIT="sha-$2"
+BUILD_NUMBER="build-$3"
 
 echo $BRANCH
 echo $COMMIT
