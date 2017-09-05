@@ -29,25 +29,28 @@ class ReportsController < ApplicationController
       a = {}
       a[:tax_id] = taxon_count.tax_id
       a[:tax_level] = taxon_count.tax_level
-      a[:name] = taxon_count.name 
-      a[:nt_zscore] = 0
-      sum = taxon_count.count
-      sum_sq = taxon_count.count**2 
+      a[:name] = taxon_count.name
+      normalized_count = taxon_count.count.to_f/@report.pipeline_output.total_reads 
+      sum = normalized_count
+      sum_sq = normalized_count**2 
       n = 1
       @report.background.samples.each do |background_sample|
-	if background_sample.pipeline_outputs.first.taxon_counts.find_by(tax_id: taxon_count.tax_id)
-	  bg_count = background_sample.pipeline_outputs.first.taxon_counts.find_by(tax_id: taxon_count.tax_id).count
+        bg_pipeline_output = background_sample.pipeline_outputs.first	
+        bg_taxon_count = bg_pipeline_output.taxon_counts.find_by(tax_id: taxon_count.tax_id)
+        if bg_taxon_count
+          bg_count = bg_taxon_count.count
+          normalized_bg_count = bg_count.to_f/bg_pipeline_output.total_reads
 	else 
-	  bg_count = 0
+	  normalized_bg_count = 0
 	end
-	sum += bg_count
-	sum_sq += bg_count**2
-	n = n+1
+	sum += normalized_bg_count
+	sum_sq += normalized_bg_count**2
+	n += 1
       end
       mean = sum.to_f/n
       stdev = Math.sqrt((sum_sq.to_f - sum**2/n)/(n-1))
       if stdev > 0
-	a[:nt_zscore] = (taxon_count.count-mean)/stdev
+	a[:nt_zscore] = (normalized_count-mean)/stdev
       else 
 	a[:nt_zscore] = 0 
       end
