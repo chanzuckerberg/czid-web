@@ -7,12 +7,12 @@
 
 <p>
   <strong>Pipeline output:</strong>
-  <%= @report.pipeline_output %>
+  <%= link_to @report.pipeline_output %>
 </p>
 
 <p>
   <strong>Sample:</strong>
-  <%= @report.pipeline_output.sample.name %>
+  <%= link_to @report.pipeline_output.sample.name, @report.pipeline_output.sample %>
 </p>
 
 <p>

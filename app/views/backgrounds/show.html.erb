@@ -26,14 +26,12 @@
   <thead>
     <tr>
       <th>Sample</th>
-      <th colspan="1"></th>
     </tr>
   </thead>
   <tbody>
     <% @background.samples.each do |sample| %>
       <tr>
         <td><%= link_to sample.name, sample %></td>
-        <td><%= link_to 'Show', sample %></td>
       </tr>
     <% end %>
   </tbody>

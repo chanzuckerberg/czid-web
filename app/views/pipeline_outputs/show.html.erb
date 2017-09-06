@@ -26,11 +26,18 @@
 </p>
 
 <p>
-  <strong>Report(s):</strong>
-  <% @pipeline_output.reports[0...-1].each do |r| %>
-    <%= link_to r.name, r if r %>, 
+  <% if @pipeline_output.reports.count == 0 %>
+     <strong>Reports:</strong> none
+  <% elsif @pipeline_output.reports.count == 1 %>
+     <strong>Report:</strong>
+     <%= link_to @pipeline_output.reports.last.name, @pipeline_output.reports.last %>
+  <% else %>
+     <strong>Reports:</strong>
+     <% @pipeline_output.reports[0...-1].each do |r| %>
+       <%= link_to r.name, r if r %>, 
+     <% end %>
+     <%= link_to @pipeline_output.reports.last.name, @pipeline_output.reports.last %>
   <% end %>
-  <%= link_to @pipeline_output.reports.last.name, @pipeline_output.reports.last if @pipeline_output.reports.last %>
 </p>
 
 <table class="table table-condensed">
