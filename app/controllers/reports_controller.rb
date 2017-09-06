@@ -33,8 +33,7 @@ class ReportsController < ApplicationController
       sum = normalized_count
       sum_sq = normalized_count**2
       n = 1
-      @report.background.samples.each do |background_sample|
-        bg_pipeline_output = background_sample.pipeline_outputs.first
+      @report.background.pipeline_outputs.each do |bg_pipeline_output|
         bg_taxon_count = bg_pipeline_output.taxon_counts.find_by(tax_id: taxon_count.tax_id)
         if bg_taxon_count
           bg_count = bg_taxon_count.count
