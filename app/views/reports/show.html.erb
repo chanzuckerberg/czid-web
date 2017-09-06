@@ -21,8 +21,17 @@
 </p>
 
 <p>
+  <strong>Background:</strong>
+  <%= link_to @report.background.name, @report.background %>
+</p>
+
+<p>
   <strong>Date created:</strong>
   <%= @report.created_at %>
+</p>
+
+<p>
+  <strong>Taxon scores:</strong>
 </p>
 
 <table class="table table-condensed">

@@ -40,12 +40,15 @@
   <% end %>
 </p>
 
+<p>
+  <strong>Taxon counts:</strong>
+</p>
+
 <table class="table table-condensed">
       <thead>
         <tr>
           <th>Taxon ID</th>
           <th>Taxon Name</th>
-          <th>Taxon Level</th>
           <th>Count</th>
         </tr>
       </thead>
@@ -54,7 +57,6 @@
           <tr>
             <td><%= element.tax_id %></td>
             <td><%= element.name %></td>
-            <td><%= element.tax_level %></td>
             <td><%= element.count %></td>
          </tr>
         <% end %>

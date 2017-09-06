@@ -29,7 +29,7 @@ class PipelineOutputsController < ApplicationController
 
     respond_to do |format|
       if @pipeline_output.save
-        @pipeline_output.name = ['run #', @pipeline_output.id, ' (', @pipeline_output.sample.name, ')'].join('')
+        @pipeline_output.name = ['ID#', @pipeline_output.id, ' (', @pipeline_output.sample.name, ')'].join('')
         @pipeline_output.save
         format.html { redirect_to @pipeline_output, notice: 'Pipeline output was successfully created.' }
         format.json { render :show, status: :created, location: @pipeline_output }

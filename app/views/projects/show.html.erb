@@ -6,11 +6,18 @@
 </p>
 
 <p>
-  <strong>User(s):</strong>
-  <% @project.users[0...-1].each do |u| %>
-    <%= link_to u.name, u if u%>, 
+  <% if @project.users.count == 0 %>
+    <strong>Users:</strong> none
+  <% elsif @project.users.count == 1 %>
+    <strong>User:</strong>
+    <%= link_to @project.users.last.name, @project.users.last %>
+  <% else %>
+    <strong>Users:</strong>
+    <% @project.users[0...-1].each do |u| %>
+      <%= link_to u.name, u if u %>,
+    <% end %>
+    <%= link_to @project.users.last.name, @project.users.last %>
   <% end %>
-  <%= link_to @project.users.last.name, @project.users.last if @project.users.last %>
 </p>
 
 <p>
@@ -22,24 +29,28 @@
   <strong>Samples:</strong>
 </p>
 
-<table class="table table-condensed">
-  <thead>
-    <tr>
-      <th>Sample</th>
-      <th>Pipeline runs</th>
-      <th colspan="1"></th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @project.samples.each do |sample| %>
+<% if @project.samples.count == 0 %>
+  No samples yet.
+<% else %>
+  <table class="table table-condensed">
+    <thead>
       <tr>
-        <td><%= link_to sample.name, sample %></td>
-        <td><%= sample.pipeline_outputs.count %></td>
-        <td><%= link_to 'Show', sample %></td>
+        <th>Sample</th>
+        <th>Pipeline runs</th>
+        <th colspan="1"></th>
       </tr>
-    <% end %>
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      <% @project.samples.each do |sample| %>
+        <tr>
+          <td><%= link_to sample.name, sample %></td>
+          <td><%= sample.pipeline_outputs.count %></td>
+          <td><%= link_to 'Show', sample %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>
 
 <p>
 <%= link_to 'Edit', edit_project_path(@project) %> |

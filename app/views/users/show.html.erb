@@ -11,11 +11,18 @@
 </p>
 
 <p>
-  <strong>Projects:</strong>
-  <% @user.projects[0...-1].each do |p| %>
-    <%= link_to p.name, p if p %>, 
+  <% if @user.projects.count == 0 %>
+    <strong>Projects:</strong> none
+  <% elsif @user.projects.count == 1 %>
+    <strong>Project:</strong>
+    <%= link_to @user.projects.last.name, @user.projects.last %>
+  <% else %>
+    <strong>Projects:</strong>
+    <% @user.projects[0...-1].each do |p| %>
+      <%= link_to p.name, p if p %>, 
+    <% end %>
+    <%= link_to @user.projects.last.name, @user.projects.last %>
   <% end %>
-  <%= link_to @user.projects.last.name, @user.projects.last if @user.projects.last %>
 </p>
 
 <p>
