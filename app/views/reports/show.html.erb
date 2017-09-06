@@ -7,7 +7,7 @@
 
 <p>
   <strong>Pipeline output:</strong>
-  <%= link_to @report.pipeline_output %>
+  <%= link_to @report.pipeline_output.name, @report.pipeline_output %>
 </p>
 
 <p>
@@ -39,8 +39,8 @@
         <tr>
           <th>Taxon ID</th>
           <th>Taxon Name</th>
-          <th>Taxon Level</th>
-          <th>Nt Z-score</th>
+          <th>NT Species Z</th>
+          <th>NT Species rM</th>
         </tr>
       </thead>
       <tbody>
@@ -48,8 +48,8 @@
           <tr>
             <td><%= element.tax_id %></td>
             <td><%= element.name %></td>
-            <td><%= element.tax_level %></td>
             <td><%= element.nt_zscore %></td>
+            <td><%= element.nt_rpm %></td>
          </tr>
         <% end %>
       </tbody>

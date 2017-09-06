@@ -11,9 +11,19 @@
     </div>
   <% end %>
 
-  <div class="field">
+  A new entry run will be created by kicking off the processing pipeline. 
+  <br>
+  For now, you can create an artificial "pipeline run" using this form.
+  <br>
+  Or post a JSON from the pipeline as follows, making sure the file contains the appropriate sample ID: 
+  <br>
+  curl -H "Accept: application/json" -H "Content-type: application/json" -X POST -d @some_output_file.json http://localhost:3000/pipeline_outputs.json 
+  <br>
+  <br>
+
+  <div class="field radiobutton-list">
     <%= form.label :sample_id %>
-    <%= form.text_field :sample_id, id: :pipeline_output_sample_id %>
+    <%= form.collection_radio_buttons :sample_id, Sample.all, :id, :name %>
   </div>
 
   <div class="field">
