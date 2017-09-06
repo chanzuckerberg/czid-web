@@ -6,11 +6,18 @@
 </p>
 
 <p>
-  <strong>Used in report(s):</strong>
-  <% @background.reports[0...-1].each do |r| %>
-    <%= link_to r.name, r if r %>, 
+  <% if @background.reports.count == 0 %>
+    <strong>Used in reports:</strong> none
+  <% elsif @background.reports.count == 1 %>
+    <strong>Used in report:</strong>
+    <%= link_to @background.reports.last.name, @background.reports.last %>
+  <% else %>
+    <strong>Used in report(s):</strong>
+    <% @background.reports[0...-1].each do |r| %>
+      <%= link_to r.name, r if r %>, 
+    <% end %>
+    <%= link_to @background.reports.last.name, @background.reports.last %>
   <% end %>
-  <%= link_to @background.reports.last.name, @background.reports.last if @background.reports.last %>
 </p>
 
 <p>
@@ -19,19 +26,19 @@
 </p>
 
 <p>
-  <strong>Samples:</strong>
+  <strong>Pipeline runs:</strong>
 </p>
 
 <table class="table table-condensed">
   <thead>
     <tr>
-      <th>Sample</th>
+      <th>Pipeline run</th>
     </tr>
   </thead>
   <tbody>
-    <% @background.samples.each do |sample| %>
+    <% @background.pipeline_outputs.each do |p| %>
       <tr>
-        <td><%= link_to sample.name, sample %></td>
+        <td><%= link_to p.name, p %></td>
       </tr>
     <% end %>
   </tbody>
