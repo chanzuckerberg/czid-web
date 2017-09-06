@@ -26,6 +26,7 @@ class PipelineOutputsController < ApplicationController
   # POST /pipeline_outputs.json
   def create
     @pipeline_output = PipelineOutput.new(pipeline_output_params)
+    @pipeline_output.name = [@pipeline_output, @pipeline_output.sample.name].join(', ')
 
     respond_to do |format|
       if @pipeline_output.save

@@ -6,6 +6,7 @@
   <thead>
     <tr>
       <th>Name</th>
+      <th>ID</th>
       <th>Project</th>
       <th>Pipeline runs</th>
       <th>Date created</th>
@@ -17,6 +18,7 @@
     <% @samples.each do |sample| %>
       <tr>
         <td><%= sample.name %></td>
+        <td><%= sample.id %></td>
         <td><%= link_to sample.project.name, sample.project if sample.project if sample.project %></td>
         <td><%= sample.pipeline_outputs.count %></td>
         <td><%= sample.created_at %></td>
