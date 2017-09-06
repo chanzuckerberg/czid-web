@@ -10,8 +10,7 @@ class PipelineOutputsController < ApplicationController
 
   # GET /pipeline_outputs/1
   # GET /pipeline_outputs/1.json
-  def show
-  end
+  def show; end
 
   # GET /pipeline_outputs/new
   def new
@@ -19,8 +18,7 @@ class PipelineOutputsController < ApplicationController
   end
 
   # GET /pipeline_outputs/1/edit
-  def edit
-  end
+  def edit; end
 
   # POST /pipeline_outputs
   # POST /pipeline_outputs.json
@@ -63,6 +61,7 @@ class PipelineOutputsController < ApplicationController
   end
 
   private
+
   # Use callbacks to share common setup or constraints between actions.
   def set_pipeline_output
     @pipeline_output = PipelineOutput.find(params[:id])
