@@ -1,0 +1,2 @@
+module BackgroundsHelper
+end

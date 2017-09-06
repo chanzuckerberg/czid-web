@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  pipeline_output: one
+  background: one
+  
+
+two:
+  name: MyString
+  pipeline_output: two

@@ -1,0 +1,27 @@
+<%= form_with(model: background, local: true) do |form| %>
+  <% if background.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(background.errors.count, "error") %> prohibited this background from being saved:</h2>
+
+      <ul>
+      <% background.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :name %>
+    <%= form.text_field :name, id: :background_name %>
+  </div>
+
+  <div class="field checkbox-list">
+    <%= form.label :samples %>
+    <%= form.collection_check_boxes :sample_ids, Sample.all, :id, :name %>
+  </div>
+
+  <div class="actions">
+    <%= form.submit %>
+  </div>
+<% end %>

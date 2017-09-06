@@ -1,0 +1,53 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @report.name %>
+</p>
+
+<p>
+  <strong>Pipeline output:</strong>
+  <%= @report.pipeline_output %>
+</p>
+
+<p>
+  <strong>Sample:</strong>
+  <%= @report.pipeline_output.sample.name %>
+</p>
+
+<p>
+  <strong>Project:</strong>
+  <%= link_to @report.pipeline_output.sample.project.name, @report.pipeline_output.sample.project %>
+</p>
+
+<p>
+  <strong>Date created:</strong>
+  <%= @report.created_at %>
+</p>
+
+<table class="table table-condensed">
+      <thead>
+        <tr>
+          <th>Taxon ID</th>
+          <th>Taxon Name</th>
+          <th>Taxon Level</th>
+          <th>Nt Z-score</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @report.taxon_zscores.sort_by(&:nt_zscore).reverse.each do |element| %>
+          <tr>
+            <td><%= element.tax_id %></td>
+            <td><%= element.name %></td>
+            <td><%= element.tax_level %></td>
+            <td><%= element.nt_zscore %></td>
+         </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+<p>
+<%= link_to 'Edit', edit_report_path(@report) %> |
+<%= link_to 'See all reports', reports_path %> |
+<%= link_to 'Front portal', root_path %>
+</p>

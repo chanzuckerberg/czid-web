@@ -10,7 +10,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170831210913) do
+ActiveRecord::Schema.define(version: 20170905222332) do
+
+  create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "backgrounds_samples", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.bigint "background_id", null: false
+    t.bigint "sample_id", null: false
+  end
 
   create_table "pipeline_outputs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "sample_id", null: false
@@ -33,6 +44,16 @@ ActiveRecord::Schema.define(version: 20170831210913) do
     t.bigint "user_id", null: false
   end
 
+  create_table "reports", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "name"
+    t.bigint "pipeline_output_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "background_id"
+    t.index ["background_id"], name: "index_reports_on_background_id"
+    t.index ["pipeline_output_id"], name: "index_reports_on_pipeline_output_id"
+  end
+
   create_table "samples", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name", collation: "utf8_general_ci"
     t.datetime "created_at", null: false
@@ -50,6 +71,17 @@ ActiveRecord::Schema.define(version: 20170831210913) do
     t.datetime "updated_at", null: false
     t.string "name", collation: "utf8_general_ci"
     t.index ["pipeline_output_id"], name: "index_taxon_counts_on_pipeline_output_id"
+  end
+
+  create_table "taxon_zscores", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.bigint "report_id"
+    t.integer "tax_id"
+    t.integer "tax_level"
+    t.float "nt_zscore", limit: 24
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "name"
+    t.index ["report_id"], name: "index_taxon_zscores_on_report_id"
   end
 
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -73,5 +105,8 @@ ActiveRecord::Schema.define(version: 20170831210913) do
   end
 
   add_foreign_key "pipeline_outputs", "samples"
+  add_foreign_key "reports", "backgrounds"
+  add_foreign_key "reports", "pipeline_outputs"
   add_foreign_key "taxon_counts", "pipeline_outputs"
+  add_foreign_key "taxon_zscores", "reports"
 end

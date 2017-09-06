@@ -1,0 +1,33 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Backgrounds</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Number of samples</th>
+      <th>Date created</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @backgrounds.each do |background| %>
+      <tr>
+        <td><%= background.name %></td>
+        <td><%= background.samples.count %></td>
+        <td><%= background.created_at %></td>
+        <td><%= link_to 'Show', background %></td>
+        <td><%= link_to 'Edit', edit_background_path(background) %></td>
+        <td><%= link_to 'Destroy', background, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+
+<p>
+<%= link_to 'New Background', new_background_path %> |
+<%= link_to 'Front portal', root_path %>
+</p>
