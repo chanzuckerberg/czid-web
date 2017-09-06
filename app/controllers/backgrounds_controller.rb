@@ -9,8 +9,7 @@ class BackgroundsController < ApplicationController
 
   # GET /backgrounds/1
   # GET /backgrounds/1.json
-  def show
-  end
+  def show; end
 
   # GET /backgrounds/new
   def new
@@ -18,8 +17,7 @@ class BackgroundsController < ApplicationController
   end
 
   # GET /backgrounds/1/edit
-  def edit
-  end
+  def edit; end
 
   # POST /backgrounds
   # POST /backgrounds.json
@@ -62,6 +60,7 @@ class BackgroundsController < ApplicationController
   end
 
   private
+
     # Use callbacks to share common setup or constraints between actions.
     def set_background
       @background = Background.find(params[:id])
@@ -69,6 +68,6 @@ class BackgroundsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def background_params
-      params.require(:background).permit(:name, sample_ids:[], reports:[])
+      params.require(:background).permit(:name, sample_ids: [], reports: [])
     end
 end

@@ -9,8 +9,7 @@ class ReportsController < ApplicationController
 
   # GET /reports/1
   # GET /reports/1.json
-  def show
-  end
+  def show; end
 
   # GET /reports/new
   def new
@@ -18,8 +17,7 @@ class ReportsController < ApplicationController
   end
 
   # GET /reports/1/edit
-  def edit
-  end
+  def edit; end
 
   # POST /reports
   # POST /reports.json
@@ -30,37 +28,36 @@ class ReportsController < ApplicationController
       a[:tax_id] = taxon_count.tax_id
       a[:tax_level] = taxon_count.tax_level
       a[:name] = taxon_count.name
-      normalized_count = taxon_count.count.to_f/@report.pipeline_output.total_reads 
+      normalized_count = taxon_count.count.to_f / @report.pipeline_output.total_reads
       sum = normalized_count
-      sum_sq = normalized_count**2 
+      sum_sq = normalized_count**2
       n = 1
       @report.background.samples.each do |background_sample|
-        bg_pipeline_output = background_sample.pipeline_outputs.first	
+        bg_pipeline_output = background_sample.pipeline_outputs.first
         bg_taxon_count = bg_pipeline_output.taxon_counts.find_by(tax_id: taxon_count.tax_id)
         if bg_taxon_count
           bg_count = bg_taxon_count.count
-          normalized_bg_count = bg_count.to_f/bg_pipeline_output.total_reads
-	else 
-	  normalized_bg_count = 0
-	end
-	sum += normalized_bg_count
-	sum_sq += normalized_bg_count**2
-	n += 1
+          normalized_bg_count = bg_count.to_f / bg_pipeline_output.total_reads
+        else
+          normalized_bg_count = 0
+        end
+        sum += normalized_bg_count
+        sum_sq += normalized_bg_count**2
+        n += 1
       end
-      mean = sum.to_f/n
-      stdev = Math.sqrt((sum_sq.to_f - sum**2/n)/(n-1))
-      if stdev > 0
-	a[:nt_zscore] = (normalized_count-mean)/stdev
-      else 
-	a[:nt_zscore] = 0 
-      end
+      mean = sum.to_f / n
+      stdev = Math.sqrt((sum_sq.to_f - sum**2 / n) / (n - 1))
+      a[:nt_zscore] = if stdev > 0
+                        (normalized_count - mean) / stdev
+                      else
+                        0
+                      end
       @report.taxon_zscores.new(a)
     end
 
     respond_to do |format|
       if @report.save
-        format.html { redirect_to @report, 
-                      notice: 'Report was successfully created.' }
+        format.html { redirect_to @report, notice: 'Report was successfully created.' }
         format.json { render :show, status: :created, location: @report }
       else
         format.html { render :new }
@@ -94,6 +91,7 @@ class ReportsController < ApplicationController
   end
 
   private
+
     # Use callbacks to share common setup or constraints between actions.
     def set_report
       @report = Report.find(params[:id])
