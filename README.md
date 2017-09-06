@@ -17,7 +17,8 @@ To get a local instance running, just do:
 
 ## Deployment
 
-TODO, for now ask RK.
+1. decide what docker tag you want to deploy (see https://hub.docker.com/r/chanzuckerberg/idseq-web/tags/)
+1. `bundle exec bin/deploy ENV TAG`
 
 ## Upload data
 

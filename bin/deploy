@@ -78,7 +78,7 @@ end
 
 client.update_service(cluster: CLUSTER,
                       service: SERVICE,
-                      task_definition: "idseq-web-dev:#{new_task.revision}")
+                      task_definition: "idseq-web-#{env}:#{new_task.revision}")
 
 loop do
   resp7 = client.describe_services(cluster: CLUSTER,
