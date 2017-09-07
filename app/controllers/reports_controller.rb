@@ -9,7 +9,7 @@ class ReportsController < ApplicationController
 
   # GET /reports/1
   # GET /reports/1.json
-  def show 
+  def show
     @nt_zscore_threshold = params[:nt_zscore_threshold]
     @nt_rpm_threshold = params[:nt_rpm_threshold]
   end
