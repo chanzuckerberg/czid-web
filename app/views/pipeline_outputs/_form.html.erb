@@ -11,9 +11,9 @@
     </div>
   <% end %>
 
-  <div class="field">
+  <div class="field radiobutton-list">
     <%= form.label :sample_id %>
-    <%= form.text_field :sample_id, id: :pipeline_output_sample_id %>
+    <%= form.collection_radio_buttons :sample_id, Sample.all, :id, :name %>
   </div>
 
   <div class="field">

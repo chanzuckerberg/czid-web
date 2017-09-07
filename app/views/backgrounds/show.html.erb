@@ -6,11 +6,11 @@
 </p>
 
 <p>
-  <strong>Used in report(s):</strong>
-  <% @background.reports[0...-1].each do |r| %>
-    <%= link_to r.name, r if r %>, 
-  <% end %>
-  <%= link_to @background.reports.last.name, @background.reports.last if @background.reports.last %>
+  <strong>Used in <%= pluralize(@background.reports.count, 'report')%>:</strong>
+  <%= raw(@background.reports.map do |r|
+    link_to(r.name, r)
+    end.join(','))
+  %>
 </p>
 
 <p>
@@ -19,25 +19,27 @@
 </p>
 
 <p>
-  <strong>Samples:</strong>
+  <strong>Composed of pipeline runs:</strong>
 </p>
 
-<table class="table table-condensed">
-  <thead>
-    <tr>
-      <th>Sample</th>
-      <th colspan="1"></th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @background.samples.each do |sample| %>
+<% if @background.pipeline_outputs.count == 0 %>
+  No pipeline runs added yet.
+<% else %>
+  <table class="table table-condensed">
+    <thead>
       <tr>
-        <td><%= link_to sample.name, sample %></td>
-        <td><%= link_to 'Show', sample %></td>
+        <th colspan="1"></th>
       </tr>
-    <% end %>
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      <% @background.pipeline_outputs.each do |p| %>
+        <tr>
+          <td><%= link_to p.name, p %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>
 
 <p>
 <%= link_to 'Edit', edit_background_path(@background) %> |

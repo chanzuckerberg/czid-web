@@ -70,6 +70,6 @@ class PipelineOutputsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def pipeline_output_params
-    params.require(:pipeline_output).permit(:sample_id, :total_reads, :remaining_reads, taxon_counts_attributes: [:tax_id, :tax_level, :count, :name])
+    params.require(:pipeline_output).permit(:sample_id, :name, :total_reads, :remaining_reads, taxon_counts_attributes: [:tax_id, :tax_level, :count, :name])
   end
 end

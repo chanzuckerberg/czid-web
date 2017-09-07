@@ -6,7 +6,8 @@
   <thead>
     <tr>
       <th>Name</th>
-      <th>Number of samples</th>
+      <th>Composed of pipeline runs</th>
+      <th>Used in reports</th>
       <th>Date created</th>
       <th colspan="3"></th>
     </tr>
@@ -16,7 +17,8 @@
     <% @backgrounds.each do |background| %>
       <tr>
         <td><%= background.name %></td>
-        <td><%= background.samples.count %></td>
+        <td><%= background.pipeline_outputs.count %></td>
+        <td><%= background.reports.count %></td>
         <td><%= background.created_at %></td>
         <td><%= link_to 'Show', background %></td>
         <td><%= link_to 'Edit', edit_background_path(background) %></td>

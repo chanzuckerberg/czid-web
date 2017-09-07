@@ -7,12 +7,12 @@
 
 <p>
   <strong>Pipeline output:</strong>
-  <%= @report.pipeline_output %>
+  <%= link_to @report.pipeline_output.name, @report.pipeline_output %>
 </p>
 
 <p>
   <strong>Sample:</strong>
-  <%= @report.pipeline_output.sample.name %>
+  <%= link_to @report.pipeline_output.sample.name, @report.pipeline_output.sample %>
 </p>
 
 <p>
@@ -21,26 +21,49 @@
 </p>
 
 <p>
+  <strong>Background:</strong>
+  <%= link_to @report.background.name, @report.background %>
+</p>
+
+<p>
   <strong>Date created:</strong>
   <%= @report.created_at %>
 </p>
+
+<p>
+  <strong>Taxon scores:</strong>
+</p>
+
+<%= form_for @report, method: :get, url: report_path(@report) do |f| %>
+  Threshold for NT Species Z: <%= text_field_tag :nt_zscore_threshold, (@nt_zscore_threshold || -1) %><br>
+  Threshold for NT Species rM: <%= text_field_tag :nt_rpm_threshold, (@nt_rpm_threshold || 0) %><br>
+  <%= f.submit %>
+<% end %>
 
 <table class="table table-condensed">
       <thead>
         <tr>
           <th>Taxon ID</th>
           <th>Taxon Name</th>
-          <th>Taxon Level</th>
-          <th>Nt Z-score</th>
+          <th>NT Species Z</th>
+          <th>NT Species rM</th>
         </tr>
       </thead>
       <tbody>
-        <% @report.taxon_zscores.sort_by(&:nt_zscore).reverse.each do |element| %>
+        <% if @nt_zscore_threshold %>
+          <% zscores_display = @report.taxon_zscores.where("nt_zscore >= #{@nt_zscore_threshold}") %>
+        <% else %>
+          <% zscores_display = @report.taxon_zscores %>
+        <% end %>
+        <% if @nt_rpm_threshold %>
+          <% zscores_display = zscores_display.where("nt_rpm >= #{@nt_rpm_threshold}") %>
+        <% end %>
+        <% zscores_display.order(nt_zscore: :desc, nt_rpm: :desc).each do |element| %>
           <tr>
             <td><%= element.tax_id %></td>
             <td><%= element.name %></td>
-            <td><%= element.tax_level %></td>
             <td><%= element.nt_zscore %></td>
+            <td><%= element.nt_rpm %></td>
          </tr>
         <% end %>
       </tbody>

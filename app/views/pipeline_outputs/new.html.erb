@@ -1,4 +1,14 @@
-<h1>New Pipeline Output</h1>
+<h1>New Pipeline Run </h1>
+
+A new entry run will be created by kicking off the processing pipeline.
+<br>
+For now, you can create an artificial "pipeline run" using this form.
+<br>
+Or post a JSON from the pipeline as follows, making sure the file contains the appropriate sample ID:
+<br>
+curl -H "Accept: application/json" -H "Content-type: application/json" -X POST -d @some_output_file.json http://localhost:3000/pipeline_outputs.json
+<br>
+<br>
 
 <%= render 'form', pipeline_output: @pipeline_output %>
 

@@ -2,7 +2,7 @@
 
 <p>
   <strong>Sample:</strong>
-  <%= @pipeline_output.sample.name %>
+  <%= link_to @pipeline_output.sample.name, @pipeline_output.sample %>
 </p>
 
 <p>
@@ -26,11 +26,15 @@
 </p>
 
 <p>
-  <strong>Report(s):</strong>
-  <% @pipeline_output.reports[0...-1].each do |r| %>
-    <%= link_to r.name, r if r %>, 
-  <% end %>
-  <%= link_to @pipeline_output.reports.last.name, @pipeline_output.reports.last if @pipeline_output.reports.last %>
+  <strong><%= pluralize(@pipeline_output.reports.count, 'Report')%>:</strong>
+  <%= raw(@pipeline_output.reports.map do |r|
+    link_to(r.name, r)
+    end.join(','))
+  %>
+</p>
+
+<p>
+  <strong>Taxon counts:</strong>
 </p>
 
 <table class="table table-condensed">
@@ -38,7 +42,6 @@
         <tr>
           <th>Taxon ID</th>
           <th>Taxon Name</th>
-          <th>Taxon Level</th>
           <th>Count</th>
         </tr>
       </thead>
@@ -47,7 +50,6 @@
           <tr>
             <td><%= element.tax_id %></td>
             <td><%= element.name %></td>
-            <td><%= element.tax_level %></td>
             <td><%= element.count %></td>
          </tr>
         <% end %>
