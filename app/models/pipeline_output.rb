@@ -4,4 +4,7 @@ class PipelineOutput < ApplicationRecord
   has_many :reports, dependent: :destroy
   has_and_belongs_to_many :backgrounds
   accepts_nested_attributes_for :taxon_counts
+  def name
+    ['ID#', id, ' (', sample.name, ')'].join('')
+  end
 end
