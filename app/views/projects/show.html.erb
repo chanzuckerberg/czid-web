@@ -6,18 +6,11 @@
 </p>
 
 <p>
-  <% if @project.users.count == 0 %>
-    <strong>Users:</strong> none
-  <% elsif @project.users.count == 1 %>
-    <strong>User:</strong>
-    <%= link_to @project.users.last.name, @project.users.last %>
-  <% else %>
-    <strong>Users:</strong>
-    <% @project.users[0...-1].each do |u| %>
-      <%= link_to u.name, u if u %>,
-    <% end %>
-    <%= link_to @project.users.last.name, @project.users.last %>
-  <% end %>
+  <strong><%= pluralize(@project.users.count, 'User')%>:</strong>
+  <%= raw(@project.users.map do |u|
+    link_to(u.name, u)
+    end.join(','))
+  %>
 </p>
 
 <p>

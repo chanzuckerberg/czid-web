@@ -6,18 +6,11 @@
 </p>
 
 <p>
-  <% if @background.reports.count == 0 %>
-    <strong>Used in reports:</strong> none
-  <% elsif @background.reports.count == 1 %>
-    <strong>Used in report:</strong>
-    <%= link_to @background.reports.last.name, @background.reports.last %>
-  <% else %>
-    <strong>Used in report(s):</strong>
-    <% @background.reports[0...-1].each do |r| %>
-      <%= link_to r.name, r if r %>, 
-    <% end %>
-    <%= link_to @background.reports.last.name, @background.reports.last %>
-  <% end %>
+  <strong>Used in <%= pluralize(@background.reports.count, 'report')%>:</strong>
+  <%= raw(@background.reports.map do |r|
+    link_to(r.name, r)
+    end.join(','))
+  %>
 </p>
 
 <p>
