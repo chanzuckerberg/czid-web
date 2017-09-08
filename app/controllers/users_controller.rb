@@ -1,6 +1,7 @@
 class UsersController < ApplicationController
   before_action :set_user, only: [:show, :edit, :update, :destroy]
-
+  before_action :configure_permitted_parameters, if: :devise_controller?
+ 
   # GET /users
   # GET /users.json
   def index
@@ -60,6 +61,14 @@ class UsersController < ApplicationController
       format.json { head :no_content }
     end
   end
+
+  protected
+
+    def configure_permitted_parameters
+      registration_params = [:email, :name, :password, :password_confirmation]
+      devise_parameter_sanitizer.for(:sign_up) { |u| u.permit(registration_params) }
+      devise_parameter_sanitizer.for(:account_update) { |u| u.permit(registration_params << :current_password) }
+    end
 
   private
     # Use callbacks to share common setup or constraints between actions.
