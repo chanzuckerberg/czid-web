@@ -1,5 +1,6 @@
 class TaxonomiesController < ApplicationController
   before_action :set_taxonomy, only: [:show, :edit, :update, :destroy]
+  protect_from_forgery unless: -> { request.format.json? }
 
   # GET /taxonomies
   # GET /taxonomies.json
