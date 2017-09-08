@@ -1,6 +1,7 @@
 class SamplesController < ApplicationController
   before_action :set_sample, only: [:show, :edit, :update, :destroy]
-  acts_as_token_authentication_handler_for User, only: [:insert]
+  acts_as_token_authentication_handler_for User, only: [:create]
+  protect_from_forgery unless: -> { request.format.json? }
 
   # GET /samples
   # GET /samples.json
@@ -15,37 +16,6 @@ class SamplesController < ApplicationController
   # GET /samples/new
   def new
     @sample = Sample.new
-  end
-
-  # GET /samples/insert
-  def insert
-    # TODO: merge create and insert somehow
-    params.require([:sample_name, :project_name, :s3_input_path])
-    @project = Project.find_by(name: params[:project_name]) ||
-               Project.new(name: params[:project_name])
-    @project.save
-    @sample = Sample.new(name: params[:sample_name])
-    @sample.project = @project
-
-    respond_to do |format|
-      if @sample.save
-        # TODO: kick off the airflow pipeline here
-
-        format.json do
-          render json: { sample_id: @sample.id, project_id: @project.id }
-        end
-        format.html do
-          output_str = 'Project Id:' + @project.id.to_s + '<br>'
-          output_str += 'Sample Id:' + @sample.id.to_s
-          render inline: output_str
-        end
-      else
-        format.json { render json: @sample.errors.full_messages, status: 403 }
-        format.html do
-          render inline: @sample.errors.full_messages.to_s, status: 403
-        end
-      end
-    end
   end
 
   # GET /samples/1/edit
@@ -100,6 +70,6 @@ class SamplesController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def sample_params
-    params.require(:sample).permit(:name, :project_id)
+    params.require(:sample).permit(:name, :project_id, input_files_attributes: [:name, :presigned_url])
   end
 end

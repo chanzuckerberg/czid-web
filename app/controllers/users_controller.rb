@@ -22,6 +22,7 @@ class UsersController < ApplicationController
   # POST /users
   # POST /users.json
   def create
+    Rails.logger.debug(user_params.inspect)
     @user = User.new(user_params)
 
     respond_to do |format|
@@ -68,6 +69,6 @@ class UsersController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def user_params
-    params.require(:user).permit(:email, :password, :password_confirmation, :name, project_ids: [])
+    params.require(:user).permit(:email, :password, :password_confirmation, :name, project_ids:[])
   end
 end
