@@ -1,6 +1,7 @@
 require 'resque/server'
 
 Rails.application.routes.draw do
+  resources :taxonomies
   resources :backgrounds
   resources :reports
   resources :pipeline_outputs

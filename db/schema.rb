@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170907174409) do
+ActiveRecord::Schema.define(version: 20170908181551) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -78,6 +78,18 @@ ActiveRecord::Schema.define(version: 20170907174409) do
     t.index ["pipeline_output_id"], name: "index_taxon_counts_on_pipeline_output_id"
   end
 
+  create_table "taxon_descriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.bigint "tax_id"
+    t.bigint "species_tax_id"
+    t.bigint "genus_tax_id"
+    t.string "species_name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "taxonomy_id"
+    t.string "genus_name"
+    t.index ["taxonomy_id"], name: "index_taxon_descriptions_on_taxonomy_id"
+  end
+
   create_table "taxon_zscores", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "report_id"
     t.integer "tax_id"
@@ -88,6 +100,12 @@ ActiveRecord::Schema.define(version: 20170907174409) do
     t.string "name"
     t.float "nt_rpm", limit: 24
     t.index ["report_id"], name: "index_taxon_zscores_on_report_id"
+  end
+
+  create_table "taxonomies", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "version"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -114,5 +132,6 @@ ActiveRecord::Schema.define(version: 20170907174409) do
   add_foreign_key "reports", "backgrounds"
   add_foreign_key "reports", "pipeline_outputs"
   add_foreign_key "taxon_counts", "pipeline_outputs"
+  add_foreign_key "taxon_descriptions", "taxonomies"
   add_foreign_key "taxon_zscores", "reports"
 end

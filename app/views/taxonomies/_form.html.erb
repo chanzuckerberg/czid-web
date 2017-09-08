@@ -1,0 +1,22 @@
+<%= form_with(model: taxonomy, local: true) do |form| %>
+  <% if taxonomy.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(taxonomy.errors.count, "error") %> prohibited this taxonomy from being saved:</h2>
+
+      <ul>
+      <% taxonomy.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :version_name %>
+    <%= form.text_field :version, id: :taxonomy_version %>
+  </div>
+
+  <div class="actions">
+    <%= form.submit %>
+  </div>
+<% end %>

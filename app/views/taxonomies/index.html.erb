@@ -1,0 +1,27 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Taxonomies</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Version name</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @taxonomies.each do |taxonomy| %>
+      <tr>
+        <td><%= taxonomy.version %></td>
+        <td><%= link_to 'Show', taxonomy %></td>
+        <td><%= link_to 'Edit', edit_taxonomy_path(taxonomy) %></td>
+        <td><%= link_to 'Destroy', taxonomy, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Taxonomy', new_taxonomy_path %>

@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  tax_id: 
+  species_tax_id: 
+  genus_tax_id: 
+  species_name: MyString
+
+two:
+  tax_id: 
+  species_tax_id: 
+  genus_tax_id: 
+  species_name: MyString
