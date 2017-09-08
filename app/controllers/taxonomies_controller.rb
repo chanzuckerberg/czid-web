@@ -10,8 +10,7 @@ class TaxonomiesController < ApplicationController
 
   # GET /taxonomies/1
   # GET /taxonomies/1.json
-  def show
-  end
+  def show; end
 
   # GET /taxonomies/new
   def new
@@ -19,8 +18,7 @@ class TaxonomiesController < ApplicationController
   end
 
   # GET /taxonomies/1/edit
-  def edit
-  end
+  def edit; end
 
   # POST /taxonomies
   # POST /taxonomies.json
@@ -63,13 +61,14 @@ class TaxonomiesController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_taxonomy
-      @taxonomy = Taxonomy.find(params[:id])
-    end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def taxonomy_params
-      params.require(:taxonomy).permit(:version, taxon_descriptions_attributes: [:tax_id, :species_tax_id, :genus_tax_id, :species_name, :genus_name])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_taxonomy
+    @taxonomy = Taxonomy.find(params[:id])
+  end
+
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def taxonomy_params
+    params.require(:taxonomy).permit(:version, taxon_descriptions_attributes: [:tax_id, :species_tax_id, :genus_tax_id, :species_name, :genus_name])
+  end
 end
