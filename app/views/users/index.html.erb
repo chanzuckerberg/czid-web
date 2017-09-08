@@ -17,7 +17,7 @@
     <% @users.each do |user| %>
       <tr>
         <td><%= user.email %></td>
-        <td><%= link_to user.name, user %></td>
+        <td><%= link_to user.name, user if user.name %></td>
         <td><% user.projects[0...-1].each do |p| %>
               <%= link_to p.name, p if p %>, 
             <% end %>
