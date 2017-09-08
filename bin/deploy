@@ -9,14 +9,14 @@ env = ARGV.shift
 image = ARGV.shift
 
 if !env || !image
-  puts "Usage: ./bin/deploy ENV IMAGE_TAG"
+  puts 'Usage: ./bin/deploy ENV IMAGE_TAG'
   abort
 end
 puts "deploying #{image} to #{env}"
 
-CLUSTER = "dev".freeze
+CLUSTER = 'dev'.freeze
 SERVICE = "idseq-web-#{env}".freeze
-REPO = "chanzuckerberg/idseq-web".freeze
+REPO = 'chanzuckerberg/idseq-web'.freeze
 
 client = Aws::ECS::Client.new
 
@@ -41,15 +41,15 @@ resp3 = client.register_task_definition(task_def)
 new_task = resp3.task_definition
 puts "created new task definition #{new_task.revision}"
 
-puts "running migrations"
+puts 'running migrations'
 
 resp4 = client.run_task(cluster: CLUSTER,
                         task_definition: "#{SERVICE}:#{new_task.revision}",
                         overrides: {
                           container_overrides: [
                             {
-                              name: "rails",
-                              command: ["rails", "db:migrate"]
+                              name: 'rails',
+                              command: ['rails', 'db:migrate']
                             }
                           ]
                         })
@@ -63,13 +63,13 @@ loop do
                                 ])
 
   print "migration task: #{resp5.tasks[0].last_status}\r"
-  if resp5.tasks[0].last_status == "STOPPED"
+  if resp5.tasks[0].last_status == 'STOPPED'
     puts
     if resp5.tasks[0].containers[0].exit_code.zero?
-      puts "migration(s) successful"
+      puts 'migration(s) successful'
       break
     else
-      puts "migration(s) failed, see logs"
+      puts 'migration(s) failed, see logs'
       exit
     end
   end
@@ -86,7 +86,7 @@ loop do
                                      SERVICE
                                    ])
 
-  puts "=" * 80
+  puts '=' * 80
   service = resp7.services[0]
 
   puts "desired: #{service.desired_count} running: #{service.running_count} pending #{service.pending_count}"
@@ -94,13 +94,13 @@ loop do
   service.deployments.each do |deployment|
     puts "\t\t#{deployment.task_definition.split('/').last}\t#{deployment.desired_count}\t#{deployment.running_count}\t#{deployment.pending_count}"
   end
-  puts "events"
+  puts 'events'
   service.events[(0..5)].each do |event|
     puts "#{printf('%4d', (Time.zone.now - event.created_at).to_i)} seconds ago:\t#{event.message}"
   end
 
   if service.deployments.count == 1
-    puts "deployment complete"
+    puts 'deployment complete'
     break
   end
   sleep 5

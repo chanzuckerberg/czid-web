@@ -11,13 +11,13 @@ def system!(cmd, err = nil)
   system(cmd) || abort("\n== Command #{cmd} failed ==\n\n#{err}\n\n====")
 end
 
-DOCKER = "docker-compose run web ".freeze
+DOCKER = 'docker-compose run web '.freeze
 
 chdir APP_ROOT do
   # TODO: make sure we're not on master
-  system!(DOCKER + "rake rubocop:auto_correct")
-  system!("git diff-index --quiet HEAD", "commit changes before re-running")
-  system!(DOCKER + "rake test")
-  system!("git push")
-  system!("hub pull-request -o")
+  system!(DOCKER + 'rake rubocop:auto_correct')
+  system!('git diff-index --quiet HEAD', 'commit changes before re-running')
+  system!(DOCKER + 'rake test')
+  system!('git push')
+  system!('hub pull-request -o')
 end

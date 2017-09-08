@@ -10,8 +10,7 @@ class SamplesController < ApplicationController
 
   # GET /samples/1
   # GET /samples/1.json
-  def show
-  end
+  def show; end
 
   # GET /samples/new
   def new
@@ -50,8 +49,7 @@ class SamplesController < ApplicationController
   end
 
   # GET /samples/1/edit
-  def edit
-  end
+  def edit; end
 
   # POST /samples
   # POST /samples.json
@@ -94,6 +92,7 @@ class SamplesController < ApplicationController
   end
 
   private
+
   # Use callbacks to share common setup or constraints between actions.
   def set_sample
     @sample = Sample.find(params[:id])

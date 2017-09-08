@@ -8,7 +8,7 @@ Rails.application.load_tasks
 require 'rubocop/rake_task'
 
 RuboCop::RakeTask.new do |t|
-  t.options = ['-R', '--config', '.rubocop_todo.yml', '-S']
+  t.options = ['-R', '--config', '.rubocop_todo.yml', '--display-cop-names', '--display-style-guide']
 end
 
 task(:default).clear
