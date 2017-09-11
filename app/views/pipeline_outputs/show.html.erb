@@ -53,13 +53,13 @@
             <td><%= element.tax_id %></td>
             <td><%= element.name %></td>
             <td><%= case element.tax_level
-                   when 1; 'species'
-                   when 2; 'genus'
+                   when TaxonCount::TAX_LEVEL_SPECIES; 'species'
+                   when TaxonCount::TAX_LEVEL_GENUS; 'genus'
                    end %>
             </td>
             <td><% case element.count_type
-                   when 'NT'; 'nucleotide hit'
-                   when 'NR'; 'protein hit'
+                   when TaxonCount::COUNT_TYPE_NT; 'nucleotide hit'
+                   when TaxonCount::COUNT_TYPE_NR; 'protein hit'
                    end %>
             </td>
             <td><%= element.count %></td>
