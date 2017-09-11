@@ -42,6 +42,8 @@
         <tr>
           <th>Taxon ID</th>
           <th>Taxon Name</th>
+          <th>Taxon Level</th>
+          <th>Count Type</th>
           <th>Count</th>
         </tr>
       </thead>
@@ -50,6 +52,14 @@
           <tr>
             <td><%= element.tax_id %></td>
             <td><%= element.name %></td>
+            <td><% case element.tax_level
+                   when 1 %>species
+                <% when 2 %>genus
+                <% end %></td>
+            <td><% case element.count_type
+                   when 'NT' %>nucleotide hit
+                <% when 'NR' %>protein hit
+                <% end %></td>
             <td><%= element.count %></td>
          </tr>
         <% end %>
