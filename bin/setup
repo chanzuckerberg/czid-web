@@ -22,7 +22,7 @@ chdir APP_ROOT do
   system!('brew install mysql')
   system!('brew install hub')
   system!('brew install bash-completion')
-  system!('brew cask install docker')
+  system!('docker -v || brew cask install docker')
 
   system! 'gem install bundler --conservative'
 
