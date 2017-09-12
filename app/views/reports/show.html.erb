@@ -37,6 +37,8 @@
 <%= form_for @report, method: :get, url: report_path(@report) do |f| %>
   Threshold for NT Species Z: <%= text_field_tag :nt_zscore_threshold, (@nt_zscore_threshold || -1) %><br>
   Threshold for NT Species rM: <%= text_field_tag :nt_rpm_threshold, (@nt_rpm_threshold || 0) %><br>
+  Threshold for NR Species Z: <%= text_field_tag :nr_zscore_threshold, (@nr_zscore_threshold || -1) %><br>
+  Threshold for NR Species rM: <%= text_field_tag :nr_rpm_threshold, (@nr_rpm_threshold || 0) %><br>
   <%= f.submit %>
 <% end %>
 
@@ -52,13 +54,18 @@
         </tr>
       </thead>
       <tbody>
+        <% zscores_display = @report.taxon_zscores %>
         <% if @nt_zscore_threshold %>
-          <% zscores_display = @report.taxon_zscores.where.not("zscore < #{@nt_zscore_threshold} and hit_type = 'NT'") %>
-        <% else %>
-          <% zscores_display = @report.taxon_zscores %>
+          <% zscores_display = @zscores_display.where.not("zscore < #{@nt_zscore_threshold} and hit_type = 'NT'") %>
         <% end %>
         <% if @nt_rpm_threshold %>
           <% zscores_display = zscores_display.where.not("rpm < #{@nt_rpm_threshold} and hit_type = 'NT'") %>
+        <% end %>
+        <% if @nr_zscore_threshold %>
+          <% zscores_display = @zscores_display.where.not("zscore < #{@nr_zscore_threshold} and hit_type = 'NR'") %>
+        <% end %>
+        <% if @nr_rpm_threshold %>
+          <% zscores_display = zscores_display.where.not("rpm < #{@nr_rpm_threshold} and hit_type = 'NR'") %>
         <% end %>
         <% zscores_display.where("hit_type = 'NT'").order(zscore: :desc, rpm: :desc).each do |element| %>
           <tr>
