@@ -31,7 +31,7 @@ class ReportsController < ApplicationController
       a[:tax_id] = taxon_count.tax_id
       a[:tax_level] = taxon_count.tax_level
       a[:name] = taxon_count.name
-      a[:nt_rpm] = 1e6 * taxon_count.count.to_f / @report.pipeline_output.total_reads
+      a[:rpm] = 1e6 * taxon_count.count.to_f / @report.pipeline_output.total_reads
       normalized_count = taxon_count.count.to_f / @report.pipeline_output.total_reads
       sum = normalized_count
       sum_sq = normalized_count**2
@@ -50,11 +50,11 @@ class ReportsController < ApplicationController
       end
       mean = sum.to_f / n
       stdev = Math.sqrt((sum_sq.to_f - sum**2 / n) / (n - 1))
-      a[:nt_zscore] = if stdev > 0
-                        (normalized_count - mean) / stdev
-                      else
-                        0
-                      end
+      a[:zscore] = if stdev > 0
+                     (normalized_count - mean) / stdev
+                   else
+                     0
+                   end
       @report.taxon_zscores.new(a)
     end
 
@@ -102,6 +102,6 @@ class ReportsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def report_params
-    params.require(:report).permit(:name, :pipeline_output_id, :background_id, taxon_zscores_attributes: [:tax_id, :tax_level, :nt_zscore, :nt_rpm, :name])
+    params.require(:report).permit(:name, :pipeline_output_id, :background_id, taxon_zscores_attributes: [:tax_id, :tax_level, :zscore, :rpm, :name])
   end
 end

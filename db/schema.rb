@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170911201058) do
+ActiveRecord::Schema.define(version: 20170912004759) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -84,11 +84,11 @@ ActiveRecord::Schema.define(version: 20170911201058) do
     t.bigint "report_id"
     t.integer "tax_id"
     t.integer "tax_level"
-    t.float "nt_zscore", limit: 24
+    t.float "zscore", limit: 24
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "name"
-    t.float "nt_rpm", limit: 24
+    t.float "rpm", limit: 24
     t.index ["report_id"], name: "index_taxon_zscores_on_report_id"
   end
 
