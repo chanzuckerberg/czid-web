@@ -51,14 +51,14 @@
       </thead>
       <tbody>
         <% if @nt_zscore_threshold %>
-          <% zscores_display = @report.taxon_zscores.where("zscore >= #{@nt_zscore_threshold}") %>
+          <% nt_zscores_display = @report.taxon_zscores.where("zscore >= #{@nt_zscore_threshold} and hit_type = 'NT'") %>
         <% else %>
-          <% zscores_display = @report.taxon_zscores %>
+          <% nt_zscores_display = @report.taxon_zscores.where("hit_type = 'NT'") %>
         <% end %>
         <% if @nt_rpm_threshold %>
-          <% zscores_display = zscores_display.where("rpm >= #{@nt_rpm_threshold}") %>
+          <% nt_zscores_display = nt_zscores_display.where("rpm >= #{@nt_rpm_threshold}") %>
         <% end %>
-        <% zscores_display.order(zscore: :desc, rpm: :desc).each do |element| %>
+        <% nt_zscores_display.order(zscore: :desc, rpm: :desc).each do |element| %>
           <tr>
             <td><%= element.tax_id %></td>
             <td><%= element.name %></td>
