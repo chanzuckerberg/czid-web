@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170907174409) do
+ActiveRecord::Schema.define(version: 20170911201058) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -75,6 +75,8 @@ ActiveRecord::Schema.define(version: 20170907174409) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "name", collation: "utf8_general_ci"
+    t.string "count_type"
+    t.index ["pipeline_output_id", "tax_id", "count_type"], name: "new_index_taxon_counts", unique: true
     t.index ["pipeline_output_id"], name: "index_taxon_counts_on_pipeline_output_id"
   end
 
