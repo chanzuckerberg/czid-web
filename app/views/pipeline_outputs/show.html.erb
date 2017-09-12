@@ -40,27 +40,20 @@
 <table class="table table-condensed">
       <thead>
         <tr>
-          <th>Taxon</th>
-          <th>Taxon Level</th>
-          <th>Count Type</th>
-          <th>Count</th>
+          <th>Species</th>
+          <th>NT Species Count</th>
+          <th>NR Species Count</th>
         </tr>
       </thead>
       <tbody>
-        <% @pipeline_output.taxon_counts.sort_by(&:count).reverse.each do |element| %>
+        <% counts_display = @pipeline_output.taxon_counts %>
+        <% nt_species_counts_display = counts_display.where("count_type = 'NT' and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}").order(count: :desc) %>
+        <% nt_species_counts_display.sort_by(&:count).reverse.each do |nt_species_element| %>
           <tr>
-            <td><%= link_to (element.name || element.tax_id), "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=#{element.tax_id}" %></td>
-            <td><%= case element.tax_level
-                   when TaxonCount::TAX_LEVEL_SPECIES; 'species'
-                   when TaxonCount::TAX_LEVEL_GENUS; 'genus'
-                   end %>
-            </td>
-            <td><% case element.count_type
-                   when TaxonCount::COUNT_TYPE_NT; 'nucleotide hit'
-                   when TaxonCount::COUNT_TYPE_NR; 'protein hit'
-                   end %>
-            </td>
-            <td><%= element.count %></td>
+            <td><%= link_to (nt_species_element.name || nt_species_element.tax_id), "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=#{nt_species_element.tax_id}" %></td>
+           <td><%= nt_species_element.count %></td>
+            <% nr_species_element = counts_display.where("count_type = 'NR' and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}").find_by(tax_id: nt_species_element.tax_id) %>
+            <td><%= nr_species_element.count %></td>
          </tr>
         <% end %>
       </tbody>

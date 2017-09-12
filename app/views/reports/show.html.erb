@@ -43,42 +43,43 @@
 <% end %>
 
 <table class="table table-condensed">
-      <thead>
-        <tr>
-          <th>Species</th>
-          <th>NT Species Z</th>
-          <th>NT Species rM</th>
-          <th>NR Species Z</th>
-          <th>NR Species rM</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% zscores_display = @report.taxon_zscores %>
-        <% if @nt_species_zscore_threshold %>
-          <% zscores_display = @zscores_display.where.not("zscore < #{@nt_species_zscore_threshold} and hit_type = 'NT' and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}") %>
-        <% end %>
-        <% if @nt_rpm_threshold %>
-          <% zscores_display = zscores_display.where.not("rpm < #{@nt_species_rpm_threshold} and hit_type = 'NT' and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}") %>
-        <% end %>
-        <% if @nr_zscore_threshold %>
-          <% zscores_display = @zscores_display.where.not("zscore < #{@nr_species_zscore_threshold} and hit_type = 'NR' and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}") %>
-        <% end %>
-        <% if @nr_rpm_threshold %>
-          <% zscores_display = zscores_display.where.not("rpm < #{@nr_species_rpm_threshold} and hit_type = 'NR' and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}") %>
-        <% end %>
-        <% nt_species_zscores_display = zscores_display.where("hit_type = 'NT' and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}").order(zscore: :desc, rpm: :desc) %>
-        <% nt_species_zscores_display.each do |nt_species_element| %>
-          <tr>
-            <td><%= link_to (nt_species_element.name || nt_species_element.tax_id), "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=#{@nt_species_element.tax_id}" %></td>
-            <td><%= nt_species_element.zscore %></td>
-            <td><%= nt_species_element.rpm %></td>
-            <% nr_species_element = zscores_display.where("hit_type = 'NR' and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}").find_by(tax_id: nt_species_element.tax_id) %>
-            <td><%= nr_species_element.zscore %></td>
-            <td><%= nr_species_element.rpm %></td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
+  <thead>
+    <tr>
+      <th>Species</th>
+      <th>NT Species Z</th>
+      <th>NT Species rM</th>
+      <th>NR Species Z</th>
+      <th>NR Species rM</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% zscores_display = @report.taxon_zscores %>
+    <% if @nt_species_zscore_threshold %>
+      <% zscores_display = zscores_display.where.not("zscore < #{@nt_species_zscore_threshold} and hit_type = 'NT' and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}") %>
+    <% end %>
+    <% if @nt_rpm_threshold %>
+      <% zscores_display = zscores_display.where.not("rpm < #{@nt_species_rpm_threshold} and hit_type = 'NT' and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}") %>
+    <% end %>
+    <% if @nr_zscore_threshold %>
+      <% zscores_display = zscores_display.where.not("zscore < #{@nr_species_zscore_threshold} and hit_type = 'NR' and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}") %>
+    <% end %>
+    <% if @nr_rpm_threshold %>
+      <% zscores_display = zscores_display.where.not("rpm < #{@nr_species_rpm_threshold} and hit_type = 'NR' and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}") %>
+    <% end %>
+    <% nt_species_zscores_display = zscores_display.where("hit_type = 'NT' and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}").order(zscore: :desc, rpm: :desc) %>
+    <% nt_species_zscores_display.each do |nt_species_element| %>
+      <tr>
+        <td><%= link_to (nt_species_element.name || nt_species_element.tax_id), "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=#{@nt_species_element.tax_id}" %></td>
+        <td><%= nt_species_element.zscore %></td>
+        <td><%= nt_species_element.rpm %></td>
+        <% nr_species_element = zscores_display.where("hit_type = 'NR' and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}").find_by(tax_id: nt_species_element.tax_id) %>
+        <td><%= nr_species_element.zscore %></td>
+        <td><%= nr_species_element.rpm %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
 
 <p>
 <%= link_to 'Edit', edit_report_path(@report) %> |
