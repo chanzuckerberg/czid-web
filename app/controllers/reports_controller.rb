@@ -34,9 +34,9 @@ class ReportsController < ApplicationController
       a[:rpm] = 1e6 * taxon_count.count.to_f / @report.pipeline_output.total_reads
       a[:hit_type] = taxon_count.count_type
       normalized_count = taxon_count.count.to_f / @report.pipeline_output.total_reads
-      sum = normalized_count
-      sum_sq = normalized_count**2
-      n = 1
+      sum = 0
+      sum_sq = 0
+      n = 0
       @report.background.pipeline_outputs.each do |bg_pipeline_output|
         bg_taxon_count = bg_pipeline_output.taxon_counts.find_by(tax_id: taxon_count.tax_id, count_type: taxon_count.count_type)
         if bg_taxon_count
