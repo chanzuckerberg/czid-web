@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170912004759) do
+ActiveRecord::Schema.define(version: 20170912010743) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -89,6 +89,7 @@ ActiveRecord::Schema.define(version: 20170912004759) do
     t.datetime "updated_at", null: false
     t.string "name"
     t.float "rpm", limit: 24
+    t.string "hit_type"
     t.index ["report_id"], name: "index_taxon_zscores_on_report_id"
   end
 

@@ -32,12 +32,13 @@ class ReportsController < ApplicationController
       a[:tax_level] = taxon_count.tax_level
       a[:name] = taxon_count.name
       a[:rpm] = 1e6 * taxon_count.count.to_f / @report.pipeline_output.total_reads
+      a[:hit_type] = taxon_count.count_type
       normalized_count = taxon_count.count.to_f / @report.pipeline_output.total_reads
       sum = normalized_count
       sum_sq = normalized_count**2
       n = 1
       @report.background.pipeline_outputs.each do |bg_pipeline_output|
-        bg_taxon_count = bg_pipeline_output.taxon_counts.find_by(tax_id: taxon_count.tax_id)
+        bg_taxon_count = bg_pipeline_output.taxon_counts.find_by(tax_id: taxon_count.tax_id, count_type: taxon_count.count_type)
         if bg_taxon_count
           bg_count = bg_taxon_count.count
           normalized_bg_count = bg_count.to_f / bg_pipeline_output.total_reads
@@ -102,6 +103,6 @@ class ReportsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def report_params
-    params.require(:report).permit(:name, :pipeline_output_id, :background_id, taxon_zscores_attributes: [:tax_id, :tax_level, :zscore, :rpm, :name])
+    params.require(:report).permit(:name, :pipeline_output_id, :background_id, taxon_zscores_attributes: [:tax_id, :tax_level, :zscore, :rpm, :hit_type, :name])
   end
 end
