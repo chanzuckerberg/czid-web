@@ -45,8 +45,7 @@
 <table class="table table-condensed">
       <thead>
         <tr>
-          <th>Taxon ID</th>
-          <th>Taxon Name</th>
+          <th>Species</th>
           <th>NT Species Z</th>
           <th>NT Species rM</th>
           <th>NR Species Z</th>
@@ -69,12 +68,12 @@
         <% end %>
         <% zscores_display.where("hit_type = 'NT'").order(zscore: :desc, rpm: :desc).each do |element| %>
           <tr>
-            <td><%= element.tax_id %></td>
-            <td><%= element.name %></td>
+            <td><%= link_to (element.name || element.tax_id), "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=#{@element.tax_id}" %></td>
             <td><%= element.zscore %></td>
             <td><%= element.rpm %></td>
-            <td><%= zscores_display.where("hit_type = 'NR'").find_by(tax_id: element.tax_id).zscore %></td>
-            <td><%= zscores_display.where("hit_type = 'NR'").find_by(tax_id: element.tax_id).rpm %></td>
+            <% nr_element = zscores_display.where("hit_type = 'NR'").find_by(tax_id: element.tax_id) %>
+            <td><%= nr_element.zscore %></td>
+            <td><%= nr_element.rpm %></td>
           </tr>
         <% end %>
       </tbody>

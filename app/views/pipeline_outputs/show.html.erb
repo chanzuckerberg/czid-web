@@ -40,8 +40,7 @@
 <table class="table table-condensed">
       <thead>
         <tr>
-          <th>Taxon ID</th>
-          <th>Taxon Name</th>
+          <th>Taxon</th>
           <th>Taxon Level</th>
           <th>Count Type</th>
           <th>Count</th>
@@ -50,8 +49,7 @@
       <tbody>
         <% @pipeline_output.taxon_counts.sort_by(&:count).reverse.each do |element| %>
           <tr>
-            <td><%= element.tax_id %></td>
-            <td><%= element.name %></td>
+            <td><%= link_to (element.name || element.tax_id), "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=#{element.tax_id}" %></td>
             <td><%= case element.tax_level
                    when TaxonCount::TAX_LEVEL_SPECIES; 'species'
                    when TaxonCount::TAX_LEVEL_GENUS; 'genus'
