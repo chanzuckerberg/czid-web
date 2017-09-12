@@ -24,7 +24,11 @@ class SamplesController < ApplicationController
   # POST /samples
   # POST /samples.json
   def create
-    @sample = Sample.new(sample_params)
+    params = sample_params
+    project_name = params.delete(:project_name)
+    project = Project.find_by_name(project_name)
+    @sample = Sample.new(params)
+    @sample.project = project
 
     respond_to do |format|
       if @sample.save
@@ -70,6 +74,6 @@ class SamplesController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def sample_params
-    params.require(:sample).permit(:name, :project_id, :status, input_files_attributes: [:name, :presigned_url])
+    params.require(:sample).permit(:name, :project_name, :status, input_files_attributes: [:name, :presigned_url])
   end
 end
