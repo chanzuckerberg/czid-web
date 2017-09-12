@@ -35,10 +35,10 @@
 </p>
 
 <%= form_for @report, method: :get, url: report_path(@report) do |f| %>
-  Threshold for NT Species Z: <%= text_field_tag :nt_zscore_threshold, (@nt_zscore_threshold || -1) %><br>
-  Threshold for NT Species rM: <%= text_field_tag :nt_rpm_threshold, (@nt_rpm_threshold || 0) %><br>
-  Threshold for NR Species Z: <%= text_field_tag :nr_zscore_threshold, (@nr_zscore_threshold || -1) %><br>
-  Threshold for NR Species rM: <%= text_field_tag :nr_rpm_threshold, (@nr_rpm_threshold || 0) %><br>
+  Threshold for NT Species Z: <%= text_field_tag :nt_species_zscore_threshold, (@nt_species_zscore_threshold || -1) %><br>
+  Threshold for NT Species rM: <%= text_field_tag :nt_species_rpm_threshold, (@nt_species_rpm_threshold || 0) %><br>
+  Threshold for NR Species Z: <%= text_field_tag :nr_species_zscore_threshold, (@nr_species_zscore_threshold || -1) %><br>
+  Threshold for NR Species rM: <%= text_field_tag :nr_species_rpm_threshold, (@nr_species_rpm_threshold || 0) %><br>
   <%= f.submit %>
 <% end %>
 
@@ -54,26 +54,27 @@
       </thead>
       <tbody>
         <% zscores_display = @report.taxon_zscores %>
-        <% if @nt_zscore_threshold %>
-          <% zscores_display = @zscores_display.where.not("zscore < #{@nt_zscore_threshold} and hit_type = 'NT'") %>
+        <% if @nt_species_zscore_threshold %>
+          <% zscores_display = @zscores_display.where.not("zscore < #{@nt_species_zscore_threshold} and hit_type = 'NT' and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}") %>
         <% end %>
         <% if @nt_rpm_threshold %>
-          <% zscores_display = zscores_display.where.not("rpm < #{@nt_rpm_threshold} and hit_type = 'NT'") %>
+          <% zscores_display = zscores_display.where.not("rpm < #{@nt_species_rpm_threshold} and hit_type = 'NT' and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}") %>
         <% end %>
         <% if @nr_zscore_threshold %>
-          <% zscores_display = @zscores_display.where.not("zscore < #{@nr_zscore_threshold} and hit_type = 'NR'") %>
+          <% zscores_display = @zscores_display.where.not("zscore < #{@nr_species_zscore_threshold} and hit_type = 'NR' and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}") %>
         <% end %>
         <% if @nr_rpm_threshold %>
-          <% zscores_display = zscores_display.where.not("rpm < #{@nr_rpm_threshold} and hit_type = 'NR'") %>
+          <% zscores_display = zscores_display.where.not("rpm < #{@nr_species_rpm_threshold} and hit_type = 'NR' and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}") %>
         <% end %>
-        <% zscores_display.where("hit_type = 'NT'").order(zscore: :desc, rpm: :desc).each do |element| %>
+        <% nt_species_zscores_display = zscores_display.where("hit_type = 'NT' and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}").order(zscore: :desc, rpm: :desc) %>
+        <% nt_species_zscores_display.each do |nt_species_element| %>
           <tr>
-            <td><%= link_to (element.name || element.tax_id), "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=#{@element.tax_id}" %></td>
-            <td><%= element.zscore %></td>
-            <td><%= element.rpm %></td>
-            <% nr_element = zscores_display.where("hit_type = 'NR'").find_by(tax_id: element.tax_id) %>
-            <td><%= nr_element.zscore %></td>
-            <td><%= nr_element.rpm %></td>
+            <td><%= link_to (nt_species_element.name || nt_species_element.tax_id), "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=#{@nt_species_element.tax_id}" %></td>
+            <td><%= nt_species_element.zscore %></td>
+            <td><%= nt_species_element.rpm %></td>
+            <% nr_species_element = zscores_display.where("hit_type = 'NR' and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}").find_by(tax_id: nt_species_element.tax_id) %>
+            <td><%= nr_species_element.zscore %></td>
+            <td><%= nr_species_element.rpm %></td>
           </tr>
         <% end %>
       </tbody>
