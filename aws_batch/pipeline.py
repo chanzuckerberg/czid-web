@@ -257,6 +257,7 @@ def generate_json_from_taxid_counts(sample, rawReadsInputPath, taxidCountsInputP
     total_reads = 2*int(total_reads.rstrip())/4
     taxon_counts_attributes = []
     remaining_reads = 0
+
     genus_to_count = {}
     genus_to_name = {}
     species_to_count = {}
