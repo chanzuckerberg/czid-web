@@ -23,7 +23,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     req_headers = { 'X-User-Email' => @user.email,
                     'X-User-Token' => @user.authentication_token }
     assert_difference('Sample.count') do
-      post samples_url, params: { sample: { name: 'new sample', project_id: @project.id } }, headers: req_headers
+      post samples_url, params: { sample: { name: 'new sample', project_name: @project.name } }, headers: req_headers
     end
 
     assert_redirected_to sample_url(Sample.last)

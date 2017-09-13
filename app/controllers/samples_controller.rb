@@ -26,7 +26,7 @@ class SamplesController < ApplicationController
   def create
     params = sample_params
     project_name = params.delete(:project_name)
-    project = Project.find_by_name(project_name)
+    project = Project.find_by(name: project_name)
     @sample = Sample.new(params)
     @sample.project = project
 
