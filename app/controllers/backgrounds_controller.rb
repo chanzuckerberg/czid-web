@@ -9,7 +9,8 @@ class BackgroundsController < ApplicationController
 
   # GET /backgrounds/1
   # GET /backgrounds/1.json
-  def show; end
+  def show
+  end
 
   # GET /backgrounds/new
   def new
@@ -17,7 +18,8 @@ class BackgroundsController < ApplicationController
   end
 
   # GET /backgrounds/1/edit
-  def edit; end
+  def edit
+  end
 
   # POST /backgrounds
   # POST /backgrounds.json
