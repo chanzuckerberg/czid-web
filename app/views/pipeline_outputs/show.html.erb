@@ -51,14 +51,14 @@
     <% nr_species_counts = counts_display.type('NR').level(TaxonCount::TAX_LEVEL_SPECIES) %>
     <% tax_ids = nt_species_counts.order(count: :desc).map(&:tax_id) %>
     <% tax_ids.each do |t| %>
-    <% nt_species_element = nt_species_counts.find_by(tax_id: t) %>
-    <% nr_species_element = nr_species_counts.find_by(tax_id: t) %>
-    <tr>
-      <td><%= link_to (nt_species_element.name || nt_species_element.tax_id),
-                       "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=#{nt_species_element.tax_id}" %></td>
-      <td><%= nt_species_element.count %></td>
-      <td><%= nr_species_element.count %></td>
-    </tr>
+      <% nt_species_element = nt_species_counts.find_by(tax_id: t) %>
+      <% nr_species_element = nr_species_counts.find_by(tax_id: t) %>
+      <tr>
+        <td><%= link_to (nt_species_element.name || nt_species_element.tax_id),
+                         "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=#{nt_species_element.tax_id}" %></td>
+        <td><%= nt_species_element.count %></td>
+        <td><%= nr_species_element.count %></td>
+      </tr>
     <% end %>
   </tbody>
 </table>
