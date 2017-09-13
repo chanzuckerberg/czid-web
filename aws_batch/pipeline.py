@@ -770,7 +770,6 @@ def run_combine_json_outputs(sample_name, input_json_1, input_json_2, output_jso
     # move it the output back to S3
     execute_command("aws s3 cp %s %s/" % (output_json, sample_s3_output_path))
 
-
 ### Main
 def main():
     global INPUT_BUCKET
