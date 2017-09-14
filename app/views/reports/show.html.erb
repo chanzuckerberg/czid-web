@@ -35,41 +35,55 @@
 </p>
 
 <%= form_for @report, method: :get, url: report_path(@report) do |f| %>
-  Threshold for NT Species Z: <%= text_field_tag :nt_species_zscore_threshold, (@nt_species_zscore_threshold || -1) %><br>
-  Threshold for NT Species rM: <%= text_field_tag :nt_species_rpm_threshold, (@nt_species_rpm_threshold || 0) %><br>
-  Threshold for NR Species Z: <%= text_field_tag :nr_species_zscore_threshold, (@nr_species_zscore_threshold || -1) %><br>
-  Threshold for NR Species rM: <%= text_field_tag :nr_species_rpm_threshold, (@nr_species_rpm_threshold || 0) %><br>
+  Threshold for NT Z: <%= text_field_tag :nt_zscore_threshold, (@nt_zscore_threshold || -1) %><br>
+  Threshold for NT rM: <%= text_field_tag :nt_rpm_threshold, (@nt_rpm_threshold || 0) %><br>
+  Threshold for NR Z: <%= text_field_tag :nr_zscore_threshold, (@nr_zscore_threshold || nil) %><br>
+  Threshold for NR rM: <%= text_field_tag :nr_rpm_threshold, (@nr_rpm_threshold || nil) %><br>
+  View level: <br>
+  <%= radio_button_tag :view_level, 'species', checked: true %>
+  <%= label :view_level, 'species' %>
+  <%= radio_button_tag :view_level, 'genus' %>
+  <%= label :view_level, 'genus' %>
   <%= f.submit %>
 <% end %>
 
 <table class="table table-condensed">
+  <% if @view_level == 'genus' %>
+    <% ordered_tax_ids = @ordered_genus_tax_ids %>
+    <% nt_zscores = @nt_genus_zscores %>
+    <% nr_zscores = @nr_genus_zscores %>
+  <% else %>
+    <% ordered_tax_ids = @ordered_species_tax_ids %>
+    <% nt_zscores = @nt_species_zscores %>
+    <% nr_zscores = @nr_species_zscores %>
+  <% end %>
   <thead>
     <tr>
-      <th>Species</th>
-      <th>NT Species Z</th>
-      <th>NT Species rM</th>
-      <th>NR Species Z</th>
-      <th>NR Species rM</th>
+      <th><%= @view_level %></th>
+      <th>NT <%= @view_level %> Z</th>
+      <th>NT <%= @view_level %> rM</th>
+      <th>NR <%= @view_level %> Z</th>
+      <th>NR <%= @view_level %> rM</th>
     </tr>
   </thead>
   <tbody>
-    <% thresholded_tax_ids = @ordered_tax_ids %>
-    <% thresholded_tax_ids = thresholded_tax_ids & @nt_species_zscores.where("zscore >= ?", @nt_species_zscore_threshold).map(&:tax_id) if @nt_species_zscore_threshold %>
-    <% thresholded_tax_ids = thresholded_tax_ids & @nr_species_zscores.where("zscore >= ?", @nr_species_zscore_threshold).map(&:tax_id) if @nr_species_zscore_threshold %>
-    <% thresholded_tax_ids = thresholded_tax_ids & @nt_species_zscores.where("rpm >= ?", @nt_species_rpm_threshold).map(&:tax_id) if @nt_species_rpm_threshold %>
-    <% thresholded_tax_ids = thresholded_tax_ids & @nr_species_zscores.where("rpm >= ?", @nr_species_rpm_threshold).map(&:tax_id) if @nr_species_rpm_threshold %>
+    <% thresholded_tax_ids = ordered_tax_ids %>
+    <% thresholded_tax_ids = thresholded_tax_ids & nt_zscores.where("zscore >= ?", @nt_zscore_threshold).map(&:tax_id) if @nt_zscore_threshold %>
+    <% thresholded_tax_ids = thresholded_tax_ids & nr_zscores.where("zscore >= ?", @nr_zscore_threshold).map(&:tax_id) if @nr_zscore_threshold %>
+    <% thresholded_tax_ids = thresholded_tax_ids & nt_zscores.where("rpm >= ?", @nt_rpm_threshold).map(&:tax_id) if @nt_rpm_threshold %>
+    <% thresholded_tax_ids = thresholded_tax_ids & nr_zscores.where("rpm >= ?", @nr_rpm_threshold).map(&:tax_id) if @nr_rpm_threshold %>
     <% thresholded_tax_ids.each do |t| %>
-      <% nt_species_element = @nt_species_zscores.find_by(tax_id: t) %>
-      <% nr_species_element = @nr_species_zscores.find_by(tax_id: t) %>
+      <% nt_element = nt_zscores.find_by(tax_id: t) %>
+      <% nr_element = nr_zscores.find_by(tax_id: t) %>
       <tr>
-        <td><%= link_to (nt_species_element.name || nt_species_element.tax_id), 
-                         "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=#{nt_species_element.tax_id}" %></td>
-        <td><%= nt_species_element.zscore %></td>
-        <td><%= nt_species_element.rpm %></td>
-        <% if nr_species_element %>
-          <td><%= nr_species_element.zscore %></td>
-          <td><%= nr_species_element.rpm %></td>
-        <% end %>
+        <td><%= link_to (nt_element.name || nt_element.tax_id),
+                         "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=#{nt_element.tax_id}" %></td>
+        <td><%= nt_element.zscore %></td> 
+        <td><%= nt_element.rpm %></td>
+          <% if nr_element %>
+            <td><%= nr_element.zscore %></td>
+            <td><%= nr_element.rpm %></td>
+          <% end %>
       </tr>
     <% end %>
   </tbody>

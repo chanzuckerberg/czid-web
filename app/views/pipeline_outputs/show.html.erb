@@ -46,7 +46,7 @@
     </tr>
   </thead>
   <tbody>
-    <% @ordered_tax_ids.each do |t| %>
+    <% @ordered_species_tax_ids.each do |t| %>
       <% nt_species_element = @nt_species_counts.find_by(tax_id: t) %>
       <% nr_species_element = @nr_species_counts.find_by(tax_id: t) %>
       <tr>

@@ -11,10 +11,11 @@ class ReportsController < ApplicationController
   # GET /reports/1
   # GET /reports/1.json
   def show
-    @nt_species_zscore_threshold = params[:nt_species_zscore_threshold]
-    @nt_species_rpm_threshold = params[:nt_species_rpm_threshold]
-    @nr_species_zscore_threshold = params[:nr_species_zscore_threshold]
-    @nr_species_rpm_threshold = params[:nr_species_rpm_threshold]
+    @nt_zscore_threshold = params[:nt_zscore_threshold]
+    @nt_rpm_threshold = params[:nt_rpm_threshold]
+    @nr_zscore_threshold = params[:nr_zscore_threshold]
+    @nr_rpm_threshold = params[:nr_rpm_threshold]
+    @view_level = params[:view_level]
   end
 
   # GET /reports/new
@@ -103,7 +104,10 @@ class ReportsController < ApplicationController
     zscores = @report.taxon_zscores
     @nt_species_zscores = zscores.type('NT').level(TaxonCount::TAX_LEVEL_SPECIES)
     @nr_species_zscores = zscores.type('NR').level(TaxonCount::TAX_LEVEL_SPECIES)
-    @ordered_tax_ids = @nt_species_zscores.order(zscore: :desc).where.not("tax_id < 0").map(&:tax_id)
+    @ordered_species_tax_ids = @nt_species_zscores.order(zscore: :desc).where.not("tax_id < 0").map(&:tax_id)
+    @nt_genus_zscores = zscores.type('NT').level(TaxonCount::TAX_LEVEL_GENUS)
+    @nr_genus_zscores = zscores.type('NR').level(TaxonCount::TAX_LEVEL_GENUS)
+    @ordered_genus_tax_ids = @nt_genus_zscores.order(zscore: :desc).where.not("tax_id < 0").map(&:tax_id)
   end
 
   # Use callbacks to share common setup or constraints between actions.

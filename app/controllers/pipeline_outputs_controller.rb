@@ -67,7 +67,10 @@ class PipelineOutputsController < ApplicationController
     counts_display = @pipeline_output.taxon_counts
     @nt_species_counts = counts_display.type('NT').level(TaxonCount::TAX_LEVEL_SPECIES)
     @nr_species_counts = counts_display.type('NR').level(TaxonCount::TAX_LEVEL_SPECIES)
-    @ordered_tax_ids = @nt_species_counts.order(count: :desc).where.not("tax_id < 0").map(&:tax_id)
+    @ordered_species_tax_ids = @nt_species_counts.order(count: :desc).where.not("tax_id < 0").map(&:tax_id)
+    @nt_genus_counts = counts_display.type('NT').level(TaxonCount::TAX_LEVEL_GENUS)
+    @nr_genus_counts = counts_display.type('NR').level(TaxonCount::TAX_LEVEL_GENUS)
+    @ordered_genus_tax_ids = @nt_genus_counts.order(count: :desc).where.not("tax_id < 0").map(&:tax_id)
   end
 
   # Use callbacks to share common setup or constraints between actions.
