@@ -9,3 +9,13 @@ two:
   sample: two
   total_reads: 1
   remaining_reads: 1
+
+pipeline_output_one:
+  sample: one
+  total_reads: 1
+  remaining_reads: 1
+
+pipeline_output_two:
+  sample: one
+  total_reads: 1
+  remaining_reads: 1
