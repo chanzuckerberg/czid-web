@@ -1,0 +1,55 @@
+#!/usr/bin/env python
+
+import argparse, io, json, os, requests, subprocess
+from tqdm import tqdm
+
+parser = argparse.ArgumentParser(description='Upload to idseq.')
+
+parser.add_argument('-t', '--token', metavar='token', type=str, required=True)
+parser.add_argument('-p', '--project-id', metavar='id', type=int, required=True)
+parser.add_argument('-s', '--sample-name', metavar='name', type=str, required=True)
+parser.add_argument('-u', '--url', metavar='url', type=str, required=True)
+parser.add_argument('-e', '--email', metavar='email', type=str, required=True)
+parser.add_argument('files', metavar='file', type=str, nargs='+', help='files to upload')
+
+args = parser.parse_args()
+
+data = {
+    "sample": {
+        "name": args.sample_name,
+        "project_id": args.project_id,
+        "input_files_attributes": [{"name": f} for f in args.files]
+    }
+}
+
+headers = {
+    'Accept': 'application/json',
+    'Content-type': 'application/json',
+    'X-User-Email': args.email,
+    'X-User-Token': args.token
+}
+
+resp = requests.post('http://' + args.url + '/samples.json', data=json.dumps(data), headers=headers)
+
+if resp.status_code == 201:
+    print("successfully created entry")
+else:
+    print('failed')
+    sys.exit()
+
+
+data = resp.json()
+
+class tqio(io.BufferedReader):
+    def __init__(self, file_path):
+        super().__init__(open(file_path, "rb"))
+        self.t = tqdm(desc=file_path, unit="bytes", unit_scale=True, total=os.path.getsize(file_path))
+ 
+    def read(self, *args, **kwargs):
+        chunk = super().read(*args, **kwargs)
+        self.t.update(len(chunk))
+        return chunk
+
+for file in data['input_files']:
+    with tqio(file['name']) as f:
+        requests.put(file['presigned_url'], data=f)

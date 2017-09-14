@@ -5,6 +5,8 @@ class Sample < ApplicationRecord
   has_many :pipeline_outputs, dependent: :destroy
   has_many :pipeline_runs, dependent: :destroy
   has_and_belongs_to_many :backgrounds
+  has_many :input_files, dependent: :destroy
+  accepts_nested_attributes_for :input_files
 
   def sample_input_s3_path
     # placeholder
