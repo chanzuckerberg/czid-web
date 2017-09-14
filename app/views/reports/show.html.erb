@@ -35,14 +35,14 @@
 </p>
 
 <%= form_for @report, method: :get, url: report_path(@report) do |f| %>
-  Threshold for NT Z: <%= text_field_tag :nt_zscore_threshold, (@nt_zscore_threshold || -1) %><br>
-  Threshold for NT rM: <%= text_field_tag :nt_rpm_threshold, (@nt_rpm_threshold || 0) %><br>
+  Threshold for NT Z: <%= text_field_tag :nt_zscore_threshold, (@nt_zscore_threshold || nil) %><br>
+  Threshold for NT rM: <%= text_field_tag :nt_rpm_threshold, (@nt_rpm_threshold || nil) %><br>
   Threshold for NR Z: <%= text_field_tag :nr_zscore_threshold, (@nr_zscore_threshold || nil) %><br>
   Threshold for NR rM: <%= text_field_tag :nr_rpm_threshold, (@nr_rpm_threshold || nil) %><br>
   View level: <br>
-  <%= radio_button_tag :view_level, 'species', checked: true %>
+  <%= radio_button_tag :view_level, 'species', (@view_level=='species' || true) %>
   <%= label :view_level, 'species' %>
-  <%= radio_button_tag :view_level, 'genus' %>
+  <%= radio_button_tag :view_level, 'genus', @view_level=='genus' %>
   <%= label :view_level, 'genus' %>
   <%= f.submit %>
 <% end %>
@@ -68,10 +68,10 @@
   </thead>
   <tbody>
     <% thresholded_tax_ids = ordered_tax_ids %>
-    <% thresholded_tax_ids = thresholded_tax_ids & nt_zscores.where("zscore >= ?", @nt_zscore_threshold).map(&:tax_id) if @nt_zscore_threshold %>
-    <% thresholded_tax_ids = thresholded_tax_ids & nr_zscores.where("zscore >= ?", @nr_zscore_threshold).map(&:tax_id) if @nr_zscore_threshold %>
-    <% thresholded_tax_ids = thresholded_tax_ids & nt_zscores.where("rpm >= ?", @nt_rpm_threshold).map(&:tax_id) if @nt_rpm_threshold %>
-    <% thresholded_tax_ids = thresholded_tax_ids & nr_zscores.where("rpm >= ?", @nr_rpm_threshold).map(&:tax_id) if @nr_rpm_threshold %>
+    <% thresholded_tax_ids = thresholded_tax_ids & nt_zscores.where("zscore >= ?", @nt_zscore_threshold).map(&:tax_id) if not @nt_zscore_threshold.blank? %>
+    <% thresholded_tax_ids = thresholded_tax_ids & nr_zscores.where("zscore >= ?", @nr_zscore_threshold).map(&:tax_id) if not @nr_zscore_threshold.blank? %>
+    <% thresholded_tax_ids = thresholded_tax_ids & nt_zscores.where("rpm >= ?", @nt_rpm_threshold).map(&:tax_id) if not @nt_rpm_threshold.blank? %>
+    <% thresholded_tax_ids = thresholded_tax_ids & nr_zscores.where("rpm >= ?", @nr_rpm_threshold).map(&:tax_id) if not @nr_rpm_threshold.blank? %>
     <% thresholded_tax_ids.each do |t| %>
       <% nt_element = nt_zscores.find_by(tax_id: t) %>
       <% nr_element = nr_zscores.find_by(tax_id: t) %>
