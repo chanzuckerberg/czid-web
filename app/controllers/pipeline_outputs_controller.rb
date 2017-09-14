@@ -11,7 +11,9 @@ class PipelineOutputsController < ApplicationController
 
   # GET /pipeline_outputs/1
   # GET /pipeline_outputs/1.json
-  def show; end
+  def show
+    @view_level = params[:view_level]
+  end
 
   # GET /pipeline_outputs/new
   def new
@@ -64,12 +66,12 @@ class PipelineOutputsController < ApplicationController
   private
 
   def typed_counts
-    counts_display = @pipeline_output.taxon_counts
-    @nt_species_counts = counts_display.type('NT').level(TaxonCount::TAX_LEVEL_SPECIES)
-    @nr_species_counts = counts_display.type('NR').level(TaxonCount::TAX_LEVEL_SPECIES)
+    counts = @pipeline_output.taxon_counts
+    @nt_species_counts = counts.type('NT').level(TaxonCount::TAX_LEVEL_SPECIES)
+    @nr_species_counts = counts.type('NR').level(TaxonCount::TAX_LEVEL_SPECIES)
     @ordered_species_tax_ids = @nt_species_counts.order(count: :desc).where.not("tax_id < 0").map(&:tax_id)
-    @nt_genus_counts = counts_display.type('NT').level(TaxonCount::TAX_LEVEL_GENUS)
-    @nr_genus_counts = counts_display.type('NR').level(TaxonCount::TAX_LEVEL_GENUS)
+    @nt_genus_counts = counts.type('NT').level(TaxonCount::TAX_LEVEL_GENUS)
+    @nr_genus_counts = counts.type('NR').level(TaxonCount::TAX_LEVEL_GENUS)
     @ordered_genus_tax_ids = @nt_genus_counts.order(count: :desc).where.not("tax_id < 0").map(&:tax_id)
   end
 
