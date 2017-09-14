@@ -16,10 +16,20 @@ class Sample < ApplicationRecord
     's3://yunfang-workdir/id-rr003/RR003-RNA-05_D10_S10'
   end
 
+  def pipeline_command
+    script_name = File.basename(IdSeqPipeline::S3_SCRIPT_LOC)
+    batch_command = "aws s3 cp #{IdSeqPipeline::S3_SCRIPT_LOC} .; chmod 755 #{script_name}; " \
+                    "INPUT_BUCKET=#{self.sample_input_s3_path} " \
+                    "OUTPUT_BUCKET=#{self.sample_output_s3_path} " \
+                    "DB_SAMPLE_ID=#{self.id} ./#{script_name}"
+    command = IdSeqPipeline::BASE_COMMAND
+    command += "aegea batch submit --command=\"#{batch_command}\" "
+    command += " --storage /mnt=1500 --ecr-image idseq --memory 64000"
+    command
+  end
+
   def kickoff_pipeline(dry_run=true) # should be triggered when the upload is complete
-    command = IdSeqPipeline.pipeline_command(self.sample_input_s3_path,
-                                             self.sample_output_s3_path,
-                                             self.id)
+    command = self.pipeline_command
     if dry_run
       Rails.logger.debug(command)
       return command
