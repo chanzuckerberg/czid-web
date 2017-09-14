@@ -20,29 +20,13 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'should create sample' do
+    req_headers = { 'X-User-Email' => @user.email,
+                    'X-User-Token' => @user.authentication_token }
     assert_difference('Sample.count') do
-      post samples_url, params: { sample: { name: 'new sample', project_id: @project.id } }
+      post samples_url, params: { sample: { name: 'new sample', project_name: @project.name } }, headers: req_headers
     end
 
     assert_redirected_to sample_url(Sample.last)
-  end
-
-  test 'upsert with token authentication via query params' do
-    parameters = { user_email: @user.email,
-                   user_token: @user.authentication_token,
-                   sample_name: 'test_sample',
-                   project_name: 'test_project',
-                   s3_input_path: 'sdfdsfsdfdsf' }
-    get insert_samples_url, params: parameters
-    assert_response :success
-  end
-
-  test 'insert with token authentication via request headers' do
-    req_headers = { 'X-User-Email' => @user.email,
-                    'X-User-Token' => @user.authentication_token }
-    parameters = { sample_name: 'test_sample', project_name: 'test_project', s3_input_path: 'fsdfsdfsdf' }
-    get insert_samples_url, params: parameters, headers: req_headers
-    assert_response :success
   end
 
   test 'should show sample' do

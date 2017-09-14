@@ -17,15 +17,20 @@ services:
     build: .
     volumes:
       - .:/app
+      - ~/.aws:/root/.aws:ro
+    command: bash -c "rm -f tmp/pids/server.pid && rails server -b 0.0.0.0 -p 3000"
     ports:
       - "3000:3000"
     depends_on:
       - db
       - redis
+    environment:
+      - SAMPLES_BUCKET_NAME=czbiohub-idseq-samples-development
   resque:
     build: .
     volumes:
       - .:/app
+      - ~/.aws:/root/.aws:ro
     depends_on:
       - db
       - redis
