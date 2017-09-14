@@ -4,8 +4,10 @@ one:
   sample: one
   total_reads: 1
   remaining_reads: 1
+  pipeline_run: one
 
 two:
   sample: two
   total_reads: 1
   remaining_reads: 1
+  pipeline_run: two
