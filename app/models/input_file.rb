@@ -9,6 +9,6 @@ class InputFile < ApplicationRecord
   end
 
   def file_path
-    File.join('samples', sample.project.name, sample.name, name)
+    File.join('samples', sample.project.id, sample.id, name)
   end
 end
