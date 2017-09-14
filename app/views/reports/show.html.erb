@@ -53,7 +53,12 @@
     </tr>
   </thead>
   <tbody>
-    <% @ordered_tax_ids.each do |t| %>
+    <% thresholded_tax_ids = @ordered_tax_ids %>
+    <% thresholded_tax_ids = thresholded_tax_ids & @nt_species_zscores.where("zscore >= ?", @nt_species_zscore_threshold).map(&:tax_id) if @nt_species_zscore_threshold %>
+    <% thresholded_tax_ids = thresholded_tax_ids & @nr_species_zscores.where("zscore >= ?", @nr_species_zscore_threshold).map(&:tax_id) if @nr_species_zscore_threshold %>
+    <% thresholded_tax_ids = thresholded_tax_ids & @nt_species_zscores.where("rpm >= ?", @nt_species_rpm_threshold).map(&:tax_id) if @nt_species_rpm_threshold %>
+    <% thresholded_tax_ids = thresholded_tax_ids & @nr_species_zscores.where("rpm >= ?", @nr_species_rpm_threshold).map(&:tax_id) if @nr_species_rpm_threshold %>
+    <% thresholded_tax_ids.each do |t| %>
       <% nt_species_element = @nt_species_zscores.find_by(tax_id: t) %>
       <% nr_species_element = @nr_species_zscores.find_by(tax_id: t) %>
       <tr>

@@ -1,6 +1,6 @@
 class ReportsController < ApplicationController
   before_action :set_report, only: [:show, :edit, :update, :destroy]
-  before_action :thresholded_zscores, only: [:show]
+  before_action :typed_zscores, only: [:show]
 
   # GET /reports
   # GET /reports.json
@@ -97,12 +97,8 @@ class ReportsController < ApplicationController
 
   private
 
-  def thresholded_zscores(nt_species_zscore_threshold, nt_rpm_threshold, nr_zscore_threshold, nr_rpm_threshold)
+  def typed_zscores
     zscores = @report.taxon_zscores
-    zscores = zscores.where.not("zscore < #{@nt_species_zscore_threshold} and hit_type = 'NT' and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}")
-    zscores = zscores.where.not("rpm < #{@nt_species_rpm_threshold} and hit_type = 'NT' and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}")
-    zscores = zscores.where.not("zscore < #{@nr_species_zscore_threshold} and hit_type = 'NR' and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}")
-    zscores = zscores.where.not("rpm < #{@nr_species_rpm_threshold} and hit_type = 'NR' and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}")
     @nt_species_zscores = zscores.type('NT').level(TaxonCount::TAX_LEVEL_SPECIES)
     @nr_species_zscores = zscores.type('NR').level(TaxonCount::TAX_LEVEL_SPECIES)
     @ordered_tax_ids = @nt_species_zscores.order(zscore: :desc).where.not("tax_id < 0").map(&:tax_id)
