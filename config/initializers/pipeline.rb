@@ -5,5 +5,5 @@ module IdSeqPipeline
   S3_SCRIPT_LOC = ENV['IDSEQ_S3_SCRIPT_LOC']
   BASE_COMMAND  = "export AWS_ACCESS_KEY_ID=#{AWS_ACCESS_KEY_ID}" \
                  " AWS_SECRET_ACCESS_KEY=#{AWS_SECRET_ACCESS_KEY}" \
-                 " AWS_DEFAULT_REGION=#{AWS_DEFAULT_REGION}; "
+                 " AWS_DEFAULT_REGION=#{AWS_DEFAULT_REGION}; ".freeze
 end

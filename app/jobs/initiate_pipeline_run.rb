@@ -7,6 +7,5 @@ class InitiatePipelineRun
     sample = Sample.find(sample_id)
     output = sample.kickoff_pipeline # dryrun only
     @logger.info(output)
-    end
   end
 end
