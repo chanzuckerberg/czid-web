@@ -1,5 +1,6 @@
 class PipelineOutputsController < ApplicationController
   before_action :set_pipeline_output, only: [:show, :edit, :update, :destroy]
+  before_action :typed_counts, only: [:show]
   protect_from_forgery unless: -> { request.format.json? }
 
   # GET /pipeline_outputs
@@ -61,6 +62,13 @@ class PipelineOutputsController < ApplicationController
   end
 
   private
+
+  def typed_counts
+    counts_display = @pipeline_output.taxon_counts
+    @nt_species_counts = counts_display.type('NT').level(TaxonCount::TAX_LEVEL_SPECIES)
+    @nr_species_counts = counts_display.type('NR').level(TaxonCount::TAX_LEVEL_SPECIES)
+    @ordered_tax_ids = @nt_species_counts.order(count: :desc).where.not("tax_id < 0").map(&:tax_id)
+  end
 
   # Use callbacks to share common setup or constraints between actions.
   def set_pipeline_output
