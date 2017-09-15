@@ -110,11 +110,12 @@ ActiveRecord::Schema.define(version: 20170914201443) do
     t.bigint "report_id"
     t.integer "tax_id"
     t.integer "tax_level"
-    t.float "nt_zscore", limit: 24
+    t.float "zscore", limit: 24
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "name"
-    t.float "nt_rpm", limit: 24
+    t.float "rpm", limit: 24
+    t.string "hit_type"
     t.index ["report_id"], name: "index_taxon_zscores_on_report_id"
   end
 

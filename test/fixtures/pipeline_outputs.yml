@@ -7,7 +7,19 @@ one:
   pipeline_run: one
 
 two:
-  sample: two
+  sample: one
   total_reads: 1
   remaining_reads: 1
   pipeline_run: two
+
+pipeline_output_one:
+  sample: one
+  total_reads: 1
+  remaining_reads: 1
+  pipeline_run: four
+
+pipeline_output_two:
+  sample: one
+  total_reads: 1
+  remaining_reads: 1
+  pipeline_run: five
