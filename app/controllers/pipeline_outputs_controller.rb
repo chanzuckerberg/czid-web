@@ -28,6 +28,9 @@ class PipelineOutputsController < ApplicationController
   def create
     @pipeline_output = PipelineOutput.new(pipeline_output_params)
 
+    params.require(:job_id)
+    @pipeline_output.pipeline_run = PipelineRun.find_by(job_id: params[:job_id])
+
     respond_to do |format|
       if @pipeline_output.save
         format.html { redirect_to @pipeline_output, notice: 'Pipeline output was successfully created.' }

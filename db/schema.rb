@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170912010743) do
+ActiveRecord::Schema.define(version: 20170914201443) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -43,7 +43,23 @@ ActiveRecord::Schema.define(version: 20170912010743) do
     t.bigint "remaining_reads", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "pipeline_run_id"
+    t.index ["pipeline_run_id"], name: "index_pipeline_outputs_on_pipeline_run_id", unique: true
     t.index ["sample_id"], name: "index_pipeline_outputs_on_sample_id"
+  end
+
+  create_table "pipeline_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "job_id"
+    t.text "command"
+    t.string "command_stdout"
+    t.text "command_error"
+    t.string "command_status"
+    t.bigint "sample_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "pipeline_output_id"
+    t.index ["pipeline_output_id"], name: "index_pipeline_runs_on_pipeline_output_id", unique: true
+    t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
   end
 
   create_table "projects", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -125,6 +141,7 @@ ActiveRecord::Schema.define(version: 20170912010743) do
 
   add_foreign_key "input_files", "samples"
   add_foreign_key "pipeline_outputs", "samples"
+  add_foreign_key "pipeline_runs", "samples"
   add_foreign_key "reports", "backgrounds"
   add_foreign_key "reports", "pipeline_outputs"
   add_foreign_key "taxon_counts", "pipeline_outputs"
