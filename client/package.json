@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "eslint-config-airbnb": "^15.1.0",
+    "font-awesome": "^4.7.0",
+    "materialize-css": "^0.100.2",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "react-logger": "^1.1.0",
@@ -15,6 +18,7 @@
     "redux-thunk": "^2.2.0"
   },
   "scripts": {
+    "lint": "eslint app",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
