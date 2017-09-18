@@ -16,6 +16,10 @@ class ReportsController < ApplicationController
     @nr_zscore_threshold = params[:nr_zscore_threshold]
     @nr_rpm_threshold = params[:nr_rpm_threshold]
     @view_level = params[:view_level]
+    respond_to do |format|
+      format.html
+      format.json { render json: @report.to_json(include: :taxon_zscores) }
+    end
   end
 
   # GET /reports/new
