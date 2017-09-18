@@ -1,18 +1,55 @@
 import React, { Component } from 'react';
 import './style.css';
+import SubHeader from './SubHeader';
 // import logo from '../../assets/logos/logo.svg'
 
-export default class NavbarSection extends Component {
+class NavbarSection extends Component {
   render() {
     return (
-      <div className="App">
-        <div className="App-header">
-          <h2>Welcome to React</h2>
+      <div>
+        <div className="site-header">
+          {/* Dropdown menu */}
+          <ul id="dropdown1" className="dropdown-content">
+            <li><a href="#!">New Project</a></li>
+            <li><a href="#!">Account</a></li>
+            <li className="divider"></li>
+            <li><a href="#!">Sign out</a></li>
+          </ul>
+
+          <div>
+            <div className="">
+              <a href="#!" className="left brand-details">
+                <div className="brand-short">
+                    ID<i>seq</i>
+                </div>
+
+                <div className="brand-long">
+                  Infectious Disease Platform
+                </div>
+              </a>
+
+              <div className="right hide-on-med-and-down header-right-nav">
+                <div>
+                  <a className="dropdown-button profile-dropdown" href="#!" data-activates="dropdown1">
+                    Rebecca Egger <i className="fa fa-angle-down"> </i>
+                  </a>
+                </div>
+
+                <div className="settings-icon">
+                  <i className="fa fa-gear"> </i>
+                </div>          
+              </div>
+            </div>
+          </div>
+          {/*   */}
         </div>
-        <p className="App-intro"><i className="fa fa-flask" aria-hidden="true"></i>
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
+        <SubHeader>
+          { this.props.children }
+        </SubHeader> 
       </div>
+
     )
   }
 }
+
+export default NavbarSection;
