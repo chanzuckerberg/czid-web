@@ -1,5 +1,7 @@
 {
   "name": "idseq-web",
   "private": true,
-  "dependencies": {}
+  "dependencies": {
+
+  }
 }
