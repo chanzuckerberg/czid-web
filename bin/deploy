@@ -17,6 +17,18 @@ puts "deploying #{image} to #{env}"
 CLUSTER = 'dev'.freeze
 SERVICE = "idseq-web-#{env}".freeze
 REPO = 'chanzuckerberg/idseq-web'.freeze
+REGION = 'us-west-2'.freeze
+LOG_GROUP = 'ecs-logs-dev'.freeze
+TASK_NAME = 'rails'.freeze
+CONTAINER_NAME = 'rails'.freeze
+
+def log_url(region, log_group, task_name, container_name, task_id)
+  "https://#{region}.console.aws.amazon.com/cloudwatch/home?region=#{region}#logEventViewer:group=#{log_group};stream=#{task_name}/#{container_name}/#{task_id}"
+end
+
+def service_url(region, cluster, service)
+  "https://#{region}.console.aws.amazon.com/ecs/home?region=#{region}#/clusters/#{cluster}/services/#{service}/details"
+end
 
 client = Aws::ECS::Client.new
 
@@ -55,6 +67,8 @@ resp4 = client.run_task(cluster: CLUSTER,
                         })
 
 migrate_task = resp4.tasks[0].task_arn
+task_id = resp4.tasks[0].task_arn.split(':').last.split('/').last
+print "  logs -> #{log_url(REGION, LOG_GROUP, TASK_NAME, CONTAINER_NAME, task_id)}\n"
 
 loop do
   resp5 = client.describe_tasks(cluster: CLUSTER,
@@ -96,8 +110,10 @@ loop do
   end
   puts 'events'
   service.events[(0..5)].each do |event|
-    puts "#{printf('%4d', (Time.zone.now - event.created_at).to_i)} seconds ago:\t#{event.message}"
+    puts "#{printf('%4d', (Time.now - event.created_at).to_i)} seconds ago:\t#{event.message}"
   end
+
+  print "  service info -> #{service_url(REGION, CLUSTER, SERVICE)}\n"
 
   if service.deployments.count == 1
     puts 'deployment complete'

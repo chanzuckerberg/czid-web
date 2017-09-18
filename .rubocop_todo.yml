@@ -48,6 +48,7 @@ AllCops:
   Exclude:
     - 'db/**/*'
     - vendor/**/*
+    - bin/*
 
 Metrics/MethodLength:
   Enabled: false
