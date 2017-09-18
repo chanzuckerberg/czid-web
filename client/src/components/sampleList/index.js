@@ -1,8 +1,5 @@
 import React, { Component } from 'react';
-import 'materialize-css/dist/js/materialize.min.js';
-import 'materialize-css/dist/css/materialize.min.css';
 import './style.css';
-import 'font-awesome/css/font-awesome.min.css';
 
 export default class SampleList extends Component {
   render() {
