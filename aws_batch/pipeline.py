@@ -10,6 +10,8 @@ import argparse
 import re
 import time
 import random
+import datetime
+import gzip
 
 INPUT_BUCKET = 's3://czbiohub-infectious-disease/UGANDA'
 OUTPUT_BUCKET = 's3://yunfang-workdir/id-uganda'
@@ -84,6 +86,7 @@ NR_TAXID_COUNTS_TO_JSON_OUT = 'counts.filter.deuterostomes.taxids.rapsearch2.fil
 NR_TAXID_COUNTS_TO_SPECIES_RPM_OUT = 'species.rpm.filter.deuterostomes.taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.csv'
 NR_TAXID_COUNTS_TO_GENUS_RPM_OUT = 'genus.rpm.filter.deuterostomes.taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.csv'
 COMBINED_JSON_OUT = 'idseq_web_sample.json'
+LOGS_OUT = 'logs.txt'
 
 ### convenience functions
 def lzw_fraction(sequence):
@@ -395,36 +398,62 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
        # Download existing data and see what has been done
         command = "aws s3 cp %s %s --recursive" % (sample_s3_output_path, result_dir)
         print execute_command(command)
+    
+    global TIME
+    TIME = datetime.datetime.now().replace(microsecond=0)
+    global RECORDS
+    RECORDS = sum(1 for line in gzip.open(fastq_file_1))/4
 
     # run STAR
     run_star(sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
              result_dir, scratch_dir, sample_s3_output_path, lazy_run)
-
-    #run priceseqfilter
+    records_remaining = sum(1 for line in open(result_dir +'/' + STAR_OUT1))/4
+    update_log(sample_name, "==========\nSTAR", records_remaining,
+               result_dir + '/' + LOGS_OUT, result_dir, sample_s3_output_path)    
+ 
+    # run priceseqfilter
     run_priceseqfilter(sample_name, result_dir +'/' + STAR_OUT1, result_dir +'/' + STAR_OUT2,
                        result_dir, sample_s3_output_path, lazy_run)
+    records_remaining = sum(1 for line in open(result_dir +'/' + PRICESEQFILTER_OUT1))/4
+    update_log(sample_name, "PriceSeqFilter", records_remaining,
+               result_dir + '/' + LOGS_OUT, result_dir, sample_s3_output_path)
 
     # run fastq to fasta
     run_fq2fa(sample_name, result_dir +'/' + PRICESEQFILTER_OUT1,
               result_dir +'/' + PRICESEQFILTER_OUT2,
               result_dir, sample_s3_output_path, lazy_run)
+    records_remaining = sum(1 for line in open(result_dir +'/' + FQ2FA_OUT1) if line.startswith(('>')))
+    update_log(sample_name, "fastq-to-fasta", records_remaining,
+               result_dir + '/' + LOGS_OUT, result_dir, sample_s3_output_path)
 
     # run cdhitdup
     run_cdhitdup(sample_name, result_dir +'/' + FQ2FA_OUT1, result_dir +'/' + FQ2FA_OUT2,
                  result_dir, sample_s3_output_path, lazy_run)
-
-    # run lzw filter
+    records_remaining = sum(1 for line in open(result_dir +'/' + CDHITDUP_OUT1) if line.startswith(('>')))
+    update_log(sample_name, "CD-HIT-DUP", records_remaining,
+               result_dir + '/' + LOGS_OUT, result_dir, sample_s3_output_path)
+ 
+   # run lzw filter
     run_lzw(sample_name, result_dir +'/' + CDHITDUP_OUT1, result_dir +'/' + CDHITDUP_OUT2,
             result_dir, sample_s3_output_path, lazy_run)
+    records_remaining = sum(1 for line in open(result_dir +'/' + LZW_OUT1) if line.startswith(('>')))
+    update_log(sample_name, "LZW filter", records_remaining,
+               result_dir + '/' + LOGS_OUT, result_dir, sample_s3_output_path)
 
     # run bowtie
     run_bowtie2(sample_name, result_dir +'/' + LZW_OUT1, result_dir +'/' + LZW_OUT2,
                 bowtie2_genome_s3_path, result_dir, sample_s3_output_path, lazy_run)
-
-    # run gsnap remotely
+    records_remaining = sum(1 for line in open(result_dir +'/' + EXTRACT_UNMAPPED_FROM_SAM_OUT1) if line.startswith(('>')))
+    update_log(sample_name, "bowtie2", records_remaining,
+               result_dir + '/' + LOGS_OUT, result_dir, sample_s3_output_path)
+ 
+   # run gsnap remotely
     run_gsnapl_remotely(sample_name, EXTRACT_UNMAPPED_FROM_SAM_OUT1, EXTRACT_UNMAPPED_FROM_SAM_OUT2,
                         gsnap_ssh_key_s3_path,
                         result_dir, sample_s3_output_path, lazy_run)
+    records_remaining = sum(1 for line in open(result_dir +'/' + GSNAPL_OUT))
+    update_log(sample_name, "GSNAPL", records_remaining,
+               result_dir + '/' + LOGS_OUT, result_dir, sample_s3_output_path)
 
     # run_annotate_gsnapl_m8_with_taxids
     run_annotate_m8_with_taxids(sample_name,
@@ -432,14 +461,20 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
                                 result_dir + '/' + ANNOTATE_GSNAPL_M8_WITH_TAXIDS_OUT,
                                 accession2taxid_s3_path,
                                 result_dir, sample_s3_output_path, lazy_run=False)
+    records_remaining = sum(1 for line in open(result_dir +'/' + ANNOTATE_GSNAPL_M8_WITH_TAXIDS_OUT))
+    update_log(sample_name, "annotate gsnapl m8 with taxids", records_remaining,
+               result_dir + '/' + LOGS_OUT, result_dir, sample_s3_output_path)
 
-    # run_generate_taxid_annotated_fasta_from_m8
+  # run_generate_taxid_annotated_fasta_from_m8
     run_generate_taxid_annotated_fasta_from_m8(sample_name,
         result_dir + '/' + GSNAPL_OUT,
         result_dir + '/' + EXTRACT_UNMAPPED_FROM_SAM_OUT3,
         result_dir + '/' + FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT,
         'NT',
         result_dir, sample_s3_output_path, lazy_run=False)
+    records_remaining = sum(1 for line in open(result_dir +'/' +  ANNOTATE_GSNAPL_M8_WITH_TAXIDS_OUT))
+    update_log(sample_name, "generate taxid annotated fasta from m8", records_remaining,
+               result_dir + '/' + LOGS_OUT, result_dir, sample_s3_output_path)
 
     run_generate_taxid_outputs_from_m8(sample_name,
         result_dir + '/' + ANNOTATE_GSNAPL_M8_WITH_TAXIDS_OUT,
@@ -450,11 +485,17 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         result_dir + '/' + NT_TAXID_COUNTS_TO_GENUS_RPM_OUT,
         taxid2info_s3_path, 'NT', db_sample_id,
         result_dir, sample_s3_output_path, lazy_run=False)
+    records_remaining = sum(1 for line in open(result_dir +'/' + ANNOTATE_GSNAPL_M8_WITH_TAXIDS_OUT))
+    update_log(sample_name, "generate taxid outputs from m8", records_remaining,
+               result_dir + '/' + LOGS_OUT, result_dir, sample_s3_output_path)
 
     # run rapsearch remotely
     run_rapsearch2_remotely(sample_name, FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT,
                            rapsearch_ssh_key_s3_path,
                            result_dir, sample_s3_output_path, lazy_run)
+    records_remaining = sum(1 for line in open(result_dir +'/' + RAPSEARCH2_OUT))
+    update_log(sample_name, "RAPSearch2", records_remaining,
+               result_dir + '/' + LOGS_OUT, result_dir, sample_s3_output_path)
 
     # run_annotate_m8_with_taxids
     run_annotate_m8_with_taxids(sample_name,
@@ -462,6 +503,9 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
                                 result_dir + '/' + ANNOTATE_RAPSEARCH2_M8_WITH_TAXIDS_OUT,
                                 accession2taxid_s3_path,
                                 result_dir, sample_s3_output_path, lazy_run=False)
+    records_remaining = sum(1 for line in open(result_dir +'/' + ANNOTATE_RAPSEARCH2_M8_WITH_TAXIDS_OUT))
+    update_log(sample_name, "annotate m8 with taxids", records_remaining,
+               result_dir + '/' + LOGS_OUT, result_dir, sample_s3_output_path)
 
     # run_generate_taxid_annotated_fasta_from_m8
     run_generate_taxid_annotated_fasta_from_m8(sample_name,
@@ -470,6 +514,9 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         result_dir + '/' + GENERATE_TAXID_ANNOTATED_FASTA_FROM_RAPSEARCH2_M8_OUT,
         'NR',
         result_dir, sample_s3_output_path, lazy_run=False)
+    records_remaining = sum(1 for line in open(result_dir +'/' + ANNOTATE_RAPSEARCH2_M8_WITH_TAXIDS_OUT))
+    update_log(sample_name, "generate taxid annotated fasta from m8", records_remaining,
+               result_dir + '/' + LOGS_OUT, result_dir, sample_s3_output_path)
 
     run_generate_taxid_outputs_from_m8(sample_name,
         result_dir + '/' + ANNOTATE_RAPSEARCH2_M8_WITH_TAXIDS_OUT,
@@ -480,12 +527,18 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         result_dir + '/' + NR_TAXID_COUNTS_TO_GENUS_RPM_OUT,
         taxid2info_s3_path, 'NR', db_sample_id,
         result_dir, sample_s3_output_path, lazy_run=False)
-    
+    records_remaining = sum(1 for line in open(result_dir +'/' + ANNOTATE_RAPSEARCH2_M8_WITH_TAXIDS_OUT))
+    update_log(sample_name, "generate taxid outputs from m8", records_remaining,
+               result_dir + '/' + LOGS_OUT, result_dir, sample_s3_output_path)
+ 
     run_combine_json_outputs(sample_name,
         result_dir + '/' + NT_TAXID_COUNTS_TO_JSON_OUT,
         result_dir + '/' + NR_TAXID_COUNTS_TO_JSON_OUT,
         result_dir + '/' + COMBINED_JSON_OUT,
         result_dir, sample_s3_output_path, lazy_run=False)
+    records_remaining = sum(1 for line in open(result_dir +'/' + ANNOTATE_RAPSEARCH2_M8_WITH_TAXIDS_OUT))
+    update_log(sample_name, "combine JSON outputs", records_remaining,
+               result_dir + '/' + LOGS_OUT, result_dir, sample_s3_output_path)
 
 def run_star(sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
              result_dir, scratch_dir, sample_s3_output_path, lazy_run):
@@ -769,6 +822,18 @@ def run_combine_json_outputs(sample_name, input_json_1, input_json_2, output_jso
     combine_json(input_json_1, input_json_2, output_json)
     # move it the output back to S3
     execute_command("aws s3 cp %s %s/" % (output_json, sample_s3_output_path))
+
+def update_log(sample_name, memo, records_remaining, log_file, result_dir, sample_s3_output_path):
+    new_time = datetime.datetime.now().replace(microsecond=0)
+    time_elapsed = new_time - TIME
+    percent_removed = (100.0 * (RECORDS - records_remaining)) / RECORDS
+    with open(log_file, 'a') as logf:
+        logf.write("%s: %s elapsed, %s %% of records dropped out, %s records remaining\n" % (memo, str(time_elapsed), str(percent_removed), str(records_remaining)))
+    global TIME
+    TIME = new_time
+    global RECORDS
+    RECORDS = records_remaining
+    execute_command("aws s3 cp %s %s/" % (log_file, sample_s3_output_path))
 
 ### Main
 def main():
