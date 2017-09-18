@@ -14,7 +14,10 @@ function configureStore() {
 }
 
 const defaultState = {
-
+  pipelineOutputs: {
+    selectedPipelineOutput: null,
+    allPipelineOutputs: null
+  }
 };
 
 export default createStore(rootReducer, defaultState, configureStore());

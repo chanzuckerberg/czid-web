@@ -1,7 +1,14 @@
 import React from 'react';
 import SampleList from '../../../components/sampleList';
+import { connectToStore } from '../../../lib/utils';
 
-class AllSamples extends Component {
+class PipelineOutputs extends Component {
+
+  componentDidMount() {
+    this.props.getAllOutputs();
+    console.log(this.props.allPipelineOutputs, 'all outputs');
+  }
+
   render() {
     return (
       <div className="container samples-page">
@@ -11,5 +18,5 @@ class AllSamples extends Component {
   }
 }
 
-export default AllSamples;
+export default connectToStore(PipelineOutputs);
 

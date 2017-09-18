@@ -20,9 +20,6 @@ export default class SampleList extends Component {
                 <th>Date</th>
                 <th>Created by</th>
                 <th>Total Reads</th>
-                <th>Quality Control (% value)</th>
-                <th>Dup. Compression Ratio</th>
-                <th>Unique Non-Human Reads</th>
                 <th>Final Reads</th>
             </tr>
           </thead>
@@ -35,9 +32,6 @@ export default class SampleList extends Component {
                   <td>{sample.date_created}</td>
                   <td>{sample.created_by}</td>
                   <td>{sample.total_reads}</td>
-                  <td>{sample.quality_control}</td>
-                  <td>{sample.duplicate_ratio}</td>
-                  <td>{sample.non_human_reads}</td>
                   <td>{sample.final_reads}</td>
                 </tr>
               </tbody>

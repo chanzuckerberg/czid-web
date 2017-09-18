@@ -2,6 +2,6 @@
   "name": "idseq-web",
   "private": true,
   "dependencies": {
-
+    "axios": "^0.16.2"
   }
 }
