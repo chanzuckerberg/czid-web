@@ -302,14 +302,14 @@ def generate_json_from_taxid_counts(sample, rawReadsInputPath, taxidCountsInputP
             "total_reads": total_reads,
             "remaining_reads": remaining_reads,
             "sample_id": dbSampleId,
-            "sampleHost": sampleHost,
-            "sampleLocation": sampleLocation,
-            "sampleDate": sampleDate,
-            "sampleTissue": sampleTissue,
-            "sampleTemplate": sampleTemplate,
-            "sampleLibrary": sampleLibrary,
-            "sampleSequencer": sampleSequencer,
-            "sampleNotes": sampleNotes,
+            "sample_host": sampleHost,
+            "sample_location": sampleLocation,
+            "sample_date": sampleDate,
+            "sample_tissue": sampleTissue,
+            "sample_template": sampleTemplate,
+            "sample_library": sampleLibrary,
+            "sample_sequencer": sampleSequencer,
+            "sample_notes": sampleNotes,
             "taxon_counts_attributes": taxon_counts_attributes
       }
     }
@@ -894,14 +894,14 @@ def main():
     OUTPUT_BUCKET = os.environ.get('OUTPUT_BUCKET', OUTPUT_BUCKET)
     KEY_S3_PATH = os.environ.get('KEY_S3_PATH', KEY_S3_PATH)
     DB_SAMPLE_ID = os.environ['DB_SAMPLE_ID']
-    SAMPLE_HOST = os.environ['SAMPLE_HOST']
-    SAMPLE_LOCATION = os.environ['SAMPLE_LOCATION']
-    SAMPLE_DATE = os.environ['SAMPLE_DATE']
-    SAMPLE_TISSUE = os.environ['SAMPLE_TISSUE']
-    SAMPLE_TEMPLATE = os.environ['SAMPLE_TEMPLATE']
-    SAMPLE_LIBRARY = os.environ['SAMPLE_LIBRARY']
-    SAMPLE_SEQUENCER = os.environ['SAMPLE_SEQUENCER']
-    SAMPLE_NOTES = os.environ['SAMPLE_NOTES']
+    SAMPLE_HOST = os.environ.get('SAMPLE_HOST', '')
+    SAMPLE_LOCATION = os.environ.get('SAMPLE_LOCATION', '')
+    SAMPLE_DATE = os.environ.get('SAMPLE_DATE', '')
+    SAMPLE_TISSUE = os.environ.get('SAMPLE_TISSUE', '')
+    SAMPLE_TEMPLATE = os.environ.get('SAMPLE_TEMPLATE', '')
+    SAMPLE_LIBRARY = os.environ.get('SAMPLE_LIBRARY', '')
+    SAMPLE_SEQUENCER = os.environ.get('SAMPLE_SEQUENCER', '')
+    SAMPLE_NOTES = os.environ.get('SAMPLE_NOTES', '')
     sample_s3_input_path = INPUT_BUCKET.rstrip('/')
     sample_s3_output_path = OUTPUT_BUCKET.rstrip('/')
     
