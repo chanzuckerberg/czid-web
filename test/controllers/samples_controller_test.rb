@@ -40,6 +40,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'should update sample' do
+    assert @sample.valid?
     patch sample_url(@sample), params: { sample: { name: @sample.name + ' asdf' } }
     assert_redirected_to sample_url(@sample)
   end

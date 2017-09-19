@@ -1,9 +1,11 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  name: file1
+  name: file1.fastq.gz
   sample: one
+  source_type: local
 
 two:
-  name: file2
+  name: file1.fastq.gz
   sample: two
+  source_type: local
