@@ -13,6 +13,8 @@ echo $COMMIT
 echo $REPO
 echo $TAG
 echo '--'
+
+docker pull $REPO
 docker-compose build web
 
 if [ "$BRANCH" == "master" ]; then
