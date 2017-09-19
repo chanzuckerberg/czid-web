@@ -10,6 +10,7 @@ before_install:
   - mkdir -p ~/.aws && printf "[default]\nregion = $AWS_REGION\naws_access_key_id = $AWS_ACCESS_KEY_ID\naws_secret_access_key = $AWS_SECRET_ACCESS_KEY\n" > ~/.aws/credentials
   - bin/build-docker $TRAVIS_BRANCH ${TRAVIS_COMMIT::8} $TRAVIS_BUILD_NUMBER
   - docker-compose up -d db
+  - docker-compose up -d redis
   - sleep 10
   - docker-compose run -e RAILS_ENV=test web rake db:create
 script:

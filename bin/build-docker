@@ -6,12 +6,15 @@ export REPO=chanzuckerberg/idseq-web
 BRANCH="branch-$1"
 COMMIT="sha-$2"
 BUILD_NUMBER="build-$3"
+COMPOSE_TAG="chanzuckerberg/idseq-web:compose"
 
 echo $BRANCH
 echo $COMMIT
 echo $REPO
 echo $TAG
 echo '--'
-docker build -t $REPO:$COMMIT .
-docker tag $REPO:$COMMIT $REPO:$BRANCH
-docker tag $REPO:$COMMIT $REPO:$BUILD_NUMBER
+docker-compose build web
+
+docker tag $COMPOSE_TAG $REPO:$COMMIT
+docker tag $COMPOSE_TAG $REPO:$BRANCH
+docker tag $COMPOSE_TAG $REPO:$BUILD_NUMBER

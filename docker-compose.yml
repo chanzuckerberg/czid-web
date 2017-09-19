@@ -15,6 +15,7 @@ services:
       - ./redis-data:/var/lib/redis/data
   web:
     build: .
+    image: chanzuckerberg/idseq-web:compose
     volumes:
       - .:/app
       - ~/.aws:/root/.aws:ro
