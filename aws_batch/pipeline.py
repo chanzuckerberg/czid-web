@@ -302,7 +302,7 @@ def generate_json_from_taxid_counts(sample, rawReadsInputPath, taxidCountsInputP
     with open(jsonOutputPath, 'wb') as outf:
         json.dump(output_dict, outf)
 
-def combine_json(inputPath1, inputPath2, outputPath):
+def combine_json(project_name, sample_name, inputPath1, inputPath2, outputPath):
     with open(inputPath1) as inf1:
         input1 = json.load(inf1).get("pipeline_output")
     with open(inputPath2) as inf2:
@@ -310,18 +310,20 @@ def combine_json(inputPath1, inputPath2, outputPath):
     total_reads = max(input1.get("total_reads"),
                       input2.get("total_reads"))
     remaining_reads = max(input1.get("remaining_reads"),
-                      input2.get("remaining_reads")) 
+                      input2.get("remaining_reads"))
     sample_id = input1.get("sample_id")
     taxon_counts_attributes = (input1.get("taxon_counts_attributes")
                               + input2.get("taxon_counts_attributes"))
     output_dict = {
         "pipeline_output": {
+        "project_name": project_name,
+        "sample_name": sample_name,
         "total_reads": total_reads,
         "remaining_reads": remaining_reads,
         "sample_id": sample_id,
         "taxon_counts_attributes": taxon_counts_attributes
         }
-    }                          
+    }
     with open(outputPath, 'wb') as outf:
         json.dump(output_dict, outf)
 
@@ -480,7 +482,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         result_dir + '/' + NR_TAXID_COUNTS_TO_GENUS_RPM_OUT,
         taxid2info_s3_path, 'NR', db_sample_id,
         result_dir, sample_s3_output_path, lazy_run=False)
-    
+
     run_combine_json_outputs(sample_name,
         result_dir + '/' + NT_TAXID_COUNTS_TO_JSON_OUT,
         result_dir + '/' + NR_TAXID_COUNTS_TO_JSON_OUT,
@@ -760,13 +762,14 @@ def run_generate_taxid_outputs_from_m8(sample_name,
     execute_command("aws s3 cp %s %s/" % (taxon_species_rpm_file, sample_s3_output_path))
     execute_command("aws s3 cp %s %s/" % (taxon_genus_rpm_file, sample_s3_output_path))
 
-def run_combine_json_outputs(sample_name, input_json_1, input_json_2, output_json, 
+def run_combine_json_outputs(sample_name, input_json_1, input_json_2, output_json,
     result_dir, sample_s3_output_path, lazy_run):
     if lazy_run:
         # check if output already exists
         if os.path.isfile(output_json):
             return 1
-    combine_json(input_json_1, input_json_2, output_json)
+    project_name = os.path.basename(os.path.dirname(sample_s3_output_path))
+    combine_json(project_name, sample_name, input_json_1, input_json_2, output_json)
     # move it the output back to S3
     execute_command("aws s3 cp %s %s/" % (output_json, sample_s3_output_path))
 
