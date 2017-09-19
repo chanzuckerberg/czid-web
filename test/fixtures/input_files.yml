@@ -6,6 +6,16 @@ one:
   source_type: local
 
 two:
-  name: file1.fastq.gz
+  name: file2.fastq.gz
+  sample: two
+  source_type: local
+
+three:
+  name: file3.fastq.gz
+  sample: one
+  source_type: local
+
+four:
+  name: file4.fastq.gz
   sample: two
   source_type: local
