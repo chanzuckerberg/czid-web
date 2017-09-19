@@ -15,6 +15,6 @@ class InputFile < ApplicationRecord
   end
 
   def file_path
-    File.join('samples', sample.project.id.to_s, sample.id.to_s, name)
+    File.join(sample.sample_path, 'fastqs', name)
   end
 end
