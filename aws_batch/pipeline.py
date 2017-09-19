@@ -788,4 +788,3 @@ def main():
                DEUTEROSTOME_TAXIDS, TAXID_TO_INFO, DB_SAMPLE_ID,  True)
 if __name__=="__main__":
     main()
-
