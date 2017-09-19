@@ -325,16 +325,17 @@ def combine_json(inputPath1, inputPath2, outputPath):
                       input2.get("total_reads"))
     remaining_reads = max(input1.get("remaining_reads"),
                       input2.get("remaining_reads")) 
-    sample_id = input1.get("sample_id")
     taxon_counts_attributes = (input1.get("taxon_counts_attributes")
                               + input2.get("taxon_counts_attributes"))
-    output_dict = {
-        "pipeline_output": {
+    pipeline_output_dict = {
         "total_reads": total_reads,
         "remaining_reads": remaining_reads,
-        "sample_id": sample_id,
         "taxon_counts_attributes": taxon_counts_attributes
-        }
+    }
+    rest_entries = {field: input1[field] for field in input1.keys() if field not in ["total_reads", "remaining_reads", "taxon_counts_attributes"]}
+    pipeline_output_dict.update(rest_entries)
+    output_dict = {
+        "pipeline_output": pipeline_output_dict
     }                          
     with open(outputPath, 'wb') as outf:
         json.dump(output_dict, outf)
