@@ -741,10 +741,11 @@ def run_gsnapl_remotely(sample, input_fa_1, input_fa_2,
                               '> /home/ec2-user/batch-pipeline-workdir/'+sample+'/'+GSNAPL_OUT, ';'])
         commands += "aws s3 cp /home/ec2-user/batch-pipeline-workdir/%s/%s %s/;" % \
                      (sample, GSNAPL_OUT, sample_s3_output_path)
-        # check if remote machins has enough capacity 
+        # check if remote machins has enough capacity
         check_command = 'ssh -o "StrictHostKeyChecking no" -i %s ec2-user@%s "ps aux|grep gsnapl|grep -v bash"' % (key_path, GSNAPL_INSTANCE_IP)
+        logger.info("waiting for server")
         wait_for_server('GSNAPL', check_command, GSNAPL_MAX_CONCURRENT)
-
+        logger.info("starting")
         remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s ec2-user@%s "%s"' % (key_path, GSNAPL_INSTANCE_IP, commands)
         execute_command(remote_command)
         # move gsnapl output back to local
@@ -824,7 +825,9 @@ def run_rapsearch2_remotely(sample, input_fasta,
         commands += "aws s3 cp /home/ec2-user/batch-pipeline-workdir/%s/%s %s/;" % \
                      (sample, RAPSEARCH2_OUT, sample_s3_output_path)
         check_command = 'ssh -o "StrictHostKeyChecking no" -i %s ec2-user@%s "ps aux|grep rapsearch|grep -v bash"' % (key_path, RAPSEARCH2_INSTANCE_IP)
+        logger.info("waiting for server")
         wait_for_server('RAPSEARCH2', check_command, RAPSEARCH2_MAX_CONCURRENT)
+        logger.info("starting")
         remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s ec2-user@%s "%s"' % (key_path, RAPSEARCH2_INSTANCE_IP, commands)
         execute_command(remote_command)
         logger.info("finished")
