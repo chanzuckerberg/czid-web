@@ -7,7 +7,7 @@ class InputFile < ApplicationRecord
 
   FILE_REGEX = %r{\A[^\s\/]+\.fastq.gz}
   validates :name, presence: true, format: { with: FILE_REGEX, message: "file must match format '#{FILE_REGEX}'" }
-  validates :source_type, presence: true, inclusion: { in: [SOURCE_TYPE_LOCAL, SOURCE_TYPE_LOCAL] }
+  validates :source_type, presence: true, inclusion: { in: %w[local s3] }
 
   after_validation(on: :create) do
     if sample && source_type == 'local'

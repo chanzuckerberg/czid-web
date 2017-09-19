@@ -13,6 +13,7 @@ class Sample < ApplicationRecord
   has_many :input_files, dependent: :destroy
   accepts_nested_attributes_for :input_files
   validate :input_files_checks
+  after_create :initiate_input_file_upload
   before_save :check_status
 
   def sample_path
@@ -23,15 +24,34 @@ class Sample < ApplicationRecord
 
   def input_files_checks
     # validate that we have exactly 2 input files
-    # validate that both input files have the same source_type
     unless self.input_files.size == 2
       self.errors.add(:input_files, "file_size !=2 for sample")
     end
+    # validate that both input files have the same source_type
     unless self.input_files[0].source_type == self.input_files[1].source_type
       self.errors.add(:input_files, "file source type different")
     end
     # TODO for s3 input types, test permissions before saving, by making a HEAD request
 
+  end
+
+  def initiate_input_file_upload
+    return unless self.input_files.first.source_type == InputFile::SOURCE_TYPE_S3
+    Resque.enqueue(InitiateS3Cp, self.id)
+  end
+
+  def initiate_s3_cp
+    command = IdSeqPipeline::BASE_COMMAND
+    fastq_1 = self.input_files[0].source
+    fastq_2 = self.input_files[1].source
+    command += "aws s3 cp #{fastq_1} #{sample_input_s3_path}/;"
+    command += "aws s3 cp #{fastq_2} #{sample_input_s3_path}/;"
+    stdout, stderr, status = Open3.capture3(command)
+    raise stderr unless status.exitstatus == 0
+
+    self.status = STATUS_UPLOADED
+    self.save # this triggers pipeline
+    return command
   end
 
   def sample_input_s3_path
