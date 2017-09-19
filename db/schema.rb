@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170911201058) do
+ActiveRecord::Schema.define(version: 20170914201443) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -28,13 +28,38 @@ ActiveRecord::Schema.define(version: 20170911201058) do
     t.bigint "sample_id", null: false
   end
 
+  create_table "input_files", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "name"
+    t.text "presigned_url"
+    t.bigint "sample_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["sample_id"], name: "index_input_files_on_sample_id"
+  end
+
   create_table "pipeline_outputs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "sample_id", null: false
     t.bigint "total_reads", null: false
     t.bigint "remaining_reads", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "pipeline_run_id"
+    t.index ["pipeline_run_id"], name: "index_pipeline_outputs_on_pipeline_run_id", unique: true
     t.index ["sample_id"], name: "index_pipeline_outputs_on_sample_id"
+  end
+
+  create_table "pipeline_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "job_id"
+    t.text "command"
+    t.string "command_stdout"
+    t.text "command_error"
+    t.string "command_status"
+    t.bigint "sample_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "pipeline_output_id"
+    t.index ["pipeline_output_id"], name: "index_pipeline_runs_on_pipeline_output_id", unique: true
+    t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
   end
 
   create_table "projects", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -64,6 +89,7 @@ ActiveRecord::Schema.define(version: 20170911201058) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "project_id"
+    t.string "status"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
   end
 
@@ -84,11 +110,12 @@ ActiveRecord::Schema.define(version: 20170911201058) do
     t.bigint "report_id"
     t.integer "tax_id"
     t.integer "tax_level"
-    t.float "nt_zscore", limit: 24
+    t.float "zscore", limit: 24
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "name"
-    t.float "nt_rpm", limit: 24
+    t.float "rpm", limit: 24
+    t.string "hit_type"
     t.index ["report_id"], name: "index_taxon_zscores_on_report_id"
   end
 
@@ -112,7 +139,9 @@ ActiveRecord::Schema.define(version: 20170911201058) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "input_files", "samples"
   add_foreign_key "pipeline_outputs", "samples"
+  add_foreign_key "pipeline_runs", "samples"
   add_foreign_key "reports", "backgrounds"
   add_foreign_key "reports", "pipeline_outputs"
   add_foreign_key "taxon_counts", "pipeline_outputs"

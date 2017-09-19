@@ -6,6 +6,7 @@ git_source(:github) do |repo_name|
 end
 
 gem 'aws-sdk-ecs'
+gem 'aws-sdk-resources'
 # Use ActiveModel has_secure_password
 gem 'bcrypt', '~> 3.1.7'
 # Use CoffeeScript for .coffee assets and views
@@ -23,11 +24,11 @@ gem 'puma', '~> 3.7'
 gem 'rails', '~> 5.1.2'
 # Use Redis adapter to run Action Cable in production
 # gem 'redis', '~> 3.0'
+gem 'simple_token_authentication', '~> 1.0' # see semver.org
 # Worker/Scheduler management
 gem 'resque'
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 5.0'
-gem 'simple_token_authentication', '~> 1.0' # see semver.org
 # Turbolinks makes navigating your web application faster. Read more: https://github.com/turbolinks/turbolinks
 gem 'turbolinks', '~> 5'
 # Use Uglifier as compressor for JavaScript assets

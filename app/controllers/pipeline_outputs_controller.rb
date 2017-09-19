@@ -1,5 +1,6 @@
 class PipelineOutputsController < ApplicationController
   before_action :set_pipeline_output, only: [:show, :edit, :update, :destroy]
+  before_action :typed_counts, only: [:show]
   protect_from_forgery unless: -> { request.format.json? }
 
   # GET /pipeline_outputs
@@ -10,7 +11,9 @@ class PipelineOutputsController < ApplicationController
 
   # GET /pipeline_outputs/1
   # GET /pipeline_outputs/1.json
-  def show; end
+  def show
+    @view_level = params[:view_level]
+  end
 
   # GET /pipeline_outputs/new
   def new
@@ -24,6 +27,9 @@ class PipelineOutputsController < ApplicationController
   # POST /pipeline_outputs.json
   def create
     @pipeline_output = PipelineOutput.new(pipeline_output_params)
+
+    params.require(:job_id)
+    @pipeline_output.pipeline_run = PipelineRun.find_by(job_id: params[:job_id])
 
     respond_to do |format|
       if @pipeline_output.save
@@ -61,6 +67,16 @@ class PipelineOutputsController < ApplicationController
   end
 
   private
+
+  def typed_counts
+    counts = @pipeline_output.taxon_counts
+    @nt_species_counts = counts.type('NT').level(TaxonCount::TAX_LEVEL_SPECIES)
+    @nr_species_counts = counts.type('NR').level(TaxonCount::TAX_LEVEL_SPECIES)
+    @ordered_species_tax_ids = @nt_species_counts.order(count: :desc).where.not("tax_id < 0").map(&:tax_id)
+    @nt_genus_counts = counts.type('NT').level(TaxonCount::TAX_LEVEL_GENUS)
+    @nr_genus_counts = counts.type('NR').level(TaxonCount::TAX_LEVEL_GENUS)
+    @ordered_genus_tax_ids = @nt_genus_counts.order(count: :desc).where.not("tax_id < 0").map(&:tax_id)
+  end
 
   # Use callbacks to share common setup or constraints between actions.
   def set_pipeline_output

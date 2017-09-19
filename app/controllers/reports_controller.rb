@@ -1,5 +1,6 @@
 class ReportsController < ApplicationController
   before_action :set_report, only: [:show, :edit, :update, :destroy]
+  before_action :typed_zscores, only: [:show]
 
   # GET /reports
   # GET /reports.json
@@ -12,6 +13,9 @@ class ReportsController < ApplicationController
   def show
     @nt_zscore_threshold = params[:nt_zscore_threshold]
     @nt_rpm_threshold = params[:nt_rpm_threshold]
+    @nr_zscore_threshold = params[:nr_zscore_threshold]
+    @nr_rpm_threshold = params[:nr_rpm_threshold]
+    @view_level = params[:view_level]
   end
 
   # GET /reports/new
@@ -31,13 +35,14 @@ class ReportsController < ApplicationController
       a[:tax_id] = taxon_count.tax_id
       a[:tax_level] = taxon_count.tax_level
       a[:name] = taxon_count.name
-      a[:nt_rpm] = 1e6 * taxon_count.count.to_f / @report.pipeline_output.total_reads
+      a[:rpm] = 1e6 * taxon_count.count.to_f / @report.pipeline_output.total_reads
+      a[:hit_type] = taxon_count.count_type
       normalized_count = taxon_count.count.to_f / @report.pipeline_output.total_reads
-      sum = normalized_count
-      sum_sq = normalized_count**2
-      n = 1
+      sum = 0
+      sum_sq = 0
+      n = 0
       @report.background.pipeline_outputs.each do |bg_pipeline_output|
-        bg_taxon_count = bg_pipeline_output.taxon_counts.find_by(tax_id: taxon_count.tax_id)
+        bg_taxon_count = bg_pipeline_output.taxon_counts.find_by(tax_id: taxon_count.tax_id, count_type: taxon_count.count_type)
         if bg_taxon_count
           bg_count = bg_taxon_count.count
           normalized_bg_count = bg_count.to_f / bg_pipeline_output.total_reads
@@ -50,11 +55,11 @@ class ReportsController < ApplicationController
       end
       mean = sum.to_f / n
       stdev = Math.sqrt((sum_sq.to_f - sum**2 / n) / (n - 1))
-      a[:nt_zscore] = if stdev > 0
-                        (normalized_count - mean) / stdev
-                      else
-                        0
-                      end
+      a[:zscore] = if stdev > 0
+                     (normalized_count - mean) / stdev
+                   else
+                     0
+                   end
       @report.taxon_zscores.new(a)
     end
 
@@ -95,6 +100,16 @@ class ReportsController < ApplicationController
 
   private
 
+  def typed_zscores
+    zscores = @report.taxon_zscores
+    @nt_species_zscores = zscores.type('NT').level(TaxonCount::TAX_LEVEL_SPECIES)
+    @nr_species_zscores = zscores.type('NR').level(TaxonCount::TAX_LEVEL_SPECIES)
+    @ordered_species_tax_ids = @nt_species_zscores.order(zscore: :desc).where.not("tax_id < 0").map(&:tax_id)
+    @nt_genus_zscores = zscores.type('NT').level(TaxonCount::TAX_LEVEL_GENUS)
+    @nr_genus_zscores = zscores.type('NR').level(TaxonCount::TAX_LEVEL_GENUS)
+    @ordered_genus_tax_ids = @nt_genus_zscores.order(zscore: :desc).where.not("tax_id < 0").map(&:tax_id)
+  end
+
   # Use callbacks to share common setup or constraints between actions.
   def set_report
     @report = Report.find(params[:id])
@@ -102,6 +117,6 @@ class ReportsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def report_params
-    params.require(:report).permit(:name, :pipeline_output_id, :background_id, taxon_zscores_attributes: [:tax_id, :tax_level, :nt_zscore, :nt_rpm, :name])
+    params.require(:report).permit(:name, :pipeline_output_id, :background_id, taxon_zscores_attributes: [:tax_id, :tax_level, :zscore, :rpm, :hit_type, :name])
   end
 end

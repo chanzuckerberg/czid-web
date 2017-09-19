@@ -37,36 +37,45 @@
   <strong>Taxon counts:</strong>
 </p>
 
+<%= form_for @pipeline_output, method: :get, url: pipeline_output_path(@pipeline_output) do |f| %>
+  <%= radio_button_tag :view_level, 'species', (@view_level=='species' || true) %>
+  <%= label :view_level, 'species' %>
+  <%= radio_button_tag :view_level, 'genus', @view_level=='genus' %>
+  <%= label :view_level, 'genus' %>
+  <%= f.submit %>
+<% end %>
+
+
 <table class="table table-condensed">
-      <thead>
-        <tr>
-          <th>Taxon ID</th>
-          <th>Taxon Name</th>
-          <th>Taxon Level</th>
-          <th>Count Type</th>
-          <th>Count</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @pipeline_output.taxon_counts.sort_by(&:count).reverse.each do |element| %>
-          <tr>
-            <td><%= element.tax_id %></td>
-            <td><%= element.name %></td>
-            <td><%= case element.tax_level
-                   when TaxonCount::TAX_LEVEL_SPECIES; 'species'
-                   when TaxonCount::TAX_LEVEL_GENUS; 'genus'
-                   end %>
-            </td>
-            <td><% case element.count_type
-                   when TaxonCount::COUNT_TYPE_NT; 'nucleotide hit'
-                   when TaxonCount::COUNT_TYPE_NR; 'protein hit'
-                   end %>
-            </td>
-            <td><%= element.count %></td>
-         </tr>
-        <% end %>
-      </tbody>
-    </table>
+  <% if @view_level == 'genus' %>
+    <% ordered_tax_ids = @ordered_genus_tax_ids %>
+    <% nt_counts = @nt_genus_counts %>
+    <% nr_counts = @nr_genus_counts %>
+  <% else %>
+    <% ordered_tax_ids = @ordered_species_tax_ids %>
+    <% nt_counts = @nt_species_counts %>
+    <% nr_counts = @nr_species_counts %>
+  <% end %>
+  <thead>
+    <tr>
+      <th><%= @view_level %></th>
+      <th>NT <%= @view_level %> count</th>
+      <th>NR <%= @view_level %> count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% ordered_tax_ids.each do |t| %>
+      <% nt_element = nt_counts.find_by(tax_id: t) %>
+      <% nr_element = nr_counts.find_by(tax_id: t) %>
+      <tr>
+        <td><%= link_to (nt_element.name || nt_element.tax_id),
+                         "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=#{nt_element.tax_id}" %></td>
+        <td><%= nt_element.count %></td>
+        <td><%= nr_element.count if nr_element %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
 
 <p>
 <%= link_to 'Edit', edit_pipeline_output_path(@pipeline_output) %> |
