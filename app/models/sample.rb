@@ -1,21 +1,29 @@
 require 'open3'
 require 'json'
 class Sample < ApplicationRecord
+  STATUS_CREATED  = 'created'.freeze
+  STATUS_UPLOADED = 'uploaded'.freeze
+  STATUS_RERUN    = 'need_rerun'.freeze
+  STATUS_CHECKED  = 'checked'.freeze  # status regarding pipeline kickoff is checked
+
   belongs_to :project
   has_many :pipeline_outputs, dependent: :destroy
   has_many :pipeline_runs, dependent: :destroy
   has_and_belongs_to_many :backgrounds
   has_many :input_files, dependent: :destroy
   accepts_nested_attributes_for :input_files
+  before_save :check_status
+
+  def sample_path
+    File.join('samples', project.id.to_s, id.to_s)
+  end
 
   def sample_input_s3_path
-    # placeholder
-    's3://czbiohub-infectious-disease/RR003/RR003-RNA-05_D10_S10'
+    "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/fastqs"
   end
 
   def sample_output_s3_path
-    # placeholder
-    's3://yunfang-workdir/id-rr003/RR003-RNA-05_D10_S10'
+    "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/results"
   end
 
   def pipeline_command
@@ -30,7 +38,14 @@ class Sample < ApplicationRecord
     command
   end
 
-  def kickoff_pipeline(dry_run = true) # should be triggered when the upload is complete
+  def check_status
+    if [STATUS_UPLOADED, STATUS_RERUN].include?(status)
+      status = STATUS_CHECKED
+      kickoff_pipeline
+    end
+  end
+
+  def kickoff_pipeline(dry_run = true)
     command = pipeline_command
     if dry_run
       Rails.logger.debug(command)
