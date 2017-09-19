@@ -3,9 +3,9 @@ set -e
 
 export REPO=chanzuckerberg/idseq-web
 
-BRANCH="branch-$1"
-COMMIT="sha-$2"
-BUILD_NUMBER="build-$3"
+BRANCH="$1"
+COMMIT="$2"
+BUILD_NUMBER="$3"
 COMPOSE_TAG="chanzuckerberg/idseq-web:compose"
 
 echo $BRANCH
@@ -15,6 +15,9 @@ echo $TAG
 echo '--'
 docker-compose build web
 
-docker tag $COMPOSE_TAG $REPO:$COMMIT
-docker tag $COMPOSE_TAG $REPO:$BRANCH
-docker tag $COMPOSE_TAG $REPO:$BUILD_NUMBER
+if [ "$BRANCH" == "master" ]; then
+  docker tag $COMPOSE_TAG $REPO:"latest"
+fi
+docker tag $COMPOSE_TAG $REPO:"sha-$COMMIT"
+docker tag $COMPOSE_TAG $REPO:"branch-$BRANCH"
+docker tag $COMPOSE_TAG $REPO:"build-$BUILD_NUMBER"
