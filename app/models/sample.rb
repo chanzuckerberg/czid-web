@@ -23,7 +23,16 @@ class Sample < ApplicationRecord
     batch_command = "aws s3 cp #{IdSeqPipeline::S3_SCRIPT_LOC} .; chmod 755 #{script_name}; " \
                     "INPUT_BUCKET=#{sample_input_s3_path} " \
                     "OUTPUT_BUCKET=#{sample_output_s3_path} " \
-                    "DB_SAMPLE_ID=#{id} ./#{script_name}"
+                    "DB_SAMPLE_ID=#{id} " \
+                    "SAMPLE_HOST=#{sample_host} " \
+                    "SAMPLE_LOCATION=#{sample_location} " \
+                    "SAMPLE_DATE=#{sample_date} " \
+                    "SAMPLE_TISSUE=#{sample_tissue} " \
+                    "SAMPLE_TEMPLATE=#{sample_template} " \
+                    "SAMPLE_LIBRARY=#{sample_library} " \
+                    "SAMPLE_SEQUENCER=#{sample_sequencer} " \
+                    "SAMPLE_NOTES=#{sample_notes} " \
+                    "./#{script_name}"
     command = IdSeqPipeline::BASE_COMMAND
     command += "aegea batch submit --command=\"#{batch_command}\" "
     command += " --storage /mnt=1500 --ecr-image idseq --memory 64000"

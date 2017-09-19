@@ -255,7 +255,9 @@ def generate_rpm_from_taxid_counts(rawReadsInputPath, taxidCountsInputPath, taxi
     genus_outf.close()
 
 def generate_json_from_taxid_counts(sample, rawReadsInputPath, taxidCountsInputPath,
-                                    taxid2infoPath, jsonOutputPath, countType, dbSampleId):
+                                    taxid2infoPath, jsonOutputPath, countType, dbSampleId,
+                                    sampleHost, sampleLocation, sampleDate, sampleTissue,
+                                    sampleTemplate, sampleLibrary, sampleSequencer, sampleNotes):
     # produce json in Ryan's output format (https://github.com/chanzuckerberg/idseq-web/blob/master/test/output.json)
     taxid2info_map = shelve.open(taxid2infoPath)
     total_reads = subprocess.check_output("zcat %s | wc -l" % rawReadsInputPath, shell=True)
@@ -300,6 +302,14 @@ def generate_json_from_taxid_counts(sample, rawReadsInputPath, taxidCountsInputP
             "total_reads": total_reads,
             "remaining_reads": remaining_reads,
             "sample_id": dbSampleId,
+            "sampleHost": sampleHost,
+            "sampleLocation": sampleLocation,
+            "sampleDate": sampleDate,
+            "sampleTissue": sampleTissue,
+            "sampleTemplate": sampleTemplate,
+            "sampleLibrary": sampleLibrary,
+            "sampleSequencer": sampleSequencer,
+            "sampleNotes": sampleNotes,
             "taxon_counts_attributes": taxon_counts_attributes
       }
     }
@@ -377,7 +387,10 @@ class TimeFilter(logging.Filter):
 def run_sample(sample_s3_input_path, sample_s3_output_path,
                star_genome_s3_path, bowtie2_genome_s3_path,
                gsnap_ssh_key_s3_path, rapsearch_ssh_key_s3_path, accession2taxid_s3_path,
-               deuterostome_list_s3_path, taxid2info_s3_path, db_sample_id, lazy_run = True):
+               deuterostome_list_s3_path, taxid2info_s3_path, db_sample_id, 
+               sample_host, sample_location, sample_date, sample_tissue,
+               sample_template, sample_library, sample_sequencer, sample_notes,
+               lazy_run = True):
 
     sample_s3_output_path = sample_s3_output_path.rstrip('/')
     sample_name = os.path.basename(sample_s3_input_path.rstrip('/'))
@@ -474,6 +487,8 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         result_dir + '/' + NT_TAXID_COUNTS_TO_SPECIES_RPM_OUT,
         result_dir + '/' + NT_TAXID_COUNTS_TO_GENUS_RPM_OUT,
         taxid2info_s3_path, 'NT', db_sample_id,
+        sample_host, sample_location, sample_date, sample_tissue,
+        sample_template, sample_library, sample_sequencer, sample_notes,
         result_dir, sample_s3_output_path, lazy_run=False)
  
     # run rapsearch remotely
@@ -503,7 +518,9 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         result_dir + '/' + NR_TAXID_COUNTS_TO_JSON_OUT,
         result_dir + '/' + NR_TAXID_COUNTS_TO_SPECIES_RPM_OUT,
         result_dir + '/' + NR_TAXID_COUNTS_TO_GENUS_RPM_OUT,
-        taxid2info_s3_path, 'NR', db_sample_id,
+        taxid2info_s3_path, 'NR', db_sample_id, 
+        sample_host, sample_location, sample_date, sample_tissue,
+        sample_template, sample_library, sample_sequencer, sample_notes,
         result_dir, sample_s3_output_path, lazy_run=False)
 
     run_combine_json_outputs(sample_name,
@@ -824,6 +841,8 @@ def run_generate_taxid_outputs_from_m8(sample_name,
     taxon_counts_csv_file, taxon_counts_json_file,
     taxon_species_rpm_file, taxon_genus_rpm_file,
     taxinfodb_s3_path, count_type, db_sample_id,
+    sample_host, sample_location, sample_date, sample_tissue,
+    sample_template, sample_library, sample_sequencer, sample_notes,
     result_dir, sample_s3_output_path, lazy_run):
     logger = logging.getLogger()
     logger.info("========== generate taxid outputs from m8 ==========")
@@ -838,7 +857,9 @@ def run_generate_taxid_outputs_from_m8(sample_name,
     logger.info("generated taxon counts from m8")
     generate_json_from_taxid_counts(sample_name, fastq_file_1, taxon_counts_csv_file,
                                     taxoninfo_path, taxon_counts_json_file,
-                                    count_type, db_sample_id)
+                                    count_type, db_sample_id, sample_host, sample_location,
+                                    sample_date, sample_tissue, sample_template, sample_library,
+                                    sample_sequencer, sample_notes)
     logger.info("generated JSON file from taxon counts")
     generate_rpm_from_taxid_counts(fastq_file_1, taxon_counts_csv_file, taxoninfo_path,
                                    taxon_species_rpm_file, taxon_genus_rpm_file)
@@ -872,13 +893,23 @@ def main():
     OUTPUT_BUCKET = os.environ.get('OUTPUT_BUCKET', OUTPUT_BUCKET)
     KEY_S3_PATH = os.environ.get('KEY_S3_PATH', KEY_S3_PATH)
     DB_SAMPLE_ID = os.environ['DB_SAMPLE_ID']
+    SAMPLE_HOST = os.environ['SAMPLE_HOST']
+    SAMPLE_LOCATION = os.environ['SAMPLE_LOCATION']
+    SAMPLE_DATE = os.environ['SAMPLE_DATE']
+    SAMPLE_TISSUE = os.environ['SAMPLE_TISSUE']
+    SAMPLE_TEMPLATE = os.environ['SAMPLE_TEMPLATE']
+    SAMPLE_LIBRARY = os.environ['SAMPLE_LIBRARY']
+    SAMPLE_SEQUENCER = os.environ['SAMPLE_SEQUENCER']
+    SAMPLE_NOTES = os.environ['SAMPLE_NOTES']
     sample_s3_input_path = INPUT_BUCKET.rstrip('/')
     sample_s3_output_path = OUTPUT_BUCKET.rstrip('/')
     
     run_sample(sample_s3_input_path, sample_s3_output_path,
                STAR_GENOME, BOWTIE2_GENOME,
                KEY_S3_PATH, KEY_S3_PATH, ACCESSION2TAXID,
-               DEUTEROSTOME_TAXIDS, TAXID_TO_INFO, DB_SAMPLE_ID,  True)
+               DEUTEROSTOME_TAXIDS, TAXID_TO_INFO, DB_SAMPLE_ID,
+               SAMPLE_HOST, SAMPLE_LOCATION, SAMPLE_DATE, SAMPLE_TISSUE,
+               SAMPLE_TEMPLATE, SAMPLE_LIBRARY, SAMPLE_SEQUENCER, SAMPLE_NOTES, True)
 
 if __name__=="__main__":
     main()
