@@ -2,10 +2,12 @@ require 'aws-sdk-s3'
 
 class InputFile < ApplicationRecord
   belongs_to :sample
+  SOURCE_TYPE_LOCAL = 'local'
+  SOURCE_TYPE_S3 = 's3'
 
   FILE_REGEX = %r{\A[^\s\/]+\.fastq.gz}
   validates :name, presence: true, format: { with: FILE_REGEX, message: "file must match format '#{FILE_REGEX}'" }
-  validates :source_type, presence: true, inclusion: { in: %w[local s3] }
+  validates :source_type, presence: true, inclusion: { in: [SOURCE_TYPE_LOCAL, SOURCE_TYPE_LOCAL] }
 
   after_validation(on: :create) do
     if sample && source_type == 'local'

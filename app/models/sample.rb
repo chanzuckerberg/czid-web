@@ -7,12 +7,25 @@ class Sample < ApplicationRecord
   has_and_belongs_to_many :backgrounds
   has_many :input_files, dependent: :destroy
   accepts_nested_attributes_for :input_files
-
+  validate :input_files_checks
   validates_associated :input_files
 
-  # TODO: validate that we have exactly 2 input files
-  # TODO validate that both input files have the same source_type
-  # TODO for s3 input types, test permissions before saving, by making a HEAD request
+  def input_files_checks
+    # validate that we have exactly 2 input files
+    # validate that both input files have the same source_type
+    unless self.input_files.size == 2
+      self.errors.add(:input_files, "file_size !=2 for sample")
+    end
+    unless self.input_files[0].source_type == self.input_files[1].source_type
+      self.errors.add(:input_files, "file source type different")
+    end
+    # TODO for s3 input types, test permissions before saving, by making a HEAD request
+
+  end
+
+  def sample_path
+    File.join('samples', project.id.to_s, id.to_s)
+  end
 
   def sample_input_s3_path
     # placeholder
@@ -36,7 +49,7 @@ class Sample < ApplicationRecord
     command
   end
 
-  def kickoff_pipeline(dry_run = true) # should be triggered when the upload is complete
+  def kickoff_pipeline(dry_run = true)
     command = pipeline_command
     if dry_run
       Rails.logger.debug(command)
