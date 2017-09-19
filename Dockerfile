@@ -4,7 +4,9 @@ FROM ruby:2.4
 # well as RubyGems. As the Ruby image itself is based on a
 # Debian image, we use apt-get to install those.
 RUN apt-get update && apt-get install -y build-essential nodejs mysql-client python-dev python-pip
-RUN pip install --upgrade pip && pip install --upgrade pyOpenSSL && pip install --upgrade aegea
+RUN pip install --upgrade pip
+RUN pip install --upgrade pyOpenSSL
+RUN pip install --upgrade aegea
 
 
 # Configure the main working directory. This is the base
