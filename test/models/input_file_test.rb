@@ -6,7 +6,7 @@ class InputFileTest < ActiveSupport::TestCase
   end
 
   test "file_path" do
-    expected = "samples/#{@input_file.sample.project.id}/#{@input_file.sample.id}/#{@input_file.name}"
+    expected = "samples/#{@input_file.sample.project.id}/#{@input_file.sample.id}/fastqs/#{@input_file.name}"
     assert_equal expected, @input_file.file_path
   end
 

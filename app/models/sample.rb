@@ -4,7 +4,7 @@ class Sample < ApplicationRecord
   STATUS_CREATED  = 'created'.freeze
   STATUS_UPLOADED = 'uploaded'.freeze
   STATUS_RERUN    = 'need_rerun'.freeze
-  STATUS_CHECKED  = 'checked'.freeze  # status regarding pipeline kickoff is checked
+  STATUS_CHECKED  = 'checked'.freeze # status regarding pipeline kickoff is checked
 
   belongs_to :project
   has_many :pipeline_outputs, dependent: :destroy
@@ -54,10 +54,9 @@ class Sample < ApplicationRecord
   end
 
   def check_status
-    if [STATUS_UPLOADED, STATUS_RERUN].include?(status)
-      status = STATUS_CHECKED
-      kickoff_pipeline
-    end
+    return unless [STATUS_UPLOADED, STATUS_RERUN].include?(status)
+    self.status = STATUS_CHECKED
+    kickoff_pipeline
   end
 
   def kickoff_pipeline(dry_run = true)
