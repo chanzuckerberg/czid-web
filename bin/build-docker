@@ -12,5 +12,6 @@ echo $COMMIT
 echo $REPO
 echo $TAG
 echo '--'
-docker login -u $DOCKER_USER -p $DOCKER_PASS
-docker push $REPO
+docker build -t $REPO:$COMMIT .
+docker tag $REPO:$COMMIT $REPO:$BRANCH
+docker tag $REPO:$COMMIT $REPO:$BUILD_NUMBER
