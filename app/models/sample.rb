@@ -23,10 +23,6 @@ class Sample < ApplicationRecord
 
   end
 
-  def sample_path
-    File.join('samples', project.id.to_s, id.to_s)
-  end
-
   def sample_input_s3_path
     # placeholder
     's3://czbiohub-infectious-disease/RR003/RR003-RNA-05_D10_S10'
