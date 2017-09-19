@@ -3,7 +3,9 @@
 one:
   name: file1
   sample: one
+  source_type: local
 
 two:
   name: file2
   sample: two
+  source_type: local
