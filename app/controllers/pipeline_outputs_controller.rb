@@ -30,10 +30,18 @@ class PipelineOutputsController < ApplicationController
   # POST /pipeline_outputs
   # POST /pipeline_outputs.json
   def create
-    @pipeline_output = PipelineOutput.new(pipeline_output_params)
+    project_name = params[:pipeline_output].delete(:project_name)
+    sample_name = params[:pipeline_output].delete(:sample_name)
+    project = Project.find_by(name: project_name)
+    @sample = Sample.find_by(name: sample_name, project: project) || Sample.new(name: sample_name, project: project)
+    @sample.save
 
-    params.require(:job_id)
-    @pipeline_output.pipeline_run = PipelineRun.find_by(job_id: params[:job_id])
+    @pipeline_output = PipelineOutput.new(pipeline_output_params)
+    @pipeline_output.sample = @sample
+
+    # params.require(:job_id)
+    fake_job_id = (0...8).map { (65 + rand(26)).chr }. join
+    @pipeline_output.pipeline_run = PipelineRun.create(sample: @sample, job_id: fake_job_id)
 
     respond_to do |format|
       if @pipeline_output.save
