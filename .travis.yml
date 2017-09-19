@@ -13,6 +13,7 @@ before_install:
   - docker-compose up -d redis
   - sleep 10
   - docker-compose run -e RAILS_ENV=test web rake db:create
+install: echo 'no install'
 script:
   - docker-compose run web rails test
   - echo "quit" | docker-compose run web rails dbconsole
