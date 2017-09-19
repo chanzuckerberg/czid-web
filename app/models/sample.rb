@@ -30,7 +30,7 @@ class Sample < ApplicationRecord
       "INPUT_BUCKET=#{sample_input_s3_path} " \
       "OUTPUT_BUCKET=#{sample_output_s3_path} " \
       "DB_SAMPLE_ID=#{id} ./#{script_name}"
-      command = IdSeqPipeline::BASE_COMMAND
+    command = IdSeqPipeline::BASE_COMMAND
     command += "aegea batch submit --command=\"#{batch_command}\" "
     command += " --storage /mnt=1500 --ecr-image idseq --memory 64000"
     command
