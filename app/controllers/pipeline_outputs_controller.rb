@@ -13,6 +13,10 @@ class PipelineOutputsController < ApplicationController
   # GET /pipeline_outputs/1.json
   def show
     @view_level = params[:view_level]
+    respond_to do |format|
+      format.html
+      format.json { render json: @pipeline_output.to_json(include: :taxon_counts) }
+    end
   end
 
   # GET /pipeline_outputs/new

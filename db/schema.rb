@@ -34,6 +34,7 @@ ActiveRecord::Schema.define(version: 20170919175918) do
     t.bigint "sample_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "source_type", null: false
     t.index ["sample_id"], name: "index_input_files_on_sample_id"
   end
 

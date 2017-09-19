@@ -77,6 +77,6 @@ class SamplesController < ApplicationController
     params.require(:sample).permit(:name, :project_name, :status,
                                    :sample_host, :sample_location, :sample_date, :sample_tissue,
                                    :sample_template, :sample_library, :sample_sequencer, :sample_notes,
-                                   input_files_attributes: [:name, :presigned_url])
+                                   input_files_attributes: [:name, :presigned_url, :source_type])
   end
 end

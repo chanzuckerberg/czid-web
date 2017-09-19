@@ -8,6 +8,12 @@ class Sample < ApplicationRecord
   has_many :input_files, dependent: :destroy
   accepts_nested_attributes_for :input_files
 
+  validates_associated :input_files
+
+  # TODO: validate that we have exactly 2 input files
+  # TODO validate that both input files have the same source_type
+  # TODO for s3 input types, test permissions before saving, by making a HEAD request
+
   def sample_input_s3_path
     # placeholder
     's3://czbiohub-infectious-disease/RR003/RR003-RNA-05_D10_S10'
