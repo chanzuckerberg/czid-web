@@ -18,6 +18,12 @@ class Sample < ApplicationRecord
     File.join('samples', project.id.to_s, id.to_s)
   end
 
+  validates_associated :input_files
+
+  # TODO: validate that we have exactly 2 input files
+  # TODO validate that both input files have the same source_type
+  # TODO for s3 input types, test permissions before saving, by making a HEAD request
+
   def sample_input_s3_path
     "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/fastqs"
   end
@@ -29,9 +35,9 @@ class Sample < ApplicationRecord
   def pipeline_command
     script_name = File.basename(IdSeqPipeline::S3_SCRIPT_LOC)
     batch_command = "aws s3 cp #{IdSeqPipeline::S3_SCRIPT_LOC} .; chmod 755 #{script_name}; " \
-                    "INPUT_BUCKET=#{sample_input_s3_path} " \
-                    "OUTPUT_BUCKET=#{sample_output_s3_path} " \
-                    "DB_SAMPLE_ID=#{id} ./#{script_name}"
+      "INPUT_BUCKET=#{sample_input_s3_path} " \
+      "OUTPUT_BUCKET=#{sample_output_s3_path} " \
+      "DB_SAMPLE_ID=#{id} ./#{script_name}"
     command = IdSeqPipeline::BASE_COMMAND
     command += "aegea batch submit --command=\"#{batch_command}\" "
     command += " --storage /mnt=1500 --ecr-image idseq --memory 64000"
