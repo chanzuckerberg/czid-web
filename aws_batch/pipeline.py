@@ -369,30 +369,34 @@ def generate_taxid_annotated_m8(input_m8, output_m8, accession2taxid_db):
             outf.write(new_line)
     outf.close()
 
-def filter_deuterostomes_from_m8(input_m8, output_m8, deuterostome_file):
-    with open(deuterostome_file) as f:
+def read_columnfile_into_list(file_name):
+    with open(file_name) as f:
         content = f.readlines()
-    taxids_toremove = [x.strip("\n") for x in content]
+    return [x.strip("\n") for x in content]
+
+def filter_deuterostomes_from_m8(input_m8, output_m8, deuterostome_file):
+    taxids_toremove = read_columnfile_into_list(deuterostome_file)
     output_f = open(output_m8, 'wb')
     with open(input_m8, "rb") as input_f:
         for line in input_f:
-            taxid = (line.split("taxid"))[1].split(":")[0]
+            taxid = (line.split("taxid"))[1].split(":")[0] # example line: "taxid9606:NB501961:14:HM7TLBGX2:1:12104:15431:7497/1  KY504764.1  100.0  150  0 [...]"
             if not taxid in taxids_toremove:
                 output_f.write(line)
     output_f.close()
 
 def filter_taxids_from_fasta(input_fa, output_fa, annotation_prefix, accession2taxid_path, deuterostome_file):
-    with open(deuterostome_file) as f:
-        content = f.readlines()
-    taxids_toremove = [x.strip("\n") for x in content]
+    taxids_toremove = read_columnfile_into_list(deuterostome_file)
     accession2taxid_dict = shelve.open(accession2taxid_path)
     input_f = open(input_fa, 'rb')
     output_f = open(output_fa, 'wb')
     sequence_name = input_f.readline()
     sequence_data = input_f.readline()
     while len(sequence_name) > 0 and len(sequence_data) > 0:
-        read_id = sequence_name.rstrip().lstrip('>')
-        accession_id = (read_id.split(annotation_prefix+":"))[1].split(":")[0] if read_id.startswith(annotation_prefix) else (read_id.split(":"+annotation_prefix+":"))[1].split(":")[0]
+        read_id = sequence_name.rstrip().lstrip('>') # example read_id: "NR::NT:CP010376.2:NB501961:14:HM7TLBGX2:1:23109:12720:8743/2"
+        split_on = annotation_prefix + ":"
+        if not read_id.startswith(annotation_prefix):
+            split_on = ":" + split_on # avoid any possible "NT:" where the NT could be part of the accession follwing "NR:" 
+        accession_id = (read_id.split(split_on))[1].split(":")[0]
         accession_id_short = accession_id.split(".")[0]
         taxid = accession2taxid_dict.get(accession_id_short, "NA")
         if not taxid in taxids_toremove:
