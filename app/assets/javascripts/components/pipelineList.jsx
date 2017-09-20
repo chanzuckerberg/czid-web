@@ -1,5 +1,4 @@
 class PipelineList extends React.Component {
-
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -14,7 +13,7 @@ class PipelineList extends React.Component {
     //     pipelineOutputs: response
     //   })
     // })
-      console.log(this.state.pipelineOutputs, 'allofem');
+      console.log(this.props, this.props.pipelineOutputs, 'allofem');
   }
 
   render() {
@@ -25,7 +24,7 @@ class PipelineList extends React.Component {
           <span>ALL</span>|<span>PIPELINES</span>|<span>REPORTS</span>
         </div>
         <div className="container sample-container">
-        {!this.state.pipelineOutputs ? 'Nothing to show' :
+        {!this.props.pipelineOutputs ? 'Nothing to show' :
           <table className="bordered highlight">
           <thead>
             <tr>
@@ -37,15 +36,15 @@ class PipelineList extends React.Component {
             </tr>
           </thead>
 
-           {this.state.pipelineOutputs.map((output, i) => {
+           {this.props.pipelineOutputs.map((output, i) => {
             return (
               <tbody key={i}>
                 <tr>
-                <td ><i className="fa fa-flask" aria-hidden="true"></i>{sample.Name}</td>
-                  <td>{sample.date_created}</td>
-                  <td>{sample.created_by}</td>
-                  <td>{sample.total_reads}</td>
-                  <td>{sample.final_reads}</td>
+                <td ><i className="fa fa-flask" aria-hidden="true"></i>{output.Name}</td>
+                  <td>{output.date_created}</td>
+                  <td>{output.created_by}</td>
+                  <td>{output.total_reads}</td>
+                  <td>{output.final_reads}</td>
                 </tr>
               </tbody>
             )
