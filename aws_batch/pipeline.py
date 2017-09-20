@@ -380,7 +380,7 @@ def filter_taxids_from_fasta(input_fa, output_fa, annotation_prefix, accession2t
     sequence_data = input_f.readline()
     while len(sequence_name) > 0 and len(sequence_data) > 0:
         read_id = sequence_name.rstrip().lstrip('>')
-        accession_id = (read_id.split(":"+annotation_prefix+":"))[1].split(":")[0]
+        accession_id = (read_id.split(annotation_prefix+":"))[1].split(":")[0] if read_id.startswith(annotation_prefix) else (read_id.split(":"+annotation_prefix+":"))[1].split(":")[0]
         accession_id_short = accession_id.split(".")[0]
         taxid = accession2taxid_dict.get(accession_id_short, "NA")
         if not taxid in taxids_toremove:
