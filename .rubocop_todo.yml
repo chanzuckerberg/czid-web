@@ -243,3 +243,6 @@ Style/StringLiteralsInInterpolation:
 # SupportedStyles: percent, brackets
 Style/SymbolArray:
   EnforcedStyle: brackets
+
+Style/GuardClause:
+  Enabled: false
