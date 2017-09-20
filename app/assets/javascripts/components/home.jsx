@@ -1,6 +1,5 @@
 class Home extends React.Component {
 
-
   componentDidMount() {
     console.log(this.props, this.props.pipelineOutputs, 'allofem');
   }
@@ -9,7 +8,6 @@ class Home extends React.Component {
     return (
       <div>
         <PipelineList {...this.props}/>
-
       </div>
     )
   }
