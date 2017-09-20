@@ -81,7 +81,7 @@ class Sample < ApplicationRecord
   def check_status
     return unless [STATUS_UPLOADED, STATUS_RERUN].include?(status)
     self.status = STATUS_CHECKED
-    kickoff_pipeline
+    kickoff_pipeline(false)
   end
 
   def kickoff_pipeline(dry_run = true)
