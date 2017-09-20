@@ -3,10 +3,6 @@ class PipelineList extends React.Component {
     super(props, context);
   }
 
-  componentDidMount() {
-    $('.tooltipped').tooltip({delay: 50});
-  }
-
   render() {
     return (
       <div>
@@ -61,5 +57,5 @@ class PipelineList extends React.Component {
     </div>
     )
   }
-
 }
+
