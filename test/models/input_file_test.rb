@@ -6,12 +6,12 @@ class InputFileTest < ActiveSupport::TestCase
   end
 
   test "file_path" do
-    expected = "samples/#{@input_file.sample.project.id}/#{@input_file.sample.id}/#{@input_file.name}"
+    expected = "samples/#{@input_file.sample.project.id}/#{@input_file.sample.id}/fastqs/#{@input_file.name}"
     assert_equal expected, @input_file.file_path
   end
 
   test "validate name presence" do
-    file = InputFile.new
+    file = InputFile.new(source_type: 'local')
     assert_not file.valid?
     assert_equal [:sample, :name], file.errors.keys
   end
@@ -19,10 +19,16 @@ class InputFileTest < ActiveSupport::TestCase
   test "validate name format" do
     invalid_names = ['.fastq', 'a .fastq.gz', 'a/b.fastq.gz']
     invalid_names.each do |name|
-      file = InputFile.new
+      file = InputFile.new(source_type: 'local')
       file.name = name
       assert_not file.valid?
       assert_equal [:sample, :name], file.errors.keys
     end
+  end
+
+  test "validate source_type" do
+    file = InputFile.new(source_type: 'invalid', name: 'valid.fastq.gz')
+    assert_not file.valid?
+    assert_equal [:sample, :source_type], file.errors.keys
   end
 end

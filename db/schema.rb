@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170914201443) do
+ActiveRecord::Schema.define(version: 20170919220613) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -34,6 +34,8 @@ ActiveRecord::Schema.define(version: 20170914201443) do
     t.bigint "sample_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "source_type", null: false
+    t.text "source"
     t.index ["sample_id"], name: "index_input_files_on_sample_id"
   end
 
@@ -90,6 +92,14 @@ ActiveRecord::Schema.define(version: 20170914201443) do
     t.datetime "updated_at", null: false
     t.bigint "project_id"
     t.string "status"
+    t.string "sample_host"
+    t.string "sample_location"
+    t.string "sample_date"
+    t.string "sample_tissue"
+    t.string "sample_template"
+    t.string "sample_library"
+    t.string "sample_sequencer"
+    t.text "sample_notes"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
   end
 

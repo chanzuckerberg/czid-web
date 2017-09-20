@@ -15,6 +15,7 @@ services:
       - ./redis-data:/var/lib/redis/data
   web:
     build: .
+    image: chanzuckerberg/idseq-web:compose
     volumes:
       - .:/app
       - ~/.aws:/root/.aws:ro
@@ -34,4 +35,6 @@ services:
     depends_on:
       - db
       - redis
+    environment:
+      - SAMPLES_BUCKET_NAME=czbiohub-idseq-samples-development
     command: bundle exec "QUEUE=* COUNT=5 rake resque:workers"
