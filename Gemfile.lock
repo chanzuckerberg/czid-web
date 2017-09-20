@@ -541,6 +541,9 @@ GEM
     materialize-sass (0.100.2)
       sass (~> 3.3)
     method_source (0.9.0)
+    materialize-rails (0.97.5.2)
+      jquery-rails
+      sass-rails
     mime-types (3.1)
       mime-types-data (~> 3.2015)
     mime-types-data (3.2016.0521)
