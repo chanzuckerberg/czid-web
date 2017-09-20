@@ -92,9 +92,12 @@ class Sample < ApplicationRecord
 
   def kickoff_pipeline(dry_run = true)
     # only kickoff pipeline when no active pipeline_run running
+<<<<<<< HEAD
     pipeline_runs.in_progress.each(&:update_job_status)
     pipeline_runs.in_progress.reload
 
+=======
+>>>>>>> One active pipeline run a time (#76)
     return unless pipeline_runs.in_progress.empty?
 
     command = pipeline_command
