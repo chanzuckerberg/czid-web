@@ -85,3 +85,6 @@ Style/StringLiterals:
 
 Style/SymbolArray:
   EnforcedStyle: brackets
+
+Style/GuardClause:
+  Enabled: false
