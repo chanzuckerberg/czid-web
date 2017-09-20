@@ -710,7 +710,7 @@ def run_star(sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
                            '--runThreadN', str(multiprocessing.cpu_count()),
                            '--genomeDir', REF_DIR + '/STAR_genome',
                            '--readFilesIn', fastq_file_1, fastq_file_2]
-    execute_command(" ".join(star_command_params)))
+    execute_command(" ".join(star_command_params))
     logger.info("finished job")
     # extract out unmapped files
     execute_command("cp %s/%s %s/%s;" % (scratch_dir, 'Unmapped.out.mate1', result_dir, STAR_OUT1))
@@ -773,7 +773,7 @@ def run_cdhitdup(sample_name, input_fa_1, input_fa_2,
                        '-o',  result_dir + '/' + CDHITDUP_OUT1,
                        '-o2', result_dir + '/' + CDHITDUP_OUT2,
                        '-e',  '0.05', '-u', '70']
-    logger.info(execute_command(" ".join(cdhitdup_params)))
+    execute_command(" ".join(cdhitdup_params))
     logger.info("finished job")
     # copy back to aws
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, CDHITDUP_OUT1, sample_s3_output_path))
@@ -819,7 +819,7 @@ def run_bowtie2(sample_name, input_fa_1, input_fa_2, bowtie_genome_s3_path,
                      '--very-sensitive-local',
                      '-f', '-1', input_fa_1, '-2', input_fa_2,
                      '-S', result_dir + '/' + BOWTIE2_OUT]
-    logger.info(execute_command(" ".join(bowtie2_params)))
+    execute_command(" ".join(bowtie2_params))
     logger.info("finished alignment")
     # extract out unmapped files from sam
     output_prefix = result_dir + '/' + EXTRACT_UNMAPPED_FROM_SAM_OUT1[:-8]
