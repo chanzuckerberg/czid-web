@@ -8,4 +8,3 @@ end
 task "resque:scheduler_setup" => :environment do
   ENV['QUEUE'] ||= '*'
 end
-
