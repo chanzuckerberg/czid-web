@@ -5,7 +5,6 @@ class PipelineList extends React.Component {
   }
 
   componentDidMount() {
-
   }
 
   render() {
