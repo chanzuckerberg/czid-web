@@ -369,7 +369,7 @@ def filter_deuterostomes_from_m8(input_m8, output_m8, deuterostome_file):
                 output_f.write(line)
     output_f.close()
 
-def filter_taxids_from_fasta(input_fa, output_fa, accession2taxid_path, deuterostome_file):
+def filter_taxids_from_fasta(input_fa, output_fa, annotation_prefix, accession2taxid_path, deuterostome_file):
     with open(deuterostome_file) as f:
         content = f.readlines()
     taxids_toremove = [x.strip("\n") for x in content]
@@ -892,7 +892,7 @@ def run_filter_deuterostomes_from_fasta(sample_name, input_fa, output_fa,
         if not os.path.isfile(deuterostome_file):
             execute_command("aws s3 cp %s %s/" % (deuterostome_list_s3_path, REF_DIR))
             logger.info("downloaded deuterostome list")
-        filter_taxids_from_fasta(input_fa, output_fa, accession2taxid_path, deuterostome_file)
+        filter_taxids_from_fasta(input_fa, output_fa, annotation_prefix, accession2taxid_path, deuterostome_file)
         logger.info("finished")
         # move the output back to S3
         execute_command("aws s3 cp %s %s/" % (output_fa, sample_s3_output_path))
