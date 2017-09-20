@@ -4,7 +4,6 @@ class PipelineList extends React.Component {
 
   }
 
-<<<<<<< HEAD
   renderPipelineOutput(samples, pipelineruns) {
     <h1>{JSON.stringify(samples, pipelineruns)}</h1>
     return samples.map((sample, i) => {
@@ -55,10 +54,6 @@ class PipelineList extends React.Component {
       </div>
     </div>
     )
-=======
-  componentDidMount() {
-
->>>>>>> Feature/react rails setup (#72)
   }
 
   render() {
