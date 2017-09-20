@@ -4,6 +4,7 @@ class Home extends React.Component {
     return (
       <div>
         <PipelineList {...this.props}/>
+
       </div>
     )
   }
