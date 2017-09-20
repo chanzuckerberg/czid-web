@@ -2,8 +2,8 @@ require 'aws-sdk-s3'
 
 class InputFile < ApplicationRecord
   belongs_to :sample
-  SOURCE_TYPE_LOCAL = 'local'
-  SOURCE_TYPE_S3 = 's3'
+  SOURCE_TYPE_LOCAL = 'local'.freeze
+  SOURCE_TYPE_S3 = 's3'.freeze
 
   FILE_REGEX = %r{\A[^\s\/]+\.fastq.gz}
   validates :name, presence: true, format: { with: FILE_REGEX, message: "file must match format '#{FILE_REGEX}'" }
