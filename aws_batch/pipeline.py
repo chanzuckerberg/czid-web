@@ -440,7 +440,8 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
 
     # configure logger
     log_file = result_dir+'/'+LOGS_OUT
-    os.remove(log_file)
+    if os.path.isfile(log_file):
+        os.remove(log_file)
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
     handler = logging.FileHandler(log_file)
@@ -470,7 +471,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
     if lazy_run:
        # Download existing data and see what has been done
         command = "aws s3 cp %s %s --recursive" % (sample_s3_output_path, result_dir)
-        print execute_command(command)
+        logger.info(execute_command(command))
 
     # run STAR
     run_star(sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
