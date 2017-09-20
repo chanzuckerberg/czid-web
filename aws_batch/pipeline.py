@@ -439,9 +439,11 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
     execute_command("mkdir -p %s " % REF_DIR);
 
     # configure logger
+    log_file = result_dir+'/'+LOGS_OUT
+    os.remove(log_file)
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
-    handler = logging.FileHandler(result_dir+'/'+LOGS_OUT, 'w')
+    handler = logging.FileHandler(log_file)
     formatter = logging.Formatter("%(asctime)s (%(time_since_last)ss elapsed): %(message)s")
     handler.addFilter(TimeFilter())
     handler.setFormatter(formatter)
@@ -572,6 +574,8 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
                     result_dir + '/' + NR_TAXID_COUNTS_TO_SPECIES_RPM_OUT,
                     result_dir + '/' + NR_TAXID_COUNTS_TO_GENUS_RPM_OUT,
                     taxid2info_s3_path, 'NR', db_sample_id,
+                    sample_host, sample_location, sample_date, sample_tissue,
+                    sample_template, sample_library, sample_sequencer, sample_notes,
                     result_dir, sample_s3_output_path, lazy_run=False)
 
     run_combine_json_outputs(sample_name,
