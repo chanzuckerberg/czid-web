@@ -226,7 +226,7 @@ def generate_tax_counts_from_m8(m8_file, output_file):
     taxid_count_map = {}
     with open(m8_file, 'rb') as m8f:
         for line in m8f:
-            taxid = (line.split("taxid"))[1].split(":")[0]
+            taxid = (line.split("taxid"))[1].split(":")[0] # example line: "taxid9606:NB501961:14:HM7TLBGX2:1:12104:15431:7497/1  KY504764.1  100.0  150  0 [...]"
             taxid_count_map[taxid] = taxid_count_map.get(taxid, 0) + 1
     with open(output_file, 'w') as f:
         writer = csv.writer(f)
