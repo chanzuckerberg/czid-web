@@ -3,16 +3,17 @@ class PipelineList extends React.Component {
   constructor(props, context) {
     super(props, context);
     this.state = {
-      pipelineOutputs: null
+      pipelineOutputs: null,
+      pipelineOutputsMock: this.getMockData()
     }
   }
 
   componentDidMount() {
-    $.get('http://dev.idseq.net/pipeline_outputs.json', function(data, status) {
-      this.setState({
-        pipelineOutputs: response
-      })
-    })
+    // $.get('http://dev.idseq.net/pipeline_outputs.json', function(data, status) {
+    //   this.setState({
+    //     pipelineOutputs: response
+    //   })
+    // })
       console.log(this.state.pipelineOutputs, 'allofem');
   }
 
@@ -24,6 +25,7 @@ class PipelineList extends React.Component {
           <span>ALL</span>|<span>PIPELINES</span>|<span>REPORTS</span>
         </div>
         <div className="container sample-container">
+        {!this.state.pipelineOutputs ? 'Nothing to show' :
           <table className="bordered highlight">
           <thead>
             <tr>
@@ -35,7 +37,7 @@ class PipelineList extends React.Component {
             </tr>
           </thead>
 
-         {!this.state.pipelineOutputs ? <p>Nothing to show</p> : this.state.pipelineOutputs.map((output, i) => {
+           {this.state.pipelineOutputs.map((output, i) => {
             return (
               <tbody key={i}>
                 <tr>
@@ -48,9 +50,8 @@ class PipelineList extends React.Component {
               </tbody>
             )
           })}
-         }
-          
         </table>
+         }
         </div>
       </div>
     )
