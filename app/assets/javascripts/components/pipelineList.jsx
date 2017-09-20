@@ -81,6 +81,5 @@ class PipelineList extends React.Component {
       </div>
     )
   }
-
 }
 
