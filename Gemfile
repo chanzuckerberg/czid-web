@@ -36,11 +36,6 @@ gem 'turbolinks', '~> 5'
 gem 'uglifier', '>= 1.3.0'
 gem 'sprockets-es6'
 
-gem 'rack-cors', require: 'rack/cors'
-gem 'react-rails'
-gem 'materialize-rails'
-gem 'font-awesome-rails'
-
 gem 'react-rails'
 gem 'materialize-rails'
 gem "font-awesome-rails"
