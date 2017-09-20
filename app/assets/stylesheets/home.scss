@@ -1,3 +1,47 @@
 // Place all the styles related to the home controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+
+table {
+  thead {
+    th {
+      font-style: thin;
+      font-size: 14px;
+      color:rgb(184, 184, 184);
+    }
+  }
+
+  tbody {
+    td {
+      i.fa {
+        border-radius: 3px;
+        padding: 5px;
+        margin: 0 13px;
+        color: #fff;
+        background-color:#5ABCD6;
+        cursor: pointer;
+      }
+      i.fa.fa-flask {
+        margin-left: 0;
+      }
+      cursor: pointer;
+    }
+  }
+
+}
+
+i.fa {
+  cursor: pointer;
+}
+
+.search-wrapper {
+  padding: 20px 0;
+  span {
+    margin: 10px;
+    color:rgb(174, 174, 174);
+    cursor: pointer;
+  }
+  span:hover {
+    color: rgb(64, 64, 64);
+  }
+}
