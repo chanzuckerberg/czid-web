@@ -27,6 +27,7 @@ gem 'rails', '~> 5.1.2'
 gem 'simple_token_authentication', '~> 1.0' # see semver.org
 # Worker/Scheduler management
 gem 'resque'
+gem 'resque-scheduler'
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 5.0'
 # Turbolinks makes navigating your web application faster. Read more: https://github.com/turbolinks/turbolinks
@@ -35,7 +36,6 @@ gem 'turbolinks', '~> 5'
 gem 'uglifier', '>= 1.3.0'
 gem 'sprockets-es6'
 
-gem 'rack-cors', require: 'rack/cors'
 gem 'react-rails'
 gem 'materialize-rails'
 gem "font-awesome-rails"
