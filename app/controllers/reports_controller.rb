@@ -28,7 +28,8 @@ class ReportsController < ApplicationController
   end
 
   # GET /reports/1/edit
-  def edit; end
+  def edit
+  end
 
   # POST /reports
   # POST /reports.json
