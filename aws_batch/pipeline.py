@@ -437,11 +437,11 @@ class TimeFilter(logging.Filter):
         self.last = record.relativeCreated
         return True
 
-def run_and_log(logparams, func_name, **args):
+def run_and_log(logparams, func_name, *args):
     logger = logging.getLogger()
     logger.info("========== %s ==========" % logparams.get(title))
     # produce the output
-    func_return = func_name(**args)
+    func_return = func_name(*args)
     if func_return == 1:
         logger.info("output exists, lazy run")
     else:
