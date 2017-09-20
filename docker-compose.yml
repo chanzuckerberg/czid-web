@@ -38,3 +38,14 @@ services:
     environment:
       - SAMPLES_BUCKET_NAME=czbiohub-idseq-samples-development
     command: bundle exec "QUEUE=* COUNT=5 rake resque:workers"
+  resque_schedule:
+    build: .
+    volumes:
+      - .:/app
+      - ~/.aws:/root/.aws:ro
+    depends_on:
+      - db
+      - redis
+    environment:
+      - SAMPLES_BUCKET_NAME=czbiohub-idseq-samples-development
+    command: bundle exec "QUEUE=* rake resque:scheduler"

@@ -87,6 +87,9 @@ class Sample < ApplicationRecord
   end
 
   def kickoff_pipeline(dry_run = true)
+    #only kickoff pipeline when no active pipeline_run running
+    return unless self.pipeline_runs.in_progress.empty?
+
     command = pipeline_command
     if dry_run
       Rails.logger.debug(command)
