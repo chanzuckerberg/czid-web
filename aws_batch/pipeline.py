@@ -440,8 +440,6 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
 
     # configure logger
     log_file = result_dir+'/'+LOGS_OUT
-    if os.path.isfile(log_file):
-        os.remove(log_file)
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
     handler = logging.FileHandler(log_file)
