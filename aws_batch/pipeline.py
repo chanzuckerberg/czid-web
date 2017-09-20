@@ -469,7 +469,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
     if lazy_run:
        # Download existing data and see what has been done
         command = "aws s3 cp %s %s --recursive" % (sample_s3_output_path, result_dir)
-        logger.info(execute_command(command))
+        print execute_command(command)
 
     # run STAR
     run_star(sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
