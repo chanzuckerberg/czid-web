@@ -5,12 +5,15 @@
 project = Project.create!(name: "Awesome Project")
 
 (1..5).each do |i|
-  sample = Sample.create!(name: "Sample #{i}", project: project)
+  sample = Sample.new(name: "Sample #{i}", project: project)
+  sample.input_files << InputFile.new(name: 'R1.fastq.gz', source_type: 'local')
+  sample.input_files << InputFile.new(name: 'R2.fastq.gz', source_type: 'local')
+  sample.save!
   taxon_counts = (1..10).map {|j| TaxonCount.new(tax_id: j, tax_level: 3, count: rand(1000)) }
   pipeline_run = PipelineRun.create!(sample: sample, command: "xyz yzyz")
   output = PipelineOutput.create!(sample: sample, total_reads: 1_000, remaining_reads: 500, taxon_counts: taxon_counts, pipeline_run: pipeline_run)
   pipeline_run.pipeline_output_id = output.id
-  pipeline_run.save
+  pipeline_run.save!
 end
 
 user = User.create!(email: "fake@example.com", name: "Fake User", password: "password", password_confirmation: "password", authentication_token: "idseq1234")
