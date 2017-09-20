@@ -533,6 +533,8 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
                     result_dir + '/' + NT_TAXID_COUNTS_TO_SPECIES_RPM_OUT,
                     result_dir + '/' + NT_TAXID_COUNTS_TO_GENUS_RPM_OUT,
                     taxid2info_s3_path, 'NT', db_sample_id,
+                    sample_host, sample_location, sample_date, sample_tissue,
+                    sample_template, sample_library, sample_sequencer, sample_notes,
                     result_dir, sample_s3_output_path, lazy_run=False)
 
     # run rapsearch remotely
