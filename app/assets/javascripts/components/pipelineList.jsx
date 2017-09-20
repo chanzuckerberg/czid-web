@@ -1,19 +1,9 @@
 class PipelineList extends React.Component {
   constructor(props, context) {
     super(props, context);
-    this.state = {
-      pipelineOutputs: null,
-      pipelineOutputsMock: this.getMockData()
-    }
   }
 
   componentDidMount() {
-    // $.get('http://dev.idseq.net/pipeline_outputs.json', function(data, status) {
-    //   this.setState({
-    //     pipelineOutputs: response
-    //   })
-    // })
-      console.log(this.props, this.props.pipelineOutputs, 'allofem');
   }
 
   render() {
