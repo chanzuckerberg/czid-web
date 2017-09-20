@@ -90,6 +90,18 @@ COMBINED_JSON_OUT = 'idseq_web_sample.json'
 LOGS_OUT = 'log.txt'
 
 ### convenience functions
+def count_reads(file_name, file_type):
+    if file_type == "fastq_gz_paired":
+        return 2*sum(1 for line in gzip.open(file_name))
+    if file_type == "fastq_paired":
+        return 2*sum(1 for line in open(file_name))/4
+    if file_type == "fasta_paired":
+        return 2*sum(1 for line in open(file_name) if line.startswith(('>')))
+    if file_type == "fasta":
+        return sum(1 for line in open(file_name) if line.startswith(('>')))
+    if file_type == "m8":
+        return sum(1 for line in open(file_name))
+
 def lzw_fraction(sequence):
     if sequence == "":
         return 0.0
@@ -421,6 +433,29 @@ class TimeFilter(logging.Filter):
         self.last = record.relativeCreated
         return True
 
+def run_and_log(logparams, func_name, **args):
+    logger = logging.getLogger()
+    logger.info("========== %s ==========" % logparams.get(title))
+    # produce the output
+    func_return = func_name(**args)
+    if func_return == 1:
+        logger.info("output exists, lazy run")
+    else:
+        logger.info("uploaded output")
+    # count records
+    if logparams[count_reads]:
+        records_before = count_reads(logparams[before_file_name], logparams[before_file_type])
+        records_after = count_reads(logparams[after_file_name], logparams[after_file_type])
+        percent_removed = (100.0 * (records_before - records_after)) / records_before
+        if "paired" in logparams[before_file_name] and "paired" in logparams[after_file_name]:
+            record_description = "read-pairs"
+        else:
+            record_description = "reads"
+        logger.info("%s %% of %s dropped out, %s %s remaining" % (str(percent_removed), record_description,
+                                                                  str(records_after), record_description))
+    # copy log file
+    execute_command("aws s3 cp %s/%s %s/;" % (args[result_dir], LOGS_OUT, args[sample_s3_output_path]))
+
 def run_sample(sample_s3_input_path, sample_s3_output_path,
                star_genome_s3_path, bowtie2_genome_s3_path,
                gsnap_ssh_key_s3_path, rapsearch_ssh_key_s3_path, accession2taxid_s3_path,
@@ -472,479 +507,474 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         print execute_command(command)
 
     # run STAR
-    run_star(sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
-             result_dir, scratch_dir, sample_s3_output_path, lazy_run)
+    logparams = {title: "STAR", count_reads: True,
+                 before_file_name: fastq_file_1,
+                 before_file_type: "fastq_gz_paired",
+                 after_file_name: os.path.join(result_dir, STAR_OUT1),
+                 after_file_type: "fastq_paired"}
+    run_and_log(logparams, run_star,
+        sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
+        result_dir, scratch_dir, sample_s3_output_path, lazy_run)
 
     # run priceseqfilter
-    run_priceseqfilter(sample_name, result_dir +'/' + STAR_OUT1, result_dir +'/' + STAR_OUT2,
-                       result_dir, sample_s3_output_path, lazy_run)
+    logparams = {title: "PriceSeqFilter", count_reads: True,
+                 before_file_name: os.path.join(result_dir, STAR_OUT1),
+                 before_file_type: "fastq_paired",
+                 after_file_name: os.path.join(result_dir, PRICESEQFILTER_OUT1),
+                 after_file_type: "fastq_paired"}
+    run_and_log(logparams, run_priceseqfilter,
+        sample_name, os.path.join(result_dir, STAR_OUT1),
+        os.path.join(result_dir, STAR_OUT2),
+        result_dir, sample_s3_output_path, lazy_run)
 
     # run fastq to fasta
-    run_fq2fa(sample_name, result_dir +'/' + PRICESEQFILTER_OUT1,
-              result_dir +'/' + PRICESEQFILTER_OUT2,
-              result_dir, sample_s3_output_path, lazy_run)
+    logparams = {title: "FASTQ to FASTA", count_reads: False}
+    run_and_log(logparams, run_fq2fa,
+        sample_name, os.path.join(result_dir, PRICESEQFILTER_OUT1),
+        os.path.join(result_dir, PRICESEQFILTER_OUT2),
+        result_dir, sample_s3_output_path, lazy_run)
 
     # run cdhitdup
-    run_cdhitdup(sample_name, result_dir +'/' + FQ2FA_OUT1, result_dir +'/' + FQ2FA_OUT2,
-                 result_dir, sample_s3_output_path, lazy_run)
-    records_remaining = sum(1 for line in open(result_dir +'/' + CDHITDUP_OUT1) if line.startswith(('>')))
+    logparams = {title: "CD-HIT-DUP", count_reads: True,
+                 before_file_name: os.path.join(result_dir, FQ2FA_OUT1),
+                 before_file_type: "fasta_paired",
+                 after_file_name: os.path.join(result_dir, CDHITDUP_OUT1),
+                 after_file_type: "fasta_paired"}
+    run_and_log(logparams, run_cdhitdup,
+        sample_name, os.path.join(result_dir, FQ2FA_OUT1),
+        os.path.join(result_dir, FQ2FA_OUT2),
+        result_dir, sample_s3_output_path, lazy_run)
 
     # run lzw filter
-    run_lzw(sample_name, result_dir +'/' + CDHITDUP_OUT1, result_dir +'/' + CDHITDUP_OUT2,
-            result_dir, sample_s3_output_path, lazy_run)
+    logparams = {title: "LZW filter", count_reads: True,
+                 before_file_name: os.path.join(result_dir, CDHITDUP_OUT1),
+                 before_file_type: "fasta_paired",
+                 after_file_name: os.path.join(result_dir, LZW_OUT1),
+                 after_file_type: "fasta_paired"}
+    run_and_log(logparams, run_lzw,
+        sample_name, os.path.join(result_dir, CDHITDUP_OUT1),
+        os.path.join(result_dir, CDHITDUP_OUT2),
+        result_dir, sample_s3_output_path, lazy_run)
 
     # run bowtie
-    run_bowtie2(sample_name, result_dir +'/' + LZW_OUT1, result_dir +'/' + LZW_OUT2,
-                bowtie2_genome_s3_path, result_dir, sample_s3_output_path, lazy_run)
+    logparams = {title: "bowtie2", count_reads: True,
+                 before_file_name: os.path.join(result_dir, LZW_OUT1),
+                 before_file_type: "fasta_paired",
+                 after_file_name: os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT1),
+                 after_file_type: "fasta_paired"}
+    run_and_log(logparams, run_bowtie2,
+        sample_name, os.path.join(result_dir, LZW_OUT1),
+        os.path.join(result_dir, LZW_OUT2),
+        bowtie2_genome_s3_path, result_dir, sample_s3_output_path, lazy_run)
 
     # run gsnap remotely
-    run_gsnapl_remotely(sample_name, EXTRACT_UNMAPPED_FROM_SAM_OUT1, EXTRACT_UNMAPPED_FROM_SAM_OUT2,
-                        gsnap_ssh_key_s3_path,
-                        result_dir, sample_s3_output_path, lazy_run)
+    logparams = {title: "GSNAPL", count_reads: True,
+                 before_file_name: os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT1),
+                 before_file_type: "fasta_paired",
+                 after_file_name: os.path.join(result_dir, GSNAPL_OUT),
+                 after_file_type: "m8"}
+    run_and_log(logparams, run_gsnapl_remotely,
+        sample_name, EXTRACT_UNMAPPED_FROM_SAM_OUT1, EXTRACT_UNMAPPED_FROM_SAM_OUT2,
+        gsnap_ssh_key_s3_path,
+        result_dir, sample_s3_output_path, lazy_run)
 
     # run_annotate_gsnapl_m8_with_taxids
-    run_annotate_m8_with_taxids(sample_name,
-                                result_dir + '/' + GSNAPL_OUT,
-                                result_dir + '/' + ANNOTATE_GSNAPL_M8_WITH_TAXIDS_OUT,
-                                accession2taxid_s3_path,
-                                result_dir, sample_s3_output_path, lazy_run=False)
+    logparams = {title: "annotate gsnapl m8 with taxids", count_reads: False}
+    run_and_log(logparams, run_annotate_m8_with_taxids,
+        sample_name, os.path.join(result_dir, GSNAPL_OUT),
+        ros.path.join(result_dir, ANNOTATE_GSNAPL_M8_WITH_TAXIDS_OUT),
+        accession2taxid_s3_path,
+        result_dir, sample_s3_output_path, lazy_run=False)
 
     # run_generate_taxid_annotated_fasta_from_m8
-    run_generate_taxid_annotated_fasta_from_m8(sample_name,
-                    result_dir + '/' + GSNAPL_OUT,
-                    result_dir + '/' + EXTRACT_UNMAPPED_FROM_SAM_OUT3,
-                    result_dir + '/' + GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT,
-                    'NT',
-                    result_dir, sample_s3_output_path, lazy_run=False)
+    logparams = {title: "generate taxid annotated fasta from m8", count_reads: False}
+    run_and_log(logparams, run_generate_taxid_annotated_fasta_from_m8,
+        sample_name, os.path.join(result_dir, GSNAPL_OUT),
+        os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT3),
+        os.path.join(result_dir, GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT),
+        'NT', result_dir, sample_s3_output_path, lazy_run=False)
 
-    run_filter_deuterostomes_from_m8(sample_name,
-                    result_dir + '/' + ANNOTATE_GSNAPL_M8_WITH_TAXIDS_OUT,
-                    result_dir + '/' + FILTER_DEUTEROSTOMES_FROM_NT_M8_OUT,
-                    deuterostome_list_s3_path,
-                    result_dir, sample_s3_output_path, lazy_run=False)
+    logparams = {title: "filter deuterostomes from m8", count_reads: True,
+                 before_file_name: os.path.join(result_dir, ANNOTATE_GSNAPL_M8_WITH_TAXIDS_OUT),
+                 before_file_type: "m8",
+                 after_file_name: os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NT_M8_OUT),
+                 after_file_type: "m8"}
+    run_and_log(logparams, run_filter_deuterostomes_from_m8,
+        sample_name, os.path.join(result_dir, ANNOTATE_GSNAPL_M8_WITH_TAXIDS_OUT),
+        os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NT_M8_OUT),
+        deuterostome_list_s3_path, result_dir, sample_s3_output_path, lazy_run=False)
 
-    run_generate_taxid_outputs_from_m8(sample_name,
-                    result_dir + '/' + FILTER_DEUTEROSTOMES_FROM_NT_M8_OUT,
-                    fastq_file_1,
-                    result_dir + '/' + NT_M8_TO_TAXID_COUNTS_FILE_OUT,
-                    result_dir + '/' + NT_TAXID_COUNTS_TO_JSON_OUT,
-                    result_dir + '/' + NT_TAXID_COUNTS_TO_SPECIES_RPM_OUT,
-                    result_dir + '/' + NT_TAXID_COUNTS_TO_GENUS_RPM_OUT,
-                    taxid2info_s3_path, 'NT', db_sample_id,
-                    sample_host, sample_location, sample_date, sample_tissue,
-                    sample_template, sample_library, sample_sequencer, sample_notes,
-                    result_dir, sample_s3_output_path, lazy_run=False)
+    logparams = {title: "generate taxid outputs from m8", count_reads: False}
+    run_and_log(logparams, run_generate_taxid_outputs_from_m8,
+        sample_name, os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NT_M8_OUT),
+        fastq_file_1, os.path.join(result_dir, NT_M8_TO_TAXID_COUNTS_FILE_OUT),
+        os.path.join(result_dir, NT_TAXID_COUNTS_TO_JSON_OUT),
+        os.path.join(result_dir, NT_TAXID_COUNTS_TO_SPECIES_RPM_OUT),
+        os.path.join(result_dir, NT_TAXID_COUNTS_TO_GENUS_RPM_OUT),
+        taxid2info_s3_path, 'NT', db_sample_id,
+        sample_host, sample_location, sample_date, sample_tissue,
+        sample_template, sample_library, sample_sequencer, sample_notes,
+        result_dir, sample_s3_output_path, lazy_run=False)
 
     # run rapsearch remotely
-    run_filter_deuterostomes_from_fasta(sample_name,
-                    result_dir + '/' + GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT,
-                    result_dir + '/' + FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT,
-                    accession2taxid_s3_path, deuterostome_list_s3_path, 'NT',
-                    result_dir, sample_s3_output_path, lazy_run=False)
+    logparams = {title: "filter deuterostomes from FASTA", count_reads: False}
+    run_and_log(logparams, run_filter_deuterostomes_from_fasta,
+        sample_name, os.path.join(result_dir, GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT),
+        os.path.join(result_dir, FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT),
+        accession2taxid_s3_path, deuterostome_list_s3_path, 'NT',
+        result_dir, sample_s3_output_path, lazy_run=False)
 
-    run_rapsearch2_remotely(sample_name, FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT,
-                            rapsearch_ssh_key_s3_path,
-                            result_dir, sample_s3_output_path, lazy_run)
+    logparams = {title: "RAPSearch2", count_reads: True,
+                 before_file_name: os.path.join(result_dir, FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT),
+                 before_file_type: "fasta",
+                 after_file_name: os.path.join(result_dir, RAPSEARCH2_OUT),
+                 after_file_type: "m8"}
+    run_and_log(logparams, run_rapsearch2_remotely,
+        sample_name, FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT,
+        rapsearch_ssh_key_s3_path,
+        result_dir, sample_s3_output_path, lazy_run)
 
     # run_annotate_m8_with_taxids
-    run_annotate_m8_with_taxids(sample_name,
-                                result_dir + '/' + RAPSEARCH2_OUT,
-                                result_dir + '/' + ANNOTATE_RAPSEARCH2_M8_WITH_TAXIDS_OUT,
-                                accession2taxid_s3_path,
-                                result_dir, sample_s3_output_path, lazy_run=False)
+    logparams = {title: "annotate m8 with taxids", count_reads: False}
+    run_and_log(logparams, run_annotate_m8_with_taxids,
+        sample_name, os.path.join(result_dir, RAPSEARCH2_OUT),
+        os.path.join(result_dir, ANNOTATE_RAPSEARCH2_M8_WITH_TAXIDS_OUT),
+        accession2taxid_s3_path,
+        result_dir, sample_s3_output_path, lazy_run=False)
 
     # run_generate_taxid_annotated_fasta_from_m8
-    run_generate_taxid_annotated_fasta_from_m8(sample_name,
-                    result_dir + '/' + RAPSEARCH2_OUT,
-                    result_dir + '/' + FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT,
-                    result_dir + '/' + GENERATE_TAXID_ANNOTATED_FASTA_FROM_RAPSEARCH2_M8_OUT,
-                    'NR',
-                    result_dir, sample_s3_output_path, lazy_run=False)
+    logparams = {title: "generate taxid annotated fasta from m8", count_reads: False}
+    run_and_log(logparams, run_generate_taxid_annotated_fasta_from_m8,
+        sample_name, result_dir + '/' + RAPSEARCH2_OUT,
+        result_dir + '/' + FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT,
+        result_dir + '/' + GENERATE_TAXID_ANNOTATED_FASTA_FROM_RAPSEARCH2_M8_OUT,
+        'NR', result_dir, sample_s3_output_path, lazy_run=False)
 
-    run_filter_deuterostomes_from_m8(sample_name,
-                    result_dir + '/' + ANNOTATE_RAPSEARCH2_M8_WITH_TAXIDS_OUT,
-                    result_dir + '/' + FILTER_DEUTEROSTOMES_FROM_NR_M8_OUT,
-                    deuterostome_list_s3_path,
-                    result_dir, sample_s3_output_path, lazy_run=False)
+    logparams = {title: "filter deuterostomes from m8", count_reads: True,
+                 before_file_name: os.path.join(result_dir, ANNOTATE_RAPSEARCH2_M8_WITH_TAXIDS_OUT),
+                 before_file_type: "m8",
+                 after_file_name: os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NR_M8_OUT),
+                 after_file_type: "m8"}
+    run_and_log(logparams, run_filter_deuterostomes_from_m8,
+        sample_name, os.path.join(result_dir, ANNOTATE_RAPSEARCH2_M8_WITH_TAXIDS_OUT),
+        os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NR_M8_OUT),
+        deuterostome_list_s3_path, result_dir, sample_s3_output_path, lazy_run=False)
 
-    run_generate_taxid_outputs_from_m8(sample_name,
-                    result_dir + '/' + FILTER_DEUTEROSTOMES_FROM_NR_M8_OUT,
-                    fastq_file_1,
-                    result_dir + '/' + NR_M8_TO_TAXID_COUNTS_FILE_OUT,
-                    result_dir + '/' + NR_TAXID_COUNTS_TO_JSON_OUT,
-                    result_dir + '/' + NR_TAXID_COUNTS_TO_SPECIES_RPM_OUT,
-                    result_dir + '/' + NR_TAXID_COUNTS_TO_GENUS_RPM_OUT,
-                    taxid2info_s3_path, 'NR', db_sample_id,
-                    sample_host, sample_location, sample_date, sample_tissue,
-                    sample_template, sample_library, sample_sequencer, sample_notes,
-                    result_dir, sample_s3_output_path, lazy_run=False)
+    logparams = {title: "generate taxid outputs from m8", count_reads: False}
+    run_and_log(logparams, run_generate_taxid_outputs_from_m8,
+        sample_name, os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NR_M8_OUT),
+        fastq_file_1, os.path.join(result_dir, NR_M8_TO_TAXID_COUNTS_FILE_OUT),
+        os.path.join(result_dir, NR_TAXID_COUNTS_TO_JSON_OUT),
+        os.path.join(result_dir, NR_TAXID_COUNTS_TO_SPECIES_RPM_OUT),
+        os.path.join(result_dir, NR_TAXID_COUNTS_TO_GENUS_RPM_OUT),
+        taxid2info_s3_path, 'NR', db_sample_id,
+        sample_host, sample_location, sample_date, sample_tissue,
+        sample_template, sample_library, sample_sequencer, sample_notes,
+        result_dir, sample_s3_output_path, lazy_run=False)
 
-    run_combine_json_outputs(sample_name,
-                    result_dir + '/' + NT_TAXID_COUNTS_TO_JSON_OUT,
-                    result_dir + '/' + NR_TAXID_COUNTS_TO_JSON_OUT,
-                    result_dir + '/' + COMBINED_JSON_OUT,
-                    result_dir, sample_s3_output_path, lazy_run=False)
+    logparams = {title: "combine JSON outputs", count_reads: False}
+    run_and_log(logparams, run_combine_json_outputs,
+        sample_name, result_dir + '/' + NT_TAXID_COUNTS_TO_JSON_OUT,
+        result_dir + '/' + NR_TAXID_COUNTS_TO_JSON_OUT,
+        result_dir + '/' + COMBINED_JSON_OUT,
+        result_dir, sample_s3_output_path, lazy_run=False)
 
 def run_star(sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
              result_dir, scratch_dir, sample_s3_output_path, lazy_run):
-    logger = logging.getLogger()
-    logger.info("========== STAR ==========")
-    if lazy_run and os.path.isfile(os.path.join(result_dir, STAR_OUT1)) and os.path.isfile(os.path.join(result_dir, STAR_OUT2)):
-        logger.info("output exists, lazy run")
-    else:
-        # check if genome downloaded already
-        genome_file = os.path.basename(star_genome_s3_path)
-        if not os.path.isfile("%s/%s" % (REF_DIR, genome_file)):
-            execute_command("aws s3 cp %s %s/" % (star_genome_s3_path, REF_DIR))
-            execute_command("cd %s; tar xvfz %s" % (REF_DIR, genome_file))
-            logger.info("downloaded index")
-        star_command_params = ['cd', scratch_dir, ';', STAR,
-                        '--outFilterMultimapNmax', '99999',
-                        '--outFilterScoreMinOverLread', '0.5',
-                        '--outFilterMatchNminOverLread', '0.5',
-                        '--outReadsUnmapped', 'Fastx',
-                        '--outFilterMismatchNmax', '999',
-                        '--outSAMmode', 'None',
-                        '--quantMode', 'GeneCounts',
-                        '--clip3pNbases', '0',
-                        '--readFilesCommand', 'zcat',
-                        '--runThreadN', str(multiprocessing.cpu_count()),
-                        '--genomeDir', REF_DIR + '/STAR_genome',
-                        '--readFilesIn', fastq_file_1, fastq_file_2]
-        logger.info(execute_command(" ".join(star_command_params)))
-        logger.info("finished")
-        # extract out unmapped files
-        execute_command("cp %s/%s %s/%s;" % (scratch_dir, 'Unmapped.out.mate1', result_dir, STAR_OUT1))
-        execute_command("cp %s/%s %s/%s;" % (scratch_dir, 'Unmapped.out.mate2', result_dir, STAR_OUT2))
-        # copy back to aws
-        execute_command("aws s3 cp %s/%s %s/;" % (result_dir, STAR_OUT1, sample_s3_output_path))
-        execute_command("aws s3 cp %s/%s %s/;" % (result_dir, STAR_OUT2, sample_s3_output_path))
-        logger.info("uploaded output")
-    # count records
-    records_before = sum(1 for line in gzip.open(fastq_file_1))/4
-    records_after = sum(1 for line in open(result_dir +'/' + STAR_OUT1))/4
-    percent_removed = (100.0 * (records_before - records_after)) / records_before
-    logger.info("%s %% of read-pairs dropped out, %s read-pairs remaining" % (str(percent_removed), str(records_after)))
-    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LOGS_OUT, sample_s3_output_path))
+    if lazy_run:
+        # check if output already exists
+        output1 = "%s/%s" % (result_dir, STAR_OUT1)
+        output2 = "%s/%s" % (result_dir, STAR_OUT2)
+        if os.path.isfile(output1) and os.path.isfile(output2):
+            return 1
+    # check if genome downloaded already
+    genome_file = os.path.basename(star_genome_s3_path)
+    if not os.path.isfile("%s/%s" % (REF_DIR, genome_file)):
+        execute_command("aws s3 cp %s %s/" % (star_genome_s3_path, REF_DIR))
+        execute_command("cd %s; tar xvfz %s" % (REF_DIR, genome_file))
+        logger.info("downloaded index")
+    star_command_params = ['cd', scratch_dir, ';', STAR,
+                           '--outFilterMultimapNmax', '99999',
+                           '--outFilterScoreMinOverLread', '0.5',
+                           '--outFilterMatchNminOverLread', '0.5',
+                           '--outReadsUnmapped', 'Fastx',
+                           '--outFilterMismatchNmax', '999',
+                           '--outSAMmode', 'None',
+                           '--quantMode', 'GeneCounts',
+                           '--clip3pNbases', '0',
+                           '--readFilesCommand', 'zcat',
+                           '--runThreadN', str(multiprocessing.cpu_count()),
+                           '--genomeDir', REF_DIR + '/STAR_genome',
+                           '--readFilesIn', fastq_file_1, fastq_file_2]
+    execute_command(" ".join(star_command_params)))
+    logger.info("finished job")
+    # extract out unmapped files
+    execute_command("cp %s/%s %s/%s;" % (scratch_dir, 'Unmapped.out.mate1', result_dir, STAR_OUT1))
+    execute_command("cp %s/%s %s/%s;" % (scratch_dir, 'Unmapped.out.mate2', result_dir, STAR_OUT2))
+    # copy back to aws
+    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, STAR_OUT1, sample_s3_output_path))
+    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, STAR_OUT2, sample_s3_output_path))
     # cleanup
     execute_command("cd %s; rm -rf *" % scratch_dir)
 
 def run_priceseqfilter(sample_name, input_fq_1, input_fq_2,
                        result_dir, sample_s3_output_path, lazy_run):
-    logger = logging.getLogger()
-    logger.info("========== PriceSeqFilter ==========")
-    if lazy_run and os.path.isfile(os.path.join(result_dir, PRICESEQFILTER_OUT1)) and os.path.isfile(os.path.join(result_dir, PRICESEQFILTER_OUT2)):
-        logging.info("output exists, lazy run")
-    else:
-        priceseq_params = [PRICESEQ_FILTER,
-                           '-a','12',
-                           '-fp',input_fq_1 , input_fq_2,
-                           '-op',
-                           result_dir +'/' + PRICESEQFILTER_OUT1,
-                           result_dir +'/' + PRICESEQFILTER_OUT2,
-                           '-rqf','85','0.98',
-                           '-rnf','90',
-                           '-log','c']
-        logger.info(execute_command(" ".join(priceseq_params)))
-        logger.info("finished")
-        # copy back to aws
-        execute_command("aws s3 cp %s/%s %s/;" % (result_dir, PRICESEQFILTER_OUT1, sample_s3_output_path))
-        execute_command("aws s3 cp %s/%s %s/;" % (result_dir, PRICESEQFILTER_OUT2, sample_s3_output_path))
-        logger.info("uploaded output")
-    # count records
-    records_before = sum(1 for line in open(input_fq_1))/4
-    records_after = sum(1 for line in open(result_dir +'/' + PRICESEQFILTER_OUT1))/4
-    percent_removed = (100.0 * (records_before - records_after)) / records_before
-    logger.info("%s %% of read-pairs dropped out, %s read-pairs remaining" % (str(percent_removed), str(records_after)))
-    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LOGS_OUT, sample_s3_output_path))
+    if lazy_run:
+        # check if output already exists
+        output1 = "%s/%s" % (result_dir, PRICESEQFILTER_OUT1)
+        output2 = "%s/%s" % (result_dir, PRICESEQFILTER_OUT2)
+        if os.path.isfile(output1) and os.path.isfile(output2):
+            return 1
+    priceseq_params = [PRICESEQ_FILTER,
+                       '-a','12',
+                       '-fp',input_fq_1 , input_fq_2,
+                       '-op',
+                       result_dir +'/' + PRICESEQFILTER_OUT1,
+                       result_dir +'/' + PRICESEQFILTER_OUT2,
+                       '-rqf','85','0.98',
+                       '-rnf','90',
+                       '-log','c']
+    execute_command(" ".join(priceseq_params))
+    logger.info("finished job")
+    # copy back to aws
+    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, PRICESEQFILTER_OUT1, sample_s3_output_path))
+    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, PRICESEQFILTER_OUT2, sample_s3_output_path))
 
 def run_fq2fa(sample_name, input_fq_1, input_fq_2,
               result_dir, sample_s3_output_path, lazy_run):
-    logger = logging.getLogger()
-    logger.info("========== FASTQ to FASTA ==========")
-    if lazy_run and os.path.isfile(os.path.join(result_dir, FQ2FA_OUT1)) and os.path.isfile(os.path.join(result_dir, FQ2FA_OUT2)):
-        logging.info("output exists, lazy run")
-    else:
-        execute_command("sed -n '1~4s/^@/>/p;2~4p' <%s >%s/%s" % (input_fq_1, result_dir, FQ2FA_OUT1))
-        execute_command("sed -n '1~4s/^@/>/p;2~4p' <%s >%s/%s" % (input_fq_2, result_dir, FQ2FA_OUT2))
-        logger.info("finished")
-        # copy back to aws
-        execute_command("aws s3 cp %s/%s %s/;" % (result_dir, FQ2FA_OUT1, sample_s3_output_path))
-        execute_command("aws s3 cp %s/%s %s/;" % (result_dir, FQ2FA_OUT2, sample_s3_output_path))
-        logger.info("uploaded output")
-    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LOGS_OUT, sample_s3_output_path))
+    if lazy_run:
+        # check if output already exists
+        output1 = "%s/%s" % (result_dir, FQ2FA_OUT1)
+        output2 = "%s/%s" % (result_dir, FQ2FA_OUT2)
+        if os.path.isfile(output1) and os.path.isfile(output2):
+            return 1
+    execute_command("sed -n '1~4s/^@/>/p;2~4p' <%s >%s/%s" % (input_fq_1, result_dir, FQ2FA_OUT1))
+    execute_command("sed -n '1~4s/^@/>/p;2~4p' <%s >%s/%s" % (input_fq_2, result_dir, FQ2FA_OUT2))
+    logger.info("finished job")
+    # copy back to aws
+    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, FQ2FA_OUT1, sample_s3_output_path))
+    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, FQ2FA_OUT2, sample_s3_output_path))
 
 def run_cdhitdup(sample_name, input_fa_1, input_fa_2,
                  result_dir, sample_s3_output_path, lazy_run):
-    logger = logging.getLogger()
-    logger.info("========== CD-HIT-DUP ==========")
-    if lazy_run and os.path.isfile(os.path.join(result_dir, CDHITDUP_OUT1)) and os.path.isfile(os.path.join(result_dir, CDHITDUP_OUT2)):
-        logging.info("output exists, lazy run")
-    else:
-        cdhitdup_params = [CDHITDUP,
-                           '-i',  input_fa_1,
-                           '-i2', input_fa_2,
-                           '-o',  result_dir + '/' + CDHITDUP_OUT1,
-                           '-o2', result_dir + '/' + CDHITDUP_OUT2,
-                           '-e',  '0.05', '-u', '70']
-        logger.info(execute_command(" ".join(cdhitdup_params)))
-        logger.info("finished")
-        # copy back to aws
-        execute_command("aws s3 cp %s/%s %s/;" % (result_dir, CDHITDUP_OUT1, sample_s3_output_path))
-        execute_command("aws s3 cp %s/%s %s/;" % (result_dir, CDHITDUP_OUT2, sample_s3_output_path))
-        logger.info("uploaded output")
-    # count records
-    records_before = sum(1 for line in open(input_fa_1) if line.startswith(('>')))
-    records_after = sum(1 for line in open(result_dir +'/' + CDHITDUP_OUT1) if line.startswith(('>')))
-    percent_removed = (100.0 * (records_before - records_after)) / records_before
-    logger.info("%s %% of read-pairs dropped out, %s read-pairs remaining" % (str(percent_removed), str(records_after)))
-    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LOGS_OUT, sample_s3_output_path))
+    if lazy_run:
+        # check if output already exists
+        output1 = "%s/%s" % (result_dir, CDHITDUP_OUT1)
+        output2 = "%s/%s" % (result_dir, CDHITDUP_OUT2)
+        if os.path.isfile(output1) and os.path.isfile(output2):
+            return 1
+    cdhitdup_params = [CDHITDUP,
+                       '-i',  input_fa_1,
+                       '-i2', input_fa_2,
+                       '-o',  result_dir + '/' + CDHITDUP_OUT1,
+                       '-o2', result_dir + '/' + CDHITDUP_OUT2,
+                       '-e',  '0.05', '-u', '70']
+    logger.info(execute_command(" ".join(cdhitdup_params)))
+    logger.info("finished job")
+    # copy back to aws
+    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, CDHITDUP_OUT1, sample_s3_output_path))
+    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, CDHITDUP_OUT2, sample_s3_output_path))
 
 def run_lzw(sample_name, input_fa_1, input_fa_2,
             result_dir, sample_s3_output_path, lazy_run):
-    logger = logging.getLogger()
-    logger.info("========== LZW filter ==========")
-    if lazy_run and os.path.isfile(os.path.join(result_dir, LZW_OUT1)) and os.path.isfile(os.path.join(result_dir, LZW_OUT2)):
-        logger.info("output exists, lazy run")
-    else:
-        output_prefix = result_dir + '/' + LZW_OUT1[:-8]
-        generate_lzw_filtered_paired(input_fa_1, input_fa_2, output_prefix, LZW_FRACTION_CUTOFF)
-        logger.info("finished")
-        # copy back to aws
-        execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LZW_OUT1, sample_s3_output_path))
-        execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LZW_OUT2, sample_s3_output_path))
-        logger.info("uploaded output")
-    # count records
-    records_before = sum(1 for line in open(input_fa_1) if line.startswith(('>')))
-    records_after = sum(1 for line in open(result_dir +'/' + LZW_OUT1) if line.startswith(('>')))
-    percent_removed = (100.0 * (records_before - records_after)) / records_before
-    logger.info("%s %% of read-pairs dropped out, %s read-pairs remaining" % (str(percent_removed), str(records_after)))
-    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LOGS_OUT, sample_s3_output_path))
+    if lazy_run:
+        # check if output already exists
+        output1 = "%s/%s" % (result_dir, LZW_OUT1)
+        output2 = "%s/%s" % (result_dir, LZW_OUT2)
+        if os.path.isfile(output1) and os.path.isfile(output2):
+            return 1
+    output_prefix = result_dir + '/' + LZW_OUT1[:-8]
+    generate_lzw_filtered_paired(input_fa_1, input_fa_2, output_prefix, LZW_FRACTION_CUTOFF)
+    logger.info("finished job")
+    # copy back to aws
+    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LZW_OUT1, sample_s3_output_path))
+    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LZW_OUT2, sample_s3_output_path))
 
 def run_bowtie2(sample_name, input_fa_1, input_fa_2, bowtie_genome_s3_path,
                 result_dir, sample_s3_output_path, lazy_run):
-    logger = logging.getLogger()
-    logger.info("========== bowtie2 ==========")
-    output1 = "%s/%s" % (result_dir, BOWTIE2_OUT)
-    output2 = "%s/%s" % (result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT1)
-    output3 = "%s/%s" % (result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT2)
-    output4 = "%s/%s" % (result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT3)
-    if lazy_run and os.path.isfile(output1) and os.path.isfile(output2) and \
-                    os.path.isfile(output3) and os.path.isfile(output4):
-        logger.info("output exists, lazy run")
-    else:
-        # Doing the work
-        # check if genome downloaded already
-        genome_file = os.path.basename(bowtie_genome_s3_path)
-        if not os.path.isfile("%s/%s" % (REF_DIR, genome_file)):
-            execute_command("aws s3 cp %s %s/" % (bowtie_genome_s3_path, REF_DIR))
-            execute_command("cd %s; tar xvfz %s" % (REF_DIR, genome_file))
-            logger.info("downloaded index")
-        genome_basename = REF_DIR + '/bowtie2_genome/GRCh38.primary_assembly.genome'
-        bowtie2_params = [BOWTIE2,
-                         '-p', str(multiprocessing.cpu_count()),
-                         '-x', genome_basename,
-                         '--very-sensitive-local',
-                         '-f', '-1', input_fa_1, '-2', input_fa_2,
-                         '-S', result_dir + '/' + BOWTIE2_OUT]
-        logger.info(execute_command(" ".join(bowtie2_params)))
-        logger.info("finished")
-        # extract out unmapped files from sam
-        output_prefix = result_dir + '/' + EXTRACT_UNMAPPED_FROM_SAM_OUT1[:-8]
-        generate_unmapped_pairs_from_sam(result_dir + '/' + BOWTIE2_OUT, output_prefix)
-        logger.info("extracted unmapped pairs from SAM file")
-        # copy back to aws
-        execute_command("aws s3 cp %s/%s %s/;" % (result_dir, BOWTIE2_OUT, sample_s3_output_path))
-        execute_command("aws s3 cp %s/%s %s/;" % (result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT1, sample_s3_output_path))
-        execute_command("aws s3 cp %s/%s %s/;" % (result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT2, sample_s3_output_path))
-        execute_command("aws s3 cp %s/%s %s/;" % (result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT3, sample_s3_output_path))
-        logger.info("uploaded output")
-    # count records
-    records_before = sum(1 for line in open(input_fa_1) if line.startswith(('>')))
-    records_after = sum(1 for line in open(result_dir +'/' + EXTRACT_UNMAPPED_FROM_SAM_OUT1) if line.startswith(('>')))
-    percent_removed = (100.0 * (records_before - records_after)) / records_before
-    logger.info("%s %% of read-pairs dropped out, %s read-pairs remaining" % (str(percent_removed), str(records_after)))
-    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LOGS_OUT, sample_s3_output_path))
+    if lazy_run:
+        # check if output already exists
+        output1 = "%s/%s" % (result_dir, BOWTIE2_OUT)
+        output2 = "%s/%s" % (result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT1)
+        output3 = "%s/%s" % (result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT2)
+        output4 = "%s/%s" % (result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT3)
+        if os.path.isfile(output1) and os.path.isfile(output2) and \
+           os.path.isfile(output3) and os.path.isfile(output4):
+            return 1
+    # Doing the work
+    # check if genome downloaded already
+    genome_file = os.path.basename(bowtie_genome_s3_path)
+    if not os.path.isfile("%s/%s" % (REF_DIR, genome_file)):
+        execute_command("aws s3 cp %s %s/" % (bowtie_genome_s3_path, REF_DIR))
+        execute_command("cd %s; tar xvfz %s" % (REF_DIR, genome_file))
+        logger.info("downloaded index")
+    genome_basename = REF_DIR + '/bowtie2_genome/GRCh38.primary_assembly.genome'
+    bowtie2_params = [BOWTIE2,
+                     '-p', str(multiprocessing.cpu_count()),
+                     '-x', genome_basename,
+                     '--very-sensitive-local',
+                     '-f', '-1', input_fa_1, '-2', input_fa_2,
+                     '-S', result_dir + '/' + BOWTIE2_OUT]
+    logger.info(execute_command(" ".join(bowtie2_params)))
+    logger.info("finished alignment")
+    # extract out unmapped files from sam
+    output_prefix = result_dir + '/' + EXTRACT_UNMAPPED_FROM_SAM_OUT1[:-8]
+    generate_unmapped_pairs_from_sam(result_dir + '/' + BOWTIE2_OUT, output_prefix)
+    logger.info("extracted unmapped pairs from SAM file")
+    # copy back to aws
+    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, BOWTIE2_OUT, sample_s3_output_path))
+    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT1, sample_s3_output_path))
+    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT2, sample_s3_output_path))
+    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT3, sample_s3_output_path))
 
 def run_gsnapl_remotely(sample, input_fa_1, input_fa_2,
                         gsnap_ssh_key_s3_path,
                         result_dir, sample_s3_output_path, lazy_run):
-    logger = logging.getLogger()
-    logger.info("========== GSNAPL ==========")
-    if lazy_run and os.path.isfile(os.path.join(result_dir, GSNAPL_OUT)):
-        logger.info("output exists, lazy run")
-    else:
-        key_name = os.path.basename(gsnap_ssh_key_s3_path)
-        execute_command("aws s3 cp %s %s/" % (gsnap_ssh_key_s3_path, REF_DIR))
-        key_path = REF_DIR +'/' + key_name
-        execute_command("chmod 400 %s" % key_path)
-        commands =  "mkdir -p /home/ec2-user/batch-pipeline-workdir/%s;" % sample
-        commands += "aws s3 cp %s/%s /home/ec2-user/batch-pipeline-workdir/%s/ ; " % \
-                     (sample_s3_output_path, input_fa_1, sample)
-        commands += "aws s3 cp %s/%s /home/ec2-user/batch-pipeline-workdir/%s/ ; " % \
-                     (sample_s3_output_path, input_fa_2, sample)
-        commands += " ".join(['/home/ec2-user/bin/gsnapl',
-                              '-A', 'm8', '--batch=2',
-                              '--gmap-mode=none', '--npaths=1', '--ordered',
-                              '-t', '32',
-                              '--maxsearch=5', '--max-mismatches=20',
-                              '-D', '/home/ec2-user/share', '-d', 'nt_k16',
-                              '/home/ec2-user/batch-pipeline-workdir/'+sample+'/'+input_fa_1,
-                              '/home/ec2-user/batch-pipeline-workdir/'+sample+'/'+input_fa_2,
-                              '> /home/ec2-user/batch-pipeline-workdir/'+sample+'/'+GSNAPL_OUT, ';'])
-        commands += "aws s3 cp /home/ec2-user/batch-pipeline-workdir/%s/%s %s/;" % \
-                     (sample, GSNAPL_OUT, sample_s3_output_path)
-        # check if remote machins has enough capacity
-        check_command = 'ssh -o "StrictHostKeyChecking no" -i %s ec2-user@%s "ps aux|grep gsnapl|grep -v bash"' % (key_path, GSNAPL_INSTANCE_IP)
-        logger.info("waiting for server")
-        wait_for_server('GSNAPL', check_command, GSNAPL_MAX_CONCURRENT)
-        logger.info("starting")
-        remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s ec2-user@%s "%s"' % (key_path, GSNAPL_INSTANCE_IP, commands)
-        execute_command(remote_command)
-        # move gsnapl output back to local
-        time.sleep(10)
-        logger.info("finished")
-        execute_command("aws s3 cp %s/%s %s/" % (sample_s3_output_path, GSNAPL_OUT, result_dir))
-        logger.info("copied output back")
-    # count records
-    records_before = 2*sum(1 for line in open(result_dir +'/' + input_fa_1) if line.startswith(('>')))
-    records_after = sum(1 for line in open(result_dir +'/' + GSNAPL_OUT))
-    percent_removed = (100.0 * (records_before - records_after)) / records_before
-    logger.info("%s %% of reads dropped out, %s reads remaining" % (str(percent_removed), str(records_after)))
-    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LOGS_OUT, sample_s3_output_path))
+    if lazy_run:
+        # check if output already exists
+        output = "%s/%s" % (result_dir, GSNAPL_OUT)
+        if os.path.isfile(output):
+            return 1
+    key_name = os.path.basename(gsnap_ssh_key_s3_path)
+    execute_command("aws s3 cp %s %s/" % (gsnap_ssh_key_s3_path, REF_DIR))
+    key_path = REF_DIR +'/' + key_name
+    execute_command("chmod 400 %s" % key_path)
+    commands =  "mkdir -p /home/ec2-user/batch-pipeline-workdir/%s;" % sample
+    commands += "aws s3 cp %s/%s /home/ec2-user/batch-pipeline-workdir/%s/ ; " % \
+                 (sample_s3_output_path, input_fa_1, sample)
+    commands += "aws s3 cp %s/%s /home/ec2-user/batch-pipeline-workdir/%s/ ; " % \
+                 (sample_s3_output_path, input_fa_2, sample)
+    commands += " ".join(['/home/ec2-user/bin/gsnapl',
+                          '-A', 'm8', '--batch=2',
+                          '--gmap-mode=none', '--npaths=1', '--ordered',
+                          '-t', '32',
+                          '--maxsearch=5', '--max-mismatches=20',
+                          '-D', '/home/ec2-user/share', '-d', 'nt_k16',
+                          '/home/ec2-user/batch-pipeline-workdir/'+sample+'/'+input_fa_1,
+                          '/home/ec2-user/batch-pipeline-workdir/'+sample+'/'+input_fa_2,
+                          '> /home/ec2-user/batch-pipeline-workdir/'+sample+'/'+GSNAPL_OUT, ';'])
+    commands += "aws s3 cp /home/ec2-user/batch-pipeline-workdir/%s/%s %s/;" % \
+                 (sample, GSNAPL_OUT, sample_s3_output_path)
+    # check if remote machins has enough capacity
+    check_command = 'ssh -o "StrictHostKeyChecking no" -i %s ec2-user@%s "ps aux|grep gsnapl|grep -v bash"' % (key_path, GSNAPL_INSTANCE_IP)
+    logger.info("waiting for server")
+    wait_for_server('GSNAPL', check_command, GSNAPL_MAX_CONCURRENT)
+    logger.info("starting alignment")
+    remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s ec2-user@%s "%s"' % (key_path, GSNAPL_INSTANCE_IP, commands)
+    execute_command(remote_command)
+    # move gsnapl output back to local
+    time.sleep(10)
+    logger.info("finished alignment")
+    execute_command("aws s3 cp %s/%s %s/" % (sample_s3_output_path, GSNAPL_OUT, result_dir))
 
 def run_annotate_m8_with_taxids(sample_name, input_m8, output_m8,
                                 accession2taxid_s3_path,
                                 result_dir, sample_s3_output_path, lazy_run):
-    logger = logging.getLogger()
-    logger.info("========== annotate m8 with taxids ==========")
-    if lazy_run and os.path.isfile(output_m8):
-        logger.info("output exists, lazy run")
-    else:
-        accession2taxid_gz = os.path.basename(accession2taxid_s3_path)
-        accession2taxid_path = REF_DIR + '/' + accession2taxid_gz[:-3]
-        if not os.path.isfile(accession2taxid_path):
-            execute_command("aws s3 cp %s %s/" % (accession2taxid_s3_path, REF_DIR))
-            execute_command("cd %s; gunzip %s" % (REF_DIR, accession2taxid_gz))
-            logger.info("accession-to-taxid map downloaded")
-        generate_taxid_annotated_m8(input_m8, output_m8, accession2taxid_path)
-        logger.info("finished")
-        # move the output back to S3
-        execute_command("aws s3 cp %s %s/" % (output_m8, sample_s3_output_path))
-        logger.info("uploaded output")
-    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LOGS_OUT, sample_s3_output_path))
+    if lazy_run:
+        # check if output already exists
+        if os.path.isfile(output_m8):
+            return 1
+    accession2taxid_gz = os.path.basename(accession2taxid_s3_path)
+    accession2taxid_path = REF_DIR + '/' + accession2taxid_gz[:-3]
+    if not os.path.isfile(accession2taxid_path):
+        execute_command("aws s3 cp %s %s/" % (accession2taxid_s3_path, REF_DIR))
+        execute_command("cd %s; gunzip %s" % (REF_DIR, accession2taxid_gz))
+        logger.info("downloaded accession-to-taxid map")
+    generate_taxid_annotated_m8(input_m8, output_m8, accession2taxid_path)
+    logger.info("finished annotation")
+    # move the output back to S3
+    execute_command("aws s3 cp %s %s/" % (output_m8, sample_s3_output_path))
 
 def run_filter_deuterostomes_from_m8(sample_name, input_m8, output_m8,
                                      deuterostome_list_s3_path,
                                      result_dir, sample_s3_output_path, lazy_run):
-    logger = logging.getLogger()
-    logger.info("========== filter deuterostomes from m8 ==========")
-    if lazy_run and os.path.isfile(output_m8):
-        logger.info("output exists, lazy run")
-    else:
-        deuterostome_file_basename = os.path.basename(deuterostome_list_s3_path)
-        deuterostome_file = os.path.join(REF_DIR, deuterostome_file_basename)
-        if not os.path.isfile(deuterostome_file):
-            execute_command("aws s3 cp %s %s/" % (deuterostome_list_s3_path, REF_DIR))
-            logger.info("downloaded deuterostome list")
-        filter_deuterostomes_from_m8(input_m8, output_m8, deuterostome_file)
-        logger.info("finished")
-        # move the output back to S3
-        execute_command("aws s3 cp %s %s/" % (output_m8, sample_s3_output_path))
-        logger.info("uploaded output")
-    # count records
-    records_before = sum(1 for line in open(input_m8))
-    records_after = sum(1 for line in open(output_m8))
-    percent_removed = (100.0 * (records_before - records_after)) / records_before
-    logger.info("%s %% of reads dropped out, %s reads remaining" % (str(percent_removed), str(records_after)))
-    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LOGS_OUT, sample_s3_output_path))
+    if lazy_run:
+        # check if output already exists
+        if os.path.isfile(output_m8):
+            return 1
+    deuterostome_file_basename = os.path.basename(deuterostome_list_s3_path)
+    deuterostome_file = os.path.join(REF_DIR, deuterostome_file_basename)
+    if not os.path.isfile(deuterostome_file):
+        execute_command("aws s3 cp %s %s/" % (deuterostome_list_s3_path, REF_DIR))
+        logger.info("downloaded deuterostome list")
+    filter_deuterostomes_from_m8(input_m8, output_m8, deuterostome_file)
+    logger.info("finished job")
+    # move the output back to S3
+    execute_command("aws s3 cp %s %s/" % (output_m8, sample_s3_output_path))
 
 def run_generate_taxid_annotated_fasta_from_m8(sample_name, input_m8, input_fasta,
     output_fasta, annotation_prefix, result_dir, sample_s3_output_path, lazy_run):
-    logger = logging.getLogger()
-    logger.info("========== generate taxid annotated fasta from m8 ==========")
-    if lazy_run and os.path.isfile(output_fasta):
-        logger.info("output exists, lazy run")
-    else:
-        generate_taxid_annotated_fasta_from_m8(input_fasta, input_m8, output_fasta, annotation_prefix)
-        logger.info("finished")
-        # move the output back to S3
-        execute_command("aws s3 cp %s %s/" % (output_fasta, sample_s3_output_path))
-        logger.info("uploaded output")
-    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LOGS_OUT, sample_s3_output_path))
+    if lazy_run:
+        # check if output already exists
+        if os.path.isfile(output_fasta):
+            return 1
+    generate_taxid_annotated_fasta_from_m8(input_fasta, input_m8, output_fasta, annotation_prefix)
+    logger.info("finished job")
+    # move the output back to S3
+    execute_command("aws s3 cp %s %s/" % (output_fasta, sample_s3_output_path))
 
 def run_filter_deuterostomes_from_fasta(sample_name, input_fa, output_fa,
     accession2taxid_s3_path, deuterostome_list_s3_path, annotation_prefix,
     result_dir, sample_s3_output_path, lazy_run):
-    logger = logging.getLogger()
-    logger.info("========== filter deuterostomes from fasta ==========")
-    if lazy_run and os.path.isfile(output_fa):
-        logger.info("output exists, lazy run")
-    else:
-        accession2taxid_gz = os.path.basename(accession2taxid_s3_path)
-        accession2taxid_path = REF_DIR + '/' + accession2taxid_gz[:-3]
-        if not os.path.isfile(accession2taxid_path):
-            execute_command("aws s3 cp %s %s/" % (accession2taxid_s3_path, REF_DIR))
-            execute_command("cd %s; gunzip %s" % (REF_DIR, accession2taxid_gz))
-            logger.info("downloaded accession-to-taxid map")
-        deuterostome_file_basename = os.path.basename(deuterostome_list_s3_path)
-        deuterostome_file = os.path.join(REF_DIR, deuterostome_file_basename)
-        if not os.path.isfile(deuterostome_file):
-            execute_command("aws s3 cp %s %s/" % (deuterostome_list_s3_path, REF_DIR))
-            logger.info("downloaded deuterostome list")
-        filter_taxids_from_fasta(input_fa, output_fa, annotation_prefix, accession2taxid_path, deuterostome_file)
-        logger.info("finished")
-        # move the output back to S3
-        execute_command("aws s3 cp %s %s/" % (output_fa, sample_s3_output_path))
-        logger.info("uploaded output")
-    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LOGS_OUT, sample_s3_output_path))
+    if lazy_run:
+        # check if output already exists
+        if os.path.isfile(output_fa):
+            return 1
+    accession2taxid_gz = os.path.basename(accession2taxid_s3_path)
+    accession2taxid_path = REF_DIR + '/' + accession2taxid_gz[:-3]
+    if not os.path.isfile(accession2taxid_path):
+        execute_command("aws s3 cp %s %s/" % (accession2taxid_s3_path, REF_DIR))
+        execute_command("cd %s; gunzip %s" % (REF_DIR, accession2taxid_gz))
+        logger.info("downloaded accession-to-taxid map")
+    deuterostome_file_basename = os.path.basename(deuterostome_list_s3_path)
+    deuterostome_file = os.path.join(REF_DIR, deuterostome_file_basename)
+    if not os.path.isfile(deuterostome_file):
+        execute_command("aws s3 cp %s %s/" % (deuterostome_list_s3_path, REF_DIR))
+        logger.info("downloaded deuterostome list")
+    filter_taxids_from_fasta(input_fa, output_fa, annotation_prefix, accession2taxid_path, deuterostome_file)
+    logger.info("finished job")
+    # move the output back to S3
+    execute_command("aws s3 cp %s %s/" % (output_fa, sample_s3_output_path))
 
 def run_rapsearch2_remotely(sample, input_fasta,
     rapsearch_ssh_key_s3_path, result_dir, sample_s3_output_path, lazy_run):
-    logger = logging.getLogger()
-    logger.info("========== RAPSearch2 ==========")
-    if lazy_run and os.path.isfile(os.path.join(result_dir, RAPSEARCH2_OUT)):
-        logger.info("output exists, lazy run")
-    else:
-        key_name = os.path.basename(rapsearch_ssh_key_s3_path)
-        execute_command("aws s3 cp %s %s/" % (rapsearch_ssh_key_s3_path, REF_DIR))
-        key_path = REF_DIR +'/' + key_name
-        execute_command("chmod 400 %s" % key_path)
-        commands =  "mkdir -p /home/ec2-user/batch-pipeline-workdir/%s;" % sample
-        commands += "aws s3 cp %s/%s /home/ec2-user/batch-pipeline-workdir/%s/ ; " % \
-                     (sample_s3_output_path, input_fasta, sample)
-        input_path = '/home/ec2-user/batch-pipeline-workdir/' + sample + '/' + input_fasta
-        output_path = '/home/ec2-user/batch-pipeline-workdir/' + sample + '/' + RAPSEARCH2_OUT
-        commands += " ".join(['/home/ec2-user/bin/rapsearch',
-                              '-d', '/home/ec2-user/references/nr_rapsearch/nr_rapsearch',
-                              '-e','-6',
-                              '-l','10',
-                              '-a','T',
-                              '-b','0',
-                              '-v','1',
-                              '-z', str(multiprocessing.cpu_count()), # threads
-                              '-q', input_path,
-                              '-o', output_path[:-3],
-                              ';'])
-        commands += "aws s3 cp /home/ec2-user/batch-pipeline-workdir/%s/%s %s/;" % \
-                     (sample, RAPSEARCH2_OUT, sample_s3_output_path)
-        check_command = 'ssh -o "StrictHostKeyChecking no" -i %s ec2-user@%s "ps aux|grep rapsearch|grep -v bash"' % (key_path, RAPSEARCH2_INSTANCE_IP)
-        logger.info("waiting for server")
-        wait_for_server('RAPSEARCH2', check_command, RAPSEARCH2_MAX_CONCURRENT)
-        logger.info("starting")
-        remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s ec2-user@%s "%s"' % (key_path, RAPSEARCH2_INSTANCE_IP, commands)
-        execute_command(remote_command)
-        logger.info("finished")
-        # move output back to local
-        time.sleep(10) # wait until the data is synced
-        execute_command("aws s3 cp %s/%s %s/" % (sample_s3_output_path, RAPSEARCH2_OUT, result_dir))
-        logger.info("copied output back")
-    # count records
-    records_before = sum(1 for line in open(result_dir +'/' + input_fasta) if line.startswith(('>')))
-    records_after = sum(1 for line in open(result_dir +'/' + RAPSEARCH2_OUT))
-    percent_removed = (100.0 * (records_before - records_after)) / records_before
-    logger.info("%s %% of reads dropped out, %s reads remaining" % (str(percent_removed), str(records_after)))
-    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LOGS_OUT, sample_s3_output_path))
+    if lazy_run:
+        # check if output already exists
+        output = "%s/%s" % (result_dir, RAPSEARCH2_OUT)
+        if os.path.isfile(output):
+            return 1
+    key_name = os.path.basename(rapsearch_ssh_key_s3_path)
+    execute_command("aws s3 cp %s %s/" % (rapsearch_ssh_key_s3_path, REF_DIR))
+    key_path = REF_DIR +'/' + key_name
+    execute_command("chmod 400 %s" % key_path)
+    commands =  "mkdir -p /home/ec2-user/batch-pipeline-workdir/%s;" % sample
+    commands += "aws s3 cp %s/%s /home/ec2-user/batch-pipeline-workdir/%s/ ; " % \
+                 (sample_s3_output_path, input_fasta, sample)
+    input_path = '/home/ec2-user/batch-pipeline-workdir/' + sample + '/' + input_fasta
+    output_path = '/home/ec2-user/batch-pipeline-workdir/' + sample + '/' + RAPSEARCH2_OUT
+    commands += " ".join(['/home/ec2-user/bin/rapsearch',
+                          '-d', '/home/ec2-user/references/nr_rapsearch/nr_rapsearch',
+                          '-e','-6',
+                          '-l','10',
+                          '-a','T',
+                          '-b','0',
+                          '-v','1',
+                          '-z', str(multiprocessing.cpu_count()), # threads
+                          '-q', input_path,
+                          '-o', output_path[:-3],
+                          ';'])
+    commands += "aws s3 cp /home/ec2-user/batch-pipeline-workdir/%s/%s %s/;" % \
+                 (sample, RAPSEARCH2_OUT, sample_s3_output_path)
+    check_command = 'ssh -o "StrictHostKeyChecking no" -i %s ec2-user@%s "ps aux|grep rapsearch|grep -v bash"' % (key_path, RAPSEARCH2_INSTANCE_IP)
+    logger.info("waiting for server")
+    wait_for_server('RAPSEARCH2', check_command, RAPSEARCH2_MAX_CONCURRENT)
+    logger.info("starting alignment")
+    remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s ec2-user@%s "%s"' % (key_path, RAPSEARCH2_INSTANCE_IP, commands)
+    execute_command(remote_command)
+    logger.info("finished alignment")
+    # move output back to local
+    time.sleep(10) # wait until the data is synced
+    execute_command("aws s3 cp %s/%s %s/" % (sample_s3_output_path, RAPSEARCH2_OUT, result_dir))
 
 def run_generate_taxid_outputs_from_m8(sample_name,
     annotated_m8, fastq_file_1,
@@ -954,8 +984,6 @@ def run_generate_taxid_outputs_from_m8(sample_name,
     sample_host, sample_location, sample_date, sample_tissue,
     sample_template, sample_library, sample_sequencer, sample_notes,
     result_dir, sample_s3_output_path, lazy_run):
-    logger = logging.getLogger()
-    logger.info("========== generate taxid outputs from m8 ==========")
     # Ignore lazyrun
     # download taxoninfodb if not exist
     taxoninfo_filename = os.path.basename(taxinfodb_s3_path)
@@ -979,23 +1007,18 @@ def run_generate_taxid_outputs_from_m8(sample_name,
     execute_command("aws s3 cp %s %s/" % (taxon_counts_json_file, sample_s3_output_path))
     execute_command("aws s3 cp %s %s/" % (taxon_species_rpm_file, sample_s3_output_path))
     execute_command("aws s3 cp %s %s/" % (taxon_genus_rpm_file, sample_s3_output_path))
-    logger.info("uploaded output")
-    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LOGS_OUT, sample_s3_output_path))
 
 def run_combine_json_outputs(sample_name, input_json_1, input_json_2, output_json,
     result_dir, sample_s3_output_path, lazy_run):
-    if lazy_run and os.path.isfile(output_json):
-        logger.info("output exists, lazy run")
-    else:
-        logger = logging.getLogger()
-        logger.info("========== combine json outputs ==========")
-        project_name = os.path.basename(os.path.dirname(sample_s3_output_path))
-        combine_json(project_name, sample_name, input_json_1, input_json_2, output_json)
-        logger.info("finished")
-        # move it the output back to S3
-        execute_command("aws s3 cp %s %s/" % (output_json, sample_s3_output_path))
-        logger.info("uploaded output")
-    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LOGS_OUT, sample_s3_output_path))
+    if lazy_run:
+        # check if output already exists
+        if os.path.isfile(output_json):
+            return 1
+    project_name = os.path.basename(os.path.dirname(sample_s3_output_path))
+    combine_json(project_name, sample_name, input_json_1, input_json_2, output_json)
+    logger.info("finished job")
+    # move it the output back to S3
+    execute_command("aws s3 cp %s %s/" % (output_json, sample_s3_output_path))
 
 ### Main
 def main():
