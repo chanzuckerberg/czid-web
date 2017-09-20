@@ -558,7 +558,6 @@ GEM
     public_suffix (3.0.0)
     puma (3.10.0)
     rack (2.0.3)
-    rack-cors (1.0.1)
     rack-protection (2.0.0)
       rack
     rack-test (0.6.3)
@@ -727,7 +726,6 @@ DEPENDENCIES
   momentjs-rails
   mysql2
   puma (~> 3.7)
-  rack-cors
   rails (~> 5.1.2)
   react-rails
   resque
