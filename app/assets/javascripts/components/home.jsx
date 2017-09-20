@@ -9,7 +9,6 @@ class Home extends React.Component {
   }
 }
 
-
 Home.propTypes = {
   samples: React.PropTypes.array,
   outputData: React.PropTypes.array,
