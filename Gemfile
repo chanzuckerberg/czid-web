@@ -38,14 +38,6 @@ gem 'sprockets-es6'
 
 gem 'react-rails'
 gem 'materialize-rails'
-gem "font-awesome-rails"
-gem 'momentjs-rails'
-
-
-gem 'momentjs-rails'
-
-gem 'react-rails'
-gem 'materialize-rails'
 gem 'font-awesome-rails'
 gem 'momentjs-rails'
 

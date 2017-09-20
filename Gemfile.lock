@@ -531,8 +531,14 @@ GEM
       nokogiri (>= 1.5.9)
     mail (2.6.6)
       mime-types (>= 1.16, < 4)
+<<<<<<< HEAD
     materialize-sass (0.100.2)
       sass (~> 3.3)
+=======
+    materialize-rails (0.97.5.2)
+      jquery-rails
+      sass-rails
+>>>>>>> Feature/react rails setup (#72)
     method_source (0.8.2)
     mime-types (3.1)
       mime-types-data (~> 3.2015)
