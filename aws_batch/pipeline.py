@@ -619,7 +619,7 @@ def run_star(sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
     records_before = sum(1 for line in gzip.open(fastq_file_1))/4
     records_after = sum(1 for line in open(result_dir +'/' + STAR_OUT1))/4
     percent_removed = (100.0 * (records_before - records_after)) / records_before
-    logger.info("%s %% of records dropped out, %s records remaining" % (str(percent_removed), str(records_after)))
+    logger.info("%s %% of read-pairs dropped out, %s read-pairs remaining" % (str(percent_removed), str(records_after)))
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LOGS_OUT, sample_s3_output_path))
     # cleanup
     execute_command("cd %s; rm -rf *" % scratch_dir)
@@ -650,7 +650,7 @@ def run_priceseqfilter(sample_name, input_fq_1, input_fq_2,
     records_before = sum(1 for line in open(input_fq_1))/4
     records_after = sum(1 for line in open(result_dir +'/' + PRICESEQFILTER_OUT1))/4
     percent_removed = (100.0 * (records_before - records_after)) / records_before
-    logger.info("%s %% of records dropped out, %s records remaining" % (str(percent_removed), str(records_after)))
+    logger.info("%s %% of read-pairs dropped out, %s read-pairs remaining" % (str(percent_removed), str(records_after)))
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LOGS_OUT, sample_s3_output_path))
 
 def run_fq2fa(sample_name, input_fq_1, input_fq_2,
@@ -692,7 +692,7 @@ def run_cdhitdup(sample_name, input_fa_1, input_fa_2,
     records_before = sum(1 for line in open(input_fa_1) if line.startswith(('>')))
     records_after = sum(1 for line in open(result_dir +'/' + CDHITDUP_OUT1) if line.startswith(('>')))
     percent_removed = (100.0 * (records_before - records_after)) / records_before
-    logger.info("%s %% of records dropped out, %s records remaining" % (str(percent_removed), str(records_after)))
+    logger.info("%s %% of read-pairs dropped out, %s read-pairs remaining" % (str(percent_removed), str(records_after)))
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LOGS_OUT, sample_s3_output_path))
 
 def run_lzw(sample_name, input_fa_1, input_fa_2,
@@ -713,7 +713,7 @@ def run_lzw(sample_name, input_fa_1, input_fa_2,
     records_before = sum(1 for line in open(input_fa_1) if line.startswith(('>')))
     records_after = sum(1 for line in open(result_dir +'/' + LZW_OUT1) if line.startswith(('>')))
     percent_removed = (100.0 * (records_before - records_after)) / records_before
-    logger.info("%s %% of records dropped out, %s records remaining" % (str(percent_removed), str(records_after)))
+    logger.info("%s %% of read-pairs dropped out, %s read-pairs remaining" % (str(percent_removed), str(records_after)))
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LOGS_OUT, sample_s3_output_path))
 
 def run_bowtie2(sample_name, input_fa_1, input_fa_2, bowtie_genome_s3_path,
@@ -758,7 +758,7 @@ def run_bowtie2(sample_name, input_fa_1, input_fa_2, bowtie_genome_s3_path,
     records_before = sum(1 for line in open(input_fa_1) if line.startswith(('>')))
     records_after = sum(1 for line in open(result_dir +'/' + EXTRACT_UNMAPPED_FROM_SAM_OUT1) if line.startswith(('>')))
     percent_removed = (100.0 * (records_before - records_after)) / records_before
-    logger.info("%s %% of records dropped out, %s records remaining" % (str(percent_removed), str(records_after)))
+    logger.info("%s %% of read-pairs dropped out, %s read-pairs remaining" % (str(percent_removed), str(records_after)))
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LOGS_OUT, sample_s3_output_path))
 
 def run_gsnapl_remotely(sample, input_fa_1, input_fa_2,
@@ -802,10 +802,10 @@ def run_gsnapl_remotely(sample, input_fa_1, input_fa_2,
         execute_command("aws s3 cp %s/%s %s/" % (sample_s3_output_path, GSNAPL_OUT, result_dir))
         logger.info("copied output back")
     # count records
-    records_before = sum(1 for line in open(result_dir +'/' + input_fa_1) if line.startswith(('>')))
+    records_before = 2*sum(1 for line in open(result_dir +'/' + input_fa_1) if line.startswith(('>')))
     records_after = sum(1 for line in open(result_dir +'/' + GSNAPL_OUT))
     percent_removed = (100.0 * (records_before - records_after)) / records_before
-    logger.info("%s %% of records dropped out, %s records remaining" % (str(percent_removed), str(records_after)))
+    logger.info("%s %% of reads dropped out, %s reads remaining" % (str(percent_removed), str(records_after)))
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LOGS_OUT, sample_s3_output_path))
 
 def run_annotate_m8_with_taxids(sample_name, input_m8, output_m8,
@@ -848,10 +848,10 @@ def run_filter_deuterostomes_from_m8(sample_name, input_m8, output_m8,
         execute_command("aws s3 cp %s %s/" % (output_m8, sample_s3_output_path))
         logger.info("uploaded output")
     # count records
-    records_before = sum(1 for line in open(result_dir +'/' + input_m8))
-    records_after = sum(1 for line in open(result_dir +'/' + output_m8))
+    records_before = sum(1 for line in open(input_m8))
+    records_after = sum(1 for line in open(output_m8))
     percent_removed = (100.0 * (records_before - records_after)) / records_before
-    logger.info("%s %% of records dropped out, %s records remaining" % (str(percent_removed), str(records_after)))
+    logger.info("%s %% of reads dropped out, %s reads remaining" % (str(percent_removed), str(records_after)))
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LOGS_OUT, sample_s3_output_path))
 
 def run_generate_taxid_annotated_fasta_from_m8(sample_name, input_m8, input_fasta,
@@ -938,7 +938,7 @@ def run_rapsearch2_remotely(sample, input_fasta,
     records_before = sum(1 for line in open(result_dir +'/' + input_fasta) if line.startswith(('>')))
     records_after = sum(1 for line in open(result_dir +'/' + RAPSEARCH2_OUT))
     percent_removed = (100.0 * (records_before - records_after)) / records_before
-    logger.info("%s %% of records dropped out, %s records remaining" % (str(percent_removed), str(records_after)))
+    logger.info("%s %% of reads dropped out, %s reads remaining" % (str(percent_removed), str(records_after)))
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LOGS_OUT, sample_s3_output_path))
 
 def run_generate_taxid_outputs_from_m8(sample_name,
