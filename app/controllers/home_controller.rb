@@ -1,5 +1,5 @@
 class HomeController < ApplicationController
-  def index
+  def home
     @users = User.all
     @projects = Project.all
     @samples = Sample.all

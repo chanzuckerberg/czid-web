@@ -21,7 +21,7 @@ class PipelineList extends React.Component {
       <div className="content-wrapper">
         <div className="search-wrapper container">
           <i className="fa fa-search" aria-hidden="true"></i>
-          <span>ALL</span>|<span>PIPELINES</span>|<span>REPORTS</span>
+          <span>PIPELINES OUTPUTS</span>
         </div>
         <div className="container sample-container">
         {!this.props.pipelineOutputs ? 'Nothing to show' :
@@ -41,10 +41,10 @@ class PipelineList extends React.Component {
               <tbody key={i}>
                 <tr>
                 <td ><i className="fa fa-flask" aria-hidden="true"></i>{output.Name}</td>
-                  <td>{output.date_created}</td>
+                  <td>{output.created_at}</td>
                   <td>{output.created_by}</td>
                   <td>{output.total_reads}</td>
-                  <td>{output.final_reads}</td>
+                  <td>{output.remaining_reads }</td>
                 </tr>
               </tbody>
             )
