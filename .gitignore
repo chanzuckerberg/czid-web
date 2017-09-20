@@ -22,3 +22,8 @@
 /yarn-error.log
 
 .byebug_history
+
+* Ignore awscli bundle files
+/awscli-bundle
+awscli-bundle.zip
+get-pip.py
