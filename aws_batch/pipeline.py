@@ -594,7 +594,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
                  "result_dir": result_dir, "sample_s3_output_path": sample_s3_output_path}
     run_and_log(logparams, run_annotate_m8_with_taxids,
         sample_name, os.path.join(result_dir, GSNAPL_OUT),
-        ros.path.join(result_dir, ANNOTATE_GSNAPL_M8_WITH_TAXIDS_OUT),
+        os.path.join(result_dir, ANNOTATE_GSNAPL_M8_WITH_TAXIDS_OUT),
         accession2taxid_s3_path,
         result_dir, sample_s3_output_path, lazy_run=False)
 
