@@ -1,3 +1,5 @@
+require 'open3'
+require 'json'
 class PipelineRun < ApplicationRecord
   belongs_to :sample
   has_one :pipeline_output
