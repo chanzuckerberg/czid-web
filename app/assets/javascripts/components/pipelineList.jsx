@@ -1,6 +1,15 @@
 class PipelineList extends React.Component {
   constructor(props, context) {
     super(props, context);
+
+  }
+
+  componentDidMount() {
+    // $.get('http://dev.idseq.net/pipeline_outputs.json', function(data, status) {
+    //   this.setState({
+    //     pipelineOutputs: response
+    //   })
+    // })
   }
 
   render() {
@@ -54,7 +63,7 @@ class PipelineList extends React.Component {
             }
           </div>
         </div>
-    </div>
+      </div>
     )
   }
 
