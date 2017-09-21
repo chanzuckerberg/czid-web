@@ -36,8 +36,7 @@ class PipelineRun < ApplicationRecord
 
   def update_job_status
     return if completed?
-    command = IdSeqPipeline::BASE_COMMAND
-    command += "aegea batch describe #{job_id}"
+    command = "aegea batch describe #{job_id}"
     stdout, _stderr, status = Open3.capture3(command)
     if status.exitstatus.zero?
       self.job_description = stdout
@@ -77,8 +76,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def download_file(s3_path)
-    command = IdSeqPipeline::BASE_COMMAND
-    command += "mkdir -p #{local_json_path};"
+    command = "mkdir -p #{local_json_path};"
     command += "aws s3 cp #{s3_path} #{local_json_path}/;"
     _stdout, _stderr, status = Open3.capture3(command)
     return nil unless status.exitstatus.zero?

@@ -10,19 +10,7 @@ To get a local instance running, just do:
 
 1. `bin/setup`
 1. `open http://localhost:3000 in your browser`
-
-To enable the automatic pipeline processing, you will need to
-
-1.  Put the following environmental variables into `config/initializers/app_environment_variables.rb`
-
-```
-ENV['AWS_ACCESS_KEY_ID'] = <YOUR_AWS_KEY>
-ENV['AWS_SECRET_ACCESS_KEY'] = <YOUR_AWS_SECRET>
-ENV['AWS_DEFAULT_REGION'] = 'us-west-2'
-ENV['IDSEQ_S3_SCRIPT_LOC'] = 's3://czbiohub-infectious-disease/bin/pipeline.py'
-
-```
-2. Run `docker-compose up`
+1. Run `docker-compose up -d`
 
 
 ## Running Tests
@@ -37,7 +25,7 @@ ENV['IDSEQ_S3_SCRIPT_LOC'] = 's3://czbiohub-infectious-disease/bin/pipeline.py'
 
 ## Submit a sample
 
-1. Follow the pipeline processing setup as mentioned above
+1. Make sure your AWS CLI is properly configured. i.e. ~/.aws/credentials are setup correctly
 1. `pip install git+https://github.com/chanzuckerberg/idseq-cli.git`
 1. `idseq -t idseq1234 -p 'Awesome Project' -s test2 -u localhost:3000 -e fake@example.com --r1 <fastq1.gz> --r2 <fastq2.gz>`
 
