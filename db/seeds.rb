@@ -5,20 +5,15 @@
 project = Project.create!(name: "Awesome Project")
 
 (1..5).each do |i|
-  sample = Sample.new(name: "Sample #{i}", project: project)
+  sample = Sample.new(name: "Sample #{i}", project: project, 
+    sample_host: "Human", sample_location: "California", sample_date: "Sept 19, 2017", sample_tissue: "CSF", sample_template: "RNA",
+    sample_library: "Nugen Nextera", sample_sequencer: "Illumina NextSeq 500, 2x150", sample_notes: "patient had no known infections")
   sample.input_files << InputFile.new(name: 'R1.fastq.gz', source_type: 'local')
   sample.input_files << InputFile.new(name: 'R2.fastq.gz', source_type: 'local')
   sample.save!
-  taxon_counts = (1..10).map {|j| TaxonCount.new(tax_id: j, tax_level: 1, count: rand(1000), name: "Some Species Name", count_type: "NT") }
-  taxon_counts << (1..10).map {|j| TaxonCount.new(tax_id: j, tax_level: 2, count: rand(1000), name: "Some Genus Name", count_type: "NT") }
-  taxon_counts << (1..4).map {|j| TaxonCount.new(tax_id: j, tax_level: 1, count: rand(1000), name: "Some Species Name", count_type: "NR") }
-  taxon_counts << (1..4).map {|j| TaxonCount.new(tax_id: j, tax_level: 2, count: rand(1000), name: "Some Genus Name", count_type: "NR") }
+  taxon_counts = (1..50).map {|j| TaxonCount.new(tax_id: j, tax_level: [1, 2].sample, count: rand(1000), name: "Some Name", count_type: ["NT", "NR"].sample) }
   pipeline_run = PipelineRun.create!(sample: sample, command: "xyz yzyz")
-  output = PipelineOutput.create!(sample: sample, total_reads: 1_000, remaining_reads: 500, 
-    sample_host: "Human", sample_location: "California", sample_date: "Sept 19, 2017",
-    sample_tissue: "CSF", sample_template: "RNA", sample_library: "Nugen Nextera",
-    sample_sequencer: "Illumina NextSeq 500, 2x150", sample_notes: "patient had no known infections",
-    taxon_counts: taxon_counts, pipeline_run: pipeline_run)
+  output = PipelineOutput.create!(sample: sample, total_reads: 1_000, remaining_reads: 500, taxon_counts: taxon_counts, pipeline_run: pipeline_run)
   pipeline_run.pipeline_output_id = output.id
   pipeline_run.save!
 end
