@@ -641,10 +641,10 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         result_dir, sample_s3_output_path, False)
 
     logparams = {"title": "RAPSearch2", "count_reads": True,
-                 before_file_name: os.path.join(result_dir, FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT),
-                 before_file_type: "fasta",
-                 after_file_name: os.path.join(result_dir, RAPSEARCH2_OUT),
-                 after_file_type: "m8",
+                 "before_file_name": os.path.join(result_dir, FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT),
+                 "before_file_type": "fasta",
+                 "after_file_name": os.path.join(result_dir, RAPSEARCH2_OUT),
+                 "after_file_type": "m8",
                  "result_dir": result_dir, "sample_s3_output_path": sample_s3_output_path}
     run_and_log(logparams, run_rapsearch2_remotely,
         sample_name, FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT,
