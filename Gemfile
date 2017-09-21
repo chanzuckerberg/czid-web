@@ -35,15 +35,10 @@ gem 'turbolinks', '~> 5'
 # Use Uglifier as compressor for JavaScript assets
 gem 'uglifier', '>= 1.3.0'
 gem 'sprockets-es6'
-
 gem 'react-rails'
-gem 'materialize-rails'
-<<<<<<< HEAD
-gem "font-awesome-rails"
-gem 'momentjs-rails'
-=======
+gem 'materialize-sass'
 gem 'font-awesome-rails'
->>>>>>> Pipeline output design (#80)
+gem 'momentjs-rails'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
