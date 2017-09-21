@@ -1,4 +1,9 @@
 class Header extends React.Component  {
+
+	componentDidMount() {
+		$('.profile-dropdown').dropdown();
+	}
+
   render() {
     return (
       <div>

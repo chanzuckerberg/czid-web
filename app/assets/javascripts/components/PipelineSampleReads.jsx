@@ -1,4 +1,9 @@
 class PipelineSampleReads extends React.Component {
+
+  componentDidMount() {
+    $('ul.tabs').tabs();
+  }
+
   render() {
     return (
       <div>
