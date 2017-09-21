@@ -441,7 +441,7 @@ def run_and_log(logparams, func_name, *args):
         records_before = count_reads(logparams["before_file_name"], logparams["before_file_type"])
         records_after = count_reads(logparams["after_file_name"], logparams["after_file_type"])
         percent_removed = (100.0 * (records_before - records_after)) / records_before
-        if "paired" in logparams["before_file_name"] and "paired" in logparams["after_file_name"]:
+        if "paired" in logparams["before_file_type"] and "paired" in logparams["after_file_type"]:
             record_description = "read-pairs"
         else:
             record_description = "reads"
