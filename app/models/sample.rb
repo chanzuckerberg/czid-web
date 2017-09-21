@@ -59,6 +59,16 @@ class Sample < ApplicationRecord
     "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/results"
   end
 
+  def sample_annotated_fasta_url
+    file_base_name = "taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.fasta"
+    "https://s3.console.aws.amazon.com/s3/object/#{SAMPLES_BUCKET_NAME}/#{sample_path}/results/#{file_base_name}"
+  end
+
+  def sample_log_url
+    file_base_name = "log.txt"
+    "https://s3.console.aws.amazon.com/s3/object/#{SAMPLES_BUCKET_NAME}/#{sample_path}/results/#{file_base_name}"
+  end
+
   def pipeline_command
     script_name = File.basename(IdSeqPipeline::S3_SCRIPT_LOC)
     batch_command = "aws s3 cp #{IdSeqPipeline::S3_SCRIPT_LOC} .; chmod 755 #{script_name}; " \
