@@ -452,12 +452,7 @@ def run_and_log(logparams, func_name, *args):
         records_before = count_reads(logparams["before_file_name"], logparams["before_file_type"])
         records_after = count_reads(logparams["after_file_name"], logparams["after_file_type"])
         percent_removed = (100.0 * (records_before - records_after)) / records_before
-        if "paired" in logparams["before_file_type"] and "paired" in logparams["after_file_type"]:
-            record_description = "read-pairs"
-        else:
-            record_description = "reads"
-        logger.info("%s %% of %s dropped out, %s %s remaining" % (str(percent_removed), record_description,
-                                                                  str(records_after), record_description))
+        logger.info("%s %% of reads dropped out, %s reads remaining" % (str(percent_removed), str(records_after)))
     # copy log file
     execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
 
@@ -512,7 +507,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
     # run STAR
     logparams = {"title": "STAR", "count_reads": True,
                  "before_file_name": fastq_file_1,
-                 "before_file_type": "fastq_gz_paired",
+                 "before_file_type": "fastq_paired",
                  "after_file_name": os.path.join(result_dir, STAR_OUT1),
                  "after_file_type": "fastq_paired",
                  "sample_s3_output_path": sample_s3_output_path}
