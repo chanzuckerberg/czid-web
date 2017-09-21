@@ -97,7 +97,7 @@ def count_reads(file_name, file_type):
     else:
         f = open(file_name)
     for line in f:
-        elif file_type == "fastq_paired":
+        if file_type == "fastq_paired":
             count += 2./4 
         elif file_type == "fasta_paired":
             if line.startswith('>'):
