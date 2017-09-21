@@ -1,4 +1,5 @@
 /* TODO: refactor stylesheet into scss */
+
 .tabs {
 
 	display: block !important;
@@ -7,10 +8,8 @@
 		width: auto !important;
 	}
 
-	.tabs-transparent {
-		.indicator {
-			background: #263039 !important;
-		}
+	.indicator {
+		background: #263039 !important;
 	}
 
 	.tab a {
