@@ -47,8 +47,12 @@ gem 'font-awesome-rails'
 
 gem 'react-rails'
 gem 'materialize-rails'
+<<<<<<< HEAD
 gem "font-awesome-rails"
 gem 'momentjs-rails'
+=======
+gem 'font-awesome-rails'
+>>>>>>> Pipeline output design (#80)
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
