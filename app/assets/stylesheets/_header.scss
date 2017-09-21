@@ -1,0 +1,59 @@
+.site-header {
+  height: 60px;
+  background: #263039;
+  color: #a8a8a8;
+  font-size: 17px;
+}
+
+.brand-short {
+  background: #414367;
+  color: #d6d6d6;
+  padding: 15px;
+  margin-right: 10px;
+  font-size: 20px;
+}
+
+.brand-short, .brand-long, .header-right-nav div {
+  display: inline-block;
+}
+
+.brand-long {
+  border-right: 1px solid #535353;
+  padding: 10px;
+}
+
+.settings-icon {
+  border-left: 1px solid #535353;
+}
+
+.settings-icon i {
+  padding: 15px;
+  font-size: 30px;
+}
+
+.profile-dropdown i {
+  margin: 20px;
+}
+
+.sub-header-component {
+  min-height: 120px;
+  padding-top: 20px;
+  box-shadow: 1px 2px 5px 2px #eaeaea;
+
+}
+
+/* SubHeader styles */
+
+.sub-header .title {
+  color: #9B9B9B;
+  font-size: 12px;
+}
+
+.sub-header .sub-title {
+  color: #333333;
+  font-size: 28px;
+}
+
+.sub-header-navigation {
+  margin-top: 15px;
+}
