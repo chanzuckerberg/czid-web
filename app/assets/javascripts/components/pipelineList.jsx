@@ -14,13 +14,12 @@ class PipelineList extends React.Component {
           <span>PIPELINES OUTPUTS</span>
         </div>
         <div className="container sample-container">
-        {!this.props.pipelineOutputs ? 'Nothing to show' :
+        {!this.props.pipelineOutputs ? <i className="fa fa-frown" aria-hidden="true">No outputs available</i> :
           <table className="bordered highlight">
           <thead>
             <tr>
                 <th>Name</th>
                 <th>Date</th>
-                <th>Created by</th>
                 <th>Total Reads</th>
                 <th>Final Reads</th>
             </tr>
@@ -30,9 +29,8 @@ class PipelineList extends React.Component {
             return (
               <tbody key={i}>
                 <tr>
-                <td ><i className="fa fa-flask" aria-hidden="true"></i>{output.Name}</td>
-                  <td>{output.created_at}</td>
-                  <td>{output.created_by}</td>
+                <td ><i className="fa fa-flask" aria-hidden="true"></i>{output.id}</td>
+                  <td>{moment(output.created_at).format('MM-DD-YYYY')}</td>
                   <td>{output.total_reads}</td>
                   <td>{output.remaining_reads }</td>
                 </tr>
@@ -46,17 +44,4 @@ class PipelineList extends React.Component {
     )
   }
 
-  getMockData() {
-    return [
-      {"Name": "NID00015_CSF_S3 Virus", "date_created":"08-10-2017", "created_by": "Gerald Buchanan", "total_reads": "-", "quality_control":"2", "duplicate_ratio":"2", "non_human_reads":"1","final_reads": "-"},
-      {"Name": "NID00015_CSF_S3", "date_created":"02-10-2017", "created_by": "Harvey Lowe", "total_reads": "1242155", "quality_control":"4", "duplicate_ratio":"2", "non_human_reads":"2", "final_reads": "4560 (003%)"},
-      {"Name": "NID00015_CSF_S3 Virus", "date_created":"08-10-2017", "created_by": "Gerald Buchanan", "total_reads": "-", "quality_control":"6", "duplicate_ratio":"2", "non_human_reads":"2","final_reads": "-"},
-      {"Name": "NID00016_CSF_S4", "date_created":"02-0302017", "created_by": "Gerald Buchanan", "total_reads": "1237818", "quality_control":"2", "duplicate_ratio":"2", "non_human_reads":"2", "final_reads": "4560 (003%)"},
-      {"Name": "NID00015_CSF_S3 Virus", "date_created":"02-0302017", "created_by": "Gerald Buchanan", "total_reads": "1237818", "quality_control":"2", "duplicate_ratio":"2","non_human_reads":"2", "final_reads": "4560 (003%)"},
-      {"Name": "NID00015_CSF_S3", "date_created":"02-0302017", "created_by": "Gerald Buchanan", "total_reads": "1237818", "quality_control":"2", "duplicate_ratio":"2","non_human_reads":"2", "final_reads": "4560 (003%)"},
-      {"Name": "NID00015_CSF_S3", "date_created":"02-0302017", "created_by": "Gerald Buchanan", "total_reads": "1237818", "quality_control":"2", "duplicate_ratio":"2","non_human_reads":"2",  "final_reads": "4560 (003%)"},
-      {"Name": "NID00015_CSF_S3 Virus", "date_created":"02-0302017", "created_by": "Gerald Buchanan", "total_reads": "1237818", "quality_control":"2", "duplicate_ratio":"2","non_human_reads":"2",  "final_reads": "4560 (003%)"},
-      {"Name": "NID00015_CSF_S3 Virus", "date_created":"02-0302017", "created_by": "Gerald Buchanan", "total_reads": "1237818", "quality_control":"2", "duplicate_ratio":"2", "non_human_reads":"2", "final_reads": "4560 (003%)"}
-    ]
-  }
 }
