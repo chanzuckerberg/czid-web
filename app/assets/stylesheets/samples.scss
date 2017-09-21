@@ -1,3 +1,135 @@
-// Place all the styles related to the Samples controller here.
-// They will automatically be included in application.css.
-// You can use Sass (SCSS) here: http://sass-lang.com/
+/* TODO: refactor stylesheet into scss */
+.tabs {
+
+	.tabs-transparent {
+		.indicator {
+			background: #263039 !important;
+		}
+	}
+
+	.tab a {
+		color: #333333;
+		font-size: 14px;
+	  padding: 0 !important;
+	  margin-right: 30px;
+	  text-transform: none !important;
+	  text-align: left;
+	}
+
+}
+
+.tab-screen {
+  background: #f8f9f9;
+  margin-top: 5px;
+}
+
+.tab-screen-content {
+  padding-top: 25px;
+}
+
+.tab-screen-content .content-title{
+  color: #767676;
+  font-size: 13px;
+  font-weight: lighter;
+  margin-bottom: 15px;
+}
+
+.custom-button {
+  font-size: 11px;
+  color: #767676 !important;
+  background: #E8E8E8;
+  border: 0;
+  padding: 10px;
+  margin: 10px;
+  min-width: 235px;
+  font-weight: 100;
+  letter-spacing: 0.43px;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.custom-button:hover, .custom-button:active {
+  background: #e2e2e2;
+}
+
+.data-divider {
+  background: #D6D6D6;
+  font-weight: lighter;
+  margin: 10px 0 30px 0;
+}
+
+.data table tr td:nth-child(odd) {
+  color: #252424 !important;
+}
+
+.data table tr td:nth-child(even) {
+  color: #767676 !important;
+}
+
+.data table tr td {
+  width: 50%;
+}
+
+.data table {
+  font-size: 14px;
+}
+
+.genome-breakdown {
+  background: #F5F5F5;
+  padding: 10px;
+}
+
+.dark-gray {
+  background: #535353;
+}
+
+.light-gray {
+  background: #D6D6D6;
+}
+
+.normal-gray {
+  background: #767676;
+}
+
+.mid-gray {
+  background: #B8B8B8;
+}
+
+.graph .visuals {
+  height: 25px;
+}
+
+.labels li, .labels li div {
+  display: inline-block;
+  margin-right: 7px;
+}
+
+.labels li {
+
+}
+
+.labels .label-color {
+  height: 15px;
+  width: 15px;
+}
+
+.read-count {
+  color: #252424;
+  font-size: 12px;
+}
+
+
+.read-label {
+  color: #767676;
+  font-size: 12px;
+  display: inline-block;
+  margin-left: 4px;
+}
+
+.notes {
+  width: inherit !important;
+}
+.sample-notes {
+  width: inherit !important;
+  font-style: italic;
+}
