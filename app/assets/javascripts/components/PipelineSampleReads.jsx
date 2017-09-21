@@ -1,4 +1,5 @@
 class PipelineSampleReads extends React.Component {
+
   componentDidMount() {
     $('ul.tabs').tabs();
     const slider = document.getElementById('genus-slider');
