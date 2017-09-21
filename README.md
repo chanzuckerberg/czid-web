@@ -22,7 +22,7 @@ ENV['AWS_DEFAULT_REGION'] = 'us-west-2'
 ENV['IDSEQ_S3_SCRIPT_LOC'] = 's3://czbiohub-infectious-disease/bin/pipeline.py'
 
 ```
-1. Run `docker-compose up`
+2. Run `docker-compose up`
 
 
 ## Running Tests
