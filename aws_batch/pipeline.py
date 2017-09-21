@@ -109,6 +109,7 @@ def count_reads(file_name, file_type):
                 count += 1
         else:
             count += 1
+    f.close()
     return count
 
 def lzw_fraction(sequence):
