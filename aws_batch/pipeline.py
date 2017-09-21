@@ -469,7 +469,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
                lazy_run = True):
 
     sample_s3_output_path = sample_s3_output_path.rstrip('/')
-    sample_name = os.path.basename(sample_s3_input_path.rstrip('/'))
+    sample_name = sample_s3_input_path[5:].rstrip('/').replace('/','-')
     sample_dir = DEST_DIR + '/' + sample_name
     fastq_dir = sample_dir + '/fastqs'
     result_dir = sample_dir + '/results'
