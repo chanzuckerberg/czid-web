@@ -5,6 +5,8 @@ class Sample < ApplicationRecord
   STATUS_UPLOADED = 'uploaded'.freeze
   STATUS_RERUN    = 'need_rerun'.freeze
   STATUS_CHECKED  = 'checked'.freeze # status regarding pipeline kickoff is checked
+  HIT_FASTA_BASENAME = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.fasta'.freeze
+  LOG_BASENAME = 'log.txt'.freeze
 
   belongs_to :project
   has_many :pipeline_outputs, dependent: :destroy
@@ -60,13 +62,11 @@ class Sample < ApplicationRecord
   end
 
   def sample_annotated_fasta_url
-    file_base_name = "taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.fasta"
-    "https://s3.console.aws.amazon.com/s3/object/#{SAMPLES_BUCKET_NAME}/#{sample_path}/results/#{file_base_name}"
+    "https://s3.console.aws.amazon.com/s3/object/#{SAMPLES_BUCKET_NAME}/#{sample_path}/results/#{HIT_FASTA_BASENAME}"
   end
 
   def sample_log_url
-    file_base_name = "log.txt"
-    "https://s3.console.aws.amazon.com/s3/object/#{SAMPLES_BUCKET_NAME}/#{sample_path}/results/#{file_base_name}"
+    "https://s3.console.aws.amazon.com/s3/object/#{SAMPLES_BUCKET_NAME}/#{sample_path}/results/#{LOG_BASENAME}"
   end
 
   def pipeline_command
