@@ -43,6 +43,9 @@ class Header extends React.Component  {
           </div>
           {/*   */}
         </div>
+        <SubHeader>
+          { this.props.children }
+        </SubHeader>
       </div>
 
     )
