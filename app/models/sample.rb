@@ -40,10 +40,9 @@ class Sample < ApplicationRecord
   end
 
   def initiate_s3_cp
-    command = IdSeqPipeline::BASE_COMMAND
     fastq1 = input_files[0].source
     fastq2 = input_files[1].source
-    command += "aws s3 cp #{fastq1} #{sample_input_s3_path}/;"
+    command = "aws s3 cp #{fastq1} #{sample_input_s3_path}/;"
     command += "aws s3 cp #{fastq2} #{sample_input_s3_path}/;"
     _stdout, stderr, status = Open3.capture3(command)
     raise stderr unless status.exitstatus.zero?
@@ -84,8 +83,7 @@ class Sample < ApplicationRecord
       "SAMPLE_SEQUENCER=#{sample_sequencer} " \
       "SAMPLE_NOTES=#{sample_notes} " \
       "./#{script_name}"
-    command = IdSeqPipeline::BASE_COMMAND
-    command += "aegea batch submit --command=\"#{batch_command}\" "
+    command = "aegea batch submit --command=\"#{batch_command}\" "
     command += " --storage /mnt=1500 --ecr-image idseq --memory 64000"
     command
   end
