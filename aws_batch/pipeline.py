@@ -714,7 +714,7 @@ def run_star(sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
     if not os.path.isfile("%s/%s" % (REF_DIR, genome_file)):
         execute_command("aws s3 cp %s %s/" % (star_genome_s3_path, REF_DIR))
         execute_command("cd %s; tar xvfz %s" % (REF_DIR, genome_file))
-        logger.info("downloaded index")
+        logging.getLogger().info("downloaded index")
     star_command_params = ['cd', scratch_dir, ';', STAR,
                            '--outFilterMultimapNmax', '99999',
                            '--outFilterScoreMinOverLread', '0.5',
@@ -729,7 +729,7 @@ def run_star(sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
                            '--genomeDir', REF_DIR + '/STAR_genome',
                            '--readFilesIn', fastq_file_1, fastq_file_2]
     execute_command(" ".join(star_command_params))
-    logger.info("finished job")
+    logging.getLogger().info("finished job")
     # extract out unmapped files
     execute_command("cp %s/%s %s/%s;" % (scratch_dir, 'Unmapped.out.mate1', result_dir, STAR_OUT1))
     execute_command("cp %s/%s %s/%s;" % (scratch_dir, 'Unmapped.out.mate2', result_dir, STAR_OUT2))
@@ -757,7 +757,7 @@ def run_priceseqfilter(sample_name, input_fq_1, input_fq_2,
                        '-rnf','90',
                        '-log','c']
     execute_command(" ".join(priceseq_params))
-    logger.info("finished job")
+    logging.getLogger().info("finished job")
     # copy back to aws
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, PRICESEQFILTER_OUT1, sample_s3_output_path))
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, PRICESEQFILTER_OUT2, sample_s3_output_path))
@@ -772,7 +772,7 @@ def run_fq2fa(sample_name, input_fq_1, input_fq_2,
             return 1
     execute_command("sed -n '1~4s/^@/>/p;2~4p' <%s >%s/%s" % (input_fq_1, result_dir, FQ2FA_OUT1))
     execute_command("sed -n '1~4s/^@/>/p;2~4p' <%s >%s/%s" % (input_fq_2, result_dir, FQ2FA_OUT2))
-    logger.info("finished job")
+    logging.getLogger().info("finished job")
     # copy back to aws
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, FQ2FA_OUT1, sample_s3_output_path))
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, FQ2FA_OUT2, sample_s3_output_path))
@@ -792,7 +792,7 @@ def run_cdhitdup(sample_name, input_fa_1, input_fa_2,
                        '-o2', result_dir + '/' + CDHITDUP_OUT2,
                        '-e',  '0.05', '-u', '70']
     execute_command(" ".join(cdhitdup_params))
-    logger.info("finished job")
+    logging.getLogger().info("finished job")
     # copy back to aws
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, CDHITDUP_OUT1, sample_s3_output_path))
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, CDHITDUP_OUT2, sample_s3_output_path))
@@ -807,7 +807,7 @@ def run_lzw(sample_name, input_fa_1, input_fa_2,
             return 1
     output_prefix = result_dir + '/' + LZW_OUT1[:-8]
     generate_lzw_filtered_paired(input_fa_1, input_fa_2, output_prefix, LZW_FRACTION_CUTOFF)
-    logger.info("finished job")
+    logging.getLogger().info("finished job")
     # copy back to aws
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LZW_OUT1, sample_s3_output_path))
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LZW_OUT2, sample_s3_output_path))
@@ -829,7 +829,7 @@ def run_bowtie2(sample_name, input_fa_1, input_fa_2, bowtie_genome_s3_path,
     if not os.path.isfile("%s/%s" % (REF_DIR, genome_file)):
         execute_command("aws s3 cp %s %s/" % (bowtie_genome_s3_path, REF_DIR))
         execute_command("cd %s; tar xvfz %s" % (REF_DIR, genome_file))
-        logger.info("downloaded index")
+        logging.getLogger().info("downloaded index")
     genome_basename = REF_DIR + '/bowtie2_genome/GRCh38.primary_assembly.genome'
     bowtie2_params = [BOWTIE2,
                      '-p', str(multiprocessing.cpu_count()),
@@ -838,11 +838,11 @@ def run_bowtie2(sample_name, input_fa_1, input_fa_2, bowtie_genome_s3_path,
                      '-f', '-1', input_fa_1, '-2', input_fa_2,
                      '-S', result_dir + '/' + BOWTIE2_OUT]
     execute_command(" ".join(bowtie2_params))
-    logger.info("finished alignment")
+    logging.getLogger().info("finished alignment")
     # extract out unmapped files from sam
     output_prefix = result_dir + '/' + EXTRACT_UNMAPPED_FROM_SAM_OUT1[:-8]
     generate_unmapped_pairs_from_sam(result_dir + '/' + BOWTIE2_OUT, output_prefix)
-    logger.info("extracted unmapped pairs from SAM file")
+    logging.getLogger().info("extracted unmapped pairs from SAM file")
     # copy back to aws
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, BOWTIE2_OUT, sample_s3_output_path))
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT1, sample_s3_output_path))
@@ -879,14 +879,14 @@ def run_gsnapl_remotely(sample, input_fa_1, input_fa_2,
                  (sample, GSNAPL_OUT, sample_s3_output_path)
     # check if remote machins has enough capacity
     check_command = 'ssh -o "StrictHostKeyChecking no" -i %s ec2-user@%s "ps aux|grep gsnapl|grep -v bash"' % (key_path, GSNAPL_INSTANCE_IP)
-    logger.info("waiting for server")
+    logging.getLogger().info("waiting for server")
     wait_for_server('GSNAPL', check_command, GSNAPL_MAX_CONCURRENT)
-    logger.info("starting alignment")
+    logging.getLogger().info("starting alignment")
     remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s ec2-user@%s "%s"' % (key_path, GSNAPL_INSTANCE_IP, commands)
     execute_command(remote_command)
     # move gsnapl output back to local
     time.sleep(10)
-    logger.info("finished alignment")
+    logging.getLogger().info("finished alignment")
     execute_command("aws s3 cp %s/%s %s/" % (sample_s3_output_path, GSNAPL_OUT, result_dir))
 
 def run_annotate_m8_with_taxids(sample_name, input_m8, output_m8,
@@ -901,9 +901,9 @@ def run_annotate_m8_with_taxids(sample_name, input_m8, output_m8,
     if not os.path.isfile(accession2taxid_path):
         execute_command("aws s3 cp %s %s/" % (accession2taxid_s3_path, REF_DIR))
         execute_command("cd %s; gunzip %s" % (REF_DIR, accession2taxid_gz))
-        logger.info("downloaded accession-to-taxid map")
+        logging.getLogger().info("downloaded accession-to-taxid map")
     generate_taxid_annotated_m8(input_m8, output_m8, accession2taxid_path)
-    logger.info("finished annotation")
+    logging.getLogger().info("finished annotation")
     # move the output back to S3
     execute_command("aws s3 cp %s %s/" % (output_m8, sample_s3_output_path))
 
@@ -918,9 +918,9 @@ def run_filter_deuterostomes_from_m8(sample_name, input_m8, output_m8,
     deuterostome_file = os.path.join(REF_DIR, deuterostome_file_basename)
     if not os.path.isfile(deuterostome_file):
         execute_command("aws s3 cp %s %s/" % (deuterostome_list_s3_path, REF_DIR))
-        logger.info("downloaded deuterostome list")
+        logging.getLogger().info("downloaded deuterostome list")
     filter_deuterostomes_from_m8(input_m8, output_m8, deuterostome_file)
-    logger.info("finished job")
+    logging.getLogger().info("finished job")
     # move the output back to S3
     execute_command("aws s3 cp %s %s/" % (output_m8, sample_s3_output_path))
 
@@ -931,7 +931,7 @@ def run_generate_taxid_annotated_fasta_from_m8(sample_name, input_m8, input_fast
         if os.path.isfile(output_fasta):
             return 1
     generate_taxid_annotated_fasta_from_m8(input_fasta, input_m8, output_fasta, annotation_prefix)
-    logger.info("finished job")
+    logging.getLogger().info("finished job")
     # move the output back to S3
     execute_command("aws s3 cp %s %s/" % (output_fasta, sample_s3_output_path))
 
@@ -947,14 +947,14 @@ def run_filter_deuterostomes_from_fasta(sample_name, input_fa, output_fa,
     if not os.path.isfile(accession2taxid_path):
         execute_command("aws s3 cp %s %s/" % (accession2taxid_s3_path, REF_DIR))
         execute_command("cd %s; gunzip %s" % (REF_DIR, accession2taxid_gz))
-        logger.info("downloaded accession-to-taxid map")
+        logging.getLogger().info("downloaded accession-to-taxid map")
     deuterostome_file_basename = os.path.basename(deuterostome_list_s3_path)
     deuterostome_file = os.path.join(REF_DIR, deuterostome_file_basename)
     if not os.path.isfile(deuterostome_file):
         execute_command("aws s3 cp %s %s/" % (deuterostome_list_s3_path, REF_DIR))
-        logger.info("downloaded deuterostome list")
+        logging.getLogger().info("downloaded deuterostome list")
     filter_taxids_from_fasta(input_fa, output_fa, annotation_prefix, accession2taxid_path, deuterostome_file)
-    logger.info("finished job")
+    logging.getLogger().info("finished job")
     # move the output back to S3
     execute_command("aws s3 cp %s %s/" % (output_fa, sample_s3_output_path))
 
@@ -988,12 +988,12 @@ def run_rapsearch2_remotely(sample, input_fasta,
     commands += "aws s3 cp /home/ec2-user/batch-pipeline-workdir/%s/%s %s/;" % \
                  (sample, RAPSEARCH2_OUT, sample_s3_output_path)
     check_command = 'ssh -o "StrictHostKeyChecking no" -i %s ec2-user@%s "ps aux|grep rapsearch|grep -v bash"' % (key_path, RAPSEARCH2_INSTANCE_IP)
-    logger.info("waiting for server")
+    logging.getLogger().info("waiting for server")
     wait_for_server('RAPSEARCH2', check_command, RAPSEARCH2_MAX_CONCURRENT)
-    logger.info("starting alignment")
+    logging.getLogger().info("starting alignment")
     remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s ec2-user@%s "%s"' % (key_path, RAPSEARCH2_INSTANCE_IP, commands)
     execute_command(remote_command)
-    logger.info("finished alignment")
+    logging.getLogger().info("finished alignment")
     # move output back to local
     time.sleep(10) # wait until the data is synced
     execute_command("aws s3 cp %s/%s %s/" % (sample_s3_output_path, RAPSEARCH2_OUT, result_dir))
@@ -1012,18 +1012,18 @@ def run_generate_taxid_outputs_from_m8(sample_name,
     taxoninfo_path = REF_DIR + '/' + taxoninfo_filename
     if not os.path.isfile(taxoninfo_path):
         execute_command("aws s3 cp %s %s/" % (taxinfodb_s3_path, REF_DIR))
-        logger.info("downloaded taxon info database")
+        logging.getLogger().info("downloaded taxon info database")
     generate_tax_counts_from_m8(annotated_m8, taxon_counts_csv_file)
-    logger.info("generated taxon counts from m8")
+    logging.getLogger().info("generated taxon counts from m8")
     generate_json_from_taxid_counts(sample_name, fastq_file_1, taxon_counts_csv_file,
                                     taxoninfo_path, taxon_counts_json_file,
                                     count_type, db_sample_id, sample_host, sample_location,
                                     sample_date, sample_tissue, sample_template, sample_library,
                                     sample_sequencer, sample_notes)
-    logger.info("generated JSON file from taxon counts")
+    logging.getLogger().info("generated JSON file from taxon counts")
     generate_rpm_from_taxid_counts(fastq_file_1, taxon_counts_csv_file, taxoninfo_path,
                                    taxon_species_rpm_file, taxon_genus_rpm_file)
-    logger.info("calculated RPM from taxon counts")
+    logging.getLogger().info("calculated RPM from taxon counts")
     # move the output back to S3
     execute_command("aws s3 cp %s %s/" % (taxon_counts_csv_file, sample_s3_output_path))
     execute_command("aws s3 cp %s %s/" % (taxon_counts_json_file, sample_s3_output_path))
@@ -1038,7 +1038,7 @@ def run_combine_json_outputs(sample_name, input_json_1, input_json_2, output_jso
             return 1
     project_name = os.path.basename(os.path.dirname(sample_s3_output_path))
     combine_json(project_name, sample_name, input_json_1, input_json_2, output_json)
-    logger.info("finished job")
+    logging.getLogger().info("finished job")
     # move it the output back to S3
     execute_command("aws s3 cp %s %s/" % (output_json, sample_s3_output_path))
 
