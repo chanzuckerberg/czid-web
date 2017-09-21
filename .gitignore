@@ -27,3 +27,6 @@
 /awscli-bundle
 awscli-bundle.zip
 get-pip.py
+
+#Ignore Jetbrain Idea directory
+.idea/
