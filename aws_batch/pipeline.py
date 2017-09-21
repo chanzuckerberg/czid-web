@@ -267,9 +267,7 @@ def generate_rpm_from_taxid_counts(rawReadsInputPath, taxidCountsInputPath, taxi
     genus_outf.close()
 
 def generate_json_from_taxid_counts(sample, rawReadsInputPath, taxidCountsInputPath,
-                                    taxid2infoPath, jsonOutputPath, countType, dbSampleId,
-                                    sampleHost, sampleLocation, sampleDate, sampleTissue,
-                                    sampleTemplate, sampleLibrary, sampleSequencer, sampleNotes):
+                                    taxid2infoPath, jsonOutputPath, countType, dbSampleId):
     # produce json in Ryan's output format (https://github.com/chanzuckerberg/idseq-web/blob/master/test/output.json)
     taxid2info_map = shelve.open(taxid2infoPath)
     total_reads = subprocess.check_output("zcat %s | wc -l" % rawReadsInputPath, shell=True)
