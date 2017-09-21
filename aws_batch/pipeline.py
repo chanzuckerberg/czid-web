@@ -314,14 +314,6 @@ def generate_json_from_taxid_counts(sample, rawReadsInputPath, taxidCountsInputP
             "total_reads": total_reads,
             "remaining_reads": remaining_reads,
             "sample_id": dbSampleId,
-            "sample_host": sampleHost,
-            "sample_location": sampleLocation,
-            "sample_date": sampleDate,
-            "sample_tissue": sampleTissue,
-            "sample_template": sampleTemplate,
-            "sample_library": sampleLibrary,
-            "sample_sequencer": sampleSequencer,
-            "sample_notes": sampleNotes,
             "taxon_counts_attributes": taxon_counts_attributes
       }
     }
@@ -464,8 +456,6 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
                star_genome_s3_path, bowtie2_genome_s3_path,
                gsnap_ssh_key_s3_path, rapsearch_ssh_key_s3_path, accession2taxid_s3_path,
                deuterostome_list_s3_path, taxid2info_s3_path, db_sample_id,
-               sample_host, sample_location, sample_date, sample_tissue,
-               sample_template, sample_library, sample_sequencer, sample_notes,
                lazy_run = True):
 
     sample_s3_output_path = sample_s3_output_path.rstrip('/')
@@ -627,8 +617,6 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         os.path.join(result_dir, NT_TAXID_COUNTS_TO_SPECIES_RPM_OUT),
         os.path.join(result_dir, NT_TAXID_COUNTS_TO_GENUS_RPM_OUT),
         taxid2info_s3_path, 'NT', db_sample_id,
-        sample_host, sample_location, sample_date, sample_tissue,
-        sample_template, sample_library, sample_sequencer, sample_notes,
         result_dir, sample_s3_output_path, False)
 
     # run rapsearch remotely
@@ -689,8 +677,6 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         os.path.join(result_dir, NR_TAXID_COUNTS_TO_SPECIES_RPM_OUT),
         os.path.join(result_dir, NR_TAXID_COUNTS_TO_GENUS_RPM_OUT),
         taxid2info_s3_path, 'NR', db_sample_id,
-        sample_host, sample_location, sample_date, sample_tissue,
-        sample_template, sample_library, sample_sequencer, sample_notes,
         result_dir, sample_s3_output_path, False)
 
     logparams = {"title": "combine JSON outputs", "count_reads": False,
@@ -1003,8 +989,6 @@ def run_generate_taxid_outputs_from_m8(sample_name,
     taxon_counts_csv_file, taxon_counts_json_file,
     taxon_species_rpm_file, taxon_genus_rpm_file,
     taxinfodb_s3_path, count_type, db_sample_id,
-    sample_host, sample_location, sample_date, sample_tissue,
-    sample_template, sample_library, sample_sequencer, sample_notes,
     result_dir, sample_s3_output_path, lazy_run):
     # Ignore lazyrun
     # download taxoninfodb if not exist
@@ -1017,9 +1001,7 @@ def run_generate_taxid_outputs_from_m8(sample_name,
     logging.getLogger().info("generated taxon counts from m8")
     generate_json_from_taxid_counts(sample_name, fastq_file_1, taxon_counts_csv_file,
                                     taxoninfo_path, taxon_counts_json_file,
-                                    count_type, db_sample_id, sample_host, sample_location,
-                                    sample_date, sample_tissue, sample_template, sample_library,
-                                    sample_sequencer, sample_notes)
+                                    count_type, db_sample_id)
     logging.getLogger().info("generated JSON file from taxon counts")
     generate_rpm_from_taxid_counts(fastq_file_1, taxon_counts_csv_file, taxoninfo_path,
                                    taxon_species_rpm_file, taxon_genus_rpm_file)
