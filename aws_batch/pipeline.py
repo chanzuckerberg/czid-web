@@ -395,7 +395,7 @@ def filter_taxids_from_fasta(input_fa, output_fa, annotation_prefix, accession2t
         read_id = sequence_name.rstrip().lstrip('>') # example read_id: "NR::NT:CP010376.2:NB501961:14:HM7TLBGX2:1:23109:12720:8743/2"
         split_on = annotation_prefix + ":"
         if not read_id.startswith(annotation_prefix):
-            split_on = ":" + split_on # avoid any possible "NT:" where the NT could be part of the accession follwing "NR:" 
+            split_on = ":" + split_on # avoid any possible "NT:" where the NT could be part of the accession follwing "NR:"
         accession_id = (read_id.split(split_on))[1].split(":")[0]
         accession_id_short = accession_id.split(".")[0]
         taxid = accession2taxid_dict.get(accession_id_short, "NA")
@@ -596,7 +596,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         sample_name, os.path.join(result_dir, GSNAPL_OUT),
         os.path.join(result_dir, ANNOTATE_GSNAPL_M8_WITH_TAXIDS_OUT),
         accession2taxid_s3_path,
-        result_dir, sample_s3_output_path, lazy_run=False)
+        result_dir, sample_s3_output_path, False)
 
     # run_generate_taxid_annotated_fasta_from_m8
     logparams = {"title": "generate taxid annotated fasta from m8", "count_reads": False,
@@ -605,7 +605,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         sample_name, os.path.join(result_dir, GSNAPL_OUT),
         os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT3),
         os.path.join(result_dir, GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT),
-        'NT', result_dir, sample_s3_output_path, lazy_run=False)
+        'NT', result_dir, sample_s3_output_path, False)
 
     logparams = {"title": "filter deuterostomes from m8", "count_reads": True,
                  "before_file_name": os.path.join(result_dir, ANNOTATE_GSNAPL_M8_WITH_TAXIDS_OUT),
@@ -616,7 +616,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
     run_and_log(logparams, run_filter_deuterostomes_from_m8,
         sample_name, os.path.join(result_dir, ANNOTATE_GSNAPL_M8_WITH_TAXIDS_OUT),
         os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NT_M8_OUT),
-        deuterostome_list_s3_path, result_dir, sample_s3_output_path, lazy_run=False)
+        deuterostome_list_s3_path, result_dir, sample_s3_output_path, False)
 
     logparams = {"title": "generate taxid outputs from m8", "count_reads": False,
                  "result_dir": result_dir, "sample_s3_output_path": sample_s3_output_path}
@@ -629,7 +629,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         taxid2info_s3_path, 'NT', db_sample_id,
         sample_host, sample_location, sample_date, sample_tissue,
         sample_template, sample_library, sample_sequencer, sample_notes,
-        result_dir, sample_s3_output_path, lazy_run=False)
+        result_dir, sample_s3_output_path, False)
 
     # run rapsearch remotely
     logparams = {"title": "filter deuterostomes from FASTA", "count_reads": False,
@@ -638,7 +638,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         sample_name, os.path.join(result_dir, GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT),
         os.path.join(result_dir, FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT),
         accession2taxid_s3_path, deuterostome_list_s3_path, 'NT',
-        result_dir, sample_s3_output_path, lazy_run=False)
+        result_dir, sample_s3_output_path, False)
 
     logparams = {"title": "RAPSearch2", "count_reads": True,
                  before_file_name: os.path.join(result_dir, FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT),
@@ -658,7 +658,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         sample_name, os.path.join(result_dir, RAPSEARCH2_OUT),
         os.path.join(result_dir, ANNOTATE_RAPSEARCH2_M8_WITH_TAXIDS_OUT),
         accession2taxid_s3_path,
-        result_dir, sample_s3_output_path, lazy_run=False)
+        result_dir, sample_s3_output_path, False)
 
     # run_generate_taxid_annotated_fasta_from_m8
     logparams = {"title": "generate taxid annotated fasta from m8", "count_reads": False,
@@ -667,7 +667,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         sample_name, result_dir + '/' + RAPSEARCH2_OUT,
         result_dir + '/' + FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT,
         result_dir + '/' + GENERATE_TAXID_ANNOTATED_FASTA_FROM_RAPSEARCH2_M8_OUT,
-        'NR', result_dir, sample_s3_output_path, lazy_run=False)
+        'NR', result_dir, sample_s3_output_path, False)
 
     logparams = {"title": "filter deuterostomes from m8", "count_reads": True,
                  "before_file_name": os.path.join(result_dir, ANNOTATE_RAPSEARCH2_M8_WITH_TAXIDS_OUT),
@@ -678,7 +678,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
     run_and_log(logparams, run_filter_deuterostomes_from_m8,
         sample_name, os.path.join(result_dir, ANNOTATE_RAPSEARCH2_M8_WITH_TAXIDS_OUT),
         os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NR_M8_OUT),
-        deuterostome_list_s3_path, result_dir, sample_s3_output_path, lazy_run=False)
+        deuterostome_list_s3_path, result_dir, sample_s3_output_path, False)
 
     logparams = {"title": "generate taxid outputs from m8", "count_reads": False,
                  "result_dir": result_dir, "sample_s3_output_path": sample_s3_output_path}
@@ -691,7 +691,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         taxid2info_s3_path, 'NR', db_sample_id,
         sample_host, sample_location, sample_date, sample_tissue,
         sample_template, sample_library, sample_sequencer, sample_notes,
-        result_dir, sample_s3_output_path, lazy_run=False)
+        result_dir, sample_s3_output_path, False)
 
     logparams = {"title": "combine JSON outputs", "count_reads": False,
                  "result_dir": result_dir, "sample_s3_output_path": sample_s3_output_path}
@@ -699,7 +699,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         sample_name, result_dir + '/' + NT_TAXID_COUNTS_TO_JSON_OUT,
         result_dir + '/' + NR_TAXID_COUNTS_TO_JSON_OUT,
         result_dir + '/' + COMBINED_JSON_OUT,
-        result_dir, sample_s3_output_path, lazy_run=False)
+        result_dir, sample_s3_output_path, False)
 
 def run_star(sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
              result_dir, scratch_dir, sample_s3_output_path, lazy_run):
