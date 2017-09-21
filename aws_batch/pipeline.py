@@ -1047,9 +1047,7 @@ def main():
     run_sample(sample_s3_input_path, sample_s3_output_path,
                STAR_GENOME, BOWTIE2_GENOME,
                KEY_S3_PATH, KEY_S3_PATH, ACCESSION2TAXID,
-               DEUTEROSTOME_TAXIDS, TAXID_TO_INFO, DB_SAMPLE_ID,
-               SAMPLE_HOST, SAMPLE_LOCATION, SAMPLE_DATE, SAMPLE_TISSUE,
-               SAMPLE_TEMPLATE, SAMPLE_LIBRARY, SAMPLE_SEQUENCER, SAMPLE_NOTES, True)
+               DEUTEROSTOME_TAXIDS, TAXID_TO_INFO, DB_SAMPLE_ID, True)
 
 if __name__=="__main__":
     main()
