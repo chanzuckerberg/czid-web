@@ -25,7 +25,8 @@ class PipelineOutputsController < ApplicationController
   end
 
   # GET /pipeline_outputs/1/edit
-  def edit; end
+  def edit
+  end
 
   # POST /pipeline_outputs
   # POST /pipeline_outputs.json
