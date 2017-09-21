@@ -1,14 +1,7 @@
 class PipelineList extends React.Component {
   constructor(props, context) {
     super(props, context);
-  }
 
-  componentDidMount() {
-    $('.tooltipped').tooltip({delay: 50});
-  }
-
-  componentDidMount() {
-    $('.tooltipped').tooltip({delay: 50});
   }
 
   renderPipelineOutput(samples, pipelineruns) {
