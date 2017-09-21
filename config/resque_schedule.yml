@@ -1,0 +1,5 @@
+check_pipeline_run:
+  cron: "*/10 * * * *"
+  class: CheckPipelineRuns
+  args:
+  description: check pipeline runs every 10m
