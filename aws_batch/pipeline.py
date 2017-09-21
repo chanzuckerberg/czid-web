@@ -87,20 +87,27 @@ NR_TAXID_COUNTS_TO_JSON_OUT = 'counts.filter.deuterostomes.taxids.rapsearch2.fil
 NR_TAXID_COUNTS_TO_SPECIES_RPM_OUT = 'species.rpm.filter.deuterostomes.taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.csv'
 NR_TAXID_COUNTS_TO_GENUS_RPM_OUT = 'genus.rpm.filter.deuterostomes.taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.csv'
 COMBINED_JSON_OUT = 'idseq_web_sample.json'
-LOGS_OUT = 'log.txt'
+LOGS_OUT_BASENAME = 'log.txt'
 
 ### convenience functions
 def count_reads(file_name, file_type):
-    if file_type == "fastq_gz_paired":
-        return 2*sum(1 for line in gzip.open(file_name))
-    if file_type == "fastq_paired":
-        return 2*sum(1 for line in open(file_name))/4
-    if file_type == "fasta_paired":
-        return 2*sum(1 for line in open(file_name) if line.startswith(('>')))
-    if file_type == "fasta":
-        return sum(1 for line in open(file_name) if line.startswith(('>')))
-    if file_type == "m8":
-        return sum(1 for line in open(file_name))
+    count = 0
+    if file_name[-3:] == '.gz':
+        f = gzip.open(file_name)
+    else:
+        f = open(file_name)
+    for line in f:
+        if line[0] == '#':
+            continue
+        elif file_type == "fastq_paired":
+            count += 2./4 
+        elif file_type == "fasta_paired":
+            count += 2 if line.startswith('>')
+        elif file_type == "fasta":
+            count += 1 if line.startswith('>')
+        else:
+            count += 1
+    return count
 
 def lzw_fraction(sequence):
     if sequence == "":
@@ -226,7 +233,8 @@ def generate_tax_counts_from_m8(m8_file, output_file):
     taxid_count_map = {}
     with open(m8_file, 'rb') as m8f:
         for line in m8f:
-            taxid = (line.split("taxid"))[1].split(":")[0] # example line: "taxid9606:NB501961:14:HM7TLBGX2:1:12104:15431:7497/1  KY504764.1  100.0  150  0 [...]"
+            taxid = (line.split("taxid"))[1].split(":")[0]
+            #"taxid9606:NB501961:14:HM7TLBGX2:1:12104:15431..."
             taxid_count_map[taxid] = taxid_count_map.get(taxid, 0) + 1
     with open(output_file, 'w') as f:
         writer = csv.writer(f)
@@ -359,23 +367,24 @@ def generate_taxid_annotated_m8(input_m8, output_m8, accession2taxid_db):
             outf.write(new_line)
     outf.close()
 
-def read_columnfile_into_list(file_name):
+def read_file_into_list(file_name):
     with open(file_name) as f:
-        content = f.readlines()
-    return [x.strip("\n") for x in content]
+        L = [x.rstrip() for x in f if x]
+    return L
 
 def filter_deuterostomes_from_m8(input_m8, output_m8, deuterostome_file):
-    taxids_toremove = read_columnfile_into_list(deuterostome_file)
+    taxids_toremove = read_file_into_list(deuterostome_file)
     output_f = open(output_m8, 'wb')
     with open(input_m8, "rb") as input_f:
         for line in input_f:
-            taxid = (line.split("taxid"))[1].split(":")[0] # example line: "taxid9606:NB501961:14:HM7TLBGX2:1:12104:15431:7497/1  KY504764.1  100.0  150  0 [...]"
+            taxid = (line.split("taxid"))[1].split(":")[0] 
+            #"taxid9606:NB501961:14:HM7TLBGX2:1:12104:15431:..."
             if not taxid in taxids_toremove:
                 output_f.write(line)
     output_f.close()
 
 def filter_taxids_from_fasta(input_fa, output_fa, annotation_prefix, accession2taxid_path, deuterostome_file):
-    taxids_toremove = read_columnfile_into_list(deuterostome_file)
+    taxids_toremove = read_file_into_list(deuterostome_file)
     accession2taxid_dict = shelve.open(accession2taxid_path)
     input_f = open(input_fa, 'rb')
     output_f = open(output_fa, 'wb')
@@ -448,13 +457,13 @@ def run_and_log(logparams, func_name, *args):
         logger.info("%s %% of %s dropped out, %s %s remaining" % (str(percent_removed), record_description,
                                                                   str(records_after), record_description))
     # copy log file
-    execute_command("aws s3 cp %s/%s %s/;" % (logparams["result_dir"], LOGS_OUT, logparams["sample_s3_output_path"]))
+    execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
 
 def run_sample(sample_s3_input_path, sample_s3_output_path,
                star_genome_s3_path, bowtie2_genome_s3_path,
                gsnap_ssh_key_s3_path, rapsearch_ssh_key_s3_path, accession2taxid_s3_path,
                deuterostome_list_s3_path, taxid2info_s3_path, db_sample_id,
-               lazy_run = True):
+               aws_batch_job_id, lazy_run = True):
 
     sample_s3_output_path = sample_s3_output_path.rstrip('/')
     sample_name = sample_s3_input_path[5:].rstrip('/').replace('/','-')
@@ -466,7 +475,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
     execute_command("mkdir -p %s " % REF_DIR);
 
     # configure logger
-    log_file = result_dir+'/'+LOGS_OUT
+    log_file = "%s/%s.%s" % (result_dir, LOGS_OUT_BASENAME, aws_batch_job_id)
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
     handler = logging.FileHandler(log_file)
@@ -504,7 +513,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
                  "before_file_type": "fastq_gz_paired",
                  "after_file_name": os.path.join(result_dir, STAR_OUT1),
                  "after_file_type": "fastq_paired",
-                 "result_dir": result_dir, "sample_s3_output_path": sample_s3_output_path}
+                 "sample_s3_output_path": sample_s3_output_path}
     run_and_log(logparams, run_star,
         sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
         result_dir, scratch_dir, sample_s3_output_path, lazy_run)
@@ -515,7 +524,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
                  "before_file_type": "fastq_paired",
                  "after_file_name": os.path.join(result_dir, PRICESEQFILTER_OUT1),
                  "after_file_type": "fastq_paired",
-                 "result_dir": result_dir, "sample_s3_output_path": sample_s3_output_path}
+                 "sample_s3_output_path": sample_s3_output_path}
     run_and_log(logparams, run_priceseqfilter,
         sample_name, os.path.join(result_dir, STAR_OUT1),
         os.path.join(result_dir, STAR_OUT2),
@@ -523,7 +532,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
 
     # run fastq to fasta
     logparams = {"title": "FASTQ to FASTA", "count_reads": False,
-                 "result_dir": result_dir, "sample_s3_output_path": sample_s3_output_path}
+                 "sample_s3_output_path": sample_s3_output_path}
     run_and_log(logparams, run_fq2fa,
         sample_name, os.path.join(result_dir, PRICESEQFILTER_OUT1),
         os.path.join(result_dir, PRICESEQFILTER_OUT2),
@@ -535,7 +544,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
                  "before_file_type": "fasta_paired",
                  "after_file_name": os.path.join(result_dir, CDHITDUP_OUT1),
                  "after_file_type": "fasta_paired",
-                 "result_dir": result_dir, "sample_s3_output_path": sample_s3_output_path}
+                 "sample_s3_output_path": sample_s3_output_path}
     run_and_log(logparams, run_cdhitdup,
         sample_name, os.path.join(result_dir, FQ2FA_OUT1),
         os.path.join(result_dir, FQ2FA_OUT2),
@@ -547,7 +556,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
                  "before_file_type": "fasta_paired",
                  "after_file_name": os.path.join(result_dir, LZW_OUT1),
                  "after_file_type": "fasta_paired",
-                 "result_dir": result_dir, "sample_s3_output_path": sample_s3_output_path}
+                 "sample_s3_output_path": sample_s3_output_path}
     run_and_log(logparams, run_lzw,
         sample_name, os.path.join(result_dir, CDHITDUP_OUT1),
         os.path.join(result_dir, CDHITDUP_OUT2),
@@ -559,7 +568,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
                  "before_file_type": "fasta_paired",
                  "after_file_name": os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT1),
                  "after_file_type": "fasta_paired",
-                 "result_dir": result_dir, "sample_s3_output_path": sample_s3_output_path}
+                 "sample_s3_output_path": sample_s3_output_path}
     run_and_log(logparams, run_bowtie2,
         sample_name, os.path.join(result_dir, LZW_OUT1),
         os.path.join(result_dir, LZW_OUT2),
@@ -571,7 +580,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
                  "before_file_type": "fasta_paired",
                  "after_file_name": os.path.join(result_dir, GSNAPL_OUT),
                  "after_file_type": "m8",
-                 "result_dir": result_dir, "sample_s3_output_path": sample_s3_output_path}
+                 "sample_s3_output_path": sample_s3_output_path}
     run_and_log(logparams, run_gsnapl_remotely,
         sample_name, EXTRACT_UNMAPPED_FROM_SAM_OUT1, EXTRACT_UNMAPPED_FROM_SAM_OUT2,
         gsnap_ssh_key_s3_path,
@@ -579,7 +588,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
 
     # run_annotate_gsnapl_m8_with_taxids
     logparams = {"title": "annotate gsnapl m8 with taxids", "count_reads": False,
-                 "result_dir": result_dir, "sample_s3_output_path": sample_s3_output_path}
+                 "sample_s3_output_path": sample_s3_output_path}
     run_and_log(logparams, run_annotate_m8_with_taxids,
         sample_name, os.path.join(result_dir, GSNAPL_OUT),
         os.path.join(result_dir, ANNOTATE_GSNAPL_M8_WITH_TAXIDS_OUT),
@@ -588,7 +597,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
 
     # run_generate_taxid_annotated_fasta_from_m8
     logparams = {"title": "generate taxid annotated fasta from m8", "count_reads": False,
-                 "result_dir": result_dir, "sample_s3_output_path": sample_s3_output_path}
+                 "sample_s3_output_path": sample_s3_output_path}
     run_and_log(logparams, run_generate_taxid_annotated_fasta_from_m8,
         sample_name, os.path.join(result_dir, GSNAPL_OUT),
         os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT3),
@@ -600,14 +609,14 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
                  "before_file_type": "m8",
                  "after_file_name": os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NT_M8_OUT),
                  "after_file_type": "m8",
-                 "result_dir": result_dir, "sample_s3_output_path": sample_s3_output_path}
+                 "sample_s3_output_path": sample_s3_output_path}
     run_and_log(logparams, run_filter_deuterostomes_from_m8,
         sample_name, os.path.join(result_dir, ANNOTATE_GSNAPL_M8_WITH_TAXIDS_OUT),
         os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NT_M8_OUT),
         deuterostome_list_s3_path, result_dir, sample_s3_output_path, False)
 
     logparams = {"title": "generate taxid outputs from m8", "count_reads": False,
-                 "result_dir": result_dir, "sample_s3_output_path": sample_s3_output_path}
+                 "sample_s3_output_path": sample_s3_output_path}
     run_and_log(logparams, run_generate_taxid_outputs_from_m8,
         sample_name, os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NT_M8_OUT),
         fastq_file_1, os.path.join(result_dir, NT_M8_TO_TAXID_COUNTS_FILE_OUT),
@@ -619,7 +628,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
 
     # run rapsearch remotely
     logparams = {"title": "filter deuterostomes from FASTA", "count_reads": False,
-                 "result_dir": result_dir, "sample_s3_output_path": sample_s3_output_path}
+                 "sample_s3_output_path": sample_s3_output_path}
     run_and_log(logparams, run_filter_deuterostomes_from_fasta,
         sample_name, os.path.join(result_dir, GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT),
         os.path.join(result_dir, FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT),
@@ -631,7 +640,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
                  "before_file_type": "fasta",
                  "after_file_name": os.path.join(result_dir, RAPSEARCH2_OUT),
                  "after_file_type": "m8",
-                 "result_dir": result_dir, "sample_s3_output_path": sample_s3_output_path}
+                 "sample_s3_output_path": sample_s3_output_path}
     run_and_log(logparams, run_rapsearch2_remotely,
         sample_name, FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT,
         rapsearch_ssh_key_s3_path,
@@ -639,7 +648,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
 
     # run_annotate_m8_with_taxids
     logparams = {"title": "annotate m8 with taxids", "count_reads": False,
-                 "result_dir": result_dir, "sample_s3_output_path": sample_s3_output_path}
+                 "sample_s3_output_path": sample_s3_output_path}
     run_and_log(logparams, run_annotate_m8_with_taxids,
         sample_name, os.path.join(result_dir, RAPSEARCH2_OUT),
         os.path.join(result_dir, ANNOTATE_RAPSEARCH2_M8_WITH_TAXIDS_OUT),
@@ -648,7 +657,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
 
     # run_generate_taxid_annotated_fasta_from_m8
     logparams = {"title": "generate taxid annotated fasta from m8", "count_reads": False,
-                 "result_dir": result_dir, "sample_s3_output_path": sample_s3_output_path}
+                 "sample_s3_output_path": sample_s3_output_path}
     run_and_log(logparams, run_generate_taxid_annotated_fasta_from_m8,
         sample_name, result_dir + '/' + RAPSEARCH2_OUT,
         result_dir + '/' + FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT,
@@ -660,14 +669,14 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
                  "before_file_type": "m8",
                  "after_file_name": os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NR_M8_OUT),
                  "after_file_type": "m8",
-                 "result_dir": result_dir, "sample_s3_output_path": sample_s3_output_path}
+                 "sample_s3_output_path": sample_s3_output_path}
     run_and_log(logparams, run_filter_deuterostomes_from_m8,
         sample_name, os.path.join(result_dir, ANNOTATE_RAPSEARCH2_M8_WITH_TAXIDS_OUT),
         os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NR_M8_OUT),
         deuterostome_list_s3_path, result_dir, sample_s3_output_path, False)
 
     logparams = {"title": "generate taxid outputs from m8", "count_reads": False,
-                 "result_dir": result_dir, "sample_s3_output_path": sample_s3_output_path}
+                 "sample_s3_output_path": sample_s3_output_path}
     run_and_log(logparams, run_generate_taxid_outputs_from_m8,
         sample_name, os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NR_M8_OUT),
         fastq_file_1, os.path.join(result_dir, NR_M8_TO_TAXID_COUNTS_FILE_OUT),
@@ -678,7 +687,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         result_dir, sample_s3_output_path, False)
 
     logparams = {"title": "combine JSON outputs", "count_reads": False,
-                 "result_dir": result_dir, "sample_s3_output_path": sample_s3_output_path}
+                 "sample_s3_output_path": sample_s3_output_path}
     run_and_log(logparams, run_combine_json_outputs,
         sample_name, result_dir + '/' + NT_TAXID_COUNTS_TO_JSON_OUT,
         result_dir + '/' + NR_TAXID_COUNTS_TO_JSON_OUT,
@@ -1031,6 +1040,7 @@ def main():
     OUTPUT_BUCKET = os.environ.get('OUTPUT_BUCKET', OUTPUT_BUCKET)
     KEY_S3_PATH = os.environ.get('KEY_S3_PATH', KEY_S3_PATH)
     DB_SAMPLE_ID = os.environ['DB_SAMPLE_ID']
+    AWS_BATCH_JOB_ID = os.environ.get('AWS_BATCH_JOB_ID', 'local')
     SAMPLE_HOST = os.environ.get('SAMPLE_HOST', '')
     SAMPLE_LOCATION = os.environ.get('SAMPLE_LOCATION', '')
     SAMPLE_DATE = os.environ.get('SAMPLE_DATE', '')
@@ -1045,7 +1055,8 @@ def main():
     run_sample(sample_s3_input_path, sample_s3_output_path,
                STAR_GENOME, BOWTIE2_GENOME,
                KEY_S3_PATH, KEY_S3_PATH, ACCESSION2TAXID,
-               DEUTEROSTOME_TAXIDS, TAXID_TO_INFO, DB_SAMPLE_ID, True)
+               DEUTEROSTOME_TAXIDS, TAXID_TO_INFO, DB_SAMPLE_ID,
+               AWS_BATCH_JOB_ID, True)
 
 if __name__=="__main__":
     main()
