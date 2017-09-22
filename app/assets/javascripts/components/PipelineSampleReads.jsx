@@ -72,6 +72,7 @@ class PipelineSampleReads extends React.Component {
               <a href="/"> {this.projectInfo.name} </a> > { this.sampleInfo.name }
             </div>
 
+            
             <div className="sub-header-navigation">
               <div className="nav-content">
                 <ul className="tabs tabs-transparent">
