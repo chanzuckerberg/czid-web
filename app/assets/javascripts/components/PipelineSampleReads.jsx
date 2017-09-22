@@ -23,7 +23,7 @@ class PipelineSampleReads extends React.Component {
                   <li className="tab"><a href="#screen1" className="active">Details</a></li>
                   <li className="tab"><a className="" href="#test2">LogFile</a></li>
                   <li className="tab"><a href="#test3">Quality</a></li>
-                  <li className="tab"><a href="#test4">Reports</a></li>
+                  <li className="tab"><a href="#screen4">Reports</a></li>
                 </ul>
               </div>
             </div>
@@ -244,6 +244,266 @@ class PipelineSampleReads extends React.Component {
                 </a>
               </div>
 
+            </div>
+          </div>
+        </div>
+        <div id="screen4" className="reports-screen tab-screen col s12">
+          <div className="container tab-screen-content">
+            <div className="row">
+              <div className="col s3 reports-sidebar">
+                <div className="sidebar-title">
+                  <span>My report</span>
+                  <i className="fa fa-file-text-o right"></i>
+                </div>
+
+                <div className="sidebar-tabs">
+                  <div className="row">
+                    <div className="col s12 sidebar-full-container">
+                      <ul id="tabs-swipe-demo" className="tabs tabs-fixed-width tabs-transparent">
+                        <li className="tab col s3"><a className="active" href="#reports-pane">REPORT INFO</a></li>
+                        <li className="tab col s3"><a href="#filters-pane">FILTERS</a></li>
+                      </ul>
+                      <div id="reports-pane" className="pane col s12">
+                        <div className="sidebar-pane">
+                          <div className="report-data">
+                            <div className="report-title">
+                              Background Model
+                            </div>
+                            <div className="report-value">
+                              All NID
+                            </div>
+                            <div className="report-title">
+                              Score Filter Preset
+                            </div>
+                            <div className="report-value">
+                              Not Set
+                            </div>
+                            <div className="report-title">
+                              Kingdom Filter
+                            </div>
+                            <div className="report-value">
+                              Remove Deuterostome
+                            </div>
+                            <div className="report-title">
+                             Total Score
+                            </div>
+                            <div className="report-value">
+                              All NID
+                            </div>
+                          </div>
+
+                          <div className="report-data">
+                            <section>
+                              <div className="report-title left">
+                                Species Z
+                              </div>
+                              <div className="report-value right">
+                                -1
+                              </div>
+                            </section>
+
+                            <section>
+                              <div className="report-title left">
+                                Genus Z
+                              </div>
+                              <div className="report-value right">
+                                -1
+                              </div>
+                            </section>
+
+                            <section>
+                              <div className="report-title left">
+                                Genus RPM
+                              </div>
+                              <div className="report-value right">
+                                0
+                              </div>
+                            </section>
+
+                            <section>
+                              <div className="report-title left">
+                                Species RPM
+                              </div>
+                              <div className="report-value right">
+                                0
+                              </div>
+                            </section>
+                          </div>
+
+                          <div className="report-data">
+                            <section>
+                              <div className="report-title left">
+                                Species Z
+                              </div>
+                              <div className="report-value right">
+                                -1
+                              </div>
+                            </section>
+
+                            <section>
+                              <div className="report-title left">
+                                Genus Z
+                              </div>
+                              <div className="report-value right">
+                                -1
+                              </div>
+                            </section>
+
+                            <section>
+                              <div className="report-title left">
+                                Genus RPM
+                              </div>
+                              <div className="report-value right">
+                                0
+                              </div>
+                            </section>
+
+                            <section>
+                              <div className="report-title left">
+                                Species RPM
+                              </div>
+                              <div className="report-value right">
+                                0
+                              </div>
+                            </section>
+                          </div>
+                        </div>
+
+                      </div>
+                      <div id="filters-pane" className="pane col s12">
+                        Category
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+              <div className="col s9 reports-main ">
+                <div className="reports-table-title">
+                  <div className="result-count">
+                    24 of 100 returned
+                  </div>
+
+                  <div className="">
+                    <select>
+                      <option>
+                        Custom selection
+                      </option>
+                      <option>
+                       Apply filter
+                      </option>
+                    </select>
+                  </div>
+
+                </div>
+
+                <table className='bordered'>
+                  <thead>
+                  <tr>
+                    <th>Category</th>
+                    <th>Species</th>
+                    <th>Genus</th>
+                    <th>Score 1</th>
+                    <th>NT Genus Z</th>
+                    <th>NT Species Z</th>
+                    <th>NT Species RM</th>
+                  </tr>
+                  </thead>
+
+                  <tbody>
+                  <tr>
+                    <td>Bacteria</td>
+                    <td>Nitrosomonas eutropha (916)</td>
+                    <td>Nitrosomonas (914)</td>
+                    <td>29452</td>
+                    <td>14.61</td>
+                    <td>1.04</td>
+                    <td>27.97</td>
+                  </tr>
+                  <tr>
+                    <td>Bacteria</td>
+                    <td>Nitrosomonas eutropha (916)</td>
+                    <td>Nitrosomonas (914)</td>
+                    <td>29452</td>
+                    <td>14.61</td>
+                    <td>1.04</td>
+                    <td>27.97</td>
+                  </tr>
+                  <tr>
+                    <td>Bacteria</td>
+                    <td>Nitrosomonas eutropha (916)</td>
+                    <td>Nitrosomonas (914)</td>
+                    <td>29452</td>
+                    <td>14.61</td>
+                    <td>1.04</td>
+                    <td>27.97</td>
+                  </tr>
+                  <tr>
+                    <td>Bacteria</td>
+                    <td>Nitrosomonas eutropha (916)</td>
+                    <td>Nitrosomonas (914)</td>
+                    <td>29452</td>
+                    <td>14.61</td>
+                    <td>1.04</td>
+                    <td>27.97</td>
+                  </tr>
+                  <tr>
+                    <td>Bacteria</td>
+                    <td>Nitrosomonas eutropha (916)</td>
+                    <td>Nitrosomonas (914)</td>
+                    <td>29452</td>
+                    <td>14.61</td>
+                    <td>1.04</td>
+                    <td>27.97</td>
+                  </tr>
+                  <tr>
+                    <td>Bacteria</td>
+                    <td>Nitrosomonas eutropha (916)</td>
+                    <td>Nitrosomonas (914)</td>
+                    <td>29452</td>
+                    <td>14.61</td>
+                    <td>1.04</td>
+                    <td>27.97</td>
+                  </tr>
+                  <tr>
+                    <td>Bacteria</td>
+                    <td>Nitrosomonas eutropha (916)</td>
+                    <td>Nitrosomonas (914)</td>
+                    <td>29452</td>
+                    <td>14.61</td>
+                    <td>1.04</td>
+                    <td>27.97</td>
+                  </tr>
+                  <tr>
+                    <td>Bacteria</td>
+                    <td>Nitrosomonas eutropha (916)</td>
+                    <td>Nitrosomonas (914)</td>
+                    <td>29452</td>
+                    <td>14.61</td>
+                    <td>1.04</td>
+                    <td>27.97</td>
+                  </tr>
+                  <tr>
+                    <td>Bacteria</td>
+                    <td>Nitrosomonas eutropha (916)</td>
+                    <td>Nitrosomonas (914)</td>
+                    <td>29452</td>
+                    <td>14.61</td>
+                    <td>1.04</td>
+                    <td>27.97</td>
+                  </tr>
+                  <tr>
+                    <td>Bacteria</td>
+                    <td>Nitrosomonas eutropha (916)</td>
+                    <td>Nitrosomonas (914)</td>
+                    <td>29452</td>
+                    <td>14.61</td>
+                    <td>1.04</td>
+                    <td>27.97</td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
