@@ -1,3 +1,89 @@
 // Place all the styles related to the Reports controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+
+@import "colors";
+
+.reports-sidebar {
+  background: $sidebar-background;
+}
+
+.sidebar-title {
+  padding: 20px;
+  color: #1B232A;
+  font-size: 18px;
+
+  span {
+    margin-left: 11px;
+  }
+
+  i {
+    margin-right: 10px;
+  }
+
+}
+
+.sidebar-tabs {
+  margin-top: 25px;
+  .tabs {
+    display: flex !important;
+
+  }
+
+  .active {
+    color: #5ABCD6 !important;
+  }
+
+  .tabs .tab a {
+    text-align: center !important;
+    font-size: 12px !important;
+  }
+
+  .sidebar-divider {
+    background: #EEF1F2;
+    height: 25px;
+    margin-top: 20px;
+  }
+
+  .pane {
+    padding: 0;
+  }
+  .report-data {
+    padding: 20px;
+    float: left;
+    width: 100%;
+    border-top: 20px solid #EEF1F2;
+  }
+
+  .sidebar-full-container {
+    padding: 0 !important;
+
+    .pane {
+      padding: 0 !important;
+    }
+  }
+
+  .report-data section {
+    float: left;
+    width: 100%;
+  }
+
+  .report-data div:nth-child(odd) {
+    color: $data-key-color;
+  }
+
+  .report-data div:nth-child(even) {
+    color: $data-value-color;
+    margin-bottom: 10px;
+  }
+
+}
+
+.reports-screen {
+  background: #ffffff !important;
+}
+
+.reports-table-title .result-count {
+  font-size: 14px;
+  color: #535353;
+}
