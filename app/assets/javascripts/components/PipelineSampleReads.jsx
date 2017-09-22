@@ -64,7 +64,6 @@ class PipelineSampleReads extends React.Component {
               <a href="/">Uganda Project</a> > NID0015_CSF_S3
             </div>
 
-            
             <div className="sub-header-navigation">
               <div className="nav-content">
                 <ul className="tabs tabs-transparent">
