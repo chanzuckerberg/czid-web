@@ -69,6 +69,8 @@ class PipelineSampleReads extends React.Component {
               <div className="nav-content">
                 <ul className="tabs tabs-transparent">
                   <li className="tab"><a href="#screen1" className="active">Details</a></li>
+                  <li className="tab"><a className="" href="#test2">LogFile</a></li>
+                  <li className="tab"><a href="#test3">Quality</a></li>
                   <li className="tab"><a href="#screen4">Reports</a></li>
                 </ul>
               </div>
@@ -298,77 +300,127 @@ class PipelineSampleReads extends React.Component {
             <div className="row">
               <div className="col s3 reports-sidebar">
                 <div className="sidebar-title">
-                  <i className="fa fa-filter fa-fw"></i> Filter Report
+                  <span>My report</span>
+                  <i className="fa fa-file-text-o right"></i>
                 </div>
 
                 <div className="sidebar-tabs">
                   <div className="row">
                     <div className="col s12 sidebar-full-container">
+                      <ul id="tabs-swipe-demo" className="tabs tabs-fixed-width tabs-transparent">
+                        <li className="tab col s3"><a className="active" href="#reports-pane">REPORT INFO</a></li>
+                        <li className="tab col s3"><a href="#filters-pane">FILTERS</a></li>
+                      </ul>
+                      <div id="reports-pane" className="pane col s12">
+                        <div className="sidebar-pane">
+                          <div className="report-data">
+                            <div className="report-title">
+                              Background Model
+                            </div>
+                            <div className="report-value">
+                              All NID
+                            </div>
+                            <div className="report-title">
+                              Score Filter Preset
+                            </div>
+                            <div className="report-value">
+                              Not Set
+                            </div>
+                            <div className="report-title">
+                              Kingdom Filter
+                            </div>
+                            <div className="report-value">
+                              Remove Deuterostome
+                            </div>
+                            <div className="report-title">
+                             Total Score
+                            </div>
+                            <div className="report-value">
+                              All NID
+                            </div>
+                          </div>
+
+                          <div className="report-data">
+                            <section>
+                              <div className="report-title left">
+                                Species Z
+                              </div>
+                              <div className="report-value right">
+                                -1
+                              </div>
+                            </section>
+
+                            <section>
+                              <div className="report-title left">
+                                Genus Z
+                              </div>
+                              <div className="report-value right">
+                                -1
+                              </div>
+                            </section>
+
+                            <section>
+                              <div className="report-title left">
+                                Genus RPM
+                              </div>
+                              <div className="report-value right">
+                                0
+                              </div>
+                            </section>
+
+                            <section>
+                              <div className="report-title left">
+                                Species RPM
+                              </div>
+                              <div className="report-value right">
+                                0
+                              </div>
+                            </section>
+                          </div>
+
+                          <div className="report-data">
+                            <section>
+                              <div className="report-title left">
+                                Species Z
+                              </div>
+                              <div className="report-value right">
+                                -1
+                              </div>
+                            </section>
+
+                            <section>
+                              <div className="report-title left">
+                                Genus Z
+                              </div>
+                              <div className="report-value right">
+                                -1
+                              </div>
+                            </section>
+
+                            <section>
+                              <div className="report-title left">
+                                Genus RPM
+                              </div>
+                              <div className="report-value right">
+                                0
+                              </div>
+                            </section>
+
+                            <section>
+                              <div className="report-title left">
+                                Species RPM
+                              </div>
+                              <div className="report-value right">
+                                0
+                              </div>
+                            </section>
+                          </div>
+                        </div>
+
+                      </div>
                       <div id="filters-pane" className="pane col s12">
-
-                        <div className="filter-controls">
-                          <div className="filter-title">
-                            CATEGORY
-                          </div>
-
-                          <div className="filter-values">
-                            <p>
-                              <input type="checkbox" className="filled-in" id="bacteria" defaultChecked="checked" />
-                              <label htmlFor="bacteria">Bacteria</label>
-                            </p>
-                            <p>
-                              <input type="checkbox" className="filled-in" id="fungi" defaultChecked="checked" />
-                              <label htmlFor="fungi">Fungi</label>
-                            </p>
-                            <p>
-                            <input type="checkbox" className="filled-in" id="virus" defaultChecked="checked" />
-                            <label htmlFor="virus">Virus</label>
-                          </p>
-                          </div>
-                        </div>
-
-                        <div className="filter-controls">
-                          <div className="filter-title">
-                            THRESHOLDS
-                          </div>
-
-                          <div className="filter-values">
-
-                            <div className="">
-                              <div className="slider-title">
-                                Genus Z Score
-                              </div>
-                              <div id="genus-slider"></div>
-                            </div>
-
-                            <div className="">
-                              <div className="slider-title">
-                                Species Z Score
-                              </div>
-                              <div id="specie-slider"></div>
-                            </div>
-
-                            <div className="">
-                              <div className="slider-title">
-                                Score 1
-                              </div>
-                              <div className="slider-values">
-                                <div className="start">1</div>
-                                <div className="end">100</div>
-                              </div>
-                              <div id="score-slider"></div>
-                            </div>
-                          </div>
-
-                        </div>
-
+                        Category
                       </div>
-                      <div className="apply-filter-button center-align">
-                        <button className="btn waves-effect grey waves-light">
-                          Apply filter
-                        </button>
-                      </div>
-
                     </div>
                   </div>
 
