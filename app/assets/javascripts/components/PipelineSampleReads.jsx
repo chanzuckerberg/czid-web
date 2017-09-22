@@ -250,5 +250,4 @@ class PipelineSampleReads extends React.Component {
       </div>
     )
   }
-
 }
