@@ -57,7 +57,7 @@ class PipelineList extends React.Component {
           }
           </div>
         </div>
-      </div>
+    </div>
     )
   }
 }
