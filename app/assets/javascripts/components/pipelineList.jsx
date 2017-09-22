@@ -4,6 +4,7 @@ class PipelineList extends React.Component {
   }
 
   componentDidMount() {
+    $('.tooltipped').tooltip({delay: 50});
   }
 
   render() {
@@ -22,17 +23,13 @@ class PipelineList extends React.Component {
               </div>
 
               <div className="title-filter">
-                <i class="fa fa-question-circle" aria-hidden="true"></i>
-                
-              </div>
+                <i className="fa fa-bar-chart" aria-hidden="true"></i>
+                <span>PIPELINES OUTPUTS</span>
+            </div>
 					  </div>
 				  </div>
 		  	</div>
         <div className="content-wrapper">
-          <div className="search-wrapper container">
-            <i className="fa fa-search" aria-hidden="true"></i>
-            <span>PIPELINES OUTPUTS</span>
-          </div>
           <div className="container sample-container">
           {!this.props.pipelineOutputs ? 'Nothing to show' :
             <table className="bordered highlight">
@@ -40,7 +37,6 @@ class PipelineList extends React.Component {
               <tr>
                   <th>Name</th>
                   <th>Date</th>
-                  <th>Created by</th>
                   <th>Total Reads</th>
                   <th>Final Reads</th>
               </tr>
@@ -51,8 +47,7 @@ class PipelineList extends React.Component {
                 <tbody key={i}>
                   <tr>
                   <td ><i className="fa fa-flask" aria-hidden="true"></i>{output.Name}</td>
-                    <td>{output.created_at}</td>
-                    <td>{output.created_by}</td>
+                    <td>{moment(output.created_at).format('MM-DD-YYYY')}</td>
                     <td>{output.total_reads}</td>
                     <td>{output.remaining_reads }</td>
                   </tr>
