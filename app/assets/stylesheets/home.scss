@@ -44,3 +44,18 @@ i.fa {
     color: rgb(64, 64, 64);
   }
 }
+
+.sub-header-home {
+  min-height: 120px;
+  padding-top: 10px;
+  box-shadow: 1px 2px 5px 2px #eaeaea;
+  background-color: #E3E8EB;
+  .title {
+    color: #A2A1BF;
+  }
+  .sub-title {
+    color: #333333;
+    margin: 14px 0;
+    font-size: 32px;
+  }
+}
