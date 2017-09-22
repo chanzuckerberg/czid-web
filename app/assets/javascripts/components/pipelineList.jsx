@@ -4,6 +4,7 @@ class PipelineList extends React.Component {
   }
 
   componentDidMount() {
+    $('.tooltipped').tooltip({delay: 50});
   }
 
   render() {
