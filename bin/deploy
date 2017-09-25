@@ -41,13 +41,13 @@ def get_service_and_task(client, cluster, service)
   resp2 = client.describe_task_definition(task_definition: service.task_definition)
   task_def = resp2.task_definition
 
-  return [service, task_def]
+  [service, task_def]
 end
 
 def register_task_def(client, task_def)
   resp = client.register_task_definition(task_def)
 
-  return resp.task_definition
+  resp.task_definition
 end
 
 def run_task(client, cluster, service, task_revision, container, command)
@@ -108,19 +108,17 @@ def update_service(client, cluster, service, task_def)
 
     print "  service info -> #{service_url(REGION, cluster, service)}\n"
 
-    if serv.deployments.count == 1
-      break
-    end
+    break if serv.deployments.count == 1
     sleep 5
   end
 end
 
-def deploy(client, cluster, service, repo, image, run_migrations=false)
+def deploy(client, cluster, service, repo, image, run_migrations = false)
   _, task_def = get_service_and_task(client, cluster, service)
   puts "current task is revision #{task_def.revision}"
   task_def = task_def.to_h
 
-  [:task_definition_arn, :revision, :status, :requires_attributes].each do |k|
+  %i[task_definition_arn revision status requires_attributes].each do |k|
     task_def.delete(k)
   end
 
