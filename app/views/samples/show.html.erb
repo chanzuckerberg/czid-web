@@ -36,10 +36,10 @@
           <tr>
             <td> <%= pipeline_run.job_status %>
             <td> <%= pipeline_run.job_id %>
-            <td> <%= link_to 'Logs', pipeline_run.get_log_url %>
+            <td> <%= link_to 'Logs', pipeline_run.log_url %>
             <td><%= pipeline_run.pipeline_output.remaining_reads if pipeline_run.pipeline_output%> &nbsp;</td>
             <td><%= pipeline_run.created_at %></td>
-            <td><%= pipeline_run.pipeline_output.created_at if pipeline_run.      pipeline_output %></td>
+            <td><%= pipeline_run.pipeline_output.created_at if pipeline_run.pipeline_output %></td>
             <td>
               <% if pipeline_run.pipeline_output %>
                 <%= link_to 'Show', pipeline_run.pipeline_output %>

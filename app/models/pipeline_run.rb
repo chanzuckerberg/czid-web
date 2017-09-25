@@ -34,7 +34,7 @@ class PipelineRun < ApplicationRecord
     return true if pipeline_output || job_status == STATUS_FAILED
   end
 
-  def get_log_url
+  def log_url
     return nil unless job_log_id
     "https://us-west-2.console.aws.amazon.com/cloudwatch/home?region=us-west-2" \
       "#logEventViewer:group=/aws/batch/job;stream=#{job_log_id}"
