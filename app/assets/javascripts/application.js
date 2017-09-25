@@ -4,3 +4,4 @@
 //= require components
 //= require materialize
 //= require moment
+//= require materialize/extras/nouislider
