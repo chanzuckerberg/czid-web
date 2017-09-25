@@ -40,9 +40,10 @@ class Sample < ApplicationRecord
   end
 
   def initiate_s3_cp
+    command = IdSeqPipeline::BASE_COMMAND
     fastq1 = input_files[0].source
     fastq2 = input_files[1].source
-    command = "aws s3 cp #{fastq1} #{sample_input_s3_path}/;"
+    command += "aws s3 cp #{fastq1} #{sample_input_s3_path}/;"
     command += "aws s3 cp #{fastq2} #{sample_input_s3_path}/;"
     _stdout, stderr, status = Open3.capture3(command)
     raise stderr unless status.exitstatus.zero?
@@ -83,7 +84,8 @@ class Sample < ApplicationRecord
       "SAMPLE_SEQUENCER=#{sample_sequencer} " \
       "SAMPLE_NOTES=#{sample_notes} " \
       "./#{script_name}"
-    command = "aegea batch submit --command=\"#{batch_command}\" "
+    command = IdSeqPipeline::BASE_COMMAND
+    command += "aegea batch submit --command=\"#{batch_command}\" "
     command += " --storage /mnt=1500 --ecr-image idseq --memory 64000"
     command
   end
@@ -96,9 +98,6 @@ class Sample < ApplicationRecord
 
   def kickoff_pipeline(dry_run = true)
     # only kickoff pipeline when no active pipeline_run running
-    pipeline_runs.in_progress.each(&:update_job_status)
-    pipeline_runs.in_progress.reload
-
     return unless pipeline_runs.in_progress.empty?
 
     command = pipeline_command

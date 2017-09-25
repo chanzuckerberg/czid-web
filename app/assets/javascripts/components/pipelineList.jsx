@@ -18,13 +18,13 @@ class PipelineList extends React.Component {
         <Header />
         <div className="sub-header-home">
 				  <div className="container">
-					  <div className="content">
+					  <div className="content">				  	
               <div className="title">
                 All Projects  >  Uganda Project
               </div>
 
               <div className="sub-title">
-                Uganda Project
+                Uganda Project 
               </div>
 
               <div className="title-filter">
@@ -33,7 +33,7 @@ class PipelineList extends React.Component {
             </div>
 					  </div>
 				  </div>
-			</div>
+		  	</div>
         <div className="content-wrapper">
           <div className="container sample-container">
           {!this.props.pipelineOutputs ? 'Nothing to show' :
@@ -100,4 +100,5 @@ class PipelineList extends React.Component {
     )
   }
 }
+
 
