@@ -72,8 +72,8 @@
   color: #767676 !important;
 }
 
-.data table tr td {
-  width: 50%;
+.data table tr td:nth-child(odd) {
+  width: 35%;
 }
 
 .data table {
