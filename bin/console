@@ -15,20 +15,14 @@ service = "idseq-web-#{env}"
 resp = ecs_client.describe_services(cluster: env, services: [service])
 service = resp.services.first
 
-task = ecs_client.list_tasks({cluster: env, service_name: "idseq-web-#{env}"}).task_arns.first
+task = ecs_client.list_tasks(cluster: env, service_name: "idseq-web-#{env}").task_arns.first
 
 tasks = ecs_client.describe_tasks(cluster: env, tasks: [task])
-instances = ecs_client.describe_container_instances({
-  cluster: env,
-  container_instances: [ tasks.tasks[0].container_instance_arn],
-})
+instances = ecs_client.describe_container_instances(cluster: env,
+                                                    container_instances: [tasks.tasks[0].container_instance_arn])
 
-resp = ec2_client.describe_instances({
-  instance_ids: [instances.container_instances[0].ec2_instance_id],
-})
+resp = ec2_client.describe_instances(instance_ids: [instances.container_instances[0].ec2_instance_id])
 
 public_ip = resp.reservations.first.instances.first.public_ip_address
 
-exec %Q(ssh -t ec2-user@#{public_ip} "docker exec -it \\`docker ps | grep chanzuckerberg/idseq-web | awk '{print \\$NF}'\\` rails console ")
-
-
+exec %(ssh -t ec2-user@#{public_ip} "docker exec -it \\`docker ps | grep chanzuckerberg/idseq-web | awk '{print \\$NF}'\\` rails console ")
