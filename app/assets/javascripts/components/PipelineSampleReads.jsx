@@ -7,7 +7,8 @@ class PipelineSampleReads extends React.Component {
   render() {
     return (
       <div>
-        <Header>
+        <Header />
+        <SubHeader>
           <div className="sub-header">
             <div className="title">
               PIPELINE
@@ -28,7 +29,7 @@ class PipelineSampleReads extends React.Component {
               </div>
             </div>
           </div>
-        </Header>
+        </SubHeader>
         <div id="screen1" className="tab-screen col s12">
           <div className="container tab-screen-content">
             <div className="row">
