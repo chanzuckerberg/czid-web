@@ -46,10 +46,10 @@ class PipelineList extends React.Component {
               return (
                 <tbody key={i}>
                   <tr>
-                  <td ><i className="fa fa-flask" aria-hidden="true"></i>{output.id}</td>
-                    <td>{moment(output.created_at).format('MM-DD-YYYY')}</td>
-                    <td>{output.total_reads}</td>
-                    <td>{output.remaining_reads }</td>
+                    <td ><a href="/pipeline_outputs/1"><i className="fa fa-flask" aria-hidden="true"></i>{output.id}</a></td>
+                    <td><a href="/pipeline_outputs/1">{moment(output.created_at).format('MM-DD-YYYY')}</a></td>
+                    <td><a href="/pipeline_outputs/1">{output.total_reads}</a></td>
+                    <td><a href="/pipeline_outputs/1">{output.remaining_reads }</a></td>
                   </tr>
                 </tbody>
               )
