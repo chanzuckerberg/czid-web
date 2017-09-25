@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170920200939) do
+ActiveRecord::Schema.define(version: 20170925213702) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -104,6 +104,7 @@ ActiveRecord::Schema.define(version: 20170920200939) do
     t.string "sample_library"
     t.string "sample_sequencer"
     t.text "sample_notes"
+    t.text "s3_preload_result_path"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
   end
 

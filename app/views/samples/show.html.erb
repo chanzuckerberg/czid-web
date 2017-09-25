@@ -22,20 +22,35 @@
 <table class="table table-condensed">
       <thead>
         <tr>
+          <th> Job Status </th>
+          <th> Job Id </th>
+          <th> Job Log </th>
           <th>Remaining reads</th>
-          <th>Date created</th>
+          <th>Job Started</th>
+          <th>Output Created</th>
+          <th> Pipeline Output&nbsp; </th>
         </tr>
       </thead>
       <tbody>
-        <% @sample.pipeline_outputs.each do |pipeline_output| %>
+        <% @sample.pipeline_runs.each do |pipeline_run| %>
           <tr>
-            <td><%= pipeline_output.remaining_reads %></td>
-            <td><%= pipeline_output.created_at %></td>
-            <td><%= link_to 'Show', pipeline_output %></td>
+            <td> <%= pipeline_run.job_status %>
+            <td> <%= pipeline_run.job_id %>
+            <td> <%= link_to 'Logs', pipeline_run.get_log_url %>
+            <td><%= pipeline_run.pipeline_output.remaining_reads if pipeline_run.pipeline_output%> &nbsp;</td>
+            <td><%= pipeline_run.created_at %></td>
+            <td><%= pipeline_run.pipeline_output.created_at if pipeline_run.      pipeline_output %></td>
+            <td>
+              <% if pipeline_run.pipeline_output %>
+                <%= link_to 'Show', pipeline_run.pipeline_output %>
+              <% else %>
+                 Pending
+              <% end %>
+            </td>
           </tr>
         <% end %>
       </tbody>
-    </table>
+</table>
 
 <p>
 <%= link_to 'Edit', edit_sample_path(@sample) %> |
