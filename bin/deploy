@@ -70,7 +70,7 @@ def run_task(client, cluster, service, task_revision, container, command)
   puts "  logs -> #{log_url(REGION, LOG_GROUP, TASK_NAME, CONTAINER_NAME, task_id)}"
 
   loop do
-    resp2 = client.describe_tasks(cluster: cluster, tasks: [migrate_task_arn])
+    resp2 = client.describe_tasks(cluster: CLUSTER, tasks: [migrate_task_arn])
 
     print "migration task: #{resp2.tasks[0].last_status}\r"
     if resp2.tasks[0].last_status == 'STOPPED'
