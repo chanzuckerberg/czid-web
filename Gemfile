@@ -36,7 +36,7 @@ gem 'turbolinks', '~> 5'
 gem 'uglifier', '>= 1.3.0'
 gem 'sprockets-es6'
 gem 'react-rails'
-gem 'materialize-rails'
+gem 'materialize-sass'
 gem "font-awesome-rails"
 gem 'momentjs-rails'
 
