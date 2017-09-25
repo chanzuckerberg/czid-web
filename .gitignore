@@ -28,5 +28,8 @@
 awscli-bundle.zip
 get-pip.py
 
+# Ignore Mac directory
+.DS_Store
+
 #Ignore Jetbrain Idea directory
 .idea/
