@@ -399,6 +399,215 @@ class PipelineSampleReads extends React.Component {
             </div>
           </div>
         </div>
+        <div id="screen4" className="reports-screen tab-screen col s12">
+          <div className="container tab-screen-content">
+            <div className="row">
+              <div className="col s3 reports-sidebar">
+                <div className="sidebar-title">
+                  <i className="fa fa-filter fa-fw"></i> Filter Report
+                </div>
+
+                <div className="sidebar-tabs">
+                  <div className="row">
+                    <div className="col s12 sidebar-full-container">
+                      <div id="filters-pane" className="pane col s12">
+
+                        <div className="filter-controls">
+                          <div className="filter-title">
+                            CATEGORY
+                          </div>
+
+                          <div className="filter-values">
+                            <p>
+                              <input type="checkbox" className="filled-in" id="bacteria" defaultChecked="checked" />
+                              <label htmlFor="bacteria">Bacteria</label>
+                            </p>
+                            <p>
+                              <input type="checkbox" className="filled-in" id="fungi" defaultChecked="checked" />
+                              <label htmlFor="fungi">Fungi</label>
+                            </p>
+                            <p>
+                            <input type="checkbox" className="filled-in" id="virus" defaultChecked="checked" />
+                            <label htmlFor="virus">Virus</label>
+                          </p>
+                          </div>
+                        </div>
+
+                        <div className="filter-controls">
+                          <div className="filter-title">
+                            THRESHOLDS
+                          </div>
+
+                          <div className="filter-values">
+
+                            <div className="">
+                              <div className="slider-title">
+                                Genus Z Score
+                              </div>
+                              <div id="genus-slider"></div>
+                            </div>
+
+                            <div className="">
+                              <div className="slider-title">
+                                Species Z Score
+                              </div>
+                              <div id="specie-slider"></div>
+                            </div>
+
+                            <div className="">
+                              <div className="slider-title">
+                                Score 1
+                              </div>
+                              <div className="slider-values">
+                                <div className="start">1</div>
+                                <div className="end">100</div>
+                              </div>
+                              <div id="score-slider"></div>
+                            </div>
+                          </div>
+
+                        </div>
+
+                      </div>
+                      <div className="apply-filter-button center-align">
+                        <button className="btn waves-effect grey waves-light">
+                          Apply filter
+                        </button>
+                      </div>
+
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+              <div className="col s9 reports-main ">
+                <div className="reports-table-title">
+                  <div className="result-count">
+                    24 of 100 returned
+                  </div>
+
+                  <div className="">
+                    <select>
+                      <option>
+                        Custom selection
+                      </option>
+                      <option>
+                       Apply filter
+                      </option>
+                    </select>
+                  </div>
+                </div>
+
+                <table className='bordered'>
+                  <thead>
+                  <tr>
+                    <th>Category</th>
+                    <th>Species</th>
+                    <th>Genus</th>
+                    <th>Score 1</th>
+                    <th>NT Genus Z</th>
+                    <th>NT Species Z</th>
+                    <th>NT Species RM</th>
+                  </tr>
+                  </thead>
+
+                  <tbody>
+                  <tr>
+                    <td>Bacteria</td>
+                    <td>Nitrosomonas eutropha (916)</td>
+                    <td>Nitrosomonas (914)</td>
+                    <td>29452</td>
+                    <td>14.61</td>
+                    <td>1.04</td>
+                    <td>27.97</td>
+                  </tr>
+                  <tr>
+                    <td>Bacteria</td>
+                    <td>Nitrosomonas eutropha (916)</td>
+                    <td>Nitrosomonas (914)</td>
+                    <td>29452</td>
+                    <td>14.61</td>
+                    <td>1.04</td>
+                    <td>27.97</td>
+                  </tr>
+                  <tr>
+                    <td>Bacteria</td>
+                    <td>Nitrosomonas eutropha (916)</td>
+                    <td>Nitrosomonas (914)</td>
+                    <td>29452</td>
+                    <td>14.61</td>
+                    <td>1.04</td>
+                    <td>27.97</td>
+                  </tr>
+                  <tr>
+                    <td>Bacteria</td>
+                    <td>Nitrosomonas eutropha (916)</td>
+                    <td>Nitrosomonas (914)</td>
+                    <td>29452</td>
+                    <td>14.61</td>
+                    <td>1.04</td>
+                    <td>27.97</td>
+                  </tr>
+                  <tr>
+                    <td>Bacteria</td>
+                    <td>Nitrosomonas eutropha (916)</td>
+                    <td>Nitrosomonas (914)</td>
+                    <td>29452</td>
+                    <td>14.61</td>
+                    <td>1.04</td>
+                    <td>27.97</td>
+                  </tr>
+                  <tr>
+                    <td>Bacteria</td>
+                    <td>Nitrosomonas eutropha (916)</td>
+                    <td>Nitrosomonas (914)</td>
+                    <td>29452</td>
+                    <td>14.61</td>
+                    <td>1.04</td>
+                    <td>27.97</td>
+                  </tr>
+                  <tr>
+                    <td>Bacteria</td>
+                    <td>Nitrosomonas eutropha (916)</td>
+                    <td>Nitrosomonas (914)</td>
+                    <td>29452</td>
+                    <td>14.61</td>
+                    <td>1.04</td>
+                    <td>27.97</td>
+                  </tr>
+                  <tr>
+                    <td>Bacteria</td>
+                    <td>Nitrosomonas eutropha (916)</td>
+                    <td>Nitrosomonas (914)</td>
+                    <td>29452</td>
+                    <td>14.61</td>
+                    <td>1.04</td>
+                    <td>27.97</td>
+                  </tr>
+                  <tr>
+                    <td>Bacteria</td>
+                    <td>Nitrosomonas eutropha (916)</td>
+                    <td>Nitrosomonas (914)</td>
+                    <td>29452</td>
+                    <td>14.61</td>
+                    <td>1.04</td>
+                    <td>27.97</td>
+                  </tr>
+                  <tr>
+                    <td>Bacteria</td>
+                    <td>Nitrosomonas eutropha (916)</td>
+                    <td>Nitrosomonas (914)</td>
+                    <td>29452</td>
+                    <td>14.61</td>
+                    <td>1.04</td>
+                    <td>27.97</td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     )
   }
