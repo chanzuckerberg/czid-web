@@ -44,23 +44,9 @@ class ReportsController < ApplicationController
       a[:rpm] = 1e6 * taxon_count.count.to_f / @report.pipeline_output.total_reads
       a[:hit_type] = taxon_count.count_type
       normalized_count = taxon_count.count.to_f / @report.pipeline_output.total_reads
-      sum = 0
-      sum_sq = 0
-      n = 0
-      @report.background.pipeline_outputs.each do |bg_pipeline_output|
-        bg_taxon_count = bg_pipeline_output.taxon_counts.find_by(tax_id: taxon_count.tax_id, count_type: taxon_count.count_type)
-        if bg_taxon_count
-          bg_count = bg_taxon_count.count
-          normalized_bg_count = bg_count.to_f / bg_pipeline_output.total_reads
-        else
-          normalized_bg_count = 0
-        end
-        sum += normalized_bg_count
-        sum_sq += normalized_bg_count**2
-        n += 1
-      end
-      mean = sum.to_f / n
-      stdev = Math.sqrt((sum_sq.to_f - sum**2 / n) / (n - 1))
+      summary = @report.background.summarize.detect {|s| s[:tax_id] == taxon_count.tax_id and s[:count_type] == taxon_count.count_type}
+      mean = summary ? summary[:mean] : 0
+      stdev = summary ? summary[:stdev] : 0
       a[:zscore] = if stdev > 0
                      (normalized_count - mean) / stdev
                    else
