@@ -10,7 +10,7 @@ class Sample < ApplicationRecord
 
   belongs_to :project
   has_many :pipeline_outputs, dependent: :destroy
-  has_many :pipeline_runs, dependent: :destroy
+  has_many :pipeline_runs, -> { order(created_at: :desc) }, dependent: :destroy
   has_and_belongs_to_many :backgrounds
   has_many :input_files, dependent: :destroy
   accepts_nested_attributes_for :input_files
@@ -44,6 +44,10 @@ class Sample < ApplicationRecord
     fastq2 = input_files[1].source
     command = "aws s3 cp #{fastq1} #{sample_input_s3_path}/;"
     command += "aws s3 cp #{fastq2} #{sample_input_s3_path}/;"
+    if s3_preload_result_path.present?
+      command += "aws s3 cp #{s3_preload_result_path} #{sample_output_s3_path} --recursive;"
+    end
+    # puts command
     _stdout, stderr, status = Open3.capture3(command)
     raise stderr unless status.exitstatus.zero?
 
