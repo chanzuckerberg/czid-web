@@ -39,7 +39,7 @@ gem 'sprockets-es6'
 gem 'momentjs-rails'
 
 gem 'react-rails'
-gem 'materialize-rails'
+gem 'materialize-sass'
 gem 'font-awesome-rails'
 
 
