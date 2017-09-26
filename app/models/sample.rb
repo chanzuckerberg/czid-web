@@ -118,8 +118,12 @@ class Sample < ApplicationRecord
     pr.command_stdout = stdout
     pr.command_error = stderr
     pr.command_status = status.to_s
-    output =  JSON.parse(pr.command_stdout)
-    pr.job_id = output['jobId']
+    if status.exitstatus.zero?
+      output =  JSON.parse(pr.command_stdout)
+      pr.job_id = output['jobId']
+    else
+      pr.job_status = PipelineRun::STATUS_FAILED
+    end
     pr.save
   end
 end
