@@ -1,7 +1,6 @@
 class PipelineList extends React.Component {
   constructor(props, context) {
     super(props, context);
-
   }
 
   componentDidMount() {
@@ -61,6 +60,6 @@ class PipelineList extends React.Component {
       </div>
     )
   }
-}
 
+}
 
