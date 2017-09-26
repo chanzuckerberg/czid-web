@@ -36,7 +36,6 @@ class PipelineRun < ApplicationRecord
 
   def update_job_status
     return if completed?
-    command = IdSeqPipeline::BASE_COMMAND
     command += "aegea batch describe #{job_id}"
     stdout, _stderr, status = Open3.capture3(command)
     if status.exitstatus.zero?
