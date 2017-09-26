@@ -4,11 +4,7 @@ class PipelineList extends React.Component {
   }
 
   componentDidMount() {
-    // $.get('http://dev.idseq.net/pipeline_outputs.json', function(data, status) {
-    //   this.setState({
-    //     pipelineOutputs: response
-    //   })
-    // })
+    $('.tooltipped').tooltip({delay: 50});
   }
 
   renderPipelineOutput(samples, pipelineruns) {
