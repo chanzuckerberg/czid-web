@@ -12,7 +12,7 @@ class Background < ApplicationRecord
     entries = []
     pipeline_outputs.each do |p|
       p.taxon_counts.each do |taxon_count|
-        entries << {taxid: taxon_count.tax_id, count_type: taxon_count.count_type}
+        entries << { taxid: taxon_count.tax_id, count_type: taxon_count.count_type }
       end
     end
     entries = entries.uniq
@@ -35,9 +35,8 @@ class Background < ApplicationRecord
       end
       mean = sum.to_f / n
       stdev = Math.sqrt((sum_sq.to_f - sum**2 / n) / (n - 1))
-      summary << {taxid: entry[:tax_id], count_type: entry[:count_type], mean: mean, stdev: stdev}
+      summary << { taxid: entry[:tax_id], count_type: entry[:count_type], mean: mean, stdev: stdev }
     end
-    return summary
+    summary
   end
-
 end

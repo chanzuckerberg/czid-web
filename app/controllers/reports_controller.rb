@@ -44,14 +44,8 @@ class ReportsController < ApplicationController
       a[:rpm] = 1e6 * taxon_count.count.to_f / @report.pipeline_output.total_reads
       a[:hit_type] = taxon_count.count_type
       normalized_count = taxon_count.count.to_f / @report.pipeline_output.total_reads
-      summary = @report.background.summarize.detect {|s| s[:tax_id] == taxon_count.tax_id and s[:count_type] == taxon_count.count_type}
-      mean = summary ? summary[:mean] : 0
-      stdev = summary ? summary[:stdev] : 0
-      a[:zscore] = if stdev > 0
-                     (normalized_count - mean) / stdev
-                   else
-                     0
-                   end
+      summary = @report.background.summarize.detect { |s| s[:tax_id] == taxon_count.tax_id && s[:count_type] == taxon_count.count_type }
+      a[:zscore] = compute_zscore(normalized_count, summary)
       @report.taxon_zscores.new(a)
     end
 
@@ -100,6 +94,14 @@ class ReportsController < ApplicationController
     @nt_genus_zscores = zscores.type('NT').level(TaxonCount::TAX_LEVEL_GENUS)
     @nr_genus_zscores = zscores.type('NR').level(TaxonCount::TAX_LEVEL_GENUS)
     @ordered_genus_tax_ids = @nt_genus_zscores.order(zscore: :desc).where.not("tax_id < 0").map(&:tax_id)
+  end
+
+  def compute_zscore(normalized_count, summary)
+    if !summary || (summary[:stdev]).zero?
+      0
+    else
+      (normalized_count - summary[:mean]) / summary[:stdev]
+    end
   end
 
   # Use callbacks to share common setup or constraints between actions.
