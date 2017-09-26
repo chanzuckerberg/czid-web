@@ -1,7 +1,6 @@
 class PipelineList extends React.Component {
   constructor(props, context) {
     super(props, context);
-
   }
 
   renderPipelineOutput(samples, pipelineruns) {
@@ -82,6 +81,6 @@ class PipelineList extends React.Component {
       </div>
     )
   }
-}
 
+}
 

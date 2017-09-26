@@ -541,9 +541,6 @@ GEM
     materialize-sass (0.100.2)
       sass (~> 3.3)
     method_source (0.9.0)
-    materialize-rails (0.97.5.2)
-      jquery-rails
-      sass-rails
     mime-types (3.1)
       mime-types-data (~> 3.2015)
     mime-types-data (3.2016.0521)
@@ -676,7 +673,8 @@ GEM
       rack (~> 2.0)
       rack-protection (= 2.0.0)
       tilt (~> 2.0)
-    spring (1.7.2)
+    spring (2.0.2)
+      activesupport (>= 4.2)
     spring-watcher-listen (2.0.1)
       listen (>= 2.7, < 4.0)
       spring (>= 1.2, < 3.0)
@@ -739,7 +737,6 @@ DEPENDENCIES
   logger
   materialize-sass
   momentjs-rails
-  materialize-rails
   mysql2
   puma (~> 3.7)
   rails (~> 5.1.2)
