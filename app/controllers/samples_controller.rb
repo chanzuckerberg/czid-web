@@ -76,7 +76,7 @@ class SamplesController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def sample_params
-    params.require(:sample).permit(:name, :project_name, :status,
+    params.require(:sample).permit(:name, :project_name, :status, :s3_preload_result_path,
                                    :sample_host, :sample_location, :sample_date, :sample_tissue,
                                    :sample_template, :sample_library, :sample_sequencer, :sample_notes,
                                    input_files_attributes: [:name, :presigned_url, :source_type, :source])
