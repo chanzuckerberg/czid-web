@@ -35,6 +35,9 @@ class ReportsController < ApplicationController
   # POST /reports.json
   def create
     @report = Report.new(report_params)
+    if not @report.background
+      @report.background = Background.find(1)
+    end
     @report.pipeline_output.taxon_counts.each do |taxon_count|
       a = {}
       a[:tax_id] = taxon_count.tax_id
