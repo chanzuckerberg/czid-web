@@ -1,26 +1,27 @@
 /* TODO: refactor stylesheet into scss */
 
 .tabs {
+  display: block !important;
+  .tab {
+    width: auto !important;
+  }
 
-	display: block !important;
+  &.tabs-transparent {
+    background: transparent;
+  }
 
-	.tab {
-		width: auto !important;
-	}
+  .indicator {
+    background: #263039 !important;
+  }
 
-	.indicator {
-		background: #263039 !important;
-	}
-
-	.tab a {
-		color: #333333;
-		font-size: 14px;
-	  padding: 0 !important;
-	  margin-right: 30px;
-	  text-transform: none !important;
-	  text-align: left;
-	}
-
+  .tab a {
+    color: #333333;
+    font-size: 14px;
+    padding: 0 !important;
+    margin-right: 30px;
+    text-transform: none !important;
+    text-align: left;
+  }
 }
 
 .tab-screen {
@@ -71,8 +72,8 @@
   color: #767676 !important;
 }
 
-.data table tr td {
-  width: 50%;
+.data table tr td:nth-child(odd) {
+  width: 35%;
 }
 
 .data table {

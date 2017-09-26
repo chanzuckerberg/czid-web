@@ -18,7 +18,7 @@ class Header extends React.Component  {
 
           <div>
             <div className="">
-              <a href="#!" className="left brand-details">
+              <a href="/" className="left brand-details">
                 <div className="brand-short">
                     ID<i>seq</i>
                 </div>
@@ -35,14 +35,10 @@ class Header extends React.Component  {
                   </a>
                 </div>
 
-                <div className="settings-icon">
-                  <i className="fa fa-gear"> </i>
-                </div>
               </div>
             </div>
           </div>
         </div>
-
       </div>
 
     )
