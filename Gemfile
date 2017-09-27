@@ -28,6 +28,7 @@ gem 'simple_token_authentication', '~> 1.0' # see semver.org
 # Worker/Scheduler management
 gem 'resque'
 gem 'resque-scheduler'
+gem 'resque-lock'
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 5.0'
 # Turbolinks makes navigating your web application faster. Read more: https://github.com/turbolinks/turbolinks
