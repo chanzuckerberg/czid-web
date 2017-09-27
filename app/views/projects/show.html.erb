@@ -18,32 +18,7 @@
   <%= @project.created_at %>
 </p>
 
-<p>
-  <strong>Samples:</strong>
-</p>
-
-<% if @project.samples.count == 0 %>
-  No samples yet.
-<% else %>
-  <table class="table table-condensed">
-    <thead>
-      <tr>
-        <th>Sample</th>
-        <th>Pipeline runs</th>
-        <th colspan="1"></th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @project.samples.each do |sample| %>
-        <tr>
-          <td><%= link_to sample.name, sample %></td>
-          <td><%= sample.pipeline_outputs.count %></td>
-          <td><%= link_to 'Show', sample %></td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-<% end %>
+<%= render "samples/samples", samples:@project.samples %>
 
 <p>
 <%= link_to 'Edit', edit_project_path(@project) %> |
