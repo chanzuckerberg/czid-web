@@ -105,6 +105,7 @@ ActiveRecord::Schema.define(version: 20170927203554) do
     t.string "sample_library"
     t.string "sample_sequencer"
     t.text "sample_notes"
+    t.text "s3_preload_result_path"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
   end
 

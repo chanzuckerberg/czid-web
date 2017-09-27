@@ -15,12 +15,16 @@ end
 puts "deploying #{image} to #{env}"
 
 CLUSTER = 'dev'.freeze
-SERVICE = "idseq-web-#{env}".freeze
+RAILS_SERVICE = "idseq-web-#{env}".freeze
+RESQUE_WORKER_SERVICE = "idseq-resque-#{env}".freeze
+RESQUE_SCHEDULER_SERVICE = "idseq-resque-scheduler-#{env}".freeze
 REPO = 'chanzuckerberg/idseq-web'.freeze
 REGION = 'us-west-2'.freeze
 LOG_GROUP = 'ecs-logs-dev'.freeze
 TASK_NAME = 'rails'.freeze
 CONTAINER_NAME = 'rails'.freeze
+
+client = Aws::ECS::Client.new
 
 def log_url(region, log_group, task_name, container_name, task_id)
   "https://#{region}.console.aws.amazon.com/cloudwatch/home?region=#{region}#logEventViewer:group=#{log_group};stream=#{task_name}/#{container_name}/#{task_id}"
@@ -30,94 +34,109 @@ def service_url(region, cluster, service)
   "https://#{region}.console.aws.amazon.com/ecs/home?region=#{region}#/clusters/#{cluster}/services/#{service}/details"
 end
 
-client = Aws::ECS::Client.new
+def get_service_and_task(client, cluster, service)
+  resp = client.describe_services(cluster: cluster, services: [service])
+  service = resp.services.first
 
-resp = client.describe_services(cluster: CLUSTER,
-                                services: [SERVICE])
+  resp2 = client.describe_task_definition(task_definition: service.task_definition)
+  task_def = resp2.task_definition
 
-service = resp.services.first
+  [service, task_def]
+end
 
-resp2 = client.describe_task_definition(task_definition: service.task_definition)
+def register_task_def(client, task_def)
+  resp = client.register_task_definition(task_def)
 
-puts "current task is revision #{resp2.task_definition.revision}"
-task_def = resp2.task_definition.to_h
+  resp.task_definition
+end
 
-task_def.delete(:task_definition_arn)
-task_def.delete(:revision)
-task_def.delete(:status)
-task_def.delete(:requires_attributes)
-task_def[:container_definitions][0][:image] = "#{REPO}:#{image}"
+def run_task(client, cluster, service, task_revision, container, command)
+  overrides = {
+    container_overrides: [
+      {
+        name: container,
+        command: command
+      }
+    ]
+  }
+  resp = client.run_task(cluster: cluster,
+                         task_definition: "#{service}:#{task_revision}",
+                         overrides: overrides)
 
-resp3 = client.register_task_definition(task_def)
+  task = resp.tasks[0]
+  migrate_task_arn = task.task_arn
+  task_id = migrate_task_arn.split(':').last.split('/').last
 
-new_task = resp3.task_definition
-puts "created new task definition #{new_task.revision}"
+  puts "  logs -> #{log_url(REGION, LOG_GROUP, TASK_NAME, CONTAINER_NAME, task_id)}"
 
-puts 'running migrations'
+  loop do
+    resp2 = client.describe_tasks(cluster: CLUSTER, tasks: [migrate_task_arn])
 
-resp4 = client.run_task(cluster: CLUSTER,
-                        task_definition: "#{SERVICE}:#{new_task.revision}",
-                        overrides: {
-                          container_overrides: [
-                            {
-                              name: 'rails',
-                              command: ['rails', 'db:migrate']
-                            }
-                          ]
-                        })
-
-migrate_task = resp4.tasks[0].task_arn
-task_id = resp4.tasks[0].task_arn.split(':').last.split('/').last
-print "  logs -> #{log_url(REGION, LOG_GROUP, TASK_NAME, CONTAINER_NAME, task_id)}\n"
-
-loop do
-  resp5 = client.describe_tasks(cluster: CLUSTER,
-                                tasks: [
-                                  migrate_task
-                                ])
-
-  print "migration task: #{resp5.tasks[0].last_status}\r"
-  if resp5.tasks[0].last_status == 'STOPPED'
-    puts
-    if resp5.tasks[0].containers[0].exit_code.zero?
-      puts 'migration(s) successful'
-      break
-    else
-      puts 'migration(s) failed, see logs'
-      exit
+    print "migration task: #{resp2.tasks[0].last_status}\r"
+    if resp2.tasks[0].last_status == 'STOPPED'
+      puts
+      if resp2.tasks[0].containers[0].exit_code.zero?
+        puts 'migration(s) successful'
+        break
+      else
+        puts 'migration(s) failed, see logs'
+        exit
+      end
     end
+    sleep(5)
   end
-  sleep(5)
 end
 
-client.update_service(cluster: CLUSTER,
-                      service: SERVICE,
-                      task_definition: "idseq-web-#{env}:#{new_task.revision}")
+def update_service(client, cluster, service, task_def)
+  client.update_service(cluster: cluster, service: service, task_definition: task_def)
 
-loop do
-  resp7 = client.describe_services(cluster: CLUSTER,
-                                   services: [
-                                     SERVICE
-                                   ])
+  loop do
+    resp = client.describe_services(cluster: cluster, services: [service])
 
-  puts '=' * 80
-  service = resp7.services[0]
+    puts '=' * 80
+    serv = resp.services[0]
 
-  puts "desired: #{service.desired_count} running: #{service.running_count} pending #{service.pending_count}"
-  puts "deployments:\t task_definition\tdesired\trunning\tpending"
-  service.deployments.each do |deployment|
-    puts "\t\t#{deployment.task_definition.split('/').last}\t#{deployment.desired_count}\t#{deployment.running_count}\t#{deployment.pending_count}"
+    puts "desired: #{serv.desired_count} running: #{serv.running_count} pending #{serv.pending_count}"
+    puts "deployments:\t task_definition\tdesired\trunning\tpending"
+    serv.deployments.each do |deployment|
+      puts "\t\t#{deployment.task_definition.split('/').last}\t#{deployment.desired_count}\t#{deployment.running_count}\t#{deployment.pending_count}"
+    end
+    puts 'events'
+    serv.events[(0..5)].each do |event|
+      puts "#{printf('%4d', (Time.now - event.created_at).to_i)} seconds ago:\t#{event.message}"
+    end
+
+    print "  service info -> #{service_url(REGION, cluster, service)}\n"
+
+    break if serv.deployments.count == 1
+    sleep 5
   end
-  puts 'events'
-  service.events[(0..5)].each do |event|
-    puts "#{printf('%4d', (Time.now - event.created_at).to_i)} seconds ago:\t#{event.message}"
-  end
-
-  print "  service info -> #{service_url(REGION, CLUSTER, SERVICE)}\n"
-
-  if service.deployments.count == 1
-    puts 'deployment complete'
-    break
-  end
-  sleep 5
 end
+
+def deploy(client, cluster, service, repo, image, run_migrations = false)
+  _, task_def = get_service_and_task(client, cluster, service)
+  puts "current task is revision #{task_def.revision}"
+  task_def = task_def.to_h
+
+  %i[task_definition_arn revision status requires_attributes].each do |k|
+    task_def.delete(k)
+  end
+
+  task_def[:container_definitions][0][:image] = "#{repo}:#{image}"
+
+  new_task = register_task_def(client, task_def)
+
+  puts "created new task definition #{new_task.revision}"
+
+  if run_migrations
+    puts 'running migrations'
+    run_task(client, cluster, service, new_task.revision, 'rails', ['rails', 'db:migrate'])
+  end
+
+  update_service(client, cluster, service, "#{service}:#{new_task.revision}")
+  puts "#{service} deployment complete"
+end
+
+deploy(client, CLUSTER, RAILS_SERVICE, REPO, image, true)
+deploy(client, CLUSTER, RESQUE_WORKER_SERVICE, REPO, image, false)
+deploy(client, CLUSTER, RESQUE_SCHEDULER_SERVICE, REPO, image, false)

@@ -10,7 +10,7 @@ class Sample < ApplicationRecord
 
   belongs_to :project
   has_many :pipeline_outputs, dependent: :destroy
-  has_many :pipeline_runs, dependent: :destroy
+  has_many :pipeline_runs, -> { order(created_at: :desc) }, dependent: :destroy
   has_and_belongs_to_many :backgrounds
   has_many :input_files, dependent: :destroy
   accepts_nested_attributes_for :input_files
@@ -44,6 +44,9 @@ class Sample < ApplicationRecord
     fastq2 = input_files[1].source
     command = "aws s3 cp #{fastq1} #{sample_input_s3_path}/;"
     command += "aws s3 cp #{fastq2} #{sample_input_s3_path}/;"
+    if s3_preload_result_path.present?
+      command += "aws s3 cp #{s3_preload_result_path} #{sample_output_s3_path} --recursive;"
+    end
     _stdout, stderr, status = Open3.capture3(command)
     raise stderr unless status.exitstatus.zero?
 
@@ -71,17 +74,10 @@ class Sample < ApplicationRecord
   def pipeline_command
     script_name = File.basename(IdSeqPipeline::S3_SCRIPT_LOC)
     batch_command = "aws s3 cp #{IdSeqPipeline::S3_SCRIPT_LOC} .; chmod 755 #{script_name}; " \
-      "INPUT_BUCKET=#{sample_input_s3_path} " \
-      "OUTPUT_BUCKET=#{sample_output_s3_path} " \
-      "DB_SAMPLE_ID=#{id} " \
-      "SAMPLE_HOST=#{sample_host} " \
-      "SAMPLE_LOCATION=#{sample_location} " \
-      "SAMPLE_DATE=#{sample_date} " \
-      "SAMPLE_TISSUE=#{sample_tissue} " \
-      "SAMPLE_TEMPLATE=#{sample_template} " \
-      "SAMPLE_LIBRARY=#{sample_library} " \
-      "SAMPLE_SEQUENCER=#{sample_sequencer} " \
-      "SAMPLE_NOTES=#{sample_notes} " \
+      "INPUT_BUCKET=#{sample_input_s3_path} OUTPUT_BUCKET=#{sample_output_s3_path} " \
+      "DB_SAMPLE_ID=#{id} SAMPLE_HOST=#{sample_host} SAMPLE_LOCATION=#{sample_location} " \
+      "SAMPLE_DATE=#{sample_date} SAMPLE_TISSUE=#{sample_tissue} SAMPLE_TEMPLATE=#{sample_template} " \
+      "SAMPLE_LIBRARY=#{sample_library} SAMPLE_SEQUENCER=#{sample_sequencer} SAMPLE_NOTES=#{sample_notes} " \
       "./#{script_name}"
     command = "aegea batch submit --command=\"#{batch_command}\" "
     command += " --storage /mnt=1500 --ecr-image idseq --memory 64000"
@@ -114,8 +110,12 @@ class Sample < ApplicationRecord
     pr.command_stdout = stdout
     pr.command_error = stderr
     pr.command_status = status.to_s
-    output =  JSON.parse(pr.command_stdout)
-    pr.job_id = output['jobId']
+    if status.exitstatus.zero?
+      output =  JSON.parse(pr.command_stdout)
+      pr.job_id = output['jobId']
+    else
+      pr.job_status = PipelineRun::STATUS_FAILED
+    end
     pr.save
   end
 end
