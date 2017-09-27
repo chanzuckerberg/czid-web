@@ -15,11 +15,11 @@ class PipelineList extends React.Component {
           <div className="container">
             <div className="content">
               <div className="title">
-                All Projects  >  Uganda Project
+                All Projects  > { this.props.outputData.project_info.name }
               </div>
 
               <div className="sub-title">
-                Uganda Project
+                { this.props.outputData.project_info.name }
               </div>
 
               <div className="title-filter">
@@ -47,7 +47,9 @@ class PipelineList extends React.Component {
                   return (
                     <tbody key={i}>
                     <tr>
-                      <td><a href={'/pipeline_outputs/' + output.id}><i className="fa fa-flask" aria-hidden="true"></i>{output.id}</a></td>
+                      <td><a href={'/pipeline_outputs/' + output.id}>
+                        <i className="fa fa-flask" aria-hidden="true"></i> {this.props.outputData.sample_info.name} </a>
+                      </td>
                       <td><a href={'/pipeline_outputs/' + output.id}>{moment(output.created_at).format(' L , h:mm a')}</a></td>
                       <td><a href={'/pipeline_outputs/' + output.id}>{output.total_reads}</a></td>
                       <td><a href={'/pipeline_outputs/' + output.id}>{output.remaining_reads }</a></td>
