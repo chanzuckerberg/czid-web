@@ -2,7 +2,6 @@ class PipelineSampleReads extends React.Component {
 
   constructor(props) {
     super(props);
-    console.log(props);
     this.pipelineOutput = this.props.pipelineOutput;
     this.sampleInfo = this.props.sampleInfo;
     this.projectInfo = this.props.projectInfo;
