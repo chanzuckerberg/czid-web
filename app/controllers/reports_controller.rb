@@ -35,14 +35,17 @@ class ReportsController < ApplicationController
   # POST /reports.json
   def create
     @report = Report.new(report_params)
-    @report.background = Background.find(1) unless @report.background
+    unless Background.find_by(name: "default") || @report.background
+      raise "No background specified and background 'default' does not exist"
+    end
+    @report.background = Background.find_by(name: "default") unless @report.background
     total_reads = @report.pipeline_output.total_reads
     summary = @report.background.summarize
-    data = @report.pipeline_output.taxon_counts.map{|h| h.attributes.merge({norm_count: h["count"]/total_reads.to_f})}
-    data_and_background = (data+summary).group_by{|h| [h["tax_id"], h["tax_level"], h["name"], h["count_type"]]}.map{|k,v| v.reduce(:merge)} 
-    zscore_array = data_and_background.map { |h| {tax_id: h["tax_id"], tax_level: h["tax_level"], name: h["name"], rpm: compute_rpm(h["count"], total_reads), hit_type: h["count_type"], zscore: compute_zscore(h["norm_count"], h[:mean], h[:stdev])} }
-    @report.taxon_zscores << TaxonZscore.create(zscore_array)  
- 
+    data = @report.pipeline_output.taxon_counts.map { |h| h.attributes.merge(norm_count: h["count"] / total_reads.to_f) }
+    data_and_background = (data + summary).group_by { |h| [h["tax_id"], h["tax_level"], h["name"], h["count_type"]] }.map { |_k, v| v.reduce(:merge) }
+    zscore_array = data_and_background.map { |h| { tax_id: h["tax_id"], tax_level: h["tax_level"], name: h["name"], rpm: compute_rpm(h["count"], total_reads), hit_type: h["count_type"], zscore: compute_zscore(h["norm_count"], h[:mean], h[:stdev]) } }
+    @report.taxon_zscores << TaxonZscore.create(zscore_array)
+
     respond_to do |format|
       if @report.save
         format.html { redirect_to @report, notice: 'Report was successfully created.' }
@@ -91,7 +94,7 @@ class ReportsController < ApplicationController
   end
 
   def compute_rpm(count, total_reads)
-    if count 
+    if count
       count * 1e6 / total_reads.to_f
     else
       0
@@ -99,10 +102,8 @@ class ReportsController < ApplicationController
   end
 
   def compute_zscore(count, mean, stdev)
-    if count and mean
+    if count && mean
       (count - mean) / stdev
-    elsif count and !mean
-      1000000000
     else
       0
     end
