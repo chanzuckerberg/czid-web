@@ -9,34 +9,12 @@ class Background < ApplicationRecord
   end
 
   def summarize
-    entries = []
-    pipeline_outputs.each do |p|
-      p.taxon_counts.each do |taxon_count|
-        entries << { taxid: taxon_count.tax_id, count_type: taxon_count.count_type }
-      end
-    end
-    entries = entries.uniq
-    summary = []
-    entries.each do |entry|
-      sum = 0
-      sum_sq = 0
-      n = 0
-      pipeline_outputs.each do |p|
-        taxon_count = p.taxon_counts.find_by(tax_id: entry[:tax_id], count_type: entry[:count_type])
-        if taxon_count
-          count = taxon_count.count
-          normalized_count = count.to_f / p.total_reads
-        else
-          normalized_count = 0
-        end
-        sum += normalized_count
-        sum_sq += normalized_count**2
-        n += 1
-      end
-      mean = sum.to_f / n
-      stdev = Math.sqrt((sum_sq.to_f - sum**2 / n) / (n - 1))
-      summary << { taxid: entry[:tax_id], count_type: entry[:count_type], mean: mean, stdev: stdev }
-    end
-    summary
+    results = PipelineOutput.joins(:taxon_counts).group("tax_id, count_type, tax_level, name").select("tax_id, count_type, tax_level, name, sum((1.0*count)/total_reads) as sum_norm_counts, sum((1.0*count*count)/(total_reads*total_reads)) as sum_norm_counts2").where("pipeline_output_id in (select pipeline_output_id from backgrounds_pipeline_outputs where background_id = #{id})")
+    n = pipeline_outputs.count
+    results.map{|h| h.attributes.merge({mean: h[:sum_norm_counts]/n.to_f, stdev: compute_stdev(h[:sum_norm_counts], h[:sum_norm_counts2], n)})}
+  end
+
+  def compute_stdev(sum, sum2, n)
+    Math.sqrt((sum2 - sum**2/n.to_f)/(n-1))
   end
 end

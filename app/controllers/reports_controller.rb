@@ -36,19 +36,13 @@ class ReportsController < ApplicationController
   def create
     @report = Report.new(report_params)
     @report.background = Background.find(1) unless @report.background
-    @report.pipeline_output.taxon_counts.each do |taxon_count|
-      a = {}
-      a[:tax_id] = taxon_count.tax_id
-      a[:tax_level] = taxon_count.tax_level
-      a[:name] = taxon_count.name
-      a[:rpm] = 1e6 * taxon_count.count.to_f / @report.pipeline_output.total_reads
-      a[:hit_type] = taxon_count.count_type
-      normalized_count = taxon_count.count.to_f / @report.pipeline_output.total_reads
-      summary = @report.background.summarize.detect { |s| s[:tax_id] == taxon_count.tax_id && s[:count_type] == taxon_count.count_type }
-      a[:zscore] = compute_zscore(normalized_count, summary)
-      @report.taxon_zscores.new(a)
-    end
-
+    total_reads = @report.pipeline_output.total_reads
+    summary = @report.background.summarize
+    data = @report.pipeline_output.taxon_counts.map{|h| h.attributes.merge({norm_count: h["count"]/total_reads.to_f})}
+    data_and_background = (data+summary).group_by{|h| [h["tax_id"], h["tax_level"], h["name"], h["count_type"]]}.map{|k,v| v.reduce(:merge)} 
+    zscore_array = data_and_background.map { |h| {tax_id: h["tax_id"], tax_level: h["tax_level"], name: h["name"], rpm: compute_rpm(h["count"], total_reads), hit_type: h["count_type"], zscore: compute_zscore(h["norm_count"], h[:mean], h[:stdev])} }
+    @report.taxon_zscores << TaxonZscore.create(zscore_array)  
+ 
     respond_to do |format|
       if @report.save
         format.html { redirect_to @report, notice: 'Report was successfully created.' }
@@ -96,11 +90,21 @@ class ReportsController < ApplicationController
     @ordered_genus_tax_ids = @nt_genus_zscores.order(zscore: :desc).where.not("tax_id < 0").map(&:tax_id)
   end
 
-  def compute_zscore(normalized_count, summary)
-    if !summary || (summary[:stdev]).zero?
-      0
+  def compute_rpm(count, total_reads)
+    if count 
+      count * 1e6 / total_reads.to_f
     else
-      (normalized_count - summary[:mean]) / summary[:stdev]
+      0
+    end
+  end
+
+  def compute_zscore(count, mean, stdev)
+    if count and mean
+      (count - mean) / stdev
+    elsif count and !mean
+      1000000000
+    else
+      0
     end
   end
 
