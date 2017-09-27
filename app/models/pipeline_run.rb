@@ -34,10 +34,15 @@ class PipelineRun < ApplicationRecord
     return true if pipeline_output || job_status == STATUS_FAILED
   end
 
+  def log_url
+    return nil unless job_log_id
+    "https://us-west-2.console.aws.amazon.com/cloudwatch/home?region=us-west-2" \
+      "#logEventViewer:group=/aws/batch/job;stream=#{job_log_id}"
+  end
+
   def update_job_status
     return if completed?
-    command = IdSeqPipeline::BASE_COMMAND
-    command += "aegea batch describe #{job_id}"
+    command = "aegea batch describe #{job_id}"
     stdout, _stderr, status = Open3.capture3(command)
     if status.exitstatus.zero?
       self.job_description = stdout
@@ -77,8 +82,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def download_file(s3_path)
-    command = IdSeqPipeline::BASE_COMMAND
-    command += "mkdir -p #{local_json_path};"
+    command = "mkdir -p #{local_json_path};"
     command += "aws s3 cp #{s3_path} #{local_json_path}/;"
     _stdout, _stderr, status = Open3.capture3(command)
     return nil unless status.exitstatus.zero?
