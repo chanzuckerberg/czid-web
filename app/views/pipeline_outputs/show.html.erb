@@ -1,1 +1,2 @@
-<%= react_component 'PipelineSampleReads' %>
+<%= react_component 'PipelineSampleReads', sampleInfo: @pipeline_output.sample,
+                    pipelineOutput: @pipeline_output, projectInfo: @pipeline_output.sample.project %>

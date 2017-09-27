@@ -1,5 +1,13 @@
 class PipelineSampleReads extends React.Component {
 
+  constructor(props) {
+    super(props);
+    console.log(props);
+    this.pipelineOutput = this.props.pipelineOutput;
+    this.sampleInfo = this.props.sampleInfo;
+    this.projectInfo = this.props.projectInfo;
+  }
+
   componentDidMount() {
     $('ul.tabs').tabs();
     const slider = document.getElementById('genus-slider');
@@ -62,14 +70,14 @@ class PipelineSampleReads extends React.Component {
             </div>
 
             <div className="sub-title">
-              <a href="/">Uganda Project</a> > NID0015_CSF_S3
+              <a href="/"> {this.projectInfo.name} </a> > { this.sampleInfo.name }
             </div>
 
             <div className="sub-header-navigation">
               <div className="nav-content">
                 <ul className="tabs tabs-transparent">
                   <li className="tab"><a href="#screen1" className="active">Details</a></li>
-                  <li className="tab"><a href="#screen4">Reports</a></li>
+                  <li className="tab"><a href="#reports">Reports</a></li>
                 </ul>
               </div>
             </div>
@@ -93,27 +101,15 @@ class PipelineSampleReads extends React.Component {
                             <tbody>
                               <tr>
                                 <td>Host</td>
-                                 <td>Human</td>
+                                 <td> { (!this.sampleInfo.host) ? 'N/A' : this.sampleInfo.host } </td>
                               </tr>
                               <tr>
                                 <td>Entry Date</td>
-                                <td>07-01-2015</td>
-                              </tr>
-                             <tr>
-                                <td>Illumina Run Date</td>
-                                <td>07-01-2015</td>
+                                <td>{moment(this.sampleInfo.created_at).format('L, h:mm a')}</td>
                               </tr>
                               <tr>
-                                <td>Illumina Flow Cell</td>
-                                <td className=" grey-text text-lighten-1">Not Set</td>
-                              </tr>
-                             <tr>
-                                <td>Nucleic Acid Type</td>
-                                <td>RNA</td>
-                              </tr>
-                             <tr>
-                                <td>Diagnosis</td>
-                                <td>Neurocysticercosis</td>
+                                <td>Location</td>
+                                <td>{ (!this.sampleInfo.sample_location) ? 'N/A' : this.sampleInfo.sample_location }</td>
                               </tr>
                             </tbody>
                           </table>
@@ -123,47 +119,11 @@ class PipelineSampleReads extends React.Component {
                             <tbody>
                               <tr>
                                 <td>Tissue Type</td>
-                                 <td>CSF</td>
+                                 <td>{ (!this.sampleInfo.sample_tissue) ? 'N/A' : this.sampleInfo.sample_tissue }</td>
                               </tr>
                               <tr>
                                 <td>Library Prep Protocol</td>
-                                <td>NuGen-Nextera</td>
-                              </tr>
-                             <tr>
-                                <td>Lab</td>
-                                <td className=" grey-text text-lighten-1">Not set</td>
-                              </tr>
-                              <tr>
-                                <td>Location</td>
-                                <td>Uganda</td>
-                              </tr>
-                             <tr>
-                                <td>Symptopms</td>
-                                <td>Fever, Coma</td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-
-                      <div className="row">
-                        <div className="col s12">
-                          <table>
-                            <tbody>
-                              <tr>
-                                <td className="notes">Notes</td>
-                                <td className="sample-notes">
-                                  Subject 2
-                                  <br/>
-                                  248 6204  Taenia solium
-                                  <br/>
-                                  827 60517 Taenia asiatica
-                                  <br/>
-                                  -- Ignored pairs: 2787
-                                  <br/>
-                                  -- Retained pairs: 569 (16.95 percent of total non-host sequence)
-                                  <br/>
-                                </td>
+                                <td>{ (!this.sampleInfo.sample_library) ? 'N/A' : this.sampleInfo.sample_library }</td>
                               </tr>
                             </tbody>
                           </table>
@@ -188,15 +148,12 @@ class PipelineSampleReads extends React.Component {
                             <tbody>
                               <tr>
                                 <td>Total reads</td>
-                                 <td>177127171</td>
+                                 <td>{ this.pipelineOutput.total_reads }</td>
                               </tr>
                               <tr>
                                 <td>Passed Quality Control</td>
-                                <td>2.78%</td>
-                              </tr>
-                             <tr>
-                                <td>Compression Ratio</td>
-                                <td>2.45</td>
+                                <td>{(this.pipelineOutput.remaining_reads /
+                                  this.pipelineOutput.total_reads * 100).toFixed(2) }%</td>
                               </tr>
                             </tbody>
                           </table>
@@ -205,72 +162,13 @@ class PipelineSampleReads extends React.Component {
                           <table className="highlight">
                             <tbody>
                               <tr>
-                                <td>Final Read Paris</td>
-                                 <td>214141</td>
-                              </tr>
-                              <tr>
-                                <td>Unmatched Reads</td>
-                                <td>12981</td>
-                              </tr>
-                             <tr>
-                                <td>Non Human Reads</td>
-                                <td>245532</td>
+                                <td>Remaining Reads</td>
+                                 <td>{ this.pipelineOutput.remaining_reads }</td>
                               </tr>
                             </tbody>
                           </table>
                         </div>
                       </div>
-                    </div>
-
-                    <div className="genome-breakdown">
-                      <div>
-                        Genome Breakdown
-                      </div>
-                      <div className="labels">
-                        <ul>
-                          <li className="">
-                            <div className="label-color mid-gray"></div>
-                            <div className="label-title">
-                              <span className="read-count">31781</span>
-                              <span className="read-label">Bacteria Reads</span>
-                            </div>
-                          </li>
-
-                          <li className="">
-                            <div className="label-color light-gray"></div>
-                            <div className="label-title">
-                              <span className="read-count">31781</span>
-                              <span className="read-label">Bacteria Reads</span>
-                            </div>
-                          </li>
-
-                          <li className="">
-                            <div className="label-color dark-gray"></div>
-                            <div className="label-title">
-                              <span className="read-count">31781</span>
-                             <span className="read-label">Bacteria Reads</span>
-                            </div>
-                          </li>
-
-                          <li className="">
-                            <div className="label-color normal-gray"></div>
-                            <div className="label-title">
-                              <span className="read-count">31781</span>
-                              <span className="read-label">Bacteria Reads</span>
-                            </div>
-                          </li>
-                        </ul>
-                      </div>
-
-                      <div className="graph">
-                        <div className="row">
-                          <div className="col s3 visuals mid-gray"></div>
-                          <div className="col s3 visuals light-gray"></div>
-                          <div className="col s3 visuals dark-gray"></div>
-                          <div className="col s3 visuals normal-gray"></div>
-                        </div>
-                      </div>
-
                     </div>
                   </div>
                 </div>
@@ -285,7 +183,7 @@ class PipelineSampleReads extends React.Component {
                   <i className="fa fa-user-times left"></i> DOWNLOAD NON HUMAN READS
                 </a>
 
-                <a href="/pipeline_outputs/1/#screen4" className="custom-button">
+                <a href={'/pipeline_outputs/' + this.pipelineOutput.id + '/#reports'} className="custom-button">
                   <i className="fa fa-file-text-o left"></i> GENERATE REPORT
                 </a>
               </div>
@@ -293,7 +191,7 @@ class PipelineSampleReads extends React.Component {
             </div>
           </div>
         </div>
-        <div id="screen4" className="reports-screen tab-screen col s12">
+        <div id="reports" className="reports-screen tab-screen col s12">
           <div className="container tab-screen-content">
             <div className="row">
               <div className="col s3 reports-sidebar">
