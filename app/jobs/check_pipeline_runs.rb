@@ -1,6 +1,8 @@
 # Jos to check the status of pipeline runs
 require 'logger'
+require 'resque/plugins/lock'
 class CheckPipelineRuns
+  extend Resque::Plugins::Lock
   @queue = :q03_pipeline_run
   @logger = Logger.new(STDOUT)
   def self.perform
