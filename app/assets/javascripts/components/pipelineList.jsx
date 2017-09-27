@@ -50,7 +50,7 @@ class PipelineList extends React.Component {
                       <td><a href={'/pipeline_outputs/' + output.id}>
                         <i className="fa fa-flask" aria-hidden="true"></i> {this.props.outputData.sample_info.name} </a>
                       </td>
-                      <td><a href={'/pipeline_outputs/' + output.id}>{moment(output.created_at).format(' L , h:mm a')}</a></td>
+                      <td><a href={'/pipeline_outputs/' + output.id}>{moment(output.created_at).format(' L,  h:mm a')}</a></td>
                       <td><a href={'/pipeline_outputs/' + output.id}>{output.total_reads}</a></td>
                       <td><a href={'/pipeline_outputs/' + output.id}>{output.remaining_reads }</a></td>
                       <td><a href={'/pipeline_outputs/' + output.id}>{(output.remaining_reads/output.total_reads * 100).toFixed(2) }%</a></td>
