@@ -3,6 +3,6 @@ class HomeController < ApplicationController
     @users = User.all
     @projects = Project.all
     @samples = Sample.all
-    @pipeline_outputs = PipelineOutput.all
+    @pipeline_outputs = PipelineOutput.order("created_at DESC")
   end
 end

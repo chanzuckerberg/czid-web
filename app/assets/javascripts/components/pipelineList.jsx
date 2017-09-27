@@ -36,9 +36,10 @@ class PipelineList extends React.Component {
                 <thead>
                 <tr>
                   <th>Name</th>
-                  <th>Date</th>
+                  <th>Date Uploaded</th>
                   <th>Total Reads</th>
                   <th>Final Reads</th>
+                  <th>Percentage Reads</th>
                 </tr>
                 </thead>
 
@@ -46,10 +47,11 @@ class PipelineList extends React.Component {
                   return (
                     <tbody key={i}>
                     <tr>
-                      <td><a href="/pipeline_outputs/1"><i className="fa fa-flask" aria-hidden="true"></i>{output.id}</a></td>
-                      <td><a href="/pipeline_outputs/1">{moment(output.created_at).format('MM-DD-YYYY')}</a></td>
-                      <td><a href="/pipeline_outputs/1">{output.total_reads}</a></td>
-                      <td><a href="/pipeline_outputs/1">{output.remaining_reads }</a></td>
+                      <td><a href={'/pipeline_outputs/' + output.id}><i className="fa fa-flask" aria-hidden="true"></i>{output.id}</a></td>
+                      <td><a href={'/pipeline_outputs/' + output.id}>{moment(output.created_at).format(' L , h:mm a')}</a></td>
+                      <td><a href={'/pipeline_outputs/' + output.id}>{output.total_reads}</a></td>
+                      <td><a href={'/pipeline_outputs/' + output.id}>{output.remaining_reads }</a></td>
+                      <td><a href={'/pipeline_outputs/' + output.id}>{(output.remaining_reads/output.total_reads * 100).toFixed(2) }%</a></td>
                     </tr>
                     </tbody>
                   )
