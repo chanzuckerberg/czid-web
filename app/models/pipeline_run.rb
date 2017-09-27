@@ -11,6 +11,7 @@ class PipelineRun < ApplicationRecord
   STATUS_FAILED = 'FAILED'.freeze
   STATUS_RUNNING = 'RUNNING'.freeze
   STATUS_ERROR = 'ERROR'.freeze # when aegea batch describe failed
+  STATUS_LOADED = 'LOADED'.freeze
 
   before_save :check_job_status
 
@@ -23,10 +24,10 @@ class PipelineRun < ApplicationRecord
     return if pipeline_output
     if job_status == STATUS_SUCCESS
       self.job_status = STATUS_CHECKED
-      load_results_from_s3
+      Resque.enqueue(LoadResultsFromS3, id)
     elsif job_status == STATUS_RUNNING && created_at < 24.hours.ago
       # Try loading the data into DB after 24 hours running the job
-      load_results_from_s3
+      Resque.enqueue(LoadResultsFromS3, id)
     end
   end
 
