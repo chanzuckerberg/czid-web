@@ -39,9 +39,9 @@ def make_star_index(fasta_file, result_dir, scratch_dir, output_path_s3, lazy_ru
     execute_command(" ".join(star_command_params))
     print "finished making STAR index"
     # archive and compress
-    execute_command("tar czvf %s -C %s %s" % (STAR_INDEX_OUT, scratch_dir, star_genome_dir_name))
+    execute_command("tar czvf %s/%s -C %s %s" % (result_dir, STAR_INDEX_OUT, scratch_dir, star_genome_dir_name))
     # copy to S3
-    execute_command("aws s3 cp %s %s/;" % (STAR_INDEX_OUT, output_path_s3))
+    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, STAR_INDEX_OUT, output_path_s3))
     # cleanup
     execute_command("cd %s; rm -rf *" % scratch_dir)
 
@@ -58,9 +58,9 @@ def make_bowtie2_index(host_name, fasta_file, result_dir, scratch_dir, output_pa
     execute_command(" ".join(bowtie2_command_params))
     print "finished making bowtie2 index"
     # archive and compress
-    execute_command("tar czvf %s -C %s %s" % (BOWTIE2_INDEX_OUT, scratch_dir, bowtie2_genome_dir_name))
+    execute_command("tar czvf %s/%s -C %s %s" % (result_dir, BOWTIE2_INDEX_OUT, scratch_dir, bowtie2_genome_dir_name))
     # copy to S3
-    execute_command("aws s3 cp %s %s/;" % (BOWTIE2_INDEX_OUT, output_path_s3))
+    execute_command("aws s3 cp %s/%s %s/;" % (result_dir, BOWTIE2_INDEX_OUT, output_path_s3))
     # cleanup
     execute_command("cd %s; rm -rf *" % scratch_dir)
 
