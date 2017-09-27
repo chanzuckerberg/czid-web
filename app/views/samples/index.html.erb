@@ -8,7 +8,7 @@
       <th>Name</th>
       <th>ID</th>
       <th>Project</th>
-      <th>Pipeline runs</th>
+      <th>Pipeline Run status</th>
       <th>Date created</th>
       <th colspan="3"></th>
     </tr>
@@ -20,7 +20,9 @@
         <td><%= sample.name %></td>
         <td><%= sample.id %></td>
         <td><%= link_to sample.project.name, sample.project if sample.project if sample.project %></td>
-        <td><%= sample.pipeline_outputs.count %></td>
+        <td>
+          <%= sample.pipeline_runs.first.job_status if sample.pipeline_runs.first %> &nbsp;
+        </td>
         <td><%= sample.created_at %></td>
         <td><%= link_to 'Show', sample %></td>
         <td><%= link_to 'Edit', edit_sample_path(sample) %></td>
