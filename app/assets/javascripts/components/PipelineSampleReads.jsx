@@ -399,7 +399,7 @@ class PipelineSampleReads extends React.Component {
             </div>
           </div>
         </div>
-        <div id="screen4" className="reports-screen tab-screen col s12">
+        <div id="reports" className="reports-screen tab-screen col s12">
           <div className="container tab-screen-content">
             <div className="row">
               <div className="col s3 reports-sidebar">
