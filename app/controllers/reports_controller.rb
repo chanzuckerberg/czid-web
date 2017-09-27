@@ -87,10 +87,14 @@ class ReportsController < ApplicationController
     zscores = @report.taxon_zscores
     @nt_species_zscores = zscores.type('NT').level(TaxonCount::TAX_LEVEL_SPECIES)
     @nr_species_zscores = zscores.type('NR').level(TaxonCount::TAX_LEVEL_SPECIES)
-    @ordered_species_tax_ids = @nt_species_zscores.order(zscore: :desc).where.not("tax_id < 0").map(&:tax_id)
+    @ordered_nt_species_tax_ids = @nt_species_zscores.order(zscore: :desc).where.not("tax_id < 0").map(&:tax_id)
+    @ordered_nr_species_tax_ids = @nr_species_zscores.order(zscore: :desc).where.not("tax_id < 0").map(&:tax_id)
+    @ordered_species_tax_ids = (@ordered_nt_species_tax_ids + @ordered_nr_species_tax_ids).uniq
     @nt_genus_zscores = zscores.type('NT').level(TaxonCount::TAX_LEVEL_GENUS)
     @nr_genus_zscores = zscores.type('NR').level(TaxonCount::TAX_LEVEL_GENUS)
-    @ordered_genus_tax_ids = @nt_genus_zscores.order(zscore: :desc).where.not("tax_id < 0").map(&:tax_id)
+    @ordered_nt_genus_tax_ids = @nt_genus_zscores.order(zscore: :desc).where.not("tax_id < 0").map(&:tax_id)
+    @ordered_nr_genus_tax_ids = @nr_genus_zscores.order(zscore: :desc).where.not("tax_id < 0").map(&:tax_id)
+    @ordered_genus_tax_ids = (@ordered_nt_genus_tax_ids + @ordered_nr_genus_tax_ids).uniq
   end
 
   def compute_rpm(count, total_reads)
