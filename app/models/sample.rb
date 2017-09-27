@@ -67,8 +67,8 @@ class Sample < ApplicationRecord
     "https://s3.console.aws.amazon.com/s3/object/#{SAMPLES_BUCKET_NAME}/#{sample_path}/results/#{HIT_FASTA_BASENAME}"
   end
 
-  def sample_log_url
-    "https://s3.console.aws.amazon.com/s3/object/#{SAMPLES_BUCKET_NAME}/#{sample_path}/results/#{LOG_BASENAME}"
+  def sample_output_folder_url
+    "https://s3.console.aws.amazon.com/s3/object/#{SAMPLES_BUCKET_NAME}/#{sample_path}/results/"
   end
 
   def pipeline_command

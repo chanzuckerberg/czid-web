@@ -34,13 +34,13 @@
 </p>
 
 <p>
-  <strong>Annotated FASTA file of hits:</strong>
-  <%= link_to @pipeline_output.sample.sample_annotated_fasta_url, @pipeline_output.sample.sample_annotated_fasta_url %>
+  <strong>Output folder:</strong>
+  <%= link_to @pipeline_output.sample.sample_output_folder_url, @pipeline_output.sample.sample_output_folder_url %>
 </p>
 
 <p>
-  <strong>Log file:</strong>
-  <%= link_to @pipeline_output.sample.sample_log_url, @pipeline_output.sample.sample_log_url %>
+  <strong>Annotated FASTA file of hits:</strong>
+  <%= link_to @pipeline_output.sample.sample_annotated_fasta_url, @pipeline_output.sample.sample_annotated_fasta_url %>
 </p>
 
 <p>
@@ -77,10 +77,12 @@
     <% ordered_tax_ids.each do |t| %>
       <% nt_element = nt_counts.find_by(tax_id: t) %>
       <% nr_element = nr_counts.find_by(tax_id: t) %>
+      <% element_name = nt_element ? nt_element.name : nr_element.name %>
+      <% element_taxid = nt_element ? nt_element.tax_id : nr_element.tax_id %>
       <tr>
-        <td><%= link_to (nt_element.name || nt_element.tax_id),
-                         "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=#{nt_element.tax_id}" %></td>
-        <td><%= nt_element.count %></td>
+        <td><%= link_to (element_name || element_taxid),
+                         "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=#{element_taxid}" %></td>
+        <td><%= nt_element.count if nt_element %></td>
         <td><%= nr_element.count if nr_element %></td>
       </tr>
     <% end %>
