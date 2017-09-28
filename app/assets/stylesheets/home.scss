@@ -67,3 +67,20 @@ i.fa {
     }
   }
 }
+
+.no-data {
+  text-align: center;
+  margin: 20px;
+  i {
+    font-size: 18px;
+  }
+}
+
+.pagination {
+  margin: 30px;
+  text-align: center;
+  a:active, a:hover {
+    outline: 0;
+    background-color: #5abcd6;
+  }
+}

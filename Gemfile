@@ -34,15 +34,24 @@ gem 'sass-rails', '~> 5.0'
 # Turbolinks makes navigating your web application faster. Read more: https://github.com/turbolinks/turbolinks
 gem 'turbolinks', '~> 5'
 # Use Uglifier as compressor for JavaScript assets
+gem 'sprockets-es6'
 gem 'uglifier', '>= 1.3.0'
 gem 'sprockets-es6'
 
 gem 'momentjs-rails'
 
+<<<<<<< HEAD
 gem 'react-rails'
 gem 'materialize-sass'
 gem 'font-awesome-rails'
 gem 'will_paginate', '~> 3.1.0'
+=======
+gem 'font-awesome-rails'
+gem 'materialize-sass'
+gem 'react-rails'
+
+gem 'jquery-rails'
+>>>>>>> ecd749d173df3dccebda1a73888b56d3358c00d9
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
