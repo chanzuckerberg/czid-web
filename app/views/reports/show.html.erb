@@ -75,15 +75,15 @@
     <% thresholded_tax_ids.each do |t| %>
       <% nt_element = nt_zscores.find_by(tax_id: t) %>
       <% nr_element = nr_zscores.find_by(tax_id: t) %>
+      <% element_name = nt_element ? nt_element.name : nr_element.name %>
+      <% element_taxid = nt_element ? nt_element.tax_id : nr_element.tax_id %>
       <tr>
-        <td><%= link_to (nt_element.name || nt_element.tax_id),
-                         "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=#{nt_element.tax_id}" %></td>
-        <td><%= nt_element.zscore %></td> 
-        <td><%= nt_element.rpm %></td>
-          <% if nr_element %>
-            <td><%= nr_element.zscore %></td>
-            <td><%= nr_element.rpm %></td>
-          <% end %>
+        <td><%= link_to (element_name || element_taxid),
+                         "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=#{element_taxid}" %></td>
+        <td><%= nt_element.zscore if nt_element %></td> 
+        <td><%= nt_element.rpm if nt_element %></td>
+        <td><%= nr_element.zscore if nr_element %></td>
+        <td><%= nr_element.rpm if nr_element %></td>
       </tr>
     <% end %>
   </tbody>
