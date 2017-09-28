@@ -21,4 +21,16 @@
 /node_modules
 /yarn-error.log
 
+# Ignore awscli bundle files
+/awscli-bundle
+awscli-bundle.zip
+get-pip.py
+
+# Ignore Mac directory
+.DS_Store
+
+# Ignore Jetbrain Idea directory
+.idea/
+
 .byebug_history
+.editorconfig

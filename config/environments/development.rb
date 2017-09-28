@@ -53,4 +53,8 @@ Rails.application.configure do
   config.file_watcher = ActiveSupport::EventedFileUpdateChecker
 
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
+
+  config.action_controller.asset_host = proc { |source|
+    "http://localhost:8080" if source =~ /wp_bundle\.js$/i
+  }
 end
