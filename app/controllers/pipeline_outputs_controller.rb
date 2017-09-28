@@ -17,7 +17,7 @@ class PipelineOutputsController < ApplicationController
       format.html
       format.json { render json: @pipeline_output.to_json(include: :taxon_counts) }
     end
-  end 
+  end
 
   # GET /pipeline_outputs/new
   def new

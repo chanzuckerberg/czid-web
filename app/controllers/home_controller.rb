@@ -13,6 +13,5 @@ class HomeController < ApplicationController
       output_data[:pipeline_run] = pipeline_run
       @final_result.push(output_data)
     end
-    
   end
 end
