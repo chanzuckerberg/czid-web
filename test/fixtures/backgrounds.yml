@@ -1,7 +1,7 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  name: MyString
+  name: default
   pipeline_outputs: [pipeline_output_one, pipeline_output_two]
 
 two:
