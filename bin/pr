@@ -15,6 +15,8 @@ DOCKER = 'docker-compose exec web '.freeze
 
 chdir APP_ROOT do
   # TODO: make sure we're not on master
+  system!("git fetch")
+  system!("git rebase origin/master")
   system!(DOCKER + 'rake rubocop:auto_correct')
   system!('git diff-index --quiet HEAD', 'commit changes before re-running')
   system!(DOCKER + 'rake test')
