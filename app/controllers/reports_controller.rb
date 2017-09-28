@@ -106,6 +106,8 @@ class ReportsController < ApplicationController
   def compute_zscore(count, mean, stdev)
     if count && mean
       (count - mean) / stdev
+    elsif count
+      Float::MAX
     else
       0
     end

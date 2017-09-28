@@ -11,9 +11,9 @@ class Background < ApplicationRecord
   end
 
   def summarize
-    results = PipelineOutput.joins(:taxon_counts).group("tax_id, count_type, tax_level, name").select("tax_id, count_type, tax_level, name, sum((1.0*count)/total_reads) as sum_norm_counts, sum((1.0*count*count)/(total_reads*total_reads)) as sum_norm_counts2").where("pipeline_output_id in (select pipeline_output_id from backgrounds_pipeline_outputs where background_id = #{id})")
+    results = TaxonCount.joins(:pipeline_output).select("tax_id, count_type, tax_level, name, sum((1.0*1e6*count)/total_reads) as sum_rpm, sum((1.0*1e6*count*1e6*count)/(total_reads*total_reads)) as sum_rpm2").group("tax_id, count_type, tax_level, name").where("pipeline_output_id in (select pipeline_output_id from backgrounds_pipeline_outputs where background_id = #{id})")
     n = pipeline_outputs.count
-    results.map { |h| h.attributes.merge(mean: h[:sum_norm_counts] / n.to_f, stdev: compute_stdev(h[:sum_norm_counts], h[:sum_norm_counts2], n)) }
+    results.map { |h| h.attributes.merge(mean: h[:sum_rpm] / n.to_f, stdev: compute_stdev(h[:sum_rpm], h[:sum_rpm2], n)) }
   end
 
   def compute_stdev(sum, sum2, n)
