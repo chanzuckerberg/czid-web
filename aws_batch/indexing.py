@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 import subprocess
+import multiprocessing
 
 INPUT_FASTA_S3 = 's3://czbiohub-infectious-disease/references/mosquitos/mosquito_genomes2.fa'
 OUTPUT_PATH_S3 = 's3://czbiohub-infectious-disease/references/mosquitos'
@@ -32,7 +33,7 @@ def make_star_index(fasta_file, result_dir, scratch_dir, output_path_s3, lazy_ru
     star_genome_dir_name = STAR_INDEX_OUT.split('.')[0]
     star_command_params = ['cd', scratch_dir, ';',
                            'mkdir', star_genome_dir_name, ';',
-                           STAR, '--runThreadN', '4',
+                           STAR, '--runThreadN', str(multiprocessing.cpu_count()),
                            '--runMode', 'genomeGenerate',
                            '--genomeDir', star_genome_dir_name,
                            '--genomeFastaFiles', fasta_file]
