@@ -1,3 +1,131 @@
 // Place all the styles related to the Reports controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+
+@import "colors";
+
+.reports-sidebar {
+  background: $sidebar-background;
+}
+
+.sidebar-title {
+  padding: 14px 0;
+  color: #767676;
+  font-size: 18px;
+
+}
+
+.sidebar-tabs {
+  .tabs {
+    display: flex !important;
+
+  }
+
+  .active {
+    color: #5ABCD6 !important;
+  }
+
+  .tabs .tab a {
+    text-align: center !important;
+    font-size: 12px !important;
+  }
+
+  .sidebar-divider {
+    background: #EEF1F2;
+    height: 25px;
+    margin-top: 20px;
+  }
+
+  .pane {
+    padding: 0;
+  }
+  .report-data {
+    padding: 20px;
+    float: left;
+    width: 100%;
+    border-top: 20px solid #EEF1F2;
+  }
+
+  .sidebar-full-container {
+    padding: 0 !important;
+
+    .pane {
+      padding: 0 !important;
+    }
+  }
+
+  .report-data section {
+    float: left;
+    width: 100%;
+  }
+
+  .report-data div:nth-child(odd) {
+    color: $data-key-color;
+  }
+
+  .report-data div:nth-child(even) {
+    color: $data-value-color;
+    margin-bottom: 10px;
+  }
+
+  #filters-pane {
+    padding: 20px !important;
+
+    .filter-title {
+      color: #B8B8B8;
+      font-size: 12px;
+      border-bottom: 1px solid #D6D6D6;
+    }
+
+    .filter-controls {
+
+      .noUi-tooltip, .noUi-handle {
+        background: #979797;
+      }
+
+      .noUi-tooltip span {
+        overflow: hidden;
+        display: none;
+      }
+
+      .noUi-connect {
+        background: #565656;
+      }
+
+      [type="checkbox"].filled-in:checked + label:after {
+        border: 2px solid #767676;
+        background-color: #767676;
+      }
+    }
+  }
+
+  .apply-filter-button button {
+    margin: 30px 0 20px;
+  }
+
+}
+
+.reports-screen {
+  background: #ffffff !important;
+}
+
+.reports-table-title .result-count {
+  font-size: 14px;
+  color: #535353;
+}
+
+.slider-title {
+  color: #535353;
+  font-size: 14px;
+  margin: 35px 0 15px;
+}
+
+.slider-values div{
+  display: inline-block;
+  margin-bottom: 15px;
+  color: #9B9B9B;
+  font-size: 12px;
+}
+.slider-values .end {
+  float: right;
+}
