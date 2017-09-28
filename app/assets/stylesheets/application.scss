@@ -1,0 +1,23 @@
+/*
+ *= require_self
+ *= require_tree .
+ *= require materialize
+ *= require font-awesome
+ */
+
+@import 'materialize';
+@import "materialize/components/color";
+@import "materialize/extras/nouislider";
+@import 'font-awesome';
+@import url('http://fonts.googleapis.com/css?family=Lato');
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Lato;
+  color:rgb(100, 100, 100);
+}
+
+a {
+  color: inherit !important;
+}
