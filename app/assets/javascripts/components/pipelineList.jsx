@@ -4,7 +4,7 @@ class PipelineList extends React.Component {
   }
 
   componentDidMount() {
-    $('.tooltipped').tooltip({delay: 50});
+    console.log(this.props.outputData, this.props);
   }
 
   render() {
@@ -32,7 +32,7 @@ class PipelineList extends React.Component {
         <div className="content-wrapper">
           <div className="container sample-container">
             {!this.props.pipelineOutputs ? 'Nothing to show' :
-              <table className="bordered highlight">
+              <table className="pagination bordered highlight">
                 <thead>
                 <tr>
                   <th>Name</th>
@@ -59,6 +59,7 @@ class PipelineList extends React.Component {
                   )
                 })}
               </table>
+              
             }
           </div>
         </div>

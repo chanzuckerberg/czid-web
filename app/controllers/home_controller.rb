@@ -5,7 +5,7 @@ class HomeController < ApplicationController
     @samples = Sample.all
     @output_data = Hash.new
 
-    @pipeline_outputs = PipelineOutput.order("created_at DESC")
+    @pipeline_outputs = PipelineOutput.paginate(:page => params[:page], :per_page => 5).order("created_at DESC")
 
     @pipeline_outputs.each do | output |
       sample_info = Sample.find(output.sample_id)
