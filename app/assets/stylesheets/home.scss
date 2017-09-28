@@ -1,3 +1,86 @@
 // Place all the styles related to the home controller here.
-// They will automatically be included in application.css.
+// They will automatically be included in application.scss.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+
+table {
+  thead {
+    th {
+      font-style: thin;
+      font-size: 14px;
+      color:rgb(184, 184, 184);
+    }
+  }
+
+  tbody {
+    td {
+      i.fa {
+        border-radius: 3px;
+        padding: 5px;
+        margin: 0 13px;
+        color: #fff;
+        background-color:#5ABCD6;
+        cursor: pointer;
+      }
+      i.fa.fa-flask {
+        margin-left: 0;
+      }
+      cursor: pointer;
+    }
+  }
+}
+
+i.fa {
+  cursor: pointer;
+}
+
+.search-wrapper {
+  padding: 20px 0;
+  span {
+    margin: 10px;
+    color:rgb(174, 174, 174);
+    cursor: pointer;
+  }
+  span:hover {
+    color: rgb(64, 64, 64);
+  }
+}
+
+.sub-header-home {
+  min-height: 120px;
+  padding-top: 10px;
+  box-shadow: 1px 2px 5px 2px #eaeaea;
+  background-color: #E3E8EB;
+  .title {
+    color: #A2A1BF;
+  }
+  .sub-title {
+    color: #333333;
+    margin: 14px 0;
+    font-size: 32px;
+  }
+  .title-filter {
+    padding: 5px 0;
+    .fa-bar-chart {
+     color: #333333;
+     font-size: 20px;
+     margin: 5px;
+    }
+  }
+}
+
+.no-data {
+  text-align: center;
+  margin: 20px;
+  i {
+    font-size: 18px;
+  }
+}
+
+.pagination {
+  margin: 30px;
+  text-align: center;
+  a:active, a:hover {
+    outline: 0;
+    background-color: #5abcd6;
+  }
+}

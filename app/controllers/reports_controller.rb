@@ -35,38 +35,14 @@ class ReportsController < ApplicationController
   # POST /reports.json
   def create
     @report = Report.new(report_params)
-    @report.pipeline_output.taxon_counts.each do |taxon_count|
-      a = {}
-      a[:tax_id] = taxon_count.tax_id
-      a[:tax_level] = taxon_count.tax_level
-      a[:name] = taxon_count.name
-      a[:rpm] = 1e6 * taxon_count.count.to_f / @report.pipeline_output.total_reads
-      a[:hit_type] = taxon_count.count_type
-      normalized_count = taxon_count.count.to_f / @report.pipeline_output.total_reads
-      sum = 0
-      sum_sq = 0
-      n = 0
-      @report.background.pipeline_outputs.each do |bg_pipeline_output|
-        bg_taxon_count = bg_pipeline_output.taxon_counts.find_by(tax_id: taxon_count.tax_id, count_type: taxon_count.count_type)
-        if bg_taxon_count
-          bg_count = bg_taxon_count.count
-          normalized_bg_count = bg_count.to_f / bg_pipeline_output.total_reads
-        else
-          normalized_bg_count = 0
-        end
-        sum += normalized_bg_count
-        sum_sq += normalized_bg_count**2
-        n += 1
-      end
-      mean = sum.to_f / n
-      stdev = Math.sqrt((sum_sq.to_f - sum**2 / n) / (n - 1))
-      a[:zscore] = if stdev > 0
-                     (normalized_count - mean) / stdev
-                   else
-                     0
-                   end
-      @report.taxon_zscores.new(a)
-    end
+    @report.background ||= Background.find_by(name: Background::DEFAULT_BACKGROUND_MODEL_NAME)
+    raise "No background specified and background #{Background::DEFAULT_BACKGROUND_MODEL_NAME} does not exist" unless @report.background
+    total_reads = @report.pipeline_output.total_reads
+    summary = @report.background.summarize
+    data = @report.pipeline_output.taxon_counts.map { |h| h.attributes.merge(norm_count: h["count"] / total_reads.to_f) }
+    data_and_background = (data + summary).group_by { |h| [h["tax_id"], h["tax_level"], h["name"], h["count_type"]] }.map { |_k, v| v.reduce(:merge) }.select { |h| h["count"] }
+    zscore_array = data_and_background.map { |h| { tax_id: h["tax_id"], tax_level: h["tax_level"], name: h["name"], rpm: compute_rpm(h["count"], total_reads), hit_type: h["count_type"], zscore: compute_zscore(h["norm_count"], h[:mean], h[:stdev]) } }
+    @report.taxon_zscores << TaxonZscore.create(zscore_array)
 
     respond_to do |format|
       if @report.save
@@ -109,10 +85,32 @@ class ReportsController < ApplicationController
     zscores = @report.taxon_zscores
     @nt_species_zscores = zscores.type('NT').level(TaxonCount::TAX_LEVEL_SPECIES)
     @nr_species_zscores = zscores.type('NR').level(TaxonCount::TAX_LEVEL_SPECIES)
-    @ordered_species_tax_ids = @nt_species_zscores.order(zscore: :desc).where.not("tax_id < 0").map(&:tax_id)
+    @ordered_nt_species_tax_ids = @nt_species_zscores.order(zscore: :desc).where.not("tax_id < 0").map(&:tax_id)
+    @ordered_nr_species_tax_ids = @nr_species_zscores.order(zscore: :desc).where.not("tax_id < 0").map(&:tax_id)
+    @ordered_species_tax_ids = (@ordered_nt_species_tax_ids + @ordered_nr_species_tax_ids).uniq
     @nt_genus_zscores = zscores.type('NT').level(TaxonCount::TAX_LEVEL_GENUS)
     @nr_genus_zscores = zscores.type('NR').level(TaxonCount::TAX_LEVEL_GENUS)
-    @ordered_genus_tax_ids = @nt_genus_zscores.order(zscore: :desc).where.not("tax_id < 0").map(&:tax_id)
+    @ordered_nt_genus_tax_ids = @nt_genus_zscores.order(zscore: :desc).where.not("tax_id < 0").map(&:tax_id)
+    @ordered_nr_genus_tax_ids = @nr_genus_zscores.order(zscore: :desc).where.not("tax_id < 0").map(&:tax_id)
+    @ordered_genus_tax_ids = (@ordered_nt_genus_tax_ids + @ordered_nr_genus_tax_ids).uniq
+  end
+
+  def compute_rpm(count, total_reads)
+    if count
+      count * 1e6 / total_reads.to_f
+    else
+      0
+    end
+  end
+
+  def compute_zscore(count, mean, stdev)
+    if count && mean
+      (count - mean) / stdev
+    elsif count
+      Float::MAX
+    else
+      0
+    end
   end
 
   # Use callbacks to share common setup or constraints between actions.
