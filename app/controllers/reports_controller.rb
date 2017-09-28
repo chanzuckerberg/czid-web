@@ -107,7 +107,7 @@ class ReportsController < ApplicationController
     if rpm && mean
       (rpm - mean) / stdev
     elsif rpm
-      Float::MAX
+      1e6
     else
       0
     end
