@@ -1,10 +1,4 @@
 class Home extends React.Component {
-
-
-  componentDidMount() {
-    console.log(this.props, this.props.pipelineOutputs, 'allofem');
-  }
-
   render() {
     return (
       <div>
@@ -14,7 +8,6 @@ class Home extends React.Component {
     )
   }
 }
-
 
 Home.propTypes = {
   pipelineOutputs: React.PropTypes.array,
