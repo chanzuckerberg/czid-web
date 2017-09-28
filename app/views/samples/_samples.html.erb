@@ -1,0 +1,41 @@
+
+<% samples ||= [] %>
+<h1>Samples</h1>
+
+<% if samples.count == 0 %>
+  No samples yet.
+<% else %>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>ID</th>
+        <th>Project</th>
+        <th>Sample Status</th>
+        <th>Pipeline Run status</th>
+        <th>Date created</th>
+        <th colspan="2"></th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% samples.each do |sample| %>
+        <tr>
+          <td><%= sample.name %></td>
+          <td><%= sample.id %></td>
+          <td><%= link_to sample.project.name, sample.project if sample.project if sample.project %></td>
+          <td><%= sample.status %>
+          <td>
+            <%= sample.pipeline_runs.first.job_status if sample.pipeline_runs.first %> &nbsp;
+          </td>
+          <td><%= sample.created_at %></td>
+          <td><%= link_to 'Show', sample %></td>
+          <td><%= link_to 'Edit', edit_sample_path(sample) %></td>
+          <!--
+          <td><%= link_to 'Destroy', sample, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+          -->
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

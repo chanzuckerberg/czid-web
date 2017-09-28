@@ -1034,9 +1034,13 @@ def main():
     global INPUT_BUCKET
     global OUTPUT_BUCKET
     global KEY_S3_PATH
+    global STAR_GENOME
+    global BOWTIE2_GENOME
     INPUT_BUCKET = os.environ.get('INPUT_BUCKET', INPUT_BUCKET)
     OUTPUT_BUCKET = os.environ.get('OUTPUT_BUCKET', OUTPUT_BUCKET)
     KEY_S3_PATH = os.environ.get('KEY_S3_PATH', KEY_S3_PATH)
+    STAR_GENOME = os.environ.get('STAR_GENOME', STAR_GENOME)
+    BOWTIE2_GENOME = os.environ.get('BOWTIE2_GENOME', BOWTIE2_GENOME)
     DB_SAMPLE_ID = os.environ['DB_SAMPLE_ID']
     AWS_BATCH_JOB_ID = os.environ.get('AWS_BATCH_JOB_ID', 'local')
     SAMPLE_HOST = os.environ.get('SAMPLE_HOST', '')

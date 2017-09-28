@@ -17,7 +17,7 @@ class BackgroundsControllerTest < ActionDispatch::IntegrationTest
 
   test "should create background" do
     assert_difference('Background.count') do
-      post backgrounds_url, params: { background: { name: @background.name, pipeline_output_ids: @background.pipeline_outputs.map(&:id) } }
+      post backgrounds_url, params: { background: { name: 'new_name', pipeline_output_ids: @background.pipeline_outputs.map(&:id) } }
     end
 
     assert_redirected_to background_url(Background.last)
