@@ -79,8 +79,10 @@ class Sample < ApplicationRecord
       "SAMPLE_LIBRARY=#{sample_library} SAMPLE_SEQUENCER=#{sample_sequencer} SAMPLE_NOTES=#{sample_notes} "
     if s3_star_index_path.present?
       batch_command_env_variables += "STAR_GENOME=#{s3_star_index_path} " \
+    end
     if s3_bowtie2_index_path.present?
       batch_command_env_variables += "BOWTIE2_GENOME=#{s3_bowtie2_index_path} " \
+    end
     batch_command = "aws s3 cp #{IdSeqPipeline::S3_SCRIPT_LOC} .; chmod 755 #{script_name}; " +
       batch_command_env_variables + "./#{script_name}"
     command = "aegea batch submit --command=\"#{batch_command}\" "
