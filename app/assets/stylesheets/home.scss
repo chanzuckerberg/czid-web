@@ -79,8 +79,32 @@ i.fa {
 .pagination {
   margin: 30px;
   text-align: center;
-  a:active, a:hover {
-    outline: 0;
-    background-color: #5abcd6;
+}
+
+.pagination {
+  font-size: 14px;
+  a:hover {
+    background: #202020 none repeat scroll 0 0;
+    text-shadow: 1px 1px 1px #171717;
+  }
+  a:active {
+    text-shadow: none;
+  }
+  .current {
+    background: #202020 none repeat scroll 0 0;
+    color: white;
+    text-shadow: 1px 1px 1px #171717;
+  }
+  .disabled {
+    color: #C0C0C0;
   }
 }
+.pagination > * {
+  margin-right: 0.1em;
+  padding: 0.3em 0.4em;
+}
+
+.page-info {
+  text-align: center;
+}
+
