@@ -453,7 +453,8 @@ def run_and_log(logparams, func_name, *args):
     else:
         logger.info("uploaded output")
     # count records
-    if logparams["before_file_name"] and logparams["before_file_type"] and logparams["after_file_name"] and logparams["after_file_type"]:
+    required_params = ["before_file_name", "before_file_type", "after_file_name", "after_file_type"]
+    if all(param in logparams for param in required_params):
         records_before = count_reads(logparams["before_file_name"], logparams["before_file_type"])
         records_after = count_reads(logparams["after_file_name"], logparams["after_file_type"])
     if logparams["count_reads"]:
