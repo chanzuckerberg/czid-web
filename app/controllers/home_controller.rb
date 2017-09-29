@@ -1,16 +1,12 @@
 class HomeController < ApplicationController
   def home
-    @users = User.all
-    @projects = Project.all
-    @samples = Sample.all
     @output_data = {}
+    @samples = Sample.paginate(page: params[:page]).order('created_at DESC')
 
-    @pipeline_outputs = PipelineOutput.order("created_at DESC")
-
-    @pipeline_outputs.each do |output|
-      sample_info =  output.sample
-      project_info = output.sample.project
-      @output_data['sample_info'] = sample_info
+    @samples.each do |output|
+      pipeline_output_info = output.pipeline_outputs.order('created_at').last
+      project_info = output.project
+      @output_data['pipeline_output_info'] = pipeline_output_info
       @output_data['project_info'] = project_info
     end
   end
