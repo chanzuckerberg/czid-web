@@ -721,6 +721,7 @@ PLATFORMS
 
 DEPENDENCIES
   airbrake (~> 7.0)
+  airbrake-ruby
   aws-sdk-ecs
   aws-sdk-resources
   bcrypt (~> 3.1.7)

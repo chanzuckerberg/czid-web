@@ -6,6 +6,7 @@ git_source(:github) do |repo_name|
 end
 
 gem 'airbrake', '~> 7.0'
+gem 'airbrake-ruby'
 gem 'aws-sdk-ecs'
 gem 'aws-sdk-resources'
 # Use ActiveModel has_secure_password
