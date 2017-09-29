@@ -540,11 +540,7 @@ GEM
       mime-types (>= 1.16, < 4)
     materialize-sass (0.100.2)
       sass (~> 3.3)
-<<<<<<< HEAD
     method_source (0.9.0)
-=======
-    method_source (0.8.2)
->>>>>>> Resolve conflicts and update with master
     mime-types (3.1)
       mime-types-data (~> 3.2015)
     mime-types-data (3.2016.0521)
@@ -739,11 +735,7 @@ DEPENDENCIES
   jquery-rails
   listen (>= 3.0.5, < 3.2)
   logger
-<<<<<<< HEAD
   materialize-rails
-=======
-  materialize-sass
->>>>>>> Resolve conflicts and update with master
   momentjs-rails
   mysql2
   puma (~> 3.7)
