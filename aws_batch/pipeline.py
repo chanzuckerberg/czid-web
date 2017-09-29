@@ -88,6 +88,10 @@ NR_TAXID_COUNTS_TO_SPECIES_RPM_OUT = 'species.rpm.filter.deuterostomes.taxids.ra
 NR_TAXID_COUNTS_TO_GENUS_RPM_OUT = 'genus.rpm.filter.deuterostomes.taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.csv'
 COMBINED_JSON_OUT = 'idseq_web_sample.json'
 LOGS_OUT_BASENAME = 'log.txt'
+STATS_OUT = 'stats.json'
+
+#global statistics log
+STATS = {}
 
 ### convenience functions
 def count_reads(file_name, file_type):
@@ -455,15 +459,21 @@ def run_and_log(logparams, func_name, *args):
     if logparams["count_reads"]:
         percent_removed = (100.0 * (records_before - records_after)) / records_before
         logger.info("%s %% of reads dropped out, %s reads remaining" % (str(percent_removed), str(records_after)))
+        STATS[func_name.__name__] = {'reads_before': records_before, 'reads_after': records_after}
     # function-specific logs
     if func_name.__name__ == "run_cdhitdup":
-      compression_ratio = records_before / records_after
-      logger.info("duplicate compression ratio: %s" % str(compression_ratio))
+        compression_ratio = records_before / records_after
+        logger.info("duplicate compression ratio: %s" % str(compression_ratio))
     if func_name.__name__ == "run_priceseqfilter":
-      pass_percentage = (100.0 * records_after) / records_before
-      logger.info("percentage of reads passing QC filter: %s %%" % str(pass_percentage))
+        pass_percentage = (100.0 * records_after) / records_before
+        logger.info("percentage of reads passing QC filter: %s %%" % str(pass_percentage))
     # copy log file
     execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
+    # write stats
+    stats_path = os.path.join(result_dir, STATS_OUT)
+    with open(stats_path, 'wb') as f:
+        json.dump(STATS, f)
+    execute_command("aws s3 cp %s %s/;" % (stats_path, logparams["sample_s3_output_path"]))
 
 def run_sample(sample_s3_input_path, sample_s3_output_path,
                star_genome_s3_path, bowtie2_genome_s3_path,
