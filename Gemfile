@@ -5,6 +5,7 @@ git_source(:github) do |repo_name|
   "https://github.com/#{repo_name}.git"
 end
 
+gem 'airbrake', '~> 7.0'
 gem 'aws-sdk-ecs'
 gem 'aws-sdk-resources'
 # Use ActiveModel has_secure_password
