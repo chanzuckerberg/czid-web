@@ -1,7 +1,7 @@
 class HomeController < ApplicationController
   def home
     @output_data = {}
-    @samples = Sample.paginate(:page => params[:page]).order('created_at DESC')
+    @samples = Sample.paginate(page: params[:page]).order('created_at DESC')
 
     @samples.each do |output|
       pipeline_output_info = output.pipeline_outputs.order('created_at').last
