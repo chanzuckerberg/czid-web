@@ -1,1 +1,59 @@
-<%= react_component 'PipelineSampleReads' %>
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @sample.name %>
+</p>
+
+<p>
+  <strong>Project:</strong>
+  <%= link_to @sample.project.name, @sample.project %>
+</p>
+
+<p>
+  <strong>Date created:</strong>
+  <%= @sample.created_at %>
+</p>
+
+<p>
+  <strong>Pipeline runs:</strong>
+</p>
+
+<table class="table table-condensed">
+      <thead>
+        <tr>
+          <th> Job Status </th>
+          <th> Job Id </th>
+          <th> Job Log </th>
+          <th>Remaining reads</th>
+          <th>Job Started</th>
+          <th>Output Created</th>
+          <th> Pipeline Output&nbsp; </th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @sample.pipeline_runs.each do |pipeline_run| %>
+          <tr>
+            <td> <%= pipeline_run.job_status %>
+            <td> <%= pipeline_run.job_id %>
+            <td> <%= link_to 'Logs', pipeline_run.log_url %>
+            <td><%= pipeline_run.pipeline_output.remaining_reads if pipeline_run.pipeline_output%> &nbsp;</td>
+            <td><%= pipeline_run.created_at %></td>
+            <td><%= pipeline_run.pipeline_output.created_at if pipeline_run.pipeline_output %></td>
+            <td>
+              <% if pipeline_run.pipeline_output %>
+                <%= link_to 'Show', pipeline_run.pipeline_output %>
+              <% else %>
+                 Pending
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+</table>
+
+<p>
+<%= link_to 'Edit', edit_sample_path(@sample) %> |
+<%= link_to 'See all samples', samples_path %> |
+<%= link_to 'Front portal', root_path %>
+</p>
