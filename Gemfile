@@ -40,9 +40,9 @@ gem 'uglifier', '>= 1.3.0'
 gem 'momentjs-rails'
 
 gem 'font-awesome-rails'
-gem 'will_paginate', '~> 3.1.0'
 gem 'materialize-sass'
 gem 'react-rails'
+gem 'will_paginate', '~> 3.1.0'
 
 gem 'jquery-rails'
 
