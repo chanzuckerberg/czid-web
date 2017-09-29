@@ -84,7 +84,7 @@ class Sample < ApplicationRecord
       batch_command_env_variables += "BOWTIE2_GENOME=#{s3_bowtie2_index_path} " \
     end
     batch_command = "aws s3 cp #{IdSeqPipeline::S3_SCRIPT_LOC} .; chmod 755 #{script_name}; " +
-      batch_command_env_variables + "./#{script_name}"
+                    batch_command_env_variables + "./#{script_name}"
     command = "aegea batch submit --command=\"#{batch_command}\" "
     command += " --storage /mnt=1500 --ecr-image idseq --memory 64000"
     command
