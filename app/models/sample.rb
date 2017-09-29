@@ -44,7 +44,7 @@ class Sample < ApplicationRecord
     fastq2 = input_files[1].source
     command = "aws s3 cp #{fastq1} #{sample_input_s3_path}/;"
     command += "aws s3 cp #{fastq2} #{sample_input_s3_path}/;"
-    if s3_preload_result_path.present?
+    if s3_preload_result_path.size > 5 and s3_preload_result_path[0..4] == 's3://'
       command += "aws s3 cp #{s3_preload_result_path} #{sample_output_s3_path} --recursive;"
     end
     _stdout, stderr, status = Open3.capture3(command)
