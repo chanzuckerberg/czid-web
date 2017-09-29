@@ -1,2 +1,7 @@
 <%= react_component 'Home', pipelineOutputs: @pipeline_outputs, outputData: @output_data %>
 
+<%= will_paginate @pipeline_outputs, :style => 'color:#5abcd6', previous_label: '<<', next_label: '>>' %>
+
+<div class="page-info">
+  <%= page_entries_info @pipeline_outputs %>
+</div>

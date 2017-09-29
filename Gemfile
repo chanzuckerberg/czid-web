@@ -42,6 +42,7 @@ gem 'momentjs-rails'
 gem 'font-awesome-rails'
 gem 'materialize-sass'
 gem 'react-rails'
+gem 'will_paginate', '~> 3.1.0'
 
 gem 'jquery-rails'
 
