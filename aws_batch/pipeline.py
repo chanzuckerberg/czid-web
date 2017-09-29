@@ -458,10 +458,10 @@ def run_and_log(logparams, func_name, *args):
     # function-specific logs
     if func_name.__name__ == "run_cdhitdup":
       compression_ratio = records_before / records_after
-      logger.info("compression ratio: %s" % str(compression_ratio))
+      logger.info("duplicate compression ratio: %s" % str(compression_ratio))
     if func_name.__name__ == "run_priceseqfilter":
       pass_percentage = (100.0 * records_after) / records_before
-      logger.info("reads passing quality filter: %s %%" % str(pass_percentage))
+      logger.info("percentage of reads passing QC filter: %s %%" % str(pass_percentage))
     # copy log file
     execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
 
