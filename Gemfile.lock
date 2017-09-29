@@ -731,7 +731,7 @@ DEPENDENCIES
   mysql2
   puma (~> 3.7)
   rails (~> 5.1.2)
-  rake (~> 12.1.0)
+  rake
   react-rails
   resque
   resque-lock

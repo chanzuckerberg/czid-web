@@ -29,7 +29,7 @@ gem 'puma', '~> 3.7'
 # gem 'redis', '~> 3.0'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 5.1.2'
-gem 'rake', '~> 12.1.0'
+gem 'rake'
 gem 'react-rails'
 # Worker/Scheduler management
 gem 'resque'
