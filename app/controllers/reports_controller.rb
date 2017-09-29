@@ -104,7 +104,7 @@ class ReportsController < ApplicationController
   end
 
   def compute_zscore(rpm, mean, stdev)
-    if rpm && mean
+    if rpm && stdev && stdev != 0
       (rpm - mean) / stdev
     elsif rpm
       1e6
