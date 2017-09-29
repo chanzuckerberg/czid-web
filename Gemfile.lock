@@ -40,6 +40,9 @@ GEM
       tzinfo (~> 1.1)
     addressable (2.5.2)
       public_suffix (>= 2.0.2, < 4.0)
+    airbrake (7.0.2)
+      airbrake-ruby (~> 2.4)
+    airbrake-ruby (2.4.0)
     arel (8.0.0)
     ast (2.3.0)
     aws-partitions (1.24.0)
@@ -514,6 +517,8 @@ GEM
       railties (>= 3.2, < 5.2)
     globalid (0.4.0)
       activesupport (>= 4.2.0)
+    health_check (2.6.0)
+      rails (>= 4.0)
     i18n (0.8.6)
     jbuilder (2.7.0)
       activesupport (>= 4.2.0)
@@ -715,6 +720,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  airbrake (~> 7.0)
   aws-sdk-ecs
   aws-sdk-resources
   bcrypt (~> 3.1.7)
@@ -723,6 +729,7 @@ DEPENDENCIES
   coffee-rails (~> 4.2)
   devise (= 4.3.0)
   font-awesome-rails
+  health_check
   jbuilder (~> 2.5)
   jquery-rails
   listen (>= 3.0.5, < 3.2)

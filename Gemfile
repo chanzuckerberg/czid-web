@@ -5,6 +5,7 @@ git_source(:github) do |repo_name|
   "https://github.com/#{repo_name}.git"
 end
 
+gem 'airbrake', '~> 7.0'
 gem 'aws-sdk-ecs'
 gem 'aws-sdk-resources'
 # Use ActiveModel has_secure_password
@@ -13,6 +14,7 @@ gem 'bcrypt', '~> 3.1.7'
 gem 'coffee-rails', '~> 4.2'
 gem 'devise', '4.3.0'
 gem 'font-awesome-rails'
+gem "health_check"
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.5'
 # jquery for rails

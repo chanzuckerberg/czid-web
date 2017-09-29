@@ -27,6 +27,11 @@
   </div>
 
   <div class="field">
+    <%= form.label :authentication_token %>
+    <%= form.text_field :authentication_token, id: :authentication_token %>
+  </div>
+
+  <div class="field">
     <%= form.label :name %>
     <%= form.text_field :name, id: :user_name %>
   </div>

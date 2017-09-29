@@ -26,6 +26,11 @@
     <%= form.password_field :password_confirmation, id: :user_password_confirmation %>
   </div>
 
+  <div class="field">
+    <%= form.label :authentication_token %>
+    <%= form.text_field :authentication_token, id: :authentication_token %>
+  </div>
+
   <div class="actions">
     <%= form.submit %>
   </div>
