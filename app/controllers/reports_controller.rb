@@ -39,9 +39,9 @@ class ReportsController < ApplicationController
     raise "No background specified and background #{Background::DEFAULT_BACKGROUND_MODEL_NAME} does not exist" unless @report.background
     total_reads = @report.pipeline_output.total_reads
     summary = @report.background.summarize
-    data = @report.pipeline_output.taxon_counts.map { |h| h.attributes.merge(norm_count: h["count"] / total_reads.to_f) }
+    data = @report.pipeline_output.taxon_counts.map { |h| h.attributes.merge(rpm: compute_rpm(h["count"], total_reads)) }
     data_and_background = (data + summary).group_by { |h| [h["tax_id"], h["tax_level"], h["name"], h["count_type"]] }.map { |_k, v| v.reduce(:merge) }.select { |h| h["count"] }
-    zscore_array = data_and_background.map { |h| { tax_id: h["tax_id"], tax_level: h["tax_level"], name: h["name"], rpm: compute_rpm(h["count"], total_reads), hit_type: h["count_type"], zscore: compute_zscore(h["norm_count"], h[:mean], h[:stdev]) } }
+    zscore_array = data_and_background.map { |h| { tax_id: h["tax_id"], tax_level: h["tax_level"], name: h["name"], rpm: h[:rpm], hit_type: h["count_type"], zscore: compute_zscore(h[:rpm], h[:mean], h[:stdev]) } }
     @report.taxon_zscores << TaxonZscore.create(zscore_array)
 
     respond_to do |format|
@@ -103,9 +103,11 @@ class ReportsController < ApplicationController
     end
   end
 
-  def compute_zscore(count, mean, stdev)
-    if count && mean
-      (count - mean) / stdev
+  def compute_zscore(rpm, mean, stdev)
+    if rpm && stdev && stdev != 0
+      (rpm - mean) / stdev
+    elsif rpm
+      1e6
     else
       0
     end

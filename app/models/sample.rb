@@ -73,12 +73,18 @@ class Sample < ApplicationRecord
 
   def pipeline_command
     script_name = File.basename(IdSeqPipeline::S3_SCRIPT_LOC)
-    batch_command = "aws s3 cp #{IdSeqPipeline::S3_SCRIPT_LOC} .; chmod 755 #{script_name}; " \
-      "INPUT_BUCKET=#{sample_input_s3_path} OUTPUT_BUCKET=#{sample_output_s3_path} " \
+    batch_command_env_variables = "INPUT_BUCKET=#{sample_input_s3_path} OUTPUT_BUCKET=#{sample_output_s3_path} " \
       "DB_SAMPLE_ID=#{id} SAMPLE_HOST=#{sample_host} SAMPLE_LOCATION=#{sample_location} " \
       "SAMPLE_DATE=#{sample_date} SAMPLE_TISSUE=#{sample_tissue} SAMPLE_TEMPLATE=#{sample_template} " \
-      "SAMPLE_LIBRARY=#{sample_library} SAMPLE_SEQUENCER=#{sample_sequencer} SAMPLE_NOTES=#{sample_notes} " \
-      "./#{script_name}"
+      "SAMPLE_LIBRARY=#{sample_library} SAMPLE_SEQUENCER=#{sample_sequencer} SAMPLE_NOTES=#{sample_notes} "
+    if s3_star_index_path.present?
+      batch_command_env_variables += "STAR_GENOME=#{s3_star_index_path} " \
+    end
+    if s3_bowtie2_index_path.present?
+      batch_command_env_variables += "BOWTIE2_GENOME=#{s3_bowtie2_index_path} " \
+    end
+    batch_command = "aws s3 cp #{IdSeqPipeline::S3_SCRIPT_LOC} .; chmod 755 #{script_name}; " +
+                    batch_command_env_variables + "./#{script_name}"
     command = "aegea batch submit --command=\"#{batch_command}\" "
     command += " --storage /mnt=1500 --ecr-image idseq --memory 64000"
     command
@@ -92,9 +98,6 @@ class Sample < ApplicationRecord
 
   def kickoff_pipeline(dry_run = true)
     # only kickoff pipeline when no active pipeline_run running
-    pipeline_runs.in_progress.each(&:update_job_status)
-    pipeline_runs.in_progress.reload
-
     return unless pipeline_runs.in_progress.empty?
 
     command = pipeline_command

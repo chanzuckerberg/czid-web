@@ -20,5 +20,6 @@ if [ "$BRANCH" == "master" ]; then
   docker tag $COMPOSE_TAG $REPO:"latest"
 fi
 docker tag $COMPOSE_TAG $REPO:"sha-$COMMIT"
-docker tag $COMPOSE_TAG $REPO:"branch-$BRANCH"
+BRANCH_CLEANED=`echo $BRANCH | sed 's/\//-/g'`
+docker tag $COMPOSE_TAG $REPO:"branch-$BRANCH_CLEANED"
 docker tag $COMPOSE_TAG $REPO:"build-$BUILD_NUMBER"
