@@ -133,7 +133,7 @@ def deploy(client, cluster, service, repo, image, run_migrations = false)
   end
 
   update_service(client, cluster, service, "#{service}:#{new_task.revision}")
-  puts "#{service} deployment complete"
+  puts "#{service} deployment probably complete, but this tool is pretty rudimentary so check for yourself"
 end
 
 deploy(client, env, RAILS_SERVICE, REPO, image, true)
