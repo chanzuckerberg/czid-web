@@ -21,6 +21,13 @@ dev:
   port: <%= ENV['DB_PORT'] %>
   username: <%= ENV['DB_USERNAME'] %>
 
+alpha:
+  <<: *default
+  host: <%= ENV['RDS_ADDRESS'] %>
+  password: <%= ENV['DB_PASSWORD'] %>
+  port: <%= ENV['DB_PORT'] %>
+  username: <%= ENV['DB_USERNAME'] %>
+
 staging:
   <<: *default
   host: <%= ENV['RDS_ADDRESS'] %>
