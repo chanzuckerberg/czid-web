@@ -8,12 +8,12 @@ class PipelineList extends React.Component {
       return (
         <tr key={i}>
           <td><a href={'/pipeline_outputs/' + output.id}>
-            <i className="fa fa-flask" aria-hidden="true"></i> {this.props.outputData.sample_info.name} </a>
+            <i className="fa fa-flask" aria-hidden="true"></i> {output.name} </a>
           </td>
           <td><a href={'/pipeline_outputs/' + output.id}>{moment(output.created_at).format(' L,  h:mm a')}</a></td>
-          <td><a href={'/pipeline_outputs/' + output.id}>{output.total_reads}</a></td>
-          <td><a href={'/pipeline_outputs/' + output.id}>{output.remaining_reads }</a></td>
-          <td><a href={'/pipeline_outputs/' + output.id}>{(output.remaining_reads/output.total_reads * 100).toFixed(2) }%</a></td>
+          <td><a href={'/pipeline_outputs/' + output.id}>{this.props.outputData.pipeline_output_info.total_reads}</a></td>
+          <td><a href={'/pipeline_outputs/' + output.id}>{this.props.outputData.pipeline_output_info.remaining_reads }</a></td>
+          <td><a href={'/pipeline_outputs/' + output.id}>{(this.props.outputData.pipeline_output_info.remaining_reads/this.props.outputData.pipeline_output_info.total_reads * 100).toFixed(2) }%</a></td>
         </tr>
       )
     })
@@ -64,7 +64,7 @@ class PipelineList extends React.Component {
             </div>
           </div>
         </div>
-          {!this.props.pipelineOutputs ? <div className="no-data"><i className="fa fa-frown-o" aria-hidden="true"> No data to display</i></div> : this.renderTable(this.props.pipelineOutputs)}
+          {!this.props.samples ? <div className="no-data"><i className="fa fa-frown-o" aria-hidden="true"> No data to display</i></div> : this.renderTable(this.props.samples)}
       </div>
     )
   }

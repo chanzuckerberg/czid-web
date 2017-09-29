@@ -6,6 +6,7 @@ git_source(:github) do |repo_name|
 end
 
 gem 'airbrake', '~> 7.0'
+gem 'airbrake-ruby'
 gem 'aws-sdk-ecs'
 gem 'aws-sdk-resources'
 # Use ActiveModel has_secure_password
@@ -13,39 +14,39 @@ gem 'bcrypt', '~> 3.1.7'
 # Use CoffeeScript for .coffee assets and views
 gem 'coffee-rails', '~> 4.2'
 gem 'devise', '4.3.0'
+gem 'font-awesome-rails'
 gem "health_check"
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.5'
+# jquery for rails
+gem 'jquery-rails'
 # Logger
 gem 'logger'
+gem 'materialize-sass'
+gem 'momentjs-rails'
 # Use mysql as the database for Active Record
 gem 'mysql2'
 # Use Puma as the app server
 gem 'puma', '~> 3.7'
-# Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 5.1.2'
 # Use Redis adapter to run Action Cable in production
 # gem 'redis', '~> 3.0'
-gem 'simple_token_authentication', '~> 1.0' # see semver.org
+# Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
+gem 'rails', '~> 5.1.2'
+gem 'rake'
+gem 'react-rails'
 # Worker/Scheduler management
 gem 'resque'
 gem 'resque-lock'
 gem 'resque-scheduler'
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 5.0'
+gem 'simple_token_authentication', '~> 1.0' # see semver.org
+gem 'sprockets-es6'
 # Turbolinks makes navigating your web application faster. Read more: https://github.com/turbolinks/turbolinks
 gem 'turbolinks', '~> 5'
 # Use Uglifier as compressor for JavaScript assets
-gem 'sprockets-es6'
 gem 'uglifier', '>= 1.3.0'
-
-gem 'momentjs-rails'
-
-gem 'font-awesome-rails'
-gem 'materialize-sass'
-gem 'react-rails'
-
-gem 'jquery-rails'
+gem 'will_paginate'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
