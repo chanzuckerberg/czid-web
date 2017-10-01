@@ -1,6 +1,5 @@
 class PipelineOutputsController < ApplicationController
   before_action :set_pipeline_output, only: [:show, :edit, :update, :destroy]
-  before_action :typed_counts, only: [:show]
   protect_from_forgery unless: -> { request.format.json? }
 
   # GET /pipeline_outputs
@@ -12,10 +11,16 @@ class PipelineOutputsController < ApplicationController
   # GET /pipeline_outputs/1
   # GET /pipeline_outputs/1.json
   def show
-    @view_level = params[:view_level]
-    respond_to do |format|
-      format.html
-      format.json { render json: @pipeline_output.to_json(include: :taxon_counts) }
+    @view_level = params[:view_level] ? params[:view_level] : 'genus'
+    @report_info = {}
+    report = @pipeline_output.reports.first
+    if report
+      external_report_info =
+        ReportsController.external_report_info(report, @view_level, params)
+      @report_info[:report_details] = external_report_info[:report_details]
+      @report_info[:taxonomy_details] = external_report_info[:taxonomy_details]
+      @report_info[:highest_tax_counts] = external_report_info[:highest_tax_counts]
+      @report_info[:view_level] = external_report_info[:view_level]
     end
   end
 
@@ -80,20 +85,6 @@ class PipelineOutputsController < ApplicationController
   end
 
   private
-
-  def typed_counts
-    counts = @pipeline_output.taxon_counts
-    @nt_species_counts = counts.type('NT').level(TaxonCount::TAX_LEVEL_SPECIES)
-    @nr_species_counts = counts.type('NR').level(TaxonCount::TAX_LEVEL_SPECIES)
-    @ordered_nt_species_tax_ids = @nt_species_counts.order(count: :desc).where.not("tax_id < 0").map(&:tax_id)
-    @ordered_nr_species_tax_ids = @nr_species_counts.order(count: :desc).where.not("tax_id < 0").map(&:tax_id)
-    @ordered_species_tax_ids = (@ordered_nt_species_tax_ids + @ordered_nr_species_tax_ids).uniq
-    @nt_genus_counts = counts.type('NT').level(TaxonCount::TAX_LEVEL_GENUS)
-    @nr_genus_counts = counts.type('NR').level(TaxonCount::TAX_LEVEL_GENUS)
-    @ordered_nt_genus_tax_ids = @nt_genus_counts.order(count: :desc).where.not("tax_id < 0").map(&:tax_id)
-    @ordered_nr_genus_tax_ids = @nr_genus_counts.order(count: :desc).where.not("tax_id < 0").map(&:tax_id)
-    @ordered_genus_tax_ids = (@ordered_nt_genus_tax_ids + @ordered_nr_genus_tax_ids).uniq
-  end
 
   # Use callbacks to share common setup or constraints between actions.
   def set_pipeline_output

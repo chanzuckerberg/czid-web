@@ -22,31 +22,6 @@ class PipelineSampleReport extends React.Component {
   render() {
     return (
       <div>
-        <Header />
-        <SubHeader>
-          <div className="sub-header">
-            <div className="title">
-              PIPELINE
-            </div>
-
-            <div className="sub-title">
-              <a href="/"> { this.report_details.project_info.name } </a> > { this.report_details.sample_info.name }
-            </div>
-
-            <div className="sub-header-navigation">
-              <div className="nav-content">
-                <ul className="tabs tabs-transparent">
-                  <li className="tab">
-                    <a href="/pipeline_outputs/57">Details</a>
-                  </li>
-                  <li className="tab">
-                    <a href="/reports/30" className="active">Reports</a>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </SubHeader>
         <div id="reports" className="reports-screen tab-screen col s12">
           <div className="container tab-screen-content">
             <div className="row">
