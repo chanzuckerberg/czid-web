@@ -1,6 +1,5 @@
 class ReportsController < ApplicationController
   before_action :set_report, only: [:show, :edit, :update, :destroy]
-  before_action :typed_zscores, only: [:show]
 
   # GET /reports
   # GET /reports.json
@@ -11,15 +10,10 @@ class ReportsController < ApplicationController
   # GET /reports/1
   # GET /reports/1.json
   def show
-    @nt_zscore_threshold = params[:nt_zscore_threshold]
-    @nt_rpm_threshold = params[:nt_rpm_threshold]
-    @nr_zscore_threshold = params[:nr_zscore_threshold]
-    @nr_rpm_threshold = params[:nr_rpm_threshold]
-    @view_level = params[:view_level]
-    respond_to do |format|
-      format.html
-      format.json { render json: @report.to_json(include: :taxon_zscores) }
-    end
+    @report_details = report_details
+    @view_level = params[:view_level] ? params[:view_level] : 'genus'
+    @taxonomy_details = taxonomy_details(@view_level)
+    @highest_tax_counts = highest_tax_counts(@view_level)
   end
 
   # GET /reports/new
@@ -81,18 +75,65 @@ class ReportsController < ApplicationController
 
   private
 
-  def typed_zscores
+  def report_details
+    {
+      report_info: @report,
+      pipeline_info: @report.pipeline_output,
+      sample_info: @report.pipeline_output.sample,
+      project_info: @report.pipeline_output.sample.project,
+      background_model: @report.background
+    }
+  end
+
+  def taxonomy_details(view_level)
+    view_level = view_level.downcase
     zscores = @report.taxon_zscores
-    @nt_species_zscores = zscores.type('NT').level(TaxonCount::TAX_LEVEL_SPECIES)
-    @nr_species_zscores = zscores.type('NR').level(TaxonCount::TAX_LEVEL_SPECIES)
-    @ordered_nt_species_tax_ids = @nt_species_zscores.order(zscore: :desc).where.not("tax_id < 0").map(&:tax_id)
-    @ordered_nr_species_tax_ids = @nr_species_zscores.order(zscore: :desc).where.not("tax_id < 0").map(&:tax_id)
-    @ordered_species_tax_ids = (@ordered_nt_species_tax_ids + @ordered_nr_species_tax_ids).uniq
-    @nt_genus_zscores = zscores.type('NT').level(TaxonCount::TAX_LEVEL_GENUS)
-    @nr_genus_zscores = zscores.type('NR').level(TaxonCount::TAX_LEVEL_GENUS)
-    @ordered_nt_genus_tax_ids = @nt_genus_zscores.order(zscore: :desc).where.not("tax_id < 0").map(&:tax_id)
-    @ordered_nr_genus_tax_ids = @nr_genus_zscores.order(zscore: :desc).where.not("tax_id < 0").map(&:tax_id)
-    @ordered_genus_tax_ids = (@ordered_nt_genus_tax_ids + @ordered_nr_genus_tax_ids).uniq
+    nt_zscore_threshold = params[:nt_zscore_threshold]
+    nt_rpm_threshold = params[:nt_rpm_threshold]
+    nr_zscore_threshold = params[:nr_zscore_threshold]
+    nr_rpm_threshold = params[:nr_rpm_threshold]
+    tax_details = []
+    if view_level == 'species'
+      nt_zscores = zscores.type('NT').level(TaxonCount::TAX_LEVEL_SPECIES)
+      nr_zscores = zscores.type('NR').level(TaxonCount::TAX_LEVEL_SPECIES)
+    else
+      nt_zscores = zscores.type('NT').level(TaxonCount::TAX_LEVEL_GENUS)
+      nr_zscores = zscores.type('NR').level(TaxonCount::TAX_LEVEL_GENUS)
+    end
+
+    # TODO, discuss why the NT score is sorted and not the NR score
+    @tax_ids = filter(nt_zscores, nt_zscore_threshold, nr_zscore_threshold,
+                      nt_rpm_threshold, nr_rpm_threshold)
+                 .paginate(page: params[:page])
+                 .order(zscore: :desc).where.not("tax_id < 0").map(&:tax_id)
+    @tax_ids.each do |id|
+      nt_ele = nt_zscores.find_by(tax_id: id)
+      nr_ele = nr_zscores.find_by(tax_id: id)
+      tax_details.push(nt_ele: nt_ele, nr_ele: nr_ele)
+    end
+    tax_details
+  end
+
+  def highest_tax_counts(view_level)
+    view_level = view_level.downcase
+    zscores = @report.taxon_zscores
+    metrics = {}
+    view_level == 'species' ?
+      nt_zscores = zscores.type('NT').level(TaxonCount::TAX_LEVEL_SPECIES) :
+      nt_zscores = zscores.type('NT').level(TaxonCount::TAX_LEVEL_GENUS)
+    highest_zscore = nt_zscores.order(zscore: :desc).first
+    highest_rpm = nt_zscores.order(rpm: :desc).first
+    metrics[:highest_zscore] = highest_zscore.zscore
+    metrics[:highest_rpm] = highest_rpm.rpm
+    metrics
+  end
+
+  def filter(nt_zscores, nt_threshold, nr_threshold, nt_rpm_threshold, nr_rpm_threshold)
+    nt_zscores = nt_zscores.where('zscore >= ?', nt_threshold) if nt_threshold
+    nt_zscores = nt_zscores.where('zscore >= ?', nr_threshold) if nr_threshold
+    nt_zscores = nt_zscores.where('rpm >= ?', nt_rpm_threshold) if nt_rpm_threshold
+    nt_zscores = nt_zscores.where('rpm >= ?', nr_rpm_threshold) if nr_rpm_threshold
+    nt_zscores
   end
 
   def compute_rpm(count, total_reads)

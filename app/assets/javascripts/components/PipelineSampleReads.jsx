@@ -76,7 +76,7 @@ class PipelineSampleReads extends React.Component {
               <div className="nav-content">
                 <ul className="tabs tabs-transparent">
                   <li className="tab"><a href="#screen1" className="active">Details</a></li>
-                  <li className="tab"><a href="#reports">Reports</a></li>
+                  <li className="tab"><a href={"/reports/30" }>Reports</a></li>
                 </ul>
               </div>
             </div>
@@ -182,7 +182,7 @@ class PipelineSampleReads extends React.Component {
                   <i className="fa fa-user-times left"></i> DOWNLOAD NON HUMAN READS
                 </a>
 
-                <a href={'/pipeline_outputs/' + this.pipelineOutput.id + '/#reports'} className="custom-button">
+                <a href={"/reports/30" } className="custom-button">
                   <i className="fa fa-file-text-o left"></i> GENERATE REPORT
                 </a>
               </div>
