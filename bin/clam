@@ -1,0 +1,27 @@
+#!/bin/bash
+#
+#  In order for this script to work, you will need PEM credentials for SSH.
+#
+#  Usage:
+#
+#      bin/clam dev bash
+#
+#      bin/clam dev 'echo $HOSTNAME'
+#
+#      bin/clam dev 'mysqldump -h $RDS_ADDRESS -u $DB_USERNAME --password=$DB_PASSWORD idseq_dev | gzip -c' > id_dev.sql.gz
+#
+#  Above, the specified commands run in the web container on environment "dev",
+#  so that the $HOSTNAME, $RDS_ADDRESS, etc variables are expanded in that
+#  environment
+#
+#  Race conditions during (re)deploy may cause this script to fail or timeout.
+#
+
+ENV=$1
+shift
+
+MACHINE=`bin/get_public_ip $ENV`
+
+CONTAINER=`ssh ec2-user@$MACHINE "docker ps | grep chanzuckerberg/idseq-web | head -1" | awk '{print $NF}'`
+
+ssh ec2-user@$MACHINE 'docker exec '$CONTAINER' /bin/bash -c '"'$*'"
