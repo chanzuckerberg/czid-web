@@ -86,7 +86,7 @@ class Sample < ApplicationRecord
     batch_command = "aws s3 cp #{IdSeqPipeline::S3_SCRIPT_LOC} .; chmod 755 #{script_name}; " +
                     batch_command_env_variables + "./#{script_name}"
     command = "aegea batch submit --command=\"#{batch_command}\" "
-    command += " --storage /mnt=1500 --ecr-image idseq --memory 64000"
+    command += " --storage /mnt=1500 --ecr-image idseq --memory 256000 --queue idseq"
     command
   end
 
