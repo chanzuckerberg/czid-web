@@ -1,4 +1,5 @@
 class PipelineOutputsController < ApplicationController
+  include ReportHelper
   before_action :set_pipeline_output, only: [:show, :edit, :update, :destroy]
   protect_from_forgery unless: -> { request.format.json? }
 
@@ -15,8 +16,7 @@ class PipelineOutputsController < ApplicationController
     @report_info = {}
     report = @pipeline_output.reports.first
     if report
-      external_report_info =
-        ReportsController.external_report_info(report, @view_level, params)
+      external_report_info = external_report_info(report, @view_level, params)
       @report_info[:report_details] = external_report_info[:report_details]
       @report_info[:taxonomy_details] = external_report_info[:taxonomy_details]
       @report_info[:highest_tax_counts] = external_report_info[:highest_tax_counts]
