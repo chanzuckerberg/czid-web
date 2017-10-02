@@ -500,7 +500,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
     handler.addFilter(TimeFilter())
     handler.setFormatter(formatter)
     logger.addHandler(handler)
-    default_logparams = {"sample_s3_output_path": sample_s3_output_path,
+    DEFAULT_LOGPARAMS = {"sample_s3_output_path": sample_s3_output_path,
                          "stats_file": os.path.join(result_dir, STATS_OUT)}
 
     # Download fastqs
@@ -527,7 +527,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         print execute_command(command)
 
     # run STAR
-    logparams = default_logparams.copy().update({"title": "STAR", "count_reads": True,
+    logparams = DEFAULT_LOGPARAMS.copy().update({"title": "STAR", "count_reads": True,
                                                  "before_file_name": fastq_file_1,
                                                  "before_file_type": "fastq_paired",
                                                  "after_file_name": os.path.join(result_dir, STAR_OUT1),
@@ -537,7 +537,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         result_dir, scratch_dir, sample_s3_output_path, lazy_run)
 
     # run priceseqfilter
-    logparams = default_logparams.copy().update({"title": "PriceSeqFilter", "count_reads": True,
+    logparams = DEFAULT_LOGPARAMS.copy().update({"title": "PriceSeqFilter", "count_reads": True,
                                                  "before_file_name": os.path.join(result_dir, STAR_OUT1),
                                                  "before_file_type": "fastq_paired",
                                                  "after_file_name": os.path.join(result_dir, PRICESEQFILTER_OUT1),
@@ -548,14 +548,14 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         result_dir, sample_s3_output_path, lazy_run)
 
     # run fastq to fasta
-    logparams = default_logparams.copy().update({"title": "FASTQ to FASTA", "count_reads": False})
+    logparams = DEFAULT_LOGPARAMS.copy().update({"title": "FASTQ to FASTA", "count_reads": False})
     run_and_log(logparams, run_fq2fa,
         sample_name, os.path.join(result_dir, PRICESEQFILTER_OUT1),
         os.path.join(result_dir, PRICESEQFILTER_OUT2),
         result_dir, sample_s3_output_path, lazy_run)
 
     # run cdhitdup
-    logparams = default_logparams.copy().update({"title": "CD-HIT-DUP", "count_reads": True,
+    logparams = DEFAULT_LOGPARAMS.copy().update({"title": "CD-HIT-DUP", "count_reads": True,
                                                  "before_file_name": os.path.join(result_dir, FQ2FA_OUT1),
                                                  "before_file_type": "fasta_paired",
                                                  "after_file_name": os.path.join(result_dir, CDHITDUP_OUT1),
@@ -566,7 +566,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         result_dir, sample_s3_output_path, lazy_run)
 
     # run lzw filter
-    logparams = default_logparams.copy().update({"title": "LZW filter", "count_reads": True,
+    logparams = DEFAULT_LOGPARAMS.copy().update({"title": "LZW filter", "count_reads": True,
                                                  "before_file_name": os.path.join(result_dir, CDHITDUP_OUT1),
                                                  "before_file_type": "fasta_paired",
                                                  "after_file_name": os.path.join(result_dir, LZW_OUT1),
@@ -577,7 +577,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         result_dir, sample_s3_output_path, lazy_run)
 
     # run bowtie
-    logparams = default_logparams.copy().update({"title": "bowtie2", "count_reads": True,
+    logparams = DEFAULT_LOGPARAMS.copy().update({"title": "bowtie2", "count_reads": True,
                                                  "before_file_name": os.path.join(result_dir, LZW_OUT1),
                                                  "before_file_type": "fasta_paired",
                                                  "after_file_name": os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT1),
@@ -588,7 +588,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         bowtie2_genome_s3_path, result_dir, sample_s3_output_path, lazy_run)
 
     # run gsnap remotely
-    logparams = default_logparams.copy().update({"title": "GSNAPL", "count_reads": True,
+    logparams = DEFAULT_LOGPARAMS.copy().update({"title": "GSNAPL", "count_reads": True,
                                                 "before_file_name": os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT1),
                                                 "before_file_type": "fasta_paired",
                                                 "after_file_name": os.path.join(result_dir, GSNAPL_OUT),
@@ -599,7 +599,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         result_dir, sample_s3_output_path, lazy_run)
 
     # run_annotate_gsnapl_m8_with_taxids
-    logparams = default_logparams.copy().update({"title": "annotate gsnapl m8 with taxids", "count_reads": False})
+    logparams = DEFAULT_LOGPARAMS.copy().update({"title": "annotate gsnapl m8 with taxids", "count_reads": False})
     run_and_log(logparams, run_annotate_m8_with_taxids,
         sample_name, os.path.join(result_dir, GSNAPL_OUT),
         os.path.join(result_dir, ANNOTATE_GSNAPL_M8_WITH_TAXIDS_OUT),
@@ -607,14 +607,14 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         result_dir, sample_s3_output_path, False)
 
     # run_generate_taxid_annotated_fasta_from_m8
-    logparams = default_logparams.copy().update({"title": "generate taxid annotated fasta from m8", "count_reads": False})
+    logparams = DEFAULT_LOGPARAMS.copy().update({"title": "generate taxid annotated fasta from m8", "count_reads": False})
     run_and_log(logparams, run_generate_taxid_annotated_fasta_from_m8,
         sample_name, os.path.join(result_dir, GSNAPL_OUT),
         os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT3),
         os.path.join(result_dir, GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT),
         'NT', result_dir, sample_s3_output_path, False)
 
-    logparams = default_logparams.copy().update({"title": "filter deuterostomes from m8", "count_reads": True,
+    logparams = DEFAULT_LOGPARAMS.copy().update({"title": "filter deuterostomes from m8", "count_reads": True,
                                                  "before_file_name": os.path.join(result_dir, ANNOTATE_GSNAPL_M8_WITH_TAXIDS_OUT),
                                                  "before_file_type": "m8",
                                                  "after_file_name": os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NT_M8_OUT),
@@ -624,7 +624,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NT_M8_OUT),
         deuterostome_list_s3_path, result_dir, sample_s3_output_path, False)
 
-    logparams = default_logparams.copy().update({"title": "generate taxid outputs from m8", "count_reads": False})
+    logparams = DEFAULT_LOGPARAMS.copy().update({"title": "generate taxid outputs from m8", "count_reads": False})
     run_and_log(logparams, run_generate_taxid_outputs_from_m8,
         sample_name, os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NT_M8_OUT),
         fastq_file_1, os.path.join(result_dir, NT_M8_TO_TAXID_COUNTS_FILE_OUT),
@@ -635,14 +635,14 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         result_dir, sample_s3_output_path, False)
 
     # run rapsearch remotely
-    logparams = default_logparams.copy().update({"title": "filter deuterostomes from FASTA", "count_reads": False})
+    logparams = DEFAULT_LOGPARAMS.copy().update({"title": "filter deuterostomes from FASTA", "count_reads": False})
     run_and_log(logparams, run_filter_deuterostomes_from_fasta,
         sample_name, os.path.join(result_dir, GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT),
         os.path.join(result_dir, FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT),
         accession2taxid_s3_path, deuterostome_list_s3_path, 'NT',
         result_dir, sample_s3_output_path, False)
 
-    logparams = default_logparams.copy().update({"title": "RAPSearch2", "count_reads": True,
+    logparams = DEFAULT_LOGPARAMS.copy().update({"title": "RAPSearch2", "count_reads": True,
                                                  "before_file_name": os.path.join(result_dir, FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT),
                                                  "before_file_type": "fasta",
                                                  "after_file_name": os.path.join(result_dir, RAPSEARCH2_OUT),
@@ -653,7 +653,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         result_dir, sample_s3_output_path, lazy_run)
 
     # run_annotate_m8_with_taxids
-    logparams = default_logparams.copy().update({"title": "annotate m8 with taxids", "count_reads": False})
+    logparams = DEFAULT_LOGPARAMS.copy().update({"title": "annotate m8 with taxids", "count_reads": False})
     run_and_log(logparams, run_annotate_m8_with_taxids,
         sample_name, os.path.join(result_dir, RAPSEARCH2_OUT),
         os.path.join(result_dir, ANNOTATE_RAPSEARCH2_M8_WITH_TAXIDS_OUT),
@@ -661,14 +661,14 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         result_dir, sample_s3_output_path, False)
 
     # run_generate_taxid_annotated_fasta_from_m8
-    logparams = default_logparams.copy().update({"title": "generate taxid annotated fasta from m8", "count_reads": False})
+    logparams = DEFAULT_LOGPARAMS.copy().update({"title": "generate taxid annotated fasta from m8", "count_reads": False})
     run_and_log(logparams, run_generate_taxid_annotated_fasta_from_m8,
         sample_name, result_dir + '/' + RAPSEARCH2_OUT,
         result_dir + '/' + FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT,
         result_dir + '/' + GENERATE_TAXID_ANNOTATED_FASTA_FROM_RAPSEARCH2_M8_OUT,
         'NR', result_dir, sample_s3_output_path, False)
 
-    logparams = default_logparams.copy().update({"title": "filter deuterostomes from m8", "count_reads": True,
+    logparams = DEFAULT_LOGPARAMS.copy().update({"title": "filter deuterostomes from m8", "count_reads": True,
                                                  "before_file_name": os.path.join(result_dir, ANNOTATE_RAPSEARCH2_M8_WITH_TAXIDS_OUT),
                                                  "before_file_type": "m8",
                                                  "after_file_name": os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NR_M8_OUT),
@@ -678,7 +678,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NR_M8_OUT),
         deuterostome_list_s3_path, result_dir, sample_s3_output_path, False)
 
-    logparams = default_logparams.copy().update({"title": "generate taxid outputs from m8", "count_reads": False})
+    logparams = DEFAULT_LOGPARAMS.copy().update({"title": "generate taxid outputs from m8", "count_reads": False})
     run_and_log(logparams, run_generate_taxid_outputs_from_m8,
         sample_name, os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NR_M8_OUT),
         fastq_file_1, os.path.join(result_dir, NR_M8_TO_TAXID_COUNTS_FILE_OUT),
@@ -688,7 +688,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         taxid2info_s3_path, 'NR', db_sample_id,
         result_dir, sample_s3_output_path, False)
 
-    logparams = default_logparams.copy().update({"title": "combine JSON outputs", "count_reads": False})
+    logparams = DEFAULT_LOGPARAMS.copy().update({"title": "combine JSON outputs", "count_reads": False})
     run_and_log(logparams, run_combine_json_outputs,
         sample_name, result_dir + '/' + NT_TAXID_COUNTS_TO_JSON_OUT,
         result_dir + '/' + NR_TAXID_COUNTS_TO_JSON_OUT,
