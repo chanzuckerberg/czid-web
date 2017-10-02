@@ -111,7 +111,7 @@ class ReportsController < ApplicationController
       # TODO, discuss why the NT score is sorted and not the NR score
       tax_ids = filter(nt_zscores, nt_zscore_threshold, nr_zscore_threshold,
                        nt_rpm_threshold, nr_rpm_threshold)
-                  .order(zscore: :desc).where.not("tax_id < 0").limit(20).map(&:tax_id)
+                .order(zscore: :desc).where.not("tax_id < 0").limit(20).map(&:tax_id)
       tax_ids.each do |id|
         nt_ele = nt_zscores.find_by(tax_id: id)
         nr_ele = nr_zscores.find_by(tax_id: id)
@@ -120,18 +120,21 @@ class ReportsController < ApplicationController
       tax_details
     end
 
-
     def highest_tax_counts(view_level, report)
       view_level = view_level.downcase
       zscores = report.taxon_zscores
       metrics = {}
-      view_level == 'species' ?
-        nt_zscores = zscores.type('NT').level(TaxonCount::TAX_LEVEL_SPECIES) :
+      if view_level == 'species'
+        nt_zscores = zscores.type('NT').level(TaxonCount::TAX_LEVEL_SPECIES)
+      else
         nt_zscores = zscores.type('NT').level(TaxonCount::TAX_LEVEL_GENUS)
+      end
       highest_zscore = nt_zscores.order(zscore: :desc).first
       highest_rpm = nt_zscores.order(rpm: :desc).first
-      metrics[:highest_zscore] = highest_zscore.zscore
-      metrics[:highest_rpm] = highest_rpm.rpm
+      if highest_zscore && highest_rpm
+        metrics[:highest_zscore] = highest_zscore[:zscore]
+        metrics[:highest_rpm] = highest_rpm[:rpm]
+      end
       metrics
     end
 
@@ -143,7 +146,6 @@ class ReportsController < ApplicationController
       nt_zscores
     end
   end
-
 
   private
 
