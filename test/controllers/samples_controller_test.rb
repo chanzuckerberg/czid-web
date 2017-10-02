@@ -7,6 +7,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     @user = users(:one)
     @user.authentication_token = 'sdfsdfsdff'
     @user.save
+    post user_session_path, params: { 'user[email]' => @user.email, 'user[password]' => 'password' }
   end
 
   test 'should get index' do

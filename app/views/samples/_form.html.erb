@@ -14,40 +14,54 @@
     <%= form.label :name %>
     <%= form.text_field :name, id: :sample_name, placeholder: 'Required' %>
   </div>
-  <%= form.hidden_field :status, value: 'created' %>
-
   <div class="field radiobutton-list">
     <%= form.label :project %>
     <%= form.collection_radio_buttons :project_id, Project.all, :id, :name %>
   </div>
 
-  <div class="field">
-    <%= form.label 'Read 1 FASTQ S3 Path' %><br>
-    <span style='font-size:9px; color: green'>
-    Example: s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz
-    </span>
-    <%= text_field_tag 'sample[input_files_attributes][0][source]', '', placeholder: 'Required' %>
-  </div>
-  <%= hidden_field_tag 'sample[input_files_attributes][0][source_type]', InputFile::SOURCE_TYPE_S3 %>
-
-  <div class="field">
-    <%= form.label 'Read 2 FASTQ S3 Path' %><br>
-    <span style='font-size:9px; color: green'>
-    Example: s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R2_001.fastq.gz
-    </span>
-    <%= text_field_tag 'sample[input_files_attributes][1][source]', '', placeholder: 'Required' %>
-  </div>
-  <div class="field">
-    <%= form.label 'Preload Results Path (S3 only)' %><br>
-    <span style='font-size:9px; color: green'>
-    Example: s3://yunfang-workdir/id-rr004/RR004_water_2_S23/
-    </span>
-    <%= form.text_field :s3_preload_result_path, placeholder: 'Optional' %>
-  </div>
-  <%= hidden_field_tag 'sample[input_files_attributes][1][source_type]', InputFile::SOURCE_TYPE_S3 %>
+  <% unless sample.id %>
+    <%= form.hidden_field :status, value: 'created' %>
+    <div class="field">
+      <%= form.label 'Read 1 FASTQ S3 Path' %><br>
+      <span style='font-size:9px; color: green'>
+      Example: s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz
+      </span>
+      <%= text_field_tag 'sample[input_files_attributes][0][source]', '', placeholder: 'Required' %>
+    </div>
+    <%= hidden_field_tag 'sample[input_files_attributes][0][source_type]', InputFile::SOURCE_TYPE_S3 %>
+    <div class="field">
+      <%= form.label 'Read 2 FASTQ S3 Path' %><br>
+      <span style='font-size:9px; color: green'>
+      Example: s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R2_001.fastq.gz
+      </span>
+      <%= text_field_tag 'sample[input_files_attributes][1][source]', '', placeholder: 'Required' %>
+    </div>
+    <div class="field">
+      <%= form.label 'Preload Results Path (S3 only)' %><br>
+      <span style='font-size:9px; color: green'>
+      Example: s3://yunfang-workdir/id-rr004/RR004_water_2_S23/
+      </span>
+      <%= form.text_field :s3_preload_result_path, placeholder: 'Optional' %>
+    </div>
+    <%= hidden_field_tag 'sample[input_files_attributes][1][source_type]', InputFile::SOURCE_TYPE_S3 %>
+  <% else %>
+    <div class="field">
+      <%= form.label 'Read 1 FASTQ S3 Path' %><br>
+      <%= text_field_tag 'sample_source_0', sample.input_files[0].source, disabled: true%>
+    </div>
+    <div class="field">
+      <%= form.label 'Read 2 FASTQ S3 Path' %><br>
+      <%= text_field_tag 'sample_source_1', sample.input_files[1].source, disabled: true%>
+    </div>
+    <div class="field">
+      <%= form.label 'Preload Results Path (S3 only)' %><br>
+      <%= form.text_field :s3_preload_result_path, disabled: true%>
+    </div>
+    <div class="field">
+      Sample Created at <%= sample.created_at %>
+    </div>
+  <% end %>
   <div class="actions">
     <%= form.submit %>
   </div>
-
-
 <% end %>

@@ -31,9 +31,9 @@ class SamplesController < ApplicationController
     if params[:project_name]
       project_name = params.delete(:project_name)
       project = Project.find_by(name: project_name)
-      @sample.project = project
     end
     @sample = Sample.new(params)
+    @sample.project = project if project
     @sample.input_files.each { |f| f.name ||= File.basename(f.source) }
 
     respond_to do |format|
