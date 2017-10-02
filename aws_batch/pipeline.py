@@ -91,7 +91,7 @@ LOGS_OUT_BASENAME = 'log.txt'
 STATS_OUT = 'stats.json'
 
 #global statistics log
-STATS = {}
+STATS = []
 
 ### convenience functions
 def count_reads(file_name, file_type):
@@ -460,7 +460,7 @@ def run_and_log(logparams, func_name, *args):
     if logparams["count_reads"]:
         percent_removed = (100.0 * (records_before - records_after)) / records_before
         logger.info("%s %% of reads dropped out, %s reads remaining" % (str(percent_removed), str(records_after)))
-        STATS[func_name.__name__] = {'reads_before': records_before, 'reads_after': records_after}
+        STATS.append({'task': func_name.__name__, 'reads_before': records_before, 'reads_after': records_after})
     # function-specific logs
     if func_name.__name__ == "run_cdhitdup":
         compression_ratio = records_before / records_after
