@@ -1,5 +1,4 @@
 class HomeController < ApplicationController
-
   def home
     @final_result = []
     @samples = Sample.includes(:pipeline_runs).paginate(page: params[:page]).order('created_at DESC')
@@ -15,4 +14,4 @@ class HomeController < ApplicationController
       @final_result.push(output_data)
     end
   end
-end   
+end
