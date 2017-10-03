@@ -59,17 +59,17 @@ class PipelineSampleReads extends React.Component {
               <div className="nav-content">
                 <ul className="tabs tabs-transparent">
                   <li className="tab" onClick={() => {this.setTab('details')}} >
-                    <a href="#screen1" className={this.getActive('details')}>Details</a>
+                    <a href="#details" className={this.getActive('details')}>Details</a>
                   </li>
                   <li className="tab" onClick={() => {this.setTab('reports')}}>
-                    <a href="#reports" className={this.getActive('reports')}>Reports</a>
+                    <a href="#reports" className={this.getActive('reports')}>Report</a>
                   </li>
                 </ul>
               </div>
             </div>
           </div>
         </SubHeader>
-        <div id="screen1" className="tab-screen col s12">
+        <div id="details" className="tab-screen col s12">
           <div className="container tab-screen-content">
             <div className="row">
               <div className="col s9">
