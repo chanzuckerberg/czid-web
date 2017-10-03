@@ -1,6 +1,7 @@
 class SamplesController < ApplicationController
+  before_action :login_required, only: [:new, :update, :destroy]
   before_action :set_sample, only: [:show, :edit, :update, :destroy]
-  acts_as_token_authentication_handler_for User, only: [:create]
+  acts_as_token_authentication_handler_for User, only: [:create], fallback: :devise
   protect_from_forgery unless: -> { request.format.json? }
 
   # GET /samples
@@ -27,10 +28,13 @@ class SamplesController < ApplicationController
   # POST /samples.json
   def create
     params = sample_params
-    project_name = params.delete(:project_name)
-    project = Project.find_by(name: project_name)
+    if params[:project_name]
+      project_name = params.delete(:project_name)
+      project = Project.find_by(name: project_name)
+    end
     @sample = Sample.new(params)
-    @sample.project = project
+    @sample.project = project if project
+    @sample.input_files.each { |f| f.name ||= File.basename(f.source) }
 
     respond_to do |format|
       if @sample.save
@@ -76,8 +80,8 @@ class SamplesController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def sample_params
-    params.require(:sample).permit(:name, :project_name, :status, :s3_preload_result_path,
-                                   :s3_star_index_path, :s3_bowtie2_index_path,
+    params.require(:sample).permit(:name, :project_name, :project_id, :status, :s3_preload_result_path,
+                                   :s3_star_index_path, :s3_bowtie2_index_path, :sample_memory,
                                    :sample_host, :sample_location, :sample_date, :sample_tissue,
                                    :sample_template, :sample_library, :sample_sequencer, :sample_notes,
                                    input_files_attributes: [:name, :presigned_url, :source_type, :source])

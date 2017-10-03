@@ -8,6 +8,13 @@ class InputFile < ApplicationRecord
   FILE_REGEX = %r{\A[^\s\/]+\.fastq.gz}
   validates :name, presence: true, format: { with: FILE_REGEX, message: "file must match format '#{FILE_REGEX}'" }
   validates :source_type, presence: true, inclusion: { in: %w[local s3] }
+  validate :s3_source_check
+
+  def s3_source_check
+    if source_type == SOURCE_TYPE_S3 && source[0..4] != 's3://'
+      errors.add(:input_files, "file source doesn't start with s3:// for s3 input")
+    end
+  end
 
   after_validation(on: :create) do
     if sample && source_type == 'local'
