@@ -1,17 +1,17 @@
 class HomeController < ApplicationController
   def home
-    @users = User.all
-    @projects = Project.all
-    @samples = Sample.all
-    @output_data = {}
+    @final_result = []
+    @samples = Sample.includes(:pipeline_runs).paginate(page: params[:page]).order('created_at DESC')
+    @project_info = @samples.first.project
 
-    @pipeline_outputs = PipelineOutput.order("created_at DESC")
+    @samples.each do |output|
+      output_data = {}
+      pipeline_info = output.pipeline_runs.first ? output.pipeline_runs.first.pipeline_output : nil
+      pipeline_run = output.pipeline_runs.first
 
-    @pipeline_outputs.each do |output|
-      sample_info =  output.sample
-      project_info = output.sample.project
-      @output_data['sample_info'] = sample_info
-      @output_data['project_info'] = project_info
+      output_data[:pipeline_info] = pipeline_info
+      output_data[:pipeline_run] = pipeline_run
+      @final_result.push(output_data)
     end
   end
 end
