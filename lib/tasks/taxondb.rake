@@ -11,13 +11,13 @@ task load_taxon_db: :environment do
   nodes_file = "#{local_taxonomy_path}/#{nodes_s3_file}"
   f = CSV.open(nodes_file, "r", col_sep: "\t|\t")
   f.each do |n|
-    TaxonChildParent.find_or_create_by(taxid: n[0].to_i).update(parent_taxid: n[1].to_i, rank: n[2])
+    TaxonChildParent.find_or_create_by(taxid: n[0].to_i).update!(parent_taxid: n[1].to_i, rank: n[2])
   end
   f.close
   categories_file = "#{local_taxonomy_path}/#{categories_s3_file}"
   f = CSV.open(categories_file, "r", col_sep: "\t")
   f.each do |c|
-    TaxonCategory.find_or_create_by(taxid: c[2].to_i).update(category: c[0])
+    TaxonCategory.find_or_create_by(taxid: c[2].to_i).update!(category: c[0])
   end
   f.close
   Open3.capture3("rm -rf #{local_taxonomy_path}")
