@@ -42,6 +42,7 @@ class Sample < ApplicationRecord
   end
 
   def initiate_s3_cp
+    return unless status == STATUS_CREATED
     fastq1 = input_files[0].source
     fastq2 = input_files[1].source
     command = "aws s3 cp #{fastq1} #{sample_input_s3_path}/;"
@@ -50,7 +51,10 @@ class Sample < ApplicationRecord
       command += "aws s3 cp #{s3_preload_result_path} #{sample_output_s3_path} --recursive;"
     end
     _stdout, stderr, status = Open3.capture3(command)
-    raise stderr unless status.exitstatus.zero?
+    unless status.exitstatus.zero?
+      Airbrake.notify("Failed to upload sample #{id} with error #{stderr}")
+      raise stderr
+    end
 
     self.status = STATUS_UPLOADED
     save # this triggers pipeline

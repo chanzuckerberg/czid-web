@@ -44,7 +44,7 @@ class PipelineRun < ApplicationRecord
   def update_job_status
     return if completed?
     command = "aegea batch describe #{job_id}"
-    stdout, _stderr, status = Open3.capture3(command)
+    stdout, stderr, status = Open3.capture3(command)
     if status.exitstatus.zero?
       self.job_description = stdout
       job_hash = JSON.parse(job_description)
@@ -53,6 +53,7 @@ class PipelineRun < ApplicationRecord
         self.job_log_id = job_hash['container']['logStreamName']
       end
     else
+      Airbrake.notify("Error for update job status for pipeline run #{id} with error #{stderr}")
       self.job_status = STATUS_ERROR
     end
     save
