@@ -6,5 +6,4 @@
 # 'U' for Unclassified
 # 'O' for Other
 class TaxonCategory < ApplicationRecord
-  belongs_to :taxon_description
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171002235554) do
+ActiveRecord::Schema.define(version: 20171003203543) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -115,20 +115,16 @@ ActiveRecord::Schema.define(version: 20171002235554) do
   create_table "taxon_categories", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.integer "taxid"
     t.string "category"
-    t.bigint "taxon_description_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["taxon_description_id"], name: "index_taxon_categories_on_taxon_description_id"
   end
 
   create_table "taxon_child_parents", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.integer "taxid"
     t.integer "parent_taxid"
     t.string "rank"
-    t.bigint "taxon_description_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["taxon_description_id"], name: "index_taxon_child_parents_on_taxon_description_id"
   end
 
   create_table "taxon_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -142,12 +138,6 @@ ActiveRecord::Schema.define(version: 20171002235554) do
     t.string "count_type"
     t.index ["pipeline_output_id", "tax_id", "count_type"], name: "new_index_taxon_counts", unique: true
     t.index ["pipeline_output_id"], name: "index_taxon_counts_on_pipeline_output_id"
-  end
-
-  create_table "taxon_descriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.bigint "version"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
   end
 
   create_table "taxon_zscores", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -188,8 +178,6 @@ ActiveRecord::Schema.define(version: 20171002235554) do
   add_foreign_key "pipeline_runs", "samples"
   add_foreign_key "reports", "backgrounds"
   add_foreign_key "reports", "pipeline_outputs"
-  add_foreign_key "taxon_categories", "taxon_descriptions"
-  add_foreign_key "taxon_child_parents", "taxon_descriptions"
   add_foreign_key "taxon_counts", "pipeline_outputs"
   add_foreign_key "taxon_zscores", "reports"
 end
