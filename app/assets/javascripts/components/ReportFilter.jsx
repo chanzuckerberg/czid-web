@@ -2,15 +2,54 @@ class ReportFilter extends React.Component {
   constructor(props) {
     super(props);
     const view_level = props.view_level || 'Genus';
-    const nt_zscore = parseInt(ReportFilter.getFilter('nt_zscore_threshold'), 10) || 1;
-    const nr_zscore = parseInt(ReportFilter.getFilter('nr_zscore_threshold'), 10) || 1;
-    const nt_rpm = parseInt(ReportFilter.getFilter('nt_rpm_threshold'), 10) || 1;
-    const nr_rpm = parseInt(ReportFilter.getFilter('nr_rpm_threshold'), 10) || 1;
 
-    this.state = { nt_zscore_start: 0, nt_zscore_end: nt_zscore,
-      nr_zscore_start: 0, nr_zscore_end: nr_zscore,
-      nt_rpm_start: 0, nt_rpm_end: nt_rpm,
-      nr_rpm_start: 0, nr_rpm_end: nr_rpm, view_level: view_level };
+    const default_nt_zscore_threshold = `0-${this.props.highest_tax_counts.highest_nt_zscore}`;
+    const default_nr_zscore_threshold = `0-${this.props.highest_tax_counts.highest_nr_zscore}`;
+    const default_nt_rpm_threshold = `0-${this.props.highest_tax_counts.highest_nt_rpm}`;
+    const default_nr_rpm_threshhold = `0-${this.props.highest_tax_counts.highest_nr_rpm}`;
+
+    const nt_zscore_threshold = ReportFilter.getFilter('nt_zscore_threshold')
+      ? ReportFilter.getFilter('nt_zscore_threshold') : default_nt_zscore_threshold;
+
+    const nr_zscore_threshold = ReportFilter.getFilter('nr_zscore_threshold')
+      ? ReportFilter.getFilter('nr_zscore_threshold') : default_nr_zscore_threshold;
+
+    const nt_rpm_threshold = ReportFilter.getFilter('nt_rpm_threshold')
+      ? ReportFilter.getFilter('nt_rpm_threshold') : default_nt_rpm_threshold;
+    const nr_rpm_threshold = ReportFilter.getFilter('nr_rpm_threshold')
+      ? ReportFilter.getFilter('nr_rpm_threshold') :default_nr_rpm_threshhold;
+
+
+
+    const nt_zscore_start =
+      (nt_zscore_threshold.split('-').length > 0) ? parseInt(nt_zscore_threshold.split('-')[0], 10) : 0;
+    const nt_zscore_end =
+      (nt_zscore_threshold.split('-').length > 1) ? parseInt(nt_zscore_threshold.split('-')[1], 10) :
+        this.props.highest_tax_counts.highest_nt_zscore;
+
+    const nr_zscore_start =
+      (nr_zscore_threshold.split('-').length > 0) ? parseInt(nr_zscore_threshold.split('-')[0], 10) : 0;
+    const nr_zscore_end =
+      (nr_zscore_threshold.split('-').length > 1) ? parseInt(nr_zscore_threshold.split('-')[1], 10) :
+        this.props.highest_tax_counts.highest_nr_zscore;
+
+    const nt_rpm_start =
+      (nt_rpm_threshold.split('-').length > 0) ? parseInt(nt_rpm_threshold.split('-')[0], 10) : 0;
+    const nt_rpm_end =
+      (nt_rpm_threshold.split('-').length > 1) ? parseInt(nt_rpm_threshold.split('-')[1], 10) :
+        this.props.highest_tax_counts.highest_nt_rpm;
+
+    const nr_rpm_start =
+      (nr_rpm_threshold.split('-').length > 0) ? parseInt(nr_rpm_threshold.split('-')[0], 10) : 0;
+    const nr_rpm_end =
+      (nr_rpm_threshold.split('-').length > 1) ? parseInt(nr_rpm_threshold.split('-')[1], 10) :
+        this.props.highest_tax_counts.highest_nr_rpm;
+
+
+
+    this.state = { nt_zscore_start, nt_zscore_end, nr_zscore_start, nr_zscore_end, nt_rpm_start, nt_rpm_end,
+      nr_rpm_start, nr_rpm_end, view_level };
+
     this.applyFilter = this.applyFilter.bind(this);
     this.selectViewLevel = this.selectViewLevel.bind(this);
   }
@@ -18,9 +57,10 @@ class ReportFilter extends React.Component {
   applyFilter() {
     const current_url = location.protocol + '//' + location.host + location.pathname;
     window.location =
-      `${current_url}?nt_zscore_threshold=${this.state.nt_zscore_end
-    }&nr_zscore_threshold=${this.state.nr_zscore_end}&nt_rpm_threshold=${this.state.nt_rpm_end
-    }&nr_rpm_threshold=${this.state.nr_rpm_end}&view_level=${this.state.view_level}`;
+      `${current_url}?nt_zscore_threshold=${this.state.nt_zscore_start}-${this.state.nt_zscore_end
+    }&nr_zscore_threshold=${this.state.nr_zscore_start}-${this.state.nr_zscore_end}&nt_rpm_threshold=${
+      this.state.nt_rpm_start}-${this.state.nt_rpm_end}&nr_rpm_threshold=${
+      this.state.nr_rpm_start}-${this.state.nr_rpm_end}&view_level=${this.state.view_level}`;
   }
 
   static getFilter(name) {
@@ -50,53 +90,53 @@ class ReportFilter extends React.Component {
     const nr_rpm = document.getElementById('nr_rpm');
 
     noUiSlider.create(nt_zscore, {
-      start: [1, this.state.nt_zscore_end],
+      start: [this.state.nt_zscore_start, this.state.nt_zscore_end],
       connect: true,
       step: 1,
       orientation: 'horizontal', // 'horizontal' or 'vertical',
       behaviour: 'tap-drag',
       range: {
         'min': 0,
-        'max': this.props.highest_tax_counts.highest_zscore
+        'max': this.props.highest_tax_counts.highest_nt_zscore
       },
       format: wNumb({
         decimals: 0
       })
     });
     noUiSlider.create(nr_zscore, {
-      start: [1, this.state.nr_zscore_end],
+      start: [this.state.nr_zscore_start, this.state.nr_zscore_end],
       connect: true,
       step: 1,
       orientation: 'horizontal', // 'horizontal' or 'vertical'
       range: {
         'min': 0,
-        'max': this.props.highest_tax_counts.highest_zscore
+        'max': this.props.highest_tax_counts.highest_nr_zscore
       },
       format: wNumb({
         decimals: 0
       })
     });
     noUiSlider.create(nt_rpm, {
-      start: [1, this.state.nt_rpm_end],
+      start: [this.state.nt_rpm_start, this.state.nt_rpm_end],
       connect: true,
       step: 1,
       orientation: 'horizontal', // 'horizontal' or 'vertical'
       range: {
         'min': 0,
-        'max': this.props.highest_tax_counts.highest_rpm
+        'max': this.props.highest_tax_counts.highest_nt_rpm
       },
       format: wNumb({
         decimals: 0
       })
     });
     noUiSlider.create(nr_rpm, {
-      start: [1, this.state.nr_rpm_end],
+      start: [this.state.nr_rpm_start, this.state.nr_rpm_end],
       connect: true,
       step: 1,
       orientation: 'horizontal', // 'horizontal' or 'vertical'
       range: {
         'min': 0,
-        'max': this.props.highest_tax_counts.highest_rpm
+        'max': this.props.highest_tax_counts.highest_nr_rpm
       },
       format: wNumb({
         decimals: 0
