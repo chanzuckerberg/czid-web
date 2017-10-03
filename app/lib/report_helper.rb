@@ -32,15 +32,22 @@ module ReportHelper
   end
 
   def highest_tax_counts(view_level, report)
+    nt_zscores = select_zscore(view_level, report.taxon_zscores)[:nt_zscores]
+    nr_zscores = select_zscore(view_level, report.taxon_zscores)[:nr_zscores]
+    metrics = metrics(nt_zscores, nr_zscores)
+    metrics
+  end
+
+  def metrics(nt, nr)
     metrics = {}
-    nt_zscores =
-      select_zscore(view_level, report.taxon_zscores)[:nt_zscores]
-    highest_zscore = nt_zscores.order(zscore: :desc).first
-    highest_rpm = nt_zscores.order(rpm: :desc).first
-    if highest_zscore && highest_rpm
-      metrics[:highest_zscore] = highest_zscore[:zscore]
-      metrics[:highest_rpm] = highest_rpm[:rpm]
-    end
+    metrics[:highest_nt_zscore] =
+      nt.order(zscore: :desc).first ? nt.order(zscore: :desc).first[:zscore] : 0
+    metrics[:highest_nr_zscore] =
+      nr.order(zscore: :desc).first ? nr.order(zscore: :desc).first[:zscore] : 0
+    metrics[:highest_nt_rpm] =
+      nt.order(rpm: :desc).first ? nt.order(rpm: :desc).first[:rpm] : 0
+    metrics[:highest_nr_rpm] =
+      nr.order(rpm: :desc).first ? nr.order(rpm: :desc).first[:rpm] : 0
     metrics
   end
 
