@@ -5,7 +5,8 @@ class InitiateS3Cp
   @logger = Logger.new(STDOUT)
   def self.perform(sample_id)
     sample = Sample.find(sample_id)
-    output = sample.initiate_s3_cp # dryrun only
+    @logger.info("Start copying sample #{sample.id}")
+    output = sample.initiate_s3_cp
     @logger.info(output)
   end
 end
