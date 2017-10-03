@@ -77,7 +77,7 @@ class PipelineList extends React.Component {
             </div>
           </div>
         </div>
-          {!this.props.samples ? <div className="no-data"><i className="fa fa-frown-o" aria-hidden="true"> No data to display</i></div> : this.renderTable(this.props.samples, this.props.outputData)}
+          {!this.props.samples && this.props.outputData? <div className="no-data"><i className="fa fa-frown-o" aria-hidden="true"> No data to display</i></div> : this.renderTable(this.props.samples, this.props.outputData)}
       </div>
     )
   }
