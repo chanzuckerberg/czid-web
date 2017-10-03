@@ -63,11 +63,11 @@ class PipelineList extends React.Component {
           <div className="container">
             <div className="content">
               <div className="title">
-                All Projects  > { this.props.projectname }
+                All Projects  > {! this.props.project ?  'No project to display yet' : this.props.project.name }
               </div>
 
               <div className="sub-title">
-                { this.props.project.name }
+              {! this.props.project ?  'No project to display yet' : this.props.project.name }
               </div>
 
               <div className="title-filter">
