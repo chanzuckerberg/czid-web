@@ -1,5 +1,6 @@
 require 'open3'
 require 'json'
+# rubocop:disable ClassLength
 class Sample < ApplicationRecord
   STATUS_CREATED  = 'created'.freeze
   STATUS_UPLOADED = 'uploaded'.freeze
@@ -7,6 +8,7 @@ class Sample < ApplicationRecord
   STATUS_CHECKED  = 'checked'.freeze # status regarding pipeline kickoff is checked
   HIT_FASTA_BASENAME = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.fasta'.freeze
   LOG_BASENAME = 'log.txt'.freeze
+  DEFAULT_MEMORY = 64_000
 
   belongs_to :project
   has_many :pipeline_outputs, dependent: :destroy
@@ -44,7 +46,7 @@ class Sample < ApplicationRecord
     fastq2 = input_files[1].source
     command = "aws s3 cp #{fastq1} #{sample_input_s3_path}/;"
     command += "aws s3 cp #{fastq2} #{sample_input_s3_path}/;"
-    if s3_preload_result_path.present?
+    if s3_preload_result_path[0..4] == 's3://'
       command += "aws s3 cp #{s3_preload_result_path} #{sample_output_s3_path} --recursive;"
     end
     _stdout, stderr, status = Open3.capture3(command)
@@ -86,7 +88,12 @@ class Sample < ApplicationRecord
     batch_command = "aws s3 cp #{IdSeqPipeline::S3_SCRIPT_LOC} .; chmod 755 #{script_name}; " +
                     batch_command_env_variables + "./#{script_name}"
     command = "aegea batch submit --command=\"#{batch_command}\" "
-    command += " --storage /mnt=1500 --ecr-image idseq --memory 64000"
+    memory = if sample_memory.present?
+               sample_memory
+             else
+               DEFAULT_MEMORY
+             end
+    command += " --storage /mnt=1500 --ecr-image idseq --memory #{memory} --queue idseq"
     command
   end
 
