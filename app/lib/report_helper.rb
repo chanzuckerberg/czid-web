@@ -22,13 +22,29 @@ module ReportHelper
     tax_details = []
     nt_zscores = select_zscore(view_level, report.taxon_zscores)[:nt_zscores]
     nr_zscores = select_zscore(view_level, report.taxon_zscores)[:nr_zscores]
-    tax_ids = filter(nt_zscores, params[:nt_zscore_threshold], params[:nr_zscore_threshold],
-                     params[:nt_rpm_threshold], params[:nr_rpm_threshold])
+    tax_ids = filter(nt_zscores, resolve_params(params)[:nt_zscore_start],
+                     resolve_params(params)[:nt_zscore_end],
+                     resolve_params(params)[:nt_rpm_start],
+                     resolve_params(params)[:nt_rpm_end])
               .order(zscore: :desc).where.not("tax_id < 0").limit(20).map(&:tax_id)
     tax_ids.each do |id|
       tax_details.push(nt_ele: nt_zscores.find_by(tax_id: id), nr_ele: nr_zscores.find_by(tax_id: id))
     end
     tax_details
+  end
+
+  def resolve_params(params)
+    new_params = {}
+    nt_zscore_threshold =
+      params[:nt_zscore_threshold] ? params[:nt_zscore_threshold].split('-') : []
+    nt_rpm_threshold =
+      params[:nt_rpm_threshold] ? params[:nt_rpm_threshold].split('-') : []
+    new_params[:nt_zscore_start] = nt_zscore_threshold[0]
+    new_params[:nt_zscore_end] = nt_zscore_threshold[1]
+    new_params[:nt_rpm_start] = nt_rpm_threshold[0]
+    new_params[:nt_rpm_end] = nt_rpm_threshold[1]
+
+    new_params
   end
 
   def highest_tax_counts(view_level, report)
@@ -51,11 +67,17 @@ module ReportHelper
     metrics
   end
 
-  def filter(nt_zscores, nt_threshold, nr_threshold, nt_rpm_threshold, nr_rpm_threshold)
-    nt_zscores = nt_zscores.where('zscore >= ?', nt_threshold) if nt_threshold
-    nt_zscores = nt_zscores.where('zscore >= ?', nr_threshold) if nr_threshold
-    nt_zscores = nt_zscores.where('rpm >= ?', nt_rpm_threshold) if nt_rpm_threshold
-    nt_zscores = nt_zscores.where('rpm >= ?', nr_rpm_threshold) if nr_rpm_threshold
+  def filter(nt_zscores, nt_threshold_start, nt_threshold_end,
+             nt_rpm_threshold_start, nt_rpm_threshold_end)
+    decimal = 0.999999
+    if nt_threshold_start && nt_threshold_end
+      nt_zscores = nt_zscores.where('zscore >= ? AND zscore <= ?',
+      nt_threshold_start, Float(nt_threshold_end) + decimal)
+    end
+    if nt_rpm_threshold_start && nt_rpm_threshold_end
+      nt_zscores = nt_zscores.where('rpm >= ? AND rpm <= ?',
+      nt_rpm_threshold_start, Float(nt_rpm_threshold_end) + decimal)
+    end
     nt_zscores
   end
 
