@@ -30,7 +30,7 @@ class PipelineSampleReport extends React.Component {
                               highest_tax_counts={this.highest_tax_counts}/>
               </div>
               <div className="col s9 reports-main ">
-                <table className='bordered'>
+                <table className='bordered report-table'>
                   <thead>
                   <tr>
                     <th>{this.uppCaseFirst(this.view_level)}</th>
@@ -45,9 +45,11 @@ class PipelineSampleReport extends React.Component {
                     return (
                       <tr key={i}>
                         <td>
-                          <a href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${
-                            genus_detail.nt_ele.tax_id}`}>{ genus_detail.nt_ele.name }
+                          <span className="link">
+                            <a href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${
+                              genus_detail.nt_ele.tax_id}`}>{ genus_detail.nt_ele.name }
                           </a>
+                          </span>
                         </td>
                         <td>{ (!genus_detail.nt_ele.zscore) ? '': genus_detail.nt_ele.zscore }</td>
                         <td>{ genus_detail.nt_ele.rpm }</td>
