@@ -3,29 +3,34 @@ class PipelineList extends React.Component {
     super(props, context);
   }
 
-  componentDidMount() {
-    console.log(this.props, 'props')
-  }
-
-  renderPipelineOutput(data) {
-    return data.map((output, i) => {
+  renderPipelineOutput(samples, pipelineruns) {
+    <h1>{JSON.stringify(samples, pipelineruns)}</h1>
+    return samples.map((sample, i) => {
       return (
         <tr key={i}>
-          <td><a href={'/pipeline_outputs/' + output.id}>
-            <i className="fa fa-flask" aria-hidden="true"></i> {output.name} </a>
+
+          <td><a href={'/samples/' + sample.id}>
+            <i className="fa fa-flask" aria-hidden="true"></i> {sample.name} </a>
           </td>
-          <td><a href={'/pipeline_outputs/' + output.id}>{moment(output.created_at).format(' L,  h:mm a')}</a></td>
-          <td><a href={'/pipeline_outputs/' + output.id}>{this.props.outputData.pipeline_output_info.total_reads}</a></td>
-          <td><a href={'/pipeline_outputs/' + output.id}>{this.props.outputData.pipeline_output_info.remaining_reads }</a></td>
-          <td><a href={'/pipeline_outputs/' + output.id}>{(this.props.outputData.pipeline_output_info.remaining_reads/this.props.outputData.pipeline_output_info.total_reads * 100).toFixed(2) }%</a></td>
-          <td><a href={'/pipeline_outputs/' + output.id}>{output.status}</a></td>
-          <td><a href={'/pipeline_outputs/' + output.id}>{this.props.outputData.pipeline_run_info.job_status}</a></td>
+
+          <td><a href={'/samples/' + sample.id}>{moment(sample.created_at).format(' L,  h:mm a')}</a></td>
+
+          <td>{ !pipelineruns[i].pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineruns[i].pipeline_info.total_reads}</a>}</td>
+
+          <td>{ !pipelineruns[i].pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineruns[i].pipeline_info.remaining_reads}</a>}</td>
+
+          <td>{ !pipelineruns[i].pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{(pipelineruns[i].pipeline_info.remaining_reads/pipelineruns[i].pipeline_info.total_reads * 100).toFixed(2) }%</a>}</td>
+
+          <td><a href={'/samples/' + sample.id}>{sample.status}</a></td>
+         
+          <td>{ !pipelineruns[i].pipeline_run ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineruns[i].pipeline_run.job_status}</a>}</td>
+
         </tr>
       )
     })
   }
 
-  renderTable(input) {
+  renderTable(samples, lastpipelinerun) {
     return (
     <div className="content-wrapper">
       <div className="container sample-container">
@@ -42,7 +47,7 @@ class PipelineList extends React.Component {
             </tr>
             </thead>
               <tbody>
-                {this.renderPipelineOutput(input)}
+                {this.renderPipelineOutput(samples, lastpipelinerun)}
               </tbody>
           </table>
       </div>
@@ -58,11 +63,11 @@ class PipelineList extends React.Component {
           <div className="container">
             <div className="content">
               <div className="title">
-                All Projects  > { this.props.outputData.project_info.name }
+                All Projects  > { this.props.projectname }
               </div>
 
               <div className="sub-title">
-                { this.props.outputData.project_info.name }
+                { this.props.project.name }
               </div>
 
               <div className="title-filter">
@@ -72,7 +77,7 @@ class PipelineList extends React.Component {
             </div>
           </div>
         </div>
-          {!this.props.samples ? <div className="no-data"><i className="fa fa-frown-o" aria-hidden="true"> No data to display</i></div> : this.renderTable(this.props.samples)}
+          {!this.props.samples ? <div className="no-data"><i className="fa fa-frown-o" aria-hidden="true"> No data to display</i></div> : this.renderTable(this.props.samples, this.props.outputData)}
       </div>
     )
   }
