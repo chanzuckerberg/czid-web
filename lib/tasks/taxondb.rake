@@ -20,4 +20,5 @@ task load_taxon_db: :environment do
     TaxonCategory.find_or_create_by(taxid: c[2].to_i).update(category: c[0])
   end
   f.close
+  Open3.capture3("rm -rf #{local_taxonomy_path}")
 end
