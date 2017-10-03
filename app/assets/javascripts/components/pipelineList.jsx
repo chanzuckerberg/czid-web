@@ -3,6 +3,10 @@ class PipelineList extends React.Component {
     super(props, context);
   }
 
+  componentDidMount() {
+    console.log(this.props, 'props')
+  }
+
   renderPipelineOutput(data) {
     return data.map((output, i) => {
       return (
@@ -14,6 +18,8 @@ class PipelineList extends React.Component {
           <td><a href={'/pipeline_outputs/' + output.id}>{this.props.outputData.pipeline_output_info.total_reads}</a></td>
           <td><a href={'/pipeline_outputs/' + output.id}>{this.props.outputData.pipeline_output_info.remaining_reads }</a></td>
           <td><a href={'/pipeline_outputs/' + output.id}>{(this.props.outputData.pipeline_output_info.remaining_reads/this.props.outputData.pipeline_output_info.total_reads * 100).toFixed(2) }%</a></td>
+          <td><a href={'/pipeline_outputs/' + output.id}>{output.status}</a></td>
+          <td><a href={'/pipeline_outputs/' + output.id}>{this.props.outputData.pipeline_run_info.job_status}</a></td>
         </tr>
       )
     })
@@ -31,6 +37,8 @@ class PipelineList extends React.Component {
               <th>Total Reads</th>
               <th>Final Reads</th>
               <th>Percentage Reads</th>
+              <th>Sample status</th>
+              <th>Pipeline run status</th>
             </tr>
             </thead>
               <tbody>
