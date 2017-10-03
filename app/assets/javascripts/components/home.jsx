@@ -10,5 +10,7 @@ class Home extends React.Component {
 }
 
 Home.propTypes = {
-  pipelineOutputs: React.PropTypes.array,
+  samples: React.PropTypes.array,
+  outputData: React.PropTypes.array,
+  project: React.PropTypes.any,
 };
