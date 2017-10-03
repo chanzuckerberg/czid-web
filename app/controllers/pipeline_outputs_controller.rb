@@ -12,7 +12,7 @@ class PipelineOutputsController < ApplicationController
   # GET /pipeline_outputs/1
   # GET /pipeline_outputs/1.json
   def show
-    @view_level = params[:view_level] ? params[:view_level] : 'genus'
+    @view_level = params[:view_level] ? params[:view_level].downcase : 'genus'
     @report_info = {}
     report = @pipeline_output.reports.first
     if report
