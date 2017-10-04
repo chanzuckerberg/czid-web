@@ -256,6 +256,8 @@ def main():
                 'genus',
                 'species']
         taxid_lineages_df = taxid_lineages_df.loc[taxid_lineages_df['tax_id'].isin(species_taxids)] # output only species-level taxids
+        taxid_lineages_df = taxid_lineages_df.fillna(-999) # avoid floats in output
+        taxid_lineages_df = taxid_lineages_df.astype(int)
         taxid_lineages_df.to_csv(opf_gz, index=False, columns=cols)
         opf_gz.close()
 
