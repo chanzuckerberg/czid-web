@@ -21,6 +21,47 @@ Everything you need to get started should be in `./bin/setup`.   If there's anyt
     docker-compose run web rails test
 ```
 
+## Using GIT and GITHUB for development
+
+```
+feature_development_loop:
+
+    # Create a new uniquely named private development branch
+
+    git fetch
+    git checkout master
+    git checkout -b <user>/<new_unique_branch_name> origin/master
+
+    # ... Do your work here. ...
+    # ... git add / rm any files, etc ...
+
+    git commit
+
+    # bin/pr rebases on origin/master, runs tests, pushes to github,
+    # and opens your browser on a compare page.  From there you can click
+    # to create a new pull request, or click to view the existing pr.
+
+    bin/pr
+
+    # You can repeat bin/pr as often as you want while you work on your
+    # feature, as you address review comments, etc.
+
+    # After the pull request is approved and merged into master via github,
+    # delete its branch from github, and...
+
+    go to feature_development_loop
+```
+
+As part of running tests you may be prompted to run
+`bundle install`.   Remember to run that inside the web
+docker container, like so: `docker-compose exec web bundle install`.
+
+Your branch is pushed with `--force` to github.  That's fine for your own
+private branch.   There should be no shared development branches other than
+master (or else the process needs to be updated to treat those the same way
+as master is treated).
+
+
 ## Environments
 
 In addition to using your local `development` instance, you may obtain access to some shared cloud environments, as follows.
