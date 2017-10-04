@@ -1,0 +1,2 @@
+class TaxonLineage < ApplicationRecord
+end
