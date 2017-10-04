@@ -130,22 +130,35 @@
   cursor: pointer;
 }
 
-#sort-report a {
-  font-size: 13px;
-  padding: 6px;
+#sort-report {
+  a {
+    font-size: 14px;
+    padding: 6px;
 
-  .sort-title {
-    display: inline-block;
-  }
+    .sort-title {
+      display: inline-block;
+      text-transform: capitalize;
+    }
 
-  .sort-icon {
-    padding: 5px;
+    .sort-icon {
+      padding: 5px;
+    }
   }
 }
 
-.sort-report.btn-flat {
-  font-size: 13px;
-  i {
-    font-size: 13px;
+.sort-report {
+  span {
+    text-transform: capitalize;
+    &.sort-value {
+      color: #929292;
+      font-size: 13px;
+      margin: 0 5px;
+    }
+  }
+  &.btn-flat {
+    font-size: 14px;
+    i {
+      font-size: 13px;
+    }
   }
 }
