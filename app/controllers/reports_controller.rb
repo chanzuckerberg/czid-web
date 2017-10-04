@@ -1,7 +1,6 @@
 class ReportsController < ApplicationController
   before_action :set_report, only: [:show, :edit, :update, :destroy]
-  before_action :typed_zscores, only: [:show]
-
+  include ReportHelper
   # GET /reports
   # GET /reports.json
   def index
@@ -11,15 +10,10 @@ class ReportsController < ApplicationController
   # GET /reports/1
   # GET /reports/1.json
   def show
-    @nt_zscore_threshold = params[:nt_zscore_threshold]
-    @nt_rpm_threshold = params[:nt_rpm_threshold]
-    @nr_zscore_threshold = params[:nr_zscore_threshold]
-    @nr_rpm_threshold = params[:nr_rpm_threshold]
-    @view_level = params[:view_level]
-    respond_to do |format|
-      format.html
-      format.json { render json: @report.to_json(include: :taxon_zscores) }
-    end
+    @report_details = report_details(@report)
+    @view_level = params[:view_level] ? params[:view_level].downcase : 'genus'
+    @taxonomy_details = taxonomy_details(@view_level, @report, params)
+    @highest_tax_counts = highest_tax_counts(@view_level, @report)
   end
 
   # GET /reports/new
@@ -80,20 +74,6 @@ class ReportsController < ApplicationController
   end
 
   private
-
-  def typed_zscores
-    zscores = @report.taxon_zscores
-    @nt_species_zscores = zscores.type('NT').level(TaxonCount::TAX_LEVEL_SPECIES)
-    @nr_species_zscores = zscores.type('NR').level(TaxonCount::TAX_LEVEL_SPECIES)
-    @ordered_nt_species_tax_ids = @nt_species_zscores.order(zscore: :desc).where.not("tax_id < 0").map(&:tax_id)
-    @ordered_nr_species_tax_ids = @nr_species_zscores.order(zscore: :desc).where.not("tax_id < 0").map(&:tax_id)
-    @ordered_species_tax_ids = (@ordered_nt_species_tax_ids + @ordered_nr_species_tax_ids).uniq
-    @nt_genus_zscores = zscores.type('NT').level(TaxonCount::TAX_LEVEL_GENUS)
-    @nr_genus_zscores = zscores.type('NR').level(TaxonCount::TAX_LEVEL_GENUS)
-    @ordered_nt_genus_tax_ids = @nt_genus_zscores.order(zscore: :desc).where.not("tax_id < 0").map(&:tax_id)
-    @ordered_nr_genus_tax_ids = @nr_genus_zscores.order(zscore: :desc).where.not("tax_id < 0").map(&:tax_id)
-    @ordered_genus_tax_ids = (@ordered_nt_genus_tax_ids + @ordered_nr_genus_tax_ids).uniq
-  end
 
   def compute_rpm(count, total_reads)
     if count
