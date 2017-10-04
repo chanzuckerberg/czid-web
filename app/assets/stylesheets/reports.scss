@@ -12,7 +12,7 @@
   padding: 14px 0;
   color: #767676;
   font-size: 18px;
-
+  margin-left: 12px;
 }
 
 #details table tr td{
@@ -128,4 +128,24 @@
 .report-table .link:hover {
   color: #0099cc;
   cursor: pointer;
+}
+
+#sort-report a {
+  font-size: 13px;
+  padding: 6px;
+
+  .sort-title {
+    display: inline-block;
+  }
+
+  .sort-icon {
+    padding: 5px;
+  }
+}
+
+.sort-report.btn-flat {
+  font-size: 13px;
+  i {
+    font-size: 13px;
+  }
 }

@@ -17,6 +17,7 @@ class PipelineSampleReport extends React.Component {
 
   componentDidMount() {
     $('ul.tabs').tabs();
+    $('.sort-report').dropdown();
   }
 
   render() {
@@ -30,6 +31,41 @@ class PipelineSampleReport extends React.Component {
                               highest_tax_counts={this.highest_tax_counts}/>
               </div>
               <div className="col s9 reports-main ">
+                <div className="report-sort right">
+
+                  <span className="">
+                    <a className='dropdown-button btn btn-flat grey lighten-4 sort-report' href='#' data-activates='sort-report'>
+                      SORT BY <i className="fa fa-sort"></i>
+                    </a>
+                  </span>
+
+                  <ul id='sort-report' className='dropdown-content'>
+                    <li>
+                      <a>
+                        <div className="sort-title">Lowest zscore</div>
+                        <div className="fa fa-sort-amount-asc right sort-icon"></div>
+                      </a>
+                    </li>
+                    <li>
+                      <a>
+                        <div className="sort-title">Highest zscore</div>
+                        <div className="fa fa-sort-amount-desc right sort-icon"></div>
+                      </a>
+                    </li>
+                    <li>
+                      <a>
+                        <div className="sort-title">Lowest rpm</div>
+                        <div className="fa fa-sort-amount-asc right sort-icon"></div>
+                      </a>
+                    </li>
+                    <li>
+                      <a>
+                        <div className="sort-title">Highest rpm</div>
+                        <div className="fa fa-sort-amount-desc right sort-icon"></div>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
                 <table className='bordered report-table'>
                   <thead>
                   <tr>
