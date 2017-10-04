@@ -31,12 +31,13 @@ class ReportFilter extends React.Component {
     this.selectViewLevel = this.selectViewLevel.bind(this);
   }
 
-  applyFilter(sorty_by) {
+  applyFilter() {
     const current_url = location.protocol + '//' + location.host + location.pathname;
-    sorty_by = (sorty_by) ? sorty_by : '';
+    const currentSort = PipelineSampleReport.currentSort();
+    const sort_by = currentSort.sort_query ? `&${currentSort.sort_query}` : '';
     window.location =
       `${current_url}?nt_zscore_threshold=${this.state.nt_zscore_start}-${this.state.nt_zscore_end}&nt_rpm_threshold=${
-      this.state.nt_rpm_start}-${this.state.nt_rpm_end}&view_level=${this.state.view_level}&${sorty_by}`;
+      this.state.nt_rpm_start}-${this.state.nt_rpm_end}&view_level=${this.state.view_level}${sort_by}`;
   }
 
   static getFilter(name) {

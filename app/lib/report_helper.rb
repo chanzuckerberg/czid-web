@@ -22,11 +22,12 @@ module ReportHelper
     tax_details = []
     nt_zscores = select_zscore(view_level, report.taxon_zscores)[:nt_zscores]
     nr_zscores = select_zscore(view_level, report.taxon_zscores)[:nr_zscores]
-    tax_ids = filter(nt_zscores, resolve_params(params)[:nt_zscore_start],
+    tax_ids = filter(sort_report(nt_zscores, params[:sort_by]),
+                     resolve_params(params)[:nt_zscore_start],
                      resolve_params(params)[:nt_zscore_end],
                      resolve_params(params)[:nt_rpm_start],
                      resolve_params(params)[:nt_rpm_end])
-              .order(zscore: :desc).where.not("tax_id < 0").limit(20).map(&:tax_id)
+                .where.not("tax_id < 0").limit(20).map(&:tax_id)
     tax_ids.each do |id|
       tax_details.push(nt_ele: nt_zscores.find_by(tax_id: id), nr_ele: nr_zscores.find_by(tax_id: id))
     end
@@ -78,6 +79,16 @@ module ReportHelper
       nt_zscores = nt_zscores.where('rpm >= ? AND rpm <= ?',
       nt_rpm_threshold_start, Float(nt_rpm_threshold_end) + decimal)
     end
+    nt_zscores
+  end
+
+  def sort_report(nt_zscores, sort_by)
+    sort_by = 'highest_zscore' if sort_by.nil?
+
+    nt_zscores = nt_zscores.order(zscore: :asc) if sort_by == 'lowest_zscore'
+    nt_zscores = nt_zscores.order(zscore: :desc) if sort_by == 'highest_zscore'
+    nt_zscores = nt_zscores.order(rpm: :asc) if sort_by == 'lowest_rpm'
+    nt_zscores = nt_zscores.order(rpm: :desc) if sort_by == 'highest_rpm'
     nt_zscores
   end
 
