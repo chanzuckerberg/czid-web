@@ -1,4 +1,4 @@
-# taxon_child_parents has ~1.6M rows; taxon_categopries ~1.5M. 
+# taxon_child_parents has ~1.6M rows; taxon_categopries ~1.5M.
 # The backtick block in this task completes in a few seconds,
 # whereas iterating over the lines in the files and inserting
 # the records in the database one-by-one would take hours.
