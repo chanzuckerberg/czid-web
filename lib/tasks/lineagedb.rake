@@ -13,8 +13,11 @@ task load_lineage_db: :environment do
   names_file = 'names.csv'
 
   `
+    # get necessary software
+    git clone https://github.com/chanzuckerberg/ncbitax2lin.git;
+
     # generate CSV files with lineage and name information
-    cd /app/ncbitax2lin;
+    cd ncbitax2lin;
     make;
     mv *.csv.gz #{local_taxonomy_path}/;
 
