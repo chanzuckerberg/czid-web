@@ -73,7 +73,7 @@ class PipelineRun < ApplicationRecord
     downloaded_stats_path = download_file(stats_json_s3_path)
     return unless downloaded_json_path && downloaded_stats_path
     json_dict = JSON.parse(File.read(downloaded_json_path))
-    stats_array = JSON.parse(File.read(stats_json_path))
+    stats_array = JSON.parse(File.read(downloaded_stats_path))
     pipeline_output_dict = json_dict['pipeline_output']
     pipeline_output_dict.slice!('name', 'total_reads',
                                 'remaining_reads', 'taxon_counts_attributes')
