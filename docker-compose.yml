@@ -27,6 +27,10 @@ services:
       - redis
     environment:
       - SAMPLES_BUCKET_NAME=czbiohub-idseq-samples-development
+      - IDSEQ_AIRBRAKE_PROJECT_ID
+      - IDSEQ_AIRBRAKE_PROJECT_KEY
+      - IDSEQ_HONEYCOMB_DATA_SET
+      - IDSEQ_HONEYCOMB_WRITE_KEY
   resque:
     build: .
     volumes:
