@@ -56,7 +56,8 @@ class PipelineSampleReport extends React.Component {
     }
     this.setState({sort_title, sort_query });
     const url = PipelineSampleReport.deleteUrlParam(window.location.href, 'sort_by');
-    window.location = `${url}&${sort_query}`
+    window.location = (PipelineSampleReport.hasQuery(url))
+      ? `${url}&${sort_query}` : `${url}?${sort_query}`;
   }
 
   static deleteUrlParam(url, parameter) {
@@ -77,6 +78,10 @@ class PipelineSampleReport extends React.Component {
     }
   }
 
+  static hasQuery(url) {
+    return (url.split('?').length >= 2);
+  }
+
   componentDidMount() {
     $('ul.tabs').tabs();
     $('.sort-report').dropdown();
@@ -89,8 +94,11 @@ class PipelineSampleReport extends React.Component {
           <div className="container tab-screen-content">
             <div className="row">
               <div className="col s3">
-                <ReportFilter view_level={this.uppCaseFirst(this.view_level)}
-                              highest_tax_counts={this.highest_tax_counts}/>
+                <ReportFilter
+                  background_model = {this.report_details.background_model.name}
+                  report_title = { this.report_details.report_info.name }
+                  view_level={this.uppCaseFirst(this.view_level)}
+                  highest_tax_counts={this.highest_tax_counts}/>
               </div>
               <div className="col s9 reports-main ">
                 <div className="report-sort right">

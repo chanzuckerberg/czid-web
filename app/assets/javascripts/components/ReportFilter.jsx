@@ -2,7 +2,8 @@ class ReportFilter extends React.Component {
   constructor(props) {
     super(props);
     const view_level = props.view_level || 'Genus';
-
+    this.background_model = props.background_model || 'N/A';
+    this.report_title = props.report_title || 'Not Set';
     const default_nt_zscore_threshold = `0-${this.props.highest_tax_counts.highest_nt_zscore}`;
     const default_nt_rpm_threshold = `0-${this.props.highest_tax_counts.highest_nt_rpm}`;
 
@@ -124,6 +125,36 @@ class ReportFilter extends React.Component {
         <div className="sidebar-tabs">
           <div className="row">
             <div className="col s12 sidebar-full-container">
+              <ul id="tabs-swipe-demo" className="tabs tabs-fixed-width tabs-transparent">
+                <li onClick={() => {PipelineSampleReads.setTab('reports_page','info')}}
+                    className="tab col s3 reports-pane">
+                  <a className={PipelineSampleReads.getActive('reports_page','info')}
+                     href="#reports-pane">REPORT INFO</a>
+                </li>
+                <li onClick={() => {PipelineSampleReads.setTab('reports_page','filters')}}
+                    className="tab col s3">
+                  <a className={PipelineSampleReads.getActive('reports_page','filters')}
+                     href="#filters-pane">FILTERS</a>
+                </li>
+              </ul>
+              <div id="reports-pane" className="pane col s12">
+                <div className="sidebar-pane">
+                  <div className="report-data">
+                    <div className="report-title">
+                      Report name
+                    </div>
+                    <div className="report-value">
+                      { this.report_title }
+                    </div>
+                    <div className="report-title">
+                     Background Model
+                    </div>
+                    <div className="report-value">
+                      { this.background_model }
+                    </div>
+                  </div>
+                </div>
+              </div>
               <div id="filters-pane" className="pane col s12">
 
                 <div className="filter-controls">
@@ -195,14 +226,12 @@ class ReportFilter extends React.Component {
                     </div>
                   </div>
                 </div>
-
+                <div className="apply-filter-button center-align">
+                  <a onClick={this.applyFilter} className="btn btn-flat waves-effect grey text-grey text-lighten-5 waves-light apply-filter-button">
+                    Apply filter
+                  </a>
+                </div>
               </div>
-              <div className="apply-filter-button center-align">
-                <a onClick={this.applyFilter} className="btn btn-flat waves-effect grey text-grey text-lighten-5 waves-light apply-filter-button">
-                  Apply filter
-                </a>
-              </div>
-
             </div>
           </div>
 

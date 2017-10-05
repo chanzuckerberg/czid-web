@@ -8,24 +8,20 @@ class PipelineSampleReads extends React.Component {
     this.reportInfo =  (Object.keys(this.props.reportInfo).length > 0) ? this.props.reportInfo : null;
 
     this.gotoReport = this.gotoReport.bind(this);
-    this.getActive = this.getActive.bind(this);
-    this.setTab = this.setTab.bind(this);
 
   }
 
   gotoReport() {
-    $(document).ready(() => {
-      $('ul.tabs').tabs('select_tab', 'reports');
-      this.setTab('reports');
-    });
+    $('ul.tabs').tabs('select_tab', 'reports');
+    PipelineSampleReads.setTab('pipeline_display','reports');
   }
 
-  getActive(tab) {
-    return (window.localStorage.getItem('active_tab') === tab) ? 'active' : '';
+  static getActive(section, tab) {
+    return (window.localStorage.getItem(section) === tab) ? 'active' : '';
   }
 
-  setTab(tab) {
-    window.localStorage.setItem('active_tab', tab);
+  static setTab(section, tab) {
+    window.localStorage.setItem(section, tab);
   }
 
   componentDidMount() {
@@ -58,11 +54,11 @@ class PipelineSampleReads extends React.Component {
             <div className="sub-header-navigation">
               <div className="nav-content">
                 <ul className="tabs tabs-transparent">
-                  <li className="tab" onClick={() => {this.setTab('details')}} >
-                    <a href="#details" className={this.getActive('details')}>Details</a>
+                  <li className="tab" onClick={() => {PipelineSampleReads.setTab('pipeline_display','details')}} >
+                    <a href="#details" className={PipelineSampleReads.getActive('pipeline_display','details')}>Details</a>
                   </li>
-                  <li className="tab" onClick={() => {this.setTab('reports')}}>
-                    <a href="#reports" className={this.getActive('reports')}>Report</a>
+                  <li className="tab" onClick={() => {PipelineSampleReads.setTab('pipeline_display', 'reports')}}>
+                    <a href="#reports" className={PipelineSampleReads.getActive('pipeline_display','reports')}>Report</a>
                   </li>
                 </ul>
               </div>
