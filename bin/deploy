@@ -12,6 +12,12 @@ if !env || !image
   puts 'Usage: ./bin/deploy ENV IMAGE_TAG'
   abort
 end
+
+if image == 'latest'
+  puts "you should not deploy latest (it doesn't mean what you think it does)"
+  abort
+end
+
 puts "deploying #{image} to #{env}"
 
 RAILS_SERVICE = "idseq-web-#{env}".freeze
