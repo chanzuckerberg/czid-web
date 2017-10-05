@@ -4,11 +4,9 @@ class PipelineList extends React.Component {
   }
 
   renderPipelineOutput(samples, pipelineruns) {
-    <h1>{JSON.stringify(samples, pipelineruns)}</h1>
     return samples.map((sample, i) => {
       return (
         <tr key={i}>
-
           <td><a href={'/samples/' + sample.id}>
             <i className="fa fa-flask" aria-hidden="true"></i> {sample.name} </a>
           </td>
@@ -21,10 +19,7 @@ class PipelineList extends React.Component {
 
           <td>{ !pipelineruns[i].pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{(pipelineruns[i].pipeline_info.remaining_reads/pipelineruns[i].pipeline_info.total_reads * 100).toFixed(2) }%</a>}</td>
 
-          <td><a href={'/samples/' + sample.id}>{sample.status}</a></td>
-         
           <td>{ !pipelineruns[i].pipeline_run ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineruns[i].pipeline_run.job_status}</a>}</td>
-
         </tr>
       )
     })
@@ -42,7 +37,6 @@ class PipelineList extends React.Component {
               <th>Total Reads</th>
               <th>Final Reads</th>
               <th>Percentage Reads</th>
-              <th>Sample status</th>
               <th>Pipeline run status</th>
             </tr>
             </thead>
@@ -77,7 +71,7 @@ class PipelineList extends React.Component {
             </div>
           </div>
         </div>
-          {!this.props.samples && this.props.outputData? <div className="no-data"><i className="fa fa-frown-o" aria-hidden="true"> No data to display</i></div> : this.renderTable(this.props.samples, this.props.outputData)}
+          {!this.props.samples && this.props.outputData ? <div className="no-data"><i className="fa fa-frown-o" aria-hidden="true"> No data to display</i></div> : this.renderTable(this.props.samples, this.props.outputData)}
       </div>
     )
   }
