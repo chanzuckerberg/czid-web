@@ -1,6 +1,6 @@
 class SamplesController < ApplicationController
   before_action :login_required, only: [:new, :update, :destroy]
-  before_action :set_sample, only: [:show, :edit, :update, :destroy]
+  before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline]
   acts_as_token_authentication_handler_for User, only: [:create], fallback: :devise
   protect_from_forgery unless: -> { request.format.json? }
 
@@ -69,6 +69,25 @@ class SamplesController < ApplicationController
     @sample.destroy
     respond_to do |format|
       format.html { redirect_to samples_url, notice: 'Sample was successfully destroyed.' }
+      format.json { head :no_content }
+    end
+  end
+
+  # PUT /samples/:id/reupload_source
+  def reupload_source
+    Resque.enqueue(InitiateS3Cp, @sample.id)
+    respond_to do |format|
+      format.html { redirect_to samples_url, notice: "Sample is being uploaded if it hasn't been." }
+      format.json { head :no_content }
+    end
+  end
+
+  # PUT /samples/:id/kickoff_pipeline
+  def kickoff_pipeline
+    @sample.status = Sample::STATUS_RERUN
+    @sample.save
+    respond_to do |format|
+      format.html { redirect_to samples_url, notice: 'A pipeline run is  in progress.' }
       format.json { head :no_content }
     end
   end

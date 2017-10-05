@@ -25,8 +25,19 @@
           <td><%= sample.id %></td>
           <td><%= link_to sample.project.name, sample.project if sample.project if sample.project %></td>
           <td><%= sample.status %>
+            <% if sample.status.to_s == 'created' and sample.created_at < 30.minutes.ago %>
+                <%= button_to 'reupload', reupload_source_sample_path(sample), method: :put %>
+            <% end %>
+          </td>
           <td>
-            <%= sample.pipeline_runs.first.job_status if sample.pipeline_runs.first %> &nbsp;
+            <% pipeline_run = sample.pipeline_runs.first %>
+            <% if pipeline_run %>
+              <%= pipeline_run.job_status %>
+              &nbsp;
+              <% if pipeline_run.job_status == 'FAILED' %>
+                <%= button_to 'rerun', kickoff_pipeline_sample_path(sample), method: :put %>
+              <% end %>
+            <% end %>
           </td>
           <td><%= sample.created_at %></td>
           <td><%= link_to 'Show', sample %></td>
