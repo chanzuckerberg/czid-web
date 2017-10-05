@@ -855,7 +855,8 @@ def run_bowtie2(sample_name, input_fa_1, input_fa_2, bowtie_genome_s3_path,
         execute_command("aws s3 cp %s %s/" % (bowtie_genome_s3_path, REF_DIR))
         execute_command("cd %s; tar xvfz %s" % (REF_DIR, genome_file))
         logging.getLogger().info("downloaded index")
-    genome_basename = REF_DIR + '/bowtie2_genome/GRCh38.primary_assembly.genome'
+    local_genome_dir_ls =  execute_command("ls %s/bowtie2_genome/*.bt2l" % REF_DIR)
+    genome_basename = local_genome_dir_ls.split("\n")[0][:-7]
     bowtie2_params = [BOWTIE2,
                      '-p', str(multiprocessing.cpu_count()),
                      '-x', genome_basename,
