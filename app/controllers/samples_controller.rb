@@ -71,7 +71,6 @@ class SamplesController < ApplicationController
     end
   end
 
-
   # PUT /samples/:id/reupload_source
   def reupload_source
     Resque.enqueue(InitiateS3Cp, @sample.id)
