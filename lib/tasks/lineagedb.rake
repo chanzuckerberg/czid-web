@@ -4,10 +4,10 @@ require 'English'
 task load_lineage_db: :environment do
   local_taxonomy_path = "/app/tmp/taxonomy"
   host = if Rails.env == 'development'
-         'db'
-       else
-         '$RDS_ADDRESS'
-       end
+           'db'
+         else
+           '$RDS_ADDRESS'
+         end
   date = `date +"%Y-%m-%d"`
   taxid_lineages_file = 'taxid-lineages.csv'
   names_file = 'names.csv'
