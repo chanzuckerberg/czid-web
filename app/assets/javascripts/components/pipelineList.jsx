@@ -3,29 +3,38 @@ class PipelineList extends React.Component {
     super(props, context);
   }
 
-  renderPipelineOutput(samples, pipelineruns) {
+  renderPipelineOutput(samples, pipelineInfo) {
     return samples.map((sample, i) => {
       return (
         <tr key={i}>
           <td><a href={'/pipeline_outputs/' + sample.id}>
             <i className="fa fa-flask" aria-hidden="true"></i> {sample.name} </a>
           </td>
-
-          <td><a href={'/pipeline_outputs/' + sample.id}>{moment(sample.created_at).format(' L,  h:mm a')}</a></td>
-
-          <td>{ !pipelineruns[i].pipeline_info ? 'N/A' : <a href={'/pipeline_outputs/' + sample.id}>{pipelineruns[i].pipeline_info.total_reads}</a>}</td>
-
-          <td>{ !pipelineruns[i].pipeline_info ? 'N/A' : <a href={'/pipeline_outputs/' + sample.id}>{pipelineruns[i].pipeline_info.remaining_reads}</a>}</td>
-
-          <td>{ !pipelineruns[i].pipeline_info ? 'N/A' : <a href={'/pipeline_outputs/' + sample.id}>{(pipelineruns[i].pipeline_info.remaining_reads/pipelineruns[i].pipeline_info.total_reads * 100).toFixed(2) }%</a>}</td>
-
-          <td>{ !pipelineruns[i].pipeline_run ? 'N/A' : <a href={'/pipeline_outputs/' + sample.id}>{pipelineruns[i].pipeline_run.job_status}</a>}</td>
+          <td><a href={'/samples/' + sample.id}>{moment(sample.created_at).format(' L,  h:mm a')}</a></td>
+          <td>{ !pipelineInfo[i].pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineInfo[i].pipeline_info.total_reads}</a>}</td>
+          <td>{ !pipelineInfo[i].pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineInfo[i].pipeline_info.remaining_reads}</a>}</td>
+          <td>{ !pipelineInfo[i].pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{this.computePercentageReads(pipelineInfo[i].pipeline_info)}%</a>}</td>
+          <td>{ !pipelineInfo[i].pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineInfo[i].pipeline_run.job_status}</a>}</td>
+          <td>{ !pipelineInfo[i].job_stats ? 'NA' : <a href={'/samples/' + sample.id}>{this.computeCompressionRatio(pipelineInfo[i].job_stats)}</a>}</td>
+          <td>{ !pipelineInfo[i].job_stats ? 'NA' : <a href={'/samples/' + sample.id}>{this.computeQcValue(pipelineInfo[i].job_stats)}%</a>}</td>
         </tr>
       )
     })
   }
 
-  renderTable(samples, lastpipelinerun) {
+  computeCompressionRatio(result) {
+    return (result.reads_before/result.reads_after).toFixed(2);
+  }
+
+  computeQcValue(result) {
+    return (100.0 * result.reads_after/result.reads_before).toFixed(2);
+  }
+
+  computePercentageReads(result) {
+    return (100.0 * result.remaining_reads/result.total_reads).toFixed(2);
+  }
+
+  renderTable(samples, pipelineInfo) {
     return (
     <div className="content-wrapper">
       <div className="container sample-container">
@@ -38,10 +47,12 @@ class PipelineList extends React.Component {
               <th>Final Reads</th>
               <th>Percentage Reads</th>
               <th>Pipeline run status</th>
+              <th>Compression Ratio</th>
+              <th>QC</th>
             </tr>
             </thead>
               <tbody>
-                {this.renderPipelineOutput(samples, lastpipelinerun)}
+                {this.renderPipelineOutput(samples, pipelineInfo)}
               </tbody>
           </table>
       </div>
