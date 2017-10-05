@@ -7,7 +7,7 @@ import logging
 
 import pandas as pd
 
-from utils import timeit, backup_file
+from utils import timeit
 
 
 logging.basicConfig(
@@ -242,7 +242,6 @@ def main():
     #                          'species'], inplace=True)
 
     taxid_lineages_csv_output = os.path.join('{0}.csv.gz'.format(args.taxid_lineages_output_prefix))
-    backup_file(taxid_lineages_csv_output)
     logging.info("writing species-level taxid lineages to {0}".format(taxid_lineages_csv_output))
     with open(taxid_lineages_csv_output, 'wb') as opf:
         # make sure the name and timestamp are not gzipped, (like gzip -n)
@@ -262,7 +261,6 @@ def main():
         opf_gz.close()
 
     names_csv_output = os.path.join('{0}.csv.gz'.format(args.names_output_prefix))
-    backup_file(names_csv_output)
     logging.info("writing names to {0}".format(names_csv_output))
     with open(names_csv_output, 'wb') as opf:
         # make sure the name and timestamp are not gzipped, (like gzip -n)
@@ -272,7 +270,6 @@ def main():
         opf_gz.close()
 
     name_lineages_csv_output = os.path.join('{0}.csv.gz'.format(args.output_prefix))
-    backup_file(name_lineages_csv_output)
     logging.info("writing lineages to {0}".format(name_lineages_csv_output))
     with open(name_lineages_csv_output, 'wb') as opf:
         # make sure the name and timestamp are not gzipped, (like gzip -n)
