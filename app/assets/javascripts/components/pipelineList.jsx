@@ -1,6 +1,9 @@
 class PipelineList extends React.Component {
   constructor(props, context) {
     super(props, context);
+    this.project = this.props.project;
+    this.samples = this.props.samples;
+    this.outputData = this.props.outputData;
   }
 
   renderPipelineOutput(samples, pipelineInfo) {
@@ -14,7 +17,7 @@ class PipelineList extends React.Component {
           <td>{ !pipelineInfo[i].pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineInfo[i].pipeline_info.total_reads}</a>}</td>
           <td>{ !pipelineInfo[i].pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineInfo[i].pipeline_info.remaining_reads}</a>}</td>
           <td>{ !pipelineInfo[i].pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{this.computePercentageReads(pipelineInfo[i].pipeline_info)}%</a>}</td>
-          <td>{ !pipelineInfo[i].pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineInfo[i].pipeline_run.job_status}</a>}</td>
+          <td>{ !pipelineInfo[i].pipeline_info ? 'Pending' : <a href={'/samples/' + sample.id}>Created</a>}</td>
           <td>{ !pipelineInfo[i].job_stats ? 'NA' : <a href={'/samples/' + sample.id}>{this.computeCompressionRatio(pipelineInfo[i].job_stats)}</a>}</td>
           <td>{ !pipelineInfo[i].job_stats ? 'NA' : <a href={'/samples/' + sample.id}>{this.computeQcValue(pipelineInfo[i].job_stats)}%</a>}</td>
         </tr>
@@ -68,11 +71,11 @@ class PipelineList extends React.Component {
           <div className="container">
             <div className="content">
               <div className="title">
-                All Projects  > { !this.props.project ?  'No project to display yet' : this.props.project.name }
+                All Projects  > { !this.project ?  'No project to display yet' : this.project.name }
               </div>
 
               <div className="sub-title">
-              { !this.props.project ?  'No project to display yet' : this.props.project.name }
+              { !this.project ?  'No project to display yet' : this.project.name }
               </div>
 
               <div className="title-filter">
@@ -82,7 +85,7 @@ class PipelineList extends React.Component {
             </div>
           </div>
         </div>
-          {!this.props.samples && this.props.outputData ? <div className="no-data"><i className="fa fa-frown-o" aria-hidden="true"> No data to display</i></div> : this.renderTable(this.props.samples, this.props.outputData)}
+          {!this.samples && this.outputData ? <div className="no-data"><i className="fa fa-frown-o" aria-hidden="true"> No data to display</i></div> : this.renderTable(this.samples, this.outputData)}
       </div>
     )
   }

@@ -14,6 +14,7 @@ class SamplesController < ApplicationController
   # GET /samples/1.json
   def show
     @pipeline_output = @sample.pipeline_runs.first ? @sample.pipeline_runs.first.pipeline_output : nil
+    @job_stats = @pipeline_output ? @pipeline_output.job_stats.first : nil
     @project_info = @sample.project
   end
 
