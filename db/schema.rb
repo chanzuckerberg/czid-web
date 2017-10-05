@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171003211411) do
+ActiveRecord::Schema.define(version: 20171003224516) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -38,6 +38,16 @@ ActiveRecord::Schema.define(version: 20171003211411) do
     t.string "source_type", null: false
     t.text "source"
     t.index ["sample_id"], name: "index_input_files_on_sample_id"
+  end
+
+  create_table "job_stats", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "task"
+    t.integer "reads_before"
+    t.integer "reads_after"
+    t.bigint "pipeline_output_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pipeline_output_id"], name: "index_job_stats_on_pipeline_output_id"
   end
 
   create_table "pipeline_outputs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -174,6 +184,7 @@ ActiveRecord::Schema.define(version: 20171003211411) do
   end
 
   add_foreign_key "input_files", "samples"
+  add_foreign_key "job_stats", "pipeline_outputs"
   add_foreign_key "pipeline_outputs", "samples"
   add_foreign_key "pipeline_runs", "samples"
   add_foreign_key "reports", "backgrounds"

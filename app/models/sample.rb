@@ -97,7 +97,7 @@ class Sample < ApplicationRecord
              else
                DEFAULT_MEMORY
              end
-    command += " --storage /mnt=1500 --ecr-image idseq --memory #{memory} --queue aegea_batch_ondemand"
+    command += " --storage /mnt=1500 --ecr-image idseq --memory #{memory} --queue aegea_batch_ondemand --vcpus 16"
     command
   end
 
