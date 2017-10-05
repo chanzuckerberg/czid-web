@@ -3,6 +3,7 @@
 require 'pathname'
 require 'fileutils'
 require 'rubygems/version'
+require 'open3'
 include FileUtils
 
 APP_ROOT = Pathname.new File.expand_path('../../', __FILE__)
@@ -14,10 +15,20 @@ end
 DOCKER = 'docker-compose exec web '.freeze
 
 chdir APP_ROOT do
-  # TODO: make sure we're not on master
+  # make sure we're not on master
+  branch = Open3.capture2("git branch | grep '*'")[0].split[1]
+  if branch == 'master'
+      abort("Refusing to create pull request:  Current git branch is master.")
+  end
+  system!("git fetch")
+  system!("git rebase origin/master")
   system!(DOCKER + 'rake rubocop:auto_correct')
   system!('git diff-index --quiet HEAD', 'commit changes before re-running')
   system!(DOCKER + 'rake test')
-  system!('git push')
-  system!('hub pull-request -o')
+  # The --force is needed for updating a branch;  without it, we end up
+  # accumulating meaningless trivial "this is a pull request" commits
+  system!("git push --force origin #{branch}")
+  # This opens in your browser a compare view of the branch vs master
+  # that lets you create a new pull request or view an existing one.
+  system!("hub compare")
 end
