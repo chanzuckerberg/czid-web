@@ -561,8 +561,11 @@ GEM
     parser (2.4.0.0)
       ast (~> 2.2)
     powerpack (0.1.1)
+    prometheus-client (0.7.1)
+      quantile (~> 0.2.0)
     public_suffix (3.0.0)
     puma (3.10.0)
+    quantile (0.2.0)
     rack (2.0.3)
     rack-protection (2.0.0)
       rack
@@ -738,6 +741,7 @@ DEPENDENCIES
   materialize-sass
   momentjs-rails
   mysql2
+  prometheus-client (= 0.7.1)
   puma (~> 3.7)
   rails (~> 5.1.2)
   rake
