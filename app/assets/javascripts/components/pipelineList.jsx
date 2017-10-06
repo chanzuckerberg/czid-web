@@ -7,19 +7,19 @@ class PipelineList extends React.Component {
     return samples.map((sample, i) => {
       return (
         <tr key={i}>
-          <td><a href={'/samples/' + sample.id}>
+          <td><a href={'/pipeline_outputs/' + sample.id}>
             <i className="fa fa-flask" aria-hidden="true"></i> {sample.name} </a>
           </td>
 
-          <td><a href={'/samples/' + sample.id}>{moment(sample.created_at).format(' L,  h:mm a')}</a></td>
+          <td><a href={'/pipeline_outputs/' + sample.id}>{moment(sample.created_at).format(' L,  h:mm a')}</a></td>
 
-          <td>{ !pipelineruns[i].pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineruns[i].pipeline_info.total_reads}</a>}</td>
+          <td>{ !pipelineruns[i].pipeline_info ? 'N/A' : <a href={'/pipeline_outputs/' + sample.id}>{pipelineruns[i].pipeline_info.total_reads}</a>}</td>
 
-          <td>{ !pipelineruns[i].pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineruns[i].pipeline_info.remaining_reads}</a>}</td>
+          <td>{ !pipelineruns[i].pipeline_info ? 'N/A' : <a href={'/pipeline_outputs/' + sample.id}>{pipelineruns[i].pipeline_info.remaining_reads}</a>}</td>
 
-          <td>{ !pipelineruns[i].pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{(pipelineruns[i].pipeline_info.remaining_reads/pipelineruns[i].pipeline_info.total_reads * 100).toFixed(2) }%</a>}</td>
+          <td>{ !pipelineruns[i].pipeline_info ? 'N/A' : <a href={'/pipeline_outputs/' + sample.id}>{(pipelineruns[i].pipeline_info.remaining_reads/pipelineruns[i].pipeline_info.total_reads * 100).toFixed(2) }%</a>}</td>
 
-          <td>{ !pipelineruns[i].pipeline_run ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineruns[i].pipeline_run.job_status}</a>}</td>
+          <td>{ !pipelineruns[i].pipeline_run ? 'N/A' : <a href={'/pipeline_outputs/' + sample.id}>{pipelineruns[i].pipeline_run.job_status}</a>}</td>
         </tr>
       )
     })
