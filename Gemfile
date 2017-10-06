@@ -24,6 +24,7 @@ gem 'jquery-rails'
 gem 'logger'
 gem 'materialize-sass'
 gem 'momentjs-rails'
+gem 'multipart-post'
 # Use mysql as the database for Active Record
 gem 'mysql2'
 gem 'prometheus-client', '0.7.1'

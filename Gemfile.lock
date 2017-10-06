@@ -752,6 +752,7 @@ DEPENDENCIES
   logger
   materialize-sass
   momentjs-rails
+  multipart-post
   mysql2
   prometheus-client (= 0.7.1)
   puma (~> 3.7)
