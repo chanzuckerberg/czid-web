@@ -8,28 +8,28 @@ task load_lineage_db: :environment do
          else
            '$RDS_ADDRESS'
          end
-  date = `date +"%Y-%m-%d"`
+  date = `date +"%Y-%m-%d"`.strip
   taxid_lineages_file = 'taxid-lineages.csv'
   names_file = 'names.csv'
 
-  `
+  ` mkdir -p #{local_taxonomy_path};
+    cd #{local_taxonomy_path};
+
     # get necessary software
-    git clone https://github.com/chanzuckerberg/ncbitax2lin.git;
+    #git clone https://github.com/chanzuckerberg/ncbitax2lin.git;
 
     # generate CSV files with lineage and name information
     cd ncbitax2lin;
-    make;
-    mv *.csv.gz #{local_taxonomy_path}/;
+    #make;
 
     # import to database
-    cd #{local_taxonomy_path};
     gunzip *.csv.gz;
-    awk -F "," '{print x+=1,","$0",",#{date},#{date}"}' #{taxid_lineages_file} | sed 's= ,=,=' > taxon_lineages;
-    mysqlimport --local --user=$DB_USERNAME --host=#{host} --password=$DB_PASSWORD --fields-terminated-by=',' idseq_#{Rails.env} taxon_lineages;
-    awk -F "," '{print x+=1,","$0",#{date},#{date}"}' #{names_file} | sed 's= ,=,=' > taxon_names;
-    mysqlimport --local --user=$DB_USERNAME --host=#{host} --password=$DB_PASSWORD --fields-terminated-by=',' idseq_#{Rails.env} taxon_names;
+    tail -n+2 #{taxid_lineages_file} | awk -F "," '{print x+=1,","$0",#{date},#{date}"}' | sed 's= ,=,=' > taxon_lineages;
+    mysqlimport --delete --local --user=$DB_USERNAME --host=#{host} --password=$DB_PASSWORD --fields-terminated-by=',' idseq_#{Rails.env} taxon_lineages;
+    tail -n+2 #{names_file} | awk -F "," '{print x+=1,","$0",#{date},#{date}"}' | sed 's= ,=,=' > taxon_names;
+    mysqlimport --delete --local --user=$DB_USERNAME --host=#{host} --password=$DB_PASSWORD --fields-terminated-by=',' idseq_#{Rails.env} taxon_names;
     cd /app;
-    rm -rf #{local_taxonomy_path}
+    # rm -rf #{local_taxonomy_path};
   `
   raise "lineage database import failed" unless $CHILD_STATUS.success?
 end
