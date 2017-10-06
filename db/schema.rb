@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171003224516) do
+ActiveRecord::Schema.define(version: 20171006003218) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -148,6 +148,26 @@ ActiveRecord::Schema.define(version: 20171003224516) do
     t.string "count_type"
     t.index ["pipeline_output_id", "tax_id", "count_type"], name: "new_index_taxon_counts", unique: true
     t.index ["pipeline_output_id"], name: "index_taxon_counts_on_pipeline_output_id"
+  end
+
+  create_table "taxon_lineages", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "taxid", null: false
+    t.integer "superkingdom_taxid", null: false
+    t.integer "phylum_taxid", null: false
+    t.integer "class_taxid", null: false
+    t.integer "order_taxid", null: false
+    t.integer "family_taxid", null: false
+    t.integer "genus_taxid", null: false
+    t.integer "species_taxid", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "taxon_names", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "taxid", null: false
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "taxon_zscores", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
