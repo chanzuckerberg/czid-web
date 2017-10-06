@@ -8,6 +8,7 @@ class PipelineSampleReads extends React.Component {
     this.reportInfo =  (Object.keys(this.props.reportInfo).length > 0) ? this.props.reportInfo : null;
     this.jobStatistics = this.props.jobStatistics
   }
+    this.reportInfo =  (Object.keys(this.props.reportInfo).length > 0) ? this.props.reportInfo : null;
 
     this.gotoReport = this.gotoReport.bind(this);
 
