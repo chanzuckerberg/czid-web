@@ -25,7 +25,7 @@ RESQUE_WORKER_SERVICE = "idseq-resque-#{env}".freeze
 RESQUE_SCHEDULER_SERVICE = "idseq-resque-scheduler-#{env}".freeze
 REPO = 'chanzuckerberg/idseq-web'.freeze
 REGION = 'us-west-2'.freeze
-LOG_GROUP = 'ecs-logs-dev'.freeze
+LOG_GROUP = "ecs-logs-#{env}".freeze
 TASK_NAME = 'rails'.freeze
 CONTAINER_NAME = 'rails'.freeze
 
