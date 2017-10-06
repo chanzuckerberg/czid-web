@@ -16,6 +16,15 @@ class SamplesController < ApplicationController
     @pipeline_output = @sample.pipeline_runs.first ? @sample.pipeline_runs.first.pipeline_output : nil
     @job_stats = @pipeline_output ? @pipeline_output.job_stats.first : nil
     @project_info = @sample.project
+    @report_info = {}
+    report = @pipeline_output.reports.first
+    if report
+      external_report_info = external_report_info(report, @view_level, params)
+      @report_info[:report_details] = external_report_info[:report_details]
+      @report_info[:taxonomy_details] = external_report_info[:taxonomy_details]
+      @report_info[:highest_tax_counts] = external_report_info[:highest_tax_counts]
+      @report_info[:view_level] = external_report_info[:view_level]
+    end
   end
 
   # GET /samples/new
