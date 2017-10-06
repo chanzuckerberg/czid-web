@@ -11,6 +11,8 @@ task load_lineage_db: :environment do
   date = `date +"%Y-%m-%d"`.strip
   taxid_lineages_file = 'taxid-lineages.csv'
   names_file = 'names.csv'
+  preload = true
+  preload_s3_path = 's3://czbiohub-infectious-disease/taxonomy'
 
   ` mkdir -p #{local_taxonomy_path};
     cd #{local_taxonomy_path};
@@ -20,7 +22,12 @@ task load_lineage_db: :environment do
 
     # generate CSV files with lineage and name information
     cd ncbitax2lin;
-    make;
+    if #{preload}; then 
+      aws s3 cp #{preload_s3_path}/#{taxid_lineages_file}.gz .
+      aws s3 cp #{preload_s3_path}/#{names_file}.gz .
+    else
+      make
+    fi
 
     # import to database
     gunzip *.csv.gz;
