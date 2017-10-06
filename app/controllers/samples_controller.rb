@@ -17,7 +17,7 @@ class SamplesController < ApplicationController
     @job_stats = @pipeline_output ? @pipeline_output.job_stats.first : nil
     @project_info = @sample.project
     @report_info = {}
-    report = @pipeline_output.reports.first
+    report = @pipeline_output ? @pipeline_output.reports.first : nil
     if report
       external_report_info = external_report_info(report, @view_level, params)
       @report_info[:report_details] = external_report_info[:report_details]
