@@ -1,0 +1,7 @@
+<div class="right header-right-nav">
+  <% if @user && @user.id %>
+    <%= button_to 'Sign Out', destroy_user_session_path, method: :delete %>
+  <% else %>
+    <%= button_to 'Sign In', new_user_session_path %>
+  <% end %>
+</div>

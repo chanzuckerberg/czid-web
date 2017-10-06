@@ -19,12 +19,11 @@
         <td><%= user.email %></td>
         <td><%= link_to user.name, user if user.name %></td>
         <td><% user.projects[0...-1].each do |p| %>
-              <%= link_to p.name, p if p %>, 
+              <%= link_to p.name, p if p %>,
             <% end %>
             <%= link_to user.projects.last.name, user.projects.last if user.projects.last %>
         </td>
         <td><%= user.created_at %></td>
-        <td><%= link_to 'Show', user %></td>
         <td><%= link_to 'Edit', edit_user_path(user) %></td>
         <td><%= link_to 'Destroy', user, method: :delete, data: { confirm: 'Are you sure?' } %></td>
       </tr>
