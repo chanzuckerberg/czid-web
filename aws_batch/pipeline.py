@@ -468,7 +468,7 @@ def run_and_log(logparams, func_name, *args):
         STATS.append({'task': func_name.__name__, 'reads_before': records_before, 'reads_after': records_after})
     # function-specific logs
     if func_name.__name__ == "run_cdhitdup":
-        compression_ratio = records_before / records_after
+        compression_ratio = (1.0 * records_before) / records_after
         logger.info("duplicate compression ratio: %s" % str(compression_ratio))
     if func_name.__name__ == "run_priceseqfilter":
         pass_percentage = (100.0 * records_after) / records_before
