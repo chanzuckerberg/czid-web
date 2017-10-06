@@ -80,7 +80,7 @@ class PipelineList extends React.Component {
 
               <div className="title-filter">
                 <i className="fa fa-bar-chart" aria-hidden="true"></i>
-                <span>PIPELINES OUTPUTS</span>
+                <span>SAMPLES</span>
               </div>
             </div>
           </div>
