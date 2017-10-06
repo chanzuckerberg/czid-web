@@ -32,6 +32,7 @@ gem 'puma', '~> 3.7'
 # Use Redis adapter to run Action Cable in production
 # gem 'redis', '~> 3.0'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
+gem "libhoney"
 gem 'rails', '~> 5.1.2'
 gem 'rake'
 gem 'react-rails'
