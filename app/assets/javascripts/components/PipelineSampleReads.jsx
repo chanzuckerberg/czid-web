@@ -6,11 +6,10 @@ class PipelineSampleReads extends React.Component {
     this.sampleInfo = this.props.sampleInfo;
     this.projectInfo = this.props.projectInfo;
     this.reportInfo =  (Object.keys(this.props.reportInfo).length > 0) ? this.props.reportInfo : null;
-    this.jobStatistics = this.props.jobStatistics
-    }
+    this.jobStatistics = this.props.jobStatistics;
     this.gotoReport = this.gotoReport.bind(this);
 
-  }
+    }
 
   gotoReport() {
     $('ul.tabs').tabs('select_tab', 'reports');

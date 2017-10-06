@@ -10,7 +10,7 @@ class PipelineList extends React.Component {
     return samples.map((sample, i) => {
       return (
         <tr key={i}>
-          <td><a href={'/pipeline_outputs/' + sample.id}>
+          <td><a href={'/samples/' + sample.id}>
             <i className="fa fa-flask" aria-hidden="true"></i> {sample.name} </a>
           </td>
           <td><a href={'/samples/' + sample.id}>{moment(sample.created_at).format(' L,  h:mm a')}</a></td>
