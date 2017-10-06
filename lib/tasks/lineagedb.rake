@@ -16,11 +16,11 @@ task load_lineage_db: :environment do
     cd #{local_taxonomy_path};
 
     # get necessary software
-    #git clone https://github.com/chanzuckerberg/ncbitax2lin.git;
+    git clone https://github.com/chanzuckerberg/ncbitax2lin.git;
 
     # generate CSV files with lineage and name information
     cd ncbitax2lin;
-    #make;
+    make;
 
     # import to database
     gunzip *.csv.gz;
@@ -29,7 +29,7 @@ task load_lineage_db: :environment do
     tail -n+2 #{names_file} | awk -F "," '{print x+=1,","$0",#{date},#{date}"}' | sed 's= ,=,=' > taxon_names;
     mysqlimport --delete --local --user=$DB_USERNAME --host=#{host} --password=$DB_PASSWORD --fields-terminated-by=',' idseq_#{Rails.env} taxon_names;
     cd /app;
-    # rm -rf #{local_taxonomy_path};
+    rm -rf #{local_taxonomy_path};
   `
   raise "lineage database import failed" unless $CHILD_STATUS.success?
 end
