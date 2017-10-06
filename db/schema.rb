@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171005174957) do
+ActiveRecord::Schema.define(version: 20171006003218) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -153,12 +153,12 @@ ActiveRecord::Schema.define(version: 20171005174957) do
   create_table "taxon_lineages", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.integer "taxid", null: false
     t.integer "superkingdom_taxid", null: false
-    t.integer "phylum_taxid"
-    t.integer "class_taxid"
-    t.integer "order_taxid"
-    t.integer "family_taxid"
-    t.integer "genus_taxid"
-    t.integer "species_taxid"
+    t.integer "phylum_taxid", null: false
+    t.integer "class_taxid", null: false
+    t.integer "order_taxid", null: false
+    t.integer "family_taxid", null: false
+    t.integer "genus_taxid", null: false
+    t.integer "species_taxid", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
