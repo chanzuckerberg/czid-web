@@ -5,6 +5,10 @@ Rails.application.routes.draw do
   resources :reports
   resources :pipeline_outputs, only: [:index, :show]
   devise_for :users
+  devise_scope :user do
+    get 'login', to: 'devise/sessions#new'
+    delete 'logout', to: 'devise/sessions#destroy'
+  end
   resources :samples do
     put :reupload_source, on: :member
     put :kickoff_pipeline, on: :member
