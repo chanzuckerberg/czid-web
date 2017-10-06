@@ -22,7 +22,7 @@ task load_lineage_db: :environment do
 
     # generate CSV files with lineage and name information
     cd ncbitax2lin;
-    if #{preload}; then 
+    if #{preload}; then
       aws s3 cp #{preload_s3_path}/#{taxid_lineages_file}.gz .
       aws s3 cp #{preload_s3_path}/#{names_file}.gz .
     else
