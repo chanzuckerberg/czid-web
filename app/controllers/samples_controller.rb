@@ -15,7 +15,7 @@ class SamplesController < ApplicationController
   def show
     @pipeline_output = @sample.pipeline_runs.first ? @sample.pipeline_runs.first.pipeline_output : nil
     @job_stats = @pipeline_output ? @pipeline_output.job_stats.first : nil
-    @project_info = @sample.project
+    @project_info = @sample.project ? @sample.project : nil
     @report_info = {}
     report = @pipeline_output ? @pipeline_output.reports.first : nil
     if report
