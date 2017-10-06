@@ -140,3 +140,17 @@
   width: inherit !important;
   font-style: italic;
 }
+
+.save-note-button {
+  margin-top: 20px;
+  button {
+    font-size: 13px;
+    color: #e8e8e8;
+    padding: 0 10px;
+    display: none;
+  }
+}
+
+[contenteditable]:focus {
+  outline: 0 solid transparent;
+}

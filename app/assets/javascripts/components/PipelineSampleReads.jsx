@@ -26,6 +26,12 @@ class PipelineSampleReads extends React.Component {
 
   componentDidMount() {
     $('ul.tabs').tabs();
+    $('.sample-notes').focusin(function() {
+      $('.save-note-button button').fadeIn(1000);
+    });
+    $('.save-note-button button').click(function() {
+      $('.save-note-button button').fadeOut(1000);
+    });
   }
 
   render() {
@@ -117,17 +123,11 @@ class PipelineSampleReads extends React.Component {
                             <tbody>
                             <tr>
                               <td className="notes">Notes</td>
-                              <td className="sample-notes">
-                                Subject 2
-                                <br/>
-                                248 6204  Taenia solium
-                                <br/>
-                                827 60517 Taenia asiatica
-                                <br/>
-                                -- Ignored pairs: 2787
-                                <br/>
-                                -- Retained pairs: 569 (16.95 percent of total non-host sequence)
-                                <br/>
+                              <td className="sample-notes" suppressContentEditableWarning={true} contentEditable={true}>
+                                Type here ...
+                                <div className='save-note-button'>
+                                  <button className='btn btn-flat grey' contentEditable={false}>Save note</button>
+                                </div>
                               </td>
                             </tr>
                             </tbody>
