@@ -102,7 +102,7 @@ def count_reads(file_name, file_type):
         f = open(file_name)
     for line in f:
         if file_type == "fastq_paired":
-            count += 2./4 
+            count += 2./4
         elif file_type == "fasta_paired":
             if line.startswith('>'):
                 count += 2
@@ -384,7 +384,7 @@ def filter_deuterostomes_from_m8(input_m8, output_m8, deuterostome_file):
     output_f = open(output_m8, 'wb')
     with open(input_m8, "rb") as input_f:
         for line in input_f:
-            taxid = (line.split("taxid"))[1].split(":")[0] 
+            taxid = (line.split("taxid"))[1].split(":")[0]
             #"taxid9606:NB501961:14:HM7TLBGX2:1:12104:15431:..."
             if not taxid in taxids_toremove:
                 output_f.write(line)
@@ -748,7 +748,6 @@ def run_star(sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
                            '--outReadsUnmapped', 'Fastx',
                            '--outFilterMismatchNmax', '999',
                            '--outSAMmode', 'None',
-                           '--quantMode', 'GeneCounts',
                            '--clip3pNbases', '0',
                            '--readFilesCommand', 'zcat',
                            '--runThreadN', str(multiprocessing.cpu_count()),
@@ -856,7 +855,8 @@ def run_bowtie2(sample_name, input_fa_1, input_fa_2, bowtie_genome_s3_path,
         execute_command("aws s3 cp %s %s/" % (bowtie_genome_s3_path, REF_DIR))
         execute_command("cd %s; tar xvfz %s" % (REF_DIR, genome_file))
         logging.getLogger().info("downloaded index")
-    genome_basename = REF_DIR + '/bowtie2_genome/GRCh38.primary_assembly.genome'
+    local_genome_dir_ls =  execute_command("ls %s/bowtie2_genome/*.bt2l" % REF_DIR)
+    genome_basename = local_genome_dir_ls.split("\n")[0][:-7]
     bowtie2_params = [BOWTIE2,
                      '-p', str(multiprocessing.cpu_count()),
                      '-x', genome_basename,

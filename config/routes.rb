@@ -5,7 +5,10 @@ Rails.application.routes.draw do
   resources :reports
   resources :pipeline_outputs
   devise_for :users
-  resources :samples
+  resources :samples do
+    put :reupload_source, on: :member
+    put :kickoff_pipeline, on: :member
+  end
   resources :projects
   resources :users
   mount Resque::Server.new, at: '/resque'

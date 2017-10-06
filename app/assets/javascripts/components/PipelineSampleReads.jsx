@@ -69,14 +69,14 @@ class PipelineSampleReads extends React.Component {
             </div>
 
             <div className="sub-title">
-              <a href="/"> {this.projectInfo.name} </a> > { this.sampleInfo.name }
+              <a href="/"> {!this.projectInfo ? 'No project to display yet' : this.projectInfo.name} </a> > { !this.sampleInfo ? 'No sample to display' : this.sampleInfo.name}
             </div>
 
             <div className="sub-header-navigation">
               <div className="nav-content">
                 <ul className="tabs tabs-transparent">
                   <li className="tab"><a href="#screen1" className="active">Details</a></li>
-                  <li className="tab"><a href="#reports">Reports</a></li>
+                  <li className="tab"><a href="#reports">Report</a></li>
                 </ul>
               </div>
             </div>
@@ -147,11 +147,11 @@ class PipelineSampleReads extends React.Component {
                             <tbody>
                               <tr>
                                 <td>Total reads</td>
-                                 <td>{ this.pipelineOutput.total_reads }</td>
+                                 <td>{ !this.pipelineOutput ? 'NA' : this.pipelineOutput.total_reads }</td>
                               </tr>
                               <tr>
                                 <td>Passed Quality Control</td>
-                                <td>{(this.pipelineOutput.remaining_reads /
+                                <td>{ !this.pipelineOutput ? 'NA' :(this.pipelineOutput.remaining_reads /
                                   this.pipelineOutput.total_reads * 100).toFixed(2) }%</td>
                               </tr>
                             </tbody>
@@ -162,7 +162,7 @@ class PipelineSampleReads extends React.Component {
                             <tbody>
                               <tr>
                                 <td>Remaining Reads</td>
-                                 <td>{ this.pipelineOutput.remaining_reads }</td>
+                                 <td>{ !this.pipelineOutput ? 'NA' : this.pipelineOutput.remaining_reads }</td>
                               </tr>
                             </tbody>
                           </table>
@@ -182,7 +182,7 @@ class PipelineSampleReads extends React.Component {
                   <i className="fa fa-user-times left"></i> DOWNLOAD NON HUMAN READS
                 </a>
 
-                <a href={'/pipeline_outputs/' + this.pipelineOutput.id + '/#reports'} className="custom-button">
+                <a href={'/samples/' + this.sampleInfo.id + '/#reports'} className="custom-button">
                   <i className="fa fa-file-text-o left"></i> GENERATE REPORT
                 </a>
               </div>
