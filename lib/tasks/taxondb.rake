@@ -16,6 +16,7 @@ task load_taxon_db: :environment do
          else
            '$RDS_ADDRESS'
          end
+  date = `date +"%Y-%m-%d"`.strip
   `
     mkdir -p #{local_taxonomy_path};
     cd #{local_taxonomy_path};
@@ -23,10 +24,10 @@ task load_taxon_db: :environment do
     tar xvf $(basename #{remote_taxdump_path});
     wget #{remote_taxcat_path};
     tar xvf $(basename #{remote_taxcat_path});
-    awk -F "\t|\t" '{print x+=1,","$1","$3","$5",2017-10-04,2017-10-04"}' #{nodes_file} | sed 's= ,=,=' > taxon_child_parents;
-    mysqlimport --local --user=$DB_USERNAME --host=#{host} --password=$DB_PASSWORD --fields-terminated-by=',' idseq_#{Rails.env} taxon_child_parents;
-    awk -F "\t" '{print x+=1,","$3","$1",2017-10-04,2017-10-04"}' #{categories_file} | sed 's= ,=,=' > taxon_categories;
-    mysqlimport --local --user=$DB_USERNAME --host=#{host} --password=$DB_PASSWORD --fields-terminated-by=',' idseq_#{Rails.env} taxon_categories;
+    awk -F "\t|\t" '{print x+=1,","$1","$3","$5",#{date},#{date}"}' #{nodes_file} | sed 's= ,=,=' > taxon_child_parents;
+    mysqlimport --delete --local --user=$DB_USERNAME --host=#{host} --password=$DB_PASSWORD --fields-terminated-by=',' idseq_#{Rails.env} taxon_child_parents;
+    awk -F "\t" '{print x+=1,","$3","$1",#{date},#{date}"}' #{categories_file} | sed 's= ,=,=' > taxon_categories;
+    mysqlimport --delete --local --user=$DB_USERNAME --host=#{host} --password=$DB_PASSWORD --fields-terminated-by=',' idseq_#{Rails.env} taxon_categories;
   `
   raise "taxon database import failed" unless $CHILD_STATUS.success?
   Open3.capture3("rm -rf #{local_taxonomy_path}")
