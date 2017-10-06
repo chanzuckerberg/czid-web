@@ -13,9 +13,7 @@ before_install:
   - docker-compose up -d db
   - docker-compose up -d redis
   - sleep 10
-  - CAPTURED_ENV=`for word in "AWS_REGION CI RAILS_ENV"; do echo -n " -e $word='\$$word' "; done;`
-  - echo "$CAPTURED_ENV"
-  - docker-compose run "$CAPTURED_ENV" web rake db:create
+  - docker-compose run web rake db:create
 install: echo 'no install'
 script:
   - docker-compose run web rails test
