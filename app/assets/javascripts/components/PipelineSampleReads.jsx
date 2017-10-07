@@ -6,10 +6,9 @@ class PipelineSampleReads extends React.Component {
     this.sampleInfo = this.props.sampleInfo;
     this.projectInfo = this.props.projectInfo;
     this.reportInfo =  (Object.keys(this.props.reportInfo).length > 0) ? this.props.reportInfo : null;
-
+    this.jobStatistics = this.props.jobStatistics;
     this.gotoReport = this.gotoReport.bind(this);
-
-  }
+    }
 
   gotoReport() {
     $('ul.tabs').tabs('select_tab', 'reports');
@@ -157,8 +156,8 @@ class PipelineSampleReads extends React.Component {
                               </tr>
                               <tr>
                                 <td>Passed Quality Control</td>
-                                <td>{(this.pipelineOutput.remaining_reads /
-                                  this.pipelineOutput.total_reads * 100).toFixed(2) }%</td>
+                                <td>{ !this.jobStatistics ? 'NA' :(this.jobStatistics.reads_after /
+                                  this.jobStatistics.reads_before * 100).toFixed(2) }%</td>
                               </tr>
                             </tbody>
                           </table>
@@ -169,6 +168,10 @@ class PipelineSampleReads extends React.Component {
                               <tr>
                                 <td>Remaining Reads</td>
                                  <td>{ this.pipelineOutput.remaining_reads }</td>
+                              </tr>
+                              <tr>
+                                <td>Compression Ratio</td>
+                                 <td>{ !this.jobStatistics ? 'NA' : (this.jobStatistics.reads_before/this.jobStatistics.reads_after).toFixed(2) }</td>
                               </tr>
                             </tbody>
                           </table>
