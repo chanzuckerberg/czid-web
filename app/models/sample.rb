@@ -10,7 +10,7 @@ class Sample < ApplicationRecord
   HIT_FASTA_BASENAME = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.fasta'.freeze
   LOG_BASENAME = 'log.txt'.freeze
   DEFAULT_MEMORY = 64_000
-  DEFAULT_QUEUE = 'aegea_batch_ondemand'
+  DEFAULT_QUEUE = 'aegea_batch_ondemand'.freeze
 
   belongs_to :project
   has_many :pipeline_outputs, dependent: :destroy
@@ -94,8 +94,8 @@ class Sample < ApplicationRecord
     batch_command = "aws s3 cp #{IdSeqPipeline::S3_SCRIPT_LOC} .; chmod 755 #{script_name}; " +
                     batch_command_env_variables + "./#{script_name}"
     command = "aegea batch submit --command=\"#{batch_command}\" "
-    memory = if sample_memory.present? then sample_memory else DEFAULT_MEMORY end
-    queue =  if job_queue.present? then job_queue else DEFAULT_QUEUE end
+    memory = sample_memory.present? ? sample_memory : DEFAULT_MEMORY
+    queue =  job_queue.present? ? job_queue : DEFAULT_QUEUE
     command += " --storage /mnt=1500 --ecr-image idseq --memory #{memory} --queue #{queue} --vcpus 16"
     command
   end
