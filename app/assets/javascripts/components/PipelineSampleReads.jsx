@@ -43,6 +43,51 @@ class PipelineSampleReads extends React.Component {
     } else {
       d_report = <p className="center-align text-grey text-lighten-2 no-report">No report found for this sample</p>
     }
+
+    let pipeline_run = null;
+    if (this.pipelineOutput) {
+      pipeline_run = (
+        <div className="data">
+          <div className="row">
+            <div className="col s6">
+              <table className="highlight">
+                <tbody>
+                <tr>
+                  <td>Total reads</td>
+                  <td>{ this.pipelineOutput.total_reads }</td>
+                </tr>
+                <tr>
+                  <td>Passed Quality Control</td>
+                  <td>{ !this.jobStatistics ? 'NA' :(this.jobStatistics.reads_after /
+                    this.jobStatistics.reads_before * 100).toFixed(2) }%</td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+            <div className="col s6">
+              <table className="highlight">
+                <tbody>
+                <tr>
+                  <td>Remaining Reads</td>
+                  <td>{ this.pipelineOutput.remaining_reads }</td>
+                </tr>
+                <tr>
+                  <td>Compression Ratio</td>
+                  <td>{ !this.jobStatistics ? 'NA' : (this.jobStatistics.reads_before/this.jobStatistics.reads_after).toFixed(2) }</td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )
+    } else {
+      pipeline_run = (
+        <div className="center">
+          There is no pipeline output for this sample
+        </div>
+      );
+    }
     return (
       <div>
         <Header />
@@ -124,9 +169,6 @@ class PipelineSampleReads extends React.Component {
                               <td className="notes">Notes</td>
                               <td className="sample-notes" suppressContentEditableWarning={true} contentEditable={true}>
                                 Type here ...
-                                <div className='save-note-button'>
-                                  <button className='btn btn-flat grey' contentEditable={false}>Save note</button>
-                                </div>
                               </td>
                             </tr>
                             </tbody>
@@ -144,40 +186,7 @@ class PipelineSampleReads extends React.Component {
                     <div className="content-title">
                       PIPELINE OUTPUT
                     </div>
-
-                    <div className="data">
-                      <div className="row">
-                        <div className="col s6">
-                          <table className="highlight">
-                            <tbody>
-                              <tr>
-                                <td>Total reads</td>
-                                 <td>{ this.pipelineOutput.total_reads }</td>
-                              </tr>
-                              <tr>
-                                <td>Passed Quality Control</td>
-                                <td>{ !this.jobStatistics ? 'NA' :(this.jobStatistics.reads_after /
-                                  this.jobStatistics.reads_before * 100).toFixed(2) }%</td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                        <div className="col s6">
-                          <table className="highlight">
-                            <tbody>
-                              <tr>
-                                <td>Remaining Reads</td>
-                                 <td>{ this.pipelineOutput.remaining_reads }</td>
-                              </tr>
-                              <tr>
-                                <td>Compression Ratio</td>
-                                 <td>{ !this.jobStatistics ? 'NA' : (this.jobStatistics.reads_before/this.jobStatistics.reads_after).toFixed(2) }</td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    </div>
+                    { pipeline_run }
                   </div>
                 </div>
               </div>
