@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171007001015) do
+ActiveRecord::Schema.define(version: 20171009042049) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -52,6 +52,7 @@ ActiveRecord::Schema.define(version: 20171007001015) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["pipeline_output_id"], name: "index_job_stats_on_pipeline_output_id"
+    t.index ["task"], name: "index_job_stats_on_task"
   end
 
   create_table "pipeline_outputs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
