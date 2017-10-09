@@ -1,4 +1,5 @@
 class SamplesController < ApplicationController
+  include ReportHelper
   before_action :login_required, only: [:new, :update, :destroy]
   before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs]
   acts_as_token_authentication_handler_for User, only: [:create], fallback: :devise
