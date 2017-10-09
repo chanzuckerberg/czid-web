@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171009042049) do
+ActiveRecord::Schema.define(version: 20171009164151) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -155,8 +155,8 @@ ActiveRecord::Schema.define(version: 20171009042049) do
     t.datetime "updated_at", null: false
     t.string "name", collation: "utf8_general_ci"
     t.string "count_type"
-    t.index ["pipeline_output_id", "count_type", "tax_level", "tax_id"], name: "index_taxon_counts_detailed", unique: true
     t.index ["pipeline_output_id", "tax_id", "count_type"], name: "new_index_taxon_counts", unique: true
+    t.index ["pipeline_output_id", "tax_level", "count_type", "tax_id"], name: "index_taxon_counts", unique: true
     t.index ["pipeline_output_id"], name: "index_taxon_counts_on_pipeline_output_id"
   end
 
@@ -192,7 +192,7 @@ ActiveRecord::Schema.define(version: 20171009042049) do
     t.string "name"
     t.float "rpm", limit: 24
     t.string "hit_type"
-    t.index ["report_id", "hit_type", "tax_level", "tax_id"], name: "index_taxon_zscores_detailed", unique: true
+    t.index ["report_id", "tax_level", "hit_type", "tax_id"], name: "index_taxon_zscores", unique: true
     t.index ["report_id"], name: "index_taxon_zscores_on_report_id"
   end
 
