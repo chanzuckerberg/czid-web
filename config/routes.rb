@@ -3,7 +3,7 @@ require 'resque/server'
 Rails.application.routes.draw do
   resources :backgrounds
   resources :reports
-  resources :pipeline_outputs
+  resources :pipeline_outputs, only: [:index, :show]
   devise_for :users
   resources :samples do
     put :reupload_source, on: :member
@@ -11,7 +11,7 @@ Rails.application.routes.draw do
     get :pipeline_runs, on: :member
   end
   resources :projects
-  resources :users
+  resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
   mount Resque::Server.new, at: '/resque'
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
   root to: 'home#home'

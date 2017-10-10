@@ -15,6 +15,26 @@ Then open `http://localhost:3000` in your browser.
 Everything you need to get started should be in `./bin/setup`.   If there's anything missing, please edit and submit a pull request.
 
 
+## User account logins
+
+In development environment, you can use the following credentials to login for all the non-read operations:
+
+```
+  email: fake@example.com
+  password: password
+```
+
+After you deploy the code, you will have to log into the rails console into the cluster and create a user credential as follows:
+
+```
+idseq-web yf$ bin/shell <cluster> "rails c"
+Running via Spring preloader in process 2608
+Loading alpha environment (Rails 5.1.4)
+irb(main):001:0> User.create(email: 'your@email.com', password: 'yourpass', password_confirmation: 'yourpass', authentication_token: 'your_auth_token')
+```
+
+You can then log in with the emaill/password you specified.
+
 ## Testing
 
 ```
@@ -70,7 +90,7 @@ In addition to using your local `development` instance, you may obtain access to
 1. `chmod 600 idseq_<env>_key.pem`
 1. `ssh-add idseq_<env>_key.pem`
 
-You can now run a non-interactive command on a cloud web container like so  
+You can now run a non-interactive command on a cloud web container like so
 `bin/clam <env> 'echo $HOSTNAME'`
 
 
@@ -89,11 +109,11 @@ Sometimes you may be prompted to run a migration or configuration command like `
 
 ## DB backup/restore within and across environments
 
-1. Backup your local `development` DB into a local file:  
+1. Backup your local `development` DB into a local file:
 `docker-compose exec web mysqldump -h db -u root idseq_development > idseq_development.sql`
-1. Backup cloud `alpha` DB into a local file:  
+1. Backup cloud `alpha` DB into a local file:
 `bin/clam alpha 'mysqldump -h $RDS_ADDRESS -u $DB_USERNAME --password=$DB_PASSWORD idseq_alpha | gzip -c' | gzip -dc > idseq_alpha.sql`
-1. Overwrite your local `development` DB with data from given backup file:  
+1. Overwrite your local `development` DB with data from given backup file:
 `docker-compose run web "cat idseq_alpha.sql | mysql -h db -u root --database idseq_development"`
 
 
