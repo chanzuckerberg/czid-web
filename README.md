@@ -77,7 +77,7 @@ You can now run a non-interactive command on a cloud web container like so
 ## Interactive shells
 
 1. `docker-compose exec web bash` for a shell in your local `development` env.
-1. `bin/shell dev bash` for a shell in the cloud `dev` env.
+1. `bin/shell alpha bash` for a shell in the cloud `alpha` env.
 
 Useful commands inside an interactive shell:
 
@@ -91,10 +91,10 @@ Sometimes you may be prompted to run a migration or configuration command like `
 
 1. Backup your local `development` DB into a local file:  
 `docker-compose exec web mysqldump -h db -u root idseq_development > idseq_development.sql`
-1. Backup cloud `dev` DB into a local file:  
-`bin/clam dev 'mysqldump -h $RDS_ADDRESS -u $DB_USERNAME --password=$DB_PASSWORD idseq_dev | gzip -c' | gzip -dc > idseq_dev.sql`
+1. Backup cloud `alpha` DB into a local file:  
+`bin/clam alpha 'mysqldump -h $RDS_ADDRESS -u $DB_USERNAME --password=$DB_PASSWORD idseq_alpha | gzip -c' | gzip -dc > idseq_alpha.sql`
 1. Overwrite your local `development` DB with data from given backup file:  
-`docker-compose run web "cat idseq_dev.sql | mysql -h db -u root --database idseq_development"`
+`docker-compose run web "cat idseq_alpha.sql | mysql -h db -u root --database idseq_development"`
 
 
 ## Deployment
