@@ -13,9 +13,7 @@ class ReportsController < ApplicationController
   def show
     @report_details = report_details(@report)
     @view_level = params[:view_level] ? params[:view_level].downcase : 'genus'
-    taxon_zscores = compute_taxon_zscores(@report)
-    @taxonomy_details = taxonomy_details(@view_level, @report, params, taxon_zscores)
-    @highest_tax_counts = highest_tax_counts(@view_level, @report, taxon_zscores)
+    @highest_tax_counts, @taxonomy_details = taxonomy_details(@view_level, @report, params)
   end
 
   # GET /reports/new
