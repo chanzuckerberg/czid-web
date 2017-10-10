@@ -2,4 +2,4 @@
 
 DEF=$1
 
-aws ecs run-task --cluster dev --task-definition $DEF --overrides '{"containerOverrides": [{"name": "rails", "command": ["rails", "db:migrate"]}]}' --started-by deploy
+aws ecs run-task --cluster alpha --task-definition $DEF --overrides '{"containerOverrides": [{"name": "rails", "command": ["rails", "db:migrate"]}]}' --started-by deploy

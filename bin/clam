@@ -4,13 +4,13 @@
 #
 #  Usage:
 #
-#      bin/clam dev bash
+#      bin/clam alpha bash
 #
-#      bin/clam dev 'echo $HOSTNAME'
+#      bin/clam alpha 'echo $HOSTNAME'
 #
-#      bin/clam dev 'mysqldump -h $RDS_ADDRESS -u $DB_USERNAME --password=$DB_PASSWORD idseq_dev | gzip -c' > id_dev.sql.gz
+#      bin/clam alpha 'mysqldump -h $RDS_ADDRESS -u $DB_USERNAME --password=$DB_PASSWORD idseq_alpha | gzip -c' > id_alpha.sql.gz
 #
-#  Above, the specified commands run in the web container on environment "dev",
+#  Above, the specified commands run in the web container on environment "alpha",
 #  so that the $HOSTNAME, $RDS_ADDRESS, etc variables are expanded in that
 #  environment
 #
