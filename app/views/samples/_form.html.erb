@@ -1,3 +1,5 @@
+<% sample.job_queue ||= Sample::DEFAULT_QUEUE %>
+<% sample.sample_memory ||= Sample::DEFAULT_MEMORY %>
 <%= form_with(model: sample, local: true) do |form| %>
   <% if sample.errors.any? %>
     <div id="error_explanation">
@@ -61,6 +63,14 @@
       Sample Created at <%= sample.created_at %>
     </div>
   <% end %>
+  <div class="field">
+    <%= form.label "Job Queue" %>
+    <%= form.text_field :job_queue, id: :job_queue, placeholder: 'Optional' %>
+  </div>
+  <div class="field">
+    <%= form.label "Sample Memory (in MBs)" %>
+    <%= form.text_field :sample_memory, id: :sample_memory, placeholder: 'Optional' %>
+  </div>
   <div class="actions">
     <%= form.submit %>
   </div>

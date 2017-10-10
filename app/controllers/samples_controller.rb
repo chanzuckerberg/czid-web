@@ -1,4 +1,5 @@
 class SamplesController < ApplicationController
+  include ReportHelper
   before_action :login_required, only: [:new, :update, :destroy, :edit, :reupload_source, :kickoff_pipeline]
   before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs]
   acts_as_token_authentication_handler_for User, only: [:create], fallback: :devise
@@ -117,7 +118,8 @@ class SamplesController < ApplicationController
     params.require(:sample).permit(:name, :project_name, :project_id, :status, :s3_preload_result_path,
                                    :s3_star_index_path, :s3_bowtie2_index_path, :sample_memory,
                                    :sample_host, :sample_location, :sample_date, :sample_tissue,
-                                   :sample_template, :sample_library, :sample_sequencer, :sample_notes,
+                                   :sample_template, :sample_library, :sample_sequencer,
+                                   :sample_notes, :job_queue,
                                    input_files_attributes: [:name, :presigned_url, :source_type, :source])
   end
 end

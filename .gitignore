@@ -34,3 +34,4 @@ get-pip.py
 
 .byebug_history
 .editorconfig
+coverage

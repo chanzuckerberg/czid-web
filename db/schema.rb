@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171006003218) do
+ActiveRecord::Schema.define(version: 20171010011300) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -22,11 +22,15 @@ ActiveRecord::Schema.define(version: 20171006003218) do
   create_table "backgrounds_pipeline_outputs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "background_id"
     t.bigint "pipeline_output_id"
+    t.index ["background_id"], name: "index_backgrounds_pipeline_outputs_on_background_id"
+    t.index ["pipeline_output_id"], name: "index_backgrounds_pipeline_outputs_on_pipeline_output_id"
   end
 
   create_table "backgrounds_samples", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "background_id", null: false
     t.bigint "sample_id", null: false
+    t.index ["background_id"], name: "index_backgrounds_samples_on_background_id"
+    t.index ["sample_id"], name: "index_backgrounds_samples_on_sample_id"
   end
 
   create_table "input_files", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -48,6 +52,7 @@ ActiveRecord::Schema.define(version: 20171006003218) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["pipeline_output_id"], name: "index_job_stats_on_pipeline_output_id"
+    t.index ["task"], name: "index_job_stats_on_task"
   end
 
   create_table "pipeline_outputs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -89,6 +94,8 @@ ActiveRecord::Schema.define(version: 20171006003218) do
   create_table "projects_users", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "project_id", null: false
     t.bigint "user_id", null: false
+    t.index ["project_id"], name: "index_projects_users_on_project_id"
+    t.index ["user_id"], name: "index_projects_users_on_user_id"
   end
 
   create_table "reports", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -119,6 +126,7 @@ ActiveRecord::Schema.define(version: 20171006003218) do
     t.text "s3_star_index_path"
     t.text "s3_bowtie2_index_path"
     t.integer "sample_memory"
+    t.string "job_queue"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
   end
 
@@ -127,6 +135,7 @@ ActiveRecord::Schema.define(version: 20171006003218) do
     t.string "category"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["taxid"], name: "index_taxon_categories_on_taxid", unique: true
   end
 
   create_table "taxon_child_parents", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -135,6 +144,7 @@ ActiveRecord::Schema.define(version: 20171006003218) do
     t.string "rank"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["taxid"], name: "index_taxon_child_parents_on_taxid", unique: true
   end
 
   create_table "taxon_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -147,7 +157,22 @@ ActiveRecord::Schema.define(version: 20171006003218) do
     t.string "name", collation: "utf8_general_ci"
     t.string "count_type"
     t.index ["pipeline_output_id", "tax_id", "count_type"], name: "new_index_taxon_counts", unique: true
+    t.index ["pipeline_output_id", "tax_level", "count_type", "tax_id"], name: "index_taxon_counts", unique: true
     t.index ["pipeline_output_id"], name: "index_taxon_counts_on_pipeline_output_id"
+  end
+
+  create_table "taxon_lineage_names", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "taxid"
+    t.string "superkingdom_name"
+    t.string "phylum_name"
+    t.string "class_name"
+    t.string "order_name"
+    t.string "family_name"
+    t.string "genus_name"
+    t.string "species_name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["taxid"], name: "index_taxon_lineage_names_on_taxid", unique: true
   end
 
   create_table "taxon_lineages", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -161,6 +186,7 @@ ActiveRecord::Schema.define(version: 20171006003218) do
     t.integer "species_taxid", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["taxid"], name: "index_taxon_lineages_on_taxid", unique: true
   end
 
   create_table "taxon_names", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -168,6 +194,7 @@ ActiveRecord::Schema.define(version: 20171006003218) do
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["taxid"], name: "index_taxon_names_on_taxid", unique: true
   end
 
   create_table "taxon_zscores", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -180,6 +207,7 @@ ActiveRecord::Schema.define(version: 20171006003218) do
     t.string "name"
     t.float "rpm", limit: 24
     t.string "hit_type"
+    t.index ["report_id", "tax_level", "hit_type", "tax_id"], name: "index_taxon_zscores", unique: true
     t.index ["report_id"], name: "index_taxon_zscores_on_report_id"
   end
 
