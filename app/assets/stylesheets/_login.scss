@@ -54,4 +54,17 @@ $break-large: 1460px;
     font-size: 20px;
     cursor: pointer;
   }
+  .forgot-password {
+    text-align: center;
+    margin: 40px;
+    span {
+      text-decoration: underline;
+      color: #414367;
+      cursor: pointer;
+      &:hover {
+        
+        color:#039be5
+      }
+    }
+  }
 }

@@ -1,3 +1,4 @@
+//= require axios
 //= require jquery
 //= require react
 //= require react_ujs
@@ -5,3 +6,4 @@
 //= require materialize
 //= require moment
 //= require materialize/extras/nouislider
+

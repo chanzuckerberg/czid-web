@@ -9,6 +9,7 @@ gem 'airbrake', '~> 7.0'
 gem 'airbrake-ruby'
 gem 'aws-sdk-ecs'
 gem 'aws-sdk-resources'
+gem 'axios_rails'
 # Use ActiveModel has_secure_password
 gem 'bcrypt', '~> 3.1.7'
 # Use CoffeeScript for .coffee assets and views
@@ -37,6 +38,7 @@ gem "libhoney"
 gem 'rails', '~> 5.1.2'
 gem 'rake'
 gem 'react-rails'
+gem 'react-router-rails', '~>0.13.3.2'
 # Worker/Scheduler management
 gem 'resque'
 gem 'resque-lock'
