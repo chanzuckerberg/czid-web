@@ -109,9 +109,9 @@ class Login extends React.Component {
                   <input ref="remember_me" type="checkbox" name="switch" className="filled-in" id="remember_me" onChange={ this.toggleCheckBox } value={this.setState.isChecked ? 1 : 0} />
                   <label htmlFor="remember_me">Remember me</label>
                 </div>
-                <div className="input-field">
-                  <input type="password" className="" />
-                  <label htmlFor="icon_telephone">Confirm Password</label>
+                <div className="">  
+                  <input ref="remember_me" type="checkbox" name="switch" className="filled-in" id="remember_me" onChange={ this.toggleCheckBox } value={this.setState.isChecked ? 1 : 0} />
+                  <label htmlFor="remember_me">Remember me</label>
                 </div>
               </div>
                 <div className="forgot-password"><span onClick={ this.gotToForgotPassword }>Forgot your password?</span><br /></div>
