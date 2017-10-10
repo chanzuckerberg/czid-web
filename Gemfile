@@ -37,8 +37,7 @@ gem 'puma', '~> 3.7'
 gem "libhoney"
 gem 'rails', '~> 5.1.2'
 gem 'rake'
-gem 'react-rails'
-gem 'react-router-rails', '~>0.13.3.2'
+gem 'react-rails', '~> 2.3.0'
 # Worker/Scheduler management
 gem 'resque'
 gem 'resque-lock'
