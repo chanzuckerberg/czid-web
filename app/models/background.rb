@@ -11,9 +11,13 @@ class Background < ApplicationRecord
   end
 
   def summarize
-    results = TaxonCount.joins(:pipeline_output).select("tax_id, count_type, tax_level, name, sum((1.0*1e6*count)/total_reads) as sum_rpm, sum((1.0*1e6*count*1e6*count)/(total_reads*total_reads)) as sum_rpm2").group("tax_id, count_type, tax_level, name").where("pipeline_output_id in (select pipeline_output_id from backgrounds_pipeline_outputs where background_id = #{id})")
+    results = TaxonCount.connection.select_all("SELECT tax_id, count_type, tax_level, name, sum((1.0*1e6*count)/total_reads) as sum_rpm, sum((1.0*1e6*count*1e6*count)/(total_reads*total_reads)) as sum_rpm2 FROM `taxon_counts` INNER JOIN `pipeline_outputs` ON `pipeline_outputs`.`id` = `taxon_counts`.`pipeline_output_id` WHERE (pipeline_output_id in (select pipeline_output_id from backgrounds_pipeline_outputs where background_id = #{id}))  GROUP BY tax_id, count_type, tax_level, name").to_hash
     n = pipeline_outputs.count
-    results.map { |h| h.attributes.merge(mean: h[:sum_rpm] / n.to_f, stdev: compute_stdev(h[:sum_rpm], h[:sum_rpm2], n)) }
+    results.each do |h|
+      h[:mean] = h["sum_rpm"] / n.to_f
+      h[:stdev] = compute_stdev(h["sum_rpm"], h["sum_rpm2"], n)
+    end
+    results
   end
 
   def compute_stdev(sum, sum2, n)

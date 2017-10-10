@@ -126,6 +126,7 @@ ActiveRecord::Schema.define(version: 20171010011300) do
     t.text "s3_star_index_path"
     t.text "s3_bowtie2_index_path"
     t.integer "sample_memory"
+    t.string "job_queue"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
   end
 
