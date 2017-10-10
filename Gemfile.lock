@@ -625,16 +625,12 @@ GEM
     rb-fsevent (0.10.2)
     rb-inotify (0.9.10)
       ffi (>= 0.5.0, < 2)
-    react-rails (1.4.2)
+    react-rails (2.3.0)
       babel-transpiler (>= 0.7.0)
-      coffee-script-source (~> 1.8)
       connection_pool
       execjs
-      rails (>= 3.2)
+      railties (>= 3.2)
       tilt
-    react-router-rails (0.13.3.2)
-      rails (>= 3.1)
-      react-rails (~> 1.4.0)
     redis (3.3.5)
     redis-namespace (1.5.3)
       redis (~> 3.0, >= 3.0.4)
