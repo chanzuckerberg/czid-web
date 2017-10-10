@@ -15,7 +15,7 @@ Then open `http://localhost:3000` in your browser.
 Everything you need to get started should be in `./bin/setup`.   If there's anything missing, please edit and submit a pull request.
 
 
-## Create user account after deployment
+## User account logins
 
 In development environment, you can use the following credentials to login for all the non-read operations:
 
@@ -33,7 +33,7 @@ Loading alpha environment (Rails 5.1.4)
 irb(main):001:0> User.create(email: 'your@email.com', password: 'yourpass', password_confirmation: 'yourpass', authentication_token: 'your_auth_token')
 ```
 
-You can then log in with the emaill/password you put in.
+You can then log in with the emaill/password you specified.
 
 ## Testing
 
