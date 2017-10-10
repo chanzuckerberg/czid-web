@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171009164151) do
+ActiveRecord::Schema.define(version: 20171010011300) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -158,6 +158,20 @@ ActiveRecord::Schema.define(version: 20171009164151) do
     t.index ["pipeline_output_id", "tax_id", "count_type"], name: "new_index_taxon_counts", unique: true
     t.index ["pipeline_output_id", "tax_level", "count_type", "tax_id"], name: "index_taxon_counts", unique: true
     t.index ["pipeline_output_id"], name: "index_taxon_counts_on_pipeline_output_id"
+  end
+
+  create_table "taxon_lineage_names", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "taxid"
+    t.string "superkingdom_name"
+    t.string "phylum_name"
+    t.string "class_name"
+    t.string "order_name"
+    t.string "family_name"
+    t.string "genus_name"
+    t.string "species_name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["taxid"], name: "index_taxon_lineage_names_on_taxid", unique: true
   end
 
   create_table "taxon_lineages", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
