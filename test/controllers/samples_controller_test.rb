@@ -33,7 +33,6 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     assert_difference('Sample.count') do
       post samples_url, params: { sample: { name: 'new sample', project_name: @project.name, input_files_attributes: input_files } }, headers: req_headers
     end
-
     assert_redirected_to sample_url(Sample.last)
   end
 
@@ -47,7 +46,6 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     assert_difference('Sample.count', 0) do
       post samples_url, params: { sample: { name: 'new sample', project_name: @project.name, input_files_attributes: input_files } }
     end
-
     assert_redirected_to new_user_session_url
   end
 
@@ -89,12 +87,10 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     assert_difference('Sample.count') do
       post samples_url, params: { sample: { name: 'new sample', project_name: @project.name, input_files_attributes: input_files } }
     end
-
     assert_redirected_to sample_url(Sample.last)
   end
 
   test 'should show sample' do
-    post user_session_path, params: @user_params
     get sample_url(@sample)
     assert_response :success
   end
@@ -117,7 +113,6 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     assert_difference('Sample.count', -1) do
       delete sample_url(@sample)
     end
-
     assert_redirected_to samples_url
   end
 end

@@ -7,6 +7,6 @@ class ApplicationController < ActionController::Base
   end
 
   def set_user
-    @user = current_user if current_user and current_user.id
+    @user = current_user if current_user && current_user.id
   end
 end
