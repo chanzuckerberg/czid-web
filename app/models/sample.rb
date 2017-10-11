@@ -1,6 +1,6 @@
 require 'open3'
 require 'json'
-# rubocop:disable ClassLength
+
 class Sample < ApplicationRecord
   self.per_page = 10
   STATUS_CREATED  = 'created'.freeze
