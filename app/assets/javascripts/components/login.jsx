@@ -5,21 +5,32 @@ class Login extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.gotToForgotPassword = this.gotToForgotPassword.bind(this)
     this.toggleCheckBox = this.toggleCheckBox.bind(this)
+    this.clearError = this.clearError.bind(this)
     this.state = {
-      isChecked: false
+      isChecked: false,
+      showFailedLogin: false,
+      errorMessage: ''
     }
   }
 
   handleSubmit(e) {
     e.preventDefault();
-    var email = this.refs.email.value;
-    var password = this.refs.password.value;
-    var remember_me = this.refs.remember_me.value;
+    if(!this.isFormInValid()) {
+      this.login()
+    }
+  }
+
+  clearError() {
+    this.setState({ showFailedLogin: false })
+  }
+
+  login() {
+    var that = this
     axios.post(`${this.props.endpoint}.json`, {
       user: {
-        email: email,
-        password: password,
-        remember_me: remember_me
+        email: this.refs.email.value,
+        password: this.refs.password.value,
+        remember_me: this.refs.remember_me.value
       },
       authenticity_token: this.csrf
     })
@@ -27,7 +38,35 @@ class Login extends React.Component {
       location.href = '/'
     })
     .catch(function (error) {
+      that.setState({
+        showFailedLogin: true,
+        errorMessage: 'Invalid Email and Password'
+      })
     });
+  }
+
+  isFormInValid() {
+    if (this.refs.email.value === '' && this.refs.password.value === '') {
+      this.setState({ 
+        showFailedLogin: true,
+        errorMessage: 'Please enter email and password'
+      })
+      return true;
+    } else if (this.refs.email.value === '') {
+      this.setState({ 
+        showFailedLogin: true,
+        errorMessage: 'Please enter email'
+      })
+      return true;
+    } else if (this.refs.password.value === '') {
+      this.setState({ 
+        showFailedLogin: true,
+        errorMessage: 'Please enter password'
+      })
+      return true;
+    } else {
+      return false;
+    }
   }
 
   gotToForgotPassword() {
@@ -42,10 +81,8 @@ class Login extends React.Component {
     this.setState.isChecked = !this.setState.isChecked;  
   }
 
-  render() {
+  renderLogin() {
     return (
-      <div>
-        <Header />
         <div className="form-wrapper">
           <div className="row">
             <form ref="form" className="new_user" id="new_user" onSubmit={ this.handleSubmit }>
@@ -53,15 +90,19 @@ class Login extends React.Component {
                 <p className="col s6 verify">Already a user? Sign in</p>
                 <p className="col s6 signup">Login</p>
               </div>
+              { this.state.showFailedLogin ? <div className="error-info" >
+                  <i className="fa fa-error"></i>
+                  <span>{this.state.errorMessage}</span>
+              </div> : null }
               <div className="row content-wrapper">
                 <div className="input-field">
                   <i className="fa fa-envelope" aria-hidden="true"></i>
-                  <input ref= "email" type="email" className="validate" />
+                  <input ref= "email" type="email" className="" onFocus={ this.clearError }  />
                   <label htmlFor="user_email">Email</label>
                 </div>
                 <div className="input-field">
                   <i className="fa fa-key" aria-hidden="true"></i>
-                  <input ref= "password" type="password" className="" />
+                  <input ref= "password" type="password" className="" onFocus={ this.clearError }   />
                   <label htmlFor="user_password">Password</label>
                 </div>
                 <div className="">  
@@ -74,7 +115,16 @@ class Login extends React.Component {
             </form>
           </div>
         </div>
+    )
+  }
+
+  render() {
+    return (
+      <div>
+        <Header />
+        { this.renderLogin() }
       </div>
     )
   }
+
 }
