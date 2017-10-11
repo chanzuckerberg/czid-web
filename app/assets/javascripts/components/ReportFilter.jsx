@@ -14,15 +14,15 @@ class ReportFilter extends React.Component {
       ? ReportFilter.getFilter('nt_rpm_threshold') : default_nt_rpm_threshold;
 
     const nt_zscore_start =
-      (nt_zscore_threshold.split('-').length > 0) ? parseInt(nt_zscore_threshold.split('-')[0], 10) : 0;
+      (nt_zscore_threshold.split(',').length > 0) ? parseInt(nt_zscore_threshold.split(',')[0], 10) : 0;
     const nt_zscore_end =
-      (nt_zscore_threshold.split('-').length > 1) ? parseInt(nt_zscore_threshold.split('-')[1], 10) :
+      (nt_zscore_threshold.split(',').length > 1) ? parseInt(nt_zscore_threshold.split(',')[1], 10) :
         this.props.highest_tax_counts.highest_nt_zscore;
 
     const nt_rpm_start =
-      (nt_rpm_threshold.split('-').length > 0) ? parseInt(nt_rpm_threshold.split('-')[0], 10) : 0;
+      (nt_rpm_threshold.split(',').length > 0) ? parseInt(nt_rpm_threshold.split(',')[0], 10) : 0;
     const nt_rpm_end =
-      (nt_rpm_threshold.split('-').length > 1) ? parseInt(nt_rpm_threshold.split('-')[1], 10) :
+      (nt_rpm_threshold.split(',').length > 1) ? parseInt(nt_rpm_threshold.split(',')[1], 10) :
         this.props.highest_tax_counts.highest_nt_rpm;
 
 
@@ -37,8 +37,8 @@ class ReportFilter extends React.Component {
     const currentSort = PipelineSampleReport.currentSort();
     const sort_by = currentSort.sort_query ? `&${currentSort.sort_query}` : '';
     window.location =
-      `${current_url}?nt_zscore_threshold=${this.state.nt_zscore_start}-${this.state.nt_zscore_end}&nt_rpm_threshold=${
-      this.state.nt_rpm_start}-${this.state.nt_rpm_end}&view_level=${this.state.view_level}${sort_by}`;
+      `${current_url}?nt_zscore_threshold=${this.state.nt_zscore_start},${this.state.nt_zscore_end}&nt_rpm_threshold=${
+      this.state.nt_rpm_start},${this.state.nt_rpm_end}&view_level=${this.state.view_level}${sort_by}`;
   }
 
   static getFilter(name) {
