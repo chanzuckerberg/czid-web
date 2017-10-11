@@ -1,4 +1,3 @@
-# rubocop:disable ModuleLength
 module ReportHelper
   def external_report_info(report, view_level, params)
     data = {}
@@ -33,8 +32,6 @@ module ReportHelper
     zscore_array
   end
 
-  # rubocop:disable Metrics/CyclomaticComplexity
-  # rubocop:disable Metrics/PerceivedComplexity
   def taxonomy_details(view_level, report, params)
     taxon_zscores = compute_taxon_zscores(report)
     wanted_level = view_level == 'species' ? TaxonCount::TAX_LEVEL_SPECIES : TaxonCount::TAX_LEVEL_GENUS
