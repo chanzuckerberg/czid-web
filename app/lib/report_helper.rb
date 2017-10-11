@@ -42,11 +42,14 @@ module ReportHelper
     nr = data['NR'] || []
     nt_genus = data2['NT'] || []
     nr_genus = data2['NR'] || []
+    genus_nt_nr = nt_genus.concat nr_genus
 
     # filter and sort the nt_scores
     htc = highest_tax_counts(nt, nr)
     rp = resolve_params(params, htc)
-    nt.keep_if do |h|
+    nt_nr = nt.concat nr
+
+    nt_nr.keep_if do |h|
       (h[:tax_id] >= 0 &&
         h[:zscore] >= rp[:nt_zscore_threshold][:start] &&
         h[:zscore] <= rp[:nt_zscore_threshold][:end] &&
@@ -54,26 +57,27 @@ module ReportHelper
         h[:rpm] <= rp[:nt_rpm_threshold][:end]
       )
     end
-    sort_report!(nt, params[:sort_by])
-
-    nr_zscore_by_taxon = nr.group_by { |h| h[:tax_id] }
-    genus_nr_zscore_by_taxon = nr_genus.group_by { |h| h[:tax_id] }
-
+    sort_report!(nt_nr, params[:sort_by])
     tax_details = []
-    nt.each do |h|
+    nt_nr.each do |h|
       lineage_info = TaxonLineage.find_by(taxid: h[:tax_id])
       category_taxid = lineage_info.superkingdom_taxid
 
       genus_taxid = lineage_info.genus_taxid
-      found_genus = nt_genus.select { |genus| genus[:tax_id] == genus_taxid }
-      matched_genus = found_genus.length == 1 ? found_genus[0] : nil
+      found_genus = genus_nt_nr.select { |genus| genus[:tax_id] == genus_taxid }
+      genus_nt_ele = found_genus[0]
+      genus_nr_ele = found_genus[1]
 
       category = TaxonName.find_by(taxid: category_taxid)
       category_name = category ? category.name : 'Other'
-      x = nr_zscore_by_taxon[h[:tax_id]]
-      tax_details.push(nt_ele: h, nr_ele: x && x[0], category: category_name,
-                       genus_nt_ele: matched_genus,
-                       genus_nr_ele: genus_nr_zscore_by_taxon[genus_taxid])
+
+      nt_ele = h[:hit_type] == 'NT' ? h : nil
+      nr_ele = h[:hit_type] == 'NR' ? h : nil
+
+      tax_details.push(nt_ele: nt_ele, nr_ele: nr_ele,
+                       category: category_name,
+                       genus_nt_ele: genus_nt_ele,
+                       genus_nr_ele: genus_nr_ele)
     end
     [htc, tax_details]
   end

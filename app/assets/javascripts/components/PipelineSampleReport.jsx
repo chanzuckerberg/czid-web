@@ -14,7 +14,7 @@ class PipelineSampleReport extends React.Component {
         ? current_sort.sort_query  : 'sort_by=highest_zscore'
     };
     this.applySort = this.applySort.bind(this);
-
+    console.log(props)
   }
 
   uppCaseFirst(name) {
@@ -160,7 +160,7 @@ class PipelineSampleReport extends React.Component {
                     return (
                       <tr key={i}>
                         <td>
-                          { taxon.category }
+                          {  taxon.category || '-' }
                         </td>
 
                         <td>
@@ -168,15 +168,23 @@ class PipelineSampleReport extends React.Component {
                             { (taxon.genus_nt_ele) ?
                               <a href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${
                                 taxon.genus_nt_ele.tax_id}`}>{ taxon.genus_nt_ele.name }
-                              </a> : 'N/A' }
-
+                              </a> : 'N/A'
+                            }
                           </span>
                         </td>
                         <td>
                           <span className="link">
-                            <a href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${
-                              taxon.nt_ele.tax_id}`}>{ taxon.nt_ele.name }
-                          </a>
+                            { (taxon.nt_ele) ?
+                              <a href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${
+                                taxon.nt_ele.tax_id}`}>{ taxon.nt_ele.name }
+                              </a> : ''
+                            }
+                            { (taxon.nr_ele) ?
+                              <a href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${
+                              taxon.nr_ele.tax_id}`}>{
+                               taxon.nr_ele.name}
+                              </a> : ''
+                            }
                           </span>
                         </td>
 
@@ -190,13 +198,15 @@ class PipelineSampleReport extends React.Component {
 
                         {/*The species scores*/}
 
-                        <td>{ (!taxon.nt_ele.zscore) ? '-': taxon.nt_ele.zscore }</td>
-                        <td>{ taxon.nt_ele.rpm }</td>
                         <td>
-                          { (!taxon.nr_ele) ? '-': taxon.nr_ele.zscore }
+                          { (taxon.nt_ele && (taxon.nt_ele.zscore)) ? taxon.nt_ele.zscore : '-' }
+                        </td>
+                        <td>{ (taxon.nt_ele && (taxon.nt_ele.rpm)) ? taxon.nt_ele.rpm : '-' }</td>
+                        <td>
+                          { (taxon.nr_ele && (taxon.nr_ele.zscore)) ? taxon.nr_ele.zscore : '-' }
                         </td>
                         <td>
-                          { (!taxon.nr_ele) ? '-': taxon.nr_ele.rpm }
+                          { (taxon.nr_ele && (taxon.nr_ele.rpm)) ? taxon.nr_ele.rpm : '-' }
                         </td>
                       </tr>
                     )
