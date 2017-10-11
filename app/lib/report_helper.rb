@@ -68,8 +68,8 @@ module ReportHelper
       found_genus = nt_genus.select { |genus| genus[:tax_id] == genus_taxid }
       matched_genus = found_genus.length == 1 ? found_genus[0] : nil
 
-      category_name = TaxonName.find_by(taxid: category_taxid) ?
-                        TaxonName.find_by(taxid: category_taxid).name : 'Other'
+      category = TaxonName.find_by(taxid: category_taxid)
+      category_name = category ? category.name : 'Other'
       x = nr_zscore_by_taxon[h[:tax_id]]
       tax_details.push(nt_ele: h, nr_ele: x && x[0], category: category_name,
                        genus_nt_ele: matched_genus,
@@ -118,20 +118,6 @@ module ReportHelper
     nt_zscores.sort! { |hl, hr| hl[sort_field] <=> hr[sort_field] }
     nt_zscores.reverse! if sort_direction == 'highest'
     nt_zscores
-  end
-
-  def select_zscore(level, zscores)
-    wanted_level = level == :species ? TaxonCount::TAX_LEVEL_SPECIES : TaxonCount::TAX_LEVEL_GENUS
-    result = {
-      nr_zscores: [],
-      nt_zscores: []
-    }
-    zscores.each do |z|
-      next unless z[:tax_level] == wanted_level
-      t =  z[:hit_type] == :NR || z[:hit_type] == "NR" ? :nr_zscores : :nt_zscores
-      result[t].push(z)
-    end
-    result
   end
 
   def compute_rpm(count, total_reads)
