@@ -76,11 +76,11 @@ class Sample < ApplicationRecord
   end
 
   def sample_output_folder_url
-    "https://s3.console.aws.amazon.com/s3/object/#{SAMPLES_BUCKET_NAME}/#{sample_path}/results/"
+    "https://s3.console.aws.amazon.com/s3/buckets/#{SAMPLES_BUCKET_NAME}/#{sample_path}/results/"
   end
 
   def sample_input_folder_url
-    "https://s3.console.aws.amazon.com/s3/object/#{SAMPLES_BUCKET_NAME}/#{sample_path}/fastqs/"
+    "https://s3.console.aws.amazon.com/s3/buckets/#{SAMPLES_BUCKET_NAME}/#{sample_path}/fastqs/"
   end
 
   def as_json(_options = {})
