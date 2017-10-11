@@ -892,23 +892,25 @@ def run_gsnapl_remotely(sample, input_fa_1, input_fa_2,
     key_path = REF_DIR +'/' + key_name
     execute_command("chmod 400 %s" % key_path)
     remote_home_dir = "/home/ubuntu"
+    remote_work_dir = "%s/batch-pipeline-workdir/%s" % (remote_home_dir, sample)
+    remote_index_dir = "%s/share" % remote_home_dir
     remote_username = "ubuntu"
-    commands =  "mkdir -p %s/batch-pipeline-workdir/%s;" % (remote_home_dir, sample)
-    commands += "aws s3 cp %s/%s %s/batch-pipeline-workdir/%s/ ; " % \
-                 (sample_s3_output_path, input_fa_1, remote_home_dir, sample)
-    commands += "aws s3 cp %s/%s %s/batch-pipeline-workdir/%s/ ; " % \
-                 (sample_s3_output_path, input_fa_2, remote_home_dir, sample)
+    commands =  "mkdir -p %s;" % remote_work_dir
+    commands += "aws s3 cp %s/%s %s/ ; " % \
+                 (sample_s3_output_path, input_fa_1, remote_work_dir)
+    commands += "aws s3 cp %s/%s %s/ ; " % \
+                 (sample_s3_output_path, input_fa_2, remote_work_dir)
     commands += " ".join([remote_home_dir+'/bin/gsnapl',
                           '-A', 'm8', '--batch=2',
                           '--gmap-mode=none', '--npaths=1', '--ordered',
                           '-t', '32',
                           '--maxsearch=5', '--max-mismatches=20',
-                          '-D', remote_home_dir+'/share', '-d', 'nt_k16',
-                          remote_home_dir+'/batch-pipeline-workdir/'+sample+'/'+input_fa_1,
-                          remote_home_dir+'/batch-pipeline-workdir/'+sample+'/'+input_fa_2,
-                          '> '+remote_home_dir+'/batch-pipeline-workdir/'+sample+'/'+GSNAPL_OUT, ';'])
-    commands += "aws s3 cp %s/batch-pipeline-workdir/%s/%s %s/;" % \
-                 (remote_home_dir, sample, GSNAPL_OUT, sample_s3_output_path)
+                          '-D', remote_index_dir, '-d', 'nt_k16',
+                          remote_work_dir+'/'+input_fa_1,
+                          remote_work_dir+'/'+input_fa_2,
+                          '> '+remote_work_dir+'/'+GSNAPL_OUT, ';'])
+    commands += "aws s3 cp %s/%s %s/;" % \
+                 (remote_work_dir, GSNAPL_OUT, sample_s3_output_path)
     # check if remote machins has enough capacity
     check_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "ps aux|grep gsnapl|grep -v bash"' % (key_path, remote_username, GSNAPL_INSTANCE_IP)
     logging.getLogger().info("waiting for server")
