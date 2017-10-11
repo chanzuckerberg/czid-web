@@ -16,7 +16,7 @@ import logging
 
 INPUT_BUCKET = 's3://czbiohub-infectious-disease/UGANDA'
 OUTPUT_BUCKET = 's3://yunfang-workdir/id-uganda'
-KEY_S3_PATH = 's3://cdebourcy-test/cdebourcy_7-19-17.pem'
+KEY_S3_PATH = 's3://cdebourcy-test/idseq-alpha.pem'
 ROOT_DIR = '/mnt'
 DEST_DIR = ROOT_DIR + '/idseq/data' # generated data go here
 REF_DIR  = ROOT_DIR + '/idseq/ref' # referene genome / ref databases go here
@@ -39,7 +39,7 @@ BOWTIE2="bowtie2"
 
 LZW_FRACTION_CUTOFF = 0.45
 GSNAPL_INSTANCE_IP = '34.211.67.166'
-RAPSEARCH2_INSTANCE_IP = '34.212.195.187'
+RAPSEARCH2_INSTANCE_IP = '54.191.193.210'
 
 GSNAPL_MAX_CONCURRENT = 5
 RAPSEARCH2_MAX_CONCURRENT = 5
@@ -884,17 +884,14 @@ def run_gsnapl_remotely(sample, input_fa_1, input_fa_2,
         output = "%s/%s" % (result_dir, GSNAPL_OUT)
         if os.path.isfile(output):
             return 1
-    #*#*# TEMPORARY
-    gsnap_ssh_key_s3_path = 's3://cdebourcy-test/idseq-alpha.pem'
-    #*#*#
     key_name = os.path.basename(gsnap_ssh_key_s3_path)
     execute_command("aws s3 cp %s %s/" % (gsnap_ssh_key_s3_path, REF_DIR))
     key_path = REF_DIR +'/' + key_name
     execute_command("chmod 400 %s" % key_path)
-    remote_home_dir = "/home/ubuntu"
+    remote_username = "ubuntu"
+    remote_home_dir = "/home/%s" % remote_username
     remote_work_dir = "%s/batch-pipeline-workdir/%s" % (remote_home_dir, sample)
     remote_index_dir = "%s/share" % remote_home_dir
-    remote_username = "ubuntu"
     commands =  "mkdir -p %s;" % remote_work_dir
     commands += "aws s3 cp %s/%s %s/ ; " % \
                  (sample_s3_output_path, input_fa_1, remote_work_dir)
@@ -1003,13 +1000,18 @@ def run_rapsearch2_remotely(sample, input_fasta,
     execute_command("aws s3 cp %s %s/" % (rapsearch_ssh_key_s3_path, REF_DIR))
     key_path = REF_DIR +'/' + key_name
     execute_command("chmod 400 %s" % key_path)
-    commands =  "mkdir -p /home/ec2-user/batch-pipeline-workdir/%s;" % sample
-    commands += "aws s3 cp %s/%s /home/ec2-user/batch-pipeline-workdir/%s/ ; " % \
-                 (sample_s3_output_path, input_fasta, sample)
-    input_path = '/home/ec2-user/batch-pipeline-workdir/' + sample + '/' + input_fasta
-    output_path = '/home/ec2-user/batch-pipeline-workdir/' + sample + '/' + RAPSEARCH2_OUT
-    commands += " ".join(['/home/ec2-user/bin/rapsearch',
-                          '-d', '/home/ec2-user/references/nr_rapsearch/nr_rapsearch',
+    remote_username = "ec2-user"
+    remote_home_dir = "/home/%s" % remote_username
+    remote_work_dir = "%s/batch-pipeline-workdir/%s" % (remote_home_dir, sample)
+    remote_index_dir = "%s/references/nr_rapsearch" % remote_home_dir
+
+    commands =  "mkdir -p %s;" % remote_work_dir
+    commands += "aws s3 cp %s/%s %s/ ; " % \
+                 (sample_s3_output_path, input_fasta, remote_work_dir)
+    input_path = remote_work_dir + '/' + input_fasta
+    output_path = remote_work_dir + '/' + RAPSEARCH2_OUT
+    commands += " ".join(['/usr/local/bin/rapsearch',
+                          '-d', remote_index_dir+'/nr_rapsearch',
                           '-e','-6',
                           '-l','10',
                           '-a','T',
@@ -1019,13 +1021,13 @@ def run_rapsearch2_remotely(sample, input_fasta,
                           '-q', input_path,
                           '-o', output_path[:-3],
                           ';'])
-    commands += "aws s3 cp /home/ec2-user/batch-pipeline-workdir/%s/%s %s/;" % \
-                 (sample, RAPSEARCH2_OUT, sample_s3_output_path)
-    check_command = 'ssh -o "StrictHostKeyChecking no" -i %s ec2-user@%s "ps aux|grep rapsearch|grep -v bash"' % (key_path, RAPSEARCH2_INSTANCE_IP)
+    commands += "aws s3 cp %s/%s %s/;" % \
+                 (remote_work_dir, RAPSEARCH2_OUT, sample_s3_output_path)
+    check_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "ps aux|grep rapsearch|grep -v bash"' % (key_path, remote_username, RAPSEARCH2_INSTANCE_IP)
     logging.getLogger().info("waiting for server")
     wait_for_server('RAPSEARCH2', check_command, RAPSEARCH2_MAX_CONCURRENT)
     logging.getLogger().info("starting alignment")
-    remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s ec2-user@%s "%s"' % (key_path, RAPSEARCH2_INSTANCE_IP, commands)
+    remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, RAPSEARCH2_INSTANCE_IP, commands)
     execute_command(remote_command)
     logging.getLogger().info("finished alignment")
     # move output back to local
