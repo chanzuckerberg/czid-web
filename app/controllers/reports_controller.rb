@@ -18,7 +18,11 @@ class ReportsController < ApplicationController
 
   # GET /reports/new
   def new
-    @report = Report.new
+    @report = if params[:report]
+                Report.new(params.require(:report).permit(:pipeline_output_id))
+              else
+                Report.new
+              end
   end
 
   # GET /reports/1/edit
