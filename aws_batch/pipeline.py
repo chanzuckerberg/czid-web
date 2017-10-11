@@ -854,8 +854,10 @@ def run_bowtie2(sample_name, input_fa_1, input_fa_2, bowtie_genome_s3_path,
         execute_command("aws s3 cp %s %s/" % (bowtie_genome_s3_path, REF_DIR))
         execute_command("cd %s; tar xvfz %s" % (REF_DIR, genome_file))
         logging.getLogger().info("downloaded index")
-    local_genome_dir_ls =  execute_command("ls %s/bowtie2_genome/*.bt2l" % REF_DIR)
-    genome_basename = local_genome_dir_ls.split("\n")[0][:-7]
+    local_genome_dir_ls =  execute_command("ls %s/bowtie2_genome/*.bt2*" % REF_DIR)
+    genome_basename = local_genome_dir_ls.split("\n")[0][:-6]
+    if genome_basename[-1] == '.':
+        genome_basename = genome_basename[:-1]
     bowtie2_params = [BOWTIE2,
                      '-p', str(multiprocessing.cpu_count()),
                      '-x', genome_basename,
@@ -882,6 +884,9 @@ def run_gsnapl_remotely(sample, input_fa_1, input_fa_2,
         output = "%s/%s" % (result_dir, GSNAPL_OUT)
         if os.path.isfile(output):
             return 1
+    #*#*# TEMPORARY
+    gsnap_ssh_key_s3_path = 's3://cdebourcy-test/idseq-alpha.pem'
+    #*#*#
     key_name = os.path.basename(gsnap_ssh_key_s3_path)
     execute_command("aws s3 cp %s %s/" % (gsnap_ssh_key_s3_path, REF_DIR))
     key_path = REF_DIR +'/' + key_name
@@ -898,7 +903,7 @@ def run_gsnapl_remotely(sample, input_fa_1, input_fa_2,
                           '--gmap-mode=none', '--npaths=1', '--ordered',
                           '-t', '32',
                           '--maxsearch=5', '--max-mismatches=20',
-                          '-D', '/home/ec2-user/share', '-d', 'nt_k16',
+                          '-D', remote_home_dir+'/share', '-d', 'nt_k16',
                           remote_home_dir+'/batch-pipeline-workdir/'+sample+'/'+input_fa_1,
                           remote_home_dir+'/batch-pipeline-workdir/'+sample+'/'+input_fa_2,
                           '> '+remote_home_dir+'/batch-pipeline-workdir/'+sample+'/'+GSNAPL_OUT, ';'])
