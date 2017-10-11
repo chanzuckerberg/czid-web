@@ -87,7 +87,7 @@ class Login extends React.Component {
           <div className="row">
             <form ref="form" className="new_user" id="new_user" onSubmit={ this.handleSubmit }>
               <div className="row title">
-                <p className="col s6 verify">Already a user? Sign in</p>
+                <p className="col s6 verify">Not a user? Sign up</p>
                 <p className="col s6 signup">Login</p>
               </div>
               { this.state.showFailedLogin ? <div className="error-info" >
