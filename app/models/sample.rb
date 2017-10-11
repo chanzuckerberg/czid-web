@@ -83,7 +83,7 @@ class Sample < ApplicationRecord
     "https://s3.console.aws.amazon.com/s3/object/#{SAMPLES_BUCKET_NAME}/#{sample_path}/fastqs/"
   end
 
-  def as_json(options={})
+  def as_json(_options = {})
     super(methods: [:sample_input_folder_url, :sample_output_folder_url, :sample_annotated_fasta_url])
   end
 
