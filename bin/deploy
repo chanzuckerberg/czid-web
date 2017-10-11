@@ -155,7 +155,7 @@ def notify_slack(env, image, stage)
   else
     puts "Not notifying Slack of this deploy because environment variable SLACK_HOOK is not set. Please add an appropriate webhook to ~/.bash_profile."
   end
-end 
+end
 
 notify_slack(env, image, "start")
 begin
@@ -163,6 +163,7 @@ begin
   deploy(client, env, RESQUE_WORKER_SERVICE, REPO, image, false)
   deploy(client, env, RESQUE_SCHEDULER_SERVICE, REPO, image, false)
   notify_slack(env, image, "end")
-rescue
+rescue => e
   notify_slack(env, image, "failure")
+  raise e
 end
