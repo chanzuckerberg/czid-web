@@ -144,11 +144,12 @@ end
 
 def notify_slack(env, image, stage)
   slack_hook = ENV["SLACK_HOOK"]
-  puts slack_hook
-  if stage=="start"
-    puts `curl -X POST --data-urlencode 'payload={"text": "starting to deploy #{image} to #{env}"}' #{slack_hook}`
-  elsif stage=="end"
-    puts `curl -X POST --data-urlencode 'payload={"text": "finished deploying #{image} to #{env}"}' #{slack_hook}`
+  if slack_hook
+    if stage=="start"
+      puts `curl -X POST --data-urlencode 'payload={"icon_emoji": ":ghost:", "text": "starting to deploy #{image} to #{env}"}' #{slack_hook}`
+    elsif stage=="end"
+      puts `curl -X POST --data-urlencode 'payload={"icon_emoji": ":sharkdance:", "text": "finished deploying #{image} to #{env}"}' #{slack_hook}`
+    end
   end
 end 
 
