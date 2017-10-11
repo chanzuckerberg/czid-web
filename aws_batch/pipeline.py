@@ -886,28 +886,30 @@ def run_gsnapl_remotely(sample, input_fa_1, input_fa_2,
     execute_command("aws s3 cp %s %s/" % (gsnap_ssh_key_s3_path, REF_DIR))
     key_path = REF_DIR +'/' + key_name
     execute_command("chmod 400 %s" % key_path)
-    commands =  "mkdir -p /home/ec2-user/batch-pipeline-workdir/%s;" % sample
-    commands += "aws s3 cp %s/%s /home/ec2-user/batch-pipeline-workdir/%s/ ; " % \
-                 (sample_s3_output_path, input_fa_1, sample)
-    commands += "aws s3 cp %s/%s /home/ec2-user/batch-pipeline-workdir/%s/ ; " % \
-                 (sample_s3_output_path, input_fa_2, sample)
-    commands += " ".join(['/home/ec2-user/bin/gsnapl',
+    remote_home_dir = "/home/ubuntu"
+    remote_username = "ubuntu"
+    commands =  "mkdir -p %s/batch-pipeline-workdir/%s;" % (remote_home_dir, sample)
+    commands += "aws s3 cp %s/%s %s/batch-pipeline-workdir/%s/ ; " % \
+                 (sample_s3_output_path, input_fa_1, remote_home_dir, sample)
+    commands += "aws s3 cp %s/%s %s/batch-pipeline-workdir/%s/ ; " % \
+                 (sample_s3_output_path, input_fa_2, remote_home_dir, sample)
+    commands += " ".join([remote_home_dir+'/bin/gsnapl',
                           '-A', 'm8', '--batch=2',
                           '--gmap-mode=none', '--npaths=1', '--ordered',
                           '-t', '32',
                           '--maxsearch=5', '--max-mismatches=20',
                           '-D', '/home/ec2-user/share', '-d', 'nt_k16',
-                          '/home/ec2-user/batch-pipeline-workdir/'+sample+'/'+input_fa_1,
-                          '/home/ec2-user/batch-pipeline-workdir/'+sample+'/'+input_fa_2,
-                          '> /home/ec2-user/batch-pipeline-workdir/'+sample+'/'+GSNAPL_OUT, ';'])
-    commands += "aws s3 cp /home/ec2-user/batch-pipeline-workdir/%s/%s %s/;" % \
-                 (sample, GSNAPL_OUT, sample_s3_output_path)
+                          remote_home_dir+'/batch-pipeline-workdir/'+sample+'/'+input_fa_1,
+                          remote_home_dir+'/batch-pipeline-workdir/'+sample+'/'+input_fa_2,
+                          '> '+remote_home_dir+'/batch-pipeline-workdir/'+sample+'/'+GSNAPL_OUT, ';'])
+    commands += "aws s3 cp %s/batch-pipeline-workdir/%s/%s %s/;" % \
+                 (remote_home_dir, sample, GSNAPL_OUT, sample_s3_output_path)
     # check if remote machins has enough capacity
-    check_command = 'ssh -o "StrictHostKeyChecking no" -i %s ec2-user@%s "ps aux|grep gsnapl|grep -v bash"' % (key_path, GSNAPL_INSTANCE_IP)
+    check_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "ps aux|grep gsnapl|grep -v bash"' % (key_path, remote_username, GSNAPL_INSTANCE_IP)
     logging.getLogger().info("waiting for server")
     wait_for_server('GSNAPL', check_command, GSNAPL_MAX_CONCURRENT)
     logging.getLogger().info("starting alignment")
-    remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s ec2-user@%s "%s"' % (key_path, GSNAPL_INSTANCE_IP, commands)
+    remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, GSNAPL_INSTANCE_IP, commands)
     execute_command(remote_command)
     # move gsnapl output back to local
     time.sleep(10)
