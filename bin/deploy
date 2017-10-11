@@ -142,6 +142,18 @@ def deploy(client, cluster, service, repo, image, run_migrations = false)
   puts "#{service} deployment probably complete, but this tool is pretty rudimentary so check for yourself"
 end
 
+def notify_slack(env, image, stage)
+  slack_hook = ENV["SLACK_HOOK"]
+  puts slack_hook
+  if stage=="start"
+    puts `curl -X POST --data-urlencode 'payload={"text": "starting to deploy #{image} to #{env}"}' #{slack_hook}`
+  elsif stage=="end"
+    puts `curl -X POST --data-urlencode 'payload={"text": "finished deploying #{image} to #{env}"}' #{slack_hook}`
+  end
+end 
+
+notify_slack(env, image, "start")
 deploy(client, env, RAILS_SERVICE, REPO, image, true)
 deploy(client, env, RESQUE_WORKER_SERVICE, REPO, image, false)
 deploy(client, env, RESQUE_SCHEDULER_SERVICE, REPO, image, false)
+notify_slack(env, image, "end")
