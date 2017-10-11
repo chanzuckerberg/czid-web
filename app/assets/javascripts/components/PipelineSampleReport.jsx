@@ -91,16 +91,16 @@ class PipelineSampleReport extends React.Component {
     return (
       <div>
         <div id="reports" className="reports-screen tab-screen col s12">
-          <div className="container tab-screen-content">
+          <div className="tab-screen-content">
             <div className="row">
-              <div className="col s3">
+              <div className="col s2">
                 <ReportFilter
                   background_model = {this.report_details.background_model.name}
                   report_title = { this.report_details.report_info.name }
                   view_level={this.uppCaseFirst(this.view_level)}
                   highest_tax_counts={this.highest_tax_counts}/>
               </div>
-              <div className="col s9 reports-main ">
+              <div className="col s10 reports-main ">
                 <div className="report-sort right">
 
                   <span className="">
@@ -141,32 +141,63 @@ class PipelineSampleReport extends React.Component {
                 <table className='bordered report-table'>
                   <thead>
                   <tr>
-                    <th>{this.uppCaseFirst(this.view_level)}</th>
-                    <th>NT {this.uppCaseFirst(this.view_level)} Z</th>
-                    <th>NT {this.uppCaseFirst(this.view_level)} rM</th>
-                    <th>NR {this.uppCaseFirst(this.view_level)} Z</th>
-                    <th>NR {this.uppCaseFirst(this.view_level)} rM</th>
+                    <th>Category</th>
+                    <th>Genus</th>
+                    <th>Species</th>
+                    <th>NT Genus Z</th>
+                    <th>NT Genus rM</th>
+                    <th>NR Genus Z</th>
+                    <th>NR Genus rM</th>
+                    {/*The Genus and Species diff*/}
+                    <th>NT Species Z</th>
+                    <th>NT Species rM</th>
+                    <th>NR Species Z</th>
+                    <th>NR Species rM</th>
                   </tr>
                   </thead>
                   <tbody>
-                  { this.taxonomy_details.map((genus_detail, i) => {
+                  { this.taxonomy_details.map((taxon, i) => {
                     return (
                       <tr key={i}>
                         <td>
+                          { taxon.category }
+                        </td>
+
+                        <td>
+                          <span className="link">
+                            { (taxon.genus_nt_ele) ?
+                              <a href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${
+                                taxon.genus_nt_ele.tax_id}`}>{ taxon.genus_nt_ele.name }
+                              </a> : 'N/A' }
+
+                          </span>
+                        </td>
+                        <td>
                           <span className="link">
                             <a href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${
-                              genus_detail.nt_ele.tax_id}`}>{ genus_detail.nt_ele.name }
+                              taxon.nt_ele.tax_id}`}>{ taxon.nt_ele.name }
                           </a>
                           </span>
                         </td>
-                        <td>{ (!genus_detail.nt_ele.zscore) ? '': genus_detail.nt_ele.zscore }</td>
-                        <td>{ genus_detail.nt_ele.rpm }</td>
+
+                        {/* The genus scores */}
+
+                        <td>{ (!taxon.genus_nt_ele) ? '-': taxon.genus_nt_ele.zscore }</td>
+                        <td>{ (!taxon.genus_nt_ele) ? '-': taxon.genus_nt_ele.rpm }</td>
+
+                        <td>{ (!taxon.genus_nr_ele) ? '-': taxon.genus_nr_ele.zscore }</td>
+                        <td>{ (!taxon.genus_nr_ele) ? '-': taxon.genus_nr_ele.rpm }</td>
+
+                        {/*The species scores*/}
+
+                        <td>{ (!taxon.nt_ele.zscore) ? '-': taxon.nt_ele.zscore }</td>
+                        <td>{ taxon.nt_ele.rpm }</td>
                         <td>
-                          { (!genus_detail.nr_ele) ? '': genus_detail.nr_ele.zscore }
-                          </td>
+                          { (!taxon.nr_ele) ? '-': taxon.nr_ele.zscore }
+                        </td>
                         <td>
-                          { (!genus_detail.nr_ele) ? '': genus_detail.nr_ele.rpm }
-                          </td>
+                          { (!taxon.nr_ele) ? '-': taxon.nr_ele.rpm }
+                        </td>
                       </tr>
                     )
                   })}
