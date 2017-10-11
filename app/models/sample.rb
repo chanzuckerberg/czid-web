@@ -79,6 +79,14 @@ class Sample < ApplicationRecord
     "https://s3.console.aws.amazon.com/s3/object/#{SAMPLES_BUCKET_NAME}/#{sample_path}/results/"
   end
 
+  def sample_input_folder_url
+    "https://s3.console.aws.amazon.com/s3/object/#{SAMPLES_BUCKET_NAME}/#{sample_path}/fastqs/"
+  end
+
+  def as_json(options={})
+    super(methods: [:sample_input_folder_url, :sample_output_folder_url, :sample_annotated_fasta_url])
+  end
+
   def pipeline_command
     script_name = File.basename(IdSeqPipeline::S3_SCRIPT_LOC)
     batch_command_env_variables = "INPUT_BUCKET=#{sample_input_s3_path} OUTPUT_BUCKET=#{sample_output_s3_path} " \

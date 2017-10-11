@@ -20,7 +20,7 @@ class ReportsController < ApplicationController
 
   # GET /reports/new
   def new
-    @report = Report.new
+    @report = Report.new(report_params)
   end
 
   # GET /reports/1/edit

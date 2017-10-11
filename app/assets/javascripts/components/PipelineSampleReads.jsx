@@ -45,6 +45,7 @@ class PipelineSampleReads extends React.Component {
     }
 
     let pipeline_run = null;
+    let down_load_section = null;
     if (this.pipelineOutput) {
       pipeline_run = (
         <div className="data">
@@ -80,7 +81,22 @@ class PipelineSampleReads extends React.Component {
             </div>
           </div>
         </div>
-      )
+    );
+
+    download_section = (
+      <div>
+        <a className="custom-button" href= { this.sampleInfo.sample_annotated_fasta_url }>
+          <i className="fa fa-cloud-download left"></i> DOWNLOAD NON HUMAN READS
+        </a>
+        <a className="custom-button" href= { this.sampleInfo.sample_output_folder_url }>
+          <i className="fa fa-cloud-download left"></i> GO TO RESULTS FOLDER
+        </a>
+        <a className="custom-button" href= { '/reports/new?report[pipeline_output_id]=' + this.pipelineOutput.id }>
+          <i className="fa fa-file-text-o left"></i> GENERATE REPORT
+        </a>
+      </div>
+    );
+
     } else {
       pipeline_run = (
         <div className="center">
@@ -192,16 +208,11 @@ class PipelineSampleReads extends React.Component {
               </div>
 
               <div className="col s3 download-area">
-                <a className="custom-button">
+                <a className="custom-button" href={ this.sampleInfo.sample_input_folder_url }>
                   <i className="fa fa-cloud-download left"></i> DOWNLOAD ALL READS
                 </a>
+                { download_section }
 
-                <a className="custom-button">
-                  <i className="fa fa-user-times left"></i> DOWNLOAD NON HUMAN READS
-                </a>
-                <a onClick={this.gotoReport}  className="custom-button">
-                  <i className="fa fa-file-text-o left"></i> GENERATE REPORT
-                </a>
               </div>
 
             </div>
