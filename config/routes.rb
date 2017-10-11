@@ -4,9 +4,9 @@ Rails.application.routes.draw do
   resources :backgrounds
   resources :reports
   resources :pipeline_outputs, only: [:index, :show]
-  devise_for :users, :controllers => {
-    sessions: 'sessions', 
-    registrations: 'registrations' 
+  devise_for :users, controllers: {
+    sessions: 'sessions',
+    registrations: 'registrations'
   }
   devise_scope :user do
     get 'login', to: 'devise/sessions#new'
