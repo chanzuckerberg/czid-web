@@ -1,9 +1,12 @@
-class PipelineList extends React.Component {
+class Samples extends React.Component {
   constructor(props, context) {
     super(props, context);
     this.project = this.props.project;
     this.samples = this.props.samples;
     this.outputData = this.props.outputData;
+  }
+
+  componentDidMount() {
   }
 
   renderPipelineOutput(samples, pipelineInfo) {
@@ -28,7 +31,7 @@ class PipelineList extends React.Component {
   computeCompressionRatio(result) {
     return (result.reads_before/result.reads_after).toFixed(2);
   }
-
+  
   computeQcValue(result) {
     return (100.0 * result.reads_after/result.reads_before).toFixed(2);
   }
