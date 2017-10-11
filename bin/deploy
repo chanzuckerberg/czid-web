@@ -142,6 +142,27 @@ def deploy(client, cluster, service, repo, image, run_migrations = false)
   puts "#{service} deployment probably complete, but this tool is pretty rudimentary so check for yourself"
 end
 
-deploy(client, env, RAILS_SERVICE, REPO, image, true)
-deploy(client, env, RESQUE_WORKER_SERVICE, REPO, image, false)
-deploy(client, env, RESQUE_SCHEDULER_SERVICE, REPO, image, false)
+def notify_slack(env, image, stage)
+  slack_hook = ENV["SLACK_HOOK"]
+  if slack_hook
+    if stage=="start"
+      puts `curl -X POST --data-urlencode 'payload={"icon_emoji": ":ghost:", "text": "starting to deploy #{image} to #{env}"}' #{slack_hook}`
+    elsif stage=="end"
+      puts `curl -X POST --data-urlencode 'payload={"icon_emoji": ":sharkdance:", "text": "finished deploying #{image} to #{env}"}' #{slack_hook}`
+    elsif stage=="failure"
+      puts `curl -X POST --data-urlencode 'payload={"icon_emoji": ":sob:", "text": "deploy of #{image} to #{env} failed"}' #{slack_hook}`
+    end
+  else
+    puts "Not notifying Slack of this deploy because environment variable SLACK_HOOK is not set. Please add an appropriate webhook to ~/.bash_profile."
+  end
+end 
+
+notify_slack(env, image, "start")
+begin
+  deploy(client, env, RAILS_SERVICE, REPO, image, true)
+  deploy(client, env, RESQUE_WORKER_SERVICE, REPO, image, false)
+  deploy(client, env, RESQUE_SCHEDULER_SERVICE, REPO, image, false)
+  notify_slack(env, image, "end")
+rescue
+  notify_slack(env, image, "failure")
+end
