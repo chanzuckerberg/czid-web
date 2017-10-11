@@ -45,7 +45,7 @@ class PipelineSampleReads extends React.Component {
     }
 
     let pipeline_run = null;
-    let down_load_section = null;
+    let download_section = null;
     if (this.pipelineOutput) {
       pipeline_run = (
         <div className="data">
