@@ -31,4 +31,4 @@ resp = ec2_client.describe_instances(instance_ids: [instances.container_instance
 
 public_ip = resp.reservations.first.instances.first.public_ip_address
 
-exec %(ssh -t ec2-user@#{public_ip} "docker exec -it \\`docker ps | grep chanzuckerberg/idseq-web | head -1 | awk '{print \\$NF}'\\` #{command} ")
+exec %(ssh -t ec2-user@#{public_ip} "docker exec -it \\`docker ps | grep ecs-idseq-web | head -1 | awk '{print \\$NF}'\\` #{command} ")
