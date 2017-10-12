@@ -36,12 +36,13 @@ module ReportHelper
     taxon_zscores = compute_taxon_zscores(report)
     genus_level = TaxonCount::TAX_LEVEL_GENUS
     species_level = TaxonCount::TAX_LEVEL_SPECIES
-    data = taxon_zscores.group_by { |h| h[:tax_level] == species_level && h[:hit_type] }
-    data2 = taxon_zscores.group_by { |h| h[:tax_level] == genus_level && h[:hit_type] }
-    nt = data['NT'] || []
-    nr = data['NR'] || []
-    nt_genus = data2['NT'] || []
-    nr_genus = data2['NR'] || []
+
+    data = taxon_zscores.group_by { |h| [h[:tax_level], h[:hit_type]] }
+    nt = data[[species_level, 'NT']] || []
+    nr = data[[species_level, 'NR']] || []
+
+    nt_genus = data[[genus_level, 'NT']] || []
+    nr_genus = data[[genus_level, 'NT']] || []
     genus_nt_nr = nt_genus.concat nr_genus
 
     # filter and sort the nt_scores
@@ -126,7 +127,7 @@ module ReportHelper
 
   def compute_rpm(count, total_reads)
     if count
-      (count * 1e6 / total_reads.to_f).round(3)
+      count * 1e6 / total_reads.to_f
     else
       0
     end
@@ -134,7 +135,7 @@ module ReportHelper
 
   def compute_zscore(rpm, mean, stdev)
     if rpm && stdev && stdev != 0
-      ((rpm - mean) / stdev).round(3)
+      (rpm - mean) / stdev
     elsif rpm
       100
     else
