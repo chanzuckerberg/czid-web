@@ -2,7 +2,7 @@ module ReportHelper
   def external_report_info(report, view_level, params)
     data = {}
     data[:report_details] = report_details(report)
-    htc, td = taxonomy_details(view_level, report, params)
+    htc, td = taxonomy_details(report, params)
     data[:highest_tax_counts] = htc
     data[:taxonomy_details] = td
     data[:view_level] = view_level
@@ -32,16 +32,48 @@ module ReportHelper
     zscore_array
   end
 
-  def taxonomy_details(view_level, report, params)
+  def taxonomy_details(report, params)
     taxon_zscores = compute_taxon_zscores(report)
-    wanted_level = view_level == 'species' ? TaxonCount::TAX_LEVEL_SPECIES : TaxonCount::TAX_LEVEL_GENUS
-    data = taxon_zscores.group_by { |h| h[:tax_level] == wanted_level && h[:hit_type] }
-    nt = data['NT'] || []
-    nr = data['NR'] || []
-    htc = highest_tax_counts(nt, nr)
+    genus_level = TaxonCount::TAX_LEVEL_GENUS
+    species_level = TaxonCount::TAX_LEVEL_SPECIES
+    tax_ids_str = ''
+
+    taxon_zscores.each do |taxon|
+      tax_ids_str += taxon[:tax_id].to_s
+      tax_ids_str += ','
+    end
+    tax_ids_str = tax_ids_str.chomp(',')
+    lineage_arr = TaxonLineage.connection.select_all("SELECT taxid, superkingdom_taxid,  genus_taxid FROM taxon_lineages WHERE taxid IN (#{tax_ids_str})").to_hash
+    lineage_info = lineage_arr.group_by { |h| h['taxid'] }
+
+    category_taxids = ''
+    lineage_info.each do |_taxid, taxons|
+      next if taxons[0]['superkingdom_taxid'].empty?
+      category_taxids += taxons[0]['superkingdom_taxid'].to_s
+      category_taxids += ','
+    end
+    category_taxids = category_taxids.chomp(',')
+    if !category_taxids.empty?
+      taxon_name_arr = TaxonLineage.connection.select_all("select taxid, name from taxon_names where taxid in (#{category_taxids})").to_hash
+      cat_name_info = taxon_name_arr.group_by { |h| h['taxid'] }
+    else
+      cat_name_info = []
+    end
+
+    data = taxon_zscores.group_by { |h| [h[:tax_level], h[:hit_type]] }
+    nt = data[[species_level, 'NT']] || []
+    nr = data[[species_level, 'NR']] || []
+
+    nt_genus = data[[genus_level, 'NT']] || []
+    nr_genus = data[[genus_level, 'NT']] || []
+    genus_nt_nr = nt_genus.concat nr_genus
+
     # filter and sort the nt_scores
+    htc = highest_tax_counts(nt, nr)
     rp = resolve_params(params, htc)
-    nt.keep_if do |h|
+    nt_nr = nt.concat nr
+
+    nt_nr.keep_if do |h|
       (h[:tax_id] >= 0 &&
         h[:zscore] >= rp[:nt_zscore_threshold][:start] &&
         h[:zscore] <= rp[:nt_zscore_threshold][:end] &&
@@ -49,12 +81,27 @@ module ReportHelper
         h[:rpm] <= rp[:nt_rpm_threshold][:end]
       )
     end
-    sort_report!(nt, params[:sort_by])
-    nr_zscore_by_taxon = nr.group_by { |h| h[:tax_id] }
+    sort_report!(nt_nr, params[:sort_by])
     tax_details = []
-    nt.each do |h|
-      x = nr_zscore_by_taxon[h[:tax_id]]
-      tax_details.push(nt_ele: h, nr_ele: x && x[0])
+    nt_nr.each do |h|
+      category_taxid = lineage_info[h[:tax_id]][0]["superkingdom_taxid"]
+      # p 'The taxid = ', category_taxid, taxon_name_info
+
+      genus_taxid = lineage_info[h[:tax_id]] && lineage_info[h[:tax_id]][0]["genus_taxid"]
+      found_genus = genus_nt_nr.select { |genus| genus[:tax_id] == genus_taxid }
+      genus_nt_ele = found_genus[0]
+      genus_nr_ele = found_genus[1]
+
+      category_info = cat_name_info[category_taxid]
+      category_name = category_info ? category_info[0]['name'] : 'Other'
+
+      nt_ele = h[:hit_type] == 'NT' ? h : nil
+      nr_ele = h[:hit_type] == 'NR' ? h : nil
+
+      tax_details.push(nt_ele: nt_ele, nr_ele: nr_ele,
+                       category: category_name,
+                       genus_nt_ele: genus_nt_ele,
+                       genus_nr_ele: genus_nr_ele)
     end
     [htc, tax_details]
   end

@@ -69,7 +69,6 @@ class Samples extends React.Component {
   render() {
     return (
       <div>
-        <Header />
         <div className="sub-header-home">
           <div className="container">
             <div className="content">

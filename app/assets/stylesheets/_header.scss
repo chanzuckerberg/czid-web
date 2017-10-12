@@ -3,6 +3,23 @@
   background: #263039;
   color: #a8a8a8;
   font-size: 17px;
+
+  .menu {
+    margin: 20px;
+    .login {
+      border: 1px solid;
+      border-radius: 3px;
+      cursor: pointer;
+      span {
+        margin: 20px;
+        color: #e3e8eb;
+        &:hover {
+          transition: .2s width ease-out;
+          color: #7d8185;
+        }
+      }
+    }
+  }
 }
 
 .brand-short {
