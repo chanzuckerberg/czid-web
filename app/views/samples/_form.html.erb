@@ -63,6 +63,12 @@
       Sample Created at <%= sample.created_at %>
     </div>
   <% end %>
+  <% if host_genomes_list.size > 0 %>
+    <div class="field">
+      <%= form.label "Host Genome" %>
+      <%= form.select :host_genome_id, host_genomes_list, id: :host_genome_id %>
+    </div>
+  <% end %>
   <div class="field">
     <%= form.label "Job Queue" %>
     <%= form.text_field :job_queue, id: :job_queue, placeholder: 'Optional' %>
