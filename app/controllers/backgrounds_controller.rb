@@ -25,7 +25,18 @@ class BackgroundsController < ApplicationController
   # POST /backgrounds
   # POST /backgrounds.json
   def create
-    @background = Background.new(background_params)
+    @background = Background.create(background_params)
+
+    data = @background.summarize.map { |h| h.slice('tax_id', 'count_type', 'tax_level', 'name', :background_id, :created_at, :updated_at, :mean, :stdev) }
+    columns = data.first.keys
+    values_list = data.map do |hash|
+      hash.values.map do |value|
+        ActiveRecord::Base.connection.quote(value)
+      end
+    end
+    ActiveRecord::Base.connection.execute <<-SQL
+    INSERT INTO taxon_summaries (#{columns.join(",")}) VALUES #{values_list.map { |values| "(#{values.join(",")})" }.join(", ")}
+    SQL
 
     respond_to do |format|
       if @background.save
