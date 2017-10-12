@@ -1,7 +1,8 @@
-<div class="right header-right-nav">
+
+<div class="">
   <% if @user && @user.id %>
-    <%= button_to 'Sign Out', destroy_user_session_path, method: :delete %>
+    <%= react_component 'Header', { userSignedIn: true, userDetails: @user, signoutEndpoint: destroy_user_session_path } %>
   <% else %>
-    <%= button_to 'Sign In', new_user_session_path %>
+    <%= react_component 'Header', userSignedIn: false %>
   <% end %>
 </div>

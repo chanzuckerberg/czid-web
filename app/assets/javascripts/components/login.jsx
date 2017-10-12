@@ -3,9 +3,9 @@ class Login extends React.Component {
     super(props, context);
     this.csrf = this.props.csrf
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.gotToForgotPassword = this.gotToForgotPassword.bind(this)
-    this.toggleCheckBox = this.toggleCheckBox.bind(this)
-    this.clearError = this.clearError.bind(this)
+    this.toggleCheckBox = this.toggleCheckBox.bind(this);
+    this.clearError = this.clearError.bind(this);
+    this.gotoPage = this.gotoPage.bind(this);
     this.state = {
       isChecked: false,
       showFailedLogin: false,
@@ -24,6 +24,10 @@ class Login extends React.Component {
     this.setState({ showFailedLogin: false })
   }
 
+  gotoPage(path) {
+    location.href = `${path}`
+  }
+
   login() {
     var that = this
     axios.post(`${this.props.endpoint}.json`, {
@@ -35,7 +39,7 @@ class Login extends React.Component {
       authenticity_token: this.csrf
     })
     .then(function (response) {
-      location.href = '/'
+      that.gotoPage('/')
     })
     .catch(function (error) {
       that.setState({
@@ -69,10 +73,6 @@ class Login extends React.Component {
     }
   }
 
-  gotToForgotPassword() {
-    location.href = '/users/password/new';
-  }
-
   toggleCheckBox() {
     var checkboxValue = $('#remember_me').prop('checked')
     this.setState({
@@ -87,7 +87,6 @@ class Login extends React.Component {
           <div className="row">
             <form ref="form" className="new_user" id="new_user" onSubmit={ this.handleSubmit }>
               <div className="row title">
-                <p className="col s6 verify">Not a user? Sign up</p>
                 <p className="col s6 signup">Login</p>
               </div>
               { this.state.showFailedLogin ? <div className="error-info" >
@@ -109,12 +108,8 @@ class Login extends React.Component {
                   <input ref="remember_me" type="checkbox" name="switch" className="filled-in" id="remember_me" onChange={ this.toggleCheckBox } value={this.setState.isChecked ? 1 : 0} />
                   <label htmlFor="remember_me">Remember me</label>
                 </div>
-                <div className="">  
-                  <input ref="remember_me" type="checkbox" name="switch" className="filled-in" id="remember_me" onChange={ this.toggleCheckBox } value={this.setState.isChecked ? 1 : 0} />
-                  <label htmlFor="remember_me">Remember me</label>
-                </div>
               </div>
-                <div className="forgot-password"><span onClick={ this.gotToForgotPassword }>Forgot your password?</span><br /></div>
+                <div className="forgot-password"><span onClick={this.gotoPage.bind(this, '/users/new/password')}>Forgot your password?</span><br /></div>
               <div onClick={ this.handleSubmit } className="center-align login-wrapper">Submit</div>
             </form>
           </div>
@@ -125,7 +120,6 @@ class Login extends React.Component {
   render() {
     return (
       <div>
-        <Header />
         { this.renderLogin() }
       </div>
     )
