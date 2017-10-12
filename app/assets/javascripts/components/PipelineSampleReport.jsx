@@ -190,23 +190,23 @@ class PipelineSampleReport extends React.Component {
 
                         {/* The genus scores */}
 
-                        <td>{ (!taxon.genus_nt_ele) ? '-': taxon.genus_nt_ele.zscore }</td>
-                        <td>{ (!taxon.genus_nt_ele) ? '-': taxon.genus_nt_ele.rpm }</td>
+                        <td>{ (!taxon.genus_nt_ele) ? '-': taxon.genus_nt_ele.zscore.toFixed(3) }</td>
+                        <td>{ (!taxon.genus_nt_ele) ? '-': taxon.genus_nt_ele.rpm.toFixed(3) }</td>
 
-                        <td>{ (!taxon.genus_nr_ele) ? '-': taxon.genus_nr_ele.zscore }</td>
-                        <td>{ (!taxon.genus_nr_ele) ? '-': taxon.genus_nr_ele.rpm }</td>
+                        <td>{ (!taxon.genus_nr_ele) ? '-': taxon.genus_nr_ele.zscore.toFixed(3) }</td>
+                        <td>{ (!taxon.genus_nr_ele) ? '-': taxon.genus_nr_ele.rpm.toFixed(3)}</td>
 
                         {/*The species scores*/}
 
                         <td>
-                          { (taxon.nt_ele && (taxon.nt_ele.zscore)) ? taxon.nt_ele.zscore : '-' }
+                          { (taxon.nt_ele && (taxon.nt_ele.zscore)) ? taxon.nt_ele.zscore.toFixed(3) : '-' }
                         </td>
-                        <td>{ (taxon.nt_ele && (taxon.nt_ele.rpm)) ? taxon.nt_ele.rpm : '-' }</td>
+                        <td>{ (taxon.nt_ele && (taxon.nt_ele.rpm)) ? taxon.nt_ele.rpm.toFixed(3) : '-' }</td>
                         <td>
-                          { (taxon.nr_ele && (taxon.nr_ele.zscore)) ? taxon.nr_ele.zscore : '-' }
+                          { (taxon.nr_ele && (taxon.nr_ele.zscore)) ? taxon.nr_ele.zscore.toFixed(3) : '-' }
                         </td>
                         <td>
-                          { (taxon.nr_ele && (taxon.nr_ele.rpm)) ? taxon.nr_ele.rpm : '-' }
+                          { (taxon.nr_ele && (taxon.nr_ele.rpm)) ? taxon.nr_ele.rpm.toFixed(3) : '-' }
                         </td>
                       </tr>
                     )
