@@ -27,22 +27,17 @@ class BackgroundsController < ApplicationController
   def create
     @background = Background.new(background_params)
 
-# =============================================================
     data = @background.summarize
-
     columns = data.first.keys
     values_list = data.map do |hash|
       hash.values.map do |value|
         ActiveRecord::Base.connection.quote(value)
       end
     end
-
     ActiveRecord::Base.connection.execute <<-SQL
     INSERT INTO taxon_summaries (#{columns.join(",")}) VALUES
     #{values_list.map { |values| "(#{values.join(",")})" }.join(", ")}
     SQL
-# ========= table TaxonSummary still to be made ===============
-# =============================================================
 
     respond_to do |format|
       if @background.save

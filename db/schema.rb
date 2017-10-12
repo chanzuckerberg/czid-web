@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171010011300) do
+ActiveRecord::Schema.define(version: 20171012162107) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -197,6 +197,19 @@ ActiveRecord::Schema.define(version: 20171010011300) do
     t.index ["taxid"], name: "index_taxon_names_on_taxid", unique: true
   end
 
+  create_table "taxon_summaries", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "tax_id"
+    t.integer "tax_level"
+    t.string "count_type"
+    t.string "name"
+    t.float "mean", limit: 24
+    t.float "stdev", limit: 24
+    t.bigint "background_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["background_id"], name: "index_taxon_summaries_on_background_id"
+  end
+
   create_table "taxon_zscores", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "report_id"
     t.integer "tax_id"
@@ -238,5 +251,6 @@ ActiveRecord::Schema.define(version: 20171010011300) do
   add_foreign_key "reports", "backgrounds"
   add_foreign_key "reports", "pipeline_outputs"
   add_foreign_key "taxon_counts", "pipeline_outputs"
+  add_foreign_key "taxon_summaries", "backgrounds"
   add_foreign_key "taxon_zscores", "reports"
 end
