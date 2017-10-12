@@ -109,7 +109,6 @@ class Login extends React.Component {
                   <label htmlFor="remember_me">Remember me</label>
                 </div>
               </div>
-                <div className="forgot-password"><span onClick={this.gotoPage.bind(this, '/users/new/password')}>Forgot your password?</span><br /></div>
               <div onClick={ this.handleSubmit } className="center-align login-wrapper">Submit</div>
             </form>
           </div>
