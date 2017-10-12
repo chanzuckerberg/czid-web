@@ -28,7 +28,6 @@ class Sample < ApplicationRecord
     File.join('samples', project.id.to_s, id.to_s)
   end
 
-
   validates_associated :input_files
 
   def input_files_checks
