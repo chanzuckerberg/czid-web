@@ -48,6 +48,7 @@ module ReportHelper
 
     category_taxids = ''
     lineage_info.each do |_taxid, taxons|
+      next if taxons[0]['superkingdom_taxid'].empty?
       category_taxids += taxons[0]['superkingdom_taxid'].to_s
       category_taxids += ','
     end
