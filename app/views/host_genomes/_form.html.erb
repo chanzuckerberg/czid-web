@@ -1,0 +1,33 @@
+<%= form_with(model: host_genome, local: true) do |form| %>
+  <% if host_genome.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(host_genome.errors.count, "error") %> prohibited this host_genome from being saved:</h2>
+      <ul>
+      <% host_genome.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :name %>
+    <%= form.text_field :name, id: :host_genome_name, placeholder: 'Required' %>
+  </div>
+  <div class="field">
+    <%= form.label 'S3 STAR index path' %><br>
+    <%= form.text_field :s3_star_index_path, id: :host_genome_s3_star_index_path, placeholder: 'Required' %>
+  </div>
+  <div class="field">
+    <%= form.label "S3 Bowtie index path" %>
+    <%= form.text_field :s3_bowtie2_index_path, id: :host_genome_s3_bowtie2_index_path, placeholder: 'Required' %>
+  </div>
+  <div class="field radiobutton-list">
+    <%= form.label :default_background %>
+    <%= form.collection_radio_buttons :default_background_id, Background.all, :id, :name %>
+  </div>
+
+  <div class="actions">
+    <%= form.submit %>
+  </div>
+<% end %>
