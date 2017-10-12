@@ -4,8 +4,8 @@ class ReportFilter extends React.Component {
     const view_level = props.view_level || 'Genus';
     this.background_model = props.background_model || 'N/A';
     this.report_title = props.report_title || 'Not Set';
-    const default_nt_zscore_threshold = `0-${this.props.highest_tax_counts.highest_nt_zscore}`;
-    const default_nt_rpm_threshold = `0-${this.props.highest_tax_counts.highest_nt_rpm}`;
+    const default_nt_zscore_threshold = `0,${this.props.highest_tax_counts.highest_nt_zscore}`;
+    const default_nt_rpm_threshold = `0,${this.props.highest_tax_counts.highest_nt_rpm}`;
 
     const nt_zscore_threshold = ReportFilter.getFilter('nt_zscore_threshold')
       ? ReportFilter.getFilter('nt_zscore_threshold') : default_nt_zscore_threshold;
@@ -140,12 +140,6 @@ class ReportFilter extends React.Component {
               <div id="reports-pane" className="pane col s12">
                 <div className="sidebar-pane">
                   <div className="report-data">
-                    <div className="report-title">
-                      Report name
-                    </div>
-                    <div className="report-value">
-                      { this.report_title }
-                    </div>
                     <div className="report-title">
                      Background Model
                     </div>
