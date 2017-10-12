@@ -148,7 +148,7 @@ class PipelineSampleReads extends React.Component {
                             <tbody>
                               <tr>
                                 <td>Host</td>
-                                 <td> { (!this.sampleInfo.host) ? 'N/A' : this.sampleInfo.host } </td>
+                                 <td> { (!this.sampleInfo.host_genome_name) ? 'N/A' : this.sampleInfo.host_genome_name } </td>
                               </tr>
                               <tr>
                                 <td>Entry Date</td>

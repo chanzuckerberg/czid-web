@@ -28,6 +28,7 @@ class Sample < ApplicationRecord
     File.join('samples', project.id.to_s, id.to_s)
   end
 
+
   validates_associated :input_files
 
   def input_files_checks
@@ -85,8 +86,12 @@ class Sample < ApplicationRecord
     "https://s3.console.aws.amazon.com/s3/buckets/#{SAMPLES_BUCKET_NAME}/#{sample_path}/fastqs/"
   end
 
+  def host_genome_name
+    host_genome.name if host_genome
+  end
+
   def as_json(_options = {})
-    super(methods: [:sample_input_folder_url, :sample_output_folder_url, :sample_annotated_fasta_url])
+    super(methods: [:sample_input_folder_url, :sample_output_folder_url, :sample_annotated_fasta_url, :host_genome_name])
   end
 
   def pipeline_command
