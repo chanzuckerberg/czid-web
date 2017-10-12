@@ -2,13 +2,14 @@ class CreateUser extends React.Component {
   constructor(props, context) {
     super(props, context);
     this.csrf = this.props.csrf;
-    this.endPoint = this.props.endPoint;
     this.handleSubmit = this.handleSubmit.bind(this);
     this.clearError = this.clearError.bind(this)
     this.state = {
       isChecked: false,
+      success: false,
       showFailed: false,
-      errorMessage: ''
+      errorMessage: '',
+      successMessage: ''
     }
   }
 
@@ -55,7 +56,8 @@ class CreateUser extends React.Component {
   }
 
   createUser() {
-    axios.post(this.endPoint, { 
+    var that = this;
+    axios.post('/users', { 
        user: {
         email: this.refs.email.value,
         password: this.refs.password.value,
@@ -64,11 +66,19 @@ class CreateUser extends React.Component {
       },
       authenticity_token: this.csrf
     }).then(function(res) {
-      console.log(res)
-      location.href = '/'
+      that.setState({
+        success: true,
+        successMessage: 'User created successfully'
+      })
+      setTimeout(function() {
+        location.href = '/';
+      }, 1000)
     })
     .catch(function(err) {
-      console.log(err)
+      that.setState({
+        success: false,
+        successMessage: 'Failed to create user'
+      })
     })
   }
 
@@ -80,6 +90,10 @@ class CreateUser extends React.Component {
               <div className="row title">
                 <p className="col s6 signup">Create User</p>
               </div>
+              { this.state.success ? <div className="success-info" >
+                <i className="fa fa-success"></i>
+                 <span>{this.state.successMessage}</span>
+                </div> : null }
               { this.state.showFailed ? <div className="error-info" >
                   <i className="fa fa-error"></i>
                   <span>{this.state.errorMessage}</span>

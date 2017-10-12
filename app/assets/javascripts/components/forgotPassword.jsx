@@ -17,10 +17,6 @@ class ForgotPassword extends React.Component {
     }
   }
 
-  componentDidMount() {
-    console.log(this)
-  }
-
   clearError() {
     this.setState({ showFailed: false })
   }
@@ -34,10 +30,8 @@ class ForgotPassword extends React.Component {
       authenticity_token: this.csrf
     })
     .then(function (response) {
-      console.log(response)
     })
     .catch(function (error) {
-      console.log(error)
       that.setState({
         showFailed: true,
         errorMessage: 'Failed to reset password'

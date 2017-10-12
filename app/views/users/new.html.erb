@@ -1,8 +1,2 @@
-<%= react_component 'CreateUser', { endpoint: new_user_path, csrf: form_authenticity_token } %>
+<%= react_component 'CreateUser', { csrf: form_authenticity_token } %>
 
-<h1>New User</h1>
-
-<%= render 'signup', user: @user %>
-
-<%= link_to 'See all users', users_path %> |
-<%= link_to 'Front portal', root_path %>
