@@ -22,6 +22,6 @@ shift
 
 MACHINE=`bin/get_public_ip $ENV`
 
-CONTAINER=`ssh ec2-user@$MACHINE "docker ps | grep chanzuckerberg/idseq-web | head -1" | awk '{print $NF}'`
+CONTAINER=`ssh ec2-user@$MACHINE "docker ps | grep ecs-idseq-web | head -1" | awk '{print $NF}'`
 
 ssh ec2-user@$MACHINE 'docker exec '$CONTAINER' /bin/bash -c '"'$*'"
