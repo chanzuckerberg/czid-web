@@ -1,8 +1,7 @@
-
 <div class="">
   <% if @user && @user.id %>
     <%= react_component 'Header', { userSignedIn: true, userDetails: @user, signoutEndpoint: destroy_user_session_path } %>
   <% else %>
-    <%= react_component 'Header', userSignedIn: false %>
+    <%= react_component 'Header', { userSignedIn: false } %>
   <% end %>
 </div>
