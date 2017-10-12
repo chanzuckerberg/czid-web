@@ -14,3 +14,5 @@
 <% end %>
 
 <%= render "devise/shared/links" %>
+
+<%= react_component 'ForgotPassword', { endpoint: user_password_path, csrf: form_authenticity_token } %>
