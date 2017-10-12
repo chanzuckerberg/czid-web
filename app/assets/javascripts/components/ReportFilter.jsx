@@ -141,12 +141,6 @@ class ReportFilter extends React.Component {
                 <div className="sidebar-pane">
                   <div className="report-data">
                     <div className="report-title">
-                      Report name
-                    </div>
-                    <div className="report-value">
-                      { this.report_title }
-                    </div>
-                    <div className="report-title">
                      Background Model
                     </div>
                     <div className="report-value">

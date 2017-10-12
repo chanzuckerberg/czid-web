@@ -36,6 +36,28 @@ module ReportHelper
     taxon_zscores = compute_taxon_zscores(report)
     genus_level = TaxonCount::TAX_LEVEL_GENUS
     species_level = TaxonCount::TAX_LEVEL_SPECIES
+    tax_ids_str = ''
+
+    taxon_zscores.each do |taxon|
+      tax_ids_str += taxon[:tax_id].to_s
+      tax_ids_str += ','
+    end
+    tax_ids_str = tax_ids_str.chomp(',')
+    lineage_arr = TaxonLineage.connection.select_all("SELECT taxid, superkingdom_taxid,  genus_taxid FROM taxon_lineages WHERE taxid IN (#{tax_ids_str})").to_hash
+    lineage_info = lineage_arr.group_by { |h| h['taxid'] }
+
+    category_taxids = ''
+    lineage_info.each do |taxid|
+      category_taxids += taxid[1][0]['superkingdom_taxid'].to_s
+      category_taxids += ','
+    end
+    category_taxids = category_taxids.chomp(',')
+    if !category_taxids.empty?
+      taxon_name_arr = TaxonLineage.connection.select_all("select taxid, name from taxon_names where taxid in (#{category_taxids})").to_hash
+      cat_name_info = taxon_name_arr.group_by { |h| h['taxid'] }
+    else
+      cat_name_info = []
+    end
 
     data = taxon_zscores.group_by { |h| [h[:tax_level], h[:hit_type]] }
     nt = data[[species_level, 'NT']] || []
@@ -61,16 +83,16 @@ module ReportHelper
     sort_report!(nt_nr, params[:sort_by])
     tax_details = []
     nt_nr.each do |h|
-      lineage_info = TaxonLineage.find_by(taxid: h[:tax_id])
-      category_taxid = lineage_info.superkingdom_taxid
+      category_taxid = lineage_info[h[:tax_id]][0]["superkingdom_taxid"]
+      # p 'The taxid = ', category_taxid, taxon_name_info
 
-      genus_taxid = lineage_info.genus_taxid
+      genus_taxid = lineage_info[h[:tax_id]] && lineage_info[h[:tax_id]][0]["genus_taxid"]
       found_genus = genus_nt_nr.select { |genus| genus[:tax_id] == genus_taxid }
       genus_nt_ele = found_genus[0]
       genus_nr_ele = found_genus[1]
 
-      category = TaxonName.find_by(taxid: category_taxid)
-      category_name = category ? category.name : 'Other'
+      category_info = cat_name_info[category_taxid]
+      category_name = category_info ? category_info[0]['name'] : 'Other'
 
       nt_ele = h[:hit_type] == 'NT' ? h : nil
       nr_ele = h[:hit_type] == 'NR' ? h : nil
