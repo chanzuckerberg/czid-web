@@ -37,19 +37,20 @@ module ReportHelper
     genus_level = TaxonCount::TAX_LEVEL_GENUS
     species_level = TaxonCount::TAX_LEVEL_SPECIES
     tax_ids_str = ''
-
-    taxon_zscores.each do |taxon|
-      tax_ids_str += taxon[:tax_id].to_s
+    tax_id_set = Set.new(taxon_zscores.map { |h| h[:tax_id] })
+    tax_id_set.delete(nil)
+    tax_id_set.sort.each do |tax_id|
+      tax_ids_str += tax_id.to_s
       tax_ids_str += ','
     end
     tax_ids_str = tax_ids_str.chomp(',')
     lineage_arr = TaxonLineage.connection.select_all("SELECT taxid, superkingdom_taxid,  genus_taxid FROM taxon_lineages WHERE taxid IN (#{tax_ids_str})").to_hash
     lineage_info = lineage_arr.group_by { |h| h['taxid'] }
-
+    cat_id_set = Set.new(lineage_info.map { |_, taxons| taxons[0]['superkingdom_taxid'] })
+    cat_id_set.delete(nil)
     category_taxids = ''
-    lineage_info.each do |_taxid, taxons|
-      next if taxons[0]['superkingdom_taxid'].empty?
-      category_taxids += taxons[0]['superkingdom_taxid'].to_s
+    cat_id_set.sort.each do |cat_id|
+      category_taxids += cat_id.to_s
       category_taxids += ','
     end
     category_taxids = category_taxids.chomp(',')
@@ -84,10 +85,11 @@ module ReportHelper
     sort_report!(nt_nr, params[:sort_by])
     tax_details = []
     nt_nr.each do |h|
-      category_taxid = lineage_info[h[:tax_id]][0]["superkingdom_taxid"]
+      linfo = lineage_info[h[:tax_id]]
+      category_taxid = linfo && linfo[0]["superkingdom_taxid"]
       # p 'The taxid = ', category_taxid, taxon_name_info
 
-      genus_taxid = lineage_info[h[:tax_id]] && lineage_info[h[:tax_id]][0]["genus_taxid"]
+      genus_taxid = linfo && linfo[0]["genus_taxid"]
       found_genus = genus_nt_nr.select { |genus| genus[:tax_id] == genus_taxid }
       genus_nt_ele = found_genus[0]
       genus_nr_ele = found_genus[1]
