@@ -106,7 +106,6 @@ class PipelineSampleReads extends React.Component {
     }
     return (
       <div>
-        <Header />
         <SubHeader>
           <div className="sub-header">
             <div className="title">
