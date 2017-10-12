@@ -1,0 +1,2 @@
+class HostGenome < ApplicationRecord
+end

@@ -13,6 +13,7 @@ class Sample < ApplicationRecord
   DEFAULT_QUEUE = 'aegea_batch_ondemand'.freeze
 
   belongs_to :project
+  belongs_to :host_genome, optional: true
   has_many :pipeline_outputs, dependent: :destroy
   has_many :pipeline_runs, -> { order(created_at: :desc) }, dependent: :destroy
   has_and_belongs_to_many :backgrounds
@@ -20,7 +21,8 @@ class Sample < ApplicationRecord
   accepts_nested_attributes_for :input_files
   validate :input_files_checks
   after_create :initiate_input_file_upload
-  before_save :check_status
+
+  before_save :check_host_genome, :check_status
 
   def sample_path
     File.join('samples', project.id.to_s, id.to_s)
@@ -106,6 +108,13 @@ class Sample < ApplicationRecord
     queue =  job_queue.present? ? job_queue : DEFAULT_QUEUE
     command += " --storage /mnt=1500 --ecr-image idseq --memory #{memory} --queue #{queue} --vcpus 16"
     command
+  end
+
+  def check_host_genome
+    if host_genome.present?
+      self.s3_star_index_path = host_genome.s3_star_index_path
+      self.s3_bowtie2_index_path = host_genome.s3_bowtie2_index_path
+    end
   end
 
   def check_status

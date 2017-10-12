@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171010011300) do
+ActiveRecord::Schema.define(version: 20171011225553) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -31,6 +31,15 @@ ActiveRecord::Schema.define(version: 20171010011300) do
     t.bigint "sample_id", null: false
     t.index ["background_id"], name: "index_backgrounds_samples_on_background_id"
     t.index ["sample_id"], name: "index_backgrounds_samples_on_sample_id"
+  end
+
+  create_table "host_genomes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "name", null: false
+    t.text "s3_star_index_path"
+    t.text "s3_bowtie2_index_path"
+    t.bigint "default_background_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "input_files", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -127,6 +136,7 @@ ActiveRecord::Schema.define(version: 20171010011300) do
     t.text "s3_bowtie2_index_path"
     t.integer "sample_memory"
     t.string "job_queue"
+    t.bigint "host_genome_id"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
   end
 
