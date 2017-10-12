@@ -20,9 +20,8 @@ class Header extends React.Component  {
         <div className="site-header">
           {/* Dropdown menu */}
           <ul id="dropdown1" className="dropdown-content">
-            {<li><a href="#!">New Project</a></li>}
-            {/* <li><a href="#!">Account</a></li> */}
-            {<li className="divider"></li>}
+            <li onClick={ this.gotoPage.bind(this, '/samples/new') }><a href="#!">New Sample</a></li>
+            <li className="divider"></li>
             <li><a rel="nofollow" data-method="delete" href={this.props.signoutEndpoint}>Logout</a></li>
           </ul>
 
