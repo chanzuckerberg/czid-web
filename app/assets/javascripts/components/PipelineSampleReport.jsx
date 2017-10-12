@@ -14,7 +14,6 @@ class PipelineSampleReport extends React.Component {
         ? current_sort.sort_query  : 'sort_by=highest_zscore'
     };
     this.applySort = this.applySort.bind(this);
-    console.log(props)
   }
 
   uppCaseFirst(name) {

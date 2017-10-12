@@ -47,8 +47,8 @@ module ReportHelper
     lineage_info = lineage_arr.group_by { |h| h['taxid'] }
 
     category_taxids = ''
-    lineage_info.each do |taxid|
-      category_taxids += taxid[1][0]['superkingdom_taxid'].to_s
+    lineage_info.each do |_taxid, taxons|
+      category_taxids += taxons[0]['superkingdom_taxid'].to_s
       category_taxids += ','
     end
     category_taxids = category_taxids.chomp(',')
