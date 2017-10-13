@@ -25,7 +25,8 @@ class BackgroundsController < ApplicationController
   # POST /backgrounds
   # POST /backgrounds.json
   def create
-    @background = Background.new(background_params)
+    @background = Background.create(background_params)
+    store_summary_set_status
 
     respond_to do |format|
       if @background.save
@@ -41,6 +42,8 @@ class BackgroundsController < ApplicationController
   # PATCH/PUT /backgrounds/1
   # PATCH/PUT /backgrounds/1.json
   def update
+    store_summary_set_status
+
     respond_to do |format|
       if @background.update(background_params)
         format.html { redirect_to @background, notice: 'Background was successfully updated.' }
@@ -67,6 +70,24 @@ class BackgroundsController < ApplicationController
   # Use callbacks to share common setup or constraints between actions.
   def set_background
     @background = Background.find(params[:id])
+  end
+
+  def store_summary_set_status
+    data = @background.summarize.map { |h| h.slice('tax_id', 'count_type', 'tax_level', 'name', :background_id, :created_at, :updated_at, :mean, :stdev) }
+    columns = data.first.keys
+    values_list = data.map do |hash|
+      hash.values.map do |value|
+        ActiveRecord::Base.connection.quote(value)
+      end
+    end
+    begin
+      ActiveRecord::Base.connection.execute <<-SQL
+      INSERT INTO taxon_summaries (#{columns.join(',')}) VALUES #{values_list.map { |values| "(#{values.join(',')})" }.join(', ')}
+      SQL
+      @background.status = Background::STATUS_SUCCESS
+    rescue
+      @background.status = Background::STATUS_FAILED
+    end
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
