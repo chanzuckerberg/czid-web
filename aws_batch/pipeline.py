@@ -14,20 +14,13 @@ import datetime
 import gzip
 import logging
 
-INPUT_BUCKET = 's3://czbiohub-infectious-disease/UGANDA'
-OUTPUT_BUCKET = 's3://yunfang-workdir/id-uganda'
-KEY_S3_PATH = 's3://cdebourcy-test/cdebourcy_7-19-17.pem'
+INPUT_BUCKET = 's3://czbiohub-infectious-disease/UGANDA' # default to be overwritten by environment variable
+OUTPUT_BUCKET = 's3://czbiohub-idseq-samples-test/id-uganda'  # default to be overwritten by environment variable
+KEY_S3_PATH = 's3://czbiohub-infectious-disease/idseq-alpha.pem'
 ROOT_DIR = '/mnt'
 DEST_DIR = ROOT_DIR + '/idseq/data' # generated data go here
 REF_DIR  = ROOT_DIR + '/idseq/ref' # referene genome / ref databases go here
 
-#INPUT_BUCKET = 's3://czbiohub-infectious-disease/UGANDA'
-#SAMPLES = ['UGANDA_S30_NP', 'UGANDA_S31_NP', 'UGANDA_S32_NP', 'UGANDA_S33_NP',
-#           'UGANDA_S34_NP', 'UGANDA_S35_NP', 'UGANDA_S36_NP', 'UGANDA_S37_NP',
-#           'UGANDA_S38_NP', 'UGANDA_S39_NP']
-#INPUT_BUCKET = 's3://czbiohub-infectious-disease/background_controls'
-
-# fastqs = INPUT_BUCKET/{sample_id}/*.fastq.gz
 
 STAR="STAR"
 HTSEQ="htseq-count"
@@ -39,17 +32,16 @@ BOWTIE2="bowtie2"
 
 LZW_FRACTION_CUTOFF = 0.45
 GSNAPL_INSTANCE_IP = '34.211.67.166'
-RAPSEARCH2_INSTANCE_IP = '34.212.195.187'
+RAPSEARCH2_INSTANCE_IP = '54.191.193.210'
 
 GSNAPL_MAX_CONCURRENT = 5
 RAPSEARCH2_MAX_CONCURRENT = 5
 
-STAR_GENOME = 's3://cdebourcy-test/id-dryrun-reference-genomes/STAR_genome.tar.gz'
-BOWTIE2_GENOME = 's3://cdebourcy-test/id-dryrun-reference-genomes/bowtie2_genome.tar.gz'
-GSNAPL_GENOME = 's3://cdebourcy-test/id-dryrun-reference-genomes/nt_k16.tar.gz'
-ACCESSION2TAXID = 's3://cdebourcy-test/id-dryrun-reference-genomes/accession2taxid.db.gz'
-DEUTEROSTOME_TAXIDS = 's3://cdebourcy-test/id-dryrun-reference-genomes/lineages-2017-03-17_deuterostome_taxIDs.txt'
-TAXID_TO_INFO = 's3://cdebourcy-test/id-dryrun-reference-genomes/taxon_info.db'
+STAR_GENOME = 's3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz'
+BOWTIE2_GENOME = 's3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz'
+ACCESSION2TAXID = 's3://czbiohub-infectious-disease/references/accession2taxid.db.gz'
+DEUTEROSTOME_TAXIDS = 's3://czbiohub-infectious-disease/references/lineages-2017-03-17_deuterostome_taxIDs.txt'
+TAXID_TO_INFO = 's3://czbiohub-infectious-disease/references/taxon_info.db'
 
 TAX_LEVEL_SPECIES = 1
 TAX_LEVEL_GENUS = 2
@@ -854,8 +846,10 @@ def run_bowtie2(sample_name, input_fa_1, input_fa_2, bowtie_genome_s3_path,
         execute_command("aws s3 cp %s %s/" % (bowtie_genome_s3_path, REF_DIR))
         execute_command("cd %s; tar xvfz %s" % (REF_DIR, genome_file))
         logging.getLogger().info("downloaded index")
-    local_genome_dir_ls =  execute_command("ls %s/bowtie2_genome/*.bt2l" % REF_DIR)
-    genome_basename = local_genome_dir_ls.split("\n")[0][:-7]
+    local_genome_dir_ls =  execute_command("ls %s/bowtie2_genome/*.bt2*" % REF_DIR)
+    genome_basename = local_genome_dir_ls.split("\n")[0][:-6]
+    if genome_basename[-1] == '.':
+        genome_basename = genome_basename[:-1]
     bowtie2_params = [BOWTIE2,
                      '-p', str(multiprocessing.cpu_count()),
                      '-x', genome_basename,
@@ -886,28 +880,32 @@ def run_gsnapl_remotely(sample, input_fa_1, input_fa_2,
     execute_command("aws s3 cp %s %s/" % (gsnap_ssh_key_s3_path, REF_DIR))
     key_path = REF_DIR +'/' + key_name
     execute_command("chmod 400 %s" % key_path)
-    commands =  "mkdir -p /home/ec2-user/batch-pipeline-workdir/%s;" % sample
-    commands += "aws s3 cp %s/%s /home/ec2-user/batch-pipeline-workdir/%s/ ; " % \
-                 (sample_s3_output_path, input_fa_1, sample)
-    commands += "aws s3 cp %s/%s /home/ec2-user/batch-pipeline-workdir/%s/ ; " % \
-                 (sample_s3_output_path, input_fa_2, sample)
-    commands += " ".join(['/home/ec2-user/bin/gsnapl',
+    remote_username = "ubuntu"
+    remote_home_dir = "/home/%s" % remote_username
+    remote_work_dir = "%s/batch-pipeline-workdir/%s" % (remote_home_dir, sample)
+    remote_index_dir = "%s/share" % remote_home_dir
+    commands =  "mkdir -p %s;" % remote_work_dir
+    commands += "aws s3 cp %s/%s %s/ ; " % \
+                 (sample_s3_output_path, input_fa_1, remote_work_dir)
+    commands += "aws s3 cp %s/%s %s/ ; " % \
+                 (sample_s3_output_path, input_fa_2, remote_work_dir)
+    commands += " ".join([remote_home_dir+'/bin/gsnapl',
                           '-A', 'm8', '--batch=2',
                           '--gmap-mode=none', '--npaths=1', '--ordered',
                           '-t', '32',
                           '--maxsearch=5', '--max-mismatches=20',
-                          '-D', '/home/ec2-user/share', '-d', 'nt_k16',
-                          '/home/ec2-user/batch-pipeline-workdir/'+sample+'/'+input_fa_1,
-                          '/home/ec2-user/batch-pipeline-workdir/'+sample+'/'+input_fa_2,
-                          '> /home/ec2-user/batch-pipeline-workdir/'+sample+'/'+GSNAPL_OUT, ';'])
-    commands += "aws s3 cp /home/ec2-user/batch-pipeline-workdir/%s/%s %s/;" % \
-                 (sample, GSNAPL_OUT, sample_s3_output_path)
+                          '-D', remote_index_dir, '-d', 'nt_k16',
+                          remote_work_dir+'/'+input_fa_1,
+                          remote_work_dir+'/'+input_fa_2,
+                          '> '+remote_work_dir+'/'+GSNAPL_OUT, ';'])
+    commands += "aws s3 cp %s/%s %s/;" % \
+                 (remote_work_dir, GSNAPL_OUT, sample_s3_output_path)
     # check if remote machins has enough capacity
-    check_command = 'ssh -o "StrictHostKeyChecking no" -i %s ec2-user@%s "ps aux|grep gsnapl|grep -v bash"' % (key_path, GSNAPL_INSTANCE_IP)
+    check_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "ps aux|grep gsnapl|grep -v bash"' % (key_path, remote_username, GSNAPL_INSTANCE_IP)
     logging.getLogger().info("waiting for server")
     wait_for_server('GSNAPL', check_command, GSNAPL_MAX_CONCURRENT)
     logging.getLogger().info("starting alignment")
-    remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s ec2-user@%s "%s"' % (key_path, GSNAPL_INSTANCE_IP, commands)
+    remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, GSNAPL_INSTANCE_IP, commands)
     execute_command(remote_command)
     # move gsnapl output back to local
     time.sleep(10)
@@ -994,13 +992,18 @@ def run_rapsearch2_remotely(sample, input_fasta,
     execute_command("aws s3 cp %s %s/" % (rapsearch_ssh_key_s3_path, REF_DIR))
     key_path = REF_DIR +'/' + key_name
     execute_command("chmod 400 %s" % key_path)
-    commands =  "mkdir -p /home/ec2-user/batch-pipeline-workdir/%s;" % sample
-    commands += "aws s3 cp %s/%s /home/ec2-user/batch-pipeline-workdir/%s/ ; " % \
-                 (sample_s3_output_path, input_fasta, sample)
-    input_path = '/home/ec2-user/batch-pipeline-workdir/' + sample + '/' + input_fasta
-    output_path = '/home/ec2-user/batch-pipeline-workdir/' + sample + '/' + RAPSEARCH2_OUT
-    commands += " ".join(['/home/ec2-user/bin/rapsearch',
-                          '-d', '/home/ec2-user/references/nr_rapsearch/nr_rapsearch',
+    remote_username = "ec2-user"
+    remote_home_dir = "/home/%s" % remote_username
+    remote_work_dir = "%s/batch-pipeline-workdir/%s" % (remote_home_dir, sample)
+    remote_index_dir = "%s/references/nr_rapsearch" % remote_home_dir
+
+    commands =  "mkdir -p %s;" % remote_work_dir
+    commands += "aws s3 cp %s/%s %s/ ; " % \
+                 (sample_s3_output_path, input_fasta, remote_work_dir)
+    input_path = remote_work_dir + '/' + input_fasta
+    output_path = remote_work_dir + '/' + RAPSEARCH2_OUT
+    commands += " ".join(['/usr/local/bin/rapsearch',
+                          '-d', remote_index_dir+'/nr_rapsearch',
                           '-e','-6',
                           '-l','10',
                           '-a','T',
@@ -1010,13 +1013,13 @@ def run_rapsearch2_remotely(sample, input_fasta,
                           '-q', input_path,
                           '-o', output_path[:-3],
                           ';'])
-    commands += "aws s3 cp /home/ec2-user/batch-pipeline-workdir/%s/%s %s/;" % \
-                 (sample, RAPSEARCH2_OUT, sample_s3_output_path)
-    check_command = 'ssh -o "StrictHostKeyChecking no" -i %s ec2-user@%s "ps aux|grep rapsearch|grep -v bash"' % (key_path, RAPSEARCH2_INSTANCE_IP)
+    commands += "aws s3 cp %s/%s %s/;" % \
+                 (remote_work_dir, RAPSEARCH2_OUT, sample_s3_output_path)
+    check_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "ps aux|grep rapsearch|grep -v bash"' % (key_path, remote_username, RAPSEARCH2_INSTANCE_IP)
     logging.getLogger().info("waiting for server")
     wait_for_server('RAPSEARCH2', check_command, RAPSEARCH2_MAX_CONCURRENT)
     logging.getLogger().info("starting alignment")
-    remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s ec2-user@%s "%s"' % (key_path, RAPSEARCH2_INSTANCE_IP, commands)
+    remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, RAPSEARCH2_INSTANCE_IP, commands)
     execute_command(remote_command)
     logging.getLogger().info("finished alignment")
     # move output back to local
