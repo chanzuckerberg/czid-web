@@ -45,9 +45,7 @@ class Login extends React.Component {
         success: true,
         successMessage: 'User signed in'
       })
-      setTimeout(function() {
-        this.gotoPage(this, '/');
-      }, 1000)
+      this.gotoPage.bind(this, '/');
     })
     .catch(function (error) {
       that.setState({
