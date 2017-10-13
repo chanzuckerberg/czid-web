@@ -30,6 +30,7 @@ class Sample < ApplicationRecord
 
   validates_associated :input_files
 
+
   def input_files_checks
     # validate that we have exactly 2 input files
     errors.add(:input_files, "file_size !=2 for sample") unless input_files.size == 2
@@ -47,8 +48,8 @@ class Sample < ApplicationRecord
 
   def initiate_s3_cp
     return unless status == STATUS_CREATED
-    fastq1 = input_files[0].source
-    fastq2 = input_files[1].source
+    fastq1 = input_files[0].source.strip
+    fastq2 = input_files[1].source.strip
     command = "aws s3 cp #{fastq1} #{sample_input_s3_path}/;"
     command += "aws s3 cp #{fastq2} #{sample_input_s3_path}/;"
     if s3_preload_result_path.present? && s3_preload_result_path[0..4] == 's3://'
@@ -119,6 +120,7 @@ class Sample < ApplicationRecord
       self.s3_star_index_path = host_genome.s3_star_index_path
       self.s3_bowtie2_index_path = host_genome.s3_bowtie2_index_path
     end
+    self.s3_preload_result_path.strip!
   end
 
   def check_status
