@@ -3,7 +3,9 @@
 one:
   name: default
   pipeline_outputs: [pipeline_output_one, pipeline_output_two]
+  taxon_summaries: [taxon_summary_one]
 
 two:
   name: MyString
   pipeline_outputs: [pipeline_output_one, pipeline_output_two]
+  taxon_summaries: [taxon_summary_two]
