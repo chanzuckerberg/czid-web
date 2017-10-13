@@ -25,7 +25,7 @@ class BackgroundsController < ApplicationController
   # POST /backgrounds
   # POST /backgrounds.json
   def create
-    @background = Background.create(background_params)    
+    @background = Background.create(background_params)
     store_summary_set_status
 
     respond_to do |format|
@@ -71,7 +71,7 @@ class BackgroundsController < ApplicationController
   def set_background
     @background = Background.find(params[:id])
   end
-  
+
   def store_summary_set_status
     data = @background.summarize.map { |h| h.slice('tax_id', 'count_type', 'tax_level', 'name', :background_id, :created_at, :updated_at, :mean, :stdev) }
     columns = data.first.keys
