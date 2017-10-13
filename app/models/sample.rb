@@ -48,8 +48,8 @@ class Sample < ApplicationRecord
 
   def initiate_s3_cp
     return unless status == STATUS_CREATED
-    fastq1 = input_files[0].source.strip
-    fastq2 = input_files[1].source.strip
+    fastq1 = input_files[0].source
+    fastq2 = input_files[1].source
     command = "aws s3 cp #{fastq1} #{sample_input_s3_path}/;"
     command += "aws s3 cp #{fastq2} #{sample_input_s3_path}/;"
     if s3_preload_result_path.present? && s3_preload_result_path[0..4] == 's3://'
