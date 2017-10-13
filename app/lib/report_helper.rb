@@ -61,20 +61,11 @@ module ReportHelper
       cat_name_info = []
     end
 
-    data = taxon_zscores.group_by { |h| [h[:tax_level], h[:hit_type]] }
-    nt = data[[species_level, 'NT']] || []
-    nr = data[[species_level, 'NR']] || []
-
-    nt_genus = data[[genus_level, 'NT']] || []
-    nr_genus = data[[genus_level, 'NT']] || []
-    genus_nt_nr = nt_genus.concat nr_genus
-
     # filter and sort the nt_scores
-    htc = highest_tax_counts(nt, nr)
+    htc = highest_tax_counts(taxon_zscores)
     rp = resolve_params(params, htc)
-    nt_nr = nt.concat nr
 
-    nt_nr.keep_if do |h|
+    taxon_zscores.keep_if do |h|
       (h[:tax_id] >= 0 &&
         h[:zscore] >= rp[:nt_zscore_threshold][:start] &&
         h[:zscore] <= rp[:nt_zscore_threshold][:end] &&
@@ -82,28 +73,36 @@ module ReportHelper
         h[:rpm] <= rp[:nt_rpm_threshold][:end]
       )
     end
-    sort_report!(nt_nr, params[:sort_by])
-    tax_details = []
-    nt_nr.each do |h|
-      linfo = lineage_info[h[:tax_id]]
-      category_taxid = linfo && linfo[0]["superkingdom_taxid"]
-      # p 'The taxid = ', category_taxid, taxon_name_info
 
-      genus_taxid = linfo && linfo[0]["genus_taxid"]
-      found_genus = genus_nt_nr.select { |genus| genus[:tax_id] == genus_taxid }
-      genus_nt_ele = found_genus[0]
-      genus_nr_ele = found_genus[1]
+    # get tax_ids in order sorted by chosen field
+    # sort_report!(taxon_zscores, params[:sort_by])
+    tax_id_arr = taxon_zscores.map {|h| h[:tax_id]}
+    tax_id_arr = Set.new tax_id_arr
 
+    tax_hit = taxon_zscores.group_by { |h| [h[:tax_id], h[:hit_type]] }
+
+    tax_details = tax_id_arr.map do |tax_id|
+      linfo = lineage_info[tax_id] || [{}]
+      linfo = linfo.first
+
+      category_taxid = linfo["superkingdom_taxid"]
       category_info = cat_name_info[category_taxid]
       category_name = category_info ? category_info[0]['name'] : 'Other'
 
-      nt_ele = h[:hit_type] == 'NT' ? h : nil
-      nr_ele = h[:hit_type] == 'NR' ? h : nil
+      genus_taxid = linfo["genus_taxid"]
+      genus_nts = tax_hit[[genus_taxid, 'NT']] || [nil]
+      genus_nrs = tax_hit[[genus_taxid, 'NR']] || [nil]
 
-      tax_details.push(nt_ele: nt_ele, nr_ele: nr_ele,
-                       category: category_name,
-                       genus_nt_ele: genus_nt_ele,
-                       genus_nr_ele: genus_nr_ele)
+      nts = tax_hit[[tax_id, 'NT']] || [nil]
+      nrs = tax_hit[[tax_id, 'NR']] || [nil]
+
+      {
+        nt_ele: nts[0],
+        nr_ele: nrs[0],
+        category: category_name,
+        genus_nt_ele: genus_nts[0],
+        genus_nr_ele: genus_nrs[0]
+      }
     end
     [htc, tax_details]
   end
@@ -123,7 +122,10 @@ module ReportHelper
     new_params
   end
 
-  def highest_tax_counts(nt, nr)
+  def highest_tax_counts(taxon_zscores)
+    hit = taxon_zscores.group_by { |h| h[:hit_type] }
+    nt = hit['NT'] || []
+    nr = hit['NR'] || []
     nt_z = nt.map { |h| h[:zscore] }.sort
     nr_z = nr.map { |h| h[:zscore] }.sort
     nt_rpm = nt.map { |h| h[:rpm] }.sort
