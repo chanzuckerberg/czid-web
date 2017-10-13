@@ -39,7 +39,7 @@ class BackgroundsController < ApplicationController
       INSERT INTO taxon_summaries (#{columns.join(',')}) VALUES #{values_list.map { |values| "(#{values.join(',')})" }.join(', ')}
       SQL
       @background.status = Background::STATUS_SUCCESS
-    rescue => e
+    rescue
       @background.status = Background::STATUS_FAILED
     end
 
