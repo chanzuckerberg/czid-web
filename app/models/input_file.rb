@@ -11,6 +11,8 @@ class InputFile < ApplicationRecord
   validate :s3_source_check
 
   def s3_source_check
+    source ||= ''
+    source.strip!
     if source_type == SOURCE_TYPE_S3 && source[0..4] != 's3://'
       errors.add(:input_files, "file source doesn't start with s3:// for s3 input")
     end
