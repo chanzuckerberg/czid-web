@@ -6,6 +6,8 @@ class Background < ApplicationRecord
   validate :validate_size
 
   DEFAULT_BACKGROUND_MODEL_NAME = "default".freeze
+  STATUS_SUCCESS = 'SUCCEEDED'.freeze
+  STATUS_FAILED = 'FAILED'.freeze
 
   def validate_size
     errors.add(:base, "Need to select at least 2 pipeline runs.") if pipeline_outputs.size < 2

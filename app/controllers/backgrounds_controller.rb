@@ -34,9 +34,14 @@ class BackgroundsController < ApplicationController
         ActiveRecord::Base.connection.quote(value)
       end
     end
-    ActiveRecord::Base.connection.execute <<-SQL
-    INSERT INTO taxon_summaries (#{columns.join(',')}) VALUES #{values_list.map { |values| "(#{values.join(',')})" }.join(', ')}
-    SQL
+    begin
+      ActiveRecord::Base.connection.execute <<-SQL
+      INSERT INTO taxon_summaries (#{columns.join(',')}) VALUES #{values_list.map { |values| "(#{values.join(',')})" }.join(', ')}
+      SQL
+      @background.status = Background::STATUS_SUCCESS
+    rescue => e
+      @background.status = Background::STATUS_FAILED
+    end
 
     respond_to do |format|
       if @background.save
