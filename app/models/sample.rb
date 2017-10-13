@@ -30,7 +30,6 @@ class Sample < ApplicationRecord
 
   validates_associated :input_files
 
-
   def input_files_checks
     # validate that we have exactly 2 input files
     errors.add(:input_files, "file_size !=2 for sample") unless input_files.size == 2
@@ -120,7 +119,7 @@ class Sample < ApplicationRecord
       self.s3_star_index_path = host_genome.s3_star_index_path
       self.s3_bowtie2_index_path = host_genome.s3_bowtie2_index_path
     end
-    self.s3_preload_result_path.strip!
+    s3_preload_result_path.strip!
   end
 
   def check_status
