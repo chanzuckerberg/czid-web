@@ -91,9 +91,6 @@ class PipelineSampleReads extends React.Component {
         <a className="custom-button" href= { this.sampleInfo.sample_output_folder_url }>
           <i className="fa fa-cloud-download left"></i> GO TO RESULTS FOLDER
         </a>
-        <a className="custom-button" href= { '/reports/new?report[pipeline_output_id]=' + this.pipelineOutput.id }>
-          <i className="fa fa-file-text-o left"></i> GENERATE REPORT
-        </a>
       </div>
     );
 
