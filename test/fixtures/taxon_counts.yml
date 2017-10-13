@@ -11,3 +11,19 @@ two:
   tax_id: 1
   tax_level: 1
   count: 1
+
+three:
+  pipeline_output: pipeline_output_one
+  tax_id: 1
+  count_type: 'NT'
+  tax_level: 1
+  name: 'some species'
+  count: 1
+
+four:
+  pipeline_output: pipeline_output_two
+  tax_id: 1
+  count_type: 'NT'
+  tax_level: 1
+  name: 'some species'
+  count: 2
