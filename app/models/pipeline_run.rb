@@ -86,10 +86,9 @@ class PipelineRun < ApplicationRecord
     save
     # rm the json
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_json_path} #{downloaded_stats_path}")
+    # generate report
     po.generate_report
-
   end
-
 
   def download_file(s3_path)
     command = "mkdir -p #{local_json_path};"
