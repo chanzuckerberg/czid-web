@@ -14,20 +14,13 @@ import datetime
 import gzip
 import logging
 
-INPUT_BUCKET = 's3://czbiohub-infectious-disease/UGANDA'
-OUTPUT_BUCKET = 's3://yunfang-workdir/id-uganda'
-KEY_S3_PATH = 's3://cdebourcy-test/idseq-alpha.pem'
+INPUT_BUCKET = 's3://czbiohub-infectious-disease/UGANDA' # default to be overwritten by environment variable
+OUTPUT_BUCKET = 's3://czbiohub-idseq-samples-test/id-uganda'  # default to be overwritten by environment variable
+KEY_S3_PATH = 's3://czbiohub-infectious-disease/idseq-alpha.pem'
 ROOT_DIR = '/mnt'
 DEST_DIR = ROOT_DIR + '/idseq/data' # generated data go here
 REF_DIR  = ROOT_DIR + '/idseq/ref' # referene genome / ref databases go here
 
-#INPUT_BUCKET = 's3://czbiohub-infectious-disease/UGANDA'
-#SAMPLES = ['UGANDA_S30_NP', 'UGANDA_S31_NP', 'UGANDA_S32_NP', 'UGANDA_S33_NP',
-#           'UGANDA_S34_NP', 'UGANDA_S35_NP', 'UGANDA_S36_NP', 'UGANDA_S37_NP',
-#           'UGANDA_S38_NP', 'UGANDA_S39_NP']
-#INPUT_BUCKET = 's3://czbiohub-infectious-disease/background_controls'
-
-# fastqs = INPUT_BUCKET/{sample_id}/*.fastq.gz
 
 STAR="STAR"
 HTSEQ="htseq-count"
@@ -44,12 +37,11 @@ RAPSEARCH2_INSTANCE_IP = '54.191.193.210'
 GSNAPL_MAX_CONCURRENT = 5
 RAPSEARCH2_MAX_CONCURRENT = 5
 
-STAR_GENOME = 's3://cdebourcy-test/id-dryrun-reference-genomes/STAR_genome.tar.gz'
-BOWTIE2_GENOME = 's3://cdebourcy-test/id-dryrun-reference-genomes/bowtie2_genome.tar.gz'
-GSNAPL_GENOME = 's3://cdebourcy-test/id-dryrun-reference-genomes/nt_k16.tar.gz'
-ACCESSION2TAXID = 's3://cdebourcy-test/id-dryrun-reference-genomes/accession2taxid.db.gz'
-DEUTEROSTOME_TAXIDS = 's3://cdebourcy-test/id-dryrun-reference-genomes/lineages-2017-03-17_deuterostome_taxIDs.txt'
-TAXID_TO_INFO = 's3://cdebourcy-test/id-dryrun-reference-genomes/taxon_info.db'
+STAR_GENOME = 's3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz'
+BOWTIE2_GENOME = 's3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz'
+ACCESSION2TAXID = 's3://czbiohub-infectious-disease/references/accession2taxid.db.gz'
+DEUTEROSTOME_TAXIDS = 's3://czbiohub-infectious-disease/references/lineages-2017-03-17_deuterostome_taxIDs.txt'
+TAXID_TO_INFO = 's3://czbiohub-infectious-disease/references/taxon_info.db'
 
 TAX_LEVEL_SPECIES = 1
 TAX_LEVEL_GENUS = 2
