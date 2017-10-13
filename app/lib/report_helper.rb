@@ -75,9 +75,25 @@ module ReportHelper
       )
     end
 
-    sort_by = params[:sort_by] || 'highest_zscore'
-    sort_direction, sort_field = sort_by.split "_"
-    sort_field = sort_field.to_sym
+    default_sort_by = 'highest_species_nt_zscore'
+    sort_by = params[:sort_by] || default_sort_by
+    parts = sort_by.split "_"
+    if parts.length == 2
+      # handle previous frontend version
+      parts = [parts[0], 'species', 'nt', parts[1]]
+    end
+    if parts.length != 4
+      # this is for general malformed parameter
+      parts = default_sort_by.split "_"
+    end
+    sort_direction, sort_tax_level, sort_hit_type, sort_field = parts.map(&:to_sym)
+    details_key = {
+      [:species, :nt] => :nt_ele,
+      [:species, :nr] => :nr_ele,
+      [:genus, :nt] => :genus_nt_ele,
+      [:genus, :nr] => :genus_nr_ele
+    }
+    sort_details_key = details_key[[sort_tax_level, sort_hit_type]]
 
     tax_id_set = Set.new(taxon_zscores.map { |h| h[:tax_id] })
 
@@ -94,20 +110,21 @@ module ReportHelper
       category_info = cat_name_info[category_taxid]
       category_name = category_info ? category_info[0]['name'] : 'Other'
 
-      nts = tax_hit[[tax_id, 'NT']] || [nil]
-      nrs = tax_hit[[tax_id, 'NR']] || [nil]
+      taxon_nts = tax_hit[[tax_id, 'NT']] || [nil]
+      taxon_nrs = tax_hit[[tax_id, 'NR']] || [nil]
 
       if level[tax_id] == species_level
-        species_nts = nts
-        species_nrs = nrs
+        species_nts = taxon_nts
+        species_nrs = taxon_nrs
         genus_taxid = linfo["genus_taxid"]
         genus_nts = tax_hit[[genus_taxid, 'NT']] || [nil]
         genus_nrs = tax_hit[[genus_taxid, 'NR']] || [nil]
       else
+        # assert level[tax_id] == genus_level
         species_nts = [nil]
         species_nrs = [nil]
-        genus_nts = nts
-        genus_nrs = nrs
+        genus_nts = taxon_nts
+        genus_nrs = taxon_nrs
       end
 
       details = {
@@ -120,10 +137,11 @@ module ReportHelper
 
       # For now we sort by species RPM or Z
       # TODO: Allow sorting by genus RPM or Z
-      if details[:nt_ele]
-        sort_key = details[:nt_ele][sort_field]
+      sort_details = details[sort_details_key]
+      if sort_details
+        sort_key = sort_details[sort_field]
         if sort_key
-          sort_key = 0.0 - sort_key if sort_direction == 'highest'
+          sort_key = 0.0 - sort_key if sort_direction == :highest
           details[:sort_key] = sort_key
         end
       end
@@ -137,7 +155,9 @@ module ReportHelper
 
     sortable.sort! { |dl, dr| dl[:sort_key] <=> dr[:sort_key] }
 
-    [htc, sortable + unsortable]
+    # HACK: -- the UI gets really slow if we return all results
+    # about 2000 results is what keeps it snappy, for now
+    [htc, (sortable + unsortable)[0...2000]]
   end
 
   def resolve_params(params, data_ranges)
