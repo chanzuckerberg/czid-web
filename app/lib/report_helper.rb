@@ -32,33 +32,34 @@ module ReportHelper
     zscore_array
   end
 
+  # rubocop:disable Metrics/AbcSize
   def taxonomy_details(report, params)
     taxon_zscores = compute_taxon_zscores(report)
-    genus_level = TaxonCount::TAX_LEVEL_GENUS
+
+    # So apparently every tax_id has a unique tax_level, species or genus.
+    # genus_level = TaxonCount::TAX_LEVEL_GENUS
     species_level = TaxonCount::TAX_LEVEL_SPECIES
-    tax_ids_str = ''
-    tax_id_set = Set.new(taxon_zscores.map { |h| h[:tax_id] })
-    tax_id_set.delete(nil)
-    tax_id_set.sort.each do |tax_id|
-      tax_ids_str += tax_id.to_s
-      tax_ids_str += ','
+    level = {}
+    taxon_zscores.each do |h|
+      level[h[:tax_id]] = h[:tax_level]
     end
-    tax_ids_str = tax_ids_str.chomp(',')
-    lineage_arr = TaxonLineage.connection.select_all("SELECT taxid, superkingdom_taxid,  genus_taxid FROM taxon_lineages WHERE taxid IN (#{tax_ids_str})").to_hash
-    lineage_info = lineage_arr.group_by { |h| h['taxid'] }
-    cat_id_set = Set.new(lineage_info.map { |_, taxons| taxons[0]['superkingdom_taxid'] })
-    cat_id_set.delete(nil)
-    category_taxids = ''
-    cat_id_set.sort.each do |cat_id|
-      category_taxids += cat_id.to_s
-      category_taxids += ','
+
+    tax_id_set = Set.new(taxon_zscores.map { |h| h[:tax_id] }).delete(nil)
+    if !tax_id_set.empty?
+      tax_ids_str = tax_id_set.sort.join(",")
+      lineage_arr = TaxonLineage.connection.select_all("SELECT taxid, superkingdom_taxid,  genus_taxid FROM taxon_lineages WHERE taxid IN (#{tax_ids_str})").to_hash
+      lineage_info = lineage_arr.group_by { |h| h['taxid'] }
+    else
+      lineage_info = {}
     end
-    category_taxids = category_taxids.chomp(',')
-    if !category_taxids.empty?
+
+    cat_id_set = Set.new(lineage_info.map { |_, taxons| taxons[0]['superkingdom_taxid'] }).delete(nil)
+    if !cat_id_set.empty?
+      category_taxids = cat_id_set.sort.join(",")
       taxon_name_arr = TaxonLineage.connection.select_all("select taxid, name from taxon_names where taxid in (#{category_taxids})").to_hash
       cat_name_info = taxon_name_arr.group_by { |h| h['taxid'] }
     else
-      cat_name_info = []
+      cat_name_info = {}
     end
 
     # filter and sort the nt_scores
@@ -74,14 +75,18 @@ module ReportHelper
       )
     end
 
-    # get tax_ids in order sorted by chosen field
-    # sort_report!(taxon_zscores, params[:sort_by])
-    tax_id_arr = taxon_zscores.map {|h| h[:tax_id]}
-    tax_id_arr = Set.new tax_id_arr
+    sort_by = params[:sort_by] || 'highest_zscore'
+    sort_direction, sort_field = sort_by.split "_"
+    sort_field = sort_field.to_sym
+
+    tax_id_set = Set.new(taxon_zscores.map { |h| h[:tax_id] })
 
     tax_hit = taxon_zscores.group_by { |h| [h[:tax_id], h[:hit_type]] }
 
-    tax_details = tax_id_arr.map do |tax_id|
+    sortable = []
+    unsortable = []
+
+    tax_id_set.each do |tax_id|
       linfo = lineage_info[tax_id] || [{}]
       linfo = linfo.first
 
@@ -89,22 +94,50 @@ module ReportHelper
       category_info = cat_name_info[category_taxid]
       category_name = category_info ? category_info[0]['name'] : 'Other'
 
-      genus_taxid = linfo["genus_taxid"]
-      genus_nts = tax_hit[[genus_taxid, 'NT']] || [nil]
-      genus_nrs = tax_hit[[genus_taxid, 'NR']] || [nil]
-
       nts = tax_hit[[tax_id, 'NT']] || [nil]
       nrs = tax_hit[[tax_id, 'NR']] || [nil]
 
-      {
-        nt_ele: nts[0],
-        nr_ele: nrs[0],
+      if level[tax_id] == species_level
+        species_nts = nts
+        species_nrs = nrs
+        genus_taxid = linfo["genus_taxid"]
+        genus_nts = tax_hit[[genus_taxid, 'NT']] || [nil]
+        genus_nrs = tax_hit[[genus_taxid, 'NR']] || [nil]
+      else
+        species_nts = [nil]
+        species_nrs = [nil]
+        genus_nts = nts
+        genus_nrs = nrs
+      end
+
+      details = {
+        nt_ele: species_nts[0],
+        nr_ele: species_nrs[0],
         category: category_name,
         genus_nt_ele: genus_nts[0],
         genus_nr_ele: genus_nrs[0]
       }
+
+      # For now we sort by species RPM or Z
+      # TODO: Allow sorting by genus RPM or Z
+      if details[:nt_ele]
+        sort_key = details[:nt_ele][sort_field]
+        if sort_key
+          sort_key = 0.0 - sort_key if sort_direction == 'highest'
+          details[:sort_key] = sort_key
+        end
+      end
+
+      if details[:sort_key]
+        sortable.push(details)
+      else
+        unsortable.push(details)
+      end
     end
-    [htc, tax_details]
+
+    sortable.sort! { |dl, dr| dl[:sort_key] <=> dr[:sort_key] }
+
+    [htc, sortable + unsortable]
   end
 
   def resolve_params(params, data_ranges)
@@ -130,6 +163,9 @@ module ReportHelper
     nr_z = nr.map { |h| h[:zscore] }.sort
     nt_rpm = nt.map { |h| h[:rpm] }.sort
     nr_rpm = nr.map { |h| h[:rpm] }.sort
+    # TODO: add species/genus field
+    # e.g. instaed of lowest_nt_zscore it should say
+    # lowest_species_nt_zscore and lowest_genus_nt_zscore
     {
       # if you change keys here, update data_ranges[...] in resolve_params(...)
       lowest_nt_zscore: nt_z[0] || 0,
@@ -143,15 +179,6 @@ module ReportHelper
     }
   end
 
-  def sort_report!(nt_zscores, sort_by)
-    sort_by = 'highest_zscore' if sort_by.nil?
-    sort_direction, sort_field = sort_by.split "_"
-    sort_field = sort_field.to_sym
-    nt_zscores.sort! { |hl, hr| hl[sort_field] <=> hr[sort_field] }
-    nt_zscores.reverse! if sort_direction == 'highest'
-    nt_zscores
-  end
-
   def compute_rpm(count, total_reads)
     if count
       count * 1e6 / total_reads.to_f
@@ -160,9 +187,19 @@ module ReportHelper
     end
   end
 
+  def clamp(z)
+    if z < -99
+      -99
+    elsif z > 99
+      99
+    else
+      z
+    end
+  end
+
   def compute_zscore(rpm, mean, stdev)
     if rpm && stdev && stdev != 0
-      (rpm - mean) / stdev
+      clamp((rpm - mean) / stdev)
     elsif rpm
       100
     else
