@@ -25,7 +25,10 @@ class BackgroundsController < ApplicationController
   # POST /backgrounds
   # POST /backgrounds.json
   def create
-    @background = Background.new(background_params)
+    ActiveRecord::Base.transaction do
+      @background = Background.create(background_params)
+      @background.store_summary
+    end
 
     respond_to do |format|
       if @background.save
@@ -41,6 +44,10 @@ class BackgroundsController < ApplicationController
   # PATCH/PUT /backgrounds/1
   # PATCH/PUT /backgrounds/1.json
   def update
+    ActiveRecord::Base.transaction do
+      @background.store_summary
+    end
+
     respond_to do |format|
       if @background.update(background_params)
         format.html { redirect_to @background, notice: 'Background was successfully updated.' }
