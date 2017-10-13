@@ -35,7 +35,7 @@ class BackgroundsController < ApplicationController
       end
     end
     ActiveRecord::Base.connection.execute <<-SQL
-    INSERT INTO taxon_summaries (#{columns.join(",")}) VALUES #{values_list.map { |values| "(#{values.join(",")})" }.join(", ")}
+    INSERT INTO taxon_summaries (#{columns.join(',')}) VALUES #{values_list.map { |values| "(#{values.join(',')})" }.join(', ')}
     SQL
 
     respond_to do |format|
