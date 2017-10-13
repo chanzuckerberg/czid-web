@@ -119,6 +119,7 @@ class Sample < ApplicationRecord
       self.s3_star_index_path = host_genome.s3_star_index_path
       self.s3_bowtie2_index_path = host_genome.s3_bowtie2_index_path
     end
+    s3_preload_result_path ||= ''
     s3_preload_result_path.strip!
   end
 
