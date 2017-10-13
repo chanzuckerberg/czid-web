@@ -1,0 +1,33 @@
+<p>
+  <strong>Name:</strong>
+  <%= @host_genome.name %>
+</p>
+
+<p>
+  <strong>ID:</strong>
+  <%= @host_genome.id %>
+</p>
+
+<p>
+  <strong>STAR S3 Path:</strong>
+  <%= @host_genome.s3_star_index_path %>
+</p>
+
+<p>
+  <strong>Bowtie S3 Path:</strong>
+  <%= @host_genome.s3_bowtie2_index_path %>
+</p>
+
+<p>
+  <strong>Default Background Model:</strong>
+<%= link_to @host_genome.default_background.name, @host_genome.default_background if @host_genome.default_background %>
+</p>
+
+<p>
+  <strong>Date created:</strong>
+  <%= @host_genome.created_at %>
+</p>
+
+<p>
+<%= link_to 'See all host_genomes', host_genomes_path %> |
+</p>

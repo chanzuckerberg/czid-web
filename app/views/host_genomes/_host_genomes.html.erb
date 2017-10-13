@@ -1,0 +1,38 @@
+
+<% host_genomes ||= [] %>
+<h1>Host Genomes</h1>
+
+<% if host_genomes.count == 0 %>
+  No host genomes yet.
+<% else %>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>ID</th>
+        <th>STAR S3 Path</th>
+        <th>Bowtie S3 Path Status</th>
+        <th>Default Background Model</th>
+        <th>Date created</th>
+        <th colspan="2"></th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% host_genomes.each do |host_genome| %>
+        <tr>
+          <td><%= host_genome.name %></td>
+          <td><%= host_genome.id %></td>
+          <td><%= host_genome.s3_star_index_path %> </td>
+          <td> <%= host_genome.s3_bowtie2_index_path %> </td>
+          <td><%= link_to host_genome.default_background.name, host_genome.default_background if host_genome.default_background %></td>
+          <td><%= host_genome.created_at %></td>
+          <td><%= link_to 'Edit', edit_host_genome_path(host_genome) %></td>
+          <!--
+          <td><%= link_to 'Destroy', host_genome, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+          -->
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

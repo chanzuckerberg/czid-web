@@ -10,4 +10,13 @@ class PipelineOutput < ApplicationRecord
   def name
     ['ID#', id, ' (', sample.name, ')'].join('')
   end
+
+  def generate_report
+    if sample.host_genome && sample.host_genome.default_background
+      Report.create(name: "#{sample.id}: #{sample.name}",
+                    pipeline_output: self,
+                    background: sample.host_genome.default_background)
+
+    end
+  end
 end
