@@ -20,12 +20,7 @@ module ReportHelper
   end
 
   def compute_taxon_zscores(report)
-    bg = report.background
-    summary = if bg.status == Background::STATUS_SUCCESS
-                TaxonSummary.connection.select_all("select * from taxon_summaries where background_id = #{bg.id}").to_hash
-              else
-                report.background.summarize
-              end
+    summary = TaxonSummary.connection.select_all("select * from taxon_summaries where background_id = #{report.background.id}").to_hash
     total_reads = report.pipeline_output.total_reads
     pipeline_output_id = report.pipeline_output.id
     data = TaxonCount.connection.select_all("select tax_id, pipeline_output_id, tax_level, count, name, count_type from taxon_counts where pipeline_output_id = #{pipeline_output_id}").to_hash
