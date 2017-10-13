@@ -27,7 +27,7 @@ class BackgroundsController < ApplicationController
   def create
     ActiveRecord::Base.transaction do
       @background = Background.create(background_params)
-      store_summary
+      @background.store_summary
     end
 
     respond_to do |format|
@@ -45,7 +45,7 @@ class BackgroundsController < ApplicationController
   # PATCH/PUT /backgrounds/1.json
   def update
     ActiveRecord::Base.transaction do
-      store_summary
+      @background.store_summary
     end
 
     respond_to do |format|
@@ -74,22 +74,6 @@ class BackgroundsController < ApplicationController
   # Use callbacks to share common setup or constraints between actions.
   def set_background
     @background = Background.find(params[:id])
-  end
-
-  def store_summary
-    data = @background.summarize.map { |h| h.slice('tax_id', 'count_type', 'tax_level', 'name', :background_id, :created_at, :updated_at, :mean, :stdev) }
-    data_chunks = data.in_groups_of(Background::TAXON_SUMMARY_CHUNK_SIZE, false)
-    data_chunks.each do |chunk|
-      columns = chunk.first.keys
-      values_list = chunk.map do |hash|
-        hash.values.map do |value|
-          ActiveRecord::Base.connection.quote(value)
-        end
-      end
-      ActiveRecord::Base.connection.execute <<-SQL
-      INSERT INTO taxon_summaries (#{columns.join(',')}) VALUES #{values_list.map { |values| "(#{values.join(',')})" }.join(', ')}
-      SQL
-    end
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.

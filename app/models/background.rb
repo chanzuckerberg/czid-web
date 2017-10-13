@@ -26,6 +26,22 @@ class Background < ApplicationRecord
     results
   end
 
+  def store_summary
+    data = summarize.map { |h| h.slice('tax_id', 'count_type', 'tax_level', 'name', :background_id, :created_at, :updated_at, :mean, :stdev) }
+    data_chunks = data.in_groups_of(TAXON_SUMMARY_CHUNK_SIZE, false)
+    data_chunks.each do |chunk|
+      columns = chunk.first.keys
+      values_list = chunk.map do |hash|
+        hash.values.map do |value|
+          ActiveRecord::Base.connection.quote(value)
+        end
+      end
+      ActiveRecord::Base.connection.execute <<-SQL
+      INSERT INTO taxon_summaries (#{columns.join(',')}) VALUES #{values_list.map { |values| "(#{values.join(',')})" }.join(', ')}
+      SQL
+    end
+  end
+
   def compute_stdev(sum, sum2, n)
     Math.sqrt((sum2 - sum**2 / n.to_f) / (n - 1))
   end
