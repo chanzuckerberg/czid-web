@@ -25,8 +25,8 @@ class BackgroundsController < ApplicationController
   # POST /backgrounds
   # POST /backgrounds.json
   def create
-    @background = Background.create(background_params)
     ActiveRecord::Base.transaction do
+      @background = Background.create(background_params)
       store_summary
     end
 
