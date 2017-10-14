@@ -178,12 +178,6 @@ class PipelineSampleReport extends React.Component {
                                 taxon.nt_ele.tax_id}`}>{ taxon.nt_ele.name }
                               </a> : ''
                             }
-                            { (taxon.nr_ele) ?
-                              <a href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${
-                              taxon.nr_ele.tax_id}`}>{
-                               taxon.nr_ele.name}
-                              </a> : ''
-                            }
                           </span>
                         </td>
 
