@@ -37,8 +37,14 @@
   </div>
 
   <div class="field checkbox-list">
-    <%= form.label :projects %>
+    <%= form.label "projects:" %>
     <%= form.collection_check_boxes :project_ids, Project.all, :id, :name %>
+  </div>
+
+  <div class="field checkbox-list">
+    <%= form.label "Role:" %>
+    <%= form.check_box :role, value: 1 , id: :admin_role_tag%>
+    <label for="admin_role_tag">Admin</label>
   </div>
 
   <div class="actions">

@@ -31,6 +31,10 @@
     <%= form.text_field :authentication_token, id: :authentication_token %>
   </div>
 
+  <div class="field checkbox-list">
+    <%= form.check_box :role, value: 1 , id: :admin_role_tag%>
+    <label for="admin_role_tag">Admin</label>
+  </div>
   <div class="actions">
     <%= form.submit %>
   </div>
