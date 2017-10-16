@@ -70,16 +70,16 @@ class CreateUser extends React.Component {
         authentication_token: this.refs.authentication_token.value
       },
       authenticity_token: this.csrf
-    }).then(function(res) {
+    }).then((res) => {
       that.setState({
         success: true,
         successMessage: 'User created successfully'
       })
-      setTimeout(function() {
+      setTimeout(() => {
         location.href = '/';
       }, 1000)
     })
-    .catch(function(err) {
+    .catch((err) => {
       that.setState({
         showFailed: true,
         errorMessage: 'Failed to create user'

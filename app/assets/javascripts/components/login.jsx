@@ -40,7 +40,7 @@ class Login extends React.Component {
       },
       authenticity_token: this.csrf
     })
-    .then(function (response) {
+    .then((response) => {
       that.setState({
         success: true,
         successMessage: 'User signed in'
@@ -48,7 +48,7 @@ class Login extends React.Component {
         that.gotoPage('/');
       })
     })
-    .catch(function (error) {
+    .catch((error) => {
       that.setState({
         showFailedLogin: true,
         errorMessage: 'Invalid Email and Password'
