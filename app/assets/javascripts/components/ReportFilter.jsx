@@ -30,17 +30,17 @@ class ReportFilter extends React.Component {
       ? ReportFilter.getFilter('nt_rpm_threshold') : default_nt_rpm_threshold;
 
     const nt_zscore_start =
-      (nt_zscore_threshold.split(',').length > 0) ? parseInt(nt_zscore_threshold.split(',')[0], 10) :
+      (nt_zscore_threshold.split(',').length > 0) ? nt_zscore_threshold.split(',')[0] :
       this.lowest_nt_zscore;
     const nt_zscore_end =
-      (nt_zscore_threshold.split(',').length > 1) ? parseInt(nt_zscore_threshold.split(',')[1], 10) :
+      (nt_zscore_threshold.split(',').length > 1) ? nt_zscore_threshold.split(',')[1] :
       this.highest_nt_zscore;
 
     const nt_rpm_start =
-      (nt_rpm_threshold.split(',').length > 0) ? parseInt(nt_rpm_threshold.split(',')[0], 10) :
+      (nt_rpm_threshold.split(',').length > 0) ? nt_rpm_threshold.split(',')[0]:
       this.lowest_nt_rpm;
     const nt_rpm_end =
-      (nt_rpm_threshold.split(',').length > 1) ? parseInt(nt_rpm_threshold.split(',')[1], 10) :
+      (nt_rpm_threshold.split(',').length > 1) ? nt_rpm_threshold.split(',')[1] :
       this.highest_nt_rpm;
 
     this.state = { nt_zscore_start, nt_zscore_end, nt_rpm_start, nt_rpm_end };
@@ -89,19 +89,23 @@ class ReportFilter extends React.Component {
     }
   }
 
-  componentDidMount() {
+  parseRange(value) {
+    value = +Number(value).toFixed(3);
+    return value;
+  }
 
+  componentDidMount() {
     if (this.has_valid_nt_zscore_range) {
       const nt_zscore = document.getElementById('nt_zscore');
       noUiSlider.create(nt_zscore, {
-        start: [this.state.nt_zscore_start, this.state.nt_zscore_end],
+        start: [this.parseRange(this.state.nt_zscore_start), this.parseRange(this.state.nt_zscore_end)],
         connect: true,
-        step: 1,
+        step: 0.1,
         orientation: 'horizontal', // 'horizontal' or 'vertical',
         behaviour: 'tap-drag',
         range: {
-          min: this.props.highest_tax_counts.lowest_nt_zscore,
-          max: this.props.highest_tax_counts.highest_nt_zscore
+          min: this.parseRange(this.lowest_nt_zscore),
+          max: this.parseRange(this.highest_nt_zscore)
         },
         format: wNumb({
           decimals: 0
@@ -109,46 +113,33 @@ class ReportFilter extends React.Component {
       });
 
       nt_zscore.noUiSlider.on('update', (values, handle) => {
-        if (handle === 0) {
-          this.setState({
-            nt_zscore_start: Math.round(values[handle])
-          });
-        } else {
-          this.setState({
-            nt_zscore_end: Math.round(values[handle])
-          });
-        }
+        const value = this.parseRange(values[handle]);
+        const newState = (handle === 0) ? { nt_zscore_start: value } : { nt_zscore_end: value };
+        this.setState(newState);
       });
     }
 
     if (this.has_valid_nt_rpm_range) {
       const nt_rpm = document.getElementById('nt_rpm');
       noUiSlider.create(nt_rpm, {
-        start: [this.state.nt_rpm_start, this.state.nt_rpm_end],
+        start: [this.parseRange(this.state.nt_rpm_start), this.parseRange(this.state.nt_rpm_end)],
         connect: true,
-        step: 1,
+        step: 0.1,
         orientation: 'horizontal', // 'horizontal' or 'vertical'
         range: {
-          min: 0,
-          max: this.props.highest_tax_counts.highest_nt_rpm
+          min: this.parseRange(this.lowest_nt_rpm),
+          max: this.parseRange(this.highest_nt_rpm)
         },
         format: wNumb({
           decimals: 0
         })
       });
       nt_rpm.noUiSlider.on('update', (values, handle) => {
-        if (handle === 0) {
-          this.setState({
-            nt_rpm_start: Math.round(values[handle])
-          });
-        } else {
-          this.setState({
-            nt_rpm_end: Math.round(values[handle])
-          });
-        }
+        const value = this.parseRange(values[handle]);
+        const newState = (handle === 0) ? { nt_rpm_start: value } : { nt_rpm_end: value };
+        this.setState(newState);
       });
     }
-
   }
   render() {
     return (
