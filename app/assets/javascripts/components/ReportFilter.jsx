@@ -2,7 +2,6 @@ class ReportFilter extends React.Component {
   constructor(props) {
     super(props);
     this.background_model = props.background_model || 'N/A';
-    this.report_title = props.report_title || 'Not Set';
 
     this.highest_nt_zscore = this.props.highest_tax_counts.highest_nt_zscore;
     this.highest_nt_rpm = this.props.highest_tax_counts.highest_nt_rpm;
