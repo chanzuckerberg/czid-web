@@ -113,50 +113,50 @@ module ReportHelper
     unsortable = []
 
     tax_id_set.each do |tax_id|
-      linfo = lineage_info[tax_id] || [{}]
-      linfo = linfo.first
-
-      category_taxid = linfo["superkingdom_taxid"]
-      category_info = cat_name_info[category_taxid]
-      category_name = category_info ? category_info[0]['name'] : 'Other'
-
-      taxon_nts = tax_hit[[tax_id, 'NT']] || [nil]
-      taxon_nrs = tax_hit[[tax_id, 'NR']] || [nil]
-
-      if level[tax_id] == species_level
-        species_nts = taxon_nts
-        species_nrs = taxon_nrs
-        genus_taxid = linfo["genus_taxid"]
-        genus_nts = tax_hit[[genus_taxid, 'NT']] || [nil]
-        genus_nrs = tax_hit[[genus_taxid, 'NR']] || [nil]
-      else
-        # assert level[tax_id] == genus_level
-        species_nts = [nil]
-        species_nrs = [nil]
-        genus_nts = taxon_nts
-        genus_nrs = taxon_nrs
-      end
-
-      details = {
-        nt_ele: species_nts[0],
-        nr_ele: species_nrs[0],
-        category: category_name,
-        genus_nt_ele: genus_nts[0],
-        genus_nr_ele: genus_nrs[0]
-      }
-
-      # For now we sort by species RPM or Z
-      # TODO: Allow sorting by genus RPM or Z
-      sort_details = details[sort_details_key]
-      if sort_details
-        sort_key = sort_details[sort_field]
-        if sort_key
-          sort_key = 0.0 - sort_key if sort_direction == :highest
-          details[:sort_key] = sort_key
-        end
-      end
-
       if level[tax_id] == view_level_int
+        linfo = lineage_info[tax_id] || [{}]
+        linfo = linfo.first
+
+        category_taxid = linfo["superkingdom_taxid"]
+        category_info = cat_name_info[category_taxid]
+        category_name = category_info ? category_info[0]['name'] : 'Other'
+
+        taxon_nts = tax_hit[[tax_id, 'NT']] || [nil]
+        taxon_nrs = tax_hit[[tax_id, 'NR']] || [nil]
+
+        if level[tax_id] == species_level
+          species_nts = taxon_nts
+          species_nrs = taxon_nrs
+          genus_taxid = linfo["genus_taxid"]
+          genus_nts = tax_hit[[genus_taxid, 'NT']] || [nil]
+          genus_nrs = tax_hit[[genus_taxid, 'NR']] || [nil]
+        else
+          # assert level[tax_id] == genus_level
+          species_nts = [nil]
+          species_nrs = [nil]
+          genus_nts = taxon_nts
+          genus_nrs = taxon_nrs
+        end
+
+        details = {
+          nt_ele: species_nts[0],
+          nr_ele: species_nrs[0],
+          category: category_name,
+          genus_nt_ele: genus_nts[0],
+          genus_nr_ele: genus_nrs[0]
+        }
+
+        # For now we sort by species RPM or Z
+        # TODO: Allow sorting by genus RPM or Z
+        sort_details = details[sort_details_key]
+        if sort_details
+          sort_key = sort_details[sort_field]
+          if sort_key
+            sort_key = 0.0 - sort_key if sort_direction == :highest
+            details[:sort_key] = sort_key
+          end
+        end
+
         if details[:sort_key]
           sortable.push(details)
         else
