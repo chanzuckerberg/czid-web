@@ -1,3 +1,7 @@
+/**
+  @class ReportFilter
+  @desc Creates react component to handle filtering in the page
+*/
 class ReportFilter extends React.Component {
   constructor(props) {
     super(props);
@@ -10,10 +14,10 @@ class ReportFilter extends React.Component {
     this.lowest_nt_rpm = this.props.highest_tax_counts.lowest_nt_rpm;
 
     this.has_valid_nt_zscore_range =
-    (this.highest_nt_zscore && (this.lowest_nt_zscore !== this.highest_nt_zscore));
+    (this.highest_nt_zscore && (this.lowest_nt_zscore < this.highest_nt_zscore));
 
     this.has_valid_nt_rpm_range =
-    (this.highest_nt_rpm && (this.lowest_nt_rpm !== this.highest_nt_rpm));
+    (this.highest_nt_rpm && (this.lowest_nt_rpm < this.highest_nt_rpm));
 
 
     const default_nt_zscore_threshold = `${this.lowest_nt_zscore},${this.highest_nt_zscore}`;
@@ -42,7 +46,7 @@ class ReportFilter extends React.Component {
     this.state = { nt_zscore_start, nt_zscore_end, nt_rpm_start, nt_rpm_end };
 
     this.applyFilter = this.applyFilter.bind(this);
-
+    this.updateThreshold = this.updateThreshold.bind(this);
   }
 
   applyFilter() {
@@ -66,6 +70,23 @@ class ReportFilter extends React.Component {
       return null;
     }
     return decodeURIComponent(results[2].replace(/\+/g, " "));
+  }
+
+  updateThreshold(e) {
+    const { innerText, className } = e.target;
+    if (className.indexOf('nt_zscore') >= 0) {
+      const ntZscore = document.getElementById('nt_zscore');
+      if (ntZscore) {
+        (className.indexOf('start') >= 0)
+        ? ntZscore.noUiSlider.set([innerText, null]) : ntZscore.noUiSlider.set([null, innerText]);
+      }
+    } else if (className.indexOf('nt_rpm') >= 0) {
+      const ntRpm = document.getElementById('nt_rpm');
+      if (ntRpm) {
+        (className.indexOf('start') >= 0)
+        ? ntRpm.noUiSlider.set([innerText, null]) : ntRpm.noUiSlider.set([null, innerText]);
+      }
+    }
   }
 
   componentDidMount() {
@@ -197,8 +218,12 @@ class ReportFilter extends React.Component {
                           NT Species Z Score
                         </div>
                         <div className="slider-values">
-                          <div className="nt_zscore start">{ this.state.nt_zscore_start }</div>
-                          <div className="nt_zscore end">{ this.state.nt_zscore_end }</div>
+                          <div suppressContentEditableWarning={true} contentEditable={true} className="nt_zscore start">
+                            { this.state.nt_zscore_start }
+                          </div>
+                          <div suppressContentEditableWarning={true} contentEditable={true} className="nt_zscore end">
+                            { this.state.nt_zscore_end }
+                          </div>
                         </div>
                         <div id="nt_zscore"></div>
                       </div>
@@ -210,8 +235,12 @@ class ReportFilter extends React.Component {
                           NT Species RPM
                         </div>
                         <div className="slider-values">
-                          <div className="nt_rpm start">{ this.state.nt_rpm_start }</div>
-                          <div className="nt_rpm end">{ this.state.nt_rpm_end }</div>
+                          <div onBlur={ this.updateThreshold } suppressContentEditableWarning={true} contentEditable={true} className="nt_rpm start">
+                            { this.state.nt_rpm_start }
+                          </div>
+                          <div  onBlur={ this.updateThreshold } suppressContentEditableWarning={true} contentEditable={true} className="nt_rpm end">
+                            { this.state.nt_rpm_end }
+                          </div>
                         </div>
                         <div id="nt_rpm"></div>
                       </div>
@@ -235,3 +264,8 @@ class ReportFilter extends React.Component {
     );
   }
 }
+
+ReportFilter.propTypes = {
+  background_model: React.PropTypes.string,
+  highest_tax_counts: React.PropTypes.object,
+};
