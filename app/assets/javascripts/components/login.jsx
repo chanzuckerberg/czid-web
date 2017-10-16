@@ -44,8 +44,9 @@ class Login extends React.Component {
       that.setState({
         success: true,
         successMessage: 'User signed in'
+      }, () => {
+        that.gotoPage('/');
       })
-      this.gotoPage.bind(this, '/');
     })
     .catch(function (error) {
       that.setState({
