@@ -155,7 +155,7 @@ class PipelineSampleReport extends React.Component {
                   </tr>
                   </thead>
                   <tbody>
-                  { this.taxonomy_details.map((taxon, i) => { /* To do: when view_level is species, should collapse to keep only 1 entry per unique genus */
+                  { this.taxonomy_details.map((taxon, i) => {
                     return (
                       <tr key={i}>
                         <td>
