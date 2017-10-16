@@ -2,7 +2,7 @@ module ReportHelper
   def external_report_info(report, view_level, params)
     data = {}
     data[:report_details] = report_details(report)
-    htc, td = taxonomy_details(report, params)
+    htc, td = taxonomy_details(report, params, view_level_name2int(view_level))
     data[:highest_tax_counts] = htc
     data[:taxonomy_details] = td
     data[:view_level] = view_level
@@ -19,6 +19,16 @@ module ReportHelper
     }
   end
 
+  def view_level_name2int(view_level)
+    case view_level.downcase
+    when 'species'
+      1
+    when 'genus'
+      2
+    end
+    # to be extended for all taxonomic ranks when needed
+  end
+
   def compute_taxon_zscores(report)
     summary = TaxonSummary.connection.select_all("select * from taxon_summaries where background_id = #{report.background.id}").to_hash
     total_reads = report.pipeline_output.total_reads
@@ -33,7 +43,7 @@ module ReportHelper
   end
 
   # rubocop:disable Metrics/AbcSize
-  def taxonomy_details(report, params)
+  def taxonomy_details(report, params, view_level_int)
     taxon_zscores = compute_taxon_zscores(report)
 
     # So apparently every tax_id has a unique tax_level, species or genus.
@@ -146,10 +156,12 @@ module ReportHelper
         end
       end
 
-      if details[:sort_key]
-        sortable.push(details)
-      else
-        unsortable.push(details)
+      if level[tax_id] == view_level_int
+        if details[:sort_key]
+          sortable.push(details)
+        else
+          unsortable.push(details)
+        end
       end
     end
 
