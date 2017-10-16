@@ -2,7 +2,7 @@ module ReportHelper
   def external_report_info(report, view_level, params)
     data = {}
     data[:report_details] = report_details(report)
-    htc, td = taxonomy_details(report, params)
+    htc, td = taxonomy_details(report, params, view_level_name2int(view_level))
     data[:highest_tax_counts] = htc
     data[:taxonomy_details] = td
     data[:view_level] = view_level
@@ -19,6 +19,16 @@ module ReportHelper
     }
   end
 
+  def view_level_name2int(view_level)
+    case view_level.downcase
+    when 'species'
+      TaxonCount::TAX_LEVEL_SPECIES
+    when 'genus'
+      TaxonCount::TAX_LEVEL_GENUS
+    end
+    # to be extended for all taxonomic ranks when needed
+  end
+
   def compute_taxon_zscores(report)
     summary = TaxonSummary.connection.select_all("select * from taxon_summaries where background_id = #{report.background.id}").to_hash
     total_reads = report.pipeline_output.total_reads
@@ -33,8 +43,20 @@ module ReportHelper
   end
 
   # rubocop:disable Metrics/AbcSize
-  def taxonomy_details(report, params)
+  def taxonomy_details(report, params, view_level_int)
     taxon_zscores = compute_taxon_zscores(report)
+
+    tax_id_set = Set.new(taxon_zscores.map { |h| h[:tax_id] }).delete(nil)
+    if !tax_id_set.empty?
+      tax_ids_str = tax_id_set.sort.join(",")
+      lineage_arr = TaxonLineage.connection.select_all("SELECT taxid, superkingdom_taxid,  genus_taxid FROM taxon_lineages WHERE taxid IN (#{tax_ids_str})").to_hash
+      lineage_info = lineage_arr.group_by { |h| h['taxid'] }
+      name_arr = TaxonName.connection.select_all("SELECT taxid, name FROM taxon_names WHERE taxid IN (#{tax_ids_str})").to_hash
+      name_info = name_arr.group_by { |h| h['taxid'] }
+    else
+      lineage_info = {}
+      name_info = {}
+    end
 
     # So apparently every tax_id has a unique tax_level, species or genus.
     # genus_level = TaxonCount::TAX_LEVEL_GENUS
@@ -42,15 +64,9 @@ module ReportHelper
     level = {}
     taxon_zscores.each do |h|
       level[h[:tax_id]] = h[:tax_level]
-    end
-
-    tax_id_set = Set.new(taxon_zscores.map { |h| h[:tax_id] }).delete(nil)
-    if !tax_id_set.empty?
-      tax_ids_str = tax_id_set.sort.join(",")
-      lineage_arr = TaxonLineage.connection.select_all("SELECT taxid, superkingdom_taxid,  genus_taxid FROM taxon_lineages WHERE taxid IN (#{tax_ids_str})").to_hash
-      lineage_info = lineage_arr.group_by { |h| h['taxid'] }
-    else
-      lineage_info = {}
+      ninfo = name_info[h[:tax_id]] || [{}]
+      ninfo = ninfo.first
+      h[:name] = ninfo["name"]
     end
 
     cat_id_set = Set.new(lineage_info.map { |_, taxons| taxons[0]['superkingdom_taxid'] }).delete(nil)
@@ -103,6 +119,8 @@ module ReportHelper
     unsortable = []
 
     tax_id_set.each do |tax_id|
+      next unless level[tax_id] == view_level_int
+
       linfo = lineage_info[tax_id] || [{}]
       linfo = linfo.first
 
@@ -154,7 +172,6 @@ module ReportHelper
     end
 
     sortable.sort! { |dl, dr| dl[:sort_key] <=> dr[:sort_key] }
-
     # HACK: -- the UI gets really slow if we return all results
     # about 2000 results is what keeps it snappy, for now
     [htc, (sortable + unsortable)[0...2000]]

@@ -39,7 +39,7 @@
 
   }
 
-  .active {
+  a.active {
     color: #5ABCD6 !important;
   }
 
@@ -92,8 +92,7 @@
         background: #979797;
       }
 
-      .noUi-tooltip span {
-        overflow: hidden;
+      .noUi-tooltip {
         display: none;
       }
 
@@ -135,6 +134,9 @@
   margin-bottom: 15px;
   color: #9B9B9B;
   font-size: 12px;
+  border: 1px solid rgb(200, 200,200);
+  padding: 0 5px;
+  background: white;
 }
 .slider-values .end {
   float: right;
