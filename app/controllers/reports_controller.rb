@@ -14,7 +14,7 @@ class ReportsController < ApplicationController
     @report_details = report_details(@report)
     @view_level = params[:view_level] ? params[:view_level].downcase : 'genus'
     @view_level_int = view_level_name2int(@view_level)
-    @highest_tax_counts, @taxonomy_details = taxonomy_details(@report, params, @view_level_int)
+    @highest_tax_counts, @taxonomy_details = taxonomy_details(@report, params, @view_level)
   end
 
   # GET /reports/new
