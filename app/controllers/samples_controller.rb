@@ -55,6 +55,7 @@ class SamplesController < ApplicationController
   # GET /samples/new
   def new
     @sample = Sample.new
+    @projects = Project.all
   end
 
   # GET /samples/1/edit

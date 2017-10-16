@@ -106,12 +106,12 @@ class Login extends React.Component {
               </div> : null }
               <div className="row content-wrapper">
                 <div className="input-field">
-                  <i className="fa fa-envelope" aria-hidden="true"></i>
+                  <i className="sample fa fa-envelope" aria-hidden="true"></i>
                   <input ref= "email" type="email" className="" onFocus={ this.clearError }  />
                   <label htmlFor="user_email">Email</label>
                 </div>
                 <div className="input-field">
-                  <i className="fa fa-key" aria-hidden="true"></i>
+                  <i className="sample fa fa-key" aria-hidden="true"></i>
                   <input ref= "password" type="password" className="" onFocus={ this.clearError }   />
                   <label htmlFor="user_password">Password</label>
                 </div>

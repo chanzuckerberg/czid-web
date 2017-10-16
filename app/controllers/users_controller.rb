@@ -12,7 +12,7 @@ class UsersController < ApplicationController
 
   # GET /users/new
   def new
-    @user = User.new
+    @newuser = User.new
   end
 
   # GET /users/1/edit
@@ -24,7 +24,7 @@ class UsersController < ApplicationController
   # POST /users.json
   def create
     Rails.logger.debug(user_params.inspect)
-    @user = User.new(user_params)
+    @newuser = User.new(user_params)
 
     respond_to do |format|
       if @user.save

@@ -1,4 +1,4 @@
-<%# <%= react_component 'SampleUpload' %> %>
+<%= react_component 'SampleUpload', {projects: @projects, csrf: form_authenticity_token}%>
 
 <div style="margin:15px;">
 <h1>New Sample</h1>
