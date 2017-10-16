@@ -2,7 +2,7 @@ module ReportHelper
   def external_report_info(report, view_level, params)
     data = {}
     data[:report_details] = report_details(report)
-    htc, td = taxonomy_details(report, params, view_level_name2int(view_level))
+    htc, td = taxonomy_details(report, params, view_level)
     data[:highest_tax_counts] = htc
     data[:taxonomy_details] = td
     data[:view_level] = view_level
@@ -63,7 +63,7 @@ module ReportHelper
   end
 
   # rubocop:disable Metrics/AbcSize
-  def taxonomy_details(report, params, view_level_int)
+  def taxonomy_details(report, params, view_level)
     taxon_zscores = compute_taxon_zscores(report)
 
     tax_id_set = Set.new(taxon_zscores.map { |h| h[:tax_id] }).delete(nil)
@@ -98,14 +98,16 @@ module ReportHelper
       cat_name_info = {}
     end
 
-    htc = highest_tax_counts(taxon_zscores)
+    view_level_int = view_level_name2int(view_level)
+    view_level_sym = view_level.downcase.to_sym
+    view_level_str = view_level.downcase
 
     default_sort_by = 'highest_species_nt_zscore'
     sort_by = params[:sort_by] || default_sort_by
     parts = sort_by.split "_"
     if parts.length == 2
       # handle previous frontend version
-      parts = [parts[0], 'species', 'nt', parts[1]]
+      parts = [parts[0], view_level_str, 'nt', parts[1]]
     end
     if parts.length != 4
       # this is for general malformed parameter
@@ -124,11 +126,15 @@ module ReportHelper
 
     tax_hit = taxon_zscores.group_by { |h| [h[:tax_id], h[:hit_type]] }
 
+    # filter and sort the nt_scores
+    htc = highest_tax_counts(taxon_zscores, view_level_str)
+    rp = resolve_params(params, view_level_str, htc)
+
     sortable = []
     unsortable = []
 
     tax_id_set.each do |tax_id|
-      next unless level[tax_id] == view_level_int && tax_id >= 0
+      next unless tax_id >= 0 && level[tax_id] == view_level_int
 
       linfo = lineage_info[tax_id] || [{}]
       linfo = linfo.first
@@ -173,10 +179,32 @@ module ReportHelper
         end
       end
 
-      if details[:sort_key]
-        sortable.push(details)
-      else
-        unsortable.push(details)
+      out_of_bounds = false
+      [:nt, :nr].each do |type|
+        filter_details = details[details_key[[view_level_sym, type]]]
+        next unless filter_details
+        [:zscore, :rpm].each do |metric|
+          fm_val = filter_details[metric]
+          high = "highest_#{view_level_str}_#{type}_#{metric}".to_sym
+          if rp[high] < fm_val
+            out_of_bounds = true
+            break
+          end
+          low = "lowest_#{view_level_str}_#{type}_#{metric}".to_sym
+          if rp[low] > fm_val
+            out_of_bounds = true
+            break
+          end
+        end
+        break if out_of_bounds
+      end
+
+      unless out_of_bounds
+        if details[:sort_key]
+          sortable.push(details)
+        else
+          unsortable.push(details)
+        end
       end
     end
 
@@ -186,43 +214,73 @@ module ReportHelper
     [htc, (sortable + unsortable)[0...2000]]
   end
 
-  def resolve_params(params, data_ranges)
-    new_params = {}
-    [:nt_zscore_threshold, :nt_rpm_threshold].each do |k|
-      s, e = params[k] ? params[k].split(',') : []
-      ntnr, metric, _threshold = k.to_s.split "_"
-      dr_s = data_ranges[('lowest_' + ntnr + "_" + metric).to_sym]
-      dr_e = data_ranges[('highest_' + ntnr + "_" + metric).to_sym]
-      new_params[k] = {
-        start: Float(s || dr_s),
-        end: Float(e || dr_e)
-      }
+  def resolve_params(params, view_level_str, data_ranges)
+    new_params = data_ranges.clone
+    [:species_nt_zscore_threshold,
+     :species_nt_rpm_threshold,
+     :species_nr_zscore_threshold,
+     :species_nr_rpm_threshold,
+     :genus_nt_zscore_threshold,
+     :genus_nt_rpm_threshold,
+     :genus_nr_zscore_threshold,
+     :genus_nr_rpm_threshold,
+     :nt_zscore_threshold,
+     :nt_rpm_threshold,
+     :nr_zscore_threshold,
+     :nr_rpm_threshold].each do |k|
+      level_type_metric = k.to_s.chomp('_threshold')
+      if level_type_metric.split("_").length < 3
+        level_type_metric = "#{view_level_str}_#{level_type_metric}".to_sym
+      end
+      high = "highest_#{level_type_metric}".to_sym
+      low = "lowest_#{level_type_metric}".to_sym
+      thresholds = params[k]
+      next unless thresholds
+      t_low, t_high = thresholds.split(',')
+      if t_low && t_high
+        new_params[low] = Float(t_low)
+        new_params[high] = Float(t_high)
+      end
     end
     new_params
   end
 
-  def highest_tax_counts(taxon_zscores)
-    hit = taxon_zscores.group_by { |h| h[:hit_type] }
-    nt = hit['NT'] || []
-    nr = hit['NR'] || []
-    nt_z = nt.map { |h| h[:zscore] }.sort
-    nr_z = nr.map { |h| h[:zscore] }.sort
-    nt_rpm = nt.map { |h| h[:rpm] }.sort
-    nr_rpm = nr.map { |h| h[:rpm] }.sort
-    # TODO: add species/genus field
-    # e.g. instaed of lowest_nt_zscore it should say
-    # lowest_species_nt_zscore and lowest_genus_nt_zscore
-    {
-      # if you change keys here, update data_ranges[...] in resolve_params(...)
-      lowest_nt_zscore: nt_z[0] || 0,
-      lowest_nr_zscore: nr_z[0] || 0,
-      lowest_nt_rpm: nt_rpm[0] || 0,
-      lowest_nr_rpm: nr_rpm[0] || 0,
-      highest_nt_zscore: nt_z[-1] || 0,
-      highest_nr_zscore: nr_z[-1] || 0,
-      highest_nt_rpm: nt_rpm[-1] || 0,
-      highest_nr_rpm: nr_rpm[-1] || 0
-    }
+  def highest_tax_counts(taxon_zscores, view_level_str)
+    # compute min/max extents for 8 columns
+    bounds = {}
+    taxon_zscores.each do |taxon|
+      level = taxon[:tax_level] == TaxonCount::TAX_LEVEL_SPECIES ? :species : :genus
+      type = taxon[:hit_type] == 'NT' ? :nt : :nr
+      [:zscore, :rpm].each do |metric|
+        tm_val = taxon[metric]
+        high = [:highest, level, type, metric]
+        bounds[high] = tm_val unless bounds[high] && bounds[high] > tm_val
+        low = [:lowest, level, type, metric]
+        bounds[low] = tm_val unless bounds[low] && bounds[low] < tm_val
+      end
+    end
+    # flatten & handle empty columns
+    flat = {}
+    default_value = 0
+    [:highest, :lowest].each do |extent|
+      [:species, :genus].each do |level|
+        [:nt, :nr].each do |type|
+          [:zscore, :rpm].each do |metric|
+            key_l = [extent, level, type, metric]
+            key_s = "#{extent}_#{level}_#{type}_#{metric}".to_sym
+            flat[key_s] = bounds.delete(key_l) || default_value
+            # For now, JS likes to get the extents of the chosen view_level
+            # without express view_level qualification
+            if level != view_level_str.to_sym
+              key_ui = "#{extent}_#{type}_#{metric}".to_sym
+              flat[key_ui] = flat[key_s]
+            end
+          end
+        end
+      end
+    end
+    logger.warn "Ignoring taxon extents key #{bounds}" unless bounds.empty?
+    flat
   end
 
   def compute_rpm(count, total_reads)
