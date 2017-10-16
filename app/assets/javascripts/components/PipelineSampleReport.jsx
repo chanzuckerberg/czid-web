@@ -4,7 +4,7 @@ class PipelineSampleReport extends React.Component {
     super(props);
     this.report_details = props.report_details;
     this.taxonomy_details = props.taxonomy_details;
-    this.view_level = ReportFilter.getFilter('view_level');
+    this.view_level = ReportFilter.getFilter('view_level') || 'species';
     this.highest_tax_counts = props.highest_tax_counts;
     const current_sort = PipelineSampleReport.currentSort();
     this.state = {
@@ -142,16 +142,16 @@ class PipelineSampleReport extends React.Component {
                   <tr>
                     <th>Category</th>
                     <th>Genus</th>
-                    <th>{ (this.view_level==='Species') ? 'Species' : '' }</th>
+                    <th>{ (this.view_level==='species') ? 'Species' : '' }</th>
                     <th>NT Genus Z</th>
                     <th>NT Genus rM</th>
                     <th>NR Genus Z</th>
                     <th>NR Genus rM</th>
                     {/*The Genus and Species diff*/}
-                    <th>{ (this.view_level==='Species') ? 'NT Species Z' : '' }</th>
-                    <th>{ (this.view_level==='Species') ? 'NT Species rM' : '' }</th>
-                    <th>{ (this.view_level==='Species') ? 'NR Species Z' : '' }</th>
-                    <th>{ (this.view_level==='Species') ? 'NR Species rM' : '' }</th>
+                    <th>{ (this.view_level==='species') ? 'NT Species Z' : '' }</th>
+                    <th>{ (this.view_level==='species') ? 'NT Species rM' : '' }</th>
+                    <th>{ (this.view_level==='species') ? 'NR Species Z' : '' }</th>
+                    <th>{ (this.view_level==='species') ? 'NR Species rM' : '' }</th>
                   </tr>
                   </thead>
                   <tbody>
@@ -173,7 +173,7 @@ class PipelineSampleReport extends React.Component {
                         </td>
                         <td>
                           <span className="link">
-                            { (this.view_level==='Species' && taxon.nt_ele) ?
+                            { (this.view_level==='species' && taxon.nt_ele) ?
                               <a href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${
                                 taxon.nt_ele.tax_id}`}>{ taxon.nt_ele.name }
                               </a> : ''
@@ -192,14 +192,14 @@ class PipelineSampleReport extends React.Component {
                         {/*The species scores*/}
  
                         <td>
-                          { (this.view_level==='Species' && taxon.nt_ele && (taxon.nt_ele.zscore)) ? taxon.nt_ele.zscore.toFixed(3) : '' }
+                          { (this.view_level=== 'species' && taxon.nt_ele && (taxon.nt_ele.zscore)) ? taxon.nt_ele.zscore.toFixed(3) : '' }
                         </td>
-                        <td>{ (this.view_level==='Species' && taxon.nt_ele && (taxon.nt_ele.rpm)) ? taxon.nt_ele.rpm.toFixed(3) : '' }</td>
+                        <td>{ (this.view_level==='species' && taxon.nt_ele && (taxon.nt_ele.rpm)) ? taxon.nt_ele.rpm.toFixed(3) : '' }</td>
                         <td>
-                          { (this.view_level==='Species' && taxon.nr_ele && (taxon.nr_ele.zscore)) ? taxon.nr_ele.zscore.toFixed(3) : '' }
+                          { (this.view_level==='species' && taxon.nr_ele && (taxon.nr_ele.zscore)) ? taxon.nr_ele.zscore.toFixed(3) : '' }
                         </td>
                         <td>
-                          { (this.view_level==='Species' && taxon.nr_ele && (taxon.nr_ele.rpm)) ? taxon.nr_ele.rpm.toFixed(3) : '' }
+                          { (this.view_level==='species' && taxon.nr_ele && (taxon.nr_ele.rpm)) ? taxon.nr_ele.rpm.toFixed(3) : '' }
                         </td>
                       </tr>
                     )
