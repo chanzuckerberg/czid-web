@@ -16,7 +16,7 @@ class PipelineSampleReport extends React.Component {
     this.applySort = this.applySort.bind(this);
   }
 
-  uppCaseFirst(name) {
+  static uppCaseFirst(name) {
 
     return (name)? name.charAt(0).toUpperCase() + name.slice(1) : name;
   }
@@ -96,7 +96,7 @@ class PipelineSampleReport extends React.Component {
                 <ReportFilter
                   background_model = {this.report_details.background_model.name}
                   report_title = { this.report_details.report_info.name }
-                  view_level={this.uppCaseFirst(this.view_level)}
+                  view_level={this.view_level}
                   highest_tax_counts={this.highest_tax_counts}/>
               </div>
               <div className="col s10 reports-main ">
