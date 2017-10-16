@@ -22,9 +22,9 @@ module ReportHelper
   def view_level_name2int(view_level)
     case view_level.downcase
     when 'species'
-      1
+      TaxonCount::TAX_LEVEL_SPECIES
     when 'genus'
-      2
+      TaxonCount::TAX_LEVEL_GENUS
     end
     # to be extended for all taxonomic ranks when needed
   end
