@@ -46,21 +46,27 @@ module ReportHelper
   def taxonomy_details(report, params, view_level_int)
     taxon_zscores = compute_taxon_zscores(report)
 
+    tax_id_set = Set.new(taxon_zscores.map { |h| h[:tax_id] }).delete(nil)
+    if !tax_id_set.empty?
+      tax_ids_str = tax_id_set.sort.join(",")
+      lineage_arr = TaxonLineage.connection.select_all("SELECT taxid, superkingdom_taxid,  genus_taxid FROM taxon_lineages WHERE taxid IN (#{tax_ids_str})").to_hash
+      lineage_info = lineage_arr.group_by { |h| h['taxid'] }
+      name_arr = TaxonName.connection.select_all("SELECT taxid, name FROM taxon_names WHERE taxid IN (#{tax_ids_str})").to_hash
+      name_info = name_arr.group_by { |h| h['taxid'] }
+    else
+      lineage_info = {}
+      name_info = {}
+    end
+
     # So apparently every tax_id has a unique tax_level, species or genus.
     # genus_level = TaxonCount::TAX_LEVEL_GENUS
     species_level = TaxonCount::TAX_LEVEL_SPECIES
     level = {}
     taxon_zscores.each do |h|
       level[h[:tax_id]] = h[:tax_level]
-    end
-
-    tax_id_set = Set.new(taxon_zscores.map { |h| h[:tax_id] }).delete(nil)
-    if !tax_id_set.empty?
-      tax_ids_str = tax_id_set.sort.join(",")
-      lineage_arr = TaxonLineage.connection.select_all("SELECT taxid, superkingdom_taxid,  genus_taxid FROM taxon_lineages WHERE taxid IN (#{tax_ids_str})").to_hash
-      lineage_info = lineage_arr.group_by { |h| h['taxid'] }
-    else
-      lineage_info = {}
+      ninfo = name_info[h[:tax_id]] || [{}]
+      ninfo = ninfo.first
+      h[:name] = ninfo["name"]
     end
 
     cat_id_set = Set.new(lineage_info.map { |_, taxons| taxons[0]['superkingdom_taxid'] }).delete(nil)
