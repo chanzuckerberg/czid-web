@@ -8,9 +8,10 @@ class User < ApplicationRecord
   ROLE_ADMIN = 1
 
   def as_json(_options = {})
-    super(methods: [:is_admin])
+    super(methods: [:admin])
   end
-  def is_admin
+
+  def admin
     role == ROLE_ADMIN
   end
 end

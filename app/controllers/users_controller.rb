@@ -37,13 +37,12 @@ class UsersController < ApplicationController
   # PATCH/PUT /users/1
   # PATCH/PUT /users/1.json
   def update
-
     respond_to do |format|
       input_params = user_params
-      if input_params[:password] and input_params[:password] == ''
+      if input_params[:password] && input_params[:password] == ''
         input_params.delete(:password)
       end
-      if input_params[:password_confirmation] and input_params[:password_confirmation] == ''
+      if input_params[:password_confirmation] && input_params[:password_confirmation] == ''
         input_params.delete(:password_confirmation)
       end
       if @user.update(input_params)
