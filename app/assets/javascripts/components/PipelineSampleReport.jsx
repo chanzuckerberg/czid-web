@@ -145,13 +145,17 @@ class PipelineSampleReport extends React.Component {
                     <th>{ (this.view_level==='Species') ? 'Species' : '' }</th>
                     <th>NT Genus Z</th>
                     <th>NT Genus rM</th>
+                    <th>NT Genus r</th>
                     <th>NR Genus Z</th>
                     <th>NR Genus rM</th>
+                    <th>NR Genus r</th>
                     {/*The Genus and Species diff*/}
                     <th>{ (this.view_level==='Species') ? 'NT Species Z' : '' }</th>
                     <th>{ (this.view_level==='Species') ? 'NT Species rM' : '' }</th>
+                    <th>{ (this.view_level==='Species') ? 'NT Species r' : '' }</th>
                     <th>{ (this.view_level==='Species') ? 'NR Species Z' : '' }</th>
                     <th>{ (this.view_level==='Species') ? 'NR Species rM' : '' }</th>
+                    <th>{ (this.view_level==='Species') ? 'NR Species r' : '' }</th>
                   </tr>
                   </thead>
                   <tbody>
@@ -185,22 +189,19 @@ class PipelineSampleReport extends React.Component {
 
                         <td>{ (!taxon.genus_nt_ele) ? '-': taxon.genus_nt_ele.zscore.toFixed(3) }</td>
                         <td>{ (!taxon.genus_nt_ele) ? '-': taxon.genus_nt_ele.rpm.toFixed(3) }</td>
-
+                        <td>{ (!taxon.genus_nt_ele) ? '-': taxon.genus_nt_ele.count }</td>
                         <td>{ (!taxon.genus_nr_ele) ? '-': taxon.genus_nr_ele.zscore.toFixed(3) }</td>
                         <td>{ (!taxon.genus_nr_ele) ? '-': taxon.genus_nr_ele.rpm.toFixed(3)}</td>
+                        <td>{ (!taxon.genus_nr_ele) ? '-': taxon.genus_nr_ele.count}</td>
 
                         {/*The species scores*/}
  
-                        <td>
-                          { (this.view_level==='Species' && taxon.nt_ele && (taxon.nt_ele.zscore)) ? taxon.nt_ele.zscore.toFixed(3) : '' }
-                        </td>
+                        <td>{ (this.view_level==='Species' && taxon.nt_ele && (taxon.nt_ele.zscore)) ? taxon.nt_ele.zscore.toFixed(3) : '' } </td>
                         <td>{ (this.view_level==='Species' && taxon.nt_ele && (taxon.nt_ele.rpm)) ? taxon.nt_ele.rpm.toFixed(3) : '' }</td>
-                        <td>
-                          { (this.view_level==='Species' && taxon.nr_ele && (taxon.nr_ele.zscore)) ? taxon.nr_ele.zscore.toFixed(3) : '' }
-                        </td>
-                        <td>
-                          { (this.view_level==='Species' && taxon.nr_ele && (taxon.nr_ele.rpm)) ? taxon.nr_ele.rpm.toFixed(3) : '' }
-                        </td>
+                        <td>{ (this.view_level==='Species' && taxon.nt_ele && (taxon.nt_ele.count)) ? taxon.nt_ele.count : '' }</td>
+                        <td>{ (this.view_level==='Species' && taxon.nr_ele && (taxon.nr_ele.zscore)) ? taxon.nr_ele.zscore.toFixed(3) : '' }</td>
+                        <td>{ (this.view_level==='Species' && taxon.nr_ele && (taxon.nr_ele.rpm)) ? taxon.nr_ele.rpm.toFixed(3) : '' }</td>
+                        <td>{ (this.view_level==='Species' && taxon.nr_ele && (taxon.nr_ele.count)) ? taxon.nr_ele.count : '' }</td>
                       </tr>
                     )
                   })}
