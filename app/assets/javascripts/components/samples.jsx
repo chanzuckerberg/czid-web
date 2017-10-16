@@ -6,8 +6,6 @@ class Samples extends React.Component {
     this.outputData = this.props.outputData;
   }
 
-  componentDidMount() {
-  }
 
   renderPipelineOutput(samples, pipelineInfo) {
     return samples.map((sample, i) => {

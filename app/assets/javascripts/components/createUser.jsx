@@ -4,6 +4,7 @@ class CreateUser extends React.Component {
     this.csrf = this.props.csrf;
     this.handleSubmit = this.handleSubmit.bind(this);
     this.clearError = this.clearError.bind(this)
+    this.gotoPage = this.gotoPage.bind(this);
     this.state = {
       isChecked: false,
       success: false,
@@ -18,6 +19,10 @@ class CreateUser extends React.Component {
     if(!this.isFormInvalid()) {
       this.createUser()
     }
+  }
+
+  gotoPage(path) {
+    location.href = `${path}`
   }
 
   clearError() {
@@ -57,7 +62,7 @@ class CreateUser extends React.Component {
 
   createUser() {
     var that = this;
-    axios.post('/users', { 
+    axios.post('/users.json', { 
        user: {
         email: this.refs.email.value,
         password: this.refs.password.value,
@@ -76,8 +81,8 @@ class CreateUser extends React.Component {
     })
     .catch(function(err) {
       that.setState({
-        success: false,
-        successMessage: 'Failed to create user'
+        showFailed: true,
+        errorMessage: 'Failed to create user'
       })
     })
   }
@@ -110,16 +115,17 @@ class CreateUser extends React.Component {
                   <label htmlFor="user_password">Password</label>
                 </div>
                 <div className="input-field">
-                  <i className="fa fa-key" aria-hidden="true"></i>
+                  <i className="fa fa-check-circle" aria-hidden="true"></i>
                   <input ref= "password_confirmation" type="password" className="" onFocus={ this.clearError }   />
                   <label htmlFor="user_password_confirmation">Confirm Password</label>
                 </div>
                 <div className="input-field">
-                  <i className="fa fa-key" aria-hidden="true"></i>
+                  <i className="fa fa-unlock" aria-hidden="true"></i>
                   <input ref= "authentication_token" type="text" className="" onFocus={ this.clearError }   />
                   <label htmlFor="user_authentication_token">Authentication Token</label>
                 </div>
               </div>
+              <input className="hidden" type="submit"/>
               <div onClick={ this.handleSubmit } className="center-align login-wrapper">Submit</div>
             </form>
           </div>

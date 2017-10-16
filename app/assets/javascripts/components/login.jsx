@@ -120,6 +120,7 @@ class Login extends React.Component {
                   <label htmlFor="remember_me">Remember me</label>
                 </div>
               </div>
+              <input className="hidden" type="submit"/>
               <div onClick={ this.handleSubmit } className="center-align login-wrapper">Submit</div>
             </form>
           </div>
