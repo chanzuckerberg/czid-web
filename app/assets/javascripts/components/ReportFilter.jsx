@@ -213,13 +213,13 @@ class ReportFilter extends React.Component {
 
                   <div className="filter-values">
                     <p className="">
-                      <input onChange={this.selectViewLevel} name="group1" value='Genus'
-                             checked={(this.state.view_level === 'Genus')} type="radio" id="genus-select" />
+                      <input onChange={this.selectViewLevel} name="group1" value='genus'
+                             checked={(this.state.view_level === 'genus')} type="radio" id="genus-select" />
                       <label htmlFor="genus-select">Genus</label>
                     </p>
                     <p className="">
-                      <input onChange={this.selectViewLevel} name="group1" value='Species'
-                             checked={(this.state.view_level === 'Species')} type="radio" id="specie-select" />
+                      <input onChange={this.selectViewLevel} name="group1" value='species'
+                             checked={(this.state.view_level === 'species')} type="radio" id="specie-select" />
                       <label htmlFor="specie-select">Species</label>
                     </p>
                   </div>
@@ -251,7 +251,7 @@ class ReportFilter extends React.Component {
                     { (this.highest_nt_rpm && (this.lowest_nt_rpm !== this.highest_nt_rpm)) ? (
                       <div className="">
                         <div className="slider-title">
-                          NT { this.state.view_level } RPM
+                          NT { PipelineSampleReport.uppCaseFirst(this.state.view_level) } RPM
                         </div>
                         <div className="slider-values">
                           <div onBlur={ this.updateThreshold } suppressContentEditableWarning={true} contentEditable={true} className="nt_rpm start">
