@@ -1,10 +1,11 @@
 /**
-  @class ReportFilter
-  @desc Creates react component to handle filtering in the page
-*/
+ @class ReportFilter
+ @desc Creates react component to handle filtering in the page
+ */
 class ReportFilter extends React.Component {
   constructor(props) {
     super(props);
+    const view_level = props.view_level || 'Genus';
     this.background_model = props.background_model || 'N/A';
 
     this.highest_nt_zscore = this.props.highest_tax_counts.highest_nt_zscore;
@@ -14,10 +15,10 @@ class ReportFilter extends React.Component {
     this.lowest_nt_rpm = this.props.highest_tax_counts.lowest_nt_rpm;
 
     this.has_valid_nt_zscore_range =
-    (this.highest_nt_zscore && (this.lowest_nt_zscore < this.highest_nt_zscore));
+      (this.highest_nt_zscore && (this.lowest_nt_zscore < this.highest_nt_zscore));
 
     this.has_valid_nt_rpm_range =
-    (this.highest_nt_rpm && (this.lowest_nt_rpm < this.highest_nt_rpm));
+      (this.highest_nt_rpm && (this.lowest_nt_rpm < this.highest_nt_rpm));
 
 
     const default_nt_zscore_threshold = `${this.lowest_nt_zscore},${this.highest_nt_zscore}`;
@@ -31,21 +32,22 @@ class ReportFilter extends React.Component {
 
     const nt_zscore_start =
       (nt_zscore_threshold.split(',').length > 0) ? nt_zscore_threshold.split(',')[0] :
-      this.lowest_nt_zscore;
+        this.lowest_nt_zscore;
     const nt_zscore_end =
       (nt_zscore_threshold.split(',').length > 1) ? nt_zscore_threshold.split(',')[1] :
-      this.highest_nt_zscore;
+        this.highest_nt_zscore;
 
     const nt_rpm_start =
       (nt_rpm_threshold.split(',').length > 0) ? nt_rpm_threshold.split(',')[0]:
-      this.lowest_nt_rpm;
+        this.lowest_nt_rpm;
     const nt_rpm_end =
       (nt_rpm_threshold.split(',').length > 1) ? nt_rpm_threshold.split(',')[1] :
-      this.highest_nt_rpm;
+        this.highest_nt_rpm;
 
-    this.state = { nt_zscore_start, nt_zscore_end, nt_rpm_start, nt_rpm_end };
+    this.state = { nt_zscore_start, nt_zscore_end, nt_rpm_start, nt_rpm_end, view_level };
 
     this.applyFilter = this.applyFilter.bind(this);
+    this.selectViewLevel = this.selectViewLevel.bind(this);
     this.updateThreshold = this.updateThreshold.bind(this);
   }
 
@@ -55,7 +57,7 @@ class ReportFilter extends React.Component {
     const sort_by = currentSort.sort_query ? `&${currentSort.sort_query}` : '';
     window.location =
       `${current_url}?nt_zscore_threshold=${this.state.nt_zscore_start},${this.state.nt_zscore_end}&nt_rpm_threshold=${
-      this.state.nt_rpm_start},${this.state.nt_rpm_end}${sort_by}`;
+        this.state.nt_rpm_start},${this.state.nt_rpm_end}&view_level=${this.state.view_level}${sort_by}`;
   }
 
   static getFilter(name) {
@@ -72,19 +74,26 @@ class ReportFilter extends React.Component {
     return decodeURIComponent(results[2].replace(/\+/g, " "));
   }
 
+  selectViewLevel(event) {
+    this.setState({
+      view_level: event.target.value
+    });
+  }
+
+
   updateThreshold(e) {
     const { innerText, className } = e.target;
     if (className.indexOf('nt_zscore') >= 0) {
       const ntZscore = document.getElementById('nt_zscore');
       if (ntZscore) {
         (className.indexOf('start') >= 0)
-        ? ntZscore.noUiSlider.set([innerText, null]) : ntZscore.noUiSlider.set([null, innerText]);
+          ? ntZscore.noUiSlider.set([innerText, null]) : ntZscore.noUiSlider.set([null, innerText]);
       }
     } else if (className.indexOf('nt_rpm') >= 0) {
       const ntRpm = document.getElementById('nt_rpm');
       if (ntRpm) {
         (className.indexOf('start') >= 0)
-        ? ntRpm.noUiSlider.set([innerText, null]) : ntRpm.noUiSlider.set([null, innerText]);
+          ? ntRpm.noUiSlider.set([innerText, null]) : ntRpm.noUiSlider.set([null, innerText]);
       }
     }
   }
@@ -166,7 +175,7 @@ class ReportFilter extends React.Component {
                 <div className="sidebar-pane">
                   <div className="report-data">
                     <div className="report-title">
-                     Background Model
+                      Background Model
                     </div>
                     <div className="report-value">
                       { this.background_model }
@@ -199,6 +208,25 @@ class ReportFilter extends React.Component {
 
                 <div className="filter-controls">
                   <div className="filter-title">
+                    VIEW LEVEL
+                  </div>
+
+                  <div className="filter-values">
+                    <p className="">
+                      <input onChange={this.selectViewLevel} name="group1" value='Genus'
+                             checked={(this.state.view_level === 'Genus')} type="radio" id="genus-select" />
+                      <label htmlFor="genus-select">Genus</label>
+                    </p>
+                    <p className="">
+                      <input onChange={this.selectViewLevel} name="group1" value='Species'
+                             checked={(this.state.view_level === 'Species')} type="radio" id="specie-select" />
+                      <label htmlFor="specie-select">Species</label>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="filter-controls">
+                  <div className="filter-title">
                     THRESHOLDS
                   </div>
 
@@ -206,7 +234,7 @@ class ReportFilter extends React.Component {
                     { (this.highest_nt_zscore && (this.lowest_nt_zscore !== this.highest_nt_zscore)) ? (
                       <div className="">
                         <div className="slider-title">
-                          NT Species Z Score
+                          NT { this.state.view_level } Z Score
                         </div>
                         <div className="slider-values">
                           <div suppressContentEditableWarning={true} contentEditable={true} className="nt_zscore start">
@@ -220,10 +248,10 @@ class ReportFilter extends React.Component {
                       </div>
                     ) : ''}
 
-                     { (this.highest_nt_rpm && (this.lowest_nt_rpm !== this.highest_nt_rpm)) ? (
+                    { (this.highest_nt_rpm && (this.lowest_nt_rpm !== this.highest_nt_rpm)) ? (
                       <div className="">
                         <div className="slider-title">
-                          NT Species RPM
+                          NT { this.state.view_level } RPM
                         </div>
                         <div className="slider-values">
                           <div onBlur={ this.updateThreshold } suppressContentEditableWarning={true} contentEditable={true} className="nt_rpm start">
@@ -236,13 +264,13 @@ class ReportFilter extends React.Component {
                         <div id="nt_rpm"></div>
                       </div>
                     ) : ''}
-                     { (!this.has_valid_nt_rpm_range && !this.has_valid_nt_zscore_range) ?
-                    <div className="center"><small>Cannot set thresholds</small></div> : '' }
+                    { (!this.has_valid_nt_rpm_range && !this.has_valid_nt_zscore_range) ?
+                      <div className="center"><small>Cannot set thresholds</small></div> : '' }
                   </div>
                 </div>
                 <div className="apply-filter-button center-align">
                   <a onClick={this.applyFilter}
-                  className="btn btn-flat waves-effect grey text-grey text-lighten-5 waves-light apply-filter-button">
+                     className="btn btn-flat waves-effect grey text-grey text-lighten-5 waves-light apply-filter-button">
                     Apply filter
                   </a>
                 </div>
