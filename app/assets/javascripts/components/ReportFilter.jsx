@@ -8,43 +8,43 @@ class ReportFilter extends React.Component {
     const view_level = props.view_level || 'Genus';
     this.background_model = props.background_model || 'N/A';
 
-    this.highest_nt_zscore = this.props.highest_tax_counts.highest_nt_zscore;
-    this.highest_nt_rpm = this.props.highest_tax_counts.highest_nt_rpm;
+    this.highest_species_nt_zscore = this.props.highest_tax_counts.highest_species_nt_zscore;
+    this.highest_species_nt_rpm = this.props.highest_tax_counts.highest_species_nt_rpm;
 
-    this.lowest_nt_zscore = this.props.highest_tax_counts.lowest_nt_zscore;
-    this.lowest_nt_rpm = this.props.highest_tax_counts.lowest_nt_rpm;
+    this.lowest_species_nt_zscore = this.props.highest_tax_counts.lowest_species_nt_zscore;
+    this.lowest_species_nt_rpm = this.props.highest_tax_counts.lowest_species_nt_rpm;
 
-    this.has_valid_nt_zscore_range =
-      (this.highest_nt_zscore && (this.lowest_nt_zscore < this.highest_nt_zscore));
+    this.has_valid_species_nt_zscore_range =
+      (this.highest_species_nt_zscore && (this.lowest_species_nt_zscore < this.highest_species_nt_zscore));
 
-    this.has_valid_nt_rpm_range =
-      (this.highest_nt_rpm && (this.lowest_nt_rpm < this.highest_nt_rpm));
+    this.has_valid_species_nt_rpm_range =
+      (this.highest_species_nt_rpm && (this.lowest_species_nt_rpm < this.highest_species_nt_rpm));
 
 
-    const default_nt_zscore_threshold = `${this.lowest_nt_zscore},${this.highest_nt_zscore}`;
-    const default_nt_rpm_threshold = `${this.lowest_nt_rpm},${this.highest_nt_rpm}`;
+    const default_species_nt_zscore_threshold = `${this.lowest_species_nt_zscore},${this.highest_species_nt_zscore}`;
+    const default_species_nt_rpm_threshold = `${this.lowest_species_nt_rpm},${this.highest_species_nt_rpm}`;
 
-    const nt_zscore_threshold = ReportFilter.getFilter('nt_zscore_threshold')
-      ? ReportFilter.getFilter('nt_zscore_threshold') : default_nt_zscore_threshold;
+    const species_nt_zscore_threshold = ReportFilter.getFilter('species_nt_zscore_threshold')
+      ? ReportFilter.getFilter('species_nt_zscore_threshold') : default_species_nt_zscore_threshold;
 
-    const nt_rpm_threshold = ReportFilter.getFilter('nt_rpm_threshold')
-      ? ReportFilter.getFilter('nt_rpm_threshold') : default_nt_rpm_threshold;
+    const species_nt_rpm_threshold = ReportFilter.getFilter('species_nt_rpm_threshold')
+      ? ReportFilter.getFilter('species_nt_rpm_threshold') : default_species_nt_rpm_threshold;
 
-    const nt_zscore_start =
-      (nt_zscore_threshold.split(',').length > 0) ? nt_zscore_threshold.split(',')[0] :
-        this.lowest_nt_zscore;
-    const nt_zscore_end =
-      (nt_zscore_threshold.split(',').length > 1) ? nt_zscore_threshold.split(',')[1] :
-        this.highest_nt_zscore;
+    const species_nt_zscore_start =
+      (species_nt_zscore_threshold.split(',').length > 0) ? species_nt_zscore_threshold.split(',')[0] :
+        this.lowest_species_nt_zscore;
+    const species_nt_zscore_end =
+      (species_nt_zscore_threshold.split(',').length > 1) ? species_nt_zscore_threshold.split(',')[1] :
+        this.highest_species_nt_zscore;
 
-    const nt_rpm_start =
-      (nt_rpm_threshold.split(',').length > 0) ? nt_rpm_threshold.split(',')[0]:
-        this.lowest_nt_rpm;
-    const nt_rpm_end =
-      (nt_rpm_threshold.split(',').length > 1) ? nt_rpm_threshold.split(',')[1] :
-        this.highest_nt_rpm;
+    const species_nt_rpm_start =
+      (species_nt_rpm_threshold.split(',').length > 0) ? species_nt_rpm_threshold.split(',')[0]:
+        this.lowest_species_nt_rpm;
+    const species_nt_rpm_end =
+      (species_nt_rpm_threshold.split(',').length > 1) ? species_nt_rpm_threshold.split(',')[1] :
+        this.highest_species_nt_rpm;
 
-    this.state = { nt_zscore_start, nt_zscore_end, nt_rpm_start, nt_rpm_end, view_level };
+    this.state = { species_nt_zscore_start, species_nt_zscore_end, species_nt_rpm_start, species_nt_rpm_end, view_level };
 
     this.applyFilter = this.applyFilter.bind(this);
     this.selectViewLevel = this.selectViewLevel.bind(this);
@@ -56,8 +56,8 @@ class ReportFilter extends React.Component {
     const currentSort = PipelineSampleReport.currentSort();
     const sort_by = currentSort.sort_query ? `&${currentSort.sort_query}` : '';
     window.location =
-      `${current_url}?nt_zscore_threshold=${this.state.nt_zscore_start},${this.state.nt_zscore_end}&nt_rpm_threshold=${
-        this.state.nt_rpm_start},${this.state.nt_rpm_end}&view_level=${this.state.view_level}${sort_by}`;
+      `${current_url}?species_nt_zscore_threshold=${this.state.species_nt_zscore_start},${this.state.species_nt_zscore_end}&species_nt_rpm_threshold=${
+        this.state.species_nt_rpm_start},${this.state.species_nt_rpm_end}&view_level=${this.state.view_level}${sort_by}`;
   }
 
   static getFilter(name) {
@@ -104,17 +104,17 @@ class ReportFilter extends React.Component {
   }
 
   componentDidMount() {
-    if (this.has_valid_nt_zscore_range) {
+    if (this.has_valid_species_nt_zscore_range) {
       const nt_zscore = document.getElementById('nt_zscore');
       noUiSlider.create(nt_zscore, {
-        start: [this.parseRange(this.state.nt_zscore_start), this.parseRange(this.state.nt_zscore_end)],
+        start: [this.parseRange(this.state.species_nt_zscore_start), this.parseRange(this.state.species_nt_zscore_end)],
         connect: true,
         step: 0.1,
         orientation: 'horizontal', // 'horizontal' or 'vertical',
         behaviour: 'tap-drag',
         range: {
-          min: this.parseRange(this.lowest_nt_zscore),
-          max: this.parseRange(this.highest_nt_zscore)
+          min: this.parseRange(this.lowest_species_nt_zscore),
+          max: this.parseRange(this.highest_species_nt_zscore)
         },
         format: wNumb({
           decimals: 0
@@ -123,21 +123,21 @@ class ReportFilter extends React.Component {
 
       nt_zscore.noUiSlider.on('update', (values, handle) => {
         const value = this.parseRange(values[handle]);
-        const newState = (handle === 0) ? { nt_zscore_start: value } : { nt_zscore_end: value };
+        const newState = (handle === 0) ? { species_nt_zscore_start: value } : { species_nt_zscore_end: value };
         this.setState(newState);
       });
     }
 
-    if (this.has_valid_nt_rpm_range) {
+    if (this.has_valid_species_nt_rpm_range) {
       const nt_rpm = document.getElementById('nt_rpm');
       noUiSlider.create(nt_rpm, {
-        start: [this.parseRange(this.state.nt_rpm_start), this.parseRange(this.state.nt_rpm_end)],
+        start: [this.parseRange(this.state.species_nt_rpm_start), this.parseRange(this.state.species_nt_rpm_end)],
         connect: true,
         step: 0.1,
         orientation: 'horizontal', // 'horizontal' or 'vertical'
         range: {
-          min: this.parseRange(this.lowest_nt_rpm),
-          max: this.parseRange(this.highest_nt_rpm)
+          min: this.parseRange(this.lowest_species_nt_rpm),
+          max: this.parseRange(this.highest_species_nt_rpm)
         },
         format: wNumb({
           decimals: 0
@@ -145,7 +145,7 @@ class ReportFilter extends React.Component {
       });
       nt_rpm.noUiSlider.on('update', (values, handle) => {
         const value = this.parseRange(values[handle]);
-        const newState = (handle === 0) ? { nt_rpm_start: value } : { nt_rpm_end: value };
+        const newState = (handle === 0) ? { species_nt_rpm_start: value } : { species_nt_rpm_end: value };
         this.setState(newState);
       });
     }
@@ -231,40 +231,40 @@ class ReportFilter extends React.Component {
                   </div>
 
                   <div className="filter-values">
-                    { (this.highest_nt_zscore && (this.lowest_nt_zscore !== this.highest_nt_zscore)) ? (
+                    { (this.highest_species_nt_zscore && (this.lowest_species_nt_zscore !== this.highest_species_nt_zscore)) ? (
                       <div className="">
                         <div className="slider-title">
                           NT { this.state.view_level } Z Score
                         </div>
                         <div className="slider-values">
                           <div suppressContentEditableWarning={true} contentEditable={true} className="nt_zscore start">
-                            { this.state.nt_zscore_start }
+                            { this.state.species_nt_zscore_start }
                           </div>
                           <div suppressContentEditableWarning={true} contentEditable={true} className="nt_zscore end">
-                            { this.state.nt_zscore_end }
+                            { this.state.species_nt_zscore_end }
                           </div>
                         </div>
                         <div id="nt_zscore"></div>
                       </div>
                     ) : ''}
 
-                    { (this.highest_nt_rpm && (this.lowest_nt_rpm !== this.highest_nt_rpm)) ? (
+                    { (this.highest_species_nt_rpm && (this.lowest_species_nt_rpm !== this.highest_species_nt_rpm)) ? (
                       <div className="">
                         <div className="slider-title">
                           NT { PipelineSampleReport.uppCaseFirst(this.state.view_level) } RPM
                         </div>
                         <div className="slider-values">
                           <div onBlur={ this.updateThreshold } suppressContentEditableWarning={true} contentEditable={true} className="nt_rpm start">
-                            { this.state.nt_rpm_start }
+                            { this.state.species_nt_rpm_start }
                           </div>
                           <div  onBlur={ this.updateThreshold } suppressContentEditableWarning={true} contentEditable={true} className="nt_rpm end">
-                            { this.state.nt_rpm_end }
+                            { this.state.species_nt_rpm_end }
                           </div>
                         </div>
                         <div id="nt_rpm"></div>
                       </div>
                     ) : ''}
-                    { (!this.has_valid_nt_rpm_range && !this.has_valid_nt_zscore_range) ?
+                    { (!this.has_valid_species_nt_rpm_range && !this.has_valid_species_nt_zscore_range) ?
                       <div className="center"><small>Cannot set thresholds</small></div> : '' }
                   </div>
                 </div>
