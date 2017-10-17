@@ -7,6 +7,7 @@ class PipelineSampleReads extends React.Component {
     this.projectInfo = this.props.projectInfo;
     this.reportInfo =  (Object.keys(this.props.reportInfo).length > 0) ? this.props.reportInfo : null;
     this.jobStatistics = this.props.jobStatistics;
+    this.summary_stats = this.props.summary_stats;
     this.gotoReport = this.gotoReport.bind(this);
     }
 
@@ -59,8 +60,7 @@ class PipelineSampleReads extends React.Component {
                 </tr>
                 <tr>
                   <td>Passed Quality Control</td>
-                  <td>{ !this.jobStatistics ? 'NA' :(this.jobStatistics.reads_after /
-                    this.jobStatistics.reads_before * 100).toFixed(2) }%</td>
+                  <td>{ !this.summary_stats ? 'NA' : this.summary_stats.qc_percent.toFixed(2) }%</td>
                 </tr>
                 </tbody>
               </table>
@@ -70,11 +70,11 @@ class PipelineSampleReads extends React.Component {
                 <tbody>
                 <tr>
                   <td>Remaining Reads</td>
-                  <td>{ this.pipelineOutput.remaining_reads }</td>
+                  <td>{ this.summary_stats.remaining_reads }</td>
                 </tr>
                 <tr>
                   <td>Compression Ratio</td>
-                  <td>{ !this.jobStatistics ? 'NA' : (this.jobStatistics.find_by(task: 'run_cdhitdup').reads_before/this.jobStatistics.find_by(task: 'run_cdhitdup').reads_after).toFixed(2) }</td>
+                  <td>{ !this.summary_stats ? 'NA' : this.summary_stats.compression_ratio.toFixed(2) }</td>
                 </tr>
                 </tbody>
               </table>
