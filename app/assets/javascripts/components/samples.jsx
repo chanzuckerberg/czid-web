@@ -28,12 +28,14 @@ class Samples extends React.Component {
     })
   }
 
-  computeCompressionRatio(result) {
-    return (result.reads_before/result.reads_after).toFixed(2);
+  computeCompressionRatio(jobstats) {
+    cdhitdup_stats = jobstats.find_by(task: 'run_cdhitdup')
+    return (1.0 * cdhitdup_stats.reads_before/cdhitdup_stats.reads_after).toFixed(2);
   }
   
-  computeQcValue(result) {
-    return (100.0 * result.reads_after/result.reads_before).toFixed(2);
+  computeQcValue(jobstats) {
+    priceseqfilter_stats = jobstats.find_by(task: 'run_priceseqfilter')
+    return (100.0 * priceseqfilter_stats.reads_after/priceseqfilter_stats.reads_before).toFixed(2);
   }
 
   computePercentageReads(result) {

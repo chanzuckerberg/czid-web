@@ -74,7 +74,7 @@ class PipelineSampleReads extends React.Component {
                 </tr>
                 <tr>
                   <td>Compression Ratio</td>
-                  <td>{ !this.jobStatistics ? 'NA' : (this.jobStatistics.reads_before/this.jobStatistics.reads_after).toFixed(2) }</td>
+                  <td>{ !this.jobStatistics ? 'NA' : (this.jobStatistics.find_by(task: 'run_cdhitdup').reads_before/this.jobStatistics.find_by(task: 'run_cdhitdup').reads_after).toFixed(2) }</td>
                 </tr>
                 </tbody>
               </table>

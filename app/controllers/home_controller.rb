@@ -7,7 +7,7 @@ class HomeController < ApplicationController
     @samples.each do |output|
       output_data = {}
       pipeline_info = output.pipeline_runs.first ? output.pipeline_runs.first.pipeline_output : nil
-      job_stats = output.pipeline_outputs.first ? output.pipeline_outputs.first.job_stats.first : nil
+      job_stats = output.pipeline_outputs.first ? output.pipeline_outputs.first.job_stats : nil
       pipeline_run = output.pipeline_runs.first ? output.pipeline_runs.first : nil
 
       output_data[:pipeline_info] = pipeline_info
