@@ -6,6 +6,7 @@ module ReportHelper
     data[:highest_tax_counts] = htc
     data[:taxonomy_details] = td
     data[:view_level] = view_level
+    data[:all_categories] = all_categories
     data
   end
 
@@ -17,6 +18,13 @@ module ReportHelper
       project_info: report.pipeline_output.sample.project,
       background_model: report.background
     }
+  end
+
+  def all_categories
+    cat_ids = TaxonLineage.distinct.pluck(:superkingdom_taxid).join(', ')
+    taxon_name_arr = []
+    taxon_name_arr = TaxonName.connection.select_all("select taxid, name from taxon_names where taxid in (#{cat_ids})").to_hash unless cat_ids.empty?
+    taxon_name_arr
   end
 
   def view_level_name2int(view_level)
