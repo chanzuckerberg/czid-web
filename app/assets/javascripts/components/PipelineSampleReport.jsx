@@ -4,9 +4,11 @@ class PipelineSampleReport extends React.Component {
     super(props);
     this.report_details = props.report_details;
     this.taxonomy_details = props.taxonomy_details;
+    this.all_categories = props.all_categories || [];
+
     this.view_level = ReportFilter.getFilter('view_level') || 'species';
     this.highest_tax_counts = props.highest_tax_counts;
-    this.defaultSortBy = 'highest_genus_nt_zscore';
+    this.defaultSortBy = 'highest_species_nt_zscore';
     const current_sort = PipelineSampleReport.currentSort();
     this.state = {
       sort_query: current_sort.sort_query
@@ -97,6 +99,7 @@ class PipelineSampleReport extends React.Component {
             <div className="row">
               <div className="col s2">
                 <ReportFilter
+                  all_categories = { this.all_categories }
                   background_model = {this.report_details.background_model.name}
                   report_title = { this.report_details.report_info.name }
                   view_level={this.view_level}
@@ -112,16 +115,16 @@ class PipelineSampleReport extends React.Component {
                     <th>
                     NT Genus Z
                     <div className='sort-controls  left'>
-                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_genus_nt_zscore')} fa fa-caret-up sort_by=highest_genus_nt_zscore` }></i>
-                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_genus_nt_zscore')} fa fa-caret-down sort_by=lowest_genus_nt_zscore` }></i>
+                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_genus_nt_zscore')} fa fa-caret-up sort_by=lowest_genus_nt_zscore` }></i>
+                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_genus_nt_zscore')} fa fa-caret-down sort_by=highest_genus_nt_zscore` }></i>
                     </div>
 
                     </th>
                     <th>
                     NT Genus rM
                      <div className='sort-controls left'>
-                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_genus_nt_rpm')} fa fa-caret-up sort_by=highest_genus_nt_rpm` }></i>
-                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_genus_nt_rpm')} fa fa-caret-down sort_by=lowest_genus_nt_rpm` }></i>
+                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_genus_nt_rpm')} fa fa-caret-up sort_by=lowest_genus_nt_rpm` }></i>
+                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_genus_nt_rpm')} fa fa-caret-down sort_by=highest_genus_nt_rpm` }></i>
                     </div>
                     </th>
                     <th>
@@ -134,15 +137,15 @@ class PipelineSampleReport extends React.Component {
                     <th>
                     NR Genus Z
                      <div className='sort-controls left'>
-                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_genus_nr_zscore')} fa fa-caret-up sort_by=highest_genus_nr_zscore` }></i>
-                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_genus_nr_zscore')} fa fa-caret-down sort_by=lowest_genus_nr_zscore` }></i>
+                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_genus_nr_zscore')} fa fa-caret-up sort_by=lowest_genus_nr_zscore` }></i>
+                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_genus_nr_zscore')} fa fa-caret-down sort_by=highest_genus_nr_zscore` }></i>
                     </div>
                     </th>
                     <th>
                     NR Genus rM
                      <div className='sort-controls left'>
-                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_genus_nr_rpm')} fa fa-caret-up sort_by=highest_genus_nr_rpm` }></i>
-                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_genus_nr_rpm')} fa fa-caret-down sort_by=lowest_genus_nr_rpm` }></i>
+                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_genus_nr_rpm')} fa fa-caret-up sort_by=lowest_genus_nr_rpm` }></i>
+                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_genus_nr_rpm')} fa fa-caret-down sort_by=highest_genus_nr_rpm` }></i>
                     </div>
                     </th>
                     <th>
@@ -157,16 +160,16 @@ class PipelineSampleReport extends React.Component {
                     <th>
                       NT Species Z
                       <div className='sort-controls left'>
-                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_species_nt_zscore')} fa fa-caret-up sort_by=highest_species_nt_zscore` }></i>
-                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_species_nt_zscore')} fa fa-caret-down sort_by=lowest_species_nt_zscore` }></i>
+                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_species_nt_zscore')} fa fa-caret-up sort_by=lowest_species_nt_zscore` }></i>
+                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_species_nt_zscore')} fa fa-caret-down sort_by=highest_species_nt_zscore` }></i>
                       </div>
                     </th> : '' }
                     { (this.view_level === 'species') ?
                     <th>
                       NT Species rM
                       <div className='sort-controls left'>
-                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_species_nt_rpm')} fa fa-caret-up sort_by=highest_species_nt_rpm` }></i>
-                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_species_nt_rpm')} fa fa-caret-down sort_by=lowest_species_nt_rpm` }></i>
+                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_species_nt_rpm')} fa fa-caret-up sort_by=lowest_species_nt_rpm` }></i>
+                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_species_nt_rpm')} fa fa-caret-down sort_by=highest_species_nt_rpm` }></i>
                       </div>
                     </th> : '' }
 
@@ -181,15 +184,15 @@ class PipelineSampleReport extends React.Component {
                     { (this.view_level === 'species') ?
                     <th>NR Species Z
                       <div className='sort-controls left'>
-                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_species_nr_zscore')} fa fa-caret-up sort_by=highest_species_nr_zscore` }></i>
-                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_species_nr_zscore')} fa fa-caret-down sort_by=lowest_species_nr_zscore` }></i>
+                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_species_nr_zscore')} fa fa-caret-up sort_by=lowest_species_nr_zscore` }></i>
+                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_species_nr_zscore')} fa fa-caret-down sort_by=highest_species_nr_zscore` }></i>
                       </div>
                     </th> : '' }
                     { (this.view_level === 'species') ?
                     <th>NR Species rM
                       <div className='sort-controls left'>
-                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_species_nr_rpm')} fa fa-caret-up sort_by=highest_species_nr_rpm` }></i>
-                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_species_nr_rpm')} fa fa-caret-down sort_by=lowest_species_nr_rpm` }></i>
+                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_species_nr_rpm')} fa fa-caret-up sort_by=lowest_species_nr_rpm` }></i>
+                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_species_nr_rpm')} fa fa-caret-down sort_by=highest_species_nr_rpm` }></i>
                       </div>
                     </th> : '' }
 
