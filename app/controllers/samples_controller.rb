@@ -18,7 +18,7 @@ class SamplesController < ApplicationController
     @view_level = params[:view_level] ? params[:view_level].downcase : 'species'
     @pipeline_output = @sample.pipeline_runs.first ? @sample.pipeline_runs.first.pipeline_output : nil
     @job_stats = @pipeline_output ? @pipeline_output.job_stats : nil
-    @summary_stats = get_summary_stats(@job_stats)
+    @summary_stats = @job_stats ? get_summary_stats(@job_stats) : nil
     @project_info = @sample.project ? @sample.project : nil
     @report_info = {}
     report = @pipeline_output ? @pipeline_output.reports.first : nil
