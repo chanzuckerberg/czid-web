@@ -8,8 +8,10 @@ class Login extends React.Component {
     this.gotoPage = this.gotoPage.bind(this);
     this.state = {
       isChecked: false,
+      success: false,
       showFailedLogin: false,
-      errorMessage: ''
+      errorMessage: '',
+      successMessage: ''
     }
   }
 
@@ -38,10 +40,15 @@ class Login extends React.Component {
       },
       authenticity_token: this.csrf
     })
-    .then(function (response) {
-      that.gotoPage('/')
+    .then((response) => {
+      that.setState({
+        success: true,
+        successMessage: 'User signed in'
+      }, () => {
+        that.gotoPage('/');
+      })
     })
-    .catch(function (error) {
+    .catch((error) => {
       that.setState({
         showFailedLogin: true,
         errorMessage: 'Invalid Email and Password'
@@ -89,6 +96,10 @@ class Login extends React.Component {
               <div className="row title">
                 <p className="col s6 signup">Login</p>
               </div>
+              { this.state.success ? <div className="success-info" >
+                <i className="fa fa-success"></i>
+                 <span>{this.state.successMessage}</span>
+                </div> : null }
               { this.state.showFailedLogin ? <div className="error-info" >
                   <i className="fa fa-error"></i>
                   <span>{this.state.errorMessage}</span>
@@ -109,6 +120,7 @@ class Login extends React.Component {
                   <label htmlFor="remember_me">Remember me</label>
                 </div>
               </div>
+              <input className="hidden" type="submit"/>
               <div onClick={ this.handleSubmit } className="center-align login-wrapper">Submit</div>
             </form>
           </div>
