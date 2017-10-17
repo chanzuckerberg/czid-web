@@ -196,12 +196,12 @@ class PipelineSampleReport extends React.Component {
 
                         {/*The species scores*/}
  
-                        <td>{ (this.view_level==='Species' && taxon.nt_ele && (taxon.nt_ele.zscore)) ? taxon.nt_ele.zscore.toFixed(3) : '' } </td>
-                        <td>{ (this.view_level==='Species' && taxon.nt_ele && (taxon.nt_ele.rpm)) ? taxon.nt_ele.rpm.toFixed(3) : '' }</td>
-                        <td>{ (this.view_level==='Species' && taxon.nt_ele && (taxon.nt_ele.count)) ? taxon.nt_ele.count : '' }</td>
-                        <td>{ (this.view_level==='Species' && taxon.nr_ele && (taxon.nr_ele.zscore)) ? taxon.nr_ele.zscore.toFixed(3) : '' }</td>
-                        <td>{ (this.view_level==='Species' && taxon.nr_ele && (taxon.nr_ele.rpm)) ? taxon.nr_ele.rpm.toFixed(3) : '' }</td>
-                        <td>{ (this.view_level==='Species' && taxon.nr_ele && (taxon.nr_ele.count)) ? taxon.nr_ele.count : '' }</td>
+                        <td>{ (this.view_level==='Species' && taxon.nt_ele) ? taxon.nt_ele.zscore.toFixed(3) : '' } </td>
+                        <td>{ (this.view_level==='Species' && taxon.nt_ele) ? taxon.nt_ele.rpm.toFixed(3) : '' }</td>
+                        <td>{ (this.view_level==='Species' && taxon.nt_ele) ? taxon.nt_ele.count : '' }</td>
+                        <td>{ (this.view_level==='Species' && taxon.nr_ele) ? taxon.nr_ele.zscore.toFixed(3) : '' }</td>
+                        <td>{ (this.view_level==='Species' && taxon.nr_ele) ? taxon.nr_ele.rpm.toFixed(3) : '' }</td>
+                        <td>{ (this.view_level==='Species' && taxon.nr_ele) ? taxon.nr_ele.count : '' }</td>
                       </tr>
                     )
                   })}

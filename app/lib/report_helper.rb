@@ -35,7 +35,7 @@ module ReportHelper
     pipeline_output_id = report.pipeline_output.id
     data = TaxonCount.connection.select_all("select tax_id, pipeline_output_id, tax_level, count, count_type from taxon_counts where pipeline_output_id = #{pipeline_output_id}").to_hash
 
-    # pad cases where only one of NT/NR is present with zeroes
+   # pad cases where only one of NT/NR is present with zeroes
     taxid_counttype = data.group_by { |h| [h["tax_id"], h["count_type"]] }
     tax_id_set = Set.new(data.map { |h| h["tax_id"] })
     tax_id_set.each do |taxid|
@@ -184,6 +184,10 @@ module ReportHelper
           sort_key = 0.0 - sort_key if sort_direction == :highest
           details[:sort_key] = sort_key
         end
+      end
+
+      if tax_id==9
+        puts "CHARLES #{details}"
       end
 
       if details[:sort_key]
