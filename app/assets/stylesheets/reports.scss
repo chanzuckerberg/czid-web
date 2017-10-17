@@ -182,3 +182,18 @@
 #reports-pane {
   padding: 0;
 }
+
+.report-table .sort-controls {
+  margin-right: 6px;
+  i {
+    font-size: 24px;
+    display: block;
+    line-height: 13px;
+    position: relative;
+    top: -2px;
+
+    &:hover, &.active {
+      color: #09c;
+    }
+  }
+}

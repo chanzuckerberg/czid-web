@@ -5,7 +5,7 @@
 class ReportFilter extends React.Component {
   constructor(props) {
     super(props);
-    const view_level = props.view_level || 'Genus';
+    const view_level = props.view_level || 'species';
     this.background_model = props.background_model || 'N/A';
 
     this.highest_species_nt_zscore = this.props.highest_tax_counts.highest_species_nt_zscore;
