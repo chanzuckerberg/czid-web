@@ -27,7 +27,6 @@ module ReportHelper
     taxon_name_arr
   end
 
-
   def view_level_name2int(view_level)
     case view_level.downcase
     when 'species'

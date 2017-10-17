@@ -20,8 +20,8 @@ class SamplesController < ApplicationController
     @job_stats = @pipeline_output ? @pipeline_output.job_stats.first : nil
     @project_info = @sample.project ? @sample.project : nil
     report = @pipeline_output ? @pipeline_output.reports.first : nil
-    @report_info = external_report_info(report, @view_level, params)
-    @report_info = {} if report.nil?
+    @report_info = {}
+    @report_info = external_report_info(report, @view_level, params) unless report.nil?
   end
 
   # GET /samples/new
