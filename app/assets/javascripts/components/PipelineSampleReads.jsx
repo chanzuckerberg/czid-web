@@ -37,6 +37,7 @@ class PipelineSampleReads extends React.Component {
     let d_report = null;
     if(this.reportInfo) {
       d_report = <PipelineSampleReport
+        all_categories = { this.reportInfo.all_categories }
         report_details={this.reportInfo.report_details}
         taxonomy_details={this.reportInfo.taxonomy_details} view_level={this.reportInfo.view_level}
         highest_tax_counts={this.reportInfo.highest_tax_counts} />;
