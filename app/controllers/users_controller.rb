@@ -27,7 +27,8 @@ class UsersController < ApplicationController
 
     respond_to do |format|
       if @user.save
-        format.html { redirect_to @user, notice: 'User was successfully created.' }
+
+        format.html { redirect_to edit_user_path(@user), notice: 'User was successfully created.' }
         format.json { render :show, status: :created, location: root_path }
       else
         format.html { render :new }
@@ -40,8 +41,15 @@ class UsersController < ApplicationController
   # PATCH/PUT /users/1.json
   def update
     respond_to do |format|
-      if @user.update(user_params)
-        format.html { redirect_to @user, notice: 'User was successfully updated.' }
+      input_params = user_params
+      if input_params[:password] && input_params[:password] == ''
+        input_params.delete(:password)
+      end
+      if input_params[:password_confirmation] && input_params[:password_confirmation] == ''
+        input_params.delete(:password_confirmation)
+      end
+      if @user.update(input_params)
+        format.html { redirect_to edit_user_path(@user), notice: 'User was successfully updated.' }
         format.json { render :show, status: :ok, location: @user }
       else
         format.html { render :edit }
@@ -69,6 +77,6 @@ class UsersController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def user_params
-    params.require(:user).permit(:email, :authentication_token, :password, :password_confirmation, :name, project_ids: [])
+    params.require(:user).permit(:email, :authentication_token, :password, :password_confirmation, :name, :role, project_ids: [])
   end
 end
