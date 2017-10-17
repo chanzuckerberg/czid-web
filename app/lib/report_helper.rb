@@ -33,7 +33,7 @@ module ReportHelper
     summary = TaxonSummary.connection.select_all("select * from taxon_summaries where background_id = #{report.background.id}").to_hash
     total_reads = report.pipeline_output.total_reads
     pipeline_output_id = report.pipeline_output.id
-    data = TaxonCount.connection.select_all("select tax_id, pipeline_output_id, tax_level, count, name, count_type from taxon_counts where pipeline_output_id = #{pipeline_output_id}").to_hash
+    data = TaxonCount.connection.select_all("select tax_id, pipeline_output_id, tax_level, count, count_type from taxon_counts where pipeline_output_id = #{pipeline_output_id}").to_hash
 
     # pad cases where only one of NT/NR is present with zeroes
     taxid_counttype = data.group_by { |h| [h["tax_id"], h["count_type"]] }
@@ -57,8 +57,8 @@ module ReportHelper
     data.each do |h|
       h[:rpm] = compute_rpm(h["count"], total_reads)
     end
-    data_and_background = (data + summary).group_by { |h| [h["tax_id"], h["tax_level"], h["name"], h["count_type"]] }.map { |_k, v| v.reduce(:merge) }.select { |h| !h["count"].nil? }
-    zscore_array = data_and_background.map { |h| { tax_id: h["tax_id"], tax_level: h["tax_level"], name: h["name"], count: h["count"], rpm: h[:rpm], hit_type: h["count_type"], zscore: compute_zscore(h[:rpm], h[:mean], h[:stdev]) } }
+    data_and_background = (data + summary).group_by { |h| [h["tax_id"], h["tax_level"], h["count_type"]] }.map { |_k, v| v.reduce(:merge) }.select { |h| !h["count"].nil? }
+    zscore_array = data_and_background.map { |h| { tax_id: h["tax_id"], tax_level: h["tax_level"], count: h["count"], rpm: h[:rpm], hit_type: h["count_type"], zscore: compute_zscore(h[:rpm], h[:mean], h[:stdev]) } }
     zscore_array
   end
 
@@ -102,6 +102,7 @@ module ReportHelper
     htc = highest_tax_counts(taxon_zscores)
     rp = resolve_params(params, htc)
 
+###  filtering to be amended by Boris's upcoming PR, for now just remove this logic as it is not implemented correctly
 #    taxon_zscores.keep_if do |h|
 #      (h[:tax_id] >= 0 &&
 #        h[:zscore] >= rp[:nt_zscore_threshold][:start] &&
@@ -110,6 +111,7 @@ module ReportHelper
 #        h[:rpm] <= rp[:nt_rpm_threshold][:end]
 #      )
 #    end
+###
 
     default_sort_by = 'highest_species_nt_zscore'
     sort_by = params[:sort_by] || default_sort_by
