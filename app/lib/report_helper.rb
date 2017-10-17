@@ -42,12 +42,12 @@ module ReportHelper
       nt_ele = taxid_counttype[[taxid, 'NT']]
       nr_ele = taxid_counttype[[taxid, 'NR']]
       if nt_ele && !nr_ele
-        nr_ele_new = nt_ele[0]
+        nr_ele_new = nt_ele[0].clone
         nr_ele_new["count_type"] = 'NR'
         nr_ele_new["count"] = 0
         data << nr_ele_new
       elsif !nt_ele && nr_ele
-        nt_ele_new = nr_ele[0]
+        nt_ele_new = nr_ele[0].clone
         nt_ele_new["count_type"] = 'NT'
         nt_ele_new["count"] = 0
         data << nt_ele_new
