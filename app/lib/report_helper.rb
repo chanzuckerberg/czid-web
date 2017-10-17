@@ -37,81 +37,68 @@ module ReportHelper
     # to be extended for all taxonomic ranks when needed
   end
 
-  def compute_taxon_zscores(report)
-    summary = TaxonSummary.connection.select_all("select * from taxon_summaries where background_id = #{report.background.id}").to_hash
-    total_reads = report.pipeline_output.total_reads
+  def select_taxons(report)
     pipeline_output_id = report.pipeline_output.id
-    data = TaxonCount.connection.select_all("select tax_id, pipeline_output_id, tax_level, count, count_type from taxon_counts where pipeline_output_id = #{pipeline_output_id}").to_hash
-
-    # pad cases where only one of NT/NR is present with zeroes
-    taxid_counttype = data.group_by { |h| [h["tax_id"], h["count_type"]] }
-    tax_id_set = Set.new(data.map { |h| h["tax_id"] })
-    tax_id_set.each do |taxid|
-      nt_ele = taxid_counttype[[taxid, 'NT']]
-      nr_ele = taxid_counttype[[taxid, 'NR']]
-      if nt_ele && !nr_ele
-        nr_ele_new = nt_ele[0].clone
-        nr_ele_new["count_type"] = 'NR'
-        nr_ele_new["count"] = 0
-        data << nr_ele_new
-      elsif !nt_ele && nr_ele
-        nt_ele_new = nr_ele[0].clone
-        nt_ele_new["count_type"] = 'NT'
-        nt_ele_new["count"] = 0
-        data << nt_ele_new
-      end
-    end
-
-    data.each do |h|
-      h[:rpm] = compute_rpm(h["count"], total_reads)
-    end
-    data_and_background = (data + summary).group_by { |h| [h["tax_id"], h["tax_level"], h["count_type"]] }.map { |_k, v| v.reduce(:merge) }.reject { |h| h["count"].nil? }
-    zscore_array = data_and_background.map { |h| { tax_id: h["tax_id"], tax_level: h["tax_level"], count: h["count"], rpm: h[:rpm], hit_type: h["count_type"], zscore: compute_zscore(h[:rpm], h[:mean], h[:stdev]) } }
-    zscore_array
+    total_reads = report.pipeline_output.total_reads
+    background_id = report.background.id
+    # Note: stdev is never 0
+    TaxonCount.select("
+      taxon_counts.tax_id         AS  tax_id,
+      taxon_counts.count_type     AS  count_type,
+      taxon_counts.tax_level      AS  tax_level,
+      taxon_lineages.genus_taxid  AS  genus_taxid,
+      taxon_names.name            AS  name,
+      tgn.name                    AS  genus_name,
+      tcn.name                    AS  category_name,
+      taxon_counts.count          AS  count,
+      (count / #{total_reads}.0
+        * 1000000.0)              AS  rpm,
+      IF(
+        stdev IS NOT NULL,
+        GREATEST(-99, LEAST(99, (((count / #{total_reads}.0 * 1000000.0) - mean) / stdev))),
+        100
+      )                           AS  zscore
+    ").joins("
+      LEFT OUTER JOIN taxon_summaries ON
+        taxon_counts.tax_id     = taxon_summaries.tax_id      AND
+        taxon_counts.count_type = taxon_summaries.count_type  AND
+        taxon_counts.tax_level  = taxon_summaries.tax_level
+    ").joins("
+      LEFT OUTER JOIN taxon_lineages ON
+        taxon_counts.tax_id = taxon_lineages.taxid
+    ").joins("
+      LEFT OUTER JOIN taxon_names ON
+        taxon_names.taxid = taxon_counts.tax_id
+    ").joins("
+      LEFT OUTER JOIN taxon_names AS tgn ON
+        tgn.taxid = taxon_lineages.genus_taxid
+    ").joins("
+      LEFT OUTER JOIN taxon_names AS tcn ON
+        tcn.taxid = taxon_lineages.superkingdom_taxid
+    ").where(
+      pipeline_output_id: pipeline_output_id,
+      taxon_summaries: {
+        background_id: background_id
+      }
+    ).to_a.map(&:attributes)
   end
 
-  # rubocop:disable Metrics/AbcSize
-  def taxonomy_details(report, params, view_level)
-    taxon_zscores = compute_taxon_zscores(report)
+  def flip_type(t)
+    t == 'NR' ? 'NT' : 'NR'
+  end
 
-    tax_id_set = Set.new(taxon_zscores.map { |h| h[:tax_id] }).delete(nil)
-    if !tax_id_set.empty?
-      tax_ids_str = tax_id_set.sort.join(",")
-      lineage_arr = TaxonLineage.connection.select_all("SELECT taxid, superkingdom_taxid,  genus_taxid FROM taxon_lineages WHERE taxid IN (#{tax_ids_str})").to_hash
-      lineage_info = lineage_arr.group_by { |h| h['taxid'] }
-      name_arr = TaxonName.connection.select_all("SELECT taxid, name FROM taxon_names WHERE taxid IN (#{tax_ids_str})").to_hash
-      name_info = name_arr.group_by { |h| h['taxid'] }
-    else
-      lineage_info = {}
-      name_info = {}
-    end
+  def zero_twin(taxon)
+    result = taxon.clone
+    result['count'] = 0
+    result['rpm'] = 0
+    result['count_type'] = flip_type(result['count_type'])
+    result['zscore'] = -100
+    result
+  end
 
-    # So apparently every tax_id has a unique tax_level, species or genus.
-    # genus_level = TaxonCount::TAX_LEVEL_GENUS
-    species_level = TaxonCount::TAX_LEVEL_SPECIES
-    level = {}
-    taxon_zscores.each do |h|
-      level[h[:tax_id]] = h[:tax_level]
-      ninfo = name_info[h[:tax_id]] || [{}]
-      ninfo = ninfo.first
-      h[:name] = ninfo["name"]
-    end
-
-    cat_id_set = Set.new(lineage_info.map { |_, taxons| taxons[0]['superkingdom_taxid'] }).delete(nil)
-    if !cat_id_set.empty?
-      category_taxids = cat_id_set.sort.join(",")
-      taxon_name_arr = TaxonLineage.connection.select_all("select taxid, name from taxon_names where taxid in (#{category_taxids})").to_hash
-      cat_name_info = taxon_name_arr.group_by { |h| h['taxid'] }
-    else
-      cat_name_info = {}
-    end
-
-    view_level_int = view_level_name2int(view_level)
-    view_level_sym = view_level.downcase.to_sym
-    view_level_str = view_level.downcase
-
+  def sort_params(params_sort_by, view_level_str, details_key)
     default_sort_by = 'highest_species_nt_zscore'
-    sort_by = params[:sort_by] || default_sort_by
+    sort_by = params_sort_by || default_sort_by
     parts = sort_by.split "_"
     if parts.length == 2
       # handle previous frontend version
@@ -121,66 +108,76 @@ module ReportHelper
       # this is for general malformed parameter
       parts = default_sort_by.split "_"
     end
-    sort_direction, sort_tax_level, sort_hit_type, sort_field = parts.map(&:to_sym)
+    sort_direction, sort_tax_level, sort_count_type, sort_field = parts.map(&:to_sym)
+    sort_details_key = details_key[[sort_tax_level, sort_count_type]]
+    [sort_field, sort_details_key, sort_direction]
+  end
+
+  def taxonomy_details(report, params, view_level)
+    report_taxons = select_taxons(report)
+
+    tax2d = {}
+    tax2d.default_proc = proc do |hash, key|
+      hash[key] = {}
+    end
+
+    report_taxons.each do |taxon|
+      tax2d[taxon['tax_id']][taxon['count_type']] = taxon
+    end
+
+    tax2d.each do |_tax_id, tax_pair|
+      tax_pair['NT'] ||= zero_twin(tax_pair['NR'])
+      tax_pair['NR'] ||= zero_twin(tax_pair['NT'])
+    end
+
+    view_level_int = view_level_name2int(view_level)
+    view_level_str = view_level.downcase
+    view_level_sym = view_level_str.to_sym
+
     details_key = {
       [:species, :nt] => :nt_ele,
       [:species, :nr] => :nr_ele,
       [:genus, :nt] => :genus_nt_ele,
       [:genus, :nr] => :genus_nr_ele
     }
-    sort_details_key = details_key[[sort_tax_level, sort_hit_type]]
+    sort_field, sort_details_key, sort_direction = sort_params(params[:sort_by], view_level_str, details_key)
 
-    tax_id_set = Set.new(taxon_zscores.map { |h| h[:tax_id] })
-
-    tax_hit = taxon_zscores.group_by { |h| [h[:tax_id], h[:hit_type]] }
-
-    # filter and sort the nt_scores
-    htc = highest_tax_counts(taxon_zscores, view_level_str)
+    htc = highest_tax_counts(report_taxons, view_level_str)
     rp = resolve_params(params, view_level_str, htc)
 
     sortable = []
     unsortable = []
 
-    tax_id_set.each do |tax_id|
-      next unless tax_id >= 0 && level[tax_id] == view_level_int
+    tax2d.each do |tax_id, tax_pair|
+      next unless tax_id >= 0 && tax_pair['NT']['tax_level'] == view_level_int
 
-      linfo = lineage_info[tax_id] || [{}]
-      linfo = linfo.first
-
-      category_taxid = linfo["superkingdom_taxid"]
-      category_info = cat_name_info[category_taxid]
-      category_name = category_info ? category_info[0]['name'] : 'Other'
-
-      taxon_nts = tax_hit[[tax_id, 'NT']] || [nil]
-      taxon_nrs = tax_hit[[tax_id, 'NR']] || [nil]
-
-      if level[tax_id] == species_level
-        species_nts = taxon_nts
-        species_nrs = taxon_nrs
-        genus_taxid = linfo["genus_taxid"]
-        genus_nts = tax_hit[[genus_taxid, 'NT']] || [nil]
-        genus_nrs = tax_hit[[genus_taxid, 'NR']] || [nil]
+      if view_level_int == TaxonCount::TAX_LEVEL_SPECIES
+        genus_taxid = tax_pair['NT']['genus_taxid']
+        # the genus_taxid should always be present in tax2d
+        # but sometimes it isn't... possibly due to a bug
+        details = {
+          nt_ele: tax_pair['NT'],
+          nr_ele: tax_pair['NR'],
+          category: tax_pair['NT']['category_name'],
+          genus_nt_ele: tax2d.fetch(genus_taxid, {})['NT'],
+          genus_nr_ele: tax2d.fetch(genus_taxid, {})['NR']
+        }
       else
-        # assert level[tax_id] == genus_level
-        species_nts = [nil]
-        species_nrs = [nil]
-        genus_nts = taxon_nts
-        genus_nrs = taxon_nrs
+        details = {
+          nt_ele: nil,
+          nr_ele: nil,
+          category: tax_pair['NT']['category_name'],
+          genus_nt_ele: tax_pair['NT'],
+          genus_nr_ele: tax_pair['NR']
+        }
       end
-
-      details = {
-        nt_ele: species_nts[0],
-        nr_ele: species_nrs[0],
-        category: category_name,
-        genus_nt_ele: genus_nts[0],
-        genus_nr_ele: genus_nrs[0]
-      }
 
       # For now we sort by species RPM or Z
       # TODO: Allow sorting by genus RPM or Z
       sort_details = details[sort_details_key]
+      sort_field_str = sort_field.to_s
       if sort_details
-        sort_key = sort_details[sort_field]
+        sort_key = sort_details[sort_field_str]
         if sort_key
           sort_key = 0.0 - sort_key if sort_direction == :highest
           details[:sort_key] = sort_key
@@ -192,7 +189,7 @@ module ReportHelper
         filter_details = details[details_key[[view_level_sym, type]]]
         next unless filter_details
         [:zscore, :rpm].each do |metric|
-          fm_val = filter_details[metric]
+          fm_val = filter_details[metric.to_s]
           high = "highest_#{view_level_str}_#{type}_#{metric}".to_sym
           if rp[high] < fm_val
             out_of_bounds = true
@@ -218,8 +215,9 @@ module ReportHelper
 
     sortable.sort! { |dl, dr| dl[:sort_key] <=> dr[:sort_key] }
     # HACK: -- the UI gets really slow if we return all results
-    # about 2000 results is what keeps it snappy, for now
-    [htc, (sortable + unsortable)[0...2000]]
+    # about 1000 results is what keeps it super snappy for now
+    rows = (sortable + unsortable)[0...1000]
+    [htc, rows]
   end
 
   def resolve_params(params, view_level_str, data_ranges)
@@ -257,10 +255,10 @@ module ReportHelper
     # compute min/max extents for 8 columns
     bounds = {}
     taxon_zscores.each do |taxon|
-      level = taxon[:tax_level] == TaxonCount::TAX_LEVEL_SPECIES ? :species : :genus
-      type = taxon[:hit_type] == 'NT' ? :nt : :nr
+      level = taxon['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES ? :species : :genus
+      type = taxon['count_type'] == 'NT' ? :nt : :nr
       [:zscore, :rpm].each do |metric|
-        tm_val = taxon[metric]
+        tm_val = taxon[metric.to_s]
         high = [:highest, level, type, metric]
         bounds[high] = tm_val unless bounds[high] && bounds[high] > tm_val
         low = [:lowest, level, type, metric]
@@ -289,34 +287,5 @@ module ReportHelper
     end
     logger.warn "Ignoring taxon extents key #{bounds}" unless bounds.empty?
     flat
-  end
-
-  def compute_rpm(count, total_reads)
-    if count
-      count * 1e6 / total_reads.to_f
-    else
-      0
-    end
-  end
-
-  def clamp(z)
-    if z < -99
-      -99
-    elsif z > 99
-      99
-    else
-      z
-    end
-  end
-
-  def compute_zscore(rpm, mean, stdev)
-    valid_stdev = !(stdev.nil? || stdev.zero?)
-    if rpm && valid_stdev
-      clamp((rpm - mean) / stdev)
-    elsif rpm && rpm != 0 && !valid_stdev
-      100
-    else
-      0
-    end
   end
 end
