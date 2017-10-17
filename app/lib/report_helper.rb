@@ -35,7 +35,7 @@ module ReportHelper
     pipeline_output_id = report.pipeline_output.id
     data = TaxonCount.connection.select_all("select tax_id, pipeline_output_id, tax_level, count, count_type from taxon_counts where pipeline_output_id = #{pipeline_output_id}").to_hash
 
-   # pad cases where only one of NT/NR is present with zeroes
+    # pad cases where only one of NT/NR is present with zeroes
     taxid_counttype = data.group_by { |h| [h["tax_id"], h["count_type"]] }
     tax_id_set = Set.new(data.map { |h| h["tax_id"] })
     tax_id_set.each do |taxid|
@@ -57,7 +57,7 @@ module ReportHelper
     data.each do |h|
       h[:rpm] = compute_rpm(h["count"], total_reads)
     end
-    data_and_background = (data + summary).group_by { |h| [h["tax_id"], h["tax_level"], h["count_type"]] }.map { |_k, v| v.reduce(:merge) }.select { |h| !h["count"].nil? }
+    data_and_background = (data + summary).group_by { |h| [h["tax_id"], h["tax_level"], h["count_type"]] }.map { |_k, v| v.reduce(:merge) }.reject { |h| h["count"].nil? }
     zscore_array = data_and_background.map { |h| { tax_id: h["tax_id"], tax_level: h["tax_level"], count: h["count"], rpm: h[:rpm], hit_type: h["count_type"], zscore: compute_zscore(h[:rpm], h[:mean], h[:stdev]) } }
     zscore_array
   end
@@ -98,20 +98,7 @@ module ReportHelper
       cat_name_info = {}
     end
 
-    # filter and sort the nt_scores
     htc = highest_tax_counts(taxon_zscores)
-    rp = resolve_params(params, htc)
-
-###  filtering to be amended by Boris's upcoming PR, for now just remove this logic as it is not implemented correctly
-#    taxon_zscores.keep_if do |h|
-#      (h[:tax_id] >= 0 &&
-#        h[:zscore] >= rp[:nt_zscore_threshold][:start] &&
-#        h[:zscore] <= rp[:nt_zscore_threshold][:end] &&
-#        h[:rpm] >= rp[:nt_rpm_threshold][:start] &&
-#        h[:rpm] <= rp[:nt_rpm_threshold][:end]
-#      )
-#    end
-###
 
     default_sort_by = 'highest_species_nt_zscore'
     sort_by = params[:sort_by] || default_sort_by
@@ -141,7 +128,7 @@ module ReportHelper
     unsortable = []
 
     tax_id_set.each do |tax_id|
-      next unless level[tax_id] == view_level_int
+      next unless level[tax_id] == view_level_int && tax_id >= 0
 
       linfo = lineage_info[tax_id] || [{}]
       linfo = linfo.first
@@ -184,10 +171,6 @@ module ReportHelper
           sort_key = 0.0 - sort_key if sort_direction == :highest
           details[:sort_key] = sort_key
         end
-      end
-
-      if tax_id==9
-        puts "CHARLES #{details}"
       end
 
       if details[:sort_key]
@@ -261,7 +244,7 @@ module ReportHelper
   end
 
   def compute_zscore(rpm, mean, stdev)
-    valid_stdev = !(stdev.nil? || stdev == 0)
+    valid_stdev = !(stdev.nil? || stdev.zero?)
     if rpm && valid_stdev
       clamp((rpm - mean) / stdev)
     elsif rpm && rpm != 0 && !valid_stdev
