@@ -10,7 +10,7 @@ class HomeController < ApplicationController
       pipeline_info = output.pipeline_runs.first ? output.pipeline_runs.first.pipeline_output : nil
       job_stats = output.pipeline_outputs.first ? output.pipeline_outputs.first.job_stats : nil
       pipeline_run = output.pipeline_runs.first ? output.pipeline_runs.first : nil
-      summary_stats = get_summary_stats(job_stats)
+      summary_stats = job_stats ? get_summary_stats(job_stats) : nil
 
       output_data[:pipeline_info] = pipeline_info
       output_data[:pipeline_run] = pipeline_run
