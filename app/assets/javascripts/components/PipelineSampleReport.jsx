@@ -6,14 +6,14 @@ class PipelineSampleReport extends React.Component {
     this.taxonomy_details = props.taxonomy_details;
     this.view_level = ReportFilter.getFilter('view_level') || 'species';
     this.highest_tax_counts = props.highest_tax_counts;
+    this.defaultSortBy = 'highest_genus_nt_zscore';
     const current_sort = PipelineSampleReport.currentSort();
     this.state = {
-      sort_title: current_sort.sort_title
-        ? current_sort.sort_title :'Highest zscore',
       sort_query: current_sort.sort_query
-        ? current_sort.sort_query  : 'sort_by=highest_zscore'
+        ? current_sort.sort_query  : `sort_by=${this.defaultSortBy}`
     };
     this.applySort = this.applySort.bind(this);
+    this.columnSorting = this.columnSorting.bind(this);
   }
 
   static uppCaseFirst(name) {
@@ -26,34 +26,14 @@ class PipelineSampleReport extends React.Component {
    let current_sort = {};
    if(sort_by) {
      current_sort = {
-       sort_title: `${sort_by.replace('_', ' ')}`,
        sort_query: `sort_by=${sort_by}`
      }
    }
    return current_sort;
   }
 
-  applySort(e) {
-    const sort_title = (e.target.textContent)
-      ? e.target.textContent : this.state.sort_title;
-    let sort_query = '';
-    switch (sort_title.toLowerCase()) {
-      case 'lowest zscore':
-        sort_query = 'sort_by=lowest_zscore';
-        break;
-      case 'highest zscore':
-        sort_query = 'sort_by=highest_zscore';
-        break;
-      case 'lowest rpm':
-        sort_query = 'sort_by=lowest_rpm';
-        break;
-      case 'highest rpm':
-        sort_query = 'sort_by=highest_rpm';
-        break;
-      default:
-        sort_query = this.state.sort_query;
-    }
-    this.setState({sort_title, sort_query });
+  applySort(sort_query) {
+    this.setState({ sort_query });
     const url = PipelineSampleReport.deleteUrlParam(window.location.href, 'sort_by');
     window.location = (PipelineSampleReport.hasQuery(url))
       ? `${url}&${sort_query}` : `${url}?${sort_query}`;
@@ -65,7 +45,6 @@ class PipelineSampleReport extends React.Component {
       const prefix = encodeURIComponent(parameter)+'=';
       const pars = queryString[1].split(/[&;]/g);
       for (let i = pars.length; i--; i > 0) {
-        //idiom for string.startsWith
         if (pars[i].lastIndexOf(prefix, 0) !== -1) {
           pars.splice(i, 1);
         }
@@ -82,8 +61,32 @@ class PipelineSampleReport extends React.Component {
   }
 
   componentDidMount() {
+    // temporal hack to adjust the width of the table, better to use flexbox in the future
+    if (this.view_level === 'species') {
+      $('#report-table thead tr th').css('width', '9%');
+    } else {
+       $('#report-table thead tr th').css('width', 'inherit');
+    }
     $('ul.tabs').tabs();
     $('.sort-report').dropdown();
+  }
+
+  getActiveSort(className) {
+    if(className) {
+      const sort = ReportFilter.getFilter('sort_by');
+      if (sort === className) {
+        return 'active';
+      } else if (className === this.defaultSortBy && !sort) {
+        return 'active';
+      }
+    }
+  }
+
+  columnSorting(e) {
+    const className = e.target.className;
+    const pos = className.indexOf('sort_by');
+    const sort_query = className.substr(pos);
+    this.applySort(sort_query);
   }
 
   render() {
@@ -100,62 +103,72 @@ class PipelineSampleReport extends React.Component {
                   highest_tax_counts={this.highest_tax_counts}/>
               </div>
               <div className="col s10 reports-main ">
-                <div className="report-sort right">
-
-                  <span className="">
-                    <a className='dropdown-button btn btn-flat grey lighten-4 sort-report' href='#' data-activates='sort-report'>
-                      <span className="sort-by">Sort By:</span>
-                      <span className="sort-value">{ this.state.sort_title }</span>
-                      <i className="fa fa-sort"></i>
-                    </a>
-                  </span>
-
-                  <ul id='sort-report' className='dropdown-content'>
-                    <li>
-                      <a onClick={this.applySort}>
-                        <div  className="sort-title">Lowest zscore</div>
-                        <div className="fa fa-sort-amount-asc right sort-icon"></div>
-                      </a>
-                    </li>
-                    <li>
-                      <a onClick={this.applySort}>
-                        <div className="sort-title">Highest zscore</div>
-                        <div className="fa fa-sort-amount-desc right sort-icon"></div>
-                      </a>
-                    </li>
-                    <li>
-                      <a onClick={this.applySort}>
-                        <div className="sort-title">Lowest rpm</div>
-                        <div className="fa fa-sort-amount-asc right sort-icon"></div>
-                      </a>
-                    </li>
-                    <li>
-                      <a onClick={this.applySort}>
-                        <div className="sort-title">Highest rpm</div>
-                        <div className="fa fa-sort-amount-desc right sort-icon"></div>
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-                <table className='bordered report-table'>
+                <table id="report-table" className='bordered report-table'>
                   <thead>
                   <tr>
                     <th>Category</th>
                     <th>Genus</th>
                     <th>{ (this.view_level==='species') ? 'Species' : '' }</th>
-                    <th>NT Genus Z</th>
-                    <th>NT Genus rM</th>
-                    <th>NT Genus r</th>
-                    <th>NR Genus Z</th>
-                    <th>NR Genus rM</th>
-                    <th>NR Genus r</th>
+                    <th>
+                    NT Genus Z
+                    <div className='sort-controls  left'>
+                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_genus_nt_zscore')} fa fa-caret-up sort_by=highest_genus_nt_zscore` }></i>
+                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_genus_nt_zscore')} fa fa-caret-down sort_by=lowest_genus_nt_zscore` }></i>
+                    </div>
+
+                    </th>
+                    <th>
+                    NT Genus rM
+                     <div className='sort-controls left'>
+                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_genus_nt_rpm')} fa fa-caret-up sort_by=highest_genus_nt_rpm` }></i>
+                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_genus_nt_rpm')} fa fa-caret-down sort_by=lowest_genus_nt_rpm` }></i>
+                    </div>
+                    </th>
+                    <th>
+                    NR Genus Z
+                     <div className='sort-controls left'>
+                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_genus_nr_zscore')} fa fa-caret-up sort_by=highest_genus_nr_zscore` }></i>
+                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_genus_nr_zscore')} fa fa-caret-down sort_by=lowest_genus_nr_zscore` }></i>
+                    </div>
+                    </th>
+                    <th>
+                    NR Genus rM
+                     <div className='sort-controls left'>
+                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_genus_nr_rpm')} fa fa-caret-up sort_by=highest_genus_nr_rpm` }></i>
+                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_genus_nr_rpm')} fa fa-caret-down sort_by=lowest_genus_nr_rpm` }></i>
+                    </div>
+                    </th>
                     {/*The Genus and Species diff*/}
-                    <th>{ (this.view_level==='species') ? 'NT Species Z' : '' }</th>
-                    <th>{ (this.view_level==='species') ? 'NT Species rM' : '' }</th>
-                    <th>{ (this.view_level==='species') ? 'NT Species r' : '' }</th>
-                    <th>{ (this.view_level==='species') ? 'NR Species Z' : '' }</th>
-                    <th>{ (this.view_level==='species') ? 'NR Species rM' : '' }</th>
-                    <th>{ (this.view_level==='species') ? 'NR Species r' : '' }</th>
+                    { (this.view_level === 'species') ?
+                    <th>
+                      NT Species Z
+                      <div className='sort-controls left'>
+                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_species_nt_zscore')} fa fa-caret-up sort_by=highest_species_nt_zscore` }></i>
+                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_species_nt_zscore')} fa fa-caret-down sort_by=lowest_species_nt_zscore` }></i>
+                      </div>
+                    </th> : '' }
+                    { (this.view_level === 'species') ?
+                    <th>
+                      NT Species rM
+                      <div className='sort-controls left'>
+                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_species_nt_rpm')} fa fa-caret-up sort_by=highest_species_nt_rpm` }></i>
+                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_species_nt_rpm')} fa fa-caret-down sort_by=lowest_species_nt_rpm` }></i>
+                      </div>
+                    </th> : '' }
+                    { (this.view_level === 'species') ?
+                    <th>NR Species Z
+                      <div className='sort-controls left'>
+                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_species_nr_zscore')} fa fa-caret-up sort_by=highest_species_nr_zscore` }></i>
+                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_species_nr_zscore')} fa fa-caret-down sort_by=lowest_species_nr_zscore` }></i>
+                      </div>
+                    </th> : '' }
+                    { (this.view_level === 'species') ?
+                    <th>NR Species rM
+                      <div className='sort-controls left'>
+                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_species_nr_rpm')} fa fa-caret-up sort_by=highest_species_nr_rpm` }></i>
+                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_species_nr_rpm')} fa fa-caret-down sort_by=lowest_species_nr_rpm` }></i>
+                      </div>
+                    </th> : '' }
                   </tr>
                   </thead>
                   <tbody>
@@ -189,18 +202,22 @@ class PipelineSampleReport extends React.Component {
 
                         <td>{ (!taxon.genus_nt_ele) ? '-': taxon.genus_nt_ele.zscore.toFixed(3) }</td>
                         <td>{ (!taxon.genus_nt_ele) ? '-': taxon.genus_nt_ele.rpm.toFixed(3) }</td>
-                        <td>{ (!taxon.genus_nt_ele) ? '-': taxon.genus_nt_ele.count }</td>
+
                         <td>{ (!taxon.genus_nr_ele) ? '-': taxon.genus_nr_ele.zscore.toFixed(3) }</td>
                         <td>{ (!taxon.genus_nr_ele) ? '-': taxon.genus_nr_ele.rpm.toFixed(3)}</td>
-                        <td>{ (!taxon.genus_nr_ele) ? '-': taxon.genus_nr_ele.count}</td>
 
                         {/*The species scores*/}
-                        <td>{ (this.view_level==='species' && taxon.nt_ele) ? taxon.nt_ele.zscore.toFixed(3) : '' } </td>
-                        <td>{ (this.view_level==='species' && taxon.nt_ele) ? taxon.nt_ele.rpm.toFixed(3) : '' }</td>
-                        <td>{ (this.view_level==='species' && taxon.nt_ele) ? taxon.nt_ele.count : '' }</td>
-                        <td>{ (this.view_level==='species' && taxon.nr_ele) ? taxon.nr_ele.zscore.toFixed(3) : '' }</td>
-                        <td>{ (this.view_level==='species' && taxon.nr_ele) ? taxon.nr_ele.rpm.toFixed(3) : '' }</td>
-                        <td>{ (this.view_level==='species' && taxon.nr_ele) ? taxon.nr_ele.count : '' }</td>
+ 
+                        <td>
+                          { (this.view_level=== 'species' && taxon.nt_ele && (taxon.nt_ele.zscore)) ? taxon.nt_ele.zscore.toFixed(3) : '' }
+                        </td>
+                        <td>{ (this.view_level==='species' && taxon.nt_ele && (taxon.nt_ele.rpm)) ? taxon.nt_ele.rpm.toFixed(3) : '' }</td>
+                        <td>
+                          { (this.view_level==='species' && taxon.nr_ele && (taxon.nr_ele.zscore)) ? taxon.nr_ele.zscore.toFixed(3) : '' }
+                        </td>
+                        <td>
+                          { (this.view_level==='species' && taxon.nr_ele && (taxon.nr_ele.rpm)) ? taxon.nr_ele.rpm.toFixed(3) : '' }
+                        </td>
                       </tr>
                     )
                   })}
