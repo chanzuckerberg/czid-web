@@ -20,6 +20,7 @@ gem "health_check"
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.5'
 # jquery for rails
+gem 'jquery-datatables'
 gem 'jquery-rails'
 # Logger
 gem 'logger'
