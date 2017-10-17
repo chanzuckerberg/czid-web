@@ -1,5 +1,6 @@
 class SamplesController < ApplicationController
   include ReportHelper
+  include SamplesHelper
   before_action :login_required, only: [:new, :update, :destroy, :edit, :reupload_source, :kickoff_pipeline]
   before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs]
   acts_as_token_authentication_handler_for User, only: [:create], fallback: :devise
@@ -17,7 +18,8 @@ class SamplesController < ApplicationController
   def show
     @view_level = params[:view_level] ? params[:view_level].downcase : 'species'
     @pipeline_output = @sample.pipeline_runs.first ? @sample.pipeline_runs.first.pipeline_output : nil
-    @job_stats = @pipeline_output ? @pipeline_output.job_stats.first : nil
+    @job_stats = @pipeline_output ? @pipeline_output.job_stats : nil
+    @summary_stats = @job_stats ? get_summary_stats(@job_stats) : nil
     @project_info = @sample.project ? @sample.project : nil
     report = @pipeline_output ? @pipeline_output.reports.first : nil
     @report_info = {}

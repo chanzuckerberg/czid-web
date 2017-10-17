@@ -3,7 +3,7 @@ class Samples extends React.Component {
     super(props, context);
     this.project = this.props.project;
     this.samples = this.props.samples;
-    this.outputData = this.props.outputData;
+    this.outputData = this.props.outputData
   }
 
 
@@ -16,26 +16,14 @@ class Samples extends React.Component {
           </td>
           <td><a href={'/samples/' + sample.id}>{moment(sample.created_at).format(' L,  h:mm a')}</a></td>
           <td>{ !pipelineInfo[i].pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineInfo[i].pipeline_info.total_reads}</a>}</td>
-          <td>{ !pipelineInfo[i].pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineInfo[i].pipeline_info.remaining_reads}</a>}</td>
-          <td>{ !pipelineInfo[i].pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{this.computePercentageReads(pipelineInfo[i].pipeline_info)}%</a>}</td>
+          <td>{ !pipelineInfo[i].pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineInfo[i].summary_stats.remaining_reads}</a>}</td>
+          <td>{ !pipelineInfo[i].pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineInfo[i].summary_stats.percent_remaining.toFixed(2)}%</a>}</td>
           <td>{ !pipelineInfo[i].pipeline_info ? 'Pending' : <a href={'/samples/' + sample.id}>Created</a>}</td>
-          <td>{ !pipelineInfo[i].job_stats ? 'NA' : <a href={'/samples/' + sample.id}>{this.computeCompressionRatio(pipelineInfo[i].job_stats)}</a>}</td>
-          <td>{ !pipelineInfo[i].job_stats ? 'NA' : <a href={'/samples/' + sample.id}>{this.computeQcValue(pipelineInfo[i].job_stats)}%</a>}</td>
+          <td>{ !pipelineInfo[i].job_stats ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineInfo[i].summary_stats.compression_ratio.toFixed(2)}</a>}</td>
+          <td>{ !pipelineInfo[i].job_stats ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineInfo[i].summary_stats.qc_percent.toFixed(2)}%</a>}</td>
         </tr>
       )
     })
-  }
-
-  computeCompressionRatio(result) {
-    return (result.reads_before/result.reads_after).toFixed(2);
-  }
-  
-  computeQcValue(result) {
-    return (100.0 * result.reads_after/result.reads_before).toFixed(2);
-  }
-
-  computePercentageReads(result) {
-    return (100.0 * result.remaining_reads/result.total_reads).toFixed(2);
   }
 
   renderTable(samples, pipelineInfo) {
