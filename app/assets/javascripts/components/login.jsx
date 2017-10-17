@@ -1,7 +1,7 @@
 class Login extends React.Component {
   constructor(props, context) {
     super(props, context);
-    this.csrf = this.props.csrf
+    this.csrf = props.csrf
     this.handleSubmit = this.handleSubmit.bind(this);
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
     this.clearError = this.clearError.bind(this);
