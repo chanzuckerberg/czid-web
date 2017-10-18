@@ -1,4 +1,4 @@
-export function numberWithCommas(x) {
+function numberWithCommas(x) {
   x = x.toString();
   var pattern = /(-?\d+)(\d{3})/;
   while (pattern.test(x))
