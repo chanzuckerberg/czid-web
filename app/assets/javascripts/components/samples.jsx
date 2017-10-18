@@ -16,11 +16,11 @@ class Samples extends React.Component {
           </td>
           <td><a href={'/samples/' + sample.id}>{moment(sample.created_at).format(' L,  h:mm a')}</a></td>
           <td>{ !pipelineInfo[i].pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineInfo[i].pipeline_info.total_reads}</a>}</td>
-          <td>{ !pipelineInfo[i].pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineInfo[i].summary_stats.remaining_reads}</a>}</td>
-          <td>{ !pipelineInfo[i].pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineInfo[i].summary_stats.percent_remaining.toFixed(2)}%</a>}</td>
+          <td>{ !pipelineInfo[i].summary_stats.remaining_reads ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineInfo[i].summary_stats.remaining_reads}</a>}</td>
+          <td>{ !pipelineInfo[i].summary_stats.percent_remaining ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineInfo[i].summary_stats.percent_remaining.toFixed(2)}%</a>}</td>
           <td>{ !pipelineInfo[i].pipeline_info ? 'Pending' : <a href={'/samples/' + sample.id}>Created</a>}</td>
-          <td>{ !pipelineInfo[i].job_stats ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineInfo[i].summary_stats.compression_ratio.toFixed(2)}</a>}</td>
-          <td>{ !pipelineInfo[i].job_stats ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineInfo[i].summary_stats.qc_percent.toFixed(2)}%</a>}</td>
+          <td>{ !pipelineInfo[i].summary_stats.compression_ratio ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineInfo[i].summary_stats.compression_ratio.toFixed(2)}</a>}</td>
+          <td>{ !pipelineInfo[i].summary_stats.qc_percent ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineInfo[i].summary_stats.qc_percent.toFixed(2)}%</a>}</td>
         </tr>
       )
     })
@@ -79,4 +79,3 @@ class Samples extends React.Component {
   }
 
 }
-

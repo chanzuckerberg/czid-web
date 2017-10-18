@@ -61,7 +61,7 @@ class PipelineSampleReads extends React.Component {
                 </tr>
                 <tr>
                   <td>Passed Quality Control</td>
-                  <td>{ !this.summary_stats ? 'NA' : this.summary_stats.qc_percent.toFixed(2) }%</td>
+                  <td>{ !this.summary_stats.qc_percent ? 'NA' : this.summary_stats.qc_percent.toFixed(2) }%</td>
                 </tr>
                 </tbody>
               </table>
@@ -71,11 +71,11 @@ class PipelineSampleReads extends React.Component {
                 <tbody>
                 <tr>
                   <td>Remaining Reads</td>
-                  <td>{ this.summary_stats.remaining_reads }</td>
+                  <td>{ !this.summary_stats.remaining_reads ? 'NA' : this.summary_stats.remaining_reads }</td>
                 </tr>
                 <tr>
                   <td>Compression Ratio</td>
-                  <td>{ !this.summary_stats ? 'NA' : this.summary_stats.compression_ratio.toFixed(2) }</td>
+                  <td>{ !this.summary_stats.compression_ratio ? 'NA' : this.summary_stats.compression_ratio.toFixed(2) }</td>
                 </tr>
                 </tbody>
               </table>
