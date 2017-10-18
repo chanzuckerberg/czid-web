@@ -12,20 +12,23 @@ module SamplesHelper
 
   def get_remaining_reads(jobstats)
     # reads remaining after host filtering
-    jobstats.find_by(task: 'run_bowtie2').reads_after
+    bowtie2_stats = jobstats.find_by(task: 'run_bowtie2')
+    bowtie2_stats.reads_after unless bowtie2_stats.nil?
   end
 
   def compute_compression_ratio(jobstats)
     cdhitdup_stats = jobstats.find_by(task: 'run_cdhitdup')
-    (1.0 * cdhitdup_stats.reads_before) / cdhitdup_stats.reads_after
+    (1.0 * cdhitdup_stats.reads_before) / cdhitdup_stats.reads_after unless cdhitdup_stats.nil?
   end
 
   def compute_qc_value(jobstats)
     priceseqfilter_stats = jobstats.find_by(task: 'run_priceseqfilter')
-    (100.0 * priceseqfilter_stats.reads_after) / priceseqfilter_stats.reads_before
+    (100.0 * priceseqfilter_stats.reads_after) / priceseqfilter_stats.reads_before unless priceseqfilter_stats.nil?
   end
 
   def compute_percentage_reads(jobstats)
-    (100.0 * jobstats.find_by(task: 'run_bowtie2').reads_after) / jobstats.find_by(task: 'run_star').reads_before
+    bowtie2_stats = jobstats.find_by(task: 'run_bowtie2')
+    star_stats = jobstats.find_by(task: 'run_star')
+    (100.0 * bowtie2_stats.reads_after) / star_stats.reads_before unless bowtie2_stats.nil? || star_stats.nil?
   end
 end
