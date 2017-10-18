@@ -4,7 +4,6 @@
 
 @import "colors";
 
-
 .reports-sidebar {
   background: $sidebar-background;
 }
@@ -111,6 +110,10 @@
     color: #f8f9f9;
   }
 
+}
+
+.report-table td{
+  cursor: inherit;
 }
 
 .reports-screen {
