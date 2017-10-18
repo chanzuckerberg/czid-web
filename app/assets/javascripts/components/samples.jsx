@@ -12,7 +12,7 @@ class Samples extends React.Component {
     return samples.map((sample, i) => {
       let pInfo = pipelineInfo[i];
       return (
-        <tr key={i}>
+        <tr key={i} onClick={ this.viewSample.bind(this, sample.id) }>
           <td><a href={'/samples/' + sample.id}>
             <i className="fa fa-flask" aria-hidden="true"></i> {sample.name} </a>
           </td>
@@ -26,6 +26,10 @@ class Samples extends React.Component {
         </tr>
       )
     })
+  }
+
+  viewSample(id) {
+    location.href = `/samples/${id}`
   }
 
   renderTable(samples, pipelineInfo) {
