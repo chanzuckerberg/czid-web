@@ -33,11 +33,10 @@ task load_lineage_db: :environment do
 
     for taxl in species genus family order class phylum superkingdom ; do
       # print out sql command
-      echo "update taxon_lineages inner join taxon_names on taxon_lineages.${taxl}_taxid = taxon_names.taxid set taxon_lineages.${taxl}_name = taxon_names.name;"
       echo "update taxon_lineages inner join taxon_names on taxon_lineages.${taxl}_taxid = taxon_names.taxid set taxon_lineages.${taxl}_name = taxon_names.name;" | mysql --user=$DB_USERNAME --host=#{host} --password=$DB_PASSWORD idseq_#{Rails.env};
     done
     cd /app;
-    #rm -rf #{local_taxonomy_path};
+    rm -rf #{local_taxonomy_path};
   `
   raise "lineage database import failed" unless $CHILD_STATUS.success?
 end
