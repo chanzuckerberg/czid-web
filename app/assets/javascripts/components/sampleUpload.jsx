@@ -23,6 +23,7 @@ class SampleUpload extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
+    this.clearError();
     if(!this.isFormInvalid()) {
       this.createSample()
     }
@@ -33,7 +34,10 @@ class SampleUpload extends React.Component {
   }
 
   clearError() {
-    this.setState({ invalid: false })
+    this.setState({ 
+      invalid: false,
+      success: false
+     })
   }
 
   gotoPage(path) {
@@ -46,6 +50,7 @@ class SampleUpload extends React.Component {
 
   handleProjectSubmit(e) {
     e.preventDefault();
+    this.clearError();
     if(!this.isProjectInvalid()) {
       this.addProject()
     }
@@ -110,7 +115,7 @@ class SampleUpload extends React.Component {
         success: true,
         successMessage: 'Sample created successfully'
       }, () => {
-        that.gotoPage('/');
+        // that.gotoPage('/');
       })
     })
     .catch(function (error) {

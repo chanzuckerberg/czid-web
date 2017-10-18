@@ -101,13 +101,14 @@ class CreateUser extends React.Component {
         errorMessage: 'Please fill all fields'
       })
       return true;
-    } else if (this.refs.email.value === '') {
+    } else if (this.refs.password.value === '') {
       this.setState({ 
         showFailed: true,
-        errorMessage: 'Please enter email'
+        errorMessage: 'Please enter password'
       })
       return true;
-    } else if (this.refs.password_confirmation.value === '') {
+    } 
+    else if (this.refs.password_confirmation.value === '') {
       this.setState({ 
         showFailed: true,
         errorMessage: 'Please re-enter password'
