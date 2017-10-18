@@ -7,5 +7,4 @@
 //= require materialize
 //= require moment
 //= require materialize/extras/nouislider
-//Select = require react-select
 
