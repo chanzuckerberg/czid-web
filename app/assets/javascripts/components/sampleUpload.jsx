@@ -72,6 +72,7 @@ class SampleUpload extends React.Component {
         success: true,
         successMessage: 'Project added successfully'
       }, () => {
+        this.refs.new_project.value = '';
         that.initializeSelectTag();
       });
     })
@@ -115,7 +116,7 @@ class SampleUpload extends React.Component {
         success: true,
         successMessage: 'Sample created successfully'
       }, () => {
-        // that.gotoPage('/');
+        that.gotoPage('/');
       })
     })
     .catch(function (error) {

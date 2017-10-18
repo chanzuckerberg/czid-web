@@ -17,13 +17,17 @@ class Login extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
+    this.clearError
     if(!this.isFormInValid()) {
       this.login()
     }
   }
 
   clearError() {
-    this.setState({ showFailedLogin: false })
+    this.setState({ 
+      showFailedLogin: false,
+      success: false
+    })
   }
 
   gotoPage(path) {
