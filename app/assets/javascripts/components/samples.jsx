@@ -15,8 +15,8 @@ class Samples extends React.Component {
             <i className="fa fa-flask" aria-hidden="true"></i> {sample.name} </a>
           </td>
           <td><a href={'/samples/' + sample.id}>{moment(sample.created_at).format(' L,  h:mm a')}</a></td>
-          <td>{ !pipelineInfo[i].pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineInfo[i].pipeline_info.total_reads}</a>}</td>
-          <td>{ !pipelineInfo[i].pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineInfo[i].summary_stats.remaining_reads}</a>}</td>
+          <td>{ !pipelineInfo[i].pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{numberWithCommas(pipelineInfo[i].pipeline_info.total_reads)}</a>}</td>
+          <td>{ !pipelineInfo[i].pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{numberWithCommas(pipelineInfo[i].summary_stats.remaining_reads)}</a>}</td>
           <td>{ !pipelineInfo[i].pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineInfo[i].summary_stats.percent_remaining.toFixed(2)}%</a>}</td>
           <td>{ !pipelineInfo[i].pipeline_info ? 'Pending' : <a href={'/samples/' + sample.id}>Created</a>}</td>
           <td>{ !pipelineInfo[i].job_stats ? 'NA' : <a href={'/samples/' + sample.id}>{pipelineInfo[i].summary_stats.compression_ratio.toFixed(2)}</a>}</td>
@@ -79,4 +79,3 @@ class Samples extends React.Component {
   }
 
 }
-
