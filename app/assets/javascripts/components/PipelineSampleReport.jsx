@@ -232,6 +232,7 @@ class PipelineSampleReport extends React.Component {
                         </td>
 
                         {/* The genus scores */}
+
                         <td>{ (!taxon.genus_nt_ele) ? '-': numberWithCommas(Number(taxon.genus_nt_ele.zscore).toFixed(3))}</td>
                         <td>{ (!taxon.genus_nt_ele) ? '-': numberWithCommas(Number(taxon.genus_nt_ele.rpm).toFixed(3))}</td>
                         <td>{ (!taxon.genus_nt_ele) ? '-': numberWithCommas(taxon.genus_nt_ele.count)}</td>
