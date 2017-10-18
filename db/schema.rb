@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171016193027) do
+ActiveRecord::Schema.define(version: 20171018000215) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -94,7 +94,7 @@ ActiveRecord::Schema.define(version: 20171016193027) do
   end
 
   create_table "projects", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name", collation: "utf8_general_ci"
+    t.string "name", collation: "latin1_swedish_ci"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_projects_on_name", unique: true
@@ -118,7 +118,7 @@ ActiveRecord::Schema.define(version: 20171016193027) do
   end
 
   create_table "samples", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name", collation: "utf8_general_ci"
+    t.string "name", collation: "latin1_swedish_ci"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "project_id"
@@ -164,7 +164,7 @@ ActiveRecord::Schema.define(version: 20171016193027) do
     t.integer "count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "name", collation: "utf8_general_ci"
+    t.string "name", collation: "latin1_swedish_ci"
     t.string "count_type"
     t.index ["pipeline_output_id", "tax_id", "count_type"], name: "new_index_taxon_counts", unique: true
     t.index ["pipeline_output_id", "tax_level", "count_type", "tax_id"], name: "index_taxon_counts", unique: true
@@ -196,6 +196,20 @@ ActiveRecord::Schema.define(version: 20171016193027) do
     t.integer "species_taxid"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "superkingdom_name"
+    t.string "phylum_name"
+    t.string "class_name"
+    t.string "order_name"
+    t.string "family_name"
+    t.string "genus_name"
+    t.string "species_name"
+    t.index ["class_taxid"], name: "index_taxon_lineages_on_class_taxid"
+    t.index ["family_taxid"], name: "index_taxon_lineages_on_family_taxid"
+    t.index ["genus_taxid"], name: "index_taxon_lineages_on_genus_taxid"
+    t.index ["order_taxid"], name: "index_taxon_lineages_on_order_taxid"
+    t.index ["phylum_taxid"], name: "index_taxon_lineages_on_phylum_taxid"
+    t.index ["species_taxid"], name: "index_taxon_lineages_on_species_taxid"
+    t.index ["superkingdom_taxid"], name: "index_taxon_lineages_on_superkingdom_taxid"
     t.index ["taxid"], name: "index_taxon_lineages_on_taxid", unique: true
   end
 
@@ -235,20 +249,20 @@ ActiveRecord::Schema.define(version: 20171016193027) do
   end
 
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "email", default: "", null: false, collation: "utf8_general_ci"
-    t.string "name", collation: "utf8_general_ci"
+    t.string "email", default: "", null: false, collation: "latin1_swedish_ci"
+    t.string "name", collation: "latin1_swedish_ci"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "encrypted_password", default: "", null: false, collation: "utf8_general_ci"
-    t.string "reset_password_token", collation: "utf8_general_ci"
+    t.string "encrypted_password", default: "", null: false, collation: "latin1_swedish_ci"
+    t.string "reset_password_token", collation: "latin1_swedish_ci"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
     t.integer "sign_in_count", default: 0, null: false
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
-    t.string "current_sign_in_ip", collation: "utf8_general_ci"
-    t.string "last_sign_in_ip", collation: "utf8_general_ci"
-    t.string "authentication_token", limit: 30, collation: "utf8_general_ci"
+    t.string "current_sign_in_ip", collation: "latin1_swedish_ci"
+    t.string "last_sign_in_ip", collation: "latin1_swedish_ci"
+    t.string "authentication_token", limit: 30, collation: "latin1_swedish_ci"
     t.integer "role"
     t.index ["authentication_token"], name: "index_users_on_authentication_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
