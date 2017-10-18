@@ -8,16 +8,14 @@ task load_lineage_db: :environment do
          else
            '$RDS_ADDRESS'
          end
-  date = `date +"%Y-%m-%d"`.strip
   taxid_lineages_file = 'taxid-lineages.csv'
   names_file = 'names.csv'
-  preload = true
   preload_s3_path = 's3://czbiohub-infectious-disease/taxonomy'
 
-  #Use the following steps to generate necessary files
+  # Use the following steps to generate necessary files
   # git clone https://github.com/chanzuckerberg/ncbitax2lin.git;
   # generate CSV files with lineage and name information
-  #cd ncbitax2lin; make
+  # cd ncbitax2lin; make
 
   ` mkdir -p #{local_taxonomy_path};
     cd #{local_taxonomy_path};
