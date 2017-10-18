@@ -234,21 +234,21 @@ class PipelineSampleReport extends React.Component {
 
                         {/* The genus scores */}
 
-                        <td>{ (!taxon.genus_nt_ele) ? '-': taxon.genus_nt_ele.zscore.toFixed(3) }</td>
-                        <td>{ (!taxon.genus_nt_ele) ? '-': taxon.genus_nt_ele.rpm.toFixed(3) }</td>
+                        <td>{ (!taxon.genus_nt_ele) ? '-': Number(taxon.genus_nt_ele.zscore).toFixed(3) }</td>
+                        <td>{ (!taxon.genus_nt_ele) ? '-': Number(taxon.genus_nt_ele.rpm).toFixed(3) }</td>
                         <td>{ (!taxon.genus_nt_ele) ? '-': taxon.genus_nt_ele.count }</td>
-                        <td>{ (!taxon.genus_nr_ele) ? '-': taxon.genus_nr_ele.zscore.toFixed(3) }</td>
-                        <td>{ (!taxon.genus_nr_ele) ? '-': taxon.genus_nr_ele.rpm.toFixed(3)}</td>
-                        <td>{ (!taxon.genus_nr_ele) ? '-': taxon.genus_nr_ele.count}</td>
+                        <td>{ (!taxon.genus_nr_ele) ? '-': Number(taxon.genus_nr_ele.zscore).toFixed(3) }</td>
+                        <td>{ (!taxon.genus_nr_ele) ? '-': Number(taxon.genus_nr_ele.rpm).toFixed(3) }</td>
+                        <td>{ (!taxon.genus_nr_ele) ? '-': taxon.genus_nr_ele.count }</td>
 
                         {/*The species scores*/}
- 
+
                         <td>
-                          { (this.view_level=== 'species' && (taxon.nt_ele && taxon.nt_ele.hasOwnProperty('zscore'))) ? taxon.nt_ele.zscore.toFixed(3) : '' }
+                          { (this.view_level=== 'species' && (taxon.nt_ele && taxon.nt_ele.hasOwnProperty('zscore'))) ? Number(taxon.nt_ele.zscore).toFixed(3) : '' }
                         </td>
 
                         <td>
-                          { (this.view_level==='species' && (taxon.nt_ele && taxon.nt_ele.hasOwnProperty('rpm'))) ? taxon.nt_ele.rpm.toFixed(3) : '' }
+                          { (this.view_level==='species' && (taxon.nt_ele && taxon.nt_ele.hasOwnProperty('rpm'))) ? Number(taxon.nt_ele.rpm).toFixed(3) : '' }
                         </td>
 
                         <td>
@@ -256,11 +256,11 @@ class PipelineSampleReport extends React.Component {
                         </td>
 
                         <td>
-                          { (this.view_level==='species' && (taxon.nr_ele && taxon.nr_ele.hasOwnProperty('zscore'))) ? taxon.nr_ele.zscore.toFixed(3) : '' }
+                          { (this.view_level==='species' && (taxon.nr_ele && taxon.nr_ele.hasOwnProperty('zscore'))) ? Number(taxon.nr_ele.zscore).toFixed(3) : '' }
                         </td>
 
                         <td>
-                          { (this.view_level==='species' && (taxon.nr_ele && taxon.nr_ele.hasOwnProperty('rpm')) ) ? taxon.nr_ele.rpm.toFixed(3) : '' }
+                          { (this.view_level==='species' && (taxon.nr_ele && taxon.nr_ele.hasOwnProperty('rpm')) ) ? Number(taxon.nr_ele.rpm).toFixed(3) : '' }
                         </td>
 
                         <td>
