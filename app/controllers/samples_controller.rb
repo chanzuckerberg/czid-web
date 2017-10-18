@@ -56,6 +56,7 @@ class SamplesController < ApplicationController
   def new
     @sample = Sample.new
     @projects = Project.all
+    @host_genomes = host_genomes_list ? host_genomes_list : nil  
   end
 
   # GET /samples/1/edit

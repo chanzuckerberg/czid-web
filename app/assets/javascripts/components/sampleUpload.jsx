@@ -6,9 +6,11 @@ class SampleUpload extends React.Component {
     this.project = props.project ? props.project : null;
     this.handleProjectSubmit = this.handleProjectSubmit.bind(this);
     this.clearError = this.clearError.bind(this);
-    this.handleChange = this.handleChange.bind(this);
+    this.handleProjectChange = this.handleProjectChange.bind(this);
     this.state = {
-      allProjects: props.projects ? props.projects : null,
+      allProjects: props.projects || [],
+      hostGenomes: props.host_genomes || [],
+      host: props.host_genomes ? props.host_genomes[0] : null,
       invalid: false,
       errorMessage: '',
       success: false,
@@ -19,6 +21,7 @@ class SampleUpload extends React.Component {
 
   componentDidMount() {
     this.initializeSelectTag();
+    console.log(this.hostGenomes, 'genomes');
   }
 
   handleSubmit(e) {
@@ -102,6 +105,7 @@ class SampleUpload extends React.Component {
       sample: {
         name: this.refs.name.value.trim(),
         project_name: this.state.project.trim(),
+        // project_id:
         input_files_attributes: [{source_type: 's3', source: this.refs.first_file_source.value.trim() },
         {source_type: 's3', source: this.refs.second_file_source.value.trim() }],
         s3_preload_result_path: this.refs.s3_preload_result_path.value.trim(),
@@ -186,11 +190,16 @@ class SampleUpload extends React.Component {
     }
   }
 
-  handleChange(e) {
+  handleProjectChange(e) {
     this.clearError();
     this.setState({
       project: e.target.value
     })
+  }
+
+  handleHostChange(e) {
+    this.clearError();
+    
   }
 
   renderSampleForm() {
@@ -216,7 +225,7 @@ class SampleUpload extends React.Component {
                 <label htmlFor= "sample_name">Name</label>
               </div>
               <div className="col s6 project-list">
-                   <select className="browser-default" onChange={ this.handleChange }> 
+                   <select className="" onChange={ this.handleProjectChange }> 
                     <option disabled selected>{this.state.project}</option>
                   { this.state.allProjects.length ? 
                       this.state.allProjects.map((project, i) => {
@@ -227,10 +236,17 @@ class SampleUpload extends React.Component {
               </div>
             </div>
               <div className="row field-row">
-                <div className="col s6 input-field">
-                  <i className="sample fa fa-folder" aria-hidden="true"></i>
-                  <input ref= "s3_preload_result_path" type="text" className="" onFocus={ this.clearError } placeholder="Optional - Example: s3://yunfang-workdir/id-rr004/RR004_water_2_S23/" />
-                  <label htmlFor="sample_s3_preload_result_path">Preload results path (s3 only)</label>
+               
+                <div className="col s6 project-list">
+                  <select name="host" className="" onChange={ this.handleHostChange }> 
+                    <option disabled selected>{this.state.project}</option>
+                      { this.state.allProjects.length ? 
+                          this.state.allProjects.map((project, i) => {
+                            return <option ref= "project" key={i} id={project.id} >{project.name}</option>
+                          }) : <option>No projects to display</option>
+                        }
+                  </select>
+                  <label>Host Genome</label>
                 </div>
                 <div className="col s6 input-field"> 
                     <i  onClick={ this.handleProjectSubmit }  className="sample add fa fa-plus" aria-hidden="true"></i>
@@ -249,12 +265,18 @@ class SampleUpload extends React.Component {
                 <label htmlFor="sample_second_file_source">Read 2 fastq s3 path</label>
               </div>
               <div className="row field-row">
-                <div className="col s6 input-field">
+              <div className="col s4 input-field">
+                  <i className="sample fa fa-folder" aria-hidden="true"></i>
+                  <input ref= "s3_preload_result_path" type="text" className="" onFocus={ this.clearError } placeholder="Optional - Example: s3://yunfang-workdir/id-rr004/RR004_water_2_S23/" />
+                  <label htmlFor="sample_s3_preload_result_path">Preload results path (s3 only)</label>
+                </div>
+                <div className="col s4 input-field">
                   <i className="sample fa fa-file" aria-hidden="true"></i>
                   <input ref= "job_queue" type="text" className="" onFocus={ this.clearError } placeholder="Optional" />
                   <label htmlFor="sample_job_queue">Job queue</label>
                 </div>
-                <div className="col s6 input-field">
+              
+                <div className="col s4 input-field">
                   <i className="sample fa fa-file" aria-hidden="true"></i>
                   <input ref= "memory" type="text" className="" onFocus={ this.clearError } placeholder="Optional" />
                   <label htmlFor="sample_memory">Sample memory (in mbs)</label>
