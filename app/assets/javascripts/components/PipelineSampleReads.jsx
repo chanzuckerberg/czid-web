@@ -57,11 +57,11 @@ class PipelineSampleReads extends React.Component {
                 <tbody>
                 <tr>
                   <td>Total reads</td>
-                  <td>{ this.pipelineOutput.total_reads }</td>
+                  <td>{ numberWithCommas(this.pipelineOutput.total_reads) }</td>
                 </tr>
                 <tr>
                   <td>Remaining Reads</td>
-                  <td>{  !this.summary_stats ? 'NA' : this.summary_stats.remaining_reads } ({ !this.summary_stats ? 'NA' : this.summary_stats.percent_remaining.toFixed(2) }%)</td>
+                  <td>{ numberWithCommas(this.summary_stats.remaining_reads) } ({ this.summary_stats.percent_remaining.toFixed(2) }%)</td>
                 </tr>
                </tbody>
               </table>

@@ -18,14 +18,6 @@ class PipelineSampleReport extends React.Component {
     this.columnSorting = this.columnSorting.bind(this);
   }
 
-  numberWithCommas(x) {
-    x = x.toString();
-    var pattern = /(-?\d+)(\d{3})/;
-    while (pattern.test(x))
-        x = x.replace(pattern, "$1,$2");
-    return x;
-  }
-
   static uppCaseFirst(name) {
     return (name)? name.charAt(0).toUpperCase() + name.slice(1) : name;
   }
@@ -241,37 +233,37 @@ class PipelineSampleReport extends React.Component {
 
                         {/* The genus scores */}
 
-                        <td>{ (!taxon.genus_nt_ele) ? '-': this.numberWithCommas(taxon.genus_nt_ele.zscore.toFixed(3))}</td>
-                        <td>{ (!taxon.genus_nt_ele) ? '-': this.numberWithCommas(taxon.genus_nt_ele.rpm.toFixed(3))}</td>
-                        <td>{ (!taxon.genus_nt_ele) ? '-': this.numberWithCommas(taxon.genus_nt_ele.count)}</td>
-                        <td>{ (!taxon.genus_nr_ele) ? '-': this.numberWithCommas(taxon.genus_nr_ele.zscore.toFixed(3))}</td>
-                        <td>{ (!taxon.genus_nr_ele) ? '-': this.numberWithCommas(taxon.genus_nr_ele.rpm.toFixed(3))}</td>
-                        <td>{ (!taxon.genus_nr_ele) ? '-': this.numberWithCommas(taxon.genus_nr_ele.count)}</td>
+                        <td>{ (!taxon.genus_nt_ele) ? '-': numberWithCommas(taxon.genus_nt_ele.zscore.toFixed(3))}</td>
+                        <td>{ (!taxon.genus_nt_ele) ? '-': numberWithCommas(taxon.genus_nt_ele.rpm.toFixed(3))}</td>
+                        <td>{ (!taxon.genus_nt_ele) ? '-': numberWithCommas(taxon.genus_nt_ele.count)}</td>
+                        <td>{ (!taxon.genus_nr_ele) ? '-': numberWithCommas(taxon.genus_nr_ele.zscore.toFixed(3))}</td>
+                        <td>{ (!taxon.genus_nr_ele) ? '-': numberWithCommas(taxon.genus_nr_ele.rpm.toFixed(3))}</td>
+                        <td>{ (!taxon.genus_nr_ele) ? '-': numberWithCommas(taxon.genus_nr_ele.count)}</td>
 
                         {/*The species scores*/}
  
                         <td>
-                          { (this.view_level=== 'species' && (taxon.nt_ele && taxon.nt_ele.hasOwnProperty('zscore'))) ? this.numberWithCommas(taxon.nt_ele.zscore.toFixed(3)) : '' }
+                          { (this.view_level=== 'species' && (taxon.nt_ele && taxon.nt_ele.hasOwnProperty('zscore'))) ? numberWithCommas(taxon.nt_ele.zscore.toFixed(3)) : '' }
                         </td>
 
                         <td>
-                          { (this.view_level==='species' && (taxon.nt_ele && taxon.nt_ele.hasOwnProperty('rpm'))) ? this.numberWithCommas(taxon.nt_ele.rpm.toFixed(3)) : '' }
+                          { (this.view_level==='species' && (taxon.nt_ele && taxon.nt_ele.hasOwnProperty('rpm'))) ? numberWithCommas(taxon.nt_ele.rpm.toFixed(3)) : '' }
                         </td>
 
                         <td>
-                          { (this.view_level==='species' && (taxon.nt_ele && taxon.nt_ele.hasOwnProperty('count')) ) ? this.numberWithCommas(taxon.nt_ele.count) : '' }
+                          { (this.view_level==='species' && (taxon.nt_ele && taxon.nt_ele.hasOwnProperty('count')) ) ? numberWithCommas(taxon.nt_ele.count) : '' }
                         </td>
 
                         <td>
-                          { (this.view_level==='species' && (taxon.nr_ele && taxon.nr_ele.hasOwnProperty('zscore'))) ? this.numberWithCommas(taxon.nr_ele.zscore.toFixed(3)) : '' }
+                          { (this.view_level==='species' && (taxon.nr_ele && taxon.nr_ele.hasOwnProperty('zscore'))) ? numberWithCommas(taxon.nr_ele.zscore.toFixed(3)) : '' }
                         </td>
 
                         <td>
-                          { (this.view_level==='species' && (taxon.nr_ele && taxon.nr_ele.hasOwnProperty('rpm')) ) ? this.numberWithCommas(taxon.nr_ele.rpm.toFixed(3)) : '' }
+                          { (this.view_level==='species' && (taxon.nr_ele && taxon.nr_ele.hasOwnProperty('rpm')) ) ? numberWithCommas(taxon.nr_ele.rpm.toFixed(3)) : '' }
                         </td>
 
                         <td>
-                          { (this.view_level==='species' && (taxon.nr_ele && taxon.nr_ele.hasOwnProperty('count')) ) ? this.numberWithCommas(taxon.nr_ele.count) : '' }
+                          { (this.view_level==='species' && (taxon.nr_ele && taxon.nr_ele.hasOwnProperty('count')) ) ? numberWithCommas(taxon.nr_ele.count) : '' }
                         </td>
 
                       </tr>
