@@ -4,6 +4,7 @@ class Samples extends React.Component {
     this.project = this.props.project;
     this.samples = this.props.samples;
     this.outputData = this.props.outputData
+    this.all_project = props.all_project|| [];
   }
 
 
@@ -52,6 +53,20 @@ class Samples extends React.Component {
     )
   }
 
+  componentDidMount() {
+    $('.project-toggle').click((e) => {
+      e.stopPropagation();
+      const arrowElement = $(e.toElement)[0];
+      const top = arrowElement.offsetTop;
+      const height = arrowElement.offsetHeight;
+      const width = arrowElement.offsetWidth;
+      const left = arrowElement.offsetLeft;
+      $('.dropdown-bubble').css({ top: `${(top + height) + 20}px`, left: `${(left - width) - 5}px`});
+      $('.dropdown-bubble').slideToggle(200);
+    });
+    $(document).click(() => { $('.dropdown-bubble').slideUp(200); });
+  }
+
   render() {
     return (
       <div>
@@ -59,11 +74,27 @@ class Samples extends React.Component {
           <div className="container">
             <div className="content">
               <div className="title">
-                All Projects  > { !this.project ?  'No project to display yet' : this.project.name }
+                All Projects { !this.project ?  '' : `> ${this.project.name}` }
               </div>
 
               <div className="sub-title">
-              { !this.project ?  'No project to display yet' : this.project.name }
+                { (!this.project) ? 'All projects' : this.project.name } <i className='fa fa-angle-down project-toggle'> </i>
+                <div className='dropdown-bubble'>
+                  <ul>
+                    <li>
+                      <a href="/">All projects </a>
+                    </li>
+                    { this.all_project.map((project, i) => {
+                      return (
+                        <li key={i}>
+                          <a href={`?project_id=${project.id}`}>
+                            { project.name }
+                          </a>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </div>
               </div>
 
               <div className="title-filter">
@@ -73,7 +104,7 @@ class Samples extends React.Component {
             </div>
           </div>
         </div>
-          {!this.samples && this.outputData ? <div className="no-data"><i className="fa fa-frown-o" aria-hidden="true"> No data to display</i></div> : this.renderTable(this.samples, this.outputData)}
+          {!this.samples.length && !this.outputData.length ? <div className="no-data"><i className="fa fa-frown-o" aria-hidden="true"> No data to display</i></div> : this.renderTable(this.samples, this.outputData)}
       </div>
     )
   }
