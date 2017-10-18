@@ -139,3 +139,37 @@ i.fa {
   }
 }
 
+
+.dropdown-bubble:after {
+  content: "";
+  position: absolute;
+  left: 20px;
+  top: -13px;
+  border-style: solid;
+  border-width: 0 17px 17px 17px;
+  border-color: transparent transparent #ffffff transparent;
+  z-index: 2;
+}
+
+.dropdown-bubble {
+    box-shadow: 0 6px 6px rgba(0, 0, 0, 0.2);
+    position: absolute;
+    background: #fff;
+    min-width: 250px;
+    top: 166px;
+    left: 462px;
+    font-size: 14px;
+    border-radius: 7px;
+    padding: 5px;
+    display: none;
+}
+
+.dropdown-bubble ul li{
+  padding: 5px;
+  border-radius: 4px;
+}
+
+.dropdown-bubble ul li:hover{
+  color: #e2e2e2;
+  background: #7a7c9e;
+}

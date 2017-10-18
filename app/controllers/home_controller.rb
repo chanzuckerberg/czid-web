@@ -2,8 +2,16 @@ class HomeController < ApplicationController
   include SamplesHelper
   def home
     @final_result = []
-    @samples = Sample.includes(:pipeline_runs, :pipeline_outputs).paginate(page: params[:page]).order('created_at DESC')
-    @project_info = @samples ? @samples.first.project : nil
+    @all_project = Project.all
+    project_id = params[:project_id] || nil
+    @project_info = nil
+
+    if project_id.nil?
+      @samples = Sample.includes(:pipeline_runs, :pipeline_outputs).paginate(page: params[:page]).order('created_at DESC')
+    else
+      @samples = Sample.includes(:pipeline_runs, :pipeline_outputs).where(project_id: project_id).paginate(page: params[:page]).order('created_at DESC')
+      @project_info = Project.find(project_id) unless project_id.nil?
+    end
 
     @samples.each do |output|
       output_data = {}
