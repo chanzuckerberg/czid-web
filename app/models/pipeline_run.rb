@@ -77,11 +77,34 @@ class PipelineRun < ApplicationRecord
     pipeline_output_dict = json_dict['pipeline_output']
     pipeline_output_dict.slice!('name', 'total_reads',
                                 'remaining_reads', 'taxon_counts_attributes')
+
+    # only keep species level counts
+    taxon_counts_attributes_filtered = []
+    pipeline_output_dict['taxon_counts_attributes'].each do |tcnt|
+      if tcnt['tax_level'].to_i == TaxonCount::TAX_LEVEL_SPECIES
+        taxon_counts_attributes_filtered << tcnt
+      end
+    end
+
+    pipeline_output_dict['taxon_counts_attributes'] = taxon_counts_attributes_filtered
     pipeline_output_dict['job_stats_attributes'] = stats_array
     po = PipelineOutput.new(pipeline_output_dict)
     po.sample = sample
     po.pipeline_run = self
     po.save
+    # aggregate the data at genus level
+    current_date = Time.now.strftime("%Y-%m-%d")
+    TaxonCount.connection.execute(
+      "INSERT INTO taxon_counts(pipeline_output_id, tax_id, name,
+                                tax_level, count_type, count, created_at, updated_at)
+       SELECT #{po.id}, taxon_lineages.genus_taxid, taxon_lineages.genus_name,
+              #{TaxonCount::TAX_LEVEL_GENUS}, taxon_counts.count_type,
+              sum(taxon_counts.count), '#{current_date}', '#{current_date}'
+       FROM  taxon_lineages, taxon_counts
+       WHERE taxon_lineages.taxid = taxon_counts.tax_id AND
+             taxon_counts.pipeline_output_id = #{po.id} AND
+             taxon_counts.tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}
+      GROUP BY 1,2,3,4,5")
     self.pipeline_output_id = po.id
     save
     # rm the json

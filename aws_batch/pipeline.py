@@ -305,6 +305,7 @@ def generate_json_from_taxid_counts(sample, rawReadsInputPath, taxidCountsInputP
                                         "name": species_name,
                                         "count_type": countType})
 
+    '''
     for (taxid, count) in genus_to_count.iteritems():
         genus_name = genus_to_name[taxid]
         taxon_counts_attributes.append({"tax_id": taxid,
@@ -312,6 +313,7 @@ def generate_json_from_taxid_counts(sample, rawReadsInputPath, taxidCountsInputP
                                         "count": count,
                                         "name": genus_name,
                                         "count_type": countType})
+    '''
 
     output_dict = {
         "pipeline_output": {
