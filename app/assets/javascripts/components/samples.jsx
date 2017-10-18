@@ -76,7 +76,7 @@ class Samples extends React.Component {
           <div className="container">
             <div className="content">
               <div className="title">
-                All Projects { !this.project ?  '' : `> ${this.project.name}` }
+                <a href='/'>All Projects</a> { !this.project ?  '' : `> ${this.project.name}` }
               </div>
 
               <div className="sub-title">
