@@ -90,7 +90,7 @@ class Login extends React.Component {
 
   renderLogin() {
     return (
-        <div className="form-wrapper">
+        <div className="login-form">
           <div className="row">
             <form ref="form" className="new_user" id="new_user" onSubmit={ this.handleSubmit }>
               <div className="row title">

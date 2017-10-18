@@ -2,29 +2,38 @@ class SampleUpload extends React.Component {
   constructor(props, context) {
     super(props, context);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.csrf = this.props.csrf;
-    this.addProject = this.addProject.bind(this);
+    this.csrf = props.csrf;
+    this.project = props.project ? props.project : null;
+    this.handleProjectSubmit = this.handleProjectSubmit.bind(this);
+    this.clearError = this.clearError.bind(this);
+    this.handleChange = this.handleChange.bind(this);
     this.state = {
       allProjects: props.projects ? props.projects : null,
-      invalidProject: false,
+      invalid: false,
       errorMessage: '',
+      success: false,
+      successMessage: '',
+      project: 'Select a Project'
     }
   }
 
   componentDidMount() {
-    console.log(axios);
-    $('select').material_select();
+    this.initializeSelectTag();
   }
 
   handleSubmit(e) {
     e.preventDefault();
-    if(!this.isFormInValid()) {
+    if(!this.isFormInvalid()) {
       this.createSample()
     }
   }
 
+  initializeSelectTag() {
+    $('select').material_select();
+  }
+
   clearError() {
-    // this.setState({ showFailedLogin: false })
+    this.setState({ invalid: false })
   }
 
   gotoPage(path) {
@@ -35,40 +44,44 @@ class SampleUpload extends React.Component {
     this.handleProjectSubmit ? this.handleProjectSubmit : null
   }
 
-  addProject(e) {
+  handleProjectSubmit(e) {
     e.preventDefault();
-    if (!this.isProjectValid()) {
-      var that = this;
-      axios.post('/projects.json', {
-        project: {
-          name: this.refs.new_project.value,
-        },
-        authenticity_token: this.csrf
-      })
-      .then((response) => {
-        var newProjectList = that.state.allProjects.slice();
-        console.log(newProjectList, that.state.allProjects, that.state.allProjects.slice(), 'initial');
-        newProjectList.push(response.data);
-        console.log(newProjectList, 'updated');
-        that.setState({
-          allProjects: newProjectList,
-        }, () => {
-          $('select').material_select();
-        })
-      })
-      .catch((error) => {
-        console.log(error)
-        that.setState({
-          errorMessage: 'Failed to add project'
-        })
-      });
+    if(!this.isProjectInvalid()) {
+      this.addProject()
     }
   }
 
-  isProjectValid() {
+  addProject() {
+    var that = this;
+    axios.post('/projects.json', {
+      project: {
+        name: this.refs.new_project.value,
+      },
+      authenticity_token: this.csrf
+    })
+    .then((response) => {
+      var newProjectList = that.state.allProjects.slice();
+      newProjectList.push(response.data);
+      that.setState({
+        allProjects: newProjectList,
+        success: true,
+        successMessage: 'Project added successfully'
+      }, () => {
+        that.initializeSelectTag();
+      });
+    })
+    .catch((error) => {
+      that.setState({
+        invalid: true,
+        errorMessage: 'Project exists already or is invalid'
+      })
+    });
+  }
+
+  isProjectInvalid() {
     if (this.refs.new_project.value === '') {
       this.setState({
-        invalidProject: true,
+        invalid: true,
         errorMessage: 'Please enter valid project name'
       })
       return true;
@@ -78,47 +91,100 @@ class SampleUpload extends React.Component {
   }
 
   createSample() {
-    console.log('got called', this.refs)
     var that = this;
     axios.post('/samples', {
       sample: {
-        name: this.refs.name.value,
-        project_name: this.refs.project.value,
-        project_id: this.refs.project.id,
-        input_files_attributes: [{source_type: 's3', source: this.refs.first_file_source.value },
-        {source_type: 's3', source: this.refs.second_file_source.value}],
-        s3_preload_result_path: this.refs.s3_preload_result_path.value,
-        job_queue: this.refs.job_queue.value,
-        memory: this.refs.memory.value,
+        name: this.refs.name.value.trim(),
+        project_name: this.state.project.trim(),
+        input_files_attributes: [{source_type: 's3', source: this.refs.first_file_source.value.trim() },
+        {source_type: 's3', source: this.refs.second_file_source.value.trim() }],
+        s3_preload_result_path: this.refs.s3_preload_result_path.value.trim(),
+        job_queue: this.refs.job_queue.value.trim(),
+        memory: this.refs.memory.value.trim(),
         status: 'created'
       },
       authenticity_token: this.csrf
     })
     .then(function (response) {
-      console.log(response.data);
-      // that.gotoPage('/samples')
+      that.setState({
+        success: true,
+        successMessage: 'Sample created successfully'
+      }, () => {
+        that.gotoPage('/');
+      })
     })
     .catch(function (error) {
-      console.log(error)
-      // that.setState({
-      //   showFailedLogin: true,
-      //   errorMessage: 'Sample upload failed'
-      // })
+     that.setState({
+      invalid: true,
+       errorMessage: 'Failed to create sample'
+     })
     });
   }
 
-  isFormInvalid() {
-
+  filePathValid(str) {
+    var regexPrefix = /^s3:\/\//;
+    var regexSuffix = /(\A[^\s\/]+\.fastq.gz)/igm;
+    if (str.match(regexPrefix) && str.match(regexSuffix)) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
-  renderProjectList(projects) {
-    return (
-      projects.map((project, i) => {
-        return (
-          <option key={i} ref="project" ></option>
-        )
+  isFormInvalid() {
+    if (this.refs.name.value === '' && this.state.project === 'Select a Project' && this.refs.first_file_source.value === '' && this.refs.second_file_source.value === '') {
+      this.setState({
+        invalid: true,
+        errorMessage: 'Please fill in all required fields'
       })
-    )
+      return true;
+    } else if (this.refs.name.value === '') {
+        this.setState({
+          invalid: true,
+          errorMessage: 'Please fill in Sample name'
+        })
+        return true;
+    } else if (this.state.project === 'Select a Project') {
+        this.setState({
+          invalid: true,
+          errorMessage: 'Please select a project'
+        })
+        return true;
+    } else if (this.refs.first_file_source.value === '') {
+        this.setState({
+          invalid: true,
+          errorMessage: 'Please fill in first read fastq path'
+        })
+        return true;
+    } else if (this.refs.second_file_source.value === '') {
+        this.setState({
+          invalid: true,
+          errorMessage: 'Please fill in second read fastq path'
+        })
+        return true;
+    } else if ( !this.filePathValid(this.refs.first_file_source.value)) {
+        this.setState({
+          invalid: true,
+          errorMessage: 'Please fill in a valid file path'
+        })
+        return true;
+    } else if ( !this.filePathValid(this.refs.second_file_source.value)) {
+      this.setState({
+        invalid: true,
+        errorMessage: 'Please fill in a valid file path'
+      })
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+  handleChange(e) {
+    this.clearError();
+    this.setState({
+      project: e.target.value
+    })
   }
 
   renderSampleForm() {
@@ -128,66 +194,68 @@ class SampleUpload extends React.Component {
           <div className="row title">
             <p className="col s6 signup">Sample Upload</p>
           </div>
+          { this.state.success ? <div className="success-info" >
+                <i className="fa fa-success"></i>
+                 <span>{this.state.successMessage}</span>
+                </div> : null }
+              { this.state.invalid ? <div className="error-info" >
+                  <i className="fa fa-error"></i>
+                  <span>{this.state.errorMessage}</span>
+              </div> : null }
           <div className="row content-wrapper">
             <div className="row field-row">
               <div className="col s6 input-field">
-                <i className="sample fa fa-envelope" aria-hidden="true"></i>
-                <input ref= "name" type="text" className="" onFocus={ this.clearError }  />
+                <i className="sample fa fa-area-chart" aria-hidden="true"></i>
+                <input ref= "name" type="text" className="" value={this.state.selectDefault} placeholder="Required - Sample name" onFocus={ this.clearError }  />
                 <label htmlFor= "sample_name">Name</label>
               </div>
-              <div className="col s6 project-list input-field">{this.state.all}
-                   <select> 
+              <div className="col s6 project-list">
+                   <select className="browser-default" onChange={ this.handleChange }> 
+                    <option disabled selected>{this.state.project}</option>
                   { this.state.allProjects.length ? 
                       this.state.allProjects.map((project, i) => {
-                        return <option key={i} ref="project" id={project.id} value={project.name}>{project.name}</option>
+                        return <option ref= "project" key={i} id={project.id} >{project.name}</option>
                       }) : <option>No projects to display</option>
                     }
                   </select>
               </div>
             </div>
-          
-            <div className="row field-row">
-              <div className="col s6 input-field">
-                <i className="sample fa fa-envelope" aria-hidden="true"></i>
-                <input ref= "s3_preload_result_path" type="text" className="" onFocus={ this.clearError } placeholder="Optional" />
-                <label htmlFor="sample_s3_preload_result_path">Preload results path (s3 only)</label>
-              </div>
-              <div className="col s4 project-wrapper"> 
-                  <input ref= "new_project" type="text" className="project_input" onFocus={ this.clearError } placeholder="Add a project if desired project is not on the list" />
-              </div>
-              <div className="col s2 btn-add">
-                <a onClick={ this.addProject }className="waves-effect waves-light btn"><i className="fa fa-plus" aria-hidden="true"></i></a>
-              </div>
-            </div>
-          
-              <div className="field-row input-field">
-                <i className="sample fa fa-envelope" aria-hidden="true"></i>
-                <input ref= "first_file_source" type="text" className="" onFocus={ this.clearError } placeholder="Required" />
-                <label htmlFor="sample_first_file_source">Read 1 fastq s3 path</label>
-              </div>
-
-              <div className="field-row input-field">
-                <i className="sample fa fa-envelope" aria-hidden="true"></i>
-                <input ref= "second_file_source" type="text" className="" onFocus={ this.clearError } placeholder="Required" />
-                <label htmlFor="sample_second_file_source">Read 2 fastq s3 path</label>
-              </div>
-
-              
-
               <div className="row field-row">
                 <div className="col s6 input-field">
-                  <i className="sample fa fa-envelope" aria-hidden="true"></i>
+                  <i className="sample fa fa-folder" aria-hidden="true"></i>
+                  <input ref= "s3_preload_result_path" type="text" className="" onFocus={ this.clearError } placeholder="Optional - Example: s3://yunfang-workdir/id-rr004/RR004_water_2_S23/" />
+                  <label htmlFor="sample_s3_preload_result_path">Preload results path (s3 only)</label>
+                </div>
+                <div className="col s6 input-field"> 
+                    <i  onClick={ this.handleProjectSubmit }  className="sample add fa fa-plus" aria-hidden="true"></i>
+                    <input ref= "new_project" type="text" onFocus={ this.clearError } placeholder="Add a project if desired project is not on the list" />
+                    <label htmlFor="new_project">Project</label>
+                </div>
+              </div>
+              <div className="field-row input-field">
+                <i className="sample fa fa-link" aria-hidden="true"></i>
+                <input ref= "first_file_source" type="text" className="" onFocus={ this.clearError } placeholder="Example: s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz" />
+                <label htmlFor="sample_first_file_source">Read 1 fastq s3 path</label>
+              </div>
+              <div className="field-row input-field">
+                <i className="sample fa fa-link" aria-hidden="true"></i>
+                <input ref= "second_file_source" type="text" className="" onFocus={ this.clearError } placeholder="Example: s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R2_001.fastq.gz" />
+                <label htmlFor="sample_second_file_source">Read 2 fastq s3 path</label>
+              </div>
+              <div className="row field-row">
+                <div className="col s6 input-field">
+                  <i className="sample fa fa-file" aria-hidden="true"></i>
                   <input ref= "job_queue" type="text" className="" onFocus={ this.clearError } placeholder="Optional" />
                   <label htmlFor="sample_job_queue">Job queue</label>
                 </div>
-
-              <div className="col s6 input-field">
-                <i className="sample fa fa-envelope" aria-hidden="true"></i>
-                <input ref= "memory" type="text" className="" onFocus={ this.clearError } placeholder="Optional" />
-                <label htmlFor="sample_memory">Sample memory (in mbs)</label>
-              </div>
+                <div className="col s6 input-field">
+                  <i className="sample fa fa-file" aria-hidden="true"></i>
+                  <input ref= "memory" type="text" className="" onFocus={ this.clearError } placeholder="Optional" />
+                  <label htmlFor="sample_memory">Sample memory (in mbs)</label>
+                </div>
             </div>
         </div>
+        <input className="hidden" type="submit"/>
         <div onClick={ this.handleSubmit } className="center-align login-wrapper">Submit</div>
       </form>
     </div>

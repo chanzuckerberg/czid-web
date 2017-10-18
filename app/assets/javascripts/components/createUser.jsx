@@ -206,7 +206,7 @@ class CreateUser extends React.Component {
 
   renderCreateUser() {
     return (
-      <div className="form-wrapper">
+      <div className="user-form">
           <div className="row">
             <form ref="form" className="new_user" id="new_user" onSubmit={ this.handleCreate }>
               <div className="row title">

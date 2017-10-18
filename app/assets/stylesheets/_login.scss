@@ -1,21 +1,11 @@
 $break-large: 1460px;
 
-.form-wrapper {
+.login-form {
   width: 30%;
   margin: 0 auto;
   box-shadow: 1px 2px 5px 2px #eaeaea;
   margin-top: 150px;
   border-radius: 4px;
-  .logo-wrapper {
-    text-align: center;
-    .brand-short {
-      background: #414367;
-      color: #d6d6d6;
-      padding: 15px;
-      margin-right: 10px;
-      font-size: 20px;
-    }
-  }
   .title {
     padding: 25px 35px;
     p.signup {
@@ -65,5 +55,29 @@ $break-large: 1460px;
         color:#039be5
       }
     }
+  }
+  .error-info {
+    width: 80%;
+    background: rgba(208, 2, 27, 0.07);
+    border-radius: 5px;
+    color: #D0021B;
+    margin: 0 auto;
+    padding: 10px 5px;
+    border: 1px solid rgba(160, 11, 64, 0.16);
+    font-size: 12px;
+    transition: .2s width ease-out;
+    text-align: center;
+  }
+  .success-info {
+    width: 80%;
+    background: #eeffd5;
+    border-radius: 5px;
+    color: #1e2025;
+    margin: 0 auto;
+    padding: 10px 5px;
+    border: 1px solid rgba(160, 11, 64, 0.16);
+    font-size: 12px;
+    transition: .2s width ease-out;
+    text-align: center;
   }
 }
