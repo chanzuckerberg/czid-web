@@ -79,4 +79,3 @@ class Samples extends React.Component {
   }
 
 }
-
