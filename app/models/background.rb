@@ -13,7 +13,7 @@ class Background < ApplicationRecord
   end
 
   def summarize
-    results = TaxonCount.connection.select_all("SELECT tax_id, count_type, tax_level, name, sum((1.0*1e6*count)/total_reads) as sum_rpm, sum((1.0*1e6*count*1e6*count)/(total_reads*total_reads)) as sum_rpm2 FROM `taxon_counts` INNER JOIN `pipeline_outputs` ON `pipeline_outputs`.`id` = `taxon_counts`.`pipeline_output_id` WHERE (pipeline_output_id in (select pipeline_output_id from backgrounds_pipeline_outputs where background_id = #{id}))  GROUP BY tax_id, count_type, tax_level, name").to_hash
+    results = TaxonCount.connection.select_all("SELECT tax_id, count_type, tax_level, sum((1.0*1e6*count)/total_reads) as sum_rpm, sum((1.0*1e6*count*1e6*count)/(total_reads*total_reads)) as sum_rpm2 FROM `taxon_counts` INNER JOIN `pipeline_outputs` ON `pipeline_outputs`.`id` = `taxon_counts`.`pipeline_output_id` WHERE (pipeline_output_id in (select pipeline_output_id from backgrounds_pipeline_outputs where background_id = #{id}))  GROUP BY tax_id, count_type, tax_level").to_hash
     n = pipeline_outputs.count
     date = DateTime.now.in_time_zone
     results.each do |h|
@@ -27,7 +27,7 @@ class Background < ApplicationRecord
   end
 
   def store_summary
-    data = summarize.map { |h| h.slice('tax_id', 'count_type', 'tax_level', 'name', :background_id, :created_at, :updated_at, :mean, :stdev) }
+    data = summarize.map { |h| h.slice('tax_id', 'count_type', 'tax_level', :background_id, :created_at, :updated_at, :mean, :stdev) }
     data_chunks = data.in_groups_of(TAXON_SUMMARY_CHUNK_SIZE, false)
     data_chunks.each do |chunk|
       columns = chunk.first.keys
@@ -36,6 +36,9 @@ class Background < ApplicationRecord
           ActiveRecord::Base.connection.quote(value)
         end
       end
+      ActiveRecord::Base.connection.execute <<-SQL
+      DELETE FROM taxon_summaries WHERE background_id = #{id}
+      SQL
       ActiveRecord::Base.connection.execute <<-SQL
       INSERT INTO taxon_summaries (#{columns.join(',')}) VALUES #{values_list.map { |values| "(#{values.join(',')})" }.join(', ')}
       SQL
