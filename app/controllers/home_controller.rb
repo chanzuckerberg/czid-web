@@ -1,4 +1,5 @@
 class HomeController < ApplicationController
+  before_action :login_required
   include SamplesHelper
   def home
     @final_result = []

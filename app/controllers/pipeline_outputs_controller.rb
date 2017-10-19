@@ -2,6 +2,7 @@ class PipelineOutputsController < ApplicationController
   include ReportHelper
   before_action :set_pipeline_output, only: [:show]
   before_action :typed_counts, only: [:show]
+  before_action :login_required, only: [:new, :edit, :update, :destroy, :create, :index, :show]
   protect_from_forgery unless: -> { request.format.json? }
 
   # GET /pipeline_outputs

@@ -11,6 +11,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'should get index' do
+    post user_session_path, params: @user_params
     get samples_url
     assert_response :success
   end
@@ -91,6 +92,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'should show sample' do
+    post user_session_path, params: @user_params
     get sample_url(@sample)
     assert_response :success
   end
