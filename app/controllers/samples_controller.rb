@@ -26,6 +26,32 @@ class SamplesController < ApplicationController
     @report_info = external_report_info(report, @view_level, params) unless report.nil?
   end
 
+  def save_note
+    sample_id = params[:sample_id]
+    sample_notes = params[:sample_notes]
+    found_sample = Sample.find_by(id: sample_id)
+    if found_sample
+      found_sample.update(sample_notes: sample_notes) unless found_sample.sample_notes == sample_notes
+      respond_to do |format|
+        format.json do
+          render json: {
+            status: 'success',
+            message: 'Note saved successfully'
+          }
+        end
+      end
+    else
+      respond_to do |format|
+        format.json do
+          render json: {
+            status: 'failed',
+            message: 'Unable to save sample, sample not found'
+          }
+        end
+      end
+    end
+  end
+
   # GET /samples/new
   def new
     @sample = Sample.new

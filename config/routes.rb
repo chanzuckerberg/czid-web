@@ -12,6 +12,7 @@ Rails.application.routes.draw do
     put :reupload_source, on: :member
     put :kickoff_pipeline, on: :member
     get :pipeline_runs, on: :member
+    post :save_note, on: :collection
   end
   resources :projects
   resources :host_genomes

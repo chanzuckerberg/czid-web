@@ -41,21 +41,25 @@
 }
 
 .custom-button {
-  font-size: 11px;
-  color: #767676 !important;
-  background: #E8E8E8;
+  color: #f8f9f9 !important;
+  background: #424468;
   border: 0;
   padding: 10px;
   margin: 10px;
-  min-width: 235px;
+  min-width: 277px;
   font-weight: 100;
   letter-spacing: 0.43px;
   display: inline-block;
   cursor: pointer;
+  border-radius: 5px;
+  font-size: 13px;
+}
+.custom-button i{
+  font-size: 20px;
 }
 
 .custom-button:hover, .custom-button:active {
-  background: #e2e2e2;
+  background: #272946;
 }
 
 .data-divider {
@@ -140,15 +144,33 @@
   width: inherit !important;
   font-style: italic;
 }
+.sample-notes pre {
+  font-family: inherit;
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  word-wrap: break-word;
+  white-space: -o-pre-wrap;
+}
 
-.save-note-button {
-  margin-top: 20px;
-  button {
-    font-size: 13px;
-    color: #e8e8e8;
-    padding: 0 10px;
-    display: none;
-  }
+.note-action-feedback {
+  width: 200px;
+  display: inline-block;
+  color: #fff;
+  border-radius: 2px;
+  padding: 6px;
+  text-align: center;
+  display: none;
+  position: absolute;
+}
+
+.note-saved-success {
+  background-color: #4caf50;
+  border-color: #449d48;
+}
+
+.note-saved-failed {
+  background-color: #f44336;
+  border-color: #f32c1e;
 }
 
 [contenteditable]:focus {
