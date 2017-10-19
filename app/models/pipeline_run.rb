@@ -77,11 +77,24 @@ class PipelineRun < ApplicationRecord
     pipeline_output_dict = json_dict['pipeline_output']
     pipeline_output_dict.slice!('name', 'total_reads',
                                 'remaining_reads', 'taxon_counts_attributes')
+
+    # only keep species level counts
+    taxon_counts_attributes_filtered = []
+    pipeline_output_dict['taxon_counts_attributes'].each do |tcnt|
+      if tcnt['tax_level'].to_i == TaxonCount::TAX_LEVEL_SPECIES
+        taxon_counts_attributes_filtered << tcnt
+      end
+    end
+
+    pipeline_output_dict['taxon_counts_attributes'] = taxon_counts_attributes_filtered
     pipeline_output_dict['job_stats_attributes'] = stats_array
     po = PipelineOutput.new(pipeline_output_dict)
     po.sample = sample
     po.pipeline_run = self
     po.save
+    # aggregate the data at genus level
+    po.generate_aggregate_counts('genus')
+
     self.pipeline_output_id = po.id
     save
     # rm the json
