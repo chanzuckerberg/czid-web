@@ -8,6 +8,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'should get index' do
+    post user_session_path, params: @user_params
     get projects_url
     assert_response :success
   end
@@ -28,6 +29,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'should show project' do
+    post user_session_path, params: @user_params
     get project_url(@project)
     assert_response :success
   end

@@ -8,6 +8,7 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should get index" do
+    post user_session_path, params: @user_params
     get reports_url
     assert_response :success
   end
@@ -28,6 +29,7 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should show report" do
+    post user_session_path, params: @user_params
     get report_url(@report)
     assert_response :success
   end
