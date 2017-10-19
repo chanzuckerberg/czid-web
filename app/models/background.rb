@@ -37,7 +37,7 @@ class Background < ApplicationRecord
         end
       end
       ActiveRecord::Base.connection.execute <<-SQL
-      INSERT INTO taxon_summaries (#{columns.join(',')}) VALUES #{values_list.map { |values| "(#{values.join(',')})" }.join(', ')}
+      REPLACE INTO taxon_summaries (#{columns.join(',')}) VALUES #{values_list.map { |values| "(#{values.join(',')})" }.join(', ')}
       SQL
     end
   end
