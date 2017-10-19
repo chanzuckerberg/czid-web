@@ -24,8 +24,8 @@ class SampleUpload extends React.Component {
       read2: this.sample.sample_annotated_fasta_url || '',
       resultPath: this.sample.sample_output_folder_url || '',
       jobQueue: this.sample.job_queue || '',
-      memory: this.sample.
-    }
+      memory: this.sample.sample_memory || null
+     }
     this.state = {
       allProjects: this.projects,
       hostGenomes: this.hostGenomes,
@@ -37,12 +37,23 @@ class SampleUpload extends React.Component {
       successMessage: '',
       project: 'Select a Project',
       job_queue: 'aegea_batch',
-      memory: 64000
+      memory: 64000,
+      selected: {
+        name: this.selectedSample.name,
+        hostGenome: this.selectedSample.hostGenome,
+        hostGenomeId: this.selectedSample.hostGenomeId,
+        project: this.selectedSample.project,
+        read1: this.selectedSample.read1,
+        read2: this.selectedSample.read2,
+        resultPath: this.selectedSample.resultPath,
+        jobQueue: this.selectedSample.jobQueue,
+        memory: this.selectedSample.memory
+      }
     }
   }
 
   componentDidMount() {
-    console.log(this.props)
+    console.log(this.props, 'allprops')
     this.initializeSelectTag();
     $(ReactDOM.findDOMNode(this.refs.projectSelect)).on('change',this.handleProjectChange);
     $(ReactDOM.findDOMNode(this.refs.hostSelect)).on('change',this.handleHostChange);
