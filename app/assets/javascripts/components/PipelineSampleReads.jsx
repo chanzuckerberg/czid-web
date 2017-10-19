@@ -9,7 +9,7 @@ class PipelineSampleReads extends React.Component {
     this.jobStatistics = this.props.jobStatistics;
     this.summary_stats = this.props.summary_stats;
     this.gotoReport = this.gotoReport.bind(this);
-    }
+  }
 
   gotoReport() {
     $('ul.tabs').tabs('select_tab', 'reports');
@@ -26,11 +26,49 @@ class PipelineSampleReads extends React.Component {
 
   componentDidMount() {
     $('ul.tabs').tabs();
-    $('.sample-notes').focusin(function() {
-      $('.save-note-button button').fadeIn(1000);
+    this.listenNoteChanges();
+  }
+
+  listenNoteChanges() {
+    let currentText = '';
+    $('.sample-notes').focusin((e) => {
+      currentText = e.target.innerText.trim();
+      if (currentText === 'Type here...') {
+        e.target.innerText = '';
+      }
     });
-    $('.save-note-button button').click(function() {
-      $('.save-note-button button').fadeOut(1000);
+
+    $('.sample-notes').focusout((e) => {
+      const newText = e.target.innerText.trim();
+      if (newText.trim() === '') {
+        e.target.innerText = 'Type here...';
+      } else if (newText !== currentText) {
+        axios.post('/samples/save_note.json', {
+          sample_id: this.sampleInfo.id,
+          sample_notes: newText
+        })
+        .then((response) => {
+          if (response.data.status === 'success') {
+            $('.note-saved-success')
+            .html(`<i class='fa fa-check-circle'></i> ${response.data.message}`)
+            .css('display', 'inline-block')
+            .delay(1000)
+            .slideUp(200);
+          } else {
+            $('.note-save-failed')
+            .html(`<i class='fa fa-frown-o'></i> ${response.data.message}`)
+            .css('display', 'inline-block')
+            .delay(1000)
+            .slideUp(200);
+          }
+        }).catch((error) => {
+          $('.note-save-failed')
+          .html(`<i class='fa fa-frown-o'></i> Something went wrong!`)
+          .css('display', 'inline-block')
+          .delay(1000)
+          .slideUp(200);
+        });
+      }
     });
   }
 
@@ -117,11 +155,11 @@ class PipelineSampleReads extends React.Component {
             <div className="sub-header-navigation">
               <div className="nav-content">
                 <ul className="tabs tabs-transparent">
-                  <li className="tab" onClick={() => {PipelineSampleReads.setTab('pipeline_display','details')}} >
-                    <a href="#details" className={PipelineSampleReads.getActive('pipeline_display','details')}>Details</a>
+                  <li className="tab">
+                    <a href="#details" className=''>Details</a>
                   </li>
-                  <li className="tab" onClick={() => {PipelineSampleReads.setTab('pipeline_display', 'reports')}}>
-                    <a href="#reports" className={PipelineSampleReads.getActive('pipeline_display','reports')}>Report</a>
+                  <li className="tab">
+                    <a href="#reports" className='active'>Report</a>
                   </li>
                 </ul>
               </div>
@@ -129,6 +167,13 @@ class PipelineSampleReads extends React.Component {
           </div>
         </SubHeader>
         <div id="details" className="tab-screen col s12">
+          <div className='center'>
+            <span className='note-action-feedback note-saved-success'>
+            </span>
+            <span className='note-action-feedback note-save-failed'>
+            </span>
+          </div>
+
           <div className="container tab-screen-content">
             <div className="row">
               <div className="col s9">
@@ -180,8 +225,10 @@ class PipelineSampleReads extends React.Component {
                             <tbody>
                             <tr>
                               <td className="notes">Notes</td>
-                              <td className="sample-notes" suppressContentEditableWarning={true} contentEditable={true}>
-                                Type here ...
+                              <td className="sample-notes" >
+                               <pre suppressContentEditableWarning={true} contentEditable={true}>
+                                { this.sampleInfo.sample_notes ? this.sampleInfo.sample_notes : 'Type here...'}
+                               </pre>
                               </td>
                             </tr>
                             </tbody>

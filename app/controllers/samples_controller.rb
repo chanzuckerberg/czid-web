@@ -33,17 +33,21 @@ class SamplesController < ApplicationController
     if found_sample
       found_sample.update(sample_notes: sample_notes) unless found_sample.sample_notes == sample_notes
       respond_to do |format|
-        format.json { render json: {
-          status: 'success',
-          message: 'Note saved successfully'
-        }}
+        format.json do
+          render json: {
+            status: 'success',
+            message: 'Note saved successfully'
+          }
+        end
       end
     else
       respond_to do |format|
-        format.json { render json: {
-          status: 'failed',
-          message: 'Unable to save sample, sample not found'
-        }}
+        format.json do
+          render json: {
+            status: 'failed',
+            message: 'Unable to save sample, sample not found'
+          }
+        end
       end
     end
   end
