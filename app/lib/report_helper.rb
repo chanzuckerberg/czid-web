@@ -48,43 +48,37 @@ module ReportHelper
     background_id = report.background.id
     # Note: stdev is never 0
     TaxonCount.select("
-      taxon_counts.tax_id         AS  tax_id,
-      taxon_counts.count_type     AS  count_type,
-      taxon_counts.tax_level      AS  tax_level,
-      taxon_lineages.genus_taxid  AS  genus_taxid,
-      taxon_names.name            AS  name,
-      tgn.name                    AS  genus_name,
-      tcn.name                    AS  category_name,
-      taxon_counts.count          AS  count,
+      taxon_counts.tax_id              AS  tax_id,
+      taxon_counts.count_type          AS  count_type,
+      taxon_counts.tax_level           AS  tax_level,
+      taxon_lineages.genus_taxid       AS  genus_taxid,
+      IF(
+        taxon_counts.tax_level=#{TaxonCount::TAX_LEVEL_SPECIES},
+        taxon_lineages.species_name,
+        taxon_lineages.genus_name
+      )                                AS  name,
+      taxon_lineages.superkingdom_name AS  category_name,
+      taxon_counts.count               AS  count,
       (count / #{total_reads}.0
-        * 1000000.0)              AS  rpm,
+        * 1000000.0)                   AS  rpm,
       IF(
         stdev IS NOT NULL,
         GREATEST(#{ZSCORE_MIN}, LEAST(#{ZSCORE_MAX}, (((count / #{total_reads}.0 * 1000000.0) - mean) / stdev))),
         #{ZSCORE_WHEN_ABSENT_FROM_BACKGROUND}
-      )                           AS  zscore
+      )
+                                       AS  zscore
     ").joins("
       LEFT OUTER JOIN taxon_summaries ON
-        taxon_counts.tax_id     = taxon_summaries.tax_id      AND
-        taxon_counts.count_type = taxon_summaries.count_type  AND
-        taxon_counts.tax_level  = taxon_summaries.tax_level
+        taxon_counts.tax_id     = taxon_summaries.tax_id          AND
+        taxon_counts.count_type = taxon_summaries.count_type      AND
+        taxon_counts.tax_level  = taxon_summaries.tax_level       AND
+        #{background_id}        = taxon_summaries.background_id
     ").joins("
       LEFT OUTER JOIN taxon_lineages ON
         taxon_counts.tax_id = taxon_lineages.taxid
-    ").joins("
-      LEFT OUTER JOIN taxon_names ON
-        taxon_names.taxid = taxon_counts.tax_id
-    ").joins("
-      LEFT OUTER JOIN taxon_names AS tgn ON
-        tgn.taxid = taxon_lineages.genus_taxid
-    ").joins("
-      LEFT OUTER JOIN taxon_names AS tcn ON
-        tcn.taxid = taxon_lineages.superkingdom_taxid
     ").where(
       pipeline_output_id: pipeline_output_id,
-      taxon_summaries: {
-        background_id: background_id
-      }
+      count_type: %w[NT NR]
     ).to_a.map(&:attributes)
   end
 
