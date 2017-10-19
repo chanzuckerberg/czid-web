@@ -93,18 +93,8 @@ class PipelineRun < ApplicationRecord
     po.pipeline_run = self
     po.save
     # aggregate the data at genus level
-    current_date = Time.now.strftime("%Y-%m-%d")
-    TaxonCount.connection.execute(
-      "INSERT INTO taxon_counts(pipeline_output_id, tax_id, name,
-                                tax_level, count_type, count, created_at, updated_at)
-       SELECT #{po.id}, taxon_lineages.genus_taxid, taxon_lineages.genus_name,
-              #{TaxonCount::TAX_LEVEL_GENUS}, taxon_counts.count_type,
-              sum(taxon_counts.count), '#{current_date}', '#{current_date}'
-       FROM  taxon_lineages, taxon_counts
-       WHERE taxon_lineages.taxid = taxon_counts.tax_id AND
-             taxon_counts.pipeline_output_id = #{po.id} AND
-             taxon_counts.tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}
-      GROUP BY 1,2,3,4,5")
+    po.generate_aggregate_counts('genus')
+
     self.pipeline_output_id = po.id
     save
     # rm the json
