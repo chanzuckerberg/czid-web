@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171018000215) do
+ActiveRecord::Schema.define(version: 20171019173420) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -231,6 +231,7 @@ ActiveRecord::Schema.define(version: 20171018000215) do
     t.float "stdev", limit: 24
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["background_id", "count_type", "tax_level", "tax_id"], name: "index_taxon_summaries_detailed", unique: true
     t.index ["background_id"], name: "index_taxon_summaries_on_background_id"
   end
 
