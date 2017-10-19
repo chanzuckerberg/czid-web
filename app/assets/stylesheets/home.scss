@@ -57,6 +57,16 @@ i.fa {
     color: #333333;
     margin: 14px 0;
     font-size: 32px;
+    .fa-angle-down {
+      font-size: 17px;
+      border: 0.5px solid #5b636b;
+      border-radius: 3px;
+      padding: 0px 5px;
+      background-color: rgba(38, 49, 58, 0.73);
+      color: #ffffff;
+      margin: 0 7px;
+      vertical-align: middle;
+    }
   }
   .title-filter {
     padding: 5px 0;
