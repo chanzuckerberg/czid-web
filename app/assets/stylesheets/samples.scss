@@ -46,7 +46,7 @@
   border: 0;
   padding: 10px;
   margin: 10px;
-  min-width: 260px;
+  min-width: 277px;
   font-weight: 100;
   letter-spacing: 0.43px;
   display: inline-block;
@@ -54,9 +54,12 @@
   border-radius: 5px;
   font-size: 13px;
 }
+.custom-button i{
+  font-size: 20px;
+}
 
 .custom-button:hover, .custom-button:active {
-  background: #e2e2e2;
+  background: #272946;
 }
 
 .data-divider {
