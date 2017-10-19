@@ -61,6 +61,7 @@ class SamplesController < ApplicationController
 
   # GET /samples/1/edit
   def edit
+    @project_info = @sample.project ? @sample.project : nil
   end
 
   # POST /samples

@@ -10,11 +10,27 @@ class SampleUpload extends React.Component {
     this.handleHostChange = this.handleHostChange.bind(this);
     this.handleQueueChange = this.handleQueueChange.bind(this);
     this.handleMemoryChange = this.handleMemoryChange.bind(this);
+    this.projects = props.projects || [];
+    this.hostGenomes = props.host_genomes || [];
+    this.hostName = this.hostGenomes.length ? this.hostGenomes[0].name : '';
+    this.hostId = this.hostGenomes.length ? this.hostGenomes[0].id : null;
+    this.sample = props.sample || ''
+    this.selectedSample = {
+      name: this.sample.name || '',
+      hostGenome: this.sample.host_genome_name || '',
+      hostGenomeId: this.sample.host_genome_id || null,
+      project: props.projectInfo ? props.projectInfo.name : '',
+      read1: this.sample.sample_input_folder_url || '',
+      read2: this.sample.sample_annotated_fasta_url || '',
+      resultPath: this.sample.sample_output_folder_url || '',
+      jobQueue: this.sample.job_queue || '',
+      memory: this.sample.
+    }
     this.state = {
-      allProjects: props.projects || [],
-      hostGenomes: props.host_genomes || [],
-      hostName: props.host_genomes.length ? props.host_genomes[0].name : '',
-      hostId: props.host_genomes.length ? props.host_genomes[0].id : null,
+      allProjects: this.projects,
+      hostGenomes: this.hostGenomes,
+      hostName: this.hostName,
+      hostId: this.hostId,
       invalid: false,
       errorMessage: '',
       success: false,
@@ -26,6 +42,7 @@ class SampleUpload extends React.Component {
   }
 
   componentDidMount() {
+    console.log(this.props)
     this.initializeSelectTag();
     $(ReactDOM.findDOMNode(this.refs.projectSelect)).on('change',this.handleProjectChange);
     $(ReactDOM.findDOMNode(this.refs.hostSelect)).on('change',this.handleHostChange);
@@ -121,6 +138,7 @@ class SampleUpload extends React.Component {
         job_queue: this.state.job_queue,
         memory: this.state.memory,
         host_genome_id: this.state.hostId,
+        host_genome_name: this.state.hostName,
         status: 'created'
       },
       authenticity_token: this.csrf
