@@ -20,10 +20,9 @@ class Samples extends React.Component {
           <td>{ !pInfo.pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{numberWithCommas(pInfo.pipeline_info.total_reads)}</a>}</td>
           <td>{ (!pInfo.summary_stats || !pInfo.summary_stats.remaining_reads) ? 'NA' : <a href={'/samples/' + sample.id}>{numberWithCommas(pInfo.summary_stats.remaining_reads)}</a>}</td>
           <td>{ (!pInfo.summary_stats || !pInfo.summary_stats.percent_remaining) ? 'NA' : <a href={'/samples/' + sample.id}>{pInfo.summary_stats.percent_remaining.toFixed(2)}%</a>}</td>
-
-          <td>{ !pInfo.pipeline_info ? 'Pending' : <a href={'/samples/' + sample.id}>Created</a>}</td>
           <td>{ (!pInfo.summary_stats || !pInfo.summary_stats.compression_ratio) ? 'NA' : <a href={'/samples/' + sample.id}>{pInfo.summary_stats.compression_ratio.toFixed(2)}</a>}</td>
           <td>{ (!pInfo.summary_stats || !pInfo.summary_stats.qc_percent) ? 'NA' : <a href={'/samples/' + sample.id}>{pInfo.summary_stats.qc_percent.toFixed(2)}%</a>}</td>
+          <td>{ !pInfo.pipeline_info ? 'Pending' : <a href={'/samples/' + sample.id}>Created</a>}</td>
         </tr>
       )
     })
@@ -41,9 +40,9 @@ class Samples extends React.Component {
               <th>Total Reads</th>
               <th>Final Reads</th>
               <th>Percentage Reads</th>
-              <th>Pipeline run status</th>
               <th>Compression Ratio</th>
               <th>QC</th>
+              <th>Pipeline run status</th>
             </tr>
             </thead>
               <tbody>
