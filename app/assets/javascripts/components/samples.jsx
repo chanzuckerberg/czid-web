@@ -5,8 +5,30 @@ class Samples extends React.Component {
     this.samples = this.props.samples;
     this.outputData = this.props.outputData
     this.all_project = props.all_project|| [];
+    this.defaultSortBy = 'newest';
+    const currentSort = PipelineSampleReport.currentSort();
+    this.state = {
+      sort_query: currentSort.sort_query
+        ? currentSort.sort_query  : `sort_by=${this.defaultSortBy}`
+    };
+    this.applySort = this.applySort.bind(this);
+    this.columnSorting = this.columnSorting.bind(this);
+    // TODO refactor component to use helper class
   }
 
+  applySort(sort_query) {
+    this.setState({ sort_query });
+    const url = PipelineSampleReport.deleteUrlParam(window.location.href, 'sort_by');
+    window.location = (PipelineSampleReport.hasQuery(url))
+      ? `${url}&${sort_query}` : `${url}?${sort_query}`;
+  }
+
+  columnSorting(e) {
+    const className = e.target.className;
+    const pos = className.indexOf('sort_by');
+    const sort_query = className.substr(pos).split(' ')[0];
+    this.applySort(sort_query);
+  }
 
   renderPipelineOutput(samples, pipelineInfo) {
     return samples.map((sample, i) => {
@@ -17,7 +39,7 @@ class Samples extends React.Component {
             <i className="fa fa-flask" aria-hidden="true"></i> {sample.name}
           </td>
           <td>{moment(sample.created_at).format(' L,  h:mm a')}</td>
-          <td>{ !pInfo.pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{numberWithCommas(pInfo.pipeline_info.total_reads)}</a>}</td>
+         <td>{ !pInfo.pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{numberWithCommas(pInfo.pipeline_info.total_reads)}</a>}</td>
           <td>{ (!pInfo.summary_stats || !pInfo.summary_stats.remaining_reads) ? 'NA' : <a href={'/samples/' + sample.id}>{numberWithCommas(pInfo.summary_stats.remaining_reads)}</a>}</td>
           <td>{ (!pInfo.summary_stats || !pInfo.summary_stats.percent_remaining) ? 'NA' : <a href={'/samples/' + sample.id}>{pInfo.summary_stats.percent_remaining.toFixed(2)}%</a>}</td>
           <td>{ (!pInfo.summary_stats || !pInfo.summary_stats.compression_ratio) ? 'NA' : <a href={'/samples/' + sample.id}>{pInfo.summary_stats.compression_ratio.toFixed(2)}</a>}</td>
@@ -31,6 +53,16 @@ class Samples extends React.Component {
   viewSample(id) {
     location.href = `/samples/${id}`
   }
+  getActiveSort(className) {
+    if(className) {
+      const sort = ReportFilter.getFilter('sort_by');
+      if (sort === className) {
+        return 'active';
+      } else if (className === this.defaultSortBy && !sort) {
+        return 'active';
+      }
+    }
+  }
 
   renderTable(samples, pipelineInfo) {
     return (
@@ -40,7 +72,12 @@ class Samples extends React.Component {
             <thead>
             <tr>
               <th>Name</th>
-              <th>Date Uploaded</th>
+              <th>Date Uploaded
+              <div className='sort-controls left'>
+                <i onClick={ this.columnSorting } className={`${this.getActiveSort('oldest')} fa fa-caret-up sort_by=oldest` }></i>
+                <i onClick={ this.columnSorting } className={`${this.getActiveSort('newest')} fa fa-caret-down sort_by=newest` }></i>
+              </div>
+              </th>
               <th>Total Reads</th>
               <th>Final Reads</th>
               <th>Percentage Reads</th>
