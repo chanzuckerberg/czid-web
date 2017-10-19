@@ -110,11 +110,11 @@ Sometimes you may be prompted to run a migration or configuration command like `
 ## DB backup/restore within and across environments
 
 1. Backup your local `development` DB into a local file:
-`docker-compose exec web mysqldump -h db -u root idseq_development > idseq_development.sql`
+`docker-compose exec web mysqldump -h db -u root idseq_development | gzip -c > idseq_development.sql.gz`
 1. Backup cloud `alpha` DB into a local file:
-`bin/clam alpha 'mysqldump -h $RDS_ADDRESS -u $DB_USERNAME --password=$DB_PASSWORD idseq_alpha | gzip -c' | gzip -dc > idseq_alpha.sql`
+`bin/clam alpha 'mysqldump -h $RDS_ADDRESS -u $DB_USERNAME --password=$DB_PASSWORD idseq_alpha | gzip -c' > idseq_alpha.sql.gz`
 1. Overwrite your local `development` DB with data from given backup file:
-`docker-compose run web "cat idseq_alpha.sql | mysql -h db -u root --database idseq_development"`
+`docker-compose run web "gzip -dc idseq_alpha.sql.gz | mysql -h db -u root --database idseq_development"`
 
 
 ## Deployment
