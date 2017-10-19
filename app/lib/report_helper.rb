@@ -1,4 +1,9 @@
 module ReportHelper
+  ZSCORE_MIN = -99
+  ZSCORE_MAX =  99
+  ZSCORE_WHEN_ABSENT_FROM_SAMPLE = -100
+  ZSCORE_WHEN_ABSENT_FROM_BACKGROUND = 100
+
   def external_report_info(report, view_level, params)
     data = {}
     data[:report_details] = report_details(report)
@@ -37,7 +42,7 @@ module ReportHelper
     # to be extended for all taxonomic ranks when needed
   end
 
-  def select_taxons(report)
+  def get_raw_taxon_counts(report)
     pipeline_output_id = report.pipeline_output.id
     total_reads = report.pipeline_output.total_reads
     background_id = report.background.id
@@ -55,8 +60,8 @@ module ReportHelper
         * 1000000.0)              AS  rpm,
       IF(
         stdev IS NOT NULL,
-        GREATEST(-99, LEAST(99, (((count / #{total_reads}.0 * 1000000.0) - mean) / stdev))),
-        100
+        GREATEST(#{ZSCORE_MIN}, LEAST(#{ZSCORE_MAX}, (((count / #{total_reads}.0 * 1000000.0) - mean) / stdev))),
+        #{ZSCORE_WHEN_ABSENT_FROM_BACKGROUND}
       )                           AS  zscore
     ").joins("
       LEFT OUTER JOIN taxon_summaries ON
@@ -92,7 +97,7 @@ module ReportHelper
     result['count'] = 0
     result['rpm'] = 0
     result['count_type'] = flip_type(result['count_type'])
-    result['zscore'] = -100
+    result['zscore'] = ZSCORE_WHEN_ABSENT_FROM_SAMPLE
     result
   end
 
@@ -113,22 +118,24 @@ module ReportHelper
     [sort_field, sort_details_key, sort_direction]
   end
 
-  def taxonomy_details(report, params, view_level)
-    report_taxons = select_taxons(report)
-
-    tax2d = {}
-    tax2d.default_proc = proc do |hash, key|
-      hash[key] = {}
+  def get_taxon_counts_2d(report)
+    taxon_counts_from_sql = get_raw_taxon_counts(report)
+    taxon_counts_2d = {}
+    taxon_counts_from_sql.each do |taxon|
+      tax_id = taxon['tax_id']
+      count_type = taxon['count_type']
+      taxon_counts_2d[tax_id] ||= {}
+      taxon_counts_2d[tax_id][count_type] = taxon
     end
-
-    report_taxons.each do |taxon|
-      tax2d[taxon['tax_id']][taxon['count_type']] = taxon
-    end
-
-    tax2d.each do |_tax_id, tax_pair|
+    taxon_counts_2d.each do |_tax_id, tax_pair|
       tax_pair['NT'] ||= zero_twin(tax_pair['NR'])
       tax_pair['NR'] ||= zero_twin(tax_pair['NT'])
     end
+    taxon_counts_2d
+  end
+
+  def taxonomy_details(report, params, view_level)
+    tax2d = get_taxon_counts_2d(report)
 
     view_level_int = view_level_name2int(view_level)
     view_level_str = view_level.downcase
@@ -142,7 +149,7 @@ module ReportHelper
     }
     sort_field, sort_details_key, sort_direction = sort_params(params[:sort_by], view_level_str, details_key)
 
-    htc = highest_tax_counts(report_taxons, view_level_str)
+    htc = highest_tax_counts(tax2d, view_level_str)
     rp = resolve_params(params, view_level_str, htc)
 
     sortable = []
@@ -251,18 +258,20 @@ module ReportHelper
     new_params
   end
 
-  def highest_tax_counts(taxon_zscores, view_level_str)
+  def highest_tax_counts(taxon_counts_2d, view_level_str)
     # compute min/max extents for 8 columns
     bounds = {}
-    taxon_zscores.each do |taxon|
-      level = taxon['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES ? :species : :genus
-      type = taxon['count_type'] == 'NT' ? :nt : :nr
-      [:zscore, :rpm].each do |metric|
-        tm_val = taxon[metric.to_s]
-        high = [:highest, level, type, metric]
-        bounds[high] = tm_val unless bounds[high] && bounds[high] > tm_val
-        low = [:lowest, level, type, metric]
-        bounds[low] = tm_val unless bounds[low] && bounds[low] < tm_val
+    taxon_counts_2d.each do |_tax_id, tax_pair|
+      tax_pair.each do |_count_type, taxon|
+        level = taxon['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES ? :species : :genus
+        type = taxon['count_type'] == 'NT' ? :nt : :nr
+        [:zscore, :rpm].each do |metric|
+          tm_val = taxon[metric.to_s]
+          high = [:highest, level, type, metric]
+          bounds[high] = tm_val unless bounds[high] && bounds[high] > tm_val
+          low = [:lowest, level, type, metric]
+          bounds[low] = tm_val unless bounds[low] && bounds[low] < tm_val
+        end
       end
     end
     # flatten & handle empty columns
