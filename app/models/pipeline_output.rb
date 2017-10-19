@@ -21,7 +21,7 @@ class PipelineOutput < ApplicationRecord
   end
 
   def generate_aggregate_counts(tax_level_name)
-    current_date = Time.now.strftime("%Y-%m-%d")
+    current_date = Time.zone.now.strftime("%Y-%m-%d")
     tax_level_id = TaxonCount::NAME_2_LEVEL[tax_level_name]
     TaxonCount.connection.execute(
       "INSERT INTO taxon_counts(pipeline_output_id, tax_id, name,
@@ -33,6 +33,7 @@ class PipelineOutput < ApplicationRecord
        WHERE taxon_lineages.taxid = taxon_counts.tax_id AND
              taxon_counts.pipeline_output_id = #{id} AND
              taxon_counts.tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}
-      GROUP BY 1,2,3,4,5")
+      GROUP BY 1,2,3,4,5"
+    )
   end
 end
