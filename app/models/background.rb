@@ -39,7 +39,7 @@ class Background < ApplicationRecord
           hash.values.map do |value|
             ActiveRecord::Base.connection.quote(value)
           end
-         end
+        end
         ActiveRecord::Base.connection.execute <<-SQL
         INSERT INTO taxon_summaries (#{columns.join(',')}) VALUES #{values_list.map { |values| "(#{values.join(',')})" }.join(', ')}
         SQL
