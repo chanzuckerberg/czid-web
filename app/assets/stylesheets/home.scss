@@ -162,14 +162,15 @@ i.fa {
 }
 
 .dropdown-bubble {
-    box-shadow: 0 6px 6px rgba(0, 0, 0, 0.2);
-    position: absolute;
-    background: #fff;
-    min-width: 250px;
-    font-size: 14px;
-    border-radius: 7px;
-    padding: 5px;
-    display: none;
+  box-shadow: 0 6px 6px rgba(0, 0, 0, 0.2);
+  position: absolute;
+  background: #fff;
+  min-width: 250px;
+  font-size: 14px;
+  border-radius: 7px;
+  padding: 5px;
+  display: none;
+  z-index: 2;
 }
 
 .dropdown-bubble ul li a{

@@ -69,7 +69,6 @@ class PipelineSampleReport extends React.Component {
        $('#report-table thead tr th').css('width', 'inherit');
     }
     $('ul.tabs').tabs();
-    $('.sort-report').dropdown();
   }
 
   getActiveSort(className) {
