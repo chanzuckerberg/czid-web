@@ -67,8 +67,8 @@ class SortHelper {
     if (queryString.length >= 2) {
       const prefix = `${encodeURIComponent(parameter)}=`;
       const pars = queryString[1].split(/[&;]/g);
-      let i = pars.length;
-      for (i -= 1; i > 0;) {
+      let i;
+      for (i = pars.length; i--; i > 0) {
         if (pars[i].lastIndexOf(prefix, 0) !== -1) {
           pars.splice(i, 1);
         }

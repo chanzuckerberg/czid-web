@@ -6,28 +6,20 @@ class Samples extends React.Component {
     this.outputData = this.props.outputData
     this.all_project = props.all_project|| [];
     this.defaultSortBy = 'newest';
-    const currentSort = PipelineSampleReport.currentSort();
+    const currentSort = SortHelper.currentSort();
     this.state = {
       sort_query: currentSort.sort_query
         ? currentSort.sort_query  : `sort_by=${this.defaultSortBy}`
     };
-    this.applySort = this.applySort.bind(this);
     this.columnSorting = this.columnSorting.bind(this);
-    // TODO refactor component to use helper class
-  }
-
-  applySort(sort_query) {
-    this.setState({ sort_query });
-    const url = PipelineSampleReport.deleteUrlParam(window.location.href, 'sort_by');
-    window.location = (PipelineSampleReport.hasQuery(url))
-      ? `${url}&${sort_query}` : `${url}?${sort_query}`;
   }
 
   columnSorting(e) {
     const className = e.target.className;
     const pos = className.indexOf('sort_by');
     const sort_query = className.substr(pos).split(' ')[0];
-    this.applySort(sort_query);
+    this.setState({ sort_query });
+    SortHelper.applySort(sort_query);
   }
 
   renderPipelineOutput(samples, pipelineInfo) {
@@ -55,7 +47,7 @@ class Samples extends React.Component {
   }
   getActiveSort(className) {
     if(className) {
-      const sort = ReportFilter.getFilter('sort_by');
+      const sort = SortHelper.getFilter('sort_by');
       if (sort === className) {
         return 'active';
       } else if (className === this.defaultSortBy && !sort) {
