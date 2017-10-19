@@ -119,7 +119,7 @@ Sometimes you may be prompted to run a migration or configuration command like `
 
 ## Deployment
 
-1. decide what docker tag you want to deploy (see https://hub.docker.com/r/chanzuckerberg/idseq-web/tags/)
+1. decide what docker tag you want to deploy (see https://hub.docker.com/r/chanzuckerberg/idseq-web/tags/). Do not use "branch-master", which is not always what you think it is; choose one that start with "sha-" and make sure the number is the commit you mean to deploy.
 1. `bundle exec bin/deploy ENV TAG`
 
 
