@@ -23,6 +23,7 @@ class PipelineOutput < ApplicationRecord
   def generate_aggregate_counts(tax_level_name)
     current_date = Time.zone.now.strftime("%Y-%m-%d")
     tax_level_id = TaxonCount::NAME_2_LEVEL[tax_level_name]
+    # TODO(yf): take into account the case when tax_id doesn't appear in the taxon_lineages table
     TaxonCount.connection.execute(
       "INSERT INTO taxon_counts(pipeline_output_id, tax_id, name,
                                 tax_level, count_type, count, created_at, updated_at)
