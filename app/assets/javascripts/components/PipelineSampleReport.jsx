@@ -213,22 +213,22 @@ class PipelineSampleReport extends React.Component {
                         </td>
 
                         <td>
-                          <span className="link">
-                            { (taxon.genus_nt_ele) ?
-                              <a href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${
-                                taxon.genus_nt_ele.tax_id}`}>{ taxon.genus_nt_ele.name }
-                              </a> : 'N/A'
-                            }
-                          </span>
+                          { (taxon.genus_nt_ele) ?
+                             <span className="link">
+                               <a href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${
+                                 taxon.genus_nt_ele.tax_id}`}>{ taxon.genus_nt_ele.name }
+                               </a>
+                             </span> : 'N/A'
+                          }
                         </td>
                         <td>
-                          <span className="link">
-                            { (this.view_level==='species' && taxon.nt_ele) ?
+                          { (this.view_level==='species' && taxon.nt_ele) ?
+                            <span className="link">
                               <a href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${
                                 taxon.nt_ele.tax_id}`}>{ taxon.nt_ele.name }
-                              </a> : ''
-                            }
-                          </span>
+                              </a>
+                            </span> : ''
+                          }
                         </td>
 
                         {/* The genus scores */}
