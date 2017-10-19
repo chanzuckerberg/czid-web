@@ -12,11 +12,11 @@ class Samples extends React.Component {
     return samples.map((sample, i) => {
       let pInfo = pipelineInfo[i];
       return (
-        <tr key={i}>
-          <td><a href={'/samples/' + sample.id}>
-            <i className="fa fa-flask" aria-hidden="true"></i> {sample.name} </a>
+        <tr onClick={ this.viewSample.bind(this, sample.id)} key={i}>
+          <td>
+            <i className="fa fa-flask" aria-hidden="true"></i> {sample.name}
           </td>
-          <td><a href={'/samples/' + sample.id}>{moment(sample.created_at).format(' L,  h:mm a')}</a></td>
+          <td>{moment(sample.created_at).format(' L,  h:mm a')}</td>
           <td>{ !pInfo.pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{numberWithCommas(pInfo.pipeline_info.total_reads)}</a>}</td>
           <td>{ (!pInfo.summary_stats || !pInfo.summary_stats.remaining_reads) ? 'NA' : <a href={'/samples/' + sample.id}>{numberWithCommas(pInfo.summary_stats.remaining_reads)}</a>}</td>
           <td>{ (!pInfo.summary_stats || !pInfo.summary_stats.percent_remaining) ? 'NA' : <a href={'/samples/' + sample.id}>{pInfo.summary_stats.percent_remaining.toFixed(2)}%</a>}</td>
@@ -26,6 +26,10 @@ class Samples extends React.Component {
         </tr>
       )
     })
+  }
+
+  viewSample(id) {
+    location.href = `/samples/${id}`
   }
 
   renderTable(samples, pipelineInfo) {
@@ -79,7 +83,7 @@ class Samples extends React.Component {
               </div>
 
               <div className="sub-title">
-                { (!this.project) ? 'All projects' : this.project.name } <i className='fa fa-angle-down project-toggle'> </i>
+                <span>{ (!this.project) ? 'All projects' : this.project.name }<i className='fa fa-angle-down project-toggle'></i></span> 
                 <div className='dropdown-bubble'>
                   <ul>
                     <li>
