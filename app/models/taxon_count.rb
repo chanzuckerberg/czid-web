@@ -5,7 +5,7 @@ class TaxonCount < ApplicationRecord
   TAX_LEVEL_FAMILY = 3
   COUNT_TYPE_NT = 'NT'.freeze
   COUNT_TYPE_NR = 'NR'.freeze
-  NAME_2_LEVEL = { 'specifies' => TAX_LEVEL_SPECIES,
+  NAME_2_LEVEL = { 'species' => TAX_LEVEL_SPECIES,
                    'genus' => TAX_LEVEL_GENUS,
                    'family' => TAX_LEVEL_FAMILY }.freeze
   scope :type, ->(count_type) { where(count_type: count_type) }
