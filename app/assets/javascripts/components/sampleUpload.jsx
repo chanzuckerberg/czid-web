@@ -254,8 +254,8 @@ class SampleUpload extends React.Component {
           <div className="row content-wrapper">
             <div className="row field-row">
               <div className="col s6 input-field name">
-                <i className="sample fa fa-area-chart" aria-hidden="true"></i>
-                <input ref= "name" type="text" className="path" placeholder="Required - Sample name" onFocus={ this.clearError }  />
+                <input ref= "name" type="text" className="path" onFocus={ this.clearError }  />
+                <label>Sample name</label>
               </div>
               <div className="col s6 input-field genome-list">
                   <select ref="hostSelect" name="host" className="" id="host" onChange={ this.handleHostChange } value={this.state.host}> 
