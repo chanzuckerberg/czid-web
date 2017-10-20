@@ -78,6 +78,7 @@ NR_M8_TO_TAXID_COUNTS_FILE_OUT = 'counts.filter.deuterostomes.taxids.rapsearch2.
 NR_TAXID_COUNTS_TO_JSON_OUT = 'counts.filter.deuterostomes.taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.json'
 NR_TAXID_COUNTS_TO_SPECIES_RPM_OUT = 'species.rpm.filter.deuterostomes.taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.csv'
 NR_TAXID_COUNTS_TO_GENUS_RPM_OUT = 'genus.rpm.filter.deuterostomes.taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.csv'
+UNIDENTIFIED_FASTA_OUT = 'unidentified.fasta'
 COMBINED_JSON_OUT = 'idseq_web_sample.json'
 LOGS_OUT_BASENAME = 'log.txt'
 STATS_OUT = 'stats.json'
@@ -720,6 +721,17 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         result_dir + '/' + COMBINED_JSON_OUT,
         result_dir, sample_s3_output_path, False)
 
+    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+        {"title": "generate FASTA of unidentified reads", "count_reads": True,
+        "before_file_name": os.path.join(result_dir, GENERATE_TAXID_ANNOTATED_FASTA_FROM_RAPSEARCH2_M8_OUT),
+        "before_file_type": "fasta",
+        "after_file_name": os.path.join(result_dir, UNIDENTIFIED_FASTA_OUT),
+        "after_file_type": "fasta"})
+    run_and_log(logparams, run_generate_unidentified_fasta,
+        sample_name, result_dir + '/' + GENERATE_TAXID_ANNOTATED_FASTA_FROM_RAPSEARCH2_M8_OUT,
+        result_dir + '/' + UNIDENTIFIED_FASTA_OUT,
+        result_dir, sample_s3_output_path, False)
+
 def run_star(sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
              result_dir, scratch_dir, sample_s3_output_path, lazy_run):
     if lazy_run:
@@ -1067,6 +1079,15 @@ def run_combine_json_outputs(sample_name, input_json_1, input_json_2, output_jso
     logging.getLogger().info("finished job")
     # move it the output back to S3
     execute_command("aws s3 cp %s %s/" % (output_json, sample_s3_output_path))
+
+def run_generate_unidentified_fasta(sample_name, input_fa, output_fa, 
+    result_dir, sample_s3_output_path, lazy_run):
+    if lazy_run:
+        if os.path.isfile(output_fa):
+            return 1
+    subprocess.check_output("grep -A 1 '>NR::NT::' %s | sed '/^--$/d' > %s" % (input_fa, output_fa), shell=True)
+    logging.getLogger().info("finished job")
+    execute_command("aws s3 cp %s %s/" % (output_fa, sample_s3_output_path))
 
 ### Main
 def main():
