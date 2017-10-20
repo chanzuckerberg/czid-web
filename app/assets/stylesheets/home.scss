@@ -24,7 +24,6 @@ table {
       i.fa.fa-flask {
         margin-left: 0;
       }
-      cursor: pointer;
     }
   }
 }
@@ -66,6 +65,10 @@ i.fa {
       color: #ffffff;
       margin: 0 7px;
       vertical-align: middle;
+      &:hover {
+        background: #2f3338;
+        border-color: #31363c;
+      }
     }
   }
   .title-filter {
