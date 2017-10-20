@@ -50,6 +50,8 @@ module ReportHelper
     total_reads = report.pipeline_output.total_reads
     background_id = report.background.id
     # Note: stdev is never 0
+    # To do: handle absence of percent_identity, alignment_length, e_value
+    #        in view of filtering on them
     query_results = TaxonCount.select("
       taxon_counts.tax_id              AS  tax_id,
       taxon_counts.count_type          AS  count_type,
@@ -64,6 +66,9 @@ module ReportHelper
       taxon_counts.count               AS  count,
       (count / #{total_reads}.0
         * 1000000.0)                   AS  rpm,
+      taxon_counts.percent_identity    AS  percent_identity,
+      taxon_counts.alignment_length    AS  alignment_length,
+      taxon_counts.e_value             AS  e_value,
       IF(
         stdev IS NOT NULL,
         GREATEST(#{ZSCORE_MIN}, LEAST(#{ZSCORE_MAX}, (((count / #{total_reads}.0 * 1000000.0) - mean) / stdev))),
@@ -101,6 +106,9 @@ module ReportHelper
     result['rpm'] = 0
     result['count_type'] = flip_type(result['count_type'])
     result['zscore'] = ZSCORE_WHEN_ABSENT_FROM_SAMPLE
+    result['percent_identity'] = 0
+    result['alignment_length'] = 0
+    result['e_value'] = 0
     result
   end
 
