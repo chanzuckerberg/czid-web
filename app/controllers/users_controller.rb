@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-  before_action :login_required
+  before_action :login_required, only: [:new, :edit, :create, :destroy, :index, :show]
   before_action :set_user, only: [:show, :edit, :update, :destroy]
   clear_respond_to
   respond_to :json
