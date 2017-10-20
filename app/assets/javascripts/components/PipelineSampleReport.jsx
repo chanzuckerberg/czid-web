@@ -175,7 +175,6 @@ class PipelineSampleReport extends React.Component {
                         <i className='fa fa-caret-down'></i>
                       </div>
                     </th>
-                    <th>
                     {/*The Genus and Species diff*/}
                     { (this.view_level === 'species') ?
                     <th>
