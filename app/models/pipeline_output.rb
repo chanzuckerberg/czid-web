@@ -26,10 +26,16 @@ class PipelineOutput < ApplicationRecord
     # TODO(yf): take into account the case when tax_id doesn't appear in the taxon_lineages table
     TaxonCount.connection.execute(
       "INSERT INTO taxon_counts(pipeline_output_id, tax_id, name,
-                                tax_level, count_type, count, created_at, updated_at)
+                                tax_level, count_type, count,
+                                percent_identity, alignment_length, e_value,
+                                created_at, updated_at)
        SELECT #{id}, taxon_lineages.#{tax_level_name}_taxid, taxon_lineages.#{tax_level_name}_name,
               #{tax_level_id}, taxon_counts.count_type,
-              sum(taxon_counts.count), '#{current_date}', '#{current_date}'
+              sum(taxon_counts.count),
+              sum(percent_identity * count) / sum(count),
+              sum(alignment_length * count) / sum(count),
+              sum(e_value * count) / sum(count),
+              '#{current_date}', '#{current_date}'
        FROM  taxon_lineages, taxon_counts
        WHERE taxon_lineages.taxid = taxon_counts.tax_id AND
              taxon_counts.pipeline_output_id = #{id} AND
