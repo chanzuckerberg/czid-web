@@ -6,7 +6,6 @@ class PipelineRun < ApplicationRecord
 
   OUTPUT_JSON_NAME = 'idseq_web_sample.json'.freeze
   STATS_JSON_NAME = 'stats.json'.freeze
-  QUALS_JSON_NAME = 
   LOCAL_JSON_PATH = '/app/tmp/results_json'.freeze
   STATUS_CHECKED = 'CHECKED'.freeze
   STATUS_SUCCESS = 'SUCCEEDED'.freeze
