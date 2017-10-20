@@ -16,7 +16,7 @@ class PipelineOutputsController < ApplicationController
   def show
     @view_level = params[:view_level] ? params[:view_level].downcase : 'genus'
     @report_info = {}
-    report = @pipeline_output.reports.first
+    report = @pipeline_output.reports.last
     if report
       external_report_info = external_report_info(report, @view_level, params)
       @report_info[:report_details] = external_report_info[:report_details]
