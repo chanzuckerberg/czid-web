@@ -13,6 +13,7 @@ import random
 import datetime
 import gzip
 import logging
+import math
 
 INPUT_BUCKET = 's3://czbiohub-infectious-disease/UGANDA' # default to be overwritten by environment variable
 OUTPUT_BUCKET = 's3://czbiohub-idseq-samples-test/id-uganda'  # default to be overwritten by environment variable
@@ -227,7 +228,7 @@ def generate_unmapped_pairs_from_sam(sam_file, output_prefix):
     output_read_2.close()
     output_merged_read.close()
 
-def generate_tax_counts_from_m8(m8_file, output_file):
+def generate_tax_counts_from_m8(m8_file, e_value_type, output_file):
     # uses m8 file with read names beginning as: "taxid<taxon ID>:"
     taxid_count_map = {}
     taxid_percent_identity_map = {}
@@ -240,8 +241,12 @@ def generate_tax_counts_from_m8(m8_file, output_file):
             percent_identity = float(line.split("\t")[2])
             alignment_length = float(line.split("\t")[3])
             e_value = float(line.split("\t")[10])
+            if e_value_type != 'log10':
+                e_value = math.log10(e_value)
             #m8 format (Blast format 8): query, subject, %id, alignment length, mismatches, gap openings, query start, query end,
-            #                            subject start, subject end, E value, bit score
+            #                            subject start, subject end, E value (log10 if rapsearch2 output), bit score
+            # E value is a negative power of 10. GSNAPL outputs raw e-value, RAPSearch2 outputs log10(e-value).
+            # Whenever we use "e_value" it refers to log10(e-value), which is easier to handle.
             taxid_count_map[taxid] = taxid_count_map.get(taxid, 0) + 1
             taxid_percent_identity_map[taxid] = taxid_percent_identity_map.get(taxid, 0) + percent_identity
             taxid_alignment_length_map[taxid] = taxid_alignment_length_map.get(taxid, 0) + alignment_length
@@ -674,7 +679,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         os.path.join(result_dir, NT_TAXID_COUNTS_TO_JSON_OUT),
         os.path.join(result_dir, NT_TAXID_COUNTS_TO_SPECIES_RPM_OUT),
         os.path.join(result_dir, NT_TAXID_COUNTS_TO_GENUS_RPM_OUT),
-        taxid2info_s3_path, 'NT', db_sample_id,
+        taxid2info_s3_path, 'NT', 'raw', db_sample_id,
         result_dir, sample_s3_output_path, False)
 
     # run rapsearch remotely
@@ -738,7 +743,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         os.path.join(result_dir, NR_TAXID_COUNTS_TO_JSON_OUT),
         os.path.join(result_dir, NR_TAXID_COUNTS_TO_SPECIES_RPM_OUT),
         os.path.join(result_dir, NR_TAXID_COUNTS_TO_GENUS_RPM_OUT),
-        taxid2info_s3_path, 'NR', db_sample_id,
+        taxid2info_s3_path, 'NR', 'log10', db_sample_id,
         result_dir, sample_s3_output_path, False)
 
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
@@ -1062,7 +1067,7 @@ def run_generate_taxid_outputs_from_m8(sample_name,
     annotated_m8, fastq_file_1,
     taxon_counts_csv_file, taxon_counts_json_file,
     taxon_species_rpm_file, taxon_genus_rpm_file,
-    taxinfodb_s3_path, count_type, db_sample_id,
+    taxinfodb_s3_path, count_type, e_value_type, db_sample_id,
     result_dir, sample_s3_output_path, lazy_run):
     # Ignore lazyrun
     # download taxoninfodb if not exist
@@ -1071,7 +1076,7 @@ def run_generate_taxid_outputs_from_m8(sample_name,
     if not os.path.isfile(taxoninfo_path):
         execute_command("aws s3 cp %s %s/" % (taxinfodb_s3_path, REF_DIR))
         logging.getLogger().info("downloaded taxon info database")
-    generate_tax_counts_from_m8(annotated_m8, taxon_counts_csv_file)
+    generate_tax_counts_from_m8(annotated_m8, e_value_type, taxon_counts_csv_file)
     logging.getLogger().info("generated taxon counts from m8")
     generate_json_from_taxid_counts(sample_name, fastq_file_1, taxon_counts_csv_file,
                                     taxoninfo_path, taxon_counts_json_file,
