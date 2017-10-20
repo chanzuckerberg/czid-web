@@ -176,6 +176,7 @@ class PipelineSampleReport extends React.Component {
                         <i className='fa fa-caret-down'></i>
                       </div>
                     </th>
+
                     {/*The Genus and Species diff*/}
                     { (this.view_level === 'species') ?
                     <th>
@@ -203,6 +204,32 @@ class PipelineSampleReport extends React.Component {
                     </th> : '' }
 
                     { (this.view_level === 'species') ?
+                    <th>
+                     NT Species %id
+                      <div className='sort-controls left'>
+                        <i className='fa fa-caret-up'></i>
+                        <i className='fa fa-caret-down'></i>
+                      </div>
+                    </th> : '' }
+                    { (this.view_level === 'species') ?
+                    <th>
+                     NT Species L
+                      <div className='sort-controls left'>
+                        <i className='fa fa-caret-up'></i>
+                        <i className='fa fa-caret-down'></i>
+                      </div>
+                    </th> : '' }
+                    { (this.view_level === 'species') ?
+                    <th>
+                     NT Species e
+                      <div className='sort-controls left'>
+                        <i className='fa fa-caret-up'></i>
+                        <i className='fa fa-caret-down'></i>
+                      </div>
+                    </th> : '' }
+
+
+                    { (this.view_level === 'species') ?
                     <th>NR Species Z
                       <div className='sort-controls left'>
                         <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_species_nr_zscore')} fa fa-caret-up sort_by=lowest_species_nr_zscore` }></i>
@@ -224,6 +251,7 @@ class PipelineSampleReport extends React.Component {
                         <i className='fa fa-caret-down'></i>
                       </div>
                     </th> : '' }
+ 
                   </tr>
                   </thead>
                   <tbody>
@@ -280,6 +308,18 @@ class PipelineSampleReport extends React.Component {
                         </td>
 
                         <td>
+                          { (this.view_level==='species' && (taxon.nt_ele && taxon.nt_ele.hasOwnProperty('percent_identity'))) ? numberWithCommas(Number(taxon.nr_ele.percent_identity).toFixed(3)) : '' }
+                        </td>
+
+                        <td>
+                          { (this.view_level==='species' && (taxon.nt_ele && taxon.nt_ele.hasOwnProperty('alignment_length')) ) ? numberWithCommas(Number(taxon.nt_ele.alignment_length).toFixed(3)) : '' }
+                        </td>
+
+                        <td>
+                          { (this.view_level==='species' && (taxon.nt_ele && taxon.nt_ele.hasOwnProperty('e_value')) ) ? numberWithCommas(Number(taxon.nt_ele.e_value).toFixed(3)) : '' }
+                        </td>
+
+                        <td>
                           { (this.view_level==='species' && (taxon.nr_ele && taxon.nr_ele.hasOwnProperty('zscore'))) ? numberWithCommas(Number(taxon.nr_ele.zscore).toFixed(3)) : '' }
                         </td>
 
@@ -290,7 +330,7 @@ class PipelineSampleReport extends React.Component {
                         <td>
                           { (this.view_level==='species' && (taxon.nr_ele && taxon.nr_ele.hasOwnProperty('count')) ) ? numberWithCommas(taxon.nr_ele.count) : '' }
                         </td>
-
+ 
                       </tr>
                     )
                   })}
