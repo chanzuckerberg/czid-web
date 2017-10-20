@@ -1100,7 +1100,7 @@ def main():
     KEY_S3_PATH = os.environ.get('KEY_S3_PATH', KEY_S3_PATH)
     STAR_GENOME = os.environ.get('STAR_GENOME', STAR_GENOME)
     BOWTIE2_GENOME = os.environ.get('BOWTIE2_GENOME', BOWTIE2_GENOME)
-    DB_SAMPLE_ID = os.environ.get['DB_SAMPLE_ID']
+    DB_SAMPLE_ID = os.environ['DB_SAMPLE_ID']
     AWS_BATCH_JOB_ID = os.environ.get('AWS_BATCH_JOB_ID', 'local')
     SAMPLE_HOST = os.environ.get('SAMPLE_HOST', '')
     SAMPLE_LOCATION = os.environ.get('SAMPLE_LOCATION', '')
