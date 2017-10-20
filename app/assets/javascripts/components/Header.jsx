@@ -2,7 +2,7 @@ class Header extends React.Component  {
   constructor(props, context) {
     super(props, context);
     this.userSignedIn = this.props.userSignedIn;
-    this.userDetails = this.props.userDetails;
+    this.userDetails = this.props.userDetails || null;
     this.location = window.location.pathname;
   }
 
@@ -21,7 +21,7 @@ class Header extends React.Component  {
           {/* Dropdown menu */}
           <ul id="dropdown1" className="dropdown-content">
             <li onClick={ this.gotoPage.bind(this, '/samples/new') }><a href="#!">New Sample</a></li>
-            <li onClick={ this.gotoPage.bind(this, '/users/new') }><a href="#!">Create User</a></li>
+           { this.userDetails && this.userDetails.admin ? <li onClick={ this.gotoPage.bind(this, '/users/new') }><a href="#!">Create User</a></li> : null }
             <li className="divider"></li>
             <li><a rel="nofollow" data-method="delete" href={this.props.signoutEndpoint}>Logout</a></li>
           </ul>

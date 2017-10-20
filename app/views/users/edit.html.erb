@@ -1,7 +1,7 @@
-<h1>Editing User</h1>
-
-<%= render 'modify', user: @user %>
-
-<%= link_to 'Show user', @user %> |
-<%= link_to 'See all users', users_path %> |
-<%= link_to 'Front portal', root_path %>
+<div>
+  <% if current_user && current_user.admin %>
+    <%= react_component 'CreateUser', { csrf: form_authenticity_token, selectedUser: @user} %>
+  <% else %>
+    <%= react_component 'ForbiddenPage' %>
+  <% end %>
+</div>

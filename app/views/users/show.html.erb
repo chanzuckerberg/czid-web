@@ -1,37 +1,39 @@
-<p id="notice"><%= notice %></p>
+<div>
+    <p id="notice"><%= notice %></p>
 
-<p>
-  <strong>Email:</strong>
-  <%= @user.email %>
-</p>
+    <p>
+      <strong>Email:</strong>
+      <%= @user.email %>
+    </p>
 
-<p>
-  <strong>Name:</strong>
-  <%= @user.name %>
-</p>
+    <p>
+      <strong>Name:</strong>
+      <%= @user.name %>
+    </p>
 
-<p>
-  <% if @user.projects.count == 0 %>
-    <strong>Projects:</strong> none
-  <% elsif @user.projects.count == 1 %>
-    <strong>Project:</strong>
-    <%= link_to @user.projects.last.name, @user.projects.last %>
-  <% else %>
-    <strong>Projects:</strong>
-    <% @user.projects[0...-1].each do |p| %>
-      <%= link_to p.name, p if p %>, 
-    <% end %>
-    <%= link_to @user.projects.last.name, @user.projects.last %>
-  <% end %>
-</p>
+    <p>
+      <% if @user.projects.count == 0 %>
+        <strong>Projects:</strong> none
+      <% elsif @user.projects.count == 1 %>
+        <strong>Project:</strong>
+        <%= link_to @user.projects.last.name, @user.projects.last %>
+      <% else %>
+        <strong>Projects:</strong>
+        <% @user.projects[0...-1].each do |p| %>
+          <%= link_to p.name, p if p %>, 
+        <% end %>
+        <%= link_to @user.projects.last.name, @user.projects.last %>
+      <% end %>
+    </p>
 
-<p>
-  <strong>Date joined:</strong>
-  <%= @user.created_at %>
-</p>
+    <p>
+      <strong>Date joined:</strong>
+      <%= @user.created_at %>
+    </p>
 
-<p>
-<%= link_to 'Edit', edit_user_path(@user) %> |
-<%= link_to 'See all users', users_path %> |
-<%= link_to 'Front portal', root_path %>
-</p>
+    <p>
+      <%= link_to 'Edit', edit_user_path(@user) %> |
+      <%= link_to 'See all users', users_path %> |
+      <%= link_to 'Front portal', root_path %>
+    </p>
+</div>
