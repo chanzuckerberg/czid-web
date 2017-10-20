@@ -5,6 +5,7 @@ class PipelineSampleReport extends React.Component {
     this.report_details = props.report_details;
     this.taxonomy_details = props.taxonomy_details;
     this.all_categories = props.all_categories || [];
+    this.checked_categories = props.checked_categories || props.all_categories
 
     this.view_level = ReportFilter.getFilter('view_level') || 'species';
     this.highest_tax_counts = props.highest_tax_counts;
@@ -98,6 +99,7 @@ class PipelineSampleReport extends React.Component {
               <div className="col s2">
                 <ReportFilter
                   all_categories = { this.all_categories }
+                  checked_categories = { this.checked_categories }
                   background_model = {this.report_details.background_model.name}
                   report_title = { this.report_details.report_info.name }
                   view_level={this.view_level}
@@ -238,7 +240,7 @@ class PipelineSampleReport extends React.Component {
                         <td>{ (!taxon.genus_nr_ele) ? '-': numberWithCommas(Number(taxon.genus_nr_ele.zscore).toFixed(3))}</td>
                         <td>{ (!taxon.genus_nr_ele) ? '-': numberWithCommas(Number(taxon.genus_nr_ele.rpm).toFixed(3))}</td>
                         <td>{ (!taxon.genus_nr_ele) ? '-': numberWithCommas(taxon.genus_nr_ele.count)}</td>
- 
+
                         {/*The species scores*/}
 
                         <td>
