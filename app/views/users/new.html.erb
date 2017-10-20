@@ -1,7 +1,2 @@
-<div>
-  <% if current_user && current_user.admin %>
-    <%= react_component 'CreateUser', { csrf: form_authenticity_token, user: @user } %>
-  <% else %>
-    <%= react_component 'ForbiddenPage' %>
-  <% end %>
-</div>
+<%= react_component 'CreateUser', { csrf: form_authenticity_token, user: current_user } %>
+
