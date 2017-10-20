@@ -50,6 +50,8 @@ module ReportHelper
     total_reads = report.pipeline_output.total_reads
     background_id = report.background.id
     # Note: stdev is never 0
+    # To do: handle absence of percent_identity, alignment_length, e_value
+    #        in view of filtering on them
     query_results = TaxonCount.select("
       taxon_counts.tax_id              AS  tax_id,
       taxon_counts.count_type          AS  count_type,
