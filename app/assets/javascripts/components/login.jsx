@@ -85,7 +85,7 @@ class Login extends React.Component {
     this.setState({
       isChecked: checkboxValue
     })
-    this.setState.isChecked = !this.setState.isChecked;  
+    this.state.isChecked = !this.state.isChecked;  
   }
 
   renderLogin() {
@@ -116,7 +116,7 @@ class Login extends React.Component {
                   <label htmlFor="user_password">Password</label>
                 </div>
                 <div className="">  
-                  <input ref="remember_me" type="checkbox" name="switch" className="filled-in" id="remember_me" onChange={ this.toggleCheckBox } value={this.setState.isChecked ? 1 : 0} />
+                  <input ref="remember_me" type="checkbox" name="switch" className="filled-in" id="remember_me" onChange={ this.toggleCheckBox } value={this.state.isChecked ? 1 : 0} />
                   <label htmlFor="remember_me">Remember me</label>
                 </div>
               </div>
