@@ -8,6 +8,7 @@ class Sample < ApplicationRecord
   STATUS_RERUN    = 'need_rerun'.freeze
   STATUS_CHECKED  = 'checked'.freeze # status regarding pipeline kickoff is checked
   HIT_FASTA_BASENAME = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.fasta'.freeze
+  UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fasta'
   LOG_BASENAME = 'log.txt'.freeze
   DEFAULT_MEMORY = 64_000
   DEFAULT_QUEUE = 'aegea_batch_ondemand'.freeze
@@ -75,6 +76,10 @@ class Sample < ApplicationRecord
 
   def sample_annotated_fasta_url
     "https://s3.console.aws.amazon.com/s3/object/#{SAMPLES_BUCKET_NAME}/#{sample_path}/results/#{HIT_FASTA_BASENAME}"
+  end
+
+  def sample_unidentified_fasta_url
+    "https://s3.console.aws.amazon.com/s3/object/#{SAMPLES_BUCKET_NAME}/#{sample_path}/results/#{UNIDENTIFIED_FASTA_BASENAME}"
   end
 
   def sample_output_folder_url
