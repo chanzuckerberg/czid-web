@@ -71,7 +71,6 @@ NT_M8_TO_TAXID_COUNTS_FILE_OUT = 'counts.filter.deuterostomes.taxids.gsnapl.unma
 NT_TAXID_COUNTS_TO_JSON_OUT = 'counts.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.json'
 NT_TAXID_COUNTS_TO_SPECIES_RPM_OUT = 'species.rpm.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.csv'
 NT_TAXID_COUNTS_TO_GENUS_RPM_OUT = 'genus.rpm.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.csv'
-NT_TAXID_QUALS_JSON_OUT = 'qualities.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.json'
 ANNOTATE_RAPSEARCH2_M8_WITH_TAXIDS_OUT = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.m8'
 GENERATE_TAXID_ANNOTATED_FASTA_FROM_RAPSEARCH2_M8_OUT = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.fasta'
 FILTER_DEUTEROSTOMES_FROM_NR_M8_OUT = 'filter.deuterostomes.taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.m8'
@@ -79,11 +78,9 @@ NR_M8_TO_TAXID_COUNTS_FILE_OUT = 'counts.filter.deuterostomes.taxids.rapsearch2.
 NR_TAXID_COUNTS_TO_JSON_OUT = 'counts.filter.deuterostomes.taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.json'
 NR_TAXID_COUNTS_TO_SPECIES_RPM_OUT = 'species.rpm.filter.deuterostomes.taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.csv'
 NR_TAXID_COUNTS_TO_GENUS_RPM_OUT = 'genus.rpm.filter.deuterostomes.taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.csv'
-NR_TAXID_QUALS_JSON_OUT = 'qualities.filter.deuterostomes.taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.json'
 COMBINED_JSON_OUT = 'idseq_web_sample.json'
 LOGS_OUT_BASENAME = 'log.txt'
-STATS_OUT = 'stats."taxid_alignment_length_map": taxid_alignment_length_map,
-                      "taxid_e_value_map": taxid_e_value_mapjson'
+STATS_OUT = 'stats.json'
 
 #global statistics log
 STATS = []
@@ -233,22 +230,9 @@ def generate_unmapped_pairs_from_sam(sam_file, output_prefix):
 def generate_tax_counts_from_m8(m8_file, output_file):
     # uses m8 file with read names beginning as: "taxid<taxon ID>:"
     taxid_count_map = {}
-    with open(m8_file, 'rb') as m8f:
-        for line in m8f:
-            taxid = (line.split("taxid"))[1].split(":")[0]
-            #"taxid9606:NB501961:14:HM7TLBGX2:1:12104:15431..."
-            taxid_count_map[taxid] = taxid_count_map.get(taxid, 0) + 1
-    with open(output_file, 'w') as f:
-        writer = csv.writer(f)
-        for row in taxid_count_map.items():
-            writer.writerow(row)
-
-def generate_tax_quals_from_m8(m8_file, output_file):
-    # uses m8 file with read names beginning as: "taxid<taxon ID>:"
-    taxid_percent_identity_map = {} # average "%identity" of hits to given taxid
-    taxid_alignment_length_map = {} # average "alignment length" of hits to given taxid
-    taxid_e_value_map = {} # average "e-value" of hits to given taxid
-    n = 0
+    taxid_percent_identity_map = {}
+    taxid_alignment_length_map = {}
+    taxid_e_value_map = {}
     with open(m8_file, 'rb') as m8f:
         for line in m8f:
             taxid = (line.split("taxid"))[1].split(":")[0]
@@ -258,18 +242,17 @@ def generate_tax_quals_from_m8(m8_file, output_file):
             e_value = float(line.split("\t")[10])
             #m8 format (Blast format 8): query, subject, %id, alignment length, mismatches, gap openings, query start, query end,
             #                            subject start, subject end, E value, bit score
-            n += 1
+            taxid_count_map[taxid] = taxid_count_map.get(taxid, 0) + 1
             taxid_percent_identity_map[taxid] = taxid_percent_identity_map.get(taxid, 0) + percent_identity
             taxid_alignment_length_map[taxid] = taxid_alignment_length_map.get(taxid, 0) + alignment_length
             taxid_e_value_map[taxid] = taxid_e_value_map.get(taxid, 0) + e_value
-    for key, value in taxid_percent_identity_map.items(): taxid_percent_identity_map[key] = value/n
-    for key, value in taxid_alignment_length_map.items(): taxid_alignment_length_map[key] = value/n
-    for key, value in taxid_e_value_map.items(): taxid_e_value_map[key] = value/n
-    taxid_qual_map = {"taxid_percent_identity_map": taxid_percent_identity_map,
-                      "taxid_alignment_length_map": taxid_alignment_length_map,
-                      "taxid_e_value_map": taxid_e_value_map}
-    with open(output_file, 'wb') as f:
-        json.dump(taxid_qual_map, f)
+    with open(output_file, 'w') as f:
+        for taxid in taxid_count_map.keys():
+            count = taxid_count_map[taxid]
+            avg_percent_identity = taxid_percent_identity_map[taxid] / count
+            avg_alignment_length = taxid_alignment_length_map[taxid] / count
+            avg_e_value = taxid_e_value_map[taxid] / count
+            f.write(",".join([taxid, count, avg_percent_identity, avg_alignment_length, avg_e_value + '\n']))
 
 def generate_rpm_from_taxid_counts(rawReadsInputPath, taxidCountsInputPath, taxid2infoPath, speciesOutputPath, genusOutputPath):
     total_reads = subprocess.check_output("zcat %s | wc -l" % rawReadsInputPath, shell=True)
@@ -322,6 +305,9 @@ def generate_json_from_taxid_counts(sample, rawReadsInputPath, taxidCountsInputP
             tok = line.rstrip().split(",")
             taxid = tok[0]
             count = float(tok[1])
+            percent_identity = float(tok[2])
+            alignment_length = float(tok[3])
+            e_value = float(tok[4])
             species_taxid, genus_taxid, scientific_name = taxid2info_map.get(taxid, ("-1", "-2", "NA"))
             genus_to_count[genus_taxid] = genus_to_count.get(genus_taxid, 0) + count
             genus_to_name[genus_taxid]  = scientific_name.split(" ")[0]
@@ -333,6 +319,9 @@ def generate_json_from_taxid_counts(sample, rawReadsInputPath, taxidCountsInputP
         taxon_counts_attributes.append({"tax_id": taxid,
                                         "tax_level": TAX_LEVEL_SPECIES,
                                         "count": count,
+                                        "percent_identity": percent_identity,
+                                        "alignment_length": alignment_length,
+                                        "e_value": e_value,
                                         "name": species_name,
                                         "count_type": countType})
 
@@ -675,7 +664,6 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         os.path.join(result_dir, NT_TAXID_COUNTS_TO_JSON_OUT),
         os.path.join(result_dir, NT_TAXID_COUNTS_TO_SPECIES_RPM_OUT),
         os.path.join(result_dir, NT_TAXID_COUNTS_TO_GENUS_RPM_OUT),
-        os.path.join(result_dir, NT_TAXID_QUALS_JSON_OUT),
         taxid2info_s3_path, 'NT', db_sample_id,
         result_dir, sample_s3_output_path, False)
 
@@ -740,7 +728,6 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         os.path.join(result_dir, NR_TAXID_COUNTS_TO_JSON_OUT),
         os.path.join(result_dir, NR_TAXID_COUNTS_TO_SPECIES_RPM_OUT),
         os.path.join(result_dir, NR_TAXID_COUNTS_TO_GENUS_RPM_OUT),
-        os.path.join(result_dir, NR_TAXID_QUALS_JSON_OUT),
         taxid2info_s3_path, 'NR', db_sample_id,
         result_dir, sample_s3_output_path, False)
 
@@ -1065,7 +1052,6 @@ def run_generate_taxid_outputs_from_m8(sample_name,
     annotated_m8, fastq_file_1,
     taxon_counts_csv_file, taxon_counts_json_file,
     taxon_species_rpm_file, taxon_genus_rpm_file,
-    taxon_quals_json_file,
     taxinfodb_s3_path, count_type, db_sample_id,
     result_dir, sample_s3_output_path, lazy_run):
     # Ignore lazyrun
@@ -1084,14 +1070,11 @@ def run_generate_taxid_outputs_from_m8(sample_name,
     generate_rpm_from_taxid_counts(fastq_file_1, taxon_counts_csv_file, taxoninfo_path,
                                    taxon_species_rpm_file, taxon_genus_rpm_file)
     logging.getLogger().info("calculated RPM from taxon counts")
-    generate_tax_quals_from_m8(annotated_m8, taxon_quals_json_file)
-    logging.getLogger().info("generated taxon alignment qualities from m8")
     # move the output back to S3
     execute_command("aws s3 cp %s %s/" % (taxon_counts_csv_file, sample_s3_output_path))
     execute_command("aws s3 cp %s %s/" % (taxon_counts_json_file, sample_s3_output_path))
     execute_command("aws s3 cp %s %s/" % (taxon_species_rpm_file, sample_s3_output_path))
     execute_command("aws s3 cp %s %s/" % (taxon_genus_rpm_file, sample_s3_output_path))
-    execute_command("aws s3 cp %s %s/" % (taxon_quals_json_file, sample_s3_output_path))
 
 def run_combine_json_outputs(sample_name, input_json_1, input_json_2, output_json,
     result_dir, sample_s3_output_path, lazy_run):
