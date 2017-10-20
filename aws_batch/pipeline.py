@@ -313,15 +313,22 @@ def generate_json_from_taxid_counts(sample, rawReadsInputPath, taxidCountsInputP
             genus_to_name[genus_taxid]  = scientific_name.split(" ")[0]
             species_to_count[species_taxid] = species_to_count.get(species_taxid, 0) + count
             species_to_name[species_taxid] = scientific_name
+            species_to_percent_identity[species_taxid] = species_to_percent_identity.get(species_taxid, 0) + count * percent_identity
+            species_to_alignment_length[species_taxid] = species_to_alignment_length.get(species_taxid, 0) + count * alignment_length
+            species_to_e_value[species_taxid] = species_to_e_value.get(species_taxid, 0) + count * e_value
 
-    for (taxid, count) in species_to_count.iteritems():
+    for taxid in species_to_count.keys():
         species_name = species_to_name[taxid]
+        count = species_to_count[taxid]
+        avg_percent_identity = species_to_percent_identity[taxid] / count
+        avg_alignment_length = species_to_alignment_length[taxid] / count
+        avg_e_value = species_to_e_value[taxid] / count       
         taxon_counts_attributes.append({"tax_id": taxid,
                                         "tax_level": TAX_LEVEL_SPECIES,
                                         "count": count,
-                                        "percent_identity": percent_identity,
-                                        "alignment_length": alignment_length,
-                                        "e_value": e_value,
+                                        "percent_identity": avg_percent_identity,
+                                        "alignment_length": avg_alignment_length,
+                                        "e_value": avg_e_value,
                                         "name": species_name,
                                         "count_type": countType})
 
