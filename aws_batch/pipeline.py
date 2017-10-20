@@ -252,7 +252,7 @@ def generate_tax_counts_from_m8(m8_file, output_file):
             avg_percent_identity = taxid_percent_identity_map[taxid] / count
             avg_alignment_length = taxid_alignment_length_map[taxid] / count
             avg_e_value = taxid_e_value_map[taxid] / count
-            f.write(",".join([taxid, count, avg_percent_identity, avg_alignment_length, str(avg_e_value) + '\n']))
+            f.write(",".join([str(taxid), str(count), str(avg_percent_identity), str(avg_alignment_length), str(avg_e_value) + '\n']))
 
 def generate_rpm_from_taxid_counts(rawReadsInputPath, taxidCountsInputPath, taxid2infoPath, speciesOutputPath, genusOutputPath):
     total_reads = subprocess.check_output("zcat %s | wc -l" % rawReadsInputPath, shell=True)
