@@ -47,8 +47,14 @@
   }
 }
 
-.profile-dropdown i {
-  margin: 20px;
+.profile-header-dropdown:hover {
+  color: #656565;
+}
+
+.profile-dropdown {
+  i {
+    margin: 20px;
+  }
 }
 
 .sub-header-component {
@@ -68,6 +74,10 @@
 .sub-header .sub-title {
   color: #333333;
   font-size: 28px;
+
+}
+.sub-header .sub-title a:hover{
+  color: #09c !important;
 }
 
 .sub-header-navigation {

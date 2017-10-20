@@ -91,7 +91,7 @@ class PipelineSampleReads extends React.Component {
         <div className="data">
           <div className="row">
             <div className="col s6">
-              <table className="highlight">
+              <table>
                 <tbody>
                 <tr>
                   <td>Total reads</td>
@@ -105,7 +105,7 @@ class PipelineSampleReads extends React.Component {
               </table>
             </div>
             <div className="col s6">
-              <table className="highlight">
+              <table>
                 <tbody>
                 <tr>
                   <td>Remaining Reads</td>
@@ -125,7 +125,7 @@ class PipelineSampleReads extends React.Component {
     download_section = (
       <div>
         <a className="custom-button" href= { this.sampleInfo.sample_annotated_fasta_url }>
-          <i className="fa fa-cloud-download left"></i> DOWNLOAD NON HUMAN READS
+          <i className="fa fa-cloud-download left"></i> DOWNLOAD NON HOST READS
         </a>
         <a className="custom-button" href= { this.sampleInfo.sample_output_folder_url }>
           <i className="fa fa-cloud-download left"></i> GO TO RESULTS FOLDER
@@ -149,7 +149,7 @@ class PipelineSampleReads extends React.Component {
             </div>
 
             <div className="sub-title">
-              <a href="/"> {this.projectInfo.name} </a> > { this.sampleInfo.name }
+              <a href={`/?project_id=${this.projectInfo.id}`}> {this.projectInfo.name} </a> > { this.sampleInfo.name }
             </div>
 
             <div className="sub-header-navigation">
@@ -187,7 +187,7 @@ class PipelineSampleReads extends React.Component {
                     <div className="data">
                       <div className="row">
                         <div className="col s6">
-                          <table className="highlight">
+                          <table>
                             <tbody>
                               <tr>
                                 <td>Host</td>
@@ -205,7 +205,7 @@ class PipelineSampleReads extends React.Component {
                           </table>
                         </div>
                         <div className="col s6">
-                          <table className="highlight responsive-table">
+                          <table className="responsive-table">
                             <tbody>
                               <tr>
                                 <td>Tissue Type</td>

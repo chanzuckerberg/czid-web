@@ -1,4 +1,9 @@
 /* TODO: refactor stylesheet into scss */
+.samples-table {
+  td {
+    cursor: pointer;
+  }
+}
 
 .tabs {
   display: block !important;

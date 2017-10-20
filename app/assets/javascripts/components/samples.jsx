@@ -60,7 +60,7 @@ class Samples extends React.Component {
     return (
     <div className="content-wrapper">
       <div className="container sample-container">
-          <table className="bordered highlight">
+          <table className="bordered highlight samples-table">
             <thead>
             <tr>
               <th>Name</th>
