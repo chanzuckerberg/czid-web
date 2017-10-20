@@ -134,6 +134,27 @@ class PipelineSampleReport extends React.Component {
                       </div>
                     </th>
                     <th>
+                     NT Genus %id
+                      <div className='sort-controls left'>
+                        <i className='fa fa-caret-up'></i>
+                        <i className='fa fa-caret-down'></i>
+                      </div>
+                    </th>
+                    <th>
+                     NT Genus L
+                      <div className='sort-controls left'>
+                        <i className='fa fa-caret-up'></i>
+                        <i className='fa fa-caret-down'></i>
+                      </div>
+                    </th>
+                    <th>
+                     NT Genus e
+                      <div className='sort-controls left'>
+                        <i className='fa fa-caret-up'></i>
+                        <i className='fa fa-caret-down'></i>
+                      </div>
+                    </th>
+                    <th>
                     NR Genus Z
                      <div className='sort-controls left'>
                       <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_genus_nr_zscore')} fa fa-caret-up sort_by=lowest_genus_nr_zscore` }></i>
@@ -154,6 +175,7 @@ class PipelineSampleReport extends React.Component {
                         <i className='fa fa-caret-down'></i>
                       </div>
                     </th>
+                    <th>
                     {/*The Genus and Species diff*/}
                     { (this.view_level === 'species') ?
                     <th>
