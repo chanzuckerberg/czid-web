@@ -8,6 +8,7 @@ class ReportFilter extends React.Component {
     const view_level = props.view_level || 'species';
     this.background_model = props.background_model || 'N/A';
     this.all_categories = props.all_categories || [];
+    this.checked_categories = (props.checked_categories || props.all_categories).map((category) => category.taxid);
 
     this.highest_species_nt_zscore = this.props.highest_tax_counts.highest_species_nt_zscore;
     this.highest_species_nt_rpm = this.props.highest_tax_counts.highest_species_nt_rpm;
@@ -44,21 +45,24 @@ class ReportFilter extends React.Component {
     const species_nt_rpm_end =
       (species_nt_rpm_threshold.split(',').length > 1) ? species_nt_rpm_threshold.split(',')[1] :
         this.highest_species_nt_rpm;
+    const checked_categories = this.checked_categories;
 
-    this.state = { species_nt_zscore_start, species_nt_zscore_end, species_nt_rpm_start, species_nt_rpm_end, view_level };
+    this.state = { species_nt_zscore_start, species_nt_zscore_end, species_nt_rpm_start, species_nt_rpm_end, view_level, checked_categories};
 
     this.applyFilter = this.applyFilter.bind(this);
     this.selectViewLevel = this.selectViewLevel.bind(this);
     this.updateThreshold = this.updateThreshold.bind(this);
+    this.selectCategory = this.selectCategory.bind(this);
   }
 
   applyFilter() {
     const current_url = location.protocol + '//' + location.host + location.pathname;
     const currentSort = PipelineSampleReport.currentSort();
     const sort_by = currentSort.sort_query ? `&${currentSort.sort_query}` : '';
+    const categories = this.checked_categories.join();
     window.location =
       `${current_url}?species_nt_zscore_threshold=${this.state.species_nt_zscore_start},${this.state.species_nt_zscore_end}&species_nt_rpm_threshold=${
-        this.state.species_nt_rpm_start},${this.state.species_nt_rpm_end}&view_level=${this.state.view_level}${sort_by}`;
+        this.state.species_nt_rpm_start},${this.state.species_nt_rpm_end}&view_level=${this.state.view_level}${sort_by}&categories=${categories}`;
   }
 
   static getFilter(name) {
@@ -81,6 +85,26 @@ class ReportFilter extends React.Component {
     });
   }
 
+  selectCategory(e) {
+    // current array of options
+    const options = this.state.checked_categories
+
+    let index
+
+    // check if the check box is checked or unchecked
+    if (e.target.checked) {
+      // add the numerical value of the checkbox to options array
+      options.push(+e.target.value)
+    } else {
+      // or remove the value from the unchecked checkbox from the array
+      index = options.indexOf(+e.target.value)
+      options.splice(index, 1)
+    }
+
+    // update the state with the new array of options
+    this.setState({ checked_categories: options })
+
+  }
 
   updateThreshold(e) {
     const { innerText, className } = e.target;
@@ -183,7 +207,7 @@ class ReportFilter extends React.Component {
                     { this.all_categories.map((category, i) => {
                       return (
                         <p key={i}>
-                          <input type="checkbox" className="filled-in" id={category.name} />
+                          <input type="checkbox" className="filled-in cat-filter" id={category.name} value={category.taxid} onClick={this.selectCategory} checked={this.checked_categories.indexOf(category.taxid) >= 0} />
                           <label htmlFor={ category.name }>{ category.name }</label>
                         </p>
                       )

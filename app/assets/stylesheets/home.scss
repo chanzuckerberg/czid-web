@@ -24,7 +24,6 @@ table {
       i.fa.fa-flask {
         margin-left: 0;
       }
-      cursor: pointer;
     }
   }
 }
@@ -66,6 +65,10 @@ i.fa {
       color: #ffffff;
       margin: 0 7px;
       vertical-align: middle;
+      &:hover {
+        background: #2f3338;
+        border-color: #31363c;
+      }
     }
   }
   .title-filter {
@@ -162,14 +165,15 @@ i.fa {
 }
 
 .dropdown-bubble {
-    box-shadow: 0 6px 6px rgba(0, 0, 0, 0.2);
-    position: absolute;
-    background: #fff;
-    min-width: 250px;
-    font-size: 14px;
-    border-radius: 7px;
-    padding: 5px;
-    display: none;
+  box-shadow: 0 6px 6px rgba(0, 0, 0, 0.2);
+  position: absolute;
+  background: #fff;
+  min-width: 250px;
+  font-size: 14px;
+  border-radius: 7px;
+  padding: 5px;
+  display: none;
+  z-index: 2;
 }
 
 .dropdown-bubble ul li a{
