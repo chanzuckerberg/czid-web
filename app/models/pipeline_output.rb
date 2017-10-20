@@ -32,9 +32,9 @@ class PipelineOutput < ApplicationRecord
        SELECT #{id}, taxon_lineages.#{tax_level_name}_taxid, taxon_lineages.#{tax_level_name}_name,
               #{tax_level_id}, taxon_counts.count_type,
               sum(taxon_counts.count),
-              sum(percent_identity * count) / sum(count),
-              sum(alignment_length * count) / sum(count),
-              sum(e_value * count) / sum(count),
+              sum(taxon_counts.percent_identity * taxon_counts.count) / sum(taxon_counts.count),
+              sum(taxon_counts.alignment_length * taxon_counts.count) / sum(taxon_counts.count),
+              sum(e_value * taxon_counts.count) / sum(taxon_counts.count),
               '#{current_date}', '#{current_date}'
        FROM  taxon_lineages, taxon_counts
        WHERE taxon_lineages.taxid = taxon_counts.tax_id AND
