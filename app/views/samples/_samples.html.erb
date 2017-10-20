@@ -34,9 +34,7 @@
             <% if pipeline_run %>
               <%= pipeline_run.job_status %>
               &nbsp;
-              <% if pipeline_run.job_status == 'FAILED' %>
-                <%= button_to 'rerun', kickoff_pipeline_sample_path(sample), method: :put %>
-              <% end %>
+              <%= button_to 'rerun', kickoff_pipeline_sample_path(sample), method: :put %>
             <% end %>
           </td>
           <td><%= sample.created_at %></td>
