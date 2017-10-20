@@ -300,6 +300,9 @@ def generate_json_from_taxid_counts(sample, rawReadsInputPath, taxidCountsInputP
     genus_to_name = {}
     species_to_count = {}
     species_to_name = {}
+    species_to_percent_identity = {}
+    species_to_alignment_length = {}
+    species_to_e_value = {}
     with open(taxidCountsInputPath) as f:
         for line in f:
             tok = line.rstrip().split(",")
