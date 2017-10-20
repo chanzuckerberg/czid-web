@@ -257,6 +257,9 @@ class PipelineSampleReport extends React.Component {
                         <td>{ (!taxon.genus_nt_ele) ? '-': numberWithCommas(Number(taxon.genus_nt_ele.zscore).toFixed(3))}</td>
                         <td>{ (!taxon.genus_nt_ele) ? '-': numberWithCommas(Number(taxon.genus_nt_ele.rpm).toFixed(3))}</td>
                         <td>{ (!taxon.genus_nt_ele) ? '-': numberWithCommas(taxon.genus_nt_ele.count)}</td>
+                        <td>{ (!taxon.genus_nt_ele) ? '-': numberWithCommas(Number(taxon.genus_nt_ele.percent_identity).toFixed(3))}</td>
+                        <td>{ (!taxon.genus_nt_ele) ? '-': numberWithCommas(Number(taxon.genus_nt_ele.alignment_length).toFixed(3))}</td>
+                        <td>{ (!taxon.genus_nt_ele) ? '-': numberWithCommas(taxon.genus_nt_ele.e_value)}</td>
                         <td>{ (!taxon.genus_nr_ele) ? '-': numberWithCommas(Number(taxon.genus_nr_ele.zscore).toFixed(3))}</td>
                         <td>{ (!taxon.genus_nr_ele) ? '-': numberWithCommas(Number(taxon.genus_nr_ele.rpm).toFixed(3))}</td>
                         <td>{ (!taxon.genus_nr_ele) ? '-': numberWithCommas(taxon.genus_nr_ele.count)}</td>
