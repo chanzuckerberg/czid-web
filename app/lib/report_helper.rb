@@ -13,7 +13,7 @@ module ReportHelper
     data[:view_level] = view_level
     data[:all_categories] = all_categories
     if params[:categories]
-      data[:checked_categories] = params[:categories].split(',').map { |c| {taxid: c.to_i} }
+      data[:checked_categories] = params[:categories].split(',').map { |c| { taxid: c.to_i } }
     end
     data
   end
@@ -89,7 +89,6 @@ module ReportHelper
     end
 
     query_results.to_a.map(&:attributes)
-
   end
 
   def flip_type(t)
