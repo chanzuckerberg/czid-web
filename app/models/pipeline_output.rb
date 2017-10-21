@@ -6,7 +6,7 @@ class PipelineOutput < ApplicationRecord
   has_and_belongs_to_many :backgrounds
   accepts_nested_attributes_for :taxon_counts
   accepts_nested_attributes_for :job_stats
-  belongs_to :pipeline_run
+  baelongs_to :pipeline_run
 
   ANNOTATED_FASTA = 'taxid_annot.fasta'.freeze
   TAXID_FASTA = 'hits.fasta'.freeze
@@ -31,10 +31,16 @@ class PipelineOutput < ApplicationRecord
     # TODO(yf): take into account the case when tax_id doesn't appear in the taxon_lineages table
     TaxonCount.connection.execute(
       "INSERT INTO taxon_counts(pipeline_output_id, tax_id, name,
-                                tax_level, count_type, count, created_at, updated_at)
+                                tax_level, count_type, count,
+                                percent_identity, alignment_length, e_value,
+                                created_at, updated_at)
        SELECT #{id}, taxon_lineages.#{tax_level_name}_taxid, taxon_lineages.#{tax_level_name}_name,
               #{tax_level_id}, taxon_counts.count_type,
-              sum(taxon_counts.count), '#{current_date}', '#{current_date}'
+              sum(taxon_counts.count),
+              sum(taxon_counts.percent_identity * taxon_counts.count) / sum(taxon_counts.count),
+              sum(taxon_counts.alignment_length * taxon_counts.count) / sum(taxon_counts.count),
+              sum(taxon_counts.e_value * taxon_counts.count) / sum(taxon_counts.count),
+              '#{current_date}', '#{current_date}'
        FROM  taxon_lineages, taxon_counts
        WHERE taxon_lineages.taxid = taxon_counts.tax_id AND
              taxon_counts.pipeline_output_id = #{id} AND
