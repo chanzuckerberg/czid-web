@@ -172,7 +172,7 @@ def generate_accid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fas
     input_fasta_f.close()
     output_fasta_f.close()
 
-def accession2taxid(read_id, accession2taxid_dict.get, hit_type):
+def accession2taxid(read_id, accession2taxid_dict, hit_type):
     accid_short = ((read_id.split(hit_type+':'))[1].split(":")[0]).split(".")[0]
     taxid = accession2taxid_dict.get(accid_short, "NA")
     return taxid
@@ -185,8 +185,8 @@ def generate_taxid_fasta_from_accid(input_fasta_file, accession2taxid_path, outp
     sequence_data = input_fasta_f.readline()
     while len(sequence_name) > 0 and len(sequence_data) > 0:
         read_id = sequence_name.rstrip().lstrip('>') # example read_id: "NR::NT:CP010376.2:NB501961:14:HM7TLBGX2:1:23109:12720:8743/2"
-        nr_taxid = accession2taxid(read_id, accession2taxid_dict.get, 'NR')
-        nt_taxid = accession2taxid(read_id, accession2taxid_dict.get, 'NT')
+        nr_taxid = accession2taxid(read_id, accession2taxid_dict, 'NR')
+        nt_taxid = accession2taxid(read_id, accession2taxid_dict, 'NT')
         new_read_name = 'nr:' + nr_taxid + ':nt:' + nt_taxid + ':' + read_id
         output_fasta_f.write(">%s\n" % new_read_name)
         output_fasta_f.write(sequence_data)
