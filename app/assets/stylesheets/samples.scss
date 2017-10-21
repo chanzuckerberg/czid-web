@@ -294,3 +294,20 @@ input[type="submit"] {
   font-size: 14px;
 }
 
+.no-edit {
+  font-size: 10px;
+  color: #9e9e9e;
+}
+
+.bottom {
+  text-align: center;
+  margin: 20px;
+  cursor: pointer;
+  color: #424468;
+  .back {
+    text-decoration: underline;
+  }
+  .home {
+    text-decoration: underline
+  }
+}

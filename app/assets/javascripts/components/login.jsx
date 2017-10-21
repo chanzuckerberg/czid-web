@@ -17,7 +17,7 @@ class Login extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
-    this.clearError
+    this.clearError()
     if(!this.isFormInValid()) {
       this.login()
     }

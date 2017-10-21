@@ -62,6 +62,9 @@ class SamplesController < ApplicationController
   # GET /samples/1/edit
   def edit
     @project_info = @sample.project ? @sample.project : nil
+    @host_genomes = host_genomes_list ? host_genomes_list : nil
+    @projects = Project.all
+    @input_files = @sample.input_files
   end
 
   # POST /samples
