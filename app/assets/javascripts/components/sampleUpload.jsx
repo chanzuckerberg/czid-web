@@ -158,7 +158,7 @@ class SampleUpload extends React.Component {
         {source_type: 's3', source: this.refs.second_file_source.value.trim() }],
         s3_preload_result_path: this.refs.s3_preload_result_path.value.trim(),
         job_queue: this.state.job_queue,
-        memory: this.state.memory,
+        sample_memory: this.state.memory,
         host_genome_id: this.state.hostId,
         host_genome_name: this.state.hostName,
         status: 'created'
@@ -192,7 +192,7 @@ class SampleUpload extends React.Component {
         project_id: this.state.selectedPId,
         s3_preload_result_path: this.state.selectedResultPath,
         job_queue: this.state.selectedJobQueue,
-        memory: this.state.selectedMemory,
+        sample_memory: this.state.selectedMemory,
         host_genome_id: this.state.selectedHostGenomeId,
         host_genome_name: this.state.selectedHostGenome,
         status: 'created'
