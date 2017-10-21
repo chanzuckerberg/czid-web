@@ -83,6 +83,7 @@ UNIDENTIFIED_FASTA_OUT = 'unidentified.fasta'
 COMBINED_JSON_OUT = 'idseq_web_sample.json'
 LOGS_OUT_BASENAME = 'log.txt'
 STATS_OUT = 'stats.json'
+TAXID_ANNOT_FASTA = 'taxid_annot.fasta'
 
 #global statistics log
 STATS = []
@@ -136,7 +137,7 @@ def lzw_fraction(sequence):
         results.append(dictionary[word])
     return float(len(results))/len(sequence)
 
-def generate_taxid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fasta_file, annotation_prefix):
+def generate_accid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fasta_file, annotation_prefix):
     '''Tag reads based on the m8 output'''
     # Example:  generate_annotated_fasta_from_m8('filter.unmapped.merged.fasta',
     #  'bowtie.unmapped.star.gsnapl-nt-k16.m8', 'NT-filter.unmapped.merged.fasta', 'NT')
@@ -164,6 +165,32 @@ def generate_taxid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fas
         read_id = sequence_name.rstrip().lstrip('>')
         accession = read_to_accession_id.get(read_id, '')
         new_read_name = annotation_prefix + ':' + accession + ':' + read_id
+        output_fasta_f.write(">%s\n" % new_read_name)
+        output_fasta_f.write(sequence_data)
+        sequence_name = input_fasta_f.readline()
+        sequence_data = input_fasta_f.readline()
+    input_fasta_f.close()
+    output_fasta_f.close()
+
+def accession2taxid(read_id, accession2taxid_dict, hit_type, taxid2info_map):
+    accid_short = ((read_id.split(hit_type+':'))[1].split(":")[0]).split(".")[0]
+    taxid = accession2taxid_dict.get(accid_short, "NA")
+    species_taxid, genus_taxid, scientific_name = taxid2info_map.get(taxid, ("-1", "-2", "NA"))
+    return species_taxid
+
+def generate_taxid_fasta_from_accid(input_fasta_file, accession2taxid_path, taxid2infoPath, output_fasta_file):
+    # currently annotates with species-level taxid; other ranks to be potentially implemented in the future
+    accession2taxid_dict = shelve.open(accession2taxid_path)
+    taxid2info_map = shelve.open(taxid2infoPath)
+    input_fasta_f = open(input_fasta_file, 'rb')
+    output_fasta_f = open(output_fasta_file, 'wb')
+    sequence_name = input_fasta_f.readline()
+    sequence_data = input_fasta_f.readline()
+    while len(sequence_name) > 0 and len(sequence_data) > 0:
+        read_id = sequence_name.rstrip().lstrip('>') # example read_id: "NR::NT:CP010376.2:NB501961:14:HM7TLBGX2:1:23109:12720:8743/2"
+        nr_taxid = accession2taxid(read_id, accession2taxid_dict, 'NR', taxid2info_map)
+        nt_taxid = accession2taxid(read_id, accession2taxid_dict, 'NT', taxid2info_map)
+        new_read_name = 'nr:' + nr_taxid + ':nt:' + nt_taxid + ':' + read_id
         output_fasta_f.write(">%s\n" % new_read_name)
         output_fasta_f.write(sequence_data)
         sequence_name = input_fasta_f.readline()
@@ -650,11 +677,10 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         accession2taxid_s3_path,
         result_dir, sample_s3_output_path, False)
 
-    # run_generate_taxid_annotated_fasta_from_m8
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "generate taxid annotated fasta from m8",
         "count_reads": False})
-    run_and_log(logparams, run_generate_taxid_annotated_fasta_from_m8,
+    run_and_log(logparams, run_generate_accid_annotated_fasta_from_m8,
         sample_name, os.path.join(result_dir, GSNAPL_OUT),
         os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT3),
         os.path.join(result_dir, GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT),
@@ -714,11 +740,11 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         accession2taxid_s3_path,
         result_dir, sample_s3_output_path, False)
 
-    # run_generate_taxid_annotated_fasta_from_m8
+    # run_generate_accid_annotated_fasta_from_m8
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
-        {"title": "generate taxid annotated fasta from m8",
+        {"title": "generate accession id annotated fasta from m8",
         "count_reads": False})
-    run_and_log(logparams, run_generate_taxid_annotated_fasta_from_m8,
+    run_and_log(logparams, run_generate_accid_annotated_fasta_from_m8,
         sample_name, result_dir + '/' + RAPSEARCH2_OUT,
         result_dir + '/' + FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT,
         result_dir + '/' + GENERATE_TAXID_ANNOTATED_FASTA_FROM_RAPSEARCH2_M8_OUT,
@@ -765,6 +791,15 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
     run_and_log(logparams, run_generate_unidentified_fasta,
         sample_name, result_dir + '/' + GENERATE_TAXID_ANNOTATED_FASTA_FROM_RAPSEARCH2_M8_OUT,
         result_dir + '/' + UNIDENTIFIED_FASTA_OUT,
+        result_dir, sample_s3_output_path, False)
+
+    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+        {"title": "generate taxid annotated fasta from accid annotated fasta",
+        "count_reads": False})
+    run_and_log(logparams, run_generate_taxid_fasta_from_accid,
+        sample_name, result_dir + '/' + GENERATE_TAXID_ANNOTATED_FASTA_FROM_RAPSEARCH2_M8_OUT,
+        accession2taxid_s3_path, taxid2info_s3_path,
+        result_dir + '/' + TAXID_ANNOT_FASTA,
         result_dir, sample_s3_output_path, False)
 
 def run_star(sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
@@ -996,15 +1031,29 @@ def run_filter_deuterostomes_from_m8(sample_name, input_m8, output_m8,
     # move the output back to S3
     execute_command("aws s3 cp %s %s/" % (output_m8, sample_s3_output_path))
 
-def run_generate_taxid_annotated_fasta_from_m8(sample_name, input_m8, input_fasta,
+def run_generate_accid_annotated_fasta_from_m8(sample_name, input_m8, input_fasta,
     output_fasta, annotation_prefix, result_dir, sample_s3_output_path, lazy_run):
     if lazy_run:
         # check if output already exists
         if os.path.isfile(output_fasta):
             return 1
-    generate_taxid_annotated_fasta_from_m8(input_fasta, input_m8, output_fasta, annotation_prefix)
+    generate_accid_annotated_fasta_from_m8(input_fasta, input_m8, output_fasta, annotation_prefix)
     logging.getLogger().info("finished job")
     # move the output back to S3
+    execute_command("aws s3 cp %s %s/" % (output_fasta, sample_s3_output_path))
+
+def run_generate_taxid_fasta_from_accid(sample_name, input_fasta, accession2taxid_s3_path, taxinfodb_s3_path,
+    output_fasta, result_dir, sample_s3_output_path, lazy_run):
+    if lazy_run:
+        # check if output already exists
+        if os.path.isfile(output_fasta):
+            return 1
+    accession2taxid_gz = os.path.basename(accession2taxid_s3_path)
+    accession2taxid_path = REF_DIR + '/' + accession2taxid_gz[:-3]
+    taxoninfo_filename = os.path.basename(taxinfodb_s3_path)
+    taxoninfo_path = REF_DIR + '/' + taxoninfo_filename
+    generate_taxid_fasta_from_accid(input_fasta, accession2taxid_path, taxoninfo_path, output_fasta)
+    logging.getLogger().info("finished job")
     execute_command("aws s3 cp %s %s/" % (output_fasta, sample_s3_output_path))
 
 def run_filter_deuterostomes_from_fasta(sample_name, input_fa, output_fa,
