@@ -50,7 +50,7 @@ class PipelineOutput < ApplicationRecord
     local_output = "#{local_fasta_path}/#{TAXID_FASTA}"
     command = "mkdir -p #{local_fasta_path};"
     command += "aws s3 cp #{input_fasta_s3_path} #{local_fasta_path}/;"
-    command += "grep -A 1 -E 'NR:#{taxid}:|NT:#{taxid}:' #{local_input} | sed '/^--$/d' > #{local_output}"
+    command += "grep -A 1 -E 'nr:#{taxid}:|nt:#{taxid}:' #{local_input} | sed '/^--$/d' > #{local_output}"
     _stdout, _stderr, status = Open3.capture3(command)
     return nil unless status.exitstatus.zero?
     "#{local_output}"

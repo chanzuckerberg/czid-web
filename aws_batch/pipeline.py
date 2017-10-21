@@ -13,6 +13,7 @@ import random
 import datetime
 import gzip
 import logging
+import math
 
 INPUT_BUCKET = 's3://czbiohub-infectious-disease/UGANDA' # default to be overwritten by environment variable
 OUTPUT_BUCKET = 's3://czbiohub-idseq-samples-test/id-uganda'  # default to be overwritten by environment variable
@@ -82,6 +83,7 @@ UNIDENTIFIED_FASTA_OUT = 'unidentified.fasta'
 COMBINED_JSON_OUT = 'idseq_web_sample.json'
 LOGS_OUT_BASENAME = 'log.txt'
 STATS_OUT = 'stats.json'
+TAXID_ANNOT_FASTA = 'taxid_annot.fasta'
 
 #global statistics log
 STATS = []
@@ -135,7 +137,7 @@ def lzw_fraction(sequence):
         results.append(dictionary[word])
     return float(len(results))/len(sequence)
 
-def generate_taxid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fasta_file, annotation_prefix):
+def generate_accid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fasta_file, annotation_prefix):
     '''Tag reads based on the m8 output'''
     # Example:  generate_annotated_fasta_from_m8('filter.unmapped.merged.fasta',
     #  'bowtie.unmapped.star.gsnapl-nt-k16.m8', 'NT-filter.unmapped.merged.fasta', 'NT')
@@ -163,6 +165,29 @@ def generate_taxid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fas
         read_id = sequence_name.rstrip().lstrip('>')
         accession = read_to_accession_id.get(read_id, '')
         new_read_name = annotation_prefix + ':' + accession + ':' + read_id
+        output_fasta_f.write(">%s\n" % new_read_name)
+        output_fasta_f.write(sequence_data)
+        sequence_name = input_fasta_f.readline()
+        sequence_data = input_fasta_f.readline()
+    input_fasta_f.close()
+    output_fasta_f.close()
+
+def accession2taxid(read_id, accession2taxid_dict.get, hit_type):
+    accid_short = ((read_id.split(hit_type+':'))[1].split(":")[0]).split(".")[0]
+    taxid = accession2taxid_dict.get(accid_short, "NA")
+    return taxid
+
+def generate_taxid_fasta_from_accid(input_fasta_file, accession2taxid_path, output_fasta_file):
+    accession2taxid_dict = shelve.open(accession2taxid_path)
+    input_fasta_f = open(input_fasta_file, 'rb')
+    output_fasta_f = open(output_fasta_file, 'wb')
+    sequence_name = input_fasta_f.readline()
+    sequence_data = input_fasta_f.readline()
+    while len(sequence_name) > 0 and len(sequence_data) > 0:
+        read_id = sequence_name.rstrip().lstrip('>') # example read_id: "NR::NT:CP010376.2:NB501961:14:HM7TLBGX2:1:23109:12720:8743/2"
+        nr_taxid = accession2taxid(read_id, accession2taxid_dict.get, 'NR')
+        nt_taxid = accession2taxid(read_id, accession2taxid_dict.get, 'NT')
+        new_read_name = 'nr:' + nr_taxid + ':nt:' + nt_taxid + ':' + read_id
         output_fasta_f.write(">%s\n" % new_read_name)
         output_fasta_f.write(sequence_data)
         sequence_name = input_fasta_f.readline()
@@ -228,18 +253,36 @@ def generate_unmapped_pairs_from_sam(sam_file, output_prefix):
     output_read_2.close()
     output_merged_read.close()
 
-def generate_tax_counts_from_m8(m8_file, output_file):
+def generate_tax_counts_from_m8(m8_file, e_value_type, output_file):
     # uses m8 file with read names beginning as: "taxid<taxon ID>:"
     taxid_count_map = {}
+    taxid_percent_identity_map = {}
+    taxid_alignment_length_map = {}
+    taxid_e_value_map = {}
     with open(m8_file, 'rb') as m8f:
         for line in m8f:
             taxid = (line.split("taxid"))[1].split(":")[0]
             #"taxid9606:NB501961:14:HM7TLBGX2:1:12104:15431..."
+            percent_identity = float(line.split("\t")[2])
+            alignment_length = float(line.split("\t")[3])
+            e_value = float(line.split("\t")[10])
+            if e_value_type != 'log10':
+                e_value = math.log10(e_value)
+            #m8 format (Blast format 8): query, subject, %id, alignment length, mismatches, gap openings, query start, query end,
+            #                            subject start, subject end, E value (log10 if rapsearch2 output), bit score
+            # E value is a negative power of 10. GSNAPL outputs raw e-value, RAPSearch2 outputs log10(e-value).
+            # Whenever we use "e_value" it refers to log10(e-value), which is easier to handle.
             taxid_count_map[taxid] = taxid_count_map.get(taxid, 0) + 1
+            taxid_percent_identity_map[taxid] = taxid_percent_identity_map.get(taxid, 0) + percent_identity
+            taxid_alignment_length_map[taxid] = taxid_alignment_length_map.get(taxid, 0) + alignment_length
+            taxid_e_value_map[taxid] = taxid_e_value_map.get(taxid, 0) + e_value
     with open(output_file, 'w') as f:
-        writer = csv.writer(f)
-        for row in taxid_count_map.items():
-            writer.writerow(row)
+        for taxid in taxid_count_map.keys():
+            count = taxid_count_map[taxid]
+            avg_percent_identity = taxid_percent_identity_map[taxid] / count
+            avg_alignment_length = taxid_alignment_length_map[taxid] / count
+            avg_e_value = taxid_e_value_map[taxid] / count
+            f.write(",".join([str(taxid), str(count), str(avg_percent_identity), str(avg_alignment_length), str(avg_e_value) + '\n']))
 
 def generate_rpm_from_taxid_counts(rawReadsInputPath, taxidCountsInputPath, taxid2infoPath, speciesOutputPath, genusOutputPath):
     total_reads = subprocess.check_output("zcat %s | wc -l" % rawReadsInputPath, shell=True)
@@ -287,22 +330,38 @@ def generate_json_from_taxid_counts(sample, rawReadsInputPath, taxidCountsInputP
     genus_to_name = {}
     species_to_count = {}
     species_to_name = {}
+    species_to_percent_identity = {}
+    species_to_alignment_length = {}
+    species_to_e_value = {}
     with open(taxidCountsInputPath) as f:
         for line in f:
             tok = line.rstrip().split(",")
             taxid = tok[0]
             count = float(tok[1])
+            percent_identity = float(tok[2])
+            alignment_length = float(tok[3])
+            e_value = float(tok[4])
             species_taxid, genus_taxid, scientific_name = taxid2info_map.get(taxid, ("-1", "-2", "NA"))
             genus_to_count[genus_taxid] = genus_to_count.get(genus_taxid, 0) + count
             genus_to_name[genus_taxid]  = scientific_name.split(" ")[0]
             species_to_count[species_taxid] = species_to_count.get(species_taxid, 0) + count
             species_to_name[species_taxid] = scientific_name
+            species_to_percent_identity[species_taxid] = species_to_percent_identity.get(species_taxid, 0) + count * percent_identity
+            species_to_alignment_length[species_taxid] = species_to_alignment_length.get(species_taxid, 0) + count * alignment_length
+            species_to_e_value[species_taxid] = species_to_e_value.get(species_taxid, 0) + count * e_value
 
-    for (taxid, count) in species_to_count.iteritems():
+    for taxid in species_to_count.keys():
         species_name = species_to_name[taxid]
+        count = species_to_count[taxid]
+        avg_percent_identity = species_to_percent_identity[taxid] / count
+        avg_alignment_length = species_to_alignment_length[taxid] / count
+        avg_e_value = species_to_e_value[taxid] / count       
         taxon_counts_attributes.append({"tax_id": taxid,
                                         "tax_level": TAX_LEVEL_SPECIES,
                                         "count": count,
+                                        "percent_identity": avg_percent_identity,
+                                        "alignment_length": avg_alignment_length,
+                                        "e_value": avg_e_value,
                                         "name": species_name,
                                         "count_type": countType})
 
@@ -615,11 +674,10 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         accession2taxid_s3_path,
         result_dir, sample_s3_output_path, False)
 
-    # run_generate_taxid_annotated_fasta_from_m8
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "generate taxid annotated fasta from m8",
         "count_reads": False})
-    run_and_log(logparams, run_generate_taxid_annotated_fasta_from_m8,
+    run_and_log(logparams, run_generate_accid_annotated_fasta_from_m8,
         sample_name, os.path.join(result_dir, GSNAPL_OUT),
         os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT3),
         os.path.join(result_dir, GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT),
@@ -645,7 +703,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         os.path.join(result_dir, NT_TAXID_COUNTS_TO_JSON_OUT),
         os.path.join(result_dir, NT_TAXID_COUNTS_TO_SPECIES_RPM_OUT),
         os.path.join(result_dir, NT_TAXID_COUNTS_TO_GENUS_RPM_OUT),
-        taxid2info_s3_path, 'NT', db_sample_id,
+        taxid2info_s3_path, 'NT', 'raw', db_sample_id,
         result_dir, sample_s3_output_path, False)
 
     # run rapsearch remotely
@@ -679,11 +737,11 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         accession2taxid_s3_path,
         result_dir, sample_s3_output_path, False)
 
-    # run_generate_taxid_annotated_fasta_from_m8
+    # run_generate_accid_annotated_fasta_from_m8
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
-        {"title": "generate taxid annotated fasta from m8",
+        {"title": "generate accession id annotated fasta from m8",
         "count_reads": False})
-    run_and_log(logparams, run_generate_taxid_annotated_fasta_from_m8,
+    run_and_log(logparams, run_generate_accid_annotated_fasta_from_m8,
         sample_name, result_dir + '/' + RAPSEARCH2_OUT,
         result_dir + '/' + FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT,
         result_dir + '/' + GENERATE_TAXID_ANNOTATED_FASTA_FROM_RAPSEARCH2_M8_OUT,
@@ -709,7 +767,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         os.path.join(result_dir, NR_TAXID_COUNTS_TO_JSON_OUT),
         os.path.join(result_dir, NR_TAXID_COUNTS_TO_SPECIES_RPM_OUT),
         os.path.join(result_dir, NR_TAXID_COUNTS_TO_GENUS_RPM_OUT),
-        taxid2info_s3_path, 'NR', db_sample_id,
+        taxid2info_s3_path, 'NR', 'log10', db_sample_id,
         result_dir, sample_s3_output_path, False)
 
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
@@ -730,6 +788,14 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
     run_and_log(logparams, run_generate_unidentified_fasta,
         sample_name, result_dir + '/' + GENERATE_TAXID_ANNOTATED_FASTA_FROM_RAPSEARCH2_M8_OUT,
         result_dir + '/' + UNIDENTIFIED_FASTA_OUT,
+        result_dir, sample_s3_output_path, False)
+
+    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+        {"title": "generate taxid annotated fasta from accid annotated fasta",
+        "count_reads": False})
+    run_and_log(logparams, run_generate_taxid_fasta_from_accid,
+        sample_name, result_dir + '/' + GENERATE_TAXID_ANNOTATED_FASTA_FROM_RAPSEARCH2_M8_OUT,
+        accession2taxid_s3_path, result_dir + '/' + TAXID_ANNOT_FASTA,
         result_dir, sample_s3_output_path, False)
 
 def run_star(sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
@@ -961,15 +1027,25 @@ def run_filter_deuterostomes_from_m8(sample_name, input_m8, output_m8,
     # move the output back to S3
     execute_command("aws s3 cp %s %s/" % (output_m8, sample_s3_output_path))
 
-def run_generate_taxid_annotated_fasta_from_m8(sample_name, input_m8, input_fasta,
+def run_generate_accid_annotated_fasta_from_m8(sample_name, input_m8, input_fasta,
     output_fasta, annotation_prefix, result_dir, sample_s3_output_path, lazy_run):
     if lazy_run:
         # check if output already exists
         if os.path.isfile(output_fasta):
             return 1
-    generate_taxid_annotated_fasta_from_m8(input_fasta, input_m8, output_fasta, annotation_prefix)
+    generate_accid_annotated_fasta_from_m8(input_fasta, input_m8, output_fasta, annotation_prefix)
     logging.getLogger().info("finished job")
     # move the output back to S3
+    execute_command("aws s3 cp %s %s/" % (output_fasta, sample_s3_output_path))
+
+def run_generate_taxid_fasta_from_accid(sample_name, input_fasta, output_fasta, accession2taxid_path,
+    result_dir, sample_s3_output_path, lazy_run):
+    if lazy_run:
+        # check if output already exists
+        if os.path.isfile(output_fasta):
+            return 1
+    generate_taxid_fasta_from_accid(input_fasta, accession2taxid_path, output_fasta)
+    logging.getLogger().info("finished job")
     execute_command("aws s3 cp %s %s/" % (output_fasta, sample_s3_output_path))
 
 def run_filter_deuterostomes_from_fasta(sample_name, input_fa, output_fa,
@@ -1044,7 +1120,7 @@ def run_generate_taxid_outputs_from_m8(sample_name,
     annotated_m8, fastq_file_1,
     taxon_counts_csv_file, taxon_counts_json_file,
     taxon_species_rpm_file, taxon_genus_rpm_file,
-    taxinfodb_s3_path, count_type, db_sample_id,
+    taxinfodb_s3_path, count_type, e_value_type, db_sample_id,
     result_dir, sample_s3_output_path, lazy_run):
     # Ignore lazyrun
     # download taxoninfodb if not exist
@@ -1053,7 +1129,7 @@ def run_generate_taxid_outputs_from_m8(sample_name,
     if not os.path.isfile(taxoninfo_path):
         execute_command("aws s3 cp %s %s/" % (taxinfodb_s3_path, REF_DIR))
         logging.getLogger().info("downloaded taxon info database")
-    generate_tax_counts_from_m8(annotated_m8, taxon_counts_csv_file)
+    generate_tax_counts_from_m8(annotated_m8, e_value_type, taxon_counts_csv_file)
     logging.getLogger().info("generated taxon counts from m8")
     generate_json_from_taxid_counts(sample_name, fastq_file_1, taxon_counts_csv_file,
                                     taxoninfo_path, taxon_counts_json_file,
