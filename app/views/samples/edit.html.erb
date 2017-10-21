@@ -1,7 +1,2 @@
-<h1>Editing Sample</h1>
+<%= react_component 'SampleUpload', {selectedSample: @sample, projectInfo: @project_info, host_genomes: @host_genomes, projects: @projects, csrf: form_authenticity_token, inputFiles: @input_files }%>
 
-<%= render 'form', sample: @sample %>
-
-<%= link_to 'Show sample', @sample %> |
-<%= link_to 'See all samples', samples_path %> |
-<%= link_to 'Front portal', root_path %>

@@ -1,7 +1,7 @@
 class Login extends React.Component {
   constructor(props, context) {
     super(props, context);
-    this.csrf = this.props.csrf
+    this.csrf = props.csrf
     this.handleSubmit = this.handleSubmit.bind(this);
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
     this.clearError = this.clearError.bind(this);
@@ -17,13 +17,17 @@ class Login extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
+    this.clearError()
     if(!this.isFormInValid()) {
       this.login()
     }
   }
 
   clearError() {
-    this.setState({ showFailedLogin: false })
+    this.setState({ 
+      showFailedLogin: false,
+      success: false
+    })
   }
 
   gotoPage(path) {
@@ -90,7 +94,7 @@ class Login extends React.Component {
 
   renderLogin() {
     return (
-        <div className="form-wrapper">
+        <div className="login-form">
           <div className="row">
             <form ref="form" className="new_user" id="new_user" onSubmit={ this.handleSubmit }>
               <div className="row title">
@@ -106,12 +110,12 @@ class Login extends React.Component {
               </div> : null }
               <div className="row content-wrapper">
                 <div className="input-field">
-                  <i className="fa fa-envelope" aria-hidden="true"></i>
+                  <i className="sample fa fa-envelope" aria-hidden="true"></i>
                   <input ref= "email" type="email" className="" onFocus={ this.clearError }  />
                   <label htmlFor="user_email">Email</label>
                 </div>
                 <div className="input-field">
-                  <i className="fa fa-key" aria-hidden="true"></i>
+                  <i className="sample fa fa-key" aria-hidden="true"></i>
                   <input ref= "password" type="password" className="" onFocus={ this.clearError }   />
                   <label htmlFor="user_password">Password</label>
                 </div>

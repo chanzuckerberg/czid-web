@@ -101,13 +101,14 @@ class CreateUser extends React.Component {
         errorMessage: 'Please fill all fields'
       })
       return true;
-    } else if (this.refs.email.value === '') {
+    } else if (this.refs.password.value === '') {
       this.setState({ 
         showFailed: true,
-        errorMessage: 'Please enter email'
+        errorMessage: 'Please enter password'
       })
       return true;
-    } else if (this.refs.password_confirmation.value === '') {
+    } 
+    else if (this.refs.password_confirmation.value === '') {
       this.setState({ 
         showFailed: true,
         errorMessage: 'Please re-enter password'
@@ -206,7 +207,7 @@ class CreateUser extends React.Component {
 
   renderCreateUser() {
     return (
-      <div className="form-wrapper">
+      <div className="user-form">
           <div className="row">
             <form ref="form" className="new_user" id="new_user" onSubmit={ this.handleCreate }>
               <div className="row title">

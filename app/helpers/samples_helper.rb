@@ -1,6 +1,6 @@
 module SamplesHelper
   def host_genomes_list
-    HostGenome.all.map { |h| [h.name, h.id] }
+    HostGenome.all.map { |h| h.slice('name', 'id') }
   end
 
   def get_summary_stats(jobstats)
