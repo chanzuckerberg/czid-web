@@ -6,7 +6,7 @@ class PipelineOutput < ApplicationRecord
   has_and_belongs_to_many :backgrounds
   accepts_nested_attributes_for :taxon_counts
   accepts_nested_attributes_for :job_stats
-  baelongs_to :pipeline_run
+  belongs_to :pipeline_run
 
   ANNOTATED_FASTA = 'taxid_annot.fasta'.freeze
   TAXID_FASTA = 'hits.fasta'.freeze
