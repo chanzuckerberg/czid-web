@@ -1038,7 +1038,7 @@ def run_generate_accid_annotated_fasta_from_m8(sample_name, input_m8, input_fast
     # move the output back to S3
     execute_command("aws s3 cp %s %s/" % (output_fasta, sample_s3_output_path))
 
-def run_generate_taxid_fasta_from_accid(sample_name, input_fasta, output_fasta, accession2taxid_path,
+def run_generate_taxid_fasta_from_accid(sample_name, input_fasta, accession2taxid_path, output_fasta,
     result_dir, sample_s3_output_path, lazy_run):
     if lazy_run:
         # check if output already exists
