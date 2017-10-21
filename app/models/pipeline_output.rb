@@ -8,7 +8,7 @@ class PipelineOutput < ApplicationRecord
   accepts_nested_attributes_for :job_stats
   belongs_to :pipeline_run
 
-  ANNOTATED_FASTA = 'taxid_annot.fasta'.freeze   ### TO DO: make this file in the pipeline (annotated with taxids not accession ids)
+  ANNOTATED_FASTA = 'taxid_annot.fasta'.freeze
   TAXID_FASTA = 'hits.fasta'.freeze
   LOCAL_FASTA_PATH = '/app/tmp/results_fasta'.freeze
 
@@ -44,6 +44,7 @@ class PipelineOutput < ApplicationRecord
   end
 
   def download_taxid_fasta(taxid)
+    # currently only works with species-level taxids (ANNOTATED_FASTA is species-level)
     input_fasta_s3_path = "#{sample.sample_output_s3_path}/#{ANNOTATED_FASTA}"
     local_fasta_path = "#{LOCAL_FASTA_PATH}/#{id}/#{taxid}"
     local_input = "#{local_fasta_path}/#{ANNOTATED_FASTA}"
