@@ -3,8 +3,8 @@ require 'rails_helper'
 RSpec.describe "taxon_sequence_files/show", type: :view do
   before(:each) do
     @taxon_sequence_file = assign(:taxon_sequence_file, TaxonSequenceFile.create!(
-      :pipeline_output => nil,
-      :taxid => 2
+                                                          pipeline_output: nil,
+                                                          taxid: 2
     ))
   end
 

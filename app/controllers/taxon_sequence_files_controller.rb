@@ -63,13 +63,14 @@ class TaxonSequenceFilesController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_taxon_sequence_file
-      @taxon_sequence_file = TaxonSequenceFile.find(params[:id])
-    end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def taxon_sequence_file_params
-      params.require(:taxon_sequence_file).permit(:pipeline_output_id, :taxid)
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_taxon_sequence_file
+    @taxon_sequence_file = TaxonSequenceFile.find(params[:id])
+  end
+
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def taxon_sequence_file_params
+    params.require(:taxon_sequence_file).permit(:pipeline_output_id, :taxid)
+  end
 end

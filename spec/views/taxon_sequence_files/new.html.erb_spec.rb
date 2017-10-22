@@ -3,8 +3,8 @@ require 'rails_helper'
 RSpec.describe "taxon_sequence_files/new", type: :view do
   before(:each) do
     assign(:taxon_sequence_file, TaxonSequenceFile.new(
-      :pipeline_output => nil,
-      :taxid => 1
+                                   pipeline_output: nil,
+                                   taxid: 1
     ))
   end
 
@@ -12,7 +12,6 @@ RSpec.describe "taxon_sequence_files/new", type: :view do
     render
 
     assert_select "form[action=?][method=?]", taxon_sequence_files_path, "post" do
-
       assert_select "input[name=?]", "taxon_sequence_file[pipeline_output_id]"
 
       assert_select "input[name=?]", "taxon_sequence_file[taxid]"
