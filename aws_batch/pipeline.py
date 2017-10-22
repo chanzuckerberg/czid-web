@@ -43,6 +43,7 @@ BOWTIE2_GENOME = 's3://czbiohub-infectious-disease/references/human/bowtie2_geno
 ACCESSION2TAXID = 's3://czbiohub-infectious-disease/references/accession2taxid.db.gz'
 DEUTEROSTOME_TAXIDS = 's3://czbiohub-infectious-disease/references/lineages-2017-03-17_deuterostome_taxIDs.txt'
 TAXID_TO_INFO = 's3://czbiohub-infectious-disease/references/taxon_info.db'
+LINEAGE_SHELF = 's3://czbiohub-infectious-disease/references/taxid-lineages.db'
 
 TAX_LEVEL_SPECIES = 1
 TAX_LEVEL_GENUS = 2
@@ -172,25 +173,28 @@ def generate_accid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fas
     input_fasta_f.close()
     output_fasta_f.close()
 
-def accession2taxid(read_id, accession2taxid_dict, hit_type, taxid2info_map):
+def accession2taxid(read_id, accession2taxid_dict, hit_type, lineage_map):
     accid_short = ((read_id.split(hit_type+':'))[1].split(":")[0]).split(".")[0]
     taxid = accession2taxid_dict.get(accid_short, "NA")
-    species_taxid, genus_taxid, scientific_name = taxid2info_map.get(taxid, ("-1", "-2", "NA"))
-    return species_taxid
+    species_taxid, genus_taxid, family_taxid = lineage_map.get(taxid, ("-1", "-2", "-3"))
+    return species_taxid, genus_taxid, family_taxid
 
-def generate_taxid_fasta_from_accid(input_fasta_file, accession2taxid_path, taxid2infoPath, output_fasta_file):
+def generate_taxid_fasta_from_accid(input_fasta_file, accession2taxid_path, lineagePath, output_fasta_file):
     # currently annotates with species-level taxid; other ranks to be potentially implemented in the future
     accession2taxid_dict = shelve.open(accession2taxid_path)
-    taxid2info_map = shelve.open(taxid2infoPath)
+    lineage_map = shelve.open(lineagePath)
     input_fasta_f = open(input_fasta_file, 'rb')
     output_fasta_f = open(output_fasta_file, 'wb')
     sequence_name = input_fasta_f.readline()
     sequence_data = input_fasta_f.readline()
     while len(sequence_name) > 0 and len(sequence_data) > 0:
         read_id = sequence_name.rstrip().lstrip('>') # example read_id: "NR::NT:CP010376.2:NB501961:14:HM7TLBGX2:1:23109:12720:8743/2"
-        nr_taxid = accession2taxid(read_id, accession2taxid_dict, 'NR', taxid2info_map)
-        nt_taxid = accession2taxid(read_id, accession2taxid_dict, 'NT', taxid2info_map)
-        new_read_name = 'nr:' + nr_taxid + ':nt:' + nt_taxid + ':' + read_id
+        nr_taxid_species, nr_taxid_genus, nr_taxid_family = accession2taxid(read_id, accession2taxid_dict, 'NR', lineage_map)
+        nt_taxid_species, nt_taxid_genus, nt_taxid_family = accession2taxid(read_id, accession2taxid_dict, 'NT', lineage_map)
+        new_read_name = ('nr:' + nr_taxid_family + ':nt:' + nt_taxid_family
+                         + ':nr:' + nr_taxid_genus + ':nt:' + nt_taxid_genus
+                         + ':nr:' + nr_taxid_species + ':nt:' + nt_taxid_species
+                         + ':' + read_id)
         output_fasta_f.write(">%s\n" % new_read_name)
         output_fasta_f.write(sequence_data)
         sequence_name = input_fasta_f.readline()
@@ -540,7 +544,7 @@ def run_and_log(logparams, func_name, *args):
 def run_sample(sample_s3_input_path, sample_s3_output_path,
                star_genome_s3_path, bowtie2_genome_s3_path,
                gsnap_ssh_key_s3_path, rapsearch_ssh_key_s3_path, accession2taxid_s3_path,
-               deuterostome_list_s3_path, taxid2info_s3_path, db_sample_id,
+               deuterostome_list_s3_path, taxid2info_s3_path, lineage_s3_path, db_sample_id,
                aws_batch_job_id, lazy_run = True):
 
     sample_s3_output_path = sample_s3_output_path.rstrip('/')
@@ -798,7 +802,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         "count_reads": False})
     run_and_log(logparams, run_generate_taxid_fasta_from_accid,
         sample_name, result_dir + '/' + GENERATE_TAXID_ANNOTATED_FASTA_FROM_RAPSEARCH2_M8_OUT,
-        accession2taxid_s3_path, taxid2info_s3_path,
+        accession2taxid_s3_path, lineage_s3_path,
         result_dir + '/' + TAXID_ANNOT_FASTA,
         result_dir, sample_s3_output_path, False)
 
@@ -1042,7 +1046,7 @@ def run_generate_accid_annotated_fasta_from_m8(sample_name, input_m8, input_fast
     # move the output back to S3
     execute_command("aws s3 cp %s %s/" % (output_fasta, sample_s3_output_path))
 
-def run_generate_taxid_fasta_from_accid(sample_name, input_fasta, accession2taxid_s3_path, taxinfodb_s3_path,
+def run_generate_taxid_fasta_from_accid(sample_name, input_fasta, accession2taxid_s3_path, lineage_s3_path,
     output_fasta, result_dir, sample_s3_output_path, lazy_run):
     if lazy_run:
         # check if output already exists
@@ -1050,9 +1054,13 @@ def run_generate_taxid_fasta_from_accid(sample_name, input_fasta, accession2taxi
             return 1
     accession2taxid_gz = os.path.basename(accession2taxid_s3_path)
     accession2taxid_path = REF_DIR + '/' + accession2taxid_gz[:-3]
-    taxoninfo_filename = os.path.basename(taxinfodb_s3_path)
-    taxoninfo_path = REF_DIR + '/' + taxoninfo_filename
-    generate_taxid_fasta_from_accid(input_fasta, accession2taxid_path, taxoninfo_path, output_fasta)
+    if not os.path.isfile(accession2taxid_path):
+        execute_command("aws s3 cp %s %s/" % (accession2taxid_s3_path, REF_DIR))
+        execute_command("cd %s; gunzip %s" % (REF_DIR, accession2taxid_gz))
+        logging.getLogger().info("downloaded accession-to-taxid map")
+    lineage_filename = os.path.basename(lineage_s3_path)
+    lineage_path = REF_DIR + '/' + lineage_filename
+    generate_taxid_fasta_from_accid(input_fasta, accession2taxid_path, lineage_path, output_fasta)
     logging.getLogger().info("finished job")
     execute_command("aws s3 cp %s %s/" % (output_fasta, sample_s3_output_path))
 
@@ -1201,7 +1209,7 @@ def main():
     run_sample(sample_s3_input_path, sample_s3_output_path,
                STAR_GENOME, BOWTIE2_GENOME,
                KEY_S3_PATH, KEY_S3_PATH, ACCESSION2TAXID,
-               DEUTEROSTOME_TAXIDS, TAXID_TO_INFO, DB_SAMPLE_ID,
+               DEUTEROSTOME_TAXIDS, TAXID_TO_INFO, LINEAGE_SHELF, DB_SAMPLE_ID,
                AWS_BATCH_JOB_ID, True)
 
 if __name__=="__main__":
