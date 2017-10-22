@@ -1060,6 +1060,9 @@ def run_generate_taxid_fasta_from_accid(sample_name, input_fasta, accession2taxi
         logging.getLogger().info("downloaded accession-to-taxid map")
     lineage_filename = os.path.basename(lineage_s3_path)
     lineage_path = REF_DIR + '/' + lineage_filename
+    if not os.path.isfile(lineage_path):
+        execute_command("aws s3 cp %s %s/" % (lineage_s3_path, REF_DIR))
+        logging.getLogger().info("downloaded taxid-lineage shelf")
     generate_taxid_fasta_from_accid(input_fasta, accession2taxid_path, lineage_path, output_fasta)
     logging.getLogger().info("finished job")
     execute_command("aws s3 cp %s %s/" % (output_fasta, sample_s3_output_path))
