@@ -1,0 +1,27 @@
+<%= form_with(model: taxon_sequence_file, local: true) do |form| %>
+  <% if taxon_sequence_file.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(taxon_sequence_file.errors.count, "error") %> prohibited this taxon_sequence_file from being saved:</h2>
+
+      <ul>
+      <% taxon_sequence_file.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :pipeline_output_id %>
+    <%= form.text_field :pipeline_output_id, id: :taxon_sequence_file_pipeline_output_id %>
+  </div>
+
+  <div class="field">
+    <%= form.label :taxid %>
+    <%= form.number_field :taxid, id: :taxon_sequence_file_taxid %>
+  </div>
+
+  <div class="actions">
+    <%= form.submit %>
+  </div>
+<% end %>

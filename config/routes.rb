@@ -1,6 +1,7 @@
 require 'resque/server'
 
 Rails.application.routes.draw do
+  resources :taxon_sequence_files
   resources :backgrounds
   resources :reports
   resources :pipeline_outputs, only: [:index, :show]
