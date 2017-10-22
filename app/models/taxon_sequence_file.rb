@@ -9,7 +9,7 @@ class TaxonSequenceFile < ApplicationRecord
   end
 
   def generate_fasta
-    # currently only works with species-level taxids (ANNOTATED_FASTA is species-level)
+    # works with species/genus/family-level taxids (ANNOTATED_FASTA has those and only those)
     s3_input_folder = "#{pipeline_output.sample.sample_output_s3_path}"
     s3_input_fasta = "#{s3_input_folder}/#{ANNOTATED_FASTA}"
     local_fasta_path = "#{LOCAL_FASTA_PATH}"
