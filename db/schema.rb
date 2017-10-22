@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171022192359) do
+ActiveRecord::Schema.define(version: 20171022194232) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -229,6 +229,7 @@ ActiveRecord::Schema.define(version: 20171022192359) do
     t.integer "taxid"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "uri"
     t.index ["pipeline_output_id"], name: "index_taxon_sequence_files_on_pipeline_output_id"
   end
 

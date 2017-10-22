@@ -1,5 +1,6 @@
 class TaxonSequenceFilesController < ApplicationController
   before_action :set_taxon_sequence_file, only: [:show, :edit, :update, :destroy]
+  before_action :login_required, only: [:new, :edit, :create, :update, :destroy, :index, :show]
 
   # GET /taxon_sequence_files
   # GET /taxon_sequence_files.json
@@ -25,7 +26,7 @@ class TaxonSequenceFilesController < ApplicationController
   # POST /taxon_sequence_files.json
   def create
     @taxon_sequence_file = TaxonSequenceFile.new(taxon_sequence_file_params)
-
+    @taxon_sequence_file.uri = @taxon_sequence_file.generate_fasta
     respond_to do |format|
       if @taxon_sequence_file.save
         format.html { redirect_to @taxon_sequence_file, notice: 'Taxon sequence file was successfully created.' }

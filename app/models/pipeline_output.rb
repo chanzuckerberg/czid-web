@@ -3,14 +3,11 @@ class PipelineOutput < ApplicationRecord
   has_many :taxon_counts, dependent: :destroy
   has_many :reports, dependent: :destroy
   has_many :job_stats, dependent: :destroy
+  has_many :taxon_sequence_files, dependent: :destroy
   has_and_belongs_to_many :backgrounds
   accepts_nested_attributes_for :taxon_counts
   accepts_nested_attributes_for :job_stats
   belongs_to :pipeline_run
-
-  ANNOTATED_FASTA = 'taxid_annot.fasta'.freeze
-  TAXID_FASTA = 'hits.fasta'.freeze
-  LOCAL_FASTA_PATH = '/app/tmp/results_fasta'.freeze
 
   def name
     ['ID#', id, ' (', sample.name, ')'].join('')
@@ -47,19 +44,5 @@ class PipelineOutput < ApplicationRecord
              taxon_counts.tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}
       GROUP BY 1,2,3,4,5"
     )
-  end
-
-  def download_taxid_fasta(taxid)
-    # currently only works with species-level taxids (ANNOTATED_FASTA is species-level)
-    input_fasta_s3_path = "#{sample.sample_output_s3_path}/#{ANNOTATED_FASTA}"
-    local_fasta_path = "#{LOCAL_FASTA_PATH}/#{id}/#{taxid}"
-    local_input = "#{local_fasta_path}/#{ANNOTATED_FASTA}"
-    local_output = "#{local_fasta_path}/#{TAXID_FASTA}"
-    command = "mkdir -p #{local_fasta_path};"
-    command += "aws s3 cp #{input_fasta_s3_path} #{local_fasta_path}/;"
-    command += "grep -A 1 -E 'nr:#{taxid}:|nt:#{taxid}:' #{local_input} | sed '/^--$/d' > #{local_output}"
-    _stdout, _stderr, status = Open3.capture3(command)
-    return nil unless status.exitstatus.zero?
-    "#{local_output}"
   end
 end
