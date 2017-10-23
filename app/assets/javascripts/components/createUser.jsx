@@ -24,7 +24,7 @@ class CreateUser extends React.Component {
       isChecked: false,
       success: false,
       showFailed: false,
-      errorMessage: '',
+      errorMessage: [],
       successMessage: '',
       isChecked : false,
       email: this.selectedUser.email || '',
@@ -162,18 +162,19 @@ class CreateUser extends React.Component {
       },
       authenticity_token: this.csrf
     }).then((res) => {
+      console.log('The res is ',res);
       that.setState({
         success: true,
         successMessage: 'User created successfully'
+      }, () => {
+        // that.gotoPage('/users');
       })
-      setTimeout(() => {
-        location.href = '/';
-      }, 1000)
     })
-    .catch((err) => {
+    .catch((error) => {
+      console.log('The error is ',error.response.data);
       that.setState({
         showFailed: true,
-        errorMessage: 'Failed to create user'
+        errorMessage: error.response.data || 'Failed to create user'
       })
     })
   }
@@ -193,10 +194,9 @@ class CreateUser extends React.Component {
       that.setState({
         success: true,
         successMessage: 'User updated successfully'
+      }, () => {
+        that.gotoPage('/users');
       })
-      setTimeout(() => {
-        location.href = '/';
-      }, 1000)
     }).catch((err) => {
       that.setState({
         showFailed: true,
@@ -217,9 +217,11 @@ class CreateUser extends React.Component {
                 <i className="fa fa-success"></i>
                  <span>{this.state.successMessage}</span>
                 </div> : null }
-              { this.state.showFailed ? <div className="error-info" >
-                  <i className="fa fa-error"></i>
-                  <span>{this.state.errorMessage}</span>
+              { this.state.errorMessage.length && this.state.showFailed ? <div className="error-info" >
+                  {/* <i className="fa fa-exclamation"></i> */}
+                  { this.state.errorMessage.map((message, i) => {
+                    return <p key={i} className="center-align"> { message }</p>
+                  }) }
               </div> : null }
               <div className="row content-wrapper">
                 <div className="input-field">
@@ -257,7 +259,7 @@ class CreateUser extends React.Component {
 
   renderUpdateUser() {
     return (
-      <div className="form-wrapper">
+      <div className="user-form">
           <div className="row">
             <form ref="form" className="new_user" id="new_user" onSubmit={ this.handleUpdate }>
               <div className="row title">
@@ -309,6 +311,10 @@ class CreateUser extends React.Component {
     return (
       <div>
         { this.props.selectedUser ? this.renderUpdateUser() : this.renderCreateUser() }
+        <div className="bottom">
+          <span className="back" onClick={ this.props.selectedUser ? this.gotoPage.bind(this, '/users') : this.gotoPage.bind(this, '/') } >Back</span>|
+          <span className="home" onClick={ this.gotoPage.bind(this, '/')}>Home</span>
+        </div>
       </div>
     )
   }
