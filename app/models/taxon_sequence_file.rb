@@ -8,6 +8,10 @@ class TaxonSequenceFile < ApplicationRecord
     "output#{pipeline_output_id}_taxid#{taxid}_hits.fasta"
   end
 
+  def output_url
+    "#{pipeline_output.sample.sample_output_folder_url}/#{fasta_name}"
+  end
+
   def generate_fasta
     # works with species/genus/family-level taxids (ANNOTATED_FASTA has those and only those)
     s3_input_folder = pipeline_output.sample.sample_output_s3_path.to_s
@@ -22,6 +26,6 @@ class TaxonSequenceFile < ApplicationRecord
     command += "aws s3 cp #{local_output} #{s3_output};"
     _stdout, _stderr, status = Open3.capture3(command)
     return nil unless status.exitstatus.zero?
-    s3_output.to_s
+    output_url.to_s
   end
 end
