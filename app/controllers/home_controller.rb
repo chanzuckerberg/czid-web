@@ -3,6 +3,7 @@ class HomeController < ApplicationController
   include SamplesHelper
   def home
     @final_result = []
+    @pipeline_run_info = []
     @all_project = Project.all
     project_id = params[:project_id]
     sort = params[:sort_by]
@@ -17,14 +18,25 @@ class HomeController < ApplicationController
 
     @samples.each do |output|
       output_data = {}
+      pipeline_run_entry = {}
       pipeline_info = output.pipeline_runs.first ? output.pipeline_runs.first.pipeline_output : nil
       job_stats = output.pipeline_outputs.first ? output.pipeline_outputs.first.job_stats : nil
       summary_stats = job_stats ? get_summary_stats(job_stats) : nil
+      pipeline_run_status = output.pipeline_runs.first ? output.pipeline_runs.first.job_status : nil
 
       output_data[:pipeline_info] = pipeline_info
       output_data[:job_stats] = job_stats
       output_data[:summary_stats] = summary_stats
       @final_result.push(output_data)
+
+      pipeline_run_entry[:job_status_description] = if %w[CHECKED SUCCEEDED].include?(pipeline_run_status)
+                                                      'COMPLETE'
+                                                    elsif %w[FAILED ERROR].include?(pipeline_run_status)
+                                                      'FAILED'
+                                                    elsif %w[RUNNING LOADED].include?(pipeline_run_status)
+                                                      'IN PROGRESS'
+                                                    end
+      @pipeline_run_info.push(pipeline_run_entry)
     end
   end
 
