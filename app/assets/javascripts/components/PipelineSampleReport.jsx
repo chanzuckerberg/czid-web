@@ -62,12 +62,6 @@ class PipelineSampleReport extends React.Component {
   }
 
   componentDidMount() {
-    // temporal hack to adjust the width of the table, better to use flexbox in the future
-    if (this.view_level === 'species') {
-      $('#report-table thead tr th').css('width', '9%');
-    } else {
-       $('#report-table thead tr th').css('width', 'inherit');
-    }
     $('ul.tabs').tabs();
     $('.sort-report').dropdown();
   }
@@ -90,6 +84,31 @@ class PipelineSampleReport extends React.Component {
     this.applySort(sort_query);
   }
 
+  render_name(tax_info) {
+    foo = (tax_info.tax_id > 0)
+      ? <span className="link">
+          <a href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${
+            tax_info.tax_id}`}>{tax_info.name || tax_info.tax_id}
+          </a>
+        </span>
+      : <span>
+          {tax_info.name || 'Placeholder ' + tax_info.tax_id}
+        </span>;
+        /*
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{tax_info.genus_name || (tax_info.genus_taxid > 0 ? tax_info.genus_taxid : '-')}] <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        */
+    foo = (tax_info.tax_id == tax_info.genus_taxid) ? <b>{foo}</b> : <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{foo}</span>
+    return foo;
+  }
+
+  render_count(x) {
+    return numberWithCommas(Number(x))
+  }
+
+  render_float(x) {
+    return numberWithCommas(Number(x).toFixed(3))
+  }
+
   render() {
     return (
       <div>
@@ -109,10 +128,10 @@ class PipelineSampleReport extends React.Component {
                   <thead>
                   <tr>
                     <th>Category</th>
-                    <th>Genus</th>
-                    <th>{ (this.view_level==='species') ? 'Species' : '' }</th>
+                    <th>Taxonomy</th>
+                    <th></th>
                     <th>
-                    NT Genus Z
+                    NT Z
                     <div className='sort-controls  left'>
                       <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_genus_nt_zscore')} fa fa-caret-up sort_by=lowest_genus_nt_zscore` }></i>
                       <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_genus_nt_zscore')} fa fa-caret-down sort_by=highest_genus_nt_zscore` }></i>
@@ -120,151 +139,64 @@ class PipelineSampleReport extends React.Component {
 
                     </th>
                     <th>
-                    NT Genus rM
+                    NT rM
                      <div className='sort-controls left'>
                       <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_genus_nt_rpm')} fa fa-caret-up sort_by=lowest_genus_nt_rpm` }></i>
                       <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_genus_nt_rpm')} fa fa-caret-down sort_by=highest_genus_nt_rpm` }></i>
                     </div>
                     </th>
                     <th>
-                     NT Genus r
+                     NT r
                       <div className='sort-controls left'>
                         <i className='fa fa-caret-up'></i>
                         <i className='fa fa-caret-down'></i>
                       </div>
                     </th>
                     <th>
-                    NR Genus Z
+                    NR Z
                      <div className='sort-controls left'>
                       <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_genus_nr_zscore')} fa fa-caret-up sort_by=lowest_genus_nr_zscore` }></i>
                       <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_genus_nr_zscore')} fa fa-caret-down sort_by=highest_genus_nr_zscore` }></i>
                     </div>
                     </th>
                     <th>
-                    NR Genus rM
+                    NR rM
                      <div className='sort-controls left'>
                       <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_genus_nr_rpm')} fa fa-caret-up sort_by=lowest_genus_nr_rpm` }></i>
                       <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_genus_nr_rpm')} fa fa-caret-down sort_by=highest_genus_nr_rpm` }></i>
                     </div>
                     </th>
                     <th>
-                     NR Genus r
+                     NR r
                       <div className='sort-controls left'>
                         <i className='fa fa-caret-up'></i>
                         <i className='fa fa-caret-down'></i>
                       </div>
                     </th>
-                    {/*The Genus and Species diff*/}
-                    { (this.view_level === 'species') ?
-                    <th>
-                      NT Species Z
-                      <div className='sort-controls left'>
-                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_species_nt_zscore')} fa fa-caret-up sort_by=lowest_species_nt_zscore` }></i>
-                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_species_nt_zscore')} fa fa-caret-down sort_by=highest_species_nt_zscore` }></i>
-                      </div>
-                    </th> : '' }
-                    { (this.view_level === 'species') ?
-                    <th>
-                      NT Species rM
-                      <div className='sort-controls left'>
-                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_species_nt_rpm')} fa fa-caret-up sort_by=lowest_species_nt_rpm` }></i>
-                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_species_nt_rpm')} fa fa-caret-down sort_by=highest_species_nt_rpm` }></i>
-                      </div>
-                    </th> : '' }
-
-                    { (this.view_level === 'species') ?
-                    <th>NT Species r
-                      <div className='sort-controls left'>
-                        <i className='fa fa-caret-up'></i>
-                        <i className='fa fa-caret-down'></i>
-                      </div>
-                    </th> : '' }
-
-                    { (this.view_level === 'species') ?
-                    <th>NR Species Z
-                      <div className='sort-controls left'>
-                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_species_nr_zscore')} fa fa-caret-up sort_by=lowest_species_nr_zscore` }></i>
-                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_species_nr_zscore')} fa fa-caret-down sort_by=highest_species_nr_zscore` }></i>
-                      </div>
-                    </th> : '' }
-                    { (this.view_level === 'species') ?
-                    <th>NR Species rM
-                      <div className='sort-controls left'>
-                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_species_nr_rpm')} fa fa-caret-up sort_by=lowest_species_nr_rpm` }></i>
-                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_species_nr_rpm')} fa fa-caret-down sort_by=highest_species_nr_rpm` }></i>
-                      </div>
-                    </th> : '' }
-
-                    { (this.view_level === 'species') ?
-                    <th>NR Species r
-                      <div className='sort-controls left'>
-                        <i className='fa fa-caret-up'></i>
-                        <i className='fa fa-caret-down'></i>
-                      </div>
-                    </th> : '' }
                   </tr>
                   </thead>
                   <tbody>
-                  { this.taxonomy_details.map((taxon, i) => {
+                  { this.taxonomy_details.map((tax_info, i) => {
                     return (
                       <tr key={i}>
                         <td>
-                          {  taxon.category || '-' }
+                          {  tax_info.category_name || '-' }
                         </td>
 
                         <td>
-                          { (taxon.genus_nt_ele) ?
-                             <span className="link">
-                               <a href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${
-                                 taxon.genus_nt_ele.tax_id}`}>{ taxon.genus_nt_ele.name }
-                               </a>
-                             </span> : 'N/A'
-                          }
+                          { this.render_name(tax_info) }
                         </td>
                         <td>
-                          { (this.view_level==='species' && taxon.nt_ele) ?
-                            <span className="link">
-                              <a href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${
-                                taxon.nt_ele.tax_id}`}>{ taxon.nt_ele.name }
-                              </a>
-                            </span> : ''
-                          }
                         </td>
 
                         {/* The genus scores */}
 
-                        <td>{ (!taxon.genus_nt_ele) ? '-': numberWithCommas(Number(taxon.genus_nt_ele.zscore).toFixed(3))}</td>
-                        <td>{ (!taxon.genus_nt_ele) ? '-': numberWithCommas(Number(taxon.genus_nt_ele.rpm).toFixed(3))}</td>
-                        <td>{ (!taxon.genus_nt_ele) ? '-': numberWithCommas(taxon.genus_nt_ele.count)}</td>
-                        <td>{ (!taxon.genus_nr_ele) ? '-': numberWithCommas(Number(taxon.genus_nr_ele.zscore).toFixed(3))}</td>
-                        <td>{ (!taxon.genus_nr_ele) ? '-': numberWithCommas(Number(taxon.genus_nr_ele.rpm).toFixed(3))}</td>
-                        <td>{ (!taxon.genus_nr_ele) ? '-': numberWithCommas(taxon.genus_nr_ele.count)}</td>
- 
-                        {/*The species scores*/}
-
-                        <td>
-                          { (this.view_level=== 'species' && (taxon.nt_ele && taxon.nt_ele.hasOwnProperty('zscore'))) ? numberWithCommas(Number(taxon.nt_ele.zscore).toFixed(3)) : '' }
-                        </td>
-
-                        <td>
-                          { (this.view_level==='species' && (taxon.nt_ele && taxon.nt_ele.hasOwnProperty('rpm'))) ? numberWithCommas(Number(taxon.nt_ele.rpm).toFixed(3)) : '' }
-                        </td>
-
-                        <td>
-                          { (this.view_level==='species' && (taxon.nt_ele && taxon.nt_ele.hasOwnProperty('count')) ) ? numberWithCommas(taxon.nt_ele.count) : '' }
-                        </td>
-
-                        <td>
-                          { (this.view_level==='species' && (taxon.nr_ele && taxon.nr_ele.hasOwnProperty('zscore'))) ? numberWithCommas(Number(taxon.nr_ele.zscore).toFixed(3)) : '' }
-                        </td>
-
-                        <td>
-                          { (this.view_level==='species' && (taxon.nr_ele && taxon.nr_ele.hasOwnProperty('rpm')) ) ? numberWithCommas(Number(taxon.nr_ele.rpm).toFixed(3)) : '' }
-                        </td>
-
-                        <td>
-                          { (this.view_level==='species' && (taxon.nr_ele && taxon.nr_ele.hasOwnProperty('count')) ) ? numberWithCommas(taxon.nr_ele.count) : '' }
-                        </td>
+                        <td>{ this.render_float(tax_info.NT.zscore) }</td>
+                        <td>{ this.render_float(tax_info.NT.rpm)    }</td>
+                        <td>{ this.render_count(tax_info.NT.r)      }</td>
+                        <td>{ this.render_float(tax_info.NR.zscore) }</td>
+                        <td>{ this.render_float(tax_info.NR.rpm)    }</td>
+                        <td>{ this.render_count(tax_info.NR.r)      }</td>
 
                       </tr>
                     )

@@ -194,21 +194,23 @@ module ReportHelper
     taxon_counts_2d
   end
 
-  def negative(vec_3d)
-    x, y, z = vec_3d
-    [-x, -y, -z]
+  def negative(vec_4d)
+    x, y, z, t = vec_4d
+    [-x, -y, -z, -t]
   end
 
   def sort_key(tax_2d, tax_info, sort_by)
     # sort by (genus, species) in the chosen metric;  making sure that
     # the genus comes before its species in either sort direction
-    genus_info = tax_2d[tax_info['genus_taxid']]
+    genus_id = tax_info['genus_taxid']
+    genus_info = tax_2d[genus_id]
     sort_key_genus = genus_info[sort_by[:count_type]][sort_by[:metric]]
     if tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
       sort_key_species = tax_info[sort_by[:count_type]][sort_by[:metric]]
-      sort_key_3d = [sort_key_genus, 1, sort_key_species]
+      sort_key_3d = [sort_key_genus, genus_id, 0, sort_key_species]
     else
-      sort_key_3d = [sort_key_genus, 0, 0]
+      genus_priority = sort_by[:direction] == 'highest' ? 1 : -1
+      sort_key_3d = [sort_key_genus, genus_id, genus_priority, 0]
     end
     sort_by[:direction] == 'lowest' ? sort_key_3d : negative(sort_key_3d)
   end
@@ -223,20 +225,24 @@ module ReportHelper
 
     rows = []
     tax_2d.each do |tax_id, tax_info|
-      next unless tax_id >= 0 && tax_info['tax_level'] >= view_level_int
+      next unless tax_info['tax_level'] >= view_level_int
       tax_info[:sort_key] = sort_key(tax_2d, tax_info, sort_by)
       rows << tax_info
     end
 
     rows.sort! { |dl, dr| dl[:sort_key] <=> dr[:sort_key] }
 
+    # HACK
+    rows = rows[0...1000]
+
     rows.each do |tax_info|
       tax_info.delete(:sort_key)
+      tax_info['genus_name'] = tax_2d[tax_info['genus_taxid']]['name']
     end
 
     puts "BORIS: #{rows[0..10]}"
 
-    [data_ranges, rows[0...1000]]
+    [data_ranges, rows]
   end
 
   def decode_range_params(params, data_ranges)
