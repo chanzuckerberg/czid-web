@@ -362,7 +362,7 @@ class SampleUpload extends React.Component {
   renderUpdateForm() {
     return (
       <div className="form-wrapper">
-        <form ref="form" onSubmit={ this.handleUpdate }>
+        <form ref="form" onSubmit={ this.handleUpdate } >
           <div className="row title">
             <p className="col s6 signup">Sample Update</p>
           </div>
@@ -439,7 +439,7 @@ class SampleUpload extends React.Component {
                 </div>
             </div>
         </div>
-        <input className="hidden" type="submit"/>
+        <input className="hidden" type="submit" formAction="/samples.json"/>
         <div onClick={ this.handleUpdate } className="center login-wrapper">Submit</div>
       </form>
     </div>
@@ -449,7 +449,7 @@ class SampleUpload extends React.Component {
   renderSampleForm() {
     return (
       <div className="form-wrapper">
-        <form ref="form" onSubmit={ this.handleUpload }>
+        <form ref="form" onSubmit={ this.handleUpload } action="/samples.json">
           <div className="row title">
             <p className="col s6 signup">Sample Upload</p>
           </div>
