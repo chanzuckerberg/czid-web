@@ -4,6 +4,7 @@ class Samples extends React.Component {
     this.project = this.props.project;
     this.samples = this.props.samples;
     this.outputData = this.props.outputData
+    this.pipeline_run_info = this.props.pipeline_run_info
     this.all_project = props.all_project|| [];
     this.defaultSortBy = 'newest';
     const currentSort = SortHelper.currentSort();
@@ -22,9 +23,10 @@ class Samples extends React.Component {
     SortHelper.applySort(sort_query);
   }
 
-  renderPipelineOutput(samples, pipelineInfo) {
+  renderPipelineOutput(samples, pipelineInfo, pipeline_run_info) {
     return samples.map((sample, i) => {
       let pInfo = pipelineInfo[i];
+      let pr_info = pipeline_run_info[i];
       return (
         <tr onClick={ this.viewSample.bind(this, sample.id)} key={i}>
           <td>
@@ -36,7 +38,7 @@ class Samples extends React.Component {
           <td>{ (!pInfo.summary_stats || !pInfo.summary_stats.percent_remaining) ? 'NA' : <a href={'/samples/' + sample.id}>{pInfo.summary_stats.percent_remaining.toFixed(2)}%</a>}</td>
           <td>{ (!pInfo.summary_stats || !pInfo.summary_stats.compression_ratio) ? 'NA' : <a href={'/samples/' + sample.id}>{pInfo.summary_stats.compression_ratio.toFixed(2)}</a>}</td>
           <td>{ (!pInfo.summary_stats || !pInfo.summary_stats.qc_percent) ? 'NA' : <a href={'/samples/' + sample.id}>{pInfo.summary_stats.qc_percent.toFixed(2)}%</a>}</td>
-          <td>{ !pInfo.pipeline_info ? 'Pending' : <a href={'/samples/' + sample.id}>Created</a>}</td>
+          <td>{ !pr_info.job_status_description ? '' : <a href={'/samples/' + sample.id}>{pr_info.job_status_description}</a>}</td>
         </tr>
       )
     })
@@ -56,7 +58,7 @@ class Samples extends React.Component {
     }
   }
 
-  renderTable(samples, pipelineInfo) {
+  renderTable(samples, pipelineInfo, pipeline_run_info) {
     return (
     <div className="content-wrapper">
       <div className="container sample-container">
@@ -79,7 +81,7 @@ class Samples extends React.Component {
             </tr>
             </thead>
               <tbody>
-                {this.renderPipelineOutput(samples, pipelineInfo)}
+                {this.renderPipelineOutput(samples, pipelineInfo, pipeline_run_info)}
               </tbody>
           </table>
       </div>
@@ -138,7 +140,7 @@ class Samples extends React.Component {
             </div>
           </div>
         </div>
-          {!this.samples.length && !this.outputData.length ? <div className="no-data"><i className="fa fa-frown-o" aria-hidden="true"> No data to display</i></div> : this.renderTable(this.samples, this.outputData)}
+          {!this.samples.length && !this.outputData.length ? <div className="no-data"><i className="fa fa-frown-o" aria-hidden="true"> No data to display</i></div> : this.renderTable(this.samples, this.outputData, this.pipeline_run_info)}
       </div>
     )
   }
