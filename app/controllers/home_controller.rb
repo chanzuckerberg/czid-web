@@ -35,6 +35,8 @@ class HomeController < ApplicationController
                                                       'FAILED'
                                                     elsif %w[RUNNING LOADED].include?(pipeline_run_status)
                                                       'IN PROGRESS'
+                                                    else
+                                                      ''
                                                     end
       @pipeline_run_info.push(pipeline_run_entry)
     end
