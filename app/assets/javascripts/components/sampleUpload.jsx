@@ -130,7 +130,7 @@ class SampleUpload extends React.Component {
     .catch((error) => {
       that.setState({
         invalid: true,
-        errorMessage: 'Project exists already or is invalid',
+        errorMessage: 'Project exists already or is invalid'
       })
     });
   }
