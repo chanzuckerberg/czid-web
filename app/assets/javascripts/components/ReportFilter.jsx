@@ -46,13 +46,17 @@ class ReportFilter extends React.Component {
       (species_nt_rpm_threshold.split(',').length > 1) ? species_nt_rpm_threshold.split(',')[1] :
         this.highest_species_nt_rpm;
     const checked_categories = this.checked_categories;
+    const genus_info = props.genus_info || {query: '', tax_id: ''};
+    const genus_query = genus_info['query'];
+    const genus_tax_id = genus_info['tax_id'];
 
-    this.state = { species_nt_zscore_start, species_nt_zscore_end, species_nt_rpm_start, species_nt_rpm_end, view_level, checked_categories};
+    this.state = { species_nt_zscore_start, species_nt_zscore_end, species_nt_rpm_start, species_nt_rpm_end, view_level, checked_categories, genus_query, genus_tax_id};
 
     this.applyFilter = this.applyFilter.bind(this);
     this.selectViewLevel = this.selectViewLevel.bind(this);
     this.updateThreshold = this.updateThreshold.bind(this);
     this.selectCategory = this.selectCategory.bind(this);
+    this.searchGenus = this.searchGenus.bind(this);
   }
 
   applyFilter() {
@@ -83,6 +87,14 @@ class ReportFilter extends React.Component {
     this.setState({
       view_level: event.target.value
     });
+  }
+
+  searchGenus(value, item) {
+    this.setState({
+      genus_query: value,
+      genus_tax_id: item.tax_id
+    });
+    console.log(item);
   }
 
   selectCategory(e) {
@@ -234,6 +246,33 @@ class ReportFilter extends React.Component {
                     </p>
                   </div>
                 </div>
+               <div className="filter-controls">
+                  <div className="filter-title">
+                    GENUS SEARCH
+                  </div>
+                  <div className="filter-values">
+					<ReactAutocomplete
+					  items={[
+						{ tax_id: 13579, name: 'Culex' },
+						{ tax_id: 13571, name: 'Dulex' },
+						{ tax_id: 13573, name: 'Mulex' }
+					  ]}
+                      shouldItemRender={(item, value) => item.name.toLowerCase().indexOf(value.toLowerCase()) > -1}
+					  getItemValue={item => item.name}
+					  renderItem={(item, highlighted) =>
+						<div
+						  key={item.tax_id}
+						  style={{ backgroundColor: highlighted ? '#eee' : 'transparent'}}
+						>
+						  {item.name}
+						</div>
+					  }
+					  value={this.state.genus_query}
+                      onChange={(e) => this.setState({genus_query: e.target.value})}
+					  onSelect={this.searchGenus}
+					/>
+                  </div>
+               </div>
 
                 <div className="filter-controls">
                   <div className="filter-title">

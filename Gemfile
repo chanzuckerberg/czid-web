@@ -38,6 +38,7 @@ gem "libhoney"
 gem 'rails', '~> 5.1.2'
 gem 'rake'
 gem 'react-rails', '~> 2.3.0'
+gem 'react-autocomplete-rails'
 # Worker/Scheduler management
 gem 'resque'
 gem 'resque-lock'
