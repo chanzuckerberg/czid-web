@@ -24,9 +24,10 @@ class CreateUser extends React.Component {
       isChecked: false,
       success: false,
       showFailed: false,
-      errorMessage: [],
+      errorMessage: '',
       successMessage: '',
       isChecked : false,
+      serverErrors: [],
       email: this.selectedUser.email || '',
       password: this.selectedUser.password || '',
       pConfirm: this.selectedUser.password_confirmation || '',
@@ -162,19 +163,17 @@ class CreateUser extends React.Component {
       },
       authenticity_token: this.csrf
     }).then((res) => {
-      console.log('The res is ',res);
       that.setState({
         success: true,
         successMessage: 'User created successfully'
       }, () => {
-        // that.gotoPage('/users');
+        that.gotoPage('/users');
       })
     })
-    .catch((error) => {
-      console.log('The error is ',error.response.data);
+    .catch((err) => {
       that.setState({
         showFailed: true,
-        errorMessage: error.response.data || 'Failed to create user'
+        serverErrors: err.response.data
       })
     })
   }
@@ -200,7 +199,7 @@ class CreateUser extends React.Component {
     }).catch((err) => {
       that.setState({
         showFailed: true,
-        errorMessage: 'Failed to update user'
+        serverErrors: err.response.data
       })
     })
   }
@@ -217,12 +216,11 @@ class CreateUser extends React.Component {
                 <i className="fa fa-success"></i>
                  <span>{this.state.successMessage}</span>
                 </div> : null }
-              { this.state.errorMessage.length && this.state.showFailed ? <div className="error-info" >
-                  {/* <i className="fa fa-exclamation"></i> */}
-                  { this.state.errorMessage.map((message, i) => {
-                    return <p key={i} className="center-align"> { message }</p>
-                  }) }
-              </div> : null }
+                <div className={this.state.showFailed ? 'error-info' : ''} >{ this.state.serverErrors.length && this.state.showFailed ? this.state.serverErrors.map((err, i) => {
+                  return <p className="error center-align" key={i}> {err} </p>
+                    }) : this.state.showFailed ? 
+                  <span>{this.state.errorMessage}</span>
+              : null }</div>
               <div className="row content-wrapper">
                 <div className="input-field">
                   <i className="fa fa-envelope" aria-hidden="true"></i>
@@ -269,10 +267,11 @@ class CreateUser extends React.Component {
                 <i className="fa fa-success"></i>
                  <span>{this.state.successMessage}</span>
                 </div> : null }
-              { this.state.showFailed ? <div className="error-info" >
-                  <i className="fa fa-error"></i>
+              <div className={this.state.showFailed ? 'error-info' : ''} >{ this.state.serverErrors.length && this.state.showFailed ? this.state.serverErrors.map((err, i) => {
+                  return <p className="error center-align" key={i}> {err} </p>
+                    }) : this.state.showFailed ? 
                   <span>{this.state.errorMessage}</span>
-              </div> : null }
+              : null }</div>
               <div className="row content-wrapper">
                 <div className="input-field">
                   <i className="fa fa-envelope" aria-hidden="true"></i>

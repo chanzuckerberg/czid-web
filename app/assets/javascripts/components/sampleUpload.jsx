@@ -130,13 +130,13 @@ class SampleUpload extends React.Component {
     .catch((error) => {
       that.setState({
         invalid: true,
-        errorMessage: 'Project exists already or is invalid'
+        errorMessage: 'Project exists already or is invalid',
       })
     });
   }
 
   isProjectInvalid() {
-    if (this.refs.new_project.value === '') {
+    if (this.refs.new_project.value === '' && this.state.project === 'Select a project') {
       this.setState({
         invalid: true,
         errorMessage: 'Please enter valid project name'
@@ -180,7 +180,6 @@ class SampleUpload extends React.Component {
      })
     });
   }
-
 
 
   updateSample() {
