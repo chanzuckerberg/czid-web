@@ -16,6 +16,7 @@ class ReportsController < ApplicationController
     @view_level_int = view_level_name2int(@view_level)
     @highest_tax_counts, @taxonomy_details = taxonomy_details(@report, params, @view_level)
     @all_categories = all_categories
+    @pipeline_output = @report.pipeline_output
   end
 
   # GET /reports/new

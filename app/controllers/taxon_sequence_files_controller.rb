@@ -30,7 +30,7 @@ class TaxonSequenceFilesController < ApplicationController
     respond_to do |format|
       if @taxon_sequence_file.save
         format.html { redirect_to @taxon_sequence_file, notice: 'Taxon sequence file was successfully created.' }
-        format.json { render :show, status: :created, location: @taxon_sequence_file }
+        format.json { render :show, status: :created, location: @taxon_sequence_file, uri: @taxon_sequence_file.uri }
       else
         format.html { render :new }
         format.json { render json: @taxon_sequence_file.errors, status: :unprocessable_entity }

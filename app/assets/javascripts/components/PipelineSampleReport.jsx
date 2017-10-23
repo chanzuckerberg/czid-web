@@ -6,6 +6,7 @@ class PipelineSampleReport extends React.Component {
     this.taxonomy_details = props.taxonomy_details;
     this.all_categories = props.all_categories || [];
     this.checked_categories = props.checked_categories || props.all_categories
+    this.pipeline_output_id = props.pipeline_output_id;
 
     this.view_level = ReportFilter.getFilter('view_level') || 'species';
     this.highest_tax_counts = props.highest_tax_counts;
@@ -17,6 +18,7 @@ class PipelineSampleReport extends React.Component {
     };
     this.applySort = this.applySort.bind(this);
     this.columnSorting = this.columnSorting.bind(this);
+    this.createTaxonSequenceFile = this.createTaxonSequenceFile.bind(this)
   }
 
   static uppCaseFirst(name) {
@@ -88,6 +90,20 @@ class PipelineSampleReport extends React.Component {
     const pos = className.indexOf('sort_by');
     const sort_query = className.substr(pos);
     this.applySort(sort_query);
+  }
+
+  createTaxonSequenceFile(pipeline_output_id, taxid) {
+    var that = this;
+    console.log(pipeline_output_id)
+    axios.post('/taxon_sequence_files.json', {
+      taxon_sequence_file: {
+        pipeline_output_id: pipeline_output_id,
+        taxid: taxid
+      }
+    })
+    .then((res) => {
+      window.location = res.uri
+    })
   }
 
   render() {
@@ -262,7 +278,7 @@ class PipelineSampleReport extends React.Component {
                           {  taxon.category || '-' }
                         </td>
 
-                        <td>
+                        <td onClick={()=>this.createTaxonSequenceFile(this.pipeline_output_id, taxon.genus_nt_ele.tax_id)} >
                           { (taxon.genus_nt_ele) ?
                              <span className="link">
                                <a href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${
@@ -271,7 +287,7 @@ class PipelineSampleReport extends React.Component {
                              </span> : 'N/A'
                           }
                         </td>
-                        <td>
+                        <td onClick={()=>this.createTaxonSequenceFile(this.pipeline_output_id, taxon.nt_ele.tax_id)} >
                           { (this.view_level==='species' && taxon.nt_ele) ?
                             <span className="link">
                               <a href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${
