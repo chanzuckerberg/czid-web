@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171020011902) do
+ActiveRecord::Schema.define(version: 20171024005841) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -93,6 +93,22 @@ ActiveRecord::Schema.define(version: 20171020011902) do
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
   end
 
+  create_table "postprocess_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "job_id"
+    t.text "command"
+    t.string "command_stdout"
+    t.text "command_error"
+    t.string "command_status"
+    t.bigint "sample_id"
+    t.string "job_status"
+    t.text "job_description"
+    t.string "job_log_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["job_status"], name: "index_postprocess_runs_on_job_status"
+    t.index ["sample_id"], name: "index_postprocess_runs_on_sample_id"
+  end
+
   create_table "projects", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name", collation: "latin1_swedish_ci"
     t.datetime "created_at", null: false
@@ -138,6 +154,13 @@ ActiveRecord::Schema.define(version: 20171020011902) do
     t.string "job_queue"
     t.bigint "host_genome_id"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
+  end
+
+  create_table "sequence_locators", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.bigint "pipeline_output_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pipeline_output_id"], name: "index_sequence_locators_on_pipeline_output_id"
   end
 
   create_table "taxon_categories", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -224,6 +247,15 @@ ActiveRecord::Schema.define(version: 20171020011902) do
     t.index ["taxid"], name: "index_taxon_names_on_taxid", unique: true
   end
 
+  create_table "taxon_sequence_files", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.bigint "pipeline_output_id"
+    t.integer "taxid"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "uri"
+    t.index ["pipeline_output_id"], name: "index_taxon_sequence_files_on_pipeline_output_id"
+  end
+
   create_table "taxon_summaries", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "background_id"
     t.integer "tax_id"
@@ -277,9 +309,12 @@ ActiveRecord::Schema.define(version: 20171020011902) do
   add_foreign_key "job_stats", "pipeline_outputs"
   add_foreign_key "pipeline_outputs", "samples"
   add_foreign_key "pipeline_runs", "samples"
+  add_foreign_key "postprocess_runs", "samples"
   add_foreign_key "reports", "backgrounds"
   add_foreign_key "reports", "pipeline_outputs"
+  add_foreign_key "sequence_locators", "pipeline_outputs"
   add_foreign_key "taxon_counts", "pipeline_outputs"
+  add_foreign_key "taxon_sequence_files", "pipeline_outputs"
   add_foreign_key "taxon_summaries", "backgrounds"
   add_foreign_key "taxon_zscores", "reports"
 end

@@ -1,0 +1,14 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Pipeline output:</strong>
+  <%= @taxon_sequence_file.pipeline_output %>
+</p>
+
+<p>
+  <strong>Taxid:</strong>
+  <%= @taxon_sequence_file.taxid %>
+</p>
+
+<%= link_to 'Edit', edit_taxon_sequence_file_path(@taxon_sequence_file) %> |
+<%= link_to 'Back', taxon_sequence_files_path %>
