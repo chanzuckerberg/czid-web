@@ -17,6 +17,8 @@ module ReportHelper
   # the fake genus IDs start here:
   FAKE_GENUS_BASE = -1900000000
 
+  DECIMALS = 1
+
 
   def external_report_info(report, view_level, params)
     data = {}
@@ -131,7 +133,7 @@ module ReportHelper
       'count_type' => taxon['count_type']
     }
     METRICS.each do |metric|
-      metric_props[metric] = taxon[metric]
+      metric_props[metric] = taxon[metric].round(DECIMALS)
     end
     metric_props
   end

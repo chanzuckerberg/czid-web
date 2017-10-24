@@ -93,23 +93,14 @@ class PipelineSampleReport extends React.Component {
     return foo;
   }
 
-  render_number(x, sort_by, column, is_blank) {
+  render_number(x, emphasize) {
+    const is_blank = (x == 0) || (x == -100);
     y = numberWithCommas(x);
-    if (sort_by == column) {
+    if (emphasize) {
       y = <b>{y}</b>;
     }
     className = is_blank ? 'report-number-blank' : 'report-number';
     return ( <td className={className}>{y}</td> );
-  }
-
-  render_count(x, sort_by, column) {
-    const is_blank = (x == 0);
-    return this.render_number(Number(x), sort_by, column, is_blank);
-  }
-
-  render_float(x, sort_by, column) {
-    const is_blank = (x == 0.0) || (x == -100.0);
-    return this.render_number(Number(x).toFixed(1), sort_by, column, is_blank);
   }
 
   render_sort_arrow(column, sort_column, sort_direction, arrow_direction) {
@@ -122,7 +113,7 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
-  render_column_header(column_visible_name, column_name) {
+  render_column_header(visible_type, visible_metric, column_name) {
     var sort_column = this.sort_column();
     var style = { 'textAlign': 'right' };
     return (
@@ -130,7 +121,7 @@ class PipelineSampleReport extends React.Component {
         <div className='sort-controls right'>
           {this.render_sort_arrow(column_name, sort_column, 'lowest', 'up')}
           {this.render_sort_arrow(column_name, sort_column, 'highest', 'down')}
-          {column_visible_name}
+          {visible_type}&nbsp;{visible_metric}
         </div>
       </th>
     );
@@ -148,7 +139,9 @@ class PipelineSampleReport extends React.Component {
     const sort_column = this.sort_column()
     const parts = sort_column.split("_")
     const sort_by = parts[1] + "_" + parts[2];
-    return (
+    console.log("Start table render.");
+    var t0 = Date.now();
+    result = (
       <div>
         <div id="reports" className="reports-screen tab-screen col s12">
           <div className="tab-screen-content">
@@ -168,12 +161,12 @@ class PipelineSampleReport extends React.Component {
                     <th>Category</th>
                     <th></th>
                     <th>Taxonomy</th>
-                    { this.render_column_header('NT Z',   'nt_zscore') }
-                    { this.render_column_header('NT rPM', 'nt_rpm')    }
-                    { this.render_column_header('NT r',   'nt_r')      }
-                    { this.render_column_header('NR Z',   'nr_zscore') }
-                    { this.render_column_header('NR rPM', 'nr_rpm')    }
-                    { this.render_column_header('NR r',   'nr_r')      }
+                    { this.render_column_header('NT', 'Z',   'nt_zscore') }
+                    { this.render_column_header('NT', 'rPM', 'nt_rpm')    }
+                    { this.render_column_header('NT', 'r',   'nt_r')      }
+                    { this.render_column_header('NR', 'Z',   'nr_zscore') }
+                    { this.render_column_header('NR', 'rPM', 'nr_rpm')    }
+                    { this.render_column_header('NR', 'r',   'nr_r')      }
                   </tr>
                   </thead>
                   <tbody>
@@ -188,12 +181,12 @@ class PipelineSampleReport extends React.Component {
                         <td>
                           { this.render_name(tax_info) }
                         </td>
-                        { this.render_float(tax_info.NT.zscore, sort_by, 'nt_zscore') }
-                        { this.render_float(tax_info.NT.rpm, sort_by, 'nt_rpm')       }
-                        { this.render_count(tax_info.NT.r, sort_by, 'nt_r')           }
-                        { this.render_float(tax_info.NR.zscore, sort_by, 'nr_zscore') }
-                        { this.render_float(tax_info.NR.rpm, sort_by, 'nr_rpm')       }
-                        { this.render_count(tax_info.NR.r, sort_by, 'nr_r')           }
+                        { this.render_number(tax_info.NT.zscore, sort_by == 'nt_zscore') }
+                        { this.render_number(tax_info.NT.rpm, sort_by == 'nt_rpm')       }
+                        { this.render_number(tax_info.NT.r, sort_by == 'nt_r')           }
+                        { this.render_number(tax_info.NR.zscore, sort_by == 'nr_zscore') }
+                        { this.render_number(tax_info.NR.rpm, sort_by == 'nr_rpm')       }
+                        { this.render_number(tax_info.NR.r, sort_by == 'nr_r')           }
                       </tr>
                     )
                   })}
@@ -204,6 +197,9 @@ class PipelineSampleReport extends React.Component {
           </div>
         </div>
       </div>
-    )
+    );
+    t1 = Date.now();
+    console.log(`End table render after ${t1 - t0} milliseconds.`);
+    return result;
   }
 }
