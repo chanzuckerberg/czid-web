@@ -99,27 +99,27 @@ class PipelineSampleReport extends React.Component {
   }
 
   render_count(x) {
-    var style = { 'text-align': 'right' };
+    var style = { 'textAlign': 'right' };
     return ( <td style={style}>{ numberWithCommas(Number(x)) }</td> )
   }
 
   render_float(x) {
-    var style = {'text-align': 'right'};
+    var style = {'textAlign': 'right'};
     return ( <td style={style}>{ numberWithCommas(Number(x).toFixed(1)) }</td> );
   }
 
   render_column_header(column_name, column_sort_name) {
+    var style = { 'textAlign': 'right' };
     return (
-      <th>
-        {column_name}
-        <br/>
-        <div className='sort-controls left'>
+      <th style={style}>
+        <div className='sort-controls right'>
           <i onClick={ this.columnSorting }
              className={ `${this.getActiveSort('lowest_' + column_sort_name) } fa fa-caret-up sort_by=${'lowest_' + column_sort_name}` }>
           </i>
           <i onClick={ this.columnSorting }
              className={ `${this.getActiveSort('highest_' + column_sort_name) } fa fa-caret-down sort_by=${'highest_' + column_sort_name}` }>
           </i>
+          {column_name}
         </div>
       </th>
     );

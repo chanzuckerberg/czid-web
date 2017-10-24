@@ -193,7 +193,8 @@
     display: block;
     line-height: 13px;
     position: relative;
-    top: -2px;
+    top: -5px;
+    bottom: 1px;
 
     &:hover, &.active {
       color: #09c;
