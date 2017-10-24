@@ -267,18 +267,18 @@ class ReportFilter extends React.Component {
                   <div className="filter-values">
 					<ReactAutocomplete
                       inputProps={{ placeholder: 'Genus name here' }}
-					  items={this.state.genus_list}
+                      items={this.state.genus_list}
                       shouldItemRender={(item, value) => item.name.toLowerCase().indexOf(value.toLowerCase()) > -1}
-					  getItemValue={item => item.name}
-					  renderItem={(item, highlighted) =>
-						<div
-						  key={item.tax_id}
-						  style={{ backgroundColor: highlighted ? '#eee' : 'transparent'}}
-						>
-						  {item.name}
-						</div>
-					  }
-					  value={this.state.genus_query}
+                      getItemValue={item => item.name}
+                      renderItem={(item, highlighted) =>
+                        <div
+                          key={item.tax_id}
+                          style={{ backgroundColor: highlighted ? '#eee' : 'transparent'}}
+                        >
+                          {item.name}
+                        </div>
+                      }
+                      value={this.state.genus_query}
                       onChange={(e) => this.setState({genus_query: e.target.value, genus_tax_id: 0 })}
 					  onSelect={this.searchGenus}
 					/>
