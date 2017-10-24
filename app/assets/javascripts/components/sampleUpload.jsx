@@ -216,7 +216,7 @@ class SampleUpload extends React.Component {
   }
 
   filePathValid(str) {
-    var regexPrefix = /^s3:\/\//;
+    var regexPrefix = /s3:\/\//;
     var regexSuffix = /(\.fastq.gz)/igm;
     if (str.match(regexPrefix) && str.match(regexSuffix)) {
       return true;
@@ -297,13 +297,13 @@ class SampleUpload extends React.Component {
     } else if ( !this.filePathValid(this.refs.first_file_source.value)) {
         this.setState({
           invalid: true,
-          errorMessage: 'Please fill in a valid file path for Read 1'
+          errorMessage: 'Please fill in a valid file path for Read 1, Sample format for path can be found below'
         })
         return true;
     } else if ( !this.filePathValid(this.refs.second_file_source.value)) {
       this.setState({
         invalid: true,
-        errorMessage: 'Please fill in a valid file path for Read 2'
+        errorMessage: 'Please fill in a valid file path for Read 2, Sample format for path can be found below'
       })
       return true;
     }
