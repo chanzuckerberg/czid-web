@@ -99,4 +99,3 @@ class PipelineOutput < ApplicationRecord
     pr.save
   end
 end
-end

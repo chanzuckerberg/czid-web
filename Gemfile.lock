@@ -46,6 +46,8 @@ GEM
     arel (8.0.0)
     ast (2.3.0)
     aws-partitions (1.24.0)
+    aws-sdk (3.0.1)
+      aws-sdk-resources (~> 3)
     aws-sdk-acm (1.0.0)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
@@ -765,6 +767,7 @@ PLATFORMS
 DEPENDENCIES
   airbrake (~> 7.0)
   airbrake-ruby
+  aws-sdk
   aws-sdk-ecs
   aws-sdk-resources
   axios_rails
