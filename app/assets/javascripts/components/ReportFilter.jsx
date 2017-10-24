@@ -47,7 +47,15 @@ class ReportFilter extends React.Component {
         this.highest_species_nt_rpm;
     const checked_categories = this.checked_categories;
 
-    this.state = { species_nt_zscore_start, species_nt_zscore_end, species_nt_rpm_start, species_nt_rpm_end, view_level, checked_categories};
+    this.state = {
+      species_nt_zscore_start: parseFloat(species_nt_zscore_start),
+      species_nt_zscore_end: parseFloat(species_nt_zscore_end),
+      species_nt_rpm_start: parseFloat(species_nt_rpm_start),
+      species_nt_rpm_end: parseFloat(species_nt_rpm_end),
+      view_level,
+      checked_categories,
+      category_changed: false
+    };
 
     this.applyFilter = this.applyFilter.bind(this);
     this.selectViewLevel = this.selectViewLevel.bind(this);
@@ -87,22 +95,22 @@ class ReportFilter extends React.Component {
 
   selectCategory(e) {
     // current array of options
-    const options = this.state.checked_categories
+    const options = this.state.checked_categories;
 
-    let index
+    let index;
 
     // check if the check box is checked or unchecked
     if (e.target.checked) {
       // add the numerical value of the checkbox to options array
-      options.push(+e.target.value)
+      options.push(+e.target.value);
     } else {
       // or remove the value from the unchecked checkbox from the array
-      index = options.indexOf(+e.target.value)
-      options.splice(index, 1)
+      index = options.indexOf(+e.target.value);
+      options.splice(index, 1);
     }
 
     // update the state with the new array of options
-    this.setState({ checked_categories: options })
+    this.setState({ checked_categories: options, category_changed: true });
 
   }
 
@@ -175,6 +183,28 @@ class ReportFilter extends React.Component {
       });
     }
   }
+
+  /**
+    * @method componentDidUpdate
+    * @param {Object} prevProps
+    * @param {Object} prevState
+    * @desc this methods gets called when the component is updated
+    * @return {Boolean} always allow the component to reflect new state values
+  */
+  componentDidUpdate(prevProps, prevState) {
+    const prev = JSON.stringify(prevState);
+    const next = JSON.stringify(this.state);
+    if (prev !== next) {
+      // filters were modified
+      $('.apply-filter-button button').removeClass('disabled');
+      $('.apply-filter-button button').addClass('blue');
+    } else {
+      $('.apply-filter-button button').addClass('disabled');
+      $('.apply-filter-button button').removeClass('blue');
+    }
+    return true;
+  }
+
   render() {
     return (
       <div className="reports-sidebar">
@@ -279,10 +309,10 @@ class ReportFilter extends React.Component {
                   </div>
                 </div>
                 <div className="apply-filter-button center-align">
-                  <a onClick={this.applyFilter}
-                     className="btn btn-flat waves-effect grey text-grey text-lighten-5 waves-light apply-filter-button">
+                  <button onClick={this.applyFilter}
+                     className="disabled btn btn-flat waves-effect text-grey text-lighten-5 waves-light apply-filter-button">
                     Apply filter
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>
