@@ -7,11 +7,15 @@ class Sample < ApplicationRecord
   STATUS_UPLOADED = 'uploaded'.freeze
   STATUS_RERUN    = 'need_rerun'.freeze
   STATUS_CHECKED  = 'checked'.freeze # status regarding pipeline kickoff is checked
+  STATUS_POSTPROCESS = 'need_postprocess'.freeze
+  STATUS_CHECKED_POSTPROCESS = 'checked_postprocess'.freeze
   HIT_FASTA_BASENAME = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.fasta'.freeze
   UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fasta'.freeze
   LOG_BASENAME = 'log.txt'.freeze
   DEFAULT_MEMORY = 64_000
   DEFAULT_QUEUE = 'aegea_batch_ondemand'.freeze
+  DEFAULT_POSTPROCESS_MEMORY = 8_000
+  DEFAULT_POSTPROCESS_QUEUE = 'aegea_batch_ondemand'.freeze
 
   belongs_to :project
   belongs_to :host_genome, optional: true
@@ -23,7 +27,7 @@ class Sample < ApplicationRecord
   validate :input_files_checks
   after_create :initiate_input_file_upload
 
-  before_save :check_host_genome, :check_status
+  before_save :check_host_genome, :check_status, :check_postprocess_status
 
   def sample_path
     File.join('samples', project.id.to_s, id.to_s)
@@ -157,6 +161,50 @@ class Sample < ApplicationRecord
       pr.job_id = output['jobId']
     else
       pr.job_status = PipelineRun::STATUS_FAILED
+    end
+    pr.save
+  end
+
+  def check_postprocess_status
+    return unless status == STATUS_POSTPROCESS
+    self.status = STATUS_CHECKED_POSTPROCESS
+    kickoff_postprocess_pipeline(false)
+  end
+
+  def postprocess_command
+    script_name = File.basename(IdSeqPostprocess::S3_SCRIPT_LOC)
+    batch_command_env_variables = "RESULTS_BUCKET=#{sample_input_s3_path} DB_SAMPLE_ID=#{id} "
+    batch_command = "aws s3 cp #{IdSeqPostprocese::S3_SCRIPT_LOC} .; chmod 755 #{script_name}; " +
+                    batch_command_env_variables + "./#{script_name}"
+    command = "aegea batch submit --command=\"#{batch_command}\" "
+    memory = DEFAULT_POSTPROCESS_MEMORY
+    queue = DEFAULT_POSTPROCESS_QUEUE
+    command += " --storage /mnt=1500 --ecr-image idseq --memory #{memory} --queue #{queue} --vcpus 16"
+    command
+  end
+
+  def kickoff_postprocess_pipeline(dry_run = true)
+    # only kickoff pipeline when no active postprocess_run running
+    return unless postprocess_runs.in_progress.empty?
+
+    command = postprocess_command
+    if dry_run
+      Rails.logger.debug(command)
+      return command
+    end
+
+    stdout, stderr, status = Open3.capture3(command)
+    pr = PostprocessRun.new
+    pr.sample = self
+    pr.command = command
+    pr.command_stdout = stdout
+    pr.command_error = stderr
+    pr.command_status = status.to_s
+    if status.exitstatus.zero?
+      output = JSON.parse(pr.command_stdout)
+      pr.job_id = output['jobId']
+    else
+      pr.job_status = PostprocessRun::STATUS_FAILED
     end
     pr.save
   end

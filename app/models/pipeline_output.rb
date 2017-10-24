@@ -5,6 +5,7 @@ class PipelineOutput < ApplicationRecord
   has_many :job_stats, dependent: :destroy
   has_many :taxon_sequence_files, dependent: :destroy
   has_and_belongs_to_many :backgrounds
+  has_one :sequence_locator, dependent: :destroy
   accepts_nested_attributes_for :taxon_counts
   accepts_nested_attributes_for :job_stats
   belongs_to :pipeline_run
