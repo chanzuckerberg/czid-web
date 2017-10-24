@@ -195,11 +195,11 @@ class ReportFilter extends React.Component {
     const next = JSON.stringify(this.state);    
     if (prev !== next) {
       // filters were modified
-      $('.apply-filter-button a').removeClass('grey');
-      $('.apply-filter-button a').addClass('blue');
+      $('.apply-filter-button button').removeClass('disabled');
+      $('.apply-filter-button button').addClass('blue');
     } else {
-      $('.apply-filter-button a').addClass('grey');
-      $('.apply-filter-button a').removeClass('blue');
+      $('.apply-filter-button button').addClass('disabled');
+      $('.apply-filter-button button').removeClass('blue');
     }
     return true;
   }
@@ -308,10 +308,10 @@ class ReportFilter extends React.Component {
                   </div>
                 </div>
                 <div className="apply-filter-button center-align">
-                  <a onClick={this.applyFilter}
-                     className="btn btn-flat waves-effect grey text-grey text-lighten-5 waves-light apply-filter-button">
+                  <button onClick={this.applyFilter}
+                     className="disabled btn btn-flat waves-effect text-grey text-lighten-5 waves-light apply-filter-button">
                     Apply filter
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>
