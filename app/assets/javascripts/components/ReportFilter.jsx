@@ -5,6 +5,7 @@
 class ReportFilter extends React.Component {
   constructor(props) {
     super(props);
+    this.sample_id = props.sample_id
     const view_level = props.view_level || 'species';
     this.background_model = props.background_model || 'N/A';
     this.all_categories = props.all_categories || [];
@@ -50,13 +51,23 @@ class ReportFilter extends React.Component {
     const genus_query = genus_info['query'];
     const genus_tax_id = genus_info['tax_id'];
 
-    this.state = { species_nt_zscore_start, species_nt_zscore_end, species_nt_rpm_start, species_nt_rpm_end, view_level, checked_categories, genus_query, genus_tax_id};
+    this.state = { species_nt_zscore_start, species_nt_zscore_end, species_nt_rpm_start, species_nt_rpm_end, view_level, checked_categories, genus_query, genus_tax_id, genus_list: []};
+
+    this.getGenusList(this.sample_id);
 
     this.applyFilter = this.applyFilter.bind(this);
     this.selectViewLevel = this.selectViewLevel.bind(this);
     this.updateThreshold = this.updateThreshold.bind(this);
     this.selectCategory = this.selectCategory.bind(this);
     this.searchGenus = this.searchGenus.bind(this);
+  }
+
+  getGenusList(sample_id) {
+    const url = `/samples/${sample_id}/genus_list.json`;
+    fetch(url)
+    .then((resp) => resp.json()) // Transform the data into json
+    .then((data) => this.setState({genus_list: data}))
+    .catch((error) => console.log(error))
   }
 
   applyFilter() {
@@ -252,11 +263,8 @@ class ReportFilter extends React.Component {
                   </div>
                   <div className="filter-values">
 					<ReactAutocomplete
-					  items={[
-						{ tax_id: 13579, name: 'Culex' },
-						{ tax_id: 13571, name: 'Dulex' },
-						{ tax_id: 13573, name: 'Mulex' }
-					  ]}
+                      inputProps={{ placeholder: 'Genus name here' }}
+					  items={this.state.genus_list}
                       shouldItemRender={(item, value) => item.name.toLowerCase().indexOf(value.toLowerCase()) > -1}
 					  getItemValue={item => item.name}
 					  renderItem={(item, highlighted) =>

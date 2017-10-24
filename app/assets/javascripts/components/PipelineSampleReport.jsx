@@ -6,6 +6,7 @@ class PipelineSampleReport extends React.Component {
     this.taxonomy_details = props.taxonomy_details;
     this.all_categories = props.all_categories || [];
     this.checked_categories = props.checked_categories || props.all_categories
+    this.sample_id = props.sample_id
 
     this.view_level = ReportFilter.getFilter('view_level') || 'species';
     this.highest_tax_counts = props.highest_tax_counts;
@@ -103,7 +104,8 @@ class PipelineSampleReport extends React.Component {
                   background_model = {this.report_details.background_model.name}
                   report_title = { this.report_details.report_info.name }
                   view_level={this.view_level}
-                  highest_tax_counts={this.highest_tax_counts}/>
+                  highest_tax_counts={this.highest_tax_counts}
+                  sample_id = {this.sample_id} />
               </div>
               <div className="col s10 reports-main ">
                 <table id="report-table" className='bordered report-table'>
@@ -251,7 +253,7 @@ class PipelineSampleReport extends React.Component {
                         <i className='fa fa-caret-down'></i>
                       </div>
                     </th> : '' }
- 
+
                   </tr>
                   </thead>
                   <tbody>
@@ -330,7 +332,7 @@ class PipelineSampleReport extends React.Component {
                         <td>
                           { (this.view_level==='species' && (taxon.nr_ele && taxon.nr_ele.hasOwnProperty('count')) ) ? numberWithCommas(taxon.nr_ele.count) : '' }
                         </td>
- 
+
                       </tr>
                     )
                   })}
