@@ -47,9 +47,9 @@ class ReportFilter extends React.Component {
       (species_nt_rpm_threshold.split(',').length > 1) ? species_nt_rpm_threshold.split(',')[1] :
         this.highest_species_nt_rpm;
     const checked_categories = this.checked_categories;
-    const genus_info = props.genus_info || {query: '', tax_id: ''};
-    const genus_query = genus_info['query'];
-    const genus_tax_id = genus_info['tax_id'];
+    const genus_info = props.genus_info || {query: "", tax_id: 0};
+    const genus_query = genus_info.query;
+    const genus_tax_id = genus_info.tax_id;
 
     this.state = { species_nt_zscore_start, species_nt_zscore_end, species_nt_rpm_start, species_nt_rpm_end, view_level, checked_categories, genus_query, genus_tax_id, genus_list: []};
 
@@ -74,10 +74,17 @@ class ReportFilter extends React.Component {
     const current_url = location.protocol + '//' + location.host + location.pathname;
     const currentSort = PipelineSampleReport.currentSort();
     const sort_by = currentSort.sort_query ? `&${currentSort.sort_query}` : '';
-    const categories = this.checked_categories.join();
+    const genus_tax_id = this.state.genus_tax_id;
+    const categories = this.state.checked_categories.join();
+    const genus_string = genus_tax_id == 0 ? '' : `&genus_tax_id=${genus_tax_id}`
+    //disable categories filtering for genus search
+    const categories_string = genus_tax_id > 0 ? '' : `&categories=${categories}`
+
     window.location =
       `${current_url}?species_nt_zscore_threshold=${this.state.species_nt_zscore_start},${this.state.species_nt_zscore_end}&species_nt_rpm_threshold=${
-        this.state.species_nt_rpm_start},${this.state.species_nt_rpm_end}&view_level=${this.state.view_level}${sort_by}&categories=${categories}`;
+        this.state.species_nt_rpm_start},${this.state.species_nt_rpm_end}&view_level=${this.state.view_level}${sort_by}${categories_string}${genus_string}`;
+
+
   }
 
   static getFilter(name) {
@@ -230,7 +237,7 @@ class ReportFilter extends React.Component {
                     { this.all_categories.map((category, i) => {
                       return (
                         <p key={i}>
-                          <input type="checkbox" className="filled-in cat-filter" id={category.name} value={category.taxid} onClick={this.selectCategory} checked={this.checked_categories.indexOf(category.taxid) >= 0} />
+                          <input type="checkbox" className="filled-in cat-filter" id={category.name} value={category.taxid} onClick={this.selectCategory} onChange={this.selectCategory} checked={this.checked_categories.indexOf(category.taxid) >= 0} />
                           <label htmlFor={ category.name }>{ category.name }</label>
                         </p>
                       )
@@ -276,7 +283,7 @@ class ReportFilter extends React.Component {
 						</div>
 					  }
 					  value={this.state.genus_query}
-                      onChange={(e) => this.setState({genus_query: e.target.value})}
+                      onChange={(e) => this.setState({genus_query: e.target.value, genus_tax_id: 0 })}
 					  onSelect={this.searchGenus}
 					/>
                   </div>
