@@ -91,6 +91,7 @@ class PipelineRun < ApplicationRecord
     po = PipelineOutput.new(pipeline_output_dict)
     po.sample = sample
     po.pipeline_run = self
+    po.status = PipelineOutput::STATUS_POSTPROCESS
     po.save # this triggers postprocess run
     # aggregate the data at genus level
     po.generate_aggregate_counts('genus')
