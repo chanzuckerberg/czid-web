@@ -7,7 +7,6 @@ class ReportFilter extends React.Component {
     super(props);
     this.sample_id = props.sample_id
     const view_level = props.view_level || 'species';
-    console.log(props.genus_info)
     const genus_info = props.genus_info || { query: "", tax_id: 0 };
     this.background_model = props.background_model || 'N/A';
     this.all_categories = props.all_categories || [];
@@ -110,7 +109,6 @@ class ReportFilter extends React.Component {
       genus_query: value,
       genus_tax_id: item.tax_id
     });
-    console.log(item);
   }
 
   selectCategory(e) {
