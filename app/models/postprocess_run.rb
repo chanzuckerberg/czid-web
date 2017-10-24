@@ -67,8 +67,6 @@ class PostprocessRun < ApplicationRecord
     "#{LOCAL_JSON_PATH}/#{id}"
   end
 
-  output_json_s3_path = "#{sample.sample_postprocess_s3_path}/#{OUTPUT_JSON_NAME}"
-
   def make_sequence_locator(json_file_s3, sequence_file_uri, hit_type)
     return if sequence_locator
     downloaded_json_path = download_file(json_file_s3)

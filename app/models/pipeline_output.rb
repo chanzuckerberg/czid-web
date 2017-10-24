@@ -62,7 +62,8 @@ class PipelineOutput < ApplicationRecord
 
   def postprocess_command
     script_name = File.basename(IdSeqPostprocess::S3_SCRIPT_LOC)
-    batch_command_env_variables = "RESULTS_BUCKET=#{sample_input_s3_path} DB_SAMPLE_ID=#{id} "
+    batch_command_env_variables = "INPUT_BUCKET=#{sample.sample_output_s3_path} " \
+      "OUTPUT_BUCKET=#{sample.sample_postprocess_s3_path} "
     batch_command = "aws s3 cp #{IdSeqPostprocese::S3_SCRIPT_LOC} .; chmod 755 #{script_name}; " +
                     batch_command_env_variables + "./#{script_name}"
     command = "aegea batch submit --command=\"#{batch_command}\" "
