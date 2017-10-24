@@ -1,3 +1,5 @@
+# to kick off postprocessing for existing pipeline_outputs,
+# set pipeline_output.status = 'need_postprocess' and save
 require 'open3'
 require 'json'
 class PostprocessRun < ApplicationRecord
