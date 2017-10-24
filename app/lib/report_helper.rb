@@ -246,23 +246,29 @@ module ReportHelper
     taxon_counts_2d
   end
 
-  def negative(vec_4d)
-    x, y, z, t = vec_4d
-    [-x, -y, -z, -t]
+  def negative(vec_6d)
+    x, y, z, t, u, v = vec_6d
+    [-x, -y, -z, -t, -u, -v]
   end
 
   def sort_key(tax_2d, tax_info, sort_by)
     # sort by (genus, species) in the chosen metric;  making sure that
     # the genus comes before its species in either sort direction
+    other_type = {
+      'NT' => 'NR',
+      'NR' => 'NT'
+    }
     genus_id = tax_info['genus_taxid']
     genus_info = tax_2d[genus_id]
     sort_key_genus = genus_info[sort_by[:count_type]][sort_by[:metric]]
+    sort_key_genus_alt = genus_info[other_type[sort_by[:count_type]]][sort_by[:metric]]
     if tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
       sort_key_species = tax_info[sort_by[:count_type]][sort_by[:metric]]
-      sort_key_3d = [sort_key_genus, genus_id, 0, sort_key_species]
+      sort_key_species_alt = tax_info[other_type[sort_by[:count_type]]][sort_by[:metric]]
+      sort_key_3d = [sort_key_genus, sort_key_genus_alt, genus_id, 0, sort_key_species, sort_key_species_alt]
     else
       genus_priority = sort_by[:direction] == 'highest' ? 1 : -1
-      sort_key_3d = [sort_key_genus, genus_id, genus_priority, 0]
+      sort_key_3d = [sort_key_genus, sort_key_genus_alt, genus_id, genus_priority, 0, 0]
     end
     sort_by[:direction] == 'lowest' ? sort_key_3d : negative(sort_key_3d)
   end
@@ -287,7 +293,28 @@ module ReportHelper
     rows.sort! { |dl, dr| dl[:sort_key] <=> dr[:sort_key] }
 
     # HACK
-    rows = rows[0...2000]
+    # && (tax_info['NT']['r'] >= 10 || tax_info['NR']['r'] >= 10)
+    puts "BORIS SORT #{sort_by}"
+    to_delete = Set.new
+    to_keep = Set.new
+    rows.each do |tax_info|
+      if sort_by[:metric] == 'zscore' && tax_info[sort_by[:count_type]]['zscore'] < 1.7
+        to_delete.add(tax_info['tax_id'])
+      elsif tax_info['NT']['zscore'] < 1.7 && tax_info['NR']['zscore'] < 1.7
+        to_delete.add(tax_info['tax_id'])
+      elsif tax_info['NT']['r'] < 10 && tax_info['NR']['r'] < 10
+        to_delete.add(tax_info['tax_id'])
+      else
+        to_keep.add(tax_info['genus_taxid'])
+      end
+    end
+    to_delete.subtract(to_keep)
+    rows.keep_if {|tax_info| !to_delete.include?tax_info['tax_id'] }
+
+    logger.info "Report contains #{rows.length} rows after filtering."
+
+    # HACK
+    rows = rows[0...20000]
 
     rows.each do |tax_info|
       UNUSED_IN_UI_FIELDS.each do |unused_field|
