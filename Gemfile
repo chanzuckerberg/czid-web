@@ -37,8 +37,8 @@ gem 'puma', '~> 3.7'
 gem "libhoney"
 gem 'rails', '~> 5.1.2'
 gem 'rake'
-gem 'react-rails', '~> 2.3.0'
 gem 'react-autocomplete-rails'
+gem 'react-rails', '~> 2.3.0'
 # Worker/Scheduler management
 gem 'resque'
 gem 'resque-lock'

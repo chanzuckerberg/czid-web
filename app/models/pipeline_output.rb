@@ -20,7 +20,7 @@ class PipelineOutput < ApplicationRecord
     end
   end
 
-  def get_distinct_genuses
+  def distinct_genuses
     TaxonCount.select("distinct tax_id, name")
               .where(tax_level: TaxonCount::TAX_LEVEL_GENUS,
                      pipeline_output_id: id)

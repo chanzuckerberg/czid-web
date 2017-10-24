@@ -57,7 +57,7 @@ class SamplesController < ApplicationController
     respond_to do |format|
       format.json do
         if @pipeline_output
-          render json: @pipeline_output.get_distinct_genuses
+          render json: @pipeline_output.distinct_genuses
         else
           render json: []
         end
