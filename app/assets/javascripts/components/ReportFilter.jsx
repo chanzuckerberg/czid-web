@@ -47,7 +47,14 @@ class ReportFilter extends React.Component {
         this.highest_species_nt_rpm;
     const checked_categories = this.checked_categories;
 
-    this.state = { species_nt_zscore_start, species_nt_zscore_end, species_nt_rpm_start, species_nt_rpm_end, view_level, checked_categories};
+    this.state = {
+      species_nt_zscore_start: parseFloat(species_nt_zscore_start),
+      species_nt_zscore_end: parseFloat(species_nt_zscore_end),
+      species_nt_rpm_start: parseFloat(species_nt_rpm_start),
+      species_nt_rpm_end: parseFloat(species_nt_rpm_end),
+      view_level,
+      checked_categories
+    };
 
     this.applyFilter = this.applyFilter.bind(this);
     this.selectViewLevel = this.selectViewLevel.bind(this);
@@ -175,6 +182,28 @@ class ReportFilter extends React.Component {
       });
     }
   }
+
+  /**
+    * @method componentDidUpdate
+    * @param {Object} prevProps
+    * @param {Object} prevState
+    * @desc this methods gets called when the component is updated
+    * @return {Boolean} always allow the component to reflect new state values
+  */
+  componentDidUpdate(prevProps, prevState) {
+    const prev = JSON.stringify(prevState);
+    const next = JSON.stringify(this.state);    
+    if (prev !== next) {
+      // filters were modified
+      $('.apply-filter-button a').removeClass('grey');
+      $('.apply-filter-button a').addClass('blue');
+    } else {
+      $('.apply-filter-button a').addClass('grey');
+      $('.apply-filter-button a').removeClass('blue');
+    }
+    return true;
+  }
+
   render() {
     return (
       <div className="reports-sidebar">
