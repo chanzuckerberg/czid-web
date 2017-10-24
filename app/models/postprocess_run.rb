@@ -6,7 +6,7 @@ class PostprocessRun < ApplicationRecord
 
   OUTPUT_FASTA_NAME = 'taxid_annot_sorted.fasta'.freeze
   LOCAL_FASTA_PATH = '/app/tmp/results_fasta'.freeze
-  OUTPUT_JSON_NAME = 'sequence_locator.json'.freeze
+  OUTPUT_JSON_NAME = 'taxid_locations.json'.freeze
   LOCAL_JSON_PATH = '/app/tmp/results_json'.freeze
   STATUS_CHECKED = 'CHECKED'.freeze
   STATUS_SUCCESS = 'SUCCEEDED'.freeze
