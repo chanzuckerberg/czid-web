@@ -53,7 +53,8 @@ class ReportFilter extends React.Component {
       species_nt_rpm_start: parseFloat(species_nt_rpm_start),
       species_nt_rpm_end: parseFloat(species_nt_rpm_end),
       view_level,
-      checked_categories
+      checked_categories,
+      category_changed: false
     };
 
     this.applyFilter = this.applyFilter.bind(this);
@@ -94,22 +95,22 @@ class ReportFilter extends React.Component {
 
   selectCategory(e) {
     // current array of options
-    const options = this.state.checked_categories
+    const options = this.state.checked_categories;
 
-    let index
+    let index;
 
     // check if the check box is checked or unchecked
     if (e.target.checked) {
       // add the numerical value of the checkbox to options array
-      options.push(+e.target.value)
+      options.push(+e.target.value);
     } else {
       // or remove the value from the unchecked checkbox from the array
-      index = options.indexOf(+e.target.value)
-      options.splice(index, 1)
+      index = options.indexOf(+e.target.value);
+      options.splice(index, 1);
     }
 
     // update the state with the new array of options
-    this.setState({ checked_categories: options })
+    this.setState({ checked_categories: options, category_changed: true });
 
   }
 
@@ -192,7 +193,7 @@ class ReportFilter extends React.Component {
   */
   componentDidUpdate(prevProps, prevState) {
     const prev = JSON.stringify(prevState);
-    const next = JSON.stringify(this.state);    
+    const next = JSON.stringify(this.state);
     if (prev !== next) {
       // filters were modified
       $('.apply-filter-button button').removeClass('disabled');
