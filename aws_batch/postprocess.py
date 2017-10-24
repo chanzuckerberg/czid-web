@@ -15,8 +15,6 @@ import gzip
 import logging
 import math
 
-INPUT_BUCKET = 's3://czbiohub-infectious-disease/UGANDA' # default to be overwritten by environment variable
-OUTPUT_BUCKET = 's3://czbiohub-idseq-samples-test/id-uganda'  # default to be overwritten by environment variable
 KEY_S3_PATH = 's3://czbiohub-infectious-disease/idseq-alpha.pem'
 ROOT_DIR = '/mnt'
 DEST_DIR = ROOT_DIR + '/idseq/data' # generated data go here
@@ -25,10 +23,18 @@ REF_DIR  = ROOT_DIR + '/idseq/ref' # referene genome / ref databases go here
 ACCESSION2TAXID = 's3://czbiohub-infectious-disease/references/accession2taxid.db.gz'
 LINEAGE_SHELF = 's3://czbiohub-infectious-disease/references/taxid-lineages.db'
 
-# output files
-TAXID_ANNOT_FASTA = 'taxid_annot_sorted.fasta'
-TAXID_LOCATIONS_JSON = 'taxid_locations.json'
+# input files
+ACCESSION_ANNOTATED_FASTA = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.fasta'
 
+# output files
+TAXID_ANNOT_FASTA = 'taxid_annot.fasta'
+TAXID_ANNOT_SORTED_FASTA_NT = 'taxid_annot_sorted_nt.fasta'
+TAXID_LOCATIONS_JSON_NT = 'taxid_locations_nt.json'
+TAXID_ANNOT_SORTED_FASTA_NR = 'taxid_annot_sorted_nr.fasta'
+TAXID_LOCATIONS_JSON_NR = 'taxid_locations_nr.json'
+LOGS_OUT_BASENAME = 'postprocess-log'
+
+# processing functions
 def accession2taxid(read_id, accession2taxid_dict, hit_type, lineage_map):
     accid_short = ((read_id.split(hit_type+':'))[1].split(":")[0]).split(".")[0]
     taxid = accession2taxid_dict.get(accid_short, "NA")
@@ -36,7 +42,6 @@ def accession2taxid(read_id, accession2taxid_dict, hit_type, lineage_map):
     return species_taxid, genus_taxid, family_taxid
 
 def generate_taxid_fasta_from_accid(input_fasta_file, accession2taxid_path, lineagePath, output_fasta_file):
-    # currently annotates with species-level taxid; other ranks to be potentially implemented in the future
     accession2taxid_dict = shelve.open(accession2taxid_path)
     lineage_map = shelve.open(lineagePath)
     input_fasta_f = open(input_fasta_file, 'rb')
@@ -47,9 +52,7 @@ def generate_taxid_fasta_from_accid(input_fasta_file, accession2taxid_path, line
         read_id = sequence_name.rstrip().lstrip('>') # example read_id: "NR::NT:CP010376.2:NB501961:14:HM7TLBGX2:1:23109:12720:8743/2"
         nr_taxid_species, nr_taxid_genus, nr_taxid_family = accession2taxid(read_id, accession2taxid_dict, 'NR', lineage_map)
         nt_taxid_species, nt_taxid_genus, nt_taxid_family = accession2taxid(read_id, accession2taxid_dict, 'NT', lineage_map)
-        new_read_name = ('nr:' + nr_taxid_family + ':nt:' + nt_taxid_family
-                         + ':nr:' + nr_taxid_genus + ':nt:' + nt_taxid_genus
-                         + ':nr:' + nr_taxid_species + ':nt:' + nt_taxid_species
+        new_read_name = ('nr:' + nr_taxid_species + ':nt:' + nt_taxid_species
                          + ':' + read_id)
         output_fasta_f.write(">%s\n" % new_read_name)
         output_fasta_f.write(sequence_data)
@@ -58,7 +61,52 @@ def generate_taxid_fasta_from_accid(input_fasta_file, accession2taxid_path, line
     input_fasta_f.close()
     output_fasta_f.close()
 
-def run_generate_taxid_fasta_from_accid(sample_name, input_fasta, accession2taxid_s3_path, lineage_s3_path,
+def generate_taxid_locator(input_fasta, taxid_field, output_fasta, output_json):
+    subprocess.check_output("sort --key %s --field-separator ':' --numeric-sort %s > %s" % (taxid_field, input_fasta, output_fasta), shell=True)
+    taxid_count_string = subprocess.check_output("cut -f %s -d ':' %s | uniq -c" % (taxid_field, output_fasta), shell=True)
+    taxid_count_lines = taxid_count_string.splitlines()
+    taxon_sequence_locations = []
+    first_row = 1
+    for line in taxid_count_lines:
+       fields = line.split()
+       count = int(fields[0])
+       taxid = int(fields[1])
+       last_row = first_row + count - 1
+       taxon_sequence_locations.append({'taxid': taxid, 'first_row': first_row, 'last_row': last_row})
+       first_row = last_row + 1
+    with open(output_json, 'wb') as f:
+       json.dump(taxon_sequence_locations, f)
+
+# job functions
+def execute_command(command):
+    print command
+    output = subprocess.check_output(command, shell=True)
+    return output
+
+class TimeFilter(logging.Filter):
+    def filter(self, record):
+        try:
+          last = self.last
+        except AttributeError:
+          last = record.relativeCreated
+        delta = datetime.datetime.fromtimestamp(record.relativeCreated/1000.0) - datetime.datetime.fromtimestamp(last/1000.0)
+        record.time_since_last = '{0:.2f}'.format(delta.seconds + delta.microseconds/1000000.0)
+        self.last = record.relativeCreated
+        return True
+
+def run_and_log(logparams, func_name, *args):
+    logger = logging.getLogger()
+    logger.info("========== %s ==========" % logparams.get("title"))
+    # produce the output
+    func_return = func_name(*args)
+    if func_return == 1:
+        logger.info("output exists, lazy run")
+    else:
+        logger.info("uploaded output")
+    # copy log file
+    execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
+
+def run_generate_taxid_fasta_from_accid(input_fasta, accession2taxid_s3_path, lineage_s3_path,
     output_fasta, result_dir, sample_s3_output_path, lazy_run):
     if lazy_run:
         # check if output already exists
@@ -79,4 +127,85 @@ def run_generate_taxid_fasta_from_accid(sample_name, input_fasta, accession2taxi
     logging.getLogger().info("finished job")
     execute_command("aws s3 cp %s %s/" % (output_fasta, sample_s3_output_path))
 
+def run_generate_taxid_locator(input_fasta, taxid_field, output_fasta, output_json,
+    result_dir, sample_s3_output_path, lazy_run):
+    if lazy_run:
+        # check if output already exists
+        if os.path.isfile(output_fasta):
+            return 1
+    generate_taxid_locator(input_fasta, taxid_field, output_fasta, output_json)
+    logging.getLogger().info("finished job")
+    execute_command("aws s3 cp %s %s/" % (output_fasta, sample_s3_output_path))
+    execute_command("aws s3 cp %s %s/" % (output_json, sample_s3_output_path))
 
+def run_sample(sample_s3_input_path, sample_s3_output_path, aws_batch_job_id, lazy_run = True):
+
+    sample_s3_output_path = sample_s3_output_path.rstrip('/')
+    sample_name = sample_s3_input_path[5:].rstrip('/').replace('/','-')
+    sample_dir = DEST_DIR + '/' + sample_name
+    input_dir = sample_dir + '/inputs'
+    result_dir = sample_dir + '/results'
+    scratch_dir = sample_dir + '/scratch'
+    execute_command("mkdir -p %s %s %s" % (sample_dir, input_dir, result_dir, scratch_dir))
+    execute_command("mkdir -p %s " % REF_DIR);
+
+    # configure logger
+    log_file = "%s/%s-%s.txt" % (result_dir, LOGS_OUT_BASENAME, aws_batch_job_id)
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    handler = logging.FileHandler(log_file)
+    formatter = logging.Formatter("%(asctime)s (%(time_since_last)ss elapsed): %(message)s")
+    handler.addFilter(TimeFilter())
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    DEFAULT_LOGPARAMS = {"sample_s3_output_path": sample_s3_output_path}
+
+    # download input
+    execute_command("aws s3 cp %s/%s %s/" % (sample_s3_input_path, ACCESSION_ANNOTATED_FASTA, input_dir))
+    input_file = os.path.join(input_dir, ACCESSION_ANNOTATED_FASTA)
+
+    if lazy_run:
+       # Download existing data and see what has been done
+        command = "aws s3 cp %s %s --recursive" % (sample_s3_output_path, result_dir)
+        print execute_command(command)
+
+    # generate taxid fasta
+    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+        {"title": "run_generate_taxid_fasta_from_accid"})
+    run_and_log(logparams, run_generate_taxid_fasta_from_accid,
+        input_file, ACCESSION2TAXID, LINEAGE_SHELF,
+        os.path.join(result_dir, TAXID_ANNOT_FASTA),
+        result_dir, sample_s3_output_path, False)
+
+    # generate taxid locator for NT
+    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+        {"title": "run_generate_taxid_locator for NT"})
+    run_and_log(logparams, run_generate_taxid_locator,
+        os.path.join(result_dir, TAXID_ANNOT_FASTA), 4,
+        os.path.join(result_dir, TAXID_ANNOT_SORTED_FASTA_NT),
+        os.path.join(result_dir, TAXID_LOCATIONS_JSON_NT),
+        result_dir, sample_s3_output_path, False)
+
+    # generate taxid locator for NR
+    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+        {"title": "run_generate_taxid_locator for NR"})
+    run_and_log(logparams, run_generate_taxid_locator,
+        os.path.join(result_dir, TAXID_ANNOT_FASTA), 2,
+        os.path.join(result_dir, TAXID_ANNOT_SORTED_FASTA_NR),
+        os.path.join(result_dir, TAXID_LOCATIONS_JSON_NR),
+        result_dir, sample_s3_output_path, False)
+
+# Main
+def main():
+    global INPUT_BUCKET
+    global OUTPUT_BUCKET
+    INPUT_BUCKET = os.environ.get('INPUT_BUCKET', INPUT_BUCKET)
+    OUTPUT_BUCKET = os.environ.get('OUTPUT_BUCKET', OUTPUT_BUCKET)
+    AWS_BATCH_JOB_ID = os.environ.get('AWS_BATCH_JOB_ID', 'local')
+    sample_s3_input_path = INPUT_BUCKET.rstrip('/')
+    sample_s3_output_path = OUTPUT_BUCKET.rstrip('/')
+
+    run_sample(sample_s3_input_path, sample_s3_output_path, AWS_BATCH_JOB_ID, True)
+
+if __name__=="__main__":
+    main()
