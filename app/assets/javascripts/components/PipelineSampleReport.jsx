@@ -66,17 +66,6 @@ class PipelineSampleReport extends React.Component {
     $('.sort-report').dropdown();
   }
 
-  getActiveSort(className) {
-    if(className) {
-      const sort = ReportFilter.getFilter('sort_by');
-      if (sort === className) {
-        return 'active';
-      } else if (className === this.defaultSortBy && !sort) {
-        return 'active';
-      }
-    }
-  }
-
   columnSorting(e) {
     const className = e.target.className;
     const pos = className.indexOf('sort_by');
@@ -94,38 +83,71 @@ class PipelineSampleReport extends React.Component {
       : <span>
           {tax_info.name || 'Placeholder ' + tax_info.tax_id}
         </span>;
-    foo = (tax_info.tax_level == 2) ? <b>{foo}</b> : <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{foo}</span>
+    if (tax_info.tax_level == 1) {
+      // indent species rows
+      foo = <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{foo}</span>
+    } else {
+      // boldface genus
+      foo = <b>{foo}</b>
+    }
     return foo;
   }
 
-  render_count(x) {
-    var style = { 'textAlign': 'right' };
-    return ( <td style={style}>{ numberWithCommas(Number(x)) }</td> )
+  render_number(x, sort_by, column, is_blank) {
+    y = numberWithCommas(x);
+    if (sort_by == column) {
+      y = <b>{y}</b>;
+    }
+    className = is_blank ? 'report-number-blank' : 'report-number';
+    return ( <td className={className}>{y}</td> );
   }
 
-  render_float(x) {
-    var style = {'textAlign': 'right'};
-    return ( <td style={style}>{ numberWithCommas(Number(x).toFixed(1)) }</td> );
+  render_count(x, sort_by, column) {
+    const is_blank = (x == 0);
+    return this.render_number(Number(x), sort_by, column, is_blank);
   }
 
-  render_column_header(column_name, column_sort_name) {
+  render_float(x, sort_by, column) {
+    const is_blank = (x == 0.0) || (x == -100.0);
+    return this.render_number(Number(x).toFixed(1), sort_by, column, is_blank);
+  }
+
+  render_sort_arrow(column, sort_column, sort_direction, arrow_direction) {
+    sort_by_this = sort_direction + "_" + column;
+    sort_by_this_active = (sort_column == sort_by_this) ? 'active' : '';
+    return (
+      <i onClick={ this.columnSorting }
+         className={ `${sort_by_this_active} fa fa-caret-${arrow_direction} sort_by=${sort_by_this}` }>
+      </i>
+    );
+  }
+
+  render_column_header(column_visible_name, column_name) {
+    var sort_column = this.sort_column();
     var style = { 'textAlign': 'right' };
     return (
       <th style={style}>
         <div className='sort-controls right'>
-          <i onClick={ this.columnSorting }
-             className={ `${this.getActiveSort('lowest_' + column_sort_name) } fa fa-caret-up sort_by=${'lowest_' + column_sort_name}` }>
-          </i>
-          <i onClick={ this.columnSorting }
-             className={ `${this.getActiveSort('highest_' + column_sort_name) } fa fa-caret-down sort_by=${'highest_' + column_sort_name}` }>
-          </i>
-          {column_name}
+          {this.render_sort_arrow(column_name, sort_column, 'lowest', 'up')}
+          {this.render_sort_arrow(column_name, sort_column, 'highest', 'down')}
+          {column_visible_name}
         </div>
       </th>
     );
   }
 
+  row_class(tax_info) {
+    return tax_info.tax_level == 2 ? 'report-row-genus' : 'report-row-species';
+  }
+
+  sort_column() {
+    return (ReportFilter.getFilter('sort_by') || this.defaultSortBy);
+  }
+
   render() {
+    const sort_column = this.sort_column()
+    const parts = sort_column.split("_")
+    const sort_by = parts[1] + "_" + parts[2];
     return (
       <div>
         <div id="reports" className="reports-screen tab-screen col s12">
@@ -157,7 +179,7 @@ class PipelineSampleReport extends React.Component {
                   <tbody>
                   { this.taxonomy_details.map((tax_info, i) => {
                     return (
-                      <tr key={i}>
+                      <tr key={i} className={this.row_class(tax_info)}>
                         <td>
                           {  tax_info.category_name }
                         </td>
@@ -166,12 +188,12 @@ class PipelineSampleReport extends React.Component {
                         <td>
                           { this.render_name(tax_info) }
                         </td>
-                        { this.render_float(tax_info.NT.zscore) }
-                        { this.render_float(tax_info.NT.rpm)    }
-                        { this.render_count(tax_info.NT.r)      }
-                        { this.render_float(tax_info.NR.zscore) }
-                        { this.render_float(tax_info.NR.rpm)    }
-                        { this.render_count(tax_info.NR.r)      }
+                        { this.render_float(tax_info.NT.zscore, sort_by, 'nt_zscore') }
+                        { this.render_float(tax_info.NT.rpm, sort_by, 'nt_rpm')       }
+                        { this.render_count(tax_info.NT.r, sort_by, 'nt_r')           }
+                        { this.render_float(tax_info.NR.zscore, sort_by, 'nr_zscore') }
+                        { this.render_float(tax_info.NR.rpm, sort_by, 'nr_rpm')       }
+                        { this.render_count(tax_info.NR.r, sort_by, 'nr_r')           }
                       </tr>
                     )
                   })}

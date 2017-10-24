@@ -113,8 +113,17 @@
 
 }
 
-.report-table td{
-  cursor: inherit;
+.report-number {
+  text-align: right;
+}
+
+.report-number-blank {
+  text-align: right;
+  color: #DDDDDD;
+}
+
+.report-row-genus {
+  background: #F7F7F7;
 }
 
 .reports-screen {
