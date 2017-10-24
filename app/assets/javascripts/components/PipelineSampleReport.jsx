@@ -8,7 +8,7 @@ class PipelineSampleReport extends React.Component {
 
     this.view_level = ReportFilter.getFilter('view_level') || 'species';
     this.highest_tax_counts = props.highest_tax_counts;
-    this.defaultSortBy = 'highest_species_nt_zscore';
+    this.defaultSortBy = 'highest_nt_zscore';
     const current_sort = PipelineSampleReport.currentSort();
     this.state = {
       sort_query: current_sort.sort_query
@@ -94,19 +94,35 @@ class PipelineSampleReport extends React.Component {
       : <span>
           {tax_info.name || 'Placeholder ' + tax_info.tax_id}
         </span>;
-        /*
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{tax_info.genus_name || (tax_info.genus_taxid > 0 ? tax_info.genus_taxid : '-')}] <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        */
-    foo = (tax_info.tax_id == tax_info.genus_taxid) ? <b>{foo}</b> : <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{foo}</span>
+    foo = (tax_info.tax_level == 2) ? <b>{foo}</b> : <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{foo}</span>
     return foo;
   }
 
   render_count(x) {
-    return numberWithCommas(Number(x))
+    var style = { 'text-align': 'right' };
+    return ( <td style={style}>{ numberWithCommas(Number(x)) }</td> )
   }
 
   render_float(x) {
-    return numberWithCommas(Number(x).toFixed(3))
+    var style = {'text-align': 'right'};
+    return ( <td style={style}>{ numberWithCommas(Number(x).toFixed(1)) }</td> );
+  }
+
+  render_column_header(column_name, column_sort_name) {
+    return (
+      <th>
+        {column_name}
+        <br/>
+        <div className='sort-controls left'>
+          <i onClick={ this.columnSorting }
+             className={ `${this.getActiveSort('lowest_' + column_sort_name) } fa fa-caret-up sort_by=${'lowest_' + column_sort_name}` }>
+          </i>
+          <i onClick={ this.columnSorting }
+             className={ `${this.getActiveSort('highest_' + column_sort_name) } fa fa-caret-down sort_by=${'highest_' + column_sort_name}` }>
+          </i>
+        </div>
+      </th>
+    );
   }
 
   render() {
@@ -128,51 +144,14 @@ class PipelineSampleReport extends React.Component {
                   <thead>
                   <tr>
                     <th>Category</th>
-                    <th>Taxonomy</th>
                     <th></th>
-                    <th>
-                    NT Z
-                    <div className='sort-controls  left'>
-                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_genus_nt_zscore')} fa fa-caret-up sort_by=lowest_genus_nt_zscore` }></i>
-                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_genus_nt_zscore')} fa fa-caret-down sort_by=highest_genus_nt_zscore` }></i>
-                    </div>
-
-                    </th>
-                    <th>
-                    NT rM
-                     <div className='sort-controls left'>
-                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_genus_nt_rpm')} fa fa-caret-up sort_by=lowest_genus_nt_rpm` }></i>
-                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_genus_nt_rpm')} fa fa-caret-down sort_by=highest_genus_nt_rpm` }></i>
-                    </div>
-                    </th>
-                    <th>
-                     NT r
-                      <div className='sort-controls left'>
-                        <i className='fa fa-caret-up'></i>
-                        <i className='fa fa-caret-down'></i>
-                      </div>
-                    </th>
-                    <th>
-                    NR Z
-                     <div className='sort-controls left'>
-                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_genus_nr_zscore')} fa fa-caret-up sort_by=lowest_genus_nr_zscore` }></i>
-                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_genus_nr_zscore')} fa fa-caret-down sort_by=highest_genus_nr_zscore` }></i>
-                    </div>
-                    </th>
-                    <th>
-                    NR rM
-                     <div className='sort-controls left'>
-                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_genus_nr_rpm')} fa fa-caret-up sort_by=lowest_genus_nr_rpm` }></i>
-                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_genus_nr_rpm')} fa fa-caret-down sort_by=highest_genus_nr_rpm` }></i>
-                    </div>
-                    </th>
-                    <th>
-                     NR r
-                      <div className='sort-controls left'>
-                        <i className='fa fa-caret-up'></i>
-                        <i className='fa fa-caret-down'></i>
-                      </div>
-                    </th>
+                    <th>Taxonomy</th>
+                    { this.render_column_header('NT Z',   'nt_zscore') }
+                    { this.render_column_header('NT rPM', 'nt_rpm')    }
+                    { this.render_column_header('NT r',   'nt_r')      }
+                    { this.render_column_header('NR Z',   'nr_zscore') }
+                    { this.render_column_header('NR rPM', 'nr_rpm')    }
+                    { this.render_column_header('NR r',   'nr_r')      }
                   </tr>
                   </thead>
                   <tbody>
@@ -180,24 +159,19 @@ class PipelineSampleReport extends React.Component {
                     return (
                       <tr key={i}>
                         <td>
-                          {  tax_info.category_name || '-' }
+                          {  tax_info.category_name }
                         </td>
-
+                        <td>
+                        </td>
                         <td>
                           { this.render_name(tax_info) }
                         </td>
-                        <td>
-                        </td>
-
-                        {/* The genus scores */}
-
-                        <td>{ this.render_float(tax_info.NT.zscore) }</td>
-                        <td>{ this.render_float(tax_info.NT.rpm)    }</td>
-                        <td>{ this.render_count(tax_info.NT.r)      }</td>
-                        <td>{ this.render_float(tax_info.NR.zscore) }</td>
-                        <td>{ this.render_float(tax_info.NR.rpm)    }</td>
-                        <td>{ this.render_count(tax_info.NR.r)      }</td>
-
+                        { this.render_float(tax_info.NT.zscore) }
+                        { this.render_float(tax_info.NT.rpm)    }
+                        { this.render_count(tax_info.NT.r)      }
+                        { this.render_float(tax_info.NR.zscore) }
+                        { this.render_float(tax_info.NR.rpm)    }
+                        { this.render_count(tax_info.NR.r)      }
                       </tr>
                     )
                   })}

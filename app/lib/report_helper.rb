@@ -3,10 +3,20 @@ module ReportHelper
   ZSCORE_MAX =  99
   ZSCORE_WHEN_ABSENT_FROM_SAMPLE = -100
   ZSCORE_WHEN_ABSENT_FROM_BACKGROUND = 100
-  # Only as a data cleanliness bug, there may be a taxon_count 'specoes' row
-  # without a corresponding 'genus' row;  then we create a fake singleton
-  # genus containing just that species;  the fake genus IDs start here:
+
+  # TODO: For taxons that have no entry in the taxon_lineages table, we should
+  # substitute this value for genus_id, which allows us to group them
+  # all together;  this should match generate_aggregate_counts in
+  # app/models/pipeline_output.rb
+  MISSING_GENUS_ID = -200
+  MISSING_SPECIES_ID = -100
+  MISSING_SPECIES_ID_ALT = -1
+
+  # For taxon_count 'species' rows without a corresponding 'genus' rows,
+  # we create a fake singleton genus containing just that species;
+  # the fake genus IDs start here:
   FAKE_GENUS_BASE = -1900000000
+
 
   def external_report_info(report, view_level, params)
     data = {}
@@ -36,17 +46,7 @@ module ReportHelper
     taxon_name_arr
   end
 
-  def view_level_name2int(view_level)
-    case view_level.downcase
-    when 'species'
-      TaxonCount::TAX_LEVEL_SPECIES
-    when 'genus'
-      TaxonCount::TAX_LEVEL_GENUS
-    end
-    # to be extended for all taxonomic ranks when needed
-  end
-
-  def get_raw_taxon_counts(report)
+  def fetch_taxon_counts(report)
     pipeline_output_id = report.pipeline_output.id
     total_reads = report.pipeline_output.total_reads
     background_id = report.background.id
@@ -60,7 +60,8 @@ module ReportHelper
         taxon_counts.tax_level=#{TaxonCount::TAX_LEVEL_SPECIES},
         taxon_lineages.species_name,
         taxon_lineages.genus_name
-      )                                AS  name,
+      )                                AS  name_from_lineages,
+      taxon_counts.name                AS  name_from_counts,
       taxon_lineages.superkingdom_name AS  category_name,
       taxon_counts.count               AS  r,
       (count / #{total_reads}.0
@@ -111,7 +112,8 @@ module ReportHelper
   METRICS = ['r', 'rpm', 'zscore']
   COUNT_TYPES = ['NT', 'NR']
   SORT_DIRECTIONS = ['lowest', 'highest']
-  PROPERTIES_OF_TAXID = ['tax_id', 'name', 'tax_level', 'genus_taxid', 'category_name']
+  PROPERTIES_OF_TAXID = ['tax_id', 'name', 'name_from_lineages', 'name_from_counts', 'tax_level', 'genus_taxid', 'category_name']
+  UNUSED_IN_UI_FIELDS = ['genus_taxid', :sort_key]
 
   def tax_info_base(taxon)
     tax_info_base = {}
@@ -145,7 +147,7 @@ module ReportHelper
     fake_genus_info
   end
 
-  def get_taxon_counts_2d(report)
+  def convert_2d(taxon_counts_from_sql)
     # Return data structured as
     #    tax_id => {
     #       tax_id,
@@ -167,30 +169,80 @@ module ReportHelper
     #       }
     #    }
     taxon_counts_2d = {}
-    taxon_counts_from_sql = get_raw_taxon_counts(report)
     taxon_counts_from_sql.each do |t|
       taxon_counts_2d[t['tax_id']] ||= tax_info_base(t)
       taxon_counts_2d[t['tax_id']][t['count_type']] = metric_props(t)
     end
+    taxon_counts_2d
+  end
+
+  def cleanup_genus_ids!(taxon_counts_2d)
     # We might rewrite the query to be super sure of this
     taxon_counts_2d.each do |tax_id, tax_info|
       if tax_info['tax_level'] == TaxonCount::TAX_LEVEL_GENUS
-        tax_info['genus_taxid'] = tax_info['tax_id']
+        tax_info['genus_taxid'] = tax_id
       end
     end
+    taxon_counts_2d
+  end
+
+  def cleanup_names!(taxon_counts_2d)
+    # There are still taxons without names
+    missing_names = Set.new
+    taxon_counts_2d.each do |tax_id, tax_info|
+      name_from_lineages = tax_info.delete('name_from_lineages')
+      name_from_counts = tax_info.delete('name_from_counts')
+      if tax_id < 0
+        # Usually -1 means accession number did not resolve to species.
+        # TODO: Can we keep the accession numbers to show in these cases?
+        level_str = tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES ? 'species' : 'genuses'
+        tax_info['name'] = "All uncategorized #{level_str}"
+        if tax_id != MISSING_SPECIES_ID && tax_id != MISSING_SPECIES_ID_ALT && tax_id != MISSING_GENUS_ID
+          tax_info['name'] += " #{tax_id}"
+        end
+      else
+        missing_names.add(tax_id) unless name_from_lineages
+        tax_info['name'] = (
+          name_from_lineages ||
+          name_from_counts ||
+          "Unnamed taxon #{tax_id}"
+        )
+      end
+      tax_info['category_name'] ||= 'Uncategorized'
+    end
+    logger.warn "Missing taxon_lineages names for taxon ids #{missing_names.to_a}" unless missing_names.empty?
+    taxon_counts_2d
+  end
+
+  def cleanup_missing_genus_counts!(taxon_counts_2d)
     # there should be a genus_pair for every species (even if it is the pseudo
     # genus id -200);  anything else indicates a bug in data import;
-    # warn about that bug and ensure affected data is NOT hidden from view
+    # warn and ensure affected data is NOT hidden from view
     fake_genuses = []
+    missing_genuses = Set.new
+    taxids_with_missing_genuses = Set.new
     taxon_counts_2d.each do |tax_id, tax_info|
-      unless taxon_counts_2d[tax_info['genus_taxid']]
-        logger.warn "Missing taxon_counts for genus_taxid #{tax_info['genus_taxid']} referenced by taxid #{tax_info['tax_id']}. Will 'promote' the taxon itself into singleton genus.  This may indicate a bug in the DB uploader code.  Try rerunning the sample."
+      genus_taxid = tax_info['genus_taxid']
+      unless taxon_counts_2d[genus_taxid]
+        taxids_with_missing_genuses.add(tax_id)
+        missing_genuses.add(genus_taxid)
         fake_genuses << fake_genus!(tax_info)
       end
     end
+    logger.warn "Missing taxon_counts for genus ids #{missing_genuses.to_a} corresponding to taxon ids #{taxids_with_missing_genuses.to_a}." unless missing_genuses.empty?
     fake_genuses.each do |fake_genus_info|
       taxon_counts_2d[fake_genus_info['genus_taxid']] = fake_genus_info
     end
+    taxon_counts_2d
+  end
+
+  def cleanup_all!(taxon_counts_2d)
+    t0 = Time.now
+    cleanup_genus_ids!(taxon_counts_2d)
+    cleanup_names!(taxon_counts_2d)
+    cleanup_missing_genus_counts!(taxon_counts_2d)
+    t1 = Time.now
+    logger.info "Data cleanup took #{t1 - t0} seconds."
     taxon_counts_2d
   end
 
@@ -216,10 +268,12 @@ module ReportHelper
   end
 
   def taxonomy_details(report, params, view_level)
-    tax_2d = get_taxon_counts_2d(report)
+    t0 = Time.now
+    tax_2d = cleanup_all!(convert_2d(fetch_taxon_counts(report)))
+    t1 = Time.now
     data_ranges = min_max(tax_2d)
 
-    view_level_int = view_level_name2int(view_level)
+    view_level_int = TaxonCount::NAME_2_LEVEL[view_level.downcase]
     sort_by = decode_sort_params(params[:sort_by])
     rp = decode_range_params(params, data_ranges)
 
@@ -233,14 +287,18 @@ module ReportHelper
     rows.sort! { |dl, dr| dl[:sort_key] <=> dr[:sort_key] }
 
     # HACK
-    rows = rows[0...1000]
+    rows = rows[0...2000]
 
     rows.each do |tax_info|
-      tax_info.delete(:sort_key)
-      tax_info['genus_name'] = tax_2d[tax_info['genus_taxid']]['name']
+      UNUSED_IN_UI_FIELDS.each do |unused_field|
+        tax_info.delete(unused_field)
+      end
     end
 
-    puts "BORIS: #{rows[0..10]}"
+    t2 = Time.now
+    logger.info "Data processing took #{t2 - t1} seconds (#{t2 - t0} with I/O)."
+
+    #puts "BORIS: #{rows[0..10]}"
 
     [data_ranges, rows]
   end
