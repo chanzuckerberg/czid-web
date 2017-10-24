@@ -62,9 +62,18 @@ def generate_taxid_fasta_from_accid(input_fasta_file, accession2taxid_path, line
     output_fasta_f.close()
 
 def generate_taxid_locator(input_fasta, taxid_field, output_fasta, output_json):
-    subprocess.check_output("sort --key %s --field-separator ':' --numeric-sort %s > %s" % (taxid_field, input_fasta, output_fasta), shell=True)
+    # put every 2-line fasta record on a single line with delimiter ":lineseparator:":
+    command = "awk 'NR % 2 == 1 { o=$0 ; next } { print o \":lineseparator:\" $0 }' %s" % input_fasta
+    # sort the records based on the field containing the taxids:
+    command += " | sort --key %s --field-separator ':' --numeric-sort" % taxid_field
+    # split every record back over 2 lines:
+    command += " | sed 's/:lineseparator:/\n/g' > %s" % output_fasta
+    # TO DO: TEST IF COMMAND GIVES EXPECTED RESULTS
+    subprocess.check_output(command, shell=True)
+    # count successive occurrences of taxids in the taxid-sorted file:
     taxid_count_string = subprocess.check_output("cut -f %s -d ':' %s | uniq -c" % (taxid_field, output_fasta), shell=True)
     taxid_count_lines = taxid_count_string.splitlines()
+    # make json giving first and last row of each taxid:
     taxon_sequence_locations = []
     first_row = 1
     for line in taxid_count_lines:
