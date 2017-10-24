@@ -216,8 +216,8 @@ class SampleUpload extends React.Component {
   }
 
   filePathValid(str) {
-    var regexPrefix = /^s3:\/\//;
-    var regexSuffix = /(\A[^\s\/]+\.fastq.gz)/igm;
+    var regexPrefix = /s3:\/\//;
+    var regexSuffix = /(\.fastq.gz)/igm;
     if (str.match(regexPrefix) && str.match(regexSuffix)) {
       return true;
     } else {
@@ -297,13 +297,13 @@ class SampleUpload extends React.Component {
     } else if ( !this.filePathValid(this.refs.first_file_source.value)) {
         this.setState({
           invalid: true,
-          errorMessage: 'Please fill in a valid file path'
+          errorMessage: 'Please fill in a valid file path for Read 1, Sample format for path can be found below'
         })
         return true;
     } else if ( !this.filePathValid(this.refs.second_file_source.value)) {
       this.setState({
         invalid: true,
-        errorMessage: 'Please fill in a valid file path'
+        errorMessage: 'Please fill in a valid file path for Read 2, Sample format for path can be found below'
       })
       return true;
     }
@@ -406,7 +406,7 @@ class SampleUpload extends React.Component {
                 <div className="input-field col s6"> 
                     <div className="row">
                       <input className="col s11 project-input" ref= "new_project" type="text" onFocus={ this.clearError } placeholder="Add a project if desired project is not on the list" />
-                      <input className="col s1 add-icon" value="&#xf067;" type="submit" onClick={ this.handleProjectSubmit } />
+                      <input className="col s1 add-icon" value="&#xf067;" type="button" onClick={ this.handleProjectSubmit } />
                     </div>
                     <label htmlFor="new_project">Project</label>
                 </div>
@@ -493,7 +493,7 @@ class SampleUpload extends React.Component {
                 <div className="input-field col s6"> 
                     <div className="row">
                       <input className="col s11 project-input" ref= "new_project" type="text" onFocus={ this.clearError } placeholder="Add a project if desired project is not on the list" />
-                      <input className="col s1 add-icon" value="&#xf067;" type="submit" onClick={ this.handleProjectSubmit } />
+                      <input className="col s1 add-icon" value="&#xf067;" type="button" onClick={ this.handleProjectSubmit } />
                     </div>
                     <label htmlFor="new_project">Project</label>
                 </div>

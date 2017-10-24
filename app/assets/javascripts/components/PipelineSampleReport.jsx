@@ -312,7 +312,7 @@ class PipelineSampleReport extends React.Component {
                         </td>
 
                         <td>
-                          { (this.view_level==='species' && (taxon.nt_ele && taxon.nt_ele.hasOwnProperty('percent_identity'))) ? numberWithCommas(Number(taxon.nr_ele.percent_identity).toFixed(3)) : '' }
+                          { (this.view_level==='species' && (taxon.nt_ele && taxon.nt_ele.hasOwnProperty('percent_identity'))) ? numberWithCommas(Number(taxon.nt_ele.percent_identity).toFixed(3)) : '' }
                         </td>
 
                         <td>
