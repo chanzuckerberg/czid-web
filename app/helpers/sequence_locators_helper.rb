@@ -10,6 +10,7 @@ module SequenceLocatorsHelper
     bucket = uri_parts[2]
     key = uri_parts[3]
     taxon_location = sequence_locator.taxon_sequence_locations.find_by(taxid: taxid)
-    Client.get_object(bucket: bucket, key: key, range: "bytes=#{taxon_location.first_byte}-#{taxon_location.last_byte}")
+    resp = Client.get_object(bucket: bucket, key: key, range: "bytes=#{taxon_location.first_byte}-#{taxon_location.last_byte}")
+    resp.body.read
   end
 end
