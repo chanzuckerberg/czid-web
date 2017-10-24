@@ -438,7 +438,7 @@ class SampleUpload extends React.Component {
                 </div>
             </div>
         </div>
-        <input className="hidden" type="submit" formAction="/samples.json"/>
+        <input className="hidden" type="submit"/>
         <div onClick={ this.handleUpdate } className="center login-wrapper">Submit</div>
       </form>
     </div>
@@ -448,7 +448,7 @@ class SampleUpload extends React.Component {
   renderSampleForm() {
     return (
       <div className="form-wrapper">
-        <form ref="form" onSubmit={ this.handleUpload } action="/samples.json">
+        <form ref="form" onSubmit={ this.handleUpload }>
           <div className="row title">
             <p className="col s6 signup">Sample Upload</p>
           </div>
