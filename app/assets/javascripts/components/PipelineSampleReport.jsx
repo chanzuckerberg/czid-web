@@ -6,6 +6,7 @@ class PipelineSampleReport extends React.Component {
     this.taxonomy_details = props.taxonomy_details;
     this.all_categories = props.all_categories || [];
     this.checked_categories = props.checked_categories || props.all_categories
+    this.genus_info = props.genus_info
     this.sample_id = props.sample_id
 
     this.view_level = ReportFilter.getFilter('view_level') || 'species';
@@ -105,7 +106,8 @@ class PipelineSampleReport extends React.Component {
                   report_title = { this.report_details.report_info.name }
                   view_level={this.view_level}
                   highest_tax_counts={this.highest_tax_counts}
-                  sample_id = {this.sample_id} />
+                  sample_id = {this.sample_id}
+                  genus_info = {this.genus_info} />
               </div>
               <div className="col s10 reports-main ">
                 <table id="report-table" className='bordered report-table'>

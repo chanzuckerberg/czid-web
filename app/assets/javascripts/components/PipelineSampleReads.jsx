@@ -79,6 +79,7 @@ class PipelineSampleReads extends React.Component {
       d_report = <PipelineSampleReport
         all_categories = { this.reportInfo.all_categories }
         checked_categories = {this.reportInfo.checked_categories || this.reportInfo.all_categories }
+        genus_info = {this.reportInfo.genus_info}
         report_details={this.reportInfo.report_details}
         taxonomy_details={this.reportInfo.taxonomy_details} view_level={this.reportInfo.view_level}
         highest_tax_counts={this.reportInfo.highest_tax_counts}
