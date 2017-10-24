@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171024013024) do
+ActiveRecord::Schema.define(version: 20171024183842) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -162,6 +162,7 @@ ActiveRecord::Schema.define(version: 20171024013024) do
     t.bigint "pipeline_output_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "hit_type"
     t.index ["pipeline_output_id"], name: "index_sequence_locators_on_pipeline_output_id"
     t.index ["postprocess_run_id"], name: "index_sequence_locators_on_postprocess_run_id"
   end

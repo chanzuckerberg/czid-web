@@ -4,10 +4,12 @@ class PostprocessRun < ApplicationRecord
   belongs_to :pipeline_output
   has_one :sequence_locator
 
-  OUTPUT_FASTA_NAME = 'taxid_annot_sorted.fasta'.freeze
-  LOCAL_FASTA_PATH = '/app/tmp/results_fasta'.freeze
-  OUTPUT_JSON_NAME = 'taxid_locations.json'.freeze
-  LOCAL_JSON_PATH = '/app/tmp/results_json'.freeze
+  OUTPUT_FASTA_NAME_NT = 'taxid_annot_sorted_nt.fasta'.freeze
+  OUTPUT_FASTA_NAME_NR = 'taxid_annot_sorted_nr.fasta'.freeze
+  LOCAL_FASTA_PATH = '/app/tmp/postprocess_results_fasta'.freeze
+  OUTPUT_JSON_NAME_NT = 'taxid_locations_nt.json'.freeze
+  OUTPUT_JSON_NAME_NR = 'taxid_locations_nr.json'.freeze
+  LOCAL_JSON_PATH = '/app/tmp/postprocess_results_json'.freeze
   STATUS_CHECKED = 'CHECKED'.freeze
   STATUS_SUCCESS = 'SUCCEEDED'.freeze
   STATUS_FAILED = 'FAILED'.freeze
@@ -65,14 +67,16 @@ class PostprocessRun < ApplicationRecord
     "#{LOCAL_JSON_PATH}/#{id}"
   end
 
-  def load_results_from_s3
+  output_json_s3_path = "#{sample.sample_postprocess_s3_path}/#{OUTPUT_JSON_NAME}"
+
+  def make_sequence_locator(json_file_s3, sequence_file_uri, hit_type)
     return if sequence_locator
-    output_json_s3_path = "#{sample.sample_output_s3_path}/#{OUTPUT_JSON_NAME}"
-    # Get the file
-    downloaded_json_path = download_file(output_json_s3_path)
+    downloaded_json_path = download_file(json_file_s3)
     return unless downloaded_json_path
     json_dict = JSON.parse(File.read(downloaded_json_path))
     sl = SequenceLocator.new(json_dict)
+    sl.sequence_file_uri = sequence_file_uri
+    sl.hit_type = hit_type
     sl.pipeline_output = pipeline_output
     sl.postprocess_run = self
     sl.save
@@ -81,5 +85,14 @@ class PostprocessRun < ApplicationRecord
     save
     # rm the json
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_json_path}")
+  end
+
+  def load_results_from_s3
+    make_sequence_locator("#{sample.sample_postprocess_s3_path}/#{OUTPUT_JSON_NAME_NT}",
+                          "#{sample.sample_postprocess_s3_path}/#{OUTPUT_FASTA_NAME_NT}",
+                          "NT")
+    make_sequence_locator("#{sample.sample_postprocess_s3_path}/#{OUTPUT_JSON_NAME_NR}",
+                          "#{sample.sample_postprocess_s3_path}/#{OUTPUT_FASTA_NAME_NR}",
+                          "NR")
   end
 end
