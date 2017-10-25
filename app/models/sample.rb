@@ -110,11 +110,11 @@ class Sample < ApplicationRecord
 
   def postprocess_batch_command
     postprocess_script_name = File.basename(IdSeqPostprocess::S3_SCRIPT_LOC)
-    postprocess_batch_command_env_variables = "INPUT_BUCKET=#{sample.sample_output_s3_path} " \
-      "OUTPUT_BUCKET=#{sample.sample_postprocess_s3_path} "
-    "aws s3 cp #{IdSeqPostprocese::S3_SCRIPT_LOC} .; chmod 755 #{postprocess_script_name}; " +
+    postprocess_batch_command_env_variables = "INPUT_BUCKET=#{sample_output_s3_path} " \
+      "OUTPUT_BUCKET=#{sample_postprocess_s3_path} "
+    "aws s3 cp #{IdSeqPostprocess::S3_SCRIPT_LOC} .; chmod 755 #{postprocess_script_name}; " +
       postprocess_batch_command_env_variables + "./#{postprocess_script_name}"
-    end
+  end
 
   def pipeline_command
     script_name = File.basename(IdSeqPipeline::S3_SCRIPT_LOC)

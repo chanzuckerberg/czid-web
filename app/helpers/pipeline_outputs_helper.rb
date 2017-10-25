@@ -5,7 +5,7 @@ module PipelineOutputsHelper
   Creds = Aws::Credentials.new(ENV['AWS_ACCESS_KEY'], ENV['AWS_ACCESS_SECRET'])
   Client = Aws::S3::Client.new(region: ENV['AWS_REGION'], credentials: Creds)
 
-  def getTaxidFasta(pipeline_output, taxid)
+  def get_taxid_fasta(pipeline_output, taxid)
     uri_parts = pipeline_output.sample.sorted_taxid_annotated_fasta_s3_path.split("/", 4)
     bucket = uri_parts[2]
     key = uri_parts[3]
