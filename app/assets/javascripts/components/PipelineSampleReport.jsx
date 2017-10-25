@@ -275,7 +275,7 @@ class PipelineSampleReport extends React.Component {
                         <td>
                           { (this.view_level==='species' && taxon.nt_ele) ?
                             <span className="link">
-                              <a href={`/sequence_locators/${this.pipeline_output_id}/NT/${taxon.nt_ele.tax_id}`}>{ taxon.nt_ele.name }</a>
+                              <a href={`/pipeline_outputs/${this.pipeline_output_id}/${taxon.nt_ele.tax_id}/fasta`}>{ taxon.nt_ele.name }</a>
                             </span> : ''
                           }
                         </td>
