@@ -200,3 +200,18 @@ table .sort-controls {
     }
   }
 }
+
+
+.genus-autocomplete-container div div.decorate-dropdown{
+  display: block;
+  min-width: 168px;
+  border-radius: 3px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px;
+  position: absolute;
+  overflow: scroll;
+  max-height: 399px;
+  z-index: 500;
+  background: #fff;
+  padding: 10px;
+}
+
