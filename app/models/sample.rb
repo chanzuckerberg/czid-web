@@ -9,6 +9,7 @@ class Sample < ApplicationRecord
   STATUS_CHECKED  = 'checked'.freeze # status regarding pipeline kickoff is checked
   HIT_FASTA_BASENAME = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.fasta'.freeze
   UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fasta'.freeze
+  SORTED_TAXID_ANNOTATED_FASTA = 'taxid_annot_sorted_nt.fasta'.freeze
   LOG_BASENAME = 'log.txt'.freeze
   DEFAULT_MEMORY = 64_000
   DEFAULT_QUEUE = 'aegea_batch_ondemand'.freeze
@@ -74,6 +75,14 @@ class Sample < ApplicationRecord
     "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/results"
   end
 
+  def sample_postprocess_s3_path
+    "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/postprocess"
+  end
+
+  def sorted_taxid_annotated_fasta_s3_path
+    "#{sample_postprocess_s3_path}/#{SORTED_TAXID_ANNOTATED_FASTA}"
+  end
+
   def sample_annotated_fasta_url
     "https://s3.console.aws.amazon.com/s3/object/#{SAMPLES_BUCKET_NAME}/#{sample_path}/results/#{HIT_FASTA_BASENAME}"
   end
@@ -99,6 +108,14 @@ class Sample < ApplicationRecord
                     :sample_unidentified_fasta_url, :host_genome_name])
   end
 
+  def postprocess_batch_command
+    postprocess_script_name = File.basename(IdSeqPostprocess::S3_SCRIPT_LOC)
+    postprocess_batch_command_env_variables = "INPUT_BUCKET=#{sample.sample_output_s3_path} " \
+      "OUTPUT_BUCKET=#{sample.sample_postprocess_s3_path} "
+    "aws s3 cp #{IdSeqPostprocese::S3_SCRIPT_LOC} .; chmod 755 #{postprocess_script_name}; " +
+      postprocess_batch_command_env_variables + "./#{postprocess_script_name}"
+    end
+
   def pipeline_command
     script_name = File.basename(IdSeqPipeline::S3_SCRIPT_LOC)
     batch_command_env_variables = "INPUT_BUCKET=#{sample_input_s3_path} OUTPUT_BUCKET=#{sample_output_s3_path} " \
@@ -113,6 +130,7 @@ class Sample < ApplicationRecord
     end
     batch_command = "aws s3 cp #{IdSeqPipeline::S3_SCRIPT_LOC} .; chmod 755 #{script_name}; " +
                     batch_command_env_variables + "./#{script_name}"
+    batch_command += "; " + postprocess_batch_command
     command = "aegea batch submit --command=\"#{batch_command}\" "
     memory = sample_memory.present? ? sample_memory : DEFAULT_MEMORY
     queue =  job_queue.present? ? job_queue : DEFAULT_QUEUE
