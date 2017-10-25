@@ -183,9 +183,21 @@ module ReportHelper
         sp_z_nr = species_nr_ele['zscore']
         g_z_nr = genus_nr_ele ? genus_nr_ele['zscore'] : nil
         sp_rpm_nr = species_nr_ele['rpm']
-        nt_aggregate_score = sp_rpm_nt==0 ? 0 : sp_z_nt*g_z_nt*sp_rpm_nt
-        nr_aggregate_score = sp_rpm_nr==0 ? 0 : sp_z_nr*g_z_nr*sp_rpm_nr
-        aggregate_score = nt_aggregate_score + nr_aggregate_score
+        nt_aggregate_score = if g_z_nt.nil?
+                               nil
+                             elsif sp_rpm_nt==0
+                               0
+                             else 
+                               sp_z_nt*g_z_nt*sp_rpm_nt
+                             end
+        nr_aggregate_score = if g_z_nr.nil?
+                               nil
+                             elsif sp_rpm_nr==0
+                               0
+                             else
+                               sp_z_nr*g_z_nr*sp_rpm_nr
+                             end
+        aggregate_score = nt_aggregate_score.nil? || nr_aggregate_score.nil? ? nil : nt_aggregate_score + nr_aggregate_score
         details = {
           nt_ele: species_nt_ele,
           nr_ele: species_nr_ele,
