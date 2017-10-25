@@ -2,6 +2,7 @@
 <html>
   <head>
     <title>IdSeq</title>
+    <%= javascript_include_tag Analytics::TRACKING_SOURCE %>
     <%= csrf_meta_tags %>
 
     <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
@@ -11,5 +12,6 @@
   <body>
     <%= render "layouts/page_header" %>
     <%= yield %>
+    <script type="text/javascript">_satellite.pageBottom();</script>
   </body>
 </html>
