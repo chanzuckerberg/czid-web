@@ -79,7 +79,7 @@ class PipelineSampleReads extends React.Component {
         all_categories = { this.reportInfo.all_categories }
         report_details={this.reportInfo.report_details}
         taxonomy_details={this.reportInfo.taxonomy_details}
-        view_level={this.reportInfo.view_level}
+        report_page_params={this.reportInfo.report_page_params}
       />;
     } else {
       d_report = <p className="center-align text-grey text-lighten-2 no-report">No report found for this sample</p>

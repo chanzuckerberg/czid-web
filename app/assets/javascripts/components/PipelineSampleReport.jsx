@@ -4,18 +4,15 @@ class PipelineSampleReport extends React.Component {
     super(props);
     this.report_details = props.report_details;
     this.real_length = props.taxonomy_details[0];
+    this.report_page_params = props.report_page_params;
     this.taxonomy_details = props.taxonomy_details[1];
     this.all_categories = props.all_categories;
-    this.sort_by = ReportFilter.getParam('sort_by');
-    this.state = {
-      sort_by: this.sort_by
-    };
     this.applySort = this.applySort.bind(this);
+    this.report_filter = null;
   }
 
   applySort(sort_by) {
-    this.setState({ sort_by });
-    ReportFilter.applyParamChange({ sort_by });
+    this.report_filter.refetchReportPage({ sort_by });
   }
 
   render_name(tax_info) {
@@ -56,7 +53,7 @@ class PipelineSampleReport extends React.Component {
     desired_sort = desired_sort_direction + "_" + column;
     applyDesiredSort = this.applySort.bind(desired_sort);
     className = `fa fa-caret-${arrow_direction}`;
-    current_sort = this.sort_by;
+    current_sort = this.report_page_params.sort_by;
     if (current_sort == desired_sort) {
       className = 'active ' + className;
     }
@@ -72,8 +69,8 @@ class PipelineSampleReport extends React.Component {
     return (
       <th style={style}>
         <div className='sort-controls right'>
-          {this.render_sort_arrow(column_name, this.sort_by, 'lowest', 'up')}
-          {this.render_sort_arrow(column_name, this.sort_by, 'highest', 'down')}
+          {this.render_sort_arrow(column_name, this.report_page_params.sort_by, 'lowest', 'up')}
+          {this.render_sort_arrow(column_name, this.report_page_params.sort_by, 'highest', 'down')}
           {visible_type}&nbsp;{visible_metric}
         </div>
       </th>
@@ -85,21 +82,24 @@ class PipelineSampleReport extends React.Component {
   }
 
   render() {
-    const parts = this.sort_by.split("_")
+    const parts = this.report_page_params.sort_by.split("_")
     const sort_column = parts[1] + "_" + parts[2];
     console.log("Start table render.");
     var t0 = Date.now();
+    this.report_filter =
+      <ReportFilter
+        all_categories = { this.all_categories }
+        background_model = { this.report_details.background_model.name }
+        report_title = { this.report_details.report_info.name }
+        report_page_params = { this.report_page_params }
+      />;
     result = (
       <div>
         <div id="reports" className="reports-screen tab-screen col s12">
           <div className="tab-screen-content">
             <div className="row">
               <div className="col s2">
-                <ReportFilter
-                  all_categories = { this.all_categories }
-                  background_model = { this.report_details.background_model.name }
-                  report_title = { this.report_details.report_info.name }
-                />
+                {this.report_filter}
               </div>
               <div className="col s10 reports-main ">
                 <table id="report-table" className='bordered report-table'>
