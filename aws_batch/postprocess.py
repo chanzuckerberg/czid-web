@@ -20,6 +20,11 @@ ROOT_DIR = '/mnt'
 DEST_DIR = ROOT_DIR + '/idseq/data' # generated data go here
 REF_DIR  = ROOT_DIR + '/idseq/ref' # referene genome / ref databases go here
 
+# Global variable examples, to be overwritten by environment variables
+INPUT_BUCKET = 's3://czbiohub-idseq-samples-development/samples/3/60/results'
+OUTPUT_BUCKET = 's3://czbiohub-idseq-samples-development/samples/3/60/postprocess'
+
+# references
 ACCESSION2TAXID = 's3://czbiohub-infectious-disease/references/accession2taxid.db.gz'
 LINEAGE_SHELF = 's3://czbiohub-infectious-disease/references/taxid-lineages.db'
 
@@ -33,6 +38,12 @@ TAXID_LOCATIONS_JSON_NT = 'taxid_locations_nt.json'
 TAXID_ANNOT_SORTED_FASTA_NR = 'taxid_annot_sorted_nr.fasta'
 TAXID_LOCATIONS_JSON_NR = 'taxid_locations_nr.json'
 LOGS_OUT_BASENAME = 'postprocess-log'
+
+# convenience functions
+def return_merged_dict(dict1, dict2):
+    result = dict1.copy()
+    result.update(dict2)
+    return result
 
 # processing functions
 def accession2taxid(read_id, accession2taxid_dict, hit_type, lineage_map):
@@ -63,17 +74,17 @@ def generate_taxid_fasta_from_accid(input_fasta_file, accession2taxid_path, line
 
 def get_taxid(sequence_name, taxid_field):
     parts = sequence_name.split(":")
-    if len(parts) < taxid_field-1:
+    if len(parts) < taxid_field:
          return 'none'
     return parts[taxid_field-1]
 
 def generate_taxid_locator(input_fasta, taxid_field, output_fasta, output_json):
     # put every 2-line fasta record on a single line with delimiter ":lineseparator:":
-    command = "awk 'NR % 2 == 1 { o=$0 ; next } { print o \":lineseparator:\" $0 }' %s" % input_fasta
+    command = "awk 'NR % 2 == 1 { o=$0 ; next } { print o \":lineseparator:\" $0 }' " + input_fasta
     # sort the records based on the field containing the taxids:
     command += " | sort --key %s --field-separator ':' --numeric-sort" % taxid_field
     # split every record back over 2 lines:
-    command += " | sed 's/:lineseparator:/\n/g' > %s" % output_fasta
+    command += " | sed 's/:lineseparator:/\\n/g' > %s" % output_fasta
     # TO DO: TEST IF COMMAND GIVES EXPECTED RESULTS
     subprocess.check_output(command, shell=True)
     # make json giving byte range of file corresponding to each taxid:
@@ -91,8 +102,8 @@ def generate_taxid_locator(input_fasta, taxid_field, output_fasta, output_json):
         if new_taxid != taxid:
             taxon_sequence_locations.append({'taxid': taxid, 'first_byte': first_byte,
                                              'last_byte': new_first_byte - 1})
-            taxid = new_taxid.copy
-            first_byte = new_first_byte.copy
+            taxid = new_taxid
+            first_byte = new_first_byte
             new_first_byte = len(sequence_name) + len(sequence_data)
         else:
             new_first_byte += len(sequence_name) + len(sequence_data)
@@ -169,7 +180,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path, aws_batch_job_id, la
     input_dir = sample_dir + '/inputs'
     result_dir = sample_dir + '/results'
     scratch_dir = sample_dir + '/scratch'
-    execute_command("mkdir -p %s %s %s" % (sample_dir, input_dir, result_dir, scratch_dir))
+    execute_command("mkdir -p %s %s %s %s" % (sample_dir, input_dir, result_dir, scratch_dir))
     execute_command("mkdir -p %s " % REF_DIR);
 
     # configure logger
