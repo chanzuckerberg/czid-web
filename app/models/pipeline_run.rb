@@ -66,7 +66,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def load_results_from_s3
-    return if pipeline_output && !pipeline_output.taxon_byteranges.empty?
+    return if pipeline_output
     output_json_s3_path = "#{sample.sample_output_s3_path}/#{OUTPUT_JSON_NAME}"
     stats_json_s3_path = "#{sample.sample_output_s3_path}/#{STATS_JSON_NAME}"
     byteranges_json_s3_path = "#{sample.sample_postprocess_s3_path}/#{TAXID_BYTERANGE_JSON_NAME}"
