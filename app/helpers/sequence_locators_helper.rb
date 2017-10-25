@@ -5,7 +5,7 @@ module SequenceLocatorsHelper
   Creds = Aws::Credentials.new(ENV['AWS_ACCESS_KEY'], ENV['AWS_ACCESS_SECRET'])
   Client = Aws::S3::Client.new(region: ENV['AWS_REGION'], credentials: Creds)
 
-  def getTaxidFastaFile(pipeline_output, sequence_locator, taxid)
+  def getTaxidFasta(sequence_locator, taxid)
     uri_parts = sequence_locator.sequence_file_uri.split("/", 4)
     bucket = uri_parts[2]
     key = uri_parts[3]

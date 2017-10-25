@@ -20,4 +20,5 @@ Rails.application.routes.draw do
   mount Resque::Server.new, at: '/resque'
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
   root to: 'home#home'
+  get 'sequence_locators/:pipeline_output_id/:hit_type/:taxid', to 'sequence_locators#show_taxid_fasta'
 end
