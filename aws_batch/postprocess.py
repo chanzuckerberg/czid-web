@@ -49,7 +49,7 @@ def return_merged_dict(dict1, dict2):
 def accession2taxid(read_id, accession2taxid_dict, hit_type, lineage_map):
     accid_short = ((read_id.split(hit_type+':'))[1].split(":")[0]).split(".")[0]
     taxid = accession2taxid_dict.get(accid_short, "NA")
-    species_taxid, genus_taxid, family_taxid = lineage_map.get(taxid, ("-1", "-2", "-3"))
+    species_taxid, genus_taxid, family_taxid = lineage_map.get(taxid, ("-100", "-200", "-300"))
     return species_taxid, genus_taxid, family_taxid
 
 def generate_taxid_fasta_from_accid(input_fasta_file, accession2taxid_path, lineagePath, output_fasta_file):
