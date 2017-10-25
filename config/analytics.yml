@@ -1,0 +1,18 @@
+default: &default
+  tracking_src: //assets.adobedtm.com/47a2b9e4fadf377fb8ee9eff00c944923722bc81/satelliteLib-822886717790164b49f60da156006f9d335ed8f2-staging.js
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+
+alpha:
+  <<: *default
+
+staging:
+  <<: *default
+
+production:
+  <<: *default
+  tracking_src: //assets.adobedtm.com/47a2b9e4fadf377fb8ee9eff00c944923722bc81/satelliteLib-822886717790164b49f60da156006f9d335ed8f2.js
