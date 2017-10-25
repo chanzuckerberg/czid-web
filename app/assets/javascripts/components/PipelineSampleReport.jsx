@@ -275,7 +275,8 @@ class PipelineSampleReport extends React.Component {
                         <td>
                           { (this.view_level==='species' && taxon.nt_ele) ?
                             <span className="link">
-                              <a href={`/pipeline_outputs/${this.pipeline_output_id}/${taxon.nt_ele.tax_id}/fasta`}>{ taxon.nt_ele.name }</a>
+                              <a href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${
+                                 taxon.nt_ele.tax_id}`}>{ taxon.nt_ele.name }</a>
                             </span> : ''
                           }
                         </td>
@@ -303,7 +304,10 @@ class PipelineSampleReport extends React.Component {
                         </td>
 
                         <td>
-                          { (this.view_level==='species' && (taxon.nt_ele && taxon.nt_ele.hasOwnProperty('count')) ) ? numberWithCommas(taxon.nt_ele.count) : '' }
+                          { (this.view_level==='species' && (taxon.nt_ele && taxon.nt_ele.hasOwnProperty('count')) ) ? 
+                            <span className="link">
+                              <a href={`/pipeline_outputs/${this.pipeline_output_id}/${taxon.nt_ele.tax_id}/fasta`}>{ numberWithCommas(taxon.nt_ele.count) }</a>
+                            </span> : '' }
                         </td>
 
                         <td>

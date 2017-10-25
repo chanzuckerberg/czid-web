@@ -1,4 +1,3 @@
-require 'aws-sdk'
 module PipelineOutputsHelper
   # TO DO: check if ENV variables on instances actually have these names
   # ENV['AWS_REGION'] ||= 'us-west-2'
