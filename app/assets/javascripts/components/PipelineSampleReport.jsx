@@ -84,7 +84,7 @@ class PipelineSampleReport extends React.Component {
           </a>
         </span>
       : <span>
-          {tax_info.name || 'Placeholder ' + tax_info.tax_id}
+          <i>{tax_info.name}</i>
         </span>;
     if (tax_info.tax_level == 1) {
       // indent species rows
@@ -98,13 +98,21 @@ class PipelineSampleReport extends React.Component {
 
   render_number(x, emphasize, num_decimals) {
     const is_blank = (x == 0) || (x == -100);
-    y = Number(x).toFixed(num_decimals);
+    units = '';
+    y = Number(x);
+    /*
+    if (y >= 1000) {
+      units = 'k';
+      y /= 1000.0;
+    }
+    */
+    y = y.toFixed(num_decimals);
     y = numberWithCommas(y);
     if (emphasize) {
       y = <b>{y}</b>;
     }
     className = is_blank ? 'report-number-blank' : 'report-number';
-    return ( <td className={className}>{y}</td> );
+    return ( <td className={className}>{y}<b>{units}</b></td> );
   }
 
   render_sort_arrow(column, sort_column, sort_direction, arrow_direction) {
@@ -190,7 +198,7 @@ class PipelineSampleReport extends React.Component {
                   </tbody>
                 </table>
                 <span>
-                {this.real_length == this.taxonomy_details.length ? ('Showing all ' + this.real_length + ' rows.') : ('Due to resource limits, showing only ' + this.taxonomy_details.length + ' of the ' + this.real_length + ' rows.')}
+                {this.real_length == this.taxonomy_details.length ? ('Showing all ' + this.real_length + ' rows passing filters.') : ('Due to resource limits, showing only ' + this.taxonomy_details.length + ' of the ' + this.real_length + ' rows passing filters.')}
                 </span>
               </div>
             </div>
