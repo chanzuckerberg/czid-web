@@ -253,7 +253,7 @@ class PipelineSampleReport extends React.Component {
                     </th> : '' }
  
                     { (this.view_level === 'species') ?
-                    <th>Aggregate
+                    <th>Aggregate Score
                       <div className='sort-controls left'>
                         <i className='fa fa-caret-up'></i>
                         <i className='fa fa-caret-down'></i>
