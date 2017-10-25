@@ -3,9 +3,3 @@ check_pipeline_run:
   class: CheckPipelineRuns
   args:
   description: check pipeline runs every 10m
-
-check_postprocess_run:
-  cron: "*/10 * * * *"
-  class: CheckPostprocessRuns
-  args:
-  description: check postprocess runs every 10m
