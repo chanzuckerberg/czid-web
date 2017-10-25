@@ -200,7 +200,12 @@ class ReportFilter extends React.Component {
         this.setState(newState);
       });
     }
+    $('.genus-autocomplete-container div input').on('focus keyup', () => {
+      $('.genus-autocomplete-container div input + div').removeAttr('style');
+      $('.genus-autocomplete-container div input + div').addClass('decorate-dropdown');
+    });
   }
+
   render() {
     return (
       <div className="reports-sidebar">
@@ -264,7 +269,7 @@ class ReportFilter extends React.Component {
                   <div className="filter-title">
                     GENUS SEARCH
                   </div>
-                  <div className="filter-values">
+                  <div className="filter-values genus-autocomplete-container">
 					<ReactAutocomplete
                       inputProps={{ placeholder: 'Genus name here' }}
                       items={this.state.genus_list}
