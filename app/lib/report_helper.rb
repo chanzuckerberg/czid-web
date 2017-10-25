@@ -154,14 +154,14 @@ module ReportHelper
     sp_rpm_nr = species_nr_ele['rpm']
     nt_aggregate_score = if g_z_nt.nil?
                            nil
-                         elsif sp_rpm_nt == 0
+                         elsif sp_rpm_nt.zero?
                            0
                          else
                            sp_z_nt * g_z_nt * sp_rpm_nt
                          end
     nr_aggregate_score = if g_z_nr.nil?
                            nil
-                         elsif sp_rpm_nr == 0
+                         elsif sp_rpm_nr.zero?
                            0
                          else
                            sp_z_nr * g_z_nr * sp_rpm_nr
