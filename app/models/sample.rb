@@ -3,6 +3,7 @@ require 'json'
 
 class Sample < ApplicationRecord
   self.per_page = 10
+ # S3_POSTPROCESS_SCRIPT_LOC = 's3://czbiohub-infectious-disease/bin/postprocess.py' # temporary fix
   STATUS_CREATED  = 'created'.freeze
   STATUS_UPLOADED = 'uploaded'.freeze
   STATUS_RERUN    = 'need_rerun'.freeze
@@ -109,10 +110,10 @@ class Sample < ApplicationRecord
   end
 
   def postprocess_batch_command
-    postprocess_script_name = File.basename(IdSeqPostprocess::S3_SCRIPT_LOC)
+    postprocess_script_name = File.basename(IdSeqPipeline::S3_POSTPROCESS_SCRIPT_LOC)
     postprocess_batch_command_env_variables = "INPUT_BUCKET=#{sample_output_s3_path} " \
       "OUTPUT_BUCKET=#{sample_postprocess_s3_path} "
-    "aws s3 cp #{IdSeqPostprocess::S3_SCRIPT_LOC} .; chmod 755 #{postprocess_script_name}; " +
+    "aws s3 cp #{IdSeqPipeline::S3_POSTPROCESS_SCRIPT_LOC} .; chmod 755 #{postprocess_script_name}; " +
       postprocess_batch_command_env_variables + "./#{postprocess_script_name}"
   end
 
