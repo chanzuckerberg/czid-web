@@ -253,7 +253,7 @@ class PipelineSampleReport extends React.Component {
                     </th> : '' }
  
                     { (this.view_level === 'species') ?
-                    <th>Aggregate Score
+                    <th>Aggregate
                       <div className='sort-controls left'>
                         <i className='fa fa-caret-up'></i>
                         <i className='fa fa-caret-down'></i>
@@ -340,7 +340,7 @@ class PipelineSampleReport extends React.Component {
                         </td>
 
                         <td>
-                          { (this.view_level==='species' && taxon.aggregate_score) ? numberWithCommas(Number(taxon.aggregate_score)) : '' }
+                          { (this.view_level==='species' && taxon.aggregate_score) ? numberWithCommas(Number(taxon.aggregate_score).toFixed(3)) : '' }
                         </td>
  
                       </tr>

@@ -177,12 +177,12 @@ module ReportHelper
         species_nr_ele = tax_pair['NR']
         genus_nt_ele = tax2d.fetch(genus_taxid, {})['NT']
         genus_nr_ele = tax2d.fetch(genus_taxid, {})['NR']
-        sp_z_nt = species_nt_ele.zscore
-        g_z_nt = genus_nt_ele.zscore
-        sp_rpm_nt = species_nt_ele.rpm
-        sp_z_nr = species_nr_ele.zscore
-        g_z_nr = genus_nr_ele.zscore
-        sp_rpm_nr = species_nr_ele.rpm
+        sp_z_nt = species_nt_ele['zscore']
+        g_z_nt = genus_nt_ele ? genus_nt_ele['zscore'] : nil
+        sp_rpm_nt = species_nt_ele['rpm']
+        sp_z_nr = species_nr_ele['zscore']
+        g_z_nr = genus_nr_ele ? genus_nr_ele['zscore'] : nil
+        sp_rpm_nr = species_nr_ele['rpm']
         nt_aggregate_score = sp_rpm_nt==0 ? 0 : sp_z_nt*g_z_nt*sp_rpm_nt
         nr_aggregate_score = sp_rpm_nr==0 ? 0 : sp_z_nr*g_z_nr*sp_rpm_nr
         aggregate_score = nt_aggregate_score + nr_aggregate_score
