@@ -12,8 +12,11 @@ module ReportHelper
     data[:taxonomy_details] = td
     data[:view_level] = view_level
     data[:all_categories] = all_categories
-    if params[:categories]
+    if params[:categories].present?
       data[:checked_categories] = params[:categories].split(',').map { |c| { taxid: c.to_i } }
+    end
+    if params[:genus_tax_id].present?
+      data[:genus_info] = TaxonLineage.get_genus_info(params[:genus_tax_id])
     end
     data
   end
@@ -45,7 +48,7 @@ module ReportHelper
     # to be extended for all taxonomic ranks when needed
   end
 
-  def get_raw_taxon_counts(report, categories)
+  def get_raw_taxon_counts(report, categories, genus_taxon_id)
     pipeline_output_id = report.pipeline_output.id
     total_reads = report.pipeline_output.total_reads
     background_id = report.background.id
@@ -93,6 +96,10 @@ module ReportHelper
       query_results = query_results.where("taxon_lineages.superkingdom_taxid in (#{categories})")
     end
 
+    if genus_taxon_id.present?
+      query_results = query_results.where("taxon_lineages.genus_taxid = #{genus_taxon_id}")
+    end
+
     query_results.to_a.map(&:attributes)
   end
 
@@ -129,8 +136,8 @@ module ReportHelper
     [sort_field, sort_details_key, sort_direction]
   end
 
-  def get_taxon_counts_2d(report, categories)
-    taxon_counts_from_sql = get_raw_taxon_counts(report, categories)
+  def get_taxon_counts_2d(report, categories, genus_tax_id)
+    taxon_counts_from_sql = get_raw_taxon_counts(report, categories, genus_tax_id)
     taxon_counts_2d = {}
     taxon_counts_from_sql.each do |taxon|
       tax_id = taxon['tax_id']
@@ -171,7 +178,7 @@ module ReportHelper
   end
 
   def taxonomy_details(report, params, view_level)
-    tax2d = get_taxon_counts_2d(report, params[:categories])
+    tax2d = get_taxon_counts_2d(report, params[:categories], params[:genus_tax_id])
 
     view_level_int = view_level_name2int(view_level)
     view_level_str = view_level.downcase
