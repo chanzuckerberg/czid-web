@@ -36,7 +36,7 @@ class HomeController < ApplicationController
                                                     elsif %w[RUNNING LOADED].include?(pipeline_run_status)
                                                       'IN PROGRESS'
                                                     else
-                                                      ''
+                                                      'UPLOADING'
                                                     end
       @pipeline_run_info.push(pipeline_run_entry)
     end
