@@ -61,6 +61,12 @@ def generate_taxid_fasta_from_accid(input_fasta_file, accession2taxid_path, line
     input_fasta_f.close()
     output_fasta_f.close()
 
+def get_taxid(sequence_name, taxid_field):
+    parts = sequence_name.split(":")
+    if len(parts) < taxid_field-1:
+         return 'none'
+    return parts[taxid_field-1]
+
 def generate_taxid_locator(input_fasta, taxid_field, output_fasta, output_json):
     # put every 2-line fasta record on a single line with delimiter ":lineseparator:":
     command = "awk 'NR % 2 == 1 { o=$0 ; next } { print o \":lineseparator:\" $0 }' %s" % input_fasta
@@ -70,19 +76,27 @@ def generate_taxid_locator(input_fasta, taxid_field, output_fasta, output_json):
     command += " | sed 's/:lineseparator:/\n/g' > %s" % output_fasta
     # TO DO: TEST IF COMMAND GIVES EXPECTED RESULTS
     subprocess.check_output(command, shell=True)
-    # count successive occurrences of taxids in the taxid-sorted file:
-    taxid_count_string = subprocess.check_output("cut -f %s -d ':' %s | uniq -c" % (taxid_field, output_fasta), shell=True)
-    taxid_count_lines = taxid_count_string.splitlines()
-    # make json giving first and last row of each taxid:
+    # make json giving byte range of file corresponding to each taxid:
     taxon_sequence_locations = []
-    first_row = 1
-    for line in taxid_count_lines:
-       fields = line.split()
-       count = int(fields[0])
-       taxid = int(fields[1])
-       last_row = first_row + count - 1
-       taxon_sequence_locations.append({'taxid': taxid, 'first_row': first_row, 'last_row': last_row})
-       first_row = last_row + 1
+    f = open(output_fasta, 'rb')
+    sequence_name = f.readline()
+    sequence_data = f.readline()
+    taxid = get_taxid(sequence_name, taxid_field)
+    first_byte = 0
+    new_first_byte = len(sequence_name) + len(sequence_data)
+    while len(sequence_name) > 0 and len(sequence_data) > 0:
+        sequence_name = f.readline()
+        sequence_data = f.readline()
+        new_taxid = get_taxid(sequence_name, taxid_field)
+        if new_taxid != taxid:
+            taxon_sequence_locations.append({'taxid': taxid, 'first_byte': first_byte,
+                                             'last_byte': new_first_byte - 1})
+            taxid = new_taxid.copy
+            first_byte = new_first_byte.copy
+            new_first_byte = len(sequence_name) + len(sequence_data)
+        else:
+            new_first_byte += len(sequence_name) + len(sequence_data)
+    f.close()
     with open(output_json, 'wb') as f:
        json.dump(taxon_sequence_locations, f)
 
