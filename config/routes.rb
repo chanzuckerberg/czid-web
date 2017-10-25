@@ -11,6 +11,7 @@ Rails.application.routes.draw do
   resources :samples do
     put :reupload_source, on: :member
     put :kickoff_pipeline, on: :member
+    get :genus_list, on: :member
     get :pipeline_runs, on: :member
     post :save_note, on: :collection
   end

@@ -23,6 +23,15 @@ class PipelineOutput < ApplicationRecord
     end
   end
 
+  def distinct_genuses
+    TaxonCount.select("distinct tax_id, name")
+              .where(tax_level: TaxonCount::TAX_LEVEL_GENUS,
+                     pipeline_output_id: id)
+              .where("name IS NOT NULL")
+              .order(:name)
+              .to_a.map { |d| d.slice('tax_id', 'name') }
+  end
+
   def generate_aggregate_counts(tax_level_name)
     current_date = Time.zone.now.strftime("%Y-%m-%d")
     tax_level_id = TaxonCount::NAME_2_LEVEL[tax_level_name]

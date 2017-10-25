@@ -1,5 +1,6 @@
 //= require react-server
 //= require react_ujs
+//= require react-autocomplete
 //= require ./components
 //
 // By default, this file is loaded for server-side rendering.
