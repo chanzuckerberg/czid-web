@@ -1,9 +1,5 @@
-<%= react_component 'Home', samples: @samples, outputData: @final_result, pipeline_run_info: @pipeline_run_info, project: @project_info, all_project: @all_project %>
-
-<%= will_paginate @samples, :style => 'color:#5abcd6', previous_label: '<<', next_label: '>>' %>
+<%= react_component 'Home', samples: @samples, outputData: @final_result, pipeline_run_info: @pipeline_run_info, project: @project_info, all_project: @all_project, samplesCount: @samples_count %>
 
 <% if @samples.length > 6 %>
- <div class="page-info">
-  <%= page_entries_info @samples %>
-</div>
+  <%= will_paginate @samples, :style => 'color:#5abcd6', previous_label: '<<', next_label: '>>' %>
 <% end %>

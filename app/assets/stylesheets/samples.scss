@@ -289,6 +289,44 @@ $break-large: 1070px;
   
 }
 
+.sample-container {
+  thead {
+    background: #f6f7f7;
+  }
+  tr {
+    th:first-child {
+      display: block;
+      margin-left: 72px;
+      margin: 0 72px;
+    }
+    th:last-child {
+      display: block;
+      text-align: center;
+      margin-right: 72px;
+    }
+  }
+  td:first-child{ 
+    display: block;
+    margin-left: 72px;
+  }
+  td:last-child {
+    display: block;
+    margin-right: 72px;
+    text-align: center;
+  }
+  input.search {
+    margin: 0;
+    border: 0;
+  }
+  .complete {
+    color: green;
+  }
+  .failed {
+    color: red;
+  }
+
+}
+
 input[type="button"] {
   font-family: FontAwesome;
   font-size: 14px;
@@ -297,4 +335,30 @@ input[type="button"] {
 .no-edit {
   font-size: 10px;
   color: #9e9e9e;
+}
+
+.bottom {
+  text-align: center;
+  margin: 20px;
+  cursor: pointer;
+  color: #424468;
+  .back {
+    text-decoration: underline;
+  }
+  .home {
+    text-decoration: underline
+  }
+}
+
+input:not([type]), input[type=search] {
+  font-family: FontAwesome;
+  border-bottom: none !important;
+  padding-left: 72px !important;
+  margin-bottom: 0 !important;
+}
+
+input[type=search]:focus:not([readonly]) {
+  padding-left: 72px !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
 }

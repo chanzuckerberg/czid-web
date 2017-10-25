@@ -8,6 +8,7 @@ class HomeController < ApplicationController
     project_id = params[:project_id]
     sort = params[:sort_by]
     @project_info = nil
+    @samples_count = Sample.all.size
 
     if project_id.nil?
       @samples = sort_by(Sample.includes(:pipeline_runs, :pipeline_outputs).paginate(page: params[:page]), sort)

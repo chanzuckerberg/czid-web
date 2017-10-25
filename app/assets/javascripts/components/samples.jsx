@@ -3,16 +3,19 @@ class Samples extends React.Component {
     super(props, context);
     this.project = this.props.project;
     this.samples = this.props.samples;
+    this.samplesAmount = this.props.samplesCount;
     this.outputData = this.props.outputData
     this.pipeline_run_info = this.props.pipeline_run_info
     this.all_project = props.all_project|| [];
     this.defaultSortBy = 'newest';
     const currentSort = SortHelper.currentSort();
     this.state = {
+      displayedSamples: this.samples,
       sort_query: currentSort.sort_query
         ? currentSort.sort_query  : `sort_by=${this.defaultSortBy}`
     };
     this.columnSorting = this.columnSorting.bind(this);
+    this.handleSearch = this.handleSearch.bind(this);
   }
 
   columnSorting(e) {
@@ -30,7 +33,7 @@ class Samples extends React.Component {
       return (
         <tr onClick={ this.viewSample.bind(this, sample.id)} key={i}>
           <td>
-            <i className="fa fa-flask" aria-hidden="true"></i> {sample.name}
+            {sample.name}
           </td>
           <td>{moment(sample.created_at).format(' L,  h:mm a')}</td>
          <td>{ !pInfo.pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{numberWithCommas(pInfo.pipeline_info.total_reads)}</a>}</td>
@@ -38,10 +41,29 @@ class Samples extends React.Component {
           <td>{ (!pInfo.summary_stats || !pInfo.summary_stats.percent_remaining) ? 'NA' : <a href={'/samples/' + sample.id}>{pInfo.summary_stats.percent_remaining.toFixed(2)}%</a>}</td>
           <td>{ (!pInfo.summary_stats || !pInfo.summary_stats.compression_ratio) ? 'NA' : <a href={'/samples/' + sample.id}>{pInfo.summary_stats.compression_ratio.toFixed(2)}</a>}</td>
           <td>{ (!pInfo.summary_stats || !pInfo.summary_stats.qc_percent) ? 'NA' : <a href={'/samples/' + sample.id}>{pInfo.summary_stats.qc_percent.toFixed(2)}%</a>}</td>
-          <td>{ !pr_info.job_status_description ? '' : <a href={'/samples/' + sample.id}>{pr_info.job_status_description}</a>}</td>
+          <td className={this.applyClass(pr_info.job_status_description)}>{ !pr_info.job_status_description ? '' : <a href={'/samples/' + sample.id}>{pr_info.job_status_description}</a>}</td>
         </tr>
       )
     })
+  }
+
+  applyClass(status) {
+    if(status === 'COMPLETE') {
+      return 'complete'
+    } else {
+      return 'failed'
+    }
+  }
+
+  handleSearch(e) {
+    let searchQuery = e.target.value.toLowerCase();
+    let displayedSamples = this.samples.filter((el) => {
+      let searchValue = el.name.toLowerCase();
+      return searchValue.indexOf(searchQuery) !== -1;
+    });
+    this.setState({
+      displayedSamples: displayedSamples
+    });
   }
 
   viewSample(id) {
@@ -61,7 +83,8 @@ class Samples extends React.Component {
   renderTable(samples, pipelineInfo, pipeline_run_info) {
     return (
     <div className="content-wrapper">
-      <div className="container sample-container">
+      <div className="sample-container">
+        <input id="search" type="search" onChange={this.handleSearch} className="search" placeholder="Search for Sample"/>
           <table className="bordered highlight samples-table">
             <thead>
             <tr>
@@ -89,6 +112,10 @@ class Samples extends React.Component {
     )
   }
 
+  gotoPage(path) {
+    location.href = `${path}`
+  }
+
   componentDidMount() {
     $('.project-toggle').click((e) => {
       e.stopPropagation();
@@ -107,10 +134,12 @@ class Samples extends React.Component {
     return (
       <div>
         <div className="sub-header-home">
-          <div className="container">
+          <div className="sub-header-items">
             <div className="content">
-              <div className="title">
-                <a href='/'>All Projects</a> { !this.project ?  '' : `> ${this.project.name}` }
+
+            <div onClick={ this.gotoPage.bind(this, '/samples/new') }   className="upload">
+                <i className="fa fa-flask" aria-hidden="true"></i>
+                <span>Upload Sample</span>
               </div>
 
               <div className="sub-title">
@@ -132,15 +161,14 @@ class Samples extends React.Component {
                   </ul>
                 </div>
               </div>
-
+             
               <div className="title-filter">
-                <i className="fa fa-bar-chart" aria-hidden="true"></i>
-                <span>SAMPLES</span>
+                <span><i>{this.samplesAmount} samples found</i></span>
               </div>
             </div>
           </div>
         </div>
-          {!this.samples.length && !this.outputData.length ? <div className="no-data"><i className="fa fa-frown-o" aria-hidden="true"> No data to display</i></div> : this.renderTable(this.samples, this.outputData, this.pipeline_run_info)}
+          {!this.samples.length && !this.outputData.length ? <div className="no-data"><i className="fa fa-frown-o" aria-hidden="true"> No data to display</i></div> : this.renderTable(this.state.displayedSamples, this.outputData, this.pipeline_run_info)}
       </div>
     )
   }

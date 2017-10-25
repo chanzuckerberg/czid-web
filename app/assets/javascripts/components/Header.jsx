@@ -30,7 +30,7 @@ class Header extends React.Component  {
             <div className="">
               <a href="/" className="left brand-details">
                 <div className="brand-short">
-                    ID<i>seq</i>
+                    ID.seq
                 </div>
 
                 <div className="brand-long">
