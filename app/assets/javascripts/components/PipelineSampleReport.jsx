@@ -340,6 +340,7 @@ class PipelineSampleReport extends React.Component {
                         </td>
 
                         <td>
+                          ## TO DO: Add info button explaining what aggregate score is
                           { (this.view_level==='species' && taxon.aggregate_score) ? numberWithCommas(Number(taxon.aggregate_score).toFixed(3)) : '' }
                         </td>
  
