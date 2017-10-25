@@ -3,7 +3,6 @@ require 'json'
 
 class Sample < ApplicationRecord
   self.per_page = 10
- # S3_POSTPROCESS_SCRIPT_LOC = 's3://czbiohub-infectious-disease/bin/postprocess.py' # temporary fix
   STATUS_CREATED  = 'created'.freeze
   STATUS_UPLOADED = 'uploaded'.freeze
   STATUS_RERUN    = 'need_rerun'.freeze
