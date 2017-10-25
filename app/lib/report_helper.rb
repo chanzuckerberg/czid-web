@@ -19,6 +19,11 @@ module ReportHelper
 
   DECIMALS = 1
 
+  DEFAULT_THRESHOLDS = {
+    'zscore' => 1.7,
+    'rpm'    => 0.0,
+    'r'      => 10
+  }
 
   def external_report_info(report, view_level, params)
     data = {}
@@ -275,15 +280,44 @@ module ReportHelper
     sort_by[:direction] == 'lowest' ? sort_key_3d : negative(sort_key_3d)
   end
 
+  def filter_rows!(rows, thresholds, sort_by)
+    # filter out rows that are below the thresholds in both NR and NT
+    # but make sure not to delete any genus row for which some species
+    # passes the filters
+    to_delete = Set.new
+    to_keep = Set.new
+    rows.each do |tax_info|
+      should_delete = false
+      # if sort column is below threshold, delete
+      if tax_info[sort_by[:count_type]][sort_by[:metric]] < thresholds[sort_by[:metric]]
+        should_delete = true
+      else
+        # if any metric is below threshold in every type, delete
+        METRICS.each do |metric|
+          should_delete = COUNT_TYPES.all? {|count_type| tax_info[count_type][metric] < thresholds[metric]}
+          break if should_delete
+        end
+      end
+      if should_delete
+        to_delete.add(tax_info['tax_id'])
+      else
+        # if we are not deleteing it, make sure to keep around its genus
+        to_keep.add(tax_info['genus_taxid'])
+      end
+    end
+    to_delete.subtract(to_keep)
+    rows.keep_if {|tax_info| !to_delete.include?tax_info['tax_id'] }
+    rows
+  end
+
   def taxonomy_details(report, params, view_level)
     t0 = Time.now
     tax_2d = cleanup_all!(convert_2d(fetch_taxon_counts(report)))
     t1 = Time.now
-    data_ranges = min_max(tax_2d)
 
     view_level_int = TaxonCount::NAME_2_LEVEL[view_level.downcase]
     sort_by = decode_sort_params(params[:sort_by])
-    rp = decode_range_params(params, data_ranges)
+    thresholds = decode_threshold_params(params)
 
     rows = []
     tax_2d.each do |tax_id, tax_info|
@@ -294,29 +328,12 @@ module ReportHelper
 
     rows.sort! { |dl, dr| dl[:sort_key] <=> dr[:sort_key] }
 
-    # HACK
-    # && (tax_info['NT']['r'] >= 10 || tax_info['NR']['r'] >= 10)
-    puts "BORIS SORT #{sort_by}"
-    to_delete = Set.new
-    to_keep = Set.new
-    rows.each do |tax_info|
-      if sort_by[:metric] == 'zscore' && tax_info[sort_by[:count_type]]['zscore'] < 1.7
-        to_delete.add(tax_info['tax_id'])
-      elsif tax_info['NT']['zscore'] < 1.7 && tax_info['NR']['zscore'] < 1.7
-        to_delete.add(tax_info['tax_id'])
-      elsif tax_info['NT']['r'] < 10 && tax_info['NR']['r'] < 10
-        to_delete.add(tax_info['tax_id'])
-      else
-        to_keep.add(tax_info['genus_taxid'])
-      end
-    end
-    to_delete.subtract(to_keep)
-    rows.keep_if {|tax_info| !to_delete.include?tax_info['tax_id'] }
+    filter_rows!(rows, thresholds, sort_by)
 
     logger.info "Report contains #{rows.length} rows after filtering."
 
-    # HACK
-    rows = rows[0...20000]
+    # HACK keep at most 10,000 rows
+    rows = rows[0...10000]
 
     rows.each do |tax_info|
       UNUSED_IN_UI_FIELDS.each do |unused_field|
@@ -327,61 +344,19 @@ module ReportHelper
     t2 = Time.now
     logger.info "Data processing took #{t2 - t1} seconds (#{t2 - t0} with I/O)."
 
-    #puts "BORIS: #{rows[0..10]}"
-
-    [data_ranges, rows]
+    [[], rows]
   end
 
-  def decode_range_params(params, data_ranges)
-    new_params = data_ranges.clone
-    [:nt_zscore_threshold,
-     :nt_rpm_threshold,
-     :nt_r_threshold,
-     :nr_zscore_threshold,
-     :nr_rpm_threshold,
-     :nr_r_threshold].each do |k|
-      type_metric = k.to_s.chomp('_threshold')
-      high = "highest_genus_#{type_metric}".to_sym
-      low = "lowest_genus__#{type_metric}".to_sym
-      thresholds = params[k]
-      next unless thresholds
-      t_low, t_high = thresholds.split(',')
-      if t_low && t_high
-        new_params[low] = Float(t_low)
-        new_params[high] = Float(t_high)
-      end
+  def decode_threshold_params(params)
+    thresholds = {}
+    [:zscore_threshold,
+     :rpm_threshold,
+     :r_threshold].each do |k|
+      metric = k.to_s.chomp('_threshold')
+      thresholds[metric] = params.fetch(k, DEFAULT_THRESHOLDS[metric])
     end
-    new_params
+    puts "BORIS thresholds are #{thresholds}"
+    thresholds
   end
 
-  def min_max(taxon_counts_2d)
-    # compute min/max extents for all genus metrics
-    bounds = {}
-    taxon_counts_2d.each do |_tax_id, tax_info|
-      next unless tax_info['tax_level'] == TaxonCount::TAX_LEVEL_GENUS
-      COUNT_TYPES.each do |count_type|
-        count_bucket = tax_info[count_type]
-        METRICS.each do |metric|
-          val = count_bucket[metric]
-          high = "highest_genus_#{count_type}_#{metric}".to_sym
-          bounds[high] = val unless bounds[high] && bounds[high] > val
-          low = "lowest_genus_#{count_type}_#{metric}".to_sym
-          bounds[low] = val unless bounds[low] && bounds[low] < val
-        end
-      end
-    end
-    # flatten & handle empty columns
-    flat = {}
-    default_value = 0
-    SORT_DIRECTIONS.each do |extent|
-      COUNT_TYPES.each do |type|
-        METRICS.each do |metric|
-          key = "#{extent}_genus_#{type}_#{metric}".to_sym
-          flat[key] = bounds.delete(key) || default_value
-        end
-      end
-    end
-    logger.warn "Ignoring taxon extents key #{bounds}" unless bounds.empty?
-    flat
-  end
 end

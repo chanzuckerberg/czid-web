@@ -61,10 +61,12 @@ class PipelineSampleReport extends React.Component {
     return (url.split('?').length >= 2);
   }
 
+/*
   componentDidMount() {
     $('ul.tabs').tabs();
     $('.sort-report').dropdown();
   }
+  */
 
   columnSorting(e) {
     const className = e.target.className;
@@ -93,9 +95,10 @@ class PipelineSampleReport extends React.Component {
     return foo;
   }
 
-  render_number(x, emphasize) {
+  render_number(x, emphasize, num_decimals) {
     const is_blank = (x == 0) || (x == -100);
-    y = numberWithCommas(x);
+    y = Number(x).toFixed(num_decimals);
+    y = numberWithCommas(y);
     if (emphasize) {
       y = <b>{y}</b>;
     }
@@ -181,12 +184,12 @@ class PipelineSampleReport extends React.Component {
                         <td>
                           { this.render_name(tax_info) }
                         </td>
-                        { this.render_number(tax_info.NT.zscore, sort_by == 'nt_zscore') }
-                        { this.render_number(tax_info.NT.rpm, sort_by == 'nt_rpm')       }
-                        { this.render_number(tax_info.NT.r, sort_by == 'nt_r')           }
-                        { this.render_number(tax_info.NR.zscore, sort_by == 'nr_zscore') }
-                        { this.render_number(tax_info.NR.rpm, sort_by == 'nr_rpm')       }
-                        { this.render_number(tax_info.NR.r, sort_by == 'nr_r')           }
+                        { this.render_number(tax_info.NT.zscore, sort_by == 'nt_zscore', 1) }
+                        { this.render_number(tax_info.NT.rpm, sort_by == 'nt_rpm', 1)       }
+                        { this.render_number(tax_info.NT.r, sort_by == 'nt_r', 0)           }
+                        { this.render_number(tax_info.NR.zscore, sort_by == 'nr_zscore', 1) }
+                        { this.render_number(tax_info.NR.rpm, sort_by == 'nr_rpm', 1)       }
+                        { this.render_number(tax_info.NR.r, sort_by == 'nr_r', 0)           }
                       </tr>
                     )
                   })}
