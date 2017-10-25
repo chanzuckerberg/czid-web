@@ -103,6 +103,14 @@ class Sample < ApplicationRecord
                     :sample_unidentified_fasta_url, :host_genome_name])
   end
 
+  def postprocess_batch_command
+    postprocess_script_name = File.basename(IdSeqPostprocess::S3_SCRIPT_LOC)
+    postprocess_batch_command_env_variables = "INPUT_BUCKET=#{sample.sample_output_s3_path} " \
+      "OUTPUT_BUCKET=#{sample.sample_postprocess_s3_path} "
+    "aws s3 cp #{IdSeqPostprocese::S3_SCRIPT_LOC} .; chmod 755 #{postprocess_script_name}; " +
+      postprocess_batch_command_env_variables + "./#{postprocess_script_name}"
+  end
+
   def pipeline_command
     script_name = File.basename(IdSeqPipeline::S3_SCRIPT_LOC)
     batch_command_env_variables = "INPUT_BUCKET=#{sample_input_s3_path} OUTPUT_BUCKET=#{sample_output_s3_path} " \
@@ -117,6 +125,7 @@ class Sample < ApplicationRecord
     end
     batch_command = "aws s3 cp #{IdSeqPipeline::S3_SCRIPT_LOC} .; chmod 755 #{script_name}; " +
                     batch_command_env_variables + "./#{script_name}"
+    batch_command += "; " + postprocess_batch_command  
     command = "aegea batch submit --command=\"#{batch_command}\" "
     memory = sample_memory.present? ? sample_memory : DEFAULT_MEMORY
     queue =  job_queue.present? ? job_queue : DEFAULT_QUEUE
