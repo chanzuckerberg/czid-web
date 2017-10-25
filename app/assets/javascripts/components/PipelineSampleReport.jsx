@@ -3,6 +3,7 @@ class PipelineSampleReport extends React.Component {
   constructor(props) {
     super(props);
     this.report_details = props.report_details;
+    this.real_length = props.highest_tax_counts[0];
     this.taxonomy_details = props.taxonomy_details;
     this.all_categories = props.all_categories || [];
 
@@ -90,7 +91,7 @@ class PipelineSampleReport extends React.Component {
       foo = <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{foo}</span>
     } else {
       // boldface genus
-      foo = <b>{foo}</b>
+      foo = <span><b>{foo}</b>&nbsp;&nbsp;&nbsp;&nbsp;<span style={{'color':'#A0A0A0'}}><i>({tax_info.species_count}&nbsp;{tax_info.category_name}&nbsp;species)</i></span></span>
     }
     return foo;
   }
@@ -161,8 +162,6 @@ class PipelineSampleReport extends React.Component {
                 <table id="report-table" className='bordered report-table'>
                   <thead>
                   <tr>
-                    <th>Category</th>
-                    <th></th>
                     <th>Taxonomy</th>
                     { this.render_column_header('NT', 'Z',   'nt_zscore') }
                     { this.render_column_header('NT', 'rPM', 'nt_rpm')    }
@@ -177,11 +176,6 @@ class PipelineSampleReport extends React.Component {
                     return (
                       <tr key={i} className={this.row_class(tax_info)}>
                         <td>
-                          {  tax_info.category_name }
-                        </td>
-                        <td>
-                        </td>
-                        <td>
                           { this.render_name(tax_info) }
                         </td>
                         { this.render_number(tax_info.NT.zscore, sort_by == 'nt_zscore', 1) }
@@ -195,6 +189,9 @@ class PipelineSampleReport extends React.Component {
                   })}
                   </tbody>
                 </table>
+                <span>
+                {this.real_length == this.taxonomy_details.length ? ('Showing all ' + this.real_length + ' rows.') : ('Due to resource limits, showing only ' + this.taxonomy_details.length + ' of the ' + this.real_length + ' rows.')}
+                </span>
               </div>
             </div>
           </div>

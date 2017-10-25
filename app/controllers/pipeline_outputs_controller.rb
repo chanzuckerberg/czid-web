@@ -22,6 +22,7 @@ class PipelineOutputsController < ApplicationController
       @report_info[:report_details] = external_report_info[:report_details]
       @report_info[:taxonomy_details] = external_report_info[:taxonomy_details]
       @report_info[:highest_tax_counts] = external_report_info[:highest_tax_counts]
+      @report_info[:real_length] = external_report_info[:real_length]
       @report_info[:view_level] = external_report_info[:view_level]
     end
   end

@@ -28,9 +28,10 @@ module ReportHelper
   def external_report_info(report, view_level, params)
     data = {}
     data[:report_details] = report_details(report)
-    htc, td = taxonomy_details(report, params, view_level)
-    data[:highest_tax_counts] = htc
+    real_length, td = taxonomy_details(report, params, view_level)
+    data[:highest_tax_counts] = [real_length]
     data[:taxonomy_details] = td
+    data[:real_length] = real_length
     data[:view_level] = view_level
     data[:all_categories] = all_categories
     data
@@ -145,7 +146,12 @@ module ReportHelper
 
   def fake_genus!(tax_info)
     # Create a singleton genus containing just this taxon
+    #
+    # This is a workaround for a bug we are fixing soon... but leaving
+    # in the code lest that bug recurs.  A warning will be logged.
+    #
     fake_genus_info = tax_info.clone
+    fake_genus_info['name'] = "#{tax_info['name']} fake genus"
     fake_genus_id = FAKE_GENUS_BASE - tax_info['tax_id']
     fake_genus_info['tax_id'] = fake_genus_id
     fake_genus_info['genus_taxid'] = fake_genus_id
@@ -160,6 +166,7 @@ module ReportHelper
     #       tax_id,
     #       tax_level,
     #       genus_taxid,
+    #       species_count,
     #       name,
     #       category_name,
     #       NR => {
@@ -243,6 +250,18 @@ module ReportHelper
     taxon_counts_2d
   end
 
+  def count_species_per_genus!(taxon_counts_2d)
+    taxon_counts_2d.each do |_tax_id, tax_info|
+      tax_info['species_count'] = 0
+    end
+    taxon_counts_2d.each do |_tax_id, tax_info|
+      next unless tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
+      genus_info = taxon_counts_2d[tax_info['genus_taxid']]
+      genus_info['species_count'] += 1
+    end
+    taxon_counts_2d
+  end
+
   def cleanup_all!(taxon_counts_2d)
     t0 = Time.now
     cleanup_genus_ids!(taxon_counts_2d)
@@ -253,29 +272,53 @@ module ReportHelper
     taxon_counts_2d
   end
 
-  def negative(vec_6d)
-    x, y, z, t, u, v = vec_6d
-    [-x, -y, -z, -t, -u, -v]
+  def negative(vec_10d)
+    vec_10d.map {|x| -x}
   end
 
   def sort_key(tax_2d, tax_info, sort_by)
-    # sort by (genus, species) in the chosen metric;  making sure that
-    # the genus comes before its species in either sort direction
+    # sort by (genus, species) in the chosen metric, making sure that
+    # the genus comes before its species in either sort direction;
+    # use the metric's NT <=> NR dual as a tertiary sort key (so, for example,
+    # when you sort by NT R, entries without NT R will be ordered amongst
+    # themselves based on their NR R (as opposed to arbitrary ordder);
+    # and within the Z, for things with equal Z, use the R as tertiary
     other_type = {
       'NT' => 'NR',
       'NR' => 'NT'
     }
+    COUNT_TYPES.each do |count_type|
+      # may be should warn when this fires
+      other_type[count_type] ||= count_type
+    end
+    other_metric = {
+      'zscore' => 'r',
+      'r' => 'zscore',
+      'rpm' => 'zscore'
+    }
+    METRICS.each do |metric|
+      # may be should warn when this fires
+      other_metric[metric] ||= metric
+    end
     genus_id = tax_info['genus_taxid']
     genus_info = tax_2d[genus_id]
+    # this got a lot longer after it became clear that we want other_type and other_metric
+    # TODO: refactor
     sort_key_genus = genus_info[sort_by[:count_type]][sort_by[:metric]]
     sort_key_genus_alt = genus_info[other_type[sort_by[:count_type]]][sort_by[:metric]]
+    sort_key_genus_om = genus_info[sort_by[:count_type]][other_metric[sort_by[:metric]]]
+    sort_key_genus_om_alt = genus_info[other_type[sort_by[:count_type]]][other_metric[sort_by[:metric]]]
     if tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
       sort_key_species = tax_info[sort_by[:count_type]][sort_by[:metric]]
       sort_key_species_alt = tax_info[other_type[sort_by[:count_type]]][sort_by[:metric]]
-      sort_key_3d = [sort_key_genus, sort_key_genus_alt, genus_id, 0, sort_key_species, sort_key_species_alt]
+      sort_key_species_om = tax_info[sort_by[:count_type]][other_metric[sort_by[:metric]]]
+      sort_key_species_om_alt = tax_info[other_type[sort_by[:count_type]]][other_metric[sort_by[:metric]]]
+      # sort_key_3d = [sort_key_genus, sort_key_genus_alt, sort_key_genus_om, sort_key_genus_om_alt, genus_id, 0, sort_key_species, sort_key_species_alt, sort_key_species_om, sort_key_species_om_alt]
+      sort_key_3d = [sort_key_genus, sort_key_genus_om, sort_key_genus_alt, sort_key_genus_om_alt, genus_id, 0, sort_key_species, sort_key_species_om, sort_key_species_alt, sort_key_species_om_alt]
     else
       genus_priority = sort_by[:direction] == 'highest' ? 1 : -1
-      sort_key_3d = [sort_key_genus, sort_key_genus_alt, genus_id, genus_priority, 0, 0]
+      # sort_key_3d = [sort_key_genus, sort_key_genus_alt, sort_key_genus_om, sort_key_genus_om_alt, genus_id, genus_priority, 0, 0, 0, 0]
+      sort_key_3d = [sort_key_genus, sort_key_genus_om, sort_key_genus_alt, sort_key_genus_om_alt, genus_id, genus_priority, 0, 0, 0, 0]
     end
     sort_by[:direction] == 'lowest' ? sort_key_3d : negative(sort_key_3d)
   end
@@ -286,6 +329,7 @@ module ReportHelper
     # passes the filters
     to_delete = Set.new
     to_keep = Set.new
+    puts "BORIS THRESHOLDS #{thresholds}"
     rows.each do |tax_info|
       should_delete = false
       # if sort column is below threshold, delete
@@ -305,6 +349,9 @@ module ReportHelper
         to_keep.add(tax_info['genus_taxid'])
       end
     end
+    # it's good to always include that genus-level bucket of uncategorized species
+    # as a sort of "all others" category
+    to_keep.add(-200)
     to_delete.subtract(to_keep)
     rows.keep_if {|tax_info| !to_delete.include?tax_info['tax_id'] }
     rows
@@ -319,8 +366,11 @@ module ReportHelper
     sort_by = decode_sort_params(params[:sort_by])
     thresholds = decode_threshold_params(params)
 
+    count_species_per_genus!(tax_2d)
+    puts "BORIS UNCATEGORIZED GENUS:  #{tax_2d[-200]}"
+
     rows = []
-    tax_2d.each do |tax_id, tax_info|
+    tax_2d.each do |_tax_id, tax_info|
       next unless tax_info['tax_level'] >= view_level_int
       tax_info[:sort_key] = sort_key(tax_2d, tax_info, sort_by)
       rows << tax_info
@@ -330,10 +380,11 @@ module ReportHelper
 
     filter_rows!(rows, thresholds, sort_by)
 
+    real_length = rows.length
     logger.info "Report contains #{rows.length} rows after filtering."
 
-    # HACK keep at most 10,000 rows
-    rows = rows[0...10000]
+    # HACK keep at most 2,000 rows
+    rows = rows[0...2000]
 
     rows.each do |tax_info|
       UNUSED_IN_UI_FIELDS.each do |unused_field|
@@ -344,18 +395,15 @@ module ReportHelper
     t2 = Time.now
     logger.info "Data processing took #{t2 - t1} seconds (#{t2 - t0} with I/O)."
 
-    [[], rows]
+    [real_length, rows]
   end
 
   def decode_threshold_params(params)
     thresholds = {}
-    [:zscore_threshold,
-     :rpm_threshold,
-     :r_threshold].each do |k|
-      metric = k.to_s.chomp('_threshold')
-      thresholds[metric] = params.fetch(k, DEFAULT_THRESHOLDS[metric])
+    METRICS.each do |metric|
+      param_key = "#{metric}_threshold"
+      thresholds[metric] = params.fetch(param_key, DEFAULT_THRESHOLDS[metric])
     end
-    puts "BORIS thresholds are #{thresholds}"
     thresholds
   end
 
