@@ -26,17 +26,17 @@ class SamplesController < ApplicationController
     @report_info = external_report_info(report, @view_level, params) unless report.nil?
   end
 
- # GET /samples/search.json
+  # GET /samples/search.json
   def search
     search_query = params[:search]
     @samples = Sample.search(search_query).includes(:pipeline_runs, :pipeline_outputs).paginate(page: params[:page])
     if @samples.length
       respond_to do |format|
-        format.json { render json: @samples, message: 'Search results found'}
+        format.json { render json: @samples, message: 'Search results found' }
       end
     else
       respond_to do |format|
-        format.json { render message: 'No Search results found'}
+        format.json { render message: 'No Search results found' }
       end
     end
   end
