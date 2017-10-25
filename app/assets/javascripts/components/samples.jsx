@@ -1,18 +1,18 @@
 class Samples extends React.Component {
   constructor(props, context) {
     super(props, context);
-    this.project = this.props.project;
-    this.samples = this.props.samples;
-    this.samplesAmount = this.props.samplesCount;
-    this.outputData = this.props.outputData
-    this.pipeline_run_info = this.props.pipeline_run_info
+    this.project = props.project;
+    this.samples = props.samples;
+    this.samplesAmount = props.samples_count;
+    this.outputData = props.outputData
+    this.pipeline_run_info = props.pipeline_run_info
     this.all_project = props.all_project|| [];
     this.defaultSortBy = 'newest';
     const currentSort = SortHelper.currentSort();
     this.state = {
-      displayedSamples: this.samples,
+      displayedSamples: this.samples || [],
       sort_query: currentSort.sort_query
-        ? currentSort.sort_query  : `sort_by=${this.defaultSortBy}`
+      ? currentSort.sort_query  : `sort_by=${this.defaultSortBy}`
     };
     this.columnSorting = this.columnSorting.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
@@ -24,6 +24,12 @@ class Samples extends React.Component {
     const sort_query = className.substr(pos).split(' ')[0];
     this.setState({ sort_query });
     SortHelper.applySort(sort_query);
+  }
+
+  renderEmptyTable() {
+    return (
+      <div className="center-align"><i className='fa fa-frown-o'> No result found</i></div>
+    )
   }
 
   renderPipelineOutput(samples, pipelineInfo, pipeline_run_info) {
@@ -56,14 +62,32 @@ class Samples extends React.Component {
   }
 
   handleSearch(e) {
-    let searchQuery = e.target.value.toLowerCase();
-    let displayedSamples = this.samples.filter((el) => {
-      let searchValue = el.name.toLowerCase();
-      return searchValue.indexOf(searchQuery) !== -1;
-    });
-    this.setState({
-      displayedSamples: displayedSamples
-    });
+    var that = this;
+    if (e.target.value === "") {
+      $("#pagination").css("display", "");
+    } 
+    axios.get('/samples/search.json', 
+      {params: {search: e.target.value}
+    }).then((response) => {
+      if (response.data.length) {
+        that.setState({
+          displayedSamples: response.data,
+        })
+        $("#pagination").css("display", "");
+      } else {
+        $("#pagination").css("display", "none");
+        that.setState({
+          displayedSamples: [],
+        })
+        that.renderEmptyTable()
+      }
+    }).catch((error) => {
+      $("#pagination").css("display", "none");
+      that.setState({
+        displayedSamples: [],
+      })
+      that.renderEmptyTable()
+    })
   }
 
   viewSample(id) {
@@ -84,7 +108,7 @@ class Samples extends React.Component {
     return (
     <div className="content-wrapper">
       <div className="sample-container">
-        <input id="search" type="search" onChange={this.handleSearch} className="search" placeholder="Search for Sample"/>
+        <input id="search" type="search" onChange={this.handleSearch} className="search" placeholder='&#xf002; Search for Sample'/>
           <table className="bordered highlight samples-table">
             <thead>
             <tr>
@@ -103,10 +127,9 @@ class Samples extends React.Component {
               <th>Pipeline run status</th>
             </tr>
             </thead>
-              <tbody>
-                {this.renderPipelineOutput(samples, pipelineInfo, pipeline_run_info)}
-              </tbody>
+              { samples.length ? <tbody>{this.renderPipelineOutput(samples, pipelineInfo, pipeline_run_info)}</tbody> : null }
           </table>
+          { !samples.length ? this.renderEmptyTable() : null }
       </div>
     </div>
     )
@@ -163,7 +186,7 @@ class Samples extends React.Component {
               </div>
              
               <div className="title-filter">
-                <span><i>{this.samplesAmount} samples found</i></span>
+                <span><i>{this.samplesAmount === 0 ? 'No sample found' : ( this.samplesAmount === 1 ? '1 sample found' : `${this.samplesAmount} samples found`)}</i></span>
               </div>
             </div>
           </div>

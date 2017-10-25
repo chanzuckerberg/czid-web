@@ -26,6 +26,21 @@ class SamplesController < ApplicationController
     @report_info = external_report_info(report, @view_level, params) unless report.nil?
   end
 
+ # GET /samples/search.json
+  def search
+    search_query = params[:search]
+    @samples = Sample.search(search_query).includes(:pipeline_runs, :pipeline_outputs).paginate(page: params[:page])
+    if @samples.length
+      respond_to do |format|
+        format.json { render json: @samples, message: 'Search results found'}
+      end
+    else 
+      respond_to do |format|
+        format.json { render message: 'No Search results found'}
+      end
+    end
+  end
+
   def save_note
     sample_id = params[:sample_id]
     sample_notes = params[:sample_notes]
@@ -162,7 +177,7 @@ class SamplesController < ApplicationController
                                    :s3_star_index_path, :s3_bowtie2_index_path, :host_genome_id,
                                    :sample_memory, :sample_location, :sample_date, :sample_tissue,
                                    :sample_template, :sample_library, :sample_sequencer,
-                                   :sample_notes, :job_queue,
+                                   :sample_notes, :job_queue, :search,
                                    input_files_attributes: [:name, :presigned_url, :source_type, :source])
   end
 end

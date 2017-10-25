@@ -291,7 +291,12 @@ $break-large: 1070px;
 
 .sample-container {
   thead {
-    background: #f6f7f7;
+    background: #d0d0d0;;
+    tr th {
+      color: #333333;
+      font-weight: bold;
+      font-size: 14px;
+    }
   }
   tr {
     th:first-child {
@@ -308,6 +313,9 @@ $break-large: 1070px;
   td:first-child{ 
     display: block;
     margin-left: 72px;
+    color: #333333;
+    font-weight: bold;
+    font-size: 15px;
   }
   td:last-child {
     display: block;
