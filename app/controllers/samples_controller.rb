@@ -34,7 +34,7 @@ class SamplesController < ApplicationController
       respond_to do |format|
         format.json { render json: @samples, message: 'Search results found'}
       end
-    else 
+    else
       respond_to do |format|
         format.json { render message: 'No Search results found'}
       end
