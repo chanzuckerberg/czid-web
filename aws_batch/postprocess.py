@@ -93,7 +93,7 @@ def generate_taxid_locator(input_fasta, taxid_field, output_fasta, output_json):
     sequence_data = f.readline()
     taxid = get_taxid(sequence_name, taxid_field)
     first_byte = 0
-    new_first_byte = len(sequence_name) + len(sequence_data)
+    new_first_byte = first_byte + len(sequence_name) + len(sequence_data)
     while len(sequence_name) > 0 and len(sequence_data) > 0:
         sequence_name = f.readline()
         sequence_data = f.readline()
@@ -103,7 +103,7 @@ def generate_taxid_locator(input_fasta, taxid_field, output_fasta, output_json):
                                              'last_byte': new_first_byte - 1})
             taxid = new_taxid
             first_byte = new_first_byte
-            new_first_byte = len(sequence_name) + len(sequence_data)
+            new_first_byte = first_byte + len(sequence_name) + len(sequence_data)
         else:
             new_first_byte += len(sequence_name) + len(sequence_data)
     f.close()
