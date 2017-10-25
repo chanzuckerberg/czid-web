@@ -5,74 +5,49 @@
 class ReportFilter extends React.Component {
   constructor(props) {
     super(props);
-    const view_level = props.view_level || 'species';
     this.background_model = props.background_model || 'N/A';
     this.all_categories = props.all_categories || [];
-
-    this.highest_species_nt_zscore = this.props.highest_tax_counts.highest_species_nt_zscore;
-    this.highest_species_nt_rpm = this.props.highest_tax_counts.highest_species_nt_rpm;
-
-    this.lowest_species_nt_zscore = this.props.highest_tax_counts.lowest_species_nt_zscore;
-    this.lowest_species_nt_rpm = this.props.highest_tax_counts.lowest_species_nt_rpm;
-
-    this.has_valid_species_nt_zscore_range =
-      (this.highest_species_nt_zscore && (this.lowest_species_nt_zscore < this.highest_species_nt_zscore));
-
-    this.has_valid_species_nt_rpm_range =
-      (this.highest_species_nt_rpm && (this.lowest_species_nt_rpm < this.highest_species_nt_rpm));
-
-
-    const default_species_nt_zscore_threshold = `${this.lowest_species_nt_zscore},${this.highest_species_nt_zscore}`;
-    const default_species_nt_rpm_threshold = `${this.lowest_species_nt_rpm},${this.highest_species_nt_rpm}`;
-
-    const species_nt_zscore_threshold = ReportFilter.getFilter('species_nt_zscore_threshold')
-      ? ReportFilter.getFilter('species_nt_zscore_threshold') : default_species_nt_zscore_threshold;
-
-    const species_nt_rpm_threshold = ReportFilter.getFilter('species_nt_rpm_threshold')
-      ? ReportFilter.getFilter('species_nt_rpm_threshold') : default_species_nt_rpm_threshold;
-
-    const species_nt_zscore_start =
-      (species_nt_zscore_threshold.split(',').length > 0) ? species_nt_zscore_threshold.split(',')[0] :
-        this.lowest_species_nt_zscore;
-    const species_nt_zscore_end =
-      (species_nt_zscore_threshold.split(',').length > 1) ? species_nt_zscore_threshold.split(',')[1] :
-        this.highest_species_nt_zscore;
-
-    const species_nt_rpm_start =
-      (species_nt_rpm_threshold.split(',').length > 0) ? species_nt_rpm_threshold.split(',')[0]:
-        this.lowest_species_nt_rpm;
-    const species_nt_rpm_end =
-      (species_nt_rpm_threshold.split(',').length > 1) ? species_nt_rpm_threshold.split(',')[1] :
-        this.highest_species_nt_rpm;
-
-    this.state = { species_nt_zscore_start, species_nt_zscore_end, species_nt_rpm_start, species_nt_rpm_end, view_level };
-
+    this.state = {}
+    defaultState = ReportFilter.defaultState();
+    for (key in defaultState) {
+      this.state[key] = props[key] || defaultState[key];
+    }
     this.applyFilter = this.applyFilter.bind(this);
     this.selectViewLevel = this.selectViewLevel.bind(this);
     this.updateThreshold = this.updateThreshold.bind(this);
   }
 
-  applyFilter() {
-    const current_url = location.protocol + '//' + location.host + location.pathname;
-    const currentSort = PipelineSampleReport.currentSort();
-    const sort_by = currentSort.sort_query ? `&${currentSort.sort_query}` : '';
-    window.location =
-      `${current_url}?species_nt_zscore_threshold=${this.state.species_nt_zscore_start},${this.state.species_nt_zscore_end}&species_nt_rpm_threshold=${
-        this.state.species_nt_rpm_start},${this.state.species_nt_rpm_end}&view_level=${this.state.view_level}${sort_by}`;
+  static defaultState() {
+    return {
+      zscore_threshold: 1.7,
+      rpm_threshold: 0.0,
+      r_threshold: 10,
+      view_level: 'genus',
+      sort_by: 'nt_zscore'
+    };
   }
 
-  static getFilter(name) {
-    const url = window.location.href;
-    name = name.replace(/[\[\]]/g, "\\$&");
-    const regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"), results = regex.exec(url);
-    if (!results) {
-      return null;
+  static applyParamChange(new_params) {
+    var params = getURLParams();
+    for (key in new_params) {
+      params[key] = new_params[key];
     }
+    window.location = location.protocol + '//' + location.host + location.pathname + '?' + jQuery.param(new_params);
+  }
 
-    if (!results[2]) {
-      return null;
+  static getURLParams() {
+    // Thank you, Internet.
+    var params = {}
+    var search = window.location.search.substring(1);
+    if (search) {
+      params = JSON.parse(
+        '{"' + search.replace(/&/g, '","').replace(/=/g,'":"') + '"}',
+        function(key, value) {
+          return key===""?value:decodeURIComponent(value)
+        }
+      );
     }
-    return decodeURIComponent(results[2].replace(/\+/g, " "));
+    return params;
   }
 
   selectViewLevel(event) {
@@ -80,7 +55,6 @@ class ReportFilter extends React.Component {
       view_level: event.target.value
     });
   }
-
 
   updateThreshold(e) {
     const { innerText, className } = e.target;
@@ -211,49 +185,6 @@ class ReportFilter extends React.Component {
                   </div>
                 </div>
 
-                <div className="filter-controls">
-                  <div className="filter-title">
-                    THRESHOLDS
-                  </div>
-
-                  <div className="filter-values">
-                    { (this.highest_species_nt_zscore && (this.lowest_species_nt_zscore !== this.highest_species_nt_zscore)) ? (
-                      <div className="">
-                        <div className="slider-title">
-                          NT { this.state.view_level } Z Score
-                        </div>
-                        <div className="slider-values">
-                          <div suppressContentEditableWarning={true} contentEditable={true} className="nt_zscore start">
-                            { this.state.species_nt_zscore_start }
-                          </div>
-                          <div suppressContentEditableWarning={true} contentEditable={true} className="nt_zscore end">
-                            { this.state.species_nt_zscore_end }
-                          </div>
-                        </div>
-                        <div id="nt_zscore"></div>
-                      </div>
-                    ) : ''}
-
-                    { (this.highest_species_nt_rpm && (this.lowest_species_nt_rpm !== this.highest_species_nt_rpm)) ? (
-                      <div className="">
-                        <div className="slider-title">
-                          NT { PipelineSampleReport.uppCaseFirst(this.state.view_level) } RPM
-                        </div>
-                        <div className="slider-values">
-                          <div onBlur={ this.updateThreshold } suppressContentEditableWarning={true} contentEditable={true} className="nt_rpm start">
-                            { this.state.species_nt_rpm_start }
-                          </div>
-                          <div  onBlur={ this.updateThreshold } suppressContentEditableWarning={true} contentEditable={true} className="nt_rpm end">
-                            { this.state.species_nt_rpm_end }
-                          </div>
-                        </div>
-                        <div id="nt_rpm"></div>
-                      </div>
-                    ) : ''}
-                    { (!this.has_valid_species_nt_rpm_range && !this.has_valid_species_nt_zscore_range) ?
-                      <div className="center"><small>Cannot set thresholds</small></div> : '' }
-                  </div>
-                </div>
                 <div className="apply-filter-button center-align">
                   <a onClick={this.applyFilter}
                      className="btn btn-flat waves-effect grey text-grey text-lighten-5 waves-light apply-filter-button">
@@ -272,5 +203,4 @@ class ReportFilter extends React.Component {
 
 ReportFilter.propTypes = {
   background_model: React.PropTypes.string,
-  highest_tax_counts: React.PropTypes.object,
 };

@@ -11,12 +11,11 @@ class ReportsController < ApplicationController
   # GET /reports/1
   # GET /reports/1.json
   def show
-    @report_details = report_details(@report)
-    @view_level = params[:view_level] ? params[:view_level].downcase : 'genus'
-    @view_level_int = view_level_name2int(@view_level)
-    @real_length, @taxonomy_details = taxonomy_details(@report, params, @view_level)
-    @highest_tax_counts = []
-    @all_categories = all_categories
+    report_info = external_report_info(@report, params)
+    @report_details = report_info[:report_details]
+    @taxonomy_details = report_info[:taxonomy_details]
+    @report_page_params = report_info[:report_page_params]
+    @all_categories = report_info[:all_categories]
   end
 
   # GET /reports/new

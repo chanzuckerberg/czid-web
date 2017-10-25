@@ -19,20 +19,75 @@ module ReportHelper
 
   DECIMALS = 1
 
-  DEFAULT_THRESHOLDS = {
-    'zscore' => 1.7,
-    'rpm'    => 0.0,
-    'r'      => 10
+  DEFAULT_PARAMS = {
+    'view_level'       => 'genus',
+    'sort_by'          => 'highest_nt_zscore',
+    'threshold_zscore' => 1.7,
+    'threshold_rpm'    => 0.0,
+    'threshold_r'      => 10
   }
 
-  def external_report_info(report, view_level, params)
+  VIEW_LEVELS = ['species', 'genus']
+  SORT_DIRECTIONS = ['highest', 'lowest']
+  METRICS = ['r', 'rpm', 'zscore']
+  COUNT_TYPES = ['NT', 'NR']
+  SORT_DIRECTIONS = ['lowest', 'highest']
+  PROPERTIES_OF_TAXID = ['tax_id', 'name', 'name_from_lineages', 'name_from_counts', 'tax_level', 'genus_taxid', 'category_name']
+  UNUSED_IN_UI_FIELDS = ['genus_taxid', :sort_key]
+
+  def decode_sort_by(sort_by)
+    parts = sort_by.split "_"
+    return nil unless parts.length == 3
+    direction = parts[0]
+    return nil unless SORT_DIRECTIONS.includes? direction
+    count_type = parts[1].upcase
+    return nil unless COUNT_TYPES.includes? count_type
+    metric = parts[2]
+    return nil unless METRICS.includes? metric
+    {
+      direction:    direction,
+      count_type:   count_type,
+      metric:       metric
+    }
+  end
+
+  def is_threshold_param(param_key)
+    parts = param_key.split "_"
+    return parts.length == 2 && parts[0] == 'threshold' && METRICS.includes? parts[1]
+  end
+
+  def valid_arg_value(name, value) {
+    # return appropriately validated value (based on name), or nil
+    return nil unless arg_value
+    if arg_name == 'view_level'
+      arg_value = result.downcase
+      arg_value = nil unless VIEW_LEVELS.includes? arg_value
+    elsif arg_name == 'sort_by'
+      arg_value = nil unless decode_sort_by(arg_value)
+    else
+      arg_value = nil unless is_threshold_param(arg_name) && arg_value.is_a? Numeric
+    end
+    return arg_value
+  }
+
+  def clean_params(raw)
+    clean = {}
+    raw = (raw || {}).clone
+    DEFAULT_PARAMS.each do |name, default_value|
+      clean[name] = valid_arg_value(name, raw[name]) || default_value
+      raw.delete(name)
+    end
+    logger.warn "Ignoring #{raw.length} report params: #{raw}."
+    clean
+  end
+
+  def external_report_info(report, params)
+    return {} if report.nil?
+    params = clean_params(params)
     data = {}
+    data[:report_page_params] = params
     data[:report_details] = report_details(report)
-    real_length, td = taxonomy_details(report, params, view_level)
-    data[:highest_tax_counts] = [real_length]
-    data[:taxonomy_details] = td
-    data[:real_length] = real_length
-    data[:view_level] = view_level
+    data[:taxonomy_details] = taxonomy_details(report, params)
     data[:all_categories] = all_categories
     data
   end
@@ -103,25 +158,6 @@ module ReportHelper
       'zscore' => ZSCORE_WHEN_ABSENT_FROM_SAMPLE
     }
   end
-
-  def decode_sort_params(params_sort_by, default='highest_nt_zscore')
-    sort_by = params_sort_by || default
-    parts = sort_by.split "_"
-    if parts.length != 3
-      parts = default.split "_"
-    end
-    {
-      direction:    parts[0],
-      count_type:   parts[1].upcase,
-      metric:       parts[2]
-    }
-  end
-
-  METRICS = ['r', 'rpm', 'zscore']
-  COUNT_TYPES = ['NT', 'NR']
-  SORT_DIRECTIONS = ['lowest', 'highest']
-  PROPERTIES_OF_TAXID = ['tax_id', 'name', 'name_from_lineages', 'name_from_counts', 'tax_level', 'genus_taxid', 'category_name']
-  UNUSED_IN_UI_FIELDS = ['genus_taxid', :sort_key]
 
   def tax_info_base(taxon)
     tax_info_base = {}
@@ -357,17 +393,18 @@ module ReportHelper
     rows
   end
 
-  def taxonomy_details(report, params, view_level)
+  def taxonomy_details(report, params)
+
+    view_level = params[:view_level]
+    view_level_int = TaxonCount::NAME_2_LEVEL[view_level.downcase]
+    sort_by = decode_sort_by(params[:sort_by])
+    thresholds = decode_thresholds(params)
+
     t0 = Time.now
     tax_2d = cleanup_all!(convert_2d(fetch_taxon_counts(report)))
     t1 = Time.now
 
-    view_level_int = TaxonCount::NAME_2_LEVEL[view_level.downcase]
-    sort_by = decode_sort_params(params[:sort_by])
-    thresholds = decode_threshold_params(params)
-
     count_species_per_genus!(tax_2d)
-    puts "BORIS UNCATEGORIZED GENUS:  #{tax_2d[-200]}"
 
     rows = []
     tax_2d.each do |_tax_id, tax_info|
@@ -375,13 +412,12 @@ module ReportHelper
       tax_info[:sort_key] = sort_key(tax_2d, tax_info, sort_by)
       rows << tax_info
     end
-
     rows.sort! { |dl, dr| dl[:sort_key] <=> dr[:sort_key] }
 
     filter_rows!(rows, thresholds, sort_by)
 
     real_length = rows.length
-    logger.info "Report contains #{rows.length} rows after filtering."
+    # logger.info "Report contains #{rows.length} rows after filtering."
 
     # HACK keep at most 2,000 rows
     rows = rows[0...2000]
@@ -398,11 +434,11 @@ module ReportHelper
     [real_length, rows]
   end
 
-  def decode_threshold_params(params)
+  def decode_thresholds(params)
     thresholds = {}
     METRICS.each do |metric|
-      param_key = "#{metric}_threshold"
-      thresholds[metric] = params.fetch(param_key, DEFAULT_THRESHOLDS[metric])
+      param_key = "threshold_#{metric}"
+      thresholds[metric] = params[param_key]
     end
     thresholds
   end

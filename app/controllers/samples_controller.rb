@@ -16,14 +16,12 @@ class SamplesController < ApplicationController
   # GET /samples/1.json
 
   def show
-    @view_level = params[:view_level] ? params[:view_level].downcase : 'species'
     @pipeline_output = @sample.pipeline_runs.first ? @sample.pipeline_runs.first.pipeline_output : nil
     @job_stats = @pipeline_output ? @pipeline_output.job_stats : nil
     @summary_stats = @job_stats ? get_summary_stats(@job_stats) : nil
     @project_info = @sample.project ? @sample.project : nil
     report = @pipeline_output ? @pipeline_output.reports.first : nil
-    @report_info = {}
-    @report_info = external_report_info(report, @view_level, params) unless report.nil?
+    @report_info = external_report_info(report, params)
   end
 
   def save_note

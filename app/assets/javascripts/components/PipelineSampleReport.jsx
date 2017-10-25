@@ -3,109 +3,46 @@ class PipelineSampleReport extends React.Component {
   constructor(props) {
     super(props);
     this.report_details = props.report_details;
-    this.real_length = props.highest_tax_counts[0];
-    this.taxonomy_details = props.taxonomy_details;
-    this.all_categories = props.all_categories || [];
-
-    this.view_level = ReportFilter.getFilter('view_level') || 'species';
-    this.highest_tax_counts = props.highest_tax_counts;
-    this.defaultSortBy = 'highest_nt_zscore';
-    const current_sort = PipelineSampleReport.currentSort();
+    this.real_length = props.taxonomy_details[0];
+    this.taxonomy_details = props.taxonomy_details[1];
+    this.all_categories = props.all_categories;
+    this.sort_by = ReportFilter.getParam('sort_by');
     this.state = {
-      sort_query: current_sort.sort_query
-        ? current_sort.sort_query  : `sort_by=${this.defaultSortBy}`
+      sort_by: this.sort_by
     };
     this.applySort = this.applySort.bind(this);
-    this.columnSorting = this.columnSorting.bind(this);
   }
 
-  static uppCaseFirst(name) {
-    return (name)? name.charAt(0).toUpperCase() + name.slice(1) : name;
-  }
-
-  static currentSort() {
-   const sort_by = ReportFilter.getFilter('sort_by');
-   let current_sort = {};
-   if(sort_by) {
-     current_sort = {
-       sort_query: `sort_by=${sort_by}`
-     }
-   }
-   return current_sort;
-  }
-
-  applySort(sort_query) {
-    this.setState({ sort_query });
-    const url = PipelineSampleReport.deleteUrlParam(window.location.href, 'sort_by');
-    window.location = (PipelineSampleReport.hasQuery(url))
-      ? `${url}&${sort_query}` : `${url}?${sort_query}`;
-  }
-
-  static deleteUrlParam(url, parameter) {
-    const queryString = url.split('?');
-    if (queryString.length >= 2) {
-      const prefix = encodeURIComponent(parameter)+'=';
-      const pars = queryString[1].split(/[&;]/g);
-      for (let i = pars.length; i--; i > 0) {
-        if (pars[i].lastIndexOf(prefix, 0) !== -1) {
-          pars.splice(i, 1);
-        }
-      }
-      url = queryString[0] + (pars.length > 0 ? '?' + pars.join('&') : '');
-      return url;
-    } else {
-      return url;
-    }
-  }
-
-  static hasQuery(url) {
-    return (url.split('?').length >= 2);
-  }
-
-/*
-  componentDidMount() {
-    $('ul.tabs').tabs();
-    $('.sort-report').dropdown();
-  }
-  */
-
-  columnSorting(e) {
-    const className = e.target.className;
-    const pos = className.indexOf('sort_by');
-    const sort_query = className.substr(pos);
-    this.applySort(sort_query);
+  applySort(sort_by) {
+    this.setState({ sort_by });
+    ReportFilter.applyParamChange({ sort_by });
   }
 
   render_name(tax_info) {
-    foo = (tax_info.tax_id > 0)
-      ? <span className="link">
-          <a href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${
-            tax_info.tax_id}`}>{tax_info.name || tax_info.tax_id}
+    indent = <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>;
+    name = <span><i>{tax_info.name}</i></span>;
+    if (tax_info.tax_id > 0) {
+      ncbi_url = `https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${tax_info.tax_id}`;
+      name =
+        <span className="link">
+          <a href={ncbi_url}>
+            {tax_info.name}
           </a>
-        </span>
-      : <span>
-          <i>{tax_info.name}</i>
         </span>;
+    }
     if (tax_info.tax_level == 1) {
       // indent species rows
-      foo = <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{foo}</span>
+      name = <span>{indent}{indent}{name}</span>
     } else {
-      // boldface genus
-      foo = <span><b>{foo}</b>&nbsp;&nbsp;&nbsp;&nbsp;<span style={{'color':'#A0A0A0'}}><i>({tax_info.species_count}&nbsp;{tax_info.category_name}&nbsp;species)</i></span></span>
+      // emphasize genus, soften category and species count
+      name = <span><b>{name}</b>{indent}<span style={{'color':'#A0A0A0'}}><i>({tax_info.species_count}&nbsp;{tax_info.category_name}&nbsp;species)</i></span></span>
     }
-    return foo;
+    return name;
   }
 
   render_number(x, emphasize, num_decimals) {
     const is_blank = (x == 0) || (x == -100);
-    units = '';
     y = Number(x);
-    /*
-    if (y >= 1000) {
-      units = 'k';
-      y /= 1000.0;
-    }
-    */
     y = y.toFixed(num_decimals);
     y = numberWithCommas(y);
     if (emphasize) {
@@ -115,24 +52,28 @@ class PipelineSampleReport extends React.Component {
     return ( <td className={className}>{y}<b>{units}</b></td> );
   }
 
-  render_sort_arrow(column, sort_column, sort_direction, arrow_direction) {
-    sort_by_this = sort_direction + "_" + column;
-    sort_by_this_active = (sort_column == sort_by_this) ? 'active' : '';
+  render_sort_arrow(column, desired_sort_direction, arrow_direction) {
+    desired_sort = desired_sort_direction + "_" + column;
+    applyDesiredSort = this.applySort.bind(desired_sort);
+    className = `fa fa-caret-${arrow_direction}`;
+    current_sort = this.sort_by;
+    if (current_sort == desired_sort) {
+      className = 'active ' + className;
+    }
     return (
-      <i onClick={ this.columnSorting }
-         className={ `${sort_by_this_active} fa fa-caret-${arrow_direction} sort_by=${sort_by_this}` }>
+      <i onClick={applyDesiredSort}
+         className={className}>
       </i>
     );
   }
 
   render_column_header(visible_type, visible_metric, column_name) {
-    var sort_column = this.sort_column();
     var style = { 'textAlign': 'right' };
     return (
       <th style={style}>
         <div className='sort-controls right'>
-          {this.render_sort_arrow(column_name, sort_column, 'lowest', 'up')}
-          {this.render_sort_arrow(column_name, sort_column, 'highest', 'down')}
+          {this.render_sort_arrow(column_name, this.sort_by, 'lowest', 'up')}
+          {this.render_sort_arrow(column_name, this.sort_by, 'highest', 'down')}
           {visible_type}&nbsp;{visible_metric}
         </div>
       </th>
@@ -143,14 +84,9 @@ class PipelineSampleReport extends React.Component {
     return tax_info.tax_level == 2 ? 'report-row-genus' : 'report-row-species';
   }
 
-  sort_column() {
-    return (ReportFilter.getFilter('sort_by') || this.defaultSortBy);
-  }
-
   render() {
-    const sort_column = this.sort_column()
-    const parts = sort_column.split("_")
-    const sort_by = parts[1] + "_" + parts[2];
+    const parts = this.sort_by.split("_")
+    const sort_column = parts[1] + "_" + parts[2];
     console.log("Start table render.");
     var t0 = Date.now();
     result = (
@@ -161,10 +97,9 @@ class PipelineSampleReport extends React.Component {
               <div className="col s2">
                 <ReportFilter
                   all_categories = { this.all_categories }
-                  background_model = {this.report_details.background_model.name}
+                  background_model = { this.report_details.background_model.name }
                   report_title = { this.report_details.report_info.name }
-                  view_level={this.view_level}
-                  highest_tax_counts={this.highest_tax_counts}/>
+                />
               </div>
               <div className="col s10 reports-main ">
                 <table id="report-table" className='bordered report-table'>
@@ -182,23 +117,25 @@ class PipelineSampleReport extends React.Component {
                   <tbody>
                   { this.taxonomy_details.map((tax_info, i) => {
                     return (
-                      <tr key={i} className={this.row_class(tax_info)}>
+                      <tr key={tax_info['tax_id']} className={this.row_class(tax_info)}>
                         <td>
                           { this.render_name(tax_info) }
                         </td>
-                        { this.render_number(tax_info.NT.zscore, sort_by == 'nt_zscore', 1) }
-                        { this.render_number(tax_info.NT.rpm, sort_by == 'nt_rpm', 1)       }
-                        { this.render_number(tax_info.NT.r, sort_by == 'nt_r', 0)           }
-                        { this.render_number(tax_info.NR.zscore, sort_by == 'nr_zscore', 1) }
-                        { this.render_number(tax_info.NR.rpm, sort_by == 'nr_rpm', 1)       }
-                        { this.render_number(tax_info.NR.r, sort_by == 'nr_r', 0)           }
+                        { this.render_number(tax_info.NT.zscore, sort_column == 'nt_zscore', 1) }
+                        { this.render_number(tax_info.NT.rpm, sort_column == 'nt_rpm', 1)       }
+                        { this.render_number(tax_info.NT.r, sort_column == 'nt_r', 0)           }
+                        { this.render_number(tax_info.NR.zscore, sort_column == 'nr_zscore', 1) }
+                        { this.render_number(tax_info.NR.rpm, sort_column == 'nr_rpm', 1)       }
+                        { this.render_number(tax_info.NR.r, sort_column == 'nr_r', 0)           }
                       </tr>
                     )
                   })}
                   </tbody>
                 </table>
                 <span>
-                {this.real_length == this.taxonomy_details.length ? ('Showing all ' + this.real_length + ' rows passing filters.') : ('Due to resource limits, showing only ' + this.taxonomy_details.length + ' of the ' + this.real_length + ' rows passing filters.')}
+                {this.real_length == this.taxonomy_details.length ?
+                  ('Showing all ' + this.real_length + ' rows passing filters.') :
+                  ('Due to resource limits, showing only ' + this.taxonomy_details.length + ' of the ' + this.real_length + ' rows passing filters.')}
                 </span>
               </div>
             </div>
