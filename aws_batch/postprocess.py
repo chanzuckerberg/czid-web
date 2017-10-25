@@ -85,7 +85,6 @@ def generate_taxid_locator(input_fasta, taxid_field, output_fasta, output_json):
     command += " | sort --key %s --field-separator ':' --numeric-sort" % taxid_field
     # split every record back over 2 lines:
     command += " | sed 's/:lineseparator:/\\n/g' > %s" % output_fasta
-    # TO DO: TEST IF COMMAND GIVES EXPECTED RESULTS
     subprocess.check_output(command, shell=True)
     # make json giving byte range of file corresponding to each taxid:
     taxon_sequence_locations = []
