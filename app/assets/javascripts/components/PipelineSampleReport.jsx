@@ -255,6 +255,14 @@ class PipelineSampleReport extends React.Component {
                         <i className='fa fa-caret-down'></i>
                       </div>
                     </th> : '' }
+ 
+                    { (this.view_level === 'species') ?
+                    <th>Aggregate Score
+                      <div className='sort-controls left'>
+                        <i className='fa fa-caret-up'></i>
+                        <i className='fa fa-caret-down'></i>
+                      </div>
+                    </th> : '' }
 
                   </tr>
                   </thead>
@@ -333,6 +341,11 @@ class PipelineSampleReport extends React.Component {
 
                         <td>
                           { (this.view_level==='species' && (taxon.nr_ele && taxon.nr_ele.hasOwnProperty('count')) ) ? numberWithCommas(taxon.nr_ele.count) : '' }
+                        </td>
+
+                        <td>
+                          # TO DO: Add info button explaining what aggregate score is
+                          { (this.view_level==='species' && taxon.aggregate_score) ? numberWithCommas(Number(taxon.aggregate_score).toFixed(3)) : '' }
                         </td>
 
                       </tr>

@@ -152,6 +152,31 @@ module ReportHelper
     taxon_counts_2d
   end
 
+  def compute_aggregate_score(species_nt_ele, species_nr_ele, genus_nt_ele, genus_nr_ele)
+    sp_z_nt = species_nt_ele['zscore']
+    g_z_nt = genus_nt_ele ? genus_nt_ele['zscore'] : nil
+    sp_rpm_nt = species_nt_ele['rpm']
+    sp_z_nr = species_nr_ele['zscore']
+    g_z_nr = genus_nr_ele ? genus_nr_ele['zscore'] : nil
+    sp_rpm_nr = species_nr_ele['rpm']
+    nt_aggregate_score = if g_z_nt.nil?
+                           nil
+                         elsif sp_rpm_nt.zero?
+                           0
+                         else
+                           sp_z_nt * g_z_nt * sp_rpm_nt
+                         end
+    nr_aggregate_score = if g_z_nr.nil?
+                           nil
+                         elsif sp_rpm_nr.zero?
+                           0
+                         else
+                           sp_z_nr * g_z_nr * sp_rpm_nr
+                         end
+    aggregate_score = nt_aggregate_score.nil? || nr_aggregate_score.nil? ? nil : nt_aggregate_score + nr_aggregate_score
+    aggregate_score
+  end
+
   def taxonomy_details(report, params, view_level)
     tax2d = get_taxon_counts_2d(report, params[:categories], params[:genus_tax_id])
 
@@ -180,12 +205,17 @@ module ReportHelper
         genus_taxid = tax_pair['NT']['genus_taxid']
         # the genus_taxid should always be present in tax2d
         # but sometimes it isn't... possibly due to a bug
+        species_nt_ele = tax_pair['NT']
+        species_nr_ele = tax_pair['NR']
+        genus_nt_ele = tax2d.fetch(genus_taxid, {})['NT']
+        genus_nr_ele = tax2d.fetch(genus_taxid, {})['NR']
         details = {
-          nt_ele: tax_pair['NT'],
-          nr_ele: tax_pair['NR'],
+          nt_ele: species_nt_ele,
+          nr_ele: species_nr_ele,
           category: tax_pair['NT']['category_name'],
-          genus_nt_ele: tax2d.fetch(genus_taxid, {})['NT'],
-          genus_nr_ele: tax2d.fetch(genus_taxid, {})['NR']
+          genus_nt_ele: genus_nt_ele,
+          genus_nr_ele: genus_nr_ele,
+          aggregate_score: compute_aggregate_score(species_nt_ele, species_nr_ele, genus_nt_ele, genus_nr_ele)
         }
       else
         details = {
