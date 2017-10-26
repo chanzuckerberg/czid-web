@@ -350,7 +350,7 @@ class PipelineSampleReport extends React.Component {
                         </td>
 
                         <td>
-                          { (this.view_level==='species' && taxon.aggregate_score) ) ?
+                          { (this.view_level==='species' && taxon.aggregate_score) ?
                             <span className="link">
                               <a href={`/pipeline_outputs/${this.pipeline_output_id}/${taxon.nr_ele.tax_id}/fasta/NT_or_NR`}>{ numberWithCommas(Number(taxon.aggregate_score).toFixed(3)) }</a>
                             </span> : '' }
