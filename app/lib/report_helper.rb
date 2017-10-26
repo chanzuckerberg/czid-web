@@ -153,6 +153,7 @@ module ReportHelper
   end
 
   def compute_aggregate_score(species_nt_ele, species_nr_ele, genus_nt_ele, genus_nr_ele)
+    # TO DO: Add info button on report display explaining what aggregate score is
     sp_z_nt = species_nt_ele['zscore']
     g_z_nt = genus_nt_ele ? genus_nt_ele['zscore'] : nil
     sp_rpm_nt = species_nt_ele['rpm']
