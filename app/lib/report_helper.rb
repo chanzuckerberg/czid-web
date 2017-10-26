@@ -23,8 +23,8 @@ module ReportHelper
     view_level:       'genus',
     sort_by:          'highest_nt_zscore',
     threshold_zscore: 1.7,
-    threshold_rpm:    0.0,
-    threshold_r:      10
+    threshold_rpm:    1.0,
+    threshold_r:      50
   }
 
   VIEW_LEVELS = ['species', 'genus']
@@ -46,7 +46,6 @@ module ReportHelper
       param_key = "threshold_#{metric}".to_sym
       thresholds[metric] = params[param_key]
     end
-    puts "BORIS #{thresholds}"
     thresholds
   end
 
@@ -442,7 +441,7 @@ module ReportHelper
     # logger.info "Report contains #{rows.length} rows after filtering."
 
     # HACK keep at most 2,000 rows
-    rows = rows[0...2000]
+    rows = rows[0...4000]
 
     rows.each do |tax_info|
       UNUSED_IN_UI_FIELDS.each do |unused_field|

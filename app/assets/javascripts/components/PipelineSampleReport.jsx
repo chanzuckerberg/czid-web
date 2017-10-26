@@ -124,7 +124,7 @@ class PipelineSampleReport extends React.Component {
                   <tbody>
                   { this.taxonomy_details.map((tax_info, i) => {
                     return (
-                      <tr key={tax_info['tax_id']} className={this.row_class(tax_info)}>
+                      <tr key={tax_info.tax_id} className={this.row_class(tax_info)}>
                         <td>
                           { this.render_name(tax_info) }
                         </td>
