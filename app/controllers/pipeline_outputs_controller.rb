@@ -1,7 +1,7 @@
 class PipelineOutputsController < ApplicationController
   include ReportHelper
   include PipelineOutputsHelper
-  before_action :set_pipeline_output, only: [:show, :show_taxid_fasta]
+  before_action :set_pipeline_output, only: [:show, :show_taxid_fasta, :send_nonhost_fasta, :send_unidentified_fasta]
   before_action :typed_counts, only: [:show]
   before_action :login_required, only: [:new, :edit, :update, :destroy, :create, :index, :show]
   protect_from_forgery unless: -> { request.format.json? }
@@ -33,12 +33,12 @@ class PipelineOutputsController < ApplicationController
   end
 
   def send_nonhost_fasta
-    @nonhost_fasta = get_nonhost_fasta(@pipeline_output)
+    @nonhost_fasta = get_s3_file(@pipeline_output.sample.annotated_fasta_s3_path)
     send_data @nonhost_fasta
   end
 
   def send_unidentified_fasta
-    @unidentified_fasta = get_unidentified_fasta(@pipeline_output)
+    @unidentified_fasta = get_s3_file(@pipeline_output.sample.unidentified_fasta_s3_path)
     send_data @unidentified_fasta
   end
 
