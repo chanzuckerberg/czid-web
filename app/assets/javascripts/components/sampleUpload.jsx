@@ -169,9 +169,10 @@ class SampleUpload extends React.Component {
       that.setState({
         success: true,
         successMessage: 'Sample created successfully'
-      }, () => {
-        that.gotoPage(`/samples/${response.data.id}`);
-      })
+      });
+      setTimeout(() => {
+        that.gotoPage(`/samples/${that.state.id}`);
+      }, 2000)
     })
     .catch(function (error) {
      that.setState({
@@ -203,15 +204,16 @@ class SampleUpload extends React.Component {
       that.setState({
         success: true,
         successMessage: 'Sample updated successfully'
-      }, () => {
+      });
+      setTimeout(() => {
         that.gotoPage(`/samples/${that.state.id}`);
-      })
+      }, 2000);
     })
     .catch(function (error) {
      that.setState({
       invalid: true,
        errorMessage: 'Failed to update sample'
-     })
+     });
     });
   }
 
