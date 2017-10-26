@@ -176,7 +176,7 @@ def generate_lzw_filtered_paired(fasta_file_1, fast_file_2, output_prefix, cutof
     output_read_1 = open(output_prefix + '.1.fasta', 'wb')
     output_read_2 = open(output_prefix + '.2.fasta', 'wb')
     read_1 = open(fasta_file_1, 'rb')
-    read_2 = open(fasta_file_1, 'rb')
+    read_2 = open(fasta_file_2, 'rb')
     count = 0
     filtered = 0
     while True:
