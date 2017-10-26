@@ -63,6 +63,7 @@ EXTRACT_UNMAPPED_FROM_SAM_OUT1 = 'unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.u
 EXTRACT_UNMAPPED_FROM_SAM_OUT2 = 'unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.2.fasta'
 EXTRACT_UNMAPPED_FROM_SAM_OUT3 = 'unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.merged.fasta'
 GSNAPL_OUT = 'gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.m8'
+GSNAPL_DEDUP_OUT = 'dedup.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.m8'
 ANNOTATE_GSNAPL_M8_WITH_TAXIDS_OUT = 'taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.m8'
 GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT = 'taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.fasta'
 FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT = 'filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.fasta'
@@ -228,6 +229,22 @@ def generate_unmapped_pairs_from_sam(sam_file, output_prefix):
     output_read_1.close()
     output_read_2.close()
     output_merged_read.close()
+
+def deduplicate_m8(input_m8, output_m8):
+    outf = open(output_m8, "wb")
+    previous_read_name = ''
+    with open(input_m8, "rb") as m8f:
+        for line in m8f:
+            if line[0] == '#':
+                continue
+            parts = line.split("\t")
+            read_name = parts[0] # Example: HWI-ST640:828:H917FADXX:2:1108:8883:88679/1/1'
+            if read_name == previous_read_name:
+                continue
+            outf.write(line)
+            previous_read_name = read_name
+    outf.close()
+
 
 def generate_tax_counts_from_m8(m8_file, e_value_type, output_file):
     # uses m8 file with read names beginning as: "taxid<taxon ID>:"
@@ -645,7 +662,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         {"title": "annotate gsnapl m8 with taxids",
         "count_reads": False})
     run_and_log(logparams, run_annotate_m8_with_taxids,
-        sample_name, os.path.join(result_dir, GSNAPL_OUT),
+        sample_name, os.path.join(result_dir, GSNAPL_DEDUP_OUT),
         os.path.join(result_dir, ANNOTATE_GSNAPL_M8_WITH_TAXIDS_OUT),
         accession2taxid_s3_path,
         result_dir, sample_s3_output_path, False)
@@ -655,7 +672,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         {"title": "generate taxid annotated fasta from m8",
         "count_reads": False})
     run_and_log(logparams, run_generate_taxid_annotated_fasta_from_m8,
-        sample_name, os.path.join(result_dir, GSNAPL_OUT),
+        sample_name, os.path.join(result_dir, GSNAPL_DEDUP_OUT),
         os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT3),
         os.path.join(result_dir, GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT),
         'NT', result_dir, sample_s3_output_path, False)
@@ -960,6 +977,9 @@ def run_gsnapl_remotely(sample, input_fa_1, input_fa_2,
     time.sleep(10)
     logging.getLogger().info("finished alignment")
     execute_command("aws s3 cp %s/%s %s/" % (sample_s3_output_path, GSNAPL_OUT, result_dir))
+    # Deduplicate m8 input. Sometimes GSNAPL outputs multiple consecutive lines for same original read and same accession id. Count functions expect only 1 (top hit).
+    deduplicate_m8(os.path.join(result_dir, GSNAPL_OUT), os.path.join(result_dir, GSNAPL_DEDUP_OUT)
+    execute_command("aws s3 cp %s/%s %s/" % (result_dir, GSNAPL_DEDUP_OUT, sample_s3_output_path))
 
 def run_annotate_m8_with_taxids(sample_name, input_m8, output_m8,
                                 accession2taxid_s3_path,
