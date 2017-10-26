@@ -19,6 +19,7 @@ KEY_S3_PATH = 's3://czbiohub-infectious-disease/idseq-alpha.pem'
 ROOT_DIR = '/mnt'
 DEST_DIR = ROOT_DIR + '/idseq/data' # generated data go here
 REF_DIR  = ROOT_DIR + '/idseq/ref' # referene genome / ref databases go here
+TEMP_DIR = ROOT_DIR + '/tmp' # tmp directory with a lot of space for sorting large files
 
 # Global variable examples, to be overwritten by environment variables
 INPUT_BUCKET = 's3://czbiohub-idseq-samples-development/samples/3/60/results'
@@ -82,7 +83,7 @@ def generate_taxid_locator(input_fasta, taxid_field, output_fasta, output_json):
     # put every 2-line fasta record on a single line with delimiter ":lineseparator:":
     command = "awk 'NR % 2 == 1 { o=$0 ; next } { print o \":lineseparator:\" $0 }' " + input_fasta
     # sort the records based on the field containing the taxids:
-    command += " | sort --key %s --field-separator ':' --numeric-sort" % taxid_field
+    command += " | sort -T %s --key %s --field-separator ':' --numeric-sort" % (TEMP_DIR, taxid_field)
     # split every record back over 2 lines:
     command += " | sed 's/:lineseparator:/\\n/g' > %s" % output_fasta
     subprocess.check_output(command, shell=True)
@@ -184,6 +185,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path, aws_batch_job_id, la
     scratch_dir = sample_dir + '/scratch'
     execute_command("mkdir -p %s %s %s %s" % (sample_dir, input_dir, result_dir, scratch_dir))
     execute_command("mkdir -p %s " % REF_DIR);
+    execute_command("mkdir -p %s " % TEMP_DIR);
 
     # configure logger
     log_file = "%s/%s-%s.txt" % (result_dir, LOGS_OUT_BASENAME, aws_batch_job_id)
