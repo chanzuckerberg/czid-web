@@ -31,7 +31,7 @@ class PipelineOutputsController < ApplicationController
     if params[:hit_type] == "NT_or_NR"
       nt_array = get_taxid_fasta(@pipeline_output, params[:taxid], 'NT').split("^>")
       nr_array = get_taxid_fasta(@pipeline_output, params[:taxid], 'NR').split("^>")
-      @taxid_fasta = (nt_array | nt_array).join(">")
+      @taxid_fasta = (nt_array | nr_array).join(">")
     else
       @taxid_fasta = get_taxid_fasta(@pipeline_output, params[:taxid], params[:hit_type])
     end
