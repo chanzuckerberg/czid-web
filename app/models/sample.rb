@@ -10,6 +10,7 @@ class Sample < ApplicationRecord
   HIT_FASTA_BASENAME = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.fasta'.freeze
   UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fasta'.freeze
   SORTED_TAXID_ANNOTATED_FASTA = 'taxid_annot_sorted_nt.fasta'.freeze
+  SORTED_NR_TAXID_ANNOTATED_FASTA = 'taxid_annot_sorted_nr.fasta'.freeze
   LOG_BASENAME = 'log.txt'.freeze
   DEFAULT_MEMORY = 64_000
   DEFAULT_QUEUE = 'aegea_batch_ondemand'.freeze
@@ -81,6 +82,10 @@ class Sample < ApplicationRecord
 
   def sorted_taxid_annotated_fasta_s3_path
     "#{sample_postprocess_s3_path}/#{SORTED_TAXID_ANNOTATED_FASTA}"
+  end
+
+  def sorted_nr_taxid_annotated_fasta_s3_path
+    "#{sample_postprocess_s3_path}/#{SORTED_NR_TAXID_ANNOTATED_FASTA}"
   end
 
   def sample_annotated_fasta_url

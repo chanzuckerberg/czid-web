@@ -28,7 +28,7 @@ class PipelineOutputsController < ApplicationController
   end
 
   def show_taxid_fasta
-    @taxid_fasta = get_taxid_fasta(@pipeline_output, params[:taxid])
+    @taxid_fasta = get_taxid_fasta(@pipeline_output, params[:taxid], params[:hit_type])
     render plain: @taxid_fasta
   end
 

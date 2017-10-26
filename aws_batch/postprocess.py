@@ -79,7 +79,7 @@ def get_taxid(sequence_name, taxid_field):
          return 'none'
     return parts[taxid_field-1]
 
-def generate_taxid_locator(input_fasta, taxid_field, output_fasta, output_json):
+def generate_taxid_locator(input_fasta, taxid_field, hit_type, output_fasta, output_json):
     # put every 2-line fasta record on a single line with delimiter ":lineseparator:":
     command = "awk 'NR % 2 == 1 { o=$0 ; next } { print o \":lineseparator:\" $0 }' " + input_fasta
     # sort the records based on the field containing the taxids:
@@ -104,7 +104,7 @@ def generate_taxid_locator(input_fasta, taxid_field, output_fasta, output_json):
             # sequence_name == '' => new_taxid=='none' => new_taxid != taxid
             # so last record will be written to output correctly.
             taxon_sequence_locations.append({'taxid': taxid, 'first_byte': first_byte,
-                                             'last_byte': end_byte - 1})
+                                             'last_byte': end_byte - 1, 'hit_type': hit_type})
             taxid = new_taxid
             first_byte = end_byte
             end_byte = first_byte + len(sequence_name) + len(sequence_data)
@@ -219,7 +219,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path, aws_batch_job_id, la
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "run_generate_taxid_locator for NT"})
     run_and_log(logparams, run_generate_taxid_locator,
-        os.path.join(result_dir, TAXID_ANNOT_FASTA), 4,
+        os.path.join(result_dir, TAXID_ANNOT_FASTA), 4, 'NT',
         os.path.join(result_dir, TAXID_ANNOT_SORTED_FASTA_NT),
         os.path.join(result_dir, TAXID_LOCATIONS_JSON_NT),
         result_dir, sample_s3_output_path, False)
@@ -228,7 +228,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path, aws_batch_job_id, la
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "run_generate_taxid_locator for NR"})
     run_and_log(logparams, run_generate_taxid_locator,
-        os.path.join(result_dir, TAXID_ANNOT_FASTA), 2,
+        os.path.join(result_dir, TAXID_ANNOT_FASTA), 2, 'NR',
         os.path.join(result_dir, TAXID_ANNOT_SORTED_FASTA_NR),
         os.path.join(result_dir, TAXID_LOCATIONS_JSON_NR),
         result_dir, sample_s3_output_path, False)
