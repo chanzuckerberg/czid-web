@@ -55,9 +55,9 @@ class Samples extends React.Component {
 
   applyClass(status) {
     if(status === 'COMPLETE') {
-      return 'complete'
+      return 'complete';
     } else {
-      return 'failed'
+      return 'failed';
     }
   }
 
@@ -66,7 +66,7 @@ class Samples extends React.Component {
     if (e.target.value === "") {
       $("#pagination").css("display", "");
       that.setState({
-        displayedSamples: this.samples,
+        displayedSamples: this.samples
       })
     } else {
       axios.get('/samples/search.json', 
@@ -82,21 +82,22 @@ class Samples extends React.Component {
           that.setState({
             displayedSamples: [],
           })
-          that.renderEmptyTable()
+          that.renderEmptyTable();
         }
       }).catch((error) => {
         $("#pagination").css("display", "none");
         that.setState({
           displayedSamples: [],
         })
-        that.renderEmptyTable()
+        that.renderEmptyTable();
       })
     }
   }
 
   viewSample(id) {
-    location.href = `/samples/${id}`
+    location.href = `/samples/${id}`;
   }
+
   getActiveSort(className) {
     if(className) {
       const sort = SortHelper.getFilter('sort_by');
@@ -140,7 +141,7 @@ class Samples extends React.Component {
   }
 
   gotoPage(path) {
-    location.href = `${path}`
+    location.href = `${path}`;
   }
 
   componentDidMount() {
