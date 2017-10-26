@@ -1,6 +1,7 @@
 class PipelineOutputsController < ApplicationController
   include ReportHelper
-  before_action :set_pipeline_output, only: [:show]
+  include PipelineOutputsHelper
+  before_action :set_pipeline_output, only: [:show, :show_taxid_fasta]
   before_action :typed_counts, only: [:show]
   before_action :login_required, only: [:new, :edit, :update, :destroy, :create, :index, :show]
   protect_from_forgery unless: -> { request.format.json? }
@@ -24,6 +25,11 @@ class PipelineOutputsController < ApplicationController
       @report_info[:highest_tax_counts] = external_report_info[:highest_tax_counts]
       @report_info[:view_level] = external_report_info[:view_level]
     end
+  end
+
+  def show_taxid_fasta
+    @taxid_fasta = get_taxid_fasta(@pipeline_output, params[:taxid])
+    render plain: @taxid_fasta
   end
 
   private

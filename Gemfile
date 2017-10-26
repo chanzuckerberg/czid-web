@@ -52,6 +52,8 @@ gem 'turbolinks', '~> 5'
 # Use Uglifier as compressor for JavaScript assets
 gem 'uglifier', '>= 1.3.0'
 gem 'will_paginate'
+# Use AWS-SDK to make AWS requests with byte range
+gem 'aws-sdk'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console

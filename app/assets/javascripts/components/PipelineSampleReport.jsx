@@ -6,6 +6,7 @@ class PipelineSampleReport extends React.Component {
     this.taxonomy_details = props.taxonomy_details;
     this.all_categories = props.all_categories || [];
     this.checked_categories = props.checked_categories || props.all_categories
+    this.pipeline_output_id = props.report_details.pipeline_info.id;
     this.genus_info = props.genus_info
     this.sample_id = props.sample_id
 
@@ -287,8 +288,7 @@ class PipelineSampleReport extends React.Component {
                           { (this.view_level==='species' && taxon.nt_ele) ?
                             <span className="link">
                               <a href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${
-                                taxon.nt_ele.tax_id}`}>{ taxon.nt_ele.name }
-                              </a>
+                                 taxon.nt_ele.tax_id}`}>{ taxon.nt_ele.name }</a>
                             </span> : ''
                           }
                         </td>
@@ -316,7 +316,10 @@ class PipelineSampleReport extends React.Component {
                         </td>
 
                         <td>
-                          { (this.view_level==='species' && (taxon.nt_ele && taxon.nt_ele.hasOwnProperty('count')) ) ? numberWithCommas(taxon.nt_ele.count) : '' }
+                          { (this.view_level==='species' && (taxon.nt_ele && taxon.nt_ele.hasOwnProperty('count')) ) ? 
+                            <span className="link">
+                              <a href={`/pipeline_outputs/${this.pipeline_output_id}/${taxon.nt_ele.tax_id}/fasta`}>{ numberWithCommas(taxon.nt_ele.count) }</a>
+                            </span> : '' }
                         </td>
 
                         <td>
