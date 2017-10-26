@@ -35,6 +35,20 @@ module ReportHelper
   PROPERTIES_OF_TAXID = ['tax_id', 'name', 'name_from_lineages', 'name_from_counts', 'tax_level', 'genus_taxid', 'category_name']
   UNUSED_IN_UI_FIELDS = ['genus_taxid', :sort_key]
 
+  # use the metric's NT <=> NR dual as a tertiary sort key (so, for example,
+  # when you sort by NT R, entries without NT R will be ordered amongst
+  # themselves based on their NR R (as opposed to arbitrary ordder);
+  # and within the Z, for things with equal Z, use the R as tertiary
+  OTHER_COUNT_TYPE = {
+    'NT' => 'NR',
+    'NR' => 'NT'
+  }
+  OTHER_METRIC = {
+    'zscore' => 'r',
+    'r' => 'zscore',
+    'rpm' => 'zscore'
+  }
+
   def is_threshold_param(param_key)
     parts = param_key.to_s.split "_"
     return (parts.length == 2 && parts[0] == 'threshold' && METRICS.include?(parts[1]))
@@ -136,7 +150,10 @@ module ReportHelper
     total_reads = report.pipeline_output.total_reads
     background_id = report.background.id
     # Note: stdev is never 0
-    TaxonCount.select("
+    # Note: connection.select_all is TWICE faster than TaxonCount.select
+    # (I/O latency goes from 2 seconds -> 0.8 seconds)
+    TaxonCount.connection.select_all("
+      SELECT
       taxon_counts.tax_id              AS  tax_id,
       taxon_counts.count_type          AS  count_type,
       taxon_counts.tax_level           AS  tax_level,
@@ -157,19 +174,19 @@ module ReportHelper
         #{ZSCORE_WHEN_ABSENT_FROM_BACKGROUND}
       )
                                        AS  zscore
-    ").joins("
+      FROM taxon_counts
       LEFT OUTER JOIN taxon_summaries ON
         taxon_counts.tax_id     = taxon_summaries.tax_id          AND
         taxon_counts.count_type = taxon_summaries.count_type      AND
         taxon_counts.tax_level  = taxon_summaries.tax_level       AND
         #{background_id}        = taxon_summaries.background_id
-    ").joins("
       LEFT OUTER JOIN taxon_lineages ON
         taxon_counts.tax_id = taxon_lineages.taxid
-    ").where(
-      pipeline_output_id: pipeline_output_id,
-      count_type: %w[NT NR]
-    ).to_a.map(&:attributes)
+      WHERE
+        pipeline_output_id = #{pipeline_output_id} AND
+        taxon_counts.count_type IN ('NT', 'NR')
+    "
+    ).to_hash
   end
 
   def zero_metrics(count_type)
@@ -336,41 +353,24 @@ module ReportHelper
 
   def sort_key(tax_2d, tax_info, sort_by)
     # sort by (genus, species) in the chosen metric, making sure that
-    # the genus comes before its species in either sort direction;
-    # use the metric's NT <=> NR dual as a tertiary sort key (so, for example,
-    # when you sort by NT R, entries without NT R will be ordered amongst
-    # themselves based on their NR R (as opposed to arbitrary ordder);
-    # and within the Z, for things with equal Z, use the R as tertiary
-    other_type = {
-      'NT' => 'NR',
-      'NR' => 'NT'
-    }
-    COUNT_TYPES.each do |count_type|
-      # may be should warn when this fires
-      other_type[count_type] ||= count_type
-    end
-    other_metric = {
-      'zscore' => 'r',
-      'r' => 'zscore',
-      'rpm' => 'zscore'
-    }
-    METRICS.each do |metric|
-      # may be should warn when this fires
-      other_metric[metric] ||= metric
-    end
+    # the genus comes before its species in either sort direction
     genus_id = tax_info['genus_taxid']
     genus_info = tax_2d[genus_id]
     # this got a lot longer after it became clear that we want other_type and other_metric
     # TODO: refactor
-    sort_key_genus = genus_info[sort_by[:count_type]][sort_by[:metric]]
-    sort_key_genus_alt = genus_info[other_type[sort_by[:count_type]]][sort_by[:metric]]
-    sort_key_genus_om = genus_info[sort_by[:count_type]][other_metric[sort_by[:metric]]]
-    sort_key_genus_om_alt = genus_info[other_type[sort_by[:count_type]]][other_metric[sort_by[:metric]]]
+    sort_count_type = sort_by[:count_type]
+    other_count_type = OTHER_COUNT_TYPE.fetch(sort_count_type, sort_count_type)
+    sort_metric = sort_by[:metric]
+    other_metric = OTHER_METRIC.fetch(sort_metric, sort_metric)
+    sort_key_genus = genus_info[sort_count_type][sort_metric]
+    sort_key_genus_alt = genus_info[other_count_type][sort_metric]
+    sort_key_genus_om = genus_info[sort_count_type][other_metric]
+    sort_key_genus_om_alt = genus_info[other_count_type][other_metric]
     if tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
-      sort_key_species = tax_info[sort_by[:count_type]][sort_by[:metric]]
-      sort_key_species_alt = tax_info[other_type[sort_by[:count_type]]][sort_by[:metric]]
-      sort_key_species_om = tax_info[sort_by[:count_type]][other_metric[sort_by[:metric]]]
-      sort_key_species_om_alt = tax_info[other_type[sort_by[:count_type]]][other_metric[sort_by[:metric]]]
+      sort_key_species = tax_info[sort_count_type][sort_metric]
+      sort_key_species_alt = tax_info[other_count_type][sort_metric]
+      sort_key_species_om = tax_info[sort_count_type][other_metric]
+      sort_key_species_om_alt = tax_info[other_count_type][other_metric]
       # sort_key_3d = [sort_key_genus, sort_key_genus_alt, sort_key_genus_om, sort_key_genus_om_alt, genus_id, 0, sort_key_species, sort_key_species_alt, sort_key_species_om, sort_key_species_om_alt]
       sort_key_3d = [sort_key_genus, sort_key_genus_om, sort_key_genus_alt, sort_key_genus_om_alt, genus_id, 0, sort_key_species, sort_key_species_om, sort_key_species_alt, sort_key_species_om_alt]
     else
@@ -433,9 +433,19 @@ module ReportHelper
       tax_info[:sort_key] = sort_key(tax_2d, tax_info, sort_by)
       rows << tax_info
     end
+
+    t2 = Time.now
+    logger.info "Sort key generation took #{t2 - t1} seconds."
+
     rows.sort! { |dl, dr| dl[:sort_key] <=> dr[:sort_key] }
 
+    t3 = Time.now
+    logger.info "Sorting took #{t3 - t2} seconds."
+
     filter_rows!(rows, thresholds, sort_by)
+
+    t4 = Time.now
+    logger.info "Filtering took #{t4 - t3} seconds."
 
     real_length = rows.length
     # logger.info "Report contains #{rows.length} rows after filtering."
@@ -449,8 +459,8 @@ module ReportHelper
       end
     end
 
-    t2 = Time.now
-    logger.info "Data processing took #{t2 - t1} seconds (#{t2 - t0} with I/O)."
+    t5 = Time.now
+    logger.info "Data processing took #{t5 - t1} seconds (#{t5 - t0} with I/O)."
 
     [real_length, rows]
   end
