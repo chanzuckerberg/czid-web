@@ -172,7 +172,7 @@ def generate_taxid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fas
     input_fasta_f.close()
     output_fasta_f.close()
 
-def generate_lzw_filtered_paired(fasta_file_1, fast_file_2, output_prefix, cutoff_fraction):
+def generate_lzw_filtered_paired(fasta_file_1, fasta_file_2, output_prefix, cutoff_fraction):
     output_read_1 = open(output_prefix + '.1.fasta', 'wb')
     output_read_2 = open(output_prefix + '.2.fasta', 'wb')
     read_1 = open(fasta_file_1, 'rb')
