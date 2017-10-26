@@ -129,10 +129,10 @@ class PipelineSampleReads extends React.Component {
 
     download_section = (
       <div>
-        <a className="custom-button" href= { this.sampleInfo.sample_annotated_fasta_url }>
+        <a className="custom-button" href= { `/pipeline_outputs/${this.pipelineOutput.id}/nonhost_fasta` }>
           <i className="fa fa-cloud-download left"></i> DOWNLOAD NON HOST READS
         </a>
-        <a className="custom-button" href= { this.sampleInfo.sample_unidentified_fasta_url }>
+        <a className="custom-button" href= { `/pipeline_outputs/${this.pipelineOutput.id}/unidentified_fasta` }>
           <i className="fa fa-cloud-download left"></i> DOWNLOAD UNIDENTIFIED READS
         </a>
         <a className="custom-button" href= { this.sampleInfo.sample_output_folder_url }>

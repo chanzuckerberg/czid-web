@@ -32,6 +32,16 @@ class PipelineOutputsController < ApplicationController
     render plain: @taxid_fasta
   end
 
+  def send_nonhost_fasta
+    @nonhost_fasta = get_nonhost_fasta(@pipeline_output)
+    send_data @nonhost_fasta
+  end
+
+  def send_unidentified_fasta
+    @unidentified_fasta = get_unidentified_fasta(@pipeline_output)
+    send_data @unidentified_fasta
+  end
+
   private
 
   # Use callbacks to share common setup or constraints between actions.
