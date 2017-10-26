@@ -20,11 +20,11 @@ module ReportHelper
   DECIMALS = 1
 
   DEFAULT_PARAMS = {
-    'view_level'       => 'genus',
-    'sort_by'          => 'highest_nt_zscore',
-    'threshold_zscore' => 1.7,
-    'threshold_rpm'    => 0.0,
-    'threshold_r'      => 10
+    view_level:       'genus',
+    sort_by:          'highest_nt_zscore',
+    threshold_zscore: 1.7,
+    threshold_rpm:    0.0,
+    threshold_r:      10
   }
 
   VIEW_LEVELS = ['species', 'genus']
@@ -35,15 +35,30 @@ module ReportHelper
   PROPERTIES_OF_TAXID = ['tax_id', 'name', 'name_from_lineages', 'name_from_counts', 'tax_level', 'genus_taxid', 'category_name']
   UNUSED_IN_UI_FIELDS = ['genus_taxid', :sort_key]
 
+  def is_threshold_param(param_key)
+    parts = param_key.to_s.split "_"
+    return (parts.length == 2 && parts[0] == 'threshold' && METRICS.include?(parts[1]))
+  end
+
+  def decode_thresholds(params)
+    thresholds = {}
+    METRICS.each do |metric|
+      param_key = "threshold_#{metric}".to_sym
+      thresholds[metric] = params[param_key]
+    end
+    puts "BORIS #{thresholds}"
+    thresholds
+  end
+
   def decode_sort_by(sort_by)
     parts = sort_by.split "_"
     return nil unless parts.length == 3
     direction = parts[0]
-    return nil unless SORT_DIRECTIONS.includes? direction
+    return nil unless SORT_DIRECTIONS.include? direction
     count_type = parts[1].upcase
-    return nil unless COUNT_TYPES.includes? count_type
+    return nil unless COUNT_TYPES.include? count_type
     metric = parts[2]
-    return nil unless METRICS.includes? metric
+    return nil unless METRICS.include? metric
     {
       direction:    direction,
       count_type:   count_type,
@@ -51,30 +66,36 @@ module ReportHelper
     }
   end
 
-  def is_threshold_param(param_key)
-    parts = param_key.split "_"
-    return parts.length == 2 && parts[0] == 'threshold' && METRICS.includes? parts[1]
+  def number_or_nil(string)
+    Float(string || '')
+  rescue ArgumentError
+    nil
   end
 
-  def valid_arg_value(name, value) {
+  def valid_arg_value(name, value)
     # return appropriately validated value (based on name), or nil
-    return nil unless arg_value
-    if arg_name == 'view_level'
-      arg_value = result.downcase
-      arg_value = nil unless VIEW_LEVELS.includes? arg_value
-    elsif arg_name == 'sort_by'
-      arg_value = nil unless decode_sort_by(arg_value)
+    return nil unless value
+    if name == :view_level
+      value = value.downcase
+      value = nil unless VIEW_LEVELS.include? value
+    elsif name == :sort_by
+      value = nil unless decode_sort_by(value)
     else
-      arg_value = nil unless is_threshold_param(arg_name) && arg_value.is_a? Numeric
+      value = nil unless is_threshold_param(name)
+      value = number_or_nil(value)
     end
-    return arg_value
-  }
+    return value
+  end
 
   def clean_params(raw)
     clean = {}
-    raw = (raw || {}).clone
+    raw_hash = {}
+    raw.each do |name, value|
+      raw_hash[name] = value
+    end
+    raw = raw_hash
     DEFAULT_PARAMS.each do |name, default_value|
-      clean[name] = valid_arg_value(name, raw[name]) || default_value
+      clean[name] = valid_arg_value(name, raw[name.to_s]) || default_value
       raw.delete(name)
     end
     logger.warn "Ignoring #{raw.length} report params: #{raw}."
@@ -89,6 +110,8 @@ module ReportHelper
     data[:report_details] = report_details(report)
     data[:taxonomy_details] = taxonomy_details(report, params)
     data[:all_categories] = all_categories
+    # puts "BORIS RETURNING #{data[:report_page_params]}"
+    # assert false
     data
   end
 
@@ -365,7 +388,6 @@ module ReportHelper
     # passes the filters
     to_delete = Set.new
     to_keep = Set.new
-    puts "BORIS THRESHOLDS #{thresholds}"
     rows.each do |tax_info|
       should_delete = false
       # if sort column is below threshold, delete
@@ -432,15 +454,6 @@ module ReportHelper
     logger.info "Data processing took #{t2 - t1} seconds (#{t2 - t0} with I/O)."
 
     [real_length, rows]
-  end
-
-  def decode_thresholds(params)
-    thresholds = {}
-    METRICS.each do |metric|
-      param_key = "threshold_#{metric}"
-      thresholds[metric] = params[param_key]
-    end
-    thresholds
   end
 
 end

@@ -7,29 +7,11 @@ class ReportFilter extends React.Component {
     super(props);
     this.background_model = props.background_model || 'N/A';
     this.all_categories = props.all_categories || [];
-    this.state = props.report_page_params;
-    this.applyFilters = this.refetchReportPage.bind(this);
-    this.selectViewLevel = this.selectViewLevel.bind(this);
-    this.applySort = this.applySort.bind(this);
+    this.applyViewLevel = this.applyViewLevel.bind(this);
   }
 
-  refetchReportPage(overrides) {
-    new_params = Object.assign({}, this.state, overrides)
-    window.location = location.protocol + '//' + location.host + location.pathname + '?' + jQuery.param(new_params);
-  }
-
-  applyFilters() {
-    this.refetchReportPage({});
-  }
-
-  applySort(sort_by) {
-    this.refetchReportPage({sort_by})
-  }
-
-  selectViewLevel(event) {
-    this.setState({
-      view_level: event.target.value
-    });
+  applyViewLevel(event) {
+    this.props.applyViewLevel(event.target.value);
   }
 
   render() {
@@ -80,20 +62,20 @@ class ReportFilter extends React.Component {
 
                   <div className="filter-values">
                     <p className="">
-                      <input onChange={this.selectViewLevel} name="group1" value='genus'
-                             checked={(this.state.view_level === 'genus')} type="radio" id="genus-select" />
+                      <input onChange={this.applyViewLevel} name="group1" value='genus'
+                             checked={(this.props.report_page_params.view_level === 'genus')} type="radio" id="genus-select" />
                       <label htmlFor="genus-select">Genus</label>
                     </p>
                     <p className="">
-                      <input onChange={this.selectViewLevel} name="group1" value='species'
-                             checked={(this.state.view_level === 'species')} type="radio" id="specie-select" />
+                      <input onChange={this.applyViewLevel} name="group1" value='species'
+                             checked={(this.props.report_page_params.view_level === 'species')} type="radio" id="specie-select" />
                       <label htmlFor="specie-select">Species</label>
                     </p>
                   </div>
                 </div>
 
                 <div className="apply-filter-button center-align">
-                  <a onClick={this.refetchReportPage}
+                  <a onClick={this.applyFilters}
                      className="btn btn-flat waves-effect grey text-grey text-lighten-5 waves-light apply-filter-button">
                     Apply filter
                   </a>

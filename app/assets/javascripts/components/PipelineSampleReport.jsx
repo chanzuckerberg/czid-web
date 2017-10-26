@@ -4,37 +4,44 @@ class PipelineSampleReport extends React.Component {
     super(props);
     this.report_details = props.report_details;
     this.real_length = props.taxonomy_details[0];
-    this.report_page_params = props.report_page_params;
     this.taxonomy_details = props.taxonomy_details[1];
     this.all_categories = props.all_categories;
-    this.applySort = this.applySort.bind(this);
-    this.report_filter = null;
+    this.applyViewLevel = this.applyViewLevel.bind(this);
   }
 
+  refreshPage(overrides) {
+    new_params = Object.assign({}, this.props.report_page_params, overrides);
+    window.location = location.protocol + '//' + location.host + location.pathname + '?' + jQuery.param(new_params);
+  }
+
+  applyViewLevel(view_level) {
+    this.refreshPage({view_level});
+  }
+
+  // applySort needs to be bound at time of use, not in constructor above
   applySort(sort_by) {
-    this.report_filter.refetchReportPage({ sort_by });
+    this.refreshPage({sort_by});
   }
 
   render_name(tax_info) {
-    indent = <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>;
-    name = <span><i>{tax_info.name}</i></span>;
+    foo = <i>{tax_info.name}</i>;
     if (tax_info.tax_id > 0) {
-      ncbi_url = `https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${tax_info.tax_id}`;
-      name =
+      foo = (
         <span className="link">
-          <a href={ncbi_url}>
+          <a href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${tax_info.tax_id}`}>
             {tax_info.name}
           </a>
-        </span>;
+        </span>
+      );
     }
     if (tax_info.tax_level == 1) {
       // indent species rows
-      name = <span>{indent}{indent}{name}</span>
+      foo = <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{foo}</span>
     } else {
       // emphasize genus, soften category and species count
-      name = <span><b>{name}</b>{indent}<span style={{'color':'#A0A0A0'}}><i>({tax_info.species_count}&nbsp;{tax_info.category_name}&nbsp;species)</i></span></span>
+      foo = <span><b>{foo}</b>&nbsp;&nbsp;&nbsp;&nbsp;<span style={{'color':'#A0A0A0'}}><i>({tax_info.species_count}&nbsp;{tax_info.category_name}&nbsp;species)</i></span></span>
     }
-    return name;
+    return foo;
   }
 
   render_number(x, emphasize, num_decimals) {
@@ -46,20 +53,20 @@ class PipelineSampleReport extends React.Component {
       y = <b>{y}</b>;
     }
     className = is_blank ? 'report-number-blank' : 'report-number';
-    return ( <td className={className}>{y}<b>{units}</b></td> );
+    return ( <td className={className}>{y}</td> );
   }
 
   render_sort_arrow(column, desired_sort_direction, arrow_direction) {
     desired_sort = desired_sort_direction + "_" + column;
-    applyDesiredSort = this.applySort.bind(desired_sort);
     className = `fa fa-caret-${arrow_direction}`;
-    current_sort = this.report_page_params.sort_by;
+    current_sort = this.props.report_page_params.sort_by;
     if (current_sort == desired_sort) {
       className = 'active ' + className;
     }
     return (
-      <i onClick={applyDesiredSort}
-         className={className}>
+      <i onClick={this.applySort.bind(this, desired_sort)}
+         className={className}
+         key = {desired_sort}>
       </i>
     );
   }
@@ -69,8 +76,8 @@ class PipelineSampleReport extends React.Component {
     return (
       <th style={style}>
         <div className='sort-controls right'>
-          {this.render_sort_arrow(column_name, this.report_page_params.sort_by, 'lowest', 'up')}
-          {this.render_sort_arrow(column_name, this.report_page_params.sort_by, 'highest', 'down')}
+          {this.render_sort_arrow(column_name, 'lowest', 'up')}
+          {this.render_sort_arrow(column_name, 'highest', 'down')}
           {visible_type}&nbsp;{visible_metric}
         </div>
       </th>
@@ -82,16 +89,16 @@ class PipelineSampleReport extends React.Component {
   }
 
   render() {
-    const parts = this.report_page_params.sort_by.split("_")
+    const parts = this.props.report_page_params.sort_by.split("_")
     const sort_column = parts[1] + "_" + parts[2];
-    console.log("Start table render.");
     var t0 = Date.now();
-    this.report_filter =
+    report_filter =
       <ReportFilter
         all_categories = { this.all_categories }
         background_model = { this.report_details.background_model.name }
         report_title = { this.report_details.report_info.name }
-        report_page_params = { this.report_page_params }
+        report_page_params = { this.props.report_page_params }
+        applyViewLevel = { this.applyViewLevel }
       />;
     result = (
       <div>
@@ -99,7 +106,7 @@ class PipelineSampleReport extends React.Component {
           <div className="tab-screen-content">
             <div className="row">
               <div className="col s2">
-                {this.report_filter}
+                {report_filter}
               </div>
               <div className="col s10 reports-main ">
                 <table id="report-table" className='bordered report-table'>
@@ -144,7 +151,7 @@ class PipelineSampleReport extends React.Component {
       </div>
     );
     t1 = Date.now();
-    console.log(`End table render after ${t1 - t0} milliseconds.`);
+    // console.log(`Table render took ${t1 - t0} milliseconds.`);
     return result;
   }
 }
