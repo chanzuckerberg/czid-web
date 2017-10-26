@@ -65,29 +65,33 @@ class Samples extends React.Component {
     var that = this;
     if (e.target.value === "") {
       $("#pagination").css("display", "");
-    } 
-    axios.get('/samples/search.json', 
-      {params: {search: e.target.value}
-    }).then((response) => {
-      if (response.data.length) {
-        that.setState({
-          displayedSamples: response.data,
-        })
-        $("#pagination").css("display", "");
-      } else {
+      that.setState({
+        displayedSamples: this.samples,
+      })
+    } else {
+      axios.get('/samples/search.json', 
+        {params: {search: e.target.value}
+      }).then((response) => {
+        if (response.data.length) {
+          that.setState({
+            displayedSamples: response.data,
+          })
+          $("#pagination").css("display", "");
+        } else {
+          $("#pagination").css("display", "none");
+          that.setState({
+            displayedSamples: [],
+          })
+          that.renderEmptyTable()
+        }
+      }).catch((error) => {
         $("#pagination").css("display", "none");
         that.setState({
           displayedSamples: [],
         })
         that.renderEmptyTable()
-      }
-    }).catch((error) => {
-      $("#pagination").css("display", "none");
-      that.setState({
-        displayedSamples: [],
       })
-      that.renderEmptyTable()
-    })
+    }
   }
 
   viewSample(id) {
