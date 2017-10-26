@@ -93,19 +93,22 @@ def generate_taxid_locator(input_fasta, taxid_field, output_fasta, output_json):
     sequence_data = f.readline()
     taxid = get_taxid(sequence_name, taxid_field)
     first_byte = 0
-    new_first_byte = first_byte + len(sequence_name) + len(sequence_data)
+    end_byte = first_byte + len(sequence_name) + len(sequence_data)
     while len(sequence_name) > 0 and len(sequence_data) > 0:
         sequence_name = f.readline()
         sequence_data = f.readline()
         new_taxid = get_taxid(sequence_name, taxid_field)
         if new_taxid != taxid:
+            # Note on boundary condition: when end of file is reached, then
+            # sequence_name == '' => new_taxid=='none' => new_taxid != taxid
+            # so last record will be written to output correctly.
             taxon_sequence_locations.append({'taxid': taxid, 'first_byte': first_byte,
-                                             'last_byte': new_first_byte - 1})
+                                             'last_byte': end_byte - 1})
             taxid = new_taxid
-            first_byte = new_first_byte
-            new_first_byte = first_byte + len(sequence_name) + len(sequence_data)
+            first_byte = end_byte
+            end_byte = first_byte + len(sequence_name) + len(sequence_data)
         else:
-            new_first_byte += len(sequence_name) + len(sequence_data)
+            end_byte += len(sequence_name) + len(sequence_data)
     f.close()
     with open(output_json, 'wb') as f:
        json.dump(taxon_sequence_locations, f)
