@@ -35,9 +35,17 @@ ACCESSION_ANNOTATED_FASTA = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnap
 # output files
 TAXID_ANNOT_FASTA = 'taxid_annot.fasta'
 TAXID_ANNOT_SORTED_FASTA_NT = 'taxid_annot_sorted_nt.fasta'
-TAXID_LOCATIONS_JSON_NT = 'taxid_locations_nt.json'
 TAXID_ANNOT_SORTED_FASTA_NR = 'taxid_annot_sorted_nr.fasta'
+TAXID_ANNOT_SORTED_FASTA_GENUS_NT = 'taxid_annot_sorted_genus_nt.fasta'
+TAXID_ANNOT_SORTED_FASTA_GENUS_NR = 'taxid_annot_sorted_genus_nr.fasta'
+TAXID_ANNOT_SORTED_FASTA_FAMILY_NT = 'taxid_annot_sorted_family_nt.fasta'
+TAXID_ANNOT_SORTED_FASTA_FAMILY_NR = 'taxid_annot_sorted_family_nr.fasta'
+TAXID_LOCATIONS_JSON_NT = 'taxid_locations_nt.json'
 TAXID_LOCATIONS_JSON_NR = 'taxid_locations_nr.json'
+TAXID_LOCATIONS_JSON_GENUS_NT = 'taxid_locations_genus_nt.json'
+TAXID_LOCATIONS_JSON_GENUS_NR = 'taxid_locations_genus_nr.json'
+TAXID_LOCATIONS_JSON_FAMILY_NT = 'taxid_locations_family_nt.json'
+TAXID_LOCATIONS_JSON_FAMILY_NR = 'taxid_locations_family_nr.json'
 LOGS_OUT_BASENAME = 'postprocess-log'
 
 # convenience functions
@@ -64,7 +72,9 @@ def generate_taxid_fasta_from_accid(input_fasta_file, accession2taxid_path, line
         read_id = sequence_name.rstrip().lstrip('>') # example read_id: "NR::NT:CP010376.2:NB501961:14:HM7TLBGX2:1:23109:12720:8743/2"
         nr_taxid_species, nr_taxid_genus, nr_taxid_family = accession2taxid(read_id, accession2taxid_dict, 'NR', lineage_map)
         nt_taxid_species, nt_taxid_genus, nt_taxid_family = accession2taxid(read_id, accession2taxid_dict, 'NT', lineage_map)
-        new_read_name = ('nr:' + nr_taxid_species + ':nt:' + nt_taxid_species
+        new_read_name = ('family_nr:' + nr_taxid_family + ':family_nt:' + nt_taxid_family
+                         + ':genus_nr:' + nr_taxid_genus + ':genus_nt:' + nt_taxid_genus
+                         + ':species_nr:' + nr_taxid_species + ':species_nt:' + nt_taxid_species
                          + ':' + read_id)
         output_fasta_f.write(">%s\n" % new_read_name)
         output_fasta_f.write(sequence_data)
@@ -74,10 +84,13 @@ def generate_taxid_fasta_from_accid(input_fasta_file, accession2taxid_path, line
     output_fasta_f.close()
 
 def get_taxid(sequence_name, taxid_field):
-    parts = sequence_name.split(":")
-    if len(parts) < taxid_field:
-         return 'none'
-    return parts[taxid_field-1]
+    parts = sequence_name.replace('>', ':').split(":%s:" % taxid_field)
+    if len(parts) <= 1:
+        # sequence_name empty or taxid_field not found
+        return 'none'
+    taxid = parts[1].split(":")[0]
+    # example sequence_name: ">nr:-100:nt:684552:NR::NT:LT629734.1:HWI-ST640:828:H917FADXX:2:1101:1424:15119/1"
+    return taxid
 
 def generate_taxid_locator(input_fasta, taxid_field, hit_type, output_fasta, output_json):
     # put every 2-line fasta record on a single line with delimiter ":lineseparator:":
@@ -215,11 +228,12 @@ def run_sample(sample_s3_input_path, sample_s3_output_path, aws_batch_job_id, la
         os.path.join(result_dir, TAXID_ANNOT_FASTA),
         result_dir, sample_s3_output_path, False)
 
+    # SPECIES level
     # generate taxid locator for NT
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "run_generate_taxid_locator for NT"})
     run_and_log(logparams, run_generate_taxid_locator,
-        os.path.join(result_dir, TAXID_ANNOT_FASTA), 4, 'NT',
+        os.path.join(result_dir, TAXID_ANNOT_FASTA), 'species_nt', 'NT',
         os.path.join(result_dir, TAXID_ANNOT_SORTED_FASTA_NT),
         os.path.join(result_dir, TAXID_LOCATIONS_JSON_NT),
         result_dir, sample_s3_output_path, False)
@@ -228,9 +242,47 @@ def run_sample(sample_s3_input_path, sample_s3_output_path, aws_batch_job_id, la
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "run_generate_taxid_locator for NR"})
     run_and_log(logparams, run_generate_taxid_locator,
-        os.path.join(result_dir, TAXID_ANNOT_FASTA), 2, 'NR',
+        os.path.join(result_dir, TAXID_ANNOT_FASTA), 'species_nr', 'NR',
         os.path.join(result_dir, TAXID_ANNOT_SORTED_FASTA_NR),
         os.path.join(result_dir, TAXID_LOCATIONS_JSON_NR),
+        result_dir, sample_s3_output_path, False)
+
+    # GENUS level
+    # generate taxid locator for NT
+    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+        {"title": "run_generate_taxid_locator for NT"})
+    run_and_log(logparams, run_generate_taxid_locator,
+        os.path.join(result_dir, TAXID_ANNOT_FASTA), 'genus_nt', 'NT',
+        os.path.join(result_dir, TAXID_ANNOT_SORTED_FASTA_GENUS_NT),
+        os.path.join(result_dir, TAXID_LOCATIONS_JSON_GENUS_NT),
+        result_dir, sample_s3_output_path, False)
+
+    # generate taxid locator for NR
+    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+        {"title": "run_generate_taxid_locator for NR"})
+    run_and_log(logparams, run_generate_taxid_locator,
+        os.path.join(result_dir, TAXID_ANNOT_FASTA), 'genus_nr', 'NR',
+        os.path.join(result_dir, TAXID_ANNOT_SORTED_FASTA_GENUS_NR),
+        os.path.join(result_dir, TAXID_LOCATIONS_JSON_GENUS_NR),
+        result_dir, sample_s3_output_path, False)
+
+    # FAMILY level
+    # generate taxid locator for NT
+    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+        {"title": "run_generate_taxid_locator for NT"})
+    run_and_log(logparams, run_generate_taxid_locator,
+        os.path.join(result_dir, TAXID_ANNOT_FASTA), 'family_nt', 'NT',
+        os.path.join(result_dir, TAXID_ANNOT_SORTED_FASTA_FAMILY_NT),
+        os.path.join(result_dir, TAXID_LOCATIONS_JSON_FAMILY_NT),
+        result_dir, sample_s3_output_path, False)
+
+    # generate taxid locator for NR
+    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+        {"title": "run_generate_taxid_locator for NR"})
+    run_and_log(logparams, run_generate_taxid_locator,
+        os.path.join(result_dir, TAXID_ANNOT_FASTA), 'family_nr', 'NR',
+        os.path.join(result_dir, TAXID_ANNOT_SORTED_FASTA_FAMILY_NR),
+        os.path.join(result_dir, TAXID_LOCATIONS_JSON_FAMILY_NR),
         result_dir, sample_s3_output_path, False)
 
 # Main
