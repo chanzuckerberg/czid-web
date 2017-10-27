@@ -123,7 +123,7 @@ def generate_taxid_locator(input_fasta, taxid_field, hit_type, output_fasta, out
             # Note on boundary condition: when end of file is reached, then
             # sequence_name == '' => new_taxid=='none' => new_taxid != taxid
             # so last record will be written to output correctly.
-            taxon_sequence_locations.append({'taxid': taxid, 'first_byte': first_byte,
+            taxon_sequence_locations.append({'taxid': int(taxid), 'first_byte': first_byte,
                                              'last_byte': end_byte - 1, 'hit_type': hit_type})
             taxid = new_taxid
             first_byte = end_byte
