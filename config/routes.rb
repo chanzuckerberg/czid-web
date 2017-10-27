@@ -22,5 +22,5 @@ Rails.application.routes.draw do
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
   root to: 'home#home'
   get 'pipeline_outputs/:id/:taxid/fasta', to: 'pipeline_outputs#show_taxid_fasta'
-  get 'pipeline_outputs/:id/:taxid/fasta/:hit_type', to: 'pipeline_outputs#show_taxid_fasta'
+  get 'pipeline_outputs/:id/:taxid/fasta/:tax_level/:hit_type', to: 'pipeline_outputs#show_taxid_fasta'
 end
