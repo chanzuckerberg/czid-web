@@ -177,13 +177,13 @@ def run_generate_taxid_fasta_from_accid(input_fasta, accession2taxid_s3_path, li
     logging.getLogger().info("finished job")
     execute_command("aws s3 cp %s %s/" % (output_fasta, sample_s3_output_path))
 
-def run_generate_taxid_locator(input_fasta, taxid_field, output_fasta, output_json,
+def run_generate_taxid_locator(input_fasta, taxid_field, hit_type, output_fasta, output_json,
     result_dir, sample_s3_output_path, lazy_run):
     if lazy_run:
         # check if output already exists
         if os.path.isfile(output_fasta):
             return 1
-    generate_taxid_locator(input_fasta, taxid_field, output_fasta, output_json)
+    generate_taxid_locator(input_fasta, taxid_field, hit_type, output_fasta, output_json)
     logging.getLogger().info("finished job")
     execute_command("aws s3 cp %s %s/" % (output_fasta, sample_s3_output_path))
     execute_command("aws s3 cp %s %s/" % (output_json, sample_s3_output_path))
