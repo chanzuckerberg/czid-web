@@ -59,6 +59,11 @@ $break-large: 1070px;
   cursor: pointer;
   border-radius: 5px;
   font-size: 13px;
+  &.small {
+    min-width: 0px;
+    padding: 10px 17px;
+    background: #424468;
+  }
 }
 .custom-button i{
   font-size: 20px;
