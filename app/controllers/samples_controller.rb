@@ -12,6 +12,33 @@ class SamplesController < ApplicationController
     @samples = Sample.all
   end
 
+
+  # GET /samples/bulk_new
+  def bulk_new
+
+  end
+
+  # POST /samples/bulk_upload
+  def bulk_upload
+    params[:samples] ||= []
+    @samples = []
+    @errors = []
+    params[:samples].each do |sample_attributes|
+      selected = sample_attributes.delete(:selected)
+      next unless selected.present?
+      sample = Sample.new(sample_attributes)
+      if sample.save
+      else
+      end
+    end
+
+    if @errors.empty?
+      format.json { render json: @samples }
+    else
+      format.json { render json: [samples: @samples, errors: @errors], status: :unprocessable_entity }
+    end
+  end
+
   # GET /samples/1
   # GET /samples/1.json
 
