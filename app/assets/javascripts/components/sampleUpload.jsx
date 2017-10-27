@@ -84,7 +84,7 @@ class SampleUpload extends React.Component {
   }
 
   clearError() {
-    this.setState({ 
+    this.setState({
       invalid: false,
       success: false
      })
@@ -176,7 +176,7 @@ class SampleUpload extends React.Component {
     .catch(function (error) {
      that.setState({
       invalid: true,
-       errorMessage: 'Failed to create sample'
+       errorMessage: JSON.stringify(error.response.data)
      })
     });
   }
@@ -380,9 +380,9 @@ class SampleUpload extends React.Component {
                 <input ref= "name" type="text" className="" onFocus={ this.clearError } onChange= { this.handleNameChange } value= { this.state.selectedName }  />
               </div>
               <div className="col s6 input-field genome-list">
-                  <select ref="hostSelect" name="host" className="" id="host" onChange={ this.handleHostChange } value={this.state.selectedHostGenome}> 
+                  <select ref="hostSelect" name="host" className="" id="host" onChange={ this.handleHostChange } value={this.state.selectedHostGenome}>
                     <option disabled defaultValue>{this.state.selectedHostGenome}</option>
-                      { this.state.hostGenomes.length ? 
+                      { this.state.hostGenomes.length ?
                           this.state.hostGenomes.map((host, i) => {
                             return <option ref= "host" key={i} id={host.id} >{host.name}</option>
                           }) : <option>No host genomes to display</option>
@@ -393,9 +393,9 @@ class SampleUpload extends React.Component {
             </div>
               <div className="row field-row">
                 <div className="input-field col s6 project-list">
-                   <select ref="projectSelect" className="" onChange={ this.handleProjectChange } value={this.state.selectedProject} id="sample"> 
+                   <select ref="projectSelect" className="" onChange={ this.handleProjectChange } value={this.state.selectedProject} id="sample">
                     <option disabled defaultValue>{this.state.selectedProject}</option>
-                   { this.state.allProjects.length ? 
+                   { this.state.allProjects.length ?
                       this.state.allProjects.map((project, i) => {
                         return <option ref= "project" key={i} id={project.id} >{project.name}</option>
                       }) : <option>No projects to display</option>
@@ -403,7 +403,7 @@ class SampleUpload extends React.Component {
                   </select>
                   <label>Project List</label>
               </div>
-                <div className="input-field col s6"> 
+                <div className="input-field col s6">
                     <div className="row">
                       <input className="col s11 project-input" ref= "new_project" type="text" onFocus={ this.clearError } placeholder="Add a project if desired project is not on the list" />
                       <input className="col s1 add-icon" value="&#xf067;" type="button" onClick={ this.handleProjectSubmit } />
@@ -468,8 +468,8 @@ class SampleUpload extends React.Component {
                 <label>Sample name</label>
               </div>
               <div className="col s6 input-field genome-list">
-                  <select ref="hostSelect" name="host" className="" id="host" onChange={ this.handleHostChange } value={this.state.host}> 
-                      { this.state.hostGenomes.length ? 
+                  <select ref="hostSelect" name="host" className="" id="host" onChange={ this.handleHostChange } value={this.state.host}>
+                      { this.state.hostGenomes.length ?
                           this.state.hostGenomes.map((host, i) => {
                             return <option ref= "host" key={i} id={host.id} >{host.name}</option>
                           }) : <option>No host genomes to display</option>
@@ -480,9 +480,9 @@ class SampleUpload extends React.Component {
             </div>
               <div className="row field-row">
                 <div className="input-field col s6 project-list">
-                   <select ref="projectSelect" className="" id="sample" onChange={ this.handleProjectChange } value={this.state.project}> 
+                   <select ref="projectSelect" className="" id="sample" onChange={ this.handleProjectChange } value={this.state.project}>
                     <option disabled defaultValue>{this.state.project}</option>
-                   { this.state.allProjects.length ? 
+                   { this.state.allProjects.length ?
                       this.state.allProjects.map((project, i) => {
                         return <option ref= "project" key={i} id={project.id} >{project.name}</option>
                       }) : <option>No projects to display</option>
@@ -490,7 +490,7 @@ class SampleUpload extends React.Component {
                   </select>
                   <label>Project List</label>
               </div>
-                <div className="input-field col s6"> 
+                <div className="input-field col s6">
                     <div className="row">
                       <input className="col s11 project-input" ref= "new_project" type="text" onFocus={ this.clearError } placeholder="Add a project if desired project is not on the list" />
                       <input className="col s1 add-icon" value="&#xf067;" type="button" onClick={ this.handleProjectSubmit } />

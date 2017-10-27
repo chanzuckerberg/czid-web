@@ -1,5 +1,5 @@
 require 'aws-sdk-s3'
-
+require 'open3'
 class InputFile < ApplicationRecord
   belongs_to :sample
   SOURCE_TYPE_LOCAL = 'local'.freeze
@@ -12,8 +12,15 @@ class InputFile < ApplicationRecord
 
   def s3_source_check
     source.strip! if source.present?
-    if source_type == SOURCE_TYPE_S3 && source[0..4] != 's3://'
-      errors.add(:input_files, "file source doesn't start with s3:// for s3 input")
+    if source_type == SOURCE_TYPE_S3
+      if source[0..4] != 's3://'
+        errors.add(:input_files, "file source doesn't start with s3:// for s3 input")
+      end
+      command = "aws s3 ls #{source}"
+      _stdout, _stderr, status = Open3.capture3(command)
+      unless status.exitstatus.zero?
+        errors.add(:input_files, "file source #{source} doesn't exist")
+      end
     end
   end
 

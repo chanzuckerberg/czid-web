@@ -95,6 +95,14 @@ class Sample < ApplicationRecord
              'NR' => "#{sample_postprocess_s3_path}/#{SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR}" } }
   end
 
+  def annotated_fasta_s3_path
+    "#{sample_output_s3_path}/#{HIT_FASTA_BASENAME}"
+  end
+
+  def unidentified_fasta_s3_path
+    "#{sample_output_s3_path}/#{UNIDENTIFIED_FASTA_BASENAME}"
+  end
+
   def sample_annotated_fasta_url
     "https://s3.console.aws.amazon.com/s3/object/#{SAMPLES_BUCKET_NAME}/#{sample_path}/results/#{HIT_FASTA_BASENAME}"
   end

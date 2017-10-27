@@ -172,7 +172,7 @@ def generate_taxid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fas
     input_fasta_f.close()
     output_fasta_f.close()
 
-def generate_lzw_filtered_paired(fasta_file_1, fast_file_2, output_prefix, cutoff_fraction):
+def generate_lzw_filtered_paired(fasta_file_1, fasta_file_2, output_prefix, cutoff_fraction):
     output_read_1 = open(output_prefix + '.1.fasta', 'wb')
     output_read_2 = open(output_prefix + '.2.fasta', 'wb')
     read_1 = open(fasta_file_1, 'rb')
@@ -508,17 +508,17 @@ def run_and_log(logparams, func_name, *args):
     if all(param in logparams for param in required_params):
         records_before = count_reads(logparams["before_file_name"], logparams["before_file_type"])
         records_after = count_reads(logparams["after_file_name"], logparams["after_file_type"])
-    if logparams["count_reads"]:
-        percent_removed = (100.0 * (records_before - records_after)) / records_before
-        logger.info("%s %% of reads dropped out, %s reads remaining" % (str(percent_removed), str(records_after)))
-        STATS.append({'task': func_name.__name__, 'reads_before': records_before, 'reads_after': records_after})
-    # function-specific logs
-    if func_name.__name__ == "run_cdhitdup":
-        compression_ratio = (1.0 * records_before) / records_after
-        logger.info("duplicate compression ratio: %s" % str(compression_ratio))
-    if func_name.__name__ == "run_priceseqfilter":
-        pass_percentage = (100.0 * records_after) / records_before
-        logger.info("percentage of reads passing QC filter: %s %%" % str(pass_percentage))
+        if logparams["count_reads"]:
+            percent_removed = (100.0 * (records_before - records_after)) / records_before
+            logger.info("%s %% of reads dropped out, %s reads remaining" % (str(percent_removed), str(records_after)))
+            STATS.append({'task': func_name.__name__, 'reads_before': records_before, 'reads_after': records_after})
+        # function-specific logs
+        if func_name.__name__ == "run_cdhitdup":
+            compression_ratio = (1.0 * records_before) / records_after
+            logger.info("duplicate compression ratio: %s" % str(compression_ratio))
+        if func_name.__name__ == "run_priceseqfilter":
+            pass_percentage = (100.0 * records_after) / records_before
+            logger.info("percentage of reads passing QC filter: %s %%" % str(pass_percentage))
     # copy log file
     execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
     # write stats
@@ -978,7 +978,7 @@ def run_gsnapl_remotely(sample, input_fa_1, input_fa_2,
     logging.getLogger().info("finished alignment")
     execute_command("aws s3 cp %s/%s %s/" % (sample_s3_output_path, GSNAPL_OUT, result_dir))
     # Deduplicate m8 input. Sometimes GSNAPL outputs multiple consecutive lines for same original read and same accession id. Count functions expect only 1 (top hit).
-    deduplicate_m8(os.path.join(result_dir, GSNAPL_OUT), os.path.join(result_dir, GSNAPL_DEDUP_OUT)
+    deduplicate_m8(os.path.join(result_dir, GSNAPL_OUT), os.path.join(result_dir, GSNAPL_DEDUP_OUT))
     execute_command("aws s3 cp %s/%s %s/" % (result_dir, GSNAPL_DEDUP_OUT, sample_s3_output_path))
 
 def run_annotate_m8_with_taxids(sample_name, input_m8, output_m8,
