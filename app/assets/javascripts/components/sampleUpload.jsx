@@ -136,7 +136,7 @@ class SampleUpload extends React.Component {
   }
 
   isProjectInvalid() {
-    if (this.refs.new_project.value === '') {
+    if (this.refs.new_project.value === '' && this.state.project === 'Select a project') {
       this.setState({
         invalid: true,
         errorMessage: 'Please enter valid project name'
@@ -180,7 +180,6 @@ class SampleUpload extends React.Component {
      })
     });
   }
-
 
 
   updateSample() {
@@ -362,7 +361,7 @@ class SampleUpload extends React.Component {
   renderUpdateForm() {
     return (
       <div className="form-wrapper">
-        <form ref="form" onSubmit={ this.handleUpdate }>
+        <form ref="form" onSubmit={ this.handleUpdate } >
           <div className="row title">
             <p className="col s6 signup">Sample Update</p>
           </div>

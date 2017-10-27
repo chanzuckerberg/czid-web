@@ -27,6 +27,7 @@ class CreateUser extends React.Component {
       errorMessage: '',
       successMessage: '',
       isChecked : false,
+      serverErrors: [],
       email: this.selectedUser.email || '',
       password: this.selectedUser.password || '',
       pConfirm: this.selectedUser.password_confirmation || '',
@@ -165,15 +166,14 @@ class CreateUser extends React.Component {
       that.setState({
         success: true,
         successMessage: 'User created successfully'
+      }, () => {
+        that.gotoPage('/users');
       })
-      setTimeout(() => {
-        location.href = '/';
-      }, 1000)
     })
     .catch((err) => {
       that.setState({
         showFailed: true,
-        errorMessage: 'Failed to create user'
+        serverErrors: err.response.data
       })
     })
   }
@@ -193,14 +193,13 @@ class CreateUser extends React.Component {
       that.setState({
         success: true,
         successMessage: 'User updated successfully'
+      }, () => {
+        that.gotoPage('/users');
       })
-      setTimeout(() => {
-        location.href = '/';
-      }, 1000)
     }).catch((err) => {
       that.setState({
         showFailed: true,
-        errorMessage: 'Failed to update user'
+        serverErrors: err.response.data
       })
     })
   }
@@ -217,10 +216,7 @@ class CreateUser extends React.Component {
                 <i className="fa fa-success"></i>
                  <span>{this.state.successMessage}</span>
                 </div> : null }
-              { this.state.showFailed ? <div className="error-info" >
-                  <i className="fa fa-error"></i>
-                  <span>{this.state.errorMessage}</span>
-              </div> : null }
+                <div className={this.state.showFailed ? 'error-info' : ''} >{this.displayError(this.state.showFailed, this.state.serverErrors, this.state.errorMessage)}</div>
               <div className="row content-wrapper">
                 <div className="input-field">
                   <i className="fa fa-envelope" aria-hidden="true"></i>
@@ -255,9 +251,19 @@ class CreateUser extends React.Component {
     )
   }
 
+  displayError(failedStatus, serverError, formattedError) {
+    if (failedStatus) {
+      return serverError.length ? serverError.map((error, i) => {
+        return <p className="error center-align" key={i}>{error}</p>
+      }) : <span>{formattedError}</span>
+    } else {
+      return null
+    }
+  }
+
   renderUpdateUser() {
     return (
-      <div className="form-wrapper">
+      <div className="user-form">
           <div className="row">
             <form ref="form" className="new_user" id="new_user" onSubmit={ this.handleUpdate }>
               <div className="row title">
@@ -267,10 +273,7 @@ class CreateUser extends React.Component {
                 <i className="fa fa-success"></i>
                  <span>{this.state.successMessage}</span>
                 </div> : null }
-              { this.state.showFailed ? <div className="error-info" >
-                  <i className="fa fa-error"></i>
-                  <span>{this.state.errorMessage}</span>
-              </div> : null }
+              <div className={this.state.showFailed ? 'error-info' : ''} >{ this.displayError(this.state.showFailed, this.state.serverErrors, this.state.errorMessage) }</div>
               <div className="row content-wrapper">
                 <div className="input-field">
                   <i className="fa fa-envelope" aria-hidden="true"></i>
@@ -309,6 +312,10 @@ class CreateUser extends React.Component {
     return (
       <div>
         { this.props.selectedUser ? this.renderUpdateUser() : this.renderCreateUser() }
+        <div className="bottom">
+          <span className="back" onClick={ this.props.selectedUser ? this.gotoPage.bind(this, '/users') : this.gotoPage.bind(this, '/') } >Back</span>|
+          <span className="home" onClick={ this.gotoPage.bind(this, '/')}>Home</span>
+        </div>
       </div>
     )
   }

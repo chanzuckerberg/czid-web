@@ -32,7 +32,7 @@ class UsersController < ApplicationController
         format.json { render :show, status: :created, location: root_path }
       else
         format.html { render :new }
-        format.json { render json: @user.errors, status: :unprocessable_entity }
+        format.json { render json: @user.errors.full_messages, status: :unprocessable_entity }
       end
     end
   end
@@ -53,7 +53,7 @@ class UsersController < ApplicationController
         format.json { render :show, status: :ok, location: @user }
       else
         format.html { render :edit }
-        format.json { render json: @user.errors, status: :unprocessable_entity }
+        format.json { render json: @user.errors.full_messages, status: :unprocessable_entity }
       end
     end
   end
