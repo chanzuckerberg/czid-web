@@ -93,8 +93,8 @@ def get_taxid(sequence_name, taxid_field):
     # example sequence_name: ">nr:-100:nt:684552:NR::NT:LT629734.1:HWI-ST640:828:H917FADXX:2:1101:1424:15119/1"
     return taxid
 
-def get_taxid_field_num(taxid_field, fasta_file):
-    with open(output_fasta) as f:
+def get_taxid_field_num(taxid_field, input_fasta):
+    with open(input_fasta) as f:
         sequence_name = f.readline()
     return sequence_name.split(":").index(taxid_field) + 1
 
