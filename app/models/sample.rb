@@ -42,6 +42,14 @@ class Sample < ApplicationRecord
     # TODO: for s3 input types, test permissions before saving, by making a HEAD request
   end
 
+  def self.search(search)
+    if search
+      where('name LIKE ?', "%#{search}%")
+    else
+      scoped
+    end
+  end
+
   def initiate_input_file_upload
     return unless input_files.first.source_type == InputFile::SOURCE_TYPE_S3
     Resque.enqueue(InitiateS3Cp, id)

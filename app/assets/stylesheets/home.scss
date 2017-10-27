@@ -47,36 +47,55 @@ i.fa {
 .sub-header-home {
   min-height: 120px;
   padding-top: 10px;
-  box-shadow: 1px 2px 5px 2px #eaeaea;
-  background-color: #E3E8EB;
-  .title {
-    color: #A2A1BF;
+  background: #263039;
+  .sub-header-items {
+    margin: 0 72px;
+  }
+  .upload {
+    float: right;
+    padding: 9px 20px;
+    border-radius: 30px;
+    border: 1px solid #4ba4c1;
+    color: #4ba4c1;
+    letter-spacing: 0.5px;
+    font-size: 12px;
+    cursor: pointer;
+    &:hover {
+      border-color: #586878;
+      color: #586878;
+    }
+    span {
+      padding-right: 13px;
+    }
+    .fa-flask {
+      padding: 0px 7px;
+    }
   }
   .sub-title {
     color: #333333;
     margin: 14px 0;
     font-size: 32px;
+    span {
+      color: #e0e0e0;
+    }
     .fa-angle-down {
       font-size: 17px;
-      border: 0.5px solid #5b636b;
-      border-radius: 3px;
-      padding: 0px 5px;
-      background-color: rgba(38, 49, 58, 0.73);
-      color: #ffffff;
-      margin: 0 7px;
+      border: 1px solid #586878;
+      border-radius: 50%;
+      padding: 5px 8px;
+      color: #586878;
+      margin: 0px 12px;
       vertical-align: middle;
       &:hover {
-        background: #2f3338;
-        border-color: #31363c;
+        border-color: #e0e0e0;
+        color: #e0e0e0;
       }
     }
   }
   .title-filter {
     padding: 5px 0;
-    .fa-bar-chart {
-     color: #333333;
-     font-size: 20px;
-     margin: 5px;
+    span {
+      color: #8697a3;
     }
   }
 }
