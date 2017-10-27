@@ -57,6 +57,7 @@ class PipelineRun < ApplicationRecord
     else
       Airbrake.notify("Error for update job status for pipeline run #{id} with error #{stderr}")
       self.job_status = STATUS_ERROR
+      self.job_status = STATUS_FAILED if stderr =~ /IndexError/ # job no longer exists
     end
     save
   end
