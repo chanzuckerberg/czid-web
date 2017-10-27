@@ -59,7 +59,6 @@ class SampleUpload extends React.Component {
   }
 
   componentDidMount() {
-    console.log(this.props, 'props');
     this.initializeSelectTag();
     $(ReactDOM.findDOMNode(this.refs.projectSelect)).on('change',this.handleProjectChange);
     $(ReactDOM.findDOMNode(this.refs.hostSelect)).on('change',this.handleHostChange);
