@@ -20,7 +20,7 @@ OUTPUT_BUCKET = 's3://czbiohub-idseq-samples-test/id-uganda'  # default to be ov
 KEY_S3_PATH = 's3://czbiohub-infectious-disease/idseq-alpha.pem'
 ROOT_DIR = '/mnt'
 DEST_DIR = ROOT_DIR + '/idseq/data' # generated data go here
-REF_DIR  = ROOT_DIR + '/idseq/ref' # referene genome / ref databases go here
+REF_DIR  = ROOT_DIR + '/idseq/ref' # referene genome / ref databases go here 
 
 
 STAR="STAR"
