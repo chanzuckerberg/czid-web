@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171026214215) do
+ActiveRecord::Schema.define(version: 20171027001341) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -148,7 +148,8 @@ ActiveRecord::Schema.define(version: 20171026214215) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "hit_type"
-    t.index ["pipeline_output_id", "hit_type", "taxid"], name: "index_taxon_byteranges_on_details"
+    t.integer "tax_level"
+    t.index ["pipeline_output_id", "tax_level", "hit_type", "taxid"], name: "index_taxon_byteranges_on_details"
     t.index ["pipeline_output_id"], name: "index_taxon_byteranges_on_pipeline_output_id"
   end
 
