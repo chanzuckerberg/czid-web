@@ -93,11 +93,17 @@ def get_taxid(sequence_name, taxid_field):
     # example sequence_name: ">nr:-100:nt:684552:NR::NT:LT629734.1:HWI-ST640:828:H917FADXX:2:1101:1424:15119/1"
     return taxid
 
+def get_taxid_field_num(taxid_field, fasta_file):
+    with open(output_fasta) as f:
+        sequence_name = f.readline()
+    return sequence_name.split(":").index(taxid_field) + 1
+
 def generate_taxid_locator(input_fasta, taxid_field, hit_type, output_fasta, output_json):
+    taxid_field_num = get_taxid_field_num(taxid_field, input_fasta)
     # put every 2-line fasta record on a single line with delimiter ":lineseparator:":
     command = "awk 'NR % 2 == 1 { o=$0 ; next } { print o \":lineseparator:\" $0 }' " + input_fasta
     # sort the records based on the field containing the taxids:
-    command += " | sort -T %s --key %s --field-separator ':' --numeric-sort" % (TEMP_DIR, taxid_field)
+    command += " | sort -T %s --key %s --field-separator ':' --numeric-sort" % (TEMP_DIR, taxid_field_num)
     # split every record back over 2 lines:
     command += " | sed 's/:lineseparator:/\\n/g' > %s" % output_fasta
     subprocess.check_output(command, shell=True)
