@@ -46,6 +46,7 @@ TAXID_LOCATIONS_JSON_GENUS_NT = 'taxid_locations_genus_nt.json'
 TAXID_LOCATIONS_JSON_GENUS_NR = 'taxid_locations_genus_nr.json'
 TAXID_LOCATIONS_JSON_FAMILY_NT = 'taxid_locations_family_nt.json'
 TAXID_LOCATIONS_JSON_FAMILY_NR = 'taxid_locations_family_nr.json'
+TAXID_LOCATIONS_JSON_ALL = 'taxid_locations_combined.json'
 LOGS_OUT_BASENAME = 'postprocess-log'
 
 # convenience functions
@@ -127,6 +128,14 @@ def generate_taxid_locator(input_fasta, taxid_field, hit_type, output_fasta, out
     with open(output_json, 'wb') as f:
        json.dump(taxon_sequence_locations, f)
 
+def combine_json(input_json_list, output_json):
+    output = []
+    for input_json in input_json_list:
+        with open(input_json) as f:
+            output.append(json.load(f))
+    with open(output_json, 'wb') as outf:
+        json.dump(output, outf)
+
 # job functions
 def execute_command(command):
     print command
@@ -186,6 +195,15 @@ def run_generate_taxid_locator(input_fasta, taxid_field, hit_type, output_fasta,
     generate_taxid_locator(input_fasta, taxid_field, hit_type, output_fasta, output_json)
     logging.getLogger().info("finished job")
     execute_command("aws s3 cp %s %s/" % (output_fasta, sample_s3_output_path))
+    execute_command("aws s3 cp %s %s/" % (output_json, sample_s3_output_path))
+
+def run_combine_json(input_json_list, output_json, result_dir, sample_s3_output_path, lazy_run):
+    if lazy_run:
+        # check if output already exists
+        if os.path.isfile(output_json):
+            return 1
+    combine_json(input_json_list, output_json)
+    logging.getLogger().info("finished job")
     execute_command("aws s3 cp %s %s/" % (output_json, sample_s3_output_path))
 
 def run_sample(sample_s3_input_path, sample_s3_output_path, aws_batch_job_id, lazy_run = True):
@@ -284,6 +302,17 @@ def run_sample(sample_s3_input_path, sample_s3_output_path, aws_batch_job_id, la
         os.path.join(result_dir, TAXID_ANNOT_SORTED_FASTA_FAMILY_NR),
         os.path.join(result_dir, TAXID_LOCATIONS_JSON_FAMILY_NR),
         result_dir, sample_s3_output_path, False)
+
+    # combine results
+    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+        {"title": "run_combine_json"})
+    input_files_basenames = [TAXID_LOCATIONS_JSON_NT, TAXID_LOCATIONS_JSON_NR,
+                             TAXID_LOCATIONS_JSON_GENUS_NT, TAXID_LOCATIONS_JSON_GENUS_NR,
+                             TAXID_LOCATIONS_JSON_FAMILY_NT, TAXID_LOCATIONS_JSON_FAMILY_NR]
+    input_files = [os.path.join(result_dir, file) for file in input_files_basenames]
+    run_and_log(logparams, run_combine_json,
+         input_files, os.path.join(result_dir, TAXID_LOCATIONS_JSON_ALL),
+         result_dir, sample_s3_output_path, False)
 
 # Main
 def main():
