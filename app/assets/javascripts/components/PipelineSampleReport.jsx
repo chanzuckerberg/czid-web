@@ -318,7 +318,7 @@ class PipelineSampleReport extends React.Component {
                         <td>
                           { (this.view_level==='species' && (taxon.nt_ele && taxon.nt_ele.hasOwnProperty('count')) ) ? 
                             <span className="link">
-                              <a href={`/pipeline_outputs/${this.pipeline_output_id}/${taxon.nt_ele.tax_id}/fasta/NT`}>{ numberWithCommas(taxon.nt_ele.count) }</a>
+                              <a href={`/pipeline_outputs/${this.pipeline_output_id}/${taxon.nt_ele.tax_id}/fasta/1/NT`}>{ numberWithCommas(taxon.nt_ele.count) }</a>
                             </span> : '' }
                         </td>
 
@@ -345,15 +345,12 @@ class PipelineSampleReport extends React.Component {
                         <td>
                           { (this.view_level==='species' && (taxon.nr_ele && taxon.nr_ele.hasOwnProperty('count')) ) ?
                             <span className="link">
-                              <a href={`/pipeline_outputs/${this.pipeline_output_id}/${taxon.nr_ele.tax_id}/fasta/NR`}>{ numberWithCommas(taxon.nr_ele.count) }</a>
+                              <a href={`/pipeline_outputs/${this.pipeline_output_id}/${taxon.nr_ele.tax_id}/fasta/1/NR`}>{ numberWithCommas(taxon.nr_ele.count) }</a>
                             </span> : '' }
                         </td>
 
                         <td>
-                          { (this.view_level==='species' && taxon.aggregate_score) ?
-                            <span className="link">
-                              <a href={`/pipeline_outputs/${this.pipeline_output_id}/${taxon.nr_ele.tax_id}/fasta/NT_or_NR`}>{ numberWithCommas(Number(taxon.aggregate_score).toFixed(3)) }</a>
-                            </span> : '' }
+                          { (this.view_level==='species' && taxon.aggregate_score) ? numberWithCommas(Number(taxon.aggregate_score).toFixed(3)) : '' }
                         </td>
 
                       </tr>

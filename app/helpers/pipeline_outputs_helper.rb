@@ -2,8 +2,6 @@ module PipelineOutputsHelper
   Client = Aws::S3::Client.new
 
   def get_taxid_fasta(pipeline_output, taxid, tax_level, hit_type)
-    hit_type = 'NT' if hit_type.nil?
-    tax_level = TaxonCount::TAX_LEVEL_SPECIES if tax_level.nil?
     uri = pipeline_output.sample.s3_paths_for_taxon_byteranges[tax_level][hit_type]
     uri_parts = uri.split("/", 4)
     bucket = uri_parts[2]
