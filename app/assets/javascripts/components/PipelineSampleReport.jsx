@@ -278,7 +278,7 @@ class PipelineSampleReport extends React.Component {
                         <td>
                           { (taxon.genus_nt_ele) ?
                              <span className="link">
-                               <a href={`/pipeline_outputs/${this.pipeline_output_id}/${taxon.genus_nt_ele.tax_id}/fasta/2/NT_or_NR`}>{ taxon.genus_nt_ele.name }
+                               <a href={`/pipeline_outputs/${this.pipeline_output_id}/fasta/2/${taxon.genus_nt_ele.tax_id}/NT_or_NR`}>{ taxon.genus_nt_ele.name }
                                </a>
                              </span> : 'N/A'
                           }
@@ -286,7 +286,7 @@ class PipelineSampleReport extends React.Component {
                         <td>
                           { (this.view_level==='species' && taxon.nt_ele) ?
                             <span className="link">
-                              <a href={`/pipeline_outputs/${this.pipeline_output_id}/${taxon.nt_ele.tax_id}/fasta/1/NT_or_NR`}>{ taxon.nt_ele.name }</a>
+                              <a href={`/pipeline_outputs/${this.pipeline_output_id}/fasta/1/${taxon.nt_ele.tax_id}/NT_or_NR`}>{ taxon.nt_ele.name }</a>
                             </span> : ''
                           }
                         </td>
