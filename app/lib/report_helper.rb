@@ -26,6 +26,7 @@ module ReportHelper
     threshold_rpm:    1.0,
     threshold_r:      50
   }
+  IGNORED_PARAMS = [:controller, :action, :id]
 
   VIEW_LEVELS = ['species', 'genus']
   SORT_DIRECTIONS = ['highest', 'lowest']
@@ -108,10 +109,15 @@ module ReportHelper
     end
     raw = raw_hash
     DEFAULT_PARAMS.each do |name, default_value|
-      clean[name] = valid_arg_value(name, raw[name.to_s]) || default_value
-      raw.delete(name)
+      raw_name = name.to_s
+      clean[name] = valid_arg_value(name, raw[raw_name]) || default_value
+      raw.delete(raw_name)
     end
-    logger.warn "Ignoring #{raw.length} report params: #{raw}."
+    IGNORED_PARAMS.each do |name|
+      raw_name = name.to_s
+      raw.delete(raw_name)
+    end
+    logger.warn "Ignoring #{raw.length} report params: #{raw}." unless raw.empty?
     clean
   end
 
