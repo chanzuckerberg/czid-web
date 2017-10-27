@@ -138,7 +138,7 @@ def combine_json(input_json_list, output_json):
     output = []
     for input_json in input_json_list:
         with open(input_json) as f:
-            output.append(json.load(f))
+            output.extend(json.load(f))
     with open(output_json, 'wb') as outf:
         json.dump(output, outf)
 
