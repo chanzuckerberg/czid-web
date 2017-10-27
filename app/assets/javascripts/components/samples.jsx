@@ -56,6 +56,8 @@ class Samples extends React.Component {
   applyClass(status) {
     if(status === 'COMPLETE') {
       return 'complete';
+    } else if (status === 'UPLOADING') {
+      return 'uploading';
     } else {
       return 'failed';
     }

@@ -332,10 +332,13 @@ $break-large: 1070px;
     border: 0;
   }
   .complete {
-    color: green;
+    color: #19d219;
   }
   .failed {
-    color: red;
+    color: #ad1818
+  }
+  .uploading {
+    color: #e2a32e
   }
 
 }
