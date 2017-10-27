@@ -32,6 +32,7 @@ class PipelineOutputsController < ApplicationController
       nt_array = get_taxid_fasta(@pipeline_output, params[:taxid], params[:tax_level].to_i, 'NT').split(">")
       nr_array = get_taxid_fasta(@pipeline_output, params[:taxid], params[:tax_level].to_i, 'NR').split(">")
       @taxid_fasta = ">" + ((nt_array | nr_array) - ['']).join(">")
+      @taxid_fasta = "Coming soon" if @taxid_fasta == ">" # Temporary fix
     else
       @taxid_fasta = get_taxid_fasta(@pipeline_output, params[:taxid], params[:tax_level].to_i, params[:hit_type])
     end
