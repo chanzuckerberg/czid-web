@@ -370,11 +370,13 @@ input:not([type]), input[type=search] {
   font-family: FontAwesome;
   border-bottom: none !important;
   padding-left: 72px !important;
+  width: 90%;
   margin-bottom: 0 !important;
 }
 
 input[type=search]:focus:not([readonly]) {
   padding-left: 72px !important;
+  width: 90%;
   border-bottom: none !important;
   box-shadow: none !important;
 }
