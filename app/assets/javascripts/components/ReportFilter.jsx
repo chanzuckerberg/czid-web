@@ -8,13 +8,24 @@ class ReportFilter extends React.Component {
     this.background_model = props.background_model || 'N/A';
     this.all_categories = props.all_categories || [];
     this.applyViewLevel = this.applyViewLevel.bind(this);
+    this.applyFilters = this.applyFilters.bind(this);
+    this.new_filter_thresholds = {};
   }
 
   applyViewLevel(event) {
     this.props.applyViewLevel(event.target.value);
   }
 
+  setFilterThreshold(threshold_name, event) {
+    this.new_filter_thresholds[threshold_name] = event.target.value;
+  }
+
+  applyFilters(event) {
+    this.props.applyNewFilterThresholds(this.new_filter_thresholds);
+  }
+
   render() {
+    align_right = {'textAlign': 'right'};
     return (
       <div className="reports-sidebar">
         <div className="sidebar-title">
@@ -71,6 +82,42 @@ class ReportFilter extends React.Component {
                              checked={(this.props.report_page_params.view_level === 'species')} type="radio" id="specie-select" />
                       <label htmlFor="specie-select">Species</label>
                     </p>
+                  </div>
+                </div>
+
+                <div className="filter-controls">
+                  <div className="filter-title">
+                    THRESHOLDS
+                  </div>
+
+                  {/* this col s3 offset-s2 stuff below is beyond the pale... probably works by chance */}
+
+                  <div className="filter-row row">
+                    <div className="input-field col s3 offset-s2">
+                      <label htmlFor="threshold-z">Z&nbsp;&ge;</label>
+                    </div>
+                    <div className="input-field col s6 offset-s1">
+                      <input name="group2" defaultValue={this.props.report_page_params['threshold_zscore']}
+                             type="text" id="threshold-z" onChange={this.setFilterThreshold.bind(this, 'threshold_zscore')}/>
+                    </div>
+                  </div>
+                  <div className="filter-row row">
+                    <div className="input-field col s5">
+                      <label htmlFor="threshold-rpm">rPM&nbsp;&ge;</label>
+                    </div>
+                    <div className="input-field col s6 offset-s1">
+                      <input name="group2" defaultValue={this.props.report_page_params['threshold_rpm']}
+                           type="text" id="threshold-rpm" onChange={this.setFilterThreshold.bind(this, 'threshold_rpm')}/>
+                    </div>
+                  </div>
+                  <div className="filter-row row">
+                    <div className="input-field col s3 offset-s2">
+                      <label htmlFor="threshold-r" className=".filter-label">r&nbsp;&ge;</label>&nbsp;
+                    </div>
+                    <div className="input-field col s6 offset-s1">
+                      <input name="group2" defaultValue={this.props.report_page_params['threshold_r']}
+                             type="text" id="threshold-r" onChange={this.setFilterThreshold.bind(this, 'threshold_r')}/>
+                    </div>
                   </div>
                 </div>
 

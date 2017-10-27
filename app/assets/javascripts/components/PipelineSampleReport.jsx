@@ -7,6 +7,7 @@ class PipelineSampleReport extends React.Component {
     this.taxonomy_details = props.taxonomy_details[1];
     this.all_categories = props.all_categories;
     this.applyViewLevel = this.applyViewLevel.bind(this);
+    this.applyNewFilterThresholds = this.applyNewFilterThresholds.bind(this);
   }
 
   refreshPage(overrides) {
@@ -21,6 +22,10 @@ class PipelineSampleReport extends React.Component {
   // applySort needs to be bound at time of use, not in constructor above
   applySort(sort_by) {
     this.refreshPage({sort_by});
+  }
+
+  applyNewFilterThresholds(new_filter_thresholds) {
+    this.refreshPage(new_filter_thresholds);
   }
 
   render_name(tax_info) {
@@ -99,6 +104,7 @@ class PipelineSampleReport extends React.Component {
         report_title = { this.report_details.report_info.name }
         report_page_params = { this.props.report_page_params }
         applyViewLevel = { this.applyViewLevel }
+        applyNewFilterThresholds = { this.applyNewFilterThresholds }
       />;
     result = (
       <div>

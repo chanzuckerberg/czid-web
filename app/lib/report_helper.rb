@@ -123,8 +123,6 @@ module ReportHelper
     data[:report_details] = report_details(report)
     data[:taxonomy_details] = taxonomy_details(report, params)
     data[:all_categories] = all_categories
-    # puts "BORIS RETURNING #{data[:report_page_params]}"
-    # assert false
     data
   end
 
