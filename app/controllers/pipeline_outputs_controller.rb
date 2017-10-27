@@ -29,11 +29,11 @@ class PipelineOutputsController < ApplicationController
 
   def show_taxid_fasta
     if params[:hit_type] == "NT_or_NR"
-      nt_array = get_taxid_fasta(@pipeline_output, params[:taxid], params[:tax_level], 'NT').split("^>")
-      nr_array = get_taxid_fasta(@pipeline_output, params[:taxid], params[:tax_level], 'NR').split("^>")
-      @taxid_fasta = (nt_array | nr_array).join(">")
+      nt_array = get_taxid_fasta(@pipeline_output, params[:taxid], params[:tax_level].to_i, 'NT').split("^>")
+      nr_array = get_taxid_fasta(@pipeline_output, params[:taxid], params[:tax_level].to_i, 'NR').split("^>")
+      @taxid_fasta = ((nt_array | nr_array) - ['']).join(">")
     else
-      @taxid_fasta = get_taxid_fasta(@pipeline_output, params[:taxid], params[:tax_level], params[:hit_type])
+      @taxid_fasta = get_taxid_fasta(@pipeline_output, params[:taxid], params[:tax_level].to_i, params[:hit_type])
     end
     render plain: @taxid_fasta
   end

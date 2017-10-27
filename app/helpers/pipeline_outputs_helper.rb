@@ -11,7 +11,7 @@ module PipelineOutputsHelper
       taxon_location = pipeline_output.taxon_byteranges.find_by(taxid: taxid, hit_type: nil, tax_level: nil)
       # for backwards-compatibility
     end
-    return 'No records' if taxon_location.nil?
+    return '' if taxon_location.nil?
     resp = Client.get_object(bucket: bucket, key: key, range: "bytes=#{taxon_location.first_byte}-#{taxon_location.last_byte}")
     resp.body.read
   end
