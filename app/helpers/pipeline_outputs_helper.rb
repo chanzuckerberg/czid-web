@@ -8,10 +8,6 @@ module PipelineOutputsHelper
     bucket = uri_parts[2]
     key = uri_parts[3]
     taxon_location = pipeline_output.taxon_byteranges.find_by(taxid: taxid, hit_type: hit_type)
-    if taxon_location.nil? && hit_type == 'NT' && tax_level == TaxonCount::TAX_LEVEL_SPECIES
-      taxon_location = pipeline_output.taxon_byteranges.find_by(taxid: taxid, hit_type: nil, tax_level: nil)
-      # for backwards-compatibility
-    end
     return '' if taxon_location.nil?
     resp = Client.get_object(bucket: bucket, key: key, range: "bytes=#{taxon_location.first_byte}-#{taxon_location.last_byte}")
     resp.body.read
