@@ -87,12 +87,12 @@ class Sample < ApplicationRecord
 
   def s3_paths_for_taxon_byteranges
     # by tax_level and hit_type
-    { 1: { 'NT': "#{sample_postprocess_s3_path}/#{SORTED_TAXID_ANNOTATED_FASTA}",
-           'NR': "#{sample_postprocess_s3_path}/#{SORTED_TAXID_ANNOTATED_FASTA_NR}" },
-      2: { 'NT': "#{sample_postprocess_s3_path}/#{SORTED_TAXID_ANNOTATED_FASTA_GENUS_NT}",
-           'NR': "#{sample_postprocess_s3_path}/#{SORTED_TAXID_ANNOTATED_FASTA_GENUS_NR}" },
-      3: { 'NT': "#{sample_postprocess_s3_path}/#{SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NT}",
-           'NR': "#{sample_postprocess_s3_path}/#{SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR}" } }
+    { 1 => { 'NT' => "#{sample_postprocess_s3_path}/#{SORTED_TAXID_ANNOTATED_FASTA}",
+             'NR' => "#{sample_postprocess_s3_path}/#{SORTED_TAXID_ANNOTATED_FASTA_NR}" },
+      2 => { 'NT' => "#{sample_postprocess_s3_path}/#{SORTED_TAXID_ANNOTATED_FASTA_GENUS_NT}",
+             'NR' => "#{sample_postprocess_s3_path}/#{SORTED_TAXID_ANNOTATED_FASTA_GENUS_NR}" },
+      3 => { 'NT' => "#{sample_postprocess_s3_path}/#{SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NT}",
+             'NR' => "#{sample_postprocess_s3_path}/#{SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR}" } }
   end
 
   def sample_annotated_fasta_url
