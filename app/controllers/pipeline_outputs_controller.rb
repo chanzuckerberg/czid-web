@@ -33,12 +33,12 @@ class PipelineOutputsController < ApplicationController
 
   def send_nonhost_fasta
     @nonhost_fasta = get_s3_file(@pipeline_output.sample.annotated_fasta_s3_path)
-    send_data @nonhost_fasta
+    send_data @nonhost_fasta, filename: @pipeline_output.sample.name + '_nonhost.fasta'
   end
 
   def send_unidentified_fasta
     @unidentified_fasta = get_s3_file(@pipeline_output.sample.unidentified_fasta_s3_path)
-    send_data @unidentified_fasta
+    send_data @unidentified_fasta, filename: @pipeline_output.sample.name + '_unidentified.fasta'
   end
 
   private
