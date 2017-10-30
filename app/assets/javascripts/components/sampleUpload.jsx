@@ -42,8 +42,9 @@ class SampleUpload extends React.Component {
       successMessage: '',
       project: 'Select a Project',
       projectId: null,
-      job_queue: null,
-      memory: null,
+      job_queue: 'aegea_batch',
+      memory: 64000,
+      serverErrors: [],
       selectedName: this.selectedSample.name || '',
       selectedHostGenome: this.selectedSample.hostGenome || '',
       selectedHostGenomeId: this.selectedSample.hostGenomeId || null,
@@ -129,9 +130,10 @@ class SampleUpload extends React.Component {
       });
     })
     .catch((error) => {
+      console.log(error.response, 'error');
       that.setState({
         invalid: true,
-        errorMessage: 'Project exists already or is invalid'
+        errorMessage: 'Project exists already or is invalid',
       })
     });
   }
@@ -176,10 +178,11 @@ class SampleUpload extends React.Component {
       }, 2000)
     })
     .catch(function (error) {
-     that.setState({
-      invalid: true,
-       errorMessage: JSON.stringify(error.response.data)
-     })
+      that.setState({
+        invalid: true,
+        serverErrors: error.response.data,
+        errorMessage: 'Failed to create sample'
+      })
     });
   }
 
@@ -212,7 +215,8 @@ class SampleUpload extends React.Component {
     .catch(function (error) {
      that.setState({
       invalid: true,
-       errorMessage: 'Failed to update sample'
+      serverErrors: error.response.data,
+      errorMessage: 'Failed to update sample'
      });
     });
   }
@@ -361,6 +365,16 @@ class SampleUpload extends React.Component {
     })
   }
 
+  displayError(failedStatus, serverError, formattedError) {
+    if (failedStatus) {
+      return serverError.length ? serverError.map((error, i) => {
+        return <p className="error center-align" key={i}>{error}</p>
+      }) : <span>{formattedError}</span>
+    } else {
+      return null
+    }
+  }
+
   renderUpdateForm() {
     return (
       <div className="form-wrapper">
@@ -368,14 +382,11 @@ class SampleUpload extends React.Component {
           <div className="row title">
             <p className="col s6 signup">Sample Update</p>
           </div>
-          { this.state.success ? <div className="success-info" >
-                <i className="fa fa-success"></i>
-                 <span>{this.state.successMessage}</span>
-                </div> : null }
-              { this.state.invalid ? <div className="error-info" >
-                  <i className="fa fa-error"></i>
-                  <span>{this.state.errorMessage}</span>
-              </div> : null }
+          {this.state.success ? <div className="success-info" >
+            <i className="fa fa-success"></i>
+              <span>{this.state.successMessage}</span>
+            </div> : null }
+          <div className={this.state.invalid ? 'error-info' : ''} >{ this.displayError(this.state.invalid, this.state.serverErrors, this.state.errorMessage) }</div>
           <div className="row content-wrapper">
             <div className="row field-row">
               <div className="col s6 input-field name">
@@ -459,10 +470,7 @@ class SampleUpload extends React.Component {
                 <i className="fa fa-success"></i>
                  <span>{this.state.successMessage}</span>
                 </div> : null }
-              { this.state.invalid ? <div className="error-info" >
-                  <i className="fa fa-error"></i>
-                  <span>{this.state.errorMessage}</span>
-              </div> : null }
+          <div className={this.state.invalid ? 'error-info' : ''} >{ this.displayError(this.state.invalid, this.state.serverErrors, this.state.errorMessage) }</div>
           <div className="row content-wrapper">
             <div className="row field-row">
               <div className="col s6 input-field name">

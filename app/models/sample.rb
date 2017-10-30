@@ -28,6 +28,7 @@ class Sample < ApplicationRecord
   has_many :input_files, dependent: :destroy
   accepts_nested_attributes_for :input_files
   validate :input_files_checks
+  validates :name, uniqueness: true
   after_create :initiate_input_file_upload
 
   before_save :check_host_genome, :check_status
@@ -46,7 +47,7 @@ class Sample < ApplicationRecord
       errors.add(:input_files, "file source type different") unless input_files[0].source_type == input_files[1].source_type
     end
     # TODO: for s3 input types, test permissions before saving, by making a HEAD request
-  end
+  end 
 
   def self.search(search)
     if search

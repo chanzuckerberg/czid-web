@@ -101,7 +101,7 @@ class SamplesController < ApplicationController
 
   # GET /samples/new
   def new
-    @sample = Sample.new
+    @sample = nil
     @projects = Project.all
     @host_genomes = host_genomes_list ? host_genomes_list : nil
   end
@@ -129,10 +129,10 @@ class SamplesController < ApplicationController
     respond_to do |format|
       if @sample.save
         format.html { redirect_to @sample, notice: 'Sample was successfully created.' }
-        format.json { render :show, status: :created, location: @sample }
+        format.json { render :show, status:   :created, location: @sample }
       else
         format.html { render :new }
-        format.json { render json: @sample.errors, status: :unprocessable_entity }
+        format.json { render json: @sample.errors.full_messages, status: :unprocessable_entity }
       end
     end
   end
@@ -141,12 +141,12 @@ class SamplesController < ApplicationController
   # PATCH/PUT /samples/1.json
   def update
     respond_to do |format|
-      if @sample.update!(sample_params)
+      if @sample.update(sample_params)
         format.html { redirect_to @sample, notice: 'Sample was successfully updated.' }
         format.json { render :show, status: :ok, location: @sample }
       else
         format.html { render :edit }
-        format.json { render json: @sample.errors, status: :unprocessable_entity }
+        format.json { render json: @sample.errors.full_messages, status: :unprocessable_entity }
       end
     end
   end
