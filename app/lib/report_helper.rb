@@ -1,3 +1,5 @@
+require 'csv'
+
 module ReportHelper
   # Truncate report table past this number of rows.
   MAX_ROWS = 3000
@@ -506,5 +508,28 @@ module ReportHelper
     logger.info "Data processing took #{t5 - t1} seconds (#{t5 - t0} with I/O)."
 
     [real_length, rows]
+  end
+
+  def get_tax_detail(tax_info, column_name)
+    # convenience function used only in generate_report_csv
+    if %w{tax_id name}.include?(column_name)
+      return tax_info[column_name]
+    else
+      parts = column_name.split(".")
+      hit_type = parts[0]
+      metric = parts[1]
+      return tax_info[hit_type][metric]
+    end
+  end
+
+  def generate_report_csv(report_info)
+    rows = report_info[:taxonomy_details][1]
+    attributes = %w{tax_id name NT.zscore NT.rpm NT.r NT.percentidentity NT.alignmentlength NT.neglogevalue NR.zscore NR.rpm NR.r NR.percentidentity NR.alignmentlength NR.neglogevalue}
+    CSV.generate(headers: true) do |csv|
+      csv << attributes
+      rows.each do |tax_info|
+        csv << attributes.map{ |attr| get_tax_detail(tax_info, attr) }
+      end
+    end
   end
 end

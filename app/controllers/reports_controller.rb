@@ -1,6 +1,6 @@
 class ReportsController < ApplicationController
   before_action :login_required, only: [:new, :edit, :update, :destroy, :create, :index, :show]
-  before_action :set_report, only: [:show, :edit, :update, :destroy]
+  before_action :set_report, only: [:show, :edit, :update, :destroy, :send_report_csv]
   include ReportHelper
   # GET /reports
   # GET /reports.json
@@ -71,6 +71,11 @@ class ReportsController < ApplicationController
       format.html { redirect_to reports_url, notice: 'Report was successfully destroyed.' }
       format.json { head :no_content }
     end
+  end
+
+  def send_report_csv
+    @report_csv = generate_report_csv(external_report_info(@report, params))
+    send_data @report_csv, filename: @report.pipeline_output.sample.name + '_report.csv'
   end
 
   private
