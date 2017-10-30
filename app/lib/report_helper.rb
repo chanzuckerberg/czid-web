@@ -31,7 +31,8 @@ module ReportHelper
     threshold_percentidentity: 0.0,
     threshold_alignmentlength: 0.0,
     threshold_neglogevalue:    0.0,
-    threshold_aggregatescore:  0.0
+    threshold_aggregatescore:  0.0,
+    excluded_categories: 'None'
   }.freeze
   IGNORED_PARAMS = [:controller, :action, :id].freeze
 
@@ -93,7 +94,7 @@ module ReportHelper
     nil
   end
 
-  def valid_arg_value(name, value)
+  def valid_arg_value(name, value, all_cats)
     # return appropriately validated value (based on name), or nil
     return nil unless value
     if name == :view_level
@@ -101,6 +102,8 @@ module ReportHelper
       value = nil unless VIEW_LEVELS.include? value
     elsif name == :sort_by
       value = nil unless decode_sort_by(value)
+    elsif name == :excluded_categories
+      value = validated_excluded_categories_or_nil(value, all_cats)
     else
       value = nil unless threshold_param?(name)
       value = number_or_nil(value)
@@ -108,7 +111,19 @@ module ReportHelper
     value
   end
 
-  def clean_params(raw)
+  def decode_excluded_categories(param_str)
+    Set.new(param_str.split(",").map { |x| x.strip.capitalize })
+  end
+
+  def validated_excluded_categories_or_nil(str, all_cats)
+    all_categories = Set.new(all_cats.map { |x| x['name'] })
+    all_categories.add('None')
+    excluded_categories = all_categories & decode_excluded_categories(str)
+    validated_str = Array(excluded_categories).map(&:capitalize).join(',')
+    !validated_str.empty? ? validated_str : nil
+  end
+
+  def clean_params(raw, all_cats)
     clean = {}
     raw_hash = {}
     raw.each do |name, value|
@@ -117,7 +132,7 @@ module ReportHelper
     raw = raw_hash
     DEFAULT_PARAMS.each do |name, default_value|
       raw_name = name.to_s
-      clean[name] = valid_arg_value(name, raw[raw_name]) || default_value
+      clean[name] = valid_arg_value(name, raw[raw_name], all_cats) || default_value
       raw.delete(raw_name)
     end
     IGNORED_PARAMS.each do |name|
@@ -130,12 +145,13 @@ module ReportHelper
 
   def external_report_info(report, params)
     return {} if report.nil?
-    params = clean_params(params)
+    all_cats = all_categories
+    params = clean_params(params, all_cats)
     data = {}
     data[:report_page_params] = params
     data[:report_details] = report_details(report)
     data[:taxonomy_details] = taxonomy_details(report, params)
-    data[:all_categories] = all_categories
+    data[:all_categories] = all_cats
     data
   end
 
@@ -150,10 +166,26 @@ module ReportHelper
   end
 
   def all_categories
-    cat_ids = TaxonLineage.distinct.pluck(:superkingdom_taxid).join(', ')
-    taxon_name_arr = []
-    taxon_name_arr = TaxonName.connection.select_all("select taxid, name from taxon_names where taxid in (#{cat_ids})").to_hash unless cat_ids.empty?
-    taxon_name_arr
+    # This query takes 1.4 seconds and the results are static, so we hardcoded it
+    # mysql> select distinct(superkingdom_taxid) as taxid, IF(superkingdom_name IS NOT NULL, superkingdom_name, 'Uncategorized') as name from taxon_lineages;
+    # +-------+---------------+
+    # | taxid | name          |
+    # +-------+---------------+
+    # |  -700 | Uncategorized |
+    # |     2 | Bacteria      |
+    # |  2157 | Archaea       |
+    # |  2759 | Eukaryota     |
+    # | 10239 | Viruses       |
+    # | 12884 | Viroids       |
+    # +-------+---------------+
+    [
+      { 'taxid' => 2, 'name' => "Bacteria" },
+      { 'taxid' => 2157, 'name' => "Archaea" },
+      { 'taxid' => 2759, 'name' => "Eukaryota" },
+      { 'taxid' => 10_239, 'name' => "Viruses" },
+      { 'taxid' => 12_884, 'name' => "Viroids" },
+      { 'taxid' => -700, 'name' => "Uncategorized" }
+    ]
   end
 
   def fetch_taxon_counts(report)
@@ -306,8 +338,8 @@ module ReportHelper
       if tax_id < 0
         # Usually -1 means accession number did not resolve to species.
         # TODO: Can we keep the accession numbers to show in these cases?
-        level_str = tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES ? 'species' : 'genera'
-        tax_info['name'] = "All uncategorized #{level_str}"
+        level_str = tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES ? 'species' : 'genus'
+        tax_info['name'] = "All taxa without #{level_str} classification"
         if tax_id != MISSING_SPECIES_ID && tax_id != MISSING_SPECIES_ID_ALT && tax_id != MISSING_GENUS_ID
           tax_info['name'] += " #{tax_id}"
         end
@@ -404,7 +436,7 @@ module ReportHelper
     sort_by[:direction] == 'lowest' ? sort_key_3d : negative(sort_key_3d)
   end
 
-  def filter_rows!(rows, thresholds)
+  def filter_rows!(rows, thresholds, excluded_categories)
     # filter out rows that are below the thresholds in both NR and NT
     # but make sure not to delete any genus row for which some species
     # passes the filters
@@ -417,16 +449,22 @@ module ReportHelper
         should_delete = COUNT_TYPES.all? { |count_type| tax_info[count_type][metric] < thresholds[metric] }
         break if should_delete
       end
+      if tax_info['tax_id'] != MISSING_GENUS_ID
+        if excluded_categories.include? tax_info['category_name']
+          # The only way a species and its genus can have different category
+          # names:  If genus_id == MISSING_GENUS_ID.  For all other species
+          # and genera, the category filter would exclude both the genus
+          # and species underneath that genus.
+          should_delete = true
+        end
+      end
       if should_delete
         to_delete.add(tax_info['tax_id'])
       else
-        # if we are not deleteing it, make sure to keep around its genus
+        # if we are not deleting it, make sure to keep around its genus
         to_keep.add(tax_info['genus_taxid'])
       end
     end
-    # it's good to always include that genus-level bucket of uncategorized species
-    # as a sort of "all others" category
-    to_keep.add(MISSING_GENUS_ID)
     to_delete.subtract(to_keep)
     rows.keep_if { |tax_info| !to_delete.include? tax_info['tax_id'] }
     rows
@@ -449,6 +487,7 @@ module ReportHelper
     view_level_int = TaxonCount::NAME_2_LEVEL[view_level.downcase]
     sort_by = decode_sort_by(params[:sort_by])
     thresholds = decode_thresholds(params)
+    excluded_categories = decode_excluded_categories(params[:excluded_categories])
 
     t0 = Time.now.to_f
     tax_2d = cleanup_all!(convert_2d(fetch_taxon_counts(report)))
@@ -486,7 +525,7 @@ module ReportHelper
     # t3 = Time.now
     # logger.info "Sorting took #{t3 - t2} seconds."
 
-    filter_rows!(rows, thresholds)
+    filter_rows!(rows, thresholds, excluded_categories)
 
     # t4 = Time.now
     # logger.info "Filtering took #{t4 - t3} seconds."
