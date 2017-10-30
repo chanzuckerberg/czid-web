@@ -81,10 +81,10 @@ class PipelineSampleReads extends React.Component {
         checked_categories = {this.reportInfo.checked_categories || this.reportInfo.all_categories }
         genus_info = {this.reportInfo.genus_info}
         report_details={this.reportInfo.report_details}
-        taxonomy_details={this.reportInfo.taxonomy_details} view_level={this.reportInfo.view_level}
-        highest_tax_counts={this.reportInfo.highest_tax_counts}
+        taxonomy_details={this.reportInfo.taxonomy_details}
+        report_page_params={this.reportInfo.report_page_params}
         sample_id = {this.sampleId}
-        />;
+      />;
     } else {
       d_report = <p className="center-align text-grey text-lighten-2 no-report">No report found for this sample</p>
     }

@@ -3,363 +3,177 @@ class PipelineSampleReport extends React.Component {
   constructor(props) {
     super(props);
     this.report_details = props.report_details;
-    this.taxonomy_details = props.taxonomy_details;
-    this.all_categories = props.all_categories || [];
-    this.checked_categories = props.checked_categories || props.all_categories
-    this.pipeline_output_id = props.report_details.pipeline_info.id;
-    this.genus_info = props.genus_info
-    this.sample_id = props.sample_id
-
-    this.view_level = ReportFilter.getFilter('view_level') || 'species';
-    this.highest_tax_counts = props.highest_tax_counts;
-    this.defaultSortBy = 'highest_species_nt_zscore';
-    const current_sort = PipelineSampleReport.currentSort();
-    this.state = {
-      sort_query: current_sort.sort_query
-        ? current_sort.sort_query  : `sort_by=${this.defaultSortBy}`
-    };
-    this.applySort = this.applySort.bind(this);
-    this.columnSorting = this.columnSorting.bind(this);
+    this.real_length = props.taxonomy_details[0];
+    this.taxonomy_details = props.taxonomy_details[1];
+    this.all_categories = props.all_categories;
+    this.applyViewLevel = this.applyViewLevel.bind(this);
+    this.applyNewFilterThresholds = this.applyNewFilterThresholds.bind(this);
   }
 
-  static uppCaseFirst(name) {
-    return (name)? name.charAt(0).toUpperCase() + name.slice(1) : name;
+  refreshPage(overrides) {
+    new_params = Object.assign({}, this.props.report_page_params, overrides);
+    window.location = location.protocol + '//' + location.host + location.pathname + '?' + jQuery.param(new_params);
   }
 
-  static currentSort() {
-   const sort_by = ReportFilter.getFilter('sort_by');
-   let current_sort = {};
-   if(sort_by) {
-     current_sort = {
-       sort_query: `sort_by=${sort_by}`
-     }
-   }
-   return current_sort;
+  applyViewLevel(view_level) {
+    this.refreshPage({view_level});
   }
 
-  applySort(sort_query) {
-    this.setState({ sort_query });
-    const url = PipelineSampleReport.deleteUrlParam(window.location.href, 'sort_by');
-    window.location = (PipelineSampleReport.hasQuery(url))
-      ? `${url}&${sort_query}` : `${url}?${sort_query}`;
+  // applySort needs to be bound at time of use, not in constructor above
+  applySort(sort_by) {
+    this.refreshPage({sort_by});
   }
 
-  static deleteUrlParam(url, parameter) {
-    const queryString = url.split('?');
-    if (queryString.length >= 2) {
-      const prefix = encodeURIComponent(parameter)+'=';
-      const pars = queryString[1].split(/[&;]/g);
-      for (let i = pars.length; i--; i > 0) {
-        if (pars[i].lastIndexOf(prefix, 0) !== -1) {
-          pars.splice(i, 1);
-        }
-      }
-      url = queryString[0] + (pars.length > 0 ? '?' + pars.join('&') : '');
-      return url;
+  applyNewFilterThresholds(new_filter_thresholds) {
+    this.refreshPage(new_filter_thresholds);
+  }
+
+  render_name(tax_info) {
+    foo = <i>{tax_info.name}</i>;
+    if (tax_info.tax_id > 0) {
+      foo = (
+        <span className="link">
+          <a href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${tax_info.tax_id}`}>
+            {tax_info.name}
+          </a>
+        </span>
+      );
+    }
+    if (tax_info.tax_level == 1) {
+      // indent species rows
+      foo = <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{foo}</span>
     } else {
-      return url;
+      // emphasize genus, soften category and species count
+      category_name = tax_info.tax_id == -200 ? 'Miscellaneous' : tax_info.category_name;
+      foo = <span><b>{foo}</b>&nbsp;&nbsp;&nbsp;&nbsp;<span style={{'color':'#A0A0A0'}}><i>({tax_info.species_count}&nbsp;{category_name}&nbsp;species)</i></span></span>
     }
+    return foo;
   }
 
-  static hasQuery(url) {
-    return (url.split('?').length >= 2);
-  }
-
-  componentDidMount() {
-    // temporal hack to adjust the width of the table, better to use flexbox in the future
-    if (this.view_level === 'species') {
-      $('#report-table thead tr th').css('width', '9%');
-    } else {
-       $('#report-table thead tr th').css('width', 'inherit');
+  render_number(x, emphasize, num_decimals) {
+    const is_blank = (x == 0) || (x == -100);
+    y = Number(x);
+    y = y.toFixed(num_decimals);
+    y = numberWithCommas(y);
+    if (emphasize) {
+      y = <b>{y}</b>;
     }
-    $('ul.tabs').tabs();
+    className = is_blank ? 'report-number-blank' : 'report-number';
+    return ( <td className={className}>{y}</td> );
   }
 
-  getActiveSort(className) {
-    if(className) {
-      const sort = ReportFilter.getFilter('sort_by');
-      if (sort === className) {
-        return 'active';
-      } else if (className === this.defaultSortBy && !sort) {
-        return 'active';
-      }
+  render_sort_arrow(column, desired_sort_direction, arrow_direction) {
+    desired_sort = desired_sort_direction + "_" + column;
+    className = `fa fa-caret-${arrow_direction}`;
+    current_sort = this.props.report_page_params.sort_by;
+    if (current_sort == desired_sort) {
+      className = 'active ' + className;
     }
+    return (
+      <i onClick={this.applySort.bind(this, desired_sort)}
+         className={className}
+         key = {desired_sort}>
+      </i>
+    );
   }
 
-  columnSorting(e) {
-    const className = e.target.className;
-    const pos = className.indexOf('sort_by');
-    const sort_query = className.substr(pos);
-    this.applySort(sort_query);
+  render_column_header(visible_type, visible_metric, column_name) {
+    var style = { 'textAlign': 'right' };
+    return (
+      <th style={style}>
+        <div className='sort-controls right'>
+          {this.render_sort_arrow(column_name, 'lowest', 'up')}
+          {this.render_sort_arrow(column_name, 'highest', 'down')}
+          {visible_type}<br/>
+          {visible_metric}
+        </div>
+      </th>
+    );
+  }
+
+  row_class(tax_info) {
+    return tax_info.tax_level == 2 ? 'report-row-genus' : 'report-row-species';
   }
 
   render() {
-    return (
+    const parts = this.props.report_page_params.sort_by.split("_")
+    const sort_column = parts[1] + "_" + parts[2];
+    var t0 = Date.now();
+    report_filter =
+      <ReportFilter
+        all_categories = { this.all_categories }
+        background_model = { this.report_details.background_model.name }
+        report_title = { this.report_details.report_info.name }
+        report_page_params = { this.props.report_page_params }
+        applyViewLevel = { this.applyViewLevel }
+        applyNewFilterThresholds = { this.applyNewFilterThresholds }
+      />;
+    result = (
       <div>
         <div id="reports" className="reports-screen tab-screen col s12">
           <div className="tab-screen-content">
             <div className="row">
               <div className="col s2">
-                <ReportFilter
-                  all_categories = { this.all_categories }
-                  checked_categories = { this.checked_categories }
-                  background_model = {this.report_details.background_model.name}
-                  report_title = { this.report_details.report_info.name }
-                  view_level={this.view_level}
-                  highest_tax_counts={this.highest_tax_counts}
-                  sample_id = {this.sample_id}
-                  genus_info = {this.genus_info} />
+                {report_filter}
               </div>
               <div className="col s10 reports-main ">
                 <table id="report-table" className='bordered report-table'>
                   <thead>
                   <tr>
-                    <th>Category</th>
-                    <th>Genus</th>
-                    <th>{ (this.view_level==='species') ? 'Species' : '' }</th>
-                    <th>
-                    NT Genus Z
-                    <div className='sort-controls  left'>
-                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_genus_nt_zscore')} fa fa-caret-up sort_by=lowest_genus_nt_zscore` }></i>
-                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_genus_nt_zscore')} fa fa-caret-down sort_by=highest_genus_nt_zscore` }></i>
-                    </div>
-
-                    </th>
-                    <th>
-                    NT Genus rM
-                     <div className='sort-controls left'>
-                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_genus_nt_rpm')} fa fa-caret-up sort_by=lowest_genus_nt_rpm` }></i>
-                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_genus_nt_rpm')} fa fa-caret-down sort_by=highest_genus_nt_rpm` }></i>
-                    </div>
-                    </th>
-                    <th>
-                     NT Genus r
-                      <div className='sort-controls left'>
-                        <i className='fa fa-caret-up'></i>
-                        <i className='fa fa-caret-down'></i>
-                      </div>
-                    </th>
-                    <th>
-                     NT Genus %id
-                      <div className='sort-controls left'>
-                        <i className='fa fa-caret-up'></i>
-                        <i className='fa fa-caret-down'></i>
-                      </div>
-                    </th>
-                    <th>
-                     NT Genus L
-                      <div className='sort-controls left'>
-                        <i className='fa fa-caret-up'></i>
-                        <i className='fa fa-caret-down'></i>
-                      </div>
-                    </th>
-                    <th>
-                     NT Genus e
-                      <div className='sort-controls left'>
-                        <i className='fa fa-caret-up'></i>
-                        <i className='fa fa-caret-down'></i>
-                      </div>
-                    </th>
-                    <th>
-                    NR Genus Z
-                     <div className='sort-controls left'>
-                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_genus_nr_zscore')} fa fa-caret-up sort_by=lowest_genus_nr_zscore` }></i>
-                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_genus_nr_zscore')} fa fa-caret-down sort_by=highest_genus_nr_zscore` }></i>
-                    </div>
-                    </th>
-                    <th>
-                    NR Genus rM
-                     <div className='sort-controls left'>
-                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_genus_nr_rpm')} fa fa-caret-up sort_by=lowest_genus_nr_rpm` }></i>
-                      <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_genus_nr_rpm')} fa fa-caret-down sort_by=highest_genus_nr_rpm` }></i>
-                    </div>
-                    </th>
-                    <th>
-                     NR Genus r
-                      <div className='sort-controls left'>
-                        <i className='fa fa-caret-up'></i>
-                        <i className='fa fa-caret-down'></i>
-                      </div>
-                    </th>
-
-                    {/*The Genus and Species diff*/}
-                    { (this.view_level === 'species') ?
-                    <th>
-                      NT Species Z
-                      <div className='sort-controls left'>
-                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_species_nt_zscore')} fa fa-caret-up sort_by=lowest_species_nt_zscore` }></i>
-                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_species_nt_zscore')} fa fa-caret-down sort_by=highest_species_nt_zscore` }></i>
-                      </div>
-                    </th> : '' }
-                    { (this.view_level === 'species') ?
-                    <th>
-                      NT Species rM
-                      <div className='sort-controls left'>
-                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_species_nt_rpm')} fa fa-caret-up sort_by=lowest_species_nt_rpm` }></i>
-                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_species_nt_rpm')} fa fa-caret-down sort_by=highest_species_nt_rpm` }></i>
-                      </div>
-                    </th> : '' }
-
-                    { (this.view_level === 'species') ?
-                    <th>NT Species r
-                      <div className='sort-controls left'>
-                        <i className='fa fa-caret-up'></i>
-                        <i className='fa fa-caret-down'></i>
-                      </div>
-                    </th> : '' }
-
-                    { (this.view_level === 'species') ?
-                    <th>
-                     NT Species %id
-                      <div className='sort-controls left'>
-                        <i className='fa fa-caret-up'></i>
-                        <i className='fa fa-caret-down'></i>
-                      </div>
-                    </th> : '' }
-                    { (this.view_level === 'species') ?
-                    <th>
-                     NT Species L
-                      <div className='sort-controls left'>
-                        <i className='fa fa-caret-up'></i>
-                        <i className='fa fa-caret-down'></i>
-                      </div>
-                    </th> : '' }
-                    { (this.view_level === 'species') ?
-                    <th>
-                     NT Species e
-                      <div className='sort-controls left'>
-                        <i className='fa fa-caret-up'></i>
-                        <i className='fa fa-caret-down'></i>
-                      </div>
-                    </th> : '' }
-
-
-                    { (this.view_level === 'species') ?
-                    <th>NR Species Z
-                      <div className='sort-controls left'>
-                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_species_nr_zscore')} fa fa-caret-up sort_by=lowest_species_nr_zscore` }></i>
-                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_species_nr_zscore')} fa fa-caret-down sort_by=highest_species_nr_zscore` }></i>
-                      </div>
-                    </th> : '' }
-                    { (this.view_level === 'species') ?
-                    <th>NR Species rM
-                      <div className='sort-controls left'>
-                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('lowest_species_nr_rpm')} fa fa-caret-up sort_by=lowest_species_nr_rpm` }></i>
-                        <i onClick={ this.columnSorting } className={ `${this.getActiveSort('highest_species_nr_rpm')} fa fa-caret-down sort_by=highest_species_nr_rpm` }></i>
-                      </div>
-                    </th> : '' }
-
-                    { (this.view_level === 'species') ?
-                    <th>NR Species r
-                      <div className='sort-controls left'>
-                        <i className='fa fa-caret-up'></i>
-                        <i className='fa fa-caret-down'></i>
-                      </div>
-                    </th> : '' }
- 
-                    { (this.view_level === 'species') ?
-                    <th>Aggregate Score
-                      <div className='sort-controls left'>
-                        <i className='fa fa-caret-up'></i>
-                        <i className='fa fa-caret-down'></i>
-                      </div>
-                    </th> : '' }
-
+                    <th>Taxonomy</th>
+                    { this.render_column_header('NT+NR', 'ZZRPM',  'nt_aggregatescore') }
+                    { this.render_column_header('NT', 'Z',   'nt_zscore') }
+                    { this.render_column_header('NT', 'rPM', 'nt_rpm')    }
+                    { this.render_column_header('NT', 'r',   'nt_r')      }
+                    { this.render_column_header('NT', '%id', 'nt_percentidentity')    }
+                    { this.render_column_header('NT', 'AL',   'nt_alignmentlength')    }
+                    { this.render_column_header('NT', 'Lg1/E',  'nt_neglogevalue')    }
+                    { this.render_column_header('NR', 'Z',   'nr_zscore') }
+                    { this.render_column_header('NR', 'rPM', 'nr_rpm')    }
+                    { this.render_column_header('NR', 'r',   'nr_r')      }
+                    { this.render_column_header('NR', '%id', 'nr_percentidentity')    }
+                    { this.render_column_header('NR', 'AL',   'nr_alignmentlength')    }
+                    { this.render_column_header('NR', 'Lg1/E',  'nr_neglogevalue')    }
                   </tr>
                   </thead>
                   <tbody>
-                  { this.taxonomy_details.map((taxon, i) => {
+                  { this.taxonomy_details.map((tax_info, i) => {
                     return (
-                      <tr key={i}>
+                      <tr key={tax_info.tax_id} className={this.row_class(tax_info)}>
                         <td>
-                          {  taxon.category || '-' }
+                          { this.render_name(tax_info) }
                         </td>
-
-                        <td>
-                          { (taxon.genus_nt_ele) ?
-                             <span className="link">
-                               <a href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${
-                                 taxon.genus_nt_ele.tax_id}`}>{ taxon.genus_nt_ele.name }
-                               </a>
-                             </span> : 'N/A'
-                          }
-                        </td>
-                        <td>
-                          { (this.view_level==='species' && taxon.nt_ele) ?
-                            <span className="link">
-                              <a href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${
-                                 taxon.nt_ele.tax_id}`}>{ taxon.nt_ele.name }</a>
-                            </span> : ''
-                          }
-                        </td>
-
-                        {/* The genus scores */}
-
-                        <td>{ (!taxon.genus_nt_ele) ? '-': numberWithCommas(Number(taxon.genus_nt_ele.zscore).toFixed(3))}</td>
-                        <td>{ (!taxon.genus_nt_ele) ? '-': numberWithCommas(Number(taxon.genus_nt_ele.rpm).toFixed(3))}</td>
-                        <td>{ (!taxon.genus_nt_ele) ? '-': numberWithCommas(taxon.genus_nt_ele.count)}</td>
-                        <td>{ (!taxon.genus_nt_ele) ? '-': numberWithCommas(Number(taxon.genus_nt_ele.percent_identity).toFixed(3))}</td>
-                        <td>{ (!taxon.genus_nt_ele) ? '-': numberWithCommas(Number(taxon.genus_nt_ele.alignment_length).toFixed(3))}</td>
-                        <td>{ (!taxon.genus_nt_ele) ? '-': numberWithCommas(Number(taxon.genus_nt_ele.e_value).toFixed(3))}</td>
-                        <td>{ (!taxon.genus_nr_ele) ? '-': numberWithCommas(Number(taxon.genus_nr_ele.zscore).toFixed(3))}</td>
-                        <td>{ (!taxon.genus_nr_ele) ? '-': numberWithCommas(Number(taxon.genus_nr_ele.rpm).toFixed(3))}</td>
-                        <td>{ (!taxon.genus_nr_ele) ? '-': numberWithCommas(taxon.genus_nr_ele.count)}</td>
-
-                        {/*The species scores*/}
-
-                        <td>
-                          { (this.view_level=== 'species' && (taxon.nt_ele && taxon.nt_ele.hasOwnProperty('zscore'))) ? numberWithCommas(Number(taxon.nt_ele.zscore).toFixed(3)) : '' }
-                        </td>
-
-                        <td>
-                          { (this.view_level==='species' && (taxon.nt_ele && taxon.nt_ele.hasOwnProperty('rpm'))) ? numberWithCommas(Number(taxon.nt_ele.rpm).toFixed(3)) : '' }
-                        </td>
-
-                        <td>
-                          { (this.view_level==='species' && (taxon.nt_ele && taxon.nt_ele.hasOwnProperty('count')) ) ? 
-                            <span className="link">
-                              <a href={`/pipeline_outputs/${this.pipeline_output_id}/${taxon.nt_ele.tax_id}/fasta`}>{ numberWithCommas(taxon.nt_ele.count) }</a>
-                            </span> : '' }
-                        </td>
-
-                        <td>
-                          { (this.view_level==='species' && (taxon.nt_ele && taxon.nt_ele.hasOwnProperty('percent_identity'))) ? numberWithCommas(Number(taxon.nt_ele.percent_identity).toFixed(3)) : '' }
-                        </td>
-
-                        <td>
-                          { (this.view_level==='species' && (taxon.nt_ele && taxon.nt_ele.hasOwnProperty('alignment_length')) ) ? numberWithCommas(Number(taxon.nt_ele.alignment_length).toFixed(3)) : '' }
-                        </td>
-
-                        <td>
-                          { (this.view_level==='species' && (taxon.nt_ele && taxon.nt_ele.hasOwnProperty('e_value')) ) ? numberWithCommas(Number(taxon.nt_ele.e_value).toFixed(3)) : '' }
-                        </td>
-
-                        <td>
-                          { (this.view_level==='species' && (taxon.nr_ele && taxon.nr_ele.hasOwnProperty('zscore'))) ? numberWithCommas(Number(taxon.nr_ele.zscore).toFixed(3)) : '' }
-                        </td>
-
-                        <td>
-                          { (this.view_level==='species' && (taxon.nr_ele && taxon.nr_ele.hasOwnProperty('rpm')) ) ? numberWithCommas(Number(taxon.nr_ele.rpm).toFixed(3)) : '' }
-                        </td>
-
-                        <td>
-                          { (this.view_level==='species' && (taxon.nr_ele && taxon.nr_ele.hasOwnProperty('count')) ) ? numberWithCommas(taxon.nr_ele.count) : '' }
-                        </td>
-
-                        <td>
-                          { (this.view_level==='species' && taxon.aggregate_score) ? numberWithCommas(Number(taxon.aggregate_score).toFixed(3)) : '' }
-                        </td>
-
+                        { this.render_number(tax_info.NT.aggregatescore, sort_column == 'nt_aggregatescore', 0) }
+                        { this.render_number(tax_info.NT.zscore, sort_column == 'nt_zscore', 1) }
+                        { this.render_number(tax_info.NT.rpm, sort_column == 'nt_rpm', 1)       }
+                        { this.render_number(tax_info.NT.r, sort_column == 'nt_r', 0)           }
+                        { this.render_number(tax_info.NT.percentidentity, sort_column == 'nt_zscore', 1) }
+                        { this.render_number(tax_info.NT.alignmentlength, sort_column == 'nt_rpm', 1)       }
+                        { this.render_number(tax_info.NT.neglogevalue, sort_column == 'nt_neglogevalue', 0) }
+                        { this.render_number(tax_info.NR.zscore, sort_column == 'nr_zscore', 1) }
+                        { this.render_number(tax_info.NR.rpm, sort_column == 'nr_rpm', 1)       }
+                        { this.render_number(tax_info.NR.r, sort_column == 'nr_r', 0)           }
+                        { this.render_number(tax_info.NR.percentidentity, sort_column == 'nr_zscore', 1) }
+                        { this.render_number(tax_info.NR.alignmentlength, sort_column == 'nr_rpm', 1)       }
+                        { this.render_number(tax_info.NR.neglogevalue, sort_column == 'nr_neglogevalue', 0) }
                       </tr>
                     )
                   })}
                   </tbody>
                 </table>
+                <span>
+                {this.real_length == this.taxonomy_details.length ?
+                  ('Showing all ' + this.real_length + ' rows passing filters.') :
+                  ('Due to resource limits, showing only ' + this.taxonomy_details.length + ' of the ' + this.real_length + ' rows passing filters.')}
+                </span>
               </div>
             </div>
           </div>
         </div>
       </div>
-    )
+    );
+    t1 = Date.now();
+    // console.log(`Table render took ${t1 - t0} milliseconds.`);
+    return result;
   }
 }

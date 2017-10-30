@@ -1,8 +1,8 @@
 .site-header {
   height: 50px;
-  background: #263039;
-  color: #a8a8a8;
-  font-size: 17px;
+  background-color: #313e49;
+  color: #a6b7c1;
+  font-size: 14px;
 
   .menu {
     margin: 12px;
@@ -23,11 +23,11 @@
 }
 
 .brand-short {
-  background: #414367;
-  color: #d6d6d6;
-  padding: 9px;
-  margin-right: 10px;
-  font-size: 20px;
+  color: #f5f5f5;
+  border-right: 1px solid #535353;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
 }
 
 .brand-short, .brand-long, .header-right-nav div {
@@ -35,8 +35,9 @@
 }
 
 .brand-long {
-  border-right: 1px solid #535353;
-  padding: 10px;
+  padding: 13px;
+  font-size: 14px;
+  color: #a6b7c1;
 }
 
 .settings-icon {

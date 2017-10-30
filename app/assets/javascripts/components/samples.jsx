@@ -1,18 +1,21 @@
 class Samples extends React.Component {
   constructor(props, context) {
     super(props, context);
-    this.project = this.props.project;
-    this.samples = this.props.samples;
-    this.outputData = this.props.outputData
-    this.pipeline_run_info = this.props.pipeline_run_info
+    this.project = props.project;
+    this.samples = props.samples;
+    this.samplesAmount = props.samples_count;
+    this.outputData = props.outputData
+    this.pipeline_run_info = props.pipeline_run_info
     this.all_project = props.all_project|| [];
     this.defaultSortBy = 'newest';
     const currentSort = SortHelper.currentSort();
     this.state = {
+      displayedSamples: this.samples || [],
       sort_query: currentSort.sort_query
-        ? currentSort.sort_query  : `sort_by=${this.defaultSortBy}`
+      ? currentSort.sort_query  : `sort_by=${this.defaultSortBy}`
     };
     this.columnSorting = this.columnSorting.bind(this);
+    this.handleSearch = this.handleSearch.bind(this);
   }
 
   columnSorting(e) {
@@ -23,6 +26,12 @@ class Samples extends React.Component {
     SortHelper.applySort(sort_query);
   }
 
+  renderEmptyTable() {
+    return (
+      <div className="center-align"><i className='fa fa-frown-o'> No result found</i></div>
+    )
+  }
+
   renderPipelineOutput(samples, pipelineInfo, pipeline_run_info) {
     return samples.map((sample, i) => {
       let pInfo = pipelineInfo[i];
@@ -30,7 +39,7 @@ class Samples extends React.Component {
       return (
         <tr onClick={ this.viewSample.bind(this, sample.id)} key={i}>
           <td>
-            <i className="fa fa-flask" aria-hidden="true"></i> {sample.name}
+            {sample.name}
           </td>
           <td>{moment(sample.created_at).format(' L,  h:mm a')}</td>
          <td>{ !pInfo.pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{numberWithCommas(pInfo.pipeline_info.total_reads)}</a>}</td>
@@ -38,15 +47,59 @@ class Samples extends React.Component {
           <td>{ (!pInfo.summary_stats || !pInfo.summary_stats.percent_remaining) ? 'NA' : <a href={'/samples/' + sample.id}>{pInfo.summary_stats.percent_remaining.toFixed(2)}%</a>}</td>
           <td>{ (!pInfo.summary_stats || !pInfo.summary_stats.compression_ratio) ? 'NA' : <a href={'/samples/' + sample.id}>{pInfo.summary_stats.compression_ratio.toFixed(2)}</a>}</td>
           <td>{ (!pInfo.summary_stats || !pInfo.summary_stats.qc_percent) ? 'NA' : <a href={'/samples/' + sample.id}>{pInfo.summary_stats.qc_percent.toFixed(2)}%</a>}</td>
-          <td>{ !pr_info.job_status_description ? '' : <a href={'/samples/' + sample.id}>{pr_info.job_status_description}</a>}</td>
+          <td className={this.applyClass(pr_info.job_status_description)}>{ !pr_info.job_status_description ? '' : <a href={'/samples/' + sample.id}>{pr_info.job_status_description}</a>}</td>
         </tr>
       )
     })
   }
 
-  viewSample(id) {
-    location.href = `/samples/${id}`
+  applyClass(status) {
+    if(status === 'COMPLETE') {
+      return 'complete';
+    } else if (status === 'UPLOADING') {
+      return 'uploading';
+    } else {
+      return 'failed';
+    }
   }
+
+  handleSearch(e) {
+    var that = this;
+    if (e.target.value === "") {
+      $("#pagination").css("display", "");
+      that.setState({
+        displayedSamples: this.samples
+      })
+    } else {
+      axios.get('/samples/search.json', 
+        {params: {search: e.target.value}
+      }).then((response) => {
+        if (response.data.length) {
+          that.setState({
+            displayedSamples: response.data,
+          })
+          $("#pagination").css("display", "");
+        } else {
+          $("#pagination").css("display", "none");
+          that.setState({
+            displayedSamples: [],
+          })
+          that.renderEmptyTable();
+        }
+      }).catch((error) => {
+        $("#pagination").css("display", "none");
+        that.setState({
+          displayedSamples: [],
+        })
+        that.renderEmptyTable();
+      })
+    }
+  }
+
+  viewSample(id) {
+    location.href = `/samples/${id}`;
+  }
+
   getActiveSort(className) {
     if(className) {
       const sort = SortHelper.getFilter('sort_by');
@@ -61,7 +114,8 @@ class Samples extends React.Component {
   renderTable(samples, pipelineInfo, pipeline_run_info) {
     return (
     <div className="content-wrapper">
-      <div className="container sample-container">
+      <div className="sample-container">
+        <input id="search" type="search" onChange={this.handleSearch} className="search" placeholder='&#xf002; Search for Sample'/>
           <table className="bordered highlight samples-table">
             <thead>
             <tr>
@@ -80,13 +134,16 @@ class Samples extends React.Component {
               <th>Pipeline run status</th>
             </tr>
             </thead>
-              <tbody>
-                {this.renderPipelineOutput(samples, pipelineInfo, pipeline_run_info)}
-              </tbody>
+              { samples.length ? <tbody>{this.renderPipelineOutput(samples, pipelineInfo, pipeline_run_info)}</tbody> : null }
           </table>
+          { !samples.length ? this.renderEmptyTable() : null }
       </div>
     </div>
     )
+  }
+
+  gotoPage(path) {
+    location.href = `${path}`;
   }
 
   componentDidMount() {
@@ -107,10 +164,12 @@ class Samples extends React.Component {
     return (
       <div>
         <div className="sub-header-home">
-          <div className="container">
+          <div className="sub-header-items">
             <div className="content">
-              <div className="title">
-                <a href='/'>All Projects</a> { !this.project ?  '' : `> ${this.project.name}` }
+
+            <div onClick={ this.gotoPage.bind(this, '/samples/new') }   className="upload">
+                <i className="fa fa-flask" aria-hidden="true"></i>
+                <span>Upload Sample</span>
               </div>
 
               <div className="sub-title">
@@ -132,15 +191,14 @@ class Samples extends React.Component {
                   </ul>
                 </div>
               </div>
-
+             
               <div className="title-filter">
-                <i className="fa fa-bar-chart" aria-hidden="true"></i>
-                <span>SAMPLES</span>
+                <span><i>{this.samplesAmount === 0 ? 'No sample found' : ( this.samplesAmount === 1 ? '1 sample found' : `${this.samplesAmount} samples found`)}</i></span>
               </div>
             </div>
           </div>
         </div>
-          {!this.samples.length && !this.outputData.length ? <div className="no-data"><i className="fa fa-frown-o" aria-hidden="true"> No data to display</i></div> : this.renderTable(this.samples, this.outputData, this.pipeline_run_info)}
+          {!this.samples.length && !this.outputData.length ? <div className="no-data"><i className="fa fa-frown-o" aria-hidden="true"> No data to display</i></div> : this.renderTable(this.state.displayedSamples, this.outputData, this.pipeline_run_info)}
       </div>
     )
   }

@@ -59,6 +59,11 @@ $break-large: 1070px;
   cursor: pointer;
   border-radius: 5px;
   font-size: 13px;
+  &.small {
+    min-width: 0px;
+    padding: 10px 17px;
+    background: #424468;
+  }
 }
 .custom-button i{
   font-size: 20px;
@@ -289,6 +294,55 @@ $break-large: 1070px;
   
 }
 
+.sample-container {
+  thead {
+    background: #d0d0d0;;
+    tr th {
+      color: #333333;
+      font-weight: bold;
+      font-size: 14px;
+    }
+  }
+  tr {
+    th:first-child {
+      display: block;
+      margin-left: 72px;
+      margin: 0 72px;
+    }
+    th:last-child {
+      display: block;
+      text-align: center;
+      margin-right: 72px;
+    }
+  }
+  td:first-child{ 
+    display: block;
+    margin-left: 72px;
+    color: #333333;
+    font-weight: bold;
+    font-size: 15px;
+  }
+  td:last-child {
+    display: block;
+    margin-right: 72px;
+    text-align: center;
+  }
+  input.search {
+    margin: 0;
+    border: 0;
+  }
+  .complete {
+    color: #19d219;
+  }
+  .failed {
+    color: #ad1818
+  }
+  .uploading {
+    color: #e2a32e
+  }
+
+}
+
 input[type="button"] {
   font-family: FontAwesome;
   font-size: 14px;
@@ -297,4 +351,32 @@ input[type="button"] {
 .no-edit {
   font-size: 10px;
   color: #9e9e9e;
+}
+
+.bottom {
+  text-align: center;
+  margin: 20px;
+  cursor: pointer;
+  color: #424468;
+  .back {
+    text-decoration: underline;
+  }
+  .home {
+    text-decoration: underline
+  }
+}
+
+input:not([type]), input[type=search] {
+  font-family: FontAwesome;
+  border-bottom: none !important;
+  padding-left: 72px !important;
+  width: 90%;
+  margin-bottom: 0 !important;
+}
+
+input[type=search]:focus:not([readonly]) {
+  padding-left: 72px !important;
+  width: 90%;
+  border-bottom: none !important;
+  box-shadow: none !important;
 }

@@ -6,7 +6,7 @@ class PipelineRun < ApplicationRecord
 
   OUTPUT_JSON_NAME = 'idseq_web_sample.json'.freeze
   STATS_JSON_NAME = 'stats.json'.freeze
-  TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_nt.json'.freeze
+  TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined.json'.freeze
   LOCAL_JSON_PATH = '/app/tmp/results_json'.freeze
   STATUS_CHECKED = 'CHECKED'.freeze
   STATUS_SUCCESS = 'SUCCEEDED'.freeze
@@ -57,6 +57,7 @@ class PipelineRun < ApplicationRecord
     else
       Airbrake.notify("Error for update job status for pipeline run #{id} with error #{stderr}")
       self.job_status = STATUS_ERROR
+      self.job_status = STATUS_FAILED if stderr =~ /IndexError/ # job no longer exists
     end
     save
   end
