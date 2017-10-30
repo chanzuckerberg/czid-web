@@ -28,12 +28,12 @@ class PipelineSampleReport extends React.Component {
     this.refreshPage(new_filter_thresholds);
   }
 
-  render_name(tax_info) {
+  render_name(tax_info, pipeline_output_id) {
     foo = <i>{tax_info.name}</i>;
     if (tax_info.tax_id > 0) {
       foo = (
         <span className="link">
-          <a href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${tax_info.tax_id}`}>
+          <a href={`/pipeline_outputs/${pipeline_output_id}/fasta/${tax_info.tax_level}/${tax_info.tax_id}/NT_or_NR`}>
             {tax_info.name}
           </a>
         </span>
@@ -141,7 +141,7 @@ class PipelineSampleReport extends React.Component {
                     return (
                       <tr key={tax_info.tax_id} className={this.row_class(tax_info)}>
                         <td>
-                          { this.render_name(tax_info) }
+                          { this.render_name(tax_info, this.report_details.pipeline_info.id) }
                         </td>
                         { this.render_number(tax_info.NT.aggregatescore, sort_column == 'nt_aggregatescore', 0) }
                         { this.render_number(tax_info.NT.zscore, sort_column == 'nt_zscore', 1) }
