@@ -357,6 +357,21 @@ $break-large: 1070px;
   ::-ms-input-placeholder { /* Microsoft Edge */
     color: #333333;
   }
+  .sort-controls {
+    margin-right: 6px;
+    i {
+      font-size: 14px;
+      display: block;
+      line-height: 13px;
+      position: relative;
+      top: 0px;
+      bottom: 0px;
+      &:hover, &.active {
+        color: #09c;
+      }
+    }
+  }
+
 }
 
 input[type="button"] {
