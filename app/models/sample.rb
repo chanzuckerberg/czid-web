@@ -47,7 +47,7 @@ class Sample < ApplicationRecord
       errors.add(:input_files, "file source type different") unless input_files[0].source_type == input_files[1].source_type
     end
     # TODO: for s3 input types, test permissions before saving, by making a HEAD request
-  end 
+  end
 
   def self.search(search)
     if search
