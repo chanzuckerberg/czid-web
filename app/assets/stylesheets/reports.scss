@@ -107,14 +107,23 @@
   }
 
   .apply-filter-button {
-    margin: 30px 0 20px;
+    margin: 20px 0 20px;
     color: #f8f9f9;
   }
 
 }
 
-.report-table td{
-  cursor: inherit;
+.report-number {
+  text-align: right;
+}
+
+.report-number-blank {
+  text-align: right;
+  color: #DDDDDD;
+}
+
+.report-row-genus {
+  background: #F7F7F7;
 }
 
 .reports-screen {
@@ -186,14 +195,15 @@
   padding: 0;
 }
 
-table .sort-controls {
+.report-table .sort-controls {
   margin-right: 6px;
   i {
     font-size: 24px;
     display: block;
     line-height: 13px;
     position: relative;
-    top: -2px;
+    top: -5px;
+    bottom: 1px;
 
     &:hover, &.active {
       color: #09c;
