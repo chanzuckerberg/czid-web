@@ -53,7 +53,8 @@ module SamplesHelper
       read_idx = matched[2].to_i - 1
       samples[name] ||= default_attributes.clone
       samples[name][:input_files_attributes] ||= []
-      samples[name][:input_files_attributes][read_idx] = { source: "#{s3_path}/#{source}",
+      samples[name][:input_files_attributes][read_idx] = { name: source,
+                                                           source: "#{s3_path}/#{source}",
                                                            source_type: InputFile::SOURCE_TYPE_S3}
     end
 

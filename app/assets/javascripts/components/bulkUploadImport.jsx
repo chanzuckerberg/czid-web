@@ -63,10 +63,7 @@ class BulkUploadImport extends React.Component {
 
   handleUploadSubmit(e) {
     e.preventDefault();
-    this.clearError();
-    if(!this.isFormInvalid()) {
-      this.bulkUploadSubmit()
-    }
+    this.bulkUploadSubmit();
   }
 
   handleImportSubmit(e) {
@@ -169,6 +166,29 @@ class BulkUploadImport extends React.Component {
     });
   }
 
+  bulkUploadSubmit() {
+    var that = this;
+    console.log(this.state)
+    var samples = []
+    this.state.selectedSampleIndices.map((idx) => {
+      samples.push(this.state.samples[idx])
+    })
+    axios.post('/samples/bulk_upload.json', {
+      samples: samples
+    })
+    .then(function (response) {
+      that.setState({
+        success: true,
+        successMessage: 'Samples created. Redirecting...',
+      });
+    }).catch(function (error) {
+     that.setState({
+      invalid: true,
+       errorMessage: JSON.stringify(error.response)
+     })
+    });
+  }
+
   filePathValid(str) {
     var regexPrefix = /s3:\/\//;
     if (str.match(regexPrefix)) {
@@ -244,7 +264,17 @@ class BulkUploadImport extends React.Component {
 
   renderBulkUploadSubmitForm() {
     return (
-      <div className="row content-wrapper">
+      <div className="form-wrapper">
+        <form ref="form" onSubmit={ this.handleUploadSubmit }>
+          <div className="row title">
+            <p className="col s6 signup">Bulk Upload</p>
+          </div>
+          <div className="row content-wrapper">
+            <div className="row header">
+              <div className="col s4 ">Name</div>
+              <div className="col s4 ">Project</div>
+              <div className="col s4 ">Host</div>
+            </div>
       {
         this.state.samples.map((sample, i) => {
           return (
@@ -283,12 +313,16 @@ class BulkUploadImport extends React.Component {
         })
       }
       </div>
+      <input className="hidden" type="submit"/>
+      <div onClick={ this.handleUploadSubmit } className="center login-wrapper">Submit</div>
+      </form>
+    </div>
     )
   }
   renderBulkUploadImportForm() {
     return (
       <div className="form-wrapper">
-        <form ref="form" onSubmit={ this.handleBulkUpload }>
+        <form ref="form" onSubmit={ this.handleImportSubmit }>
           <div className="row title">
             <p className="col s6 signup">Bulk Upload</p>
           </div>

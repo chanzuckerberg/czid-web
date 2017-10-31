@@ -39,21 +39,22 @@ class SamplesController < ApplicationController
 
   # POST /samples/bulk_upload
   def bulk_upload
-    params[:samples] ||= []
+    puts params
+    samples = samples_params || []
     @samples = []
     @errors = []
-    params[:samples].each do |sample_attributes|
-      selected = sample_attributes.delete(:selected)
-      next unless selected.present?
+    samples.each do |sample_attributes|
       sample = Sample.new(sample_attributes)
       if sample.save
+        @samples << sample
       else
+        @errors << sample.errors
       end
     end
 
     respond_to do |format|
       if @errors.empty?
-        format.json { render json: @samples }
+        format.json { render json: {samples: @samples} }
       else
         format.json { render json: {samples: @samples, errors: @errors}, status: :unprocessable_entity }
       end
@@ -218,6 +219,11 @@ class SamplesController < ApplicationController
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
+  def samples_params
+    new_params = params.permit(samples: [:name, :project_id, :status, :host_genome_id,
+                                         input_files_attributes: [:name, :presigned_url, :source_type, :source]])
+    new_params[:samples] if new_params
+  end
   def sample_params
     params.require(:sample).permit(:name, :project_name, :project_id, :status, :s3_preload_result_path,
                                    :s3_star_index_path, :s3_bowtie2_index_path, :host_genome_id,
