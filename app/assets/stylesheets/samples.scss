@@ -209,7 +209,7 @@ $break-large: 1070px;
     .name {
       margin-top: 16px;
     }
-    .sample {
+    .sample { 
       float: right;
       padding-top: 20px;
     }
@@ -308,6 +308,10 @@ $break-large: 1070px;
       display: block;
       margin-left: 72px;
       margin: 0 72px;
+      width: 200px;
+      overflow: hidden;
+      display: inline-block;
+      white-space: nowrap;
     }
     th:last-child {
       display: block;
@@ -322,6 +326,10 @@ $break-large: 1070px;
       margin-left: 72px;
       color: #333333;
       font-weight: bold;
+      width: 200px;
+      overflow: hidden;
+      display: inline-block;
+      white-space: nowrap;
     }
     &:last-child {
       display: block;
@@ -357,6 +365,21 @@ $break-large: 1070px;
   ::-ms-input-placeholder { /* Microsoft Edge */
     color: #333333;
   }
+  .sort-controls {
+    margin-right: 6px;
+    i {
+      font-size: 17px;
+      display: block;
+      line-height: 9px;
+      position: relative;
+      top: 0px;
+      bottom: 0px;
+      &:hover, &.active {
+        color: #09c;
+      }
+    }
+  }
+
 }
 
 input[type="button"] {
