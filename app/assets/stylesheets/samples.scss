@@ -296,7 +296,7 @@ $break-large: 1070px;
 
 .sample-container {
   thead {
-    background: #d0d0d0;;
+    background: #f1f1f1;
     tr th {
       color: #333333;
       font-weight: bold;
@@ -315,17 +315,19 @@ $break-large: 1070px;
       margin-right: 72px;
     }
   }
-  td:first-child{ 
-    display: block;
-    margin-left: 72px;
-    color: #333333;
-    font-weight: bold;
-    font-size: 15px;
-  }
-  td:last-child {
-    display: block;
-    margin-right: 72px;
-    text-align: center;
+  td {
+    font-size: 14px;
+    &:first-child{ 
+      display: block;
+      margin-left: 72px;
+      color: #333333;
+      font-weight: bold;
+    }
+    &:last-child {
+      display: block;
+      margin-right: 72px;
+      text-align: center;
+    }
   }
   input.search {
     margin: 0;
@@ -340,7 +342,21 @@ $break-large: 1070px;
   .uploading {
     color: #e2a32e
   }
-
+  ::-webkit-input-placeholder { /* WebKit, Blink, Edge */
+    color: #333333;
+  }
+  :-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+    color: #333333;
+  }
+  ::-moz-placeholder { /* Mozilla Firefox 19+ */
+    color: #333333;
+  }
+  :-ms-input-placeholder { /* Internet Explorer 10-11 */
+    color: #333333;
+  }
+  ::-ms-input-placeholder { /* Microsoft Edge */
+    color: #333333;
+  }
 }
 
 input[type="button"] {

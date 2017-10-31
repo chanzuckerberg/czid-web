@@ -11,8 +11,9 @@ class Samples extends React.Component {
     const currentSort = SortHelper.currentSort();
     this.state = {
       displayedSamples: this.samples || [],
+      samplesCount: this.samplesAmount || [],
       sort_query: currentSort.sort_query
-      ? currentSort.sort_query  : `sort_by=${this.defaultSortBy}`
+      ? currentSort.sort_query  : `sort_by=${this.defaultSortBy}`,
     };
     this.columnSorting = this.columnSorting.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
@@ -45,8 +46,8 @@ class Samples extends React.Component {
          <td>{ !pInfo.pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{numberWithCommas(pInfo.pipeline_info.total_reads)}</a>}</td>
           <td>{ (!pInfo.summary_stats || !pInfo.summary_stats.remaining_reads) ? 'NA' : <a href={'/samples/' + sample.id}>{numberWithCommas(pInfo.summary_stats.remaining_reads)}</a>}</td>
           <td>{ (!pInfo.summary_stats || !pInfo.summary_stats.percent_remaining) ? 'NA' : <a href={'/samples/' + sample.id}>{pInfo.summary_stats.percent_remaining.toFixed(2)}%</a>}</td>
-          <td>{ (!pInfo.summary_stats || !pInfo.summary_stats.compression_ratio) ? 'NA' : <a href={'/samples/' + sample.id}>{pInfo.summary_stats.compression_ratio.toFixed(2)}</a>}</td>
           <td>{ (!pInfo.summary_stats || !pInfo.summary_stats.qc_percent) ? 'NA' : <a href={'/samples/' + sample.id}>{pInfo.summary_stats.qc_percent.toFixed(2)}%</a>}</td>
+          <td>{ (!pInfo.summary_stats || !pInfo.summary_stats.compression_ratio) ? 'NA' : <a href={'/samples/' + sample.id}>{pInfo.summary_stats.compression_ratio.toFixed(2)}</a>}</td>
           <td className={this.applyClass(pr_info.job_status_description)}>{ !pr_info.job_status_description ? '' : <a href={'/samples/' + sample.id}>{pr_info.job_status_description}</a>}</td>
         </tr>
       )
@@ -68,7 +69,8 @@ class Samples extends React.Component {
     if (e.target.value === "") {
       $("#pagination").css("display", "");
       that.setState({
-        displayedSamples: this.samples
+        displayedSamples: this.samples,
+        samplesCount: this.props.samples_count
       })
     } else {
       axios.get('/samples/search.json', 
@@ -77,12 +79,14 @@ class Samples extends React.Component {
         if (response.data.length) {
           that.setState({
             displayedSamples: response.data,
+            samplesCount: response.data.length
           })
-          $("#pagination").css("display", "");
+          $("#pagination").css("display", "none");
         } else {
           $("#pagination").css("display", "none");
           that.setState({
             displayedSamples: [],
+            samplesCount: 0
           })
           that.renderEmptyTable();
         }
@@ -90,6 +94,7 @@ class Samples extends React.Component {
         $("#pagination").css("display", "none");
         that.setState({
           displayedSamples: [],
+          samplesCount: 0
         })
         that.renderEmptyTable();
       })
@@ -129,8 +134,8 @@ class Samples extends React.Component {
               <th>Total Reads</th>
               <th>Final Reads</th>
               <th>Percentage Reads</th>
-              <th>Compression Ratio</th>
               <th>QC</th>
+              <th>Compression Ratio</th>
               <th>Pipeline run status</th>
             </tr>
             </thead>
@@ -193,7 +198,7 @@ class Samples extends React.Component {
               </div>
              
               <div className="title-filter">
-                <span><i>{this.samplesAmount === 0 ? 'No sample found' : ( this.samplesAmount === 1 ? '1 sample found' : `${this.samplesAmount} samples found`)}</i></span>
+                <span><i>{this.state.samplesCount === 0 ? 'No sample found' : ( this.state.samplesCount === 1 ? '1 sample found' : `${this.state.samplesCount} samples found`)}</i></span>
               </div>
             </div>
           </div>
