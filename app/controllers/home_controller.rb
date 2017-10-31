@@ -26,7 +26,7 @@ class HomeController < ApplicationController
     project_id = params[:project_id]
     search_query = params[:search]
 
-    if project_id
+    if project_id.present?
       @samples = Sample.includes(:pipeline_runs, :pipeline_outputs).search(search_query).where(project_id: project_id).paginate(page: params[:page])
     else
       @samples = Sample.includes(:pipeline_runs, :pipeline_outputs).search(search_query).paginate(page: params[:page])

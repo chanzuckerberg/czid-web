@@ -64,6 +64,7 @@ module SamplesHelper
       end
     end
     sample_list
+  end
     
   def samples_output_data(samples)
     final_result = []
