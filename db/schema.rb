@@ -10,8 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
+<<<<<<< HEAD
 ActiveRecord::Schema.define(version: 20171031193737) do
 
+=======
+ActiveRecord::Schema.define(version: 20171027001341) do
+  
+>>>>>>> replace changes
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.datetime "created_at", null: false
@@ -40,8 +45,11 @@ ActiveRecord::Schema.define(version: 20171031193737) do
     t.bigint "default_background_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+<<<<<<< HEAD
     t.integer "sample_memory"
     t.string "job_queue"
+=======
+>>>>>>> replace changes
   end
 
   create_table "input_files", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -239,6 +247,7 @@ ActiveRecord::Schema.define(version: 20171031193737) do
     t.index ["taxid"], name: "index_taxon_names_on_taxid", unique: true
   end
 
+<<<<<<< HEAD
   create_table "taxon_sequence_files", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "pipeline_output_id"
     t.integer "taxid"
@@ -248,6 +257,8 @@ ActiveRecord::Schema.define(version: 20171031193737) do
     t.index ["pipeline_output_id"], name: "index_taxon_sequence_files_on_pipeline_output_id"
   end
 
+=======
+>>>>>>> replace changes
   create_table "taxon_summaries", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "background_id"
     t.integer "tax_id"
