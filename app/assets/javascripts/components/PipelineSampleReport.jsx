@@ -122,6 +122,12 @@ class PipelineSampleReport extends React.Component {
         applyNewFilterThresholds = { this.applyNewFilterThresholds }
         applyExcludedCategories = { this.applyExcludedCategories }
       />;
+    // To do: apply sort & filter to downloaded file
+    download_button = (
+      <a href= { `/reports/${this.report_details.report_info.id}/${this.props.report_page_params.view_level}/csv` }>
+          <i className="fa fa-cloud-download left"></i>
+      </a>
+    );
     result = (
       <div>
         <div id="reports" className="reports-screen tab-screen col s12">
@@ -133,6 +139,7 @@ class PipelineSampleReport extends React.Component {
               <div className="col s10 reports-main ">
                 <table id="report-table" className='bordered report-table'>
                   <thead>
+                  { download_button }
                   <tr>
                     <th>Taxonomy</th>
                     { this.render_column_header('NT+NR', 'ZZRPM',  'nt_aggregatescore') }
