@@ -75,6 +75,7 @@ class ReportsController < ApplicationController
 
   def send_report_csv
     # override DEFAULT_PARAMS of report_helper.rb to get raw data
+    # TO DO: add flag to turn off thresholding rather than editing params
     params[:threshold_zscore] = 0
     params[:threshold_rpm] = 0
     params[:threshold_r] = 0
