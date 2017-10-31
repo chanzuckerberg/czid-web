@@ -214,7 +214,7 @@ class Samples extends React.Component {
             </div>
           </div>
         </div>
-          {!this.state.displayedSamples && !this.state.displayedOutputData && this.state.displayedPipelineRunInfo ? <div className="no-data"><i className="fa fa-frown-o" aria-hidden="true"> No data to display</i></div> : this.renderTable(this.state.displayedSamples, this.state.displayedOutputData, this.state.displayedPipelineRunInfo)}
+          {!this.state.displayedSamples && !this.state.displayedOutputData && !this.state.displayedPipelineRunInfo ? <div className="no-data"><i className="fa fa-frown-o" aria-hidden="true"> No data to display</i></div> : this.renderTable(this.state.displayedSamples, this.state.displayedOutputData, this.state.displayedPipelineRunInfo)}
       </div>
     )
   }
