@@ -108,6 +108,7 @@ class PipelineSampleReport extends React.Component {
         applyViewLevel = { this.applyViewLevel }
         applyNewFilterThresholds = { this.applyNewFilterThresholds }
       />;
+    // To do: apply sort & filter to downloaded file
     download_button = (
       <a href= { `/reports/${this.report_details.report_info.id}/${this.props.report_page_params.view_level}/csv` }>
           <i className="fa fa-cloud-download left"></i>
