@@ -9,13 +9,16 @@ class HomeController < ApplicationController
     sort = params[:sort_by]
     @project_info = nil
 
-    if project_id.nil?
+    if params[:ids].present?
+      @samples = sort_by(Sample.includes(:pipeline_runs, :pipeline_outputs).where("id in (#{params[:ids]})").paginate(page: params[:page]), sort)
+      @samples_count = @samples.size
+    elsif project_id.present?
+      @samples = sort_by(Sample.includes(:pipeline_runs, :pipeline_outputs).where(project_id: project_id).paginate(page: params[:page]), sort)
+      @project_info = Project.find(project_id)
+      @samples_count = Sample.where(project_id: project_id).size
+    else
       @samples = sort_by(Sample.includes(:pipeline_runs, :pipeline_outputs).paginate(page: params[:page]), sort)
       @samples_count = Sample.all.size
-    else
-      @samples = sort_by(Sample.includes(:pipeline_runs, :pipeline_outputs).where(project_id: project_id).paginate(page: params[:page]), sort)
-      @project_info = Project.find(project_id) unless project_id.nil?
-      @samples_count = Sample.where(project_id: project_id).size
     end
 
     @samples.each do |output|

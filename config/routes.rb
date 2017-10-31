@@ -13,9 +13,13 @@ Rails.application.routes.draw do
     put :kickoff_pipeline, on: :member
     get :genus_list, on: :member
     get :pipeline_runs, on: :member
+    get :bulk_new, on: :collection
+    get :bulk_import, on: :collection
+    post :bulk_upload, on: :collection
+    post :save_note, on: :collection # This needs to be fixed to be on: :member
     get :search, on: :collection
-    post :save_note, on: :collection
   end
+
   resources :projects
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]

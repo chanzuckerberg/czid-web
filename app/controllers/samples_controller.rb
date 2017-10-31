@@ -1,7 +1,7 @@
 class SamplesController < ApplicationController
   include ReportHelper
   include SamplesHelper
-  before_action :login_required, only: [:new, :index, :update, :destroy, :edit, :show, :reupload_source, :kickoff_pipeline]
+  before_action :login_required, only: [:new, :index, :update, :destroy, :edit, :show, :reupload_source, :kickoff_pipeline, :bulk_new, :bulk_import, :bulk_upload]
   before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :genus_list]
   acts_as_token_authentication_handler_for User, only: [:create], fallback: :devise
   protect_from_forgery unless: -> { request.format.json? }
@@ -9,7 +9,56 @@ class SamplesController < ApplicationController
   # GET /samples
   # GET /samples.json
   def index
-    @samples = Sample.all
+    @samples = if params[:ids].present?
+                 Sample.where("id in (#{params[:ids]})")
+               else
+                 Sample.all
+               end
+  end
+
+  # GET /samples/bulk_new
+  def bulk_new
+    @projects = Project.all
+    @host_genomes = HostGenome.all
+  end
+
+  def bulk_import
+    @project_id = params[:project_id]
+    @host_genome_id = params[:host_genome_id]
+    @bulk_path = params[:bulk_path]
+    @samples = parsed_samples_for_s3_path(@bulk_path, @project_id, @host_genome_id)
+    respond_to do |format|
+      format.json do
+        if @samples.present?
+          render json: { samples: @samples }
+        else
+          render json: { status: "No samples imported under #{@bulk_path}" }, status: :unprocessable_entity
+        end
+      end
+    end
+  end
+
+  # POST /samples/bulk_upload
+  def bulk_upload
+    samples = samples_params || []
+    @samples = []
+    @errors = []
+    samples.each do |sample_attributes|
+      sample = Sample.new(sample_attributes)
+      if sample.save
+        @samples << sample
+      else
+        @errors << sample.errors
+      end
+    end
+
+    respond_to do |format|
+      if @errors.empty?
+        format.json { render json: { samples: @samples, sample_ids: @samples.pluck(:id) } }
+      else
+        format.json { render json: { samples: @samples, errors: @errors }, status: :unprocessable_entity }
+      end
+    end
   end
 
   # GET /samples/1
@@ -170,6 +219,12 @@ class SamplesController < ApplicationController
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
+  def samples_params
+    new_params = params.permit(samples: [:name, :project_id, :status, :host_genome_id,
+                                         input_files_attributes: [:name, :presigned_url, :source_type, :source]])
+    new_params[:samples] if new_params
+  end
+
   def sample_params
     params.require(:sample).permit(:name, :project_name, :project_id, :status, :s3_preload_result_path,
                                    :s3_star_index_path, :s3_bowtie2_index_path, :host_genome_id,
