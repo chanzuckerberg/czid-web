@@ -34,14 +34,12 @@ module SamplesHelper
   end
 
   def parsed_samples_for_s3_path(s3_path, project_id, host_genome_id)
-
     default_attributes = { project_id: project_id,
                            host_genome_id: host_genome_id,
-                           status: 'created',
-                         }
+                           status: 'created' }
     s3_path.chomp!('/')
     command = "aws s3 ls #{s3_path}/ | grep -v Undetermined"
-    s3_output, stderr, status = Open3.capture3(command)
+    s3_output, _stderr, status = Open3.capture3(command)
     return unless status.exitstatus.zero?
     s3_output.chomp!
     entries = s3_output.split("\n")
@@ -55,7 +53,7 @@ module SamplesHelper
       samples[name][:input_files_attributes] ||= []
       samples[name][:input_files_attributes][read_idx] = { name: source,
                                                            source: "#{s3_path}/#{source}",
-                                                           source_type: InputFile::SOURCE_TYPE_S3}
+                                                           source_type: InputFile::SOURCE_TYPE_S3 }
     end
 
     sample_list = []
@@ -66,7 +64,6 @@ module SamplesHelper
       end
     end
 
-    return sample_list
-
+    sample_list
   end
 end

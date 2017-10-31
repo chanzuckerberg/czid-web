@@ -9,41 +9,37 @@ class SamplesController < ApplicationController
   # GET /samples
   # GET /samples.json
   def index
-    if params[:ids].present?
-      @samples = Sample.where("id in (#{params[:ids]})")
-    else
-      @samples = Sample.all
-    end
+    @samples = if params[:ids].present?
+                 Sample.where("id in (#{params[:ids]})")
+               else
+                 Sample.all
+               end
   end
-
 
   # GET /samples/bulk_new
   def bulk_new
     @projects = Project.all
     @host_genomes = HostGenome.all
-
   end
 
   def bulk_import
-    puts params
     @project_id = params[:project_id]
     @host_genome_id = params[:host_genome_id]
     @bulk_path = params[:bulk_path]
     @samples = parsed_samples_for_s3_path(@bulk_path, @project_id, @host_genome_id)
     respond_to do |format|
-      format.json {
+      format.json do
         if @samples.present?
           render json: { samples: @samples }
         else
           render json: { status: "No samples imported under #{@bulk_path}" }, status: :unprocessable_entity
         end
-      }
+      end
     end
   end
 
   # POST /samples/bulk_upload
   def bulk_upload
-    puts params
     samples = samples_params || []
     @samples = []
     @errors = []
@@ -58,9 +54,9 @@ class SamplesController < ApplicationController
 
     respond_to do |format|
       if @errors.empty?
-        format.json { render json: {samples: @samples, sample_ids: @samples.pluck(:id)} }
+        format.json { render json: { samples: @samples, sample_ids: @samples.pluck(:id) } }
       else
-        format.json { render json: {samples: @samples, errors: @errors}, status: :unprocessable_entity }
+        format.json { render json: { samples: @samples, errors: @errors }, status: :unprocessable_entity }
       end
     end
   end
@@ -228,6 +224,7 @@ class SamplesController < ApplicationController
                                          input_files_attributes: [:name, :presigned_url, :source_type, :source]])
     new_params[:samples] if new_params
   end
+
   def sample_params
     params.require(:sample).permit(:name, :project_name, :project_id, :status, :s3_preload_result_path,
                                    :s3_star_index_path, :s3_bowtie2_index_path, :host_genome_id,
