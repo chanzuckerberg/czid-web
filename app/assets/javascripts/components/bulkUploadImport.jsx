@@ -13,6 +13,7 @@ class BulkUploadImport extends React.Component {
     this.handleProjectChange = this.handleProjectChange.bind(this);
     this.handleProjectChangeForSample = this.handleProjectChangeForSample.bind(this);
     this.handleHostChange = this.handleHostChange.bind(this);
+    this.handleHostChangeForSample = this.handleHostChangeForSample.bind(this);
     this.handleBulkPathChange = this.handleBulkPathChange.bind(this);
     this.selectSample = this.selectSample.bind(this);
     this.state = {
@@ -37,7 +38,6 @@ class BulkUploadImport extends React.Component {
     this.initializeSelectTag();
     $(ReactDOM.findDOMNode(this.refs.projectSelect)).on('change',this.handleProjectChange);
     $(ReactDOM.findDOMNode(this.refs.hostSelect)).on('change',this.handleHostChange);
-    $(ReactDOM.findDOMNode(this.refs.sampleProjectSelect)).on('change',this.handleProjectChangeForSample);
   }
 
   selectSample(e) {
@@ -145,6 +145,7 @@ class BulkUploadImport extends React.Component {
 
   bulkUploadImport() {
     var that = this;
+    console.log(this.state)
     axios.get('/samples/bulk_import.json', {
       params: {
         project_id: this.state.projectId,
@@ -204,19 +205,33 @@ class BulkUploadImport extends React.Component {
 
   handleProjectChangeForSample(e) {
     const samples = this.state.samples
-    samples[e.target.id].project_id = e.target.selectedIndex
+    console.log(e.target.id)
+    console.log(e.target.selectedIndex)
+    samples[e.target.id].project_id = this.state.allProjects[e.target.selectedIndex].id
     this.setState({
       samples: samples
     })
     this.clearError();
-    console.log(this.state.samples)
+    console.log(samples[e.target.id])
+  }
+
+  handleHostChangeForSample(e) {
+    const samples = this.state.samples
+    console.log(e.target.id)
+    console.log(e.target.selectedIndex)
+    samples[e.target.id].host_genome_id = this.state.hostGenomes[e.target.selectedIndex].id
+    this.setState({
+      samples: samples
+    })
+    this.clearError();
+    console.log(samples[e.target.id])
   }
 
 
   handleHostChange(e) {
     this.setState({
       hostName: e.target.value.trim(),
-      hostId: e.target.selectedIndex
+      hostId: this.state.hostGenomes[e.target.selectedIndex].id
     })
     this.clearError();
   }
@@ -233,16 +248,36 @@ class BulkUploadImport extends React.Component {
       {
         this.state.samples.map((sample, i) => {
           return (
-            <div className="row field-row" key={i}>
+            <div className="row field-row" key={i} >
+              <div className="col s4">
 			  <input ref="samples_list" type="checkbox" id={i} className="filled-in" value={ this.state.selectedSampleIndices.indexOf(i) < 0? 0:1 } onChange = { this.selectSample } />
 			  <label htmlFor={i}> {sample.name}</label>
-				<select id={i} onChange={ this.handleProjectChangeForSample} value={sample.project_id}>
+             </div>
+
+              <div className="col s4">
+				<select className="browser-default" id={i} onChange={ this.handleProjectChangeForSample} value={sample.project_id}>
 					 { this.state.allProjects.length ?
 						this.state.allProjects.map((project, j) => {
-						  return <option ref= "project" key={j} id={project.id} >{project.name}</option>
+						  return <option ref= "project" key={j} value={project.id}>{project.name}</option>
 						}) : <option>No projects to display</option>
 					  }
 				</select>
+             </div>
+
+              <div className="col s4">
+				<select className="browser-default" id={i} onChange={ this.handleHostChangeForSample} value={sample.host_genome_id}>
+					 { this.state.hostGenomes.length ?
+						this.state.hostGenomes.map((host_genome, j) => {
+						  return <option ref= "genome" key={j} value={host_genome.id}>{host_genome.name}</option>
+						}) : <option>No host genomes to display</option>
+					  }
+				</select>
+              </div>
+              <div className="col s12">
+                <p>{sample.input_files_attributes[0].source } </p>
+                <p> {sample.input_files_attributes[1].source } </p>
+              </div>
+              <div><hr/></div>
             </div>
           )
         })
@@ -291,7 +326,7 @@ class BulkUploadImport extends React.Component {
                   <select ref="hostSelect" name="host" className="" id="host" onChange={ this.handleHostChange } value={this.state.hostName}>
                       { this.state.hostGenomes.length ?
                           this.state.hostGenomes.map((host, i) => {
-                            return <option ref= "host" key={i} id={host.id} >{host.name}</option>
+                            return <option ref= "host" key={i} id={host.id}>{host.name}</option>
                           }) : <option>No host genomes to display</option>
                         }
                   </select>
