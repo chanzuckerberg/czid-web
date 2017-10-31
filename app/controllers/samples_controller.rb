@@ -15,7 +15,26 @@ class SamplesController < ApplicationController
 
   # GET /samples/bulk_new
   def bulk_new
+    @projects = Project.all
+    @host_genomes = HostGenome.all
 
+  end
+
+  def bulk_import
+    puts params
+    @project_id = params[:project_id]
+    @host_genome_id = params[:host_genome_id]
+    @bulk_path = params[:bulk_path]
+    @samples = parsed_samples_for_s3_path(@bulk_path, @project_id, @host_genome_id)
+    respond_to do |format|
+      format.json {
+        if @samples.present?
+          render json: { samples: @samples }
+        else
+          render json: { status: "No samples imported under #{@bulk_path}" }, status: :unprocessable_entity
+        end
+      }
+    end
   end
 
   # POST /samples/bulk_upload
@@ -32,10 +51,12 @@ class SamplesController < ApplicationController
       end
     end
 
-    if @errors.empty?
-      format.json { render json: @samples }
-    else
-      format.json { render json: [samples: @samples, errors: @errors], status: :unprocessable_entity }
+    respond_to do |format|
+      if @errors.empty?
+        format.json { render json: @samples }
+      else
+        format.json { render json: {samples: @samples, errors: @errors}, status: :unprocessable_entity }
+      end
     end
   end
 
