@@ -2,7 +2,7 @@ class SamplesController < ApplicationController
   include ReportHelper
   include SamplesHelper
   before_action :login_required, only: [:new, :index, :update, :destroy, :edit, :show, :reupload_source, :kickoff_pipeline, :bulk_new, :bulk_import, :bulk_upload]
-  before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :genus_list]
+  before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs]
   acts_as_token_authentication_handler_for User, only: [:create], fallback: :devise
   protect_from_forgery unless: -> { request.format.json? }
 
@@ -109,19 +109,6 @@ class SamplesController < ApplicationController
             status: 'failed',
             message: 'Unable to save sample, sample not found'
           }
-        end
-      end
-    end
-  end
-
-  def genus_list
-    @pipeline_output = @sample.pipeline_runs.first ? @sample.pipeline_runs.first.pipeline_output : nil
-    respond_to do |format|
-      format.json do
-        if @pipeline_output
-          render json: @pipeline_output.distinct_genuses
-        else
-          render json: []
         end
       end
     end
