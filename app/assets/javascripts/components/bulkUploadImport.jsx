@@ -44,7 +44,7 @@ class BulkUploadImport extends React.Component {
   selectSample(e) {
     // current array of options
     const sample_list = this.state.selectedSampleIndices
-    console.log(sample_list)
+    //console.log(sample_list)
 
     let index
 
@@ -143,7 +143,7 @@ class BulkUploadImport extends React.Component {
 
   bulkUploadImport() {
     var that = this;
-    console.log(this.state)
+    //console.log(this.state)
     axios.get('/samples/bulk_import.json', {
       params: {
         project_id: this.state.projectId,
@@ -169,7 +169,7 @@ class BulkUploadImport extends React.Component {
 
   bulkUploadSubmit() {
     var that = this;
-    console.log(this.state)
+    //console.log(this.state)
     var samples = []
     this.state.selectedSampleIndices.map((idx) => {
       samples.push(this.state.samples[idx])
@@ -230,26 +230,20 @@ class BulkUploadImport extends React.Component {
 
   handleProjectChangeForSample(e) {
     const samples = this.state.samples
-    console.log(e.target.id)
-    console.log(e.target.selectedIndex)
     samples[e.target.id].project_id = this.state.allProjects[e.target.selectedIndex].id
     this.setState({
       samples: samples
     })
     this.clearError();
-    console.log(samples[e.target.id])
   }
 
   handleHostChangeForSample(e) {
     const samples = this.state.samples
-    console.log(e.target.id)
-    console.log(e.target.selectedIndex)
     samples[e.target.id].host_genome_id = this.state.hostGenomes[e.target.selectedIndex].id
     this.setState({
       samples: samples
     })
     this.clearError();
-    console.log(samples[e.target.id])
   }
 
 
