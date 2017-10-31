@@ -24,6 +24,11 @@ class ProjectsController < ApplicationController
   def edit
   end
 
+  # Get /projects/1/visuals
+  def visuals
+
+  end
+
   # POST /projects
   # POST /projects.json
   def create
