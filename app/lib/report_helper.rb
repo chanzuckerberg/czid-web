@@ -512,23 +512,23 @@ module ReportHelper
 
   def get_tax_detail(tax_info, column_name)
     # convenience function used only in generate_report_csv
-    if %w{tax_id name}.include?(column_name)
-      return tax_info[column_name]
-    else
+    if column_name.include?(".")
       parts = column_name.split(".")
       hit_type = parts[0]
       metric = parts[1]
-      return tax_info[hit_type][metric]
+      tax_info[hit_type][metric]
+    else
+      tax_info[column_name]
     end
   end
 
   def generate_report_csv(report_info)
     rows = report_info[:taxonomy_details][1]
-    attributes = %w{tax_id name NT.zscore NT.rpm NT.r NR.zscore NR.rpm NR.r}
+    attributes = %w[category_name tax_id name NT.zscore NT.rpm NT.r NR.zscore NR.rpm NR.r]
     CSV.generate(headers: true) do |csv|
       csv << attributes
       rows.each do |tax_info|
-        csv << attributes.map{ |attr| get_tax_detail(tax_info, attr) }
+        csv << attributes.map { |attr| get_tax_detail(tax_info, attr) }
       end
     end
   end
