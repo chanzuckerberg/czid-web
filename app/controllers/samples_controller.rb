@@ -73,7 +73,6 @@ class SamplesController < ApplicationController
     @report_info = external_report_info(report, params)
   end
 
-
   def save_note
     sample_id = params[:sample_id]
     sample_notes = params[:sample_notes]

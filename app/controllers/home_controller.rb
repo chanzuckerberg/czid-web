@@ -26,16 +26,16 @@ class HomeController < ApplicationController
     project_id = params[:project_id]
     search_query = params[:search]
 
-    if project_id.present?
-      @samples = Sample.includes(:pipeline_runs, :pipeline_outputs).search(search_query).where(project_id: project_id).paginate(page: params[:page])
-    else
-      @samples = Sample.includes(:pipeline_runs, :pipeline_outputs).search(search_query).paginate(page: params[:page])
-    end
+    @samples = if project_id.present?
+                 Sample.includes(:pipeline_runs, :pipeline_outputs).search(search_query).where(project_id: project_id).paginate(page: params[:page])
+               else
+                 Sample.includes(:pipeline_runs, :pipeline_outputs).search(search_query).paginate(page: params[:page])
+               end
     @final_result = samples_info(@samples)[:final_result]
     @pipeline_run_info = samples_info(@samples)[:pipeline_run_info]
     if @samples.length
       respond_to do |format|
-        format.json { render json: {samples: @samples, final_result: @final_result, pipeline_run_info: @pipeline_run_info}, message: 'Search results found' }
+        format.json { render json: { samples: @samples, final_result: @final_result, pipeline_run_info: @pipeline_run_info }, message: 'Search results found' }
       end
     else
       respond_to do |format|
