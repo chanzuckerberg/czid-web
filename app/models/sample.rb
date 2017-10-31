@@ -171,7 +171,7 @@ class Sample < ApplicationRecord
       self.s3_star_index_path = host_genome.s3_star_index_path
       self.s3_bowtie2_index_path = host_genome.s3_bowtie2_index_path
       self.sample_memory ||= host_genome.sample_memory
-      self.job_queue = host_genome.job_queue unless self.job_queue.present?
+      self.job_queue = host_genome.job_queue if job_queue.blank?
     end
     s3_preload_result_path ||= ''
     s3_preload_result_path.strip!
