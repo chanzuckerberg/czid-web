@@ -1,7 +1,7 @@
 class SamplesController < ApplicationController
   include ReportHelper
   include SamplesHelper
-  before_action :login_required, only: [:new, :index, :update, :destroy, :edit, :show, :reupload_source, :kickoff_pipeline]
+  before_action :login_required, only: [:new, :index, :update, :destroy, :edit, :show, :reupload_source, :kickoff_pipeline, :bulk_new, :bulk_import, :bulk_upload]
   before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :genus_list]
   acts_as_token_authentication_handler_for User, only: [:create], fallback: :devise
   protect_from_forgery unless: -> { request.format.json? }
@@ -9,7 +9,11 @@ class SamplesController < ApplicationController
   # GET /samples
   # GET /samples.json
   def index
-    @samples = Sample.all
+    if params[:ids].present?
+      @samples = Sample.where("id in (#{params[:ids]})")
+    else
+      @samples = Sample.all
+    end
   end
 
 
@@ -54,7 +58,7 @@ class SamplesController < ApplicationController
 
     respond_to do |format|
       if @errors.empty?
-        format.json { render json: {samples: @samples} }
+        format.json { render json: {samples: @samples, sample_ids: @samples.pluck(:id)} }
       else
         format.json { render json: {samples: @samples, errors: @errors}, status: :unprocessable_entity }
       end

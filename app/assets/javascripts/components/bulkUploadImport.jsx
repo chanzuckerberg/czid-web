@@ -30,7 +30,8 @@ class BulkUploadImport extends React.Component {
       projectId: null,
       selectedBulkPath: '',
       samples: [],
-      selectedSampleIndices: []
+      selectedSampleIndices: [],
+      createdSampleIds: []
     }
   }
 
@@ -180,7 +181,11 @@ class BulkUploadImport extends React.Component {
       that.setState({
         success: true,
         successMessage: 'Samples created. Redirecting...',
+        createdSampleIds: response.data.sample_ids
       });
+      setTimeout(() => {
+        that.gotoPage(`/?ids=${that.state.createdSampleIds.join(',')}`);
+      }, 5000)
     }).catch(function (error) {
      that.setState({
       invalid: true,
