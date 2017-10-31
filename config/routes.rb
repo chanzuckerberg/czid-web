@@ -29,4 +29,5 @@ Rails.application.routes.draw do
   get 'pipeline_outputs/:id/fasta/:tax_level/:taxid/:hit_type', to: 'pipeline_outputs#show_taxid_fasta'
   get 'pipeline_outputs/:id/nonhost_fasta', to: 'pipeline_outputs#send_nonhost_fasta'
   get 'pipeline_outputs/:id/unidentified_fasta', to: 'pipeline_outputs#send_unidentified_fasta'
+  get 'reports/:id/:view_level/csv', to: 'reports#send_report_csv'
 end

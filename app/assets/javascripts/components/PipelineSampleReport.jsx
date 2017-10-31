@@ -8,6 +8,7 @@ class PipelineSampleReport extends React.Component {
     this.all_categories = props.all_categories;
     this.applyViewLevel = this.applyViewLevel.bind(this);
     this.applyNewFilterThresholds = this.applyNewFilterThresholds.bind(this);
+    this.applyExcludedCategories = this.applyExcludedCategories.bind(this);
   }
 
   refreshPage(overrides) {
@@ -28,12 +29,24 @@ class PipelineSampleReport extends React.Component {
     this.refreshPage(new_filter_thresholds);
   }
 
-  render_name(tax_info) {
+  applyExcludedCategories(category, checked) {
+    excluded_categories = "" + this.props.report_page_params.excluded_categories;
+    if (checked) {
+      // remove from excluded_categories
+      excluded_categories = excluded_categories.split(",").filter(c => c != category).join(",");
+    } else {
+      // add to excluded_categories
+      excluded_categories = excluded_categories + "," + category;
+    }
+    this.refreshPage({excluded_categories});
+  }
+
+  render_name(tax_info, pipeline_output_id) {
     foo = <i>{tax_info.name}</i>;
     if (tax_info.tax_id > 0) {
       foo = (
         <span className="link">
-          <a href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${tax_info.tax_id}`}>
+          <a href={`/pipeline_outputs/${pipeline_output_id}/fasta/${tax_info.tax_level}/${tax_info.tax_id}/NT_or_NR`}>
             {tax_info.name}
           </a>
         </span>
@@ -44,7 +57,7 @@ class PipelineSampleReport extends React.Component {
       foo = <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{foo}</span>
     } else {
       // emphasize genus, soften category and species count
-      category_name = tax_info.tax_id == -200 ? 'Miscellaneous' : tax_info.category_name;
+      category_name = tax_info.tax_id == -200 ? '' : tax_info.category_name;
       foo = <span><b>{foo}</b>&nbsp;&nbsp;&nbsp;&nbsp;<span style={{'color':'#A0A0A0'}}><i>({tax_info.species_count}&nbsp;{category_name}&nbsp;species)</i></span></span>
     }
     return foo;
@@ -107,7 +120,14 @@ class PipelineSampleReport extends React.Component {
         report_page_params = { this.props.report_page_params }
         applyViewLevel = { this.applyViewLevel }
         applyNewFilterThresholds = { this.applyNewFilterThresholds }
+        applyExcludedCategories = { this.applyExcludedCategories }
       />;
+    // To do: apply sort & filter to downloaded file
+    download_button = (
+      <a href= { `/reports/${this.report_details.report_info.id}/${this.props.report_page_params.view_level}/csv` }>
+          <i className="fa fa-cloud-download left"></i>
+      </a>
+    );
     result = (
       <div>
         <div id="reports" className="reports-screen tab-screen col s12">
@@ -119,6 +139,7 @@ class PipelineSampleReport extends React.Component {
               <div className="col s10 reports-main ">
                 <table id="report-table" className='bordered report-table'>
                   <thead>
+                  { download_button }
                   <tr>
                     <th>Taxonomy</th>
                     { this.render_column_header('NT+NR', 'ZZRPM',  'nt_aggregatescore') }
@@ -141,7 +162,7 @@ class PipelineSampleReport extends React.Component {
                     return (
                       <tr key={tax_info.tax_id} className={this.row_class(tax_info)}>
                         <td>
-                          { this.render_name(tax_info) }
+                          { this.render_name(tax_info, this.report_details.pipeline_info.id) }
                         </td>
                         { this.render_number(tax_info.NT.aggregatescore, sort_column == 'nt_aggregatescore', 0) }
                         { this.render_number(tax_info.NT.zscore, sort_column == 'nt_zscore', 1) }

@@ -14,8 +14,7 @@ class ReportFilter extends React.Component {
     // this.getGenusList(this.sample_id);
     this.applyViewLevel = this.applyViewLevel.bind(this);
     this.applyFilters = this.applyFilters.bind(this);
-    // this.checked_categories = (props.checked_categories || props.all_categories).map((category) => category.taxid);
-    // this.selectCategory = this.selectCategory.bind(this);
+    this.applyExcludedCategories = this.applyExcludedCategories.bind(this);
     // this.searchGenus = this.searchGenus.bind(this);
   }
 
@@ -29,6 +28,10 @@ class ReportFilter extends React.Component {
 
   applyFilters(event) {
     this.props.applyNewFilterThresholds(this.new_filter_thresholds);
+  }
+
+  applyExcludedCategories(e) {
+    this.props.applyExcludedCategories(e.target.value, e.target.checked)
   }
 
   /*
@@ -45,6 +48,7 @@ class ReportFilter extends React.Component {
     `${current_url}?species_nt_zscore_threshold=${this.state.species_nt_zscore_start},${this.state.species_nt_zscore_end}&species_nt_rpm_threshold=${this.state.species_nt_rpm_start},${this.state.species_nt_rpm_end}&view_level=${this.state.view_level}&categories=${categories}${sort_by}`;
     }
   }
+  */
 
   getGenusList(sample_id) {
     const url = `/samples/${sample_id}/genus_list.json`;
@@ -60,27 +64,6 @@ class ReportFilter extends React.Component {
       genus_tax_id: item.tax_id
     });
   }
-
-  FIX_THIS_selectCategory(e) {
-    // current array of options
-    const options = this.state.checked_categories
-
-    let index
-
-    // check if the check box is checked or unchecked
-    if (e.target.checked) {
-      // add the numerical value of the checkbox to options array
-      options.push(+e.target.value)
-    } else {
-      // or remove the value from the unchecked checkbox from the array
-      index = options.indexOf(+e.target.value)
-      options.splice(index, 1)
-    }
-
-    // update the state with the new array of options
-    this.setState({ checked_categories: options })
-  }
-  */
 
   render() {
     align_right = {'textAlign': 'right'};
@@ -106,7 +89,6 @@ class ReportFilter extends React.Component {
               </div>
               <div id="filters-pane" className="pane col s12">
 
-              {/*
                 <div className="filter-controls">
                   <div className="filter-title">
                     CATEGORY
@@ -116,7 +98,7 @@ class ReportFilter extends React.Component {
                     { this.all_categories.map((category, i) => {
                       return (
                         <p key={i}>
-                          <input type="checkbox" className="filled-in cat-filter" id={category.name} value={category.taxid} onClick={this.selectCategory} onChange={(e) => console.log(e)} checked={this.checked_categories.indexOf(category.taxid) >= 0} />
+                          <input type="checkbox" className="filled-in cat-filter" id={category.name} value={category.name} onClick={this.applyExcludedCategories} defaultChecked={this.props.report_page_params.excluded_categories.indexOf(category.name) < 0} />
                           <label htmlFor={ category.name }>{ category.name }</label>
                         </p>
                       )
@@ -124,8 +106,6 @@ class ReportFilter extends React.Component {
                     { this.all_categories.length < 1 ? <p>None found</p> : '' }
                   </div>
                 </div>
-
-                */}
 
                 <div className="filter-controls">
                   <div className="filter-title">
