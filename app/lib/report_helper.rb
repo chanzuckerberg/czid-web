@@ -563,10 +563,12 @@ module ReportHelper
 
   def generate_report_csv(report_info)
     rows = report_info[:taxonomy_details][1]
+    view_level_int = TaxonCount::NAME_2_LEVEL[report_info[:report_page_params][:view_level].downcase]
     attributes = %w[category_name tax_id name NT.zscore NT.rpm NT.r NR.zscore NR.rpm NR.r]
     CSV.generate(headers: true) do |csv|
       csv << attributes
       rows.each do |tax_info|
+        next unless tax_info['tax_level'] == view_level_int
         csv << attributes.map { |attr| get_tax_detail(tax_info, attr) }
       end
     end
