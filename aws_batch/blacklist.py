@@ -3,6 +3,7 @@ import shelve
 import subprocess
 import os
 import gzip
+import sys
 
 ACCESSION2TAXID_DB_PATH = '/mnt/idseq/ref/accession2taxid.db'
 INPUT_FASTA_S3 = 's3://czbiohub-ncbi-store/blast/db/FASTA/vector.gz'
@@ -10,7 +11,7 @@ ROOT_DIR = '/mnt/idseq'
 
 ### Functions
 def execute_command(command):
-    print command
+    print >>sys.stderr, command
     output = subprocess.check_output(command, shell=True)
     return output
 
