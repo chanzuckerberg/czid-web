@@ -64,11 +64,13 @@ class BulkUploadImport extends React.Component {
 
   handleUploadSubmit(e) {
     e.preventDefault();
+    e.target.disabled = true;
     this.bulkUploadSubmit();
   }
 
   handleImportSubmit(e) {
     e.preventDefault();
+    e.target.disabled = true;
     this.clearError();
     if(!this.isImportFormInvalid()) {
       this.bulkUploadImport()
