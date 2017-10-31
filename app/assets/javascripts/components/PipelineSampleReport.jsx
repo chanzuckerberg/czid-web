@@ -8,6 +8,7 @@ class PipelineSampleReport extends React.Component {
     this.all_categories = props.all_categories;
     this.applyViewLevel = this.applyViewLevel.bind(this);
     this.applyNewFilterThresholds = this.applyNewFilterThresholds.bind(this);
+    this.applyExcludedCategories = this.applyExcludedCategories.bind(this);
   }
 
   refreshPage(overrides) {
@@ -28,6 +29,18 @@ class PipelineSampleReport extends React.Component {
     this.refreshPage(new_filter_thresholds);
   }
 
+  applyExcludedCategories(category, checked) {
+    excluded_categories = "" + this.props.report_page_params.excluded_categories;
+    if (checked) {
+      // remove from excluded_categories
+      excluded_categories = excluded_categories.split(",").filter(c => c != category).join(",");
+    } else {
+      // add to excluded_categories
+      excluded_categories = excluded_categories + "," + category;
+    }
+    this.refreshPage({excluded_categories});
+  }
+
   render_name(tax_info, pipeline_output_id) {
     foo = <i>{tax_info.name}</i>;
     if (tax_info.tax_id > 0) {
@@ -44,7 +57,7 @@ class PipelineSampleReport extends React.Component {
       foo = <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{foo}</span>
     } else {
       // emphasize genus, soften category and species count
-      category_name = tax_info.tax_id == -200 ? 'Miscellaneous' : tax_info.category_name;
+      category_name = tax_info.tax_id == -200 ? '' : tax_info.category_name;
       foo = <span><b>{foo}</b>&nbsp;&nbsp;&nbsp;&nbsp;<span style={{'color':'#A0A0A0'}}><i>({tax_info.species_count}&nbsp;{category_name}&nbsp;species)</i></span></span>
     }
     return foo;
@@ -107,6 +120,7 @@ class PipelineSampleReport extends React.Component {
         report_page_params = { this.props.report_page_params }
         applyViewLevel = { this.applyViewLevel }
         applyNewFilterThresholds = { this.applyNewFilterThresholds }
+        applyExcludedCategories = { this.applyExcludedCategories }
       />;
     result = (
       <div>
