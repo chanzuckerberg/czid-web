@@ -27,7 +27,7 @@ class SamplesController < ApplicationController
   # GET /samples/search.json
   def search
     search_query = params[:search]
-    @samples = Sample.includes(:pipeline_runs, :pipeline_outputs).search(search_query).paginate(page: params[:page], per_page: 10)
+    @samples = Sample.includes(:pipeline_runs, :pipeline_outputs).search(search_query).paginate(page: params[:page])
     if @samples.length
       respond_to do |format|
         format.json { render json: @samples, message: 'Search results found' }
