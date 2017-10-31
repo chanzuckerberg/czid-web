@@ -15,6 +15,14 @@
     <%= form.text_field :name, id: :host_genome_name, placeholder: 'Required' %>
   </div>
   <div class="field">
+    <%= form.label 'Sample memory' %><br>
+    <%= form.text_field :sample_memory, id: :host_genome_sample_memory, placeholder: 'Required' %>
+  </div>
+  <div class="field">
+    <%= form.label 'Job queue' %><br>
+    <%= form.text_field :job_queue, id: :host_genome_job_queue, placeholder: 'Required' %>
+  </div>
+  <div class="field">
     <%= form.label 'S3 STAR index path' %><br>
     <%= form.text_field :s3_star_index_path, id: :host_genome_s3_star_index_path, placeholder: 'Required' %>
   </div>
