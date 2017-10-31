@@ -524,7 +524,7 @@ module ReportHelper
 
   def generate_report_csv(report_info)
     rows = report_info[:taxonomy_details][1]
-    attributes = %w{tax_id name NT.zscore NT.rpm NT.r NT.percentidentity NT.alignmentlength NT.neglogevalue NR.zscore NR.rpm NR.r NR.percentidentity NR.alignmentlength NR.neglogevalue}
+    attributes = %w{tax_id name NT.zscore NT.rpm NT.r NR.zscore NR.rpm NR.r}
     CSV.generate(headers: true) do |csv|
       csv << attributes
       rows.each do |tax_info|
