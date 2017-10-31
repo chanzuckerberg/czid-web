@@ -1,17 +1,20 @@
 class Samples extends React.Component {
   constructor(props, context) {
     super(props, context);
-    this.project = props.project;
+    this.project = props.project || null;
+    this.projectId = this.project ? this.project.id : null;
     this.samples = props.samples;
     this.samplesAmount = props.samples_count;
-    this.outputData = props.outputData
-    this.pipeline_run_info = props.pipeline_run_info
+    this.outputData = props.outputData || [];
+    this.pipelineRunInfo = props.pipeline_run_info || [];
     this.all_project = props.all_project|| [];
     this.defaultSortBy = 'newest';
     const currentSort = SortHelper.currentSort();
     this.state = {
       displayedSamples: this.samples || [],
-      samplesCount: this.samplesAmount || [],
+      displayedOutputData: this.outputData || [],
+      displayedPipelineRunInfo: this.pipelineRunInfo || [],
+      samplesCount: this.samplesAmount,
       sort_query: currentSort.sort_query
       ? currentSort.sort_query  : `sort_by=${this.defaultSortBy}`,
     };
@@ -67,25 +70,31 @@ class Samples extends React.Component {
   handleSearch(e) {
     var that = this;
     if (e.target.value === "") {
-      $("#pagination").css("display", "");
       that.setState({
         displayedSamples: this.samples,
+        displayedOutputData: this.outputData,
+        displayedPipelineRunInfo: this.pipelineRunInfo,
         samplesCount: this.props.samples_count
       })
+      $("#pagination").css("display", "");
     } else {
-      axios.get('/samples/search.json', 
-        {params: {search: e.target.value}
+      axios.get('/search.json', 
+        {params: {search: e.target.value, project_id: this.projectId}
       }).then((response) => {
-        if (response.data.length) {
+        if (response.data.samples.length) {
           that.setState({
-            displayedSamples: response.data,
-            samplesCount: response.data.length
+            displayedSamples: response.data.samples,
+            displayedOutputData: response.data.final_result,
+            displayedPipelineRunInfo: response.data.pipeline_run_info,
+            samplesCount: response.data.samples.length
           })
           $("#pagination").css("display", "none");
         } else {
           $("#pagination").css("display", "none");
           that.setState({
             displayedSamples: [],
+            displayedOutputData: [],
+            displayedPipelineRunInfo: [],
             samplesCount: 0
           })
           that.renderEmptyTable();
@@ -94,6 +103,8 @@ class Samples extends React.Component {
         $("#pagination").css("display", "none");
         that.setState({
           displayedSamples: [],
+          displayedOutputData: [],
+          displayedPipelineRunInfo: [],
           samplesCount: 0
         })
         that.renderEmptyTable();
@@ -203,7 +214,7 @@ class Samples extends React.Component {
             </div>
           </div>
         </div>
-          {!this.samples.length && !this.outputData.length ? <div className="no-data"><i className="fa fa-frown-o" aria-hidden="true"> No data to display</i></div> : this.renderTable(this.state.displayedSamples, this.outputData, this.pipeline_run_info)}
+          {!this.state.displayedSamples && !this.state.displayedOutputData && this.state.displayedPipelineRunInfo ? <div className="no-data"><i className="fa fa-frown-o" aria-hidden="true"> No data to display</i></div> : this.renderTable(this.state.displayedSamples, this.state.displayedOutputData, this.state.displayedPipelineRunInfo)}
       </div>
     )
   }

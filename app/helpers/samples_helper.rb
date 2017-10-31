@@ -63,7 +63,46 @@ module SamplesHelper
         sample_list << sample_attributes
       end
     end
-
     sample_list
+    
+  def samples_output_data(samples)
+    final_result = []
+    samples.each do |output|
+      output_data = {}
+      pipeline_info = output.pipeline_runs.first ? output.pipeline_runs.first.pipeline_output : nil
+      job_stats = output.pipeline_outputs.first ? output.pipeline_outputs.first.job_stats : nil
+      summary_stats = job_stats ? get_summary_stats(job_stats) : nil
+      pipeline_run_status = output.pipeline_runs.first ? output.pipeline_runs.first.job_status : nil
+
+      output_data[:pipeline_info] = pipeline_info
+      output_data[:job_stats] = job_stats
+      output_data[:summary_stats] = summary_stats
+      final_result.push(output_data)
+    end
+    final_result
+  end
+
+  def samples_pipeline_run_info(samples)
+    pipeline_run_info = []
+    pipeline_run_entry = {}
+    samples.each do |output|
+      pipeline_run_status = output.pipeline_runs.first ? output.pipeline_runs.first.job_status : nil
+      pipeline_run_entry[:job_status_description] = if %w[CHECKED SUCCEEDED].include?(pipeline_run_status)
+        'COMPLETE'
+      elsif %w[FAILED ERROR].include?(pipeline_run_status)
+        'FAILED'
+      elsif %w[RUNNING LOADED].include?(pipeline_run_status)
+        'IN PROGRESS'
+      else
+        'UPLOADING'
+      end
+      pipeline_run_info.push(pipeline_run_entry)
+    end
+    pipeline_run_info 
+  end
+
+  def samples_info(samples)
+    { final_result: samples_output_data(samples),
+      pipeline_run_info: samples_pipeline_run_info(samples) }
   end
 end
