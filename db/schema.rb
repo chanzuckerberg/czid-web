@@ -239,15 +239,6 @@ ActiveRecord::Schema.define(version: 20171031193737) do
     t.index ["taxid"], name: "index_taxon_names_on_taxid", unique: true
   end
 
-  create_table "taxon_sequence_files", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.bigint "pipeline_output_id"
-    t.integer "taxid"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "uri"
-    t.index ["pipeline_output_id"], name: "index_taxon_sequence_files_on_pipeline_output_id"
-  end
-
   create_table "taxon_summaries", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "background_id"
     t.integer "tax_id"
@@ -305,7 +296,6 @@ ActiveRecord::Schema.define(version: 20171031193737) do
   add_foreign_key "reports", "pipeline_outputs"
   add_foreign_key "taxon_byteranges", "pipeline_outputs"
   add_foreign_key "taxon_counts", "pipeline_outputs"
-  add_foreign_key "taxon_sequence_files", "pipeline_outputs"
   add_foreign_key "taxon_summaries", "backgrounds"
   add_foreign_key "taxon_zscores", "reports"
 end
