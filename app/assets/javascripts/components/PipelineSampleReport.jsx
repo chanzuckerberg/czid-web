@@ -43,17 +43,13 @@ class PipelineSampleReport extends React.Component {
 
   render_name(tax_info, report_details) {
     foo = <i>{tax_info.name}</i>;
-    if (report_details.taxon_fasta_flag) {
-      link_url = `/pipeline_outputs/${report_details.pipeline_info.id}/fasta/${tax_info.tax_level}/${tax_info.tax_id}/NT_or_NR`
-    } else {
-      link_url = `https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${tax_info.tax_id}`
-    }
     if (tax_info.tax_id > 0) {
-      foo = (
-        <span className="link">
-          <a href={ link_url }>{tax_info.name}</a>
-        </span>
-      );
+      if (report_details.taxon_fasta_flag) {
+        taxon_fasta_url = `/pipeline_outputs/${report_details.pipeline_info.id}/fasta/${tax_info.tax_level}/${tax_info.tax_id}/NT_or_NR`
+        foo = <span className="link"><a href={taxon_fasta_url}>{tax_info.name}</a></span>
+      } else {
+        foo = <span>{tax_info.name}</span>
+      }
     }
     if (tax_info.tax_level == 1) {
       // indent species rows
