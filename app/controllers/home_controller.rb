@@ -18,8 +18,9 @@ class HomeController < ApplicationController
       @samples = sort_by(Sample.includes(:pipeline_runs, :pipeline_outputs).paginate(page: params[:page]), sort)
       @samples_count = Sample.all.size
     end
-    @final_result = samples_info(@samples) ? samples_info(@samples)[:final_result] : nil
-    @pipeline_run_info = samples_info(@samples) ? samples_info(@samples)[:pipeline_run_info] : nil
+    samples_info_output = samples_info(@samples) || {}
+    @final_result = samples_info_output[:final_result] || []
+    @pipeline_run_info = samples_info_output[:pipeline_run_info] || []
   end
 
   def search
@@ -27,9 +28,9 @@ class HomeController < ApplicationController
     search_query = params[:search]
 
     @samples = if project_id.present?
-                 Sample.includes(:pipeline_runs, :pipeline_outputs).search(search_query).where(project_id: project_id).paginate(page: params[:page])
+                 Sample.includes(:pipeline_runs, :pipeline_outputs).search(search_query).where(project_id: project_id)
                else
-                 Sample.includes(:pipeline_runs, :pipeline_outputs).search(search_query).paginate(page: params[:page])
+                 Sample.includes(:pipeline_runs, :pipeline_outputs).search(search_query)
                end
     @final_result = samples_info(@samples)[:final_result]
     @pipeline_run_info = samples_info(@samples)[:pipeline_run_info]

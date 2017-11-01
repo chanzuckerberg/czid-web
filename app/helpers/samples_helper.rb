@@ -70,11 +70,11 @@ module SamplesHelper
     final_result = []
     samples.each do |output|
       output_data = {}
-      pipeline_info = output.pipeline_runs.first ? output.pipeline_runs.first.pipeline_output : nil
-      job_stats = output.pipeline_outputs.first ? output.pipeline_outputs.first.job_stats : nil
+      pipeline_output = output.pipeline_runs.first ? output.pipeline_runs.first.pipeline_output : nil
+      job_stats = pipeline_output ? pipeline_output.job_stats : nil
       summary_stats = job_stats ? get_summary_stats(job_stats) : nil
 
-      output_data[:pipeline_info] = pipeline_info
+      output_data[:pipeline_output] = pipeline_output
       output_data[:job_stats] = job_stats
       output_data[:summary_stats] = summary_stats
       final_result.push(output_data)
@@ -94,6 +94,8 @@ module SamplesHelper
           'FAILED'
         elsif %w[RUNNING LOADED].include?(pipeline_run_status)
           'IN PROGRESS'
+        elsif pipeline_run_status == 'RUNNABLE'
+          'INITIALIZING'
         else
           'UPLOADING'
         end

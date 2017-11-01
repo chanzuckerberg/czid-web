@@ -11,6 +11,7 @@ class Samples extends React.Component {
     this.defaultSortBy = 'newest';
     const currentSort = SortHelper.currentSort();
     this.state = {
+      showSearchLoader: false,
       displayedSamples: this.samples || [],
       displayedOutputData: this.outputData || [],
       displayedPipelineRunInfo: this.pipelineRunInfo || [],
@@ -46,7 +47,7 @@ class Samples extends React.Component {
             {sample.name}
           </td>
           <td>{moment(sample.created_at).format(' L,  h:mm a')}</td>
-         <td>{ !pInfo.pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{numberWithCommas(pInfo.pipeline_info.total_reads)}</a>}</td>
+         <td>{ !pInfo.pipeline_output ? 'NA' : <a href={'/samples/' + sample.id}>{numberWithCommas(pInfo.pipeline_output.total_reads)}</a>}</td>
           <td>{ (!pInfo.summary_stats || !pInfo.summary_stats.remaining_reads) ? 'NA' : <a href={'/samples/' + sample.id}>{numberWithCommas(pInfo.summary_stats.remaining_reads)}</a>}</td>
           <td>{ (!pInfo.summary_stats || !pInfo.summary_stats.percent_remaining) ? 'NA' : <a href={'/samples/' + sample.id}>{pInfo.summary_stats.percent_remaining.toFixed(2)}%</a>}</td>
           <td>{ (!pInfo.summary_stats || !pInfo.summary_stats.qc_percent) ? 'NA' : <a href={'/samples/' + sample.id}>{pInfo.summary_stats.qc_percent.toFixed(2)}%</a>}</td>
@@ -62,6 +63,8 @@ class Samples extends React.Component {
       return 'complete';
     } else if (status === 'UPLOADING') {
       return 'uploading';
+    } else if (status === 'INITIALIZING') {
+      return 'initializing';
     } else {
       return 'failed';
     }
@@ -69,12 +72,14 @@ class Samples extends React.Component {
 
   handleSearch(e) {
     var that = this;
+    that.setState({ showSearchLoader: true })
     if (e.target.value === "") {
       that.setState({
         displayedSamples: this.samples,
         displayedOutputData: this.outputData,
         displayedPipelineRunInfo: this.pipelineRunInfo,
-        samplesCount: this.props.samples_count
+        samplesCount: this.props.samples_count,
+        showSearchLoader: false
       })
       $("#pagination").css("display", "");
     } else {
@@ -86,7 +91,8 @@ class Samples extends React.Component {
             displayedSamples: response.data.samples,
             displayedOutputData: response.data.final_result,
             displayedPipelineRunInfo: response.data.pipeline_run_info,
-            samplesCount: response.data.samples.length
+            samplesCount: response.data.samples.length,
+            showSearchLoader: false
           })
           $("#pagination").css("display", "none");
         } else {
@@ -95,7 +101,8 @@ class Samples extends React.Component {
             displayedSamples: [],
             displayedOutputData: [],
             displayedPipelineRunInfo: [],
-            samplesCount: 0
+            samplesCount: 0,
+            showSearchLoader: false
           })
           that.renderEmptyTable();
         }
@@ -105,7 +112,8 @@ class Samples extends React.Component {
           displayedSamples: [],
           displayedOutputData: [],
           displayedPipelineRunInfo: [],
-          samplesCount: 0
+          samplesCount: 0,
+          showSearchLoader: false
         })
         that.renderEmptyTable();
       })
@@ -131,7 +139,7 @@ class Samples extends React.Component {
     return (
     <div className="content-wrapper">
       <div className="sample-container">
-        <input id="search" type="search" onChange={this.handleSearch} className="search" placeholder='&#xf002; Search for Sample'/>
+        <input id="search" type="search" onChange={this.handleSearch} className="search" placeholder='&#xf002; Search for Sample'/>{ this.state.showSearchLoader ? <i className='fa fa-spinner fa-spin fa-lg'></i> : null }
           <table className="bordered highlight samples-table">
             <thead>
             <tr>
