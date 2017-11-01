@@ -99,9 +99,9 @@ module SamplesHelper
         else
           'UPLOADING'
         end
-        pipeline_run_info.push(pipeline_run_entry)
-      end
-      pipeline_run_info
+      pipeline_run_info.push(pipeline_run_entry)
+    end
+    pipeline_run_info
   end
 
   def samples_info(samples)
