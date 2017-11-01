@@ -328,6 +328,7 @@ $break-large: 1070px;
       font-weight: bold;
       width: 200px;
       overflow: hidden;
+      text-overflow: ellipsis;
       display: inline-block;
       white-space: nowrap;
     }
