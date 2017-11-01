@@ -1,4 +1,5 @@
 require 'csv'
+require 'open3'
 
 module ReportHelper
   # Truncate report table past this number of rows.
@@ -157,13 +158,26 @@ module ReportHelper
     data
   end
 
+  def taxon_fastas_present?(report)
+    s3_path_hash = report.pipeline_output.sample.s3_paths_for_taxon_byteranges
+    s3_path_hash.each do |_tax_level, h|
+      h.each do |_hit_type, s3_path|
+        command = "aws s3 ls #{s3_path}"
+        _stdout, _stderr, status = Open3.capture3(command)
+        return false unless status.exitstatus.zero?
+      end
+    end
+    return true
+  end
+
   def report_details(report)
     {
       report_info: report,
       pipeline_info: report.pipeline_output,
       sample_info: report.pipeline_output.sample,
       project_info: report.pipeline_output.sample.project,
-      background_model: report.background
+      background_model: report.background,
+      taxon_fasta_flag: taxon_fastas_present?(report)
     }
   end
 
