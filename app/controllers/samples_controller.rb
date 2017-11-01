@@ -73,21 +73,6 @@ class SamplesController < ApplicationController
     @report_info = external_report_info(report, params)
   end
 
-  # GET /samples/search.json
-  def search
-    search_query = params[:search]
-    @samples = Sample.includes(:pipeline_runs, :pipeline_outputs).search(search_query).paginate(page: params[:page])
-    if @samples.length
-      respond_to do |format|
-        format.json { render json: @samples, message: 'Search results found' }
-      end
-    else
-      respond_to do |format|
-        format.json { render message: 'No Search results found' }
-      end
-    end
-  end
-
   def save_note
     sample_id = params[:sample_id]
     sample_notes = params[:sample_notes]

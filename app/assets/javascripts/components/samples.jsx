@@ -1,17 +1,21 @@
 class Samples extends React.Component {
   constructor(props, context) {
     super(props, context);
-    this.project = props.project;
+    this.project = props.project || null;
+    this.projectId = this.project ? this.project.id : null;
     this.samples = props.samples;
-    this.samplesAmount = props.samples_count;
-    this.outputData = props.outputData
-    this.pipeline_run_info = props.pipeline_run_info
+    this.samplesCount = props.samples_count;
+    this.outputData = props.outputData || [];
+    this.pipelineRunInfo = props.pipeline_run_info || [];
     this.all_project = props.all_project|| [];
     this.defaultSortBy = 'newest';
     const currentSort = SortHelper.currentSort();
     this.state = {
+      showSearchLoader: false,
       displayedSamples: this.samples || [],
-      samplesCount: this.samplesAmount || [],
+      displayedOutputData: this.outputData || [],
+      displayedPipelineRunInfo: this.pipelineRunInfo || [],
+      samplesCount: this.samplesCount,
       sort_query: currentSort.sort_query
       ? currentSort.sort_query  : `sort_by=${this.defaultSortBy}`,
     };
@@ -43,7 +47,7 @@ class Samples extends React.Component {
             {sample.name}
           </td>
           <td>{moment(sample.created_at).format(' L,  h:mm a')}</td>
-         <td>{ !pInfo.pipeline_info ? 'NA' : <a href={'/samples/' + sample.id}>{numberWithCommas(pInfo.pipeline_info.total_reads)}</a>}</td>
+         <td>{ !pInfo.pipeline_output ? 'NA' : <a href={'/samples/' + sample.id}>{numberWithCommas(pInfo.pipeline_output.total_reads)}</a>}</td>
           <td>{ (!pInfo.summary_stats || !pInfo.summary_stats.remaining_reads) ? 'NA' : <a href={'/samples/' + sample.id}>{numberWithCommas(pInfo.summary_stats.remaining_reads)}</a>}</td>
           <td>{ (!pInfo.summary_stats || !pInfo.summary_stats.percent_remaining) ? 'NA' : <a href={'/samples/' + sample.id}>{pInfo.summary_stats.percent_remaining.toFixed(2)}%</a>}</td>
           <td>{ (!pInfo.summary_stats || !pInfo.summary_stats.qc_percent) ? 'NA' : <a href={'/samples/' + sample.id}>{pInfo.summary_stats.qc_percent.toFixed(2)}%</a>}</td>
@@ -59,6 +63,8 @@ class Samples extends React.Component {
       return 'complete';
     } else if (status === 'UPLOADING') {
       return 'uploading';
+    } else if (status === 'INITIALIZING') {
+      return 'initializing';
     } else {
       return 'failed';
     }
@@ -66,27 +72,37 @@ class Samples extends React.Component {
 
   handleSearch(e) {
     var that = this;
+    that.setState({ showSearchLoader: true })
     if (e.target.value === "") {
-      $("#pagination").css("display", "");
       that.setState({
         displayedSamples: this.samples,
-        samplesCount: this.props.samples_count
+        displayedOutputData: this.outputData,
+        displayedPipelineRunInfo: this.pipelineRunInfo,
+        samplesCount: this.props.samples_count,
+        showSearchLoader: false
       })
+      $("#pagination").css("display", "");
     } else {
-      axios.get('/samples/search.json', 
-        {params: {search: e.target.value}
+      axios.get('/search.json', 
+        {params: {search: e.target.value, project_id: this.projectId}
       }).then((response) => {
-        if (response.data.length) {
+        if (response.data.samples.length) {
           that.setState({
-            displayedSamples: response.data,
-            samplesCount: response.data.length
+            displayedSamples: response.data.samples,
+            displayedOutputData: response.data.final_result,
+            displayedPipelineRunInfo: response.data.pipeline_run_info,
+            samplesCount: response.data.samples.length,
+            showSearchLoader: false
           })
           $("#pagination").css("display", "none");
         } else {
           $("#pagination").css("display", "none");
           that.setState({
             displayedSamples: [],
-            samplesCount: 0
+            displayedOutputData: [],
+            displayedPipelineRunInfo: [],
+            samplesCount: 0,
+            showSearchLoader: false
           })
           that.renderEmptyTable();
         }
@@ -94,7 +110,10 @@ class Samples extends React.Component {
         $("#pagination").css("display", "none");
         that.setState({
           displayedSamples: [],
-          samplesCount: 0
+          displayedOutputData: [],
+          displayedPipelineRunInfo: [],
+          samplesCount: 0,
+          showSearchLoader: false
         })
         that.renderEmptyTable();
       })
@@ -120,7 +139,7 @@ class Samples extends React.Component {
     return (
     <div className="content-wrapper">
       <div className="sample-container">
-        <input id="search" type="search" onChange={this.handleSearch} className="search" placeholder='&#xf002; Search for Sample'/>
+        <input id="search" type="search" onChange={this.handleSearch} className="search" placeholder='&#xf002; Search for Sample'/>{ this.state.showSearchLoader ? <i className='fa fa-spinner fa-spin fa-lg'></i> : null }
           <table className="bordered highlight samples-table">
             <thead>
             <tr>
@@ -203,7 +222,7 @@ class Samples extends React.Component {
             </div>
           </div>
         </div>
-          {!this.samples.length && !this.outputData.length ? <div className="no-data"><i className="fa fa-frown-o" aria-hidden="true"> No data to display</i></div> : this.renderTable(this.state.displayedSamples, this.outputData, this.pipeline_run_info)}
+          {!this.state.displayedSamples && !this.state.displayedOutputData && !this.state.displayedPipelineRunInfo ? <div className="no-data"><i className="fa fa-frown-o" aria-hidden="true"> No data to display</i></div> : this.renderTable(this.state.displayedSamples, this.state.displayedOutputData, this.state.displayedPipelineRunInfo)}
       </div>
     )
   }
