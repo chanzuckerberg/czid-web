@@ -199,6 +199,15 @@ $break-large: 1070px;
       margin-top: 9px;
       text-align: left;
     }
+    span.single {
+      float: right;
+      text-decoration: underline;
+      color: #a2a1bf;
+      cursor: pointer;
+      &:hover, &.active {
+        color: #414367;
+      }
+    }
   }
   .content-wrapper {
     padding: 40px 50px;

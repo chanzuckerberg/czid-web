@@ -476,6 +476,7 @@ class SampleUpload extends React.Component {
         <form ref="form" onSubmit={ this.handleUpload }>
           <div className="row title">
             <p className="col s6 signup">Sample Upload</p>
+            <span onClick={ this.gotoPage.bind(this, '/samples/bulk_new') } className="single">Upload multiple samples? Click here</span>
           </div>
           { this.state.success ? <div className="success-info" >
                 <i className="fa fa-success"></i>

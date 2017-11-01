@@ -337,6 +337,7 @@ class BulkUploadImport extends React.Component {
         <form ref="form" onSubmit={ this.handleImportSubmit }>
           <div className="row title">
             <p className="col s6 signup">Bulk Upload</p>
+            <span onClick={ this.gotoPage.bind(this, '/samples/new') } className="single">Upload a single sample? Click here</span>
           </div>
           { this.state.success ? <div className="success-info" >
                 <i className="fa fa-success"></i>
