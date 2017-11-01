@@ -510,26 +510,9 @@ module ReportHelper
     aggregate
   end
 
-  def taxonomy_details(report, params)
-    view_level = params[:view_level]
-    view_level_int = TaxonCount::NAME_2_LEVEL[view_level.downcase]
-    sort_by = decode_sort_by(params[:sort_by])
-    thresholds = decode_thresholds(params)
-    excluded_categories = decode_excluded_categories(params[:excluded_categories])
-
-    t0 = Time.now.to_f
-    tax_2d = cleanup_all!(convert_2d(fetch_taxon_counts(report)))
-    t1 = Time.now.to_f
-
-    count_species_per_genus!(tax_2d)
-
-    # Compute aggregate scores and all genera
-    all_genera = Set.new
+  def compute_aggregate_scores!(tax_2d)
     tax_2d.each do |_tax_id, tax_info|
-      unless tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
-        all_genera.add(tax_info['name'])
-        next
-      end
+      next unless tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
       species_info = tax_info
       genus_id = species_info['genus_taxid']
       genus_info = tax_2d[genus_id]
@@ -537,53 +520,94 @@ module ReportHelper
       species_info['NT']['aggregatescore'] = species_score
       genus_info['NT']['aggregatescore'] = species_score unless genus_info['NT']['aggregatescore'] && genus_info['NT']['aggregatescore'] > species_score
     end
-
     tax_2d.each do |_tax_id, tax_info|
       tax_info['NR']['aggregatescore'] = tax_info['NT']['aggregatescore']
     end
+    tax_2d
+  end
 
+  def wall_clock_ms
+    # used for rudimentary perf analysis
+    Time.now.to_f
+  end
+
+  def apply_filters!(rows, tax_2d, all_genera, params)
+    thresholds = decode_thresholds(params)
+    excluded_categories = decode_excluded_categories(params[:excluded_categories])
+    if all_genera.include? params[:selected_genus]
+      # Apply only the genus filter.
+      rows.keep_if do |tax_info|
+        genus_taxid = tax_info['genus_taxid']
+        genus_name = tax_2d[genus_taxid]['name']
+        genus_name == params[:selected_genus]
+      end
+    else
+      # Rare case of param cleanup this deep...
+      params[:selected_genus] = DEFAULT_PARAMS[:selected_genus]
+      # Apply all but the genus filter.
+      filter_rows!(rows, thresholds, excluded_categories)
+    end
+  end
+
+  def taxonomy_details(report, params)
+    # Fetch and clean data.
+    t0 = wall_clock_ms
+    tax_2d = cleanup_all!(convert_2d(fetch_taxon_counts(report)))
+    t1 = wall_clock_ms
+
+    # These counts are shown in the UI on each genus line.
+    count_species_per_genus!(tax_2d)
+
+    # Pull out all genera names in sample (before filters are applied).
+    all_genera = Set.new
+    tax_2d.each do |_tax_id, tax_info|
+      tax_name = tax_info['name']
+      tax_level = tax_info['tax_level']
+      all_genera.add(tax_name) if tax_level == TaxonCount::TAX_LEVEL_GENUS
+    end
+    # This gets returned to UI for the genus search autoselect dropdown.
+    all_genera_in_sample = all_genera.sort_by(&:downcase)
+
+    # Compute all aggregate scores.
+    compute_aggregate_scores!(tax_2d)
+
+    # Filter out species rows if selected level is genus.
     rows = []
+    view_level_int = TaxonCount::NAME_2_LEVEL[params[:view_level].downcase]
     tax_2d.each do |_tax_id, tax_info|
       next unless tax_info['tax_level'] >= view_level_int
-      tax_info[:sort_key] = sort_key(tax_2d, tax_info, sort_by)
       rows << tax_info
     end
 
-    rows.sort! { |dl, dr| dl[:sort_key] <=> dr[:sort_key] }
+    # Compute sort key and sort.
+    sort_by = decode_sort_by(params[:sort_by])
+    rows.each do |tax_info|
+      tax_info[:sort_key] = sort_key(tax_2d, tax_info, sort_by)
+    end
+    rows.sort_by! { |tax_info| tax_info[:sort_key] }
 
+    # Apply filters, unless disabled for CSV download.
     unless params[:disable_filters] == 1
-      if all_genera.include? params[:selected_genus]
-        # Apply only the genus filter.
-        rows.keep_if do |tax_info|
-          genus_taxid = tax_info['genus_taxid']
-          genus_name = tax_2d[genus_taxid]['name']
-          genus_name == params[:selected_genus]
-        end
-      else
-        # Rare case of param cleanup this deep...
-        params[:selected_genus] = DEFAULT_PARAMS[:selected_genus]
-        # Apply all but the genus filter.
-        filter_rows!(rows, thresholds, excluded_categories)
-      end
+      apply_filters!(rows, tax_2d, all_genera, params)
     end
 
+    # This is displayed at the bottom of the page.
     real_length = rows.length
 
     # HACK
     rows = rows[0...MAX_ROWS]
 
+    # Delete fields that are unused in the UI.
     rows.each do |tax_info|
       UNUSED_IN_UI_FIELDS.each do |unused_field|
         tax_info.delete(unused_field)
       end
     end
 
-    all_genera = all_genera.sort_by(&:downcase)
-
-    t5 = Time.now.to_f
+    t5 = wall_clock_ms
     logger.info "Data processing took #{t5 - t1} seconds (#{t5 - t0} with I/O)."
 
-    [[real_length, rows], all_genera]
+    [[real_length, rows], all_genera_in_sample]
   end
 
   def get_tax_detail(tax_info, column_name)
