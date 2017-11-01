@@ -84,8 +84,8 @@ module SamplesHelper
 
   def samples_pipeline_run_info(samples)
     pipeline_run_info = []
-    pipeline_run_entry = {}
     samples.each do |output|
+      pipeline_run_entry = {}
       pipeline_run_status = output.pipeline_runs.first ? output.pipeline_runs.first.job_status : nil
       pipeline_run_entry[:job_status_description] =
         if %w[CHECKED SUCCEEDED].include?(pipeline_run_status)
@@ -99,9 +99,9 @@ module SamplesHelper
         else
           'UPLOADING'
         end
-      pipeline_run_info.push(pipeline_run_entry)
-    end
-    pipeline_run_info
+        pipeline_run_info.push(pipeline_run_entry)
+      end
+      pipeline_run_info
   end
 
   def samples_info(samples)
