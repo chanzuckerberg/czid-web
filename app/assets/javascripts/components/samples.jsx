@@ -4,7 +4,7 @@ class Samples extends React.Component {
     this.project = props.project || null;
     this.projectId = this.project ? this.project.id : null;
     this.samples = props.samples;
-    this.samplesAmount = props.samples_count;
+    this.samplesCount = props.samples_count;
     this.outputData = props.outputData || [];
     this.pipelineRunInfo = props.pipeline_run_info || [];
     this.all_project = props.all_project|| [];
@@ -15,7 +15,7 @@ class Samples extends React.Component {
       displayedSamples: this.samples || [],
       displayedOutputData: this.outputData || [],
       displayedPipelineRunInfo: this.pipelineRunInfo || [],
-      samplesCount: this.samplesAmount,
+      samplesCount: this.samplesCount,
       sort_query: currentSort.sort_query
       ? currentSort.sort_query  : `sort_by=${this.defaultSortBy}`,
     };
