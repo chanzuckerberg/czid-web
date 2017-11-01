@@ -57,16 +57,15 @@ class PipelineSampleReport extends React.Component {
     this.refreshPage(overrides);
   }
 
-  render_name(tax_info, pipeline_output_id) {
+  render_name(tax_info, report_details) {
     foo = <i>{tax_info.name}</i>;
     if (tax_info.tax_id > 0) {
-      foo = (
-        <span className="link">
-          <a href={`/pipeline_outputs/${pipeline_output_id}/fasta/${tax_info.tax_level}/${tax_info.tax_id}/NT_or_NR`}>
-            {tax_info.name}
-          </a>
-        </span>
-      );
+      if (report_details.taxon_fasta_flag) {
+        taxon_fasta_url = `/pipeline_outputs/${report_details.pipeline_info.id}/fasta/${tax_info.tax_level}/${tax_info.tax_id}/NT_or_NR`
+        foo = <span className="link"><a href={taxon_fasta_url}>{tax_info.name}</a></span>
+      } else {
+        foo = <span>{tax_info.name}</span>
+      }
     }
     if (tax_info.tax_level == 1) {
       // indent species rows
@@ -179,7 +178,7 @@ class PipelineSampleReport extends React.Component {
                     return (
                       <tr key={tax_info.tax_id} className={this.row_class(tax_info)}>
                         <td>
-                          { this.render_name(tax_info, this.report_details.pipeline_info.id) }
+                          { this.render_name(tax_info, this.report_details) }
                         </td>
                         { this.render_number(tax_info.NT.aggregatescore, sort_column == 'nt_aggregatescore', 0) }
                         { this.render_number(tax_info.NT.zscore, sort_column == 'nt_zscore', 1) }
