@@ -83,6 +83,7 @@ class PipelineSampleReads extends React.Component {
         report_details={this.reportInfo.report_details}
         taxonomy_details={this.reportInfo.taxonomy_details}
         report_page_params={this.reportInfo.report_page_params}
+        all_genera_in_sample={this.reportInfo.all_genera_in_sample}
         sample_id = {this.sampleId}
       />;
     } else {
