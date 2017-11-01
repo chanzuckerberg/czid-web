@@ -167,7 +167,7 @@ module ReportHelper
         return false unless status.exitstatus.zero?
       end
     end
-    return true
+    true
   end
 
   def report_details(report)
