@@ -15,6 +15,7 @@ class ReportsController < ApplicationController
     @report_details = report_info[:report_details]
     @taxonomy_details = report_info[:taxonomy_details]
     @report_page_params = report_info[:report_page_params]
+    @all_genera_in_sample = report_info[:all_genera_in_sample]
     @all_categories = report_info[:all_categories]
   end
 

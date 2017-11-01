@@ -35,7 +35,9 @@ module ReportHelper
     threshold_alignmentlength: 0.0,
     threshold_neglogevalue:    0.0,
     threshold_aggregatescore:  0.0,
-    excluded_categories: 'None'
+    excluded_categories: 'None',
+    selected_genus: 'None',
+    disable_filters: 0
   }.freeze
   IGNORED_PARAMS = [:controller, :action, :id].freeze
 
@@ -97,6 +99,11 @@ module ReportHelper
     nil
   end
 
+  ZERO_ONE = {
+    '0' => 0,
+    '1' => 1
+  }.freeze
+
   def valid_arg_value(name, value, all_cats)
     # return appropriately validated value (based on name), or nil
     return nil unless value
@@ -107,6 +114,11 @@ module ReportHelper
       value = nil unless decode_sort_by(value)
     elsif name == :excluded_categories
       value = validated_excluded_categories_or_nil(value, all_cats)
+    elsif name == :selected_genus
+      # This gets validated later in taxonomy_details()
+      value = value
+    elsif name == :disable_filters
+      value = ZERO_ONE[value]
     else
       value = nil unless threshold_param?(name)
       value = number_or_nil(value)
@@ -151,10 +163,10 @@ module ReportHelper
     all_cats = all_categories
     params = clean_params(params, all_cats)
     data = {}
-    data[:report_page_params] = params
     data[:report_details] = report_details(report)
-    data[:taxonomy_details] = taxonomy_details(report, params)
+    data[:taxonomy_details], data[:all_genera_in_sample] = taxonomy_details(report, params)
     data[:all_categories] = all_cats
+    data[:report_page_params] = params
     data
   end
 
@@ -511,9 +523,13 @@ module ReportHelper
 
     count_species_per_genus!(tax_2d)
 
-    # Compute aggregate scores
+    # Compute aggregate scores and all genera
+    all_genera = Set.new
     tax_2d.each do |_tax_id, tax_info|
-      next unless tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
+      unless tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
+        all_genera.add(tax_info['name'])
+        next
+      end
       species_info = tax_info
       genus_id = species_info['genus_taxid']
       genus_info = tax_2d[genus_id]
@@ -533,18 +549,23 @@ module ReportHelper
       rows << tax_info
     end
 
-    # t2 = Time.now
-    # logger.info "Sort key generation took #{t2 - t1} seconds."
-
     rows.sort! { |dl, dr| dl[:sort_key] <=> dr[:sort_key] }
 
-    # t3 = Time.now
-    # logger.info "Sorting took #{t3 - t2} seconds."
-
-    filter_rows!(rows, thresholds, excluded_categories)
-
-    # t4 = Time.now
-    # logger.info "Filtering took #{t4 - t3} seconds."
+    unless params[:disable_filters] == 1
+      if all_genera.include? params[:selected_genus]
+        # Apply only the genus filter.
+        rows.keep_if do |tax_info|
+          genus_taxid = tax_info['genus_taxid']
+          genus_name = tax_2d[genus_taxid]['name']
+          genus_name == params[:selected_genus]
+        end
+      else
+        # Rare case of param cleanup this deep...
+        params[:selected_genus] = DEFAULT_PARAMS[:selected_genus]
+        # Apply all but the genus filter.
+        filter_rows!(rows, thresholds, excluded_categories)
+      end
+    end
 
     real_length = rows.length
 
@@ -557,10 +578,12 @@ module ReportHelper
       end
     end
 
+    all_genera = all_genera.sort_by(&:downcase)
+
     t5 = Time.now.to_f
     logger.info "Data processing took #{t5 - t1} seconds (#{t5 - t0} with I/O)."
 
-    [real_length, rows]
+    [[real_length, rows], all_genera]
   end
 
   def get_tax_detail(tax_info, column_name)

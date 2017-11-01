@@ -5,10 +5,12 @@ class PipelineSampleReport extends React.Component {
     this.report_details = props.report_details;
     this.real_length = props.taxonomy_details[0];
     this.taxonomy_details = props.taxonomy_details[1];
+    this.all_genera_in_sample = props.all_genera_in_sample;
     this.all_categories = props.all_categories;
     this.applyViewLevel = this.applyViewLevel.bind(this);
     this.applyNewFilterThresholds = this.applyNewFilterThresholds.bind(this);
     this.applyExcludedCategories = this.applyExcludedCategories.bind(this);
+    this.applyGenusFilter = this.applyGenusFilter.bind(this);
   }
 
   refreshPage(overrides) {
@@ -17,7 +19,11 @@ class PipelineSampleReport extends React.Component {
   }
 
   applyViewLevel(view_level) {
-    this.refreshPage({view_level});
+    overrides = {view_level};
+    if (view_level == 'genus') {
+      overrides.selected_genus = 'None';
+    }
+    this.refreshPage(overrides);
   }
 
   // applySort needs to be bound at time of use, not in constructor above
@@ -39,6 +45,16 @@ class PipelineSampleReport extends React.Component {
       excluded_categories = excluded_categories + "," + category;
     }
     this.refreshPage({excluded_categories});
+  }
+
+  applyGenusFilter(selected_genus) {
+    overrides = {selected_genus};
+    if (selected_genus != 'None') {
+      overrides.view_level = 'species';
+    } else {
+      overrides.view_level = 'genus';
+    }
+    this.refreshPage(overrides);
   }
 
   render_name(tax_info, report_details) {
@@ -114,12 +130,14 @@ class PipelineSampleReport extends React.Component {
     report_filter =
       <ReportFilter
         all_categories = { this.all_categories }
+        all_genera_in_sample = {  this.all_genera_in_sample }
         background_model = { this.report_details.background_model.name }
         report_title = { this.report_details.report_info.name }
         report_page_params = { this.props.report_page_params }
         applyViewLevel = { this.applyViewLevel }
         applyNewFilterThresholds = { this.applyNewFilterThresholds }
         applyExcludedCategories = { this.applyExcludedCategories }
+        applyGenusFilter = { this.applyGenusFilter }
       />;
     // To do: improve presentation and place download_button somewhere on report page
     download_button = (
