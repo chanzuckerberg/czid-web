@@ -67,6 +67,49 @@
 					border-bottom: 1px solid rgba(160, 160, 160, 0.2);
 				}
 			}
+			#heat-map {
+				background: rgb(245, 245, 245);
+				svg {
+					path.domain {
+						display: none;
+					}
+					.tick {
+						line {
+							display: none;
+						}
+					}
+				}
+			}
+			.color-scale-info {
+				margin-top: 20px;
+				li{
+					display: inline-block;
+					width: 20px;
+					height: 20px;
+					border: 1px solid;
+					margin: 3px;
+
+					&.a {
+						background: #9E9E9E;
+					}
+
+					&.b {
+						background: #757575;
+					}
+
+					&.c {
+						background: #424242;
+					}
+					&.d {
+						background: #212121;
+					}
+					&.e {
+						background: #263238;
+					}
+				}
+			}
+
+
 		}
 		.Visualization-actions {
 			ul li {

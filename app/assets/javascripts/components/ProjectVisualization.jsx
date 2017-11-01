@@ -8,28 +8,215 @@ class ProjectVisualization extends React.Component {
     super(props);
     this.heatmapData = [{
       pathogen: 'Clavispora',
-      readInfo: [{ rpm: 0.045, rCount: 2, sample: 'MMC-4-102A_S7' }]
-    },{
-      pathogen: 'Clavispora',
-      readInfo: [{ rpm: 0.045, rCount: 2, sample: 'MMC-4-102A_S7' }]
-    },{
-      pathogen: 'Clavispora',
-      readInfo: [{ rpm: 0.045, rCount: 2, sample: 'MMC-4-102A_S7' }]
-    },{
-      pathogen: 'Clavispora',
-      readInfo: [{ rpm: 0.045, rCount: 2, sample: 'MMC-4-102A_S7' }]
+      readInfo: [{
+        rpm: 50.091,
+        rCount: 140,
+        sample: 'MMC-3--H2O_S6'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-4-102A_S7'
+      },{
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-5-102A_S8'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-6-102A_S9'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-7-102A_S10'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-8-102A_S11'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-9-102A_S12'
+      },{
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-10-102A_S13'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-11-102A_S14'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-12-102A_S15'
+      }]
     }, {
       pathogen: 'Spirometra',
-      readInfo: [{ rpm: 0.226, rCount: 10, sample: 'MMC-4-102A_S7' }]
+      readInfo: [{
+        rpm: 50.091,
+        rCount: 140,
+        sample: 'MMC-3--H2O_S6'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-4-102A_S7'
+      },{
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-5-102A_S8'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-6-102A_S9'
+      },{
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-8-102A_S11'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-9-102A_S12'
+      },{
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-10-102A_S13'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-11-102A_S14'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-12-102A_S15'
+      }]
     }, {
       pathogen: 'Klebsiella',
-      readInfo: [{ rpm: 0.181, rCount: 8, sample: 'MMC-4-102A_S7' }]
+      readInfo: [{
+        rpm: 50.091,
+        rCount: 140,
+        sample: 'MMC-3--H2O_S6'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-4-102A_S7'
+      },{
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-5-102A_S8'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-6-102A_S9'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-7-102A_S10'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-8-102A_S11'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-9-102A_S12'
+      },{
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-10-102A_S13'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-11-102A_S14'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-12-102A_S15'
+      }]
     }, {
       pathogen: 'Streptococcus',
-      readInfo: [{ rpm: 1.747, rCount: 77, sample: 'MMC-4-102A_S7' }]
+      readInfo: [{
+        rpm: 50.091,
+        rCount: 140,
+        sample: 'MMC-3--H2O_S6'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-4-102A_S7'
+      },{
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-5-102A_S8'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-6-102A_S9'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-7-102A_S10'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-8-102A_S11'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-9-102A_S12'
+      },{
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-10-102A_S13'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-11-102A_S14'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-12-102A_S15'
+      }]
     }, {
       pathogen: 'Ralstonia',
-      readInfo: [{ rpm: 0.045, rCount: 2, sample: 'MMC-4-102A_S7' }]
+      readInfo: [{
+        rpm: 50.091,
+        rCount: 140,
+        sample: 'MMC-3--H2O_S6'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-4-102A_S7'
+      },{
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-5-102A_S8'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-6-102A_S9'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-7-102A_S10'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-8-102A_S11'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-9-102A_S12'
+      },{
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-10-102A_S13'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-11-102A_S14'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-12-102A_S15'
+      }]
     }, {
       pathogen: 'Delftia',
       readInfo: [{
@@ -40,13 +227,48 @@ class ProjectVisualization extends React.Component {
         rpm: 0.181,
         rCount: 8,
         sample: 'MMC-4-102A_S7'
+      },{
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-5-102A_S8'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-6-102A_S9'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-7-102A_S10'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-8-102A_S11'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-9-102A_S12'
+      },{
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-10-102A_S13'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-11-102A_S14'
+      }, {
+        rpm: 0.181,
+        rCount: 8,
+        sample: 'MMC-12-102A_S15'
       }]
     }];
-
     const a = this.heatmapData.map(d => d.readInfo.length);
     this.totalPathogens = a.reduce((total, val) => total + val);
+    console.log('TOTAL pathogens', this.totalPathogens);
     this.temp = new Array(this.totalPathogens);
-    this.samples = ['MMC-4-102A_S7', 'MMC-3--H2O_S6', 'MMC-5-102A_S8', 'MMC-5-102A_S8', 'MMC-5-102A_S8', 'MMC-5-102A_S8', 'MMC-5-102A_S8', 'MMC-5-102A_S8', 'MMC-5-102A_S8', 'MMC-5-102A_S8', 'MMC-5-102A_S8', 'MMC-5-102A_S8'];
+    this.samples = ['MMC-4-102A_S7', 'MMC-3--H2O_S6',
+    'MMC-5-102A_S8', 'MMC-6-102A_S9', 'MMC-7-102A_S10',
+    'MMC-8-102A_S11', 'MMC-9-102A_S12', 'MMC-10-102A_S13',
+    'MMC-11-102A_S14', 'MMC-12-102A_S15'];
     //
   }
 	componentDidMount() {
@@ -93,8 +315,8 @@ class ProjectVisualization extends React.Component {
 						<li>
 							<div className='row'>
 								<div className='pathogen-label col s10'>
-									<input id='Azospira' className='filled-in' type="checkbox" defaultChecked={false} />
-									<label htmlFor='Azospira'>Azospira</label>
+									<input id='Delftia' className='filled-in' type="checkbox" defaultChecked={true} />
+									<label htmlFor='Delftia'>Delftia</label>
 								</div>
 								<div className='remove-icon right col center s2'>
 									<i className='fa fa-times'></i>
@@ -104,7 +326,7 @@ class ProjectVisualization extends React.Component {
 						<li>
 							<div className='row'>
 								<div className='pathogen-label col s10'>
-									<input id='Ralstonia' className='filled-in' type="checkbox" defaultChecked={false} />
+									<input id='Ralstonia' className='filled-in' type="checkbox" defaultChecked={true} />
 									<label htmlFor='Ralstonia'>Ralstonia</label>
 								</div>
 								<div className='remove-icon right col center s2'>
@@ -115,14 +337,47 @@ class ProjectVisualization extends React.Component {
 						<li>
 							<div className='row'>
 								<div className='pathogen-label col s10'>
-									<input id='Methylobacterium' className='filled-in' type="checkbox" defaultChecked={false} />
-									<label htmlFor='Methylobacterium'>Methylobacterium</label>
+									<input id='Streptococcus' className='filled-in' type="checkbox" defaultChecked={true} />
+									<label htmlFor='Streptococcus'>Streptococcus</label>
 								</div>
 								<div className='remove-icon right col center s2'>
 									<i className='fa fa-times'></i>
 								</div>
 							</div>
 						</li>
+                  <li>
+                    <div className='row'>
+                      <div className='pathogen-label col s10'>
+                        <input id='Klebsiella' className='filled-in' type="checkbox" defaultChecked={true} />
+                        <label htmlFor='Klebsiella'>Klebsiella</label>
+                      </div>
+                      <div className='remove-icon right col center s2'>
+                        <i className='fa fa-times'></i>
+                      </div>
+                    </div>
+                  </li>
+                  <li>
+                    <div className='row'>
+                      <div className='pathogen-label col s10'>
+                        <input id='Klebsiella' className='filled-in' type="checkbox" defaultChecked={true} />
+                        <label htmlFor='Klebsiella'>Spirometra</label>
+                      </div>
+                      <div className='remove-icon right col center s2'>
+                        <i className='fa fa-times'></i>
+                      </div>
+                    </div>
+                  </li>
+                  <li>
+                    <div className='row'>
+                      <div className='pathogen-label col s10'>
+                        <input id='Klebsiella' className='filled-in' type="checkbox" defaultChecked={true} />
+                        <label htmlFor='Klebsiella'>Clavispora</label>
+                      </div>
+                      <div className='remove-icon right col center s2'>
+                        <i className='fa fa-times'></i>
+                      </div>
+                    </div>
+                  </li>
 					</ul>
 				</div>
 			</div>
@@ -181,7 +436,34 @@ class ProjectVisualization extends React.Component {
                 <i className="fa fa-chevron-up card-collapse right"></i>
               </div>
               <div className="card-content">
-                <div id="heat-map"></div>
+                <div className='row'>
+                  <div className='col s9' id="heat-map"></div>
+                   <div className='col s3'>
+                      <div className='select-focus'>
+                        Visualize <select className='browser-default'>
+                          <option>
+                            Rpm
+                          </option>
+                          <option>
+                            R count
+                          </option>
+                          <option>
+                            zscore
+                          </option>
+                        </select>
+                      </div>
+                      <div className='color-scale-info'>
+                        Color Scale
+                        <ul>
+                          <li className='a'></li>
+                          <li className='b'></li>
+                          <li className='c'></li>
+                          <li className='d'></li>
+                          <li className='e'></li>
+                        </ul>
+                      </div>
+                   </div>
+                </div>
               </div>
             </div>
 
@@ -208,9 +490,9 @@ class ProjectVisualization extends React.Component {
   }
 
   renderHeatMap() {
-    const canvas = { width: 400, height: 400, minHeigth: 400 };
+    const canvas = { width: 800, height: 600, minHeigth: 400 };
     const svg = d3.select('#heat-map').append('svg');
-    const margin = { top: 50, right: 10, bottom: 100, left: 60 };
+    const margin = { top: 50, right: 35, bottom: 200, left: 80 };
     const xMargin = { left: margin.left + 10, right: margin.right + 10 };
     const dataLength = this.heatmapData.length;
     const totalSamples = this.samples.length;
@@ -219,9 +501,6 @@ class ProjectVisualization extends React.Component {
       (canvas.height - margin.top - margin.bottom) / dataLength;
     const rectWidth =
       (canvas.width - xMargin.left - xMargin.right) / totalSamples;
-
-    const colorGridSize = 30;
-
 
     svg
       .attr('width', canvas.width)
@@ -237,7 +516,7 @@ class ProjectVisualization extends React.Component {
     const xScale = d3
       .scaleLinear()
       .domain([1, totalSamples])
-      .range([xMargin.left, canvas.width - xMargin.right]);
+      .range([xMargin.left, canvas.width - xMargin.right - 20]);
 
     const rectHeightScale = d3
       .scaleLinear()
@@ -265,33 +544,44 @@ class ProjectVisualization extends React.Component {
       .attr('transform', 'rotate(50)');
 
     svg.append('g')
-      .attr('transform', `translate(${[0, (canvas.height - margin.bottom) + rectHeight]})`)
+      .attr('transform', `translate(${[25, (canvas.height - margin.bottom) + rectHeight]})`)
       .call(xAxis)
       .selectAll('text')
       .attr('text-anchor', 'start')
       .attr('transform', `rotate(60)`);
 
-    svg
-      .append('g')
-      .selectAll('rect')
-      .data(this.heatmapData)
-      .enter().append('rect')
-      .attr('height', rectHeight)
-      .attr('width', rectWidth)
-      .attr('x', (d, i) => {
-        let sampleName = d.readInfo[0].sample;
-        let pos = this.samples.indexOf(sampleName);
-        if (pos >= 0) {
-          return xScale(pos + 1);
-        } else {
-          console.log('No sample found for pathogen');
-        }
-      })
-      .attr('y', (d, i) => {
-        console.log(i + 1);
-        return yScale(i + 1) - 30;
-      })
-      .attr('fill', '#c7c6c6')
-      .attr('stroke', '#fff');
+    //let readInfo;
+    this.heatmapData.map((pathogen, i) => {
+      let { readInfo } = pathogen;
+      console.log('Read info', readInfo);
+      svg
+        .append('g')
+        .selectAll('rect')
+        .data(readInfo)
+        .enter()
+        .append('rect')
+        .attr('height', rectHeight)
+        .attr('width', rectWidth)
+        .attr('fill', (d, i) => {
+          if (i < 1) {
+            return '#c7c6c6';
+          }
+          return (i % 2 === 0) ? ((i % 3 === 0) ? '#9E9E9E' : '#757575') : '#424242';
+        })
+        .attr('stroke', '#fff')
+        .attr('y', () => yScale(i + 1) - 30)
+        .attr('x', (d, index) => {
+          console.log('Rectangles', d, 'Pos', index);
+          let sampleName = readInfo[index].sample;
+          let pos = this.samples.indexOf(sampleName);
+          if (pos >= 0) {
+            return xScale(pos + 1);
+          }
+        })
+        .append('title')
+        .text((data, i) => {
+          return `RPM: ${data.rpm} R count: ${data.rCount}`;
+        });
+      });
   }
 }
