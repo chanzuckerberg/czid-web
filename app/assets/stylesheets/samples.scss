@@ -245,7 +245,13 @@ $break-large: 1070px;
       font-size: 9px;
       color: #4a91cc;
     }
-
+    .header {
+      border-bottom: 1px solid #646464;
+      .sample-title {
+        padding-left: 0px;
+      }
+    }
+    
   }
   .login-wrapper {
     background-color: #A2A1BF;
@@ -262,6 +268,11 @@ $break-large: 1070px;
   .field-row {
     margin-top: 0;
     margin-bottom: 0;
+    .sample-names {
+      margin: 0;
+      padding-top: 9px;
+      padding-left: 0;
+    } 
   }
   .genome-list {
     margin-top: 16px;
@@ -294,6 +305,13 @@ $break-large: 1070px;
   }
   .success-info {
     width: 40%;
+  }
+  .sample-row {
+    
+    .select-wrapper input.select-dropdown {
+      margin: 0;
+      border-bottom: 0;
+    }
   }
 
 
