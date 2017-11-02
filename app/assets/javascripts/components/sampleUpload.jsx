@@ -29,7 +29,8 @@ class SampleUpload extends React.Component {
       memory: this.sample.sample_memory || '',
       id: this.sample.id || '',
       inputFiles: props.inputFiles && props.inputFiles.length ? props.inputFiles : [],
-      projectId: this.project ? this.project.id : null
+      projectId: this.project ? this.project.id : null,
+      status: this.sample.status
     };
     this.state = {
       allProjects: this.projects || [],
@@ -163,7 +164,8 @@ class SampleUpload extends React.Component {
         job_queue: this.state.job_queue,
         sample_memory: this.state.memory,
         host_genome_id: this.state.hostId,
-        host_genome_name: this.state.hostName
+        host_genome_name: this.state.hostName,
+        status: ''
       },
       authenticity_token: this.csrf
     })
@@ -196,7 +198,8 @@ class SampleUpload extends React.Component {
         job_queue: this.state.selectedJobQueue,
         sample_memory: this.state.selectedMemory,
         host_genome_id: this.state.selectedHostGenomeId,
-        host_genome_name: this.state.selectedHostGenome
+        host_genome_name: this.state.selectedHostGenome,
+        status: this.selectedSample.status
       },
       authenticity_token: this.csrf
     })
