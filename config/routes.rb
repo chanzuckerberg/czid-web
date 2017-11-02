@@ -31,4 +31,6 @@ Rails.application.routes.draw do
   get 'reports/:id/:view_level/csv', to: 'reports#send_report_csv'
   post 'gsnapl_machines', to: 'gsnapl_machines#create'
   get 'gsnapl_machines', to: 'gsnapl_machines#index'
+  post 'gsnapl_runs', to: 'gsnapl_runs#create'
+  get 'gsnapl_runs', to: 'gsnapl_runs#index'
 end

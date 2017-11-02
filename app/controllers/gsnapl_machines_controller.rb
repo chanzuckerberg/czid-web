@@ -4,16 +4,7 @@ class GsnaplMachinesController < ApplicationController
   def create
     @gsnapl_machine = GsnaplMachine.create(gsnapl_machine_params)
     # To do: check there's actually an instance at the IP (or other security checks)
-
-    respond_to do |format|
-      if @gsnapl_machine.save
-        format.html
-        format.json { render json: @gsnapl_machine.to_json, status: :created }
-      else
-        format.html
-        format.json { render json: @gsnapl_machine.errors, status: :unprocessable_entity }
-      end
-    end
+    @gsnapl_machine.save
   end
 
   def index

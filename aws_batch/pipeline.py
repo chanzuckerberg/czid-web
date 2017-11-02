@@ -508,6 +508,11 @@ def wait_for_server_ip(service_name, key_path, remote_username, idseq_web, max_c
                   (service_name, min_nproc, wait_seconds)
             time.sleep(wait_seconds)
 
+def register_gsnapl_run(aws_batch_job_id, gsnapl_instance_ip, idseq_web):
+    command = "curl -H \"Content-Type: application/json\" -X POST -d '{\"aws_batch_job_id\":\"%s\",\"gsnapl_machine_ip\":\"%s\"}' %s/gsnapl_runs" % \
+              (aws_batch_job_id, gsnapl_instance_ip, idseq_web)
+    return subprocess.check_output(command, shell=True)
+
 '''
 def wait_for_server_cpu(service_name, idseq_web, max_cpu_util):
     while True:
@@ -702,7 +707,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         "after_file_type": "m8"})
     run_and_log(logparams, run_gsnapl_remotely,
         sample_name, EXTRACT_UNMAPPED_FROM_SAM_OUT1, EXTRACT_UNMAPPED_FROM_SAM_OUT2,
-        gsnap_ssh_key_s3_path, environment,
+        gsnap_ssh_key_s3_path, environment, aws_batch_job_id,
         result_dir, sample_s3_output_path, lazy_run)
 
     # run_annotate_gsnapl_m8_with_taxids
@@ -983,7 +988,7 @@ def run_bowtie2(sample_name, input_fa_1, input_fa_2, bowtie_genome_s3_path,
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT3, sample_s3_output_path))
 
 def run_gsnapl_remotely(sample, input_fa_1, input_fa_2,
-                        gsnap_ssh_key_s3_path, environment,
+                        gsnap_ssh_key_s3_path, environment, aws_batch_job_id,
                         result_dir, sample_s3_output_path, lazy_run):
     if lazy_run:
         # check if output already exists
@@ -1019,6 +1024,7 @@ def run_gsnapl_remotely(sample, input_fa_1, input_fa_2,
     logging.getLogger().info("waiting for server")
     gsnapl_instance_ip = wait_for_server_ip('GSNAPL', key_path, remote_username, idseq_web, GSNAPL_MAX_CONCURRENT)
     logging.getLogger().info("starting alignment on machine " + gsnapl_instance_ip)
+    register_gsnapl_run(aws_batch_job_id, gsnapl_instance_ip, idseq_web)
     remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, gsnapl_instance_ip, commands)
     execute_command(remote_command)
     # move gsnapl output back to local
