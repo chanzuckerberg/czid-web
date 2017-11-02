@@ -498,7 +498,7 @@ def wait_for_server_cpu(service_name, idseq_web, max_cpu_util):
             ip_cpu_dict[ip] = cpu_util
         min_util_ip, min_cpu_util = min(ip_cpu_dict, key=ip_cpu_dict.get)
         if min_cpu_util <= max_cpu_util:
-            print "%s server has capacity. Kicking off " % service_name
+            print "%s server %s has capacity. Kicking off " % (service_name, min_util_ip)
             return min_util_ip
         else:
             wait_seconds = random.randint(30, 60)
