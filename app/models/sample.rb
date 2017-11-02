@@ -20,6 +20,8 @@ class Sample < ApplicationRecord
   DEFAULT_MEMORY = 64_000
   DEFAULT_QUEUE = 'aegea_batch_ondemand'.freeze
 
+  attr_accessor :bulk_mode
+
   belongs_to :project
   belongs_to :host_genome, optional: true
   has_many :pipeline_outputs, dependent: :destroy
@@ -31,6 +33,17 @@ class Sample < ApplicationRecord
   after_create :initiate_input_file_upload
 
   before_save :check_host_genome, :check_status
+
+
+  # getter
+   def bulk_mode
+     @bulk_mode
+   end
+
+   # setter
+   def bulk_mode=(val)
+     @bulk_mode = val
+   end
 
   def sample_path
     File.join('samples', project.id.to_s, id.to_s)
