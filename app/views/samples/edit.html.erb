@@ -1,2 +1,1 @@
-<%= react_component 'SampleUpload', {selectedSample: @sample, projectInfo: @project_info, host_genomes: @host_genomes, projects: @projects, csrf: form_authenticity_token, inputFiles: @input_files }%>
-
+<%= react_component 'SampleUpload', {selectedSample: @sample, projectInfo: @project_info, host_genomes: @host_genomes, projects: @projects, csrf: form_authenticity_token, inputFiles: @input_files, loggedin_user: current_user }%>

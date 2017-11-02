@@ -17,7 +17,8 @@ class SampleUpload extends React.Component {
     this.hostGenomes = props.host_genomes || [];
     this.hostName = this.hostGenomes.length ? this.hostGenomes[0].name : '';
     this.hostId = this.hostGenomes.length ? this.hostGenomes[0].id : null;
-    this.sample = props.selectedSample || ''
+    this.sample = props.selectedSample || '';
+    this.userDetails = props.loggedin_user;
     this.selectedSample = {
       name: this.sample.name || '',
       hostGenome: this.sample.host_genome_name || '',
@@ -28,8 +29,9 @@ class SampleUpload extends React.Component {
       memory: this.sample.sample_memory || '',
       id: this.sample.id || '',
       inputFiles: props.inputFiles && props.inputFiles.length ? props.inputFiles : [],
-      projectId: this.project ? this.project.id : null
-    }
+      projectId: this.project ? this.project.id : null,
+      status: this.sample.status
+    };
     this.state = {
       allProjects: this.projects || [],
       hostGenomes: this.hostGenomes || [],
@@ -41,8 +43,9 @@ class SampleUpload extends React.Component {
       successMessage: '',
       project: 'Select a Project',
       projectId: null,
-      job_queue: null,
-      memory: null,
+      job_queue: '',
+      memory: '',
+      serverErrors: [],
       selectedName: this.selectedSample.name || '',
       selectedHostGenome: this.selectedSample.hostGenome || '',
       selectedHostGenomeId: this.selectedSample.hostGenomeId || null,
@@ -54,7 +57,7 @@ class SampleUpload extends React.Component {
       id: this.selectedSample.id,
       firstInput: this.selectedSample.inputFiles.length && this.selectedSample.inputFiles[0] ? (this.selectedSample.inputFiles[0].source === null ? '' : this.selectedSample.inputFiles[0].source) : '',
       secondInput: this.selectedSample.inputFiles.length && this.selectedSample.inputFiles[1] ? (this.selectedSample.inputFiles[1].source === null ? '' : this.selectedSample.inputFiles[1].source) : '',
-    }
+    };
   }
 
   componentDidMount() {
@@ -128,9 +131,10 @@ class SampleUpload extends React.Component {
       });
     })
     .catch((error) => {
+      console.log(error.response, 'error');
       that.setState({
         invalid: true,
-        errorMessage: 'Project exists already or is invalid'
+        errorMessage: 'Project exists already or is invalid',
       })
     });
   }
@@ -161,24 +165,24 @@ class SampleUpload extends React.Component {
         sample_memory: this.state.memory,
         host_genome_id: this.state.hostId,
         host_genome_name: this.state.hostName,
-        status: 'created'
+        status: ''
       },
       authenticity_token: this.csrf
     })
-    .then(function (response) {
+    .then((response) => {
       that.setState({
         success: true,
         successMessage: 'Sample created successfully'
       });
       setTimeout(() => {
-        that.gotoPage(`/samples/${that.state.id}`);
+        that.gotoPage(`/samples/${response.data.id}`);
       }, 2000)
     })
     .catch(function (error) {
-     that.setState({
-      invalid: true,
-       errorMessage: JSON.stringify(error.response.data)
-     })
+      that.setState({
+        invalid: true,
+        serverErrors: error.response.data,
+      })
     });
   }
 
@@ -195,11 +199,11 @@ class SampleUpload extends React.Component {
         sample_memory: this.state.selectedMemory,
         host_genome_id: this.state.selectedHostGenomeId,
         host_genome_name: this.state.selectedHostGenome,
-        status: 'created'
+        status: this.selectedSample.status
       },
       authenticity_token: this.csrf
     })
-    .then(function (response) {
+    .then((response) => {
       that.setState({
         success: true,
         successMessage: 'Sample updated successfully'
@@ -211,7 +215,7 @@ class SampleUpload extends React.Component {
     .catch(function (error) {
      that.setState({
       invalid: true,
-       errorMessage: 'Failed to update sample'
+      serverErrors: error.response.data,
      });
     });
   }
@@ -360,6 +364,16 @@ class SampleUpload extends React.Component {
     })
   }
 
+  displayError(failedStatus, serverError, formattedError) {
+    if (failedStatus) {
+      return serverError.length ? serverError.map((error, i) => {
+        return <p className="error center-align" key={i}>{error}</p>
+      }) : <span>{formattedError}</span>
+    } else {
+      return null
+    }
+  }
+
   renderUpdateForm() {
     return (
       <div className="form-wrapper">
@@ -367,14 +381,11 @@ class SampleUpload extends React.Component {
           <div className="row title">
             <p className="col s6 signup">Sample Update</p>
           </div>
-          { this.state.success ? <div className="success-info" >
-                <i className="fa fa-success"></i>
-                 <span>{this.state.successMessage}</span>
-                </div> : null }
-              { this.state.invalid ? <div className="error-info" >
-                  <i className="fa fa-error"></i>
-                  <span>{this.state.errorMessage}</span>
-              </div> : null }
+          {this.state.success ? <div className="success-info" >
+            <i className="fa fa-success"></i>
+              <span>{this.state.successMessage}</span>
+            </div> : null }
+          <div className={this.state.invalid ? 'error-info' : ''} >{ this.displayError(this.state.invalid, this.state.serverErrors, this.state.errorMessage) }</div>
           <div className="row content-wrapper">
             <div className="row field-row">
               <div className="col s6 input-field name">
@@ -423,21 +434,21 @@ class SampleUpload extends React.Component {
                 <label htmlFor="sample_second_file_source">Read 2 fastq s3 path</label>
               </div>
               <div className="row field-row">
-                <div className="col s4 input-field">
+                <div className={ this.userDetails.admin ? "col s4 input-field" : "col s12 input-field"}>
                   <i className="sample fa fa-folder" aria-hidden="true"></i>
                   <input ref= "s3_preload_result_path" type="text" className="no-edit" onChange={ this.handleResultChange }  onFocus={ this.clearError } readOnly placeholder="Optional" value={ this.state.selectedResultPath }/>
                   <label htmlFor="sample_s3_preload_result_path">Preload results path (s3 only)</label>
                 </div>
-                <div className="col s4 input-field">
+                { this.userDetails.admin ? <div className="col s4 input-field">
                   <i className="sample fa fa-file" aria-hidden="true"></i>
                   <input ref= "job_queue" type="text" className="" onFocus={ this.clearError } placeholder="Optional" value={this.state.selectedJobQueue} onChange={ this.handleQueueChange } />
                   <label htmlFor="sample_job_queue">Job queue</label>
-                </div>
-                <div className="col s4 input-field">
+                </div> : null }
+                { this.userDetails.admin ? <div className="col s4 input-field">
                   <i className="sample fa fa-file" aria-hidden="true"></i>
                   <input ref= "memory" type="text" className="" value={this.state.selectedMemory} onFocus={ this.clearError } placeholder="Optional" onChange={ this.handleMemoryChange } />
                   <label htmlFor="sample_memory">Sample memory (in mbs)</label>
-                </div>
+                </div> : null }
             </div>
         </div>
         <input className="hidden" type="submit"/>
@@ -458,10 +469,7 @@ class SampleUpload extends React.Component {
                 <i className="fa fa-success"></i>
                  <span>{this.state.successMessage}</span>
                 </div> : null }
-              { this.state.invalid ? <div className="error-info" >
-                  <i className="fa fa-error"></i>
-                  <span>{this.state.errorMessage}</span>
-              </div> : null }
+          <div className={this.state.invalid ? 'error-info' : ''} >{ this.displayError(this.state.invalid, this.state.serverErrors, this.state.errorMessage) }</div>
           <div className="row content-wrapper">
             <div className="row field-row">
               <div className="col s6 input-field name">
@@ -512,22 +520,22 @@ class SampleUpload extends React.Component {
                 <label htmlFor="sample_second_file_source">Read 2 fastq s3 path</label>
               </div>
               <div className="row field-row">
-                <div className="col s4 input-field">
+                <div className={ this.userDetails.admin ? "col s4 input-field" :  "col s12 input-field" }>
                   <i className="sample fa fa-folder" aria-hidden="true"></i>
                   <input ref= "s3_preload_result_path" type="text" className="path" onFocus={ this.clearError } placeholder="Optional" />
                   <span className="path_label">Example: s3://yunfang-workdir/id-rr004/RR004_water_2_S23/</span>
                   <label htmlFor="sample_s3_preload_result_path">Preload results path (s3 only)</label>
                 </div>
-                <div className="col s4 input-field">
+                { this.userDetails.admin ? <div className="col s4 input-field">
                   <i className="sample fa fa-file" aria-hidden="true"></i>
                   <input ref= "job_queue" type="text" className="" onFocus={ this.clearError } placeholder="Optional" value={this.state.job_queue} onChange={ this.handleQueueChange } />
                   <label htmlFor="sample_job_queue">Job queue</label>
-                </div>
-                <div className="col s4 input-field">
+                </div> : null }
+                { this.userDetails.admin ? <div className="col s4 input-field">
                   <i className="sample fa fa-file" aria-hidden="true"></i>
                   <input ref= "memory" type="text" className="" value={this.state.memory} onFocus={ this.clearError } placeholder="Optional" onChange={ this.handleMemoryChange } />
                   <label htmlFor="sample_memory">Sample memory (in mbs)</label>
-                </div>
+                </div> : null }
             </div>
         </div>
         <input className="hidden" type="submit"/>
