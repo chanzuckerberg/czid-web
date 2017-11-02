@@ -163,8 +163,7 @@ class SampleUpload extends React.Component {
         job_queue: this.state.job_queue,
         sample_memory: this.state.memory,
         host_genome_id: this.state.hostId,
-        host_genome_name: this.state.hostName,
-        status: ''
+        host_genome_name: this.state.hostName
       },
       authenticity_token: this.csrf
     })
@@ -197,8 +196,7 @@ class SampleUpload extends React.Component {
         job_queue: this.state.selectedJobQueue,
         sample_memory: this.state.selectedMemory,
         host_genome_id: this.state.selectedHostGenomeId,
-        host_genome_name: this.state.selectedHostGenome,
-        status: ''
+        host_genome_name: this.state.selectedHostGenome
       },
       authenticity_token: this.csrf
     })
