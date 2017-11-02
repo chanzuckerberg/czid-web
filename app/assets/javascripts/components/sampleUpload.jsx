@@ -42,8 +42,8 @@ class SampleUpload extends React.Component {
       successMessage: '',
       project: 'Select a Project',
       projectId: null,
-      job_queue: 'aegea_batch',
-      memory: 64000,
+      job_queue: '',
+      memory: '',
       serverErrors: [],
       selectedName: this.selectedSample.name || '',
       selectedHostGenome: this.selectedSample.hostGenome || '',
@@ -174,7 +174,7 @@ class SampleUpload extends React.Component {
         successMessage: 'Sample created successfully'
       });
       setTimeout(() => {
-        that.gotoPage(`/samples/${that.state.id}`);
+        that.gotoPage(`/samples/${response.data.id}`);
       }, 2000)
     })
     .catch(function (error) {

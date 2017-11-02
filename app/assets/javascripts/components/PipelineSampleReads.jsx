@@ -28,7 +28,7 @@ class PipelineSampleReads extends React.Component {
   shouldProcessPipeline(status) {
     if (status === null || this.state.rerun === true ) {
       return true;
-    } else if ( status === 'ERROR') {
+    } else if ( status === 'ERROR' || status === 'CHECKED' || status === 'FAILED') {
       return false;
     } else { 
       return null;

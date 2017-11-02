@@ -65,7 +65,9 @@ class SamplesController < ApplicationController
   # GET /samples/1.json
 
   def show
-    @pipeline_output = @sample.pipeline_runs.first ? @sample.pipeline_runs.first.pipeline_output : nil
+    first_pipeline_run = @sample.pipeline_runs.first ? @sample.pipeline_runs.first : nil
+    @pipeline_output = first_pipeline_run ? first_pipeline_run.pipeline_output : nil
+    @sample_status = first_pipeline_run ? first_pipeline_run.job_status : nil
     @job_stats = @pipeline_output ? @pipeline_output.job_stats : nil
     @summary_stats = @job_stats ? get_summary_stats(@job_stats) : nil
     @project_info = @sample.project ? @sample.project : nil
