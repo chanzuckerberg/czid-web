@@ -33,6 +33,7 @@ class SampleUpload extends React.Component {
       status: this.sample.status
     };
     this.state = {
+      submitting: false,
       allProjects: this.projects || [],
       hostGenomes: this.hostGenomes || [],
       hostName: this.hostName,
@@ -68,6 +69,7 @@ class SampleUpload extends React.Component {
 
   handleUpload(e) {
     e.preventDefault();
+    e.target.disabled = true;
     this.clearError();
     if(!this.isFormInvalid()) {
       this.createSample()
@@ -76,6 +78,7 @@ class SampleUpload extends React.Component {
 
   handleUpdate(e) {
     e.preventDefault();
+    e.target.disabled = true;
     this.clearError();
     if(!this.isUpdateFormInvalid()) {
       this.updateSample()
@@ -153,6 +156,9 @@ class SampleUpload extends React.Component {
 
   createSample() {
     var that = this;
+    that.setState({
+      submitting: true
+    })
     axios.post('/samples.json', {
       sample: {
         name: this.refs.name.value.trim(),
@@ -172,6 +178,7 @@ class SampleUpload extends React.Component {
     .then((response) => {
       that.setState({
         success: true,
+        submitting: false,
         successMessage: 'Sample created successfully'
       });
       setTimeout(() => {
@@ -189,6 +196,9 @@ class SampleUpload extends React.Component {
 
   updateSample() {
     var that = this;
+    that.setState({
+      submitting: true
+    })
     axios.put(`/samples/${this.state.id}.json`, {
       sample: {
         name: this.state.selectedName,
@@ -206,6 +216,7 @@ class SampleUpload extends React.Component {
     .then((response) => {
       that.setState({
         success: true,
+        submitting: false,
         successMessage: 'Sample updated successfully'
       });
       setTimeout(() => {
@@ -214,6 +225,7 @@ class SampleUpload extends React.Component {
     })
     .catch(function (error) {
      that.setState({
+      submitting: false,
       invalid: true,
       serverErrors: error.response.data,
      });
@@ -452,7 +464,7 @@ class SampleUpload extends React.Component {
             </div>
         </div>
         <input className="hidden" type="submit"/>
-        <div onClick={ this.handleUpdate } className="center login-wrapper">Submit</div>
+        <div onClick={ this.handleUpdate } className="center login-wrapper">{ !this.state.submitting ? 'Submit' : <i className='fa fa-spinner fa-spin fa-lg'></i>}</div>
       </form>
     </div>
     )
@@ -539,7 +551,7 @@ class SampleUpload extends React.Component {
             </div>
         </div>
         <input className="hidden" type="submit"/>
-        <div onClick={ this.handleUpload } className="center login-wrapper">Submit</div>
+        <div onClick={ this.handleUpload } className="center login-wrapper">{ !this.state.submitting ? 'Submit' : <i className='fa fa-spinner fa-spin fa-lg'></i>}</div>
       </form>
     </div>
     )
