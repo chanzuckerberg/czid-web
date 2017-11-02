@@ -967,7 +967,12 @@ def run_gsnapl_remotely(sample, input_fa_1, input_fa_2,
     commands += "aws s3 cp %s/%s %s/;" % \
                  (remote_work_dir, GSNAPL_OUT, sample_s3_output_path)
     # check if remote machins has enough capacity
-    check_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "ps aux|grep gsnapl|grep -v bash"' % (key_path, remote_username, GSNAPL_INSTANCE_IP)
+    get_metrics_command = "aws cloudwatch get-metric-statistics --metric-name CPUUtilization --namespace AWS/EC2 --dimensions Name=InstanceId,Value=%s --statistics Maximum --start-time=\"$(TZ='UTC+0:1' date)\" --end-time=\"$(date)\" --period 60" % GSNAPL_INSTANCE_IP
+    metric_json = json.loads(execute_command(get_metrics_command))
+    # example: {"Datapoints": [{"Timestamp": "2017-11-02T00:38:00Z","Maximum": 19.35,"Unit": "Percent"}], "Label": "CPUUtilization"}
+    cpu_util = metric_json["Datapoints"][0]["Maximum"]
+    # move the above to a function: wait_for_server_cpu( GSNAPL_MAX_CPU)
+
     logging.getLogger().info("waiting for server")
     wait_for_server('GSNAPL', check_command, GSNAPL_MAX_CONCURRENT)
     logging.getLogger().info("starting alignment")
