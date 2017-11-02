@@ -36,8 +36,7 @@ GSNAPL_INSTANCE_IP = '34.211.67.166'
 RAPSEARCH2_INSTANCE_IP = '54.191.193.210'
 IDSEQ_WEB = 'http://idseq.net'
 
-GSNAPL_MAX_CPU_UTIL = 80
-GSNAPL_MAX_CONCURRENT = 5
+GSNAPL_MAX_CONCURRENT = 10
 RAPSEARCH2_MAX_CONCURRENT = 5
 
 STAR_GENOME = 's3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz'
@@ -485,6 +484,25 @@ def wait_for_server(service_name, command, max_concurrent):
                   (service_name, len(output), wait_seconds)
             time.sleep(wait_seconds)
 
+def wait_for_server_ip(service_name, key_path, remote_username, idseq_web, max_concurrent):
+    while True:
+        gsnapl_instance_ips = subprocess.check_output("curl %s/gsnapl_ips" % IDSEQ_WEB).split(",")
+        ip_nproc_dict = {}
+        for ip in gsnapl_instance_ips:
+            command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "ps aux|grep gsnapl|grep -v bash"' % (key_path, remote_username, ip)
+            output = execute_command(command).rstrip().split("\n")
+            ip_nproc_dict[ip] = len(output)
+        min_nproc_ip, min_nproc = min(ip_nproc_dict, key=ip_nproc_dict.get)
+        if min_nproc <= max_concurrent:
+            print "%s server %s has capacity. Kicking off " % (service_name, min_nproc_ip)
+            return min_nproc_ip
+        else:
+            wait_seconds = random.randint(30, 60)
+            print "%s servers busy. Smallest number of running processes is %f. Wait for %d seconds" % \
+                  (service_name, min_nproc, wait_seconds)
+            time.sleep(wait_seconds)
+
+'''
 def wait_for_server_cpu(service_name, idseq_web, max_cpu_util):
     while True:
         gsnapl_instance_ips = subprocess.check_output("curl %s/gsnapl_ips" % IDSEQ_WEB).split(",")
@@ -505,6 +523,7 @@ def wait_for_server_cpu(service_name, idseq_web, max_cpu_util):
             print "%s servers busy. Smallest CPU utilization is %f. Wait for %d seconds" % \
                   (service_name, min_cpu_util, wait_seconds)
             time.sleep(wait_seconds)
+'''
 
 class TimeFilter(logging.Filter):
     def filter(self, record):
@@ -991,7 +1010,7 @@ def run_gsnapl_remotely(sample, input_fa_1, input_fa_2,
                  (remote_work_dir, GSNAPL_OUT, sample_s3_output_path)
     # check if remote machins has enough capacity
     logging.getLogger().info("waiting for server")
-    gsnapl_instance_ip = wait_for_server_cpu('GSNAPL', idseq_web, GSNAPL_MAX_CPU_UTIL)
+    gsnapl_instance_ip = wait_for_server_ip('GSNAPL', key_path, remote_username, idseq_web, GSNAPL_MAX_CONCURRENT)
     logging.getLogger().info("starting alignment on machine " + gsnapl_instance_ip)
     remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, gsnapl_instance_ip, commands)
     execute_command(remote_command)

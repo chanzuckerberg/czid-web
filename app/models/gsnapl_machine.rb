@@ -1,0 +1,2 @@
+class GsnaplMachine < ApplicationRecord
+end
