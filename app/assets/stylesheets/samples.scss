@@ -218,6 +218,9 @@ $break-large: 1070px;
       float: right;
       padding-top: 20px;
     }
+    .all {
+      padding: 0;
+    }
     .project-input {
       margin-top: 50px;
     }
@@ -249,6 +252,9 @@ $break-large: 1070px;
       border-bottom: 1px solid #646464;
       .sample-title {
         padding-left: 0px;
+        span.name {
+          margin: 20px;
+        }
       }
     }
     
@@ -270,8 +276,9 @@ $break-large: 1070px;
     margin-bottom: 0;
     .sample-names {
       margin: 0;
-      padding-top: 9px;
+      padding-top: 20px;
       padding-left: 0;
+      border-bottom: 1px solid #9e9e9e;
     } 
   }
   .genome-list {
@@ -310,7 +317,7 @@ $break-large: 1070px;
     
     .select-wrapper input.select-dropdown {
       margin: 0;
-      border-bottom: 0;
+      // border-bottom: 0;
     }
   }
 

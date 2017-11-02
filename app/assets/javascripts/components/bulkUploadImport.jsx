@@ -308,15 +308,15 @@ class BulkUploadImport extends React.Component {
           </div>
           <div className="row content-wrapper">
             <div className="row header">
-              <div className="col s4 sample-title">Name</div>
-              <div className="col s4 ">Select Project</div>
+              <div className="col s4 sample-title">
+                <span className="col s1 all"><input type="checkbox" checked = { this.state.allChecked } id="checkAll" className="filled-in checkAll" onChange={this.initializeSelectAll()}
+                />
+                <label htmlFor="checkAll"></label></span>
+                <span className="name">Name</span>
+              </div>
+              <div className="col s4 ">Select Sample Project</div>
               <div className="col s4 ">Host</div>
             </div>
-            <p>
-              <input type="checkbox" checked = { this.state.allChecked } id="checkAll" className="filled-in checkAll" onChange={this.initializeSelectAll()}
-              />
-              <label htmlFor="checkAll">Select All Samples</label>
-            </p>
             { this.state.samples.map((sample, i) => {
               return (
                 <div className="row field-row sample-row" key={i} >
@@ -324,9 +324,8 @@ class BulkUploadImport extends React.Component {
                     <input ref="samples_list" type="checkbox" id={i} className="filled-in sample-box" value={ this.state.selectedSampleIndices.indexOf(i) < 0? 0:1 } onChange = { this.selectSample } />
                     <label htmlFor={i}> {sample.name}</label>
                   </p>
-
                   <div className="col s4">
-                    <select className="" id={i} onChange={ this.handleProjectChangeForSample} value={sample.project_id}>
+                    <select className="" id={i} onChange={ this.handleProjectChangeForSample } value={sample.project_id}>
                       { this.state.allProjects.length ?
                         this.state.allProjects.map((project, j) => {
                           return <option ref= "project" key={j} value={project.id}>{project.name}</option>
@@ -346,7 +345,6 @@ class BulkUploadImport extends React.Component {
                   </div>
                   <div className="col s12">
                   </div>
-                  <hr />
                 </div>
               )
             })
