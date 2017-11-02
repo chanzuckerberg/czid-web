@@ -3,12 +3,18 @@ class PipelineSampleReport extends React.Component {
   constructor(props) {
     super(props);
     this.report_details = props.report_details;
-    this.real_length = props.taxonomy_details[0];
-    this.taxonomy_details = props.taxonomy_details[1];
+    this.rows_passing_filters = props.taxonomy_details[0];
+    this.rows_total = props.taxonomy_details[1];
+    this.taxonomy_details = props.taxonomy_details[2];
+    this.all_genera_in_sample = props.all_genera_in_sample;
     this.all_categories = props.all_categories;
     this.applyViewLevel = this.applyViewLevel.bind(this);
     this.applyNewFilterThresholds = this.applyNewFilterThresholds.bind(this);
     this.applyExcludedCategories = this.applyExcludedCategories.bind(this);
+    this.applyGenusFilter = this.applyGenusFilter.bind(this);
+    this.expandOrCollapseGenus = this.expandOrCollapseGenus.bind(this);
+    this.disableFilters = this.disableFilters.bind(this);
+    this.enableFilters = this.enableFilters.bind(this);
   }
 
   refreshPage(overrides) {
@@ -16,8 +22,22 @@ class PipelineSampleReport extends React.Component {
     window.location = location.protocol + '//' + location.host + location.pathname + '?' + jQuery.param(new_params);
   }
 
+  disableFilters() {
+    disable_filters = 1;
+    this.refreshPage({disable_filters});
+  }
+
+  enableFilters() {
+    disable_filters = 0;
+    this.refreshPage({disable_filters});
+  }
+
   applyViewLevel(view_level) {
-    this.refreshPage({view_level});
+    overrides = {view_level};
+    if (view_level == 'genus') {
+      overrides.selected_genus = 'None';
+    }
+    this.refreshPage(overrides);
   }
 
   // applySort needs to be bound at time of use, not in constructor above
@@ -41,24 +61,44 @@ class PipelineSampleReport extends React.Component {
     this.refreshPage({excluded_categories});
   }
 
-  render_name(tax_info, pipeline_output_id) {
-    foo = <i>{tax_info.name}</i>;
+  applyGenusFilter(selected_genus) {
+    overrides = {selected_genus};
+    if (selected_genus != 'None') {
+      overrides.view_level = 'species';
+    }
+    this.refreshPage(overrides);
+  }
+
+  render_name(tax_info, report_details) {
+    let foo = <i>{tax_info.name}</i>;
     if (tax_info.tax_id > 0) {
-      foo = (
-        <span className="link">
-          <a href={`/pipeline_outputs/${pipeline_output_id}/fasta/${tax_info.tax_level}/${tax_info.tax_id}/NT_or_NR`}>
-            {tax_info.name}
-          </a>
-        </span>
-      );
+      if (report_details.taxon_fasta_flag) {
+        taxon_fasta_url = `/pipeline_outputs/${report_details.pipeline_info.id}/fasta/${tax_info.tax_level}/${tax_info.tax_id}/NT_or_NR`
+        foo = <span className="link"><a href={taxon_fasta_url}>{tax_info.name}</a></span>
+      } else {
+        foo = <span>{tax_info.name}</span>
+      }
     }
     if (tax_info.tax_level == 1) {
       // indent species rows
-      foo = <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{foo}</span>
+      foo = <div className='species-name'>{foo}</div>;
     } else {
       // emphasize genus, soften category and species count
       category_name = tax_info.tax_id == -200 ? '' : tax_info.category_name;
-      foo = <span><b>{foo}</b>&nbsp;&nbsp;&nbsp;&nbsp;<span style={{'color':'#A0A0A0'}}><i>({tax_info.species_count}&nbsp;{category_name}&nbsp;species)</i></span></span>
+      // Most groups are initially expanded, so they get a toggle with fa-minus initial state.
+      plus_or_minus = <i className={`fa fa-minus ${tax_info.tax_id}`} onClick={this.expandOrCollapseGenus}></i>;
+      if (tax_info.tax_id <= 0) {
+        // Except for group "All taxa without genus classification", which is initially collapsed.
+        plus_or_minus = <i className={`fa fa-plus ${tax_info.tax_id}`} onClick={this.expandOrCollapseGenus}></i>;
+      }
+      // Except in Genus view, nothing is expandable.
+      if (this.props.report_page_params.view_level == 'genus') {
+        plus_or_minus = '';
+      }
+      foo = <div>
+              <div className='genus-name'> {plus_or_minus} {foo}</div>
+              <i className='count-info'>({tax_info.species_count} {category_name} species)</i>
+            </div>;
     }
     return foo;
   }
@@ -105,22 +145,60 @@ class PipelineSampleReport extends React.Component {
   }
 
   row_class(tax_info) {
-    return tax_info.tax_level == 2 ? 'report-row-genus' : 'report-row-species';
+    if (tax_info.tax_level == 2) {
+      return `report-row-genus ${tax_info.genus_taxid}`;
+    }
+    if (tax_info.genus_taxid < 0) {
+      // The "all taxa without genus classification" group is initially collapsed.
+      return `report-row-species ${tax_info.genus_taxid} hidden`;
+    }
+    return `report-row-species ${tax_info.genus_taxid}`;
+  }
+
+  expandOrCollapseGenus(e) {
+    // className as set in render_name() is like 'fa fa-plus ${taxId}'
+    const className = e.target.attributes.class.nodeValue;
+    const attr = className.split(' ');
+    const taxId = attr[2];
+    $(`.report-row-species.${taxId}`).toggleClass('hidden');
+    // HACK.  Flipping plus/minus should be done with React, not DOM change.
+    if (attr[1] == 'fa-plus') {
+      e.target.attributes.class.nodeValue = `fa fa-minus ${taxId}`;
+    } else {
+      e.target.attributes.class.nodeValue = `fa fa-plus ${taxId}`;
+    }
   }
 
   render() {
     const parts = this.props.report_page_params.sort_by.split("_")
     const sort_column = parts[1] + "_" + parts[2];
     var t0 = Date.now();
+    filter_stats = this.rows_passing_filters + ' rows passing filters, out of ' + this.rows_total + ' total rows.';
+    if (this.props.report_page_params.disable_filters == 1) {
+      filter_stats = this.rows_total + ' unfiltered rows.';
+    }
+    filter_row_stats = (
+      <span>
+        {this.rows_passing_filters == this.taxonomy_details.length ?
+          ('Showing all ' + filter_stats) :
+          ('Due to resource limits, showing only ' + this.taxonomy_details.length + ' of the ' + filter_stats)}
+        <br/>
+        {this.rows_passing_filters < this.rows_total && this.props.report_page_params.disable_filters == 0 ? <a href="#" onClick={this.disableFilters}>Click to disable filters.</a> : ''}
+        {this.props.report_page_params.disable_filters == 1 ? <a href="#" onClick={this.enableFilters}>Click to enable filters.</a> : ''}
+      </span>
+    );
     report_filter =
       <ReportFilter
         all_categories = { this.all_categories }
+        all_genera_in_sample = {  this.all_genera_in_sample }
         background_model = { this.report_details.background_model.name }
         report_title = { this.report_details.report_info.name }
         report_page_params = { this.props.report_page_params }
         applyViewLevel = { this.applyViewLevel }
         applyNewFilterThresholds = { this.applyNewFilterThresholds }
         applyExcludedCategories = { this.applyExcludedCategories }
+        applyGenusFilter = { this.applyGenusFilter }
+        enableFilters = { this.enableFilters }
       />;
     // To do: improve presentation and place download_button somewhere on report page
     download_button = (
@@ -133,7 +211,7 @@ class PipelineSampleReport extends React.Component {
         <div id="reports" className="reports-screen tab-screen col s12">
           <div className="tab-screen-content">
             <div className="row">
-              <div className="col s2">
+              <div className="col s2 reports-sidebar">
                 {report_filter}
               </div>
               <div className="col s10 reports-main ">
@@ -147,13 +225,13 @@ class PipelineSampleReport extends React.Component {
                     { this.render_column_header('NT', 'r',   'nt_r')      }
                     { this.render_column_header('NT', '%id', 'nt_percentidentity')    }
                     { this.render_column_header('NT', 'AL',   'nt_alignmentlength')    }
-                    { this.render_column_header('NT', 'Lg1/E',  'nt_neglogevalue')    }
+                    { this.render_column_header('NT', 'Log(1/E)',  'nt_neglogevalue')    }
                     { this.render_column_header('NR', 'Z',   'nr_zscore') }
                     { this.render_column_header('NR', 'rPM', 'nr_rpm')    }
                     { this.render_column_header('NR', 'r',   'nr_r')      }
                     { this.render_column_header('NR', '%id', 'nr_percentidentity')    }
                     { this.render_column_header('NR', 'AL',   'nr_alignmentlength')    }
-                    { this.render_column_header('NR', 'Lg1/E',  'nr_neglogevalue')    }
+                    { this.render_column_header('NR', 'Log(1/E)',  'nr_neglogevalue')    }
                   </tr>
                   </thead>
                   <tbody>
@@ -161,31 +239,27 @@ class PipelineSampleReport extends React.Component {
                     return (
                       <tr key={tax_info.tax_id} className={this.row_class(tax_info)}>
                         <td>
-                          { this.render_name(tax_info, this.report_details.pipeline_info.id) }
+                          { this.render_name(tax_info, this.report_details) }
                         </td>
                         { this.render_number(tax_info.NT.aggregatescore, sort_column == 'nt_aggregatescore', 0) }
                         { this.render_number(tax_info.NT.zscore, sort_column == 'nt_zscore', 1) }
                         { this.render_number(tax_info.NT.rpm, sort_column == 'nt_rpm', 1)       }
                         { this.render_number(tax_info.NT.r, sort_column == 'nt_r', 0)           }
-                        { this.render_number(tax_info.NT.percentidentity, sort_column == 'nt_zscore', 1) }
-                        { this.render_number(tax_info.NT.alignmentlength, sort_column == 'nt_rpm', 1)       }
+                        { this.render_number(tax_info.NT.percentidentity, sort_column == 'nt_percentidentity', 1) }
+                        { this.render_number(tax_info.NT.alignmentlength, sort_column == 'nt_alignmentlength', 1)       }
                         { this.render_number(tax_info.NT.neglogevalue, sort_column == 'nt_neglogevalue', 0) }
                         { this.render_number(tax_info.NR.zscore, sort_column == 'nr_zscore', 1) }
                         { this.render_number(tax_info.NR.rpm, sort_column == 'nr_rpm', 1)       }
                         { this.render_number(tax_info.NR.r, sort_column == 'nr_r', 0)           }
-                        { this.render_number(tax_info.NR.percentidentity, sort_column == 'nr_zscore', 1) }
-                        { this.render_number(tax_info.NR.alignmentlength, sort_column == 'nr_rpm', 1)       }
+                        { this.render_number(tax_info.NR.percentidentity, sort_column == 'nr_percentidentity', 1) }
+                        { this.render_number(tax_info.NR.alignmentlength, sort_column == 'nr_alignmentlength', 1)       }
                         { this.render_number(tax_info.NR.neglogevalue, sort_column == 'nr_neglogevalue', 0) }
                       </tr>
                     )
                   })}
                   </tbody>
                 </table>
-                <span>
-                {this.real_length == this.taxonomy_details.length ?
-                  ('Showing all ' + this.real_length + ' rows passing filters.') :
-                  ('Due to resource limits, showing only ' + this.taxonomy_details.length + ' of the ' + this.real_length + ' rows passing filters.')}
-                </span>
+              {filter_row_stats}
               </div>
             </div>
           </div>
