@@ -34,16 +34,11 @@ class Sample < ApplicationRecord
 
   before_save :check_host_genome, :check_status
 
-
   # getter
-   def bulk_mode
-     @bulk_mode
-   end
+  attr_reader :bulk_mode
 
-   # setter
-   def bulk_mode=(val)
-     @bulk_mode = val
-   end
+  # setter
+  attr_writer :bulk_mode
 
   def sample_path
     File.join('samples', project.id.to_s, id.to_s)
