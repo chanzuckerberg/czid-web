@@ -45,6 +45,7 @@ class SamplesController < ApplicationController
     @errors = []
     samples.each do |sample_attributes|
       sample = Sample.new(sample_attributes)
+      sample.bulk_mode = true
       if sample.save
         @samples << sample
       else
