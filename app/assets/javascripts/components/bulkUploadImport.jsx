@@ -408,6 +408,7 @@ class BulkUploadImport extends React.Component {
             <div className="field-row input-field align">
                 <i className="sample fa fa-link" aria-hidden="true"></i>
                 <input ref= "bulk_path" type="text" className="path" onFocus={ this.clearError } placeholder="Required" onChange={ this.handleBulkPathChange } />
+                <span className="path_label">Example: s3://czbiohub-seqbot/fastqs/171018_NB501961_0022_AHL2TVBGX3/rawdata</span>
                 <label htmlFor="bulk_path">S3 Bulk Upload Path </label>
             </div>
           </div>
