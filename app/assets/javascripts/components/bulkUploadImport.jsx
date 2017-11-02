@@ -32,7 +32,8 @@ class BulkUploadImport extends React.Component {
       selectedBulkPath: '',
       samples: [],
       selectedSampleIndices: [],
-      createdSampleIds: []
+      createdSampleIds: [],
+      allChecked: false,
     }
   }
 
@@ -43,24 +44,48 @@ class BulkUploadImport extends React.Component {
   }
 
   selectSample(e) {
+    this.setState({
+      allChecked: false,
+    })
     // current array of options
-    const sample_list = this.state.selectedSampleIndices
-    //console.log(sample_list)
+    const sampleList = this.state.selectedSampleIndices
 
     let index
 
     // check if the check box is checked or unchecked
     if (e.target.checked) {
       // add the numerical value of the checkbox to options array
-      sample_list.push(+e.target.id)
+      sampleList.push(+e.target.id)
     } else {
       // or remove the value from the unchecked checkbox from the array
-      index = sample_list.indexOf(+e.target.id)
-      sample_list.splice(index, 1)
+      index = sampleList.indexOf(+e.target.id)
+      sampleList.splice(index, 1)
     }
 
     // update the state with the new array of options
-    this.setState({ selectedSampleIndices: sample_list })
+    this.setState({ selectedSampleIndices: sampleList })
+  }
+
+  initializeSelectAll() {
+    $(".checkAll").click((e) => {
+      checkedStatus = e.target.checked;
+      this.setState({
+        allChecked: checkedStatus
+      }, () => {
+        $('input:checkbox').not(this).prop('checked', this.state.allChecked);
+        $(".sample-box").each((id, element) => {
+            let sampleList = this.state.selectedSampleIndices;
+            if (this.state.allChecked) {
+              if (sampleList.indexOf(id) === -1) {
+                sampleList.push(+id);
+              }
+            } else {
+              sampleList = []
+            }
+          this.setState({ selectedSampleIndices: sampleList })
+        });
+      })
+    });
   }
 
   handleUploadSubmit(e) {
@@ -165,6 +190,8 @@ class BulkUploadImport extends React.Component {
         samples: response.data.samples,
         imported: true
       });
+      that.initializeSelectTag()
+      that.initializeSelectAll()
     }).catch(function (error) {
      that.setState({
       submitting: false,
@@ -197,7 +224,7 @@ class BulkUploadImport extends React.Component {
           submitting: false
         });
         that.gotoPage(`/?ids=${that.state.createdSampleIds.join(',')}`);
-      }, 5000)
+      }, 2000)
     }).catch(function (error) {
      that.setState({
       submitting: false,
@@ -283,47 +310,47 @@ class BulkUploadImport extends React.Component {
           </div>
           <div className="row content-wrapper">
             <div className="row header">
-              <div className="col s4 ">Name</div>
-              <div className="col s4 ">Project</div>
+              <div className="col s4 sample-title">
+                <span className="col s1 all"><input type="checkbox" checked = { this.state.allChecked } id="checkAll" className="filled-in checkAll" onChange={this.initializeSelectAll()}
+                />
+                <label htmlFor="checkAll"></label></span>
+                <span className="name">Name</span>
+              </div>
+              <div className="col s4 ">Select Sample Project</div>
               <div className="col s4 ">Host</div>
             </div>
-      {
-        this.state.samples.map((sample, i) => {
-          return (
-            <div className="row field-row" key={i} >
-              <div className="col s4">
-			  <input ref="samples_list" type="checkbox" id={i} className="filled-in" value={ this.state.selectedSampleIndices.indexOf(i) < 0? 0:1 } onChange = { this.selectSample } />
-			  <label htmlFor={i}> {sample.name}</label>
-             </div>
+            { this.state.samples.map((sample, i) => {
+              return (
+                <div className="row field-row sample-row" key={i} >
+                  <p className="col s4 sample-names">
+                    <input ref="samples_list" type="checkbox" id={i} className="filled-in sample-box" value={ this.state.selectedSampleIndices.indexOf(i) < 0? 0:1 } onChange = { this.selectSample } />
+                    <label htmlFor={i}> {sample.name}</label>
+                  </p>
+                  <div className="col s4">
+                    <select className="" id={i} onChange={ this.handleProjectChangeForSample } value={sample.project_id}>
+                      { this.state.allProjects.length ?
+                        this.state.allProjects.map((project, j) => {
+                          return <option ref= "project" key={j} value={project.id}>{project.name}</option>
+                        }) : <option>No projects to display</option>
+                        }
+                    </select>
+                  </div>
 
-              <div className="col s4">
-				<select className="browser-default" id={i} onChange={ this.handleProjectChangeForSample} value={sample.project_id}>
-					 { this.state.allProjects.length ?
-						this.state.allProjects.map((project, j) => {
-						  return <option ref= "project" key={j} value={project.id}>{project.name}</option>
-						}) : <option>No projects to display</option>
-					  }
-				</select>
-             </div>
-
-              <div className="col s4">
-				<select className="browser-default" id={i} onChange={ this.handleHostChangeForSample} value={sample.host_genome_id}>
-					 { this.state.hostGenomes.length ?
-						this.state.hostGenomes.map((host_genome, j) => {
-						  return <option ref= "genome" key={j} value={host_genome.id}>{host_genome.name}</option>
-						}) : <option>No host genomes to display</option>
-					  }
-				</select>
-              </div>
-              <div className="col s12">
-                <p>{sample.input_files_attributes[0].source } </p>
-                <p> {sample.input_files_attributes[1].source } </p>
-              </div>
-              <div><hr/></div>
-            </div>
-          )
-        })
-      }
+                  <div className="col s4">
+                    <select className="" id={i} onChange={ this.handleHostChangeForSample} value={sample.host_genome_id}>
+                      { this.state.hostGenomes.length ?
+                        this.state.hostGenomes.map((host_genome, j) => {
+                          return <option ref= "genome" key={j} value={host_genome.id}>{host_genome.name}</option>
+                        }) : <option>No host genomes to display</option>
+                        }
+                    </select>
+                  </div>
+                  <div className="col s12">
+                  </div>
+                </div>
+              )
+            })
+          }
       </div>
       <input className="hidden" type="submit"/>
       <div onClick={ this.handleUploadSubmit } className="center login-wrapper">{ !this.state.submitting ? 'Submit' : <i className='fa fa-spinner fa-spin fa-lg'></i>}</div>
@@ -337,6 +364,7 @@ class BulkUploadImport extends React.Component {
         <form ref="form" onSubmit={ this.handleImportSubmit }>
           <div className="row title">
             <p className="col s6 signup">Bulk Upload</p>
+            <span onClick={ this.gotoPage.bind(this, '/samples/new') } className="single">Upload a single sample? Click here</span>
           </div>
           { this.state.success ? <div className="success-info" >
                 <i className="fa fa-success"></i>
@@ -382,6 +410,7 @@ class BulkUploadImport extends React.Component {
             <div className="field-row input-field align">
                 <i className="sample fa fa-link" aria-hidden="true"></i>
                 <input ref= "bulk_path" type="text" className="path" onFocus={ this.clearError } placeholder="Required" onChange={ this.handleBulkPathChange } />
+                <span className="path_label">Example: s3://czbiohub-seqbot/fastqs/171018_NB501961_0022_AHL2TVBGX3/rawdata</span>
                 <label htmlFor="bulk_path">S3 Bulk Upload Path </label>
             </div>
           </div>
