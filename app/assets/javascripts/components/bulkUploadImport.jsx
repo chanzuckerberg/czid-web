@@ -74,9 +74,11 @@ class BulkUploadImport extends React.Component {
       }, () => {
         $('input:checkbox').not(this).prop('checked', this.state.allChecked);
         $(".sample-box").each((id, element) => {
-            let sampleList = this.state.selectedSampleIndices
+            let sampleList = this.state.selectedSampleIndices;
             if (this.state.allChecked) {
-              sampleList.push(+id);
+              if (sampleList.indexOf(id) === -1) {
+                sampleList.push(+id);
+              }
             } else {
               sampleList = []
             }
@@ -222,7 +224,7 @@ class BulkUploadImport extends React.Component {
           submitting: false
         });
         that.gotoPage(`/?ids=${that.state.createdSampleIds.join(',')}`);
-      }, 5000)
+      }, 2000)
     }).catch(function (error) {
      that.setState({
       submitting: false,
