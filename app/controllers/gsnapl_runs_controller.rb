@@ -28,7 +28,7 @@ class GsnaplRunsController < ApplicationController
   end
 
   def gsnapl_run_params
-    params.require(:gsnapl_run).permit(:aws_batch_job_id, :gsnapl_machine_ip)
+    params.permit(:aws_batch_job_id, :gsnapl_machine_ip)
   end
 end
 
