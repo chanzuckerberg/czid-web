@@ -34,7 +34,9 @@ BOWTIE2="bowtie2"
 LZW_FRACTION_CUTOFF = 0.45
 GSNAPL_INSTANCE_IP = '34.211.67.166'
 RAPSEARCH2_INSTANCE_IP = '54.191.193.210'
+IDSEQ_WEB = 'http://idseq.net'
 
+GSNAPL_MAX_CPU_UTIL = 80
 GSNAPL_MAX_CONCURRENT = 5
 RAPSEARCH2_MAX_CONCURRENT = 5
 
@@ -483,6 +485,27 @@ def wait_for_server(service_name, command, max_concurrent):
                   (service_name, len(output), wait_seconds)
             time.sleep(wait_seconds)
 
+def wait_for_server_cpu(service_name, idseq_web, max_cpu_util):
+    while True:
+        gsnapl_instance_ips = subprocess.check_output("curl %s/gsnapl_ips" % IDSEQ_WEB).split(",")
+        ip_cpu_dict = {}
+        for ip in gsnapl_instance_ips:
+            get_metrics_command = "aws cloudwatch get-metric-statistics --metric-name CPUUtilization --namespace AWS/EC2 --statistics Maximum " \
+                                  "--start-time=\"$(TZ='UTC+0:1' date)\" --end-time=\"$(date)\" --period 60 --dimensions Name=InstanceId,Value=" + ip
+            metric_json = json.loads(execute_command(get_metrics_command))
+            # example: {"Datapoints": [{"Timestamp": "2017-11-02T00:38:00Z","Maximum": 19.35,"Unit": "Percent"}], "Label": "CPUUtilization"}
+            cpu_util = float(metric_json["Datapoints"][-1]["Maximum"])
+            ip_cpu_dict[ip] = cpu_util
+        min_util_ip, min_cpu_util = min(ip_cpu_dict, key=ip_cpu_dict.get)
+        if min_cpu_util <= max_cpu_util:
+            print "%s server has capacity. Kicking off " % service_name
+            return min_util_ip
+        else:
+            wait_seconds = random.randint(30, 60)
+            print "%s servers busy. Smallest CPU utilization is %f. Wait for %d seconds" % \
+                  (service_name, min_cpu_util, wait_seconds)
+            time.sleep(wait_seconds)
+
 class TimeFilter(logging.Filter):
     def filter(self, record):
         try:
@@ -531,7 +554,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
                star_genome_s3_path, bowtie2_genome_s3_path,
                gsnap_ssh_key_s3_path, rapsearch_ssh_key_s3_path, accession2taxid_s3_path,
                deuterostome_list_s3_path, taxid2info_s3_path, db_sample_id,
-               aws_batch_job_id, lazy_run = True):
+               aws_batch_job_id, idseq_web, lazy_run = True):
 
     sample_s3_output_path = sample_s3_output_path.rstrip('/')
     sample_name = sample_s3_input_path[5:].rstrip('/').replace('/','-')
@@ -654,7 +677,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         "after_file_type": "m8"})
     run_and_log(logparams, run_gsnapl_remotely,
         sample_name, EXTRACT_UNMAPPED_FROM_SAM_OUT1, EXTRACT_UNMAPPED_FROM_SAM_OUT2,
-        gsnap_ssh_key_s3_path,
+        gsnap_ssh_key_s3_path, idseq_web,
         result_dir, sample_s3_output_path, lazy_run)
 
     # run_annotate_gsnapl_m8_with_taxids
@@ -935,7 +958,7 @@ def run_bowtie2(sample_name, input_fa_1, input_fa_2, bowtie_genome_s3_path,
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT3, sample_s3_output_path))
 
 def run_gsnapl_remotely(sample, input_fa_1, input_fa_2,
-                        gsnap_ssh_key_s3_path,
+                        gsnap_ssh_key_s3_path, idseq_web,
                         result_dir, sample_s3_output_path, lazy_run):
     if lazy_run:
         # check if output already exists
@@ -967,16 +990,10 @@ def run_gsnapl_remotely(sample, input_fa_1, input_fa_2,
     commands += "aws s3 cp %s/%s %s/;" % \
                  (remote_work_dir, GSNAPL_OUT, sample_s3_output_path)
     # check if remote machins has enough capacity
-    get_metrics_command = "aws cloudwatch get-metric-statistics --metric-name CPUUtilization --namespace AWS/EC2 --dimensions Name=InstanceId,Value=%s --statistics Maximum --start-time=\"$(TZ='UTC+0:1' date)\" --end-time=\"$(date)\" --period 60" % GSNAPL_INSTANCE_IP
-    metric_json = json.loads(execute_command(get_metrics_command))
-    # example: {"Datapoints": [{"Timestamp": "2017-11-02T00:38:00Z","Maximum": 19.35,"Unit": "Percent"}], "Label": "CPUUtilization"}
-    cpu_util = metric_json["Datapoints"][0]["Maximum"]
-    # move the above to a function: wait_for_server_cpu( GSNAPL_MAX_CPU)
-
     logging.getLogger().info("waiting for server")
-    wait_for_server('GSNAPL', check_command, GSNAPL_MAX_CONCURRENT)
-    logging.getLogger().info("starting alignment")
-    remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, GSNAPL_INSTANCE_IP, commands)
+    gsnapl_instance_ip = wait_for_server_cpu('GSNAPL', idseq_web, GSNAPL_MAX_CPU_UTIL)
+    logging.getLogger().info("starting alignment on machine " + gsnapl_instance_ip)
+    remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, gsnapl_instance_ip, commands)
     execute_command(remote_command)
     # move gsnapl output back to local
     time.sleep(10)
@@ -1156,6 +1173,7 @@ def main():
     global KEY_S3_PATH
     global STAR_GENOME
     global BOWTIE2_GENOME
+    global IDSEQ_WEB
     INPUT_BUCKET = os.environ.get('INPUT_BUCKET', INPUT_BUCKET)
     OUTPUT_BUCKET = os.environ.get('OUTPUT_BUCKET', OUTPUT_BUCKET)
     KEY_S3_PATH = os.environ.get('KEY_S3_PATH', KEY_S3_PATH)
@@ -1171,6 +1189,7 @@ def main():
     SAMPLE_LIBRARY = os.environ.get('SAMPLE_LIBRARY', '')
     SAMPLE_SEQUENCER = os.environ.get('SAMPLE_SEQUENCER', '')
     SAMPLE_NOTES = os.environ.get('SAMPLE_NOTES', '')
+    IDSEQ_WEB = os.environ.get('IDSEQ_WEB', IDSEQ_WEB)
     sample_s3_input_path = INPUT_BUCKET.rstrip('/')
     sample_s3_output_path = OUTPUT_BUCKET.rstrip('/')
 
@@ -1178,7 +1197,7 @@ def main():
                STAR_GENOME, BOWTIE2_GENOME,
                KEY_S3_PATH, KEY_S3_PATH, ACCESSION2TAXID,
                DEUTEROSTOME_TAXIDS, TAXID_TO_INFO, DB_SAMPLE_ID,
-               AWS_BATCH_JOB_ID, True)
+               AWS_BATCH_JOB_ID, IDSEQ_WEB, True)
 
 if __name__=="__main__":
     main()
