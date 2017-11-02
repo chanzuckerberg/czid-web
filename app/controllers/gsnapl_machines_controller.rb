@@ -9,8 +9,19 @@ class GsnaplMachinesController < ApplicationController
 
   def index
     @gsnapl_machines = GsnaplMachine.all
-    @gsnapl_ips_comma_separated = @gsnapl_machines.map(&:ip).join(",")
-    render plain: @gsnapl_ips_comma_separated
+    render plain: @gsnapl_machines.to_json
+  end
+
+  def show_ips
+    @gsnapl_machines = GsnaplMachine.all
+    @ips_comma_separated = @gsnapl_machines.map(&:ip).join(",")
+    render plain: @ips_comma_separated
+  end
+
+  def show_instance_ids
+    @gsnapl_machines = GsnaplMachine.all
+    @instance_ids_comma_separated = @gsnapl_machines.map(&:instance_id).join(",")
+    render plain: @instance_ids_comma_separated
   end
 
   def destroy
@@ -28,6 +39,6 @@ class GsnaplMachinesController < ApplicationController
   end
 
   def gsnapl_machine_params
-    params.require(:gsnapl_machine).permit(:ip)
+    params.require(:gsnapl_machine).permit(:ip, :instance_id)
   end
 end

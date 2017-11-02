@@ -3,3 +3,9 @@ check_pipeline_run:
   class: CheckPipelineRuns
   args:
   description: check pipeline runs every 10m
+
+check_gsnapl_machines:
+  cron: "*/10 * * * *"
+  class: CheckGsnaplMachines
+  args:
+  description: check on GSNAPL machines every 10m

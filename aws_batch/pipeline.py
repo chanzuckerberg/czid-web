@@ -492,7 +492,7 @@ def wait_for_server(service_name, command, max_concurrent):
 
 def wait_for_server_ip(service_name, key_path, remote_username, idseq_web, max_concurrent):
     while True:
-        gsnapl_instance_ips = subprocess.check_output("curl %s/gsnapl_machines" % idseq_web, shell=True).split(",")
+        gsnapl_instance_ips = subprocess.check_output("curl %s/gsnapl_machines/ips" % idseq_web, shell=True).split(",")
         ip_nproc_dict = {}
         for ip in gsnapl_instance_ips:
             command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "ps aux|grep gsnapl|grep -v bash"' % (key_path, remote_username, ip)
@@ -513,14 +513,16 @@ def register_gsnapl_run(aws_batch_job_id, gsnapl_instance_ip, idseq_web):
               (aws_batch_job_id, gsnapl_instance_ip, idseq_web)
     return subprocess.check_output(command, shell=True)
 
-'''
+''' We decided not to kickoff based on CPU but still based on number of running processes. Leaving this function for documentation and future reference.
 def wait_for_server_cpu(service_name, idseq_web, max_cpu_util):
     while True:
-        gsnapl_instance_ips = subprocess.check_output("curl %s/gsnapl_machines" % idseq_web, shell=True).split(",")
+        gsnapl_machines = subprocess.check_output("curl %s/gsnapl_machines" % idseq_web, shell=True).split(",")
         ip_cpu_dict = {}
-        for ip in gsnapl_instance_ips:
+        for machine in gsnapl_machines:
+            instance_id = machine["instance_id"]
+            ip = machine["ip"]
             get_metrics_command = "aws cloudwatch get-metric-statistics --metric-name CPUUtilization --namespace AWS/EC2 --statistics Maximum " \
-                                  "--start-time=\"$(TZ='UTC+0:1' date)\" --end-time=\"$(date)\" --period 60 --dimensions Name=InstanceId,Value=" + ip
+                                  "--start-time=\"$(TZ='UTC+0:1' date)\" --end-time=\"$(date)\" --period 60 --dimensions Name=InstanceId,Value=" + instance_id
             metric_json = json.loads(execute_command(get_metrics_command))
             # example: {"Datapoints": [{"Timestamp": "2017-11-02T00:38:00Z","Maximum": 19.35,"Unit": "Percent"}], "Label": "CPUUtilization"}
             cpu_util = float(metric_json["Datapoints"][-1]["Maximum"])
