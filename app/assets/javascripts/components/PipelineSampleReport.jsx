@@ -86,10 +86,10 @@ class PipelineSampleReport extends React.Component {
       // emphasize genus, soften category and species count
       category_name = tax_info.tax_id == -200 ? '' : tax_info.category_name;
       // Most groups are initially expanded, so they get a toggle with fa-minus initial state.
-      plus_or_minus = <i className={`fa fa-minus ${tax_info.tax_id}`} onClick={this.expandOrCollapseGenus}></i>;
+      plus_or_minus = <i className={`fa fa-angle-down ${tax_info.tax_id}`} onClick={this.expandOrCollapseGenus}></i>;
       if (tax_info.tax_id <= 0) {
         // Except for group "All taxa without genus classification", which is initially collapsed.
-        plus_or_minus = <i className={`fa fa-plus ${tax_info.tax_id}`} onClick={this.expandOrCollapseGenus}></i>;
+        plus_or_minus = <i className={`fa fa-angle-right ${tax_info.tax_id}`} onClick={this.expandOrCollapseGenus}></i>;
       }
       // Except in Genus view, nothing is expandable.
       if (this.props.report_page_params.view_level == 'genus') {
@@ -156,17 +156,18 @@ class PipelineSampleReport extends React.Component {
   }
 
   expandOrCollapseGenus(e) {
-    // className as set in render_name() is like 'fa fa-plus ${taxId}'
+    // className as set in render_name() is like 'fa fa-angle-right ${taxId}'
     const className = e.target.attributes.class.nodeValue;
     const attr = className.split(' ');
     const taxId = attr[2];
     $(`.report-row-species.${taxId}`).toggleClass('hidden');
     // HACK.  Flipping plus/minus should be done with React, not DOM change.
-    if (attr[1] == 'fa-plus') {
-      e.target.attributes.class.nodeValue = `fa fa-minus ${taxId}`;
+    if (attr[1] == 'fa-angle-right') {
+      e.target.attributes.class.nodeValue = `fa fa-angle-down ${taxId}`;
     } else {
-      e.target.attributes.class.nodeValue = `fa fa-plus ${taxId}`;
+      e.target.attributes.class.nodeValue = `fa fa-angle-right ${taxId}`;
     }
+    e.nativeEvent.stopImmediatePropagation();
   }
 
   render() {
