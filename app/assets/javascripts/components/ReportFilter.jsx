@@ -69,59 +69,115 @@ class ReportFilter extends React.Component {
           THRESHOLDS
         </div>
         <div className="filter-row row">
-          <div className="input-field col s3 offset-s2">
-            <label htmlFor="threshold-z">Z&nbsp;&ge;</label>
+          <div className='col s12'>
+            <div className='col s7 filter-label'>
+              <div className='threshold-label'>
+                <label htmlFor="threshold_z">
+                  Z &ge;
+                </label>
+              </div>
+            </div>
+            <div className='col s5 input-container'>
+              <input
+              onChange={this.setFilterThreshold.bind(this, 'threshold_zscore')}
+              name="group2"
+              defaultValue={this.props.report_page_params['threshold_zscore']}
+              id="threshold_z"
+              type="text" />
+            </div>
           </div>
-          <div className="input-field col s6 offset-s1">
-            <input name="group2" defaultValue={this.props.report_page_params['threshold_zscore']}
-                   type="text" id="threshold-z" onChange={this.setFilterThreshold.bind(this, 'threshold_zscore')}/>
+
+          <div className="col s12">
+            <div className='col s7 filter-label'>
+              <div className='threshold-label'>
+                <label htmlFor="threshold_rpm">
+                 rPM &ge;
+                </label>
+              </div>
+            </div>
+            <div className='col s5 input-container'>
+              <input
+              onChange={this.setFilterThreshold.bind(this, 'threshold_rpm')}
+              name="group2"
+              defaultValue={this.props.report_page_params['threshold_rpm']}
+              id="threshold_rpm"
+              type="text"/>
+            </div>
+          </div>
+
+          <div className="col s12">
+            <div className='col s7 filter-label'>
+              <div className='threshold-label'>
+                <label htmlFor="threshold_r">
+                r &ge;
+                </label>
+              </div>
+            </div>
+            <div className='col s5 input-container'>
+              <input
+              onChange={this.setFilterThreshold.bind(this, 'threshold_r')}
+              name="group2"
+              defaultValue={this.props.report_page_params['threshold_r']}
+              id="threshold_r"
+              type="text"/>
+            </div>
+          </div>
+
+          <div className="col s12">
+            <div className='col s7 filter-label'>
+              <div className='threshold-label'>
+                <label htmlFor="threshold_aggregatescore">
+                 NT+NR* &ge;
+                </label>
+              </div>
+            </div>
+            <div className='col s5 input-container'>
+              <input
+              onChange={this.setFilterThreshold.bind(this, 'threshold_aggregatescore')}
+              name="group2"
+              defaultValue={this.props.report_page_params['threshold_aggregatescore']}
+              id="threshold_aggregatescore"
+              type="text"/>
+            </div>
+          </div>
+
+          <div className="col s12">
+            <div className='col s7 filter-label'>
+              <div className='threshold-label'>
+                <label htmlFor="threshold_percentidentity">
+                  %id &ge;
+                </label>
+              </div>
+            </div>
+            <div className='col s5 input-container'>
+              <input
+              onChange={this.setFilterThreshold.bind(this, 'threshold_percentidentity')}
+              name="group2"
+              defaultValue={this.props.report_page_params['threshold_percentidentity']}
+              id="threshold_percentidentity"
+              type="text"/>
+            </div>
+          </div>
+
+          <div className="col s12">
+            <div className='col s7 filter-label'>
+              <div className='threshold-label'>
+                <label htmlFor="threshold_neglogevalue">
+                  log(1/E) &ge;
+                </label>
+              </div>
+            </div>
+             <div className='col s5 input-container'>
+              <input
+              onChange={this.setFilterThreshold.bind(this, 'threshold_neglogevalue')}
+              name="group2"
+              defaultValue={this.props.report_page_params['threshold_neglogevalue']}
+              id="threshold_neglogevalue"
+              type="text"/>
+              </div>
           </div>
         </div>
-        <div className="filter-row row">
-          <div className="input-field col s4 offset-s1">
-            <label htmlFor="threshold-rpm">rPM&nbsp;&ge;</label>
-          </div>
-          <div className="input-field col s6 offset-s1">
-            <input name="group2" defaultValue={this.props.report_page_params['threshold_rpm']}
-                 type="text" id="threshold-rpm" onChange={this.setFilterThreshold.bind(this, 'threshold_rpm')}/>
-          </div>
-        </div>
-        <div className="filter-row row">
-          <div className="input-field col s4 offset-s2">
-            <label htmlFor="threshold-r" className=".filter-label">r&nbsp;&ge;</label>&nbsp;
-          </div>
-          <div className="input-field col s6">
-            <input name="group2" defaultValue={this.props.report_page_params['threshold_r']}
-                   type="text" id="threshold-r" onChange={this.setFilterThreshold.bind(this, 'threshold_r')}/>
-          </div>
-        </div>
-        <div className="filter-row row">
-          <div className="input-field col s2 offset-s1">
-            <label htmlFor="threshold-aggregatescore" className=".filter-label">NT+NR*&nbsp;&ge;</label>&nbsp;
-          </div>
-          <div className="input-field col s6 offset-s3">
-            <input name="group2" defaultValue={this.props.report_page_params['threshold_aggregatescore']}
-                   type="text" id="threshold-aggregatescore" onChange={this.setFilterThreshold.bind(this, 'threshold_aggregatescore')}/>
-          </div>
-        </div>
-        <div className="filter-row row">
-          <div className="input-field col s2 offset-s2">
-            <label htmlFor="threshold-percentidentity" className=".filter-label">%id&nbsp;&ge;</label>&nbsp;
-          </div>
-          <div className="input-field col s6 offset-s2">
-            <input name="group2" defaultValue={this.props.report_page_params['threshold_percentidentity']}
-                   type="text" id="threshold-percentidentity" onChange={this.setFilterThreshold.bind(this, 'threshold_percentidentity')}/>
-          </div>
-        </div>
-        <div className="filter-row row">
-          <div className="input-field col s3 offset-s1">
-            <label htmlFor="threshold-negevalue" className=".filter-label">lg(1/E)&nbsp;&ge;</label>&nbsp;
-          </div>
-          <div className="input-field col s6 offset-s2">
-            <input name="group2" defaultValue={this.props.report_page_params['threshold_neglogevalue']}
-                   type="text" id="threshold-neglogevalue" onChange={this.setFilterThreshold.bind(this, 'threshold_neglogevalue')}/>
-          </div>
-        </div>
+
         <div className="apply-filter-button center-align">
           <a onClick={this.applyFilters}
              className="btn btn-flat waves-effect grey text-grey text-lighten-5 waves-light apply-filter-button">
@@ -153,7 +209,7 @@ class ReportFilter extends React.Component {
     );
   }
   return (
-      <div className="reports-sidebar">
+      <div>
         <div className="sidebar-title">
           <i className="fa fa-filter fa-fw"></i> Filter Report
         </div>

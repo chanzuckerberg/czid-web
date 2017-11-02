@@ -47,7 +47,7 @@ module ReportHelper
   METRICS = %w[r rpm zscore percentidentity alignmentlength neglogevalue aggregatescore].freeze
   COUNT_TYPES = %w[NT NR].freeze
   PROPERTIES_OF_TAXID = %w[tax_id name name_from_lineages name_from_counts tax_level genus_taxid category_name].freeze # note: no underscore in sortable column names
-  UNUSED_IN_UI_FIELDS = ['genus_taxid', :sort_key].freeze
+  UNUSED_IN_UI_FIELDS = [:sort_key].freeze
 
   # use the metric's NT <=> NR dual as a tertiary sort key (so, for example,
   # when you sort by NT R, entries without NT R will be ordered amongst
