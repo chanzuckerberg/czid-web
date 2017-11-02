@@ -34,7 +34,6 @@ BOWTIE2="bowtie2"
 LZW_FRACTION_CUTOFF = 0.45
 GSNAPL_INSTANCE_IP = '34.211.67.166'
 RAPSEARCH2_INSTANCE_IP = '54.191.193.210'
-IDSEQ_WEB = 'http://idseq.net'
 
 GSNAPL_MAX_CONCURRENT = 10
 RAPSEARCH2_MAX_CONCURRENT = 5
@@ -472,6 +471,13 @@ def execute_command(command):
     output = subprocess.check_output(command, shell=True)
     return output
 
+def get_url_for_idseq_machine_db(environment):
+    if environment == "development":
+        return "alpha.idseq.net"
+    if environment == "production":
+        return "idseq.net"
+    return environment + ".idseq.net"
+
 def wait_for_server(service_name, command, max_concurrent):
     while True:
         output = execute_command(command).rstrip().split("\n")
@@ -573,7 +579,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
                star_genome_s3_path, bowtie2_genome_s3_path,
                gsnap_ssh_key_s3_path, rapsearch_ssh_key_s3_path, accession2taxid_s3_path,
                deuterostome_list_s3_path, taxid2info_s3_path, db_sample_id,
-               aws_batch_job_id, idseq_web, lazy_run = True):
+               aws_batch_job_id, environment, lazy_run = True):
 
     sample_s3_output_path = sample_s3_output_path.rstrip('/')
     sample_name = sample_s3_input_path[5:].rstrip('/').replace('/','-')
@@ -696,7 +702,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         "after_file_type": "m8"})
     run_and_log(logparams, run_gsnapl_remotely,
         sample_name, EXTRACT_UNMAPPED_FROM_SAM_OUT1, EXTRACT_UNMAPPED_FROM_SAM_OUT2,
-        gsnap_ssh_key_s3_path, idseq_web,
+        gsnap_ssh_key_s3_path, environment,
         result_dir, sample_s3_output_path, lazy_run)
 
     # run_annotate_gsnapl_m8_with_taxids
@@ -977,7 +983,7 @@ def run_bowtie2(sample_name, input_fa_1, input_fa_2, bowtie_genome_s3_path,
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT3, sample_s3_output_path))
 
 def run_gsnapl_remotely(sample, input_fa_1, input_fa_2,
-                        gsnap_ssh_key_s3_path, idseq_web,
+                        gsnap_ssh_key_s3_path, environment,
                         result_dir, sample_s3_output_path, lazy_run):
     if lazy_run:
         # check if output already exists
@@ -1009,6 +1015,7 @@ def run_gsnapl_remotely(sample, input_fa_1, input_fa_2,
     commands += "aws s3 cp %s/%s %s/;" % \
                  (remote_work_dir, GSNAPL_OUT, sample_s3_output_path)
     # check if remote machins has enough capacity
+    idseq_web = get_url_for_idseq_machine_db(environment)
     logging.getLogger().info("waiting for server")
     gsnapl_instance_ip = wait_for_server_ip('GSNAPL', key_path, remote_username, idseq_web, GSNAPL_MAX_CONCURRENT)
     logging.getLogger().info("starting alignment on machine " + gsnapl_instance_ip)
@@ -1192,7 +1199,7 @@ def main():
     global KEY_S3_PATH
     global STAR_GENOME
     global BOWTIE2_GENOME
-    global IDSEQ_WEB
+    global ENVIRONMENT
     INPUT_BUCKET = os.environ.get('INPUT_BUCKET', INPUT_BUCKET)
     OUTPUT_BUCKET = os.environ.get('OUTPUT_BUCKET', OUTPUT_BUCKET)
     KEY_S3_PATH = os.environ.get('KEY_S3_PATH', KEY_S3_PATH)
@@ -1208,7 +1215,7 @@ def main():
     SAMPLE_LIBRARY = os.environ.get('SAMPLE_LIBRARY', '')
     SAMPLE_SEQUENCER = os.environ.get('SAMPLE_SEQUENCER', '')
     SAMPLE_NOTES = os.environ.get('SAMPLE_NOTES', '')
-    IDSEQ_WEB = os.environ.get('IDSEQ_WEB', IDSEQ_WEB)
+    ENVIRONMENT = os.environ.get('ENVIRONMENT', ENVIRONMENT)
     sample_s3_input_path = INPUT_BUCKET.rstrip('/')
     sample_s3_output_path = OUTPUT_BUCKET.rstrip('/')
 
@@ -1216,7 +1223,7 @@ def main():
                STAR_GENOME, BOWTIE2_GENOME,
                KEY_S3_PATH, KEY_S3_PATH, ACCESSION2TAXID,
                DEUTEROSTOME_TAXIDS, TAXID_TO_INFO, DB_SAMPLE_ID,
-               AWS_BATCH_JOB_ID, IDSEQ_WEB, True)
+               AWS_BATCH_JOB_ID, ENVIRONMENT, True)
 
 if __name__=="__main__":
     main()

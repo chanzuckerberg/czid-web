@@ -147,7 +147,8 @@ class Sample < ApplicationRecord
   def pipeline_command
     script_name = File.basename(IdSeqPipeline::S3_SCRIPT_LOC)
     batch_command_env_variables = "INPUT_BUCKET=#{sample_input_s3_path} OUTPUT_BUCKET=#{sample_output_s3_path} " \
-      "DB_SAMPLE_ID=#{id} SAMPLE_HOST=#{sample_host} SAMPLE_LOCATION=#{sample_location} " \
+      "ENVIRONMENT=#{Rails.env} DB_SAMPLE_ID=#{id} " \
+      "SAMPLE_HOST=#{sample_host} SAMPLE_LOCATION=#{sample_location} " \
       "SAMPLE_DATE=#{sample_date} SAMPLE_TISSUE=#{sample_tissue} SAMPLE_TEMPLATE=#{sample_template} " \
       "SAMPLE_LIBRARY=#{sample_library} SAMPLE_SEQUENCER=#{sample_sequencer} SAMPLE_NOTES=#{sample_notes} "
     if s3_star_index_path.present?
