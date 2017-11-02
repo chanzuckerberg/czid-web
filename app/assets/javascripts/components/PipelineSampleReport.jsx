@@ -11,6 +11,7 @@ class PipelineSampleReport extends React.Component {
     this.applyNewFilterThresholds = this.applyNewFilterThresholds.bind(this);
     this.applyExcludedCategories = this.applyExcludedCategories.bind(this);
     this.applyGenusFilter = this.applyGenusFilter.bind(this);
+    this.expandOrCollapseGenus = this.expandOrCollapseGenus.bind(this);
   }
 
   refreshPage(overrides) {
@@ -58,7 +59,7 @@ class PipelineSampleReport extends React.Component {
   }
 
   render_name(tax_info, report_details) {
-    foo = <i>{tax_info.name}</i>;
+    let foo = <i>{tax_info.name}</i>;
     if (tax_info.tax_id > 0) {
       if (report_details.taxon_fasta_flag) {
         taxon_fasta_url = `/pipeline_outputs/${report_details.pipeline_info.id}/fasta/${tax_info.tax_level}/${tax_info.tax_id}/NT_or_NR`
@@ -69,11 +70,24 @@ class PipelineSampleReport extends React.Component {
     }
     if (tax_info.tax_level == 1) {
       // indent species rows
-      foo = <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{foo}</span>
+      foo = <div className='species-name'>{foo}</div>;
     } else {
       // emphasize genus, soften category and species count
       category_name = tax_info.tax_id == -200 ? '' : tax_info.category_name;
-      foo = <span><b>{foo}</b>&nbsp;&nbsp;&nbsp;&nbsp;<span style={{'color':'#A0A0A0'}}><i>({tax_info.species_count}&nbsp;{category_name}&nbsp;species)</i></span></span>
+      // Most groups are initially expanded, so they get a toggle with fa-minus initial state.
+      plus_or_minus = <i className={`fa fa-minus ${tax_info.tax_id}`} onClick={this.expandOrCollapseGenus}></i>;
+      if (tax_info.tax_id <= 0) {
+        // Except for group "All taxa without genus classification", which is initially collapsed.
+        plus_or_minus = <i className={`fa fa-plus ${tax_info.tax_id}`} onClick={this.expandOrCollapseGenus}></i>;
+      }
+      // Except in Genus view, nothing is expandable.
+      if (this.props.report_page_params.view_level == 'genus') {
+        plus_or_minus = '';
+      }
+      foo = <div>
+              <div className='genus-name'> {plus_or_minus} {foo}</div>
+              <i className='count-info'>({tax_info.species_count} {category_name} species)</i>
+            </div>;
     }
     return foo;
   }
@@ -120,7 +134,28 @@ class PipelineSampleReport extends React.Component {
   }
 
   row_class(tax_info) {
-    return tax_info.tax_level == 2 ? 'report-row-genus' : 'report-row-species';
+    if (tax_info.tax_level == 2) {
+      return `report-row-genus ${tax_info.genus_taxid}`;
+    }
+    if (tax_info.genus_taxid < 0) {
+      // The "all taxa without genus classification" group is initially collapsed.
+      return `report-row-species ${tax_info.genus_taxid} hidden`;
+    }
+    return `report-row-species ${tax_info.genus_taxid}`;
+  }
+
+  expandOrCollapseGenus(e) {
+    // className as set in render_name() is like 'fa fa-plus ${taxId}'
+    const className = e.target.attributes.class.nodeValue;
+    const attr = className.split(' ');
+    const taxId = attr[2];
+    $(`.report-row-species.${taxId}`).toggleClass('hidden');
+    // HACK.  Flipping plus/minus should be done with React, not DOM change.
+    if (attr[1] == 'fa-plus') {
+      e.target.attributes.class.nodeValue = `fa fa-minus ${taxId}`;
+    } else {
+      e.target.attributes.class.nodeValue = `fa fa-plus ${taxId}`;
+    }
   }
 
   render() {
@@ -150,7 +185,7 @@ class PipelineSampleReport extends React.Component {
         <div id="reports" className="reports-screen tab-screen col s12">
           <div className="tab-screen-content">
             <div className="row">
-              <div className="col s2">
+              <div className="col s2 reports-sidebar">
                 {report_filter}
               </div>
               <div className="col s10 reports-main ">
@@ -164,13 +199,13 @@ class PipelineSampleReport extends React.Component {
                     { this.render_column_header('NT', 'r',   'nt_r')      }
                     { this.render_column_header('NT', '%id', 'nt_percentidentity')    }
                     { this.render_column_header('NT', 'AL',   'nt_alignmentlength')    }
-                    { this.render_column_header('NT', 'Lg1/E',  'nt_neglogevalue')    }
+                    { this.render_column_header('NT', 'Log(1/E)',  'nt_neglogevalue')    }
                     { this.render_column_header('NR', 'Z',   'nr_zscore') }
                     { this.render_column_header('NR', 'rPM', 'nr_rpm')    }
                     { this.render_column_header('NR', 'r',   'nr_r')      }
                     { this.render_column_header('NR', '%id', 'nr_percentidentity')    }
                     { this.render_column_header('NR', 'AL',   'nr_alignmentlength')    }
-                    { this.render_column_header('NR', 'Lg1/E',  'nr_neglogevalue')    }
+                    { this.render_column_header('NR', 'Log(1/E)',  'nr_neglogevalue')    }
                   </tr>
                   </thead>
                   <tbody>
