@@ -18,11 +18,17 @@ class ReportFilter extends React.Component {
     this.applyFilters = this.applyFilters.bind(this);
     this.applyExcludedCategories = this.applyExcludedCategories.bind(this);
     this.applyGenusFilter = this.applyGenusFilter.bind(this);
+    this.enableFilters = this.enableFilters.bind(this);
+    this.clearGenusSearch = this.clearGenusSearch.bind(this);
   }
 
   static genusSearchValueFor(selected_genus) {
     genus_search_value = selected_genus == 'None' ? '' : selected_genus;
     return {genus_search_value};
+  }
+
+  enableFilters() {
+    this.props.enableFilters();
   }
 
   applyViewLevel(event) {
@@ -46,6 +52,10 @@ class ReportFilter extends React.Component {
     this.props.applyGenusFilter(selected_genus);
   }
 
+  clearGenusSearch() {
+    this.applyGenusFilter('None');
+  }
+
   componentDidMount() {
     $('.genus-autocomplete-container div input').on('focus keyup', () => {
       $('.genus-autocomplete-container div input + div').removeAttr('style');
@@ -53,142 +63,64 @@ class ReportFilter extends React.Component {
     });
   }
 
+  thresholdInput(metric_token, visible_metric_name) {
+    return (
+      <div className='col s12'>
+        <div className='col s8'>
+          <div className='threshold-label'>
+            <label htmlFor={`threshold_${metric_token}`}>
+              {visible_metric_name} &ge;
+            </label>
+          </div>
+        </div>
+        <div className='col s4 input-container'>
+          <input
+          onChange={this.setFilterThreshold.bind(this, `threshold_${metric_token}`)}
+          name="group2"
+          defaultValue={this.props.report_page_params[`threshold_${metric_token}`]}
+          id={`threshold_${metric_token}`}
+          type="text" />
+        </div>
+      </div>
+    );
+  }
+
   render() {
     align_right = {'textAlign': 'right'};
     threshold_filters = (
       <div className="filter-controls">
       <div className="filter-title">
-        Thresholds and category filters disabled by genus search.
+        {this.props.report_page_params.disable_filters == 0 ?
+        <a href="#" onClick={this.clearGenusSearch}>Click to clear genus search and enable filters.</a> :
+        <a href="#" onClick={this.enableFilters}>Click to enable filters.</a>}
       </div>
       </div>
     );
-    if (this.props.report_page_params.selected_genus == 'None') {
+    if (this.props.report_page_params.disable_filters == 0 && this.props.report_page_params.selected_genus == 'None') {
       threshold_filters = (
         <div className="filter-controls">
-        <div className="filter-title">
-          THRESHOLDS
-        </div>
-        <div className="filter-row row">
-          <div className='col s12'>
-            <div className='col s7 filter-label'>
-              <div className='threshold-label'>
-                <label htmlFor="threshold_z">
-                  Z &ge;
-                </label>
-              </div>
-            </div>
-            <div className='col s5 input-container'>
-              <input
-              onChange={this.setFilterThreshold.bind(this, 'threshold_zscore')}
-              name="group2"
-              defaultValue={this.props.report_page_params['threshold_zscore']}
-              id="threshold_z"
-              type="text" />
-            </div>
+          <div className="filter-title">
+            THRESHOLDS
           </div>
-
-          <div className="col s12">
-            <div className='col s7 filter-label'>
-              <div className='threshold-label'>
-                <label htmlFor="threshold_rpm">
-                 rPM &ge;
-                </label>
-              </div>
-            </div>
-            <div className='col s5 input-container'>
-              <input
-              onChange={this.setFilterThreshold.bind(this, 'threshold_rpm')}
-              name="group2"
-              defaultValue={this.props.report_page_params['threshold_rpm']}
-              id="threshold_rpm"
-              type="text"/>
-            </div>
+          <div className="filter-row row">
+            {this.thresholdInput('zscore', 'Z')}
+            {this.thresholdInput('rpm', 'rPM')}
+            {this.thresholdInput('r', 'r')}
+            {this.thresholdInput('aggregatescore', 'NT+NR*')}
+            {this.thresholdInput('percentidentity', '%id')}
+            {this.thresholdInput('neglogevalue', 'log(1/E)')}
           </div>
-
-          <div className="col s12">
-            <div className='col s7 filter-label'>
-              <div className='threshold-label'>
-                <label htmlFor="threshold_r">
-                r &ge;
-                </label>
-              </div>
-            </div>
-            <div className='col s5 input-container'>
-              <input
-              onChange={this.setFilterThreshold.bind(this, 'threshold_r')}
-              name="group2"
-              defaultValue={this.props.report_page_params['threshold_r']}
-              id="threshold_r"
-              type="text"/>
-            </div>
-          </div>
-
-          <div className="col s12">
-            <div className='col s7 filter-label'>
-              <div className='threshold-label'>
-                <label htmlFor="threshold_aggregatescore">
-                 NT+NR* &ge;
-                </label>
-              </div>
-            </div>
-            <div className='col s5 input-container'>
-              <input
-              onChange={this.setFilterThreshold.bind(this, 'threshold_aggregatescore')}
-              name="group2"
-              defaultValue={this.props.report_page_params['threshold_aggregatescore']}
-              id="threshold_aggregatescore"
-              type="text"/>
-            </div>
-          </div>
-
-          <div className="col s12">
-            <div className='col s7 filter-label'>
-              <div className='threshold-label'>
-                <label htmlFor="threshold_percentidentity">
-                  %id &ge;
-                </label>
-              </div>
-            </div>
-            <div className='col s5 input-container'>
-              <input
-              onChange={this.setFilterThreshold.bind(this, 'threshold_percentidentity')}
-              name="group2"
-              defaultValue={this.props.report_page_params['threshold_percentidentity']}
-              id="threshold_percentidentity"
-              type="text"/>
-            </div>
-          </div>
-
-          <div className="col s12">
-            <div className='col s7 filter-label'>
-              <div className='threshold-label'>
-                <label htmlFor="threshold_neglogevalue">
-                  log(1/E) &ge;
-                </label>
-              </div>
-            </div>
-             <div className='col s5 input-container'>
-              <input
-              onChange={this.setFilterThreshold.bind(this, 'threshold_neglogevalue')}
-              name="group2"
-              defaultValue={this.props.report_page_params['threshold_neglogevalue']}
-              id="threshold_neglogevalue"
-              type="text"/>
-              </div>
+          <div className="apply-filter-button center-align">
+            <a onClick={this.applyFilters}
+               className="btn btn-flat waves-effect grey text-grey text-lighten-5 waves-light apply-filter-button">
+              Apply filter
+            </a>
           </div>
         </div>
-
-        <div className="apply-filter-button center-align">
-          <a onClick={this.applyFilters}
-             className="btn btn-flat waves-effect grey text-grey text-lighten-5 waves-light apply-filter-button">
-            Apply filter
-          </a>
-        </div>
-      </div>
-    );
+      );
   }
   category_filter = '';
-  if (this.props.report_page_params.selected_genus == 'None') {
+  if (this.props.report_page_params.disable_filters == 0 && this.props.report_page_params.selected_genus == 'None') {
     category_filter = (
         <div className="filter-controls">
           <div className="filter-title">
@@ -205,6 +137,35 @@ class ReportFilter extends React.Component {
             })}
             { this.all_categories.length < 1 ? <p>None found</p> : '' }
           </div>
+      </div>
+    );
+  }
+  genus_search = '';
+  if (this.props.report_page_params.disable_filters == 0) {
+    genus_search = (
+      <div className="filter-controls">
+        <div className="filter-title">
+          GENUS SEARCH
+        </div>
+        <div className="filter-values genus-autocomplete-container">
+          <ReactAutocomplete
+            inputProps={{ placeholder: 'Genus name here' }}
+            items={this.genus_search_items}
+            shouldItemRender={(item, value) => item == 'None' || item.toLowerCase().indexOf(value.toLowerCase()) > -1}
+            getItemValue={item => item}
+            renderItem={(item, highlighted) =>
+              <div
+                key={item}
+                style={{ backgroundColor: highlighted ? '#eee' : 'transparent'}}
+              >
+                {item}
+              </div>
+            }
+            value={this.state.genus_search_value}
+            onChange={(e) => this.setState(ReportFilter.genusSearchValueFor(e.target.value))}
+            onSelect={this.applyGenusFilter}
+         />
+        </div>
       </div>
     );
   }
@@ -251,30 +212,7 @@ class ReportFilter extends React.Component {
                   </div>
                 </div>
 
-                <div className="filter-controls">
-                  <div className="filter-title">
-                    GENUS SEARCH
-                  </div>
-                  <div className="filter-values genus-autocomplete-container">
-          					<ReactAutocomplete
-                      inputProps={{ placeholder: 'Genus name here' }}
-                      items={this.genus_search_items}
-                      shouldItemRender={(item, value) => item == 'None' || item.toLowerCase().indexOf(value.toLowerCase()) > -1}
-                      getItemValue={item => item}
-                      renderItem={(item, highlighted) =>
-                        <div
-                          key={item}
-                          style={{ backgroundColor: highlighted ? '#eee' : 'transparent'}}
-                        >
-                          {item}
-                        </div>
-                      }
-                      value={this.state.genus_search_value}
-                      onChange={(e) => this.setState(ReportFilter.genusSearchValueFor(e.target.value))}
-					            onSelect={this.applyGenusFilter}
-					         />
-                  </div>
-                </div>
+                {genus_search}
 
                 {threshold_filters}
 

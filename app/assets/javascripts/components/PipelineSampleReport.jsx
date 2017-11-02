@@ -3,8 +3,9 @@ class PipelineSampleReport extends React.Component {
   constructor(props) {
     super(props);
     this.report_details = props.report_details;
-    this.real_length = props.taxonomy_details[0];
-    this.taxonomy_details = props.taxonomy_details[1];
+    this.rows_passing_filters = props.taxonomy_details[0];
+    this.rows_total = props.taxonomy_details[1];
+    this.taxonomy_details = props.taxonomy_details[2];
     this.all_genera_in_sample = props.all_genera_in_sample;
     this.all_categories = props.all_categories;
     this.applyViewLevel = this.applyViewLevel.bind(this);
@@ -12,11 +13,23 @@ class PipelineSampleReport extends React.Component {
     this.applyExcludedCategories = this.applyExcludedCategories.bind(this);
     this.applyGenusFilter = this.applyGenusFilter.bind(this);
     this.expandOrCollapseGenus = this.expandOrCollapseGenus.bind(this);
+    this.disableFilters = this.disableFilters.bind(this);
+    this.enableFilters = this.enableFilters.bind(this);
   }
 
   refreshPage(overrides) {
     new_params = Object.assign({}, this.props.report_page_params, overrides);
     window.location = location.protocol + '//' + location.host + location.pathname + '?' + jQuery.param(new_params);
+  }
+
+  disableFilters() {
+    disable_filters = 1;
+    this.refreshPage({disable_filters});
+  }
+
+  enableFilters() {
+    disable_filters = 0;
+    this.refreshPage({disable_filters});
   }
 
   applyViewLevel(view_level) {
@@ -52,8 +65,6 @@ class PipelineSampleReport extends React.Component {
     overrides = {selected_genus};
     if (selected_genus != 'None') {
       overrides.view_level = 'species';
-    } else {
-      overrides.view_level = 'genus';
     }
     this.refreshPage(overrides);
   }
@@ -162,6 +173,20 @@ class PipelineSampleReport extends React.Component {
     const parts = this.props.report_page_params.sort_by.split("_")
     const sort_column = parts[1] + "_" + parts[2];
     var t0 = Date.now();
+    filter_stats = this.rows_passing_filters + ' rows passing filters, out of ' + this.rows_total + ' total rows.';
+    if (this.props.report_page_params.disable_filters == 1) {
+      filter_stats = this.rows_total + ' unfiltered rows.';
+    }
+    filter_row_stats = (
+      <span>
+        {this.rows_passing_filters == this.taxonomy_details.length ?
+          ('Showing all ' + filter_stats) :
+          ('Due to resource limits, showing only ' + this.taxonomy_details.length + ' of the ' + filter_stats)}
+        <br/>
+        {this.rows_passing_filters < this.rows_total && this.props.report_page_params.disable_filters == 0 ? <a href="#" onClick={this.disableFilters}>Click to disable filters.</a> : ''}
+        {this.props.report_page_params.disable_filters == 1 ? <a href="#" onClick={this.enableFilters}>Click to enable filters.</a> : ''}
+      </span>
+    );
     report_filter =
       <ReportFilter
         all_categories = { this.all_categories }
@@ -173,6 +198,7 @@ class PipelineSampleReport extends React.Component {
         applyNewFilterThresholds = { this.applyNewFilterThresholds }
         applyExcludedCategories = { this.applyExcludedCategories }
         applyGenusFilter = { this.applyGenusFilter }
+        enableFilters = { this.enableFilters }
       />;
     // To do: improve presentation and place download_button somewhere on report page
     download_button = (
@@ -233,11 +259,7 @@ class PipelineSampleReport extends React.Component {
                   })}
                   </tbody>
                 </table>
-                <span>
-                {this.real_length == this.taxonomy_details.length ?
-                  ('Showing all ' + this.real_length + ' rows passing filters.') :
-                  ('Due to resource limits, showing only ' + this.taxonomy_details.length + ' of the ' + this.real_length + ' rows passing filters.')}
-                </span>
+              {filter_row_stats}
               </div>
             </div>
           </div>

@@ -579,6 +579,9 @@ module ReportHelper
       rows << tax_info
     end
 
+    # Total number of rows for view level, before application of filters.
+    rows_total = rows.length
+
     # Compute sort key and sort.
     sort_by = decode_sort_by(params[:sort_by])
     rows.each do |tax_info|
@@ -591,8 +594,8 @@ module ReportHelper
       apply_filters!(rows, tax_2d, all_genera, params)
     end
 
-    # This is displayed at the bottom of the page.
-    real_length = rows.length
+    # These stats are displayed at the bottom of the page.
+    rows_passing_filters = rows.length
 
     # HACK
     rows = rows[0...MAX_ROWS]
@@ -607,7 +610,7 @@ module ReportHelper
     t5 = wall_clock_ms
     logger.info "Data processing took #{t5 - t1} seconds (#{t5 - t0} with I/O)."
 
-    [[real_length, rows], all_genera_in_sample]
+    [[rows_passing_filters, rows_total, rows], all_genera_in_sample]
   end
 
   def get_tax_detail(tax_info, column_name)
