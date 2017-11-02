@@ -219,14 +219,14 @@ class PipelineSampleReport extends React.Component {
                         { this.render_number(tax_info.NT.zscore, sort_column == 'nt_zscore', 1) }
                         { this.render_number(tax_info.NT.rpm, sort_column == 'nt_rpm', 1)       }
                         { this.render_number(tax_info.NT.r, sort_column == 'nt_r', 0)           }
-                        { this.render_number(tax_info.NT.percentidentity, sort_column == 'nt_zscore', 1) }
-                        { this.render_number(tax_info.NT.alignmentlength, sort_column == 'nt_rpm', 1)       }
+                        { this.render_number(tax_info.NT.percentidentity, sort_column == 'nt_percentidentity', 1) }
+                        { this.render_number(tax_info.NT.alignmentlength, sort_column == 'nt_alignmentlength', 1)       }
                         { this.render_number(tax_info.NT.neglogevalue, sort_column == 'nt_neglogevalue', 0) }
                         { this.render_number(tax_info.NR.zscore, sort_column == 'nr_zscore', 1) }
                         { this.render_number(tax_info.NR.rpm, sort_column == 'nr_rpm', 1)       }
                         { this.render_number(tax_info.NR.r, sort_column == 'nr_r', 0)           }
-                        { this.render_number(tax_info.NR.percentidentity, sort_column == 'nr_zscore', 1) }
-                        { this.render_number(tax_info.NR.alignmentlength, sort_column == 'nr_rpm', 1)       }
+                        { this.render_number(tax_info.NR.percentidentity, sort_column == 'nr_percentidentity', 1) }
+                        { this.render_number(tax_info.NR.alignmentlength, sort_column == 'nr_alignmentlength', 1)       }
                         { this.render_number(tax_info.NR.neglogevalue, sort_column == 'nr_neglogevalue', 0) }
                       </tr>
                     )
