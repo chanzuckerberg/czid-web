@@ -419,3 +419,12 @@ input[type=search]:focus:not([readonly]) {
   border-bottom: none !important;
   box-shadow: none !important;
 }
+.no-report {
+  .fa-spinner {
+    color: #414367;
+    cursor: pointer;
+  }
+  .failed {
+    font-weight: bold;
+  }
+}

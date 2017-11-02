@@ -1,1 +1,1 @@
-<%= react_component 'SampleUpload', {projects: @projects, csrf: form_authenticity_token, host_genomes: @host_genomes}%>
+<%= react_component 'SampleUpload', {projects: @projects, csrf: form_authenticity_token, host_genomes: @host_genomes, loggedin_user: current_user}%>
