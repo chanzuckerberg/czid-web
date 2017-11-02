@@ -25,7 +25,7 @@ class PipelineSampleReads extends React.Component {
     PipelineSampleReads.setTab('pipeline_display','reports');
   }
 
-  shouldProcessPipeline(status) {
+  pipelineInProgress(status) {
     if (status === null || this.state.rerun === true ) {
       return true;
     } else if ( status === 'ERROR' || status === 'CHECKED' || status === 'FAILED') {
@@ -120,7 +120,7 @@ class PipelineSampleReads extends React.Component {
         sample_id = {this.sampleId}
       />;
     } else {
-      d_report = <div className="center-align text-grey text-lighten-2 no-report">{ this.shouldProcessPipeline(this.pipelineStatus) ? <div>Processing Sample...<p><i className='fa fa-spinner fa-spin fa-3x'></i></p></div> : 
+      d_report = <div className="center-align text-grey text-lighten-2 no-report">{ this.pipelineInProgress(this.pipelineStatus) ? <div>Processing Sample...<p><i className='fa fa-spinner fa-spin fa-3x'></i></p></div> : 
         <div>
           <h6 className="failed"><i className="fa fa-frown-o"></i>  {this.state.failureText}  </h6>
           <p><a onClick={ this.rerunPipeline }className="custom-button small"><i className="fa fa-repeat left"></i>RERUN PIPELINE</a></p>

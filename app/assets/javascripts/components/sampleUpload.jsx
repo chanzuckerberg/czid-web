@@ -164,7 +164,7 @@ class SampleUpload extends React.Component {
         sample_memory: this.state.memory,
         host_genome_id: this.state.hostId,
         host_genome_name: this.state.hostName,
-        status: 'created'
+        status: ''
       },
       authenticity_token: this.csrf
     })
@@ -181,7 +181,6 @@ class SampleUpload extends React.Component {
       that.setState({
         invalid: true,
         serverErrors: error.response.data,
-        errorMessage: 'Failed to create sample'
       })
     });
   }
@@ -199,7 +198,7 @@ class SampleUpload extends React.Component {
         sample_memory: this.state.selectedMemory,
         host_genome_id: this.state.selectedHostGenomeId,
         host_genome_name: this.state.selectedHostGenome,
-        status: 'created'
+        status: ''
       },
       authenticity_token: this.csrf
     })
@@ -216,7 +215,6 @@ class SampleUpload extends React.Component {
      that.setState({
       invalid: true,
       serverErrors: error.response.data,
-      errorMessage: 'Failed to update sample'
      });
     });
   }
