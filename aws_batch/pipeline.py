@@ -492,7 +492,7 @@ def wait_for_server(service_name, command, max_concurrent):
 
 def wait_for_server_ip(service_name, key_path, remote_username, idseq_web, max_concurrent):
     while True:
-        gsnapl_instance_ips = subprocess.check_output("curl %s/gsnapl_ips" % IDSEQ_WEB).split(",")
+        gsnapl_instance_ips = subprocess.check_output("curl %s/gsnapl_machines" % idseq_web, shell=True).split(",")
         ip_nproc_dict = {}
         for ip in gsnapl_instance_ips:
             command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "ps aux|grep gsnapl|grep -v bash"' % (key_path, remote_username, ip)
@@ -511,7 +511,7 @@ def wait_for_server_ip(service_name, key_path, remote_username, idseq_web, max_c
 '''
 def wait_for_server_cpu(service_name, idseq_web, max_cpu_util):
     while True:
-        gsnapl_instance_ips = subprocess.check_output("curl %s/gsnapl_ips" % IDSEQ_WEB).split(",")
+        gsnapl_instance_ips = subprocess.check_output("curl %s/gsnapl_machines" % idseq_web, shell=True).split(",")
         ip_cpu_dict = {}
         for ip in gsnapl_instance_ips:
             get_metrics_command = "aws cloudwatch get-metric-statistics --metric-name CPUUtilization --namespace AWS/EC2 --statistics Maximum " \

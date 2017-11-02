@@ -8,7 +8,7 @@ class GsnaplMachinesController < ApplicationController
     respond_to do |format|
       if @gsnapl_machine.save
         format.html
-        format.json { render json: status: :created, location: @gsnapl_machine }
+        format.json { render json: @gsnapl_machine.to_json, status: :created }
       else
         format.html
         format.json { render json: @gsnapl_machine.errors, status: :unprocessable_entity }

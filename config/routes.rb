@@ -29,4 +29,6 @@ Rails.application.routes.draw do
   get 'pipeline_outputs/:id/nonhost_fasta', to: 'pipeline_outputs#send_nonhost_fasta'
   get 'pipeline_outputs/:id/unidentified_fasta', to: 'pipeline_outputs#send_unidentified_fasta'
   get 'reports/:id/:view_level/csv', to: 'reports#send_report_csv'
+  post 'gsnapl_machines', to: 'gsnapl_machines#create'
+  get 'gsnapl_machines', to: 'gsnapl_machines#index'
 end
