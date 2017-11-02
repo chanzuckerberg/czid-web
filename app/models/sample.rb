@@ -28,7 +28,6 @@ class Sample < ApplicationRecord
   has_many :input_files, dependent: :destroy
   accepts_nested_attributes_for :input_files
   validate :input_files_checks
-  validates :name, uniqueness: true
   after_create :initiate_input_file_upload
 
   before_save :check_host_genome, :check_status
