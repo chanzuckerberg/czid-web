@@ -9,23 +9,23 @@ class ProjectVisualization extends React.Component {
     this.heatmapData = [{
       pathogen: 'Clavispora',
       readInfo: [{
-        rpm: 50.091,
+        rpm: 2.091,
         rCount: 140,
         sample: 'MMC-3--H2O_S6'
       }, {
-        rpm: 0.181,
+        rpm: 3.65,
         rCount: 8,
         sample: 'MMC-4-102A_S7'
-      },{
-        rpm: 0.181,
+      }, {
+        rpm: 10.181,
         rCount: 8,
         sample: 'MMC-5-102A_S8'
       }, {
-        rpm: 0.181,
+        rpm: 424,
         rCount: 8,
         sample: 'MMC-6-102A_S9'
       }, {
-        rpm: 0.181,
+        rpm: 32.103,
         rCount: 8,
         sample: 'MMC-7-102A_S10'
       }, {
@@ -33,41 +33,41 @@ class ProjectVisualization extends React.Component {
         rCount: 8,
         sample: 'MMC-8-102A_S11'
       }, {
-        rpm: 0.181,
+        rpm: 948.22,
         rCount: 8,
         sample: 'MMC-9-102A_S12'
-      },{
-        rpm: 0.181,
+      }, {
+        rpm: 438.8,
         rCount: 8,
         sample: 'MMC-10-102A_S13'
       }, {
-        rpm: 0.181,
+        rpm: 365,
         rCount: 8,
         sample: 'MMC-11-102A_S14'
       }, {
-        rpm: 0.181,
+        rpm: 901,
         rCount: 8,
         sample: 'MMC-12-102A_S15'
       }]
     }, {
       pathogen: 'Spirometra',
       readInfo: [{
-        rpm: 50.091,
+        rpm: 691,
         rCount: 140,
         sample: 'MMC-3--H2O_S6'
       }, {
-        rpm: 0.181,
+        rpm: 432,
         rCount: 8,
         sample: 'MMC-4-102A_S7'
-      },{
-        rpm: 0.181,
+      } ,{
+        rpm: 772,
         rCount: 8,
         sample: 'MMC-5-102A_S8'
       }, {
-        rpm: 0.181,
+        rpm: 243.4,
         rCount: 8,
         sample: 'MMC-6-102A_S9'
-      },{
+      } ,{
         rpm: 0.181,
         rCount: 8,
         sample: 'MMC-8-102A_S11'
@@ -75,12 +75,12 @@ class ProjectVisualization extends React.Component {
         rpm: 0.181,
         rCount: 8,
         sample: 'MMC-9-102A_S12'
-      },{
-        rpm: 0.181,
+      }, {
+        rpm: 12.94,
         rCount: 8,
         sample: 'MMC-10-102A_S13'
       }, {
-        rpm: 0.181,
+        rpm: 82.21,
         rCount: 8,
         sample: 'MMC-11-102A_S14'
       }, {
@@ -91,186 +91,187 @@ class ProjectVisualization extends React.Component {
     }, {
       pathogen: 'Klebsiella',
       readInfo: [{
-        rpm: 50.091,
+        rpm: 13,
         rCount: 140,
         sample: 'MMC-3--H2O_S6'
       }, {
-        rpm: 0.181,
+        rpm: 4.91,
         rCount: 8,
         sample: 'MMC-4-102A_S7'
-      },{
-        rpm: 0.181,
+      }, {
+        rpm: 110,
         rCount: 8,
         sample: 'MMC-5-102A_S8'
       }, {
-        rpm: 0.181,
+        rpm: 3424.1,
         rCount: 8,
         sample: 'MMC-6-102A_S9'
       }, {
-        rpm: 0.181,
+        rpm: 13,
         rCount: 8,
         sample: 'MMC-7-102A_S10'
       }, {
-        rpm: 0.181,
+        rpm: 234,
         rCount: 8,
         sample: 'MMC-8-102A_S11'
       }, {
-        rpm: 0.181,
+        rpm: 9439,
         rCount: 8,
         sample: 'MMC-9-102A_S12'
-      },{
-        rpm: 0.181,
+      }, {
+        rpm: 234.2,
         rCount: 8,
         sample: 'MMC-10-102A_S13'
       }, {
-        rpm: 0.181,
+        rpm: 11.1,
         rCount: 8,
         sample: 'MMC-11-102A_S14'
       }, {
-        rpm: 0.181,
+        rpm: 149.10,
         rCount: 8,
         sample: 'MMC-12-102A_S15'
       }]
     }, {
       pathogen: 'Streptococcus',
       readInfo: [{
-        rpm: 50.091,
-        rCount: 140,
+        rpm: 137.2,
+        rCount: 13,
         sample: 'MMC-3--H2O_S6'
       }, {
-        rpm: 0.181,
-        rCount: 8,
+        rpm: 237.24,
+        rCount: 24,
         sample: 'MMC-4-102A_S7'
-      },{
-        rpm: 0.181,
-        rCount: 8,
+      }, {
+        rpm: 938.21,
+        rCount: 24,
         sample: 'MMC-5-102A_S8'
       }, {
-        rpm: 0.181,
-        rCount: 8,
+        rpm: 383.2,
+        rCount: 632,
         sample: 'MMC-6-102A_S9'
       }, {
-        rpm: 0.181,
-        rCount: 8,
+        rpm: 245.1,
+        rCount: 53,
         sample: 'MMC-7-102A_S10'
       }, {
-        rpm: 0.181,
-        rCount: 8,
+        rpm: 132.22,
+        rCount: 35,
         sample: 'MMC-8-102A_S11'
       }, {
-        rpm: 0.181,
-        rCount: 8,
+        rpm: 43.221,
+        rCount: 23,
         sample: 'MMC-9-102A_S12'
-      },{
-        rpm: 0.181,
-        rCount: 8,
+      }, {
+        rpm: 34.21,
+        rCount: 3,
         sample: 'MMC-10-102A_S13'
       }, {
-        rpm: 0.181,
-        rCount: 8,
+        rpm: 654.123,
+        rCount: 28,
         sample: 'MMC-11-102A_S14'
       }, {
-        rpm: 0.181,
-        rCount: 8,
+        rpm: 243.51,
+        rCount: 84,
         sample: 'MMC-12-102A_S15'
       }]
     }, {
       pathogen: 'Ralstonia',
       readInfo: [{
-        rpm: 50.091,
+        rpm: 939.48,
         rCount: 140,
         sample: 'MMC-3--H2O_S6'
       }, {
-        rpm: 0.181,
+        rpm: 244.43,
         rCount: 8,
         sample: 'MMC-4-102A_S7'
-      },{
-        rpm: 0.181,
+      }, {
+        rpm: 412.30,
         rCount: 8,
         sample: 'MMC-5-102A_S8'
       }, {
-        rpm: 0.181,
+        rpm: 83.22,
         rCount: 8,
         sample: 'MMC-6-102A_S9'
       }, {
-        rpm: 0.181,
+        rpm: 341.24,
         rCount: 8,
         sample: 'MMC-7-102A_S10'
       }, {
-        rpm: 0.181,
+        rpm: 425.2,
         rCount: 8,
         sample: 'MMC-8-102A_S11'
       }, {
-        rpm: 0.181,
+        rpm: 829.21,
         rCount: 8,
         sample: 'MMC-9-102A_S12'
-      },{
-        rpm: 0.181,
+      }, {
+        rpm: 134.1,
         rCount: 8,
         sample: 'MMC-10-102A_S13'
       }, {
-        rpm: 0.181,
+        rpm: 53.1,
         rCount: 8,
         sample: 'MMC-11-102A_S14'
       }, {
-        rpm: 0.181,
+        rpm: 892.2,
         rCount: 8,
         sample: 'MMC-12-102A_S15'
       }]
     }, {
       pathogen: 'Delftia',
       readInfo: [{
-        rpm: 50.091,
+        rpm: 132.1,
         rCount: 140,
         sample: 'MMC-3--H2O_S6'
       }, {
-        rpm: 0.181,
+        rpm: 134.1,
         rCount: 8,
         sample: 'MMC-4-102A_S7'
-      },{
-        rpm: 0.181,
+      }, {
+        rpm: 342.24,
         rCount: 8,
         sample: 'MMC-5-102A_S8'
       }, {
-        rpm: 0.181,
+        rpm: 2421.13,
         rCount: 8,
         sample: 'MMC-6-102A_S9'
       }, {
-        rpm: 0.181,
+        rpm: 242.1,
         rCount: 8,
         sample: 'MMC-7-102A_S10'
       }, {
-        rpm: 0.181,
+        rpm: 2424.5,
         rCount: 8,
         sample: 'MMC-8-102A_S11'
       }, {
-        rpm: 0.181,
+        rpm: 2.402,
         rCount: 8,
         sample: 'MMC-9-102A_S12'
-      },{
-        rpm: 0.181,
+      }, {
+        rpm: 1342,
         rCount: 8,
         sample: 'MMC-10-102A_S13'
       }, {
-        rpm: 0.181,
+        rpm: 24.89,
         rCount: 8,
         sample: 'MMC-11-102A_S14'
       }, {
-        rpm: 0.181,
-        rCount: 8,
+        rpm: 2472,
+        rCount: 242,
         sample: 'MMC-12-102A_S15'
       }]
     }];
     const a = this.heatmapData.map(d => d.readInfo.length);
     this.totalPathogens = a.reduce((total, val) => total + val);
-    console.log('TOTAL pathogens', this.totalPathogens);
-    this.temp = new Array(this.totalPathogens);
+    this.temp = d3.range(this.totalPathogens);
     this.samples = ['MMC-4-102A_S7', 'MMC-3--H2O_S6',
     'MMC-5-102A_S8', 'MMC-6-102A_S9', 'MMC-7-102A_S10',
     'MMC-8-102A_S11', 'MMC-9-102A_S12', 'MMC-10-102A_S13',
     'MMC-11-102A_S14', 'MMC-12-102A_S15'];
     //
+    this.renderHeatMap = this.renderHeatMap.bind(this);
   }
+
 	componentDidMount() {
 		this.renderHeatMap();
     $('.card-collapse').click((e) => {
@@ -453,14 +454,8 @@ class ProjectVisualization extends React.Component {
                         </select>
                       </div>
                       <div className='color-scale-info'>
-                        Color Scale
-                        <ul>
-                          <li className='a'></li>
-                          <li className='b'></li>
-                          <li className='c'></li>
-                          <li className='d'></li>
-                          <li className='e'></li>
-                        </ul>
+                        <div className='scale-label'>Color scale range</div>
+                        <div id='color-scale'></div>
                       </div>
                    </div>
                 </div>
@@ -496,32 +491,41 @@ class ProjectVisualization extends React.Component {
     const xMargin = { left: margin.left + 10, right: margin.right + 10 };
     const dataLength = this.heatmapData.length;
     const totalSamples = this.samples.length;
+    const colors = ['#a021f0', '#ff26f4', '#ff7279', '#ff6201', '#ffec01'];
 
     const rectHeight =
       (canvas.height - margin.top - margin.bottom) / dataLength;
     const rectWidth =
       (canvas.width - xMargin.left - xMargin.right) / totalSamples;
 
+    const minMaxes = [];
+    this.heatmapData.map((data) => {
+      let minMax = d3.extent(data.readInfo, (d) => {
+        return d.rpm;
+      });
+      minMaxes.push(...minMax);
+    });
+    const colorMinMax = d3.extent(minMaxes);
+
+    const colorScale = d3
+    .scaleQuantile()
+    .domain(minMaxes)
+    .range(colors);
     svg
       .attr('width', canvas.width)
       .attr('height', canvas.height);
+
+    this.renderColorScale(colorMinMax, colorScale);
 
     const yScale = d3
       .scaleLinear()
       .domain([1, dataLength])
       .range([canvas.height - margin.bottom, margin.top]);
 
-    console.log('Y would be ', canvas.height - yScale(2));
-
     const xScale = d3
       .scaleLinear()
       .domain([1, totalSamples])
       .range([xMargin.left, canvas.width - xMargin.right - 20]);
-
-    const rectHeightScale = d3
-      .scaleLinear()
-      .domain([])
-      .range();
 
     const xAxis = d3
       .axisBottom(xScale)
@@ -532,7 +536,6 @@ class ProjectVisualization extends React.Component {
       .axisLeft(yScale)
       .ticks(dataLength - 1)
       .tickFormat((d, i) => {
-        console.log('Y Data', d);
         return this.heatmapData[i].pathogen;
       });
 
@@ -550,10 +553,8 @@ class ProjectVisualization extends React.Component {
       .attr('text-anchor', 'start')
       .attr('transform', `rotate(60)`);
 
-    //let readInfo;
     this.heatmapData.map((pathogen, i) => {
       let { readInfo } = pathogen;
-      console.log('Read info', readInfo);
       svg
         .append('g')
         .selectAll('rect')
@@ -562,16 +563,10 @@ class ProjectVisualization extends React.Component {
         .append('rect')
         .attr('height', rectHeight)
         .attr('width', rectWidth)
-        .attr('fill', (d, i) => {
-          if (i < 1) {
-            return '#c7c6c6';
-          }
-          return (i % 2 === 0) ? ((i % 3 === 0) ? '#9E9E9E' : '#757575') : '#424242';
-        })
+        .attr('fill', (d, i) => colorScale(d.rpm))
         .attr('stroke', '#fff')
         .attr('y', () => yScale(i + 1) - 30)
         .attr('x', (d, index) => {
-          console.log('Rectangles', d, 'Pos', index);
           let sampleName = readInfo[index].sample;
           let pos = this.samples.indexOf(sampleName);
           if (pos >= 0) {
@@ -583,5 +578,36 @@ class ProjectVisualization extends React.Component {
           return `RPM: ${data.rpm} R count: ${data.rCount}`;
         });
       });
+  }
+
+  renderColorScale(colorMinMax, colorScale) {
+    const colorScaleView = d3.select('#color-scale').append('svg');
+    const colorScaleMargin = { left: 10, right: 10, bottom: 10, top: 10 };
+    const colorScaleCanvas = { width: 300, height: 200 };
+    const quantiles = [colorMinMax[0], ...colorScale.quantiles()];
+    const gridHeight =
+      (colorScaleCanvas.height - colorScaleMargin.top - colorScaleMargin.bottom) / quantiles.length;
+    const gridWidth = 30;
+
+    colorScaleView
+      .attr('width', colorScaleCanvas.width)
+      .attr('height', colorScaleCanvas.height);
+
+    const c = colorScaleView.selectAll('g')
+      .data(quantiles).enter().append('g');
+      c
+      .append('rect')
+      .attr('fill', d => colorScale(d))
+      .attr('height', gridHeight)
+      .attr('width', 30)
+      .attr('stroke', '#fff')
+      .attr('y', (d, i) => i * gridHeight)
+      .attr('x', 0);
+      c
+      .append('text')
+      .text(d => `≥ ${d.toFixed(3)}`)
+      .attr('x', gridWidth + 5)
+      .attr('y', (d, i) => ((i * gridHeight) + (gridHeight / 1.5)))
+      .attr('fill', 'rgb(160, 160, 160)');
   }
 }
