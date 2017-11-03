@@ -5,6 +5,7 @@ class User < ApplicationRecord
   devise :database_authenticatable, :recoverable,
          :rememberable, :trackable, :validatable
   has_and_belongs_to_many :projects
+  has_many :samples
   ROLE_ADMIN = 1
 
   def as_json(_options = {})
