@@ -36,4 +36,8 @@ class InputFile < ApplicationRecord
   def file_path
     File.join(sample.sample_path, 'fastqs', name)
   end
+
+  def type
+    FILE_REGEX.match(name)[1]
+  end
 end
