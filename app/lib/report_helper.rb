@@ -10,14 +10,6 @@ module ReportHelper
   ZSCORE_WHEN_ABSENT_FROM_SAMPLE = -100
   ZSCORE_WHEN_ABSENT_FROM_BACKGROUND = 100
 
-  # TODO: For taxons that have no entry in the taxon_lineages table, we should
-  # substitute this value for genus_id, which allows us to group them
-  # all together;  this should match generate_aggregate_counts in
-  # app/models/pipeline_output.rb
-  MISSING_GENUS_ID = -200
-  MISSING_SPECIES_ID = -100
-  MISSING_SPECIES_ID_ALT = -1
-
   # For taxon_count 'species' rows without a corresponding 'genus' rows,
   # we create a fake singleton genus containing just that species;
   # the fake genus IDs start here:
@@ -231,7 +223,7 @@ module ReportHelper
       IF (
         taxon_lineages.genus_taxid IS NOT NULL,
         taxon_lineages.genus_taxid,
-        #{MISSING_GENUS_ID}
+        #{TaxonLineage::MISSING_GENUS_ID}
       )                                AS  genus_taxid,
       IF(
         taxon_counts.tax_level=#{TaxonCount::TAX_LEVEL_SPECIES},
@@ -368,7 +360,9 @@ module ReportHelper
         # TODO: Can we keep the accession numbers to show in these cases?
         level_str = tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES ? 'species' : 'genus'
         tax_info['name'] = "All taxa without #{level_str} classification"
-        if tax_id != MISSING_SPECIES_ID && tax_id != MISSING_SPECIES_ID_ALT && tax_id != MISSING_GENUS_ID
+        if tax_id == TaxonLineage::BLACKLIST_GENUS_ID
+          tax_info['name'] = "All artificial constructs"
+        elsif !(TaxonLineage::MISSING_LINEAGE_ID.values.include? tax_id)
           tax_info['name'] += " #{tax_id}"
         end
       else
@@ -477,12 +471,10 @@ module ReportHelper
         should_delete = COUNT_TYPES.all? { |count_type| tax_info[count_type][metric] < thresholds[metric] }
         break if should_delete
       end
-      if tax_info['tax_id'] != MISSING_GENUS_ID
+      if tax_info['tax_id'] != TaxonLineage::MISSING_GENUS_ID && tax_info['tax_id'] != TaxonLineage::BLACKLIST_GENUS_ID
         if excluded_categories.include? tax_info['category_name']
           # The only way a species and its genus can have different category
-          # names:  If genus_id == MISSING_GENUS_ID.  For all other species
-          # and genera, the category filter would exclude both the genus
-          # and species underneath that genus.
+          # names:  If genus_id == MISSING_GENUS_ID or BLACKLIST_GENUS_ID.
           should_delete = true
         end
       end
