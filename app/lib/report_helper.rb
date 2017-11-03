@@ -10,6 +10,10 @@ module ReportHelper
   ZSCORE_WHEN_ABSENT_FROM_SAMPLE = -100
   ZSCORE_WHEN_ABSENT_FROM_BACKGROUND = 100
 
+  DEFAULT_SAMPLE_NEGLOGEVALUE = 0.0
+  DEFAULT_SAMPLE_PERCENTIDENTITY = 0.0
+  DEFAULT_SAMPLE_ALIGNMENTLENGTH = 0.0
+
   # For taxon_count 'species' rows without a corresponding 'genus' rows,
   # we create a fake singleton genus containing just that species;
   # the fake genus IDs start here:
@@ -38,8 +42,29 @@ module ReportHelper
   # We do not allow underscores in metric names, sorry!
   METRICS = %w[r rpm zscore percentidentity alignmentlength neglogevalue aggregatescore].freeze
   COUNT_TYPES = %w[NT NR].freeze
-  PROPERTIES_OF_TAXID = %w[tax_id name tax_level genus_taxid category_name].freeze # note: no underscore in sortable column names
-  UNUSED_IN_UI_FIELDS = [:sort_key].freeze
+  PROPERTIES_OF_TAXID = %w[tax_id name tax_level genus_taxid superkingdom_taxid category_name].freeze # note: no underscore in sortable column names
+  UNUSED_IN_UI_FIELDS = ['superkingdom_taxid', :sort_key].freeze
+
+  # This query takes 1.4 seconds and the results are static, so we hardcoded it
+  # mysql> select distinct(superkingdom_taxid) as taxid, IF(superkingdom_name IS NOT NULL, superkingdom_name, 'Uncategorized') as name from taxon_lineages;
+  # +-------+---------------+
+  # | taxid | name          |
+  # +-------+---------------+
+  # |  -700 | Uncategorized |
+  # |     2 | Bacteria      |
+  # |  2157 | Archaea       |
+  # |  2759 | Eukaryota     |
+  # | 10239 | Viruses       |
+  # | 12884 | Viroids       |
+  # +-------+---------------+
+  ALL_CATEGORIES = [
+    { 'taxid' => 2, 'name' => "Bacteria" },
+    { 'taxid' => 2157, 'name' => "Archaea" },
+    { 'taxid' => 2759, 'name' => "Eukaryota" },
+    { 'taxid' => 10_239, 'name' => "Viruses" },
+    { 'taxid' => 12_884, 'name' => "Viroids" },
+    { 'taxid' => TaxonLineage::MISSING_SUPERKINGDOM_ID, 'name' => "Uncategorized" }
+  ].freeze
 
   # use the metric's NT <=> NR dual as a tertiary sort key (so, for example,
   # when you sort by NT R, entries without NT R will be ordered amongst
@@ -152,12 +177,11 @@ module ReportHelper
 
   def external_report_info(report, params)
     return {} if report.nil?
-    all_cats = all_categories
-    params = clean_params(params, all_cats)
+    params = clean_params(params, ALL_CATEGORIES)
     data = {}
     data[:report_details] = report_details(report)
     data[:taxonomy_details], data[:all_genera_in_sample] = taxonomy_details(report, params)
-    data[:all_categories] = all_cats
+    data[:all_categories] = ALL_CATEGORIES
     data[:report_page_params] = params
     data
   end
@@ -186,26 +210,7 @@ module ReportHelper
   end
 
   def all_categories
-    # This query takes 1.4 seconds and the results are static, so we hardcoded it
-    # mysql> select distinct(superkingdom_taxid) as taxid, IF(superkingdom_name IS NOT NULL, superkingdom_name, 'Uncategorized') as name from taxon_lineages;
-    # +-------+---------------+
-    # | taxid | name          |
-    # +-------+---------------+
-    # |  -700 | Uncategorized |
-    # |     2 | Bacteria      |
-    # |  2157 | Archaea       |
-    # |  2759 | Eukaryota     |
-    # | 10239 | Viruses       |
-    # | 12884 | Viroids       |
-    # +-------+---------------+
-    [
-      { 'taxid' => 2, 'name' => "Bacteria" },
-      { 'taxid' => 2157, 'name' => "Archaea" },
-      { 'taxid' => 2759, 'name' => "Eukaryota" },
-      { 'taxid' => 10_239, 'name' => "Viruses" },
-      { 'taxid' => 12_884, 'name' => "Viroids" },
-      { 'taxid' => -700, 'name' => "Uncategorized" }
-    ]
+    ALL_CATEGORIES
   end
 
   def fetch_taxon_counts(report)
@@ -217,40 +222,34 @@ module ReportHelper
     # (I/O latency goes from 2 seconds -> 0.8 seconds)
     TaxonCount.connection.select_all("
       SELECT
-      taxon_counts.tax_id              AS  tax_id,
-      taxon_counts.count_type          AS  count_type,
-      taxon_counts.tax_level           AS  tax_level,
-      IF (
-        taxon_lineages.genus_taxid IS NOT NULL,
-        taxon_lineages.genus_taxid,
-        #{TaxonLineage::MISSING_GENUS_ID}
-      )                                AS  genus_taxid,
-      taxon_counts.name                AS  name,
-      taxon_lineages.superkingdom_name AS  category_name,
-      taxon_counts.count               AS  r,
-      (count / #{total_reads}.0
-        * 1000000.0)                   AS  rpm,
-      IF(
-        stdev IS NOT NULL,
-        GREATEST(#{ZSCORE_MIN}, LEAST(#{ZSCORE_MAX}, (((count / #{total_reads}.0 * 1000000.0) - mean) / stdev))),
-        #{ZSCORE_WHEN_ABSENT_FROM_BACKGROUND}
-      )
-                                       AS  zscore,
-      taxon_counts.percent_identity    AS  percentidentity,
-      taxon_counts.alignment_length    AS  alignmentlength,
-      IF(
-        taxon_counts.e_value IS NOT NULL,
-        (0.0 - taxon_counts.e_value),
-        NULL
-      )                                AS  neglogevalue
+        taxon_counts.tax_id              AS  tax_id,
+        taxon_counts.count_type          AS  count_type,
+        taxon_counts.tax_level           AS  tax_level,
+        taxon_counts.genus_taxid         AS  genus_taxid,
+        taxon_counts.name                AS  name,
+        taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
+        taxon_counts.count               AS  r,
+        (count / #{total_reads}.0
+          * 1000000.0)                   AS  rpm,
+        IF(
+          stdev IS NOT NULL,
+          GREATEST(#{ZSCORE_MIN}, LEAST(#{ZSCORE_MAX}, (((count / #{total_reads}.0 * 1000000.0) - mean) / stdev))),
+          #{ZSCORE_WHEN_ABSENT_FROM_BACKGROUND}
+        )
+                                         AS  zscore,
+        taxon_counts.percent_identity    AS  percentidentity,
+        taxon_counts.alignment_length    AS  alignmentlength,
+        IF(
+          taxon_counts.e_value IS NOT NULL,
+          (0.0 - taxon_counts.e_value),
+          #{DEFAULT_SAMPLE_NEGLOGEVALUE}
+        )                                AS  neglogevalue
       FROM taxon_counts
       LEFT OUTER JOIN taxon_summaries ON
         #{background_id}        = taxon_summaries.background_id   AND
         taxon_counts.count_type = taxon_summaries.count_type      AND
         taxon_counts.tax_level  = taxon_summaries.tax_level       AND
         taxon_counts.tax_id     = taxon_summaries.tax_id
-      LEFT OUTER JOIN taxon_lineages ON
-        taxon_counts.tax_id = taxon_lineages.taxid
       WHERE
         pipeline_output_id = #{pipeline_output_id} AND
         taxon_counts.count_type IN ('NT', 'NR')
@@ -263,9 +262,9 @@ module ReportHelper
       'r' => 0,
       'rpm' => 0,
       'zscore' => ZSCORE_WHEN_ABSENT_FROM_SAMPLE,
-      'percentidentity' => 0,
-      'alignmentlength' => 0,
-      'neglogevalue' => 0
+      'percentidentity' => DEFAULT_SAMPLE_PERCENTIDENTITY,
+      'alignmentlength' => DEFAULT_SAMPLE_ALIGNMENTLENGTH,
+      'neglogevalue' => DEFAULT_SAMPLE_NEGLOGEVALUE
     }
   end
 
@@ -346,6 +345,10 @@ module ReportHelper
 
   def cleanup_names!(taxon_counts_2d)
     # There are still taxons without names
+    category = {}
+    ALL_CATEGORIES.each do |c|
+      category[c['taxid']] = c['name']
+    end
     missing_names = Set.new
     taxon_counts_2d.each do |tax_id, tax_info|
       if tax_id < 0
@@ -362,7 +365,8 @@ module ReportHelper
         missing_names.add(tax_id)
         tax_info['name'] = "Unnamed taxon #{tax_id}"
       end
-      tax_info['category_name'] ||= 'Uncategorized'
+      category_id = tax_info.delete('superkindom_taxid')
+      tax_info['category_name'] = category[category_id] || 'Uncategorized'
     end
     logger.warn "Missing names for taxon ids #{missing_names.to_a}" unless missing_names.empty?
     taxon_counts_2d

@@ -79,4 +79,22 @@ class PipelineOutput < ApplicationRecord
       ")
     end
   end
+
+  def update_genera
+    # Make sure to run update_genera after generate_aggregate_counts
+    # HACK This should probably have been accomplished with schema DEFAULTs
+    TaxonCount.connection.execute("
+      UPDATE taxon_counts
+      SET taxon_counts.genus_taxid = #{TaxonLineage::MISSING_GENUS_ID},
+          taxon_counts.superkingdom_taxid = #{TaxonLineage::MISSING_SUPERKINGDOM_ID}
+      WHERE taxon_counts.pipeline_output_id=#{id}
+    ")
+    TaxonCount.connection.execute("
+      UPDATE taxon_counts, taxon_lineages
+      SET taxon_counts.genus_taxid = taxon_lineages.genus_taxid,
+          taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
+      WHERE taxon_counts.pipeline_output_id=#{id} AND
+            taxon_lineages.taxid = taxon_counts.tax_id
+    ")
+  end
 end
