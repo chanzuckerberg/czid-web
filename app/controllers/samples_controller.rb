@@ -128,6 +128,7 @@ class SamplesController < ApplicationController
     @sample = Sample.new(params)
     @sample.project = project if project
     @sample.input_files.each { |f| f.name ||= File.basename(f.source) }
+    @sample.input_files.each { |f| f.type = InputFile::FILE_REGEX.match(f.name)[1] }
 
     respond_to do |format|
       if @sample.save
