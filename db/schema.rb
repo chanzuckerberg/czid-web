@@ -33,22 +33,6 @@ ActiveRecord::Schema.define(version: 20171103004139) do
     t.index ["sample_id"], name: "index_backgrounds_samples_on_sample_id"
   end
 
-  create_table "gsnapl_machines", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "ip"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "instance_id"
-    t.index ["ip"], name: "index_gsnapl_machines_on_ip"
-  end
-
-  create_table "gsnapl_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.bigint "gsnapl_machine_id"
-    t.string "aws_batch_job_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["gsnapl_machine_id"], name: "index_gsnapl_runs_on_gsnapl_machine_id"
-  end
-
   create_table "host_genomes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name", null: false
     t.text "s3_star_index_path"
@@ -305,7 +289,6 @@ ActiveRecord::Schema.define(version: 20171103004139) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
-  add_foreign_key "gsnapl_runs", "gsnapl_machines"
   add_foreign_key "input_files", "samples"
   add_foreign_key "job_stats", "pipeline_outputs"
   add_foreign_key "pipeline_outputs", "samples"
