@@ -16,6 +16,7 @@ import logging
 import math
 
 INPUT_BUCKET = 's3://czbiohub-infectious-disease/UGANDA' # default to be overwritten by environment variable
+FILE_TYPE = 'fastq.gz'
 OUTPUT_BUCKET = 's3://czbiohub-idseq-samples-test/id-uganda'  # default to be overwritten by environment variable
 KEY_S3_PATH = 's3://czbiohub-infectious-disease/idseq-alpha.pem'
 ROOT_DIR = '/mnt'
@@ -527,7 +528,7 @@ def run_and_log(logparams, func_name, *args):
         json.dump(STATS, f)
     execute_command("aws s3 cp %s %s/;" % (stats_path, logparams["sample_s3_output_path"]))
 
-def run_sample(sample_s3_input_path, sample_s3_output_path,
+def run_sample(sample_s3_input_path, file_type, sample_s3_output_path,
                star_genome_s3_path, bowtie2_genome_s3_path,
                gsnap_ssh_key_s3_path, rapsearch_ssh_key_s3_path, accession2taxid_s3_path,
                deuterostome_list_s3_path, taxid2info_s3_path, db_sample_id,
@@ -555,16 +556,16 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
                          "stats_file": os.path.join(result_dir, STATS_OUT)}
 
     # Download fastqs
-    command = "aws s3 ls %s/ |grep fastq.gz" % (sample_s3_input_path)
+    command = "aws s3 ls %s/ | grep %s" % (sample_s3_input_path, file_type)
     output = execute_command(command).rstrip().split("\n")
     for line in output:
-        m = re.match(".*?([^ ]*.fastq.gz)", line)
+        m = re.match(".*?([^ ]*." + re.escape(file_type) + ")", line)
         if m:
             execute_command("aws s3 cp %s/%s %s/" % (sample_s3_input_path, m.group(1), fastq_dir))
         else:
-            print "%s doesn't match fastq.gz" % line
+            print "%s doesn't match %s" % (line, file_type)
 
-    fastq_files = execute_command("ls %s/*.fastq.gz" % fastq_dir).rstrip().split("\n")
+    fastq_files = execute_command("ls %s/*.%s" % (fastq_dir, file_type)).rstrip().split("\n")
 
     if len(fastq_files) <= 1:
         return # only support paired reads for now
@@ -578,47 +579,54 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         print execute_command(command)
 
     # run STAR
+    file_type_for_log = "fastq_paired" if "fastq" in file_type else "fasta_paired"
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "STAR", "count_reads": True,
         "before_file_name": fastq_file_1,
-        "before_file_type": "fastq_paired",
+        "before_file_type": file_type_for_log,
         "after_file_name": os.path.join(result_dir, STAR_OUT1),
-        "after_file_type": "fastq_paired"})
+        "after_file_type": file_type_for_log})
     run_and_log(logparams, run_star,
-        sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
+        sample_name, fastq_file_1, fastq_file_2, file_type, star_genome_s3_path,
         result_dir, scratch_dir, sample_s3_output_path, lazy_run)
 
     # run priceseqfilter
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "PriceSeqFilter", "count_reads": True,
         "before_file_name": os.path.join(result_dir, STAR_OUT1),
-        "before_file_type": "fastq_paired",
+        "before_file_type": "file_type_for_log",
         "after_file_name": os.path.join(result_dir, PRICESEQFILTER_OUT1),
-        "after_file_type": "fastq_paired"})
+        "after_file_type": "file_type_for_log"})
     run_and_log(logparams, run_priceseqfilter,
         sample_name, os.path.join(result_dir, STAR_OUT1),
-        os.path.join(result_dir, STAR_OUT2),
+        os.path.join(result_dir, STAR_OUT2), file_type,
         result_dir, sample_s3_output_path, lazy_run)
 
     # run fastq to fasta
-    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
-        {"title": "FASTQ to FASTA",
-        "count_reads": False})
-    run_and_log(logparams, run_fq2fa,
-        sample_name, os.path.join(result_dir, PRICESEQFILTER_OUT1),
-        os.path.join(result_dir, PRICESEQFILTER_OUT2),
-        result_dir, sample_s3_output_path, lazy_run)
+    if "fastq" in file_type:
+        logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+            {"title": "FASTQ to FASTA",
+            "count_reads": False})
+        run_and_log(logparams, run_fq2fa,
+            sample_name, os.path.join(result_dir, PRICESEQFILTER_OUT1),
+            os.path.join(result_dir, PRICESEQFILTER_OUT2),
+            result_dir, sample_s3_output_path, lazy_run)
+        next_input_1 = FQ2FA_OUT1
+        next_input_2 = FQ2FA_OUT2
+    else:
+        next_input_1 = PRICESEQFILTER_OUT1
+        next_input_2 = PRICESEQFILTER_OUT2
 
     # run cdhitdup
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "CD-HIT-DUP", "count_reads": True,
-        "before_file_name": os.path.join(result_dir, FQ2FA_OUT1),
+        "before_file_name": os.path.join(result_dir, next_input_1),
         "before_file_type": "fasta_paired",
         "after_file_name": os.path.join(result_dir, CDHITDUP_OUT1),
         "after_file_type": "fasta_paired"})
     run_and_log(logparams, run_cdhitdup,
-        sample_name, os.path.join(result_dir, FQ2FA_OUT1),
-        os.path.join(result_dir, FQ2FA_OUT2),
+        sample_name, os.path.join(result_dir, next_input_1),
+        os.path.join(result_dir, next_input_2),
         result_dir, sample_s3_output_path, lazy_run)
 
     # run lzw filter
@@ -784,7 +792,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         result_dir + '/' + UNIDENTIFIED_FASTA_OUT,
         result_dir, sample_s3_output_path, False)
 
-def run_star(sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
+def run_star(sample_name, fastq_file_1, fastq_file_2, file_type, star_genome_s3_path,
              result_dir, scratch_dir, sample_s3_output_path, lazy_run):
     if lazy_run:
         # check if output already exists
@@ -806,10 +814,11 @@ def run_star(sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
                            '--outFilterMismatchNmax', '999',
                            '--outSAMmode', 'None',
                            '--clip3pNbases', '0',
-                           '--readFilesCommand', 'zcat',
                            '--runThreadN', str(multiprocessing.cpu_count()),
                            '--genomeDir', REF_DIR + '/STAR_genome',
                            '--readFilesIn', fastq_file_1, fastq_file_2]
+    if ".gz" in file_type:
+        star_command_params.extend(['--readFilesCommand', 'zcat'])
     execute_command(" ".join(star_command_params))
     logging.getLogger().info("finished job")
     # extract out unmapped files
@@ -821,7 +830,7 @@ def run_star(sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
     # cleanup
     execute_command("cd %s; rm -rf *" % scratch_dir)
 
-def run_priceseqfilter(sample_name, input_fq_1, input_fq_2,
+def run_priceseqfilter(sample_name, input_fq_1, input_fq_2, file_type,
                        result_dir, sample_s3_output_path, lazy_run):
     if lazy_run:
         # check if output already exists
@@ -835,9 +844,10 @@ def run_priceseqfilter(sample_name, input_fq_1, input_fq_2,
                        '-op',
                        result_dir +'/' + PRICESEQFILTER_OUT1,
                        result_dir +'/' + PRICESEQFILTER_OUT2,
-                       '-rqf','85','0.98',
                        '-rnf','90',
                        '-log','c']
+    if "fastq" in file_type:
+        priceseq_params.extend(['-rqf','85','0.98'])
     execute_command(" ".join(priceseq_params))
     logging.getLogger().info("finished job")
     # copy back to aws
@@ -1152,6 +1162,7 @@ def main():
     global STAR_GENOME
     global BOWTIE2_GENOME
     INPUT_BUCKET = os.environ.get('INPUT_BUCKET', INPUT_BUCKET)
+    FILE_TYPE = os.environ.get('FILE_TYPE', FILE_TYPE)
     OUTPUT_BUCKET = os.environ.get('OUTPUT_BUCKET', OUTPUT_BUCKET)
     KEY_S3_PATH = os.environ.get('KEY_S3_PATH', KEY_S3_PATH)
     STAR_GENOME = os.environ.get('STAR_GENOME', STAR_GENOME)
@@ -1169,7 +1180,7 @@ def main():
     sample_s3_input_path = INPUT_BUCKET.rstrip('/')
     sample_s3_output_path = OUTPUT_BUCKET.rstrip('/')
 
-    run_sample(sample_s3_input_path, sample_s3_output_path,
+    run_sample(sample_s3_input_path, FILE_TYPE, sample_s3_output_path,
                STAR_GENOME, BOWTIE2_GENOME,
                KEY_S3_PATH, KEY_S3_PATH, ACCESSION2TAXID,
                DEUTEROSTOME_TAXIDS, TAXID_TO_INFO, DB_SAMPLE_ID,
