@@ -31,4 +31,3 @@ class GsnaplRunsController < ApplicationController
     params.permit(:aws_batch_job_id, :gsnapl_machine_ip)
   end
 end
-
