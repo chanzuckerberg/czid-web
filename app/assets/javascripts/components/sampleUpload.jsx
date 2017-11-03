@@ -234,7 +234,7 @@ class SampleUpload extends React.Component {
 
   filePathValid(str) {
     var regexPrefix = /s3:\/\//;
-    var regexSuffix = /(\.fastq.gz|\.fasta)/igm;
+    var regexSuffix = /(\.fastq|\.fastq.gz|\.fasta|\.fasta.gz)/igm;
     if (str.match(regexPrefix) && str.match(regexSuffix)) {
       return true;
     } else {
