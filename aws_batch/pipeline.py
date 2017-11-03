@@ -278,9 +278,8 @@ def generate_tax_counts_from_m8(m8_file, e_value_type, output_file):
             avg_e_value = taxid_e_value_map[taxid] / count
             f.write(",".join([str(taxid), str(count), str(avg_percent_identity), str(avg_alignment_length), str(avg_e_value) + '\n']))
 
-def generate_rpm_from_taxid_counts(rawReadsInputPath, taxidCountsInputPath, taxid2infoPath, speciesOutputPath, genusOutputPath):
-    total_reads = subprocess.check_output("zcat %s | wc -l" % rawReadsInputPath, shell=True)
-    total_reads = int(2*total_reads.rstrip())/4
+def generate_rpm_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, speciesOutputPath, genusOutputPath):
+    total_reads = (item for item in STATS if item["task"] == "run_star").next().get("reads_before")
     taxid2info_map = shelve.open(taxid2infoPath)
     species_rpm_map = {}
     genus_rpm_map = {}
@@ -311,12 +310,11 @@ def generate_rpm_from_taxid_counts(rawReadsInputPath, taxidCountsInputPath, taxi
         genus_outf.write("%s,%s,%s\n" % (genus_taxid, genus_name, rpm))
     genus_outf.close()
 
-def generate_json_from_taxid_counts(sample, rawReadsInputPath, taxidCountsInputPath,
+def generate_json_from_taxid_counts(sample, taxidCountsInputPath,
                                     taxid2infoPath, jsonOutputPath, countType, dbSampleId):
     # produce json in Ryan's output format (https://github.com/chanzuckerberg/idseq-web/blob/master/test/output.json)
     taxid2info_map = shelve.open(taxid2infoPath)
-    total_reads = subprocess.check_output("zcat %s | wc -l" % rawReadsInputPath, shell=True)
-    total_reads = 2*int(total_reads.rstrip())/4
+    total_reads = (item for item in STATS if item["task"] == "run_star").next().get("reads_before")
     taxon_counts_attributes = []
     remaining_reads = (item for item in STATS if item["task"] == "run_bowtie2").next().get("reads_after")
 
@@ -701,7 +699,7 @@ def run_sample(sample_s3_input_path, file_type, sample_s3_output_path,
         "count_reads": False})
     run_and_log(logparams, run_generate_taxid_outputs_from_m8,
         sample_name, os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NT_M8_OUT),
-        fastq_file_1, os.path.join(result_dir, NT_M8_TO_TAXID_COUNTS_FILE_OUT),
+        os.path.join(result_dir, NT_M8_TO_TAXID_COUNTS_FILE_OUT),
         os.path.join(result_dir, NT_TAXID_COUNTS_TO_JSON_OUT),
         os.path.join(result_dir, NT_TAXID_COUNTS_TO_SPECIES_RPM_OUT),
         os.path.join(result_dir, NT_TAXID_COUNTS_TO_GENUS_RPM_OUT),
@@ -765,7 +763,7 @@ def run_sample(sample_s3_input_path, file_type, sample_s3_output_path,
         "count_reads": False})
     run_and_log(logparams, run_generate_taxid_outputs_from_m8,
         sample_name, os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NR_M8_OUT),
-        fastq_file_1, os.path.join(result_dir, NR_M8_TO_TAXID_COUNTS_FILE_OUT),
+        os.path.join(result_dir, NR_M8_TO_TAXID_COUNTS_FILE_OUT),
         os.path.join(result_dir, NR_TAXID_COUNTS_TO_JSON_OUT),
         os.path.join(result_dir, NR_TAXID_COUNTS_TO_SPECIES_RPM_OUT),
         os.path.join(result_dir, NR_TAXID_COUNTS_TO_GENUS_RPM_OUT),
@@ -1106,7 +1104,7 @@ def run_rapsearch2_remotely(sample, input_fasta,
     execute_command("aws s3 cp %s/%s %s/" % (sample_s3_output_path, RAPSEARCH2_OUT, result_dir))
 
 def run_generate_taxid_outputs_from_m8(sample_name,
-    annotated_m8, fastq_file_1,
+    annotated_m8,
     taxon_counts_csv_file, taxon_counts_json_file,
     taxon_species_rpm_file, taxon_genus_rpm_file,
     taxinfodb_s3_path, count_type, e_value_type, db_sample_id,
@@ -1120,11 +1118,11 @@ def run_generate_taxid_outputs_from_m8(sample_name,
         logging.getLogger().info("downloaded taxon info database")
     generate_tax_counts_from_m8(annotated_m8, e_value_type, taxon_counts_csv_file)
     logging.getLogger().info("generated taxon counts from m8")
-    generate_json_from_taxid_counts(sample_name, fastq_file_1, taxon_counts_csv_file,
+    generate_json_from_taxid_counts(sample_name, taxon_counts_csv_file,
                                     taxoninfo_path, taxon_counts_json_file,
                                     count_type, db_sample_id)
     logging.getLogger().info("generated JSON file from taxon counts")
-    generate_rpm_from_taxid_counts(fastq_file_1, taxon_counts_csv_file, taxoninfo_path,
+    generate_rpm_from_taxid_counts(taxon_counts_csv_file, taxoninfo_path,
                                    taxon_species_rpm_file, taxon_genus_rpm_file)
     logging.getLogger().info("calculated RPM from taxon counts")
     # move the output back to S3
