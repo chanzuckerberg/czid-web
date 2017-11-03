@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171103004139) do
+ActiveRecord::Schema.define(version: 20171031193737) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -52,7 +52,6 @@ ActiveRecord::Schema.define(version: 20171103004139) do
     t.datetime "updated_at", null: false
     t.string "source_type", null: false
     t.text "source"
-    t.string "type"
     t.index ["sample_id"], name: "index_input_files_on_sample_id"
   end
 
