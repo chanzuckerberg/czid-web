@@ -523,14 +523,14 @@ class SampleUpload extends React.Component {
               <div className="field-row input-field align">
                 <i className="sample fa fa-link" aria-hidden="true"></i>
                 <input ref= "first_file_source" type="text" className="path" onFocus={ this.clearError } placeholder="Required" />
-                <span className="path_label">Example: s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz (.fastq, .fasta.gz, .fasta also accepted)</span>
-                <label htmlFor="sample_first_file_source">Read 1 fastq s3 path</label>
+                <span className="path_label">Example: s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz</span>
+                <label htmlFor="sample_first_file_source">Read 1 s3 path (accepted formats: .fastq, .fastq.gz, .fasta, .fasta.gz)</label>
               </div>
               <div className="field-row input-field align" >
                 <i className="sample fa fa-link" aria-hidden="true"></i>
                 <input ref= "second_file_source" type="text" className="path" onFocus={ this.clearError } placeholder="Required" />
-                <span className="path_label">Example: s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R2_001.fastq.gz (.fastq, .fasta.gz, .fasta also accepted)</span>
-                <label htmlFor="sample_second_file_source">Read 2 fastq s3 path</label>
+                <span className="path_label">Example: s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R2_001.fastq.gz</span>
+                <label htmlFor="sample_second_file_source">Read 2 s3 path (same format as Read 1 s3 path)</label>
               </div>
               <div className="row field-row">
                 <div className={ this.userDetails.admin ? "col s4 input-field" :  "col s12 input-field" }>
