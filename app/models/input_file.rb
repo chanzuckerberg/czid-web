@@ -5,7 +5,7 @@ class InputFile < ApplicationRecord
   SOURCE_TYPE_LOCAL = 'local'.freeze
   SOURCE_TYPE_S3 = 's3'.freeze
 
-  FILE_REGEX = %r{\A[^\s\/]+\.(fastq.gz|fasta)\z}
+  FILE_REGEX = %r{\A[^\s\/]+\.(fastq|fastq.gz|fasta|fasta.gz)\z}
   validates :name, presence: true, format: { with: FILE_REGEX, message: "file must match format '#{FILE_REGEX}'" }
   validates :source_type, presence: true, inclusion: { in: %w[local s3] }
   validate :s3_source_check
@@ -37,7 +37,7 @@ class InputFile < ApplicationRecord
     File.join(sample.sample_path, 'fastqs', name)
   end
 
-  def type
+  def file_type
     FILE_REGEX.match(name)[1]
   end
 end
