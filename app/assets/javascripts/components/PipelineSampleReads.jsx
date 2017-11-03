@@ -26,9 +26,9 @@ class PipelineSampleReads extends React.Component {
   }
 
   pipelineInProgress(status) {
-    if (status === null || this.state.rerun === true ) {
+    if (status === null || this.state.rerun === true || status === 'RUNNABLE' || status === 'RUNNING') {
       return true;
-    } else if ( status === 'ERROR' || status === 'CHECKED' || status === 'FAILED') {
+    } else if ( status === 'ERROR' || status === 'FAILED') {
       return false;
     } else { 
       return null;
