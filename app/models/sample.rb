@@ -23,6 +23,7 @@ class Sample < ApplicationRecord
   attr_accessor :bulk_mode
 
   belongs_to :project
+  belongs_to :user # This is the user who uploaded the sample, possibly distinct from the user(s) owning the sample's project
   belongs_to :host_genome, optional: true
   has_many :pipeline_outputs, dependent: :destroy
   has_many :pipeline_runs, -> { order(created_at: :desc) }, dependent: :destroy
