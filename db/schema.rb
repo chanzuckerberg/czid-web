@@ -299,3 +299,4 @@ ActiveRecord::Schema.define(version: 20171031193737) do
     add_foreign_key "taxon_summaries", "backgrounds"
     add_foreign_key "taxon_zscores", "reports"
   end
+
