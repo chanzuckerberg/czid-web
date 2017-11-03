@@ -1172,6 +1172,7 @@ def run_generate_unidentified_fasta(sample_name, input_fa, output_fa,
 ### Main
 def main():
     global INPUT_BUCKET
+    global FILE_TYPE
     global OUTPUT_BUCKET
     global KEY_S3_PATH
     global STAR_GENOME
