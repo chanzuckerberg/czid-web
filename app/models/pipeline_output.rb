@@ -63,4 +63,20 @@ class PipelineOutput < ApplicationRecord
       GROUP BY 1,2,3,4,5"
     )
   end
+
+  def update_names
+    # The names from the taxon_lineages table are preferred, but, not always
+    # available;  this code merges them into taxon_counts.name.
+    %w[species genus].each do |level|
+      level_id = TaxonCount::NAME_2_LEVEL[level]
+      TaxonCount.connection.execute("
+        UPDATE taxon_counts, taxon_lineages
+        SET taxon_counts.name = taxon_lineages.#{level}_name
+        WHERE taxon_counts.pipeline_output_id=#{id} AND
+              taxon_counts.tax_level=#{level_id} AND
+              taxon_counts.tax_id = taxon_lineages.taxid AND
+              taxon_lineages.#{level}_name IS NOT NULL
+      ")
+    end
+  end
 end

@@ -100,6 +100,8 @@ class PipelineRun < ApplicationRecord
     po.save
     # aggregate the data at genus level
     po.generate_aggregate_counts('genus')
+    # merge more accurate name information from lineages table
+    po.update_names
 
     self.pipeline_output_id = po.id
     save

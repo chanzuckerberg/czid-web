@@ -7,6 +7,7 @@ task genus_aggregation: :environment do
                tax_level > #{TaxonCount::TAX_LEVEL_SPECIES}"
       )
       po.generate_aggregate_counts('genus')
+      po.update_names
     end
   end
 end
