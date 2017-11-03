@@ -26,21 +26,11 @@ class PipelineOutput < ApplicationRecord
   def generate_aggregate_counts(tax_level_name)
     current_date = Time.zone.now.strftime("%Y-%m-%d")
     tax_level_id = TaxonCount::NAME_2_LEVEL[tax_level_name]
-    missing_lineage_id_for_level = {
-      species: -100,
-      genus: -200,
-      family: -300,
-      order: -400,
-      class: -500,
-      phyllum: -600,
-      superkingdom: -700
-    }
     # The unctagorizable_name chosen here is not important. The report page
     # endpoint makes its own choice about what to display in this case.  It
     # has general logic to handle this and other undefined cases uniformly.
-    # What is crucially important is the uncategorizable_id.  Must match
-    # the constant at the top of report_helper.rb.
-    uncategorizable_id = missing_lineage_id_for_level.fetch(tax_level_name.to_sym, -9999)
+    # What is crucially important is the uncategorizable_id.
+    uncategorizable_id = TaxonLineage::MISSING_LINEAGE_ID.fetch(tax_level_name.to_sym, -9999)
     uncategorizable_name = "Uncategorizable as a #{tax_level_name}"
     TaxonCount.connection.execute(
       "INSERT INTO taxon_counts(pipeline_output_id, tax_id, name,
