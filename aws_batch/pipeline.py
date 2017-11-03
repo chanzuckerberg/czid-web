@@ -112,6 +112,19 @@ def count_reads(file_name, file_type):
     f.close()
     return int(count)
 
+def get_total_initial_reads(fastq_file_1, initial_file_type_for_log, stats_file):
+    # If "total_reads" is present in stats file, get that value, otherwise get value from input file.
+    # Slightly hacky, but allows us to take into account actual initial read number in the case where
+    # input files are already pre-filtered -- just put it in a stats file in the preload folder as:
+    # [{"total_reads": <value>}]
+    if os.path.isfile(stats_file):
+        with open(stats_file) as f:
+            existing_stats = json.load(f)
+        total_reads_entry = [item for item in existing_stats if "total_reads" in item]
+        if len(total_reads_entry) > 0:
+            return total_reads_entry[0]["total_reads"]
+    return count_reads(fastq_file_1, initial_file_type_for_log)
+
 def lzw_fraction(sequence):
     if sequence == "":
         return 0.0
@@ -576,14 +589,18 @@ def run_sample(sample_s3_input_path, file_type, sample_s3_output_path,
         command = "aws s3 cp %s %s --recursive" % (sample_s3_output_path, result_dir)
         print execute_command(command)
 
+    # Record total number of input reads
+    initial_file_type_for_log = "fastq_paired" if "fastq" in file_type else "fasta_paired"
+    stats_file = os.path.join(result_dir, STATS_OUT)
+    STATS.append({'total_reads': get_total_initial_reads(fastq_file_1, initial_file_type_for_log, stats_file)})
+
     # run STAR
-    file_type_for_log = "fastq_paired" if "fastq" in file_type else "fasta_paired"
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "STAR", "count_reads": True,
         "before_file_name": fastq_file_1,
-        "before_file_type": file_type_for_log,
+        "before_file_type": initial_file_type_for_log,
         "after_file_name": os.path.join(result_dir, STAR_OUT1),
-        "after_file_type": file_type_for_log})
+        "after_file_type": initial_file_type_for_log})
     run_and_log(logparams, run_star,
         sample_name, fastq_file_1, fastq_file_2, file_type, star_genome_s3_path,
         result_dir, scratch_dir, sample_s3_output_path, lazy_run)
@@ -592,9 +609,9 @@ def run_sample(sample_s3_input_path, file_type, sample_s3_output_path,
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "PriceSeqFilter", "count_reads": True,
         "before_file_name": os.path.join(result_dir, STAR_OUT1),
-        "before_file_type": "file_type_for_log",
+        "before_file_type": initial_file_type_for_log,
         "after_file_name": os.path.join(result_dir, PRICESEQFILTER_OUT1),
-        "after_file_type": "file_type_for_log"})
+        "after_file_type": initial_file_type_for_log})
     run_and_log(logparams, run_priceseqfilter,
         sample_name, os.path.join(result_dir, STAR_OUT1),
         os.path.join(result_dir, STAR_OUT2), file_type,
