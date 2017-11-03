@@ -567,7 +567,7 @@ def run_sample(sample_s3_input_path, file_type, sample_s3_output_path,
                          "stats_file": os.path.join(result_dir, STATS_OUT)}
 
     # Download fastqs
-    command = "aws s3 ls %s/ | grep %s" % (sample_s3_input_path, file_type)
+    command = "aws s3 ls %s/ | grep '\.%s$'" % (sample_s3_input_path, file_type)
     output = execute_command(command).rstrip().split("\n")
     for line in output:
         m = re.match(".*?([^ ]*." + re.escape(file_type) + ")", line)
