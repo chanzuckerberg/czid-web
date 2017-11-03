@@ -38,7 +38,7 @@ module ReportHelper
   # We do not allow underscores in metric names, sorry!
   METRICS = %w[r rpm zscore percentidentity alignmentlength neglogevalue aggregatescore].freeze
   COUNT_TYPES = %w[NT NR].freeze
-  PROPERTIES_OF_TAXID = %w[tax_id name name_from_lineages name_from_counts tax_level genus_taxid category_name].freeze # note: no underscore in sortable column names
+  PROPERTIES_OF_TAXID = %w[tax_id name tax_level genus_taxid category_name].freeze # note: no underscore in sortable column names
   UNUSED_IN_UI_FIELDS = [:sort_key].freeze
 
   # use the metric's NT <=> NR dual as a tertiary sort key (so, for example,
@@ -225,12 +225,7 @@ module ReportHelper
         taxon_lineages.genus_taxid,
         #{TaxonLineage::MISSING_GENUS_ID}
       )                                AS  genus_taxid,
-      IF(
-        taxon_counts.tax_level=#{TaxonCount::TAX_LEVEL_SPECIES},
-        taxon_lineages.species_name,
-        taxon_lineages.genus_name
-      )                                AS  name_from_lineages,
-      taxon_counts.name                AS  name_from_counts,
+      taxon_counts.name                AS  name,
       taxon_lineages.superkingdom_name AS  category_name,
       taxon_counts.count               AS  r,
       (count / #{total_reads}.0
@@ -250,10 +245,10 @@ module ReportHelper
       )                                AS  neglogevalue
       FROM taxon_counts
       LEFT OUTER JOIN taxon_summaries ON
-        taxon_counts.tax_id     = taxon_summaries.tax_id          AND
+        #{background_id}        = taxon_summaries.background_id   AND
         taxon_counts.count_type = taxon_summaries.count_type      AND
         taxon_counts.tax_level  = taxon_summaries.tax_level       AND
-        #{background_id}        = taxon_summaries.background_id
+        taxon_counts.tax_id     = taxon_summaries.tax_id
       LEFT OUTER JOIN taxon_lineages ON
         taxon_counts.tax_id = taxon_lineages.taxid
       WHERE
@@ -353,8 +348,6 @@ module ReportHelper
     # There are still taxons without names
     missing_names = Set.new
     taxon_counts_2d.each do |tax_id, tax_info|
-      name_from_lineages = tax_info.delete('name_from_lineages')
-      name_from_counts = tax_info.delete('name_from_counts')
       if tax_id < 0
         # Usually -1 means accession number did not resolve to species.
         # TODO: Can we keep the accession numbers to show in these cases?
@@ -365,17 +358,13 @@ module ReportHelper
         elsif !(TaxonLineage::MISSING_LINEAGE_ID.values.include? tax_id)
           tax_info['name'] += " #{tax_id}"
         end
-      else
-        missing_names.add(tax_id) unless name_from_lineages
-        tax_info['name'] = (
-          name_from_lineages ||
-          name_from_counts ||
-          "Unnamed taxon #{tax_id}"
-        )
+      elsif !tax_info['name']
+        missing_names.add(tax_id)
+        tax_info['name'] = "Unnamed taxon #{tax_id}"
       end
       tax_info['category_name'] ||= 'Uncategorized'
     end
-    logger.warn "Missing taxon_lineages names for taxon ids #{missing_names.to_a}" unless missing_names.empty?
+    logger.warn "Missing names for taxon ids #{missing_names.to_a}" unless missing_names.empty?
     taxon_counts_2d
   end
 
