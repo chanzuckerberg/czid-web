@@ -232,7 +232,10 @@ class SampleUpload extends React.Component {
     });
   }
 
-  filePathValid(str) {
+  filePathValid(str, read) {
+    if (read == 2 && str === '') {
+      return true;
+    } 
     var regexPrefix = /s3:\/\//;
     var regexSuffix = /(\.fastq|\.fastq.gz|\.fasta|\.fasta.gz)/igm;
     if (str.match(regexPrefix) && str.match(regexSuffix)) {
@@ -305,19 +308,13 @@ class SampleUpload extends React.Component {
           errorMessage: 'Please fill in first read fastq path'
         })
         return true;
-    } else if (this.refs.second_file_source.value === '') {
-        this.setState({
-          invalid: true,
-          errorMessage: 'Please fill in second read fastq path'
-        })
-        return true;
-    } else if ( !this.filePathValid(this.refs.first_file_source.value)) {
+    } else if ( !this.filePathValid(this.refs.first_file_source.value, 1)) {
         this.setState({
           invalid: true,
           errorMessage: 'Please fill in a valid file path for Read 1, Sample format for path can be found below'
         })
         return true;
-    } else if ( !this.filePathValid(this.refs.second_file_source.value)) {
+    } else if ( !this.filePathValid(this.refs.second_file_source.value, 2)) {
       this.setState({
         invalid: true,
         errorMessage: 'Please fill in a valid file path for Read 2, Sample format for path can be found below'
