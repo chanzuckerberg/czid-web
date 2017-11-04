@@ -102,6 +102,8 @@ class PipelineRun < ApplicationRecord
     po.generate_aggregate_counts('genus')
     # merge more accurate name information from lineages table
     po.update_names
+    # denormalize genus_taxid and superkingdom_taxid into taxon_counts
+    po.update_genera
 
     self.pipeline_output_id = po.id
     save

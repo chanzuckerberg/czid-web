@@ -8,6 +8,7 @@ task genus_aggregation: :environment do
       )
       po.generate_aggregate_counts('genus')
       po.update_names
+      po.update_genera
     end
   end
 end
