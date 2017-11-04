@@ -59,7 +59,8 @@ class PipelineSampleReport extends React.Component {
   }
 
   isGenusSearch() {
-    return this.props.report_page_params.selected_genus != 'None';
+    params = this.props.report_page_params;
+    return params.selected_genus != 'None' && params.disable_filters != 1;
   }
 
   render_name(tax_info, report_details) {
@@ -232,7 +233,7 @@ class PipelineSampleReport extends React.Component {
                       <span className={`table-arrow ${right_arrow_initial_visibility}`}>
                         <i className={`fa fa-angle-right`} onClick={this.expandTable}></i>
                       </span>
-                      <span className={`table-arrow hidden hidden`}>
+                      <span className={`table-arrow hidden`}>
                         <i className={`fa fa-angle-down`} onClick={this.collapseTable}></i>
                       </span>
                       Taxonomy
