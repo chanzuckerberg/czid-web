@@ -93,6 +93,10 @@ class Sample < ApplicationRecord
     "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/fastqs"
   end
 
+  def filter_host_flag
+    host_genome == HostGenome::NO_HOST_NAME ? 0 : 1
+  end
+
   def sample_output_s3_path
     "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/results"
   end
@@ -155,10 +159,7 @@ class Sample < ApplicationRecord
   def pipeline_command
     script_name = File.basename(IdSeqPipeline::S3_SCRIPT_LOC)
     batch_command_env_variables = "INPUT_BUCKET=#{sample_input_s3_path} OUTPUT_BUCKET=#{sample_output_s3_path} " \
-      "FILE_TYPE=#{input_files.first.file_type} " \
-      "DB_SAMPLE_ID=#{id} SAMPLE_HOST=#{sample_host} SAMPLE_LOCATION=#{sample_location} " \
-      "SAMPLE_DATE=#{sample_date} SAMPLE_TISSUE=#{sample_tissue} SAMPLE_TEMPLATE=#{sample_template} " \
-      "SAMPLE_LIBRARY=#{sample_library} SAMPLE_SEQUENCER=#{sample_sequencer} SAMPLE_NOTES=#{sample_notes} "
+      "FILE_TYPE=#{input_files.first.file_type} FILTER_HOST_FLAG=#{filter_host_flag} DB_SAMPLE_ID=#{id} "
     if s3_star_index_path.present?
       batch_command_env_variables += "STAR_GENOME=#{s3_star_index_path} " \
     end

@@ -23,6 +23,7 @@ ROOT_DIR = '/mnt'
 DEST_DIR = ROOT_DIR + '/idseq/data' # generated data go here
 REF_DIR  = ROOT_DIR + '/idseq/ref' # referene genome / ref databases go here
 
+FILTER_HOST_FLAG = 1
 
 STAR="STAR"
 HTSEQ="htseq-count"
@@ -124,6 +125,23 @@ def get_total_initial_reads(fastq_file_1, initial_file_type_for_log, stats_file)
         if len(total_reads_entry) > 0:
             return total_reads_entry[0]["total_reads"]
     return count_reads(fastq_file_1, initial_file_type_for_log)
+
+def clean_direct_gsnapl_input(fastq_files, file_type, sample_s3_output_path):
+    # unzip files if necessary 
+    if ".gz" in file_type:
+        subprocess.check_output(" ".join(["gunzip"] + fastq_files), shell=True)
+        cleaned_files = [os.path.splitext(f) for f in fastq_files]
+    else:
+        cleaned_files = fastq_files
+    # generate file type for log
+    file_type_trimmed = file_type.split(".gz")[0]
+    file_type_for_log = file_type_trimmed
+    if len(fastq_files)==2:
+        file_type_for_log += "_paired"
+    # copy files to S3
+    for f in cleaned_files:
+        execute_command("aws s3 cp %s %s/" % (f, sample_s3_output_path))
+    return cleaned_files, file_type_for_log
 
 def lzw_fraction(sequence):
     if sequence == "":
@@ -539,7 +557,7 @@ def run_and_log(logparams, func_name, *args):
         json.dump(STATS, f)
     execute_command("aws s3 cp %s %s/;" % (stats_path, logparams["sample_s3_output_path"]))
 
-def run_sample(sample_s3_input_path, file_type, sample_s3_output_path,
+def run_sample(sample_s3_input_path, file_type, filter_host_flag, sample_s3_output_path,
                star_genome_s3_path, bowtie2_genome_s3_path,
                gsnap_ssh_key_s3_path, rapsearch_ssh_key_s3_path, accession2taxid_s3_path,
                deuterostome_list_s3_path, taxid2info_s3_path, db_sample_id,
@@ -578,11 +596,13 @@ def run_sample(sample_s3_input_path, file_type, sample_s3_output_path,
 
     fastq_files = execute_command("ls %s/*.%s" % (fastq_dir, file_type)).rstrip().split("\n")
 
-    if len(fastq_files) <= 1:
-        return # only support paired reads for now
-    else:
-        fastq_file_1 = fastq_files[0]
-        fastq_file_2 = fastq_files[1]
+    # Identify input files and characteristics
+    if filter_host_flag:
+        if len(fastq_files) <= 1:
+            return # only support paired reads for now
+        else:
+            fastq_file_1 = fastq_files[0]
+            fastq_file_2 = fastq_files[1]
 
     if lazy_run:
        # Download existing data and see what has been done
@@ -592,91 +612,31 @@ def run_sample(sample_s3_input_path, file_type, sample_s3_output_path,
     # Record total number of input reads
     initial_file_type_for_log = "fastq_paired" if "fastq" in file_type else "fasta_paired"
     stats_file = os.path.join(result_dir, STATS_OUT)
-    STATS.append({'total_reads': get_total_initial_reads(fastq_file_1, initial_file_type_for_log, stats_file)})
+    STATS.append({'total_reads': get_total_initial_reads(fastq_files[0], initial_file_type_for_log, stats_file)})
 
-    # run STAR
-    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
-        {"title": "STAR", "count_reads": True,
-        "before_file_name": fastq_file_1,
-        "before_file_type": initial_file_type_for_log,
-        "after_file_name": os.path.join(result_dir, STAR_OUT1),
-        "after_file_type": initial_file_type_for_log})
-    run_and_log(logparams, run_star,
-        sample_name, fastq_file_1, fastq_file_2, file_type, star_genome_s3_path,
-        result_dir, scratch_dir, sample_s3_output_path, lazy_run)
-
-    # run priceseqfilter
-    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
-        {"title": "PriceSeqFilter", "count_reads": True,
-        "before_file_name": os.path.join(result_dir, STAR_OUT1),
-        "before_file_type": initial_file_type_for_log,
-        "after_file_name": os.path.join(result_dir, PRICESEQFILTER_OUT1),
-        "after_file_type": initial_file_type_for_log})
-    run_and_log(logparams, run_priceseqfilter,
-        sample_name, os.path.join(result_dir, STAR_OUT1),
-        os.path.join(result_dir, STAR_OUT2), file_type,
-        result_dir, sample_s3_output_path, lazy_run)
-
-    # run fastq to fasta
-    if "fastq" in file_type:
-        logparams = return_merged_dict(DEFAULT_LOGPARAMS,
-            {"title": "FASTQ to FASTA",
-            "count_reads": False})
-        run_and_log(logparams, run_fq2fa,
-            sample_name, os.path.join(result_dir, PRICESEQFILTER_OUT1),
-            os.path.join(result_dir, PRICESEQFILTER_OUT2),
-            result_dir, sample_s3_output_path, lazy_run)
-        next_input_1 = FQ2FA_OUT1
-        next_input_2 = FQ2FA_OUT2
-    else:
-        next_input_1 = PRICESEQFILTER_OUT1
-        next_input_2 = PRICESEQFILTER_OUT2
-
-    # run cdhitdup
-    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
-        {"title": "CD-HIT-DUP", "count_reads": True,
-        "before_file_name": os.path.join(result_dir, next_input_1),
-        "before_file_type": "fasta_paired",
-        "after_file_name": os.path.join(result_dir, CDHITDUP_OUT1),
-        "after_file_type": "fasta_paired"})
-    run_and_log(logparams, run_cdhitdup,
-        sample_name, os.path.join(result_dir, next_input_1),
-        os.path.join(result_dir, next_input_2),
-        result_dir, sample_s3_output_path, lazy_run)
-
-    # run lzw filter
-    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
-        {"title": "LZW filter", "count_reads": True,
-        "before_file_name": os.path.join(result_dir, CDHITDUP_OUT1),
-        "before_file_type": "fasta_paired",
-        "after_file_name": os.path.join(result_dir, LZW_OUT1),
-        "after_file_type": "fasta_paired"})
-    run_and_log(logparams, run_lzw,
-        sample_name, os.path.join(result_dir, CDHITDUP_OUT1),
-        os.path.join(result_dir, CDHITDUP_OUT2),
-        result_dir, sample_s3_output_path, lazy_run)
-
-    # run bowtie
-    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
-        {"title": "bowtie2", "count_reads": True,
-        "before_file_name": os.path.join(result_dir, LZW_OUT1),
-        "before_file_type": "fasta_paired",
-        "after_file_name": os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT1),
-        "after_file_type": "fasta_paired"})
-    run_and_log(logparams, run_bowtie2,
-        sample_name, os.path.join(result_dir, LZW_OUT1),
-        os.path.join(result_dir, LZW_OUT2),
-        bowtie2_genome_s3_path, result_dir, sample_s3_output_path, lazy_run)
+    # run host filtering
+    if filter_host_flag:
+        run_host_filtering(sample_name, fastq_file_1, fastq_file_2, file_type, star_genome_s3_path, bowtie2_genome_s3_path,
+                           result_dir, scratch_dir, sample_s3_output_path, lazy_run)
 
     # run gsnap remotely
+    if filter_host_flag:
+        gsnapl_input_files = [EXTRACT_UNMAPPED_FROM_SAM_OUT1, EXTRACT_UNMAPPED_FROM_SAM_OUT2]
+        before_file_name_for_log = os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT1)
+        before_file_type_for_log = "fasta_paired"
+    else:
+        cleaned_files, before_file_type_for_log = clean_direct_gsnapl_input(fastq_files, file_type, sample_s3_output_path)
+        before_file_name_for_log = cleaned_files[0]
+        gsnapl_input_files = [os.path.basename(f) for f in cleaned_files]
+
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "GSNAPL", "count_reads": True,
-        "before_file_name": os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT1),
-        "before_file_type": "fasta_paired",
+        "before_file_name": before_file_name_for_log,
+        "before_file_type": before_file_type_for_log,
         "after_file_name": os.path.join(result_dir, GSNAPL_OUT),
         "after_file_type": "m8"})
     run_and_log(logparams, run_gsnapl_remotely,
-        sample_name, EXTRACT_UNMAPPED_FROM_SAM_OUT1, EXTRACT_UNMAPPED_FROM_SAM_OUT2,
+        sample_name, gsnapl_input_files,
         gsnap_ssh_key_s3_path,
         result_dir, sample_s3_output_path, lazy_run)
 
@@ -807,6 +767,83 @@ def run_sample(sample_s3_input_path, file_type, sample_s3_output_path,
         result_dir + '/' + UNIDENTIFIED_FASTA_OUT,
         result_dir, sample_s3_output_path, False)
 
+def run_host_filtering(sample_name, fastq_file_1, fastq_file_2, file_type, star_genome_s3_path, bowtie2_genome_s3_path,
+                       result_dir, scratch_dir, sample_s3_output_path, lazy_run):
+    # run STAR
+    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+        {"title": "STAR", "count_reads": True,
+        "before_file_name": fastq_file_1,
+        "before_file_type": initial_file_type_for_log,
+        "after_file_name": os.path.join(result_dir, STAR_OUT1),
+        "after_file_type": initial_file_type_for_log})
+    run_and_log(logparams, run_star,
+        sample_name, fastq_file_1, fastq_file_2, file_type, star_genome_s3_path,
+        result_dir, scratch_dir, sample_s3_output_path, lazy_run)
+
+    # run priceseqfilter
+    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+        {"title": "PriceSeqFilter", "count_reads": True,
+        "before_file_name": os.path.join(result_dir, STAR_OUT1),
+        "before_file_type": initial_file_type_for_log,
+        "after_file_name": os.path.join(result_dir, PRICESEQFILTER_OUT1),
+        "after_file_type": initial_file_type_for_log})
+    run_and_log(logparams, run_priceseqfilter,
+        sample_name, os.path.join(result_dir, STAR_OUT1),
+        os.path.join(result_dir, STAR_OUT2), file_type,
+        result_dir, sample_s3_output_path, lazy_run)
+
+    # run fastq to fasta
+    if "fastq" in file_type:
+        logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+            {"title": "FASTQ to FASTA",
+            "count_reads": False})
+        run_and_log(logparams, run_fq2fa,
+            sample_name, os.path.join(result_dir, PRICESEQFILTER_OUT1),
+            os.path.join(result_dir, PRICESEQFILTER_OUT2),
+            result_dir, sample_s3_output_path, lazy_run)
+        next_input_1 = FQ2FA_OUT1
+        next_input_2 = FQ2FA_OUT2
+    else:
+        next_input_1 = PRICESEQFILTER_OUT1
+        next_input_2 = PRICESEQFILTER_OUT2
+
+    # run cdhitdup
+    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+        {"title": "CD-HIT-DUP", "count_reads": True,
+        "before_file_name": os.path.join(result_dir, next_input_1),
+        "before_file_type": "fasta_paired",
+        "after_file_name": os.path.join(result_dir, CDHITDUP_OUT1),
+        "after_file_type": "fasta_paired"})
+    run_and_log(logparams, run_cdhitdup,
+        sample_name, os.path.join(result_dir, next_input_1),
+        os.path.join(result_dir, next_input_2),
+        result_dir, sample_s3_output_path, lazy_run)
+
+    # run lzw filter
+    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+        {"title": "LZW filter", "count_reads": True,
+        "before_file_name": os.path.join(result_dir, CDHITDUP_OUT1),
+        "before_file_type": "fasta_paired",
+        "after_file_name": os.path.join(result_dir, LZW_OUT1),
+        "after_file_type": "fasta_paired"})
+    run_and_log(logparams, run_lzw,
+        sample_name, os.path.join(result_dir, CDHITDUP_OUT1),
+        os.path.join(result_dir, CDHITDUP_OUT2),
+        result_dir, sample_s3_output_path, lazy_run)
+
+    # run bowtie
+    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+        {"title": "bowtie2", "count_reads": True,
+        "before_file_name": os.path.join(result_dir, LZW_OUT1),
+        "before_file_type": "fasta_paired",
+        "after_file_name": os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT1),
+        "after_file_type": "fasta_paired"})
+    run_and_log(logparams, run_bowtie2,
+        sample_name, os.path.join(result_dir, LZW_OUT1),
+        os.path.join(result_dir, LZW_OUT2),
+        bowtie2_genome_s3_path, result_dir, sample_s3_output_path, lazy_run)
+
+
 def run_star(sample_name, fastq_file_1, fastq_file_2, file_type, star_genome_s3_path,
              result_dir, scratch_dir, sample_s3_output_path, lazy_run):
     if lazy_run:
@@ -919,7 +956,7 @@ def run_lzw(sample_name, input_fa_1, input_fa_2,
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LZW_OUT1, sample_s3_output_path))
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LZW_OUT2, sample_s3_output_path))
 
-def run_bowtie2(sample_name, input_fa_1, input_fa_2, bowtie_genome_s3_path,
+def run_bowtie2(sample_name, input_fa_1, input_fa_2, bowtie2_genome_s3_path,
                 result_dir, sample_s3_output_path, lazy_run):
     if lazy_run:
         # check if output already exists
@@ -932,9 +969,9 @@ def run_bowtie2(sample_name, input_fa_1, input_fa_2, bowtie_genome_s3_path,
             return 1
     # Doing the work
     # check if genome downloaded already
-    genome_file = os.path.basename(bowtie_genome_s3_path)
+    genome_file = os.path.basename(bowtie2_genome_s3_path)
     if not os.path.isfile("%s/%s" % (REF_DIR, genome_file)):
-        execute_command("aws s3 cp %s %s/" % (bowtie_genome_s3_path, REF_DIR))
+        execute_command("aws s3 cp %s %s/" % (bowtie2_genome_s3_path, REF_DIR))
         execute_command("cd %s; tar xvfz %s" % (REF_DIR, genome_file))
         logging.getLogger().info("downloaded index")
     local_genome_dir_ls =  execute_command("ls %s/bowtie2_genome/*.bt2*" % REF_DIR)
@@ -959,7 +996,7 @@ def run_bowtie2(sample_name, input_fa_1, input_fa_2, bowtie_genome_s3_path,
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT2, sample_s3_output_path))
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT3, sample_s3_output_path))
 
-def run_gsnapl_remotely(sample, input_fa_1, input_fa_2,
+def run_gsnapl_remotely(sample, input_files,
                         gsnap_ssh_key_s3_path,
                         result_dir, sample_s3_output_path, lazy_run):
     if lazy_run:
@@ -976,19 +1013,17 @@ def run_gsnapl_remotely(sample, input_fa_1, input_fa_2,
     remote_work_dir = "%s/batch-pipeline-workdir/%s" % (remote_home_dir, sample)
     remote_index_dir = "%s/share" % remote_home_dir
     commands =  "mkdir -p %s;" % remote_work_dir
-    commands += "aws s3 cp %s/%s %s/ ; " % \
-                 (sample_s3_output_path, input_fa_1, remote_work_dir)
-    commands += "aws s3 cp %s/%s %s/ ; " % \
-                 (sample_s3_output_path, input_fa_2, remote_work_dir)
+    for input_fa in input_files:
+        commands += "aws s3 cp %s/%s %s/ ; " % \
+                 (sample_s3_output_path, input_fa, remote_work_dir)
     commands += " ".join([remote_home_dir+'/bin/gsnapl',
                           '-A', 'm8', '--batch=2',
                           '--gmap-mode=none', '--npaths=1', '--ordered',
                           '-t', '32',
                           '--maxsearch=5', '--max-mismatches=20',
-                          '-D', remote_index_dir, '-d', 'nt_k16',
-                          remote_work_dir+'/'+input_fa_1,
-                          remote_work_dir+'/'+input_fa_2,
-                          '> '+remote_work_dir+'/'+GSNAPL_OUT, ';'])
+                          '-D', remote_index_dir, '-d', 'nt_k16']
+                          + [remote_work_dir+'/'+input_fa for input_fa in input_files]
+                          + ['> '+remote_work_dir+'/'+GSNAPL_OUT, ';'])
     commands += "aws s3 cp %s/%s %s/;" % \
                  (remote_work_dir, GSNAPL_OUT, sample_s3_output_path)
     # check if remote machins has enough capacity
@@ -1177,6 +1212,7 @@ def main():
     global KEY_S3_PATH
     global STAR_GENOME
     global BOWTIE2_GENOME
+    global FILTER_HOST_FLAG
     INPUT_BUCKET = os.environ.get('INPUT_BUCKET', INPUT_BUCKET)
     FILE_TYPE = os.environ.get('FILE_TYPE', FILE_TYPE)
     OUTPUT_BUCKET = os.environ.get('OUTPUT_BUCKET', OUTPUT_BUCKET)
@@ -1185,18 +1221,11 @@ def main():
     BOWTIE2_GENOME = os.environ.get('BOWTIE2_GENOME', BOWTIE2_GENOME)
     DB_SAMPLE_ID = os.environ['DB_SAMPLE_ID']
     AWS_BATCH_JOB_ID = os.environ.get('AWS_BATCH_JOB_ID', 'local')
-    SAMPLE_HOST = os.environ.get('SAMPLE_HOST', '')
-    SAMPLE_LOCATION = os.environ.get('SAMPLE_LOCATION', '')
-    SAMPLE_DATE = os.environ.get('SAMPLE_DATE', '')
-    SAMPLE_TISSUE = os.environ.get('SAMPLE_TISSUE', '')
-    SAMPLE_TEMPLATE = os.environ.get('SAMPLE_TEMPLATE', '')
-    SAMPLE_LIBRARY = os.environ.get('SAMPLE_LIBRARY', '')
-    SAMPLE_SEQUENCER = os.environ.get('SAMPLE_SEQUENCER', '')
-    SAMPLE_NOTES = os.environ.get('SAMPLE_NOTES', '')
+    FILTER_HOST_FLAG = os.environ.get('FILTER_HOST_FLAG', FILTER_HOST_FLAG)
     sample_s3_input_path = INPUT_BUCKET.rstrip('/')
     sample_s3_output_path = OUTPUT_BUCKET.rstrip('/')
 
-    run_sample(sample_s3_input_path, FILE_TYPE, sample_s3_output_path,
+    run_sample(sample_s3_input_path, FILE_TYPE, FILTER_HOST_FLAG, sample_s3_output_path,
                STAR_GENOME, BOWTIE2_GENOME,
                KEY_S3_PATH, KEY_S3_PATH, ACCESSION2TAXID,
                DEUTEROSTOME_TAXIDS, TAXID_TO_INFO, DB_SAMPLE_ID,
