@@ -187,10 +187,11 @@
   color: #A0A0A0;
 }
 
-.report-table .genus-name {
-  display: inline-block;
-  margin-right: 5px;
-
+.report-table {
+  .genus-name {
+    display: inline-block;
+    margin-right: 5px;
+  }
   .fa {
     margin-left: 5px;
     font-size: 20px;
