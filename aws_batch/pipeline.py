@@ -477,7 +477,7 @@ def execute_command(command):
 def execute_command_realtime_stdout(command):
     print command
     sys.stdout.flush()
-    process = subprocess.Popen(command, shell=True, stdout=PIPE)
+    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
     while True:
         line = process.stdout.readline().rstrip()
         if not line:
