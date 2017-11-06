@@ -482,7 +482,7 @@ def execute_command_realtime_stdout(command):
         line = process.stdout.readline().rstrip()
         if not line:
             break
-        yield line
+        print line
 
 def wait_for_server(service_name, command, max_concurrent):
     while True:
