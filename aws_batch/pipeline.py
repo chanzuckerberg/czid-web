@@ -1153,6 +1153,11 @@ def run_generate_unidentified_fasta(sample_name, input_fa, output_fa,
 
 ### Main
 def main():
+    # Unbuffer stdout and redirect stderr into stdout.  This helps observe logged events in realtime.
+    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+    os.dup2(sys.stdout.fileno(), sys.stderr.fileno())
+  
+    # collect environment variables
     global INPUT_BUCKET
     global OUTPUT_BUCKET
     global KEY_S3_PATH
