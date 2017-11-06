@@ -478,17 +478,13 @@ def execute_command_realtime_stdout(command, progress_file=''):
     print command
     sys.stdout.flush()
     process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+    process2 = subprocess.Popen("tail -f " + progress_file, shell=True)
     while True:
         line = process.stdout.readline().rstrip()
-        if line:
-            print line
-        else:
-            break
-        if progress_file and os.path.isfile(progress_file):
-            last_line = ''
-            with open(progress_file, "r") as f:
-                for last_line in f: pass
-                if last_line: print last_line
+        if not line: break
+        print line
+    process.wait()
+    process2.kill()
 
 def wait_for_server(service_name, command, max_concurrent):
     while True:
