@@ -82,7 +82,7 @@ NR_TAXID_COUNTS_TO_SPECIES_RPM_OUT = 'species.rpm.filter.deuterostomes.taxids.ra
 NR_TAXID_COUNTS_TO_GENUS_RPM_OUT = 'genus.rpm.filter.deuterostomes.taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.csv'
 UNIDENTIFIED_FASTA_OUT = 'unidentified.fasta'
 COMBINED_JSON_OUT = 'idseq_web_sample.json'
-LOGS_OUT_BASENAME = 'log.txt'
+LOGS_OUT_BASENAME = 'log'
 STATS_OUT = 'stats.json'
 
 #global statistics log
@@ -547,7 +547,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
     execute_command("mkdir -p %s " % REF_DIR);
 
     # configure logger
-    log_file = "%s/%s.%s" % (result_dir, LOGS_OUT_BASENAME, aws_batch_job_id)
+    log_file = "%s/%s.%s.txt" % (result_dir, LOGS_OUT_BASENAME, aws_batch_job_id)
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
     handler = logging.FileHandler(log_file)
