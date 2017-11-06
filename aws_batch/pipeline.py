@@ -468,10 +468,10 @@ def return_merged_dict(dict1, dict2):
 
 def execute_command(command):
     print command
-    # sys.stdout.flush()
+    sys.stdout.flush()
     output = subprocess.check_output(command, shell=True)
     print output
-    # sys.stdout.flush()
+    sys.stdout.flush()
     return output
 
 def wait_for_server(service_name, command, max_concurrent):
