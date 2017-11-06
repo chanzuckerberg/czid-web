@@ -480,14 +480,12 @@ def execute_command_realtime_stdout(command, progress_file=''):
     process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
     while True:
         line = process.stdout.readline().rstrip()
-        if line:
-            print line
+        if line: print line
         if not progress_file == '':
             last_line = ''
             with open(progress_file, "r") as f:
-                last_line = f.readlines()[-1]
-            if last_line:
-                print last_line
+                for last_line in f: pass
+                if last_line: print last_line
 
 def wait_for_server(service_name, command, max_concurrent):
     while True:
