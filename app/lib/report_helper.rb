@@ -259,7 +259,8 @@ module ReportHelper
       'zscore' => ZSCORE_WHEN_ABSENT_FROM_SAMPLE,
       'percentidentity' => DEFAULT_SAMPLE_PERCENTIDENTITY,
       'alignmentlength' => DEFAULT_SAMPLE_ALIGNMENTLENGTH,
-      'neglogevalue' => DEFAULT_SAMPLE_NEGLOGEVALUE
+      'neglogevalue' => DEFAULT_SAMPLE_NEGLOGEVALUE,
+      'aggregatescore' => nil
     }
   end
 
@@ -457,7 +458,10 @@ module ReportHelper
       should_delete = false
       # if any metric is below threshold in every type, delete
       METRICS.each do |metric|
-        should_delete = COUNT_TYPES.all? { |count_type| tax_info[count_type][metric] < thresholds[metric] }
+        should_delete = COUNT_TYPES.all? do |count_type|
+          # aggregatescore is null for genera, and thus not considered in filtering genera
+          !(tax_info[count_type][metric]) || tax_info[count_type][metric] < thresholds[metric]
+        end
         break if should_delete
       end
       if tax_info['tax_id'] != TaxonLineage::MISSING_GENUS_ID && tax_info['tax_id'] != TaxonLineage::BLACKLIST_GENUS_ID
@@ -491,18 +495,28 @@ module ReportHelper
     aggregate
   end
 
-  def compute_aggregate_scores!(tax_2d)
-    tax_2d.each do |_tax_id, tax_info|
-      next unless tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
-      species_info = tax_info
+  def compute_genera_aggregate_scores!(rows, tax_2d)
+    rows.each do |species_info|
+      next unless species_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
       genus_id = species_info['genus_taxid']
       genus_info = tax_2d[genus_id]
-      species_score = aggregate_score(genus_info, tax_info)
-      species_info['NT']['aggregatescore'] = species_score
-      genus_info['NT']['aggregatescore'] = species_score unless genus_info['NT']['aggregatescore'] && genus_info['NT']['aggregatescore'] > species_score
+      species_score = species_info['NT']['aggregatescore']
+      genus_score = genus_info['NT']['aggregatescore']
+      unless genus_score && genus_score > species_score
+        genus_info['NT']['aggregatescore'] = species_score
+        genus_info['NR']['aggregatescore'] = species_score
+      end
     end
-    tax_2d.each do |_tax_id, tax_info|
-      tax_info['NR']['aggregatescore'] = tax_info['NT']['aggregatescore']
+  end
+
+  def compute_species_aggregate_scores!(rows, tax_2d)
+    rows.each do |species_info|
+      next unless species_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
+      genus_id = species_info['genus_taxid']
+      genus_info = tax_2d[genus_id]
+      species_score = aggregate_score(genus_info, species_info)
+      species_info['NT']['aggregatescore'] = species_score
+      species_info['NR']['aggregatescore'] = species_score
     end
     tax_2d
   end
@@ -549,20 +563,16 @@ module ReportHelper
     # This gets returned to UI for the genus search autoselect dropdown.
     all_genera_in_sample = all_genera.sort_by(&:downcase)
 
-    # Compute all aggregate scores.
-    compute_aggregate_scores!(tax_2d)
-
-    # Compute sort key and sort.
     rows = []
-    sort_by = decode_sort_by(params[:sort_by])
     tax_2d.each do |_tax_id, tax_info|
-      tax_info[:sort_key] = sort_key(tax_2d, tax_info, sort_by)
       rows << tax_info
     end
-    rows.sort_by! { |tax_info| tax_info[:sort_key] }
+
+    # Compute all species aggregate scores.  These are used in filtering.
+    compute_species_aggregate_scores!(rows, tax_2d)
 
     # Total number of rows for view level, before application of filters.
-    rows_total = rows.length
+    rows_total = tax_2d.length
 
     # Apply filters, unless disabled for CSV download.
     unless params[:disable_filters] == 1
@@ -571,6 +581,16 @@ module ReportHelper
 
     # These stats are displayed at the bottom of the page.
     rows_passing_filters = rows.length
+
+    # Compute all genus aggregate scores.  These are used only in sorting.
+    compute_genera_aggregate_scores!(rows, tax_2d)
+
+    # Compute sort key and sort.
+    sort_by = decode_sort_by(params[:sort_by])
+    rows.each do |tax_info|
+      tax_info[:sort_key] = sort_key(tax_2d, tax_info, sort_by)
+    end
+    rows.sort_by! { |tax_info| tax_info[:sort_key] }
 
     # HACK
     rows = rows[0...MAX_ROWS]
