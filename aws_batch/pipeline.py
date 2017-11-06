@@ -468,6 +468,7 @@ def return_merged_dict(dict1, dict2):
 
 def execute_command(command):
     print command
+    sys.stdout.flush()
     output = subprocess.check_output(command, shell=True)
     return output
 
@@ -497,6 +498,8 @@ class TimeFilter(logging.Filter):
 def run_and_log(logparams, func_name, *args):
     logger = logging.getLogger()
     logger.info("========== %s ==========" % logparams.get("title"))
+    # copy log file -- start
+    execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
     # produce the output
     func_return = func_name(*args)
     if func_return == 1:
@@ -519,7 +522,7 @@ def run_and_log(logparams, func_name, *args):
         if func_name.__name__ == "run_priceseqfilter":
             pass_percentage = (100.0 * records_after) / records_before
             logger.info("percentage of reads passing QC filter: %s %%" % str(pass_percentage))
-    # copy log file
+    # copy log file -- end
     execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
     # write stats
     stats_path = logparams["stats_file"]
