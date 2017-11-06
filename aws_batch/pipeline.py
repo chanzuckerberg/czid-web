@@ -469,10 +469,12 @@ def return_merged_dict(dict1, dict2):
 def execute_command(command):
     print command
     sys.stdout.flush()
-    output = subprocess.check_output(command, shell=True)
-    print output
-    sys.stdout.flush()
-    return output
+    process = subprocess.Popen(command, shell=True, stdout=PIPE)
+    while True:
+        line = process.stdout.readline().rstrip()
+        if not line:
+            break
+        yield line
 
 def wait_for_server(service_name, command, max_concurrent):
     while True:
@@ -1154,8 +1156,8 @@ def run_generate_unidentified_fasta(sample_name, input_fa, output_fa,
 ### Main
 def main():
     # Unbuffer stdout and redirect stderr into stdout.  This helps observe logged events in realtime.
-    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
-    os.dup2(sys.stdout.fileno(), sys.stderr.fileno())
+    # sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+    # os.dup2(sys.stdout.fileno(), sys.stderr.fileno())
   
     # collect environment variables
     global INPUT_BUCKET
