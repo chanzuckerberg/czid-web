@@ -482,7 +482,7 @@ def execute_command_realtime_stdout(command, progress_file=''):
         line = process.stdout.readline().rstrip()
         if line: print line
         if process.returncode: break
-        if progress_file:
+        if progress_file and os.path.isfile(progress_file):
             last_line = ''
             with open(progress_file, "r") as f:
                 for last_line in f: pass
