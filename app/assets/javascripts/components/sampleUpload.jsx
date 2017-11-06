@@ -317,9 +317,7 @@ class SampleUpload extends React.Component {
       })
       return true;
     }
-    else {
-      return false;
-    }
+    return false;
   }
 
   handleProjectChange(e) {

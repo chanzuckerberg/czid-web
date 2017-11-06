@@ -193,10 +193,11 @@ class BulkUploadImport extends React.Component {
       that.initializeSelectTag()
       that.initializeSelectAll()
     }).catch(function (error) {
+      console.log(error, error.response, 'response')
      that.setState({
       submitting: false,
       invalid: true,
-      errorMessage: JSON.stringify(error.response)
+      errorMessage: error.response.data.status
      })
     });
   }
@@ -226,10 +227,11 @@ class BulkUploadImport extends React.Component {
         that.gotoPage(`/?ids=${that.state.createdSampleIds.join(',')}`);
       }, 2000)
     }).catch(function (error) {
+      console.log(error, error.response, 'response')
      that.setState({
       submitting: false,
       invalid: true,
-      errorMessage: JSON.stringify(error.response)
+      errorMessage: error.response.data.status
      })
     });
   }
@@ -244,19 +246,21 @@ class BulkUploadImport extends React.Component {
   }
 
   isImportFormInvalid() {
-    if (this.state.project === 'Select a project' && this.refs.bulk_path === '') {
+    console.log(this.state.project, this.refs.bulk_path.value.length, 'check')
+    if (this.state.project === "Select a Project"  && this.refs.bulk_path.value === '') {
+      console.log('got here true');
       this.setState({
         invalid: true,
         errorMessage: 'Please fill in all required fields'
       })
       return true;
-    } else if (this.state.project === 'Select a project') {
+    } else if (this.state.project === "Select a Project") {
       this.setState({
         invalid: true,
         errorMessage: 'Please select a project'
       })
       return true;
-    } else if (this.refs.bulk_path === '') {
+    } else if (this.refs.bulk_path.value === '') {
         this.setState({
           invalid: true,
           errorMessage: 'Please fill in the S3 bulk_path path'
@@ -365,7 +369,8 @@ class BulkUploadImport extends React.Component {
           }
       </div>
       <input className="hidden" type="submit"/>
-      <div onClick={ this.handleUploadSubmit } className="center login-wrapper">{ !this.state.submitting ? 'Submit' : <i className='fa fa-spinner fa-spin fa-lg'></i>}</div>
+        { !this.submitting ? <div onClick={ this.handleUploadSubmit } className="center login-wrapper"> 'Submit' </div> : null }
+        { this.submitting ? <div className="center login-wrapper disabled"> <i className='fa fa-spinner fa-spin fa-lg'></i> </div> : null }
       </form>
     </div>
     )
