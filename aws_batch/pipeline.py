@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+usr/bin/env python
 import os
 import sys
 import multiprocessing
@@ -508,6 +508,8 @@ def run_and_log(logparams, func_name, *args):
         logger.info("output exists, lazy run")
     else:
         logger.info("uploaded output")
+    # copy log file -- after work is done
+    execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
     # count records
     required_params = ["before_file_name", "before_file_type", "after_file_name", "after_file_type"]
     if all(param in logparams for param in required_params):
