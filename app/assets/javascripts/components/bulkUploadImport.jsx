@@ -41,6 +41,8 @@ class BulkUploadImport extends React.Component {
     this.initializeSelectTag();
     $(ReactDOM.findDOMNode(this.refs.projectSelect)).on('change',this.handleProjectChange);
     $(ReactDOM.findDOMNode(this.refs.hostSelect)).on('change',this.handleHostChange);
+    this.initializeSelectTag()
+    this.initializeSelectAll()
   }
 
   selectSample(e) {
@@ -91,7 +93,15 @@ class BulkUploadImport extends React.Component {
   handleUploadSubmit(e) {
     e.preventDefault();
     e.target.disabled = true;
-    this.bulkUploadSubmit();
+    this.setState({
+      submitting: true
+    })
+    if(!this.isUploadFormInvalid()) {
+      // this.setState({
+      //   submitting: true
+      // });
+      this.bulkUploadSubmit();
+    }
   }
 
   handleImportSubmit(e) {
@@ -99,6 +109,10 @@ class BulkUploadImport extends React.Component {
     e.target.disabled = true;
     this.clearError();
     if(!this.isImportFormInvalid()) {
+      console.log(this, 'this ctx');
+      // this.setState({
+      //   submitting: true
+      // });
       this.bulkUploadImport()
     }
   }
@@ -173,7 +187,7 @@ class BulkUploadImport extends React.Component {
     var that = this;
     that.setState({
       submitting: true
-    })
+    });
     axios.get('/samples/bulk_import.json', {
       params: {
         project_id: this.state.projectId,
@@ -190,14 +204,14 @@ class BulkUploadImport extends React.Component {
         samples: response.data.samples,
         imported: true
       });
-      that.initializeSelectTag()
-      that.initializeSelectAll()
+      // that.initializeSelectTag()
+      // that.initializeSelectAll()
     }).catch(function (error) {
-      console.log(error, error.response, 'response')
+      console.log(error, 'error upload');
      that.setState({
       submitting: false,
-      invalid: true,
-      errorMessage: error.response.data.status
+      invalid: true
+      // errorMessage: error ? error.response.data.status : null
      })
     });
   }
@@ -206,7 +220,7 @@ class BulkUploadImport extends React.Component {
     var that = this;
     that.setState({
       submitting: true
-    })
+    });
     var samples = []
     this.state.selectedSampleIndices.map((idx) => {
       samples.push(this.state.samples[idx])
@@ -230,8 +244,8 @@ class BulkUploadImport extends React.Component {
       console.log(error, error.response, 'response')
      that.setState({
       submitting: false,
-      invalid: true,
-      errorMessage: error.response.data.status
+      invalid: true
+      // errorMessage: error.response.data.status
      })
     });
   }
@@ -273,6 +287,18 @@ class BulkUploadImport extends React.Component {
         })
         return true;
     } 
+    return false;
+  }
+
+  isUploadFormInvalid() {
+    console.log('legth of ids', this.state.selectedSampleIndices.length)
+    if (!this.state.selectedSampleIndices.length) {
+      this.setState({
+        invalid: true,
+        errorMessage: 'Please select desired samples'
+      })
+      return true;
+    }
     return false;
   }
 
@@ -324,6 +350,14 @@ class BulkUploadImport extends React.Component {
           <div className="row title">
             <p className="col s6 signup">Bulk Upload</p>
           </div>
+          { this.state.success ? <div className="success-info" >
+                <i className="fa fa-success"></i>
+                 <span>{this.state.successMessage}</span>
+                </div> : null }
+              { this.state.invalid ? <div className="error-info" >
+                  <i className="fa fa-error"></i>
+                  <span>{this.state.errorMessage}</span>
+              </div> : null }
           <div className="row content-wrapper">
             <div className="row header">
               <div className="col s4 sample-title">
@@ -369,8 +403,8 @@ class BulkUploadImport extends React.Component {
           }
       </div>
       <input className="hidden" type="submit"/>
-        { !this.submitting ? <div onClick={ this.handleUploadSubmit } className="center login-wrapper"> 'Submit' </div> : null }
-        { this.submitting ? <div className="center login-wrapper disabled"> <i className='fa fa-spinner fa-spin fa-lg'></i> </div> : null }
+        { this.state.submitting ? <div className="center login-wrapper disabled"> <i className='fa fa-spinner fa-spin fa-lg'></i> </div> : 
+          <div onClick={ this.handleUploadSubmit } className="center login-wrapper">Submit</div> }
       </form>
     </div>
     )
@@ -432,7 +466,8 @@ class BulkUploadImport extends React.Component {
             </div>
           </div>
         <input className="hidden" type="submit"/>
-        <div onClick={ this.handleImportSubmit } className="center login-wrapper">{ !this.state.submitting ? 'Submit' : <i className='fa fa-spinner fa-spin fa-lg'></i>}</div>
+        { this.state.submitting ? <div className="center login-wrapper disabled"> <i className='fa fa-spinner fa-spin fa-lg'></i> </div> : 
+          <div onClick={ this.handleImportSubmit } className="center login-wrapper">Submit</div> }
       </form>
     </div>
     )
@@ -441,7 +476,7 @@ class BulkUploadImport extends React.Component {
   render() {
     return (
       <div>
-        { this.state.imported ? this.renderBulkUploadSubmitForm(): this.renderBulkUploadImportForm() }
+        { !this.state.imported ? this.renderBulkUploadImportForm() : this.renderBulkUploadSubmitForm() }
           <div className="bottom">
             <span className="back" onClick={ this.gotoPage.bind(this, '/samples') } >Samples</span>|
             <span className="home" onClick={ this.gotoPage.bind(this, '/')}>Home</span>
