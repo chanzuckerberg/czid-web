@@ -5,8 +5,6 @@
 		margin-top: 4px;
 
 		#visualization-sidebar {
-			height: -webkit-fill-available;
-			height: fill-available;
 			.select-pathogens {
 				background: #fff;
 				.search-pathogen {
@@ -32,9 +30,30 @@
 			    }
 			  }
 			  .selected-pathogens {
+				.checked-pathogens {
+					div {
+						display: inline-block;
+						&.pathogen-label {
+							width: 80%;
+						}
+					}
+				}
+				.title {
+					padding: 15px 23px 0;
+					font-size: 16px;
+					small {
+						margin-left: 10px;
+						font-weight: bold
+					}
+				}
+				.pagination-controls {
+					div {
+						display: inline-block;
+						padding: 15px 20px 0px 20px;
+					}
+				}
 				ul li {
-					padding: 10px;
-
+					padding: 6px 20px;
 					[type="checkbox"] + label {
 						line-height: 20px;
 					}
@@ -47,11 +66,18 @@
 					.row {
 						margin-bottom: 0;
 					}
-
 					div {
 						&.pathogen-label {
+							&.samples {
+								font-size: 13px;
+							}
+							&.selectable {
+								cursor: pointer;
+							}
+							.selected {
+								color: #cccccc;
+							}
 						}
-
 						&.remove-icon {
 							padding: 4px;
 							margin-top: -4px;
@@ -109,11 +135,8 @@
 				}
 				.scale-label {
 					padding-bottom: 10px;
-
 				}
 			}
-
-
 		}
 		.Visualization-actions {
 			ul li {
