@@ -244,6 +244,19 @@ class BulkUploadImport extends React.Component {
   }
 
   isImportFormInvalid() {
+    if (this.state.project === 'Select a project' && this.refs.bulk_path === '') {
+      this.setState({
+        invalid: true,
+        errorMessage: 'Please fill in all required fields'
+      })
+      return true;
+    } else if (this.state.project === 'Select a project') {
+      this.setState({
+        invalid: true,
+        errorMessage: 'Please select a project'
+      })
+      return true;
+    }
     if (this.refs.bulk_path === '') {
         this.setState({
           invalid: true,
@@ -256,7 +269,7 @@ class BulkUploadImport extends React.Component {
           errorMessage: 'Please fill in a valid bulk_path '
         })
         return true;
-    }
+    } 
     return false;
   }
 
