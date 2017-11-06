@@ -817,6 +817,7 @@ def run_star(sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
                            '--runThreadN', str(multiprocessing.cpu_count()),
                            '--genomeDir', REF_DIR + '/STAR_genome',
                            '--readFilesIn', fastq_file_1, fastq_file_2]
+    os.dup2(sys.stdout.fileno(), os.path.join(result_dir, "Log.progress.out"))
     execute_command(" ".join(star_command_params))
     logging.getLogger().info("finished job")
     # extract out unmapped files
