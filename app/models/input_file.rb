@@ -6,9 +6,22 @@ class InputFile < ApplicationRecord
   SOURCE_TYPE_S3 = 's3'.freeze
 
   FILE_REGEX = %r{\A[^\s\/]+\.(fastq|fastq.gz|fasta|fasta.gz)\z}
-  validates :name, presence: true, format: { with: FILE_REGEX, message: "file must match format '#{FILE_REGEX}'" }
+  validates :name, presence: true, format: { with: FILE_REGEX, message: "file must match format '#{FILE_REGEX}'" },
+    unless: :optional_input?
   validates :source_type, presence: true, inclusion: { in: %w[local s3] }
-  validate :s3_source_check
+  validate :s3_source_check, unless: :optional_input?
+  validate :file_type_consistency_check, unless: :optional_input?
+
+  def optional_input?
+    # If host filtering is skipped, read2 is optional. If a file name is given, it should nevertheless be validated. 
+    # TO DO: less hacky way of determining that we're dealing with read2
+    sample.host_genome.name == HostGenome::NO_HOST_NAME && id > sample.input_files.first.id && name == ''
+  end
+
+  def file_type_consistency_check
+    unless file_type == sample.input_files.first.file_type
+    errors.add(:input_files, "file types are not equal")
+  end
 
   def s3_source_check
     source.strip! if source.present?
