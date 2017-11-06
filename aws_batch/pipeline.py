@@ -477,8 +477,8 @@ def execute_command(command):
 def execute_command_realtime_stdout(command, progress_file=''):
     print command
     sys.stdout.flush()
+    process2 = subprocess.Popen("touch %s ; tail -f %s" % (progress_file, progress_file), shell=True)
     process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
-    process2 = subprocess.Popen("tail -f " + progress_file, shell=True)
     while True:
         line = process.stdout.readline().rstrip()
         if not line: break
