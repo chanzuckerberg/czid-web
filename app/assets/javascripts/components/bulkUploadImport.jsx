@@ -256,8 +256,7 @@ class BulkUploadImport extends React.Component {
         errorMessage: 'Please select a project'
       })
       return true;
-    }
-    if (this.refs.bulk_path === '') {
+    } else if (this.refs.bulk_path === '') {
         this.setState({
           invalid: true,
           errorMessage: 'Please fill in the S3 bulk_path path'
