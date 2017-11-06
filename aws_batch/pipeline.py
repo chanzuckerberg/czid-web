@@ -474,7 +474,7 @@ def execute_command(command):
     sys.stdout.flush()
     return output
 
-def execute_command_realtime_stdout(command):
+def execute_command_realtime_stdout(command, progress_file=''):
     print command
     sys.stdout.flush()
     process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
@@ -482,6 +482,12 @@ def execute_command_realtime_stdout(command):
         line = process.stdout.readline().rstrip()
         if line:
             print line
+        if not progress_file == '':
+            last_line = ''
+            with open(progress_file, "r") as f:
+                last_line = f1.readlines()[-1]
+            if last_line:
+                print last_line
 
 def wait_for_server(service_name, command, max_concurrent):
     while True:
@@ -826,7 +832,7 @@ def run_star(sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
                            '--runThreadN', str(multiprocessing.cpu_count()),
                            '--genomeDir', REF_DIR + '/STAR_genome',
                            '--readFilesIn', fastq_file_1, fastq_file_2]
-    execute_command_realtime_stdout(" ".join(star_command_params))
+    execute_command_realtime_stdout(" ".join(star_command_params), os.path.join(scratch_dir, "Log.progress.out"))
     logging.getLogger().info("finished job")
     # extract out unmapped files
     execute_command("cp %s/%s %s/%s;" % (scratch_dir, 'Unmapped.out.mate1', result_dir, STAR_OUT1))
