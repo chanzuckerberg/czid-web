@@ -480,8 +480,10 @@ def execute_command_realtime_stdout(command, progress_file=''):
     process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
     while True:
         line = process.stdout.readline().rstrip()
-        if line: print line
-        if process.returncode: break
+        if line:
+            print line
+        else:
+            break
         if progress_file and os.path.isfile(progress_file):
             last_line = ''
             with open(progress_file, "r") as f:
