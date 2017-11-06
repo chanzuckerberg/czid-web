@@ -470,8 +470,7 @@ def execute_command(command):
     print command
     sys.stdout.flush()
     output = subprocess.check_output(command, shell=True)
-    print output
-    sys.stdout.flush()
+    logger.info(output)
     return output
 
 def wait_for_server(service_name, command, max_concurrent):
