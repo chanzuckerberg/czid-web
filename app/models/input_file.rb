@@ -7,13 +7,13 @@ class InputFile < ApplicationRecord
 
   FILE_REGEX = %r{\A[^\s\/]+\.(fastq|fastq.gz|fasta|fasta.gz)\z}
   validates :name, presence: true, format: { with: FILE_REGEX, message: "file must match format '#{FILE_REGEX}'" },
-    unless: :optional_input?
+                   unless: :optional_input?
   validates :source_type, presence: true, inclusion: { in: %w[local s3] }
   validate :s3_source_check, unless: :optional_input?
   validate :file_type_consistency_check, unless: :optional_input?
 
   def optional_input?
-    # If host filtering is skipped, read2 is optional. If a file name is given, it should nevertheless be validated. 
+    # If host filtering is skipped, read2 is optional. If a file name is given, it should nevertheless be validated.
     # TO DO: determine if we're indeed dealing with read2 (right now implicit, since frontend won't allow empty read1 name)
     sample.host_genome.name == HostGenome::NO_HOST_NAME && name == ''
   end
