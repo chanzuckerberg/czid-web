@@ -1,20 +1,20 @@
-class GsnaplRunsController < ApplicationController
-  before_action :set_gsnapl_run, only: :destroy
+class MachineRunsController < ApplicationController
+  before_action :set_machine_run, only: :destroy
 
   def create
-    @gsnapl_machine = GsnaplMachine.find_by(ip: gsnapl_run_params[:gsnapl_machine_ip])
-    @gsnapl_run = GsnaplRun.create(gsnapl_machine_id: @gsnapl_machine.id, aws_batch_job_id: gsnapl_run_params[:aws_batch_job_id])
+    @machine = Machine.find_by(ip: machine_run_params[:machine_ip])
+    @machine_run = MachineRun.create(machine_id: @machine.id, aws_batch_job_id: machine_run_params[:aws_batch_job_id])
     # To do: security checks
-    @gsnapl_run.save
+    @machine_run.save
   end
 
   def index
-    @gsnapl_runs = GsnaplRun.all
-    render plain: @gsnapl_runs.to_json
+    @machine_runs = MachineRun.all
+    render plain: @machine_runs.to_json
   end
 
   def destroy
-    @gsnapl_run.destroy
+    @machine_run.destroy
     respond_to do |format|
       format.html
       format.json { head :no_content }
@@ -23,11 +23,11 @@ class GsnaplRunsController < ApplicationController
 
   private
 
-  def set_gsnapl_run
-    @gsnapl_run = GsnaplRun.find(params[:id])
+  def set_machine_run
+    @machine_run = MachineRun.find(params[:id])
   end
 
-  def gsnapl_run_params
-    params.permit(:aws_batch_job_id, :gsnapl_machine_ip)
+  def machine_run_params
+    params.permit(:aws_batch_job_id, :machine_ip)
   end
 end
