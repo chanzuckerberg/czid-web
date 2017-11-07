@@ -348,7 +348,7 @@ def generate_json_from_taxid_counts(sample, rawReadsInputPath, taxidCountsInputP
         count = species_to_count[taxid]
         avg_percent_identity = species_to_percent_identity[taxid] / count
         avg_alignment_length = species_to_alignment_length[taxid] / count
-        avg_e_value = species_to_e_value[taxid] / count       
+        avg_e_value = species_to_e_value[taxid] / count
         taxon_counts_attributes.append({"tax_id": taxid,
                                         "tax_level": TAX_LEVEL_SPECIES,
                                         "count": count,
@@ -784,6 +784,23 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         result_dir + '/' + UNIDENTIFIED_FASTA_OUT,
         result_dir, sample_s3_output_path, False)
 
+def run_star_part(output_dir, genome_dir, fastq_file_1, fastq_file_2):
+    star_command_params = ['cd', output_dir, ';', STAR,
+                           '--outFilterMultimapNmax', '99999',
+                           '--outFilterScoreMinOverLread', '0.5',
+                           '--outFilterMatchNminOverLread', '0.5',
+                           '--outReadsUnmapped', 'Fastx',
+                           '--outFilterMismatchNmax', '999',
+                           '--outSAMmode', 'None',
+                           '--clip3pNbases', '0',
+                           '--runThreadN', str(multiprocessing.cpu_count()),
+                           '--genomeDir', genome_dir,
+                           '--readFilesIn', fastq_file_1, fastq_file_2]
+    if fastq_file_1[-3:] == '.gz':
+        ['--readFilesCommand', 'zcat']
+    execute_command(" ".join(star_command_params))
+    logging.getLogger().info("finished job")
+
 def run_star(sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
              result_dir, scratch_dir, sample_s3_output_path, lazy_run):
     if lazy_run:
@@ -798,23 +815,25 @@ def run_star(sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
         execute_command("aws s3 cp %s %s/" % (star_genome_s3_path, REF_DIR))
         execute_command("cd %s; tar xvfz %s" % (REF_DIR, genome_file))
         logging.getLogger().info("downloaded index")
-    star_command_params = ['cd', scratch_dir, ';', STAR,
-                           '--outFilterMultimapNmax', '99999',
-                           '--outFilterScoreMinOverLread', '0.5',
-                           '--outFilterMatchNminOverLread', '0.5',
-                           '--outReadsUnmapped', 'Fastx',
-                           '--outFilterMismatchNmax', '999',
-                           '--outSAMmode', 'None',
-                           '--clip3pNbases', '0',
-                           '--readFilesCommand', 'zcat',
-                           '--runThreadN', str(multiprocessing.cpu_count()),
-                           '--genomeDir', REF_DIR + '/STAR_genome',
-                           '--readFilesIn', fastq_file_1, fastq_file_2]
-    execute_command(" ".join(star_command_params))
-    logging.getLogger().info("finished job")
-    # extract out unmapped files
-    execute_command("cp %s/%s %s/%s;" % (scratch_dir, 'Unmapped.out.mate1', result_dir, STAR_OUT1))
-    execute_command("cp %s/%s %s/%s;" % (scratch_dir, 'Unmapped.out.mate2', result_dir, STAR_OUT2))
+    # Check if parts.txt file exists, if so use the new version of (partitioned indices). Otherwise, stay put
+    if os.path.isfile("%s/STAR_genome/parts.txt" % REF_DIR):
+        num_parts = int(open("%s/STAR_genome/parts.txt" % REF_DIR, 'rb').read())
+        part_idx = 0
+        tmp_result_dir = "%s/star-part-%d" % (scratch_dir, part_idx)
+        run_star_part(tmp_result_dir, REF_DIR + "/STAR_genome/part-%d" % part_idx, fastq_file_1, fastq_file_2)
+        for i in range(1, num_parts):
+            fastq_1 = "%s/Unmapped.out.mate1" % tmp_result_dir
+            fastq_2 = "%s/Unmapped.out.mate2" % tmp_result_dir
+            tmp_result_dir = "%s/star-part-%d" % (scratch_dir, i)
+            run_star_part(tmp_result_dir, REF_DIR + "/STAR_genome/part-%d" % i, fastq_1, fastq_2)
+        # extract out unmapped files
+        execute_command("cp %s/%s %s/%s;" % (tmp_result_dir, 'Unmapped.out.mate1', result_dir, STAR_OUT1))
+        execute_command("cp %s/%s %s/%s;" % (tmp_result_dir, 'Unmapped.out.mate2', result_dir, STAR_OUT2))
+    else:
+        run_star_part(scratch_dir, REF_DIR + '/STAR_genome', fastq_file_1, fastq_file_2)
+        # extract out unmapped files
+        execute_command("cp %s/%s %s/%s;" % (scratch_dir, 'Unmapped.out.mate1', result_dir, STAR_OUT1))
+        execute_command("cp %s/%s %s/%s;" % (scratch_dir, 'Unmapped.out.mate2', result_dir, STAR_OUT2))
     # copy back to aws
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, STAR_OUT1, sample_s3_output_path))
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, STAR_OUT2, sample_s3_output_path))
@@ -1135,7 +1154,7 @@ def run_combine_json_outputs(sample_name, input_json_1, input_json_2, output_jso
     # move it the output back to S3
     execute_command("aws s3 cp %s %s/" % (output_json, sample_s3_output_path))
 
-def run_generate_unidentified_fasta(sample_name, input_fa, output_fa, 
+def run_generate_unidentified_fasta(sample_name, input_fa, output_fa,
     result_dir, sample_s3_output_path, lazy_run):
     if lazy_run:
         if os.path.isfile(output_fa):
