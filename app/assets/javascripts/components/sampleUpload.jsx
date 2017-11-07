@@ -37,7 +37,6 @@ class SampleUpload extends React.Component {
       allProjects: this.projects || [],
       hostGenomes: this.hostGenomes || [],
       hostName: this.hostName,
-      host: this.hostName,
       hostId: this.hostId,
       invalid: false,
       errorMessage: '',
@@ -233,8 +232,8 @@ class SampleUpload extends React.Component {
     });
   }
 
-  filePathValid(str, read, host_name) {
-    if (read == 2 && str === '' && host_name === 'No host subtraction') {
+  filePathValid(str, read) {
+    if (read == 2 && str === '') {
       return true;
     } 
     var regexPrefix = /s3:\/\//;
@@ -309,13 +308,13 @@ class SampleUpload extends React.Component {
           errorMessage: 'Please fill in first read file path'
         })
         return true;
-    } else if ( !this.filePathValid(this.refs.first_file_source.value, 1, this.state.host)) {
+    } else if ( !this.filePathValid(this.refs.first_file_source.value, 1)) {
         this.setState({
           invalid: true,
           errorMessage: 'Please fill in a valid file path for Read 1, Sample format for path can be found below'
         })
         return true;
-    } else if ( !this.filePathValid(this.refs.second_file_source.value, 2, this.state.host)) {
+    } else if ( !this.filePathValid(this.refs.second_file_source.value, 2)) {
       this.setState({
         invalid: true,
         errorMessage: 'Please fill in a valid file path for Read 2, Sample format for path can be found below'
