@@ -14,13 +14,14 @@ class InputFile < ApplicationRecord
 
   def optional_input?
     # If host filtering is skipped, read2 is optional. If a file name is given, it should nevertheless be validated. 
-    # TO DO: less hacky way of determining that we're dealing with read2
-    sample.host_genome.name == HostGenome::NO_HOST_NAME && id > sample.input_files.first.id && name == ''
+    # TO DO: determine if we're indeed dealing with read2 (right now implicit, since frontend won't allow empty read1 name)
+    sample.host_genome.name == HostGenome::NO_HOST_NAME && name == ''
   end
 
   def file_type_consistency_check
     unless file_type == sample.input_files.first.file_type
-    errors.add(:input_files, "file types are not equal")
+      errors.add(:input_files, "file types are not equal")
+    end
   end
 
   def s3_source_check
