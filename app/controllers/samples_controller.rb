@@ -127,6 +127,7 @@ class SamplesController < ApplicationController
     end
     @sample = Sample.new(params)
     @sample.project = project if project
+    @sample.input_files.each { |f| f.destroy if f.source.empty? }
     @sample.input_files.each { |f| f.name ||= File.basename(f.source) }
     @sample.user = @user if @user
 

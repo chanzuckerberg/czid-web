@@ -48,11 +48,16 @@ class Sample < ApplicationRecord
   validates_associated :input_files
 
   def input_files_checks
-    # validate that we have exactly 2 input files
-    errors.add(:input_files, "file_size !=2 for sample") unless input_files.size == 2
-    # validate that both input files have the same source_type
+    # validate that we have the correct number of input files
+    if host_genome && host_genome.name == HostGenome::NO_HOST_NAME
+      errors.add(:input_files, "no input files") unless input_files.size >= 1
+    else
+      errors.add(:input_files, "file_size != 2 for sample and host subtraction not skipped") unless input_files.size == 2
+    end
+    # validate that both input files have the same source_type and file_type
     if input_files.length == 2
       errors.add(:input_files, "file source type different") unless input_files[0].source_type == input_files[1].source_type
+      errors.add(:input_files, "file formats different") unless input_files[0].file_type == input_files[1].file_type
     end
     # TODO: for s3 input types, test permissions before saving, by making a HEAD request
   end
@@ -162,10 +167,10 @@ class Sample < ApplicationRecord
     batch_command_env_variables = "INPUT_BUCKET=#{sample_input_s3_path} OUTPUT_BUCKET=#{sample_output_s3_path} " \
       "FILE_TYPE=#{input_files.first.file_type} FILTER_HOST_FLAG=#{filter_host_flag} DB_SAMPLE_ID=#{id} "
     if s3_star_index_path.present?
-      batch_command_env_variables += "STAR_GENOME=#{s3_star_index_path} " \
+      batch_command_env_variables += "STAR_GENOME=#{s3_star_index_path} "
     end
     if s3_bowtie2_index_path.present?
-      batch_command_env_variables += "BOWTIE2_GENOME=#{s3_bowtie2_index_path} " \
+      batch_command_env_variables += "BOWTIE2_GENOME=#{s3_bowtie2_index_path} "
     end
     batch_command = "aws s3 cp #{IdSeqPipeline::S3_SCRIPT_LOC} .; chmod 755 #{script_name}; " +
                     batch_command_env_variables + "./#{script_name}"
