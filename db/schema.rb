@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171102232046) do
+ActiveRecord::Schema.define(version: 20171107201501) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -31,22 +31,6 @@ ActiveRecord::Schema.define(version: 20171102232046) do
     t.bigint "sample_id", null: false
     t.index ["background_id"], name: "index_backgrounds_samples_on_background_id"
     t.index ["sample_id"], name: "index_backgrounds_samples_on_sample_id"
-  end
-
-  create_table "gsnapl_machines", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "ip"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "instance_id"
-    t.index ["ip"], name: "index_gsnapl_machines_on_ip"
-  end
-
-  create_table "gsnapl_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.bigint "gsnapl_machine_id"
-    t.string "aws_batch_job_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["gsnapl_machine_id"], name: "index_gsnapl_runs_on_gsnapl_machine_id"
   end
 
   create_table "host_genomes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -80,6 +64,23 @@ ActiveRecord::Schema.define(version: 20171102232046) do
     t.datetime "updated_at", null: false
     t.index ["pipeline_output_id"], name: "index_job_stats_on_pipeline_output_id"
     t.index ["task"], name: "index_job_stats_on_task"
+  end
+
+  create_table "machine_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.bigint "machine_id"
+    t.string "aws_batch_job_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["machine_id"], name: "index_machine_runs_on_machine_id"
+  end
+
+  create_table "machines", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "ip"
+    t.string "instance_id"
+    t.string "service"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ip"], name: "index_machines_on_ip"
   end
 
   create_table "pipeline_outputs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -304,9 +305,9 @@ ActiveRecord::Schema.define(version: 20171102232046) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
-  add_foreign_key "gsnapl_runs", "gsnapl_machines"
   add_foreign_key "input_files", "samples"
   add_foreign_key "job_stats", "pipeline_outputs"
+  add_foreign_key "machine_runs", "machines"
   add_foreign_key "pipeline_outputs", "samples"
   add_foreign_key "pipeline_runs", "samples"
   add_foreign_key "reports", "backgrounds"
