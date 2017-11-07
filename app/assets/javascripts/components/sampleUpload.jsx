@@ -158,7 +158,7 @@ class SampleUpload extends React.Component {
     var that = this;
     that.setState({
       submitting: true
-    })
+    });
     axios.post('/samples.json', {
       sample: {
         name: this.refs.name.value.trim(),
@@ -170,7 +170,7 @@ class SampleUpload extends React.Component {
         job_queue: this.state.job_queue,
         sample_memory: this.state.memory,
         host_genome_id: this.state.hostId,
-        host_genome_name: this.state.hostName,
+        host_genome_name: this.state.host,
         status: ''
       },
       authenticity_token: this.csrf
