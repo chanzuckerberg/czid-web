@@ -92,14 +92,11 @@ class BulkUploadImport extends React.Component {
 
   handleUploadSubmit(e) {
     e.preventDefault();
-    e.target.disabled = true;
-    this.setState({
-      submitting: true
-    })
+    this.clearError();
     if(!this.isUploadFormInvalid()) {
-      // this.setState({
-      //   submitting: true
-      // });
+      this.setState({
+        submitting: true
+      });
       this.bulkUploadSubmit();
     }
   }
@@ -109,10 +106,9 @@ class BulkUploadImport extends React.Component {
     e.target.disabled = true;
     this.clearError();
     if(!this.isImportFormInvalid()) {
-      console.log(this, 'this ctx');
-      // this.setState({
-      //   submitting: true
-      // });
+      this.setState({
+        submitting: true
+      });
       this.bulkUploadImport()
     }
   }
@@ -185,9 +181,6 @@ class BulkUploadImport extends React.Component {
 
   bulkUploadImport() {
     var that = this;
-    that.setState({
-      submitting: true
-    });
     axios.get('/samples/bulk_import.json', {
       params: {
         project_id: this.state.projectId,
@@ -196,31 +189,28 @@ class BulkUploadImport extends React.Component {
         authenticity_token: this.csrf
       }
     })
-    .then(function (response) {
-      that.setState({
+    .then((response) => {
+      this.setState({
         submitting: false,
         success: true,
         successMessage: 'Samples imported. Pick the ones you want to submit.',
         samples: response.data.samples,
         imported: true
       });
-      // that.initializeSelectTag()
-      // that.initializeSelectAll()
-    }).catch(function (error) {
-      console.log(error, 'error upload');
+      that.initializeSelectTag()
+      that.initializeSelectAll()
+    })
+    .catch(function (error) {
      that.setState({
       submitting: false,
-      invalid: true
-      // errorMessage: error ? error.response.data.status : null
+      invalid: true,
+      errorMessage: error.response.data.status
      })
     });
   }
 
   bulkUploadSubmit() {
     var that = this;
-    that.setState({
-      submitting: true
-    });
     var samples = []
     this.state.selectedSampleIndices.map((idx) => {
       samples.push(this.state.samples[idx])
@@ -228,7 +218,7 @@ class BulkUploadImport extends React.Component {
     axios.post('/samples/bulk_upload.json', {
       samples: samples
     })
-    .then(function (response) {
+    .then((response) => {
       that.setState({
         success: true,
         successMessage: 'Samples created. Redirecting...',
@@ -244,8 +234,8 @@ class BulkUploadImport extends React.Component {
       console.log(error, error.response, 'response')
      that.setState({
       submitting: false,
-      invalid: true
-      // errorMessage: error.response.data.status
+      invalid: true,
+      errorMessage: error.response.data.status
      })
     });
   }
@@ -314,7 +304,8 @@ class BulkUploadImport extends React.Component {
     const samples = this.state.samples
     samples[e.target.id].project_id = this.state.allProjects[e.target.selectedIndex].id
     this.setState({
-      samples: samples
+      samples: samples,
+      project: e.target.value.trim()
     })
     this.clearError();
   }
@@ -377,7 +368,7 @@ class BulkUploadImport extends React.Component {
                     <label htmlFor={i}> {sample.name}</label>
                   </p>
                   <div className="col s4">
-                    <select className="" id={i} onChange={ this.handleProjectChangeForSample } value={sample.project_id}>
+                    <select className="" id={i} onChange={ this.handleProjectChangeForSample } value={this.state.project}>
                       { this.state.allProjects.length ?
                         this.state.allProjects.map((project, j) => {
                           return <option ref= "project" key={j} value={project.id}>{project.name}</option>
@@ -476,7 +467,8 @@ class BulkUploadImport extends React.Component {
   render() {
     return (
       <div>
-        { !this.state.imported ? this.renderBulkUploadImportForm() : this.renderBulkUploadSubmitForm() }
+        { this.state.imported ? this.renderBulkUploadSubmitForm() : null }
+        { !this.state.imported ? this.renderBulkUploadImportForm() : null }
           <div className="bottom">
             <span className="back" onClick={ this.gotoPage.bind(this, '/samples') } >Samples</span>|
             <span className="home" onClick={ this.gotoPage.bind(this, '/')}>Home</span>

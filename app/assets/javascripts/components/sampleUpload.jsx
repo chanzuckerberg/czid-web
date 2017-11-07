@@ -183,6 +183,7 @@ class SampleUpload extends React.Component {
     .catch(function (error) {
       that.setState({
         invalid: true,
+        submitting: false,
         serverErrors: error.response.data,
       })
     });
@@ -454,7 +455,8 @@ class SampleUpload extends React.Component {
             </div>
         </div>
         <input className="hidden" type="submit"/>
-        <div onClick={ this.handleUpdate } className="center login-wrapper">{ !this.state.submitting ? 'Submit' : <i className='fa fa-spinner fa-spin fa-lg'></i>}</div>
+        { this.state.submitting ? <div className="center login-wrapper disabled"> <i className='fa fa-spinner fa-spin fa-lg'></i> </div> : 
+          <div onClick={ this.handleUpdate } className="center login-wrapper">Submit</div> }
       </form>
     </div>
     )
@@ -542,7 +544,8 @@ class SampleUpload extends React.Component {
             </div>
         </div>
         <input className="hidden" type="submit"/>
-        <div onClick={ this.handleUpload } className="center login-wrapper">{ !this.state.submitting ? 'Submit' : <i className='fa fa-spinner fa-spin fa-lg'></i>}</div>
+        { this.state.submitting ? <div className="center login-wrapper disabled"> <i className='fa fa-spinner fa-spin fa-lg'></i> </div> : 
+          <div onClick={ this.handleUpload } className="center login-wrapper">Submit</div> }
       </form>
     </div>
     )
