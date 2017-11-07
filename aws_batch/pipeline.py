@@ -797,7 +797,7 @@ def run_star_part(output_dir, genome_dir, fastq_file_1, fastq_file_2):
                            '--genomeDir', genome_dir,
                            '--readFilesIn', fastq_file_1, fastq_file_2]
     if fastq_file_1[-3:] == '.gz':
-        ['--readFilesCommand', 'zcat']
+        star_command_params += ['--readFilesCommand', 'zcat']
     execute_command(" ".join(star_command_params))
     logging.getLogger().info("finished job")
 
