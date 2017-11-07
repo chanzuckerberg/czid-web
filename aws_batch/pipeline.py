@@ -481,7 +481,7 @@ def execute_command_realtime_stdout(command, progress_file=''):
     try:
         subprocess.check_call(command, shell=True)
     finally:
-        subprocess.kill(tail)
+        tail.kill()
 
 def wait_for_server(service_name, command, max_concurrent):
     while True:
