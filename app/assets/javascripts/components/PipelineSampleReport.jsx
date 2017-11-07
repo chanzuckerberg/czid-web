@@ -8,11 +8,12 @@ class PipelineSampleReport extends React.Component {
     this.taxonomy_details = props.taxonomy_details[2];
     this.all_genera_in_sample = props.all_genera_in_sample;
     this.all_categories = props.all_categories;
-    this.applyViewLevel = this.applyViewLevel.bind(this);
     this.applyNewFilterThresholds = this.applyNewFilterThresholds.bind(this);
     this.applyExcludedCategories = this.applyExcludedCategories.bind(this);
     this.applyGenusFilter = this.applyGenusFilter.bind(this);
     this.expandOrCollapseGenus = this.expandOrCollapseGenus.bind(this);
+    this.expandTable = this.expandTable.bind(this);
+    this.collapseTable = this.collapseTable.bind(this);
     this.disableFilters = this.disableFilters.bind(this);
     this.enableFilters = this.enableFilters.bind(this);
   }
@@ -30,14 +31,6 @@ class PipelineSampleReport extends React.Component {
   enableFilters() {
     disable_filters = 0;
     this.refreshPage({disable_filters});
-  }
-
-  applyViewLevel(view_level) {
-    overrides = {view_level};
-    if (view_level == 'genus') {
-      overrides.selected_genus = 'None';
-    }
-    this.refreshPage(overrides);
   }
 
   // applySort needs to be bound at time of use, not in constructor above
@@ -62,11 +55,12 @@ class PipelineSampleReport extends React.Component {
   }
 
   applyGenusFilter(selected_genus) {
-    overrides = {selected_genus};
-    if (selected_genus != 'None') {
-      overrides.view_level = 'species';
-    }
-    this.refreshPage(overrides);
+    this.refreshPage({selected_genus});
+  }
+
+  isGenusSearch() {
+    params = this.props.report_page_params;
+    return params.selected_genus != 'None' && params.disable_filters != 1;
   }
 
   render_name(tax_info, report_details) {
@@ -86,15 +80,17 @@ class PipelineSampleReport extends React.Component {
       // emphasize genus, soften category and species count
       category_name = tax_info.tax_id == -200 ? '' : tax_info.category_name;
       // Most groups are initially expanded, so they get a toggle with fa-minus initial state.
-      plus_or_minus = <i className={`fa fa-angle-down ${tax_info.tax_id}`} onClick={this.expandOrCollapseGenus}></i>;
-      if (tax_info.tax_id <= 0) {
-        // Except for group "All taxa without genus classification", which is initially collapsed.
-        plus_or_minus = <i className={`fa fa-angle-right ${tax_info.tax_id}`} onClick={this.expandOrCollapseGenus}></i>;
-      }
-      // Except in Genus view, nothing is expandable.
-      if (this.props.report_page_params.view_level == 'genus') {
-        plus_or_minus = '';
-      }
+      fake_or_real = tax_info.genus_taxid < 0 ? 'fake-genus' : 'real-genus';
+      right_arrow_initial_visibility = this.isGenusSearch() ? 'hidden' : '';
+      down_arrow_initial_visibility = this.isGenusSearch() ? '' : 'hidden';
+      plus_or_minus = <span>
+        <span className={`report-arrow-down report-arrow ${tax_info.tax_id} ${fake_or_real} ${down_arrow_initial_visibility}`}>
+          <i className={`fa fa-angle-down ${tax_info.tax_id}`} onClick={this.expandOrCollapseGenus}></i>
+        </span>
+        <span className={`report-arrow-right report-arrow ${tax_info.tax_id} ${fake_or_real} ${right_arrow_initial_visibility}`}>
+          <i className={`fa fa-angle-right ${tax_info.tax_id}`} onClick={this.expandOrCollapseGenus}></i>
+        </span>
+      </span>;
       foo = <div>
               <div className='genus-name'> {plus_or_minus} {foo}</div>
               <i className='count-info'>({tax_info.species_count} {category_name} species)</i>
@@ -146,13 +142,17 @@ class PipelineSampleReport extends React.Component {
 
   row_class(tax_info) {
     if (tax_info.tax_level == 2) {
-      return `report-row-genus ${tax_info.genus_taxid}`;
+      if (tax_info.tax_id < 0) {
+        return `report-row-genus ${tax_info.genus_taxid} fake-genus`;
+      } else {
+        return `report-row-genus ${tax_info.genus_taxid} real-genus`;
+      }
     }
+    initial_visibility = this.isGenusSearch() ? '' : 'hidden';
     if (tax_info.genus_taxid < 0) {
-      // The "all taxa without genus classification" group is initially collapsed.
-      return `report-row-species ${tax_info.genus_taxid} hidden`;
+      return `report-row-species ${tax_info.genus_taxid} fake-genus ${initial_visibility}`;
     }
-    return `report-row-species ${tax_info.genus_taxid}`;
+    return `report-row-species ${tax_info.genus_taxid} real-genus ${initial_visibility}`;
   }
 
   expandOrCollapseGenus(e) {
@@ -161,13 +161,23 @@ class PipelineSampleReport extends React.Component {
     const attr = className.split(' ');
     const taxId = attr[2];
     $(`.report-row-species.${taxId}`).toggleClass('hidden');
-    // HACK.  Flipping plus/minus should be done with React, not DOM change.
-    if (attr[1] == 'fa-angle-right') {
-      e.target.attributes.class.nodeValue = `fa fa-angle-down ${taxId}`;
-    } else {
-      e.target.attributes.class.nodeValue = `fa fa-angle-right ${taxId}`;
-    }
-    e.nativeEvent.stopImmediatePropagation();
+    $(`.report-arrow.${taxId}`).toggleClass('hidden');
+  }
+
+  expandTable(e) {
+    // expand all real genera
+    $(`.report-row-species.real-genus`).removeClass('hidden');
+    $(`.report-arrow-down.real-genus`).removeClass('hidden');
+    $(`.report-arrow-right.real-genus`).addClass('hidden');
+    $(`.table-arrow`).toggleClass('hidden');
+  }
+
+  collapseTable(e) {
+    // collapse all genera (real or negative)
+    $(`.report-row-species`).addClass('hidden');
+    $(`.report-arrow-down`).addClass('hidden');
+    $(`.report-arrow-right`).removeClass('hidden');
+    $(`.table-arrow`).toggleClass('hidden');
   }
 
   render() {
@@ -195,7 +205,6 @@ class PipelineSampleReport extends React.Component {
         background_model = { this.report_details.background_model.name }
         report_title = { this.report_details.report_info.name }
         report_page_params = { this.props.report_page_params }
-        applyViewLevel = { this.applyViewLevel }
         applyNewFilterThresholds = { this.applyNewFilterThresholds }
         applyExcludedCategories = { this.applyExcludedCategories }
         applyGenusFilter = { this.applyGenusFilter }
@@ -207,6 +216,7 @@ class PipelineSampleReport extends React.Component {
           <i className="fa fa-cloud-download left"></i>
       </a>
     );
+    right_arrow_initial_visibility = this.isGenusSearch() ? 'hidden' : '';
     result = (
       <div>
         <div id="reports" className="reports-screen tab-screen col s12">
@@ -219,7 +229,15 @@ class PipelineSampleReport extends React.Component {
                 <table id="report-table" className='bordered report-table'>
                   <thead>
                   <tr>
-                    <th>Taxonomy</th>
+                    <th>
+                      <span className={`table-arrow ${right_arrow_initial_visibility}`}>
+                        <i className={`fa fa-angle-right`} onClick={this.expandTable}></i>
+                      </span>
+                      <span className={`table-arrow hidden`}>
+                        <i className={`fa fa-angle-down`} onClick={this.collapseTable}></i>
+                      </span>
+                      Taxonomy
+                    </th>
                     { this.render_column_header('NT+NR', 'ZZRPM',  'nt_aggregatescore') }
                     { this.render_column_header('NT', 'Z',   'nt_zscore') }
                     { this.render_column_header('NT', 'rPM', 'nt_rpm')    }

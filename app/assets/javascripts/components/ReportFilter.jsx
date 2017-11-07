@@ -6,15 +6,12 @@ class ReportFilter extends React.Component {
   constructor(props) {
     super(props);
     this.sample_id = props.sample_id
-    const view_level = props.view_level || 'species';
-    const genus_info = props.genus_info || { query: "", tax_id: 0 };
     this.background_model = props.background_model || 'N/A';
     this.all_categories = props.all_categories || [];
     this.new_filter_thresholds = {};
     this.state = ReportFilter.genusSearchValueFor(props.report_page_params.selected_genus);
     this.genus_search_items = this.props.all_genera_in_sample;
     this.genus_search_items.splice(0, 0, 'None');
-    this.applyViewLevel = this.applyViewLevel.bind(this);
     this.applyFilters = this.applyFilters.bind(this);
     this.applyExcludedCategories = this.applyExcludedCategories.bind(this);
     this.applyGenusFilter = this.applyGenusFilter.bind(this);
@@ -29,10 +26,6 @@ class ReportFilter extends React.Component {
 
   enableFilters() {
     this.props.enableFilters();
-  }
-
-  applyViewLevel(event) {
-    this.props.applyViewLevel(event.target.value);
   }
 
   setFilterThreshold(threshold_name, event) {
@@ -190,37 +183,14 @@ class ReportFilter extends React.Component {
                 </div>
               </div>
               <div id="filters-pane" className="pane col s12">
-
                 {category_filter}
-
-                <div className="filter-controls">
-                  <div className="filter-title">
-                    VIEW LEVEL
-                  </div>
-
-                  <div className="filter-values">
-                    <p className="">
-                      <input onChange={this.applyViewLevel} name="group1" value='genus'
-                             checked={(this.props.report_page_params.view_level === 'genus')} type="radio" id="genus-select" />
-                      <label htmlFor="genus-select">Genus</label>
-                    </p>
-                    <p className="">
-                      <input onChange={this.applyViewLevel} name="group1" value='species'
-                             checked={(this.props.report_page_params.view_level === 'species')} type="radio" id="specie-select" />
-                      <label htmlFor="specie-select">Species</label>
-                    </p>
-                  </div>
-                </div>
-
                 {genus_search}
-
                 {threshold_filters}
-
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
     );
   }
 }

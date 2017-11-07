@@ -10,13 +10,9 @@ module ReportHelper
   ZSCORE_WHEN_ABSENT_FROM_SAMPLE = -100
   ZSCORE_WHEN_ABSENT_FROM_BACKGROUND = 100
 
-  # TODO: For taxons that have no entry in the taxon_lineages table, we should
-  # substitute this value for genus_id, which allows us to group them
-  # all together;  this should match generate_aggregate_counts in
-  # app/models/pipeline_output.rb
-  MISSING_GENUS_ID = -200
-  MISSING_SPECIES_ID = -100
-  MISSING_SPECIES_ID_ALT = -1
+  DEFAULT_SAMPLE_NEGLOGEVALUE = 0.0
+  DEFAULT_SAMPLE_PERCENTIDENTITY = 0.0
+  DEFAULT_SAMPLE_ALIGNMENTLENGTH = 0.0
 
   # For taxon_count 'species' rows without a corresponding 'genus' rows,
   # we create a fake singleton genus containing just that species;
@@ -26,7 +22,6 @@ module ReportHelper
   DECIMALS = 1
 
   DEFAULT_PARAMS = {
-    view_level:       'genus',
     sort_by:          'highest_nt_aggregatescore',
     threshold_zscore: 1.7,
     threshold_rpm:    1.0,
@@ -41,13 +36,33 @@ module ReportHelper
   }.freeze
   IGNORED_PARAMS = [:controller, :action, :id].freeze
 
-  VIEW_LEVELS = %w[species genus].freeze
   SORT_DIRECTIONS = %w[highest lowest].freeze
   # We do not allow underscores in metric names, sorry!
   METRICS = %w[r rpm zscore percentidentity alignmentlength neglogevalue aggregatescore].freeze
   COUNT_TYPES = %w[NT NR].freeze
-  PROPERTIES_OF_TAXID = %w[tax_id name name_from_lineages name_from_counts tax_level genus_taxid category_name].freeze # note: no underscore in sortable column names
-  UNUSED_IN_UI_FIELDS = [:sort_key].freeze
+  PROPERTIES_OF_TAXID = %w[tax_id name tax_level genus_taxid superkingdom_taxid category_name].freeze # note: no underscore in sortable column names
+  UNUSED_IN_UI_FIELDS = ['superkingdom_taxid', :sort_key].freeze
+
+  # This query takes 1.4 seconds and the results are static, so we hardcoded it
+  # mysql> select distinct(superkingdom_taxid) as taxid, IF(superkingdom_name IS NOT NULL, superkingdom_name, 'Uncategorized') as name from taxon_lineages;
+  # +-------+---------------+
+  # | taxid | name          |
+  # +-------+---------------+
+  # |  -700 | Uncategorized |
+  # |     2 | Bacteria      |
+  # |  2157 | Archaea       |
+  # |  2759 | Eukaryota     |
+  # | 10239 | Viruses       |
+  # | 12884 | Viroids       |
+  # +-------+---------------+
+  ALL_CATEGORIES = [
+    { 'taxid' => 2, 'name' => "Bacteria" },
+    { 'taxid' => 2157, 'name' => "Archaea" },
+    { 'taxid' => 2759, 'name' => "Eukaryota" },
+    { 'taxid' => 10_239, 'name' => "Viruses" },
+    { 'taxid' => 12_884, 'name' => "Viroids" },
+    { 'taxid' => TaxonLineage::MISSING_SUPERKINGDOM_ID, 'name' => "Uncategorized" }
+  ].freeze
 
   # use the metric's NT <=> NR dual as a tertiary sort key (so, for example,
   # when you sort by NT R, entries without NT R will be ordered amongst
@@ -107,10 +122,7 @@ module ReportHelper
   def valid_arg_value(name, value, all_cats)
     # return appropriately validated value (based on name), or nil
     return nil unless value
-    if name == :view_level
-      value = value.downcase
-      value = nil unless VIEW_LEVELS.include? value
-    elsif name == :sort_by
+    if name == :sort_by
       value = nil unless decode_sort_by(value)
     elsif name == :excluded_categories
       value = validated_excluded_categories_or_nil(value, all_cats)
@@ -160,12 +172,11 @@ module ReportHelper
 
   def external_report_info(report, params)
     return {} if report.nil?
-    all_cats = all_categories
-    params = clean_params(params, all_cats)
+    params = clean_params(params, ALL_CATEGORIES)
     data = {}
     data[:report_details] = report_details(report)
     data[:taxonomy_details], data[:all_genera_in_sample] = taxonomy_details(report, params)
-    data[:all_categories] = all_cats
+    data[:all_categories] = ALL_CATEGORIES
     data[:report_page_params] = params
     data
   end
@@ -194,26 +205,7 @@ module ReportHelper
   end
 
   def all_categories
-    # This query takes 1.4 seconds and the results are static, so we hardcoded it
-    # mysql> select distinct(superkingdom_taxid) as taxid, IF(superkingdom_name IS NOT NULL, superkingdom_name, 'Uncategorized') as name from taxon_lineages;
-    # +-------+---------------+
-    # | taxid | name          |
-    # +-------+---------------+
-    # |  -700 | Uncategorized |
-    # |     2 | Bacteria      |
-    # |  2157 | Archaea       |
-    # |  2759 | Eukaryota     |
-    # | 10239 | Viruses       |
-    # | 12884 | Viroids       |
-    # +-------+---------------+
-    [
-      { 'taxid' => 2, 'name' => "Bacteria" },
-      { 'taxid' => 2157, 'name' => "Archaea" },
-      { 'taxid' => 2759, 'name' => "Eukaryota" },
-      { 'taxid' => 10_239, 'name' => "Viruses" },
-      { 'taxid' => 12_884, 'name' => "Viroids" },
-      { 'taxid' => -700, 'name' => "Uncategorized" }
-    ]
+    ALL_CATEGORIES
   end
 
   def fetch_taxon_counts(report)
@@ -225,45 +217,34 @@ module ReportHelper
     # (I/O latency goes from 2 seconds -> 0.8 seconds)
     TaxonCount.connection.select_all("
       SELECT
-      taxon_counts.tax_id              AS  tax_id,
-      taxon_counts.count_type          AS  count_type,
-      taxon_counts.tax_level           AS  tax_level,
-      IF (
-        taxon_lineages.genus_taxid IS NOT NULL,
-        taxon_lineages.genus_taxid,
-        #{MISSING_GENUS_ID}
-      )                                AS  genus_taxid,
-      IF(
-        taxon_counts.tax_level=#{TaxonCount::TAX_LEVEL_SPECIES},
-        taxon_lineages.species_name,
-        taxon_lineages.genus_name
-      )                                AS  name_from_lineages,
-      taxon_counts.name                AS  name_from_counts,
-      taxon_lineages.superkingdom_name AS  category_name,
-      taxon_counts.count               AS  r,
-      (count / #{total_reads}.0
-        * 1000000.0)                   AS  rpm,
-      IF(
-        stdev IS NOT NULL,
-        GREATEST(#{ZSCORE_MIN}, LEAST(#{ZSCORE_MAX}, (((count / #{total_reads}.0 * 1000000.0) - mean) / stdev))),
-        #{ZSCORE_WHEN_ABSENT_FROM_BACKGROUND}
-      )
-                                       AS  zscore,
-      taxon_counts.percent_identity    AS  percentidentity,
-      taxon_counts.alignment_length    AS  alignmentlength,
-      IF(
-        taxon_counts.e_value IS NOT NULL,
-        (0.0 - taxon_counts.e_value),
-        NULL
-      )                                AS  neglogevalue
+        taxon_counts.tax_id              AS  tax_id,
+        taxon_counts.count_type          AS  count_type,
+        taxon_counts.tax_level           AS  tax_level,
+        taxon_counts.genus_taxid         AS  genus_taxid,
+        taxon_counts.name                AS  name,
+        taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
+        taxon_counts.count               AS  r,
+        (count / #{total_reads}.0
+          * 1000000.0)                   AS  rpm,
+        IF(
+          stdev IS NOT NULL,
+          GREATEST(#{ZSCORE_MIN}, LEAST(#{ZSCORE_MAX}, (((count / #{total_reads}.0 * 1000000.0) - mean) / stdev))),
+          #{ZSCORE_WHEN_ABSENT_FROM_BACKGROUND}
+        )
+                                         AS  zscore,
+        taxon_counts.percent_identity    AS  percentidentity,
+        taxon_counts.alignment_length    AS  alignmentlength,
+        IF(
+          taxon_counts.e_value IS NOT NULL,
+          (0.0 - taxon_counts.e_value),
+          #{DEFAULT_SAMPLE_NEGLOGEVALUE}
+        )                                AS  neglogevalue
       FROM taxon_counts
       LEFT OUTER JOIN taxon_summaries ON
-        taxon_counts.tax_id     = taxon_summaries.tax_id          AND
+        #{background_id}        = taxon_summaries.background_id   AND
         taxon_counts.count_type = taxon_summaries.count_type      AND
         taxon_counts.tax_level  = taxon_summaries.tax_level       AND
-        #{background_id}        = taxon_summaries.background_id
-      LEFT OUTER JOIN taxon_lineages ON
-        taxon_counts.tax_id = taxon_lineages.taxid
+        taxon_counts.tax_id     = taxon_summaries.tax_id
       WHERE
         pipeline_output_id = #{pipeline_output_id} AND
         taxon_counts.count_type IN ('NT', 'NR')
@@ -276,9 +257,10 @@ module ReportHelper
       'r' => 0,
       'rpm' => 0,
       'zscore' => ZSCORE_WHEN_ABSENT_FROM_SAMPLE,
-      'percentidentity' => 0,
-      'alignmentlength' => 0,
-      'neglogevalue' => 0
+      'percentidentity' => DEFAULT_SAMPLE_PERCENTIDENTITY,
+      'alignmentlength' => DEFAULT_SAMPLE_ALIGNMENTLENGTH,
+      'neglogevalue' => DEFAULT_SAMPLE_NEGLOGEVALUE,
+      'aggregatescore' => nil
     }
   end
 
@@ -357,31 +339,33 @@ module ReportHelper
     taxon_counts_2d
   end
 
-  def cleanup_names!(taxon_counts_2d)
-    # There are still taxons without names
+  def validate_names!(taxon_counts_2d)
+    # This converts superkingdom_id to category_name and makes up
+    # suitable names for missing and blacklisted genera and species.
+    category = {}
+    ALL_CATEGORIES.each do |c|
+      category[c['taxid']] = c['name']
+    end
     missing_names = Set.new
     taxon_counts_2d.each do |tax_id, tax_info|
-      name_from_lineages = tax_info.delete('name_from_lineages')
-      name_from_counts = tax_info.delete('name_from_counts')
       if tax_id < 0
         # Usually -1 means accession number did not resolve to species.
         # TODO: Can we keep the accession numbers to show in these cases?
         level_str = tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES ? 'species' : 'genus'
         tax_info['name'] = "All taxa without #{level_str} classification"
-        if tax_id != MISSING_SPECIES_ID && tax_id != MISSING_SPECIES_ID_ALT && tax_id != MISSING_GENUS_ID
+        if tax_id == TaxonLineage::BLACKLIST_GENUS_ID
+          tax_info['name'] = "All artificial constructs"
+        elsif !(TaxonLineage::MISSING_LINEAGE_ID.values.include? tax_id) && tax_id != TaxonLineage::MISSING_SPECIES_ID_ALT
           tax_info['name'] += " #{tax_id}"
         end
-      else
-        missing_names.add(tax_id) unless name_from_lineages
-        tax_info['name'] = (
-          name_from_lineages ||
-          name_from_counts ||
-          "Unnamed taxon #{tax_id}"
-        )
+      elsif !tax_info['name']
+        missing_names.add(tax_id)
+        tax_info['name'] = "Unnamed taxon #{tax_id}"
       end
-      tax_info['category_name'] ||= 'Uncategorized'
+      category_id = tax_info.delete('superkingdom_taxid')
+      tax_info['category_name'] = category[category_id] || 'Uncategorized'
     end
-    logger.warn "Missing taxon_lineages names for taxon ids #{missing_names.to_a}" unless missing_names.empty?
+    logger.warn "Missing names for taxon ids #{missing_names.to_a}" unless missing_names.empty?
     taxon_counts_2d
   end
 
@@ -389,19 +373,19 @@ module ReportHelper
     # there should be a genus_pair for every species (even if it is the pseudo
     # genus id -200);  anything else indicates a bug in data import;
     # warn and ensure affected data is NOT hidden from view
-    fake_genuses = []
-    missing_genuses = Set.new
-    taxids_with_missing_genuses = Set.new
+    fake_genera = []
+    missing_genera = Set.new
+    taxids_with_missing_genera = Set.new
     taxon_counts_2d.each do |tax_id, tax_info|
       genus_taxid = tax_info['genus_taxid']
       unless taxon_counts_2d[genus_taxid]
-        taxids_with_missing_genuses.add(tax_id)
-        missing_genuses.add(genus_taxid)
-        fake_genuses << fake_genus!(tax_info)
+        taxids_with_missing_genera.add(tax_id)
+        missing_genera.add(genus_taxid)
+        fake_genera << fake_genus!(tax_info)
       end
     end
-    logger.warn "Missing taxon_counts for genus ids #{missing_genuses.to_a} corresponding to taxon ids #{taxids_with_missing_genuses.to_a}." unless missing_genuses.empty?
-    fake_genuses.each do |fake_genus_info|
+    logger.warn "Missing taxon_counts for genus ids #{missing_genera.to_a} corresponding to taxon ids #{taxids_with_missing_genera.to_a}." unless missing_genera.empty?
+    fake_genera.each do |fake_genus_info|
       taxon_counts_2d[fake_genus_info['genus_taxid']] = fake_genus_info
     end
     taxon_counts_2d
@@ -422,7 +406,7 @@ module ReportHelper
   def cleanup_all!(taxon_counts_2d)
     # t0 = Time.now
     cleanup_genus_ids!(taxon_counts_2d)
-    cleanup_names!(taxon_counts_2d)
+    validate_names!(taxon_counts_2d)
     cleanup_missing_genus_counts!(taxon_counts_2d)
     # t1 = Time.now
     # logger.info "Data cleanup took #{t1 - t0} seconds."
@@ -474,15 +458,16 @@ module ReportHelper
       should_delete = false
       # if any metric is below threshold in every type, delete
       METRICS.each do |metric|
-        should_delete = COUNT_TYPES.all? { |count_type| tax_info[count_type][metric] < thresholds[metric] }
+        should_delete = COUNT_TYPES.all? do |count_type|
+          # aggregatescore is null for genera, and thus not considered in filtering genera
+          !(tax_info[count_type][metric]) || tax_info[count_type][metric] < thresholds[metric]
+        end
         break if should_delete
       end
-      if tax_info['tax_id'] != MISSING_GENUS_ID
+      if tax_info['tax_id'] != TaxonLineage::MISSING_GENUS_ID && tax_info['tax_id'] != TaxonLineage::BLACKLIST_GENUS_ID
         if excluded_categories.include? tax_info['category_name']
           # The only way a species and its genus can have different category
-          # names:  If genus_id == MISSING_GENUS_ID.  For all other species
-          # and genera, the category filter would exclude both the genus
-          # and species underneath that genus.
+          # names:  If genus_id == MISSING_GENUS_ID or BLACKLIST_GENUS_ID.
           should_delete = true
         end
       end
@@ -510,18 +495,28 @@ module ReportHelper
     aggregate
   end
 
-  def compute_aggregate_scores!(tax_2d)
-    tax_2d.each do |_tax_id, tax_info|
-      next unless tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
-      species_info = tax_info
+  def compute_genera_aggregate_scores!(rows, tax_2d)
+    rows.each do |species_info|
+      next unless species_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
       genus_id = species_info['genus_taxid']
       genus_info = tax_2d[genus_id]
-      species_score = aggregate_score(genus_info, tax_info)
-      species_info['NT']['aggregatescore'] = species_score
-      genus_info['NT']['aggregatescore'] = species_score unless genus_info['NT']['aggregatescore'] && genus_info['NT']['aggregatescore'] > species_score
+      species_score = species_info['NT']['aggregatescore']
+      genus_score = genus_info['NT']['aggregatescore']
+      unless genus_score && genus_score > species_score
+        genus_info['NT']['aggregatescore'] = species_score
+        genus_info['NR']['aggregatescore'] = species_score
+      end
     end
-    tax_2d.each do |_tax_id, tax_info|
-      tax_info['NR']['aggregatescore'] = tax_info['NT']['aggregatescore']
+  end
+
+  def compute_species_aggregate_scores!(rows, tax_2d)
+    rows.each do |species_info|
+      next unless species_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
+      genus_id = species_info['genus_taxid']
+      genus_info = tax_2d[genus_id]
+      species_score = aggregate_score(genus_info, species_info)
+      species_info['NT']['aggregatescore'] = species_score
+      species_info['NR']['aggregatescore'] = species_score
     end
     tax_2d
   end
@@ -568,26 +563,16 @@ module ReportHelper
     # This gets returned to UI for the genus search autoselect dropdown.
     all_genera_in_sample = all_genera.sort_by(&:downcase)
 
-    # Compute all aggregate scores.
-    compute_aggregate_scores!(tax_2d)
-
-    # Filter out species rows if selected level is genus.
     rows = []
-    view_level_int = TaxonCount::NAME_2_LEVEL[params[:view_level].downcase]
     tax_2d.each do |_tax_id, tax_info|
-      next unless tax_info['tax_level'] >= view_level_int
       rows << tax_info
     end
 
-    # Total number of rows for view level, before application of filters.
-    rows_total = rows.length
+    # Compute all species aggregate scores.  These are used in filtering.
+    compute_species_aggregate_scores!(rows, tax_2d)
 
-    # Compute sort key and sort.
-    sort_by = decode_sort_by(params[:sort_by])
-    rows.each do |tax_info|
-      tax_info[:sort_key] = sort_key(tax_2d, tax_info, sort_by)
-    end
-    rows.sort_by! { |tax_info| tax_info[:sort_key] }
+    # Total number of rows for view level, before application of filters.
+    rows_total = tax_2d.length
 
     # Apply filters, unless disabled for CSV download.
     unless params[:disable_filters] == 1
@@ -596,6 +581,16 @@ module ReportHelper
 
     # These stats are displayed at the bottom of the page.
     rows_passing_filters = rows.length
+
+    # Compute all genus aggregate scores.  These are used only in sorting.
+    compute_genera_aggregate_scores!(rows, tax_2d)
+
+    # Compute sort key and sort.
+    sort_by = decode_sort_by(params[:sort_by])
+    rows.each do |tax_info|
+      tax_info[:sort_key] = sort_key(tax_2d, tax_info, sort_by)
+    end
+    rows.sort_by! { |tax_info| tax_info[:sort_key] }
 
     # HACK
     rows = rows[0...MAX_ROWS]
@@ -627,12 +622,10 @@ module ReportHelper
 
   def generate_report_csv(report_info)
     rows = report_info[:taxonomy_details][1]
-    view_level_int = TaxonCount::NAME_2_LEVEL[report_info[:report_page_params][:view_level].downcase]
     attributes = %w[category_name tax_id name NT.zscore NT.rpm NT.r NR.zscore NR.rpm NR.r]
     CSV.generate(headers: true) do |csv|
       csv << attributes
       rows.each do |tax_info|
-        next unless tax_info['tax_level'] == view_level_int
         csv << attributes.map { |attr| get_tax_detail(tax_info, attr) }
       end
     end
