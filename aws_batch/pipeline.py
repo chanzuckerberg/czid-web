@@ -1224,8 +1224,9 @@ def main():
     FILTER_HOST_FLAG = os.environ.get('FILTER_HOST_FLAG', FILTER_HOST_FLAG)
     sample_s3_input_path = INPUT_BUCKET.rstrip('/')
     sample_s3_output_path = OUTPUT_BUCKET.rstrip('/')
+    filter_host_flag = (FILTER_HOST_FLAG != 0)
 
-    run_sample(sample_s3_input_path, FILE_TYPE, FILTER_HOST_FLAG, sample_s3_output_path,
+    run_sample(sample_s3_input_path, FILE_TYPE, filter_host_flag, sample_s3_output_path,
                STAR_GENOME, BOWTIE2_GENOME,
                KEY_S3_PATH, KEY_S3_PATH, ACCESSION2TAXID,
                DEUTEROSTOME_TAXIDS, TAXID_TO_INFO, DB_SAMPLE_ID,
