@@ -125,9 +125,9 @@ class SamplesController < ApplicationController
       project_name = params.delete(:project_name)
       project = Project.find_by(name: project_name)
     end
+    params[:input_files_attributes] = params[:input_files_attributes].select { |f| f["source"] != '' }
     @sample = Sample.new(params)
     @sample.project = project if project
-    @sample.input_files.each { |f| f.destroy if f.source.empty? }
     @sample.input_files.each { |f| f.name ||= File.basename(f.source) }
     @sample.user = @user if @user
 
