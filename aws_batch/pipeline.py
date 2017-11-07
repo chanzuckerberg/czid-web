@@ -471,6 +471,15 @@ def execute_command(command):
     output = subprocess.check_output(command, shell=True)
     return output
 
+def get_key_path(environment):
+    if environment == "development":
+        return "s3://czbiohub-infectious-disease/idseq-alpha.pem"
+    ## remove the following 2 lines once we're ready for the changes to affect production:
+    if environment == "production":
+        return "s3://czbiohub-infectious-disease/idseq-alpha.pem"
+    ##
+    return "s3://czbiohub-infectious-disease/idseq-%s.pem" % environment
+
 def get_url_for_idseq_machine_db(environment):
     if environment == "development":
         return "alpha.idseq.net"
@@ -1208,6 +1217,7 @@ def main():
     global STAR_GENOME
     global BOWTIE2_GENOME
     global ENVIRONMENT
+
     INPUT_BUCKET = os.environ.get('INPUT_BUCKET', INPUT_BUCKET)
     OUTPUT_BUCKET = os.environ.get('OUTPUT_BUCKET', OUTPUT_BUCKET)
     KEY_S3_PATH = os.environ.get('KEY_S3_PATH', KEY_S3_PATH)
@@ -1226,10 +1236,11 @@ def main():
     ENVIRONMENT = os.environ.get('ENVIRONMENT', ENVIRONMENT)
     sample_s3_input_path = INPUT_BUCKET.rstrip('/')
     sample_s3_output_path = OUTPUT_BUCKET.rstrip('/')
+    key_s3_path = get_key_path(ENVIRONMENT)
 
     run_sample(sample_s3_input_path, sample_s3_output_path,
                STAR_GENOME, BOWTIE2_GENOME,
-               KEY_S3_PATH, KEY_S3_PATH, ACCESSION2TAXID,
+               key_s3_path, key_s3_path, ACCESSION2TAXID,
                DEUTEROSTOME_TAXIDS, TAXID_TO_INFO, DB_SAMPLE_ID,
                AWS_BATCH_JOB_ID, ENVIRONMENT, True)
 
