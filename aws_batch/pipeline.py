@@ -617,7 +617,7 @@ def run_sample(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
     # run host filtering
     if filter_host_flag:
         run_host_filtering(sample_name, fastq_file_1, fastq_file_2, file_type, star_genome_s3_path, bowtie2_genome_s3_path,
-                           result_dir, scratch_dir, sample_s3_output_path, lazy_run)
+                           DEFAULT_LOGPARAMS, result_dir, scratch_dir, sample_s3_output_path, lazy_run)
 
     # run gsnap remotely
     if filter_host_flag:
@@ -768,7 +768,7 @@ def run_sample(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
         result_dir, sample_s3_output_path, False)
 
 def run_host_filtering(sample_name, fastq_file_1, fastq_file_2, file_type, star_genome_s3_path, bowtie2_genome_s3_path,
-                       result_dir, scratch_dir, sample_s3_output_path, lazy_run):
+                       DEFAULT_LOGPARAMS, result_dir, scratch_dir, sample_s3_output_path, lazy_run):
     # run STAR
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "STAR", "count_reads": True,
