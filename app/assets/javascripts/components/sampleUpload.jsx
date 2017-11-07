@@ -37,6 +37,7 @@ class SampleUpload extends React.Component {
       allProjects: this.projects || [],
       hostGenomes: this.hostGenomes || [],
       hostName: this.hostName,
+      host: this.hostName,
       hostId: this.hostId,
       invalid: false,
       errorMessage: '',
