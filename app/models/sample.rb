@@ -1,6 +1,6 @@
 require 'open3'
 require 'json'
-
+ 
 class Sample < ApplicationRecord
   self.per_page = 10
   STATUS_CREATED  = 'created'.freeze
