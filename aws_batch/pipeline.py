@@ -477,14 +477,11 @@ def execute_command(command):
 def execute_command_realtime_stdout(command, progress_file=''):
     print command
     sys.stdout.flush()
-    process2 = subprocess.Popen("touch %s ; tail -f %s" % (progress_file, progress_file), shell=True)
-    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
-    while True:
-        line = process.stdout.readline().rstrip()
-        if not line: break
-        print line
-    process.wait()
-    process2.kill()
+    tail = subprocess.Popen("touch %s ; tail -f %s" % (progress_file, progress_file), shell=True)
+    try:
+        subprocess.check_call(command, shell=True)
+    finally:
+        tail.kill()
 
 def wait_for_server(service_name, command, max_concurrent):
     while True:
@@ -1165,6 +1162,11 @@ def run_generate_unidentified_fasta(sample_name, input_fa, output_fa,
 
 ### Main
 def main():
+    # Unbuffer stdout and redirect stderr into stdout.  This helps observe logged events in realtime.
+    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+    os.dup2(sys.stdout.fileno(), sys.stderr.fileno())
+  
+    # collect environment variables
     global INPUT_BUCKET
     global OUTPUT_BUCKET
     global KEY_S3_PATH
