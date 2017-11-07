@@ -1,6 +1,6 @@
 require 'json'
-class GsnaplMachine < ApplicationRecord
-  has_many :gsnapl_runs, dependent: :destroy
+class Machine < ApplicationRecord
+  has_many :machine_runs, dependent: :destroy
 
   def self.clean
     stdout, _stderr, status = Open3.capture3("aws ec2 describe-instance-status --instance-ids #{instance_id}")
