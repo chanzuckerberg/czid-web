@@ -15,8 +15,6 @@ class SampleUpload extends React.Component {
     this.handleResultChange = this.handleResultChange.bind(this);
     this.projects = props.projects || [];
     this.hostGenomes = props.host_genomes || [];
-    this.hostName = this.hostGenomes.length ? this.hostGenomes[0].name : '';
-    this.hostId = this.hostGenomes.length ? this.hostGenomes[0].id : null;
     this.sample = props.selectedSample || '';
     this.userDetails = props.loggedin_user;
     this.selectedSample = {
@@ -36,8 +34,6 @@ class SampleUpload extends React.Component {
       submitting: false,
       allProjects: this.projects || [],
       hostGenomes: this.hostGenomes || [],
-      hostName: this.hostName,
-      hostId: this.hostId,
       invalid: false,
       errorMessage: '',
       success: false,
@@ -169,9 +165,8 @@ class SampleUpload extends React.Component {
         s3_preload_result_path: this.refs.s3_preload_result_path.value.trim(),
         job_queue: this.state.job_queue,
         sample_memory: this.state.memory,
-        host_genome_id: this.state.hostId,
-        host_genome_name: this.state.hostName,
-        status: ''
+        host_genome_id: this.state.selectedHostGenomeId,
+        status: 'created'
       },
       authenticity_token: this.csrf
     })
@@ -207,9 +202,7 @@ class SampleUpload extends React.Component {
         s3_preload_result_path: this.state.selectedResultPath,
         job_queue: this.state.selectedJobQueue,
         sample_memory: this.state.selectedMemory,
-        host_genome_id: this.state.selectedHostGenomeId,
-        host_genome_name: this.state.selectedHostGenome,
-        status: this.selectedSample.status
+        host_genome_id: this.state.selectedHostGenomeId
       },
       authenticity_token: this.csrf
     })
@@ -343,7 +336,7 @@ class SampleUpload extends React.Component {
     this.setState({
       host: e.target.value.trim(),
       selectedHostGenome: e.target.value.trim(),
-      selectedHostGenomeId: e.target.selectedIndex
+      selectedHostGenomeId: this.state.hostGenomes[e.target.selectedIndex].id
     })
     this.clearError();
   }
@@ -405,7 +398,6 @@ class SampleUpload extends React.Component {
               </div>
               <div className="col s6 input-field genome-list">
                   <select ref="hostSelect" name="host" className="" id="host" onChange={ this.handleHostChange } value={this.state.selectedHostGenome}>
-                    <option disabled defaultValue>{this.state.selectedHostGenome}</option>
                       { this.state.hostGenomes.length ?
                           this.state.hostGenomes.map((host, i) => {
                             return <option ref= "host" key={i} id={host.id} >{host.name}</option>
