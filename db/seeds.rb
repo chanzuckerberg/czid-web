@@ -8,8 +8,8 @@ project = Project.create!(name: "Awesome Project")
   sample = Sample.new(name: "Sample #{i}", project: project,
     sample_host: "Human", sample_location: "California", sample_date: "Sept 19, 2017", sample_tissue: "CSF", sample_template: "RNA",
     sample_library: "Nugen Nextera", sample_sequencer: "Illumina NextSeq 500, 2x150", sample_notes: "patient had no known infections")
-  sample.input_files << InputFile.new(name: 'R1.fastq.gz', source_type: 'local')
-  sample.input_files << InputFile.new(name: 'R2.fastq.gz', source_type: 'local')
+  sample.input_files << InputFile.new(name: 'R1.fastq.gz', source_type: 'local', source: 'R1.fastq.gz')
+  sample.input_files << InputFile.new(name: 'R2.fastq.gz', source_type: 'local', source: 'R2.fastq.gz')
   sample.save!
   taxon_counts = (1..50).map {|j| TaxonCount.new(tax_id: j, tax_level: [1, 2].sample, count: rand(1000), name: "Some Name", count_type: ["NT", "NR"].sample) }
   pipeline_run = PipelineRun.create!(sample: sample, command: "xyz yzyz")

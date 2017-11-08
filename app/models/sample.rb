@@ -58,6 +58,9 @@ class Sample < ApplicationRecord
     if input_files.length == 2
       errors.add(:input_files, "file source type different") unless input_files[0].source_type == input_files[1].source_type
       errors.add(:input_files, "file formats different") unless input_files[0].file_type == input_files[1].file_type
+      if input_files[0].source == input_files[1].source
+        errors.add(:input_files, "read 1 source and read 2 source are identical")
+      end
     end
     # TODO: for s3 input types, test permissions before saving, by making a HEAD request
   end
@@ -165,7 +168,8 @@ class Sample < ApplicationRecord
   def pipeline_command
     script_name = File.basename(IdSeqPipeline::S3_SCRIPT_LOC)
     batch_command_env_variables = "INPUT_BUCKET=#{sample_input_s3_path} OUTPUT_BUCKET=#{sample_output_s3_path} " \
-      "FILE_TYPE=#{input_files.first.file_type} FILTER_HOST_FLAG=#{filter_host_flag} DB_SAMPLE_ID=#{id} "
+      "FILE_TYPE=#{input_files.first.file_type} FILTER_HOST_FLAG=#{filter_host_flag} " \
+      "ENVIRONMENT=#{Rails.env} DB_SAMPLE_ID=#{id} "
     if s3_star_index_path.present?
       batch_command_env_variables += "STAR_GENOME=#{s3_star_index_path} "
     end
@@ -178,7 +182,7 @@ class Sample < ApplicationRecord
     command = "aegea batch submit --command=\"#{batch_command}\" "
     memory = sample_memory.present? ? sample_memory : DEFAULT_MEMORY
     queue =  job_queue.present? ? job_queue : DEFAULT_QUEUE
-    command += " --storage /mnt=1500 --ecr-image idseq --memory #{memory} --queue #{queue} --vcpus 16"
+    command += " --storage /mnt=500 --ecr-image idseq --memory #{memory} --queue #{queue} --vcpus 4"
     command
   end
 
