@@ -492,7 +492,7 @@ def wait_for_server(service_name, command, max_concurrent):
 
 def get_server_ips(service_name, environment):
     tag = "service"
-    value = "-".join(service_name, environment)
+    value = "%s-%s" % (service_name, environment)
     describe_json = json.loads(execute_command("aws ec2 describe-instances --filters 'Name=tag:%s,Values=%s' 'Name=instance-state-name,Values=running'" % (tag, value)))
     server_ips = []
     for reservation in describe_json["Reservations"]:
