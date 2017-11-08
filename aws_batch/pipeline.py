@@ -469,14 +469,13 @@ def execute_command(command):
     output = subprocess.check_output(command, shell=True)
     return output
 
-def get_key_path(environment):
+def environment_for_aligners(environment):
     if environment == "development":
-        return "s3://czbiohub-infectious-disease/idseq-alpha.pem"
-    ## remove the following 2 lines once we're ready for the changes to affect production:
-    if environment == "production":
-        return "s3://czbiohub-infectious-disease/idseq-alpha.pem"
-    ##
-    return "s3://czbiohub-infectious-disease/idseq-%s.pem" % environment
+        return "alpha"
+    return environment
+
+def get_key_path(environment):
+    return "s3://czbiohub-infectious-disease/idseq-%s.pem" % environment_for_aligners(environment)
 
 def wait_for_server(service_name, command, max_concurrent):
     while True:
@@ -492,7 +491,7 @@ def wait_for_server(service_name, command, max_concurrent):
 
 def get_server_ips(service_name, environment):
     tag = "service"
-    value = "%s-%s" % (service_name, environment)
+    value = "%s-%s" % (service_name, environment_for_aligners(environment))
     describe_json = json.loads(execute_command("aws ec2 describe-instances --filters 'Name=tag:%s,Values=%s' 'Name=instance-state-name,Values=running'" % (tag, value)))
     server_ips = []
     for reservation in describe_json["Reservations"]:
