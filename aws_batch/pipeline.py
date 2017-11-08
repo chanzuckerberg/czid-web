@@ -507,11 +507,12 @@ def wait_for_server_ip(service_name, key_path, remote_username, environment, max
         for ip in instance_ips:
             command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "ps aux|grep gsnapl|grep -v bash" || echo "error"' % (key_path, remote_username, ip)
             output = execute_command(command).rstrip().split("\n")
-            if output != "error": ip_nproc_dict[ip] = len(output)
+            if output != ["error"]: ip_nproc_dict[ip] = len(output)
         if not ip_nproc_dict:
             have_capacity = False
         else:
-            min_nproc_ip, min_nproc = min(ip_nproc_dict, key=ip_nproc_dict.get)
+            min_nproc_ip = min(ip_nproc_dict, key=ip_nproc_dict.get)
+            min_nproc = ip_nproc_dict[min_nproc_ip]
             have_capacity = (min_nproc <= max_concurrent)
         if have_capacity:
             print "%s server %s has capacity. Kicking off " % (service_name, min_nproc_ip)
