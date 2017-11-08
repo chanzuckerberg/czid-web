@@ -480,13 +480,6 @@ def get_key_path(environment):
     ##
     return "s3://czbiohub-infectious-disease/idseq-%s.pem" % environment
 
-def get_url_for_idseq_machine_db(environment):
-    if environment == "development":
-        return "alpha.idseq.net"
-    if environment == "production":
-        return "idseq.net"
-    return environment + ".idseq.net"
-
 def wait_for_server(service_name, command, max_concurrent):
     while True:
         output = execute_command(command).rstrip().split("\n")
@@ -499,9 +492,19 @@ def wait_for_server(service_name, command, max_concurrent):
                   (service_name, len(output), wait_seconds)
             time.sleep(wait_seconds)
 
-def wait_for_server_ip(service_name, key_path, remote_username, idseq_web, max_concurrent):
+def get_server_ips(service_name, environment):
+    tag = "service"
+    value = "-".join(service_name, environment)
+    describe_json = json.loads(execute_command("aws ec2 describe-instances --filters 'Name=tag:%s,Values=%s' 'Name=instance-state-name,Values=running'" % (tag, value)))
+    server_ips = []
+    for reservation in describe_json["Reservations"]:
+        for instance in reservation["Instances"]:
+            server_ips += [instance["NetworkInterfaces"][0]["PrivateIpAddress"]]
+    return server_ips
+
+def wait_for_server_ip(service_name, key_path, remote_username, environment, max_concurrent):
     while True:
-        instance_ips = subprocess.check_output("curl %s/machines/%s/ips" % (idseq_web, service_name), shell=True).split(",")
+        instance_ips = get_server_ips(service_name, environment)
         ip_nproc_dict = {}
         for ip in instance_ips:
             command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "ps aux|grep gsnapl|grep -v bash"' % (key_path, remote_username, ip)
@@ -1006,9 +1009,8 @@ def run_gsnapl_remotely(sample, input_fa_1, input_fa_2,
     commands += "aws s3 cp %s/%s %s/;" % \
                  (remote_work_dir, GSNAPL_OUT, sample_s3_output_path)
     # check if remote machins has enough capacity
-    idseq_web = get_url_for_idseq_machine_db(environment)
     logging.getLogger().info("waiting for server")
-    gsnapl_instance_ip = wait_for_server_ip('gsnap', key_path, remote_username, idseq_web, GSNAPL_MAX_CONCURRENT)
+    gsnapl_instance_ip = wait_for_server_ip('gsnap', key_path, remote_username, environment, GSNAPL_MAX_CONCURRENT)
     logging.getLogger().info("starting alignment on machine " + gsnapl_instance_ip)
     register_server_run(aws_batch_job_id, gsnapl_instance_ip, idseq_web)
     remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, gsnapl_instance_ip, commands)
@@ -1124,9 +1126,8 @@ def run_rapsearch2_remotely(sample, input_fasta, rapsearch_ssh_key_s3_path,
                           ';'])
     commands += "aws s3 cp %s/%s %s/;" % \
                  (remote_work_dir, RAPSEARCH2_OUT, sample_s3_output_path)
-    idseq_web = get_url_for_idseq_machine_db(environment)
     logging.getLogger().info("waiting for server")
-    instance_ip = wait_for_server_ip('rapsearch', key_path, remote_username, idseq_web, RAPSEARCH2_MAX_CONCURRENT)
+    instance_ip = wait_for_server_ip('rapsearch', key_path, remote_username, environment, RAPSEARCH2_MAX_CONCURRENT)
     logging.getLogger().info("starting alignment on machine " + instance_ip)
     register_server_run(aws_batch_job_id, instance_ip, idseq_web)
     remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, instance_ip, commands)
