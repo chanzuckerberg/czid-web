@@ -29,10 +29,4 @@ Rails.application.routes.draw do
   get 'pipeline_outputs/:id/nonhost_fasta', to: 'pipeline_outputs#send_nonhost_fasta'
   get 'pipeline_outputs/:id/unidentified_fasta', to: 'pipeline_outputs#send_unidentified_fasta'
   get 'reports/:id/:view_level/csv', to: 'reports#send_report_csv'
-  post 'machines', to: 'machines#create'
-  get 'machines', to: 'machines#index'
-  get 'machines/:service/ips', to: 'machines#show_ips'
-  get 'machines/:service/instance_ids', to: 'machines#show_instance_ids'
-  post 'machine_runs', to: 'machine_runs#create'
-  get 'machine_runs', to: 'machine_runs#index'
 end
