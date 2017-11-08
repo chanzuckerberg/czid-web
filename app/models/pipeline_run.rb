@@ -12,6 +12,7 @@ class PipelineRun < ApplicationRecord
   STATUS_SUCCESS = 'SUCCEEDED'.freeze
   STATUS_FAILED = 'FAILED'.freeze
   STATUS_RUNNING = 'RUNNING'.freeze
+  STATUS_RUNNABLE = 'RUNNABLE'.freeze
   STATUS_ERROR = 'ERROR'.freeze # when aegea batch describe failed
   STATUS_LOADED = 'LOADED'.freeze
 

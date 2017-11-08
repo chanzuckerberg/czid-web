@@ -5,6 +5,7 @@
 <% if samples.count == 0 %>
   No samples yet.
 <% else %>
+  <div class="sample-container">
   <table>
     <thead>
       <tr>
@@ -14,17 +15,20 @@
         <th>Project</th>
         <th>Sample Status</th>
         <th>Pipeline Run status</th>
-        <th>Date created</th>
-        <th colspan="2"></th>
+        <th>Job Id </th>
+        <th>Job Submitted At</th>
+        <th> Job Queue </th>
+        <th> Memory Requirement </th>
+        <th>&nbsp;</th>
       </tr>
     </thead>
 
     <tbody>
       <% samples.each do |sample| %>
-        <tr>
+        <tr class=<%= sample_status_display(sample)%>>
           <td><%= sample.name %></td>
           <td><%= sample.id %></td>
-          <td><%= sample.user.email if sample.user %></td>
+          <td class='small'><%= sample.user.email if sample.user %></td>
           <td><%= link_to sample.project.name, sample.project if sample.project if sample.project %></td>
           <td><%= sample.status %>
             <% if sample.status.to_s == 'created' and sample.created_at < 30.minutes.ago %>
@@ -33,7 +37,11 @@
           </td>
           <td>
             <% pipeline_run = sample.pipeline_runs.first %>
+            <% pipeline_run_submitted = 'N/A' %>
+            <% pipeline_job_id = 'N/A' %>
             <% if pipeline_run %>
+              <% pipeline_run_submitted = pipeline_run.created_at %>
+              <% pipeline_job_id = pipeline_run.job_id %>
               <%= pipeline_run.job_status %>
               &nbsp;
               <% if pipeline_run.completed? %>
@@ -41,14 +49,15 @@
               <% end %>
             <% end %>
           </td>
-          <td><%= sample.created_at %></td>
-          <td><%= link_to 'Runs', pipeline_runs_sample_path(sample) %></td>
-          <td><%= link_to 'Edit', edit_sample_path(sample) %></td>
-          <!--
-          <td><%= link_to 'Destroy', sample, method: :delete, data: { confirm: 'Are you sure?' } %></td>
-          -->
+          <td><%= pipeline_job_id %></td>
+          <td class="small"><%= pipeline_run_submitted %></td>
+          <td class=small><%= sample.job_queue %></td>
+          <td><%= sample.sample_memory %></td>
+          <td><%= link_to 'Runs', pipeline_runs_sample_path(sample) %> &nbsp;
+              <%= link_to 'Edit', edit_sample_path(sample) %></td>
         </tr>
       <% end %>
     </tbody>
   </table>
+  </div>
 <% end %>
