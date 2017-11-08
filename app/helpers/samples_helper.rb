@@ -49,7 +49,7 @@ module SamplesHelper
         return 'initializing'
       end
     end
-    return ''
+    ''
   end
 
   def parsed_samples_for_s3_path(s3_path, project_id, host_genome_id)
