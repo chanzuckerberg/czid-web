@@ -345,9 +345,9 @@ def generate_json_from_taxid_counts(sample, taxidCountsInputPath,
                                     taxid2infoPath, jsonOutputPath, countType, dbSampleId):
     # produce json in Ryan's output format (https://github.com/chanzuckerberg/idseq-web/blob/master/test/output.json)
     taxid2info_map = shelve.open(taxid2infoPath)
-    total_reads = (item for item in STATS if item["task"] == "run_star").next().get("reads_before")
+    total_reads = [item for item in existing_stats if "total_reads" in item][0]["total_reads"]
     taxon_counts_attributes = []
-    remaining_reads = (item for item in STATS if item["task"] == "run_bowtie2").next().get("reads_after")
+    remaining_reads = (item for item in STATS if item["task"] == "run_gsnapl_remotely").next().get("reads_before")
 
     genus_to_count = {}
     genus_to_name = {}
