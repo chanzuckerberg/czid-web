@@ -15,9 +15,9 @@ import gzip
 import logging
 import math
 
+ENVIRONMENT = 'alpha'
 INPUT_BUCKET = 's3://czbiohub-infectious-disease/UGANDA' # default to be overwritten by environment variable
 OUTPUT_BUCKET = 's3://czbiohub-idseq-samples-test/id-uganda'  # default to be overwritten by environment variable
-KEY_S3_PATH = 's3://czbiohub-infectious-disease/idseq-alpha.pem'
 ROOT_DIR = '/mnt'
 DEST_DIR = ROOT_DIR + '/idseq/data' # generated data go here
 REF_DIR  = ROOT_DIR + '/idseq/ref' # referene genome / ref databases go here
@@ -32,8 +32,6 @@ BOWTIE2="bowtie2"
 
 
 LZW_FRACTION_CUTOFF = 0.45
-GSNAPL_INSTANCE_IP = '34.211.67.166'
-RAPSEARCH2_INSTANCE_IP = '54.191.193.210'
 
 GSNAPL_MAX_CONCURRENT = 5
 RAPSEARCH2_MAX_CONCURRENT = 5
@@ -474,6 +472,14 @@ def execute_command(command):
     sys.stdout.flush()
     return output
 
+def environment_for_aligners(environment):
+    if environment == "development":
+        return "alpha"
+    return environment
+
+def get_key_path(environment):
+    return "s3://czbiohub-infectious-disease/idseq-%s.pem" % environment_for_aligners(environment)
+
 def execute_command_realtime_stdout(command, progress_file=''):
     print command
     sys.stdout.flush()
@@ -493,6 +499,39 @@ def wait_for_server(service_name, command, max_concurrent):
             wait_seconds = random.randint(30, 60)
             print "%s server busy. %d processes running. Wait for %d seconds" % \
                   (service_name, len(output), wait_seconds)
+            time.sleep(wait_seconds)
+
+def get_server_ips(service_name, environment):
+    tag = "service"
+    value = "%s-%s" % (service_name, environment_for_aligners(environment))
+    describe_json = json.loads(execute_command("aws ec2 describe-instances --filters 'Name=tag:%s,Values=%s' 'Name=instance-state-name,Values=running'" % (tag, value)))
+    server_ips = []
+    for reservation in describe_json["Reservations"]:
+        for instance in reservation["Instances"]:
+            server_ips += [instance["NetworkInterfaces"][0]["Association"]["PublicIp"]]
+    return server_ips
+
+def wait_for_server_ip(service_name, key_path, remote_username, environment, max_concurrent):
+    while True:
+        instance_ips = get_server_ips(service_name, environment)
+        ip_nproc_dict = {}
+        for ip in instance_ips:
+            command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "ps aux|grep gsnapl|grep -v bash" || echo "error"' % (key_path, remote_username, ip)
+            output = execute_command(command).rstrip().split("\n")
+            if output != ["error"]: ip_nproc_dict[ip] = len(output)
+        if not ip_nproc_dict:
+            have_capacity = False
+        else:
+            min_nproc_ip = min(ip_nproc_dict, key=ip_nproc_dict.get)
+            min_nproc = ip_nproc_dict[min_nproc_ip]
+            have_capacity = (min_nproc <= max_concurrent)
+        if have_capacity:
+            print "%s server %s has capacity. Kicking off " % (service_name, min_nproc_ip)
+            return min_nproc_ip
+        else:
+            wait_seconds = random.randint(30, 60)
+            print "%s servers busy. Wait for %d seconds" % \
+                  (service_name, wait_seconds)
             time.sleep(wait_seconds)
 
 class TimeFilter(logging.Filter):
@@ -547,7 +586,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
                star_genome_s3_path, bowtie2_genome_s3_path,
                gsnap_ssh_key_s3_path, rapsearch_ssh_key_s3_path, accession2taxid_s3_path,
                deuterostome_list_s3_path, taxid2info_s3_path, db_sample_id,
-               aws_batch_job_id, lazy_run = True):
+               aws_batch_job_id, environment, lazy_run = True):
 
     sample_s3_output_path = sample_s3_output_path.rstrip('/')
     sample_name = sample_s3_input_path[5:].rstrip('/').replace('/','-')
@@ -670,7 +709,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         "after_file_type": "m8"})
     run_and_log(logparams, run_gsnapl_remotely,
         sample_name, EXTRACT_UNMAPPED_FROM_SAM_OUT1, EXTRACT_UNMAPPED_FROM_SAM_OUT2,
-        gsnap_ssh_key_s3_path,
+        gsnap_ssh_key_s3_path, environment, aws_batch_job_id,
         result_dir, sample_s3_output_path, lazy_run)
 
     # run_annotate_gsnapl_m8_with_taxids
@@ -734,7 +773,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         "after_file_type": "m8"})
     run_and_log(logparams, run_rapsearch2_remotely,
         sample_name, FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT,
-        rapsearch_ssh_key_s3_path,
+        rapsearch_ssh_key_s3_path, environment, aws_batch_job_id,
         result_dir, sample_s3_output_path, lazy_run)
 
     # run_annotate_m8_with_taxids
@@ -951,7 +990,7 @@ def run_bowtie2(sample_name, input_fa_1, input_fa_2, bowtie_genome_s3_path,
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT3, sample_s3_output_path))
 
 def run_gsnapl_remotely(sample, input_fa_1, input_fa_2,
-                        gsnap_ssh_key_s3_path,
+                        gsnap_ssh_key_s3_path, environment, aws_batch_job_id,
                         result_dir, sample_s3_output_path, lazy_run):
     if lazy_run:
         # check if output already exists
@@ -983,11 +1022,10 @@ def run_gsnapl_remotely(sample, input_fa_1, input_fa_2,
     commands += "aws s3 cp %s/%s %s/;" % \
                  (remote_work_dir, GSNAPL_OUT, sample_s3_output_path)
     # check if remote machins has enough capacity
-    check_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "ps aux|grep gsnapl|grep -v bash"' % (key_path, remote_username, GSNAPL_INSTANCE_IP)
     logging.getLogger().info("waiting for server")
-    wait_for_server('GSNAPL', check_command, GSNAPL_MAX_CONCURRENT)
-    logging.getLogger().info("starting alignment")
-    remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, GSNAPL_INSTANCE_IP, commands)
+    gsnapl_instance_ip = wait_for_server_ip('gsnap', key_path, remote_username, environment, GSNAPL_MAX_CONCURRENT)
+    logging.getLogger().info("starting alignment on machine " + gsnapl_instance_ip)
+    remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, gsnapl_instance_ip, commands)
     execute_command(remote_command)
     # move gsnapl output back to local
     time.sleep(10)
@@ -1066,8 +1104,8 @@ def run_filter_deuterostomes_from_fasta(sample_name, input_fa, output_fa,
     # move the output back to S3
     execute_command("aws s3 cp %s %s/" % (output_fa, sample_s3_output_path))
 
-def run_rapsearch2_remotely(sample, input_fasta,
-    rapsearch_ssh_key_s3_path, result_dir, sample_s3_output_path, lazy_run):
+def run_rapsearch2_remotely(sample, input_fasta, rapsearch_ssh_key_s3_path,
+    environment, aws_batch_job_id, result_dir, sample_s3_output_path, lazy_run):
     if lazy_run:
         # check if output already exists
         output = "%s/%s" % (result_dir, RAPSEARCH2_OUT)
@@ -1100,11 +1138,10 @@ def run_rapsearch2_remotely(sample, input_fasta,
                           ';'])
     commands += "aws s3 cp %s/%s %s/;" % \
                  (remote_work_dir, RAPSEARCH2_OUT, sample_s3_output_path)
-    check_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "ps aux|grep rapsearch|grep -v bash"' % (key_path, remote_username, RAPSEARCH2_INSTANCE_IP)
     logging.getLogger().info("waiting for server")
-    wait_for_server('RAPSEARCH2', check_command, RAPSEARCH2_MAX_CONCURRENT)
-    logging.getLogger().info("starting alignment")
-    remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, RAPSEARCH2_INSTANCE_IP, commands)
+    instance_ip = wait_for_server_ip('rapsearch', key_path, remote_username, environment, RAPSEARCH2_MAX_CONCURRENT)
+    logging.getLogger().info("starting alignment on machine " + instance_ip)
+    remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, instance_ip, commands)
     execute_command(remote_command)
     logging.getLogger().info("finished alignment")
     # move output back to local
@@ -1169,32 +1206,26 @@ def main():
     # collect environment variables
     global INPUT_BUCKET
     global OUTPUT_BUCKET
-    global KEY_S3_PATH
     global STAR_GENOME
     global BOWTIE2_GENOME
+    global ENVIRONMENT
+
     INPUT_BUCKET = os.environ.get('INPUT_BUCKET', INPUT_BUCKET)
     OUTPUT_BUCKET = os.environ.get('OUTPUT_BUCKET', OUTPUT_BUCKET)
-    KEY_S3_PATH = os.environ.get('KEY_S3_PATH', KEY_S3_PATH)
     STAR_GENOME = os.environ.get('STAR_GENOME', STAR_GENOME)
     BOWTIE2_GENOME = os.environ.get('BOWTIE2_GENOME', BOWTIE2_GENOME)
     DB_SAMPLE_ID = os.environ['DB_SAMPLE_ID']
     AWS_BATCH_JOB_ID = os.environ.get('AWS_BATCH_JOB_ID', 'local')
-    SAMPLE_HOST = os.environ.get('SAMPLE_HOST', '')
-    SAMPLE_LOCATION = os.environ.get('SAMPLE_LOCATION', '')
-    SAMPLE_DATE = os.environ.get('SAMPLE_DATE', '')
-    SAMPLE_TISSUE = os.environ.get('SAMPLE_TISSUE', '')
-    SAMPLE_TEMPLATE = os.environ.get('SAMPLE_TEMPLATE', '')
-    SAMPLE_LIBRARY = os.environ.get('SAMPLE_LIBRARY', '')
-    SAMPLE_SEQUENCER = os.environ.get('SAMPLE_SEQUENCER', '')
-    SAMPLE_NOTES = os.environ.get('SAMPLE_NOTES', '')
+    ENVIRONMENT = os.environ.get('ENVIRONMENT', ENVIRONMENT)
     sample_s3_input_path = INPUT_BUCKET.rstrip('/')
     sample_s3_output_path = OUTPUT_BUCKET.rstrip('/')
+    key_s3_path = get_key_path(ENVIRONMENT)
 
     run_sample(sample_s3_input_path, sample_s3_output_path,
                STAR_GENOME, BOWTIE2_GENOME,
-               KEY_S3_PATH, KEY_S3_PATH, ACCESSION2TAXID,
+               key_s3_path, key_s3_path, ACCESSION2TAXID,
                DEUTEROSTOME_TAXIDS, TAXID_TO_INFO, DB_SAMPLE_ID,
-               AWS_BATCH_JOB_ID, True)
+               AWS_BATCH_JOB_ID, ENVIRONMENT, True)
 
 if __name__=="__main__":
     main()
