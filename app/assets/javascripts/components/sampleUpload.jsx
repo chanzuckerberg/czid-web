@@ -184,7 +184,7 @@ class SampleUpload extends React.Component {
         invalid: true,
         submitting: false,
         serverErrors: error.response.data,
-        errorMessage: 'Failed to upload sample'
+        errorMessage: 'Something went wrong'
       })
     });
   }
