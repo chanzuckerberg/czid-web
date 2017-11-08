@@ -53,6 +53,9 @@ class Sample < ApplicationRecord
     # validate that both input files have the same source_type
     if input_files.length == 2
       errors.add(:input_files, "file source type different") unless input_files[0].source_type == input_files[1].source_type
+      if input_files[0].source == input_files[1].source
+        errors.add(:input_files, "read 1 source and read 2 source are identical")
+      end
     end
     # TODO: for s3 input types, test permissions before saving, by making a HEAD request
   end
