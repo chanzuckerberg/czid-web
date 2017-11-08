@@ -310,7 +310,7 @@ def generate_tax_counts_from_m8(m8_file, e_value_type, output_file):
             f.write(",".join([str(taxid), str(count), str(avg_percent_identity), str(avg_alignment_length), str(avg_e_value) + '\n']))
 
 def generate_rpm_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, speciesOutputPath, genusOutputPath):
-    total_reads = (item for item in STATS if item["task"] == "run_star").next().get("reads_before")
+    total_reads = [item for item in STATS if "total_reads" in item][0]["total_reads"]
     taxid2info_map = shelve.open(taxid2infoPath)
     species_rpm_map = {}
     genus_rpm_map = {}
