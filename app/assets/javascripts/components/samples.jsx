@@ -139,7 +139,10 @@ class Samples extends React.Component {
     return (
     <div className="content-wrapper">
       <div className="sample-container">
-        <input id="search" type="search" onChange={this.handleSearch} className="search" placeholder='&#xf002; Search for Sample'/>{ this.state.showSearchLoader ? <i className='fa fa-spinner fa-spin fa-lg'></i> : null }
+        <div className="row search-box">
+          <span className="icon"><i className="fa fa-search" aria-hidden="true"></i></span>
+          <input id="search" type="search" onChange={this.handleSearch} className="search" placeholder='Search for Sample'/>{ this.state.showSearchLoader ? <i className='fa fa-spinner fa-spin fa-lg'></i> : null }
+        </div>
           <table className="bordered highlight samples-table">
             <thead>
             <tr>

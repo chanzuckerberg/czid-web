@@ -31,6 +31,7 @@ $break-large: 1460px;
   }
   .mail {
     padding: 0 48px;
+    margin-bottom: 20px;
     p {
       margin-top: 10px;
       font-size: 14px;
@@ -82,6 +83,9 @@ $break-large: 1460px;
     font-size: 12px;
     transition: .2s width ease-out;
     text-align: center;
+    @media screen and (max-width: $break-large) {
+      width: 70%;
+    }
   }
   .success-info {
     width: 80%;
