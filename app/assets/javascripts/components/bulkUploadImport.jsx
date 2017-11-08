@@ -314,7 +314,6 @@ class BulkUploadImport extends React.Component {
     this.clearError();
   }
 
-
   handleHostChange(e) {
     this.setState({
       hostName: e.target.value.trim(),
