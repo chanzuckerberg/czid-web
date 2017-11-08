@@ -7,7 +7,8 @@ $break-large: 1460px;
   margin-top: 150px;
   border-radius: 4px;
   .title {
-    padding: 25px 35px;
+    margin-bottom: 0px;
+    padding: 25px 35px 0 35px;
     p.signup {
       font-size: 24px;
       font-weight: bold;
@@ -25,6 +26,20 @@ $break-large: 1460px;
       }
       @media screen and (min-width: $break-large) {
         
+      }
+    }
+  }
+  .mail {
+    padding: 0 48px;
+    p {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    span {
+      color: #4a91cc;
+      cursor: pointer;
+      &:hover {
+        color: #5ABCD6
       }
     }
   }
