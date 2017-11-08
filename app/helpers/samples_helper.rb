@@ -33,6 +33,25 @@ module SamplesHelper
     (100.0 * bowtie2_stats.reads_after) / star_stats.reads_before unless bowtie2_stats.nil? || star_stats.nil?
   end
 
+  def sample_status_display(sample)
+    if sample.status == Sample::STATUS_CREATED
+      return 'uploading'
+    elsif sample.status == Sample::STATUS_CHECKED
+      pipeline_run = sample.pipeline_runs.first
+      return '' unless pipeline_run
+      if pipeline_run.job_status == PipelineRun::STATUS_CHECKED
+        return 'complete'
+      elsif pipeline_run.job_status == PipelineRun::STATUS_FAILED
+        return 'failed'
+      elsif pipeline_run.job_status == PipelineRun::STATUS_RUNNING
+        return 'running'
+      else
+        return 'initializing'
+      end
+    end
+    return ''
+  end
+
   def parsed_samples_for_s3_path(s3_path, project_id, host_genome_id)
     default_attributes = { project_id: project_id,
                            host_genome_id: host_genome_id,
