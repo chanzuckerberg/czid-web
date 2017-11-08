@@ -746,7 +746,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
     run_and_log(logparams, run_filter_deuterostomes_from_fasta,
         sample_name, os.path.join(result_dir, GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT),
         os.path.join(result_dir, FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT),
-        accession2taxid_s3_path, deuterostome_list_s3_path, 'NT', environment, aws_batch_job_id,
+        accession2taxid_s3_path, deuterostome_list_s3_path, 'NT',
         result_dir, sample_s3_output_path, False)
 
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
@@ -757,7 +757,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         "after_file_type": "m8"})
     run_and_log(logparams, run_rapsearch2_remotely,
         sample_name, FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT,
-        rapsearch_ssh_key_s3_path,
+        rapsearch_ssh_key_s3_path, environment, aws_batch_job_id,
         result_dir, sample_s3_output_path, lazy_run)
 
     # run_annotate_m8_with_taxids
