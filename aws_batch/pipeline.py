@@ -523,11 +523,6 @@ def wait_for_server_ip(service_name, key_path, remote_username, environment, max
                   (service_name, wait_seconds)
             time.sleep(wait_seconds)
 
-def register_server_run(aws_batch_job_id, instance_ip, idseq_web):
-    command = "curl -H \"Content-Type: application/json\" -X POST -d '{\"aws_batch_job_id\":\"%s\",\"machine_ip\":\"%s\"}' %s/machine_runs" % \
-              (aws_batch_job_id, instance_ip, idseq_web)
-    return subprocess.check_output(command, shell=True)
-
 class TimeFilter(logging.Filter):
     def filter(self, record):
         try:
@@ -1015,7 +1010,6 @@ def run_gsnapl_remotely(sample, input_fa_1, input_fa_2,
     logging.getLogger().info("waiting for server")
     gsnapl_instance_ip = wait_for_server_ip('gsnap', key_path, remote_username, environment, GSNAPL_MAX_CONCURRENT)
     logging.getLogger().info("starting alignment on machine " + gsnapl_instance_ip)
-    register_server_run(aws_batch_job_id, gsnapl_instance_ip, idseq_web)
     remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, gsnapl_instance_ip, commands)
     execute_command(remote_command)
     # move gsnapl output back to local
@@ -1132,7 +1126,6 @@ def run_rapsearch2_remotely(sample, input_fasta, rapsearch_ssh_key_s3_path,
     logging.getLogger().info("waiting for server")
     instance_ip = wait_for_server_ip('rapsearch', key_path, remote_username, environment, RAPSEARCH2_MAX_CONCURRENT)
     logging.getLogger().info("starting alignment on machine " + instance_ip)
-    register_server_run(aws_batch_job_id, instance_ip, idseq_web)
     remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, instance_ip, commands)
     execute_command(remote_command)
     logging.getLogger().info("finished alignment")
