@@ -497,7 +497,7 @@ def get_server_ips(service_name, environment):
     server_ips = []
     for reservation in describe_json["Reservations"]:
         for instance in reservation["Instances"]:
-            server_ips += [instance["NetworkInterfaces"][0]["PrivateIpAddress"]]
+            server_ips += [instance["NetworkInterfaces"][0]["Association"]["PublicIp"]]
     return server_ips
 
 def wait_for_server_ip(service_name, key_path, remote_username, environment, max_concurrent):
