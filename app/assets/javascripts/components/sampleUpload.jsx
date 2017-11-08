@@ -180,7 +180,7 @@ class SampleUpload extends React.Component {
         that.gotoPage(`/samples/${response.data.id}`);
       }, 2000)
     })
-    .catch(function (error) {
+    .catch((error) => {
       that.setState({
         invalid: true,
         submitting: false,
@@ -218,7 +218,7 @@ class SampleUpload extends React.Component {
         that.gotoPage(`/samples/${that.state.id}`);
       }, 2000);
     })
-    .catch(function (error) {
+    .catch((error) => {
      that.setState({
       submitting: false,
       invalid: true,

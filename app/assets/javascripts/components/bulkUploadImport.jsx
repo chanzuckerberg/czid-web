@@ -200,7 +200,7 @@ class BulkUploadImport extends React.Component {
       that.initializeSelectTag()
       that.initializeSelectAll()
     })
-    .catch(function (error) {
+    .catch((error) => {
      that.setState({
       submitting: false,
       invalid: true,
@@ -230,7 +230,7 @@ class BulkUploadImport extends React.Component {
         });
         that.gotoPage(`/?ids=${that.state.createdSampleIds.join(',')}`);
       }, 2000)
-    }).catch(function (error) {
+    }).catch((error) => {
       console.log(error, error.response, 'response')
      that.setState({
       submitting: false,
