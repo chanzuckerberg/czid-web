@@ -45,6 +45,7 @@ class SamplesController < ApplicationController
     @errors = []
     samples.each do |sample_attributes|
       sample = Sample.new(sample_attributes)
+      sample.bulk_mode = true
       if sample.save
         @samples << sample
       else
@@ -65,7 +66,9 @@ class SamplesController < ApplicationController
   # GET /samples/1.json
 
   def show
-    @pipeline_output = @sample.pipeline_runs.first ? @sample.pipeline_runs.first.pipeline_output : nil
+    first_pipeline_run = @sample.pipeline_runs.first ? @sample.pipeline_runs.first : nil
+    @pipeline_output = first_pipeline_run ? first_pipeline_run.pipeline_output : nil
+    @sample_status = first_pipeline_run ? first_pipeline_run.job_status : nil
     @job_stats = @pipeline_output ? @pipeline_output.job_stats : nil
     @summary_stats = @job_stats ? get_summary_stats(@job_stats) : nil
     @project_info = @sample.project ? @sample.project : nil
@@ -101,7 +104,7 @@ class SamplesController < ApplicationController
 
   # GET /samples/new
   def new
-    @sample = Sample.new
+    @sample = nil
     @projects = Project.all
     @host_genomes = host_genomes_list ? host_genomes_list : nil
   end
@@ -125,6 +128,7 @@ class SamplesController < ApplicationController
     @sample = Sample.new(params)
     @sample.project = project if project
     @sample.input_files.each { |f| f.name ||= File.basename(f.source) }
+    @sample.user = @user if @user
 
     respond_to do |format|
       if @sample.save
@@ -132,7 +136,7 @@ class SamplesController < ApplicationController
         format.json { render :show, status: :created, location: @sample }
       else
         format.html { render :new }
-        format.json { render json: @sample.errors, status: :unprocessable_entity }
+        format.json { render json: @sample.errors.full_messages, status: :unprocessable_entity }
       end
     end
   end
@@ -141,12 +145,12 @@ class SamplesController < ApplicationController
   # PATCH/PUT /samples/1.json
   def update
     respond_to do |format|
-      if @sample.update!(sample_params)
+      if @sample.update(sample_params)
         format.html { redirect_to @sample, notice: 'Sample was successfully updated.' }
         format.json { render :show, status: :ok, location: @sample }
       else
         format.html { render :edit }
-        format.json { render json: @sample.errors, status: :unprocessable_entity }
+        format.json { render json: @sample.errors.full_messages, status: :unprocessable_entity }
       end
     end
   end

@@ -10,6 +10,7 @@
       <tr>
         <th>Name</th>
         <th>ID</th>
+        <th>Uploader</th>
         <th>Project</th>
         <th>Sample Status</th>
         <th>Pipeline Run status</th>
@@ -23,6 +24,7 @@
         <tr>
           <td><%= sample.name %></td>
           <td><%= sample.id %></td>
+          <td><%= sample.user.email if sample.user %></td>
           <td><%= link_to sample.project.name, sample.project if sample.project if sample.project %></td>
           <td><%= sample.status %>
             <% if sample.status.to_s == 'created' and sample.created_at < 30.minutes.ago %>

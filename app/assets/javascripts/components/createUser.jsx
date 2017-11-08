@@ -8,7 +8,6 @@ class CreateUser extends React.Component {
     this.handleEmailChange = this.handleEmailChange.bind(this);
     this.handlePasswordChange = this.handlePasswordChange.bind(this);
     this.handlePConfirmChange = this.handlePConfirmChange.bind(this);
-    this.handleTokenChange = this.handleTokenChange.bind(this);
     this.clearError = this.clearError.bind(this)
     this.gotoPage = this.gotoPage.bind(this);
     this.toggleCheckBox = this.toggleCheckBox.bind(this); 
@@ -17,7 +16,6 @@ class CreateUser extends React.Component {
       password: '',
       id: this.user ? this.user.id : null,
       password_confirmation: '',
-      authentication_token: this.user ? this.user.authentication_token : '',
       adminStatus: this.user ? this.user.admin : null
     }
     this.state = {
@@ -31,7 +29,6 @@ class CreateUser extends React.Component {
       email: this.selectedUser.email || '',
       password: this.selectedUser.password || '',
       pConfirm: this.selectedUser.password_confirmation || '',
-      auth: this.selectedUser.authentication_token || '',
       adminstatus: this.selectedUser.adminStatus,
       id: this.selectedUser.id,
       isMustFill: this.selectedUser.adminStatus ? true : undefined,
@@ -83,12 +80,6 @@ class CreateUser extends React.Component {
     });
   }
 
-  handleTokenChange(e) {
-    this.setState({
-        auth: e.target.value
-    });
-  }
-
   handleEmailChange(e) {
     this.setState({
         email: e.target.value
@@ -96,7 +87,7 @@ class CreateUser extends React.Component {
   }
 
   isCreateFormInvalid() {
-    if (this.refs.email.value === '' && this.refs.password.value === '' && this.refs.password_confirmation.value === '' && this.refs.authentication_token.value === '') {
+    if (this.refs.email.value === '' && this.refs.password.value === '' && this.refs.password_confirmation.value === '') {
       this.setState({ 
         showFailed: true,
         errorMessage: 'Please fill all fields'
@@ -115,35 +106,16 @@ class CreateUser extends React.Component {
         errorMessage: 'Please re-enter password'
       })
       return true;
-    } else if (this.refs.authentication_token.value === '') {
-      this.setState({ 
-        showFailed: true,
-        errorMessage: 'Please enter authentication token'
-      })
-      return true;
-    } 
-    else {
+    } else {
       return false;
     }
   }
 
   isUpdateFormValid() {
-    if (this.state.email === '' && this.state.auth === '') {
+    if (this.state.email === '') {
       this.setState({ 
         showFailed: true,
-        errorMessage: 'Please fill all fields'
-      })
-      return true;
-    } else if (this.state.email === '') {
-      this.setState({ 
-        showFailed: true,
-        errorMessage: 'Please enter email'
-      })
-      return true;
-    } else if (this.state.auth === '') {
-      this.setState({ 
-        showFailed: true,
-        errorMessage: 'Please enter authentication token'
+        errorMessage: 'Please enter valid email address'
       })
       return true;
     } else {
@@ -158,7 +130,6 @@ class CreateUser extends React.Component {
         email: this.refs.email.value,
         password: this.refs.password.value,
         password_confirmation: this.refs.password_confirmation.value,
-        authentication_token: this.refs.authentication_token.value,
         role: this.refs.admin.value
       },
       authenticity_token: this.csrf
@@ -185,7 +156,6 @@ class CreateUser extends React.Component {
         email: this.state.email,
         password: this.state.password,
         password_confirmation: this.state.pConfirm,
-        authentication_token: this.state.auth,
         role: this.state.adminstatus ? 1 : 0
       },
       authentication_token: this.csrf
@@ -232,11 +202,6 @@ class CreateUser extends React.Component {
                   <i className="fa fa-check-circle" aria-hidden="true"></i>
                   <input ref= "password_confirmation" type="password" className="" onFocus={ this.clearError }   />
                   <label htmlFor="user_password_confirmation">Confirm Password</label>
-                </div>
-                <div className="input-field">
-                  <i className="fa fa-unlock" aria-hidden="true"></i>
-                  <input ref= "authentication_token" type="text" className="" onFocus={ this.clearError }   />
-                  <label htmlFor="user_authentication_token">Authentication Token</label>
                 </div>
                 <p>
                   <input ref="admin" type="checkbox" name="switch" id="admin" className="filled-in" onChange={ this.toggleCheckBox } value={ this.state.isChecked ? 1 : 0 } />
@@ -289,11 +254,6 @@ class CreateUser extends React.Component {
                   <i className="fa fa-check-circle" aria-hidden="true"></i>
                   <input type="password" onChange = { this.handlePConfirmChange } className="" onFocus={ this.clearError }  value={ this.state.pConfirm} />
                   <label htmlFor="user_password_confirmation">Confirm Password</label>
-                </div>
-                <div className="input-field">
-                  <i className="fa fa-unlock" aria-hidden="true"></i>
-                  <input type="text" onChange = { this.handleTokenChange } className="" onFocus={ this.clearError }   value={ this.state.auth}/>
-                  <label htmlFor="user_authentication_token">Authentication Token</label>
                 </div>
                 <p>
                   <input type="checkbox" id="admin" className="filled-in" checked={ this.state.isMustFill } onChange={ this.toggleCheckBox } value={ this.state.adminValue } />

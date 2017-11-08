@@ -20,7 +20,10 @@ class Sample < ApplicationRecord
   DEFAULT_MEMORY = 64_000
   DEFAULT_QUEUE = 'aegea_batch_ondemand'.freeze
 
+  attr_accessor :bulk_mode
+
   belongs_to :project
+  belongs_to :user, optional: true # This is the user who uploaded the sample, possibly distinct from the user(s) owning the sample's project
   belongs_to :host_genome, optional: true
   has_many :pipeline_outputs, dependent: :destroy
   has_many :pipeline_runs, -> { order(created_at: :desc) }, dependent: :destroy
@@ -31,6 +34,12 @@ class Sample < ApplicationRecord
   after_create :initiate_input_file_upload
 
   before_save :check_host_genome, :check_status
+
+  # getter
+  attr_reader :bulk_mode
+
+  # setter
+  attr_writer :bulk_mode
 
   def sample_path
     File.join('samples', project.id.to_s, id.to_s)
@@ -160,7 +169,7 @@ class Sample < ApplicationRecord
     command = "aegea batch submit --command=\"#{batch_command}\" "
     memory = sample_memory.present? ? sample_memory : DEFAULT_MEMORY
     queue =  job_queue.present? ? job_queue : DEFAULT_QUEUE
-    command += " --storage /mnt=1500 --ecr-image idseq --memory #{memory} --queue #{queue} --vcpus 16"
+    command += " --storage /mnt=500 --ecr-image idseq --memory #{memory} --queue #{queue} --vcpus 16"
     command
   end
 

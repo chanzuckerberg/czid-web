@@ -86,7 +86,6 @@
     }
 
     .filter-controls {
-      //padding: 15px;
       .noUi-tooltip, .noUi-handle {
         background: #979797;
       }
@@ -103,6 +102,31 @@
         border: 2px solid #767676;
         background-color: #767676;
       }
+
+      .threshold-label {
+        text-align: right;
+        margin-top: 15px;
+        label {
+          font-size: 15px;
+          color: #464343;
+        }
+      }
+      input.browser-default {
+        padding: 5px;
+        width: 100%;
+        margin-top: 10px;
+        &:focus {
+          outline: none;
+        }
+      }
+      .input-container {
+        padding: 0;
+      }
+
+      .filter-label {
+        text-align: right;
+      }
+
     }
   }
 
@@ -157,6 +181,38 @@
 .report-table .link:hover {
   color: #0099cc;
   cursor: pointer;
+}
+
+.report-table .count-info {
+  color: #A0A0A0;
+}
+
+.report-table {
+  .genus-name {
+    display: inline-block;
+    margin-right: 5px;
+  }
+  .fa {
+    margin-left: 5px;
+    font-size: 20px;
+    width: 20px;
+    &:hover {
+      color: #444242;
+    }
+    -webkit-user-select: none;  /* Chrome all / Safari all */
+    -moz-user-select: none;     /* Firefox all */
+    -ms-user-select: none;      /* IE 10+ */
+    user-select: none;          /* Likely future */
+  }
+}
+.report-table .species-name {
+  margin-left: 40px;
+}
+
+.report-table .toggle-species {
+  &:hover {
+    color: #313030;
+  }
 }
 
 #sort-report {
@@ -224,4 +280,3 @@
   background: #fff;
   padding: 10px;
 }
-

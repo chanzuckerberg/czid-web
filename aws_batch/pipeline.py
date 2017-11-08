@@ -80,7 +80,7 @@ NR_TAXID_COUNTS_TO_SPECIES_RPM_OUT = 'species.rpm.filter.deuterostomes.taxids.ra
 NR_TAXID_COUNTS_TO_GENUS_RPM_OUT = 'genus.rpm.filter.deuterostomes.taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.csv'
 UNIDENTIFIED_FASTA_OUT = 'unidentified.fasta'
 COMBINED_JSON_OUT = 'idseq_web_sample.json'
-LOGS_OUT_BASENAME = 'log.txt'
+LOGS_OUT_BASENAME = 'log'
 STATS_OUT = 'stats.json'
 
 #global statistics log
@@ -466,7 +466,10 @@ def return_merged_dict(dict1, dict2):
 
 def execute_command(command):
     print command
+    sys.stdout.flush()
     output = subprocess.check_output(command, shell=True)
+    print output
+    sys.stdout.flush()
     return output
 
 def environment_for_aligners(environment):
@@ -476,6 +479,15 @@ def environment_for_aligners(environment):
 
 def get_key_path(environment):
     return "s3://czbiohub-infectious-disease/idseq-%s.pem" % environment_for_aligners(environment)
+
+def execute_command_realtime_stdout(command, progress_file=''):
+    print command
+    sys.stdout.flush()
+    tail = subprocess.Popen("touch %s ; tail -f %s" % (progress_file, progress_file), shell=True)
+    try:
+        subprocess.check_call(command, shell=True)
+    finally:
+        tail.kill()
 
 def wait_for_server(service_name, command, max_concurrent):
     while True:
@@ -536,12 +548,16 @@ class TimeFilter(logging.Filter):
 def run_and_log(logparams, func_name, *args):
     logger = logging.getLogger()
     logger.info("========== %s ==========" % logparams.get("title"))
+    # copy log file -- start
+    execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
     # produce the output
     func_return = func_name(*args)
     if func_return == 1:
         logger.info("output exists, lazy run")
     else:
         logger.info("uploaded output")
+    # copy log file -- after work is done
+    execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
     # count records
     required_params = ["before_file_name", "before_file_type", "after_file_name", "after_file_type"]
     if all(param in logparams for param in required_params):
@@ -558,7 +574,7 @@ def run_and_log(logparams, func_name, *args):
         if func_name.__name__ == "run_priceseqfilter":
             pass_percentage = (100.0 * records_after) / records_before
             logger.info("percentage of reads passing QC filter: %s %%" % str(pass_percentage))
-    # copy log file
+    # copy log file -- end
     execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
     # write stats
     stats_path = logparams["stats_file"]
@@ -582,7 +598,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
     execute_command("mkdir -p %s " % REF_DIR);
 
     # configure logger
-    log_file = "%s/%s.%s" % (result_dir, LOGS_OUT_BASENAME, aws_batch_job_id)
+    log_file = "%s/%s.%s.txt" % (result_dir, LOGS_OUT_BASENAME, aws_batch_job_id)
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
     handler = logging.FileHandler(log_file)
@@ -849,7 +865,7 @@ def run_star(sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
                            '--runThreadN', str(multiprocessing.cpu_count()),
                            '--genomeDir', REF_DIR + '/STAR_genome',
                            '--readFilesIn', fastq_file_1, fastq_file_2]
-    execute_command(" ".join(star_command_params))
+    execute_command_realtime_stdout(" ".join(star_command_params), os.path.join(scratch_dir, "Log.progress.out"))
     logging.getLogger().info("finished job")
     # extract out unmapped files
     execute_command("cp %s/%s %s/%s;" % (scratch_dir, 'Unmapped.out.mate1', result_dir, STAR_OUT1))
@@ -877,7 +893,7 @@ def run_priceseqfilter(sample_name, input_fq_1, input_fq_2,
                        '-rqf','85','0.98',
                        '-rnf','90',
                        '-log','c']
-    execute_command(" ".join(priceseq_params))
+    execute_command_realtime_stdout(" ".join(priceseq_params))
     logging.getLogger().info("finished job")
     # copy back to aws
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, PRICESEQFILTER_OUT1, sample_s3_output_path))
@@ -912,7 +928,7 @@ def run_cdhitdup(sample_name, input_fa_1, input_fa_2,
                        '-o',  result_dir + '/' + CDHITDUP_OUT1,
                        '-o2', result_dir + '/' + CDHITDUP_OUT2,
                        '-e',  '0.05', '-u', '70']
-    execute_command(" ".join(cdhitdup_params))
+    execute_command_realtime_stdout(" ".join(cdhitdup_params))
     logging.getLogger().info("finished job")
     # copy back to aws
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, CDHITDUP_OUT1, sample_s3_output_path))
@@ -961,7 +977,7 @@ def run_bowtie2(sample_name, input_fa_1, input_fa_2, bowtie_genome_s3_path,
                      '--very-sensitive-local',
                      '-f', '-1', input_fa_1, '-2', input_fa_2,
                      '-S', result_dir + '/' + BOWTIE2_OUT]
-    execute_command(" ".join(bowtie2_params))
+    execute_command_realtime_stdout(" ".join(bowtie2_params))
     logging.getLogger().info("finished alignment")
     # extract out unmapped files from sam
     output_prefix = result_dir + '/' + EXTRACT_UNMAPPED_FROM_SAM_OUT1[:-8]
@@ -1183,6 +1199,11 @@ def run_generate_unidentified_fasta(sample_name, input_fa, output_fa,
 
 ### Main
 def main():
+    # Unbuffer stdout and redirect stderr into stdout.  This helps observe logged events in realtime.
+    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+    os.dup2(sys.stdout.fileno(), sys.stderr.fileno())
+  
+    # collect environment variables
     global INPUT_BUCKET
     global OUTPUT_BUCKET
     global STAR_GENOME

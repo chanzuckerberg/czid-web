@@ -2,15 +2,7 @@
 // They will automatically be included in application.scss.
 // You can use Sass (SCSS) here: http://sass-lang.com/
 
-table {
-  thead {
-    th {
-      font-style: thin;
-      font-size: 14px;
-      color:rgb(184, 184, 184);
-    }
-  }
-
+.sample-container {
   tbody {
     td {
       i.fa {
@@ -24,6 +16,16 @@ table {
       i.fa.fa-flask {
         margin-left: 0;
       }
+    }
+  }
+}
+
+table {
+  thead {
+    th {
+      font-style: thin;
+      font-size: 14px;
+      color:rgb(184, 184, 184);
     }
   }
 }

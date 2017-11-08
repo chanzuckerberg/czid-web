@@ -1,6 +1,8 @@
 class ProjectsController < ApplicationController
   before_action :set_project, only: [:show, :edit, :update, :destroy]
   before_action :login_required, only: [:new, :edit, :create, :update, :destroy, :index, :show]
+  clear_respond_to
+  respond_to :json
 
   # GET /projects
   # GET /projects.json
@@ -33,7 +35,7 @@ class ProjectsController < ApplicationController
         format.json { render :show, status: :created, location: @project }
       else
         format.html { render :new }
-        format.json { render json: @project.errors, status: :unprocessable_entity }
+        format.json { render json: @project.errors.full_messages, status: :unprocessable_entity }
       end
     end
   end
@@ -47,7 +49,7 @@ class ProjectsController < ApplicationController
         format.json { render :show, status: :ok, location: @project }
       else
         format.html { render :edit }
-        format.json { render json: @project.errors, status: :unprocessable_entity }
+        format.json { render json: @project.errors.full_messages, status: :unprocessable_entity }
       end
     end
   end
