@@ -518,8 +518,8 @@ def wait_for_server_ip(service_name, key_path, remote_username, environment, max
             return min_nproc_ip
         else:
             wait_seconds = random.randint(30, 60)
-            print "%s servers busy. Smallest number of running processes is %f. Wait for %d seconds" % \
-                  (service_name, min_nproc, wait_seconds)
+            print "%s servers busy. Wait for %d seconds" % \
+                  (service_name, wait_seconds)
             time.sleep(wait_seconds)
 
 def register_server_run(aws_batch_job_id, instance_ip, idseq_web):
