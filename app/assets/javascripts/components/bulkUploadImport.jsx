@@ -300,7 +300,7 @@ class BulkUploadImport extends React.Component {
     const samples = this.state.samples
     samples[e.target.id].project_id = this.state.allProjects[e.target.selectedIndex].id
     this.setState({
-      samples: samples,
+      samples: samples
     })
     this.clearError();
   }
