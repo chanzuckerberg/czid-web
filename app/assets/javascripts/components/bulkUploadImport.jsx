@@ -231,7 +231,6 @@ class BulkUploadImport extends React.Component {
         that.gotoPage(`/?ids=${that.state.createdSampleIds.join(',')}`);
       }, 2000)
     }).catch((error) => {
-      console.log(error, error.response, 'response')
      that.setState({
       submitting: false,
       invalid: true,
@@ -250,9 +249,7 @@ class BulkUploadImport extends React.Component {
   }
 
   isImportFormInvalid() {
-    console.log(this.state.project, this.refs.bulk_path.value.length, 'check')
     if (this.state.project === "Select a Project"  && this.refs.bulk_path.value === '') {
-      console.log('got here true');
       this.setState({
         invalid: true,
         errorMessage: 'Please fill in all required fields'
@@ -281,7 +278,6 @@ class BulkUploadImport extends React.Component {
   }
 
   isUploadFormInvalid() {
-    console.log('legth of ids', this.state.selectedSampleIndices.length)
     if (!this.state.selectedSampleIndices.length) {
       this.setState({
         invalid: true,
