@@ -190,7 +190,7 @@ class BulkUploadImport extends React.Component {
       }
     })
     .then((response) => {
-      this.setState({
+      that.setState({
         submitting: false,
         success: true,
         successMessage: 'Samples imported. Pick the ones you want to submit.',
