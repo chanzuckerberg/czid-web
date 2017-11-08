@@ -15,9 +15,9 @@ import gzip
 import logging
 import math
 
+ENVIRONMENT = 'alpha'
 INPUT_BUCKET = 's3://czbiohub-infectious-disease/UGANDA' # default to be overwritten by environment variable
 OUTPUT_BUCKET = 's3://czbiohub-idseq-samples-test/id-uganda'  # default to be overwritten by environment variable
-KEY_S3_PATH = 's3://czbiohub-infectious-disease/idseq-alpha.pem'
 ROOT_DIR = '/mnt'
 DEST_DIR = ROOT_DIR + '/idseq/data' # generated data go here
 REF_DIR  = ROOT_DIR + '/idseq/ref' # referene genome / ref databases go here
@@ -1188,26 +1188,16 @@ def run_generate_unidentified_fasta(sample_name, input_fa, output_fa,
 def main():
     global INPUT_BUCKET
     global OUTPUT_BUCKET
-    global KEY_S3_PATH
     global STAR_GENOME
     global BOWTIE2_GENOME
     global ENVIRONMENT
 
     INPUT_BUCKET = os.environ.get('INPUT_BUCKET', INPUT_BUCKET)
     OUTPUT_BUCKET = os.environ.get('OUTPUT_BUCKET', OUTPUT_BUCKET)
-    KEY_S3_PATH = os.environ.get('KEY_S3_PATH', KEY_S3_PATH)
     STAR_GENOME = os.environ.get('STAR_GENOME', STAR_GENOME)
     BOWTIE2_GENOME = os.environ.get('BOWTIE2_GENOME', BOWTIE2_GENOME)
     DB_SAMPLE_ID = os.environ['DB_SAMPLE_ID']
     AWS_BATCH_JOB_ID = os.environ.get('AWS_BATCH_JOB_ID', 'local')
-    SAMPLE_HOST = os.environ.get('SAMPLE_HOST', '')
-    SAMPLE_LOCATION = os.environ.get('SAMPLE_LOCATION', '')
-    SAMPLE_DATE = os.environ.get('SAMPLE_DATE', '')
-    SAMPLE_TISSUE = os.environ.get('SAMPLE_TISSUE', '')
-    SAMPLE_TEMPLATE = os.environ.get('SAMPLE_TEMPLATE', '')
-    SAMPLE_LIBRARY = os.environ.get('SAMPLE_LIBRARY', '')
-    SAMPLE_SEQUENCER = os.environ.get('SAMPLE_SEQUENCER', '')
-    SAMPLE_NOTES = os.environ.get('SAMPLE_NOTES', '')
     ENVIRONMENT = os.environ.get('ENVIRONMENT', ENVIRONMENT)
     sample_s3_input_path = INPUT_BUCKET.rstrip('/')
     sample_s3_output_path = OUTPUT_BUCKET.rstrip('/')
