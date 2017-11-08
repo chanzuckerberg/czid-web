@@ -75,7 +75,6 @@ class ReportsController < ApplicationController
   end
 
   def send_report_csv
-    params[:disable_filters] = 1
     params[:is_csv] = 1
     @report_csv = generate_report_csv(external_report_info(@report, params))
     send_data @report_csv, filename: @report.pipeline_output.sample.name + '_report.csv'
