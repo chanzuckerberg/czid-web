@@ -301,7 +301,6 @@ class BulkUploadImport extends React.Component {
     samples[e.target.id].project_id = this.state.allProjects[e.target.selectedIndex].id
     this.setState({
       samples: samples,
-      project: e.target.value.trim()
     })
     this.clearError();
   }
@@ -364,7 +363,7 @@ class BulkUploadImport extends React.Component {
                     <label htmlFor={i}> {sample.name}</label>
                   </p>
                   <div className="col s4">
-                    <select className="" id={i} onChange={ this.handleProjectChangeForSample } value={this.state.project}>
+                    <select className="" id={i} onChange={ this.handleProjectChangeForSample } value={sample.project_id}>
                       { this.state.allProjects.length ?
                         this.state.allProjects.map((project, j) => {
                           return <option ref= "project" key={j} value={project.id}>{project.name}</option>

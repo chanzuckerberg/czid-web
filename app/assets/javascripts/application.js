@@ -1,7 +1,7 @@
 //= require axios
 //= require react
-//= require components
 //= require react_ujs
+//= require components
 //= require jquery
 //= require jquery_ujs
 //= require react-autocomplete
