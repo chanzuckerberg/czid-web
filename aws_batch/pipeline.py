@@ -785,6 +785,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         result_dir, sample_s3_output_path, False)
 
 def run_star_part(output_dir, genome_dir, fastq_file_1, fastq_file_2):
+    execute_command("mkdir -p %s" % output_dir)
     star_command_params = ['cd', output_dir, ';', STAR,
                            '--outFilterMultimapNmax', '99999',
                            '--outFilterScoreMinOverLread', '0.5',
@@ -817,7 +818,8 @@ def run_star(sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
         logging.getLogger().info("downloaded index")
     # Check if parts.txt file exists, if so use the new version of (partitioned indices). Otherwise, stay put
     if os.path.isfile("%s/STAR_genome/parts.txt" % REF_DIR):
-        num_parts = int(open("%s/STAR_genome/parts.txt" % REF_DIR, 'rb').read())
+        with open("%s/STAR_genome/parts.txt" % REF_DIR, 'rb') as parts_f:
+            num_parts = int(parts_f.read())
         part_idx = 0
         tmp_result_dir = "%s/star-part-%d" % (scratch_dir, part_idx)
         run_star_part(tmp_result_dir, REF_DIR + "/STAR_genome/part-%d" % part_idx, fastq_file_1, fastq_file_2)
