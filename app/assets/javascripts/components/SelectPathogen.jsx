@@ -5,36 +5,39 @@
 class SelectPathogen extends React.Component {
   constructor(props) {
     super(props);
+    // currently we are getting real data from the csv files created
     const samples = [{
-      name: 'FREZtarsABDO05_DNA_S9',
-      link: 'http://localhost:3000/reports/121/genus/csv'
+	name: 'Sample_DP_H20_10212016_Proctor_S15',
+	link: 'http://localhost:3000/reports/132/genus/csv'
     }, {
-      name: 'TEAtarsHEAD05_RNA_S7',
-      link: 'http://localhost:3000/reports/120/genus/csv'
+	name: 'Sample_DP_H20_07152016_Proctor_DNA_Batch_2',
+	link: 'http://localhost:3000/reports/136/genus/csv'
     }, {
-      name: 'TEAtarsABDO05_DNA_S12',
-      link: 'http://localhost:3000/reports/118/genus/csv'
+	name: 'Sample_DP_H20_09082016',
+	link: 'http://localhost:3000/reports/139/genus/csv'
     }, {
-      name: 'TEAtarsABDO20_RNA_S5',
-      link: 'http://localhost:3000/reports/117/genus/csv'
+	name: 'Sample_DP_H20_09082016_Proctor_RNA',
+	link: 'http://localhost:3000/reports/143/genus/csv'
     }, {
-      name: 'TEAtarsHEAD05_DNA_S11',
-      link: 'http://localhost:3000/reports/116/genus/csv'
+	name: 'Sample_DP_H20_02112017_Proctor_RNA',
+	link: 'http://localhost:3000/reports/145/genus/csv'
     }, {
-      name: 'FREZtarsABDO20_RNA_S3',
-      link: 'http://localhost:3000/reports/123/genus/csv'
+	name: 'Sample_cMAL_H20_X',
+	link: 'http://localhost:3000/reports/147/genus/csv'
     }, {
-      name: 'FREZtarsHEAD20_RNA_S6',
-      link: 'http://localhost:3000/reports/124/genus/csv'
+	name: 'mBAL-H20-RNA-B5',
+	link: 'http://localhost:3000/reports/157/genus/csv'
     }, {
-      name: 'FREZtarsHEAD05_RNA_S1',
-      link: 'http://localhost:3000/reports/122/genus/csv'
+	name: 'Sample_cMAL_H20_A',
+	link: 'http://localhost:3000/reports/158/genus/csv'
     }];
+
+    // TODO remove iteration to have separate sample name array
     this.sampleNames = samples.map((s) => s.name);
     this.state = { samples, pathogens: [], selectedReads: [] };
     this.allReads = [];
     this.paginatePathogens = new Pagination();
-    this.pathogensPerPage = 20;
+    this.pathogensPerPage = 15;
     this.maxSelection = 10;
     this.changePage = this.changePage.bind(this);
     this.getPos = this.getPos.bind(this);
@@ -42,33 +45,34 @@ class SelectPathogen extends React.Component {
   }
 
 	componentDidMount() {
+		$('select').material_select();
+		// fetch data from the csv files
     this.getData(this.state.samples, (data) => {
 	this.allReads = data;
 	this.paginatePathogens.initialize(data, this.pathogensPerPage);
 	this.setState({
 		pathogens: this.paginatePathogens.firstPage()
 	});
-	this.props.renderHeatMap(this.state.pathogens, this.sampleNames);
+	ProjectVisualization.renderHeatMap(this.state.pathogens,
+		this.sampleNames, 'nt_zscore');
     });
 	}
 
 	getPos() {
+		// help keep track of the position of the pathogen
 		return this.paginatePathogens.currentPage * this.pathogensPerPage;
 	}
 
 	selectPathogen(pos) {
-		if (!this.allReads[pos]['selected']) {
-			this.allReads[pos]['selected'] = true;
+    // update the state with what the user has selected
+    if (!this.allReads[pos]['selected']) {
+      this.allReads[pos]['selected'] = true;
 			this.allReads[pos]['pos'] = pos;
 			if (this.state.selectedReads.length < this.maxSelection) {
 				this.setState({
 					selectedReads: [...this.state.selectedReads, this.allReads[pos]]
 				});
-			} else {
-				console.log('No more room');
 			}
-		} else {
-			console.log('Ignoring you!');
 		}
 	}
 
@@ -91,7 +95,8 @@ class SelectPathogen extends React.Component {
         result = this.paginatePathogens.next();
       }
       this.setState({ pathogens: result });
-      // this.props.renderHeatMap(this.state.pathogens, this.sampleNames);
+      ProjectVisualization.renderHeatMap(this.state.pathogens,
+		this.sampleNames, 'nt_zscore');
     }
   }
 
@@ -102,15 +107,26 @@ class SelectPathogen extends React.Component {
       let uniquePathogens = [];
       let dataFromCSV = [];
       let fetchCSv = () => {
+	// axios.get(csvFiles[index].link)
+	// .then((res) => {
+	// 	console.log('Response', res);
+	// 	console.log();
+	// 	let rows = res.data.split("\n");
+	// 	let header = rows[0].split(',');
+	// 	console.log('head', header);
+	// })
+	// .catch((e) => {
+	// 	console.log('Error occured', e.response);
+	// });
         d3.csv(csvFiles[index].link, (d) => {
           let foundPos = uniquePathogens.indexOf(d.name);
           let readInfo = {
             nt_zscore: +d['NT.zscore'],
             nt_rpm: +d['NT.rpm'],
             nt_r: +d['NT.r'],
-            nr_zscore: +d['NT.zscore'],
-            nr_rpm: +d['NT.rpm'],
-            nr_r: d['NT.r'],
+            nr_zscore: +d['NR.zscore'],
+            nr_rpm: +d['NR.rpm'],
+            nr_r: d['NR.r'],
             sample: csvFiles[index].name
           };
           if (foundPos > -1) {
@@ -139,6 +155,34 @@ class SelectPathogen extends React.Component {
 	render() {
 		return (
 			<div id="visualization-sidebar">
+				<div className='select-pathogens all-pathogens card'>
+		      <div className=''>
+			<div className='select-focus'>
+				Switch count type
+				<select className='browser-default'
+				onChange={(e) => ProjectVisualization.renderHeatMap(this.state.pathogens, this.sampleNames, e.target.value) }>
+		            <option value='nt_zscore'>
+		             NT zscore
+		            </option>
+		            <option value='nt_rpm'>
+		             NT rpm
+		            </option>
+		            <option value='nt_r'>
+		             NT r
+		            </option>
+		            <option value='nr_zscore'>
+		             NR zscore
+		            </option>
+		            <option value='nr_rpm'>
+		             NR rpm
+		            </option>
+		            <option value='nr_r'>
+		             NR r
+		            </option>
+							</select>
+            </div>
+		      </div>
+		    </div>
 		    <div className='select-pathogens genus card'>
 		      <div className='selected-pathogens'>
 			<div className='title grey-text'>

@@ -26,7 +26,6 @@ class ProjectsController < ApplicationController
 
   # Get /projects/1/visuals
   def visuals
-
   end
 
   # POST /projects

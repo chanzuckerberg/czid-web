@@ -9,8 +9,8 @@ class ProjectVisualization extends React.Component {
   }
 
 	componentDidMount() {
-
 	}
+
   /**
     * @method render
     * @desc overrides render component method
@@ -31,7 +31,7 @@ class ProjectVisualization extends React.Component {
         </SubHeader>
         <div className="row visualization-content">
 	        <div className="col s2" id="visualization-sidebar">
-            <SelectPathogen renderHeatMap = { this.renderHeatMap } />
+            <SelectPathogen />
 	        </div>
 	        <div className="col s10 graphs">
             <div className="card">
@@ -41,24 +41,13 @@ class ProjectVisualization extends React.Component {
               </div>
               <div className="card-content">
                 <div className='row'>
-                  <div className='col s9' id="heat-map"></div>
+                  <div className='col s9' id="heat-map">
+                    <svg id='heat-map-canvas'></svg>
+                  </div>
                    <div className='col s3'>
-                      <div className='select-focus'>
-                        Visualize <select className='browser-default'>
-                          <option>
-                            nt_rpm
-                          </option>
-                          <option>
-                            R count
-                          </option>
-                          <option>
-                            zscore
-                          </option>
-                        </select>
-                      </div>
                       <div className='color-scale-info'>
                         <div className='scale-label'>Color scale range</div>
-                        <div id='color-scale'></div>
+                        <svg id='color-scale'></svg>
                       </div>
                    </div>
                 </div>
@@ -90,15 +79,19 @@ class ProjectVisualization extends React.Component {
     );
   }
 
-  renderHeatMap(pathogens, samples) {
+  static renderHeatMap(pathogens, samples, scoreType) {
 
-    const canvas = { width: 700, height: 800 };
-    const svg = d3.select('#heat-map').append('svg');
+    const canvas = { width: 800, height: 800 };
+    const svg = d3.select('#heat-map-canvas');
     const margin = { top: 50, right: 35, bottom: 200, left: 120 };
     const xMargin = { left: margin.left + 10, right: margin.right + 10 };
     const dataLength = pathogens.length;
     const totalSamples = samples.length;
-    const colors = ['#a021f0', '#ff26f4', '#ff7279', '#ff6201', '#ffec01'];
+    const expectedReads = dataLength * totalSamples;
+    let totalReads = 0;
+
+    const colors = ['rgb(0, 250, 250)', 'rgb(23, 173, 203)',
+    'rgb(46, 100, 158)', 'rgb(24, 53, 103)', 'rgb(0, 0, 0)'];
 
     if (dataLength && totalSamples) {
       const rectHeight =
@@ -108,8 +101,9 @@ class ProjectVisualization extends React.Component {
 
       const minMaxes = [];
       pathogens.map((data) => {
+        totalReads += data.readInfo.length;
         let minMax = d3.extent(data.readInfo, (d) => {
-          return d.nt_rpm;
+          return d[scoreType];
         });
         minMaxes.push(...minMax);
       });
@@ -146,58 +140,91 @@ class ProjectVisualization extends React.Component {
         .tickFormat((d, i) => {
           return pathogens[i].pathogen;
         });
+
+      svg.select('.yAxis').remove(); // we should do a smart update instead
       svg
         .append('g')
+        .attr('class', 'yAxis')
+        .transition()
+        .duration(100)
         .attr('transform', `translate(${[margin.left, 0]})`)
         .call(yAxis)
         .selectAll('text')
         .attr('transform', 'rotate(50)');
 
-      svg.append('g')
+      svg.select('.xAxis').remove();
+      svg
+        .append('g')
+        .attr('class', 'xAxis')
         .attr('transform', `translate(${[25, (canvas.height - margin.bottom) + rectHeight]})`)
         .call(xAxis)
         .selectAll('text')
         .attr('text-anchor', 'start')
         .attr('transform', `rotate(60)`);
 
-      pathogens.map((pathogen, i) => {
-        let { readInfo } = pathogen;
-        let drawRect = svg.append('g').selectAll('rect').data(readInfo, (d, _id) => i);
+      const drawPathogenGroup = svg.selectAll('.grouped-pathogens')
+        .data(pathogens, d => d.pathogen);
 
+      drawPathogenGroup.exit().remove();
 
-        drawRect.exit().remove();
+      const update = drawPathogenGroup
+        .enter()
+        .append('g')
+        .attr('class', 'grouped-pathogens')
+        .attr('transform', (d, i) => `translate(0, ${yScale(i + 1) - 30})`)
+        .merge(drawPathogenGroup);
 
-        let enter = drawRect
-          .enter()
-          .append('rect')
-          .attr('height', rectHeight)
-          .attr('width', rectWidth);
-
-
-        drawRect = enter.merge(drawRect)
-          .attr('fill', (d, i) => colorScale(d.nt_rpm))
-          .attr('stroke', '#fff')
-          .attr('y', () => yScale(i + 1) - 30)
-          .attr('x', (d, index) => {
-            let sampleName = readInfo[index].sample;
-            let pos = samples.indexOf(sampleName);
-            if (pos >= 0) {
-              return xScale(pos + 1);
+      update
+        .selectAll('rect')
+        .data((d, i) => {
+          if (d.readInfo) {
+            let count = totalSamples - d.readInfo.length;
+            if (count) {
+              let foundSamples = d.readInfo.map((r) => r.sample);
+              let unAvailableSamples =
+              samples.filter((s) => foundSamples.indexOf(s) < 0);
+              // we need to draw more rect to fill the blank space
+              unAvailableSamples.forEach((s) => {
+                d.readInfo.push({ sample: s, type: 'no-read' });
+              });
+              return d.readInfo;
             }
-          })
-          .append('title')
-          .text((data, i) => {
-            return `RPM: ${data.nt_rpm} NT zscore: ${data.nt_zscore}`;
-          });
+          }
+          return d.readInfo;
+        })
+        .enter()
+        .append('rect')
+        .attr('height', rectHeight)
+        .attr('width', rectWidth)
+        .attr('fill', (d, i) => {
+          if (d['type'] == 'no-read') {
+            // we encountered a placeholder rectangle
+            return '#cacaca';
+          }
+          return colorScale(d[scoreType]);
+        })
+        .attr('stroke', '#fff')
+        .attr('y', 0)
+        .attr('x', (d) => {
+          let sampleName = d.sample;
+          let pos = samples.indexOf(sampleName);
+          if (pos >= 0) {
+            return xScale(pos + 1);
+          }
+        })
+        .append('title')
+        .text((d, i) => {
+          return `NT rpm: ${d.nt_rpm} NT zscore: ${d.nt_zscore}\nNR rpm: ${d.nr_rpm} NR zscore:  ${d.nr_zscore}`;
         });
     }
   }
 
   static renderColorScale(colorMinMax, colorScale) {
-    const colorScaleView = d3.select('#color-scale').append('svg');
+    const colorScaleView = d3.select('#color-scale');
     const colorScaleMargin = { left: 10, right: 10, bottom: 10, top: 10 };
     const colorScaleCanvas = { width: 300, height: 200 };
     const quantiles = [...new Set([colorMinMax[0], ...colorScale.quantiles()])];
+
     const gridHeight =
       (colorScaleCanvas.height - colorScaleMargin.top - colorScaleMargin.bottom) / quantiles.length;
     const gridWidth = 30;
@@ -206,21 +233,47 @@ class ProjectVisualization extends React.Component {
       .attr('width', colorScaleCanvas.width)
       .attr('height', colorScaleCanvas.height);
 
-    const c = colorScaleView.selectAll('g')
-      .data(quantiles).enter().append('g');
-      c
-      .append('rect')
-      .attr('fill', d => colorScale(d))
-      .attr('height', gridHeight)
-      .attr('width', 30)
-      .attr('stroke', '#fff')
-      .attr('y', (d, i) => i * gridHeight)
-      .attr('x', 0);
-      c
-      .append('text')
-      .text(d => `≥ ${(d) ? d.toFixed(3) : d}`)
-      .attr('x', gridWidth + 5)
-      .attr('y', (d, i) => ((i * gridHeight) + (gridHeight / 1.5)))
-      .attr('fill', 'rgb(160, 160, 160)');
+    colorScaleView.select('.color-quantile').remove();
+
+    const c = colorScaleView.selectAll('.color-quantile')
+      .data(quantiles)
+      .enter()
+        .append('g')
+        .attr('class', 'color-quantile');
+        c
+        .append('rect')
+        .attr('class', 'color-quantile')
+        .attr('fill', d => colorScale(d))
+        .attr('height', gridHeight)
+        .attr('width', 30)
+        .attr('stroke', '#fff')
+        .attr('y', (d, i) => i * gridHeight)
+        .attr('x', 0);
+
+        c
+        .append('text')
+        .text(d => `≥ ${(d) ? d.toFixed(3) : d}`)
+        .attr('x', gridWidth + 5)
+        .attr('y', (d, i) => ((i * gridHeight) + (gridHeight / 1.5)))
+        .attr('fill', 'rgb(160, 160, 160)');
+
+     //  const merge =  c
+     //  .enter()
+     //  .append('g')
+     //  .append('rect')
+
+     // issue updating the color scale
+
+
+     //  .merge(c);
+
+     // const update = drawPathogenGroup
+     //    .enter()
+     //    .append('g')
+     //    .attr('class', 'grouped-pathogens')
+     //    .attr('transform', (d, i) => `translate(0, ${yScale(i + 1) - 30})`)
+     //    .merge(drawPathogenGroup);
   }
+
 }
+

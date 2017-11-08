@@ -1,155 +1,160 @@
 #project-visualization {
+  .visualization-content {
+    background: #eeeff1;
+    margin-top: 4px;
+    #visualization-sidebar {
+      .select-pathogens {
+        background: #fff;
+        .select-focus {
+          padding: 10px;
+        }
+        .search-pathogen {
+          border-bottom: 3px solid #414366;
+          font-weight: bolder;
+          font-size: 17px;
+          .search-row {
+        margin-bottom: 0;
+        input {
+          margin: 0;
+          border: 0;
+          &:focus {
+            border: 0;
+            box-shadow: inherit;
+          }
+        }
+        .add-pathogen-icon {
+          padding: 5px;
+          margin-top: 9px;
+          font-size: 20px;
+          color: #6c6f84;
+        }
+          }
+        }
+        .selected-pathogens {
+        .checked-pathogens {
+          div {
+            display: inline-block;
+            &.pathogen-label {
+              width: 80%;
+            }
+          }
+        }
+        .title {
+          padding: 15px 23px 0;
+          font-size: 16px;
+          small {
+            margin-left: 10px;
+            font-weight: bold
+          }
+        }
+        .pagination-controls {
+          div {
+            display: inline-block;
+            padding: 15px 20px 0px 20px;
+          }
+        }
+        ul li {
+          padding: 6px 20px;
+          [type="checkbox"] + label {
+            line-height: 20px;
+          }
 
-	.visualization-content {
-		background: #eeeff1;
-		margin-top: 4px;
+          [type="checkbox"]:checked + label:after {
+            border-color: #565886;
+            background-color: #565886;
+          }
 
-		#visualization-sidebar {
-			.select-pathogens {
-				background: #fff;
-				.search-pathogen {
-					border-bottom: 3px solid #414366;
-			    font-weight: bolder;
-			    font-size: 17px;
-			    .search-row {
-				margin-bottom: 0;
-				input {
-					margin: 0;
-					border: 0;
-					&:focus {
-						border: 0;
-						box-shadow: inherit;
-					}
-				}
-				.add-pathogen-icon {
-					padding: 5px;
-					margin-top: 9px;
-					font-size: 20px;
-					color: #6c6f84;
-				}
-			    }
-			  }
-			  .selected-pathogens {
-				.checked-pathogens {
-					div {
-						display: inline-block;
-						&.pathogen-label {
-							width: 80%;
-						}
-					}
-				}
-				.title {
-					padding: 15px 23px 0;
-					font-size: 16px;
-					small {
-						margin-left: 10px;
-						font-weight: bold
-					}
-				}
-				.pagination-controls {
-					div {
-						display: inline-block;
-						padding: 15px 20px 0px 20px;
-					}
-				}
-				ul li {
-					padding: 6px 20px;
-					[type="checkbox"] + label {
-						line-height: 20px;
-					}
+          .row {
+            margin-bottom: 0;
+          }
+          div {
+            &.pathogen-label {
+              &.samples {
+                font-size: 13px;
+                div {
+                  text-overflow: ellipsis;
+                  overflow: hidden;
+                }
+              }
+              &.selectable {
+                cursor: pointer;
+              }
+              .selected {
+                color: #cccccc;
+              }
+            }
+            &.remove-icon {
+              padding: 4px;
+              margin-top: -4px;
+            }
+          }
+        }
+        }
+      }
+    }
+    .graphs {
+      .card {
+        .card-action.top {
+          border-bottom: 1px solid rgba(160, 160, 160, 0.2);
+        }
+      }
+      #heat-map {
+        background: rgb(245, 245, 245);
+        svg {
+          path.domain {
+            display: none;
+          }
+          .tick {
+            line {
+               display: none;
+            }
+          }
+        }
+      }
+      .color-scale-info {
+        margin-top: 20px;
+        li{
+          display: inline-block;
+          width: 20px;
+          height: 20px;
+          border: 1px solid;
+          margin: 3px;
 
-					[type="checkbox"]:checked + label:after {
-						border-color: #565886;
-						background-color: #565886;
-					}
+          &.a {
+            background: #9E9E9E;
+          }
 
-					.row {
-						margin-bottom: 0;
-					}
-					div {
-						&.pathogen-label {
-							&.samples {
-								font-size: 13px;
-							}
-							&.selectable {
-								cursor: pointer;
-							}
-							.selected {
-								color: #cccccc;
-							}
-						}
-						&.remove-icon {
-							padding: 4px;
-							margin-top: -4px;
-						}
-					}
-				}
-			  }
-			}
-		}
-		.graphs {
-			.card {
-				.card-action.top {
-					border-bottom: 1px solid rgba(160, 160, 160, 0.2);
-				}
-			}
-			#heat-map {
-				background: rgb(245, 245, 245);
-				svg {
-					path.domain {
-						display: none;
-					}
-					.tick {
-						line {
-							display: none;
-						}
-					}
-				}
-			}
-			.color-scale-info {
-				margin-top: 20px;
-				li{
-					display: inline-block;
-					width: 20px;
-					height: 20px;
-					border: 1px solid;
-					margin: 3px;
+          &.b {
+            background: #757575;
+          }
 
-					&.a {
-						background: #9E9E9E;
-					}
-
-					&.b {
-						background: #757575;
-					}
-
-					&.c {
-						background: #424242;
-					}
-					&.d {
-						background: #212121;
-					}
-					&.e {
-						background: #263238;
-					}
-				}
-				.scale-label {
-					padding-bottom: 10px;
-				}
-			}
-		}
-		.Visualization-actions {
-			ul li {
-				padding: 10px;
-				border-bottom: 1px solid #e8e8e8;
-				i {
-					border: 1px solid transparent;
-					border-radius: 100%;
-					padding: 5px;
-					color: #fff;
-					font-weight: bold;
-				}
-			}
-		}
-	}
+          &.c {
+            background: #424242;
+          }
+          &.d {
+            background: #212121;
+          }
+          &.e {
+            background: #263238;
+          }
+        }
+        .scale-label {
+          padding-bottom: 10px;
+        }
+      }
+    }
+    .Visualization-actions {
+      ul li {
+        padding: 10px;
+        border-bottom: 1px solid #e8e8e8;
+        i {
+          border: 1px solid transparent;
+          border-radius: 100%;
+          padding: 5px;
+          color: #fff;
+          font-weight: bold;
+        }
+      }
+    }
+  }
 }
