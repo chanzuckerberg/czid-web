@@ -50,7 +50,7 @@ class Sample < ApplicationRecord
   def input_files_checks
     # validate that we have the correct number of input files
     if host_genome && host_genome.name == HostGenome::NO_HOST_NAME
-      errors.add(:input_files, "no input files") unless input_files.size >= 1
+      errors.add(:input_files, "no input files") unless input_files.size.between?(1, 2)
     else
       errors.add(:input_files, "file_size != 2 for sample and host subtraction not skipped") unless input_files.size == 2
     end
@@ -81,9 +81,11 @@ class Sample < ApplicationRecord
   def initiate_s3_cp
     return unless status == STATUS_CREATED
     fastq1 = input_files[0].source
-    fastq2 = input_files[1].source
     command = "aws s3 cp #{fastq1} #{sample_input_s3_path}/;"
-    command += "aws s3 cp #{fastq2} #{sample_input_s3_path}/;"
+    if input_files.size == 2
+      fastq2 = input_files[1].source
+      command += "aws s3 cp #{fastq2} #{sample_input_s3_path}/;"
+    end
     if s3_preload_result_path.present? && s3_preload_result_path[0..4] == 's3://'
       command += "aws s3 cp #{s3_preload_result_path} #{sample_output_s3_path} --recursive;"
     end
