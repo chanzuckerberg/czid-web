@@ -185,6 +185,7 @@ class SampleUpload extends React.Component {
         invalid: true,
         submitting: false,
         serverErrors: error.response.data,
+        errorMessage: 'Failed to upload sample'
       })
     });
   }
@@ -222,6 +223,7 @@ class SampleUpload extends React.Component {
       submitting: false,
       invalid: true,
       serverErrors: error.response.data,
+      errorMessage: 'Failed to upload sample'
      });
     });
   }

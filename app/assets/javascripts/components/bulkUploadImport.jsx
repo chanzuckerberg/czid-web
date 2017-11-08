@@ -204,7 +204,7 @@ class BulkUploadImport extends React.Component {
      that.setState({
       submitting: false,
       invalid: true,
-      errorMessage: error.response.data.status
+      errorMessage: error.response.data.status || 'Failed to upload bulk'
      })
     });
   }
@@ -235,7 +235,7 @@ class BulkUploadImport extends React.Component {
      that.setState({
       submitting: false,
       invalid: true,
-      errorMessage: error.response.data.status
+      errorMessage: error.response.data.status || 'Failed to submit bulk'
      })
     });
   }
