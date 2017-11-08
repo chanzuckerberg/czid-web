@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171107201501) do
+ActiveRecord::Schema.define(version: 20171031193737) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -64,23 +64,6 @@ ActiveRecord::Schema.define(version: 20171107201501) do
     t.datetime "updated_at", null: false
     t.index ["pipeline_output_id"], name: "index_job_stats_on_pipeline_output_id"
     t.index ["task"], name: "index_job_stats_on_task"
-  end
-
-  create_table "machine_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.bigint "machine_id"
-    t.string "aws_batch_job_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["machine_id"], name: "index_machine_runs_on_machine_id"
-  end
-
-  create_table "machines", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "ip"
-    t.string "instance_id"
-    t.string "service"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["ip"], name: "index_machines_on_ip"
   end
 
   create_table "pipeline_outputs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -307,7 +290,6 @@ ActiveRecord::Schema.define(version: 20171107201501) do
 
   add_foreign_key "input_files", "samples"
   add_foreign_key "job_stats", "pipeline_outputs"
-  add_foreign_key "machine_runs", "machines"
   add_foreign_key "pipeline_outputs", "samples"
   add_foreign_key "pipeline_runs", "samples"
   add_foreign_key "reports", "backgrounds"
