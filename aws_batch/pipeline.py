@@ -126,7 +126,7 @@ def get_total_initial_reads(fastq_file_1, initial_file_type_for_log, stats_file)
     return count_reads(fastq_file_1, initial_file_type_for_log)
 
 def clean_direct_gsnapl_input(fastq_files, file_type, sample_s3_output_path):
-    # unzip files if necessary 
+    # unzip files if necessary
     if ".gz" in file_type:
         subprocess.check_output(" ".join(["gunzip"] + fastq_files), shell=True)
         cleaned_files = [os.path.splitext(f) for f in fastq_files]
@@ -713,7 +713,7 @@ def run_sample(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
 
     # Download fastqs
     command = "aws s3 ls %s/ | grep '\.%s$'" % (sample_s3_input_path, file_type)
-    output = execute_command(command).rstrip().split("\n")
+    output = execute_command_with_output(command).rstrip().split("\n")
     for line in output:
         m = re.match(".*?([^ ]*." + re.escape(file_type) + ")", line)
         if m:
@@ -721,7 +721,7 @@ def run_sample(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
         else:
             print "%s doesn't match %s" % (line, file_type)
 
-    fastq_files = execute_command("ls %s/*.%s" % (fastq_dir, file_type)).rstrip().split("\n")
+    fastq_files = execute_command_with_output("ls %s/*.%s" % (fastq_dir, file_type)).rstrip().split("\n")
 
     # Identify input files and characteristics
     if filter_host_flag:
@@ -894,6 +894,23 @@ def run_sample(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
         result_dir + '/' + UNIDENTIFIED_FASTA_OUT,
         result_dir, sample_s3_output_path, False)
 
+def run_star_part(output_dir, genome_dir, fastq_file_1, fastq_file_2):
+    execute_command("mkdir -p %s" % output_dir)
+    star_command_params = ['cd', output_dir, ';', STAR,
+                           '--outFilterMultimapNmax', '99999',
+                           '--outFilterScoreMinOverLread', '0.5',
+                           '--outFilterMatchNminOverLread', '0.5',
+                           '--outReadsUnmapped', 'Fastx',
+                           '--outFilterMismatchNmax', '999',
+                           '--outSAMmode', 'None',
+                           '--clip3pNbases', '0',
+                           '--runThreadN', str(multiprocessing.cpu_count()),
+                           '--genomeDir', genome_dir,
+                           '--readFilesIn', fastq_file_1, fastq_file_2]
+    if fastq_file_1[-3:] == '.gz':
+        star_command_params += ['--readFilesCommand', 'zcat']
+    execute_command_realtime_stdout(" ".join(star_command_params), os.path.join(output_dir, "Log.progress.out"))
+
 def run_host_filtering(sample_name, fastq_file_1, fastq_file_2, file_type, initial_file_type_for_log, star_genome_s3_path, bowtie2_genome_s3_path,
                        DEFAULT_LOGPARAMS, result_dir, scratch_dir, sample_s3_output_path, lazy_run):
     # run STAR
@@ -985,29 +1002,32 @@ def run_star(sample_name, fastq_file_1, fastq_file_2, file_type, star_genome_s3_
         execute_command("aws s3 cp %s %s/" % (star_genome_s3_path, REF_DIR))
         execute_command("cd %s; tar xvfz %s" % (REF_DIR, genome_file))
         logging.getLogger().info("downloaded index")
-    star_command_params = ['cd', scratch_dir, ';', STAR,
-                           '--outFilterMultimapNmax', '99999',
-                           '--outFilterScoreMinOverLread', '0.5',
-                           '--outFilterMatchNminOverLread', '0.5',
-                           '--outReadsUnmapped', 'Fastx',
-                           '--outFilterMismatchNmax', '999',
-                           '--outSAMmode', 'None',
-                           '--clip3pNbases', '0',
-                           '--runThreadN', str(multiprocessing.cpu_count()),
-                           '--genomeDir', REF_DIR + '/STAR_genome',
-                           '--readFilesIn', fastq_file_1, fastq_file_2]
-    if ".gz" in file_type:
-        star_command_params.extend(['--readFilesCommand', 'zcat'])
-    execute_command_realtime_stdout(" ".join(star_command_params), os.path.join(scratch_dir, "Log.progress.out"))
-    logging.getLogger().info("finished job")
-    # extract out unmapped files
-    execute_command("cp %s/%s %s/%s;" % (scratch_dir, 'Unmapped.out.mate1', result_dir, STAR_OUT1))
-    execute_command("cp %s/%s %s/%s;" % (scratch_dir, 'Unmapped.out.mate2', result_dir, STAR_OUT2))
+    # Check if parts.txt file exists, if so use the new version of (partitioned indices). Otherwise, stay put
+    if os.path.isfile("%s/STAR_genome/parts.txt" % REF_DIR):
+        with open("%s/STAR_genome/parts.txt" % REF_DIR, 'rb') as parts_f:
+            num_parts = int(parts_f.read())
+        part_idx = 0
+        tmp_result_dir = "%s/star-part-%d" % (scratch_dir, part_idx)
+        run_star_part(tmp_result_dir, REF_DIR + "/STAR_genome/part-%d" % part_idx, fastq_file_1, fastq_file_2)
+        for i in range(1, num_parts):
+            fastq_1 = "%s/Unmapped.out.mate1" % tmp_result_dir
+            fastq_2 = "%s/Unmapped.out.mate2" % tmp_result_dir
+            tmp_result_dir = "%s/star-part-%d" % (scratch_dir, i)
+            run_star_part(tmp_result_dir, REF_DIR + "/STAR_genome/part-%d" % i, fastq_1, fastq_2)
+        # extract out unmapped files
+        execute_command("cp %s/%s %s/%s;" % (tmp_result_dir, 'Unmapped.out.mate1', result_dir, STAR_OUT1))
+        execute_command("cp %s/%s %s/%s;" % (tmp_result_dir, 'Unmapped.out.mate2', result_dir, STAR_OUT2))
+    else:
+        run_star_part(scratch_dir, REF_DIR + '/STAR_genome', fastq_file_1, fastq_file_2)
+        # extract out unmapped files
+        execute_command("cp %s/%s %s/%s;" % (scratch_dir, 'Unmapped.out.mate1', result_dir, STAR_OUT1))
+        execute_command("cp %s/%s %s/%s;" % (scratch_dir, 'Unmapped.out.mate2', result_dir, STAR_OUT2))
     # copy back to aws
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, STAR_OUT1, sample_s3_output_path))
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, STAR_OUT2, sample_s3_output_path))
     # cleanup
     execute_command("cd %s; rm -rf *" % scratch_dir)
+    logging.getLogger().info("finished job")
 
 def run_priceseqfilter(sample_name, input_fq_1, input_fq_2, file_type,
                        result_dir, sample_s3_output_path, lazy_run):
