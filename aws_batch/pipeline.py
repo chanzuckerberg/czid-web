@@ -601,8 +601,10 @@ def get_server_ips(service_name, environment):
     return server_ips
 
 def wait_for_server_ip(service_name, key_path, remote_username, environment, max_concurrent):
+    instance_ips = get_server_ips(service_name, environment)
+    i = 1
     while True:
-        instance_ips = get_server_ips(service_name, environment)
+        if i % 10 == 0: instance_ips = get_server_ips(service_name, environment)
         ip_nproc_dict = {}
         for ip in instance_ips:
             command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "ps aux|grep gsnapl|grep -v bash" || echo "error"' % (key_path, remote_username, ip)
@@ -618,10 +620,11 @@ def wait_for_server_ip(service_name, key_path, remote_username, environment, max
             print "%s server %s has capacity. Kicking off " % (service_name, min_nproc_ip)
             return min_nproc_ip
         else:
-            wait_seconds = random.randint(300, 600)
+            wait_seconds = random.randint(30, 60)
             print "%s servers busy. Wait for %d seconds" % \
                   (service_name, wait_seconds)
             time.sleep(wait_seconds)
+            i += 1
 
 class TimeFilter(logging.Filter):
     def filter(self, record):
