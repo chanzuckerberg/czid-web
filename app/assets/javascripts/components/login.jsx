@@ -6,6 +6,7 @@ class Login extends React.Component {
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
     this.clearError = this.clearError.bind(this);
     this.gotoPage = this.gotoPage.bind(this);
+    this.sendMail = this.sendMail.bind(this);
     this.state = {
       isChecked: false,
       success: false,
@@ -92,6 +93,11 @@ class Login extends React.Component {
     this.state.isChecked = !this.state.isChecked;  
   }
 
+  sendMail() {
+    var link = "mailto:regger@chanzuckerberg.com?Subject=Request%20IDseq%20Access"
+    window.location.href = link;
+  }
+
   renderLogin() {
     return (
         <div className="login-form">
@@ -100,6 +106,7 @@ class Login extends React.Component {
               <div className="row title">
                 <p className="col s6 signup">Login</p>
               </div>
+              <div className="mail"><p>To request access to IDseq, please email us<span onClick={ this.sendMail }> here</span></p></div>
               { this.state.success ? <div className="success-info" >
                 <i className="fa fa-success"></i>
                  <span>{this.state.successMessage}</span>

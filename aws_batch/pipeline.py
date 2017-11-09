@@ -14,6 +14,7 @@ import datetime
 import gzip
 import logging
 import math
+import threading
 
 ENVIRONMENT = 'alpha'
 INPUT_BUCKET = 's3://czbiohub-infectious-disease/UGANDA' # default to be overwritten by environment variable
@@ -35,7 +36,7 @@ BOWTIE2="bowtie2"
 
 LZW_FRACTION_CUTOFF = 0.45
 
-GSNAPL_MAX_CONCURRENT = 5
+GSNAPL_MAX_CONCURRENT = 20
 RAPSEARCH2_MAX_CONCURRENT = 5
 
 STAR_GENOME = 's3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz'
@@ -149,8 +150,8 @@ def lzw_fraction(sequence):
     dictionary = {}
     # Initialize dictionary with single char
     for c in sequence:
-       dict_size += 1
-       dictionary[c] = dict_size
+        dict_size += 1
+        dictionary[c] = dict_size
 
     word = ""
     results = []
@@ -191,7 +192,7 @@ def generate_taxid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fas
     output_fasta_f = open(output_fasta_file, 'wb')
     sequence_name = input_fasta_f.readline()
     sequence_data = input_fasta_f.readline()
-    while len(sequence_name) > 0 and len(sequence_data) > 0:
+    while sequence_name and sequence_data:
         read_id = sequence_name.rstrip().lstrip('>')
         accession = read_to_accession_id.get(read_id, '')
         new_read_name = annotation_prefix + ':' + accession + ':' + read_id
@@ -238,14 +239,14 @@ def generate_unmapped_pairs_from_sam(sam_file, output_prefix):
     header = True
     with open(sam_file, 'rb') as samf:
         line = samf.readline()
-        while(line[0] == '@'):
+        while line[0] == '@':
             line = samf.readline() # skip headers
         read1 = line
         read2 = samf.readline()
-        while (len(read1) > 0 and len(read2) >0):
+        while read1 and read2:
             parts1 = read1.split("\t")
             parts2 = read2.split("\t")
-            if (parts1[1] == "77" and parts2[1] == "141"): # both parts unmapped
+            if parts1[1] == "77" and parts2[1] == "141": # both parts unmapped
                 output_read_1.write(">%s\n%s\n" %(parts1[0], parts1[9]))
                 output_read_2.write(">%s\n%s\n" %(parts2[0], parts2[9]))
                 output_merged_read.write(">%s/1\n%s\n" %(parts1[0], parts1[9]))
@@ -376,7 +377,7 @@ def generate_json_from_taxid_counts(sample, taxidCountsInputPath,
         count = species_to_count[taxid]
         avg_percent_identity = species_to_percent_identity[taxid] / count
         avg_alignment_length = species_to_alignment_length[taxid] / count
-        avg_e_value = species_to_e_value[taxid] / count       
+        avg_e_value = species_to_e_value[taxid] / count
         taxon_counts_attributes.append({"tax_id": taxid,
                                         "tax_level": TAX_LEVEL_SPECIES,
                                         "count": count,
@@ -471,7 +472,7 @@ def filter_taxids_from_fasta(input_fa, output_fa, annotation_prefix, accession2t
     output_f = open(output_fa, 'wb')
     sequence_name = input_f.readline()
     sequence_data = input_f.readline()
-    while len(sequence_name) > 0 and len(sequence_data) > 0:
+    while sequence_name and sequence_data:
         read_id = sequence_name.rstrip().lstrip('>') # example read_id: "NR::NT:CP010376.2:NB501961:14:HM7TLBGX2:1:23109:12720:8743/2"
         split_on = annotation_prefix + ":"
         if not read_id.startswith(annotation_prefix):
@@ -494,14 +495,6 @@ def return_merged_dict(dict1, dict2):
 
 ### job functions
 
-def execute_command(command):
-    print command
-    sys.stdout.flush()
-    output = subprocess.check_output(command, shell=True)
-    print output
-    sys.stdout.flush()
-    return output
-
 def environment_for_aligners(environment):
     if environment == "development":
         return "alpha"
@@ -510,18 +503,83 @@ def environment_for_aligners(environment):
 def get_key_path(environment):
     return "s3://czbiohub-infectious-disease/idseq-%s.pem" % environment_for_aligners(environment)
 
-def execute_command_realtime_stdout(command, progress_file=''):
-    print command
-    sys.stdout.flush()
-    tail = subprocess.Popen("touch %s ; tail -f %s" % (progress_file, progress_file), shell=True)
-    try:
-        subprocess.check_call(command, shell=True)
-    finally:
-        tail.kill()
+class Updater(object):
+
+    def __init__(self, update_period, update_function):
+        self.update_period = update_period
+        self.update_function = update_function
+        self.timer_thread = None
+        self.t_start = time.time()
+
+    def relaunch(self, initial_launch=False):
+        if self.timer_thread and not initial_launch:
+            t_elapsed = time.time() - self.t_start
+            self.update_function(t_elapsed)
+        self.timer_thread = threading.Timer(self.update_period, self.relaunch)
+        self.timer_thread.start()
+
+    def __enter__(self):
+        self.relaunch(initial_launch=True)
+        return self
+
+    def __exit__(self, *args):
+        self.timer_thread.cancel()
+
+
+class CommandTracker(Updater):
+
+    lock = threading.RLock()
+    count = 0
+
+    def __init__(self, update_period=15):
+        super(CommandTracker, self).__init__(update_period, self.print_update)
+        with CommandTracker.lock:
+            self.id = CommandTracker.count
+            CommandTracker.count += 1
+
+    def print_update(self, t_elapsed):
+        print "Command %d still running after %3.1f seconds." % (self.id, t_elapsed)
+        sys.stdout.flush()
+
+
+class ProgressFile(object):
+
+    def __init__(self, progress_file):
+        self.progress_file = progress_file
+        self.tail_subproc = None
+
+    def __enter__(self):
+        # TODO:  Do something else here. Tail gets confused if the file pre-exists.  Also need to rate-limit.
+        if self.progress_file:
+            self.tail_subproc = subprocess.Popen("touch {pf} ; tail -f {pf}".format(pf=self.progress_file), shell=True)
+        return self
+
+    def __exit__(self, *args):
+        if self.tail_subproc:
+            self.tail_subproc.kill()
+
+
+def execute_command_with_output(command, progress_file=None):
+    with CommandTracker() as ct:
+        print "Command {}: {}".format(ct.id, command)
+        with ProgressFile(progress_file):
+            return subprocess.check_output(command, shell=True)
+
+
+def execute_command_realtime_stdout(command, progress_file=None):
+    with CommandTracker() as ct:
+        print "Command {}: {}".format(ct.id, command)
+        with ProgressFile(progress_file):
+            subprocess.check_call(command, shell=True)
+
+
+def execute_command(command, progress_file=None):
+    execute_command_realtime_stdout(command, progress_file)
+
 
 def wait_for_server(service_name, command, max_concurrent):
     while True:
-        output = execute_command(command).rstrip().split("\n")
+        output = execute_command_with_output(command).rstrip().split("\n")
         if len(output) <= max_concurrent:
             print "%s server has capacity. Kicking off " % service_name
             return
@@ -534,7 +592,7 @@ def wait_for_server(service_name, command, max_concurrent):
 def get_server_ips(service_name, environment):
     tag = "service"
     value = "%s-%s" % (service_name, environment_for_aligners(environment))
-    describe_json = json.loads(execute_command("aws ec2 describe-instances --filters 'Name=tag:%s,Values=%s' 'Name=instance-state-name,Values=running'" % (tag, value)))
+    describe_json = json.loads(execute_command_with_output("aws ec2 describe-instances --filters 'Name=tag:%s,Values=%s' 'Name=instance-state-name,Values=running'" % (tag, value)))
     server_ips = []
     for reservation in describe_json["Reservations"]:
         for instance in reservation["Instances"]:
@@ -547,7 +605,7 @@ def wait_for_server_ip(service_name, key_path, remote_username, environment, max
         ip_nproc_dict = {}
         for ip in instance_ips:
             command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "ps aux|grep gsnapl|grep -v bash" || echo "error"' % (key_path, remote_username, ip)
-            output = execute_command(command).rstrip().split("\n")
+            output = execute_command_with_output(command).rstrip().split("\n")
             if output != ["error"]: ip_nproc_dict[ip] = len(output)
         if not ip_nproc_dict:
             have_capacity = False
@@ -567,18 +625,25 @@ def wait_for_server_ip(service_name, key_path, remote_username, environment, max
 class TimeFilter(logging.Filter):
     def filter(self, record):
         try:
-          last = self.last
+            last = self.last
         except AttributeError:
-          last = record.relativeCreated
+            last = record.relativeCreated
         delta = datetime.datetime.fromtimestamp(record.relativeCreated/1000.0) - datetime.datetime.fromtimestamp(last/1000.0)
         record.time_since_last = '{0:.2f}'.format(delta.seconds + delta.microseconds/1000000.0)
         self.last = record.relativeCreated
         return True
 
+def percent_str(percent):
+    try:
+        return "%3.1f" % percent
+    except:
+        return str(percent)
+
 def run_and_log(logparams, func_name, *args):
     logger = logging.getLogger()
     logger.info("========== %s ==========" % logparams.get("title"))
     # copy log file -- start
+    logger.handlers[0].flush()
     execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
     # produce the output
     func_return = func_name(*args)
@@ -595,7 +660,7 @@ def run_and_log(logparams, func_name, *args):
         records_after = count_reads(logparams["after_file_name"], logparams["after_file_type"])
         if logparams["count_reads"]:
             percent_removed = (100.0 * (records_before - records_after)) / records_before
-            logger.info("%s %% of reads dropped out, %s reads remaining" % (str(percent_removed), str(records_after)))
+            logger.info("%s %% of reads dropped out, %s reads remaining" % (percent_str(percent_removed), str(records_after)))
             STATS.append({'task': func_name.__name__, 'reads_before': records_before, 'reads_after': records_after})
         # function-specific logs
         if func_name.__name__ == "run_cdhitdup":
@@ -605,6 +670,7 @@ def run_and_log(logparams, func_name, *args):
             pass_percentage = (100.0 * records_after) / records_before
             logger.info("percentage of reads passing QC filter: %s %%" % str(pass_percentage))
     # copy log file -- end
+    logger.handlers[0].flush()
     execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
     # write stats
     stats_path = logparams["stats_file"]
@@ -625,7 +691,7 @@ def run_sample(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
     result_dir = sample_dir + '/results'
     scratch_dir = sample_dir + '/scratch'
     execute_command("mkdir -p %s %s %s %s" % (sample_dir, fastq_dir, result_dir, scratch_dir))
-    execute_command("mkdir -p %s " % REF_DIR);
+    execute_command("mkdir -p %s " % REF_DIR)
 
     # configure logger
     log_file = "%s/%s.%s.txt" % (result_dir, LOGS_OUT_BASENAME, aws_batch_job_id)
@@ -634,6 +700,12 @@ def run_sample(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
     handler = logging.FileHandler(log_file)
     formatter = logging.Formatter("%(asctime)s (%(time_since_last)ss elapsed): %(message)s")
     handler.addFilter(TimeFilter())
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    # now also echo to stdout so they get to cloudwatch
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setLevel(logging.INFO)
+    formatter = logging.Formatter('(%(time_since_last)ss elapsed): %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     DEFAULT_LOGPARAMS = {"sample_s3_output_path": sample_s3_output_path,
@@ -662,7 +734,7 @@ def run_sample(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
     if lazy_run:
        # Download existing data and see what has been done
         command = "aws s3 cp %s %s --recursive" % (sample_s3_output_path, result_dir)
-        print execute_command(command)
+        print execute_command_with_output(command)
 
     # Record total number of input reads
     initial_file_type_for_log = "fastq_paired" if "fastq" in file_type else "fasta_paired"
@@ -1029,11 +1101,12 @@ def run_bowtie2(sample_name, input_fa_1, input_fa_2, bowtie2_genome_s3_path,
         execute_command("aws s3 cp %s %s/" % (bowtie2_genome_s3_path, REF_DIR))
         execute_command("cd %s; tar xvfz %s" % (REF_DIR, genome_file))
         logging.getLogger().info("downloaded index")
-    local_genome_dir_ls =  execute_command("ls %s/bowtie2_genome/*.bt2*" % REF_DIR)
+    local_genome_dir_ls =  execute_command_with_output("ls %s/bowtie2_genome/*.bt2*" % REF_DIR)
     genome_basename = local_genome_dir_ls.split("\n")[0][:-6]
     if genome_basename[-1] == '.':
         genome_basename = genome_basename[:-1]
     bowtie2_params = [BOWTIE2,
+                     '-q',
                      '-p', str(multiprocessing.cpu_count()),
                      '-x', genome_basename,
                      '--very-sensitive-local',
@@ -1202,7 +1275,7 @@ def run_rapsearch2_remotely(sample, input_fasta, rapsearch_ssh_key_s3_path,
     instance_ip = wait_for_server_ip('rapsearch', key_path, remote_username, environment, RAPSEARCH2_MAX_CONCURRENT)
     logging.getLogger().info("starting alignment on machine " + instance_ip)
     remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, instance_ip, commands)
-    execute_command(remote_command)
+    execute_command_realtime_stdout(remote_command)
     logging.getLogger().info("finished alignment")
     # move output back to local
     time.sleep(10) # wait until the data is synced
@@ -1248,7 +1321,7 @@ def run_combine_json_outputs(sample_name, input_json_1, input_json_2, output_jso
     # move it the output back to S3
     execute_command("aws s3 cp %s %s/" % (output_json, sample_s3_output_path))
 
-def run_generate_unidentified_fasta(sample_name, input_fa, output_fa, 
+def run_generate_unidentified_fasta(sample_name, input_fa, output_fa,
     result_dir, sample_s3_output_path, lazy_run):
     if lazy_run:
         if os.path.isfile(output_fa):
@@ -1262,7 +1335,7 @@ def main():
     # Unbuffer stdout and redirect stderr into stdout.  This helps observe logged events in realtime.
     sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
     os.dup2(sys.stdout.fileno(), sys.stderr.fileno())
-  
+
     # collect environment variables
     global INPUT_BUCKET
     global FILE_TYPE
