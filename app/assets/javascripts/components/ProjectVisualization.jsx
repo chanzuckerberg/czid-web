@@ -99,7 +99,7 @@ class ProjectVisualization extends React.Component {
       const rectWidth =
         (canvas.width - xMargin.left - xMargin.right) / totalSamples;
 
-      const minMaxes = [];
+      let minMaxes = [];
       pathogens.map((data) => {
         totalReads += data.readInfo.length;
         let minMax = d3.extent(data.readInfo, (d) => {
@@ -107,6 +107,7 @@ class ProjectVisualization extends React.Component {
         });
         minMaxes.push(...minMax);
       });
+      minMaxes = [...new Set(minMaxes)];
       const colorMinMax = d3.extent(minMaxes);
 
       const colorScale = d3
@@ -167,15 +168,15 @@ class ProjectVisualization extends React.Component {
 
       drawPathogenGroup.exit().remove();
 
-      const update = drawPathogenGroup
+      const pathogenUpdate = drawPathogenGroup
         .enter()
         .append('g')
         .attr('class', 'grouped-pathogens')
         .attr('transform', (d, i) => `translate(0, ${yScale(i + 1) - 30})`)
         .merge(drawPathogenGroup);
 
-      update
-        .selectAll('rect')
+      const drawRect = pathogenUpdate
+        .selectAll('.color-rect')
         .data((d, i) => {
           if (d.readInfo) {
             let count = totalSamples - d.readInfo.length;
@@ -191,31 +192,47 @@ class ProjectVisualization extends React.Component {
             }
           }
           return d.readInfo;
-        })
-        .enter()
-        .append('rect')
-        .attr('height', rectHeight)
-        .attr('width', rectWidth)
-        .attr('fill', (d, i) => {
-          if (d['type'] == 'no-read') {
-            // we encountered a placeholder rectangle
-            return '#cacaca';
-          }
-          return colorScale(d[scoreType]);
-        })
-        .attr('stroke', '#fff')
-        .attr('y', 0)
-        .attr('x', (d) => {
-          let sampleName = d.sample;
-          let pos = samples.indexOf(sampleName);
-          if (pos >= 0) {
-            return xScale(pos + 1);
-          }
-        })
-        .append('title')
-        .text((d, i) => {
-          return `NT rpm: ${d.nt_rpm} NT zscore: ${d.nt_zscore}\nNR rpm: ${d.nr_rpm} NR zscore:  ${d.nr_zscore}`;
-        });
+        }, (k) => k[scoreType]);
+      drawRect.exit().remove();
+      const rectUpdate = 
+        drawRect
+          .enter()
+          .append('rect')
+          .attr('fill', (d, i) => {
+            if (d['type'] == 'no-read') {
+              // we encountered a placeholder rectangle
+              return '#cacaca';
+            }
+            return colorScale(d[scoreType]);
+          })
+          .attr('class', 'color-rect')
+          .attr('height', rectHeight)
+          .attr('width', rectWidth)
+          .attr('stroke', '#fff')
+          .attr('y', 0)
+          .attr('x', (d) => {
+            let sampleName = d.sample;
+            let pos = samples.indexOf(sampleName);
+            if (pos >= 0) {
+              return xScale(pos + 1);
+            }
+          })
+          .append('title')
+          .text((d, i) => {
+            if (d['type'] == 'no-read') {
+              return '';
+            }
+            return `NT rpm: ${d.nt_rpm} NT zscore: ${d.nt_zscore}\nNR rpm: ${d.nr_rpm} NR zscore:  ${d.nr_zscore}`;
+          });
+
+        rectUpdate.merge(drawRect)
+          .attr('fill', (d, i) => {
+            if (d['type'] == 'no-read') {
+              // we encountered a placeholder rectangle
+              return '#cacaca';
+            }
+            return colorScale(d[scoreType]);
+          });
     }
   }
 
@@ -249,7 +266,6 @@ class ProjectVisualization extends React.Component {
         .attr('stroke', '#fff')
         .attr('y', (d, i) => i * gridHeight)
         .attr('x', 0);
-
         c
         .append('text')
         .text(d => `≥ ${(d) ? d.toFixed(3) : d}`)

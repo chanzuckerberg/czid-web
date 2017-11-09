@@ -95,8 +95,7 @@ class SelectPathogen extends React.Component {
         result = this.paginatePathogens.next();
       }
       this.setState({ pathogens: result });
-      ProjectVisualization.renderHeatMap(this.state.pathogens,
-		this.sampleNames, 'nt_zscore');
+      ProjectVisualization.renderHeatMap(result, this.sampleNames, 'nt_zscore');
     }
   }
 
