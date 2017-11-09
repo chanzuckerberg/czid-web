@@ -14,6 +14,7 @@ import datetime
 import gzip
 import logging
 import math
+from common import *
 
 KEY_S3_PATH = 's3://czbiohub-infectious-disease/idseq-alpha.pem'
 ROOT_DIR = '/mnt'
@@ -143,34 +144,6 @@ def combine_json(input_json_list, output_json):
         json.dump(output, outf)
 
 # job functions
-def execute_command(command):
-    print command
-    output = subprocess.check_output(command, shell=True)
-    return output
-
-class TimeFilter(logging.Filter):
-    def filter(self, record):
-        try:
-          last = self.last
-        except AttributeError:
-          last = record.relativeCreated
-        delta = datetime.datetime.fromtimestamp(record.relativeCreated/1000.0) - datetime.datetime.fromtimestamp(last/1000.0)
-        record.time_since_last = '{0:.2f}'.format(delta.seconds + delta.microseconds/1000000.0)
-        self.last = record.relativeCreated
-        return True
-
-def run_and_log(logparams, func_name, *args):
-    logger = logging.getLogger()
-    logger.info("========== %s ==========" % logparams.get("title"))
-    # produce the output
-    func_return = func_name(*args)
-    if func_return == 1:
-        logger.info("output exists, lazy run")
-    else:
-        logger.info("uploaded output")
-    # copy log file
-    execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
-
 def run_generate_taxid_fasta_from_accid(input_fasta, accession2taxid_s3_path, lineage_s3_path,
     output_fasta, result_dir, sample_s3_output_path, lazy_run):
     if lazy_run:
