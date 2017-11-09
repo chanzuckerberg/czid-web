@@ -713,7 +713,7 @@ def run_sample(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
 
     # Download fastqs
     command = "aws s3 ls %s/ | grep '\.%s$'" % (sample_s3_input_path, file_type)
-    output = execute_command(command).rstrip().split("\n")
+    output = execute_command_with_output(command).rstrip().split("\n")
     for line in output:
         m = re.match(".*?([^ ]*." + re.escape(file_type) + ")", line)
         if m:
@@ -721,7 +721,7 @@ def run_sample(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
         else:
             print "%s doesn't match %s" % (line, file_type)
 
-    fastq_files = execute_command("ls %s/*.%s" % (fastq_dir, file_type)).rstrip().split("\n")
+    fastq_files = execute_command_with_output("ls %s/*.%s" % (fastq_dir, file_type)).rstrip().split("\n")
 
     # Identify input files and characteristics
     if filter_host_flag:
