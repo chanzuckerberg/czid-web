@@ -130,7 +130,6 @@ class SampleUpload extends React.Component {
       });
     })
     .catch((error) => {
-      console.log(error.response, 'error');
       that.setState({
         invalid: true,
         errorMessage: 'Project exists already or is invalid',
@@ -180,10 +179,12 @@ class SampleUpload extends React.Component {
         that.gotoPage(`/samples/${response.data.id}`);
       }, 2000)
     })
-    .catch(function (error) {
+    .catch((error) => {
       that.setState({
         invalid: true,
+        submitting: false,
         serverErrors: error.response.data,
+        errorMessage: 'Something went wrong'
       })
     });
   }
@@ -216,11 +217,12 @@ class SampleUpload extends React.Component {
         that.gotoPage(`/samples/${that.state.id}`);
       }, 2000);
     })
-    .catch(function (error) {
+    .catch((error) => {
      that.setState({
       submitting: false,
       invalid: true,
       serverErrors: error.response.data,
+      errorMessage: 'Failed to upload sample'
      });
     });
   }
@@ -317,9 +319,7 @@ class SampleUpload extends React.Component {
       })
       return true;
     }
-    else {
-      return false;
-    }
+    return false;
   }
 
   handleProjectChange(e) {
@@ -456,7 +456,8 @@ class SampleUpload extends React.Component {
             </div>
         </div>
         <input className="hidden" type="submit"/>
-        <div onClick={ this.handleUpdate } className="center login-wrapper">{ !this.state.submitting ? 'Submit' : <i className='fa fa-spinner fa-spin fa-lg'></i>}</div>
+        { this.state.submitting ? <div className="center login-wrapper disabled"> <i className='fa fa-spinner fa-spin fa-lg'></i> </div> : 
+          <div onClick={ this.handleUpdate } className="center login-wrapper">Submit</div> }
       </form>
     </div>
     )
@@ -544,7 +545,8 @@ class SampleUpload extends React.Component {
             </div>
         </div>
         <input className="hidden" type="submit"/>
-        <div onClick={ this.handleUpload } className="center login-wrapper">{ !this.state.submitting ? 'Submit' : <i className='fa fa-spinner fa-spin fa-lg'></i>}</div>
+        { this.state.submitting ? <div className="center login-wrapper disabled"> <i className='fa fa-spinner fa-spin fa-lg'></i> </div> : 
+          <div onClick={ this.handleUpload } className="center login-wrapper">Submit</div> }
       </form>
     </div>
     )
