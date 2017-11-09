@@ -80,11 +80,10 @@ class Sample < ApplicationRecord
 
   def initiate_s3_cp
     return unless status == STATUS_CREATED
-    fastq1 = input_files[0].source
-    command = "aws s3 cp #{fastq1} #{sample_input_s3_path}/;"
-    if input_files.size == 2
-      fastq2 = input_files[1].source
-      command += "aws s3 cp #{fastq2} #{sample_input_s3_path}/;"
+    command = ""
+    input_files.each do |input_file|
+      fastq = input_file.source
+      command += "aws s3 cp #{fastq} #{sample_input_s3_path}/;"
     end
     if s3_preload_result_path.present? && s3_preload_result_path[0..4] == 's3://'
       command += "aws s3 cp #{s3_preload_result_path} #{sample_output_s3_path} --recursive;"
@@ -105,7 +104,7 @@ class Sample < ApplicationRecord
   end
 
   def filter_host_flag
-    host_genome.name == HostGenome::NO_HOST_NAME ? 0 : 1
+    host_genome && host_genome.name == HostGenome::NO_HOST_NAME ? 0 : 1
   end
 
   def sample_output_s3_path
