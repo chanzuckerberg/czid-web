@@ -52,6 +52,12 @@ i.fa {
   background: #263039;
   .sub-header-items {
     margin: 0 72px;
+    .dropdown-bubble {
+      .dropdown-container {
+        max-height: 250px;
+        overflow: scroll;
+      }
+    }
   }
   .upload {
     float: right;
@@ -177,7 +183,7 @@ i.fa {
 .dropdown-bubble:after {
   content: "";
   position: absolute;
-  left: 20px;
+  left: 30px;
   top: -13px;
   border-style: solid;
   border-width: 0 17px 17px 17px;

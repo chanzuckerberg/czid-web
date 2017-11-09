@@ -6,14 +6,6 @@
 </p>
 
 <p>
-  <strong><%= pluralize(@project.users.count, 'User')%>:</strong>
-  <%= raw(@project.users.map do |u|
-    link_to(u.name, u)
-    end.join(','))
-  %>
-</p>
-
-<p>
   <strong>Date created:</strong>
   <%= @project.created_at %>
 </p>

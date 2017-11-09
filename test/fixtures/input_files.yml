@@ -4,18 +4,22 @@ one:
   name: file1.fastq.gz
   sample: one
   source_type: local
+  source: file1.fastq.gz
 
 two:
   name: file2.fastq.gz
   sample: two
   source_type: local
+  source: file2.fastq.gz
 
 three:
   name: file3.fastq.gz
   sample: one
   source_type: local
+  source: file3.fastq.gz
 
 four:
   name: file4.fastq.gz
   sample: two
   source_type: local
+  source: file4.fastq.gz

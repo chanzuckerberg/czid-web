@@ -48,11 +48,19 @@ class Sample < ApplicationRecord
   validates_associated :input_files
 
   def input_files_checks
-    # validate that we have exactly 2 input files
-    errors.add(:input_files, "file_size !=2 for sample") unless input_files.size == 2
-    # validate that both input files have the same source_type
+    # validate that we have the correct number of input files
+    if host_genome && host_genome.name == HostGenome::NO_HOST_NAME
+      errors.add(:input_files, "no input files") unless input_files.size.between?(1, 2)
+    else
+      errors.add(:input_files, "file_size != 2 for sample and host subtraction not skipped") unless input_files.size == 2
+    end
+    # validate that both input files have the same source_type and file_type
     if input_files.length == 2
       errors.add(:input_files, "file source type different") unless input_files[0].source_type == input_files[1].source_type
+      errors.add(:input_files, "file formats different") unless input_files[0].file_type == input_files[1].file_type
+      if input_files[0].source == input_files[1].source
+        errors.add(:input_files, "read 1 source and read 2 source are identical")
+      end
     end
     # TODO: for s3 input types, test permissions before saving, by making a HEAD request
   end
@@ -72,10 +80,11 @@ class Sample < ApplicationRecord
 
   def initiate_s3_cp
     return unless status == STATUS_CREATED
-    fastq1 = input_files[0].source
-    fastq2 = input_files[1].source
-    command = "aws s3 cp #{fastq1} #{sample_input_s3_path}/;"
-    command += "aws s3 cp #{fastq2} #{sample_input_s3_path}/;"
+    command = ""
+    input_files.each do |input_file|
+      fastq = input_file.source
+      command += "aws s3 cp #{fastq} #{sample_input_s3_path}/;"
+    end
     if s3_preload_result_path.present? && s3_preload_result_path[0..4] == 's3://'
       command += "aws s3 cp #{s3_preload_result_path} #{sample_output_s3_path} --recursive;"
     end
@@ -92,6 +101,10 @@ class Sample < ApplicationRecord
 
   def sample_input_s3_path
     "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/fastqs"
+  end
+
+  def filter_host_flag
+    host_genome && host_genome.name == HostGenome::NO_HOST_NAME ? 0 : 1
   end
 
   def sample_output_s3_path
@@ -156,14 +169,13 @@ class Sample < ApplicationRecord
   def pipeline_command
     script_name = File.basename(IdSeqPipeline::S3_SCRIPT_LOC)
     batch_command_env_variables = "INPUT_BUCKET=#{sample_input_s3_path} OUTPUT_BUCKET=#{sample_output_s3_path} " \
-      "DB_SAMPLE_ID=#{id} SAMPLE_HOST=#{sample_host} SAMPLE_LOCATION=#{sample_location} " \
-      "SAMPLE_DATE=#{sample_date} SAMPLE_TISSUE=#{sample_tissue} SAMPLE_TEMPLATE=#{sample_template} " \
-      "SAMPLE_LIBRARY=#{sample_library} SAMPLE_SEQUENCER=#{sample_sequencer} SAMPLE_NOTES=#{sample_notes} "
+      "FILE_TYPE=#{input_files.first.file_type} FILTER_HOST_FLAG=#{filter_host_flag} " \
+      "ENVIRONMENT=#{Rails.env} DB_SAMPLE_ID=#{id} "
     if s3_star_index_path.present?
-      batch_command_env_variables += "STAR_GENOME=#{s3_star_index_path} " \
+      batch_command_env_variables += "STAR_GENOME=#{s3_star_index_path} "
     end
     if s3_bowtie2_index_path.present?
-      batch_command_env_variables += "BOWTIE2_GENOME=#{s3_bowtie2_index_path} " \
+      batch_command_env_variables += "BOWTIE2_GENOME=#{s3_bowtie2_index_path} "
     end
     batch_command = "aws s3 cp #{IdSeqPipeline::S3_SCRIPT_LOC} .; chmod 755 #{script_name}; " +
                     batch_command_env_variables + "./#{script_name}"
@@ -171,7 +183,7 @@ class Sample < ApplicationRecord
     command = "aegea batch submit --command=\"#{batch_command}\" "
     memory = sample_memory.present? ? sample_memory : DEFAULT_MEMORY
     queue =  job_queue.present? ? job_queue : DEFAULT_QUEUE
-    command += " --storage /mnt=1500 --ecr-image idseq --memory #{memory} --queue #{queue} --vcpus 16"
+    command += " --storage /mnt=500 --ecr-image idseq --memory #{memory} --queue #{queue} --vcpus 4"
     command
   end
 

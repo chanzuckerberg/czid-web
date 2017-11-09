@@ -15,8 +15,6 @@ class SampleUpload extends React.Component {
     this.handleResultChange = this.handleResultChange.bind(this);
     this.projects = props.projects || [];
     this.hostGenomes = props.host_genomes || [];
-    this.hostName = this.hostGenomes.length ? this.hostGenomes[0].name : '';
-    this.hostId = this.hostGenomes.length ? this.hostGenomes[0].id : null;
     this.sample = props.selectedSample || '';
     this.userDetails = props.loggedin_user;
     this.selectedSample = {
@@ -36,8 +34,6 @@ class SampleUpload extends React.Component {
       submitting: false,
       allProjects: this.projects || [],
       hostGenomes: this.hostGenomes || [],
-      hostName: this.hostName,
-      hostId: this.hostId,
       invalid: false,
       errorMessage: '',
       success: false,
@@ -134,7 +130,6 @@ class SampleUpload extends React.Component {
       });
     })
     .catch((error) => {
-      console.log(error.response, 'error');
       that.setState({
         invalid: true,
         errorMessage: 'Project exists already or is invalid',
@@ -169,9 +164,8 @@ class SampleUpload extends React.Component {
         s3_preload_result_path: this.refs.s3_preload_result_path.value.trim(),
         job_queue: this.state.job_queue,
         sample_memory: this.state.memory,
-        host_genome_id: this.state.hostId,
-        host_genome_name: this.state.hostName,
-        status: ''
+        host_genome_id: this.state.selectedHostGenomeId,
+        status: 'created'
       },
       authenticity_token: this.csrf
     })
@@ -185,10 +179,12 @@ class SampleUpload extends React.Component {
         that.gotoPage(`/samples/${response.data.id}`);
       }, 2000)
     })
-    .catch(function (error) {
+    .catch((error) => {
       that.setState({
         invalid: true,
+        submitting: false,
         serverErrors: error.response.data,
+        errorMessage: 'Something went wrong'
       })
     });
   }
@@ -207,9 +203,7 @@ class SampleUpload extends React.Component {
         s3_preload_result_path: this.state.selectedResultPath,
         job_queue: this.state.selectedJobQueue,
         sample_memory: this.state.selectedMemory,
-        host_genome_id: this.state.selectedHostGenomeId,
-        host_genome_name: this.state.selectedHostGenome,
-        status: this.selectedSample.status
+        host_genome_id: this.state.selectedHostGenomeId
       },
       authenticity_token: this.csrf
     })
@@ -223,18 +217,22 @@ class SampleUpload extends React.Component {
         that.gotoPage(`/samples/${that.state.id}`);
       }, 2000);
     })
-    .catch(function (error) {
+    .catch((error) => {
      that.setState({
       submitting: false,
       invalid: true,
       serverErrors: error.response.data,
+      errorMessage: 'Failed to upload sample'
      });
     });
   }
 
-  filePathValid(str) {
+  filePathValid(str, read) {
+    if (read == 2 && str === '') {
+      return true;
+    }
     var regexPrefix = /s3:\/\//;
-    var regexSuffix = /(\.fastq.gz)/igm;
+    var regexSuffix = /(\.fastq|\.fastq.gz|\.fasta|\.fasta.gz)/igm;
     if (str.match(regexPrefix) && str.match(regexSuffix)) {
       return true;
     } else {
@@ -302,31 +300,23 @@ class SampleUpload extends React.Component {
     else if (this.refs.first_file_source.value === '') {
         this.setState({
           invalid: true,
-          errorMessage: 'Please fill in first read fastq path'
+          errorMessage: 'Please fill in first read file path'
         })
         return true;
-    } else if (this.refs.second_file_source.value === '') {
-        this.setState({
-          invalid: true,
-          errorMessage: 'Please fill in second read fastq path'
-        })
-        return true;
-    } else if ( !this.filePathValid(this.refs.first_file_source.value)) {
+    } else if ( !this.filePathValid(this.refs.first_file_source.value, 1)) {
         this.setState({
           invalid: true,
           errorMessage: 'Please fill in a valid file path for Read 1, Sample format for path can be found below'
         })
         return true;
-    } else if ( !this.filePathValid(this.refs.second_file_source.value)) {
+    } else if ( !this.filePathValid(this.refs.second_file_source.value, 2)) {
       this.setState({
         invalid: true,
         errorMessage: 'Please fill in a valid file path for Read 2, Sample format for path can be found below'
       })
       return true;
     }
-    else {
-      return false;
-    }
+    return false;
   }
 
   handleProjectChange(e) {
@@ -343,7 +333,7 @@ class SampleUpload extends React.Component {
     this.setState({
       host: e.target.value.trim(),
       selectedHostGenome: e.target.value.trim(),
-      selectedHostGenomeId: e.target.selectedIndex
+      selectedHostGenomeId: this.state.hostGenomes[e.target.selectedIndex].id
     })
     this.clearError();
   }
@@ -405,7 +395,6 @@ class SampleUpload extends React.Component {
               </div>
               <div className="col s6 input-field genome-list">
                   <select ref="hostSelect" name="host" className="" id="host" onChange={ this.handleHostChange } value={this.state.selectedHostGenome}>
-                    <option disabled defaultValue>{this.state.selectedHostGenome}</option>
                       { this.state.hostGenomes.length ?
                           this.state.hostGenomes.map((host, i) => {
                             return <option ref= "host" key={i} id={host.id} >{host.name}</option>
@@ -464,7 +453,8 @@ class SampleUpload extends React.Component {
             </div>
         </div>
         <input className="hidden" type="submit"/>
-        <div onClick={ this.handleUpdate } className="center login-wrapper">{ !this.state.submitting ? 'Submit' : <i className='fa fa-spinner fa-spin fa-lg'></i>}</div>
+        { this.state.submitting ? <div className="center login-wrapper disabled"> <i className='fa fa-spinner fa-spin fa-lg'></i> </div> : 
+          <div onClick={ this.handleUpdate } className="center login-wrapper">Submit</div> }
       </form>
     </div>
     )
@@ -524,13 +514,13 @@ class SampleUpload extends React.Component {
                 <i className="sample fa fa-link" aria-hidden="true"></i>
                 <input ref= "first_file_source" type="text" className="path" onFocus={ this.clearError } placeholder="Required" />
                 <span className="path_label">Example: s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz</span>
-                <label htmlFor="sample_first_file_source">Read 1 fastq s3 path</label>
+                <label htmlFor="sample_first_file_source">Read 1 s3 path (accepted formats: .fastq, .fastq.gz, .fasta, .fasta.gz)</label>
               </div>
               <div className="field-row input-field align" >
                 <i className="sample fa fa-link" aria-hidden="true"></i>
                 <input ref= "second_file_source" type="text" className="path" onFocus={ this.clearError } placeholder="Required" />
                 <span className="path_label">Example: s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R2_001.fastq.gz</span>
-                <label htmlFor="sample_second_file_source">Read 2 fastq s3 path</label>
+                <label htmlFor="sample_second_file_source">Read 2 s3 path (same format as Read 1 s3 path)</label>
               </div>
               <div className="row field-row">
                 <div className={ this.userDetails.admin ? "col s4 input-field" :  "col s12 input-field" }>
@@ -552,7 +542,8 @@ class SampleUpload extends React.Component {
             </div>
         </div>
         <input className="hidden" type="submit"/>
-        <div onClick={ this.handleUpload } className="center login-wrapper">{ !this.state.submitting ? 'Submit' : <i className='fa fa-spinner fa-spin fa-lg'></i>}</div>
+        { this.state.submitting ? <div className="center login-wrapper disabled"> <i className='fa fa-spinner fa-spin fa-lg'></i> </div> : 
+          <div onClick={ this.handleUpload } className="center login-wrapper">Submit</div> }
       </form>
     </div>
     )

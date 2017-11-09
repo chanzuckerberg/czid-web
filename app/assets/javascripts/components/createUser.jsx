@@ -19,6 +19,7 @@ class CreateUser extends React.Component {
       adminStatus: this.user ? this.user.admin : null
     }
     this.state = {
+      submitting: false,
       isChecked: false,
       success: false,
       showFailed: false,
@@ -39,13 +40,19 @@ class CreateUser extends React.Component {
   handleCreate(e) {
     e.preventDefault();
     if(!this.isCreateFormInvalid()) {
-      this.createUser()
+      this.setState({
+        submitting: true
+      });
+      this.createUser();
     }
   }
 
   handleUpdate(e) {
     e.preventDefault();
     if(!this.isUpdateFormValid()) {
+      this.setState({
+        submitting: true
+      });
       this.updateUser()
     }
   }
@@ -135,6 +142,7 @@ class CreateUser extends React.Component {
       authenticity_token: this.csrf
     }).then((res) => {
       that.setState({
+        submitting: false,
         success: true,
         successMessage: 'User created successfully'
       }, () => {
@@ -143,6 +151,7 @@ class CreateUser extends React.Component {
     })
     .catch((err) => {
       that.setState({
+        submitting: false,
         showFailed: true,
         serverErrors: err.response.data
       })
@@ -162,6 +171,7 @@ class CreateUser extends React.Component {
     }).then((res) => {
       that.setState({
         success: true,
+        submitting: false,
         successMessage: 'User updated successfully'
       }, () => {
         that.gotoPage('/users');
@@ -169,6 +179,7 @@ class CreateUser extends React.Component {
     }).catch((err) => {
       that.setState({
         showFailed: true,
+        submitting: false,
         serverErrors: err.response.data
       })
     })
@@ -209,7 +220,8 @@ class CreateUser extends React.Component {
                 </p>
               </div>
               <input className="hidden" type="submit"/>
-              <div onClick={ this.handleCreate } className="center-align login-wrapper">Submit</div>
+              { this.state.submitting ? <div className="center login-wrapper disabled"> <i className='fa fa-spinner fa-spin fa-lg'></i> </div> : 
+                <div onClick={ this.handleCreate } className="center login-wrapper">Submit</div> }
             </form>
           </div>
         </div>
@@ -261,7 +273,8 @@ class CreateUser extends React.Component {
                 </p>
               </div>
               <input className="hidden" type="submit"/>
-              <div onClick={ this.handleUpdate } className="center-align login-wrapper">Submit</div>
+              { this.state.submitting ? <div className="center login-wrapper disabled"> <i className='fa fa-spinner fa-spin fa-lg'></i> </div> : 
+                <div onClick={ this.handleUpdate } className="center login-wrapper">Submit</div> }
             </form>
           </div>
         </div>

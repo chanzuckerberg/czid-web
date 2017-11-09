@@ -61,7 +61,7 @@ class Samples extends React.Component {
   applyClass(status) {
     if(status === 'COMPLETE') {
       return 'complete';
-    } else if (status === 'UPLOADING') {
+    } else if (status === 'UPLOADING' || status === 'IN PROGRESS') {
       return 'uploading';
     } else if (status === 'INITIALIZING') {
       return 'initializing';
@@ -139,7 +139,10 @@ class Samples extends React.Component {
     return (
     <div className="content-wrapper">
       <div className="sample-container">
-        <input id="search" type="search" onChange={this.handleSearch} className="search" placeholder='&#xf002; Search for Sample'/>{ this.state.showSearchLoader ? <i className='fa fa-spinner fa-spin fa-lg'></i> : null }
+        <div className="row search-box">
+          <span className="icon"><i className="fa fa-search" aria-hidden="true"></i></span>
+          <input id="search" type="search" onChange={this.handleSearch} className="search" placeholder='Search for Sample'/>{ this.state.showSearchLoader ? <i className='fa fa-spinner fa-spin fa-lg'></i> : null }
+        </div>
           <table className="bordered highlight samples-table">
             <thead>
             <tr>
@@ -199,20 +202,22 @@ class Samples extends React.Component {
               <div className="sub-title">
                 <span>{ (!this.project) ? 'All projects' : this.project.name }<i className='fa fa-angle-down project-toggle'></i></span> 
                 <div className='dropdown-bubble'>
-                  <ul>
-                    <li>
-                      <a href="/">All projects </a>
-                    </li>
-                    { this.all_project.map((project, i) => {
-                      return (
-                        <li key={i}>
-                          <a href={`?project_id=${project.id}`}>
-                            { project.name }
-                          </a>
-                        </li>
-                      )
-                    })}
-                  </ul>
+                  <div className="dropdown-container">
+                    <ul>
+                      <li>
+                        <a href="/">All projects </a>
+                      </li>
+                      { this.all_project.map((project, i) => {
+                        return (
+                          <li key={i}>
+                            <a href={`?project_id=${project.id}`}>
+                              { project.name }
+                            </a>
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </div>
                 </div>
               </div>
              

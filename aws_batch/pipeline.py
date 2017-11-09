@@ -14,14 +14,17 @@ import datetime
 import gzip
 import logging
 import math
+import threading
 
+ENVIRONMENT = 'alpha'
 INPUT_BUCKET = 's3://czbiohub-infectious-disease/UGANDA' # default to be overwritten by environment variable
+FILE_TYPE = 'fastq.gz'
 OUTPUT_BUCKET = 's3://czbiohub-idseq-samples-test/id-uganda'  # default to be overwritten by environment variable
-KEY_S3_PATH = 's3://czbiohub-infectious-disease/idseq-alpha.pem'
 ROOT_DIR = '/mnt'
 DEST_DIR = ROOT_DIR + '/idseq/data' # generated data go here
 REF_DIR  = ROOT_DIR + '/idseq/ref' # referene genome / ref databases go here
 
+FILTER_HOST_FLAG = 1
 
 STAR="STAR"
 HTSEQ="htseq-count"
@@ -32,10 +35,8 @@ BOWTIE2="bowtie2"
 
 
 LZW_FRACTION_CUTOFF = 0.45
-GSNAPL_INSTANCE_IP = '34.211.67.166'
-RAPSEARCH2_INSTANCE_IP = '54.191.193.210'
 
-GSNAPL_MAX_CONCURRENT = 5
+GSNAPL_MAX_CONCURRENT = 20
 RAPSEARCH2_MAX_CONCURRENT = 5
 
 STAR_GENOME = 's3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz'
@@ -82,7 +83,7 @@ NR_TAXID_COUNTS_TO_SPECIES_RPM_OUT = 'species.rpm.filter.deuterostomes.taxids.ra
 NR_TAXID_COUNTS_TO_GENUS_RPM_OUT = 'genus.rpm.filter.deuterostomes.taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.csv'
 UNIDENTIFIED_FASTA_OUT = 'unidentified.fasta'
 COMBINED_JSON_OUT = 'idseq_web_sample.json'
-LOGS_OUT_BASENAME = 'log.txt'
+LOGS_OUT_BASENAME = 'log'
 STATS_OUT = 'stats.json'
 
 #global statistics log
@@ -111,6 +112,36 @@ def count_reads(file_name, file_type):
     f.close()
     return int(count)
 
+def get_total_initial_reads(fastq_file_1, initial_file_type_for_log, stats_file):
+    # If "total_reads" is present in stats file, get that value, otherwise get value from input file.
+    # Slightly hacky, but allows us to take into account actual initial read number in the case where
+    # input files are already pre-filtered -- just put it in a stats file in the preload folder as:
+    # [{"total_reads": <value>}]
+    if os.path.isfile(stats_file):
+        with open(stats_file) as f:
+            existing_stats = json.load(f)
+        total_reads_entry = [item for item in existing_stats if "total_reads" in item]
+        if len(total_reads_entry) > 0:
+            return total_reads_entry[0]["total_reads"]
+    return count_reads(fastq_file_1, initial_file_type_for_log)
+
+def clean_direct_gsnapl_input(fastq_files, file_type, sample_s3_output_path):
+    # unzip files if necessary
+    if ".gz" in file_type:
+        subprocess.check_output(" ".join(["gunzip"] + fastq_files), shell=True)
+        cleaned_files = [os.path.splitext(f) for f in fastq_files]
+    else:
+        cleaned_files = fastq_files
+    # generate file type for log
+    file_type_trimmed = file_type.split(".gz")[0]
+    file_type_for_log = file_type_trimmed
+    if len(fastq_files)==2:
+        file_type_for_log += "_paired"
+    # copy files to S3
+    for f in cleaned_files:
+        execute_command("aws s3 cp %s %s/" % (f, sample_s3_output_path))
+    return cleaned_files, file_type_for_log
+
 def lzw_fraction(sequence):
     if sequence == "":
         return 0.0
@@ -119,8 +150,8 @@ def lzw_fraction(sequence):
     dictionary = {}
     # Initialize dictionary with single char
     for c in sequence:
-       dict_size += 1
-       dictionary[c] = dict_size
+        dict_size += 1
+        dictionary[c] = dict_size
 
     word = ""
     results = []
@@ -161,7 +192,7 @@ def generate_taxid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fas
     output_fasta_f = open(output_fasta_file, 'wb')
     sequence_name = input_fasta_f.readline()
     sequence_data = input_fasta_f.readline()
-    while len(sequence_name) > 0 and len(sequence_data) > 0:
+    while sequence_name and sequence_data:
         read_id = sequence_name.rstrip().lstrip('>')
         accession = read_to_accession_id.get(read_id, '')
         new_read_name = annotation_prefix + ':' + accession + ':' + read_id
@@ -208,14 +239,14 @@ def generate_unmapped_pairs_from_sam(sam_file, output_prefix):
     header = True
     with open(sam_file, 'rb') as samf:
         line = samf.readline()
-        while(line[0] == '@'):
+        while line[0] == '@':
             line = samf.readline() # skip headers
         read1 = line
         read2 = samf.readline()
-        while (len(read1) > 0 and len(read2) >0):
+        while read1 and read2:
             parts1 = read1.split("\t")
             parts2 = read2.split("\t")
-            if (parts1[1] == "77" and parts2[1] == "141"): # both parts unmapped
+            if parts1[1] == "77" and parts2[1] == "141": # both parts unmapped
                 output_read_1.write(">%s\n%s\n" %(parts1[0], parts1[9]))
                 output_read_2.write(">%s\n%s\n" %(parts2[0], parts2[9]))
                 output_merged_read.write(">%s/1\n%s\n" %(parts1[0], parts1[9]))
@@ -277,9 +308,8 @@ def generate_tax_counts_from_m8(m8_file, e_value_type, output_file):
             avg_e_value = taxid_e_value_map[taxid] / count
             f.write(",".join([str(taxid), str(count), str(avg_percent_identity), str(avg_alignment_length), str(avg_e_value) + '\n']))
 
-def generate_rpm_from_taxid_counts(rawReadsInputPath, taxidCountsInputPath, taxid2infoPath, speciesOutputPath, genusOutputPath):
-    total_reads = subprocess.check_output("zcat %s | wc -l" % rawReadsInputPath, shell=True)
-    total_reads = int(2*total_reads.rstrip())/4
+def generate_rpm_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, speciesOutputPath, genusOutputPath):
+    total_reads = [item for item in STATS if "total_reads" in item][0]["total_reads"]
     taxid2info_map = shelve.open(taxid2infoPath)
     species_rpm_map = {}
     genus_rpm_map = {}
@@ -310,14 +340,13 @@ def generate_rpm_from_taxid_counts(rawReadsInputPath, taxidCountsInputPath, taxi
         genus_outf.write("%s,%s,%s\n" % (genus_taxid, genus_name, rpm))
     genus_outf.close()
 
-def generate_json_from_taxid_counts(sample, rawReadsInputPath, taxidCountsInputPath,
+def generate_json_from_taxid_counts(sample, taxidCountsInputPath,
                                     taxid2infoPath, jsonOutputPath, countType, dbSampleId):
     # produce json in Ryan's output format (https://github.com/chanzuckerberg/idseq-web/blob/master/test/output.json)
     taxid2info_map = shelve.open(taxid2infoPath)
-    total_reads = subprocess.check_output("zcat %s | wc -l" % rawReadsInputPath, shell=True)
-    total_reads = 2*int(total_reads.rstrip())/4
+    total_reads = [item for item in STATS if "total_reads" in item][0]["total_reads"]
     taxon_counts_attributes = []
-    remaining_reads = (item for item in STATS if item["task"] == "run_bowtie2").next().get("reads_after")
+    remaining_reads = (item for item in STATS if item.get("task") == "run_gsnapl_remotely").next().get("reads_before")
 
     genus_to_count = {}
     genus_to_name = {}
@@ -443,7 +472,7 @@ def filter_taxids_from_fasta(input_fa, output_fa, annotation_prefix, accession2t
     output_f = open(output_fa, 'wb')
     sequence_name = input_f.readline()
     sequence_data = input_f.readline()
-    while len(sequence_name) > 0 and len(sequence_data) > 0:
+    while sequence_name and sequence_data:
         read_id = sequence_name.rstrip().lstrip('>') # example read_id: "NR::NT:CP010376.2:NB501961:14:HM7TLBGX2:1:23109:12720:8743/2"
         split_on = annotation_prefix + ":"
         if not read_id.startswith(annotation_prefix):
@@ -466,14 +495,91 @@ def return_merged_dict(dict1, dict2):
 
 ### job functions
 
-def execute_command(command):
-    print command
-    output = subprocess.check_output(command, shell=True)
-    return output
+def environment_for_aligners(environment):
+    if environment == "development":
+        return "alpha"
+    return environment
+
+def get_key_path(environment):
+    return "s3://czbiohub-infectious-disease/idseq-%s.pem" % environment_for_aligners(environment)
+
+class Updater(object):
+
+    def __init__(self, update_period, update_function):
+        self.update_period = update_period
+        self.update_function = update_function
+        self.timer_thread = None
+        self.t_start = time.time()
+
+    def relaunch(self, initial_launch=False):
+        if self.timer_thread and not initial_launch:
+            t_elapsed = time.time() - self.t_start
+            self.update_function(t_elapsed)
+        self.timer_thread = threading.Timer(self.update_period, self.relaunch)
+        self.timer_thread.start()
+
+    def __enter__(self):
+        self.relaunch(initial_launch=True)
+        return self
+
+    def __exit__(self, *args):
+        self.timer_thread.cancel()
+
+
+class CommandTracker(Updater):
+
+    lock = threading.RLock()
+    count = 0
+
+    def __init__(self, update_period=15):
+        super(CommandTracker, self).__init__(update_period, self.print_update)
+        with CommandTracker.lock:
+            self.id = CommandTracker.count
+            CommandTracker.count += 1
+
+    def print_update(self, t_elapsed):
+        print "Command %d still running after %3.1f seconds." % (self.id, t_elapsed)
+        sys.stdout.flush()
+
+
+class ProgressFile(object):
+
+    def __init__(self, progress_file):
+        self.progress_file = progress_file
+        self.tail_subproc = None
+
+    def __enter__(self):
+        # TODO:  Do something else here. Tail gets confused if the file pre-exists.  Also need to rate-limit.
+        if self.progress_file:
+            self.tail_subproc = subprocess.Popen("touch {pf} ; tail -f {pf}".format(pf=self.progress_file), shell=True)
+        return self
+
+    def __exit__(self, *args):
+        if self.tail_subproc:
+            self.tail_subproc.kill()
+
+
+def execute_command_with_output(command, progress_file=None):
+    with CommandTracker() as ct:
+        print "Command {}: {}".format(ct.id, command)
+        with ProgressFile(progress_file):
+            return subprocess.check_output(command, shell=True)
+
+
+def execute_command_realtime_stdout(command, progress_file=None):
+    with CommandTracker() as ct:
+        print "Command {}: {}".format(ct.id, command)
+        with ProgressFile(progress_file):
+            subprocess.check_call(command, shell=True)
+
+
+def execute_command(command, progress_file=None):
+    execute_command_realtime_stdout(command, progress_file)
+
 
 def wait_for_server(service_name, command, max_concurrent):
     while True:
-        output = execute_command(command).rstrip().split("\n")
+        output = execute_command_with_output(command).rstrip().split("\n")
         if len(output) <= max_concurrent:
             print "%s server has capacity. Kicking off " % service_name
             return
@@ -483,26 +589,70 @@ def wait_for_server(service_name, command, max_concurrent):
                   (service_name, len(output), wait_seconds)
             time.sleep(wait_seconds)
 
+def get_server_ips(service_name, environment):
+    tag = "service"
+    value = "%s-%s" % (service_name, environment_for_aligners(environment))
+    describe_json = json.loads(execute_command_with_output("aws ec2 describe-instances --filters 'Name=tag:%s,Values=%s' 'Name=instance-state-name,Values=running'" % (tag, value)))
+    server_ips = []
+    for reservation in describe_json["Reservations"]:
+        for instance in reservation["Instances"]:
+            server_ips += [instance["NetworkInterfaces"][0]["Association"]["PublicIp"]]
+    return server_ips
+
+def wait_for_server_ip(service_name, key_path, remote_username, environment, max_concurrent):
+    while True:
+        instance_ips = get_server_ips(service_name, environment)
+        ip_nproc_dict = {}
+        for ip in instance_ips:
+            command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "ps aux|grep gsnapl|grep -v bash" || echo "error"' % (key_path, remote_username, ip)
+            output = execute_command_with_output(command).rstrip().split("\n")
+            if output != ["error"]: ip_nproc_dict[ip] = len(output)
+        if not ip_nproc_dict:
+            have_capacity = False
+        else:
+            min_nproc_ip = min(ip_nproc_dict, key=ip_nproc_dict.get)
+            min_nproc = ip_nproc_dict[min_nproc_ip]
+            have_capacity = (min_nproc <= max_concurrent)
+        if have_capacity:
+            print "%s server %s has capacity. Kicking off " % (service_name, min_nproc_ip)
+            return min_nproc_ip
+        else:
+            wait_seconds = random.randint(30, 60)
+            print "%s servers busy. Wait for %d seconds" % \
+                  (service_name, wait_seconds)
+            time.sleep(wait_seconds)
+
 class TimeFilter(logging.Filter):
     def filter(self, record):
         try:
-          last = self.last
+            last = self.last
         except AttributeError:
-          last = record.relativeCreated
+            last = record.relativeCreated
         delta = datetime.datetime.fromtimestamp(record.relativeCreated/1000.0) - datetime.datetime.fromtimestamp(last/1000.0)
         record.time_since_last = '{0:.2f}'.format(delta.seconds + delta.microseconds/1000000.0)
         self.last = record.relativeCreated
         return True
 
+def percent_str(percent):
+    try:
+        return "%3.1f" % percent
+    except:
+        return str(percent)
+
 def run_and_log(logparams, func_name, *args):
     logger = logging.getLogger()
     logger.info("========== %s ==========" % logparams.get("title"))
+    # copy log file -- start
+    logger.handlers[0].flush()
+    execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
     # produce the output
     func_return = func_name(*args)
     if func_return == 1:
         logger.info("output exists, lazy run")
     else:
         logger.info("uploaded output")
+    # copy log file -- after work is done
+    execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
     # count records
     required_params = ["before_file_name", "before_file_type", "after_file_name", "after_file_type"]
     if all(param in logparams for param in required_params):
@@ -510,7 +660,7 @@ def run_and_log(logparams, func_name, *args):
         records_after = count_reads(logparams["after_file_name"], logparams["after_file_type"])
         if logparams["count_reads"]:
             percent_removed = (100.0 * (records_before - records_after)) / records_before
-            logger.info("%s %% of reads dropped out, %s reads remaining" % (str(percent_removed), str(records_after)))
+            logger.info("%s %% of reads dropped out, %s reads remaining" % (percent_str(percent_removed), str(records_after)))
             STATS.append({'task': func_name.__name__, 'reads_before': records_before, 'reads_after': records_after})
         # function-specific logs
         if func_name.__name__ == "run_cdhitdup":
@@ -519,7 +669,8 @@ def run_and_log(logparams, func_name, *args):
         if func_name.__name__ == "run_priceseqfilter":
             pass_percentage = (100.0 * records_after) / records_before
             logger.info("percentage of reads passing QC filter: %s %%" % str(pass_percentage))
-    # copy log file
+    # copy log file -- end
+    logger.handlers[0].flush()
     execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
     # write stats
     stats_path = logparams["stats_file"]
@@ -527,11 +678,11 @@ def run_and_log(logparams, func_name, *args):
         json.dump(STATS, f)
     execute_command("aws s3 cp %s %s/;" % (stats_path, logparams["sample_s3_output_path"]))
 
-def run_sample(sample_s3_input_path, sample_s3_output_path,
+def run_sample(sample_s3_input_path, file_type, filter_host_flag, sample_s3_output_path,
                star_genome_s3_path, bowtie2_genome_s3_path,
                gsnap_ssh_key_s3_path, rapsearch_ssh_key_s3_path, accession2taxid_s3_path,
                deuterostome_list_s3_path, taxid2info_s3_path, db_sample_id,
-               aws_batch_job_id, lazy_run = True):
+               aws_batch_job_id, environment, lazy_run = True):
 
     sample_s3_output_path = sample_s3_output_path.rstrip('/')
     sample_name = sample_s3_input_path[5:].rstrip('/').replace('/','-')
@@ -540,10 +691,10 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
     result_dir = sample_dir + '/results'
     scratch_dir = sample_dir + '/scratch'
     execute_command("mkdir -p %s %s %s %s" % (sample_dir, fastq_dir, result_dir, scratch_dir))
-    execute_command("mkdir -p %s " % REF_DIR);
+    execute_command("mkdir -p %s " % REF_DIR)
 
     # configure logger
-    log_file = "%s/%s.%s" % (result_dir, LOGS_OUT_BASENAME, aws_batch_job_id)
+    log_file = "%s/%s.%s.txt" % (result_dir, LOGS_OUT_BASENAME, aws_batch_job_id)
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
     handler = logging.FileHandler(log_file)
@@ -551,110 +702,69 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
     handler.addFilter(TimeFilter())
     handler.setFormatter(formatter)
     logger.addHandler(handler)
+    # now also echo to stdout so they get to cloudwatch
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setLevel(logging.INFO)
+    formatter = logging.Formatter('(%(time_since_last)ss elapsed): %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
     DEFAULT_LOGPARAMS = {"sample_s3_output_path": sample_s3_output_path,
                          "stats_file": os.path.join(result_dir, STATS_OUT)}
 
     # Download fastqs
-    command = "aws s3 ls %s/ |grep fastq.gz" % (sample_s3_input_path)
+    command = "aws s3 ls %s/ | grep '\.%s$'" % (sample_s3_input_path, file_type)
     output = execute_command(command).rstrip().split("\n")
     for line in output:
-        m = re.match(".*?([^ ]*.fastq.gz)", line)
+        m = re.match(".*?([^ ]*." + re.escape(file_type) + ")", line)
         if m:
             execute_command("aws s3 cp %s/%s %s/" % (sample_s3_input_path, m.group(1), fastq_dir))
         else:
-            print "%s doesn't match fastq.gz" % line
+            print "%s doesn't match %s" % (line, file_type)
 
-    fastq_files = execute_command("ls %s/*.fastq.gz" % fastq_dir).rstrip().split("\n")
+    fastq_files = execute_command("ls %s/*.%s" % (fastq_dir, file_type)).rstrip().split("\n")
 
-    if len(fastq_files) <= 1:
-        return # only support paired reads for now
-    else:
-        fastq_file_1 = fastq_files[0]
-        fastq_file_2 = fastq_files[1]
+    # Identify input files and characteristics
+    if filter_host_flag:
+        if len(fastq_files) <= 1:
+            return # only support paired reads for now
+        else:
+            fastq_file_1 = fastq_files[0]
+            fastq_file_2 = fastq_files[1]
 
     if lazy_run:
        # Download existing data and see what has been done
         command = "aws s3 cp %s %s --recursive" % (sample_s3_output_path, result_dir)
-        print execute_command(command)
+        print execute_command_with_output(command)
 
-    # run STAR
-    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
-        {"title": "STAR", "count_reads": True,
-        "before_file_name": fastq_file_1,
-        "before_file_type": "fastq_paired",
-        "after_file_name": os.path.join(result_dir, STAR_OUT1),
-        "after_file_type": "fastq_paired"})
-    run_and_log(logparams, run_star,
-        sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
-        result_dir, scratch_dir, sample_s3_output_path, lazy_run)
+    # Record total number of input reads
+    initial_file_type_for_log = "fastq_paired" if "fastq" in file_type else "fasta_paired"
+    stats_file = os.path.join(result_dir, STATS_OUT)
+    STATS.append({'total_reads': get_total_initial_reads(fastq_files[0], initial_file_type_for_log, stats_file)})
 
-    # run priceseqfilter
-    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
-        {"title": "PriceSeqFilter", "count_reads": True,
-        "before_file_name": os.path.join(result_dir, STAR_OUT1),
-        "before_file_type": "fastq_paired",
-        "after_file_name": os.path.join(result_dir, PRICESEQFILTER_OUT1),
-        "after_file_type": "fastq_paired"})
-    run_and_log(logparams, run_priceseqfilter,
-        sample_name, os.path.join(result_dir, STAR_OUT1),
-        os.path.join(result_dir, STAR_OUT2),
-        result_dir, sample_s3_output_path, lazy_run)
-
-    # run fastq to fasta
-    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
-        {"title": "FASTQ to FASTA",
-        "count_reads": False})
-    run_and_log(logparams, run_fq2fa,
-        sample_name, os.path.join(result_dir, PRICESEQFILTER_OUT1),
-        os.path.join(result_dir, PRICESEQFILTER_OUT2),
-        result_dir, sample_s3_output_path, lazy_run)
-
-    # run cdhitdup
-    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
-        {"title": "CD-HIT-DUP", "count_reads": True,
-        "before_file_name": os.path.join(result_dir, FQ2FA_OUT1),
-        "before_file_type": "fasta_paired",
-        "after_file_name": os.path.join(result_dir, CDHITDUP_OUT1),
-        "after_file_type": "fasta_paired"})
-    run_and_log(logparams, run_cdhitdup,
-        sample_name, os.path.join(result_dir, FQ2FA_OUT1),
-        os.path.join(result_dir, FQ2FA_OUT2),
-        result_dir, sample_s3_output_path, lazy_run)
-
-    # run lzw filter
-    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
-        {"title": "LZW filter", "count_reads": True,
-        "before_file_name": os.path.join(result_dir, CDHITDUP_OUT1),
-        "before_file_type": "fasta_paired",
-        "after_file_name": os.path.join(result_dir, LZW_OUT1),
-        "after_file_type": "fasta_paired"})
-    run_and_log(logparams, run_lzw,
-        sample_name, os.path.join(result_dir, CDHITDUP_OUT1),
-        os.path.join(result_dir, CDHITDUP_OUT2),
-        result_dir, sample_s3_output_path, lazy_run)
-
-    # run bowtie
-    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
-        {"title": "bowtie2", "count_reads": True,
-        "before_file_name": os.path.join(result_dir, LZW_OUT1),
-        "before_file_type": "fasta_paired",
-        "after_file_name": os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT1),
-        "after_file_type": "fasta_paired"})
-    run_and_log(logparams, run_bowtie2,
-        sample_name, os.path.join(result_dir, LZW_OUT1),
-        os.path.join(result_dir, LZW_OUT2),
-        bowtie2_genome_s3_path, result_dir, sample_s3_output_path, lazy_run)
+    # run host filtering
+    if filter_host_flag:
+        run_host_filtering(sample_name, fastq_file_1, fastq_file_2, file_type, initial_file_type_for_log, star_genome_s3_path, bowtie2_genome_s3_path,
+                           DEFAULT_LOGPARAMS, result_dir, scratch_dir, sample_s3_output_path, lazy_run)
 
     # run gsnap remotely
+    if filter_host_flag:
+        gsnapl_input_files = [EXTRACT_UNMAPPED_FROM_SAM_OUT1, EXTRACT_UNMAPPED_FROM_SAM_OUT2]
+        before_file_name_for_log = os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT1)
+        before_file_type_for_log = "fasta_paired"
+    else:
+        cleaned_files, before_file_type_for_log = clean_direct_gsnapl_input(fastq_files, file_type, sample_s3_output_path)
+        before_file_name_for_log = cleaned_files[0]
+        gsnapl_input_files = [os.path.basename(f) for f in cleaned_files]
+
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "GSNAPL", "count_reads": True,
-        "before_file_name": os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT1),
-        "before_file_type": "fasta_paired",
+        "before_file_name": before_file_name_for_log,
+        "before_file_type": before_file_type_for_log,
         "after_file_name": os.path.join(result_dir, GSNAPL_OUT),
         "after_file_type": "m8"})
     run_and_log(logparams, run_gsnapl_remotely,
-        sample_name, EXTRACT_UNMAPPED_FROM_SAM_OUT1, EXTRACT_UNMAPPED_FROM_SAM_OUT2,
-        gsnap_ssh_key_s3_path,
+        sample_name, gsnapl_input_files,
+        gsnap_ssh_key_s3_path, environment, aws_batch_job_id,
         result_dir, sample_s3_output_path, lazy_run)
 
     # run_annotate_gsnapl_m8_with_taxids
@@ -693,7 +803,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         "count_reads": False})
     run_and_log(logparams, run_generate_taxid_outputs_from_m8,
         sample_name, os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NT_M8_OUT),
-        fastq_file_1, os.path.join(result_dir, NT_M8_TO_TAXID_COUNTS_FILE_OUT),
+        os.path.join(result_dir, NT_M8_TO_TAXID_COUNTS_FILE_OUT),
         os.path.join(result_dir, NT_TAXID_COUNTS_TO_JSON_OUT),
         os.path.join(result_dir, NT_TAXID_COUNTS_TO_SPECIES_RPM_OUT),
         os.path.join(result_dir, NT_TAXID_COUNTS_TO_GENUS_RPM_OUT),
@@ -718,7 +828,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         "after_file_type": "m8"})
     run_and_log(logparams, run_rapsearch2_remotely,
         sample_name, FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT,
-        rapsearch_ssh_key_s3_path,
+        rapsearch_ssh_key_s3_path, environment, aws_batch_job_id,
         result_dir, sample_s3_output_path, lazy_run)
 
     # run_annotate_m8_with_taxids
@@ -757,7 +867,7 @@ def run_sample(sample_s3_input_path, sample_s3_output_path,
         "count_reads": False})
     run_and_log(logparams, run_generate_taxid_outputs_from_m8,
         sample_name, os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NR_M8_OUT),
-        fastq_file_1, os.path.join(result_dir, NR_M8_TO_TAXID_COUNTS_FILE_OUT),
+        os.path.join(result_dir, NR_M8_TO_TAXID_COUNTS_FILE_OUT),
         os.path.join(result_dir, NR_TAXID_COUNTS_TO_JSON_OUT),
         os.path.join(result_dir, NR_TAXID_COUNTS_TO_SPECIES_RPM_OUT),
         os.path.join(result_dir, NR_TAXID_COUNTS_TO_GENUS_RPM_OUT),
@@ -800,9 +910,85 @@ def run_star_part(output_dir, genome_dir, fastq_file_1, fastq_file_2):
     if fastq_file_1[-3:] == '.gz':
         star_command_params += ['--readFilesCommand', 'zcat']
     execute_command(" ".join(star_command_params))
-    logging.getLogger().info("finished job")
 
-def run_star(sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
+def run_host_filtering(sample_name, fastq_file_1, fastq_file_2, file_type, initial_file_type_for_log, star_genome_s3_path, bowtie2_genome_s3_path,
+                       DEFAULT_LOGPARAMS, result_dir, scratch_dir, sample_s3_output_path, lazy_run):
+    # run STAR
+    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+        {"title": "STAR", "count_reads": True,
+        "before_file_name": fastq_file_1,
+        "before_file_type": initial_file_type_for_log,
+        "after_file_name": os.path.join(result_dir, STAR_OUT1),
+        "after_file_type": initial_file_type_for_log})
+    run_and_log(logparams, run_star,
+        sample_name, fastq_file_1, fastq_file_2, file_type, star_genome_s3_path,
+        result_dir, scratch_dir, sample_s3_output_path, lazy_run)
+
+    # run priceseqfilter
+    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+        {"title": "PriceSeqFilter", "count_reads": True,
+        "before_file_name": os.path.join(result_dir, STAR_OUT1),
+        "before_file_type": initial_file_type_for_log,
+        "after_file_name": os.path.join(result_dir, PRICESEQFILTER_OUT1),
+        "after_file_type": initial_file_type_for_log})
+    run_and_log(logparams, run_priceseqfilter,
+        sample_name, os.path.join(result_dir, STAR_OUT1),
+        os.path.join(result_dir, STAR_OUT2), file_type,
+        result_dir, sample_s3_output_path, lazy_run)
+
+    # run fastq to fasta
+    if "fastq" in file_type:
+        logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+            {"title": "FASTQ to FASTA",
+            "count_reads": False})
+        run_and_log(logparams, run_fq2fa,
+            sample_name, os.path.join(result_dir, PRICESEQFILTER_OUT1),
+            os.path.join(result_dir, PRICESEQFILTER_OUT2),
+            result_dir, sample_s3_output_path, lazy_run)
+        next_input_1 = FQ2FA_OUT1
+        next_input_2 = FQ2FA_OUT2
+    else:
+        next_input_1 = PRICESEQFILTER_OUT1
+        next_input_2 = PRICESEQFILTER_OUT2
+
+    # run cdhitdup
+    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+        {"title": "CD-HIT-DUP", "count_reads": True,
+        "before_file_name": os.path.join(result_dir, next_input_1),
+        "before_file_type": "fasta_paired",
+        "after_file_name": os.path.join(result_dir, CDHITDUP_OUT1),
+        "after_file_type": "fasta_paired"})
+    run_and_log(logparams, run_cdhitdup,
+        sample_name, os.path.join(result_dir, next_input_1),
+        os.path.join(result_dir, next_input_2),
+        result_dir, sample_s3_output_path, lazy_run)
+
+    # run lzw filter
+    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+        {"title": "LZW filter", "count_reads": True,
+        "before_file_name": os.path.join(result_dir, CDHITDUP_OUT1),
+        "before_file_type": "fasta_paired",
+        "after_file_name": os.path.join(result_dir, LZW_OUT1),
+        "after_file_type": "fasta_paired"})
+    run_and_log(logparams, run_lzw,
+        sample_name, os.path.join(result_dir, CDHITDUP_OUT1),
+        os.path.join(result_dir, CDHITDUP_OUT2),
+        result_dir, sample_s3_output_path, lazy_run)
+
+    # run bowtie
+    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+        {"title": "bowtie2", "count_reads": True,
+        "before_file_name": os.path.join(result_dir, LZW_OUT1),
+        "before_file_type": "fasta_paired",
+        "after_file_name": os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT1),
+        "after_file_type": "fasta_paired"})
+    run_and_log(logparams, run_bowtie2,
+        sample_name, os.path.join(result_dir, LZW_OUT1),
+        os.path.join(result_dir, LZW_OUT2),
+        bowtie2_genome_s3_path, result_dir, sample_s3_output_path, lazy_run)
+
+
+def run_star(sample_name, fastq_file_1, fastq_file_2, file_type, star_genome_s3_path,
              result_dir, scratch_dir, sample_s3_output_path, lazy_run):
     if lazy_run:
         # check if output already exists
@@ -841,8 +1027,9 @@ def run_star(sample_name, fastq_file_1, fastq_file_2, star_genome_s3_path,
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, STAR_OUT2, sample_s3_output_path))
     # cleanup
     execute_command("cd %s; rm -rf *" % scratch_dir)
+    logging.getLogger().info("finished job")
 
-def run_priceseqfilter(sample_name, input_fq_1, input_fq_2,
+def run_priceseqfilter(sample_name, input_fq_1, input_fq_2, file_type,
                        result_dir, sample_s3_output_path, lazy_run):
     if lazy_run:
         # check if output already exists
@@ -856,10 +1043,11 @@ def run_priceseqfilter(sample_name, input_fq_1, input_fq_2,
                        '-op',
                        result_dir +'/' + PRICESEQFILTER_OUT1,
                        result_dir +'/' + PRICESEQFILTER_OUT2,
-                       '-rqf','85','0.98',
                        '-rnf','90',
                        '-log','c']
-    execute_command(" ".join(priceseq_params))
+    if "fastq" in file_type:
+        priceseq_params.extend(['-rqf','85','0.98'])
+    execute_command_realtime_stdout(" ".join(priceseq_params))
     logging.getLogger().info("finished job")
     # copy back to aws
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, PRICESEQFILTER_OUT1, sample_s3_output_path))
@@ -894,7 +1082,7 @@ def run_cdhitdup(sample_name, input_fa_1, input_fa_2,
                        '-o',  result_dir + '/' + CDHITDUP_OUT1,
                        '-o2', result_dir + '/' + CDHITDUP_OUT2,
                        '-e',  '0.05', '-u', '70']
-    execute_command(" ".join(cdhitdup_params))
+    execute_command_realtime_stdout(" ".join(cdhitdup_params))
     logging.getLogger().info("finished job")
     # copy back to aws
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, CDHITDUP_OUT1, sample_s3_output_path))
@@ -915,7 +1103,7 @@ def run_lzw(sample_name, input_fa_1, input_fa_2,
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LZW_OUT1, sample_s3_output_path))
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LZW_OUT2, sample_s3_output_path))
 
-def run_bowtie2(sample_name, input_fa_1, input_fa_2, bowtie_genome_s3_path,
+def run_bowtie2(sample_name, input_fa_1, input_fa_2, bowtie2_genome_s3_path,
                 result_dir, sample_s3_output_path, lazy_run):
     if lazy_run:
         # check if output already exists
@@ -928,22 +1116,23 @@ def run_bowtie2(sample_name, input_fa_1, input_fa_2, bowtie_genome_s3_path,
             return 1
     # Doing the work
     # check if genome downloaded already
-    genome_file = os.path.basename(bowtie_genome_s3_path)
+    genome_file = os.path.basename(bowtie2_genome_s3_path)
     if not os.path.isfile("%s/%s" % (REF_DIR, genome_file)):
-        execute_command("aws s3 cp %s %s/" % (bowtie_genome_s3_path, REF_DIR))
+        execute_command("aws s3 cp %s %s/" % (bowtie2_genome_s3_path, REF_DIR))
         execute_command("cd %s; tar xvfz %s" % (REF_DIR, genome_file))
         logging.getLogger().info("downloaded index")
-    local_genome_dir_ls =  execute_command("ls %s/bowtie2_genome/*.bt2*" % REF_DIR)
+    local_genome_dir_ls =  execute_command_with_output("ls %s/bowtie2_genome/*.bt2*" % REF_DIR)
     genome_basename = local_genome_dir_ls.split("\n")[0][:-6]
     if genome_basename[-1] == '.':
         genome_basename = genome_basename[:-1]
     bowtie2_params = [BOWTIE2,
+                     '-q',
                      '-p', str(multiprocessing.cpu_count()),
                      '-x', genome_basename,
                      '--very-sensitive-local',
                      '-f', '-1', input_fa_1, '-2', input_fa_2,
                      '-S', result_dir + '/' + BOWTIE2_OUT]
-    execute_command(" ".join(bowtie2_params))
+    execute_command_realtime_stdout(" ".join(bowtie2_params))
     logging.getLogger().info("finished alignment")
     # extract out unmapped files from sam
     output_prefix = result_dir + '/' + EXTRACT_UNMAPPED_FROM_SAM_OUT1[:-8]
@@ -955,8 +1144,8 @@ def run_bowtie2(sample_name, input_fa_1, input_fa_2, bowtie_genome_s3_path,
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT2, sample_s3_output_path))
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT3, sample_s3_output_path))
 
-def run_gsnapl_remotely(sample, input_fa_1, input_fa_2,
-                        gsnap_ssh_key_s3_path,
+def run_gsnapl_remotely(sample, input_files,
+                        gsnap_ssh_key_s3_path, environment, aws_batch_job_id,
                         result_dir, sample_s3_output_path, lazy_run):
     if lazy_run:
         # check if output already exists
@@ -972,27 +1161,24 @@ def run_gsnapl_remotely(sample, input_fa_1, input_fa_2,
     remote_work_dir = "%s/batch-pipeline-workdir/%s" % (remote_home_dir, sample)
     remote_index_dir = "%s/share" % remote_home_dir
     commands =  "mkdir -p %s;" % remote_work_dir
-    commands += "aws s3 cp %s/%s %s/ ; " % \
-                 (sample_s3_output_path, input_fa_1, remote_work_dir)
-    commands += "aws s3 cp %s/%s %s/ ; " % \
-                 (sample_s3_output_path, input_fa_2, remote_work_dir)
+    for input_fa in input_files:
+        commands += "aws s3 cp %s/%s %s/ ; " % \
+                 (sample_s3_output_path, input_fa, remote_work_dir)
     commands += " ".join([remote_home_dir+'/bin/gsnapl',
                           '-A', 'm8', '--batch=2',
                           '--gmap-mode=none', '--npaths=1', '--ordered',
                           '-t', '32',
                           '--maxsearch=5', '--max-mismatches=20',
-                          '-D', remote_index_dir, '-d', 'nt_k16',
-                          remote_work_dir+'/'+input_fa_1,
-                          remote_work_dir+'/'+input_fa_2,
-                          '> '+remote_work_dir+'/'+GSNAPL_OUT, ';'])
+                          '-D', remote_index_dir, '-d', 'nt_k16']
+                          + [remote_work_dir+'/'+input_fa for input_fa in input_files]
+                          + ['> '+remote_work_dir+'/'+GSNAPL_OUT, ';'])
     commands += "aws s3 cp %s/%s %s/;" % \
                  (remote_work_dir, GSNAPL_OUT, sample_s3_output_path)
     # check if remote machins has enough capacity
-    check_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "ps aux|grep gsnapl|grep -v bash"' % (key_path, remote_username, GSNAPL_INSTANCE_IP)
     logging.getLogger().info("waiting for server")
-    wait_for_server('GSNAPL', check_command, GSNAPL_MAX_CONCURRENT)
-    logging.getLogger().info("starting alignment")
-    remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, GSNAPL_INSTANCE_IP, commands)
+    gsnapl_instance_ip = wait_for_server_ip('gsnap', key_path, remote_username, environment, GSNAPL_MAX_CONCURRENT)
+    logging.getLogger().info("starting alignment on machine " + gsnapl_instance_ip)
+    remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, gsnapl_instance_ip, commands)
     execute_command(remote_command)
     # move gsnapl output back to local
     time.sleep(10)
@@ -1071,8 +1257,8 @@ def run_filter_deuterostomes_from_fasta(sample_name, input_fa, output_fa,
     # move the output back to S3
     execute_command("aws s3 cp %s %s/" % (output_fa, sample_s3_output_path))
 
-def run_rapsearch2_remotely(sample, input_fasta,
-    rapsearch_ssh_key_s3_path, result_dir, sample_s3_output_path, lazy_run):
+def run_rapsearch2_remotely(sample, input_fasta, rapsearch_ssh_key_s3_path,
+    environment, aws_batch_job_id, result_dir, sample_s3_output_path, lazy_run):
     if lazy_run:
         # check if output already exists
         output = "%s/%s" % (result_dir, RAPSEARCH2_OUT)
@@ -1105,19 +1291,18 @@ def run_rapsearch2_remotely(sample, input_fasta,
                           ';'])
     commands += "aws s3 cp %s/%s %s/;" % \
                  (remote_work_dir, RAPSEARCH2_OUT, sample_s3_output_path)
-    check_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "ps aux|grep rapsearch|grep -v bash"' % (key_path, remote_username, RAPSEARCH2_INSTANCE_IP)
     logging.getLogger().info("waiting for server")
-    wait_for_server('RAPSEARCH2', check_command, RAPSEARCH2_MAX_CONCURRENT)
-    logging.getLogger().info("starting alignment")
-    remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, RAPSEARCH2_INSTANCE_IP, commands)
-    execute_command(remote_command)
+    instance_ip = wait_for_server_ip('rapsearch', key_path, remote_username, environment, RAPSEARCH2_MAX_CONCURRENT)
+    logging.getLogger().info("starting alignment on machine " + instance_ip)
+    remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, instance_ip, commands)
+    execute_command_realtime_stdout(remote_command)
     logging.getLogger().info("finished alignment")
     # move output back to local
     time.sleep(10) # wait until the data is synced
     execute_command("aws s3 cp %s/%s %s/" % (sample_s3_output_path, RAPSEARCH2_OUT, result_dir))
 
 def run_generate_taxid_outputs_from_m8(sample_name,
-    annotated_m8, fastq_file_1,
+    annotated_m8,
     taxon_counts_csv_file, taxon_counts_json_file,
     taxon_species_rpm_file, taxon_genus_rpm_file,
     taxinfodb_s3_path, count_type, e_value_type, db_sample_id,
@@ -1131,11 +1316,11 @@ def run_generate_taxid_outputs_from_m8(sample_name,
         logging.getLogger().info("downloaded taxon info database")
     generate_tax_counts_from_m8(annotated_m8, e_value_type, taxon_counts_csv_file)
     logging.getLogger().info("generated taxon counts from m8")
-    generate_json_from_taxid_counts(sample_name, fastq_file_1, taxon_counts_csv_file,
+    generate_json_from_taxid_counts(sample_name, taxon_counts_csv_file,
                                     taxoninfo_path, taxon_counts_json_file,
                                     count_type, db_sample_id)
     logging.getLogger().info("generated JSON file from taxon counts")
-    generate_rpm_from_taxid_counts(fastq_file_1, taxon_counts_csv_file, taxoninfo_path,
+    generate_rpm_from_taxid_counts(taxon_counts_csv_file, taxoninfo_path,
                                    taxon_species_rpm_file, taxon_genus_rpm_file)
     logging.getLogger().info("calculated RPM from taxon counts")
     # move the output back to S3
@@ -1167,34 +1352,38 @@ def run_generate_unidentified_fasta(sample_name, input_fa, output_fa,
 
 ### Main
 def main():
+    # Unbuffer stdout and redirect stderr into stdout.  This helps observe logged events in realtime.
+    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+    os.dup2(sys.stdout.fileno(), sys.stderr.fileno())
+
+    # collect environment variables
     global INPUT_BUCKET
+    global FILE_TYPE
     global OUTPUT_BUCKET
-    global KEY_S3_PATH
     global STAR_GENOME
     global BOWTIE2_GENOME
+    global FILTER_HOST_FLAG
+    global ENVIRONMENT
+
     INPUT_BUCKET = os.environ.get('INPUT_BUCKET', INPUT_BUCKET)
+    FILE_TYPE = os.environ.get('FILE_TYPE', FILE_TYPE)
     OUTPUT_BUCKET = os.environ.get('OUTPUT_BUCKET', OUTPUT_BUCKET)
-    KEY_S3_PATH = os.environ.get('KEY_S3_PATH', KEY_S3_PATH)
     STAR_GENOME = os.environ.get('STAR_GENOME', STAR_GENOME)
     BOWTIE2_GENOME = os.environ.get('BOWTIE2_GENOME', BOWTIE2_GENOME)
     DB_SAMPLE_ID = os.environ['DB_SAMPLE_ID']
     AWS_BATCH_JOB_ID = os.environ.get('AWS_BATCH_JOB_ID', 'local')
-    SAMPLE_HOST = os.environ.get('SAMPLE_HOST', '')
-    SAMPLE_LOCATION = os.environ.get('SAMPLE_LOCATION', '')
-    SAMPLE_DATE = os.environ.get('SAMPLE_DATE', '')
-    SAMPLE_TISSUE = os.environ.get('SAMPLE_TISSUE', '')
-    SAMPLE_TEMPLATE = os.environ.get('SAMPLE_TEMPLATE', '')
-    SAMPLE_LIBRARY = os.environ.get('SAMPLE_LIBRARY', '')
-    SAMPLE_SEQUENCER = os.environ.get('SAMPLE_SEQUENCER', '')
-    SAMPLE_NOTES = os.environ.get('SAMPLE_NOTES', '')
+    FILTER_HOST_FLAG = int(os.environ.get('FILTER_HOST_FLAG', FILTER_HOST_FLAG))
+    ENVIRONMENT = os.environ.get('ENVIRONMENT', ENVIRONMENT)
+
     sample_s3_input_path = INPUT_BUCKET.rstrip('/')
     sample_s3_output_path = OUTPUT_BUCKET.rstrip('/')
+    key_s3_path = get_key_path(ENVIRONMENT)
 
-    run_sample(sample_s3_input_path, sample_s3_output_path,
+    run_sample(sample_s3_input_path, FILE_TYPE, FILTER_HOST_FLAG, sample_s3_output_path,
                STAR_GENOME, BOWTIE2_GENOME,
-               KEY_S3_PATH, KEY_S3_PATH, ACCESSION2TAXID,
+               key_s3_path, key_s3_path, ACCESSION2TAXID,
                DEUTEROSTOME_TAXIDS, TAXID_TO_INFO, DB_SAMPLE_ID,
-               AWS_BATCH_JOB_ID, True)
+               AWS_BATCH_JOB_ID, ENVIRONMENT, True)
 
 if __name__=="__main__":
     main()
