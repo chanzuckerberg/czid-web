@@ -34,7 +34,7 @@ BOWTIE2="bowtie2"
 
 LZW_FRACTION_CUTOFF = 0.45
 
-GSNAPL_MAX_CONCURRENT = 5
+GSNAPL_MAX_CONCURRENT = 20
 RAPSEARCH2_MAX_CONCURRENT = 5
 
 STAR_GENOME = 's3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz'
