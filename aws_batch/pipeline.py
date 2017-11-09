@@ -909,7 +909,7 @@ def run_star_part(output_dir, genome_dir, fastq_file_1, fastq_file_2):
                            '--readFilesIn', fastq_file_1, fastq_file_2]
     if fastq_file_1[-3:] == '.gz':
         star_command_params += ['--readFilesCommand', 'zcat']
-    execute_command(" ".join(star_command_params))
+    execute_command_realtime_stdout(" ".join(star_command_params), os.path.join(output_dir, "Log.progress.out"))
 
 def run_host_filtering(sample_name, fastq_file_1, fastq_file_2, file_type, initial_file_type_for_log, star_genome_s3_path, bowtie2_genome_s3_path,
                        DEFAULT_LOGPARAMS, result_dir, scratch_dir, sample_s3_output_path, lazy_run):
