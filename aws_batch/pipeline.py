@@ -16,7 +16,7 @@ import logging
 import math
 import threading
 
-ENVIRONMENT = 'alpha'
+ENVIRONMENT = 'production'
 INPUT_BUCKET = 's3://czbiohub-infectious-disease/UGANDA' # default to be overwritten by environment variable
 FILE_TYPE = 'fastq.gz'
 OUTPUT_BUCKET = 's3://czbiohub-idseq-samples-test/id-uganda'  # default to be overwritten by environment variable
@@ -496,6 +496,7 @@ def return_merged_dict(dict1, dict2):
 ### job functions
 
 def environment_for_aligners(environment):
+    return "production" ## temporary fix since we only have "production" gsnap/rapsearch machines right now
     if environment == "development":
         return "alpha"
     return environment
@@ -617,7 +618,7 @@ def wait_for_server_ip(service_name, key_path, remote_username, environment, max
             print "%s server %s has capacity. Kicking off " % (service_name, min_nproc_ip)
             return min_nproc_ip
         else:
-            wait_seconds = random.randint(30, 60)
+            wait_seconds = random.randint(300, 600)
             print "%s servers busy. Wait for %d seconds" % \
                   (service_name, wait_seconds)
             time.sleep(wait_seconds)
