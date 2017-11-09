@@ -3,6 +3,7 @@ require 'json'
 class PipelineRun < ApplicationRecord
   belongs_to :sample
   has_one :pipeline_output
+  has_many :pipeline_run_stages
 
   OUTPUT_JSON_NAME = 'idseq_web_sample.json'.freeze
   STATS_JSON_NAME = 'stats.json'.freeze
