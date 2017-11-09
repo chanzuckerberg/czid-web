@@ -105,7 +105,7 @@ class Sample < ApplicationRecord
   end
 
   def filter_host_flag
-    host_genome == HostGenome::NO_HOST_NAME ? 0 : 1
+    host_genome.name == HostGenome::NO_HOST_NAME ? 0 : 1
   end
 
   def sample_output_s3_path
