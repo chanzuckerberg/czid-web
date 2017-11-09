@@ -16,7 +16,7 @@ import logging
 import math
 import threading
 
-ENVIRONMENT = 'alpha'
+ENVIRONMENT = 'production'
 INPUT_BUCKET = 's3://czbiohub-infectious-disease/UGANDA' # default to be overwritten by environment variable
 FILE_TYPE = 'fastq.gz'
 OUTPUT_BUCKET = 's3://czbiohub-idseq-samples-test/id-uganda'  # default to be overwritten by environment variable
@@ -496,6 +496,7 @@ def return_merged_dict(dict1, dict2):
 ### job functions
 
 def environment_for_aligners(environment):
+    return "production" ## temporary fix since we only have "production" gsnap/rapsearch machines right now
     if environment == "development":
         return "alpha"
     return environment
@@ -600,8 +601,10 @@ def get_server_ips(service_name, environment):
     return server_ips
 
 def wait_for_server_ip(service_name, key_path, remote_username, environment, max_concurrent):
+    instance_ips = get_server_ips(service_name, environment)
+    i = 1
     while True:
-        instance_ips = get_server_ips(service_name, environment)
+        if i % 10 == 0: instance_ips = get_server_ips(service_name, environment)
         ip_nproc_dict = {}
         for ip in instance_ips:
             command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "ps aux|grep gsnapl|grep -v bash" || echo "error"' % (key_path, remote_username, ip)
@@ -621,6 +624,7 @@ def wait_for_server_ip(service_name, key_path, remote_username, environment, max
             print "%s servers busy. Wait for %d seconds" % \
                   (service_name, wait_seconds)
             time.sleep(wait_seconds)
+            i += 1
 
 class TimeFilter(logging.Filter):
     def filter(self, record):
