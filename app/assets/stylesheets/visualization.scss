@@ -5,6 +5,12 @@
     #visualization-sidebar {
       .select-pathogens {
         background: #fff;
+        .loading-pathogens {
+          display: none;
+          font-size: 13px;
+          margin-bottom: 7px;
+          padding-bottom: 15px;
+        }
         .select-focus {
           padding: 10px;
         }
