@@ -79,6 +79,7 @@ class PipelineRun < ApplicationRecord
     return unless downloaded_json_path && downloaded_stats_path && downloaded_byteranges_path
     json_dict = JSON.parse(File.read(downloaded_json_path))
     stats_array = JSON.parse(File.read(downloaded_stats_path))
+    stats_array = stats_array.reject { |entry| entry.key?("total_reads") }
     byteranges_array = JSON.parse(File.read(downloaded_byteranges_path))
     pipeline_output_dict = json_dict['pipeline_output']
     pipeline_output_dict.slice!('name', 'total_reads',
