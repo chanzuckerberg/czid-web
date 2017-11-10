@@ -114,7 +114,7 @@ module SamplesHelper
         elsif %w[RUNNING LOADED].include?(pipeline_run_status)
           'IN PROGRESS'
         elsif pipeline_run_status == 'RUNNABLE'
-          'QUEUED'
+          'INITIALIZING'
         else
           'UPLOADING'
         end
