@@ -18,6 +18,16 @@ class PipelineSampleReport extends React.Component {
     this.enableFilters = this.enableFilters.bind(this);
   }
 
+  componentDidMount() {
+    $('.species-links').hide()
+    //display download links when genus name is hovered on
+    $('.genus-row').hover(function() {
+      $(this).find(".species-links").show(); 
+    }, function() {
+      $(this).find(".species-links").hide(); 
+    });
+  }
+
   refreshPage(overrides) {
     new_params = Object.assign({}, this.props.report_page_params, overrides);
     window.location = location.protocol + '//' + location.host + location.pathname + '?' + jQuery.param(new_params);
@@ -75,7 +85,7 @@ class PipelineSampleReport extends React.Component {
     }
     if (tax_info.tax_level == 1) {
       // indent species rows
-      foo = <div className='species-name'>{foo}</div>;
+      foo = <div className='species-name'>{foo}<span>sldfkdnf</span></div>;
     } else {
       // emphasize genus, soften category and species count
       category_name = tax_info.tax_id == -200 ? '' : tax_info.category_name;
@@ -91,9 +101,13 @@ class PipelineSampleReport extends React.Component {
           <i className={`fa fa-angle-right ${tax_info.tax_id}`} onClick={this.expandOrCollapseGenus}></i>
         </span>
       </span>;
-      foo = <div>
+      foo = <div className="genus-row">
               <div className='genus-name'> {plus_or_minus} {foo}</div>
               <i className='count-info'>({tax_info.species_count} {category_name} species)</i>
+              <span className="species-links">
+                <i className="fa fa-link cloud" aria-hidden="true"></i>
+                <i className="fa fa-cloud-download cloud" aria-hidden="true"></i>
+              </span>
             </div>;
     }
     return foo;
@@ -225,61 +239,71 @@ class PipelineSampleReport extends React.Component {
               <div className="col s2 reports-sidebar">
                 {report_filter}
               </div>
-              <div className="col s10 reports-main ">
-                <table id="report-table" className='bordered report-table'>
-                  <thead>
-                  <tr>
-                    <th>
-                      <span className={`table-arrow ${right_arrow_initial_visibility}`}>
-                        <i className={`fa fa-angle-right`} onClick={this.expandTable}></i>
-                      </span>
-                      <span className={`table-arrow hidden`}>
-                        <i className={`fa fa-angle-down`} onClick={this.collapseTable}></i>
-                      </span>
-                      Taxonomy
-                    </th>
-                    { this.render_column_header('NT+NR', 'ZZRPM',  'nt_aggregatescore') }
-                    { this.render_column_header('NT', 'Z',   'nt_zscore') }
-                    { this.render_column_header('NT', 'rPM', 'nt_rpm')    }
-                    { this.render_column_header('NT', 'r',   'nt_r')      }
-                    { this.render_column_header('NT', '%id', 'nt_percentidentity')    }
-                    { this.render_column_header('NT', 'AL',   'nt_alignmentlength')    }
-                    { this.render_column_header('NT', 'Log(1/E)',  'nt_neglogevalue')    }
-                    { this.render_column_header('NR', 'Z',   'nr_zscore') }
-                    { this.render_column_header('NR', 'rPM', 'nr_rpm')    }
-                    { this.render_column_header('NR', 'r',   'nr_r')      }
-                    { this.render_column_header('NR', '%id', 'nr_percentidentity')    }
-                    { this.render_column_header('NR', 'AL',   'nr_alignmentlength')    }
-                    { this.render_column_header('NR', 'Log(1/E)',  'nr_neglogevalue')    }
-                  </tr>
-                  </thead>
-                  <tbody>
-                  { this.taxonomy_details.map((tax_info, i) => {
-                    return (
-                      <tr key={tax_info.tax_id} className={this.row_class(tax_info)}>
-                        <td>
-                          { this.render_name(tax_info, this.report_details) }
-                        </td>
-                        { this.render_number(tax_info.NT.aggregatescore, sort_column == 'nt_aggregatescore', 0) }
-                        { this.render_number(tax_info.NT.zscore, sort_column == 'nt_zscore', 1) }
-                        { this.render_number(tax_info.NT.rpm, sort_column == 'nt_rpm', 1)       }
-                        { this.render_number(tax_info.NT.r, sort_column == 'nt_r', 0)           }
-                        { this.render_number(tax_info.NT.percentidentity, sort_column == 'nt_percentidentity', 1) }
-                        { this.render_number(tax_info.NT.alignmentlength, sort_column == 'nt_alignmentlength', 1)       }
-                        { this.render_number(tax_info.NT.neglogevalue, sort_column == 'nt_neglogevalue', 0) }
-                        { this.render_number(tax_info.NR.zscore, sort_column == 'nr_zscore', 1) }
-                        { this.render_number(tax_info.NR.rpm, sort_column == 'nr_rpm', 1)       }
-                        { this.render_number(tax_info.NR.r, sort_column == 'nr_r', 0)           }
-                        { this.render_number(tax_info.NR.percentidentity, sort_column == 'nr_percentidentity', 1) }
-                        { this.render_number(tax_info.NR.alignmentlength, sort_column == 'nr_alignmentlength', 1)       }
-                        { this.render_number(tax_info.NR.neglogevalue, sort_column == 'nr_neglogevalue', 0) }
-                      </tr>
-                    )
-                  })}
-                  </tbody>
-                </table>
-              {filter_row_stats}
-              </div>
+              <div className="col s10 reports-section">
+                <div className="reports-count">
+                  <span className="download">
+                    <a className="custom-button download" href="">
+                      <i className="fa fa-cloud-download left"></i> Download Report
+                    </a>
+                  </span>
+                  <span className="count"><b>{this.rows_total} results</b> matching filter criteria</span>
+                </div>
+                <div className="row reports-main ">
+                  <table id="report-table" className='bordered report-table'>
+                    <thead>
+                    <tr>
+                      <th>
+                        <span className={`table-arrow ${right_arrow_initial_visibility}`}>
+                          <i className={`fa fa-angle-right`} onClick={this.expandTable}></i>
+                        </span>
+                        <span className={`table-arrow hidden`}>
+                          <i className={`fa fa-angle-down`} onClick={this.collapseTable}></i>
+                        </span>
+                        Taxonomy
+                      </th>
+                      { this.render_column_header('NT+NR', 'ZZRPM',  'nt_aggregatescore') }
+                      { this.render_column_header('NT', 'Z',   'nt_zscore') }
+                      { this.render_column_header('NT', 'rPM', 'nt_rpm')    }
+                      { this.render_column_header('NT', 'r',   'nt_r')      }
+                      { this.render_column_header('NT', '%id', 'nt_percentidentity')    }
+                      { this.render_column_header('NT', 'AL',   'nt_alignmentlength')    }
+                      { this.render_column_header('NT', 'Log(1/E)',  'nt_neglogevalue')    }
+                      { this.render_column_header('NR', 'Z',   'nr_zscore') }
+                      { this.render_column_header('NR', 'rPM', 'nr_rpm')    }
+                      { this.render_column_header('NR', 'r',   'nr_r')      }
+                      { this.render_column_header('NR', '%id', 'nr_percentidentity')    }
+                      { this.render_column_header('NR', 'AL',   'nr_alignmentlength')    }
+                      { this.render_column_header('NR', 'Log(1/E)',  'nr_neglogevalue')    }
+                    </tr>
+                    </thead>
+                    <tbody>
+                    { this.taxonomy_details.map((tax_info, i) => {
+                      return (
+                        <tr key={tax_info.tax_id} className={this.row_class(tax_info)}>
+                          <td>
+                            { this.render_name(tax_info, this.report_details) }
+                          </td>
+                          { this.render_number(tax_info.NT.aggregatescore, sort_column == 'nt_aggregatescore', 0) }
+                          { this.render_number(tax_info.NT.zscore, sort_column == 'nt_zscore', 1) }
+                          { this.render_number(tax_info.NT.rpm, sort_column == 'nt_rpm', 1)       }
+                          { this.render_number(tax_info.NT.r, sort_column == 'nt_r', 0)           }
+                          { this.render_number(tax_info.NT.percentidentity, sort_column == 'nt_percentidentity', 1) }
+                          { this.render_number(tax_info.NT.alignmentlength, sort_column == 'nt_alignmentlength', 1)       }
+                          { this.render_number(tax_info.NT.neglogevalue, sort_column == 'nt_neglogevalue', 0) }
+                          { this.render_number(tax_info.NR.zscore, sort_column == 'nr_zscore', 1) }
+                          { this.render_number(tax_info.NR.rpm, sort_column == 'nr_rpm', 1)       }
+                          { this.render_number(tax_info.NR.r, sort_column == 'nr_r', 0)           }
+                          { this.render_number(tax_info.NR.percentidentity, sort_column == 'nr_percentidentity', 1) }
+                          { this.render_number(tax_info.NR.alignmentlength, sort_column == 'nr_alignmentlength', 1)       }
+                          { this.render_number(tax_info.NR.neglogevalue, sort_column == 'nr_neglogevalue', 0) }
+                        </tr>
+                      )
+                    })}
+                    </tbody>
+                  </table>
+                {filter_row_stats}
+                </div>
+            </div>
             </div>
           </div>
         </div>
