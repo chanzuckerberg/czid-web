@@ -19,12 +19,12 @@ class PipelineSampleReport extends React.Component {
   }
 
   componentDidMount() {
-    $('.species-links').hide()
+    $('.link-tag').hide()
     //display download links when genus name is hovered on
-    $('.genus-row').hover(function() {
-      $(this).find(".species-links").show(); 
+    $('.hover-wrapper').hover(function() {
+      $(this).find(".link-tag").show(); 
     }, function() {
-      $(this).find(".species-links").hide(); 
+      $(this).find(".link-tag").hide(); 
     });
   }
 
@@ -85,7 +85,14 @@ class PipelineSampleReport extends React.Component {
     }
     if (tax_info.tax_level == 1) {
       // indent species rows
-      foo = <div className='species-name'>{foo}<span>sldfkdnf</span></div>;
+      foo = <div className="hover-wrapper">
+          <div className='species-name'>{foo}
+          <span className="link-tag">
+            <i className="fa fa-link cloud" aria-hidden="true"></i>
+            <i className="fa fa-cloud-download cloud" aria-hidden="true"></i>
+          </span>
+        </div>
+      </div>;
     } else {
       // emphasize genus, soften category and species count
       category_name = tax_info.tax_id == -200 ? '' : tax_info.category_name;
@@ -101,10 +108,10 @@ class PipelineSampleReport extends React.Component {
           <i className={`fa fa-angle-right ${tax_info.tax_id}`} onClick={this.expandOrCollapseGenus}></i>
         </span>
       </span>;
-      foo = <div className="genus-row">
+      foo = <div className="hover-wrapper">
               <div className='genus-name'> {plus_or_minus} {foo}</div>
               <i className='count-info'>({tax_info.species_count} {category_name} species)</i>
-              <span className="species-links">
+              <span className="link-tag">
                 <i className="fa fa-link cloud" aria-hidden="true"></i>
                 <i className="fa fa-cloud-download cloud" aria-hidden="true"></i>
               </span>

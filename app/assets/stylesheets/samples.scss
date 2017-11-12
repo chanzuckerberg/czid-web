@@ -490,9 +490,9 @@ input[type=search]:focus:not([readonly]) {
 }
 
 
-.genus-row {
+.hover-wrapper {
   cursor: pointer;
-  .species-links {
+  .link-tag {
     padding: 10px;
     color: #84d4fa;
     font-size: 15px;
