@@ -119,7 +119,7 @@ class PipelineRun < ApplicationRecord
     downloaded_byteranges_path = download_file(byteranges_json_s3_path, local_json_path)
     return unless downloaded_byteranges_path
     taxon_byteranges_csv_file = "#{local_json_path}/taxon_byteranges"
-    hash_array_json2csv(downloaded_byteranges_path, taxon_byteranges_csv_file, ["taxid", "hit_type", "first_byte", "last_byte"])
+    hash_array_json2csv(downloaded_byteranges_path, taxon_byteranges_csv_file, %w[taxid hit_type first_byte last_byte])
     ` cd #{local_json_path};
       sed -e 's/$/,#{pipeline_output.id}/' -i taxon_byteranges;
       mysqlimport --delete --local --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --columns=taxid,hit_type,first_byte,last_byte,pipeline_output_id --fields-terminated-by=',' idseq_#{Rails.env} taxon_byteranges;
