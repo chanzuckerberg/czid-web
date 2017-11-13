@@ -16,6 +16,7 @@ class PipelineRun < ApplicationRecord
   STATUS_RUNNABLE = 'RUNNABLE'.freeze
   STATUS_ERROR = 'ERROR'.freeze # when aegea batch describe failed
   STATUS_LOADED = 'LOADED'.freeze
+  POSTPROCESS_STATUS_LOADED = 'LOADED'.freeze
 
   before_save :check_job_status
 
@@ -116,6 +117,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def load_postprocess_from_s3
+    return if postprocess_status == POSTPROCESS_STATUS_LOADED
     byteranges_json_s3_path = "#{sample.sample_postprocess_s3_path}/#{TAXID_BYTERANGE_JSON_NAME}"
     downloaded_byteranges_path = download_file(byteranges_json_s3_path, local_json_path)
     return unless downloaded_byteranges_path
@@ -125,6 +127,8 @@ class PipelineRun < ApplicationRecord
       sed -e 's/$/,#{pipeline_output.id}/' -i taxon_byteranges;
       mysqlimport --replace --local --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --columns=taxid,hit_type,first_byte,last_byte,pipeline_output_id --fields-terminated-by=',' idseq_#{Rails.env} taxon_byteranges;
     `
+    self.postprocess_status = POSTPROCESS_STATUS_LOADED
+    save
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_byteranges_path}")
   end
 
