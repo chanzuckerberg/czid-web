@@ -150,7 +150,7 @@ class ProjectVisualization extends React.Component {
         .text(d => d.pathogen)
         .attr('y', (d, i) => ((i * grid.height) + 5) + (grid.height / 1.5))
         .attr('text-anchor', 'end')
-        .attr('x', margin.left + 5)
+        .attr('x', margin.left - 5)
         .merge(drawPathogenName)
         .transition(transition)
         .attr('y', (d, i) => ((i * grid.height) + 5) + (grid.height / 1.5))
