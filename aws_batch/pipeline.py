@@ -663,7 +663,10 @@ def run_and_log(logparams, func_name, *args):
         records_before = count_reads(logparams["before_file_name"], logparams["before_file_type"])
         records_after = count_reads(logparams["after_file_name"], logparams["after_file_type"])
         if logparams["count_reads"]:
-            percent_removed = (100.0 * (records_before - records_after)) / records_before
+            if int(records_before) > 0:
+                percent_removed = (100.0 * (records_before - records_after)) / records_before
+            else:
+                percent_removed = 0.0
             logger.info("%s %% of reads dropped out, %s reads remaining" % (percent_str(percent_removed), str(records_after)))
             STATS.append({'task': func_name.__name__, 'reads_before': records_before, 'reads_after': records_after})
         # function-specific logs
