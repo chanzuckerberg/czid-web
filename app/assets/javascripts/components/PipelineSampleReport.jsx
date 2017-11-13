@@ -17,15 +17,19 @@ class PipelineSampleReport extends React.Component {
     this.disableFilters = this.disableFilters.bind(this);
     this.enableFilters = this.enableFilters.bind(this);
   }
-
+  
   componentDidMount() {
-    $('.link-tag').hide()
+    this.hideTags();
     //display download links when genus name is hovered on
     $('.hover-wrapper').hover(function() {
       $(this).find(".link-tag").show(); 
     }, function() {
       $(this).find(".link-tag").hide(); 
     });
+  }
+
+  hideTags() {
+    $('.link-tag').hide()
   }
 
   refreshPage(overrides) {
@@ -89,7 +93,7 @@ class PipelineSampleReport extends React.Component {
           <div className='species-name'>{foo}
           <span className="link-tag">
             <i className="fa fa-link cloud" aria-hidden="true"></i>
-            <i className="fa fa-cloud-download cloud" aria-hidden="true"></i>
+            <i className="fa fa-download cloud" aria-hidden="true"></i>
           </span>
         </div>
       </div>;
@@ -113,7 +117,7 @@ class PipelineSampleReport extends React.Component {
               <i className='count-info'>({tax_info.species_count} {category_name} species)</i>
               <span className="link-tag">
                 <i className="fa fa-link cloud" aria-hidden="true"></i>
-                <i className="fa fa-cloud-download cloud" aria-hidden="true"></i>
+                <i className="fa fa-download cloud" aria-hidden="true"></i>
               </span>
             </div>;
     }
@@ -201,23 +205,28 @@ class PipelineSampleReport extends React.Component {
     $(`.table-arrow`).toggleClass('hidden');
   }
 
+  downloadReport(id, view_level) {
+    location.href = `/reports/${id}/${view_level}/csv`
+  }
+
   render() {
     const parts = this.props.report_page_params.sort_by.split("_")
     const sort_column = parts[1] + "_" + parts[2];
     var t0 = Date.now();
-    filter_stats = this.rows_passing_filters + ' rows passing filters, out of ' + this.rows_total + ' total rows.';
+    filter_stats = this.rows_passing_filters + ' Results matching filter criteria';
     if (this.props.report_page_params.disable_filters == 1) {
       filter_stats = this.rows_total + ' unfiltered rows.';
     }
     filter_row_stats = (
-      <span>
-        {this.rows_passing_filters == this.taxonomy_details.length ?
-          ('Showing all ' + filter_stats) :
-          ('Due to resource limits, showing only ' + this.taxonomy_details.length + ' of the ' + filter_stats)}
-        <br/>
-        {this.rows_passing_filters < this.rows_total && this.props.report_page_params.disable_filters == 0 ? <a href="#" onClick={this.disableFilters}>Click to disable filters.</a> : ''}
-        {this.props.report_page_params.disable_filters == 1 ? <a href="#" onClick={this.enableFilters}>Click to enable filters.</a> : ''}
-      </span>
+      <div>
+        <span className="count">
+          {this.rows_passing_filters == this.taxonomy_details.length ?
+            (filter_stats) :
+            ('Due to resource limits, showing only ' + this.taxonomy_details.length + ' of the ' + filter_stats)}
+        </span>
+        {this.rows_passing_filters < this.rows_total && this.props.report_page_params.disable_filters == 0 ? <span className="disable" onClick={this.disableFilters}><b> Disable filters</b></span> : ''}
+        {this.props.report_page_params.disable_filters == 1 ? <span className="disable" onClick={this.enableFilters}><b> Enable filters</b></span> : ''}
+      </div>
     );
     report_filter =
       <ReportFilter
@@ -233,9 +242,11 @@ class PipelineSampleReport extends React.Component {
       />;
     // To do: improve presentation and place download_button somewhere on report page
     download_button = (
-      <a href= { `/reports/${this.report_details.report_info.id}/${this.props.report_page_params.view_level}/csv` }>
-          <i className="fa fa-cloud-download left"></i>
-      </a>
+      <span className="download">
+        <a className="custom-button download" onClick={this.downloadReport.bind(this, this.report_details.report_info.id, this.props.report_page_params.view_level )}>
+          <i className="fa fa-cloud-download left"></i> Download Report
+        </a>
+      </span>
     );
     right_arrow_initial_visibility = this.isGenusSearch() ? 'hidden' : '';
     result = (
@@ -248,12 +259,8 @@ class PipelineSampleReport extends React.Component {
               </div>
               <div className="col s10 reports-section">
                 <div className="reports-count">
-                  <span className="download">
-                    <a className="custom-button download" href="">
-                      <i className="fa fa-cloud-download left"></i> Download Report
-                    </a>
-                  </span>
-                  <span className="count"><b>{this.rows_total} results</b> matching filter criteria</span>
+                  { download_button }
+                  { filter_row_stats }
                 </div>
                 <div className="row reports-main ">
                   <table id="report-table" className='bordered report-table'>
@@ -308,7 +315,6 @@ class PipelineSampleReport extends React.Component {
                     })}
                     </tbody>
                   </table>
-                {filter_row_stats}
                 </div>
             </div>
             </div>

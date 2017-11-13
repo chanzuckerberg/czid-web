@@ -267,6 +267,12 @@
   }
 }
 
+.report-table {
+  td:first-child {
+    width: 450px;
+  }
+}
+
 
 .genus-autocomplete-container div div.decorate-dropdown{
   display: block;
@@ -279,4 +285,43 @@
   z-index: 500;
   background: #fff;
   padding: 10px;
+}
+
+.reports-section {
+  padding: 0 !important;
+  .reports-count {
+    box-shadow: 1px 2px 5px 0px #eaeaea;
+    .count {
+      display: inline-block;
+      margin: 20px 0 18px 60px;
+      
+    }
+    .download {
+      float: right;
+    }
+    .disable {
+      cursor: pointer;
+      color: #414367;
+      &:hover {
+        color: #84d4fa;
+      }
+    }
+  }
+}
+
+.hover-wrapper {
+  cursor: pointer;
+  .link-tag {
+    padding: 10px;
+    color: #84d4fa;
+    font-size: 15px;
+    cursor: pointer;
+    .cloud {
+      color: #84d4fa;
+      font-size: 15px;
+      &:hover {
+        color: #414367
+      }
+    }
+  }
 }
