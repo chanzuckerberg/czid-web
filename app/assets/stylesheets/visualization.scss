@@ -2,6 +2,12 @@
   .visualization-content {
     background: #eeeff1;
     margin-top: 4px;
+    .viz {
+      &.loading-pathogens {
+        margin-top: 20px;
+        display: none;
+      }
+    }
     #visualization-sidebar {
       .select-pathogens {
         background: #fff;
@@ -119,34 +125,6 @@
       }
       .color-scale-info {
         margin-top: 20px;
-        li{
-          display: inline-block;
-          width: 20px;
-          height: 20px;
-          border: 1px solid;
-          margin: 3px;
-
-          &.a {
-            background: #9E9E9E;
-          }
-
-          &.b {
-            background: #757575;
-          }
-
-          &.c {
-            background: #424242;
-          }
-          &.d {
-            background: #212121;
-          }
-          &.e {
-            background: #263238;
-          }
-        }
-        .scale-label {
-          padding-bottom: 10px;
-        }
       }
     }
     .Visualization-actions {

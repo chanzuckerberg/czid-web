@@ -42,6 +42,12 @@ class ProjectVisualization extends React.Component {
               <div className="card-content">
                 <div className='row'>
                   <div className='col s9 center' id="heat-map">
+                    <div className="viz loading-pathogens center grey-text darken-2">
+                      <div className='message'>
+                        Please wait fetching pathogens to visualize
+                      </div>
+                      <i className="fa fa-spinner fa-spin fa-2x"></i>
+                    </div>
                     <svg id='heat-map-canvas'></svg>
                   </div>
                    <div className='col s3'>
@@ -89,7 +95,6 @@ class ProjectVisualization extends React.Component {
       width: (grid.width * totalSamples) + paddingLeft,
       height: (grid.height * dataLength) + paddingBottom
     };
-
     const svg = d3.select('#heat-map-canvas');
     const margin = {
       top: 20,
@@ -145,7 +150,7 @@ class ProjectVisualization extends React.Component {
         .text(d => d.pathogen)
         .attr('y', (d, i) => ((i * grid.height) + 5) + (grid.height / 1.5))
         .attr('text-anchor', 'end')
-        .attr('x', margin.left)
+        .attr('x', margin.left + 5)
         .merge(drawPathogenName)
         .transition(transition)
         .attr('y', (d, i) => ((i * grid.height) + 5) + (grid.height / 1.5))

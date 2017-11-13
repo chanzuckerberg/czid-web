@@ -54,11 +54,15 @@ class SelectPathogen extends React.Component {
   componentDidMount() {
     $('select').material_select();
     // fetch data from the csv files
-    this.setState({ fetchingPathogens: true });
-    $('.loading-pathogens').show();
+    // this.setState({ fetchingPathogens: true });
+    $('.selected-pathogens .loading-pathogens').show();
+    $('.viz.loading-pathogens').show();
     this.getData(this.state.samples, (data) => {
-      $('.loading-pathogens').hide();
-      this.setState({ fetchingPathogens: false });
+      $('.selected-pathogens .loading-pathogens').hide();
+      $('.viz.loading-pathogens i').hide();
+      $('.viz.loading-pathogens .message').html('All set, now select a pathogen...');
+      // this.setState({ fetchingPathogens: false });
+      $('.viz.loading-pathogens').show();
       this.allReads = data;
       this.paginatePathogens.initialize(data, this.pathogensPerPage);
       this.setState({
@@ -77,7 +81,8 @@ class SelectPathogen extends React.Component {
           selectedReads: updatedPathogens
         });
         const sorted = ProjectVisualization.sortPathogens(updatedPathogens, this.state.sortBy);
-        if (updatedPathogens.length > 1) {
+        if (updatedPathogens.length > 0) {
+          $('.viz.loading-pathogens').hide();
           ProjectVisualization.renderHeatMap(sorted, this.sampleNames,
             this.state.countType, this.state.sortBy);
         }
