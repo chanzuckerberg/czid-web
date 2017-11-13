@@ -120,6 +120,7 @@ class PipelineRun < ApplicationRecord
     return if postprocess_status == POSTPROCESS_STATUS_LOADED
     byteranges_json_s3_path = "#{sample.sample_postprocess_s3_path}/#{TAXID_BYTERANGE_JSON_NAME}"
     downloaded_byteranges_path = download_file(byteranges_json_s3_path, local_json_path)
+    puts downloaded_byteranges_path
     return unless downloaded_byteranges_path
     taxon_byteranges_csv_file = "#{local_json_path}/taxon_byteranges"
     hash_array_json2csv(downloaded_byteranges_path, taxon_byteranges_csv_file, %w[taxid hit_type first_byte last_byte])
@@ -127,6 +128,7 @@ class PipelineRun < ApplicationRecord
       sed -e 's/$/,#{pipeline_output.id}/' -i taxon_byteranges;
       mysqlimport --replace --local --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --columns=taxid,hit_type,first_byte,last_byte,pipeline_output_id --fields-terminated-by=',' idseq_#{Rails.env} taxon_byteranges;
     `
+    puts "done mysqlimport"
     self.postprocess_status = POSTPROCESS_STATUS_LOADED
     save
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_byteranges_path}")
