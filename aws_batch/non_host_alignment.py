@@ -26,21 +26,9 @@ REF_DIR  = ROOT_DIR + '/idseq/ref' # referene genome / ref databases go here
 
 FILTER_HOST_FLAG = 1
 
-STAR="STAR"
-HTSEQ="htseq-count"
-SAMTOOLS="samtools"
-PRICESEQ_FILTER="PriceSeqFilter"
-CDHITDUP="cd-hit-dup"
-BOWTIE2="bowtie2"
-
-
-LZW_FRACTION_CUTOFF = 0.45
-
 GSNAPL_MAX_CONCURRENT = 20
 RAPSEARCH2_MAX_CONCURRENT = 5
 
-STAR_GENOME = 's3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz'
-BOWTIE2_GENOME = 's3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz'
 ACCESSION2TAXID = 's3://czbiohub-infectious-disease/references/accession2taxid.db.gz'
 DEUTEROSTOME_TAXIDS = 's3://czbiohub-infectious-disease/references/lineages-2017-03-17_deuterostome_taxIDs.txt'
 TAXID_TO_INFO = 's3://czbiohub-infectious-disease/references/taxon_info.db'
@@ -48,18 +36,7 @@ TAXID_TO_INFO = 's3://czbiohub-infectious-disease/references/taxon_info.db'
 TAX_LEVEL_SPECIES = 1
 TAX_LEVEL_GENUS = 2
 
-#output files
-STAR_OUT1 = 'unmapped.star.1.fq'
-STAR_OUT2 = 'unmapped.star.2.fq'
-PRICESEQFILTER_OUT1 = 'priceseqfilter.unmapped.star.1.fq'
-PRICESEQFILTER_OUT2 = 'priceseqfilter.unmapped.star.2.fq'
-FQ2FA_OUT1 = 'priceseqfilter.unmapped.star.1.fasta'
-FQ2FA_OUT2 = 'priceseqfilter.unmapped.star.2.fasta'
-CDHITDUP_OUT1 = 'cdhitdup.priceseqfilter.unmapped.star.1.fasta'
-CDHITDUP_OUT2 = 'cdhitdup.priceseqfilter.unmapped.star.2.fasta'
-LZW_OUT1 = 'lzw.cdhitdup.priceseqfilter.unmapped.star.1.fasta'
-LZW_OUT2 = 'lzw.cdhitdup.priceseqfilter.unmapped.star.2.fasta'
-BOWTIE2_OUT = 'bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.sam'
+# output files
 EXTRACT_UNMAPPED_FROM_SAM_OUT1 = 'unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.1.fasta'
 EXTRACT_UNMAPPED_FROM_SAM_OUT2 = 'unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.2.fasta'
 EXTRACT_UNMAPPED_FROM_SAM_OUT3 = 'unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.merged.fasta'
@@ -86,32 +63,10 @@ COMBINED_JSON_OUT = 'idseq_web_sample.json'
 LOGS_OUT_BASENAME = 'log'
 STATS_OUT = 'stats.json'
 
-#global statistics log
+# global statistics log
 STATS = []
 
 ### convenience functions
-def count_reads(file_name, file_type):
-    count = 0
-    if file_name[-3:] == '.gz':
-        f = gzip.open(file_name)
-    else:
-        f = open(file_name)
-    for line in f:
-        if file_type == "fastq_paired":
-            count += 2./4
-        elif file_type == "fasta_paired":
-            if line.startswith('>'):
-                count += 2
-        elif file_type == "fasta":
-            if line.startswith('>'):
-                count += 1
-        elif file_type == "m8" and line[0] == '#':
-            continue
-        else:
-            count += 1
-    f.close()
-    return int(count)
-
 def clean_direct_gsnapl_input(fastq_files, file_type, sample_s3_output_path):
     # unzip files if necessary
     if ".gz" in file_type:
@@ -128,32 +83,6 @@ def clean_direct_gsnapl_input(fastq_files, file_type, sample_s3_output_path):
     for f in cleaned_files:
         execute_command("aws s3 cp %s %s/" % (f, sample_s3_output_path))
     return cleaned_files, file_type_for_log
-
-def lzw_fraction(sequence):
-    if sequence == "":
-        return 0.0
-    sequence = sequence.upper()
-    dict_size = 0
-    dictionary = {}
-    # Initialize dictionary with single char
-    for c in sequence:
-        dict_size += 1
-        dictionary[c] = dict_size
-
-    word = ""
-    results = []
-    for c in sequence:
-        wc = word + c
-        if dictionary.get(wc):
-            word = wc
-        else:
-            results.append(dictionary[word])
-            dict_size += 1
-            dictionary[wc] = dict_size
-            word = c
-    if word != "":
-        results.append(dictionary[word])
-    return float(len(results))/len(sequence)
 
 def generate_taxid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fasta_file, annotation_prefix):
     '''Tag reads based on the m8 output'''
@@ -190,64 +119,6 @@ def generate_taxid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fas
     input_fasta_f.close()
     output_fasta_f.close()
 
-def generate_lzw_filtered_paired(fasta_file_1, fasta_file_2, output_prefix, cutoff_fraction):
-    output_read_1 = open(output_prefix + '.1.fasta', 'wb')
-    output_read_2 = open(output_prefix + '.2.fasta', 'wb')
-    read_1 = open(fasta_file_1, 'rb')
-    read_2 = open(fasta_file_2, 'rb')
-    count = 0
-    filtered = 0
-    while True:
-        line_r1_header   = read_1.readline()
-        line_r1_sequence = read_1.readline()
-        line_r2_header   = read_2.readline()
-        line_r2_sequence = read_2.readline()
-        if line_r1_header and line_r1_sequence and line_r2_header and line_r2_sequence:
-            fraction_1 = lzw_fraction(line_r1_sequence.rstrip())
-            fraction_2 = lzw_fraction(line_r2_sequence.rstrip())
-            count += 1
-            if fraction_1 > cutoff_fraction and fraction_2 > cutoff_fraction:
-                output_read_1.write(line_r1_header)
-                output_read_1.write(line_r1_sequence)
-                output_read_2.write(line_r2_header)
-                output_read_2.write(line_r2_sequence)
-            else:
-                filtered += 1
-        else:
-            break
-    print "LZW filter: total reads: %d, filtered reads: %d, kept ratio: %f" % (count, filtered, 1 - float(filtered)/count)
-    output_read_1.close()
-    output_read_2.close()
-
-def generate_unmapped_pairs_from_sam(sam_file, output_prefix):
-    output_read_1 = open(output_prefix + '.1.fasta', 'wb')
-    output_read_2 = open(output_prefix + '.2.fasta', 'wb')
-    output_merged_read = open(output_prefix + '.merged.fasta', 'wb')
-    header = True
-    with open(sam_file, 'rb') as samf:
-        line = samf.readline()
-        while line[0] == '@':
-            line = samf.readline() # skip headers
-        read1 = line
-        read2 = samf.readline()
-        while read1 and read2:
-            parts1 = read1.split("\t")
-            parts2 = read2.split("\t")
-            if parts1[1] == "77" and parts2[1] == "141": # both parts unmapped
-                output_read_1.write(">%s\n%s\n" %(parts1[0], parts1[9]))
-                output_read_2.write(">%s\n%s\n" %(parts2[0], parts2[9]))
-                output_merged_read.write(">%s/1\n%s\n" %(parts1[0], parts1[9]))
-                output_merged_read.write(">%s/2\n%s\n" %(parts2[0], parts2[9]))
-            else: # parts mapped
-                print "Matched HG38 -----"
-                print read1
-                print read2
-            read1 = samf.readline()
-            read2 = samf.readline()
-    output_read_1.close()
-    output_read_2.close()
-    output_merged_read.close()
-
 def deduplicate_m8(input_m8, output_m8):
     outf = open(output_m8, "wb")
     previous_read_name = ''
@@ -262,7 +133,6 @@ def deduplicate_m8(input_m8, output_m8):
             outf.write(line)
             previous_read_name = read_name
     outf.close()
-
 
 def generate_tax_counts_from_m8(m8_file, e_value_type, output_file):
     # uses m8 file with read names beginning as: "taxid<taxon ID>:"
@@ -374,16 +244,6 @@ def generate_json_from_taxid_counts(sample, taxidCountsInputPath,
                                         "name": species_name,
                                         "count_type": countType})
 
-    '''
-    for (taxid, count) in genus_to_count.iteritems():
-        genus_name = genus_to_name[taxid]
-        taxon_counts_attributes.append({"tax_id": taxid,
-                                        "tax_level": TAX_LEVEL_GENUS,
-                                        "count": count,
-                                        "name": genus_name,
-                                        "count_type": countType})
-    '''
-
     output_dict = {
         "pipeline_output": {
             "total_reads": total_reads,
@@ -491,80 +351,6 @@ def environment_for_aligners(environment):
 def get_key_path(environment):
     return "s3://czbiohub-infectious-disease/idseq-%s.pem" % environment_for_aligners(environment)
 
-class Updater(object):
-
-    def __init__(self, update_period, update_function):
-        self.update_period = update_period
-        self.update_function = update_function
-        self.timer_thread = None
-        self.t_start = time.time()
-
-    def relaunch(self, initial_launch=False):
-        if self.timer_thread and not initial_launch:
-            t_elapsed = time.time() - self.t_start
-            self.update_function(t_elapsed)
-        self.timer_thread = threading.Timer(self.update_period, self.relaunch)
-        self.timer_thread.start()
-
-    def __enter__(self):
-        self.relaunch(initial_launch=True)
-        return self
-
-    def __exit__(self, *args):
-        self.timer_thread.cancel()
-
-
-class CommandTracker(Updater):
-
-    lock = threading.RLock()
-    count = 0
-
-    def __init__(self, update_period=15):
-        super(CommandTracker, self).__init__(update_period, self.print_update)
-        with CommandTracker.lock:
-            self.id = CommandTracker.count
-            CommandTracker.count += 1
-
-    def print_update(self, t_elapsed):
-        print "Command %d still running after %3.1f seconds." % (self.id, t_elapsed)
-        sys.stdout.flush()
-
-
-class ProgressFile(object):
-
-    def __init__(self, progress_file):
-        self.progress_file = progress_file
-        self.tail_subproc = None
-
-    def __enter__(self):
-        # TODO:  Do something else here. Tail gets confused if the file pre-exists.  Also need to rate-limit.
-        if self.progress_file:
-            self.tail_subproc = subprocess.Popen("touch {pf} ; tail -f {pf}".format(pf=self.progress_file), shell=True)
-        return self
-
-    def __exit__(self, *args):
-        if self.tail_subproc:
-            self.tail_subproc.kill()
-
-
-def execute_command_with_output(command, progress_file=None):
-    with CommandTracker() as ct:
-        print "Command {}: {}".format(ct.id, command)
-        with ProgressFile(progress_file):
-            return subprocess.check_output(command, shell=True)
-
-
-def execute_command_realtime_stdout(command, progress_file=None):
-    with CommandTracker() as ct:
-        print "Command {}: {}".format(ct.id, command)
-        with ProgressFile(progress_file):
-            subprocess.check_call(command, shell=True)
-
-
-def execute_command(command, progress_file=None):
-    execute_command_realtime_stdout(command, progress_file)
-
-
 def wait_for_server(service_name, command, max_concurrent):
     while True:
         output = execute_command_with_output(command).rstrip().split("\n")
@@ -612,62 +398,6 @@ def wait_for_server_ip(service_name, key_path, remote_username, environment, max
                   (service_name, wait_seconds)
             time.sleep(wait_seconds)
             i += 1
-
-class TimeFilter(logging.Filter):
-    def filter(self, record):
-        try:
-            last = self.last
-        except AttributeError:
-            last = record.relativeCreated
-        delta = datetime.datetime.fromtimestamp(record.relativeCreated/1000.0) - datetime.datetime.fromtimestamp(last/1000.0)
-        record.time_since_last = '{0:.2f}'.format(delta.seconds + delta.microseconds/1000000.0)
-        self.last = record.relativeCreated
-        return True
-
-def percent_str(percent):
-    try:
-        return "%3.1f" % percent
-    except:
-        return str(percent)
-
-def run_and_log(logparams, func_name, *args):
-    logger = logging.getLogger()
-    logger.info("========== %s ==========" % logparams.get("title"))
-    # copy log file -- start
-    logger.handlers[0].flush()
-    execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
-    # produce the output
-    func_return = func_name(*args)
-    if func_return == 1:
-        logger.info("output exists, lazy run")
-    else:
-        logger.info("uploaded output")
-    # copy log file -- after work is done
-    execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
-    # count records
-    required_params = ["before_file_name", "before_file_type", "after_file_name", "after_file_type"]
-    if all(param in logparams for param in required_params):
-        records_before = count_reads(logparams["before_file_name"], logparams["before_file_type"])
-        records_after = count_reads(logparams["after_file_name"], logparams["after_file_type"])
-        if logparams["count_reads"]:
-            percent_removed = (100.0 * (records_before - records_after)) / records_before
-            logger.info("%s %% of reads dropped out, %s reads remaining" % (percent_str(percent_removed), str(records_after)))
-            STATS.append({'task': func_name.__name__, 'reads_before': records_before, 'reads_after': records_after})
-        # function-specific logs
-        if func_name.__name__ == "run_cdhitdup":
-            compression_ratio = (1.0 * records_before) / records_after
-            logger.info("duplicate compression ratio: %s" % str(compression_ratio))
-        if func_name.__name__ == "run_priceseqfilter":
-            pass_percentage = (100.0 * records_after) / records_before
-            logger.info("percentage of reads passing QC filter: %s %%" % str(pass_percentage))
-    # copy log file -- end
-    logger.handlers[0].flush()
-    execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
-    # write stats
-    stats_path = logparams["stats_file"]
-    with open(stats_path, 'wb') as f:
-        json.dump(STATS, f)
-    execute_command("aws s3 cp %s %s/;" % (stats_path, logparams["sample_s3_output_path"]))
 
 def run_stage2(sample_s3_input_path, file_type, filter_host_flag, sample_s3_output_path,
                gsnap_ssh_key_s3_path, rapsearch_ssh_key_s3_path, accession2taxid_s3_path,
@@ -718,7 +448,7 @@ def run_stage2(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
     command = "aws s3 cp %s %s --recursive" % (sample_s3_output_path, result_dir)
     print execute_command_with_output(command)
 
-    # Record total number of input reads if stage1 was skipped
+    # Import existing job stats
     stats_file = os.path.join(result_dir, STATS_OUT)
     with open(stats_file) as f:
         STATS = json.load(f)
