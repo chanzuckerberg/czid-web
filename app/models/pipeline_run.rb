@@ -34,11 +34,12 @@ class PipelineRun < ApplicationRecord
     end
   end
 
-  def check_output_status
+  def output_ready
     output_json_s3_path = "#{sample.sample_output_s3_path}/#{OUTPUT_JSON_NAME}"
     stats_json_s3_path = "#{sample.sample_output_s3_path}/#{STATS_JSON_NAME}"
     byteranges_json_s3_path = "#{sample.sample_postprocess_s3_path}/#{TAXID_BYTERANGE_JSON_NAME}"
     # check the existence of all 3 and make sure they are all generated after pr.created_at
+    file_generated_since_run(output_json_s3_path) && file_generated_since_run(stats_json_s3_path) && file_generated_since_run(byteranges_json_s3_path)
   end
 
   def completed?
@@ -129,4 +130,13 @@ class PipelineRun < ApplicationRecord
     return nil unless status.exitstatus.zero?
     "#{local_json_path}/#{File.basename(s3_path)}"
   end
+
+  def file_generated_since_run(s3_path)
+    command = "aws s3 ls #{s3_path}"
+    stdout, _stderr, status = Open3.capture3(command)
+    return false unless status.exitstatus.zero?
+    s3_file_time = stdout[0..18].to_time
+    return (s3_file_time > created_at)
+  end
+
 end
