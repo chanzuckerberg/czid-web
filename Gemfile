@@ -38,7 +38,7 @@ gem "libhoney"
 gem 'rails', '~> 5.1.2'
 gem 'rake'
 gem 'react-autocomplete-rails'
-gem 'react-rails', '~> 2.3.0'
+gem "react_on_rails", "10.0.0"
 # Worker/Scheduler management
 gem 'resque'
 gem 'resque-lock'
@@ -51,6 +51,7 @@ gem 'sprockets-es6'
 gem 'turbolinks', '~> 5'
 # Use Uglifier as compressor for JavaScript assets
 gem 'uglifier', '>= 1.3.0'
+gem 'webpacker', '= 3.0.1'
 gem 'will_paginate'
 # Use AWS-SDK to make AWS requests with byte range
 gem 'aws-sdk'

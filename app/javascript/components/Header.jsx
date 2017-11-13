@@ -1,4 +1,9 @@
-class Header extends React.Component  {
+import React, {Component} from 'react';
+import $ from 'jquery';
+import 'materialize-css'; // It installs the JS asset only
+import 'materialize-css/dist/css/materialize.min.css';
+
+export default class Header extends Component  {
   constructor(props, context) {
     super(props, context);
     this.userSignedIn = this.props.userSignedIn;
@@ -7,7 +12,7 @@ class Header extends React.Component  {
   }
 
 	componentDidMount() {
-    $('.profile-dropdown').dropdown();
+    // $('.profile-dropdown').dropdown();
   }
   
   gotoPage(path) {

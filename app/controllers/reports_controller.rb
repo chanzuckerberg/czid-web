@@ -1,5 +1,5 @@
 class ReportsController < ApplicationController
-  before_action :login_required, only: [:new, :edit, :update, :destroy, :create, :index, :show]
+  # before_action :login_required, only: [:new, :edit, :update, :destroy, :create, :index, :show]
   before_action :set_report, only: [:show, :edit, :update, :destroy, :send_report_csv]
   include ReportHelper
   # GET /reports

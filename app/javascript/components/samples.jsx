@@ -1,5 +1,10 @@
-class Samples extends React.Component {
+import React, { Component } from 'react';
+import moment from 'moment';
+// import  
+
+export default class Samples extends Component {
   constructor(props, context) {
+    console.log(props, 'all props here');
     super(props, context);
     this.project = props.project || null;
     this.projectId = this.project ? this.project.id : null;
@@ -9,27 +14,27 @@ class Samples extends React.Component {
     this.pipelineRunInfo = props.pipeline_run_info || [];
     this.all_project = props.all_project|| [];
     this.defaultSortBy = 'newest';
-    const currentSort = SortHelper.currentSort();
+    // const currentSort = SortHelper.currentSort();
     this.state = {
       showSearchLoader: false,
       displayedSamples: this.samples || [],
       displayedOutputData: this.outputData || [],
       displayedPipelineRunInfo: this.pipelineRunInfo || [],
       samplesCount: this.samplesCount,
-      sort_query: currentSort.sort_query
-      ? currentSort.sort_query  : `sort_by=${this.defaultSortBy}`,
+      // sort_query: currentSort.sort_query
+      // ? currentSort.sort_query  : `sort_by=${this.defaultSortBy}`,
     };
-    this.columnSorting = this.columnSorting.bind(this);
+    // this.columnSorting = this.columnSorting.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
   }
 
-  columnSorting(e) {
-    const className = e.target.className;
-    const pos = className.indexOf('sort_by');
-    const sort_query = className.substr(pos).split(' ')[0];
-    this.setState({ sort_query });
-    SortHelper.applySort(sort_query);
-  }
+  // columnSorting(e) {
+  //   const className = e.target.className;
+  //   const pos = className.indexOf('sort_by');
+  //   const sort_query = className.substr(pos).split(' ')[0];
+  //   this.setState({ sort_query });
+  //   SortHelper.applySort(sort_query);
+  // }
 
   renderEmptyTable() {
     return (
@@ -149,8 +154,8 @@ class Samples extends React.Component {
               <th>Name</th>
               <th>Date Uploaded
               <div className='sort-controls left'>
-                <i onClick={ this.columnSorting } className={`${this.getActiveSort('oldest')} fa fa-caret-up sort_by=oldest` }></i>
-                <i onClick={ this.columnSorting } className={`${this.getActiveSort('newest')} fa fa-caret-down sort_by=newest` }></i>
+                {/* <i onClick={ this.columnSorting } className={`${this.getActiveSort('oldest')} fa fa-caret-up sort_by=oldest` }></i> */}
+                {/* <i onClick={ this.columnSorting } className={`${this.getActiveSort('newest')} fa fa-caret-down sort_by=newest` }></i> */}
               </div>
               </th>
               <th>Total Reads</th>
@@ -174,6 +179,7 @@ class Samples extends React.Component {
   }
 
   componentDidMount() {
+    console.log(this.props, 'all props here');
     $('.project-toggle').click((e) => {
       e.stopPropagation();
       const arrowElement = $(e.toElement)[0];

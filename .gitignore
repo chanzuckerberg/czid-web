@@ -34,4 +34,7 @@ get-pip.py
 
 .byebug_history
 .editorconfig
-coverage
+coverage/public/packs
+public/packs/
+/public/packs-test
+/node_modules

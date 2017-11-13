@@ -3,7 +3,13 @@ FROM ruby:2.4
 # Install apt based dependencies required to run Rails as
 # well as RubyGems. As the Ruby image itself is based on a
 # Debian image, we use apt-get to install those.
+RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
 RUN apt-get update && apt-get install -y build-essential nodejs mysql-client python-dev python-pip
+# for yarn
+RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+RUN apt-get update -qq && apt-get install -y yarn
+
 RUN pip install --upgrade pip
 RUN pip install --upgrade pyOpenSSL
 RUN pip install --upgrade aegea

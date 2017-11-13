@@ -1,4 +1,7 @@
-class Login extends React.Component {
+import React, {Component} from 'react';
+import axios from 'axios';
+
+export default class Login extends Component {
   constructor(props, context) {
     super(props, context);
     this.csrf = props.csrf
@@ -37,7 +40,7 @@ class Login extends React.Component {
 
   login() {
     var that = this
-    axios.post(`${this.props.endpoint}.json`, {
+    axios.post('https://localhost:3000/users/sign_in.json', {
       user: {
         email: this.refs.email.value,
         password: this.refs.password.value,

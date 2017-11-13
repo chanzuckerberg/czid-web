@@ -1,7 +1,8 @@
 class HomeController < ApplicationController
-  before_action :login_required
+  # before_action :login_required
   include SamplesHelper
-  def home
+
+  def index
     @all_project = Project.all
     project_id = params[:project_id]
     sort = params[:sort_by]
@@ -21,6 +22,10 @@ class HomeController < ApplicationController
     samples_info_output = samples_info(@samples) || {}
     @final_result = samples_info_output[:final_result] || []
     @pipeline_run_info = samples_info_output[:pipeline_run_info] || []
+    respond_to do |format|
+      format.html
+      format.json { render json: {samples_info: samples_info_output, samples: @samples, project_info: @project_info, all_projects: @all_project, samples_count: @samples_count} }
+    end
   end
 
   def search
