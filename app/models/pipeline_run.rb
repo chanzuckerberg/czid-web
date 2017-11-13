@@ -34,6 +34,13 @@ class PipelineRun < ApplicationRecord
     end
   end
 
+  def check_output_status
+    output_json_s3_path = "#{sample.sample_output_s3_path}/#{OUTPUT_JSON_NAME}"
+    stats_json_s3_path = "#{sample.sample_output_s3_path}/#{STATS_JSON_NAME}"
+    byteranges_json_s3_path = "#{sample.sample_postprocess_s3_path}/#{TAXID_BYTERANGE_JSON_NAME}"
+    # check the existence of all 3 and make sure they are all generated after pr.created_at
+  end
+
   def completed?
     return true if pipeline_output || job_status == STATUS_FAILED
   end
