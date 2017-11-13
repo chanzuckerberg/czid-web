@@ -24,11 +24,11 @@ class PipelineRun < ApplicationRecord
   end
 
   def check_job_status
-    return if pipeline_output
-    if job_status == STATUS_SUCCESS || job_status == STATUS_CHECKED
+    if pipeline_output
       self.job_status = STATUS_CHECKED
-      Resque.enqueue(LoadResultsFromS3, id)
-    elsif job_status == STATUS_RUNNING && created_at < 1.hours.ago && output_ready?
+      return
+    end
+    if output_ready?
       # Try loading the data into DB after 24 hours running the job
       self.job_status = STATUS_CHECKED
       Resque.enqueue(LoadResultsFromS3, id)
