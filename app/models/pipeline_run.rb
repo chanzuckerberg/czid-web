@@ -5,6 +5,7 @@ class PipelineRun < ApplicationRecord
   belongs_to :sample
   has_one :pipeline_output
   has_many :pipeline_run_stages
+  accepts_nested_attributes_for :pipeline_run_stages
 
   OUTPUT_JSON_NAME = 'idseq_web_sample.json'.freeze
   STATS_JSON_NAME = 'stats.json'.freeze
@@ -20,8 +21,9 @@ class PipelineRun < ApplicationRecord
   POSTPROCESS_STATUS_LOADED = 'LOADED'.freeze
 
 
+
   before_save :check_job_status
-  after_create  :create_run_stages
+  before_create  :create_run_stages
 
   def self.in_progress
     where("job_status != '#{STATUS_FAILED}' OR job_status IS NULL")
@@ -35,8 +37,12 @@ class PipelineRun < ApplicationRecord
 
   def create_run_stages
     # Host Filtering
+    host_filtering_stage = PipelineRunStage.new(step_number:1)
+
+
     # Alignment and Merging
     # Post Processing
+    self.pipeline_run_stages = [host_filtering_stage, alignment_stage, post_processing_stage]
 
   end
 
