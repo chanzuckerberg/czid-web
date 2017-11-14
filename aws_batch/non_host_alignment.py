@@ -69,6 +69,19 @@ STATS_OUT = 'stats.json'
 STATS = []
 
 ### convenience functions
+def chunk_input(input_files_basenames, chunk_nlines, part_suffix, result_dir)
+    part_lists = []
+    for input_file in input_files_basenames:
+        input_file_full_local_path = os.path.join(result_dir, input_file)
+        out_prefix = input_file_full_local_path + part_suffix
+        execute_command("split --numeric-suffixes -l %d %s %s" % (chunk_nlines, input_file_full_local_path, out_prefix))
+        execute_command("aws s3 cp %s* %s/" % (out_prefix, sample_s3_output_path))
+        partial_files = [os.path.basename(partial_file) for partial_file in execute_command_with_output("ls %s*" % out_prefix).rstrip().split("\n")]
+        part_lists += partial_files
+    input_chunks = [list(part) for part in zip(*part_lists)]
+    # e.g. [["input_R1.fasta-part-1", "input_R2.fasta-part-1"],["input_R1.fasta-part-2", "input_R2.fasta-part-2"],["input_R1.fasta-part-3", "input_R2.fasta-part-3"],...]
+    return input_chunks
+
 def clean_direct_gsnapl_input(fastq_files, file_type, sample_s3_output_path):
     # unzip files if necessary
     if ".gz" in file_type:
@@ -612,40 +625,11 @@ def run_stage2(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
         result_dir + '/' + UNIDENTIFIED_FASTA_OUT,
         result_dir, sample_s3_output_path, False)
 
-def run_gsnapl_remotely(sample, input_files,
-                        gsnap_ssh_key_s3_path, environment, aws_batch_job_id,
-                        result_dir, sample_s3_output_path, lazy_run):
-    if lazy_run:
-        # check if output already exists
-        output = "%s/%s" % (result_dir, GSNAPL_OUT)
-        output2 = "%s/%s" % (result_dir, GSNAPL_DEDUP_OUT)
-        if os.path.isfile(output) and os.path.isfile(output2):
-            return 1
-    key_name = os.path.basename(gsnap_ssh_key_s3_path)
-    execute_command("aws s3 cp %s %s/" % (gsnap_ssh_key_s3_path, REF_DIR))
-    key_path = REF_DIR +'/' + key_name
-    execute_command("chmod 400 %s" % key_path)
-    remote_username = "ubuntu"
-    remote_home_dir = "/home/%s" % remote_username
-    remote_work_dir = "%s/batch-pipeline-workdir/%s" % (remote_home_dir, sample)
-    remote_index_dir = "%s/share" % remote_home_dir
-    commands =  "mkdir -p %s;" % remote_work_dir
-    # split file:
-    part_lists = []
-    for input_file in input_files:
-        input_file_full_local_path = os.path.join(result_dir, input_file)
-        out_prefix = input_file_full_local_path + "-part-"
-        execute_command("split --numeric-suffixes -l %d %s %s" % (2*GSNAPL_CHUNK_SIZE, input_file_full_local_path, out_prefix))
-        execute_command("aws s3 cp %s* %s/" % (out_prefix, sample_s3_output_path))
-        partial_files = [os.path.basename(partial_file) for partial_file in execute_command_with_output("ls %s*" % out_prefix).rstrip().split("\n")]
-        part_lists += partial_files
-    input_chunks = [list(part) for part in zip(*part_lists)]
-    # e.g. [["input_R1.fasta-part-1", "input_R2.fasta-part-1"],["input_R1.fasta-part-2", "input_R2.fasta-part-2"],["input_R1.fasta-part-3", "input_R2.fasta-part-3"],...]
-    # iterate over chunks:
-    for input_files in input_chunks:
-        chunk_id = input_files[0].split("-")[-1]
-        outfile_basename = 'gsnapl-out-part-'+chunk_id
-        dedup_outfile_basename = 'dedup-'+outfile_basename
+def run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work_dir, remote_username,
+                     input_files, key_path, environment, result_dir, sample_s3_output_path)
+        chunk_id = input_files[0].split(part_suffix)[-1]
+        outfile_basename = 'gsnapl-out' + part_suffix + chunk_id
+        dedup_outfile_basename = 'dedup-' + outfile_basename
         remote_outfile = os.path.join(remote_work_dir, outfile_basename)
         for input_fa in input_files:
             commands += "aws s3 cp %s/%s %s/ ; " % \
@@ -672,6 +656,38 @@ def run_gsnapl_remotely(sample, input_files,
         # Deduplicate m8 input. Sometimes GSNAPL outputs multiple consecutive lines for same original read and same accession id. Count functions expect only 1 (top hit).
         deduplicate_m8(os.path.join(result_dir, outfile_basename), os.path.join(result_dir, dedup_outfile_basename))
         execute_command("aws s3 cp %s/%s %s/" % (result_dir, dedup_outfile_basename, sample_s3_output_path))
+        return os.path.join(result_dir, dedup_outfile_basename)
+
+def run_gsnapl_remotely(sample, input_files,
+                        gsnap_ssh_key_s3_path, environment, aws_batch_job_id,
+                        result_dir, sample_s3_output_path, lazy_run):
+    if lazy_run:
+        # check if output already exists
+        output = "%s/%s" % (result_dir, GSNAPL_OUT)
+        output2 = "%s/%s" % (result_dir, GSNAPL_DEDUP_OUT)
+        if os.path.isfile(output) and os.path.isfile(output2):
+            return 1
+    key_name = os.path.basename(gsnap_ssh_key_s3_path)
+    execute_command("aws s3 cp %s %s/" % (gsnap_ssh_key_s3_path, REF_DIR))
+    key_path = REF_DIR +'/' + key_name
+    execute_command("chmod 400 %s" % key_path)
+    remote_username = "ubuntu"
+    remote_home_dir = "/home/%s" % remote_username
+    remote_work_dir = "%s/batch-pipeline-workdir/%s" % (remote_home_dir, sample)
+    remote_index_dir = "%s/share" % remote_home_dir
+    commands =  "mkdir -p %s;" % remote_work_dir
+    # split file:
+    chunk_nlines = 2*GSNAPL_CHUNK_SIZE
+    part_suffix = "-part-"
+    input_chunks = chunk_input(input_files, chunk_nlines, part_suffix, result_dir)
+    # process chunks:
+    chunk_output_files = []
+    for chunk_input_files in input_chunks:
+        chunk_output_files += [run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work_dir, remote_username,
+                                                chunk_input_files, key_path, environment, result_dir, sample_s3_output_path)]
+    # merge output chunks:
+    execute_command("cat %s > %s" % (" ".join(chunk_output_files), os.path.join(result_dir, GSNAPL_DEDUP_OUT))
+    execute_command("aws s3 cp %s/%s %s/" % (result_dir, GSNAPL_DEDUP_OUT, sample_s3_output_path))
 
 def run_annotate_m8_with_taxids(sample_name, input_m8, output_m8,
                                 accession2taxid_s3_path,
