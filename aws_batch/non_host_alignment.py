@@ -29,6 +29,8 @@ FILTER_HOST_FLAG = 1
 GSNAPL_MAX_CONCURRENT = 20
 RAPSEARCH2_MAX_CONCURRENT = 5
 
+GSNAPL_CHUNK_SIZE = 1000 # number of fasta records in a chunk
+
 ACCESSION2TAXID = 's3://czbiohub-infectious-disease/references/accession2taxid.db.gz'
 DEUTEROSTOME_TAXIDS = 's3://czbiohub-infectious-disease/references/lineages-2017-03-17_deuterostome_taxIDs.txt'
 TAXID_TO_INFO = 's3://czbiohub-infectious-disease/references/taxon_info.db'
@@ -299,7 +301,7 @@ def generate_merged_fasta(input_files, output_file):
                         suffix = "/" + str(idx)
                     else:
                         suffix = ""
-                    outfile.write(line + suffix)
+                    outfile.write(line.rstrip() + suffix + "\n")
 
 def read_file_into_list(file_name):
     with open(file_name) as f:
@@ -628,32 +630,48 @@ def run_gsnapl_remotely(sample, input_files,
     remote_work_dir = "%s/batch-pipeline-workdir/%s" % (remote_home_dir, sample)
     remote_index_dir = "%s/share" % remote_home_dir
     commands =  "mkdir -p %s;" % remote_work_dir
-    for input_fa in input_files:
-        commands += "aws s3 cp %s/%s %s/ ; " % \
-                 (sample_s3_output_path, input_fa, remote_work_dir)
-    commands += " ".join([remote_home_dir+'/bin/gsnapl',
-                          '-A', 'm8', '--batch=2',
-                          '--gmap-mode=none', '--npaths=1', '--ordered',
-                          '-t', '32',
-                          '--maxsearch=5', '--max-mismatches=20',
-                          '-D', remote_index_dir, '-d', 'nt_k16']
-                          + [remote_work_dir+'/'+input_fa for input_fa in input_files]
-                          + ['> '+remote_work_dir+'/'+GSNAPL_OUT, ';'])
-    commands += "aws s3 cp %s/%s %s/;" % \
-                 (remote_work_dir, GSNAPL_OUT, sample_s3_output_path)
-    # check if remote machins has enough capacity
-    logging.getLogger().info("waiting for server")
-    gsnapl_instance_ip = wait_for_server_ip('gsnap', key_path, remote_username, environment, GSNAPL_MAX_CONCURRENT)
-    logging.getLogger().info("starting alignment on machine " + gsnapl_instance_ip)
-    remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, gsnapl_instance_ip, commands)
-    execute_command(remote_command)
-    # move gsnapl output back to local
-    time.sleep(10)
-    logging.getLogger().info("finished alignment")
-    execute_command("aws s3 cp %s/%s %s/" % (sample_s3_output_path, GSNAPL_OUT, result_dir))
-    # Deduplicate m8 input. Sometimes GSNAPL outputs multiple consecutive lines for same original read and same accession id. Count functions expect only 1 (top hit).
-    deduplicate_m8(os.path.join(result_dir, GSNAPL_OUT), os.path.join(result_dir, GSNAPL_DEDUP_OUT))
-    execute_command("aws s3 cp %s/%s %s/" % (result_dir, GSNAPL_DEDUP_OUT, sample_s3_output_path))
+    # split file:
+    part_lists = []
+    for input_file in input_files:
+        input_file_full_local_path = os.path.join(result_dir, input_file)
+        out_prefix = input_file_full_local_path + "-part-"
+        execute_command("split --numeric-suffixes -l %d %s %s" % (2*GSNAPL_CHUNK_SIZE, input_file_full_local_path, out_prefix))
+        execute_command("aws s3 cp %s* %s/" % (out_prefix, sample_s3_output_path))
+        partial_files = [os.path.basename(partial_file) for partial_file in execute_command_with_output("ls %s*" % out_prefix).rstrip().split("\n")]
+        part_lists += partial_files
+    input_chunks = [list(part) for part in zip(*part_lists)]
+    # e.g. [["input_R1.fasta-part-1", "input_R2.fasta-part-1"],["input_R1.fasta-part-2", "input_R2.fasta-part-2"],["input_R1.fasta-part-3", "input_R2.fasta-part-3"],...]
+    # iterate over chunks:
+    for input_files in input_chunks:
+        chunk_id = input_files[0].split("-")[-1]
+        outfile_basename = 'gsnapl-out-part-'+chunk_id
+        dedup_outfile_basename = 'dedup-'+outfile_basename
+        remote_outfile = os.path.join(remote_work_dir, outfile_basename)
+        for input_fa in input_files:
+            commands += "aws s3 cp %s/%s %s/ ; " % \
+                     (sample_s3_output_path, input_fa, remote_work_dir)
+        commands += " ".join([remote_home_dir+'/bin/gsnapl',
+                              '-A', 'm8', '--batch=2',
+                              '--gmap-mode=none', '--npaths=1', '--ordered',
+                              '-t', '32',
+                              '--maxsearch=5', '--max-mismatches=20',
+                              '-D', remote_index_dir, '-d', 'nt_k16']
+                              + [remote_work_dir+'/'+input_fa for input_fa in input_files]
+                              + ['> '+remote_outfile, ';'])
+        commands += "aws s3 cp %s %s/;" % (remote_outfile, sample_s3_output_path)
+        # check if remote machins has enough capacity
+        logging.getLogger().info("waiting for server")
+        gsnapl_instance_ip = wait_for_server_ip('gsnap', key_path, remote_username, environment, GSNAPL_MAX_CONCURRENT)
+        logging.getLogger().info("starting alignment for chunk %s on machine %s" % (chunk_id, gsnapl_instance_ip))
+        remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, gsnapl_instance_ip, commands)
+        execute_command(remote_command)
+        # move gsnapl output back to local
+        time.sleep(10)
+        logging.getLogger().info("finished alignment")
+        execute_command("aws s3 cp %s/%s %s/" % (sample_s3_output_path, outfile_basename, result_dir))
+        # Deduplicate m8 input. Sometimes GSNAPL outputs multiple consecutive lines for same original read and same accession id. Count functions expect only 1 (top hit).
+        deduplicate_m8(os.path.join(result_dir, outfile_basename), os.path.join(result_dir, dedup_outfile_basename))
+        execute_command("aws s3 cp %s/%s %s/" % (result_dir, dedup_outfile_basename, sample_s3_output_path))
 
 def run_annotate_m8_with_taxids(sample_name, input_m8, output_m8,
                                 accession2taxid_s3_path,
