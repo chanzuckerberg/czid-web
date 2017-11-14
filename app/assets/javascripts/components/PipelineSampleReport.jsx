@@ -17,7 +17,7 @@ class PipelineSampleReport extends React.Component {
     this.disableFilters = this.disableFilters.bind(this);
     this.enableFilters = this.enableFilters.bind(this);
   }
-  
+
   refreshPage(overrides) {
     new_params = Object.assign({}, this.props.report_page_params, overrides);
     window.location = location.protocol + '//' + location.host + location.pathname + '?' + jQuery.param(new_params);
@@ -220,7 +220,7 @@ class PipelineSampleReport extends React.Component {
     const parts = this.props.report_page_params.sort_by.split("_")
     const sort_column = parts[1] + "_" + parts[2];
     var t0 = Date.now();
-    filter_stats = this.rows_passing_filters + ' rows passing filters, out of ' + this.rows_total + ' total rows.';;
+    filter_stats = this.rows_passing_filters + ' rows passing filters, out of ' + this.rows_total + ' total rows.';
     if (this.props.report_page_params.disable_filters == 1) {
       filter_stats = this.rows_total + ' unfiltered rows.';
     }
