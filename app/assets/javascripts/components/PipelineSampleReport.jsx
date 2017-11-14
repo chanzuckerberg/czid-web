@@ -77,12 +77,29 @@ class PipelineSampleReport extends React.Component {
     return params.selected_genus != 'None' && params.disable_filters != 1;
   }
 
+  gotoNCBI(taxId) {
+    const ncbiLink = `https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${taxId}`;
+    window.open(ncbiLink, '_blank');
+  }
+
+  downloadFastaUrl(reportDetails, taxInfo) {
+    location.href = `/pipeline_outputs/${reportDetails.pipeline_info.id}/fasta/${taxInfo.tax_level}/${taxInfo.tax_id}/NT_or_NR`;
+  }
+
+  displayTags(taxInfo, reportDetails) {
+    return (
+      <span className="link-tag">
+        <i onClick={this.gotoNCBI.bind(this, taxInfo.tax_id)} className="fa fa-link cloud" aria-hidden="true"></i>
+        { taxInfo.tax_id > 0 && reportDetails.taxon_fasta_flag ? <i onClick={this.downloadFastaUrl.bind(this, reportDetails, taxInfo)} className="fa fa-download cloud" aria-hidden="true"></i> : null }
+      </span>
+    )
+  }
+
   render_name(tax_info, report_details) {
     let foo = <i>{tax_info.name}</i>;
     if (tax_info.tax_id > 0) {
       if (report_details.taxon_fasta_flag) {
-        taxon_fasta_url = `/pipeline_outputs/${report_details.pipeline_info.id}/fasta/${tax_info.tax_level}/${tax_info.tax_id}/NT_or_NR`
-        foo = <span className="link"><a href={taxon_fasta_url}>{tax_info.name}</a></span>
+        foo = <span className="link"><a>{tax_info.name}</a></span>
       } else {
         foo = <span>{tax_info.name}</span>
       }
@@ -91,10 +108,7 @@ class PipelineSampleReport extends React.Component {
       // indent species rows
       foo = <div className="hover-wrapper">
           <div className='species-name'>{foo}
-          <span className="link-tag">
-            <i className="fa fa-link cloud" aria-hidden="true"></i>
-            <i className="fa fa-download cloud" aria-hidden="true"></i>
-          </span>
+          { this.displayTags(tax_info, report_details) }
         </div>
       </div>;
     } else {
@@ -114,12 +128,9 @@ class PipelineSampleReport extends React.Component {
       </span>;
       foo = <div className="hover-wrapper">
               <div className='genus-name'> {plus_or_minus} {foo}</div>
-              <i className='count-info'>({tax_info.species_count} {category_name} species)</i>
-              <span className="link-tag">
-                <i className="fa fa-link cloud" aria-hidden="true"></i>
-                <i className="fa fa-download cloud" aria-hidden="true"></i>
-              </span>
-            </div>;
+            <i className='count-info'>({tax_info.species_count} {category_name} species)</i>
+            { this.displayTags(tax_info, report_details) }
+        </div>;
     }
     return foo;
   }
@@ -205,8 +216,8 @@ class PipelineSampleReport extends React.Component {
     $(`.table-arrow`).toggleClass('hidden');
   }
 
-  downloadReport(id, view_level) {
-    location.href = `/reports/${id}/${view_level}/csv`
+  downloadReport(id) {
+    location.href = `/reports/${id}/csv`
   }
 
   render() {
@@ -243,7 +254,7 @@ class PipelineSampleReport extends React.Component {
     // To do: improve presentation and place download_button somewhere on report page
     download_button = (
       <span className="download">
-        <a className="custom-button download" onClick={this.downloadReport.bind(this, this.report_details.report_info.id, this.props.report_page_params.view_level )}>
+        <a className="custom-button download" onClick={this.downloadReport.bind(this, this.report_details.report_info.id)}>
           <i className="fa fa-cloud-download left"></i> Download Report
         </a>
       </span>
