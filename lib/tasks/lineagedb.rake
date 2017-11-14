@@ -3,11 +3,7 @@ require 'csv'
 require 'English'
 task load_lineage_db: :environment do
   local_taxonomy_path = "/app/tmp/taxonomy"
-  host = if Rails.env == 'development'
-           'db'
-         else
-           '$RDS_ADDRESS'
-         end
+  host = Rails.env == 'development' ? 'db' : '$RDS_ADDRESS'
   taxid_lineages_file = 'taxid-lineages.csv'
   names_file = 'names.csv'
   preload_s3_path = 's3://czbiohub-infectious-disease/taxonomy'

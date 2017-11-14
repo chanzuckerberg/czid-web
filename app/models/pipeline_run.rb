@@ -1,6 +1,7 @@
 require 'open3'
 require 'json'
 class PipelineRun < ApplicationRecord
+  include ApplicationHelper
   belongs_to :sample
   has_one :pipeline_output
 
@@ -15,6 +16,7 @@ class PipelineRun < ApplicationRecord
   STATUS_RUNNABLE = 'RUNNABLE'.freeze
   STATUS_ERROR = 'ERROR'.freeze # when aegea batch describe failed
   STATUS_LOADED = 'LOADED'.freeze
+  POSTPROCESS_STATUS_LOADED = 'LOADED'.freeze
 
   before_save :check_job_status
 
@@ -82,16 +84,14 @@ class PipelineRun < ApplicationRecord
     return if pipeline_output
     output_json_s3_path = "#{sample.sample_output_s3_path}/#{OUTPUT_JSON_NAME}"
     stats_json_s3_path = "#{sample.sample_output_s3_path}/#{STATS_JSON_NAME}"
-    byteranges_json_s3_path = "#{sample.sample_postprocess_s3_path}/#{TAXID_BYTERANGE_JSON_NAME}"
+
     # Get the file
-    downloaded_json_path = download_file(output_json_s3_path)
-    downloaded_stats_path = download_file(stats_json_s3_path)
-    downloaded_byteranges_path = download_file(byteranges_json_s3_path)
-    return unless downloaded_json_path && downloaded_stats_path && downloaded_byteranges_path
+    downloaded_json_path = download_file(output_json_s3_path, local_json_path)
+    downloaded_stats_path = download_file(stats_json_s3_path, local_json_path)
+    return unless downloaded_json_path && downloaded_stats_path
     json_dict = JSON.parse(File.read(downloaded_json_path))
     stats_array = JSON.parse(File.read(downloaded_stats_path))
     stats_array = stats_array.select { |entry| entry.key?("task") }
-    byteranges_array = JSON.parse(File.read(downloaded_byteranges_path))
     pipeline_output_dict = json_dict['pipeline_output']
     pipeline_output_dict.slice!('name', 'total_reads',
                                 'remaining_reads', 'taxon_counts_attributes')
@@ -106,7 +106,6 @@ class PipelineRun < ApplicationRecord
 
     pipeline_output_dict['taxon_counts_attributes'] = taxon_counts_attributes_filtered
     pipeline_output_dict['job_stats_attributes'] = stats_array
-    pipeline_output_dict['taxon_byteranges_attributes'] = byteranges_array
     po = PipelineOutput.new(pipeline_output_dict)
     po.sample = sample
     po.pipeline_run = self
@@ -120,18 +119,36 @@ class PipelineRun < ApplicationRecord
 
     self.pipeline_output_id = po.id
     save
+    Resque.enqueue(LoadPostprocessFromS3, id)
+
     # rm the json
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_json_path} #{downloaded_stats_path}")
     # generate report
     po.generate_report
   end
 
-  def download_file(s3_path)
-    command = "mkdir -p #{local_json_path};"
-    command += "aws s3 cp #{s3_path} #{local_json_path}/;"
+  def load_postprocess_from_s3
+    return if postprocess_status == POSTPROCESS_STATUS_LOADED
+    byteranges_json_s3_path = "#{sample.sample_postprocess_s3_path}/#{TAXID_BYTERANGE_JSON_NAME}"
+    downloaded_byteranges_path = download_file(byteranges_json_s3_path, local_json_path)
+    return unless downloaded_byteranges_path
+    taxon_byteranges_csv_file = "#{local_json_path}/taxon_byteranges"
+    hash_array_json2csv(downloaded_byteranges_path, taxon_byteranges_csv_file, %w[taxid hit_type first_byte last_byte])
+    ` cd #{local_json_path};
+      sed -e 's/$/,#{pipeline_output.id}/' -i taxon_byteranges;
+      mysqlimport --replace --local --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --columns=taxid,hit_type,first_byte,last_byte,pipeline_output_id --fields-terminated-by=',' idseq_#{Rails.env} taxon_byteranges;
+    `
+    self.postprocess_status = POSTPROCESS_STATUS_LOADED
+    save
+    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_byteranges_path}")
+  end
+
+  def download_file(s3_path, destination_dir)
+    command = "mkdir -p #{destination_dir};"
+    command += "aws s3 cp #{s3_path} #{destination_dir}/;"
     _stdout, _stderr, status = Open3.capture3(command)
     return nil unless status.exitstatus.zero?
-    "#{local_json_path}/#{File.basename(s3_path)}"
+    "#{destination_dir}/#{File.basename(s3_path)}"
   end
 
   def file_generated_since_run(s3_path)
