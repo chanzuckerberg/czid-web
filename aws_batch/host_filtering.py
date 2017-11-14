@@ -24,8 +24,6 @@ ROOT_DIR = '/mnt'
 DEST_DIR = ROOT_DIR + '/idseq/data' # generated data go here
 REF_DIR  = ROOT_DIR + '/idseq/ref' # referene genome / ref databases go here
 
-FILTER_HOST_FLAG = 1
-
 STAR="STAR"
 PRICESEQ_FILTER="PriceSeqFilter"
 CDHITDUP="cd-hit-dup"
@@ -62,19 +60,6 @@ STATS_OUT = 'stats.json'
 STATS = []
 
 ### convenience functions
-def get_total_initial_reads(fastq_file_1, initial_file_type_for_log, stats_file):
-    # If "total_reads" is present in stats file, get that value, otherwise get value from input file.
-    # Slightly hacky, but allows us to take into account actual initial read number in the case where
-    # input files are already pre-filtered -- just put it in a stats file in the preload folder as:
-    # [{"total_reads": <value>}]
-    if os.path.isfile(stats_file):
-        with open(stats_file) as f:
-            existing_stats = json.load(f)
-        total_reads_entry = [item for item in existing_stats if "total_reads" in item]
-        if len(total_reads_entry) > 0:
-            return total_reads_entry[0]["total_reads"]
-    return count_reads(fastq_file_1, initial_file_type_for_log)
-
 def lzw_fraction(sequence):
     if sequence == "":
         return 0.0
@@ -160,7 +145,7 @@ def generate_unmapped_pairs_from_sam(sam_file, output_prefix):
     output_merged_read.close()
 
 ### job functions
-def run_stage1(sample_s3_input_path, file_type, filter_host_flag, sample_s3_output_path,
+def run_stage1(sample_s3_input_path, file_type, sample_s3_output_path,
                star_genome_s3_path, bowtie2_genome_s3_path, db_sample_id,
                aws_batch_job_id, lazy_run = True):
 
@@ -204,12 +189,11 @@ def run_stage1(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
     fastq_files = execute_command_with_output("ls %s/*.%s" % (fastq_dir, file_type)).rstrip().split("\n")
 
     # Identify input files and characteristics
-    if filter_host_flag:
-        if len(fastq_files) <= 1:
-            return # only support paired reads for now
-        else:
-            fastq_file_1 = fastq_files[0]
-            fastq_file_2 = fastq_files[1]
+    if len(fastq_files) <= 1:
+        return # only support paired reads for now
+    else:
+        fastq_file_1 = fastq_files[0]
+        fastq_file_2 = fastq_files[1]
 
     if lazy_run:
        # Download existing data and see what has been done
@@ -218,13 +202,11 @@ def run_stage1(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
 
     # Record total number of input reads
     initial_file_type_for_log = "fastq_paired" if "fastq" in file_type else "fasta_paired"
-    stats_file = os.path.join(result_dir, STATS_OUT)
-    STATS.append({'total_reads': get_total_initial_reads(fastq_files[0], initial_file_type_for_log, stats_file)})
+    STATS.append({'total_reads': count_reads(fastq_files[0], initial_file_type_for_log)})
 
     # run host filtering
-    if filter_host_flag:
-        run_host_filtering(sample_name, fastq_file_1, fastq_file_2, file_type, initial_file_type_for_log, star_genome_s3_path, bowtie2_genome_s3_path,
-                           DEFAULT_LOGPARAMS, result_dir, scratch_dir, sample_s3_output_path, lazy_run)
+    run_host_filtering(sample_name, fastq_file_1, fastq_file_2, file_type, initial_file_type_for_log, star_genome_s3_path, bowtie2_genome_s3_path,
+                       DEFAULT_LOGPARAMS, result_dir, scratch_dir, sample_s3_output_path, lazy_run)
 
 def run_star_part(output_dir, genome_dir, fastq_file_1, fastq_file_2):
     execute_command("mkdir -p %s" % output_dir)
@@ -488,7 +470,6 @@ def main():
     global OUTPUT_BUCKET
     global STAR_GENOME
     global BOWTIE2_GENOME
-    global FILTER_HOST_FLAG
 
     INPUT_BUCKET = os.environ.get('INPUT_BUCKET', INPUT_BUCKET)
     FILE_TYPE = os.environ.get('FILE_TYPE', FILE_TYPE)
@@ -497,12 +478,11 @@ def main():
     BOWTIE2_GENOME = os.environ.get('BOWTIE2_GENOME', BOWTIE2_GENOME)
     DB_SAMPLE_ID = os.environ['DB_SAMPLE_ID']
     AWS_BATCH_JOB_ID = os.environ.get('AWS_BATCH_JOB_ID', 'local')
-    FILTER_HOST_FLAG = int(os.environ.get('FILTER_HOST_FLAG', FILTER_HOST_FLAG))
-
+ 
     sample_s3_input_path = INPUT_BUCKET.rstrip('/')
     sample_s3_output_path = OUTPUT_BUCKET.rstrip('/')
 
-    run_stage1(sample_s3_input_path, FILE_TYPE, FILTER_HOST_FLAG, sample_s3_output_path,
+    run_stage1(sample_s3_input_path, FILE_TYPE, sample_s3_output_path,
                STAR_GENOME, BOWTIE2_GENOME, DB_SAMPLE_ID,
                AWS_BATCH_JOB_ID, True)
 
