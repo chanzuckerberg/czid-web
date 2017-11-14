@@ -600,7 +600,8 @@ def run_gsnapl_remotely(sample, input_files,
     if lazy_run:
         # check if output already exists
         output = "%s/%s" % (result_dir, GSNAPL_OUT)
-        if os.path.isfile(output):
+        output2 = "%s/%s" % (result_dir, GSNAPL_DEDUP_OUT)
+        if os.path.isfile(output) and os.path.isfile(output2):
             return 1
     key_name = os.path.basename(gsnap_ssh_key_s3_path)
     execute_command("aws s3 cp %s %s/" % (gsnap_ssh_key_s3_path, REF_DIR))
