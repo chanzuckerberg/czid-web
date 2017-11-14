@@ -459,7 +459,7 @@ def generate_merged_fasta(input_files, output_file):
                         suffix = "/" + str(idx)
                     else:
                         suffix = ""
-                    outfile.write(line + suffix)
+                    outfile.write(line.rstrip() + suffix + "\n")
 
 def read_file_into_list(file_name):
     with open(file_name) as f:
