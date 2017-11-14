@@ -26,6 +26,8 @@ REF_DIR  = ROOT_DIR + '/idseq/ref' # referene genome / ref databases go here
 
 FILTER_HOST_FLAG = 1
 
+FILTER_HOST_FLAG_NO_ALIGNMENT = 3
+
 STAR="STAR"
 HTSEQ="htseq-count"
 SAMTOOLS="samtools"
@@ -752,6 +754,9 @@ def run_sample(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
     if filter_host_flag:
         run_host_filtering(sample_name, fastq_file_1, fastq_file_2, file_type, initial_file_type_for_log, star_genome_s3_path, bowtie2_genome_s3_path,
                            DEFAULT_LOGPARAMS, result_dir, scratch_dir, sample_s3_output_path, lazy_run)
+
+    if filter_host_flag and filter_host_flag == FILTER_HOST_FLAG_NO_ALIGNMENT:
+        return
 
     # run gsnap remotely
     if filter_host_flag:

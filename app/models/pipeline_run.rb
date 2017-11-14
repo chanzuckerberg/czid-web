@@ -19,14 +19,38 @@ class PipelineRun < ApplicationRecord
   STATUS_LOADED = 'LOADED'.freeze
   POSTPROCESS_STATUS_LOADED = 'LOADED'.freeze
 
+
   before_save :check_job_status
+  after_create  :create_run_stages
 
   def self.in_progress
     where("job_status != '#{STATUS_FAILED}' OR job_status IS NULL")
-      .where(pipeline_output_id: nil)
+      .where(finalized: 0)
+  end
+
+  def finalized?
+    finalized == 1
+  end
+
+
+  def create_run_stages
+    # Host Filtering
+    # Alignment and Merging
+    # Post Processing
+
   end
 
   def check_job_status
+    return if finalized?
+    check_job_status_old unless pipeline_run_stages.present?
+
+
+
+
+  end
+
+  def check_job_status_old # Before pipeline_run_stages are introduced
+
     if pipeline_output
       self.job_status = STATUS_CHECKED
       return
@@ -49,7 +73,9 @@ class PipelineRun < ApplicationRecord
   end
 
   def completed?
-    return true if pipeline_output || job_status == STATUS_FAILED
+    return true if finalized?
+    # Old version before run stages
+    return true if pipeline_run_stages.present? && (pipeline_output || job_status == STATUS_FAILED)
   end
 
   def log_url
