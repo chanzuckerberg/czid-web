@@ -199,7 +199,6 @@ def generate_rpm_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, species
 
 def generate_json_from_taxid_counts(sample, taxidCountsInputPath,
                                     taxid2infoPath, jsonOutputPath, countType, dbSampleId):
-    # produce json in Ryan's output format (https://github.com/chanzuckerberg/idseq-web/blob/master/test/output.json)
     taxid2info_map = shelve.open(taxid2infoPath)
     total_reads = [item for item in STATS if "total_reads" in item][0]["total_reads"]
     taxon_counts_attributes = []
@@ -255,26 +254,20 @@ def generate_json_from_taxid_counts(sample, taxidCountsInputPath,
     with open(jsonOutputPath, 'wb') as outf:
         json.dump(output_dict, outf)
 
-def combine_json(project_name, sample_name, inputPath1, inputPath2, outputPath):
+def combine_pipeline_output_json(inputPath1, inputPath2, outputPath):
+    total_reads = [item for item in STATS if "total_reads" in item][0]["total_reads"]
+    remaining_reads = (item for item in STATS if item.get("task") == "run_gsnapl_remotely").next().get("reads_before")
     with open(inputPath1) as inf1:
         input1 = json.load(inf1).get("pipeline_output")
     with open(inputPath2) as inf2:
         input2 = json.load(inf2).get("pipeline_output")
-    total_reads = max(input1.get("total_reads"),
-                      input2.get("total_reads"))
-    remaining_reads = max(input1.get("remaining_reads"),
-                          input2.get("remaining_reads"))
     taxon_counts_attributes = (input1.get("taxon_counts_attributes")
                               + input2.get("taxon_counts_attributes"))
     pipeline_output_dict = {
-        "project_name": project_name,
-        "sample_name": sample_name,
         "total_reads": total_reads,
         "remaining_reads": remaining_reads,
         "taxon_counts_attributes": taxon_counts_attributes
     }
-    rest_entries = {field: input1[field] for field in input1.keys() if field not in ["total_reads", "remaining_reads", "taxon_counts_attributes", "project_name", "sample_name"]}
-    pipeline_output_dict.update(rest_entries)
     output_dict = {
         "pipeline_output": pipeline_output_dict
     }
@@ -585,7 +578,7 @@ def run_stage2(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
         {"title": "combine JSON outputs",
         "count_reads": False})
     run_and_log(logparams, run_combine_json_outputs,
-        sample_name, result_dir + '/' + NT_TAXID_COUNTS_TO_JSON_OUT,
+        result_dir + '/' + NT_TAXID_COUNTS_TO_JSON_OUT,
         result_dir + '/' + NR_TAXID_COUNTS_TO_JSON_OUT,
         result_dir + '/' + COMBINED_JSON_OUT,
         result_dir, sample_s3_output_path, False)
@@ -786,14 +779,13 @@ def run_generate_taxid_outputs_from_m8(sample_name,
     execute_command("aws s3 cp %s %s/" % (taxon_species_rpm_file, sample_s3_output_path))
     execute_command("aws s3 cp %s %s/" % (taxon_genus_rpm_file, sample_s3_output_path))
 
-def run_combine_json_outputs(sample_name, input_json_1, input_json_2, output_json,
+def run_combine_json_outputs(input_json_1, input_json_2, output_json,
     result_dir, sample_s3_output_path, lazy_run):
     if lazy_run:
         # check if output already exists
         if os.path.isfile(output_json):
             return 1
-    project_name = os.path.basename(os.path.dirname(sample_s3_output_path))
-    combine_json(project_name, sample_name, input_json_1, input_json_2, output_json)
+    combine_pipeline_output_json(input_json_1, input_json_2, output_json)
     logging.getLogger().info("finished job")
     # move it the output back to S3
     execute_command("aws s3 cp %s %s/" % (output_json, sample_s3_output_path))
