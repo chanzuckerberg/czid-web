@@ -311,7 +311,13 @@
 
 .hover-wrapper {
   cursor: pointer;
+  &:hover {
+    .link-tag {
+      visibility: visible;
+    }
+  }
   .link-tag {
+    visibility: hidden;
     padding: 10px;
     color: #84d4fa;
     font-size: 15px;

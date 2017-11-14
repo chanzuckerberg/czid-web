@@ -18,20 +18,6 @@ class PipelineSampleReport extends React.Component {
     this.enableFilters = this.enableFilters.bind(this);
   }
   
-  componentDidMount() {
-    this.hideTags();
-    //only display download links when genus name is hovered on
-    $('.hover-wrapper').hover(function() {
-      $(this).find(".link-tag").show(); 
-    }, function() {
-      $(this).find(".link-tag").hide(); 
-    });
-  }
-
-  hideTags() {
-    $('.link-tag').hide()
-  }
-
   refreshPage(overrides) {
     new_params = Object.assign({}, this.props.report_page_params, overrides);
     window.location = location.protocol + '//' + location.host + location.pathname + '?' + jQuery.param(new_params);
@@ -78,21 +64,28 @@ class PipelineSampleReport extends React.Component {
   }
 
   //path to NCBI 
-  gotoNCBI(taxId) {
+  gotoNCBI(e) {
+    const taxId = e.target.getAttribute('data-tax-id');
     const ncbiLink = `https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${taxId}`;
     window.open(ncbiLink, '_blank');
   }
 
   //download Fasta  
-  downloadFastaUrl(reportDetails, taxInfo) {
-    location.href = `/pipeline_outputs/${reportDetails.pipeline_info.id}/fasta/${taxInfo.tax_level}/${taxInfo.tax_id}/NT_or_NR`;
+  downloadFastaUrl(e) {
+    const pipelineId = e.target.getAttribute('data-pipeline-id');
+    const taxLevel = e.target.getAttribute('data-tax-level');
+    const taxId = e.target.getAttribute('data-tax-id');
+    console.log(pipelineId, taxLevel, taxId, 'fasta params');
+    location.href = `/pipeline_outputs/${pipelineId}/fasta/${taxLevel}/${taxId}/NT_or_NR`;
   }
 
   displayTags(taxInfo, reportDetails) {
     return (
       <span className="link-tag">
-        <i onClick={this.gotoNCBI.bind(this, taxInfo.tax_id)} className="fa fa-link cloud" aria-hidden="true"></i>
-        { taxInfo.tax_id > 0 && reportDetails.taxon_fasta_flag ? <i onClick={this.downloadFastaUrl.bind(this, reportDetails, taxInfo)} className="fa fa-download cloud" aria-hidden="true"></i> : null }
+        <i data-tax-id={taxInfo.tax_id} onClick={this.gotoNCBI} className="fa fa-link cloud" aria-hidden="true"></i>
+        { taxInfo.tax_id > 0 && reportDetails.taxon_fasta_flag ? <i data-pipeline-id={reportDetails.pipeline_info.id} 
+        data-tax-level={taxInfo.tax_level} data-tax-id={taxInfo.tax_id}
+        onClick={this.downloadFastaUrl} className="fa fa-download cloud" aria-hidden="true"></i> : null }
       </span>
     )
   }
@@ -227,7 +220,7 @@ class PipelineSampleReport extends React.Component {
     const parts = this.props.report_page_params.sort_by.split("_")
     const sort_column = parts[1] + "_" + parts[2];
     var t0 = Date.now();
-    filter_stats = this.rows_passing_filters + ' Results matching filter criteria';
+    filter_stats = this.rows_passing_filters + ' rows passing filters, out of ' + this.rows_total + ' total rows.';;
     if (this.props.report_page_params.disable_filters == 1) {
       filter_stats = this.rows_total + ' unfiltered rows.';
     }
