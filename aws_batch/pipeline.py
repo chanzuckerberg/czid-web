@@ -799,7 +799,7 @@ def run_sample(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
     # run_generate_taxid_annotated_fasta_from_m8
     if not filter_host_flag:
         # make the EXTRACT_UNMAPPED_FROM_SAM_OUT3 input needed below
-        generate_merged_fasta(gsnapl_input_files, os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT3))
+        generate_merged_fasta([cleaned_files, os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT3))
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "generate taxid annotated fasta from m8",
         "count_reads": False})
