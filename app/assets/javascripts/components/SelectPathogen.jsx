@@ -48,6 +48,7 @@ class SelectPathogen extends React.Component {
     this.selectPathogen = this.selectPathogen.bind(this);
     this.sortPathogen = this.sortPathogen.bind(this);
     this.switchCountType = this.switchCountType.bind(this);
+    this.filterPathogen = this.filterPathogen.bind(this);
 
   }
 
@@ -69,6 +70,26 @@ class SelectPathogen extends React.Component {
         pathogens: this.paginatePathogens.firstPage()
       });
     });
+  }
+
+  filterPathogen(pathogeName) {
+    if (typeof pathogeName === 'undefined') {
+      return;
+    }
+    if (pathogeName.trim().length) {
+      pathogeName = pathogeName.toLowerCase();
+      // filtering all pathogens have some perf issues, 
+      // so only filtering the pathogens in the current page
+      const filteredPathogens = this.state.pathogens.filter(read => 
+        (read.pathogen.toLowerCase().indexOf(pathogeName) > -1));
+      this.setState({
+        pathogens: filteredPathogens
+      });
+    } else {
+      this.setState({
+        pathogens: this.paginatePathogens.getCurrentPage()
+      });
+    }
   }
 
   selectPathogen(pos) {
@@ -271,8 +292,7 @@ class SelectPathogen extends React.Component {
                 return (
                   <li className='checked-pathogens' key={i}>
                     <div className='pathogen-label'>
-                      <input id={i} disabled={true} className='filled-in' type="checkbox" defaultChecked={true} />
-                      <label htmlFor={i}>{ read.pathogen }</label>
+                      <div>{ read.pathogen }</div>
 							     </div>
                    <div className='remove-icon right col center s2'>
 								    <i className='fa fa-times' onClick={() => this.unSelectPathogen(i)}></i>
@@ -291,7 +311,7 @@ class SelectPathogen extends React.Component {
 		      <div className='search-pathogen'>
 		        <div className='row search-row'>
       				<div className='col s12'>
-      					<input type='text' placeholder='Filter Pathogen' />
+      					<input onKeyUp={e => this.filterPathogen(e.target.value)} type='text' placeholder='Filter Pathogen' />
       				</div>
 		        </div>
 		      </div>
