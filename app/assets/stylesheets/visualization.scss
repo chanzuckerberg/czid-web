@@ -2,6 +2,10 @@
   .visualization-content {
     background: #eeeff1;
     margin-top: 4px;
+    .scroll-heatmap {
+      width: 100%;
+      overflow: scroll;
+    }
     .viz {
       &.loading-pathogens {
         margin-top: 20px;
@@ -43,64 +47,64 @@
           }
         }
         .selected-pathogens {
-        .checked-pathogens {
-          div {
-            display: inline-block;
-            &.pathogen-label {
-              width: 80%;
+          .checked-pathogens {
+            div {
+              display: inline-block;
+              &.pathogen-label {
+                width: 80%;
+              }
             }
           }
-        }
-        .title {
-          padding: 15px 23px 0;
-          font-size: 16px;
-          small {
-            margin-left: 10px;
-            font-weight: bold
+          .title {
+            padding: 15px 23px 0;
+            font-size: 16px;
+            small {
+              margin-left: 10px;
+              font-weight: bold
+            }
           }
-        }
-        .pagination-controls {
-          div {
-            display: inline-block;
-            padding: 15px 20px 0px 20px;
+          .pagination-controls {
+            div {
+              display: inline-block;
+              padding: 15px 20px 0px 20px;
+            }
           }
-        }
-        ul li {
-          padding: 6px 20px;
-          [type="checkbox"] + label {
-            line-height: 20px;
-          }
+          ul li {
+            padding: 6px 20px;
+            [type="checkbox"] + label {
+              line-height: 20px;
+            }
 
-          [type="checkbox"]:checked + label:after {
-            border-color: #565886;
-            background-color: #565886;
-          }
+            [type="checkbox"]:checked + label:after {
+              border-color: #565886;
+              background-color: #565886;
+            }
 
-          .row {
-            margin-bottom: 0;
-          }
-          div {
-            &.pathogen-label {
-              &.samples {
-                font-size: 13px;
-                div {
-                  text-overflow: ellipsis;
-                  overflow: hidden;
+            .row {
+              margin-bottom: 0;
+            }
+            div {
+              &.pathogen-label {
+                &.samples {
+                  font-size: 13px;
+                  div {
+                    text-overflow: ellipsis;
+                    overflow: hidden;
+                  }
+                }
+                &.selectable {
+                  cursor: pointer;
+                }
+                .selected {
+                  color: #cccccc;
                 }
               }
-              &.selectable {
-                cursor: pointer;
+              &.remove-icon {
+                padding: 4px;
+                margin-top: -4px;
               }
-              .selected {
-                color: #cccccc;
-              }
-            }
-            &.remove-icon {
-              padding: 4px;
-              margin-top: -4px;
             }
           }
-        }
         }
       }
     }

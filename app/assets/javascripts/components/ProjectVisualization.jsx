@@ -42,13 +42,16 @@ class ProjectVisualization extends React.Component {
               <div className="card-content">
                 <div className='row'>
                   <div className='col s9 center' id="heat-map">
-                    <div className="viz loading-pathogens center grey-text darken-2">
-                      <div className='message'>
-                        Please wait fetching pathogens to visualize
+                    <div className='scroll-heatmap center'>
+                      <div className="viz loading-pathogens center grey-text darken-2">
+                        <div className='message'>
+                          Please wait fetching pathogens to visualize
+                        </div>
+                        <i className="fa fa-spinner fa-spin fa-2x"></i>
                       </div>
-                      <i className="fa fa-spinner fa-spin fa-2x"></i>
+                      <svg id='heat-map-canvas'></svg>                      
                     </div>
-                    <svg id='heat-map-canvas'></svg>
+
                   </div>
                    <div className='col s3'>
                       <div className='color-scale-info'>
@@ -102,9 +105,9 @@ class ProjectVisualization extends React.Component {
       bottom: 20,
       left: 20 + paddingLeft
     };
-    const colors = ['rgb(0, 250, 250)', 'rgb(23, 173, 203)',
-    'rgb(46, 100, 158)', 'rgb(24, 53, 103)', 'rgb(0, 0, 0)'];
-    const blankRectColor = '#cacaca'; // the color of the placeholder rect
+    const colors = ['#ffffb4', '#fed975', '#feb34f', '#fd8d3d', '#fb4e29',
+    '#e51b1b', '#b10026'];
+    const blankRectColor = '#f3f3ed'; // the color of the placeholder rect
     if (dataLength && totalSamples) {
 
       let minMaxes = [];
