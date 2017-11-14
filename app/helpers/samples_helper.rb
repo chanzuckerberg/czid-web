@@ -64,7 +64,7 @@ module SamplesHelper
     entries = s3_output.split("\n")
     samples = {}
     entries.each do |file_name|
-      matched = /([^ ]*)_R(\d)_001.fastq.gz$/.match(file_name)
+      matched = /([^ ]*)_R(\d)_001.(fastq.gz|fastq|fasta.gz|fasta)\z/.match(file_name)
       source = matched[0]
       name = matched[1]
       read_idx = matched[2].to_i - 1

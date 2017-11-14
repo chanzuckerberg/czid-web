@@ -36,12 +36,13 @@ class PipelineSampleReads extends React.Component {
   }
 
   rerunPipeline() {
+    this.setState({
+      rerun: true
+    })
     axios.put(`${this.rerunPath}.json`, {
       authenticity_token: this.csrf
     }).then((response) => {
-      this.setState({
-        rerun: true
-      })
+    // this should set status to UPLOADING/IN PROGRESS after rerun
     }).catch((error) => {
       this.setState({
         rerun: false,
@@ -123,7 +124,10 @@ class PipelineSampleReads extends React.Component {
       d_report = <div className="center-align text-grey text-lighten-2 no-report">{ this.pipelineInProgress(this.pipelineStatus) ? <div>Processing Sample...<p><i className='fa fa-spinner fa-spin fa-3x'></i></p></div> : 
         <div>
           <h6 className="failed"><i className="fa fa-frown-o"></i>  {this.state.failureText}  </h6>
-          <p><a onClick={ this.rerunPipeline }className="custom-button small"><i className="fa fa-repeat left"></i>RERUN PIPELINE</a></p>
+          <p>
+           { !this.state.rerun ? <a onClick={ this.rerunPipeline }className="custom-button small"><i className="fa fa-repeat left"></i>RERUN PIPELINE</a>
+            : null }
+            </p>
         </div> }
       </div>
     }
