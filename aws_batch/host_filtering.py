@@ -203,6 +203,10 @@ def run_stage1(sample_s3_input_path, file_type, sample_s3_output_path,
     # Record total number of input reads
     initial_file_type_for_log = "fastq_paired" if "fastq" in file_type else "fasta_paired"
     STATS.append({'total_reads': count_reads(fastq_files[0], initial_file_type_for_log)})
+    stats_path = os.path.join(result_dir, STATS_OUT)
+    with open(stats_path, 'wb') as f:
+        json.dump(STATS, f)
+    execute_command("aws s3 cp %s %s/;" % (stats_path, sample_s3_output_path))
 
     # run host filtering
     run_host_filtering(sample_name, fastq_file_1, fastq_file_2, file_type, initial_file_type_for_log, star_genome_s3_path, bowtie2_genome_s3_path,
