@@ -449,6 +449,18 @@ def generate_taxid_annotated_m8(input_m8, output_m8, accession2taxid_db):
             outf.write(new_line)
     outf.close()
 
+def generate_merged_fasta(input_files, output_file):
+    with open(output_file, 'w') as outfile:
+        for fname in input_files:
+            idx = input_files.index(fname) + 1
+            with open(fname) as infile:
+                for line in infile:
+                    if line.startswith(">"):
+                        suffix = "/" + str(idx)
+                    else:
+                        suffix = ""
+                    outfile.write(line + suffix)
+
 def read_file_into_list(file_name):
     with open(file_name) as f:
         L = [x.rstrip() for x in f if x]
@@ -785,12 +797,16 @@ def run_sample(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
         result_dir, sample_s3_output_path, False)
 
     # run_generate_taxid_annotated_fasta_from_m8
+    merged_fasta = os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT3)
+    if not os.path.isfile(merged_fasta):
+        # make the EXTRACT_UNMAPPED_FROM_SAM_OUT3 input needed below
+        generate_merged_fasta(cleaned_files, merged_fasta)
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "generate taxid annotated fasta from m8",
         "count_reads": False})
     run_and_log(logparams, run_generate_taxid_annotated_fasta_from_m8,
         sample_name, os.path.join(result_dir, GSNAPL_DEDUP_OUT),
-        os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT3),
+        merged_fasta,
         os.path.join(result_dir, GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT),
         'NT', result_dir, sample_s3_output_path, False)
 
