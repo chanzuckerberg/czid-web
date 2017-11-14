@@ -26,14 +26,25 @@ class PipelineRun < ApplicationRecord
   end
 
   def check_job_status
-    return if pipeline_output
-    if job_status == STATUS_SUCCESS || job_status == STATUS_CHECKED
+    if pipeline_output
+      self.job_status = STATUS_CHECKED
+      return
+    end
+    if output_ready?
+      # Try loading the data into DB after 24 hours running the job
       self.job_status = STATUS_CHECKED
       Resque.enqueue(LoadResultsFromS3, id)
-    elsif job_status == STATUS_RUNNING && created_at < 12.hours.ago
-      # Try loading the data into DB after 24 hours running the job
-      Resque.enqueue(LoadResultsFromS3, id)
+      # terminate the job
+      terminate_job
     end
+  end
+
+  def output_ready?
+    output_json_s3_path = "#{sample.sample_output_s3_path}/#{OUTPUT_JSON_NAME}"
+    stats_json_s3_path = "#{sample.sample_output_s3_path}/#{STATS_JSON_NAME}"
+    byteranges_json_s3_path = "#{sample.sample_postprocess_s3_path}/#{TAXID_BYTERANGE_JSON_NAME}"
+    # check the existence of all 3 and make sure they are all generated after pr.created_at
+    file_generated_since_run(output_json_s3_path) && file_generated_since_run(stats_json_s3_path) && file_generated_since_run(byteranges_json_s3_path)
   end
 
   def completed?
@@ -138,5 +149,18 @@ class PipelineRun < ApplicationRecord
     _stdout, _stderr, status = Open3.capture3(command)
     return nil unless status.exitstatus.zero?
     "#{destination_dir}/#{File.basename(s3_path)}"
+  end
+
+  def file_generated_since_run(s3_path)
+    command = "aws s3 ls #{s3_path}"
+    stdout, _stderr, status = Open3.capture3(command)
+    return false unless status.exitstatus.zero?
+    s3_file_time = DateTime.strptime(stdout[0..18], "%Y-%m-%d %H:%M:%S")
+    (s3_file_time > created_at)
+  end
+
+  def terminate_job
+    command = "aegea batch terminate #{job_id}"
+    _stdout, _stderr, _status = Open3.capture3(command)
   end
 end
