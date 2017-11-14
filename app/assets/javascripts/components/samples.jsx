@@ -21,6 +21,7 @@ class Samples extends React.Component {
     };
     this.columnSorting = this.columnSorting.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
+    this.handleClearSearch = this.handleClearSearch.bind(this);
   }
 
   columnSorting(e) {
@@ -70,32 +71,48 @@ class Samples extends React.Component {
     }
   }
 
-  handleSearch(e) {
-    var that = this;
-    that.setState({ showSearchLoader: true })
+  handleClearSearch(e) {
     if (e.target.value === "") {
-      that.setState({
+      this.setState({
         displayedSamples: this.samples,
         displayedOutputData: this.outputData,
         displayedPipelineRunInfo: this.pipelineRunInfo,
         samplesCount: this.props.samples_count,
         showSearchLoader: false
-      })
-      $("#pagination").css("display", "");
-    } else {
-      axios.get('/search.json', 
-        {params: {search: e.target.value, project_id: this.projectId}
-      }).then((response) => {
-        if (response.data.samples.length) {
-          that.setState({
-            displayedSamples: response.data.samples,
-            displayedOutputData: response.data.final_result,
-            displayedPipelineRunInfo: response.data.pipeline_run_info,
-            samplesCount: response.data.samples.length,
-            showSearchLoader: false
-          })
-          $("#pagination").css("display", "none");
-        } else {
+    })
+    $("#pagination").css("display", "");
+    }
+  }
+
+  handleSearch(e) {
+    var that = this;
+    if (e.target.value !== '') {
+      if (e.key === 'Enter') {
+        that.setState({ showSearchLoader: true })
+        axios.get('/search.json', 
+          {params: {search: e.target.value, project_id: this.projectId}
+        }).then((response) => {
+          if (response.data.samples.length) {
+            that.setState({
+              displayedSamples: response.data.samples,
+              displayedOutputData: response.data.final_result,
+              displayedPipelineRunInfo: response.data.pipeline_run_info,
+              samplesCount: response.data.samples.length,
+              showSearchLoader: false
+            })
+            $("#pagination").css("display", "none");
+          } else {
+            $("#pagination").css("display", "none");
+            that.setState({
+              displayedSamples: [],
+              displayedOutputData: [],
+              displayedPipelineRunInfo: [],
+              samplesCount: 0,
+              showSearchLoader: false
+            })
+            that.renderEmptyTable();
+          }
+        }).catch((error) => {
           $("#pagination").css("display", "none");
           that.setState({
             displayedSamples: [],
@@ -105,18 +122,10 @@ class Samples extends React.Component {
             showSearchLoader: false
           })
           that.renderEmptyTable();
-        }
-      }).catch((error) => {
-        $("#pagination").css("display", "none");
-        that.setState({
-          displayedSamples: [],
-          displayedOutputData: [],
-          displayedPipelineRunInfo: [],
-          samplesCount: 0,
-          showSearchLoader: false
-        })
-        that.renderEmptyTable();
       })
+      }
+    } else {
+      this.handleClearSearch
     }
   }
 
@@ -141,7 +150,7 @@ class Samples extends React.Component {
       <div className="sample-container">
         <div className="row search-box">
           <span className="icon"><i className="fa fa-search" aria-hidden="true"></i></span>
-          <input id="search" type="search" onChange={this.handleSearch} className="search" placeholder='Search for Sample'/>{ this.state.showSearchLoader ? <i className='fa fa-spinner fa-spin fa-lg'></i> : null }
+          <input id="search" type="search" onChange={this.handleClearSearch} onKeyPress={this.handleSearch} className="search" placeholder='Search for Sample'/>{ this.state.showSearchLoader ? <i className='fa fa-spinner fa-spin fa-lg'></i> : null }
         </div>
           <table className="bordered highlight samples-table">
             <thead>
