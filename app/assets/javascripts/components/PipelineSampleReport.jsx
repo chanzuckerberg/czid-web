@@ -20,7 +20,7 @@ class PipelineSampleReport extends React.Component {
   
   componentDidMount() {
     this.hideTags();
-    //display download links when genus name is hovered on
+    //only display download links when genus name is hovered on
     $('.hover-wrapper').hover(function() {
       $(this).find(".link-tag").show(); 
     }, function() {
@@ -77,11 +77,13 @@ class PipelineSampleReport extends React.Component {
     return params.selected_genus != 'None' && params.disable_filters != 1;
   }
 
+  //path to NCBI 
   gotoNCBI(taxId) {
     const ncbiLink = `https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${taxId}`;
     window.open(ncbiLink, '_blank');
   }
 
+  //download Fasta  
   downloadFastaUrl(reportDetails, taxInfo) {
     location.href = `/pipeline_outputs/${reportDetails.pipeline_info.id}/fasta/${taxInfo.tax_level}/${taxInfo.tax_id}/NT_or_NR`;
   }
@@ -216,6 +218,7 @@ class PipelineSampleReport extends React.Component {
     $(`.table-arrow`).toggleClass('hidden');
   }
 
+  //Download report in csv
   downloadReport(id) {
     location.href = `/reports/${id}/csv`
   }
