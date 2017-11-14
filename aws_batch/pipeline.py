@@ -456,7 +456,7 @@ def generate_merged_fasta(input_files, output_file):
             with open(fname) as infile:
                 for line in infile:
                     if line.startswith(">"):
-                        suffix = "/" + idx
+                        suffix = "/" + str(idx)
                     else:
                         suffix = ""
                     outfile.write(line + suffix)
