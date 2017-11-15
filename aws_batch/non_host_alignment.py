@@ -67,7 +67,18 @@ LOGS_OUT_BASENAME = 'log'
 STATS_OUT = 'stats.json'
 TARGET_OUTPUTS = { "run_gsnapl_remotely": [os.path.join(RESULT_DIR, ),
                                            os.path.join(RESULT_DIR, )],
-                   "run_annotate_m8_with_taxids" ... }
+                   "run_annotate_m8_with_taxids__1": ,
+                   "run_generate_taxid_annotated_fasta_from_m8__1":
+                   "run_filter_deuterostomes_from_m8__1":
+                   "run_generate_taxid_outputs_from_m8":
+                   "run_filter_deuterostomes_from_fasta"
+                   "run_rapsearch2_remotely"
+                   "run_annotate_m8_with_taxids"
+                   "run_generate_taxid_annotated_fasta_from_m8__2"
+                   "run_filter_deuterostomes_from_m8__2"
+                   "run_generate_taxid_outputs_from_m8"
+                   "run_combine_json_outputs"
+                   "run_generate_unidentified_fasta" }
 
 # global statistics log
 STATS = []
