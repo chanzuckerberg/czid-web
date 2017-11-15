@@ -1,4 +1,6 @@
-class SubHeader extends React.Component {
+import React, { Component } from 'react';
+
+export default class SubHeader extends Component {
 	render() {
 		return (
 			<div className="sub-header-component">

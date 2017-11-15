@@ -1,17 +1,17 @@
 import React, { Component } from 'react';
 import moment from 'moment';
-// import  
+import numberWithCommas from '../helpers/strings';
+import { withRouter } from 'react-router'
 
-export default class Samples extends Component {
-  constructor(props, context) {
-    console.log(props, 'all props here');
-    super(props, context);
+class Samples extends Component {
+  constructor(props) {
+    super(props);
     this.project = props.project || null;
     this.projectId = this.project ? this.project.id : null;
     this.samples = props.samples;
     this.samplesCount = props.samples_count;
-    this.outputData = props.outputData || [];
-    this.pipelineRunInfo = props.pipeline_run_info || [];
+    this.outputData = props.samples_info.final_result || [];
+    this.pipelineRunInfo = props.samples_info.pipeline_run_info || [];
     this.all_project = props.all_project|| [];
     this.defaultSortBy = 'newest';
     // const currentSort = SortHelper.currentSort();
@@ -47,7 +47,7 @@ export default class Samples extends Component {
       let pInfo = pipelineInfo[i];
       let pr_info = pipeline_run_info[i];
       return (
-        <tr onClick={ this.viewSample.bind(this, sample.id)} key={i}>
+        <tr onClick={ this.gotoSample.bind(this, sample.id)} key={i}>
           <td>
             {sample.name}
           </td>
@@ -174,8 +174,13 @@ export default class Samples extends Component {
     )
   }
 
-  gotoPage(path) {
-    location.href = `${path}`;
+  gotoPage() {
+    console.log(this, this.props, 'check props');
+    this.props.history.push('/upload');
+  }
+
+  gotoSample(id) {
+    this.props.history.push(`home/${id}`)
   }
 
   componentDidMount() {
@@ -200,7 +205,7 @@ export default class Samples extends Component {
           <div className="sub-header-items">
             <div className="content">
 
-            <div onClick={ this.gotoPage.bind(this, '/samples/new') }   className="upload">
+            <div onClick={ this.gotoPage.bind(this) }   className="upload">
                 <i className="fa fa-flask" aria-hidden="true"></i>
                 <span>Upload Sample</span>
               </div>
@@ -239,3 +244,5 @@ export default class Samples extends Component {
   }
 
 }
+
+export default withRouter(Samples)

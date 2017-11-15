@@ -34,7 +34,7 @@ export default class Home extends Component {
     console.log(this.state, this.state.allSamples)
     return (
       <div>
-          {/* { this.state.allSamples ? <Samples  {...this.state.allSamples}/> : <h5 className="center">Loading...</h5>}  */}
+          { this.state.allSamples ? <Samples  {...this.state.allSamples}/> : <h5 className="center">Loading...</h5>} 
       </div>
     )
   }

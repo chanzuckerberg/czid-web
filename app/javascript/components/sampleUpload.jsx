@@ -1,4 +1,6 @@
-class SampleUpload extends React.Component {
+import React, { Component } from 'react';
+
+export default class SampleUpload extends Component {
   constructor(props, context) {
     super(props, context);
     this.handleUpload = this.handleUpload.bind(this);
