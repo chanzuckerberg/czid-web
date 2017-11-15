@@ -107,7 +107,7 @@ class ProjectVisualization extends React.Component {
     };
     const colors = ['#ffffb4', '#fed975', '#feb34f', '#fd8d3d', '#fb4e29',
     '#e51b1b', '#b10026'];
-    const blankRectColor = '#f3f3ed'; // the color of the placeholder rect
+    const blankRectColor = '#a9a9a9'; // the color of the placeholder rect
     if (dataLength && totalSamples) {
 
       let minMaxes = [];
@@ -220,7 +220,6 @@ class ProjectVisualization extends React.Component {
           .attr('class', 'color-rect')
           .attr('height', grid.height)
           .attr('width', grid.width)
-          .attr('stroke', '#fff')
           .attr('y', 0)
           .attr('x', (d, i) => {
             const sampleName = d.sample;
@@ -297,8 +296,7 @@ class ProjectVisualization extends React.Component {
       .attr('width', gridWidth)
       .attr('fill', d => colorScale(d))
       .attr('y', (d, i) => (i * gridHeight))
-      .attr('x', colorScaleMargin.left)
-      .attr('stroke', '#fff');
+      .attr('x', colorScaleMargin.left);
 
     cGroup
       .append('text')
