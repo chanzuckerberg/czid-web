@@ -79,6 +79,7 @@ RESULT_DIR = ''
 
 # global statistics log
 STATS = []
+DEFAULT_LOGPARAMS = {}
 
 ### convenience functions
 def lzw_fraction(sequence):
@@ -185,8 +186,6 @@ def run_stage1(lazy_run = True):
     formatter = logging.Formatter('(%(time_since_last)ss elapsed): %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
-    DEFAULT_LOGPARAMS = {"SAMPLE_S3_OUTPUT_PATH": SAMPLE_S3_OUTPUT_PATH,
-                         "stats_file": os.path.join(RESULT_DIR, STATS_OUT)}
 
     # Download fastqs
     command = "aws s3 ls %s/ | grep '\.%s$'" % (SAMPLE_S3_INPUT_PATH, FILE_TYPE)
@@ -221,8 +220,7 @@ def run_stage1(lazy_run = True):
     execute_command("aws s3 cp %s %s/;" % (stats_path, SAMPLE_S3_OUTPUT_PATH))
 
     # run host filtering
-    run_host_filtering(fastq_file_1, fastq_file_2, initial_file_type_for_log,
-                       DEFAULT_LOGPARAMS, lazy_run)
+    run_host_filtering(fastq_file_1, fastq_file_2, initial_file_type_for_log, lazy_run)
 
 def run_star_part(output_dir, genome_dir, fastq_file_1, fastq_file_2):
     execute_command("mkdir -p %s" % output_dir)
@@ -241,8 +239,7 @@ def run_star_part(output_dir, genome_dir, fastq_file_1, fastq_file_2):
         star_command_params += ['--readFilesCommand', 'zcat']
     execute_command_realtime_stdout(" ".join(star_command_params), os.path.join(output_dir, "Log.progress.out"))
 
-def run_host_filtering(fastq_file_1, fastq_file_2, initial_file_type_for_log,
-                       DEFAULT_LOGPARAMS, lazy_run):
+def run_host_filtering(fastq_file_1, fastq_file_2, initial_file_type_for_log, lazy_run):
     # run STAR
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "STAR", "count_reads": True,
@@ -250,7 +247,7 @@ def run_host_filtering(fastq_file_1, fastq_file_2, initial_file_type_for_log,
         "before_file_type": initial_file_type_for_log,
         "after_file_name": os.path.join(RESULT_DIR, STAR_OUT1),
         "after_file_type": initial_file_type_for_log})
-    run_and_log(logparams, TARGET_OUTPUTS, lazy_run, run_star,
+    run_and_log(logparams, TARGET_OUTPUTS["run_star"], lazy_run, run_star,
         fastq_file_1, fastq_file_2)
 
     # run priceseqfilter
@@ -260,7 +257,7 @@ def run_host_filtering(fastq_file_1, fastq_file_2, initial_file_type_for_log,
         "before_file_type": initial_file_type_for_log,
         "after_file_name": os.path.join(RESULT_DIR, PRICESEQFILTER_OUT1),
         "after_file_type": initial_file_type_for_log})
-    run_and_log(logparams, TARGET_OUTPUTS, lazy_run, run_priceseqfilter,
+    run_and_log(logparams, TARGET_OUTPUTS["run_priceseqfilter"], lazy_run, run_priceseqfilter,
         os.path.join(RESULT_DIR, STAR_OUT1),
         os.path.join(RESULT_DIR, STAR_OUT2))
 
@@ -269,7 +266,7 @@ def run_host_filtering(fastq_file_1, fastq_file_2, initial_file_type_for_log,
         logparams = return_merged_dict(DEFAULT_LOGPARAMS,
             {"title": "FASTQ to FASTA",
             "count_reads": False})
-        run_and_log(logparams, TARGET_OUTPUTS, lazy_run, run_fq2fa,
+        run_and_log(logparams, TARGET_OUTPUTS["run_fq2fa"], lazy_run, run_fq2fa,
             os.path.join(RESULT_DIR, PRICESEQFILTER_OUT1),
             os.path.join(RESULT_DIR, PRICESEQFILTER_OUT2))
         next_input_1 = FQ2FA_OUT1
@@ -285,7 +282,7 @@ def run_host_filtering(fastq_file_1, fastq_file_2, initial_file_type_for_log,
         "before_file_type": "fasta_paired",
         "after_file_name": os.path.join(RESULT_DIR, CDHITDUP_OUT1),
         "after_file_type": "fasta_paired"})
-    run_and_log(logparams, TARGET_OUTPUTS, lazy_run, run_cdhitdup,
+    run_and_log(logparams, TARGET_OUTPUTS["run_cdhitdup"], lazy_run, run_cdhitdup,
         os.path.join(RESULT_DIR, next_input_1),
         os.path.join(RESULT_DIR, next_input_2))
 
@@ -296,7 +293,7 @@ def run_host_filtering(fastq_file_1, fastq_file_2, initial_file_type_for_log,
         "before_file_type": "fasta_paired",
         "after_file_name": os.path.join(RESULT_DIR, LZW_OUT1),
         "after_file_type": "fasta_paired"})
-    run_and_log(logparams, TARGET_OUTPUTS, lazy_run, run_lzw,
+    run_and_log(logparams, TARGET_OUTPUTS["run_lzw"], lazy_run, run_lzw,
         os.path.join(RESULT_DIR, CDHITDUP_OUT1),
         os.path.join(RESULT_DIR, CDHITDUP_OUT2))
 
@@ -307,7 +304,7 @@ def run_host_filtering(fastq_file_1, fastq_file_2, initial_file_type_for_log,
         "before_file_type": "fasta_paired",
         "after_file_name": os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT1),
         "after_file_type": "fasta_paired"})
-    run_and_log(logparams, TARGET_OUTPUTS, lazy_run, run_bowtie2,
+    run_and_log(logparams, TARGET_OUTPUTS["run_bowtie2"], lazy_run, run_bowtie2,
         os.path.join(RESULT_DIR, LZW_OUT1),
         os.path.join(RESULT_DIR, LZW_OUT2))
 
@@ -440,6 +437,7 @@ def main():
     global RESULT_DIR
     global SCRATCH_DIR
     global SAMPLE_DIR
+    global DEFAULT_LOGPARAMS
 
     INPUT_BUCKET = os.environ.get('INPUT_BUCKET', INPUT_BUCKET)
     FILE_TYPE = os.environ.get('FILE_TYPE', FILE_TYPE)
@@ -457,6 +455,9 @@ def main():
     FASTQ_DIR = SAMPLE_DIR + '/fastqs'
     RESULT_DIR = SAMPLE_DIR + '/results'
     SCRATCH_DIR = SAMPLE_DIR + '/scratch'
+
+    DEFAULT_LOGPARAMS = {"SAMPLE_S3_OUTPUT_PATH": SAMPLE_S3_OUTPUT_PATH,
+                         "stats_file": os.path.join(RESULT_DIR, STATS_OUT)}
 
     run_stage1(True)
 

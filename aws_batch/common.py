@@ -130,7 +130,7 @@ def run_and_log(logparams, target_outputs, lazy_run, func_name, *args):
     logger.handlers[0].flush()
     execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
     # produce the output
-    if lazy_run and all(os.path.isfile(output) for output in target_outputs[func_name.__name__]):
+    if lazy_run and all(os.path.isfile(output) for output in target_outputs):
         logger.info("output exists, lazy run")
     else:
         func_name(*args)
