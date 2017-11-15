@@ -28,7 +28,7 @@ SCRATCH_DIR = None
 RESULT_DIR = None
 ROOT_DIR = '/mnt'
 DEST_DIR = ROOT_DIR + '/idseq/data' # generated data go here
-REF_DIR  = ROOT_DIR + '/idseq/ref' # referene genome / ref databases go here
+REF_DIR = ROOT_DIR + '/idseq/ref' # referene genome / ref databases go here
 
 # software packages
 STAR="STAR"
@@ -39,10 +39,6 @@ BOWTIE2="bowtie2"
 # pipeline configuration
 LZW_FRACTION_CUTOFF = 0.45
 FILE_TYPE = 'fastq.gz'
-
-# compute capacity
-GSNAPL_MAX_CONCURRENT = 20
-RAPSEARCH2_MAX_CONCURRENT = 5
 
 # reference genomes
 STAR_GENOME = 's3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz'
@@ -85,6 +81,7 @@ TARGET_OUTPUTS = { "run_star": [os.path.join(RESULT_DIR, STAR_OUT1),
 # statistics and logging
 STATS = []
 DEFAULT_LOGPARAMS = {}
+AWS_BATCH_JOB_ID = None
 
 # convenience functions
 def lzw_fraction(sequence):
@@ -428,6 +425,7 @@ def main():
     global SCRATCH_DIR
     global SAMPLE_DIR
     global DEFAULT_LOGPARAMS
+    global AWS_BATCH_JOB_ID
 
     INPUT_BUCKET = os.environ.get('INPUT_BUCKET', INPUT_BUCKET)
     FILE_TYPE = os.environ.get('FILE_TYPE', FILE_TYPE)
