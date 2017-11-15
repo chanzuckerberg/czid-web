@@ -16,15 +16,18 @@ import logging
 import math
 from common import *
 
-KEY_S3_PATH = 's3://czbiohub-infectious-disease/idseq-alpha.pem'
+AWS_BATCH_JOB_ID = None
+
+# data directories
+INPUT_BUCKET = None
+OUTPUT_BUCKET = None
+SAMPLE_S3_INPUT_PATH = None
+SAMPLE_S3_OUTPUT_PATH = None
+RESULT_DIR = None
 ROOT_DIR = '/mnt'
 DEST_DIR = ROOT_DIR + '/idseq/data' # generated data go here
-REF_DIR  = ROOT_DIR + '/idseq/ref' # referene genome / ref databases go here
+REF_DIR = ROOT_DIR + '/idseq/ref' # referene genome / ref databases go here
 TEMP_DIR = ROOT_DIR + '/tmp' # tmp directory with a lot of space for sorting large files
-
-# Global variable examples, to be overwritten by environment variables
-INPUT_BUCKET = 's3://czbiohub-idseq-samples-development/samples/3/60/results'
-OUTPUT_BUCKET = 's3://czbiohub-idseq-samples-development/samples/3/60/postprocess'
 
 # references
 ACCESSION2TAXID = 's3://czbiohub-infectious-disease/references/accession2taxid.db.gz'
@@ -49,6 +52,22 @@ TAXID_LOCATIONS_JSON_FAMILY_NT = 'taxid_locations_family_nt.json'
 TAXID_LOCATIONS_JSON_FAMILY_NR = 'taxid_locations_family_nr.json'
 TAXID_LOCATIONS_JSON_ALL = 'taxid_locations_combined.json'
 LOGS_OUT_BASENAME = 'postprocess-log'
+
+# target outputs by task
+TARGET_OUTPUTS = { "run_generate_taxid_fasta_from_accid": [os.path.join(RESULT_DIR, TAXID_ANNOT_FASTA)],
+                   "run_generate_taxid_locator__1": [os.path.join(RESULT_DIR, TAXID_ANNOT_SORTED_FASTA_NT),
+                                                     os.path.join(RESULT_DIR, TAXID_LOCATIONS_JSON_NT)],
+                   "run_generate_taxid_locator__2": [os.path.join(RESULT_DIR, TAXID_ANNOT_SORTED_FASTA_NR),
+                                                     os.path.join(RESULT_DIR, TAXID_LOCATIONS_JSON_NR)],
+                   "run_generate_taxid_locator__3": [os.path.join(RESULT_DIR, TAXID_ANNOT_SORTED_FASTA_GENUS_NT),
+                                                     os.path.join(RESULT_DIR, TAXID_LOCATIONS_JSON_GENUS_NT)],
+                   "run_generate_taxid_locator__4": [os.path.join(RESULT_DIR, TAXID_ANNOT_SORTED_FASTA_GENUS_NR),
+                                                     os.path.join(RESULT_DIR, TAXID_LOCATIONS_JSON_GENUS_NR)],
+                   "run_generate_taxid_locator__5": [os.path.join(RESULT_DIR, TAXID_ANNOT_SORTED_FASTA_FAMILY_NT),
+                                                     os.path.join(RESULT_DIR, TAXID_LOCATIONS_JSON_FAMILY_NT)],
+                   "run_generate_taxid_locator__6": [os.path.join(RESULT_DIR, TAXID_ANNOT_SORTED_FASTA_FAMILY_NR),
+                                                     os.path.join(RESULT_DIR, TAXID_LOCATIONS_JSON_FAMILY_NR)],
+                   "run_combine_json": [os.path.join(RESULT_DIR, TAXID_LOCATIONS_JSON_ALL)] }
 
 # convenience functions
 def return_merged_dict(dict1, dict2):
@@ -207,7 +226,8 @@ def run_stage3(sample_s3_input_path, sample_s3_output_path, aws_batch_job_id, la
     # generate taxid fasta
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "run_generate_taxid_fasta_from_accid"})
-    run_and_log(logparams, False, run_generate_taxid_fasta_from_accid,
+    run_and_log(logparams, TARGET_OUTPUTS["run_generate_taxid_fasta_from_accid"], False,
+        run_generate_taxid_fasta_from_accid,
         input_file, ACCESSION2TAXID, LINEAGE_SHELF,
         os.path.join(result_dir, TAXID_ANNOT_FASTA),
         result_dir, sample_s3_output_path)
@@ -216,7 +236,8 @@ def run_stage3(sample_s3_input_path, sample_s3_output_path, aws_batch_job_id, la
     # generate taxid locator for NT
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "run_generate_taxid_locator for NT"})
-    run_and_log(logparams, False, run_generate_taxid_locator,
+    run_and_log(logparams, TARGET_OUTPUTS["run_generate_taxid_locator__1"], False,
+        run_generate_taxid_locator,
         os.path.join(result_dir, TAXID_ANNOT_FASTA), 'species_nt', 'NT',
         os.path.join(result_dir, TAXID_ANNOT_SORTED_FASTA_NT),
         os.path.join(result_dir, TAXID_LOCATIONS_JSON_NT),
@@ -225,7 +246,8 @@ def run_stage3(sample_s3_input_path, sample_s3_output_path, aws_batch_job_id, la
     # generate taxid locator for NR
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "run_generate_taxid_locator for NR"})
-    run_and_log(logparams, False, run_generate_taxid_locator,
+    run_and_log(logparams, TARGET_OUTPUTS["run_generate_taxid_locator__2"], False,
+        run_generate_taxid_locator,
         os.path.join(result_dir, TAXID_ANNOT_FASTA), 'species_nr', 'NR',
         os.path.join(result_dir, TAXID_ANNOT_SORTED_FASTA_NR),
         os.path.join(result_dir, TAXID_LOCATIONS_JSON_NR),
@@ -235,7 +257,8 @@ def run_stage3(sample_s3_input_path, sample_s3_output_path, aws_batch_job_id, la
     # generate taxid locator for NT
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "run_generate_taxid_locator for NT"})
-    run_and_log(logparams, False, run_generate_taxid_locator,
+    run_and_log(logparams, TARGET_OUTPUTS["run_generate_taxid_locator__3"], False,
+        run_generate_taxid_locator,
         os.path.join(result_dir, TAXID_ANNOT_FASTA), 'genus_nt', 'NT',
         os.path.join(result_dir, TAXID_ANNOT_SORTED_FASTA_GENUS_NT),
         os.path.join(result_dir, TAXID_LOCATIONS_JSON_GENUS_NT),
@@ -244,7 +267,8 @@ def run_stage3(sample_s3_input_path, sample_s3_output_path, aws_batch_job_id, la
     # generate taxid locator for NR
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "run_generate_taxid_locator for NR"})
-    run_and_log(logparams, False, run_generate_taxid_locator,
+    run_and_log(logparams, TARGET_OUTPUTS["run_generate_taxid_locator__4"], False,
+        run_generate_taxid_locator,
         os.path.join(result_dir, TAXID_ANNOT_FASTA), 'genus_nr', 'NR',
         os.path.join(result_dir, TAXID_ANNOT_SORTED_FASTA_GENUS_NR),
         os.path.join(result_dir, TAXID_LOCATIONS_JSON_GENUS_NR),
@@ -254,7 +278,8 @@ def run_stage3(sample_s3_input_path, sample_s3_output_path, aws_batch_job_id, la
     # generate taxid locator for NT
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "run_generate_taxid_locator for NT"})
-    run_and_log(logparams, False, run_generate_taxid_locator,
+    run_and_log(logparams, TARGET_OUTPUTS["run_generate_taxid_locator__5"], False,
+        run_generate_taxid_locator,
         os.path.join(result_dir, TAXID_ANNOT_FASTA), 'family_nt', 'NT',
         os.path.join(result_dir, TAXID_ANNOT_SORTED_FASTA_FAMILY_NT),
         os.path.join(result_dir, TAXID_LOCATIONS_JSON_FAMILY_NT),
@@ -263,7 +288,8 @@ def run_stage3(sample_s3_input_path, sample_s3_output_path, aws_batch_job_id, la
     # generate taxid locator for NR
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "run_generate_taxid_locator for NR"})
-    run_and_log(logparams, False, run_generate_taxid_locator,
+    run_and_log(logparams, TARGET_OUTPUTS["run_generate_taxid_locator__6"], False,
+        run_generate_taxid_locator,
         os.path.join(result_dir, TAXID_ANNOT_FASTA), 'family_nr', 'NR',
         os.path.join(result_dir, TAXID_ANNOT_SORTED_FASTA_FAMILY_NR),
         os.path.join(result_dir, TAXID_LOCATIONS_JSON_FAMILY_NR),
@@ -276,19 +302,29 @@ def run_stage3(sample_s3_input_path, sample_s3_output_path, aws_batch_job_id, la
                              TAXID_LOCATIONS_JSON_GENUS_NT, TAXID_LOCATIONS_JSON_GENUS_NR,
                              TAXID_LOCATIONS_JSON_FAMILY_NT, TAXID_LOCATIONS_JSON_FAMILY_NR]
     input_files = [os.path.join(result_dir, file) for file in input_files_basenames]
-    run_and_log(logparams, False, run_combine_json,
+    run_and_log(logparams, TARGET_OUTPUTS["run_combine_json"], False, run_combine_json,
          input_files, os.path.join(result_dir, TAXID_LOCATIONS_JSON_ALL),
          result_dir, sample_s3_output_path)
 
 # Main
 def main():
+    # Unbuffer stdout and redirect stderr into stdout.  This helps observe logged events in realtime.
+    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+    os.dup2(sys.stdout.fileno(), sys.stderr.fileno())
+
+    # collect environment variables and set global variables
     global INPUT_BUCKET
     global OUTPUT_BUCKET
+    global SAMPLE_S3_INPUT_PATH
+    global SAMPLE_S3_OUTPUT_PATH
+    global AWS_BATCH_JOB_ID
+
     INPUT_BUCKET = os.environ.get('INPUT_BUCKET', INPUT_BUCKET)
     OUTPUT_BUCKET = os.environ.get('OUTPUT_BUCKET', OUTPUT_BUCKET)
     AWS_BATCH_JOB_ID = os.environ.get('AWS_BATCH_JOB_ID', 'local')
-    sample_s3_input_path = INPUT_BUCKET.rstrip('/')
-    sample_s3_output_path = OUTPUT_BUCKET.rstrip('/')
+
+    SAMPLE_S3_INPUT_PATH = INPUT_BUCKET.rstrip('/')
+    SAMPLE_S3_OUTPUT_PATH = OUTPUT_BUCKET.rstrip('/')
 
     run_stage3(sample_s3_input_path, sample_s3_output_path, AWS_BATCH_JOB_ID, True)
 
