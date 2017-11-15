@@ -12,9 +12,8 @@ module SamplesHelper
   end
 
   def get_remaining_reads(jobstats)
-    # reads remaining after host filtering
-    bowtie2_stats = jobstats.find_by(task: 'run_bowtie2')
-    bowtie2_stats.reads_after unless bowtie2_stats.nil?
+    po = jobstats.pipeline_output
+    po.remaining_reads unless po.nil?
   end
 
   def compute_compression_ratio(jobstats)
@@ -28,9 +27,8 @@ module SamplesHelper
   end
 
   def compute_percentage_reads(jobstats)
-    bowtie2_stats = jobstats.find_by(task: 'run_bowtie2')
-    star_stats = jobstats.find_by(task: 'run_star')
-    (100.0 * bowtie2_stats.reads_after) / star_stats.reads_before unless bowtie2_stats.nil? || star_stats.nil?
+    po = jobstats.pipeline_output
+    (100.0 * po.remaining_reads) / po.total_reads unless po.nil?
   end
 
   def sample_status_display(sample)
