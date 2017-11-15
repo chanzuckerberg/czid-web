@@ -123,6 +123,22 @@ def return_merged_dict(dict1, dict2):
     result.update(dict2)
     return result
 
+def configure_logger(log_file):
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    handler = logging.FileHandler(log_file)
+    formatter = logging.Formatter("%(asctime)s (%(time_since_last)ss elapsed): %(message)s")
+    handler.addFilter(TimeFilter())
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    # echo to stdout so they get to cloudwatch
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setLevel(logging.INFO)
+    formatter = logging.Formatter('(%(time_since_last)ss elapsed): %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    return logger
+
 def run_and_log(logparams, target_outputs, lazy_run, func_name, *args):
     logger = logging.getLogger()
     logger.info("========== %s ==========" % logparams.get("title"))

@@ -373,19 +373,7 @@ def run_stage1(lazy_run = True):
 
     # configure logger
     log_file = "%s/%s.%s.txt" % (RESULT_DIR, LOGS_OUT_BASENAME, AWS_BATCH_JOB_ID)
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-    handler = logging.FileHandler(log_file)
-    formatter = logging.Formatter("%(asctime)s (%(time_since_last)ss elapsed): %(message)s")
-    handler.addFilter(TimeFilter())
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    # now also echo to stdout so they get to cloudwatch
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setLevel(logging.INFO)
-    formatter = logging.Formatter('(%(time_since_last)ss elapsed): %(message)s')
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
+    logger = configure_logger(log_file)
 
     # Download fastqs
     command = "aws s3 ls %s/ | grep '\.%s$'" % (SAMPLE_S3_INPUT_PATH, FILE_TYPE)
@@ -396,7 +384,6 @@ def run_stage1(lazy_run = True):
             execute_command("aws s3 cp %s/%s %s/" % (SAMPLE_S3_INPUT_PATH, m.group(1), FASTQ_DIR))
         else:
             print "%s doesn't match %s" % (line, FILE_TYPE)
-
     fastq_files = execute_command_with_output("ls %s/*.%s" % (FASTQ_DIR, FILE_TYPE)).rstrip().split("\n")
 
     # Identify input files and characteristics
@@ -406,8 +393,8 @@ def run_stage1(lazy_run = True):
         fastq_file_1 = fastq_files[0]
         fastq_file_2 = fastq_files[1]
 
+    # Download existing data and see what has been done
     if lazy_run:
-       # Download existing data and see what has been done
         command = "aws s3 cp %s %s --recursive" % (SAMPLE_S3_OUTPUT_PATH, RESULT_DIR)
         print execute_command_with_output(command)
 
