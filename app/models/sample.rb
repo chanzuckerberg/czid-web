@@ -201,32 +201,16 @@ class Sample < ApplicationRecord
   def check_status
     return unless [STATUS_UPLOADED, STATUS_RERUN].include?(status)
     self.status = STATUS_CHECKED
-    kickoff_pipeline(false)
+    kickoff_pipeline
   end
 
-  def kickoff_pipeline(dry_run = true)
+  def kickoff_pipeline
     # only kickoff pipeline when no active pipeline_run running
     return unless pipeline_runs.in_progress.empty?
-
-    command = pipeline_command
-    if dry_run
-      Rails.logger.debug(command)
-      return command
-    end
 
     stdout, stderr, status = Open3.capture3(command)
     pr = PipelineRun.new
     pr.sample = self
-    pr.command = command
-    pr.command_stdout = stdout
-    pr.command_error = stderr
-    pr.command_status = status.to_s
-    if status.exitstatus.zero?
-      output =  JSON.parse(pr.command_stdout)
-      pr.job_id = output['jobId']
-    else
-      pr.job_status = PipelineRun::STATUS_FAILED
-    end
     pr.save
   end
 end
