@@ -21,9 +21,9 @@ class PipelineRun < ApplicationRecord
   POSTPROCESS_STATUS_LOADED = 'LOADED'.freeze
 
 
-
-  before_save :check_job_status
   before_create  :create_run_stages
+  before_save :check_job_status
+  after_create :kickoff_job
 
   def self.in_progress
     where("job_status != '#{STATUS_FAILED}' OR job_status IS NULL")
@@ -35,24 +35,61 @@ class PipelineRun < ApplicationRecord
   end
 
 
+  def kickoff_job
+    pipelinr_run_stages.first.run_job
+  end
+
   def create_run_stages
     # Host Filtering
-    host_filtering_stage = PipelineRunStage.new(step_number:1)
-
+    run_stages = []
+    if sample.host_genome && sample.host_genome.name == HostGenome::NO_HOST_NAME
+      run_stages << PipelineRunStage.new(
+        step_number: 1,
+        name: 'Host Filtering',
+        job_command_func: 'host_filtering_command',
+        load_db_command_func: 'db_load_host_filtering',
+        output_func: 'host_filtering_outputs'
+      )
+    end
 
     # Alignment and Merging
+    run_stages << PipelineRunStage.new(
+      step_number: 2,
+      name: 'GSNAPL/RAPSEARCH alignment',
+      job_command_func: 'alignment_command',
+      load_db_command_func: 'db_load_alignment',
+      output_func: 'alignment_outputs'
+    )
     # Post Processing
-    self.pipeline_run_stages = [host_filtering_stage, alignment_stage, post_processing_stage]
-
+    run_stages << PipelineRunStage.new(
+      step_number: 3,
+      name: 'Post Processing',
+      job_command_func: 'postprocess_command',
+      load_db_command_func: 'db_load_postprocess',
+      output_func: 'postprocess_outputs'
+    )
+    self.pipeline_run_stages = run_stages
   end
 
   def check_job_status
+    # only update the pipeline_run info. do not update pipeline_run_stage info
     return if finalized?
     check_job_status_old unless pipeline_run_stages.present?
-
-
-
-
+    pipeline_run_stages.order(:step_number).each do |prs|
+      if prs.failed?
+         self.finalized = 1
+         self.job_status = "#{prs.step_number}.#{prs.name}-#{STAUS_FAILED}"
+         return
+      elsif prs.succeeded?
+        next
+      else # still running
+        self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
+        return
+      end
+    end
+    # All done
+    self.finalized = 1
+    self.job_status = STATUS_CHECKED
   end
 
   def check_job_status_old # Before pipeline_run_stages are introduced
@@ -91,6 +128,23 @@ class PipelineRun < ApplicationRecord
   end
 
   def update_job_status
+    update_job_status_old unless pipeline_run_stages.present?
+    pipeline_run_stages.order(:step_number).each do |prs|
+      if !prs.started? # Not started yet
+        prs.run_job
+        return
+      elsif prs.succeeded?
+        # great do nothing. go to the next step.
+        next
+      elsif prs.failed?
+        return
+      else # This step is still running
+        prs.update_job_status
+      end
+    end
+  end
+
+  def update_job_status_old
     return if completed?
     command = "aegea batch describe #{job_id}"
     stdout, stderr, status = Open3.capture3(command)
@@ -176,7 +230,7 @@ class PipelineRun < ApplicationRecord
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_byteranges_path}")
   end
 
-  def download_file(s3_path, destination_dir)
+  def self.download_file(s3_path, destination_dir)
     command = "mkdir -p #{destination_dir};"
     command += "aws s3 cp #{s3_path} #{destination_dir}/;"
     _stdout, _stderr, status = Open3.capture3(command)
