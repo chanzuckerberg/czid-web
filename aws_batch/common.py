@@ -6,8 +6,6 @@ import subprocess
 import logging
 import json
 
-TASK_OUTPUT_FILES = { TO DO }
-
 class Updater(object):
 
     def __init__(self, update_period, update_function):
@@ -125,14 +123,14 @@ def return_merged_dict(dict1, dict2):
     result.update(dict2)
     return result
 
-def run_and_log(logparams, lazy_run, func_name, *args):
+def run_and_log(logparams, target_outputs, lazy_run, func_name, *args):
     logger = logging.getLogger()
     logger.info("========== %s ==========" % logparams.get("title"))
     # copy log file -- start
     logger.handlers[0].flush()
     execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
     # produce the output
-    if lazy_run and all(os.path.isfile(output) for output in TASK_OUTPUT_FILES[func_name.__name__]):
+    if lazy_run and all(os.path.isfile(output) for output in target_outputs[func_name.__name__]):
         logger.info("output exists, lazy run")
     else:
         func_name(*args)

@@ -65,6 +65,9 @@ UNIDENTIFIED_FASTA_OUT = 'unidentified.fasta'
 COMBINED_JSON_OUT = 'idseq_web_sample.json'
 LOGS_OUT_BASENAME = 'log'
 STATS_OUT = 'stats.json'
+TARGET_OUTPUTS = { "run_gsnapl_remotely": [os.path.join(RESULT_DIR, ),
+                                           os.path.join(RESULT_DIR, )],
+                   "run_annotate_m8_with_taxids" ... }
 
 # global statistics log
 STATS = []
@@ -489,7 +492,7 @@ def run_stage2(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
         "before_file_type": before_file_type_for_log,
         "after_file_name": os.path.join(result_dir, GSNAPL_OUT),
         "after_file_type": "m8"})
-    run_and_log(logparams, lazy_run, run_gsnapl_remotely,
+    run_and_log(logparams, TARGET_OUTPUTS, lazy_run, run_gsnapl_remotely,
         sample_name, gsnapl_input_files,
         gsnap_ssh_key_s3_path, environment, aws_batch_job_id,
         result_dir, sample_s3_output_path)
@@ -498,7 +501,7 @@ def run_stage2(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "annotate gsnapl m8 with taxids",
         "count_reads": False})
-    run_and_log(logparams, False, run_annotate_m8_with_taxids,
+    run_and_log(logparams, TARGET_OUTPUTS, False, run_annotate_m8_with_taxids,
         sample_name, os.path.join(result_dir, GSNAPL_DEDUP_OUT),
         os.path.join(result_dir, ANNOTATE_GSNAPL_M8_WITH_TAXIDS_OUT),
         accession2taxid_s3_path, result_dir, sample_s3_output_path)
@@ -507,7 +510,7 @@ def run_stage2(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "generate taxid annotated fasta from m8",
         "count_reads": False})
-    run_and_log(logparams, False, run_generate_taxid_annotated_fasta_from_m8,
+    run_and_log(logparams, TARGET_OUTPUTS, False, run_generate_taxid_annotated_fasta_from_m8,
         sample_name, os.path.join(result_dir, GSNAPL_DEDUP_OUT),
         os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT3),
         os.path.join(result_dir, GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT),
@@ -519,7 +522,7 @@ def run_stage2(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
         "before_file_type": "m8",
         "after_file_name": os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NT_M8_OUT),
         "after_file_type": "m8"})
-    run_and_log(logparams, False, run_filter_deuterostomes_from_m8,
+    run_and_log(logparams, TARGET_OUTPUTS, False, run_filter_deuterostomes_from_m8,
         sample_name, os.path.join(result_dir, ANNOTATE_GSNAPL_M8_WITH_TAXIDS_OUT),
         os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NT_M8_OUT),
         deuterostome_list_s3_path, result_dir, sample_s3_output_path)
@@ -527,7 +530,7 @@ def run_stage2(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "generate taxid outputs from m8",
         "count_reads": False})
-    run_and_log(logparams, False, run_generate_taxid_outputs_from_m8,
+    run_and_log(logparams, TARGET_OUTPUTS, False, run_generate_taxid_outputs_from_m8,
         sample_name, os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NT_M8_OUT),
         os.path.join(result_dir, NT_M8_TO_TAXID_COUNTS_FILE_OUT),
         os.path.join(result_dir, NT_TAXID_COUNTS_TO_JSON_OUT),
@@ -540,7 +543,7 @@ def run_stage2(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "filter deuterostomes from FASTA",
         "count_reads": False})
-    run_and_log(logparams, False, run_filter_deuterostomes_from_fasta,
+    run_and_log(logparams, TARGET_OUTPUTS, False, run_filter_deuterostomes_from_fasta,
         sample_name, os.path.join(result_dir, GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT),
         os.path.join(result_dir, FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT),
         accession2taxid_s3_path, deuterostome_list_s3_path, 'NT',
@@ -552,7 +555,7 @@ def run_stage2(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
         "before_file_type": "fasta",
         "after_file_name": os.path.join(result_dir, RAPSEARCH2_OUT),
         "after_file_type": "m8"})
-    run_and_log(logparams, lazy_run, run_rapsearch2_remotely,
+    run_and_log(logparams, TARGET_OUTPUTS, lazy_run, run_rapsearch2_remotely,
         sample_name, FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT,
         rapsearch_ssh_key_s3_path, environment, aws_batch_job_id,
         result_dir, sample_s3_output_path)
@@ -561,7 +564,7 @@ def run_stage2(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "annotate m8 with taxids",
         "count_reads": False})
-    run_and_log(logparams, False, run_annotate_m8_with_taxids,
+    run_and_log(logparams, TARGET_OUTPUTS, False, run_annotate_m8_with_taxids,
         sample_name, os.path.join(result_dir, RAPSEARCH2_OUT),
         os.path.join(result_dir, ANNOTATE_RAPSEARCH2_M8_WITH_TAXIDS_OUT),
         accession2taxid_s3_path, result_dir, sample_s3_output_path)
@@ -574,7 +577,7 @@ def run_stage2(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "generate taxid annotated fasta from m8",
         "count_reads": False})
-    run_and_log(logparams, False, run_generate_taxid_annotated_fasta_from_m8,
+    run_and_log(logparams, TARGET_OUTPUTS, False, run_generate_taxid_annotated_fasta_from_m8,
         sample_name, result_dir + '/' + RAPSEARCH2_OUT,
         result_dir + '/' + FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT,
         result_dir + '/' + GENERATE_TAXID_ANNOTATED_FASTA_FROM_RAPSEARCH2_M8_OUT,
@@ -586,7 +589,7 @@ def run_stage2(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
         "before_file_type": "m8",
         "after_file_name": os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NR_M8_OUT),
         "after_file_type": "m8"})
-    run_and_log(logparams, False, run_filter_deuterostomes_from_m8,
+    run_and_log(logparams, TARGET_OUTPUTS, False, run_filter_deuterostomes_from_m8,
         sample_name, os.path.join(result_dir, ANNOTATE_RAPSEARCH2_M8_WITH_TAXIDS_OUT),
         os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NR_M8_OUT),
         deuterostome_list_s3_path, result_dir, sample_s3_output_path)
@@ -594,7 +597,7 @@ def run_stage2(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "generate taxid outputs from m8",
         "count_reads": False})
-    run_and_log(logparams, False, run_generate_taxid_outputs_from_m8,
+    run_and_log(logparams, TARGET_OUTPUTS, False, run_generate_taxid_outputs_from_m8,
         sample_name, os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NR_M8_OUT),
         os.path.join(result_dir, NR_M8_TO_TAXID_COUNTS_FILE_OUT),
         os.path.join(result_dir, NR_TAXID_COUNTS_TO_JSON_OUT),
@@ -606,7 +609,7 @@ def run_stage2(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "combine JSON outputs",
         "count_reads": False})
-    run_and_log(logparams, False, run_combine_json_outputs,
+    run_and_log(logparams, TARGET_OUTPUTS, False, run_combine_json_outputs,
         result_dir + '/' + NT_TAXID_COUNTS_TO_JSON_OUT,
         result_dir + '/' + NR_TAXID_COUNTS_TO_JSON_OUT,
         result_dir + '/' + COMBINED_JSON_OUT,
@@ -618,7 +621,7 @@ def run_stage2(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
         "before_file_type": "fasta",
         "after_file_name": os.path.join(result_dir, UNIDENTIFIED_FASTA_OUT),
         "after_file_type": "fasta"})
-    run_and_log(logparams, False, run_generate_unidentified_fasta,
+    run_and_log(logparams, TARGET_OUTPUTS, False, run_generate_unidentified_fasta,
         sample_name, result_dir + '/' + GENERATE_TAXID_ANNOTATED_FASTA_FROM_RAPSEARCH2_M8_OUT,
         result_dir + '/' + UNIDENTIFIED_FASTA_OUT,
         result_dir, sample_s3_output_path)
