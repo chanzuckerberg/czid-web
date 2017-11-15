@@ -446,12 +446,11 @@ def run_sample(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
     fastq_files = execute_command_with_output("ls %s/*.%s" % (fastq_dir, file_type)).rstrip().split("\n")
 
     # Identify input files and characteristics
-    if filter_host_flag:
-        if len(fastq_files) <= 1:
-            return # only support paired reads for now
-        else:
-            fastq_file_1 = fastq_files[0]
-            fastq_file_2 = fastq_files[1]
+    if len(fastq_files) <= 1:
+        return # only support paired reads for now
+    else:
+        fastq_file_1 = fastq_files[0]
+        fastq_file_2 = fastq_files[1]
 
     if lazy_run:
        # Download existing data and see what has been done
@@ -464,9 +463,8 @@ def run_sample(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
     STATS.append({'total_reads': get_total_initial_reads(fastq_files[0], initial_file_type_for_log, stats_file)})
 
     # run host filtering
-    if filter_host_flag:
-        run_host_filtering(sample_name, fastq_file_1, fastq_file_2, file_type, initial_file_type_for_log, star_genome_s3_path, bowtie2_genome_s3_path,
-                           DEFAULT_LOGPARAMS, result_dir, scratch_dir, sample_s3_output_path, lazy_run)
+    run_host_filtering(sample_name, fastq_file_1, fastq_file_2, file_type, initial_file_type_for_log, star_genome_s3_path, bowtie2_genome_s3_path,
+                       DEFAULT_LOGPARAMS, result_dir, scratch_dir, sample_s3_output_path, lazy_run)
 
 
 def run_star_part(output_dir, genome_dir, fastq_file_1, fastq_file_2):
