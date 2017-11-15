@@ -25,7 +25,6 @@ SAMPLE_S3_INPUT_PATH = None
 SAMPLE_S3_OUTPUT_PATH = None
 SAMPLE_DIR = None
 FASTQ_DIR = None
-SCRATCH_DIR = None
 RESULT_DIR = None
 ROOT_DIR = '/mnt'
 DEST_DIR = ROOT_DIR + '/idseq/data' # generated data go here
@@ -640,8 +639,7 @@ def run_generate_unidentified_fasta(input_fa, output_fa):
 
 def run_stage2(lazy_run = True):
     # make local directories
-    execute_command("mkdir -p %s %s %s %s" % (SAMPLE_DIR, FASTQ_DIR, RESULT_DIR, SCRATCH_DIR))
-    execute_command("mkdir -p %s " % REF_DIR)
+    execute_command("mkdir -p %s %s %s %s" % (SAMPLE_DIR, FASTQ_DIR, RESULT_DIR, REF_DIR))
 
     # configure logger
     log_file = "%s/%s.%s.txt" % (RESULT_DIR, LOGS_OUT_BASENAME, AWS_BATCH_JOB_ID)
@@ -843,7 +841,6 @@ def main():
     global SAMPLE_S3_OUTPUT_PATH
     global FASTQ_DIR
     global RESULT_DIR
-    global SCRATCH_DIR
     global SAMPLE_DIR
     global DEFAULT_LOGPARAMS
     global AWS_BATCH_JOB_ID
@@ -863,11 +860,11 @@ def main():
     SAMPLE_DIR = DEST_DIR + '/' + sample_name
     FASTQ_DIR = SAMPLE_DIR + '/fastqs'
     RESULT_DIR = SAMPLE_DIR + '/results'
-    SCRATCH_DIR = SAMPLE_DIR + '/scratch'
     DEFAULT_LOGPARAMS = {"SAMPLE_S3_OUTPUT_PATH": SAMPLE_S3_OUTPUT_PATH,
                          "stats_file": os.path.join(RESULT_DIR, STATS_OUT)}
     KEY_S3_PATH = get_key_path(ENVIRONMENT)
 
+    # execute the pipeline stage
     run_stage2(True)
 
 if __name__=="__main__":
