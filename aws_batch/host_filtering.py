@@ -17,23 +17,34 @@ import math
 import threading
 from common import *
 
-INPUT_BUCKET = 's3://czbiohub-infectious-disease/UGANDA' # default to be overwritten by environment variable
-FILE_TYPE = 'fastq.gz'
-OUTPUT_BUCKET = 's3://czbiohub-idseq-samples-test/id-uganda'  # default to be overwritten by environment variable
+# data directories
+INPUT_BUCKET = None 
+OUTPUT_BUCKET = None
+SAMPLE_S3_INPUT_PATH = None
+SAMPLE_S3_OUTPUT_PATH = None
+SAMPLE_DIR = None
+FASTQ_DIR = None
+SCRATCH_DIR = None
+RESULT_DIR = None
 ROOT_DIR = '/mnt'
 DEST_DIR = ROOT_DIR + '/idseq/data' # generated data go here
 REF_DIR  = ROOT_DIR + '/idseq/ref' # referene genome / ref databases go here
 
+# software packages
 STAR="STAR"
 PRICESEQ_FILTER="PriceSeqFilter"
 CDHITDUP="cd-hit-dup"
 BOWTIE2="bowtie2"
 
+# pipeline configuration
 LZW_FRACTION_CUTOFF = 0.45
+FILE_TYPE = 'fastq.gz'
 
+# compute capacity
 GSNAPL_MAX_CONCURRENT = 20
 RAPSEARCH2_MAX_CONCURRENT = 5
 
+# reference genomes
 STAR_GENOME = 's3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz'
 BOWTIE2_GENOME = 's3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz'
 
@@ -54,6 +65,8 @@ EXTRACT_UNMAPPED_FROM_SAM_OUT2 = 'unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.u
 EXTRACT_UNMAPPED_FROM_SAM_OUT3 = 'unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.merged.fasta'
 LOGS_OUT_BASENAME = 'log'
 STATS_OUT = 'stats.json'
+
+# target outputs by task
 TARGET_OUTPUTS = { "run_star": [os.path.join(RESULT_DIR, STAR_OUT1),
                                 os.path.join(RESULT_DIR, STAR_OUT2)],
                    "run_priceseqfilter": [os.path.join(RESULT_DIR, PRICESEQFILTER_OUT1),
@@ -69,19 +82,11 @@ TARGET_OUTPUTS = { "run_star": [os.path.join(RESULT_DIR, STAR_OUT1),
                                    os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT3)]
                  }
 
-# data directories
-SAMPLE_S3_INPUT_PATH = ''
-SAMPLE_S3_OUTPUT_PATH = ''
-SAMPLE_DIR = ''
-FASTQ_DIR = ''
-SCRATCH_DIR = ''
-RESULT_DIR = ''
-
-# global statistics log
+# statistics and logging
 STATS = []
 DEFAULT_LOGPARAMS = {}
 
-### convenience functions
+# convenience functions
 def lzw_fraction(sequence):
     if sequence == "":
         return 0.0
@@ -92,7 +97,6 @@ def lzw_fraction(sequence):
     for c in sequence:
         dict_size += 1
         dictionary[c] = dict_size
-
     word = ""
     results = []
     for c in sequence:
@@ -166,62 +170,7 @@ def generate_unmapped_pairs_from_sam(sam_file, output_prefix):
     output_read_2.close()
     output_merged_read.close()
 
-### job functions
-def run_stage1(lazy_run = True):
-    execute_command("mkdir -p %s %s %s %s" % (SAMPLE_DIR, FASTQ_DIR, RESULT_DIR, SCRATCH_DIR))
-    execute_command("mkdir -p %s " % REF_DIR)
-
-    # configure logger
-    log_file = "%s/%s.%s.txt" % (RESULT_DIR, LOGS_OUT_BASENAME, AWS_BATCH_JOB_ID)
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-    handler = logging.FileHandler(log_file)
-    formatter = logging.Formatter("%(asctime)s (%(time_since_last)ss elapsed): %(message)s")
-    handler.addFilter(TimeFilter())
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    # now also echo to stdout so they get to cloudwatch
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setLevel(logging.INFO)
-    formatter = logging.Formatter('(%(time_since_last)ss elapsed): %(message)s')
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-
-    # Download fastqs
-    command = "aws s3 ls %s/ | grep '\.%s$'" % (SAMPLE_S3_INPUT_PATH, FILE_TYPE)
-    output = execute_command_with_output(command).rstrip().split("\n")
-    for line in output:
-        m = re.match(".*?([^ ]*." + re.escape(FILE_TYPE) + ")", line)
-        if m:
-            execute_command("aws s3 cp %s/%s %s/" % (SAMPLE_S3_INPUT_PATH, m.group(1), FASTQ_DIR))
-        else:
-            print "%s doesn't match %s" % (line, FILE_TYPE)
-
-    fastq_files = execute_command_with_output("ls %s/*.%s" % (FASTQ_DIR, FILE_TYPE)).rstrip().split("\n")
-
-    # Identify input files and characteristics
-    if len(fastq_files) <= 1:
-        return # only support paired reads for now
-    else:
-        fastq_file_1 = fastq_files[0]
-        fastq_file_2 = fastq_files[1]
-
-    if lazy_run:
-       # Download existing data and see what has been done
-        command = "aws s3 cp %s %s --recursive" % (SAMPLE_S3_OUTPUT_PATH, RESULT_DIR)
-        print execute_command_with_output(command)
-
-    # Record total number of input reads
-    initial_file_type_for_log = "fastq_paired" if "fastq" in FILE_TYPE else "fasta_paired"
-    STATS.append({'total_reads': count_reads(fastq_files[0], initial_file_type_for_log)})
-    stats_path = os.path.join(RESULT_DIR, STATS_OUT)
-    with open(stats_path, 'wb') as f:
-        json.dump(STATS, f)
-    execute_command("aws s3 cp %s %s/;" % (stats_path, SAMPLE_S3_OUTPUT_PATH))
-
-    # run host filtering
-    run_host_filtering(fastq_file_1, fastq_file_2, initial_file_type_for_log, lazy_run)
-
+# job functions
 def run_star_part(output_dir, genome_dir, fastq_file_1, fastq_file_2):
     execute_command("mkdir -p %s" % output_dir)
     star_command_params = ['cd', output_dir, ';', STAR,
@@ -238,76 +187,6 @@ def run_star_part(output_dir, genome_dir, fastq_file_1, fastq_file_2):
     if fastq_file_1[-3:] == '.gz':
         star_command_params += ['--readFilesCommand', 'zcat']
     execute_command_realtime_stdout(" ".join(star_command_params), os.path.join(output_dir, "Log.progress.out"))
-
-def run_host_filtering(fastq_file_1, fastq_file_2, initial_file_type_for_log, lazy_run):
-    # run STAR
-    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
-        {"title": "STAR", "count_reads": True,
-        "before_file_name": fastq_file_1,
-        "before_file_type": initial_file_type_for_log,
-        "after_file_name": os.path.join(RESULT_DIR, STAR_OUT1),
-        "after_file_type": initial_file_type_for_log})
-    run_and_log(logparams, TARGET_OUTPUTS["run_star"], lazy_run, run_star,
-        fastq_file_1, fastq_file_2)
-
-    # run priceseqfilter
-    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
-        {"title": "PriceSeqFilter", "count_reads": True,
-        "before_file_name": os.path.join(RESULT_DIR, STAR_OUT1),
-        "before_file_type": initial_file_type_for_log,
-        "after_file_name": os.path.join(RESULT_DIR, PRICESEQFILTER_OUT1),
-        "after_file_type": initial_file_type_for_log})
-    run_and_log(logparams, TARGET_OUTPUTS["run_priceseqfilter"], lazy_run, run_priceseqfilter,
-        os.path.join(RESULT_DIR, STAR_OUT1),
-        os.path.join(RESULT_DIR, STAR_OUT2))
-
-    # run fastq to fasta
-    if "fastq" in FILE_TYPE:
-        logparams = return_merged_dict(DEFAULT_LOGPARAMS,
-            {"title": "FASTQ to FASTA",
-            "count_reads": False})
-        run_and_log(logparams, TARGET_OUTPUTS["run_fq2fa"], lazy_run, run_fq2fa,
-            os.path.join(RESULT_DIR, PRICESEQFILTER_OUT1),
-            os.path.join(RESULT_DIR, PRICESEQFILTER_OUT2))
-        next_input_1 = FQ2FA_OUT1
-        next_input_2 = FQ2FA_OUT2
-    else:
-        next_input_1 = PRICESEQFILTER_OUT1
-        next_input_2 = PRICESEQFILTER_OUT2
-
-    # run cdhitdup
-    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
-        {"title": "CD-HIT-DUP", "count_reads": True,
-        "before_file_name": os.path.join(RESULT_DIR, next_input_1),
-        "before_file_type": "fasta_paired",
-        "after_file_name": os.path.join(RESULT_DIR, CDHITDUP_OUT1),
-        "after_file_type": "fasta_paired"})
-    run_and_log(logparams, TARGET_OUTPUTS["run_cdhitdup"], lazy_run, run_cdhitdup,
-        os.path.join(RESULT_DIR, next_input_1),
-        os.path.join(RESULT_DIR, next_input_2))
-
-    # run lzw filter
-    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
-        {"title": "LZW filter", "count_reads": True,
-        "before_file_name": os.path.join(RESULT_DIR, CDHITDUP_OUT1),
-        "before_file_type": "fasta_paired",
-        "after_file_name": os.path.join(RESULT_DIR, LZW_OUT1),
-        "after_file_type": "fasta_paired"})
-    run_and_log(logparams, TARGET_OUTPUTS["run_lzw"], lazy_run, run_lzw,
-        os.path.join(RESULT_DIR, CDHITDUP_OUT1),
-        os.path.join(RESULT_DIR, CDHITDUP_OUT2))
-
-    # run bowtie
-    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
-        {"title": "bowtie2", "count_reads": True,
-        "before_file_name": os.path.join(RESULT_DIR, LZW_OUT1),
-        "before_file_type": "fasta_paired",
-        "after_file_name": os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT1),
-        "after_file_type": "fasta_paired"})
-    run_and_log(logparams, TARGET_OUTPUTS["run_bowtie2"], lazy_run, run_bowtie2,
-        os.path.join(RESULT_DIR, LZW_OUT1),
-        os.path.join(RESULT_DIR, LZW_OUT2))
-
 
 def run_star(fastq_file_1, fastq_file_2):
     # check if genome downloaded already
@@ -419,13 +298,137 @@ def run_bowtie2(input_fa_1, input_fa_2):
     execute_command("aws s3 cp %s/%s %s/;" % (RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT2, SAMPLE_S3_OUTPUT_PATH))
     execute_command("aws s3 cp %s/%s %s/;" % (RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT3, SAMPLE_S3_OUTPUT_PATH))
 
-### Main
+def run_host_filtering(fastq_file_1, fastq_file_2, initial_file_type_for_log, lazy_run):
+    # run STAR
+    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+        {"title": "STAR", "count_reads": True,
+        "before_file_name": fastq_file_1,
+        "before_file_type": initial_file_type_for_log,
+        "after_file_name": os.path.join(RESULT_DIR, STAR_OUT1),
+        "after_file_type": initial_file_type_for_log})
+    run_and_log(logparams, TARGET_OUTPUTS["run_star"], lazy_run, run_star,
+        fastq_file_1, fastq_file_2)
+
+    # run priceseqfilter
+    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+        {"title": "PriceSeqFilter", "count_reads": True,
+        "before_file_name": os.path.join(RESULT_DIR, STAR_OUT1),
+        "before_file_type": initial_file_type_for_log,
+        "after_file_name": os.path.join(RESULT_DIR, PRICESEQFILTER_OUT1),
+        "after_file_type": initial_file_type_for_log})
+    run_and_log(logparams, TARGET_OUTPUTS["run_priceseqfilter"], lazy_run, run_priceseqfilter,
+        os.path.join(RESULT_DIR, STAR_OUT1),
+        os.path.join(RESULT_DIR, STAR_OUT2))
+
+    # run fastq to fasta
+    if "fastq" in FILE_TYPE:
+        logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+            {"title": "FASTQ to FASTA",
+            "count_reads": False})
+        run_and_log(logparams, TARGET_OUTPUTS["run_fq2fa"], lazy_run, run_fq2fa,
+            os.path.join(RESULT_DIR, PRICESEQFILTER_OUT1),
+            os.path.join(RESULT_DIR, PRICESEQFILTER_OUT2))
+        next_input_1 = FQ2FA_OUT1
+        next_input_2 = FQ2FA_OUT2
+    else:
+        next_input_1 = PRICESEQFILTER_OUT1
+        next_input_2 = PRICESEQFILTER_OUT2
+
+    # run cdhitdup
+    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+        {"title": "CD-HIT-DUP", "count_reads": True,
+        "before_file_name": os.path.join(RESULT_DIR, next_input_1),
+        "before_file_type": "fasta_paired",
+        "after_file_name": os.path.join(RESULT_DIR, CDHITDUP_OUT1),
+        "after_file_type": "fasta_paired"})
+    run_and_log(logparams, TARGET_OUTPUTS["run_cdhitdup"], lazy_run, run_cdhitdup,
+        os.path.join(RESULT_DIR, next_input_1),
+        os.path.join(RESULT_DIR, next_input_2))
+
+    # run lzw filter
+    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+        {"title": "LZW filter", "count_reads": True,
+        "before_file_name": os.path.join(RESULT_DIR, CDHITDUP_OUT1),
+        "before_file_type": "fasta_paired",
+        "after_file_name": os.path.join(RESULT_DIR, LZW_OUT1),
+        "after_file_type": "fasta_paired"})
+    run_and_log(logparams, TARGET_OUTPUTS["run_lzw"], lazy_run, run_lzw,
+        os.path.join(RESULT_DIR, CDHITDUP_OUT1),
+        os.path.join(RESULT_DIR, CDHITDUP_OUT2))
+
+    # run bowtie
+    logparams = return_merged_dict(DEFAULT_LOGPARAMS,
+        {"title": "bowtie2", "count_reads": True,
+        "before_file_name": os.path.join(RESULT_DIR, LZW_OUT1),
+        "before_file_type": "fasta_paired",
+        "after_file_name": os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT1),
+        "after_file_type": "fasta_paired"})
+    run_and_log(logparams, TARGET_OUTPUTS["run_bowtie2"], lazy_run, run_bowtie2,
+        os.path.join(RESULT_DIR, LZW_OUT1),
+        os.path.join(RESULT_DIR, LZW_OUT2))
+
+def run_stage1(lazy_run = True):
+    execute_command("mkdir -p %s %s %s %s" % (SAMPLE_DIR, FASTQ_DIR, RESULT_DIR, SCRATCH_DIR))
+    execute_command("mkdir -p %s " % REF_DIR)
+
+    # configure logger
+    log_file = "%s/%s.%s.txt" % (RESULT_DIR, LOGS_OUT_BASENAME, AWS_BATCH_JOB_ID)
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    handler = logging.FileHandler(log_file)
+    formatter = logging.Formatter("%(asctime)s (%(time_since_last)ss elapsed): %(message)s")
+    handler.addFilter(TimeFilter())
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    # now also echo to stdout so they get to cloudwatch
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setLevel(logging.INFO)
+    formatter = logging.Formatter('(%(time_since_last)ss elapsed): %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+    # Download fastqs
+    command = "aws s3 ls %s/ | grep '\.%s$'" % (SAMPLE_S3_INPUT_PATH, FILE_TYPE)
+    output = execute_command_with_output(command).rstrip().split("\n")
+    for line in output:
+        m = re.match(".*?([^ ]*." + re.escape(FILE_TYPE) + ")", line)
+        if m:
+            execute_command("aws s3 cp %s/%s %s/" % (SAMPLE_S3_INPUT_PATH, m.group(1), FASTQ_DIR))
+        else:
+            print "%s doesn't match %s" % (line, FILE_TYPE)
+
+    fastq_files = execute_command_with_output("ls %s/*.%s" % (FASTQ_DIR, FILE_TYPE)).rstrip().split("\n")
+
+    # Identify input files and characteristics
+    if len(fastq_files) <= 1:
+        return # only support paired reads for now
+    else:
+        fastq_file_1 = fastq_files[0]
+        fastq_file_2 = fastq_files[1]
+
+    if lazy_run:
+       # Download existing data and see what has been done
+        command = "aws s3 cp %s %s --recursive" % (SAMPLE_S3_OUTPUT_PATH, RESULT_DIR)
+        print execute_command_with_output(command)
+
+    # Record total number of input reads
+    initial_file_type_for_log = "fastq_paired" if "fastq" in FILE_TYPE else "fasta_paired"
+    STATS.append({'total_reads': count_reads(fastq_files[0], initial_file_type_for_log)})
+    stats_path = os.path.join(RESULT_DIR, STATS_OUT)
+    with open(stats_path, 'wb') as f:
+        json.dump(STATS, f)
+    execute_command("aws s3 cp %s %s/;" % (stats_path, SAMPLE_S3_OUTPUT_PATH))
+
+    # run host filtering
+    run_host_filtering(fastq_file_1, fastq_file_2, initial_file_type_for_log, lazy_run)
+
+# Main
 def main():
     # Unbuffer stdout and redirect stderr into stdout.  This helps observe logged events in realtime.
     sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
     os.dup2(sys.stdout.fileno(), sys.stderr.fileno())
 
-    # collect environment variables
+    # collect environment variables and set global variables
     global INPUT_BUCKET
     global FILE_TYPE
     global OUTPUT_BUCKET
@@ -446,19 +449,18 @@ def main():
     BOWTIE2_GENOME = os.environ.get('BOWTIE2_GENOME', BOWTIE2_GENOME)
     DB_SAMPLE_ID = os.environ['DB_SAMPLE_ID']
     AWS_BATCH_JOB_ID = os.environ.get('AWS_BATCH_JOB_ID', 'local')
- 
+
     SAMPLE_S3_INPUT_PATH = INPUT_BUCKET.rstrip('/')
     SAMPLE_S3_OUTPUT_PATH = OUTPUT_BUCKET.rstrip('/')
-
     sample_name = SAMPLE_S3_INPUT_PATH[5:].rstrip('/').replace('/','-')
     SAMPLE_DIR = DEST_DIR + '/' + sample_name
     FASTQ_DIR = SAMPLE_DIR + '/fastqs'
     RESULT_DIR = SAMPLE_DIR + '/results'
     SCRATCH_DIR = SAMPLE_DIR + '/scratch'
-
     DEFAULT_LOGPARAMS = {"SAMPLE_S3_OUTPUT_PATH": SAMPLE_S3_OUTPUT_PATH,
                          "stats_file": os.path.join(RESULT_DIR, STATS_OUT)}
 
+    # execute the pipeline stage
     run_stage1(True)
 
 if __name__=="__main__":
