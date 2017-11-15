@@ -188,8 +188,12 @@ class PipelineRun < ApplicationRecord
     command = "aws s3 ls #{s3_path}"
     stdout, _stderr, status = Open3.capture3(command)
     return false unless status.exitstatus.zero?
-    s3_file_time = DateTime.strptime(stdout[0..18], "%Y-%m-%d %H:%M:%S")
-    (s3_file_time > created_at)
+    begin
+      s3_file_time = DateTime.strptime(stdout[0..18], "%Y-%m-%d %H:%M:%S")
+      return (s3_file_time > created_at)
+    rescue
+      return nil
+    end
   end
 
   def terminate_job
