@@ -6,6 +6,8 @@ import subprocess
 import logging
 import json
 
+TASK_OUTPUT_FILES = { TO DO }
+
 class Updater(object):
 
     def __init__(self, update_period, update_function):
@@ -118,36 +120,31 @@ def count_reads(file_name, file_type):
     f.close()
     return int(count)
 
-def run_and_log(logparams, func_name, *args):
+def return_merged_dict(dict1, dict2):
+    result = dict1.copy()
+    result.update(dict2)
+    return result
+
+def run_and_log(logparams, lazy_run, func_name, *args):
     logger = logging.getLogger()
     logger.info("========== %s ==========" % logparams.get("title"))
     # copy log file -- start
     logger.handlers[0].flush()
     execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
     # produce the output
-    func_return = func_name(*args)
-    if func_return == 1:
+    if lazy_run and all(os.path.isfile(output) for output in TASK_OUTPUT_FILES[func_name.__name__]):
         logger.info("output exists, lazy run")
     else:
+        func_name(*args)
         logger.info("uploaded output")
     # copy log file -- after work is done
     execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
     # count records
     required_params = ["before_file_name", "before_file_type", "after_file_name", "after_file_type"]
-    if all(param in logparams for param in required_params):
+    if logparams["count_reads"] and all(param in logparams for param in required_params):
         records_before = count_reads(logparams["before_file_name"], logparams["before_file_type"])
         records_after = count_reads(logparams["after_file_name"], logparams["after_file_type"])
-        if logparams["count_reads"]:
-            percent_removed = (100.0 * (records_before - records_after)) / records_before
-            logger.info("%s %% of reads dropped out, %s reads remaining" % (percent_str(percent_removed), str(records_after)))
-            STATS.append({'task': func_name.__name__, 'reads_before': records_before, 'reads_after': records_after})
-        # function-specific logs
-        if func_name.__name__ == "run_cdhitdup":
-            compression_ratio = (1.0 * records_before) / records_after
-            logger.info("duplicate compression ratio: %s" % str(compression_ratio))
-        if func_name.__name__ == "run_priceseqfilter":
-            pass_percentage = (100.0 * records_after) / records_before
-            logger.info("percentage of reads passing QC filter: %s %%" % str(pass_percentage))
+        STATS.append({'task': func_name.__name__, 'reads_before': records_before, 'reads_after': records_after})
     # copy log file -- end
     logger.handlers[0].flush()
     execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))

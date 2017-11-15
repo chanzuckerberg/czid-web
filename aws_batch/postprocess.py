@@ -145,11 +145,7 @@ def combine_json(input_json_list, output_json):
 
 # job functions
 def run_generate_taxid_fasta_from_accid(input_fasta, accession2taxid_s3_path, lineage_s3_path,
-    output_fasta, result_dir, sample_s3_output_path, lazy_run):
-    if lazy_run:
-        # check if output already exists
-        if os.path.isfile(output_fasta):
-            return 1
+    output_fasta, result_dir, sample_s3_output_path):
     accession2taxid_gz = os.path.basename(accession2taxid_s3_path)
     accession2taxid_path = REF_DIR + '/' + accession2taxid_gz[:-3]
     if not os.path.isfile(accession2taxid_path):
@@ -166,27 +162,18 @@ def run_generate_taxid_fasta_from_accid(input_fasta, accession2taxid_s3_path, li
     execute_command("aws s3 cp %s %s/" % (output_fasta, sample_s3_output_path))
 
 def run_generate_taxid_locator(input_fasta, taxid_field, hit_type, output_fasta, output_json,
-    result_dir, sample_s3_output_path, lazy_run):
-    if lazy_run:
-        # check if output already exists
-        if os.path.isfile(output_fasta):
-            return 1
+    result_dir, sample_s3_output_path):
     generate_taxid_locator(input_fasta, taxid_field, hit_type, output_fasta, output_json)
     logging.getLogger().info("finished job")
     execute_command("aws s3 cp %s %s/" % (output_fasta, sample_s3_output_path))
     execute_command("aws s3 cp %s %s/" % (output_json, sample_s3_output_path))
 
-def run_combine_json(input_json_list, output_json, result_dir, sample_s3_output_path, lazy_run):
-    if lazy_run:
-        # check if output already exists
-        if os.path.isfile(output_json):
-            return 1
+def run_combine_json(input_json_list, output_json, result_dir, sample_s3_output_path):
     combine_json(input_json_list, output_json)
     logging.getLogger().info("finished job")
     execute_command("aws s3 cp %s %s/" % (output_json, sample_s3_output_path))
 
-def run_sample(sample_s3_input_path, sample_s3_output_path, aws_batch_job_id, lazy_run = True):
-
+def run_stage3(sample_s3_input_path, sample_s3_output_path, aws_batch_job_id, lazy_run = True):
     sample_s3_output_path = sample_s3_output_path.rstrip('/')
     sample_name = sample_s3_input_path[5:].rstrip('/').replace('/','-')
     sample_dir = DEST_DIR + '/' + sample_name
@@ -220,67 +207,67 @@ def run_sample(sample_s3_input_path, sample_s3_output_path, aws_batch_job_id, la
     # generate taxid fasta
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "run_generate_taxid_fasta_from_accid"})
-    run_and_log(logparams, run_generate_taxid_fasta_from_accid,
+    run_and_log(logparams, False, run_generate_taxid_fasta_from_accid,
         input_file, ACCESSION2TAXID, LINEAGE_SHELF,
         os.path.join(result_dir, TAXID_ANNOT_FASTA),
-        result_dir, sample_s3_output_path, False)
+        result_dir, sample_s3_output_path)
 
     # SPECIES level
     # generate taxid locator for NT
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "run_generate_taxid_locator for NT"})
-    run_and_log(logparams, run_generate_taxid_locator,
+    run_and_log(logparams, False, run_generate_taxid_locator,
         os.path.join(result_dir, TAXID_ANNOT_FASTA), 'species_nt', 'NT',
         os.path.join(result_dir, TAXID_ANNOT_SORTED_FASTA_NT),
         os.path.join(result_dir, TAXID_LOCATIONS_JSON_NT),
-        result_dir, sample_s3_output_path, False)
+        result_dir, sample_s3_output_path)
 
     # generate taxid locator for NR
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "run_generate_taxid_locator for NR"})
-    run_and_log(logparams, run_generate_taxid_locator,
+    run_and_log(logparams, False, run_generate_taxid_locator,
         os.path.join(result_dir, TAXID_ANNOT_FASTA), 'species_nr', 'NR',
         os.path.join(result_dir, TAXID_ANNOT_SORTED_FASTA_NR),
         os.path.join(result_dir, TAXID_LOCATIONS_JSON_NR),
-        result_dir, sample_s3_output_path, False)
+        result_dir, sample_s3_output_path)
 
     # GENUS level
     # generate taxid locator for NT
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "run_generate_taxid_locator for NT"})
-    run_and_log(logparams, run_generate_taxid_locator,
+    run_and_log(logparams, False, run_generate_taxid_locator,
         os.path.join(result_dir, TAXID_ANNOT_FASTA), 'genus_nt', 'NT',
         os.path.join(result_dir, TAXID_ANNOT_SORTED_FASTA_GENUS_NT),
         os.path.join(result_dir, TAXID_LOCATIONS_JSON_GENUS_NT),
-        result_dir, sample_s3_output_path, False)
+        result_dir, sample_s3_output_path)
 
     # generate taxid locator for NR
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "run_generate_taxid_locator for NR"})
-    run_and_log(logparams, run_generate_taxid_locator,
+    run_and_log(logparams, False, run_generate_taxid_locator,
         os.path.join(result_dir, TAXID_ANNOT_FASTA), 'genus_nr', 'NR',
         os.path.join(result_dir, TAXID_ANNOT_SORTED_FASTA_GENUS_NR),
         os.path.join(result_dir, TAXID_LOCATIONS_JSON_GENUS_NR),
-        result_dir, sample_s3_output_path, False)
+        result_dir, sample_s3_output_path)
 
     # FAMILY level
     # generate taxid locator for NT
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "run_generate_taxid_locator for NT"})
-    run_and_log(logparams, run_generate_taxid_locator,
+    run_and_log(logparams, False, run_generate_taxid_locator,
         os.path.join(result_dir, TAXID_ANNOT_FASTA), 'family_nt', 'NT',
         os.path.join(result_dir, TAXID_ANNOT_SORTED_FASTA_FAMILY_NT),
         os.path.join(result_dir, TAXID_LOCATIONS_JSON_FAMILY_NT),
-        result_dir, sample_s3_output_path, False)
+        result_dir, sample_s3_output_path)
 
     # generate taxid locator for NR
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "run_generate_taxid_locator for NR"})
-    run_and_log(logparams, run_generate_taxid_locator,
+    run_and_log(logparams, False, run_generate_taxid_locator,
         os.path.join(result_dir, TAXID_ANNOT_FASTA), 'family_nr', 'NR',
         os.path.join(result_dir, TAXID_ANNOT_SORTED_FASTA_FAMILY_NR),
         os.path.join(result_dir, TAXID_LOCATIONS_JSON_FAMILY_NR),
-        result_dir, sample_s3_output_path, False)
+        result_dir, sample_s3_output_path)
 
     # combine results
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
@@ -289,9 +276,9 @@ def run_sample(sample_s3_input_path, sample_s3_output_path, aws_batch_job_id, la
                              TAXID_LOCATIONS_JSON_GENUS_NT, TAXID_LOCATIONS_JSON_GENUS_NR,
                              TAXID_LOCATIONS_JSON_FAMILY_NT, TAXID_LOCATIONS_JSON_FAMILY_NR]
     input_files = [os.path.join(result_dir, file) for file in input_files_basenames]
-    run_and_log(logparams, run_combine_json,
+    run_and_log(logparams, False, run_combine_json,
          input_files, os.path.join(result_dir, TAXID_LOCATIONS_JSON_ALL),
-         result_dir, sample_s3_output_path, False)
+         result_dir, sample_s3_output_path)
 
 # Main
 def main():
@@ -303,7 +290,7 @@ def main():
     sample_s3_input_path = INPUT_BUCKET.rstrip('/')
     sample_s3_output_path = OUTPUT_BUCKET.rstrip('/')
 
-    run_sample(sample_s3_input_path, sample_s3_output_path, AWS_BATCH_JOB_ID, True)
+    run_stage3(sample_s3_input_path, sample_s3_output_path, AWS_BATCH_JOB_ID, True)
 
 if __name__=="__main__":
     main()

@@ -238,9 +238,9 @@ def run_host_filtering(sample_name, fastq_file_1, fastq_file_2, file_type, initi
         "before_file_type": initial_file_type_for_log,
         "after_file_name": os.path.join(result_dir, STAR_OUT1),
         "after_file_type": initial_file_type_for_log})
-    run_and_log(logparams, run_star,
+    run_and_log(logparams, lazy_run, run_star,
         sample_name, fastq_file_1, fastq_file_2, file_type, star_genome_s3_path,
-        result_dir, scratch_dir, sample_s3_output_path, lazy_run)
+        result_dir, scratch_dir, sample_s3_output_path)
 
     # run priceseqfilter
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
@@ -249,20 +249,20 @@ def run_host_filtering(sample_name, fastq_file_1, fastq_file_2, file_type, initi
         "before_file_type": initial_file_type_for_log,
         "after_file_name": os.path.join(result_dir, PRICESEQFILTER_OUT1),
         "after_file_type": initial_file_type_for_log})
-    run_and_log(logparams, run_priceseqfilter,
+    run_and_log(logparams, lazy_run, run_priceseqfilter,
         sample_name, os.path.join(result_dir, STAR_OUT1),
         os.path.join(result_dir, STAR_OUT2), file_type,
-        result_dir, sample_s3_output_path, lazy_run)
+        result_dir, sample_s3_output_path)
 
     # run fastq to fasta
     if "fastq" in file_type:
         logparams = return_merged_dict(DEFAULT_LOGPARAMS,
             {"title": "FASTQ to FASTA",
             "count_reads": False})
-        run_and_log(logparams, run_fq2fa,
+        run_and_log(logparams, lazy_run, run_fq2fa,
             sample_name, os.path.join(result_dir, PRICESEQFILTER_OUT1),
             os.path.join(result_dir, PRICESEQFILTER_OUT2),
-            result_dir, sample_s3_output_path, lazy_run)
+            result_dir, sample_s3_output_path)
         next_input_1 = FQ2FA_OUT1
         next_input_2 = FQ2FA_OUT2
     else:
@@ -276,10 +276,10 @@ def run_host_filtering(sample_name, fastq_file_1, fastq_file_2, file_type, initi
         "before_file_type": "fasta_paired",
         "after_file_name": os.path.join(result_dir, CDHITDUP_OUT1),
         "after_file_type": "fasta_paired"})
-    run_and_log(logparams, run_cdhitdup,
+    run_and_log(logparams, lazy_run, run_cdhitdup,
         sample_name, os.path.join(result_dir, next_input_1),
         os.path.join(result_dir, next_input_2),
-        result_dir, sample_s3_output_path, lazy_run)
+        result_dir, sample_s3_output_path)
 
     # run lzw filter
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
@@ -288,10 +288,10 @@ def run_host_filtering(sample_name, fastq_file_1, fastq_file_2, file_type, initi
         "before_file_type": "fasta_paired",
         "after_file_name": os.path.join(result_dir, LZW_OUT1),
         "after_file_type": "fasta_paired"})
-    run_and_log(logparams, run_lzw,
+    run_and_log(logparams, lazy_run, run_lzw,
         sample_name, os.path.join(result_dir, CDHITDUP_OUT1),
         os.path.join(result_dir, CDHITDUP_OUT2),
-        result_dir, sample_s3_output_path, lazy_run)
+        result_dir, sample_s3_output_path)
 
     # run bowtie
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
@@ -300,20 +300,14 @@ def run_host_filtering(sample_name, fastq_file_1, fastq_file_2, file_type, initi
         "before_file_type": "fasta_paired",
         "after_file_name": os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT1),
         "after_file_type": "fasta_paired"})
-    run_and_log(logparams, run_bowtie2,
+    run_and_log(logparams, lazy_run, run_bowtie2,
         sample_name, os.path.join(result_dir, LZW_OUT1),
         os.path.join(result_dir, LZW_OUT2),
-        bowtie2_genome_s3_path, result_dir, sample_s3_output_path, lazy_run)
+        bowtie2_genome_s3_path, result_dir, sample_s3_output_path)
 
 
 def run_star(sample_name, fastq_file_1, fastq_file_2, file_type, star_genome_s3_path,
-             result_dir, scratch_dir, sample_s3_output_path, lazy_run):
-    if lazy_run:
-        # check if output already exists
-        output1 = "%s/%s" % (result_dir, STAR_OUT1)
-        output2 = "%s/%s" % (result_dir, STAR_OUT2)
-        if os.path.isfile(output1) and os.path.isfile(output2):
-            return 1
+             result_dir, scratch_dir, sample_s3_output_path):
     # check if genome downloaded already
     genome_file = os.path.basename(star_genome_s3_path)
     if not os.path.isfile("%s/%s" % (REF_DIR, genome_file)):
@@ -348,13 +342,7 @@ def run_star(sample_name, fastq_file_1, fastq_file_2, file_type, star_genome_s3_
     logging.getLogger().info("finished job")
 
 def run_priceseqfilter(sample_name, input_fq_1, input_fq_2, file_type,
-                       result_dir, sample_s3_output_path, lazy_run):
-    if lazy_run:
-        # check if output already exists
-        output1 = "%s/%s" % (result_dir, PRICESEQFILTER_OUT1)
-        output2 = "%s/%s" % (result_dir, PRICESEQFILTER_OUT2)
-        if os.path.isfile(output1) and os.path.isfile(output2):
-            return 1
+                       result_dir, sample_s3_output_path):
     priceseq_params = [PRICESEQ_FILTER,
                        '-a','12',
                        '-fp',input_fq_1 , input_fq_2,
@@ -372,13 +360,7 @@ def run_priceseqfilter(sample_name, input_fq_1, input_fq_2, file_type,
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, PRICESEQFILTER_OUT2, sample_s3_output_path))
 
 def run_fq2fa(sample_name, input_fq_1, input_fq_2,
-              result_dir, sample_s3_output_path, lazy_run):
-    if lazy_run:
-        # check if output already exists
-        output1 = "%s/%s" % (result_dir, FQ2FA_OUT1)
-        output2 = "%s/%s" % (result_dir, FQ2FA_OUT2)
-        if os.path.isfile(output1) and os.path.isfile(output2):
-            return 1
+              result_dir, sample_s3_output_path):
     execute_command("sed -n '1~4s/^@/>/p;2~4p' <%s >%s/%s" % (input_fq_1, result_dir, FQ2FA_OUT1))
     execute_command("sed -n '1~4s/^@/>/p;2~4p' <%s >%s/%s" % (input_fq_2, result_dir, FQ2FA_OUT2))
     logging.getLogger().info("finished job")
@@ -387,13 +369,7 @@ def run_fq2fa(sample_name, input_fq_1, input_fq_2,
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, FQ2FA_OUT2, sample_s3_output_path))
 
 def run_cdhitdup(sample_name, input_fa_1, input_fa_2,
-                 result_dir, sample_s3_output_path, lazy_run):
-    if lazy_run:
-        # check if output already exists
-        output1 = "%s/%s" % (result_dir, CDHITDUP_OUT1)
-        output2 = "%s/%s" % (result_dir, CDHITDUP_OUT2)
-        if os.path.isfile(output1) and os.path.isfile(output2):
-            return 1
+                 result_dir, sample_s3_output_path):
     cdhitdup_params = [CDHITDUP,
                        '-i',  input_fa_1,
                        '-i2', input_fa_2,
@@ -407,13 +383,7 @@ def run_cdhitdup(sample_name, input_fa_1, input_fa_2,
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, CDHITDUP_OUT2, sample_s3_output_path))
 
 def run_lzw(sample_name, input_fa_1, input_fa_2,
-            result_dir, sample_s3_output_path, lazy_run):
-    if lazy_run:
-        # check if output already exists
-        output1 = "%s/%s" % (result_dir, LZW_OUT1)
-        output2 = "%s/%s" % (result_dir, LZW_OUT2)
-        if os.path.isfile(output1) and os.path.isfile(output2):
-            return 1
+            result_dir, sample_s3_output_path):
     output_prefix = result_dir + '/' + LZW_OUT1[:-8]
     generate_lzw_filtered_paired(input_fa_1, input_fa_2, output_prefix, LZW_FRACTION_CUTOFF)
     logging.getLogger().info("finished job")
@@ -422,17 +392,7 @@ def run_lzw(sample_name, input_fa_1, input_fa_2,
     execute_command("aws s3 cp %s/%s %s/;" % (result_dir, LZW_OUT2, sample_s3_output_path))
 
 def run_bowtie2(sample_name, input_fa_1, input_fa_2, bowtie2_genome_s3_path,
-                result_dir, sample_s3_output_path, lazy_run):
-    if lazy_run:
-        # check if output already exists
-        output1 = "%s/%s" % (result_dir, BOWTIE2_OUT)
-        output2 = "%s/%s" % (result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT1)
-        output3 = "%s/%s" % (result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT2)
-        output4 = "%s/%s" % (result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT3)
-        if os.path.isfile(output1) and os.path.isfile(output2) and \
-           os.path.isfile(output3) and os.path.isfile(output4):
-            return 1
-    # Doing the work
+                result_dir, sample_s3_output_path):
     # check if genome downloaded already
     genome_file = os.path.basename(bowtie2_genome_s3_path)
     if not os.path.isfile("%s/%s" % (REF_DIR, genome_file)):

@@ -365,9 +365,6 @@ def return_merged_dict(dict1, dict2):
 
 def environment_for_aligners(environment):
     return "production" ## temporary fix since we only have "production" gsnap/rapsearch machines right now
-    if environment == "development":
-        return "alpha"
-    return environment
 
 def get_key_path(environment):
     return "s3://czbiohub-infectious-disease/idseq-%s.pem" % environment_for_aligners(environment)
@@ -465,9 +462,11 @@ def run_stage2(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
 
         fastq_files = execute_command_with_output("ls %s/*.%s" % (fastq_dir, file_type)).rstrip().split("\n")
 
-    # Download existing data and see what has been done
-    command = "aws s3 cp %s %s --recursive" % (sample_s3_output_path, result_dir)
-    print execute_command_with_output(command)
+    if lazy_run:
+        # Download existing data and see what has been done
+        ## NOTE: OUTPUT_BUCKETS for all the stages need to be distinct for this to work properly.
+        command = "aws s3 cp %s %s --recursive" % (sample_s3_output_path, result_dir)
+        print execute_command_with_output(command)
 
     # Import existing job stats
     stats_file = os.path.join(result_dir, STATS_OUT)
@@ -490,30 +489,29 @@ def run_stage2(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
         "before_file_type": before_file_type_for_log,
         "after_file_name": os.path.join(result_dir, GSNAPL_OUT),
         "after_file_type": "m8"})
-    run_and_log(logparams, run_gsnapl_remotely,
+    run_and_log(logparams, lazy_run, run_gsnapl_remotely,
         sample_name, gsnapl_input_files,
         gsnap_ssh_key_s3_path, environment, aws_batch_job_id,
-        result_dir, sample_s3_output_path, lazy_run)
+        result_dir, sample_s3_output_path)
 
     # run_annotate_gsnapl_m8_with_taxids
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "annotate gsnapl m8 with taxids",
         "count_reads": False})
-    run_and_log(logparams, run_annotate_m8_with_taxids,
+    run_and_log(logparams, False, run_annotate_m8_with_taxids,
         sample_name, os.path.join(result_dir, GSNAPL_DEDUP_OUT),
         os.path.join(result_dir, ANNOTATE_GSNAPL_M8_WITH_TAXIDS_OUT),
-        accession2taxid_s3_path,
-        result_dir, sample_s3_output_path, False)
+        accession2taxid_s3_path, result_dir, sample_s3_output_path)
 
     # run_generate_taxid_annotated_fasta_from_m8
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "generate taxid annotated fasta from m8",
         "count_reads": False})
-    run_and_log(logparams, run_generate_taxid_annotated_fasta_from_m8,
+    run_and_log(logparams, False, run_generate_taxid_annotated_fasta_from_m8,
         sample_name, os.path.join(result_dir, GSNAPL_DEDUP_OUT),
         os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT3),
         os.path.join(result_dir, GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT),
-        'NT', result_dir, sample_s3_output_path, False)
+        'NT', result_dir, sample_s3_output_path)
 
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "filter deuterostomes from m8", "count_reads": True,
@@ -521,32 +519,32 @@ def run_stage2(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
         "before_file_type": "m8",
         "after_file_name": os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NT_M8_OUT),
         "after_file_type": "m8"})
-    run_and_log(logparams, run_filter_deuterostomes_from_m8,
+    run_and_log(logparams, False, run_filter_deuterostomes_from_m8,
         sample_name, os.path.join(result_dir, ANNOTATE_GSNAPL_M8_WITH_TAXIDS_OUT),
         os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NT_M8_OUT),
-        deuterostome_list_s3_path, result_dir, sample_s3_output_path, False)
+        deuterostome_list_s3_path, result_dir, sample_s3_output_path)
 
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "generate taxid outputs from m8",
         "count_reads": False})
-    run_and_log(logparams, run_generate_taxid_outputs_from_m8,
+    run_and_log(logparams, False, run_generate_taxid_outputs_from_m8,
         sample_name, os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NT_M8_OUT),
         os.path.join(result_dir, NT_M8_TO_TAXID_COUNTS_FILE_OUT),
         os.path.join(result_dir, NT_TAXID_COUNTS_TO_JSON_OUT),
         os.path.join(result_dir, NT_TAXID_COUNTS_TO_SPECIES_RPM_OUT),
         os.path.join(result_dir, NT_TAXID_COUNTS_TO_GENUS_RPM_OUT),
         taxid2info_s3_path, 'NT', 'raw', db_sample_id,
-        result_dir, sample_s3_output_path, False)
+        result_dir, sample_s3_output_path)
 
     # run rapsearch remotely
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "filter deuterostomes from FASTA",
         "count_reads": False})
-    run_and_log(logparams, run_filter_deuterostomes_from_fasta,
+    run_and_log(logparams, False, run_filter_deuterostomes_from_fasta,
         sample_name, os.path.join(result_dir, GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT),
         os.path.join(result_dir, FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT),
         accession2taxid_s3_path, deuterostome_list_s3_path, 'NT',
-        result_dir, sample_s3_output_path, False)
+        result_dir, sample_s3_output_path)
 
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "RAPSearch2", "count_reads": True,
@@ -554,20 +552,19 @@ def run_stage2(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
         "before_file_type": "fasta",
         "after_file_name": os.path.join(result_dir, RAPSEARCH2_OUT),
         "after_file_type": "m8"})
-    run_and_log(logparams, run_rapsearch2_remotely,
+    run_and_log(logparams, lazy_run, run_rapsearch2_remotely,
         sample_name, FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT,
         rapsearch_ssh_key_s3_path, environment, aws_batch_job_id,
-        result_dir, sample_s3_output_path, lazy_run)
+        result_dir, sample_s3_output_path)
 
     # run_annotate_m8_with_taxids
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "annotate m8 with taxids",
         "count_reads": False})
-    run_and_log(logparams, run_annotate_m8_with_taxids,
+    run_and_log(logparams, False, run_annotate_m8_with_taxids,
         sample_name, os.path.join(result_dir, RAPSEARCH2_OUT),
         os.path.join(result_dir, ANNOTATE_RAPSEARCH2_M8_WITH_TAXIDS_OUT),
-        accession2taxid_s3_path,
-        result_dir, sample_s3_output_path, False)
+        accession2taxid_s3_path, result_dir, sample_s3_output_path)
 
     # run_generate_taxid_annotated_fasta_from_m8
     merged_fasta = os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT3)
@@ -577,11 +574,11 @@ def run_stage2(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "generate taxid annotated fasta from m8",
         "count_reads": False})
-    run_and_log(logparams, run_generate_taxid_annotated_fasta_from_m8,
+    run_and_log(logparams, False, run_generate_taxid_annotated_fasta_from_m8,
         sample_name, result_dir + '/' + RAPSEARCH2_OUT,
         result_dir + '/' + FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT,
         result_dir + '/' + GENERATE_TAXID_ANNOTATED_FASTA_FROM_RAPSEARCH2_M8_OUT,
-        'NR', result_dir, sample_s3_output_path, False)
+        'NR', result_dir, sample_s3_output_path)
 
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "filter deuterostomes from m8", "count_reads": True,
@@ -589,31 +586,31 @@ def run_stage2(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
         "before_file_type": "m8",
         "after_file_name": os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NR_M8_OUT),
         "after_file_type": "m8"})
-    run_and_log(logparams, run_filter_deuterostomes_from_m8,
+    run_and_log(logparams, False, run_filter_deuterostomes_from_m8,
         sample_name, os.path.join(result_dir, ANNOTATE_RAPSEARCH2_M8_WITH_TAXIDS_OUT),
         os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NR_M8_OUT),
-        deuterostome_list_s3_path, result_dir, sample_s3_output_path, False)
+        deuterostome_list_s3_path, result_dir, sample_s3_output_path)
 
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "generate taxid outputs from m8",
         "count_reads": False})
-    run_and_log(logparams, run_generate_taxid_outputs_from_m8,
+    run_and_log(logparams, False, run_generate_taxid_outputs_from_m8,
         sample_name, os.path.join(result_dir, FILTER_DEUTEROSTOMES_FROM_NR_M8_OUT),
         os.path.join(result_dir, NR_M8_TO_TAXID_COUNTS_FILE_OUT),
         os.path.join(result_dir, NR_TAXID_COUNTS_TO_JSON_OUT),
         os.path.join(result_dir, NR_TAXID_COUNTS_TO_SPECIES_RPM_OUT),
         os.path.join(result_dir, NR_TAXID_COUNTS_TO_GENUS_RPM_OUT),
         taxid2info_s3_path, 'NR', 'log10', db_sample_id,
-        result_dir, sample_s3_output_path, False)
+        result_dir, sample_s3_output_path)
 
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "combine JSON outputs",
         "count_reads": False})
-    run_and_log(logparams, run_combine_json_outputs,
+    run_and_log(logparams, False, run_combine_json_outputs,
         result_dir + '/' + NT_TAXID_COUNTS_TO_JSON_OUT,
         result_dir + '/' + NR_TAXID_COUNTS_TO_JSON_OUT,
         result_dir + '/' + COMBINED_JSON_OUT,
-        result_dir, sample_s3_output_path, False)
+        result_dir, sample_s3_output_path)
 
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "generate FASTA of unidentified reads", "count_reads": True,
@@ -621,10 +618,10 @@ def run_stage2(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
         "before_file_type": "fasta",
         "after_file_name": os.path.join(result_dir, UNIDENTIFIED_FASTA_OUT),
         "after_file_type": "fasta"})
-    run_and_log(logparams, run_generate_unidentified_fasta,
+    run_and_log(logparams, False, run_generate_unidentified_fasta,
         sample_name, result_dir + '/' + GENERATE_TAXID_ANNOTATED_FASTA_FROM_RAPSEARCH2_M8_OUT,
         result_dir + '/' + UNIDENTIFIED_FASTA_OUT,
-        result_dir, sample_s3_output_path, False)
+        result_dir, sample_s3_output_path)
 
 def run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work_dir, remote_username,
                      input_files, key_path, environment, result_dir, sample_s3_output_path)
@@ -662,12 +659,7 @@ def run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work
 
 def run_gsnapl_remotely(sample, input_files,
                         gsnap_ssh_key_s3_path, environment, aws_batch_job_id,
-                        result_dir, sample_s3_output_path, lazy_run):
-    if lazy_run:
-        # check if output already exists
-        output2 = "%s/%s" % (result_dir, GSNAPL_DEDUP_OUT)
-        if os.path.isfile(output) and os.path.isfile(output2):
-            return 1
+                        result_dir, sample_s3_output_path):
     key_name = os.path.basename(gsnap_ssh_key_s3_path)
     execute_command("aws s3 cp %s %s/" % (gsnap_ssh_key_s3_path, REF_DIR))
     key_path = REF_DIR +'/' + key_name
@@ -689,13 +681,7 @@ def run_gsnapl_remotely(sample, input_files,
     execute_command("cat %s > %s" % (" ".join(chunk_output_files), os.path.join(result_dir, GSNAPL_DEDUP_OUT))
     execute_command("aws s3 cp %s/%s %s/" % (result_dir, GSNAPL_DEDUP_OUT, sample_s3_output_path))
 
-def run_annotate_m8_with_taxids(sample_name, input_m8, output_m8,
-                                accession2taxid_s3_path,
-                                result_dir, sample_s3_output_path, lazy_run):
-    if lazy_run:
-        # check if output already exists
-        if os.path.isfile(output_m8):
-            return 1
+def run_annotate_m8_with_taxids(sample_name, input_m8, output_m8, accession2taxid_s3_path, result_dir, sample_s3_output_path):
     accession2taxid_gz = os.path.basename(accession2taxid_s3_path)
     accession2taxid_path = REF_DIR + '/' + accession2taxid_gz[:-3]
     if not os.path.isfile(accession2taxid_path):
@@ -709,11 +695,7 @@ def run_annotate_m8_with_taxids(sample_name, input_m8, output_m8,
 
 def run_filter_deuterostomes_from_m8(sample_name, input_m8, output_m8,
                                      deuterostome_list_s3_path,
-                                     result_dir, sample_s3_output_path, lazy_run):
-    if lazy_run:
-        # check if output already exists
-        if os.path.isfile(output_m8):
-            return 1
+                                     result_dir, sample_s3_output_path):
     deuterostome_file_basename = os.path.basename(deuterostome_list_s3_path)
     deuterostome_file = os.path.join(REF_DIR, deuterostome_file_basename)
     if not os.path.isfile(deuterostome_file):
@@ -725,11 +707,7 @@ def run_filter_deuterostomes_from_m8(sample_name, input_m8, output_m8,
     execute_command("aws s3 cp %s %s/" % (output_m8, sample_s3_output_path))
 
 def run_generate_taxid_annotated_fasta_from_m8(sample_name, input_m8, input_fasta,
-    output_fasta, annotation_prefix, result_dir, sample_s3_output_path, lazy_run):
-    if lazy_run:
-        # check if output already exists
-        if os.path.isfile(output_fasta):
-            return 1
+    output_fasta, annotation_prefix, result_dir, sample_s3_output_path):
     generate_taxid_annotated_fasta_from_m8(input_fasta, input_m8, output_fasta, annotation_prefix)
     logging.getLogger().info("finished job")
     # move the output back to S3
@@ -737,11 +715,7 @@ def run_generate_taxid_annotated_fasta_from_m8(sample_name, input_m8, input_fast
 
 def run_filter_deuterostomes_from_fasta(sample_name, input_fa, output_fa,
     accession2taxid_s3_path, deuterostome_list_s3_path, annotation_prefix,
-    result_dir, sample_s3_output_path, lazy_run):
-    if lazy_run:
-        # check if output already exists
-        if os.path.isfile(output_fa):
-            return 1
+    result_dir, sample_s3_output_path):
     accession2taxid_gz = os.path.basename(accession2taxid_s3_path)
     accession2taxid_path = REF_DIR + '/' + accession2taxid_gz[:-3]
     if not os.path.isfile(accession2taxid_path):
@@ -759,12 +733,7 @@ def run_filter_deuterostomes_from_fasta(sample_name, input_fa, output_fa,
     execute_command("aws s3 cp %s %s/" % (output_fa, sample_s3_output_path))
 
 def run_rapsearch2_remotely(sample, input_fasta, rapsearch_ssh_key_s3_path,
-    environment, aws_batch_job_id, result_dir, sample_s3_output_path, lazy_run):
-    if lazy_run:
-        # check if output already exists
-        output = "%s/%s" % (result_dir, RAPSEARCH2_OUT)
-        if os.path.isfile(output):
-            return 1
+    environment, aws_batch_job_id, result_dir, sample_s3_output_path):
     key_name = os.path.basename(rapsearch_ssh_key_s3_path)
     execute_command("aws s3 cp %s %s/" % (rapsearch_ssh_key_s3_path, REF_DIR))
     key_path = REF_DIR +'/' + key_name
@@ -823,8 +792,7 @@ def run_generate_taxid_outputs_from_m8(sample_name,
     taxon_counts_csv_file, taxon_counts_json_file,
     taxon_species_rpm_file, taxon_genus_rpm_file,
     taxinfodb_s3_path, count_type, e_value_type, db_sample_id,
-    result_dir, sample_s3_output_path, lazy_run):
-    # Ignore lazyrun
+    result_dir, sample_s3_output_path):
     # download taxoninfodb if not exist
     taxoninfo_filename = os.path.basename(taxinfodb_s3_path)
     taxoninfo_path = REF_DIR + '/' + taxoninfo_filename
@@ -847,21 +815,14 @@ def run_generate_taxid_outputs_from_m8(sample_name,
     execute_command("aws s3 cp %s %s/" % (taxon_genus_rpm_file, sample_s3_output_path))
 
 def run_combine_json_outputs(input_json_1, input_json_2, output_json,
-    result_dir, sample_s3_output_path, lazy_run):
-    if lazy_run:
-        # check if output already exists
-        if os.path.isfile(output_json):
-            return 1
+    result_dir, sample_s3_output_path):
     combine_pipeline_output_json(input_json_1, input_json_2, output_json)
     logging.getLogger().info("finished job")
     # move it the output back to S3
     execute_command("aws s3 cp %s %s/" % (output_json, sample_s3_output_path))
 
 def run_generate_unidentified_fasta(sample_name, input_fa, output_fa,
-    result_dir, sample_s3_output_path, lazy_run):
-    if lazy_run:
-        if os.path.isfile(output_fa):
-            return 1
+    result_dir, sample_s3_output_path):
     subprocess.check_output("grep -A 1 '>NR::NT::' %s | sed '/^--$/d' > %s" % (input_fa, output_fa), shell=True)
     logging.getLogger().info("finished job")
     execute_command("aws s3 cp %s %s/" % (output_fa, sample_s3_output_path))
