@@ -83,7 +83,7 @@ class PipelineSampleReport extends React.Component {
     return (
       <span className="link-tag">
         { taxInfo.tax_id > 0 ? <i data-tax-id={taxInfo.tax_id} onClick={this.gotoNCBI} className="fa fa-link cloud" aria-hidden="true"></i> : null }
-        { taxInfo.tax_id > 0 && reportDetails.taxon_fasta_flag ? <i data-pipeline-id={reportDetails.pipeline_info.id} 
+        { reportDetails.taxon_fasta_flag ? <i data-pipeline-id={reportDetails.pipeline_info.id} 
         data-tax-level={taxInfo.tax_level} data-tax-id={taxInfo.tax_id}
         onClick={this.downloadFastaUrl} className="fa fa-download cloud" aria-hidden="true"></i> : null }
       </span>
