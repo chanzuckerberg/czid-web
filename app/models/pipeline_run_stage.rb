@@ -117,6 +117,12 @@ class PipelineRunStage < ApplicationRecord
     pipeline_run.sample.sample_output_s3_path
   end
 
+  def log_url
+    return nil unless job_log_id
+    "https://us-west-2.console.aws.amazon.com/cloudwatch/home?region=us-west-2" \
+      "#logEventViewer:group=/aws/batch/job;stream=#{job_log_id}"
+  end
+
   ########### STAGE SPECIFIC FUNCTIONS BELOW ############
 
   def host_filtering_command
@@ -132,7 +138,7 @@ class PipelineRunStage < ApplicationRecord
       batch_command_env_variables += "BOWTIE2_GENOME=#{sample.s3_bowtie2_index_path} "
     end
     batch_command = "aws s3 cp #{IdSeqPipeline::S3_HOST_FILTER_SCRIPT_LOC} .; chmod 755 #{script_name}; " +
-                    batch_command_env_variables + "./#{script_name}"
+                    batch_command_env_variables + " ./#{script_name}"
     command = "aegea batch submit --command=\"#{batch_command}\" "
     memory = sample.sample_memory.present? ? sample.sample_memory : Sample::DEFAULT_MEMORY
     queue =  sample.job_queue.present? ? sample.job_queue : Sample::DEFAULT_QUEUE
@@ -159,7 +165,7 @@ class PipelineRunStage < ApplicationRecord
     batch_command_env_variables = "INPUT_BUCKET=#{sample.sample_output_s3_path} " \
       "OUTPUT_BUCKET=#{sample.sample_postprocess_s3_path} "
     batch_command = "aws s3 cp #{IdSeqPipeline::S3_POSTPROCESS_SCRIPT_LOC} .; chmod 755 #{script_name}; " +
-                    batch_command_env_variables + "./#{script_name}"
+                    batch_command_env_variables + " ./#{script_name}"
     command = "aegea batch submit --command=\"#{batch_command}\" "
     queue = sample.job_queue.present? ? sample.job_queue : Sample::DEFAULT_QUEUE
     command += " --storage /mnt=#{DEFAULT_STORAGE_IN_GB} --ecr-image idseq --memory #{DEFAULT_MEMORY_IN_MB} --queue #{queue} --vcpus 4"
