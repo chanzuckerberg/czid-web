@@ -29,7 +29,6 @@ Specific components
 
 * 
 
-
 # Testing Script:
 
 ###Login Page
@@ -70,7 +69,6 @@ Specific components
 * Filters work as expected
 * Disabling Filters works
 * Filtering by column works 
-
 
 # Checklist:
 
