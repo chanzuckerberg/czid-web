@@ -65,6 +65,7 @@ STATS_OUT = 'stats.json'
 # statistics and logging
 STATS = []
 DEFAULT_LOGPARAMS = {}
+TARGET_OUTPUTS = None
 AWS_BATCH_JOB_ID = None
 
 # convenience functions
@@ -393,6 +394,7 @@ def main():
     global SAMPLE_DIR
     global DEFAULT_LOGPARAMS
     global AWS_BATCH_JOB_ID
+    global TARGET_OUTPUTS
 
     INPUT_BUCKET = os.environ.get('INPUT_BUCKET', INPUT_BUCKET)
     FILE_TYPE = os.environ.get('FILE_TYPE', FILE_TYPE)
