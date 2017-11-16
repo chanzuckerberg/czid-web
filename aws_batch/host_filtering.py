@@ -62,21 +62,6 @@ EXTRACT_UNMAPPED_FROM_SAM_OUT3 = 'unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.u
 LOGS_OUT_BASENAME = 'log'
 STATS_OUT = 'stats.json'
 
-# target outputs by task
-TARGET_OUTPUTS = { "run_star": [os.path.join(RESULT_DIR, STAR_OUT1),
-                                os.path.join(RESULT_DIR, STAR_OUT2)],
-                   "run_priceseqfilter": [os.path.join(RESULT_DIR, PRICESEQFILTER_OUT1),
-                                          os.path.join(RESULT_DIR, PRICESEQFILTER_OUT2)],
-                   "run_fq2fa": [os.path.join(RESULT_DIR, FQ2FA_OUT1),
-                                 os.path.join(RESULT_DIR, FQ2FA_OUT2)],
-                   "run_cdhitdup": [os.path.join(RESULT_DIR, CDHITDUP_OUT1),
-                                    os.path.join(RESULT_DIR, CDHITDUP_OUT2)],
-                   "run_lzw": [os.path.join(RESULT_DIR, LZW_OUT1),
-                               os.path.join(RESULT_DIR, LZW_OUT2)],
-                   "run_bowtie2": [os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT1),
-                                   os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT2),
-                                   os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT3)] }
-
 # statistics and logging
 STATS = []
 DEFAULT_LOGPARAMS = {}
@@ -426,6 +411,21 @@ def main():
     SCRATCH_DIR = SAMPLE_DIR + '/scratch'
     DEFAULT_LOGPARAMS = {"SAMPLE_S3_OUTPUT_PATH": SAMPLE_S3_OUTPUT_PATH,
                          "stats_file": os.path.join(RESULT_DIR, STATS_OUT)}
+
+    # target outputs by task
+    TARGET_OUTPUTS = { "run_star": [os.path.join(RESULT_DIR, STAR_OUT1),
+                                    os.path.join(RESULT_DIR, STAR_OUT2)],
+                       "run_priceseqfilter": [os.path.join(RESULT_DIR, PRICESEQFILTER_OUT1),
+                                              os.path.join(RESULT_DIR, PRICESEQFILTER_OUT2)],
+                       "run_fq2fa": [os.path.join(RESULT_DIR, FQ2FA_OUT1),
+                                     os.path.join(RESULT_DIR, FQ2FA_OUT2)],
+                       "run_cdhitdup": [os.path.join(RESULT_DIR, CDHITDUP_OUT1),
+                                        os.path.join(RESULT_DIR, CDHITDUP_OUT2)],
+                       "run_lzw": [os.path.join(RESULT_DIR, LZW_OUT1),
+                                   os.path.join(RESULT_DIR, LZW_OUT2)],
+                       "run_bowtie2": [os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT1),
+                                       os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT2),
+                                       os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT3)] }
 
     # execute the pipeline stage
     run_stage1(True)
