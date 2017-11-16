@@ -243,7 +243,7 @@ class PipelineRun < ApplicationRecord
     return false unless status.exitstatus.zero?
     begin
       s3_file_time = DateTime.strptime(stdout[0..18], "%Y-%m-%d %H:%M:%S")
-      return (s3_file_time > created_at)
+      return (s3_file_time && created_at && s3_file_time > created_at)
     rescue
       return nil
     end

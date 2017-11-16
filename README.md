@@ -135,3 +135,7 @@ Sometimes you may be prompted to run a migration or configuration command like `
 There is an example of the JSON for uploading pipeline results in `test/output.json`. To test locally you can run:
 
 >curl -H "Accept: application/json" -H "Content-type: application/json" -X POST -d @output.json http://localhost:3000/pipeline_outputs.json
+
+## Dependencies
+
+https://github.com/kislyuk/aegea
