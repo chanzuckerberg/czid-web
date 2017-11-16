@@ -77,12 +77,12 @@ class PipelineRun < ApplicationRecord
       if prs.failed?
         self.finalized = 1
         self.job_status = "#{prs.step_number}.#{prs.name}-#{STAUS_FAILED}"
-        return
+        return nil
       elsif prs.succeeded?
         next
       else # still running
         self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
-        return
+        return nil
       end
     end
     # All done
@@ -129,14 +129,15 @@ class PipelineRun < ApplicationRecord
     pipeline_run_stages.order(:step_number).each do |prs|
       if !prs.started? # Not started yet
         prs.run_job
-        return
+        break
       elsif prs.succeeded?
         # great do nothing. go to the next step.
         next
       elsif prs.failed?
-        return
+        break
       else # This step is still running
         prs.update_job_status
+        break
       end
     end
   end
