@@ -36,7 +36,7 @@ class PipelineRun < ApplicationRecord
 
 
   def kickoff_job
-    pipelinr_run_stages.first.run_job
+    pipeline_run_stages.first.run_job
   end
 
   def create_run_stages

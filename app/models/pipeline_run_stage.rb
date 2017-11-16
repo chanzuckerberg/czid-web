@@ -61,6 +61,8 @@ class PipelineRunStage < ApplicationRecord
   def run_load_db
     return unless output_ready?
     return if completed?
+
+    set_pipeline_output
     self.send(load_db_command_func)
     self.update(db_load_status: 1)
   end
@@ -101,6 +103,14 @@ class PipelineRunStage < ApplicationRecord
     _stdout, _stderr, _status = Open3.capture3(command)
   end
 
+  def set_pipeline_output
+    return if pipeline_run.pipeline_output
+    pipeline_run.pipeline_output = PipelineOutput.new(pipeline_run: pipeline_run,
+  end
+  def sample_output_s3_path
+    pipeline_run.sample.sample_output_s3_path
+  end
+
 
   ########### STAGE SPECIFIC FUNCTIONS BELOW ############
 
@@ -113,22 +123,93 @@ class PipelineRunStage < ApplicationRecord
   def postprocess_command
   end
 
+
   def db_load_host_filtering
+    po = pipeline_run.pipeline_output
+    pr = pipeline_run
+
+    stats_json_s3_path = "#{sample_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
+    downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, pr.local_json_path)
+    stats_array = JSON.parse(File.read(downloaded_stats_path))
+    stats_array = stats_array.select { |entry| entry.key?("task") }
+    po.job_stats_attributes = stats_array
+    po.save
+    # rm the json
+    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_stats_path}")
   end
 
   def db_load_alignment
+    po = pipeline_run.pipeline_output
+    pr = pipeline_run
+
+    output_json_s3_path = "#{sample_output_s3_path}/#{PipelineRun::OUTPUT_JSON_NAME}"
+    stats_json_s3_path = "#{sample_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
+
+    # Get the file
+    downloaded_json_path = PipelineRun.download_file(output_json_s3_path, pr.local_json_path)
+    downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, pr.local_json_path)
+    return unless downloaded_json_path && downloaded_stats_path
+    json_dict = JSON.parse(File.read(downloaded_json_path))
+    stats_array = JSON.parse(File.read(downloaded_stats_path))
+    stats_array = stats_array.select { |entry| entry.key?("task") }
+    pipeline_output_dict = json_dict['pipeline_output']
+    pipeline_output_dict.slice!('name', 'total_reads',
+                                'remaining_reads', 'taxon_counts_attributes')
+
+    # only keep species level counts
+    taxon_counts_attributes_filtered = []
+    pipeline_output_dict['taxon_counts_attributes'].each do |tcnt|
+      if tcnt['tax_level'].to_i == TaxonCount::TAX_LEVEL_SPECIES
+        taxon_counts_attributes_filtered << tcnt
+      end
+    end
+
+    po.taxon_counts_attributes = taxon_counts_attributes_filtered
+    po.job_stats_attributes = stats_array
+    po.save
+    # aggregate the data at genus level
+    po.generate_aggregate_counts('genus')
+    # merge more accurate name information from lineages table
+    po.update_names
+    # denormalize genus_taxid and superkingdom_taxid into taxon_counts
+    po.update_genera
+    # generate report
+    po.generate_report
+
+    # rm the json
+    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_json_path} #{downloaded_stats_path}")
   end
 
   def db_load_postprocess
+    po = pipeline_run.pipeline_output
+    pr = pipeline_run
+    byteranges_json_s3_path = "#{pr.sample.sample_postprocess_s3_path}/#{PipelineRun::TAXID_BYTERANGE_JSON_NAME}"
+    downloaded_byteranges_path = PipelineRun.download_file(byteranges_json_s3_path, pr.local_json_path)
+    taxon_byteranges_csv_file = "#{pr.local_json_path}/taxon_byteranges"
+    hash_array_json2csv(downloaded_byteranges_path, taxon_byteranges_csv_file, %w[taxid hit_type first_byte last_byte])
+    ` cd #{pr.local_json_path};
+      sed -e 's/$/,#{po.id}/' -i taxon_byteranges;
+      mysqlimport --replace --local --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --columns=taxid,hit_type,first_byte,last_byte,pipeline_output_id --fields-terminated-by=',' idseq_#{Rails.env} taxon_byteranges;
+    `
+    po.save
+    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_byteranges_path}")
   end
 
   def host_filtering_outputs
+    stats_json_s3_path = "#{sample_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
+    unmapped_fasta_s3_path = "#{sample_output_s3_path}/#{unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.merged.fasta}"
+    [stats_json_s3_path, unmapped_fasta_s3_path]
   end
 
   def alignment_outputs
+    stats_json_s3_path = "#{sample_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
+    output_json_s3_path = "#{sample_output_s3_path}/#{PipelineRun::OUTPUT_JSON_NAME}"
+    [stats_json_s3_path, output_json_s3_path]
   end
 
   def postprocess_outputs
+    ["#{pipeline_run.sample.sample_postprocess_s3_path}/#{PipelineRun::TAXID_BYTERANGE_JSON_NAME}"]
+
   end
 
 end
