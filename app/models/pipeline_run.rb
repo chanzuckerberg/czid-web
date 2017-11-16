@@ -73,7 +73,6 @@ class PipelineRun < ApplicationRecord
     # only update the pipeline_run info. do not update pipeline_run_stage info
     return if finalized? || id.nil?
     check_job_status_old if pipeline_run_stages.blank?
-    puts "check job status"
     pipeline_run_stages.order(:step_number).each do |prs|
       if prs.failed?
         self.finalized = 1

@@ -55,7 +55,7 @@ class PipelineRunStage < ApplicationRecord
     else
       self.job_status = STATUS_FAILED
     end
-    self.created_at = Time.now
+    self.created_at = Time.now.utc
     save
   end
 
