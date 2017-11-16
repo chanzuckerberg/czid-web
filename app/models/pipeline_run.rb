@@ -76,7 +76,7 @@ class PipelineRun < ApplicationRecord
     pipeline_run_stages.order(:step_number).each do |prs|
       if prs.failed?
         self.finalized = 1
-        self.job_status = "#{prs.step_number}.#{prs.name}-#{STAUS_FAILED}"
+        self.job_status = "#{prs.step_number}.#{prs.name}-#{STATUS_FAILED}"
         return nil
       elsif prs.succeeded?
         next
