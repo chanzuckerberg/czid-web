@@ -1,7 +1,7 @@
 class PipelineRunStage < ApplicationRecord
   belongs_to :pipeline_run
   DEFAULT_MEMORY_IN_MB = 4000
-  DEFAULT_STORAGE_IN_GB = 100
+  DEFAULT_STORAGE_IN_GB = 500
   JOB_TYPE_BATCH = 1
 
   STATUS_STARTED = 'STARTED'.freeze
@@ -135,7 +135,7 @@ class PipelineRunStage < ApplicationRecord
     command = "aegea batch submit --command=\"#{batch_command}\" "
     memory = sample.sample_memory.present? ? sample.sample_memory : Sample::DEFAULT_MEMORY
     queue =  sample.job_queue.present? ? sample.job_queue : Sample::DEFAULT_QUEUE
-    command += " --storage /mnt=500 --ecr-image idseq --memory #{memory} --queue #{queue} --vcpus 4"
+    command += " --storage /mnt=#{DEFAULT_STORAGE_IN_GB} --ecr-image idseq --memory #{memory} --queue #{queue} --vcpus 4"
     command
   end
 
@@ -207,8 +207,9 @@ class PipelineRunStage < ApplicationRecord
       end
     end
 
-    po.taxon_counts_attributes = taxon_counts_attributes_filtered
+    po.job_stats.delete_all
     po.job_stats_attributes = stats_array
+    po.taxon_counts_attributes = taxon_counts_attributes_filtered
     po.save
     # aggregate the data at genus level
     po.generate_aggregate_counts('genus')
