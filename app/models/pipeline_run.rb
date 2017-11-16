@@ -156,7 +156,7 @@ class PipelineRun < ApplicationRecord
     stdout, _stderr, status = Open3.capture3(command)
     return false unless status.exitstatus.zero?
     s3_file_time = DateTime.strptime(stdout[0..18], "%Y-%m-%d %H:%M:%S")
-    (s3_file_time > created_at)
+    (s3_file_time && created_at && s3_file_time > created_at)
   end
 
   def terminate_job
