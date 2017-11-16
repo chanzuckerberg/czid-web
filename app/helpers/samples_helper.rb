@@ -12,8 +12,8 @@ module SamplesHelper
   end
 
   def get_remaining_reads(jobstats)
-    po = jobstats.pipeline_output
-    po.remaining_reads unless po.nil?
+    po = jobstats[0].pipeline_output
+    po.remaining_reads
   end
 
   def compute_compression_ratio(jobstats)
@@ -27,8 +27,8 @@ module SamplesHelper
   end
 
   def compute_percentage_reads(jobstats)
-    po = jobstats.pipeline_output
-    (100.0 * po.remaining_reads) / po.total_reads unless po.nil?
+    po = jobstats[0].pipeline_output
+    (100.0 * po.remaining_reads) / po.total_reads
   end
 
   def sample_status_display(sample)
