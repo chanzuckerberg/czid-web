@@ -67,6 +67,7 @@ class PipelineRunStage < ApplicationRecord
     set_pipeline_output
     send(load_db_command_func)
     update(db_load_status: 1)
+    pipeline_run.update_job_status
   end
 
   def update_job_status
