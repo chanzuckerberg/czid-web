@@ -42,7 +42,7 @@ class PipelineRun < ApplicationRecord
   def create_run_stages
     # Host Filtering
     run_stages = []
-    if sample.host_genome && sample.host_genome.name == HostGenome::NO_HOST_NAME
+    unless (sample.host_genome && sample.host_genome.name == HostGenome::NO_HOST_NAME)
       run_stages << PipelineRunStage.new(
         step_number: 1,
         name: 'Host Filtering',
@@ -73,7 +73,7 @@ class PipelineRun < ApplicationRecord
 
   def check_job_status
     # only update the pipeline_run info. do not update pipeline_run_stage info
-    return if finalized?
+    return if finalized? || id.nil?
     check_job_status_old unless pipeline_run_stages.present?
     pipeline_run_stages.order(:step_number).each do |prs|
       if prs.failed?

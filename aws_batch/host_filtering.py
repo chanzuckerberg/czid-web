@@ -744,7 +744,7 @@ def main():
 
     sample_s3_input_path = INPUT_BUCKET.rstrip('/')
     sample_s3_output_path = OUTPUT_BUCKET.rstrip('/')
-    key_s3_path = get_key_path(ENVIRONMENT)
+    key_s3_path = "" # remove this later
 
     run_sample(sample_s3_input_path, FILE_TYPE, FILTER_HOST_FLAG, sample_s3_output_path,
                STAR_GENOME, BOWTIE2_GENOME,

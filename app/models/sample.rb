@@ -208,7 +208,6 @@ class Sample < ApplicationRecord
     # only kickoff pipeline when no active pipeline_run running
     return unless pipeline_runs.in_progress.empty?
 
-    stdout, stderr, status = Open3.capture3(command)
     pr = PipelineRun.new
     pr.sample = self
     pr.save
