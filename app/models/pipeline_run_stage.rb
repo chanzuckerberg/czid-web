@@ -211,7 +211,6 @@ class PipelineRunStage < ApplicationRecord
     po.total_reads = pipeline_output_dict['total_reads']
     po.remaining_reads = pipeline_output_dict['remaining_reads']
 
-
     # only keep species level counts
     taxon_counts_attributes_filtered = []
     pipeline_output_dict['taxon_counts_attributes'].each do |tcnt|
