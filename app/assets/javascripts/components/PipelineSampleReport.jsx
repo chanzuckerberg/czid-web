@@ -63,19 +63,49 @@ class PipelineSampleReport extends React.Component {
     return params.selected_genus != 'None' && params.disable_filters != 1;
   }
 
+  //path to NCBI 
+  gotoNCBI(e) {
+    const taxId = e.target.getAttribute('data-tax-id');
+    const ncbiLink = `https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${taxId}`;
+    window.open(ncbiLink, '_blank');
+  }
+
+  //download Fasta  
+  downloadFastaUrl(e) {
+    const pipelineId = e.target.getAttribute('data-pipeline-id');
+    const taxLevel = e.target.getAttribute('data-tax-level');
+    const taxId = e.target.getAttribute('data-tax-id');
+    console.log(pipelineId, taxLevel, taxId, 'fasta params');
+    location.href = `/pipeline_outputs/${pipelineId}/fasta/${taxLevel}/${taxId}/NT_or_NR`;
+  }
+
+  displayTags(taxInfo, reportDetails) {
+    return (
+      <span className="link-tag">
+        { taxInfo.tax_id > 0 ? <i data-tax-id={taxInfo.tax_id} onClick={this.gotoNCBI} className="fa fa-link cloud" aria-hidden="true"></i> : null }
+        { reportDetails.taxon_fasta_flag ? <i data-pipeline-id={reportDetails.pipeline_info.id} 
+        data-tax-level={taxInfo.tax_level} data-tax-id={taxInfo.tax_id}
+        onClick={this.downloadFastaUrl} className="fa fa-download cloud" aria-hidden="true"></i> : null }
+      </span>
+    )
+  }
+
   render_name(tax_info, report_details) {
     let foo = <i>{tax_info.name}</i>;
     if (tax_info.tax_id > 0) {
       if (report_details.taxon_fasta_flag) {
-        taxon_fasta_url = `/pipeline_outputs/${report_details.pipeline_info.id}/fasta/${tax_info.tax_level}/${tax_info.tax_id}/NT_or_NR`
-        foo = <span className="link"><a href={taxon_fasta_url}>{tax_info.name}</a></span>
+        foo = <span className="link"><a>{tax_info.name}</a></span>
       } else {
         foo = <span>{tax_info.name}</span>
       }
     }
     if (tax_info.tax_level == 1) {
       // indent species rows
-      foo = <div className='species-name'>{foo}</div>;
+      foo = <div className="hover-wrapper">
+          <div className='species-name'>{foo}
+          { this.displayTags(tax_info, report_details) }
+        </div>
+      </div>;
     } else {
       // emphasize genus, soften category and species count
       category_name = tax_info.tax_id == -200 ? '' : tax_info.category_name;
@@ -91,10 +121,11 @@ class PipelineSampleReport extends React.Component {
           <i className={`fa fa-angle-right ${tax_info.tax_id}`} onClick={this.expandOrCollapseGenus}></i>
         </span>
       </span>;
-      foo = <div>
+      foo = <div className="hover-wrapper">
               <div className='genus-name'> {plus_or_minus} {foo}</div>
-              <i className='count-info'>({tax_info.species_count} {category_name} species)</i>
-            </div>;
+            <i className='count-info'>({tax_info.species_count} {category_name} species)</i>
+            { this.displayTags(tax_info, report_details) }
+        </div>;
     }
     return foo;
   }
@@ -180,6 +211,11 @@ class PipelineSampleReport extends React.Component {
     $(`.table-arrow`).toggleClass('hidden');
   }
 
+  //Download report in csv
+  downloadReport(id) {
+    location.href = `/reports/${id}/csv`
+  }
+
   render() {
     const parts = this.props.report_page_params.sort_by.split("_")
     const sort_column = parts[1] + "_" + parts[2];
@@ -189,14 +225,15 @@ class PipelineSampleReport extends React.Component {
       filter_stats = this.rows_total + ' unfiltered rows.';
     }
     filter_row_stats = (
-      <span>
-        {this.rows_passing_filters == this.taxonomy_details.length ?
-          ('Showing all ' + filter_stats) :
-          ('Due to resource limits, showing only ' + this.taxonomy_details.length + ' of the ' + filter_stats)}
-        <br/>
-        {this.rows_passing_filters < this.rows_total && this.props.report_page_params.disable_filters == 0 ? <a href="#" onClick={this.disableFilters}>Click to disable filters.</a> : ''}
-        {this.props.report_page_params.disable_filters == 1 ? <a href="#" onClick={this.enableFilters}>Click to enable filters.</a> : ''}
-      </span>
+      <div>
+        <span className="count">
+          {this.rows_passing_filters == this.taxonomy_details.length ?
+            (filter_stats) :
+            ('Due to resource limits, showing only ' + this.taxonomy_details.length + ' of the ' + filter_stats)}
+        </span>
+        {this.rows_passing_filters < this.rows_total && this.props.report_page_params.disable_filters == 0 ? <span className="disable" onClick={this.disableFilters}><b> Disable filters</b></span> : ''}
+        {this.props.report_page_params.disable_filters == 1 ? <span className="disable" onClick={this.enableFilters}><b> Enable filters</b></span> : ''}
+      </div>
     );
     report_filter =
       <ReportFilter
@@ -212,9 +249,11 @@ class PipelineSampleReport extends React.Component {
       />;
     // To do: improve presentation and place download_button somewhere on report page
     download_button = (
-      <a href= { `/reports/${this.report_details.report_info.id}/${this.props.report_page_params.view_level}/csv` }>
-          <i className="fa fa-cloud-download left"></i>
-      </a>
+      <span className="download">
+        <a className="custom-button download" onClick={this.downloadReport.bind(this, this.report_details.report_info.id)}>
+          <i className="fa fa-cloud-download left"></i> Download Report
+        </a>
+      </span>
     );
     right_arrow_initial_visibility = this.isGenusSearch() ? 'hidden' : '';
     result = (
@@ -225,61 +264,66 @@ class PipelineSampleReport extends React.Component {
               <div className="col s2 reports-sidebar">
                 {report_filter}
               </div>
-              <div className="col s10 reports-main ">
-                <table id="report-table" className='bordered report-table'>
-                  <thead>
-                  <tr>
-                    <th>
-                      <span className={`table-arrow ${right_arrow_initial_visibility}`}>
-                        <i className={`fa fa-angle-right`} onClick={this.expandTable}></i>
-                      </span>
-                      <span className={`table-arrow hidden`}>
-                        <i className={`fa fa-angle-down`} onClick={this.collapseTable}></i>
-                      </span>
-                      Taxonomy
-                    </th>
-                    { this.render_column_header('NT+NR', 'ZZRPM',  'nt_aggregatescore') }
-                    { this.render_column_header('NT', 'Z',   'nt_zscore') }
-                    { this.render_column_header('NT', 'rPM', 'nt_rpm')    }
-                    { this.render_column_header('NT', 'r',   'nt_r')      }
-                    { this.render_column_header('NT', '%id', 'nt_percentidentity')    }
-                    { this.render_column_header('NT', 'AL',   'nt_alignmentlength')    }
-                    { this.render_column_header('NT', 'Log(1/E)',  'nt_neglogevalue')    }
-                    { this.render_column_header('NR', 'Z',   'nr_zscore') }
-                    { this.render_column_header('NR', 'rPM', 'nr_rpm')    }
-                    { this.render_column_header('NR', 'r',   'nr_r')      }
-                    { this.render_column_header('NR', '%id', 'nr_percentidentity')    }
-                    { this.render_column_header('NR', 'AL',   'nr_alignmentlength')    }
-                    { this.render_column_header('NR', 'Log(1/E)',  'nr_neglogevalue')    }
-                  </tr>
-                  </thead>
-                  <tbody>
-                  { this.taxonomy_details.map((tax_info, i) => {
-                    return (
-                      <tr key={tax_info.tax_id} className={this.row_class(tax_info)}>
-                        <td>
-                          { this.render_name(tax_info, this.report_details) }
-                        </td>
-                        { this.render_number(tax_info.NT.aggregatescore, sort_column == 'nt_aggregatescore', 0) }
-                        { this.render_number(tax_info.NT.zscore, sort_column == 'nt_zscore', 1) }
-                        { this.render_number(tax_info.NT.rpm, sort_column == 'nt_rpm', 1)       }
-                        { this.render_number(tax_info.NT.r, sort_column == 'nt_r', 0)           }
-                        { this.render_number(tax_info.NT.percentidentity, sort_column == 'nt_percentidentity', 1) }
-                        { this.render_number(tax_info.NT.alignmentlength, sort_column == 'nt_alignmentlength', 1)       }
-                        { this.render_number(tax_info.NT.neglogevalue, sort_column == 'nt_neglogevalue', 0) }
-                        { this.render_number(tax_info.NR.zscore, sort_column == 'nr_zscore', 1) }
-                        { this.render_number(tax_info.NR.rpm, sort_column == 'nr_rpm', 1)       }
-                        { this.render_number(tax_info.NR.r, sort_column == 'nr_r', 0)           }
-                        { this.render_number(tax_info.NR.percentidentity, sort_column == 'nr_percentidentity', 1) }
-                        { this.render_number(tax_info.NR.alignmentlength, sort_column == 'nr_alignmentlength', 1)       }
-                        { this.render_number(tax_info.NR.neglogevalue, sort_column == 'nr_neglogevalue', 0) }
-                      </tr>
-                    )
-                  })}
-                  </tbody>
-                </table>
-              {filter_row_stats}
-              </div>
+              <div className="col s10 reports-section">
+                <div className="reports-count">
+                  { download_button }
+                  { filter_row_stats }
+                </div>
+                <div className="row reports-main ">
+                  <table id="report-table" className='bordered report-table'>
+                    <thead>
+                    <tr>
+                      <th>
+                        <span className={`table-arrow ${right_arrow_initial_visibility}`}>
+                          <i className={`fa fa-angle-right`} onClick={this.expandTable}></i>
+                        </span>
+                        <span className={`table-arrow hidden`}>
+                          <i className={`fa fa-angle-down`} onClick={this.collapseTable}></i>
+                        </span>
+                        Taxonomy
+                      </th>
+                      { this.render_column_header('NT+NR', 'ZZRPM',  'nt_aggregatescore') }
+                      { this.render_column_header('NT', 'Z',   'nt_zscore') }
+                      { this.render_column_header('NT', 'rPM', 'nt_rpm')    }
+                      { this.render_column_header('NT', 'r',   'nt_r')      }
+                      { this.render_column_header('NT', '%id', 'nt_percentidentity')    }
+                      { this.render_column_header('NT', 'AL',   'nt_alignmentlength')    }
+                      { this.render_column_header('NT', 'Log(1/E)',  'nt_neglogevalue')    }
+                      { this.render_column_header('NR', 'Z',   'nr_zscore') }
+                      { this.render_column_header('NR', 'rPM', 'nr_rpm')    }
+                      { this.render_column_header('NR', 'r',   'nr_r')      }
+                      { this.render_column_header('NR', '%id', 'nr_percentidentity')    }
+                      { this.render_column_header('NR', 'AL',   'nr_alignmentlength')    }
+                      { this.render_column_header('NR', 'Log(1/E)',  'nr_neglogevalue')    }
+                    </tr>
+                    </thead>
+                    <tbody>
+                    { this.taxonomy_details.map((tax_info, i) => {
+                      return (
+                        <tr key={tax_info.tax_id} className={this.row_class(tax_info)}>
+                          <td>
+                            { this.render_name(tax_info, this.report_details) }
+                          </td>
+                          { this.render_number(tax_info.NT.aggregatescore, sort_column == 'nt_aggregatescore', 0) }
+                          { this.render_number(tax_info.NT.zscore, sort_column == 'nt_zscore', 1) }
+                          { this.render_number(tax_info.NT.rpm, sort_column == 'nt_rpm', 1)       }
+                          { this.render_number(tax_info.NT.r, sort_column == 'nt_r', 0)           }
+                          { this.render_number(tax_info.NT.percentidentity, sort_column == 'nt_percentidentity', 1) }
+                          { this.render_number(tax_info.NT.alignmentlength, sort_column == 'nt_alignmentlength', 1)       }
+                          { this.render_number(tax_info.NT.neglogevalue, sort_column == 'nt_neglogevalue', 0) }
+                          { this.render_number(tax_info.NR.zscore, sort_column == 'nr_zscore', 1) }
+                          { this.render_number(tax_info.NR.rpm, sort_column == 'nr_rpm', 1)       }
+                          { this.render_number(tax_info.NR.r, sort_column == 'nr_r', 0)           }
+                          { this.render_number(tax_info.NR.percentidentity, sort_column == 'nr_percentidentity', 1) }
+                          { this.render_number(tax_info.NR.alignmentlength, sort_column == 'nr_alignmentlength', 1)       }
+                          { this.render_number(tax_info.NR.neglogevalue, sort_column == 'nr_neglogevalue', 0) }
+                        </tr>
+                      )
+                    })}
+                    </tbody>
+                  </table>
+                </div>
+            </div>
             </div>
           </div>
         </div>

@@ -60,7 +60,19 @@ $break-large: 1070px;
     padding: 10px 17px;
     background: #424468;
   }
+  &.download {
+    min-width: 0px;
+    background: #edf8ff;
+    color: rgb(3, 169, 244) !important;
+    font-weight: 600;
+    cursor: pointer;
+    margin: 10px 40px;
+    &:hover {
+      background: rgb(178, 235, 242)
+    }
+  }
 }
+
 .custom-button i{
   font-size: 20px;
 }
