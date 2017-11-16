@@ -5,6 +5,7 @@ task :load_blacklist, [:blacklist_file] => :environment do |_t, args|
     tl = TaxonLineage.find_by(taxid: taxon_id.to_i)
     if tl
       tl.genus_taxid = TaxonLineage::BLACKLIST_GENUS_ID
+      tl.genus_name = nil
       tl.save
     end
   end
