@@ -75,8 +75,7 @@ TARGET_OUTPUTS = { "run_star": [os.path.join(RESULT_DIR, STAR_OUT1),
                                os.path.join(RESULT_DIR, LZW_OUT2)],
                    "run_bowtie2": [os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT1),
                                    os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT2),
-                                   os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT3)]
-                 }
+                                   os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT3)] }
 
 # statistics and logging
 STATS = []
@@ -299,32 +298,24 @@ def run_host_filtering(fastq_file_1, fastq_file_2, initial_file_type_for_log, la
     # run STAR
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "STAR", "count_reads": True,
-        "before_file_name": fastq_file_1,
-        "before_file_type": initial_file_type_for_log,
-        "after_file_name": os.path.join(RESULT_DIR, STAR_OUT1),
-        "after_file_type": initial_file_type_for_log})
-    run_and_log(logparams, TARGET_OUTPUTS["run_star"], lazy_run, run_star,
-        fastq_file_1, fastq_file_2)
+        "before_file_name": fastq_file_1, "before_file_type": initial_file_type_for_log,
+        "after_file_name": os.path.join(RESULT_DIR, STAR_OUT1), "after_file_type": initial_file_type_for_log})
+    run_and_log(logparams, TARGET_OUTPUTS["run_star"], lazy_run, run_star, fastq_file_1, fastq_file_2)
 
     # run priceseqfilter
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "PriceSeqFilter", "count_reads": True,
-        "before_file_name": os.path.join(RESULT_DIR, STAR_OUT1),
-        "before_file_type": initial_file_type_for_log,
-        "after_file_name": os.path.join(RESULT_DIR, PRICESEQFILTER_OUT1),
-        "after_file_type": initial_file_type_for_log})
+        "before_file_name": os.path.join(RESULT_DIR, STAR_OUT1), "before_file_type": initial_file_type_for_log,
+        "after_file_name": os.path.join(RESULT_DIR, PRICESEQFILTER_OUT1), "after_file_type": initial_file_type_for_log})
     run_and_log(logparams, TARGET_OUTPUTS["run_priceseqfilter"], lazy_run, run_priceseqfilter,
-        os.path.join(RESULT_DIR, STAR_OUT1),
-        os.path.join(RESULT_DIR, STAR_OUT2))
+        os.path.join(RESULT_DIR, STAR_OUT1), os.path.join(RESULT_DIR, STAR_OUT2))
 
     # run fastq to fasta
     if "fastq" in FILE_TYPE:
         logparams = return_merged_dict(DEFAULT_LOGPARAMS,
-            {"title": "FASTQ to FASTA",
-            "count_reads": False})
+            {"title": "FASTQ to FASTA", "count_reads": False})
         run_and_log(logparams, TARGET_OUTPUTS["run_fq2fa"], lazy_run, run_fq2fa,
-            os.path.join(RESULT_DIR, PRICESEQFILTER_OUT1),
-            os.path.join(RESULT_DIR, PRICESEQFILTER_OUT2))
+            os.path.join(RESULT_DIR, PRICESEQFILTER_OUT1), os.path.join(RESULT_DIR, PRICESEQFILTER_OUT2))
         next_input_1 = FQ2FA_OUT1
         next_input_2 = FQ2FA_OUT2
     else:
@@ -334,35 +325,26 @@ def run_host_filtering(fastq_file_1, fastq_file_2, initial_file_type_for_log, la
     # run cdhitdup
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "CD-HIT-DUP", "count_reads": True,
-        "before_file_name": os.path.join(RESULT_DIR, next_input_1),
-        "before_file_type": "fasta_paired",
-        "after_file_name": os.path.join(RESULT_DIR, CDHITDUP_OUT1),
-        "after_file_type": "fasta_paired"})
+        "before_file_name": os.path.join(RESULT_DIR, next_input_1), "before_file_type": "fasta_paired",
+        "after_file_name": os.path.join(RESULT_DIR, CDHITDUP_OUT1), "after_file_type": "fasta_paired"})
     run_and_log(logparams, TARGET_OUTPUTS["run_cdhitdup"], lazy_run, run_cdhitdup,
-        os.path.join(RESULT_DIR, next_input_1),
-        os.path.join(RESULT_DIR, next_input_2))
+        os.path.join(RESULT_DIR, next_input_1), os.path.join(RESULT_DIR, next_input_2))
 
     # run lzw filter
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "LZW filter", "count_reads": True,
-        "before_file_name": os.path.join(RESULT_DIR, CDHITDUP_OUT1),
-        "before_file_type": "fasta_paired",
-        "after_file_name": os.path.join(RESULT_DIR, LZW_OUT1),
-        "after_file_type": "fasta_paired"})
+        "before_file_name": os.path.join(RESULT_DIR, CDHITDUP_OUT1), "before_file_type": "fasta_paired",
+        "after_file_name": os.path.join(RESULT_DIR, LZW_OUT1), "after_file_type": "fasta_paired"})
     run_and_log(logparams, TARGET_OUTPUTS["run_lzw"], lazy_run, run_lzw,
-        os.path.join(RESULT_DIR, CDHITDUP_OUT1),
-        os.path.join(RESULT_DIR, CDHITDUP_OUT2))
+        os.path.join(RESULT_DIR, CDHITDUP_OUT1), os.path.join(RESULT_DIR, CDHITDUP_OUT2))
 
     # run bowtie
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "bowtie2", "count_reads": True,
-        "before_file_name": os.path.join(RESULT_DIR, LZW_OUT1),
-        "before_file_type": "fasta_paired",
-        "after_file_name": os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT1),
-        "after_file_type": "fasta_paired"})
+        "before_file_name": os.path.join(RESULT_DIR, LZW_OUT1), "before_file_type": "fasta_paired",
+        "after_file_name": os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT1), "after_file_type": "fasta_paired"})
     run_and_log(logparams, TARGET_OUTPUTS["run_bowtie2"], lazy_run, run_bowtie2,
-        os.path.join(RESULT_DIR, LZW_OUT1),
-        os.path.join(RESULT_DIR, LZW_OUT2))
+        os.path.join(RESULT_DIR, LZW_OUT1), os.path.join(RESULT_DIR, LZW_OUT2))
 
 def run_stage1(lazy_run = True):
     execute_command("mkdir -p %s %s %s %s" % (SAMPLE_DIR, FASTQ_DIR, RESULT_DIR, SCRATCH_DIR))
