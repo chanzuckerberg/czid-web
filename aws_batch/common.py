@@ -5,6 +5,7 @@ import sys
 import subprocess
 import logging
 import json
+import gzip
 
 class Updater(object):
 
