@@ -202,9 +202,14 @@ class PipelineRunStage < ApplicationRecord
     json_dict = JSON.parse(File.read(downloaded_json_path))
     stats_array = JSON.parse(File.read(downloaded_stats_path))
     stats_array = stats_array.select { |entry| entry.key?("task") }
+
     pipeline_output_dict = json_dict['pipeline_output']
     pipeline_output_dict.slice!('name', 'total_reads',
                                 'remaining_reads', 'taxon_counts_attributes')
+    po.name = pipeline_output_dict['name']
+    po.total_reads = pipeline_output_dict['total_reads']
+    po.remaining_reads = pipeline_output_dict['remaining_reads']
+
 
     # only keep species level counts
     taxon_counts_attributes_filtered = []
