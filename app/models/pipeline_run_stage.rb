@@ -106,7 +106,9 @@ class PipelineRunStage < ApplicationRecord
   def set_pipeline_output
     return if pipeline_run.pipeline_output
     pipeline_run.pipeline_output = PipelineOutput.new(pipeline_run: pipeline_run,
-                                                      sample: pipeline_run.sample)
+                                                      sample: pipeline_run.sample,
+                                                      total_reads: 0,
+                                                      remaining_reads: 0)
   end
 
   def sample_output_s3_path
@@ -169,6 +171,8 @@ class PipelineRunStage < ApplicationRecord
     stats_json_s3_path = "#{sample_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
     downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, pr.local_json_path)
     stats_array = JSON.parse(File.read(downloaded_stats_path))
+    po.total_reads = (stats_array[0] || {})['total_reads'] || 0
+
     stats_array = stats_array.select { |entry| entry.key?("task") }
     po.job_stats_attributes = stats_array
     po.save
