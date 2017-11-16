@@ -20,8 +20,7 @@ class PipelineRun < ApplicationRecord
   STATUS_LOADED = 'LOADED'.freeze
   POSTPROCESS_STATUS_LOADED = 'LOADED'.freeze
 
-
-  before_create  :create_run_stages
+  before_create :create_run_stages
   before_save :check_job_status
   after_create :kickoff_job
 
@@ -34,7 +33,6 @@ class PipelineRun < ApplicationRecord
     finalized == 1
   end
 
-
   def kickoff_job
     pipeline_run_stages.first.run_job
   end
@@ -42,7 +40,7 @@ class PipelineRun < ApplicationRecord
   def create_run_stages
     # Host Filtering
     run_stages = []
-    unless (sample.host_genome && sample.host_genome.name == HostGenome::NO_HOST_NAME)
+    unless sample.host_genome && sample.host_genome.name == HostGenome::NO_HOST_NAME
       run_stages << PipelineRunStage.new(
         step_number: 1,
         name: 'Host Filtering',
@@ -74,12 +72,12 @@ class PipelineRun < ApplicationRecord
   def check_job_status
     # only update the pipeline_run info. do not update pipeline_run_stage info
     return if finalized? || id.nil?
-    check_job_status_old unless pipeline_run_stages.present?
+    check_job_status_old if pipeline_run_stages.blank?
     pipeline_run_stages.order(:step_number).each do |prs|
       if prs.failed?
-         self.finalized = 1
-         self.job_status = "#{prs.step_number}.#{prs.name}-#{STAUS_FAILED}"
-         return
+        self.finalized = 1
+        self.job_status = "#{prs.step_number}.#{prs.name}-#{STAUS_FAILED}"
+        return
       elsif prs.succeeded?
         next
       else # still running
@@ -93,7 +91,6 @@ class PipelineRun < ApplicationRecord
   end
 
   def check_job_status_old # Before pipeline_run_stages are introduced
-
     if pipeline_output
       self.job_status = STATUS_CHECKED
       return
@@ -128,7 +125,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def update_job_status
-    update_job_status_old unless pipeline_run_stages.present?
+    update_job_status_old if pipeline_run_stages.blank?
     pipeline_run_stages.order(:step_number).each do |prs|
       if !prs.started? # Not started yet
         prs.run_job

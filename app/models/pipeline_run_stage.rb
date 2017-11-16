@@ -36,20 +36,20 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def output_ready?
-    s3_output_list = self.send(output_func)
+    s3_output_list = send(output_func)
     s3_output_list.each do |out_f|
       return false unless file_generated_since_run(out_f)
     end
-    return true
+    true
   end
 
   def run_job
     # Check output for the run and decide if we should run this stage
     return if job_command.present? && job_status != 'FAILED' # job has been started successfully
-    self.job_command = self.send(job_command_func)
+    self.job_command = send(job_command_func)
     self.command_stdout, self.command_stderr, status = Open3.capture3(job_command)
     if status.exitstatus.zero?
-      output =  JSON.parse(command_stdout)
+      output = JSON.parse(command_stdout)
       self.job_id = output['jobId']
       self.job_status = STATUS_STARTED
     else
@@ -63,8 +63,8 @@ class PipelineRunStage < ApplicationRecord
     return if completed?
 
     set_pipeline_output
-    self.send(load_db_command_func)
-    self.update(db_load_status: 1)
+    send(load_db_command_func)
+    update(db_load_status: 1)
   end
 
   def update_job_status
@@ -108,10 +108,10 @@ class PipelineRunStage < ApplicationRecord
     pipeline_run.pipeline_output = PipelineOutput.new(pipeline_run: pipeline_run,
                                                       sample: pipeline_run.sample)
   end
+
   def sample_output_s3_path
     pipeline_run.sample.sample_output_s3_path
   end
-
 
   ########### STAGE SPECIFIC FUNCTIONS BELOW ############
 
@@ -142,9 +142,9 @@ class PipelineRunStage < ApplicationRecord
     batch_command_env_variables = "INPUT_BUCKET=#{sample.sample_input_s3_path} OUTPUT_BUCKET=#{sample.sample_output_s3_path} " \
       "ENVIRONMENT=#{Rails.env} DB_SAMPLE_ID=#{sample.id}"
     batch_command = "aws s3 cp #{IdSeqPipeline::S3_ALIGNMENT_SCRIPT_LOC} .; chmod 755 #{script_name}; " +
-      batch_command_env_variables + " ./#{script_name}"
+                    batch_command_env_variables + " ./#{script_name}"
     command = "aegea batch submit --command=\"#{batch_command}\" "
-    queue =  sample.job_queue.present? ? sample.job_queue : Sample::DEFAULT_QUEUE
+    queue = sample.job_queue.present? ? sample.job_queue : Sample::DEFAULT_QUEUE
     command += " --storage /mnt=#{DEFAULT_STORAGE_IN_GB} --ecr-image idseq --memory #{DEFAULT_MEMORY_IN_MB} --queue #{queue} --vcpus 4"
     command
   end
@@ -155,13 +155,12 @@ class PipelineRunStage < ApplicationRecord
     batch_command_env_variables = "INPUT_BUCKET=#{sample.sample_output_s3_path} " \
       "OUTPUT_BUCKET=#{sample.sample_postprocess_s3_path} "
     batch_command = "aws s3 cp #{IdSeqPipeline::S3_POSTPROCESS_SCRIPT_LOC} .; chmod 755 #{script_name}; " +
-      batch_command_env_variables + "./#{script_name}"
+                    batch_command_env_variables + "./#{script_name}"
     command = "aegea batch submit --command=\"#{batch_command}\" "
-    queue =  sample.job_queue.present? ? sample.job_queue : Sample::DEFAULT_QUEUE
+    queue = sample.job_queue.present? ? sample.job_queue : Sample::DEFAULT_QUEUE
     command += " --storage /mnt=#{DEFAULT_STORAGE_IN_GB} --ecr-image idseq --memory #{DEFAULT_MEMORY_IN_MB} --queue #{queue} --vcpus 4"
     command
   end
-
 
   def db_load_host_filtering
     po = pipeline_run.pipeline_output
@@ -248,7 +247,5 @@ class PipelineRunStage < ApplicationRecord
 
   def postprocess_outputs
     ["#{pipeline_run.sample.sample_postprocess_s3_path}/#{PipelineRun::TAXID_BYTERANGE_JSON_NAME}"]
-
   end
-
 end
