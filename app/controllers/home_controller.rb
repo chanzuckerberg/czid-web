@@ -1,48 +1,45 @@
 class HomeController < ApplicationController
   before_action :login_required
   include SamplesHelper
+
   def home
     @all_project = Project.all
     project_id = params[:project_id]
+    search_query = params[:search]
     sort = params[:sort_by]
     @project_info = nil
 
     if params[:ids].present?
-      @samples = sort_by(Sample.includes(:pipeline_runs, :pipeline_outputs).where("id in (#{params[:ids]})").paginate(page: params[:page]), sort)
-      @samples_count = @samples.size
+      samples = Sample.includes(:pipeline_runs, :pipeline_outputs).where("id in (#{params[:ids]})")
+      @samples = sort_by(samples.paginate(page: params[:page]), sort)
+      @samples_count = samples.size
+      @all_samples = format_samples(@samples)
     elsif project_id.present?
-      @samples = sort_by(Sample.includes(:pipeline_runs, :pipeline_outputs).where(project_id: project_id).paginate(page: params[:page]), sort)
+      if search_query.present?
+        samples = Sample.includes(:pipeline_runs, :pipeline_outputs).where(project_id: project_id).search(search_query)
+        @samples = sort_by(samples.paginate(page: params[:page]), sort)
+        @samples_count = samples.size
+      else
+        samples = Sample.includes(:pipeline_runs, :pipeline_outputs).where(project_id: project_id)
+        @samples = sort_by(samples.paginate(page: params[:page]), sort)
+        @samples_count = samples.size
+      end
       @project_info = Project.find(project_id)
-      @samples_count = Sample.where(project_id: project_id).size
+      @all_samples = format_samples(@samples)
+        # all_samples = Sample.includes(:pipeline_runs, :pipeline_outputs).where(project_id: project_id)
     else
-      @samples = sort_by(Sample.includes(:pipeline_runs, :pipeline_outputs).paginate(page: params[:page]), sort)
-      @samples_count = Sample.all.size
-    end
-    samples_info_output = samples_info(@samples) || {}
-    @final_result = samples_info_output[:final_result] || []
-    @pipeline_run_info = samples_info_output[:pipeline_run_info] || []
-  end
-
-  def search
-    project_id = params[:project_id]
-    search_query = params[:search]
-
-    @samples = if project_id.present?
-                 Sample.includes(:pipeline_runs, :pipeline_outputs).search(search_query).where(project_id: project_id)
-               else
-                 Sample.includes(:pipeline_runs, :pipeline_outputs).search(search_query)
-               end
-    @final_result = samples_info(@samples)[:final_result]
-    @pipeline_run_info = samples_info(@samples)[:pipeline_run_info]
-    if @samples.length
-      respond_to do |format|
-        format.json { render json: { samples: @samples, final_result: @final_result, pipeline_run_info: @pipeline_run_info }, message: 'Search results found' }
+      if search_query.present?
+        samples = Sample.includes(:pipeline_runs, :pipeline_outputs).search(search_query)
+        @samples = sort_by(samples.paginate(page: params[:page]), sort)
+      else
+        samples = Sample.includes(:pipeline_runs, :pipeline_outputs)
+        @samples = sort_by(samples.paginate(page: params[:page]), sort)
       end
-    else
-      respond_to do |format|
-        format.json { render message: 'No Search results found' }
+        @samples_count = samples.size
+        @all_samples = format_samples(@samples)
+        # all_samples = Sample.includes(:pipeline_runs, :pipeline_outputs).all
       end
-    end
+      # @all_samples = format_samples(@samples)
   end
 
   def sort_by(samples, dir = nil)
