@@ -337,7 +337,7 @@ def run_stage1(lazy_run = True):
 
     # configure logger
     log_file = "%s/%s.%s.txt" % (RESULT_DIR, LOGS_OUT_BASENAME, AWS_BATCH_JOB_ID)
-    logger = configure_logger(log_file)
+    configure_logger(log_file)
 
     # Download fastqs
     command = "aws s3 ls %s/ | grep '\.%s$'" % (SAMPLE_S3_INPUT_PATH, FILE_TYPE)
