@@ -445,6 +445,8 @@ def run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work
         for input_fa in input_files:
             commands += "aws s3 cp %s/%s %s/ ; " % \
                      (SAMPLE_S3_OUTPUT_CHUNKS_PATH, input_fa, remote_work_dir)
+        if lazy_run:
+            commands += "if [ -f %s ]; then echo 'chunk %s output file exists, lazy run'; exit 0; fi;" % (remote_outfile, chunk_id)    
         commands += " ".join([remote_home_dir+'/bin/gsnapl',
                               '-A', 'm8', '--batch=2',
                               '--gmap-mode=none', '--npaths=1', '--ordered',
@@ -547,6 +549,8 @@ def run_rapsearch_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_w
     input_path = remote_work_dir + '/' + input_fasta
     outfile_basename = 'rapsearch2-out' + part_suffix + chunk_id + '.m8'
     output_path = os.path.join(remote_work_dir, outfile_basename)
+    if lazy_run:
+        commands += "if [ -f %s ]; then echo 'chunk %s output file exists, lazy run'; exit 0; fi;" % (output_path, chunk_id)
     commands += " ".join(['/usr/local/bin/rapsearch',
                           '-d', remote_index_dir+'/nr_rapsearch',
                           '-e','-6',
