@@ -1,4 +1,6 @@
-<%= react_component 'Home', samples: @samples, outputData: @final_result, pipeline_run_info: @pipeline_run_info, project: @project_info, all_project: @all_project, samples_count: @samples_count %>
+<%= react_component 'Home', project: @project_info, all_project: @all_project, 
+samples_count: @samples_count, unfiltered: @all_samples
+%>
 
 <% if @samples.length %>
   <%= will_paginate @samples, :style => 'color:#5abcd6', previous_label: '<<', next_label: '>>', id: 'pagination' %>
