@@ -478,7 +478,7 @@ def run_gsnapl_remotely(input_files):
     # split file:
     chunk_nlines = 2*GSNAPL_CHUNK_SIZE
     part_suffix = "-part-"
-    input_chunks = chunk_input(input_files, chunk_nlines, part_suffix, RESULT_DIR)
+    input_chunks = chunk_input(input_files, chunk_nlines, part_suffix)
     # process chunks:
     chunk_output_files = []
     for chunk_input_files in input_chunks:
@@ -579,7 +579,7 @@ def run_rapsearch2_remotely(input_fasta):
     # split file:
     chunk_nlines = 2*RAPSEARCH_CHUNK_SIZE
     part_suffix = "-part-"
-    input_chunks = chunk_input([input_fasta], chunk_nlines, part_suffix, RESULT_DIR)
+    input_chunks = chunk_input([input_fasta], chunk_nlines, part_suffix)
     # process chunks:
     chunk_output_files = []
     for chunk_input_file in input_chunks:
