@@ -8,6 +8,17 @@ class Samples extends React.Component {
     this.switchProject = this.switchProject.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
     this.all_project = props.all_project|| [];
+    // this.filteredJobs = props.filtered || []
+    // this.filteredJobsComplete = {
+    //   samples: this.filteredJobs.complete_jobs || [],
+    //   outputData: this.filteredJobs.completed_info.final_result || [],
+    //   pipelineRunInfo: this.filteredJobs.completed_info.pipeline_run_info
+    // }
+    // this.filteredJobsFailed = {
+    //   samples: this.filteredJobs.failed_jobs,
+    //   outputData: this.filteredJobs.failed_info.final_result || [],
+    //   pipelineRunInfo: this.filteredJobs.failed_info.pipeline_run_info
+    // }
     this.defaultSortBy = 'newest';
     const currentSort = SortHelper.currentSort();
     this.state = {
@@ -164,7 +175,7 @@ class Samples extends React.Component {
               <th>Percentage Reads</th>
               <th>QC</th>
               <th>Compression Ratio</th>
-              <th>Pipeline run status</th>
+              <th className="status-dropdown" data-activates="dropdownstatus"><a href="#!" data-activates="dropdownstatus"><i className="status-filter fa fa-caret-down"></i></a>Pipeline run status</th>
             </tr>
             </thead>
               { samples.length ? <tbody>{this.renderPipelineOutput(samples)}</tbody> : null }
