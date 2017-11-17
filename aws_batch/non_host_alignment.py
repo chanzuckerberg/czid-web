@@ -556,7 +556,7 @@ def run_rapsearch_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_w
                           '-o', output_path[:-3],
                           ';'])
     commands += "aws s3 cp %s %s/;" % (output_path, SAMPLE_S3_OUTPUT_PATH)
-    logging.getLogger().info("waiting for server")
+    write_to_log("waiting for server")
     instance_ip = wait_for_server_ip('rapsearch', key_path, remote_username, ENVIRONMENT, RAPSEARCH2_MAX_CONCURRENT)
     write_to_log("starting alignment for chunk %s on machine %s" % (chunk_id, instance_ip))
     remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, instance_ip, commands)
