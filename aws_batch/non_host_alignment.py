@@ -23,6 +23,7 @@ INPUT_BUCKET = None # input for this stage, i.e. result bucket from previous sta
 OUTPUT_BUCKET = None
 SAMPLE_S3_INPUT_PATH = None
 SAMPLE_S3_OUTPUT_PATH = None
+SAMPLE_NAME = None
 SAMPLE_DIR = None
 FASTQ_DIR = None
 RESULT_DIR = None
@@ -472,7 +473,7 @@ def run_gsnapl_remotely(input_files):
     execute_command("chmod 400 %s" % key_path)
     remote_username = "ubuntu"
     remote_home_dir = "/home/%s" % remote_username
-    remote_work_dir = "%s/batch-pipeline-workdir/%s" % (remote_home_dir, sample)
+    remote_work_dir = "%s/batch-pipeline-workdir/%s" % (remote_home_dir, SAMPLE_NAME)
     remote_index_dir = "%s/share" % remote_home_dir
     # split file:
     chunk_nlines = 2*GSNAPL_CHUNK_SIZE
@@ -573,7 +574,7 @@ def run_rapsearch2_remotely(input_fasta):
     execute_command("chmod 400 %s" % key_path)
     remote_username = "ec2-user"
     remote_home_dir = "/home/%s" % remote_username
-    remote_work_dir = "%s/batch-pipeline-workdir/%s" % (remote_home_dir, sample)
+    remote_work_dir = "%s/batch-pipeline-workdir/%s" % (remote_home_dir, SAMPLE_NAME)
     remote_index_dir = "%s/references/nr_rapsearch" % remote_home_dir
     # split file:
     chunk_nlines = 2*RAPSEARCH_CHUNK_SIZE
@@ -805,7 +806,8 @@ def main():
     global AWS_BATCH_JOB_ID
     global KEY_S3_PATH
     global TARGET_OUTPUTS
-
+    global SAMPLE_NAME
+    
     FASTQ_BUCKET = os.environ.get('FASTQ_BUCKET', FASTQ_BUCKET)
     INPUT_BUCKET = os.environ.get('INPUT_BUCKET', INPUT_BUCKET)
     FILE_TYPE = os.environ.get('FILE_TYPE', FILE_TYPE)
@@ -816,7 +818,7 @@ def main():
     SAMPLE_S3_FASTQ_PATH = FASTQ_BUCKET.rstrip('/')
     SAMPLE_S3_INPUT_PATH = INPUT_BUCKET.rstrip('/')
     SAMPLE_S3_OUTPUT_PATH = OUTPUT_BUCKET.rstrip('/')
-    sample_name = SAMPLE_S3_INPUT_PATH[5:].rstrip('/').replace('/','-')
+    SAMPLE_NAME = SAMPLE_S3_INPUT_PATH[5:].rstrip('/').replace('/','-')
     SAMPLE_DIR = DEST_DIR + '/' + sample_name
     FASTQ_DIR = SAMPLE_DIR + '/fastqs'
     RESULT_DIR = SAMPLE_DIR + '/results'
