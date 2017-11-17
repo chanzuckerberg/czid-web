@@ -420,7 +420,7 @@ def clean_direct_gsnapl_input(fastq_files):
     # unzip files if necessary
     if ".gz" in FILE_TYPE:
         subprocess.check_output(" ".join(["gunzip"] + fastq_files), shell=True)
-        cleaned_files = [os.path.splitext(f) for f in fastq_files]
+        cleaned_files = [os.path.splitext(f)[0] for f in fastq_files]
     else:
         cleaned_files = fastq_files
     # generate file type for log
