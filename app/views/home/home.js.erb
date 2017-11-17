@@ -1,0 +1,7 @@
+$('#samples').append('<%= j render @samples %>');
+<% if @samples.next_page %>
+  $('.pagination').replaceWith('<%= j will_paginate @samples %>');
+<% else %>
+  $(window).off('scroll');
+  $('.pagination').remove();
+<% end %>
