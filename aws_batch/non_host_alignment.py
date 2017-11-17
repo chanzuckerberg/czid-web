@@ -681,7 +681,7 @@ def run_stage2(lazy_run = True):
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "GSNAPL", "count_reads": True,
         "before_file_name": before_file_name_for_log, "before_file_type": before_file_type_for_log,
-        "after_file_name": os.path.join(RESULT_DIR, GSNAPL_OUT), "after_file_type": "m8"})
+        "after_file_name": os.path.join(RESULT_DIR, GSNAPL_DEDUP_OUT), "after_file_type": "m8"})
     run_and_log(logparams, TARGET_OUTPUTS["run_gsnapl_remotely"], lazy_run, run_gsnapl_remotely, gsnapl_input_files)
 
     # run_annotate_gsnapl_m8_with_taxids
