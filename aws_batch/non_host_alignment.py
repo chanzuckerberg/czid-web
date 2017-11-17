@@ -653,7 +653,7 @@ def run_stage2(lazy_run = True):
         for line in output:
             m = re.match(".*?([^ ]*." + re.escape(FILE_TYPE) + ")", line)
             if m:
-                execute_command("aws s3 cp %s/%s %s/" % (SAMPLE_S3_INPUT_PATH, m.group(1), FASTQ_DIR))
+                execute_command("aws s3 cp %s/%s %s/" % (SAMPLE_S3_FASTQ_PATH, m.group(1), FASTQ_DIR))
             else:
                 print "%s doesn't match %s" % (line, FILE_TYPE)
         fastq_files = execute_command_with_output("ls %s/*.%s" % (FASTQ_DIR, FILE_TYPE)).rstrip().split("\n")
