@@ -686,6 +686,10 @@ def run_bowtie2(sample_name, input_fa_1, input_fa_2, bowtie2_genome_s3_path,
         output4 = "%s/%s" % (result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT3)
         if os.path.isfile(output1) and os.path.isfile(output2) and \
            os.path.isfile(output3) and os.path.isfile(output4):
+            # Touch the output to make sure the datestamp changes to signal run of this script
+            execute_command("touch %s" % output2)
+            execute_command("touch %s" % output3)
+            execute_command("touch %s" % output4)
             return 1
     # Doing the work
     # check if genome downloaded already
