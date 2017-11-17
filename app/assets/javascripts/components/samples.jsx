@@ -161,7 +161,7 @@ class Samples extends React.Component {
               <th>Percentage Reads</th>
               <th>QC</th>
               <th>Compression Ratio</th>
-              <th className="status-dropdown" data-activates="dropdownstatus"><a href="#!" data-activates="dropdownstatus"><i className="status-filter fa fa-caret-down"></i></a>Pipeline run status</th>
+              <th>Pipeline run status</th>
             </tr>
             </thead>
               { samples.length ? <tbody>{this.renderPipelineOutput(samples)}</tbody> : null }
