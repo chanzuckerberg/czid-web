@@ -9,6 +9,7 @@ import gzip
 import os
 
 STATS = []
+LOGGER = None
 
 class Updater(object):
 
@@ -128,20 +129,20 @@ def return_merged_dict(dict1, dict2):
     return result
 
 def configure_logger(log_file):
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
+    global LOGGER
+    LOGGER = logging.getLogger()
+    LOGGER.setLevel(logging.INFO)
     handler = logging.FileHandler(log_file)
     formatter = logging.Formatter("%(asctime)s (%(time_since_last)ss elapsed): %(message)s")
     handler.addFilter(TimeFilter())
     handler.setFormatter(formatter)
-    logger.addHandler(handler)
+    LOGGER.addHandler(handler)
     # echo to stdout so they get to cloudwatch
     handler = logging.StreamHandler(sys.stdout)
     handler.setLevel(logging.INFO)
     formatter = logging.Formatter('(%(time_since_last)ss elapsed): %(message)s')
     handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    return logger
+    LOGGER.addHandler(handler)
 
 def load_existing_stats(stats_file):
     global STATS
@@ -156,19 +157,20 @@ def get_remaining_reads_from_stats():
     return (item for item in STATS if item.get("task") == "run_gsnapl_remotely").next().get("reads_before")
 
 def run_and_log(logparams, target_outputs, lazy_run, func_name, *args):
-    logger = logging.getLogger()
-    logger.info("========== %s ==========" % logparams.get("title"))
+    global LOGGER
+    LOGGER = logging.getLogger()
+    LOGGER.info("========== %s ==========" % logparams.get("title"))
     # copy log file -- start
-    logger.handlers[0].flush()
-    execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
+    LOGGER.handlers[0].flush()
+    execute_command("aws s3 cp %s %s/;" % (LOGGER.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
     # produce the output
     if lazy_run and all(os.path.isfile(output) for output in target_outputs):
-        logger.info("output exists, lazy run")
+        LOGGER.info("output exists, lazy run")
     else:
         func_name(*args)
-        logger.info("uploaded output")
+        LOGGER.info("uploaded output")
     # copy log file -- after work is done
-    execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
+    execute_command("aws s3 cp %s %s/;" % (LOGGER.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
     # count records
     required_params = ["before_file_name", "before_file_type", "after_file_name", "after_file_type"]
     if logparams.get("count_reads") and all(param in logparams for param in required_params):
@@ -176,8 +178,8 @@ def run_and_log(logparams, target_outputs, lazy_run, func_name, *args):
         records_after = count_reads(logparams["after_file_name"], logparams["after_file_type"])
         STATS.append({'task': func_name.__name__, 'reads_before': records_before, 'reads_after': records_after})
     # copy log file -- end
-    logger.handlers[0].flush()
-    execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
+    LOGGER.handlers[0].flush()
+    execute_command("aws s3 cp %s %s/;" % (LOGGER.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
     # write stats
     stats_path = logparams.get("stats_file")
     if stats_path and os.path.isfile(stats_path):
@@ -186,4 +188,4 @@ def run_and_log(logparams, target_outputs, lazy_run, func_name, *args):
         execute_command("aws s3 cp %s %s/;" % (stats_path, logparams["sample_s3_output_path"]))
 
 def write_to_log(message):
-    logging.getLogger().info(message)
+    LOGGER.info(message)
