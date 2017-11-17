@@ -24,6 +24,7 @@ OUTPUT_BUCKET = None
 SAMPLE_S3_FASTQ_PATH = None
 SAMPLE_S3_INPUT_PATH = None
 SAMPLE_S3_OUTPUT_PATH = None
+SAMPLE_S3_OUTPUT_CHUNKS_PATH = None
 SAMPLE_NAME = None
 SAMPLE_DIR = None
 FASTQ_DIR = None
@@ -410,7 +411,7 @@ def chunk_input(input_files_basenames, chunk_nlines, part_suffix):
         out_prefix = input_file_full_local_path + part_suffix
         out_prefix_base = input_file + part_suffix
         execute_command("split --numeric-suffixes -l %d %s %s" % (chunk_nlines, input_file_full_local_path, out_prefix))
-        execute_command("aws s3 cp %s/ %s/ --recursive --exclude '*' --include '%s*'" % (RESULT_DIR, SAMPLE_S3_OUTPUT_PATH, out_prefix_base))
+        execute_command("aws s3 cp %s/ %s/ --recursive --exclude '*' --include '%s*'" % (RESULT_DIR, SAMPLE_S3_OUTPUT_CHUNKS_PATH, out_prefix_base))
         partial_files = [os.path.basename(partial_file) for partial_file in execute_command_with_output("ls %s*" % out_prefix).rstrip().split("\n")]
         part_lists.append(partial_files)
     input_chunks = [list(part) for part in zip(*part_lists)]
@@ -443,7 +444,7 @@ def run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work
         commands = "mkdir -p %s;" % remote_work_dir
         for input_fa in input_files:
             commands += "aws s3 cp %s/%s %s/ ; " % \
-                     (SAMPLE_S3_OUTPUT_PATH, input_fa, remote_work_dir)
+                     (SAMPLE_S3_OUTPUT_CHUNKS_PATH, input_fa, remote_work_dir)
         commands += " ".join([remote_home_dir+'/bin/gsnapl',
                               '-A', 'm8', '--batch=2',
                               '--gmap-mode=none', '--npaths=1', '--ordered',
@@ -462,10 +463,10 @@ def run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work
         # move gsnapl output back to local
         time.sleep(10)
         write_to_log("finished alignment for chunk %s" % chunk_id)
-        execute_command("aws s3 cp %s/%s %s/" % (SAMPLE_S3_OUTPUT_PATH, outfile_basename, RESULT_DIR))
+        execute_command("aws s3 cp %s/%s %s/" % (SAMPLE_S3_OUTPUT_CHUNKS_PATH, outfile_basename, RESULT_DIR))
         # Deduplicate m8 input. Sometimes GSNAPL outputs multiple consecutive lines for same original read and same accession id. Count functions expect only 1 (top hit).
         deduplicate_m8(os.path.join(RESULT_DIR, outfile_basename), os.path.join(RESULT_DIR, dedup_outfile_basename))
-        execute_command("aws s3 cp %s/%s %s/" % (RESULT_DIR, dedup_outfile_basename, SAMPLE_S3_OUTPUT_PATH))
+        execute_command("aws s3 cp %s/%s %s/" % (RESULT_DIR, dedup_outfile_basename, SAMPLE_S3_OUTPUT_CHUNKS_PATH))
         return os.path.join(RESULT_DIR, dedup_outfile_basename)
 
 def run_gsnapl_remotely(input_files):
@@ -542,7 +543,7 @@ def run_rapsearch_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_w
     chunk_id = input_fasta.split(part_suffix)[-1]
     commands = "mkdir -p %s;" % remote_work_dir
     commands += "aws s3 cp %s/%s %s/ ; " % \
-                 (SAMPLE_S3_OUTPUT_PATH, input_fasta, remote_work_dir)
+                 (SAMPLE_S3_OUTPUT_CHUNKS_PATH, input_fasta, remote_work_dir)
     input_path = remote_work_dir + '/' + input_fasta
     outfile_basename = 'rapsearch2-out' + part_suffix + chunk_id + '.m8'
     output_path = os.path.join(remote_work_dir, outfile_basename)
@@ -557,7 +558,7 @@ def run_rapsearch_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_w
                           '-q', input_path,
                           '-o', output_path[:-3],
                           ';'])
-    commands += "aws s3 cp %s %s/;" % (output_path, SAMPLE_S3_OUTPUT_PATH)
+    commands += "aws s3 cp %s %s/;" % (output_path, SAMPLE_S3_OUTPUT_CHUNKS_PATH)
     write_to_log("waiting for server")
     instance_ip = wait_for_server_ip('rapsearch', key_path, remote_username, ENVIRONMENT, RAPSEARCH2_MAX_CONCURRENT)
     write_to_log("starting alignment for chunk %s on machine %s" % (chunk_id, instance_ip))
@@ -566,7 +567,7 @@ def run_rapsearch_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_w
     write_to_log("finished alignment for chunk %s" % chunk_id)
     # move output back to local
     time.sleep(10) # wait until the data is synced
-    execute_command("aws s3 cp %s/%s %s/" % (SAMPLE_S3_OUTPUT_PATH, outfile_basename, RESULT_DIR))
+    execute_command("aws s3 cp %s/%s %s/" % (SAMPLE_S3_OUTPUT_CHUNKS_PATH, outfile_basename, RESULT_DIR))
     return os.path.join(RESULT_DIR, outfile_basename)
 
 def run_rapsearch2_remotely(input_fasta):
@@ -808,6 +809,7 @@ def main():
     global TARGET_OUTPUTS
     global SAMPLE_NAME
     global SAMPLE_S3_FASTQ_PATH
+    global SAMPLE_S3_OUTPUT_CHUNKS_PATH
     
     FASTQ_BUCKET = os.environ.get('FASTQ_BUCKET', FASTQ_BUCKET)
     INPUT_BUCKET = os.environ.get('INPUT_BUCKET', INPUT_BUCKET)
@@ -819,6 +821,7 @@ def main():
     SAMPLE_S3_FASTQ_PATH = FASTQ_BUCKET.rstrip('/')
     SAMPLE_S3_INPUT_PATH = INPUT_BUCKET.rstrip('/')
     SAMPLE_S3_OUTPUT_PATH = OUTPUT_BUCKET.rstrip('/')
+    SAMPLE_S3_OUTPUT_CHUNKS_PATH = os.path.join(SAMPLE_S3_OUTPUT_PATH, "chunks")
     SAMPLE_NAME = SAMPLE_S3_INPUT_PATH[5:].rstrip('/').replace('/','-')
     SAMPLE_DIR = DEST_DIR + '/' + SAMPLE_NAME
     FASTQ_DIR = SAMPLE_DIR + '/fastqs'
