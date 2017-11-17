@@ -672,8 +672,7 @@ def run_stage2(lazy_run = True):
 
     # Import existing job stats
     stats_file = os.path.join(RESULT_DIR, STATS_OUT)
-    with open(stats_file) as f:
-        STATS = json.load(f)
+    load_existing_stats(stats_file)
 
     # run gsnap remotely
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
