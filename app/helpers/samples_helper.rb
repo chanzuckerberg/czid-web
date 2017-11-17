@@ -144,4 +144,5 @@ module SamplesHelper
     end
     formatted_samples
   end
+
 end
