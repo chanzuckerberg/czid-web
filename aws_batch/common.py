@@ -149,6 +149,9 @@ def load_existing_stats(stats_file):
     with open(stats_file) as f:
         STATS = json.load(f)    
 
+def get_total_reads_from_stats():
+    return [item for item in STATS if "total_reads" in item][0]["total_reads"]
+        
 def run_and_log(logparams, target_outputs, lazy_run, func_name, *args):
     logger = logging.getLogger()
     logger.info("========== %s ==========" % logparams.get("title"))
