@@ -455,7 +455,7 @@ def run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work
                               '-D', remote_index_dir, '-d', 'nt_k16']
                               + [remote_work_dir+'/'+input_fa for input_fa in input_files]
                               + ['> '+remote_outfile, ';'])
-        commands += "aws s3 cp %s %s/;" % (remote_outfile, SAMPLE_S3_OUTPUT_PATH)
+        commands += "aws s3 cp %s %s/;" % (remote_outfile, SAMPLE_S3_OUTPUT_CHUNKS_PATH)
         # check if remote machins has enough capacity
         write_to_log("waiting for server")
         gsnapl_instance_ip = wait_for_server_ip('gsnap', key_path, remote_username, ENVIRONMENT, GSNAPL_MAX_CONCURRENT)
