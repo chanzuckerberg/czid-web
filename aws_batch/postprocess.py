@@ -53,24 +53,9 @@ TAXID_LOCATIONS_JSON_FAMILY_NR = 'taxid_locations_family_nr.json'
 TAXID_LOCATIONS_JSON_ALL = 'taxid_locations_combined.json'
 LOGS_OUT_BASENAME = 'postprocess-log'
 
-# target outputs by task
-TARGET_OUTPUTS = { "run_generate_taxid_fasta_from_accid": [os.path.join(RESULT_DIR, TAXID_ANNOT_FASTA)],
-                   "run_generate_taxid_locator__1": [os.path.join(RESULT_DIR, TAXID_ANNOT_SORTED_FASTA_NT),
-                                                     os.path.join(RESULT_DIR, TAXID_LOCATIONS_JSON_NT)],
-                   "run_generate_taxid_locator__2": [os.path.join(RESULT_DIR, TAXID_ANNOT_SORTED_FASTA_NR),
-                                                     os.path.join(RESULT_DIR, TAXID_LOCATIONS_JSON_NR)],
-                   "run_generate_taxid_locator__3": [os.path.join(RESULT_DIR, TAXID_ANNOT_SORTED_FASTA_GENUS_NT),
-                                                     os.path.join(RESULT_DIR, TAXID_LOCATIONS_JSON_GENUS_NT)],
-                   "run_generate_taxid_locator__4": [os.path.join(RESULT_DIR, TAXID_ANNOT_SORTED_FASTA_GENUS_NR),
-                                                     os.path.join(RESULT_DIR, TAXID_LOCATIONS_JSON_GENUS_NR)],
-                   "run_generate_taxid_locator__5": [os.path.join(RESULT_DIR, TAXID_ANNOT_SORTED_FASTA_FAMILY_NT),
-                                                     os.path.join(RESULT_DIR, TAXID_LOCATIONS_JSON_FAMILY_NT)],
-                   "run_generate_taxid_locator__6": [os.path.join(RESULT_DIR, TAXID_ANNOT_SORTED_FASTA_FAMILY_NR),
-                                                     os.path.join(RESULT_DIR, TAXID_LOCATIONS_JSON_FAMILY_NR)],
-                   "run_combine_json": [os.path.join(RESULT_DIR, TAXID_LOCATIONS_JSON_ALL)] }
-
 # logging
 DEFAULT_LOGPARAMS = {}
+TARGET_OUTPUTS = None
 AWS_BATCH_JOB_ID = None
 
 # convenience functions
@@ -301,7 +286,8 @@ def main():
     global SAMPLE_DIR
     global RESULT_DIR
     global INPUT_DIR
-
+    global TARGET_OUTPUTS
+    
     INPUT_BUCKET = os.environ.get('INPUT_BUCKET', INPUT_BUCKET)
     OUTPUT_BUCKET = os.environ.get('OUTPUT_BUCKET', OUTPUT_BUCKET)
     AWS_BATCH_JOB_ID = os.environ.get('AWS_BATCH_JOB_ID', 'local')
@@ -312,7 +298,23 @@ def main():
     SAMPLE_DIR = DEST_DIR + '/' + sample_name
     INPUT_DIR = SAMPLE_DIR + '/inputs'
     RESULT_DIR = SAMPLE_DIR + '/results'
-    DEFAULT_LOGPARAMS = {"SAMPLE_S3_OUTPUT_PATH": SAMPLE_S3_OUTPUT_PATH}
+    DEFAULT_LOGPARAMS = {"sample_s3_output_path": SAMPLE_S3_OUTPUT_PATH}
+
+    # target outputs by task
+    TARGET_OUTPUTS = { "run_generate_taxid_fasta_from_accid": [os.path.join(RESULT_DIR, TAXID_ANNOT_FASTA)],
+                       "run_generate_taxid_locator__1": [os.path.join(RESULT_DIR, TAXID_ANNOT_SORTED_FASTA_NT),
+                                                         os.path.join(RESULT_DIR, TAXID_LOCATIONS_JSON_NT)],
+                       "run_generate_taxid_locator__2": [os.path.join(RESULT_DIR, TAXID_ANNOT_SORTED_FASTA_NR),
+                                                         os.path.join(RESULT_DIR, TAXID_LOCATIONS_JSON_NR)],
+                       "run_generate_taxid_locator__3": [os.path.join(RESULT_DIR, TAXID_ANNOT_SORTED_FASTA_GENUS_NT),
+                                                         os.path.join(RESULT_DIR, TAXID_LOCATIONS_JSON_GENUS_NT)],
+                       "run_generate_taxid_locator__4": [os.path.join(RESULT_DIR, TAXID_ANNOT_SORTED_FASTA_GENUS_NR),
+                                                         os.path.join(RESULT_DIR, TAXID_LOCATIONS_JSON_GENUS_NR)],
+                       "run_generate_taxid_locator__5": [os.path.join(RESULT_DIR, TAXID_ANNOT_SORTED_FASTA_FAMILY_NT),
+                                                         os.path.join(RESULT_DIR, TAXID_LOCATIONS_JSON_FAMILY_NT)],
+                       "run_generate_taxid_locator__6": [os.path.join(RESULT_DIR, TAXID_ANNOT_SORTED_FASTA_FAMILY_NR),
+                                                         os.path.join(RESULT_DIR, TAXID_LOCATIONS_JSON_FAMILY_NR)],
+                       "run_combine_json": [os.path.join(RESULT_DIR, TAXID_LOCATIONS_JSON_ALL)] }
 
     # execute the pipeline stage
     run_stage3(True)
