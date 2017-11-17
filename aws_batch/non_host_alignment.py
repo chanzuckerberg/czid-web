@@ -401,7 +401,7 @@ def check_s3_file_presence(s3_path):
     return int(execute_command_with_output(command).rstrip())
 
 # job functions
-def chunk_input(input_files_basenames, chunk_nlines, part_suffix)
+def chunk_input(input_files_basenames, chunk_nlines, part_suffix):
     part_lists = []
     for input_file in input_files_basenames:
         input_file_full_local_path = os.path.join(RESULT_DIR, input_file)
