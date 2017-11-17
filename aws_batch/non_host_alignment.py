@@ -484,7 +484,7 @@ def run_gsnapl_remotely(input_files):
         chunk_output_files += [run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work_dir, remote_username,
                                                 chunk_input_files, key_path)]
     # merge output chunks:
-    execute_command("cat %s > %s" % (" ".join(chunk_output_files), os.path.join(RESULT_DIR, GSNAPL_DEDUP_OUT))
+    execute_command("cat %s > %s" % (" ".join(chunk_output_files), os.path.join(RESULT_DIR, GSNAPL_DEDUP_OUT)))
     execute_command("aws s3 cp %s/%s %s/" % (RESULT_DIR, GSNAPL_DEDUP_OUT, SAMPLE_S3_OUTPUT_PATH))
 
 def run_annotate_m8_with_taxids(input_m8, output_m8):
