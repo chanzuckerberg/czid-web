@@ -144,10 +144,10 @@ def configure_logger(log_file):
     return logger
 
 def load_existing_stats(stats_file):
-    if not os.path.isfile(stats_file):
-        return
-    with open(stats_file) as f:
-        STATS = json.load(f)    
+    global STATS
+    if os.path.isfile(stats_file):
+        with open(stats_file) as f:
+            STATS = json.load(f)    
 
 def get_total_reads_from_stats():
     return [item for item in STATS if "total_reads" in item][0]["total_reads"]
@@ -183,3 +183,6 @@ def run_and_log(logparams, target_outputs, lazy_run, func_name, *args):
     with open(stats_path, 'wb') as f:
         json.dump(STATS, f)
     execute_command("aws s3 cp %s %s/;" % (stats_path, logparams["sample_s3_output_path"]))
+
+def write_to_log(message):
+    logging.getLogger().info(message)
