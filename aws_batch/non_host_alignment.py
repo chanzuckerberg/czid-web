@@ -599,9 +599,7 @@ def run_generate_taxid_outputs_from_m8(annotated_m8, taxon_counts_csv_file, taxo
         logging.getLogger().info("downloaded taxon info database")
     generate_tax_counts_from_m8(annotated_m8, e_value_type, taxon_counts_csv_file)
     logging.getLogger().info("generated taxon counts from m8")
-    generate_json_from_taxid_counts(sample_name, taxon_counts_csv_file,
-                                    taxoninfo_path, taxon_counts_json_file,
-                                    count_type, db_sample_id)
+    generate_json_from_taxid_counts(taxon_counts_csv_file, taxoninfo_path, taxon_counts_json_file, count_type)
     logging.getLogger().info("generated JSON file from taxon counts")
     generate_rpm_from_taxid_counts(taxon_counts_csv_file, taxoninfo_path,
                                    taxon_species_rpm_file, taxon_genus_rpm_file)
