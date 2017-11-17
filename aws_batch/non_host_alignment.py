@@ -819,7 +819,7 @@ def main():
     SAMPLE_S3_INPUT_PATH = INPUT_BUCKET.rstrip('/')
     SAMPLE_S3_OUTPUT_PATH = OUTPUT_BUCKET.rstrip('/')
     SAMPLE_NAME = SAMPLE_S3_INPUT_PATH[5:].rstrip('/').replace('/','-')
-    SAMPLE_DIR = DEST_DIR + '/' + sample_name
+    SAMPLE_DIR = DEST_DIR + '/' + SAMPLE_NAME
     FASTQ_DIR = SAMPLE_DIR + '/fastqs'
     RESULT_DIR = SAMPLE_DIR + '/results'
     DEFAULT_LOGPARAMS = {"sample_s3_output_path": SAMPLE_S3_OUTPUT_PATH,
