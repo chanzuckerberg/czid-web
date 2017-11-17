@@ -185,7 +185,7 @@ def run_stage3(lazy_run = True):
  
     # configure logger
     log_file = "%s/%s.%s.txt" % (RESULT_DIR, LOGS_OUT_BASENAME, AWS_BATCH_JOB_ID)
-    logger = configure_logger(log_file)
+    configure_logger(log_file)
 
     # download input
     execute_command("aws s3 cp %s/%s %s/" % (SAMPLE_S3_INPUT_PATH, ACCESSION_ANNOTATED_FASTA, INPUT_DIR))
