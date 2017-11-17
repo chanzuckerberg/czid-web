@@ -254,7 +254,7 @@ def generate_json_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, jsonOu
 
 def combine_pipeline_output_json(inputPath1, inputPath2, outputPath):
     total_reads = get_total_reads_from_stats()
-    remaining_reads = (item for item in STATS if item.get("task") == "run_gsnapl_remotely").next().get("reads_before")
+    remaining_reads = get_remaining_reads_from_stats()
     with open(inputPath1) as inf1:
         input1 = json.load(inf1).get("pipeline_output")
     with open(inputPath2) as inf2:
