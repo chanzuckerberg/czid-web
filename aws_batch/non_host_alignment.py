@@ -542,7 +542,7 @@ def run_rapsearch_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_w
     commands += "aws s3 cp %s/%s %s/ ; " % \
                  (SAMPLE_S3_OUTPUT_PATH, input_fasta, remote_work_dir)
     input_path = remote_work_dir + '/' + input_fasta
-    outfile_basename = 'rapsearch2-out' + part_suffix + chunk_id
+    outfile_basename = 'rapsearch2-out' + part_suffix + chunk_id + '.m8'
     output_path = os.path.join(remote_work_dir, outfile_basename)
     commands += " ".join(['/usr/local/bin/rapsearch',
                           '-d', remote_index_dir+'/nr_rapsearch',
