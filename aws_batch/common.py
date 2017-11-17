@@ -171,7 +171,7 @@ def run_and_log(logparams, target_outputs, lazy_run, func_name, *args):
     execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
     # count records
     required_params = ["before_file_name", "before_file_type", "after_file_name", "after_file_type"]
-    if logparams["count_reads"] and all(param in logparams for param in required_params):
+    if logparams.get("count_reads") and all(param in logparams for param in required_params):
         records_before = count_reads(logparams["before_file_name"], logparams["before_file_type"])
         records_after = count_reads(logparams["after_file_name"], logparams["after_file_type"])
         STATS.append({'task': func_name.__name__, 'reads_before': records_before, 'reads_after': records_after})
