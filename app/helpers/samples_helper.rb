@@ -122,8 +122,43 @@ module SamplesHelper
     pipeline_run_info
   end
 
-  def samples_info(samples)
-    { final_result: samples_output_data(samples),
-      pipeline_run_info: samples_pipeline_run_info(samples) }
+  # def filter_samples(samples)
+  #   sorted_jobs = {}
+  #   complete_jobs = []
+  #   failed_jobs = []
+  #   uploaded_jobs = []
+  #   initialized_jobs = []
+  #   samples.each do |output|
+  #     pipeline_run_status = output.pipeline_runs.first ? output.pipeline_runs.first.job_status : nil
+  #     if pipeline_run_status == 'CHECKED'
+  #       complete_jobs.push(output)
+  #     elsif pipeline_run_status == 'FAILED'
+  #       failed_jobs.push(output)
+  #     elsif pipeline_run_status == 'INITIALIZING'
+  #       initialized_jobs.push(output)
+  #     elsif pipeline_run_status == 'UPLOADING'
+  #       uploaded_jobs.push(output)
+  #     end
+  #   end
+  #   # complete_jobs
+  #   sorted_jobs[:complete] = complete_jobs
+  #   sorted_jobs[:failed] = failed_jobs
+  #   sorted_jobs[:complete] = complete_jobs
+  #   sorted_jobs[:complete] = complete_jobs
+  # end
+
+  def format_samples(samples)
+    formatted_samples = []
+    samples.each_with_index do |sample, i|
+      job_info = {}
+      final_result = samples_output_data(samples)
+      pipeline_run_info = samples_pipeline_run_info(samples)
+      job_info[:job] = samples[i]
+      job_info[:statistics] = final_result[i]
+      job_info[:run_info] = pipeline_run_info[i]
+      formatted_samples.push(job_info)
+    end
+    formatted_samples
   end
+
 end
