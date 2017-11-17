@@ -175,7 +175,7 @@ def run_star(fastq_file_1, fastq_file_2):
     if not os.path.isfile("%s/%s" % (REF_DIR, genome_file)):
         execute_command("aws s3 cp %s %s/" % (STAR_GENOME, REF_DIR))
         execute_command("cd %s; tar xvfz %s" % (REF_DIR, genome_file))
-        logging.getLogger().info("downloaded index")
+        write_to_log("downloaded index")
     # Check if parts.txt file exists, if so use the new version of (partitioned indices). Otherwise, stay put
     if os.path.isfile("%s/STAR_genome/parts.txt" % REF_DIR):
         with open("%s/STAR_genome/parts.txt" % REF_DIR, 'rb') as parts_f:
@@ -201,7 +201,7 @@ def run_star(fastq_file_1, fastq_file_2):
     execute_command("aws s3 cp %s/%s %s/;" % (RESULT_DIR, STAR_OUT2, SAMPLE_S3_OUTPUT_PATH))
     # cleanup
     execute_command("cd %s; rm -rf *" % SCRATCH_DIR)
-    logging.getLogger().info("finished job")
+    write_to_log("finished job")
 
 def run_priceseqfilter(input_fq_1, input_fq_2):
     priceseq_params = [PRICESEQ_FILTER,
@@ -215,7 +215,7 @@ def run_priceseqfilter(input_fq_1, input_fq_2):
     if "fastq" in FILE_TYPE:
         priceseq_params.extend(['-rqf','85','0.98'])
     execute_command_realtime_stdout(" ".join(priceseq_params))
-    logging.getLogger().info("finished job")
+    write_to_log("finished job")
     # copy back to aws
     execute_command("aws s3 cp %s/%s %s/;" % (RESULT_DIR, PRICESEQFILTER_OUT1, SAMPLE_S3_OUTPUT_PATH))
     execute_command("aws s3 cp %s/%s %s/;" % (RESULT_DIR, PRICESEQFILTER_OUT2, SAMPLE_S3_OUTPUT_PATH))
@@ -223,7 +223,7 @@ def run_priceseqfilter(input_fq_1, input_fq_2):
 def run_fq2fa(input_fq_1, input_fq_2):
     execute_command("sed -n '1~4s/^@/>/p;2~4p' <%s >%s/%s" % (input_fq_1, RESULT_DIR, FQ2FA_OUT1))
     execute_command("sed -n '1~4s/^@/>/p;2~4p' <%s >%s/%s" % (input_fq_2, RESULT_DIR, FQ2FA_OUT2))
-    logging.getLogger().info("finished job")
+    write_to_log("finished job")
     # copy back to aws
     execute_command("aws s3 cp %s/%s %s/;" % (RESULT_DIR, FQ2FA_OUT1, SAMPLE_S3_OUTPUT_PATH))
     execute_command("aws s3 cp %s/%s %s/;" % (RESULT_DIR, FQ2FA_OUT2, SAMPLE_S3_OUTPUT_PATH))
@@ -236,7 +236,7 @@ def run_cdhitdup(input_fa_1, input_fa_2):
                        '-o2', RESULT_DIR + '/' + CDHITDUP_OUT2,
                        '-e',  '0.05', '-u', '70']
     execute_command_realtime_stdout(" ".join(cdhitdup_params))
-    logging.getLogger().info("finished job")
+    write_to_log("finished job")
     # copy back to aws
     execute_command("aws s3 cp %s/%s %s/;" % (RESULT_DIR, CDHITDUP_OUT1, SAMPLE_S3_OUTPUT_PATH))
     execute_command("aws s3 cp %s/%s %s/;" % (RESULT_DIR, CDHITDUP_OUT2, SAMPLE_S3_OUTPUT_PATH))
@@ -244,7 +244,7 @@ def run_cdhitdup(input_fa_1, input_fa_2):
 def run_lzw(input_fa_1, input_fa_2):
     output_prefix = RESULT_DIR + '/' + LZW_OUT1[:-8]
     generate_lzw_filtered_paired(input_fa_1, input_fa_2, output_prefix, LZW_FRACTION_CUTOFF)
-    logging.getLogger().info("finished job")
+    write_to_log("finished job")
     # copy back to aws
     execute_command("aws s3 cp %s/%s %s/;" % (RESULT_DIR, LZW_OUT1, SAMPLE_S3_OUTPUT_PATH))
     execute_command("aws s3 cp %s/%s %s/;" % (RESULT_DIR, LZW_OUT2, SAMPLE_S3_OUTPUT_PATH))
@@ -255,7 +255,7 @@ def run_bowtie2(input_fa_1, input_fa_2):
     if not os.path.isfile("%s/%s" % (REF_DIR, genome_file)):
         execute_command("aws s3 cp %s %s/" % (BOWTIE2_GENOME, REF_DIR))
         execute_command("cd %s; tar xvfz %s" % (REF_DIR, genome_file))
-        logging.getLogger().info("downloaded index")
+        write_to_log.info("downloaded index")
     local_genome_dir_ls =  execute_command_with_output("ls %s/bowtie2_genome/*.bt2*" % REF_DIR)
     genome_basename = local_genome_dir_ls.split("\n")[0][:-6]
     if genome_basename[-1] == '.':
@@ -268,11 +268,11 @@ def run_bowtie2(input_fa_1, input_fa_2):
                      '-f', '-1', input_fa_1, '-2', input_fa_2,
                      '-S', RESULT_DIR + '/' + BOWTIE2_OUT]
     execute_command_realtime_stdout(" ".join(bowtie2_params))
-    logging.getLogger().info("finished alignment")
+    write_to_log("finished alignment")
     # extract out unmapped files from sam
     output_prefix = RESULT_DIR + '/' + EXTRACT_UNMAPPED_FROM_SAM_OUT1[:-8]
     generate_unmapped_pairs_from_sam(RESULT_DIR + '/' + BOWTIE2_OUT, output_prefix)
-    logging.getLogger().info("extracted unmapped pairs from SAM file")
+    write_to_log("extracted unmapped pairs from SAM file")
     # copy back to aws
     execute_command("aws s3 cp %s/%s %s/;" % (RESULT_DIR, BOWTIE2_OUT, SAMPLE_S3_OUTPUT_PATH))
     execute_command("aws s3 cp %s/%s %s/;" % (RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT1, SAMPLE_S3_OUTPUT_PATH))
