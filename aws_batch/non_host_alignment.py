@@ -397,7 +397,7 @@ def wait_for_server_ip(service_name, key_path, remote_username, environment, max
             i += 1
 
 def check_s3_file_presence(s3_path):
-    check_command = "aws s3 ls %s | wc -l" % s3_path
+    command = "aws s3 ls %s | wc -l" % s3_path
     return int(execute_command_with_output(command).rstrip())
 
 # job functions
