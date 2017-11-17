@@ -432,7 +432,7 @@ def clean_direct_gsnapl_input(fastq_files):
     return cleaned_files, file_type_for_log
 
 def run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work_dir, remote_username,
-                     input_files, key_path)
+                     input_files, key_path):
         chunk_id = input_files[0].split(part_suffix)[-1]
         outfile_basename = 'gsnapl-out' + part_suffix + chunk_id
         dedup_outfile_basename = 'dedup-' + outfile_basename
@@ -535,7 +535,7 @@ def run_filter_deuterostomes_from_fasta(input_fa, output_fa, annotation_prefix):
     execute_command("aws s3 cp %s %s/" % (output_fa, SAMPLE_S3_OUTPUT_PATH))
 
 def run_rapsearch_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work_dir, remote_username,
-                        input_fasta, key_path)
+                        input_fasta, key_path):
     chunk_id = input_fasta.split(part_suffix)[-1]
     commands = "mkdir -p %s;" % remote_work_dir
     commands += "aws s3 cp %s/%s %s/ ; " % \
