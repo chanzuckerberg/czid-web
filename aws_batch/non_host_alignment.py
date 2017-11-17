@@ -658,7 +658,7 @@ def run_stage2(lazy_run = True):
                 print "%s doesn't match %s" % (line, FILE_TYPE)
         fastq_files = execute_command_with_output("ls %s/*.%s" % (FASTQ_DIR, FILE_TYPE)).rstrip().split("\n")
         # prepare files for gsnap
-        cleaned_files, before_file_type_for_log = clean_direct_gsnapl_input(fastq_files, FILE_TYPE, SAMPLE_S3_OUTPUT_PATH)
+        cleaned_files, before_file_type_for_log = clean_direct_gsnapl_input(fastq_files)
         before_file_name_for_log = cleaned_files[0]
         gsnapl_input_files = [os.path.basename(f) for f in cleaned_files]
         # make combined fasta needed later
