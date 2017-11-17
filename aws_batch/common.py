@@ -8,6 +8,8 @@ import json
 import gzip
 import os
 
+STATS = []
+
 class Updater(object):
 
     def __init__(self, update_period, update_function):
