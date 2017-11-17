@@ -452,14 +452,14 @@ def run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work
                               + ['> '+remote_outfile, ';'])
         commands += "aws s3 cp %s %s/;" % (remote_outfile, SAMPLE_S3_OUTPUT_PATH)
         # check if remote machins has enough capacity
-        logging.getLogger().info("waiting for server")
+        write_to_log("waiting for server")
         gsnapl_instance_ip = wait_for_server_ip('gsnap', key_path, remote_username, ENVIRONMENT, GSNAPL_MAX_CONCURRENT)
-        logging.getLogger().info("starting alignment for chunk %s on machine %s" % (chunk_id, gsnapl_instance_ip))
+        write_to_log("starting alignment for chunk %s on machine %s" % (chunk_id, gsnapl_instance_ip))
         remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, gsnapl_instance_ip, commands)
         execute_command(remote_command)
         # move gsnapl output back to local
         time.sleep(10)
-        logging.getLogger().info("finished alignment for chunk %s" % chunk_id)
+        write_to_log("finished alignment for chunk %s" % chunk_id)
         execute_command("aws s3 cp %s/%s %s/" % (SAMPLE_S3_OUTPUT_PATH, outfile_basename, RESULT_DIR))
         # Deduplicate m8 input. Sometimes GSNAPL outputs multiple consecutive lines for same original read and same accession id. Count functions expect only 1 (top hit).
         deduplicate_m8(os.path.join(RESULT_DIR, outfile_basename), os.path.join(RESULT_DIR, dedup_outfile_basename))
@@ -494,9 +494,9 @@ def run_annotate_m8_with_taxids(input_m8, output_m8):
     if not os.path.isfile(accession2taxid_path):
         execute_command("aws s3 cp %s %s/" % (ACCESSION2TAXID, REF_DIR))
         execute_command("cd %s; gunzip %s" % (REF_DIR, accession2taxid_gz))
-        logging.getLogger().info("downloaded accession-to-taxid map")
+        write_to_log("downloaded accession-to-taxid map")
     generate_taxid_annotated_m8(input_m8, output_m8, accession2taxid_path)
-    logging.getLogger().info("finished annotation")
+    write_to_log("finished annotation")
     # move the output back to S3
     execute_command("aws s3 cp %s %s/" % (output_m8, SAMPLE_S3_OUTPUT_PATH))
 
@@ -505,16 +505,16 @@ def run_filter_deuterostomes_from_m8(input_m8, output_m8):
     deuterostome_file = os.path.join(REF_DIR, deuterostome_file_basename)
     if not os.path.isfile(deuterostome_file):
         execute_command("aws s3 cp %s %s/" % (DEUTEROSTOME_TAXIDS, REF_DIR))
-        logging.getLogger().info("downloaded deuterostome list")
+        write_to_log("downloaded deuterostome list")
     filter_deuterostomes_from_m8(input_m8, output_m8, deuterostome_file)
-    logging.getLogger().info("finished job")
+    write_to_log("finished job")
     # move the output back to S3
     execute_command("aws s3 cp %s %s/" % (output_m8, SAMPLE_S3_OUTPUT_PATH))
 
 def run_generate_taxid_annotated_fasta_from_m8(input_m8, input_fasta,
     output_fasta, annotation_prefix):
     generate_taxid_annotated_fasta_from_m8(input_fasta, input_m8, output_fasta, annotation_prefix)
-    logging.getLogger().info("finished job")
+    write_to_log("finished job")
     # move the output back to S3
     execute_command("aws s3 cp %s %s/" % (output_fasta, SAMPLE_S3_OUTPUT_PATH))
 
@@ -524,14 +524,14 @@ def run_filter_deuterostomes_from_fasta(input_fa, output_fa, annotation_prefix):
     if not os.path.isfile(accession2taxid_path):
         execute_command("aws s3 cp %s %s/" % (ACCESSION2TAXID, REF_DIR))
         execute_command("cd %s; gunzip %s" % (REF_DIR, accession2taxid_gz))
-        logging.getLogger().info("downloaded accession-to-taxid map")
+        write_to_log("downloaded accession-to-taxid map")
     deuterostome_file_basename = os.path.basename(DEUTEROSTOME_TAXIDS)
     deuterostome_file = os.path.join(REF_DIR, deuterostome_file_basename)
     if not os.path.isfile(deuterostome_file):
         execute_command("aws s3 cp %s %s/" % (DEUTEROSTOME_TAXIDS, REF_DIR))
-        logging.getLogger().info("downloaded deuterostome list")
+        write_to_log("downloaded deuterostome list")
     filter_taxids_from_fasta(input_fa, output_fa, annotation_prefix, accession2taxid_path, deuterostome_file)
-    logging.getLogger().info("finished job")
+    write_to_log("finished job")
     # move the output back to S3
     execute_command("aws s3 cp %s %s/" % (output_fa, SAMPLE_S3_OUTPUT_PATH))
 
@@ -558,10 +558,10 @@ def run_rapsearch_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_w
     commands += "aws s3 cp %s %s/;" % (output_path, SAMPLE_S3_OUTPUT_PATH)
     logging.getLogger().info("waiting for server")
     instance_ip = wait_for_server_ip('rapsearch', key_path, remote_username, ENVIRONMENT, RAPSEARCH2_MAX_CONCURRENT)
-    logging.getLogger().info("starting alignment for chunk %s on machine %s" % (chunk_id, instance_ip))
+    write_to_log("starting alignment for chunk %s on machine %s" % (chunk_id, instance_ip))
     remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, instance_ip, commands)
     execute_command_realtime_stdout(remote_command)
-    logging.getLogger().info("finished alignment for chunk %s" % chunk_id)
+    write_to_log("finished alignment for chunk %s" % chunk_id)
     # move output back to local
     time.sleep(10) # wait until the data is synced
     execute_command("aws s3 cp %s/%s %s/" % (SAMPLE_S3_OUTPUT_PATH, outfile_basename, RESULT_DIR))
@@ -596,14 +596,14 @@ def run_generate_taxid_outputs_from_m8(annotated_m8, taxon_counts_csv_file, taxo
     taxoninfo_path = REF_DIR + '/' + taxoninfo_filename
     if not os.path.isfile(taxoninfo_path):
         execute_command("aws s3 cp %s %s/" % (TAXID_TO_INFO, REF_DIR))
-        logging.getLogger().info("downloaded taxon info database")
+        write_to_log("downloaded taxon info database")
     generate_tax_counts_from_m8(annotated_m8, e_value_type, taxon_counts_csv_file)
-    logging.getLogger().info("generated taxon counts from m8")
+    write_to_log("generated taxon counts from m8")
     generate_json_from_taxid_counts(taxon_counts_csv_file, taxoninfo_path, taxon_counts_json_file, count_type)
-    logging.getLogger().info("generated JSON file from taxon counts")
+    write_to_log("generated JSON file from taxon counts")
     generate_rpm_from_taxid_counts(taxon_counts_csv_file, taxoninfo_path,
                                    taxon_species_rpm_file, taxon_genus_rpm_file)
-    logging.getLogger().info("calculated RPM from taxon counts")
+    write_to_log("calculated RPM from taxon counts")
     # move the output back to S3
     execute_command("aws s3 cp %s %s/" % (taxon_counts_csv_file, SAMPLE_S3_OUTPUT_PATH))
     execute_command("aws s3 cp %s %s/" % (taxon_counts_json_file, SAMPLE_S3_OUTPUT_PATH))
@@ -612,13 +612,13 @@ def run_generate_taxid_outputs_from_m8(annotated_m8, taxon_counts_csv_file, taxo
 
 def run_combine_json_outputs(input_json_1, input_json_2, output_json):
     combine_pipeline_output_json(input_json_1, input_json_2, output_json)
-    logging.getLogger().info("finished job")
+    write_to_log("finished job")
     # move it the output back to S3
     execute_command("aws s3 cp %s %s/" % (output_json, SAMPLE_S3_OUTPUT_PATH))
 
 def run_generate_unidentified_fasta(input_fa, output_fa):
     subprocess.check_output("grep -A 1 '>NR::NT::' %s | sed '/^--$/d' > %s" % (input_fa, output_fa), shell=True)
-    logging.getLogger().info("finished job")
+    write_to_log("finished job")
     execute_command("aws s3 cp %s %s/" % (output_fa, SAMPLE_S3_OUTPUT_PATH))
 
 def run_stage2(lazy_run = True):
@@ -627,7 +627,7 @@ def run_stage2(lazy_run = True):
 
     # configure logger
     log_file = "%s/%s.%s.txt" % (RESULT_DIR, LOGS_OUT_BASENAME, AWS_BATCH_JOB_ID)
-    logger = configure_logger(log_file)
+    configure_logger(log_file)
 
     # Download input files
     input1_s3_path = os.path.join(SAMPLE_S3_INPUT_PATH, EXTRACT_UNMAPPED_FROM_SAM_OUT1)
