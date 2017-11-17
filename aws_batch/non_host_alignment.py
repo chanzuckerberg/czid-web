@@ -436,7 +436,7 @@ def clean_direct_gsnapl_input(fastq_files):
     return cleaned_files, file_type_for_log
 
 def run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work_dir, remote_username,
-                     input_files, key_path):
+                     input_files, key_path, lazy_run):
         chunk_id = input_files[0].split(part_suffix)[-1]
         outfile_basename = 'gsnapl-out' + part_suffix + chunk_id
         dedup_outfile_basename = 'dedup-' + outfile_basename
@@ -471,7 +471,7 @@ def run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work
         execute_command("aws s3 cp %s/%s %s/" % (RESULT_DIR, dedup_outfile_basename, SAMPLE_S3_OUTPUT_CHUNKS_PATH))
         return os.path.join(RESULT_DIR, dedup_outfile_basename)
 
-def run_gsnapl_remotely(input_files):
+def run_gsnapl_remotely(input_files, lazy_run):
     key_name = os.path.basename(KEY_S3_PATH)
     execute_command("aws s3 cp %s %s/" % (KEY_S3_PATH, REF_DIR))
     key_path = REF_DIR +'/' + key_name
@@ -488,7 +488,7 @@ def run_gsnapl_remotely(input_files):
     chunk_output_files = []
     for chunk_input_files in input_chunks:
         chunk_output_files += [run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work_dir, remote_username,
-                                                chunk_input_files, key_path)]
+                                                chunk_input_files, key_path, lazy_run)]
     # merge output chunks:
     execute_command("cat %s > %s" % (" ".join(chunk_output_files), os.path.join(RESULT_DIR, GSNAPL_DEDUP_OUT)))
     execute_command("aws s3 cp %s/%s %s/" % (RESULT_DIR, GSNAPL_DEDUP_OUT, SAMPLE_S3_OUTPUT_PATH))
@@ -541,7 +541,7 @@ def run_filter_deuterostomes_from_fasta(input_fa, output_fa, annotation_prefix):
     execute_command("aws s3 cp %s %s/" % (output_fa, SAMPLE_S3_OUTPUT_PATH))
 
 def run_rapsearch_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work_dir, remote_username,
-                        input_fasta, key_path):
+                        input_fasta, key_path, lazy_run):
     chunk_id = input_fasta.split(part_suffix)[-1]
     commands = "mkdir -p %s;" % remote_work_dir
     commands += "aws s3 cp %s/%s %s/ ; " % \
@@ -574,7 +574,7 @@ def run_rapsearch_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_w
     execute_command("aws s3 cp %s/%s %s/" % (SAMPLE_S3_OUTPUT_CHUNKS_PATH, outfile_basename, RESULT_DIR))
     return os.path.join(RESULT_DIR, outfile_basename)
 
-def run_rapsearch2_remotely(input_fasta):
+def run_rapsearch2_remotely(input_fasta, lazy_run):
     key_name = os.path.basename(KEY_S3_PATH)
     execute_command("aws s3 cp %s %s/" % (KEY_S3_PATH, REF_DIR))
     key_path = REF_DIR +'/' + key_name
@@ -591,7 +591,7 @@ def run_rapsearch2_remotely(input_fasta):
     chunk_output_files = []
     for chunk_input_file in input_chunks:
         chunk_output_files += [run_rapsearch_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work_dir, remote_username,
-                                                   chunk_input_file[0], key_path)]
+                                                   chunk_input_file[0], key_path, lazy_run)]
     # merge output chunks:
     execute_command("cat %s > %s" % (" ".join(chunk_output_files), os.path.join(RESULT_DIR, RAPSEARCH2_OUT)))
     execute_command("aws s3 cp %s/%s %s/" % (RESULT_DIR, RAPSEARCH2_OUT, SAMPLE_S3_OUTPUT_PATH))
@@ -687,7 +687,7 @@ def run_stage2(lazy_run = True):
         {"title": "GSNAPL", "count_reads": True,
         "before_file_name": before_file_name_for_log, "before_file_type": before_file_type_for_log,
         "after_file_name": os.path.join(RESULT_DIR, GSNAPL_DEDUP_OUT), "after_file_type": "m8"})
-    run_and_log(logparams, TARGET_OUTPUTS["run_gsnapl_remotely"], lazy_run, run_gsnapl_remotely, gsnapl_input_files)
+    run_and_log(logparams, TARGET_OUTPUTS["run_gsnapl_remotely"], lazy_run, run_gsnapl_remotely, gsnapl_input_files, lazy_run)
 
     # run_annotate_gsnapl_m8_with_taxids
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
@@ -722,7 +722,7 @@ def run_stage2(lazy_run = True):
         os.path.join(RESULT_DIR, NT_TAXID_COUNTS_TO_SPECIES_RPM_OUT),
         os.path.join(RESULT_DIR, NT_TAXID_COUNTS_TO_GENUS_RPM_OUT), 'NT', 'raw')
 
-    # run rapsearch remotely
+    # filter deuterostomes
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "filter deuterostomes from FASTA", "count_reads": False})
     run_and_log(logparams, TARGET_OUTPUTS["run_filter_deuterostomes_from_fasta"], False,
@@ -730,13 +730,14 @@ def run_stage2(lazy_run = True):
         os.path.join(RESULT_DIR, GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT),
         os.path.join(RESULT_DIR, FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT), 'NT')
 
+    # run rapsearch
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "RAPSearch2", "count_reads": True,
         "before_file_name": os.path.join(RESULT_DIR, FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT),
         "before_file_type": "fasta",
         "after_file_name": os.path.join(RESULT_DIR, RAPSEARCH2_OUT), "after_file_type": "m8"})
     run_and_log(logparams, TARGET_OUTPUTS["run_rapsearch2_remotely"], lazy_run, run_rapsearch2_remotely,
-        FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT)
+        FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT, lazy_run)
 
     # run_annotate_m8_with_taxids
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
