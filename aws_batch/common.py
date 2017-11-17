@@ -8,6 +8,8 @@ import json
 import gzip
 import os
 
+STATS = []
+
 class Updater(object):
 
     def __init__(self, update_period, update_function):
@@ -143,7 +145,6 @@ def configure_logger(log_file):
 
 def load_existing_stats(stats_file):
     if not os.path.isfile(stats_file):
-        STATS = []
         return
     with open(stats_file) as f:
         STATS = json.load(f)    
