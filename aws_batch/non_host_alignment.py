@@ -410,7 +410,7 @@ def chunk_input(input_files_basenames, chunk_nlines, part_suffix):
         execute_command("split --numeric-suffixes -l %d %s %s" % (chunk_nlines, input_file_full_local_path, out_prefix))
         execute_command("aws s3 cp %s* %s/" % (out_prefix, SAMPLE_S3_OUTPUT_PATH))
         partial_files = [os.path.basename(partial_file) for partial_file in execute_command_with_output("ls %s*" % out_prefix).rstrip().split("\n")]
-        part_lists += partial_files
+        part_lists.append(partial_files)
     input_chunks = [list(part) for part in zip(*part_lists)]
     # e.g. [["input_R1.fasta-part-1", "input_R2.fasta-part-1"],["input_R1.fasta-part-2", "input_R2.fasta-part-2"],["input_R1.fasta-part-3", "input_R2.fasta-part-3"],...]
     return input_chunks
