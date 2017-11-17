@@ -21,6 +21,7 @@ from common import *
 FASTQ_BUCKET = None # bucket with initial input files
 INPUT_BUCKET = None # input for this stage, i.e. result bucket from previous stage
 OUTPUT_BUCKET = None
+SAMPLE_S3_FASTQ_PATH = None
 SAMPLE_S3_INPUT_PATH = None
 SAMPLE_S3_OUTPUT_PATH = None
 SAMPLE_NAME = None
@@ -805,6 +806,7 @@ def main():
     global KEY_S3_PATH
     global TARGET_OUTPUTS
     global SAMPLE_NAME
+    global SAMPLE_S3_FASTQ_PATH
     
     FASTQ_BUCKET = os.environ.get('FASTQ_BUCKET', FASTQ_BUCKET)
     INPUT_BUCKET = os.environ.get('INPUT_BUCKET', INPUT_BUCKET)
