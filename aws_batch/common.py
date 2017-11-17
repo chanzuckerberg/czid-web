@@ -179,10 +179,11 @@ def run_and_log(logparams, target_outputs, lazy_run, func_name, *args):
     logger.handlers[0].flush()
     execute_command("aws s3 cp %s %s/;" % (logger.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
     # write stats
-    stats_path = logparams["stats_file"]
-    with open(stats_path, 'wb') as f:
-        json.dump(STATS, f)
-    execute_command("aws s3 cp %s %s/;" % (stats_path, logparams["sample_s3_output_path"]))
+    stats_path = logparams.get("stats_file")
+    if stats_path and os.path.isfile(stats_path):
+        with open(stats_path, 'wb') as f:
+            json.dump(STATS, f)
+        execute_command("aws s3 cp %s %s/;" % (stats_path, logparams["sample_s3_output_path"]))
 
 def write_to_log(message):
     logging.getLogger().info(message)
