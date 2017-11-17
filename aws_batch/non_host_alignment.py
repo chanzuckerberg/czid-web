@@ -201,7 +201,7 @@ def generate_json_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, jsonOu
     taxid2info_map = shelve.open(taxid2infoPath)
     total_reads = get_total_reads_from_stats()
     taxon_counts_attributes = []
-    remaining_reads = (item for item in STATS if item.get("task") == "run_gsnapl_remotely").next().get("reads_before")
+    remaining_reads = get_remaining_reads_from_stats()
 
     genus_to_count = {}
     genus_to_name = {}
