@@ -201,6 +201,10 @@ i.fa {
   padding: 5px;
   display: none;
   z-index: 2;
+  .title a {
+    border-bottom: 1px solid #d0d0d0;
+    border-radius: 0px;
+  }
 }
 
 .dropdown-bubble ul li a{
