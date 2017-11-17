@@ -166,7 +166,7 @@ def generate_tax_counts_from_m8(m8_file, e_value_type, output_file):
             f.write(",".join([str(taxid), str(count), str(avg_percent_identity), str(avg_alignment_length), str(avg_e_value) + '\n']))
 
 def generate_rpm_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, speciesOutputPath, genusOutputPath):
-    total_reads = [item for item in STATS if "total_reads" in item][0]["total_reads"]
+    total_reads = get_total_reads_from_stats()
     taxid2info_map = shelve.open(taxid2infoPath)
     species_rpm_map = {}
     genus_rpm_map = {}
@@ -199,7 +199,7 @@ def generate_rpm_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, species
 
 def generate_json_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, jsonOutputPath, countType):
     taxid2info_map = shelve.open(taxid2infoPath)
-    total_reads = [item for item in STATS if "total_reads" in item][0]["total_reads"]
+    total_reads = get_total_reads_from_stats()
     taxon_counts_attributes = []
     remaining_reads = (item for item in STATS if item.get("task") == "run_gsnapl_remotely").next().get("reads_before")
 
@@ -253,7 +253,7 @@ def generate_json_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, jsonOu
         json.dump(output_dict, outf)
 
 def combine_pipeline_output_json(inputPath1, inputPath2, outputPath):
-    total_reads = [item for item in STATS if "total_reads" in item][0]["total_reads"]
+    total_reads = get_total_reads_from_stats()
     remaining_reads = (item for item in STATS if item.get("task") == "run_gsnapl_remotely").next().get("reads_before")
     with open(inputPath1) as inf1:
         input1 = json.load(inf1).get("pipeline_output")
@@ -671,6 +671,7 @@ def run_stage2(lazy_run = True):
         print execute_command_with_output(command)
 
     # Import existing job stats
+    execute_command("aws s3 cp %s/%s %s/" % (SAMPLE_S3_INPUT_PATH, STATS_OUT, RESULT_DIR))
     stats_file = os.path.join(RESULT_DIR, STATS_OUT)
     load_existing_stats(stats_file)
 
