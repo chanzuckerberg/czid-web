@@ -78,7 +78,6 @@ LOGS_OUT_BASENAME = 'log'
 STATS_OUT = 'stats.json'
 
 # statistics and logging
-STATS = []
 DEFAULT_LOGPARAMS = {}
 TARGET_OUTPUTS = None
 AWS_BATCH_JOB_ID = None
