@@ -14,22 +14,25 @@ class SampleUpload extends React.Component {
     this.handleMemoryChange = this.handleMemoryChange.bind(this);
     this.handleResultChange = this.handleResultChange.bind(this);
     this.projects = props.projects || [];
+    this.project = props.projectInfo || '';
     this.hostGenomes = props.host_genomes || [];
     this.sample = props.selectedSample || '';
     this.userDetails = props.loggedin_user;
-    this.selectedSample = {
+    this.selected = {
       name: this.sample.name || '',
-      hostGenome: this.sample.host_genome_name || '',
-      hostGenomeId: this.sample.host_genome_id || null,
-      project: props.projectInfo ? props.projectInfo : '',
-      resultPath: this.sample.s3_preload_result_path || '',
-      jobQueue: this.sample.job_queue || '',
-      memory: this.sample.sample_memory || '',
+      hostGenome: this.sample ? this.sample.host_genome_name : this.hostGenomes[0].name,
+      hostGenomeId: this.sample ? this.sample.host_genome_id : this.hostGenomes[0].id,
+      project: this.project ? this.project.name : 'Select a project',
+      projectId: this.project ? this.project.id : null,
+      resultPath: this.sample ? this.sample.s3_preload_result_path : '',
+      jobQueue: this.sample ? this.sample.job_queue : '',
+      memory: this.sample ? this.sample.sample_memory : '',
       id: this.sample.id || '',
       inputFiles: props.inputFiles && props.inputFiles.length ? props.inputFiles : [],
-      projectId: this.project ? this.project.id : null,
       status: this.sample.status
     };
+    this.firstInput = this.selected.inputFiles.length && this.selected.inputFiles[0] ? (this.selected.inputFiles[0].source === null ? '' : this.selected.inputFiles[0].source) : '',
+    this.secondInput = this.selected.inputFiles.length && this.selected.inputFiles[1] ? (this.selected.inputFiles[1].source === null ? '' : this.selected.inputFiles[1].source) : '',
     this.state = {
       submitting: false,
       allProjects: this.projects || [],
@@ -38,22 +41,16 @@ class SampleUpload extends React.Component {
       errorMessage: '',
       success: false,
       successMessage: '',
-      project: 'Select a Project',
-      projectId: null,
-      job_queue: '',
-      memory: '',
       serverErrors: [],
-      selectedName: this.selectedSample.name || '',
-      selectedHostGenome: this.selectedSample.hostGenome || '',
-      selectedHostGenomeId: this.selectedSample.hostGenomeId || null,
-      selectedProject: this.selectedSample.project.name || '',
-      selectedPId: this.selectedSample.projectId || null,
-      selectedResultPath: this.selectedSample.resultPath || '',
-      selectedJobQueue: this.selectedSample.jobQueue || '',
-      selectedMemory: this.selectedSample.memory || '',
-      id: this.selectedSample.id,
-      firstInput: this.selectedSample.inputFiles.length && this.selectedSample.inputFiles[0] ? (this.selectedSample.inputFiles[0].source === null ? '' : this.selectedSample.inputFiles[0].source) : '',
-      secondInput: this.selectedSample.inputFiles.length && this.selectedSample.inputFiles[1] ? (this.selectedSample.inputFiles[1].source === null ? '' : this.selectedSample.inputFiles[1].source) : '',
+      selectedName: this.selected.name || '',
+      selectedHostGenome: this.selected.hostGenome || '',
+      selectedHostGenomeId: this.selected.hostGenomeId || null,
+      selectedProject: this.selected.project || '',
+      selectedPId: this.selected.projectId || null,
+      selectedResultPath: this.selected.resultPath || '',
+      selectedJobQueue: this.selected.jobQueue || '',
+      selectedMemory: this.selected.memory || '',
+      id: this.selected.id,
     };
   }
 
@@ -118,10 +115,8 @@ class SampleUpload extends React.Component {
       newProjectList.push(response.data);
       that.setState({
         allProjects: newProjectList,
-        project: response.data.name,
         selectedProject: response.data.name,
         selectedPId: response.data.id,
-        projectId: response.data.id,
         success: true,
         successMessage: 'Project added successfully'
       }, () => {
@@ -138,7 +133,7 @@ class SampleUpload extends React.Component {
   }
 
   isProjectInvalid() {
-    if (this.refs.new_project.value === '' && this.state.project === 'Select a project') {
+    if (this.refs.new_project.value === '' && this.state.selectedProject === 'Select a project') {
       this.setState({
         invalid: true,
         errorMessage: 'Please enter valid project name'
@@ -157,13 +152,13 @@ class SampleUpload extends React.Component {
     axios.post('/samples.json', {
       sample: {
         name: this.refs.name.value.trim(),
-        project_name: this.state.project.trim(),
-        project_id: this.state.projectId,
+        project_name: this.state.selectedProject.trim(),
+        project_id: this.state.selectedPId,
         input_files_attributes: [{source_type: 's3', source: this.refs.first_file_source.value.trim() },
         {source_type: 's3', source: this.refs.second_file_source.value.trim() }],
         s3_preload_result_path: this.refs.s3_preload_result_path.value.trim(),
-        job_queue: this.state.job_queue,
-        sample_memory: this.state.memory,
+        job_queue: this.state.selectedJobQueue,
+        sample_memory: this.state.selectedMemory,
         host_genome_id: this.state.selectedHostGenomeId,
         status: 'created'
       },
@@ -272,7 +267,7 @@ class SampleUpload extends React.Component {
   }
 
   isFormInvalid() {
-    if (this.refs.name.value === '' && this.state.project === 'Select a Project' && this.refs.first_file_source.value === '' && this.refs.second_file_source.value === '' && this.state.host === '') {
+    if (this.refs.name.value === '' && this.state.selectedProject === 'Select a Project' && this.refs.first_file_source.value === '' && this.refs.second_file_source.value === '' && this.state.selectedHostGenome === '') {
       this.setState({
         invalid: true,
         errorMessage: 'Please fill in all required fields'
@@ -284,13 +279,13 @@ class SampleUpload extends React.Component {
           errorMessage: 'Please fill in Sample name'
         })
         return true;
-    } else if (this.state.project === 'Select a Project') {
+    } else if (this.state.selectedProject === 'Select a Project') {
         this.setState({
           invalid: true,
           errorMessage: 'Please select a project'
         })
         return true;
-    } else if (this.state.host === '') {
+    } else if (this.state.selectedHostGenome === '') {
       this.setState({
         invalid: true,
         errorMessage: 'Please select a host genome'
@@ -322,8 +317,7 @@ class SampleUpload extends React.Component {
   handleProjectChange(e) {
     this.setState({
       selectedProject: e.target.value.trim(),
-      project: e.target.value.trim(),
-      selectedPId: e.target.selectedIndex
+      selectedPId: this.state.allProjects[e.target.selectedIndex].id
     })
     this.clearError();
   }
@@ -331,7 +325,6 @@ class SampleUpload extends React.Component {
 
   handleHostChange(e) {
     this.setState({
-      host: e.target.value.trim(),
       selectedHostGenome: e.target.value.trim(),
       selectedHostGenomeId: this.state.hostGenomes[e.target.selectedIndex].id
     })
@@ -340,7 +333,6 @@ class SampleUpload extends React.Component {
 
   handleQueueChange(e) {
     this.setState({
-      job_queue: e.target.value.trim(),
       selectedJobQueue: e.target.value.trim()
     })
     this.clearError();
@@ -348,7 +340,6 @@ class SampleUpload extends React.Component {
 
   handleMemoryChange(e) {
     this.setState({
-      memory: e.target.value.trim(),
       selectedMemory: e.target.value.trim()
     })
     this.clearError();
@@ -426,12 +417,12 @@ class SampleUpload extends React.Component {
               </div>
               <div className="field-row input-field align">
                 <i className="sample fa fa-link" aria-hidden="true"></i>
-                <input ref= "first_file_source" type="text" className="no-edit" onFocus={ this.clearError } placeholder="Required" value={ this.state.firstInput } readOnly/>
+                <input ref= "first_file_source" type="text" className="no-edit" onFocus={ this.clearError } placeholder="Required" value={ this.firstInput } readOnly/>
                 <label htmlFor="sample_first_file_source">Read 1 fastq s3 path</label>
               </div>
               <div className="field-row input-field align" >
                 <i className="sample fa fa-link" aria-hidden="true"></i>
-                <input ref= "second_file_source" type="text" className="no-edit" onFocus={ this.clearError } placeholder="Required" value={ this.state.secondInput } readOnly/>
+                <input ref= "second_file_source" type="text" className="no-edit" onFocus={ this.clearError } placeholder="Required" value={ this.secondInput } readOnly/>
                 <label htmlFor="sample_second_file_source">Read 2 fastq s3 path</label>
               </div>
               <div className="row field-row">
@@ -480,7 +471,7 @@ class SampleUpload extends React.Component {
                 <label>Sample name</label>
               </div>
               <div className="col s6 input-field genome-list">
-                  <select ref="hostSelect" name="host" className="" id="host" onChange={ this.handleHostChange } value={this.state.host}>
+                  <select ref="hostSelect" name="host" className="" id="host" onChange={ this.handleHostChange } value={this.state.selectedHostGenome}>
                       { this.state.hostGenomes.length ?
                           this.state.hostGenomes.map((host, i) => {
                             return <option ref= "host" key={i} id={host.id} >{host.name}</option>
@@ -492,8 +483,8 @@ class SampleUpload extends React.Component {
             </div>
               <div className="row field-row">
                 <div className="input-field col s6 project-list">
-                   <select ref="projectSelect" className="" id="sample" onChange={ this.handleProjectChange } value={this.state.project}>
-                    <option disabled defaultValue>{this.state.project}</option>
+                   <select ref="projectSelect" className="" id="sample" onChange={ this.handleProjectChange } value={this.state.selectedProject}>
+                    <option disabled defaultValue>{this.state.selectedProject}</option>
                    { this.state.allProjects.length ?
                       this.state.allProjects.map((project, i) => {
                         return <option ref= "project" key={i} id={project.id} >{project.name}</option>
@@ -531,12 +522,12 @@ class SampleUpload extends React.Component {
                 </div>
                 { this.userDetails.admin ? <div className="col s4 input-field">
                   <i className="sample fa fa-file" aria-hidden="true"></i>
-                  <input ref= "job_queue" type="text" className="" onFocus={ this.clearError } placeholder="Optional" value={this.state.job_queue} onChange={ this.handleQueueChange } />
+                  <input ref= "job_queue" type="text" className="" onFocus={ this.clearError } placeholder="Optional" value={this.state.selectedJobQueue} onChange={ this.handleQueueChange } />
                   <label htmlFor="sample_job_queue">Job queue</label>
                 </div> : null }
                 { this.userDetails.admin ? <div className="col s4 input-field">
                   <i className="sample fa fa-file" aria-hidden="true"></i>
-                  <input ref= "memory" type="text" className="" value={this.state.memory} onFocus={ this.clearError } placeholder="Optional" onChange={ this.handleMemoryChange } />
+                  <input ref= "memory" type="text" className="" value={this.state.selectedMemory} onFocus={ this.clearError } placeholder="Optional" onChange={ this.handleMemoryChange } />
                   <label htmlFor="sample_memory">Sample memory (in mbs)</label>
                 </div> : null }
             </div>
@@ -561,3 +552,4 @@ class SampleUpload extends React.Component {
     )
   }
 }
+
