@@ -55,7 +55,7 @@ module SamplesHelper
                            host_genome_id: host_genome_id,
                            status: 'created' }
     s3_path.chomp!('/')
-    command = "aws s3 ls #{s3_path}/ | grep -v Undetermined |grep fast"
+    command = "aws s3 ls #{s3_path}/ | grep -v Undetermined | grep fast"
     s3_output, _stderr, status = Open3.capture3(command)
     return unless status.exitstatus.zero?
     s3_output.chomp!
