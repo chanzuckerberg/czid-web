@@ -205,9 +205,7 @@ class PipelineRunStage < ApplicationRecord
     stats_array = stats_array.select { |entry| entry.key?("task") }
 
     pipeline_output_dict = json_dict['pipeline_output']
-    pipeline_output_dict.slice!('name', 'total_reads',
-                                'remaining_reads', 'taxon_counts_attributes')
-    po.name = pipeline_output_dict['name']
+    pipeline_output_dict.slice!('remaining_reads', 'total_reads', 'taxon_counts_attributes')
     po.total_reads = pipeline_output_dict['total_reads']
     po.remaining_reads = pipeline_output_dict['remaining_reads']
 
