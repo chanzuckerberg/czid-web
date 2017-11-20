@@ -88,7 +88,7 @@ module SamplesHelper
     final_result = []
     samples.each do |output|
       output_data = {}
-      pipeline_output = output.pipeline_runs.first ? output.pipeline_runs.first.pipeline_output : nil
+      pipeline_output = output.pipeline_runs && output.pipeline_runs.first ? output.pipeline_runs.first.pipeline_output : nil
       job_stats = pipeline_output ? pipeline_output.job_stats : nil
       summary_stats = job_stats ? get_summary_stats(job_stats) : nil
 
@@ -128,8 +128,8 @@ module SamplesHelper
       pipeline_run_status = output.pipeline_runs.first ? output.pipeline_runs.first.job_status : nil
       if query == 'UPLOADING'
         filtered.push(output) unless pipeline_run_status
-      else
-        filtered.push(output) if pipeline_run_status == query
+      elsif pipeline_run_status == query
+        filtered.push(output)
       end
     end
     filtered
