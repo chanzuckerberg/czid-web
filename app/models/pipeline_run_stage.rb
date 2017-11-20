@@ -8,6 +8,7 @@ class PipelineRunStage < ApplicationRecord
   STATUS_STARTED = 'STARTED'.freeze
   STATUS_FAILED  = 'FAILED'.freeze
   STATUS_CHECKED = 'CHECKED'.freeze
+  STATUS_LOADED = 'LOADED'.freeze
 
   before_save :check_job_status
 
@@ -66,7 +67,7 @@ class PipelineRunStage < ApplicationRecord
 
     set_pipeline_output
     send(load_db_command_func)
-    update(db_load_status: 1)
+    update(db_load_status: 1, job_status: STATUS_LOADED)
     pipeline_run.update_job_status
   end
 
