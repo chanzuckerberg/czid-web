@@ -115,7 +115,7 @@ class PipelineRun < ApplicationRecord
   def completed?
     return true if finalized?
     # Old version before run stages
-    return true if pipeline_run_stages.present? && (pipeline_output || job_status == STATUS_FAILED)
+    return true if pipeline_run_stages.blank? && (pipeline_output || job_status == STATUS_FAILED)
   end
 
   def log_url
