@@ -2,7 +2,11 @@
 samples_count: @samples_count, unfiltered: @all_samples
 %>
 
+<div id="samples">
+  <%= render @samples %>
+</div>
+
 <% if @samples.length %>
-  <%= will_paginate @samples, :style => 'color:#5abcd6', previous_label: '<<', next_label: '>>', id: 'pagination' %>
+  <%= will_paginate @samples %>
 <% end %>
 
