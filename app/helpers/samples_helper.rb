@@ -126,16 +126,14 @@ module SamplesHelper
     filtered = []
     samples.each do |output|
       pipeline_run_status = output.pipeline_runs.first ? output.pipeline_runs.first.job_status : nil
-      if pipeline_run_status == query
-        filtered.push(output)
-      end
+      filtered.push(output) if pipeline_run_status == query
     end
     filtered
   end
 
   def format_samples(samples)
     formatted_samples = []
-    samples.each_with_index do |sample, i|
+    samples.each_with_index do |_sample, i|
       job_info = {}
       final_result = samples_output_data(samples)
       pipeline_run_info = samples_pipeline_run_info(samples)
@@ -146,6 +144,4 @@ module SamplesHelper
     end
     formatted_samples
   end
-
-
 end

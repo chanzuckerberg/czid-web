@@ -12,36 +12,36 @@ class HomeController < ApplicationController
     @project_info = nil
 
     if params[:ids].present?
-      samples = Sample.includes(:pipeline_runs, :pipeline_outputs).where("id in (#{params[:ids]})")
+      samples = sort_by(Sample.includes(:pipeline_runs, :pipeline_outputs).where("id in (#{params[:ids]})"), sort)
     elsif project_id.present?
       if filter_query.present? && search_query.present?
-        search_results = Sample.includes(:pipeline_runs, :pipeline_outputs).where(project_id: project_id).search(search_query)
+        search_results = sort_by(Sample.includes(:pipeline_runs, :pipeline_outputs).where(project_id: project_id).search(search_query), sort)
         samples = filter_samples(search_results, filter_query)
       elsif search_query.present?
-        samples = Sample.includes(:pipeline_runs, :pipeline_outputs).where(project_id: project_id).search(search_query)
+        samples = sort_by(Sample.includes(:pipeline_runs, :pipeline_outputs).where(project_id: project_id).search(search_query), sort)
       elsif filter_query.present?
-        unfiltered_samples = Sample.includes(:pipeline_runs, :pipeline_outputs).where(project_id: project_id)
+        unfiltered_samples = sort_by(Sample.includes(:pipeline_runs, :pipeline_outputs).where(project_id: project_id), sort)
         samples = filter_samples(unfiltered_samples, filter_query)
       else
-        samples = Sample.includes(:pipeline_runs, :pipeline_outputs).where(project_id: project_id)
+        samples = sort_by(Sample.includes(:pipeline_runs, :pipeline_outputs).where(project_id: project_id), sort)
       end
       @project_info = Project.find(project_id)
     else
       if filter_query.present? && search_query.present?
-        search_results = Sample.includes(:pipeline_runs, :pipeline_outputs).search(search_query)
+        search_results = sort_by(Sample.includes(:pipeline_runs, :pipeline_outputs).search(search_query), sort)
         samples = filter_samples(search_results, filter_query)
       elsif search_query.present?
-        samples = Sample.includes(:pipeline_runs, :pipeline_outputs).search(search_query)
+        samples = sort_by(Sample.includes(:pipeline_runs, :pipeline_outputs).search(search_query), sort)
       elsif filter_query.present?
-        unfiltered_samples = Sample.includes(:pipeline_runs, :pipeline_outputs)
+        unfiltered_samples = sort_by(Sample.includes(:pipeline_runs, :pipeline_outputs), sort)
         samples = filter_samples(unfiltered_samples, filter_query)
       else
-        samples = Sample.includes(:pipeline_runs, :pipeline_outputs)
+        samples = sort_by(Sample.includes(:pipeline_runs, :pipeline_outputs), sort)
       end
     end
-      @samples = samples.paginate(page: params[:page])
-      @samples_count = samples.size
-      @all_samples = format_samples(@samples)
+    @samples = samples.paginate(page: params[:page], :per_page => 10)
+    @samples_count = samples.size
+    @all_samples = format_samples(@samples)
   end
 
   def sort_by(samples, dir = nil)
@@ -49,5 +49,4 @@ class HomeController < ApplicationController
     dir ||= default_dir
     dir == 'newest' ? samples.order(created_at: :desc) : samples.order(created_at: :asc)
   end
-
 end
