@@ -142,7 +142,7 @@ class Samples extends React.Component {
             <li data-status="CHECKED" onClick={ this.filterByStatus }><a data-status="CHECKED" className="complete" href="#!">Complete</a></li>
             {/* <li data-status="RUNNING" onClick={ this.filterByStatus }><a data-status="RUNNING" className="running" href="#!">In Progress</a></li> */}
             <li onClick={ this.filterByStatus } data-status="FAILED" ><a data-status="FAILED" className="failed" href="#!">Failed</a></li>
-            {/* <li data-status="UPLOADING" onClick={ this.filterByStatus } ><a data-status="UPLOADING" className="uploading" href="#!">Uploading</a></li> */}
+            <li data-status="UPLOADING" onClick={ this.filterByStatus } ><a data-status="UPLOADING" className="uploading" href="#!">Uploading</a></li>
             {/* <li data-status="RUNNABLE" onClick={ this.filterByStatus } ><a data-status="RUNNABLE" className="initializing" href="#!">Initializing</a></li> */}
             <li className="divider"></li>
           </ul>

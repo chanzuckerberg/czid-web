@@ -126,7 +126,11 @@ module SamplesHelper
     filtered = []
     samples.each do |output|
       pipeline_run_status = output.pipeline_runs.first ? output.pipeline_runs.first.job_status : nil
-      filtered.push(output) if pipeline_run_status == query
+      if query == 'UPLOADING'
+        filtered.push(output) unless pipeline_run_status
+      else
+        filtered.push(output) if pipeline_run_status == query
+      end
     end
     filtered
   end
