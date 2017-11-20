@@ -8,17 +8,6 @@ class Samples extends React.Component {
     this.switchProject = this.switchProject.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
     this.all_project = props.all_project|| [];
-    // this.filteredJobs = props.filtered || []
-    // this.filteredJobsComplete = {
-    //   samples: this.filteredJobs.complete_jobs || [],
-    //   outputData: this.filteredJobs.completed_info.final_result || [],
-    //   pipelineRunInfo: this.filteredJobs.completed_info.pipeline_run_info
-    // }
-    // this.filteredJobsFailed = {
-    //   samples: this.filteredJobs.failed_jobs,
-    //   outputData: this.filteredJobs.failed_info.final_result || [],
-    //   pipelineRunInfo: this.filteredJobs.failed_info.pipeline_run_info
-    // }
     this.defaultSortBy = 'newest';
     const currentSort = SortHelper.currentSort();
     this.state = {
