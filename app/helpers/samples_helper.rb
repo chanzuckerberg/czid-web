@@ -122,30 +122,16 @@ module SamplesHelper
     pipeline_run_info
   end
 
-  # def filter_samples(samples)
-  #   sorted_jobs = {}
-  #   complete_jobs = []
-  #   failed_jobs = []
-  #   uploaded_jobs = []
-  #   initialized_jobs = []
-  #   samples.each do |output|
-  #     pipeline_run_status = output.pipeline_runs.first ? output.pipeline_runs.first.job_status : nil
-  #     if pipeline_run_status == 'CHECKED'
-  #       complete_jobs.push(output)
-  #     elsif pipeline_run_status == 'FAILED'
-  #       failed_jobs.push(output)
-  #     elsif pipeline_run_status == 'INITIALIZING'
-  #       initialized_jobs.push(output)
-  #     elsif pipeline_run_status == 'UPLOADING'
-  #       uploaded_jobs.push(output)
-  #     end
-  #   end
-  #   # complete_jobs
-  #   sorted_jobs[:complete] = complete_jobs
-  #   sorted_jobs[:failed] = failed_jobs
-  #   sorted_jobs[:complete] = complete_jobs
-  #   sorted_jobs[:complete] = complete_jobs
-  # end
+  def filter_samples(samples, query)
+    filtered = []
+    samples.each do |output|
+      pipeline_run_status = output.pipeline_runs.first ? output.pipeline_runs.first.job_status : nil
+      if pipeline_run_status == query
+        filtered.push(output)
+      end
+    end
+    filtered
+  end
 
   def format_samples(samples)
     formatted_samples = []
@@ -160,5 +146,6 @@ module SamplesHelper
     end
     formatted_samples
   end
+
 
 end
