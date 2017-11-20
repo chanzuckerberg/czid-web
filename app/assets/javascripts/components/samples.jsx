@@ -137,7 +137,7 @@ class Samples extends React.Component {
         </div>
           {/* Dropdown menu */}
           <ul id='dropdownstatus' className='status dropdown-content'>
-          <li><a href="#!" className="title"><b>Filter by Pipeline run status</b></a></li>
+          <li><a href="#!" className="title"><b>Filter by status</b></a></li>
             <li className="divider"></li>
             <li data-status="CHECKED" onClick={ this.filterByStatus }><a data-status="CHECKED" className="complete" href="#!">Complete</a></li>
             <li data-status="RUNNING" onClick={ this.filterByStatus }><a data-status="RUNNING" className="running" href="#!">In Progress</a></li>
