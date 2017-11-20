@@ -140,12 +140,11 @@ class Samples extends React.Component {
           <li><a href="#!" className="title"><b>Filter by Pipeline run status</b></a></li>
             <li className="divider"></li>
             <li data-status="CHECKED" onClick={ this.filterByStatus }><a data-status="CHECKED" className="complete" href="#!">Complete</a></li>
-            <li data-status="RUNNING" onClick={ this.filterByStatus }><a data-status="RUNNING" className="running" href="#!">In Progress</a></li>
+            {/* <li data-status="RUNNING" onClick={ this.filterByStatus }><a data-status="RUNNING" className="running" href="#!">In Progress</a></li> */}
             <li onClick={ this.filterByStatus } data-status="FAILED" ><a data-status="FAILED" className="failed" href="#!">Failed</a></li>
-            <li data-status="UPLOADING" onClick={ this.filterByStatus } ><a data-status="UPLOADING" className="uploading" href="#!">Uploading</a></li>
-            <li data-status="RUNNABLE" onClick={ this.filterByStatus } ><a data-status="RUNNABLE" className="initializing" href="#!">Initializing</a></li>
+            {/* <li data-status="UPLOADING" onClick={ this.filterByStatus } ><a data-status="UPLOADING" className="uploading" href="#!">Uploading</a></li> */}
+            {/* <li data-status="RUNNABLE" onClick={ this.filterByStatus } ><a data-status="RUNNABLE" className="initializing" href="#!">Initializing</a></li> */}
             <li className="divider"></li>
-            {/* <li data-status="ALL" onClick={ this.filterByStatus } data-status="ALL"><a data-status="ALL" className="initializing" href="#!">All</a></li> */}
           </ul>
           <table className="bordered highlight samples-table">
             <thead>
