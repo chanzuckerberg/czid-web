@@ -27,7 +27,7 @@ class HomeController < ApplicationController
       end
       @project_info = Project.find(project_id)
     else
-      if filter_query.present? && search_query.present?
+      elsif filter_query.present? && search_query.present?
         search_results = sort_by(Sample.includes(:pipeline_runs, :pipeline_outputs).search(search_query), sort)
         samples = filter_samples(search_results, filter_query)
       elsif search_query.present?
@@ -39,7 +39,7 @@ class HomeController < ApplicationController
         samples = sort_by(Sample.includes(:pipeline_runs, :pipeline_outputs), sort)
       end
     end
-    @samples = samples.paginate(page: params[:page], :per_page => 10)
+    @samples = samples.paginate(page: params[:page], per_page: 10)
     @samples_count = samples.size
     @all_samples = format_samples(@samples)
   end
