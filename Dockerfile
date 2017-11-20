@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y build-essential nodejs mysql-client pyt
 RUN pip install --upgrade pip
 RUN pip install --upgrade pyOpenSSL
 RUN pip install --upgrade setuptools
-RUN pip install 'git+git://github.com/boris-dimitrov/aegea.git@boris/fix_another_typo'
+RUN pip install --upgrade aegea
 RUN pip install --upgrade pandas
 
 # Configure the main working directory. This is the base
