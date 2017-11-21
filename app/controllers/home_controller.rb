@@ -21,7 +21,7 @@ class HomeController < ApplicationController
 
     results = results.search(name_search_query) if name_search_query.present?
     results = filter_samples(results, filter_query) if filter_query.present?
-
+  
     @samples = results.paginate(page: params[:page], per_page: 10)
     @samples_count = results.size
     @all_samples = format_samples(@samples)
