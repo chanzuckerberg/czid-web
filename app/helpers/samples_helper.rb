@@ -122,8 +122,27 @@ module SamplesHelper
     pipeline_run_info
   end
 
-  def samples_info(samples)
-    { final_result: samples_output_data(samples),
-      pipeline_run_info: samples_pipeline_run_info(samples) }
+  def filter_samples(samples, query)
+    if query == 'UPLOADING'
+      samples = samples.where(status: 'created')
+      samples = samples.where(status: 'created')
+    else
+      samples = samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status = '#{query}'")
+    end
+    samples
+  end
+
+  def format_samples(samples)
+    formatted_samples = []
+    samples.each_with_index do |_sample, i|
+      job_info = {}
+      final_result = samples_output_data(samples)
+      pipeline_run_info = samples_pipeline_run_info(samples)
+      job_info[:db_sample] = samples[i]
+      job_info[:derived_sample_output] = final_result[i]
+      job_info[:run_info] = pipeline_run_info[i]
+      formatted_samples.push(job_info)
+    end
+    formatted_samples
   end
 end

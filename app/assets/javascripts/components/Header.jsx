@@ -7,7 +7,11 @@ class Header extends React.Component  {
   }
 
 	componentDidMount() {
-    $('.profile-dropdown').dropdown();
+    $('.profile-dropdown').dropdown({
+      belowOrigin: true,
+      stopPropagation: false,
+      hover: true
+    });
   }
   
   gotoPage(path) {
@@ -39,7 +43,7 @@ class Header extends React.Component  {
               </a>
 
               <div className={ this.userSignedIn ? "right hide-on-med-and-down header-right-nav" : "right hide-on-med-and-down header-right-nav menu" }>
-                { this.userSignedIn ? <div className='profile-header-dropdown'><a className="dropdown-button profile-dropdown" href="#!" data-activates="dropdown1">
+                { this.userSignedIn ? <div className='profile-header-dropdown'><a className="dropdown-button profile-dropdown" data-activates="dropdown1">
                     { this.userDetails.email } <i className="fa fa-angle-down"></i>
                     </a></div>:  (this.location === '/users/sign_in' ? null : <div className="login"><span onClick={ this.gotoPage.bind(this, '/users/sign_in') }>Login</span></div>) 
                  }

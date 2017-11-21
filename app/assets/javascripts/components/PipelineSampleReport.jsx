@@ -75,7 +75,6 @@ class PipelineSampleReport extends React.Component {
     const pipelineId = e.target.getAttribute('data-pipeline-id');
     const taxLevel = e.target.getAttribute('data-tax-level');
     const taxId = e.target.getAttribute('data-tax-id');
-    console.log(pipelineId, taxLevel, taxId, 'fasta params');
     location.href = `/pipeline_outputs/${pipelineId}/fasta/${taxLevel}/${taxId}/NT_or_NR`;
   }
 
