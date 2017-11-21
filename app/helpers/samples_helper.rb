@@ -132,7 +132,6 @@ module SamplesHelper
     samples
   end
 
-
   def format_samples(samples)
     formatted_samples = []
     samples.each_with_index do |_sample, i|
