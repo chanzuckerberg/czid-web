@@ -88,7 +88,7 @@ module SamplesHelper
     final_result = []
     samples.each do |output|
       output_data = {}
-      pipeline_output = output.pipeline_runs && output.pipeline_runs.first ? output.pipeline_runs.first.pipeline_output : nil
+      pipeline_output = output.pipeline_runs.first ? output.pipeline_runs.first.pipeline_output : nil
       job_stats = pipeline_output ? pipeline_output.job_stats : nil
       summary_stats = job_stats ? get_summary_stats(job_stats) : nil
 
@@ -141,8 +141,8 @@ module SamplesHelper
       job_info = {}
       final_result = samples_output_data(samples)
       pipeline_run_info = samples_pipeline_run_info(samples)
-      job_info[:job] = samples[i]
-      job_info[:statistics] = final_result[i]
+      job_info[:db_sample] = samples[i]
+      job_info[:derived_sample_output] = final_result[i]
       job_info[:run_info] = pipeline_run_info[i]
       formatted_samples.push(job_info)
     end

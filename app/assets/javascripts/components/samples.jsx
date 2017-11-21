@@ -14,13 +14,14 @@ class Samples extends React.Component {
       showSearchLoader: false,
       urlProjectId: this.fetchParams('project_id') || null,
       urlFilterQuery: this.fetchParams('filter') || null,
-      urlSearchQuery: this.fetchParams('search') || null,
+      urlSearchQuery: this.fetchParams('search') || '',
       displayedSamples: this.samples || [],
       samplesCount: this.samplesCount,
       sort_query: currentSort.sort_query
       ? currentSort.sort_query  : `sort_by=${this.defaultSortBy}`,
     };
     this.columnSorting = this.columnSorting.bind(this);
+    this.handleSearchChange = this.handleSearchChange.bind(this);
     this.filterByStatus = this.filterByStatus.bind(this)
     $("#pagination").css("display", "");
   }
@@ -40,23 +41,29 @@ class Samples extends React.Component {
     )
   }
 
+  handleSearchChange(e) {
+    this.setState({
+      urlSearchQuery: e.target.value
+    })
+  }
+
   renderPipelineOutput(samples) {
     return samples.map((sample, i) => {
-      let job = sample.job;
-      let statistics = sample.statistics;
+      let dbSample = sample.db_sample;
+      let derivedOutput = sample.derived_sample_output;
       let runInfo = sample.run_info
       return (
-        <tr onClick={ this.viewSample.bind(this, job.id)} key={i}>
+        <tr onClick={ this.viewSample.bind(this, dbSample.id)} key={i}>
           <td>
-            {job.name}
+            {dbSample.name}
           </td>
-          <td>{moment(job.created_at).format(' L,  h:mm a')}</td>
-          <td>{ !statistics.pipeline_output ? 'NA' : <a href={'/samples/' + job.id}>{numberWithCommas(statistics.pipeline_output.total_reads)}</a>}</td>
-          <td>{ (!statistics.summary_stats || !statistics.summary_stats.remaining_reads) ? 'NA' : <a href={'/samples/' + job.id}>{numberWithCommas(statistics.summary_stats.remaining_reads)}</a>}</td>
-          <td>{ (!statistics.summary_stats || !statistics.summary_stats.percent_remaining) ? 'NA' : <a href={'/samples/' + job.id}>{statistics.summary_stats.percent_remaining.toFixed(2)}%</a>}</td>
-          <td>{ (!statistics.summary_stats || !statistics.summary_stats.qc_percent) ? 'NA' : <a href={'/samples/' + job.id}>{statistics.summary_stats.qc_percent.toFixed(2)}%</a>}</td>
-          <td>{ (!statistics.summary_stats || !statistics.summary_stats.compression_ratio) ? 'NA' : <a href={'/samples/' + job.id}>{statistics.summary_stats.compression_ratio.toFixed(2)}</a>}</td>
-          <td className={this.applyClass(runInfo.job_status_description)}>{ !runInfo.job_status_description ? '' : <a href={'/samples/' + job.id}>{runInfo.job_status_description}</a>}</td>
+          <td>{moment(dbSample.created_at).format(' L,  h:mm a')}</td>
+          <td>{ !derivedOutput.pipeline_output ? 'NA' : <a href={'/samples/' + dbSample.id}>{numberWithCommas(derivedOutput.pipeline_output.total_reads)}</a>}</td>
+          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.remaining_reads) ? 'NA' : <a href={'/samples/' + dbSample.id}>{numberWithCommas(derivedOutput.summary_stats.remaining_reads)}</a>}</td>
+          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? 'NA' : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.percent_remaining.toFixed(2)}%</a>}</td>
+          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? 'NA' : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.qc_percent.toFixed(2)}%</a>}</td>
+          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.compression_ratio) ? 'NA' : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.compression_ratio.toFixed(2)}</a>}</td>
+          <td className={this.applyClass(runInfo.job_status_description)}>{ !runInfo.job_status_description ? '' : <a href={'/samples/' + dbSample.id}>{runInfo.job_status_description}</a>}</td>
         </tr>
       )
     })
@@ -81,10 +88,6 @@ class Samples extends React.Component {
 
   handleSearch(e) {
     if (e.target.value !== '' && e.key === 'Enter') {
-      this.setState({ 
-        showSearchLoader: true,
-        urlSearchQuery: e.target.value
-      })
       if (this.state.urlProjectId ) {
         let projectId = parseInt(this.state.urlProjectId)
         this.setState({ showSearchLoader: false })
@@ -133,7 +136,7 @@ class Samples extends React.Component {
       <div className="sample-container">
         <div className="row search-box">
           <span className="icon"><i className="fa fa-search" aria-hidden="true"></i></span>
-          <input id="search" type="search" onKeyPress={this.handleSearch} className="search" placeholder='Search for Sample'/>{ this.state.showSearchLoader ? <i className='fa fa-spinner fa-spin fa-lg'></i> : null }
+          <input id="search" value={this.state.urlSearchQuery} onChange={this.handleSearchChange}  type="search" onKeyPress={this.handleSearch} className="search" placeholder='Search for Sample'/>{ this.state.showSearchLoader ? <i className='fa fa-spinner fa-spin fa-lg'></i> : null }
         </div>
           {/* Dropdown menu */}
           <ul id='dropdownstatus' className='status dropdown-content'>
