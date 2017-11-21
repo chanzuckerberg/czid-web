@@ -123,17 +123,15 @@ module SamplesHelper
   end
 
   def filter_samples(samples, query)
-    filtered = []
-    samples.each do |output|
-      pipeline_run_status = output.pipeline_runs.first ? output.pipeline_runs.first.job_status : nil
-      if query == 'UPLOADING'
-        filtered.push(output) unless pipeline_run_status
-      elsif pipeline_run_status == query
-        filtered.push(output)
-      end
+    if query == 'UPLOADING'
+      samples = samples.where(status: 'created')
+      samples = samples.where(status: 'created')
+    else
+      samples = samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status = '#{query}'")
     end
-    filtered
+    samples
   end
+
 
   def format_samples(samples)
     formatted_samples = []
