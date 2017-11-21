@@ -10,7 +10,7 @@ class HomeController < ApplicationController
     filter_query = params[:filter]
     sort = params[:sort_by]
     @project_info = nil
-    results = sort_by(Sample.includes(:pipeline_runs, :pipeline_outputs), sort)
+    results = Sample.includes(:pipeline_runs, :pipeline_outputs)
 
     results = results.where("id in (#{params[:ids]})") if params[:ids].present?
 
@@ -22,7 +22,7 @@ class HomeController < ApplicationController
     results = results.search(name_search_query) if name_search_query.present?
     results = filter_samples(results, filter_query) if filter_query.present?
 
-    @samples = results.paginate(page: params[:page], per_page: 10)
+    @samples = sort_by(results, sort).paginate(page: params[:page], per_page: 10)
     @samples_count = results.size
     @all_samples = format_samples(@samples)
   end
