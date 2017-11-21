@@ -47,5 +47,4 @@ class HomeController < ApplicationController
     dir ||= default_dir
     dir == 'newest' ? samples.order(created_at: :desc) : samples.order(created_at: :asc)
   end
-
 end
