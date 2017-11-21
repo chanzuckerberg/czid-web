@@ -48,8 +48,8 @@ class HomeController < ApplicationController
     @samples = results.paginate(page: params[:page], per_page: 10)
     @samples_count = results.size
     @all_samples = format_samples(@samples)
-  end 
-   
+  end
+
   def sort_by(samples, dir = nil)
     default_dir = 'newest'
     dir ||= default_dir
