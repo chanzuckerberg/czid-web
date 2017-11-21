@@ -372,6 +372,10 @@ def run_stage1(lazy_run = True):
 
     # run host filtering
     run_host_filtering(fastq_file_1, fastq_file_2, initial_file_type_for_log, lazy_run)
+    # copy the merged fasta file back to results folder to change time stamp
+    execute_command("aws s3 cp %s/%s %s/;" % (RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT1, SAMPLE_S3_OUTPUT_PATH))
+    execute_command("aws s3 cp %s/%s %s/;" % (RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT2, SAMPLE_S3_OUTPUT_PATH))
+    execute_command("aws s3 cp %s/%s %s/;" % (RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT3, SAMPLE_S3_OUTPUT_PATH))
 
 # Main
 def main():
