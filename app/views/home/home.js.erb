@@ -1,2 +1,2 @@
-$(#samples).append('<%= escape_javascript render(@samples) %>');
+$(#samples).append('<%= j render "home/index" %>');
 $('.pagination').replaceWith('<%= escape_javascript will_paginate(@samples) %>');
