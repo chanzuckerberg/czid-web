@@ -6,7 +6,7 @@ samples_count: @samples_count, unfiltered: @all_samples
   <%= render @samples %>
 </div>
 
-<% if @samples.length %>
+<%# <% if @samples.length %> 
   <%= will_paginate @samples %>
 <% end %>
 
