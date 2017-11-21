@@ -8,7 +8,7 @@ class InputFile < ApplicationRecord
   FILE_REGEX = %r{\A[^\s\/]+\.(fastq|fastq.gz|fasta|fasta.gz)\z}
   validates :name, presence: true, format: { with: FILE_REGEX, message: "file must match format '#{FILE_REGEX}'" }
   validates :source_type, presence: true, inclusion: { in: %w[local s3] }
-  validate :s3_source_check
+  validate :s3_source_check, on: :create
 
   def s3_source_check
     source.strip! if source.present?

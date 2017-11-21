@@ -12,9 +12,8 @@ module SamplesHelper
   end
 
   def get_remaining_reads(jobstats)
-    # reads remaining after host filtering
-    bowtie2_stats = jobstats.find_by(task: 'run_bowtie2')
-    bowtie2_stats.reads_after unless bowtie2_stats.nil?
+    po = jobstats[0].pipeline_output unless jobstats[0].nil?
+    po.remaining_reads unless po.nil?
   end
 
   def compute_compression_ratio(jobstats)
@@ -28,9 +27,8 @@ module SamplesHelper
   end
 
   def compute_percentage_reads(jobstats)
-    bowtie2_stats = jobstats.find_by(task: 'run_bowtie2')
-    star_stats = jobstats.find_by(task: 'run_star')
-    (100.0 * bowtie2_stats.reads_after) / star_stats.reads_before unless bowtie2_stats.nil? || star_stats.nil?
+    po = jobstats[0].pipeline_output unless jobstats[0].nil?
+    (100.0 * po.remaining_reads) / po.total_reads unless po.nil?
   end
 
   def sample_status_display(sample)
@@ -57,7 +55,7 @@ module SamplesHelper
                            host_genome_id: host_genome_id,
                            status: 'created' }
     s3_path.chomp!('/')
-    command = "aws s3 ls #{s3_path}/ | grep -v Undetermined"
+    command = "aws s3 ls #{s3_path}/ | grep -v Undetermined | grep fast"
     s3_output, _stderr, status = Open3.capture3(command)
     return unless status.exitstatus.zero?
     s3_output.chomp!
@@ -65,6 +63,7 @@ module SamplesHelper
     samples = {}
     entries.each do |file_name|
       matched = /([^ ]*)_R(\d)_001.(fastq.gz|fastq|fasta.gz|fasta)\z/.match(file_name)
+      next unless matched
       source = matched[0]
       name = matched[1]
       read_idx = matched[2].to_i - 1
@@ -123,8 +122,27 @@ module SamplesHelper
     pipeline_run_info
   end
 
-  def samples_info(samples)
-    { final_result: samples_output_data(samples),
-      pipeline_run_info: samples_pipeline_run_info(samples) }
+  def filter_samples(samples, query)
+    if query == 'UPLOADING'
+      samples = samples.where(status: 'created')
+      samples = samples.where(status: 'created')
+    else
+      samples = samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status = '#{query}'")
+    end
+    samples
+  end
+
+  def format_samples(samples)
+    formatted_samples = []
+    samples.each_with_index do |_sample, i|
+      job_info = {}
+      final_result = samples_output_data(samples)
+      pipeline_run_info = samples_pipeline_run_info(samples)
+      job_info[:db_sample] = samples[i]
+      job_info[:derived_sample_output] = final_result[i]
+      job_info[:run_info] = pipeline_run_info[i]
+      formatted_samples.push(job_info)
+    end
+    formatted_samples
   end
 end

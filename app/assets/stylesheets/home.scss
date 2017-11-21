@@ -18,6 +18,9 @@
       }
     }
   }
+  .dropdown-content {
+    width: 220px !important;
+  }
 }
 
 table {
@@ -201,6 +204,10 @@ i.fa {
   padding: 5px;
   display: none;
   z-index: 2;
+  .title a {
+    border-bottom: 1px solid #d0d0d0;
+    border-radius: 0px;
+  }
 }
 
 .dropdown-bubble ul li a{
@@ -215,4 +222,8 @@ i.fa {
 
 .dropdown-bubble ul li a:hover{
   background: #7a7c9e;
+}
+
+.dropdown-content ul li {
+  cursor: pointer;
 }

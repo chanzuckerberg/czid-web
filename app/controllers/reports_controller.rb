@@ -75,18 +75,10 @@ class ReportsController < ApplicationController
   end
 
   def send_report_csv
-    # override DEFAULT_PARAMS of report_helper.rb to get raw data
-    # TO DO: add flag to turn off thresholding rather than editing params
-    params[:threshold_zscore] = 0
-    params[:threshold_rpm] = 0
-    params[:threshold_r] = 0
-    params[:threshold_percentidentity] = 0
-    params[:threshold_alignmentlength] = 0
-    params[:threshold_neglogevalue] = 0
-    params[:threshold_aggregatescore] = 0
-    params[:excluded_categories] = 'None'
-    # serve CSV
-    @report_csv = generate_report_csv(external_report_info(@report, params))
+    params[:is_csv] = 1
+    params[:sort_by] = "highest_nt_aggregatescore"
+    tax_details, _all_genera_in_sample = taxonomy_details(@report, params)
+    @report_csv = generate_report_csv(tax_details)
     send_data @report_csv, filename: @report.pipeline_output.sample.name + '_report.csv'
   end
 

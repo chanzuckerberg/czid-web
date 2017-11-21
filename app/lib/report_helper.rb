@@ -575,7 +575,7 @@ module ReportHelper
     rows_total = tax_2d.length
 
     # Apply filters, unless disabled for CSV download.
-    unless params[:disable_filters] == 1
+    unless params[:disable_filters] == 1 || params[:is_csv] == 1
       apply_filters!(rows, tax_2d, all_genera, params)
     end
 
@@ -593,7 +593,7 @@ module ReportHelper
     rows.sort_by! { |tax_info| tax_info[:sort_key] }
 
     # HACK
-    rows = rows[0...MAX_ROWS]
+    rows = rows[0...MAX_ROWS] unless params[:is_csv] == 1
 
     # Delete fields that are unused in the UI.
     rows.each do |tax_info|
@@ -620,8 +620,8 @@ module ReportHelper
     end
   end
 
-  def generate_report_csv(report_info)
-    rows = report_info[:taxonomy_details][2]
+  def generate_report_csv(tax_details)
+    rows = tax_details[2]
     attributes = %w[category_name tax_id name NT.zscore NT.rpm NT.r NR.zscore NR.rpm NR.r]
     CSV.generate(headers: true) do |csv|
       csv << attributes

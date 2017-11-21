@@ -3,6 +3,14 @@
   td {
     cursor: pointer;
   }
+  th i.status-filter {
+    margin: 0 10px;
+  }
+  ul.status {
+    li a{
+      font-size: 14px;
+    }
+  }
 }
 $break-large: 1070px;
 
@@ -60,7 +68,19 @@ $break-large: 1070px;
     padding: 10px 17px;
     background: #424468;
   }
+  &.download {
+    min-width: 0px;
+    background: #edf8ff;
+    color: rgb(3, 169, 244) !important;
+    font-weight: 600;
+    cursor: pointer;
+    margin: 10px 40px;
+    &:hover {
+      background: rgb(178, 235, 242)
+    }
+  }
 }
+
 .custom-button i{
   font-size: 20px;
 }
@@ -257,7 +277,6 @@ $break-large: 1070px;
         }
       }
     }
-
   }
   .login-wrapper {
     background: #A2A1BF;
@@ -342,6 +361,7 @@ $break-large: 1070px;
       color: #333333;
       font-weight: bold;
       font-size: 14px;
+      cursor: pointer;
     }
   }
   tr {
@@ -382,21 +402,6 @@ $break-large: 1070px;
   input.search {
     margin: 0;
     border: 0;
-  }
-  .complete {
-    color: #19d219;
-  }
-  .failed {
-    color: #ad1818
-  }
-  .running {
-    color: #3f51b5
-  }
-  .initializing {
-    color: #9e9e9e
-  }
-  .uploading {
-    color: #e2a32e
   }
   .sort-controls {
     margin-right: 6px;
@@ -461,4 +466,20 @@ input[type=search]:focus:not([readonly]) {
   .failed {
     font-weight: bold;
   }
+}
+
+.complete, {
+  color: #19d219 !important;
+}
+.failed {
+  color: #ad1818 !important;
+}
+.running {
+  color: #3f51b5 !important;
+}
+.initializing {
+  color: #9e9e9e !important;
+}
+.uploading {
+  color: #e2a32e !important;
 }

@@ -6,8 +6,8 @@ FROM ruby:2.4
 RUN apt-get update && apt-get install -y build-essential nodejs mysql-client python-dev python-pip
 RUN pip install --upgrade pip
 RUN pip install --upgrade pyOpenSSL
+RUN pip install --upgrade setuptools
 RUN pip install --upgrade aegea
-RUN pip install --upgrade pandas
 
 # Configure the main working directory. This is the base
 # directory used in any further RUN, COPY, and ENTRYPOINT

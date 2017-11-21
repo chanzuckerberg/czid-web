@@ -26,6 +26,8 @@ REF_DIR  = ROOT_DIR + '/idseq/ref' # referene genome / ref databases go here
 
 FILTER_HOST_FLAG = 1
 
+FILTER_HOST_FLAG_NO_ALIGNMENT = 3
+
 STAR="STAR"
 HTSEQ="htseq-count"
 SAMTOOLS="samtools"
@@ -449,6 +451,18 @@ def generate_taxid_annotated_m8(input_m8, output_m8, accession2taxid_db):
             outf.write(new_line)
     outf.close()
 
+def generate_merged_fasta(input_files, output_file):
+    with open(output_file, 'w') as outfile:
+        for fname in input_files:
+            idx = input_files.index(fname) + 1
+            with open(fname) as infile:
+                for line in infile:
+                    if line.startswith(">") and not "/" in line:
+                        suffix = "/" + str(idx)
+                    else:
+                        suffix = ""
+                    outfile.write(line.rstrip() + suffix + "\n")
+
 def read_file_into_list(file_name):
     with open(file_name) as f:
         L = [x.rstrip() for x in f if x]
@@ -663,7 +677,10 @@ def run_and_log(logparams, func_name, *args):
         records_before = count_reads(logparams["before_file_name"], logparams["before_file_type"])
         records_after = count_reads(logparams["after_file_name"], logparams["after_file_type"])
         if logparams["count_reads"]:
-            percent_removed = (100.0 * (records_before - records_after)) / records_before
+            if int(records_before) > 0:
+                percent_removed = (100.0 * (records_before - records_after)) / records_before
+            else:
+                percent_removed = 0.0
             logger.info("%s %% of reads dropped out, %s reads remaining" % (percent_str(percent_removed), str(records_after)))
             STATS.append({'task': func_name.__name__, 'reads_before': records_before, 'reads_after': records_after})
         # function-specific logs
@@ -750,6 +767,9 @@ def run_sample(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
         run_host_filtering(sample_name, fastq_file_1, fastq_file_2, file_type, initial_file_type_for_log, star_genome_s3_path, bowtie2_genome_s3_path,
                            DEFAULT_LOGPARAMS, result_dir, scratch_dir, sample_s3_output_path, lazy_run)
 
+    if filter_host_flag and filter_host_flag == FILTER_HOST_FLAG_NO_ALIGNMENT:
+        return
+
     # run gsnap remotely
     if filter_host_flag:
         gsnapl_input_files = [EXTRACT_UNMAPPED_FROM_SAM_OUT1, EXTRACT_UNMAPPED_FROM_SAM_OUT2]
@@ -782,12 +802,16 @@ def run_sample(sample_s3_input_path, file_type, filter_host_flag, sample_s3_outp
         result_dir, sample_s3_output_path, False)
 
     # run_generate_taxid_annotated_fasta_from_m8
+    merged_fasta = os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT3)
+    if not os.path.isfile(merged_fasta):
+        # make the EXTRACT_UNMAPPED_FROM_SAM_OUT3 input needed below
+        generate_merged_fasta(cleaned_files, merged_fasta)
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "generate taxid annotated fasta from m8",
         "count_reads": False})
     run_and_log(logparams, run_generate_taxid_annotated_fasta_from_m8,
         sample_name, os.path.join(result_dir, GSNAPL_DEDUP_OUT),
-        os.path.join(result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT3),
+        merged_fasta,
         os.path.join(result_dir, GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT),
         'NT', result_dir, sample_s3_output_path, False)
 
@@ -1154,7 +1178,8 @@ def run_gsnapl_remotely(sample, input_files,
     if lazy_run:
         # check if output already exists
         output = "%s/%s" % (result_dir, GSNAPL_OUT)
-        if os.path.isfile(output):
+        output2 = "%s/%s" % (result_dir, GSNAPL_DEDUP_OUT)
+        if os.path.isfile(output) and os.path.isfile(output2):
             return 1
     key_name = os.path.basename(gsnap_ssh_key_s3_path)
     execute_command("aws s3 cp %s %s/" % (gsnap_ssh_key_s3_path, REF_DIR))

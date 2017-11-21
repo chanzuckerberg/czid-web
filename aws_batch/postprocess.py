@@ -105,7 +105,7 @@ def get_taxid(sequence_name, taxid_field):
 def get_taxid_field_num(taxid_field, input_fasta):
     with open(input_fasta) as f:
         sequence_name = f.readline()
-    return sequence_name.replace('>', ':').split(":").index(taxid_field)
+    return sequence_name.replace('>', ':').split(":").index(taxid_field) + 1
 
 def generate_taxid_locator(input_fasta, taxid_field, hit_type, output_fasta, output_json):
     taxid_field_num = get_taxid_field_num(taxid_field, input_fasta)

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171103202818) do
+ActiveRecord::Schema.define(version: 20171115223929) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -77,6 +77,30 @@ ActiveRecord::Schema.define(version: 20171103202818) do
     t.index ["sample_id"], name: "index_pipeline_outputs_on_sample_id"
   end
 
+  create_table "pipeline_run_stages", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.bigint "pipeline_run_id"
+    t.integer "step_number"
+    t.integer "job_type"
+    t.string "job_status"
+    t.integer "db_load_status", default: 0, null: false
+    t.text "job_command"
+    t.text "command_stdout"
+    t.text "command_stderr"
+    t.string "command_status"
+    t.text "job_description"
+    t.string "job_log_id"
+    t.float "job_progress_pct", limit: 24
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "job_command_func"
+    t.string "load_db_command_func"
+    t.string "job_id"
+    t.string "output_func"
+    t.string "name"
+    t.index ["pipeline_run_id", "step_number"], name: "index_pipeline_run_stages_on_pipeline_run_id_and_step_number"
+    t.index ["pipeline_run_id"], name: "index_pipeline_run_stages_on_pipeline_run_id"
+  end
+
   create_table "pipeline_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "job_id"
     t.text "command"
@@ -90,13 +114,15 @@ ActiveRecord::Schema.define(version: 20171103202818) do
     t.string "job_status"
     t.text "job_description"
     t.string "job_log_id"
+    t.string "postprocess_status"
+    t.integer "finalized", default: 0, null: false
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
     t.index ["pipeline_output_id"], name: "index_pipeline_runs_on_pipeline_output_id", unique: true
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
   end
 
   create_table "projects", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name", collation: "utf8_general_ci"
+    t.string "name", collation: "latin1_swedish_ci"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_projects_on_name", unique: true
@@ -120,7 +146,7 @@ ActiveRecord::Schema.define(version: 20171103202818) do
   end
 
   create_table "samples", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name", collation: "utf8_general_ci"
+    t.string "name", collation: "latin1_swedish_ci"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "project_id"
@@ -153,7 +179,7 @@ ActiveRecord::Schema.define(version: 20171103202818) do
     t.datetime "updated_at", null: false
     t.string "hit_type"
     t.integer "tax_level"
-    t.index ["pipeline_output_id", "tax_level", "hit_type", "taxid"], name: "index_taxon_byteranges_on_details"
+    t.index ["pipeline_output_id", "tax_level", "hit_type", "taxid"], name: "index_taxon_byteranges_on_details", unique: true
     t.index ["pipeline_output_id"], name: "index_taxon_byteranges_on_pipeline_output_id"
   end
 
@@ -181,7 +207,7 @@ ActiveRecord::Schema.define(version: 20171103202818) do
     t.integer "count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "name", collation: "utf8_general_ci"
+    t.string "name", collation: "latin1_swedish_ci"
     t.string "count_type"
     t.float "percent_identity", limit: 24
     t.float "alignment_length", limit: 24
@@ -272,20 +298,20 @@ ActiveRecord::Schema.define(version: 20171103202818) do
   end
 
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "email", default: "", null: false, collation: "utf8_general_ci"
-    t.string "name", collation: "utf8_general_ci"
+    t.string "email", default: "", null: false, collation: "latin1_swedish_ci"
+    t.string "name", collation: "latin1_swedish_ci"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "encrypted_password", default: "", null: false, collation: "utf8_general_ci"
-    t.string "reset_password_token", collation: "utf8_general_ci"
+    t.string "encrypted_password", default: "", null: false, collation: "latin1_swedish_ci"
+    t.string "reset_password_token", collation: "latin1_swedish_ci"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
     t.integer "sign_in_count", default: 0, null: false
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
-    t.string "current_sign_in_ip", collation: "utf8_general_ci"
-    t.string "last_sign_in_ip", collation: "utf8_general_ci"
-    t.string "authentication_token", limit: 30, collation: "utf8_general_ci"
+    t.string "current_sign_in_ip", collation: "latin1_swedish_ci"
+    t.string "last_sign_in_ip", collation: "latin1_swedish_ci"
+    t.string "authentication_token", limit: 30, collation: "latin1_swedish_ci"
     t.integer "role"
     t.index ["authentication_token"], name: "index_users_on_authentication_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
@@ -295,6 +321,7 @@ ActiveRecord::Schema.define(version: 20171103202818) do
   add_foreign_key "input_files", "samples"
   add_foreign_key "job_stats", "pipeline_outputs"
   add_foreign_key "pipeline_outputs", "samples"
+  add_foreign_key "pipeline_run_stages", "pipeline_runs"
   add_foreign_key "pipeline_runs", "samples"
   add_foreign_key "reports", "backgrounds"
   add_foreign_key "reports", "pipeline_outputs"
