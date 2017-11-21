@@ -83,17 +83,20 @@ class Samples extends React.Component {
     }
   }
 
+  //Fetch Params from url for queries
   fetchParams(param) {
     let urlParams = new URLSearchParams(window.location.search);
     return urlParams.get(param)
   }
 
+  //handle search when query is passed
   handleSearch(e) {
     if (e.target.value !== '' && e.key === 'Enter') {
       this.displayResultsByParams(this.state.urlProjectId, e.target.value, this.state.urlFilterQuery)
     }
   }
 
+  //display results from entire samples or within a project based on parameters, Also filter and search
   displayResultsByParams(project, searchParams, filterParams) {
     let projectId = parseInt(project);
     if (projectId && searchParams !== '' && filterParams) {
@@ -113,11 +116,10 @@ class Samples extends React.Component {
     }
   }
 
+  //Select or switch Project
   switchProject(e) {
-    let id = e.target.getAttribute('data-id')
-    this.setState({
-      urlProjectId: id
-    })
+    let id = e.target.getAttribute('data-id');
+    this.setState({ urlProjectId: id });
     location.href = `?project_id=${id}`;
   }
 
@@ -199,22 +201,21 @@ class Samples extends React.Component {
     this.displayPipelineStatusFilter();
   }
 
+  // initialize filter dropdown
   displayPipelineStatusFilter() {
     $('.status-dropdown').dropdown({
       belowOrigin: true,
       stopPropagation: false,
-      hover: true,
       constrainWidth: true
     });
   }
 
+  //handle filtering when a filter is selected from list
   filterByStatus(e) {
     var that = this;
     let status = e.target.getAttribute('data-status');
-    that.setState({
-      urlFilterQuery: status
-    })
-    this.displayResultsByParams(this.state.urlProjectId, this.state.urlSearchQuery, status)
+    that.setState({ urlFilterQuery: status });
+    this.displayResultsByParams(this.state.urlProjectId, this.state.urlSearchQuery, status);
   }
 
   render() {

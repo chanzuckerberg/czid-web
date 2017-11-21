@@ -59,6 +59,9 @@ i.fa {
       .dropdown-container {
         max-height: 250px;
         overflow: scroll;
+        ul {
+          cursor: pointer;
+        }
       }
     }
   }

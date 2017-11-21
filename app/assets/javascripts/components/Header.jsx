@@ -7,10 +7,13 @@ class Header extends React.Component  {
   }
 
 	componentDidMount() {
+   this.displayProfileMenu();
+  }
+
+  displayProfileMenu() {
     $('.profile-dropdown').dropdown({
       belowOrigin: true,
-      stopPropagation: false,
-      hover: true
+      stopPropagation: false
     });
   }
   
