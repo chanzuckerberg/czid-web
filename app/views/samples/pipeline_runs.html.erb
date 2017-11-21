@@ -20,6 +20,7 @@
 <table class="table table-condensed">
       <thead>
         <tr>
+          <th> Run ID </th>
           <th> Job Status </th>
           <th> Job Id </th>
           <th> Job Log </th>
@@ -31,7 +32,29 @@
       </thead>
       <tbody>
         <% @sample.pipeline_runs.each do |pipeline_run| %>
+          <% if pipeline_run.pipeline_run_stages.present? %>
+            <% prs = pipeline_run.pipeline_run_stages %>
+            <% prs.each do |run_stage| %>
+              <tr>
+                <td> <%= "#{pipeline_run.id} - #{run_stage.name}" %>
+                <td> <%= run_stage.job_status %>
+                <td> <%= run_stage.job_id %>
+                <td> <%= link_to 'Logs', run_stage.log_url %>
+                <td><%= pipeline_run.pipeline_output.remaining_reads if pipeline_run.pipeline_output%> &nbsp;</td>
+                <td><%= run_stage.created_at %></td>
+                <td><%= pipeline_run.pipeline_output.created_at if pipeline_run.pipeline_output %></td>
+                <td>
+                  <% if pipeline_run.pipeline_output %>
+                    <%= link_to 'Show', pipeline_run.pipeline_output %>
+                  <% else %>
+                     Pending
+                  <% end %>
+                 </td>
+               </tr>
+            <% end %>
+          <% else %>
           <tr>
+            <td> <%= pipeline_run.id %>
             <td> <%= pipeline_run.job_status %>
             <td> <%= pipeline_run.job_id %>
             <td> <%= link_to 'Logs', pipeline_run.log_url %>
@@ -44,8 +67,9 @@
               <% else %>
                  Pending
               <% end %>
-            </td>
-          </tr>
+             </td>
+           </tr>
+          <% end %>
         <% end %>
       </tbody>
 </table>

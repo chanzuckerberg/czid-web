@@ -686,6 +686,10 @@ def run_bowtie2(sample_name, input_fa_1, input_fa_2, bowtie2_genome_s3_path,
         output4 = "%s/%s" % (result_dir, EXTRACT_UNMAPPED_FROM_SAM_OUT3)
         if os.path.isfile(output1) and os.path.isfile(output2) and \
            os.path.isfile(output3) and os.path.isfile(output4):
+            # Touch the output to make sure the datestamp changes to signal run of this script
+            execute_command("aws s3 cp %s %s/" % (output2, sample_s3_output_path))
+            execute_command("aws s3 cp %s %s/" % (output3, sample_s3_output_path))
+            execute_command("aws s3 cp %s %s/" % (output4, sample_s3_output_path))
             return 1
     # Doing the work
     # check if genome downloaded already
@@ -744,7 +748,7 @@ def main():
 
     sample_s3_input_path = INPUT_BUCKET.rstrip('/')
     sample_s3_output_path = OUTPUT_BUCKET.rstrip('/')
-    key_s3_path = get_key_path(ENVIRONMENT)
+    key_s3_path = "" # remove this later
 
     run_sample(sample_s3_input_path, FILE_TYPE, FILTER_HOST_FLAG, sample_s3_output_path,
                STAR_GENOME, BOWTIE2_GENOME,

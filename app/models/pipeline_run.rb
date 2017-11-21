@@ -4,6 +4,8 @@ class PipelineRun < ApplicationRecord
   include ApplicationHelper
   belongs_to :sample
   has_one :pipeline_output
+  has_many :pipeline_run_stages
+  accepts_nested_attributes_for :pipeline_run_stages
 
   OUTPUT_JSON_NAME = 'idseq_web_sample.json'.freeze
   STATS_JSON_NAME = 'stats.json'.freeze
@@ -18,14 +20,77 @@ class PipelineRun < ApplicationRecord
   STATUS_LOADED = 'LOADED'.freeze
   POSTPROCESS_STATUS_LOADED = 'LOADED'.freeze
 
+  before_create :create_run_stages
   before_save :check_job_status
+  after_create :kickoff_job
 
   def self.in_progress
     where("job_status != '#{STATUS_FAILED}' OR job_status IS NULL")
-      .where(pipeline_output_id: nil)
+      .where(finalized: 0)
+  end
+
+  def finalized?
+    finalized == 1
+  end
+
+  def kickoff_job
+    pipeline_run_stages.first.run_job
+  end
+
+  def create_run_stages
+    # Host Filtering
+    run_stages = []
+    unless sample.host_genome && sample.host_genome.name == HostGenome::NO_HOST_NAME
+      run_stages << PipelineRunStage.new(
+        step_number: 1,
+        name: 'Host Filtering',
+        job_command_func: 'host_filtering_command',
+        load_db_command_func: 'db_load_host_filtering',
+        output_func: 'host_filtering_outputs'
+      )
+    end
+
+    # Alignment and Merging
+    run_stages << PipelineRunStage.new(
+      step_number: 2,
+      name: 'GSNAPL/RAPSEARCH alignment',
+      job_command_func: 'alignment_command',
+      load_db_command_func: 'db_load_alignment',
+      output_func: 'alignment_outputs'
+    )
+    # Post Processing
+    run_stages << PipelineRunStage.new(
+      step_number: 3,
+      name: 'Post Processing',
+      job_command_func: 'postprocess_command',
+      load_db_command_func: 'db_load_postprocess',
+      output_func: 'postprocess_outputs'
+    )
+    self.pipeline_run_stages = run_stages
   end
 
   def check_job_status
+    # only update the pipeline_run info. do not update pipeline_run_stage info
+    return if finalized? || id.nil?
+    check_job_status_old if pipeline_run_stages.blank?
+    pipeline_run_stages.order(:step_number).each do |prs|
+      if prs.failed?
+        self.finalized = 1
+        self.job_status = "#{prs.step_number}.#{prs.name}-#{STATUS_FAILED}"
+        return nil
+      elsif prs.succeeded?
+        next
+      else # still running
+        self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
+        return nil
+      end
+    end
+    # All done
+    self.finalized = 1
+    self.job_status = STATUS_CHECKED
+  end
+
+  def check_job_status_old # Before pipeline_run_stages are introduced
     if pipeline_output
       self.job_status = STATUS_CHECKED
       return
@@ -48,7 +113,9 @@ class PipelineRun < ApplicationRecord
   end
 
   def completed?
-    return true if pipeline_output || job_status == STATUS_FAILED
+    return true if finalized?
+    # Old version before run stages
+    return true if pipeline_run_stages.blank? && (pipeline_output || job_status == STATUS_FAILED)
   end
 
   def log_url
@@ -58,6 +125,25 @@ class PipelineRun < ApplicationRecord
   end
 
   def update_job_status
+    update_job_status_old if pipeline_run_stages.blank?
+    pipeline_run_stages.order(:step_number).each do |prs|
+      if !prs.started? # Not started yet
+        prs.run_job
+        break
+      elsif prs.succeeded?
+        # great do nothing. go to the next step.
+        next
+      elsif prs.failed?
+        break
+      else # This step is still running
+        prs.update_job_status
+        break
+      end
+    end
+    save
+  end
+
+  def update_job_status_old
     return if completed?
     command = "aegea batch describe #{job_id}"
     stdout, stderr, status = Open3.capture3(command)
@@ -143,7 +229,7 @@ class PipelineRun < ApplicationRecord
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_byteranges_path}")
   end
 
-  def download_file(s3_path, destination_dir)
+  def self.download_file(s3_path, destination_dir)
     command = "mkdir -p #{destination_dir};"
     command += "aws s3 cp #{s3_path} #{destination_dir}/;"
     _stdout, _stderr, status = Open3.capture3(command)
@@ -155,8 +241,12 @@ class PipelineRun < ApplicationRecord
     command = "aws s3 ls #{s3_path}"
     stdout, _stderr, status = Open3.capture3(command)
     return false unless status.exitstatus.zero?
-    s3_file_time = DateTime.strptime(stdout[0..18], "%Y-%m-%d %H:%M:%S")
-    (s3_file_time && created_at && s3_file_time > created_at)
+    begin
+      s3_file_time = DateTime.strptime(stdout[0..18], "%Y-%m-%d %H:%M:%S")
+      return (s3_file_time && created_at && s3_file_time > created_at)
+    rescue
+      return nil
+    end
   end
 
   def terminate_job
