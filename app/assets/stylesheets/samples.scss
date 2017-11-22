@@ -313,6 +313,10 @@ $break-large: 1070px;
   }
   .project-list {
     margin-top: 65px;
+    ul.select-dropdown {
+      height: 200px;
+      overflow: scroll;
+    }
   }
   .project-wrapper {
     margin: 35px 0;
