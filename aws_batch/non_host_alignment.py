@@ -40,8 +40,8 @@ ENVIRONMENT = 'production'
 # compute capacity
 GSNAPL_MAX_CONCURRENT = 20 # number of gsnapl jobs allowed to run concurrently on 1 machine
 RAPSEARCH2_MAX_CONCURRENT = 5
-GSNAPL_CHUNK_SIZE = 1000 # number of fasta records in a chunk
-RAPSEARCH_CHUNK_SIZE = 1000
+GSNAPL_CHUNK_SIZE = 30000 # number of fasta records in a chunk
+RAPSEARCH_CHUNK_SIZE = 10000
 KEY_S3_PATH = None
 
 # references
@@ -401,7 +401,10 @@ def wait_for_server_ip(service_name, key_path, remote_username, environment, max
 
 def check_s3_file_presence(s3_path):
     command = "aws s3 ls %s | wc -l" % s3_path
-    return int(execute_command_with_output(command).rstrip())
+    try:
+      return int(execute_command_with_output(command).rstrip())
+    except:
+      return False
 
 # job functions
 def chunk_input(input_files_basenames, chunk_nlines, part_suffix):
@@ -811,7 +814,7 @@ def main():
     global SAMPLE_NAME
     global SAMPLE_S3_FASTQ_PATH
     global SAMPLE_S3_OUTPUT_CHUNKS_PATH
-    
+
     FASTQ_BUCKET = os.environ.get('FASTQ_BUCKET', FASTQ_BUCKET)
     INPUT_BUCKET = os.environ.get('INPUT_BUCKET', INPUT_BUCKET)
     FILE_TYPE = os.environ.get('FILE_TYPE', FILE_TYPE)
