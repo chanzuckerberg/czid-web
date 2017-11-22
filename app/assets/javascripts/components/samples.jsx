@@ -10,8 +10,10 @@ class Samples extends React.Component {
     this.all_project = props.all_project|| [];
     this.defaultSortBy = 'newest';
     const currentSort = SortHelper.currentSort();
+    this.columnSorting = this.columnSorting.bind(this);
+    this.handleSearchChange = this.handleSearchChange.bind(this);
+    this.filterByStatus = this.filterByStatus.bind(this)
     this.state = {
-      showSearchLoader: false,
       urlProjectId: this.fetchParams('project_id') || null,
       urlFilterQuery: this.fetchParams('filter') || null,
       urlSearchQuery: this.fetchParams('search') || '',
@@ -20,9 +22,6 @@ class Samples extends React.Component {
       sort_query: currentSort.sort_query
       ? currentSort.sort_query  : `sort_by=${this.defaultSortBy}`,
     };
-    this.columnSorting = this.columnSorting.bind(this);
-    this.handleSearchChange = this.handleSearchChange.bind(this);
-    this.filterByStatus = this.filterByStatus.bind(this)
     $("#pagination").css("display", "");
   }
 
@@ -42,9 +41,12 @@ class Samples extends React.Component {
   }
 
   handleSearchChange(e) {
-    this.setState({
-      urlSearchQuery: e.target.value
-    })
+    if (e.target.value !== '') {
+      this.setState({ urlSearchQuery: e.target.value });
+    } else {
+      this.setState({ urlSearchQuery: '' });
+      this.displayResultsByParams(this.state.urlProjectId, e.target.value, this.state.urlFilterQuery);
+    }
   }
 
   renderPipelineOutput(samples) {
@@ -81,38 +83,44 @@ class Samples extends React.Component {
     }
   }
 
+  //Fetch Params from url for queries
   fetchParams(param) {
     let urlParams = new URLSearchParams(window.location.search);
     return urlParams.get(param)
   }
 
+  //handle search when query is passed
   handleSearch(e) {
     if (e.target.value !== '' && e.key === 'Enter') {
-      if (this.state.urlProjectId ) {
-        let projectId = parseInt(this.state.urlProjectId)
-        this.setState({ showSearchLoader: false })
-        if (this.state.urlFilterQuery) {
-          location.href = `?project_id=${projectId}&filter=${this.state.urlFilterQuery}&search=${e.target.value}`
-        } else {
-          location.href = `?project_id=${projectId}&search=${e.target.value}`
-        }
-      } else {
-        this.setState({ showSearchLoader: false })
-          if (this.state.urlFilterQuery) {
-            location.href = `?filter=${this.state.urlFilterQuery}&search=${e.target.value}`
-          } else {
-            location.href = `?search=${e.target.value}`
-          }
-      }
+      this.displayResultsByParams(this.state.urlProjectId, e.target.value, this.state.urlFilterQuery)
     }
   }
 
+  //display results from entire samples or within a project based on parameters, Also filter and search
+  displayResultsByParams(project, searchParams, filterParams) {
+    let projectId = parseInt(project);
+    if (projectId && searchParams !== '' && filterParams) {
+      location.href = `?project_id=${projectId}&filter=${filterParams}&search=${searchParams}`;
+    } else if (projectId && searchParams !== '') {
+      location.href = `?project_id=${projectId}&search=${searchParams}`;
+    } else if (projectId && filterParams) {
+      location.href = `?project_id=${projectId}&filter=${filterParams}`;
+    } else if (searchParams !== '' && filterParams) {
+      location.href = `?search=${searchParams}&filter=${filterParams}`;
+    } else if (searchParams !== '') {
+      location.href = `?search=${searchParams}`;
+    } else if (filterParams) {
+      location.href = `?filter=${filterParams}`;
+    } else {
+      location.href = '/';
+    }
+  }
+
+  //Select or switch Project
   switchProject(e) {
-    let id = e.target.getAttribute('data-id')
-    this.setState({
-      urlProjectId: id
-    })
-    location.href = `?project_id=${id}`
+    let id = e.target.getAttribute('data-id');
+    this.setState({ urlProjectId: id });
+    location.href = `?project_id=${id}`;
   }
 
   viewSample(id) {
@@ -136,7 +144,7 @@ class Samples extends React.Component {
       <div className="sample-container">
         <div className="row search-box">
           <span className="icon"><i className="fa fa-search" aria-hidden="true"></i></span>
-          <input id="search" value={this.state.urlSearchQuery} onChange={this.handleSearchChange}  type="search" onKeyPress={this.handleSearch} className="search" placeholder='Search for Sample'/>{ this.state.showSearchLoader ? <i className='fa fa-spinner fa-spin fa-lg'></i> : null }
+          <input id="search" value={this.state.urlSearchQuery} onChange={this.handleSearchChange}  type="search" onKeyDown={this.handleSearch} className="search" placeholder='Search for Sample'/>{ this.state.showSearchLoader ? <i className='fa fa-spinner fa-spin fa-lg'></i> : null }
         </div>
           {/* Dropdown menu */}
           <ul id='dropdownstatus' className='status dropdown-content'>
@@ -147,7 +155,6 @@ class Samples extends React.Component {
             <li onClick={ this.filterByStatus } data-status="FAILED" ><a data-status="FAILED" className="failed" href="#!">Failed</a></li>
             <li data-status="UPLOADING" onClick={ this.filterByStatus } ><a data-status="UPLOADING" className="uploading" href="#!">Uploading</a></li>
             <li data-status="RUNNABLE" onClick={ this.filterByStatus } ><a data-status="RUNNABLE" className="initializing" href="#!">Initializing</a></li>
-            <li className="divider"></li>
           </ul>
           <table className="bordered highlight samples-table">
             <thead>
@@ -164,7 +171,7 @@ class Samples extends React.Component {
               <th>Percentage Reads</th>
               <th>QC</th>
               <th>Compression Ratio</th>
-              <th>Pipeline run status</th>
+              <th className="status-dropdown" data-activates="dropdownstatus"><a href="#!" data-activates="dropdownstatus"><i className="status-filter fa fa-caret-down"></i></a>Pipeline run status</th>
             </tr>
             </thead>
               { samples.length ? <tbody>{this.renderPipelineOutput(samples)}</tbody> : null }
@@ -194,41 +201,21 @@ class Samples extends React.Component {
     this.displayPipelineStatusFilter();
   }
 
+  // initialize filter dropdown
   displayPipelineStatusFilter() {
     $('.status-dropdown').dropdown({
       belowOrigin: true,
       stopPropagation: false,
-      hover: true,
       constrainWidth: true
-    })
+    });
   }
 
+  //handle filtering when a filter is selected from list
   filterByStatus(e) {
     var that = this;
     let status = e.target.getAttribute('data-status');
-    that.setState({
-      urlFilterQuery: status
-    })
-    if(status === 'ALL') {
-      this.setState({
-        displayedSamples: this.samples
-      })
-    } else {
-      if (this.state.urlProjectId) {
-        let projectId = parseInt(this.state.urlProjectId)
-        if (this.state.urlSearchQuery) {
-          location.href = `?project_id=${projectId}&search=${this.state.urlSearchQuery}&filter=${status}`
-        } else {
-          location.href = `?project_id=${projectId}&filter=${status}`
-        }
-      } else {
-        if (this.state.urlSearchQuery) {
-          location.href = `?search=${this.state.urlSearchQuery}&filter=${status}`
-        } else {
-          location.href = `?filter=${status}`
-        }
-      }
-    }
+    that.setState({ urlFilterQuery: status });
+    this.displayResultsByParams(this.state.urlProjectId, this.state.urlSearchQuery, status);
   }
 
   render() {
