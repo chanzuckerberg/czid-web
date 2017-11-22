@@ -88,7 +88,7 @@ module SamplesHelper
     final_result = []
     samples.each do |output|
       output_data = {}
-      pipeline_output = output.pipeline_runs && output.pipeline_runs.first ? output.pipeline_runs.first.pipeline_output : nil
+      pipeline_output = output.pipeline_runs.first ? output.pipeline_runs.first.pipeline_output : nil
       job_stats = pipeline_output ? pipeline_output.job_stats : nil
       summary_stats = job_stats ? get_summary_stats(job_stats) : nil
 
