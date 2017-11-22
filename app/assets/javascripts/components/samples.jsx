@@ -232,15 +232,15 @@ class Samples extends React.Component {
                       <span>Upload Sample</span> 
                     </a>
                   </li>
-                  {(this.project) ? 
-                  <li>
-                    <a href={`/projects/${this.project.id}/visuals`}>
-                      <i className="fa fa-bar-chart" aria-hidden="true"></i>
-                      <span>Project Heatmap</span> 
-                    </a>
-                  </li>
-                  : undefined
-                }
+                  {/*{(this.project) ?*/}
+                  {/*<li>*/}
+                    {/*<a href={`/projects/${this.project.id}/visuals`}>*/}
+                      {/*<i className="fa fa-bar-chart" aria-hidden="true"></i>*/}
+                      {/*<span>Project Heatmap</span>*/}
+                    {/*</a>*/}
+                  {/*</li>*/}
+                  {/*: undefined*/}
+                {/*}*/}
                 </ul>
               </div>
 
