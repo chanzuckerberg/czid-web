@@ -8,4 +8,4 @@
 //= require materialize
 //= require moment
 //= require materialize/extras/nouislider
-
+//= require d3

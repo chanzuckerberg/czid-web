@@ -14,6 +14,7 @@ gem 'axios_rails'
 gem 'bcrypt', '~> 3.1.7'
 # Use CoffeeScript for .coffee assets and views
 gem 'coffee-rails', '~> 4.2'
+gem 'd3-rails'
 gem 'devise', '4.3.0'
 gem 'font-awesome-rails'
 gem "health_check"

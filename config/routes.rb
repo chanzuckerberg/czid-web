@@ -16,9 +16,11 @@ Rails.application.routes.draw do
     get :bulk_import, on: :collection
     post :bulk_upload, on: :collection
     post :save_note, on: :collection # This needs to be fixed to be on: :member
+    get :search, on: :collection
   end
-
-  resources :projects
+  resources :projects do
+    get :visuals, on: :member
+  end
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
   mount Resque::Server.new, at: '/resque'
