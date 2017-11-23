@@ -65,20 +65,26 @@ i.fa {
       }
     }
   }
-  .sub-header-buttons {
-    ul {
-      li {
-        display: inline-block;
-        margin-right: 15px;
-        color: #4ba4c1;
-        letter-spacing: 0.5px;
-        &:hover {
-          color: #336d80;
-        }
-      }
+  .upload {
+    float: right;
+    padding: 9px 20px;
+    border-radius: 30px;
+    border: 1px solid #4ba4c1;
+    color: #4ba4c1;
+    letter-spacing: 0.5px;
+    font-size: 12px;
+    cursor: pointer;
+    &:hover {
+      border-color: #586878;
+      color: #586878;
+    }
+    span {
+      padding-right: 13px;
+    }
+    .fa-flask {
+      padding: 0px 7px;
     }
   }
-
   .sub-title {
     color: #333333;
     margin: 14px 0;
