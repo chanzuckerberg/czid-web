@@ -18,9 +18,7 @@ Rails.application.routes.draw do
     post :save_note, on: :collection # This needs to be fixed to be on: :member
   end
 
-  resources :projects do
-    get :visuals, on: :member
-  end
+  resources :projects
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
   mount Resque::Server.new, at: '/resque'
