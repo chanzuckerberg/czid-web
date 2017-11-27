@@ -39,7 +39,7 @@ ENVIRONMENT = 'production'
 
 # compute capacity
 GSNAPL_MAX_CONCURRENT = 20 # number of gsnapl jobs allowed to run concurrently on 1 machine
-RAPSEARCH2_MAX_CONCURRENT = 5
+RAPSEARCH2_MAX_CONCURRENT = 1
 GSNAPL_CHUNK_SIZE = 30000 # number of fasta records in a chunk
 RAPSEARCH_CHUNK_SIZE = 10000
 KEY_S3_PATH = None
@@ -565,7 +565,7 @@ def run_rapsearch_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_w
                           '-a','T',
                           '-b','0',
                           '-v','1',
-                          '-z', '$(nproc --all)',
+                          '-z', 4,
                           '-q', input_path,
                           '-o', output_path[:-3],
                           ';'])
