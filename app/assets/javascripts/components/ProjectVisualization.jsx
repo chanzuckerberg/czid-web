@@ -7,6 +7,7 @@ class ProjectVisualization  extends React.Component {
     super(props);
     this.projectName = props.project_name;
     this.csvRecords = props.csv_records;
+    this.totalRecords = this.csvRecords.length;
   }
   render () {
     return (
@@ -27,6 +28,9 @@ class ProjectVisualization  extends React.Component {
               <div className='selected-pathogens'>
                 <div className='title grey-text'>
                   All Processed Samples
+                  {
+                    (this.totalRecords) ? <small>({this.totalRecords})</small> : ''
+                  }
                 </div>
                 <ul>
                   { this.csvRecords.map((sample, i) => {
@@ -40,7 +44,7 @@ class ProjectVisualization  extends React.Component {
                       </li>
                     );
                   })}
-                  { ((!this.csvRecords.length)) ?
+                  { ((!this.totalRecords)) ?
                     <div className='text-grey text-lighten-1 center'>-no processed samples-</div> : ''
                   }
                 </ul>
