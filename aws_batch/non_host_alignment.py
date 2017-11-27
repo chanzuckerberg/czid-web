@@ -412,8 +412,8 @@ def chunk_input(input_files_basenames, chunk_nlines, part_suffix):
     part_lists = []
     for input_file in input_files_basenames:
         input_file_full_local_path = os.path.join(RESULT_DIR, input_file)
-        out_prefix = input_file_full_local_path + part_suffix
-        out_prefix_base = input_file + part_suffix
+        out_prefix = os.path.join(CHUNKS_RESULT_DIR, input_file) + part_suffix
+        out_prefix_base = os.path.basename(out_prefix)
         execute_command("split --numeric-suffixes -l %d %s %s" % (chunk_nlines, input_file_full_local_path, out_prefix))
         execute_command("aws s3 cp %s/ %s/ --recursive --exclude '*' --include '%s*'" % (RESULT_DIR, SAMPLE_S3_OUTPUT_CHUNKS_PATH, out_prefix_base))
         partial_files = [os.path.basename(partial_file) for partial_file in execute_command_with_output("ls %s*" % out_prefix).rstrip().split("\n")]
