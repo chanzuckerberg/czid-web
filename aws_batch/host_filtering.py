@@ -255,7 +255,7 @@ def run_bowtie2(input_fa_1, input_fa_2):
     if not os.path.isfile("%s/%s" % (REF_DIR, genome_file)):
         execute_command("aws s3 cp %s %s/" % (BOWTIE2_GENOME, REF_DIR))
         execute_command("cd %s; tar xvfz %s" % (REF_DIR, genome_file))
-        write_to_log.info("downloaded index")
+        write_to_log("downloaded index")
     local_genome_dir_ls =  execute_command_with_output("ls %s/bowtie2_genome/*.bt2*" % REF_DIR)
     genome_basename = local_genome_dir_ls.split("\n")[0][:-6]
     if genome_basename[-1] == '.':
