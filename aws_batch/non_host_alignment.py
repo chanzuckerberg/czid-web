@@ -29,6 +29,7 @@ SAMPLE_NAME = None
 SAMPLE_DIR = None
 FASTQ_DIR = None
 RESULT_DIR = None
+CHUNKS_RESULT_DIR = None
 ROOT_DIR = '/mnt'
 DEST_DIR = ROOT_DIR + '/idseq/data' # generated data go here
 REF_DIR = ROOT_DIR + '/idseq/ref' # referene genome / ref databases go here
@@ -474,11 +475,11 @@ def run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work
         # move gsnapl output back to local
         time.sleep(10)
         write_to_log("finished alignment for chunk %s" % chunk_id)
-        execute_command("aws s3 cp %s/%s %s/" % (SAMPLE_S3_OUTPUT_CHUNKS_PATH, outfile_basename, RESULT_DIR))
+        execute_command("aws s3 cp %s/%s %s/" % (SAMPLE_S3_OUTPUT_CHUNKS_PATH, outfile_basename, CHUNKS_RESULT_DIR))
         # Deduplicate m8 input. Sometimes GSNAPL outputs multiple consecutive lines for same original read and same accession id. Count functions expect only 1 (top hit).
-        deduplicate_m8(os.path.join(RESULT_DIR, outfile_basename), os.path.join(RESULT_DIR, dedup_outfile_basename))
-        execute_command("aws s3 cp %s/%s %s/" % (RESULT_DIR, dedup_outfile_basename, SAMPLE_S3_OUTPUT_CHUNKS_PATH))
-        return os.path.join(RESULT_DIR, dedup_outfile_basename)
+        deduplicate_m8(os.path.join(CHUNKS_RESULT_DIR, outfile_basename), os.path.join(CHUNKS_RESULT_DIR, dedup_outfile_basename))
+        execute_command("aws s3 cp %s/%s %s/" % (CHUNKS_RESULT_DIR, dedup_outfile_basename, SAMPLE_S3_OUTPUT_CHUNKS_PATH))
+        return os.path.join(CHUNKS_RESULT_DIR, dedup_outfile_basename)
 
 def run_gsnapl_remotely(input_files):
     key_name = os.path.basename(KEY_S3_PATH)
@@ -578,8 +579,8 @@ def run_rapsearch_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_w
     write_to_log("finished alignment for chunk %s" % chunk_id)
     # move output back to local
     time.sleep(10) # wait until the data is synced
-    execute_command("aws s3 cp %s/%s %s/" % (SAMPLE_S3_OUTPUT_CHUNKS_PATH, outfile_basename, RESULT_DIR))
-    return os.path.join(RESULT_DIR, outfile_basename)
+    execute_command("aws s3 cp %s/%s %s/" % (SAMPLE_S3_OUTPUT_CHUNKS_PATH, outfile_basename, CHUNKS_RESULT_DIR))
+    return os.path.join(CHUNKS_RESULT_DIR, outfile_basename)
 
 def run_rapsearch2_remotely(input_fasta):
     key_name = os.path.basename(KEY_S3_PATH)
@@ -822,7 +823,8 @@ def main():
     global SAMPLE_NAME
     global SAMPLE_S3_FASTQ_PATH
     global SAMPLE_S3_OUTPUT_CHUNKS_PATH
-
+    global CHUNKS_RESULT_DIR
+    
     FASTQ_BUCKET = os.environ.get('FASTQ_BUCKET', FASTQ_BUCKET)
     INPUT_BUCKET = os.environ.get('INPUT_BUCKET', INPUT_BUCKET)
     FILE_TYPE = os.environ.get('FILE_TYPE', FILE_TYPE)
@@ -838,6 +840,7 @@ def main():
     SAMPLE_DIR = DEST_DIR + '/' + SAMPLE_NAME
     FASTQ_DIR = SAMPLE_DIR + '/fastqs'
     RESULT_DIR = SAMPLE_DIR + '/results'
+    CHUNKS_RESULT_DIR = os.path.join(RESULT_DIR, "chunks")
     DEFAULT_LOGPARAMS = {"sample_s3_output_path": SAMPLE_S3_OUTPUT_PATH,
                          "stats_file": os.path.join(RESULT_DIR, STATS_OUT)}
     KEY_S3_PATH = get_key_path(ENVIRONMENT)
