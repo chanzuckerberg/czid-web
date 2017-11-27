@@ -382,7 +382,7 @@ def wait_for_server_ip(service_name, key_path, remote_username, environment, max
         for ip in instance_ips:
             command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "ps aux|grep %s|grep -v bash" || echo "error"' % (key_path, remote_username, ip, service_name)
             output = execute_command_with_output(command).rstrip().split("\n")
-            if output != ["error"]: ip_nproc_dict[ip] = len(output)
+            if output != ["error"]: ip_nproc_dict[ip] = len(output) - 1
         if not ip_nproc_dict:
             have_capacity = False
         else:
