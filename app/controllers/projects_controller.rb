@@ -28,6 +28,8 @@ class ProjectsController < ApplicationController
   def visuals
     project_id = params[:id]
     if project_id
+      project_info = Project.select('name').where(id: project_id)
+      @project_name = project_info[0].name if project_info[0]
       # we can avoid many joins, when we create a relationship between reports and projects, or with the samples
       # time_start = Time.now
       sql = <<-SQL
