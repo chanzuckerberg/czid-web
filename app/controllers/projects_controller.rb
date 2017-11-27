@@ -44,7 +44,7 @@ class ProjectsController < ApplicationController
       # time_end = Time.now
       # p 'Query took', "#{(time_end - time_start)} seconds"
       find_reports.each do |record|
-        @csv_records.push({name: record.first, link: fetch_csv_url(record.last)})
+        @csv_records.push(name: record.first, link: fetch_csv_url(record.last))
       end
     end
   end

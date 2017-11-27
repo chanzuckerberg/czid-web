@@ -7,7 +7,6 @@ class ProjectVisualization  extends React.Component {
     super(props);
     this.projectName = props.project_name;
     this.csvRecords = props.csv_records;
-    console.log('ALl props', props);
   }
   render () {
     return (
@@ -70,26 +69,6 @@ class ProjectVisualization  extends React.Component {
               </div>
             </div>
           </div>
-          {
-            /*
-            <div className='col s2'>
-              <div className='Visualization-actions'>
-                <ul className='card'>
-                  <li>
-                    <a href=''>
-                      <i className='fa fa-save text-white indigo'></i> Save Data
-                    </a>
-                  </li>
-                  <li>
-                    <a href=''>
-                      <i className='fa fa-cloud-download text-white teal'></i> Download Data
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </div>
-            */
-          }
         </div>
       </div>
     );
