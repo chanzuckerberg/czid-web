@@ -565,7 +565,7 @@ def run_rapsearch_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_w
                           '-a','T',
                           '-b','0',
                           '-v','1',
-                          '-z', str(multiprocessing.cpu_count()),
+                          '-z', '$(nproc --all)',
                           '-q', input_path,
                           '-o', output_path[:-3],
                           ';'])
