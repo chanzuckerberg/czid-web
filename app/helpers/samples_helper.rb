@@ -50,6 +50,10 @@ module SamplesHelper
     ''
   end
 
+  # def sample_status_display(sample)
+
+
+
   def parsed_samples_for_s3_path(s3_path, project_id, host_genome_id)
     default_attributes = { project_id: project_id,
                            host_genome_id: host_genome_id,
@@ -131,6 +135,19 @@ module SamplesHelper
               end
     samples
   end
+
+  # def samples_pipeline_run_info(samples)
+  #   pipeline_run_info = []
+  #   samples.each do |output|
+  #     pipeline_run_entry = {}
+        # if output.pipeline_run.first && output.pipeline_run.first.run_stages 
+  #     run_stages = output.pipeline_runs.first && output.pipeline_runs.first.pipeline_run_stages ? output.pipeline_runs.first.pipeline_run_stages : 
+  #     host_filtering = output.pipeline_runs.first && output.pipeline_runs.first.pipeline_run_stages ? output.pipeline_runs.first.pipeline_run_stages.first : null
+        # gsnap_alignment = 
+  #     pipeline_run_entry[:job_status_description] = 
+  #       if 
+  #   end
+  # end
 
   def format_samples(samples)
     formatted_samples = []
