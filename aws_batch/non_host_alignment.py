@@ -380,7 +380,7 @@ def wait_for_server_ip(service_name, key_path, remote_username, environment, max
         if i % 10 == 0: instance_ips = get_server_ips(service_name, environment)
         ip_nproc_dict = {}
         for ip in instance_ips:
-            command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "ps aux|grep gsnapl|grep -v bash" || echo "error"' % (key_path, remote_username, ip)
+            command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "ps aux|grep %s|grep -v bash" || echo "error"' % (key_path, remote_username, ip, service_name)
             output = execute_command_with_output(command).rstrip().split("\n")
             if output != ["error"]: ip_nproc_dict[ip] = len(output)
         if not ip_nproc_dict:
