@@ -425,13 +425,21 @@ def clean_direct_gsnapl_input(fastq_files):
     # unzip files if necessary
     if ".gz" in FILE_TYPE:
         subprocess.check_output(" ".join(["gunzip"] + fastq_files), shell=True)
-        cleaned_files = [os.path.splitext(f)[0] for f in fastq_files]
+        unzipped_files = [os.path.splitext(f)[0] for f in fastq_files]
     else:
-        cleaned_files = fastq_files
-    # generate file type for log
+        unzipped_files = fastq_files
+    # convert to fasta if necessary
     file_type_trimmed = FILE_TYPE.split(".gz")[0]
-    file_type_for_log = file_type_trimmed
-    if len(fastq_files)==2:
+    if file_type_trimmed == "fastq":
+        file_prefixes = [os.path.splitext(f)[0] for f in unzipped_files]
+        for file_prefix in file_prefixes:
+            execute_command("sed -n '1~4s/^@/>/p;2~4p' <%s.fastq >%s.fasta" % (file_prefix, file_prefix))
+        cleaned_files = [f + ".fasta" for f in file_prefixes]
+    else:
+        cleaned_files = unzipped_files
+    # generate file type for log
+    file_type_for_log = "fasta"
+    if len(fastq_files) == 2:
         file_type_for_log += "_paired"
     # copy files to S3
     for f in cleaned_files:
