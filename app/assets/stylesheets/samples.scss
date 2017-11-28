@@ -400,7 +400,8 @@ $break-large: 1070px;
     &:last-child {
       display: block;
       margin-right: 72px;
-      text-align: center;
+      text-align: left;
+      margin-left: 20px;
     }
   }
   input.search {
@@ -486,4 +487,16 @@ input[type=search]:focus:not([readonly]) {
 }
 .uploading {
   color: #e2a32e !important;
+}
+
+.postprocess-class {
+  color: #19d219;
+}
+
+.gsnap-class {
+  color: #e2a32e;
+}
+
+.hostfiltering-class{
+  color: #19d219;
 }

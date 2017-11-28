@@ -54,6 +54,17 @@ class Samples extends React.Component {
       let dbSample = sample.db_sample;
       let derivedOutput = sample.derived_sample_output;
       let runInfo = sample.run_info
+      rowWithChuckStatus = (
+        <td className={this.applyChunkStatusClass(runInfo.post_processing, runInfo.gsnap_alignment, runInfo.host_filtering)}>
+          <a href={'/samples/' + dbSample.id}>{this.getChunckedStatus(runInfo.post_processing, runInfo.gsnap_alignment, runInfo.host_filtering)}</a>
+        </td>
+      );
+      rowWithoutChunkStatus = (
+        <td className={this.applyClass(runInfo.job_status_description)}>
+          <a href={'/samples/' + dbSample.id}>{runInfo.job_status_description}</a>
+        </td>
+      )
+     
       return (
         <tr onClick={ this.viewSample.bind(this, dbSample.id)} key={i}>
           <td>
@@ -65,7 +76,7 @@ class Samples extends React.Component {
           <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? 'NA' : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.percent_remaining.toFixed(2)}%</a>}</td>
           <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? 'NA' : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.qc_percent.toFixed(2)}%</a>}</td>
           <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.compression_ratio) ? 'NA' : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.compression_ratio.toFixed(2)}</a>}</td>
-          <td className={this.applyClass(runInfo.job_status_description)}>{ !runInfo.job_status_description ? '' : <a href={'/samples/' + dbSample.id}>{runInfo.job_status_description}</a>}</td>
+          { !runInfo.job_status_description ? rowWithChuckStatus : rowWithoutChunkStatus }
         </tr>
       )
     })
@@ -74,12 +85,38 @@ class Samples extends React.Component {
   applyClass(status) {
     if(status === 'COMPLETE') {
       return 'complete';
-    } else if (status === 'UPLOADING' || status === 'IN PROGRESS') {
+    } else if (status === 'UPLOADING' || status === 'IN PROGRESS' || status === 'WAITING') {
       return 'uploading';
     } else if (status === 'INITIALIZING') {
       return 'initializing';
-    } else {
+    } else if (status === 'FAILED') {
       return 'failed';
+    }
+  }
+
+  applyChunkStatusClass(postProcess, gsnapAlignment, hostFiltering) {
+    if (postProcess === 'LOADED' || gsnapAlignment ===   'LOADED' || hostFiltering === 'LOADED') {
+      return 'complete';
+    } else if (postProcess === 'CHECKED' || gsnapAlignment === 'CHECKED' || hostFiltering === 'CHECKED') {
+      return 'running';
+    } else if (postProcess === 'FAILED' || gsnapAlignment === 'FAILED' || hostFiltering === 'FAILED')  {
+      return 'failed';
+    } else if (postProcess === 'STARTED' || gsnapAlignment === 'STARTED' || hostFiltering === 'STARTED')  {
+      return 'uploading';
+    } else {
+      return 'initializing';
+    }
+  }
+
+  getChunckedStatus(postProcess, gsnapAlignment, hostFiltering) {
+    if (postProcess && gsnapAlignment === 'LOADED' && hostFiltering === 'LOADED') {
+      return  `Post Processing: ${postProcess}`;
+    } else if (postProcess === null && gsnapAlignment && hostFiltering === 'LOADED') {
+      return `Gsnap Alignment: ${gsnapAlignment}`;
+    } else if (postProcess === null && gsnapAlignment === null && hostFiltering) {
+      return `Host Filtering: ${hostFiltering}`;
+    } else {
+      return `WAITING`;
     }
   }
 
@@ -217,6 +254,7 @@ class Samples extends React.Component {
     that.setState({ urlFilterQuery: status });
     this.displayResultsByParams(this.state.urlProjectId, this.state.urlSearchQuery, status);
   }
+
 
   render() {
     return (

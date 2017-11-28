@@ -50,8 +50,6 @@ module SamplesHelper
     ''
   end
 
-  # def sample_status_display(sample)
-
 
 
   def parsed_samples_for_s3_path(s3_path, project_id, host_genome_id)
@@ -104,29 +102,6 @@ module SamplesHelper
     final_result
   end
 
-  def samples_pipeline_run_info(samples)
-    pipeline_run_info = []
-    samples.each do |output|
-      pipeline_run_entry = {}
-      pipeline_run_status = output.pipeline_runs.first ? output.pipeline_runs.first.job_status : nil
-      pipeline_run_entry[:job_status_description] =
-        if %w[CHECKED SUCCEEDED].include?(pipeline_run_status)
-          'COMPLETE'
-        elsif %w[FAILED ERROR].include?(pipeline_run_status)
-          'FAILED'
-        elsif %w[RUNNING LOADED].include?(pipeline_run_status)
-          'IN PROGRESS'
-        elsif pipeline_run_status == 'RUNNABLE'
-          'INITIALIZING'
-        else
-          'UPLOADING'
-        end
-      pipeline_run_entry[:finalized] = output.pipeline_runs.first ? output.pipeline_runs.first.finalized : 0
-      pipeline_run_info.push(pipeline_run_entry)
-    end
-    pipeline_run_info
-  end
-
   def filter_samples(samples, query)
     samples = if query == 'UPLOADING'
                 samples.where(status: 'created')
@@ -136,18 +111,39 @@ module SamplesHelper
     samples
   end
 
-  # def samples_pipeline_run_info(samples)
-  #   pipeline_run_info = []
-  #   samples.each do |output|
-  #     pipeline_run_entry = {}
-        # if output.pipeline_run.first && output.pipeline_run.first.run_stages 
-  #     run_stages = output.pipeline_runs.first && output.pipeline_runs.first.pipeline_run_stages ? output.pipeline_runs.first.pipeline_run_stages : 
-  #     host_filtering = output.pipeline_runs.first && output.pipeline_runs.first.pipeline_run_stages ? output.pipeline_runs.first.pipeline_run_stages.first : null
-        # gsnap_alignment = 
-  #     pipeline_run_entry[:job_status_description] = 
-  #       if 
-  #   end
-  # end
+  def samples_pipeline_run_info(samples)
+    pipeline_run_info = []
+    samples.each do |output|
+      pipeline_run_entry = {}
+      if output.pipeline_runs.first
+        recent_pipeline_run = output.pipeline_runs.first
+        if recent_pipeline_run.pipeline_run_stages.present?
+          run_stages = recent_pipeline_run.pipeline_run_stages || []
+          host_filtering = run_stages ? run_stages.first.job_status : nil
+          gsnap_alignment = run_stages ? run_stages.second.job_status : nil
+          post_processing = run_stages ? run_stages.third.job_status : nil
+          pipeline_run_entry[:post_processing] = post_processing 
+          pipeline_run_entry[:gsnap_alignment] = gsnap_alignment 
+          pipeline_run_entry[:host_filtering] = host_filtering
+        else
+          pipeline_run_status = recent_pipeline_run.job_status
+          pipeline_run_entry[:job_status_description] = 
+          if %w[CHECKED SUCCEEDED].include?(pipeline_run_status)
+            'COMPLETE'
+          elsif %w[FAILED ERROR].include?(pipeline_run_status)
+            'FAILED'
+          elsif %w[RUNNING LOADED].include?(pipeline_run_status)
+            'IN PROGRESS'
+          elsif pipeline_run_status == 'RUNNABLE'
+            'INITIALIZING'
+          end
+        end
+      pipeline_run_entry[:finalized] = output.pipeline_runs.first ? output.pipeline_runs.first.finalized : 0
+      pipeline_run_info.push(pipeline_run_entry)
+    end
+    pipeline_run_info
+  end
+
 
   def format_samples(samples)
     formatted_samples = []
