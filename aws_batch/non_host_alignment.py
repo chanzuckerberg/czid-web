@@ -541,8 +541,8 @@ def run_filter_deuterostomes_from_m8(input_m8, output_m8):
     execute_command("aws s3 cp %s %s/" % (output_m8, SAMPLE_S3_OUTPUT_PATH))
 
 def run_generate_taxid_annotated_fasta_from_m8(input_m8, input_fasta,
-    output_fasta, annotation_prefix):
-    generate_taxid_annotated_fasta_from_m8(input_fasta, input_m8, output_fasta, annotation_prefix)
+    output_fasta, annotation_prefix, full_alignment_info):
+    generate_taxid_annotated_fasta_from_m8(input_fasta, input_m8, output_fasta, annotation_prefix, full_alignment_info)
     write_to_log("finished job")
     # move the output back to S3
     execute_command("aws s3 cp %s %s/" % (output_fasta, SAMPLE_S3_OUTPUT_PATH))
@@ -724,7 +724,7 @@ def run_stage2(lazy_run = True):
     run_and_log(logparams, TARGET_OUTPUTS["run_generate_taxid_annotated_fasta_from_m8__1"], False,
         run_generate_taxid_annotated_fasta_from_m8, os.path.join(RESULT_DIR, GSNAPL_DEDUP_OUT),
         os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT3),
-        os.path.join(RESULT_DIR, GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT), 'NT')
+        os.path.join(RESULT_DIR, GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT), 'NT', True)
 
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "filter deuterostomes from m8__1", "count_reads": True,
@@ -776,7 +776,7 @@ def run_stage2(lazy_run = True):
         RESULT_DIR + '/' + RAPSEARCH2_OUT,
         RESULT_DIR + '/' + FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT,
         RESULT_DIR + '/' + GENERATE_TAXID_ANNOTATED_FASTA_FROM_RAPSEARCH2_M8_OUT,
-        'NR')
+        'NR', True)
 
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "filter deuterostomes from m8", "count_reads": True,
