@@ -9,6 +9,7 @@ class PipelineRunStage < ApplicationRecord
   STATUS_FAILED  = 'FAILED'.freeze
   STATUS_CHECKED = 'CHECKED'.freeze
   STATUS_LOADED = 'LOADED'.freeze
+  STATUS_ERROR = 'ERROR'.freeze
 
   before_save :check_job_status
 
