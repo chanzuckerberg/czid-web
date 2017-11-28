@@ -100,12 +100,21 @@ module SamplesHelper
   end
 
   def filter_samples(samples, query)
-    samples = if query == 'WAITING'
-                samples.where(status: 'created')
-              else
-                samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status = ?", query)
-              end
-    samples
+    p query, 'query found here!!!!'
+    db_query = nil
+   if query == 'WAITING'
+      samples = samples.where(status: 'created')
+   end
+    if query == 'FAILED'
+      db_query = query || '1.Host Filtering-FAILED' || '2.GSNAPL/RAPSEARCH alignment-FAILED' || '3.Post Processing-FAILED' || 'ERROR' 
+    elsif query == 'UPLOADING'
+      db_query = query || '1.Host Filtering-STARTED' || '1.Host Filtering-CHECKED' || '1.Host Filtering-LOADED' ||
+      '2.GSNAPL/RAPSEARCH alignment-STARTED' || '2.GSNAPL/RAPSEARCH alignment-CHECKED' || '2.GSNAPL/RAPSEARCH alignment-LOADED' || nil || '3.Post Processing-STARTED' || '3.Post Processing-CHECKED'
+    elsif query == 'CHECKED'
+      db_query = query || '3.Post Processing-CHECKED'
+    samples = samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status = ?", db_query)
+  end
+  samples
   end
 
   def samples_pipeline_run_info(samples)
@@ -117,10 +126,10 @@ module SamplesHelper
         if recent_pipeline_run.pipeline_run_stages.present?
           run_stages = recent_pipeline_run.pipeline_run_stages || []
           host_filtering = run_stages ? run_stages.first.job_status : nil
-          gsnap_alignment = run_stages ? run_stages.second.job_status : nil
+          alignment = run_stages ? run_stages.second.job_status : nil
           post_processing = run_stages ? run_stages.third.job_status : nil
           pipeline_run_entry[:post_processing] = post_processing
-          pipeline_run_entry[:gsnap_alignment] = gsnap_alignment
+          pipeline_run_entry[:alignment] = alignment
           pipeline_run_entry[:host_filtering] = host_filtering
         else
           pipeline_run_status = recent_pipeline_run.job_status

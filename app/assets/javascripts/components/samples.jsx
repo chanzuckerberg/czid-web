@@ -54,9 +54,9 @@ class Samples extends React.Component {
       let dbSample = sample.db_sample;
       let derivedOutput = sample.derived_sample_output;
       let runInfo = sample.run_info
-      rowWithChuckStatus = (
-        <td className={this.applyChunkStatusClass(runInfo.post_processing, runInfo.gsnap_alignment, runInfo.host_filtering)}>
-          <a href={'/samples/' + dbSample.id}>{this.getChunckedStatus(runInfo.post_processing, runInfo.gsnap_alignment, runInfo.host_filtering)}</a>
+      rowWithChunkStatus = (
+        <td className={this.applyChunkStatusClass(runInfo.post_processing, runInfo.alignmment, runInfo.host_filtering)}>
+          <a href={'/samples/' + dbSample.id}>{this.getChunckedStatus(runInfo.post_processing, runInfo.alignment, runInfo.host_filtering)}</a>
         </td>
       );
       rowWithoutChunkStatus = (
@@ -76,7 +76,7 @@ class Samples extends React.Component {
           <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? 'NA' : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.percent_remaining.toFixed(2)}%</a>}</td>
           <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? 'NA' : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.qc_percent.toFixed(2)}%</a>}</td>
           <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.compression_ratio) ? 'NA' : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.compression_ratio.toFixed(2)}</a>}</td>
-          { !runInfo.job_status_description ? rowWithChuckStatus : rowWithoutChunkStatus }
+          { !runInfo.job_status_description ? rowWithChunkStatus : rowWithoutChunkStatus }
         </tr>
       )
     })
@@ -94,26 +94,26 @@ class Samples extends React.Component {
     }
   }
 
-  applyChunkStatusClass(postProcess, gsnapAlignment, hostFiltering) {
-    if (postProcess === 'LOADED' || gsnapAlignment ===   'LOADED' || hostFiltering === 'LOADED') {
+  applyChunkStatusClass(postProcess, alignment, hostFiltering) {
+    if (postProcess === 'LOADED' || alignment ===   'LOADED' || hostFiltering === 'LOADED') {
       return 'complete';
-    } else if (postProcess === 'CHECKED' || gsnapAlignment === 'CHECKED' || hostFiltering === 'CHECKED') {
+    } else if (postProcess === 'CHECKED' || alignment === 'CHECKED' || hostFiltering === 'CHECKED') {
       return 'uploading';
-    } else if (postProcess === 'FAILED' || gsnapAlignment === 'FAILED' || hostFiltering === 'FAILED')  {
+    } else if (postProcess === 'FAILED' || alignment === 'FAILED' || hostFiltering === 'FAILED')  {
       return 'failed';
-    } else if (postProcess === 'STARTED' || gsnapAlignment === 'STARTED' || hostFiltering === 'STARTED')  {
+    } else if (postProcess === 'STARTED' || alignment === 'STARTED' || hostFiltering === 'STARTED')  {
       return 'started';
     } else {
       return 'initializing';
     }
   }
 
-  getChunckedStatus(postProcess, gsnapAlignment, hostFiltering) {
-    if (postProcess && gsnapAlignment === 'LOADED' && hostFiltering === 'LOADED') {
+  getChunckedStatus(postProcess, alignment, hostFiltering) {
+    if (postProcess && alignment === 'LOADED' && hostFiltering === 'LOADED') {
       return  `Post Processing: ${postProcess}`;
-    } else if (postProcess === null && gsnapAlignment && hostFiltering === 'LOADED') {
-      return `Gsnap Alignment: ${gsnapAlignment}`;
-    } else if (postProcess === null && gsnapAlignment === null && hostFiltering) {
+    } else if (postProcess === null && alignment && hostFiltering === 'LOADED') {
+      return `Gsnap Alignment: ${alignment}`;
+    } else if (postProcess === null && alignment === null && hostFiltering) {
       return `Host Filtering: ${hostFiltering}`;
     } else {
       return `WAITING`;
@@ -186,12 +186,12 @@ class Samples extends React.Component {
           {/* Dropdown menu */}
           <ul id='dropdownstatus' className='status dropdown-content'>
           <li><a href="#!" className="title"><b>Filter by status</b></a></li>
+          <li data-status="WAITING" onClick={ this.filterByStatus } ><a data-status="WAITING" className="waiting" href="#!">Waiting</a></li>
+          <li data-status="UPLOADING" onClick={ this.filterByStatus }><a data-status="UPLOADING" className="uploading" href="#!">Uploading</a></li>
+          <li data-status="CHECKED" onClick={ this.filterByStatus }><a data-status="CHECKED" className="complete" href="#!">Complete</a></li>
+          <li onClick={ this.filterByStatus } data-status="FAILED" ><a data-status="FAILED" className="failed" href="#!">Failed</a></li>
             <li className="divider"></li>
-            <li data-status="CHECKED" onClick={ this.filterByStatus }><a data-status="CHECKED" className="complete" href="#!">Complete</a></li>
-            {/* <li data-status="RUNNING" onClick={ this.filterByStatus }><a data-status="RUNNING" className="waiting" href="#!">In Progress</a></li> */}
-            <li onClick={ this.filterByStatus } data-status="FAILED" ><a data-status="FAILED" className="failed" href="#!">Failed</a></li>
-            <li data-status="WAITING" onClick={ this.filterByStatus } ><a data-status="WAITING" className="waiting" href="#!">Waiting</a></li>
-            <li data-status="RUNNABLE" onClick={ this.filterByStatus } ><a data-status="RUNNABLE" className="initializing" href="#!">Initializing</a></li>
+          <li data-status="ALL" onClick={ this.filterByStatus }><a data-status="ALL" className="all" href="#!">All</a></li>
           </ul>
           <table className="bordered highlight samples-table">
             <thead>
