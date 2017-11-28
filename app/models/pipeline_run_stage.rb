@@ -129,17 +129,19 @@ class PipelineRunStage < ApplicationRecord
 
   def host_filtering_command
     script_name = File.basename(IdSeqPipeline::S3_HOST_FILTER_SCRIPT_LOC)
+    common_script_name = File.basename(IdSeqPipeline::S3_COMMON_SCRIPT_LOC)
     sample = pipeline_run.sample
     file_type = sample.input_files.first.file_type
     batch_command_env_variables = "INPUT_BUCKET=#{sample.sample_input_s3_path} OUTPUT_BUCKET=#{sample.sample_output_s3_path} " \
-      "FILE_TYPE=#{file_type} ENVIRONMENT=#{Rails.env} DB_SAMPLE_ID=#{sample.id}"
+      "FILE_TYPE=#{file_type} DB_SAMPLE_ID=#{sample.id}"
     if sample.s3_star_index_path.present?
       batch_command_env_variables += "STAR_GENOME=#{sample.s3_star_index_path} "
     end
     if sample.s3_bowtie2_index_path.present?
       batch_command_env_variables += "BOWTIE2_GENOME=#{sample.s3_bowtie2_index_path} "
     end
-    batch_command = "aws s3 cp #{IdSeqPipeline::S3_HOST_FILTER_SCRIPT_LOC} .; chmod 755 #{script_name}; " +
+    batch_command = "aws s3 cp #{IdSeqPipeline::S3_HOST_FILTER_SCRIPT_LOC} .; chmod 755 #{script_name}; " \
+      "aws s3 cp #{IdSeqPipeline::S3_COMMON_SCRIPT_LOC} .; chmod 755 #{common_script_name}; " +
                     batch_command_env_variables + " ./#{script_name}"
     command = "aegea batch submit --command=\"#{batch_command}\" "
     memory = sample.sample_memory.present? ? sample.sample_memory : Sample::DEFAULT_MEMORY
@@ -150,10 +152,13 @@ class PipelineRunStage < ApplicationRecord
 
   def alignment_command
     script_name = File.basename(IdSeqPipeline::S3_ALIGNMENT_SCRIPT_LOC)
+    common_script_name = File.basename(IdSeqPipeline::S3_COMMON_SCRIPT_LOC)
     sample = pipeline_run.sample
-    batch_command_env_variables = "INPUT_BUCKET=#{sample.sample_input_s3_path} OUTPUT_BUCKET=#{sample.sample_output_s3_path} " \
-      "ENVIRONMENT=#{Rails.env} DB_SAMPLE_ID=#{sample.id}"
-    batch_command = "aws s3 cp #{IdSeqPipeline::S3_ALIGNMENT_SCRIPT_LOC} .; chmod 755 #{script_name}; " +
+    file_type = sample.input_files.first.file_type
+    batch_command_env_variables = "FASTQ_BUCKET=#{sample.sample_input_s3_path} INPUT_BUCKET=#{sample.sample_output_s3_path} " \
+      "OUTPUT_BUCKET=#{sample.sample_output_s3_path} FILE_TYPE=#{file_type} ENVIRONMENT=#{Rails.env} DB_SAMPLE_ID=#{sample.id}"
+    batch_command = "aws s3 cp #{IdSeqPipeline::S3_ALIGNMENT_SCRIPT_LOC} .; chmod 755 #{script_name}; " \
+      "aws s3 cp #{IdSeqPipeline::S3_COMMON_SCRIPT_LOC} .; chmod 755 #{common_script_name}; " +
                     batch_command_env_variables + " ./#{script_name}"
     command = "aegea batch submit --command=\"#{batch_command}\" "
     queue = sample.job_queue.present? ? sample.job_queue : Sample::DEFAULT_QUEUE
@@ -163,10 +168,12 @@ class PipelineRunStage < ApplicationRecord
 
   def postprocess_command
     script_name = File.basename(IdSeqPipeline::S3_POSTPROCESS_SCRIPT_LOC)
+    common_script_name = File.basename(IdSeqPipeline::S3_COMMON_SCRIPT_LOC)
     sample = pipeline_run.sample
     batch_command_env_variables = "INPUT_BUCKET=#{sample.sample_output_s3_path} " \
       "OUTPUT_BUCKET=#{sample.sample_postprocess_s3_path} "
-    batch_command = "aws s3 cp #{IdSeqPipeline::S3_POSTPROCESS_SCRIPT_LOC} .; chmod 755 #{script_name}; " +
+    batch_command = "aws s3 cp #{IdSeqPipeline::S3_POSTPROCESS_SCRIPT_LOC} .; chmod 755 #{script_name}; " \
+      "aws s3 cp #{IdSeqPipeline::S3_COMMON_SCRIPT_LOC} .; chmod 755 #{common_script_name}; " +
                     batch_command_env_variables + " ./#{script_name}"
     command = "aegea batch submit --command=\"#{batch_command}\" "
     queue = sample.job_queue.present? ? sample.job_queue : Sample::DEFAULT_QUEUE
