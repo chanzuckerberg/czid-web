@@ -47,10 +47,7 @@ module SamplesHelper
         return 'initializing'
       end
     end
-    ''
   end
-
-
 
   def parsed_samples_for_s3_path(s3_path, project_id, host_genome_id)
     default_attributes = { project_id: project_id,
@@ -103,7 +100,7 @@ module SamplesHelper
   end
 
   def filter_samples(samples, query)
-    samples = if query == 'UPLOADING'
+    samples = if query == 'WAITING'
                 samples.where(status: 'created')
               else
                 samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status = ?", query)
@@ -139,6 +136,9 @@ module SamplesHelper
           end
         end
       pipeline_run_entry[:finalized] = output.pipeline_runs.first ? output.pipeline_runs.first.finalized : 0
+      else
+        pipeline_run_entry[:job_status_description] = 'WAITING'
+      end
       pipeline_run_info.push(pipeline_run_entry)
     end
     pipeline_run_info

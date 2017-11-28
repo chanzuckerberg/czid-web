@@ -479,7 +479,7 @@ input[type=search]:focus:not([readonly]) {
 .failed {
   color: #ad1818 !important;
 }
-.running {
+.waiting {
   color: #3f51b5 !important;
 }
 .initializing {
@@ -487,6 +487,10 @@ input[type=search]:focus:not([readonly]) {
 }
 .uploading {
   color: #e2a32e !important;
+}
+
+.started {
+  color: #9e5353;
 }
 
 .postprocess-class {

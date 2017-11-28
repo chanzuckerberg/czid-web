@@ -85,8 +85,8 @@ class Samples extends React.Component {
   applyClass(status) {
     if(status === 'COMPLETE') {
       return 'complete';
-    } else if (status === 'UPLOADING' || status === 'IN PROGRESS' || status === 'WAITING') {
-      return 'uploading';
+    } else if (status === 'WAITING') {
+      return 'waiting';
     } else if (status === 'INITIALIZING') {
       return 'initializing';
     } else if (status === 'FAILED') {
@@ -98,11 +98,11 @@ class Samples extends React.Component {
     if (postProcess === 'LOADED' || gsnapAlignment ===   'LOADED' || hostFiltering === 'LOADED') {
       return 'complete';
     } else if (postProcess === 'CHECKED' || gsnapAlignment === 'CHECKED' || hostFiltering === 'CHECKED') {
-      return 'running';
+      return 'uploading';
     } else if (postProcess === 'FAILED' || gsnapAlignment === 'FAILED' || hostFiltering === 'FAILED')  {
       return 'failed';
     } else if (postProcess === 'STARTED' || gsnapAlignment === 'STARTED' || hostFiltering === 'STARTED')  {
-      return 'uploading';
+      return 'started';
     } else {
       return 'initializing';
     }
@@ -188,9 +188,9 @@ class Samples extends React.Component {
           <li><a href="#!" className="title"><b>Filter by status</b></a></li>
             <li className="divider"></li>
             <li data-status="CHECKED" onClick={ this.filterByStatus }><a data-status="CHECKED" className="complete" href="#!">Complete</a></li>
-            <li data-status="RUNNING" onClick={ this.filterByStatus }><a data-status="RUNNING" className="running" href="#!">In Progress</a></li>
+            {/* <li data-status="RUNNING" onClick={ this.filterByStatus }><a data-status="RUNNING" className="waiting" href="#!">In Progress</a></li> */}
             <li onClick={ this.filterByStatus } data-status="FAILED" ><a data-status="FAILED" className="failed" href="#!">Failed</a></li>
-            <li data-status="UPLOADING" onClick={ this.filterByStatus } ><a data-status="UPLOADING" className="uploading" href="#!">Uploading</a></li>
+            <li data-status="WAITING" onClick={ this.filterByStatus } ><a data-status="WAITING" className="waiting" href="#!">Waiting</a></li>
             <li data-status="RUNNABLE" onClick={ this.filterByStatus } ><a data-status="RUNNABLE" className="initializing" href="#!">Initializing</a></li>
           </ul>
           <table className="bordered highlight samples-table">
