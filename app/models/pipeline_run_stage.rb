@@ -143,7 +143,7 @@ class PipelineRunStage < ApplicationRecord
     end
     batch_command = "aws s3 cp #{IdSeqPipeline::S3_HOST_FILTER_SCRIPT_LOC} .; chmod 755 #{script_name}; " \
       "aws s3 cp #{IdSeqPipeline::S3_COMMON_SCRIPT_LOC} .; chmod 755 #{common_script_name}; " +
-      batch_command_env_variables + " ./#{script_name}"
+                    batch_command_env_variables + " ./#{script_name}"
     command = "aegea batch submit --command=\"#{batch_command}\" "
     memory = sample.sample_memory.present? ? sample.sample_memory : Sample::DEFAULT_MEMORY
     queue =  sample.job_queue.present? ? sample.job_queue : Sample::DEFAULT_QUEUE
@@ -160,7 +160,7 @@ class PipelineRunStage < ApplicationRecord
       "OUTPUT_BUCKET=#{sample.sample_output_s3_path} FILE_TYPE=#{file_type} ENVIRONMENT=#{Rails.env} DB_SAMPLE_ID=#{sample.id}"
     batch_command = "aws s3 cp #{IdSeqPipeline::S3_ALIGNMENT_SCRIPT_LOC} .; chmod 755 #{script_name}; " \
       "aws s3 cp #{IdSeqPipeline::S3_COMMON_SCRIPT_LOC} .; chmod 755 #{common_script_name}; " +
-      batch_command_env_variables + " ./#{script_name}"
+                    batch_command_env_variables + " ./#{script_name}"
     command = "aegea batch submit --command=\"#{batch_command}\" "
     queue = sample.job_queue.present? ? sample.job_queue : Sample::DEFAULT_QUEUE
     command += " --storage /mnt=#{DEFAULT_STORAGE_IN_GB} --ecr-image idseq --memory #{DEFAULT_MEMORY_IN_MB} --queue #{queue} --vcpus 4"
@@ -175,7 +175,7 @@ class PipelineRunStage < ApplicationRecord
       "OUTPUT_BUCKET=#{sample.sample_postprocess_s3_path} "
     batch_command = "aws s3 cp #{IdSeqPipeline::S3_POSTPROCESS_SCRIPT_LOC} .; chmod 755 #{script_name}; " \
       "aws s3 cp #{IdSeqPipeline::S3_COMMON_SCRIPT_LOC} .; chmod 755 #{common_script_name}; " +
-      batch_command_env_variables + " ./#{script_name}"
+                    batch_command_env_variables + " ./#{script_name}"
     command = "aegea batch submit --command=\"#{batch_command}\" "
     queue = sample.job_queue.present? ? sample.job_queue : Sample::DEFAULT_QUEUE
     command += " --storage /mnt=#{DEFAULT_STORAGE_IN_GB} --ecr-image idseq --memory #{DEFAULT_MEMORY_IN_MB} --queue #{queue} --vcpus 4"
