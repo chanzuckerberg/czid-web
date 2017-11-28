@@ -156,7 +156,7 @@ class PipelineSampleReads extends React.Component {
               <table>
                 <tbody>
                 <tr>
-                  <td>Remaining Reads</td>
+                  <td>Total Non-Host Reads</td>
                   <td>{ !this.summary_stats.remaining_reads ? 'NA' : numberWithCommas(this.summary_stats.remaining_reads) } ({ !this.summary_stats.percent_remaining ? 'NA' : this.summary_stats.percent_remaining.toFixed(2) }%)</td>
                 </tr>
                 <tr>
