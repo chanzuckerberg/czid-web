@@ -260,7 +260,6 @@
     position: relative;
     top: -5px;
     bottom: 1px;
-
     &:hover, &.active {
       color: #09c;
     }
@@ -272,19 +271,50 @@
     width: 450px;
   }
 }
-
-
-.genus-autocomplete-container div div.decorate-dropdown{
-  display: block;
-  min-width: 168px;
-  border-radius: 3px;
-  box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px;
-  position: absolute;
-  overflow: scroll;
-  max-height: 399px;
-  z-index: 500;
-  background: #fff;
-  padding: 10px;
+.genus-autocomplete-container {
+  padding: 0 !important;
+  div {
+    display: block !important;
+    input + div {
+      left: inherit !important;
+      top: inherit !important;
+      border-bottom-left-radius: 3px !important;
+      border-bottom-right-radius: 3px !important;
+      position: absolute !important;
+      overflow: scroll !important;
+      max-height: 400px !important;
+      z-index: 500 !important;
+      background: #fff !important;
+      min-width: 95% !important;
+      max-width: 95%;
+      font-size: inherit !important;
+      padding: 0 !important;
+      div {
+        padding: 8px;
+        cursor: pointer;
+      }
+    }
+    [role='combobox'] {
+      width: 100% !important;
+      border: 1px solid #A6B7C1 !important;
+      margin: 5px 0 0 0 !important;
+      padding-left: 8px;
+      border-radius: 3px;
+      background: #fff;
+      -webkit-transition: all 0.30s ease-in-out;
+      -moz-transition: all 0.30s ease-in-out;
+      -ms-transition: all 0.30s ease-in-out;
+      -o-transition: all 0.30s ease-in-out;
+      outline: none;
+      &::placeholder, &::-webkit-input-placeholder, &:-moz-placeholder, &::placeholder {
+        color: #BAC7CF
+      }
+      &:focus {
+        box-shadow: 0 0 5px #00a9f4 !important;
+        border: 1px solid #00a9f4 !important;
+      }
+    }
+  }
 }
 
 .reports-section {

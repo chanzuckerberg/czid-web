@@ -117,6 +117,7 @@ module SamplesHelper
         else
           'UPLOADING'
         end
+      pipeline_run_entry[:finalized] = output.pipeline_runs.first ? output.pipeline_runs.first.finalized : 0
       pipeline_run_info.push(pipeline_run_entry)
     end
     pipeline_run_info
