@@ -467,7 +467,7 @@ def run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work
                               + ['> '+remote_outfile, ';'])
         commands += "aws s3 cp %s %s/;" % (remote_outfile, SAMPLE_S3_OUTPUT_CHUNKS_PATH)
         # check if remote machine has enough capacity
-        if lazy_run and not check_s3_file_presence(os.path.join(SAMPLE_S3_OUTPUT_CHUNKS_PATH, dedup_outfile_basename)):
+        if not lazy_run or not check_s3_file_presence(os.path.join(SAMPLE_S3_OUTPUT_CHUNKS_PATH, dedup_outfile_basename)):
             write_to_log("waiting for server")
             gsnapl_instance_ip = wait_for_server_ip('gsnap', key_path, remote_username, ENVIRONMENT, GSNAPL_MAX_CONCURRENT)
             write_to_log("starting alignment for chunk %s on machine %s" % (chunk_id, gsnapl_instance_ip))
@@ -572,7 +572,7 @@ def run_rapsearch_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_w
                           '-o', output_path[:-3],
                           ';'])
     commands += "aws s3 cp %s %s/;" % (output_path, SAMPLE_S3_OUTPUT_CHUNKS_PATH)
-    if lazy_run and not check_s3_file_presence(os.path.join(SAMPLE_S3_OUTPUT_CHUNKS_PATH, outfile_basename)):
+    if not lazy_run or not check_s3_file_presence(os.path.join(SAMPLE_S3_OUTPUT_CHUNKS_PATH, outfile_basename)):
         write_to_log("waiting for server")
         instance_ip = wait_for_server_ip('rapsearch', key_path, remote_username, ENVIRONMENT, RAPSEARCH2_MAX_CONCURRENT)
         write_to_log("starting alignment for chunk %s on machine %s" % (chunk_id, instance_ip))
