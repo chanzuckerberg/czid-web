@@ -49,13 +49,6 @@ class ReportFilter extends React.Component {
     this.applyGenusFilter('None');
   }
 
-  componentDidMount() {
-    $('.genus-autocomplete-container div input').on('focus keyup', () => {
-      $('.genus-autocomplete-container div input + div').removeAttr('style');
-      $('.genus-autocomplete-container div input + div').addClass('decorate-dropdown');
-    });
-  }
-
   thresholdInput(metric_token, visible_metric_name) {
     return (
       <div className='col s12'>
@@ -137,27 +130,29 @@ class ReportFilter extends React.Component {
   if (this.props.report_page_params.disable_filters == 0) {
     genus_search = (
       <div className="filter-controls">
-        <div className="filter-title">
-          GENUS SEARCH
-        </div>
-        <div className="filter-values genus-autocomplete-container">
-          <ReactAutocomplete
-            inputProps={{ placeholder: 'Genus name here' }}
-            items={this.genus_search_items}
-            shouldItemRender={(item, value) => item == 'None' || item.toLowerCase().indexOf(value.toLowerCase()) > -1}
-            getItemValue={item => item}
-            renderItem={(item, highlighted) =>
-              <div
-                key={item}
-                style={{ backgroundColor: highlighted ? '#eee' : 'transparent'}}
-              >
-                {item}
-              </div>
-            }
-            value={this.state.genus_search_value}
-            onChange={(e) => this.setState(ReportFilter.genusSearchValueFor(e.target.value))}
-            onSelect={this.applyGenusFilter}
-         />
+        <div className="row">
+          <div className="input-field col s12">
+            <div className='genus-name-label'>GENUS SEARCH</div>
+            <div className="filter-values genus-autocomplete-container">
+              <ReactAutocomplete
+                inputProps={{ placeholder: 'Genus name here' }}
+                items={this.genus_search_items}
+                shouldItemRender={(item, value) => item == 'None' || item.toLowerCase().indexOf(value.toLowerCase()) > -1}
+                getItemValue={item => item}
+                renderItem={(item, highlighted) =>
+                  <div
+                    key={item}
+                    style={{ backgroundColor: highlighted ? '#eee' : 'transparent'}}
+                  >
+                    {item}
+                  </div>
+                }
+                value={this.state.genus_search_value}
+                onChange={(e) => this.setState(ReportFilter.genusSearchValueFor(e.target.value))}
+                onSelect={this.applyGenusFilter}
+              />
+            </div>
+          </div>
         </div>
       </div>
     );
