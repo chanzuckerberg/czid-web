@@ -493,7 +493,7 @@ def run_gsnapl_remotely(input_files, lazy_run):
     remote_index_dir = "%s/share" % remote_home_dir
     # split file:
     chunk_nlines = 2*GSNAPL_CHUNK_SIZE
-    part_suffix = "-chunksize-" + GSNAPL_CHUNK_SIZE + "-part-"
+    part_suffix = "-chunksize-%d-part-" % GSNAPL_CHUNK_SIZE
     input_chunks = chunk_input(input_files, chunk_nlines, part_suffix)
     # process chunks:
     chunk_output_files = []
@@ -595,7 +595,7 @@ def run_rapsearch2_remotely(input_fasta, lazy_run):
     remote_index_dir = "%s/references/nr_rapsearch" % remote_home_dir
     # split file:
     chunk_nlines = 2*RAPSEARCH_CHUNK_SIZE
-    part_suffix = "-chunksize-" + RAPSEARCH_CHUNK_SIZE + "-part-"
+    part_suffix = "-chunksize-%d-part-" % RAPSEARCH_CHUNK_SIZE
     input_chunks = chunk_input([input_fasta], chunk_nlines, part_suffix)
     # process chunks:
     chunk_output_files = []
