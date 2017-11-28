@@ -142,7 +142,7 @@ def clean_direct_gsnapl_input(fastq_files, file_type, sample_s3_output_path):
         execute_command("aws s3 cp %s %s/" % (f, sample_s3_output_path))
     return cleaned_files, file_type_for_log
 
-def generate_taxid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fasta_file, annotation_prefix):
+def generate_taxid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fasta_file, annotation_prefix, full_alignment_info):
     '''Tag reads based on the m8 output'''
     # Example:  generate_annotated_fasta_from_m8('filter.unmapped.merged.fasta',
     #  'bowtie.unmapped.star.gsnapl-nt-k16.m8', 'NT-filter.unmapped.merged.fasta', 'NT')
@@ -169,7 +169,10 @@ def generate_taxid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fas
     while sequence_name and sequence_data:
         read_id = sequence_name.rstrip().lstrip('>')
         accession = read_to_accession_id.get(read_id, '')
-        new_read_name = annotation_prefix + ':' + accession + ':' + read_id
+        annotation = accession
+        if full_alignment_info:
+            annotation += ### full alignment info from the m8
+        new_read_name = annotation_prefix + ':' + annotation + ':' + read_id
         output_fasta_f.write(">%s\n" % new_read_name)
         output_fasta_f.write(sequence_data)
         sequence_name = input_fasta_f.readline()
