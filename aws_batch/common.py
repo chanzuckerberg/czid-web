@@ -148,7 +148,7 @@ def load_existing_stats(stats_file):
     global STATS
     if os.path.isfile(stats_file):
         with open(stats_file) as f:
-            STATS = json.load(f)    
+            STATS = json.load(f)
 
 def get_total_reads_from_stats():
     return [item for item in STATS if "total_reads" in item][0]["total_reads"]
