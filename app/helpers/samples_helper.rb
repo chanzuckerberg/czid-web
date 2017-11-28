@@ -100,21 +100,23 @@ module SamplesHelper
   end
 
   def filter_samples(samples, query)
-    p query, 'query found here!!!!'
-    db_query = nil
    if query == 'WAITING'
-      samples = samples.where(status: 'created')
-   end
-    if query == 'FAILED'
-      db_query = query || '1.Host Filtering-FAILED' || '2.GSNAPL/RAPSEARCH alignment-FAILED' || '3.Post Processing-FAILED' || 'ERROR' 
-    elsif query == 'UPLOADING'
-      db_query = query || '1.Host Filtering-STARTED' || '1.Host Filtering-CHECKED' || '1.Host Filtering-LOADED' ||
-      '2.GSNAPL/RAPSEARCH alignment-STARTED' || '2.GSNAPL/RAPSEARCH alignment-CHECKED' || '2.GSNAPL/RAPSEARCH alignment-LOADED' || nil || '3.Post Processing-STARTED' || '3.Post Processing-CHECKED'
-    elsif query == 'CHECKED'
-      db_query = query || '3.Post Processing-CHECKED'
-    samples = samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status = ?", db_query)
-  end
-  samples
+    samples = samples.joins("LEFT OUTER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where("samples.status = ?  or pipeline_runs.job_status is NULL", 'created')
+   else
+      if query == 'FAILED'
+        db_query = [query, '1.Host Filtering-FAILED', '2.GSNAPL/RAPSEARCH alignment-FAILED', '3.Post Processing-FAILED', 'ERROR']
+        samples = samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status IN (?)", db_query)
+      elsif query == 'UPLOADING'
+        db_query = [query, '1.Host Filtering-STARTED', '1.Host Filtering-CHECKED','1.Host Filtering-LOADED',
+        '2.GSNAPL/RAPSEARCH alignment-STARTED', '2.GSNAPL/RAPSEARCH alignment-CHECKED', '2.GSNAPL/RAPSEARCH alignment-LOADED','3.Post Processing-STARTED','3.Post Processing-CHECKED'] 
+        samples = samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status IN (?)", db_query)
+      elsif query == 'CHECKED'
+        db_query = [query,'3.Post Processing-CHECKED'] 
+        samples = samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status IN (?)", db_query)
+      else samples = samples
+      end
+    end
+    samples
   end
 
   def samples_pipeline_run_info(samples)
@@ -123,6 +125,7 @@ module SamplesHelper
       pipeline_run_entry = {}
       if output.pipeline_runs.first
         recent_pipeline_run = output.pipeline_runs.first
+        pipeline_run_entry[:job_status_description] = 'WAITING' if recent_pipeline_run.job_status.nil?
         if recent_pipeline_run.pipeline_run_stages.present?
           run_stages = recent_pipeline_run.pipeline_run_stages || []
           host_filtering = run_stages ? run_stages.first.job_status : nil

@@ -87,36 +87,32 @@ class Samples extends React.Component {
       return 'complete';
     } else if (status === 'WAITING') {
       return 'waiting';
-    } else if (status === 'INITIALIZING') {
-      return 'initializing';
+    } else if (status === 'INPROGRESS') {
+      return 'uploading';
     } else if (status === 'FAILED') {
       return 'failed';
     }
   }
 
   applyChunkStatusClass(postProcess, alignment, hostFiltering) {
-    if (postProcess === 'LOADED' || alignment ===   'LOADED' || hostFiltering === 'LOADED') {
-      return 'complete';
-    } else if (postProcess === 'CHECKED' || alignment === 'CHECKED' || hostFiltering === 'CHECKED') {
-      return 'uploading';
-    } else if (postProcess === 'FAILED' || alignment === 'FAILED' || hostFiltering === 'FAILED')  {
-      return 'failed';
-    } else if (postProcess === 'STARTED' || alignment === 'STARTED' || hostFiltering === 'STARTED')  {
-      return 'started';
-    } else {
-      return 'initializing';
+    if (postProcess) {
+      return postProcess === 'LOADED' ? 'complete' : 'uploading';
+    } else if(alignment) {
+      return alignment === 'FAILED' ? 'failed' : 'uploading';
+    } else if(hostFiltering) {
+      return hostFiltering === 'FAILED' ? 'failed' : 'uploading';
     }
   }
 
   getChunckedStatus(postProcess, alignment, hostFiltering) {
     if (postProcess && alignment === 'LOADED' && hostFiltering === 'LOADED') {
-      return  `Post Processing: ${postProcess}`;
+      return  'Post Processing';
     } else if (postProcess === null && alignment && hostFiltering === 'LOADED') {
-      return `Gsnap Alignment: ${alignment}`;
+      return 'Alignment';
     } else if (postProcess === null && alignment === null && hostFiltering) {
-      return `Host Filtering: ${hostFiltering}`;
+      return 'Host Filtering';
     } else {
-      return `WAITING`;
+      return 'WAITING';
     }
   }
 
@@ -187,7 +183,7 @@ class Samples extends React.Component {
           <ul id='dropdownstatus' className='status dropdown-content'>
           <li><a href="#!" className="title"><b>Filter by status</b></a></li>
           <li data-status="WAITING" onClick={ this.filterByStatus } ><a data-status="WAITING" className="waiting" href="#!">Waiting</a></li>
-          <li data-status="UPLOADING" onClick={ this.filterByStatus }><a data-status="UPLOADING" className="uploading" href="#!">Uploading</a></li>
+          <li data-status="UPLOADING" onClick={ this.filterByStatus }><a data-status="UPLOADING" className="uploading" href="#!">In Progress</a></li>
           <li data-status="CHECKED" onClick={ this.filterByStatus }><a data-status="CHECKED" className="complete" href="#!">Complete</a></li>
           <li onClick={ this.filterByStatus } data-status="FAILED" ><a data-status="FAILED" className="failed" href="#!">Failed</a></li>
             <li className="divider"></li>
