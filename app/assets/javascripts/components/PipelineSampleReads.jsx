@@ -13,6 +13,7 @@ class PipelineSampleReads extends React.Component {
     this.gotoReport = this.gotoReport.bind(this);
     this.sampleId = this.sampleInfo.id;
     this.pipelineStatus = props.sample_status
+    this.pipelineRun = props.pipelineRun
     this.rerunPipeline = this.rerunPipeline.bind(this);
     this.state = {
       rerun: false,
@@ -25,14 +26,13 @@ class PipelineSampleReads extends React.Component {
     PipelineSampleReads.setTab('pipeline_display','reports');
   }
 
-  pipelineInProgress(status) {
-    if (status === null || this.state.rerun === true || status === 'RUNNABLE' || status === 'RUNNING') {
+  pipelineInProgress() {
+    if (this.pipelineRun === null) {
       return true;
-    } else if ( status === 'ERROR' || status === 'FAILED') {
+    } else if (this.pipelineRun.finalized === 1) {
       return false;
-    } else { 
-      return null;
     }
+    return true;
   }
 
   rerunPipeline() {
@@ -121,7 +121,7 @@ class PipelineSampleReads extends React.Component {
         sample_id = {this.sampleId}
       />;
     } else {
-      d_report = <div className="center-align text-grey text-lighten-2 no-report">{ this.pipelineInProgress(this.pipelineStatus) ? <div>Processing Sample...<p><i className='fa fa-spinner fa-spin fa-3x'></i></p></div> : 
+      d_report = <div className="center-align text-grey text-lighten-2 no-report">{ this.pipelineInProgress() ? <div>Processing Sample...<p><i className='fa fa-spinner fa-spin fa-3x'></i></p></div> :
         <div>
           <h6 className="failed"><i className="fa fa-frown-o"></i>  {this.state.failureText}  </h6>
           <p>
@@ -131,7 +131,7 @@ class PipelineSampleReads extends React.Component {
         </div> }
       </div>
     }
- 
+
     let pipeline_run = null;
     let download_section = null;
     if (this.pipelineOutput) {
