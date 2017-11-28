@@ -39,6 +39,18 @@ module PipelineOutputsHelper
       echo $SEQUENCE_LENGTH
     `
     raise "sequence length lookup failed" unless $CHILD_STATUS.success?
-    return sequence_length
+    sequence_length
+  end
+  
+  def get_taxid_m8(pipeline_output, taxid, tax_level)
+    uri = pipeline_output.sample.s3_paths_for_taxon_m8_byteranges[tax_level]
+    # e.g. "s3://czbiohub-idseq-samples-development/samples/8/74/postprocess/taxid_annot_sorted_genus_nt.m8"
+    uri_parts = uri.split("/", 4)
+    bucket = uri_parts[2]
+    key = uri_parts[3]
+    taxon_location = pipeline_output.taxon_byteranges.find_by(taxid: taxid, output_type: "m8")
+    return '' if taxon_location.nil?
+    resp = Client.get_object(bucket: bucket, key: key, range: "bytes=#{taxon_location.first_byte}-#{taxon_location.last_byte}")
+    resp.body.read
   end
 end
