@@ -117,19 +117,17 @@ module SamplesHelper
         else
           'UPLOADING'
         end
-      pipeline_run_entry[:finalized] = output.pipeline_runs.first ? output.pipeline_runs.first.finalized : 0
       pipeline_run_info.push(pipeline_run_entry)
     end
     pipeline_run_info
   end
 
   def filter_samples(samples, query)
-    if query == 'UPLOADING'
-      samples = samples.where(status: 'created')
-      samples = samples.where(status: 'created')
-    else
-      samples = samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status = '#{query}'")
-    end
+    samples = if query == 'UPLOADING'
+                samples.where(status: 'created')
+              else
+                samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status = ?", query)
+              end
     samples
   end
 
