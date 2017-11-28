@@ -224,24 +224,11 @@ class Samples extends React.Component {
         <div className="sub-header-home">
           <div className="sub-header-items">
             <div className="content">
-              <div className="sub-header-buttons right">
-                <ul>
-                  <li>
-                    <a href='/samples/new'>
-                      <i className="fa fa-flask" aria-hidden="true"></i>
-                      <span>Upload Sample</span> 
-                    </a>
-                  </li>
-                  {(this.project) ?
-                  <li>
-                    <a href={`/projects/${this.project.id}/visuals`}>
-                      <i className="fa fa-bar-chart" aria-hidden="true"></i>
-                      <span>Project Heatmap</span>
-                    </a>
-                  </li>
-                  : undefined
-                }
-                </ul>
+              <div  className="upload">
+                <a href='/samples/new'>
+                  <i className="fa fa-flask" aria-hidden="true"/>
+                  <span>Upload Sample</span>
+                </a>
               </div>
 
               <div className="sub-title">
