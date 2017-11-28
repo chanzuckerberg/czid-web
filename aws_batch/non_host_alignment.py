@@ -448,7 +448,7 @@ def clean_direct_gsnapl_input(fastq_files):
     return cleaned_files, file_type_for_log
 
 def run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work_dir, remote_username,
-                     input_files, key_path):
+                     input_files, key_path, lazy_run):
         chunk_id = input_files[0].split(part_suffix)[-1]
         outfile_basename = 'gsnapl-out' + part_suffix + chunk_id
         dedup_outfile_basename = 'dedup-' + outfile_basename
@@ -466,12 +466,13 @@ def run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work
                               + [remote_work_dir+'/'+input_fa for input_fa in input_files]
                               + ['> '+remote_outfile, ';'])
         commands += "aws s3 cp %s %s/;" % (remote_outfile, SAMPLE_S3_OUTPUT_CHUNKS_PATH)
-        # check if remote machins has enough capacity
-        write_to_log("waiting for server")
-        gsnapl_instance_ip = wait_for_server_ip('gsnap', key_path, remote_username, ENVIRONMENT, GSNAPL_MAX_CONCURRENT)
-        write_to_log("starting alignment for chunk %s on machine %s" % (chunk_id, gsnapl_instance_ip))
-        remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, gsnapl_instance_ip, commands)
-        execute_command(remote_command)
+        # check if remote machine has enough capacity
+        if lazy_run and not check_s3_file_presence(os.path.join(SAMPLE_S3_OUTPUT_CHUNKS_PATH, dedup_outfile_basename)):
+            write_to_log("waiting for server")
+            gsnapl_instance_ip = wait_for_server_ip('gsnap', key_path, remote_username, ENVIRONMENT, GSNAPL_MAX_CONCURRENT)
+            write_to_log("starting alignment for chunk %s on machine %s" % (chunk_id, gsnapl_instance_ip))
+            remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, gsnapl_instance_ip, commands)
+            execute_command(remote_command)
         # move gsnapl output back to local
         time.sleep(10)
         write_to_log("finished alignment for chunk %s" % chunk_id)
@@ -481,7 +482,7 @@ def run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work
         execute_command("aws s3 cp %s/%s %s/" % (CHUNKS_RESULT_DIR, dedup_outfile_basename, SAMPLE_S3_OUTPUT_CHUNKS_PATH))
         return os.path.join(CHUNKS_RESULT_DIR, dedup_outfile_basename)
 
-def run_gsnapl_remotely(input_files):
+def run_gsnapl_remotely(input_files, lazy_run):
     key_name = os.path.basename(KEY_S3_PATH)
     execute_command("aws s3 cp %s %s/" % (KEY_S3_PATH, REF_DIR))
     key_path = REF_DIR +'/' + key_name
@@ -492,13 +493,13 @@ def run_gsnapl_remotely(input_files):
     remote_index_dir = "%s/share" % remote_home_dir
     # split file:
     chunk_nlines = 2*GSNAPL_CHUNK_SIZE
-    part_suffix = "-part-"
+    part_suffix = "-chunksize-" + GSNAPL_CHUNK_SIZE + "-part-"
     input_chunks = chunk_input(input_files, chunk_nlines, part_suffix)
     # process chunks:
     chunk_output_files = []
     for chunk_input_files in input_chunks:
         chunk_output_files += [run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work_dir, remote_username,
-                                                chunk_input_files, key_path)]
+                                                chunk_input_files, key_path, lazy_run)]
     # merge output chunks:
     execute_command("cat %s > %s" % (" ".join(chunk_output_files), os.path.join(RESULT_DIR, GSNAPL_DEDUP_OUT)))
     execute_command("aws s3 cp %s/%s %s/" % (RESULT_DIR, GSNAPL_DEDUP_OUT, SAMPLE_S3_OUTPUT_PATH))
@@ -551,7 +552,7 @@ def run_filter_deuterostomes_from_fasta(input_fa, output_fa, annotation_prefix):
     execute_command("aws s3 cp %s %s/" % (output_fa, SAMPLE_S3_OUTPUT_PATH))
 
 def run_rapsearch_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work_dir, remote_username,
-                        input_fasta, key_path):
+                        input_fasta, key_path, lazy_run):
     chunk_id = input_fasta.split(part_suffix)[-1]
     commands = "mkdir -p %s;" % remote_work_dir
     commands += "aws s3 cp %s/%s %s/ ; " % \
@@ -571,18 +572,19 @@ def run_rapsearch_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_w
                           '-o', output_path[:-3],
                           ';'])
     commands += "aws s3 cp %s %s/;" % (output_path, SAMPLE_S3_OUTPUT_CHUNKS_PATH)
-    write_to_log("waiting for server")
-    instance_ip = wait_for_server_ip('rapsearch', key_path, remote_username, ENVIRONMENT, RAPSEARCH2_MAX_CONCURRENT)
-    write_to_log("starting alignment for chunk %s on machine %s" % (chunk_id, instance_ip))
-    remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, instance_ip, commands)
-    execute_command_realtime_stdout(remote_command)
-    write_to_log("finished alignment for chunk %s" % chunk_id)
+    if lazy_run and not check_s3_file_presence(os.path.join(SAMPLE_S3_OUTPUT_CHUNKS_PATH, outfile_basename)):
+        write_to_log("waiting for server")
+        instance_ip = wait_for_server_ip('rapsearch', key_path, remote_username, ENVIRONMENT, RAPSEARCH2_MAX_CONCURRENT)
+        write_to_log("starting alignment for chunk %s on machine %s" % (chunk_id, instance_ip))
+        remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, instance_ip, commands)
+        execute_command_realtime_stdout(remote_command)
+        write_to_log("finished alignment for chunk %s" % chunk_id)
     # move output back to local
     time.sleep(10) # wait until the data is synced
     execute_command("aws s3 cp %s/%s %s/" % (SAMPLE_S3_OUTPUT_CHUNKS_PATH, outfile_basename, CHUNKS_RESULT_DIR))
     return os.path.join(CHUNKS_RESULT_DIR, outfile_basename)
 
-def run_rapsearch2_remotely(input_fasta):
+def run_rapsearch2_remotely(input_fasta, lazy_run):
     key_name = os.path.basename(KEY_S3_PATH)
     execute_command("aws s3 cp %s %s/" % (KEY_S3_PATH, REF_DIR))
     key_path = REF_DIR +'/' + key_name
@@ -593,13 +595,13 @@ def run_rapsearch2_remotely(input_fasta):
     remote_index_dir = "%s/references/nr_rapsearch" % remote_home_dir
     # split file:
     chunk_nlines = 2*RAPSEARCH_CHUNK_SIZE
-    part_suffix = "-part-"
+    part_suffix = "-chunksize-" + RAPSEARCH_CHUNK_SIZE + "-part-"
     input_chunks = chunk_input([input_fasta], chunk_nlines, part_suffix)
     # process chunks:
     chunk_output_files = []
     for chunk_input_file in input_chunks:
         chunk_output_files += [run_rapsearch_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work_dir, remote_username,
-                                                   chunk_input_file[0], key_path)]
+                                                   chunk_input_file[0], key_path, lazy_run)]
     # merge output chunks:
     execute_command("cat %s > %s" % (" ".join(chunk_output_files), os.path.join(RESULT_DIR, RAPSEARCH2_OUT)))
     execute_command("aws s3 cp %s/%s %s/" % (RESULT_DIR, RAPSEARCH2_OUT, SAMPLE_S3_OUTPUT_PATH))
@@ -695,7 +697,7 @@ def run_stage2(lazy_run = True):
         {"title": "GSNAPL", "count_reads": True,
         "before_file_name": before_file_name_for_log, "before_file_type": before_file_type_for_log,
         "after_file_name": os.path.join(RESULT_DIR, GSNAPL_DEDUP_OUT), "after_file_type": "m8"})
-    run_and_log(logparams, TARGET_OUTPUTS["run_gsnapl_remotely"], lazy_run, run_gsnapl_remotely, gsnapl_input_files)
+    run_and_log(logparams, TARGET_OUTPUTS["run_gsnapl_remotely"], lazy_run, run_gsnapl_remotely, gsnapl_input_files, lazy_run)
 
     # run_annotate_gsnapl_m8_with_taxids
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
@@ -745,7 +747,7 @@ def run_stage2(lazy_run = True):
         "before_file_type": "fasta",
         "after_file_name": os.path.join(RESULT_DIR, RAPSEARCH2_OUT), "after_file_type": "m8"})
     run_and_log(logparams, TARGET_OUTPUTS["run_rapsearch2_remotely"], lazy_run, run_rapsearch2_remotely,
-        FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT)
+        FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT, lazy_run)
 
     # run_annotate_m8_with_taxids
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
