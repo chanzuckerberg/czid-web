@@ -24,4 +24,21 @@ module PipelineOutputsHelper
       return 'Coming soon' # Temporary fix
     end
   end
+  
+  def get_sequence_length_for_accession(accession_id)
+    sequence_length = `
+      QUERY=#{accession_id}
+      BASE=https://eutils.ncbi.nlm.nih.gov/entrez/eutils
+      SEARCH_URL=${BASE}/esearch.fcgi?db=nuccore\&term=${QUERY}\&usehistory=y
+      OUTPUT=$(curl $SEARCH_URL)
+      WEB=$(echo $OUTPUT | sed -e 's/.*<WebEnv>\(.*\)<\/WebEnv>.*/\1/')
+      KEY=$(echo $OUTPUT | sed -e 's/.*<QueryKey>\(.*\)<\/QueryKey>.*/\1/')
+      FETCH_URL=${BASE}/efetch.fcgi?db=nuccore\&query_key=${KEY}\&WebEnv=${WEB}\&rettype=fasta\&retmode=xml
+      RESULT=$(curl $FETCH_URL)
+      SEQUENCE_LENGTH=$(echo $RESULT | sed -e 's/.*<TSeq_length>\(.*\)<\/TSeq_length>.*/\1/')
+      echo $SEQUENCE_LENGTH
+    `
+    raise "sequence length lookup failed" unless $CHILD_STATUS.success?
+    return sequence_length
+  end
 end
