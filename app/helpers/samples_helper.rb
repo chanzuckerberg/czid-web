@@ -103,15 +103,15 @@ module SamplesHelper
     if query == 'WAITING'
       samples = samples.joins("LEFT OUTER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where("samples.status = ?  or pipeline_runs.job_status is NULL", 'created')
     elsif query == 'FAILED'
-        db_query = [query, '1.Host Filtering-FAILED', '2.GSNAPL/RAPSEARCH alignment-FAILED', '3.Post Processing-FAILED', 'ERROR']
-        samples = samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status IN (?)", db_query)
+      db_query = [query, '1.Host Filtering-FAILED', '2.GSNAPL/RAPSEARCH alignment-FAILED', '3.Post Processing-FAILED', 'ERROR']
+      samples = samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status IN (?)", db_query)
     elsif query == 'UPLOADING'
-        db_query = [query, '1.Host Filtering-STARTED', '1.Host Filtering-CHECKED', '1.Host Filtering-LOADED',
-                    '2.GSNAPL/RAPSEARCH alignment-STARTED', '2.GSNAPL/RAPSEARCH alignment-CHECKED', '2.GSNAPL/RAPSEARCH alignment-LOADED', '3.Post Processing-STARTED', '3.Post Processing-CHECKED']
-        samples = samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status IN (?)", db_query)
+      db_query = [query, '1.Host Filtering-STARTED', '1.Host Filtering-CHECKED', '1.Host Filtering-LOADED',
+                  '2.GSNAPL/RAPSEARCH alignment-STARTED', '2.GSNAPL/RAPSEARCH alignment-CHECKED', '2.GSNAPL/RAPSEARCH alignment-LOADED', '3.Post Processing-STARTED', '3.Post Processing-CHECKED']
+      samples = samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status IN (?)", db_query)
     elsif query == 'CHECKED'
-        db_query = [query, '3.Post Processing-CHECKED']
-        samples = samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status IN (?)", db_query)
+      db_query = [query, '3.Post Processing-CHECKED']
+      samples = samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status IN (?)", db_query)
     else samples = samples
     end
     samples
