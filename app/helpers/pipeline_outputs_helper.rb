@@ -25,7 +25,7 @@ module PipelineOutputsHelper
     end
   end
   
-  def get_sequence_length_for_accession(accession_id)
+  def get_sequence_length_from_accession(accession_id)
     sequence_length = `
       QUERY=#{accession_id}
       BASE=https://eutils.ncbi.nlm.nih.gov/entrez/eutils
