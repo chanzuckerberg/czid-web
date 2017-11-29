@@ -21,6 +21,7 @@ class Samples extends React.Component {
       samplesCount: this.samplesCount,
       sort_query: currentSort.sort_query
       ? currentSort.sort_query  : `sort_by=${this.defaultSortBy}`,
+      checkFilter: false
     };
     $("#pagination").css("display", "");
   }
