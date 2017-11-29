@@ -134,6 +134,10 @@ def generate_taxid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fas
         sequence_data = input_fasta_f.readline()
     input_fasta_f.close()
     output_fasta_f.close()
+    if full_alignment_info:
+        # touch a file in S3 to indicate presence of the information for the web app
+        indicator_file = "%s/full_alignment_info_present_%s.txt" % (RESULT_DIR, annotation_prefix)
+        execute_command("echo 'yes' > %s; aws s3 cp %s %s/" % (indicator_file, indicator_file, SAMPLE_S3_OUTPUT_PATH))
 
 def deduplicate_m8(input_m8, output_m8):
     outf = open(output_m8, "wb")
