@@ -103,7 +103,7 @@ def generate_taxid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fas
         for line in m8f:
             if line[0] == '#':
                 continue
-            parts = line.split("\t")
+            parts = line.rstrip().split("\t")
             read_name = parts[0]
             read_name_parts = read_name.split("/")
             if len(read_name_parts) > 1:
