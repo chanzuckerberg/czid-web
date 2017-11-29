@@ -248,11 +248,10 @@ class PipelineSampleReport extends React.Component {
       />;
     // To do: improve presentation and place download_button somewhere on report page
     download_button = (
-      <span className="download">
-        <a className="custom-button download" onClick={this.downloadReport.bind(this, this.report_details.report_info.id)}>
-          <i className="fa fa-cloud-download left"></i> Download Report
-        </a>
-      </span>
+      <a href={`/reports/${this.report_details.report_info.id}/csv`} className="download-report right">
+        <div className="fa fa-cloud-download"/>
+        <div>Download Report</div>
+      </a>
     );
     right_arrow_initial_visibility = this.isGenusSearch() ? 'hidden' : '';
     result = (
