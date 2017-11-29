@@ -313,6 +313,10 @@ $break-large: 1070px;
   }
   .project-list {
     margin-top: 65px;
+    ul.select-dropdown {
+      height: 200px;
+      overflow: scroll;
+    }
   }
   .project-wrapper {
     margin: 35px 0;
@@ -396,7 +400,8 @@ $break-large: 1070px;
     &:last-child {
       display: block;
       margin-right: 72px;
-      text-align: center;
+      text-align: left;
+      margin-left: 20px;
     }
   }
   input.search {
@@ -474,7 +479,7 @@ input[type=search]:focus:not([readonly]) {
 .failed {
   color: #ad1818 !important;
 }
-.running {
+.waiting {
   color: #3f51b5 !important;
 }
 .initializing {
@@ -483,3 +488,8 @@ input[type=search]:focus:not([readonly]) {
 .uploading {
   color: #e2a32e !important;
 }
+
+.all {
+  color: #9e5353;
+}
+

@@ -33,7 +33,7 @@ module SamplesHelper
 
   def sample_status_display(sample)
     if sample.status == Sample::STATUS_CREATED
-      return 'uploading'
+      'uploading'
     elsif sample.status == Sample::STATUS_CHECKED
       pipeline_run = sample.pipeline_runs.first
       return '' unless pipeline_run
@@ -47,7 +47,6 @@ module SamplesHelper
         return 'initializing'
       end
     end
-    ''
   end
 
   def parsed_samples_for_s3_path(s3_path, project_id, host_genome_id)
@@ -100,36 +99,53 @@ module SamplesHelper
     final_result
   end
 
+  def filter_samples(samples, query)
+    samples = if query == 'WAITING'
+                samples.joins("LEFT OUTER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where("samples.status = ?  or pipeline_runs.job_status is NULL and pipeline_runs.finalized != 1", 'created')
+              elsif query == 'FAILED'
+                samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status like '%FAILED'")
+              elsif query == 'UPLOADING'
+                samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status NOT IN (?) and pipeline_runs.finalized != 1", %w[CHECKED FAILED])
+              elsif query == 'CHECKED'
+                samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status IN (?) and pipeline_runs.finalized = 1", query)
+              else
+                samples
+              end
+    samples
+  end
+
   def samples_pipeline_run_info(samples)
     pipeline_run_info = []
     samples.each do |output|
       pipeline_run_entry = {}
-      pipeline_run_status = output.pipeline_runs.first ? output.pipeline_runs.first.job_status : nil
-      pipeline_run_entry[:job_status_description] =
-        if %w[CHECKED SUCCEEDED].include?(pipeline_run_status)
-          'COMPLETE'
-        elsif %w[FAILED ERROR].include?(pipeline_run_status)
-          'FAILED'
-        elsif %w[RUNNING LOADED].include?(pipeline_run_status)
-          'IN PROGRESS'
-        elsif pipeline_run_status == 'RUNNABLE'
-          'INITIALIZING'
+      if output.pipeline_runs.first
+        recent_pipeline_run = output.pipeline_runs.first
+        pipeline_run_entry[:job_status_description] = 'WAITING' if recent_pipeline_run.job_status.nil?
+        if recent_pipeline_run.pipeline_run_stages.present?
+          run_stages = recent_pipeline_run.pipeline_run_stages || []
+          run_stages.each do |rs|
+            pipeline_run_entry[rs[:name]] = rs.job_status
+          end
         else
-          'UPLOADING'
+          pipeline_run_status = recent_pipeline_run.job_status
+          pipeline_run_entry[:job_status_description] =
+            if %w[CHECKED SUCCEEDED].include?(pipeline_run_status)
+              'COMPLETE'
+            elsif %w[FAILED ERROR].include?(pipeline_run_status)
+              'FAILED'
+            elsif %w[RUNNING LOADED].include?(pipeline_run_status)
+              'IN PROGRESS'
+            elsif pipeline_run_status == 'RUNNABLE'
+              'INITIALIZING'
+            end
         end
+      else
+        pipeline_run_entry[:job_status_description] = 'WAITING'
+      end
       pipeline_run_entry[:finalized] = output.pipeline_runs.first ? output.pipeline_runs.first.finalized : 0
       pipeline_run_info.push(pipeline_run_entry)
     end
     pipeline_run_info
-  end
-
-  def filter_samples(samples, query)
-    samples = if query == 'UPLOADING'
-                samples.where(status: 'created')
-              else
-                samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status = ?", query)
-              end
-    samples
   end
 
   def format_samples(samples)

@@ -54,6 +54,17 @@ class Samples extends React.Component {
       let dbSample = sample.db_sample;
       let derivedOutput = sample.derived_sample_output;
       let runInfo = sample.run_info
+      rowWithChunkStatus = (
+        <td className={this.applyChunkStatusClass(runInfo)}>
+          <a href={'/samples/' + dbSample.id}>{this.getChunkedStage(runInfo)}</a>
+        </td>
+      );
+      rowWithoutChunkStatus = (
+        <td className={this.applyClass(runInfo.job_status_description)}>
+          <a href={'/samples/' + dbSample.id}>{runInfo.job_status_description}</a>
+        </td>
+      )
+
       return (
         <tr onClick={ this.viewSample.bind(this, dbSample.id)} key={i}>
           <td>
@@ -65,7 +76,7 @@ class Samples extends React.Component {
           <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? 'NA' : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.percent_remaining.toFixed(2)}%</a>}</td>
           <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? 'NA' : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.qc_percent.toFixed(2)}%</a>}</td>
           <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.compression_ratio) ? 'NA' : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.compression_ratio.toFixed(2)}</a>}</td>
-          <td className={this.applyClass(runInfo.job_status_description)}>{ !runInfo.job_status_description ? '' : <a href={'/samples/' + dbSample.id}>{runInfo.job_status_description}</a>}</td>
+          { !runInfo.job_status_description ? rowWithChunkStatus : rowWithoutChunkStatus }
         </tr>
       )
     })
@@ -74,12 +85,45 @@ class Samples extends React.Component {
   applyClass(status) {
     if(status === 'COMPLETE') {
       return 'complete';
-    } else if (status === 'UPLOADING' || status === 'IN PROGRESS') {
+    } else if (status === 'WAITING') {
+      return 'waiting';
+    } else if (status === 'INPROGRESS') {
       return 'uploading';
-    } else if (status === 'INITIALIZING') {
-      return 'initializing';
-    } else {
+    } else if (status === 'FAILED') {
       return 'failed';
+    }
+  }
+
+  applyChunkStatusClass(runInfo) {
+    let postProcess = runInfo['Post Processing']
+    let hostFiltering = runInfo['Host Filtering']
+    let alignment = runInfo['GSNAPL/RAPSEARCH alignment']
+    if (postProcess) {
+      return postProcess === 'LOADED' ? 'complete' : 'uploading';
+    } else if(alignment) {
+      return alignment === 'FAILED' ? 'failed' : 'uploading';
+    } else if(hostFiltering) {
+      return hostFiltering === 'FAILED' ? 'failed' : 'uploading';
+    }
+  }
+
+  getChunkedStage(runInfo) {
+    let postProcess = runInfo['Post Processing']
+    let hostFiltering = runInfo['Host Filtering']
+    let alignment = runInfo['GSNAPL/RAPSEARCH alignment']
+    if (postProcess === 'FAILED' || alignment === 'FAILED' || hostFiltering === 'FAILED') {
+      return 'FAILED';
+    } else if (postProcess) {
+      if (postProcess === 'LOADED')
+        return 'Complete';
+      else
+        return  'Post Processing';
+    } else if (alignment) {
+      return 'Alignment';
+    } else if (hostFiltering) {
+      return 'Host Filtering';
+    }  else {
+      return 'WAITING';
     }
   }
 
@@ -149,12 +193,12 @@ class Samples extends React.Component {
           {/* Dropdown menu */}
           <ul id='dropdownstatus' className='status dropdown-content'>
           <li><a href="#!" className="title"><b>Filter by status</b></a></li>
+          <li data-status="WAITING" onClick={ this.filterByStatus } ><a data-status="WAITING" className="waiting" href="#!">Waiting</a></li>
+          <li data-status="UPLOADING" onClick={ this.filterByStatus }><a data-status="UPLOADING" className="uploading" href="#!">In Progress</a></li>
+          <li data-status="CHECKED" onClick={ this.filterByStatus }><a data-status="CHECKED" className="complete" href="#!">Complete</a></li>
+          <li onClick={ this.filterByStatus } data-status="FAILED" ><a data-status="FAILED" className="failed" href="#!">Failed</a></li>
             <li className="divider"></li>
-            <li data-status="CHECKED" onClick={ this.filterByStatus }><a data-status="CHECKED" className="complete" href="#!">Complete</a></li>
-            <li data-status="RUNNING" onClick={ this.filterByStatus }><a data-status="RUNNING" className="running" href="#!">In Progress</a></li>
-            <li onClick={ this.filterByStatus } data-status="FAILED" ><a data-status="FAILED" className="failed" href="#!">Failed</a></li>
-            <li data-status="UPLOADING" onClick={ this.filterByStatus } ><a data-status="UPLOADING" className="uploading" href="#!">Uploading</a></li>
-            <li data-status="RUNNABLE" onClick={ this.filterByStatus } ><a data-status="RUNNABLE" className="initializing" href="#!">Initializing</a></li>
+          <li data-status="ALL" onClick={ this.filterByStatus }><a data-status="ALL" className="all" href="#!">All</a></li>
           </ul>
           <table className="bordered highlight samples-table">
             <thead>
@@ -218,6 +262,7 @@ class Samples extends React.Component {
     this.displayResultsByParams(this.state.urlProjectId, this.state.urlSearchQuery, status);
   }
 
+
   render() {
     return (
       <div>
@@ -232,7 +277,7 @@ class Samples extends React.Component {
               </div>
 
               <div className="sub-title">
-                <span>{ (!this.project) ? 'All projects' : this.project.name }<i className='fa fa-angle-down project-toggle'></i></span> 
+                <span>{ (!this.project) ? 'All projects' : this.project.name }<i className='fa fa-angle-down project-toggle'></i></span>
                 <div className='dropdown-bubble'>
                   <div className="dropdown-container">
                     <ul>
@@ -252,7 +297,7 @@ class Samples extends React.Component {
                   </div>
                 </div>
               </div>
-             
+
               <div className="title-filter">
                 <span><i>{this.state.samplesCount === 0 ? 'No sample found' : ( this.state.samplesCount === 1 ? '1 sample found' : `${this.state.samplesCount} samples found`)}</i></span>
               </div>
