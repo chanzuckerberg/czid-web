@@ -64,7 +64,7 @@ class Samples extends React.Component {
           <a href={'/samples/' + dbSample.id}>{runInfo.job_status_description}</a>
         </td>
       )
-     
+
       return (
         <tr onClick={ this.viewSample.bind(this, dbSample.id)} key={i}>
           <td>
@@ -111,15 +111,18 @@ class Samples extends React.Component {
     let postProcess = runInfo['Post Processing']
     let hostFiltering = runInfo['Host Filtering']
     let alignment = runInfo['GSNAPL/RAPSEARCH alignment']
-    if (postProcess && alignment === 'LOADED' && hostFiltering === 'LOADED') {
-      return  'Post Processing';
-    } else if (postProcess === null && alignment && hostFiltering === 'LOADED') {
-      return 'Alignment';
-    } else if (postProcess === null && alignment === null && hostFiltering) {
-      return 'Host Filtering';
-    } else if (postProcess === 'FAILED' || alignment === 'FAILED' || hostFiltering === 'FAILED') {
+    if (postProcess === 'FAILED' || alignment === 'FAILED' || hostFiltering === 'FAILED') {
       return 'FAILED';
-    } else {
+    } else if (postProcess) {
+      if (postProcess === 'LOADED')
+        return 'Complete';
+      else
+        return  'Post Processing';
+    } else if (alignment) {
+      return 'Alignment';
+    } else if (hostFiltering) {
+      return 'Host Filtering';
+    }  else {
       return 'WAITING';
     }
   }
@@ -274,7 +277,7 @@ class Samples extends React.Component {
               </div>
 
               <div className="sub-title">
-                <span>{ (!this.project) ? 'All projects' : this.project.name }<i className='fa fa-angle-down project-toggle'></i></span> 
+                <span>{ (!this.project) ? 'All projects' : this.project.name }<i className='fa fa-angle-down project-toggle'></i></span>
                 <div className='dropdown-bubble'>
                   <div className="dropdown-container">
                     <ul>
@@ -294,7 +297,7 @@ class Samples extends React.Component {
                   </div>
                 </div>
               </div>
-             
+
               <div className="title-filter">
                 <span><i>{this.state.samplesCount === 0 ? 'No sample found' : ( this.state.samplesCount === 1 ? '1 sample found' : `${this.state.samplesCount} samples found`)}</i></span>
               </div>
