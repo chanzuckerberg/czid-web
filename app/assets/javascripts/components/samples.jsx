@@ -115,13 +115,13 @@ class Samples extends React.Component {
       return 'FAILED';
     } else if (postProcess) {
       if (postProcess === 'LOADED')
-        return 'Complete';
+        return 'COMPLETE';
       else
-        return  'Post Processing';
+        return  'POST PROCESSING';
     } else if (alignment) {
-      return 'Alignment';
+      return 'ALIGNMENT';
     } else if (hostFiltering) {
-      return 'Host Filtering';
+      return 'HOST FILTERING';
     }  else {
       return 'WAITING';
     }
