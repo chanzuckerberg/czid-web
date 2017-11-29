@@ -25,11 +25,13 @@ class PipelineSampleReport extends React.Component {
 
   disableFilters() {
     disable_filters = 1;
+    ReportFilter.showLoading('Disabling filters...');
     this.refreshPage({disable_filters});
   }
 
   enableFilters() {
     disable_filters = 0;
+    ReportFilter.showLoading('Enabling filters...');
     this.refreshPage({disable_filters});
   }
 
