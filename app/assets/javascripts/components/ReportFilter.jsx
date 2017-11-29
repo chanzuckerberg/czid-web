@@ -63,11 +63,11 @@ class ReportFilter extends React.Component {
         <div className='col s6 input-container'>
           <input
             className='browser-default'
-          onChange={this.setFilterThreshold.bind(this, `threshold_${metric_token}`)}
-          name="group2"
-          defaultValue={this.props.report_page_params[`threshold_${metric_token}`]}
-          id={`threshold_${metric_token}`}
-          type="number" />
+            onChange={this.setFilterThreshold.bind(this, `threshold_${metric_token}`)}
+            name="group2"
+            defaultValue={this.props.report_page_params[`threshold_${metric_token}`]}
+            id={`threshold_${metric_token}`}
+            type="number" />
         </div>
       </div>
     );
@@ -77,11 +77,11 @@ class ReportFilter extends React.Component {
     align_right = {'textAlign': 'right'};
     threshold_filters = (
       <div className="filter-controls">
-      <div className="filter-title">
-        {this.props.report_page_params.disable_filters == 0 ?
-        <a href="#" onClick={this.clearGenusSearch}>Click to clear genus search and enable filters.</a> :
-        <a href="#" onClick={this.enableFilters}>Click to enable filters.</a>}
-      </div>
+        <div className="filter-title">
+          {this.props.report_page_params.disable_filters == 0 ?
+            <a href="#" onClick={this.clearGenusSearch}>Click to clear genus search and enable filters.</a> :
+            <a href="#" onClick={this.enableFilters}>Click to enable filters.</a>}
+        </div>
       </div>
     );
     if (this.props.report_page_params.disable_filters == 0 && this.props.report_page_params.selected_genus == 'None') {
@@ -106,15 +106,15 @@ class ReportFilter extends React.Component {
           </div>
         </div>
       );
-  }
-  category_filter = '';
-  if (this.props.report_page_params.disable_filters == 0 && this.props.report_page_params.selected_genus == 'None') {
-    category_filter = (
+    }
+    category_filter = '';
+    if (this.props.report_page_params.disable_filters == 0 && this.props.report_page_params.selected_genus == 'None') {
+      category_filter = (
         <div className="filter-controls">
-          <div className="filter-title">
-            CATEGORY
+          <div className="category-title">
+            CATEGORIES
           </div>
-          <div className="filter-values">
+          <div className="categories">
             { this.all_categories.map((category, i) => {
               return (
                 <p key={i}>
@@ -125,51 +125,51 @@ class ReportFilter extends React.Component {
             })}
             { this.all_categories.length < 1 ? <p>None found</p> : '' }
           </div>
-      </div>
-    );
-  }
-  genus_search = '';
-  if (this.props.report_page_params.disable_filters == 0) {
-    genus_search = (
-      <div className="filter-controls">
-        <div className="row">
-          <div className="input-field col s12 genus-search-row">
-            <div className='genus-name-label'>GENUS SEARCH</div>
-            <div className="filter-values genus-autocomplete-container">
-              <ReactAutocomplete
-                inputProps={{ placeholder: 'Search for a genus...' }}
-                items={this.genus_search_items}
-                shouldItemRender={(item, value) => item == 'None' || item.toLowerCase().indexOf(value.toLowerCase()) > -1}
-                getItemValue={item => item}
-                renderItem={(item, highlighted) =>
-                  <div
-                    key={item}
-                    style={{ backgroundColor: highlighted ? '#eee' : 'transparent'}}
-                  >
-                    {item}
-                  </div>
-                }
-                value={this.state.genus_search_value}
-                onChange={(e) => this.setState(ReportFilter.genusSearchValueFor(e.target.value))}
-                onSelect={this.applyGenusFilter}
-              />
+        </div>
+      );
+    }
+    genus_search = '';
+    if (this.props.report_page_params.disable_filters == 0) {
+      genus_search = (
+        <div className="filter-controls">
+          <div className="row">
+            <div className="input-field col s12 genus-search-row">
+              <div className='genus-name-label'>GENUS SEARCH</div>
+              <div className="filter-values genus-autocomplete-container">
+                <ReactAutocomplete
+                  inputProps={{ placeholder: 'Search for a genus...' }}
+                  items={this.genus_search_items}
+                  shouldItemRender={(item, value) => item == 'None' || item.toLowerCase().indexOf(value.toLowerCase()) > -1}
+                  getItemValue={item => item}
+                  renderItem={(item, highlighted) =>
+                    <div
+                      key={item}
+                      style={{ backgroundColor: highlighted ? '#eee' : 'transparent'}}
+                    >
+                      {item}
+                    </div>
+                  }
+                  value={this.state.genus_search_value}
+                  onChange={(e) => this.setState(ReportFilter.genusSearchValueFor(e.target.value))}
+                  onSelect={this.applyGenusFilter}
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    );
-  }
-  return (
+      );
+    }
+    return (
       <div>
         <div className="sidebar-title">
-          <i className="fa fa-filter fa-fw"></i> Filter Report
+          Report Filters
         </div>
         <div className="sidebar-tabs">
           <div className="row">
             <div className="col s12 sidebar-full-container">
               <div id="reports-pane" className="pane col s12">
                 <div className="sidebar-pane">
-                  <div className="report-data">
+                  <div className="report-data background-model">
                     <div className="report-title">
                       Background Model
                     </div>

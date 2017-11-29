@@ -69,7 +69,7 @@ $break-large: 1070px;
     background: #424468;
   }
   &.download {
-    min-width: 0px;
+    min-width: 0;
     background: #edf8ff;
     color: rgb(3, 169, 244) !important;
     font-weight: 600;
@@ -313,10 +313,6 @@ $break-large: 1070px;
   }
   .project-list {
     margin-top: 65px;
-    ul.select-dropdown {
-      height: 200px;
-      overflow: scroll;
-    }
   }
   .project-wrapper {
     margin: 35px 0;
@@ -472,7 +468,7 @@ input[type=search]:focus:not([readonly]) {
   }
 }
 
-.complete, {
+.complete {
   color: #19d219 !important;
 }
 .failed {

@@ -82,9 +82,9 @@ class PipelineSampleReport extends React.Component {
     return (
       <span className="link-tag">
         { taxInfo.tax_id > 0 ? <i data-tax-id={taxInfo.tax_id} onClick={this.gotoNCBI} className="fa fa-link cloud" aria-hidden="true"></i> : null }
-        { reportDetails.taxon_fasta_flag ? <i data-pipeline-id={reportDetails.pipeline_info.id} 
-        data-tax-level={taxInfo.tax_level} data-tax-id={taxInfo.tax_id}
-        onClick={this.downloadFastaUrl} className="fa fa-download cloud" aria-hidden="true"></i> : null }
+        { reportDetails.taxon_fasta_flag ? <i data-pipeline-id={reportDetails.pipeline_info.id}
+                                              data-tax-level={taxInfo.tax_level} data-tax-id={taxInfo.tax_id}
+                                              onClick={this.downloadFastaUrl} className="fa fa-download cloud" aria-hidden="true"></i> : null }
       </span>
     )
   }
@@ -101,7 +101,7 @@ class PipelineSampleReport extends React.Component {
     if (tax_info.tax_level == 1) {
       // indent species rows
       foo = <div className="hover-wrapper">
-          <div className='species-name'>{foo}
+        <div className='species-name'>{foo}
           { this.displayTags(tax_info, report_details) }
         </div>
       </div>;
@@ -121,10 +121,10 @@ class PipelineSampleReport extends React.Component {
         </span>
       </span>;
       foo = <div className="hover-wrapper">
-              <div className='genus-name'> {plus_or_minus} {foo}</div>
-            <i className='count-info'>({tax_info.species_count} {category_name} species)</i>
-            { this.displayTags(tax_info, report_details) }
-        </div>;
+        <div className='genus-name'> {plus_or_minus} {foo}</div>
+        <i className='count-info'>({tax_info.species_count} {category_name} species)</i>
+        { this.displayTags(tax_info, report_details) }
+      </div>;
     }
     return foo;
   }
@@ -248,11 +248,10 @@ class PipelineSampleReport extends React.Component {
       />;
     // To do: improve presentation and place download_button somewhere on report page
     download_button = (
-      <span className="download">
-        <a className="custom-button download" onClick={this.downloadReport.bind(this, this.report_details.report_info.id)}>
-          <i className="fa fa-cloud-download left"></i> Download Report
-        </a>
-      </span>
+      <a href={`/reports/${this.report_details.report_info.id}/csv`} className="download-report right">
+        <div className="fa fa-cloud-download"/>
+        <div>Download Report</div>
+      </a>
     );
     right_arrow_initial_visibility = this.isGenusSearch() ? 'hidden' : '';
     result = (
@@ -322,7 +321,7 @@ class PipelineSampleReport extends React.Component {
                     </tbody>
                   </table>
                 </div>
-            </div>
+              </div>
             </div>
           </div>
         </div>
