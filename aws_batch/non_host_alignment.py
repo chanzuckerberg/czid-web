@@ -405,7 +405,7 @@ def check_s3_file_presence(s3_path):
     try:
       return int(execute_command_with_output(command).rstrip())
     except:
-      return False
+      return 0
 
 # job functions
 def chunk_input(input_files_basenames, chunk_nlines, part_suffix):
@@ -688,9 +688,11 @@ def run_stage2(lazy_run = True):
         print execute_command_with_output(command)
 
     # Import existing job stats
-    execute_command("aws s3 cp %s/%s %s/" % (SAMPLE_S3_INPUT_PATH, STATS_OUT, RESULT_DIR))
-    stats_file = os.path.join(RESULT_DIR, STATS_OUT)
-    load_existing_stats(stats_file)
+    stats_s3_path = os.path.join(SAMPLE_S3_INPUT_PATH, STATS_OUT)
+    if check_s3_file_presence(stats_s3_path):
+        execute_command("aws s3 cp %s/%s %s/" % (SAMPLE_S3_INPUT_PATH, STATS_OUT, RESULT_DIR))
+        stats_file = os.path.join(RESULT_DIR, STATS_OUT)
+        load_existing_stats(stats_file)
 
     # run gsnap remotely
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
@@ -826,7 +828,7 @@ def main():
     global SAMPLE_S3_FASTQ_PATH
     global SAMPLE_S3_OUTPUT_CHUNKS_PATH
     global CHUNKS_RESULT_DIR
-    
+
     FASTQ_BUCKET = os.environ.get('FASTQ_BUCKET', FASTQ_BUCKET)
     INPUT_BUCKET = os.environ.get('INPUT_BUCKET', INPUT_BUCKET)
     FILE_TYPE = os.environ.get('FILE_TYPE', FILE_TYPE)

@@ -148,10 +148,18 @@ def load_existing_stats(stats_file):
     global STATS
     if os.path.isfile(stats_file):
         with open(stats_file) as f:
-            STATS = json.load(f)    
+            STATS = json.load(f)
 
 def get_total_reads_from_stats():
-    return [item for item in STATS if "total_reads" in item][0]["total_reads"]
+    for item in STATS:
+        if "total_reads" in item:
+            return item["total_reads"]
+    # check run star if total reads not available
+    for item in STATS:
+        if item.get("task") == 'run_star':
+            return item["reads_before"]
+    # no entry
+    return 0.1
 
 def get_remaining_reads_from_stats():
     return (item for item in STATS if item.get("task") == "run_gsnapl_remotely").next().get("reads_before")
