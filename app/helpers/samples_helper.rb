@@ -100,17 +100,17 @@ module SamplesHelper
   end
 
   def filter_samples(samples, query)
-    if query == 'WAITING'
-      samples = samples.joins("LEFT OUTER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where("samples.status = ?  or pipeline_runs.job_status is NULL and pipeline_runs.finalized != 1", 'created')
-    elsif query == 'FAILED'
-      samples = samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status IN (?) and pipeline_runs.finalized = 1", [ query || 'ERROR'])
-    elsif query == 'UPLOADING'
-      samples = samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status NOT IN (?) and pipeline_runs.finalized != 1", ['CHECKED', 'FAILED'])
-    elsif query == 'CHECKED'
-      samples = samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status IN (?) and pipeline_runs.finalized = 1", query)
-    else 
-      samples = samples
-    end
+    samples = if query == 'WAITING'
+                samples.joins("LEFT OUTER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where("samples.status = ?  or pipeline_runs.job_status is NULL and pipeline_runs.finalized != 1", 'created')
+              elsif query == 'FAILED'
+                samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status IN (?) and pipeline_runs.finalized = 1", [query || 'ERROR'])
+              elsif query == 'UPLOADING'
+                samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status NOT IN (?) and pipeline_runs.finalized != 1", %w[CHECKED FAILED])
+              elsif query == 'CHECKED'
+                samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status IN (?) and pipeline_runs.finalized = 1", query)
+              else
+                samples
+              end
     samples
   end
 
