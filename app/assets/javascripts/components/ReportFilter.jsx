@@ -5,7 +5,7 @@
 class ReportFilter extends React.Component {
   constructor(props) {
     super(props);
-    this.sample_id = props.sample_id
+    this.sample_id = props.sample_id;
     this.background_model = props.background_model || 'N/A';
     this.all_categories = props.all_categories || [];
     this.new_filter_thresholds = {};
@@ -29,7 +29,8 @@ class ReportFilter extends React.Component {
   }
 
   setFilterThreshold(threshold_name, event) {
-    this.new_filter_thresholds[threshold_name] = event.target.value;
+    this.new_filter_thresholds[threshold_name] = event.target.value.trim();
+    $('.apply-filter-button a').addClass('changed');
   }
 
   applyFilters(event) {
@@ -52,20 +53,21 @@ class ReportFilter extends React.Component {
   thresholdInput(metric_token, visible_metric_name) {
     return (
       <div className='col s12'>
-        <div className='col s8'>
-          <div className='threshold-label'>
+        <div className='col s6'>
+          <div className='threshold-label left'>
             <label htmlFor={`threshold_${metric_token}`}>
               {visible_metric_name} &ge;
             </label>
           </div>
         </div>
-        <div className='col s4 input-container'>
+        <div className='col s6 input-container'>
           <input
+            className='browser-default'
           onChange={this.setFilterThreshold.bind(this, `threshold_${metric_token}`)}
           name="group2"
           defaultValue={this.props.report_page_params[`threshold_${metric_token}`]}
           id={`threshold_${metric_token}`}
-          type="text" />
+          type="number" />
         </div>
       </div>
     );
@@ -85,22 +87,22 @@ class ReportFilter extends React.Component {
     if (this.props.report_page_params.disable_filters == 0 && this.props.report_page_params.selected_genus == 'None') {
       threshold_filters = (
         <div className="filter-controls">
-          <div className="filter-title">
-            THRESHOLDS
-          </div>
-          <div className="filter-row row">
+          <div className="filter-row row threshold-row">
+            <div className='thresh-values'>
+              THRESHOLD VALUES
+            </div>
             {this.thresholdInput('zscore', 'Z')}
             {this.thresholdInput('rpm', 'rPM')}
             {this.thresholdInput('r', 'r')}
             {this.thresholdInput('aggregatescore', 'NT+NR*')}
             {this.thresholdInput('percentidentity', '%id')}
             {this.thresholdInput('neglogevalue', 'log(1/E)')}
-          </div>
-          <div className="apply-filter-button center-align">
-            <a onClick={this.applyFilters}
-               className="btn btn-flat waves-effect grey text-grey text-lighten-5 waves-light apply-filter-button">
-              Apply filter
-            </a>
+            <div className="apply-filter-button left center-align">
+              <a onClick={this.applyFilters}
+                 className="btn btn-flat waves-effect grey text-grey text-lighten-5 waves-light apply-filter-button">
+                Apply threshold
+              </a>
+            </div>
           </div>
         </div>
       );
@@ -131,7 +133,7 @@ class ReportFilter extends React.Component {
     genus_search = (
       <div className="filter-controls">
         <div className="row">
-          <div className="input-field col s12">
+          <div className="input-field col s12 genus-search-row">
             <div className='genus-name-label'>GENUS SEARCH</div>
             <div className="filter-values genus-autocomplete-container">
               <ReactAutocomplete

@@ -4,6 +4,16 @@
 
 @import "colors";
 
+// removing the arrows
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance:textfield;
+}
 
 .reports-sidebar {
   background: $sidebar-background;
@@ -112,6 +122,8 @@
         }
       }
       input.browser-default {
+        border: 1px solid !important;
+        border-color: #dfdfdf !important;
         padding: 5px;
         width: 100%;
         margin-top: 10px;
@@ -121,6 +133,12 @@
       }
       .input-container {
         padding: 0;
+        input {
+          &:focus {
+            box-shadow: 0 0 5px #00a9f4 !important;
+            border: 1px solid #00a9f4 !important;
+          }
+        }
       }
 
       .filter-label {
@@ -131,8 +149,15 @@
   }
 
   .apply-filter-button {
-    margin: 20px 0 20px;
     color: #f8f9f9;
+    width: 100%;
+    padding: 0 12px;
+    a {
+      margin: 20px 0 15px;
+      &.changed {
+        background: #5ABCD6 !important;
+      }
+    }
   }
 
 }
@@ -271,6 +296,20 @@
     width: 450px;
   }
 }
+.genus-search-row {
+  padding-left: 0 !important;
+}
+.threshold-row {
+  background: #fff;
+  border: 1px solid #D9E0E4;
+  border-radius: 4px;
+  margin-top: 30px;
+  .thresh-values {
+    color: #677986;
+    padding: 18px;
+    font-weight: 500;
+  }
+}
 .genus-autocomplete-container {
   padding: 0 !important;
   div {
@@ -285,8 +324,8 @@
       max-height: 400px !important;
       z-index: 500 !important;
       background: #fff !important;
-      min-width: 95% !important;
-      max-width: 95%;
+      min-width: 99% !important;
+      max-width: 99%;
       font-size: inherit !important;
       padding: 0 !important;
       div {
