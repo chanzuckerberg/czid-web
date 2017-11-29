@@ -195,7 +195,7 @@ module ReportHelper
     command = "aws s3 ls #{s3_path}"
     _stdout, _stderr, status = Open3.capture3(command)
     return false unless status.exitstatus.zero?
-    true    
+    true
   end
 
   def alignment_info_present?(report)

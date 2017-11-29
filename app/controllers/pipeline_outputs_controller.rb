@@ -46,18 +46,18 @@ class PipelineOutputsController < ApplicationController
     taxid_fasta = get_taxid_fasta(@pipeline_output, params[:taxid], params[:tax_level].to_i, hit_type)
     @alignment_info = parse_alignment_from_taxid_fasta(taxid_fasta, hit_type)
     # example:
-    # { ENV49438.1: { reference_length: 1000, 
+    # { ENV49438.1: { reference_length: 1000,
     #                 aligned_reads: [ { read_id: HWI-ST640:828:H917FADXX:2:1101:18758:10088/1, alignment_start: 55, alignment_end: 70 },
     #                                  { read_id: HWI-ST640:828:H917FADXX:2:1101:1424:15119/1, alignment_start: 1, alignment_end: 135 },
     #                                  { read_id: HWI-ST640:828:H917FADXX:2:1101:1424:15119/2, alignment_start: 917, alignment_end: 899 } ]
     #               },
-    #   ENV50000.1: { reference_length: 2000, 
+    #   ENV50000.1: { reference_length: 2000,
     #                 aligned_reads: [ { read_id: HWI-ST640:828:H917FADXX:2:1101:17890:73242/2, alignment_start: 900, alignment_end: 800 } ]
     #               },
-    #  ... } 
+    #  ... }
     @accession_ids = @alignment_info.keys
   end
-  
+
   private
 
   # Use callbacks to share common setup or constraints between actions.

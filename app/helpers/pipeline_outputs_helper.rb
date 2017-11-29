@@ -29,7 +29,7 @@ module PipelineOutputsHelper
     alignment_info = {}
     taxid_fasta.each_line do |line|
       next unless line.start_with? '>'
-      # example line: 
+      # example line:
       #  >family_nr:481:family_nt:-300:genus_nr:482:genus_nt:-200:species_nr:-100:species_nt:-100:NR::NT:WP_039856594.1: \
       #  NT-pident:91.1:NT-length:135:NT-mismatch:12:NT-gapopen:0:NT-qstart:1:NT-qend:135:NT-sstart:4070:NT-send:3936:NT-evalue:1.4e-64:NT-bitscore:256.3 \
       #  M05295:49:000000000-G17RL:1:1103:18620:22956/2
@@ -43,7 +43,7 @@ module PipelineOutputsHelper
       if alignment_info.key?(accession_id)
         alignment_info[accession_id][:aligned_reads].push(read_info)
       else
-        alignment_info[accession_id] = { aligned_reads: [ read_info ] }
+        alignment_info[accession_id] = { aligned_reads: [read_info] }
       end
     end
     # Add reference length information (this uses the NCBI eutils API)
