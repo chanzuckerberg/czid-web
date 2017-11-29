@@ -359,6 +359,14 @@ $break-large: 1070px;
       display: inline-block;
     }
   }
+  ul li {
+    .filter, .filter-item {
+      display: inline-block;
+    }
+    .filter {
+      margin: 0px 0 0 20px;
+    }
+  }
   thead {
     background: #f1f1f1;
     tr th {

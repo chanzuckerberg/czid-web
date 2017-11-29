@@ -188,6 +188,7 @@ class Samples extends React.Component {
   }
 
   renderTable(samples) {
+    foo = <i className="filter fa fa-check"></i>
     return (
     <div className="content-wrapper">
       <div className="sample-container">
@@ -197,13 +198,14 @@ class Samples extends React.Component {
         </div>
           {/* Dropdown menu */}
           <ul id='dropdownstatus' className='status dropdown-content'>
-          <li><a href="#!" className="title"><b>Filter by status</b></a></li>
-          <li data-status="WAITING" onClick={ this.filterByStatus } ><a data-status="WAITING" className="waiting" href="#!">WAITING</a></li>
-          <li data-status="UPLOADING" onClick={ this.filterByStatus }><a data-status="UPLOADING" className="uploading" href="#!">IN PROGRESS</a></li>
-          <li data-status="CHECKED" onClick={ this.filterByStatus }><a data-status="CHECKED" className="complete" href="#!">COMPLETE</a></li>
-          <li onClick={ this.filterByStatus } data-status="FAILED" ><a data-status="FAILED" className="failed" href="#!">FAILED</a></li>
+            <li className="filter-item"><a href="#!" className="title filter-item"><b>Filter by status</b></a></li>
             <li className="divider"></li>
-          <li data-status="ALL" onClick={ this.filterByStatus }><a data-status="ALL" className="all" href="#!">All</a></li>
+            <li className="WAITING" data-status="WAITING" onClick={ this.filterByStatus } >{foo}<a data-status="WAITING" className="waiting filter-item" href="#!">Waiting</a></li>
+            <li className="filter-item" data-status="UPLOADING" onClick={ this.filterByStatus }>{foo}<a data-status="UPLOADING" className="uploading filter-item" href="#!">In Progress</a></li>
+            <li className="filter-item" data-status="CHECKED" onClick={ this.filterByStatus }>{foo}<a data-status="CHECKED" className="complete filter-item" href="#!">Complete</a></li>
+            <li className="filter-item" onClick={ this.filterByStatus } data-status="FAILED" >{foo}<a data-status="FAILED" className="failed filter-item" href="#!">Failed</a></li>
+              <li className="divider"></li>
+            <li className="filter-item" data-status="ALL" onClick={ this.filterByStatus }>{foo}<a data-status="ALL" className="all filter-item" href="#!">All</a></li>
           </ul>
           <table className="bordered highlight samples-table">
             <thead>
@@ -258,6 +260,11 @@ class Samples extends React.Component {
       constrainWidth: true
     });
   }
+
+  displayCheckMarks(filter) {
+    $(`.filter-items[data-slide="${filter}"]`).addClass('active');
+  }
+  
 
   //handle filtering when a filter is selected from list
   filterByStatus(e) {
