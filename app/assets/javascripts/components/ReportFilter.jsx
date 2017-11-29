@@ -118,7 +118,7 @@ class ReportFilter extends React.Component {
             { this.all_categories.map((category, i) => {
               return (
                 <p key={i}>
-                  <input type="checkbox" className="filled-in blue cat-filter" id={category.name} value={category.name} onClick={this.applyExcludedCategories} defaultChecked={this.props.report_page_params.excluded_categories.indexOf(category.name) < 0} />
+                  <input type="checkbox" className="filled-in cat-filter" id={category.name} value={category.name} onClick={this.applyExcludedCategories} defaultChecked={this.props.report_page_params.excluded_categories.indexOf(category.name) < 0} />
                   <label htmlFor={ category.name }>{ category.name }</label>
                 </p>
               )
