@@ -405,7 +405,7 @@ def check_s3_file_presence(s3_path):
     try:
       return int(execute_command_with_output(command).rstrip())
     except:
-      return False
+      return 0
 
 # job functions
 def chunk_input(input_files_basenames, chunk_nlines, part_suffix):
