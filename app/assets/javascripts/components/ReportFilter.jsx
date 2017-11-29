@@ -19,6 +19,21 @@ class ReportFilter extends React.Component {
     this.clearGenusSearch = this.clearGenusSearch.bind(this);
   }
 
+  componentDidMount() {
+    // a polyfill for firefox, but disbaled for now
+    // $(window).resize(() => {
+    //   this.resizeFilterHeight();
+    // });
+  }
+
+  resizeFilterHeight() {
+    const height = window.innerHeight;
+    const subHeader = $('.sub-header-component').height();
+    const headerHeight = $('.site-header').height();
+    const newHeight = height;
+    // $('.reports-sidebar').css('min-height', newHeight);
+  }
+
   static genusSearchValueFor(selected_genus) {
     genus_search_value = selected_genus == 'None' ? '' : selected_genus;
     return {genus_search_value};

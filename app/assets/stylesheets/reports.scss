@@ -16,6 +16,15 @@ input[type=number] {
 
 .reports-sidebar {
   background: $sidebar-background;
+  position: sticky;
+  z-index: 1;
+  position: -webkit-sticky;
+  position: -moz-sticky;
+  position: -o-sticky;
+  position: -ms-sticky;
+  top: 0;
+  min-height: -webkit-fill-available !important;
+  border-right: 1px solid rgb(212, 212, 212);
 }
 
 .sidebar-title {
