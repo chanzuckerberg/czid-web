@@ -396,6 +396,12 @@ $break-large: 1070px;
       text-overflow: ellipsis;
       display: inline-block;
       white-space: nowrap;
+      .uploader {
+        font-size: 12px;
+        margin: 0;
+        font-weight: normal;
+        color: #737373;
+      }
     }
     &:last-child {
       display: block;
