@@ -101,18 +101,15 @@ module SamplesHelper
 
   def filter_samples(samples, query)
     if query == 'WAITING'
-      samples = samples.joins("LEFT OUTER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where("samples.status = ?  or pipeline_runs.job_status is NULL", 'created')
+      samples = samples.joins("LEFT OUTER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where("samples.status = ?  or pipeline_runs.job_status is NULL and pipeline_runs.finalized != 1", 'created')
     elsif query == 'FAILED'
-      db_query = [query, '1.Host Filtering-FAILED', '2.GSNAPL/RAPSEARCH alignment-FAILED', '3.Post Processing-FAILED', 'ERROR']
-      samples = samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status IN (?)", db_query)
+      samples = samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status IN (?) and pipeline_runs.finalized = 1", [ query || 'ERROR'])
     elsif query == 'UPLOADING'
-      db_query = [query, '1.Host Filtering-STARTED', '1.Host Filtering-CHECKED', '1.Host Filtering-LOADED',
-                  '2.GSNAPL/RAPSEARCH alignment-STARTED', '2.GSNAPL/RAPSEARCH alignment-CHECKED', '2.GSNAPL/RAPSEARCH alignment-LOADED', '3.Post Processing-STARTED', '3.Post Processing-CHECKED']
-      samples = samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status IN (?)", db_query)
+      samples = samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status NOT IN (?) and pipeline_runs.finalized != 1", ['CHECKED', 'FAILED'])
     elsif query == 'CHECKED'
-      db_query = [query, '3.Post Processing-CHECKED']
-      samples = samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status IN (?)", db_query)
-    else samples = samples
+      samples = samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status IN (?) and pipeline_runs.finalized = 1", query)
+    else 
+      samples = samples
     end
     samples
   end
@@ -126,12 +123,9 @@ module SamplesHelper
         pipeline_run_entry[:job_status_description] = 'WAITING' if recent_pipeline_run.job_status.nil?
         if recent_pipeline_run.pipeline_run_stages.present?
           run_stages = recent_pipeline_run.pipeline_run_stages || []
-          host_filtering = run_stages ? run_stages.first.job_status : nil
-          alignment = run_stages ? run_stages.second.job_status : nil
-          post_processing = run_stages ? run_stages.third.job_status : nil
-          pipeline_run_entry[:post_processing] = post_processing
-          pipeline_run_entry[:alignment] = alignment
-          pipeline_run_entry[:host_filtering] = host_filtering
+          run_stages.each do |rs|
+            pipeline_run_entry[rs[:name]] = rs.job_status
+          end
         else
           pipeline_run_status = recent_pipeline_run.job_status
           pipeline_run_entry[:job_status_description] =
@@ -145,10 +139,10 @@ module SamplesHelper
               'INITIALIZING'
             end
         end
-        pipeline_run_entry[:finalized] = output.pipeline_runs.first ? output.pipeline_runs.first.finalized : 0
       else
         pipeline_run_entry[:job_status_description] = 'WAITING'
       end
+      pipeline_run_entry[:finalized] = output.pipeline_runs.first ? output.pipeline_runs.first.finalized : 0
       pipeline_run_info.push(pipeline_run_entry)
     end
     pipeline_run_info

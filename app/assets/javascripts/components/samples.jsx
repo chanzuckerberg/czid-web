@@ -55,8 +55,8 @@ class Samples extends React.Component {
       let derivedOutput = sample.derived_sample_output;
       let runInfo = sample.run_info
       rowWithChunkStatus = (
-        <td className={this.applyChunkStatusClass(runInfo.post_processing, runInfo.alignmment, runInfo.host_filtering)}>
-          <a href={'/samples/' + dbSample.id}>{this.getChunckedStatus(runInfo.post_processing, runInfo.alignment, runInfo.host_filtering)}</a>
+        <td className={this.applyChunkStatusClass(runInfo)}>
+          <a href={'/samples/' + dbSample.id}>{this.getChunkedStage(runInfo)}</a>
         </td>
       );
       rowWithoutChunkStatus = (
@@ -94,7 +94,10 @@ class Samples extends React.Component {
     }
   }
 
-  applyChunkStatusClass(postProcess, alignment, hostFiltering) {
+  applyChunkStatusClass(runInfo) {
+    let postProcess = runInfo['Post Processing']
+    let hostFiltering = runInfo['Host Filtering']
+    let alignment = runInfo['GSNAPL/RAPSEARCH alignment']
     if (postProcess) {
       return postProcess === 'LOADED' ? 'complete' : 'uploading';
     } else if(alignment) {
@@ -104,13 +107,18 @@ class Samples extends React.Component {
     }
   }
 
-  getChunckedStatus(postProcess, alignment, hostFiltering) {
+  getChunkedStage(runInfo) {
+    let postProcess = runInfo['Post Processing']
+    let hostFiltering = runInfo['Host Filtering']
+    let alignment = runInfo['GSNAPL/RAPSEARCH alignment']
     if (postProcess && alignment === 'LOADED' && hostFiltering === 'LOADED') {
       return  'Post Processing';
     } else if (postProcess === null && alignment && hostFiltering === 'LOADED') {
       return 'Alignment';
     } else if (postProcess === null && alignment === null && hostFiltering) {
       return 'Host Filtering';
+    } else if (postProcess === 'FAILED' || alignment === 'FAILED' || hostFiltering === 'FAILED') {
+      return 'FAILED';
     } else {
       return 'WAITING';
     }
