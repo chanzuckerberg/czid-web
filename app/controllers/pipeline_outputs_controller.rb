@@ -42,7 +42,7 @@ class PipelineOutputsController < ApplicationController
   end
 
   def show_alignment_info
-    # implementing NT first, to do: NR
+    # implementing NT first; to do: NR
     taxid_fasta = get_taxid_fasta(@pipeline_output, params[:taxid], params[:tax_level].to_i, 'NT')
     alignment_info = parse_alignment_from_taxid_fasta(@taxid_fasta)
     alignment_info.each do |accession_id, _info|
