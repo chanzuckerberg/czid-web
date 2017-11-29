@@ -37,13 +37,13 @@ module PipelineOutputsHelper
       accession_id = line.split(":" + hit_type + ":")[1].split(":")[0]
       alignment_start = line.split(":" + hit_type + "-sstart")[1].split(":")[0]
       alignment_end = line.split(":" + hit_type + "-send")[1].split(":")[0]
-      read_info = { :read_id => read_id,
-                    :alignment_start => alignment_start,
-                    :alignment_end => alignment_end }
+      read_info = { read_id: read_id,
+                    alignment_start: alignment_start,
+                    alignment_end: alignment_end }
       if alignment_info.key?(accession_id)
         alignment_info[accession_id][:aligned_reads].push(read_info)
       else
-        alignment_info[accession_id] = { :aligned_reads => [ read_info ] }
+        alignment_info[accession_id] = { aligned_reads: [ read_info ] }
       end
     end
     alignment_info
