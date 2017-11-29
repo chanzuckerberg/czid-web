@@ -87,6 +87,11 @@ TARGET_OUTPUTS = None
 AWS_BATCH_JOB_ID = None
 
 # convenience functions
+def fuzzy_get(dictionary, raw_key, default_value):
+    value_list = [dictionary[key] for key in dictionary if raw_key in key]
+    value = value_list[0] if value_list else default_value
+    return value
+
 def generate_taxid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fasta_file, annotation_prefix, full_alignment_info):
     '''Tag reads based on the m8 output'''
     # Example:  generate_annotated_fasta_from_m8('filter.unmapped.merged.fasta',
@@ -123,15 +128,18 @@ def generate_taxid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fas
     sequence_data = input_fasta_f.readline()
     while sequence_name and sequence_data:
         read_id = sequence_name.rstrip().lstrip('>')
-        accession = read_to_accession_id.get(read_id, '')
-        annotation = annotation_prefix + ':' + accession
-        if full_alignment_info:
-            annotation += ":" + read_to_alignment_info.get(read_id, '')
         first_annotation_pass = (":read_id:" not in read_id)
         if first_annotation_pass:
-            new_read_name = annotation + ':read_id:' + read_id
+            accession = read_to_accession_id.get(read_id, '')
+            info = ':' + read_to_alignment_info.get(read_id, '') if full_alignment_info else ''
+            annotation_suffix = ':read_id:'
         else:
-            new_read_name = annotation + ':' + read_id
+            raw_read_id = read_id.split(":read_id:")[1]
+            accession = fuzzy_get(read_to_accession_id, raw_read_id, '')
+            info = ':' + fuzzy_get(read_to_alignment_info, raw_read_id, '') if full_alignment_info else ''
+            annotation_suffix = ':'
+        annotation = annotation_prefix + ':' + accession + info + annotation_suffix
+        new_read_name = annotation + read_id
         output_fasta_f.write(">%s\n" % new_read_name)
         output_fasta_f.write(sequence_data)
         sequence_name = input_fasta_f.readline()
