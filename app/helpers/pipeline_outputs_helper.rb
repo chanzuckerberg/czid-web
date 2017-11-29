@@ -35,11 +35,9 @@ module PipelineOutputsHelper
       #  M05295:49:000000000-G17RL:1:1103:18620:22956/2
       read_id = line.strip.split(":read_id:")[1]
       accession_id = line.split(":" + hit_type + ":")[1].split(":")[0]
-      alignment_start = line.split(":" + hit_type + "-sstart")[1].split(":")[0]
-      alignment_end = line.split(":" + hit_type + "-send")[1].split(":")[0]
-      read_info = { read_id: read_id,
-                    alignment_start: alignment_start,
-                    alignment_end: alignment_end }
+      alignment_start = line.split(":" + hit_type + "-sstart:")[1].split(":")[0]
+      alignment_end = line.split(":" + hit_type + "-send:")[1].split(":")[0]
+      read_info = { read_id: read_id, alignment_start: alignment_start, alignment_end: alignment_end }
       if alignment_info.key?(accession_id)
         alignment_info[accession_id][:aligned_reads].push(read_info)
       else

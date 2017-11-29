@@ -56,6 +56,7 @@ class PipelineOutputsController < ApplicationController
     #               },
     #  ... }
     @accession_ids = @alignment_info.keys
+    render plain: @alignment_info
   end
 
   private
