@@ -114,7 +114,7 @@ def generate_taxid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fas
             read_to_accession_id[output_read_name] = accession_id
             if full_alignment_info:
                 alignment_info = [":".join(list(pair)) for pair in zip(m8_column_names_with_prefix, parts[2:12])]
-                # e.g.: ["pident:91.1", "length:135", "mismatch:12", ...]
+                # e.g.: ["NT-pident:91.1", "NT-length:135", "NT-mismatch:12", ...]
                 read_to_alignment_info[output_read_name] = ":".join(alignment_info)
     # Go through the input_fasta_file to get the results and tag reads
     input_fasta_f = open(input_fasta_file, 'rb')
