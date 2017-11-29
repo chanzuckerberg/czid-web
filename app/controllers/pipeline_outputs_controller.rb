@@ -1,7 +1,7 @@
 class PipelineOutputsController < ApplicationController
   include ReportHelper
   include PipelineOutputsHelper
-  before_action :set_pipeline_output, only: [:show, :show_taxid_fasta, :send_nonhost_fasta, :send_unidentified_fasta]
+  before_action :set_pipeline_output, only: [:show, :show_taxid_fasta, :send_nonhost_fasta, :send_unidentified_fasta, :get_alignment_info]
   before_action :typed_counts, only: [:show]
   before_action :login_required, only: [:new, :edit, :update, :destroy, :create, :index, :show]
   protect_from_forgery unless: -> { request.format.json? }
@@ -41,6 +41,26 @@ class PipelineOutputsController < ApplicationController
     send_data @unidentified_fasta, filename: @pipeline_output.sample.name + '_unidentified.fasta'
   end
 
+  def get_alignment_info
+    # implementing NT first, to do: NR
+    taxid_fasta = get_taxid_fasta(@pipeline_output, params[:taxid], params[:tax_level].to_i, 'NT')
+    alignment_info = parse_alignment_from_taxid_fasta(@taxid_fasta)
+    alignment_info.each do |accession_id, _info|
+      alignment_info[accession_id][:reference_length] = get_sequence_length_from_accession(accession_id)
+    end
+    @alignment_info = alignment_info
+    # example:
+    # { ENV49438.1: { reference_length: 1000, 
+    #                 aligned_reads: [ { read_id: HWI-ST640:828:H917FADXX:2:1101:18758:10088/1, alignment_start: 55, alignment_end: 70 },
+    #                                  { read_id: HWI-ST640:828:H917FADXX:2:1101:1424:15119/1, alignment_start: 1, alignment_end: 135 },
+    #                                  { read_id: HWI-ST640:828:H917FADXX:2:1101:1424:15119/2, alignment_start: 917, alignment_end: 899 } ]
+    #               },
+    #   ENV50000.1: { reference_length: 2000, 
+    #                 aligned_reads: [ { read_id: HWI-ST640:828:H917FADXX:2:1101:17890:73242/2, alignment_start: 900, alignment_end: 800 } ]
+    #               },
+    #  ... } 
+  end
+  
   private
 
   # Use callbacks to share common setup or constraints between actions.
