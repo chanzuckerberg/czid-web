@@ -1,7 +1,7 @@
 class PipelineOutputsController < ApplicationController
   include ReportHelper
   include PipelineOutputsHelper
-  before_action :set_pipeline_output, only: [:show, :show_taxid_fasta, :send_nonhost_fasta, :send_unidentified_fasta, :get_alignment_info]
+  before_action :set_pipeline_output, only: [:show, :show_taxid_fasta, :send_nonhost_fasta, :send_unidentified_fasta, :show_alignment_info]
   before_action :typed_counts, only: [:show]
   before_action :login_required, only: [:new, :edit, :update, :destroy, :create, :index, :show]
   protect_from_forgery unless: -> { request.format.json? }
@@ -41,7 +41,7 @@ class PipelineOutputsController < ApplicationController
     send_data @unidentified_fasta, filename: @pipeline_output.sample.name + '_unidentified.fasta'
   end
 
-  def get_alignment_info
+  def show_alignment_info
     # implementing NT first, to do: NR
     taxid_fasta = get_taxid_fasta(@pipeline_output, params[:taxid], params[:tax_level].to_i, 'NT')
     alignment_info = parse_alignment_from_taxid_fasta(@taxid_fasta)
