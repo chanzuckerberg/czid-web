@@ -59,7 +59,7 @@ class Samples extends React.Component {
           <td>
             {dbSample.name}
           </td>
-          <td>{moment(dbSample.created_at).format(' L,  h:mm a')}</td>
+          <td>{moment(dbSample.created_at).startOf('second').fromNow()}</td>
           <td>{ !derivedOutput.pipeline_output ? 'NA' : <a href={'/samples/' + dbSample.id}>{numberWithCommas(derivedOutput.pipeline_output.total_reads)}</a>}</td>
           <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.remaining_reads) ? 'NA' : <a href={'/samples/' + dbSample.id}>{numberWithCommas(derivedOutput.summary_stats.remaining_reads)}</a>}</td>
           <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? 'NA' : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.percent_remaining.toFixed(2)}%</a>}</td>

@@ -246,7 +246,7 @@ class PipelineSampleReads extends React.Component {
                               </tr>
                               <tr>
                                 <td>Entry Date</td>
-                                <td>{moment(this.sampleInfo.created_at).format('L, h:mm a')}</td>
+                                <td>{moment(this.sampleInfo.created_at).startOf('second').fromNow()}</td>
                               </tr>
                               <tr>
                                 <td>Location</td>
