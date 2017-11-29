@@ -46,6 +46,10 @@ module PipelineOutputsHelper
         alignment_info[accession_id] = { aligned_reads: [ read_info ] }
       end
     end
+    # Add reference length information (this uses the NCBI eutils API)
+    alignment_info.each do |accession_id, _info|
+      alignment_info[accession_id][:reference_length] = get_sequence_length_from_accession(accession_id)
+    end
     alignment_info
   end
 
