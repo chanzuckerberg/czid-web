@@ -59,6 +59,7 @@ class PipelineOutputsController < ApplicationController
     #                 aligned_reads: [ { read_id: HWI-ST640:828:H917FADXX:2:1101:17890:73242/2, alignment_start: 900, alignment_end: 800 } ]
     #               },
     #  ... } 
+    @accession_ids = alignment_info.keys
   end
   
   private
