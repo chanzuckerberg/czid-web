@@ -101,7 +101,7 @@ module SamplesHelper
 
   def filter_samples(samples, query)
     samples = if query == 'WAITING'
-                samples.joins("LEFT OUTER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where("samples.status = ?  or pipeline_runs.job_status is NULL and pipeline_runs.finalized != 1", 'created')
+                samples.joins("LEFT OUTER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id) or pipeline_runs.id  IS NULL ").where("samples.status = ?  or pipeline_runs.job_status is NULL", 'created')
               elsif query == 'FAILED'
                 samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status like '%FAILED'")
               elsif query == 'UPLOADING'
