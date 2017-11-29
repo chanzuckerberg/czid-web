@@ -124,10 +124,14 @@ def generate_taxid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fas
     while sequence_name and sequence_data:
         read_id = sequence_name.rstrip().lstrip('>')
         accession = read_to_accession_id.get(read_id, '')
-        annotation = accession
+        annotation = annotation_prefix + ':' + accession
         if full_alignment_info:
             annotation += ":" + read_to_alignment_info.get(read_id, '')
-        new_read_name = annotation_prefix + ':' + annotation + ':read_id:' + read_id
+        first_annotation_pass = (":read_id:" not in read_id)
+        if first_annotation_pass:
+            new_read_name = annotation + ':read_id:' + read_id
+        else:
+            new_read_name = annotation + ':' + read_id
         output_fasta_f.write(">%s\n" % new_read_name)
         output_fasta_f.write(sequence_data)
         sequence_name = input_fasta_f.readline()
