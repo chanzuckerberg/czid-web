@@ -50,7 +50,7 @@ class ReportFilter extends React.Component {
   }
 
   applyGenusFilter(selected_genus) {
-    ReportFilter.showLoading(`Now filtering by '${selected_genus}'`);
+    ReportFilter.showLoading(`Filtering for '${selected_genus}'...`);
     this.setState(ReportFilter.genusSearchValueFor(selected_genus));
     this.props.applyGenusFilter(selected_genus);
   }
