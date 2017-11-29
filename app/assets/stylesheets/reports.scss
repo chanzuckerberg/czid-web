@@ -1,7 +1,7 @@
 // Place all the styles related to the Reports controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
-
+// custom-button
 @import "colors";
 
 // removing the arrows
@@ -20,10 +20,12 @@ input[type=number] {
 }
 
 .sidebar-title {
-  padding: 14px 0;
-  color: #767676;
+  padding: 15px 0 10px 0;
+  color: #002238;
   font-size: 18px;
-  margin-left: 12px;
+  border-bottom: 1px solid #c8c8c8;
+  margin: 0 10px 15px
+
 }
 
 #details table tr td{
@@ -61,9 +63,12 @@ input[type=number] {
   }
 
   .report-data {
-    padding: 20px;
+    margin-bottom: 25px;
     float: left;
     width: 100%;
+    &.background-model {
+      border-bottom: 1px solid rgb(200, 200, 200);
+    }
   }
 
 
@@ -73,13 +78,15 @@ input[type=number] {
   }
 
   .report-data div:nth-child(odd) {
-    color: $data-key-color;
+    color: #677986;
+    font-size: 16px;
+    font-weight: 400;
   }
 
   .report-data div:nth-child(even) {
-    color: $data-value-color;
+    color: #1B232A;
     margin-bottom: 10px;
-    font-size: 13px;
+    font-size: 14px;
   }
 
   #filters-pane {
@@ -96,6 +103,18 @@ input[type=number] {
     }
 
     .filter-controls {
+      .category-title {
+        color: #677986;
+        margin-bottom: 15px;
+      }
+      .categories {
+        p {
+          margin: 5px;
+          label {
+            color: #1B232A;
+          }
+        }
+      }
       .noUi-tooltip, .noUi-handle {
         background: #979797;
       }
@@ -109,8 +128,13 @@ input[type=number] {
       }
 
       [type="checkbox"].filled-in:checked + label:after {
-        border: 2px solid #767676;
-        background-color: #767676;
+        border: 2px solid #2786C1;
+        background-color: #2786C1;
+      }
+
+      [type="checkbox"].filled-in +  label:after {
+        border: 2px solid #c7c7c7;
+        background-color: #fff;
       }
 
       .threshold-label {
@@ -359,7 +383,24 @@ input[type=number] {
 .reports-section {
   padding: 0 !important;
   .reports-count {
-    box-shadow: 1px 2px 5px 0px #eaeaea;
+    box-shadow: 1px 2px 5px 0 #eaeaea;
+    .download-report {
+      background: #edf8ff;
+      color: rgb(3, 169, 244) !important;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 10px 40px;
+      display: inline-block;
+      padding: 10px;
+      border-radius: 3px;
+      &:hover {
+        background: rgb(178, 235, 242)
+      }
+      div {
+        display: inline-block;
+        margin-right: 3px;
+      }
+    }
     .count {
       display: inline-block;
       margin: 20px 0 18px 45px;

@@ -111,14 +111,14 @@ class ReportFilter extends React.Component {
   if (this.props.report_page_params.disable_filters == 0 && this.props.report_page_params.selected_genus == 'None') {
     category_filter = (
         <div className="filter-controls">
-          <div className="filter-title">
-            CATEGORY
+          <div className="category-title">
+            CATEGORIES
           </div>
-          <div className="filter-values">
+          <div className="categories">
             { this.all_categories.map((category, i) => {
               return (
                 <p key={i}>
-                  <input type="checkbox" className="filled-in cat-filter" id={category.name} value={category.name} onClick={this.applyExcludedCategories} defaultChecked={this.props.report_page_params.excluded_categories.indexOf(category.name) < 0} />
+                  <input type="checkbox" className="filled-in blue cat-filter" id={category.name} value={category.name} onClick={this.applyExcludedCategories} defaultChecked={this.props.report_page_params.excluded_categories.indexOf(category.name) < 0} />
                   <label htmlFor={ category.name }>{ category.name }</label>
                 </p>
               )
@@ -162,14 +162,14 @@ class ReportFilter extends React.Component {
   return (
       <div>
         <div className="sidebar-title">
-          <i className="fa fa-filter fa-fw"></i> Filter Report
+          Report Filters
         </div>
         <div className="sidebar-tabs">
           <div className="row">
             <div className="col s12 sidebar-full-container">
               <div id="reports-pane" className="pane col s12">
                 <div className="sidebar-pane">
-                  <div className="report-data">
+                  <div className="report-data background-model">
                     <div className="report-title">
                       Background Model
                     </div>
