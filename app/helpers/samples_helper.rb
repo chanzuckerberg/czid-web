@@ -84,7 +84,7 @@ module SamplesHelper
   end
 
   def sample_uploaders(samples)
-    all_uploaders = [] 
+    all_uploaders = []
     samples.each do |s|
       user = {}
       if s.user_id.present?
