@@ -25,16 +25,20 @@ class PipelineSampleReport extends React.Component {
 
   disableFilters() {
     disable_filters = 1;
+    ReportFilter.showLoading('Disabling filters...');
     this.refreshPage({disable_filters});
   }
 
   enableFilters() {
     disable_filters = 0;
+    ReportFilter.showLoading('Enabling filters...');
     this.refreshPage({disable_filters});
   }
 
   // applySort needs to be bound at time of use, not in constructor above
   applySort(sort_by) {
+    const regex = new RegExp('_', 'g');
+    ReportFilter.showLoading(`Sorting the table by ${sort_by.replace(regex, ' ')}...`);
     this.refreshPage({sort_by});
   }
 

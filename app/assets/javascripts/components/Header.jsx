@@ -24,6 +24,12 @@ class Header extends React.Component  {
   render() {
     return (
       <div>
+        <div className="page-loading">
+          <div className="btn disabled">
+            <i className="fa fa-spinner fa-spin"/>
+            <span className='spinner-label'></span>
+          </div>
+        </div>
         <div className="site-header">
           {/* Dropdown menu */}
           <ul id="dropdown1" className="dropdown-content">

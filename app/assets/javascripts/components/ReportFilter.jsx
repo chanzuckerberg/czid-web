@@ -34,14 +34,23 @@ class ReportFilter extends React.Component {
   }
 
   applyFilters(event) {
+    ReportFilter.showLoading('Applying thresholds values...');
     this.props.applyNewFilterThresholds(this.new_filter_thresholds);
   }
 
+  static showLoading(message) {
+    $('.page-loading .spinner-label').text(message);
+    $('body').css('overflow', 'hidden');
+    $('.page-loading').css('display', 'flex');
+  }
+
   applyExcludedCategories(e) {
+    ReportFilter.showLoading('Applying category filter...');
     this.props.applyExcludedCategories(e.target.value, e.target.checked)
   }
 
   applyGenusFilter(selected_genus) {
+    ReportFilter.showLoading(`Filtering for '${selected_genus}'...`);
     this.setState(ReportFilter.genusSearchValueFor(selected_genus));
     this.props.applyGenusFilter(selected_genus);
   }
