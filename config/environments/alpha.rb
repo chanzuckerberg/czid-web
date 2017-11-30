@@ -72,10 +72,9 @@ Rails.application.configure do
 
   config.action_mailer.delivery_method = :mailgun
   config.action_mailer.mailgun_settings = {
-        api_key: ENV['MAIL_GUN_API_KEY'],
-        domain: 'mg.idseq.net'
+    api_key: ENV['MAIL_GUN_API_KEY'],
+    domain: 'mg.idseq.net'
   }
-
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
