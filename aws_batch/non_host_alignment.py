@@ -253,7 +253,7 @@ def generate_rpm_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, species
         genus_outf.write("%s,%s,%s\n" % (genus_taxid, genus_name, rpm))
     genus_outf.close()
 
-def generate_json_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, jsonOutputPath, countType,
+def generate_json_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, jsonOutputPath, countType, lineage_map,
                                     species_total_concordant, genus_total_concordant, family_total_concordant):
     taxid2info_map = shelve.open(taxid2infoPath)
     total_reads = get_total_reads_from_stats()
@@ -689,7 +689,7 @@ def run_generate_taxid_outputs_from_m8(annotated_m8, taxon_counts_csv_file, taxo
                                                                                           taxon_counts_csv_file, lineage_map)
     write_to_log("generated taxon counts from m8")
     generate_json_from_taxid_counts(taxon_counts_csv_file, taxoninfo_path, taxon_counts_json_file, count_type,
-                                    species_concordant, genus_concordant, family_concordant)
+                                    lineage_map, species_concordant, genus_concordant, family_concordant)
     write_to_log("generated JSON file from taxon counts")
     generate_rpm_from_taxid_counts(taxon_counts_csv_file, taxoninfo_path,
                                    taxon_species_rpm_file, taxon_genus_rpm_file)
