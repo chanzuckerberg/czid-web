@@ -172,8 +172,8 @@ class PipelineRun < ApplicationRecord
     stats_json_s3_path = "#{sample.sample_output_s3_path}/#{STATS_JSON_NAME}"
 
     # Get the file
-    downloaded_json_path = download_file(output_json_s3_path, local_json_path)
-    downloaded_stats_path = download_file(stats_json_s3_path, local_json_path)
+    downloaded_json_path = PipelineRun.download_file(output_json_s3_path, local_json_path)
+    downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, local_json_path)
     return unless downloaded_json_path && downloaded_stats_path
     json_dict = JSON.parse(File.read(downloaded_json_path))
     stats_array = JSON.parse(File.read(downloaded_stats_path))
@@ -216,7 +216,7 @@ class PipelineRun < ApplicationRecord
   def load_postprocess_from_s3
     return if postprocess_status == POSTPROCESS_STATUS_LOADED
     byteranges_json_s3_path = "#{sample.sample_postprocess_s3_path}/#{TAXID_BYTERANGE_JSON_NAME}"
-    downloaded_byteranges_path = download_file(byteranges_json_s3_path, local_json_path)
+    downloaded_byteranges_path = PipelineRun.download_file(byteranges_json_s3_path, local_json_path)
     return unless downloaded_byteranges_path
     taxon_byteranges_csv_file = "#{local_json_path}/taxon_byteranges"
     hash_array_json2csv(downloaded_byteranges_path, taxon_byteranges_csv_file, %w[taxid hit_type first_byte last_byte])
