@@ -363,8 +363,12 @@ $break-large: 1070px;
     .filter, .filter-item {
       display: inline-block;
     }
+    i.all {
+      margin: 0px 0px 0 120px;
+    }
     .filter {
-      margin: 0px 0 0 20px;
+      margin: 0px 0px 0 80px;
+      color: #888e8e;
     }
   }
   thead {
