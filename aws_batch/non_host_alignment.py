@@ -283,8 +283,8 @@ def generate_json_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, jsonOu
             species_to_percent_identity[species_taxid] = species_to_percent_identity.get(species_taxid, 0) + count * percent_identity
             species_to_alignment_length[species_taxid] = species_to_alignment_length.get(species_taxid, 0) + count * alignment_length
             species_to_e_value[species_taxid] = species_to_e_value.get(species_taxid, 0) + count * e_value
-            species_to_genus_level_concordance[species_taxid] = genus_total_concordant(genus_taxid, 0)
-            species_to_family_level_concordance[species_taxid] = family_total_concordant(family_taxid, 0)
+            species_to_genus_level_concordance[species_taxid] = genus_total_concordant.get(genus_taxid, 0)
+            species_to_family_level_concordance[species_taxid] = family_total_concordant.get(family_taxid, 0)
 
     for taxid in species_to_count.keys():
         species_name = species_to_name[taxid]
