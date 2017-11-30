@@ -163,7 +163,7 @@ def generate_tax_counts_from_m8(m8_file, e_value_type, output_file, lineage_map)
             # Get raw read ID without our annotations:
             # If m8 is from gsnap (case 1), 1 field has been prepended (taxid field).
             # If m8 is from rapsearch in an old version of the pipeline (case 2), 3 fields have been prepended (taxid, 'NT', NT accession ID).
-            # If m8 is from rapsearch in this version of the pipeline (case 3), many fields have been prepended (taxid, alignment info fields),
+            # If m8 is from rapsearch in a newer version of the pipeline (case 3), many fields have been prepended (taxid, alignment info fields),
             # but the delimiter ":read_id:" marks the beginning of the raw read ID.
             read_id_column = read_id_column.split(":", 1)[1] # remove taxid field (all cases)
             if ":read_id:" in read_id_column: # case 3

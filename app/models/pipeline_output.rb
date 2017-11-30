@@ -58,7 +58,7 @@ class PipelineOutput < ApplicationRecord
                 WHEN #{TaxonCount::TAX_LEVEL_SPECIES} THEN taxon_counts.species_total_concordant / sum(taxon_counts.count)
                 WHEN #{TaxonCount::TAX_LEVEL_GENUS} THEN taxon_counts.genus_total_concordant / sum(taxon_counts.count)
                 WHEN #{TaxonCount::TAX_LEVEL_FAMILY} THEN taxon_counts.family_total_concordant / sum(taxon_counts.count)
-              END
+              END,
               '#{current_date}',
               '#{current_date}'
        FROM  taxon_lineages, taxon_counts
