@@ -663,7 +663,7 @@ def run_combine_json_outputs(input_json_1, input_json_2, output_json):
     execute_command("aws s3 cp %s %s/" % (output_json, SAMPLE_S3_OUTPUT_PATH))
 
 def run_generate_unidentified_fasta(input_fa, output_fa):
-    subprocess.check_output("grep -A 1 '>NR::NT::' %s | sed '/^--$/d' > %s" % (input_fa, output_fa), shell=True)
+    subprocess.check_output("grep -A 1 '>NR::' %s | grep -A 1 ':NT::' | sed '/^--$/d' > %s" % (input_fa, output_fa), shell=True)
     write_to_log("finished job")
     execute_command("aws s3 cp %s %s/" % (output_fa, SAMPLE_S3_OUTPUT_PATH))
 
