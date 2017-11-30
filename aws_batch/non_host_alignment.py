@@ -296,7 +296,6 @@ def generate_json_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, jsonOu
                                         "percent_identity": avg_percent_identity,
                                         "alignment_length": avg_alignment_length,
                                         "e_value": avg_e_value,
-                                        "percent_concordant": overall_percent_concordant,
                                         "name": species_name,
                                         "count_type": countType,
                                         # Not very elegant, but until such time as we propagate alignment information at the level of
