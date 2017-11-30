@@ -143,30 +143,68 @@ def generate_tax_counts_from_m8(m8_file, e_value_type, output_file):
     taxid_percent_identity_map = {}
     taxid_alignment_length_map = {}
     taxid_e_value_map = {}
+    taxid_concordance_map = {}
+    previous_pair = ''
+    previous_taxid = ''
     with open(m8_file, 'rb') as m8f:
         for line in m8f:
-            taxid = (line.split("taxid"))[1].split(":")[0]
-            #"taxid9606:NB501961:14:HM7TLBGX2:1:12104:15431..."
-            percent_identity = float(line.split("\t")[2])
-            alignment_length = float(line.split("\t")[3])
-            e_value = float(line.split("\t")[10])
-            if e_value_type != 'log10':
-                e_value = math.log10(e_value)
-            # m8 format (Blast format 8): query, subject, %id, alignment length, mismatches, gap openings, query start, query end,
-            #                            subject start, subject end, E value (log10 if rapsearch2 output), bit score
+
+            # Get taxid:
+            line_columns = line.split("\t")
+            read_id_column = line_columns[0]
+            taxid = (read_id_column.split("taxid"))[1].split(":")[0]
+
+            # Get raw read ID without our annotations:
+            # If m8 is from gsnap (case 1), 1 field has been prepended (taxid field).
+            # If m8 is from rapsearch in an old version of the pipeline (case 2), 3 fields have been prepended (taxid, 'NT', NT accession ID).
+            # If m8 is from rapsearch in this version of the pipeline (case 3), many fields have been prepended (taxid, alignment info fields),
+            # but the delimiter ":read_id:" marks the beginning of the raw read ID.
+            read_id_colum = read_id_column.split(":", 1)[1] # remove taxid field (all cases)
+            if ":read_id:" in read_id_column: # case 3
+                raw_read_id = read_id_column.split(":read_id:")[1]
+            elif read_id_colum.startswith("NT:"): # case 2
+                raw_read_id = read_id_column.split(":", 2)[2]
+            else: # case 1
+                raw_read_id = read_id_column
+
+            # Get alignment quality metrics from m8 format (blast format 8):
+            #   query, subject, %id, alignment length, mismatches, gap openings, query start, query end,
+            #   subject start, subject end, E value (log10 if rapsearch2 output), bit score
             # E value is a negative power of 10. GSNAPL outputs raw e-value, RAPSearch2 outputs log10(e-value).
             # Whenever we use "e_value" it refers to log10(e-value), which is easier to handle.
+            percent_identity = float(line_columns[2])
+            alignment_length = float(line_columns[3])
+            e_value = float(line_columns[10])
+            if e_value_type != 'log10':
+                e_value = math.log10(e_value)
             taxid_count_map[taxid] = taxid_count_map.get(taxid, 0) + 1
             taxid_percent_identity_map[taxid] = taxid_percent_identity_map.get(taxid, 0) + percent_identity
             taxid_alignment_length_map[taxid] = taxid_alignment_length_map.get(taxid, 0) + alignment_length
             taxid_e_value_map[taxid] = taxid_e_value_map.get(taxid, 0) + e_value
+
+            # Determine pair alignment concordance:
+            # To be efficient, this uses the fact that the mates of a pair appear consecutively in the m8 file (1 then 2).
+            # Indeed, that is the case in the fasta input to gsnap/rapsearch and the aligners preserve the order.
+            # (Guaranteed by the "--ordered" option in gsnap. To be verified for rapsearch -- at first glance
+            # seems to be satisfied but possible hiccups when multiple worker threads are used.)
+            raw_read_id_parts = raw_read_id.split("/")
+            pair_name = raw_read_id_parts[0] # e.g. NB501961:14:HM7TLBGX2:2:11103:1246:5674
+            mate_name = raw_read_id_parts[1] # either 1 or 2
+            taxid_concordance_map[taxid] = taxid_concordance_map.get(taxid, 0)
+            if mate_name == "2" and pair_name == previous_pair and taxid == previous_taxid:
+                taxid_concordance_map[taxid] += 2 # add both reads to the concordance count
+                previous_pair = pair_name
+                previous_taxid = taxid
+
+    # Write results:
     with open(output_file, 'w') as f:
         for taxid in taxid_count_map.keys():
             count = taxid_count_map[taxid]
             avg_percent_identity = taxid_percent_identity_map[taxid] / count
             avg_alignment_length = taxid_alignment_length_map[taxid] / count
             avg_e_value = taxid_e_value_map[taxid] / count
-            f.write(",".join([str(taxid), str(count), str(avg_percent_identity), str(avg_alignment_length), str(avg_e_value) + '\n']))
+            percent_concordant = (100.0 * taxid_concordance_map[taxid]) / count
+            f.write(",".join([str(taxid), str(count), str(avg_percent_identity), str(avg_alignment_length), str(avg_e_value), str(percent_concordant) + '\n']))
 
 def generate_rpm_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, speciesOutputPath, genusOutputPath):
     total_reads = get_total_reads_from_stats()
@@ -213,6 +251,7 @@ def generate_json_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, jsonOu
     species_to_percent_identity = {}
     species_to_alignment_length = {}
     species_to_e_value = {}
+    species_to_total_concordant = {}
     with open(taxidCountsInputPath) as f:
         for line in f:
             tok = line.rstrip().split(",")
@@ -221,6 +260,7 @@ def generate_json_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, jsonOu
             percent_identity = float(tok[2])
             alignment_length = float(tok[3])
             e_value = float(tok[4])
+            percent_concordant = float(tok[5])
             species_taxid, genus_taxid, scientific_name = taxid2info_map.get(taxid, ("-1", "-2", "NA"))
             genus_to_count[genus_taxid] = genus_to_count.get(genus_taxid, 0) + count
             genus_to_name[genus_taxid]  = scientific_name.split(" ")[0]
@@ -229,6 +269,7 @@ def generate_json_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, jsonOu
             species_to_percent_identity[species_taxid] = species_to_percent_identity.get(species_taxid, 0) + count * percent_identity
             species_to_alignment_length[species_taxid] = species_to_alignment_length.get(species_taxid, 0) + count * alignment_length
             species_to_e_value[species_taxid] = species_to_e_value.get(species_taxid, 0) + count * e_value
+            species_to_total_concordant[species_taxid] = species_to_total_concordant.get(species_taxid, 0) + count * percent_concordant / 100.0
 
     for taxid in species_to_count.keys():
         species_name = species_to_name[taxid]
@@ -236,12 +277,14 @@ def generate_json_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, jsonOu
         avg_percent_identity = species_to_percent_identity[taxid] / count
         avg_alignment_length = species_to_alignment_length[taxid] / count
         avg_e_value = species_to_e_value[taxid] / count
+        overall_percent_concordant = (100.0 * species_to_total_concordant[taxid]) / count
         taxon_counts_attributes.append({"tax_id": taxid,
                                         "tax_level": TAX_LEVEL_SPECIES,
                                         "count": count,
                                         "percent_identity": avg_percent_identity,
                                         "alignment_length": avg_alignment_length,
                                         "e_value": avg_e_value,
+                                        "percent_concordant": overall_percent_concordant,
                                         "name": species_name,
                                         "count_type": countType})
 
@@ -460,7 +503,7 @@ def run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work
         commands += " ".join([remote_home_dir+'/bin/gsnapl',
                               '-A', 'm8', '--batch=2',
                               '--gmap-mode=none', '--npaths=1', '--ordered',
-                              '-t', '32',
+                              '-t', '32', '--ordered', # ensures output is in same order as input for threads > 1
                               '--maxsearch=5', '--max-mismatches=20',
                               '-D', remote_index_dir, '-d', 'nt_k16']
                               + [remote_work_dir+'/'+input_fa for input_fa in input_files]
