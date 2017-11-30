@@ -398,7 +398,6 @@ class SampleUpload extends React.Component {
               <div className="row field-row">
                 <div className="input-field col s6 project-list">
                    <select ref="projectSelect" className="" onChange={ this.handleProjectChange } value={this.state.selectedProject} id="sample">
-                    <option disabled defaultValue>{this.state.selectedProject}</option>
                    { this.state.allProjects.length ?
                       this.state.allProjects.map((project, i) => {
                         return <option ref= "project" key={i} id={project.id} >{project.name}</option>
@@ -484,7 +483,6 @@ class SampleUpload extends React.Component {
               <div className="row field-row">
                 <div className="input-field col s6 project-list">
                    <select ref="projectSelect" className="" id="sample" onChange={ this.handleProjectChange } value={this.state.selectedProject}>
-                    <option disabled defaultValue>{this.state.selectedProject}</option>
                    { this.state.allProjects.length ?
                       this.state.allProjects.map((project, i) => {
                         return <option ref= "project" key={i} id={project.id} >{project.name}</option>
