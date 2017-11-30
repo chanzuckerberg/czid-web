@@ -35,7 +35,7 @@ class PipelineOutput < ApplicationRecord
     TaxonCount.connection.execute(
       "INSERT INTO taxon_counts(pipeline_output_id, tax_id, name,
                                 tax_level, count_type, count,
-                                percent_identity, alignment_length, e_value,
+                                percent_identity, alignment_length, e_value, percent_concordant,
                                 created_at, updated_at)
        SELECT #{id},
               IF(
@@ -54,6 +54,7 @@ class PipelineOutput < ApplicationRecord
               sum(taxon_counts.percent_identity * taxon_counts.count) / sum(taxon_counts.count),
               sum(taxon_counts.alignment_length * taxon_counts.count) / sum(taxon_counts.count),
               sum(taxon_counts.e_value * taxon_counts.count) / sum(taxon_counts.count),
+              sum(taxon_counts.percent_concordant * taxon_counts.count) / sum(taxon_counts.count),
               '#{current_date}',
               '#{current_date}'
        FROM  taxon_lineages, taxon_counts
