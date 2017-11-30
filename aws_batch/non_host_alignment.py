@@ -196,16 +196,16 @@ def generate_tax_counts_from_m8(m8_file, e_value_type, output_file, lineage_map)
             raw_read_id_parts = raw_read_id.split("/")
             pair_name = raw_read_id_parts[0] # e.g. NB501961:14:HM7TLBGX2:2:11103:1246:5674
             mate_name = raw_read_id_parts[1] # either 1 or 2
-            species_taxid_concordance_map[species_taxid] = species_taxid_concordance_map.get(species_taxid, 0)
-            genus_taxid_concordance_map[genus_taxid] = genus_taxid_concordance_map.get(genus_taxid, 0)
-            family_taxid_concordance_map[family_taxid] = family_taxid_concordance_map.get(family_taxid, 0)
+            species_taxid_concordance_map[taxid] = species_taxid_concordance_map.get(taxid, 0)
+            genus_taxid_concordance_map[taxid] = genus_taxid_concordance_map.get(taxid, 0)
+            family_taxid_concordance_map[taxid] = family_taxid_concordance_map.get(taxid, 0)
             if mate_name == "2" and pair_name == previous_pair:
                 if species_taxid == previous_species_taxid:
-                    species_taxid_concordance_map[species_taxid] += 2 # add both reads to the concordance count
+                    species_taxid_concordance_map[taxid] += 2 # add both reads to the concordance count
                 if genus_taxid == previous_genus_taxid:
-                    genus_taxid_concordance_map[genus_taxid] += 2
+                    genus_taxid_concordance_map[taxid] += 2
                 if family_taxid == previous_family_taxid:
-                    family_taxid_concordance_map[family_taxid] += 2
+                    family_taxid_concordance_map[taxid] += 2
                 previous_pair = pair_name
                 previous_species_taxid = species_taxid
                 previous_genus_taxid = genus_taxid
