@@ -1,9 +1,8 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
   protect_from_forgery with: :null_session
-  before_action :set_user, 
-  before_action: :current_user_details
-
+  before_action :set_user
+  
   def login_required
     redirect_to '/users/sign_in' unless current_user
   end
