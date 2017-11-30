@@ -300,9 +300,9 @@ def generate_json_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, jsonOu
                                         "count_type": countType,
                                         # Not very elegant, but until such time as we propagate alignment information at the level of
                                         # individual reads to the web app's database, we have to do the concordance aggregation here:
-                                        "species_total_concordant": species_total_concordant,
-                                        "genus_total_concordant": genus_total_concordant,
-                                        "family_total_concordant": family_total_concordant})
+                                        "species_total_concordant": species_total_concordant[taxid],
+                                        "genus_total_concordant": genus_total_concordant[taxid],
+                                        "family_total_concordant": family_total_concordant[taxid]})
 
     output_dict = {
         "pipeline_output": {
