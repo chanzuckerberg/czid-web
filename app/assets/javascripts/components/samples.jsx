@@ -54,6 +54,7 @@ class Samples extends React.Component {
       let dbSample = sample.db_sample;
       let derivedOutput = sample.derived_sample_output;
       let runInfo = sample.run_info
+      let uploader = sample.uploader.name
       rowWithChunkStatus = (
         <td className={this.applyChunkStatusClass(runInfo)}>
           <a href={'/samples/' + dbSample.id}>{this.getChunkedStage(runInfo)}</a>
@@ -69,6 +70,7 @@ class Samples extends React.Component {
         <tr onClick={ this.viewSample.bind(this, dbSample.id)} key={i}>
           <td>
             {dbSample.name}
+            {!uploader || uploader === '' ? '' : <p className="uploader">Uploaded by {uploader}</p>}
           </td>
           <td>{moment(dbSample.created_at).startOf('second').fromNow()}</td>
           <td>{ !derivedOutput.pipeline_output ? 'NA' : <a href={'/samples/' + dbSample.id}>{numberWithCommas(derivedOutput.pipeline_output.total_reads)}</a>}</td>
@@ -115,13 +117,13 @@ class Samples extends React.Component {
       return 'FAILED';
     } else if (postProcess) {
       if (postProcess === 'LOADED')
-        return 'Complete';
+        return 'COMPLETE';
       else
-        return  'Post Processing';
+        return  'POST PROCESSING';
     } else if (alignment) {
-      return 'Alignment';
+      return 'ALIGNMENT';
     } else if (hostFiltering) {
-      return 'Host Filtering';
+      return 'HOST FILTERING';
     }  else {
       return 'WAITING';
     }
