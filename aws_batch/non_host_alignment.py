@@ -206,10 +206,10 @@ def generate_tax_counts_from_m8(m8_file, e_value_type, output_file, lineage_map)
                     genus_taxid_concordance_map[genus_taxid] += 2
                 if family_taxid == previous_family_taxid:
                     family_taxid_concordance_map[family_taxid] += 2
-                previous_pair = pair_name
-                previous_species_taxid = species_taxid
-                previous_genus_taxid = genus_taxid
-                previous_family_taxid = family_taxid
+            previous_pair = pair_name
+            previous_species_taxid = species_taxid
+            previous_genus_taxid = genus_taxid
+            previous_family_taxid = family_taxid
 
     # Write results:
     with open(output_file, 'w') as f:
