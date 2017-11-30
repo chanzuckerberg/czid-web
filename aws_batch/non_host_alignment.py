@@ -159,7 +159,7 @@ def generate_tax_counts_from_m8(m8_file, e_value_type, output_file):
             # If m8 is from rapsearch in an old version of the pipeline (case 2), 3 fields have been prepended (taxid, 'NT', NT accession ID).
             # If m8 is from rapsearch in this version of the pipeline (case 3), many fields have been prepended (taxid, alignment info fields),
             # but the delimiter ":read_id:" marks the beginning of the raw read ID.
-            read_id_colum = read_id_column.split(":", 1)[1] # remove taxid field (all cases)
+            read_id_column = read_id_column.split(":", 1)[1] # remove taxid field (all cases)
             if ":read_id:" in read_id_column: # case 3
                 raw_read_id = read_id_column.split(":read_id:")[1]
             elif read_id_colum.startswith("NT:"): # case 2
