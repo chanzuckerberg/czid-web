@@ -273,7 +273,7 @@ class BulkUploadImport extends React.Component {
           errorMessage: 'Please fill in a valid bulk_path '
         })
         return true;
-    } 
+    }
     return false;
   }
 
@@ -289,9 +289,13 @@ class BulkUploadImport extends React.Component {
   }
 
   handleProjectChange(e) {
+    let projectId
+    if (e.target.selectedIndex > 0) {
+      projectId = this.projects[e.target.selectedIndex - 1].id;
+    }
     this.setState({
       project: e.target.value.trim(),
-      projectId: e.target.selectedIndex
+      projectId: projectId
     })
     this.clearError();
   }
@@ -388,7 +392,7 @@ class BulkUploadImport extends React.Component {
           }
       </div>
       <input className="hidden" type="submit"/>
-        { this.state.submitting ? <div className="center login-wrapper disabled"> <i className='fa fa-spinner fa-spin fa-lg'></i> </div> : 
+        { this.state.submitting ? <div className="center login-wrapper disabled"> <i className='fa fa-spinner fa-spin fa-lg'></i> </div> :
           <div onClick={ this.handleUploadSubmit } className="center login-wrapper">Submit</div> }
       </form>
     </div>
@@ -451,7 +455,7 @@ class BulkUploadImport extends React.Component {
             </div>
           </div>
         <input className="hidden" type="submit"/>
-        { this.state.submitting ? <div className="center login-wrapper disabled"> <i className='fa fa-spinner fa-spin fa-lg'></i> </div> : 
+        { this.state.submitting ? <div className="center login-wrapper disabled"> <i className='fa fa-spinner fa-spin fa-lg'></i> </div> :
           <div onClick={ this.handleImportSubmit } className="center login-wrapper">Submit</div> }
       </form>
     </div>
