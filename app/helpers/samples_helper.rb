@@ -83,6 +83,21 @@ module SamplesHelper
     sample_list
   end
 
+  def sample_uploaders(samples)
+    all_uploaders = []
+    samples.each do |s|
+      user = {}
+      if s.user_id.present?
+        id = s.user_id
+        user[:name] = User.find(id).name
+      else
+        user[:name] = nil
+      end
+      all_uploaders.push(user)
+    end
+    all_uploaders
+  end
+
   def samples_output_data(samples)
     final_result = []
     samples.each do |output|
@@ -154,9 +169,11 @@ module SamplesHelper
       job_info = {}
       final_result = samples_output_data(samples)
       pipeline_run_info = samples_pipeline_run_info(samples)
+      uploaders = sample_uploaders(samples)
       job_info[:db_sample] = samples[i]
       job_info[:derived_sample_output] = final_result[i]
       job_info[:run_info] = pipeline_run_info[i]
+      job_info[:uploader] = uploaders[i]
       formatted_samples.push(job_info)
     end
     formatted_samples
