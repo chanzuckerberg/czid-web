@@ -168,7 +168,7 @@ def generate_tax_counts_from_m8(m8_file, e_value_type, output_file, lineage_map)
             read_id_column = read_id_column.split(":", 1)[1] # remove taxid field (all cases)
             if ":read_id:" in read_id_column: # case 3
                 raw_read_id = read_id_column.split(":read_id:")[1]
-            elif read_id_colum.startswith("NT:"): # case 2
+            elif read_id_column.startswith("NT:"): # case 2
                 raw_read_id = read_id_column.split(":", 2)[2]
             else: # case 1
                 raw_read_id = read_id_column
