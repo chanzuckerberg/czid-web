@@ -682,6 +682,7 @@ def run_generate_taxid_outputs_from_m8(annotated_m8, taxon_counts_csv_file, taxo
     if not os.path.isfile(lineage_path):
         execute_command("aws s3 cp %s %s/" % (LINEAGE_SHELF, REF_DIR))
         logging.getLogger().info("downloaded taxid-lineage shelf")
+    lineage_map = shelve.open(lineage_path)
 
     species_concordant, genus_concordant, family_concordant = generate_tax_counts_from_m8(annotated_m8, e_value_type,
                                                                                           taxon_counts_csv_file, lineage_map)
