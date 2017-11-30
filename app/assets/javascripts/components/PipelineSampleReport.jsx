@@ -291,12 +291,14 @@ class PipelineSampleReport extends React.Component {
                       { this.render_column_header('NT', '%id', 'nt_percentidentity')    }
                       { this.render_column_header('NT', 'AL',   'nt_alignmentlength')    }
                       { this.render_column_header('NT', 'Log(1/E)',  'nt_neglogevalue')    }
+                      { this.render_column_header('NT', '%conc',  'nt_percentconcordant')    }
                       { this.render_column_header('NR', 'Z',   'nr_zscore') }
                       { this.render_column_header('NR', 'rPM', 'nr_rpm')    }
                       { this.render_column_header('NR', 'r',   'nr_r')      }
                       { this.render_column_header('NR', '%id', 'nr_percentidentity')    }
                       { this.render_column_header('NR', 'AL',   'nr_alignmentlength')    }
                       { this.render_column_header('NR', 'Log(1/E)',  'nr_neglogevalue')    }
+                      { this.render_column_header('NR', '%conc',  'nr_percentconcordant')    }
                     </tr>
                     </thead>
                     <tbody>
@@ -313,12 +315,14 @@ class PipelineSampleReport extends React.Component {
                           { this.render_number(tax_info.NT.percentidentity, sort_column == 'nt_percentidentity', 1) }
                           { this.render_number(tax_info.NT.alignmentlength, sort_column == 'nt_alignmentlength', 1)       }
                           { this.render_number(tax_info.NT.neglogevalue, sort_column == 'nt_neglogevalue', 0) }
+                          { this.render_number(tax_info.NT.percentconcordant, sort_column == 'nt_percentconcordant', 1) }
                           { this.render_number(tax_info.NR.zscore, sort_column == 'nr_zscore', 1) }
                           { this.render_number(tax_info.NR.rpm, sort_column == 'nr_rpm', 1)       }
                           { this.render_number(tax_info.NR.r, sort_column == 'nr_r', 0)           }
                           { this.render_number(tax_info.NR.percentidentity, sort_column == 'nr_percentidentity', 1) }
                           { this.render_number(tax_info.NR.alignmentlength, sort_column == 'nr_alignmentlength', 1)       }
                           { this.render_number(tax_info.NR.neglogevalue, sort_column == 'nr_neglogevalue', 0) }
+                          { this.render_number(tax_info.NR.percentconcordant, sort_column == 'nr_percentconcordant', 1) }
                         </tr>
                       )
                     })}
