@@ -54,7 +54,11 @@ class PipelineOutput < ApplicationRecord
               sum(taxon_counts.percent_identity * taxon_counts.count) / sum(taxon_counts.count),
               sum(taxon_counts.alignment_length * taxon_counts.count) / sum(taxon_counts.count),
               sum(taxon_counts.e_value * taxon_counts.count) / sum(taxon_counts.count),
-              sum(taxon_counts.percent_concordant * taxon_counts.count) / sum(taxon_counts.count),
+              CASE #{tax_level_id}
+                WHEN #{TaxonCount::TAX_LEVEL_SPECIES} THEN taxon_counts.species_total_concordant / sum(taxon_counts.count)
+                WHEN #{TaxonCount::TAX_LEVEL_GENUS} THEN taxon_counts.genus_total_concordant / sum(taxon_counts.count)
+                WHEN #{TaxonCount::TAX_LEVEL_FAMILY} THEN taxon_counts.family_total_concordant / sum(taxon_counts.count)
+              END
               '#{current_date}',
               '#{current_date}'
        FROM  taxon_lineages, taxon_counts
