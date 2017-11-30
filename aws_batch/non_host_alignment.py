@@ -196,16 +196,16 @@ def generate_tax_counts_from_m8(m8_file, e_value_type, output_file, lineage_map)
             raw_read_id_parts = raw_read_id.split("/")
             pair_name = raw_read_id_parts[0] # e.g. NB501961:14:HM7TLBGX2:2:11103:1246:5674
             mate_name = raw_read_id_parts[1] # either 1 or 2
-            species_taxid_concordance_map[taxid] = species_taxid_concordance_map.get(taxid, 0)
-            genus_taxid_concordance_map[taxid] = genus_taxid_concordance_map.get(taxid, 0)
-            family_taxid_concordance_map[taxid] = family_taxid_concordance_map.get(taxid, 0)
+            species_taxid_concordance_map[species_taxid] = species_taxid_concordance_map.get(species_taxid, 0)
+            genus_taxid_concordance_map[genus_taxid] = genus_taxid_concordance_map.get(genus_taxid, 0)
+            family_taxid_concordance_map[family_taxid] = family_taxid_concordance_map.get(family_taxid, 0)
             if mate_name == "2" and pair_name == previous_pair:
                 if species_taxid == previous_species_taxid:
-                    species_taxid_concordance_map[taxid] += 2 # add both reads to the concordance count
+                    species_taxid_concordance_map[species_taxid] += 2 # add both reads to the concordance count
                 if genus_taxid == previous_genus_taxid:
-                    genus_taxid_concordance_map[taxid] += 2
+                    genus_taxid_concordance_map[genus_taxid] += 2
                 if family_taxid == previous_family_taxid:
-                    family_taxid_concordance_map[taxid] += 2
+                    family_taxid_concordance_map[family_taxid] += 2
                 previous_pair = pair_name
                 previous_species_taxid = species_taxid
                 previous_genus_taxid = genus_taxid
@@ -260,13 +260,14 @@ def generate_json_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, jsonOu
     taxon_counts_attributes = []
     remaining_reads = get_remaining_reads_from_stats()
 
-    genus_to_count = {}
-    genus_to_name = {}
     species_to_count = {}
     species_to_name = {}
     species_to_percent_identity = {}
     species_to_alignment_length = {}
     species_to_e_value = {}
+    species_to_species_level_concordance = species_total_concordant
+    species_to_genus_level_concordance = {}
+    species_to_family_level_concordance = {}
     with open(taxidCountsInputPath) as f:
         for line in f:
             tok = line.rstrip().split(",")
@@ -275,14 +276,15 @@ def generate_json_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, jsonOu
             percent_identity = float(tok[2])
             alignment_length = float(tok[3])
             e_value = float(tok[4])
-            species_taxid, genus_taxid, scientific_name = taxid2info_map.get(taxid, ("-1", "-2", "NA"))
-            genus_to_count[genus_taxid] = genus_to_count.get(genus_taxid, 0) + count
-            genus_to_name[genus_taxid]  = scientific_name.split(" ")[0]
+            _species_taxid, _genus_taxid, scientific_name = taxid2info_map.get(taxid, ("-1", "-2", "NA"))
+            species_taxid, genus_taxid, family_taxid = lineage_map.get(taxid, ("-100", "-200", "-300"))
             species_to_count[species_taxid] = species_to_count.get(species_taxid, 0) + count
             species_to_name[species_taxid] = scientific_name
             species_to_percent_identity[species_taxid] = species_to_percent_identity.get(species_taxid, 0) + count * percent_identity
             species_to_alignment_length[species_taxid] = species_to_alignment_length.get(species_taxid, 0) + count * alignment_length
             species_to_e_value[species_taxid] = species_to_e_value.get(species_taxid, 0) + count * e_value
+            species_to_genus_level_concordance[species_taxid] = genus_total_concordant(genus_taxid, 0)
+            species_to_family_level_concordance[species_taxid] = family_total_concordant(family_taxid, 0)
 
     for taxid in species_to_count.keys():
         species_name = species_to_name[taxid]
@@ -300,9 +302,9 @@ def generate_json_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, jsonOu
                                         "count_type": countType,
                                         # Not very elegant, but until such time as we propagate alignment information at the level of
                                         # individual reads to the web app's database, we have to do the concordance aggregation here:
-                                        "species_total_concordant": species_total_concordant[taxid],
-                                        "genus_total_concordant": genus_total_concordant[taxid],
-                                        "family_total_concordant": family_total_concordant[taxid]})
+                                        "species_total_concordant": species_to_species_level_concordance[taxid],
+                                        "genus_total_concordant": species_to_genus_level_concordance[taxid],
+                                        "family_total_concordant": species_to_family_level_concordance[taxid]})
 
     output_dict = {
         "pipeline_output": {
