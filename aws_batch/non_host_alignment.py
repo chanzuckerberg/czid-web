@@ -300,6 +300,7 @@ def generate_json_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, jsonOu
                                         "e_value": avg_e_value,
                                         "name": species_name,
                                         "count_type": countType,
+                                        "percent_concordant": (100.0 * species_to_species_level_concordance[taxid]) / count
                                         # Not very elegant, but until such time as we propagate alignment information at the level of
                                         # individual reads to the web app's database, we have to do the concordance aggregation here:
                                         "species_total_concordant": species_to_species_level_concordance[taxid],
