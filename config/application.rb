@@ -19,5 +19,11 @@ module Idseq
     config.to_prepare do
       DeviseController.respond_to :html, :json
     end
+
+    config.action_mailer.delivery_method = :mailgun
+    config.action_mailer.mailgun_settings = {
+          api_key: ENV['MAIL_GUN_API_KEY'],
+          domain: 'mg.idseq.net'
+    }
   end
 end
