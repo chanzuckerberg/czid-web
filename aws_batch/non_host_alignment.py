@@ -49,6 +49,7 @@ KEY_S3_PATH = None
 ACCESSION2TAXID = 's3://czbiohub-infectious-disease/references/accession2taxid.db.gz'
 DEUTEROSTOME_TAXIDS = 's3://czbiohub-infectious-disease/references/lineages-2017-03-17_deuterostome_taxIDs.txt'
 TAXID_TO_INFO = 's3://czbiohub-infectious-disease/references/taxon_info.db'
+LINEAGE_SHELF = 's3://czbiohub-infectious-disease/references/taxid-lineages.db'
 
 # definitions for integration with web app
 TAX_LEVEL_SPECIES = 1
@@ -137,15 +138,19 @@ def deduplicate_m8(input_m8, output_m8):
             previous_read_name = read_name
     outf.close()
 
-def generate_tax_counts_from_m8(m8_file, e_value_type, output_file):
-    # uses m8 file with read names beginning as: "taxid<taxon ID>:"
+def generate_tax_counts_from_m8(m8_file, e_value_type, output_file, lineage_map):
     taxid_count_map = {}
     taxid_percent_identity_map = {}
     taxid_alignment_length_map = {}
     taxid_e_value_map = {}
-    taxid_concordance_map = {}
+    species_taxid_concordance_map = {}
+    genus_taxid_concordance_map = {}
+    family_taxid_concordance_map = {}
     previous_pair = ''
-    previous_taxid = ''
+    previous_species_taxid = ''
+    previous_genus_taxid = ''
+    previous_family_taxid = ''
+
     with open(m8_file, 'rb') as m8f:
         for line in m8f:
 
@@ -153,6 +158,7 @@ def generate_tax_counts_from_m8(m8_file, e_value_type, output_file):
             line_columns = line.split("\t")
             read_id_column = line_columns[0]
             taxid = (read_id_column.split("taxid"))[1].split(":")[0]
+            species_taxid, genus_taxid, family_taxid = lineage_map.get(taxid, ("-100", "-200", "-300"))
 
             # Get raw read ID without our annotations:
             # If m8 is from gsnap (case 1), 1 field has been prepended (taxid field).
@@ -168,7 +174,7 @@ def generate_tax_counts_from_m8(m8_file, e_value_type, output_file):
                 raw_read_id = read_id_column
 
             # Get alignment quality metrics from m8 format (blast format 8):
-            #   query, subject, %id, alignment length, mismatches, gap openings, query start, query end,
+            #   %id, alignment length, mismatches, gap openings, query start, query end,
             #   subject start, subject end, E value (log10 if rapsearch2 output), bit score
             # E value is a negative power of 10. GSNAPL outputs raw e-value, RAPSearch2 outputs log10(e-value).
             # Whenever we use "e_value" it refers to log10(e-value), which is easier to handle.
@@ -190,11 +196,20 @@ def generate_tax_counts_from_m8(m8_file, e_value_type, output_file):
             raw_read_id_parts = raw_read_id.split("/")
             pair_name = raw_read_id_parts[0] # e.g. NB501961:14:HM7TLBGX2:2:11103:1246:5674
             mate_name = raw_read_id_parts[1] # either 1 or 2
-            taxid_concordance_map[taxid] = taxid_concordance_map.get(taxid, 0)
-            if mate_name == "2" and pair_name == previous_pair and taxid == previous_taxid:
-                taxid_concordance_map[taxid] += 2 # add both reads to the concordance count
+            species_taxid_concordance_map[species_taxid] = species_taxid_concordance_map.get(species_taxid, 0)
+            genus_taxid_concordance_map[genus_taxid] = genus_taxid_concordance_map.get(genus_taxid, 0)
+            family_taxid_concordance_map[family_taxid] = family_taxid_concordance_map.get(family_taxid, 0)
+            if mate_name == "2" and pair_name == previous_pair:
+                if species_taxid == previous_species_taxid:
+                    species_taxid_concordance_map[species_taxid] += 2 # add both reads to the concordance count
+                if genus_taxid == previous_genus_taxid:
+                    genus_taxid_concordance_map[genus_taxid] += 2
+                if family_taxid == previous_family_taxid:
+                    family_taxid_concordance_map[family_taxid] += 2
                 previous_pair = pair_name
-                previous_taxid = taxid
+                previous_species_taxid = species_taxid
+                previous_genus_taxid = genus_taxid
+                previous_family_taxid = family_taxid
 
     # Write results:
     with open(output_file, 'w') as f:
@@ -203,8 +218,8 @@ def generate_tax_counts_from_m8(m8_file, e_value_type, output_file):
             avg_percent_identity = taxid_percent_identity_map[taxid] / count
             avg_alignment_length = taxid_alignment_length_map[taxid] / count
             avg_e_value = taxid_e_value_map[taxid] / count
-            percent_concordant = (100.0 * taxid_concordance_map[taxid]) / count
-            f.write(",".join([str(taxid), str(count), str(avg_percent_identity), str(avg_alignment_length), str(avg_e_value), str(percent_concordant) + '\n']))
+            f.write(",".join([str(taxid), str(count), str(avg_percent_identity), str(avg_alignment_length), str(avg_e_value) + '\n']))
+    return species_taxid_concordance_map, genus_taxid_concordance_map, family_taxid_concordance_map
 
 def generate_rpm_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, speciesOutputPath, genusOutputPath):
     total_reads = get_total_reads_from_stats()
@@ -238,7 +253,8 @@ def generate_rpm_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, species
         genus_outf.write("%s,%s,%s\n" % (genus_taxid, genus_name, rpm))
     genus_outf.close()
 
-def generate_json_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, jsonOutputPath, countType):
+def generate_json_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, jsonOutputPath, countType,
+                                    species_total_concordant, genus_total_concordant, family_total_concordant):
     taxid2info_map = shelve.open(taxid2infoPath)
     total_reads = get_total_reads_from_stats()
     taxon_counts_attributes = []
@@ -251,7 +267,6 @@ def generate_json_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, jsonOu
     species_to_percent_identity = {}
     species_to_alignment_length = {}
     species_to_e_value = {}
-    species_to_total_concordant = {}
     with open(taxidCountsInputPath) as f:
         for line in f:
             tok = line.rstrip().split(",")
@@ -260,7 +275,6 @@ def generate_json_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, jsonOu
             percent_identity = float(tok[2])
             alignment_length = float(tok[3])
             e_value = float(tok[4])
-            percent_concordant = float(tok[5])
             species_taxid, genus_taxid, scientific_name = taxid2info_map.get(taxid, ("-1", "-2", "NA"))
             genus_to_count[genus_taxid] = genus_to_count.get(genus_taxid, 0) + count
             genus_to_name[genus_taxid]  = scientific_name.split(" ")[0]
@@ -269,7 +283,6 @@ def generate_json_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, jsonOu
             species_to_percent_identity[species_taxid] = species_to_percent_identity.get(species_taxid, 0) + count * percent_identity
             species_to_alignment_length[species_taxid] = species_to_alignment_length.get(species_taxid, 0) + count * alignment_length
             species_to_e_value[species_taxid] = species_to_e_value.get(species_taxid, 0) + count * e_value
-            species_to_total_concordant[species_taxid] = species_to_total_concordant.get(species_taxid, 0) + count * percent_concordant / 100.0
 
     for taxid in species_to_count.keys():
         species_name = species_to_name[taxid]
@@ -277,7 +290,6 @@ def generate_json_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, jsonOu
         avg_percent_identity = species_to_percent_identity[taxid] / count
         avg_alignment_length = species_to_alignment_length[taxid] / count
         avg_e_value = species_to_e_value[taxid] / count
-        overall_percent_concordant = (100.0 * species_to_total_concordant[taxid]) / count
         taxon_counts_attributes.append({"tax_id": taxid,
                                         "tax_level": TAX_LEVEL_SPECIES,
                                         "count": count,
@@ -286,7 +298,12 @@ def generate_json_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, jsonOu
                                         "e_value": avg_e_value,
                                         "percent_concordant": overall_percent_concordant,
                                         "name": species_name,
-                                        "count_type": countType})
+                                        "count_type": countType,
+                                        # Not very elegant, but until such time as we propagate alignment information at the level of
+                                        # individual reads to the web app's database, we have to do the concordance aggregation here:
+                                        "species_total_concordant": species_total_concordant,
+                                        "genus_total_concordant": genus_total_concordant,
+                                        "family_total_concordant": family_total_concordant})
 
     output_dict = {
         "pipeline_output": {
@@ -651,15 +668,26 @@ def run_rapsearch2_remotely(input_fasta, lazy_run):
 
 def run_generate_taxid_outputs_from_m8(annotated_m8, taxon_counts_csv_file, taxon_counts_json_file,
     taxon_species_rpm_file, taxon_genus_rpm_file, count_type, e_value_type):
+
     # download taxoninfodb if not exist
     taxoninfo_filename = os.path.basename(TAXID_TO_INFO)
     taxoninfo_path = REF_DIR + '/' + taxoninfo_filename
     if not os.path.isfile(taxoninfo_path):
         execute_command("aws s3 cp %s %s/" % (TAXID_TO_INFO, REF_DIR))
         write_to_log("downloaded taxon info database")
-    generate_tax_counts_from_m8(annotated_m8, e_value_type, taxon_counts_csv_file)
+
+    # download lineage db if not exist
+    lineage_filename = os.path.basename(LINEAGE_SHELF)
+    lineage_path = REF_DIR + '/' + lineage_filename
+    if not os.path.isfile(lineage_path):
+        execute_command("aws s3 cp %s %s/" % (LINEAGE_SHELF, REF_DIR))
+        logging.getLogger().info("downloaded taxid-lineage shelf")
+
+    species_concordant, genus_concordant, family_concordant = generate_tax_counts_from_m8(annotated_m8, e_value_type,
+                                                                                          taxon_counts_csv_file, lineage_map)
     write_to_log("generated taxon counts from m8")
-    generate_json_from_taxid_counts(taxon_counts_csv_file, taxoninfo_path, taxon_counts_json_file, count_type)
+    generate_json_from_taxid_counts(taxon_counts_csv_file, taxoninfo_path, taxon_counts_json_file, count_type,
+                                    species_concordant, genus_concordant, family_concordant)
     write_to_log("generated JSON file from taxon counts")
     generate_rpm_from_taxid_counts(taxon_counts_csv_file, taxoninfo_path,
                                    taxon_species_rpm_file, taxon_genus_rpm_file)
