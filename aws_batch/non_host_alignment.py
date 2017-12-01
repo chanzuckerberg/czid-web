@@ -40,7 +40,7 @@ ENVIRONMENT = 'production'
 
 # compute capacity
 GSNAPL_MAX_CONCURRENT = 20 # number of gsnapl jobs allowed to run concurrently on 1 machine
-RAPSEARCH2_MAX_CONCURRENT = 1
+RAPSEARCH2_MAX_CONCURRENT = 3
 GSNAPL_CHUNK_SIZE = 30000 # number of fasta records in a chunk
 RAPSEARCH_CHUNK_SIZE = 10000
 KEY_S3_PATH = None
@@ -567,7 +567,7 @@ def run_rapsearch_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_w
                           '-a','T',
                           '-b','0',
                           '-v','1',
-                          '-z','4',
+                          '-z','24',
                           '-q', input_path,
                           '-o', output_path[:-3],
                           ';'])
@@ -591,7 +591,7 @@ def run_rapsearch2_remotely(input_fasta, lazy_run):
     execute_command("chmod 400 %s" % key_path)
     remote_username = "ec2-user"
     remote_home_dir = "/home/%s" % remote_username
-    remote_work_dir = "%s/batch-pipeline-workdir/%s" % (remote_home_dir, SAMPLE_NAME)
+    remote_work_dir = "%s/data/batch-pipeline-workdir/%s" % (remote_home_dir, SAMPLE_NAME)
     remote_index_dir = "%s/references/nr_rapsearch" % remote_home_dir
     # split file:
     chunk_nlines = 2*RAPSEARCH_CHUNK_SIZE
