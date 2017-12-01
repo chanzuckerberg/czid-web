@@ -141,7 +141,7 @@ module SamplesHelper
           run_stages.each do |rs|
             pipeline_run_entry[rs[:name]] = rs.job_status
           end
-          pipeline_run_entry[:total_runtime] = run_stages.map{ |rs| rs.updated_at - rs.created_at }.sum
+          pipeline_run_entry[:total_runtime] = run_stages.map { |rs| rs.updated_at - rs.created_at }.sum
         else
           pipeline_run_status = recent_pipeline_run.job_status
           pipeline_run_entry[:job_status_description] =
