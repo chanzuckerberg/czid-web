@@ -21,7 +21,6 @@ Rails.application.routes.draw do
   resources :projects do
     get :visuals, on: :member
   end
-  get 'projects/:id', to: 'projects#show'
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
   mount Resque::Server.new, at: '/resque'
