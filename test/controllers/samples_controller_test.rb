@@ -22,7 +22,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'should create sample' do
-    req_headers = { 'X-User-Email' => @user.email}
+    req_headers = { 'X-User-Email' => @user.email }
     input_files = [{ source: "RR004_water_2_S23_R1_001.fastq.gz",
                      name: "RR004_water_2_S23_R1_001.fastq.gz",
                      source_type: "local" },
