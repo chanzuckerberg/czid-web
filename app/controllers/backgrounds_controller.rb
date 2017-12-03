@@ -1,5 +1,4 @@
-class BackgroundsController < ApplicationController
-  before_action :login_required, only: [:new, :edit, :update, :destroy, :create, :index, :show]
+class BackgroundsController < SecuredController
   before_action :set_background, only: [:show, :edit, :update, :destroy]
 
   # GET /backgrounds

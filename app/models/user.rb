@@ -8,10 +8,10 @@ class User < ApplicationRecord
   has_many :samples
   ROLE_ADMIN = 1
 
-  def as_json(_options = {})
-    super(methods: [:admin])
+  def as_json(options={})  
+    super({except: [:authentication_token], methods: [:admin]}.merge(options))
   end
-
+  
   def admin
     role == ROLE_ADMIN
   end
