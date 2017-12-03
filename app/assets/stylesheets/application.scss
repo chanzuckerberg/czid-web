@@ -24,16 +24,12 @@ a {
   color: inherit !important;
 }
 
-.field select {
-  display: block;
-}
-
 .hidden {
   display: none;
 }
 .error-info {
   background: rgba(208, 2, 27, 0.07);
-  border-radius: 5px;
+  border-radius: 2px;
   color: #D0021B;
   margin: 0 auto;
   padding: 10px 5px;
