@@ -1,6 +1,6 @@
 class ProjectsController < SecuredController
   before_action :set_project, only: [:show, :edit, :update, :destroy]
-  
+
   clear_respond_to
   respond_to :json
 

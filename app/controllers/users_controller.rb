@@ -30,8 +30,8 @@ class UsersController < SecuredController
     end
   end
 
-   # GET /users/1/edit
-   def edit
+  # GET /users/1/edit
+  def edit
     user
   end
 
@@ -74,7 +74,7 @@ class UsersController < SecuredController
   end
   helper_method :user
 
-  def new_user(attrs={})
+  def new_user(attrs = {})
     @user ||= User.new(attrs)
   end
 

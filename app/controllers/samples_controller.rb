@@ -1,7 +1,7 @@
 class SamplesController < SecuredController
   include ReportHelper
   include SamplesHelper
-  
+
   before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs]
   acts_as_token_authentication_handler_for User, only: [:create, :bulk_upload], fallback: :devise
   protect_from_forgery unless: -> { request.format.json? }

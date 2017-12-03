@@ -1,6 +1,5 @@
 require 'will_paginate/array'
 class HomeController < SecuredController
-  
   include SamplesHelper
 
   def home

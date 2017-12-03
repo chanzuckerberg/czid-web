@@ -1,5 +1,4 @@
 class ReportsController < SecuredController
-  
   before_action :set_report, only: [:show, :edit, :update, :destroy, :send_report_csv]
   include ReportHelper
   # GET /reports
