@@ -5,7 +5,6 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     @sample = samples(:one)
     @project = projects(:one)
     @user = users(:one)
-    @user.authenticity_token = 'sdfsdfsdff'
     @user.save
     @user_params = { 'user[email]' => @user.email, 'user[password]' => 'password' }
   end
@@ -23,8 +22,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'should create sample' do
-    req_headers = { 'X-User-Email' => @user.email,
-                    'X-User-Token' => @user.authenticity_token }
+    req_headers = { 'X-User-Email' => @user.email}
     input_files = [{ source: "RR004_water_2_S23_R1_001.fastq.gz",
                      name: "RR004_water_2_S23_R1_001.fastq.gz",
                      source_type: "local" },
