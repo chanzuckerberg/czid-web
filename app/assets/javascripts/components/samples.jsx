@@ -24,7 +24,8 @@ class Samples extends React.Component {
       pageEnd: false,
       initialFetchedSamples: [],
       loading: false,
-      isRequesting: false
+      isRequesting: false,
+      displayEmpty: false
     };
   }
 
@@ -160,8 +161,12 @@ class Samples extends React.Component {
   //fetch first set of samples
   fetchSamples() {
     axios.get(`/project_samples`).then((res) => {
+      if (!res.data.samples.length) {
+        this.setState({ displayEmpty: true });
+      }
       this.setState((prevState) => ({
         loading: false,
+        displayEmpty: false,
         initialFetchedSamples: res.data.samples,
         allSamples: res.data.samples,
         pagesLoaded: prevState.pagesLoaded+1,
@@ -235,13 +240,17 @@ class Samples extends React.Component {
   fetchResults() {
     const params = this.getParams();
     axios.get(`/project_samples${params}`).then((res) => {
+      if (!res.data.samples.length) {
+        this.setState({ displayEmpty: true });
+      }
       this.setState((prevState) => ({
         loading: false,
+        displayEmpty: false,
         initialFetchedSamples: res.data.samples,
         allSamples: res.data.samples,
         totalNumber: res.data.total_count,
         pagesLoaded: prevState.pagesLoaded+1
-      }))
+      }));
     })
   }
 
@@ -386,6 +395,9 @@ class Samples extends React.Component {
           { samples.length ? this.renderPipelineOutput(samples) : this.renderEmptyTable() }
       </div>
       { !this.state.pageEnd && this.state.initialFetchedSamples && this.state.initialFetchedSamples.length > 14 ? <div className="scroll">
+        <i className='fa fa-spinner fa-spin fa-3x'></i>
+      </div> : "" }
+      { this.state.loading ? <div className="scroll">
         <i className='fa fa-spinner fa-spin fa-3x'></i>
       </div> : "" }
     </div>
