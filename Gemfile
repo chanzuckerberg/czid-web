@@ -18,6 +18,7 @@ gem 'd3-rails'
 gem 'devise', '4.3.0'
 gem 'font-awesome-rails'
 gem "health_check"
+gem 'mailgun_rails'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.5'
 # jquery for rails
