@@ -21,7 +21,7 @@ class ProjectSamplesController < ApplicationController
     @samples_count = results.size
     @all_samples = format_samples(@samples)
 
-    render json: {samples: @all_samples, total_count: @samples_count}
+    render json: { samples: @all_samples, total_count: @samples_count }
   end
 
   private
