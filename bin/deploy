@@ -69,6 +69,10 @@ def run_task(client, cluster, service, task_revision, container, command)
                          overrides: overrides)
 
   task = resp.tasks[0]
+  if resp.failures.length > 1
+    raise "run_task failed. failures: #{resp.failures.map{|f| f.reason}. join ', '}"
+  end
+
   migrate_task_arn = task.task_arn
   task_id = migrate_task_arn.split(':').last.split('/').last
 
