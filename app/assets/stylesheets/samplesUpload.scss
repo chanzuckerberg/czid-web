@@ -139,7 +139,7 @@
                 .genome-label {
                   color: #95A1AB;
                   text-align: center;
-                  font-size: 12px;
+                  font-size: 0.75em;
                   margin-top: 5px;
                 }
                 &.active, &:hover {
@@ -176,6 +176,25 @@
                   color: #263039;
                   font-size: 13px;
                 }
+              }
+            }
+            .admin-genomes {
+              .genome-label {
+                // float: right;
+                font-size: 0.75em;
+                color: #313E49;
+                display: inline-block;
+                border-right: 1px solid #313E49;
+                padding-right: 5px;
+                margin-left: 5px;
+                cursor: pointer;
+                &:hover, &.active {
+                  color: #3a71a0;
+                }
+              }
+              .genome-label:last-child {
+                border-right: 0;
+                padding-right: 0;
               }
             }
           }
