@@ -10,14 +10,14 @@ class UsersController < ApplicationController
 
   # GET /users/new
   def new
-    set_new_user
+    new_user
   end
 
   # POST /users
   # POST /users.json
   def create
     Rails.logger.debug(user_params.inspect)
-    set_new_user(user_params)
+    new_user(user_params)
 
     respond_to do |format|
       if @user.save
@@ -72,7 +72,7 @@ class UsersController < ApplicationController
     @user ||= User.find(params[:id])
   end
 
-  def set_new_user(attrs = {})
+  def new_user(attrs = {})
     @user ||= User.new(attrs)
   end
 
