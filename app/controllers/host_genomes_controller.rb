@@ -1,4 +1,4 @@
-class HostGenomesController < SecuredController
+class HostGenomesController < ApplicationController
   before_action :set_host_genome, only: [:show, :edit, :update, :destroy]
 
   # GET /host_genomes

@@ -1,4 +1,4 @@
-class BackgroundsController < SecuredController
+class BackgroundsController < ApplicationController
   before_action :set_background, only: [:show, :edit, :update, :destroy]
 
   # GET /backgrounds

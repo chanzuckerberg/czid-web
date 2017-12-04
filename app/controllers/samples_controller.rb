@@ -1,4 +1,4 @@
-class SamplesController < SecuredController
+class SamplesController < ApplicationController
   include ReportHelper
   include SamplesHelper
 

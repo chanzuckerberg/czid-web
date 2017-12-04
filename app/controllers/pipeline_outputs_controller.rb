@@ -1,4 +1,4 @@
-class PipelineOutputsController < SecuredController
+class PipelineOutputsController < ApplicationController
   include ReportHelper
   include PipelineOutputsHelper
   before_action :set_pipeline_output, only: [:show, :show_taxid_fasta, :send_nonhost_fasta, :send_unidentified_fasta]

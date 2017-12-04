@@ -1,4 +1,4 @@
-class UsersController < SecuredController
+class UsersController < ApplicationController
   clear_respond_to
   respond_to :json
 
