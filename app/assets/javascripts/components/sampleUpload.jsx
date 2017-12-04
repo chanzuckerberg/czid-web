@@ -18,10 +18,12 @@ class SampleUpload extends React.Component {
     this.hostGenomes = props.host_genomes || [];
     this.sample = props.selectedSample || '';
     this.userDetails = props.loggedin_user;
+    const selectedHostGenomeName = (this.hostGenomes[0] && this.hostGenomes[0].name) ? this.hostGenomes[0].name : '';
+    const selectedHostGenomeId = (this.hostGenomes[0] && this.hostGenomes[0].id) ? this.hostGenomes[0].id : '';
     this.selected = {
       name: this.sample.name || '',
-      hostGenome: this.sample ? this.sample.host_genome_name : this.hostGenomes[0].name,
-      hostGenomeId: this.sample ? this.sample.host_genome_id : this.hostGenomes[0].id,
+      hostGenome: this.sample ? this.sample.host_genome_name : selectedHostGenomeName,
+      hostGenomeId: this.sample ? this.sample.host_genome_id : selectedHostGenomeId,
       project: this.project ? this.project.name : 'Select a project',
       projectId: this.project ? this.project.id : null,
       resultPath: this.sample ? this.sample.s3_preload_result_path : '',
@@ -31,8 +33,8 @@ class SampleUpload extends React.Component {
       inputFiles: props.inputFiles && props.inputFiles.length ? props.inputFiles : [],
       status: this.sample.status
     };
-    this.firstInput = this.selected.inputFiles.length && this.selected.inputFiles[0] ? (this.selected.inputFiles[0].source === null ? '' : this.selected.inputFiles[0].source) : '',
-    this.secondInput = this.selected.inputFiles.length && this.selected.inputFiles[1] ? (this.selected.inputFiles[1].source === null ? '' : this.selected.inputFiles[1].source) : '',
+    this.firstInput = this.selected.inputFiles.length && this.selected.inputFiles[0] ? (this.selected.inputFiles[0].source === null ? '' : this.selected.inputFiles[0].source) : '';
+    this.secondInput = this.selected.inputFiles.length && this.selected.inputFiles[1] ? (this.selected.inputFiles[1].source === null ? '' : this.selected.inputFiles[1].source) : '';
     this.state = {
       submitting: false,
       allProjects: this.projects || [],
@@ -131,7 +133,7 @@ class SampleUpload extends React.Component {
     .catch((error) => {
       that.setState({
         invalid: true,
-        errors: { 'selectedProject': 'Project already exists or is in-valid' },
+        errors: { 'selectedProject': 'Project already exists or is invalid' },
       })
     });
   }
@@ -324,11 +326,14 @@ class SampleUpload extends React.Component {
   }
 
   handleProjectChange(e) {
-    this.setState({
-      selectedProject: e.target.value.trim(),
-      selectedPId: this.state.allProjects[e.target.selectedIndex].id,
-      errors: Object.assign({}, this.state.errors, {selectedProject: null})
-    });
+    if(e.target.value.trim().toLowerCase() !== 'select a project') {
+      const selectedIndex = e.target.selectedIndex - 1; // because the first item is Select a project
+      this.setState({
+        selectedProject: e.target.value.trim(),
+        selectedPId: this.state.allProjects[selectedIndex].id,
+        errors: Object.assign({}, this.state.errors, {selectedProject: null})
+      });
+    }
     this.clearError();
   }
 
@@ -597,11 +602,17 @@ class SampleUpload extends React.Component {
                           })
                         }
                         { this.state.hostGenomes.length ? '' :
-                          <li>
+                          <div>
                             <small>No host genome found!</small>
-                          </li>
+                          </div>
                         }
                       </ul>
+                      {
+                        (this.state.errors.selectedHostGenome) ?
+                          <div className='field-error'>
+                            {this.state.errors.selectedHostGenome}
+                          </div> : null
+                      }
                     </div>
                   </div>
                 </div>
