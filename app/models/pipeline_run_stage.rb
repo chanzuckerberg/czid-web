@@ -136,10 +136,10 @@ class PipelineRunStage < ApplicationRecord
     batch_command_env_variables = "INPUT_BUCKET=#{sample.sample_input_s3_path} OUTPUT_BUCKET=#{sample.sample_output_s3_path} " \
       "FILE_TYPE=#{file_type} DB_SAMPLE_ID=#{sample.id}"
     if sample.s3_star_index_path.present?
-      batch_command_env_variables += "STAR_GENOME=#{sample.s3_star_index_path} "
+      batch_command_env_variables += " STAR_GENOME=#{sample.s3_star_index_path} "
     end
     if sample.s3_bowtie2_index_path.present?
-      batch_command_env_variables += "BOWTIE2_GENOME=#{sample.s3_bowtie2_index_path} "
+      batch_command_env_variables += " BOWTIE2_GENOME=#{sample.s3_bowtie2_index_path} "
     end
     batch_command = "aws s3 cp #{IdSeqPipeline::S3_HOST_FILTER_SCRIPT_LOC} .; chmod 755 #{script_name}; " \
       "aws s3 cp #{IdSeqPipeline::S3_COMMON_SCRIPT_LOC} .; chmod 755 #{common_script_name}; " +
