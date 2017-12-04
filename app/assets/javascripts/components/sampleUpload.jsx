@@ -390,21 +390,23 @@ class SampleUpload extends React.Component {
   resolveGenomeIcon (genomeName) {
     let imgPath = '/assets/generic_genome.png';
     if (typeof genomeName === 'undefined') {
-      return imgPath;
+      return false;
     }
     genomeName = genomeName.toLowerCase();
     switch (genomeName) {
       case 'mosquito':
-        imgPath = '/assets/mosquito.png';
+        return '/assets/mosquito.png';
         break;
       case 'human':
-        imgPath = '/assets/human.png';
+        return '/assets/human.png';
         break;
-      case 'non-host':
-        imgPath = '/assets/bacteria.png';
+      case 'no host subtraction':
+        return '/assets/bacteria.png';
         break;
+      default:
+        return imgPath;
     }
-    return imgPath;
+
   }
 
   renderUpdateForm() {
@@ -576,10 +578,12 @@ class SampleUpload extends React.Component {
 
                 <div className='field'>
                   <div className='row'>
-                    <div className='col field-title no-padding s12 tooltipped'
+                    <div className='col field-title no-padding s5 tooltipped'
                          data-position="top" data-delay="50"
                          data-tooltip='This would be subtracted by the pipeline'>
-                      Select The Host Genome for this Sample
+                      Select Host Genome
+                    </div>
+                    <div className='col s7 right-align no-padding right admin-genomes'>
                     </div>
                   </div>
                   <div className='row input-row'>
@@ -588,6 +592,7 @@ class SampleUpload extends React.Component {
                         {
                           this.state.hostGenomes.map((g) => {
                             return (
+                              this.resolveGenomeIcon(g.name) ?
                               <li
                                   key={g.id} className={ `${this.state.selectedHostGenome ===  g.name ? 'active' : null} `}
                                   id={g.name} onClick={() => this.handleHostChange(g.id, g.name)}>
@@ -597,7 +602,7 @@ class SampleUpload extends React.Component {
                                 <div className='genome-label'>
                                   { g.name }
                                 </div>
-                              </li>
+                              </li> : null
                             );
                           })
                         }
