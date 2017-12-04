@@ -692,17 +692,15 @@ def run_stage2(lazy_run = True):
 
     # Make sure there are no tabs in sequence names, since tabs are used as a delimiter in m8 files    
     files_to_collapse_basenames = _gsnapl_input_files + [EXTRACT_UNMAPPED_FROM_SAM_OUT3]
-    collapsed_files = [os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT1_CLEANED),
-                       os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT2_CLEANED),
-                       os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT3_CLEANED)]
+    collapsed_files = ["%s/nospace.%s" % (RESULT_DIR, f) for f in files_to_collapse_basenames]
     for file_basename in files_to_collapse_basenames:
         execute_command("aws s3 cp %s/%s %s/" % (SAMPLE_S3_OUTPUT_PATH, file_basename, RESULT_DIR))
     remove_whitespace_from_files([os.path.join(RESULT_DIR, file_basename) for file_basename in files_to_collapse_basenames],
                                   ";", collapsed_files)
     for filename in collapsed_files:
         execute_command("aws s3 cp %s %s/" % (filename, SAMPLE_S3_OUTPUT_PATH))
-    gsnapl_input_files = [EXTRACT_UNMAPPED_FROM_SAM_OUT1_CLEANED, EXTRACT_UNMAPPED_FROM_SAM_OUT2_CLEANED]
-    merged_fasta = os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT3_CLEANED)
+    gsnapl_input_files = [os.path.basename(f) for f in collapsed_files[:-1]]
+    merged_fasta = collapsed_files[-1]
 
     if lazy_run:
         # Download existing data and see what has been done
