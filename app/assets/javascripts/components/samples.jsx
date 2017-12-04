@@ -392,7 +392,7 @@ class Samples extends React.Component {
     )
   }
 
-  selectProject() {
+  initializeProjectList() {
     $('.project-toggle').click((e) => {
       e.stopPropagation();
       const arrowElement = $(e.toElement)[0];
@@ -410,7 +410,7 @@ class Samples extends React.Component {
     $('.filter').hide()
     this.fetchProjectPageData();
     this.scrollDown();
-    this.selectProject();
+    this.initializeProjectList();
     this.displayPipelineStatusFilter();
     this.displayCheckMarks(this.state.urlFilterQuery);
   }
