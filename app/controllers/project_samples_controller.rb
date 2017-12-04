@@ -12,14 +12,12 @@ class ProjectSamplesController < ApplicationController
 
     results = results.where("id in (#{params[:ids]})") if params[:ids].present?
 
-    if project_id.present?
-      results = results.where(project_id: project_id)
-    end
+    results = results.where(project_id: project_id) if project_id.present?
 
     results = results.search(name_search_query) if name_search_query.present?
     results = filter_samples(results, filter_query) if filter_query.present?
 
-    @samples = sort_by(results, sort).paginate(page: params[:page], per_page: params[:per_page]||15)
+    @samples = sort_by(results, sort).paginate(page: params[:page], per_page: params[:per_page] || 15)
     @samples_count = results.size
     @all_samples = format_samples(@samples)
 
