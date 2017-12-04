@@ -1,7 +1,6 @@
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
     super(props, context);
-    this.projects = props.projects || [];
     this.hostGenomes = props.host_genomes || [];
     this.hostName = this.hostGenomes.length ? this.hostGenomes[0].name : '';
     this.hostId = this.hostGenomes.length ? this.hostGenomes[0].id : null;
@@ -18,7 +17,7 @@ class BulkUploadImport extends React.Component {
     this.selectSample = this.selectSample.bind(this);
     this.state = {
       submitting: false,
-      allProjects: this.projects || [],
+      allProjects: props.projects || [],
       hostGenomes: this.hostGenomes || [],
       invalid: false,
       errorMessage: '',
@@ -273,7 +272,7 @@ class BulkUploadImport extends React.Component {
           errorMessage: 'Please fill in a valid bulk_path '
         })
         return true;
-    } 
+    }
     return false;
   }
 
@@ -289,9 +288,13 @@ class BulkUploadImport extends React.Component {
   }
 
   handleProjectChange(e) {
+    let projectId
+    if (e.target.selectedIndex > 0) {
+      projectId = this.state.allProjects[e.target.selectedIndex - 1].id;
+    }
     this.setState({
       project: e.target.value.trim(),
-      projectId: e.target.selectedIndex
+      projectId: projectId
     })
     this.clearError();
   }
@@ -388,7 +391,7 @@ class BulkUploadImport extends React.Component {
           }
       </div>
       <input className="hidden" type="submit"/>
-        { this.state.submitting ? <div className="center login-wrapper disabled"> <i className='fa fa-spinner fa-spin fa-lg'></i> </div> : 
+        { this.state.submitting ? <div className="center login-wrapper disabled"> <i className='fa fa-spinner fa-spin fa-lg'></i> </div> :
           <div onClick={ this.handleUploadSubmit } className="center login-wrapper">Submit</div> }
       </form>
     </div>
@@ -451,7 +454,7 @@ class BulkUploadImport extends React.Component {
             </div>
           </div>
         <input className="hidden" type="submit"/>
-        { this.state.submitting ? <div className="center login-wrapper disabled"> <i className='fa fa-spinner fa-spin fa-lg'></i> </div> : 
+        { this.state.submitting ? <div className="center login-wrapper disabled"> <i className='fa fa-spinner fa-spin fa-lg'></i> </div> :
           <div onClick={ this.handleImportSubmit } className="center login-wrapper">Submit</div> }
       </form>
     </div>
