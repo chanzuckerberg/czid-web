@@ -13,7 +13,6 @@ class SampleUpload extends React.Component {
     this.handleQueueChange = this.handleQueueChange.bind(this);
     this.handleMemoryChange = this.handleMemoryChange.bind(this);
     this.handleResultChange = this.handleResultChange.bind(this);
-    this.projects = props.projects || [];
     this.project = props.projectInfo || '';
     this.hostGenomes = props.host_genomes || [];
     this.sample = props.selectedSample || '';
@@ -35,7 +34,7 @@ class SampleUpload extends React.Component {
     this.secondInput = this.selected.inputFiles.length && this.selected.inputFiles[1] ? (this.selected.inputFiles[1].source === null ? '' : this.selected.inputFiles[1].source) : '',
     this.state = {
       submitting: false,
-      allProjects: this.projects || [],
+      allProjects: props.projects || [],
       hostGenomes: this.hostGenomes || [],
       invalid: false,
       errorMessage: '',
@@ -315,9 +314,13 @@ class SampleUpload extends React.Component {
   }
 
   handleProjectChange(e) {
+    let projectId;
+    if (e.target.selectedIndex > 0) {
+      projectId = this.state.allProjects[e.target.selectedIndex - 1].id;
+    }
     this.setState({
       selectedProject: e.target.value.trim(),
-      selectedPId: this.state.allProjects[e.target.selectedIndex].id
+      selectedPId: projectId
     })
     this.clearError();
   }
@@ -398,6 +401,7 @@ class SampleUpload extends React.Component {
               <div className="row field-row">
                 <div className="input-field col s6 project-list">
                    <select ref="projectSelect" className="" onChange={ this.handleProjectChange } value={this.state.selectedProject} id="sample">
+                   <option disabled defaultValue>{this.state.selectedProject}</option>
                    { this.state.allProjects.length ?
                       this.state.allProjects.map((project, i) => {
                         return <option ref= "project" key={i} id={project.id} >{project.name}</option>
@@ -483,6 +487,7 @@ class SampleUpload extends React.Component {
               <div className="row field-row">
                 <div className="input-field col s6 project-list">
                    <select ref="projectSelect" className="" id="sample" onChange={ this.handleProjectChange } value={this.state.selectedProject}>
+                   <option disabled defaultValue>{this.state.selectedProject}</option>
                    { this.state.allProjects.length ?
                       this.state.allProjects.map((project, i) => {
                         return <option ref= "project" key={i} id={project.id} >{project.name}</option>

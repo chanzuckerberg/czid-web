@@ -1,7 +1,6 @@
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
     super(props, context);
-    this.projects = props.projects || [];
     this.hostGenomes = props.host_genomes || [];
     this.hostName = this.hostGenomes.length ? this.hostGenomes[0].name : '';
     this.hostId = this.hostGenomes.length ? this.hostGenomes[0].id : null;
@@ -18,7 +17,7 @@ class BulkUploadImport extends React.Component {
     this.selectSample = this.selectSample.bind(this);
     this.state = {
       submitting: false,
-      allProjects: this.projects || [],
+      allProjects: props.projects || [],
       hostGenomes: this.hostGenomes || [],
       invalid: false,
       errorMessage: '',
@@ -291,7 +290,7 @@ class BulkUploadImport extends React.Component {
   handleProjectChange(e) {
     let projectId
     if (e.target.selectedIndex > 0) {
-      projectId = this.projects[e.target.selectedIndex - 1].id;
+      projectId = this.state.allProjects[e.target.selectedIndex - 1].id;
     }
     this.setState({
       project: e.target.value.trim(),
