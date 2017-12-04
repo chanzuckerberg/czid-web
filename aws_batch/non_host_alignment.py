@@ -422,6 +422,11 @@ def chunk_input(input_files_basenames, chunk_nlines, part_suffix):
     # e.g. [["input_R1.fasta-part-1", "input_R2.fasta-part-1"],["input_R1.fasta-part-2", "input_R2.fasta-part-2"],["input_R1.fasta-part-3", "input_R2.fasta-part-3"],...]
     return input_chunks
 
+def remove_whitespace_from_files(input_files, replacement, output_files):
+    for idx, input_file in input_files:
+        output_file = output_files[idx]
+        execute_command("sed 's/[[:blank:]]/%s/g' %s > %s" % (replacement, input_file, output_file))
+
 def clean_direct_gsnapl_input(fastq_files):
     # unzip files if necessary
     if ".gz" in FILE_TYPE:
@@ -438,9 +443,6 @@ def clean_direct_gsnapl_input(fastq_files):
         cleaned_files = [f + ".fasta" for f in file_prefixes]
     else:
         cleaned_files = unzipped_files
-    # clean sequence names of whitespace if necessary: replace with colon
-    for cleaned_file in cleaned_files:
-        execute_command("sed 's/[[:blank:]]/;/g' %s > %s.tmp && mv -f %s.tmp %s" % (cleaned_file, cleaned_file, cleaned_file, cleaned_file))
     # generate file type for log
     file_type_for_log = "fasta"
     if len(fastq_files) == 2:
@@ -658,12 +660,18 @@ def run_stage2(lazy_run = True):
     input3_present = check_s3_file_presence(input3_s3_path)
     if input1_present and input2_present and input3_present:
         # output of previous stage
-        if SAMPLE_S3_INPUT_PATH != SAMPLE_S3_OUTPUT_PATH:
-            execute_command("aws s3 cp %s %s/" % (input1_s3_path, SAMPLE_S3_OUTPUT_PATH))
-            execute_command("aws s3 cp %s %s/" % (input2_s3_path, SAMPLE_S3_OUTPUT_PATH))
-            execute_command("aws s3 cp %s %s/" % (input3_s3_path, SAMPLE_S3_OUTPUT_PATH))
-        gsnapl_input_files = [EXTRACT_UNMAPPED_FROM_SAM_OUT1, EXTRACT_UNMAPPED_FROM_SAM_OUT2]
-        before_file_name_for_log = os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT1)
+        execute_command("aws s3 cp %s %s/" % (input1_s3_path, RESULT_DIR))
+        execute_command("aws s3 cp %s %s/" % (input2_s3_path, RESULT_DIR))
+        execute_command("aws s3 cp %s %s/" % (input3_s3_path, RESULT_DIR))
+        remove_whitespace_from_files([os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT1),
+                                      os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT2),
+                                      os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT3)],
+                                     ";",
+                                     [os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT1_CLEANED), 
+                                      os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT2_CLEANED),
+                                      os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT3_CLEANED)])
+        gsnapl_input_files = [EXTRACT_UNMAPPED_FROM_SAM_OUT1_CLEANED, EXTRACT_UNMAPPED_FROM_SAM_OUT2_CLEANED]
+        before_file_name_for_log = os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT1_CLEANED)
         before_file_type_for_log = "fasta_paired"
     else:
         # in case where previous stage was skipped, go back to original input
