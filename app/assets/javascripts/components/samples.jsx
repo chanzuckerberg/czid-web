@@ -166,9 +166,9 @@ class Samples extends React.Component {
       }
       this.setState((prevState) => ({
         loading: false,
-        displayEmpty: false,
         initialFetchedSamples: res.data.samples,
         allSamples: res.data.samples,
+        displayEmpty: false,
         pagesLoaded: prevState.pagesLoaded+1,
         totalNumber: res.data.total_count
       }))
@@ -245,9 +245,9 @@ class Samples extends React.Component {
       }
       this.setState((prevState) => ({
         loading: false,
-        displayEmpty: false,
         initialFetchedSamples: res.data.samples,
         allSamples: res.data.samples,
+        displayEmpty: false,
         totalNumber: res.data.total_count,
         pagesLoaded: prevState.pagesLoaded+1
       }));
