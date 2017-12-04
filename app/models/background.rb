@@ -4,6 +4,7 @@ class Background < ApplicationRecord
   has_many :reports, dependent: :destroy
   has_many :taxon_summaries, dependent: :destroy
   validate :validate_size
+  after_save :store_summary
 
   DEFAULT_BACKGROUND_MODEL_NAME = "default".freeze
   TAXON_SUMMARY_CHUNK_SIZE = 100

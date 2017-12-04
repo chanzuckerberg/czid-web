@@ -44,7 +44,6 @@ class BackgroundsController < ApplicationController
   # PATCH/PUT /backgrounds/1
   # PATCH/PUT /backgrounds/1.json
   def update
-    @background.store_summary
 
     respond_to do |format|
       if @background.update(background_params)
