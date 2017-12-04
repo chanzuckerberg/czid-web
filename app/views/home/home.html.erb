@@ -1,9 +1,3 @@
-<%= react_component 'Home', project: @project_info, all_project: @all_project, 
-samples_count: @samples_count, unfiltered: @all_samples
-%>
-
 <div id="samples">
-  <%= render @samples %>
-  <%= will_paginate @samples %>
-<% end %>
-
+  <%= react_component 'Home' %>
+</div>

@@ -1,29 +1,31 @@
 class Samples extends React.Component {
   constructor(props, context) {
     super(props, context);
-    this.project = props.project || null;
-    this.projectId = this.project ? this.project.id : null;
-    this.samples = props.unfiltered;
-    this.samplesCount = props.samples_count;
     this.switchProject = this.switchProject.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
-    this.all_project = props.all_project|| [];
     this.defaultSortBy = 'newest';
     const currentSort = SortHelper.currentSort();
     this.columnSorting = this.columnSorting.bind(this);
     this.handleSearchChange = this.handleSearchChange.bind(this);
-    this.filterByStatus = this.filterByStatus.bind(this)
+    this.loadMore = this.loadMore.bind(this)
+    this.fetchResults = this.fetchResults.bind(this)
+    this.fetchSamples = this.fetchSamples.bind(this);
+    this.handleStatusFilterSelect = this.handleStatusFilterSelect.bind(this)
     this.state = {
-      urlProjectId: this.fetchParams('project_id') || null,
-      urlFilterQuery: this.fetchParams('filter') || null,
-      urlSearchQuery: this.fetchParams('search') || '',
-      displayedSamples: this.samples || [],
-      samplesCount: this.samplesCount,
+      project: null,
+      selectedProjectId: null,
+      filterParams: null,
+      searchParams: '',
+      allSamples: [],
+      allProjects: [],
       sort_query: currentSort.sort_query
       ? currentSort.sort_query  : `sort_by=${this.defaultSortBy}`,
-      checkFilter: false
+      pagesLoaded: 0,
+      pageEnd: false,
+      initialFetchedSamples: [],
+      loading: false,
+      isRequesting: false
     };
-    $("#pagination").css("display", "");
   }
 
   columnSorting(e) {
@@ -34,19 +36,16 @@ class Samples extends React.Component {
     SortHelper.applySort(sort_query);
   }
 
-  renderEmptyTable() {
-    $("#pagination").css("display", "none");
-    return (
-      <div className="center-align"><i className='fa fa-frown-o'> No result found</i></div>
-    )
-  }
-
   handleSearchChange(e) {
     if (e.target.value !== '') {
-      this.setState({ urlSearchQuery: e.target.value });
+      this.setState({ searchParams: e.target.value });
     } else {
-      this.setState({ urlSearchQuery: '' });
-      this.displayResultsByParams(this.state.urlProjectId, e.target.value, this.state.urlFilterQuery);
+      this.setState({ 
+        searchParams: '',
+        pageEnd: false,
+        pagesLoaded: 0
+      });
+      this.fetchResults()
     }
   }
 
@@ -109,7 +108,6 @@ class Samples extends React.Component {
           <span>{this.appendStatusIcon(status)}</span><p className="status">{status}</p>
         </div>
       )
-
       return (
         <div className="row job-container" onClick={ this.viewSample.bind(this, dbSample.id)} key={i}>
           <div className="job-card">
@@ -148,6 +146,102 @@ class Samples extends React.Component {
     })
   }
 
+  //Load more samples on scroll
+  scrollDown() {
+    var that = this;
+    $(window).scroll(function() {
+      if ($(window).scrollTop() > $(document).height() - $(window).height() - 60) {
+        { !that.state.isRequesting && !that.state.pageEnd ? that.loadMore() : null }
+        return false;
+      }
+    });
+  }
+
+  //fetch first set of samples
+  fetchSamples() {
+    axios.get(`/project_samples`).then((res) => {
+      this.setState((prevState) => ({
+        loading: false,
+        initialFetchedSamples: res.data,
+        allSamples: res.data,
+        pagesLoaded: prevState.pagesLoaded+1,
+      }))
+    }).catch((err) => {
+      this.setState((prevState) => ({
+        loading: false,
+        allSamples: [],
+        pagesLoaded: 0,
+      }))
+    })
+  }
+
+  //fetch all Projects
+  fetchProjects() {
+    axios.get(`/projects.json`).then((res) => {
+      this.setState({ 
+        allProjects: res.data,
+        loading: false,
+      })
+    }).catch((err) => {
+      this.setState({ 
+        allProjects: [],
+        loading: false,
+      })
+    })
+  }
+
+  //fetch data used by projects page
+  fetchProjectPageData() {
+    this.setState({ loading: true })
+    this.fetchProjects();
+    this.fetchSamples();
+  }
+
+  //load more paginated samples
+  loadMore() {
+    const params = this.getParams();
+    this.setState({ isRequesting: true })
+    axios.get(`/project_samples${params}`).then((res) => {
+      this.setState((prevState) => ({
+        isRequesting: false,
+        allSamples: [...prevState.allSamples, ...res.data],
+        pagesLoaded: prevState.pagesLoaded+1,
+        pageEnd: res.data.length >= 15 ? false : true,
+      }))
+    }).catch((err) => {
+      this.setState((prevState) => ({
+        isRequesting: false,
+        allSamples: [...prevState.allSamples],
+        pagesLoaded: prevState.pagesLoaded,
+        pageEnd: prevState.pageEnd
+      }))
+    })
+  }
+
+  //fetch project, filter and search params
+  getParams() {
+    const projectId = parseInt(this.state.selectedProjectId);
+    
+    const paramsWithProject = `?filter=${this.state.filterParams}&page=${this.state.pagesLoaded+1}&project_id=${projectId}&search=${this.state.searchParams}`;
+
+    const paramsWithoutProject = `?filter=${this.state.filterParams}&page=${this.state.pagesLoaded+1}&search=${this.state.searchParams}`;
+
+    const params = projectId ? paramsWithProject : paramsWithoutProject;
+    return params;
+  }
+
+  //fetch results from filtering, search or switching projects
+  fetchResults() {
+    const params = this.getParams();
+    axios.get(`/project_samples${params}`).then((res) => {
+      this.setState((prevState) => ({
+        loading: false,
+        initialFetchedSamples: res.data,
+        allSamples: res.data,
+        pagesLoaded: prevState.pagesLoaded+1
+      }))
+    })
+  }
 
   applyClass(status) {
     if(status === 'COMPLETE') {
@@ -194,44 +288,50 @@ class Samples extends React.Component {
     }
   }
 
-  //Fetch Params from url for queries
-  fetchParams(param) {
-    let urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(param)
-  }
-
   //handle search when query is passed
   handleSearch(e) {
     if (e.target.value !== '' && e.key === 'Enter') {
-      this.displayResultsByParams(this.state.urlProjectId, e.target.value, this.state.urlFilterQuery)
-    }
-  }
-
-  //display results from entire samples or within a project based on parameters, Also filter and search
-  displayResultsByParams(project, searchParams, filterParams) {
-    let projectId = parseInt(project);
-    if (projectId && searchParams !== '' && filterParams) {
-      location.href = `?project_id=${projectId}&filter=${filterParams}&search=${searchParams}`;
-    } else if (projectId && searchParams !== '') {
-      location.href = `?project_id=${projectId}&search=${searchParams}`;
-    } else if (projectId && filterParams) {
-      location.href = `?project_id=${projectId}&filter=${filterParams}`;
-    } else if (searchParams !== '' && filterParams) {
-      location.href = `?search=${searchParams}&filter=${filterParams}`;
-    } else if (searchParams !== '') {
-      location.href = `?search=${searchParams}`;
-    } else if (filterParams) {
-      location.href = `?filter=${filterParams}`;
-    } else {
-      location.href = '/';
+      this.setState({
+        loading: true,
+        pagesLoaded: 0, 
+        pageEnd: false, 
+        searchParams: e.target.value 
+      }, () => {
+        this.fetchResults(); 
+      });
     }
   }
 
   //Select or switch Project
   switchProject(e) {
     let id = e.target.getAttribute('data-id');
-    this.setState({ urlProjectId: id });
-    location.href = `?project_id=${id}`;
+    this.setState({ 
+      selectedProjectId: id, 
+      pageEnd: false
+    });
+    this.fetchProjectDetails(id)
+  }
+
+  fetchProjectDetails(projId) {
+    if (!projId) {
+      this.setState({
+        selectedProjectId: null,
+        project: null,
+        pagesLoaded: 0,
+        pageEnd: false,
+      });
+      this.fetchSamples();
+    } else {
+      axios.get(`projects/${projId}.json`).then((res) => {
+        this.setState({ 
+          pagesLoaded: 0,
+          project: res.data
+        })
+        this.fetchResults();
+      }).catch((err) => {
+        this.setState({ project: null})
+      })
+    }
   }
 
   viewSample(id) {
@@ -267,32 +367,30 @@ class Samples extends React.Component {
       <div className="sample-container">
         <div className="row search-box">
           <span className="icon"><i className="fa fa-search" aria-hidden="true"></i></span>
-          <input id="search" value={this.state.urlSearchQuery} onChange={this.handleSearchChange}  type="search" onKeyDown={this.handleSearch} className="search" placeholder='Search for sample'/>{ this.state.showSearchLoader ? <i className='fa fa-spinner fa-spin fa-lg'></i> : null }
+          <input id="search" value={this.state.searchParams} onChange={this.handleSearchChange}  type="search" onKeyDown={this.handleSearch} className="search" placeholder='Search for Sample'/>{ this.state.showSearchLoader ? <i className='fa fa-spinner fa-spin fa-lg'></i> : null }
         </div>
           {/* Dropdown menu */}
           <ul id='dropdownstatus' className='status dropdown-content'>
-            <li className="filter-item"><a href="#!" className="title filter-item"><b>Filter by status</b></a></li>
+          <li><a className="title"><b>Filter by status</b></a></li>
+          <li className="divider"></li>
+          <li className="filter-item" data-status="WAITING" onClick={ this.handleStatusFilterSelect } ><a data-status="WAITING" className="filter-item waiting">Waiting</a><i data-status="WAITING" className="filter fa fa-check"></i></li>
+          <li className="filter-item" data-status="UPLOADING" onClick={ this.handleStatusFilterSelect }><a data-status="UPLOADING" className="filter-item uploading">In Progress</a><i data-status="UPLOADING"  className="filter fa fa-check"></i></li>
+          <li className="filter-item" data-status="CHECKED" onClick={ this.handleStatusFilterSelect }><a data-status="CHECKED" className="filter-item complete">Complete</a><i data-status="CHECKED" className="filter fa fa-check"></i></li>
+          <li className="filter-item" onClick={ this.handleStatusFilterSelect } data-status="FAILED" ><a data-status="FAILED" className="filter-item failed">Failed</a><i data-status="FAILED" className="filter fa fa-check"></i></li>
             <li className="divider"></li>
-            <li className="filter-item" data-status="WAITING" onClick={ this.filterByStatus } ><a data-status="WAITING" className="waiting filter-item" href="#!">Waiting</a><i data-status="WAITING" className="filter fa fa-check"></i></li>
-            <li className="filter-item" data-status="UPLOADING" onClick={ this.filterByStatus }><a data-status="UPLOADING" className="uploading filter-item" href="#!">In Progress</a><i data-status="UPLOADING"  className="filter fa fa-check"></i></li>
-            <li className="filter-item" data-status="CHECKED" onClick={ this.filterByStatus }><a data-status="CHECKED" className="complete filter-item" href="#!">Complete</a><i data-status="CHECKED" className="filter fa fa-check"></i></li>
-            <li className="filter-item" onClick={ this.filterByStatus } data-status="FAILED" ><a data-status="FAILED" className="failed filter-item" href="#!">Failed</a><i data-status="FAILED" className="filter fa fa-check"></i></li>
-              <li className="divider"></li>
-            <li className="filter-item" data-status="ALL" onClick={ this.filterByStatus }><a data-status="ALL" className="all filter-item" href="#!">All</a><i data-status="ALL" className="filter all fa fa-check"></i></li>
+          <li className="filter-item" data-status="ALL" onClick={ this.handleStatusFilterSelect }><a data-status="ALL" className="filter-item all">All</a><i data-status="ALL" className="filter all fa fa-check"></i></li>
           </ul>
           { tableHead }
           { samples.length ? this.renderPipelineOutput(samples) : this.renderEmptyTable() }
       </div>
+      { !this.state.pageEnd && this.state.initialFetchedSamples && this.state.initialFetchedSamples.length > 14 ? <div className="scroll">
+        <i className='fa fa-spinner fa-spin fa-3x'></i>
+      </div> : "" }
     </div>
     )
   }
 
-  gotoPage(path) {
-    location.href = `${path}`;
-  }
-
-  componentDidMount() {
-    $('.filter').hide()
+  selectProject() {
     $('.project-toggle').click((e) => {
       e.stopPropagation();
       const arrowElement = $(e.toElement)[0];
@@ -304,6 +402,13 @@ class Samples extends React.Component {
       $('.dropdown-bubble').slideToggle(200);
     });
     $(document).click(() => { $('.dropdown-bubble').slideUp(200); });
+  }
+
+  componentDidMount() {
+    $('.filter').hide()
+    this.fetchProjectPageData();
+    this.scrollDown();
+    this.selectProject();
     this.displayPipelineStatusFilter();
     this.displayCheckMarks(this.state.urlFilterQuery);
   }
@@ -325,13 +430,17 @@ class Samples extends React.Component {
   
 
   //handle filtering when a filter is selected from list
-  filterByStatus(e) {
-    var that = this;
+  handleStatusFilterSelect(e) {
     let status = e.target.getAttribute('data-status');
-    that.setState({ urlFilterQuery: status });
-    this.displayResultsByParams(this.state.urlProjectId, this.state.urlSearchQuery, status);
+    this.setState({
+      loading: true,
+      pagesLoaded: 0,
+      pageEnd: false, 
+      filterParams: status 
+    }, () => {
+      this.fetchResults(); 
+    });
   }
-
 
   render() {
     return (
@@ -347,14 +456,14 @@ class Samples extends React.Component {
               </div>
 
               <div className="sub-title">
-                <span>{ (!this.project) ? 'All projects' : this.project.name }<i className='fa fa-angle-down project-toggle'></i></span>
+                <span>{ (!this.state.project) ? 'All projects' : this.state.project.name }<i className='fa fa-angle-down project-toggle'></i></span>
                 <div className='dropdown-bubble'>
                   <div className="dropdown-container">
                     <ul>
-                      <li className="title">
-                        <a href="/">All projects </a>
+                      <li onClick={this.switchProject} className="title">
+                        <a >All projects </a>
                       </li>
-                      { this.all_project.map((project, i) => {
+                      { this.state.allProjects.map((project, i) => {
                         return (
                           <li key={i}>
                             <a data-id={project.id} onClick={this.switchProject} >
@@ -369,12 +478,12 @@ class Samples extends React.Component {
               </div>
 
               <div className="title-filter">
-                <span><i>{this.state.samplesCount === 0 ? 'No sample found' : ( this.state.samplesCount === 1 ? '1 sample found' : `${this.state.samplesCount} samples found`)}</i></span>
+                <span><i>{this.state.allSamples.length === 0 ? 'No sample found' : ( this.state.allSamples.length === 1 ? '1 sample found' : `${this.state.allSamples.length} samples found`)}</i></span>
               </div>
             </div>
           </div>
         </div>
-          {!this.state.displayedSamples ? <div className="no-data"><i className="fa fa-frown-o" aria-hidden="true"> No data to display</i></div> : this.renderTable(this.state.displayedSamples)}
+          {this.renderTable(this.state.allSamples)}
       </div>
     )
   }
