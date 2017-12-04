@@ -438,7 +438,7 @@ def clean_direct_gsnapl_input(fastq_files):
         cleaned_files = [f + ".fasta" for f in file_prefixes]
     else:
         cleaned_files = unzipped_files
-    # clean sequence names of whitespace if necessary
+    # clean sequence names of whitespace if necessary: replace with colon
     for cleaned_file in cleaned_files:
         execute_command("sed 's/[[:blank:]]/;/g' %s > %s.tmp && mv -f %s.tmp %s" % (cleaned_file, cleaned_file, cleaned_file, cleaned_file))
     # generate file type for log
