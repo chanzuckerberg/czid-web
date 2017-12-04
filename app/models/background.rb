@@ -9,7 +9,7 @@ class Background < ApplicationRecord
   TAXON_SUMMARY_CHUNK_SIZE = 100
 
   def validate_size
-    errors.add(:base, "Need to select at least 2 pipeline runs.") if pipeline_outputs.size < 2
+    errors.add(:base, "Need to select at least 2 pipeline outputs.") if pipeline_outputs.size < 2
   end
 
   def summarize
