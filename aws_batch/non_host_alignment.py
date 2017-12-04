@@ -426,7 +426,7 @@ def chunk_input(input_files_basenames, chunk_nlines, part_suffix):
     return input_chunks
 
 def remove_whitespace_from_files(input_files, replacement, output_files):
-    for idx, input_file in input_files:
+    for idx, input_file in enumerate(input_files):
         output_file = output_files[idx]
         execute_command("sed 's/[[:blank:]]/%s/g' %s > %s" % (replacement, input_file, output_file))
 
