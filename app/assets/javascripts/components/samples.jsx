@@ -7,19 +7,19 @@ class Samples extends React.Component {
     const currentSort = SortHelper.currentSort();
     this.columnSorting = this.columnSorting.bind(this);
     this.handleSearchChange = this.handleSearchChange.bind(this);
-    this.loadMore = this.loadMore.bind(this)
-    this.fetchResults = this.fetchResults.bind(this)
+    this.loadMore = this.loadMore.bind(this);
+    this.fetchResults = this.fetchResults.bind(this);
     this.fetchSamples = this.fetchSamples.bind(this);
-    this.handleStatusFilterSelect = this.handleStatusFilterSelect.bind(this)
+    this.handleStatusFilterSelect = this.handleStatusFilterSelect.bind(this);
     this.state = {
       project: null,
+      totalNumber: null,
       selectedProjectId: null,
       filterParams: null,
       searchParams: '',
       allSamples: [],
       allProjects: [],
-      sort_query: currentSort.sort_query
-      ? currentSort.sort_query  : `sort_by=${this.defaultSortBy}`,
+      sort_query: currentSort.sort_query ? currentSort.sort_query  : `sort_by=${this.defaultSortBy}`,
       pagesLoaded: 0,
       pageEnd: false,
       initialFetchedSamples: [],
@@ -162,9 +162,10 @@ class Samples extends React.Component {
     axios.get(`/project_samples`).then((res) => {
       this.setState((prevState) => ({
         loading: false,
-        initialFetchedSamples: res.data,
-        allSamples: res.data,
+        initialFetchedSamples: res.data.samples,
+        allSamples: res.data.samples,
         pagesLoaded: prevState.pagesLoaded+1,
+        totalNumber: res.data.total_count
       }))
     }).catch((err) => {
       this.setState((prevState) => ({
@@ -204,9 +205,9 @@ class Samples extends React.Component {
     axios.get(`/project_samples${params}`).then((res) => {
       this.setState((prevState) => ({
         isRequesting: false,
-        allSamples: [...prevState.allSamples, ...res.data],
+        allSamples: [...prevState.allSamples, ...res.data.samples],
         pagesLoaded: prevState.pagesLoaded+1,
-        pageEnd: res.data.length >= 15 ? false : true,
+        pageEnd: res.data.samples.length >= 15 ? false : true,
       }))
     }).catch((err) => {
       this.setState((prevState) => ({
@@ -236,8 +237,9 @@ class Samples extends React.Component {
     axios.get(`/project_samples${params}`).then((res) => {
       this.setState((prevState) => ({
         loading: false,
-        initialFetchedSamples: res.data,
-        allSamples: res.data,
+        initialFetchedSamples: res.data.samples,
+        allSamples: res.data.samples,
+        totalNumber: res.data.total_count,
         pagesLoaded: prevState.pagesLoaded+1
       }))
     })
@@ -478,7 +480,7 @@ class Samples extends React.Component {
               </div>
 
               <div className="title-filter">
-                <span><i>{this.state.allSamples.length === 0 ? 'No sample found' : ( this.state.allSamples.length === 1 ? '1 sample found' : `${this.state.allSamples.length} samples found`)}</i></span>
+                <span><i>{this.state.allSamples.length === 0 ? 'No sample found' : ( this.state.allSamples.length === 1 ? '1 sample found' : `${this.state.allSamples.length} out of ${this.state.totalNumber} samples found`)}</i></span>
               </div>
             </div>
           </div>
