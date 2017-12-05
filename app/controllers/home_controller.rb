@@ -1,6 +1,5 @@
 require 'will_paginate/array'
 class HomeController < ApplicationController
-  before_action :login_required
   include SamplesHelper
 
   def home
