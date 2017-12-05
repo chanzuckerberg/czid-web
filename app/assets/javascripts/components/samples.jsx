@@ -73,11 +73,11 @@ class Samples extends React.Component {
             {!uploader || uploader === '' ? '' : <p className="uploader">Uploaded by {uploader}</p>}
           </td>
           <td>{moment(dbSample.created_at).startOf('second').fromNow()}</td>
-          <td>{ !derivedOutput.pipeline_output ? 'NA' : <a href={'/samples/' + dbSample.id}>{numberWithCommas(derivedOutput.pipeline_output.total_reads)}</a>}</td>
-          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.remaining_reads) ? 'NA' : <a href={'/samples/' + dbSample.id}>{numberWithCommas(derivedOutput.summary_stats.remaining_reads)}</a>}</td>
-          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? 'NA' : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.percent_remaining.toFixed(2)}%</a>}</td>
-          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? 'NA' : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.qc_percent.toFixed(2)}%</a>}</td>
-          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.compression_ratio) ? 'NA' : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.compression_ratio.toFixed(2)}</a>}</td>
+          <td>{ !derivedOutput.pipeline_output ? '' : <a href={'/samples/' + dbSample.id}>{numberWithCommas(derivedOutput.pipeline_output.total_reads)}</a>}</td>
+          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.remaining_reads) ? '' : <a href={'/samples/' + dbSample.id}>{numberWithCommas(derivedOutput.summary_stats.remaining_reads)}</a>}</td>
+          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? '' : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.percent_remaining.toFixed(2)}%</a>}</td>
+          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? '' : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.qc_percent.toFixed(2)}%</a>}</td>
+          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.compression_ratio) ? '' : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.compression_ratio.toFixed(2)}</a>}</td>
           { !runInfo.job_status_description ? rowWithChunkStatus : rowWithoutChunkStatus }
         </tr>
       )
@@ -212,11 +212,11 @@ class Samples extends React.Component {
                 <i onClick={ this.columnSorting } className={`${this.getActiveSort('newest')} fa fa-caret-down sort_by=newest` }></i>
               </div>
               </th>
-              <th>Total Reads</th>
-              <th>Final Reads</th>
-              <th>Percentage Reads</th>
-              <th>QC</th>
-              <th>Compression Ratio</th>
+              <th>Total reads</th>
+              <th>Non-host reads</th>
+              <th>Non-host percentage</th>
+              <th>Passed quality control</th>
+              <th>Duplicate compression ratio</th>
               <th className="status-dropdown" data-activates="dropdownstatus"><a href="#!" data-activates="dropdownstatus"><i className="status-filter fa fa-caret-down"></i></a>Pipeline run status</th>
             </tr>
             </thead>
