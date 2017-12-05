@@ -89,7 +89,7 @@ class Samples extends React.Component {
 }
 
   renderPipelineOutput(samples) {
-    var BLANK_TEXT = ''
+    var BLANK_TEXT = 'NA'
 
     return samples.map((sample, i) => {
       let dbSample = sample.db_sample;
@@ -122,22 +122,22 @@ class Samples extends React.Component {
             </div>
             <div className="reads col s1">
               <p>
-              { !derivedOutput.pipeline_output ? 'NA' : numberWithCommas(derivedOutput.pipeline_output.total_reads) }
+              { !derivedOutput.pipeline_output ? BLANK_TEXT : numberWithCommas(derivedOutput.pipeline_output.total_reads) }
               </p>
             </div>
             <div className="reads col s2">
               <p>
-              { (!derivedOutput.summary_stats || !derivedOutput.summary_stats.remaining_reads) ? 'NA' : numberWithCommas(derivedOutput.summary_stats.remaining_reads) }
+              { (!derivedOutput.summary_stats || !derivedOutput.summary_stats.remaining_reads) ? BLANK_TEXT : numberWithCommas(derivedOutput.summary_stats.remaining_reads) }
               { (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? '' : ` (${derivedOutput.summary_stats.percent_remaining.toFixed(2)}%)` } 
               </p>
             </div>
             <div className="reads col s2">
               <p>
-              { (!derivedOutput.summary_stats || !derivedOutput.summary_stats.compression_ratio) ? 'NA' : derivedOutput.summary_stats.compression_ratio.toFixed(2) }
+              { (!derivedOutput.summary_stats || !derivedOutput.summary_stats.compression_ratio) ? BLANK_TEXT : derivedOutput.summary_stats.compression_ratio.toFixed(2) }
               </p>
             </div>
             <div className="reads col s1">
-              <p>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? 'NA' : `${derivedOutput.summary_stats.qc_percent.toFixed(2)}%`}</p>
+              <p>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? BLANK_TEXT : `${derivedOutput.summary_stats.qc_percent.toFixed(2)}%`}</p>
             </div>
               <div className={ runInfo.total_runtime ? "reads status-col col s2" : 'reads col s2 no-time'}>{ !runInfo.job_status_description ? rowWithChunkStatus : rowWithoutChunkStatus }
               { runInfo.total_runtime ? <p className="time"><i className="fa fa-clock-o" aria-hidden="true"></i><span>{this.formatRunTime(runInfo.total_runtime)}</span></p> : ''}
@@ -147,6 +147,7 @@ class Samples extends React.Component {
       )
     })
   }
+
 
   applyClass(status) {
     if(status === 'COMPLETE') {
