@@ -9,6 +9,11 @@ class Background < ApplicationRecord
   DEFAULT_BACKGROUND_MODEL_NAME = "default".freeze
   TAXON_SUMMARY_CHUNK_SIZE = 100
 
+
+  def eligible_pipeline_outputs
+    PipelineOut.where("id in (select pipeline_output_id from pipeline_runs where id in (select max(id) from pipeline_runs group by")
+  end
+
   def validate_size
     errors.add(:base, "Need to select at least 2 pipeline runs.") if pipeline_outputs.size < 2
   end
