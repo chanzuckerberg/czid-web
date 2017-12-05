@@ -243,11 +243,29 @@ class PipelineSampleReads extends React.Component {
                             <tbody>
                               <tr>
                                 <td>Host</td>
-                                 <td> { (!this.sampleInfo.host_genome_name) ? BLANK_TEXT : this.sampleInfo.host_genome_name } </td>
+                                <td> { (!this.sampleInfo.host_genome_name) ? BLANK_TEXT : this.sampleInfo.host_genome_name } </td>
                               </tr>
                               <tr>
                                 <td>Entry date</td>
                                 <td>{moment(this.sampleInfo.created_at).startOf('second').fromNow()}</td>
+                              </tr>
+                              <tr>
+                                <td>Location</td>
+                                <td>{ (!this.sampleInfo.sample_location) ? BLANK_TEXT : this.sampleInfo.sample_location }</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                        <div className="col s6">
+                          <table className="responsive-table">
+                            <tbody>
+                              <tr>
+                                <td>Tissue Type</td>
+                                 <td>{ (!this.sampleInfo.sample_tissue) ? BLANK_TEXT : this.sampleInfo.sample_tissue }</td>
+                              </tr>
+                              <tr>
+                                <td>Library Prep Protocol</td>
+                                <td>{ (!this.sampleInfo.sample_library) ? BLANK_TEXT : this.sampleInfo.sample_library }</td>
                               </tr>
                             </tbody>
                           </table>
