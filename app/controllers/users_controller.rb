@@ -1,9 +1,7 @@
 class UsersController < ApplicationController
-  before_action :login_required, only: [:new, :edit, :create, :destroy, :index, :show]
-  before_action :set_user, only: [:show, :edit, :update, :destroy]
   clear_respond_to
   respond_to :json
-
+  before_action :set_user, only: [:show, :edit, :update, :destroy]
   # GET /users
   # GET /users.json
   def index
@@ -12,29 +10,28 @@ class UsersController < ApplicationController
 
   # GET /users/new
   def new
-    @user = User.new
-  end
-
-  # GET /users/1/edit
-  def edit
+    new_user
   end
 
   # POST /users
   # POST /users.json
   def create
     Rails.logger.debug(user_params.inspect)
-    @user = User.new(user_params)
+    new_user(user_params)
 
     respond_to do |format|
       if @user.save
-
         format.html { redirect_to edit_user_path(@user), notice: 'User was successfully created.' }
         format.json { render :show, status: :created, location: root_path }
       else
         format.html { render :new }
-        format.json { render json: @user.errors.full_messages, status: :unprocessable_entity }
+        format.json { render json: @user.errors, status: :unprocessable_entity }
       end
     end
+  end
+
+  # GET /users/1/edit
+  def edit
   end
 
   # PATCH/PUT /users/1
@@ -72,7 +69,11 @@ class UsersController < ApplicationController
 
   # Use callbacks to share common setup or constraints between actions.
   def set_user
-    @user = User.find(params[:id])
+    @user ||= User.find(params[:id])
+  end
+
+  def new_user(attrs = {})
+    @user ||= User.new(attrs)
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.

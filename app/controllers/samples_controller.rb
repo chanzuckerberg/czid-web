@@ -1,7 +1,8 @@
 class SamplesController < ApplicationController
   include ReportHelper
   include SamplesHelper
-  before_action :login_required, only: [:new, :index, :update, :destroy, :edit, :show, :reupload_source, :kickoff_pipeline, :bulk_new, :bulk_import, :bulk_upload]
+
+  before_action :authenticate_user!, only: [:new, :index, :update, :destroy, :edit, :show, :reupload_source, :kickoff_pipeline, :bulk_new, :bulk_import, :bulk_upload]
   before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs]
   acts_as_token_authentication_handler_for User, only: [:create, :bulk_upload], fallback: :devise
   protect_from_forgery unless: -> { request.format.json? }

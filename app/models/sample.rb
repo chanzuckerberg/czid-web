@@ -32,6 +32,7 @@ class Sample < ApplicationRecord
   accepts_nested_attributes_for :input_files
   validate :input_files_checks
   after_create :initiate_input_file_upload
+  validates :name, uniqueness: { scope: :project_id }
 
   before_save :check_host_genome, :check_status
 
