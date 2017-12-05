@@ -74,7 +74,24 @@ class SamplesController < ApplicationController
     @job_stats = @pipeline_output ? @pipeline_output.job_stats : nil
     @summary_stats = @job_stats ? get_summary_stats(@job_stats) : nil
     @project_info = @sample.project ? @sample.project : nil
-    report = @pipeline_output ? @pipeline_output.reports.first : nil
+
+    ##################################################
+    ## Duct tape for changing background id dynamically
+    ## TODO(yf): clean the following up.
+    ####################################################
+    report = nil
+    default_background_id = (@sample.host_genome && @sample.host_genome.default_background) ? @sample.host_genome.default_background.id : nil
+    if @pipeline_output
+      report = @pipeline_output.reports.first || Report.new(pipeline_output: @pipeline_output)
+      background_id = params[:background_id] || default_background_id || report.background_id
+      if background_id
+        report.background_id = background_id
+        report.name = "#{@sample.id} #{background_id} #{@sample.name}"
+      else
+        report = nil
+      end
+    end
+
     @report_info = external_report_info(report, params)
   end
 
