@@ -319,11 +319,13 @@ class Samples extends React.Component {
 
   // initialize filter dropdown
   displayPipelineStatusFilter() {
+    const textSize = 14
     $('.status-dropdown').dropdown({
       belowOrigin: true,
       stopPropagation: false,
       constrainWidth: true
     });
+    $(".dropdown-content>li>a").css("font-size", textSize)
   }
 
   displayCheckMarks(filter) {
