@@ -50,6 +50,8 @@ class Samples extends React.Component {
   }
 
   renderPipelineOutput(samples) {
+    var BLANK_TEXT = ''
+
     return samples.map((sample, i) => {
       let dbSample = sample.db_sample;
       let derivedOutput = sample.derived_sample_output;
@@ -70,14 +72,14 @@ class Samples extends React.Component {
         <tr onClick={ this.viewSample.bind(this, dbSample.id)} key={i}>
           <td>
             {dbSample.name}
-            {!uploader || uploader === '' ? '' : <p className="uploader">Uploaded by {uploader}</p>}
+            {!uploader || uploader === '' ? BLANK_TEXT : <p className="uploader">Uploaded by {uploader}</p>}
           </td>
           <td>{moment(dbSample.created_at).startOf('second').fromNow()}</td>
-          <td>{ !derivedOutput.pipeline_output ? 'NA' : <a href={'/samples/' + dbSample.id}>{numberWithCommas(derivedOutput.pipeline_output.total_reads)}</a>}</td>
-          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.remaining_reads) ? 'NA' : <a href={'/samples/' + dbSample.id}>{numberWithCommas(derivedOutput.summary_stats.remaining_reads)}</a>}</td>
-          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? 'NA' : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.percent_remaining.toFixed(2)}%</a>}</td>
-          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? 'NA' : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.qc_percent.toFixed(2)}%</a>}</td>
-          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.compression_ratio) ? 'NA' : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.compression_ratio.toFixed(2)}</a>}</td>
+          <td>{ !derivedOutput.pipeline_output ? BLANK_TEXT : <a href={'/samples/' + dbSample.id}>{numberWithCommas(derivedOutput.pipeline_output.total_reads)}</a>}</td>
+          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.remaining_reads) ? BLANK_TEXT : <a href={'/samples/' + dbSample.id}>{numberWithCommas(derivedOutput.summary_stats.remaining_reads)}</a>}</td>
+          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? BLANK_TEXT : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.percent_remaining.toFixed(2)}%</a>}</td>
+          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? BLANK_TEXT : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.qc_percent.toFixed(2)}%</a>}</td>
+          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.compression_ratio) ? BLANK_TEXT : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.compression_ratio.toFixed(2)}</a>}</td>
           { !runInfo.job_status_description ? rowWithChunkStatus : rowWithoutChunkStatus }
         </tr>
       )
@@ -190,15 +192,15 @@ class Samples extends React.Component {
       <div className="sample-container">
         <div className="row search-box">
           <span className="icon"><i className="fa fa-search" aria-hidden="true"></i></span>
-          <input id="search" value={this.state.urlSearchQuery} onChange={this.handleSearchChange}  type="search" onKeyDown={this.handleSearch} className="search" placeholder='Search for Sample'/>{ this.state.showSearchLoader ? <i className='fa fa-spinner fa-spin fa-lg'></i> : null }
+          <input id="search" value={this.state.urlSearchQuery} onChange={this.handleSearchChange}  type="search" onKeyDown={this.handleSearch} className="search" placeholder='Search for sample'/>{ this.state.showSearchLoader ? <i className='fa fa-spinner fa-spin fa-lg'></i> : null }
         </div>
           {/* Dropdown menu */}
           <ul id='dropdownstatus' className='status dropdown-content'>
           <li><a href="#!" className="title"><b>Filter by status</b></a></li>
-          <li data-status="WAITING" onClick={ this.filterByStatus } ><a data-status="WAITING" className="waiting" href="#!">Waiting</a></li>
-          <li data-status="UPLOADING" onClick={ this.filterByStatus }><a data-status="UPLOADING" className="uploading" href="#!">In Progress</a></li>
-          <li data-status="CHECKED" onClick={ this.filterByStatus }><a data-status="CHECKED" className="complete" href="#!">Complete</a></li>
-          <li onClick={ this.filterByStatus } data-status="FAILED" ><a data-status="FAILED" className="failed" href="#!">Failed</a></li>
+          <li data-status="WAITING" onClick={ this.filterByStatus } ><a data-status="WAITING" className="waiting" href="#!">WAITING</a></li>
+          <li data-status="UPLOADING" onClick={ this.filterByStatus }><a data-status="UPLOADING" className="uploading" href="#!">IN PROGRESS</a></li>
+          <li data-status="CHECKED" onClick={ this.filterByStatus }><a data-status="CHECKED" className="complete" href="#!">COMPLETE</a></li>
+          <li onClick={ this.filterByStatus } data-status="FAILED" ><a data-status="FAILED" className="failed" href="#!">FAILED</a></li>
             <li className="divider"></li>
           <li data-status="ALL" onClick={ this.filterByStatus }><a data-status="ALL" className="all" href="#!">All</a></li>
           </ul>
@@ -206,17 +208,17 @@ class Samples extends React.Component {
             <thead>
             <tr>
               <th>Name</th>
-              <th>Date Uploaded
+              <th>Date uploaded
               <div className='sort-controls left'>
                 <i onClick={ this.columnSorting } className={`${this.getActiveSort('oldest')} fa fa-caret-up sort_by=oldest` }></i>
                 <i onClick={ this.columnSorting } className={`${this.getActiveSort('newest')} fa fa-caret-down sort_by=newest` }></i>
               </div>
               </th>
-              <th>Total Reads</th>
-              <th>Final Reads</th>
-              <th>Percentage Reads</th>
-              <th>QC</th>
-              <th>Compression Ratio</th>
+              <th>Total reads</th>
+              <th>Non-host reads</th>
+              <th>Non-host percentage</th>
+              <th>Passed quality control</th>
+              <th>Duplicate compression ratio</th>
               <th className="status-dropdown" data-activates="dropdownstatus"><a href="#!" data-activates="dropdownstatus"><i className="status-filter fa fa-caret-down"></i></a>Pipeline run status</th>
             </tr>
             </thead>
@@ -274,7 +276,7 @@ class Samples extends React.Component {
               <div  className="upload">
                 <a href='/samples/new'>
                   <i className="fa fa-flask" aria-hidden="true"/>
-                  <span>Upload Sample</span>
+                  <span>Upload sample</span>
                 </a>
               </div>
 

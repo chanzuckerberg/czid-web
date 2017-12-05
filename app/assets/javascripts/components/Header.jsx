@@ -33,8 +33,8 @@ class Header extends React.Component  {
         <div className="site-header">
           {/* Dropdown menu */}
           <ul id="dropdown1" className="dropdown-content">
-            <li onClick={ this.gotoPage.bind(this, '/samples/new') }><a href="#!">New Sample</a></li>
-           { this.userDetails && this.userDetails.admin ? <li onClick={ this.gotoPage.bind(this, '/users/new') }><a href="#!">Create User</a></li> : null }
+            <li onClick={ this.gotoPage.bind(this, '/samples/new') }><a href="#!">New sample</a></li>
+           { this.userDetails && this.userDetails.admin ? <li onClick={ this.gotoPage.bind(this, '/users/new') }><a href="#!">Create user</a></li> : null }
             <li className="divider"></li>
             <li><a rel="nofollow" data-method="delete" href={this.props.signoutEndpoint}>Logout</a></li>
           </ul>

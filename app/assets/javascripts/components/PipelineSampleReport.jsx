@@ -126,7 +126,7 @@ class PipelineSampleReport extends React.Component {
       </span>;
       foo = <div className="hover-wrapper">
         <div className='genus-name'> {plus_or_minus} {foo}</div>
-        <i className='count-info'>({tax_info.species_count} {category_name} species)</i>
+        <i className='count-info'>({tax_info.species_count} {category_name.toLowerCase} species)</i>
         { this.displayTags(tax_info, report_details) }
       </div>;
     }
@@ -254,7 +254,7 @@ class PipelineSampleReport extends React.Component {
     download_button = (
       <a href={`/reports/${this.report_details.report_info.id}/csv`} className="download-report right">
         <div className="fa fa-cloud-download"/>
-        <div>Download Report</div>
+        <div>Download report</div>
       </a>
     );
     right_arrow_initial_visibility = this.isGenusSearch() ? 'hidden' : '';

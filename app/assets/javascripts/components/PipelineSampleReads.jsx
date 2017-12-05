@@ -134,11 +134,12 @@ class PipelineSampleReads extends React.Component {
 
     let pipeline_run = null;
     let download_section = null;
+    var BLANK_TEXT = 'unknown'
     if (this.pipelineOutput) {
       pipeline_run = (
         <div className="data">
           <div className="row">
-            <div className="col s6">
+            <div className="col s5">
               <table>
                 <tbody>
                 <tr>
@@ -146,22 +147,22 @@ class PipelineSampleReads extends React.Component {
                   <td>{ numberWithCommas(this.pipelineOutput.total_reads) }</td>
                 </tr>
                 <tr>
-                  <td>Passed Quality Control</td>
-                  <td>{ !this.summary_stats.qc_percent ? 'NA' : this.summary_stats.qc_percent.toFixed(2) }%</td>
+                  <td>Non-host reads</td>
+                  <td>{ !this.summary_stats.remaining_reads ? BLANK_TEXT : numberWithCommas(this.summary_stats.remaining_reads) } { !this.summary_stats.percent_remaining ? '' : `(${this.summary_stats.percent_remaining.toFixed(2)}%)` }</td>
                 </tr>
                 </tbody>
               </table>
             </div>
-            <div className="col s6">
+            <div className="col s7">
               <table>
                 <tbody>
                 <tr>
-                  <td>Total Non-Host Reads</td>
-                  <td>{ !this.summary_stats.remaining_reads ? 'NA' : numberWithCommas(this.summary_stats.remaining_reads) } ({ !this.summary_stats.percent_remaining ? 'NA' : this.summary_stats.percent_remaining.toFixed(2) }%)</td>
+                  <td>Passed quality control</td>
+                  <td>{ !this.summary_stats.qc_percent ? BLANK_TEXT : `${this.summary_stats.qc_percent.toFixed(2)}%` }</td>
                 </tr>
                 <tr>
-                  <td>Compression Ratio</td>
-                  <td>{ !this.summary_stats.compression_ratio ? 'NA' : this.summary_stats.compression_ratio.toFixed(2) }</td>
+                  <td>Duplicate compression ratio</td>
+                  <td>{ !this.summary_stats.compression_ratio ? BLANK_TEXT : this.summary_stats.compression_ratio.toFixed(2) }</td>
                 </tr>
                 </tbody>
               </table>
@@ -242,15 +243,15 @@ class PipelineSampleReads extends React.Component {
                             <tbody>
                               <tr>
                                 <td>Host</td>
-                                 <td> { (!this.sampleInfo.host_genome_name) ? 'N/A' : this.sampleInfo.host_genome_name } </td>
+                                <td> { (!this.sampleInfo.host_genome_name) ? BLANK_TEXT : this.sampleInfo.host_genome_name } </td>
                               </tr>
                               <tr>
-                                <td>Entry Date</td>
+                                <td>Entry date</td>
                                 <td>{moment(this.sampleInfo.created_at).startOf('second').fromNow()}</td>
                               </tr>
                               <tr>
                                 <td>Location</td>
-                                <td>{ (!this.sampleInfo.sample_location) ? 'N/A' : this.sampleInfo.sample_location }</td>
+                                <td>{ (!this.sampleInfo.sample_location) ? BLANK_TEXT : this.sampleInfo.sample_location }</td>
                               </tr>
                             </tbody>
                           </table>
@@ -260,11 +261,11 @@ class PipelineSampleReads extends React.Component {
                             <tbody>
                               <tr>
                                 <td>Tissue Type</td>
-                                 <td>{ (!this.sampleInfo.sample_tissue) ? 'N/A' : this.sampleInfo.sample_tissue }</td>
+                                 <td>{ (!this.sampleInfo.sample_tissue) ? BLANK_TEXT : this.sampleInfo.sample_tissue }</td>
                               </tr>
                               <tr>
                                 <td>Library Prep Protocol</td>
-                                <td>{ (!this.sampleInfo.sample_library) ? 'N/A' : this.sampleInfo.sample_library }</td>
+                                <td>{ (!this.sampleInfo.sample_library) ? BLANK_TEXT : this.sampleInfo.sample_library }</td>
                               </tr>
                             </tbody>
                           </table>

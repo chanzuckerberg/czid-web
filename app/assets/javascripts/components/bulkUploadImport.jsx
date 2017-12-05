@@ -354,7 +354,7 @@ class BulkUploadImport extends React.Component {
                 <label htmlFor="checkAll"></label></span>
                 <span className="name">Name</span>
               </div>
-              <div className="col s4 ">Select Sample Project</div>
+              <div className="col s4 ">Select sample project</div>
               <div className="col s4 ">Host</div>
             </div>
             { this.state.samples.map((sample, i) => {
@@ -424,14 +424,14 @@ class BulkUploadImport extends React.Component {
                       }) : <option>No projects to display</option>
                     }
                   </select>
-                  <label>Project List</label>
+                  <label>Project list</label>
               </div>
               <div className="input-field col s6">
                     <div className="row">
                       <input className="col s11 project-input" ref= "new_project" type="text" onFocus={ this.clearError } placeholder="Add a project if desired project is not on the list" />
                       <input className="col s1 add-icon" value="&#xf067;" type="button" onClick={ this.handleProjectSubmit } />
                     </div>
-                    <label htmlFor="new_project">Default Project</label>
+                    <label htmlFor="new_project">Default project</label>
               </div>
             </div>
             <div className="row field-row">
@@ -443,14 +443,14 @@ class BulkUploadImport extends React.Component {
                           }) : <option>No host genomes to display</option>
                         }
                   </select>
-                  <label>Default Host Genome</label>
+                  <label>Default host genome</label>
               </div>
             </div>
             <div className="field-row input-field align">
                 <i className="sample fa fa-link" aria-hidden="true"></i>
                 <input ref= "bulk_path" type="text" className="path" onFocus={ this.clearError } placeholder="Required" onChange={ this.handleBulkPathChange } />
                 <span className="path_label">Example: s3://czbiohub-seqbot/fastqs/171018_NB501961_0022_AHL2TVBGX3/rawdata</span>
-                <label htmlFor="bulk_path">S3 Bulk Upload Path </label>
+                <label htmlFor="bulk_path">S3 bulk upload path </label>
             </div>
           </div>
         <input className="hidden" type="submit"/>
