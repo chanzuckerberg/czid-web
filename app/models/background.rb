@@ -10,8 +10,8 @@ class Background < ApplicationRecord
   TAXON_SUMMARY_CHUNK_SIZE = 100
 
 
-  def eligible_pipeline_outputs
-    PipelineOut.where("id in (select pipeline_output_id from pipeline_runs where id in (select max(id) from pipeline_runs group by")
+  def self.eligible_pipeline_outputs
+    PipelineOutput.where("pipeline_run_id in (select max(id) from pipeline_runs group by sample_id)").order(:sample_id)
   end
 
   def validate_size

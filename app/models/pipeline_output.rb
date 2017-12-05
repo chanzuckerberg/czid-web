@@ -23,6 +23,10 @@ class PipelineOutput < ApplicationRecord
     end
   end
 
+  def check_box_label
+    "#{sample.project.name} : #{sample.name} (#{id})"
+  end
+
   def generate_aggregate_counts(tax_level_name)
     current_date = Time.zone.now.strftime("%Y-%m-%d")
     tax_level_id = TaxonCount::NAME_2_LEVEL[tax_level_name]

@@ -18,7 +18,11 @@
 
   <div class="field checkbox-list">
     <%= form.label :pipeline_outputs %>
-    <%= form.collection_check_boxes :pipeline_output_ids, PipelineOutput.all, :id, :name %>
+    <%= form.collection_check_boxes :pipeline_output_ids, Background.eligible_pipeline_outputs, :id, :check_box_label do |cb| %>
+      <%= cb.check_box %>
+      <%= cb.label %>
+      <br>
+    <% end %>
   </div>
 
   <div class="actions">
