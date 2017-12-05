@@ -50,6 +50,8 @@ class Samples extends React.Component {
   }
 
   renderPipelineOutput(samples) {
+    var BLANK_TEXT = ''
+
     return samples.map((sample, i) => {
       let dbSample = sample.db_sample;
       let derivedOutput = sample.derived_sample_output;
@@ -70,14 +72,14 @@ class Samples extends React.Component {
         <tr onClick={ this.viewSample.bind(this, dbSample.id)} key={i}>
           <td>
             {dbSample.name}
-            {!uploader || uploader === '' ? '' : <p className="uploader">Uploaded by {uploader}</p>}
+            {!uploader || uploader === '' ? BLANK_TEXT : <p className="uploader">Uploaded by {uploader}</p>}
           </td>
           <td>{moment(dbSample.created_at).startOf('second').fromNow()}</td>
-          <td>{ !derivedOutput.pipeline_output ? '' : <a href={'/samples/' + dbSample.id}>{numberWithCommas(derivedOutput.pipeline_output.total_reads)}</a>}</td>
-          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.remaining_reads) ? '' : <a href={'/samples/' + dbSample.id}>{numberWithCommas(derivedOutput.summary_stats.remaining_reads)}</a>}</td>
-          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? '' : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.percent_remaining.toFixed(2)}%</a>}</td>
-          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? '' : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.qc_percent.toFixed(2)}%</a>}</td>
-          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.compression_ratio) ? '' : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.compression_ratio.toFixed(2)}</a>}</td>
+          <td>{ !derivedOutput.pipeline_output ? BLANK_TEXT : <a href={'/samples/' + dbSample.id}>{numberWithCommas(derivedOutput.pipeline_output.total_reads)}</a>}</td>
+          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.remaining_reads) ? BLANK_TEXT : <a href={'/samples/' + dbSample.id}>{numberWithCommas(derivedOutput.summary_stats.remaining_reads)}</a>}</td>
+          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? BLANK_TEXT : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.percent_remaining.toFixed(2)}%</a>}</td>
+          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? BLANK_TEXT : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.qc_percent.toFixed(2)}%</a>}</td>
+          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.compression_ratio) ? BLANK_TEXT : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.compression_ratio.toFixed(2)}</a>}</td>
           { !runInfo.job_status_description ? rowWithChunkStatus : rowWithoutChunkStatus }
         </tr>
       )
