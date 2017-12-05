@@ -210,7 +210,7 @@ def check_pair_concordance(read_to_taxid):
         read_2_id = read_1_id.replace("/1", "/2", 1)
         if read_2_id not in read_to_taxid:
             continue
-        species_taxid_1, genus_taxid_1, family_taxid_1 = read_to_taxid[read_id]
+        species_taxid_1, genus_taxid_1, family_taxid_1 = read_to_taxid[read_1_id]
         species_taxid_2, genus_taxid_2, family_taxid_2 = read_to_taxid[read_2_id]
         if species_taxid_1 == species_taxid_2: # add both reads to the concordance count
             species_taxid_concordance_map[species_taxid_1] = species_taxid_concordance_map.get(species_taxid_1, 0) + 2
