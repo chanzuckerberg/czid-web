@@ -13,14 +13,20 @@ class SampleUpload extends React.Component {
     this.handleQueueChange = this.handleQueueChange.bind(this);
     this.handleMemoryChange = this.handleMemoryChange.bind(this);
     this.handleResultChange = this.handleResultChange.bind(this);
+    this.projects = props.projects || [];
     this.project = props.projectInfo || '';
     this.hostGenomes = props.host_genomes || [];
     this.sample = props.selectedSample || '';
     this.userDetails = props.loggedin_user;
+    const selectedHostGenomeName = (this.hostGenomes[0] && this.hostGenomes[0].name) ? this.hostGenomes[0].name : '';
+    const selectedHostGenomeId = (this.hostGenomes[0] && this.hostGenomes[0].id) ? this.hostGenomes[0].id : '';
+    const adminGenomes = this.hostGenomes.filter((g) => {
+      return g.name.toLowerCase().indexOf('test') >= 0;
+    });
     this.selected = {
       name: this.sample.name || '',
-      hostGenome: this.sample ? this.sample.host_genome_name : this.hostGenomes[0].name,
-      hostGenomeId: this.sample ? this.sample.host_genome_id : this.hostGenomes[0].id,
+      hostGenome: this.sample ? this.sample.host_genome_name : selectedHostGenomeName,
+      hostGenomeId: this.sample ? this.sample.host_genome_id : selectedHostGenomeId,
       project: this.project ? this.project.name : 'Select a project',
       projectId: this.project ? this.project.id : null,
       resultPath: this.sample ? this.sample.s3_preload_result_path : '',
@@ -30,11 +36,11 @@ class SampleUpload extends React.Component {
       inputFiles: props.inputFiles && props.inputFiles.length ? props.inputFiles : [],
       status: this.sample.status
     };
-    this.firstInput = this.selected.inputFiles.length && this.selected.inputFiles[0] ? (this.selected.inputFiles[0].source === null ? '' : this.selected.inputFiles[0].source) : '',
-    this.secondInput = this.selected.inputFiles.length && this.selected.inputFiles[1] ? (this.selected.inputFiles[1].source === null ? '' : this.selected.inputFiles[1].source) : '',
+    this.firstInput = this.selected.inputFiles.length && this.selected.inputFiles[0] ? (this.selected.inputFiles[0].source === null ? '' : this.selected.inputFiles[0].source) : '';
+    this.secondInput = this.selected.inputFiles.length && this.selected.inputFiles[1] ? (this.selected.inputFiles[1].source === null ? '' : this.selected.inputFiles[1].source) : '';
     this.state = {
       submitting: false,
-      allProjects: props.projects || [],
+      allProjects: this.projects || [],
       hostGenomes: this.hostGenomes || [],
       invalid: false,
       errorMessage: '',
@@ -50,10 +56,14 @@ class SampleUpload extends React.Component {
       selectedJobQueue: this.selected.jobQueue || '',
       selectedMemory: this.selected.memory || '',
       id: this.selected.id,
+      errors: {},
+      adminGenomes
     };
   }
 
   componentDidMount() {
+    $('body').addClass('background-cover');
+    $('.tooltipped').tooltip({delay: 50, html: true});
     this.initializeSelectTag();
     $(ReactDOM.findDOMNode(this.refs.projectSelect)).on('change',this.handleProjectChange);
     $(ReactDOM.findDOMNode(this.refs.hostSelect)).on('change',this.handleHostChange);
@@ -61,7 +71,6 @@ class SampleUpload extends React.Component {
 
   handleUpload(e) {
     e.preventDefault();
-    e.target.disabled = true;
     this.clearError();
     if(!this.isFormInvalid()) {
       this.createSample()
@@ -94,7 +103,9 @@ class SampleUpload extends React.Component {
 
 
   handleProjectSubmit(e) {
-    e.preventDefault();
+    if (e && e.preventDefault) {
+      e.preventDefault();
+    }
     this.clearError();
     if(!this.isProjectInvalid()) {
       this.addProject()
@@ -126,7 +137,7 @@ class SampleUpload extends React.Component {
     .catch((error) => {
       that.setState({
         invalid: true,
-        errorMessage: 'Project exists already or is invalid',
+        errors: { 'selectedProject': 'Project already exists or is invalid' },
       })
     });
   }
@@ -144,18 +155,17 @@ class SampleUpload extends React.Component {
   }
 
   createSample() {
-    var that = this;
-    that.setState({
+    this.setState({
       submitting: true
-    })
+    });
     axios.post('/samples.json', {
       sample: {
-        name: this.refs.name.value.trim(),
+        name: this.selected.sampleName,
         project_name: this.state.selectedProject.trim(),
         project_id: this.state.selectedPId,
         input_files_attributes: [{source_type: 's3', source: this.refs.first_file_source.value.trim() },
         {source_type: 's3', source: this.refs.second_file_source.value.trim() }],
-        s3_preload_result_path: this.refs.s3_preload_result_path.value.trim(),
+        s3_preload_result_path: (this.userDetails.admin) ? this.refs.s3_preload_result_path.value.trim() : '',
         job_queue: this.state.selectedJobQueue,
         sample_memory: this.state.selectedMemory,
         host_genome_id: this.state.selectedHostGenomeId,
@@ -164,22 +174,22 @@ class SampleUpload extends React.Component {
       authenticity_token: this.csrf
     })
     .then((response) => {
-      that.setState({
+      this.setState({
         success: true,
         submitting: false,
         successMessage: 'Sample created successfully'
       });
       setTimeout(() => {
-        that.gotoPage(`/samples/${response.data.id}`);
-      }, 2000)
+        this.gotoPage(`/samples/${response.data.id}`);
+      }, 2000);
     })
     .catch((error) => {
-      that.setState({
+      this.setState({
         invalid: true,
         submitting: false,
         serverErrors: error.response.data,
         errorMessage: 'Something went wrong'
-      })
+      });
     });
   }
 
@@ -221,17 +231,10 @@ class SampleUpload extends React.Component {
     });
   }
 
-  filePathValid(str, read) {
-    if (read == 2 && str === '') {
-      return true;
-    }
-    var regexPrefix = /s3:\/\//;
-    var regexSuffix = /(\.fastq|\.fastq.gz|\.fasta|\.fasta.gz)/igm;
-    if (str.match(regexPrefix) && str.match(regexSuffix)) {
-      return true;
-    } else {
-      return false;
-    }
+  filePathValid(str) {
+    const regexPrefix = /s3:\/\//;
+    const regexSuffix = /(\.fastq|\.fastq.gz|\.fasta|\.fasta.gz)/igm;
+    return (str.match(regexPrefix) && str.match(regexSuffix));
   }
 
   isUpdateFormInvalid() {
@@ -239,25 +242,25 @@ class SampleUpload extends React.Component {
       this.setState({
         invalid: true,
         errorMessage: 'Please fill in name, host genome and select a project'
-      })
+      });
       return true;
     } else if (this.state.selectedName === '') {
         this.setState({
           invalid: true,
           errorMessage: 'Please fill in Sample name'
-        })
+        });
         return true;
     } else if (this.state.selectedProject === 'Select a Project') {
         this.setState({
           invalid: true,
           errorMessage: 'Please select a project'
-        })
+        });
         return true;
     } else if (this.state.selectedHostGenome === '') {
       this.setState({
         invalid: true,
         errorMessage: 'Please select a host genome'
-      })
+      });
       return true;
     }
     else {
@@ -266,107 +269,146 @@ class SampleUpload extends React.Component {
   }
 
   isFormInvalid() {
-    if (this.refs.name.value === '' && this.state.selectedProject === 'Select a Project' && this.refs.first_file_source.value === '' && this.refs.second_file_source.value === '' && this.state.selectedHostGenome === '') {
-      this.setState({
-        invalid: true,
-        errorMessage: 'Please fill in all required fields'
-      })
-      return true;
-    } else if (this.refs.name.value === '') {
-        this.setState({
-          invalid: true,
-          errorMessage: 'Please fill in Sample name'
-        })
-        return true;
-    } else if (this.state.selectedProject === 'Select a Project') {
-        this.setState({
-          invalid: true,
-          errorMessage: 'Please select a project'
-        })
-        return true;
-    } else if (this.state.selectedHostGenome === '') {
-      this.setState({
-        invalid: true,
-        errorMessage: 'Please select a host genome'
-      })
-      return true;
+    const errors = {};
+    if(this.state.selectedProject) {
+      if(this.state.selectedProject.toLowerCase() === 'select a project') {
+        errors.selectedProject = 'Please select a project';
+      }
+    } else {
+      errors.selectedProject = 'Please select a project';
     }
-    else if (this.refs.first_file_source.value === '') {
-        this.setState({
-          invalid: true,
-          errorMessage: 'Please fill in first read file path'
-        })
-        return true;
-    } else if ( !this.filePathValid(this.refs.first_file_source.value, 1)) {
-        this.setState({
-          invalid: true,
-          errorMessage: 'Please fill in a valid file path for Read 1, Sample format for path can be found below'
-        })
-        return true;
-    } else if ( !this.filePathValid(this.refs.second_file_source.value, 2)) {
-      this.setState({
-        invalid: true,
-        errorMessage: 'Please fill in a valid file path for Read 2, Sample format for path can be found below'
-      })
-      return true;
+
+    if(this.state.selectedHostGenome) {
+      if (this.state.selectedHostGenome === '') {
+        errors.selectedHostGenome = 'Please select a host genome';
+      }
+    } else {
+      errors.selectedHostGenome = 'Please select a host genome';
     }
-    return false;
+
+    if (this.refs.first_file_source) {
+      const firstFileSourceValue = this.refs.first_file_source.value.trim();
+      if(!this.filePathValid(firstFileSourceValue)) {
+        errors.first_file_source = 'Error: invalid file path';
+      } else {
+        const arr = firstFileSourceValue.split('/');
+        this.selected.sampleName = arr[arr.length - 2];
+      }
+    } else {
+      errors.first_file_source = 'Error: invalid file path';
+    }
+
+    if (this.refs.second_file_source) {
+      const secondFileSourceValue = this.refs.second_file_source.value.trim();
+      if(secondFileSourceValue !== '' && !this.filePathValid(secondFileSourceValue)) {
+        errors.second_file_source = 'Error: invalid file path';
+      }
+    }
+
+    if(this.userDetails.admin ) {
+      // running validations for admin inputs
+      if(this.refs.s3_preload_result_path) {
+        const preloadPath = this.refs.s3_preload_result_path.value.trim();
+        if(preloadPath !== '' && preloadPath.indexOf('s3://') < 0) {
+          errors.s3_preload_result_path = 'Error: invalid file path';
+        }
+      }
+      if(this.state.selectedMemory !== '') {
+        const memorySize = parseInt(this.state.selectedMemory, 10);
+        if(isNaN(memorySize) || memorySize < 1) {
+          errors.memory = 'Memory size is not valid';
+        }
+      }
+    }
+    const errorLength  = Object.keys(errors).length;
+    if (errorLength) {
+      this.setState({ invalid: true, errors });
+    } else {
+      this.setState({ invalid: false, errors });
+    }
+    return errorLength;
   }
 
   handleProjectChange(e) {
-    let projectId;
-    if (e.target.selectedIndex > 0) {
-      projectId = this.state.allProjects[e.target.selectedIndex - 1].id;
+    if(e.target.value.trim().toLowerCase() !== 'select a project') {
+      const selectedIndex = e.target.selectedIndex - 1; // because the first item is Select a project
+      this.setState({
+        selectedProject: e.target.value.trim(),
+        selectedPId: this.state.allProjects[selectedIndex].id,
+        errors: Object.assign({}, this.state.errors, {selectedProject: null})
+      });
     }
-    this.setState({
-      selectedProject: e.target.value.trim(),
-      selectedPId: projectId
-    })
     this.clearError();
   }
 
 
-  handleHostChange(e) {
+  handleHostChange(hostId, hostName) {
     this.setState({
-      selectedHostGenome: e.target.value.trim(),
-      selectedHostGenomeId: this.state.hostGenomes[e.target.selectedIndex].id
-    })
+      selectedHostGenome: hostName,
+      selectedHostGenomeId: hostId
+    });
     this.clearError();
   }
 
   handleQueueChange(e) {
     this.setState({
       selectedJobQueue: e.target.value.trim()
-    })
+    });
     this.clearError();
   }
 
   handleMemoryChange(e) {
     this.setState({
       selectedMemory: e.target.value.trim()
-    })
+    });
     this.clearError();
   }
 
   handleNameChange(e) {
     this.setState({
       selectedName: e.target.value.trim(),
-    })
+    });
   }
 
   handleResultChange(e) {
     this.setState({
       selectedResultPath: e.target.value.trim()
-    })
+    });
   }
 
   displayError(failedStatus, serverError, formattedError) {
     if (failedStatus) {
-      return serverError.length ? serverError.map((error, i) => {
-        return <p className="error center-align" key={i}>{error}</p>
-      }) : <span>{formattedError}</span>
+      return (serverError instanceof Array) ? serverError.map((error, i) => {
+        return <p key={i}>{error}</p>
+      }) : <p>{formattedError}</p>
     } else {
       return null
+    }
+  }
+
+  toggleNewProjectInput(e) {
+    $('.new-project-input').slideToggle();
+    $('.new-project-button').toggleClass('active');
+  }
+
+  resolveGenomeIcon (genomeName) {
+    let imgPath = '/assets/generic_genome.png';
+    if (typeof genomeName === 'undefined') {
+      return false;
+    }
+    genomeName = genomeName.toLowerCase();
+    switch (genomeName) {
+      case 'mosquito':
+        return '/assets/mosquito.png';
+        break;
+      case 'human':
+        return '/assets/human.png';
+        break;
+      case 'no host subtraction':
+        return '/assets/bacteria.png';
+        break;
+      default:
+        return false;
     }
   }
 
@@ -401,7 +443,7 @@ class SampleUpload extends React.Component {
               <div className="row field-row">
                 <div className="input-field col s6 project-list">
                    <select ref="projectSelect" className="" onChange={ this.handleProjectChange } value={this.state.selectedProject} id="sample">
-                   <option disabled defaultValue>{this.state.selectedProject}</option>
+                    <option disabled defaultValue>{this.state.selectedProject}</option>
                    { this.state.allProjects.length ?
                       this.state.allProjects.map((project, i) => {
                         return <option ref= "project" key={i} id={project.id} >{project.name}</option>
@@ -456,101 +498,314 @@ class SampleUpload extends React.Component {
 
   renderSampleForm() {
     return (
-      <div className="form-wrapper">
-        <form ref="form" onSubmit={ this.handleUpload }>
-          <div className="row title">
-            <p className="col s6 signup">Sample Upload</p>
-            <span onClick={ this.gotoPage.bind(this, '/samples/bulk_new') } className="single">To upload multiple samples, click here</span>
-          </div>
-          { this.state.success ? <div className="success-info" >
-                <i className="fa fa-success"></i>
-                 <span>{this.state.successMessage}</span>
-                </div> : null }
-          <div className={this.state.invalid ? 'error-info' : ''} >{ this.displayError(this.state.invalid, this.state.serverErrors, this.state.errorMessage) }</div>
-          <div className="row content-wrapper">
-            <div className="row field-row">
-              <div className="col s6 input-field name">
-                <input ref= "name" type="text" className="" onFocus={ this.clearError }  />
-                <label>Sample name</label>
+      <div id='samplesUploader' className='row'>
+        <div className='col s4 offset-s4 upload-form-container'>
+          <div className='content'>
+            <div>
+              <div className='form-title'>
+                Single Upload
               </div>
-              <div className="col s6 input-field genome-list">
-                  <select ref="hostSelect" name="host" className="" id="host" onChange={ this.handleHostChange } value={this.state.selectedHostGenome}>
-                      { this.state.hostGenomes.length ?
-                          this.state.hostGenomes.map((host, i) => {
-                            return <option ref= "host" key={i} id={host.id} >{host.name}</option>
-                          }) : <option>No host genomes to display</option>
-                        }
-                  </select>
-                  <label>Host Genomes</label>
-                </div>
+              <div className='upload-info'>
+                Upload a single file to be processed through the IDseq pipeline.
+              </div>
             </div>
-              <div className="row field-row">
-                <div className="input-field col s6 project-list">
-                   <select ref="projectSelect" className="" id="sample" onChange={ this.handleProjectChange } value={this.state.selectedProject}>
-                   <option disabled defaultValue>{this.state.selectedProject}</option>
-                   { this.state.allProjects.length ?
-                      this.state.allProjects.map((project, i) => {
-                        return <option ref= "project" key={i} id={project.id} >{project.name}</option>
-                      }) : <option>No projects to display</option>
-                    }
-                  </select>
-                  <label>Project List</label>
-              </div>
-                <div className="input-field col s6">
-                    <div className="row">
-                      <input className="col s11 project-input" ref= "new_project" type="text" onFocus={ this.clearError } placeholder="Add a project if desired project is not on the list" />
-                      <input className="col s1 add-icon" value="&#xf067;" type="button" onClick={ this.handleProjectSubmit } />
+            <div>
+              <p className='upload-question'>
+                Want to upload multiple samples at once? <a href='bulk_new/'>Click Here.</a>
+                <br/>
+                Rather use our CLI? <a href='https://github.com/chanzuckerberg/idseq-web/blob/master/README.md#submit-a-sample' target='_blank'>Read Documentation Here.</a>
+              </p>
+            </div>
+            { this.state.success ?
+              <div className="form-feedback success-message" >
+                <i className="fa fa-check-circle-o"/> <span>{this.state.successMessage}</span>
+              </div> : null
+            }
+            {
+              this.state.invalid ?
+                <div className='form-feedback error-message'>
+                  { this.displayError(this.state.invalid, this.state.serverErrors, this.state.errorMessage) }
+                </div> : null
+            }
+            <form ref="form" onSubmit={ this.handleUpload }>
+              <div className='fields'>
+                <div className='field'>
+                  <div className='row'>
+                    <div className='col field-title no-padding s12'>
+                      Project
                     </div>
-                    <label htmlFor="new_project">Project</label>
+                  </div>
+                  <div className='row input-row'>
+                    <div className='col project-list no-padding s8 tooltipped' data-position="top" data-delay="50" data-tooltip="Name of experiment or project">
+                      <select ref="projectSelect" className="" id="sample" onChange={ this.handleProjectChange } value={this.state.selectedProject}>
+                        <option disabled defaultValue>{this.state.selectedProject}</option>
+                        { this.state.allProjects.length ?
+                          this.state.allProjects.map((project, i) => {
+                            return <option ref= "project" key={i} id={project.id} >{project.name}</option>
+                          }) : <option>No projects to display</option>
+                        }
+                      </select>
+                      {
+                        (this.state.errors.selectedProject) ?
+                          <div className='field-error'>
+                            {this.state.errors.selectedProject}
+                          </div> : null
+                      }
+                    </div>
+                    <div className='col no-padding s4'>
+                      <button type='button' onClick={this.toggleNewProjectInput}
+                              className='new-project-button new-button skyblue-button tooltipped'
+                              data-position="right" data-delay="50" data-tooltip="Add your desired experiment or project name">
+                        <i className='fa fa-plus'/>
+                        <span>
+                          New Project
+                        </span>
+                      </button>
+                    </div>
+                    <div className='col no-padding s12 new-project-input hidden'>
+                      <input type='text' onBlur={ (e) => {
+                        if (e.target.value.trim().length) {
+                          this.handleProjectSubmit();
+                        }
+                        $('.new-project-button').click();
+                      }} ref='new_project' onFocus={ this.clearError } className='browser-default' placeholder='Input new project name' />
+                      {
+                        (this.state.errors.new_project) ?
+                          <div className='field-error'>
+                            {this.state.errors.new_project}
+                          </div> : null
+                      }
+                    </div>
+                  </div>
+                </div>
+
+                <div className='field'>
+                  <div className='row'>
+                    <div className='col field-title no-padding s5 tooltipped'
+                         data-position="top" data-delay="50"
+                         data-tooltip='This would be subtracted by the pipeline'>
+                      Select Host Genome
+                    </div>
+                    {
+                      (this.userDetails.admin) ?
+                        <div className='col s7 right-align no-padding right admin-genomes'>
+                          {
+                            this.state.adminGenomes.map((g) => {
+                              return (
+                                <div key={g.id}
+                                     className={`${this.state.selectedHostGenome ===  g.name ? 'active' : ''} genome-label`}
+                                     id={g.name} onClick={() => this.handleHostChange(g.id, g.name)}>
+                                  { g.name }
+                                  </div>
+                              );
+                            })
+                          }
+                        </div> : null
+                    }
+                    </div>
+                  <div className='row input-row'>
+                    <div className='col center no-padding s12'>
+                      <ul className='host-selector'>
+                        {
+                          this.state.hostGenomes.map((g) => {
+                            return (
+                              this.resolveGenomeIcon(g.name) ?
+                              <li
+                                  key={g.id} className={ `${this.state.selectedHostGenome ===  g.name ? 'active' : ''} `}
+                                  id={g.name} onClick={() => this.handleHostChange(g.id, g.name)}>
+                                <div className='img-container'
+                                     style={{'backgroundImage': `url(${this.resolveGenomeIcon(g.name)})`}}>
+                                </div>
+                                <div className='genome-label'>
+                                  { g.name }
+                                </div>
+                              </li> : null
+                            );
+                          })
+                        }
+                        { this.state.hostGenomes.length ? '' :
+                          <div>
+                            <small>No host genome found!</small>
+                          </div>
+                        }
+                      </ul>
+                      {
+                        (this.state.errors.selectedHostGenome) ?
+                          <div className='field-error'>
+                            {this.state.errors.selectedHostGenome}
+                          </div> : null
+                      }
+                    </div>
+                  </div>
+                </div>
+                <div className='field'>
+                  <div className='row'>
+                    <div className='col no-padding s12'>
+                      <div className='field-title'>
+                        <div className='read-count-label'>
+                          Read 1
+                        </div>
+                        <div className='validation-info'>
+                          Accepted Formats: fastq,  fastq.gz, fasta, fasta.gz
+                        </div>
+                        <div className='example-link'>
+                          Example: s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className='row input-row'>
+                    <div className='col no-padding s12'>
+                      <input type='text' ref='first_file_source' onFocus={ this.clearError } className='browser-default' placeholder='aws/path-to-sample' />
+                      {
+                        (this.state.errors.first_file_source) ?
+                          <div className='field-error'>
+                            {this.state.errors.first_file_source}
+                          </div> : null
+                      }
+                    </div>
+                  </div>
+                </div>
+                <div className='field'>
+                  <div className='row'>
+                    <div className='col no-padding s12'>
+                      <div className='field-title'>
+                        <div className='read-count-label'>
+                          Read 2
+                        </div>
+                        <div className='validation-info'>
+                          Accepted Formats: fastq,  fastq.gz, fasta, fasta.gz
+                        </div>
+                        <div className='example-link'>
+                          Example: s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R2_001.fastq.gz
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className='row input-row'>
+                    <div className='col no-padding s12'>
+                      <input ref='second_file_source' onFocus={ this.clearError } type='text' className='browser-default' placeholder='aws/path-to-sample' />
+                      {
+                        (this.state.errors.second_file_source) ?
+                          <div className='field-error'>
+                            {this.state.errors.second_file_source}
+                          </div> : null
+                      }
+                    </div>
+                  </div>
+                </div>
+                {
+                  this.userDetails.admin ?
+                    <div>
+                      <div className='admin-fields divider'/>
+                      <div className='admin-input-title'>
+                        Admin Inputs
+                      </div>
+                      <div className='field'>
+                        <div className='row'>
+                          <div className='col no-padding s12'>
+                            <div className='field-title'>
+                              <div className='read-count-label'>
+                                Preload Results Path (s3)
+                              </div>
+                              <div className='example-link'>
+                                Example: s3://yunfang-workdir/id-rr004/RR004_water_2_S23/
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className='row input-row'>
+                          <div className='col no-padding s12'>
+                            <input type='text' ref='s3_preload_result_path' className='browser-default' placeholder='aws/path-of-results' />
+                            {
+                              (this.state.errors.s3_preload_result_path) ?
+                                <div className='field-error'>
+                                  {this.state.errors.s3_preload_result_path}
+                                </div> : null
+                            }
+                          </div>
+                        </div>
+                      </div>
+                      <div className='field'>
+                        <div className='row'>
+                          <div className='col no-padding s12'>
+                            <div className='field-title'>
+                              <div className='read-count-label' htmlFor="sample_job_queue">
+                                Job Queue
+                              </div>
+                              <div className='validation-info'>
+                                Example: aegea_batch_ondemand
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className='row input-row'>
+                          <div className='col no-padding s12'>
+                            <input id='sample_job_queue' ref= "job_queue" type='text' className='browser-default'
+                                   placeholder='queue' value={this.state.selectedJobQueue}
+                                   onChange={ this.handleQueueChange } />
+                            {
+                              (this.state.errors.job_queue) ?
+                                <div className='field-error'>
+                                  {this.state.errors.job_queue}
+                                </div> : null
+                            }
+                          </div>
+                        </div>
+                      </div>
+                      <div className='field'>
+                        <div className='row'>
+                          <div className='col no-padding s12'>
+                            <div className='field-title'>
+                              <div htmlFor="sample_memory" className='read-count-label'>
+                                Sample Memory (in mbs)
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className='row input-row'>
+                          <div className='col no-padding s12'>
+                            <input id='sample_memory' type='text' className='browser-default' ref= "memory" value={this.state.selectedMemory} placeholder='240000' onChange={ this.handleMemoryChange } />
+                            {
+                              (this.state.errors.memory) ?
+                                <div className='field-error'>
+                                  {this.state.errors.memory}
+                                </div> : null
+                            }
+                          </div>
+                        </div>
+                      </div>
+                    </div> :
+                    null
+                }
+                <div className='field'>
+                  <div className='row'>
+                    <div className='col no-padding s12'>
+                      { (this.state.submitting) ?
+                        <button type='button' disabled className='new-button blue-button upload-samples-button'>
+                          <i className='fa fa-spinner fa-spin fa-lg'/>
+                        </button> :
+                        <button type='submit' onClick={ this.handleUpload } className='new-button blue-button upload-samples-button'>
+                          Upload sample
+                        </button>
+                      }
+                      <button type='button' onClick={() => window.history.back()} className='new-button skyblue-button'>
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div className="field-row input-field align">
-                <i className="sample fa fa-link" aria-hidden="true"></i>
-                <input ref= "first_file_source" type="text" className="path" onFocus={ this.clearError } placeholder="Required" />
-                <span className="path_label">Example: s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz</span>
-                <label htmlFor="sample_first_file_source">Read 1 s3 path (accepted formats: .fastq, .fastq.gz, .fasta, .fasta.gz)</label>
-              </div>
-              <div className="field-row input-field align" >
-                <i className="sample fa fa-link" aria-hidden="true"></i>
-                <input ref= "second_file_source" type="text" className="path" onFocus={ this.clearError } placeholder="Required" />
-                <span className="path_label">Example: s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R2_001.fastq.gz</span>
-                <label htmlFor="sample_second_file_source">Read 2 s3 path (same format as Read 1 s3 path)</label>
-              </div>
-              <div className="row field-row">
-                <div className={ this.userDetails.admin ? "col s4 input-field" :  "col s12 input-field" }>
-                  <i className="sample fa fa-folder" aria-hidden="true"></i>
-                  <input ref= "s3_preload_result_path" type="text" className="path" onFocus={ this.clearError } placeholder="Optional" />
-                  <span className="path_label">Example: s3://yunfang-workdir/id-rr004/RR004_water_2_S23/</span>
-                  <label htmlFor="sample_s3_preload_result_path">Preload results path (s3 only)</label>
-                </div>
-                { this.userDetails.admin ? <div className="col s4 input-field">
-                  <i className="sample fa fa-file" aria-hidden="true"></i>
-                  <input ref= "job_queue" type="text" className="" onFocus={ this.clearError } placeholder="Optional" value={this.state.selectedJobQueue} onChange={ this.handleQueueChange } />
-                  <label htmlFor="sample_job_queue">Job queue</label>
-                </div> : null }
-                { this.userDetails.admin ? <div className="col s4 input-field">
-                  <i className="sample fa fa-file" aria-hidden="true"></i>
-                  <input ref= "memory" type="text" className="" value={this.state.selectedMemory} onFocus={ this.clearError } placeholder="Optional" onChange={ this.handleMemoryChange } />
-                  <label htmlFor="sample_memory">Sample memory (in mbs)</label>
-                </div> : null }
-            </div>
+            </form>
+          </div>
         </div>
-        <input className="hidden" type="submit"/>
-        { this.state.submitting ? <div className="center login-wrapper disabled"> <i className='fa fa-spinner fa-spin fa-lg'></i> </div> : 
-          <div onClick={ this.handleUpload } className="center login-wrapper">Submit</div> }
-      </form>
-    </div>
+      </div>
     )
   }
-
   render() {
     return (
       <div>
         { this.props.selectedSample ? this.renderUpdateForm() : this.renderSampleForm() }
-          <div className="bottom">
-            <span className="back" onClick={ this.props.selectedSample ? this.gotoPage.bind(this, '/samples') : this.gotoPage.bind(this, '/') } >Back</span>|
-            <span className="home" onClick={ this.gotoPage.bind(this, '/')}>Home</span>
-          </div>
       </div>
     )
   }
