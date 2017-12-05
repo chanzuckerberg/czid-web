@@ -699,7 +699,7 @@ class SampleUpload extends React.Component {
                     <div>
                       <div className='admin-fields divider'/>
                       <div className='admin-input-title'>
-                        Admin Options
+                        Admin options
                       </div>
                       <div className='field'>
                         <div className='row'>

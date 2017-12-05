@@ -260,11 +260,11 @@ class PipelineSampleReads extends React.Component {
                           <table className="responsive-table">
                             <tbody>
                               <tr>
-                                <td>Tissue Type</td>
+                                <td>Tissue type</td>
                                  <td>{ (!this.sampleInfo.sample_tissue) ? BLANK_TEXT : this.sampleInfo.sample_tissue }</td>
                               </tr>
                               <tr>
-                                <td>Library Prep Protocol</td>
+                                <td>Library prep protocol</td>
                                 <td>{ (!this.sampleInfo.sample_library) ? BLANK_TEXT : this.sampleInfo.sample_library }</td>
                               </tr>
                             </tbody>
