@@ -144,7 +144,7 @@ module SamplesHelper
           pipeline_run_entry[:total_runtime] = if recent_pipeline_run.finalized?
                                                  run_stages.map { |rs| rs.updated_at - rs.created_at }.sum # total processing time (without time spent waiting), for performance evaluation
                                                else
-                                                 Time.now - recent_pipeline_run.created_at # time since pipeline kickoff (including time spent waiting), for run diagnostics
+                                                 Time.current - recent_pipeline_run.created_at # time since pipeline kickoff (including time spent waiting), for run diagnostics
                                                end
         else
           pipeline_run_status = recent_pipeline_run.job_status
