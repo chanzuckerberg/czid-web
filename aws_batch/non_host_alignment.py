@@ -522,7 +522,7 @@ def run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work
         commands += " ".join([remote_home_dir+'/bin/gsnapl',
                               '-A', 'm8', '--batch=2',
                               '--gmap-mode=none', '--npaths=1', '--ordered',
-                              '-t', '32', '--ordered', # ensures output is in same order as input for threads > 1
+                              '-t', '32',
                               '--maxsearch=5', '--max-mismatches=20',
                               '-D', remote_index_dir, '-d', 'nt_k16']
                               + [remote_work_dir+'/'+input_fa for input_fa in input_files]
