@@ -88,6 +88,7 @@ class SamplesController < ApplicationController
       if background_id
         report.background_id = background_id
         report.name = "#{@sample.id} #{background_id} #{@sample.name}"
+        report.save
       else
         report = nil
       end
