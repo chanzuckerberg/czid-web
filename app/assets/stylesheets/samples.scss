@@ -361,8 +361,10 @@ $break-large: 1070px;
     }
     .filter {
       margin: 0px 0px 0 80px;
-      color: #888e8e;
+      color: #070a0a;
     }
+  ul .dropdown-content li > a {
+    font-size: 14px !important;
   }
   .table-container {
     margin: 0 67px 7px;
@@ -383,6 +385,9 @@ $break-large: 1070px;
     border-bottom: 1px solid #dfdddd;
     .job-card {
       margin: 0 63px;
+      .no-time {
+        padding-top: 14px;
+      }
       .reads {
         .status-col {
           padding: 6px 18px !important;

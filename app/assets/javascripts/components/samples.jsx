@@ -76,6 +76,18 @@ class Samples extends React.Component {
     }
   }
 
+  formatRunTime(runtime) {
+    runtime = Number(runtime);
+    var h = Math.floor(runtime / 3600);
+    var m = Math.floor(runtime % 3600 / 60);
+    var s = Math.floor(runtime % 3600 % 60);
+
+    var hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
+    var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
+    var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
+    return hDisplay + mDisplay + sDisplay; 
+}
+
   renderPipelineOutput(samples) {
     var BLANK_TEXT = ''
 
@@ -116,7 +128,7 @@ class Samples extends React.Component {
             <div className="reads col s2">
               <p>
               { (!derivedOutput.summary_stats || !derivedOutput.summary_stats.remaining_reads) ? 'NA' : numberWithCommas(derivedOutput.summary_stats.remaining_reads) }
-              { (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? '' : `(${derivedOutput.summary_stats.percent_remaining.toFixed(2)}%)` } 
+              { (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? '' : ` (${derivedOutput.summary_stats.percent_remaining.toFixed(2)}%)` } 
               </p>
             </div>
             <div className="reads col s2">
@@ -127,8 +139,8 @@ class Samples extends React.Component {
             <div className="reads col s1">
               <p>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? 'NA' : `${derivedOutput.summary_stats.qc_percent.toFixed(2)}%`}</p>
             </div>
-            <div className="reads status-col col s2">{ !runInfo.job_status_description ? rowWithChunkStatus : rowWithoutChunkStatus }
-              <p className="time"><i className="fa fa-clock-o" aria-hidden="true"></i><span>Running for 3 hours</span></p>
+              <div className={ runInfo.total_runtime ? "reads status-col col s2" : 'reads col s2 no-time'}>{ !runInfo.job_status_description ? rowWithChunkStatus : rowWithoutChunkStatus }
+              { runInfo.total_runtime ? <p className="time"><i className="fa fa-clock-o" aria-hidden="true"></i><span>{this.formatRunTime(runInfo.total_runtime)}</span></p> : ''}
             </div>
           </div>
         </div>
@@ -258,6 +270,7 @@ class Samples extends React.Component {
         </div>
           {/* Dropdown menu */}
           <ul id='dropdownstatus' className='status dropdown-content'>
+<<<<<<< HEAD
             <li className="filter-item"><a href="#!" className="title filter-item"><b>Filter by status</b></a></li>
             <li className="divider"></li>
             <li className="filter-item" data-status="WAITING" onClick={ this.filterByStatus } ><a data-status="WAITING" className="waiting filter-item" href="#!">Waiting</a><i data-status="WAITING" className="filter fa fa-check"></i></li>
@@ -266,6 +279,15 @@ class Samples extends React.Component {
             <li className="filter-item" onClick={ this.filterByStatus } data-status="FAILED" ><a data-status="FAILED" className="failed filter-item" href="#!">Failed</a><i data-status="FAILED" className="filter fa fa-check"></i></li>
               <li className="divider"></li>
             <li className="filter-item" data-status="ALL" onClick={ this.filterByStatus }><a data-status="ALL" className="all filter-item" href="#!">All</a><i data-status="ALL" className="filter all fa fa-check"></i></li>
+=======
+            <li><a href="#!" className="title"><b>Filter by status</b></a></li>
+            <li data-status="WAITING" onClick={ this.filterByStatus } ><a data-status="WAITING" className="waiting" href="#!">WAITING</a></li>
+            <li data-status="UPLOADING" onClick={ this.filterByStatus }><a data-status="UPLOADING" className="uploading" href="#!">IN PROGRESS</a></li>
+            <li data-status="CHECKED" onClick={ this.filterByStatus }><a data-status="CHECKED" className="complete" href="#!">COMPLETE</a></li>
+            <li onClick={ this.filterByStatus } data-status="FAILED" ><a data-status="FAILED" className="failed" href="#!">FAILED</a></li>
+              <li className="divider"></li>
+            <li data-status="ALL" onClick={ this.filterByStatus }><a data-status="ALL" className="all" href="#!">All</a></li>
+>>>>>>> Samples run time update
           </ul>
           { tableHead }
           { samples.length ? this.renderPipelineOutput(samples) : this.renderEmptyTable() }
