@@ -192,15 +192,15 @@ class Samples extends React.Component {
       <div className="sample-container">
         <div className="row search-box">
           <span className="icon"><i className="fa fa-search" aria-hidden="true"></i></span>
-          <input id="search" value={this.state.urlSearchQuery} onChange={this.handleSearchChange}  type="search" onKeyDown={this.handleSearch} className="search" placeholder='Search for Sample'/>{ this.state.showSearchLoader ? <i className='fa fa-spinner fa-spin fa-lg'></i> : null }
+          <input id="search" value={this.state.urlSearchQuery} onChange={this.handleSearchChange}  type="search" onKeyDown={this.handleSearch} className="search" placeholder='Search for sample'/>{ this.state.showSearchLoader ? <i className='fa fa-spinner fa-spin fa-lg'></i> : null }
         </div>
           {/* Dropdown menu */}
           <ul id='dropdownstatus' className='status dropdown-content'>
           <li><a href="#!" className="title"><b>Filter by status</b></a></li>
-          <li data-status="WAITING" onClick={ this.filterByStatus } ><a data-status="WAITING" className="waiting" href="#!">Waiting</a></li>
-          <li data-status="UPLOADING" onClick={ this.filterByStatus }><a data-status="UPLOADING" className="uploading" href="#!">In Progress</a></li>
-          <li data-status="CHECKED" onClick={ this.filterByStatus }><a data-status="CHECKED" className="complete" href="#!">Complete</a></li>
-          <li onClick={ this.filterByStatus } data-status="FAILED" ><a data-status="FAILED" className="failed" href="#!">Failed</a></li>
+          <li data-status="WAITING" onClick={ this.filterByStatus } ><a data-status="WAITING" className="waiting" href="#!">WAITING</a></li>
+          <li data-status="UPLOADING" onClick={ this.filterByStatus }><a data-status="UPLOADING" className="uploading" href="#!">IN PROGRESS</a></li>
+          <li data-status="CHECKED" onClick={ this.filterByStatus }><a data-status="CHECKED" className="complete" href="#!">COMPLETE</a></li>
+          <li onClick={ this.filterByStatus } data-status="FAILED" ><a data-status="FAILED" className="failed" href="#!">FAILED</a></li>
             <li className="divider"></li>
           <li data-status="ALL" onClick={ this.filterByStatus }><a data-status="ALL" className="all" href="#!">All</a></li>
           </ul>
@@ -208,7 +208,7 @@ class Samples extends React.Component {
             <thead>
             <tr>
               <th>Name</th>
-              <th>Date Uploaded
+              <th>Date uploaded
               <div className='sort-controls left'>
                 <i onClick={ this.columnSorting } className={`${this.getActiveSort('oldest')} fa fa-caret-up sort_by=oldest` }></i>
                 <i onClick={ this.columnSorting } className={`${this.getActiveSort('newest')} fa fa-caret-down sort_by=newest` }></i>
@@ -276,7 +276,7 @@ class Samples extends React.Component {
               <div  className="upload">
                 <a href='/samples/new'>
                   <i className="fa fa-flask" aria-hidden="true"/>
-                  <span>Upload Sample</span>
+                  <span>Upload sample</span>
                 </a>
               </div>
 
