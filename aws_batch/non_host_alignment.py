@@ -205,7 +205,7 @@ def check_pair_concordance(read_to_taxid):
     species_taxid_concordance_map = {}
     genus_taxid_concordance_map = {}
     family_taxid_concordance_map = {}
-    read_1_ids = [read_id for read_to_taxid.keys() if "/1" in read_id]
+    read_1_ids = [read_id for read_id in read_to_taxid.keys() if "/1" in read_id]
     for read_1_id in read_1_ids:
         read_2_id = read_1_id.replace("/1", "/2", 1)
         if read_2_id not in read_to_taxid:
