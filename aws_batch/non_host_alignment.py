@@ -88,6 +88,11 @@ TARGET_OUTPUTS = None
 AWS_BATCH_JOB_ID = None
 
 # convenience functions
+def fuzzy_get(dictionary, raw_key, default_value):
+    value_list = [dictionary[key] for key in dictionary if raw_key in key]
+    value = value_list[0] if value_list else default_value
+    return value
+
 def generate_taxid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fasta_file, annotation_prefix):
     '''Tag reads based on the m8 output'''
     # Example:  generate_annotated_fasta_from_m8('filter.unmapped.merged.fasta',
@@ -143,13 +148,7 @@ def generate_tax_counts_from_m8(m8_file, e_value_type, output_file, lineage_map)
     taxid_percent_identity_map = {}
     taxid_alignment_length_map = {}
     taxid_e_value_map = {}
-    species_taxid_concordance_map = {}
-    genus_taxid_concordance_map = {}
-    family_taxid_concordance_map = {}
-    previous_pair = ''
-    previous_species_taxid = ''
-    previous_genus_taxid = ''
-    previous_family_taxid = ''
+    read_to_taxid = {}
 
     with open(m8_file, 'rb') as m8f:
         for line in m8f:
@@ -188,28 +187,8 @@ def generate_tax_counts_from_m8(m8_file, e_value_type, output_file, lineage_map)
             taxid_alignment_length_map[taxid] = taxid_alignment_length_map.get(taxid, 0) + alignment_length
             taxid_e_value_map[taxid] = taxid_e_value_map.get(taxid, 0) + e_value
 
-            # Determine pair alignment concordance:
-            # To be efficient, this uses the fact that the mates of a pair appear consecutively in the m8 file (1 then 2).
-            # Indeed, that is the case in the fasta input to gsnap/rapsearch and the aligners preserve the order.
-            # (Guaranteed by the "--ordered" option in gsnap. To be verified for rapsearch -- at first glance
-            # seems to be satisfied but possible hiccups when multiple worker threads are used.)
-            raw_read_id_parts = raw_read_id.split("/")
-            pair_name = raw_read_id_parts[0] # e.g. NB501961:14:HM7TLBGX2:2:11103:1246:5674
-            mate_name = raw_read_id_parts[1] # either 1 or 2
-            species_taxid_concordance_map[species_taxid] = species_taxid_concordance_map.get(species_taxid, 0)
-            genus_taxid_concordance_map[genus_taxid] = genus_taxid_concordance_map.get(genus_taxid, 0)
-            family_taxid_concordance_map[family_taxid] = family_taxid_concordance_map.get(family_taxid, 0)
-            if mate_name == "2" and pair_name == previous_pair:
-                if species_taxid == previous_species_taxid:
-                    species_taxid_concordance_map[species_taxid] += 2 # add both reads to the concordance count
-                if genus_taxid == previous_genus_taxid:
-                    genus_taxid_concordance_map[genus_taxid] += 2
-                if family_taxid == previous_family_taxid:
-                    family_taxid_concordance_map[family_taxid] += 2
-            previous_pair = pair_name
-            previous_species_taxid = species_taxid
-            previous_genus_taxid = genus_taxid
-            previous_family_taxid = family_taxid
+            # Keep mapping of read ids to taxids in order to determine pair concordance later:
+            read_to_taxid[raw_read_id] = (species_taxid, genus_taxid, family_taxid)
 
     # Write results:
     with open(output_file, 'w') as f:
@@ -219,6 +198,26 @@ def generate_tax_counts_from_m8(m8_file, e_value_type, output_file, lineage_map)
             avg_alignment_length = taxid_alignment_length_map[taxid] / count
             avg_e_value = taxid_e_value_map[taxid] / count
             f.write(",".join([str(taxid), str(count), str(avg_percent_identity), str(avg_alignment_length), str(avg_e_value) + '\n']))
+    # Determine pair concordance:
+    return check_pair_concordance(read_to_taxid)
+
+def check_pair_concordance(read_to_taxid):
+    species_taxid_concordance_map = {}
+    genus_taxid_concordance_map = {}
+    family_taxid_concordance_map = {}
+    read_1_ids = [read_id for read_to_taxid.keys() if "/1" in read_id]
+    for read_1_id in read_1_ids:
+        read_2_id = read_1_id.replace("/1", "/2", 1)
+        if read_2_id not in read_to_taxid:
+            continue
+        species_taxid_1, genus_taxid_1, family_taxid_1 = read_to_taxid.get(read_id)
+        species_taxid_2, genus_taxid_2, family_taxid_2 = read_to_taxid.get(mate2_read_id)
+        if species_taxid_1 == species_taxid_2:
+            species_taxid_concordance_map[species_taxid_1] += 2 # add both reads to the concordance count
+        if genus_taxid_1 == genus_taxid_2:
+            genus_taxid_concordance_map[genus_taxid_1] += 2
+        if family_taxid_1 == family_taxid_2:
+            family_taxid_concordance_map[family_taxid_1] += 2
     return species_taxid_concordance_map, genus_taxid_concordance_map, family_taxid_concordance_map
 
 def generate_rpm_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, speciesOutputPath, genusOutputPath):
