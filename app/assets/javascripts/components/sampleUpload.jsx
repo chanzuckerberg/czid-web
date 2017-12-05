@@ -437,7 +437,7 @@ class SampleUpload extends React.Component {
                           }) : <option>No host genomes to display</option>
                         }
                   </select>
-                  <label>Host Genomes</label>
+                  <label>Host genomes</label>
                 </div>
             </div>
               <div className="row field-row">
@@ -450,7 +450,7 @@ class SampleUpload extends React.Component {
                       }) : <option>No projects to display</option>
                     }
                   </select>
-                  <label>Project List</label>
+                  <label>Project list</label>
               </div>
                 <div className="input-field col s6">
                     <div className="row">
@@ -506,14 +506,14 @@ class SampleUpload extends React.Component {
                 Single Upload
               </div>
               <div className='upload-info'>
-                Upload a single file to be processed through the IDseq pipeline.
+                Upload a single sample to be processed through the IDseq pipeline.
               </div>
             </div>
             <div>
               <p className='upload-question'>
-                Want to upload multiple samples at once? <a href='bulk_new/'>Click Here.</a>
+                Want to upload multiple samples at once? <a href='bulk_new/'>Click here.</a>
                 <br/>
-                Rather use our CLI? <a href='https://github.com/chanzuckerberg/idseq-web/blob/master/README.md#submit-a-sample' target='_blank'>Read Documentation Here.</a>
+                Rather use our CLI? <a href='https://github.com/chanzuckerberg/idseq-web/blob/master/README.md#submit-a-sample' target='_blank'>Read documentation here.</a>
               </p>
             </div>
             { this.state.success ?
@@ -558,7 +558,7 @@ class SampleUpload extends React.Component {
                               data-position="right" data-delay="50" data-tooltip="Add your desired experiment or project name">
                         <i className='fa fa-plus'/>
                         <span>
-                          New Project
+                          New project
                         </span>
                       </button>
                     </div>
@@ -584,7 +584,7 @@ class SampleUpload extends React.Component {
                     <div className='col field-title no-padding s5 tooltipped'
                          data-position="top" data-delay="50"
                          data-tooltip='This would be subtracted by the pipeline'>
-                      Select Host Genome
+                      Select host genome
                     </div>
                     {
                       (this.userDetails.admin) ?
@@ -646,7 +646,7 @@ class SampleUpload extends React.Component {
                           Read 1
                         </div>
                         <div className='validation-info'>
-                          Accepted Formats: fastq,  fastq.gz, fasta, fasta.gz
+                          Accepted formats: fastq, fastq.gz, fasta, fasta.gz
                         </div>
                         <div className='example-link'>
                           Example: s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz
@@ -674,7 +674,7 @@ class SampleUpload extends React.Component {
                           Read 2
                         </div>
                         <div className='validation-info'>
-                          Accepted Formats: fastq,  fastq.gz, fasta, fasta.gz
+                          Accepted formats: fastq, fastq.gz, fasta, fasta.gz
                         </div>
                         <div className='example-link'>
                           Example: s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R2_001.fastq.gz
@@ -699,14 +699,14 @@ class SampleUpload extends React.Component {
                     <div>
                       <div className='admin-fields divider'/>
                       <div className='admin-input-title'>
-                        Admin Inputs
+                        Admin Options
                       </div>
                       <div className='field'>
                         <div className='row'>
                           <div className='col no-padding s12'>
                             <div className='field-title'>
                               <div className='read-count-label'>
-                                Preload Results Path (s3)
+                                Preload results path (s3)
                               </div>
                               <div className='example-link'>
                                 Example: s3://yunfang-workdir/id-rr004/RR004_water_2_S23/
@@ -731,7 +731,7 @@ class SampleUpload extends React.Component {
                           <div className='col no-padding s12'>
                             <div className='field-title'>
                               <div className='read-count-label' htmlFor="sample_job_queue">
-                                Job Queue
+                                Job queue
                               </div>
                               <div className='validation-info'>
                                 Example: aegea_batch_ondemand
@@ -758,7 +758,7 @@ class SampleUpload extends React.Component {
                           <div className='col no-padding s12'>
                             <div className='field-title'>
                               <div htmlFor="sample_memory" className='read-count-label'>
-                                Sample Memory (in mbs)
+                                Sample memory (in MB)
                               </div>
                             </div>
                           </div>
