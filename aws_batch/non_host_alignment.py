@@ -88,11 +88,6 @@ TARGET_OUTPUTS = None
 AWS_BATCH_JOB_ID = None
 
 # convenience functions
-def fuzzy_get(dictionary, raw_key, default_value):
-    value_list = [dictionary[key] for key in dictionary if raw_key in key]
-    value = value_list[0] if value_list else default_value
-    return value
-
 def generate_taxid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fasta_file, annotation_prefix):
     '''Tag reads based on the m8 output'''
     # Example:  generate_annotated_fasta_from_m8('filter.unmapped.merged.fasta',
