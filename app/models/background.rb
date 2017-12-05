@@ -9,7 +9,6 @@ class Background < ApplicationRecord
   DEFAULT_BACKGROUND_MODEL_NAME = "default".freeze
   TAXON_SUMMARY_CHUNK_SIZE = 100
 
-
   def self.eligible_pipeline_outputs
     PipelineOutput.where("pipeline_run_id in (select max(id) from pipeline_runs group by sample_id)").order(:sample_id)
   end

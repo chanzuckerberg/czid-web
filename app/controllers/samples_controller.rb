@@ -81,7 +81,7 @@ class SamplesController < ApplicationController
     ## TODO(yf): clean the following up.
     ####################################################
     report = nil
-    default_background_id = (@sample.host_genome && @sample.host_genome.default_background) ? @sample.host_genome.default_background.id : nil
+    default_background_id = @sample.host_genome && @sample.host_genome.default_background ? @sample.host_genome.default_background.id : nil
     if @pipeline_output
       report = @pipeline_output.reports.first || Report.new(pipeline_output: @pipeline_output)
       background_id = params[:background_id] || default_background_id || report.background_id
