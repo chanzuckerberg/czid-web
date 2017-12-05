@@ -3,9 +3,6 @@
   td {
     cursor: pointer;
   }
-  th i.status-filter {
-    margin: 0 10px;
-  }
   ul.status {
     li a{
       font-size: 14px;
@@ -351,13 +348,9 @@ $break-large: 1070px;
 }
 
 .sample-container {
-  .search-box {
+  .wrapper {
+    border-bottom: 1px #291d1d26 solid;
     margin-bottom: 0;
-    padding: 0 72px;
-    .icon {
-      padding-top: 12px;
-      display: inline-block;
-    }
   }
   ul li {
     .filter, .filter-item {
@@ -371,55 +364,69 @@ $break-large: 1070px;
       color: #888e8e;
     }
   }
-  thead {
-    background: #f1f1f1;
-    tr th {
-      color: #333333;
-      font-weight: bold;
-      font-size: 14px;
-      cursor: pointer;
-    }
-  }
-  tr {
-    th:first-child {
-      display: block;
-      margin-left: 72px;
-      margin: 0 72px;
-      width: 200px;
-      overflow: hidden;
-      display: inline-block;
-      white-space: nowrap;
-    }
-    th:last-child {
-      display: block;
-      text-align: center;
-      margin-right: 72px;
-    }
-  }
-  td {
+  .table-container {
+    margin: 0 67px 7px;
+    color: #333333;
+    font-weight: 600;
     font-size: 14px;
-    &:first-child{
-      display: block;
-      margin-left: 72px;
-      color: #333333;
-      font-weight: bold;
-      width: 200px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      display: inline-block;
-      white-space: nowrap;
-      .uploader {
-        font-size: 12px;
-        margin: 0;
-        font-weight: normal;
-        color: #737373;
+    .status-dropdown {
+      cursor: pointer;
+      padding-left: 0;
+      .status-filter {
+        padding: 0 10px
       }
     }
-    &:last-child {
-      display: block;
-      margin-right: 72px;
-      text-align: left;
-      margin-left: 20px;
+  }
+  .job-container {
+    cursor: pointer;
+    margin-bottom: 0;
+    border-bottom: 1px solid #dfdddd;
+    .job-card {
+      margin: 0 63px;
+      .reads {
+        .status-col {
+          padding: 6px 18px !important;
+        }
+        p.status {
+          font-size: 12px;
+          display: inline-block;
+          margin: 0 10px;
+        }
+        .time {
+          margin: 0;
+          font-size: 12px;
+          span {
+            margin: 10px;
+          }
+        }
+        margin: 15px 0;
+      }
+      .sample-name {
+        color: #333333;
+        font-weight: bold;
+        margin-bottom: 0;
+      }
+      .uploader {
+        font-size: 12px;
+        font-weight: normal;
+        color: #737373;
+        margin: 0;
+      }
+    }
+    &:hover {
+      background: #f1f1f1;
+    }
+  }
+  .search-box {
+    margin-bottom: 0;
+    width: 16%;
+    border: 1px solid #e6e6e6;
+    margin: 17px 73px;
+    border-radius: 3px;
+    .icon {
+      padding-top: 12px;
+      display: inline-block;
+      margin: 0 10px;
     }
   }
   input.search {
