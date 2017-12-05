@@ -20,6 +20,9 @@ class SampleUpload extends React.Component {
     this.userDetails = props.loggedin_user;
     const selectedHostGenomeName = (this.hostGenomes[0] && this.hostGenomes[0].name) ? this.hostGenomes[0].name : '';
     const selectedHostGenomeId = (this.hostGenomes[0] && this.hostGenomes[0].id) ? this.hostGenomes[0].id : '';
+    const adminGenomes = this.hostGenomes.filter((g) => {
+      return g.name.toLowerCase().indexOf('test') >= 0;
+    });
     this.selected = {
       name: this.sample.name || '',
       hostGenome: this.sample ? this.sample.host_genome_name : selectedHostGenomeName,
@@ -53,7 +56,8 @@ class SampleUpload extends React.Component {
       selectedJobQueue: this.selected.jobQueue || '',
       selectedMemory: this.selected.memory || '',
       id: this.selected.id,
-      errors: {}
+      errors: {},
+      adminGenomes
     };
   }
 
@@ -404,9 +408,8 @@ class SampleUpload extends React.Component {
         return '/assets/bacteria.png';
         break;
       default:
-        return imgPath;
+        return false;
     }
-
   }
 
   renderUpdateForm() {
@@ -583,18 +586,32 @@ class SampleUpload extends React.Component {
                          data-tooltip='This would be subtracted by the pipeline'>
                       Select Host Genome
                     </div>
-                    <div className='col s7 right-align no-padding right admin-genomes'>
+                    {
+                      (this.userDetails.admin) ?
+                        <div className='col s7 right-align no-padding right admin-genomes'>
+                          {
+                            this.state.adminGenomes.map((g) => {
+                              return (
+                                <div key={g.id}
+                                     className={`${this.state.selectedHostGenome ===  g.name ? 'active' : ''} genome-label`}
+                                     id={g.name} onClick={() => this.handleHostChange(g.id, g.name)}>
+                                  { g.name }
+                                  </div>
+                              );
+                            })
+                          }
+                        </div> : null
+                    }
                     </div>
-                  </div>
                   <div className='row input-row'>
-                    <div className='col no-padding s12'>
+                    <div className='col center no-padding s12'>
                       <ul className='host-selector'>
                         {
                           this.state.hostGenomes.map((g) => {
                             return (
                               this.resolveGenomeIcon(g.name) ?
                               <li
-                                  key={g.id} className={ `${this.state.selectedHostGenome ===  g.name ? 'active' : null} `}
+                                  key={g.id} className={ `${this.state.selectedHostGenome ===  g.name ? 'active' : ''} `}
                                   id={g.name} onClick={() => this.handleHostChange(g.id, g.name)}>
                                 <div className='img-container'
                                      style={{'backgroundImage': `url(${this.resolveGenomeIcon(g.name)})`}}>
