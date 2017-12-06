@@ -422,6 +422,11 @@ def chunk_input(input_files_basenames, chunk_nlines, part_suffix):
     # e.g. [["input_R1.fasta-part-1", "input_R2.fasta-part-1"],["input_R1.fasta-part-2", "input_R2.fasta-part-2"],["input_R1.fasta-part-3", "input_R2.fasta-part-3"],...]
     return input_chunks
 
+def remove_whitespace_from_files(input_files, replacement, output_files):
+    for idx, input_file in enumerate(input_files):
+        output_file = output_files[idx]
+        execute_command("sed 's/[[:blank:]]/%s/g' %s > %s" % (replacement, input_file, output_file))
+
 def clean_direct_gsnapl_input(fastq_files):
     # unzip files if necessary
     if ".gz" in FILE_TYPE:
@@ -659,7 +664,7 @@ def run_stage2(lazy_run = True):
             execute_command("aws s3 cp %s %s/" % (input1_s3_path, SAMPLE_S3_OUTPUT_PATH))
             execute_command("aws s3 cp %s %s/" % (input2_s3_path, SAMPLE_S3_OUTPUT_PATH))
             execute_command("aws s3 cp %s %s/" % (input3_s3_path, SAMPLE_S3_OUTPUT_PATH))
-        gsnapl_input_files = [EXTRACT_UNMAPPED_FROM_SAM_OUT1, EXTRACT_UNMAPPED_FROM_SAM_OUT2]
+        _gsnapl_input_files = [EXTRACT_UNMAPPED_FROM_SAM_OUT1, EXTRACT_UNMAPPED_FROM_SAM_OUT2]
         before_file_name_for_log = os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT1)
         before_file_type_for_log = "fasta_paired"
     else:
@@ -676,10 +681,23 @@ def run_stage2(lazy_run = True):
         # prepare files for gsnap
         cleaned_files, before_file_type_for_log = clean_direct_gsnapl_input(fastq_files)
         before_file_name_for_log = cleaned_files[0]
-        gsnapl_input_files = [os.path.basename(f) for f in cleaned_files]
+        _gsnapl_input_files = [os.path.basename(f) for f in cleaned_files]
         # make combined fasta needed later
-        merged_fasta = os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT3)
-        generate_merged_fasta(cleaned_files, merged_fasta)
+        _merged_fasta = os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT3)
+        generate_merged_fasta(cleaned_files, _merged_fasta)
+        execute_command("aws s3 cp %s %s/" % (_merged_fasta, SAMPLE_S3_OUTPUT_PATH))
+
+    # Make sure there are no tabs in sequence names, since tabs are used as a delimiter in m8 files    
+    files_to_collapse_basenames = _gsnapl_input_files + [EXTRACT_UNMAPPED_FROM_SAM_OUT3]
+    collapsed_files = ["%s/nospace.%s" % (RESULT_DIR, f) for f in files_to_collapse_basenames]
+    for file_basename in files_to_collapse_basenames:
+        execute_command("aws s3 cp %s/%s %s/" % (SAMPLE_S3_OUTPUT_PATH, file_basename, RESULT_DIR))
+    remove_whitespace_from_files([os.path.join(RESULT_DIR, file_basename) for file_basename in files_to_collapse_basenames],
+                                  ";", collapsed_files)
+    for filename in collapsed_files:
+        execute_command("aws s3 cp %s %s/" % (filename, SAMPLE_S3_OUTPUT_PATH))
+    gsnapl_input_files = [os.path.basename(f) for f in collapsed_files[:-1]]
+    merged_fasta = collapsed_files[-1]
 
     if lazy_run:
         # Download existing data and see what has been done
@@ -712,8 +730,7 @@ def run_stage2(lazy_run = True):
         {"title": "generate taxid annotated fasta from m8", "count_reads": False})
     run_and_log(logparams, TARGET_OUTPUTS["run_generate_taxid_annotated_fasta_from_m8__1"], False,
         run_generate_taxid_annotated_fasta_from_m8, os.path.join(RESULT_DIR, GSNAPL_DEDUP_OUT),
-        os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT3),
-        os.path.join(RESULT_DIR, GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT), 'NT')
+        merged_fasta, os.path.join(RESULT_DIR, GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT), 'NT')
 
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "filter deuterostomes from m8__1", "count_reads": True,
