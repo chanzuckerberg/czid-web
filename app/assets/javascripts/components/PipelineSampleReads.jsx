@@ -141,7 +141,7 @@ class PipelineSampleReads extends React.Component {
       pipeline_run = (
         <div className="data">
           <div className="row">
-            <div className="col s6">
+            <div className="col s5">
               <table>
                 <tbody>
                 <tr>
@@ -155,7 +155,7 @@ class PipelineSampleReads extends React.Component {
                 </tbody>
               </table>
             </div>
-            <div className="col s6">
+            <div className="col s7">
               <table>
                 <tbody>
                 <tr>
