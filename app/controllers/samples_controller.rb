@@ -105,7 +105,7 @@ class SamplesController < ApplicationController
     ####################################################
     report = nil
     default_background_id = @sample.host_genome && @sample.host_genome.default_background ? @sample.host_genome.default_background.id : nil
-    if @pipeline_output
+    if @pipeline_output &&  (@pipeline_output.remaining_reads.to_i > 0 || @pipeline_run.finalized?)
       report = @pipeline_output.reports.first || Report.new(pipeline_output: @pipeline_output)
       background_id = params[:background_id] || default_background_id || report.background_id
       if background_id
