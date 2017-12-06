@@ -305,19 +305,19 @@ class PipelineSampleReport extends React.Component {
                         </span>
                         Taxonomy
                       </th>
-                      { this.render_column_header('NT+NR', 'ZZRPM',  'nt_aggregatescore', 'Aggregate score') }
-                      { this.render_column_header('NT', 'Z',   'nt_zscore', 'z-score relative to background model') }
-                      { this.render_column_header('NT', 'rPM', 'nt_rpm', 'number of reads per million total input reads')    }
-                      { this.render_column_header('NT', 'r',   'nt_r', 'number of reads aligning to the species in the NCBI NT database')      }
-                      { this.render_column_header('NT', '%id', 'nt_percentidentity', 'average percent-identity of alignments')    }
-                      { this.render_column_header('NT', 'L',   'nt_alignmentlength', 'average length of alignments')    }
-                      { this.render_column_header('NT', 'Log(1/E)',  'nt_neglogevalue', 'average log-10-transformed expect value')    }
-                      { this.render_column_header('NR', 'Z',   'nr_zscore', 'number of reads aligning to the species in the NCBI NR database') }
-                      { this.render_column_header('NR', 'rPM', 'nr_rpm')    }
-                      { this.render_column_header('NR', 'r',   'nr_r')      }
-                      { this.render_column_header('NR', '%id', 'nr_percentidentity')    }
-                      { this.render_column_header('NR', 'AL',   'nr_alignmentlength')    }
-                      { this.render_column_header('NR', 'Log(1/E)',  'nr_neglogevalue')    }
+                        {this.render_column_header('NT+NR', 'ZZRPM',  'nt_aggregatescore', 'Aggregate score') }
+                        {this.render_column_header('NT', 'Z',   'nt_zscore', 'Z-score relative to background model for alignments to NCBI NT') }
+                        {this.render_column_header('NT', 'rPM', 'nt_rpm', 'Number of reads aligning to the taxon in the NCBI NT database per million total input reads')}
+                        {this.render_column_header('NT', 'r',   'nt_r', 'Number of reads aligning to the taxon in the NCBI NT database')}
+                        {this.render_column_header('NT', '%id', 'nt_percentidentity', 'Average percent-identity of alignments to NCBI NT')}
+                        {this.render_column_header('NT', 'L',   'nt_alignmentlength', 'Average length of alignments to NCBI NT')}
+                        {this.render_column_header('NT', 'Log(1/E)',  'nt_neglogevalue', 'Average log-10-transformed expect value for alignments to NCBI NT')}
+                        {this.render_column_header('NR', 'Z',   'nr_zscore', 'Z-score relative to background model for alignments to NCBI NR') }
+                        {this.render_column_header('NR', 'rPM', 'nr_rpm', 'Number of reads aligning to the taxon in the NCBI NR database per million total input reads')}
+                        {this.render_column_header('NR', 'r',   'nr_r', 'Number of reads aligning to the taxon in the NCBI NR database')}
+                        {this.render_column_header('NR', '%id', 'nr_percentidentity', 'Average percent-identity of alignments to NCBI NR')}
+                        {this.render_column_header('NR', 'AL',   'nr_alignmentlength', 'Average length of alignments to NCBI NR')}
+                        {this.render_column_header('NR', 'Log(1/E)',  'nr_neglogevalue', 'Average log-10-transformed expect value for alignments to NCBI NR')}
                     </tr>
                     </thead>
                     <tbody>
