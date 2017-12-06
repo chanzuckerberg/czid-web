@@ -18,6 +18,7 @@ class SampleUpload extends React.Component {
     this.hostGenomes = props.host_genomes || [];
     this.sample = props.selectedSample || '';
     this.userDetails = props.loggedin_user;
+    this.updateGeneratedSampleName = this.updateGeneratedSampleName.bind(this);
     const selectedHostGenomeName = (this.hostGenomes[0] && this.hostGenomes[0].name) ? this.hostGenomes[0].name : '';
     const selectedHostGenomeId = (this.hostGenomes[0] && this.hostGenomes[0].id) ? this.hostGenomes[0].id : '';
     const adminGenomes = this.hostGenomes.filter((g) => {
@@ -57,7 +58,8 @@ class SampleUpload extends React.Component {
       selectedMemory: this.selected.memory || '',
       id: this.selected.id,
       errors: {},
-      adminGenomes
+      adminGenomes,
+      generatedSampleName: ''
     };
   }
 
@@ -160,7 +162,7 @@ class SampleUpload extends React.Component {
     });
     axios.post('/samples.json', {
       sample: {
-        name: this.selected.sampleName,
+        name: this.state.generatedSampleName,
         project_name: this.state.selectedProject.trim(),
         project_id: this.state.selectedPId,
         input_files_attributes: [{source_type: 's3', source: this.refs.first_file_source.value.trim() },
@@ -267,9 +269,24 @@ class SampleUpload extends React.Component {
       return false;
     }
   }
-
+  baseName(str) {
+    let base = new String(str).substring(str.lastIndexOf('/') + 1);
+    if(base.lastIndexOf(".") != -1) {
+      base = base.substring(0, base.lastIndexOf("."));
+    }
+    return base;
+  }
   isFormInvalid() {
     const errors = {};
+
+    if(this.state.generatedSampleName) {
+      if(this.state.generatedSampleName.toLowerCase() === '') {
+        errors.generatedSampleName = 'Please enter a sample name';
+      }
+    } else {
+      errors.generatedSampleName = 'Please enter a sample name';
+    }
+
     if(this.state.selectedProject) {
       if(this.state.selectedProject.toLowerCase() === 'select a project') {
         errors.selectedProject = 'Please select a project';
@@ -290,9 +307,6 @@ class SampleUpload extends React.Component {
       const firstFileSourceValue = this.refs.first_file_source.value.trim();
       if(!this.filePathValid(firstFileSourceValue)) {
         errors.first_file_source = 'Error: invalid file path';
-      } else {
-        const arr = firstFileSourceValue.split('/');
-        this.selected.sampleName = arr[arr.length - 2];
       }
     } else {
       errors.first_file_source = 'Error: invalid file path';
@@ -340,7 +354,6 @@ class SampleUpload extends React.Component {
     }
     this.clearError();
   }
-
 
   handleHostChange(hostId, hostName) {
     this.setState({
@@ -409,6 +422,17 @@ class SampleUpload extends React.Component {
         break;
       default:
         return false;
+    }
+  }
+
+  updateGeneratedSampleName(e) {
+    let value = e.target.value.trim();
+    if(value.length && value.indexOf('/')) {
+      let base = this.baseName(value);
+      let fastqLabel = /.fastq*$|.fasta*$|.gz*$/igm;
+      let readLabel = /_R1.*$|_R2.*$/ig;
+      base = base.replace(fastqLabel, '').replace(readLabel, '');
+      this.state.generatedSampleName = base;
     }
   }
 
@@ -495,6 +519,7 @@ class SampleUpload extends React.Component {
     </div>
     )
   }
+
 
   renderSampleForm() {
     return (
@@ -656,7 +681,7 @@ class SampleUpload extends React.Component {
                   </div>
                   <div className='row input-row'>
                     <div className='col no-padding s12'>
-                      <input type='text' ref='first_file_source' onFocus={ this.clearError } className='browser-default' placeholder='aws/path-to-sample' />
+                      <input type='text' ref='first_file_source' onKeyUp={this.updateGeneratedSampleName} onBlur={ this.clearError } className='browser-default' placeholder='aws/path-to-sample' />
                       {
                         (this.state.errors.first_file_source) ?
                           <div className='field-error'>
@@ -778,6 +803,32 @@ class SampleUpload extends React.Component {
                     </div> :
                     null
                 }
+                <div className='field'>
+                  <div className='row'>
+                    <div className='col no-padding s12'>
+                      <div className='field-title'>
+                        <div className='read-count-label'>
+                          Sample name
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className='row input-row'>
+                    <div className='col no-padding s12'>
+                      <input type='text' ref='sample_name' className='browser-default' value={this.state.generatedSampleName} onChange={ (e) => {
+                        this.setState({
+                            generatedSampleName: e.target.value.trim()
+                          });
+                      }} placeholder='sample name' />
+                      {
+                        (this.state.errors.generatedSampleName) ?
+                          <div className='field-error'>
+                            {this.state.errors.generatedSampleName}
+                          </div> : null
+                      }
+                    </div>
+                  </div>
+                </div>
                 <div className='field'>
                   <div className='row'>
                     <div className='col no-padding s12'>
