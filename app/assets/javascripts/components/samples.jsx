@@ -21,6 +21,7 @@ class Samples extends React.Component {
       samplesCount: this.samplesCount,
       sort_query: currentSort.sort_query
       ? currentSort.sort_query  : `sort_by=${this.defaultSortBy}`,
+      checkFilter: false
     };
     $("#pagination").css("display", "");
   }
@@ -196,13 +197,14 @@ class Samples extends React.Component {
         </div>
           {/* Dropdown menu */}
           <ul id='dropdownstatus' className='status dropdown-content'>
-          <li><a href="#!" className="title"><b>Filter by status</b></a></li>
-          <li data-status="WAITING" onClick={ this.filterByStatus } ><a data-status="WAITING" className="waiting" href="#!">WAITING</a></li>
-          <li data-status="UPLOADING" onClick={ this.filterByStatus }><a data-status="UPLOADING" className="uploading" href="#!">IN PROGRESS</a></li>
-          <li data-status="CHECKED" onClick={ this.filterByStatus }><a data-status="CHECKED" className="complete" href="#!">COMPLETE</a></li>
-          <li onClick={ this.filterByStatus } data-status="FAILED" ><a data-status="FAILED" className="failed" href="#!">FAILED</a></li>
+            <li className="filter-item"><a href="#!" className="title filter-item"><b>Filter by status</b></a></li>
             <li className="divider"></li>
-          <li data-status="ALL" onClick={ this.filterByStatus }><a data-status="ALL" className="all" href="#!">All</a></li>
+            <li className="filter-item" data-status="WAITING" onClick={ this.filterByStatus } ><a data-status="WAITING" className="waiting filter-item" href="#!">Waiting</a><i data-status="WAITING" className="filter fa fa-check"></i></li>
+            <li className="filter-item" data-status="UPLOADING" onClick={ this.filterByStatus }><a data-status="UPLOADING" className="uploading filter-item" href="#!">In Progress</a><i data-status="UPLOADING"  className="filter fa fa-check"></i></li>
+            <li className="filter-item" data-status="CHECKED" onClick={ this.filterByStatus }><a data-status="CHECKED" className="complete filter-item" href="#!">Complete</a><i data-status="CHECKED" className="filter fa fa-check"></i></li>
+            <li className="filter-item" onClick={ this.filterByStatus } data-status="FAILED" ><a data-status="FAILED" className="failed filter-item" href="#!">Failed</a><i data-status="FAILED" className="filter fa fa-check"></i></li>
+              <li className="divider"></li>
+            <li className="filter-item" data-status="ALL" onClick={ this.filterByStatus }><a data-status="ALL" className="all filter-item" href="#!">All</a><i data-status="ALL" className="filter all fa fa-check"></i></li>
           </ul>
           <table className="bordered highlight samples-table">
             <thead>
@@ -235,6 +237,7 @@ class Samples extends React.Component {
   }
 
   componentDidMount() {
+    $('.filter').hide()
     $('.project-toggle').click((e) => {
       e.stopPropagation();
       const arrowElement = $(e.toElement)[0];
@@ -247,6 +250,7 @@ class Samples extends React.Component {
     });
     $(document).click(() => { $('.dropdown-bubble').slideUp(200); });
     this.displayPipelineStatusFilter();
+    this.displayCheckMarks(this.state.urlFilterQuery);
   }
 
   // initialize filter dropdown
@@ -257,6 +261,11 @@ class Samples extends React.Component {
       constrainWidth: true
     });
   }
+
+  displayCheckMarks(filter) {
+    $(`.filter[data-status="${filter}"]`).show();
+  }
+  
 
   //handle filtering when a filter is selected from list
   filterByStatus(e) {
