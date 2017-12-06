@@ -33,10 +33,10 @@ class SamplesController < ApplicationController
 
   def all
     @samples = if params[:ids].present?
-                Sample.where("id in (#{params[:ids]})")
-              else
-                Sample.all
-              end
+                 Sample.where("id in (#{params[:ids]})")
+               else
+                 Sample.all
+               end
   end
 
   # GET /samples/bulk_new
@@ -231,8 +231,6 @@ class SamplesController < ApplicationController
   def pipeline_runs
   end
 
-  private
-
   # Use callbacks to share common setup or constraints between actions.
   def set_sample
     @sample = Sample.find(params[:id])
@@ -255,10 +253,10 @@ class SamplesController < ApplicationController
   end
 
   private
-  
-    def sort_by(samples, dir = nil)
-      default_dir = 'newest'
-      dir ||= default_dir
-      dir == 'newest' ? samples.order(created_at: :desc) : samples.order(created_at: :asc)
-    end
+
+  def sort_by(samples, dir = nil)
+    default_dir = 'newest'
+    dir ||= default_dir
+    dir == 'newest' ? samples.order(created_at: :desc) : samples.order(created_at: :asc)
+  end
 end
