@@ -11,12 +11,13 @@ class Samples extends React.Component {
     this.fetchResults = this.fetchResults.bind(this);
     this.fetchSamples = this.fetchSamples.bind(this);
     this.handleStatusFilterSelect = this.handleStatusFilterSelect.bind(this);
+    this.setUrlLocation = this.setUrlLocation.bind(this);
     this.state = {
       project: null,
       totalNumber: null,
-      selectedProjectId: null,
-      filterParams: null,
-      searchParams: '',
+      selectedProjectId: this.fetchParams('project_id') || null,
+      filterParams: this.fetchParams('filter') || '',
+      searchParams: this.fetchParams('search') || '',
       allSamples: [],
       allProjects: [],
       sort_query: currentSort.sort_query ? currentSort.sort_query  : `sort_by=${this.defaultSortBy}`,
@@ -37,6 +38,12 @@ class Samples extends React.Component {
     SortHelper.applySort(sort_query);
   }
 
+  fetchParams(param) {
+    let urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param)
+  }
+
+
   handleSearchChange(e) {
     if (e.target.value !== '') {
       this.setState({ searchParams: e.target.value });
@@ -45,8 +52,10 @@ class Samples extends React.Component {
         searchParams: '',
         pageEnd: false,
         pagesLoaded: 0
+      }, () => {
+        this.setUrlLocation();
+        this.fetchResults();
       });
-      this.fetchResults()
     }
   }
 
@@ -160,7 +169,8 @@ class Samples extends React.Component {
 
   //fetch first set of samples
   fetchSamples() {
-    axios.get(`/samples`).then((res) => {
+    const params = this.getParams();
+    axios.get(`/samples${params}`).then((res) => {
       if (!res.data.samples.length) {
         this.setState({ displayEmpty: true });
       }
@@ -308,6 +318,7 @@ class Samples extends React.Component {
         pageEnd: false, 
         searchParams: e.target.value 
       }, () => {
+        this.setUrlLocation();
         this.fetchResults(); 
       });
     }
@@ -319,8 +330,10 @@ class Samples extends React.Component {
     this.setState({ 
       selectedProjectId: id, 
       pageEnd: false
+    }, () => {
+      this.setUrlLocation();
+      this.fetchProjectDetails(id)
     });
-    this.fetchProjectDetails(id)
   }
 
   fetchProjectDetails(projId) {
@@ -333,6 +346,7 @@ class Samples extends React.Component {
       });
       this.fetchSamples();
     } else {
+      projId = parseInt(projId);
       axios.get(`projects/${projId}.json`).then((res) => {
         this.setState({ 
           pagesLoaded: 0,
@@ -421,6 +435,7 @@ class Samples extends React.Component {
   componentDidMount() {
     $('.filter').hide()
     this.fetchProjectPageData();
+    this.state.selectedProjectId ? this.fetchProjectDetails(this.state.selectedProjectId) : null;
     this.scrollDown();
     this.initializeProjectList();
     this.displayPipelineStatusFilter();
@@ -441,7 +456,6 @@ class Samples extends React.Component {
     $('.filter').hide()
     $(`.filter[data-status="${filter}"]`).show();
   }
-  
 
   //handle filtering when a filter is selected from list
   handleStatusFilterSelect(e) {
@@ -452,9 +466,36 @@ class Samples extends React.Component {
       pageEnd: false, 
       filterParams: status 
     }, () => {
+      this.setUrlLocation();
       this.displayCheckMarks(this.state.filterParams);
       this.fetchResults(); 
     });
+  }
+
+  //set Url based on requests
+  setUrlLocation() {
+    let searchParams = this.state.searchParams;
+    let filterParams = this.state.filterParams;
+    let projectId = parseInt(this.state.selectedProjectId);
+    let params;
+    if (projectId && searchParams !== '' && filterParams) {
+      params = `?project_id=${projectId}&filter=${filterParams}&search=${searchParams}`;
+    } else if (projectId && searchParams !== '') {
+      params = `?project_id=${projectId}&search=${searchParams}`;
+    } else if (projectId && filterParams) {
+      params = `?project_id=${projectId}&filter=${filterParams}`;
+    } else if (searchParams !== '' && filterParams) {
+      params = `?search=${searchParams}&filter=${filterParams}`;
+    } else if (projectId) {
+      params = `?project_id=${projectId}`;
+    } else if (searchParams !== '') {
+      params = `?search=${searchParams}`;
+    } else if (filterParams) {
+      params = `?filter=${filterParams}`;
+    } else {
+      params = '';
+    }
+    window.history.replaceState(null, null, params)
   }
 
   render() {
@@ -476,7 +517,7 @@ class Samples extends React.Component {
                   <div className="dropdown-container">
                     <ul>
                       <li onClick={this.switchProject} className="title">
-                        <a >All projects </a>
+                        <a>All projects </a>
                       </li>
                       { this.state.allProjects.map((project, i) => {
                         return (
