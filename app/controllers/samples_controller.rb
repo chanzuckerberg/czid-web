@@ -97,17 +97,16 @@ class SamplesController < ApplicationController
     @report_info = external_report_info(report, params)
   end
 
-  def save_note
-    sample_id = params[:sample_id]
-    sample_notes = params[:sample_notes]
-    found_sample = Sample.find_by(id: sample_id)
-    if found_sample
-      found_sample.update(sample_notes: sample_notes) unless found_sample.sample_notes == sample_notes
-      respond_to do |format|
+  def save_metadata
+    sample = Sample.find_by(id: params[:sample_id])
+    metadata = params.slice(*Sample::METADATA_FIELDS).reject { |k, v| sample[k] == v }
+    if sample
+      sample.update_attributes!(metadata)
+        respond_to do |format|
         format.json do
           render json: {
             status: 'success',
-            message: 'Note saved successfully'
+            message: 'Metadata saved successfully'
           }
         end
       end

@@ -20,6 +20,8 @@ class Sample < ApplicationRecord
   DEFAULT_MEMORY = 64_000
   DEFAULT_QUEUE = 'aegea_batch_ondemand'.freeze
 
+  METADATA_FIELDS = [:sample_host, :sample_location, :sample_date, :sample_tissue, :sample_template, :sample_library, :sample_sequencer, :sample_notes]
+
   attr_accessor :bulk_mode
 
   belongs_to :project
