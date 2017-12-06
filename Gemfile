@@ -4,7 +4,7 @@ git_source(:github) do |repo_name|
   repo_name = "#{repo_name}/#{repo_name}" unless repo_name.include?('/')
   "https://github.com/#{repo_name}.git"
 end
-
+gem 'bootstrap-tooltip-rails'
 gem 'airbrake', '~> 7.0'
 gem 'airbrake-ruby'
 gem 'aws-sdk-ecs'
