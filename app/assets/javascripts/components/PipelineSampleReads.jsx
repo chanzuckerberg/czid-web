@@ -76,9 +76,7 @@ class PipelineSampleReads extends React.Component {
     $('.sample-notes').focusout((e) => {
       const newText = e.target.innerText.trim();
       const field = e.target.id;
-      if (newText.trim() === '') {
-        e.target.innerText = this.TYPE_PROMPT;
-      } else if (newText !== currentText) {
+      if (newText !== currentText) {
         axios.post('/samples/' + this.sampleInfo.id + '/save_metadata.json', {
           field: field,
           value: newText
@@ -104,7 +102,10 @@ class PipelineSampleReads extends React.Component {
           .delay(1000)
           .slideUp(200);
         });
-      }
+      };
+      if (newText.trim() === '') {
+        e.target.innerText = this.TYPE_PROMPT;
+      } 
     });
   }
 
@@ -254,7 +255,7 @@ class PipelineSampleReads extends React.Component {
                                 <td>Location</td>
                                 <td className="sample-notes">
                                  <pre suppressContentEditableWarning={true} contentEditable={true} id="sample_location">
-                                  { this.sampleInfo.sample_location ? this.sampleInfo.sample_location : this.TYPE_PROMPT}
+                                  { this.sampleInfo.sample_location && this.sampleInfo.sample_location.trim() !== "" ? this.sampleInfo.sample_location : this.TYPE_PROMPT}
                                  </pre>
                                 </td>
                               </tr>
@@ -268,7 +269,7 @@ class PipelineSampleReads extends React.Component {
                                 <td>Tissue type</td>
                                 <td className="sample-notes">
                                  <pre suppressContentEditableWarning={true} contentEditable={true} id="sample_tissue">
-                                  { this.sampleInfo.sample_tissue ? this.sampleInfo.sample_tissue : this.TYPE_PROMPT}
+                                  { this.sampleInfo.sample_tissue && this.sampleInfo.sample_tissue.trim() !== "" ? this.sampleInfo.sample_tissue : this.TYPE_PROMPT}
                                  </pre>
                                 </td>
                               </tr>
@@ -276,7 +277,7 @@ class PipelineSampleReads extends React.Component {
                                 <td>Library prep protocol</td>
                                 <td className="sample-notes">
                                  <pre suppressContentEditableWarning={true} contentEditable={true} id="sample_library">
-                                  { this.sampleInfo.sample_library ? this.sampleInfo.sample_library : this.TYPE_PROMPT}
+                                  { this.sampleInfo.sample_library && this.sampleInfo.sample_library.trim() !== "" ? this.sampleInfo.sample_library : this.TYPE_PROMPT}
                                  </pre>
                                 </td>
                               </tr>
@@ -292,7 +293,7 @@ class PipelineSampleReads extends React.Component {
                               <td className="notes">Notes</td>
                               <td className="sample-notes">
                                <pre suppressContentEditableWarning={true} contentEditable={true} id="sample_notes">
-                                { this.sampleInfo.sample_notes ? this.sampleInfo.sample_notes : this.TYPE_PROMPT}
+                                { this.sampleInfo.sample_notes && this.sampleInfo.sample_notes.trim() !== "" ? this.sampleInfo.sample_notes : this.TYPE_PROMPT}
                                </pre>
                               </td>
                              </tr>

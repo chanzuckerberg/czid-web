@@ -98,17 +98,20 @@ class SamplesController < ApplicationController
   end
 
   def save_metadata
-    metadata = { params[:field].to_sym => params[:value] }
-    test = "test"
+    field = params[:field].to_sym
+    value = params[:value]
+    metadata = { field => value }
+    metadata.select! { |k, _v| Sample::METADATA_FIELDS.include?(k) }
     if @sample
-      metadata.reject! { |k, v| !Sample::METADATA_FIELDS.include?(k.to_sym) || @sample[k] == v }
-      @sample.update_attributes!(metadata)
-      respond_to do |format|
-        format.json do
-          render json: {
-            status: "success",
-            message: "Saved successfully"
-          }
+      unless @sample[field].blank? && value.strip.blank?
+        @sample.update_attributes!(metadata)
+        respond_to do |format|
+          format.json do
+            render json: {
+              status: "success",
+              message: "Saved successfully"
+            }
+          end
         end
       end
     else
