@@ -374,6 +374,12 @@ class Samples extends React.Component {
     }
   }
 
+  renderEmptyTable() {
+    return (
+      <div className="center-align"><i className='fa fa-frown-o'> No result found</i></div>
+    )
+  }
+
   renderTable(samples) {
     const tableHead = (
       <div className="row wrapper">
