@@ -3,7 +3,7 @@ class SamplesController < ApplicationController
   include SamplesHelper
 
   before_action :authenticate_user!, only: [:new, :index, :update, :destroy, :edit, :show, :reupload_source, :kickoff_pipeline, :bulk_new, :bulk_import, :bulk_upload]
-  before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs]
+  before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata]
   acts_as_token_authentication_handler_for User, only: [:create, :bulk_upload], fallback: :devise
   protect_from_forgery unless: -> { request.format.json? }
 
@@ -98,12 +98,11 @@ class SamplesController < ApplicationController
   end
 
   def save_metadata
-    sample = Sample.find_by(id: params[:sample_id])
     metadata = { params[:field].to_sym => params[:value] }
     test = "test"
-    if sample
-      metadata.reject! { |k, v| !Sample::METADATA_FIELDS.include?(k.to_sym) || sample[k] == v }
-      sample.update_attributes!(metadata)
+    if @sample
+      metadata.reject! { |k, v| !Sample::METADATA_FIELDS.include?(k.to_sym) || @sample[k] == v }
+      @sample.update_attributes!(metadata)
       respond_to do |format|
         format.json do
           render json: {

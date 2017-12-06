@@ -15,7 +15,7 @@ Rails.application.routes.draw do
     get :bulk_new, on: :collection
     get :bulk_import, on: :collection
     post :bulk_upload, on: :collection
-    post :save_metadata, on: :collection
+    post :save_metadata, on: :member
   end
 
   resources :projects do

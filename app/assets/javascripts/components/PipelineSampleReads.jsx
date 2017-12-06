@@ -79,8 +79,7 @@ class PipelineSampleReads extends React.Component {
       if (newText.trim() === '') {
         e.target.innerText = this.TYPE_PROMPT;
       } else if (newText !== currentText) {
-        axios.post('/samples/save_metadata.json', {
-          sample_id: this.sampleInfo.id,
+        axios.post('/samples/' + this.sampleInfo.id + '/save_metadata.json', {
           field: field,
           value: newText
         })
