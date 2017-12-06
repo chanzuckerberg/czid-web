@@ -424,7 +424,6 @@ class Samples extends React.Component {
     this.scrollDown();
     this.initializeProjectList();
     this.displayPipelineStatusFilter();
-    this.displayCheckMarks(this.state.urlFilterQuery);
   }
 
   // initialize filter dropdown
@@ -439,6 +438,7 @@ class Samples extends React.Component {
   }
 
   displayCheckMarks(filter) {
+    $('.filter').hide()
     $(`.filter[data-status="${filter}"]`).show();
   }
   
@@ -452,6 +452,7 @@ class Samples extends React.Component {
       pageEnd: false, 
       filterParams: status 
     }, () => {
+      this.displayCheckMarks(this.state.filterParams);
       this.fetchResults(); 
     });
   }
