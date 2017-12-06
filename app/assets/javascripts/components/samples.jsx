@@ -18,6 +18,7 @@ class Samples extends React.Component {
       selectedProjectId: this.fetchParams('project_id') || null,
       filterParams: this.fetchParams('filter') || '',
       searchParams: this.fetchParams('search') || '',
+      sampleIdsParams: this.fetchParams('ids') || [],
       allSamples: [],
       allProjects: [],
       sort_query: currentSort.sort_query ? currentSort.sort_query  : `sort_by=${this.defaultSortBy}`,
@@ -171,9 +172,6 @@ class Samples extends React.Component {
   fetchSamples() {
     const params = this.getParams();
     axios.get(`/samples?${params}`).then((res) => {
-      if (!res.data.samples.length) {
-        this.setState({ displayEmpty: true });
-      }
       this.setState((prevState) => ({
         loading: false,
         initialFetchedSamples: res.data.samples,
@@ -182,10 +180,14 @@ class Samples extends React.Component {
         pagesLoaded: prevState.pagesLoaded+1,
         totalNumber: res.data.total_count
       }))
+    if (!this.state.allSamples.length) {
+      this.setState({ displayEmpty: true });
+    }
     }).catch((err) => {
       this.setState((prevState) => ({
         loading: false,
         allSamples: [],
+        displayEmpty: true,
         pagesLoaded: 0,
       }))
     })
@@ -238,9 +240,15 @@ class Samples extends React.Component {
   getParams() {
     let params = `filter=${this.state.filterParams}&page=${this.state.pagesLoaded+1}&search=${this.state.searchParams}`;
     let projectId = parseInt(this.state.selectedProjectId);
+
     if(projectId) {
       params += `&project_id=${projectId}`
     }
+    if(this.state.sampleIdsParams.length) {
+      let sampleParams = this.state.sampleIdsParams;
+      params += `&ids=${sampleParams}`
+    }
+
     return params;
   }
 
@@ -248,9 +256,6 @@ class Samples extends React.Component {
   fetchResults() {
     const params = this.getParams();
     axios.get(`/samples?${params}`).then((res) => {
-      if (!res.data.samples.length) {
-        this.setState({ displayEmpty: true });
-      }
       this.setState((prevState) => ({
         loading: false,
         initialFetchedSamples: res.data.samples,
@@ -259,6 +264,16 @@ class Samples extends React.Component {
         totalNumber: res.data.total_count,
         pagesLoaded: prevState.pagesLoaded+1
       }));
+      if (!this.state.allSamples.length) {
+        this.setState({ displayEmpty: true });
+      }
+    }).catch((err) => {
+      this.setState({
+        loading: false,
+        initialFetchedSamples: [],
+        allSamples: [],
+        displayEmpty: true,
+      })
     })
   }
 
@@ -410,7 +425,7 @@ class Samples extends React.Component {
           <li className="filter-item" data-status="ALL" onClick={ this.handleStatusFilterSelect }><a data-status="ALL" className="filter-item all">All</a><i data-status="ALL" className="filter all fa fa-check"></i></li>
           </ul>
           { tableHead }
-          { samples.length && !this.displayEmpty ? this.renderPipelineOutput(samples) : this.renderEmptyTable() }
+          { !samples.length && this.state.displayEmpty ? this.renderEmptyTable() : this.renderPipelineOutput(samples)  }
       </div>
       { !this.state.pageEnd && this.state.initialFetchedSamples && this.state.initialFetchedSamples.length > 14 ? <div className="scroll">
         <i className='fa fa-spinner fa-spin fa-3x'></i>
