@@ -10,6 +10,29 @@ class SamplesController < ApplicationController
   # GET /samples
   # GET /samples.json
   def index
+    @all_project = Project.all
+    project_id = params[:project_id]
+    name_search_query = params[:search]
+    filter_query = params[:filter]
+    sort = params[:sort_by]
+    samples_query = JSON.parse(params[:ids]) if params[:ids].present?
+    results = Sample.includes(:pipeline_runs, :pipeline_outputs)
+
+    results = results.where(id: samples_query) if samples_query.present?
+
+    results = results.where(project_id: project_id) if project_id.present?
+
+    results = results.search(name_search_query) if name_search_query.present?
+    results = filter_samples(results, filter_query) if filter_query.present?
+
+    @samples = sort_by(results, sort).paginate(page: params[:page], per_page: params[:per_page] || 15)
+    @samples_count = results.size
+    @all_samples = format_samples(@samples)
+
+    render json: { samples: @all_samples, total_count: @samples_count }
+  end
+
+  def all
     @samples = if params[:ids].present?
                  Sample.where("id in (#{params[:ids]})")
                else
@@ -212,8 +235,6 @@ class SamplesController < ApplicationController
   def pipeline_runs
   end
 
-  private
-
   # Use callbacks to share common setup or constraints between actions.
   def set_sample
     @sample = Sample.find(params[:id])
@@ -233,5 +254,11 @@ class SamplesController < ApplicationController
                                    :sample_template, :sample_library, :sample_sequencer,
                                    :sample_notes, :job_queue, :search,
                                    input_files_attributes: [:name, :presigned_url, :source_type, :source])
+  end
+
+  def sort_by(samples, dir = nil)
+    default_dir = 'newest'
+    dir ||= default_dir
+    dir == 'newest' ? samples.order(created_at: :desc) : samples.order(created_at: :asc)
   end
 end
