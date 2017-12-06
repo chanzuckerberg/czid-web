@@ -93,6 +93,25 @@ class PipelineSampleReport extends React.Component {
     )
   }
 
+  category_to_adjective(category) {
+    category_lowercase = category.toLowerCase()
+    switch(category_lowercase) {
+      case "bacteria":
+        return "bacterial"
+      case "archaea":
+        return "archaeal"
+      case "eukaryota":
+        return "eukaryotic"
+      case "viruses":
+        return "viral"
+      case "viroids":
+        return "viroidal"
+      case "uncategorized":
+        return "uncategorized"
+    }
+    return category_lowercase
+  }
+
   render_name(tax_info, report_details) {
     let foo = <i>{tax_info.name}</i>;
     if (tax_info.tax_id > 0) {
@@ -126,7 +145,7 @@ class PipelineSampleReport extends React.Component {
       </span>;
       foo = <div className="hover-wrapper">
         <div className='genus-name'> {plus_or_minus} {foo}</div>
-        <i className='count-info'>({tax_info.species_count} {category_name.toLowerCase} species)</i>
+        <i className='count-info'>({tax_info.species_count} {this.category_to_adjective(category_name)} species)</i>
         { this.displayTags(tax_info, report_details) }
       </div>;
     }
