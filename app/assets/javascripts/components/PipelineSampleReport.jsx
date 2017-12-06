@@ -16,23 +16,26 @@ class PipelineSampleReport extends React.Component {
     this.collapseTable = this.collapseTable.bind(this);
     this.disableFilters = this.disableFilters.bind(this);
     this.enableFilters = this.enableFilters.bind(this);
+    this.initializeTooltip();
   }
 
-  componentDidMount() {
+  initializeTooltip() {
     // only updating the tooltip offset when the component is loaded
-    const tooltipIdentifier = $("[rel='tooltip']");
-    tooltipIdentifier.tooltip({
-      delay: 0,
-      html: true,
-      placement: 'bottom',
-      offset: '0px 50px'
-    });
-    $('.sort-controls').hover(() => {
-      const selectTooltip = $('.tooltip');
-      const leftOffset = parseInt(selectTooltip.css('left'));
-      if(!isNaN(leftOffset)) {
-        selectTooltip.css('left', leftOffset - 15);
-      }
+    $(() => {
+      const tooltipIdentifier = $("[rel='tooltip']");
+      tooltipIdentifier.tooltip({
+        delay: 0,
+        html: true,
+        placement: 'bottom',
+        offset: '0px 50px'
+      });
+      $('.sort-controls').hover(() => {
+        const selectTooltip = $('.tooltip');
+        const leftOffset = parseInt(selectTooltip.css('left'));
+        if(!isNaN(leftOffset)) {
+          selectTooltip.css('left', leftOffset - 15);
+        }
+      });
     });
   }
 
