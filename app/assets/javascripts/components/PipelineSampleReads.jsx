@@ -1,5 +1,4 @@
 class PipelineSampleReads extends React.Component {
-
   constructor(props) {
     super(props);
     this.pipelineOutput = props.pipelineOutput;
@@ -18,7 +17,8 @@ class PipelineSampleReads extends React.Component {
     this.state = {
       rerun: false,
       failureText: 'Sample run failed'
-    }
+    };
+    this.TYPE_PROMPT = "Type here..."
   }
 
   gotoReport() {
@@ -68,19 +68,21 @@ class PipelineSampleReads extends React.Component {
     let currentText = '';
     $('.sample-notes').focusin((e) => {
       currentText = e.target.innerText.trim();
-      if (currentText === 'Type here...') {
+      if (currentText === this.TYPE_PROMPT) {
         e.target.innerText = '';
       }
     });
 
     $('.sample-notes').focusout((e) => {
       const newText = e.target.innerText.trim();
+      const field = e.target.id;
       if (newText.trim() === '') {
-        e.target.innerText = 'Type here...';
+        e.target.innerText = this.TYPE_PROMPT;
       } else if (newText !== currentText) {
-        axios.post('/samples/save_note.json', {
+        axios.post('/samples/save_metadata.json', {
           sample_id: this.sampleInfo.id,
-          sample_notes: newText
+          field: field,
+          value: newText
         })
         .then((response) => {
           if (response.data.status === 'success') {
@@ -139,7 +141,7 @@ class PipelineSampleReads extends React.Component {
       pipeline_run = (
         <div className="data">
           <div className="row">
-            <div className="col s5">
+            <div className="col s6">
               <table>
                 <tbody>
                 <tr>
@@ -153,7 +155,7 @@ class PipelineSampleReads extends React.Component {
                 </tbody>
               </table>
             </div>
-            <div className="col s7">
+            <div className="col s6">
               <table>
                 <tbody>
                 <tr>
@@ -251,7 +253,11 @@ class PipelineSampleReads extends React.Component {
                               </tr>
                               <tr>
                                 <td>Location</td>
-                                <td>{ (!this.sampleInfo.sample_location) ? BLANK_TEXT : this.sampleInfo.sample_location }</td>
+                                <td className="sample-notes">
+                                 <pre suppressContentEditableWarning={true} contentEditable={true} id="sample_location">
+                                  { this.sampleInfo.sample_location ? this.sampleInfo.sample_location : this.TYPE_PROMPT}
+                                 </pre>
+                                </td>
                               </tr>
                             </tbody>
                           </table>
@@ -261,11 +267,19 @@ class PipelineSampleReads extends React.Component {
                             <tbody>
                               <tr>
                                 <td>Tissue type</td>
-                                 <td>{ (!this.sampleInfo.sample_tissue) ? BLANK_TEXT : this.sampleInfo.sample_tissue }</td>
+                                <td className="sample-notes">
+                                 <pre suppressContentEditableWarning={true} contentEditable={true} id="sample_tissue">
+                                  { this.sampleInfo.sample_tissue ? this.sampleInfo.sample_tissue : this.TYPE_PROMPT}
+                                 </pre>
+                                </td>
                               </tr>
                               <tr>
                                 <td>Library prep protocol</td>
-                                <td>{ (!this.sampleInfo.sample_library) ? BLANK_TEXT : this.sampleInfo.sample_library }</td>
+                                <td className="sample-notes">
+                                 <pre suppressContentEditableWarning={true} contentEditable={true} id="sample_library">
+                                  { this.sampleInfo.sample_library ? this.sampleInfo.sample_library : this.TYPE_PROMPT}
+                                 </pre>
+                                </td>
                               </tr>
                             </tbody>
                           </table>
@@ -275,14 +289,14 @@ class PipelineSampleReads extends React.Component {
                         <div className="col s12">
                           <table>
                             <tbody>
-                            <tr>
+                             <tr>
                               <td className="notes">Notes</td>
-                              <td className="sample-notes" >
-                               <pre suppressContentEditableWarning={true} contentEditable={true}>
-                                { this.sampleInfo.sample_notes ? this.sampleInfo.sample_notes : 'Type here...'}
+                              <td className="sample-notes">
+                               <pre suppressContentEditableWarning={true} contentEditable={true} id="sample_notes">
+                                { this.sampleInfo.sample_notes ? this.sampleInfo.sample_notes : this.TYPE_PROMPT}
                                </pre>
                               </td>
-                            </tr>
+                             </tr>
                             </tbody>
                           </table>
                         </div>

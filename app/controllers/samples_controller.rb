@@ -99,14 +99,16 @@ class SamplesController < ApplicationController
 
   def save_metadata
     sample = Sample.find_by(id: params[:sample_id])
-    metadata = params.slice(*Sample::METADATA_FIELDS).reject { |k, v| sample[k] == v }
+    metadata = { params[:field].to_sym => params[:value] }
+    test = "test"
     if sample
+      metadata.reject! { |k, v| !Sample::METADATA_FIELDS.include?(k.to_sym) || sample[k] == v }
       sample.update_attributes!(metadata)
-        respond_to do |format|
+      respond_to do |format|
         format.json do
           render json: {
-            status: 'success',
-            message: 'Metadata saved successfully'
+            status: "success",
+            message: "Saved successfully"
           }
         end
       end
