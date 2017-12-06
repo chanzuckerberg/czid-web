@@ -50,42 +50,104 @@ class Samples extends React.Component {
     }
   }
 
+
+  appendStatusIcon(status) {
+    switch(status) {
+      case 'WAITING':
+        return <i className="waiting fa fa-arrow-up" aria-hidden="true"></i>;
+        break;
+      case 'INPROGRESS':
+        return <i className="uploading fa fa-repeat" aria-hidden="true"></i>;
+        break;
+      case 'HOST FILTERING':
+        return <i className="uploading fa fa-repeat" aria-hidden="true"></i>;
+        break;
+      case 'ALIGNEMENT':
+        return <i className="uploading fa fa-repeat" aria-hidden="true"></i>;
+        break;
+      case 'FAILED':
+        return <i className="failed fa fa-times" aria-hidden="true"></i>;
+        break;
+      case 'COMPLETE':
+        return <i className="complete fa fa-check" aria-hidden="true"></i>;
+        break;
+      default:
+        return <i className="waiting fa fa-arrow-up" aria-hidden="true"></i>;
+    }
+  }
+
+  formatRunTime(runtime) {
+    runtime = Number(runtime);
+    var h = Math.floor(runtime / 3600);
+    var m = Math.floor(runtime % 3600 / 60);
+    var s = Math.floor(runtime % 3600 % 60);
+
+    var hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
+    var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
+    var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
+    return hDisplay + mDisplay + sDisplay; 
+}
+
   renderPipelineOutput(samples) {
-    var BLANK_TEXT = ''
+    var BLANK_TEXT = 'NA'
 
     return samples.map((sample, i) => {
       let dbSample = sample.db_sample;
       let derivedOutput = sample.derived_sample_output;
       let runInfo = sample.run_info
       let uploader = sample.uploader.name
+      let statusClass = !runInfo.job_status_description ? this.applyChunkStatusClass(runInfo) : this.applyClass(runInfo.job_status_description)
+      let status = !runInfo.job_status_description ? this.getChunkedStage(runInfo) : runInfo.job_status_description
+
       rowWithChunkStatus = (
-        <td className={this.applyChunkStatusClass(runInfo)}>
-          <a href={'/samples/' + dbSample.id}>{this.getChunkedStage(runInfo)}</a>
-        </td>
+        <div className={statusClass}>
+          <span>{this.appendStatusIcon(status)}</span><p className="status">{status}</p>
+        </div>
       );
       rowWithoutChunkStatus = (
-        <td className={this.applyClass(runInfo.job_status_description)}>
-          <a href={'/samples/' + dbSample.id}>{runInfo.job_status_description}</a>
-        </td>
+        <div className={statusClass}>
+          <span>{this.appendStatusIcon(status)}</span><p className="status">{status}</p>
+        </div>
       )
 
       return (
-        <tr onClick={ this.viewSample.bind(this, dbSample.id)} key={i}>
-          <td>
-            {dbSample.name}
-            {!uploader || uploader === '' ? BLANK_TEXT : <p className="uploader">Uploaded by {uploader}</p>}
-          </td>
-          <td>{moment(dbSample.created_at).startOf('second').fromNow()}</td>
-          <td>{ !derivedOutput.pipeline_output ? BLANK_TEXT : <a href={'/samples/' + dbSample.id}>{numberWithCommas(derivedOutput.pipeline_output.total_reads)}</a>}</td>
-          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.remaining_reads) ? BLANK_TEXT : <a href={'/samples/' + dbSample.id}>{numberWithCommas(derivedOutput.summary_stats.remaining_reads)}</a>}</td>
-          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? BLANK_TEXT : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.percent_remaining.toFixed(2)}%</a>}</td>
-          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? BLANK_TEXT : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.qc_percent.toFixed(2)}%</a>}</td>
-          <td>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.compression_ratio) ? BLANK_TEXT : <a href={'/samples/' + dbSample.id}>{derivedOutput.summary_stats.compression_ratio.toFixed(2)}</a>}</td>
-          { !runInfo.job_status_description ? rowWithChunkStatus : rowWithoutChunkStatus }
-        </tr>
+        <div className="row job-container" onClick={ this.viewSample.bind(this, dbSample.id)} key={i}>
+          <div className="job-card">
+            <div className="col s4">
+              <p className="sample-name">{dbSample.name}</p>
+              <p className="uploader">
+                <span>Uploaded {moment(dbSample.created_at).startOf('second').fromNow()}</span>
+                { !uploader || uploader === '' ? '' : <span> | by {uploader}</span>} 
+              </p>
+            </div>
+            <div className="reads col s1">
+              <p>
+              { !derivedOutput.pipeline_output ? BLANK_TEXT : numberWithCommas(derivedOutput.pipeline_output.total_reads) }
+              </p>
+            </div>
+            <div className="reads col s2">
+              <p>
+              { (!derivedOutput.summary_stats || !derivedOutput.summary_stats.remaining_reads) ? BLANK_TEXT : numberWithCommas(derivedOutput.summary_stats.remaining_reads) }
+              { (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? '' : ` (${derivedOutput.summary_stats.percent_remaining.toFixed(2)}%)` } 
+              </p>
+            </div>
+            <div className="reads col s2">
+              <p>
+              { (!derivedOutput.summary_stats || !derivedOutput.summary_stats.compression_ratio) ? BLANK_TEXT : derivedOutput.summary_stats.compression_ratio.toFixed(2) }
+              </p>
+            </div>
+            <div className="reads col s1">
+              <p>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? BLANK_TEXT : `${derivedOutput.summary_stats.qc_percent.toFixed(2)}%`}</p>
+            </div>
+              <div className={ runInfo.total_runtime ? "reads status-col col s2" : 'reads col s2 no-time'}>{ !runInfo.job_status_description ? rowWithChunkStatus : rowWithoutChunkStatus }
+              { runInfo.total_runtime ? <p className="time"><i className="fa fa-clock-o" aria-hidden="true"></i><span>{this.formatRunTime(runInfo.total_runtime)}</span></p> : ''}
+            </div>
+          </div>
+        </div>
       )
     })
   }
+
 
   applyClass(status) {
     if(status === 'COMPLETE') {
@@ -188,6 +250,18 @@ class Samples extends React.Component {
   }
 
   renderTable(samples) {
+    const tableHead = (
+      <div className="row wrapper">
+        <div className="row table-container">
+          <div className="col s4"><span>Name</span></div>
+          <div className="col s1">Total Reads</div>
+          <div className="col s2">Non-Host reads</div>
+          <div className="col s2">Compression Ratio</div>
+          <div className="col s1">Quality</div>
+          <div className="col s2 status-dropdown" data-activates="dropdownstatus"><i className="status-filter fa fa-caret-down"></i>Status</div>
+        </div>
+      </div>
+    )
     return (
     <div className="content-wrapper">
       <div className="sample-container">
@@ -206,27 +280,8 @@ class Samples extends React.Component {
               <li className="divider"></li>
             <li className="filter-item" data-status="ALL" onClick={ this.filterByStatus }><a data-status="ALL" className="all filter-item" href="#!">All</a><i data-status="ALL" className="filter all fa fa-check"></i></li>
           </ul>
-          <table className="bordered highlight samples-table">
-            <thead>
-            <tr>
-              <th>Name</th>
-              <th>Date uploaded
-              <div className='sort-controls left'>
-                <i onClick={ this.columnSorting } className={`${this.getActiveSort('oldest')} fa fa-caret-up sort_by=oldest` }></i>
-                <i onClick={ this.columnSorting } className={`${this.getActiveSort('newest')} fa fa-caret-down sort_by=newest` }></i>
-              </div>
-              </th>
-              <th>Total reads</th>
-              <th>Non-host reads</th>
-              <th>Non-host percentage</th>
-              <th>Passed quality control</th>
-              <th>Duplicate compression ratio</th>
-              <th className="status-dropdown" data-activates="dropdownstatus"><a href="#!" data-activates="dropdownstatus"><i className="status-filter fa fa-caret-down"></i></a>Pipeline run status</th>
-            </tr>
-            </thead>
-              { samples.length ? <tbody>{this.renderPipelineOutput(samples)}</tbody> : null }
-          </table>
-          { !samples.length ? this.renderEmptyTable() : null }
+          { tableHead }
+          { samples.length ? this.renderPipelineOutput(samples) : this.renderEmptyTable() }
       </div>
     </div>
     )
@@ -255,11 +310,13 @@ class Samples extends React.Component {
 
   // initialize filter dropdown
   displayPipelineStatusFilter() {
+    const textSize = 14
     $('.status-dropdown').dropdown({
       belowOrigin: true,
       stopPropagation: false,
       constrainWidth: true
     });
+    $(".dropdown-content>li>a").css("font-size", textSize)
   }
 
   displayCheckMarks(filter) {
