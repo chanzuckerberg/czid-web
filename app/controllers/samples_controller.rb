@@ -3,7 +3,7 @@ class SamplesController < ApplicationController
   include SamplesHelper
 
   before_action :authenticate_user!, only: [:new, :index, :update, :destroy, :edit, :show, :reupload_source, :kickoff_pipeline, :bulk_new, :bulk_import, :bulk_upload]
-  before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs]
+  before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata]
   acts_as_token_authentication_handler_for User, only: [:create, :bulk_upload], fallback: :devise
   protect_from_forgery unless: -> { request.format.json? }
 
@@ -97,18 +97,21 @@ class SamplesController < ApplicationController
     @report_info = external_report_info(report, params)
   end
 
-  def save_note
-    sample_id = params[:sample_id]
-    sample_notes = params[:sample_notes]
-    found_sample = Sample.find_by(id: sample_id)
-    if found_sample
-      found_sample.update(sample_notes: sample_notes) unless found_sample.sample_notes == sample_notes
-      respond_to do |format|
-        format.json do
-          render json: {
-            status: 'success',
-            message: 'Note saved successfully'
-          }
+  def save_metadata
+    field = params[:field].to_sym
+    value = params[:value]
+    metadata = { field => value }
+    metadata.select! { |k, _v| Sample::METADATA_FIELDS.include?(k) }
+    if @sample
+      unless @sample[field].blank? && value.strip.blank?
+        @sample.update_attributes!(metadata)
+        respond_to do |format|
+          format.json do
+            render json: {
+              status: "success",
+              message: "Saved successfully"
+            }
+          end
         end
       end
     else
