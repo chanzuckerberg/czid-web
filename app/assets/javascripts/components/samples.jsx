@@ -170,7 +170,7 @@ class Samples extends React.Component {
   //fetch first set of samples
   fetchSamples() {
     const params = this.getParams();
-    axios.get(`/samples${params}`).then((res) => {
+    axios.get(`/samples?${params}`).then((res) => {
       if (!res.data.samples.length) {
         this.setState({ displayEmpty: true });
       }
@@ -217,7 +217,7 @@ class Samples extends React.Component {
   loadMore() {
     const params = this.getParams();
     this.setState({ isRequesting: true })
-    axios.get(`/samples${params}`).then((res) => {
+    axios.get(`/samples?${params}`).then((res) => {
       this.setState((prevState) => ({
         isRequesting: false,
         allSamples: [...prevState.allSamples, ...res.data.samples],
@@ -236,20 +236,18 @@ class Samples extends React.Component {
 
   //fetch project, filter and search params
   getParams() {
-    const projectId = parseInt(this.state.selectedProjectId);
-    
-    const paramsWithProject = `?filter=${this.state.filterParams}&page=${this.state.pagesLoaded+1}&project_id=${projectId}&search=${this.state.searchParams}`;
-
-    const paramsWithoutProject = `?filter=${this.state.filterParams}&page=${this.state.pagesLoaded+1}&search=${this.state.searchParams}`;
-
-    const params = projectId ? paramsWithProject : paramsWithoutProject;
+    let params = `filter=${this.state.filterParams}&page=${this.state.pagesLoaded+1}&search=${this.state.searchParams}`;
+    let projectId = parseInt(this.state.selectedProjectId);
+    if(projectId) {
+      params += `&project_id=${projectId}`
+    }
     return params;
   }
 
   //fetch results from filtering, search or switching projects
   fetchResults() {
     const params = this.getParams();
-    axios.get(`/samples${params}`).then((res) => {
+    axios.get(`/samples?${params}`).then((res) => {
       if (!res.data.samples.length) {
         this.setState({ displayEmpty: true });
       }
@@ -412,7 +410,7 @@ class Samples extends React.Component {
           <li className="filter-item" data-status="ALL" onClick={ this.handleStatusFilterSelect }><a data-status="ALL" className="filter-item all">All</a><i data-status="ALL" className="filter all fa fa-check"></i></li>
           </ul>
           { tableHead }
-          { samples.length ? this.renderPipelineOutput(samples) : this.renderEmptyTable() }
+          { samples.length && !this.displayEmpty ? this.renderPipelineOutput(samples) : this.renderEmptyTable() }
       </div>
       { !this.state.pageEnd && this.state.initialFetchedSamples && this.state.initialFetchedSamples.length > 14 ? <div className="scroll">
         <i className='fa fa-spinner fa-spin fa-3x'></i>
