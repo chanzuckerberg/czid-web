@@ -160,7 +160,7 @@ class Samples extends React.Component {
 
   //fetch first set of samples
   fetchSamples() {
-    axios.get(`/project_samples`).then((res) => {
+    axios.get(`/samples`).then((res) => {
       if (!res.data.samples.length) {
         this.setState({ displayEmpty: true });
       }
@@ -207,7 +207,7 @@ class Samples extends React.Component {
   loadMore() {
     const params = this.getParams();
     this.setState({ isRequesting: true })
-    axios.get(`/project_samples${params}`).then((res) => {
+    axios.get(`/samples${params}`).then((res) => {
       this.setState((prevState) => ({
         isRequesting: false,
         allSamples: [...prevState.allSamples, ...res.data.samples],
@@ -239,7 +239,7 @@ class Samples extends React.Component {
   //fetch results from filtering, search or switching projects
   fetchResults() {
     const params = this.getParams();
-    axios.get(`/project_samples${params}`).then((res) => {
+    axios.get(`/samples${params}`).then((res) => {
       if (!res.data.samples.length) {
         this.setState({ displayEmpty: true });
       }

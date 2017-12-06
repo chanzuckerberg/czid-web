@@ -11,6 +11,7 @@ Rails.application.routes.draw do
   resources :samples do
     put :reupload_source, on: :member
     put :kickoff_pipeline, on: :member
+    get :all, on: :collection
     get :pipeline_runs, on: :member
     get :bulk_new, on: :collection
     get :bulk_import, on: :collection
@@ -23,9 +24,6 @@ Rails.application.routes.draw do
   end
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
-  resources :home, only: [:index]
-
-  get '/project_samples', to: 'project_samples#index'
 
   mount Resque::Server.new, at: '/resque'
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
