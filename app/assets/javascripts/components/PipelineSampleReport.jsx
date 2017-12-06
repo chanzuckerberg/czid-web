@@ -18,6 +18,24 @@ class PipelineSampleReport extends React.Component {
     this.enableFilters = this.enableFilters.bind(this);
   }
 
+  componentDidMount() {
+    // only updating the tooltip offset when the component is loaded
+    const tooltipIdentifier = $("[rel='tooltip']");
+    tooltipIdentifier.tooltip({
+      delay: 0,
+      html: true,
+      placement: 'bottom',
+      offset: '0px 50px'
+    });
+    $('.sort-controls').hover(() => {
+      const selectTooltip = $('.tooltip');
+      const leftOffset = parseInt(selectTooltip.css('left'));
+      if(!isNaN(leftOffset)) {
+        selectTooltip.css('left', leftOffset - 15);
+      }
+    });
+  }
+
   refreshPage(overrides) {
     new_params = Object.assign({}, this.props.report_page_params, overrides);
     window.location = location.protocol + '//' + location.host + location.pathname + '?' + jQuery.param(new_params);
@@ -160,11 +178,11 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
-  render_column_header(visible_type, visible_metric, column_name) {
-    var style = { 'textAlign': 'right' };
+  render_column_header(visible_type, visible_metric, column_name, tooltip_message) {
+    var style = { 'textAlign': 'right', 'cursor': 'pointer' };
     return (
       <th style={style}>
-        <div className='sort-controls right'>
+        <div className='sort-controls right' rel='tooltip' title={tooltip_message}>
           {this.render_sort_arrow(column_name, 'lowest', 'up')}
           {this.render_sort_arrow(column_name, 'highest', 'down')}
           {visible_type}<br/>
@@ -284,14 +302,14 @@ class PipelineSampleReport extends React.Component {
                         </span>
                         Taxonomy
                       </th>
-                      { this.render_column_header('NT+NR', 'ZZRPM',  'nt_aggregatescore') }
-                      { this.render_column_header('NT', 'Z',   'nt_zscore') }
-                      { this.render_column_header('NT', 'rPM', 'nt_rpm')    }
-                      { this.render_column_header('NT', 'r',   'nt_r')      }
-                      { this.render_column_header('NT', '%id', 'nt_percentidentity')    }
-                      { this.render_column_header('NT', 'AL',   'nt_alignmentlength')    }
-                      { this.render_column_header('NT', 'Log(1/E)',  'nt_neglogevalue')    }
-                      { this.render_column_header('NR', 'Z',   'nr_zscore') }
+                      { this.render_column_header('NT+NR', 'ZZRPM',  'nt_aggregatescore', 'Aggregate score') }
+                      { this.render_column_header('NT', 'Z',   'nt_zscore', 'z-score relative to background model') }
+                      { this.render_column_header('NT', 'rPM', 'nt_rpm', 'number of reads per million total input reads')    }
+                      { this.render_column_header('NT', 'r',   'nt_r', 'number of reads aligning to the species in the NCBI NT database')      }
+                      { this.render_column_header('NT', '%id', 'nt_percentidentity', 'average percent-identity of alignments')    }
+                      { this.render_column_header('NT', 'L',   'nt_alignmentlength', 'average length of alignments')    }
+                      { this.render_column_header('NT', 'Log(1/E)',  'nt_neglogevalue', 'average log-10-transformed expect value')    }
+                      { this.render_column_header('NR', 'Z',   'nr_zscore', 'number of reads aligning to the species in the NCBI NR database') }
                       { this.render_column_header('NR', 'rPM', 'nr_rpm')    }
                       { this.render_column_header('NR', 'r',   'nr_r')      }
                       { this.render_column_header('NR', '%id', 'nr_percentidentity')    }
