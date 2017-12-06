@@ -386,12 +386,18 @@ $break-large: 1070px;
     border-bottom: 1px solid #dfdddd;
     .job-card {
       margin: 0 63px;
+      .blank {
+        color: #b5b0b0
+      }
       .no-time {
         padding-top: 14px;
       }
       .reads {
         .status-col {
           padding: 6px 18px !important;
+        }
+        .percent {
+          color: #0099cc;
         }
         p.status {
           font-size: 12px;
