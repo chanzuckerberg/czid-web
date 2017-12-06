@@ -252,8 +252,6 @@ class SamplesController < ApplicationController
                                    input_files_attributes: [:name, :presigned_url, :source_type, :source])
   end
 
-  private
-
   def sort_by(samples, dir = nil)
     default_dir = 'newest'
     dir ||= default_dir
