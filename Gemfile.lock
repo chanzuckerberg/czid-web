@@ -487,6 +487,9 @@ GEM
       execjs (~> 2.0)
     bcrypt (3.1.11)
     bindex (0.5.0)
+    bootstrap-tooltip-rails (0.1)
+      rails (>= 3.1)
+      thor
     builder (3.2.3)
     byebug (9.1.0)
     capybara (2.15.4)
@@ -783,6 +786,7 @@ DEPENDENCIES
   aws-sdk-resources
   axios_rails
   bcrypt (~> 3.1.7)
+  bootstrap-tooltip-rails
   byebug
   capybara (~> 2.13)
   coffee-rails (~> 4.2)

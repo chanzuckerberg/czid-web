@@ -16,6 +16,27 @@ class PipelineSampleReport extends React.Component {
     this.collapseTable = this.collapseTable.bind(this);
     this.disableFilters = this.disableFilters.bind(this);
     this.enableFilters = this.enableFilters.bind(this);
+    this.initializeTooltip();
+  }
+
+  initializeTooltip() {
+    // only updating the tooltip offset when the component is loaded
+    $(() => {
+      const tooltipIdentifier = $("[rel='tooltip']");
+      tooltipIdentifier.tooltip({
+        delay: 0,
+        html: true,
+        placement: 'bottom',
+        offset: '0px 50px'
+      });
+      $('.sort-controls').hover(() => {
+        const selectTooltip = $('.tooltip');
+        const leftOffset = parseInt(selectTooltip.css('left'));
+        if(!isNaN(leftOffset)) {
+          selectTooltip.css('left', leftOffset - 15);
+        }
+      });
+    });
   }
 
   refreshPage(overrides) {
@@ -179,11 +200,11 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
-  render_column_header(visible_type, visible_metric, column_name) {
-    var style = { 'textAlign': 'right' };
+  render_column_header(visible_type, visible_metric, column_name, tooltip_message) {
+    var style = { 'textAlign': 'right', 'cursor': 'pointer' };
     return (
       <th style={style}>
-        <div className='sort-controls right'>
+        <div className='sort-controls right' rel='tooltip' title={tooltip_message}>
           {this.render_sort_arrow(column_name, 'lowest', 'up')}
           {this.render_sort_arrow(column_name, 'highest', 'down')}
           {visible_type}<br/>
@@ -303,19 +324,19 @@ class PipelineSampleReport extends React.Component {
                         </span>
                         Taxonomy
                       </th>
-                      { this.render_column_header('NT+NR', 'ZZRPM',  'nt_aggregatescore') }
-                      { this.render_column_header('NT', 'Z',   'nt_zscore') }
-                      { this.render_column_header('NT', 'rPM', 'nt_rpm')    }
-                      { this.render_column_header('NT', 'r',   'nt_r')      }
-                      { this.render_column_header('NT', '%id', 'nt_percentidentity')    }
-                      { this.render_column_header('NT', 'AL',   'nt_alignmentlength')    }
-                      { this.render_column_header('NT', 'Log(1/E)',  'nt_neglogevalue')    }
-                      { this.render_column_header('NR', 'Z',   'nr_zscore') }
-                      { this.render_column_header('NR', 'rPM', 'nr_rpm')    }
-                      { this.render_column_header('NR', 'r',   'nr_r')      }
-                      { this.render_column_header('NR', '%id', 'nr_percentidentity')    }
-                      { this.render_column_header('NR', 'AL',   'nr_alignmentlength')    }
-                      { this.render_column_header('NR', 'Log(1/E)',  'nr_neglogevalue')    }
+                        {this.render_column_header('NT+NR', 'ZZRPM',  'nt_aggregatescore', 'Aggregate score') }
+                        {this.render_column_header('NT', 'Z',   'nt_zscore', 'Z-score relative to background model for alignments to NCBI NT') }
+                        {this.render_column_header('NT', 'rPM', 'nt_rpm', 'Number of reads aligning to the taxon in the NCBI NT database per million total input reads')}
+                        {this.render_column_header('NT', 'r',   'nt_r', 'Number of reads aligning to the taxon in the NCBI NT database')}
+                        {this.render_column_header('NT', '%id', 'nt_percentidentity', 'Average percent-identity of alignments to NCBI NT')}
+                        {this.render_column_header('NT', 'L',   'nt_alignmentlength', 'Average length of alignments to NCBI NT')}
+                        {this.render_column_header('NT', 'Log(1/E)',  'nt_neglogevalue', 'Average log-10-transformed expect value for alignments to NCBI NT')}
+                        {this.render_column_header('NR', 'Z',   'nr_zscore', 'Z-score relative to background model for alignments to NCBI NR') }
+                        {this.render_column_header('NR', 'rPM', 'nr_rpm', 'Number of reads aligning to the taxon in the NCBI NR database per million total input reads')}
+                        {this.render_column_header('NR', 'r',   'nr_r', 'Number of reads aligning to the taxon in the NCBI NR database')}
+                        {this.render_column_header('NR', '%id', 'nr_percentidentity', 'Average percent-identity of alignments to NCBI NR')}
+                        {this.render_column_header('NR', 'AL',   'nr_alignmentlength', 'Average length of alignments to NCBI NR')}
+                        {this.render_column_header('NR', 'Log(1/E)',  'nr_neglogevalue', 'Average log-10-transformed expect value for alignments to NCBI NR')}
                     </tr>
                     </thead>
                     <tbody>
