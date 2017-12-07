@@ -435,7 +435,9 @@ class SampleUpload extends React.Component {
         base = base.replace(fastqLabel, '').replace(readLabel, '');
         this.state.sampleName = base;
         this.setState({ sampleName: base });
-        this.refs.sample_name.value = base;
+        if(!this.refs.sample_name.value.trim().length) {
+          this.refs.sample_name.value = base;
+        }
       }
     } else if(sampleField) {
       this.setState({ sampleName: sampleField });
