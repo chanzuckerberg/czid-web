@@ -429,14 +429,13 @@ class SampleUpload extends React.Component {
     if(e) {
       let value = e.target.value.trim();
       if((value.length && value.indexOf('/'))) {
-        let base = this.baseName(value);
-        let fastqLabel = /.fastq*$|.fasta*$|.gz*$/igm;
-        let readLabel = /_R1.*$|_R2.*$/ig;
-        base = base.replace(fastqLabel, '').replace(readLabel, '');
-        this.state.sampleName = base;
-        this.setState({ sampleName: base });
         if(!this.refs.sample_name.value.trim().length) {
+          let base = this.baseName(value);
+          let fastqLabel = /.fastq*$|.fasta*$|.gz*$/igm;
+          let readLabel = /_R1.*$|_R2.*$/ig;
+          base = base.replace(fastqLabel, '').replace(readLabel, '');
           this.refs.sample_name.value = base;
+          this.setState({ sampleName: base });
         }
       }
     } else if(sampleField) {
@@ -727,6 +726,29 @@ class SampleUpload extends React.Component {
                     </div>
                   </div>
                 </div>
+                <div className='field'>
+                  <div className='row'>
+                    <div className='col no-padding s12'>
+                      <div className='field-title'>
+                        <div className='read-count-label'>
+                          Sample name
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className='row input-row'>
+                    <div className='col no-padding s12'>
+                      <input type='text' ref='sample_name' className='browser-default' 
+                      onChange={(e) => this.updateSampleName(null, e.target.value)} placeholder='sample name' />
+                      {
+                        (this.state.errors.sampleName) ?
+                          <div className='field-error'>
+                            {this.state.errors.sampleName}
+                          </div> : null
+                      }
+                    </div>
+                  </div>
+                </div>
                 {
                   this.userDetails.admin ?
                     <div>
@@ -811,29 +833,6 @@ class SampleUpload extends React.Component {
                     </div> :
                     null
                 }
-                <div className='field'>
-                  <div className='row'>
-                    <div className='col no-padding s12'>
-                      <div className='field-title'>
-                        <div className='read-count-label'>
-                          Sample name
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className='row input-row'>
-                    <div className='col no-padding s12'>
-                      <input type='text' ref='sample_name' className='browser-default' 
-                      onChange={(e) => this.updateSampleName(null, e.target.value)} placeholder='sample name' />
-                      {
-                        (this.state.errors.sampleName) ?
-                          <div className='field-error'>
-                            {this.state.errors.sampleName}
-                          </div> : null
-                      }
-                    </div>
-                  </div>
-                </div>
                 <div className='field'>
                   <div className='row'>
                     <div className='col no-padding s12'>
