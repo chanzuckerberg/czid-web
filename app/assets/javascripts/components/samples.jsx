@@ -69,6 +69,9 @@ class Samples extends React.Component {
       case 'INPROGRESS':
         return <i className="uploading fa fa-repeat" aria-hidden="true"></i>;
         break;
+      case 'POST PROCESSING':
+        return <i className="uploading fa fa-repeat" aria-hidden="true"></i>;
+        break;
       case 'HOST FILTERING':
         return <i className="uploading fa fa-repeat" aria-hidden="true"></i>;
         break;
