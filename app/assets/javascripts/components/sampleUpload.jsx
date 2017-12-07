@@ -60,7 +60,7 @@ class SampleUpload extends React.Component {
       id: this.selected.id,
       errors: {},
       adminGenomes,
-      sampleName: ''
+      sampleName: '',
       disableProjectSelect: false
     };
   }
@@ -539,7 +539,7 @@ class SampleUpload extends React.Component {
   renderSampleForm() {
     return (
       <div id='samplesUploader' className='row'>
-        <div className='col s4 offset-s4 upload-form-container'>
+        <div className='col s4 m3 offset-s3 offset-m4 l3 offset-l4 upload-form-container'>
           <div className='content'>
             <div>
               <div className='form-title'>
