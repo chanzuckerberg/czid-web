@@ -327,6 +327,15 @@ input[type=number] {
   td:first-child {
     width: 450px;
   }
+  td:last-child {
+    padding-right: 50px;
+  }
+  th:first-child {
+    width: 450px;
+  }
+  th:last-child {
+    padding-right: 50px;
+  }
 }
 .genus-search-row {
   padding-left: 0 !important;
