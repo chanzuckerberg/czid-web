@@ -29,6 +29,7 @@
       .form-title {
         font-size: 21px;
         color: #333E48;
+        font-weight: 700;
         letter-spacing: 0.28px;
       }
       .upload-info {
@@ -43,6 +44,9 @@
         a {
           font-weight: 600;
         }
+        a:hover {
+          color: #5ABCD6 !important;
+        }
       }
       .fields {
         .field {
@@ -55,11 +59,15 @@
                 border: 1px solid #CAD0DA;
                 background: #fff;
               }
+              [disabled] {
+                background: #EEF1F2;
+                border: #CAD0DA;
+              }
             }
             .field-title {
               color: #000;
               font-size: 12px;
-
+              font-weight: 600;
               .validation-info {
                 color: #677986;
               }
@@ -150,18 +158,24 @@
                   }
                 }
                 .img-container {
-                  width: 100%;
-                  height: 80px;
                   text-align: center;
                   background-repeat: no-repeat;
                   background-size: contain;
                   background-position: center;
+                  padding: 10px;
+                  svg {
+                    width: 65px;
+                  }
                 }
               }
             }
             .project-list {
               .select-wrapper {
                 height: 50px;
+                width: 90%;
+                input {
+                  padding-left: 1em;
+                }
               }
               .select-dropdown {
                 padding-left: 2px;
