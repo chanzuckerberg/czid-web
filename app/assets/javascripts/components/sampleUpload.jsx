@@ -13,6 +13,7 @@ class SampleUpload extends React.Component {
     this.handleQueueChange = this.handleQueueChange.bind(this);
     this.handleMemoryChange = this.handleMemoryChange.bind(this);
     this.handleResultChange = this.handleResultChange.bind(this);
+    this.toggleNewProjectInput = this.toggleNewProjectInput.bind(this);
     this.projects = props.projects || [];
     this.project = props.projectInfo || '';
     this.hostGenomes = props.host_genomes || [];
@@ -59,7 +60,8 @@ class SampleUpload extends React.Component {
       id: this.selected.id,
       errors: {},
       adminGenomes,
-      sampleName: ''
+      sampleName: '',
+      disableProjectSelect: false
     };
   }
 
@@ -355,6 +357,7 @@ class SampleUpload extends React.Component {
     this.clearError();
   }
 
+
   handleHostChange(hostId, hostName) {
     this.setState({
       selectedHostGenome: hostName,
@@ -402,9 +405,14 @@ class SampleUpload extends React.Component {
   toggleNewProjectInput(e) {
     $('.new-project-input').slideToggle();
     $('.new-project-button').toggleClass('active');
+    this.setState({
+      disableProjectSelect: !this.state.disableProjectSelect
+    }, () => {
+      this.initializeSelectTag();
+    });
   }
 
-  resolveGenomeIcon (genomeName) {
+  resolveGenomeIcon (genomeName, color) {
     let imgPath = '/assets/generic_genome.png';
     if (typeof genomeName === 'undefined') {
       return false;
@@ -412,13 +420,13 @@ class SampleUpload extends React.Component {
     genomeName = genomeName.toLowerCase();
     switch (genomeName) {
       case 'mosquito':
-        return '/assets/mosquito.png';
+        return IconComponent.mosquito(color);
         break;
       case 'human':
-        return '/assets/human.png';
+        return IconComponent.human(color);
         break;
       case 'no host subtraction':
-        return '/assets/bacteria.png';
+        return IconComponent.bacteria(color);
         break;
       default:
         return false;
@@ -531,7 +539,7 @@ class SampleUpload extends React.Component {
   renderSampleForm() {
     return (
       <div id='samplesUploader' className='row'>
-        <div className='col s4 offset-s4 upload-form-container'>
+        <div className='col s4 m3 offset-s3 offset-m4 l3 offset-l4 upload-form-container'>
           <div className='content'>
             <div>
               <div className='form-title'>
@@ -569,7 +577,7 @@ class SampleUpload extends React.Component {
                   </div>
                   <div className='row input-row'>
                     <div className='col project-list no-padding s8 tooltipped' data-position="top" data-delay="50" data-tooltip="Name of experiment or project">
-                      <select ref="projectSelect" className="" id="sample" onChange={ this.handleProjectChange } value={this.state.selectedProject}>
+                      <select ref="projectSelect" disabled={(this.state.disableProjectSelect ? 'disabled' : '')} className="projectSelect" id="sample" onChange={ this.handleProjectChange } value={this.state.selectedProject}>
                         <option disabled defaultValue>{this.state.selectedProject}</option>
                         { this.state.allProjects.length ?
                           this.state.allProjects.map((project, i) => {
@@ -645,8 +653,13 @@ class SampleUpload extends React.Component {
                               <li
                                   key={g.id} className={ `${this.state.selectedHostGenome ===  g.name ? 'active' : ''} `}
                                   id={g.name} onClick={() => this.handleHostChange(g.id, g.name)}>
-                                <div className='img-container'
-                                     style={{'backgroundImage': `url(${this.resolveGenomeIcon(g.name)})`}}>
+                                <div className='img-container'>
+                                  {
+                                    this.state.selectedHostGenome ===  g.name ?
+                                    this.resolveGenomeIcon(g.name, '#59bcd6')
+                                    :
+                                    this.resolveGenomeIcon(g.name, '#95A1Ab')
+                                }
                                 </div>
                                 <div className='genome-label'>
                                   { g.name }
@@ -738,7 +751,7 @@ class SampleUpload extends React.Component {
                   </div>
                   <div className='row input-row'>
                     <div className='col no-padding s12'>
-                      <input type='text' ref='sample_name' className='browser-default' 
+                      <input type='text' ref='sample_name' className='browser-default'
                       onChange={(e) => this.updateSampleName(null, e.target.value)} placeholder='sample name' />
                       {
                         (this.state.errors.sampleName) ?
