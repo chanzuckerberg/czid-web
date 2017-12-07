@@ -48,6 +48,9 @@
           color: #5ABCD6 !important;
         }
       }
+      .bulkSumbitForm {
+        margin-top: 50px;
+      }
       .fields {
         .field {
           .row {
@@ -221,6 +224,18 @@
         .admin-input-title {
           color: #677986;
           font-size: 13px;
+        }
+        [type="checkbox"].filled-in:checked + label:after {
+          border: 2px solid #2786C1;
+          background-color: #2786C1;
+        }
+
+        [type="checkbox"].filled-in +  label:after {
+          border: 2px solid #c7c7c7;
+          background-color: #fff;
+        }
+        label {
+          color: #1B232A;
         }
       }
     }

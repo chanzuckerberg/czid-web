@@ -37,6 +37,7 @@ class BulkUploadImport extends React.Component {
   }
 
   componentDidMount() {
+    $('body').addClass('background-cover');
     this.initializeSelectTag();
     $(ReactDOM.findDOMNode(this.refs.projectSelect)).on('change',this.handleProjectChange);
     $(ReactDOM.findDOMNode(this.refs.hostSelect)).on('change',this.handleHostChange);
@@ -299,21 +300,26 @@ class BulkUploadImport extends React.Component {
     this.clearError();
   }
 
-  handleProjectChangeForSample(e) {
+  handleProjectChangeForSample(samplesId, projectId, element) {
+    const selectedSampleElement = $(element.target);
+    selectedSampleElement.parent().prev().text(selectedSampleElement.text());
+    // updating the label for slected project
     const samples = this.state.samples
-    samples[e.target.id].project_id = this.state.allProjects[e.target.selectedIndex].id
+    samples[samplesId].project_id = this.state.allProjects[projectId].id
     this.setState({
       samples: samples
     })
     this.clearError();
   }
 
-  handleHostChangeForSample(e) {
-    const samples = this.state.samples
-    samples[e.target.id].host_genome_id = this.state.hostGenomes[e.target.selectedIndex].id
+  handleHostChangeForSample(samplesId, hostGenomeId, element) {
+    const selectedSampleElement = $(element.target);
+    selectedSampleElement.parent().prev().text(selectedSampleElement.text());
+    const samples = this.state.samples;
+    samples[samplesId].host_genome_id = this.state.hostGenomes[hostGenomeId].id
     this.setState({
       samples: samples
-    })
+    });
     this.clearError();
   }
 
@@ -333,68 +339,106 @@ class BulkUploadImport extends React.Component {
 
   renderBulkUploadSubmitForm() {
     return (
-      <div className="form-wrapper">
-        <form ref="form" onSubmit={ this.handleUploadSubmit }>
-          <div className="row title">
-            <p className="col s6 signup">Bulk Upload</p>
-          </div>
-          { this.state.success ? <div className="success-info" >
-                <i className="fa fa-success"></i>
-                 <span>{this.state.successMessage}</span>
-                </div> : null }
-              { this.state.invalid ? <div className="error-info" >
-                  <i className="fa fa-error"></i>
-                  <span>{this.state.errorMessage}</span>
-              </div> : null }
-          <div className="row content-wrapper">
-            <div className="row header">
-              <div className="col s4 sample-title">
-                <span className="col s1 all"><input type="checkbox" checked = { this.state.allChecked } id="checkAll" className="filled-in checkAll" onChange={this.initializeSelectAll()}
-                />
-                <label htmlFor="checkAll"></label></span>
-                <span className="name">Name</span>
+      <div id='samplesUploader' className='row'>
+        <div className='col s8 offset-s2 upload-form-container'>
+          <div className='content'>
+            <div>
+              <div className='form-title'>
+                Batch Upload
               </div>
-              <div className="col s4 ">Select sample project</div>
-              <div className="col s4 ">Host</div>
-            </div>
-            { this.state.samples.map((sample, i) => {
-              return (
-                <div className="row field-row sample-row" key={i} >
-                  <p className="col s4 sample-names">
-                    <input ref="samples_list" type="checkbox" id={i} className="filled-in sample-box" value={ this.state.selectedSampleIndices.indexOf(i) < 0? 0:1 } onChange = { this.selectSample } />
-                    <label htmlFor={i}> {sample.name}</label>
-                  </p>
-                  <div className="col s4">
-                    <select className="" id={i} onChange={ this.handleProjectChangeForSample } value={sample.project_id}>
-                      { this.state.allProjects.length ?
-                        this.state.allProjects.map((project, j) => {
-                          return <option ref= "project" key={j} value={project.id}>{project.name}</option>
-                        }) : <option>No projects to display</option>
-                        }
-                    </select>
+              <div className='upload-info'>
+                Select which files you want to run through the pipeline.
+              </div>
+              <br />
+              <form className='bulkSumbitForm' ref="form" onSubmit={ this.handleUploadSubmit }>
+                { this.state.success ?
+                  <div className="form-feedback success-message" >
+                    <i className="fa fa-check-circle-o"/> <span>{this.state.successMessage}</span>
+                  </div> : null
+                }
+                {
+                  this.state.invalid ?
+                    <div className='form-feedback error-message'>
+                      <span>{this.state.errorMessage}</span>
+                    </div> : null
+                }
+                <div className='fields'>
+                  <div className="row">
+                    <div className="row header">
+                      <div className="col s5 no-padding">
+                        <input type="checkbox"
+                        checked = { this.state.allChecked } id="checkAll"
+                        className="filled-in checkAll" onChange={this.initializeSelectAll()}
+                        />
+                        <label htmlFor="checkAll">Sample Name</label>
+                      </div>
+                      <div className="col s3 no-padding">Host</div>
+                      <div className="col s4 no-padding">Project</div>
+                    </div>
+                    <div className='divider'></div>
+                    { this.state.samples.map((sample, i) => {
+                      return (
+                        <div className="row field-row sample-row" key={i} >
+                          <p className="col s5 sample-names no-padding">
+                            <input ref="samples_list" type="checkbox" id={i} className="filled-in sample-box" value={ this.state.selectedSampleIndices.indexOf(i) < 0? 0:1 } onChange = { this.selectSample } />
+                            <label htmlFor={i}> {sample.name}</label>
+                          </p>
+                          <div className="col s3 no-padding">
+                            <div className='dropdown-button custom-select-dropdown' href='#' data-activates={`genome-dropdown${i}`}>
+                             { this.state.hostName }
+                            </div>
+                            <ul id={`genome-dropdown${i}`} className='dropdown-content'>
+                              { this.state.hostGenomes.length ?
+                              this.state.hostGenomes.map((host_genome, j) => {
+                                  return <li onClick={ (e) => { this.handleHostChangeForSample(i, j, e) }} ref= "genome"
+                                  key={j} value={host_genome.id}>{host_genome.name}</li>
+                                }) : <li>No host genomes to display</li>
+                                }
+                            </ul>
+                          </div>
+                          <div className="col s4 no-padding">
+                            <div className='dropdown-button custom-select-dropdown' href='#' data-activates={`project-dropdown${i}`}>
+                            { this.state.project }
+                            </div>
+                              <ul id={`project-dropdown${i}`} className='dropdown-content'>
+                                { this.state.allProjects.length ?
+                                this.state.allProjects.map((project, j) => {
+                                  return <li onClick={ (e) => {
+                                    this.handleProjectChangeForSample(i, j, e)
+                                  }} ref= "project" key={j} value={project.id}>{project.name}</li>
+                                }) : <li>No projects to display</li>
+                                }
+                              </ul>
+                          </div>
+                          <div className="col s12">
+                          </div>
+                        </div>
+                      )})
+                    }
                   </div>
-
-                  <div className="col s4">
-                    <select className="" id={i} onChange={ this.handleHostChangeForSample} value={sample.host_genome_id}>
-                      { this.state.hostGenomes.length ?
-                        this.state.hostGenomes.map((host_genome, j) => {
-                          return <option ref= "genome" key={j} value={host_genome.id}>{host_genome.name}</option>
-                        }) : <option>No host genomes to display</option>
+                  <div className='field'>
+                    <div className='row'>
+                      <div className='col no-padding s12'>
+                        { (this.state.submitting) ?
+                          <button type='button' disabled className='new-button blue-button upload-samples-button'>
+                            <i className='fa fa-spinner fa-spin fa-lg'/>
+                          </button> :
+                          <button type='submit' onClick={ this.handleUploadSubmit } className='new-button blue-button upload-samples-button'>
+                            Run samples
+                          </button>
                         }
-                    </select>
-                  </div>
-                  <div className="col s12">
+                        <button type='button' onClick={() => window.history.back()} className='new-button skyblue-button'>
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              )
-            })
-          }
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
-      <input className="hidden" type="submit"/>
-        { this.state.submitting ? <div className="center login-wrapper disabled"> <i className='fa fa-spinner fa-spin fa-lg'></i> </div> :
-          <div onClick={ this.handleUploadSubmit } className="center login-wrapper">Submit</div> }
-      </form>
-    </div>
     )
   }
   renderBulkUploadImportForm() {
@@ -424,14 +468,14 @@ class BulkUploadImport extends React.Component {
                       }) : <option>No projects to display</option>
                     }
                   </select>
-                  <label>Project list</label>
+                  <label>Project List</label>
               </div>
               <div className="input-field col s6">
                     <div className="row">
                       <input className="col s11 project-input" ref= "new_project" type="text" onFocus={ this.clearError } placeholder="Add a project if desired project is not on the list" />
                       <input className="col s1 add-icon" value="&#xf067;" type="button" onClick={ this.handleProjectSubmit } />
                     </div>
-                    <label htmlFor="new_project">Default project</label>
+                    <label htmlFor="new_project">Default Project</label>
               </div>
             </div>
             <div className="row field-row">
@@ -443,14 +487,14 @@ class BulkUploadImport extends React.Component {
                           }) : <option>No host genomes to display</option>
                         }
                   </select>
-                  <label>Default host genome</label>
+                  <label>Default Host Genome</label>
               </div>
             </div>
             <div className="field-row input-field align">
                 <i className="sample fa fa-link" aria-hidden="true"></i>
                 <input ref= "bulk_path" type="text" className="path" onFocus={ this.clearError } placeholder="Required" onChange={ this.handleBulkPathChange } />
                 <span className="path_label">Example: s3://czbiohub-seqbot/fastqs/171018_NB501961_0022_AHL2TVBGX3/rawdata</span>
-                <label htmlFor="bulk_path">S3 bulk upload path </label>
+                <label htmlFor="bulk_path">S3 Bulk Upload Path </label>
             </div>
           </div>
         <input className="hidden" type="submit"/>
@@ -466,10 +510,6 @@ class BulkUploadImport extends React.Component {
       <div>
         { this.state.imported ? this.renderBulkUploadSubmitForm() : null }
         { !this.state.imported ? this.renderBulkUploadImportForm() : null }
-          <div className="bottom">
-            <span className="back" onClick={ this.gotoPage.bind(this, '/samples') } >Samples</span>|
-            <span className="home" onClick={ this.gotoPage.bind(this, '/')}>Home</span>
-          </div>
       </div>
     )
   }
