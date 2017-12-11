@@ -49,7 +49,7 @@ class Samples extends React.Component {
     if (e.target.value !== '') {
       this.setState({ searchParams: e.target.value });
     } else {
-      this.setState({ 
+      this.setState({
         searchParams: '',
         pageEnd: false,
         pagesLoaded: 0
@@ -98,7 +98,7 @@ class Samples extends React.Component {
     var hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
     var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
     var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
-    return hDisplay + mDisplay + sDisplay; 
+    return hDisplay + mDisplay + sDisplay;
 }
 
   renderPipelineOutput(samples) {
@@ -129,7 +129,7 @@ class Samples extends React.Component {
               <p className="sample-name">{dbSample.name}</p>
               <p className="uploader">
                 <span>Uploaded {moment(dbSample.created_at).startOf('second').fromNow()}</span>
-                { !uploader || uploader === '' ? '' : <span> | by {uploader}</span>} 
+                { !uploader || uploader === '' ? '' : <span> | by {uploader}</span>}
               </p>
             </div>
             <div className="reads col s1">
@@ -140,7 +140,7 @@ class Samples extends React.Component {
             <div className="reads col s2">
               <p>
               { (!derivedOutput.summary_stats || !derivedOutput.summary_stats.remaining_reads) ? BLANK_TEXT : numberWithCommas(derivedOutput.summary_stats.remaining_reads) }
-              { (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? '' : <span className="percent"> {`(${derivedOutput.summary_stats.percent_remaining.toFixed(2)}%)`} </span> } 
+              { (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? '' : <span className="percent"> {`(${derivedOutput.summary_stats.percent_remaining.toFixed(2)}%)`} </span> }
               </p>
             </div>
             <div className="reads col s1">
@@ -164,7 +164,7 @@ class Samples extends React.Component {
   scrollDown() {
     var that = this;
     $(window).scroll(function() {
-      if ($(window).scrollTop() > $(document).height() - $(window).height() - 60) {
+     if ($(window).scrollTop() > $(document).height() - $(window).height() - 6000) {
         { !that.state.isRequesting && !that.state.pageEnd ? that.loadMore() : null }
         return false;
       }
@@ -199,12 +199,12 @@ class Samples extends React.Component {
   //fetch all Projects
   fetchProjects() {
     axios.get(`/projects.json`).then((res) => {
-      this.setState({ 
+      this.setState({
         allProjects: res.data,
         loading: false,
       })
     }).catch((err) => {
-      this.setState({ 
+      this.setState({
         allProjects: [],
         loading: false,
       })
@@ -330,12 +330,12 @@ class Samples extends React.Component {
     if (e.target.value !== '' && e.key === 'Enter') {
       this.setState({
         loading: true,
-        pagesLoaded: 0, 
-        pageEnd: false, 
-        searchParams: e.target.value 
+        pagesLoaded: 0,
+        pageEnd: false,
+        searchParams: e.target.value
       }, () => {
         this.setUrlLocation();
-        this.fetchResults(); 
+        this.fetchResults();
       });
     }
   }
@@ -343,8 +343,8 @@ class Samples extends React.Component {
   //Select or switch Project
   switchProject(e) {
     let id = e.target.getAttribute('data-id');
-    this.setState({ 
-      selectedProjectId: id, 
+    this.setState({
+      selectedProjectId: id,
       pageEnd: false
     }, () => {
       this.setUrlLocation();
@@ -364,7 +364,7 @@ class Samples extends React.Component {
     } else {
       projId = parseInt(projId);
       axios.get(`projects/${projId}.json`).then((res) => {
-        this.setState({ 
+        this.setState({
           pagesLoaded: 0,
           project: res.data
         })
@@ -485,12 +485,12 @@ class Samples extends React.Component {
     this.setState({
       loading: true,
       pagesLoaded: 0,
-      pageEnd: false, 
-      filterParams: status 
+      pageEnd: false,
+      filterParams: status
     }, () => {
       this.setUrlLocation();
       this.displayCheckMarks(this.state.filterParams);
-      this.fetchResults(); 
+      this.fetchResults();
     });
   }
 
