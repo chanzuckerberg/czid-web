@@ -24,9 +24,9 @@ module ReportHelper
 
   DEFAULT_PARAMS = {
     sort_by:          'highest_nt_aggregatescore',
-    threshold_zscore: 1.7,
-    threshold_rpm:    1.0,
-    threshold_r:      50,
+    threshold_zscore: 0.0,
+    threshold_rpm:    0.0,
+    threshold_r:      0.0,
     threshold_percentidentity: 0.0,
     threshold_alignmentlength: 0.0,
     threshold_neglogevalue:    0.0,

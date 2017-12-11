@@ -1,5 +1,4 @@
 class PipelineSampleReads extends React.Component {
-
   constructor(props) {
     super(props);
     this.pipelineOutput = props.pipelineOutput;
@@ -18,7 +17,8 @@ class PipelineSampleReads extends React.Component {
     this.state = {
       rerun: false,
       failureText: 'Sample run failed'
-    }
+    };
+    this.TYPE_PROMPT = "Type here..."
   }
 
   gotoReport() {
@@ -68,19 +68,18 @@ class PipelineSampleReads extends React.Component {
     let currentText = '';
     $('.sample-notes').focusin((e) => {
       currentText = e.target.innerText.trim();
-      if (currentText === 'Type here...') {
+      if (currentText === this.TYPE_PROMPT) {
         e.target.innerText = '';
       }
     });
 
     $('.sample-notes').focusout((e) => {
       const newText = e.target.innerText.trim();
-      if (newText.trim() === '') {
-        e.target.innerText = 'Type here...';
-      } else if (newText !== currentText) {
-        axios.post('/samples/save_note.json', {
-          sample_id: this.sampleInfo.id,
-          sample_notes: newText
+      const field = e.target.id;
+      if (newText !== currentText) {
+        axios.post('/samples/' + this.sampleInfo.id + '/save_metadata.json', {
+          field: field,
+          value: newText
         })
         .then((response) => {
           if (response.data.status === 'success') {
@@ -103,7 +102,10 @@ class PipelineSampleReads extends React.Component {
           .delay(1000)
           .slideUp(200);
         });
-      }
+      };
+      if (newText.trim() === '') {
+        e.target.innerText = this.TYPE_PROMPT;
+      } 
     });
   }
 
@@ -121,7 +123,7 @@ class PipelineSampleReads extends React.Component {
         sample_id = {this.sampleId}
       />;
     } else {
-      d_report = <div className="center-align text-grey text-lighten-2 no-report">{ this.pipelineInProgress() ? <div>Processing Sample...<p><i className='fa fa-spinner fa-spin fa-3x'></i></p></div> :
+      d_report = <div className="center-align text-grey text-lighten-2 no-report">{ this.pipelineInProgress() ? <div>Sample Waiting ...<p><i className='fa fa-spinner fa-spin fa-3x'></i></p></div> :
         <div>
           <h6 className="failed"><i className="fa fa-frown-o"></i>  {this.state.failureText}  </h6>
           <p>
@@ -134,11 +136,12 @@ class PipelineSampleReads extends React.Component {
 
     let pipeline_run = null;
     let download_section = null;
+    var BLANK_TEXT = 'unknown'
     if (this.pipelineOutput) {
       pipeline_run = (
         <div className="data">
           <div className="row">
-            <div className="col s6">
+            <div className="col s5">
               <table>
                 <tbody>
                 <tr>
@@ -146,22 +149,22 @@ class PipelineSampleReads extends React.Component {
                   <td>{ numberWithCommas(this.pipelineOutput.total_reads) }</td>
                 </tr>
                 <tr>
-                  <td>Passed Quality Control</td>
-                  <td>{ !this.summary_stats.qc_percent ? 'NA' : this.summary_stats.qc_percent.toFixed(2) }%</td>
+                  <td>Non-host reads</td>
+                  <td>{ !this.summary_stats.remaining_reads ? BLANK_TEXT : numberWithCommas(this.summary_stats.remaining_reads) } { !this.summary_stats.percent_remaining ? '' : `(${this.summary_stats.percent_remaining.toFixed(2)}%)` }</td>
                 </tr>
                 </tbody>
               </table>
             </div>
-            <div className="col s6">
+            <div className="col s7">
               <table>
                 <tbody>
                 <tr>
-                  <td>Total Non-Host Reads</td>
-                  <td>{ !this.summary_stats.remaining_reads ? 'NA' : numberWithCommas(this.summary_stats.remaining_reads) } ({ !this.summary_stats.percent_remaining ? 'NA' : this.summary_stats.percent_remaining.toFixed(2) }%)</td>
+                  <td>Passed quality control</td>
+                  <td>{ !this.summary_stats.qc_percent ? BLANK_TEXT : `${this.summary_stats.qc_percent.toFixed(2)}%` }</td>
                 </tr>
                 <tr>
-                  <td>Compression Ratio</td>
-                  <td>{ !this.summary_stats.compression_ratio ? 'NA' : this.summary_stats.compression_ratio.toFixed(2) }</td>
+                  <td>Duplicate compression ratio</td>
+                  <td>{ !this.summary_stats.compression_ratio ? BLANK_TEXT : this.summary_stats.compression_ratio.toFixed(2) }</td>
                 </tr>
                 </tbody>
               </table>
@@ -242,15 +245,19 @@ class PipelineSampleReads extends React.Component {
                             <tbody>
                               <tr>
                                 <td>Host</td>
-                                 <td> { (!this.sampleInfo.host_genome_name) ? 'N/A' : this.sampleInfo.host_genome_name } </td>
+                                <td> { (!this.sampleInfo.host_genome_name) ? BLANK_TEXT : this.sampleInfo.host_genome_name } </td>
                               </tr>
                               <tr>
-                                <td>Entry Date</td>
+                                <td>Entry date</td>
                                 <td>{moment(this.sampleInfo.created_at).startOf('second').fromNow()}</td>
                               </tr>
                               <tr>
                                 <td>Location</td>
-                                <td>{ (!this.sampleInfo.sample_location) ? 'N/A' : this.sampleInfo.sample_location }</td>
+                                <td className="sample-notes">
+                                 <pre suppressContentEditableWarning={true} contentEditable={true} id="sample_location">
+                                  { this.sampleInfo.sample_location && this.sampleInfo.sample_location.trim() !== "" ? this.sampleInfo.sample_location : this.TYPE_PROMPT}
+                                 </pre>
+                                </td>
                               </tr>
                             </tbody>
                           </table>
@@ -259,12 +266,20 @@ class PipelineSampleReads extends React.Component {
                           <table className="responsive-table">
                             <tbody>
                               <tr>
-                                <td>Tissue Type</td>
-                                 <td>{ (!this.sampleInfo.sample_tissue) ? 'N/A' : this.sampleInfo.sample_tissue }</td>
+                                <td>Tissue type</td>
+                                <td className="sample-notes">
+                                 <pre suppressContentEditableWarning={true} contentEditable={true} id="sample_tissue">
+                                  { this.sampleInfo.sample_tissue && this.sampleInfo.sample_tissue.trim() !== "" ? this.sampleInfo.sample_tissue : this.TYPE_PROMPT}
+                                 </pre>
+                                </td>
                               </tr>
                               <tr>
-                                <td>Library Prep Protocol</td>
-                                <td>{ (!this.sampleInfo.sample_library) ? 'N/A' : this.sampleInfo.sample_library }</td>
+                                <td>Library prep protocol</td>
+                                <td className="sample-notes">
+                                 <pre suppressContentEditableWarning={true} contentEditable={true} id="sample_library">
+                                  { this.sampleInfo.sample_library && this.sampleInfo.sample_library.trim() !== "" ? this.sampleInfo.sample_library : this.TYPE_PROMPT}
+                                 </pre>
+                                </td>
                               </tr>
                             </tbody>
                           </table>
@@ -274,14 +289,14 @@ class PipelineSampleReads extends React.Component {
                         <div className="col s12">
                           <table>
                             <tbody>
-                            <tr>
+                             <tr>
                               <td className="notes">Notes</td>
-                              <td className="sample-notes" >
-                               <pre suppressContentEditableWarning={true} contentEditable={true}>
-                                { this.sampleInfo.sample_notes ? this.sampleInfo.sample_notes : 'Type here...'}
+                              <td className="sample-notes">
+                               <pre suppressContentEditableWarning={true} contentEditable={true} id="sample_notes">
+                                { this.sampleInfo.sample_notes && this.sampleInfo.sample_notes.trim() !== "" ? this.sampleInfo.sample_notes : this.TYPE_PROMPT}
                                </pre>
                               </td>
-                            </tr>
+                             </tr>
                             </tbody>
                           </table>
                         </div>

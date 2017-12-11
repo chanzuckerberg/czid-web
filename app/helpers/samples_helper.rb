@@ -83,6 +83,21 @@ module SamplesHelper
     sample_list
   end
 
+  def sample_uploaders(samples)
+    all_uploaders = []
+    samples.each do |s|
+      user = {}
+      if s.user_id.present?
+        id = s.user_id
+        user[:name] = User.find(id).name
+      else
+        user[:name] = nil
+      end
+      all_uploaders.push(user)
+    end
+    all_uploaders
+  end
+
   def samples_output_data(samples)
     final_result = []
     samples.each do |output|
@@ -126,6 +141,11 @@ module SamplesHelper
           run_stages.each do |rs|
             pipeline_run_entry[rs[:name]] = rs.job_status
           end
+          pipeline_run_entry[:total_runtime] = if recent_pipeline_run.finalized?
+                                                 run_stages.map { |rs| rs.updated_at - rs.created_at }.sum # total processing time (without time spent waiting), for performance evaluation
+                                               else
+                                                 Time.current - recent_pipeline_run.created_at # time since pipeline kickoff (including time spent waiting), for run diagnostics
+                                               end
         else
           pipeline_run_status = recent_pipeline_run.job_status
           pipeline_run_entry[:job_status_description] =
@@ -154,9 +174,11 @@ module SamplesHelper
       job_info = {}
       final_result = samples_output_data(samples)
       pipeline_run_info = samples_pipeline_run_info(samples)
+      uploaders = sample_uploaders(samples)
       job_info[:db_sample] = samples[i]
       job_info[:derived_sample_output] = final_result[i]
       job_info[:run_info] = pipeline_run_info[i]
+      job_info[:uploader] = uploaders[i]
       formatted_samples.push(job_info)
     end
     formatted_samples

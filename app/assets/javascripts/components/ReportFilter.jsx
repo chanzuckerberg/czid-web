@@ -49,7 +49,7 @@ class ReportFilter extends React.Component {
   }
 
   applyFilters(event) {
-    ReportFilter.showLoading('Applying thresholds values...');
+    ReportFilter.showLoading('Applying thresholds...');
     this.props.applyNewFilterThresholds(this.new_filter_thresholds);
   }
 
@@ -187,7 +187,7 @@ class ReportFilter extends React.Component {
     return (
       <div>
         <div className="sidebar-title">
-          Report Filters
+          Report filters
         </div>
         <div className="sidebar-tabs">
           <div className="row">
@@ -196,7 +196,7 @@ class ReportFilter extends React.Component {
                 <div className="sidebar-pane">
                   <div className="report-data background-model">
                     <div className="report-title">
-                      Background Model
+                      Background model
                     </div>
                     <div className="report-value">
                       { this.background_model }

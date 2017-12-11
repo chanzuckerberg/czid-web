@@ -149,7 +149,7 @@ input[type=number] {
         text-align: right;
         margin-top: 15px;
         label {
-          font-size: 15px;
+          font-size: 13px;
           color: #464343;
         }
       }
@@ -326,6 +326,15 @@ input[type=number] {
 .report-table {
   td:first-child {
     width: 450px;
+  }
+  td:last-child {
+    padding-right: 50px;
+  }
+  th:first-child {
+    width: 450px;
+  }
+  th:last-child {
+    padding-right: 50px;
   }
 }
 .genus-search-row {

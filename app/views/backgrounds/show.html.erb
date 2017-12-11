@@ -5,6 +5,7 @@
   <%= @background.name %>
 </p>
 
+<!--
 <p>
   <strong>Used in <%= pluralize(@background.reports.count, 'report')%>:</strong>
   <%= raw(@background.reports.map do |r|
@@ -12,6 +13,7 @@
     end.join(','))
   %>
 </p>
+-->
 
 <p>
   <strong>Date created:</strong>
@@ -34,7 +36,7 @@
     <tbody>
       <% @background.pipeline_outputs.each do |p| %>
         <tr>
-          <td><%= link_to p.name, p %></td>
+          <td><%= link_to p.check_box_label, p %></td>
         </tr>
       <% end %>
     </tbody>

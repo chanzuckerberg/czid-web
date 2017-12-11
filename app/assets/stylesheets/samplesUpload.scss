@@ -1,0 +1,228 @@
+.background-cover {
+  background-color: #edf1f2;
+}
+
+#samplesUploader {
+  .upload-form-container {
+    margin-top: 50px;
+    background: #ffffff;
+    min-height: 400px;
+    border-radius: 3px;
+    .content {
+      // border: 1px solid;
+      margin: 25px;
+      .form-feedback {
+        font-size: 14px;
+        margin-bottom: 15px;
+        p {
+          word-wrap: break-word;
+          margin: 0;
+          font-size: 12px;
+        }
+      }
+      .success-message {
+        color: #61A615;
+      }
+      .error-message {
+        color: #D0021B;
+      }
+      .form-title {
+        font-size: 21px;
+        color: #333E48;
+        font-weight: 700;
+        letter-spacing: 0.28px;
+      }
+      .upload-info {
+        color: #677986;
+        font-size: 14px;
+      }
+      .upload-question {
+        color: #313E49;
+        font-size: 12px;
+        margin-top: 20px;
+        margin-bottom: 25px;
+        a {
+          font-weight: 600;
+        }
+        a:hover {
+          color: #5ABCD6 !important;
+        }
+      }
+      .fields {
+        .field {
+          .row {
+            &.input-row {
+              margin-top: -10px;
+              .browser-default {
+                width: 100%;
+                padding: 10px;
+                border: 1px solid #CAD0DA;
+                background: #fff;
+              }
+              [disabled] {
+                background: #EEF1F2;
+                border: #CAD0DA;
+              }
+            }
+            .field-title {
+              color: #000;
+              font-size: 12px;
+              font-weight: 600;
+              .validation-info {
+                color: #677986;
+              }
+            }
+            .field-error {
+              color: #d9534f;
+              font-size: 12px;
+            }
+            .no-padding {
+              padding: 0;
+            }
+            .example-link {
+              color: #3D8CAD !important;
+              font-size: 11px;
+            }
+            .new-button {
+              padding: 10px;
+              border-radius: 2px;
+              border: 1px solid;
+              min-width: 120px;
+              i {
+                margin-right: 5px;
+              }
+              &[disabled] {
+                background-color: #cccccc;
+                border-color: #cccccc;
+              }
+            }
+            .skyblue-button {
+              background: #D6EEF5;
+              border-color: #D6EEF5;
+              color: #68C2D9;
+              i {
+                color: #5ABCD6;
+              }
+              &.new-project-button {
+                width: 92%;
+                float: right;
+                font-size: 13px;
+                height:48px;
+                background:#e9ecf1;
+                border-color: #e9ecf1;
+                color: #586A78;
+                i {
+                  color: #586A78;
+                }
+                &:hover, &.active {
+                  background: #c3dde4;
+                  border-color: #c3dde4;
+                  color: #4d9db1;
+                  i {
+                    color: #4d9db1;
+                  }
+                }
+              }
+            }
+            .blue-button {
+              background: #5ABCD6;
+              border-color: #5ABCD6;
+              color: #FFFFFF;
+            }
+            .upload-samples-button {
+              margin-right: 10px;
+            }
+            .host-selector {
+              margin-top: 0;
+              li {
+                display: inline-block;
+                margin-right: 10px;
+                border: 1px solid transparent;
+                padding: 5px;
+                min-height: 120px;
+                width: 120px;
+                margin-bottom: 10px;
+                background: #E8EFF1;
+                cursor: pointer;
+                .genome-label {
+                  color: #95A1AB;
+                  text-align: center;
+                  font-size: 0.75em;
+                  margin-top: 5px;
+                }
+                &.active, &:hover {
+                  background: #D6EEF5;
+                  border-color: #4BA4C1;
+                  .genome-label {
+                    color: #5ABCD6;
+                  }
+                }
+                .img-container {
+                  text-align: center;
+                  background-repeat: no-repeat;
+                  background-size: contain;
+                  background-position: center;
+                  padding: 10px;
+                  svg {
+                    width: 65px;
+                  }
+                }
+              }
+            }
+            .project-list {
+              .select-wrapper {
+                height: 50px;
+                width: 90%;
+                input {
+                  padding-left: 1em;
+                }
+              }
+              .select-dropdown {
+                padding-left: 2px;
+                border: 1px solid #CAD0DA;
+              }
+              .caret {
+                color: #bac8cf;
+
+              }
+              li {
+                span {
+                  color: #263039;
+                  font-size: 13px;
+                }
+              }
+            }
+            .admin-genomes {
+              .genome-label {
+                // float: right;
+                font-size: 0.75em;
+                color: #313E49;
+                display: inline-block;
+                border-right: 1px solid #313E49;
+                padding-right: 5px;
+                margin-left: 5px;
+                cursor: pointer;
+                &:hover, &.active {
+                  color: #3a71a0;
+                }
+              }
+              .genome-label:last-child {
+                border-right: 0;
+                padding-right: 0;
+              }
+            }
+          }
+        }
+        .admin-fields {
+          &.divider {
+            margin: 20px 0;
+          }
+        }
+        .admin-input-title {
+          color: #677986;
+          font-size: 13px;
+        }
+      }
+    }
+  }
+}
