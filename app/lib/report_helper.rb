@@ -187,12 +187,22 @@ module ReportHelper
     s3_path_hash = report.pipeline_output.sample.s3_paths_for_taxon_byteranges
     s3_path_hash.each do |_tax_level, h|
       h.each do |_hit_type, s3_path|
-        command = "aws s3 ls #{s3_path}"
-        _stdout, _stderr, status = Open3.capture3(command)
-        return false unless status.exitstatus.zero?
+        return false unless s3_file_present?(s3_path)
       end
     end
     true
+  end
+
+  def s3_file_present?(s3_path)
+    command = "aws s3 ls #{s3_path}"
+    _stdout, _stderr, status = Open3.capture3(command)
+    return false unless status.exitstatus.zero?
+    true
+  end
+
+  def alignment_info_present?(report)
+    indicator_s3_path = "#{report.pipeline_output.sample.sample_output_s3_path}/full_alignment_info_present_NT.txt"
+    s3_file_present?(indicator_s3_path)
   end
 
   def report_details(report)
@@ -202,7 +212,8 @@ module ReportHelper
       sample_info: report.pipeline_output.sample,
       project_info: report.pipeline_output.sample.project,
       background_model: report.background,
-      taxon_fasta_flag: taxon_fastas_present?(report)
+      taxon_fasta_flag: taxon_fastas_present?(report),
+      alignment_info_flag: alignment_info_present?(report)
     }
   end
 

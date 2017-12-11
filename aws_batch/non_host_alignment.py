@@ -88,17 +88,28 @@ TARGET_OUTPUTS = None
 AWS_BATCH_JOB_ID = None
 
 # convenience functions
-def generate_taxid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fasta_file, annotation_prefix):
+def fuzzy_get(dictionary, raw_key, default_value):
+    value_list = [dictionary[key] for key in dictionary if raw_key in key]
+    value = value_list[0] if value_list else default_value
+    return value
+
+def generate_taxid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fasta_file, annotation_prefix, full_alignment_info):
     '''Tag reads based on the m8 output'''
     # Example:  generate_annotated_fasta_from_m8('filter.unmapped.merged.fasta',
     #  'bowtie.unmapped.star.gsnapl-nt-k16.m8', 'NT-filter.unmapped.merged.fasta', 'NT')
     # Construct the m8_hash
     read_to_accession_id = {}
+    if full_alignment_info:
+        read_to_alignment_info = {}
+        m8_column_names = ["pident", "length", "mismatch", "gapopen", "qstart",
+                           "qend", "sstart", "send", "evalue", "bitscore"]
+        # conventional column names, see: https://github.com/seqan/lambda/wiki/BLAST-Output-Formats
+        m8_column_names_with_prefix = ["-".join([annotation_prefix, column]) for column in m8_column_names]
     with open(m8_file, 'rb') as m8f:
         for line in m8f:
             if line[0] == '#':
                 continue
-            parts = line.split("\t")
+            parts = line.rstrip().split("\t")
             read_name = parts[0]
             read_name_parts = read_name.split("/")
             if len(read_name_parts) > 1:
@@ -107,6 +118,10 @@ def generate_taxid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fas
                 output_read_name = read_name
             accession_id = parts[1]
             read_to_accession_id[output_read_name] = accession_id
+            if full_alignment_info:
+                alignment_info = [":".join(list(pair)) for pair in zip(m8_column_names_with_prefix, parts[2:12])]
+                # e.g.: ["NT-pident:91.1", "NT-length:135", "NT-mismatch:12", ...]
+                read_to_alignment_info[output_read_name] = ":".join(alignment_info)
     # Go through the input_fasta_file to get the results and tag reads
     input_fasta_f = open(input_fasta_file, 'rb')
     output_fasta_f = open(output_fasta_file, 'wb')
@@ -114,14 +129,28 @@ def generate_taxid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fas
     sequence_data = input_fasta_f.readline()
     while sequence_name and sequence_data:
         read_id = sequence_name.rstrip().lstrip('>')
-        accession = read_to_accession_id.get(read_id, '')
-        new_read_name = annotation_prefix + ':' + accession + ':' + read_id
+        first_annotation_pass = (":read_id:" not in read_id)
+        if first_annotation_pass:
+            accession = read_to_accession_id.get(read_id, '')
+            info = ':' + read_to_alignment_info.get(read_id, '') if full_alignment_info else ''
+            annotation_suffix = ':read_id:'
+        else:
+            raw_read_id = read_id.split(":read_id:")[1]
+            accession = fuzzy_get(read_to_accession_id, raw_read_id, '')
+            info = ':' + fuzzy_get(read_to_alignment_info, raw_read_id, '') if full_alignment_info else ''
+            annotation_suffix = ':'
+        annotation = annotation_prefix + ':' + accession + info + annotation_suffix
+        new_read_name = annotation + read_id
         output_fasta_f.write(">%s\n" % new_read_name)
         output_fasta_f.write(sequence_data)
         sequence_name = input_fasta_f.readline()
         sequence_data = input_fasta_f.readline()
     input_fasta_f.close()
     output_fasta_f.close()
+    if full_alignment_info:
+        # touch a file in S3 to indicate presence of the information for the web app
+        indicator_file = "%s/full_alignment_info_present_%s.txt" % (RESULT_DIR, annotation_prefix)
+        execute_command("echo 'yes' > %s; aws s3 cp %s %s/" % (indicator_file, indicator_file, SAMPLE_S3_OUTPUT_PATH))
 
 def deduplicate_m8(input_m8, output_m8):
     outf = open(output_m8, "wb")
@@ -592,8 +621,8 @@ def run_filter_deuterostomes_from_m8(input_m8, output_m8):
     execute_command("aws s3 cp %s %s/" % (output_m8, SAMPLE_S3_OUTPUT_PATH))
 
 def run_generate_taxid_annotated_fasta_from_m8(input_m8, input_fasta,
-    output_fasta, annotation_prefix):
-    generate_taxid_annotated_fasta_from_m8(input_fasta, input_m8, output_fasta, annotation_prefix)
+    output_fasta, annotation_prefix, full_alignment_info):
+    generate_taxid_annotated_fasta_from_m8(input_fasta, input_m8, output_fasta, annotation_prefix, full_alignment_info)
     write_to_log("finished job")
     # move the output back to S3
     execute_command("aws s3 cp %s %s/" % (output_fasta, SAMPLE_S3_OUTPUT_PATH))
@@ -710,7 +739,7 @@ def run_combine_json_outputs(input_json_1, input_json_2, output_json):
     execute_command("aws s3 cp %s %s/" % (output_json, SAMPLE_S3_OUTPUT_PATH))
 
 def run_generate_unidentified_fasta(input_fa, output_fa):
-    subprocess.check_output("grep -A 1 '>NR::NT::' %s | sed '/^--$/d' > %s" % (input_fa, output_fa), shell=True)
+    subprocess.check_output("grep -A 1 '>NR::' %s | grep -A 1 ':NT::' | sed '/^--$/d' > %s" % (input_fa, output_fa), shell=True)
     write_to_log("finished job")
     execute_command("aws s3 cp %s %s/" % (output_fa, SAMPLE_S3_OUTPUT_PATH))
 
@@ -801,7 +830,7 @@ def run_stage2(lazy_run = True):
         {"title": "generate taxid annotated fasta from m8", "count_reads": False})
     run_and_log(logparams, TARGET_OUTPUTS["run_generate_taxid_annotated_fasta_from_m8__1"], False,
         run_generate_taxid_annotated_fasta_from_m8, os.path.join(RESULT_DIR, GSNAPL_DEDUP_OUT),
-        merged_fasta, os.path.join(RESULT_DIR, GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT), 'NT')
+        merged_fasta, os.path.join(RESULT_DIR, GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT), 'NT', True)
 
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "filter deuterostomes from m8__1", "count_reads": True,
@@ -853,7 +882,7 @@ def run_stage2(lazy_run = True):
         RESULT_DIR + '/' + RAPSEARCH2_OUT,
         RESULT_DIR + '/' + FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT,
         RESULT_DIR + '/' + GENERATE_TAXID_ANNOTATED_FASTA_FROM_RAPSEARCH2_M8_OUT,
-        'NR')
+        'NR', True)
 
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "filter deuterostomes from m8", "count_reads": True,

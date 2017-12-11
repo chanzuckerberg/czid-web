@@ -24,4 +24,49 @@ module PipelineOutputsHelper
       return 'Coming soon' # Temporary fix
     end
   end
+
+  def parse_alignment_from_taxid_fasta(taxid_fasta, hit_type)
+    alignment_info = {}
+    taxid_fasta.each_line do |line|
+      next unless line.start_with? '>'
+      # example line:
+      #  >family_nr:481:family_nt:-300:genus_nr:482:genus_nt:-200:species_nr:-100:species_nt:-100:NR::NT:WP_039856594.1: \
+      #  NT-pident:91.1:NT-length:135:NT-mismatch:12:NT-gapopen:0:NT-qstart:1:NT-qend:135:NT-sstart:4070:NT-send:3936:NT-evalue:1.4e-64:NT-bitscore:256.3 \
+      #  M05295:49:000000000-G17RL:1:1103:18620:22956/2
+      read_id = line.strip.split(":read_id:")[1]
+      accession_id = line.split(":" + hit_type + ":")[1].split(":")[0]
+      start_delimiter = ":" + hit_type + "-sstart:"
+      end_delimiter = ":" + hit_type + "-send:"
+      alignment_start = line.split(start_delimiter)[1].split(":")[0] if line.include? start_delimiter
+      alignment_end = line.split(end_delimiter)[1].split(":")[0] if line.include? end_delimiter
+      read_info = { read_id: read_id, alignment_start: alignment_start, alignment_end: alignment_end }
+      if alignment_info.key?(accession_id)
+        alignment_info[accession_id][:aligned_reads].push(read_info)
+      else
+        alignment_info[accession_id] = { aligned_reads: [read_info] }
+      end
+    end
+    # Add reference length information (this uses the NCBI eutils API)
+    alignment_info.each do |accession_id, _info|
+      alignment_info[accession_id][:reference_length] = get_sequence_length_from_accession(accession_id)
+    end
+    alignment_info
+  end
+
+  def get_sequence_length_from_accession(accession_id)
+    sequence_length = `
+      QUERY=#{accession_id}
+      BASE=https://eutils.ncbi.nlm.nih.gov/entrez/eutils
+      SEARCH_URL=${BASE}/esearch.fcgi?db=nuccore\\&term=${QUERY}\\&usehistory=y
+      OUTPUT=$(curl $SEARCH_URL)
+      WEB=$(echo $OUTPUT | sed -e 's/.*<WebEnv>\\(.*\\)<\\/WebEnv>.*/\\1/')
+      KEY=$(echo $OUTPUT | sed -e 's/.*<QueryKey>\\(.*\\)<\\/QueryKey>.*/\\1/')
+      FETCH_URL=${BASE}/efetch.fcgi?db=nuccore\\&query_key=${KEY}\\&WebEnv=${WEB}\\&rettype=fasta\\&retmode=xml
+      RESULT=$(curl $FETCH_URL)
+      SEQUENCE_LENGTH=$(echo $RESULT | sed -e 's/.*<TSeq_length>\\(.*\\)<\\/TSeq_length>.*/\\1/')
+      echo $SEQUENCE_LENGTH
+    `
+    raise "sequence length lookup failed" unless $CHILD_STATUS.success?
+    sequence_length.strip
+  end
 end
