@@ -4,6 +4,7 @@ class Header extends React.Component  {
     this.userSignedIn = this.props.userSignedIn;
     this.userDetails = this.props.userDetails || null;
     this.location = window.location.pathname;
+    this.sendMail = this.sendMail.bind(this);
   }
 
 	componentDidMount() {
@@ -21,14 +22,26 @@ class Header extends React.Component  {
     location.href = `${path}`
   }
 
+  sendMail() {
+    var link = "mailto:regger@chanzuckerberg.com?Subject=Report%20Feedback"
+    window.location.href = link;
+  }
+
   render() {
     return (
       <div>
+        <div className="page-loading">
+          <div className="btn disabled">
+            <i className="fa fa-spinner fa-spin"/>
+            <span className='spinner-label'></span>
+          </div>
+        </div>
         <div className="site-header">
           {/* Dropdown menu */}
           <ul id="dropdown1" className="dropdown-content">
-            <li onClick={ this.gotoPage.bind(this, '/samples/new') }><a href="#!">New Sample</a></li>
-           { this.userDetails && this.userDetails.admin ? <li onClick={ this.gotoPage.bind(this, '/users/new') }><a href="#!">Create User</a></li> : null }
+            <li onClick={ this.gotoPage.bind(this, '/samples/new') }><a href="#!">New sample</a></li>
+           { this.userDetails && this.userDetails.admin ? <li onClick={ this.gotoPage.bind(this, '/users/new') }><a href="#!">Create user</a></li> : null }
+            <li onClick={ this.sendMail }><a href="#!">Report Feedback</a></li>
             <li className="divider"></li>
             <li><a rel="nofollow" data-method="delete" href={this.props.signoutEndpoint}>Logout</a></li>
           </ul>

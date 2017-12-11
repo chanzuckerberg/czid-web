@@ -61,4 +61,10 @@ Rails.application.configure do
   config.action_controller.asset_host = proc { |source|
     "http://localhost:8080" if source =~ /wp_bundle\.js$/i
   }
+
+  config.action_mailer.delivery_method = :mailgun
+  config.action_mailer.mailgun_settings = {
+    api_key: ENV['MAIL_GUN_API_KEY'],
+    domain: 'mg.idseq.net'
+  }
 end

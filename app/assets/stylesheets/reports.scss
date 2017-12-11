@@ -16,6 +16,15 @@ input[type=number] {
 
 .reports-sidebar {
   background: $sidebar-background;
+  position: sticky;
+  z-index: 1;
+  position: -webkit-sticky;
+  position: -moz-sticky;
+  position: -o-sticky;
+  position: -ms-sticky;
+  top: 0;
+  min-height: -webkit-fill-available !important;
+  border-right: 1px solid rgb(212, 212, 212);
 }
 
 .sidebar-title {
@@ -140,7 +149,7 @@ input[type=number] {
         text-align: right;
         margin-top: 15px;
         label {
-          font-size: 15px;
+          font-size: 13px;
           color: #464343;
         }
       }
@@ -317,6 +326,15 @@ input[type=number] {
 .report-table {
   td:first-child {
     width: 450px;
+  }
+  td:last-child {
+    padding-right: 50px;
+  }
+  th:first-child {
+    width: 450px;
+  }
+  th:last-child {
+    padding-right: 50px;
   }
 }
 .genus-search-row {

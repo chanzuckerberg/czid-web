@@ -3,6 +3,8 @@
 #
 
 project = Project.create!(name: "Awesome Project")
+background = Background.new(name: "fake background")
+HostGenome.create!(name: "human", default_background_id: 1)
 
 (1..5).each do |i|
   sample = Sample.new(name: "Sample #{i}", project: project,
@@ -16,6 +18,8 @@ project = Project.create!(name: "Awesome Project")
   output = PipelineOutput.create!(sample: sample, total_reads: 1_000, remaining_reads: 500, taxon_counts: taxon_counts, pipeline_run: pipeline_run)
   pipeline_run.pipeline_output_id = output.id
   pipeline_run.save!
+  background.pipeline_outputs << output
 end
 
+background.save!
 user = User.create!(email: "fake@example.com", name: "Fake User", password: "password", password_confirmation: "password", role: 1, authentication_token: "idseq1234")

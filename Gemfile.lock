@@ -487,6 +487,9 @@ GEM
       execjs (~> 2.0)
     bcrypt (3.1.11)
     bindex (0.5.0)
+    bootstrap-tooltip-rails (0.1)
+      rails (>= 3.1)
+      thor
     builder (3.2.3)
     byebug (9.1.0)
     capybara (2.15.4)
@@ -569,9 +572,16 @@ GEM
       nokogiri (>= 1.5.9)
     mail (2.7.0)
       mini_mime (>= 0.1.1)
+    mailgun_rails (0.9.0)
+      actionmailer (>= 3.2.13)
+      json (>= 1.7.7)
+      rest-client (>= 1.6.7)
     materialize-sass (0.100.2)
       sass (~> 3.3)
     method_source (0.9.0)
+    mime-types (3.1)
+      mime-types-data (~> 3.2015)
+    mime-types-data (3.2016.0521)
     mini_mime (1.0.0)
     mini_portile2 (2.3.0)
     minitest (5.10.3)
@@ -582,6 +592,7 @@ GEM
     multipart-post (2.0.0)
     mustermann (1.0.1)
     mysql2 (0.4.9)
+    netrc (0.11.0)
     nio4r (2.1.0)
     nokogiri (1.8.1)
       mini_portile2 (~> 2.3.0)
@@ -654,6 +665,10 @@ GEM
       redis (~> 3.3)
       resque (~> 1.26)
       rufus-scheduler (~> 3.2)
+    rest-client (2.0.2)
+      http-cookie (>= 1.0.2, < 2.0)
+      mime-types (>= 1.16, < 4.0)
+      netrc (~> 0.8)
     rspec-core (3.7.0)
       rspec-support (~> 3.7.0)
     rspec-expectations (3.7.0)
@@ -771,6 +786,7 @@ DEPENDENCIES
   aws-sdk-resources
   axios_rails
   bcrypt (~> 3.1.7)
+  bootstrap-tooltip-rails
   byebug
   capybara (~> 2.13)
   coffee-rails (~> 4.2)
@@ -784,6 +800,7 @@ DEPENDENCIES
   libhoney
   listen (>= 3.0.5, < 3.2)
   logger
+  mailgun_rails
   materialize-sass
   momentjs-rails
   multipart-post

@@ -16,6 +16,27 @@ class PipelineSampleReport extends React.Component {
     this.collapseTable = this.collapseTable.bind(this);
     this.disableFilters = this.disableFilters.bind(this);
     this.enableFilters = this.enableFilters.bind(this);
+    this.initializeTooltip();
+  }
+
+  initializeTooltip() {
+    // only updating the tooltip offset when the component is loaded
+    $(() => {
+      const tooltipIdentifier = $("[rel='tooltip']");
+      tooltipIdentifier.tooltip({
+        delay: 0,
+        html: true,
+        placement: 'bottom',
+        offset: '0px 50px'
+      });
+      $('.sort-controls').hover(() => {
+        const selectTooltip = $('.tooltip');
+        const leftOffset = parseInt(selectTooltip.css('left'));
+        if(!isNaN(leftOffset)) {
+          selectTooltip.css('left', leftOffset - 15);
+        }
+      });
+    });
   }
 
   refreshPage(overrides) {
@@ -25,16 +46,20 @@ class PipelineSampleReport extends React.Component {
 
   disableFilters() {
     disable_filters = 1;
+    ReportFilter.showLoading('Disabling filters...');
     this.refreshPage({disable_filters});
   }
 
   enableFilters() {
     disable_filters = 0;
+    ReportFilter.showLoading('Enabling filters...');
     this.refreshPage({disable_filters});
   }
 
   // applySort needs to be bound at time of use, not in constructor above
   applySort(sort_by) {
+    const regex = new RegExp('_', 'g');
+    ReportFilter.showLoading(`Sorting the table by ${sort_by.replace(regex, ' ')}...`);
     this.refreshPage({sort_by});
   }
 
@@ -89,6 +114,25 @@ class PipelineSampleReport extends React.Component {
     )
   }
 
+  category_to_adjective(category) {
+    category_lowercase = category.toLowerCase()
+    switch(category_lowercase) {
+      case "bacteria":
+        return "bacterial"
+      case "archaea":
+        return "archaeal"
+      case "eukaryota":
+        return "eukaryotic"
+      case "viruses":
+        return "viral"
+      case "viroids":
+        return "viroidal"
+      case "uncategorized":
+        return "uncategorized"
+    }
+    return category_lowercase
+  }
+
   render_name(tax_info, report_details) {
     let foo = <i>{tax_info.name}</i>;
     if (tax_info.tax_id > 0) {
@@ -122,7 +166,7 @@ class PipelineSampleReport extends React.Component {
       </span>;
       foo = <div className="hover-wrapper">
         <div className='genus-name'> {plus_or_minus} {foo}</div>
-        <i className='count-info'>({tax_info.species_count} {category_name} species)</i>
+        <i className='count-info'>({tax_info.species_count} {this.category_to_adjective(category_name)} species)</i>
         { this.displayTags(tax_info, report_details) }
       </div>;
     }
@@ -156,11 +200,11 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
-  render_column_header(visible_type, visible_metric, column_name) {
-    var style = { 'textAlign': 'right' };
+  render_column_header(visible_type, visible_metric, column_name, tooltip_message) {
+    var style = { 'textAlign': 'right', 'cursor': 'pointer' };
     return (
       <th style={style}>
-        <div className='sort-controls right'>
+        <div className='sort-controls right' rel='tooltip' title={tooltip_message}>
           {this.render_sort_arrow(column_name, 'lowest', 'up')}
           {this.render_sort_arrow(column_name, 'highest', 'down')}
           {visible_type}<br/>
@@ -250,7 +294,7 @@ class PipelineSampleReport extends React.Component {
     download_button = (
       <a href={`/reports/${this.report_details.report_info.id}/csv`} className="download-report right">
         <div className="fa fa-cloud-download"/>
-        <div>Download Report</div>
+        <div>Download report</div>
       </a>
     );
     right_arrow_initial_visibility = this.isGenusSearch() ? 'hidden' : '';
@@ -280,19 +324,21 @@ class PipelineSampleReport extends React.Component {
                         </span>
                         Taxonomy
                       </th>
-                      { this.render_column_header('NT+NR', 'ZZRPM',  'nt_aggregatescore') }
-                      { this.render_column_header('NT', 'Z',   'nt_zscore') }
-                      { this.render_column_header('NT', 'rPM', 'nt_rpm')    }
-                      { this.render_column_header('NT', 'r',   'nt_r')      }
-                      { this.render_column_header('NT', '%id', 'nt_percentidentity')    }
-                      { this.render_column_header('NT', 'AL',   'nt_alignmentlength')    }
-                      { this.render_column_header('NT', 'Log(1/E)',  'nt_neglogevalue')    }
-                      { this.render_column_header('NR', 'Z',   'nr_zscore') }
-                      { this.render_column_header('NR', 'rPM', 'nr_rpm')    }
-                      { this.render_column_header('NR', 'r',   'nr_r')      }
-                      { this.render_column_header('NR', '%id', 'nr_percentidentity')    }
-                      { this.render_column_header('NR', 'AL',   'nr_alignmentlength')    }
-                      { this.render_column_header('NR', 'Log(1/E)',  'nr_neglogevalue')    }
+                        {this.render_column_header('NT+NR', 'ZZRPM',  'nt_aggregatescore', 'Aggregate score') }
+                        {this.render_column_header('NT', 'Z',   'nt_zscore', 'Z-score relative to background model for alignments to NCBI NT') }
+                        {this.render_column_header('NT', 'rPM', 'nt_rpm', 'Number of reads aligning to the taxon in the NCBI NT database per million total input reads')}
+                        {this.render_column_header('NT', 'r',   'nt_r', 'Number of reads aligning to the taxon in the NCBI NT database')}
+                        {this.render_column_header('NT', '%id', 'nt_percentidentity', 'Average percent-identity of alignments to NCBI NT')}
+                        {this.render_column_header('NT', 'L',   'nt_alignmentlength', 'Average length of alignments to NCBI NT')}
+                        {this.render_column_header('NT', 'Log(1/E)',  'nt_neglogevalue', 'Average log-10-transformed expect value for alignments to NCBI NT')}
+                        {this.render_column_header('NT', '%conc',  'nt_percentconcordant', 'Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NT)')}
+                        {this.render_column_header('NR', 'Z',   'nr_zscore', 'Z-score relative to background model for alignments to NCBI NR') }
+                        {this.render_column_header('NR', 'rPM', 'nr_rpm', 'Number of reads aligning to the taxon in the NCBI NR database per million total input reads')}
+                        {this.render_column_header('NR', 'r',   'nr_r', 'Number of reads aligning to the taxon in the NCBI NR database')}
+                        {this.render_column_header('NR', '%id', 'nr_percentidentity', 'Average percent-identity of alignments to NCBI NR')}
+                        {this.render_column_header('NR', 'AL',   'nr_alignmentlength', 'Average length of alignments to NCBI NR')}
+                        {this.render_column_header('NR', 'Log(1/E)',  'nr_neglogevalue', 'Average log-10-transformed expect value for alignments to NCBI NR')}
+                        {this.render_column_header('NR', '%conc',  'nr_percentconcordant', 'Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NR)')}
                     </tr>
                     </thead>
                     <tbody>
@@ -309,12 +355,14 @@ class PipelineSampleReport extends React.Component {
                           { this.render_number(tax_info.NT.percentidentity, sort_column == 'nt_percentidentity', 1) }
                           { this.render_number(tax_info.NT.alignmentlength, sort_column == 'nt_alignmentlength', 1)       }
                           { this.render_number(tax_info.NT.neglogevalue, sort_column == 'nt_neglogevalue', 0) }
+                          { this.render_number(tax_info.NT.percentconcordant, sort_column == 'nt_percentconcordant', 1) }
                           { this.render_number(tax_info.NR.zscore, sort_column == 'nr_zscore', 1) }
                           { this.render_number(tax_info.NR.rpm, sort_column == 'nr_rpm', 1)       }
                           { this.render_number(tax_info.NR.r, sort_column == 'nr_r', 0)           }
                           { this.render_number(tax_info.NR.percentidentity, sort_column == 'nr_percentidentity', 1) }
                           { this.render_number(tax_info.NR.alignmentlength, sort_column == 'nr_alignmentlength', 1)       }
                           { this.render_number(tax_info.NR.neglogevalue, sort_column == 'nr_neglogevalue', 0) }
+                          { this.render_number(tax_info.NR.percentconcordant, sort_column == 'nr_percentconcordant', 1) }
                         </tr>
                       )
                     })}

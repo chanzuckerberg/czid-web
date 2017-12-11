@@ -4,12 +4,12 @@ git_source(:github) do |repo_name|
   repo_name = "#{repo_name}/#{repo_name}" unless repo_name.include?('/')
   "https://github.com/#{repo_name}.git"
 end
-
 gem 'airbrake', '~> 7.0'
 gem 'airbrake-ruby'
 gem 'aws-sdk-ecs'
 gem 'aws-sdk-resources'
 gem 'axios_rails'
+gem 'bootstrap-tooltip-rails'
 # Use ActiveModel has_secure_password
 gem 'bcrypt', '~> 3.1.7'
 # Use CoffeeScript for .coffee assets and views
@@ -18,6 +18,7 @@ gem 'd3-rails'
 gem 'devise', '4.3.0'
 gem 'font-awesome-rails'
 gem "health_check"
+gem 'mailgun_rails'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.5'
 # jquery for rails

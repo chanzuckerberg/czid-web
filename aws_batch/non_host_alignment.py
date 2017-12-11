@@ -40,7 +40,7 @@ ENVIRONMENT = 'production'
 
 # compute capacity
 GSNAPL_MAX_CONCURRENT = 20 # number of gsnapl jobs allowed to run concurrently on 1 machine
-RAPSEARCH2_MAX_CONCURRENT = 1
+RAPSEARCH2_MAX_CONCURRENT = 3
 GSNAPL_CHUNK_SIZE = 30000 # number of fasta records in a chunk
 RAPSEARCH_CHUNK_SIZE = 10000
 KEY_S3_PATH = None
@@ -49,6 +49,7 @@ KEY_S3_PATH = None
 ACCESSION2TAXID = 's3://czbiohub-infectious-disease/references/accession2taxid.db.gz'
 DEUTEROSTOME_TAXIDS = 's3://czbiohub-infectious-disease/references/lineages-2017-03-17_deuterostome_taxIDs.txt'
 TAXID_TO_INFO = 's3://czbiohub-infectious-disease/references/taxon_info.db'
+LINEAGE_SHELF = 's3://czbiohub-infectious-disease/references/taxid-lineages.db'
 
 # definitions for integration with web app
 TAX_LEVEL_SPECIES = 1
@@ -166,29 +167,54 @@ def deduplicate_m8(input_m8, output_m8):
             previous_read_name = read_name
     outf.close()
 
-def generate_tax_counts_from_m8(m8_file, e_value_type, output_file):
-    # uses m8 file with read names beginning as: "taxid<taxon ID>:"
+def generate_tax_counts_from_m8(m8_file, e_value_type, output_file, lineage_map):
     taxid_count_map = {}
     taxid_percent_identity_map = {}
     taxid_alignment_length_map = {}
     taxid_e_value_map = {}
+    read_to_taxid = {}
+
     with open(m8_file, 'rb') as m8f:
         for line in m8f:
-            taxid = (line.split("taxid"))[1].split(":")[0]
-            #"taxid9606:NB501961:14:HM7TLBGX2:1:12104:15431..."
-            percent_identity = float(line.split("\t")[2])
-            alignment_length = float(line.split("\t")[3])
-            e_value = float(line.split("\t")[10])
-            if e_value_type != 'log10':
-                e_value = math.log10(e_value)
-            # m8 format (Blast format 8): query, subject, %id, alignment length, mismatches, gap openings, query start, query end,
-            #                            subject start, subject end, E value (log10 if rapsearch2 output), bit score
+
+            # Get taxid:
+            line_columns = line.split("\t")
+            read_id_column = line_columns[0]
+            taxid = (read_id_column.split("taxid"))[1].split(":")[0]
+            species_taxid, genus_taxid, family_taxid = lineage_map.get(taxid, ("-100", "-200", "-300"))
+
+            # Get raw read ID without our annotations:
+            # If m8 is from gsnap (case 1), 1 field has been prepended (taxid field).
+            # If m8 is from rapsearch in an old version of the pipeline (case 2), 3 fields have been prepended (taxid, 'NT', NT accession ID).
+            # If m8 is from rapsearch in a newer version of the pipeline (case 3), many fields have been prepended (taxid, alignment info fields),
+            # but the delimiter ":read_id:" marks the beginning of the raw read ID.
+            read_id_column = read_id_column.split(":", 1)[1] # remove taxid field (all cases)
+            if ":read_id:" in read_id_column: # case 3
+                raw_read_id = read_id_column.split(":read_id:")[1]
+            elif read_id_column.startswith("NT:"): # case 2
+                raw_read_id = read_id_column.split(":", 2)[2]
+            else: # case 1
+                raw_read_id = read_id_column
+
+            # Get alignment quality metrics from m8 format (blast format 8):
+            #   %id, alignment length, mismatches, gap openings, query start, query end,
+            #   subject start, subject end, E value (log10 if rapsearch2 output), bit score
             # E value is a negative power of 10. GSNAPL outputs raw e-value, RAPSearch2 outputs log10(e-value).
             # Whenever we use "e_value" it refers to log10(e-value), which is easier to handle.
+            percent_identity = float(line_columns[2])
+            alignment_length = float(line_columns[3])
+            e_value = float(line_columns[10])
+            if e_value_type != 'log10':
+                e_value = math.log10(e_value)
             taxid_count_map[taxid] = taxid_count_map.get(taxid, 0) + 1
             taxid_percent_identity_map[taxid] = taxid_percent_identity_map.get(taxid, 0) + percent_identity
             taxid_alignment_length_map[taxid] = taxid_alignment_length_map.get(taxid, 0) + alignment_length
             taxid_e_value_map[taxid] = taxid_e_value_map.get(taxid, 0) + e_value
+
+            # Keep mapping of read ids to taxids in order to determine pair concordance later:
+            read_to_taxid[raw_read_id] = (species_taxid, genus_taxid, family_taxid)
+
+    # Write results:
     with open(output_file, 'w') as f:
         for taxid in taxid_count_map.keys():
             count = taxid_count_map[taxid]
@@ -196,6 +222,27 @@ def generate_tax_counts_from_m8(m8_file, e_value_type, output_file):
             avg_alignment_length = taxid_alignment_length_map[taxid] / count
             avg_e_value = taxid_e_value_map[taxid] / count
             f.write(",".join([str(taxid), str(count), str(avg_percent_identity), str(avg_alignment_length), str(avg_e_value) + '\n']))
+    # Determine pair concordance:
+    return check_pair_concordance(read_to_taxid)
+
+def check_pair_concordance(read_to_taxid):
+    species_taxid_concordance_map = {}
+    genus_taxid_concordance_map = {}
+    family_taxid_concordance_map = {}
+    read_1_ids = [read_id for read_id in read_to_taxid.keys() if "/1" in read_id]
+    for read_1_id in read_1_ids:
+        read_2_id = read_1_id.replace("/1", "/2", 1)
+        if read_2_id not in read_to_taxid:
+            continue
+        species_taxid_1, genus_taxid_1, family_taxid_1 = read_to_taxid[read_1_id]
+        species_taxid_2, genus_taxid_2, family_taxid_2 = read_to_taxid[read_2_id]
+        if species_taxid_1 == species_taxid_2: # add both reads to the concordance count
+            species_taxid_concordance_map[species_taxid_1] = species_taxid_concordance_map.get(species_taxid_1, 0) + 2
+        if genus_taxid_1 == genus_taxid_2:
+            genus_taxid_concordance_map[genus_taxid_1] = genus_taxid_concordance_map.get(genus_taxid_1, 0) + 2
+        if family_taxid_1 == family_taxid_2:
+            family_taxid_concordance_map[family_taxid_1] = family_taxid_concordance_map.get(family_taxid_1, 0) + 2
+    return species_taxid_concordance_map, genus_taxid_concordance_map, family_taxid_concordance_map
 
 def generate_rpm_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, speciesOutputPath, genusOutputPath):
     total_reads = get_total_reads_from_stats()
@@ -229,19 +276,21 @@ def generate_rpm_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, species
         genus_outf.write("%s,%s,%s\n" % (genus_taxid, genus_name, rpm))
     genus_outf.close()
 
-def generate_json_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, jsonOutputPath, countType):
+def generate_json_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, jsonOutputPath, countType, lineage_map,
+                                    species_total_concordant, genus_total_concordant, family_total_concordant):
     taxid2info_map = shelve.open(taxid2infoPath)
     total_reads = get_total_reads_from_stats()
     taxon_counts_attributes = []
     remaining_reads = get_remaining_reads_from_stats()
 
-    genus_to_count = {}
-    genus_to_name = {}
     species_to_count = {}
     species_to_name = {}
     species_to_percent_identity = {}
     species_to_alignment_length = {}
     species_to_e_value = {}
+    species_to_species_level_concordance = {}
+    species_to_genus_level_concordance = {}
+    species_to_family_level_concordance = {}
     with open(taxidCountsInputPath) as f:
         for line in f:
             tok = line.rstrip().split(",")
@@ -250,14 +299,16 @@ def generate_json_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, jsonOu
             percent_identity = float(tok[2])
             alignment_length = float(tok[3])
             e_value = float(tok[4])
-            species_taxid, genus_taxid, scientific_name = taxid2info_map.get(taxid, ("-1", "-2", "NA"))
-            genus_to_count[genus_taxid] = genus_to_count.get(genus_taxid, 0) + count
-            genus_to_name[genus_taxid]  = scientific_name.split(" ")[0]
+            _species_taxid, _genus_taxid, scientific_name = taxid2info_map.get(taxid, ("-1", "-2", "NA"))
+            species_taxid, genus_taxid, family_taxid = lineage_map.get(taxid, ("-100", "-200", "-300"))
             species_to_count[species_taxid] = species_to_count.get(species_taxid, 0) + count
             species_to_name[species_taxid] = scientific_name
             species_to_percent_identity[species_taxid] = species_to_percent_identity.get(species_taxid, 0) + count * percent_identity
             species_to_alignment_length[species_taxid] = species_to_alignment_length.get(species_taxid, 0) + count * alignment_length
             species_to_e_value[species_taxid] = species_to_e_value.get(species_taxid, 0) + count * e_value
+            species_to_species_level_concordance[species_taxid] = species_total_concordant.get(species_taxid, 0)
+            species_to_genus_level_concordance[species_taxid] = genus_total_concordant.get(genus_taxid, 0)
+            species_to_family_level_concordance[species_taxid] = family_total_concordant.get(family_taxid, 0)
 
     for taxid in species_to_count.keys():
         species_name = species_to_name[taxid]
@@ -272,7 +323,13 @@ def generate_json_from_taxid_counts(taxidCountsInputPath, taxid2infoPath, jsonOu
                                         "alignment_length": avg_alignment_length,
                                         "e_value": avg_e_value,
                                         "name": species_name,
-                                        "count_type": countType})
+                                        "count_type": countType,
+                                        "percent_concordant": (100.0 * species_to_species_level_concordance[taxid]) / count,
+                                        # Not very elegant, but until such time as we propagate alignment information at the level of
+                                        # individual reads to the web app's database, we have to do the concordance aggregation here:
+                                        "species_total_concordant": species_to_species_level_concordance[taxid],
+                                        "genus_total_concordant": species_to_genus_level_concordance[taxid],
+                                        "family_total_concordant": species_to_family_level_concordance[taxid]})
 
     output_dict = {
         "pipeline_output": {
@@ -451,6 +508,11 @@ def chunk_input(input_files_basenames, chunk_nlines, part_suffix):
     # e.g. [["input_R1.fasta-part-1", "input_R2.fasta-part-1"],["input_R1.fasta-part-2", "input_R2.fasta-part-2"],["input_R1.fasta-part-3", "input_R2.fasta-part-3"],...]
     return input_chunks
 
+def remove_whitespace_from_files(input_files, replacement, output_files):
+    for idx, input_file in enumerate(input_files):
+        output_file = output_files[idx]
+        execute_command("sed 's/[[:blank:]]/%s/g' %s > %s" % (replacement, input_file, output_file))
+
 def clean_direct_gsnapl_input(fastq_files):
     # unzip files if necessary
     if ".gz" in FILE_TYPE:
@@ -494,6 +556,7 @@ def run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work
                               '-D', remote_index_dir, '-d', 'nt_k16']
                               + [remote_work_dir+'/'+input_fa for input_fa in input_files]
                               + ['> '+remote_outfile, ';'])
+        commands += "echo '' >> %s;" % remote_outfile # add a blank line at the end of the file so S3 copy doesn't fail if output is empty
         commands += "aws s3 cp %s %s/;" % (remote_outfile, SAMPLE_S3_OUTPUT_CHUNKS_PATH)
         # check if remote machine has enough capacity
         if not lazy_run or not check_s3_file_presence(os.path.join(SAMPLE_S3_OUTPUT_CHUNKS_PATH, dedup_outfile_basename)):
@@ -509,6 +572,7 @@ def run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work
         # Deduplicate m8 input. Sometimes GSNAPL outputs multiple consecutive lines for same original read and same accession id. Count functions expect only 1 (top hit).
         deduplicate_m8(os.path.join(CHUNKS_RESULT_DIR, outfile_basename), os.path.join(CHUNKS_RESULT_DIR, dedup_outfile_basename))
         execute_command("aws s3 cp %s/%s %s/" % (CHUNKS_RESULT_DIR, dedup_outfile_basename, SAMPLE_S3_OUTPUT_CHUNKS_PATH))
+        execute_command("sed -i '$ {/^$/d;}' %s" % os.path.join(CHUNKS_RESULT_DIR, dedup_outfile_basename)) # remove blank line from end of file
         return os.path.join(CHUNKS_RESULT_DIR, dedup_outfile_basename)
 
 def run_gsnapl_remotely(input_files, lazy_run):
@@ -596,7 +660,7 @@ def run_rapsearch_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_w
                           '-a','T',
                           '-b','0',
                           '-v','1',
-                          '-z','4',
+                          '-z','24',
                           '-q', input_path,
                           '-o', output_path[:-3],
                           ';'])
@@ -620,7 +684,7 @@ def run_rapsearch2_remotely(input_fasta, lazy_run):
     execute_command("chmod 400 %s" % key_path)
     remote_username = "ec2-user"
     remote_home_dir = "/home/%s" % remote_username
-    remote_work_dir = "%s/batch-pipeline-workdir/%s" % (remote_home_dir, SAMPLE_NAME)
+    remote_work_dir = "%s/data/batch-pipeline-workdir/%s" % (remote_home_dir, SAMPLE_NAME)
     remote_index_dir = "%s/references/nr_rapsearch" % remote_home_dir
     # split file:
     chunk_nlines = 2*RAPSEARCH_CHUNK_SIZE
@@ -637,15 +701,27 @@ def run_rapsearch2_remotely(input_fasta, lazy_run):
 
 def run_generate_taxid_outputs_from_m8(annotated_m8, taxon_counts_csv_file, taxon_counts_json_file,
     taxon_species_rpm_file, taxon_genus_rpm_file, count_type, e_value_type):
+
     # download taxoninfodb if not exist
     taxoninfo_filename = os.path.basename(TAXID_TO_INFO)
     taxoninfo_path = REF_DIR + '/' + taxoninfo_filename
     if not os.path.isfile(taxoninfo_path):
         execute_command("aws s3 cp %s %s/" % (TAXID_TO_INFO, REF_DIR))
         write_to_log("downloaded taxon info database")
-    generate_tax_counts_from_m8(annotated_m8, e_value_type, taxon_counts_csv_file)
+
+    # download lineage db if not exist
+    lineage_filename = os.path.basename(LINEAGE_SHELF)
+    lineage_path = REF_DIR + '/' + lineage_filename
+    if not os.path.isfile(lineage_path):
+        execute_command("aws s3 cp %s %s/" % (LINEAGE_SHELF, REF_DIR))
+        logging.getLogger().info("downloaded taxid-lineage shelf")
+    lineage_map = shelve.open(lineage_path)
+
+    species_concordant, genus_concordant, family_concordant = generate_tax_counts_from_m8(annotated_m8, e_value_type,
+                                                                                          taxon_counts_csv_file, lineage_map)
     write_to_log("generated taxon counts from m8")
-    generate_json_from_taxid_counts(taxon_counts_csv_file, taxoninfo_path, taxon_counts_json_file, count_type)
+    generate_json_from_taxid_counts(taxon_counts_csv_file, taxoninfo_path, taxon_counts_json_file, count_type,
+                                    lineage_map, species_concordant, genus_concordant, family_concordant)
     write_to_log("generated JSON file from taxon counts")
     generate_rpm_from_taxid_counts(taxon_counts_csv_file, taxoninfo_path,
                                    taxon_species_rpm_file, taxon_genus_rpm_file)
@@ -688,7 +764,7 @@ def run_stage2(lazy_run = True):
             execute_command("aws s3 cp %s %s/" % (input1_s3_path, SAMPLE_S3_OUTPUT_PATH))
             execute_command("aws s3 cp %s %s/" % (input2_s3_path, SAMPLE_S3_OUTPUT_PATH))
             execute_command("aws s3 cp %s %s/" % (input3_s3_path, SAMPLE_S3_OUTPUT_PATH))
-        gsnapl_input_files = [EXTRACT_UNMAPPED_FROM_SAM_OUT1, EXTRACT_UNMAPPED_FROM_SAM_OUT2]
+        _gsnapl_input_files = [EXTRACT_UNMAPPED_FROM_SAM_OUT1, EXTRACT_UNMAPPED_FROM_SAM_OUT2]
         before_file_name_for_log = os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT1)
         before_file_type_for_log = "fasta_paired"
     else:
@@ -705,10 +781,23 @@ def run_stage2(lazy_run = True):
         # prepare files for gsnap
         cleaned_files, before_file_type_for_log = clean_direct_gsnapl_input(fastq_files)
         before_file_name_for_log = cleaned_files[0]
-        gsnapl_input_files = [os.path.basename(f) for f in cleaned_files]
+        _gsnapl_input_files = [os.path.basename(f) for f in cleaned_files]
         # make combined fasta needed later
-        merged_fasta = os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT3)
-        generate_merged_fasta(cleaned_files, merged_fasta)
+        _merged_fasta = os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT3)
+        generate_merged_fasta(cleaned_files, _merged_fasta)
+        execute_command("aws s3 cp %s %s/" % (_merged_fasta, SAMPLE_S3_OUTPUT_PATH))
+
+    # Make sure there are no tabs in sequence names, since tabs are used as a delimiter in m8 files    
+    files_to_collapse_basenames = _gsnapl_input_files + [EXTRACT_UNMAPPED_FROM_SAM_OUT3]
+    collapsed_files = ["%s/nospace.%s" % (RESULT_DIR, f) for f in files_to_collapse_basenames]
+    for file_basename in files_to_collapse_basenames:
+        execute_command("aws s3 cp %s/%s %s/" % (SAMPLE_S3_OUTPUT_PATH, file_basename, RESULT_DIR))
+    remove_whitespace_from_files([os.path.join(RESULT_DIR, file_basename) for file_basename in files_to_collapse_basenames],
+                                  ";", collapsed_files)
+    for filename in collapsed_files:
+        execute_command("aws s3 cp %s %s/" % (filename, SAMPLE_S3_OUTPUT_PATH))
+    gsnapl_input_files = [os.path.basename(f) for f in collapsed_files[:-1]]
+    merged_fasta = collapsed_files[-1]
 
     if lazy_run:
         # Download existing data and see what has been done
@@ -741,8 +830,7 @@ def run_stage2(lazy_run = True):
         {"title": "generate taxid annotated fasta from m8", "count_reads": False})
     run_and_log(logparams, TARGET_OUTPUTS["run_generate_taxid_annotated_fasta_from_m8__1"], False,
         run_generate_taxid_annotated_fasta_from_m8, os.path.join(RESULT_DIR, GSNAPL_DEDUP_OUT),
-        os.path.join(RESULT_DIR, EXTRACT_UNMAPPED_FROM_SAM_OUT3),
-        os.path.join(RESULT_DIR, GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT), 'NT', True)
+        merged_fasta, os.path.join(RESULT_DIR, GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT), 'NT', True)
 
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "filter deuterostomes from m8__1", "count_reads": True,

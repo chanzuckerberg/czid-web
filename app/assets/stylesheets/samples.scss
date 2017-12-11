@@ -3,9 +3,6 @@
   td {
     cursor: pointer;
   }
-  th i.status-filter {
-    margin: 0 10px;
-  }
   ul.status {
     li a{
       font-size: 14px;
@@ -313,6 +310,10 @@ $break-large: 1070px;
   }
   .project-list {
     margin-top: 65px;
+    ul.select-dropdown {
+      height: 200px;
+      overflow: scroll;
+    }
   }
   .project-wrapper {
     margin: 35px 0;
@@ -347,56 +348,97 @@ $break-large: 1070px;
 }
 
 .sample-container {
+  .wrapper {
+    border-bottom: 1px #291d1d26 solid;
+    margin-bottom: 0;
+  }
+  ul li {
+    .filter, .filter-item {
+      display: inline-block;
+    }
+    i.all {
+      margin: 0px 0px 0 120px;
+    }
+    .filter {
+      margin: 0px 0px 0 80px;
+      color: #070a0a;
+    }
+  }
+  ul .dropdown-content li > a {
+    font-size: 14px !important;
+  }
+  .table-container {
+    margin: 0 67px 7px;
+    color: #333333;
+    font-weight: 600;
+    font-size: 14px;
+    .status-dropdown {
+      cursor: pointer;
+      padding-left: 0;
+      .status-filter {
+        padding: 0 10px
+      }
+    }
+  }
+  .job-container {
+    cursor: pointer;
+    margin-bottom: 0;
+    border-bottom: 1px solid #dfdddd;
+    .job-card {
+      margin: 0 63px;
+      .blank {
+        color: #b5b0b0
+      }
+      .no-time {
+        padding-top: 14px;
+      }
+      .reads {
+        .status-col {
+          padding: 6px 18px !important;
+        }
+        .percent {
+          color: #0099cc;
+        }
+        p.status {
+          font-size: 12px;
+          display: inline-block;
+          margin: 0 10px;
+        }
+        .time {
+          margin: 0;
+          font-size: 12px;
+          span {
+            margin: 10px;
+          }
+        }
+        margin: 15px 0;
+      }
+      .sample-name {
+        color: #333333;
+        font-weight: bold;
+        margin-bottom: 0;
+      }
+      .uploader {
+        font-size: 12px;
+        font-weight: normal;
+        color: #737373;
+        margin: 0;
+      }
+    }
+    &:hover {
+      background: #f1f1f1;
+    }
+  }
   .search-box {
     margin-bottom: 0;
-    padding: 0 72px;
+    width: 16%;
+    border: 1px solid #e6e6e6;
+    margin: 17px 73px;
+    border-radius: 3px;
     .icon {
       padding-top: 12px;
       display: inline-block;
-    }
-  }
-  thead {
-    background: #f1f1f1;
-    tr th {
-      color: #333333;
-      font-weight: bold;
-      font-size: 14px;
-      cursor: pointer;
-    }
-  }
-  tr {
-    th:first-child {
-      display: block;
-      margin-left: 72px;
-      margin: 0 72px;
-      width: 200px;
-      overflow: hidden;
-      display: inline-block;
-      white-space: nowrap;
-    }
-    th:last-child {
-      display: block;
-      text-align: center;
-      margin-right: 72px;
-    }
-  }
-  td {
-    font-size: 14px;
-    &:first-child{
-      display: block;
-      margin-left: 72px;
-      color: #333333;
-      font-weight: bold;
-      width: 200px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      display: inline-block;
-      white-space: nowrap;
-    }
-    &:last-child {
-      display: block;
-      margin-right: 72px;
-      text-align: center;
+      margin: 0 10px;
     }
   }
   input.search {
@@ -474,7 +516,7 @@ input[type=search]:focus:not([readonly]) {
 .failed {
   color: #ad1818 !important;
 }
-.running {
+.waiting {
   color: #3f51b5 !important;
 }
 .initializing {
@@ -483,3 +525,8 @@ input[type=search]:focus:not([readonly]) {
 .uploading {
   color: #e2a32e !important;
 }
+
+.all {
+  color: #9e5353;
+}
+

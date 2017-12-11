@@ -20,20 +20,17 @@ class CreateUser extends React.Component {
     }
     this.state = {
       submitting: false,
-      isChecked: false,
+      isChecked: this.selectedUser.adminStatus ? true : false,
       success: false,
       showFailed: false,
       errorMessage: '',
       successMessage: '',
-      isChecked : false,
       serverErrors: [],
       email: this.selectedUser.email || '',
       password: this.selectedUser.password || '',
       pConfirm: this.selectedUser.password_confirmation || '',
       adminstatus: this.selectedUser.adminStatus,
-      id: this.selectedUser.id,
-      isMustFill: this.selectedUser.adminStatus ? true : undefined,
-      adminValue: this.selectedUser.adminStatus ? 1 : 0
+      id: this.selectedUser.id
     }
   }
 
@@ -66,13 +63,10 @@ class CreateUser extends React.Component {
   }
 
   toggleCheckBox(e) {
-    var checkboxValue = $('#admin').prop('checked')
     this.setState({
-      isChecked: checkboxValue,
-      adminstatus: !this.state.adminstatus,
+      isChecked: e.target.value == "true" ? false : true,
+      adminstatus: e.target.value == "true" ? false : true,
     })
-    this.isMustFill = !this.isMustFill;
-    this.state.isChecked = !this.state.isChecked;
   }
 
   handlePasswordChange(e) {
@@ -137,7 +131,7 @@ class CreateUser extends React.Component {
         email: this.refs.email.value,
         password: this.refs.password.value,
         password_confirmation: this.refs.password_confirmation.value,
-        role: this.refs.admin.value
+        role: this.state.isChecked ? 1 : 0
       },
       authenticity_token: this.csrf
     }).then((res) => {
@@ -215,7 +209,7 @@ class CreateUser extends React.Component {
                   <label htmlFor="user_password_confirmation">Confirm Password</label>
                 </div>
                 <p>
-                  <input ref="admin" type="checkbox" name="switch" id="admin" className="filled-in" onChange={ this.toggleCheckBox } value={ this.state.isChecked ? 1 : 0 } />
+                  <input ref="admin" type="checkbox" name="switch" id="admin" className="filled-in" onChange={ this.toggleCheckBox } value={ this.state.isChecked } />
                   <label htmlFor="admin">Admin</label>
                 </p>
               </div>
@@ -268,7 +262,7 @@ class CreateUser extends React.Component {
                   <label htmlFor="user_password_confirmation">Confirm Password</label>
                 </div>
                 <p>
-                  <input type="checkbox" id="admin" className="filled-in" checked={ this.state.isMustFill } onChange={ this.toggleCheckBox } value={ this.state.adminValue } />
+                  <input type="checkbox" id="admin" className="filled-in" checked = {this.state.isChecked ? "checked" : ""} onChange={ this.toggleCheckBox } value={this.state.isChecked } />
                   <label htmlFor="admin">Admin</label>
                 </p>
               </div>
@@ -293,3 +287,4 @@ class CreateUser extends React.Component {
     )
   }
 }
+

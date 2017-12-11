@@ -19,6 +19,21 @@ class ReportFilter extends React.Component {
     this.clearGenusSearch = this.clearGenusSearch.bind(this);
   }
 
+  componentDidMount() {
+    // a polyfill for firefox, but disbaled for now
+    // $(window).resize(() => {
+    //   this.resizeFilterHeight();
+    // });
+  }
+
+  resizeFilterHeight() {
+    const height = window.innerHeight;
+    const subHeader = $('.sub-header-component').height();
+    const headerHeight = $('.site-header').height();
+    const newHeight = height;
+    // $('.reports-sidebar').css('min-height', newHeight);
+  }
+
   static genusSearchValueFor(selected_genus) {
     genus_search_value = selected_genus == 'None' ? '' : selected_genus;
     return {genus_search_value};
@@ -34,14 +49,23 @@ class ReportFilter extends React.Component {
   }
 
   applyFilters(event) {
+    ReportFilter.showLoading('Applying thresholds...');
     this.props.applyNewFilterThresholds(this.new_filter_thresholds);
   }
 
+  static showLoading(message) {
+    $('.page-loading .spinner-label').text(message);
+    $('body').css('overflow', 'hidden');
+    $('.page-loading').css('display', 'flex');
+  }
+
   applyExcludedCategories(e) {
+    ReportFilter.showLoading('Applying category filter...');
     this.props.applyExcludedCategories(e.target.value, e.target.checked)
   }
 
   applyGenusFilter(selected_genus) {
+    ReportFilter.showLoading(`Filtering for '${selected_genus}'...`);
     this.setState(ReportFilter.genusSearchValueFor(selected_genus));
     this.props.applyGenusFilter(selected_genus);
   }
@@ -97,6 +121,7 @@ class ReportFilter extends React.Component {
             {this.thresholdInput('aggregatescore', 'NT+NR*')}
             {this.thresholdInput('percentidentity', '%id')}
             {this.thresholdInput('neglogevalue', 'log(1/E)')}
+            {this.thresholdInput('percentconcordant', '%conc')}
             <div className="apply-filter-button left center-align">
               <a onClick={this.applyFilters}
                  className="btn btn-flat waves-effect grey text-grey text-lighten-5 waves-light apply-filter-button">
@@ -162,7 +187,7 @@ class ReportFilter extends React.Component {
     return (
       <div>
         <div className="sidebar-title">
-          Report Filters
+          Report filters
         </div>
         <div className="sidebar-tabs">
           <div className="row">
@@ -171,7 +196,7 @@ class ReportFilter extends React.Component {
                 <div className="sidebar-pane">
                   <div className="report-data background-model">
                     <div className="report-title">
-                      Background Model
+                      Background model
                     </div>
                     <div className="report-value">
                       { this.background_model }

@@ -2,7 +2,6 @@ require 'open3'
 require 'json'
 
 class Sample < ApplicationRecord
-  self.per_page = 10
   STATUS_CREATED  = 'created'.freeze
   STATUS_UPLOADED = 'uploaded'.freeze
   STATUS_RERUN    = 'need_rerun'.freeze
@@ -20,6 +19,8 @@ class Sample < ApplicationRecord
   DEFAULT_MEMORY = 64_000
   DEFAULT_QUEUE = 'aegea_batch_ondemand'.freeze
 
+  METADATA_FIELDS = [:sample_host, :sample_location, :sample_date, :sample_tissue, :sample_template, :sample_library, :sample_sequencer, :sample_notes].freeze
+
   attr_accessor :bulk_mode
 
   belongs_to :project
@@ -32,6 +33,7 @@ class Sample < ApplicationRecord
   accepts_nested_attributes_for :input_files
   validate :input_files_checks
   after_create :initiate_input_file_upload
+  validates :name, uniqueness: { scope: :project_id }
 
   before_save :check_host_genome, :check_status
 
