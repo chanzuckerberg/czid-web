@@ -13,6 +13,7 @@ module ReportHelper
   DEFAULT_SAMPLE_NEGLOGEVALUE = 0.0
   DEFAULT_SAMPLE_PERCENTIDENTITY = 0.0
   DEFAULT_SAMPLE_ALIGNMENTLENGTH = 0.0
+  DEFAULT_SAMPLE_PERCENTCONCORDANT = 0.0
 
   # For taxon_count 'species' rows without a corresponding 'genus' rows,
   # we create a fake singleton genus containing just that species;
@@ -29,6 +30,7 @@ module ReportHelper
     threshold_percentidentity: 0.0,
     threshold_alignmentlength: 0.0,
     threshold_neglogevalue:    0.0,
+    threshold_percentconcordant: 0.0,
     threshold_aggregatescore:  0.0,
     excluded_categories: 'None',
     selected_genus: 'None',
@@ -38,7 +40,7 @@ module ReportHelper
 
   SORT_DIRECTIONS = %w[highest lowest].freeze
   # We do not allow underscores in metric names, sorry!
-  METRICS = %w[r rpm zscore percentidentity alignmentlength neglogevalue aggregatescore].freeze
+  METRICS = %w[r rpm zscore percentidentity alignmentlength neglogevalue percentconcordant aggregatescore].freeze
   COUNT_TYPES = %w[NT NR].freeze
   PROPERTIES_OF_TAXID = %w[tax_id name tax_level genus_taxid superkingdom_taxid category_name].freeze # note: no underscore in sortable column names
   UNUSED_IN_UI_FIELDS = ['superkingdom_taxid', :sort_key].freeze
@@ -238,7 +240,8 @@ module ReportHelper
           taxon_counts.e_value IS NOT NULL,
           (0.0 - taxon_counts.e_value),
           #{DEFAULT_SAMPLE_NEGLOGEVALUE}
-        )                                AS  neglogevalue
+        )                                AS  neglogevalue,
+        taxon_counts.percent_concordant  AS  percentconcordant
       FROM taxon_counts
       LEFT OUTER JOIN taxon_summaries ON
         #{background_id}        = taxon_summaries.background_id   AND
@@ -260,6 +263,7 @@ module ReportHelper
       'percentidentity' => DEFAULT_SAMPLE_PERCENTIDENTITY,
       'alignmentlength' => DEFAULT_SAMPLE_ALIGNMENTLENGTH,
       'neglogevalue' => DEFAULT_SAMPLE_NEGLOGEVALUE,
+      'percentconcordant' => DEFAULT_SAMPLE_PERCENTCONCORDANT,
       'aggregatescore' => nil
     }
   end

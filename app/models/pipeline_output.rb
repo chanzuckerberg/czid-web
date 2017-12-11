@@ -40,7 +40,8 @@ class PipelineOutput < ApplicationRecord
       "INSERT INTO taxon_counts(pipeline_output_id, tax_id, name,
                                 tax_level, count_type, count,
                                 percent_identity, alignment_length, e_value,
-                                created_at, updated_at)
+                                species_total_concordant, genus_total_concordant, family_total_concordant,
+                                percent_concordant, created_at, updated_at)
        SELECT #{id},
               IF(
                 taxon_lineages.#{tax_level_name}_taxid IS NOT NULL,
@@ -58,6 +59,15 @@ class PipelineOutput < ApplicationRecord
               sum(taxon_counts.percent_identity * taxon_counts.count) / sum(taxon_counts.count),
               sum(taxon_counts.alignment_length * taxon_counts.count) / sum(taxon_counts.count),
               sum(taxon_counts.e_value * taxon_counts.count) / sum(taxon_counts.count),
+              /* We use AVG below because an aggregation function is needed, but all the entries being grouped are the same */
+              AVG(species_total_concordant),
+              AVG(genus_total_concordant),
+              AVG(family_total_concordant),
+              CASE #{tax_level_id}
+                WHEN #{TaxonCount::TAX_LEVEL_SPECIES} THEN AVG(100.0 * taxon_counts.species_total_concordant) / sum(taxon_counts.count)
+                WHEN #{TaxonCount::TAX_LEVEL_GENUS} THEN AVG(100.0 * taxon_counts.genus_total_concordant) / sum(taxon_counts.count)
+                WHEN #{TaxonCount::TAX_LEVEL_FAMILY} THEN AVG(100.0 * taxon_counts.family_total_concordant) / sum(taxon_counts.count)
+              END,
               '#{current_date}',
               '#{current_date}'
        FROM  taxon_lineages, taxon_counts

@@ -331,12 +331,14 @@ class PipelineSampleReport extends React.Component {
                         {this.render_column_header('NT', '%id', 'nt_percentidentity', 'Average percent-identity of alignments to NCBI NT')}
                         {this.render_column_header('NT', 'L',   'nt_alignmentlength', 'Average length of alignments to NCBI NT')}
                         {this.render_column_header('NT', 'Log(1/E)',  'nt_neglogevalue', 'Average log-10-transformed expect value for alignments to NCBI NT')}
+                        {this.render_column_header('NT', '%conc',  'nt_percentconcordant', 'Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NT)')}
                         {this.render_column_header('NR', 'Z',   'nr_zscore', 'Z-score relative to background model for alignments to NCBI NR') }
                         {this.render_column_header('NR', 'rPM', 'nr_rpm', 'Number of reads aligning to the taxon in the NCBI NR database per million total input reads')}
                         {this.render_column_header('NR', 'r',   'nr_r', 'Number of reads aligning to the taxon in the NCBI NR database')}
                         {this.render_column_header('NR', '%id', 'nr_percentidentity', 'Average percent-identity of alignments to NCBI NR')}
                         {this.render_column_header('NR', 'AL',   'nr_alignmentlength', 'Average length of alignments to NCBI NR')}
                         {this.render_column_header('NR', 'Log(1/E)',  'nr_neglogevalue', 'Average log-10-transformed expect value for alignments to NCBI NR')}
+                        {this.render_column_header('NR', '%conc',  'nr_percentconcordant', 'Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NR)')}
                     </tr>
                     </thead>
                     <tbody>
@@ -353,12 +355,14 @@ class PipelineSampleReport extends React.Component {
                           { this.render_number(tax_info.NT.percentidentity, sort_column == 'nt_percentidentity', 1) }
                           { this.render_number(tax_info.NT.alignmentlength, sort_column == 'nt_alignmentlength', 1)       }
                           { this.render_number(tax_info.NT.neglogevalue, sort_column == 'nt_neglogevalue', 0) }
+                          { this.render_number(tax_info.NT.percentconcordant, sort_column == 'nt_percentconcordant', 1) }
                           { this.render_number(tax_info.NR.zscore, sort_column == 'nr_zscore', 1) }
                           { this.render_number(tax_info.NR.rpm, sort_column == 'nr_rpm', 1)       }
                           { this.render_number(tax_info.NR.r, sort_column == 'nr_r', 0)           }
                           { this.render_number(tax_info.NR.percentidentity, sort_column == 'nr_percentidentity', 1) }
                           { this.render_number(tax_info.NR.alignmentlength, sort_column == 'nr_alignmentlength', 1)       }
                           { this.render_number(tax_info.NR.neglogevalue, sort_column == 'nr_neglogevalue', 0) }
+                          { this.render_number(tax_info.NR.percentconcordant, sort_column == 'nr_percentconcordant', 1) }
                         </tr>
                       )
                     })}

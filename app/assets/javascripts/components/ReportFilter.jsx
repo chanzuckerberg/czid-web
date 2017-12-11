@@ -121,6 +121,7 @@ class ReportFilter extends React.Component {
             {this.thresholdInput('aggregatescore', 'NT+NR*')}
             {this.thresholdInput('percentidentity', '%id')}
             {this.thresholdInput('neglogevalue', 'log(1/E)')}
+            {this.thresholdInput('percentconcordant', '%conc')}
             <div className="apply-filter-button left center-align">
               <a onClick={this.applyFilters}
                  className="btn btn-flat waves-effect grey text-grey text-lighten-5 waves-light apply-filter-button">
