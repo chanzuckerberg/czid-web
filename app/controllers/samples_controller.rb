@@ -6,6 +6,7 @@ class SamplesController < ApplicationController
   before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata]
   acts_as_token_authentication_handler_for User, only: [:create, :bulk_upload], fallback: :devise
   protect_from_forgery unless: -> { request.format.json? }
+  PAGE_SIZE = 30
 
   # GET /samples
   # GET /samples.json
@@ -25,7 +26,7 @@ class SamplesController < ApplicationController
     results = results.search(name_search_query) if name_search_query.present?
     results = filter_samples(results, filter_query) if filter_query.present?
 
-    @samples = sort_by(results, sort).paginate(page: params[:page], per_page: params[:per_page] || 15)
+    @samples = sort_by(results, sort).paginate(page: params[:page], per_page: params[:per_page] || PAGE_SIZE)
     @samples_count = results.size
     @all_samples = format_samples(@samples)
 
