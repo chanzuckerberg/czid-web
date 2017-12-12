@@ -18,6 +18,7 @@ class PipelineSampleReport extends React.Component {
     this.enableFilters = this.enableFilters.bind(this);
     this.new_filter_thresholds = {};
     this.applyFilters = this.applyFilters.bind(this);
+    this.handleThresholdEnter = this.handleThresholdEnter.bind(this);
     this.initializeTooltip();
   }
 
@@ -75,6 +76,12 @@ class PipelineSampleReport extends React.Component {
     this.applyNewFilterThresholds(this.new_filter_thresholds);
   }
 
+  handleThresholdEnter(event) {
+    if (event.keyCode == 13) {
+      this.applyFilters();
+    }
+  }
+
   applyNewFilterThresholds(new_filter_thresholds) {
     this.refreshPage(new_filter_thresholds);
   }
@@ -84,6 +91,7 @@ class PipelineSampleReport extends React.Component {
       <input
         className='browser-default'
         onChange={this.setFilterThreshold.bind(this, `threshold_${metric_token}`)}
+        onKeyDown={this.handleThresholdEnter}
         name="group2"
         defaultValue={this.props.report_page_params[`threshold_${metric_token}`]}
         id={`threshold_${metric_token}`}
@@ -245,6 +253,8 @@ class PipelineSampleReport extends React.Component {
           {this.render_sort_arrow(column_name, 'highest', 'down')}
           {visible_type}<br/>
           {visible_metric}<br/>
+        </div>
+        <div className='sort-controls right' rel='tooltip' title='Threshold'>
           {report_column_threshold}
         </div>
       </th>
@@ -373,7 +383,6 @@ class PipelineSampleReport extends React.Component {
                         {this.render_column_header('NR', 'AL',   'nr_alignmentlength', 'Average length of alignments to NCBI NR')}
                         {this.render_column_header('NR', 'Log(1/E)',  'nr_neglogevalue', 'Average log-10-transformed expect value for alignments to NCBI NR')}
                         {this.render_column_header('NR', '%conc',  'nr_percentconcordant', 'Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NR)')}
-                        {this.thresholdFilterButton()}
                     </tr>
                     </thead>
                     <tbody>
