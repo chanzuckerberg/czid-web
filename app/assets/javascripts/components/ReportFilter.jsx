@@ -8,11 +8,9 @@ class ReportFilter extends React.Component {
     this.sample_id = props.sample_id;
     this.background_model = props.background_model || 'N/A';
     this.all_categories = props.all_categories || [];
-    this.new_filter_thresholds = {};
     this.state = ReportFilter.genusSearchValueFor(props.report_page_params.selected_genus);
     this.genus_search_items = this.props.all_genera_in_sample;
     this.genus_search_items.splice(0, 0, 'None');
-    this.applyFilters = this.applyFilters.bind(this);
     this.applyExcludedCategories = this.applyExcludedCategories.bind(this);
     this.applyGenusFilter = this.applyGenusFilter.bind(this);
     this.enableFilters = this.enableFilters.bind(this);
@@ -43,16 +41,6 @@ class ReportFilter extends React.Component {
     this.props.enableFilters();
   }
 
-  setFilterThreshold(threshold_name, event) {
-    this.new_filter_thresholds[threshold_name] = event.target.value.trim();
-    $('.apply-filter-button a').addClass('changed');
-  }
-
-  applyFilters(event) {
-    ReportFilter.showLoading('Applying thresholds...');
-    this.props.applyNewFilterThresholds(this.new_filter_thresholds);
-  }
-
   static showLoading(message) {
     $('.page-loading .spinner-label').text(message);
     $('body').css('overflow', 'hidden');
@@ -74,64 +62,8 @@ class ReportFilter extends React.Component {
     this.applyGenusFilter('None');
   }
 
-  thresholdInput(metric_token, visible_metric_name) {
-    return (
-      <div className='col s12'>
-        <div className='col s6'>
-          <div className='threshold-label left'>
-            <label htmlFor={`threshold_${metric_token}`}>
-              {visible_metric_name} &ge;
-            </label>
-          </div>
-        </div>
-        <div className='col s6 input-container'>
-          <input
-            className='browser-default'
-            onChange={this.setFilterThreshold.bind(this, `threshold_${metric_token}`)}
-            name="group2"
-            defaultValue={this.props.report_page_params[`threshold_${metric_token}`]}
-            id={`threshold_${metric_token}`}
-            type="number" />
-        </div>
-      </div>
-    );
-  }
-
   render() {
     align_right = {'textAlign': 'right'};
-    threshold_filters = (
-      <div className="filter-controls">
-        <div className="filter-title">
-          {this.props.report_page_params.disable_filters == 0 ?
-            <a href="#" onClick={this.clearGenusSearch}>Click to clear genus search and enable filters.</a> :
-            <a href="#" onClick={this.enableFilters}>Click to enable filters.</a>}
-        </div>
-      </div>
-    );
-    if (this.props.report_page_params.disable_filters == 0 && this.props.report_page_params.selected_genus == 'None') {
-      threshold_filters = (
-        <div className="filter-controls">
-          <div className="filter-row row threshold-row">
-            <div className='thresh-values'>
-              THRESHOLD VALUES
-            </div>
-            {this.thresholdInput('zscore', 'Z')}
-            {this.thresholdInput('rpm', 'rPM')}
-            {this.thresholdInput('r', 'r')}
-            {this.thresholdInput('aggregatescore', 'NT+NR*')}
-            {this.thresholdInput('percentidentity', '%id')}
-            {this.thresholdInput('neglogevalue', 'log(1/E)')}
-            {this.thresholdInput('percentconcordant', '%conc')}
-            <div className="apply-filter-button left center-align">
-              <a onClick={this.applyFilters}
-                 className="btn btn-flat waves-effect grey text-grey text-lighten-5 waves-light apply-filter-button">
-                Apply threshold
-              </a>
-            </div>
-          </div>
-        </div>
-      );
-    }
     category_filter = '';
     if (this.props.report_page_params.disable_filters == 0 && this.props.report_page_params.selected_genus == 'None') {
       category_filter = (

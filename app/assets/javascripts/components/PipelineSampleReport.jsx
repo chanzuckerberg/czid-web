@@ -93,12 +93,12 @@ class PipelineSampleReport extends React.Component {
 
   thresholdFilterButton() {
     return (
-      <div className="apply-filter-button left center-align">
+      <td>
         <a onClick={this.applyFilters}
            className="btn btn-flat waves-effect grey text-grey text-lighten-5 waves-light apply-filter-button">
         Apply threshold
         </a>
-      </div>
+      </td>
     );
   }
 
@@ -323,7 +323,6 @@ class PipelineSampleReport extends React.Component {
         background_model = { this.report_details.background_model.name }
         report_title = { this.report_details.report_info.name }
         report_page_params = { this.props.report_page_params }
-        applyNewFilterThresholds = { this.applyNewFilterThresholds }
         applyExcludedCategories = { this.applyExcludedCategories }
         applyGenusFilter = { this.applyGenusFilter }
         enableFilters = { this.enableFilters }
