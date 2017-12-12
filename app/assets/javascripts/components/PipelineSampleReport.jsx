@@ -237,8 +237,7 @@ class PipelineSampleReport extends React.Component {
 
   render_column_header(visible_type, visible_metric, column_name, tooltip_message) {
     var style = { 'textAlign': 'right', 'cursor': 'pointer' };
-    metric_token = column_name.split("_")[1]
-    report_column_threshold = this.thresholdInputColumn(metric_token)
+    report_column_threshold = this.thresholdInputColumn(column_name)
     return (
       <th style={style}>
         <div className='sort-controls right' rel='tooltip' title={tooltip_message}>

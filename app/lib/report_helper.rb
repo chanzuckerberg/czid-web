@@ -24,14 +24,21 @@ module ReportHelper
 
   DEFAULT_PARAMS = {
     sort_by:          'highest_nt_aggregatescore',
-    threshold_zscore: 0.0,
-    threshold_rpm:    0.0,
-    threshold_r:      0.0,
-    threshold_percentidentity: 0.0,
-    threshold_alignmentlength: 0.0,
-    threshold_neglogevalue:    0.0,
-    threshold_percentconcordant: 0.0,
-    threshold_aggregatescore:  0.0,
+    threshold_nt_zscore: 0.0,
+    threshold_nt_rpm:    0.0,
+    threshold_nt_r:      0.0,
+    threshold_nt_percentidentity: 0.0,
+    threshold_nt_alignmentlength: 0.0,
+    threshold_nt_neglogevalue:    0.0,
+    threshold_nt_percentconcordant: 0.0,
+    threshold_nt_aggregatescore:  0.0,
+    threshold_nr_zscore: 0.0,
+    threshold_nr_rpm:    0.0,
+    threshold_nr_r:      0.0,
+    threshold_nr_percentidentity: 0.0,
+    threshold_nr_alignmentlength: 0.0,
+    threshold_nr_neglogevalue:    0.0,
+    threshold_nr_percentconcordant: 0.0,
     excluded_categories: 'None',
     selected_genus: 'None',
     disable_filters: 0
@@ -82,14 +89,17 @@ module ReportHelper
 
   def threshold_param?(param_key)
     parts = param_key.to_s.split "_"
-    (parts.length == 2 && parts[0] == 'threshold' && METRICS.include?(parts[1]))
+    (parts.length == 3 && parts[0] == 'threshold' && COUNT_TYPES.include?(parts[1].upcase) && METRICS.include?(parts[2]))
   end
 
   def decode_thresholds(params)
     thresholds = {}
-    METRICS.each do |metric|
-      param_key = "threshold_#{metric}".to_sym
-      thresholds[metric] = params[param_key]
+    COUNT_TYPES.each do |count_type|
+      thresholds[count_type] = {}
+      METRICS.each do |metric|
+        param_key = "threshold_#{count_type.downcase}_#{metric}".to_sym
+        thresholds[count_type][metric] = params[param_key]
+      end
     end
     thresholds
   end
@@ -453,18 +463,18 @@ module ReportHelper
   end
 
   def filter_rows!(rows, thresholds, excluded_categories)
-    # filter out rows that are below the thresholds in both NR and NT
+    # filter out rows that are below the thresholds
     # but make sure not to delete any genus row for which some species
     # passes the filters
     to_delete = Set.new
     to_keep = Set.new
     rows.each do |tax_info|
       should_delete = false
-      # if any metric is below threshold in every type, delete
+      # if any metric is below threshold in the specified type, delete
       METRICS.each do |metric|
         should_delete = COUNT_TYPES.all? do |count_type|
           # aggregatescore is null for genera, and thus not considered in filtering genera
-          !(tax_info[count_type][metric]) || tax_info[count_type][metric] < thresholds[metric]
+          !(tax_info[count_type][metric]) || !(thresholds[count_type][metric]) || tax_info[count_type][metric] < thresholds[count_type][metric]
         end
         break if should_delete
       end
