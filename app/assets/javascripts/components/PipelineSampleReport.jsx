@@ -16,6 +16,8 @@ class PipelineSampleReport extends React.Component {
     this.collapseTable = this.collapseTable.bind(this);
     this.disableFilters = this.disableFilters.bind(this);
     this.enableFilters = this.enableFilters.bind(this);
+    this.new_filter_thresholds = {};
+    this.applyFilters = this.applyFilters.bind(this);
     this.initializeTooltip();
   }
 
@@ -63,8 +65,41 @@ class PipelineSampleReport extends React.Component {
     this.refreshPage({sort_by});
   }
 
+  setFilterThreshold(threshold_name, event) {
+    this.new_filter_thresholds[threshold_name] = event.target.value.trim();
+    $('.apply-filter-button a').addClass('changed');
+  }
+
+  applyFilters(event) {
+    ReportFilter.showLoading('Applying thresholds...');
+    this.applyNewFilterThresholds(this.new_filter_thresholds);
+  }
+
   applyNewFilterThresholds(new_filter_thresholds) {
     this.refreshPage(new_filter_thresholds);
+  }
+
+  thresholdInputColumn(metric_token) {
+    return (
+      <input
+        className='browser-default'
+        onChange={this.setFilterThreshold.bind(this, `threshold_${metric_token}`)}
+        name="group2"
+        defaultValue={this.props.report_page_params[`threshold_${metric_token}`]}
+        id={`threshold_${metric_token}`}
+        type="number" />
+    );
+  }
+
+  thresholdFilterButton() {
+    return (
+      <div className="apply-filter-button left center-align">
+        <a onClick={this.applyFilters}
+           className="btn btn-flat waves-effect grey text-grey text-lighten-5 waves-light apply-filter-button">
+        Apply threshold
+        </a>
+      </div>
+    );
   }
 
   applyExcludedCategories(category, checked) {
@@ -202,8 +237,8 @@ class PipelineSampleReport extends React.Component {
 
   render_column_header(visible_type, visible_metric, column_name, tooltip_message) {
     var style = { 'textAlign': 'right', 'cursor': 'pointer' };
-    metric_token = { column_name.split("_")[1] }
-    report_column_threshold = ReportFilter.thresholdInputColumn(metric_token)
+    metric_token = column_name.split("_")[1]
+    report_column_threshold = this.thresholdInputColumn(metric_token)
     return (
       <th style={style}>
         <div className='sort-controls right' rel='tooltip' title={tooltip_message}>
@@ -342,7 +377,7 @@ class PipelineSampleReport extends React.Component {
                         {this.render_column_header('NR', 'AL',   'nr_alignmentlength', 'Average length of alignments to NCBI NR')}
                         {this.render_column_header('NR', 'Log(1/E)',  'nr_neglogevalue', 'Average log-10-transformed expect value for alignments to NCBI NR')}
                         {this.render_column_header('NR', '%conc',  'nr_percentconcordant', 'Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NR)')}
-                        {ReportFilter.thresholdFilterButton()}
+                        {this.thresholdFilterButton()}
                     </tr>
                     </thead>
                     <tbody>

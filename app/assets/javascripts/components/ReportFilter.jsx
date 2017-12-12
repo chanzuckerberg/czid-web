@@ -232,7 +232,6 @@ class ReportFilter extends React.Component {
               <div id="filters-pane" className="pane col s12">
                 {category_filter}
                 {genus_search}
-                {threshold_filters}
               </div>
             </div>
           </div>

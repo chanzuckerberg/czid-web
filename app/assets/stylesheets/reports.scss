@@ -336,6 +336,16 @@ input[type=number] {
   th:last-child {
     padding-right: 50px;
   }
+  input.browser-default {
+    border: 1px solid !important;
+    border-color: #dfdfdf !important;
+    padding: 5px;
+    width: 100%;
+    margin-top: 10px;
+      &:focus {
+        outline: none;
+    }
+  }
 }
 .genus-search-row {
   padding-left: 0 !important;
