@@ -3,7 +3,7 @@ class SamplesController < ApplicationController
   include SamplesHelper
 
   before_action :authenticate_user!, only: [:new, :index, :update, :destroy, :edit, :show, :reupload_source, :kickoff_pipeline, :bulk_new, :bulk_import, :bulk_upload]
-  before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata]
+  before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata, :report_info]
   acts_as_token_authentication_handler_for User, only: [:create, :bulk_upload], fallback: :devise
   protect_from_forgery unless: -> { request.format.json? }
   PAGE_SIZE = 30
@@ -119,6 +119,37 @@ class SamplesController < ApplicationController
     end
 
     @report_info = external_report_info(report, params)
+  end
+
+  def report_info
+    first_pipeline_run = @sample.pipeline_runs.first ? @sample.pipeline_runs.first : nil
+    @pipeline_run = first_pipeline_run
+    @pipeline_output = first_pipeline_run ? first_pipeline_run.pipeline_output : nil
+    @sample_status = first_pipeline_run ? first_pipeline_run.job_status : nil
+    @job_stats = @pipeline_output ? @pipeline_output.job_stats : nil
+    @summary_stats = @job_stats ? get_summary_stats(@job_stats) : nil
+    @project_info = @sample.project ? @sample.project : nil
+
+    ##################################################
+    ## Duct tape for changing background id dynamically
+    ## TODO(yf): clean the following up.
+    ####################################################
+    report = nil
+    default_background_id = @sample.host_genome && @sample.host_genome.default_background ? @sample.host_genome.default_background.id : nil
+    if @pipeline_output &&  (@pipeline_output.remaining_reads.to_i > 0 || @pipeline_run.finalized?)
+      report = @pipeline_output.reports.first || Report.new(pipeline_output: @pipeline_output)
+      background_id = params[:background_id] || default_background_id || report.background_id
+      if background_id
+        report.background_id = background_id
+        report.name = "#{@sample.id} #{background_id} #{@sample.name}"
+        report.save
+      else
+        report = nil
+      end
+    end
+
+    @report_info = external_report_info(report, params)
+    render json: { report_info: @report_info }
   end
 
   def save_metadata
