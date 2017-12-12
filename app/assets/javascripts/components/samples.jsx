@@ -401,10 +401,10 @@ class Samples extends React.Component {
       <div className="row wrapper">
         <div className="row table-container">
           <div className="col s4"><span>Name</span></div>
-          <div className="col s1">Total reads</div>
+          <div className="col s2">Total reads</div>
           <div className="col s2">Non-host reads</div>
-          <div className="col s1">Passed quality control</div>
-          <div className="col s2">Duplicate compression ratio</div>
+          <div className="col s1">Passed QC</div>
+          <div className="col s1">DCR</div>
           <div className="col s2 status-dropdown" data-activates="dropdownstatus"><i className="status-filter fa fa-caret-down"></i>Status</div>
         </div>
       </div>
