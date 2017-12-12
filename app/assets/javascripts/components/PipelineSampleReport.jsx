@@ -29,7 +29,7 @@ class PipelineSampleReport extends React.Component {
       tooltipIdentifier.tooltip({
         delay: 0,
         html: true,
-        placement: 'bottom',
+        placement: 'top',
         offset: '0px 50px'
       });
       $('.sort-controls').hover(() => {
@@ -254,7 +254,7 @@ class PipelineSampleReport extends React.Component {
           {visible_type}<br/>
           {visible_metric}<br/>
         </div>
-        <div className='sort-controls right' rel='tooltip' title='Threshold'>
+        <div className='sort-controls right' rel='tooltip' data-placement='bottom' title='Threshold'>
           {report_column_threshold}
         </div>
       </th>

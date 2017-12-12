@@ -471,13 +471,11 @@ module ReportHelper
     rows.each do |tax_info|
       should_delete = false
       # if any metric is below threshold in the specified type, delete
-      METRICS.each do |metric|
-        COUNT_TYPES.each do |count_type|
+      METRICS.any? do |metric|
+        COUNT_TYPES.any? do |count_type|
           should_delete = !(tax_info[count_type][metric]) || (thresholds[count_type][metric] && tax_info[count_type][metric] < thresholds[count_type][metric])
           # aggregatescore is null for genera, and thus not considered in filtering genera
-          break if should_delete
         end
-        break if should_delete
       end
       if tax_info['tax_id'] != TaxonLineage::MISSING_GENUS_ID && tax_info['tax_id'] != TaxonLineage::BLACKLIST_GENUS_ID
         if excluded_categories.include? tax_info['category_name']
