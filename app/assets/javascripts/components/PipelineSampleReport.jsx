@@ -312,8 +312,6 @@ class PipelineSampleReport extends React.Component {
             (filter_stats) :
             ('Due to resource limits, showing only ' + this.taxonomy_details.length + ' of the ' + filter_stats)}
         </span>
-        {this.rows_passing_filters < this.rows_total && this.props.report_page_params.disable_filters == 0 ? <span className="disable" onClick={this.disableFilters}><b> Disable filters</b></span> : ''}
-        {this.props.report_page_params.disable_filters == 1 ? <span className="disable" onClick={this.enableFilters}><b> Enable filters</b></span> : ''}
       </div>
     );
     report_filter =
