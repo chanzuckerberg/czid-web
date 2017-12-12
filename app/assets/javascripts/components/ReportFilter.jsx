@@ -97,6 +97,31 @@ class ReportFilter extends React.Component {
     );
   }
 
+  thresholdInputColumn(metric_token) {
+    return (
+        <div className='col s1 input-container'>
+          <input
+            className='browser-default'
+            onChange={this.setFilterThreshold.bind(this, `threshold_${metric_token}`)}
+            name="group2"
+            defaultValue={this.props.report_page_params[`threshold_${metric_token}`]}
+            id={`threshold_${metric_token}`}
+            type="number" />
+        </div>
+    );
+  }
+
+  thresholdFilterButton() {
+    return (
+      <div className="apply-filter-button left center-align">
+        <a onClick={this.applyFilters}
+           className="btn btn-flat waves-effect grey text-grey text-lighten-5 waves-light apply-filter-button">
+        Apply threshold
+        </a>
+      </div>
+    );
+  }
+
   render() {
     align_right = {'textAlign': 'right'};
     threshold_filters = (
