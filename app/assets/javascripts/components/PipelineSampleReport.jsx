@@ -202,12 +202,8 @@ class PipelineSampleReport extends React.Component {
 
   render_column_header(visible_type, visible_metric, column_name, tooltip_message) {
     var style = { 'textAlign': 'right', 'cursor': 'pointer' };
-    report_column_threshold = 
-      <ReportColumnThreshold
-        metric_token = { column_name.split("_")[1] }
-        report_page_params = { this.props.report_page_params }
-        applyNewFilterThresholds = { this.applyNewFilterThresholds }
-      />;
+    metric_token = { column_name.split("_")[1] }
+    report_column_threshold = ReportFilter.thresholdInputColumn(metric_token)
     return (
       <th style={style}>
         <div className='sort-controls right' rel='tooltip' title={tooltip_message}>
@@ -346,6 +342,7 @@ class PipelineSampleReport extends React.Component {
                         {this.render_column_header('NR', 'AL',   'nr_alignmentlength', 'Average length of alignments to NCBI NR')}
                         {this.render_column_header('NR', 'Log(1/E)',  'nr_neglogevalue', 'Average log-10-transformed expect value for alignments to NCBI NR')}
                         {this.render_column_header('NR', '%conc',  'nr_percentconcordant', 'Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NR)')}
+                        {ReportFilter.thresholdFilterButton()}
                     </tr>
                     </thead>
                     <tbody>
