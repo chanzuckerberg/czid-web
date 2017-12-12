@@ -474,7 +474,7 @@ module ReportHelper
       METRICS.each do |metric|
         should_delete = COUNT_TYPES.all? do |count_type|
           # aggregatescore is null for genera, and thus not considered in filtering genera
-          !(tax_info[count_type][metric]) || !(thresholds[count_type][metric]) || tax_info[count_type][metric] < thresholds[count_type][metric]
+          !(tax_info[count_type][metric]) || (thresholds[count_type][metric] && tax_info[count_type][metric] < thresholds[count_type][metric])
         end
         break if should_delete
       end
