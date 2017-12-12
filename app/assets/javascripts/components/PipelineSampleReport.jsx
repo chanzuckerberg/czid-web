@@ -205,15 +205,8 @@ class PipelineSampleReport extends React.Component {
     report_column_threshold = 
       <ReportColumnThreshold
         metric_token = { column_name.split("_")[1] }
-        all_categories = { this.all_categories }
-        all_genera_in_sample = {  this.all_genera_in_sample }
-        background_model = { this.report_details.background_model.name }
-        report_title = { this.report_details.report_info.name }
         report_page_params = { this.props.report_page_params }
         applyNewFilterThresholds = { this.applyNewFilterThresholds }
-        applyExcludedCategories = { this.applyExcludedCategories }
-        applyGenusFilter = { this.applyGenusFilter }
-        enableFilters = { this.enableFilters }
       />;
     return (
       <th style={style}>
