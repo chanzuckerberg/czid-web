@@ -9,19 +9,22 @@ class ReportFilter extends React.Component {
     this.background_model = props.background_model || 'N/A';
     this.backgroundModels = props.all_backgrounds || [];
     this.all_categories = props.all_categories || [];
-    this.genus_search_items = this.props.all_genera_in_sample;
-    this.genus_search_items.splice(0, 0, 'None');
     this.applyExcludedCategories = this.applyExcludedCategories.bind(this);
     this.applyGenusFilter = this.applyGenusFilter.bind(this);
     this.enableFilters = this.enableFilters.bind(this);
     this.clearGenusSearch = this.clearGenusSearch.bind(this);
+
     this.handleBackgroundModelChange = this.handleBackgroundModelChange.bind(this);
     this.handleGenusSearch = this.handleGenusSearch.bind(this);
     this.state = {
       genusSearchValue: this.setGenusSearchValueFor(props.report_page_params.selected_genus) || "",
       backgroundName: this.background_model.name || null,
-      backgroundParams: this.background_model.id || null
+      backgroundParams: this.background_model.id || null,
+      genus_search_items: props.all_genera_in_sample
     }
+  }
+  componentWillReceiveProps(newProps){
+      this.setState({genus_search_items: newProps.all_genera_in_sample})
   }
 
   componentDidMount() {
@@ -59,7 +62,7 @@ class ReportFilter extends React.Component {
     background_id = this.state.backgroundParams
     this.refreshPage({background_id});
   }
- 
+
   resizeFilterHeight() {
     const height = window.innerHeight;
     const subHeader = $('.sub-header-component').height();
@@ -133,7 +136,7 @@ class ReportFilter extends React.Component {
               <div className="filter-values genus-autocomplete-container">
                 <ReactAutocomplete
                   inputProps={{ placeholder: 'Search for a genus...' }}
-                  items={this.genus_search_items}
+                  items={this.state.genus_search_items}
                   shouldItemRender={(item, value) => item == 'None' || item.toLowerCase().indexOf(value.toLowerCase()) > -1}
                   getItemValue={item => item}
                   renderItem={(item, highlighted) =>

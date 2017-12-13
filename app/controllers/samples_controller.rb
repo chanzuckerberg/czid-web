@@ -3,7 +3,7 @@ class SamplesController < ApplicationController
   include SamplesHelper
 
   before_action :authenticate_user!, only: [:new, :index, :update, :destroy, :edit, :show, :reupload_source, :kickoff_pipeline, :bulk_new, :bulk_import, :bulk_upload]
-  before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata]
+  before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata, :report_info, :search_list]
   acts_as_token_authentication_handler_for User, only: [:create, :bulk_upload], fallback: :devise
   protect_from_forgery unless: -> { request.format.json? }
   PAGE_SIZE = 30
@@ -119,7 +119,56 @@ class SamplesController < ApplicationController
       end
     end
 
+    if report
+      @report_present = 1
+      @report_ts = @pipeline_output.updated_at.to_i
+      @all_categories = all_categories
+      @report_details = report_details(report)
+      @report_page_params = clean_params(params, @all_categories)
+    end
+  end
+
+  def report_info
+    expires_in 30.days
+
+    first_pipeline_run = @sample.pipeline_runs.first ? @sample.pipeline_runs.first : nil
+    @pipeline_run = first_pipeline_run
+    @pipeline_output = first_pipeline_run ? first_pipeline_run.pipeline_output : nil
+
+    ##################################################
+    ## Duct tape for changing background id dynamically
+    ## TODO(yf): clean the following up.
+    ####################################################
+    report = nil
+    default_background_id = @sample.host_genome && @sample.host_genome.default_background ? @sample.host_genome.default_background.id : nil
+    if @pipeline_output &&  (@pipeline_output.remaining_reads.to_i > 0 || @pipeline_run.finalized?)
+      report = @pipeline_output.reports.first || Report.new(pipeline_output: @pipeline_output)
+      background_id = params[:background_id] || default_background_id || report.background_id
+      if background_id
+        report.background_id = background_id
+        report.name = "#{@sample.id} #{background_id} #{@sample.name}"
+        report.save
+      else
+        report = nil
+      end
+    end
+
     @report_info = external_report_info(report, params)
+    render json: @report_info
+  end
+
+  def search_list
+    expires_in 30.days
+
+    first_pipeline_run = @sample.pipeline_runs.first ? @sample.pipeline_runs.first : nil
+    @pipeline_run = first_pipeline_run
+    @pipeline_output_id = first_pipeline_run ? first_pipeline_run.pipeline_output.id : nil
+    if @pipeline_output_id
+      @search_list = fetch_lineage_info(@pipeline_output_id)
+      render json: @search_list
+    else
+      render json: { lineage_map: {}, search_list: [] }
+    end
   end
 
   def save_metadata
