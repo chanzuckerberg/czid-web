@@ -8,6 +8,7 @@ class PipelineSampleReport extends React.Component {
     this.all_categories = props.all_categories
     this.report_details = props.report_details
     this.report_page_params = props.report_page_params
+    this.all_backgrounds = props.all_backgrounds;
     this.state = {
       taxonomy_details:  [],
       all_genera_in_sample: [],
@@ -352,8 +353,9 @@ class PipelineSampleReport extends React.Component {
     report_filter =
       <ReportFilter
         all_categories = { this.all_categories }
+        all_backgrounds = { this.all_backgrounds }
         all_genera_in_sample = {  this.state.all_genera_in_sample }
-        background_model = { this.report_details.background_model.name }
+        background_model = { this.report_details.background_model }
         report_title = { this.report_details.report_info.name }
         report_page_params = { this.report_page_params }
         applyExcludedCategories = { this.applyExcludedCategories }

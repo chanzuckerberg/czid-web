@@ -3,6 +3,7 @@ class PipelineSampleReads extends React.Component {
     super(props);
     this.pipelineOutput = props.pipelineOutput;
     this.csrf = props.csrf;
+    this.allBackgrounds = props.all_backgrounds
     this.rerunPath = props.rerun_path;
     this.sampleInfo = props.sampleInfo;
     this.projectInfo = props.projectInfo;
@@ -122,6 +123,7 @@ class PipelineSampleReads extends React.Component {
         sample_id = {this.sampleId}
         report_ts = {this.reportTime}
         all_categories = {this.allCategories}
+        all_backgrounds = {this.allBackgrounds}
         report_details = {this.reportDetails}
         report_page_params = {this.reportPageParams}
       />;
