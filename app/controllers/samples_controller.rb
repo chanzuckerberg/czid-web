@@ -121,22 +121,18 @@ class SamplesController < ApplicationController
     if report
       @report_present = 1
       @report_ts = @pipeline_output.updated_at.to_i
-      @all_categories = all_categories()
+      @all_categories = all_categories
       @report_details = report_details(report)
-      @report_page_params =  clean_params(params, @all_categories)
+      @report_page_params = clean_params(params, @all_categories)
     end
   end
 
   def report_info
-    expires_in 7.days
+    expires_in 30.days
 
     first_pipeline_run = @sample.pipeline_runs.first ? @sample.pipeline_runs.first : nil
     @pipeline_run = first_pipeline_run
     @pipeline_output = first_pipeline_run ? first_pipeline_run.pipeline_output : nil
-    @sample_status = first_pipeline_run ? first_pipeline_run.job_status : nil
-    @job_stats = @pipeline_output ? @pipeline_output.job_stats : nil
-    @summary_stats = @job_stats ? get_summary_stats(@job_stats) : nil
-    @project_info = @sample.project ? @sample.project : nil
 
     ##################################################
     ## Duct tape for changing background id dynamically
