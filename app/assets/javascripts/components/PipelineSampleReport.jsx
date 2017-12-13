@@ -9,6 +9,7 @@ class PipelineSampleReport extends React.Component {
     this.report_details = props.report_details
     this.report_page_params = props.report_page_params
     this.all_backgrounds = props.all_backgrounds;
+    this.max_rows_to_render = props.max_rows || 2000
     this.state = {
       taxonomy_details:  [],
       all_genera_in_sample: [],
@@ -412,7 +413,7 @@ class PipelineSampleReport extends React.Component {
                     </tr>
                     </thead>
                     <tbody>
-                    { this.state.loading ? (<span> Loading results.. </span>) : (this.state.taxonomy_details.map((tax_info, i) => {
+                    { this.state.loading ? (<div>Loading results.. </div>) : (this.state.taxonomy_details.slice(0, this.max_rows_to_render).map((tax_info, i) => {
                       return (
                         <tr key={tax_info.tax_id} className={this.row_class(tax_info)}>
                           <td>
