@@ -3,7 +3,7 @@ require 'open3'
 
 module ReportHelper
   # Truncate report table past this number of rows.
-  TAXON_CATEGORY_OFFSET=100000000
+  TAXON_CATEGORY_OFFSET = 100_000_000
   ZSCORE_MIN = -99
   ZSCORE_MAX =  99
   ZSCORE_WHEN_ABSENT_FROM_SAMPLE = -100
@@ -278,7 +278,8 @@ module ReportHelper
     lineage_records = TaxonLineage.where(
       "taxid in (select tax_id from taxon_counts
                  where pipeline_output_id = #{pipeline_output_id}
-                   and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES})")
+                   and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES})"
+    )
     result_map = {}
     search_key_list = Set.new
     lineage_records.each do |lr|
@@ -287,14 +288,14 @@ module ReportHelper
         tax_name = lr["#{category}_name"]
         tax_id = lr["#{category}_taxid"]
         display_name = "#{tax_name} (#{category})"
-        search_id = level*TAXON_CATEGORY_OFFSET + tax_id
-        key_array <<  search_id
+        search_id = level * TAXON_CATEGORY_OFFSET + tax_id
+        key_array << search_id
         search_key_list.add([display_name, search_id])
       end
       result_map[lr.taxid] = key_array
     end
     search_key_list = search_key_list.sort_by { |u| u[0].downcase }
-    { lineage_map: result_map, search_list: search_key_list}
+    { lineage_map: result_map, search_list: search_key_list }
   end
 
   def tax_info_base(taxon)
