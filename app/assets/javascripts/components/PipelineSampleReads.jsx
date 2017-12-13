@@ -71,10 +71,10 @@ class PipelineSampleReads extends React.Component {
     $('ul.tabs').tabs();
     this.listenNoteChanges();
     this.initializeSelectTag();
-    field = "sample_tissue"
-    $(ReactDOM.findDOMNode(this.refs[field])).on('change',this.handleDropdownChange);
-    field = "sample_nucleotide" 
-    $(ReactDOM.findDOMNode(this.refs[field])).on('change',this.handleDropdownChange);
+    for (var i = 0; i < this.DROPDOWN_METADATA_FIELDS.length; i++) {
+      field = this.DROPDOWN_METADATA_FIELDS[i];
+      $(ReactDOM.findDOMNode(this.refs[field])).on('change',this.handleDropdownChange);
+    }
   }
 
   initializeSelectTag() {
