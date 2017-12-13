@@ -10,6 +10,7 @@ class PipelineSampleReads extends React.Component {
     this.summary_stats = props.summary_stats;
     this.gotoReport = this.gotoReport.bind(this);
     this.sampleId = this.sampleInfo.id;
+    this.host_genome = props.host_genome;
     this.pipelineStatus = props.sample_status
     this.pipelineRun = props.pipelineRun
     this.rerunPipeline = this.rerunPipeline.bind(this);
@@ -18,7 +19,7 @@ class PipelineSampleReads extends React.Component {
       failureText: 'Sample run failed'
     };
     this.TYPE_PROMPT = "Type here...";
-    this.TISSUE_TYPES = ["Brain", "Bronchoalveolar lavage (BAL)", "Cerebrospinal fluid (CSF)",
+    this.TISSUE_TYPES = ["Bronchoalveolar lavage (BAL)", "Cerebrospinal fluid (CSF)",
                          "Nasopharyngeal (NP) swab", "Plasma", "Serum", "Solid tissue", 
                          "Stool", "Synovial fluid", "Whole blood", "Other"];
     this.NUCLEOTIDE_TYPES = ["DNA", "RNA"];
@@ -298,7 +299,7 @@ class PipelineSampleReads extends React.Component {
                             <tbody>
                               <tr>
                                 <td>Host</td>
-                                <td> { (!this.sampleInfo.host_genome_name) ? BLANK_TEXT : this.sampleInfo.host_genome_name } </td>
+                                <td> { !this.host_genome ? BLANK_TEXT : this.host_genome.name } </td>
                               </tr>
                               <tr>
                                 <td>Upload date</td>
@@ -382,7 +383,7 @@ class PipelineSampleReads extends React.Component {
 
               <div className="col s3 download-area">
                 <a className="custom-button" href={ this.sampleInfo.sample_input_folder_url }>
-                  <i className="fa fa-cloud-download left"></i> DOWNLOAD ALL READS
+                  <i className="fa fa-cloud-download left"></i> GO TO SOURCE DATA
                 </a>
                 { download_section }
 
