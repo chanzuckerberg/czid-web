@@ -3,6 +3,7 @@ class PipelineSampleReads extends React.Component {
     super(props);
     this.pipelineOutput = props.pipelineOutput;
     this.csrf = props.csrf;
+    this.allBackgrounds = props.all_backgrounds
     this.rerunPath = props.rerun_path;
     this.sampleInfo = props.sampleInfo;
     this.projectInfo = props.projectInfo;
@@ -114,6 +115,7 @@ class PipelineSampleReads extends React.Component {
     if(this.reportInfo) {
       d_report = <PipelineSampleReport
         all_categories = { this.reportInfo.all_categories }
+        all_backgrounds = {this.allBackgrounds}
         checked_categories = {this.reportInfo.checked_categories || this.reportInfo.all_categories }
         genus_info = {this.reportInfo.genus_info}
         report_details={this.reportInfo.report_details}
