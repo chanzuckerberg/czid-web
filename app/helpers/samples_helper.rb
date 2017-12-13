@@ -1,5 +1,4 @@
 require 'open3'
-
 module SamplesHelper
   def host_genomes_list
     HostGenome.all.map { |h| h.slice('name', 'id') }
