@@ -16,6 +16,9 @@ class PipelineSampleReport extends React.Component {
     this.collapseTable = this.collapseTable.bind(this);
     this.disableFilters = this.disableFilters.bind(this);
     this.enableFilters = this.enableFilters.bind(this);
+    this.new_filter_thresholds = {};
+    this.applyFilters = this.applyFilters.bind(this);
+    this.handleThresholdEnter = this.handleThresholdEnter.bind(this);
     this.initializeTooltip();
   }
 
@@ -26,7 +29,7 @@ class PipelineSampleReport extends React.Component {
       tooltipIdentifier.tooltip({
         delay: 0,
         html: true,
-        placement: 'bottom',
+        placement: 'top',
         offset: '0px 50px'
       });
       $('.sort-controls').hover(() => {
@@ -63,8 +66,48 @@ class PipelineSampleReport extends React.Component {
     this.refreshPage({sort_by});
   }
 
+  setFilterThreshold(threshold_name, event) {
+    this.new_filter_thresholds[threshold_name] = event.target.value.trim();
+    $('.apply-filter-button a').addClass('changed');
+  }
+
+  applyFilters(event) {
+    ReportFilter.showLoading('Applying thresholds...');
+    this.applyNewFilterThresholds(this.new_filter_thresholds);
+  }
+
+  handleThresholdEnter(event) {
+    if (event.keyCode == 13) {
+      this.applyFilters();
+    }
+  }
+
   applyNewFilterThresholds(new_filter_thresholds) {
     this.refreshPage(new_filter_thresholds);
+  }
+
+  thresholdInputColumn(metric_token) {
+    return (
+      <input
+        className='browser-default'
+        onChange={this.setFilterThreshold.bind(this, `threshold_${metric_token}`)}
+        onKeyDown={this.handleThresholdEnter}
+        name="group2"
+        defaultValue={this.props.report_page_params[`threshold_${metric_token}`]}
+        id={`threshold_${metric_token}`}
+        type="number" />
+    );
+  }
+
+  thresholdFilterButton() {
+    return (
+      <td>
+        <a onClick={this.applyFilters}
+           className="btn btn-flat waves-effect grey text-grey text-lighten-5 waves-light apply-filter-button">
+        Apply threshold
+        </a>
+      </td>
+    );
   }
 
   applyExcludedCategories(category, checked) {
@@ -202,13 +245,17 @@ class PipelineSampleReport extends React.Component {
 
   render_column_header(visible_type, visible_metric, column_name, tooltip_message) {
     var style = { 'textAlign': 'right', 'cursor': 'pointer' };
+    report_column_threshold = this.thresholdInputColumn(column_name)
     return (
       <th style={style}>
         <div className='sort-controls right' rel='tooltip' title={tooltip_message}>
           {this.render_sort_arrow(column_name, 'lowest', 'up')}
           {this.render_sort_arrow(column_name, 'highest', 'down')}
           {visible_type}<br/>
-          {visible_metric}
+          {visible_metric}<br/>
+        </div>
+        <div className='sort-controls right' rel='tooltip' data-placement='bottom' title='Threshold'>
+          {report_column_threshold}
         </div>
       </th>
     );
@@ -274,8 +321,6 @@ class PipelineSampleReport extends React.Component {
             (filter_stats) :
             ('Due to resource limits, showing only ' + this.taxonomy_details.length + ' of the ' + filter_stats)}
         </span>
-        {this.rows_passing_filters < this.rows_total && this.props.report_page_params.disable_filters == 0 ? <span className="disable" onClick={this.disableFilters}><b> Disable filters</b></span> : ''}
-        {this.props.report_page_params.disable_filters == 1 ? <span className="disable" onClick={this.enableFilters}><b> Enable filters</b></span> : ''}
       </div>
     );
     report_filter =
@@ -285,7 +330,6 @@ class PipelineSampleReport extends React.Component {
         background_model = { this.report_details.background_model.name }
         report_title = { this.report_details.report_info.name }
         report_page_params = { this.props.report_page_params }
-        applyNewFilterThresholds = { this.applyNewFilterThresholds }
         applyExcludedCategories = { this.applyExcludedCategories }
         applyGenusFilter = { this.applyGenusFilter }
         enableFilters = { this.enableFilters }
