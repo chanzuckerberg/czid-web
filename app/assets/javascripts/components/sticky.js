@@ -693,7 +693,7 @@ const StickySidebar = (() => {
     return StickySidebar;
   })();
 
-  export default StickySidebar;
+  // export default StickySidebar;
 
   // Global
   // -------------------------
