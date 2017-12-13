@@ -17,14 +17,15 @@ class ReportFilter extends React.Component {
     this.handleBackgroundModelChange = this.handleBackgroundModelChange.bind(this);
     this.handleGenusSearch = this.handleGenusSearch.bind(this);
     this.state = {
-      genusSearchValue: this.setGenusSearchValueFor(props.report_page_params.selected_genus) || "",
+      searchKey: null,
+      searchId: null,
       backgroundName: this.background_model.name || null,
       backgroundParams: this.background_model.id || null,
-      genus_search_items: props.all_genera_in_sample
+      search_items: props.search_keys_in_sample
     }
   }
   componentWillReceiveProps(newProps){
-      this.setState({genus_search_items: newProps.all_genera_in_sample})
+      this.setState({search_items: newProps.search_keys_in_sample})
   }
 
   componentDidMount() {
@@ -42,7 +43,7 @@ class ReportFilter extends React.Component {
 
   handleGenusSearch(e) {
     this.setState({
-      genusSearchValue: this.setGenusSearchValueFor(e.target.value)
+      searchKey: e.target.value
     })
   }
 
@@ -91,12 +92,13 @@ class ReportFilter extends React.Component {
     this.props.applyExcludedCategories(e.target.value, e.target.checked)
   }
 
-  applyGenusFilter(selected_genus) {
+  applyGenusFilter(value, item) {
     ReportFilter.showLoading(`Filtering for '${selected_genus}'...`);
     this.setState({
-      genusSearchValue: this.setGenusSearchValueFor(selected_genus)
+      searchKey: value,
+      searchId: item[1]
     });
-    this.props.applyGenusFilter(selected_genus);
+    this.props.applyGenusFilter(searchId);
   }
 
   clearGenusSearch() {
@@ -105,9 +107,7 @@ class ReportFilter extends React.Component {
 
   render() {
     align_right = {'textAlign': 'right'};
-    category_filter = '';
-    if (this.props.report_page_params.disable_filters == 0 && this.props.report_page_params.selected_genus == 'None') {
-      category_filter = (
+    category_filter = (
         <div className="filter-controls">
           <div className="category-title">
             CATEGORIES
@@ -124,39 +124,35 @@ class ReportFilter extends React.Component {
             { this.all_categories.length < 1 ? <p>None found</p> : '' }
           </div>
         </div>
-      );
-    }
-    genus_search = '';
-    if (this.props.report_page_params.disable_filters == 0) {
-      genus_search = (
-        <div className="filter-controls">
-          <div className="row">
-            <div className="input-field col s12 genus-search-row">
-              <div className='genus-name-label'>GENUS SEARCH</div>
-              <div className="filter-values genus-autocomplete-container">
-                <ReactAutocomplete
-                  inputProps={{ placeholder: 'Search for a genus...' }}
-                  items={this.state.genus_search_items}
-                  shouldItemRender={(item, value) => item == 'None' || item.toLowerCase().indexOf(value.toLowerCase()) > -1}
-                  getItemValue={item => item}
-                  renderItem={(item, highlighted) =>
-                    <div
-                      key={item}
-                      style={{ backgroundColor: highlighted ? '#eee' : 'transparent'}}
-                    >
-                      {item}
-                    </div>
-                  }
-                  value={this.state.genusSearchValue}
-                  onChange={this.handleGenusSearch}
-                  onSelect={this.applyGenusFilter}
-                />
-              </div>
+    );
+    genus_search = (
+      <div className="filter-controls">
+        <div className="row">
+          <div className="input-field col s12 genus-search-row">
+            <div className='genus-name-label'>SEARCH</div>
+            <div className="filter-values genus-autocomplete-container">
+              <ReactAutocomplete
+                inputProps={{ placeholder: 'specifies, genus, family, etc' }}
+                items={this.state.search_items}
+                shouldItemRender={(item, value) => item[0] == 'None' || item[0].toLowerCase().indexOf(value.toLowerCase()) > -1}
+                getItemValue={item => item[0]}
+                renderItem={(item, highlighted) =>
+                  <div
+                    key={item[1]}
+                    style={{ backgroundColor: highlighted ? '#eee' : 'transparent'}}
+                  >
+                    {item[0]}
+                  </div>
+                }
+                value={this.state.searchKey}
+                onChange={this.handleGenusSearch}
+                onSelect={this.applyGenusFilter}
+              />
             </div>
           </div>
         </div>
-      );
-    }
+      </div>
+    );
     return (
       <div>
         <div className="sidebar-title">

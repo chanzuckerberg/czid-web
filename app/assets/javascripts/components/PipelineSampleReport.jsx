@@ -12,13 +12,16 @@ class PipelineSampleReport extends React.Component {
     this.max_rows_to_render = props.max_rows || 2000
     this.state = {
       taxonomy_details:  [],
-      all_genera_in_sample: [],
+      search_keys_in_sample: [],
+      lineage_map: {},
+      data_to_show: [],
       rows_passing_filters: 0,
       rows_total: 0,
       loading: true
     };
 
     this.fetchReportData();
+    this.fetchSearchList();
     this.applyNewFilterThresholds = this.applyNewFilterThresholds.bind(this);
     this.applyExcludedCategories = this.applyExcludedCategories.bind(this);
     this.applyGenusFilter = this.applyGenusFilter.bind(this);
@@ -33,18 +36,25 @@ class PipelineSampleReport extends React.Component {
     this.initializeTooltip();
   }
 
+  fetchSearchList() {
+    axios.get(`/samples/${this.sample_id}/search_list?report_ts=${this.report_ts}`).then((res) => {
+      let search_list = res.data.search_list
+      search_list.splice(0, 0, ['None', 0])
+      this.setState({
+        lineage_map: res.data.lineage_map,
+        search_keys_in_sample: search_list
+       })
+    });
+  }
+
   fetchReportData() {
     const params = `?${window.location.search.replace("?", "")}&report_ts=${this.report_ts}`
-    console.log(params)
     axios.get(`/samples/${this.sample_id}/report_info${params}`).then((res) => {
 
-      let all_genera_in_sample = res.data.all_genera_in_sample
-      all_genera_in_sample.splice(0, 0, 'None')
       this.setState({
         rows_passing_filters: res.data.taxonomy_details[0],
         rows_total:  res.data.taxonomy_details[1],
         taxonomy_details:  res.data.taxonomy_details[2],
-        all_genera_in_sample: all_genera_in_sample,
         loading: false
       });
     });
@@ -355,7 +365,7 @@ class PipelineSampleReport extends React.Component {
       <ReportFilter
         all_categories = { this.all_categories }
         all_backgrounds = { this.all_backgrounds }
-        all_genera_in_sample = {  this.state.all_genera_in_sample }
+        search_keys_in_sample = {  this.state.search_keys_in_sample }
         background_model = { this.report_details.background_model }
         report_title = { this.report_details.report_info.name }
         report_page_params = { this.report_page_params }
