@@ -44,7 +44,8 @@ class ReportFilter extends React.Component {
   }
 
   refreshPage(overrides) {
-    new_params = Object.assign({}, this.state.backgroundParams, overrides);
+    ReportFilter.showLoading('Fetching results...');
+    new_params = Object.assign({}, this.props.report_page_params, overrides);
     window.location = location.protocol + '//' + location.host + location.pathname + '?' + jQuery.param(new_params);
   }
 
@@ -54,8 +55,9 @@ class ReportFilter extends React.Component {
     this.setState({
       backgroundName: e.target.value,
       backgroundParams: this.backgroundModels[selectedIndex].id
-    })
-    this.refreshPage({background_id: this.state.backgroundParams});
+    });
+    background_id = this.state.backgroundParams
+    this.refreshPage({background_id});
   }
  
   resizeFilterHeight() {
