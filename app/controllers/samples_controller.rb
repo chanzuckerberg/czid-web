@@ -308,8 +308,10 @@ class SamplesController < ApplicationController
   end
 
   def sort_by(samples, dir = nil)
-    default_dir = 'newest'
+    default_dir = 'created_at,desc'
     dir ||= default_dir
-    dir == 'newest' ? samples.order(created_at: :desc) : samples.order(created_at: :asc)
+    column, direction = dir.split(',')
+    samples = samples.order("#{column} #{direction}") if column && direction
+    samples
   end
 end
