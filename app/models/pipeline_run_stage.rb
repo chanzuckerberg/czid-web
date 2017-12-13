@@ -1,6 +1,5 @@
 class PipelineRunStage < ApplicationRecord
   include ApplicationHelper
-
   belongs_to :pipeline_run
   DEFAULT_MEMORY_IN_MB = 4000
   DEFAULT_STORAGE_IN_GB = 500
