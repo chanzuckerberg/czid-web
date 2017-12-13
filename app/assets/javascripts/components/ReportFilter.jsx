@@ -34,10 +34,6 @@ class ReportFilter extends React.Component {
     });
     this.initializeSelectTag();
     $(ReactDOM.findDOMNode(this.refs.background)).on('change',this.handleBackgroundModelChange);
-    // a polyfill for firefox, but disbaled for now
-    // $(window).resize(() => {
-    //   this.resizeFilterHeight();
-    // });
   }
 
   initializeSelectTag() {
