@@ -1,5 +1,7 @@
 class PipelineRunStage < ApplicationRecord
   include ApplicationHelper
+  include PipelineOutputsHelper
+
   belongs_to :pipeline_run
   DEFAULT_MEMORY_IN_MB = 4000
   DEFAULT_STORAGE_IN_GB = 500
@@ -217,6 +219,7 @@ class PipelineRunStage < ApplicationRecord
     pipeline_output_dict.slice!('remaining_reads', 'total_reads', 'taxon_counts_attributes')
     po.total_reads = pipeline_output_dict['total_reads']
     po.remaining_reads = pipeline_output_dict['remaining_reads']
+    po.unmapped_reads = count_unmapped_reads(po)
 
     # only keep species level counts
     taxon_counts_attributes_filtered = []

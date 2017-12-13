@@ -24,4 +24,9 @@ module PipelineOutputsHelper
       return 'Coming soon' # Temporary fix
     end
   end
+
+  def count_unmapped_reads(pipeline_output)
+    unidentified_fasta = get_s3_file(pipeline_output.sample.unidentified_fasta_s3_path)
+    unidentified_fasta.lines.count
+  end
 end
