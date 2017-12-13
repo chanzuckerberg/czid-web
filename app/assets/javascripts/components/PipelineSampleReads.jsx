@@ -278,10 +278,18 @@ class PipelineSampleReads extends React.Component {
                                 </td>
                               </tr>
                               <tr>
-                                <td>Library prep protocol</td>
+                                <td>Nucleotide type</td>
                                 <td className="sample-notes">
-                                 <pre suppressContentEditableWarning={true} contentEditable={true} id="sample_library">
-                                  { this.sampleInfo.sample_library && this.sampleInfo.sample_library.trim() !== "" ? this.sampleInfo.sample_library : this.TYPE_PROMPT}
+                                 <pre suppressContentEditableWarning={true} contentEditable={true} id="sample_template">
+                                  { this.sampleInfo.sample_template && this.sampleInfo.sample_template.trim() !== "" ? this.sampleInfo.sample_template : this.TYPE_PROMPT}
+                                 </pre>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td>Patient ID</td>
+                                <td className="sample-notes">
+                                 <pre suppressContentEditableWarning={true} contentEditable={true} id="sample_patient">
+                                  { this.sampleInfo.sample_patient && this.sampleInfo.sample_patient.trim() !== "" ? this.sampleInfo.sample_patient : this.TYPE_PROMPT}
                                  </pre>
                                 </td>
                               </tr>
