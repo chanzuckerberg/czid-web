@@ -25,6 +25,10 @@ class ReportFilter extends React.Component {
   }
 
   componentDidMount() {
+    const sidebar = new StickySidebar('.report-filters-container', {
+      containerSelector: '#reports',
+      innerWrapperSelector: '.reports-sidebar-content'
+    });
     this.initializeSelectTag();
     $(ReactDOM.findDOMNode(this.refs.background)).on('change',this.handleBackgroundModelChange);
     // a polyfill for firefox, but disbaled for now
@@ -59,7 +63,7 @@ class ReportFilter extends React.Component {
     background_id = this.state.backgroundParams
     this.refreshPage({background_id});
   }
- 
+
   resizeFilterHeight() {
     const height = window.innerHeight;
     const subHeader = $('.sub-header-component').height();
@@ -144,8 +148,8 @@ class ReportFilter extends React.Component {
                       {item}
                     </div>
                   }
-                  value={this.state.genusSearchValue}
-                  onChange={this.handleGenusSearch}
+                  value={this.state.genus_search_value}
+                  onChange={(e) => this.setState(ReportFilter.genusSearchValueFor(e.target.value))}
                   onSelect={this.applyGenusFilter}
                 />
               </div>
@@ -155,7 +159,7 @@ class ReportFilter extends React.Component {
       );
     }
     return (
-      <div>
+      <div className='reports-sidebar-content'>
         <div className="sidebar-title">
           Report filters
         </div>
