@@ -35,12 +35,14 @@ class PipelineSampleReport extends React.Component {
     const params = `?${window.location.search.replace("?", "")}&report_ts=${this.report_ts}`
     console.log(params)
     axios.get(`/samples/${this.sample_id}/report_info${params}`).then((res) => {
-      console.log(res)
+
+      let all_genera_in_sample = res.data.all_genera_in_sample
+      all_genera_in_sample.splice(0, 0, 'None')
       this.setState({
         rows_passing_filters: res.data.taxonomy_details[0],
         rows_total:  res.data.taxonomy_details[1],
         taxonomy_details:  res.data.taxonomy_details[2],
-        all_genera_in_sample:  res.data.all_genera_in_sample,
+        all_genera_in_sample: all_genera_in_sample,
         loading: false
       });
     });

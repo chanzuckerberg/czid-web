@@ -8,13 +8,18 @@ class ReportFilter extends React.Component {
     this.sample_id = props.sample_id;
     this.background_model = props.background_model || 'N/A';
     this.all_categories = props.all_categories || [];
-    this.state = ReportFilter.genusSearchValueFor(props.report_page_params.selected_genus);
-    this.genus_search_items = this.props.all_genera_in_sample;
-    this.genus_search_items.splice(0, 0, 'None');
     this.applyExcludedCategories = this.applyExcludedCategories.bind(this);
     this.applyGenusFilter = this.applyGenusFilter.bind(this);
     this.enableFilters = this.enableFilters.bind(this);
     this.clearGenusSearch = this.clearGenusSearch.bind(this);
+    this.state = {
+      genus_search_value: ReportFilter.genusSearchValueFor(props.report_page_params.selected_genus),
+      genus_search_items: props.all_genera_in_sample
+    }
+  }
+
+  componentWillReceiveProps(newProps){
+      this.setState({genus_search_items: newProps.all_genera_in_sample})
   }
 
   componentDidMount() {
@@ -34,7 +39,7 @@ class ReportFilter extends React.Component {
 
   static genusSearchValueFor(selected_genus) {
     genus_search_value = selected_genus == 'None' ? '' : selected_genus;
-    return {genus_search_value};
+    return genus_search_value;
   }
 
   enableFilters() {
@@ -54,7 +59,7 @@ class ReportFilter extends React.Component {
 
   applyGenusFilter(selected_genus) {
     ReportFilter.showLoading(`Filtering for '${selected_genus}'...`);
-    this.setState(ReportFilter.genusSearchValueFor(selected_genus));
+    this.setState({genus_search_value: ReportFilter.genusSearchValueFor(selected_genus)});
     this.props.applyGenusFilter(selected_genus);
   }
 
@@ -95,7 +100,7 @@ class ReportFilter extends React.Component {
               <div className="filter-values genus-autocomplete-container">
                 <ReactAutocomplete
                   inputProps={{ placeholder: 'Search for a genus...' }}
-                  items={this.genus_search_items}
+                  items={this.state.genus_search_items}
                   shouldItemRender={(item, value) => item == 'None' || item.toLowerCase().indexOf(value.toLowerCase()) > -1}
                   getItemValue={item => item}
                   renderItem={(item, highlighted) =>
@@ -107,7 +112,7 @@ class ReportFilter extends React.Component {
                     </div>
                   }
                   value={this.state.genus_search_value}
-                  onChange={(e) => this.setState(ReportFilter.genusSearchValueFor(e.target.value))}
+                  onChange={(e) => this.setState({genus_search_value: ReportFilter.genusSearchValueFor(e.target.value)})}
                   onSelect={this.applyGenusFilter}
                 />
               </div>
