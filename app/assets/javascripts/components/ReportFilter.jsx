@@ -7,8 +7,8 @@ class ReportFilter extends React.Component {
     super(props);
     this.sample_id = props.sample_id;
     this.background_model = props.background_model || 'N/A';
+    this.backgroundModels = props.all_backgrounds || [];
     this.all_categories = props.all_categories || [];
-    this.state = ReportFilter.genusSearchValueFor(props.report_page_params.selected_genus);
     this.genus_search_items = this.props.all_genera_in_sample;
     this.genus_search_items.splice(0, 0, 'None');
     this.applyExcludedCategories = this.applyExcludedCategories.bind(this);

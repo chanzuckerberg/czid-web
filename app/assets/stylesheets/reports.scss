@@ -74,8 +74,11 @@ input[type=number] {
     float: left;
     width: 100%;
     &.background-model {
-      .select-dropdown {
-        font-size: 12px;
+      .input-field {
+        margin-top: 0;
+        .select-dropdown {
+          font-size: 12px;
+        }
       }
     }
   }
