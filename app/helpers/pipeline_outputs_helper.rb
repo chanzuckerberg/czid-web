@@ -21,7 +21,7 @@ module PipelineOutputsHelper
       resp = Client.get_object(bucket: bucket, key: key)
       return resp.body.read
     rescue
-      return nil # check this doesn't break anything
+      return nil
     end
   end
 end
