@@ -29,6 +29,27 @@ class Samples extends React.Component {
       isRequesting: false,
       displayEmpty: false
     };
+    this.initializeTooltip();
+  }
+
+  initializeTooltip() {
+    // only updating the tooltip offset when the component is loaded
+    $(() => {
+      const tooltipIdentifier = $("[rel='tooltip']");
+      tooltipIdentifier.tooltip({
+        delay: 0,
+        html: true,
+        placement: 'top',
+        offset: '0px 50px'
+      });
+      $('.row.table-container div').hover(() => {
+        const selectTooltip = $('.tooltip');
+        const leftOffset = parseInt(selectTooltip.css('left'));
+        if(!isNaN(leftOffset)) {
+          selectTooltip.css('left', leftOffset - 15);
+        }
+      });
+    });
   }
 
   columnSorting(e) {
@@ -143,10 +164,10 @@ class Samples extends React.Component {
               { (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? '' : <span className="percent"> {`(${derivedOutput.summary_stats.percent_remaining.toFixed(2)}%)`} </span> }
               </p>
             </div>
-            <div className="reads col s1">
+            <div className="reads col s1 center">
               <p>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? BLANK_TEXT : `${derivedOutput.summary_stats.qc_percent.toFixed(2)}%`}</p>
             </div>
-            <div className="reads col s1">
+            <div className="reads col s1 center">
               <p>
               { (!derivedOutput.summary_stats || !derivedOutput.summary_stats.compression_ratio) ? BLANK_TEXT : derivedOutput.summary_stats.compression_ratio.toFixed(2) }
               </p>
@@ -403,11 +424,11 @@ class Samples extends React.Component {
           <div className="col s4"><span>Name</span></div>
           <div className="col s2">Total reads</div>
           <div className="col s2">Non-host reads</div>
-          <div className="col s1">Passed QC</div>
-          <div className="col s1">DCR</div>
+          <div className="col s1 center" rel='tooltip' data-placement='bottom' title='Passed quality control'>Passed QC</div>
+          <div className="col s1 center" rel='tooltip' data-placement='bottom' title='Duplicate compression ratio'>DCR</div>
           <div className="col s2 status-dropdown" data-activates="dropdownstatus"><i className="status-filter fa fa-caret-down"></i>Status</div>
         </div>
-      </div>
+      </div> 
     )
     return (
     <div className="content-wrapper">
