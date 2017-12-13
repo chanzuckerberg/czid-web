@@ -29,7 +29,7 @@ class PipelineOutput < ApplicationRecord
   end
 
   def count_unmapped_reads
-    unidentified_fasta = get_s3_file(pipeline_output.sample.unidentified_fasta_s3_path)
+    unidentified_fasta = get_s3_file(sample.unidentified_fasta_s3_path)
     unidentified_fasta.lines.count if unidentified_fasta
   end
 
