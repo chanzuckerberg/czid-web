@@ -372,6 +372,16 @@ $break-large: 1070px;
     color: #333333;
     font-weight: 600;
     font-size: 14px;
+    .sort-able {
+      i {
+        margin-left: 7px;
+      }
+      &:hover {
+        i {
+          color: #09c;
+        }
+      }
+    }
     .status-dropdown {
       cursor: pointer;
       padding-left: 0;
