@@ -30,6 +30,7 @@ class Samples extends React.Component {
       isRequesting: false,
       displayEmpty: false
     };
+    this.sortCount = 0;
     this.initializeTooltip();
   }
 
@@ -54,10 +55,20 @@ class Samples extends React.Component {
   }
 
   sortSamples() {
-    const new_sort = (this.state.sort_by === 'name,desc') ? 'name,asc' :  'name,desc';
+    this.sortCount += 1;
+    let new_sort;
+    if(this.sortCount === 3) {
+      this.sortCount = 0;
+      new_sort = 'created_at,desc';
+    } else {
+      new_sort = (this.state.sort_by === 'name,asc') ? 'name,desc' :  'name,asc';
+    }
     this.setState({ sort_by: new_sort, pagesLoaded: 0, pageEnd: false }, () => {
       this.setUrlLocation();
-      this.fetchResults();
+      ReportFilter.showLoading('Sorting samples...');
+      this.fetchResults(() => {
+        ReportFilter.hideLoading();
+      });
     });
   }
 
@@ -286,7 +297,7 @@ class Samples extends React.Component {
   }
 
   //fetch results from filtering, search or switching projects
-  fetchResults() {
+  fetchResults(cb) {
     const params = this.getParams();
     axios.get(`/samples?${params}`).then((res) => {
       this.setState((prevState) => ({
@@ -300,13 +311,19 @@ class Samples extends React.Component {
       if (!this.state.allSamples.length) {
         this.setState({ displayEmpty: true });
       }
+      if(typeof cb === 'function') {
+        cb();
+      }
     }).catch((err) => {
       this.setState({
         loading: false,
         initialFetchedSamples: [],
         allSamples: [],
         displayEmpty: true,
-      })
+      });
+      if(typeof cb === 'function') {
+        cb();
+      }
     })
   }
 
@@ -433,7 +450,8 @@ class Samples extends React.Component {
           <div className="col s4 sort-able">
             <div onClick={this.sortSamples}>
               <span>Name</span>
-              <i className={`fa ${(this.state.sort_by === 'name,desc') ? 'fa fa-caret-up' : 'fa fa-caret-down'}`}></i>
+              <i className={`fa ${(this.state.sort_by === 'name,desc') ? 'fa fa-caret-up' : 'fa fa-caret-down'}
+              ${(this.state.sort_by === 'name,desc' || this.state.sort_by === 'name,asc') ? 'active': ''}`}></i>
             </div>
           </div>
           <div className="col s2">Total reads</div>
