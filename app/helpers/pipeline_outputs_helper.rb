@@ -21,12 +21,7 @@ module PipelineOutputsHelper
       resp = Client.get_object(bucket: bucket, key: key)
       return resp.body.read
     rescue
-      return 'Coming soon' # Temporary fix
+      return nil
     end
-  end
-
-  def count_unmapped_reads(pipeline_output)
-    unidentified_fasta = get_s3_file(pipeline_output.sample.unidentified_fasta_s3_path)
-    unidentified_fasta.lines.count
   end
 end

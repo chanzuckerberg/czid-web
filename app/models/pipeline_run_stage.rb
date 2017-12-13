@@ -219,7 +219,7 @@ class PipelineRunStage < ApplicationRecord
     pipeline_output_dict.slice!('remaining_reads', 'total_reads', 'taxon_counts_attributes')
     po.total_reads = pipeline_output_dict['total_reads']
     po.remaining_reads = pipeline_output_dict['remaining_reads']
-    po.unmapped_reads = count_unmapped_reads(po)
+    po.unmapped_reads = po.count_unmapped_reads
 
     # only keep species level counts
     taxon_counts_attributes_filtered = []
