@@ -3,8 +3,7 @@ require 'open3'
 
 module ReportHelper
   # Truncate report table past this number of rows.
-  MAX_ROWS = 3000
-
+  TAXON_CATEGORY_OFFSET=100000000
   ZSCORE_MIN = -99
   ZSCORE_MAX =  99
   ZSCORE_WHEN_ABSENT_FROM_SAMPLE = -100
@@ -273,6 +272,29 @@ module ReportHelper
       'percentconcordant' => DEFAULT_SAMPLE_PERCENTCONCORDANT,
       'aggregatescore' => nil
     }
+  end
+
+  def fetch_lineage_info(pipeline_output_id)
+    lineage_records = TaxonLineage.where(
+      "taxid in (select tax_id from taxon_counts
+                 where pipeline_output_id = #{pipeline_output_id}
+                   and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES})")
+    result_map = {}
+    search_key_list = Set.new
+    lineage_records.each do |lr|
+      key_array = []
+      TaxonCount::NAME_2_LEVEL.each do |category, level|
+        tax_name = lr["#{category}_name"]
+        tax_id = lr["#{category}_taxid"]
+        display_name = "#{tax_name} (#{category})"
+        search_id = level*TAXON_CATEGORY_OFFSET + tax_id
+        key_array <<  search_id
+        search_key_list.add([display_name, search_id])
+      end
+      result_map[lr.taxid] = key_array
+    end
+    search_key_list = search_key_list.sort_by { |u| u[0].downcase }
+    { lineage_map: result_map, search_list: search_key_list}
   end
 
   def tax_info_base(taxon)
@@ -585,9 +607,9 @@ module ReportHelper
     rows_total = tax_2d.length
 
     # Apply filters, unless disabled for CSV download.
-    unless params[:disable_filters] == 1 || params[:is_csv] == 1
-      apply_filters!(rows, tax_2d, all_genera, params)
-    end
+    #unless params[:disable_filters] == 1 || params[:is_csv] == 1
+    #  apply_filters!(rows, tax_2d, all_genera, params)
+    #end
 
     # These stats are displayed at the bottom of the page.
     rows_passing_filters = rows.length
@@ -601,9 +623,6 @@ module ReportHelper
       tax_info[:sort_key] = sort_key(tax_2d, tax_info, sort_by)
     end
     rows.sort_by! { |tax_info| tax_info[:sort_key] }
-
-    # HACK
-    rows = rows[0...MAX_ROWS] unless params[:is_csv] == 1
 
     # Delete fields that are unused in the UI.
     rows.each do |tax_info|

@@ -3,7 +3,7 @@ class SamplesController < ApplicationController
   include SamplesHelper
 
   before_action :authenticate_user!, only: [:new, :index, :update, :destroy, :edit, :show, :reupload_source, :kickoff_pipeline, :bulk_new, :bulk_import, :bulk_upload]
-  before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata, :report_info]
+  before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata, :report_info, :search_list]
   acts_as_token_authentication_handler_for User, only: [:create, :bulk_upload], fallback: :devise
   protect_from_forgery unless: -> { request.format.json? }
   PAGE_SIZE = 30
@@ -154,6 +154,20 @@ class SamplesController < ApplicationController
 
     @report_info = external_report_info(report, params)
     render json: @report_info
+  end
+
+  def search_list
+    expires_in 30.days
+
+    first_pipeline_run = @sample.pipeline_runs.first ? @sample.pipeline_runs.first : nil
+    @pipeline_run = first_pipeline_run
+    @pipeline_output_id = first_pipeline_run ? first_pipeline_run.pipeline_output.id : nil
+    if @pipeline_output_id
+      @search_list = fetch_lineage_info(@pipeline_output_id)
+      render json: @search_list
+    else
+      render json: { lineage_map: {}, search_list: [] }
+    end
   end
 
   def save_metadata

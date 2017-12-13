@@ -14,6 +14,7 @@ Rails.application.routes.draw do
     get :all, on: :collection
     get :pipeline_runs, on: :member
     get :report_info, on: :member
+    get :search_list, on: :member
     get :bulk_new, on: :collection
     get :bulk_import, on: :collection
     post :bulk_upload, on: :collection
