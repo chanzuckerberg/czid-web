@@ -24,7 +24,7 @@ class PipelineSampleReads extends React.Component {
                          "Stool", "Synovial fluid", "Whole blood", "Other"];
     this.NUCLEOTIDE_TYPES = ["DNA", "RNA"];
     this.DROPDOWN_OPTIONS = { sample_tissue: this.TISSUE_TYPES,
-                              sample_template: this.NUCLEOTIDE_TYPES };
+                              sample_nucleotide: this.NUCLEOTIDE_TYPES };
     this.DROPDOWN_METADATA_FIELDS = Object.keys(this.DROPDOWN_OPTIONS);
     this.handleDropdownChange = this.handleDropdownChange.bind(this);
   }
@@ -73,7 +73,7 @@ class PipelineSampleReads extends React.Component {
     this.initializeSelectTag();
     field = "sample_tissue"
     $(ReactDOM.findDOMNode(this.refs[field])).on('change',this.handleDropdownChange);
-    field = "sample_template" 
+    field = "sample_nucleotide" 
     $(ReactDOM.findDOMNode(this.refs[field])).on('change',this.handleDropdownChange);
   }
 
@@ -331,9 +331,9 @@ class PipelineSampleReads extends React.Component {
                               <tr>
                                 <td>Nucleotide type</td>
                                 <td className="sample-notes">
-                                  <select ref="sample_template" name="sample_template" className="" id="sample_template" onChange={ this.handleDropdownChange } value={ this.sampleInfo.sample_template ? this.sampleInfo.sample_template : this.NUCLEOTIDE_TYPES[this.NUCLEOTIDE_TYPES.length-1] }>
+                                  <select ref="sample_nucleotide" name="sample_nucleotide" className="" id="sample_nucleotide" onChange={ this.handleDropdownChange } value={ this.sampleInfo.sample_nucleotide ? this.sampleInfo.sample_nucleotide : this.NUCLEOTIDE_TYPES[this.NUCLEOTIDE_TYPES.length-1] }>
                                     { this.NUCLEOTIDE_TYPES.map((nt_type, i) => {
-                                        return <option ref="sample_template" key={i}>{nt_type}</option> }) }
+                                        return <option ref="sample_nucleotide" key={i}>{nt_type}</option> }) }
                                   </select>
                                 </td>
                               </tr>
