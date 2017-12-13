@@ -3,8 +3,8 @@
   <head>
     <title>IDseq</title>
     <%= javascript_include_tag Analytics::TRACKING_SOURCE %>
-    <% if @user && @user.id %>
-      <script type="text/javascript">_satellite.setVar("USERID", <%= @user.id %>); </script>
+    <% if current_user && current_user.id %>
+      <script type="text/javascript">_satellite.setVar("USERID", <%= current_user.id %>); </script>
     <% end %>
     <%= csrf_meta_tags %>
     <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>

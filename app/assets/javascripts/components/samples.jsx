@@ -132,7 +132,7 @@ class Samples extends React.Component {
                 { !uploader || uploader === '' ? '' : <span> | by {uploader}</span>}
               </p>
             </div>
-            <div className="reads col s1">
+            <div className="reads col s2">
               <p>
               { !derivedOutput.pipeline_output ? BLANK_TEXT : numberWithCommas(derivedOutput.pipeline_output.total_reads) }
               </p>
@@ -146,7 +146,7 @@ class Samples extends React.Component {
             <div className="reads col s1">
               <p>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? BLANK_TEXT : `${derivedOutput.summary_stats.qc_percent.toFixed(2)}%`}</p>
             </div>
-            <div className="reads col s2">
+            <div className="reads col s1">
               <p>
               { (!derivedOutput.summary_stats || !derivedOutput.summary_stats.compression_ratio) ? BLANK_TEXT : derivedOutput.summary_stats.compression_ratio.toFixed(2) }
               </p>
@@ -401,10 +401,10 @@ class Samples extends React.Component {
       <div className="row wrapper">
         <div className="row table-container">
           <div className="col s4"><span>Name</span></div>
-          <div className="col s1">Total reads</div>
+          <div className="col s2">Total reads</div>
           <div className="col s2">Non-host reads</div>
-          <div className="col s1">Passed quality control</div>
-          <div className="col s2">Duplicate compression ratio</div>
+          <div className="col s1">Passed QC</div>
+          <div className="col s1">DCR</div>
           <div className="col s2 status-dropdown" data-activates="dropdownstatus"><i className="status-filter fa fa-caret-down"></i>Status</div>
         </div>
       </div>
