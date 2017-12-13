@@ -2,12 +2,21 @@ class PipelineSampleReport extends React.Component {
 
   constructor(props) {
     super(props);
-    this.report_details = props.report_details;
-    this.rows_passing_filters = props.taxonomy_details[0];
-    this.rows_total = props.taxonomy_details[1];
-    this.taxonomy_details = props.taxonomy_details[2];
-    this.all_genera_in_sample = props.all_genera_in_sample;
-    this.all_categories = props.all_categories;
+    this.report_ts = props.report_ts
+    this.sample_id = props.sample_id
+
+    this.all_categories = props.all_categories
+    this.report_details = props.report_details
+    this.report_page_params = props.report_page_params
+    this.state = {
+      taxonomy_details:  [],
+      all_genera_in_sample: [],
+      rows_passing_filters: 0,
+      rows_total: 0,
+      loading: true
+    };
+
+    this.fetchReportData();
     this.applyNewFilterThresholds = this.applyNewFilterThresholds.bind(this);
     this.applyExcludedCategories = this.applyExcludedCategories.bind(this);
     this.applyGenusFilter = this.applyGenusFilter.bind(this);
@@ -17,6 +26,21 @@ class PipelineSampleReport extends React.Component {
     this.disableFilters = this.disableFilters.bind(this);
     this.enableFilters = this.enableFilters.bind(this);
     this.initializeTooltip();
+  }
+
+  fetchReportData() {
+    const params = `?${window.location.search.replace("?", "")}&report_ts=${this.report_ts}`
+    console.log(params)
+    axios.get(`/samples/${this.sample_id}/report_info${params}`).then((res) => {
+      console.log(res)
+      this.setState({
+        rows_passing_filters: res.data.taxonomy_details[0],
+        rows_total:  res.data.taxonomy_details[1],
+        taxonomy_details:  res.data.taxonomy_details[2],
+        all_genera_in_sample:  res.data.all_genera_in_sample,
+        loading: false
+      });
+    });
   }
 
   initializeTooltip() {
@@ -40,7 +64,7 @@ class PipelineSampleReport extends React.Component {
   }
 
   refreshPage(overrides) {
-    new_params = Object.assign({}, this.props.report_page_params, overrides);
+    new_params = Object.assign({}, this.report_page_params, overrides);
     window.location = location.protocol + '//' + location.host + location.pathname + '?' + jQuery.param(new_params);
   }
 
@@ -68,7 +92,7 @@ class PipelineSampleReport extends React.Component {
   }
 
   applyExcludedCategories(category, checked) {
-    excluded_categories = "" + this.props.report_page_params.excluded_categories;
+    excluded_categories = "" + this.report_page_params.excluded_categories;
     if (checked) {
       // remove from excluded_categories
       excluded_categories = excluded_categories.split(",").filter(c => c != category).join(",");
@@ -84,18 +108,18 @@ class PipelineSampleReport extends React.Component {
   }
 
   isGenusSearch() {
-    params = this.props.report_page_params;
+    params = this.report_page_params;
     return params.selected_genus != 'None' && params.disable_filters != 1;
   }
 
-  //path to NCBI 
+  //path to NCBI
   gotoNCBI(e) {
     const taxId = e.target.getAttribute('data-tax-id');
     const ncbiLink = `https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${taxId}`;
     window.open(ncbiLink, '_blank');
   }
 
-  //download Fasta  
+  //download Fasta
   downloadFastaUrl(e) {
     const pipelineId = e.target.getAttribute('data-pipeline-id');
     const taxLevel = e.target.getAttribute('data-tax-level');
@@ -188,7 +212,7 @@ class PipelineSampleReport extends React.Component {
   render_sort_arrow(column, desired_sort_direction, arrow_direction) {
     desired_sort = desired_sort_direction + "_" + column;
     className = `fa fa-caret-${arrow_direction}`;
-    current_sort = this.props.report_page_params.sort_by;
+    current_sort = this.report_page_params.sort_by;
     if (current_sort == desired_sort) {
       className = 'active ' + className;
     }
@@ -260,31 +284,31 @@ class PipelineSampleReport extends React.Component {
   }
 
   render() {
-    const parts = this.props.report_page_params.sort_by.split("_")
+    const parts = this.report_page_params.sort_by.split("_")
     const sort_column = parts[1] + "_" + parts[2];
     var t0 = Date.now();
-    filter_stats = this.rows_passing_filters + ' rows passing filters, out of ' + this.rows_total + ' total rows.';
-    if (this.props.report_page_params.disable_filters == 1) {
-      filter_stats = this.rows_total + ' unfiltered rows.';
+    filter_stats = this.state.rows_passing_filters + ' rows passing filters, out of ' + this.state.rows_total + ' total rows.';
+    if (this.report_page_params.disable_filters == 1) {
+      filter_stats = this.state.rows_total + ' unfiltered rows.';
     }
-    filter_row_stats = (
+    filter_row_stats = this.state.loading ? null : (
       <div>
         <span className="count">
-          {this.rows_passing_filters == this.taxonomy_details.length ?
+          {this.state.rows_passing_filters == this.state.taxonomy_details.length ?
             (filter_stats) :
-            ('Due to resource limits, showing only ' + this.taxonomy_details.length + ' of the ' + filter_stats)}
+            ('Due to resource limits, showing only ' + this.state.taxonomy_details.length + ' of the ' + filter_stats)}
         </span>
-        {this.rows_passing_filters < this.rows_total && this.props.report_page_params.disable_filters == 0 ? <span className="disable" onClick={this.disableFilters}><b> Disable filters</b></span> : ''}
-        {this.props.report_page_params.disable_filters == 1 ? <span className="disable" onClick={this.enableFilters}><b> Enable filters</b></span> : ''}
+        {this.state.rows_passing_filters < this.state.rows_total && this.report_page_params.disable_filters == 0 ? <span className="disable" onClick={this.disableFilters}><b> Disable filters</b></span> : ''}
+        {this.report_page_params.disable_filters == 1 ? <span className="disable" onClick={this.enableFilters}><b> Enable filters</b></span> : ''}
       </div>
     );
     report_filter =
       <ReportFilter
         all_categories = { this.all_categories }
-        all_genera_in_sample = {  this.all_genera_in_sample }
+        all_genera_in_sample = {  this.state.all_genera_in_sample }
         background_model = { this.report_details.background_model.name }
         report_title = { this.report_details.report_info.name }
-        report_page_params = { this.props.report_page_params }
+        report_page_params = { this.report_page_params }
         applyNewFilterThresholds = { this.applyNewFilterThresholds }
         applyExcludedCategories = { this.applyExcludedCategories }
         applyGenusFilter = { this.applyGenusFilter }
@@ -342,7 +366,7 @@ class PipelineSampleReport extends React.Component {
                     </tr>
                     </thead>
                     <tbody>
-                    { this.taxonomy_details.map((tax_info, i) => {
+                    { this.state.loading ? (<span> Loading results.. </span>) : (this.state.taxonomy_details.map((tax_info, i) => {
                       return (
                         <tr key={tax_info.tax_id} className={this.row_class(tax_info)}>
                           <td>
@@ -365,7 +389,7 @@ class PipelineSampleReport extends React.Component {
                           { this.render_number(tax_info.NR.percentconcordant, sort_column == 'nr_percentconcordant', 1) }
                         </tr>
                       )
-                    })}
+                    }))}
                     </tbody>
                   </table>
                 </div>

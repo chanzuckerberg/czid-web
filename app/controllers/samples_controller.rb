@@ -118,10 +118,18 @@ class SamplesController < ApplicationController
       end
     end
 
-    @report_info = external_report_info(report, params)
+    if report
+      @report_present = 1
+      @report_ts = @pipeline_output.updated_at.to_i
+      @all_categories = all_categories()
+      @report_details = report_details(report)
+      @report_page_params =  clean_params(params, @all_categories)
+    end
   end
 
   def report_info
+    expires_in 7.days
+
     first_pipeline_run = @sample.pipeline_runs.first ? @sample.pipeline_runs.first : nil
     @pipeline_run = first_pipeline_run
     @pipeline_output = first_pipeline_run ? first_pipeline_run.pipeline_output : nil
@@ -149,7 +157,7 @@ class SamplesController < ApplicationController
     end
 
     @report_info = external_report_info(report, params)
-    render json: { report_info: @report_info }
+    render json: @report_info
   end
 
   def save_metadata

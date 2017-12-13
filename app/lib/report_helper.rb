@@ -176,10 +176,7 @@ module ReportHelper
     return {} if report.nil?
     params = clean_params(params, ALL_CATEGORIES)
     data = {}
-    data[:report_details] = report_details(report)
     data[:taxonomy_details], data[:all_genera_in_sample] = taxonomy_details(report, params)
-    data[:all_categories] = ALL_CATEGORIES
-    data[:report_page_params] = params
     data
   end
 
@@ -202,7 +199,7 @@ module ReportHelper
       sample_info: report.pipeline_output.sample,
       project_info: report.pipeline_output.sample.project,
       background_model: report.background,
-      taxon_fasta_flag: taxon_fastas_present?(report)
+      taxon_fasta_flag: report.pipeline_output.pipeline_run.finalized?
     }
   end
 
