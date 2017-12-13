@@ -7,7 +7,6 @@ class PipelineSampleReads extends React.Component {
     this.sampleInfo = props.sampleInfo;
     this.projectInfo = props.projectInfo;
     this.reportInfo =  (Object.keys(props.reportInfo).length > 0) ? props.reportInfo : null;
-    this.jobStatistics = props.jobStatistics;
     this.summary_stats = props.summary_stats;
     this.gotoReport = this.gotoReport.bind(this);
     this.sampleId = this.sampleInfo.id;
@@ -19,13 +18,13 @@ class PipelineSampleReads extends React.Component {
       failureText: 'Sample run failed'
     };
     this.TYPE_PROMPT = "Type here...";
-    this.TISSUE_TYPES = ["Bronchoalveolar lavage (BAL)", "Cerebrospinal fluid (CSF)",
+    this.TISSUE_TYPES = ["Brain", "Bronchoalveolar lavage (BAL)", "Cerebrospinal fluid (CSF)",
                          "Nasopharyngeal (NP) swab", "Plasma", "Serum", "Solid tissue", 
                          "Stool", "Synovial fluid", "Whole blood", "Other"];
     this.NUCLEOTIDE_TYPES = ["DNA", "RNA"];
     this.DROPDOWN_OPTIONS = { sample_tissue: this.TISSUE_TYPES,
                               sample_template: this.NUCLEOTIDE_TYPES };
-    this.DROPDOWN_METADATA_FIELDS = ["sample_tissue", "sample_template"];
+    this.DROPDOWN_METADATA_FIELDS = Object.keys(this.DROPDOWN_OPTIONS);
     this.handleDropdownChange = this.handleDropdownChange.bind(this);
   }
 
@@ -71,8 +70,10 @@ class PipelineSampleReads extends React.Component {
     $('ul.tabs').tabs();
     this.listenNoteChanges();
     this.initializeSelectTag();
-    $(ReactDOM.findDOMNode(this.refs.sample_tissue)).on('change',this.handleDropdownChange);
-    $(ReactDOM.findDOMNode(this.refs.sample_template)).on('change',this.handleDropdownChange);
+    field = "sample_tissue"
+    $(ReactDOM.findDOMNode(this.refs[field])).on('change',this.handleDropdownChange);
+    field = "sample_template" 
+    $(ReactDOM.findDOMNode(this.refs[field])).on('change',this.handleDropdownChange);
   }
 
   initializeSelectTag() {
@@ -214,6 +215,10 @@ class PipelineSampleReads extends React.Component {
                   <td>Duplicate compression ratio</td>
                   <td>{ !this.summary_stats.compression_ratio ? BLANK_TEXT : this.summary_stats.compression_ratio.toFixed(2) }</td>
                 </tr>
+                <tr>
+                  <td>Date processed</td>
+                  <td>{ !this.summary_stats.last_processed_at ? BLANK_TEXT : moment(this.summary_stats.last_processed_at).startOf('second').fromNow() }</td>
+                </tr>
                 </tbody>
               </table>
             </div>
@@ -296,7 +301,7 @@ class PipelineSampleReads extends React.Component {
                                 <td> { (!this.sampleInfo.host_genome_name) ? BLANK_TEXT : this.sampleInfo.host_genome_name } </td>
                               </tr>
                               <tr>
-                                <td>Entry date</td>
+                                <td>Upload date</td>
                                 <td>{moment(this.sampleInfo.created_at).startOf('second').fromNow()}</td>
                               </tr>
                               <tr>
@@ -336,14 +341,6 @@ class PipelineSampleReads extends React.Component {
                                 <td className="sample-notes">
                                  <pre suppressContentEditableWarning={true} contentEditable={true} id="sample_patient">
                                   { this.sampleInfo.sample_patient && this.sampleInfo.sample_patient.trim() !== "" ? this.sampleInfo.sample_patient : this.TYPE_PROMPT}
-                                 </pre>
-                                </td>
-                              </tr>
-                              <tr>
-                                <td>Patient diagnosis</td>
-                                <td className="sample-notes">
-                                 <pre suppressContentEditableWarning={true} contentEditable={true} id="sample_diagnosis">
-                                  { this.sampleInfo.sample_diagnosis && this.sampleInfo.sample_diagnosis.trim() !== "" ? this.sampleInfo.sample_diagnosis : this.TYPE_PROMPT}
                                  </pre>
                                 </td>
                               </tr>
