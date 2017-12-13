@@ -18,7 +18,15 @@ class PipelineSampleReads extends React.Component {
       rerun: false,
       failureText: 'Sample run failed'
     };
-    this.TYPE_PROMPT = "Type here..."
+    this.TYPE_PROMPT = "Type here...";
+    this.TISSUE_TYPES = ["Bronchoalveolar lavage (BAL)", "Cerebrospinal fluid (CSF)",
+                         "Nasopharyngeal (NP) swab", "Plasma", "Serum", "Solid tissue", 
+                         "Stool", "Synovial fluid", "Whole blood", "Other"];
+    this.NUCLEOTIDE_TYPES = ["DNA", "RNA"];
+    this.DROPDOWN_OPTIONS = { sample_tissue: this.TISSUE_TYPES,
+                              sample_template: this.NUCLEOTIDE_TYPES };
+    this.DROPDOWN_METADATA_FIELDS = ["sample_tissue", "sample_template"];
+    this.handleDropdownChange = this.handleDropdownChange.bind(this);
   }
 
   gotoReport() {
@@ -62,6 +70,42 @@ class PipelineSampleReads extends React.Component {
   componentDidMount() {
     $('ul.tabs').tabs();
     this.listenNoteChanges();
+    this.initializeSelectTag();
+    $(ReactDOM.findDOMNode(this.refs.sample_tissue)).on('change',this.handleDropdownChange);
+    $(ReactDOM.findDOMNode(this.refs.sample_template)).on('change',this.handleDropdownChange);
+  }
+
+  initializeSelectTag() {
+    $('select').material_select();
+  }
+
+  handleDropdownChange(e) {
+    const field = e.target.id;
+    const value = this.DROPDOWN_OPTIONS[field][e.target.selectedIndex];
+    axios.post('/samples/' + this.sampleInfo.id + '/save_metadata.json', {
+      field: field, value: value
+    })
+    .then((response) => {
+      if (response.data.status === 'success') {
+        $('.note-saved-success')
+        .html(`<i class='fa fa-check-circle'></i> ${response.data.message}`)
+        .css('display', 'inline-block')
+        .delay(1000)
+        .slideUp(200);
+      } else {
+        $('.note-save-failed')
+        .html(`<i class='fa fa-frown-o'></i> ${response.data.message}`)
+        .css('display', 'inline-block')
+        .delay(1000)
+        .slideUp(200);
+      }
+    }).catch((error) => {
+      $('.note-save-failed')
+      .html(`<i class='fa fa-frown-o'></i> Something went wrong!`)
+      .css('display', 'inline-block')
+      .delay(1000)
+      .slideUp(200);
+    });
   }
 
   listenNoteChanges() {
@@ -272,17 +316,19 @@ class PipelineSampleReads extends React.Component {
                               <tr>
                                 <td>Tissue type</td>
                                 <td className="sample-notes">
-                                 <pre suppressContentEditableWarning={true} contentEditable={true} id="sample_tissue">
-                                  { this.sampleInfo.sample_tissue && this.sampleInfo.sample_tissue.trim() !== "" ? this.sampleInfo.sample_tissue : this.TYPE_PROMPT}
-                                 </pre>
+                                  <select ref="sample_tissue" name="sample_tissue" className="" id="sample_tissue" onChange={ this.handleDropdownChange } value={ this.sampleInfo.sample_tissue ? this.sampleInfo.sample_tissue : this.TISSUE_TYPES[this.TISSUE_TYPES.length-1] }>
+                                    { this.TISSUE_TYPES.map((tissue, i) => {
+                                        return <option ref="sample_tissue" key={i}>{tissue}</option> }) }
+                                  </select>
                                 </td>
                               </tr>
                               <tr>
                                 <td>Nucleotide type</td>
                                 <td className="sample-notes">
-                                 <pre suppressContentEditableWarning={true} contentEditable={true} id="sample_template">
-                                  { this.sampleInfo.sample_template && this.sampleInfo.sample_template.trim() !== "" ? this.sampleInfo.sample_template : this.TYPE_PROMPT}
-                                 </pre>
+                                  <select ref="sample_template" name="sample_template" className="" id="sample_template" onChange={ this.handleDropdownChange } value={ this.sampleInfo.sample_template ? this.sampleInfo.sample_template : this.NUCLEOTIDE_TYPES[this.NUCLEOTIDE_TYPES.length-1] }>
+                                    { this.NUCLEOTIDE_TYPES.map((nt_type, i) => {
+                                        return <option ref="sample_template" key={i}>{nt_type}</option> }) }
+                                  </select>
                                 </td>
                               </tr>
                               <tr>
