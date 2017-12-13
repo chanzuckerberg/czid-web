@@ -49,16 +49,25 @@ class PipelineSampleReads extends React.Component {
 
   render_metadata_textfield(label, field, line_break) {
     display_value = this.sampleInfo[field] && this.sampleInfo[field].trim() !== "" ? this.sampleInfo[field] : this.TYPE_PROMPT
-    return (
-      <tr>
-        <td>{label}</td>
+    title = <td>{label}</td>
+    editable = 
         <td className="sample-notes">
           <pre suppressContentEditableWarning={true} contentEditable={true} id={field}>
             {display_value}
           </pre>
         </td>
-      </tr>
-    );
+    if (line_break === 0) {
+      return (
+        <tr>{title}{editable}</tr>
+      );
+    } else {
+      return (
+        <div>
+          <tr>{title}</tr>
+          <tr>{editable}</tr>
+        </div>
+      );
+    }
   }
 
   gotoReport() {
