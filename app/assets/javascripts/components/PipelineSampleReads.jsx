@@ -29,6 +29,38 @@ class PipelineSampleReads extends React.Component {
     this.handleDropdownChange = this.handleDropdownChange.bind(this);
   }
 
+  render_metadata_dropdown(label, field) {
+    dropdown_options = this.DROPDOWN_OPTIONS[field]
+    display_value = this.sampleInfo[field] ? this.sampleInfo[field] : dropdown_options[dropdown_options.length-1]
+    return (
+      <tr>
+        <td>{label}</td>
+        <td className="sample-notes">
+          <select ref={field} name={field} className="" id={field} onChange={this.handleDropdownChange} value={display_value}>
+            { dropdown_options.map((option_value, i) => {
+                return <option ref={field} key={i}>{option_value}</option>
+              }) 
+            }
+          </select>
+        </td>
+      </tr>
+    );
+  }
+
+  render_metadata_textfield(label, field, line_break) {
+    display_value = this.sampleInfo[field] && this.sampleInfo[field].trim() !== "" ? this.sampleInfo[field] : this.TYPE_PROMPT
+    return (
+      <tr>
+        <td>{label}</td>
+        <td className="sample-notes">
+          <pre suppressContentEditableWarning={true} contentEditable={true} id={field}>
+            {display_value}
+          </pre>
+        </td>
+      </tr>
+    );
+  }
+
   gotoReport() {
     $('ul.tabs').tabs('select_tab', 'reports');
     PipelineSampleReads.setTab('pipeline_display','reports');
@@ -305,46 +337,16 @@ class PipelineSampleReads extends React.Component {
                                 <td>Upload date</td>
                                 <td>{moment(this.sampleInfo.created_at).startOf('second').fromNow()}</td>
                               </tr>
-                              <tr>
-                                <td>Location</td>
-                                <td className="sample-notes">
-                                 <pre suppressContentEditableWarning={true} contentEditable={true} id="sample_location">
-                                  { this.sampleInfo.sample_location && this.sampleInfo.sample_location.trim() !== "" ? this.sampleInfo.sample_location : this.TYPE_PROMPT}
-                                 </pre>
-                                </td>
-                              </tr>
+                              {this.render_metadata_textfield("Location", "sample_location", 0)}
                             </tbody>
                           </table>
                         </div>
                         <div className="col s6">
                           <table className="responsive-table">
                             <tbody>
-                              <tr>
-                                <td>Tissue type</td>
-                                <td className="sample-notes">
-                                  <select ref="sample_tissue" name="sample_tissue" className="" id="sample_tissue" onChange={ this.handleDropdownChange } value={ this.sampleInfo.sample_tissue ? this.sampleInfo.sample_tissue : this.TISSUE_TYPES[this.TISSUE_TYPES.length-1] }>
-                                    { this.TISSUE_TYPES.map((tissue, i) => {
-                                        return <option ref="sample_tissue" key={i}>{tissue}</option> }) }
-                                  </select>
-                                </td>
-                              </tr>
-                              <tr>
-                                <td>Nucleotide type</td>
-                                <td className="sample-notes">
-                                  <select ref="sample_nucleotide" name="sample_nucleotide" className="" id="sample_nucleotide" onChange={ this.handleDropdownChange } value={ this.sampleInfo.sample_nucleotide ? this.sampleInfo.sample_nucleotide : this.NUCLEOTIDE_TYPES[this.NUCLEOTIDE_TYPES.length-1] }>
-                                    { this.NUCLEOTIDE_TYPES.map((nt_type, i) => {
-                                        return <option ref="sample_nucleotide" key={i}>{nt_type}</option> }) }
-                                  </select>
-                                </td>
-                              </tr>
-                              <tr>
-                                <td>Patient ID</td>
-                                <td className="sample-notes">
-                                 <pre suppressContentEditableWarning={true} contentEditable={true} id="sample_patient">
-                                  { this.sampleInfo.sample_patient && this.sampleInfo.sample_patient.trim() !== "" ? this.sampleInfo.sample_patient : this.TYPE_PROMPT}
-                                 </pre>
-                                </td>
-                              </tr>
+                              {this.render_metadata_dropdown("Tissue type", "sample_tissue")}
+                              {this.render_metadata_dropdown("Nucleotide type", "sample_nucleotide")}
+                              {this.render_metadata_textfield("Patient ID", "sample_patient", 0)}
                             </tbody>
                           </table>
                         </div>
@@ -353,14 +355,7 @@ class PipelineSampleReads extends React.Component {
                         <div className="col s12">
                           <table>
                             <tbody>
-                             <tr>
-                              <td className="notes">Notes</td>
-                              <td className="sample-notes">
-                               <pre suppressContentEditableWarning={true} contentEditable={true} id="sample_notes">
-                                { this.sampleInfo.sample_notes && this.sampleInfo.sample_notes.trim() !== "" ? this.sampleInfo.sample_notes : this.TYPE_PROMPT}
-                               </pre>
-                              </td>
-                             </tr>
+                              {this.render_metadata_textfield("Notes", "sample_notes", 1)}
                             </tbody>
                           </table>
                         </div>
