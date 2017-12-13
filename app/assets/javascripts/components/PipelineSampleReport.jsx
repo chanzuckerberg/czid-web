@@ -563,8 +563,8 @@ class PipelineSampleReport extends React.Component {
         <div id="reports" className="reports-screen tab-screen col s12">
           <div className="tab-screen-content">
             <div className="row">
-              <div className="col s2 reports-sidebar">
-                {report_filter}
+              <div className="col s2 reports-sidebar no-padding">
+                <div className='report-filters-container'>{report_filter}</div>
               </div>
               <div className="col s10 reports-section">
                 <div className="reports-count">
