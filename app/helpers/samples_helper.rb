@@ -1,5 +1,8 @@
 require 'open3'
+
 module SamplesHelper
+  include PipelineOutputsHelper
+
   def host_genomes_list
     HostGenome.all.map { |h| h.slice('name', 'id') }
   end
@@ -8,7 +11,13 @@ module SamplesHelper
     { remaining_reads: get_remaining_reads(jobstats),
       compression_ratio: compute_compression_ratio(jobstats),
       qc_percent: compute_qc_value(jobstats),
-      percent_remaining: compute_percentage_reads(jobstats) }
+      percent_remaining: compute_percentage_reads(jobstats),
+      unmapped_reads: count_unmapped_reads(jobstats) }
+  end
+
+  def count_unmapped_reads(jobstats)
+    unidentified_fasta = get_s3_file(@pipeline_output.sample.unidentified_fasta_s3_path)
+    unidentified_fasta.lines.count
   end
 
   def get_remaining_reads(jobstats)

@@ -152,6 +152,10 @@ class PipelineSampleReads extends React.Component {
                   <td>Non-host reads</td>
                   <td>{ !this.summary_stats.remaining_reads ? BLANK_TEXT : numberWithCommas(this.summary_stats.remaining_reads) } { !this.summary_stats.percent_remaining ? '' : `(${this.summary_stats.percent_remaining.toFixed(2)}%)` }</td>
                 </tr>
+                <tr>
+                  <td>Unmapped reads</td>
+                  <td>{ !this.summary_stats.unmapped_reads ? BLANK_TEXT : numberWithCommas(this.summary_stats.unmapped_reads) }</td>
+                </tr>
                 </tbody>
               </table>
             </div>
