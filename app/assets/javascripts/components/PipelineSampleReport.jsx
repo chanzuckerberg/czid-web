@@ -413,7 +413,7 @@ class PipelineSampleReport extends React.Component {
                     </tr>
                     </thead>
                     <tbody>
-                    { this.state.loading ? (<div>Loading results.. </div>) : (this.state.taxonomy_details.slice(0, this.max_rows_to_render).map((tax_info, i) => {
+                    { this.state.loading ? (<tr><td>Loading results.. </td></tr>) : (this.state.taxonomy_details.slice(0, this.max_rows_to_render).map((tax_info, i) => {
                       return (
                         <tr key={tax_info.tax_id} className={this.row_class(tax_info)}>
                           <td>
