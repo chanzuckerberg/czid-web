@@ -293,6 +293,14 @@ class PipelineSampleReads extends React.Component {
                                  </pre>
                                 </td>
                               </tr>
+                              <tr>
+                                <td>Patient diagnosis</td>
+                                <td className="sample-notes">
+                                 <pre suppressContentEditableWarning={true} contentEditable={true} id="sample_diagnosis">
+                                  { this.sampleInfo.sample_diagnosis && this.sampleInfo.sample_diagnosis.trim() !== "" ? this.sampleInfo.sample_diagnosis : this.TYPE_PROMPT}
+                                 </pre>
+                                </td>
+                              </tr>
                             </tbody>
                           </table>
                         </div>

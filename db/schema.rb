@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171213012921) do
+ActiveRecord::Schema.define(version: 20171213014027) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -167,6 +167,7 @@ ActiveRecord::Schema.define(version: 20171213012921) do
     t.string "job_queue"
     t.bigint "host_genome_id"
     t.bigint "user_id"
+    t.text "sample_diagnosis"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
     t.index ["user_id"], name: "index_samples_on_user_id"
   end
