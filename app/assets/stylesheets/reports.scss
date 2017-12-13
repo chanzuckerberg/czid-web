@@ -16,15 +16,18 @@ input[type=number] {
 
 .reports-sidebar {
   background: $sidebar-background;
-  position: sticky;
   z-index: 1;
-  position: -webkit-sticky;
-  position: -moz-sticky;
-  position: -o-sticky;
-  position: -ms-sticky;
+  width: inherit;
   top: 0;
-  min-height: -webkit-fill-available !important;
   border-right: 1px solid rgb(212, 212, 212);
+  .report-filters-container{
+      will-change: min-height;
+  }
+  .reports-sidebar-content {
+    transform: translate(0, 0); /* For browsers don't support translate3d. */
+    transform: translate3d(0, 0, 0);
+    will-change: position, transform;
+  }
 }
 
 .sidebar-title {
@@ -414,6 +417,7 @@ input[type=number] {
 
 .reports-section {
   padding: 0 !important;
+  border-left: 1px solid #d4d4d4;
   .reports-count {
     box-shadow: 1px 2px 5px 0 #eaeaea;
     .download-report {
