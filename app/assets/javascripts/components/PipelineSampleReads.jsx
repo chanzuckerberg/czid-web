@@ -7,11 +7,13 @@ class PipelineSampleReads extends React.Component {
     this.rerunPath = props.rerun_path;
     this.sampleInfo = props.sampleInfo;
     this.projectInfo = props.projectInfo;
+
     this.reportPresent =  props.reportPresent;
     this.reportTime = props.reportTime;
     this.allCategories  = props.allCategories
     this.reportDetails  = props.reportDetails
     this.reportPageParams  = props.reportPageParams
+
     this.jobStatistics = props.jobStatistics;
     this.summary_stats = props.summary_stats;
     this.gotoReport = this.gotoReport.bind(this);
