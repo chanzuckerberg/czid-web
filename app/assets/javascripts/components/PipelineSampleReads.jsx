@@ -3,10 +3,16 @@ class PipelineSampleReads extends React.Component {
     super(props);
     this.pipelineOutput = props.pipelineOutput;
     this.csrf = props.csrf;
+    this.allBackgrounds = props.all_backgrounds
     this.rerunPath = props.rerun_path;
     this.sampleInfo = props.sampleInfo;
     this.projectInfo = props.projectInfo;
-    this.reportInfo =  (Object.keys(props.reportInfo).length > 0) ? props.reportInfo : null;
+    this.reportPresent =  props.reportPresent;
+    this.reportTime = props.reportTime;
+    this.allCategories  = props.allCategories
+    this.reportDetails  = props.reportDetails
+    this.reportPageParams  = props.reportPageParams
+    this.jobStatistics = props.jobStatistics;
     this.summary_stats = props.summary_stats;
     this.gotoReport = this.gotoReport.bind(this);
     this.sampleId = this.sampleInfo.id;
@@ -192,22 +198,20 @@ class PipelineSampleReads extends React.Component {
       };
       if (newText.trim() === '') {
         e.target.innerText = this.TYPE_PROMPT;
-      } 
+      }
     });
   }
 
   render() {
     let d_report = null;
-    if(this.reportInfo) {
+    if(this.reportPresent) {
       d_report = <PipelineSampleReport
-        all_categories = { this.reportInfo.all_categories }
-        checked_categories = {this.reportInfo.checked_categories || this.reportInfo.all_categories }
-        genus_info = {this.reportInfo.genus_info}
-        report_details={this.reportInfo.report_details}
-        taxonomy_details={this.reportInfo.taxonomy_details}
-        report_page_params={this.reportInfo.report_page_params}
-        all_genera_in_sample={this.reportInfo.all_genera_in_sample}
         sample_id = {this.sampleId}
+        report_ts = {this.reportTime}
+        all_categories = {this.allCategories}
+        all_backgrounds = {this.allBackgrounds}
+        report_details = {this.reportDetails}
+        report_page_params = {this.reportPageParams}
       />;
     } else {
       d_report = <div className="center-align text-grey text-lighten-2 no-report">{ this.pipelineInProgress() ? <div>Sample Waiting ...<p><i className='fa fa-spinner fa-spin fa-3x'></i></p></div> :

@@ -7,23 +7,60 @@ class ReportFilter extends React.Component {
     super(props);
     this.sample_id = props.sample_id;
     this.background_model = props.background_model || 'N/A';
+    this.backgroundModels = props.all_backgrounds || [];
     this.all_categories = props.all_categories || [];
-    this.new_filter_thresholds = {};
-    this.state = ReportFilter.genusSearchValueFor(props.report_page_params.selected_genus);
-    this.genus_search_items = this.props.all_genera_in_sample;
-    this.genus_search_items.splice(0, 0, 'None');
-    this.applyFilters = this.applyFilters.bind(this);
     this.applyExcludedCategories = this.applyExcludedCategories.bind(this);
     this.applyGenusFilter = this.applyGenusFilter.bind(this);
     this.enableFilters = this.enableFilters.bind(this);
     this.clearGenusSearch = this.clearGenusSearch.bind(this);
+
+    this.handleBackgroundModelChange = this.handleBackgroundModelChange.bind(this);
+    this.handleGenusSearch = this.handleGenusSearch.bind(this);
+    this.state = {
+      genusSearchValue: this.setGenusSearchValueFor(props.report_page_params.selected_genus) || "",
+      backgroundName: this.background_model.name || null,
+      backgroundParams: this.background_model.id || null,
+      genus_search_items: props.all_genera_in_sample
+    }
+  }
+  componentWillReceiveProps(newProps){
+      this.setState({genus_search_items: newProps.all_genera_in_sample})
   }
 
   componentDidMount() {
+    this.initializeSelectTag();
+    $(ReactDOM.findDOMNode(this.refs.background)).on('change',this.handleBackgroundModelChange);
     // a polyfill for firefox, but disbaled for now
     // $(window).resize(() => {
     //   this.resizeFilterHeight();
     // });
+  }
+
+  initializeSelectTag() {
+    $('select').material_select();
+  }
+
+  handleGenusSearch(e) {
+    this.setState({
+      genusSearchValue: this.setGenusSearchValueFor(e.target.value)
+    })
+  }
+
+  refreshPage(overrides) {
+    ReportFilter.showLoading('Fetching results...');
+    new_params = Object.assign({}, this.props.report_page_params, overrides);
+    window.location = location.protocol + '//' + location.host + location.pathname + '?' + jQuery.param(new_params);
+  }
+
+
+  handleBackgroundModelChange(e) {
+    const selectedIndex = e.target.selectedIndex
+    this.setState({
+      backgroundName: e.target.value,
+      backgroundParams: this.backgroundModels[selectedIndex].id
+    });
+    background_id = this.state.backgroundParams
+    this.refreshPage({background_id});
   }
 
   resizeFilterHeight() {
@@ -34,23 +71,13 @@ class ReportFilter extends React.Component {
     // $('.reports-sidebar').css('min-height', newHeight);
   }
 
-  static genusSearchValueFor(selected_genus) {
+  setGenusSearchValueFor(selected_genus) {
     genus_search_value = selected_genus == 'None' ? '' : selected_genus;
-    return {genus_search_value};
+    return genus_search_value;
   }
 
   enableFilters() {
     this.props.enableFilters();
-  }
-
-  setFilterThreshold(threshold_name, event) {
-    this.new_filter_thresholds[threshold_name] = event.target.value.trim();
-    $('.apply-filter-button a').addClass('changed');
-  }
-
-  applyFilters(event) {
-    ReportFilter.showLoading('Applying thresholds...');
-    this.props.applyNewFilterThresholds(this.new_filter_thresholds);
   }
 
   static showLoading(message) {
@@ -66,7 +93,9 @@ class ReportFilter extends React.Component {
 
   applyGenusFilter(selected_genus) {
     ReportFilter.showLoading(`Filtering for '${selected_genus}'...`);
-    this.setState(ReportFilter.genusSearchValueFor(selected_genus));
+    this.setState({
+      genusSearchValue: this.setGenusSearchValueFor(selected_genus)
+    });
     this.props.applyGenusFilter(selected_genus);
   }
 
@@ -74,64 +103,8 @@ class ReportFilter extends React.Component {
     this.applyGenusFilter('None');
   }
 
-  thresholdInput(metric_token, visible_metric_name) {
-    return (
-      <div className='col s12'>
-        <div className='col s6'>
-          <div className='threshold-label left'>
-            <label htmlFor={`threshold_${metric_token}`}>
-              {visible_metric_name} &ge;
-            </label>
-          </div>
-        </div>
-        <div className='col s6 input-container'>
-          <input
-            className='browser-default'
-            onChange={this.setFilterThreshold.bind(this, `threshold_${metric_token}`)}
-            name="group2"
-            defaultValue={this.props.report_page_params[`threshold_${metric_token}`]}
-            id={`threshold_${metric_token}`}
-            type="number" />
-        </div>
-      </div>
-    );
-  }
-
   render() {
     align_right = {'textAlign': 'right'};
-    threshold_filters = (
-      <div className="filter-controls">
-        <div className="filter-title">
-          {this.props.report_page_params.disable_filters == 0 ?
-            <a href="#" onClick={this.clearGenusSearch}>Click to clear genus search and enable filters.</a> :
-            <a href="#" onClick={this.enableFilters}>Click to enable filters.</a>}
-        </div>
-      </div>
-    );
-    if (this.props.report_page_params.disable_filters == 0 && this.props.report_page_params.selected_genus == 'None') {
-      threshold_filters = (
-        <div className="filter-controls">
-          <div className="filter-row row threshold-row">
-            <div className='thresh-values'>
-              THRESHOLD VALUES
-            </div>
-            {this.thresholdInput('zscore', 'Z')}
-            {this.thresholdInput('rpm', 'rPM')}
-            {this.thresholdInput('r', 'r')}
-            {this.thresholdInput('aggregatescore', 'NT+NR*')}
-            {this.thresholdInput('percentidentity', '%id')}
-            {this.thresholdInput('neglogevalue', 'log(1/E)')}
-            {this.thresholdInput('percentconcordant', '%conc')}
-            <div className="apply-filter-button left center-align">
-              <a onClick={this.applyFilters}
-                 className="btn btn-flat waves-effect grey text-grey text-lighten-5 waves-light apply-filter-button">
-                Apply threshold
-              </a>
-            </div>
-          </div>
-        </div>
-      );
-    }
     category_filter = '';
     if (this.props.report_page_params.disable_filters == 0 && this.props.report_page_params.selected_genus == 'None') {
       category_filter = (
@@ -163,7 +136,7 @@ class ReportFilter extends React.Component {
               <div className="filter-values genus-autocomplete-container">
                 <ReactAutocomplete
                   inputProps={{ placeholder: 'Search for a genus...' }}
-                  items={this.genus_search_items}
+                  items={this.state.genus_search_items}
                   shouldItemRender={(item, value) => item == 'None' || item.toLowerCase().indexOf(value.toLowerCase()) > -1}
                   getItemValue={item => item}
                   renderItem={(item, highlighted) =>
@@ -174,8 +147,8 @@ class ReportFilter extends React.Component {
                       {item}
                     </div>
                   }
-                  value={this.state.genus_search_value}
-                  onChange={(e) => this.setState(ReportFilter.genusSearchValueFor(e.target.value))}
+                  value={this.state.genusSearchValue}
+                  onChange={this.handleGenusSearch}
                   onSelect={this.applyGenusFilter}
                 />
               </div>
@@ -196,18 +169,23 @@ class ReportFilter extends React.Component {
                 <div className="sidebar-pane">
                   <div className="report-data background-model">
                     <div className="report-title">
-                      Background model
+                      Select background model
                     </div>
-                    <div className="report-value">
-                      { this.background_model }
-                    </div>
+                      <div className="input-field">
+                        <select ref="background" name="background" className="" id="background" onChange={ this.handleBackgroundModelChange } value={this.state.backgroundName}>
+                          { this.backgroundModels.length ?
+                              this.backgroundModels.map((background, i) => {
+                                return <option ref= "background" key={i}  >{background.name}</option>
+                              }) : <option>No background models to display</option>
+                            }
+                        </select>
+                      </div>
                   </div>
                 </div>
               </div>
               <div id="filters-pane" className="pane col s12">
                 {category_filter}
                 {genus_search}
-                {threshold_filters}
               </div>
             </div>
           </div>
@@ -218,5 +196,5 @@ class ReportFilter extends React.Component {
 }
 
 ReportFilter.propTypes = {
-  background_model: React.PropTypes.string,
+  background_model: React.PropTypes.object
 };

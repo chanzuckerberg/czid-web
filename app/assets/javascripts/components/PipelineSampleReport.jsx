@@ -2,12 +2,23 @@ class PipelineSampleReport extends React.Component {
 
   constructor(props) {
     super(props);
-    this.report_details = props.report_details;
-    this.rows_passing_filters = props.taxonomy_details[0];
-    this.rows_total = props.taxonomy_details[1];
-    this.taxonomy_details = props.taxonomy_details[2];
-    this.all_genera_in_sample = props.all_genera_in_sample;
-    this.all_categories = props.all_categories;
+    this.report_ts = props.report_ts
+    this.sample_id = props.sample_id
+
+    this.all_categories = props.all_categories
+    this.report_details = props.report_details
+    this.report_page_params = props.report_page_params
+    this.all_backgrounds = props.all_backgrounds;
+    this.max_rows_to_render = props.max_rows || 2000
+    this.state = {
+      taxonomy_details:  [],
+      all_genera_in_sample: [],
+      rows_passing_filters: 0,
+      rows_total: 0,
+      loading: true
+    };
+
+    this.fetchReportData();
     this.applyNewFilterThresholds = this.applyNewFilterThresholds.bind(this);
     this.applyExcludedCategories = this.applyExcludedCategories.bind(this);
     this.applyGenusFilter = this.applyGenusFilter.bind(this);
@@ -16,7 +27,27 @@ class PipelineSampleReport extends React.Component {
     this.collapseTable = this.collapseTable.bind(this);
     this.disableFilters = this.disableFilters.bind(this);
     this.enableFilters = this.enableFilters.bind(this);
+    this.new_filter_thresholds = {};
+    this.applyFilters = this.applyFilters.bind(this);
+    this.handleThresholdEnter = this.handleThresholdEnter.bind(this);
     this.initializeTooltip();
+  }
+
+  fetchReportData() {
+    const params = `?${window.location.search.replace("?", "")}&report_ts=${this.report_ts}`
+    console.log(params)
+    axios.get(`/samples/${this.sample_id}/report_info${params}`).then((res) => {
+
+      let all_genera_in_sample = res.data.all_genera_in_sample
+      all_genera_in_sample.splice(0, 0, 'None')
+      this.setState({
+        rows_passing_filters: res.data.taxonomy_details[0],
+        rows_total:  res.data.taxonomy_details[1],
+        taxonomy_details:  res.data.taxonomy_details[2],
+        all_genera_in_sample: all_genera_in_sample,
+        loading: false
+      });
+    });
   }
 
   initializeTooltip() {
@@ -26,7 +57,7 @@ class PipelineSampleReport extends React.Component {
       tooltipIdentifier.tooltip({
         delay: 0,
         html: true,
-        placement: 'bottom',
+        placement: 'top',
         offset: '0px 50px'
       });
       $('.sort-controls').hover(() => {
@@ -40,7 +71,7 @@ class PipelineSampleReport extends React.Component {
   }
 
   refreshPage(overrides) {
-    new_params = Object.assign({}, this.props.report_page_params, overrides);
+    new_params = Object.assign({}, this.report_page_params, overrides);
     window.location = location.protocol + '//' + location.host + location.pathname + '?' + jQuery.param(new_params);
   }
 
@@ -63,12 +94,52 @@ class PipelineSampleReport extends React.Component {
     this.refreshPage({sort_by});
   }
 
+  setFilterThreshold(threshold_name, event) {
+    this.new_filter_thresholds[threshold_name] = event.target.value.trim();
+    $('.apply-filter-button a').addClass('changed');
+  }
+
+  applyFilters(event) {
+    ReportFilter.showLoading('Applying thresholds...');
+    this.applyNewFilterThresholds(this.new_filter_thresholds);
+  }
+
+  handleThresholdEnter(event) {
+    if (event.keyCode == 13) {
+      this.applyFilters();
+    }
+  }
+
   applyNewFilterThresholds(new_filter_thresholds) {
     this.refreshPage(new_filter_thresholds);
   }
 
+  thresholdInputColumn(metric_token) {
+    return (
+      <input
+        className='browser-default'
+        onChange={this.setFilterThreshold.bind(this, `threshold_${metric_token}`)}
+        onKeyDown={this.handleThresholdEnter}
+        name="group2"
+        defaultValue={this.props.report_page_params[`threshold_${metric_token}`]}
+        id={`threshold_${metric_token}`}
+        type="number" />
+    );
+  }
+
+  thresholdFilterButton() {
+    return (
+      <td>
+        <a onClick={this.applyFilters}
+           className="btn btn-flat waves-effect grey text-grey text-lighten-5 waves-light apply-filter-button">
+        Apply threshold
+        </a>
+      </td>
+    );
+  }
+
   applyExcludedCategories(category, checked) {
-    excluded_categories = "" + this.props.report_page_params.excluded_categories;
+    excluded_categories = "" + this.report_page_params.excluded_categories;
     if (checked) {
       // remove from excluded_categories
       excluded_categories = excluded_categories.split(",").filter(c => c != category).join(",");
@@ -84,18 +155,18 @@ class PipelineSampleReport extends React.Component {
   }
 
   isGenusSearch() {
-    params = this.props.report_page_params;
+    params = this.report_page_params;
     return params.selected_genus != 'None' && params.disable_filters != 1;
   }
 
-  //path to NCBI 
+  //path to NCBI
   gotoNCBI(e) {
     const taxId = e.target.getAttribute('data-tax-id');
     const ncbiLink = `https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${taxId}`;
     window.open(ncbiLink, '_blank');
   }
 
-  //download Fasta  
+  //download Fasta
   downloadFastaUrl(e) {
     const pipelineId = e.target.getAttribute('data-pipeline-id');
     const taxLevel = e.target.getAttribute('data-tax-level');
@@ -188,7 +259,7 @@ class PipelineSampleReport extends React.Component {
   render_sort_arrow(column, desired_sort_direction, arrow_direction) {
     desired_sort = desired_sort_direction + "_" + column;
     className = `fa fa-caret-${arrow_direction}`;
-    current_sort = this.props.report_page_params.sort_by;
+    current_sort = this.report_page_params.sort_by;
     if (current_sort == desired_sort) {
       className = 'active ' + className;
     }
@@ -202,13 +273,17 @@ class PipelineSampleReport extends React.Component {
 
   render_column_header(visible_type, visible_metric, column_name, tooltip_message) {
     var style = { 'textAlign': 'right', 'cursor': 'pointer' };
+    report_column_threshold = this.thresholdInputColumn(column_name)
     return (
       <th style={style}>
         <div className='sort-controls right' rel='tooltip' title={tooltip_message}>
           {this.render_sort_arrow(column_name, 'lowest', 'up')}
           {this.render_sort_arrow(column_name, 'highest', 'down')}
           {visible_type}<br/>
-          {visible_metric}
+          {visible_metric}<br/>
+        </div>
+        <div className='sort-controls right' rel='tooltip' data-placement='bottom' title='Threshold'>
+          {report_column_threshold}
         </div>
       </th>
     );
@@ -260,32 +335,30 @@ class PipelineSampleReport extends React.Component {
   }
 
   render() {
-    const parts = this.props.report_page_params.sort_by.split("_")
+    const parts = this.report_page_params.sort_by.split("_")
     const sort_column = parts[1] + "_" + parts[2];
     var t0 = Date.now();
-    filter_stats = this.rows_passing_filters + ' rows passing filters, out of ' + this.rows_total + ' total rows.';
-    if (this.props.report_page_params.disable_filters == 1) {
-      filter_stats = this.rows_total + ' unfiltered rows.';
+    filter_stats = this.state.rows_passing_filters + ' rows passing filters, out of ' + this.state.rows_total + ' total rows.';
+    if (this.report_page_params.disable_filters == 1) {
+      filter_stats = this.state.rows_total + ' unfiltered rows.';
     }
-    filter_row_stats = (
+    filter_row_stats = this.state.loading ? null : (
       <div>
         <span className="count">
-          {this.rows_passing_filters == this.taxonomy_details.length ?
+          {this.state.rows_passing_filters == this.state.taxonomy_details.length ?
             (filter_stats) :
-            ('Due to resource limits, showing only ' + this.taxonomy_details.length + ' of the ' + filter_stats)}
+            ('Due to resource limits, showing only ' + this.state.taxonomy_details.length + ' of the ' + filter_stats)}
         </span>
-        {this.rows_passing_filters < this.rows_total && this.props.report_page_params.disable_filters == 0 ? <span className="disable" onClick={this.disableFilters}><b> Disable filters</b></span> : ''}
-        {this.props.report_page_params.disable_filters == 1 ? <span className="disable" onClick={this.enableFilters}><b> Enable filters</b></span> : ''}
       </div>
     );
     report_filter =
       <ReportFilter
         all_categories = { this.all_categories }
-        all_genera_in_sample = {  this.all_genera_in_sample }
-        background_model = { this.report_details.background_model.name }
+        all_backgrounds = { this.all_backgrounds }
+        all_genera_in_sample = {  this.state.all_genera_in_sample }
+        background_model = { this.report_details.background_model }
         report_title = { this.report_details.report_info.name }
-        report_page_params = { this.props.report_page_params }
-        applyNewFilterThresholds = { this.applyNewFilterThresholds }
+        report_page_params = { this.report_page_params }
         applyExcludedCategories = { this.applyExcludedCategories }
         applyGenusFilter = { this.applyGenusFilter }
         enableFilters = { this.enableFilters }
@@ -329,20 +402,18 @@ class PipelineSampleReport extends React.Component {
                         {this.render_column_header('NT', 'rPM', 'nt_rpm', 'Number of reads aligning to the taxon in the NCBI NT database per million total input reads')}
                         {this.render_column_header('NT', 'r',   'nt_r', 'Number of reads aligning to the taxon in the NCBI NT database')}
                         {this.render_column_header('NT', '%id', 'nt_percentidentity', 'Average percent-identity of alignments to NCBI NT')}
-                        {this.render_column_header('NT', 'L',   'nt_alignmentlength', 'Average length of alignments to NCBI NT')}
                         {this.render_column_header('NT', 'Log(1/E)',  'nt_neglogevalue', 'Average log-10-transformed expect value for alignments to NCBI NT')}
                         {this.render_column_header('NT', '%conc',  'nt_percentconcordant', 'Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NT)')}
                         {this.render_column_header('NR', 'Z',   'nr_zscore', 'Z-score relative to background model for alignments to NCBI NR') }
                         {this.render_column_header('NR', 'rPM', 'nr_rpm', 'Number of reads aligning to the taxon in the NCBI NR database per million total input reads')}
                         {this.render_column_header('NR', 'r',   'nr_r', 'Number of reads aligning to the taxon in the NCBI NR database')}
                         {this.render_column_header('NR', '%id', 'nr_percentidentity', 'Average percent-identity of alignments to NCBI NR')}
-                        {this.render_column_header('NR', 'AL',   'nr_alignmentlength', 'Average length of alignments to NCBI NR')}
                         {this.render_column_header('NR', 'Log(1/E)',  'nr_neglogevalue', 'Average log-10-transformed expect value for alignments to NCBI NR')}
                         {this.render_column_header('NR', '%conc',  'nr_percentconcordant', 'Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NR)')}
                     </tr>
                     </thead>
                     <tbody>
-                    { this.taxonomy_details.map((tax_info, i) => {
+                    { this.state.loading ? (<tr><td>Loading results.. </td></tr>) : (this.state.taxonomy_details.slice(0, this.max_rows_to_render).map((tax_info, i) => {
                       return (
                         <tr key={tax_info.tax_id} className={this.row_class(tax_info)}>
                           <td>
@@ -353,19 +424,17 @@ class PipelineSampleReport extends React.Component {
                           { this.render_number(tax_info.NT.rpm, sort_column == 'nt_rpm', 1)       }
                           { this.render_number(tax_info.NT.r, sort_column == 'nt_r', 0)           }
                           { this.render_number(tax_info.NT.percentidentity, sort_column == 'nt_percentidentity', 1) }
-                          { this.render_number(tax_info.NT.alignmentlength, sort_column == 'nt_alignmentlength', 1)       }
                           { this.render_number(tax_info.NT.neglogevalue, sort_column == 'nt_neglogevalue', 0) }
                           { this.render_number(tax_info.NT.percentconcordant, sort_column == 'nt_percentconcordant', 1) }
                           { this.render_number(tax_info.NR.zscore, sort_column == 'nr_zscore', 1) }
                           { this.render_number(tax_info.NR.rpm, sort_column == 'nr_rpm', 1)       }
                           { this.render_number(tax_info.NR.r, sort_column == 'nr_r', 0)           }
                           { this.render_number(tax_info.NR.percentidentity, sort_column == 'nr_percentidentity', 1) }
-                          { this.render_number(tax_info.NR.alignmentlength, sort_column == 'nr_alignmentlength', 1)       }
                           { this.render_number(tax_info.NR.neglogevalue, sort_column == 'nr_neglogevalue', 0) }
                           { this.render_number(tax_info.NR.percentconcordant, sort_column == 'nr_percentconcordant', 1) }
                         </tr>
                       )
-                    })}
+                    }))}
                     </tbody>
                   </table>
                 </div>

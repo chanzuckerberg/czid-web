@@ -230,6 +230,7 @@ class PipelineRunStage < ApplicationRecord
     po.job_stats.delete_all
     po.job_stats_attributes = stats_array
     po.taxon_counts_attributes = taxon_counts_attributes_filtered
+    po.updated_at = Time.now.utc
     po.save
     # aggregate the data at genus level
     po.generate_aggregate_counts('genus')

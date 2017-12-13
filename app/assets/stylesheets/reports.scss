@@ -43,7 +43,6 @@ input[type=number] {
 .sidebar-tabs {
   .tabs {
     display: flex !important;
-    border-bottom: 1px solid #D6D6D6;
     .indicator {
       display: none;
     }
@@ -75,7 +74,12 @@ input[type=number] {
     float: left;
     width: 100%;
     &.background-model {
-      border-bottom: 1px solid rgb(200, 200, 200);
+      .input-field {
+        margin-top: 0;
+        .select-dropdown {
+          font-size: 12px;
+        }
+      }
     }
   }
 
@@ -335,6 +339,17 @@ input[type=number] {
   }
   th:last-child {
     padding-right: 50px;
+  }
+  input.browser-default {
+    text-align: right;
+    border: 1px solid !important;
+    border-color: #dfdfdf !important;
+    padding: 5px;
+    width: 100%;
+    margin-top: 10px;
+      &:focus {
+        outline: none;
+    }
   }
 }
 .genus-search-row {

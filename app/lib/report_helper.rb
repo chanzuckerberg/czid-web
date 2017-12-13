@@ -3,8 +3,7 @@ require 'open3'
 
 module ReportHelper
   # Truncate report table past this number of rows.
-  MAX_ROWS = 3000
-
+  TAXON_CATEGORY_OFFSET = 100_000_000
   ZSCORE_MIN = -99
   ZSCORE_MAX =  99
   ZSCORE_WHEN_ABSENT_FROM_SAMPLE = -100
@@ -24,14 +23,21 @@ module ReportHelper
 
   DEFAULT_PARAMS = {
     sort_by:          'highest_nt_aggregatescore',
-    threshold_zscore: 0.0,
-    threshold_rpm:    0.0,
-    threshold_r:      0.0,
-    threshold_percentidentity: 0.0,
-    threshold_alignmentlength: 0.0,
-    threshold_neglogevalue:    0.0,
-    threshold_percentconcordant: 0.0,
-    threshold_aggregatescore:  0.0,
+    threshold_nt_zscore: 0.0,
+    threshold_nt_rpm:    0.0,
+    threshold_nt_r:      0.0,
+    threshold_nt_percentidentity: 0.0,
+    threshold_nt_alignmentlength: 0.0,
+    threshold_nt_neglogevalue:    0.0,
+    threshold_nt_percentconcordant: 0.0,
+    threshold_nt_aggregatescore:  0.0,
+    threshold_nr_zscore: 0.0,
+    threshold_nr_rpm:    0.0,
+    threshold_nr_r:      0.0,
+    threshold_nr_percentidentity: 0.0,
+    threshold_nr_alignmentlength: 0.0,
+    threshold_nr_neglogevalue:    0.0,
+    threshold_nr_percentconcordant: 0.0,
     excluded_categories: 'None',
     selected_genus: 'None',
     disable_filters: 0
@@ -82,14 +88,17 @@ module ReportHelper
 
   def threshold_param?(param_key)
     parts = param_key.to_s.split "_"
-    (parts.length == 2 && parts[0] == 'threshold' && METRICS.include?(parts[1]))
+    (parts.length == 3 && parts[0] == 'threshold' && COUNT_TYPES.include?(parts[1].upcase) && METRICS.include?(parts[2]))
   end
 
   def decode_thresholds(params)
     thresholds = {}
-    METRICS.each do |metric|
-      param_key = "threshold_#{metric}".to_sym
-      thresholds[metric] = params[param_key]
+    COUNT_TYPES.each do |count_type|
+      thresholds[count_type] = {}
+      METRICS.each do |metric|
+        param_key = "threshold_#{count_type.downcase}_#{metric}".to_sym
+        thresholds[count_type][metric] = params[param_key]
+      end
     end
     thresholds
   end
@@ -176,10 +185,7 @@ module ReportHelper
     return {} if report.nil?
     params = clean_params(params, ALL_CATEGORIES)
     data = {}
-    data[:report_details] = report_details(report)
     data[:taxonomy_details], data[:all_genera_in_sample] = taxonomy_details(report, params)
-    data[:all_categories] = ALL_CATEGORIES
-    data[:report_page_params] = params
     data
   end
 
@@ -202,7 +208,7 @@ module ReportHelper
       sample_info: report.pipeline_output.sample,
       project_info: report.pipeline_output.sample.project,
       background_model: report.background,
-      taxon_fasta_flag: taxon_fastas_present?(report)
+      taxon_fasta_flag: report.pipeline_output.pipeline_run.finalized?
     }
   end
 
@@ -266,6 +272,30 @@ module ReportHelper
       'percentconcordant' => DEFAULT_SAMPLE_PERCENTCONCORDANT,
       'aggregatescore' => nil
     }
+  end
+
+  def fetch_lineage_info(pipeline_output_id)
+    lineage_records = TaxonLineage.where(
+      "taxid in (select tax_id from taxon_counts
+                 where pipeline_output_id = #{pipeline_output_id}
+                   and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES})"
+    )
+    result_map = {}
+    search_key_list = Set.new
+    lineage_records.each do |lr|
+      key_array = []
+      TaxonCount::NAME_2_LEVEL.each do |category, level|
+        tax_name = lr["#{category}_name"]
+        tax_id = lr["#{category}_taxid"]
+        display_name = "#{tax_name} (#{category})"
+        search_id = level * TAXON_CATEGORY_OFFSET + tax_id
+        key_array << search_id
+        search_key_list.add([display_name, search_id])
+      end
+      result_map[lr.taxid] = key_array
+    end
+    search_key_list = search_key_list.sort_by { |u| u[0].downcase }
+    { lineage_map: result_map, search_list: search_key_list }
   end
 
   def tax_info_base(taxon)
@@ -453,20 +483,19 @@ module ReportHelper
   end
 
   def filter_rows!(rows, thresholds, excluded_categories)
-    # filter out rows that are below the thresholds in both NR and NT
+    # filter out rows that are below the thresholds
     # but make sure not to delete any genus row for which some species
     # passes the filters
     to_delete = Set.new
     to_keep = Set.new
     rows.each do |tax_info|
       should_delete = false
-      # if any metric is below threshold in every type, delete
-      METRICS.each do |metric|
-        should_delete = COUNT_TYPES.all? do |count_type|
+      # if any metric is below threshold in the specified type, delete
+      METRICS.any? do |metric|
+        COUNT_TYPES.any? do |count_type|
+          should_delete = !(tax_info[count_type][metric]) || (thresholds[count_type][metric] && tax_info[count_type][metric] < thresholds[count_type][metric])
           # aggregatescore is null for genera, and thus not considered in filtering genera
-          !(tax_info[count_type][metric]) || tax_info[count_type][metric] < thresholds[metric]
         end
-        break if should_delete
       end
       if tax_info['tax_id'] != TaxonLineage::MISSING_GENUS_ID && tax_info['tax_id'] != TaxonLineage::BLACKLIST_GENUS_ID
         if excluded_categories.include? tax_info['category_name']
@@ -595,9 +624,6 @@ module ReportHelper
       tax_info[:sort_key] = sort_key(tax_2d, tax_info, sort_by)
     end
     rows.sort_by! { |tax_info| tax_info[:sort_key] }
-
-    # HACK
-    rows = rows[0...MAX_ROWS] unless params[:is_csv] == 1
 
     # Delete fields that are unused in the UI.
     rows.each do |tax_info|

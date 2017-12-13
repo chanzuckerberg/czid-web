@@ -1,4 +1,6 @@
-<%= react_component 'PipelineSampleReads', sampleInfo: @sample, pipelineOutput: @pipeline_output,
-    host_genome: @host_genome, projectInfo: @project_info, jobStatistics: @job_stats,
-    summary_stats: @summary_stats, reportInfo: @report_info, pipelineRun: @pipeline_run,
-    sample_status: @sample_status, rerun_path: kickoff_pipeline_sample_path %>
+<%= react_component 'PipelineSampleReads', sampleInfo: @sample, pipelineOutput: @pipeline_output, projectInfo: @project_info, jobStatistics: @job_stats,
+  host_genome: @host_genome, summary_stats: @summary_stats, pipelineRun: @pipeline_run,
+  reportPresent: @report_present, reportTime: @report_ts,
+  allCategories: @all_categories, reportDetails: @report_details, reportPageParams: @report_page_params,
+  sample_status: @sample_status, rerun_path: kickoff_pipeline_sample_path,
+  all_backgrounds: @background_models %>
