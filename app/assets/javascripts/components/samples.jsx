@@ -34,6 +34,15 @@ class Samples extends React.Component {
     this.initializeTooltip();
   }
 
+  static showLoading(message) {
+    $('.page-loading .spinner-label').text(message);
+    $('.page-loading').css('display', 'flex');
+  }
+
+  static hideLoader() {
+    $('.page-loading').css('display', 'none');
+  }
+
   initializeTooltip() {
     // only updating the tooltip offset when the component is loaded
     $(() => {
@@ -216,25 +225,28 @@ class Samples extends React.Component {
 
   //fetch first set of samples
   fetchSamples() {
+    Samples.showLoading('Fetching samples...');
     const params = this.getParams();
     axios.get(`/samples?${params}`).then((res) => {
+      Samples.hideLoader();
       this.setState((prevState) => ({
-        loading: false,
         initialFetchedSamples: res.data.samples,
         allSamples: res.data.samples,
         displayEmpty: false,
         pagesLoaded: prevState.pagesLoaded+1,
-        totalNumber: res.data.total_count
-      }))
+        totalNumber: res.data.total_count,
+        pageEnd: res.data.samples.length >= 15 ? false : true,
+      }));
     if (!this.state.allSamples.length) {
       this.setState({ displayEmpty: true });
     }
     }).catch((err) => {
+      Samples.hideLoader();
       this.setState((prevState) => ({
-        loading: false,
         allSamples: [],
         displayEmpty: true,
         pagesLoaded: 0,
+        pageEnd: prevState.pageEnd
       }))
     })
   }
@@ -256,7 +268,6 @@ class Samples extends React.Component {
 
   //fetch data used by projects page
   fetchProjectPageData() {
-    this.setState({ loading: true })
     this.fetchProjects();
     this.fetchSamples();
   }
@@ -294,21 +305,22 @@ class Samples extends React.Component {
       let sampleParams = this.state.sampleIdsParams;
       params += `&ids=${sampleParams}`
     }
-
     return params;
   }
 
   //fetch results from filtering, search or switching projects
-  fetchResults(cb) {
+  fetchResults() {
+    Samples.showLoading('Fetching samples...');
     const params = this.getParams();
     axios.get(`/samples?${params}`).then((res) => {
+      Samples.hideLoader();
       this.setState((prevState) => ({
-        loading: false,
         initialFetchedSamples: res.data.samples,
         allSamples: res.data.samples,
         displayEmpty: false,
         totalNumber: res.data.total_count,
-        pagesLoaded: prevState.pagesLoaded+1
+        pagesLoaded: prevState.pagesLoaded+1,
+        pageEnd: res.data.samples.length >= 15 ? false : true,
       }));
       if (!this.state.allSamples.length) {
         this.setState({ displayEmpty: true });
@@ -317,15 +329,11 @@ class Samples extends React.Component {
         cb();
       }
     }).catch((err) => {
-      this.setState({
-        loading: false,
+      this.setState((prevstate) => ({
         initialFetchedSamples: [],
         allSamples: [],
         displayEmpty: true,
-      });
-      if(typeof cb === 'function') {
-        cb();
-      }
+      }))
     })
   }
 
@@ -377,12 +385,13 @@ class Samples extends React.Component {
   //handle search when query is passed
   handleSearch(e) {
     if (e.target.value !== '' && e.key === 'Enter') {
+      Samples.showLoading(`Searching for samples that match ${e.target.value}...`)
       this.setState({
-        loading: true,
         pagesLoaded: 0,
         pageEnd: false,
         searchParams: e.target.value
       }, () => {
+        Samples.hideLoader();
         this.setUrlLocation();
         this.fetchResults();
       });
@@ -396,6 +405,7 @@ class Samples extends React.Component {
       selectedProjectId: id,
       pageEnd: false
     }, () => {
+      Samples.hideLoader();
       this.setUrlLocation();
       this.fetchProjectDetails(id)
     });
@@ -469,7 +479,7 @@ class Samples extends React.Component {
       <div className="sample-container">
         <div className="row search-box">
           <span className="icon"><i className="fa fa-search" aria-hidden="true"></i></span>
-          <input id="search" value={this.state.searchParams} onChange={this.handleSearchChange}  type="search" onKeyDown={this.handleSearch} className="search" placeholder='Search for Sample'/>{ this.state.showSearchLoader ? <i className='fa fa-spinner fa-spin fa-lg'></i> : null }
+          <input id="search" value={this.state.searchParams} onChange={this.handleSearchChange}  type="search" onKeyDown={this.handleSearch} className="search" placeholder='Search for Sample'/>
         </div>
           {/* Dropdown menu */}
           <ul id='dropdownstatus' className='status dropdown-content'>
@@ -485,10 +495,7 @@ class Samples extends React.Component {
           { tableHead }
           { !samples.length && this.state.displayEmpty ? this.renderEmptyTable() : this.renderPipelineOutput(samples)  }
       </div>
-      { !this.state.pageEnd && this.state.initialFetchedSamples && this.state.initialFetchedSamples.length > 14 ? <div className="scroll">
-        <i className='fa fa-spinner fa-spin fa-3x'></i>
-      </div> : "" }
-      { this.state.loading ? <div className="scroll">
+      { !this.state.pageEnd && this.state.initialFetchedSamples.length > 0 && this.isRequesting ? <div className="scroll">
         <i className='fa fa-spinner fa-spin fa-3x'></i>
       </div> : "" }
     </div>
@@ -538,7 +545,6 @@ class Samples extends React.Component {
   handleStatusFilterSelect(e) {
     let status = e.target.getAttribute('data-status');
     this.setState({
-      loading: true,
       pagesLoaded: 0,
       pageEnd: false,
       filterParams: status
