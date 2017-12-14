@@ -287,6 +287,7 @@ module ReportHelper
       TaxonCount::NAME_2_LEVEL.each do |category, level|
         tax_name = lr["#{category}_name"]
         tax_id = lr["#{category}_taxid"]
+        next unless tax_name and  tax_name.strip.present?
         display_name = "#{tax_name} (#{category})"
         search_id = level * TAXON_CATEGORY_OFFSET + tax_id
         key_array << search_id

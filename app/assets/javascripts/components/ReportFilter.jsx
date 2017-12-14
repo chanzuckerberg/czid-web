@@ -10,15 +10,14 @@ class ReportFilter extends React.Component {
     this.backgroundModels = props.all_backgrounds || [];
     this.all_categories = props.all_categories || [];
     this.applyExcludedCategories = this.applyExcludedCategories.bind(this);
-    this.applyGenusFilter = this.applyGenusFilter.bind(this);
-    this.enableFilters = this.enableFilters.bind(this);
-    this.clearGenusSearch = this.clearGenusSearch.bind(this);
+    this.searchSelectedTaxon = this.searchSelectedTaxon.bind(this);
+    this.handleSearch = this.handleSearch.bind(this);
 
     this.handleBackgroundModelChange = this.handleBackgroundModelChange.bind(this);
-    this.handleGenusSearch = this.handleGenusSearch.bind(this);
     this.state = {
-      searchKey: null,
-      searchId: null,
+      searchKey: '',
+      searchId: 0,
+      excluded_categories: [],
       backgroundName: this.background_model.name || null,
       backgroundParams: this.background_model.id || null,
       search_items: props.search_keys_in_sample
@@ -41,14 +40,15 @@ class ReportFilter extends React.Component {
     $('select').material_select();
   }
 
-  handleGenusSearch(e) {
+  handleSearch(e) {
     this.setState({
-      searchKey: e.target.value
+      searchKey: e.target.value,
     })
   }
 
+  // only for background model
   refreshPage(overrides) {
-    ReportFilter.showLoading('Fetching results...');
+    ReportFilter.showLoading('Fetching results for new background...');
     new_params = Object.assign({}, this.props.report_page_params, overrides);
     window.location = location.protocol + '//' + location.host + location.pathname + '?' + jQuery.param(new_params);
   }
@@ -72,14 +72,6 @@ class ReportFilter extends React.Component {
     // $('.reports-sidebar').css('min-height', newHeight);
   }
 
-  setGenusSearchValueFor(selected_genus) {
-    genus_search_value = selected_genus == 'None' ? '' : selected_genus;
-    return genus_search_value;
-  }
-
-  enableFilters() {
-    this.props.enableFilters();
-  }
 
   static showLoading(message) {
     $('.page-loading .spinner-label').text(message);
@@ -88,21 +80,38 @@ class ReportFilter extends React.Component {
   }
 
   applyExcludedCategories(e) {
-    ReportFilter.showLoading('Applying category filter...');
-    this.props.applyExcludedCategories(e.target.value, e.target.checked)
-  }
-
-  applyGenusFilter(value, item) {
-    ReportFilter.showLoading(`Filtering for '${selected_genus}'...`);
+    //ReportFilter.showLoading('Applying category filter...');
+    let excluded_categories = this.state.excluded_categories
+    if (e.target.checked) {
+      ridx = excluded_categories.indexOf(e.target.value)
+      if (ridx > -1) {
+        excluded_categories.splice(ridx, 1);
+      }
+    } else {
+      excluded_categories.push(e.target.value);
+    }
     this.setState({
-      searchKey: value,
-      searchId: item[1]
-    });
-    this.props.applyGenusFilter(searchId);
+      excluded_categories: excluded_categories,
+      searchId: 0,
+      searchKey: ''
+    })
+    this.applySearchFilter()
   }
 
-  clearGenusSearch() {
-    this.applyGenusFilter('None');
+  searchSelectedTaxon(value, item) {
+    //ReportFilter.showLoading(`Filtering for '${value}'...`);
+    let searchId = item[1];
+    this.state.searchId = searchId
+    this.setState({
+      excluded_categories: [],
+      searchKey: item[0]
+    })
+
+    this.applySearchFilter()
+  }
+
+  applySearchFilter() {
+    this.props.applySearchFilter(this.state.searchId, this.state.excluded_categories)
   }
 
   render() {
@@ -145,8 +154,8 @@ class ReportFilter extends React.Component {
                   </div>
                 }
                 value={this.state.searchKey}
-                onChange={this.handleGenusSearch}
-                onSelect={this.applyGenusFilter}
+                onChange={this.handleSearch}
+                onSelect={this.searchSelectedTaxon}
               />
             </div>
           </div>

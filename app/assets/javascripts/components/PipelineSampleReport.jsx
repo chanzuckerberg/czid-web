@@ -17,6 +17,8 @@ class PipelineSampleReport extends React.Component {
       data_to_show: [],
       rows_passing_filters: 0,
       rows_total: 0,
+      selected_taxons: [],
+      selected_taxon_params: {},
       loading: true
     };
 
@@ -24,7 +26,7 @@ class PipelineSampleReport extends React.Component {
     this.fetchSearchList();
     this.applyNewFilterThresholds = this.applyNewFilterThresholds.bind(this);
     this.applyExcludedCategories = this.applyExcludedCategories.bind(this);
-    this.applyGenusFilter = this.applyGenusFilter.bind(this);
+    this.applySearchFilter = this.applySearchFilter.bind(this);
     this.expandOrCollapseGenus = this.expandOrCollapseGenus.bind(this);
     this.expandTable = this.expandTable.bind(this);
     this.collapseTable = this.collapseTable.bind(this);
@@ -54,10 +56,55 @@ class PipelineSampleReport extends React.Component {
       this.setState({
         rows_passing_filters: res.data.taxonomy_details[0],
         rows_total:  res.data.taxonomy_details[1],
-        taxonomy_details:  res.data.taxonomy_details[2],
+        taxonomy_details: res.data.taxonomy_details[2],
+        selected_taxons: res.data.taxonomy_details[2],
         loading: false
       });
     });
+  }
+
+  applySearchFilter(searchTaxonId, excludedCategories) {
+    let selected_taxons = []
+    if (searchTaxonId > 0) {
+      genus_taxon = {}
+      matched_taxons = []
+      for (var i = 0; i < this.state.taxonomy_details.length; i++) {
+        taxon = this.state.taxonomy_details[i]
+        if (taxon.genus_taxid == taxon.tax_id) {
+          if (matched_taxons.length > 0) {
+            selected_taxons.push(genus_taxon)
+            selected_taxons = selected_taxons.concat(matched_taxons)
+          }
+          genus_taxon = taxon
+          matched_taxons = []
+        } else {
+          // species
+          match_keys = this.state.lineage_map[taxon.tax_id.toString()]
+          if (match_keys && match_keys.indexOf(searchTaxonId) > -1) {
+            matched_taxons.push(taxon)
+          }
+        }
+      }
+      if (matched_taxons.length > 0) {
+        selected_taxons.push(genus_taxon)
+        selected_taxons = selected_taxons.concat(matched_taxons)
+      }
+    } else if (excludedCategories.length > 0) {
+      for (var i = 0; i < this.state.taxonomy_details.length; i++) {
+        taxon = this.state.taxonomy_details[i]
+        if (excludedCategories.indexOf(taxon.category_name) < 0 ) {
+          // not in the excluded categories
+          selected_taxons.push(taxon)
+        }
+      }
+    } else {
+      selected_taxons = this.state.taxonomy_details
+    }
+
+    this.setState({
+      selected_taxons: selected_taxons,
+      rows_passing_filters: selected_taxons.length
+    })
   }
 
   initializeTooltip() {
@@ -160,9 +207,6 @@ class PipelineSampleReport extends React.Component {
     this.refreshPage({excluded_categories});
   }
 
-  applyGenusFilter(selected_genus) {
-    this.refreshPage({selected_genus});
-  }
 
   isGenusSearch() {
     params = this.report_page_params;
@@ -287,7 +331,6 @@ class PipelineSampleReport extends React.Component {
     return (
       <th style={style}>
         <div className='sort-controls right' rel='tooltip' title={tooltip_message}>
-          {this.render_sort_arrow(column_name, 'lowest', 'up')}
           {this.render_sort_arrow(column_name, 'highest', 'down')}
           {visible_type}<br/>
           {visible_metric}<br/>
@@ -352,15 +395,15 @@ class PipelineSampleReport extends React.Component {
     if (this.report_page_params.disable_filters == 1) {
       filter_stats = this.state.rows_total + ' unfiltered rows.';
     }
+
     filter_row_stats = this.state.loading ? null : (
       <div>
         <span className="count">
-          {this.state.rows_passing_filters == this.state.taxonomy_details.length ?
-            (filter_stats) :
-            ('Due to resource limits, showing only ' + this.state.taxonomy_details.length + ' of the ' + filter_stats)}
+      {filter_stats}
         </span>
       </div>
     );
+
     report_filter =
       <ReportFilter
         all_categories = { this.all_categories }
@@ -370,7 +413,7 @@ class PipelineSampleReport extends React.Component {
         report_title = { this.report_details.report_info.name }
         report_page_params = { this.report_page_params }
         applyExcludedCategories = { this.applyExcludedCategories }
-        applyGenusFilter = { this.applyGenusFilter }
+        applySearchFilter = {this.applySearchFilter }
         enableFilters = { this.enableFilters }
       />;
     // To do: improve presentation and place download_button somewhere on report page
@@ -423,7 +466,7 @@ class PipelineSampleReport extends React.Component {
                     </tr>
                     </thead>
                     <tbody>
-                    { this.state.loading ? (<tr><td>Loading results.. </td></tr>) : (this.state.taxonomy_details.slice(0, this.max_rows_to_render).map((tax_info, i) => {
+                    { this.state.loading ? (<tr><td>Loading results.. </td></tr>) : (this.state.selected_taxons.slice(0, this.max_rows_to_render).map((tax_info, i) => {
                       return (
                         <tr key={tax_info.tax_id} className={this.row_class(tax_info)}>
                           <td>
