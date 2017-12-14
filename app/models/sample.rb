@@ -19,7 +19,10 @@ class Sample < ApplicationRecord
   DEFAULT_MEMORY = 64_000
   DEFAULT_QUEUE = 'aegea_batch_ondemand'.freeze
 
-  METADATA_FIELDS = [:sample_patient, :sample_location, :sample_date, :sample_tissue, :sample_nucleotide, :sample_library, :sample_sequencer, :sample_notes].freeze
+  METADATA_FIELDS = [:sample_host, # this has been repurposed to be patient ID (nothing to do with host genome)
+                     :sample_location, :sample_date, :sample_tissue,
+                     :sample_template, # this refers to nucleotide type (RNA or DNA)
+                     :sample_library, :sample_sequencer, :sample_notes].freeze
 
   attr_accessor :bulk_mode
 

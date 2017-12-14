@@ -32,7 +32,7 @@ class PipelineSampleReads extends React.Component {
                          "Stool", "Synovial fluid", "Whole blood", "Other"];
     this.NUCLEOTIDE_TYPES = ["DNA", "RNA"];
     this.DROPDOWN_OPTIONS = { sample_tissue: this.TISSUE_TYPES,
-                              sample_nucleotide: this.NUCLEOTIDE_TYPES };
+                              sample_template: this.NUCLEOTIDE_TYPES };
     this.DROPDOWN_METADATA_FIELDS = Object.keys(this.DROPDOWN_OPTIONS);
     this.handleDropdownChange = this.handleDropdownChange.bind(this);
   }
@@ -360,8 +360,8 @@ class PipelineSampleReads extends React.Component {
                           <table className="responsive-table">
                             <tbody>
                               {this.render_metadata_dropdown("Tissue type", "sample_tissue")}
-                              {this.render_metadata_dropdown("Nucleotide type", "sample_nucleotide")}
-                              {this.render_metadata_textfield("Patient ID", "sample_patient", 0)}
+                              {this.render_metadata_dropdown("Nucleotide type", "sample_template")}
+                              {this.render_metadata_textfield("Patient ID", "sample_host", 0)}
                             </tbody>
                           </table>
                         </div>
