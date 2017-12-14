@@ -495,7 +495,7 @@ class Samples extends React.Component {
           { tableHead }
           { !samples.length && this.state.displayEmpty ? this.renderEmptyTable() : this.renderPipelineOutput(samples)  }
       </div>
-      { !this.state.pageEnd && this.state.initialFetchedSamples.length > 14 && this.isRequesting ? <div className="scroll">
+      { !this.state.pageEnd && this.state.allSamples.length > 14 && this.state.isRequesting ? <div className="scroll">
         <i className='fa fa-spinner fa-spin fa-3x'></i>
       </div> : "" }
     </div>
