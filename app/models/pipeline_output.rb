@@ -30,7 +30,7 @@ class PipelineOutput < ApplicationRecord
 
   def count_unmapped_reads
     unidentified_fasta = get_s3_file(sample.unidentified_fasta_s3_path)
-    unidentified_fasta.lines.count if unidentified_fasta
+    unidentified_fasta.lines.select { |line| line.start_with? '>' }.count if unidentified_fasta
   end
 
   def generate_aggregate_counts(tax_level_name)
