@@ -27,8 +27,8 @@ class PipelineSampleReads extends React.Component {
       failureText: 'Sample run failed'
     };
     this.TYPE_PROMPT = "Type here...";
-    this.TISSUE_TYPES = ["Bronchoalveolar lavage (BAL)", "Cerebrospinal fluid (CSF)",
-                         "Nasopharyngeal (NP) swab", "Plasma", "Serum", "Solid tissue", 
+    this.TISSUE_TYPES = ["Bronchoalveolar lavage", "Cerebrospinal fluid",
+                         "Nasopharyngeal swab", "Plasma", "Serum", "Solid tissue", 
                          "Stool", "Synovial fluid", "Whole blood", "Other"];
     this.NUCLEOTIDE_TYPES = ["DNA", "RNA"];
     this.DROPDOWN_OPTIONS = { sample_tissue: this.TISSUE_TYPES,
