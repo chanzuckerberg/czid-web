@@ -7,16 +7,13 @@ module SamplesHelper
   def populate_metadata_bulk(csv_s3_path)
     # CSV should have columns "sample_name" and any desired columns from Sample::METADATA_FIELDS
     csv = get_s3_file(csv_s3_path)
-    csv.gsub!("\uFEFF", "") # remove BOM if present (file likely comes from Excel)
+    csv.delete!("\uFEFF") # remove BOM if present (file likely comes from Excel)
     CSV.parse(csv, headers: true) do |row|
       # CSV should have columns "sample_name" and any desired columns from Sample::METADATA_FIELDS
       h = row.to_h
       metadata = h.select { |k, _v| k && Sample::METADATA_FIELDS.include?(k.to_sym) }
-      puts h['sample_name']
       sample = Sample.find_by(name: h['sample_name'])
-      puts sample.id
       sample.update_attributes!(metadata) if sample
-      puts metadata
     end
   end
 
