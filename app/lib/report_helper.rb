@@ -44,6 +44,8 @@ module ReportHelper
   }.freeze
   IGNORED_PARAMS = [:controller, :action, :id].freeze
 
+  IGNORE_IN_DOWNLOAD = [[:species_count], [:NT, :count_type], [:NR, :count_type]].freeze
+
   SORT_DIRECTIONS = %w[highest lowest].freeze
   # We do not allow underscores in metric names, sorry!
   METRICS = %w[r rpm zscore percentidentity alignmentlength neglogevalue percentconcordant aggregatescore].freeze
@@ -638,25 +640,29 @@ module ReportHelper
     [[rows_passing_filters, rows_total, rows], all_genera_in_sample]
   end
 
-  def get_tax_detail(tax_info, column_name)
-    # convenience function used only in generate_report_csv
-    if column_name.include?(".")
-      parts = column_name.split(".")
-      hit_type = parts[0]
-      metric = parts[1]
-      tax_info[hit_type][metric]
-    else
-      tax_info[column_name]
-    end
+  def flat_hash(h, f = [], g = {})
+    return g.update(f => h) unless h.is_a? Hash
+    h.each { |k, r| flat_hash(r, f + [k], g) }
+    g
+    # example: turn    { :a => { :b => { :c => 1,
+    #                                    :d => 2 },
+    #                            :e => 3 },
+    #                    :f => 4 }
+    # into    {[:a, :b, :c] => 1, [:a, :b, :d] => 2, [:a, :e] => 3, [:f] => 4}
   end
 
   def generate_report_csv(tax_details)
     rows = tax_details[2]
-    attributes = %w[category_name tax_id name NT.aggregatescore NT.zscore NT.rpm NT.r NR.zscore NR.rpm NR.r]
+    flat_keys = flat_hash(rows[0]).keys if rows[0]
+    flat_keys_symbols = flat_keys.map { |array_key| array_key.map(&:to_sym) }
+    attributes_as_symbols = flat_keys_symbols - IGNORE_IN_DOWNLOAD
+    attribute_names = attributes_as_symbols.map { |k| k.map(&:to_s).join("_") }
     CSV.generate(headers: true) do |csv|
-      csv << attributes
+      csv << attribute_names
       rows.each do |tax_info|
-        csv << attributes.map { |attr| get_tax_detail(tax_info, attr) }
+        flat_tax_info = flat_hash(tax_info)
+        flat_tax_info_by_symbols = flat_tax_info.map { |k, v| [k.map(&:to_sym), v] }.to_h
+        csv << flat_tax_info_by_symbols.values_at(*attributes_as_symbols)
       end
     end
   end
