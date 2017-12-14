@@ -653,7 +653,8 @@ module ReportHelper
 
   def generate_report_csv(tax_details)
     rows = tax_details[2]
-    flat_keys = flat_hash(rows[0]).keys if rows[0]
+    return if rows.blank?
+    flat_keys = flat_hash(rows[0]).keys
     flat_keys_symbols = flat_keys.map { |array_key| array_key.map(&:to_sym) }
     attributes_as_symbols = flat_keys_symbols - IGNORE_IN_DOWNLOAD
     attribute_names = attributes_as_symbols.map { |k| k.map(&:to_s).join("_") }
