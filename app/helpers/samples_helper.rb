@@ -5,7 +5,7 @@ module SamplesHelper
   include PipelineOutputsHelper
 
   def populate_metadata_bulk(csv_s3_path)
-    # CSV should have columns "sample_name" and any desired columns from Sample::METADATA_FIELDS
+    # CSV should have columns "sample_name", "project_name", and any desired columns from Sample::METADATA_FIELDS
     csv = get_s3_file(csv_s3_path)
     csv.delete!("\uFEFF") # remove BOM if present (file likely comes from Excel)
     CSV.parse(csv, headers: true) do |row|
