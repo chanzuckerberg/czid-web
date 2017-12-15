@@ -95,7 +95,7 @@ class ReportFilter extends React.Component {
       searchId: 0,
       searchKey: ''
     })
-    this.applySearchFilter()
+    this.applySearchFilter(0, excluded_categories)
   }
 
   searchSelectedTaxon(value, item) {
@@ -105,11 +105,11 @@ class ReportFilter extends React.Component {
     this.state.excluded_categories = []
     this.state.searchKey = item[0]
 
-    this.applySearchFilter()
+    this.applySearchFilter(searchId, [])
   }
 
-  applySearchFilter() {
-    this.props.applySearchFilter(this.state.searchId, this.state.excluded_categories)
+  applySearchFilter(searchId, excluded_categories) {
+    this.props.applySearchFilter(searchId, excluded_categories)
   }
 
   render() {
@@ -141,7 +141,7 @@ class ReportFilter extends React.Component {
               <ReactAutocomplete
                 inputProps={{ placeholder: 'species, genus, family, etc' }}
                 items={this.state.search_items}
-                shouldItemRender={(item, value) => item[0] == 'None' || item[0].toLowerCase().indexOf(value.toLowerCase()) > -1}
+                shouldItemRender={(item, value) => (value.length > 2) && (item[0] == 'None' || item[0].toLowerCase().indexOf(value.toLowerCase()) > -1)}
                 getItemValue={item => item[0]}
                 renderItem={(item, highlighted) =>
                   <div

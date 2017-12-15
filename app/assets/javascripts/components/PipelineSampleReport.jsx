@@ -10,15 +10,20 @@ class PipelineSampleReport extends React.Component {
     this.report_page_params = props.report_page_params
     this.all_backgrounds = props.all_backgrounds;
     this.max_rows_to_render = props.max_rows || 1000
+    this.default_sort_by = this.report_page_params.sort_by.replace('highest_', '')
+    this.sort_params = {}
 
     this.state = {
       taxonomy_details:  [],
       search_keys_in_sample: [],
       lineage_map: {},
+      genus_map: {},
       rows_passing_filters: 0,
       rows_total: 0,
       thresholded_taxons: [],
       selected_taxons: [],
+
+      sort_by: this.default_sort_by,
       new_filter_thresholds: {
         NT_aggregatescore: 0.0,
         //other potential fields
@@ -46,6 +51,10 @@ class PipelineSampleReport extends React.Component {
     this.fetchSearchList();
     this.applySearchFilter = this.applySearchFilter.bind(this);
     this.applyThresholdFilters = this.applyThresholdFilters.bind(this);
+    this.sortResults = this.sortResults.bind(this);
+    this.sortCompareFunction = this.sortCompareFunction.bind(this);
+    this.setSortParams = this.setSortParams.bind(this);
+
     this.taxonPassThresholdFilter = this.taxonPassThresholdFilter.bind(this);
     this.expandOrCollapseGenus = this.expandOrCollapseGenus.bind(this);
     this.expandTable = this.expandTable.bind(this);
@@ -69,11 +78,19 @@ class PipelineSampleReport extends React.Component {
   fetchReportData() {
     const params = `?${window.location.search.replace("?", "")}&report_ts=${this.report_ts}`
     axios.get(`/samples/${this.sample_id}/report_info${params}`).then((res) => {
+      let genus_map = {}
+      for (var i = 0; i < res.data.taxonomy_details[2].length; i++) {
+        taxon = res.data.taxonomy_details[2][i]
+        if (taxon.genus_taxid == taxon.tax_id) {
+          genus_map[taxon.genus_taxid] = taxon
+        }
+      }
 
       this.setState({
         rows_passing_filters: res.data.taxonomy_details[0],
         rows_total:  res.data.taxonomy_details[1],
         taxonomy_details: res.data.taxonomy_details[2],
+        genus_map: genus_map
       });
       this.applyThresholdFilters(res.data.taxonomy_details[2])
     });
@@ -153,9 +170,93 @@ class PipelineSampleReport extends React.Component {
   // applySort needs to be bound at time of use, not in constructor above
   // TODO(yf): fix this
   applySort(sort_by) {
-    const regex = new RegExp('_', 'g');
-    ReportFilter.showLoading(`Sorting the table by ${sort_by.replace(regex, ' ')}...`);
-    this.refreshPage({sort_by});
+    console.log(sort_by)
+    if (sort_by.toLowerCase() != this.state.sort_by) {
+      this.state.sort_by = sort_by.toLowerCase()
+      this.sortResults();
+    }
+  }
+
+  sortCompareFunction(a, b) {
+    let [ptype, pmetric] = this.sortParams["primary"]
+    let [stype, smetric] = this.sortParams["secondary"]
+    genus_a = this.state.genus_map[a.genus_taxid]
+    genus_b = this.state.genus_map[b.genus_taxid]
+
+    genus_a_p_val = parseFloat(genus_a[ptype][pmetric])
+    genus_a_s_val = parseFloat(genus_a[stype][smetric])
+    a_p_val = parseFloat(a[ptype][pmetric])
+    a_s_val = parseFloat(a[stype][smetric])
+
+    genus_b_p_val = parseFloat(genus_b[ptype][pmetric])
+    genus_b_s_val = parseFloat(genus_b[stype][smetric])
+    b_p_val = parseFloat(b[ptype][pmetric])
+    b_s_val = parseFloat(b[stype][smetric])
+    // compared at genus level descending and then species level descending
+    //
+    //
+    if (a.genus_taxid == b.genus_taxid) {
+      //same genus
+      if (a.tax_level > b.tax_level) {
+        return -1
+      } else if (a.tax_level < b.tax_level) {
+        return 1
+      } else {
+        if (a_p_val > b_p_val) {
+          return -1
+        } else if (a_p_val < b_p_val ) {
+          return 1
+        } else {
+          if (a_s_val > b_s_val) {
+            return -1
+          } else if (a_s_val < b_s_val) {
+            return 1
+          } else {
+            return 0
+          }
+        }
+      }
+    } else {
+      if (genus_a_p_val > genus_b_p_val) {
+        return -1
+      } else if (genus_a_p_val < genus_b_p_val ) {
+        return 1
+      } else {
+        if (genus_a_s_val > genus_b_s_val) {
+          return -1
+        } else if (genus_a_s_val < genus_b_s_val) {
+          return 1
+        } else {
+          if (a.genus_taxid < b.genus_taxid) {
+            return -1
+          } else if (a.genus_taxid > b.genus_taxid) {
+            return 1
+          }
+        }
+      }
+    }
+  }
+
+  setSortParams() {
+    let primary_sort = this.state.sort_by.split("_")
+    primary_sort[0] = primary_sort[0].toUpperCase()
+    let secondary_sort = this.default_sort_by.split("_")
+    secondary_sort[0] = secondary_sort[0].toUpperCase()
+    this.sortParams = {
+      primary: primary_sort,
+      secondary: secondary_sort
+    }
+  }
+
+  sortResults() {
+    this.setSortParams();
+    let selected_taxons = this.state.selected_taxons
+    selected_taxons = selected_taxons.sort(this.sortCompareFunction)
+    this.setState({
+      selecte_taxons: selected_taxons
+    })
+    this.state.thresholded_taxons = this.state.thresholded_taxons.sort(this.sortCompareFunction)
+    this.state.taxonomy_details = this.state.taxonomy_details.sort(this.sortCompareFunction)
   }
 
   setFilterThreshold(e) {
@@ -344,14 +445,14 @@ class PipelineSampleReport extends React.Component {
   }
 
   render_sort_arrow(column, desired_sort_direction, arrow_direction) {
-    desired_sort = desired_sort_direction + "_" + column;
+    desired_sort = column.toLowerCase();
     className = `fa fa-caret-${arrow_direction}`;
-    current_sort = this.report_page_params.sort_by;
+    current_sort = this.state.sort_by;
     if (current_sort == desired_sort) {
       className = 'active ' + className;
     }
     return (
-      <i onClick={this.applySort.bind(this, desired_sort)}
+      <i onClick={this.applySort.bind(this, column)}
          className={className}
          key = {desired_sort}>
       </i>
