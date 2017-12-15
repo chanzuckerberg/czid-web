@@ -102,10 +102,8 @@ class ReportFilter extends React.Component {
     //ReportFilter.showLoading(`Filtering for '${value}'...`);
     let searchId = item[1];
     this.state.searchId = searchId
-    this.setState({
-      excluded_categories: [],
-      searchKey: item[0]
-    })
+    this.state.excluded_categories = []
+    this.state.searchKey = item[0]
 
     this.applySearchFilter()
   }
@@ -125,7 +123,7 @@ class ReportFilter extends React.Component {
             { this.all_categories.map((category, i) => {
               return (
                 <p key={i}>
-                  <input type="checkbox" className="filled-in cat-filter" id={category.name} value={category.name} onClick={this.applyExcludedCategories} defaultChecked={this.props.report_page_params.excluded_categories.indexOf(category.name) < 0} />
+                  <input type="checkbox" className="filled-in cat-filter" id={category.name} value={category.name} onClick={this.applyExcludedCategories} checked={this.state.excluded_categories.indexOf(category.name) < 0} />
                   <label htmlFor={ category.name }>{ category.name }</label>
                 </p>
               )
