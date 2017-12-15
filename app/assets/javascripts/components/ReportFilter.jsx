@@ -139,7 +139,7 @@ class ReportFilter extends React.Component {
             <div className='genus-name-label'>SEARCH</div>
             <div className="filter-values genus-autocomplete-container">
               <ReactAutocomplete
-                inputProps={{ placeholder: 'specifies, genus, family, etc' }}
+                inputProps={{ placeholder: 'species, genus, family, etc' }}
                 items={this.state.search_items}
                 shouldItemRender={(item, value) => item[0] == 'None' || item[0].toLowerCase().indexOf(value.toLowerCase()) > -1}
                 getItemValue={item => item[0]}
