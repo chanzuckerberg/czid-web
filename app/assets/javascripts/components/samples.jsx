@@ -22,7 +22,7 @@ class Samples extends React.Component {
       sampleIdsParams: this.fetchParams('ids') || [],
       allSamples: [],
       allProjects: [],
-      sort_by: this.fetchParams('sort_by') || 'name,asc',
+      sort_by: this.fetchParams('sort_by') || 'created_at,desc',
       pagesLoaded: 0,
       pageEnd: false,
       initialFetchedSamples: [],
