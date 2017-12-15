@@ -12,6 +12,7 @@ class Samples extends React.Component {
     this.fetchSamples = this.fetchSamples.bind(this);
     this.handleStatusFilterSelect = this.handleStatusFilterSelect.bind(this);
     this.setUrlLocation = this.setUrlLocation.bind(this);
+    this.sortSamples = this.sortSamples.bind(this);
     this.state = {
       project: null,
       totalNumber: null,
@@ -21,7 +22,7 @@ class Samples extends React.Component {
       sampleIdsParams: this.fetchParams('ids') || [],
       allSamples: [],
       allProjects: [],
-      sort_query: currentSort.sort_query ? currentSort.sort_query  : `sort_by=${this.defaultSortBy}`,
+      sort_by: this.fetchParams('sort_by') || 'created_at,desc',
       pagesLoaded: 0,
       pageEnd: false,
       initialFetchedSamples: [],
@@ -29,6 +30,7 @@ class Samples extends React.Component {
       isRequesting: false,
       displayEmpty: false
     };
+    this.sortCount = 0;
     this.initializeTooltip();
   }
 
@@ -48,6 +50,26 @@ class Samples extends React.Component {
         if(!isNaN(leftOffset)) {
           selectTooltip.css('left', leftOffset - 15);
         }
+      });
+    });
+  }
+
+  sortSamples() {
+    this.sortCount += 1;
+    let new_sort, message = '';
+    if(this.sortCount === 3) {
+      this.sortCount = 0;
+      new_sort = 'created_at,desc';
+      message = 'Sorting samples by date created...';
+    } else {
+      new_sort = (this.state.sort_by === 'name,asc') ? 'name,desc' :  'name,asc';
+      message = (new_sort === 'name,asc') ? 'Sorting samples by name (A-Z)...' : 'Sorting samples by name (Z-A)...';
+    }
+    this.setState({ sort_by: new_sort, pagesLoaded: 0, pageEnd: false }, () => {
+      this.setUrlLocation();
+      ReportFilter.showLoading(message);
+      this.fetchResults(() => {
+        ReportFilter.hideLoading();
       });
     });
   }
@@ -262,7 +284,7 @@ class Samples extends React.Component {
 
   //fetch project, filter and search params
   getParams() {
-    let params = `filter=${this.state.filterParams}&page=${this.state.pagesLoaded+1}&search=${this.state.searchParams}`;
+    let params = `filter=${this.state.filterParams}&page=${this.state.pagesLoaded+1}&search=${this.state.searchParams}&sort_by=${this.state.sort_by}`;
     let projectId = parseInt(this.state.selectedProjectId);
 
     if(projectId) {
@@ -277,7 +299,7 @@ class Samples extends React.Component {
   }
 
   //fetch results from filtering, search or switching projects
-  fetchResults() {
+  fetchResults(cb) {
     const params = this.getParams();
     axios.get(`/samples?${params}`).then((res) => {
       this.setState((prevState) => ({
@@ -291,13 +313,19 @@ class Samples extends React.Component {
       if (!this.state.allSamples.length) {
         this.setState({ displayEmpty: true });
       }
+      if(typeof cb === 'function') {
+        cb();
+      }
     }).catch((err) => {
       this.setState({
         loading: false,
         initialFetchedSamples: [],
         allSamples: [],
         displayEmpty: true,
-      })
+      });
+      if(typeof cb === 'function') {
+        cb();
+      }
     })
   }
 
@@ -421,14 +449,20 @@ class Samples extends React.Component {
     const tableHead = (
       <div className="row wrapper">
         <div className="row table-container">
-          <div className="col s4"><span>Name</span></div>
+          <div className="col s4 sort-able">
+            <div onClick={this.sortSamples}>
+              <span>Name</span>
+              <i className={`fa ${(this.state.sort_by === 'name,desc') ? 'fa fa-caret-up' : 'fa fa-caret-down'}
+              ${(this.state.sort_by === 'name,desc' || this.state.sort_by === 'name,asc') ? 'active': 'hidden'}`}></i>
+            </div>
+          </div>
           <div className="col s2">Total reads</div>
           <div className="col s2">Non-host reads</div>
           <div className="col s1 center" rel='tooltip' data-placement='bottom' title='Passed quality control'>Passed QC</div>
           <div className="col s1 center" rel='tooltip' data-placement='bottom' title='Duplicate compression ratio'>DCR</div>
           <div className="col s2 status-dropdown" data-activates="dropdownstatus"><i className="status-filter fa fa-caret-down"></i>Status</div>
         </div>
-      </div> 
+      </div>
     )
     return (
     <div className="content-wrapper">
@@ -517,28 +551,14 @@ class Samples extends React.Component {
 
   //set Url based on requests
   setUrlLocation() {
-    let searchParams = this.state.searchParams;
-    let filterParams = this.state.filterParams;
     let projectId = parseInt(this.state.selectedProjectId);
-    let params;
-    if (projectId && searchParams !== '' && filterParams) {
-      params = `?project_id=${projectId}&filter=${filterParams}&search=${searchParams}`;
-    } else if (projectId && searchParams !== '') {
-      params = `?project_id=${projectId}&search=${searchParams}`;
-    } else if (projectId && filterParams) {
-      params = `?project_id=${projectId}&filter=${filterParams}`;
-    } else if (searchParams !== '' && filterParams) {
-      params = `?search=${searchParams}&filter=${filterParams}`;
-    } else if (projectId) {
-      params = `?project_id=${projectId}`;
-    } else if (searchParams !== '') {
-      params = `?search=${searchParams}`;
-    } else if (filterParams) {
-      params = `?filter=${filterParams}`;
-    } else {
-      params = '';
-    }
-    window.history.replaceState(null, null, params)
+    const params = {
+      project_id: projectId ? projectId : '',
+      filter: this.state.filterParams,
+      search: this.state.searchParams,
+      sort_by: this.state.sort_by
+    };
+    window.history.replaceState(null, null, `?${jQuery.param(params)}`)
   }
 
   render() {

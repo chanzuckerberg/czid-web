@@ -86,6 +86,12 @@ class ReportFilter extends React.Component {
     $('.page-loading').css('display', 'flex');
   }
 
+  static hideLoading() {
+    $('.page-loading .spinner-label').text();
+    $('body').css('overflow', 'scroll');
+    $('.page-loading').css('display', 'none');
+  }
+
   applyExcludedCategories(e) {
     ReportFilter.showLoading('Applying category filter...');
     this.props.applyExcludedCategories(e.target.value, e.target.checked)
