@@ -433,7 +433,7 @@ class Samples extends React.Component {
   renderTable(samples) {
 
     column_select_anchor = (
-      <span className="col s2 status-dropdown" data-activates="dropdown-column-select"><i className="status-filter fa fa-caret-down"></i>Select Columns</span>
+      <span className="col s2 column-dropdown" data-activates="dropdown-column-select"><i className="status-filter fa fa-caret-down"></i>Select Columns</span>
     );
 
     search_box = (
@@ -522,12 +522,23 @@ class Samples extends React.Component {
     this.scrollDown();
     this.initializeProjectList();
     this.displayPipelineStatusFilter();
+    this.displayColumnSelector();
   }
 
   // initialize filter dropdown
   displayPipelineStatusFilter() {
     const textSize = 14
     $('.status-dropdown').dropdown({
+      belowOrigin: true,
+      stopPropagation: false,
+      constrainWidth: true
+    });
+    $(".dropdown-content>li>a").css("font-size", textSize)
+  }
+
+  displayColumnSelector() {
+    const textSize = 14
+    $('.column-dropdown').dropdown({
       belowOrigin: true,
       stopPropagation: false,
       constrainWidth: true
