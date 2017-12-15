@@ -1,5 +1,21 @@
 require 'open3'
+require 'csv'
+
 module SamplesHelper
+  include PipelineOutputsHelper
+
+  def populate_metadata_bulk(csv_s3_path)
+    # CSV should have columns "sample_name" and any desired columns from Sample::METADATA_FIELDS
+    csv = get_s3_file(csv_s3_path)
+    csv.delete!("\uFEFF") # remove BOM if present (file likely comes from Excel)
+    CSV.parse(csv, headers: true) do |row|
+      h = row.to_h
+      metadata = h.select { |k, _v| k && Sample::METADATA_FIELDS.include?(k.to_sym) }
+      sample = Sample.find_by(name: h['sample_name'])
+      sample.update_attributes!(metadata) if sample
+    end
+  end
+
   def host_genomes_list
     HostGenome.all.map { |h| h.slice('name', 'id') }
   end

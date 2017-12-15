@@ -77,6 +77,7 @@ class PipelineRun < ApplicationRecord
       if prs.failed?
         self.finalized = 1
         self.job_status = "#{prs.step_number}.#{prs.name}-#{STATUS_FAILED}"
+        Airbrake.notify("Sample #{sample.id} failed #{prs.name}")
         return nil
       elsif prs.succeeded?
         next
