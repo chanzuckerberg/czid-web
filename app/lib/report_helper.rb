@@ -21,8 +21,8 @@ module ReportHelper
 
   DECIMALS = 1
 
-  DEFAULT_SORT_PARAM = 'highest_nt_aggregatescore'
-  DEFAULT_PARAMS = {sort_by: DEFAULT_SORT_PARAM}
+  DEFAULT_SORT_PARAM = 'highest_nt_aggregatescore'.freeze
+  DEFAULT_PARAMS = { sort_by: DEFAULT_SORT_PARAM }.freeze
 
   IGNORED_PARAMS = [:controller, :action, :id].freeze
 
