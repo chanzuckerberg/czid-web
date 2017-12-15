@@ -30,6 +30,9 @@ class Samples extends React.Component {
       displayEmpty: false
     };
     this.initializeTooltip();
+    this.PIPELINE_COLUMNS = ["Total reads", "Non-host reads" , "Quality control", "Compression ratio", "Pipeline status"]
+    this.METADATA_COLUMNS = ["Tissue type", "Location" , "Host", "Notes"]
+
   }
 
   initializeTooltip() {
@@ -417,13 +420,29 @@ class Samples extends React.Component {
     )
   }
 
+  display_column_options(column_list) {
+    return column_list.map((option_name, i) => {
+      return (
+        <li className="filter-item" data-column={option_name} onClick={() => ""}>
+          <input type="checkbox" className="filled-in cat-filter" id={option_name} value={option_name} onClick={() => ""} defaultChecked={-1 < 0} />
+          <label htmlFor={option_name}>{option_name}</label>
+        </li>
+      ) })
+  }
+
   renderTable(samples) {
+
+    column_select_anchor = (
+      <span className="col s2 status-dropdown" data-activates="dropdown-column-select"><i className="status-filter fa fa-caret-down"></i>Select Columns</span>
+    );
+
     search_box = (
-      <div className="row search-box">
+      <span className="search-box">
         <span className="icon"><i className="fa fa-search" aria-hidden="true"></i></span>
-          <input id="search" value={this.state.searchParams} onChange={this.handleSearchChange}  type="search" onKeyDown={this.handleSearch} className="search" placeholder='Search for Sample'/>{ this.state.showSearchLoader ? <i className='fa fa-spinner fa-spin fa-lg'></i> : null }
-      </div>
-    )
+        <input id="search" value={this.state.searchParams} onChange={this.handleSearchChange}  type="search" onKeyDown={this.handleSearch} className="search" placeholder='Search for Sample'/>{ this.state.showSearchLoader ? <i className='fa fa-spinner fa-spin fa-lg'></i> : null }
+      </span>
+    );
+
     const tableHead = (
       <div className="row wrapper">
         <div className="row table-container">
@@ -435,7 +454,8 @@ class Samples extends React.Component {
           <div className="col s2 status-dropdown" data-activates="dropdownstatus"><i className="status-filter fa fa-caret-down"></i>Status</div>
         </div>
       </div> 
-    )
+    );
+
     status_filter_dropdown = (
       <ul id='dropdownstatus' className='status dropdown-content'>
         <li><a className="title"><b>Filter by status</b></a></li>
@@ -447,17 +467,17 @@ class Samples extends React.Component {
         <li className="divider"></li>
         <li className="filter-item" data-status="ALL" onClick={ this.handleStatusFilterSelect }><a data-status="ALL" className="filter-item all">All</a><i data-status="ALL" className="filter all fa fa-check"></i></li>
       </ul>
-    )
+    );
+
     column_select_dropdown = (
-      <ul id='dropdown-column-select' className='status dropdown-content'>
-        <li><a className="title"><b>Filter by status</b></a></li>
+      <ul id='dropdown-column-select' className='column-select dropdown-content'>
+        <li><a className="title"><b>Pipeline Data</b></a></li>
         <li className="divider"></li>
-        <li className="filter-item" data-status="WAITING" onClick={ this.handleStatusFilterSelect } ><a data-status="WAITING" className="filter-item waiting">Waiting</a><i data-status="WAITING" className="filter fa fa-check"></i></li>
-        <li className="filter-item" data-status="UPLOADING" onClick={ this.handleStatusFilterSelect }><a data-status="UPLOADING" className="filter-item uploading">In Progress</a><i data-status="UPLOADING"  className="filter fa fa-check"></i></li>
-        <li className="filter-item" data-status="CHECKED" onClick={ this.handleStatusFilterSelect }><a data-status="CHECKED" className="filter-item complete">Complete</a><i data-status="CHECKED" className="filter fa fa-check"></i></li>
-        <li className="filter-item" onClick={ this.handleStatusFilterSelect } data-status="FAILED" ><a data-status="FAILED" className="filter-item failed">Failed</a><i data-status="FAILED" className="filter fa fa-check"></i></li>
+        { this.display_column_options(this.PIPELINE_COLUMNS) }
         <li className="divider"></li>
-        <li className="filter-item" data-status="ALL" onClick={ this.handleStatusFilterSelect }><a data-status="ALL" className="filter-item all">All</a><i data-status="ALL" className="filter all fa fa-check"></i></li>
+        <li><a className="title"><b>Sample Data</b></a></li>
+        <li className="divider"></li>
+        { this.display_column_options(this.METADATA_COLUMNS) }
       </ul>
     )
 
@@ -465,6 +485,7 @@ class Samples extends React.Component {
     <div className="content-wrapper">
       <div className="sample-container">
           { search_box }
+          { column_select_anchor }
           { column_select_dropdown }
           { status_filter_dropdown }
           { tableHead }
