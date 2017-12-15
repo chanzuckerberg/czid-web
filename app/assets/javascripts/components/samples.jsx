@@ -30,18 +30,16 @@ class Samples extends React.Component {
       displayEmpty: false
     };
     this.initializeTooltip();
-    this.PIPELINE_COLUMNS = ["Total reads", "Non-host reads" , "Quality control", "Compression ratio", "Pipeline status"]
-    this.METADATA_COLUMNS = ["Tissue type", "Nucleotide type", "Location" , "Host", "Notes"]
-    this.COLUMN_NAME_TO_ID = { Total_reads: "total_reads",
-                               Non_host_reads: "nonhost_reads",
-                               Quality_control: "QC",
-                               Compression_ratio: "CR",
-                               Pipeline_status: "pipeline_status",
-                               Tissue_type: "tissue",
-                               Nucleotide_type: "nucleotide",
-                               Location: "location",
-                               Host: "host",
-                               Notes: "notes" }
+    this.COLUMN_DISPLAY_MAP = { total_reads: { display_name: "Total reads", type: "pipeline_data" },
+                                nonhost_reads: { display_name: "Non-host reads", type: "pipeline_data" },
+                                quality_control: { display_name: "Passed QC", tooltip: "Passed quality control", type: "pipeline_data" },
+                                compression_ratio: { display_name: "DCR", tooltip: "Duplicate compression ratio", type: "pipeline_data" },
+                                pipeline_status: { display_name: "Status", type: "pipeline_data" },
+                                tissue_type: { display_name: "Tissue type", type: "metadata" },
+                                nucleotide_type: { display_name: "Nucleotide type", type: "metadata" },
+                                location: { display_name: "Location", type: "metadata" },
+                                host_genome: { display_name: "Host", type: "metadata" },
+                                notes: { display_name: "Notes", type: "metadata" } }
     this.hideOrShowColumn = this.hideOrShowColumn.bind(this)
   }
 
@@ -156,6 +154,16 @@ class Samples extends React.Component {
           <span>{this.appendStatusIcon(status)}</span><p className="status">{status}</p>
         </div>
       )
+      data_values = { total_reads: !derivedOutput.pipeline_output ? BLANK_TEXT : numberWithCommas(derivedOutput.pipeline_output.total_reads),
+                      nonhost_reads: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.remaining_reads) ? BLANK_TEXT : numberWithCommas(derivedOutput.summary_stats.remaining_reads),
+                      nonhost_reads_percent: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? '' : <span className="percent"> {`(${derivedOutput.summary_stats.percent_remaining.toFixed(2)}%)`} </span>,
+                      quality_control: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? BLANK_TEXT : `${derivedOutput.summary_stats.qc_percent.toFixed(2)}%`,
+                      compression_ratio: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.compression_ratio) ? BLANK_TEXT : derivedOutput.summary_stats.compression_ratio.toFixed(2),
+                      tissue_type: dbSample && dbSample.sample_tissue ? dbSample.sample_tissue : BLANK_TEXT,
+                      nucleotide_type: dbSample && dbSample.sample_template ? dbSample.sample_template : BLANK_TEXT,
+                      host_genome: BLANK_TEXT,
+                      notes: dbSample && dbSample.sample_notes ? dbSample.sample_notes : BLANK_TEXT }
+
       return (
         <div className="row job-container" onClick={ this.viewSample.bind(this, dbSample.id)} key={i}>
           <div className="job-card">
@@ -166,41 +174,17 @@ class Samples extends React.Component {
                 { !uploader || uploader === '' ? '' : <span> | by {uploader}</span>}
               </p>
             </div>
-            <div className="reads col s2">
-              <p>
-              { !derivedOutput.pipeline_output ? BLANK_TEXT : numberWithCommas(derivedOutput.pipeline_output.total_reads) }
-              </p>
-            </div>
-            <div className="reads col s2">
-              <p>
-              { (!derivedOutput.summary_stats || !derivedOutput.summary_stats.remaining_reads) ? BLANK_TEXT : numberWithCommas(derivedOutput.summary_stats.remaining_reads) }
-              { (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? '' : <span className="percent"> {`(${derivedOutput.summary_stats.percent_remaining.toFixed(2)}%)`} </span> }
-              </p>
-            </div>
-            <div className="reads col s1 center">
-              <p>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? BLANK_TEXT : `${derivedOutput.summary_stats.qc_percent.toFixed(2)}%`}</p>
-            </div>
-            <div className="reads col s1 center">
-              <p>
-              { (!derivedOutput.summary_stats || !derivedOutput.summary_stats.compression_ratio) ? BLANK_TEXT : derivedOutput.summary_stats.compression_ratio.toFixed(2) }
-              </p>
-            </div>
 
-            <div className={`sample-list-optional-column-value ${this.COLUMN_NAME_TO_ID["Tissue_type"]} col s2 hidden`} key={this.COLUMN_NAME_TO_ID["Tissue_type"]}>
-              <p>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? BLANK_TEXT : `${derivedOutput.summary_stats.qc_percent.toFixed(2)}%`}</p>
-            </div>
-            <div className={`sample-list-optional-column-value ${this.COLUMN_NAME_TO_ID["Nucleotide_type"]} col s2 hidden`} key={this.COLUMN_NAME_TO_ID["Nucleotide_type"]}>
-              <p>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? BLANK_TEXT : `${derivedOutput.summary_stats.qc_percent.toFixed(2)}%`}</p>
-            </div>
-            <div className={`sample-list-optional-column-value ${this.COLUMN_NAME_TO_ID["Quality_control"]} col s2 hidden`} key={this.COLUMN_NAME_TO_ID["Quality_control"]}>
-              <p>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? BLANK_TEXT : `${derivedOutput.summary_stats.qc_percent.toFixed(2)}%`}</p>
-            </div>
-            <div className={`sample-list-optional-column-value ${this.COLUMN_NAME_TO_ID["Host"]} col s2 hidden`} key={this.COLUMN_NAME_TO_ID["Host"]}>
-              <p>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? BLANK_TEXT : `${derivedOutput.summary_stats.qc_percent.toFixed(2)}%`}</p>
-            </div>
-            <div className={`sample-list-optional-column-value ${this.COLUMN_NAME_TO_ID["Notes"]} col s2 hidden`} key={this.COLUMN_NAME_TO_ID["Notes"]}>
-              <p>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? BLANK_TEXT : `${derivedOutput.summary_stats.qc_percent.toFixed(2)}%`}</p>
-            </div>
+            <div key="total_reads" className="optional-column total_reads reads col s2"><p>{ data_values.total_reads }</p></div>
+            <div key="nonhost_reads" className="optional-column nonhost_reads reads col s2"><p>{ data_values.nonhost_reads }{ nonhost_reads_percent }</p></div>
+            <div key="quality_control" className="optional-column quality_control reads col s1 center"><p>{ data_values.quality_control }</p></div>
+            <div key="compression_ratio" className="optional-column compression_ratio reads col s1 center"><p>{ data_values.compression_ratio }</p></div>
+
+            <div key="tissue_type" className="optional-column tissue_type col s2 hidden"><p>{ data_values.tissue_type }</p></div>
+            <div key="nucleotide_type" className="optional-column nucleotide_type col s2 hidden"><p>{ data_values.nucleotide_type }</p></div>
+            <div key="location" className="optional-column location col s2 hidden"><p>{ data_values.location }</p></div>
+            <div key="host_genome" className="optional-column host_genome col s2 hidden"><p>{ data_values.host_genome }</p></div>
+            <div key="notes" className="optional-column notes col s2 hidden"><p>{ data_values.notes }</p></div>
 
             <div className={ runInfo.total_runtime ? "reads status-col col s2" : 'reads col s2 no-time'}>{ !runInfo.job_status_description ? rowWithChunkStatus : rowWithoutChunkStatus }
               { runInfo.total_runtime ? <p className="time"><i className="fa fa-clock-o" aria-hidden="true"></i><span>{this.formatRunTime(runInfo.total_runtime)}</span></p> : ''}
@@ -448,22 +432,22 @@ class Samples extends React.Component {
   }
 
   hideOrShowColumn(e) {
-    // assumes className has column name as 2nd word
     const column_name = e.target.id;
-    column_classname = column_name.split(" ").join("_")
-    console.log(column_name)
-    $(`.sample-list-optional-column-value.${column_classname}`).toggleClass('hidden');
-    $(`.sample-list-optional-column.${column_classname}`).toggleClass('hidden');
+    $(`.optional-column.${column_name}`).toggleClass('hidden');
   }
 
-  display_column_options(column_list, default_checked) {
+  display_column_options(column_map, data_type, default_checked) {
+    column_list = Object.keys(column_map)
     return column_list.map((option_name, i) => {
-      return (
-        <li className="column-item" data-column={option_name} id={this.COLUMN_NAME_TO_ID[option_name.split(" ").join("_").split("-").join("_")]} onClick={this.hideOrShowColumn}>
-          <input type="checkbox" className="filled-in cat-filter" id={this.COLUMN_NAME_TO_ID[option_name.split(" ").join("_").split("-").join("_")]} value={option_name} defaultChecked={default_checked} />
-          <label htmlFor={option_name}>{option_name}</label>
-        </li>
-      ) })
+      if (this.COLUMN_DISPLAY_MAP[option_name].type === data_type) {
+        return (
+          <li className="column-item" data-column={option_name} id={option_name} onClick={this.hideOrShowColumn}>
+            <input type="checkbox" className="filled-in cat-filter" value={option_name} defaultChecked={default_checked}/>
+            <label htmlFor={option_name}>{this.COLUMN_DISPLAY_MAP[option_name].display_name}</label>
+          </li>
+        )
+      }
+    })
   }
 
   renderTable(samples) {
@@ -484,18 +468,21 @@ class Samples extends React.Component {
         <div className="row table-container">
           <div className="col s4"><span>Name</span></div>
 
-          <div className="col s2">Total reads</div>
-          <div className="col s2">Non-host reads</div>
-          <div className="col s1 center" rel='tooltip' data-placement='bottom' title='Passed quality control'>Passed QC</div>
-          <div className="col s1 center" rel='tooltip' data-placement='bottom' title='Duplicate compression ratio'>DCR</div>
+          <div key="total_reads" className="optional-column total_reads col s2">{ this.COLUMN_DISPLAY_MAP.total_reads.display_name }</div>
+          <div key="nonhost_reads" className="optional-column nonhost_reads col s2">{ this.COLUMN_DISPLAY_MAP.nonhost_reads.display_name }</div>
+          <div key="quality_control" className="optional-column quality_control col s1 center"
+            rel='tooltip' data-placement='bottom' title={this.COLUMN_DISPLAY_MAP.quality_control.tooltip}>{ this.COLUMN_DISPLAY_MAP.quality_control.display_name }</div>
+          <div key="compression_ratio" className="optional-column compression_ratio col s1 center"
+            rel='tooltip' data-placement='bottom' title={this.COLUMN_DISPLAY_MAP.compression_ratio.tooltip}>{ this.COLUMN_DISPLAY_MAP.compression_ratio.display_name }</div>
 
-          <div key={this.COLUMN_NAME_TO_ID["Tissue_type"]} className={`sample-list-optional-column ${this.COLUMN_NAME_TO_ID["Tissue_type"]} col s2 hidden`}>Tissue type</div>
-          <div key={this.COLUMN_NAME_TO_ID["Nucleotide_type"]} className={`sample-list-optional-column ${this.COLUMN_NAME_TO_ID["Nucleotide_type"]} col s2 hidden`}>Nucleotide type</div>
-          <div key={this.COLUMN_NAME_TO_ID["Location"]} className={`sample-list-optional-column ${this.COLUMN_NAME_TO_ID["Location"]} col s2 hidden`}>Location</div>
-          <div key={this.COLUMN_NAME_TO_ID["Host"]} className={`sample-list-optional-column ${this.COLUMN_NAME_TO_ID["Host"]} col s2 hidden`}>Host</div>
-          <div key={this.COLUMN_NAME_TO_ID["Notes"]} className={`sample-list-optional-column ${this.COLUMN_NAME_TO_ID["Notes"]} col s2 hidden`}>Notes</div>
+          <div key="tissue_type" className={`optional-column tissue_type col s2 hidden`}>{ this.COLUMN_DISPLAY_MAP.tissue_type.display_name }</div>
+          <div key="nucleotide_type" className={`optional-column nucleotide_type col s2 hidden`}>{ this.COLUMN_DISPLAY_MAP.nucleotide_type.display_name }</div>
+          <div key="location" className={`optional-column location col s2 hidden`}>{ this.COLUMN_DISPLAY_MAP.location.display_name }</div>
+          <div key="host_genome" className={`optional-column host_genome col s2 hidden`}>{ this.COLUMN_DISPLAY_MAP.host_genome.display_name }</div>
+          <div key="notes" className={`optional-column notes col s2 hidden`}>{ this.COLUMN_DISPLAY_MAP.notes.display_name }</div>
 
-          <div className="col s2 status-dropdown" data-activates="dropdownstatus"><i className="status-filter fa fa-caret-down"></i>Status</div>
+          <div key="pipeline_status" className="optional-column pipeline_status col s2 status-dropdown" data-activates="dropdownstatus">
+            <i className="status-filter fa fa-caret-down"></i>{ this.COLUMN_DISPLAY_MAP.pipeline_status.display_name }</div>
         </div>
       </div> 
     );
@@ -517,11 +504,11 @@ class Samples extends React.Component {
       <ul id='dropdown-column-select' className='column-select dropdown-content'>
         <li><a className="title"><b>Pipeline Data</b></a></li>
         <li className="divider"></li>
-        { this.display_column_options(this.PIPELINE_COLUMNS, true) }
+        { this.display_column_options(this.COLUMN_DISPLAY_MAP, "pipeline_data", true) }
         <li className="divider"></li>
         <li><a className="title"><b>Sample Data</b></a></li>
         <li className="divider"></li>
-        { this.display_column_options(this.METADATA_COLUMNS, false) }
+        { this.display_column_options(this.COLUMN_DISPLAY_MAP, "metadata", false) }
       </ul>
     )
 
