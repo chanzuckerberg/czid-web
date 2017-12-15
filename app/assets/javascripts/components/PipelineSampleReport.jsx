@@ -9,7 +9,8 @@ class PipelineSampleReport extends React.Component {
     this.report_details = props.report_details
     this.report_page_params = props.report_page_params
     this.all_backgrounds = props.all_backgrounds;
-    this.max_rows_to_render = props.max_rows || 2000
+    this.max_rows_to_render = props.max_rows || 1000
+
     this.state = {
       taxonomy_details:  [],
       search_keys_in_sample: [],
@@ -150,6 +151,7 @@ class PipelineSampleReport extends React.Component {
   }
 
   // applySort needs to be bound at time of use, not in constructor above
+  // TODO(yf): fix this
   applySort(sort_by) {
     const regex = new RegExp('_', 'g');
     ReportFilter.showLoading(`Sorting the table by ${sort_by.replace(regex, ' ')}...`);
@@ -219,6 +221,7 @@ class PipelineSampleReport extends React.Component {
     }
   }
 
+  // Remove this after fix sorting
   refreshPage(overrides) {
     new_params = Object.assign({}, this.report_page_params, overrides);
     window.location = location.protocol + '//' + location.host + location.pathname + '?' + jQuery.param(new_params);
