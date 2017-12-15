@@ -31,8 +31,18 @@ class Samples extends React.Component {
     };
     this.initializeTooltip();
     this.PIPELINE_COLUMNS = ["Total reads", "Non-host reads" , "Quality control", "Compression ratio", "Pipeline status"]
-    this.METADATA_COLUMNS = ["Tissue type", "Location" , "Host", "Notes"]
-
+    this.METADATA_COLUMNS = ["Tissue type", "Nucleotide type", "Location" , "Host", "Notes"]
+    this.COLUMN_NAME_TO_ID = { Total_reads: "total_reads",
+                               Non_host_reads: "nonhost_reads",
+                               Quality_control: "QC",
+                               Compression_ratio: "CR",
+                               Pipeline_status: "pipeline_status",
+                               Tissue_type: "tissue",
+                               Nucleotide_type: "nucleotide",
+                               Location: "location",
+                               Host: "host",
+                               Notes: "notes" }
+    this.hideOrShowColumn = this.hideOrShowColumn.bind(this)
   }
 
   initializeTooltip() {
@@ -175,7 +185,24 @@ class Samples extends React.Component {
               { (!derivedOutput.summary_stats || !derivedOutput.summary_stats.compression_ratio) ? BLANK_TEXT : derivedOutput.summary_stats.compression_ratio.toFixed(2) }
               </p>
             </div>
-              <div className={ runInfo.total_runtime ? "reads status-col col s2" : 'reads col s2 no-time'}>{ !runInfo.job_status_description ? rowWithChunkStatus : rowWithoutChunkStatus }
+
+            <div className={`sample-list-optional-column-value ${this.COLUMN_NAME_TO_ID["Tissue_type"]} col s2 hidden`} key={this.COLUMN_NAME_TO_ID["Tissue_type"]}>
+              <p>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? BLANK_TEXT : `${derivedOutput.summary_stats.qc_percent.toFixed(2)}%`}</p>
+            </div>
+            <div className={`sample-list-optional-column-value ${this.COLUMN_NAME_TO_ID["Nucleotide_type"]} col s2 hidden`} key={this.COLUMN_NAME_TO_ID["Nucleotide_type"]}>
+              <p>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? BLANK_TEXT : `${derivedOutput.summary_stats.qc_percent.toFixed(2)}%`}</p>
+            </div>
+            <div className={`sample-list-optional-column-value ${this.COLUMN_NAME_TO_ID["Quality_control"]} col s2 hidden`} key={this.COLUMN_NAME_TO_ID["Quality_control"]}>
+              <p>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? BLANK_TEXT : `${derivedOutput.summary_stats.qc_percent.toFixed(2)}%`}</p>
+            </div>
+            <div className={`sample-list-optional-column-value ${this.COLUMN_NAME_TO_ID["Host"]} col s2 hidden`} key={this.COLUMN_NAME_TO_ID["Host"]}>
+              <p>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? BLANK_TEXT : `${derivedOutput.summary_stats.qc_percent.toFixed(2)}%`}</p>
+            </div>
+            <div className={`sample-list-optional-column-value ${this.COLUMN_NAME_TO_ID["Notes"]} col s2 hidden`} key={this.COLUMN_NAME_TO_ID["Notes"]}>
+              <p>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? BLANK_TEXT : `${derivedOutput.summary_stats.qc_percent.toFixed(2)}%`}</p>
+            </div>
+
+            <div className={ runInfo.total_runtime ? "reads status-col col s2" : 'reads col s2 no-time'}>{ !runInfo.job_status_description ? rowWithChunkStatus : rowWithoutChunkStatus }
               { runInfo.total_runtime ? <p className="time"><i className="fa fa-clock-o" aria-hidden="true"></i><span>{this.formatRunTime(runInfo.total_runtime)}</span></p> : ''}
             </div>
           </div>
@@ -420,11 +447,20 @@ class Samples extends React.Component {
     )
   }
 
-  display_column_options(column_list) {
+  hideOrShowColumn(e) {
+    // assumes className has column name as 2nd word
+    const column_name = e.target.id;
+    column_classname = column_name.split(" ").join("_")
+    console.log(column_name)
+    $(`.sample-list-optional-column-value.${column_classname}`).toggleClass('hidden');
+    $(`.sample-list-optional-column.${column_classname}`).toggleClass('hidden');
+  }
+
+  display_column_options(column_list, default_checked) {
     return column_list.map((option_name, i) => {
       return (
-        <li className="filter-item" data-column={option_name} onClick={() => ""}>
-          <input type="checkbox" className="filled-in cat-filter" id={option_name} value={option_name} onClick={() => ""} defaultChecked={-1 < 0} />
+        <li className="column-item" data-column={option_name} id={this.COLUMN_NAME_TO_ID[option_name.split(" ").join("_").split("-").join("_")]} onClick={this.hideOrShowColumn}>
+          <input type="checkbox" className="filled-in cat-filter" id={this.COLUMN_NAME_TO_ID[option_name.split(" ").join("_").split("-").join("_")]} value={option_name} defaultChecked={default_checked} />
           <label htmlFor={option_name}>{option_name}</label>
         </li>
       ) })
@@ -447,10 +483,18 @@ class Samples extends React.Component {
       <div className="row wrapper">
         <div className="row table-container">
           <div className="col s4"><span>Name</span></div>
+
           <div className="col s2">Total reads</div>
           <div className="col s2">Non-host reads</div>
           <div className="col s1 center" rel='tooltip' data-placement='bottom' title='Passed quality control'>Passed QC</div>
           <div className="col s1 center" rel='tooltip' data-placement='bottom' title='Duplicate compression ratio'>DCR</div>
+
+          <div key={this.COLUMN_NAME_TO_ID["Tissue_type"]} className={`sample-list-optional-column ${this.COLUMN_NAME_TO_ID["Tissue_type"]} col s2 hidden`}>Tissue type</div>
+          <div key={this.COLUMN_NAME_TO_ID["Nucleotide_type"]} className={`sample-list-optional-column ${this.COLUMN_NAME_TO_ID["Nucleotide_type"]} col s2 hidden`}>Nucleotide type</div>
+          <div key={this.COLUMN_NAME_TO_ID["Location"]} className={`sample-list-optional-column ${this.COLUMN_NAME_TO_ID["Location"]} col s2 hidden`}>Location</div>
+          <div key={this.COLUMN_NAME_TO_ID["Host"]} className={`sample-list-optional-column ${this.COLUMN_NAME_TO_ID["Host"]} col s2 hidden`}>Host</div>
+          <div key={this.COLUMN_NAME_TO_ID["Notes"]} className={`sample-list-optional-column ${this.COLUMN_NAME_TO_ID["Notes"]} col s2 hidden`}>Notes</div>
+
           <div className="col s2 status-dropdown" data-activates="dropdownstatus"><i className="status-filter fa fa-caret-down"></i>Status</div>
         </div>
       </div> 
@@ -473,11 +517,11 @@ class Samples extends React.Component {
       <ul id='dropdown-column-select' className='column-select dropdown-content'>
         <li><a className="title"><b>Pipeline Data</b></a></li>
         <li className="divider"></li>
-        { this.display_column_options(this.PIPELINE_COLUMNS) }
+        { this.display_column_options(this.PIPELINE_COLUMNS, true) }
         <li className="divider"></li>
         <li><a className="title"><b>Sample Data</b></a></li>
         <li className="divider"></li>
-        { this.display_column_options(this.METADATA_COLUMNS) }
+        { this.display_column_options(this.METADATA_COLUMNS, false) }
       </ul>
     )
 
