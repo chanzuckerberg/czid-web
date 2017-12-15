@@ -10,9 +10,12 @@ module SamplesHelper
     csv.delete!("\uFEFF") # remove BOM if present (file likely comes from Excel)
     CSV.parse(csv, headers: true) do |row|
       h = row.to_h
+      sample_project = Project.find_by(name: h['project_name'])
+      next unless sample_project
+      sample = Sample.find_by(name: h['sample_name'], project_id: sample_project.id)
+      next unless sample
       metadata = h.select { |k, _v| k && Sample::METADATA_FIELDS.include?(k.to_sym) }
-      sample = Sample.find_by(name: h['sample_name'])
-      sample.update_attributes!(metadata) if sample
+      sample.update_attributes!(metadata)
     end
   end
 
