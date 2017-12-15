@@ -381,10 +381,13 @@ $break-large: 1070px;
         &.active {
           color: #09c;
         }
+        &.hidden {
+          display: none;
+        }
       }
       &:hover {
         i {
-          color: #09c;
+          display: inline-block;
         }
       }
     }
