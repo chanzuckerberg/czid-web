@@ -47,8 +47,6 @@ class PipelineSampleReport extends React.Component {
       loading: true
     };
 
-    this.fetchReportData();
-    this.fetchSearchList();
     this.applySearchFilter = this.applySearchFilter.bind(this);
     this.applyThresholdFilters = this.applyThresholdFilters.bind(this);
     this.sortResults = this.sortResults.bind(this);
@@ -62,6 +60,11 @@ class PipelineSampleReport extends React.Component {
 
     this.handleThresholdEnter = this.handleThresholdEnter.bind(this);
     this.initializeTooltip();
+  }
+
+  componentWillMount() {
+    this.fetchReportData();
+    this.fetchSearchList();
   }
 
   fetchSearchList() {
@@ -80,7 +83,7 @@ class PipelineSampleReport extends React.Component {
     axios.get(`/samples/${this.sample_id}/report_info${params}`).then((res) => {
       let genus_map = {}
       for (var i = 0; i < res.data.taxonomy_details[2].length; i++) {
-        taxon = res.data.taxonomy_details[2][i]
+        let taxon = res.data.taxonomy_details[2][i]
         if (taxon.genus_taxid == taxon.tax_id) {
           genus_map[taxon.genus_taxid] = taxon
         }
@@ -104,7 +107,7 @@ class PipelineSampleReport extends React.Component {
       genus_taxon = {}
       matched_taxons = []
       for (var i = 0; i < this.state.taxonomy_details.length; i++) {
-        taxon = this.state.taxonomy_details[i]
+        let taxon = this.state.taxonomy_details[i]
         if (taxon.genus_taxid == taxon.tax_id) {
           if (matched_taxons.length > 0) {
             selected_taxons.push(genus_taxon)
@@ -126,7 +129,7 @@ class PipelineSampleReport extends React.Component {
       }
     } else if (excludedCategories.length > 0) {
       for (var i = 0; i < thresholded_taxons.length; i++) {
-        taxon = thresholded_taxons[i]
+        let taxon = thresholded_taxons[i]
         if (excludedCategories.indexOf(taxon.category_name) < 0 ) {
           // not in the excluded categories
           selected_taxons.push(taxon)
@@ -292,7 +295,7 @@ class PipelineSampleReport extends React.Component {
     genus_taxon = {}
     matched_taxons = []
     for (var i = 0; i < candidate_taxons.length; i++) {
-      taxon = candidate_taxons[i]
+      let taxon = candidate_taxons[i]
       if (taxon.genus_taxid == taxon.tax_id) {
         // genus
         if (matched_taxons.length > 0) {
