@@ -56,16 +56,18 @@ class Samples extends React.Component {
 
   sortSamples() {
     this.sortCount += 1;
-    let new_sort;
+    let new_sort, message = '';
     if(this.sortCount === 3) {
       this.sortCount = 0;
       new_sort = 'created_at,desc';
+      message = 'Sorting samples by date created...';
     } else {
       new_sort = (this.state.sort_by === 'name,asc') ? 'name,desc' :  'name,asc';
+      message = (new_sort === 'name,asc') ? 'Sorting samples by name (A-Z)...' : 'Sorting samples by name (Z-A)...';
     }
     this.setState({ sort_by: new_sort, pagesLoaded: 0, pageEnd: false }, () => {
       this.setUrlLocation();
-      ReportFilter.showLoading('Sorting samples...');
+      ReportFilter.showLoading(message);
       this.fetchResults(() => {
         ReportFilter.hideLoading();
       });
@@ -451,7 +453,7 @@ class Samples extends React.Component {
             <div onClick={this.sortSamples}>
               <span>Name</span>
               <i className={`fa ${(this.state.sort_by === 'name,desc') ? 'fa fa-caret-up' : 'fa fa-caret-down'}
-              ${(this.state.sort_by === 'name,desc' || this.state.sort_by === 'name,asc') ? 'active': ''}`}></i>
+              ${(this.state.sort_by === 'name,desc' || this.state.sort_by === 'name,asc') ? 'active': 'hidden'}`}></i>
             </div>
           </div>
           <div className="col s2">Total reads</div>
