@@ -288,9 +288,9 @@ module ReportHelper
       TaxonCount::NAME_2_LEVEL.each do |category, level|
         tax_name = lr["#{category}_name"]
         tax_id = lr["#{category}_taxid"]
-        next unless tax_name and  tax_name.strip.present?
+        next unless tax_name && tax_name.strip.present?
         display_name = "#{tax_name} (#{category})"
-        sort_key = "#{(10-level)}-#{tax_name}"
+        sort_key = "#{(10 - level)}-#{tax_name}"
         search_id = level * TAXON_CATEGORY_OFFSET + tax_id
         sort_map[search_id] = sort_key
         key_array << search_id
@@ -612,9 +612,9 @@ module ReportHelper
     rows_total = tax_2d.length
 
     # Apply filters, unless disabled for CSV download.
-    #unless params[:disable_filters] == 1 || params[:is_csv] == 1
+    # unless params[:disable_filters] == 1 || params[:is_csv] == 1
     #  apply_filters!(rows, tax_2d, all_genera, params)
-    #end
+    # end
 
     # These stats are displayed at the bottom of the page.
     rows_passing_filters = rows.length

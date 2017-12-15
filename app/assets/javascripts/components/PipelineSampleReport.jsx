@@ -119,7 +119,7 @@ class PipelineSampleReport extends React.Component {
       selected_taxons = thresholded_taxons
     }
 
-    console.log(excludedCategories)
+    //console.log(excludedCategories)
     this.setState({
       loading: false,
       excluded_categories: excludedCategories,
