@@ -160,8 +160,13 @@ class PipelineSampleReport extends React.Component {
 
   setFilterThreshold(e) {
     threshold_name = e.target.id
-    this.state.new_filter_thresholds[threshold_name] = parseFloat(e.target.value.trim());
-    //console.log(this.state.new_filter_thresholds)
+    val = parseFloat(e.target.value.trim());
+    if (isNaN(val)) {
+      delete this.state.new_filter_thresholds[threshold_name]
+    } else {
+      this.state.new_filter_thresholds[threshold_name] = val;
+    }
+    console.log(this.state.new_filter_thresholds)
   }
 
   taxonPassThresholdFilter(taxon) {
