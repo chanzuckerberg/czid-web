@@ -147,7 +147,7 @@ class ReportFilter extends React.Component {
               <ReactAutocomplete
                 inputProps={{ placeholder: 'species, genus, family, etc' }}
                 items={this.state.search_items}
-                shouldItemRender={(item, value) => (value.length > 2) && (item[0] == 'None' || item[0].toLowerCase().indexOf(value.toLowerCase()) > -1)}
+                shouldItemRender={(item, value) => (item[0] == 'None') || (value.length > 2 && item[0].toLowerCase().indexOf(value.toLowerCase()) > -1)}
                 getItemValue={item => item[0]}
                 renderItem={(item, highlighted) =>
                   <div

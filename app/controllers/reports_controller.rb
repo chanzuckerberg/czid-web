@@ -76,7 +76,7 @@ class ReportsController < ApplicationController
   def send_report_csv
     params[:is_csv] = 1
     params[:sort_by] = "highest_nt_aggregatescore"
-    tax_details, _all_genera_in_sample = taxonomy_details(@report, params)
+    tax_details = taxonomy_details(@report, params)
     @report_csv = generate_report_csv(tax_details)
     send_data @report_csv, filename: @report.pipeline_output.sample.name + '_report.csv'
   end

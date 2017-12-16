@@ -595,11 +595,6 @@ module ReportHelper
     # Total number of rows for view level, before application of filters.
     rows_total = tax_2d.length
 
-    # Apply filters, unless disabled for CSV download.
-    # unless params[:disable_filters] == 1 || params[:is_csv] == 1
-    #  apply_filters!(rows, tax_2d, all_genera, params)
-    # end
-
     # These stats are displayed at the bottom of the page.
     rows_passing_filters = rows.length
 
