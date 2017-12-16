@@ -21,27 +21,9 @@ module ReportHelper
 
   DECIMALS = 1
 
-  DEFAULT_PARAMS = {
-    sort_by:          'highest_nt_aggregatescore',
-    threshold_nt_zscore: 0.0,
-    threshold_nt_rpm:    0.0,
-    threshold_nt_r:      0.0,
-    threshold_nt_percentidentity: 0.0,
-    threshold_nt_alignmentlength: 0.0,
-    threshold_nt_neglogevalue:    0.0,
-    threshold_nt_percentconcordant: 0.0,
-    threshold_nt_aggregatescore:  0.0,
-    threshold_nr_zscore: 0.0,
-    threshold_nr_rpm:    0.0,
-    threshold_nr_r:      0.0,
-    threshold_nr_percentidentity: 0.0,
-    threshold_nr_alignmentlength: 0.0,
-    threshold_nr_neglogevalue:    0.0,
-    threshold_nr_percentconcordant: 0.0,
-    excluded_categories: 'None',
-    selected_genus: 'None',
-    disable_filters: 0
-  }.freeze
+  DEFAULT_SORT_PARAM = 'highest_nt_aggregatescore'.freeze
+  DEFAULT_PARAMS = { sort_by: DEFAULT_SORT_PARAM }.freeze
+
   IGNORED_PARAMS = [:controller, :action, :id].freeze
 
   SORT_DIRECTIONS = %w[highest lowest].freeze
@@ -185,7 +167,7 @@ module ReportHelper
     return {} if report.nil?
     params = clean_params(params, ALL_CATEGORIES)
     data = {}
-    data[:taxonomy_details], data[:all_genera_in_sample] = taxonomy_details(report, params)
+    data[:taxonomy_details] = taxonomy_details(report, params)
     data
   end
 
@@ -282,19 +264,23 @@ module ReportHelper
     )
     result_map = {}
     search_key_list = Set.new
+    sort_map = {}
     lineage_records.each do |lr|
       key_array = []
       TaxonCount::NAME_2_LEVEL.each do |category, level|
         tax_name = lr["#{category}_name"]
         tax_id = lr["#{category}_taxid"]
+        next unless tax_name && tax_name.strip.present?
         display_name = "#{tax_name} (#{category})"
+        sort_key = "#{(10 - level)}-#{tax_name}"
         search_id = level * TAXON_CATEGORY_OFFSET + tax_id
+        sort_map[search_id] = sort_key
         key_array << search_id
         search_key_list.add([display_name, search_id])
       end
       result_map[lr.taxid] = key_array
     end
-    search_key_list = search_key_list.sort_by { |u| u[0].downcase }
+    search_key_list = search_key_list.sort_by { |u| sort_map[u[1]] }
     { lineage_map: result_map, search_list: search_key_list }
   end
 
@@ -536,8 +522,8 @@ module ReportHelper
       species_score = species_info['NT']['aggregatescore']
       genus_score = genus_info['NT']['aggregatescore']
       unless genus_score && genus_score > species_score
-        genus_info['NT']['aggregatescore'] = species_score
-        genus_info['NR']['aggregatescore'] = species_score
+        genus_info['NT']['aggregatescore'] = species_score.to_f
+        genus_info['NR']['aggregatescore'] = species_score.to_f
       end
     end
   end
@@ -548,8 +534,8 @@ module ReportHelper
       genus_id = species_info['genus_taxid']
       genus_info = tax_2d[genus_id]
       species_score = aggregate_score(genus_info, species_info)
-      species_info['NT']['aggregatescore'] = species_score
-      species_info['NR']['aggregatescore'] = species_score
+      species_info['NT']['aggregatescore'] = species_score.to_f
+      species_info['NR']['aggregatescore'] = species_score.to_f
     end
     tax_2d
   end
@@ -559,6 +545,8 @@ module ReportHelper
     Time.now.to_f
   end
 
+  # DEPRECATED
+  # TODO(yf): remove the following.
   def apply_filters!(rows, tax_2d, all_genera, params)
     thresholds = decode_thresholds(params)
     excluded_categories = decode_excluded_categories(params[:excluded_categories])
@@ -593,8 +581,6 @@ module ReportHelper
       tax_level = tax_info['tax_level']
       all_genera.add(tax_name) if tax_level == TaxonCount::TAX_LEVEL_GENUS
     end
-    # This gets returned to UI for the genus search autoselect dropdown.
-    all_genera_in_sample = all_genera.sort_by(&:downcase)
 
     rows = []
     tax_2d.each do |_tax_id, tax_info|
@@ -608,9 +594,9 @@ module ReportHelper
     rows_total = tax_2d.length
 
     # Apply filters, unless disabled for CSV download.
-    unless params[:disable_filters] == 1 || params[:is_csv] == 1
-      apply_filters!(rows, tax_2d, all_genera, params)
-    end
+    # unless params[:disable_filters] == 1 || params[:is_csv] == 1
+    #  apply_filters!(rows, tax_2d, all_genera, params)
+    # end
 
     # These stats are displayed at the bottom of the page.
     rows_passing_filters = rows.length
@@ -635,7 +621,7 @@ module ReportHelper
     t5 = wall_clock_ms
     logger.info "Data processing took #{t5 - t1} seconds (#{t5 - t0} with I/O)."
 
-    [[rows_passing_filters, rows_total, rows], all_genera_in_sample]
+    [rows_passing_filters, rows_total, rows]
   end
 
   def get_tax_detail(tax_info, column_name)

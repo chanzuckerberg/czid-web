@@ -9,45 +9,145 @@ class PipelineSampleReport extends React.Component {
     this.report_details = props.report_details
     this.report_page_params = props.report_page_params
     this.all_backgrounds = props.all_backgrounds;
-    this.max_rows_to_render = props.max_rows || 2000
+    this.max_rows_to_render = props.max_rows || 1000
+    this.default_sort_by = this.report_page_params.sort_by.replace('highest_', '')
+    this.sort_params = {}
+
     this.state = {
       taxonomy_details:  [],
-      all_genera_in_sample: [],
+      search_keys_in_sample: [],
+      lineage_map: {},
+      genus_map: {},
       rows_passing_filters: 0,
       rows_total: 0,
+      thresholded_taxons: [],
+      selected_taxons: [],
+
+      sort_by: this.default_sort_by,
+      new_filter_thresholds: {
+        NT_aggregatescore: 0.0,
+        //other potential fields
+        /*
+        NT_zscore: 0.0,
+        NT_rpm: 0.0,
+        NT_r: 0.0,
+        NT_percentidentity: 0.0,
+        NT_neglogevalue: 0.0,
+        NT_percentconcordant: 0.0,
+        NR_zscore: 0.0,
+        NR_rpm: 0.0,
+        NR_r: 0.0,
+        NR_percentidentity: 0.0,
+        NR_neglogevalue: 0.0,
+        NR_percentconcordant: 0.0,
+        */
+      },
+      excluded_categories: [],
+      search_taxon_id: 0,
       loading: true
     };
 
-    this.fetchReportData();
-    this.applyNewFilterThresholds = this.applyNewFilterThresholds.bind(this);
-    this.applyExcludedCategories = this.applyExcludedCategories.bind(this);
-    this.applyGenusFilter = this.applyGenusFilter.bind(this);
+    this.applySearchFilter = this.applySearchFilter.bind(this);
+    this.applyThresholdFilters = this.applyThresholdFilters.bind(this);
+    this.sortResults = this.sortResults.bind(this);
+    this.sortCompareFunction = this.sortCompareFunction.bind(this);
+    this.setSortParams = this.setSortParams.bind(this);
+
+    this.taxonPassThresholdFilter = this.taxonPassThresholdFilter.bind(this);
     this.expandOrCollapseGenus = this.expandOrCollapseGenus.bind(this);
     this.expandTable = this.expandTable.bind(this);
     this.collapseTable = this.collapseTable.bind(this);
-    this.disableFilters = this.disableFilters.bind(this);
-    this.enableFilters = this.enableFilters.bind(this);
-    this.new_filter_thresholds = {};
-    this.applyFilters = this.applyFilters.bind(this);
+
     this.handleThresholdEnter = this.handleThresholdEnter.bind(this);
     this.initializeTooltip();
   }
 
+  componentWillMount() {
+    this.fetchReportData();
+    this.fetchSearchList();
+  }
+
+  fetchSearchList() {
+    axios.get(`/samples/${this.sample_id}/search_list?report_ts=${this.report_ts}`).then((res) => {
+      let search_list = res.data.search_list
+      search_list.splice(0, 0, ['None', 0])
+      this.setState({
+        lineage_map: res.data.lineage_map,
+        search_keys_in_sample: search_list
+       })
+    });
+  }
+
   fetchReportData() {
     const params = `?${window.location.search.replace("?", "")}&report_ts=${this.report_ts}`
-    console.log(params)
     axios.get(`/samples/${this.sample_id}/report_info${params}`).then((res) => {
+      let genus_map = {}
+      for (var i = 0; i < res.data.taxonomy_details[2].length; i++) {
+        let taxon = res.data.taxonomy_details[2][i]
+        if (taxon.genus_taxid == taxon.tax_id) {
+          genus_map[taxon.genus_taxid] = taxon
+        }
+      }
 
-      let all_genera_in_sample = res.data.all_genera_in_sample
-      all_genera_in_sample.splice(0, 0, 'None')
       this.setState({
         rows_passing_filters: res.data.taxonomy_details[0],
         rows_total:  res.data.taxonomy_details[1],
-        taxonomy_details:  res.data.taxonomy_details[2],
-        all_genera_in_sample: all_genera_in_sample,
-        loading: false
+        taxonomy_details: res.data.taxonomy_details[2],
+        genus_map: genus_map
       });
+      this.applyThresholdFilters(res.data.taxonomy_details[2])
     });
+  }
+
+  applySearchFilter(searchTaxonId, excludedCategories, input_taxons) {
+    let selected_taxons = []
+    let thresholded_taxons = input_taxons || this.state.thresholded_taxons
+    if (searchTaxonId > 0) {
+      //ignore all the thresholds
+      genus_taxon = {}
+      matched_taxons = []
+      for (var i = 0; i < this.state.taxonomy_details.length; i++) {
+        let taxon = this.state.taxonomy_details[i]
+        if (taxon.genus_taxid == taxon.tax_id) {
+          if (matched_taxons.length > 0) {
+            selected_taxons.push(genus_taxon)
+            selected_taxons = selected_taxons.concat(matched_taxons)
+          }
+          genus_taxon = taxon
+          matched_taxons = []
+        } else {
+          // species
+          match_keys = this.state.lineage_map[taxon.tax_id.toString()]
+          if (match_keys && match_keys.indexOf(searchTaxonId) > -1) {
+            matched_taxons.push(taxon)
+          }
+        }
+      }
+      if (matched_taxons.length > 0) {
+        selected_taxons.push(genus_taxon)
+        selected_taxons = selected_taxons.concat(matched_taxons)
+      }
+    } else if (excludedCategories.length > 0) {
+      for (var i = 0; i < thresholded_taxons.length; i++) {
+        let taxon = thresholded_taxons[i]
+        if (excludedCategories.indexOf(taxon.category_name) < 0 ) {
+          // not in the excluded categories
+          selected_taxons.push(taxon)
+        }
+      }
+    } else {
+      selected_taxons = thresholded_taxons
+    }
+
+    //console.log(excludedCategories)
+    this.setState({
+      loading: false,
+      excluded_categories: excludedCategories,
+      search_taxon_id: searchTaxonId,
+      thresholded_taxons: thresholded_taxons,
+      selected_taxons: selected_taxons,
+      rows_passing_filters: selected_taxons.length
+    })
   }
 
   initializeTooltip() {
@@ -70,94 +170,185 @@ class PipelineSampleReport extends React.Component {
     });
   }
 
-  refreshPage(overrides) {
-    new_params = Object.assign({}, this.report_page_params, overrides);
-    window.location = location.protocol + '//' + location.host + location.pathname + '?' + jQuery.param(new_params);
-  }
-
-  disableFilters() {
-    disable_filters = 1;
-    ReportFilter.showLoading('Disabling filters...');
-    this.refreshPage({disable_filters});
-  }
-
-  enableFilters() {
-    disable_filters = 0;
-    ReportFilter.showLoading('Enabling filters...');
-    this.refreshPage({disable_filters});
-  }
-
   // applySort needs to be bound at time of use, not in constructor above
+  // TODO(yf): fix this
   applySort(sort_by) {
-    const regex = new RegExp('_', 'g');
-    ReportFilter.showLoading(`Sorting the table by ${sort_by.replace(regex, ' ')}...`);
-    this.refreshPage({sort_by});
+    console.log(sort_by)
+    if (sort_by.toLowerCase() != this.state.sort_by) {
+      this.state.sort_by = sort_by.toLowerCase()
+      this.sortResults();
+    }
   }
 
-  setFilterThreshold(threshold_name, event) {
-    this.new_filter_thresholds[threshold_name] = event.target.value.trim();
-    $('.apply-filter-button a').addClass('changed');
+  sortCompareFunction(a, b) {
+    let [ptype, pmetric] = this.sortParams["primary"]
+    let [stype, smetric] = this.sortParams["secondary"]
+    genus_a = this.state.genus_map[a.genus_taxid]
+    genus_b = this.state.genus_map[b.genus_taxid]
+
+    genus_a_p_val = parseFloat(genus_a[ptype][pmetric])
+    genus_a_s_val = parseFloat(genus_a[stype][smetric])
+    a_p_val = parseFloat(a[ptype][pmetric])
+    a_s_val = parseFloat(a[stype][smetric])
+
+    genus_b_p_val = parseFloat(genus_b[ptype][pmetric])
+    genus_b_s_val = parseFloat(genus_b[stype][smetric])
+    b_p_val = parseFloat(b[ptype][pmetric])
+    b_s_val = parseFloat(b[stype][smetric])
+    // compared at genus level descending and then species level descending
+    //
+    //
+    if (a.genus_taxid == b.genus_taxid) {
+      //same genus
+      if (a.tax_level > b.tax_level) {
+        return -1
+      } else if (a.tax_level < b.tax_level) {
+        return 1
+      } else {
+        if (a_p_val > b_p_val) {
+          return -1
+        } else if (a_p_val < b_p_val ) {
+          return 1
+        } else {
+          if (a_s_val > b_s_val) {
+            return -1
+          } else if (a_s_val < b_s_val) {
+            return 1
+          } else {
+            return 0
+          }
+        }
+      }
+    } else {
+      if (genus_a_p_val > genus_b_p_val) {
+        return -1
+      } else if (genus_a_p_val < genus_b_p_val ) {
+        return 1
+      } else {
+        if (genus_a_s_val > genus_b_s_val) {
+          return -1
+        } else if (genus_a_s_val < genus_b_s_val) {
+          return 1
+        } else {
+          if (a.genus_taxid < b.genus_taxid) {
+            return -1
+          } else if (a.genus_taxid > b.genus_taxid) {
+            return 1
+          }
+        }
+      }
+    }
   }
 
-  applyFilters(event) {
-    ReportFilter.showLoading('Applying thresholds...');
-    this.applyNewFilterThresholds(this.new_filter_thresholds);
+  setSortParams() {
+    let primary_sort = this.state.sort_by.split("_")
+    primary_sort[0] = primary_sort[0].toUpperCase()
+    let secondary_sort = this.default_sort_by.split("_")
+    secondary_sort[0] = secondary_sort[0].toUpperCase()
+    this.sortParams = {
+      primary: primary_sort,
+      secondary: secondary_sort
+    }
+  }
+
+  sortResults() {
+    this.setSortParams();
+    let selected_taxons = this.state.selected_taxons
+    selected_taxons = selected_taxons.sort(this.sortCompareFunction)
+    this.setState({
+      selecte_taxons: selected_taxons
+    })
+    this.state.thresholded_taxons = this.state.thresholded_taxons.sort(this.sortCompareFunction)
+    this.state.taxonomy_details = this.state.taxonomy_details.sort(this.sortCompareFunction)
+  }
+
+  setFilterThreshold(e) {
+    threshold_name = e.target.id
+    val = parseFloat(e.target.value.trim());
+    if (isNaN(val)) {
+      delete this.state.new_filter_thresholds[threshold_name]
+    } else {
+      this.state.new_filter_thresholds[threshold_name] = val;
+    }
+    console.log(this.state.new_filter_thresholds)
+  }
+
+  taxonPassThresholdFilter(taxon) {
+    //console.log(taxon)
+    if (Object.keys(taxon).length <= 0) {
+      return false;
+    }
+    for (var filter_key in this.state.new_filter_thresholds) {
+      const threshold = this.state.new_filter_thresholds[filter_key]
+      const key_parts = filter_key.split("_")
+      val = (taxon[key_parts[0]] || {})[key_parts[1]]
+      if (val < threshold) {
+        //console.log([val, threshold, filter_key])
+        return false;
+      }
+    }
+    return true;
+  }
+
+  applyThresholdFilters(candidate_taxons) {
+    let thresholded_taxons = []
+    genus_taxon = {}
+    matched_taxons = []
+    for (var i = 0; i < candidate_taxons.length; i++) {
+      let taxon = candidate_taxons[i]
+      if (taxon.genus_taxid == taxon.tax_id) {
+        // genus
+        if (matched_taxons.length > 0) {
+          thresholded_taxons.push(genus_taxon)
+          thresholded_taxons = thresholded_taxons.concat(matched_taxons)
+        } else if (this.taxonPassThresholdFilter(genus_taxon)) {
+          thresholded_taxons.push(genus_taxon)
+        }
+        genus_taxon = taxon
+        matched_taxons = []
+      } else {
+        // species
+        if (this.taxonPassThresholdFilter(taxon)) {
+          matched_taxons.push(taxon)
+        }
+      }
+    }
+
+    if (matched_taxons.length > 0) {
+      thresholded_taxons.push(genus_taxon)
+      thresholded_taxons = thresholded_taxons.concat(matched_taxons)
+    } else if (this.taxonPassThresholdFilter(genus_taxon)) {
+      thresholded_taxons.push(genus_taxon)
+    }
+
+    this.applySearchFilter(0, this.state.excluded_categories, thresholded_taxons)
   }
 
   handleThresholdEnter(event) {
     if (event.keyCode == 13) {
-      this.applyFilters();
+      this.applyThresholdFilters(this.state.taxonomy_details);
     }
   }
 
-  applyNewFilterThresholds(new_filter_thresholds) {
-    this.refreshPage(new_filter_thresholds);
+  // Remove this after fix sorting
+  refreshPage(overrides) {
+    new_params = Object.assign({}, this.report_page_params, overrides);
+    window.location = location.protocol + '//' + location.host + location.pathname + '?' + jQuery.param(new_params);
   }
 
   thresholdInputColumn(metric_token) {
     return (
       <input
         className='browser-default'
-        onChange={this.setFilterThreshold.bind(this, `threshold_${metric_token}`)}
+        onChange={this.setFilterThreshold.bind(this)}
         onKeyDown={this.handleThresholdEnter}
         name="group2"
-        defaultValue={this.props.report_page_params[`threshold_${metric_token}`]}
-        id={`threshold_${metric_token}`}
+        defaultValue={this.state.new_filter_thresholds[metric_token]}
+        id={metric_token}
         type="number" />
     );
   }
 
-  thresholdFilterButton() {
-    return (
-      <td>
-        <a onClick={this.applyFilters}
-           className="btn btn-flat waves-effect grey text-grey text-lighten-5 waves-light apply-filter-button">
-        Apply threshold
-        </a>
-      </td>
-    );
-  }
-
-  applyExcludedCategories(category, checked) {
-    excluded_categories = "" + this.report_page_params.excluded_categories;
-    if (checked) {
-      // remove from excluded_categories
-      excluded_categories = excluded_categories.split(",").filter(c => c != category).join(",");
-    } else {
-      // add to excluded_categories
-      excluded_categories = excluded_categories + "," + category;
-    }
-    this.refreshPage({excluded_categories});
-  }
-
-  applyGenusFilter(selected_genus) {
-    this.refreshPage({selected_genus});
-  }
-
-  isGenusSearch() {
-    params = this.report_page_params;
-    return params.selected_genus != 'None' && params.disable_filters != 1;
-  }
 
   //path to NCBI
   gotoNCBI(e) {
@@ -225,8 +416,8 @@ class PipelineSampleReport extends React.Component {
       category_name = tax_info.tax_id == -200 ? '' : tax_info.category_name;
       // Most groups are initially expanded, so they get a toggle with fa-minus initial state.
       fake_or_real = tax_info.genus_taxid < 0 ? 'fake-genus' : 'real-genus';
-      right_arrow_initial_visibility = this.isGenusSearch() ? 'hidden' : '';
-      down_arrow_initial_visibility = this.isGenusSearch() ? '' : 'hidden';
+      right_arrow_initial_visibility = '';
+      down_arrow_initial_visibility = '';
       plus_or_minus = <span>
         <span className={`report-arrow-down report-arrow ${tax_info.tax_id} ${fake_or_real} ${down_arrow_initial_visibility}`}>
           <i className={`fa fa-angle-down ${tax_info.tax_id}`} onClick={this.expandOrCollapseGenus}></i>
@@ -257,14 +448,14 @@ class PipelineSampleReport extends React.Component {
   }
 
   render_sort_arrow(column, desired_sort_direction, arrow_direction) {
-    desired_sort = desired_sort_direction + "_" + column;
+    desired_sort = column.toLowerCase();
     className = `fa fa-caret-${arrow_direction}`;
-    current_sort = this.report_page_params.sort_by;
+    current_sort = this.state.sort_by;
     if (current_sort == desired_sort) {
       className = 'active ' + className;
     }
     return (
-      <i onClick={this.applySort.bind(this, desired_sort)}
+      <i onClick={this.applySort.bind(this, column)}
          className={className}
          key = {desired_sort}>
       </i>
@@ -277,7 +468,6 @@ class PipelineSampleReport extends React.Component {
     return (
       <th style={style}>
         <div className='sort-controls right' rel='tooltip' title={tooltip_message}>
-          {this.render_sort_arrow(column_name, 'lowest', 'up')}
           {this.render_sort_arrow(column_name, 'highest', 'down')}
           {visible_type}<br/>
           {visible_metric}<br/>
@@ -297,7 +487,7 @@ class PipelineSampleReport extends React.Component {
         return `report-row-genus ${tax_info.genus_taxid} real-genus`;
       }
     }
-    initial_visibility = this.isGenusSearch() ? '' : 'hidden';
+    initial_visibility = '';
     if (tax_info.genus_taxid < 0) {
       return `report-row-species ${tax_info.genus_taxid} fake-genus ${initial_visibility}`;
     }
@@ -339,28 +529,25 @@ class PipelineSampleReport extends React.Component {
     const sort_column = parts[1] + "_" + parts[2];
     var t0 = Date.now();
     filter_stats = this.state.rows_passing_filters + ' rows passing filters, out of ' + this.state.rows_total + ' total rows.';
-    if (this.report_page_params.disable_filters == 1) {
-      filter_stats = this.state.rows_total + ' unfiltered rows.';
-    }
+
     filter_row_stats = this.state.loading ? null : (
       <div>
         <span className="count">
-          {this.state.rows_passing_filters == this.state.taxonomy_details.length ?
-            (filter_stats) :
-            ('Due to resource limits, showing only ' + this.state.taxonomy_details.length + ' of the ' + filter_stats)}
+      {filter_stats}
         </span>
       </div>
     );
+
     report_filter =
       <ReportFilter
         all_categories = { this.all_categories }
         all_backgrounds = { this.all_backgrounds }
-        all_genera_in_sample = {  this.state.all_genera_in_sample }
+        search_keys_in_sample = {  this.state.search_keys_in_sample }
         background_model = { this.report_details.background_model }
         report_title = { this.report_details.report_info.name }
         report_page_params = { this.report_page_params }
         applyExcludedCategories = { this.applyExcludedCategories }
-        applyGenusFilter = { this.applyGenusFilter }
+        applySearchFilter = {this.applySearchFilter }
         enableFilters = { this.enableFilters }
       />;
     // To do: improve presentation and place download_button somewhere on report page
@@ -370,7 +557,7 @@ class PipelineSampleReport extends React.Component {
         <div>Download report</div>
       </a>
     );
-    right_arrow_initial_visibility = this.isGenusSearch() ? 'hidden' : '';
+    right_arrow_initial_visibility = '';
     result = (
       <div>
         <div id="reports" className="reports-screen tab-screen col s12">
@@ -397,23 +584,23 @@ class PipelineSampleReport extends React.Component {
                         </span>
                         Taxonomy
                       </th>
-                        {this.render_column_header('NT+NR', 'ZZRPM',  'nt_aggregatescore', 'Aggregate score') }
-                        {this.render_column_header('NT', 'Z',   'nt_zscore', 'Z-score relative to background model for alignments to NCBI NT') }
-                        {this.render_column_header('NT', 'rPM', 'nt_rpm', 'Number of reads aligning to the taxon in the NCBI NT database per million total input reads')}
-                        {this.render_column_header('NT', 'r',   'nt_r', 'Number of reads aligning to the taxon in the NCBI NT database')}
-                        {this.render_column_header('NT', '%id', 'nt_percentidentity', 'Average percent-identity of alignments to NCBI NT')}
-                        {this.render_column_header('NT', 'Log(1/E)',  'nt_neglogevalue', 'Average log-10-transformed expect value for alignments to NCBI NT')}
-                        {this.render_column_header('NT', '%conc',  'nt_percentconcordant', 'Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NT)')}
-                        {this.render_column_header('NR', 'Z',   'nr_zscore', 'Z-score relative to background model for alignments to NCBI NR') }
-                        {this.render_column_header('NR', 'rPM', 'nr_rpm', 'Number of reads aligning to the taxon in the NCBI NR database per million total input reads')}
-                        {this.render_column_header('NR', 'r',   'nr_r', 'Number of reads aligning to the taxon in the NCBI NR database')}
-                        {this.render_column_header('NR', '%id', 'nr_percentidentity', 'Average percent-identity of alignments to NCBI NR')}
-                        {this.render_column_header('NR', 'Log(1/E)',  'nr_neglogevalue', 'Average log-10-transformed expect value for alignments to NCBI NR')}
-                        {this.render_column_header('NR', '%conc',  'nr_percentconcordant', 'Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NR)')}
+                        {this.render_column_header('NT+NR', 'ZZRPM',  'NT_aggregatescore', 'Aggregate score') }
+                        {this.render_column_header('NT', 'Z',   'NT_zscore', 'Z-score relative to background model for alignments to NCBI NT') }
+                        {this.render_column_header('NT', 'rPM', 'NT_rpm', 'Number of reads aligning to the taxon in the NCBI NT database per million total input reads')}
+                        {this.render_column_header('NT', 'r',   'NT_r', 'Number of reads aligning to the taxon in the NCBI NT database')}
+                        {this.render_column_header('NT', '%id', 'NT_percentidentity', 'Average percent-identity of alignments to NCBI NT')}
+                        {this.render_column_header('NT', 'Log(1/E)',  'NT_neglogevalue', 'Average log-10-transformed expect value for alignments to NCBI NT')}
+                        {this.render_column_header('NT', '%conc',  'NT_percentconcordant', 'Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NT)')}
+                        {this.render_column_header('NR', 'Z',   'NR_zscore', 'Z-score relative to background model for alignments to NCBI NR') }
+                        {this.render_column_header('NR', 'rPM', 'NR_rpm', 'Number of reads aligning to the taxon in the NCBI NR database per million total input reads')}
+                        {this.render_column_header('NR', 'r',   'NR_r', 'Number of reads aligning to the taxon in the NCBI NR database')}
+                        {this.render_column_header('NR', '%id', 'NR_percentidentity', 'Average percent-identity of alignments to NCBI NR')}
+                        {this.render_column_header('NR', 'Log(1/E)',  'NR_neglogevalue', 'Average log-10-transformed expect value for alignments to NCBI NR')}
+                        {this.render_column_header('NR', '%conc',  'NR_percentconcordant', 'Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NR)')}
                     </tr>
                     </thead>
                     <tbody>
-                    { this.state.loading ? (<tr><td>Loading results.. </td></tr>) : (this.state.taxonomy_details.slice(0, this.max_rows_to_render).map((tax_info, i) => {
+                    { this.state.loading ? (<tr><td>Loading results.. </td></tr>) : (this.state.selected_taxons.slice(0, this.max_rows_to_render).map((tax_info, i) => {
                       return (
                         <tr key={tax_info.tax_id} className={this.row_class(tax_info)}>
                           <td>

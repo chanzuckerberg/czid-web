@@ -10,21 +10,21 @@ class ReportFilter extends React.Component {
     this.backgroundModels = props.all_backgrounds || [];
     this.all_categories = props.all_categories || [];
     this.applyExcludedCategories = this.applyExcludedCategories.bind(this);
-    this.applyGenusFilter = this.applyGenusFilter.bind(this);
-    this.enableFilters = this.enableFilters.bind(this);
-    this.clearGenusSearch = this.clearGenusSearch.bind(this);
+    this.searchSelectedTaxon = this.searchSelectedTaxon.bind(this);
+    this.handleSearch = this.handleSearch.bind(this);
 
     this.handleBackgroundModelChange = this.handleBackgroundModelChange.bind(this);
-    this.handleGenusSearch = this.handleGenusSearch.bind(this);
     this.state = {
-      genusSearchValue: this.setGenusSearchValueFor(props.report_page_params.selected_genus) || "",
+      searchKey: '',
+      searchId: 0,
+      excluded_categories: [],
       backgroundName: this.background_model.name || null,
       backgroundParams: this.background_model.id || null,
-      genus_search_items: props.all_genera_in_sample
+      search_items: props.search_keys_in_sample
     }
   }
   componentWillReceiveProps(newProps){
-      this.setState({genus_search_items: newProps.all_genera_in_sample})
+      this.setState({search_items: newProps.search_keys_in_sample})
   }
 
   componentDidMount() {
@@ -40,14 +40,15 @@ class ReportFilter extends React.Component {
     $('select').material_select();
   }
 
-  handleGenusSearch(e) {
+  handleSearch(e) {
     this.setState({
-      genusSearchValue: this.setGenusSearchValueFor(e.target.value)
+      searchKey: e.target.value,
     })
   }
 
+  // only for background model
   refreshPage(overrides) {
-    ReportFilter.showLoading('Fetching results...');
+    ReportFilter.showLoading('Fetching results for new background...');
     new_params = Object.assign({}, this.props.report_page_params, overrides);
     window.location = location.protocol + '//' + location.host + location.pathname + '?' + jQuery.param(new_params);
   }
@@ -71,14 +72,6 @@ class ReportFilter extends React.Component {
     // $('.reports-sidebar').css('min-height', newHeight);
   }
 
-  setGenusSearchValueFor(selected_genus) {
-    genus_search_value = selected_genus == 'None' ? '' : selected_genus;
-    return genus_search_value;
-  }
-
-  enableFilters() {
-    this.props.enableFilters();
-  }
 
   static showLoading(message) {
     $('.page-loading .spinner-label').text(message);
@@ -93,27 +86,41 @@ class ReportFilter extends React.Component {
   }
 
   applyExcludedCategories(e) {
-    ReportFilter.showLoading('Applying category filter...');
-    this.props.applyExcludedCategories(e.target.value, e.target.checked)
-  }
-
-  applyGenusFilter(selected_genus) {
-    ReportFilter.showLoading(`Filtering for '${selected_genus}'...`);
+    //ReportFilter.showLoading('Applying category filter...');
+    let excluded_categories = this.state.excluded_categories
+    if (e.target.checked) {
+      ridx = excluded_categories.indexOf(e.target.value)
+      if (ridx > -1) {
+        excluded_categories.splice(ridx, 1);
+      }
+    } else {
+      excluded_categories.push(e.target.value);
+    }
     this.setState({
-      genusSearchValue: this.setGenusSearchValueFor(selected_genus)
-    });
-    this.props.applyGenusFilter(selected_genus);
+      excluded_categories: excluded_categories,
+      searchId: 0,
+      searchKey: ''
+    })
+    this.applySearchFilter(0, excluded_categories)
   }
 
-  clearGenusSearch() {
-    this.applyGenusFilter('None');
+  searchSelectedTaxon(value, item) {
+    //ReportFilter.showLoading(`Filtering for '${value}'...`);
+    let searchId = item[1];
+    this.state.searchId = searchId
+    this.state.excluded_categories = []
+    this.state.searchKey = item[0]
+
+    this.applySearchFilter(searchId, [])
+  }
+
+  applySearchFilter(searchId, excluded_categories) {
+    this.props.applySearchFilter(searchId, excluded_categories)
   }
 
   render() {
     align_right = {'textAlign': 'right'};
-    category_filter = '';
-    if (this.props.report_page_params.disable_filters == 0 && this.props.report_page_params.selected_genus == 'None') {
-      category_filter = (
+    category_filter = (
         <div className="filter-controls">
           <div className="category-title">
             CATEGORIES
@@ -122,7 +129,7 @@ class ReportFilter extends React.Component {
             { this.all_categories.map((category, i) => {
               return (
                 <p key={i}>
-                  <input type="checkbox" className="filled-in cat-filter" id={category.name} value={category.name} onClick={this.applyExcludedCategories} defaultChecked={this.props.report_page_params.excluded_categories.indexOf(category.name) < 0} />
+                  <input type="checkbox" className="filled-in cat-filter" id={category.name} value={category.name} onClick={this.applyExcludedCategories} onChange={(e) => {}} checked={this.state.excluded_categories.indexOf(category.name) < 0} />
                   <label htmlFor={ category.name }>{ category.name }</label>
                 </p>
               )
@@ -130,39 +137,35 @@ class ReportFilter extends React.Component {
             { this.all_categories.length < 1 ? <p>None found</p> : '' }
           </div>
         </div>
-      );
-    }
-    genus_search = '';
-    if (this.props.report_page_params.disable_filters == 0) {
-      genus_search = (
-        <div className="filter-controls">
-          <div className="row">
-            <div className="input-field col s12 genus-search-row">
-              <div className='genus-name-label'>GENUS SEARCH</div>
-              <div className="filter-values genus-autocomplete-container">
-                <ReactAutocomplete
-                  inputProps={{ placeholder: 'Search for a genus...' }}
-                  items={this.state.genus_search_items}
-                  shouldItemRender={(item, value) => item == 'None' || item.toLowerCase().indexOf(value.toLowerCase()) > -1}
-                  getItemValue={item => item}
-                  renderItem={(item, highlighted) =>
-                    <div
-                      key={item}
-                      style={{ backgroundColor: highlighted ? '#eee' : 'transparent'}}
-                    >
-                      {item}
-                    </div>
-                  }
-                  value={this.state.genusSearchValue}
-                  onChange={this.handleGenusSearch}
-                  onSelect={this.applyGenusFilter}
-                />
-              </div>
+    );
+    genus_search = (
+      <div className="filter-controls">
+        <div className="row">
+          <div className="input-field col s12 genus-search-row">
+            <div className='genus-name-label'>SEARCH</div>
+            <div className="filter-values genus-autocomplete-container">
+              <ReactAutocomplete
+                inputProps={{ placeholder: 'species, genus, family, etc' }}
+                items={this.state.search_items}
+                shouldItemRender={(item, value) => (value.length > 2) && (item[0] == 'None' || item[0].toLowerCase().indexOf(value.toLowerCase()) > -1)}
+                getItemValue={item => item[0]}
+                renderItem={(item, highlighted) =>
+                  <div
+                    key={item[1]}
+                    style={{ backgroundColor: highlighted ? '#eee' : 'transparent'}}
+                  >
+                    {item[0]}
+                  </div>
+                }
+                value={this.state.searchKey}
+                onChange={this.handleSearch}
+                onSelect={this.searchSelectedTaxon}
+              />
             </div>
           </div>
         </div>
-      );
-    }
+      </div>
+    );
     return (
       <div>
         <div className="sidebar-title">
