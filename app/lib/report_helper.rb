@@ -638,7 +638,7 @@ module ReportHelper
 
   def generate_report_csv(tax_details)
     rows = tax_details[2]
-    attributes = %w[category_name tax_id name NT.aggregatescore NT.zscore NT.rpm NT.r NR.zscore NR.rpm NR.r]
+    attributes = %w[category_name tax_id tax_level name NT.aggregatescore NT.zscore NT.rpm NT.r NR.zscore NR.rpm NR.r]
     CSV.generate(headers: true) do |csv|
       csv << attributes
       rows.each do |tax_info|
