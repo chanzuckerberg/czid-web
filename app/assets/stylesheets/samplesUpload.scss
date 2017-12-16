@@ -67,6 +67,7 @@
                 border: #CAD0DA;
               }
             }
+
             .field-title {
               color: #000;
               font-size: 12px;
@@ -175,9 +176,9 @@
             .project-list {
               .select-wrapper {
                 height: 50px;
-                width: 90%;
+                width: 98%;
                 input {
-                  padding-left: 1em;
+                  padding-left: 2%;
                 }
               }
               .select-dropdown {
@@ -214,6 +215,42 @@
                 padding-right: 0;
               }
             }
+          }
+        }
+        .custom-select-dropdown {
+          border: 1px solid transparent;
+          padding: 8px;
+          &:hover, &.active {
+            box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+            }
+          &.genome-select{
+            width: inherit;
+            min-width: 75px;
+            div {
+              display: inline-block;
+            }
+            i {
+              position: relative;
+
+              top: -5px;
+              left: 5px;
+            }
+          }
+          i {
+              color: #BAC7CF;
+              font-weight: bold;
+            }
+          svg {
+            width: 35px;
+          }
+        }
+        .dropdown-content {
+          &.genomes {
+            width: initial !important;
+          }
+          li {
+            min-height: inherit;
+            padding: 10px
           }
         }
         .admin-fields {
