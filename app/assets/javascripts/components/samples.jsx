@@ -175,16 +175,16 @@ class Samples extends React.Component {
               </p>
             </div>
 
-            <div key="total_reads" className="optional-column total_reads reads col s2"><p>{ data_values.total_reads }</p></div>
-            <div key="nonhost_reads" className="optional-column nonhost_reads reads col s2"><p>{ data_values.nonhost_reads }{ nonhost_reads_percent }</p></div>
+            <div key="total_reads" className="optional-column total_reads reads col s1"><p>{ data_values.total_reads }</p></div>
+            <div key="nonhost_reads" className="optional-column nonhost_reads reads col s2"><p>{ data_values.nonhost_reads }{ data_values.nonhost_reads_percent }</p></div>
             <div key="quality_control" className="optional-column quality_control reads col s1 center"><p>{ data_values.quality_control }</p></div>
             <div key="compression_ratio" className="optional-column compression_ratio reads col s1 center"><p>{ data_values.compression_ratio }</p></div>
 
-            <div key="tissue_type" className="optional-column tissue_type col s2 hidden"><p>{ data_values.tissue_type }</p></div>
-            <div key="nucleotide_type" className="optional-column nucleotide_type col s2 hidden"><p>{ data_values.nucleotide_type }</p></div>
-            <div key="location" className="optional-column location col s2 hidden"><p>{ data_values.location }</p></div>
-            <div key="host_genome" className="optional-column host_genome col s2 hidden"><p>{ data_values.host_genome }</p></div>
-            <div key="notes" className="optional-column notes col s2 hidden"><p>{ data_values.notes }</p></div>
+            <div key="tissue_type" className="optional-column tissue_type col s1 hidden"><p>{ data_values.tissue_type }</p></div>
+            <div key="nucleotide_type" className="optional-column nucleotide_type col s1 hidden"><p>{ data_values.nucleotide_type }</p></div>
+            <div key="location" className="optional-column location col s1 hidden"><p>{ data_values.location }</p></div>
+            <div key="host_genome" className="optional-column host_genome col s1 hidden"><p>{ data_values.host_genome }</p></div>
+            <div key="notes" className="optional-column notes col s1 hidden"><p>{ data_values.notes }</p></div>
 
             <div className={ runInfo.total_runtime ? "reads status-col col s2" : 'reads col s2 no-time'}>{ !runInfo.job_status_description ? rowWithChunkStatus : rowWithoutChunkStatus }
               { runInfo.total_runtime ? <p className="time"><i className="fa fa-clock-o" aria-hidden="true"></i><span>{this.formatRunTime(runInfo.total_runtime)}</span></p> : ''}
@@ -468,18 +468,18 @@ class Samples extends React.Component {
         <div className="row table-container">
           <div className="col s4"><span>Name</span></div>
 
-          <div key="total_reads" className="optional-column total_reads col s2">{ this.COLUMN_DISPLAY_MAP.total_reads.display_name }</div>
+          <div key="total_reads" className="optional-column total_reads col s1">{ this.COLUMN_DISPLAY_MAP.total_reads.display_name }</div>
           <div key="nonhost_reads" className="optional-column nonhost_reads col s2">{ this.COLUMN_DISPLAY_MAP.nonhost_reads.display_name }</div>
           <div key="quality_control" className="optional-column quality_control col s1 center"
             rel='tooltip' data-placement='bottom' title={this.COLUMN_DISPLAY_MAP.quality_control.tooltip}>{ this.COLUMN_DISPLAY_MAP.quality_control.display_name }</div>
           <div key="compression_ratio" className="optional-column compression_ratio col s1 center"
             rel='tooltip' data-placement='bottom' title={this.COLUMN_DISPLAY_MAP.compression_ratio.tooltip}>{ this.COLUMN_DISPLAY_MAP.compression_ratio.display_name }</div>
 
-          <div key="tissue_type" className={`optional-column tissue_type col s2 hidden`}>{ this.COLUMN_DISPLAY_MAP.tissue_type.display_name }</div>
-          <div key="nucleotide_type" className={`optional-column nucleotide_type col s2 hidden`}>{ this.COLUMN_DISPLAY_MAP.nucleotide_type.display_name }</div>
-          <div key="location" className={`optional-column location col s2 hidden`}>{ this.COLUMN_DISPLAY_MAP.location.display_name }</div>
-          <div key="host_genome" className={`optional-column host_genome col s2 hidden`}>{ this.COLUMN_DISPLAY_MAP.host_genome.display_name }</div>
-          <div key="notes" className={`optional-column notes col s2 hidden`}>{ this.COLUMN_DISPLAY_MAP.notes.display_name }</div>
+          <div key="tissue_type" className={`optional-column tissue_type col s1 hidden`}>{ this.COLUMN_DISPLAY_MAP.tissue_type.display_name }</div>
+          <div key="nucleotide_type" className={`optional-column nucleotide_type col s1 hidden`}>{ this.COLUMN_DISPLAY_MAP.nucleotide_type.display_name }</div>
+          <div key="location" className={`optional-column location col s1 hidden`}>{ this.COLUMN_DISPLAY_MAP.location.display_name }</div>
+          <div key="host_genome" className={`optional-column host_genome col s1 hidden`}>{ this.COLUMN_DISPLAY_MAP.host_genome.display_name }</div>
+          <div key="notes" className={`optional-column notes col s1 hidden`}>{ this.COLUMN_DISPLAY_MAP.notes.display_name }</div>
 
           <div key="pipeline_status" className="optional-column pipeline_status col s2 status-dropdown" data-activates="dropdownstatus">
             <i className="status-filter fa fa-caret-down"></i>{ this.COLUMN_DISPLAY_MAP.pipeline_status.display_name }</div>
