@@ -38,8 +38,8 @@ class PipelineSampleReads extends React.Component {
   }
 
   render_metadata_dropdown(label, field) {
-    dropdown_options = this.DROPDOWN_OPTIONS[field]
-    display_value = this.sampleInfo[field] ? this.sampleInfo[field] : dropdown_options[dropdown_options.length-1]
+    let dropdown_options = this.DROPDOWN_OPTIONS[field]
+    let display_value = this.sampleInfo[field] ? this.sampleInfo[field] : dropdown_options[dropdown_options.length-1]
     return (
       <tr>
         <td>{label}</td>
@@ -56,9 +56,9 @@ class PipelineSampleReads extends React.Component {
   }
 
   render_metadata_textfield(label, field, line_break) {
-    display_value = this.sampleInfo[field] && this.sampleInfo[field].trim() !== "" ? this.sampleInfo[field] : this.TYPE_PROMPT
-    title = <td>{label}</td>
-    editable = 
+    let display_value = this.sampleInfo[field] && this.sampleInfo[field].trim() !== "" ? this.sampleInfo[field] : this.TYPE_PROMPT
+    let title = <td>{label}</td>
+    let editable = 
         <td className="sample-notes">
           <pre suppressContentEditableWarning={true} contentEditable={true} id={field}>
             {display_value}
@@ -121,7 +121,7 @@ class PipelineSampleReads extends React.Component {
     this.listenNoteChanges();
     this.initializeSelectTag();
     for (var i = 0; i < this.DROPDOWN_METADATA_FIELDS.length; i++) {
-      field = this.DROPDOWN_METADATA_FIELDS[i];
+      let field = this.DROPDOWN_METADATA_FIELDS[i];
       $(ReactDOM.findDOMNode(this.refs[field])).on('change',this.handleDropdownChange);
     }
   }
