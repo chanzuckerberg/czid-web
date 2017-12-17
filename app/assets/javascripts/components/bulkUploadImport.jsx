@@ -288,12 +288,12 @@ class BulkUploadImport extends React.Component {
     }
     if(this.refs.bulk_path) {
       if (this.refs.bulk_path.value === '') {
-        errors.bulk_path = 'Please fill in the S3 bulk_path path';
+        errors.bulk_path = 'Please fill in the S3 bulk path';
       } else if(!this.filePathValid(this.refs.bulk_path.value)) {
         errors.bulk_path = 'S3 bulk path is invalid';
       }
     } else {
-      errors.bulk_path = 'Please fill in the S3 bulk_path path';
+      errors.bulk_path = 'Please fill in the S3 bulk path';
     }
     const errorsLength = Object.keys(errors).length;
     this.setState({
