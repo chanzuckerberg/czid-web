@@ -99,6 +99,7 @@ class SamplesController < ApplicationController
     @job_stats = @pipeline_output ? @pipeline_output.job_stats : nil
     @summary_stats = @job_stats ? get_summary_stats(@job_stats) : nil
     @project_info = @sample.project ? @sample.project : nil
+    @host_genome = @sample.host_genome ? @sample.host_genome : nil
     @background_models = Background.all
 
     ##################################################

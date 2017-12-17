@@ -18,6 +18,7 @@ class PipelineSampleReads extends React.Component {
     this.summary_stats = props.summary_stats;
     this.gotoReport = this.gotoReport.bind(this);
     this.sampleId = this.sampleInfo.id;
+    this.host_genome = props.host_genome;
     this.pipelineStatus = props.sample_status
     this.pipelineRun = props.pipelineRun
     this.rerunPipeline = this.rerunPipeline.bind(this);
@@ -25,7 +26,56 @@ class PipelineSampleReads extends React.Component {
       rerun: false,
       failureText: 'Sample run failed'
     };
-    this.TYPE_PROMPT = "Type here..."
+    this.TYPE_PROMPT = "Type here...";
+    this.TISSUE_TYPES = ["Bronchoalveolar lavage", "Cerebrospinal fluid",
+                         "Nasopharyngeal swab", "Plasma", "Serum", "Solid tissue", 
+                         "Stool", "Synovial fluid", "Whole blood", "Other"];
+    this.NUCLEOTIDE_TYPES = ["DNA", "RNA"];
+    this.DROPDOWN_OPTIONS = { sample_tissue: this.TISSUE_TYPES,
+                              sample_template: this.NUCLEOTIDE_TYPES };
+    this.DROPDOWN_METADATA_FIELDS = Object.keys(this.DROPDOWN_OPTIONS);
+    this.handleDropdownChange = this.handleDropdownChange.bind(this);
+  }
+
+  render_metadata_dropdown(label, field) {
+    let dropdown_options = this.DROPDOWN_OPTIONS[field]
+    let display_value = this.sampleInfo[field] ? this.sampleInfo[field] : dropdown_options[dropdown_options.length-1]
+    return (
+      <tr>
+        <td>{label}</td>
+        <td className="sample-notes">
+          <select ref={field} name={field} className="" id={field} onChange={this.handleDropdownChange} value={display_value}>
+            { dropdown_options.map((option_value, i) => {
+                return <option ref={field} key={i}>{option_value}</option>
+              }) 
+            }
+          </select>
+        </td>
+      </tr>
+    );
+  }
+
+  render_metadata_textfield(label, field, line_break) {
+    let display_value = this.sampleInfo[field] && this.sampleInfo[field].trim() !== "" ? this.sampleInfo[field] : this.TYPE_PROMPT
+    let title = <td>{label}</td>
+    let editable = 
+        <td className="sample-notes">
+          <pre suppressContentEditableWarning={true} contentEditable={true} id={field}>
+            {display_value}
+          </pre>
+        </td>
+    if (line_break === 0) {
+      return (
+        <tr>{title}{editable}</tr>
+      );
+    } else {
+      return (
+        <div>
+          <tr>{title}</tr>
+          <tr>{editable}</tr>
+        </div>
+      );
+    }
   }
 
   gotoReport() {
@@ -69,6 +119,44 @@ class PipelineSampleReads extends React.Component {
   componentDidMount() {
     $('ul.tabs').tabs();
     this.listenNoteChanges();
+    this.initializeSelectTag();
+    for (var i = 0; i < this.DROPDOWN_METADATA_FIELDS.length; i++) {
+      let field = this.DROPDOWN_METADATA_FIELDS[i];
+      $(ReactDOM.findDOMNode(this.refs[field])).on('change',this.handleDropdownChange);
+    }
+  }
+
+  initializeSelectTag() {
+    $('select').material_select();
+  }
+
+  handleDropdownChange(e) {
+    const field = e.target.id;
+    const value = this.DROPDOWN_OPTIONS[field][e.target.selectedIndex];
+    axios.post('/samples/' + this.sampleInfo.id + '/save_metadata.json', {
+      field: field, value: value
+    })
+    .then((response) => {
+      if (response.data.status === 'success') {
+        $('.note-saved-success')
+        .html(`<i class='fa fa-check-circle'></i> ${response.data.message}`)
+        .css('display', 'inline-block')
+        .delay(1000)
+        .slideUp(200);
+      } else {
+        $('.note-save-failed')
+        .html(`<i class='fa fa-frown-o'></i> ${response.data.message}`)
+        .css('display', 'inline-block')
+        .delay(1000)
+        .slideUp(200);
+      }
+    }).catch((error) => {
+      $('.note-save-failed')
+      .html(`<i class='fa fa-frown-o'></i> Something went wrong!`)
+      .css('display', 'inline-block')
+      .delay(1000)
+      .slideUp(200);
+    });
   }
 
   listenNoteChanges() {
@@ -157,6 +245,10 @@ class PipelineSampleReads extends React.Component {
                   <td>Non-host reads</td>
                   <td>{ !this.summary_stats.remaining_reads ? BLANK_TEXT : numberWithCommas(this.summary_stats.remaining_reads) } { !this.summary_stats.percent_remaining ? '' : `(${this.summary_stats.percent_remaining.toFixed(2)}%)` }</td>
                 </tr>
+                <tr>
+                  <td>Unmapped reads</td>
+                  <td>{ !this.summary_stats.unmapped_reads ? BLANK_TEXT : numberWithCommas(this.summary_stats.unmapped_reads) }</td>
+                </tr>
                 </tbody>
               </table>
             </div>
@@ -170,6 +262,10 @@ class PipelineSampleReads extends React.Component {
                 <tr>
                   <td>Duplicate compression ratio</td>
                   <td>{ !this.summary_stats.compression_ratio ? BLANK_TEXT : this.summary_stats.compression_ratio.toFixed(2) }</td>
+                </tr>
+                <tr>
+                  <td>Date processed</td>
+                  <td>{ !this.summary_stats.last_processed_at ? BLANK_TEXT : moment(this.summary_stats.last_processed_at).startOf('second').fromNow() }</td>
                 </tr>
                 </tbody>
               </table>
@@ -250,42 +346,22 @@ class PipelineSampleReads extends React.Component {
                             <tbody>
                               <tr>
                                 <td>Host</td>
-                                <td> { (!this.sampleInfo.host_genome_name) ? BLANK_TEXT : this.sampleInfo.host_genome_name } </td>
+                                <td> { !this.host_genome ? BLANK_TEXT : this.host_genome.name } </td>
                               </tr>
                               <tr>
-                                <td>Entry date</td>
+                                <td>Upload date</td>
                                 <td>{moment(this.sampleInfo.created_at).startOf('second').fromNow()}</td>
                               </tr>
-                              <tr>
-                                <td>Location</td>
-                                <td className="sample-notes">
-                                 <pre suppressContentEditableWarning={true} contentEditable={true} id="sample_location">
-                                  { this.sampleInfo.sample_location && this.sampleInfo.sample_location.trim() !== "" ? this.sampleInfo.sample_location : this.TYPE_PROMPT}
-                                 </pre>
-                                </td>
-                              </tr>
+                              {this.render_metadata_textfield("Location", "sample_location", 0)}
                             </tbody>
                           </table>
                         </div>
                         <div className="col s6">
                           <table className="responsive-table">
                             <tbody>
-                              <tr>
-                                <td>Tissue type</td>
-                                <td className="sample-notes">
-                                 <pre suppressContentEditableWarning={true} contentEditable={true} id="sample_tissue">
-                                  { this.sampleInfo.sample_tissue && this.sampleInfo.sample_tissue.trim() !== "" ? this.sampleInfo.sample_tissue : this.TYPE_PROMPT}
-                                 </pre>
-                                </td>
-                              </tr>
-                              <tr>
-                                <td>Library prep protocol</td>
-                                <td className="sample-notes">
-                                 <pre suppressContentEditableWarning={true} contentEditable={true} id="sample_library">
-                                  { this.sampleInfo.sample_library && this.sampleInfo.sample_library.trim() !== "" ? this.sampleInfo.sample_library : this.TYPE_PROMPT}
-                                 </pre>
-                                </td>
-                              </tr>
+                              {this.render_metadata_dropdown("Tissue type", "sample_tissue")}
+                              {this.render_metadata_dropdown("Nucleotide type", "sample_template")}
+                              {this.render_metadata_textfield("Patient ID", "sample_host", 0)}
                             </tbody>
                           </table>
                         </div>
@@ -294,14 +370,7 @@ class PipelineSampleReads extends React.Component {
                         <div className="col s12">
                           <table>
                             <tbody>
-                             <tr>
-                              <td className="notes">Notes</td>
-                              <td className="sample-notes">
-                               <pre suppressContentEditableWarning={true} contentEditable={true} id="sample_notes">
-                                { this.sampleInfo.sample_notes && this.sampleInfo.sample_notes.trim() !== "" ? this.sampleInfo.sample_notes : this.TYPE_PROMPT}
-                               </pre>
-                              </td>
-                             </tr>
+                              {this.render_metadata_textfield("Notes", "sample_notes", 1)}
                             </tbody>
                           </table>
                         </div>
@@ -324,7 +393,7 @@ class PipelineSampleReads extends React.Component {
 
               <div className="col s3 download-area">
                 <a className="custom-button" href={ this.sampleInfo.sample_input_folder_url }>
-                  <i className="fa fa-cloud-download left"></i> DOWNLOAD ALL READS
+                  <i className="fa fa-cloud-download left"></i> GO TO SOURCE DATA
                 </a>
                 { download_section }
 

@@ -8,7 +8,7 @@ HostGenome.create!(name: "human", default_background_id: 1)
 
 (1..5).each do |i|
   sample = Sample.new(name: "Sample #{i}", project: project,
-    sample_host: "Human", sample_location: "California", sample_date: "Sept 19, 2017", sample_tissue: "CSF", sample_template: "RNA",
+    sample_location: "California", sample_date: "Sept 19, 2017", sample_tissue: "CSF", sample_template: "RNA",
     sample_library: "Nugen Nextera", sample_sequencer: "Illumina NextSeq 500, 2x150", sample_notes: "patient had no known infections")
   sample.input_files << InputFile.new(name: 'R1.fastq.gz', source_type: 'local', source: 'R1.fastq.gz')
   sample.input_files << InputFile.new(name: 'R2.fastq.gz', source_type: 'local', source: 'R2.fastq.gz')

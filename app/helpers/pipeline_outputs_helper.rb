@@ -21,7 +21,7 @@ module PipelineOutputsHelper
       resp = Client.get_object(bucket: bucket, key: key)
       return resp.body.read
     rescue
-      return 'Coming soon' # Temporary fix
+      return nil
     end
   end
 end
