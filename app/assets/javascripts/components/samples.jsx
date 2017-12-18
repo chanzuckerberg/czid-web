@@ -13,6 +13,7 @@ class Samples extends React.Component {
     this.handleStatusFilterSelect = this.handleStatusFilterSelect.bind(this);
     this.setUrlLocation = this.setUrlLocation.bind(this);
     this.sortSamples = this.sortSamples.bind(this);
+    this.pageSize = props.pageSize || 30
     this.state = {
       project: null,
       totalNumber: null,
@@ -22,7 +23,7 @@ class Samples extends React.Component {
       sampleIdsParams: this.fetchParams('ids') || [],
       allSamples: [],
       allProjects: [],
-      sort_by: this.fetchParams('sort_by') || 'created_at,desc',
+      sort_by: this.fetchParams('sort_by') || 'id,desc',
       pagesLoaded: 0,
       pageEnd: false,
       initialFetchedSamples: [],
@@ -68,7 +69,7 @@ class Samples extends React.Component {
     let new_sort, message = '';
     if(this.sortCount === 3) {
       this.sortCount = 0;
-      new_sort = 'created_at,desc';
+      new_sort = 'id,desc';
       message = 'Sorting samples by date created...';
     } else {
       new_sort = (this.state.sort_by === 'name,asc') ? 'name,desc' :  'name,asc';
@@ -235,7 +236,7 @@ class Samples extends React.Component {
         displayEmpty: false,
         pagesLoaded: prevState.pagesLoaded+1,
         totalNumber: res.data.total_count,
-        pageEnd: res.data.samples.length >= 15 ? false : true,
+        pageEnd: res.data.samples.length >= this.pageSize ? false : true,
       }));
     if (!this.state.allSamples.length) {
       this.setState({ displayEmpty: true });
@@ -281,7 +282,7 @@ class Samples extends React.Component {
         isRequesting: false,
         allSamples: [...prevState.allSamples, ...res.data.samples],
         pagesLoaded: prevState.pagesLoaded+1,
-        pageEnd: res.data.samples.length >= 15 ? false : true,
+        pageEnd: res.data.samples.length >= this.pageSize ? false : true,
       }))
     }).catch((err) => {
       this.setState((prevState) => ({
@@ -320,7 +321,7 @@ class Samples extends React.Component {
         displayEmpty: false,
         totalNumber: res.data.total_count,
         pagesLoaded: prevState.pagesLoaded+1,
-        pageEnd: res.data.samples.length >= 15 ? false : true,
+        pageEnd: res.data.samples.length >= this.pageSize ? false : true,
       }));
       if (!this.state.allSamples.length) {
         this.setState({ displayEmpty: true });
@@ -334,8 +335,8 @@ class Samples extends React.Component {
         allSamples: [],
         displayEmpty: true,
       });
-      if(typeof cb === 'function') {		
-        cb();		
+      if(typeof cb === 'function') {
+        cb();
       }
     })
   }

@@ -12,6 +12,7 @@ class SamplesController < ApplicationController
   # GET /samples.json
   def index
     @all_project = Project.all
+    @page_size = PAGE_SIZE
     project_id = params[:project_id]
     name_search_query = params[:search]
     filter_query = params[:filter]
@@ -309,7 +310,7 @@ class SamplesController < ApplicationController
   end
 
   def sort_by(samples, dir = nil)
-    default_dir = 'created_at,desc'
+    default_dir = 'id,desc'
     dir ||= default_dir
     column, direction = dir.split(',')
     samples = samples.order("#{column} #{direction}") if column && direction
