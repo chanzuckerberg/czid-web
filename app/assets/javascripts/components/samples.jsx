@@ -171,12 +171,12 @@ class Samples extends React.Component {
 
       rowWithChunkStatus = (
         <div className={statusClass}>
-          <span>{this.appendStatusIcon(status)}</span><p className="optional_column pipeline_status status">{status}</p>
+          <span>{this.appendStatusIcon(status)}</span><p className="optional-column pipeline_status status">{status}</p>
         </div>
       );
       rowWithoutChunkStatus = (
         <div className={statusClass}>
-          <span>{this.appendStatusIcon(status)}</span><p className="optional_column pipeline_status status">{status}</p>
+          <span>{this.appendStatusIcon(status)}</span><p className="optional-column pipeline_status status">{status}</p>
         </div>
       )
       data_values = { total_reads: !derivedOutput.pipeline_output ? BLANK_TEXT : numberWithCommas(derivedOutput.pipeline_output.total_reads),
@@ -463,19 +463,16 @@ class Samples extends React.Component {
   }
 
   handleColumnSelectChange(e) {
-    console.log("executing");
     var selO = e.target;
-    for(i=0; i < selO.length; i++){
-        column_name = selO.options[i].value;
-        if(selO.options[i].selected){
-           if (column_name !== "") {
-              $(`.optional-column.${column_name}`).removeClass('hidden');
-            }
-       } else {
-           if (column_name !== "") {
-              $(`.optional-column.${column_name}`).addClass('hidden');
-            }
-       }
+    for (i=0; i < selO.length; i++) {
+      column_name = selO.options[i].value;
+      if (column_name !== "") {
+        if (selO.options[i].selected) {
+          $(`.optional-column.${column_name}`).removeClass('hidden');
+        } else {
+          $(`.optional-column.${column_name}`).addClass('hidden');
+        }
+      }
     }
   }
 
@@ -546,19 +543,18 @@ class Samples extends React.Component {
     );
 
     column_select_dropdown = (
-     <div className="column-dropdown">
-      <div class="input-field col s4">
-        <select multiple ref="columnSelector" onChange={this.handleColumnSelectChange}>
-           <option value="" disabled selected>Select columns</option>
-           <optgroup label="Pipeline Data">
-           { this.display_column_options(this.COLUMN_DISPLAY_MAP, "pipeline_data", true) }
-           </optgroup>
-           <optgroup label="Sample Data">
-           { this.display_column_options(this.COLUMN_DISPLAY_MAP, "metadata", false) }
-           </optgroup>
-         </select>
-         <label>Select Columns</label>
-       </div>
+      <div className="column-dropdown">
+        <div class="input-field col s4">
+          <select multiple ref="columnSelector" onChange={this.handleColumnSelectChange}>
+            <option value="" disabled selected>Select Columns</option>
+            <optgroup label="Pipeline Data">
+              { this.display_column_options(this.COLUMN_DISPLAY_MAP, "pipeline_data", true) }
+            </optgroup>
+            <optgroup label="Sample Data">
+              { this.display_column_options(this.COLUMN_DISPLAY_MAP, "metadata", false) }
+            </optgroup>
+          </select>
+        </div>
       </div>
     );
  
