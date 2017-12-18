@@ -127,7 +127,7 @@ def deploy(client, cluster, service, repo, image, run_migrations = false)
   puts "current task is revision #{task_def.revision}"
   task_def = task_def.to_h
 
-  %i[task_definition_arn revision status requires_attributes].each do |k|
+  %i[task_definition_arn revision status requires_attributes compatibilities].each do |k|
     task_def.delete(k)
   end
 

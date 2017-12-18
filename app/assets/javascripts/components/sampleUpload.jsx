@@ -67,11 +67,24 @@ class SampleUpload extends React.Component {
 
   componentDidMount() {
     $('body').addClass('background-cover');
-    $('.tooltipped').tooltip({delay: 50, html: true});
+    $('.tooltipped').tooltip({ delay: 50 });
     this.initializeSelectTag();
     $(ReactDOM.findDOMNode(this.refs.projectSelect)).on('change',this.handleProjectChange);
     $(ReactDOM.findDOMNode(this.refs.hostSelect)).on('change',this.handleHostChange);
+    this.initializeTooltip();
   }
+    initializeTooltip() {
+      // only updating the tooltip offset when the component is loaded
+      $(() => {
+        const tooltipIdentifier = $("[rel='tooltip']");
+        tooltipIdentifier.tooltip({
+          delay: 0,
+          html: true,
+          placement: 'top',
+          offset: '0px 50px'
+        });
+      });
+    }
 
   handleUpload(e) {
     e.preventDefault();
@@ -412,7 +425,7 @@ class SampleUpload extends React.Component {
     });
   }
 
-  resolveGenomeIcon (genomeName, color) {
+  static resolveGenomeIcon (genomeName, color) {
     let imgPath = '/assets/generic_genome.png';
     if (typeof genomeName === 'undefined') {
       return false;
@@ -539,7 +552,7 @@ class SampleUpload extends React.Component {
   renderSampleForm() {
     return (
       <div id='samplesUploader' className='row'>
-        <div className='col s4 offset-s4 upload-form-container'>
+        <div className='col s4 valign-wrapper offset-s4 upload-form-container'>
           <div className='content'>
             <div>
               <div className='form-title'>
@@ -551,7 +564,7 @@ class SampleUpload extends React.Component {
             </div>
             <div>
               <p className='upload-question'>
-                Want to upload multiple samples at once? <a href='bulk_new/'>Click here.</a>
+                Want to upload multiple samples at once? <a href='/samples/bulk_new'>Click here.</a>
                 <br/>
                 Rather use our CLI? <a href='https://github.com/chanzuckerberg/idseq-web/blob/master/README.md#submit-a-sample' target='_blank'>Read documentation here.</a>
               </p>
@@ -576,7 +589,8 @@ class SampleUpload extends React.Component {
                     </div>
                   </div>
                   <div className='row input-row'>
-                    <div className='col project-list no-padding s8 tooltipped' data-position="top" data-delay="50" data-tooltip="Name of experiment or project">
+                    <div className='col project-list no-padding s8'
+                         title='Name of experiment or project' data-placement='top' rel='tooltip'>
                       <select ref="projectSelect" disabled={(this.state.disableProjectSelect ? 'disabled' : '')} className="projectSelect" id="sample" onChange={ this.handleProjectChange } value={this.state.selectedProject}>
                         <option disabled defaultValue>{this.state.selectedProject}</option>
                         { this.state.allProjects.length ?
@@ -594,8 +608,8 @@ class SampleUpload extends React.Component {
                     </div>
                     <div className='col no-padding s4'>
                       <button type='button' onClick={this.toggleNewProjectInput}
-                              className='new-project-button new-button skyblue-button tooltipped'
-                              data-position="right" data-delay="50" data-tooltip="Add your desired experiment or project name">
+                              title='Add your desired experiment or project name' data-placement='right' rel='tooltip'
+                              className='new-project-button new-button skyblue-button'>
                         <i className='fa fa-plus'/>
                         <span>
                           New project
@@ -621,9 +635,8 @@ class SampleUpload extends React.Component {
 
                 <div className='field'>
                   <div className='row'>
-                    <div className='col field-title no-padding s5 tooltipped'
-                         data-position="top" data-delay="50"
-                         data-tooltip='This would be subtracted by the pipeline'>
+                    <div className='col field-title no-padding s5'
+                         title='This will be subtracted by the pipeline' data-placement='left' rel='tooltip'>
                       Select host genome
                     </div>
                     {
@@ -649,18 +662,16 @@ class SampleUpload extends React.Component {
                         {
                           this.state.hostGenomes.map((g) => {
                             return (
-                              this.resolveGenomeIcon(g.name) ?
+                              SampleUpload.resolveGenomeIcon(g.name) ?
                               <li
                                   key={g.id} className={ `${this.state.selectedHostGenome ===  g.name ? 'active' : ''} `}
                                   id={g.name} onClick={() => this.handleHostChange(g.id, g.name)}>
-                                <div className='img-container'>
                                   {
                                     this.state.selectedHostGenome ===  g.name ?
-                                    this.resolveGenomeIcon(g.name, '#59bcd6')
+                                    <div className='img-container' dangerouslySetInnerHTML={{ __html: SampleUpload.resolveGenomeIcon(g.name, '#59bcd6') }} />
                                     :
-                                    this.resolveGenomeIcon(g.name, '#95A1Ab')
-                                }
-                                </div>
+                                    <div className='img-container' dangerouslySetInnerHTML={{ __html: SampleUpload.resolveGenomeIcon(g.name, '#95A1Ab') }} />
+                                  }
                                 <div className='genome-label'>
                                   { g.name }
                                 </div>

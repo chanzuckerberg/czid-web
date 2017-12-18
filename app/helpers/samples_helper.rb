@@ -21,10 +21,15 @@ module SamplesHelper
   end
 
   def get_summary_stats(jobstats)
+    po = jobstats[0].pipeline_output unless jobstats[0].nil?
+    unmapped_reads = po.nil? ? nil : po.unmapped_reads
+    last_processed_at = po.nil? ? nil : po.created_at
     { remaining_reads: get_remaining_reads(jobstats),
       compression_ratio: compute_compression_ratio(jobstats),
       qc_percent: compute_qc_value(jobstats),
-      percent_remaining: compute_percentage_reads(jobstats) }
+      percent_remaining: compute_percentage_reads(jobstats),
+      unmapped_reads: unmapped_reads,
+      last_processed_at: last_processed_at }
   end
 
   def get_remaining_reads(jobstats)

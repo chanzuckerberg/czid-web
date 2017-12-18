@@ -99,6 +99,7 @@ class SamplesController < ApplicationController
     @job_stats = @pipeline_output ? @pipeline_output.job_stats : nil
     @summary_stats = @job_stats ? get_summary_stats(@job_stats) : nil
     @project_info = @sample.project ? @sample.project : nil
+    @host_genome = @sample.host_genome ? @sample.host_genome : nil
     @background_models = Background.all
 
     ##################################################
@@ -308,8 +309,10 @@ class SamplesController < ApplicationController
   end
 
   def sort_by(samples, dir = nil)
-    default_dir = 'newest'
+    default_dir = 'created_at,desc'
     dir ||= default_dir
-    dir == 'newest' ? samples.order(created_at: :desc) : samples.order(created_at: :asc)
+    column, direction = dir.split(',')
+    samples = samples.order("#{column} #{direction}") if column && direction
+    samples
   end
 end

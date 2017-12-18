@@ -1,4 +1,5 @@
 class PipelineOutput < ApplicationRecord
+  include PipelineOutputsHelper
   belongs_to :sample
   has_many :taxon_counts, dependent: :destroy
   has_many :reports, -> { order(created_at: :desc) }, dependent: :destroy
@@ -25,6 +26,11 @@ class PipelineOutput < ApplicationRecord
 
   def check_box_label
     "#{sample.project.name} : #{sample.name} (#{id})"
+  end
+
+  def count_unmapped_reads
+    unidentified_fasta = get_s3_file(sample.unidentified_fasta_s3_path)
+    unidentified_fasta.lines.select { |line| line.start_with? '>' }.count if unidentified_fasta
   end
 
   def generate_aggregate_counts(tax_level_name)
