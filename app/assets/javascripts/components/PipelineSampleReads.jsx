@@ -29,7 +29,7 @@ class PipelineSampleReads extends React.Component {
     this.TYPE_PROMPT = "Type here...";
     this.TISSUE_TYPES = ['-',"Bronchoalveolar lavage", "Cerebrospinal fluid",
                          "Nasopharyngeal swab", "Plasma", "Serum", "Solid tissue", 
-                         "Stool", "Synovial fluid", "Whole blood", "Other"];
+                         "Stool", "Synovial fluid", "Whole blood"];
     this.NUCLEOTIDE_TYPES = ['-',"DNA", "RNA"];
     this.DROPDOWN_OPTIONS = { sample_tissue: this.TISSUE_TYPES,
                               sample_template: this.NUCLEOTIDE_TYPES };
@@ -39,7 +39,7 @@ class PipelineSampleReads extends React.Component {
 
   render_metadata_dropdown(label, field) {
     let dropdown_options = this.DROPDOWN_OPTIONS[field];
-    let display_value = this.sampleInfo[field];
+    let display_value = this.sampleInfo[field] ? this.sampleInfo[field] : '-';
     return (
       <div className='row detail-row no-padding'>
         <div className='col s5 label'>
@@ -274,7 +274,7 @@ class PipelineSampleReads extends React.Component {
                     numberWithCommas(this.summary_stats.remaining_reads)
                   }
                   { !this.summary_stats.percent_remaining ? '' :
-                    `(${this.summary_stats.percent_remaining.toFixed(2)}%)`
+                    ` (${this.summary_stats.percent_remaining.toFixed(2)}%)`
                   }
                 </div>
               </div>
@@ -467,7 +467,7 @@ class PipelineSampleReads extends React.Component {
                   Downloads Reads
                 </div>
                 <a className="custom-button" href={ this.sampleInfo.sample_input_folder_url }>
-                  <i className="fa fa-cloud-download"/>
+                  <i className="fa fa-folder-open"/>
                   Go To Source Data
                 </a>
                 { download_section }
