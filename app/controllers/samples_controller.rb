@@ -19,6 +19,7 @@ class SamplesController < ApplicationController
     sort = params[:sort_by]
     samples_query = JSON.parse(params[:ids]) if params[:ids].present?
     results = Sample.includes(:pipeline_runs, :pipeline_outputs)
+    results = Sample.includes(:pipeline_runs)
 
     results = results.where(id: samples_query) if samples_query.present?
 
