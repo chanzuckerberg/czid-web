@@ -5,8 +5,8 @@ class IconComponent extends React.Component {
 
   static mosquito(color) {
     return (
-        <svg fill={color} x="0px" y="0px"
-           viewBox="0 0 463.003 463.003" style={{'enableBackground' : 'new 0 0 463.003 463.003'}}>
+        `<svg fill='${color}' x="0px" y="0px"
+           viewBox="0 0 463.003 463.003" style='enable-background : new 0 0 463.003 463.003'>
         <path d="M359.418,189.996c12.73-3.407,35.161-10.159,42.347-17.101c5.774-5.578,7.161-13.759,3.62-21.351
           c-5.167-11.076-18.691-17.164-34.458-15.502c-10.467,1.102-33.561,7.968-58.011,15.238c-20.258,6.023-44.515,13.235-57.914,15.777
           v-7.556c0-1.22-0.094-2.419-0.274-3.589l24.98-14.988c9.434-5.66,15.294-16.01,15.294-27.011V89.579l46.932-78.219
@@ -67,14 +67,14 @@ class IconComponent extends React.Component {
         </g>
         <g>
         </g>
-        </svg>
+        </svg>`
     );
   }
 
   static human(color) {
     return (
-      <svg fill={color} x="0px" y="0px"
-         viewBox="0 0 511.997 511.997" style={{'enableBackground' : 'new 0 0 511.997 511.997'}}>
+      `<svg fill='${color}' x="0px" y="0px"
+         viewBox="0 0 511.997 511.997" style='enable-background : new 0 0 511.997 511.997'>
       <g>
         <g>
           <path d="M157.897,185.906c-3.217-2.609-7.939-2.117-10.549,1.101c-3.03,3.736-7.047,5.793-11.313,5.793
@@ -226,13 +226,14 @@ class IconComponent extends React.Component {
       </g>
       <g>
       </g>
-      </svg>
+      </svg>`
     )
   }
 
   static bacteria(color) {
     return (
-      <svg fill={color} x="0px" y="0px" viewBox="0 0 496 496" style={{'enableBackground' : 'new new 0 0 496 496'}}>
+      `
+      <svg fill=${color} x="0px" y="0px" viewBox="0 0 496 496" style='enable-background : new new 0 0 496 496'>
         <g>
           <g>
             <g>
@@ -307,7 +308,7 @@ class IconComponent extends React.Component {
         </g>
         <g>
         </g>
-      </svg>
+      </svg>`
     );
   }
 }
