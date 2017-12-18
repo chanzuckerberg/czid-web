@@ -20,7 +20,7 @@
 ENV=$1
 shift
 
-MACHINE=`bin/get_public_ip $ENV`
+MACHINE=`bin/get_private_ip $ENV`
 
 CONTAINER=`ssh ec2-user@$MACHINE "docker ps | grep ecs-idseq-web | head -1" | awk '{print $NF}'`
 
