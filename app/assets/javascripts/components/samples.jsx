@@ -309,7 +309,7 @@ class Samples extends React.Component {
   }
 
   //fetch results from filtering, search or switching projects
-  fetchResults() {
+  fetchResults(cb) {
     Samples.showLoading('Fetching samples...');
     const params = this.getParams();
     axios.get(`/samples?${params}`).then((res) => {
@@ -329,11 +329,14 @@ class Samples extends React.Component {
         cb();
       }
     }).catch((err) => {
-      this.setState((prevstate) => ({
+      this.setState({
         initialFetchedSamples: [],
         allSamples: [],
         displayEmpty: true,
-      }))
+      });
+      if(typeof cb === 'function') {		
+        cb();		
+      }
     })
   }
 
