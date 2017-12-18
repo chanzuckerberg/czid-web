@@ -40,7 +40,10 @@ class Samples extends React.Component {
                                 location: { display_name: "Location", type: "metadata" },
                                 host_genome: { display_name: "Host", type: "metadata" },
                                 notes: { display_name: "Notes", type: "metadata" } }
-    this.hideOrShowColumn = this.hideOrShowColumn.bind(this)
+    this.handleColumnSelectChange = this.handleColumnSelectChange.bind(this);
+    $(document).ready(function() {
+      $('select').material_select();
+    });
   }
 
   initializeTooltip() {
@@ -431,9 +434,21 @@ class Samples extends React.Component {
     )
   }
 
-  hideOrShowColumn(e) {
-    const column_name = e.target.id;
-    $(`.optional-column.${column_name}`).toggleClass('hidden');
+  handleColumnSelectChange(e) {
+    console.log("executing");
+    var selO = e.target;
+    for(i=0; i < selO.length; i++){
+        column_name = selO.options[i].value;
+        if(selO.options[i].selected){
+           if (column_name !== "") {
+              $(`.optional-column.${column_name}`).removeClass('hidden');
+            }
+       } else {
+           if (column_name !== "") {
+              $(`.optional-column.${column_name}`).addClass('hidden');
+            }
+       }
+    }
   }
 
   display_column_options(column_map, data_type, default_checked) {
@@ -441,7 +456,7 @@ class Samples extends React.Component {
     return column_list.map((option_name, i) => {
       if (this.COLUMN_DISPLAY_MAP[option_name].type === data_type) {
         return (
-          <option value={option_name} id={option_name} onClick={this.hideOrShowColumn}>
+          <option key={option_name} id={option_name} value={option_name} selected={default_checked}>
             {this.COLUMN_DISPLAY_MAP[option_name].display_name}
           </option>
         )
@@ -502,16 +517,22 @@ class Samples extends React.Component {
     );
 
     column_select_dropdown = (
-     <select>
-      <optgroup label="Pipeline Data">
-        { this.display_column_options(this.COLUMN_DISPLAY_MAP, "pipeline_data", true) }
-      </optgroup>
-      <optgroup label="Sample Data">
-        { this.display_column_options(this.COLUMN_DISPLAY_MAP, "metadata", false) }
-      </optgroup>
-     </select>
-    )
-
+     <div className="column-dropdown">
+      <div class="input-field col s4">
+        <select multiple ref="columnSelector" onChange={this.handleColumnSelectChange}>
+           <option value="" disabled selected>Select columns</option>
+           <optgroup label="Pipeline Data">
+           { this.display_column_options(this.COLUMN_DISPLAY_MAP, "pipeline_data", true) }
+           </optgroup>
+           <optgroup label="Sample Data">
+           { this.display_column_options(this.COLUMN_DISPLAY_MAP, "metadata", false) }
+           </optgroup>
+         </select>
+         <label>Select Columns</label>
+       </div>
+      </div>
+    );
+ 
     return (
     <div className="content-wrapper">
       <div className="sample-container">
@@ -555,6 +576,10 @@ class Samples extends React.Component {
     this.initializeProjectList();
     this.displayPipelineStatusFilter();
     this.displayColumnSelector();
+    $(document).ready(function() {
+      $('select').material_select();
+    });		  
+    $(ReactDOM.findDOMNode(this.refs.columnSelector)).on('change',this.handleColumnSelectChange.bind(this));
   }
 
   // initialize filter dropdown
