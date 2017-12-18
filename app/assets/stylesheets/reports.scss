@@ -78,6 +78,12 @@ input[type=number] {
         margin-top: 0;
         .select-dropdown {
           font-size: 12px;
+          padding: 2px;
+          border: 1px solid #CAD0DA;
+          border-radius: 2px;
+          .caret {
+            color: #bac8cf;
+          }
         }
       }
     }
