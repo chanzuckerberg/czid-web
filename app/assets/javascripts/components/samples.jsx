@@ -441,10 +441,9 @@ class Samples extends React.Component {
     return column_list.map((option_name, i) => {
       if (this.COLUMN_DISPLAY_MAP[option_name].type === data_type) {
         return (
-          <li className="column-item" data-column={option_name} id={option_name} onClick={this.hideOrShowColumn}>
-            <input type="checkbox" className="filled-in cat-filter" value={option_name} defaultChecked={default_checked}/>
-            <label htmlFor={option_name}>{this.COLUMN_DISPLAY_MAP[option_name].display_name}</label>
-          </li>
+          <option value={option_name} id={option_name} onClick={this.hideOrShowColumn}>
+            {this.COLUMN_DISPLAY_MAP[option_name].display_name}
+          </option>
         )
       }
     })
@@ -503,22 +502,20 @@ class Samples extends React.Component {
     );
 
     column_select_dropdown = (
-      <ul id='dropdown-column-select' className='column-select dropdown-content'>
-        <li><a className="title"><b>Pipeline Data</b></a></li>
-        <li className="divider"></li>
+     <select>
+      <optgroup label="Pipeline Data">
         { this.display_column_options(this.COLUMN_DISPLAY_MAP, "pipeline_data", true) }
-        <li className="divider"></li>
-        <li><a className="title"><b>Sample Data</b></a></li>
-        <li className="divider"></li>
+      </optgroup>
+      <optgroup label="Sample Data">
         { this.display_column_options(this.COLUMN_DISPLAY_MAP, "metadata", false) }
-      </ul>
+      </optgroup>
+     </select>
     )
 
     return (
     <div className="content-wrapper">
       <div className="sample-container">
           { search_box }
-          { column_select_anchor }
           { column_select_dropdown }
           { status_filter_dropdown }
           <div className="sample-table-container">
