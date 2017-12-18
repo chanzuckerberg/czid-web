@@ -463,16 +463,16 @@ class PipelineSampleReport extends React.Component {
   }
 
   render_column_header(visible_type, visible_metric, column_name, tooltip_message) {
-    var style = { 'textAlign': 'right', 'cursor': 'pointer' };
+    var style = { 'textAlign': 'left', 'cursor': 'pointer' };
     report_column_threshold = this.thresholdInputColumn(column_name)
     return (
       <th style={style}>
-        <div className='sort-controls right' rel='tooltip' title={tooltip_message}>
+        <div className='sort-controls left' rel='tooltip' title={tooltip_message}>
           {this.render_sort_arrow(column_name, 'highest', 'down')}
-          {visible_type}<br/>
-          {visible_metric}<br/>
+          {visible_type}{' '}
+          {visible_metric}
         </div>
-        <div className='sort-controls right' rel='tooltip' data-placement='bottom' title='Threshold'>
+        <div className='sort-controls left' rel='tooltip' data-placement='bottom' title='Threshold'>
           {report_column_threshold}
         </div>
       </th>
@@ -562,7 +562,7 @@ class PipelineSampleReport extends React.Component {
       <div>
         <div id="reports" className="reports-screen tab-screen col s12">
           <div className="tab-screen-content">
-            <div className="row">
+            <div className="row reports-container">
               <div className="col s2 reports-sidebar">
                 {report_filter}
               </div>
@@ -571,7 +571,7 @@ class PipelineSampleReport extends React.Component {
                   { download_button }
                   { filter_row_stats }
                 </div>
-                <div className="row reports-main ">
+                <div className="reports-main ">
                   <table id="report-table" className='bordered report-table'>
                     <thead>
                     <tr>
@@ -584,18 +584,18 @@ class PipelineSampleReport extends React.Component {
                         </span>
                         Taxonomy
                       </th>
-                        {this.render_column_header('NT+NR', 'ZZRPM',  'NT_aggregatescore', 'Aggregate score') }
+                        {this.render_column_header('', 'Score',  'NT_aggregatescore', 'Aggregate score') }
                         {this.render_column_header('NT', 'Z',   'NT_zscore', 'Z-score relative to background model for alignments to NCBI NT') }
                         {this.render_column_header('NT', 'rPM', 'NT_rpm', 'Number of reads aligning to the taxon in the NCBI NT database per million total input reads')}
                         {this.render_column_header('NT', 'r',   'NT_r', 'Number of reads aligning to the taxon in the NCBI NT database')}
                         {this.render_column_header('NT', '%id', 'NT_percentidentity', 'Average percent-identity of alignments to NCBI NT')}
-                        {this.render_column_header('NT', 'Log(1/E)',  'NT_neglogevalue', 'Average log-10-transformed expect value for alignments to NCBI NT')}
+                        {this.render_column_header('NT', 'log(1/E)',  'NT_neglogevalue', 'Average log-10-transformed expect value for alignments to NCBI NT')}
                         {this.render_column_header('NT', '%conc',  'NT_percentconcordant', 'Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NT)')}
                         {this.render_column_header('NR', 'Z',   'NR_zscore', 'Z-score relative to background model for alignments to NCBI NR') }
                         {this.render_column_header('NR', 'rPM', 'NR_rpm', 'Number of reads aligning to the taxon in the NCBI NR database per million total input reads')}
                         {this.render_column_header('NR', 'r',   'NR_r', 'Number of reads aligning to the taxon in the NCBI NR database')}
                         {this.render_column_header('NR', '%id', 'NR_percentidentity', 'Average percent-identity of alignments to NCBI NR')}
-                        {this.render_column_header('NR', 'Log(1/E)',  'NR_neglogevalue', 'Average log-10-transformed expect value for alignments to NCBI NR')}
+                        {this.render_column_header('NR', 'log(1/E)',  'NR_neglogevalue', 'Average log-10-transformed expect value for alignments to NCBI NR')}
                         {this.render_column_header('NR', '%conc',  'NR_percentconcordant', 'Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NR)')}
                     </tr>
                     </thead>

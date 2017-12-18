@@ -14,6 +14,12 @@ input[type=number] {
   -moz-appearance:textfield;
 }
 
+.row.reports-container{
+margin-bottom: 0px;
+}
+
+//Report Sidebar and Filters Styling
+
 .reports-sidebar {
   background: $sidebar-background;
   position: sticky;
@@ -22,7 +28,7 @@ input[type=number] {
   position: -moz-sticky;
   position: -o-sticky;
   position: -ms-sticky;
-  top: 0;
+  top: 10px;
   min-height: -webkit-fill-available !important;
   border-right: 1px solid rgb(212, 212, 212);
 }
@@ -82,7 +88,6 @@ input[type=number] {
       }
     }
   }
-
 
   .report-data section {
     float: left;
@@ -198,6 +203,12 @@ input[type=number] {
 
 }
 
+.reports-main {
+  width: 100%;
+  overflow: auto;
+  overflow-y: hidden;
+}
+
 .report-number {
   text-align: right;
 }
@@ -239,6 +250,11 @@ input[type=number] {
   float: right;
 }
 
+.report-table {
+  // min-width: 1000px;
+  font-size: 14px;
+}
+
 .report-table .link:hover {
   color: #0099cc;
   cursor: pointer;
@@ -256,7 +272,7 @@ input[type=number] {
   .fa {
     margin-left: 5px;
     font-size: 20px;
-    width: 20px;
+    width: 10px;
     &:hover {
       color: #444242;
     }
@@ -297,7 +313,7 @@ input[type=number] {
     text-transform: capitalize;
     &.sort-value {
       color: #929292;
-      font-size: 13px;
+      font-size: 14px;
       margin: 0 5px;
     }
   }
@@ -313,14 +329,13 @@ input[type=number] {
 }
 
 .report-table .sort-controls {
-  margin-right: 6px;
+  width: 95px;
+  white-space: nowrap;
+  overflow: hidden;
   i {
-    font-size: 24px;
+    font-size: 20px;
+    float: right;
     display: block;
-    line-height: 13px;
-    position: relative;
-    top: -5px;
-    bottom: 1px;
     &:hover, &.active {
       color: #09c;
     }
@@ -328,18 +343,37 @@ input[type=number] {
 }
 
 .report-table {
-  td:first-child {
-    width: 450px;
+
+  th{
+    font-size: 14px;
+    padding: 10px 10px;
   }
+
+  td{
+    padding: 10px 10px;
+  }
+
+  td, th {
+    width: 95px;
+    font-size:14px;
+  }
+
+  td:first-child {
+    min-width:400px;
+    width:400px;
+  }
+
   td:last-child {
     padding-right: 50px;
   }
   th:first-child {
-    width: 450px;
+    min-width: 400px;
+    width: 400px;
   }
   th:last-child {
     padding-right: 50px;
   }
+
   input.browser-default {
     text-align: right;
     border: 1px solid !important;
@@ -435,7 +469,7 @@ input[type=number] {
     }
     .count {
       display: inline-block;
-      margin: 20px 0 18px 45px;
+      margin: 20px 0 18px 20px;
 
     }
     .download {
@@ -464,6 +498,9 @@ input[type=number] {
     color: #84d4fa;
     font-size: 15px;
     cursor: pointer;
+    .fa-download {
+      margin-left:12px;
+    }
     .cloud {
       color: #84d4fa;
       font-size: 15px;
