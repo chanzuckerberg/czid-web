@@ -416,7 +416,7 @@ class PipelineSampleReport extends React.Component {
       category_name = tax_info.tax_id == -200 ? '' : tax_info.category_name;
       // Most groups are initially expanded, so they get a toggle with fa-minus initial state.
       fake_or_real = tax_info.genus_taxid < 0 ? 'fake-genus' : 'real-genus';
-      right_arrow_initial_visibility = '';
+      right_arrow_initial_visibility = 'hidden';
       down_arrow_initial_visibility = '';
       plus_or_minus = <span>
         <span className={`report-arrow-down report-arrow ${tax_info.tax_id} ${fake_or_real} ${down_arrow_initial_visibility}`}>
