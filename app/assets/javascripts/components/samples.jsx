@@ -466,12 +466,6 @@ class Samples extends React.Component {
 
   renderTable(samples) {
 
-    column_select_anchor = (
-      <div className="column-dropdown">
-        <span className="col s2 column-dropdown" data-activates="dropdown-column-select"><i className="column-arrow fa fa-caret-down"></i>Select Columns</span>
-      </div>
-    );
-
     search_box = (
       <div className="search-box">
         <span className="icon"><i className="fa fa-search" aria-hidden="true"></i></span>
@@ -575,7 +569,6 @@ class Samples extends React.Component {
     this.scrollDown();
     this.initializeProjectList();
     this.displayPipelineStatusFilter();
-    this.displayColumnSelector();
     $(document).ready(function() {
       $('select').material_select();
     });		  
@@ -586,16 +579,6 @@ class Samples extends React.Component {
   displayPipelineStatusFilter() {
     const textSize = 14
     $('.status-dropdown').dropdown({
-      belowOrigin: true,
-      stopPropagation: false,
-      constrainWidth: true
-    });
-    $(".dropdown-content>li>a").css("font-size", textSize)
-  }
-
-  displayColumnSelector() {
-    const textSize = 14
-    $('.column-dropdown').dropdown({
       belowOrigin: true,
       stopPropagation: false,
       constrainWidth: true
