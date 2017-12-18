@@ -597,7 +597,7 @@ class Samples extends React.Component {
               </div>
 
               <div className="title-filter">
-                <span><i>{this.state.allSamples.length === 0 ? 'No sample found' : ( this.state.allSamples.length === 1 ? '1 sample found' : `${this.state.allSamples.length} out of ${this.state.totalNumber} samples found`)}</i></span>
+                <span><i>{this.state.allSamples.length === 0 ? 'No sample found' : ( this.state.allSamples.length === 1 ? 'Showing 1 sample found' : `Showing ${this.state.allSamples.length} out of ${this.state.totalNumber} samples found`)}</i></span>
               </div>
             </div>
           </div>
