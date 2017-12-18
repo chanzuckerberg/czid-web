@@ -368,7 +368,8 @@ $break-large: 1070px;
   ul .dropdown-content li > a {
     font-size: 14px !important;
   }
-  .table-container {
+ .table-container {
+    display: flex;
     margin: 0 67px 7px;
     color: #333333;
     font-weight: 600;
@@ -386,6 +387,7 @@ $break-large: 1070px;
     margin-bottom: 0;
     border-bottom: 1px solid #dfdddd;
     .job-card {
+      display: flex;
       margin: 0 63px;
       .blank {
         color: #b5b0b0

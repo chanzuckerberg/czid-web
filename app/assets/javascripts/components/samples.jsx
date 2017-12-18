@@ -146,12 +146,12 @@ class Samples extends React.Component {
 
       rowWithChunkStatus = (
         <div className={statusClass}>
-          <span>{this.appendStatusIcon(status)}</span><p className="status">{status}</p>
+          <span>{this.appendStatusIcon(status)}</span><p className="optional_column pipeline_status status">{status}</p>
         </div>
       );
       rowWithoutChunkStatus = (
         <div className={statusClass}>
-          <span>{this.appendStatusIcon(status)}</span><p className="status">{status}</p>
+          <span>{this.appendStatusIcon(status)}</span><p className="optional_column pipeline_status status">{status}</p>
         </div>
       )
       data_values = { total_reads: !derivedOutput.pipeline_output ? BLANK_TEXT : numberWithCommas(derivedOutput.pipeline_output.total_reads),
@@ -186,7 +186,7 @@ class Samples extends React.Component {
             <div key="host_genome" className="optional-column host_genome col s1 hidden"><p>{ data_values.host_genome }</p></div>
             <div key="notes" className="optional-column notes col s1 hidden"><p>{ data_values.notes }</p></div>
 
-            <div className={ runInfo.total_runtime ? "reads status-col col s2" : 'reads col s2 no-time'}>{ !runInfo.job_status_description ? rowWithChunkStatus : rowWithoutChunkStatus }
+            <div className={ runInfo.total_runtime ? "optional-column pipeline_status reads status-col col s2" : 'optional-column pipeline_status reads col s2 no-time'}>{ !runInfo.job_status_description ? rowWithChunkStatus : rowWithoutChunkStatus }
               { runInfo.total_runtime ? <p className="time"><i className="fa fa-clock-o" aria-hidden="true"></i><span>{this.formatRunTime(runInfo.total_runtime)}</span></p> : ''}
             </div>
           </div>
@@ -521,8 +521,10 @@ class Samples extends React.Component {
           { column_select_anchor }
           { column_select_dropdown }
           { status_filter_dropdown }
-          { tableHead }
-          { !samples.length && this.state.displayEmpty ? this.renderEmptyTable() : this.renderPipelineOutput(samples)  }
+          <div className="sample-table-container">
+            { tableHead }
+            { !samples.length && this.state.displayEmpty ? this.renderEmptyTable() : this.renderPipelineOutput(samples)  }
+          </div>
       </div>
       { !this.state.pageEnd && this.state.initialFetchedSamples && this.state.initialFetchedSamples.length > 14 ? <div className="scroll">
         <i className='fa fa-spinner fa-spin fa-3x'></i>
