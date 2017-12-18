@@ -347,6 +347,7 @@ $break-large: 1070px;
   }
 }
 
+
 .sample-container {
   .wrapper {
     border-bottom: 1px #291d1d26 solid;
@@ -430,6 +431,7 @@ $break-large: 1070px;
     }
   }
   .search-box {
+    display: inline-block;
     margin-bottom: 0;
     width: 30%;
     border: 1px solid #e6e6e6;
@@ -440,6 +442,9 @@ $break-large: 1070px;
       display: inline-block;
       margin: 0 10px;
     }
+  }
+  .column-dropdown {    
+    display: inline-block;
   }
   input.search {
     margin: 0;

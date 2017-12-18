@@ -453,14 +453,16 @@ class Samples extends React.Component {
   renderTable(samples) {
 
     column_select_anchor = (
-      <span className="col s2 column-dropdown" data-activates="dropdown-column-select"><i className="status-filter fa fa-caret-down"></i>Select Columns</span>
+      <div className="column-dropdown">
+        <span className="col s2 column-dropdown" data-activates="dropdown-column-select"><i className="column-arrow fa fa-caret-down"></i>Select Columns</span>
+      </div>
     );
 
     search_box = (
-      <span className="search-box">
+      <div className="search-box">
         <span className="icon"><i className="fa fa-search" aria-hidden="true"></i></span>
         <input id="search" value={this.state.searchParams} onChange={this.handleSearchChange}  type="search" onKeyDown={this.handleSearch} className="search" placeholder='Search for Sample'/>{ this.state.showSearchLoader ? <i className='fa fa-spinner fa-spin fa-lg'></i> : null }
-      </span>
+      </div>
     );
 
     const tableHead = (
