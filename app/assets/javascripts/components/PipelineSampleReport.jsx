@@ -582,7 +582,7 @@ class PipelineSampleReport extends React.Component {
         resetAllFilters = { this.resetAllFilters }
       />;
     filter_stats = this.state.rows_passing_filters + ' rows passing filters, out of ' + this.state.rows_total + ' total rows.';
-    disable_filter = this.anyFilterSet() ? (<span className="disable" onClick={(e) => this.refs.report_filter.resetAllFilters()}><b> Disable filters</b></span> ) : null;
+    disable_filter = this.anyFilterSet() ? (<span className="disable" onClick={(e) => this.refs.report_filter.resetAllFilters()}><b> Disable all filters</b></span> ) : null;
     filter_row_stats = this.state.loading ? null : (
       <div>
         <span className="count">
