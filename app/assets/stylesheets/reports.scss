@@ -16,15 +16,15 @@ input[type=number] {
 
 .flash {
   animation-name: anim-info-updated;
-  animation-duration: 5s;
+  animation-duration: 500ms;
 }
 
 @keyframes anim-info-updated {
     0% {
-      background-color:  yellow;
+      background-color: #edf8ff;
     }
     100% {
-      background-color:  transparent;
+      background-color: transparent;
     }
 }
 
