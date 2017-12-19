@@ -29,6 +29,6 @@ instances = ecs_client.describe_container_instances(cluster: env,
 
 resp = ec2_client.describe_instances(instance_ids: [instances.container_instances[0].ec2_instance_id])
 
-public_ip = resp.reservations.first.instances.first.public_ip_address
+private_ip = resp.reservations.first.instances.first.private_ip_address
 
-exec %(ssh -t ec2-user@#{public_ip} "docker exec -it \\`docker ps | grep ecs-idseq-web | head -1 | awk '{print \\$NF}'\\` #{command} ")
+exec %(ssh -t ec2-user@#{private_ip} "docker exec -it \\`docker ps | grep ecs-idseq-web | head -1 | awk '{print \\$NF}'\\` #{command} ")
