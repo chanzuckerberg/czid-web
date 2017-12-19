@@ -558,9 +558,8 @@ class Samples extends React.Component {
 
     column_select_dropdown = (
       <div className="column-dropdown">
-        <div class="input-field col s4">
+        <div class="input-field col s8">
           <select multiple name="columnSelector" ref="columnSelector" onChange={this.handleColumnSelectChange}>
-            <option value="" disabled selected>Select Columns</option>
             <optgroup label="Pipeline Data">
               { this.display_column_options(this.COLUMN_DISPLAY_MAP, "pipeline_data", true) }
             </optgroup>
