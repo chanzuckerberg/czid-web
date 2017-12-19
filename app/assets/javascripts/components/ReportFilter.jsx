@@ -104,11 +104,11 @@ class ReportFilter extends React.Component {
     })
     this.applySearchFilter(0, excluded_categories)
 
-    // flash
-    $(`.filter-message`).addClass('flash')
-    $(`.filter-message`).one('webkitAnimationEnd oanimationend msAnimationEnd animationend', function(event) {
-      $(`.filter-message`).removeClass('flash')
-    });
+    this.flash()
+  }
+
+  flash() {
+    this.props.flash()
   }
 
   resetAllFilters() {
@@ -131,7 +131,8 @@ class ReportFilter extends React.Component {
   }
 
   applySearchFilter(searchId, excluded_categories) {
-    this.props.applySearchFilter(searchId, excluded_categories)
+    this.props.applySearchFilter(searchId, excluded_categories);
+    this.flash()
   }
 
   render() {
@@ -182,9 +183,6 @@ class ReportFilter extends React.Component {
         </div>
       </div>
     );
-    filter_message = (
-      <div className="filter-message"><span className="count">hello</span></div>
-    );
     return (
       <div>
         <div className="sidebar-title">
@@ -214,7 +212,7 @@ class ReportFilter extends React.Component {
               <div id="filters-pane" className="pane col s12">
                 {category_filter}
                 {genus_search}
-                {filter_message}
+                {this.props.filter_row_stats}
               </div>
             </div>
           </div>
