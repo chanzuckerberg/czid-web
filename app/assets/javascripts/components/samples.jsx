@@ -495,9 +495,7 @@ class Samples extends React.Component {
 
   handleColumnSelectChange(e) {
     selected_columns = this.findSelectedColumns(e.target);
-    console.log("before: " + this.columnHidden("tissue_type"));
     this.setState({columnsShown: selected_columns});
-    console.log("after: " + this.columnHidden("tissue_type"));
   }
 
   columnHidden(column) {
