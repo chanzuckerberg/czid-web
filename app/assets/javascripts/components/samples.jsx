@@ -194,7 +194,8 @@ class Samples extends React.Component {
       return (
         <div className="row job-container" onClick={ this.viewSample.bind(this, dbSample.id)} key={i}>
           <div className="job-card">
-            <div className="col s4">
+
+            <div className="col s12">
               <p className="sample-name">{dbSample.name}</p>
               <p className="uploader">
                 <span>Uploaded {moment(dbSample.created_at).startOf('second').fromNow()}</span>
@@ -202,19 +203,19 @@ class Samples extends React.Component {
               </p>
             </div>
 
-            <div key="total_reads" className="reads col s2" hidden={this.columnHidden("total_reads")}><p>{ data_values["total_reads"] }</p></div>
-            <div key="nonhost_reads" className="reads col s2" hidden={this.columnHidden("nonhost_reads")}><p>{ data_values["nonhost_reads"] }{ data_values["nonhost_reads_percent"] }</p></div>
-            <div key="quality_control" className="reads col s1 center" hidden={this.columnHidden("quality_control")}><p>{ data_values["quality_control"] }</p></div>
-            <div key="compression_ratio" className="reads col s1 center" hidden={this.columnHidden("compression_ratio")}><p>{ data_values["compression_ratio"] }</p></div>
+            <div key="total_reads" className="reads col s6" hidden={this.columnHidden("total_reads")}><p>{ data_values["total_reads"] }</p></div>
+            <div key="nonhost_reads" className="reads col s6" hidden={this.columnHidden("nonhost_reads")}><p>{ data_values["nonhost_reads"] }{ data_values["nonhost_reads_percent"] }</p></div>
+            <div key="quality_control" className="reads col s6 center" hidden={this.columnHidden("quality_control")}><p>{ data_values["quality_control"] }</p></div>
+            <div key="compression_ratio" className="reads col s6 center" hidden={this.columnHidden("compression_ratio")}><p>{ data_values["compression_ratio"] }</p></div>
 
             { Object.keys(this.COLUMN_DISPLAY_MAP).map((option_name, i) => {
                 if (this.COLUMN_DISPLAY_MAP[option_name].type === "metadata") {
                   return (
-                    <div key={option_name} className="reads col s1" hidden={this.columnHidden(option_name)}><p>{ data_values[option_name] }</p></div>
+                    <div key={option_name} className="reads col s6" hidden={this.columnHidden(option_name)}><p>{ data_values[option_name] }</p></div>
                   )
             }})}
 
-            <div className={ runInfo.total_runtime ? "reads status-col col s2" : 'reads col s2 no-time'} hidden={this.columnHidden("pipeline_status")}>
+            <div className={ runInfo.total_runtime ? "reads status-col col s6" : 'reads col s6 no-time'} hidden={this.columnHidden("pipeline_status")}>
               { !runInfo.job_status_description ? rowWithChunkStatus : rowWithoutChunkStatus }
               { runInfo.total_runtime ? <p className="time"><i className="fa fa-clock-o" aria-hidden="true"></i><span>{this.formatRunTime(runInfo.total_runtime)}</span></p> : ''}
             </div>
@@ -514,7 +515,7 @@ class Samples extends React.Component {
       <div className="row wrapper">
         <div className="row table-container">
 
-          <div className="col s4 sort-able">
+          <div className="col s12 sort-able">
             <div onClick={this.sortSamples}>
               <span>Name</span>
               <i className={`fa ${(this.state.sort_by === 'name,desc') ? 'fa fa-caret-up' : 'fa fa-caret-down'}
@@ -522,21 +523,21 @@ class Samples extends React.Component {
             </div>
           </div>
 
-          <div className="col s2" hidden={this.columnHidden("total_reads")}>{ this.COLUMN_DISPLAY_MAP.total_reads.display_name }</div>
-          <div className="col s2" hidden={this.columnHidden("nonhost_reads")}>{ this.COLUMN_DISPLAY_MAP.nonhost_reads.display_name }</div>
-          <div className="col s1 center" rel='tooltip' data-placement='bottom' title={this.COLUMN_DISPLAY_MAP.quality_control.tooltip}
+          <div className="col s6" hidden={this.columnHidden("total_reads")}>{ this.COLUMN_DISPLAY_MAP.total_reads.display_name }</div>
+          <div className="col s6" hidden={this.columnHidden("nonhost_reads")}>{ this.COLUMN_DISPLAY_MAP.nonhost_reads.display_name }</div>
+          <div className="col s6 center" rel='tooltip' data-placement='bottom' title={this.COLUMN_DISPLAY_MAP.quality_control.tooltip}
             hidden={this.columnHidden("quality_control")}>{ this.COLUMN_DISPLAY_MAP.quality_control.display_name }</div>
-          <div className="col s1 center" rel='tooltip' data-placement='bottom' title={this.COLUMN_DISPLAY_MAP.compression_ratio.tooltip}
+          <div className="col s6 center" rel='tooltip' data-placement='bottom' title={this.COLUMN_DISPLAY_MAP.compression_ratio.tooltip}
             hidden={this.columnHidden("compression_ratio")}>{ this.COLUMN_DISPLAY_MAP.compression_ratio.display_name }</div>
 
           { Object.keys(this.COLUMN_DISPLAY_MAP).map((option_name, i) => {
               if (this.COLUMN_DISPLAY_MAP[option_name].type === "metadata") {
                 return (
-                  <div key={i} className="col s1" hidden={this.columnHidden(option_name)}>{ this.COLUMN_DISPLAY_MAP[option_name].display_name }</div>
+                  <div key={i} className="col s6" hidden={this.columnHidden(option_name)}>{ this.COLUMN_DISPLAY_MAP[option_name].display_name }</div>
                 )
           }})}
 
-          <div className="col s2 status-dropdown" data-activates="dropdownstatus" hidden={this.columnHidden("pipeline_status")}>
+          <div className="col s6 status-dropdown" data-activates="dropdownstatus" hidden={this.columnHidden("pipeline_status")}>
             <i className="status-filter fa fa-caret-down"></i>{ this.COLUMN_DISPLAY_MAP.pipeline_status.display_name }
           </div>
         </div>
