@@ -28,7 +28,8 @@ class Samples extends React.Component {
       initialFetchedSamples: [],
       loading: false,
       isRequesting: false,
-      displayEmpty: false
+      displayEmpty: false,
+      columnsShown: ["total_reads", "nonhost_reads", "quality_control" , "compression_ratio", "pipeline_status"]
     };
     this.sortCount = 0;
     this.initializeTooltip();
@@ -43,6 +44,7 @@ class Samples extends React.Component {
                                 host_genome: { display_name: "Host", type: "metadata" },
                                 notes: { display_name: "Notes", type: "metadata" } }
     this.handleColumnSelectChange = this.handleColumnSelectChange.bind(this);
+    this.columnHidden = this.columnHidden.bind(this);
     $(document).ready(function() {
       $('select').material_select();
     });
@@ -200,18 +202,21 @@ class Samples extends React.Component {
               </p>
             </div>
 
-            <div key="total_reads" className="optional-column total_reads reads col s1"><p>{ data_values.total_reads }</p></div>
-            <div key="nonhost_reads" className="optional-column nonhost_reads reads col s2"><p>{ data_values.nonhost_reads }{ data_values.nonhost_reads_percent }</p></div>
-            <div key="quality_control" className="optional-column quality_control reads col s1 center"><p>{ data_values.quality_control }</p></div>
-            <div key="compression_ratio" className="optional-column compression_ratio reads col s1 center"><p>{ data_values.compression_ratio }</p></div>
+            <div key="total_reads" className="reads col s1" hidden={this.columnHidden("total_reads")}><p>{ data_values["total_reads"] }</p></div>
+            <div key="nonhost_reads" className="reads col s2" hidden={this.columnHidden("nonhost_reads")}><p>{ data_values["nonhost_reads"] }{ data_values["nonhost_reads_percent"] }</p></div>
+            <div key="quality_control" className="reads col s1 center" hidden={this.columnHidden("quality_control")}><p>{ data_values["quality_control"] }</p></div>
+            <div key="compression_ratio" className="reads col s1 center" hidden={this.columnHidden("compression_ratio")}><p>{ data_values["compression_ratio"] }</p></div>
 
-            <div key="tissue_type" className="optional-column tissue_type col s1 hidden"><p>{ data_values.tissue_type }</p></div>
-            <div key="nucleotide_type" className="optional-column nucleotide_type col s1 hidden"><p>{ data_values.nucleotide_type }</p></div>
-            <div key="location" className="optional-column location col s1 hidden"><p>{ data_values.location }</p></div>
-            <div key="host_genome" className="optional-column host_genome col s1 hidden"><p>{ data_values.host_genome }</p></div>
-            <div key="notes" className="optional-column notes col s1 hidden"><p>{ data_values.notes }</p></div>
+            { Object.keys(this.COLUMN_DISPLAY_MAP).map((option_name, i) => {
+                if (this.COLUMN_DISPLAY_MAP[option_name].type === "metadata") {
+                  return (
+                    <div className="col s1" hidden={this.columnHidden(option_name)}><p>{ data_values[option_name] }</p></div>
+                  )
+            }})}
 
-            <div className={ runInfo.total_runtime ? "optional-column pipeline_status reads status-col col s2" : 'optional-column pipeline_status reads col s2 no-time'}>{ !runInfo.job_status_description ? rowWithChunkStatus : rowWithoutChunkStatus }
+
+            <div className={ runInfo.total_runtime ? "reads status-col col s2" : 'reads col s2 no-time'} hidden={this.columnHidden("pipeline_status")}>
+              { !runInfo.job_status_description ? rowWithChunkStatus : rowWithoutChunkStatus }
               { runInfo.total_runtime ? <p className="time"><i className="fa fa-clock-o" aria-hidden="true"></i><span>{this.formatRunTime(runInfo.total_runtime)}</span></p> : ''}
             </div>
           </div>
@@ -414,7 +419,7 @@ class Samples extends React.Component {
       pageEnd: false
     }, () => {
       this.setUrlLocation();
-      this.fetchProjectDetails(id)
+      this.fetchProjectDetails(id);
     });
   }
 
@@ -462,27 +467,35 @@ class Samples extends React.Component {
     )
   }
 
-  handleColumnSelectChange(e) {
-    var selO = e.target;
+  findSelectedColumns(selO) {
+    var selValues = [];
     for (i=0; i < selO.length; i++) {
       column_name = selO.options[i].value;
-      if (column_name !== "") {
-        if (selO.options[i].selected) {
-          $(`.optional-column.${column_name}`).removeClass('hidden');
-        } else {
-          $(`.optional-column.${column_name}`).addClass('hidden');
-        }
+      if (selO.options[i].selected && column_name !== "") {
+        selValues.push(column_name);
       }
     }
+    return selValues;
+  }
+
+  handleColumnSelectChange(e) {
+    selected_columns = this.findSelectedColumns(e.target);
+    console.log("before: " + this.columnHidden("tissue_type"));
+    this.setState({columnsShown: selected_columns});
+    console.log("after: " + this.columnHidden("tissue_type"));
+  }
+
+  columnHidden(column) {
+    return !this.state.columnsShown.includes(column)
   }
 
   display_column_options(column_map, data_type, default_checked) {
     column_list = Object.keys(column_map)
     return column_list.map((option_name, i) => {
-      if (this.COLUMN_DISPLAY_MAP[option_name].type === data_type) {
+      if (column_map[option_name].type === data_type) {
         return (
           <option key={option_name} id={option_name} value={option_name} selected={default_checked}>
-            {this.COLUMN_DISPLAY_MAP[option_name].display_name}
+            {column_map[option_name].display_name}
           </option>
         )
       }
@@ -510,21 +523,23 @@ class Samples extends React.Component {
             </div>
           </div>
 
-          <div key="total_reads" className="optional-column total_reads col s1">{ this.COLUMN_DISPLAY_MAP.total_reads.display_name }</div>
-          <div key="nonhost_reads" className="optional-column nonhost_reads col s2">{ this.COLUMN_DISPLAY_MAP.nonhost_reads.display_name }</div>
-          <div key="quality_control" className="optional-column quality_control col s1 center"
-            rel='tooltip' data-placement='bottom' title={this.COLUMN_DISPLAY_MAP.quality_control.tooltip}>{ this.COLUMN_DISPLAY_MAP.quality_control.display_name }</div>
-          <div key="compression_ratio" className="optional-column compression_ratio col s1 center"
-            rel='tooltip' data-placement='bottom' title={this.COLUMN_DISPLAY_MAP.compression_ratio.tooltip}>{ this.COLUMN_DISPLAY_MAP.compression_ratio.display_name }</div>
+          <div className="col s1" hidden={this.columnHidden("total_reads")}>{ this.COLUMN_DISPLAY_MAP.total_reads.display_name }</div>
+          <div className="col s2" hidden={this.columnHidden("nonhost_reads")}>{ this.COLUMN_DISPLAY_MAP.nonhost_reads.display_name }</div>
+          <div className="col s1 center" rel='tooltip' data-placement='bottom' title={this.COLUMN_DISPLAY_MAP.quality_control.tooltip}
+            hidden={this.columnHidden("quality_control")}>{ this.COLUMN_DISPLAY_MAP.quality_control.display_name }</div>
+          <div className="col s1 center" rel='tooltip' data-placement='bottom' title={this.COLUMN_DISPLAY_MAP.compression_ratio.tooltip}
+            hidden={this.columnHidden("compression_ratio")}>{ this.COLUMN_DISPLAY_MAP.compression_ratio.display_name }</div>
 
-          <div key="tissue_type" className={`optional-column tissue_type col s1 hidden`}>{ this.COLUMN_DISPLAY_MAP.tissue_type.display_name }</div>
-          <div key="nucleotide_type" className={`optional-column nucleotide_type col s1 hidden`}>{ this.COLUMN_DISPLAY_MAP.nucleotide_type.display_name }</div>
-          <div key="location" className={`optional-column location col s1 hidden`}>{ this.COLUMN_DISPLAY_MAP.location.display_name }</div>
-          <div key="host_genome" className={`optional-column host_genome col s1 hidden`}>{ this.COLUMN_DISPLAY_MAP.host_genome.display_name }</div>
-          <div key="notes" className={`optional-column notes col s1 hidden`}>{ this.COLUMN_DISPLAY_MAP.notes.display_name }</div>
+          { Object.keys(this.COLUMN_DISPLAY_MAP).map((option_name, i) => {
+              if (this.COLUMN_DISPLAY_MAP[option_name].type === "metadata") {
+                return (
+                  <div className="col s1" hidden={this.columnHidden(option_name)}>{ this.COLUMN_DISPLAY_MAP[option_name].display_name }</div>
+                )
+          }})}
 
           <div key="pipeline_status" className="optional-column pipeline_status col s2 status-dropdown" data-activates="dropdownstatus">
-            <i className="status-filter fa fa-caret-down"></i>{ this.COLUMN_DISPLAY_MAP.pipeline_status.display_name }</div>
+            <i className="status-filter fa fa-caret-down"></i>{ this.COLUMN_DISPLAY_MAP.pipeline_status.display_name }
+          </div>
         </div>
       </div> 
     );
@@ -545,7 +560,7 @@ class Samples extends React.Component {
     column_select_dropdown = (
       <div className="column-dropdown">
         <div class="input-field col s4">
-          <select multiple ref="columnSelector" onChange={this.handleColumnSelectChange}>
+          <select multiple name="columnSelector" ref="columnSelector" onChange={this.handleColumnSelectChange}>
             <option value="" disabled selected>Select Columns</option>
             <optgroup label="Pipeline Data">
               { this.display_column_options(this.COLUMN_DISPLAY_MAP, "pipeline_data", true) }
@@ -600,9 +615,13 @@ class Samples extends React.Component {
     this.scrollDown();
     this.initializeProjectList();
     this.displayPipelineStatusFilter();
+    this.initializeColumnSelect();
+  }
+
+  initializeColumnSelect() {
     $(document).ready(function() {
       $('select').material_select();
-    });		  
+    });
     $(ReactDOM.findDOMNode(this.refs.columnSelector)).on('change',this.handleColumnSelectChange.bind(this));
   }
 
@@ -644,7 +663,7 @@ class Samples extends React.Component {
       project_id: projectId ? projectId : '',
       filter: this.state.filterParams,
       search: this.state.searchParams,
-      sort_by: this.state.sort_by
+      sort_by: this.state.sort_by   
     };
     window.history.replaceState(null, null, `?${jQuery.param(params)}`)
   }
