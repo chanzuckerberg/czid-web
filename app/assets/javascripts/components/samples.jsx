@@ -188,7 +188,7 @@ class Samples extends React.Component {
                       compression_ratio: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.compression_ratio) ? BLANK_TEXT : derivedOutput.summary_stats.compression_ratio.toFixed(2),
                       tissue_type: dbSample && dbSample.sample_tissue ? dbSample.sample_tissue : BLANK_TEXT,
                       nucleotide_type: dbSample && dbSample.sample_template ? dbSample.sample_template : BLANK_TEXT,
-                      host_genome: BLANK_TEXT,
+                      host_genome: derivedOutput && derivedOutput.host_genome_name ? derivedOutput.host_genome_name : BLANK_TEXT,
                       notes: dbSample && dbSample.sample_notes ? dbSample.sample_notes : BLANK_TEXT }
 
       return (
