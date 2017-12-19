@@ -17,8 +17,6 @@ class Samples extends React.Component {
     this.switchColumn = this.switchColumn.bind(this);
     this.uploadSample = this.uploadSample.bind(this);
     this.toggleDisplayProjects = this.toggleDisplayProjects.bind(this);
-    this.toggleDisplayFavProjects = this.toggleDisplayFavProjects.bind(this);
-    this.toggleFavorite = this.toggleFavorite.bind(this);
     this.pageSize = props.pageSize || 30
     this.state = {
       project: null,
@@ -27,10 +25,7 @@ class Samples extends React.Component {
       filterParams: this.fetchParams('filter') || '',
       searchParams: this.fetchParams('search') || '',
       sampleIdsParams: this.fetchParams('ids') || [],
-      favouriteProjects: props.favorites || [],
-      formattedProjectList: [],
-      formattedFavProjectList: [],
-      favIds: [],
+      favouriteProjects: [],
       allSamples: [],
       allProjects: [],
       sort_by: this.fetchParams('sort_by') || 'id,desc',
@@ -58,9 +53,7 @@ class Samples extends React.Component {
         'notes',
         'tissue_type',
         'nucleotide_type'
-      ],
-      showLess: true,
-      showLessFavorites: true
+      ]
     };
     this.sortCount = 0;
 
@@ -583,12 +576,7 @@ class Samples extends React.Component {
   //Select or switch Project
   switchProject(e) {
     let id = e.target.getAttribute('data-id');
-    let listType = e.target.getAttribute('data-type');
-    if (listType == 'fav') {
-      this.highlightSelectedFavoriteProject(id) 
-    } else {
-      this.highlightSelectedProject(id);
-    }
+    this.highlightSelectedProject(id);
     this.setState({
       selectedProjectId: id,
       pageEnd: false
@@ -645,10 +633,6 @@ class Samples extends React.Component {
     this.setState((prevState) => ({ showLess: !prevState.showLess }))
   }
 
-  toggleDisplayFavProjects() {
-    this.setState((prevState) => ({ showLessFavorites: !prevState.showLessFavorites }))
-  }
-
   renderEmptyTable() {
     return (
       <div className="center-align"><i className='fa fa-frown-o'> No result found</i></div>
@@ -689,12 +673,6 @@ class Samples extends React.Component {
   }
  
 
-  addFavIconClass(project) {
-    return (
-      <i data-status="favorite" data-fav={project.favorited} data-id={project.id} onClick={this.toggleFavorite} className={!project.favorited ? "favorite fa fa-star-o":  "favorite fa fa-star"}></i>
-    )
-  }
-
   renderSidebar() {
     const sortLogic = (a, b) => {
       var nameA = a.name.toUpperCase(); // ignore upper and lowercase
@@ -718,35 +696,23 @@ class Samples extends React.Component {
           <div className="row fav-row">
             <span className="title">Favorite Projects</span>
             <hr/>
-            <div className="fav-projects-wrapper">
-              {!this.state.formattedFavProjectList.length ? <div className="none">None</div>: this.state.showLessFavorites ? this.state.formattedFavProjectList.sort(sortLogic).slice(0,4).map((project, i) => {
-                return (
-                  <div className="fav-item" data-id={project.id}  key={i}><div onClick={this.switchProject} data-type="fav" data-id={project.id}><span data-id={project.id}>{project.name}</span></div>{this.addFavIconClass(project)}</div>
-                )
-              }): 
-              this.state.formattedFavProjectList.sort(sortLogic).map((project, i) => {
-                return (
-                  <div className="fav-item" data-id={project.id}  key={i}><div onClick={this.switchProject} data-type="fav" data-id={project.id}><span data-id={project.id}>{project.name}</span></div>{this.addFavIconClass(project)}</div>
-                )
-              }) }
-              { this.state.formattedFavProjectList.length > 4 ? <div className="more" onClick={this.toggleDisplayFavProjects}>{this.state.showLessFavorites ? 'Show More...' : 'Show Less...'}</div> : ''}
-            </div>
+            {this.state.favouriteProjects.length ? "" : <div className="none">None</div>}
           </div>
           <div className="projects">
             <span onClick={this.switchProject} className="title">All Projects</span>
             <hr/>
             <div className="projects-wrapper">
-              { !this.state.formattedProjectList.length ? "None" : this.state.showLess ? this.state.formattedProjectList.sort(sortLogic).slice(0,7).map((project, i) => {
+              {this.state.showLess ? this.state.allProjects.sort(sortLogic).slice(0,7).map((project, i) => {
                   return (
-                      <div className="project-item" data-id={project.id}  key={i}><div onClick={this.switchProject} data-id={project.id}><span data-id={project.id}>{project.name}</span></div>{this.addFavIconClass(project)}</div>
+                    <div key={i} data-id={project.id} onClick={this.switchProject}  className="project-item">{project.name}</div>
                   )
                 }) : 
-                this.state.formattedProjectList.sort(sortLogic).map((project, i) => {
+                this.state.allProjects.sort(sortLogic).map((project, i) => {
                 return (
-                  <div className="project-item" data-id={project.id} key={i}><div onClick={this.switchProject} data-id={project.id}><span data-id={project.id}>{project.name}</span></div>{this.addFavIconClass(project)}</div>
+                  <div key={i} data-id={project.id} onClick={this.switchProject} className="project-item">{project.name}</div>
                 )
               }) }
-              { this.state.formattedProjectList.length ? <div className="more" onClick={this.toggleDisplayProjects}>{this.state.showLess ? 'Show More...' : 'Show Less...'}</div> : ''}
+              { this.state.allProjects.length ? <div className="more" onClick={this.toggleDisplayProjects}>{this.state.showLess ? 'Show More...' : 'Show Less...'}</div> : ''}
              </div>
           </div>
         </div>
@@ -934,19 +900,9 @@ class Samples extends React.Component {
   }
 
   highlightSelectedProject(id) {
-    this.removeHighlight();
+    $('.project-item').removeClass('highlight')
     $(`.project-item[data-id="${id}"]`).addClass('highlight');
   }
-
-  removeHighlight() {
-    $('.fav-item').removeClass('highlight')
-    $('.project-item').removeClass('highlight')
-  }
-
-  highlightSelectedFavoriteProject(id) {
-    this.removeHighlight();
-    $(`.fav-item[data-id="${id}"]`).addClass('highlight');
-  } 
 
   //handle filtering when a filter is selected from list
   handleStatusFilterSelect(e) {

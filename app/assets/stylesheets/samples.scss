@@ -851,12 +851,34 @@ input[type=search]:focus:not([readonly]) {
       padding: 0 5px;
       text-decoration: underline;
       color: #4ba4c2;
+        .project-item {
+          padding: 10px 5px;
+          cursor: pointer;
+          font-size: 12px;
+          &:hover {
+            background: #e0dfdf;
+          }
+        }
+        .highlight {
+          background: #bfd1dc;
+        }
+        .more {
+          font-size: 12px;
+          cursor: pointer;
+          padding: 0 5px;
+          text-decoration: underline;
+          color: #4ba4c2;
+        }
+      }
     }
   }
 }
 
+<<<<<<< HEAD
 .fa-star{
   color: #9f9f43;
 }
 
 
+=======
+>>>>>>> Create sidebar for projects on samples page
