@@ -472,10 +472,6 @@ class Samples extends React.Component {
     )
   }
 
-  sortProjects(projects) {
-
-  }
-
   renderSidebar() {
     const sortLogic = (a, b) => {
       var nameA = a.name.toUpperCase(); // ignore upper and lowercase
