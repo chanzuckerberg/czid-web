@@ -69,6 +69,10 @@ class PipelineSampleReport extends React.Component {
     this.fetchSearchList();
   }
 
+  componentDidMount() {
+    this.listenThresholdChanges();
+  }
+
   fetchSearchList() {
     axios.get(`/samples/${this.sample_id}/search_list?report_ts=${this.report_ts}`).then((res) => {
       let search_list = res.data.search_list
@@ -367,6 +371,12 @@ class PipelineSampleReport extends React.Component {
     if (event.keyCode == 13) {
       this.applyThresholdFilters(this.state.taxonomy_details);
     }
+  }
+
+  listenThresholdChanges() {
+    $('.metric-thresholds').focusout((e) => {
+      this.applyThresholdFilters(this.state.taxonomy_details);
+    })
   }
 
   // Remove this after fix sorting
