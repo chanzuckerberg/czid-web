@@ -103,6 +103,9 @@ class ReportFilter extends React.Component {
       searchKey: ''
     })
     this.applySearchFilter(0, excluded_categories)
+
+    // flash
+    $(`.filter-message`).addClass('flash')
   }
 
   resetAllFilters() {
@@ -176,6 +179,9 @@ class ReportFilter extends React.Component {
         </div>
       </div>
     );
+    filter_message = (
+      <div className="filter-message"><span className="count">hello</span></div>
+    );
     return (
       <div>
         <div className="sidebar-title">
@@ -205,6 +211,7 @@ class ReportFilter extends React.Component {
               <div id="filters-pane" className="pane col s12">
                 {category_filter}
                 {genus_search}
+                {filter_message}
               </div>
             </div>
           </div>

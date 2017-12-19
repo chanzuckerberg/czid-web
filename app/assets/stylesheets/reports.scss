@@ -14,6 +14,41 @@ input[type=number] {
   -moz-appearance:textfield;
 }
 
+.flash {
+  animation-name: anim-info-updated;
+  animation-duration: 2s;
+}
+
+@keyframes anim-info-updated {
+    0% {
+      border: 2px solid green;
+      background-color:  rgba(0, 128, 0, 0.5);
+      color: rgb(0, 64, 0);
+    }
+    4% {
+      border: 2px solid transparent;
+    }
+    8% {
+      border: 2px solid green;
+    }
+    12% {
+      border: 2px solid transparent;
+    }
+    16% {
+      border: 2px solid green;
+    }
+    50% {
+      border: 2px solid green;
+      background-color:  rgba(0, 128, 0, 0.5);
+      color: rgb(0, 64, 0);
+    }
+    100% {
+      border: 2px solid transparent;
+      background-color:  rgba(0, 128, 0, 0);
+      color: rgb(0, 128, 0);
+    }
+}
+
 .row.reports-container{
 margin-bottom: 0px;
 }
