@@ -82,7 +82,12 @@ class PipelineSampleReport extends React.Component {
   }
 
   fetchReportData() {
-    const params = `?${window.location.search.replace("?", "")}&report_ts=${this.report_ts}`
+    let params = `?${window.location.search.replace("?", "")}&report_ts=${this.report_ts}`;
+    const cached_background_id = Cookies.get('background_id');
+    if(cached_background_id) {
+      params = params.indexOf('background_id=')
+      < 0 ? `${params}&background_id=${cached_background_id}` : params;
+    }
     axios.get(`/samples/${this.sample_id}/report_info${params}`).then((res) => {
       let genus_map = {}
       for (var i = 0; i < res.data.taxonomy_details[2].length; i++) {
