@@ -14,7 +14,9 @@ class Samples extends React.Component {
     this.setUrlLocation = this.setUrlLocation.bind(this);
     this.sortSamples = this.sortSamples.bind(this);
     this.switchColumn = this.switchColumn.bind(this);
-    this.pageSize = props.pageSize || 30;
+    this.uploadSample = this.uploadSample.bind(this);
+    this.toggleDisplayProjects = this.toggleDisplayProjects.bind(this);
+    this.pageSize = props.pageSize || 30
     this.state = {
       project: null,
       totalNumber: null,
@@ -22,6 +24,7 @@ class Samples extends React.Component {
       filterParams: this.fetchParams('filter') || '',
       searchParams: this.fetchParams('search') || '',
       sampleIdsParams: this.fetchParams('ids') || [],
+      favouriteProjects: [],
       allSamples: [],
       allProjects: [],
       sort_by: this.fetchParams('sort_by') || 'id,desc',
@@ -49,7 +52,8 @@ class Samples extends React.Component {
         'notes',
         'tissue_type',
         'nucleotide_type'
-      ]
+      ],
+      showLess: true
     };
     this.sortCount = 0;
 
@@ -473,6 +477,7 @@ class Samples extends React.Component {
   //Select or switch Project
   switchProject(e) {
     let id = e.target.getAttribute('data-id');
+    this.highlightSelectedProject(id);
     this.setState({
       selectedProjectId: id,
       pageEnd: false
@@ -510,6 +515,10 @@ class Samples extends React.Component {
     location.href = `/samples/${id}`;
   }
 
+  uploadSample() {
+    location.href = '/samples/new'
+  }
+
   getActiveSort(className) {
     if(className) {
       const sort = SortHelper.getFilter('sort_by');
@@ -519,6 +528,10 @@ class Samples extends React.Component {
         return 'active';
       }
     }
+  }
+
+  toggleDisplayProjects() {
+    this.setState((prevState) => ({ showLess: !prevState.showLess }))
   }
 
   renderEmptyTable() {
@@ -558,6 +571,54 @@ class Samples extends React.Component {
         )
       }
     })
+  }
+ 
+
+  renderSidebar() {
+    const sortLogic = (a, b) => {
+      var nameA = a.name.toUpperCase(); // ignore upper and lowercase
+      var nameB = b.name.toUpperCase(); // ignore upper and lowercase
+      if (nameA < nameB) {
+        return -1;
+      }
+      if (nameA > nameB) {
+        return 1;
+      }
+      // names must be equal
+      return 0;
+    };
+    return (  
+      <div className="project-wrapper">
+        <div className="row">
+          <div className="samples">
+            <p>All Samples</p>
+            <span onClick={this.uploadSample}><i className="fa fa-lg fa-plus-circle" aria-hidden="true"></i></span>
+          </div>
+          <div className="row fav-row">
+            <span className="title">Favorite Projects</span>
+            <hr/>
+            {this.state.favouriteProjects.length ? "" : <div className="none">None</div>}
+          </div>
+          <div className="projects">
+            <span onClick={this.switchProject} className="title">All Projects</span>
+            <hr/>
+            <div className="projects-wrapper">
+              {this.state.showLess ? this.state.allProjects.sort(sortLogic).slice(0,7).map((project, i) => {
+                  return (
+                    <div key={i} data-id={project.id} onClick={this.switchProject}  className="project-item">{project.name}</div>
+                  )
+                }) : 
+                this.state.allProjects.sort(sortLogic).map((project, i) => {
+                return (
+                  <div key={i} data-id={project.id} onClick={this.switchProject} className="project-item">{project.name}</div>
+                )
+              }) }
+              { this.state.allProjects.length ? <div className="more" onClick={this.toggleDisplayProjects}>{this.state.showLess ? 'Show More...' : 'Show Less...'}</div> : ''}
+             </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   renderTable(samples) {
@@ -734,6 +795,16 @@ class Samples extends React.Component {
     $(".dropdown-content>li>a").css("font-size", textSize)
   }
 
+  displayCheckMarks(filter) {
+    $('.filter').hide();
+    $(`.filter[data-status="${filter}"]`).show();
+  }
+
+  highlightSelectedProject(id) {
+    $('.project-item').removeClass('highlight')
+    $(`.project-item[data-id="${id}"]`).addClass('highlight');
+  }
+
   //handle filtering when a filter is selected from list
   handleStatusFilterSelect(e) {
     let status = e.target.getAttribute('data-status');
@@ -762,45 +833,14 @@ class Samples extends React.Component {
   render() {
     return (
       <div>
-        <div className="sub-header-home">
-          <div className="sub-header-items">
-            <div className="content">
-              <div  className="upload">
-                <a href='/samples/new'>
-                  <i className="fa fa-flask" aria-hidden="true"/>
-                  <span>Upload sample</span>
-                </a>
-              </div>
-
-              <div className="sub-title">
-                <span>{ (!this.state.project) ? 'All projects' : this.state.project.name }<i className='fa fa-angle-down project-toggle'></i></span>
-                <div className='dropdown-bubble'>
-                  <div className="dropdown-container">
-                    <ul>
-                      <li onClick={this.switchProject} className="title">
-                        <a>All projects </a>
-                      </li>
-                      { this.state.allProjects.map((project, i) => {
-                        return (
-                          <li key={i}>
-                            <a data-id={project.id} onClick={this.switchProject} >
-                              { project.name }
-                            </a>
-                          </li>
-                        )
-                      })}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              <div className="title-filter">
-                <span><i>{this.state.allSamples.length === 0 ? 'No sample found' : ( this.state.allSamples.length === 1 ? '1 sample found' : `Showing ${this.state.allSamples.length} out of ${this.state.totalNumber} samples found`)}</i></span>
-              </div>
+          <div className="row content-body">
+            <div className="col s2 sidebar">
+              {this.renderSidebar()}
             </div>
+             <div className="col s10">
+              {this.renderTable(this.state.allSamples)}
+            </div> 
           </div>
-        </div>
-        {this.renderTable(this.state.allSamples)}
       </div>
     )
   }
