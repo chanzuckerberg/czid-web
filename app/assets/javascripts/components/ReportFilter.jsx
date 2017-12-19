@@ -106,6 +106,9 @@ class ReportFilter extends React.Component {
 
     // flash
     $(`.filter-message`).addClass('flash')
+    $(`.filter-message`).one('webkitAnimationEnd oanimationend msAnimationEnd animationend', function(event) {
+      $(`.filter-message`).removeClass('flash')
+    });
   }
 
   resetAllFilters() {
