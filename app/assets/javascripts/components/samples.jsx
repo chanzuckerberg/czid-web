@@ -202,7 +202,7 @@ class Samples extends React.Component {
               </p>
             </div>
 
-            <div key="total_reads" className="reads col s1" hidden={this.columnHidden("total_reads")}><p>{ data_values["total_reads"] }</p></div>
+            <div key="total_reads" className="reads col s2" hidden={this.columnHidden("total_reads")}><p>{ data_values["total_reads"] }</p></div>
             <div key="nonhost_reads" className="reads col s2" hidden={this.columnHidden("nonhost_reads")}><p>{ data_values["nonhost_reads"] }{ data_values["nonhost_reads_percent"] }</p></div>
             <div key="quality_control" className="reads col s1 center" hidden={this.columnHidden("quality_control")}><p>{ data_values["quality_control"] }</p></div>
             <div key="compression_ratio" className="reads col s1 center" hidden={this.columnHidden("compression_ratio")}><p>{ data_values["compression_ratio"] }</p></div>
@@ -210,7 +210,7 @@ class Samples extends React.Component {
             { Object.keys(this.COLUMN_DISPLAY_MAP).map((option_name, i) => {
                 if (this.COLUMN_DISPLAY_MAP[option_name].type === "metadata") {
                   return (
-                    <div className="col s1" hidden={this.columnHidden(option_name)}><p>{ data_values[option_name] }</p></div>
+                    <div key={option_name} className="reads col s1" hidden={this.columnHidden(option_name)}><p>{ data_values[option_name] }</p></div>
                   )
             }})}
 
@@ -522,7 +522,7 @@ class Samples extends React.Component {
             </div>
           </div>
 
-          <div className="col s1" hidden={this.columnHidden("total_reads")}>{ this.COLUMN_DISPLAY_MAP.total_reads.display_name }</div>
+          <div className="col s2" hidden={this.columnHidden("total_reads")}>{ this.COLUMN_DISPLAY_MAP.total_reads.display_name }</div>
           <div className="col s2" hidden={this.columnHidden("nonhost_reads")}>{ this.COLUMN_DISPLAY_MAP.nonhost_reads.display_name }</div>
           <div className="col s1 center" rel='tooltip' data-placement='bottom' title={this.COLUMN_DISPLAY_MAP.quality_control.tooltip}
             hidden={this.columnHidden("quality_control")}>{ this.COLUMN_DISPLAY_MAP.quality_control.display_name }</div>
@@ -532,7 +532,7 @@ class Samples extends React.Component {
           { Object.keys(this.COLUMN_DISPLAY_MAP).map((option_name, i) => {
               if (this.COLUMN_DISPLAY_MAP[option_name].type === "metadata") {
                 return (
-                  <div className="col s1" hidden={this.columnHidden(option_name)}>{ this.COLUMN_DISPLAY_MAP[option_name].display_name }</div>
+                  <div key={i} className="col s1" hidden={this.columnHidden(option_name)}>{ this.COLUMN_DISPLAY_MAP[option_name].display_name }</div>
                 )
           }})}
 
@@ -558,7 +558,7 @@ class Samples extends React.Component {
 
     column_select_dropdown = (
       <div className="column-dropdown">
-        <div class="input-field">
+        <div className="input-field">
           <select multiple name="columnSelector" ref="columnSelector" onChange={this.handleColumnSelectChange}>
             <optgroup label="Pipeline Data">
               { this.display_column_options(this.COLUMN_DISPLAY_MAP, "pipeline_data", true) }
