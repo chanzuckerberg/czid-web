@@ -25,22 +25,19 @@ class PipelineSampleReport extends React.Component {
 
       sort_by: this.default_sort_by,
       new_filter_thresholds: {
-        NT_aggregatescore: 0.0,
-        //other potential fields
-        /*
-        NT_zscore: 0.0,
-        NT_rpm: 0.0,
-        NT_r: 0.0,
-        NT_percentidentity: 0.0,
-        NT_neglogevalue: 0.0,
-        NT_percentconcordant: 0.0,
-        NR_zscore: 0.0,
-        NR_rpm: 0.0,
-        NR_r: 0.0,
-        NR_percentidentity: 0.0,
-        NR_neglogevalue: 0.0,
-        NR_percentconcordant: 0.0,
-        */
+        NT_aggregatescore: Cookies.get('NT_aggregatescore') || 0.0,
+        NT_zscore: Cookies.get('NT_zscore') || 0.0,
+        NT_rpm: Cookies.get('NT_rpm') || 0.0,
+        NT_r: Cookies.get('NT_r')  || 0.0,
+        NT_percentidentity: Cookies.get('NT_percentidentity') || 0.0,
+        NT_neglogevalue: Cookies.get('NT_neglogevalue') || 0.0,
+        NT_percentconcordant: Cookies.get('NT_percentconcordant') || 0.0,
+        NR_zscore: Cookies.get('NR_zscore') || 0.0,
+        NR_rpm: Cookies.get('NR_rpm') || 0.0,
+        NR_r: Cookies.get('NR_r') || 0.0,
+        NR_percentidentity: Cookies.get('NR_percentidentity') || 0.0,
+        NR_neglogevalue: Cookies.get('NR_neglogevalue') || 0.0,
+        NR_percentconcordant: Cookies.get('NR_percentconcordant') || 0.0,
       },
       excluded_categories: [],
       search_taxon_id: 0,
@@ -306,14 +303,14 @@ class PipelineSampleReport extends React.Component {
   }
 
   setFilterThreshold(e) {
-    threshold_name = e.target.id
-    val = parseFloat(e.target.value.trim());
+    const threshold_name = e.target.id;
+    const val = parseFloat(e.target.value.trim());
     if (isNaN(val)) {
       delete this.state.new_filter_thresholds[threshold_name]
     } else {
       this.state.new_filter_thresholds[threshold_name] = val;
+      Cookies.set(threshold_name, val);
     }
-    console.log(this.state.new_filter_thresholds)
   }
 
   taxonPassThresholdFilter(taxon) {
@@ -512,13 +509,13 @@ class PipelineSampleReport extends React.Component {
   }
 
   render_column_header(visible_type, visible_metric, column_name, tooltip_message) {
-    var style = { 'textAlign': 'left', 'cursor': 'pointer' };
-    report_column_threshold = this.thresholdInputColumn(column_name)
+    const style = { 'textAlign': 'left', 'cursor': 'pointer' };
+    const report_column_threshold = this.thresholdInputColumn(column_name);
     return (
       <th style={style}>
         <div className='sort-controls left' rel='tooltip' title={tooltip_message}>
           {this.render_sort_arrow(column_name, 'highest', 'down')}
-          {visible_type}{' '}
+          {`${visible_type} `}
           {visible_metric}
         </div>
         <div className='sort-controls left' rel='tooltip' data-placement='bottom' title='Threshold'>
