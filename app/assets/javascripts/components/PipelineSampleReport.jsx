@@ -9,7 +9,7 @@ class PipelineSampleReport extends React.Component {
     this.report_details = props.report_details
     this.report_page_params = props.report_page_params
     this.all_backgrounds = props.all_backgrounds;
-    this.max_rows_to_render = props.max_rows || 1000
+    this.max_rows_to_render = props.max_rows || 2000
     this.default_sort_by = this.report_page_params.sort_by.replace('highest_', '')
     this.sort_params = {}
 
@@ -49,6 +49,8 @@ class PipelineSampleReport extends React.Component {
 
     this.applySearchFilter = this.applySearchFilter.bind(this);
     this.applyThresholdFilters = this.applyThresholdFilters.bind(this);
+    this.anyFilterSet = this.anyFilterSet.bind(this)
+    this.resetAllFilters = this.resetAllFilters.bind(this)
     this.sortResults = this.sortResults.bind(this);
     this.sortCompareFunction = this.sortCompareFunction.bind(this);
     this.setSortParams = this.setSortParams.bind(this);
@@ -67,10 +69,14 @@ class PipelineSampleReport extends React.Component {
     this.fetchSearchList();
   }
 
+  componentDidMount() {
+    this.listenThresholdChanges();
+  }
+
   fetchSearchList() {
     axios.get(`/samples/${this.sample_id}/search_list?report_ts=${this.report_ts}`).then((res) => {
       let search_list = res.data.search_list
-      search_list.splice(0, 0, ['None', 0])
+      search_list.splice(0, 0, ['All', 0])
       this.setState({
         lineage_map: res.data.lineage_map,
         search_keys_in_sample: search_list
@@ -97,6 +103,25 @@ class PipelineSampleReport extends React.Component {
       });
       this.applyThresholdFilters(res.data.taxonomy_details[2])
     });
+  }
+
+  anyFilterSet() {
+    if (this.state.search_taxon_id > 0 || this.state.excluded_categories.length > 0 || Object.keys(this.state.new_filter_thresholds).length > 0) {
+      return true
+    }
+    return false
+  }
+
+  resetAllFilters() {
+    this.setState({
+      new_filter_thresholds: { },
+      excluded_categories: [],
+      search_taxon_id: 0,
+      thresholded_taxons: this.state.taxonomy_details,
+      selected_taxons: this.state.taxonomy_details,
+      rows_passing_filters: this.state.taxonomy_details.length
+    })
+    $(".metric-thresholds").val("");
   }
 
   applySearchFilter(searchTaxonId, excludedCategories, input_taxons) {
@@ -133,6 +158,24 @@ class PipelineSampleReport extends React.Component {
         if (excludedCategories.indexOf(taxon.category_name) < 0 ) {
           // not in the excluded categories
           selected_taxons.push(taxon)
+        } else if (taxon.category_name == 'Uncategorized' && parseInt(taxon.tax_id) == -200) {
+          //the 'All taxa without genus classification' taxon
+          let uncat_taxon = taxon
+          let filtered_children = []
+          i++
+          taxon = thresholded_taxons[i]
+          while(taxon && taxon.genus_taxid == -200) {
+            if (excludedCategories.indexOf(taxon.category_name) < 0 ) {
+              filtered_children.push(taxon)
+            }
+            i++
+            taxon = thresholded_taxons[i]
+          }
+          if (filtered_children.length  > 0) {
+            selected_taxons.push(uncat_taxon)
+            selected_taxons = selected_taxons.concat(filtered_children)
+          }
+          i--
         }
       }
     } else {
@@ -330,6 +373,12 @@ class PipelineSampleReport extends React.Component {
     }
   }
 
+  listenThresholdChanges() {
+    $('.metric-thresholds').focusout((e) => {
+      this.applyThresholdFilters(this.state.taxonomy_details);
+    })
+  }
+
   // Remove this after fix sorting
   refreshPage(overrides) {
     new_params = Object.assign({}, this.report_page_params, overrides);
@@ -339,7 +388,7 @@ class PipelineSampleReport extends React.Component {
   thresholdInputColumn(metric_token) {
     return (
       <input
-        className='browser-default'
+        className='browser-default metric-thresholds'
         onChange={this.setFilterThreshold.bind(this)}
         onKeyDown={this.handleThresholdEnter}
         name="group2"
@@ -416,7 +465,7 @@ class PipelineSampleReport extends React.Component {
       category_name = tax_info.tax_id == -200 ? '' : tax_info.category_name;
       // Most groups are initially expanded, so they get a toggle with fa-minus initial state.
       fake_or_real = tax_info.genus_taxid < 0 ? 'fake-genus' : 'real-genus';
-      right_arrow_initial_visibility = '';
+      right_arrow_initial_visibility = 'hidden';
       down_arrow_initial_visibility = '';
       plus_or_minus = <span>
         <span className={`report-arrow-down report-arrow ${tax_info.tax_id} ${fake_or_real} ${down_arrow_initial_visibility}`}>
@@ -463,16 +512,16 @@ class PipelineSampleReport extends React.Component {
   }
 
   render_column_header(visible_type, visible_metric, column_name, tooltip_message) {
-    var style = { 'textAlign': 'right', 'cursor': 'pointer' };
+    var style = { 'textAlign': 'left', 'cursor': 'pointer' };
     report_column_threshold = this.thresholdInputColumn(column_name)
     return (
       <th style={style}>
-        <div className='sort-controls right' rel='tooltip' title={tooltip_message}>
+        <div className='sort-controls left' rel='tooltip' title={tooltip_message}>
           {this.render_sort_arrow(column_name, 'highest', 'down')}
-          {visible_type}<br/>
-          {visible_metric}<br/>
+          {visible_type}{' '}
+          {visible_metric}
         </div>
-        <div className='sort-controls right' rel='tooltip' data-placement='bottom' title='Threshold'>
+        <div className='sort-controls left' rel='tooltip' data-placement='bottom' title='Threshold'>
           {report_column_threshold}
         </div>
       </th>
@@ -528,18 +577,9 @@ class PipelineSampleReport extends React.Component {
     const parts = this.report_page_params.sort_by.split("_")
     const sort_column = parts[1] + "_" + parts[2];
     var t0 = Date.now();
-    filter_stats = this.state.rows_passing_filters + ' rows passing filters, out of ' + this.state.rows_total + ' total rows.';
-
-    filter_row_stats = this.state.loading ? null : (
-      <div>
-        <span className="count">
-      {filter_stats}
-        </span>
-      </div>
-    );
 
     report_filter =
-      <ReportFilter
+      <ReportFilter ref="report_filter"
         all_categories = { this.all_categories }
         all_backgrounds = { this.all_backgrounds }
         search_keys_in_sample = {  this.state.search_keys_in_sample }
@@ -549,7 +589,17 @@ class PipelineSampleReport extends React.Component {
         applyExcludedCategories = { this.applyExcludedCategories }
         applySearchFilter = {this.applySearchFilter }
         enableFilters = { this.enableFilters }
+        resetAllFilters = { this.resetAllFilters }
       />;
+    filter_stats = this.state.rows_passing_filters + ' rows passing filters, out of ' + this.state.rows_total + ' total rows.';
+    disable_filter = this.anyFilterSet() ? (<span className="disable" onClick={(e) => this.refs.report_filter.resetAllFilters()}><b> Disable all filters</b></span> ) : null;
+    filter_row_stats = this.state.loading ? null : (
+      <div>
+        <span className="count">
+      {filter_stats} {disable_filter}
+        </span>
+      </div>
+    );
     // To do: improve presentation and place download_button somewhere on report page
     download_button = (
       <a href={`/reports/${this.report_details.report_info.id}/csv`} className="download-report right">
@@ -562,7 +612,7 @@ class PipelineSampleReport extends React.Component {
       <div>
         <div id="reports" className="reports-screen tab-screen col s12">
           <div className="tab-screen-content">
-            <div className="row">
+            <div className="row reports-container">
               <div className="col s2 reports-sidebar">
                 {report_filter}
               </div>
@@ -571,7 +621,7 @@ class PipelineSampleReport extends React.Component {
                   { download_button }
                   { filter_row_stats }
                 </div>
-                <div className="row reports-main ">
+                <div className="reports-main ">
                   <table id="report-table" className='bordered report-table'>
                     <thead>
                     <tr>
@@ -584,18 +634,18 @@ class PipelineSampleReport extends React.Component {
                         </span>
                         Taxonomy
                       </th>
-                        {this.render_column_header('NT+NR', 'ZZRPM',  'NT_aggregatescore', 'Aggregate score') }
+                        {this.render_column_header('', 'Score',  'NT_aggregatescore', 'Aggregate score') }
                         {this.render_column_header('NT', 'Z',   'NT_zscore', 'Z-score relative to background model for alignments to NCBI NT') }
                         {this.render_column_header('NT', 'rPM', 'NT_rpm', 'Number of reads aligning to the taxon in the NCBI NT database per million total input reads')}
                         {this.render_column_header('NT', 'r',   'NT_r', 'Number of reads aligning to the taxon in the NCBI NT database')}
                         {this.render_column_header('NT', '%id', 'NT_percentidentity', 'Average percent-identity of alignments to NCBI NT')}
-                        {this.render_column_header('NT', 'Log(1/E)',  'NT_neglogevalue', 'Average log-10-transformed expect value for alignments to NCBI NT')}
+                        {this.render_column_header('NT', 'log(1/E)',  'NT_neglogevalue', 'Average log-10-transformed expect value for alignments to NCBI NT')}
                         {this.render_column_header('NT', '%conc',  'NT_percentconcordant', 'Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NT)')}
                         {this.render_column_header('NR', 'Z',   'NR_zscore', 'Z-score relative to background model for alignments to NCBI NR') }
                         {this.render_column_header('NR', 'rPM', 'NR_rpm', 'Number of reads aligning to the taxon in the NCBI NR database per million total input reads')}
                         {this.render_column_header('NR', 'r',   'NR_r', 'Number of reads aligning to the taxon in the NCBI NR database')}
                         {this.render_column_header('NR', '%id', 'NR_percentidentity', 'Average percent-identity of alignments to NCBI NR')}
-                        {this.render_column_header('NR', 'Log(1/E)',  'NR_neglogevalue', 'Average log-10-transformed expect value for alignments to NCBI NR')}
+                        {this.render_column_header('NR', 'log(1/E)',  'NR_neglogevalue', 'Average log-10-transformed expect value for alignments to NCBI NR')}
                         {this.render_column_header('NR', '%conc',  'NR_percentconcordant', 'Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NR)')}
                     </tr>
                     </thead>

@@ -109,6 +109,8 @@ Sometimes you may be prompted to run a migration or configuration command like `
 
 ## DB backup/restore within and across environments
 
+Note that this requires the proper ssh config to access the deployed versions of the site. That info is deployment specific, so check with a teammate.
+
 1. Backup your local `development` DB into a local file:
 `docker-compose exec web mysqldump -h db -u root idseq_development | gzip -c > idseq_development.sql.gz`
 1. Backup cloud `alpha` DB into a local file:

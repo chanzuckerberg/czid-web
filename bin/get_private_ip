@@ -7,10 +7,8 @@ require 'aws-sdk-ec2'
 require 'pp'
 
 env = ARGV.shift
-command = ARGV.shift || "rails console"
 if !env
-  puts 'Usage: ./bin/shell ENV [COMMAND]'
-  puts '  COMMAND: default is "rails console"'
+  puts 'Usage: ./bin/get_private_ip ENV'
   abort
 end
 
@@ -29,14 +27,6 @@ instances = ecs_client.describe_container_instances(cluster: env,
 
 resp = ec2_client.describe_instances(instance_ids: [instances.container_instances[0].ec2_instance_id])
 
-public_ip = resp.reservations.first.instances.first.public_ip_address
+private_ip = resp.reservations.first.instances.first.private_ip_address
 
-puts public_ip
-
-#exec %(ssh -t ec2-user@#{public_ip} "echo docker exec -it \\`docker ps | grep chanzuckerberg/idseq-web | head -1 | awk '{print \\$NF}'\\` #{command} ")
-
-#idseq_web_container = `ssh ec2-user@#{public_ip} "docker ps | grep chanzuckerberg/idseq-web | head -1 | awk '{print \\$NF}'"`.strip
-
-#puts "ssh ec2-user@#{public_ip} 'docker exec #{idseq_web_container} /bin/bash -c '"
-
-#exec %(ssh ec2-user@#{public_ip} 'docker exec #{idseq_web_container} /bin/bash -c "echo \$HOSTNAME mysqldump -h \$RDS_ADDRESS -u \$DB_USERNAME --password=\$DB_PASSWORD idseq_dev"')
+puts private_ip
