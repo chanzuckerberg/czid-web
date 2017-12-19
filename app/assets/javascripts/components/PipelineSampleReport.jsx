@@ -12,6 +12,8 @@ class PipelineSampleReport extends React.Component {
     this.max_rows_to_render = props.max_rows || 2000
     this.default_sort_by = this.report_page_params.sort_by.replace('highest_', '')
     this.sort_params = {}
+    const filter_thresholds = Cookies.get('filter_thresholds')
+    const cached_cats = Cookies.get('excluded_categories');
 
     this.state = {
       taxonomy_details:  [],
@@ -24,22 +26,23 @@ class PipelineSampleReport extends React.Component {
       selected_taxons: [],
 
       sort_by: this.default_sort_by,
-      new_filter_thresholds: {
-        NT_aggregatescore: Cookies.get('NT_aggregatescore') || 0.0,
-        NT_zscore: Cookies.get('NT_zscore') || 0.0,
-        NT_rpm: Cookies.get('NT_rpm') || 0.0,
-        NT_r: Cookies.get('NT_r')  || 0.0,
-        NT_percentidentity: Cookies.get('NT_percentidentity') || 0.0,
-        NT_neglogevalue: Cookies.get('NT_neglogevalue') || 0.0,
-        NT_percentconcordant: Cookies.get('NT_percentconcordant') || 0.0,
-        NR_zscore: Cookies.get('NR_zscore') || 0.0,
-        NR_rpm: Cookies.get('NR_rpm') || 0.0,
-        NR_r: Cookies.get('NR_r') || 0.0,
-        NR_percentidentity: Cookies.get('NR_percentidentity') || 0.0,
-        NR_neglogevalue: Cookies.get('NR_neglogevalue') || 0.0,
-        NR_percentconcordant: Cookies.get('NR_percentconcordant') || 0.0,
-      },
-      excluded_categories: [],
+      new_filter_thresholds: (filter_thresholds) ? JSON.parse(filter_thresholds) : { NT_aggregatescore: 0.0 },
+        /*
+        NT_zscore: 0.0,
+        NT_rpm: 0.0,
+        NT_r: 0.0,
+        NT_percentidentity: 0.0,
+        NT_neglogevalue: 0.0,
+        NT_percentconcordant: 0.0,
+        NR_zscore: 0.0,
+        NR_rpm: 0.0,
+        NR_r: 0.0,
+        NR_percentidentity: 0.0,
+        NR_neglogevalue: 0.0,
+        NR_percentconcordant: 0.0,
+      }
+      */
+      excluded_categories: (cached_cats) ? JSON.parse(cached_cats) : [],
       search_taxon_id: 0,
       loading: true
     };
@@ -123,6 +126,8 @@ class PipelineSampleReport extends React.Component {
       selected_taxons: this.state.taxonomy_details,
       rows_passing_filters: this.state.taxonomy_details.length
     })
+    Cookies.set('filter_thresholds', "{}")
+    Cookies.set('excluded_categories', "[]")
     $(".metric-thresholds").val("");
   }
 
@@ -314,8 +319,8 @@ class PipelineSampleReport extends React.Component {
       delete this.state.new_filter_thresholds[threshold_name]
     } else {
       this.state.new_filter_thresholds[threshold_name] = val;
-      Cookies.set(threshold_name, val);
     }
+    Cookies.set('filter_thresholds', JSON.stringify(this.state.new_filter_thresholds))
   }
 
   taxonPassThresholdFilter(taxon) {

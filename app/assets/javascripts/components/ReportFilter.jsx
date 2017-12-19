@@ -109,7 +109,7 @@ class ReportFilter extends React.Component {
       Cookies.set('excluded_categories', JSON.stringify(excluded_categories));
       this.applySearchFilter(0, excluded_categories);
     });
-    
+
   }
 
   resetAllFilters() {
