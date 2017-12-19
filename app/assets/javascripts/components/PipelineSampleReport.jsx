@@ -634,7 +634,7 @@ class PipelineSampleReport extends React.Component {
                   { download_button }
                   { filter_row_stats }
                 </div>
-                <div id="reports-main" className="reports-main">
+                <div className="reports-main">
                   <table id="report-table" className='bordered report-table'>
                     <thead>
                     <tr>
