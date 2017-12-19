@@ -488,12 +488,12 @@ class Samples extends React.Component {
     return !this.state.columnsShown.includes(column)
   }
 
-  display_column_options(column_map, data_type, default_checked) {
+  display_column_options(column_map, data_type) {
     column_list = Object.keys(column_map)
     return column_list.map((option_name, i) => {
       if (column_map[option_name].type === data_type) {
         return (
-          <option key={option_name} id={option_name} value={option_name} selected={default_checked}>
+          <option key={option_name} id={option_name} value={option_name}>
             {column_map[option_name].display_name}
           </option>
         )
@@ -559,12 +559,12 @@ class Samples extends React.Component {
     column_select_dropdown = (
       <div className="column-dropdown">
         <div className="input-field">
-          <select multiple name="columnSelector" ref="columnSelector" onChange={this.handleColumnSelectChange}>
+          <select multiple name="columnSelector" ref="columnSelector" value={this.state.columnsShown} onChange={this.handleColumnSelectChange}>
             <optgroup label="Pipeline Data">
-              { this.display_column_options(this.COLUMN_DISPLAY_MAP, "pipeline_data", true) }
+              { this.display_column_options(this.COLUMN_DISPLAY_MAP, "pipeline_data") }
             </optgroup>
             <optgroup label="Sample Data">
-              { this.display_column_options(this.COLUMN_DISPLAY_MAP, "metadata", false) }
+              { this.display_column_options(this.COLUMN_DISPLAY_MAP, "metadata") }
             </optgroup>
           </select>
         </div>
