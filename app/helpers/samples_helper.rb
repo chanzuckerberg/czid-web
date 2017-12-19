@@ -191,11 +191,11 @@ module SamplesHelper
 
   def format_samples(samples)
     formatted_samples = []
+    final_result = samples_output_data(samples)
+    pipeline_run_info = samples_pipeline_run_info(samples)
+    uploaders = sample_uploaders(samples)
     samples.each_with_index do |_sample, i|
       job_info = {}
-      final_result = samples_output_data(samples)
-      pipeline_run_info = samples_pipeline_run_info(samples)
-      uploaders = sample_uploaders(samples)
       job_info[:db_sample] = samples[i]
       job_info[:derived_sample_output] = final_result[i]
       job_info[:run_info] = pipeline_run_info[i]
