@@ -173,12 +173,12 @@ class Samples extends React.Component {
 
       rowWithChunkStatus = (
         <div className={statusClass}>
-          <span>{this.appendStatusIcon(status)}</span><p className="optional-column pipeline_status status">{status}</p>
+          <span>{this.appendStatusIcon(status)}</span><p className="status">{status}</p>
         </div>
       );
       rowWithoutChunkStatus = (
         <div className={statusClass}>
-          <span>{this.appendStatusIcon(status)}</span><p className="optional-column pipeline_status status">{status}</p>
+          <span>{this.appendStatusIcon(status)}</span><p className="status">{status}</p>
         </div>
       )
       data_values = { total_reads: !derivedOutput.pipeline_output ? BLANK_TEXT : numberWithCommas(derivedOutput.pipeline_output.total_reads),
@@ -536,7 +536,7 @@ class Samples extends React.Component {
                 )
           }})}
 
-          <div key="pipeline_status" className="optional-column pipeline_status col s2 status-dropdown" data-activates="dropdownstatus">
+          <div className="col s2 status-dropdown" data-activates="dropdownstatus" hidden={this.columnHidden("pipeline_status")}>
             <i className="status-filter fa fa-caret-down"></i>{ this.COLUMN_DISPLAY_MAP.pipeline_status.display_name }
           </div>
         </div>
