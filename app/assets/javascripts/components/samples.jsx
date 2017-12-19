@@ -501,7 +501,7 @@ class Samples extends React.Component {
             <span onClick={this.switchProject} className="title">All Projects</span>
             <hr/>
             <div className="projects-wrapper">
-              {this.state.showLess ? this.state.allProjects.sort(sortLogic).slice(0,7).map((project, i) => {
+              { !this.state.allProjects.length ? "None" : this.state.showLess ? this.state.allProjects.sort(sortLogic).slice(0,7).map((project, i) => {
                   return (
                     <div key={i} data-id={project.id} onClick={this.switchProject}  className="project-item">{project.name}</div>
                   )
