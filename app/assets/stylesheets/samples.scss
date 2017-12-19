@@ -418,6 +418,17 @@ $break-large: 1070px;
 }
 
 .sample-container {
+  .title-wrapper {
+    margin-bottom: 50px;
+    .title {
+      font-size: 25px;
+      font-weight: 600;
+      padding: 10px 10px 0;
+    }
+    .title-filter {
+      padding: 0 10px;
+    }
+  }
   .wrapper {
     border-bottom: 1px #291d1d26 solid;
     margin-bottom: 0;
@@ -438,7 +449,7 @@ $break-large: 1070px;
     font-size: 14px !important;
   }
   .table-container {
-    margin: 0 67px 7px;
+    margin: 0 10px 7px;
     color: #333333;
     font-weight: 600;
     font-size: 14px;
@@ -474,7 +485,7 @@ $break-large: 1070px;
     margin-bottom: 0;
     border-bottom: 1px solid #dfdddd;
     .job-card {
-      margin: 0 63px;
+      margin: 0 10px;
       .blank {
         color: #b5b0b0
       }
@@ -522,7 +533,7 @@ $break-large: 1070px;
     margin-bottom: 0;
     width: 30%;
     border: 1px solid #e6e6e6;
-    margin: 17px 73px;
+    margin-top: 19px;
     border-radius: 3px;
     .icon {
       padding-top: 12px;
@@ -617,5 +628,74 @@ input[type=search]:focus:not([readonly]) {
 
 .all {
   color: #9e5353;
+}
+
+.content-body {
+  .sidebar {
+    height: 100vh;
+    border-right: 1px solid #eaeaea;
+    background: #F8F9F9;
+    padding: 10px 20px !important;
+    font-size: 14px;
+    position: sticky;
+    top: 10px;
+    .title {
+      font-weight: 600;
+      hr {
+        border-color: #fff8ef;
+      }
+    }
+    .project-wrapper {
+      .fav-row {
+        .none {
+          padding: 10px 5px;
+          font-size: 12px;
+        }
+      }
+      .samples {
+        p {
+          display: inline-block
+        }
+        span {
+          float: right;
+          vertical-align: middle;
+          margin: 13px 0px;
+          &:hover {
+            color: #4ba4c2;
+          }
+        }
+      }
+    }
+    .projects {
+      span {
+        cursor: pointer;
+        &:hover {
+          color: #4ba4c2;
+        }
+      }
+      .projects-wrapper {
+        height: 300px;
+        overflow: scroll;
+        .project-item {
+          padding: 10px 5px;
+          cursor: pointer;
+          font-size: 12px;
+          &:hover {
+            background: #e0dfdf;
+          }
+        }
+        .highlight {
+          background: #bfd1dc;
+        }
+        .more {
+          font-size: 12px;
+          cursor: pointer;
+          padding: 0 5px;
+          text-decoration: underline;
+          color: #4ba4c2;
+        }
+      }
+    }
+  }
 }
 
