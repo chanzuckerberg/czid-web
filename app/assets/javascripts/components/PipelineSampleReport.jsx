@@ -102,7 +102,7 @@ class PipelineSampleReport extends React.Component {
         taxonomy_details: res.data.taxonomy_details[2],
         genus_map: genus_map
       });
-      this.applyThresholdFilters(res.data.taxonomy_details[2])
+      this.applyThresholdFilters(res.data.taxonomy_details[2], false)
     });
   }
 
@@ -341,7 +341,7 @@ class PipelineSampleReport extends React.Component {
     return true;
   }
 
-  applyThresholdFilters(candidate_taxons) {
+  applyThresholdFilters(candidate_taxons, play_animation = true) {
     let thresholded_taxons = []
     genus_taxon = {}
     matched_taxons = []
@@ -373,7 +373,10 @@ class PipelineSampleReport extends React.Component {
     }
 
     this.applySearchFilter(0, this.state.excluded_categories, thresholded_taxons);
-    this.flash()
+
+    if (play_animation) {
+      this.flash()
+    }
   }
 
   handleThresholdEnter(event) {
@@ -590,7 +593,7 @@ class PipelineSampleReport extends React.Component {
     filter_stats = this.state.rows_passing_filters + ' rows passing filters, out of ' + this.state.rows_total + ' total rows.';
     disable_filter = this.anyFilterSet() ? (<span className="disable" onClick={(e) => this.refs.report_filter.resetAllFilters()}><b> Disable all filters</b></span> ) : null;
     filter_row_stats = this.state.loading ? null : (
-      <div  id="filter-message" className="filter-message">
+      <div id="filter-message" className="filter-message">
         <span className="count">
           {filter_stats} {disable_filter}
         </span>
