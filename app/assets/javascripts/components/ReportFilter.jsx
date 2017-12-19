@@ -124,11 +124,13 @@ class ReportFilter extends React.Component {
   searchSelectedTaxon(value, item) {
     //ReportFilter.showLoading(`Filtering for '${value}'...`);
     let searchId = item[1];
-    this.state.searchId = searchId;
-    this.state.excluded_categories = [];
-    this.state.searchKey = item[0];
-    PipelineSampleReads.saveReportAttribute('genus_search', value);
-    this.applySearchFilter(searchId, []);
+    this.setState({
+      searchId,
+      excluded_categories: [],
+      searchKey: item[0]
+    }, () => {
+      this.applySearchFilter(searchId, []);
+    });
   }
 
   applySearchFilter(searchId, excluded_categories) {
@@ -174,7 +176,7 @@ class ReportFilter extends React.Component {
                     {item[0]}
                   </div>
                 }
-                value={this.state.searchKey}
+                value={ this.state.searchKey }
                 onChange={this.handleSearch}
                 onSelect={this.searchSelectedTaxon}
               />
