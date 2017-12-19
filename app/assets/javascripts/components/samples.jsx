@@ -214,7 +214,6 @@ class Samples extends React.Component {
                   )
             }})}
 
-
             <div className={ runInfo.total_runtime ? "reads status-col col s2" : 'reads col s2 no-time'} hidden={this.columnHidden("pipeline_status")}>
               { !runInfo.job_status_description ? rowWithChunkStatus : rowWithoutChunkStatus }
               { runInfo.total_runtime ? <p className="time"><i className="fa fa-clock-o" aria-hidden="true"></i><span>{this.formatRunTime(runInfo.total_runtime)}</span></p> : ''}
@@ -663,7 +662,7 @@ class Samples extends React.Component {
       project_id: projectId ? projectId : '',
       filter: this.state.filterParams,
       search: this.state.searchParams,
-      sort_by: this.state.sort_by   
+      sort_by: this.state.sort_by
     };
     window.history.replaceState(null, null, `?${jQuery.param(params)}`)
   }
