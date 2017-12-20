@@ -204,7 +204,10 @@ class PipelineSampleReport extends React.Component {
 
   flash() {
     $(`.filter-message`).removeClass('flash')
-    document.getElementById('filter-message').offsetHeight; /* trigger reflow */
+    let el = document.getElementById('filter-message')
+    if (el) {
+      el.offsetHeight; /* trigger reflow */
+    }
     $(`.filter-message`).addClass('flash')
   }
 
