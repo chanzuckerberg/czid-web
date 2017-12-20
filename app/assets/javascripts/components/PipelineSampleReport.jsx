@@ -86,6 +86,7 @@ class PipelineSampleReport extends React.Component {
   }
 
   fetchReportData() {
+    ReportFilter.showLoading('Loading results...');
     let params = `?${window.location.search.replace("?", "")}&report_ts=${this.report_ts}`;
     const cached_background_id = Cookies.get('background_id');
     if(cached_background_id) {
@@ -93,6 +94,7 @@ class PipelineSampleReport extends React.Component {
       < 0 ? `${params}&background_id=${cached_background_id}` : params;
     }
     axios.get(`/samples/${this.sample_id}/report_info${params}`).then((res) => {
+      Samples.hideLoader();
       let genus_map = {}
       for (var i = 0; i < res.data.taxonomy_details[2].length; i++) {
         let taxon = res.data.taxonomy_details[2][i]
@@ -673,7 +675,7 @@ class PipelineSampleReport extends React.Component {
                     </tr>
                     </thead>
                     <tbody>
-                    { this.state.loading ? (<tr><td>Loading results.. </td></tr>) : (this.state.selected_taxons.slice(0, this.max_rows_to_render).map((tax_info, i) => {
+                    { this.state.selected_taxons.slice(0, this.max_rows_to_render).map((tax_info, i) => {
                       return (
                         <tr key={tax_info.tax_id} className={this.row_class(tax_info)}>
                           <td>
@@ -694,7 +696,7 @@ class PipelineSampleReport extends React.Component {
                           { this.render_number(tax_info.NR.percentconcordant, sort_column == 'nr_percentconcordant', 1) }
                         </tr>
                       )
-                    }))}
+                    })}
                     </tbody>
                   </table>
                 </div>
