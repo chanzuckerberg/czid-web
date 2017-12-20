@@ -24,9 +24,6 @@ class ReportFilter extends React.Component {
       backgroundParams: Cookies.get('background_id') || this.background_model.id,
       search_items: props.search_keys_in_sample
     };
-    if(this.state.excluded_categories.length) {
-      this.applySearchFilter(0, this.state.excluded_categories);
-    }
   }
   componentWillReceiveProps(newProps){
       this.setState({search_items: newProps.search_keys_in_sample})
