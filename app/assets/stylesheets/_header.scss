@@ -88,6 +88,7 @@
   i {
     display: none
   }
+  border: 1px solid transparent;
   &:hover, &.active {
     border: 1px solid #5ABCD6;
     background: #D6EEF5;
