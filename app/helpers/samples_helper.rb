@@ -37,9 +37,9 @@ module SamplesHelper
         stage_statuses = data_values.values_at(:host_filtering_status, :nonhost_alignment_status, :postprocessing_status)
         if stage_statuses.any? { |status| status == "FAILED" }
           data_values[:overall_job_status] = "FAILED"
-        else if stage_statuses.any? { |status| status == "RUNNING" }
+        elsif stage_statuses.any? { |status| status == "RUNNING" }
           data_values[:overall_job_status] = "RUNNING"
-        else if stage_statuses.all? { |status| status == "LOADED" }
+        elsif stage_statuses.all? { |status| status == "LOADED" }
           data_values[:overall_job_status] = "COMPLETE"
         end
         attributes_as_symbols = attributes.map(&:to_sym)
