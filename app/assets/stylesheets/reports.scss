@@ -98,9 +98,10 @@ margin-bottom: 0px;
         margin-top: 0;
         .select-dropdown {
           font-size: 12px;
-          padding: 2px;
+          padding: 10px;
           border: 1px solid #CAD0DA;
           border-radius: 2px;
+          background-color: white;
           .caret {
             color: #bac8cf;
           }
@@ -247,13 +248,13 @@ margin-bottom: 0px;
 }
 
 .reports-table-title .result-count {
-  font-size: 14px;
+  font-size: 12px;
   color: #535353;
 }
 
 .slider-title {
   color: #535353;
-  font-size: 14px;
+  font-size: 12px;
   margin: 35px 0 15px;
 }
 
@@ -272,7 +273,7 @@ margin-bottom: 0px;
 
 .report-table {
   // min-width: 1000px;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .report-table .link:hover {
@@ -290,7 +291,8 @@ margin-bottom: 0px;
     margin-right: 5px;
   }
   .fa {
-    margin-left: 5px;
+    margin-left: 2px;
+    margin-right: 5px;
     font-size: 20px;
     width: 10px;
     &:hover {
@@ -349,13 +351,16 @@ margin-bottom: 0px;
 }
 
 .report-table .sort-controls {
-  width: 95px;
+  width: 75px;
+  min-width: 50px;
   white-space: nowrap;
   overflow: hidden;
+  font-weight: 600;
   i {
     font-size: 20px;
     float: right;
     display: block;
+    margin-right: 3px;
     &:hover, &.active {
       color: #09c;
     }
@@ -365,30 +370,32 @@ margin-bottom: 0px;
 .report-table {
 
   th{
-    font-size: 14px;
-    padding: 10px 10px;
+    padding: 8px 6px;
   }
 
   td{
-    padding: 10px 10px;
+    padding: 8px 6px;
   }
 
   td, th {
-    width: 95px;
-    font-size:14px;
+    width: 75px;
+    min-width:50px;
+    font-size:12px;
   }
 
   td:first-child {
-    min-width:400px;
-    width:400px;
+    min-width:350px;
+    width:350px;
+    font-size:14px;
   }
 
   td:last-child {
     padding-right: 50px;
   }
   th:first-child {
-    min-width: 400px;
-    width: 400px;
+    min-width: 350px;
+    width: 350px;
+    font-size:14px;
   }
   th:last-child {
     padding-right: 50px;
@@ -400,7 +407,7 @@ margin-bottom: 0px;
     border-color: #dfdfdf !important;
     padding: 5px;
     width: 100%;
-    margin-top: 10px;
+    margin-top: 5px;
       &:focus {
         outline: none;
     }
