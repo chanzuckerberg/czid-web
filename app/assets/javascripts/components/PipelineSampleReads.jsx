@@ -351,6 +351,12 @@ class PipelineSampleReads extends React.Component {
         </div>
       );
     }
+    sample_dropdown = (
+      <div className='details-value custom-select-dropdown select-dropdown' data-activates={field}>
+        this.sampleInfo.name;
+        <i className="fa fa-chevron-down right"/>
+      </div>
+    )
     return (
       <div>
         <SubHeader>
@@ -360,7 +366,7 @@ class PipelineSampleReads extends React.Component {
             </div>
 
             <div className="sub-title">
-              <a href={`/?project_id=${this.projectInfo.id}`}> {this.projectInfo.name} </a> > { this.sampleInfo.name }
+              <a href={`/?project_id=${this.projectInfo.id}`}> {this.projectInfo.name} </a> > { sample_dropdown }
             </div>
 
             <div className="sub-header-navigation">
