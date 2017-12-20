@@ -34,6 +34,14 @@ module SamplesHelper
                         postprocessing_status: runInfo ? runInfo['Post Processing'] : '',
                         uploader: sample_info[:uploader] ? sample_info[:uploader][:name] : '',
                         runtime_seconds: runInfo ? runInfo[:total_runtime] : '' }
+        stage_statuses = data_values.values_at(:host_filtering_status, :nonhost_alignment_status, :postprocessing_status)
+        if stage_statuses.any? { |status| status == "FAILED" }
+          data_values[:overall_job_status] = "FAILED"
+        else if stage_statuses.any? { |status| status == "RUNNING" }
+          data_values[:overall_job_status] = "RUNNING"
+        else if stage_statuses.all? { |status| status == "LOADED" }
+          data_values[:overall_job_status] = "COMPLETE"
+        end
         attributes_as_symbols = attributes.map(&:to_sym)
         csv << data_values.values_at(*attributes_as_symbols)
       end
