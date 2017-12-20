@@ -369,7 +369,11 @@ class PipelineSampleReads extends React.Component {
        {
          Object.keys(this.sample_map).map((sample_id, i) => {
            return (
-             <li key={i}>{this.sample_map[sample_id]}</li>
+             <li key={i}>
+               <a href={`/samples/${sample_id}`}>
+                 { this.sample_map[sample_id] }
+               </a>
+             </li>
            )})
        }
       </ul>
