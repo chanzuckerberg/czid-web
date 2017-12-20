@@ -34,4 +34,5 @@ Rails.application.routes.draw do
   get 'pipeline_outputs/:id/nonhost_fasta', to: 'pipeline_outputs#send_nonhost_fasta'
   get 'pipeline_outputs/:id/unidentified_fasta', to: 'pipeline_outputs#send_unidentified_fasta'
   get 'reports/:id/csv', to: 'reports#send_report_csv', as: :fetch_csv
+  get 'projects/:id/csv', to: 'projects#send_project_csv'
 end

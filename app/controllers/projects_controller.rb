@@ -1,4 +1,6 @@
 class ProjectsController < ApplicationController
+  include SamplesHelper
+
   before_action :set_project, only: [:show, :edit, :update, :destroy]
 
   clear_respond_to
@@ -13,6 +15,20 @@ class ProjectsController < ApplicationController
   # GET /projects/1
   # GET /projects/1.json
   def show
+  end
+
+  def send_project_csv
+    if params[:id] == 'all'
+      samples = Sample.all
+      project_name = "all-projects"
+    else
+      project = Project.find(params[:id])
+      samples = project ? project.samples : nil
+      project_name = project && project.name ? "project-#{project.name.downcase.split(' ').join('_')}" : "project"
+    end
+    formatted_samples = format_samples(samples)
+    project_csv = generate_sample_list_csv(formatted_samples)
+    send_data project_csv, filename: project_name + '_sample-table.csv'
   end
 
   # GET /projects/new

@@ -4,6 +4,50 @@ require 'csv'
 module SamplesHelper
   include PipelineOutputsHelper
 
+  def generate_sample_list_csv(formatted_samples)
+    attributes = %w[sample_name uploader upload_date runtime_seconds overall_job_status
+                    host_filtering_status nonhost_alignment_status postprocessing_status
+                    total_reads nonhost_reads nonhost_reads_percent
+                    quality_control compression_ratio tissue_type nucleotide_type
+                    location host_genome notes]
+    CSV.generate(headers: true) do |csv|
+      csv << attributes
+      formatted_samples.each do |sample_info|
+        derived_output = sample_info[:derived_sample_output]
+        db_sample = sample_info[:db_sample]
+        run_info = sample_info[:run_info]
+        data_values = { sample_name: db_sample ? db_sample[:name] : '',
+                        upload_date: db_sample ? db_sample[:created_at] : '',
+                        total_reads: derived_output[:pipeline_output] ? derived_output[:pipeline_output][:total_reads] : '',
+                        nonhost_reads: derived_output[:summary_stats] ? derived_output[:summary_stats][:remaining_reads] : '',
+                        nonhost_reads_percent: derived_output[:summary_stats] && derived_output[:summary_stats][:percent_remaining] ? derived_output[:summary_stats][:percent_remaining].round(3) : '',
+                        quality_control: derived_output[:summary_stats] && derived_output[:summary_stats][:qc_percent] ? derived_output[:summary_stats][:qc_percent].round(3) : '',
+                        compression_ratio: derived_output[:summary_stats] && derived_output[:summary_stats][:compression_ratio] ? derived_output[:summary_stats][:compression_ratio].round(2) : '',
+                        tissue_type: db_sample ? db_sample[:sample_tissue] : '',
+                        nucleotide_type: db_sample ? db_sample[:sample_template] : '',
+                        location: db_sample ? db_sample[:sample_location] : '',
+                        host_genome: derived_output ? derived_output[:host_genome_name] : '',
+                        notes: db_sample ? db_sample[:sample_notes] : '',
+                        overall_job_status: run_info ? run_info[:job_status_description] : '',
+                        host_filtering_status: run_info ? run_info['Host Filtering'] : '',
+                        nonhost_alignment_status: run_info ? run_info['GSNAPL/RAPSEARCH alignment'] : '',
+                        postprocessing_status: run_info ? run_info['Post Processing'] : '',
+                        uploader: sample_info[:uploader] ? sample_info[:uploader][:name] : '',
+                        runtime_seconds: run_info ? run_info[:total_runtime] : '' }
+        stage_statuses = data_values.values_at(:host_filtering_status, :nonhost_alignment_status, :postprocessing_status)
+        if stage_statuses.any? { |status| status == "FAILED" }
+          data_values[:overall_job_status] = "FAILED"
+        elsif stage_statuses.any? { |status| status == "RUNNING" }
+          data_values[:overall_job_status] = "RUNNING"
+        elsif stage_statuses.all? { |status| status == "LOADED" }
+          data_values[:overall_job_status] = "COMPLETE"
+        end
+        attributes_as_symbols = attributes.map(&:to_sym)
+        csv << data_values.values_at(*attributes_as_symbols)
+      end
+    end
+  end
+
   def get_samples_in_project(project)
     Hash[project.samples.map { |s| [s.id, s.name] }]
   end
@@ -134,6 +178,7 @@ module SamplesHelper
       job_stats = pipeline_output ? pipeline_output.job_stats : nil
       summary_stats = job_stats ? get_summary_stats(job_stats) : nil
 
+      output_data[:host_genome_name] = output.host_genome ? output.host_genome.name : nil
       output_data[:pipeline_output] = pipeline_output
       output_data[:job_stats] = job_stats
       output_data[:summary_stats] = summary_stats
