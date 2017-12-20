@@ -478,8 +478,9 @@ class Samples extends React.Component {
         </div>
       </div>
     )
+    let project_id = this.state.selectedProjectId ? this.state.selectedProjectId : 'all'
     let download_button = (
-      <a href={`/projects/id/csv`} className="download-project">
+      <a href={`/projects/${project_id}/csv`} className="download-project">
         <div className="fa fa-cloud-download"/>
         <div>Download project</div>
       </a>
