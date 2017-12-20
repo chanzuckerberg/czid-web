@@ -82,6 +82,22 @@
   color: #09c !important;
 }
 
+.sample-select-dropdown {
+  padding: 8px;
+  display: inline-block;
+  i {
+    display: none
+  }
+  &:hover, &.active {
+    border: 1px solid #5ABCD6;
+    background: #D6EEF5;
+    color: #5ABCD6;
+    i {
+      display: inline-block;
+    }
+  }
+}
+
 .sub-header-navigation {
   margin-top: 15px;
 }

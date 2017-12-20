@@ -352,8 +352,8 @@ class PipelineSampleReads extends React.Component {
       );
     }
     sample_dropdown = (
-      <div className='details-value custom-select-dropdown select-dropdown' data-activates={field}>
-        this.sampleInfo.name;
+      <div className='sample-select-dropdown'>
+        { this.sampleInfo.name }
         <i className="fa fa-chevron-down right"/>
       </div>
     )
