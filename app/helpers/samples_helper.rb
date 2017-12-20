@@ -5,35 +5,35 @@ module SamplesHelper
   include PipelineOutputsHelper
 
   def generate_sample_list_csv(formatted_samples)
-    attributes = ["sample_name", "uploader", "upload_date", "runtime_seconds", "overall_job_status",
-                  "host_filtering_status", "nonhost_alignment_status", "postprocessing_status",
-                  "total_reads", "nonhost_reads", "nonhost_reads_percent",
-                  "quality_control", "compression_ratio", "tissue_type", "nucleotide_type",
-                  "location", "host_genome", "notes"]
+    attributes = %w[sample_name uploader upload_date runtime_seconds overall_job_status
+                    host_filtering_status nonhost_alignment_status postprocessing_status
+                    total_reads nonhost_reads nonhost_reads_percent
+                    quality_control compression_ratio tissue_type nucleotide_type
+                    location host_genome notes]
     CSV.generate(headers: true) do |csv|
       csv << attributes
       formatted_samples.each do |sample_info|
-        derivedOutput = sample_info[:derived_sample_output]
-        dbSample = sample_info[:db_sample]
-        runInfo = sample_info[:run_info]
-        data_values = { sample_name: dbSample && dbSample[:name] ? dbSample[:name] : '',
-                        upload_date: dbSample && dbSample[:created_at] ? dbSample[:created_at] : '',
-                        total_reads: !derivedOutput[:pipeline_output] ? '' : derivedOutput[:pipeline_output][:total_reads],
-                        nonhost_reads: (!derivedOutput[:summary_stats] || !derivedOutput[:summary_stats][:remaining_reads]) ? '' : derivedOutput[:summary_stats][:remaining_reads],
-                        nonhost_reads_percent: (!derivedOutput[:summary_stats] || !derivedOutput[:summary_stats][:percent_remaining]) ? '' : derivedOutput[:summary_stats][:percent_remaining].round(3),
-                        quality_control: (!derivedOutput[:summary_stats] || !derivedOutput[:summary_stats][:qc_percent]) ? '' : derivedOutput[:summary_stats][:qc_percent].round(3),
-                        compression_ratio: (!derivedOutput[:summary_stats] || !derivedOutput[:summary_stats][:compression_ratio]) ? '' : derivedOutput[:summary_stats][:compression_ratio].round(2),
-                        tissue_type: dbSample && dbSample[:sample_tissue] ? dbSample[:sample_tissue] : '',
-                        nucleotide_type: dbSample && dbSample[:sample_template] ? dbSample[:sample_template] : '',
-                        location: dbSample && dbSample[:sample_location] ? dbSample[:sample_location] : '',
-                        host_genome: derivedOutput && derivedOutput[:host_genome_name] ? derivedOutput[:host_genome_name] : '',
-                        notes: dbSample && dbSample[:sample_notes] ? dbSample[:sample_notes] : '',
-                        overall_job_status: runInfo ? runInfo[:job_status_description] : '',
-                        host_filtering_status: runInfo ? runInfo['Host Filtering'] : '',
-                        nonhost_alignment_status: runInfo ? runInfo['GSNAPL/RAPSEARCH alignment'] : '',
-                        postprocessing_status: runInfo ? runInfo['Post Processing'] : '',
+        derived_output = sample_info[:derived_sample_output]
+        db_sample = sample_info[:db_sample]
+        run_info = sample_info[:run_info]
+        data_values = { sample_name: db_sample ? db_sample[:name] : '',
+                        upload_date: db_sample ? db_sample[:created_at] : '',
+                        total_reads: derived_output[:pipeline_output] ? derived_output[:pipeline_output][:total_reads] : '',
+                        nonhost_reads: derived_output[:summary_stats] ? derived_output[:summary_stats][:remaining_reads] : '',
+                        nonhost_reads_percent: derived_output[:summary_stats] && derived_output[:summary_stats][:percent_remaining] ? derived_output[:summary_stats][:percent_remaining].round(3) : '',
+                        quality_control: derived_output[:summary_stats] && derived_output[:summary_stats][:qc_percent] ? derived_output[:summary_stats][:qc_percent].round(3) : '',
+                        compression_ratio: derived_output[:summary_stats] && derived_output[:summary_stats][:compression_ratio] ? derived_output[:summary_stats][:compression_ratio].round(2) : '',
+                        tissue_type: db_sample ? db_sample[:sample_tissue] : '',
+                        nucleotide_type: db_sample ? db_sample[:sample_template] : '',
+                        location: db_sample ? db_sample[:sample_location] : '',
+                        host_genome: derived_output ? derived_output[:host_genome_name] : '',
+                        notes: db_sample ? db_sample[:sample_notes] : '',
+                        overall_job_status: run_info ? run_info[:job_status_description] : '',
+                        host_filtering_status: run_info ? run_info['Host Filtering'] : '',
+                        nonhost_alignment_status: run_info ? run_info['GSNAPL/RAPSEARCH alignment'] : '',
+                        postprocessing_status: run_info ? run_info['Post Processing'] : '',
                         uploader: sample_info[:uploader] ? sample_info[:uploader][:name] : '',
-                        runtime_seconds: runInfo ? runInfo[:total_runtime] : '' }
+                        runtime_seconds: run_info ? run_info[:total_runtime] : '' }
         stage_statuses = data_values.values_at(:host_filtering_status, :nonhost_alignment_status, :postprocessing_status)
         if stage_statuses.any? { |status| status == "FAILED" }
           data_values[:overall_job_status] = "FAILED"
