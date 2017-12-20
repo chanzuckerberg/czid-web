@@ -519,6 +519,7 @@ $break-large: 1070px;
     }
   }
   .search-box {
+    display: inline-block;
     margin-bottom: 0;
     width: 30%;
     border: 1px solid #e6e6e6;
@@ -549,6 +550,24 @@ $break-large: 1070px;
     }
   }
 
+}
+
+.download-project {
+  background: #edf8ff;
+  color: rgb(3, 169, 244) !important;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 10px 40px;
+  display: inline-block;
+  padding: 10px;
+  border-radius: 3px;
+  &:hover {
+    background: rgb(178, 235, 242)
+  }
+  div {
+    display: inline-block;
+    margin-right: 3px
+  }
 }
 
 input[type="button"] {

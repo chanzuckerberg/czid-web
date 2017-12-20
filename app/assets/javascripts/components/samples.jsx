@@ -478,13 +478,23 @@ class Samples extends React.Component {
         </div>
       </div>
     )
+    let download_button = (
+      <a href={`/projects/id/csv`} className="download-project">
+        <div className="fa fa-cloud-download"/>
+        <div>Download project</div>
+      </a>
+    );
     return (
     <div className="content-wrapper">
       <div className="sample-container">
+
         <div className="row search-box">
           <span className="icon"><i className="fa fa-search" aria-hidden="true"></i></span>
           <input id="search" value={this.state.searchParams} onChange={this.handleSearchChange}  type="search" onKeyDown={this.handleSearch} className="search" placeholder='Search for Sample'/>
         </div>
+
+        { download_button }
+
           {/* Dropdown menu */}
           <ul id='dropdownstatus' className='status dropdown-content'>
           <li><a className="title"><b>Filter by status</b></a></li>
