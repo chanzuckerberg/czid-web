@@ -29,7 +29,7 @@ class PipelineOutputsController < ApplicationController
       @taxid_fasta = get_taxid_fasta(@pipeline_output, params[:taxid], params[:tax_level].to_i, params[:hit_type])
     end
     taxid_name = @pipeline_output.taxon_counts.find_by(tax_id: params[:taxid], tax_level: params[:tax_level]).name
-    taxid_name_clean = taxid_name.downcase.gsub(/\W/, "-")
+    taxid_name_clean = taxid_name ? taxid_name.downcase.gsub(/\W/, "-") : ''
     send_data @taxid_fasta, filename: @pipeline_output.sample.name + '_' + taxid_name_clean + '-hits.fasta'
   end
 
