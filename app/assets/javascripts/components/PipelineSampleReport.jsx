@@ -86,7 +86,7 @@ class PipelineSampleReport extends React.Component {
   }
 
   fetchReportData() {
-    ReportFilter.showLoading('Loading results...');
+    Samples.showLoading('Loading results...');
     let params = `?${window.location.search.replace("?", "")}&report_ts=${this.report_ts}`;
     const cached_background_id = Cookies.get('background_id');
     if(cached_background_id) {
