@@ -358,25 +358,30 @@ class PipelineSampleReads extends React.Component {
         </div>
       );
     }
-    sample_dropdown = (
-      <div className='dropdown-button sample-select-dropdown' data-activates='sample-list'>
-        { this.sampleInfo.name }
-        <i className="fa fa-chevron-down right"/>
-      </div>
-    )
-    sample_dropdown_content = (
-      <ul id='sample-list' className='dropdown-content sample-dropdown-content'>
-       { Object.keys(this.sample_map).map((sample_id, i) => {
-           return (
-             <li key={i}>
-               <a href={`/samples/${sample_id}`}>
-                 { this.sample_map[sample_id] }
-               </a>
-             </li>
-           )})
-       } 
-      </ul>
-    )
+
+    if (this.sample_map && Object.keys(this.sample_map).length > 1) {
+      sample_dropdown = (
+        <div className='dropdown-button sample-select-dropdown' data-activates='sample-list'>
+          { this.sampleInfo.name }<i className="fa fa-chevron-down right"/>
+
+          <ul id='sample-list' className='dropdown-content sample-dropdown-content'>
+           { Object.keys(this.sample_map).map((sample_id, i) => {
+               return (
+                 <li key={i}>
+                   <a href={`/samples/${sample_id}`}>
+                     { this.sample_map[sample_id] }
+                   </a>
+                 </li>
+               )})
+           }
+          </ul>
+        </div>
+      )
+    } else {
+      sample_dropdown = <span>{ this.sampleInfo.name }</span>
+    }
+
+
     return (
       <div>
         <SubHeader>
@@ -387,7 +392,6 @@ class PipelineSampleReads extends React.Component {
 
             <div className="sub-title">
               <a href={`/?project_id=${this.projectInfo.id}`}> {this.projectInfo.name} </a> > { sample_dropdown }
-              { sample_dropdown_content }
             </div>
 
             <div className="sub-header-navigation">
