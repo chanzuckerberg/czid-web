@@ -437,7 +437,8 @@ $break-large: 1070px;
   ul .dropdown-content li > a {
     font-size: 14px !important;
   }
-  .table-container {
+ .table-container {
+    display: flex;
     margin: 0 67px 7px;
     color: #333333;
     font-weight: 600;
@@ -474,6 +475,7 @@ $break-large: 1070px;
     margin-bottom: 0;
     border-bottom: 1px solid #dfdddd;
     .job-card {
+      display: flex;
       margin: 0 63px;
       .blank {
         color: #b5b0b0
@@ -519,6 +521,7 @@ $break-large: 1070px;
     }
   }
   .search-box {
+    display: inline-block;
     margin-bottom: 0;
     width: 30%;
     border: 1px solid #e6e6e6;
@@ -529,6 +532,10 @@ $break-large: 1070px;
       display: inline-block;
       margin: 0 10px;
     }
+  }
+  .column-dropdown {    
+    display: inline-block;
+    width: 30%;
   }
   input.search {
     margin: 0;

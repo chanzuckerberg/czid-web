@@ -29,10 +29,26 @@ class Samples extends React.Component {
       initialFetchedSamples: [],
       loading: false,
       isRequesting: false,
-      displayEmpty: false
+      displayEmpty: false,
+      columnsShown: ["total_reads", "nonhost_reads", "quality_control" , "compression_ratio", "pipeline_status"]
     };
     this.sortCount = 0;
     this.initializeTooltip();
+    this.COLUMN_DISPLAY_MAP = { total_reads: { display_name: "Total reads", type: "pipeline_data" },
+                                nonhost_reads: { display_name: "Non-host reads", type: "pipeline_data" },
+                                quality_control: { display_name: "Passed QC", tooltip: "Passed quality control", type: "pipeline_data" },
+                                compression_ratio: { display_name: "DCR", tooltip: "Duplicate compression ratio", type: "pipeline_data" },
+                                pipeline_status: { display_name: "Status", type: "pipeline_data" },
+                                tissue_type: { display_name: "Tissue type", type: "metadata" },
+                                nucleotide_type: { display_name: "Nucleotide type", type: "metadata" },
+                                location: { display_name: "Location", type: "metadata" },
+                                host_genome: { display_name: "Host", type: "metadata" },
+                                notes: { display_name: "Notes", type: "metadata" } }
+    this.handleColumnSelectChange = this.handleColumnSelectChange.bind(this);
+    this.columnHidden = this.columnHidden.bind(this);
+    $(document).ready(function() {
+      $('select').material_select();
+    });
   }
 
   static showLoading(message) {
@@ -175,36 +191,43 @@ class Samples extends React.Component {
           <span>{this.appendStatusIcon(status)}</span><p className="status">{status}</p>
         </div>
       )
+      data_values = { total_reads: !derivedOutput.pipeline_output ? BLANK_TEXT : numberWithCommas(derivedOutput.pipeline_output.total_reads),
+                      nonhost_reads: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.remaining_reads) ? BLANK_TEXT : numberWithCommas(derivedOutput.summary_stats.remaining_reads),
+                      nonhost_reads_percent: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? '' : <span className="percent"> {`(${derivedOutput.summary_stats.percent_remaining.toFixed(2)}%)`} </span>,
+                      quality_control: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? BLANK_TEXT : `${derivedOutput.summary_stats.qc_percent.toFixed(2)}%`,
+                      compression_ratio: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.compression_ratio) ? BLANK_TEXT : derivedOutput.summary_stats.compression_ratio.toFixed(2),
+                      tissue_type: dbSample && dbSample.sample_tissue ? dbSample.sample_tissue : BLANK_TEXT,
+                      nucleotide_type: dbSample && dbSample.sample_template ? dbSample.sample_template : BLANK_TEXT,
+                      location: dbSample && dbSample.sample_location ? dbSample.sample_location : BLANK_TEXT,
+                      host_genome: derivedOutput && derivedOutput.host_genome_name ? derivedOutput.host_genome_name : BLANK_TEXT,
+                      notes: dbSample && dbSample.sample_notes ? dbSample.sample_notes : BLANK_TEXT }
+
       return (
         <div className="row job-container" onClick={ this.viewSample.bind(this, dbSample.id)} key={i}>
           <div className="job-card">
-            <div className="col s4">
+
+            <div className="col s12">
               <p className="sample-name">{dbSample.name}</p>
               <p className="uploader">
                 <span>Uploaded {moment(dbSample.created_at).startOf('second').fromNow()}</span>
                 { !uploader || uploader === '' ? '' : <span> | by {uploader}</span>}
               </p>
             </div>
-            <div className="reads col s2">
-              <p>
-              { !derivedOutput.pipeline_output ? BLANK_TEXT : numberWithCommas(derivedOutput.pipeline_output.total_reads) }
-              </p>
-            </div>
-            <div className="reads col s2">
-              <p>
-              { (!derivedOutput.summary_stats || !derivedOutput.summary_stats.remaining_reads) ? BLANK_TEXT : numberWithCommas(derivedOutput.summary_stats.remaining_reads) }
-              { (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? '' : <span className="percent"> {`(${derivedOutput.summary_stats.percent_remaining.toFixed(2)}%)`} </span> }
-              </p>
-            </div>
-            <div className="reads col s1 center">
-              <p>{ (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? BLANK_TEXT : `${derivedOutput.summary_stats.qc_percent.toFixed(2)}%`}</p>
-            </div>
-            <div className="reads col s1 center">
-              <p>
-              { (!derivedOutput.summary_stats || !derivedOutput.summary_stats.compression_ratio) ? BLANK_TEXT : derivedOutput.summary_stats.compression_ratio.toFixed(2) }
-              </p>
-            </div>
-              <div className={ runInfo.total_runtime ? "reads status-col col s2" : 'reads col s2 no-time'}>{ !runInfo.job_status_description ? rowWithChunkStatus : rowWithoutChunkStatus }
+
+            <div key="total_reads" className="reads col s6" hidden={this.columnHidden("total_reads")}><p>{ data_values["total_reads"] }</p></div>
+            <div key="nonhost_reads" className="reads col s6" hidden={this.columnHidden("nonhost_reads")}><p>{ data_values["nonhost_reads"] }{ data_values["nonhost_reads_percent"] }</p></div>
+            <div key="quality_control" className="reads col s6 center" hidden={this.columnHidden("quality_control")}><p>{ data_values["quality_control"] }</p></div>
+            <div key="compression_ratio" className="reads col s6 center" hidden={this.columnHidden("compression_ratio")}><p>{ data_values["compression_ratio"] }</p></div>
+
+            { Object.keys(this.COLUMN_DISPLAY_MAP).map((option_name, i) => {
+                if (this.COLUMN_DISPLAY_MAP[option_name].type === "metadata") {
+                  return (
+                    <div key={option_name} className="reads col s6" hidden={this.columnHidden(option_name)}><p>{ data_values[option_name] }</p></div>
+                  )
+            }})}
+
+            <div className={ runInfo.total_runtime ? "reads status-col col s6" : 'reads col s6 no-time'} hidden={this.columnHidden("pipeline_status")}>
+              { !runInfo.job_status_description ? rowWithChunkStatus : rowWithoutChunkStatus }
               { runInfo.total_runtime ? <p className="time"><i className="fa fa-clock-o" aria-hidden="true"></i><span>{this.formatRunTime(runInfo.total_runtime)}</span></p> : ''}
             </div>
           </div>
@@ -411,7 +434,7 @@ class Samples extends React.Component {
     }, () => {
       Samples.hideLoader();
       this.setUrlLocation();
-      this.fetchProjectDetails(id)
+      this.fetchProjectDetails(id);
     });
   }
 
@@ -459,45 +482,119 @@ class Samples extends React.Component {
     )
   }
 
+  findSelectedColumns(selO) {
+    var selValues = [];
+    for (i=0; i < selO.length; i++) {
+      column_name = selO.options[i].value;
+      if (selO.options[i].selected && column_name !== "") {
+        selValues.push(column_name);
+      }
+    }
+    return selValues;
+  }
+
+  handleColumnSelectChange(e) {
+    selected_columns = this.findSelectedColumns(e.target);
+    this.setState({columnsShown: selected_columns});
+  }
+
+  columnHidden(column) {
+    return !this.state.columnsShown.includes(column)
+  }
+
+  display_column_options(column_map, data_type) {
+    column_list = Object.keys(column_map)
+    return column_list.map((option_name, i) => {
+      if (column_map[option_name].type === data_type) {
+        return (
+          <option key={option_name} id={option_name} value={option_name}>
+            {column_map[option_name].display_name}
+          </option>
+        )
+      }
+    })
+  }
+
   renderTable(samples) {
+
+    search_box = (
+      <div className="row search-box">
+        <span className="icon"><i className="fa fa-search" aria-hidden="true"></i></span>
+        <input id="search" value={this.state.searchParams} onChange={this.handleSearchChange}  type="search" onKeyDown={this.handleSearch} className="search" placeholder='Search for sample'/>
+      </div>
+    );
+
     const tableHead = (
       <div className="row wrapper">
         <div className="row table-container">
-          <div className="col s4 sort-able">
+
+          <div className="col s12 sort-able">
             <div onClick={this.sortSamples}>
               <span>Name</span>
               <i className={`fa ${(this.state.sort_by === 'name,desc') ? 'fa fa-caret-up' : 'fa fa-caret-down'}
               ${(this.state.sort_by === 'name,desc' || this.state.sort_by === 'name,asc') ? 'active': 'hidden'}`}></i>
             </div>
           </div>
-          <div className="col s2">Total reads</div>
-          <div className="col s2">Non-host reads</div>
-          <div className="col s1 center" rel='tooltip' data-placement='bottom' title='Passed quality control'>Passed QC</div>
-          <div className="col s1 center" rel='tooltip' data-placement='bottom' title='Duplicate compression ratio'>DCR</div>
-          <div className="col s2 status-dropdown" data-activates="dropdownstatus"><i className="status-filter fa fa-caret-down"></i>Status</div>
+
+          <div className="col s6" hidden={this.columnHidden("total_reads")}>{ this.COLUMN_DISPLAY_MAP.total_reads.display_name }</div>
+          <div className="col s6" hidden={this.columnHidden("nonhost_reads")}>{ this.COLUMN_DISPLAY_MAP.nonhost_reads.display_name }</div>
+          <div className="col s6 center" rel='tooltip' data-placement='bottom' title={this.COLUMN_DISPLAY_MAP.quality_control.tooltip}
+            hidden={this.columnHidden("quality_control")}>{ this.COLUMN_DISPLAY_MAP.quality_control.display_name }</div>
+          <div className="col s6 center" rel='tooltip' data-placement='bottom' title={this.COLUMN_DISPLAY_MAP.compression_ratio.tooltip}
+            hidden={this.columnHidden("compression_ratio")}>{ this.COLUMN_DISPLAY_MAP.compression_ratio.display_name }</div>
+
+          { Object.keys(this.COLUMN_DISPLAY_MAP).map((option_name, i) => {
+              if (this.COLUMN_DISPLAY_MAP[option_name].type === "metadata") {
+                return (
+                  <div key={i} className="col s6" hidden={this.columnHidden(option_name)}>{ this.COLUMN_DISPLAY_MAP[option_name].display_name }</div>
+                )
+          }})}
+
+          <div className="col s6 status-dropdown" data-activates="dropdownstatus" hidden={this.columnHidden("pipeline_status")}>
+            <i className="status-filter fa fa-caret-down"></i>{ this.COLUMN_DISPLAY_MAP.pipeline_status.display_name }
+          </div>
+        </div>
+      </div> 
+    );
+
+    status_filter_dropdown = (
+      <ul id='dropdownstatus' className='status dropdown-content'>
+        <li><a className="title"><b>Filter by status</b></a></li>
+        <li className="divider"></li>
+        <li className="filter-item" data-status="WAITING" onClick={ this.handleStatusFilterSelect } ><a data-status="WAITING" className="filter-item waiting">Waiting</a><i data-status="WAITING" className="filter fa fa-check"></i></li>
+        <li className="filter-item" data-status="UPLOADING" onClick={ this.handleStatusFilterSelect }><a data-status="UPLOADING" className="filter-item uploading">In Progress</a><i data-status="UPLOADING"  className="filter fa fa-check"></i></li>
+        <li className="filter-item" data-status="CHECKED" onClick={ this.handleStatusFilterSelect }><a data-status="CHECKED" className="filter-item complete">Complete</a><i data-status="CHECKED" className="filter fa fa-check"></i></li>
+        <li className="filter-item" onClick={ this.handleStatusFilterSelect } data-status="FAILED" ><a data-status="FAILED" className="filter-item failed">Failed</a><i data-status="FAILED" className="filter fa fa-check"></i></li>
+        <li className="divider"></li>
+        <li className="filter-item" data-status="ALL" onClick={ this.handleStatusFilterSelect }><a data-status="ALL" className="filter-item all">All</a><i data-status="ALL" className="filter all fa fa-check"></i></li>
+      </ul>
+    );
+
+    column_select_dropdown = (
+      <div className="column-dropdown">
+        <div className="input-field">
+          <select multiple name="columnSelector" ref="columnSelector" value={this.state.columnsShown} onChange={this.handleColumnSelectChange}>
+            <optgroup label="Pipeline Data">
+              { this.display_column_options(this.COLUMN_DISPLAY_MAP, "pipeline_data") }
+            </optgroup>
+            <optgroup label="Sample Data">
+              { this.display_column_options(this.COLUMN_DISPLAY_MAP, "metadata") }
+            </optgroup>
+          </select>
         </div>
       </div>
-    )
+    );
+ 
     return (
     <div className="content-wrapper">
       <div className="sample-container">
-        <div className="row search-box">
-          <span className="icon"><i className="fa fa-search" aria-hidden="true"></i></span>
-          <input id="search" value={this.state.searchParams} onChange={this.handleSearchChange}  type="search" onKeyDown={this.handleSearch} className="search" placeholder='Search for Sample'/>
-        </div>
-          {/* Dropdown menu */}
-          <ul id='dropdownstatus' className='status dropdown-content'>
-          <li><a className="title"><b>Filter by status</b></a></li>
-          <li className="divider"></li>
-          <li className="filter-item" data-status="WAITING" onClick={ this.handleStatusFilterSelect } ><a data-status="WAITING" className="filter-item waiting">Waiting</a><i data-status="WAITING" className="filter fa fa-check"></i></li>
-          <li className="filter-item" data-status="UPLOADING" onClick={ this.handleStatusFilterSelect }><a data-status="UPLOADING" className="filter-item uploading">In Progress</a><i data-status="UPLOADING"  className="filter fa fa-check"></i></li>
-          <li className="filter-item" data-status="CHECKED" onClick={ this.handleStatusFilterSelect }><a data-status="CHECKED" className="filter-item complete">Complete</a><i data-status="CHECKED" className="filter fa fa-check"></i></li>
-          <li className="filter-item" onClick={ this.handleStatusFilterSelect } data-status="FAILED" ><a data-status="FAILED" className="filter-item failed">Failed</a><i data-status="FAILED" className="filter fa fa-check"></i></li>
-            <li className="divider"></li>
-          <li className="filter-item" data-status="ALL" onClick={ this.handleStatusFilterSelect }><a data-status="ALL" className="filter-item all">All</a><i data-status="ALL" className="filter all fa fa-check"></i></li>
-          </ul>
-          { tableHead }
-          { !samples.length && this.state.displayEmpty ? this.renderEmptyTable() : this.renderPipelineOutput(samples)  }
+          { search_box }
+          { column_select_dropdown }
+          { status_filter_dropdown }
+          <div className="sample-table-container">
+            { tableHead }
+            { !samples.length && this.state.displayEmpty ? this.renderEmptyTable() : this.renderPipelineOutput(samples)  }
+          </div>
       </div>
       { !this.state.pageEnd && this.state.allSamples.length > 14 ? <div className="scroll">
         <i className='fa fa-spinner fa-spin fa-3x'></i>
@@ -527,6 +624,14 @@ class Samples extends React.Component {
     this.scrollDown();
     this.initializeProjectList();
     this.displayPipelineStatusFilter();
+    this.initializeColumnSelect();
+  }
+
+  initializeColumnSelect() {
+    $(document).ready(function() {
+      $('select').material_select();
+    });
+    $(ReactDOM.findDOMNode(this.refs.columnSelector)).on('change',this.handleColumnSelectChange.bind(this));
   }
 
   // initialize filter dropdown

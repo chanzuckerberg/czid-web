@@ -134,6 +134,7 @@ module SamplesHelper
       job_stats = pipeline_output ? pipeline_output.job_stats : nil
       summary_stats = job_stats ? get_summary_stats(job_stats) : nil
 
+      output_data[:host_genome_name] = output.host_genome ? output.host_genome.name : nil
       output_data[:pipeline_output] = pipeline_output
       output_data[:job_stats] = job_stats
       output_data[:summary_stats] = summary_stats
