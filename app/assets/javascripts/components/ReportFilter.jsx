@@ -108,8 +108,12 @@ class ReportFilter extends React.Component {
     }, () => {
       Cookies.set('excluded_categories', JSON.stringify(excluded_categories));
       this.applySearchFilter(0, excluded_categories);
+      this.flash();
     });
+  }
 
+  flash() {
+    this.props.flash()
   }
 
   resetAllFilters() {
@@ -134,7 +138,8 @@ class ReportFilter extends React.Component {
   }
 
   applySearchFilter(searchId, excluded_categories) {
-    this.props.applySearchFilter(searchId, excluded_categories)
+    this.props.applySearchFilter(searchId, excluded_categories);
+    this.flash()
   }
 
   render() {
@@ -216,6 +221,7 @@ class ReportFilter extends React.Component {
               <div id="filters-pane" className="pane col s12">
                 {category_filter}
                 {genus_search}
+                {this.props.filter_row_stats}
               </div>
             </div>
           </div>

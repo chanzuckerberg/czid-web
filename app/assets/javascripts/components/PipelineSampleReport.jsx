@@ -54,6 +54,7 @@ class PipelineSampleReport extends React.Component {
     this.sortResults = this.sortResults.bind(this);
     this.sortCompareFunction = this.sortCompareFunction.bind(this);
     this.setSortParams = this.setSortParams.bind(this);
+    this.flash = this.flash.bind(this);
 
     this.taxonPassThresholdFilter = this.taxonPassThresholdFilter.bind(this);
     this.expandOrCollapseGenus = this.expandOrCollapseGenus.bind(this);
@@ -106,7 +107,7 @@ class PipelineSampleReport extends React.Component {
         taxonomy_details: res.data.taxonomy_details[2],
         genus_map: genus_map
       });
-      this.applyThresholdFilters(res.data.taxonomy_details[2])
+      this.applyThresholdFilters(res.data.taxonomy_details[2], false)
     });
   }
 
@@ -129,6 +130,7 @@ class PipelineSampleReport extends React.Component {
     Cookies.set('filter_thresholds', "{}")
     Cookies.set('excluded_categories', "[]")
     $(".metric-thresholds").val("");
+    this.flash();
   }
 
   applySearchFilter(searchTaxonId, excludedCategories, input_taxons) {
@@ -198,6 +200,12 @@ class PipelineSampleReport extends React.Component {
       selected_taxons: selected_taxons,
       rows_passing_filters: selected_taxons.length
     })
+  }
+
+  flash() {
+    $(`.filter-message`).removeClass('flash')
+    document.getElementById('filter-message').offsetHeight; /* trigger reflow */
+    $(`.filter-message`).addClass('flash')
   }
 
   initializeTooltip() {
@@ -340,7 +348,7 @@ class PipelineSampleReport extends React.Component {
     return true;
   }
 
-  applyThresholdFilters(candidate_taxons) {
+  applyThresholdFilters(candidate_taxons, play_animation = true) {
     let thresholded_taxons = []
     genus_taxon = {}
     matched_taxons = []
@@ -371,7 +379,11 @@ class PipelineSampleReport extends React.Component {
       thresholded_taxons.push(genus_taxon)
     }
 
-    this.applySearchFilter(0, this.state.excluded_categories, thresholded_taxons)
+    this.applySearchFilter(0, this.state.excluded_categories, thresholded_taxons);
+
+    if (play_animation) {
+      this.flash()
+    }
   }
 
   handleThresholdEnter(event) {
@@ -585,6 +597,15 @@ class PipelineSampleReport extends React.Component {
     const sort_column = parts[1] + "_" + parts[2];
     var t0 = Date.now();
 
+    filter_stats = this.state.rows_passing_filters + ' rows passing filters, out of ' + this.state.rows_total + ' total rows.';
+    disable_filter = this.anyFilterSet() ? (<span className="disable" onClick={(e) => this.refs.report_filter.resetAllFilters()}><b> Disable all filters</b></span> ) : null;
+    filter_row_stats = this.state.loading ? null : (
+      <div id="filter-message" className="filter-message">
+        <span className="count">
+          {filter_stats} {disable_filter}
+        </span>
+      </div>
+    );
     report_filter =
       <ReportFilter ref="report_filter"
         all_categories = { this.all_categories }
@@ -595,19 +616,11 @@ class PipelineSampleReport extends React.Component {
         report_page_params = { this.report_page_params }
         applyExcludedCategories = { this.applyExcludedCategories }
         applySearchFilter = {this.applySearchFilter }
+        flash = { this.flash }
+        filter_row_stats = { filter_row_stats }
         enableFilters = { this.enableFilters }
         resetAllFilters = { this.resetAllFilters }
       />;
-    filter_stats = this.state.rows_passing_filters + ' rows passing filters, out of ' + this.state.rows_total + ' total rows.';
-    disable_filter = this.anyFilterSet() ? (<span className="disable" onClick={(e) => this.refs.report_filter.resetAllFilters()}><b> Disable all filters</b></span> ) : null;
-    filter_row_stats = this.state.loading ? null : (
-      <div>
-        <span className="count">
-      {filter_stats} {disable_filter}
-        </span>
-      </div>
-    );
-    // To do: improve presentation and place download_button somewhere on report page
     download_button = (
       <a href={`/reports/${this.report_details.report_info.id}/csv`} className="download-report right">
         <div className="fa fa-cloud-download"/>
@@ -628,7 +641,7 @@ class PipelineSampleReport extends React.Component {
                   { download_button }
                   { filter_row_stats }
                 </div>
-                <div className="reports-main ">
+                <div className="reports-main">
                   <table id="report-table" className='bordered report-table'>
                     <thead>
                     <tr>

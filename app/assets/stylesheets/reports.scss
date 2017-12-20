@@ -14,6 +14,20 @@ input[type=number] {
   -moz-appearance:textfield;
 }
 
+.flash {
+  animation-name: anim-info-updated;
+  animation-duration: 500ms;
+}
+
+@keyframes anim-info-updated {
+    0% {
+      background-color: #edf8ff;
+    }
+    100% {
+      background-color: transparent;
+    }
+}
+
 .row.reports-container{
 margin-bottom: 0px;
 }
