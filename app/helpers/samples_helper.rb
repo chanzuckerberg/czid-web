@@ -13,16 +13,16 @@ module SamplesHelper
       formatted_samples.each do |sample_info|
         derivedOutput = sample_info[:derived_sample_output]
         dbSample = sample_info[:db_sample]
-        data_values = { total_reads: !derivedOutput.pipeline_output ? '' : derivedOutput.pipeline_output.total_reads,
-                        nonhost_reads: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.remaining_reads) ? '' : derivedOutput.summary_stats.remaining_reads,
-                        nonhost_reads_percent: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? '' : derivedOutput.summary_stats.percent_remaining.round(3),
-                        quality_control: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? '' : derivedOutput.summary_stats.qc_percent.round(3),
-                        compression_ratio: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.compression_ratio) ? '' : derivedOutput.summary_stats.compression_ratio.round(2),
-                        tissue_type: dbSample && dbSample.sample_tissue ? dbSample.sample_tissue : '',
-                        nucleotide_type: dbSample && dbSample.sample_template ? dbSample.sample_template : '',
-                        location: dbSample && dbSample.sample_location ? dbSample.sample_location : '',
-                        host_genome: derivedOutput && derivedOutput.host_genome_name ? derivedOutput.host_genome_name : '',
-                        notes: dbSample && dbSample.sample_notes ? dbSample.sample_notes : '' }
+        data_values = { total_reads: !derivedOutput[:pipeline_output] ? '' : derivedOutput[:pipeline_output][:total_reads],
+                        nonhost_reads: (!derivedOutput[:summary_stats] || !derivedOutput[:summary_stats][:remaining_reads]) ? '' : derivedOutput[:summary_stats][:remaining_reads],
+                        nonhost_reads_percent: (!derivedOutput[:summary_stats] || !derivedOutput[:summary_stats][:percent_remaining]) ? '' : derivedOutput[:summary_stats][:percent_remaining].round(3),
+                        quality_control: (!derivedOutput[:summary_stats] || !derivedOutput[:summary_stats][:qc_percent]) ? '' : derivedOutput[:summary_stats][:qc_percent].round(3),
+                        compression_ratio: (!derivedOutput[:summary_stats] || !derivedOutput[:summary_stats][:compression_ratio]) ? '' : derivedOutput[:summary_stats][:compression_ratio].round(2),
+                        tissue_type: dbSample && dbSample[:sample_tissue] ? dbSample[:sample_tissue] : '',
+                        nucleotide_type: dbSample && dbSample[:sample_template] ? dbSample[:sample_template] : '',
+                        location: dbSample && dbSample[:sample_location] ? dbSample[:sample_location] : '',
+                        host_genome: derivedOutput && derivedOutput[:host_genome_name] ? derivedOutput[:host_genome_name] : '',
+                        notes: dbSample && dbSample[:sample_notes] ? dbSample[:sample_notes] : '' }
         attributes_as_symbols = attributes.map(&:to_sym)
         csv << data_values.values_at(*attributes_as_symbols)
       end

@@ -24,7 +24,7 @@ class ProjectsController < ApplicationController
     else
       project = Project.find(params[:id])
       samples = project ? project.samples : nil
-      project_name = (project && project.name) ? "project-#{project.name}" : "project"
+      project_name = (project && project.name) ? "project-#{project.name.downcase.split(" ").join("_")}" : "project"
     end
     formatted_samples = format_samples(samples)
     project_csv = generate_sample_list_csv(formatted_samples)
