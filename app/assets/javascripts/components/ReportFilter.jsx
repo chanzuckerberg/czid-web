@@ -15,13 +15,17 @@ class ReportFilter extends React.Component {
     this.resetAllFilters = this.resetAllFilters.bind(this);
 
     this.handleBackgroundModelChange = this.handleBackgroundModelChange.bind(this);
+    const cached_cats = Cookies.get('excluded_categories');
     this.state = {
       searchKey: '',
       searchId: 0,
-      excluded_categories: [],
-      backgroundName: this.background_model.name || null,
-      backgroundParams: this.background_model.id || null,
+      excluded_categories: (cached_cats) ? JSON.parse(cached_cats) : [] ,
+      backgroundName: Cookies.get('background_name') || this.background_model.name ,
+      backgroundParams: Cookies.get('background_id') || this.background_model.id,
       search_items: props.search_keys_in_sample
+    };
+    if(this.state.excluded_categories.length) {
+      this.applySearchFilter(0, this.state.excluded_categories);
     }
   }
   componentWillReceiveProps(newProps){
@@ -56,13 +60,13 @@ class ReportFilter extends React.Component {
 
 
   handleBackgroundModelChange(e) {
-    const selectedIndex = e.target.selectedIndex
-    this.setState({
-      backgroundName: e.target.value,
-      backgroundParams: this.backgroundModels[selectedIndex].id
+    const backgroundName = e.target.value;
+    const backgroundParams = this.backgroundModels[e.target.selectedIndex].id;
+    this.setState({ backgroundName, backgroundParams }, () => {
+      Cookies.set('background_name', backgroundName);
+      Cookies.set('background_id', backgroundParams);
+      this.refreshPage({background_id: backgroundParams});
     });
-    background_id = this.state.backgroundParams
-    this.refreshPage({background_id});
   }
 
   resizeFilterHeight() {
@@ -88,9 +92,9 @@ class ReportFilter extends React.Component {
 
   applyExcludedCategories(e) {
     //ReportFilter.showLoading('Applying category filter...');
-    let excluded_categories = this.state.excluded_categories
+    let excluded_categories = this.state.excluded_categories;
     if (e.target.checked) {
-      ridx = excluded_categories.indexOf(e.target.value)
+      ridx = excluded_categories.indexOf(e.target.value);
       if (ridx > -1) {
         excluded_categories.splice(ridx, 1);
       }
@@ -101,8 +105,11 @@ class ReportFilter extends React.Component {
       excluded_categories: excluded_categories,
       searchId: 0,
       searchKey: ''
-    })
-    this.applySearchFilter(0, excluded_categories)
+    }, () => {
+      Cookies.set('excluded_categories', JSON.stringify(excluded_categories));
+      this.applySearchFilter(0, excluded_categories);
+    });
+
   }
 
   resetAllFilters() {
@@ -110,18 +117,20 @@ class ReportFilter extends React.Component {
       excluded_categories: [],
       searchId: 0,
       searchKey: ''
-    })
+    });
     this.props.resetAllFilters()
   }
 
   searchSelectedTaxon(value, item) {
     //ReportFilter.showLoading(`Filtering for '${value}'...`);
     let searchId = item[1];
-    this.state.searchId = searchId
-    this.state.excluded_categories = []
-    this.state.searchKey = item[0]
-
-    this.applySearchFilter(searchId, [])
+    this.setState({
+      searchId,
+      excluded_categories: [],
+      searchKey: item[0]
+    }, () => {
+      this.applySearchFilter(searchId, []);
+    });
   }
 
   applySearchFilter(searchId, excluded_categories) {
@@ -129,8 +138,8 @@ class ReportFilter extends React.Component {
   }
 
   render() {
-    align_right = {'textAlign': 'right'};
-    category_filter = (
+    const align_right = {'textAlign': 'right'};
+    const category_filter = (
         <div className="filter-controls">
           <div className="category-title">
             CATEGORIES
@@ -167,7 +176,7 @@ class ReportFilter extends React.Component {
                     {item[0]}
                   </div>
                 }
-                value={this.state.searchKey}
+                value={ this.state.searchKey }
                 onChange={this.handleSearch}
                 onSelect={this.searchSelectedTaxon}
               />
@@ -191,7 +200,9 @@ class ReportFilter extends React.Component {
                       Select background model
                     </div>
                       <div className="input-field">
-                        <select ref="background" name="background" className="" id="background" onChange={ this.handleBackgroundModelChange } value={this.state.backgroundName}>
+                        <select ref="background" name="background" className="" id="background"
+                                onChange={ this.handleBackgroundModelChange }
+                                defaultValue={ this.state.backgroundName }>
                           { this.backgroundModels.length ?
                               this.backgroundModels.map((background, i) => {
                                 return <option ref= "background" key={i}  >{background.name}</option>

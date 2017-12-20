@@ -23,6 +23,7 @@ gem 'mailgun_rails'
 gem 'jbuilder', '~> 2.5'
 # jquery for rails
 gem 'jquery-rails'
+gem 'js_cookie_rails'
 # Logger
 gem 'logger'
 gem 'materialize-sass'

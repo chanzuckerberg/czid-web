@@ -12,6 +12,8 @@ class PipelineSampleReport extends React.Component {
     this.max_rows_to_render = props.max_rows || 2000
     this.default_sort_by = this.report_page_params.sort_by.replace('highest_', '')
     this.sort_params = {}
+    const filter_thresholds = Cookies.get('filter_thresholds')
+    const cached_cats = Cookies.get('excluded_categories');
 
     this.state = {
       taxonomy_details:  [],
@@ -24,9 +26,7 @@ class PipelineSampleReport extends React.Component {
       selected_taxons: [],
 
       sort_by: this.default_sort_by,
-      new_filter_thresholds: {
-        NT_aggregatescore: 0.0,
-        //other potential fields
+      new_filter_thresholds: (filter_thresholds) ? JSON.parse(filter_thresholds) : { NT_aggregatescore: 0.0 },
         /*
         NT_zscore: 0.0,
         NT_rpm: 0.0,
@@ -40,9 +40,9 @@ class PipelineSampleReport extends React.Component {
         NR_percentidentity: 0.0,
         NR_neglogevalue: 0.0,
         NR_percentconcordant: 0.0,
-        */
-      },
-      excluded_categories: [],
+      }
+      */
+      excluded_categories: (cached_cats) ? JSON.parse(cached_cats) : [],
       search_taxon_id: 0,
       loading: true
     };
@@ -85,7 +85,12 @@ class PipelineSampleReport extends React.Component {
   }
 
   fetchReportData() {
-    const params = `?${window.location.search.replace("?", "")}&report_ts=${this.report_ts}`
+    let params = `?${window.location.search.replace("?", "")}&report_ts=${this.report_ts}`;
+    const cached_background_id = Cookies.get('background_id');
+    if(cached_background_id) {
+      params = params.indexOf('background_id=')
+      < 0 ? `${params}&background_id=${cached_background_id}` : params;
+    }
     axios.get(`/samples/${this.sample_id}/report_info${params}`).then((res) => {
       let genus_map = {}
       for (var i = 0; i < res.data.taxonomy_details[2].length; i++) {
@@ -121,6 +126,8 @@ class PipelineSampleReport extends React.Component {
       selected_taxons: this.state.taxonomy_details,
       rows_passing_filters: this.state.taxonomy_details.length
     })
+    Cookies.set('filter_thresholds', "{}")
+    Cookies.set('excluded_categories', "[]")
     $(".metric-thresholds").val("");
   }
 
@@ -306,14 +313,14 @@ class PipelineSampleReport extends React.Component {
   }
 
   setFilterThreshold(e) {
-    threshold_name = e.target.id
-    val = parseFloat(e.target.value.trim());
+    const threshold_name = e.target.id;
+    const val = parseFloat(e.target.value.trim());
     if (isNaN(val)) {
       delete this.state.new_filter_thresholds[threshold_name]
     } else {
       this.state.new_filter_thresholds[threshold_name] = val;
     }
-    console.log(this.state.new_filter_thresholds)
+    Cookies.set('filter_thresholds', JSON.stringify(this.state.new_filter_thresholds))
   }
 
   taxonPassThresholdFilter(taxon) {
@@ -512,13 +519,13 @@ class PipelineSampleReport extends React.Component {
   }
 
   render_column_header(visible_type, visible_metric, column_name, tooltip_message) {
-    var style = { 'textAlign': 'left', 'cursor': 'pointer' };
-    report_column_threshold = this.thresholdInputColumn(column_name)
+    const style = { 'textAlign': 'left', 'cursor': 'pointer' };
+    const report_column_threshold = this.thresholdInputColumn(column_name);
     return (
       <th style={style}>
         <div className='sort-controls left' rel='tooltip' title={tooltip_message}>
           {this.render_sort_arrow(column_name, 'highest', 'down')}
-          {visible_type}{' '}
+          {`${visible_type} `}
           {visible_metric}
         </div>
         <div className='sort-controls left' rel='tooltip' data-placement='bottom' title='Threshold'>

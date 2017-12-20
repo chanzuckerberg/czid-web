@@ -9,3 +9,4 @@
 //= require moment
 //= require materialize/extras/nouislider
 //= require bootstrap/bootstrap-tooltip
+//= require js.cookie
