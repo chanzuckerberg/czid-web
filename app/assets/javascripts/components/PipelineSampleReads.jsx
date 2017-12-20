@@ -366,8 +366,7 @@ class PipelineSampleReads extends React.Component {
     )
     sample_dropdown_content = (
       <ul id='sample-list' className='dropdown-content sample-dropdown-content'>
-       {
-         Object.keys(this.sample_map).map((sample_id, i) => {
+       { Object.keys(this.sample_map).map((sample_id, i) => {
            return (
              <li key={i}>
                <a href={`/samples/${sample_id}`}>
@@ -375,7 +374,7 @@ class PipelineSampleReads extends React.Component {
                </a>
              </li>
            )})
-       }
+       } 
       </ul>
     )
     return (
