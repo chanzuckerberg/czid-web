@@ -482,7 +482,7 @@ class Samples extends React.Component {
     let download_button = (
       <a href={`/projects/${project_id}/csv`} className="download-project">
         <div className="fa fa-cloud-download"/>
-        <div>Download project</div>
+        <div>Download table</div>
       </a>
     );
     return (
