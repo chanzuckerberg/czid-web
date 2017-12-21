@@ -809,26 +809,38 @@ input[type=search]:focus:not([readonly]) {
       .projects-wrapper {
         height: 300px;
         overflow: scroll;
-        .project-item {
-          padding: 10px 5px;
-          cursor: pointer;
-          font-size: 12px;
-          &:hover {
-            background: #e0dfdf;
-          }
-        }
-        .highlight {
-          background: #bfd1dc;
-        }
-        .more {
-          font-size: 12px;
-          cursor: pointer;
-          padding: 0 5px;
-          text-decoration: underline;
-          color: #4ba4c2;
+      }
+    }
+    .project-item, .fav-item {
+      padding: 10px 5px;
+      cursor: pointer;
+      font-size: 12px;
+      &:hover {
+        background: #e0dfdf;
+        .favorite {
+          visibility: visible;
         }
       }
+      .favorite {
+        visibility: hidden;
+        float: right;
+      }
+    }
+    .highlight {
+      background: #bfd1dc;
+    }
+    .more {
+      font-size: 12px;
+      cursor: pointer;
+      padding: 0 5px;
+      text-decoration: underline;
+      color: #4ba4c2;
     }
   }
 }
+
+.fa-star{
+  color: #9f9f43;
+}
+
 

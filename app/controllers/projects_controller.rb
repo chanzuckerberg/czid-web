@@ -1,11 +1,6 @@
 class ProjectsController < ApplicationController
-  include SamplesHelper
-
-  before_action :set_project, only: [:show, :edit, :update, :destroy]
-
   clear_respond_to
   respond_to :json
-
   # GET /projects
   # GET /projects.json
   def index
@@ -15,6 +10,7 @@ class ProjectsController < ApplicationController
   # GET /projects/1
   # GET /projects/1.json
   def show
+    set_project
   end
 
   def send_project_csv
@@ -65,6 +61,15 @@ class ProjectsController < ApplicationController
     end
   end
 
+  def favorite
+    set_project
+      if current_user.favorites.include? @project
+        current_user.favorites.delete(@project)
+      else
+        current_user.favorites << @project
+      end
+  end
+
   # POST /projects
   # POST /projects.json
   def create
@@ -109,7 +114,7 @@ class ProjectsController < ApplicationController
 
   # Use callbacks to share common setup or constraints between actions.
   def set_project
-    @project = Project.find(params[:id])
+    @project ||= Project.find(params[:id])
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
