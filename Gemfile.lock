@@ -628,6 +628,9 @@ GEM
       activesupport (>= 4.2.0)
     health_check (2.7.0)
       rails (>= 4.0)
+    honeycomb-rails (0.4.0)
+      libhoney (>= 1.3.2)
+      rails (>= 3.0.0)
     http (2.2.2)
       addressable (~> 2.3)
       http-cookie (~> 1.0)
@@ -885,10 +888,10 @@ DEPENDENCIES
   devise (= 4.3.0)
   font-awesome-rails
   health_check
+  honeycomb-rails
   jbuilder (~> 2.5)
   jquery-rails
   js_cookie_rails
-  libhoney
   listen (>= 3.0.5, < 3.2)
   logger
   mailgun_rails

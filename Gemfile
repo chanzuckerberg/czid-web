@@ -18,6 +18,7 @@ gem 'd3-rails'
 gem 'devise', '4.3.0'
 gem 'font-awesome-rails'
 gem "health_check"
+gem 'honeycomb-rails'
 gem 'mailgun_rails'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.5'
@@ -37,7 +38,6 @@ gem 'puma', '~> 3.7'
 # Use Redis adapter to run Action Cable in production
 # gem 'redis', '~> 3.0'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem "libhoney"
 gem 'rails', '~> 5.1.2'
 gem 'rake'
 gem 'react-autocomplete-rails'
