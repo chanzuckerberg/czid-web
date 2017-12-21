@@ -15,6 +15,7 @@ import gzip
 import logging
 import math
 import threading
+import shutil
 from common import *
 
 # data directories
@@ -565,7 +566,10 @@ def run_gsnapl_remotely(input_files, lazy_run):
         chunk_output_files += [run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work_dir, remote_username,
                                                 chunk_input_files, key_path, lazy_run)]
     # merge output chunks:
-    execute_command("cat %s > %s" % (" ".join(chunk_output_files), os.path.join(RESULT_DIR, GSNAPL_DEDUP_OUT)))
+    with open(os.path.join(RESULT_DIR, GSNAPL_DEDUP_OUT),'wb') as outf:
+        for f in chunk_output_files:
+            with open(f,'rb') as fd:
+                shutil.copyfileobj(fd, outf)
     execute_command("aws s3 cp %s/%s %s/" % (RESULT_DIR, GSNAPL_DEDUP_OUT, SAMPLE_S3_OUTPUT_PATH))
 
 def run_annotate_m8_with_taxids(input_m8, output_m8):
