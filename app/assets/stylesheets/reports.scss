@@ -90,21 +90,42 @@ margin-bottom: 0px;
   }
 
   .report-data {
-    margin-bottom: 25px;
+    margin-bottom: 20px;
     float: left;
     width: 100%;
     &.background-model {
       .input-field {
-        margin-top: 0;
-        .select-dropdown {
-          font-size: 12px;
-          padding: 10px;
-          border: 1px solid #CAD0DA;
-          border-radius: 2px;
-          background-color: white;
-          .caret {
-            color: #bac8cf;
+        margin-top: 5px;
+        .caret {
+          color: rgb(103, 121, 134);
+          z-index: 500;
+          display: none !important;
+        }
+        .fa-angle-down{
+          position: absolute;
+          z-index: 50;
+          top: 31%;
+          right:2px;
+          font-size: 18px;
+          color: #444242;
+        }
+        .select-wrapper{
+          ul{
+            top:45px !important;
+            padding-left: 0px !important;
+             li > span{
+               color: black !important;
+               font-size: 14px !important;
+             }
           }
+        }
+        .select-dropdown {
+          background: #fff;
+          border-radius: 3px;
+          padding-left: 8px;
+          border: 1px solid #A6B7C1;
+          width: 100%;
+          font-size: 14px;
         }
       }
     }
@@ -125,6 +146,11 @@ margin-bottom: 0px;
     color: #1B232A;
     margin-bottom: 10px;
     font-size: 14px;
+  }
+
+  .report-title {
+    font-size: 14px;
+    color: #333333;
   }
 
   #filters-pane {
