@@ -11,10 +11,10 @@ module SamplesHelper
     all_project_id_sample_name = Sample.all.map { |s| [s.project_id, s.name] }
     # Read and clean input CSV.
     # CSV should have columns "sample_name", "project_name", and any desired columns from Sample::METADATA_FIELDS
-    csv = get_s3_file(csv_s3_path)
-    csv.delete!("\uFEFF") # remove BOM if present (file likely comes from Excel)
+    input_csv = get_s3_file(csv_s3_path)
+    input_csv.delete!("\uFEFF") # remove BOM if present (file likely comes from Excel)
     cleaned_metadata = []
-    CSV.parse(csv, headers: true) do |row|
+    CSV.parse(input_csv, headers: true) do |row|
       h = row.to_h
       project_id = project_name_to_id[h['project_name']]
       next unless all_project_id_sample_name.include?([project_id, h['sample_name']])
@@ -29,15 +29,29 @@ module SamplesHelper
     input_name = csv_s3_path.tr(":/.", "---")
     unique_folder = "/app/tmp/#{input_name}"
     ` mkdir -p #{unique_folder} `
-    CSV.open("/#{unique_folder}/samples", "wb") do |csv|
+    cleaned_csv_path = "/#{unique_folder}/samples"
+    CSV.open(cleaned_csv_path, "wb") do |csv|
       cleaned_metadata.each do |row_hash|
         csv << row_hash.values
       end
     end
-    columns = cleaned_metadata[0].keys.join(",")
-    ` cd #{unique_folder};
-      mysqlimport --replace --local --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --columns=#{columns} --fields-terminated-by=',' idseq_#{Rails.env} samples;
-    `
+    columns_array = cleaned_metadata[0].keys
+    columns = columns_array.join(",")
+    set_statements = columns_array.map { |col| "samples.#{col} = temp_samples.#{col}" }.join(",")
+    Sample.connection.execute(
+      "CREATE TEMPORARY TABLE temp_samples LIKE samples;
+
+       LOAD DATA INFILE '#{cleaned_csv_path}'
+       INTO TABLE temp_samples
+       FIELDS TERMINATED BY ','
+       (#{columns});
+
+       UPDATE samples
+       INNER JOIN temp_samples on temp_samples.id = samples.id
+       SET #{set_statements};
+
+       DROP TEMPORARY TABLE temp_samples;"
+    )
   end
 
   def host_genomes_list
