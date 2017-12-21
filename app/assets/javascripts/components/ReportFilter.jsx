@@ -202,6 +202,7 @@ class ReportFilter extends React.Component {
                       Select background model
                     </div>
                       <div className="input-field">
+                      <i className="fa fa-angle-down right"/>
                         <select ref="background" name="background" className="" id="background"
                                 onChange={ this.handleBackgroundModelChange }
                                 defaultValue={ this.state.backgroundName }>

@@ -29,7 +29,7 @@ class PipelineSampleReads extends React.Component {
     };
     this.TYPE_PROMPT = "Type here...";
     this.TISSUE_TYPES = ['-',"Bronchoalveolar lavage", "Cerebrospinal fluid",
-                         "Nasopharyngeal swab", "Plasma", "Serum", "Solid tissue", 
+                         "Nasopharyngeal swab", "Plasma", "Serum", "Solid tissue",
                          "Stool", "Synovial fluid", "Whole blood"];
     this.NUCLEOTIDE_TYPES = ['-',"DNA", "RNA"];
     this.DROPDOWN_OPTIONS = { sample_tissue: this.TISSUE_TYPES,
@@ -60,7 +60,7 @@ class PipelineSampleReads extends React.Component {
               </div>
               <i className="fa fa-chevron-down right"/>
             </div>
-            
+
             <ul id={field} className='dropdown-content details-dropdown'>
               {
                 dropdown_options.map((option_value, i) => {
@@ -437,7 +437,7 @@ class PipelineSampleReads extends React.Component {
                               {!this.host_genome ? BLANK_TEXT : this.host_genome.name}
                             </div>
                           </div>
-  
+
                           <div className='row detail-row'>
                             <div className='col s6 no-padding'>
                               Upload date
@@ -482,7 +482,7 @@ class PipelineSampleReads extends React.Component {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="row">
                   <div className="col s12">
                     <div className="content-title">
