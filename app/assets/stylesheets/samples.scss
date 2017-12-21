@@ -423,8 +423,13 @@ $break-large: 1070px;
     .download-project {
       padding: 11px;
       display: block;
+      border: 1px solid transparent;
       i {
         margin-right: 4px;
+      }
+      &:hover {
+        background: #f4f4f4;
+        border: 1px solid #d9d9d9;
       }
     }
   }
