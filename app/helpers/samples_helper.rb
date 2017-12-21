@@ -62,7 +62,7 @@ module SamplesHelper
       h = row.to_h
       project_id = project_name_to_id[h['project_name']]
       next unless all_project_id_sample_name.include?([project_id, h['sample_name']])
-      sample = Sample.find_by(name: h['sample_name'], project_id: sample_project.id)
+      sample = Sample.find_by(name: h['sample_name'], project_id: project_id)
       metadata = h.select { |k, _v| k && Sample::METADATA_FIELDS.include?(k.to_sym) }
       sample.update_attributes!(metadata)
     end
