@@ -62,11 +62,11 @@ class ProjectsController < ApplicationController
   end
 
   def favorite
-      if current_user.favorites.include? @project
-        current_user.favorites.delete(@project)
-      else
-        current_user.favorites << @project
-      end
+    if current_user.favorites.include? @project
+      current_user.favorites.delete(@project)
+    else
+      current_user.favorites << @project
+    end
   end
 
   # POST /projects
