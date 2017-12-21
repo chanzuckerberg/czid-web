@@ -870,15 +870,35 @@ input[type=search]:focus:not([readonly]) {
           color: #4ba4c2;
         }
       }
+      .favorite {
+        visibility: hidden;
+        float: right;
+      }
+    }
+    .highlight {
+      background: #bfd1dc;
+    }
+    .more {
+      font-size: 12px;
+      cursor: pointer;
+      padding: 0 5px;
+      text-decoration: underline;
+      color: #4ba4c2;
     }
   }
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Implement Add/remove to/from favorite projects
 .fa-star{
   color: #9f9f43;
 }
 
 
+<<<<<<< HEAD
 =======
 >>>>>>> Create sidebar for projects on samples page
+=======
+>>>>>>> Implement Add/remove to/from favorite projects

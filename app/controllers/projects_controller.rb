@@ -1,5 +1,8 @@
 class ProjectsController < ApplicationController
+<<<<<<< HEAD
   before_action :set_project, only: [:show, :edit, :update, :destroy, :add_favorite, :remove_favorite]
+=======
+>>>>>>> Implement Add/remove to/from favorite projects
   clear_respond_to
   respond_to :json
   # GET /projects
@@ -11,6 +14,7 @@ class ProjectsController < ApplicationController
   # GET /projects/1
   # GET /projects/1.json
   def show
+    set_project
   end
 
   def send_project_csv
@@ -117,7 +121,7 @@ class ProjectsController < ApplicationController
 
   # Use callbacks to share common setup or constraints between actions.
   def set_project
-    @project = Project.find(params[:id])
+    @project ||= Project.find(params[:id])
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
