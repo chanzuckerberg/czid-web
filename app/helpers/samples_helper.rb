@@ -2,21 +2,42 @@ require 'open3'
 require 'csv'
 
 module SamplesHelper
+  include ApplicationHelper
   include PipelineOutputsHelper
 
   def populate_metadata_bulk(csv_s3_path)
+    # Get list of available samples
+    project_name_to_id = Hash[Project.all.map { |p| [p.name, p.id] }]
+    all_project_id_sample_name = Sample.all.map { |s| [s.project_id, s.name] }
+    # Read and clean input CSV.
     # CSV should have columns "sample_name", "project_name", and any desired columns from Sample::METADATA_FIELDS
     csv = get_s3_file(csv_s3_path)
     csv.delete!("\uFEFF") # remove BOM if present (file likely comes from Excel)
+    cleaned_metadata = []
     CSV.parse(csv, headers: true) do |row|
       h = row.to_h
-      sample_project = Project.find_by(name: h['project_name'])
-      next unless sample_project
-      sample = Sample.find_by(name: h['sample_name'], project_id: sample_project.id)
-      next unless sample
+      project_id = project_name_to_id[h['project_name']]
+      next unless all_project_id_sample_name.include?([project_id, h['sample_name']])
       metadata = h.select { |k, _v| k && Sample::METADATA_FIELDS.include?(k.to_sym) }
-      sample.update_attributes!(metadata)
+      next if metadata.empty?
+      metadata["project_id"] = project_id
+      metadata["name"] = h['sample_name']
+      cleaned_metadata << metadata
     end
+    # Import into database
+    return if cleaned_metadata.empty?
+    input_name = csv_s3_path.tr(":/.", "---")
+    unique_folder = "/app/tmp/#{input_name}"
+    ` mkdir -p #{unique_folder} `
+    CSV.open("/#{unique_folder}/samples", "wb") do |csv|
+      cleaned_metadata.each do |row_hash|
+        csv << row_hash.values
+      end
+    end
+    columns = cleaned_metadata[0].keys.join(",")
+    ` cd #{unique_folder};
+      mysqlimport --replace --local --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --columns=#{columns} --fields-terminated-by=',' idseq_#{Rails.env} samples;
+    `
   end
 
   def host_genomes_list
