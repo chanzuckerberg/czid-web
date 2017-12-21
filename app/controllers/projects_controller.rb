@@ -1,8 +1,5 @@
 class ProjectsController < ApplicationController
-<<<<<<< HEAD
   before_action :set_project, only: [:show, :edit, :update, :destroy, :add_favorite, :remove_favorite]
-=======
->>>>>>> Implement Add/remove to/from favorite projects
   clear_respond_to
   respond_to :json
   # GET /projects
