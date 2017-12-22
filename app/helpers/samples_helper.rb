@@ -56,12 +56,13 @@ module SamplesHelper
     # CSV should have columns "sample_name", "project_name", and any desired columns from Sample::METADATA_FIELDS
     csv = get_s3_file(csv_s3_path)
     csv.delete!("\uFEFF") # remove BOM if present (file likely comes from Excel)
+    project_name_to_id = Hash[Project.all.map { |p| [p.name, p.id] }]
+    all_project_id_sample_name = Sample.all.map { |s| [s.project_id, s.name] }
     CSV.parse(csv, headers: true) do |row|
       h = row.to_h
-      sample_project = Project.find_by(name: h['project_name'])
-      next unless sample_project
-      sample = Sample.find_by(name: h['sample_name'], project_id: sample_project.id)
-      next unless sample
+      project_id = project_name_to_id[h['project_name']]
+      next unless all_project_id_sample_name.include?([project_id, h['sample_name']])
+      sample = Sample.find_by(name: h['sample_name'], project_id: project_id)
       metadata = h.select { |k, _v| k && Sample::METADATA_FIELDS.include?(k.to_sym) }
       sample.update_attributes!(metadata)
     end
