@@ -15,6 +15,7 @@ import gzip
 import logging
 import math
 import threading
+import shutil
 from common import *
 
 # data directories
@@ -88,6 +89,12 @@ TARGET_OUTPUTS = None
 AWS_BATCH_JOB_ID = None
 
 # convenience functions
+def concatenate_files(file_list, output_file):
+    with open(output_file, 'wb') as outf:
+        for f in file_list:
+            with open(f, 'rb') as fd:
+                shutil.copyfileobj(fd, outf)
+
 def generate_taxid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fasta_file, annotation_prefix):
     '''Tag reads based on the m8 output'''
     # Example:  generate_annotated_fasta_from_m8('filter.unmapped.merged.fasta',
@@ -565,7 +572,7 @@ def run_gsnapl_remotely(input_files, lazy_run):
         chunk_output_files += [run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work_dir, remote_username,
                                                 chunk_input_files, key_path, lazy_run)]
     # merge output chunks:
-    execute_command("cat %s > %s" % (" ".join(chunk_output_files), os.path.join(RESULT_DIR, GSNAPL_DEDUP_OUT)))
+    concatenate_files(chunk_output_files, os.path.join(RESULT_DIR, GSNAPL_DEDUP_OUT))
     execute_command("aws s3 cp %s/%s %s/" % (RESULT_DIR, GSNAPL_DEDUP_OUT, SAMPLE_S3_OUTPUT_PATH))
 
 def run_annotate_m8_with_taxids(input_m8, output_m8):
@@ -667,7 +674,7 @@ def run_rapsearch2_remotely(input_fasta, lazy_run):
         chunk_output_files += [run_rapsearch_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work_dir, remote_username,
                                                    chunk_input_file[0], key_path, lazy_run)]
     # merge output chunks:
-    execute_command("cat %s > %s" % (" ".join(chunk_output_files), os.path.join(RESULT_DIR, RAPSEARCH2_OUT)))
+    concatenate_files(chunk_output_files, os.path.join(RESULT_DIR, RAPSEARCH2_OUT))
     execute_command("aws s3 cp %s/%s %s/" % (RESULT_DIR, RAPSEARCH2_OUT, SAMPLE_S3_OUTPUT_PATH))
 
 def run_generate_taxid_outputs_from_m8(annotated_m8, taxon_counts_csv_file, taxon_counts_json_file,
