@@ -237,8 +237,6 @@ class Samples extends React.Component {
                   </li>
                   {
                     this.state.columnsShown.map((column, pos) => {
-                      const nonhost_reads_percent = (column === 'nonhost_reads')
-                        ? data_values["nonhost_reads_percent"] : '';
                       let column_data = '';
                       if (column === 'pipeline_status') {
                         column_data = (
@@ -258,10 +256,16 @@ class Samples extends React.Component {
                             </div>
                           </li>
                         )
+                      } else if(column === 'nonhost_reads') {
+                        column_data = (<li key={pos}>
+                          <div className='card-label center center-label'>
+                            {data_values[column]} {data_values["nonhost_reads_percent"]}
+                          </div>
+                        </li>)
                       } else {
                         column_data = (<li key={pos}>
                           <div className='card-label center center-label'>
-                            {data_values[column]} {nonhost_reads_percent}
+                            {data_values[column]}
                           </div>
                         </li>)
                       }
@@ -651,23 +655,10 @@ class Samples extends React.Component {
       </div>
     );
 
-    const status_filter_dropdown = (
-      <ul id='dropdownstatus' className='status dropdown-content'>
-        <li><a className="title"><b>Filter by status</b></a></li>
-        <li className="divider"></li>
-        <li className="filter-item" data-status="WAITING" onClick={ this.handleStatusFilterSelect } ><a data-status="WAITING" className="filter-item waiting">Waiting</a><i data-status="WAITING" className="filter fa fa-check"></i></li>
-        <li className="filter-item" data-status="UPLOADING" onClick={ this.handleStatusFilterSelect }><a data-status="UPLOADING" className="filter-item uploading">In Progress</a><i data-status="UPLOADING"  className="filter fa fa-check"></i></li>
-        <li className="filter-item" data-status="CHECKED" onClick={ this.handleStatusFilterSelect }><a data-status="CHECKED" className="filter-item complete">Complete</a><i data-status="CHECKED" className="filter fa fa-check"></i></li>
-        <li className="filter-item" onClick={ this.handleStatusFilterSelect } data-status="FAILED" ><a data-status="FAILED" className="filter-item failed">Failed</a><i data-status="FAILED" className="filter fa fa-check"></i></li>
-        <li className="divider"></li>
-        <li className="filter-item" data-status="ALL" onClick={ this.handleStatusFilterSelect }><a data-status="ALL" className="filter-item all">All</a><i data-status="ALL" className="filter all fa fa-check"></i></li>
-      </ul>
-    );
     return (
       <div className="row content-wrapper">
         <div className="sample-container col s12">
           { search_box }
-          { status_filter_dropdown }
           <div className="sample-table-container row">
             { tableHead }
             { !samples.length && this.state.displayEmpty ? this.renderEmptyTable() : this.renderPipelineOutput(samples)  }

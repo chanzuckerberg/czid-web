@@ -480,6 +480,9 @@ $break-large: 1070px;
             &.center-label {
               color: #333333;
               font-size: 13px;
+              .blank {
+                color: #b5b0b0
+              }
               .time {
                 .duration-label {
                   margin-left: 5px;
@@ -625,7 +628,7 @@ $break-large: 1070px;
     display: inline-block;
     width: inherit;
     border: 1px solid #e6e6e6;
-    margin: 17px 0 10px;
+    margin: 17px 0 0;
     border-radius: 3px;
     .icon {
       padding-top: 12px;
@@ -635,10 +638,6 @@ $break-large: 1070px;
     .search {
       width: 80% !important;
     }
-  }
-  .column-dropdown {
-    display: inline-block;
-    width: 30%;
   }
   input.search {
     margin: 0;
