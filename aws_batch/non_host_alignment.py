@@ -157,6 +157,12 @@ def generate_tax_counts_from_m8(m8_file, e_value_type, output_file, lineage_map)
 
             # Get taxid:
             line_columns = line.split("\t")
+            # If file is corrupt, log it:
+            corrupt = (len(line_columns) < 12)
+            if corrupt:
+                write_to_log(m8_file + " is corrupt at line:\n" + line + "\n----> delete it and its corrupt ancestors before restarting run")
+                raise AssertionError
+            # Otherwise continue processing:
             read_id_column = line_columns[0]
             taxid = (read_id_column.split("taxid"))[1].split(":")[0]
             species_taxid, genus_taxid, family_taxid = lineage_map.get(taxid, ("-100", "-200", "-300"))
