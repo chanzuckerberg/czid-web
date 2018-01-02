@@ -214,8 +214,8 @@ class Samples extends React.Component {
         notes: dbSample && dbSample.sample_notes ? dbSample.sample_notes : BLANK_TEXT };
 
       return (
-        <a key={i} href={`/samples/${dbSample.id}`}>
-          <div className='col s12 no-padding sample-feed'>
+        <a className='col s12 no-padding sample-feed' key={i} href={`/samples/${dbSample.id}`}>
+          <div>
             <div className='samples-card white'>
               <div className='flex-container'>
                 <ul className='flex-items'>
@@ -586,28 +586,27 @@ class Samples extends React.Component {
       </div>
     );
     const tableHead = (
-      <div className="">
-        <div className='col s12 sample-feed no-padding'>
-          <div className='samples-card white'>
-            <div className='flex-container'>
-              <ul className='flex-items'>
-                <li className='sample-name-info'>
-                  <div className='card-label center-label sample-name'>
-                    <div className='sort-able' onClick={this.sortSamples}>
-                      <span>Name</span><i className={`fa ${(this.state.sort_by === 'name,desc')
-                      ? 'fa fa-sort-alpha-desc' : 'fa fa-sort-alpha-asc'}
-                    ${(this.state.sort_by === 'name,desc' || this.state.sort_by === 'name,asc') ? 'active': 'hidden'}`}/>
-                    </div>
+      <div className='col s12 sample-feed no-padding samples-table-head'>
+        <div className='samples-card white'>
+          <div className='flex-container'>
+            <ul className='flex-items'>
+              <li className='sample-name-info'>
+                <div className='card-label center-label sample-name'>
+                  <div className='sort-able' onClick={this.sortSamples}>
+                    <span>Name</span><i className={`fa ${(this.state.sort_by === 'name,desc')
+                    ? 'fa fa-sort-alpha-desc' : 'fa fa-sort-alpha-asc'}
+                  ${(this.state.sort_by === 'name,desc' || this.state.sort_by === 'name,asc') ? 'active': 'hidden'}`}/>
                   </div>
-                </li>
-                { this.state.columnsShown.map((column_name, pos) => {
-                  return (
-                    <li key={`shown-${pos}`}>
-                      <div className='card-label center-label sample-name center menu-dropdown' rel='tooltip'
-                           data-activates={`column-dropdown-${pos}`} data-placement='bottom'
-                           data-original-title={ this.COLUMN_DISPLAY_MAP[column_name].tooltip }>
-                        { this.COLUMN_DISPLAY_MAP[column_name].display_name } <i className="fa fa-caret-down"/>
-                      </div>
+                </div>
+              </li>
+              { this.state.columnsShown.map((column_name, pos) => {
+                return (
+                  <li key={`shown-${pos}`}>
+                    <div className='card-label center-label sample-name center menu-dropdown' rel='tooltip'
+                      data-activates={`column-dropdown-${pos}`} data-placement='bottom'
+                      data-original-title={ this.COLUMN_DISPLAY_MAP[column_name].tooltip }>
+                      {this.COLUMN_DISPLAY_MAP[column_name].display_name } <i className="fa fa-caret-down"/>
+                    </div>
 
                       <ul className='dropdown-content column-dropdown' id={`column-dropdown-${pos}`}>
                         { column_name === 'pipeline_status' ?
@@ -649,7 +648,6 @@ class Samples extends React.Component {
                 })
                 }
               </ul>
-            </div>
           </div>
         </div>
       </div>
@@ -685,8 +683,23 @@ class Samples extends React.Component {
   }
 
   componentDidMount() {
-    $('.filter').hide();
-    $('body').addClass('background-cover');
+    $(() => {
+      const samplesHeader = $('.sample-table-container');
+      $(window).scroll(() => {
+        console.log('Scrolling...');
+        console.log(samplesHeader.offset().top);
+        if ($(window).scrollTop() > samplesHeader.offset().top) {
+          console.log('Adding shadow...');
+          samplesHeader.addClass('shadow');
+        } else {
+          console.log('Removing shadow...');
+          samplesHeader.removeClass('shadow');
+        }
+      });
+      $('.filter').hide();
+      $('body').addClass('background-cover');
+    });
+
     this.initializeTooltip();
     this.fetchProjectPageData();
     this.state.selectedProjectId ? this.fetchProjectDetails(this.state.selectedProjectId) : null;
@@ -694,6 +707,7 @@ class Samples extends React.Component {
     this.initializeProjectList();
     this.displayPipelineStatusFilter();
     this.initializeColumnSelect();
+
   }
 
   initializeColumnSelect() {
