@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171214185800) do
+ActiveRecord::Schema.define(version: 20180102204635) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -288,20 +288,6 @@ ActiveRecord::Schema.define(version: 20171214185800) do
     t.index ["background_id"], name: "index_taxon_summaries_on_background_id"
   end
 
-  create_table "taxon_zscores", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.bigint "report_id"
-    t.integer "tax_id"
-    t.integer "tax_level"
-    t.float "zscore", limit: 24
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "name"
-    t.float "rpm", limit: 24
-    t.string "hit_type"
-    t.index ["report_id", "tax_level", "hit_type", "tax_id"], name: "index_taxon_zscores", unique: true
-    t.index ["report_id"], name: "index_taxon_zscores_on_report_id"
-  end
-
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "email", default: "", null: false, collation: "latin1_swedish_ci"
     t.string "name", collation: "latin1_swedish_ci"
@@ -323,16 +309,4 @@ ActiveRecord::Schema.define(version: 20171214185800) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
-  add_foreign_key "input_files", "samples"
-  add_foreign_key "job_stats", "pipeline_outputs"
-  add_foreign_key "pipeline_outputs", "samples"
-  add_foreign_key "pipeline_run_stages", "pipeline_runs"
-  add_foreign_key "pipeline_runs", "samples"
-  add_foreign_key "reports", "backgrounds"
-  add_foreign_key "reports", "pipeline_outputs"
-  add_foreign_key "samples", "users"
-  add_foreign_key "taxon_byteranges", "pipeline_outputs"
-  add_foreign_key "taxon_counts", "pipeline_outputs"
-  add_foreign_key "taxon_summaries", "backgrounds"
-  add_foreign_key "taxon_zscores", "reports"
 end
