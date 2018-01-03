@@ -442,7 +442,7 @@ $break-large: 1070px;
     .samples-table-head {
       position: -webkit-sticky;
       position: sticky;
-      top: 0;
+      top: -1px;
     }      
   }
 

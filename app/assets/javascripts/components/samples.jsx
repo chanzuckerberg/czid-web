@@ -682,6 +682,16 @@ class Samples extends React.Component {
     $(document).click(() => { $('.dropdown-bubble').slideUp(200); });
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    const prevStatus = prevState.filterParams;
+    const currentStatus = this.state.filterParams;
+    if(prevStatus !== currentStatus) {
+      $(`i[data-status="${prevStatus}"]`).removeClass('active');
+    } else {
+      $(`i[data-status="${currentStatus}"]`).addClass('active');
+    }
+  }
+
   componentDidMount() {
     $(() => {
       const samplesHeader = $('.sample-table-container');
@@ -727,9 +737,6 @@ class Samples extends React.Component {
   //handle filtering when a filter is selected from list
   handleStatusFilterSelect(e) {
     let status = e.target.getAttribute('data-status');
-    let prevStatus = this.state.filterParams;
-    $(`i[data-status="${prevStatus}"]`).removeClass('active');
-    $(`i[data-status="${status}"]`).addClass('active');
     this.setState({
       pagesLoaded: 0,
       pageEnd: false,
