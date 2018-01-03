@@ -223,8 +223,8 @@ class Sample < ApplicationRecord
       _stdout, _stderr, status = Open3.capture3(command)
       # Delete pipeline_run
       if !File.zero?(file.path) && status.exitstatus.zero?
-        pr.pipeline_run_stages.destroy_all
-        pr.destroy
+        PipelineRunStage.where(pipeline_run_id: pr.id).delete_all
+        PipelineRun.delete(pr.id)
       end
       file.unlink
     end
