@@ -37,7 +37,7 @@ class SamplesController < ApplicationController
 
   def all
     @samples = if params[:ids].present?
-                 Sample.where(["id in (?)", "#{params[:ids]}")
+                 Sample.where(["id in (?)", "#{params[:ids]}"])
                else
                  Sample.all
                end

@@ -578,6 +578,7 @@ GEM
     bootstrap-tooltip-rails (0.1)
       rails (>= 3.1)
       thor
+    brakeman (4.1.1)
     builder (3.2.3)
     byebug (9.1.0)
     capybara (2.16.1)
@@ -880,6 +881,7 @@ DEPENDENCIES
   axios_rails
   bcrypt (~> 3.1.7)
   bootstrap-tooltip-rails
+  brakeman
   byebug
   capybara (~> 2.13)
   coffee-rails (~> 4.2)
@@ -923,4 +925,4 @@ DEPENDENCIES
   will_paginate
 
 BUNDLED WITH
-   1.16.0
+   1.16.1
