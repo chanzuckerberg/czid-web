@@ -418,6 +418,20 @@ $break-large: 1070px;
 }
 
 .sample-container {
+<<<<<<< HEAD
+=======
+  .title-wrapper {
+    margin-bottom: 50px;
+    .title {
+      font-size: 25px;
+      font-weight: 600;
+      padding: 10px 10px 0;
+    }
+    .title-filter {
+      padding: 0 10px;
+    }
+  }
+>>>>>>> Fix bug on favorite projects
   .download-table {
     padding-right: 0 !important;
     .download-project {
@@ -780,6 +794,8 @@ input[type=search]:focus:not([readonly]) {
     }
     .project-wrapper {
       .fav-row {
+        height: 300px;
+        overflow: scroll;
         .none {
           padding: 10px 5px;
           font-size: 12px;

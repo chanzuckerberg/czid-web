@@ -29,6 +29,7 @@ class Samples extends React.Component {
       sampleIdsParams: this.fetchParams('ids') || [],
       favouriteProjects: props.favorites || [],
       formattedProjectList: [],
+      formattedFavProjectList: [],
       favIds: [],
       allSamples: [],
       allProjects: [],
@@ -447,6 +448,10 @@ class Samples extends React.Component {
   }
 
   toggleFavorite(e) {
+    console.log('loading starts');
+    this.setState({
+      loading: true
+    });
     this.switchProject(e);
     let projectId = e.target.getAttribute('data-id');
     axios
@@ -454,27 +459,40 @@ class Samples extends React.Component {
         authenticity_token: this.csrf
       })
       .then((res) => {
+        this.setState({
+          loading: false
+        })
         this.checkIfProjecExistInFavorites(projectId, this.state.formattedProjectList);
       }).catch((err) => {
+        this.setState({
+          loading: false
+        })
     })
   }
 
   reformatProjectList(favorites, allProjects) {
+    let favProjects = [];
     let favIds = favorites.map(e => e.id);
     let formattedList = allProjects.map(e => {
       let project = e;
 
       if (!project.favorited) {
-        project.favorited = favIds.includes(e.id);
-      }
+        project.favorited = favIds.includes(project.id);
+
+        if (project.favorited) {
+          favProjects.push(project);
+        }
+      } 
 
       return project;
     });
 
     this.setState({ 
       formattedProjectList: formattedList,
+      formattedFavProjectList: favProjects,
       favIds: favIds
     });
+
     return formattedList;
   }
 
@@ -507,8 +525,8 @@ class Samples extends React.Component {
 
   // remove Projects from favorites list
   removeProjectFromFavorites(id) {
-    let updatedFavouriteProjects = this.state.favouriteProjects.filter(project => project.id != id);
-    let removedFavouriteProject = this.state.favouriteProjects.filter(project => project.id == id);
+    let updatedFavouriteProjects = this.state.formattedFavProjectList.filter(project => project.id != id);
+    let removedFavouriteProject = this.state.formattedFavProjectList.filter(project => project.id == id);
 
     let favIds = this.state.favIds;
     let projectIdIndex = favIds.indexOf(removedFavouriteProject[0].id);
@@ -516,7 +534,7 @@ class Samples extends React.Component {
     if (projectIdIndex > -1) {
       favIds.splice(projectIdIndex, 1);
       this.setState({ 
-          favouriteProjects: updatedFavouriteProjects,
+        formattedFavProjectList: updatedFavouriteProjects,
           favIds
       });
     }
@@ -528,7 +546,7 @@ class Samples extends React.Component {
     let updatedProject = projects.filter(project => project.id == id);
 
     this.setState({
-        favouriteProjects: [...this.state.favouriteProjects, ...updatedProject],
+        formattedFavProjectList: [...this.state.formattedFavProjectList, ...updatedProject],
         favIds: [...this.state.favIds, updatedProject[0].id]
     });
   }
@@ -707,17 +725,17 @@ class Samples extends React.Component {
           <div className="row fav-row">
             <span className="title">Favorite Projects</span>
             <hr/>
-            {!this.state.favouriteProjects.length ? <div className="none">None</div>: this.state.showLessFavorites ? this.state.favouriteProjects.sort(sortLogic).slice(0,4).map((project, i) => {
+            {!this.state.formattedFavProjectList.length ? <div className="none">None</div>: this.state.showLessFavorites ? this.state.formattedFavProjectList.sort(sortLogic).slice(0,4).map((project, i) => {
               return (
-                <div key={i} data-id={project.id} className="fav-item"><span data-id={project.id} data-type="fav" onClick={this.switchProject}>{project.name}</span><i data-status="favorite"  data-id={project.id} onClick={this.toggleFavorite}  className="favorite fa fa-star" aria-hidden="true"></i></div>
+                <div key={i} data-id={project.id} className="fav-item"><span data-id={project.id} data-type="fav" onClick={this.switchProject}>{project.name}</span>{this.addFavIconClass(project)}</div>
               )
             }): 
-            this.state.favouriteProjects.sort(sortLogic).map((project, i) => {
+            this.state.formattedFavProjectList.sort(sortLogic).map((project, i) => {
               return (
-                <div key={i} data-id={project.id} className="fav-item"><span data-id={project.id} data-type="fav" onClick={this.switchProject}>{project.name}</span><i onClick={this.toggleFavorite}className="favorite fa fa-star" aria-hidden="true"></i></div>
+                <div key={i} data-id={project.id} className="fav-item"><span data-id={project.id} data-type="fav" onClick={this.switchProject}>{project.name}</span>{this.addFavIconClass(project)}</div>
               )
             }) }
-            { this.state.favouriteProjects.length > 4 ? <div className="more" onClick={this.toggleDisplayFavProjects}>{this.state.showLessFavorites ? 'Show More...' : 'Show Less...'}</div> : ''}
+            { this.state.formattedFavProjectList.length > 4 ? <div className="more" onClick={this.toggleDisplayFavProjects}>{this.state.showLessFavorites ? 'Show More...' : 'Show Less...'}</div> : ''}
           </div>
           <div className="projects">
             <span onClick={this.switchProject} className="title">All Projects</span>
