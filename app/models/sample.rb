@@ -1,5 +1,6 @@
 require 'open3'
 require 'json'
+require 'tempfile'
 
 class Sample < ApplicationRecord
   STATUS_CREATED  = 'created'.freeze
@@ -209,6 +210,25 @@ class Sample < ApplicationRecord
     kickoff_pipeline
   end
 
+  def archive_old_pipeline_runs
+    old_pipeline_runs = pipeline_runs.order('id desc').offset(1)
+    old_pipeline_runs.each do |pr|
+      # Write pipeline_run data to file
+      file = Tempfile.new
+      file.write(pr.to_json(include: :pipeline_run_stages))
+      file.close
+      # Copy file to S3
+      command = "aws s3 cp #{file.path} #{pr.archive_s3_path}/"
+      _stdout, _stderr, status = Open3.capture3(command)
+      # Delete pipeline_run
+      if !File.zero?(file.path) && status.exitstatus.zero?
+        pr.pipeline_run_stages.destroy_all
+        pr.destroy
+      end
+      file.unlink
+    end
+  end
+
   def kickoff_pipeline
     # only kickoff pipeline when no active pipeline_run running
     return unless pipeline_runs.in_progress.empty?
@@ -216,5 +236,7 @@ class Sample < ApplicationRecord
     pr = PipelineRun.new
     pr.sample = self
     pr.save
+
+    archive_old_pipeline_runs
   end
 end
