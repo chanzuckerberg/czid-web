@@ -25,7 +25,7 @@ class PipelineRun < ApplicationRecord
   after_create :kickoff_job
 
   def archive_s3_path
-    's3://#{SAMPLES_BUCKET_NAME}/pipeline_runs/#{id}'
+    "s3://#{SAMPLES_BUCKET_NAME}/pipeline_runs/#{id}"
   end
 
   def self.in_progress

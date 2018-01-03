@@ -218,7 +218,8 @@ class Sample < ApplicationRecord
       file.write(pr.to_json(include: :pipeline_run_stages))
       file.close
       # Copy file to S3
-      command = "aws s3 cp #{file.path} #{pr.archive_s3_path}/"
+      pr_s3_file_name = "pipeline_run_#{pr.id}.json"
+      command = "aws s3 cp #{file.path} #{pr.archive_s3_path}/#{pr_s3_file_name}"
       _stdout, _stderr, status = Open3.capture3(command)
       # Delete pipeline_run
       if !File.zero?(file.path) && status.exitstatus.zero?
