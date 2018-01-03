@@ -528,7 +528,7 @@ def run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work
                      (SAMPLE_S3_OUTPUT_CHUNKS_PATH, input_fa, remote_work_dir)
         commands += " ".join([remote_home_dir+'/bin/gsnapl',
                               '-A', 'm8', '--batch=2',
-                              '--gmap-mode=none', '--npaths=1', '--ordered',
+                              '--gmap-mode=none', '--npaths=1',
                               '-t', '32',
                               '--maxsearch=5', '--max-mismatches=20',
                               '-D', remote_index_dir, '-d', 'nt_k16']
