@@ -515,6 +515,9 @@ $break-large: 1070px;
               text-overflow: ellipsis;
               margin-right: 20px;
             }
+            &.column-title {
+              cursor: pointer;
+            }
             .project-name {
               background-color: #E7F5FE;
               padding: 3px;
@@ -740,4 +743,11 @@ input[type=search]:focus:not([readonly]) {
 .all {
   color: #9e5353;
 }
-
+.filter {
+  &.hidden {
+    display: none !important;
+  }
+  &.active {
+    display: inline !important;
+  }
+}
