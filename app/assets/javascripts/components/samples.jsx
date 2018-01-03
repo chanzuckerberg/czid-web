@@ -448,10 +448,7 @@ class Samples extends React.Component {
   }
 
   toggleFavorite(e) {
-    console.log('loading starts');
-    this.setState({
-      loading: true
-    });
+    Samples.showLoading('Fetching samples...');
     this.switchProject(e);
     let projectId = e.target.getAttribute('data-id');
     axios
@@ -459,14 +456,10 @@ class Samples extends React.Component {
         authenticity_token: this.csrf
       })
       .then((res) => {
-        this.setState({
-          loading: false
-        })
+        Samples.hideLoader();
         this.checkIfProjecExistInFavorites(projectId, this.state.formattedProjectList);
       }).catch((err) => {
-        this.setState({
-          loading: false
-        })
+        Samples.hideLoader();
     })
   }
 
