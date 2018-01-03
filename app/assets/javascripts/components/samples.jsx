@@ -444,8 +444,7 @@ class Samples extends React.Component {
   }
 
   toggleFavorite(e) {
-    Samples.showLoading('Fetching samples...');
-    this.switchProject(e);
+    let favStatus = e.target.getAttribute('data-fav');
     let projectId = e.target.getAttribute('data-id');
     Samples.showLoading(`${favStatus == 'true' ? 'Removing from' : 'Adding to' } favorites...`)
     axios
@@ -676,6 +675,12 @@ class Samples extends React.Component {
     })
   }
  
+
+  addFavIconClass(project) {
+    return (
+      <i data-status="favorite" data-fav={project.favorited} data-id={project.id} onClick={this.toggleFavorite} className={!project.favorited ? "favorite fa fa-star-o":  "favorite fa fa-star"}></i>
+    )
+  }
 
   renderSidebar() {
     const sortLogic = (a, b) => {
