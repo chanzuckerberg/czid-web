@@ -43,9 +43,10 @@ class BackgroundsController < ApplicationController
     background_copy = @background.dup
     @background.assign_attributes(background_params)
     if @background.changed?
-      background_copy.archive_of = @background.id
-      background_copy.name += DateTime.now.in_time_zone.to_s(:db)
-      background_copy.save!
+      archived_background = ArchivedBackground.new
+      archived_background.archive_of = @background.id
+      archived_background.data = background_copy.as_json(include: [:pipeline_outputs, :samples, :taxon_summaries])
+      archived_background.save!
     end
     respond_to do |format|
       if @background.save
