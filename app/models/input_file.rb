@@ -17,7 +17,7 @@ class InputFile < ApplicationRecord
         errors.add(:input_files, "file source doesn't start with s3:// for s3 input")
       end
       unless sample.bulk_mode # skip the check for bulk mode
-        _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", "#{source}")
+        _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", source.to_s)
         unless status.exitstatus.zero?
           errors.add(:input_files, "file source #{source} doesn't exist")
         end

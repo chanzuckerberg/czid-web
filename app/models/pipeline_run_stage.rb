@@ -74,7 +74,7 @@ class PipelineRunStage < ApplicationRecord
 
   def update_job_status
     return if completed?
-    stdout, stderr, status = Open3.capture3("aegea", "batch", "describe", "#{job_id}")
+    stdout, stderr, status = Open3.capture3("aegea", "batch", "describe", job_id.to_s)
     if status.exitstatus.zero?
       self.job_description = stdout
       job_hash = JSON.parse(job_description)
@@ -91,7 +91,7 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def file_generated_since_run(s3_path)
-    stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", "#{s3_path}")
+    stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", s3_path.to_s)
     return false unless status.exitstatus.zero?
     begin
       s3_file_time = DateTime.strptime(stdout[0..18], "%Y-%m-%d %H:%M:%S")
@@ -102,8 +102,7 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def terminate_job
-    command = "aegea batch terminate"
-    _stdout, _stderr, _status = Open3.capture3("aegea", "batch", "terminate", "#{job_id}")
+    _stdout, _stderr, _status = Open3.capture3("aegea", "batch", "terminate", job_id.to_s)
   end
 
   def set_pipeline_output

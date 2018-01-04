@@ -88,14 +88,14 @@ class Sample < ApplicationRecord
     stderr_array = []
     input_files.each do |input_file|
       fastq = input_file.source
-      _stdout, stderr, status = Open3.capture3("aws", "s3", "cp", "#{fastq}", "#{sample_input_s3_path}/")
+      _stdout, stderr, status = Open3.capture3("aws", "s3", "cp", fastq.to_s, "#{sample_input_s3_path}/")
       stderr_array << stderr unless status.exitstatus.zero?
     end
     if s3_preload_result_path.present? && s3_preload_result_path[0..4] == 's3://'
-      _stdout, stderr, status = Open3.capture3("aws", "s3", "cp", "#{s3_preload_result_path}", "#{sample_output_s3_path}", "--recursive")
+      _stdout, stderr, status = Open3.capture3("aws", "s3", "cp", s3_preload_result_path.to_s, sample_output_s3_path.to_s, "--recursive")
       stderr_array << stderr unless status.exitstatus.zero?
     end
-    if !stderr_array.empty?
+    unless stderr_array.empty?
       Airbrake.notify("Failed to upload sample #{id} with error #{stderr_array[0]}")
       raise stderr_array[0]
     end
