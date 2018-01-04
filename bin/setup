@@ -23,8 +23,9 @@ chdir APP_ROOT do
   end
   dependencies.each do |pkg|
     package_exists = system("brew ls #{pkg} >/dev/null")
-    (puts("== Installing #{pkg} ... ==") && system!("brew install #{pkg}")) unless package_exists
-    puts "== #{pkg} already up-to-date. ==" if package_exists
+    package_exists ? puts "== #{pkg} already up-to-date. ==" :
+    puts("== Installing #{pkg} ... ==")
+    system!("brew install #{pkg}") unless package_exists
   end
   system! 'gem install bundler --conservative'
   system!('brew link node')
