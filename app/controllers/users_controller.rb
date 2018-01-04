@@ -1,7 +1,7 @@
 class UsersController < ApplicationController
   clear_respond_to
   respond_to :json
-  before_action :set_user, only: [:show, :edit, :destroy]
+  before_action :set_user, only: [:show, :edit, :update, :destroy]
   before_action :authenticate_user!, only: [:create, :update]
   acts_as_token_authentication_handler_for User, only: [:create, :update], fallback: :devise
 
@@ -19,8 +19,8 @@ class UsersController < ApplicationController
   # POST /users
   # POST /users.json
   def create
-    Rails.logger.debug(user_params.inspect)
-    new_user(user_params)
+    new_user_params = user_params
+    new_user(new_user_params)
 
     respond_to do |format|
       if @user.save
@@ -41,7 +41,6 @@ class UsersController < ApplicationController
   # PATCH/PUT /users/1.json
   def update
     input_params = user_params
-    set_user
     respond_to do |format|
       if input_params[:password] && input_params[:password] == ''
         input_params.delete(:password)
@@ -77,13 +76,12 @@ class UsersController < ApplicationController
   end
 
   def new_user(attrs = {})
-    @user = User.new(attrs)
+    @user ||= User.new(attrs)
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def user_params
-    # At the time this method is called, @user must be the authenticated user making the request
-    if @user && @user.admin
+    if current_user && current_user.admin
       params.require(:user).permit(:role, :email, :authentication_token, :password, :password_confirmation, :name, project_ids: [])
     else
       params.require(:user).permit(:email, :authentication_token, :password, :password_confirmation, :name, project_ids: [])
