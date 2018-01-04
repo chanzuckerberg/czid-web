@@ -127,11 +127,10 @@ module SamplesHelper
                            host_genome_id: host_genome_id,
                            status: 'created' }
     s3_path.chomp!('/')
-    command = "aws s3 ls #{s3_path}/ | grep -v Undetermined | grep fast"
-    s3_output, _stderr, status = Open3.capture3(command)
+    s3_output, _stderr, status = Open3.capture3("aws", "s3", "ls", "#{s3_path}/")
     return unless status.exitstatus.zero?
     s3_output.chomp!
-    entries = s3_output.split("\n")
+    entries = s3_output.split("\n").reject { |line| line.include? "Undetermined" }.select { |line| line.include? "fast" }
     samples = {}
     entries.each do |file_name|
       matched = /([^ ]*)_R(\d)_001.(fastq.gz|fastq|fasta.gz|fasta)\z/.match(file_name)

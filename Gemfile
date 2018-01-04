@@ -10,6 +10,7 @@ gem 'aws-sdk-ecs'
 gem 'aws-sdk-resources'
 gem 'axios_rails'
 gem 'bootstrap-tooltip-rails'
+gem 'brakeman'
 # Use ActiveModel has_secure_password
 gem 'bcrypt', '~> 3.1.7'
 # Use CoffeeScript for .coffee assets and views
