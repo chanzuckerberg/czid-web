@@ -106,6 +106,7 @@ def generate_taxid_annotated_fasta_from_m8(input_fasta_file, m8_file, output_fas
             if line[0] == '#':
                 continue
             parts = line.split("\t")
+            log_corrupt(len(parts) < 12, m8_file, line)
             read_name = parts[0]
             read_name_parts = read_name.split("/")
             if len(read_name_parts) > 1:
@@ -145,6 +146,11 @@ def deduplicate_m8(input_m8, output_m8):
             previous_read_name = read_name
     outf.close()
 
+def log_corrupt(is_corrupt, m8_file, line):
+    if is_corrupt:
+        write_to_log(m8_file + " is corrupt at line:\n" + line + "\n----> delete it and its corrupt ancestors before restarting run")
+        raise AssertionError
+
 def generate_tax_counts_from_m8(m8_file, e_value_type, output_file, lineage_map):
     taxid_count_map = {}
     taxid_percent_identity_map = {}
@@ -157,6 +163,9 @@ def generate_tax_counts_from_m8(m8_file, e_value_type, output_file, lineage_map)
 
             # Get taxid:
             line_columns = line.split("\t")
+            # If file is corrupt, log it:
+            log_corrupt(len(line_columns) < 12, m8_file, line)
+            # Otherwise continue processing:
             read_id_column = line_columns[0]
             taxid = (read_id_column.split("taxid"))[1].split(":")[0]
             species_taxid, genus_taxid, family_taxid = lineage_map.get(taxid, ("-100", "-200", "-300"))
@@ -347,6 +356,7 @@ def generate_taxid_annotated_m8(input_m8, output_m8, accession2taxid_db):
             if line[0] == '#':
                 continue
             parts = line.split("\t")
+            log_corrupt(len(parts) < 12, input_m8, line)
             read_name = parts[0] # Example: HWI-ST640:828:H917FADXX:2:1108:8883:88679/1/1',
             accession_id = parts[1] # Example: CP000671.1',
             accession_id_short = accession_id.split(".")[0]
