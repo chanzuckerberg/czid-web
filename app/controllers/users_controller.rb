@@ -17,8 +17,7 @@ class UsersController < ApplicationController
   # POST /users
   # POST /users.json
   def create
-    new_user_params = user_params
-    new_user(new_user_params)
+    new_user(user_params)
 
     respond_to do |format|
       if @user.save
@@ -38,8 +37,8 @@ class UsersController < ApplicationController
   # PATCH/PUT /users/1
   # PATCH/PUT /users/1.json
   def update
-    input_params = user_params
     respond_to do |format|
+      input_params = user_params
       if input_params[:password] && input_params[:password] == ''
         input_params.delete(:password)
       end
