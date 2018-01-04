@@ -2,8 +2,6 @@ class UsersController < ApplicationController
   clear_respond_to
   respond_to :json
   before_action :set_user, only: [:show, :edit, :update, :destroy]
-  before_action :authenticate_user!, only: [:create, :update]
-  acts_as_token_authentication_handler_for User, only: [:create, :update], fallback: :devise
 
   # GET /users
   # GET /users.json
