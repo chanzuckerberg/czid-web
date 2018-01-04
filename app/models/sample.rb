@@ -214,17 +214,25 @@ class Sample < ApplicationRecord
     old_pipeline_runs = pipeline_runs.order('id desc').offset(1)
     old_pipeline_runs.each do |pr|
       # Write pipeline_run data to file
+      json_output = pr.to_json(include: [:pipeline_run_stages,
+                                         { pipeline_output: {
+                                           include: [:taxon_counts,
+                                                     :taxon_byteranges,
+                                                     :job_stats]
+                                         } }])
       file = Tempfile.new
-      file.write(pr.to_json(include: :pipeline_run_stages))
+      file.write(json_output)
       file.close
       # Copy file to S3
       pr_s3_file_name = "pipeline_run_#{pr.id}.json"
-      command = "aws s3 cp #{file.path} #{pr.archive_s3_path}/#{pr_s3_file_name}"
-      _stdout, _stderr, status = Open3.capture3(command)
-      # Delete pipeline_run
+      _stdout, _stderr, status = Open3.capture3("aws", "s3", "cp", file.path.to_s,
+                                                "#{pr.archive_s3_path}/#{pr_s3_file_name}")
+      # Delete any taxon_counts / taxon_byteranges associated with the pipeline run
+      po = pr.pipeline_output
+      next unless po
       if !File.zero?(file.path) && status.exitstatus.zero?
-        PipelineRunStage.where(pipeline_run_id: pr.id).delete_all
-        PipelineRun.delete(pr.id)
+        TaxonCount.where(pipeline_output_id: po.id).delete_all
+        TaxonByterange.where(pipeline_output_id: po.id).delete_all
       end
       file.unlink
     end
