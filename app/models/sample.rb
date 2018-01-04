@@ -230,7 +230,7 @@ class Sample < ApplicationRecord
       # Delete any taxon_counts / taxon_byteranges associated with the pipeline run
       po = pr.pipeline_output
       next unless po
-      if !File.zero?(file.path) && status.exitstatus.zero?
+      if !File.zero?(file.path) && status.exitstatus && status.exitstatus.zero?
         TaxonCount.where(pipeline_output_id: po.id).delete_all
         TaxonByterange.where(pipeline_output_id: po.id).delete_all
       end
