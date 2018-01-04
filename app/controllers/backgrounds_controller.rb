@@ -40,8 +40,14 @@ class BackgroundsController < ApplicationController
   # PATCH/PUT /backgrounds/1
   # PATCH/PUT /backgrounds/1.json
   def update
+    background_copy = @background.dup
+    @background.assign_attributes(background_params)
+    if @background.changed?
+      background_copy.archive_of = @background.id
+      background_copy.save!
+    end
     respond_to do |format|
-      if @background.update(background_params)
+      if @background.save
         format.html { redirect_to @background, notice: 'Background was successfully updated.' }
         format.json { render :show, status: :ok, location: @background }
       else
