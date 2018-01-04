@@ -17,6 +17,7 @@ class UsersController < ApplicationController
   # POST /users
   # POST /users.json
   def create
+    Rails.logger.debug(user_params.inspect)
     new_user(user_params)
 
     respond_to do |format|
