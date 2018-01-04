@@ -103,7 +103,7 @@ class SamplesController < ApplicationController
     @project_info = @sample.project ? @sample.project : nil
     @project_sample_ids_names = @sample.project ? get_samples_in_project(@sample.project) : nil
     @host_genome = @sample.host_genome ? @sample.host_genome : nil
-    @background_models = Background.all
+    @background_models = Background.where("archive_of IS ?", nil)
 
     ##################################################
     ## Duct tape for changing background id dynamically

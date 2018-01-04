@@ -44,6 +44,7 @@ class BackgroundsController < ApplicationController
     @background.assign_attributes(background_params)
     if @background.changed?
       background_copy.archive_of = @background.id
+      background_copy.name += DateTime.now.in_time_zone.to_s(:db)
       background_copy.save!
     end
     respond_to do |format|
