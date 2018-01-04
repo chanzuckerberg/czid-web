@@ -12,21 +12,23 @@ def system!(*args)
 end
 
 chdir APP_ROOT do
-  puts '== Installing dependencies =='
   system('brew help 1>/dev/null') || abort('install homebrew from directions at https://brew.sh/')
   system('open -a Docker 1>/dev/null') || abort('install docker from directions at https://docs.docker.com/docker-for-mac/install/')
-
+  puts '== Updating homebrew Formulae =='
+  system!('brew update')
+  dependencies = ['mysql', 'hub', 'bash-completion', 'node', 'yarn']
+  puts '== Installing dependencies =='
   if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.4.1')
     system!('brew install ruby')
   end
-
-  system!('brew install mysql')
-  system!('brew install hub')
-  system!('brew install bash-completion')
-  system!('docker -v || brew cask install docker')
-
+  dependencies.each do |pkg|
+    package_exists = system("brew ls #{pkg} >/dev/null")
+    (puts("== Installing #{pkg} ... ==") && system!("brew install #{pkg}")) unless package_exists
+    puts "== #{pkg} already up-to-date. ==" if package_exists
+  end
   system! 'gem install bundler --conservative'
-
+  system!('brew link node')
+  system!('docker -v || brew cask install docker')
   puts "\n== Preparing database =="
   system! 'docker-compose build'
   system! 'docker-compose up -d db'
