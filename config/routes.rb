@@ -2,7 +2,6 @@ require 'resque/server'
 
 Rails.application.routes.draw do
   resources :backgrounds
-  resources :reports
   resources :pipeline_outputs, only: [:index, :show]
   devise_for :users, controllers: {
     sessions: 'sessions',
@@ -14,6 +13,7 @@ Rails.application.routes.draw do
     get :all, on: :collection
     get :pipeline_runs, on: :member
     get :report_info, on: :member
+    get :report_csv, on: :member
     get :search_list, on: :member
     get :bulk_new, on: :collection
     get :bulk_import, on: :collection
@@ -33,6 +33,5 @@ Rails.application.routes.draw do
   get 'pipeline_outputs/:id/fasta/:tax_level/:taxid/:hit_type', to: 'pipeline_outputs#show_taxid_fasta'
   get 'pipeline_outputs/:id/nonhost_fasta', to: 'pipeline_outputs#send_nonhost_fasta'
   get 'pipeline_outputs/:id/unidentified_fasta', to: 'pipeline_outputs#send_unidentified_fasta'
-  get 'reports/:id/csv', to: 'reports#send_report_csv', as: :fetch_csv
   get 'projects/:id/csv', to: 'projects#send_project_csv'
 end

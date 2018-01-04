@@ -210,8 +210,6 @@ class PipelineRun < ApplicationRecord
 
     # rm the json
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_json_path} #{downloaded_stats_path}")
-    # generate report
-    po.generate_report
   end
 
   def load_postprocess_from_s3

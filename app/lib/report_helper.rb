@@ -165,34 +165,21 @@ module ReportHelper
     clean
   end
 
-  def external_report_info(report, params)
-    return {} if report.nil?
+  def external_report_info(pipeline_output_id, background_id, params)
+    return {} if pipeline_output_id.nil? || background_id.nil?
     params = clean_params(params, ALL_CATEGORIES)
     data = {}
-    data[:taxonomy_details] = taxonomy_details(report, params)
+    data[:taxonomy_details] = taxonomy_details(pipeline_output_id, background_id, params)
     data
   end
 
-  def taxon_fastas_present?(report)
-    s3_path_hash = report.pipeline_output.sample.s3_paths_for_taxon_byteranges
-    s3_path_hash.each do |_tax_level, h|
-      h.each do |_hit_type, s3_path|
-        command = "aws s3 ls #{s3_path}"
-        _stdout, _stderr, status = Open3.capture3(command)
-        return false unless status.exitstatus.zero?
-      end
-    end
-    true
-  end
-
-  def report_details(report)
+  def report_details(pipeline_output, background)
     {
-      report_info: report,
-      pipeline_info: report.pipeline_output,
-      sample_info: report.pipeline_output.sample,
-      project_info: report.pipeline_output.sample.project,
-      background_model: report.background,
-      taxon_fasta_flag: report.pipeline_output.pipeline_run.finalized?
+      pipeline_info: pipeline_output,
+      sample_info: pipeline_output.sample,
+      project_info: pipeline_output.sample.project,
+      background_model: background,
+      taxon_fasta_flag: pipeline_output.pipeline_run.finalized?
     }
   end
 
@@ -200,10 +187,9 @@ module ReportHelper
     ALL_CATEGORIES
   end
 
-  def fetch_taxon_counts(report)
-    pipeline_output_id = report.pipeline_output.id
-    total_reads = report.pipeline_output.total_reads
-    background_id = report.background.id
+  def fetch_taxon_counts(pipeline_output_id, background_id)
+    pipeline_output = PipelineOutput.find(pipeline_output_id)
+    total_reads = pipeline_output.total_reads if pipeline_output
     # Note: stdev is never 0
     # Note: connection.select_all is TWICE faster than TaxonCount.select
     # (I/O latency goes from 2 seconds -> 0.8 seconds)
@@ -567,10 +553,10 @@ module ReportHelper
     end
   end
 
-  def taxonomy_details(report, params)
+  def taxonomy_details(pipeline_output_id, background_id, params)
     # Fetch and clean data.
     t0 = wall_clock_ms
-    tax_2d = cleanup_all!(convert_2d(fetch_taxon_counts(report)))
+    tax_2d = cleanup_all!(convert_2d(fetch_taxon_counts(pipeline_output_id, background_id)))
     t1 = wall_clock_ms
 
     # These counts are shown in the UI on each genus line.

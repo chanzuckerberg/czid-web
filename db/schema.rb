@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180102204635) do
+ActiveRecord::Schema.define(version: 20180104222853) do
 
   create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -31,6 +31,13 @@ ActiveRecord::Schema.define(version: 20180102204635) do
     t.bigint "sample_id", null: false
     t.index ["background_id"], name: "index_backgrounds_samples_on_background_id"
     t.index ["sample_id"], name: "index_backgrounds_samples_on_sample_id"
+  end
+
+  create_table "favorite_projects", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "project_id"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "host_genomes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -134,16 +141,6 @@ ActiveRecord::Schema.define(version: 20180102204635) do
     t.bigint "user_id", null: false
     t.index ["project_id"], name: "index_projects_users_on_project_id"
     t.index ["user_id"], name: "index_projects_users_on_user_id"
-  end
-
-  create_table "reports", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name"
-    t.bigint "pipeline_output_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.bigint "background_id"
-    t.index ["background_id"], name: "index_reports_on_background_id"
-    t.index ["pipeline_output_id"], name: "index_reports_on_pipeline_output_id"
   end
 
   create_table "samples", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|

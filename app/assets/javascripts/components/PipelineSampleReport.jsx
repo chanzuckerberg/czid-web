@@ -617,7 +617,7 @@ class PipelineSampleReport extends React.Component {
         all_backgrounds = { this.all_backgrounds }
         search_keys_in_sample = {  this.state.search_keys_in_sample }
         background_model = { this.report_details.background_model }
-        report_title = { this.report_details.report_info.name }
+        report_title = { this.report_details.sample_info.name }
         report_page_params = { this.report_page_params }
         applyExcludedCategories = { this.applyExcludedCategories }
         applySearchFilter = {this.applySearchFilter }
@@ -627,7 +627,7 @@ class PipelineSampleReport extends React.Component {
         resetAllFilters = { this.resetAllFilters }
       />;
     download_button = (
-      <a href={`/reports/${this.report_details.report_info.id}/csv`} className="download-report right">
+      <a href={`/samples/${this.sample_id}/report_csv?background_id=${this.report_details.background_model.id}`} className="download-report right">
         <div className="fa fa-cloud-download"/>
         <div>Download report</div>
       </a>

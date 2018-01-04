@@ -3,7 +3,7 @@ class SamplesController < ApplicationController
   include SamplesHelper
 
   before_action :authenticate_user!, only: [:new, :index, :update, :destroy, :edit, :show, :reupload_source, :kickoff_pipeline, :bulk_new, :bulk_import, :bulk_upload]
-  before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata, :report_info, :search_list]
+  before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata, :report_info, :search_list, :report_csv]
   acts_as_token_authentication_handler_for User, only: [:create, :bulk_upload], fallback: :devise
   protect_from_forgery unless: -> { request.format.json? }
   PAGE_SIZE = 30
@@ -90,6 +90,19 @@ class SamplesController < ApplicationController
     end
   end
 
+  # GET /samples/1/report_csv
+  def report_csv
+    params[:is_csv] = 1
+    params[:sort_by] = "highest_nt_aggregatescore"
+    default_background_id = @sample.host_genome && @sample.host_genome.default_background ? @sample.host_genome.default_background.id : nil
+    background_id = params[:background_id] || default_background_id
+    pipeline_output = @sample.pipeline_runs.first ? @sample.pipeline_runs.first.pipeline_output : nil
+    pipeline_output_id = pipeline_output ? pipeline_output.id : nil
+    tax_details = taxonomy_details(pipeline_output_id, background_id, params)
+    @report_csv = generate_report_csv(tax_details)
+    send_data @report_csv, filename: @sample.name + '_report.csv'
+  end
+
   # GET /samples/1
   # GET /samples/1.json
 
@@ -105,30 +118,16 @@ class SamplesController < ApplicationController
     @host_genome = @sample.host_genome ? @sample.host_genome : nil
     @background_models = Background.all
 
-    ##################################################
-    ## Duct tape for changing background id dynamically
-    ## TODO(yf): clean the following up.
-    ####################################################
-    report = nil
     default_background_id = @sample.host_genome && @sample.host_genome.default_background ? @sample.host_genome.default_background.id : nil
     if @pipeline_output &&  (@pipeline_output.remaining_reads.to_i > 0 || @pipeline_run.finalized?)
-      report = @pipeline_output.reports.first || Report.new(pipeline_output: @pipeline_output)
-      background_id = params[:background_id] || default_background_id || report.background_id
+      background_id = params[:background_id] || default_background_id
       if background_id
-        report.background_id = background_id
-        report.name = "#{@sample.id} #{background_id} #{@sample.name}"
-        report.save
-      else
-        report = nil
+        @report_present = 1
+        @report_ts = @pipeline_output.updated_at.to_i
+        @all_categories = all_categories
+        @report_details = report_details(@pipeline_output, Background.find(background_id))
+        @report_page_params = clean_params(params, @all_categories)
       end
-    end
-
-    if report
-      @report_present = 1
-      @report_ts = @pipeline_output.updated_at.to_i
-      @all_categories = all_categories
-      @report_details = report_details(report)
-      @report_page_params = clean_params(params, @all_categories)
     end
   end
 
@@ -143,21 +142,15 @@ class SamplesController < ApplicationController
     ## Duct tape for changing background id dynamically
     ## TODO(yf): clean the following up.
     ####################################################
-    report = nil
+    background_id = nil
+    pipeline_output_id = nil
     default_background_id = @sample.host_genome && @sample.host_genome.default_background ? @sample.host_genome.default_background.id : nil
     if @pipeline_output &&  (@pipeline_output.remaining_reads.to_i > 0 || @pipeline_run.finalized?)
-      report = @pipeline_output.reports.first || Report.new(pipeline_output: @pipeline_output)
-      background_id = params[:background_id] || default_background_id || report.background_id
-      if background_id
-        report.background_id = background_id
-        report.name = "#{@sample.id} #{background_id} #{@sample.name}"
-        report.save
-      else
-        report = nil
-      end
+      background_id = params[:background_id] || default_background_id
+      pipeline_output_id = @pipeline_output.id
     end
 
-    @report_info = external_report_info(report, params)
+    @report_info = external_report_info(pipeline_output_id, background_id, params)
     render json: @report_info
   end
 
@@ -166,7 +159,7 @@ class SamplesController < ApplicationController
 
     first_pipeline_run = @sample.pipeline_runs.first ? @sample.pipeline_runs.first : nil
     @pipeline_run = first_pipeline_run
-    @pipeline_output_id = first_pipeline_run ? first_pipeline_run.pipeline_output.id : nil
+    @pipeline_output_id = first_pipeline_run.pipeline_output ? first_pipeline_run.pipeline_output.id : nil
     if @pipeline_output_id
       @search_list = fetch_lineage_info(@pipeline_output_id)
       render json: @search_list
