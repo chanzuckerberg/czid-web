@@ -791,8 +791,10 @@ input[type=search]:focus:not([readonly]) {
     }
     .project-wrapper {
       .fav-row {
-        height: 300px;
-        overflow: scroll;
+        .fav-projects-wrapper {
+          height: 120px;
+          overflow: scroll;
+        }
         .none {
           padding: 10px 5px;
           font-size: 12px;
@@ -837,6 +839,7 @@ input[type=search]:focus:not([readonly]) {
       .favorite {
         visibility: hidden;
         float: right;
+        margin-top: -14px;
       }
     }
     .highlight {

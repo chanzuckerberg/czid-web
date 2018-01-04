@@ -718,17 +718,19 @@ class Samples extends React.Component {
           <div className="row fav-row">
             <span className="title">Favorite Projects</span>
             <hr/>
-            {!this.state.formattedFavProjectList.length ? <div className="none">None</div>: this.state.showLessFavorites ? this.state.formattedFavProjectList.sort(sortLogic).slice(0,4).map((project, i) => {
-              return (
-                <div key={i} data-id={project.id} className="fav-item"><span data-id={project.id} data-type="fav" onClick={this.switchProject}>{project.name}</span>{this.addFavIconClass(project)}</div>
-              )
-            }): 
-            this.state.formattedFavProjectList.sort(sortLogic).map((project, i) => {
-              return (
-                <div key={i} data-id={project.id} className="fav-item"><span data-id={project.id} data-type="fav" onClick={this.switchProject}>{project.name}</span>{this.addFavIconClass(project)}</div>
-              )
-            }) }
-            { this.state.formattedFavProjectList.length > 4 ? <div className="more" onClick={this.toggleDisplayFavProjects}>{this.state.showLessFavorites ? 'Show More...' : 'Show Less...'}</div> : ''}
+            <div className="fav-projects-wrapper">
+              {!this.state.formattedFavProjectList.length ? <div className="none">None</div>: this.state.showLessFavorites ? this.state.formattedFavProjectList.sort(sortLogic).slice(0,4).map((project, i) => {
+                return (
+                  <div className="fav-item" key={i} data-id={project.id} ><div data-id={project.id} data-type="fav" onClick={this.switchProject}><span>{project.name}</span></div>{this.addFavIconClass(project)}</div>
+                )
+              }): 
+              this.state.formattedFavProjectList.sort(sortLogic).map((project, i) => {
+                return (
+                  <div className="fav-item" key={i} data-id={project.id} ><div data-id={project.id} data-type="fav" onClick={this.switchProject}><span>{project.name}</span>{this.addFavIconClass(project)}</div></div>
+                )
+              }) }
+              { this.state.formattedFavProjectList.length > 4 ? <div className="more" onClick={this.toggleDisplayFavProjects}>{this.state.showLessFavorites ? 'Show More...' : 'Show Less...'}</div> : ''}
+            </div>
           </div>
           <div className="projects">
             <span onClick={this.switchProject} className="title">All Projects</span>
@@ -736,12 +738,12 @@ class Samples extends React.Component {
             <div className="projects-wrapper">
               { !this.state.formattedProjectList.length ? "None" : this.state.showLess ? this.state.formattedProjectList.sort(sortLogic).slice(0,7).map((project, i) => {
                   return (
-                      <div key={i} data-id={project.id} className="project-item"><span data-id={project.id} onClick={this.switchProject}>{project.name}</span>{this.addFavIconClass(project)}</div>
+                      <div className="project-item" data-id={project.id}  key={i}><div onClick={this.switchProject} data-id={project.id}><span data-id={project.id}>{project.name}</span></div>{this.addFavIconClass(project)}</div>
                   )
                 }) : 
                 this.state.formattedProjectList.sort(sortLogic).map((project, i) => {
                 return (
-                  <div key={i} data-id={project.id} className="project-item"><span data-id={project.id} onClick={this.switchProject} >{project.name}</span>{this.addFavIconClass(project)}</div>
+                  <div className="project-item" data-id={project.id} key={i}><div onClick={this.switchProject} data-id={project.id}><span data-id={project.id}>{project.name}</span></div>{this.addFavIconClass(project)}</div>
                 )
               }) }
               { this.state.formattedProjectList.length ? <div className="more" onClick={this.toggleDisplayProjects}>{this.state.showLess ? 'Show More...' : 'Show Less...'}</div> : ''}
