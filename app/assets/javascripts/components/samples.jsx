@@ -214,8 +214,8 @@ class Samples extends React.Component {
         notes: dbSample && dbSample.sample_notes ? dbSample.sample_notes : BLANK_TEXT };
 
       return (
-        <a key={i} href={`/samples/${dbSample.id}`}>
-          <div className='col s12 no-padding sample-feed'>
+        <a className='col s12 no-padding sample-feed' key={i} href={`/samples/${dbSample.id}`}>
+          <div>
             <div className='samples-card white'>
               <div className='flex-container'>
                 <ul className='flex-items'>
@@ -586,28 +586,27 @@ class Samples extends React.Component {
       </div>
     );
     const tableHead = (
-      <div className="">
-        <div className='col s12 sample-feed no-padding'>
-          <div className='samples-card white'>
-            <div className='flex-container'>
-              <ul className='flex-items'>
-                <li className='sample-name-info'>
-                  <div className='card-label center-label sample-name'>
-                    <div className='sort-able' onClick={this.sortSamples}>
-                      <span>Name</span><i className={`fa ${(this.state.sort_by === 'name,desc')
-                      ? 'fa fa-sort-alpha-desc' : 'fa fa-sort-alpha-asc'}
-                    ${(this.state.sort_by === 'name,desc' || this.state.sort_by === 'name,asc') ? 'active': 'hidden'}`}/>
-                    </div>
+      <div className='col s12 sample-feed no-padding samples-table-head'>
+        <div className='samples-card white'>
+          <div className='flex-container'>
+            <ul className='flex-items'>
+              <li className='sample-name-info'>
+                <div className='card-label column-title center-label sample-name'>
+                  <div className='sort-able' onClick={this.sortSamples}>
+                    <span>Name</span><i className={`fa ${(this.state.sort_by === 'name,desc')
+                    ? 'fa fa-sort-alpha-desc' : 'fa fa-sort-alpha-asc'}
+                  ${(this.state.sort_by === 'name,desc' || this.state.sort_by === 'name,asc') ? 'active': 'hidden'}`}/>
                   </div>
-                </li>
-                { this.state.columnsShown.map((column_name, pos) => {
-                  return (
-                    <li key={`shown-${pos}`}>
-                      <div className='card-label center-label sample-name center menu-dropdown' rel='tooltip'
-                           data-activates={`column-dropdown-${pos}`} data-placement='bottom'
-                           data-original-title={ this.COLUMN_DISPLAY_MAP[column_name].tooltip }>
-                        { this.COLUMN_DISPLAY_MAP[column_name].display_name } <i className="fa fa-caret-down"/>
-                      </div>
+                </div>
+              </li>
+              { this.state.columnsShown.map((column_name, pos) => {
+                return (
+                  <li key={`shown-${pos}`}>
+                    <div className='card-label column-title center-label sample-name center menu-dropdown' rel='tooltip'
+                      data-activates={`column-dropdown-${pos}`} data-placement='bottom'
+                      data-original-title={ this.COLUMN_DISPLAY_MAP[column_name].tooltip }>
+                      {this.COLUMN_DISPLAY_MAP[column_name].display_name } <i className="fa fa-caret-down"/>
+                    </div>
 
                       <ul className='dropdown-content column-dropdown' id={`column-dropdown-${pos}`}>
                         { column_name === 'pipeline_status' ?
@@ -617,11 +616,11 @@ class Samples extends React.Component {
                                 <b>Filter status</b>
                               </a>
                             </li>
-                            <li className="filter-item" data-status="WAITING" onClick={ this.handleStatusFilterSelect } ><a data-status="WAITING" className="filter-item waiting">Waiting</a><i data-status="WAITING" className="filter fa fa-check"></i></li>
-                            <li className="filter-item" data-status="UPLOADING" onClick={ this.handleStatusFilterSelect }><a data-status="UPLOADING" className="filter-item uploading">In Progress</a><i data-status="UPLOADING"  className="filter fa fa-check"></i></li>
-                            <li className="filter-item" data-status="CHECKED" onClick={ this.handleStatusFilterSelect }><a data-status="CHECKED" className="filter-item complete">Complete</a><i data-status="CHECKED" className="filter fa fa-check"></i></li>
-                            <li className="filter-item" onClick={ this.handleStatusFilterSelect } data-status="FAILED" ><a data-status="FAILED" className="filter-item failed">Failed</a><i data-status="FAILED" className="filter fa fa-check"></i></li>
-                            <li className="filter-item" data-status="ALL" onClick={ this.handleStatusFilterSelect }><a data-status="ALL" className="filter-item all">All</a><i data-status="ALL" className="filter all fa fa-check"></i></li>
+                            <li className="filter-item" data-status="WAITING" onClick={ this.handleStatusFilterSelect } ><a data-status="WAITING" className="filter-item waiting">Waiting</a><i data-status="WAITING" className="filter fa fa-check hidden"></i></li>
+                            <li className="filter-item" data-status="UPLOADING" onClick={ this.handleStatusFilterSelect }><a data-status="UPLOADING" className="filter-item uploading">In Progress</a><i data-status="UPLOADING"  className="filter fa fa-check hidden"></i></li>
+                            <li className="filter-item" data-status="CHECKED" onClick={ this.handleStatusFilterSelect }><a data-status="CHECKED" className="filter-item complete">Complete</a><i data-status="CHECKED" className="filter fa fa-check hidden"></i></li>
+                            <li className="filter-item" onClick={ this.handleStatusFilterSelect } data-status="FAILED" ><a data-status="FAILED" className="filter-item failed">Failed</a><i data-status="FAILED" className="filter fa fa-check hidden"></i></li>
+                            <li className="filter-item" data-status="ALL" onClick={ this.handleStatusFilterSelect }><a data-status="ALL" className="filter-item all">All</a><i data-status="ALL" className="filter all fa fa-check hidden"></i></li>
                             <li className="divider"/>
                           </div> : ''}
                         <li>
@@ -649,7 +648,6 @@ class Samples extends React.Component {
                 })
                 }
               </ul>
-            </div>
           </div>
         </div>
       </div>
@@ -684,9 +682,30 @@ class Samples extends React.Component {
     $(document).click(() => { $('.dropdown-bubble').slideUp(200); });
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    const prevStatus = prevState.filterParams;
+    const currentStatus = this.state.filterParams;
+    if(prevStatus !== currentStatus) {
+      $(`i[data-status="${prevStatus}"]`).removeClass('active');
+    } else {
+      $(`i[data-status="${currentStatus}"]`).addClass('active');
+    }
+  }
+
   componentDidMount() {
-    $('.filter').hide();
-    $('body').addClass('background-cover');
+    $(() => {
+      const samplesHeader = $('.sample-table-container');
+      $(window).scroll(() => {
+        if ($(window).scrollTop() > samplesHeader.offset().top) {
+          samplesHeader.addClass('shadow');
+        } else {
+          samplesHeader.removeClass('shadow');
+        }
+      });
+      $('.filter').hide();
+      $('body').addClass('background-cover');
+    });
+
     this.initializeTooltip();
     this.fetchProjectPageData();
     this.state.selectedProjectId ? this.fetchProjectDetails(this.state.selectedProjectId) : null;
@@ -694,6 +713,7 @@ class Samples extends React.Component {
     this.initializeProjectList();
     this.displayPipelineStatusFilter();
     this.initializeColumnSelect();
+
   }
 
   initializeColumnSelect() {
@@ -714,11 +734,6 @@ class Samples extends React.Component {
     $(".dropdown-content>li>a").css("font-size", textSize)
   }
 
-  displayCheckMarks(filter) {
-    $('.filter').hide();
-    $(`.filter[data-status="${filter}"]`).show();
-  }
-
   //handle filtering when a filter is selected from list
   handleStatusFilterSelect(e) {
     let status = e.target.getAttribute('data-status');
@@ -728,7 +743,6 @@ class Samples extends React.Component {
       filterParams: status
     }, () => {
       this.setUrlLocation();
-      this.displayCheckMarks(this.state.filterParams);
       this.fetchResults();
     });
   }
