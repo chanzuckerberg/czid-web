@@ -2,6 +2,7 @@ class UsersController < ApplicationController
   clear_respond_to
   respond_to :json
   before_action :set_user, only: [:show, :edit, :update, :destroy]
+
   # GET /users
   # GET /users.json
   def index
@@ -78,6 +79,10 @@ class UsersController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def user_params
-    params.require(:user).permit(:email, :authentication_token, :password, :password_confirmation, :name, :role, project_ids: [])
+    if current_user && current_user.admin
+      params.require(:user).permit(:role, :email, :authentication_token, :password, :password_confirmation, :name, project_ids: [])
+    else
+      params.require(:user).permit(:email, :authentication_token, :password, :password_confirmation, :name, project_ids: [])
+    end
   end
 end
