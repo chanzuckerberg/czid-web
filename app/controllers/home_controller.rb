@@ -3,6 +3,7 @@ class HomeController < ApplicationController
   include SamplesHelper
 
   def index
+    @favorite_projects = current_user.favorites
     render 'home'
   end
 

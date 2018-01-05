@@ -6,6 +6,8 @@ class User < ApplicationRecord
          :rememberable, :trackable, :validatable
   has_and_belongs_to_many :projects
   has_many :samples
+  has_many :favorite_projects
+  has_many :favorites, through: :favorite_projects, source: :project
   ROLE_ADMIN = 1
 
   def as_json(options = {})
