@@ -40,12 +40,12 @@ class BackgroundsController < ApplicationController
   # PATCH/PUT /backgrounds/1
   # PATCH/PUT /backgrounds/1.json
   def update
-    background_copy = @background.dup
+    current_data = @background.as_json(include: [:pipeline_outputs, :samples, :taxon_summaries])
     @background.assign_attributes(background_params)
     if @background.changed?
       archived_background = ArchivedBackground.new
       archived_background.archive_of = @background.id
-      archived_background.data = background_copy.as_json(include: [:pipeline_outputs, :samples, :taxon_summaries])
+      archived_background.data = current_data
       archived_background.save!
     end
     respond_to do |format|
