@@ -47,8 +47,9 @@ class BackgroundsController < ApplicationController
       archived_background.archive_of = @background.id
       archived_background.data = current_data
       archive_successful = archived_background.save
-      TaxonSummary.where(background_id: @background.id).delete_all if archive_successful
       update_successful = @background.save # this triggers recomputation of @background's taxon_summaries
+    else
+      update_successful = true
     end
     respond_to do |format|
       if update_successful
