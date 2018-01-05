@@ -23,7 +23,8 @@ Rails.application.routes.draw do
 
   resources :projects do
     get :visuals, on: :member
-    put :favorite, on: :member
+    put :add_favorite, on: :member
+    put :remove_favorite, on: :member
   end
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]

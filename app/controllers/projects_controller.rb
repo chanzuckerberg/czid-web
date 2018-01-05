@@ -1,5 +1,5 @@
 class ProjectsController < ApplicationController
-  before_action :set_project, only: [:show, :edit, :update, :destroy, :favorite]
+  before_action :set_project, only: [:show, :edit, :update, :destroy, :add_favorite, :remove_favorite]
   clear_respond_to
   respond_to :json
   # GET /projects
@@ -61,11 +61,14 @@ class ProjectsController < ApplicationController
     end
   end
 
-  def favorite
+  def add_favorite
+    remove_favorite
+    current_user.favorites << @project
+  end
+
+  def remove_favorite
     if current_user.favorites.include? @project
       current_user.favorites.delete(@project)
-    else
-      current_user.favorites << @project
     end
   end
 
