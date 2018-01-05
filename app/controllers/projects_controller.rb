@@ -38,6 +38,7 @@ class ProjectsController < ApplicationController
 
   # Get /projects/1/visuals
   def visuals
+    # TODO(cyril/yf): the following no longer work because Report model is gone
     project_id = params[:id]
     if project_id
       project_info = Project.select('name').where(id: project_id)

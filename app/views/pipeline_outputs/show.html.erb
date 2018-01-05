@@ -26,14 +26,6 @@
 </p>
 
 <p>
-  <strong><%= pluralize(@pipeline_output.reports.count, 'Report')%>:</strong>
-  <%= raw(@pipeline_output.reports.map do |r|
-    link_to(r.name, r)
-    end.join(','))
-  %>
-</p>
-
-<p>
   <strong>Output folder:</strong>
   <%= link_to @pipeline_output.sample.sample_output_folder_url, @pipeline_output.sample.sample_output_folder_url %>
 </p>

@@ -70,6 +70,6 @@ class BackgroundsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def background_params
-    params.require(:background).permit(:name, pipeline_output_ids: [], sample_ids: [], reports: [])
+    params.require(:background).permit(:name, pipeline_output_ids: [], sample_ids: [])
   end
 end
