@@ -46,10 +46,12 @@ class BackgroundsController < ApplicationController
       archived_background = ArchivedBackground.new
       archived_background.archive_of = @background.id
       archived_background.data = current_data
-      archived_background.save!
+      archive_successful = archived_background.save
+      TaxonSummary.where(background_id: @background.id).delete_all if archive_successful
+      update_successful = @background.save # this triggers recomputation of @background's taxon_summaries
     end
     respond_to do |format|
-      if @background.save
+      if update_successful
         format.html { redirect_to @background, notice: 'Background was successfully updated.' }
         format.json { render :show, status: :ok, location: @background }
       else
