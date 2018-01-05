@@ -1,4 +1,5 @@
 class BackgroundsController < ApplicationController
+  include BackgroundsHelper
   before_action :set_background, only: [:show, :edit, :update, :destroy]
 
   # GET /backgrounds
@@ -43,20 +44,12 @@ class BackgroundsController < ApplicationController
     current_data = @background.as_json(include: [{pipeline_outputs: {only: :id}},
                                                  {samples: {only: :id}},
                                                  :taxon_summaries])
-    current_pipeline_output_ids = @background.pipeline_outputs.map(&:id)
-    current_sample_ids = @background.samples.map(&:id)
-    new_pipeline_output_ids = background_params[:pipeline_output_ids].map(&:to_i).select { |id| id >=1 } if background_params[:pipeline_output_ids]
-    new_sample_ids = background_params[:sample_ids] ? background_params[:sample_ids].map(&:to_i) : nil
-    @background.assign_attributes(background_params)
-    if @background.changed? || current_pipeline_output_ids.sort != new_pipeline_output_ids.sort || (new_sample_ids && current_sample_ids.sort != new_sample_ids.sort)
+    background_changed = assign_attributes_and_has_changed?(background_params)
+    if background_changed
       Rails.logger.info("BACKGROUND CHANGED")
-      archived_background = ArchivedBackground.new
-      archived_background.archive_of = @background.id
-      archived_background.data = current_data
-      archive_successful = archived_background.save
+      archive_successful = archive_background(current_data)
       Rails.logger.info("ARCHIVING SUCCESSFUL? #{archive_successful}")
-      #update_successful = @background.save # this triggers recomputation of @background's taxon_summaries
-      update_successful = true
+      update_successful = @background.save # this triggers recomputation of @background's taxon_summaries
     else
       Rails.logger.info("BACKGROUND DID NOT CHANGE")
       update_successful = true
