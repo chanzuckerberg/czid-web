@@ -24,6 +24,10 @@ class PipelineRun < ApplicationRecord
   before_save :check_job_status
   after_create :kickoff_job
 
+  def archive_s3_path
+    "s3://#{SAMPLES_BUCKET_NAME}/pipeline_runs/#{id}_sample#{sample.id}"
+  end
+
   def self.in_progress
     where("job_status != '#{STATUS_FAILED}' OR job_status IS NULL")
       .where(finalized: 0)
