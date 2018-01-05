@@ -41,14 +41,18 @@ class BackgroundsController < ApplicationController
   # PATCH/PUT /backgrounds/1
   # PATCH/PUT /backgrounds/1.json
   def update
-    current_data = @background.as_json(include: [{pipeline_outputs: {only: :id}},
-                                                 {samples: {only: :id}},
-                                                 :taxon_summaries])
+    current_data = @background.as_json(include: [{pipeline_outputs: {only: [:id, :pipeline_run_id]}},
+                                                 {samples: {only: :id}}])
+    current_data_full_string = @background.to_json(include: [{pipeline_outputs: {only: [:id, :pipeline_run_id]}},
+                                                             {samples: {only: :id}},
+                                                             :taxon_summaries])
     background_changed = assign_attributes_and_has_changed?(background_params)
     if background_changed
       Rails.logger.info("BACKGROUND CHANGED")
-      archive_successful = archive_background(current_data)
-      Rails.logger.info("ARCHIVING SUCCESSFUL? #{archive_successful}")
+      db_archive_successful = archive_background_to_db(current_data)
+      s3_archive_successful = archive_background_to_s3(current_data_full_string)
+      Rails.logger.info("DB ARCHIVING SUCCESSFUL? #{db_archive_successful}")
+      Rails.logger.info("S3 ARCHIVING SUCCESSFUL? #{s3_archive_successful}")
       update_successful = @background.save # this triggers recomputation of @background's taxon_summaries
     else
       Rails.logger.info("BACKGROUND DID NOT CHANGE")
