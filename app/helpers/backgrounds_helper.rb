@@ -24,9 +24,10 @@ module BackgroundsHelper
     @background.changed? || !same_contents(current_pipeline_output_ids, new_pipeline_output_ids) || !same_contents(current_sample_ids, new_sample_ids)
   end
 
-  def archive_background_to_db(old_data)
+  def archive_background_to_db(old_data, s3_backup_path)
     archived_background = ArchivedBackground.new
     archived_background.archive_of = @background.id
+    archived_background.s3_backup_path = s3_backup_path
     archived_background.data = old_data
     archived_background.save
   end
@@ -38,6 +39,6 @@ module BackgroundsHelper
     destination_filename = "background_#{@background.id}_#{Time.now.in_time_zone.to_s(:number)}.json"
     s3_destination = "s3://#{SAMPLES_BUCKET_NAME}/backgrounds/#{@background.id}/#{destination_filename}"
     _stdout, _stderr, status = Open3.capture3("aws", "s3", "cp", file.path.to_s, s3_destination)
-    status.exitstatus.zero?
+    [status.exitstatus.zero?, s3_destination]
   end
 end
