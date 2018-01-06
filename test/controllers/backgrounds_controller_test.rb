@@ -36,7 +36,7 @@ class BackgroundsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update background" do
-    patch background_url(@background), params: { background: { name: @background.name, pipeline_outputs: @background.pipeline_outputs } }
+    patch background_url(@background), params: { background: { name: @background.name, pipeline_output_ids: @background.pipeline_outputs.map(&:id) } }
     assert_redirected_to background_url(@background)
   end
 
