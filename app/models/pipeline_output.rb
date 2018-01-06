@@ -17,5 +17,4 @@ class PipelineOutput < ApplicationRecord
   def check_box_label
     "#{sample.project.name} : #{sample.name} (#{id})"
   end
-
 end

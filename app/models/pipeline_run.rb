@@ -257,5 +257,4 @@ class PipelineRun < ApplicationRecord
     unidentified_fasta = get_s3_file(sample.unidentified_fasta_s3_path)
     unidentified_fasta.lines.select { |line| line.start_with? '>' }.count if unidentified_fasta
   end
-
 end
