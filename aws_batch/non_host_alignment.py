@@ -553,19 +553,16 @@ def run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work
                 write_to_log("waiting for server")
                 gsnapl_instance_ip = wait_for_server_ip('gsnap', key_path, remote_username, ENVIRONMENT, GSNAPL_MAX_CONCURRENT)
                 write_to_log("starting alignment for chunk %s on machine %s" % (chunk_id, gsnapl_instance_ip))
-                remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, gsnapl_instance_ip, commands)
-                execute_command(remote_command)
+                execute_command(remote_command(commands, key_path, remote_username, gsnapl_instance_ip))
                 # check if every row has correct number of columns (12) in the output file on the remote machine
                 verification_command = "awk '{print NF}' %s | sort -nu | head -n 1" % remote_outfile
-                remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, gsnapl_instance_ip, verification_command)
-                min_column_number = float(execute_command_with_output(remote_command))
+                min_column_number = float(execute_command_with_output(remote_command(verification_command, key_path, remote_username, gsnapl_instance_ip)))
                 write_to_log("Try no. %d: Smallest number of columns observed in any line was %d" % (try_number, min_column_number))
                 try_number += 1
             # move output from remote machine to s3
             upload_command = "echo '' >> %s;" % remote_outfile # add a blank line at the end of the file so S3 copy doesn't fail if output is empty
             upload_command += "aws s3 cp %s %s/;" % (remote_outfile, SAMPLE_S3_OUTPUT_CHUNKS_PATH)
-            remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, gsnapl_instance_ip, upload_command)
-            execute_command(remote_command)
+            execute_command(remote_command(upload_command, key_path, remote_username, gsnapl_instance_ip))
         # move gsnapl output from s3 to local
         time.sleep(10)
         write_to_log("finished alignment for chunk %s" % chunk_id)
