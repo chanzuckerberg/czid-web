@@ -1,11 +1,7 @@
 class ProjectsController < ApplicationController
-  include SamplesHelper
-
-  before_action :set_project, only: [:show, :edit, :update, :destroy]
-
+  before_action :set_project, only: [:show, :edit, :update, :destroy, :add_favorite, :remove_favorite]
   clear_respond_to
   respond_to :json
-
   # GET /projects
   # GET /projects.json
   def index
@@ -42,6 +38,7 @@ class ProjectsController < ApplicationController
 
   # Get /projects/1/visuals
   def visuals
+    # TODO(cyril/yf): the following no longer work because Report model is gone
     project_id = params[:id]
     if project_id
       project_info = Project.select('name').where(id: project_id)
@@ -62,6 +59,17 @@ class ProjectsController < ApplicationController
       find_reports.each do |record|
         @csv_records.push(name: record.first, link: fetch_csv_url(record.last))
       end
+    end
+  end
+
+  def add_favorite
+    remove_favorite
+    current_user.favorites << @project
+  end
+
+  def remove_favorite
+    if current_user.favorites.include? @project
+      current_user.favorites.delete(@project)
     end
   end
 

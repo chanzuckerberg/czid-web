@@ -235,8 +235,6 @@ class PipelineRunStage < ApplicationRecord
     po.update_names
     # denormalize genus_taxid and superkingdom_taxid into taxon_counts
     po.update_genera
-    # generate report
-    po.generate_report
 
     # rm the json
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_json_path} #{downloaded_stats_path}")

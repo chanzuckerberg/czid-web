@@ -24,6 +24,10 @@ class PipelineRun < ApplicationRecord
   before_save :check_job_status
   after_create :kickoff_job
 
+  def archive_s3_path
+    "s3://#{SAMPLES_BUCKET_NAME}/pipeline_runs/#{id}_sample#{sample.id}"
+  end
+
   def self.in_progress
     where("job_status != '#{STATUS_FAILED}' OR job_status IS NULL")
       .where(finalized: 0)
@@ -209,8 +213,6 @@ class PipelineRun < ApplicationRecord
 
     # rm the json
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_json_path} #{downloaded_stats_path}")
-    # generate report
-    po.generate_report
   end
 
   def load_postprocess_from_s3

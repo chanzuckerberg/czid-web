@@ -15,8 +15,6 @@ class PipelineOutputsController < ApplicationController
   # GET /pipeline_outputs/1
   # GET /pipeline_outputs/1.json
   def show
-    report = @pipeline_output.reports.first
-    @report_info = external_report_info(report, params)
   end
 
   def show_taxid_fasta
