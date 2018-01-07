@@ -39,6 +39,7 @@ module BackgroundsHelper
     destination_filename = "background_#{@background.id}_#{Time.now.in_time_zone.to_s(:number)}.json"
     s3_destination = "s3://#{SAMPLES_BUCKET_NAME}/backgrounds/#{@background.id}/#{destination_filename}"
     _stdout, _stderr, status = Open3.capture3("aws", "s3", "cp", file.path.to_s, s3_destination)
+    file.unlink
     [status.exitstatus.zero?, s3_destination]
   end
 end
