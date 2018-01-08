@@ -560,6 +560,7 @@ def run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work
                 write_to_log("Try no. %d: Smallest number of columns observed in any line was %d" % (try_number, min_column_number))
                 try_number += 1
             # move output from remote machine to s3
+            assert min_column_number == correct_number_of_output_columns, "Chunk %s output corrupt; not copying to S3. Re-start pipeline to try again." % chunk_id
             upload_command = "echo '' >> %s;" % remote_outfile # add a blank line at the end of the file so S3 copy doesn't fail if output is empty
             upload_command += "aws s3 cp %s %s/;" % (remote_outfile, SAMPLE_S3_OUTPUT_CHUNKS_PATH)
             execute_command(remote_command(upload_command, key_path, remote_username, gsnapl_instance_ip))
