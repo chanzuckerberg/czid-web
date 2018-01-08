@@ -578,7 +578,7 @@ class Samples extends React.Component {
 
     const projInfo = (
       <div>
-        <h6 className="proj-title">{ (!this.state.project) ? 'All projects' : this.state.project.name }</h6>
+        <div className="proj-title">{ (!this.state.project) ? 'All projects' : this.state.project.name }</div>
         <p>{ this.state.allSamples.length === 0 ? 'No sample found' : ( this.state.allSamples.length === 1 ? '1 sample found' : `${this.state.allSamples.length} out of ${this.state.totalNumber} samples found`) }</p>
       </div>
     );
