@@ -46,7 +46,7 @@
     let projectId = e.target.getAttribute('data-id');
     Samples.showLoading(`${favStatus == 'true' ? 'Removing from' : 'Adding to' } favorites...`)
     axios
-      .put(`/projects/${projectId}/favorite?`, {
+      .put(`/projects/${projectId}/${favStatus == 'true' ? 'remove_favorite' : 'add_favorite' }?`, {
         authenticity_token: this.csrf
       })
       .then((res) => {
@@ -195,12 +195,12 @@
         <div className="fav-projects-wrapper">
           {!this.state.formattedFavProjectList.length ? <div className="none">None</div>: this.state.showLessFavorites ? this.state.formattedFavProjectList.sort(sortLogic).slice(0,4).map((project, i) => {
             return (
-              <div className="fav-item" key={i} data-id={project.id} ><div data-id={project.id} data-type="fav" onClick={this.handleProjectClick}><span>{project.name}</span></div>{this.addFavIconClass(project)}</div>
+              <div className="fav-item" data-id={project.id}  key={i}><div onClick={this.handleProjectClick} data-id={project.id}><span data-id={project.id}>{project.name}</span></div>{this.addFavIconClass(project)}</div>
             )
           }): 
           this.state.formattedFavProjectList.sort(sortLogic).map((project, i) => {
             return (
-              <div className="fav-item" key={i} data-id={project.id} ><div data-id={project.id} data-type="fav" onClick={this.handleProjectClick}><span>{project.name}</span>{this.addFavIconClass(project)}</div></div>
+              <div className="fav-item" data-id={project.id}  key={i}><div onClick={this.handleProjectClick} data-id={project.id}><span data-id={project.id}>{project.name}</span></div>{this.addFavIconClass(project)}</div>
             )
           }) }
           { this.state.formattedFavProjectList.length > 4 ? <div className="more" onClick={this.toggleDisplayFavProjects}>{this.state.showLessFavorites ? 'Show More...' : 'Show Less...'}</div> : ''}
