@@ -2,6 +2,7 @@ require 'open3'
 require 'json'
 class PipelineRun < ApplicationRecord
   include ApplicationHelper
+  include PipelineOutputsHelper
   belongs_to :sample
   has_one :pipeline_output
   has_many :pipeline_run_stages
