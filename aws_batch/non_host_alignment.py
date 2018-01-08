@@ -40,7 +40,7 @@ FILE_TYPE = 'fastq.gz'
 ENVIRONMENT = 'production'
 
 # compute capacity
-GSNAPL_MAX_CONCURRENT = 20 # number of gsnapl jobs allowed to run concurrently on 1 machine
+GSNAPL_MAX_CONCURRENT = 5 # number of gsnapl jobs allowed to run concurrently on 1 machine
 RAPSEARCH2_MAX_CONCURRENT = 3
 GSNAPL_CHUNK_SIZE = 30000 # number of fasta records in a chunk
 RAPSEARCH_CHUNK_SIZE = 10000
@@ -537,8 +537,8 @@ def run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work
             commands += "aws s3 cp %s/%s %s/ ; " % \
                      (SAMPLE_S3_OUTPUT_CHUNKS_PATH, input_fa, remote_work_dir)
         commands += " ".join([remote_home_dir+'/bin/gsnapl',
-                              '-A', 'm8', '--batch=2',
-                              '--gmap-mode=none', '--npaths=1',
+                              '-A', 'm8', '--batch=0', '--use-shared-memory=0',
+                              '--gmap-mode=none', '--npaths=1', '--ordered',
                               '-t', '32',
                               '--maxsearch=5', '--max-mismatches=20',
                               '-D', remote_index_dir, '-d', 'nt_k16']
@@ -775,7 +775,7 @@ def run_stage2(lazy_run = True):
         generate_merged_fasta(cleaned_files, _merged_fasta)
         execute_command("aws s3 cp %s %s/" % (_merged_fasta, SAMPLE_S3_OUTPUT_PATH))
 
-    # Make sure there are no tabs in sequence names, since tabs are used as a delimiter in m8 files    
+    # Make sure there are no tabs in sequence names, since tabs are used as a delimiter in m8 files
     files_to_collapse_basenames = _gsnapl_input_files + [EXTRACT_UNMAPPED_FROM_SAM_OUT3]
     collapsed_files = ["%s/nospace.%s" % (RESULT_DIR, f) for f in files_to_collapse_basenames]
     for file_basename in files_to_collapse_basenames:

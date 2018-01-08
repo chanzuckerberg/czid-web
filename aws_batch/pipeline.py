@@ -38,7 +38,7 @@ BOWTIE2="bowtie2"
 
 LZW_FRACTION_CUTOFF = 0.45
 
-GSNAPL_MAX_CONCURRENT = 20
+GSNAPL_MAX_CONCURRENT = 5
 RAPSEARCH2_MAX_CONCURRENT = 5
 
 STAR_GENOME = 's3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz'
@@ -1194,7 +1194,7 @@ def run_gsnapl_remotely(sample, input_files,
         commands += "aws s3 cp %s/%s %s/ ; " % \
                  (sample_s3_output_path, input_fa, remote_work_dir)
     commands += " ".join([remote_home_dir+'/bin/gsnapl',
-                          '-A', 'm8', '--batch=2',
+                          '-A', 'm8', '--batch=0', '--use-shared-memory=0',
                           '--gmap-mode=none', '--npaths=1', '--ordered',
                           '-t', '32',
                           '--maxsearch=5', '--max-mismatches=20',
