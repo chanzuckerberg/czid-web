@@ -1,0 +1,2 @@
+class ArchivedBackground < ApplicationRecord
+end

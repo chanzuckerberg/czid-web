@@ -84,6 +84,9 @@ def execute_command_realtime_stdout(command, progress_file=None):
 def execute_command(command, progress_file=None):
     execute_command_realtime_stdout(command, progress_file)
 
+def remote_command(base_command, key_path, remote_username, instance_ip):
+    return 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, instance_ip, base_command)
+
 class TimeFilter(logging.Filter):
     def filter(self, record):
         try:
