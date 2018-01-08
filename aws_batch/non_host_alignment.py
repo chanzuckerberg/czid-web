@@ -549,7 +549,7 @@ def run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work
             min_column_number = 0
             max_tries = 2
             try_number = 1
-            while (min_column_number < correct_number_of_output_columns and try_number <= max_tries):
+            while (min_column_number != correct_number_of_output_columns and try_number <= max_tries):
                 write_to_log("waiting for server")
                 gsnapl_instance_ip = wait_for_server_ip('gsnap', key_path, remote_username, ENVIRONMENT, GSNAPL_MAX_CONCURRENT)
                 write_to_log("starting alignment for chunk %s on machine %s" % (chunk_id, gsnapl_instance_ip))
