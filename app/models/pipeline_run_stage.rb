@@ -193,7 +193,7 @@ class PipelineRunStage < ApplicationRecord
     stats_array = stats_array.select { |entry| entry.key?("task") }
 
     # TODO(yf): remove the following line
-    stats_array = stats_array.map { |entry| entry["pipeline_output_id"] = po.id; entry; entry }
+    stats_array.each { |entry| entry["pipeline_output_id"] = po.id }
     pr.job_stats_attributes = stats_array
 
     # rm the json
@@ -228,7 +228,7 @@ class PipelineRunStage < ApplicationRecord
     stats_array = JSON.parse(File.read(downloaded_stats_path))
     stats_array = stats_array.select { |entry| entry.key?("task") }
     # TODO(yf): remove the following line
-    stats_array = stats_array.map { |entry| entry[:pipeline_output_id] = po.id; entry }
+    stats_array.each { |entry| entry[:pipeline_output_id] = po.id }
 
     # only keep species level counts
     taxon_counts_attributes_filtered = []
