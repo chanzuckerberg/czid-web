@@ -161,8 +161,6 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def postprocess_command
-    script_name = File.basename(IdSeqPipeline::S3_POSTPROCESS_SCRIPT_LOC)
-    common_script_name = File.basename(IdSeqPipeline::S3_COMMON_SCRIPT_LOC)
     sample = pipeline_run.sample
     batch_command_env_variables = "INPUT_BUCKET=#{sample.sample_output_s3_path} " \
       "OUTPUT_BUCKET=#{sample.sample_postprocess_s3_path} "
