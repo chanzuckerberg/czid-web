@@ -102,8 +102,7 @@ class Sample < ApplicationRecord
     end
 
     self.status = STATUS_UPLOADED
-    save # this triggers pipeline
-    command
+    save # this triggers pipeline command
   end
 
   def sample_input_s3_path
