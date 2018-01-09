@@ -61,6 +61,9 @@ RUN wget http://launchpadlibrarian.net/162265652/fastx-toolkit_0.0.14-1_amd64.de
 RUN gdebi --non-interactive libgtextutils0_0.7-1_amd64.deb
 RUN gdebi --non-interactive fastx-toolkit_0.0.14-1_amd64.deb
 
+# Install IDseq pipeline package
+RUN pip install git+https://github.com/chanzuckerberg/idseq-pipeline.git
+
 # For aegea
 RUN apt-get install -y python3-pip
 RUN pip3 install awscli-cwlogs==1.4.0 keymaker==0.2.1 boto3==1.4.3 awscli==1.11.44 dynamoq==0.0.5 tractorbeam==0.1.3
