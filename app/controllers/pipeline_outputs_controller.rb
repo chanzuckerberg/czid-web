@@ -17,29 +17,6 @@ class PipelineOutputsController < ApplicationController
   def show
   end
 
-  def show_taxid_fasta
-    if params[:hit_type] == "NT_or_NR"
-      nt_array = get_taxid_fasta(@pipeline_output, params[:taxid], params[:tax_level].to_i, 'NT').split(">")
-      nr_array = get_taxid_fasta(@pipeline_output, params[:taxid], params[:tax_level].to_i, 'NR').split(">")
-      @taxid_fasta = ">" + ((nt_array | nr_array) - ['']).join(">")
-      @taxid_fasta = "Coming soon" if @taxid_fasta == ">" # Temporary fix
-    else
-      @taxid_fasta = get_taxid_fasta(@pipeline_output, params[:taxid], params[:tax_level].to_i, params[:hit_type])
-    end
-    taxid_name = @pipeline_output.taxon_counts.find_by(tax_id: params[:taxid], tax_level: params[:tax_level]).name
-    taxid_name_clean = taxid_name ? taxid_name.downcase.gsub(/\W/, "-") : ''
-    send_data @taxid_fasta, filename: @pipeline_output.sample.name + '_' + taxid_name_clean + '-hits.fasta'
-  end
-
-  def send_nonhost_fasta
-    @nonhost_fasta = get_s3_file(@pipeline_output.sample.annotated_fasta_s3_path)
-    send_data @nonhost_fasta, filename: @pipeline_output.sample.name + '_nonhost.fasta'
-  end
-
-  def send_unidentified_fasta
-    @unidentified_fasta = get_s3_file(@pipeline_output.sample.unidentified_fasta_s3_path)
-    send_data @unidentified_fasta, filename: @pipeline_output.sample.name + '_unidentified.fasta'
-  end
 
   private
 

@@ -1,9 +1,10 @@
 class SamplesController < ApplicationController
   include ReportHelper
   include SamplesHelper
+  include PipelineOutputsHelper
 
   before_action :authenticate_user!, only: [:new, :index, :update, :destroy, :edit, :show, :reupload_source, :kickoff_pipeline, :bulk_new, :bulk_import, :bulk_upload]
-  before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata, :report_info, :search_list, :report_csv]
+  before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta]
   acts_as_token_authentication_handler_for User, only: [:create, :bulk_upload], fallback: :devise
   protect_from_forgery unless: -> { request.format.json? }
   PAGE_SIZE = 30
@@ -195,6 +196,31 @@ class SamplesController < ApplicationController
         end
       end
     end
+  end
+
+  def show_taxid_fasta
+    if params[:hit_type] == "NT_or_NR"
+      nt_array = get_taxid_fasta(@sample, params[:taxid], params[:tax_level].to_i, 'NT').split(">")
+      nr_array = get_taxid_fasta(@sample, params[:taxid], params[:tax_level].to_i, 'NR').split(">")
+      @taxid_fasta = ">" + ((nt_array | nr_array) - ['']).join(">")
+      @taxid_fasta = "Coming soon" if @taxid_fasta == ">" # Temporary fix
+    else
+      @taxid_fasta = get_taxid_fasta(@sample, params[:taxid], params[:tax_level].to_i, params[:hit_type])
+    end
+    pipeline_run = @sample.pipeline_runs.first
+    taxid_name = pipeline_run.taxon_counts.find_by(tax_id: params[:taxid], tax_level: params[:tax_level]).name
+    taxid_name_clean = taxid_name ? taxid_name.downcase.gsub(/\W/, "-") : ''
+    send_data @taxid_fasta, filename: @sample.name + '_' + taxid_name_clean + '-hits.fasta'
+  end
+
+  def nonhost_fasta
+    @nonhost_fasta = get_s3_file(@sample.annotated_fasta_s3_path)
+    send_data @nonhost_fasta, filename: @sample.name + '_nonhost.fasta'
+  end
+
+  def unidentified_fasta
+    @unidentified_fasta = get_s3_file(@sample.unidentified_fasta_s3_path)
+    send_data @unidentified_fasta, filename: @sample.name + '_unidentified.fasta'
   end
 
   # GET /samples/new

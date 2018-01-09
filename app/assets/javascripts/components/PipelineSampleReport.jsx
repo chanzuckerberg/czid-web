@@ -60,6 +60,7 @@ class PipelineSampleReport extends React.Component {
     this.expandOrCollapseGenus = this.expandOrCollapseGenus.bind(this);
     this.expandTable = this.expandTable.bind(this);
     this.collapseTable = this.collapseTable.bind(this);
+    this.downloadFastaUrl = this.downloadFastaUrl.bind(this)
 
     this.handleThresholdEnter = this.handleThresholdEnter.bind(this);
     this.initializeTooltip();
@@ -432,18 +433,16 @@ class PipelineSampleReport extends React.Component {
 
   //download Fasta
   downloadFastaUrl(e) {
-    const pipelineId = e.target.getAttribute('data-pipeline-id');
     const taxLevel = e.target.getAttribute('data-tax-level');
     const taxId = e.target.getAttribute('data-tax-id');
-    location.href = `/pipeline_outputs/${pipelineId}/fasta/${taxLevel}/${taxId}/NT_or_NR`;
+    location.href = `/samples/${this.sample_id}/fasta/${taxLevel}/${taxId}/NT_or_NR`;
   }
 
   displayTags(taxInfo, reportDetails) {
     return (
       <span className="link-tag">
         { taxInfo.tax_id > 0 ? <i data-tax-id={taxInfo.tax_id} onClick={this.gotoNCBI} className="fa fa-link cloud" aria-hidden="true"></i> : null }
-        { reportDetails.taxon_fasta_flag ? <i data-pipeline-id={reportDetails.pipeline_info.id}
-                                              data-tax-level={taxInfo.tax_level} data-tax-id={taxInfo.tax_id}
+        { reportDetails.taxon_fasta_flag ? <i data-tax-level={taxInfo.tax_level} data-tax-id={taxInfo.tax_id}
                                               onClick={this.downloadFastaUrl} className="fa fa-download cloud" aria-hidden="true"></i> : null }
       </span>
     )

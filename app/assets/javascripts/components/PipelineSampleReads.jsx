@@ -1,7 +1,6 @@
 class PipelineSampleReads extends React.Component {
   constructor(props) {
     super(props);
-    this.pipelineOutput = props.pipelineOutput;
     this.csrf = props.csrf;
     this.allBackgrounds = props.all_backgrounds;
     this.rerunPath = props.rerun_path;
@@ -258,7 +257,7 @@ class PipelineSampleReads extends React.Component {
     let pipeline_run = null;
     let download_section = null;
     const BLANK_TEXT = 'unknown';
-    if (this.pipelineOutput) {
+    if (this.pipelineRun) {
       pipeline_run = (
         <div className="data">
           <div className="row">
@@ -268,7 +267,7 @@ class PipelineSampleReads extends React.Component {
                   Total reads
                 </div>
                 <div className='details-value col s6 no-padding'>
-                  { numberWithCommas(this.pipelineOutput.total_reads) }
+                  { numberWithCommas(this.pipelineRun.total_reads) }
                 </div>
               </div>
               <div className='row detail-row'>
@@ -336,11 +335,11 @@ class PipelineSampleReads extends React.Component {
 
     download_section = (
       <div>
-        <a className="custom-button" href= { `/pipeline_outputs/${this.pipelineOutput.id}/nonhost_fasta` }>
+        <a className="custom-button" href= { `/samples/${this.sampleInfo.id}/nonhost_fasta` }>
           <i className="fa fa-cloud-download"></i>
           Download Non-Host Reads
         </a>
-        <a className="custom-button" href= { `/pipeline_outputs/${this.pipelineOutput.id}/unidentified_fasta` }>
+        <a className="custom-button" href= { `/samples/${this.sampleInfo.id}/unidentified_fasta` }>
           <i className="fa fa-cloud-download"></i>
           Download Unmapped Reads
         </a>

@@ -2,7 +2,6 @@ require 'resque/server'
 
 Rails.application.routes.draw do
   resources :backgrounds
-  resources :pipeline_outputs, only: [:index, :show]
   devise_for :users, controllers: {
     sessions: 'sessions',
     registrations: 'registrations'
@@ -17,9 +16,12 @@ Rails.application.routes.draw do
     get :search_list, on: :member
     get :bulk_new, on: :collection
     get :bulk_import, on: :collection
+    get :nonhost_fasta, on: :member
+    get :unidentified_fasta, on: :member
     post :bulk_upload, on: :collection
     post :save_metadata, on: :member
   end
+  get 'samples/:id/fasta/:tax_level/:taxid/:hit_type', to: 'samples#show_taxid_fasta'
 
   resources :projects do
     get :visuals, on: :member
@@ -32,8 +34,5 @@ Rails.application.routes.draw do
   mount Resque::Server.new, at: '/resque'
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
   root to: 'home#index'
-  get 'pipeline_outputs/:id/fasta/:tax_level/:taxid/:hit_type', to: 'pipeline_outputs#show_taxid_fasta'
-  get 'pipeline_outputs/:id/nonhost_fasta', to: 'pipeline_outputs#send_nonhost_fasta'
-  get 'pipeline_outputs/:id/unidentified_fasta', to: 'pipeline_outputs#send_unidentified_fasta'
   get 'projects/:id/csv', to: 'projects#send_project_csv'
 end

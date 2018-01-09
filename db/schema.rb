@@ -40,9 +40,11 @@ ActiveRecord::Schema.define(version: 20180109201539) do
     t.index ["background_id", "pipeline_run_id"], name: "index_bg_pr_id", unique: true
   end
 
-  create_table "backgrounds_samples", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.bigint "background_id"
-    t.bigint "sample_id"
+  create_table "backgrounds_samples", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.bigint "background_id", null: false
+    t.bigint "sample_id", null: false
+    t.index ["background_id"], name: "index_backgrounds_samples_on_background_id"
+    t.index ["sample_id"], name: "index_backgrounds_samples_on_sample_id"
   end
 
   create_table "favorite_projects", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
