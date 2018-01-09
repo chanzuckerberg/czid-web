@@ -4,6 +4,7 @@ class HomeController < ApplicationController
 
   def index
     @favorite_projects = current_user.favorites
+    @projects = Project.all
     render 'home'
   end
 
