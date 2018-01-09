@@ -1,5 +1,6 @@
 class PipelineRunStage < ApplicationRecord
   include ApplicationHelper
+  include PipelineOutputsHelper
   belongs_to :pipeline_run
   DEFAULT_MEMORY_IN_MB = 4000
   DEFAULT_STORAGE_IN_GB = 500
@@ -186,11 +187,15 @@ class PipelineRunStage < ApplicationRecord
     stats_json_s3_path = "#{sample_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
     downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, pr.local_json_path)
     stats_array = JSON.parse(File.read(downloaded_stats_path))
-    po.total_reads = (stats_array[0] || {})['total_reads'] || 0
-
-    stats_array = stats_array.select { |entry| entry.key?("task") }
-    po.job_stats_attributes = stats_array
+    pr.total_reads = (stats_array[0] || {})['total_reads'] || 0
+    po.total_reads = pr.total_reads # TODO(yf): remove this to remove soon
     po.save
+    stats_array = stats_array.select { |entry| entry.key?("task") }
+
+    # TODO(yf): remove the following line
+    stats_array.each { |entry| entry["pipeline_output_id"] = po.id }
+    pr.job_stats_attributes = stats_array
+
     # rm the json
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_stats_path}")
   end
@@ -207,34 +212,44 @@ class PipelineRunStage < ApplicationRecord
     downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, pr.local_json_path)
     return unless downloaded_json_path && downloaded_stats_path
     json_dict = JSON.parse(File.read(downloaded_json_path))
-    stats_array = JSON.parse(File.read(downloaded_stats_path))
-    stats_array = stats_array.select { |entry| entry.key?("task") }
 
     pipeline_output_dict = json_dict['pipeline_output']
     pipeline_output_dict.slice!('remaining_reads', 'total_reads', 'taxon_counts_attributes')
-    po.total_reads = pipeline_output_dict['total_reads']
-    po.remaining_reads = pipeline_output_dict['remaining_reads']
-    po.unmapped_reads = po.count_unmapped_reads
+
+    pr.total_reads = pipeline_output_dict['total_reads']
+    pr.remaining_reads = pipeline_output_dict['remaining_reads']
+    pr.unmapped_reads = pr.count_unmapped_reads
+
+    po.total_reads = pr.total_reads
+    po.remaining_reads = pr.remaining_reads
+    po.unmapped_reads = pr.unmapped_reads
+    po.save
+
+    stats_array = JSON.parse(File.read(downloaded_stats_path))
+    stats_array = stats_array.select { |entry| entry.key?("task") }
+    # TODO(yf): remove the following line
+    stats_array.each { |entry| entry[:pipeline_output_id] = po.id }
 
     # only keep species level counts
     taxon_counts_attributes_filtered = []
     pipeline_output_dict['taxon_counts_attributes'].each do |tcnt|
       if tcnt['tax_level'].to_i == TaxonCount::TAX_LEVEL_SPECIES
+        tcnt[:pipeline_output_id] = po.id
         taxon_counts_attributes_filtered << tcnt
       end
     end
 
-    po.job_stats.delete_all
-    po.job_stats_attributes = stats_array
-    po.taxon_counts_attributes = taxon_counts_attributes_filtered
-    po.updated_at = Time.now.utc
-    po.save
+    pr.job_stats.delete_all
+    pr.job_stats_attributes = stats_array
+    pr.taxon_counts_attributes = taxon_counts_attributes_filtered
+    pr.updated_at = Time.now.utc
+    pr.save
     # aggregate the data at genus level
-    po.generate_aggregate_counts('genus')
+    pr.generate_aggregate_counts('genus')
     # merge more accurate name information from lineages table
-    po.update_names
+    pr.update_names
     # denormalize genus_taxid and superkingdom_taxid into taxon_counts
-    po.update_genera
+    pr.update_genera
 
     # rm the json
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_json_path} #{downloaded_stats_path}")
@@ -248,10 +263,9 @@ class PipelineRunStage < ApplicationRecord
     taxon_byteranges_csv_file = "#{pr.local_json_path}/taxon_byteranges"
     hash_array_json2csv(downloaded_byteranges_path, taxon_byteranges_csv_file, %w[taxid hit_type first_byte last_byte])
     ` cd #{pr.local_json_path};
-      sed -e 's/$/,#{po.id}/' -i taxon_byteranges;
-      mysqlimport --replace --local --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --columns=taxid,hit_type,first_byte,last_byte,pipeline_output_id --fields-terminated-by=',' idseq_#{Rails.env} taxon_byteranges;
+      sed -e 's/$/,#{pr.id},#{po.id}/' -i taxon_byteranges;
+      mysqlimport --replace --local --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --columns=taxid,hit_type,first_byte,last_byte,pipeline_run_id,pipeline_output_id --fields-terminated-by=',' idseq_#{Rails.env} taxon_byteranges;
     `
-    po.save
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_byteranges_path}")
   end
 

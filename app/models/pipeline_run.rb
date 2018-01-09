@@ -2,10 +2,18 @@ require 'open3'
 require 'json'
 class PipelineRun < ApplicationRecord
   include ApplicationHelper
+  include PipelineOutputsHelper
   belongs_to :sample
   has_one :pipeline_output
   has_many :pipeline_run_stages
   accepts_nested_attributes_for :pipeline_run_stages
+
+  has_many :taxon_counts, dependent: :destroy
+  has_many :job_stats, dependent: :destroy
+  has_many :taxon_byteranges, dependent: :destroy
+  accepts_nested_attributes_for :taxon_counts
+  accepts_nested_attributes_for :job_stats
+  accepts_nested_attributes_for :taxon_byteranges
 
   OUTPUT_JSON_NAME = 'idseq_web_sample.json'.freeze
   STATS_JSON_NAME = 'stats.json'.freeze
@@ -76,7 +84,6 @@ class PipelineRun < ApplicationRecord
   def check_job_status
     # only update the pipeline_run info. do not update pipeline_run_stage info
     return if finalized? || id.nil?
-    check_job_status_old if pipeline_run_stages.blank?
     pipeline_run_stages.order(:step_number).each do |prs|
       if prs.failed?
         self.finalized = 1
@@ -93,20 +100,6 @@ class PipelineRun < ApplicationRecord
     # All done
     self.finalized = 1
     self.job_status = STATUS_CHECKED
-  end
-
-  def check_job_status_old # Before pipeline_run_stages are introduced
-    if pipeline_output
-      self.job_status = STATUS_CHECKED
-      return
-    end
-    if output_ready?
-      # Try loading the data into DB after 24 hours running the job
-      self.job_status = STATUS_CHECKED
-      Resque.enqueue(LoadResultsFromS3, id)
-      # terminate the job
-      terminate_job
-    end
   end
 
   def output_ready?
@@ -130,7 +123,6 @@ class PipelineRun < ApplicationRecord
   end
 
   def update_job_status
-    update_job_status_old if pipeline_run_stages.blank?
     pipeline_run_stages.order(:step_number).each do |prs|
       if !prs.started? # Not started yet
         prs.run_job
@@ -148,87 +140,8 @@ class PipelineRun < ApplicationRecord
     save
   end
 
-  def update_job_status_old
-    return if completed?
-    stdout, stderr, status = Open3.capture3("aegea", "batch", "describe", job_id.to_s)
-    if status.exitstatus.zero?
-      self.job_description = stdout
-      job_hash = JSON.parse(job_description)
-      self.job_status = job_hash['status']
-      if job_hash['container'] && job_hash['container']['logStreamName']
-        self.job_log_id = job_hash['container']['logStreamName']
-      end
-    else
-      Airbrake.notify("Error for update job status for pipeline run #{id} with error #{stderr}")
-      self.job_status = STATUS_ERROR
-      self.job_status = STATUS_FAILED if stderr =~ /IndexError/ # job no longer exists
-    end
-    save
-  end
-
   def local_json_path
     "#{LOCAL_JSON_PATH}/#{id}"
-  end
-
-  def load_results_from_s3
-    return if pipeline_output
-    output_json_s3_path = "#{sample.sample_output_s3_path}/#{OUTPUT_JSON_NAME}"
-    stats_json_s3_path = "#{sample.sample_output_s3_path}/#{STATS_JSON_NAME}"
-
-    # Get the file
-    downloaded_json_path = PipelineRun.download_file(output_json_s3_path, local_json_path)
-    downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, local_json_path)
-    return unless downloaded_json_path && downloaded_stats_path
-    json_dict = JSON.parse(File.read(downloaded_json_path))
-    stats_array = JSON.parse(File.read(downloaded_stats_path))
-    stats_array = stats_array.select { |entry| entry.key?("task") }
-    pipeline_output_dict = json_dict['pipeline_output']
-    pipeline_output_dict.slice!('name', 'total_reads',
-                                'remaining_reads', 'taxon_counts_attributes')
-
-    # only keep species level counts
-    taxon_counts_attributes_filtered = []
-    pipeline_output_dict['taxon_counts_attributes'].each do |tcnt|
-      if tcnt['tax_level'].to_i == TaxonCount::TAX_LEVEL_SPECIES
-        taxon_counts_attributes_filtered << tcnt
-      end
-    end
-
-    pipeline_output_dict['taxon_counts_attributes'] = taxon_counts_attributes_filtered
-    pipeline_output_dict['job_stats_attributes'] = stats_array
-    po = PipelineOutput.new(pipeline_output_dict)
-    po.sample = sample
-    po.pipeline_run = self
-    po.save
-    # aggregate the data at genus level
-    po.generate_aggregate_counts('genus')
-    # merge more accurate name information from lineages table
-    po.update_names
-    # denormalize genus_taxid and superkingdom_taxid into taxon_counts
-    po.update_genera
-
-    self.pipeline_output_id = po.id
-    save
-    Resque.enqueue(LoadPostprocessFromS3, id)
-
-    # rm the json
-    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_json_path} #{downloaded_stats_path}")
-  end
-
-  def load_postprocess_from_s3
-    return if postprocess_status == POSTPROCESS_STATUS_LOADED
-    byteranges_json_s3_path = "#{sample.sample_postprocess_s3_path}/#{TAXID_BYTERANGE_JSON_NAME}"
-    downloaded_byteranges_path = PipelineRun.download_file(byteranges_json_s3_path, local_json_path)
-    return unless downloaded_byteranges_path
-    taxon_byteranges_csv_file = "#{local_json_path}/taxon_byteranges"
-    hash_array_json2csv(downloaded_byteranges_path, taxon_byteranges_csv_file, %w[taxid hit_type first_byte last_byte])
-    ` cd #{local_json_path};
-      sed -e 's/$/,#{pipeline_output.id}/' -i taxon_byteranges;
-      mysqlimport --replace --local --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --columns=taxid,hit_type,first_byte,last_byte,pipeline_output_id --fields-terminated-by=',' idseq_#{Rails.env} taxon_byteranges;
-    `
-    self.postprocess_status = POSTPROCESS_STATUS_LOADED
-    save
-    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_byteranges_path}")
   end
 
   def self.download_file(s3_path, destination_dir)
@@ -253,5 +166,96 @@ class PipelineRun < ApplicationRecord
   def terminate_job
     command = "aegea batch terminate #{job_id}"
     _stdout, _stderr, _status = Open3.capture3(command)
+  end
+
+  def generate_aggregate_counts(tax_level_name)
+    current_date = Time.zone.now.strftime("%Y-%m-%d")
+    tax_level_id = TaxonCount::NAME_2_LEVEL[tax_level_name]
+    # The unctagorizable_name chosen here is not important. The report page
+    # endpoint makes its own choice about what to display in this case.  It
+    # has general logic to handle this and other undefined cases uniformly.
+    # What is crucially important is the uncategorizable_id.
+    uncategorizable_id = TaxonLineage::MISSING_LINEAGE_ID.fetch(tax_level_name.to_sym, -9999)
+    uncategorizable_name = "Uncategorizable as a #{tax_level_name}"
+    TaxonCount.connection.execute(
+      "INSERT INTO taxon_counts(pipeline_run_id, pipeline_output_id, tax_id, name,
+                                tax_level, count_type, count,
+                                percent_identity, alignment_length, e_value,
+                                species_total_concordant, genus_total_concordant, family_total_concordant,
+                                percent_concordant, created_at, updated_at)
+       SELECT #{id},
+              taxon_counts.pipeline_output_id,
+              IF(
+                taxon_lineages.#{tax_level_name}_taxid IS NOT NULL,
+                taxon_lineages.#{tax_level_name}_taxid,
+                #{uncategorizable_id}
+              ),
+              IF(
+                taxon_lineages.#{tax_level_name}_taxid IS NOT NULL,
+                taxon_lineages.#{tax_level_name}_name,
+                '#{uncategorizable_name}'
+              ),
+              #{tax_level_id},
+              taxon_counts.count_type,
+              sum(taxon_counts.count),
+              sum(taxon_counts.percent_identity * taxon_counts.count) / sum(taxon_counts.count),
+              sum(taxon_counts.alignment_length * taxon_counts.count) / sum(taxon_counts.count),
+              sum(taxon_counts.e_value * taxon_counts.count) / sum(taxon_counts.count),
+              /* We use AVG below because an aggregation function is needed, but all the entries being grouped are the same */
+              AVG(species_total_concordant),
+              AVG(genus_total_concordant),
+              AVG(family_total_concordant),
+              CASE #{tax_level_id}
+                WHEN #{TaxonCount::TAX_LEVEL_SPECIES} THEN AVG(100.0 * taxon_counts.species_total_concordant) / sum(taxon_counts.count)
+                WHEN #{TaxonCount::TAX_LEVEL_GENUS} THEN AVG(100.0 * taxon_counts.genus_total_concordant) / sum(taxon_counts.count)
+                WHEN #{TaxonCount::TAX_LEVEL_FAMILY} THEN AVG(100.0 * taxon_counts.family_total_concordant) / sum(taxon_counts.count)
+              END,
+              '#{current_date}',
+              '#{current_date}'
+       FROM  taxon_lineages, taxon_counts
+       WHERE taxon_lineages.taxid = taxon_counts.tax_id AND
+             taxon_counts.pipeline_run_id = #{id} AND
+             taxon_counts.tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}
+      GROUP BY 1,2,3,4,5,6"
+    )
+  end
+
+  def update_names
+    # The names from the taxon_lineages table are preferred, but, not always
+    # available;  this code merges them into taxon_counts.name.
+    %w[species genus].each do |level|
+      level_id = TaxonCount::NAME_2_LEVEL[level]
+      TaxonCount.connection.execute("
+        UPDATE taxon_counts, taxon_lineages
+        SET taxon_counts.name = taxon_lineages.#{level}_name
+        WHERE taxon_counts.pipeline_run_id=#{id} AND
+              taxon_counts.tax_level=#{level_id} AND
+              taxon_counts.tax_id = taxon_lineages.taxid AND
+              taxon_lineages.#{level}_name IS NOT NULL
+      ")
+    end
+  end
+
+  def update_genera
+    # Make sure to run update_genera after generate_aggregate_counts
+    # HACK This should probably have been accomplished with schema DEFAULTs
+    TaxonCount.connection.execute("
+      UPDATE taxon_counts
+      SET taxon_counts.genus_taxid = #{TaxonLineage::MISSING_GENUS_ID},
+          taxon_counts.superkingdom_taxid = #{TaxonLineage::MISSING_SUPERKINGDOM_ID}
+      WHERE taxon_counts.pipeline_run_id=#{id}
+    ")
+    TaxonCount.connection.execute("
+      UPDATE taxon_counts, taxon_lineages
+      SET taxon_counts.genus_taxid = taxon_lineages.genus_taxid,
+          taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
+      WHERE taxon_counts.pipeline_run_id=#{id} AND
+            taxon_lineages.taxid = taxon_counts.tax_id
+    ")
+  end
+
+  def count_unmapped_reads
+    unidentified_fasta = get_s3_file(sample.unidentified_fasta_s3_path)
+    unidentified_fasta.lines.select { |line| line.start_with? '>' }.count if unidentified_fasta
   end
 end
