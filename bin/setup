@@ -19,11 +19,12 @@ chdir APP_ROOT do
   dependencies = ['mysql', 'hub', 'bash-completion', 'node', 'yarn']
   puts '== Installing dependencies =='
   if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.4.1')
+    puts("== Updating ruby ... ==")
     system!('brew install ruby')
   end
   dependencies.each do |pkg|
     package_exists = system("brew ls #{pkg} >/dev/null")
-    package_exists ? puts "== #{pkg} already up-to-date. ==" :
+    package_exists ? puts("== #{pkg} already up-to-date. ==") :
     puts("== Installing #{pkg} ... ==")
     system!("brew install #{pkg}") unless package_exists
   end

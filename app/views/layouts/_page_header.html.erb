@@ -1,7 +1,12 @@
 <div class="">
-  <% if current_user && current_user.id %>
-    <%= react_component 'Header', { userSignedIn: true, userDetails: current_user, signoutEndpoint: destroy_user_session_path } %>
-  <% else %>
-    <%= react_component 'Header', { userSignedIn: false } %>
-  <% end %>
+
 </div> 
+<!--
+
+ < % if current_user && current_user.id %>
+    < %= react_component 'Header', { userSignedIn: true, userDetails: current_user, signoutEndpoint: destroy_user_session_path } %>
+  < % else %>
+    < %= react_component 'Header', { userSignedIn: false } % >
+  < % end %>
+
+ -->

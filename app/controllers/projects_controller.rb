@@ -15,6 +15,10 @@ class ProjectsController < ApplicationController
   def show
   end
 
+  def test
+    @song_title = 'Black is the new black!'
+  end
+
   def send_project_csv
     if params[:id] == 'all'
       samples = Sample.all

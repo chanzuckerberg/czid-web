@@ -23,7 +23,7 @@ Rails.application.routes.draw do
 
   resources :projects do
     get :visuals, on: :member
-    put :add_favorite, on: :member
+    put :add_favorite, on: :member # this should be a post request
     put :remove_favorite, on: :member
   end
   resources :host_genomes

@@ -1,17 +1,4 @@
-/*
- *= require_self
- *= require_tree .
- *= require materialize
- *= require font-awesome
- *= require bootstrap/bootstrap-tooltip
- */
-
-@import 'materialize';
-@import "materialize/components/color";
-@import "materialize/extras/nouislider";
-@import 'font-awesome';
 @import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800');
-
 .tooltip {
   &.in {
     opacity: 1 !important;
@@ -79,4 +66,3 @@ a {
     text-decoration: underline
   }
 }
-
