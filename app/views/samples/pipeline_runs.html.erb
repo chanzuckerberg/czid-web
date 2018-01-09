@@ -27,7 +27,6 @@
           <th>Remaining reads</th>
           <th>Job Started</th>
           <th>Output Created</th>
-          <th> Pipeline Output&nbsp; </th>
         </tr>
       </thead>
       <tbody>
@@ -43,13 +42,6 @@
                 <td><%= pipeline_run.pipeline_output.remaining_reads if pipeline_run.pipeline_output%> &nbsp;</td>
                 <td><%= run_stage.created_at %></td>
                 <td><%= pipeline_run.pipeline_output.created_at if pipeline_run.pipeline_output %></td>
-                <td>
-                  <% if pipeline_run.pipeline_output %>
-                    <%= link_to 'Show', pipeline_run.pipeline_output %>
-                  <% else %>
-                     Pending
-                  <% end %>
-                 </td>
                </tr>
             <% end %>
           <% else %>
