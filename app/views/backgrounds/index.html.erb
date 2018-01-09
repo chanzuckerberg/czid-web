@@ -16,7 +16,7 @@
     <% @backgrounds.each do |background| %>
       <tr>
         <td><%= background.name %></td>
-        <td><%= background.pipeline_outputs.count %></td>
+        <td><%= background.pipeline_runs.count %></td>
         <td><%= background.created_at %></td>
         <td><%= link_to 'Show', background %></td>
         <td><%= link_to 'Edit', edit_background_path(background) %></td>

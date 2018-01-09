@@ -7,6 +7,7 @@ class PipelineRun < ApplicationRecord
   has_one :pipeline_output
   has_many :pipeline_run_stages
   accepts_nested_attributes_for :pipeline_run_stages
+  has_and_belongs_to_many :backgrounds
 
   has_many :taxon_counts, dependent: :destroy
   has_many :job_stats, dependent: :destroy
@@ -31,6 +32,10 @@ class PipelineRun < ApplicationRecord
   before_create :create_run_stages
   before_save :check_job_status
   after_create :kickoff_job
+
+  def check_box_label
+    "#{sample.project.name} : #{sample.name} (#{id})"
+  end
 
   def archive_s3_path
     "s3://#{SAMPLES_BUCKET_NAME}/pipeline_runs/#{id}_sample#{sample.id}"
