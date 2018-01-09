@@ -1,17 +1,14 @@
-// Place all the styles related to the users controller here.
-// They will automatically be included in application.scss.
-// You can use Sass (SCSS) here: http://sass-lang.com/
-
 $break-large: 1460px;
 
-.user-form {
-  width: 35%;
+.login-form {
+  width: 30%;
   margin: 0 auto;
   box-shadow: 1px 2px 5px 2px #eaeaea;
   margin-top: 150px;
   border-radius: 4px;
   .title {
-    padding: 25px 35px;
+    margin-bottom: 0px;
+    padding: 25px 35px 0 35px;
     p.signup {
       font-size: 24px;
       font-weight: bold;
@@ -19,9 +16,40 @@ $break-large: 1460px;
       margin-top: 9px;
       text-align: left;
     }
+    p.verify {
+      text-align: right;
+      float: right;
+      color: #b8b8b8;
+      cursor: pointer;
+      &:hover {
+        color: #5ABCD6
+      }
+      @media screen and (min-width: $break-large) {
+
+      }
+    }
+  }
+  .mail {
+    padding: 0 48px;
+    margin-bottom: 20px;
+    p {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    span {
+      color: #4a91cc;
+      cursor: pointer;
+      &:hover {
+        color: #5ABCD6
+      }
+    }
   }
   .content-wrapper {
     padding: 40px 50px;
+    .sample {
+      float: right;
+      padding-top: 20px;
+    }
   }
   .login-wrapper {
     background-color: #A2A1BF;
@@ -32,7 +60,18 @@ $break-large: 1460px;
     font-size: 20px;
     cursor: pointer;
   }
-
+  .forgot-password {
+    text-align: center;
+    margin: 40px;
+    span {
+      text-decoration: underline;
+      color: #414367;
+      cursor: pointer;
+      &:hover {
+        color:#039be5
+      }
+    }
+  }
   .error-info {
     width: 80%;
     background: rgba(208, 2, 27, 0.07);
@@ -44,6 +83,9 @@ $break-large: 1460px;
     font-size: 12px;
     transition: .2s width ease-out;
     text-align: center;
+    @media screen and (max-width: $break-large) {
+      width: 70%;
+    }
   }
   .success-info {
     width: 80%;
@@ -56,13 +98,5 @@ $break-large: 1460px;
     font-size: 12px;
     transition: .2s width ease-out;
     text-align: center;
-  }
-  .input-field {
-    i {
-      float: right;
-    }
-  }
-  p .error {
-    margin: 0;
   }
 }
