@@ -3,7 +3,12 @@ class PipelineRunStage < ApplicationRecord
   include PipelineOutputsHelper
   belongs_to :pipeline_run
 
-  PIPELINE_INSTALL_COMMAND = "pip install git+https://github.com/chanzuckerberg/idseq-pipeline.git".freeze
+  COMMIT_SHA = "curl -s 'https://api.github.com/repos/chanzuckerberg/idseq-pipeline/commits/master' | " \
+    "python -c \"import sys, json; print json.load(sys.stdin)['sha']\"".freeze
+  UPLOAD_COMMIT_SHA = "SHA_INFO_FILE=job_${AWS_BATCH_JOB_ID}_pipeline_commit_sha.txt; " \
+    "echo $(#{COMMIT_SHA}) > ${SHA_INFO_FILE}; " \
+    "aws s3 cp ${SHA_INFO_FILE} #{sample.sample_output_s3_path}/; ".freeze
+  PIPELINE_INSTALL_COMMAND = UPLOAD_COMMIT_SHA + "pip install git+https://github.com/chanzuckerberg/idseq-pipeline.git".freeze
 
   DEFAULT_MEMORY_IN_MB = 4000
   DEFAULT_STORAGE_IN_GB = 500
