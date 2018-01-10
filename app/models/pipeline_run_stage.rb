@@ -3,7 +3,7 @@ class PipelineRunStage < ApplicationRecord
   include PipelineOutputsHelper
   belongs_to :pipeline_run
 
-  DEFAULT_MEMORY_IN_MB = 4000
+  DEFAULT_MEMORY_IN_MB = 16_000
   DEFAULT_STORAGE_IN_GB = 500
   JOB_TYPE_BATCH = 1
   COMMIT_SHA_FILE_ON_WORKER = "/mnt/idseq-pipeline/commit-sha.txt".freeze
