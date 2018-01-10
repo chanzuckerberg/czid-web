@@ -6,6 +6,7 @@ class PipelineRunStage < ApplicationRecord
   DEFAULT_MEMORY_IN_MB = 4000
   DEFAULT_STORAGE_IN_GB = 500
   JOB_TYPE_BATCH = 1
+  COMMIT_SHA_FILE_ON_WORKER = "/mnt/idseq-pipeline/commit-sha.txt".freeze
 
   STATUS_STARTED = 'STARTED'.freeze
   STATUS_FAILED  = 'FAILED'.freeze
@@ -16,12 +17,10 @@ class PipelineRunStage < ApplicationRecord
   before_save :check_job_status
 
   def install_pipeline
+    "cd /mnt; " \
     "git clone https://github.com/chanzuckerberg/idseq-pipeline.git; " \
-    "echo $AWS_BATCH_JOB_ID; " \
-    "SHA_INFO_FILE=job.$AWS_BATCH_JOB_ID.pipeline.commit.sha.txt; " \
-    "echo $(git rev-parse master) > $SHA_INFO_FILE; " \
-    "aws s3 cp $SHA_INFO_FILE #{pipeline_run.sample.sample_output_s3_path}/; " \
-    "cd idseq-pipeline; pip install -e .[test]"
+    "cd idseq-pipeline; git rev-parse master > #{COMMIT_SHA_FILE_ON_WORKER}; " \
+    "pip install -e .[test]"
   end
 
   def check_job_status
@@ -140,7 +139,8 @@ class PipelineRunStage < ApplicationRecord
     sample = pipeline_run.sample
     file_type = sample.input_files.first.file_type
     batch_command_env_variables = "INPUT_BUCKET=#{sample.sample_input_s3_path} OUTPUT_BUCKET=#{sample.sample_output_s3_path} " \
-      "FILE_TYPE=#{file_type} DB_SAMPLE_ID=#{sample.id}"
+      "FILE_TYPE=#{file_type} DB_SAMPLE_ID=#{sample.id} " \
+      "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} "
     if sample.s3_star_index_path.present?
       batch_command_env_variables += " STAR_GENOME=#{sample.s3_star_index_path} "
     end
@@ -159,7 +159,8 @@ class PipelineRunStage < ApplicationRecord
     sample = pipeline_run.sample
     file_type = sample.input_files.first.file_type
     batch_command_env_variables = "FASTQ_BUCKET=#{sample.sample_input_s3_path} INPUT_BUCKET=#{sample.sample_output_s3_path} " \
-      "OUTPUT_BUCKET=#{sample.sample_output_s3_path} FILE_TYPE=#{file_type} ENVIRONMENT=#{Rails.env} DB_SAMPLE_ID=#{sample.id}"
+      "OUTPUT_BUCKET=#{sample.sample_output_s3_path} FILE_TYPE=#{file_type} ENVIRONMENT=#{Rails.env} DB_SAMPLE_ID=#{sample.id} " \
+      "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} "
     batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline non_host_alignment"
     command = "aegea batch submit --command=\"#{batch_command}\" "
     queue = sample.job_queue.present? ? sample.job_queue : Sample::DEFAULT_QUEUE
@@ -170,7 +171,8 @@ class PipelineRunStage < ApplicationRecord
   def postprocess_command
     sample = pipeline_run.sample
     batch_command_env_variables = "INPUT_BUCKET=#{sample.sample_output_s3_path} " \
-      "OUTPUT_BUCKET=#{sample.sample_postprocess_s3_path} "
+      "OUTPUT_BUCKET=#{sample.sample_postprocess_s3_path} " \
+      "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} "
     batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline postprocess"
     command = "aegea batch submit --command=\"#{batch_command}\" "
     queue = sample.job_queue.present? ? sample.job_queue : Sample::DEFAULT_QUEUE
