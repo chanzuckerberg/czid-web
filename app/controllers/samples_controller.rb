@@ -118,7 +118,7 @@ class SamplesController < ApplicationController
     @background_models = Background.all
 
     default_background_id = @sample.host_genome && @sample.host_genome.default_background ? @sample.host_genome.default_background.id : nil
-    if @pipeline_run && (@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && (!@pipeline_run.failed?)
+    if @pipeline_run && (@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?
       background_id = params[:background_id] || default_background_id
       if background_id
         @report_present = 1
@@ -141,7 +141,7 @@ class SamplesController < ApplicationController
     ####################################################
     background_id = nil
     default_background_id = @sample.host_genome && @sample.host_genome.default_background ? @sample.host_genome.default_background.id : nil
-    if @pipeline_run && (@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && (!@pipeline_run.failed?)
+    if @pipeline_run && (@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?
       background_id = params[:background_id] || default_background_id
       pipeline_run_id = @pipeline_run.id
     end
