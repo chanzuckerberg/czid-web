@@ -15,19 +15,13 @@ class PipelineRunStage < ApplicationRecord
 
   before_save :check_job_status
 
-  def get_commit_sha
-    "curl -s 'https://api.github.com/repos/chanzuckerberg/idseq-pipeline/commits/master' | " \
-    "python -c \"import sys, json; print json.load(sys.stdin)['sha']\""
-  end
-
-  def upload_commit_sha
-    "SHA_INFO_FILE=job_${AWS_BATCH_JOB_ID}_pipeline_commit_sha.txt; " \
-    "echo $(#{get_commit_sha}) > ${SHA_INFO_FILE}; " \
-    "aws s3 cp ${SHA_INFO_FILE} #{pipeline_run.sample.sample_output_s3_path}/; "
-  end
-
   def install_pipeline
-    upload_commit_sha + "pip install git+https://github.com/chanzuckerberg/idseq-pipeline.git"
+    "git clone https://github.com/chanzuckerberg/idseq-pipeline.git; " \
+    "echo $AWS_BATCH_JOB_ID; " \
+    "SHA_INFO_FILE=job.$AWS_BATCH_JOB_ID.pipeline.commit.sha.txt; " \
+    "echo $(git rev-parse master) > $SHA_INFO_FILE; " \
+    "aws s3 cp $SHA_INFO_FILE #{pipeline_run.sample.sample_output_s3_path}/; " \
+    "cd idseq-pipeline; pip install -e .[test]"
   end
 
   def check_job_status
