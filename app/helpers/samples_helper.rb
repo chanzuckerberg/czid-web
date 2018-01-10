@@ -101,7 +101,7 @@ module SamplesHelper
 
   def compute_percentage_reads(jobstats)
     pr = jobstats[0].pipeline_run unless jobstats[0].nil?
-    (100.0 * pr.remaining_reads) / pr.total_reads unless pr.nil?
+    (100.0 * pr.remaining_reads) / pr.total_reads unless pr.nil? || pr.remaining_reads.nil? || pr.total_reads.nil?
   end
 
   def sample_status_display(sample)
