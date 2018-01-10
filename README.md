@@ -1,6 +1,6 @@
 # ID Portal ![travis ci build status](https://travis-ci.org/chanzuckerberg/idseq-web.svg?branch=master) [![Coverage Status](https://coveralls.io/repos/github/chanzuckerberg/idseq-web/badge.svg?branch=master)](https://coveralls.io/github/chanzuckerberg/idseq-web?branch=master)
 
-This app stores and analyzes the output from the infectious disease pipeline.
+This app stores and analyzes the output from the infectious disease pipeline. 
 
 
 ## Setup
