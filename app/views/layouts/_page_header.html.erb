@@ -1,12 +1,11 @@
-<div class="">
-
-</div> 
-<!--
-
- < % if current_user && current_user.id %>
-    < %= react_component 'Header', { userSignedIn: true, userDetails: current_user, signoutEndpoint: destroy_user_session_path } %>
-  < % else %>
-    < %= react_component 'Header', { userSignedIn: false } % >
-  < % end %>
-
- -->
+<div id="page_header" class="">
+  <% if current_user && current_user.id %>
+    <%= javascript_tag do %>
+      react_component('Header', { userSignedIn: true, userDetails: '<%=raw current_user.to_json%>', signoutEndpoint: '<%=destroy_user_session_path%>' }, 'page_header')
+    <% end %>
+  <% else %>
+    <%= javascript_tag do %>
+      react_component('Header', { userSignedIn: false }, 'page_header')
+    <% end %>
+  <% end %>
+</div>

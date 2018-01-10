@@ -1,4 +1,5 @@
-<div id="samples">
-  <%= react_component 'Home', pageSize: @page_size, csrf: form_authenticity_token,
-  favorites: @favorite_projects, projects: @projects %>
+<div id="samples_page">
+  <%= javascript_tag do %>
+    react_component('Home', { pageSize: '<%=@page_size%>', csrf: '<%= form_authenticity_token %>', favorites: '<%= raw @favorite_projects.to_json %>' }, 'samples_page')
+  <% end %>
 </div>

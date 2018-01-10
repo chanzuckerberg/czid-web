@@ -1,6 +1,5 @@
 import React from 'react';
 import axios from 'axios';
-import '../styles/_login.scss';
 class Login extends React.Component {
   constructor(props, context) {
     super(props, context);
