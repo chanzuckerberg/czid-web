@@ -49,6 +49,10 @@ class PipelineRun < ApplicationRecord
     finalized == 1
   end
 
+  def failed?
+    /FAILED/ =~ job_status
+  end
+
   def kickoff_job
     pipeline_run_stages.first.run_job
   end
