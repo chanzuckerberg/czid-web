@@ -41,7 +41,7 @@ class BackgroundsController < ApplicationController
   # PATCH/PUT /backgrounds/1
   # PATCH/PUT /backgrounds/1.json
   def update
-    current_data = @background.as_json(include: [{ pipeline_runs: { only: [:id, :sample_id] } } ])
+    current_data = @background.as_json(include: [{ pipeline_runs: { only: [:id, :sample_id] } }])
     current_data_full_string = @background.to_json(include: [{ pipeline_runs: { only: [:id, :sample_id] } },
                                                              :taxon_summaries])
     background_changed = assign_attributes_and_has_changed?(background_params)

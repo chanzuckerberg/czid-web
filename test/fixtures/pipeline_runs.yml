@@ -6,11 +6,23 @@
 #
 one:
   job_id: 'dfdf'
+  total_reads: 1
+  remaining_reads: 1
 two:
   job_id: 'sdfsf'
+  total_reads: 1
+  remaining_reads: 1
 three:
+  sample: one
   job_id: 'sdfsdfsdf'
+  total_reads: 1
+  remaining_reads: 1
 four:
+  sample: two
   job_id: 'four'
+  total_reads: 1
+  remaining_reads: 1
 five:
   job_id: 'five'
+  total_reads: 1
+  remaining_reads: 1

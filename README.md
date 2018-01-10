@@ -132,12 +132,6 @@ Note that this requires the proper ssh config to access the deployed versions of
 1. `idseq -t idseq1234 -p 'Awesome Project' -s test2 -u localhost:3000 -e fake@example.com --r1 <fastq1.gz> --r2 <fastq2.gz>`
 
 
-## Upload data (deprecated)
-
-There is an example of the JSON for uploading pipeline results in `test/output.json`. To test locally you can run:
-
->curl -H "Accept: application/json" -H "Content-type: application/json" -X POST -d @output.json http://localhost:3000/pipeline_outputs.json
-
 ## Dependencies
 
 https://github.com/kislyuk/aegea

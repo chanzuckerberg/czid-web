@@ -30,7 +30,6 @@ class Sample < ApplicationRecord
   belongs_to :project
   belongs_to :user, optional: true # This is the user who uploaded the sample, possibly distinct from the user(s) owning the sample's project
   belongs_to :host_genome, optional: true
-  has_many :pipeline_outputs, dependent: :destroy
   has_many :pipeline_runs, -> { order(created_at: :desc) }, dependent: :destroy
   has_and_belongs_to_many :backgrounds, through: :pipeline_runs
   has_many :input_files, dependent: :destroy
@@ -216,11 +215,9 @@ class Sample < ApplicationRecord
     old_pipeline_runs.each do |pr|
       # Write pipeline_run data to file
       json_output = pr.to_json(include: [:pipeline_run_stages,
-                                         { pipeline_output: {
-                                           include: [:taxon_counts,
-                                                     :taxon_byteranges,
-                                                     :job_stats]
-                                         } }])
+                                         :taxon_counts,
+                                         :taxon_byteranges,
+                                         :job_stats])
       file = Tempfile.new
       file.write(json_output)
       file.close
@@ -229,11 +226,9 @@ class Sample < ApplicationRecord
       _stdout, _stderr, status = Open3.capture3("aws", "s3", "cp", file.path.to_s,
                                                 "#{pr.archive_s3_path}/#{pr_s3_file_name}")
       # Delete any taxon_counts / taxon_byteranges associated with the pipeline run
-      po = pr.pipeline_output
-      next unless po
       if !File.zero?(file.path) && status.exitstatus && status.exitstatus.zero?
-        TaxonCount.where(pipeline_output_id: po.id).delete_all
-        TaxonByterange.where(pipeline_output_id: po.id).delete_all
+        TaxonCount.where(pipeline_run_id: pr.id).delete_all
+        TaxonByterange.where(pipeline_run_id: pr.id).delete_all
       end
       file.unlink
     end

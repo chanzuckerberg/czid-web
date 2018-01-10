@@ -18,7 +18,7 @@ module SamplesHelper
         run_info = sample_info[:run_info]
         data_values = { sample_name: db_sample ? db_sample[:name] : '',
                         upload_date: db_sample ? db_sample[:created_at] : '',
-                        total_reads: derived_output[:pipeline_output] ? derived_output[:pipeline_output][:total_reads] : '',
+                        total_reads: derived_output[:pipeline_run] ? derived_output[:pipeline_run][:total_reads] : '',
                         nonhost_reads: derived_output[:summary_stats] ? derived_output[:summary_stats][:remaining_reads] : '',
                         nonhost_reads_percent: derived_output[:summary_stats] && derived_output[:summary_stats][:percent_remaining] ? derived_output[:summary_stats][:percent_remaining].round(3) : '',
                         quality_control: derived_output[:summary_stats] && derived_output[:summary_stats][:qc_percent] ? derived_output[:summary_stats][:qc_percent].round(3) : '',
@@ -73,9 +73,9 @@ module SamplesHelper
   end
 
   def get_summary_stats(jobstats)
-    po = jobstats[0].pipeline_output unless jobstats[0].nil?
-    unmapped_reads = po.nil? ? nil : po.unmapped_reads
-    last_processed_at = po.nil? ? nil : po.created_at
+    pr = jobstats[0].pipeline_run unless jobstats[0].nil?
+    unmapped_reads = pr.nil? ? nil : pr.unmapped_reads
+    last_processed_at = pr.nil? ? nil : pr.created_at
     { remaining_reads: get_remaining_reads(jobstats),
       compression_ratio: compute_compression_ratio(jobstats),
       qc_percent: compute_qc_value(jobstats),
@@ -85,8 +85,8 @@ module SamplesHelper
   end
 
   def get_remaining_reads(jobstats)
-    po = jobstats[0].pipeline_output unless jobstats[0].nil?
-    po.remaining_reads unless po.nil?
+    pr = jobstats[0].pipeline_run unless jobstats[0].nil?
+    pr.remaining_reads unless pr.nil?
   end
 
   def compute_compression_ratio(jobstats)
@@ -100,8 +100,8 @@ module SamplesHelper
   end
 
   def compute_percentage_reads(jobstats)
-    po = jobstats[0].pipeline_output unless jobstats[0].nil?
-    (100.0 * po.remaining_reads) / po.total_reads unless po.nil?
+    pr = jobstats[0].pipeline_run unless jobstats[0].nil?
+    (100.0 * pr.remaining_reads) / pr.total_reads unless pr.nil?
   end
 
   def sample_status_display(sample)
@@ -153,38 +153,6 @@ module SamplesHelper
       end
     end
     sample_list
-  end
-
-  def sample_uploaders(samples)
-    all_uploaders = []
-    samples.each do |s|
-      user = {}
-      if s.user_id.present?
-        id = s.user_id
-        user[:name] = User.find(id).name
-      else
-        user[:name] = nil
-      end
-      all_uploaders.push(user)
-    end
-    all_uploaders
-  end
-
-  def samples_output_data(samples)
-    final_result = []
-    samples.each do |output|
-      output_data = {}
-      pipeline_output = output.pipeline_runs.first ? output.pipeline_runs.first.pipeline_output : nil
-      job_stats = pipeline_output ? pipeline_output.job_stats : nil
-      summary_stats = job_stats ? get_summary_stats(job_stats) : nil
-
-      output_data[:host_genome_name] = output.host_genome ? output.host_genome.name : nil
-      output_data[:pipeline_output] = pipeline_output
-      output_data[:job_stats] = job_stats
-      output_data[:summary_stats] = summary_stats
-      final_result.push(output_data)
-    end
-    final_result
   end
 
   def filter_samples(samples, query)
@@ -239,6 +207,37 @@ module SamplesHelper
       pipeline_run_info.push(pipeline_run_entry)
     end
     pipeline_run_info
+  end
+
+  def samples_output_data(samples)
+    final_result = []
+    samples.each do |output|
+      output_data = {}
+      pipeline_run = output.pipeline_runs.first
+      job_stats = pipeline_run ? pipeline_run.job_stats : nil
+      summary_stats = job_stats ? get_summary_stats(job_stats) : nil
+      output_data[:pipeline_run] = pipeline_run
+      output_data[:host_genome_name] = output.host_genome ? output.host_genome.name : nil
+      output_data[:job_stats] = job_stats
+      output_data[:summary_stats] = summary_stats
+      final_result.push(output_data)
+    end
+    final_result
+  end
+
+  def sample_uploaders(samples)
+    all_uploaders = []
+    samples.each do |s|
+      user = {}
+      if s.user_id.present?
+        id = s.user_id
+        user[:name] = User.find(id).name
+      else
+        user[:name] = nil
+      end
+      all_uploaders.push(user)
+    end
+    all_uploaders
   end
 
   def format_samples(samples)
