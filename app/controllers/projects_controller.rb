@@ -1,6 +1,6 @@
 class ProjectsController < ApplicationController
   include SamplesHelper
-  
+
   before_action :set_project, only: [:show, :edit, :update, :destroy, :add_favorite, :remove_favorite]
   clear_respond_to
   respond_to :json
