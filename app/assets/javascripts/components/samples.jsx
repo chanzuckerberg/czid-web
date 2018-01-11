@@ -261,13 +261,13 @@ class Samples extends React.Component {
                         )
                       } else if(column === 'nonhost_reads') {
                         column_data = (<li key={pos}>
-                          <div className='card-label center center-label'>
+                          <div className='card-label center center-label data-label'>
                             {data_values[column]} {data_values["nonhost_reads_percent"]}
                           </div>
                         </li>)
                       } else {
                         column_data = (<li key={pos}>
-                          <div className='card-label center center-label'>
+                          <div className='card-label center center-label data-label'>
                             {data_values[column]}
                           </div>
                         </li>)

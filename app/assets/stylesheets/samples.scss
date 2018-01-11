@@ -510,7 +510,6 @@ $break-large: 1070px;
               }
             }
             &.center-label {
-              color: #333333;
               font-size: 13px;
               .blank {
                 color: #b5b0b0
@@ -519,6 +518,11 @@ $break-large: 1070px;
                 .duration-label {
                   margin-left: 5px;
                   font-size: 12px;
+                }
+              }
+              &.data-label {
+                .percent {
+                  color: #188fd8 !important;
                 }
               }
             }
@@ -617,59 +621,7 @@ $break-large: 1070px;
       }
     }
   }
-  .job-container {
-    cursor: pointer;
-    margin-bottom: 0;
-    border-bottom: 1px solid #dfdddd;
-    .job-card {
-      display: flex;
-      margin: 0 10px;
-      .blank {
-        color: #b5b0b0
-      }
-      .no-time {
-        padding-top: 14px;
-      }
-      .reads {
-        .status-col {
-          padding: 6px 18px !important;
-        }
-        .percent {
-          color: #0099cc;
-        }
-        p.status {
-          font-size: 12px;
-          display: inline-block;
-          margin: 0 10px;
-        }
-        .time {
-          margin: 0;
-          font-size: 12px;
-          span {
-            margin: 10px;
-          }
-        }
-        margin: 15px 0;
-      }
-      .sample-name {
-        color: #333333;
-        font-weight: bold;
-        margin-bottom: 0;
-      }
-      .column-dropdown {
-        display: none;
-      }
-      .uploader {
-        font-size: 12px;
-        font-weight: normal;
-        color: #737373;
-        margin: 0;
-      }
-    }
-    &:hover {
-      background: #f1f1f1;
-    }
-  }
+
   .search-box {
     display: inline-block;
     width: inherit;
