@@ -2,8 +2,8 @@
 
 one:
   name: default
-  pipeline_outputs: [pipeline_output_one, pipeline_output_two]
+  pipeline_runs: [three, four]
 
 two:
   name: MyString
-  pipeline_outputs: [pipeline_output_one, pipeline_output_two]
+  pipeline_runs: [three, four]

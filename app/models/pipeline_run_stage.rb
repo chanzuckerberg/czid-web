@@ -67,7 +67,6 @@ class PipelineRunStage < ApplicationRecord
     return unless output_ready?
     return if completed?
 
-    set_pipeline_output
     send(load_db_command_func)
     update(db_load_status: 1, job_status: STATUS_LOADED)
     pipeline_run.update_job_status
@@ -104,14 +103,6 @@ class PipelineRunStage < ApplicationRecord
 
   def terminate_job
     _stdout, _stderr, _status = Open3.capture3("aegea", "batch", "terminate", job_id.to_s)
-  end
-
-  def set_pipeline_output
-    return if pipeline_run.pipeline_output
-    pipeline_run.pipeline_output = PipelineOutput.new(pipeline_run: pipeline_run,
-                                                      sample: pipeline_run.sample,
-                                                      total_reads: 0,
-                                                      remaining_reads: 0)
   end
 
   def sample_output_s3_path
@@ -181,19 +172,15 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def db_load_host_filtering
-    po = pipeline_run.pipeline_output
     pr = pipeline_run
 
     stats_json_s3_path = "#{sample_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
     downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, pr.local_json_path)
     stats_array = JSON.parse(File.read(downloaded_stats_path))
     pr.total_reads = (stats_array[0] || {})['total_reads'] || 0
-    po.total_reads = pr.total_reads # TODO(yf): remove this to remove soon
-    po.save
     stats_array = stats_array.select { |entry| entry.key?("task") }
 
     # TODO(yf): remove the following line
-    stats_array.each { |entry| entry["pipeline_output_id"] = po.id }
     pr.job_stats_attributes = stats_array
 
     # rm the json
@@ -201,7 +188,6 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def db_load_alignment
-    po = pipeline_run.pipeline_output
     pr = pipeline_run
 
     output_json_s3_path = "#{sample_output_s3_path}/#{PipelineRun::OUTPUT_JSON_NAME}"
@@ -220,21 +206,13 @@ class PipelineRunStage < ApplicationRecord
     pr.remaining_reads = pipeline_output_dict['remaining_reads']
     pr.unmapped_reads = pr.count_unmapped_reads
 
-    po.total_reads = pr.total_reads
-    po.remaining_reads = pr.remaining_reads
-    po.unmapped_reads = pr.unmapped_reads
-    po.save
-
     stats_array = JSON.parse(File.read(downloaded_stats_path))
     stats_array = stats_array.select { |entry| entry.key?("task") }
-    # TODO(yf): remove the following line
-    stats_array.each { |entry| entry[:pipeline_output_id] = po.id }
 
     # only keep species level counts
     taxon_counts_attributes_filtered = []
     pipeline_output_dict['taxon_counts_attributes'].each do |tcnt|
       if tcnt['tax_level'].to_i == TaxonCount::TAX_LEVEL_SPECIES
-        tcnt[:pipeline_output_id] = po.id
         taxon_counts_attributes_filtered << tcnt
       end
     end
@@ -256,15 +234,14 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def db_load_postprocess
-    po = pipeline_run.pipeline_output
     pr = pipeline_run
     byteranges_json_s3_path = "#{pr.sample.sample_postprocess_s3_path}/#{PipelineRun::TAXID_BYTERANGE_JSON_NAME}"
     downloaded_byteranges_path = PipelineRun.download_file(byteranges_json_s3_path, pr.local_json_path)
     taxon_byteranges_csv_file = "#{pr.local_json_path}/taxon_byteranges"
     hash_array_json2csv(downloaded_byteranges_path, taxon_byteranges_csv_file, %w[taxid hit_type first_byte last_byte])
     ` cd #{pr.local_json_path};
-      sed -e 's/$/,#{pr.id},#{po.id}/' -i taxon_byteranges;
-      mysqlimport --replace --local --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --columns=taxid,hit_type,first_byte,last_byte,pipeline_run_id,pipeline_output_id --fields-terminated-by=',' idseq_#{Rails.env} taxon_byteranges;
+      sed -e 's/$/,#{pr.id}/' -i taxon_byteranges;
+      mysqlimport --replace --local --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --columns=taxid,hit_type,first_byte,last_byte,pipeline_run_id --fields-terminated-by=',' idseq_#{Rails.env} taxon_byteranges;
     `
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_byteranges_path}")
   end

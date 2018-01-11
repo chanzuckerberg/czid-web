@@ -14,10 +14,10 @@
 </p>
 
 <p>
-  <strong>Composed of pipeline runs:</strong>
+<strong>Composed of <%= @background.pipeline_runs.count %> pipeline runs:</strong>
 </p>
 
-<% if @background.pipeline_outputs.count == 0 %>
+<% if @background.pipeline_runs.count == 0 %>
   No pipeline runs added yet.
 <% else %>
   <table class="table table-condensed">
@@ -27,9 +27,9 @@
       </tr>
     </thead>
     <tbody>
-      <% @background.pipeline_outputs.each do |p| %>
+      <% @background.pipeline_runs.each do |p| %>
         <tr>
-          <td><%= link_to p.check_box_label, p %></td>
+          <td><%= p.check_box_label %></td>
         </tr>
       <% end %>
     </tbody>

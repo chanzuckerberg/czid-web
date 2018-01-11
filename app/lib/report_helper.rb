@@ -165,21 +165,21 @@ module ReportHelper
     clean
   end
 
-  def external_report_info(pipeline_output_id, background_id, params)
-    return {} if pipeline_output_id.nil? || background_id.nil?
+  def external_report_info(pipeline_run_id, background_id, params)
+    return {} if pipeline_run_id.nil? || background_id.nil?
     params = clean_params(params, ALL_CATEGORIES)
     data = {}
-    data[:taxonomy_details] = taxonomy_details(pipeline_output_id, background_id, params)
+    data[:taxonomy_details] = taxonomy_details(pipeline_run_id, background_id, params)
     data
   end
 
-  def report_details(pipeline_output, background)
+  def report_details(pipeline_run, background)
     {
-      pipeline_info: pipeline_output,
-      sample_info: pipeline_output.sample,
-      project_info: pipeline_output.sample.project,
+      pipeline_info: pipeline_run,
+      sample_info: pipeline_run.sample,
+      project_info: pipeline_run.sample.project,
       background_model: background,
-      taxon_fasta_flag: pipeline_output.pipeline_run.finalized?
+      taxon_fasta_flag: pipeline_run.finalized?
     }
   end
 
@@ -187,9 +187,9 @@ module ReportHelper
     ALL_CATEGORIES
   end
 
-  def fetch_taxon_counts(pipeline_output_id, background_id)
-    pipeline_output = PipelineOutput.find(pipeline_output_id)
-    total_reads = pipeline_output.total_reads if pipeline_output
+  def fetch_taxon_counts(pipeline_run_id, background_id)
+    pipeline_run = PipelineRun.find(pipeline_run_id)
+    total_reads = pipeline_run.total_reads if pipeline_run
     # Note: stdev is never 0
     # Note: connection.select_all is TWICE faster than TaxonCount.select
     # (I/O latency goes from 2 seconds -> 0.8 seconds)
@@ -225,7 +225,7 @@ module ReportHelper
         taxon_counts.tax_level  = taxon_summaries.tax_level       AND
         taxon_counts.tax_id     = taxon_summaries.tax_id
       WHERE
-        pipeline_output_id = #{pipeline_output_id} AND
+        pipeline_run_id = #{pipeline_run_id} AND
         taxon_counts.count_type IN ('NT', 'NR')
     ").to_hash
   end
@@ -244,10 +244,10 @@ module ReportHelper
     }
   end
 
-  def fetch_lineage_info(pipeline_output_id)
+  def fetch_lineage_info(pipeline_run_id)
     lineage_records = TaxonLineage.where(
       "taxid in (select tax_id from taxon_counts
-                 where pipeline_output_id = #{pipeline_output_id}
+                 where pipeline_run_id = #{pipeline_run_id}
                    and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES})"
     )
     result_map = {}
@@ -553,10 +553,10 @@ module ReportHelper
     end
   end
 
-  def taxonomy_details(pipeline_output_id, background_id, params)
+  def taxonomy_details(pipeline_run_id, background_id, params)
     # Fetch and clean data.
     t0 = wall_clock_ms
-    tax_2d = cleanup_all!(convert_2d(fetch_taxon_counts(pipeline_output_id, background_id)))
+    tax_2d = cleanup_all!(convert_2d(fetch_taxon_counts(pipeline_run_id, background_id)))
     t1 = wall_clock_ms
 
     # These counts are shown in the UI on each genus line.

@@ -206,7 +206,7 @@ class Samples extends React.Component {
           <span>{status}</span>
         </div>
       );
-      const data_values = { total_reads: !derivedOutput.pipeline_output ? BLANK_TEXT : numberWithCommas(derivedOutput.pipeline_output.total_reads),
+      const data_values = { total_reads: !derivedOutput.pipeline_run ? BLANK_TEXT : numberWithCommas(derivedOutput.pipeline_run.total_reads),
         nonhost_reads: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.remaining_reads) ? BLANK_TEXT : numberWithCommas(derivedOutput.summary_stats.remaining_reads),
         nonhost_reads_percent: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? '' : <span className="percent"> {`(${derivedOutput.summary_stats.percent_remaining.toFixed(2)}%)`} </span>,
         quality_control: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? BLANK_TEXT : `${derivedOutput.summary_stats.qc_percent.toFixed(2)}%`,
@@ -542,7 +542,7 @@ class Samples extends React.Component {
       }
     })
   }
- 
+
 
   addFavIconClass(project) {
     return (
@@ -582,7 +582,7 @@ class Samples extends React.Component {
         <p>{ this.state.allSamples.length === 0 ? 'No sample found' : ( this.state.allSamples.length === 1 ? '1 sample found' : `${this.state.allSamples.length} out of ${this.state.totalNumber} samples found`) }</p>
       </div>
     );
-    
+
     const tableHead = (
       <div className='col s12 sample-feed no-padding samples-table-head'>
         <div className='samples-card white'>
@@ -764,14 +764,14 @@ class Samples extends React.Component {
   }
 
   render() {
-    project_section = 
+    project_section =
       <ProjectSelection
         favoriteProjects = { this.favoriteProjects }
         allProjects = { this.allProjects }
         csrf = { this.csrf }
         selectProject = { this.handleProjectSelection }
       />;
-    
+
     return (
       <div>
           <div className="row content-body">
@@ -780,7 +780,7 @@ class Samples extends React.Component {
             </div>
              <div className="col s10">
               { this.renderTable(this.state.allSamples) }
-            </div> 
+            </div>
           </div>
       </div>
     )

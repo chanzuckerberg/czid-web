@@ -1,5 +1,5 @@
 class TaxonCount < ApplicationRecord
-  belongs_to :pipeline_output
+  belongs_to :pipeline_run
   TAX_LEVEL_SPECIES = 1
   TAX_LEVEL_GENUS = 2
   TAX_LEVEL_FAMILY = 3

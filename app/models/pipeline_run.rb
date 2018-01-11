@@ -4,9 +4,9 @@ class PipelineRun < ApplicationRecord
   include ApplicationHelper
   include PipelineOutputsHelper
   belongs_to :sample
-  has_one :pipeline_output
   has_many :pipeline_run_stages
   accepts_nested_attributes_for :pipeline_run_stages
+  has_and_belongs_to_many :backgrounds
 
   has_many :taxon_counts, dependent: :destroy
   has_many :job_stats, dependent: :destroy
@@ -32,6 +32,10 @@ class PipelineRun < ApplicationRecord
   before_save :check_job_status
   after_create :kickoff_job
 
+  def check_box_label
+    "#{sample.project.name} : #{sample.name} (#{id})"
+  end
+
   def archive_s3_path
     "s3://#{SAMPLES_BUCKET_NAME}/pipeline_runs/#{id}_sample#{sample.id}"
   end
@@ -43,6 +47,10 @@ class PipelineRun < ApplicationRecord
 
   def finalized?
     finalized == 1
+  end
+
+  def failed?
+    /FAILED/ =~ job_status
   end
 
   def kickoff_job
@@ -113,7 +121,7 @@ class PipelineRun < ApplicationRecord
   def completed?
     return true if finalized?
     # Old version before run stages
-    return true if pipeline_run_stages.blank? && (pipeline_output || job_status == STATUS_FAILED)
+    return true if pipeline_run_stages.blank? && (job_status == STATUS_FAILED || job_status == STATUS_CHECKED)
   end
 
   def log_url
@@ -178,13 +186,12 @@ class PipelineRun < ApplicationRecord
     uncategorizable_id = TaxonLineage::MISSING_LINEAGE_ID.fetch(tax_level_name.to_sym, -9999)
     uncategorizable_name = "Uncategorizable as a #{tax_level_name}"
     TaxonCount.connection.execute(
-      "INSERT INTO taxon_counts(pipeline_run_id, pipeline_output_id, tax_id, name,
+      "INSERT INTO taxon_counts(pipeline_run_id, tax_id, name,
                                 tax_level, count_type, count,
                                 percent_identity, alignment_length, e_value,
                                 species_total_concordant, genus_total_concordant, family_total_concordant,
                                 percent_concordant, created_at, updated_at)
        SELECT #{id},
-              taxon_counts.pipeline_output_id,
               IF(
                 taxon_lineages.#{tax_level_name}_taxid IS NOT NULL,
                 taxon_lineages.#{tax_level_name}_taxid,
@@ -216,7 +223,7 @@ class PipelineRun < ApplicationRecord
        WHERE taxon_lineages.taxid = taxon_counts.tax_id AND
              taxon_counts.pipeline_run_id = #{id} AND
              taxon_counts.tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}
-      GROUP BY 1,2,3,4,5,6"
+      GROUP BY 1,2,3,4,5"
     )
   end
 
