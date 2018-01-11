@@ -519,6 +519,7 @@ $break-large: 1070px;
                 }
               }
               &.data-label {
+                text-align: left;
                 .percent {
                   color: #188fd8;
                 }
@@ -538,6 +539,7 @@ $break-large: 1070px;
             }
             &.column-title {
               cursor: pointer;
+              text-align: left
             }
             .project-name {
               background-color: #E7F5FE;
