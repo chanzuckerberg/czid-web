@@ -271,6 +271,21 @@ $break-large: 1070px;
   outline: 0 solid transparent;
 }
 
+.wrapper {
+  position: relative;
+  .proj-title {
+    margin-top: 18px;
+    font-size: 18px;
+    font-weight: 600;
+    &.all-proj {
+      margin-top: 7px;
+    }
+  }
+  p {
+    margin: 0;
+  }
+}
+
 .form-wrapper {
   width: 70%;
   margin: 0 auto;
@@ -298,11 +313,6 @@ $break-large: 1070px;
   }
   .content-wrapper {
     padding: 40px 50px;
-    .project-info {
-        .proj-title {
-        font-weight: 600;
-      }
-    }
     .name {
       margin-top: 16px;
     }
@@ -784,12 +794,6 @@ input[type=search]:focus:not([readonly]) {
       }
     }
     .projects {
-      span {
-        cursor: pointer;
-        &:hover {
-          color: #4ba4c2;
-        }
-      }
       .projects-wrapper {
         height: 300px;
         overflow: scroll;
