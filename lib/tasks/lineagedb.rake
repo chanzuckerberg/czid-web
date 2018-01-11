@@ -9,7 +9,6 @@ task load_lineage_db: :environment do
   preload_s3_path = 's3://czbiohub-infectious-disease/references'
 
   # Use 'OUTPUT_PATH_S3=s3://czbiohub-infectious-disease/references idseq_pipeline lineages' to generate and upload the necessary files
-  
   ` mkdir -p #{local_taxonomy_path};
     cd #{local_taxonomy_path};
 
