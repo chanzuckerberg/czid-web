@@ -13,6 +13,7 @@
     this.toggleDisplayFavProjects = this.toggleDisplayFavProjects.bind(this);
     this.toggleFavorite = this.toggleFavorite.bind(this);
     this.handleProjectClick = this.handleProjectClick.bind(this);
+    this.uploadSample = this.uploadSample.bind(this);
     
     this.state = {
       formattedProjectList: [],
@@ -35,6 +36,11 @@
 
   toggleDisplayProjects() {
     this.setState((prevState) => ({ showLess: !prevState.showLess }))
+  }
+
+
+  uploadSample() {
+    location.href = '/samples/new'
   }
 
   toggleDisplayFavProjects() {
@@ -147,15 +153,36 @@
     if (listType == 'fav') {
       this.highlightSelectedFavoriteProject(id) 
     } else {
-      this.highlightSelectedProject(id);
+      this.highlightSelectedProject(e, id);
     }
     this.props.selectProject(id);
   }
 
-  highlightSelectedProject(id) {
+  highlightSelectedProject(e, id) {
     this.removeHighlight();
-    $(`.project-item[data-id="${id}"]`).addClass('highlight');
+    this.removeHighlightedText();
+    id ? $(`.project-item[data-id="${id}"]`).addClass('highlight') : this.highlightAllSamplesorAllProject(e)
   }
+
+  highlightAllSamplesorAllProject(e) {
+    let tagAttribute =  e.target.getAttribute('data-title')
+    if (tagAttribute === "allsamples") {
+      console.log(tagAttribute === "allsamples");
+      this.removeHighlightedText();
+      $('.samples-title').addClass('highlight-text')
+    } else {
+      this.removeHighlightedText();
+      $('.projects-title').addClass('highlight-text')
+    }
+  }
+
+  removeHighlightedText() {
+    console.log('got called remove samples highlight');
+    $('.samples-title').removeClass('highlight-text')
+    console.log('got called remove projects highlight');
+    $('.projects-title').removeClass('highlight-text')
+  }
+
 
   removeHighlight() {
     $('.fav-item').removeClass('highlight')
@@ -164,6 +191,7 @@
 
   highlightSelectedFavoriteProject(id) {
     this.removeHighlight();
+    this.removeHighlightedText();
     $(`.fav-item[data-id="${id}"]`).addClass('highlight');
   } 
 
@@ -210,7 +238,7 @@
 
     const all_projects_section = (
       <div className="projects">
-        <span onClick={this.handleProjectClick} className="title">All Projects</span>
+        <span onClick={this.handleProjectClick} data-title="allprojects" className="title projects-title">All Projects</span>
         <hr/>
         <div className="projects-wrapper">
           { !this.state.formattedProjectList.length ? "None" : this.state.showLess ? this.state.formattedProjectList.sort(sortLogic).slice(0,7).map((project, i) => {
@@ -231,7 +259,7 @@
       <div className="project-wrapper">
         <div className="row">
           <div className="samples">
-            <p>All Samples</p>
+            <p data-title="allsamples" className="samples-title" onClick={this.handleProjectClick}>All Samples</p>
             <span onClick={this.uploadSample}><i className="fa fa-lg fa-plus-circle" aria-hidden="true"></i></span>
           </div>
           { fav_section }
