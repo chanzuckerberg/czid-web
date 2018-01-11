@@ -13,11 +13,6 @@ end
 chdir APP_ROOT do
   # This script is a way to update your development environment automatically.
   # Add necessary update steps to this file.
-
-  puts "\n== Removing old logs and tempfiles =="
-  system! 'bin/rails log:clear tmp:clear'
-  puts '== Installing dependencies =='
-  system! 'gem install bundler --conservative'
   system('bundle check') || system!('bundle install')
   puts "\n== Preparing database =="
   system! 'docker-compose build'
