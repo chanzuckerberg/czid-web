@@ -579,7 +579,7 @@ class Samples extends React.Component {
     );
 
     const tableHead = (
-      <div className='col s12 sample-feed no-padding samples-table-head'>
+      <div className='col s12 sample-feed-head no-padding samples-table-head'>
         <div className='samples-card white'>
           <div className='flex-container'>
             <ul className='flex-items'>
