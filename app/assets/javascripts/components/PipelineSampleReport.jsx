@@ -487,10 +487,9 @@ class PipelineSampleReport extends React.Component {
     } else {
       // emphasize genus, soften category and species count
       category_name = tax_info.tax_id == -200 ? '' : tax_info.category_name;
-      // Most groups are initially expanded, so they get a toggle with fa-minus initial state.
       fake_or_real = tax_info.genus_taxid < 0 ? 'fake-genus' : 'real-genus';
-      right_arrow_initial_visibility = 'hidden';
-      down_arrow_initial_visibility = '';
+      right_arrow_initial_visibility = '';
+      down_arrow_initial_visibility = 'hidden';
       plus_or_minus = <span>
         <span className={`report-arrow-down report-arrow ${tax_info.tax_id} ${fake_or_real} ${down_arrow_initial_visibility}`}>
           <i className={`fa fa-angle-down ${tax_info.tax_id}`} onClick={this.expandOrCollapseGenus}></i>
@@ -560,7 +559,7 @@ class PipelineSampleReport extends React.Component {
         return `report-row-genus ${tax_info.genus_taxid} real-genus`;
       }
     }
-    initial_visibility = '';
+    initial_visibility = 'hidden';
     if (tax_info.genus_taxid < 0) {
       return `report-row-species ${tax_info.genus_taxid} fake-genus ${initial_visibility}`;
     }
