@@ -6,11 +6,7 @@ class Header extends React.Component  {
     this.userSignedIn = this.props.userSignedIn;
     this.location = window.location.pathname;
     this.sendMail = this.sendMail.bind(this);
-    try {
-      this.userDetails = JSON.parse(this.props.userDetails);
-    } catch(e){
-      this.userDetails = null;
-    }
+    this.userDetails = this.props.userDetails;
   }
 
 	componentDidMount() {

@@ -1,3 +1,5 @@
-<%= javascript_tag do %>
-  react_component('Login', { endpoint: '<%= session_path(@user) %>', csrf: '<%= form_authenticity_token %>'  })
-<% end %>
+<div id='login_page'>
+  <%= javascript_tag do %>
+    react_component('Login', { endpoint: '<%= session_path(@user) %>', csrf: '<%= form_authenticity_token %>'  }, 'login_page')
+  <% end %>
+</div>
