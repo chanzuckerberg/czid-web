@@ -14,11 +14,9 @@ HostGenome.create!(name: "human", default_background_id: 1)
   sample.input_files << InputFile.new(name: 'R2.fastq.gz', source_type: 'local', source: 'R2.fastq.gz')
   sample.save!
   taxon_counts = (1..50).map {|j| TaxonCount.new(tax_id: j, tax_level: [1, 2].sample, count: rand(1000), name: "Some Name", count_type: ["NT", "NR"].sample) }
-  pipeline_run = PipelineRun.create!(sample: sample, command: "xyz yzyz")
-  output = PipelineOutput.create!(sample: sample, total_reads: 1_000, remaining_reads: 500, taxon_counts: taxon_counts, pipeline_run: pipeline_run)
-  pipeline_run.pipeline_output_id = output.id
+  pipeline_run = PipelineRun.create!(sample: sample, command: "xyz yzyz", total_reads: 1_000, remaining_reads: 500, taxon_counts: taxon_counts)
   pipeline_run.save!
-  background.pipeline_outputs << output
+  background.pipeline_runs << pipeline_run
 end
 
 background.save!
