@@ -165,21 +165,17 @@
   }
 
   highlightAllSamplesorAllProject(e) {
+    this.removeHighlightedText();
     let tagAttribute =  e.target.getAttribute('data-title')
     if (tagAttribute === "allsamples") {
-      console.log(tagAttribute === "allsamples");
-      this.removeHighlightedText();
       $('.samples-title').addClass('highlight-text')
     } else {
-      this.removeHighlightedText();
       $('.projects-title').addClass('highlight-text')
     }
   }
 
   removeHighlightedText() {
-    console.log('got called remove samples highlight');
     $('.samples-title').removeClass('highlight-text')
-    console.log('got called remove projects highlight');
     $('.projects-title').removeClass('highlight-text')
   }
 
