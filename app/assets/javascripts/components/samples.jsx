@@ -756,7 +756,8 @@ class Samples extends React.Component {
   handleProjectSelection(id) {
     this.setState({
       selectedProjectId: id,
-      pageEnd: false
+      pageEnd: false,
+      pagesLoaded: 0
     }, () => {
       this.setUrlLocation();
       this.fetchProjectDetails(id);
