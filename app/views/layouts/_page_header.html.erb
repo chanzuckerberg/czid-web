@@ -1,7 +1,7 @@
 <div id="page_header" class="">
   <% if current_user && current_user.id %>
     <%= javascript_tag do %>
-      react_component('Header', { userSignedIn: true, userDetails: '<%=raw current_user.to_json%>', signoutEndpoint: '<%=destroy_user_session_path%>' }, 'page_header')
+      react_component('Header', { userSignedIn: true, userDetails: JSON.parse('<%=raw current_user.to_json%>'), signoutEndpoint: '<%=destroy_user_session_path%>' }, 'page_header')
     <% end %>
   <% else %>
     <%= javascript_tag do %>
