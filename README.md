@@ -117,6 +117,8 @@ Note that this requires the proper ssh config to access the deployed versions of
 `bin/clam alpha 'mysqldump -h $RDS_ADDRESS -u $DB_USERNAME --password=$DB_PASSWORD idseq_alpha | gzip -c' > idseq_alpha.sql.gz`
 1. Overwrite your local `development` DB with data from given backup file:
 `docker-compose run web "gzip -dc idseq_alpha.sql.gz | mysql -h db -u root --database idseq_development"`
+1. Let RAILS know it's okay to use alpha data locally.
+`docker-compose run web bin/rails db:environment:set RAILS_ENV=development`
 
 
 ## Deployment
