@@ -248,7 +248,7 @@
               <div className="project-item" data-id={project.id} key={i}><div onClick={this.handleProjectClick} data-id={project.id}><span data-id={project.id}>{project.name}</span></div>{this.addFavIconClass(project)}</div>
             )
           }) }
-          { this.state.formattedProjectList.length ? <div className="more" onClick={this.toggleDisplayProjects}>{this.state.showLess ? 'Show More...' : 'Show Less...'}</div> : ''}
+          { this.state.formattedProjectList.length > 7 ? <div className="more" onClick={this.toggleDisplayProjects}>{this.state.showLess ? 'Show More...' : 'Show Less...'}</div> : ''}
         </div>
       </div>
     )
