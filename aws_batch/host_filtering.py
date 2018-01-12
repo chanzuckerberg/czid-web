@@ -43,6 +43,7 @@ FILE_TYPE = 'fastq.gz'
 # reference genomes
 STAR_GENOME = 's3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz'
 BOWTIE2_GENOME = 's3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz'
+STAR_BOWTIE_VERSION_FILE_S3 = 's3://czbiohub-infectious-disease/references/human/.version.txt'
 
 # output files
 STAR_OUT1 = 'unmapped.star.1.fq'
@@ -284,7 +285,8 @@ def run_host_filtering(fastq_file_1, fastq_file_2, initial_file_type_for_log, la
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "STAR", "count_reads": True,
         "before_file_name": fastq_file_1, "before_file_type": initial_file_type_for_log,
-        "after_file_name": os.path.join(RESULT_DIR, STAR_OUT1), "after_file_type": initial_file_type_for_log})
+        "after_file_name": os.path.join(RESULT_DIR, STAR_OUT1), "after_file_type": initial_file_type_for_log,
+        "version_file_s3": STAR_BOWTIE_VERSION_FILE_S3, "output_version_file": os.path.join(RESULT_DIR, VERSION_OUT)})
     run_and_log(logparams, TARGET_OUTPUTS["run_star"], lazy_run, run_star, fastq_file_1, fastq_file_2)
 
     # run priceseqfilter
