@@ -4,11 +4,11 @@
       sampleInfo: JSON.parse('<%= raw @sample.to_json %>'),
       pipelineOutput: JSON.parse('<%= raw @pipeline_output.to_json %>'),
       projectInfo: JSON.parse('<%= raw @project_info.to_json %>'),
+      pipelineRun: JSON.parse('<%= raw @pipeline_run.to_json %>'),
       jobStatistics: JSON.parse('<%= raw @job_stats.to_json %>'),
       project_sample_ids_names: JSON.parse('<%= raw @project_sample_ids_names.to_json %>'),
       host_genome: JSON.parse('<%= raw @host_genome.to_json %>'),
       summary_stats: JSON.parse('<%= raw @summary_stats.to_json %>'),
-      pipelineRun: JSON.parse('<%= raw @pipeline_run.to_json %>'),
       reportPresent: JSON.parse('<%= raw @report_present.to_json %>'),
       reportTime: JSON.parse('<%= raw @report_ts.to_json %>'),
       allCategories: JSON.parse('<%= raw @all_categories.to_json %>'),
@@ -18,24 +18,6 @@
       rerun_path: '<%= kickoff_pipeline_sample_path %>',
       all_backgrounds: JSON.parse('<%= raw @background_models.to_json %>')
     }, 'PipelineSampleReads_page');
+    // console.log('Pipleine run have invalid json', '<%=  @pipeline_run %>');
   <% end %>
 </div>
-
-
-<!-- < % = react_component 'PipelineSampleReads',
-sampleInfo: @sample,
-pipelineOutput: @pipeline_output,
-projectInfo: @project_info,
-jobStatistics: @job_stats,
-project_sample_ids_names: @project_sample_ids_names,
-host_genome: @host_genome,
-summary_stats: @summary_stats,
-pipelineRun: @pipeline_run,
-reportPresent: @report_present,
-reportTime: @report_ts,
-allCategories: @all_categories,
-reportDetails: @report_details,
-reportPageParams: @report_page_params,
-sample_status: @sample_status,
-rerun_path: kickoff_pipeline_sample_path,
-all_backgrounds: @background_models % > -->

@@ -3,7 +3,8 @@
     react_component('Home', {
       pageSize: '<%=@page_size%>',
       csrf: '<%= form_authenticity_token %>',
-      favorites: JSON.parse('<%= raw @favorite_projects.to_json %>')
+      favorites: JSON.parse('<%= raw @favorite_projects.to_json %>'),
+      projects: JSON.parse('<%= raw @projects.to_json %>')
     }, 'samples_page');
   <% end %>
 </div>
