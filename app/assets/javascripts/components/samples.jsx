@@ -261,13 +261,13 @@ class Samples extends React.Component {
                         )
                       } else if(column === 'nonhost_reads') {
                         column_data = (<li key={pos}>
-                          <div className='card-label center center-label'>
+                          <div className='card-label center center-label data-label'>
                             {data_values[column]} {data_values["nonhost_reads_percent"]}
                           </div>
                         </li>)
                       } else {
                         column_data = (<li key={pos}>
-                          <div className='card-label center center-label'>
+                          <div className='card-label center center-label data-label'>
                             {data_values[column]}
                           </div>
                         </li>)
@@ -572,14 +572,14 @@ class Samples extends React.Component {
     );
 
     const projInfo = (
-      <div>
-        <div className="proj-title">{ (!this.state.project) ? 'All Samples' : this.state.project.name }</div>
+      <div className="wrapper">
+        <div className={(!this.state.project) ? "proj-title all-proj" : "proj-title"}>{ (!this.state.project) ? <div>All projects</div> : this.state.project.name }</div>
         <p>{ this.state.allSamples.length === 0 ? 'No sample found' : ( this.state.allSamples.length === 1 ? '1 sample found' : `${this.state.allSamples.length} out of ${this.state.totalNumber} samples found`) }</p>
       </div>
     );
 
     const tableHead = (
-      <div className='col s12 sample-feed no-padding samples-table-head'>
+      <div className='col s12 sample-feed-head no-padding samples-table-head'>
         <div className='samples-card white'>
           <div className='flex-container'>
             <ul className='flex-items'>

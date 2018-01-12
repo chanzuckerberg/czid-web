@@ -271,6 +271,21 @@ $break-large: 1070px;
   outline: 0 solid transparent;
 }
 
+.wrapper {
+  position: relative;
+  .proj-title {
+    margin-top: 18px;
+    font-size: 18px;
+    font-weight: 600;
+    &.all-proj {
+      margin-top: 7px;
+    }
+  }
+  p {
+    margin: 0;
+  }
+}
+
 .form-wrapper {
   width: 70%;
   margin: 0 auto;
@@ -298,13 +313,6 @@ $break-large: 1070px;
   }
   .content-wrapper {
     padding: 40px 50px;
-    .project-info {
-      height: 48px !important;
-      margin-top: 18px !important;
-        .proj-title {
-        font-weight: 600;
-      }
-    }
     .name {
       margin-top: 16px;
     }
@@ -465,7 +473,7 @@ $break-large: 1070px;
     }      
   }
 
-  .sample-feed {
+  .sample-feed, .sample-feed-head {
     margin-bottom: 2px;
     .samples-card {
       padding: 5px 20px;
@@ -510,7 +518,6 @@ $break-large: 1070px;
               }
             }
             &.center-label {
-              color: #333333;
               font-size: 13px;
               .blank {
                 color: #b5b0b0
@@ -519,6 +526,12 @@ $break-large: 1070px;
                 .duration-label {
                   margin-left: 5px;
                   font-size: 12px;
+                }
+              }
+              &.data-label {
+                text-align: left;
+                .percent {
+                  color: #188fd8;
                 }
               }
             }
@@ -536,6 +549,7 @@ $break-large: 1070px;
             }
             &.column-title {
               cursor: pointer;
+              text-align: left
             }
             .project-name {
               background-color: #E7F5FE;
@@ -550,6 +564,15 @@ $break-large: 1070px;
             }
           }
         }
+      }
+    }
+  }
+
+  .sample-feed {
+    &:hover {
+      cursor: pointer;
+      .sample-name{
+        color: #188fd8 !important;
       }
     }
   }
@@ -617,59 +640,7 @@ $break-large: 1070px;
       }
     }
   }
-  .job-container {
-    cursor: pointer;
-    margin-bottom: 0;
-    border-bottom: 1px solid #dfdddd;
-    .job-card {
-      display: flex;
-      margin: 0 10px;
-      .blank {
-        color: #b5b0b0
-      }
-      .no-time {
-        padding-top: 14px;
-      }
-      .reads {
-        .status-col {
-          padding: 6px 18px !important;
-        }
-        .percent {
-          color: #0099cc;
-        }
-        p.status {
-          font-size: 12px;
-          display: inline-block;
-          margin: 0 10px;
-        }
-        .time {
-          margin: 0;
-          font-size: 12px;
-          span {
-            margin: 10px;
-          }
-        }
-        margin: 15px 0;
-      }
-      .sample-name {
-        color: #333333;
-        font-weight: bold;
-        margin-bottom: 0;
-      }
-      .column-dropdown {
-        display: none;
-      }
-      .uploader {
-        font-size: 12px;
-        font-weight: normal;
-        color: #737373;
-        margin: 0;
-      }
-    }
-    &:hover {
-      background: #f1f1f1;
-    }
-  }
+
   .search-box {
     display: inline-block;
     width: inherit;
@@ -829,12 +800,6 @@ input[type=search]:focus:not([readonly]) {
       }
     }
     .projects {
-      span {
-        cursor: pointer;
-        &:hover {
-          color: #4ba4c2;
-        }
-      }
       .projects-wrapper {
         height: 300px;
         overflow: scroll;
