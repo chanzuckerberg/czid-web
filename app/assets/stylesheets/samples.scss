@@ -299,6 +299,8 @@ $break-large: 1070px;
   .content-wrapper {
     padding: 40px 50px;
     .project-info {
+      height: 48px !important;
+      margin-top: 18px !important;
         .proj-title {
         font-weight: 600;
       }
@@ -785,10 +787,11 @@ input[type=search]:focus:not([readonly]) {
     height: 100vh;
     border-right: 1px solid #eaeaea;
     background: #F8F9F9;
+    position: sticky;
+    top: -10px;
     padding: 10px 20px !important;
     font-size: 14px;
     position: sticky;
-    top: 10px;
     .title {
       font-weight: 600;
       hr {
@@ -807,8 +810,13 @@ input[type=search]:focus:not([readonly]) {
         }
       }
       .samples {
+        cursor: pointer;
         p {
-          display: inline-block
+          font-weight: 600;
+          display: inline-block;
+          &:hover {
+            color: #4ba4c2;
+          }
         }
         span {
           float: right;
@@ -850,6 +858,9 @@ input[type=search]:focus:not([readonly]) {
     }
     .highlight {
       background: #bfd1dc;
+    }
+    .highlight-text {
+      color: #2d93d2;
     }
     .more {
       font-size: 12px;

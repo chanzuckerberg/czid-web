@@ -16,7 +16,6 @@ class Samples extends React.Component {
     this.setUrlLocation = this.setUrlLocation.bind(this);
     this.sortSamples = this.sortSamples.bind(this);
     this.switchColumn = this.switchColumn.bind(this);
-    this.uploadSample = this.uploadSample.bind(this);
     this.handleProjectSelection = this.handleProjectSelection.bind(this);
     this.pageSize = props.pageSize || 30
     this.state = {
@@ -485,10 +484,6 @@ class Samples extends React.Component {
     location.href = `/samples/${id}`;
   }
 
-  uploadSample() {
-    location.href = '/samples/new'
-  }
-
   getActiveSort(className) {
     if(className) {
       const sort = SortHelper.getFilter('sort_by');
@@ -578,7 +573,7 @@ class Samples extends React.Component {
 
     const projInfo = (
       <div>
-        <div className="proj-title">{ (!this.state.project) ? 'All projects' : this.state.project.name }</div>
+        <div className="proj-title">{ (!this.state.project) ? 'All Samples' : this.state.project.name }</div>
         <p>{ this.state.allSamples.length === 0 ? 'No sample found' : ( this.state.allSamples.length === 1 ? '1 sample found' : `${this.state.allSamples.length} out of ${this.state.totalNumber} samples found`) }</p>
       </div>
     );
@@ -756,6 +751,7 @@ class Samples extends React.Component {
   handleProjectSelection(id) {
     this.setState({
       selectedProjectId: id,
+      pagesLoaded: 0,
       pageEnd: false
     }, () => {
       this.setUrlLocation();
