@@ -13,6 +13,7 @@
     this.toggleDisplayFavProjects = this.toggleDisplayFavProjects.bind(this);
     this.toggleFavorite = this.toggleFavorite.bind(this);
     this.handleProjectClick = this.handleProjectClick.bind(this);
+    this.handleAllProjectorSamplesClick = this.handleAllProjectorSamplesClick.bind(this);
     this.uploadSample = this.uploadSample.bind(this);
     
     this.state = {
@@ -158,13 +159,8 @@
     this.props.selectProject(id);
   }
 
-  highlightSelectedProject(e, id) {
+  handleAllProjectorSamplesClick(e) {
     this.removeHighlight();
-    this.removeHighlightedText();
-    id ? $(`.project-item[data-id="${id}"]`).addClass('highlight') : this.highlightAllSamplesorAllProject(e)
-  }
-
-  highlightAllSamplesorAllProject(e) {
     this.removeHighlightedText();
     let tagAttribute =  e.target.getAttribute('data-title')
     if (tagAttribute === "allsamples") {
@@ -172,6 +168,13 @@
     } else {
       $('.projects-title').addClass('highlight-text')
     }
+    this.props.viewAllSamples();
+  }
+
+  highlightSelectedProject(e, id) {
+    this.removeHighlight();
+    this.removeHighlightedText();
+    $(`.project-item[data-id="${id}"]`).addClass('highlight')
   }
 
   removeHighlightedText() {
@@ -234,7 +237,7 @@
 
     const all_projects_section = (
       <div className="projects">
-        <span onClick={this.handleProjectClick} data-title="allprojects" className="title projects-title">All Projects</span>
+        <span onClick={this.handleAllProjectorSamplesClick} data-title="allprojects" className="title projects-title">All Projects</span>
         <hr/>
         <div className="projects-wrapper">
           { !this.state.formattedProjectList.length ? "None" : this.state.showLess ? this.state.formattedProjectList.sort(sortLogic).slice(0,7).map((project, i) => {
@@ -255,7 +258,7 @@
       <div className="project-wrapper">
         <div className="row">
           <div className="samples">
-            <p data-title="allsamples" className="samples-title" onClick={this.handleProjectClick}>All Samples</p>
+            <p data-title="allsamples" className="samples-title" onClick={this.handleAllProjectorSamplesClick}>All Samples</p>
             <span onClick={this.uploadSample}><i className="fa fa-lg fa-plus-circle" aria-hidden="true"></i></span>
           </div>
           { fav_section }
