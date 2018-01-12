@@ -1,3 +1,11 @@
-<%= react_component 'SampleUpload',
-  projects: @projects, csrf: form_authenticity_token, sample: @sample,
-  host_genomes: @host_genomes, loggedin_user: current_user %>
+<div id="sample_upload_page">
+  <%= javascript_tag do %>
+    react_component('SampleUpload', {
+      projects: JSON.parse('<%= raw @projects.to_json %>'),
+      csrf: '<%= form_authenticity_token %>',
+      sample: JSON.parse('<%= raw @sample.to_json %>'),
+      host_genomes: JSON.parse('<%= raw @host_genomes.to_json %>'),
+      loggedin_user: JSON.parse('<%= raw current_user.to_json %>')
+    }, 'sample_upload_page');
+  <% end %>
+</div>

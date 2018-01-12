@@ -1,7 +1,14 @@
-<div>
+<div id='user_edit_page'>
   <% if current_user && current_user.admin %>
-    <%= react_component 'CreateUser', { csrf: form_authenticity_token, selectedUser: @user} %>
+    <%= javascript_tag do %>
+      react_component('CreateUser', {
+        selectedUser: JSON.parse('<%= raw @user.to_json %>'),
+        csrf: '<%= form_authenticity_token %>',
+      }, 'user_edit_page');
+    <% end %>
   <% else %>
-    <%= react_component 'ForbiddenPage' %>
+    <%= javascript_tag do %>
+      react_component('ForbiddenPage', 'user_edit_page');
+    <% end %>
   <% end %>
 </div>
