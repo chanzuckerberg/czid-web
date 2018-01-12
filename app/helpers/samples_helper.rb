@@ -170,87 +170,75 @@ module SamplesHelper
     samples
   end
 
-  def samples_pipeline_run_info(samples)
-    pipeline_run_info = []
-    samples.each do |output|
-      pipeline_run_entry = {}
-      if output.pipeline_runs.first
-        recent_pipeline_run = output.pipeline_runs.first
-        pipeline_run_entry[:job_status_description] = 'WAITING' if recent_pipeline_run.job_status.nil?
-        if recent_pipeline_run.pipeline_run_stages.present?
-          run_stages = recent_pipeline_run.pipeline_run_stages || []
-          run_stages.each do |rs|
-            pipeline_run_entry[rs[:name]] = rs.job_status
-          end
-          pipeline_run_entry[:total_runtime] = if recent_pipeline_run.finalized?
-                                                 run_stages.map { |rs| rs.updated_at - rs.created_at }.sum # total processing time (without time spent waiting), for performance evaluation
-                                               else
-                                                 Time.current - recent_pipeline_run.created_at # time since pipeline kickoff (including time spent waiting), for run diagnostics
-                                               end
-        else
-          pipeline_run_status = recent_pipeline_run.job_status
-          pipeline_run_entry[:job_status_description] =
-            if %w[CHECKED SUCCEEDED].include?(pipeline_run_status)
-              'COMPLETE'
-            elsif %w[FAILED ERROR].include?(pipeline_run_status)
-              'FAILED'
-            elsif %w[RUNNING LOADED].include?(pipeline_run_status)
-              'IN PROGRESS'
-            elsif pipeline_run_status == 'RUNNABLE'
-              'INITIALIZING'
-            end
+  def get_total_runtime(pipeline_run)
+    if pipeline_run.finalized?
+      # total processing time (without time spent waiting), for performance evaluation
+      pipeline_run.pipeline_run_stages.map { |rs| rs.updated_at - rs.created_at }.sum
+    else
+      # time since pipeline kickoff (including time spent waiting), for run diagnostics
+      (Time.current - pipeline_run.created_at)
+    end
+  end
+
+  def pipeline_run_info(pipeline_run)
+    pipeline_run_entry = {}
+    if pipeline_run
+      pipeline_run_entry[:job_status_description] = 'WAITING' if pipeline_run.job_status.nil?
+      if pipeline_run.pipeline_run_stages.present?
+        run_stages = pipeline_run.pipeline_run_stages
+        run_stages.each do |rs|
+          pipeline_run_entry[rs.name] = rs.job_status
         end
+        pipeline_run_entry[:total_runtime] = get_total_runtime(pipeline_run)
       else
-        pipeline_run_entry[:job_status_description] = 'WAITING'
+        # old data
+        pipeline_run_status = pipeline_run.job_status
+        pipeline_run_entry[:job_status_description] =
+          if %w[CHECKED SUCCEEDED].include?(pipeline_run_status)
+            'COMPLETE'
+          elsif %w[FAILED ERROR].include?(pipeline_run_status)
+            'FAILED'
+          elsif %w[RUNNING LOADED].include?(pipeline_run_status)
+            'IN PROGRESS'
+          elsif pipeline_run_status == 'RUNNABLE'
+            'INITIALIZING'
+          end
       end
-      pipeline_run_entry[:finalized] = output.pipeline_runs.first ? output.pipeline_runs.first.finalized : 0
-      pipeline_run_info.push(pipeline_run_entry)
+      pipeline_run_entry[:finalized] = pipeline_run.finalized
+    else
+      pipeline_run_entry[:job_status_description] = 'WAITING'
+      pipeline_run_entry[:finalized] = 0
     end
-    pipeline_run_info
+    pipeline_run_entry
   end
 
-  def samples_output_data(samples)
-    final_result = []
-    samples.each do |output|
-      output_data = {}
-      pipeline_run = output.pipeline_runs.first
-      job_stats = pipeline_run ? pipeline_run.job_stats : nil
-      summary_stats = job_stats ? get_summary_stats(job_stats) : nil
-      output_data[:pipeline_run] = pipeline_run
-      output_data[:host_genome_name] = output.host_genome ? output.host_genome.name : nil
-      output_data[:job_stats] = job_stats
-      output_data[:summary_stats] = summary_stats
-      final_result.push(output_data)
-    end
-    final_result
+  def sample_uploader(sample)
+    user = {}
+    user[:name] = (sample.user.name if sample.user)
+    user
   end
 
-  def sample_uploaders(samples)
-    all_uploaders = []
-    samples.each do |s|
-      user = {}
-      if s.user_id.present?
-        id = s.user_id
-        user[:name] = User.find(id).name
-      else
-        user[:name] = nil
-      end
-      all_uploaders.push(user)
-    end
-    all_uploaders
+  def sample_derived_data(sample)
+    output_data = {}
+    pipeline_run = sample.pipeline_runs.first
+    job_stats = pipeline_run ? pipeline_run.job_stats : nil
+    summary_stats = job_stats ? get_summary_stats(job_stats) : nil
+    output_data[:pipeline_run] = pipeline_run
+    output_data[:host_genome_name] = sample.host_genome ? sample.host_genome.name : nil
+    output_data[:job_stats] = job_stats
+    output_data[:summary_stats] = summary_stats
+
+    output_data
   end
 
   def format_samples(samples)
     formatted_samples = []
-    final_result = samples_output_data(samples)
-    pipeline_run_info = samples_pipeline_run_info(samples)
-    uploaders = sample_uploaders(samples)
-    samples.each_with_index do |_sample, i|
+    samples.each_with_index do |sample|
       job_info = {}
-      job_info[:db_sample] = samples[i]
-      job_info[:derived_sample_output] = final_result[i]
-      job_info[:run_info] = pipeline_run_info[i]
-      job_info[:uploader] = uploaders[i]
+      job_info[:db_sample] = sample
+      job_info[:derived_sample_output] = sample_derived_data(sample)
+      job_info[:run_info] = pipeline_run_info(sample.pipeline_runs.first)
+      job_info[:uploader] = sample_uploader(sample)
       formatted_samples.push(job_info)
     end
     formatted_samples

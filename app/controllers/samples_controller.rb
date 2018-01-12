@@ -243,7 +243,7 @@ class SamplesController < ApplicationController
     @sample = Sample.new(params)
     @sample.project = project if project
     @sample.input_files.each { |f| f.name ||= File.basename(f.source) }
-    @sample.user = @user if @user
+    @sample.user = current_user if current_user
 
     respond_to do |format|
       if @sample.save
