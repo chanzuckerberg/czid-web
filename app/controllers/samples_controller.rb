@@ -107,7 +107,9 @@ class SamplesController < ApplicationController
   # GET /samples/1.json
 
   def show
-    first_pipeline_run = @sample.pipeline_runs.first ? @sample.pipeline_runs.first : nil
+    # we should try not to return the entire pipeline_run hash to the frontend probably select what we need
+    first_pipeline_run = @sample.pipeline_runs.first ?
+    @sample.pipeline_runs.select('created_at, finalized, id, unmapped_reads, total_reads, sample_id, remaining_reads, job_status, updated_at').first : nil
     @pipeline_run = first_pipeline_run
     @pipeline_output = first_pipeline_run ? first_pipeline_run.pipeline_output : nil
     @sample_status = first_pipeline_run ? first_pipeline_run.job_status : nil
