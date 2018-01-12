@@ -1,5 +1,10 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
+import Cookies from 'js-cookie';
+import ReactAutocomplete from 'react-autocomplete';
+import $ from 'jquery';
+
 /**
  @class ReportFilter
  @desc Creates react component to handle filtering in the page
@@ -53,8 +58,8 @@ class ReportFilter extends React.Component {
   // only for background model
   refreshPage(overrides) {
     ReportFilter.showLoading('Fetching results for new background...');
-    new_params = Object.assign({}, this.props.report_page_params, overrides);
-    window.location = location.protocol + '//' + location.host + location.pathname + '?' + jQuery.param(new_params);
+    const new_params = Object.assign({}, this.props.report_page_params, overrides);
+    window.location = location.protocol + '//' + location.host + location.pathname + '?' + $.param(new_params);
   }
 
 
@@ -93,7 +98,7 @@ class ReportFilter extends React.Component {
     //ReportFilter.showLoading('Applying category filter...');
     let excluded_categories = this.state.excluded_categories;
     if (e.target.checked) {
-      ridx = excluded_categories.indexOf(e.target.value);
+      const ridx = excluded_categories.indexOf(e.target.value);
       if (ridx > -1) {
         excluded_categories.splice(ridx, 1);
       }
@@ -161,7 +166,7 @@ class ReportFilter extends React.Component {
           </div>
         </div>
     );
-    genus_search = (
+    let genus_search = (
       <div className="filter-controls">
         <div className="row">
           <div className="input-field col s12 genus-search-row">
@@ -234,3 +239,5 @@ class ReportFilter extends React.Component {
 ReportFilter.propTypes = {
   background_model: PropTypes.object
 };
+
+export default ReportFilter;

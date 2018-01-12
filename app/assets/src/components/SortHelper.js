@@ -3,7 +3,6 @@
  * @desc a helper class to handle sorting on tables
 */
 class SortHelper {
-
   /**
     @method currentSort
     @desc this gets the current sort from the url

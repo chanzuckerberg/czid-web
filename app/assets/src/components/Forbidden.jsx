@@ -13,3 +13,5 @@ class ForbiddenPage extends React.Component {
   }
 
 }
+
+export default ForbiddenPage;

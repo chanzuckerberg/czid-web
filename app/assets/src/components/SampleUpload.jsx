@@ -1,4 +1,8 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
+import axios from 'axios';
+import $ from 'jquery';
+import IconComponent from './IconComponent';
 
 class SampleUpload extends React.Component {
   constructor(props, context) {
@@ -891,3 +895,5 @@ class SampleUpload extends React.Component {
     )
   }
 }
+
+export default SampleUpload;

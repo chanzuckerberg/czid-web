@@ -1,6 +1,16 @@
 import React from 'react';
-import $ from 'jquery';
-class Header extends React.Component  {
+import PropTypes from 'prop-types';
+
+/**
+  @class Header
+  @desc header component used as a partial
+*/
+class Header extends React.Component {
+  /**
+    @method constructor
+    @param {Object} props
+    @param {Object} context
+  */
   constructor(props, context) {
     super(props, context);
     this.userSignedIn = this.props.userSignedIn;
@@ -9,8 +19,12 @@ class Header extends React.Component  {
     this.userDetails = this.props.userDetails;
   }
 
-	componentDidMount() {
-   this.displayProfileMenu();
+  /**
+   * @method componentDidMount
+   * @desc display the profile menu when component is mounted
+   */
+  componentDidMount() {
+    this.displayProfileMenu();
   }
 
   displayProfileMenu() {
@@ -21,7 +35,7 @@ class Header extends React.Component  {
   }
 
   gotoPage(path) {
-    location.href = `${path}`
+    window.location.href = `${path}`
   }
 
   sendMail() {
@@ -70,8 +84,13 @@ class Header extends React.Component  {
           </div>
         </div>
       </div>
-
     )
   }
 }
+
+Header.propTypes = {
+  userSignedIn: PropTypes.object,
+  userDetails: PropTypes.object
+};
+
 export default Header;

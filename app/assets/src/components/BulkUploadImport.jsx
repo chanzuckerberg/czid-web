@@ -1,4 +1,9 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
+import axios from 'axios';
+import $ from 'jquery';
+import SampleUpload from './SampleUpload';
+
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
     super(props, context);
@@ -72,29 +77,29 @@ class BulkUploadImport extends React.Component {
   selectSample(e) {
     this.setState({
       allChecked: false,
-    })
+    });
     // current array of options
-    const sampleList = this.state.selectedSampleIndices
+    const sampleList = this.state.selectedSampleIndices;
 
-    let index
+    let index;
 
     // check if the check box is checked or unchecked
     if (e.target.checked) {
       // add the numerical value of the checkbox to options array
-      sampleList.push(+e.target.id)
+      sampleList.push(+e.target.id);
     } else {
       // or remove the value from the unchecked checkbox from the array
-      index = sampleList.indexOf(+e.target.id)
-      sampleList.splice(index, 1)
+      index = sampleList.indexOf(+e.target.id);
+      sampleList.splice(index, 1);
     }
 
     // update the state with the new array of options
-    this.setState({ selectedSampleIndices: sampleList })
+    this.setState({ selectedSampleIndices: sampleList });
   }
 
   initializeSelectAll() {
     $(".checkAll").click((e) => {
-      checkedStatus = e.target.checked;
+      const checkedStatus = e.target.checked;
       this.setState({
         allChecked: checkedStatus
       }, () => {
@@ -674,7 +679,8 @@ class BulkUploadImport extends React.Component {
                           Upload samples
                         </button>
                       }
-                      <button type='button' onClick={() => window.history.back()} className='new-button skyblue-button'>
+                      <button type='button' className="new-button skyblue-button"
+                        onClick={() => window.history.back()}>
                         Cancel
                       </button>
                     </div>
@@ -694,7 +700,7 @@ class BulkUploadImport extends React.Component {
         { this.state.imported ? this.renderBulkUploadSubmitForm() : null }
         { !this.state.imported ? this.renderBulkUploadImportForm() : null }
       </div>
-    )
+    );
   }
 }
 export default BulkUploadImport;

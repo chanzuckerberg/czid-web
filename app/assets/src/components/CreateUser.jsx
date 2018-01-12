@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from 'axios';
 
 class CreateUser extends React.Component {
   constructor(props, context) {
@@ -289,3 +290,5 @@ class CreateUser extends React.Component {
     )
   }
 }
+
+export default CreateUser;

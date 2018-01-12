@@ -2,16 +2,19 @@ import React from 'react';
 import axios from 'axios';
 import ReactDOM from 'react-dom';
 import moment from 'moment';
+import $ from 'jquery';
 import SortHelper from './SortHelper';
 import numberWithCommas from '../helpers/strings';
+import ProjectSelection from './ProjectSelection';
+import ReportFilter from './ReportFilter';
 
 class Samples extends React.Component {
   constructor(props, context) {
     super(props, context);
-    console.log('Props', props);
-    this.switchProject = this.switchProject.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
     this.csrf = props.csrf;
+    this.favoriteProjects = props.favorites || [];
+    this.allProjects = props.projects || [];
     this.defaultSortBy = 'newest';
     const currentSort = SortHelper.currentSort();
     this.columnSorting = this.columnSorting.bind(this);
@@ -24,23 +27,17 @@ class Samples extends React.Component {
     this.sortSamples = this.sortSamples.bind(this);
     this.switchColumn = this.switchColumn.bind(this);
     this.uploadSample = this.uploadSample.bind(this);
-    this.toggleDisplayProjects = this.toggleDisplayProjects.bind(this);
-    this.toggleDisplayFavProjects = this.toggleDisplayFavProjects.bind(this);
-    this.toggleFavorite = this.toggleFavorite.bind(this);
+    this.handleProjectSelection = this.handleProjectSelection.bind(this);
     this.pageSize = props.pageSize || 30
     this.state = {
       project: null,
       totalNumber: null,
+      projectId: null,
       selectedProjectId: this.fetchParams('project_id') || null,
       filterParams: this.fetchParams('filter') || '',
       searchParams: this.fetchParams('search') || '',
       sampleIdsParams: this.fetchParams('ids') || [],
-      favouriteProjects: JSON.parse(props.favorites) || [],
-      formattedProjectList: [],
-      formattedFavProjectList: [],
-      favIds: [],
       allSamples: [],
-      allProjects: [],
       sort_by: this.fetchParams('sort_by') || 'id,desc',
       pagesLoaded: 0,
       pageEnd: false,
@@ -66,9 +63,7 @@ class Samples extends React.Component {
         'notes',
         'tissue_type',
         'nucleotide_type'
-      ],
-      showLess: true,
-      showLessFavorites: true
+      ]
     };
     this.sortCount = 0;
 
@@ -339,27 +334,8 @@ class Samples extends React.Component {
     })
   }
 
-  //fetch all Projects
-  fetchProjects() {
-    axios.get(`/projects.json`).then((res) => {
-      this.setState({
-        allProjects: res.data,
-        loading: false,
-      }, () => {
-        console.log('Samples state',this.state);
-        this.reformatProjectList(this.state.favouriteProjects, this.state.allProjects);
-      })
-    }).catch((err) => {
-      this.setState({
-        allProjects: [],
-        loading: false,
-      })
-    })
-  }
-
   //fetch data used by projects page
   fetchProjectPageData() {
-    this.fetchProjects();
     this.fetchSamples();
   }
 
@@ -456,103 +432,6 @@ class Samples extends React.Component {
     }
   }
 
-  toggleFavorite(e) {
-    let favStatus = e.target.getAttribute('data-fav');
-    let projectId = e.target.getAttribute('data-id');
-    Samples.showLoading(`${favStatus == 'true' ? 'Removing from' : 'Adding to' } favorites...`)
-    axios
-      .put(`/projects/${projectId}/${favStatus == 'true' ? 'remove_favorite' : 'add_favorite'}?`, {
-        authenticity_token: this.csrf
-      })
-      .then((res) => {
-        Samples.hideLoader();
-        this.checkIfProjecExistInFavorites(projectId, this.state.formattedProjectList);
-      }).catch((err) => {
-        Samples.hideLoader();
-    })
-  }
-
-  reformatProjectList(favorites, allProjects) {
-    let favProjects = [];
-    let favIds = favorites.map(e => e.id);
-    let formattedList = allProjects.map(e => {
-      let project = e;
-
-      if (!project.favorited) {
-        project.favorited = favIds.includes(project.id);
-
-        if (project.favorited) {
-          favProjects.push(project);
-        }
-      }
-
-      return project;
-    });
-
-    this.setState({
-      formattedProjectList: formattedList,
-      formattedFavProjectList: favProjects,
-      favIds: favIds
-    });
-
-    return formattedList;
-  }
-
-  // update
-  updateProjectsState(id, projects) {
-    let updatedList = projects.map(project => {
-      if (project.id == id) {
-        project.favorited = !project.favorited
-      }
-
-      return project;
-    });
-
-    this.setState({ formattedProjectList: updatedList });
-
-    return updatedList;
-  }
-
-  // check existence of projects in favorites projects list
-  // if true then remove else add
-  checkIfProjecExistInFavorites(id, projects) {
-    if (this.state.favIds.includes(parseInt(id))) {
-      this.removeProjectFromFavorites(id);
-    } else {
-      this.addProjectToFavorites(id, projects);
-    }
-    this.updateProjectsState(id, projects);
-  }
-
-
-  // remove Projects from favorites list
-  removeProjectFromFavorites(id) {
-    let updatedFavouriteProjects = this.state.formattedFavProjectList.filter(project => project.id != id);
-    let removedFavouriteProject = this.state.formattedFavProjectList.filter(project => project.id == id);
-
-    let favIds = this.state.favIds;
-    let projectIdIndex = favIds.indexOf(removedFavouriteProject[0].id);
-
-    if (projectIdIndex > -1) {
-      favIds.splice(projectIdIndex, 1);
-      this.setState({
-        formattedFavProjectList: updatedFavouriteProjects,
-          favIds
-      });
-    }
-  }
-
-
-  // add Projects to favorites list
-  addProjectToFavorites(id, projects) {
-    let updatedProject = projects.filter(project => project.id == id);
-
-    this.setState({
-        formattedFavProjectList: [...this.state.formattedFavProjectList, ...updatedProject],
-        favIds: [...this.state.favIds, updatedProject[0].id]
-    });
-  }
-
   getChunkedStage(runInfo) {
     let postProcess = runInfo['Post Processing']
     let hostFiltering = runInfo['Host Filtering']
@@ -589,25 +468,6 @@ class Samples extends React.Component {
     }
   }
 
-  //Select or switch Project
-  switchProject(e) {
-    let id = e.target.getAttribute('data-id');
-    let listType = e.target.getAttribute('data-type');
-    if (listType == 'fav') {
-      this.highlightSelectedFavoriteProject(id)
-    } else {
-      this.highlightSelectedProject(id);
-    }
-    this.setState({
-      selectedProjectId: id,
-      pageEnd: false
-    }, () => {
-      Samples.hideLoader();
-      this.setUrlLocation();
-      this.fetchProjectDetails(id);
-    });
-  }
-
   fetchProjectDetails(projId) {
     if (!projId) {
       this.setState({
@@ -626,7 +486,7 @@ class Samples extends React.Component {
         });
         this.fetchResults();
       }).catch((err) => {
-        this.setState({ project: null})
+        this.setState({ project: null })
       })
     }
   }
@@ -654,10 +514,6 @@ class Samples extends React.Component {
     this.setState((prevState) => ({ showLess: !prevState.showLess }))
   }
 
-  toggleDisplayFavProjects() {
-    this.setState((prevState) => ({ showLessFavorites: !prevState.showLessFavorites }))
-  }
-
   renderEmptyTable() {
     return (
       <div className="center-align"><i className='fa fa-frown-o'> No result found</i></div>
@@ -665,9 +521,9 @@ class Samples extends React.Component {
   }
 
   findSelectedColumns(selO) {
-    var selValues = [];
-    for (i=0; i < selO.length; i++) {
-      column_name = selO.options[i].value;
+    let selValues = [];
+    for (let i = 0; i < selO.length; i++) {
+      let column_name = selO.options[i].value;
       if (selO.options[i].selected && column_name !== "") {
         selValues.push(column_name);
       }
@@ -676,8 +532,8 @@ class Samples extends React.Component {
   }
 
   handleColumnSelectChange(e) {
-    selected_columns = this.findSelectedColumns(e.target);
-    this.setState({columnsShown: selected_columns});
+    const selectedColumns = this.findSelectedColumns(e.target);
+    this.setState({columnsShown: selectedColumns});
   }
 
   columnHidden(column) {
@@ -685,8 +541,8 @@ class Samples extends React.Component {
   }
 
   display_column_options(column_map, data_type) {
-    column_list = Object.keys(column_map)
-    return column_list.map((option_name, i) => {
+    const columnList = Object.keys(column_map)
+    return columnList.map((option_name, i) => {
       if (column_map[option_name].type === data_type) {
         return (
           <option key={option_name} id={option_name} value={option_name}>
@@ -701,65 +557,6 @@ class Samples extends React.Component {
   addFavIconClass(project) {
     return (
       <i data-status="favorite" data-fav={project.favorited} data-id={project.id} onClick={this.toggleFavorite} className={!project.favorited ? "favorite fa fa-star-o":  "favorite fa fa-star"}></i>
-    )
-  }
-
-  renderSidebar() {
-    const sortLogic = (a, b) => {
-      var nameA = a.name.toUpperCase(); // ignore upper and lowercase
-      var nameB = b.name.toUpperCase(); // ignore upper and lowercase
-      if (nameA < nameB) {
-        return -1;
-      }
-      if (nameA > nameB) {
-        return 1;
-      }
-      // names must be equal
-      return 0;
-    };
-    return (
-      <div className="project-wrapper">
-        <div className="row">
-          <div className="samples">
-            <p>All Samples</p>
-            <span onClick={this.uploadSample}><i className="fa fa-lg fa-plus-circle" aria-hidden="true"></i></span>
-          </div>
-          <div className="row fav-row">
-            <span className="title">Favorite Projects</span>
-            <hr/>
-            <div className="fav-projects-wrapper">
-              {!this.state.formattedFavProjectList.length ? <div className="none">None</div>: this.state.showLessFavorites ? this.state.formattedFavProjectList.sort(sortLogic).slice(0,4).map((project, i) => {
-                return (
-                  <div className="fav-item" data-id={project.id}  key={i}><div onClick={this.switchProject} data-type="fav" data-id={project.id}><span data-id={project.id}>{project.name}</span></div>{this.addFavIconClass(project)}</div>
-                )
-              }):
-              this.state.formattedFavProjectList.sort(sortLogic).map((project, i) => {
-                return (
-                  <div className="fav-item" data-id={project.id}  key={i}><div onClick={this.switchProject} data-type="fav" data-id={project.id}><span data-id={project.id}>{project.name}</span></div>{this.addFavIconClass(project)}</div>
-                )
-              }) }
-              { this.state.formattedFavProjectList.length > 4 ? <div className="more" onClick={this.toggleDisplayFavProjects}>{this.state.showLessFavorites ? 'Show More...' : 'Show Less...'}</div> : ''}
-            </div>
-          </div>
-          <div className="projects">
-            <span onClick={this.switchProject} className="title">All Projects</span>
-            <hr/>
-            <div className="projects-wrapper">
-              { !this.state.formattedProjectList.length ? "None" : this.state.showLess ? this.state.formattedProjectList.sort(sortLogic).slice(0,7).map((project, i) => {
-                  return (
-                      <div className="project-item" data-id={project.id}  key={i}><div onClick={this.switchProject} data-id={project.id}><span data-id={project.id}>{project.name}</span></div>{this.addFavIconClass(project)}</div>
-                  )
-                }) :
-                this.state.formattedProjectList.sort(sortLogic).map((project, i) => {
-                return (
-                  <div className="project-item" data-id={project.id} key={i}><div onClick={this.switchProject} data-id={project.id}><span data-id={project.id}>{project.name}</span></div>{this.addFavIconClass(project)}</div>
-                )
-              }) }
-              { this.state.formattedProjectList.length ? <div className="more" onClick={this.toggleDisplayProjects}>{this.state.showLess ? 'Show More...' : 'Show Less...'}</div> : ''}
-             </div>
-          </div>
-        </div>
-      </div>
     )
   }
 
@@ -788,6 +585,14 @@ class Samples extends React.Component {
         </div>
       </div>
     );
+
+    const projInfo = (
+      <div>
+        <div className="proj-title">{ (!this.state.project) ? 'All projects' : this.state.project.name }</div>
+        <p>{ this.state.allSamples.length === 0 ? 'No sample found' : ( this.state.allSamples.length === 1 ? '1 sample found' : `${this.state.allSamples.length} out of ${this.state.totalNumber} samples found`) }</p>
+      </div>
+    );
+
     const tableHead = (
       <div className='col s12 sample-feed no-padding samples-table-head'>
         <div className='samples-card white'>
@@ -858,6 +663,9 @@ class Samples extends React.Component {
 
     return (
       <div className="row content-wrapper">
+        <div className="project-info col s12">
+        { projInfo }
+        </div>
         <div className="sample-container col s12">
           { search_box }
           <div className="sample-table-container row">
@@ -871,19 +679,7 @@ class Samples extends React.Component {
       </div>
     )
   }
-  initializeProjectList() {
-    $('.project-toggle').click((e) => {
-      e.stopPropagation();
-      const arrowElement = $(e.toElement)[0];
-      const top = arrowElement.offsetTop;
-      const height = arrowElement.offsetHeight;
-      const width = arrowElement.offsetWidth;
-      const left = arrowElement.offsetLeft;
-      $('.dropdown-bubble').css({ top: `${(top + height) + 20}px`, left: `${(left - width) - 5}px`});
-      $('.dropdown-bubble').slideToggle(200);
-    });
-    $(document).click(() => { $('.dropdown-bubble').slideUp(200); });
-  }
+
 
   componentDidUpdate(prevProps, prevState) {
     const prevStatus = prevState.filterParams;
@@ -913,7 +709,7 @@ class Samples extends React.Component {
     this.fetchProjectPageData();
     this.state.selectedProjectId ? this.fetchProjectDetails(this.state.selectedProjectId) : null;
     this.scrollDown();
-    this.initializeProjectList();
+    // this.initializeProjectList();
     this.displayPipelineStatusFilter();
     this.initializeColumnSelect();
 
@@ -942,21 +738,6 @@ class Samples extends React.Component {
     $(`.filter[data-status="${filter}"]`).show();
   }
 
-  highlightSelectedProject(id) {
-    this.removeHighlight();
-    $(`.project-item[data-id="${id}"]`).addClass('highlight');
-  }
-
-  removeHighlight() {
-    $('.fav-item').removeClass('highlight')
-    $('.project-item').removeClass('highlight')
-  }
-
-  highlightSelectedFavoriteProject(id) {
-    this.removeHighlight();
-    $(`.fav-item[data-id="${id}"]`).addClass('highlight');
-  }
-
   //handle filtering when a filter is selected from list
   handleStatusFilterSelect(e) {
     let status = e.target.getAttribute('data-status');
@@ -974,23 +755,41 @@ class Samples extends React.Component {
   setUrlLocation() {
     let projectId = parseInt(this.state.selectedProjectId);
     const params = {
-      project_id: projectId ? projectId : '',
+      project_id: projectId ? projectId : null,
       filter: this.state.filterParams,
       search: this.state.searchParams,
       sort_by: this.state.sort_by
     };
-    window.history.replaceState(null, null, `?${jQuery.param(params)}`)
+    window.history.replaceState(null, null, `?${$.param(params)}`)
+  }
+
+  handleProjectSelection(id) {
+    this.setState({
+      selectedProjectId: id,
+      pageEnd: false
+    }, () => {
+      this.setUrlLocation();
+      this.fetchProjectDetails(id);
+    });
   }
 
   render() {
+    const project_section =
+      <ProjectSelection
+        favoriteProjects = { this.favoriteProjects }
+        allProjects = { this.allProjects }
+        csrf = { this.csrf }
+        selectProject = { this.handleProjectSelection }
+      />;
+
     return (
       <div>
           <div className="row content-body">
             <div className="col s2 sidebar">
-              {this.renderSidebar()}
+              { project_section }
             </div>
              <div className="col s10">
-              {this.renderTable(this.state.allSamples)}
+              { this.renderTable(this.state.allSamples) }
             </div>
           </div>
       </div>

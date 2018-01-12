@@ -1,4 +1,11 @@
 import React from 'react';
+import axios from 'axios';
+import Cookies from 'js-cookie';
+import $ from 'jquery';
+import Samples from './Samples';
+import ReportFilter from './ReportFilter';
+import numberWithCommas from '../helpers/strings';
+
 
 class PipelineSampleReport extends React.Component {
 
@@ -13,8 +20,8 @@ class PipelineSampleReport extends React.Component {
     this.all_backgrounds = props.all_backgrounds;
     this.max_rows_to_render = props.max_rows || 2000
     this.default_sort_by = this.report_page_params.sort_by.replace('highest_', '')
-    this.sort_params = {}
-    const filter_thresholds = Cookies.get('filter_thresholds')
+    this.sort_params = {};
+    const filter_thresholds = Cookies.get('filter_thresholds');
     const cached_cats = Cookies.get('excluded_categories');
 
     this.state = {
@@ -142,8 +149,8 @@ class PipelineSampleReport extends React.Component {
     let thresholded_taxons = input_taxons || this.state.thresholded_taxons
     if (searchTaxonId > 0) {
       //ignore all the thresholds
-      genus_taxon = {}
-      matched_taxons = []
+      let genus_taxon = {}
+      let matched_taxons = []
       for (var i = 0; i < this.state.taxonomy_details.length; i++) {
         let taxon = this.state.taxonomy_details[i]
         if (taxon.genus_taxid == taxon.tax_id) {
@@ -155,7 +162,7 @@ class PipelineSampleReport extends React.Component {
           matched_taxons = []
         } else {
           // species
-          match_keys = this.state.lineage_map[taxon.tax_id.toString()]
+          const match_keys = this.state.lineage_map[taxon.tax_id.toString()]
           if (match_keys && match_keys.indexOf(searchTaxonId) > -1) {
             matched_taxons.push(taxon)
           }
@@ -246,20 +253,20 @@ class PipelineSampleReport extends React.Component {
   }
 
   sortCompareFunction(a, b) {
-    let [ptype, pmetric] = this.sortParams["primary"]
-    let [stype, smetric] = this.sortParams["secondary"]
-    genus_a = this.state.genus_map[a.genus_taxid]
-    genus_b = this.state.genus_map[b.genus_taxid]
+    let [ptype, pmetric] = this.sortParams["primary"];
+    let [stype, smetric] = this.sortParams["secondary"];
+    let genus_a = this.state.genus_map[a.genus_taxid];
+    let genus_b = this.state.genus_map[b.genus_taxid];
 
-    genus_a_p_val = parseFloat(genus_a[ptype][pmetric])
-    genus_a_s_val = parseFloat(genus_a[stype][smetric])
-    a_p_val = parseFloat(a[ptype][pmetric])
-    a_s_val = parseFloat(a[stype][smetric])
+    let genus_a_p_val = parseFloat(genus_a[ptype][pmetric]);
+    let genus_a_s_val = parseFloat(genus_a[stype][smetric]);
+    let a_p_val = parseFloat(a[ptype][pmetric]);
+    let a_s_val = parseFloat(a[stype][smetric]);
 
-    genus_b_p_val = parseFloat(genus_b[ptype][pmetric])
-    genus_b_s_val = parseFloat(genus_b[stype][smetric])
-    b_p_val = parseFloat(b[ptype][pmetric])
-    b_s_val = parseFloat(b[stype][smetric])
+    let genus_b_p_val = parseFloat(genus_b[ptype][pmetric]);
+    let genus_b_s_val = parseFloat(genus_b[stype][smetric]);
+    let b_p_val = parseFloat(b[ptype][pmetric]);
+    let b_s_val = parseFloat(b[stype][smetric]);
     // compared at genus level descending and then species level descending
     //
     //
@@ -346,7 +353,7 @@ class PipelineSampleReport extends React.Component {
     for (var filter_key in this.state.new_filter_thresholds) {
       const threshold = this.state.new_filter_thresholds[filter_key]
       const key_parts = filter_key.split("_")
-      val = (taxon[key_parts[0]] || {})[key_parts[1]]
+      const val = (taxon[key_parts[0]] || {})[key_parts[1]]
       if (val < threshold) {
         //console.log([val, threshold, filter_key])
         return false;
@@ -356,9 +363,9 @@ class PipelineSampleReport extends React.Component {
   }
 
   applyThresholdFilters(candidate_taxons, play_animation = true) {
-    let thresholded_taxons = []
-    genus_taxon = {}
-    matched_taxons = []
+    let thresholded_taxons = [];
+    let genus_taxon = {};
+    let matched_taxons = [];
     for (var i = 0; i < candidate_taxons.length; i++) {
       let taxon = candidate_taxons[i]
       if (taxon.genus_taxid == taxon.tax_id) {
@@ -407,8 +414,8 @@ class PipelineSampleReport extends React.Component {
 
   // Remove this after fix sorting
   refreshPage(overrides) {
-    new_params = Object.assign({}, this.report_page_params, overrides);
-    window.location = location.protocol + '//' + location.host + location.pathname + '?' + jQuery.param(new_params);
+    const new_params = Object.assign({}, this.report_page_params, overrides);
+    window.location = location.protocol + '//' + location.host + location.pathname + '?' + $.param(new_params);
   }
 
   thresholdInputColumn(metric_token) {
@@ -452,7 +459,7 @@ class PipelineSampleReport extends React.Component {
   }
 
   category_to_adjective(category) {
-    category_lowercase = category.toLowerCase()
+    let category_lowercase = category.toLowerCase()
     switch(category_lowercase) {
       case "bacteria":
         return "bacterial"
@@ -488,11 +495,11 @@ class PipelineSampleReport extends React.Component {
       </div>;
     } else {
       // emphasize genus, soften category and species count
-      category_name = tax_info.tax_id == -200 ? '' : tax_info.category_name;
-      fake_or_real = tax_info.genus_taxid < 0 ? 'fake-genus' : 'real-genus';
-      right_arrow_initial_visibility = '';
-      down_arrow_initial_visibility = 'hidden';
-      plus_or_minus = <span>
+      let category_name = tax_info.tax_id == -200 ? '' : tax_info.category_name;
+      let fake_or_real = tax_info.genus_taxid < 0 ? 'fake-genus' : 'real-genus';
+      let right_arrow_initial_visibility = '';
+      let down_arrow_initial_visibility = 'hidden';
+      let plus_or_minus = <span>
         <span className={`report-arrow-down report-arrow ${tax_info.tax_id} ${fake_or_real} ${down_arrow_initial_visibility}`}>
           <i className={`fa fa-angle-down ${tax_info.tax_id}`} onClick={this.expandOrCollapseGenus}></i>
         </span>
@@ -511,20 +518,18 @@ class PipelineSampleReport extends React.Component {
 
   render_number(x, emphasize, num_decimals) {
     const is_blank = (x == 0) || (x == -100);
-    y = Number(x);
-    y = y.toFixed(num_decimals);
-    y = numberWithCommas(y);
+    let y = numberWithCommas(Number(x).toFixed(num_decimals));
     if (emphasize) {
       y = <b>{y}</b>;
     }
-    className = is_blank ? 'report-number-blank' : 'report-number';
+    const className = is_blank ? 'report-number-blank' : 'report-number';
     return ( <td className={className}>{y}</td> );
   }
 
   render_sort_arrow(column, desired_sort_direction, arrow_direction) {
-    desired_sort = column.toLowerCase();
-    className = `fa fa-caret-${arrow_direction}`;
-    current_sort = this.state.sort_by;
+    const desired_sort = column.toLowerCase();
+    let className = `fa fa-caret-${arrow_direction}`;
+    const current_sort = this.state.sort_by;
     if (current_sort == desired_sort) {
       className = 'active ' + className;
     }
@@ -561,7 +566,7 @@ class PipelineSampleReport extends React.Component {
         return `report-row-genus ${tax_info.genus_taxid} real-genus`;
       }
     }
-    initial_visibility = 'hidden';
+    const initial_visibility = 'hidden';
     if (tax_info.genus_taxid < 0) {
       return `report-row-species ${tax_info.genus_taxid} fake-genus ${initial_visibility}`;
     }
@@ -601,18 +606,18 @@ class PipelineSampleReport extends React.Component {
   render() {
     const parts = this.report_page_params.sort_by.split("_")
     const sort_column = parts[1] + "_" + parts[2];
-    var t0 = Date.now();
+    const t0 = Date.now();
 
-    filter_stats = this.state.rows_passing_filters + ' rows passing filters, out of ' + this.state.rows_total + ' total rows.';
-    disable_filter = this.anyFilterSet() ? (<span className="disable" onClick={(e) => this.refs.report_filter.resetAllFilters()}><b> Disable all filters</b></span> ) : null;
-    filter_row_stats = this.state.loading ? null : (
+    let filter_stats = this.state.rows_passing_filters + ' rows passing filters, out of ' + this.state.rows_total + ' total rows.';
+    let disable_filter = this.anyFilterSet() ? (<span className="disable" onClick={(e) => this.refs.report_filter.resetAllFilters()}><b> Disable all filters</b></span> ) : null;
+    let filter_row_stats = this.state.loading ? null : (
       <div id="filter-message" className="filter-message">
         <span className="count">
           {filter_stats} {disable_filter}
         </span>
       </div>
     );
-    report_filter =
+    const report_filter =
       <ReportFilter ref="report_filter"
         all_categories = { this.all_categories }
         all_backgrounds = { this.all_backgrounds }
@@ -627,14 +632,14 @@ class PipelineSampleReport extends React.Component {
         enableFilters = { this.enableFilters }
         resetAllFilters = { this.resetAllFilters }
       />;
-    download_button = (
+    const download_button = (
       <a href={`/samples/${this.sample_id}/report_csv?background_id=${this.report_details.background_model.id}`} className="download-report right">
         <div className="fa fa-cloud-download"/>
         <div>Download report</div>
       </a>
     );
-    right_arrow_initial_visibility = '';
-    result = (
+    const right_arrow_initial_visibility = '';
+    const result = (
       <div>
         <div id="reports" className="reports-screen tab-screen col s12">
           <div className="tab-screen-content">
@@ -707,8 +712,9 @@ class PipelineSampleReport extends React.Component {
         </div>
       </div>
     );
-    t1 = Date.now();
-    // console.log(`Table render took ${t1 - t0} milliseconds.`);
+    const t1 = Date.now();
     return result;
   }
 }
+
+export default PipelineSampleReport;
