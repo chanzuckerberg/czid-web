@@ -17,7 +17,6 @@ class Samples extends React.Component {
     this.sortSamples = this.sortSamples.bind(this);
     this.switchColumn = this.switchColumn.bind(this);
     this.handleProjectSelection = this.handleProjectSelection.bind(this);
-    this.handleViewAllSamples = this.handleViewAllSamples.bind(this);
     this.pageSize = props.pageSize || 30
     this.state = {
       project: null,
@@ -752,15 +751,12 @@ class Samples extends React.Component {
   handleProjectSelection(id) {
     this.setState({
       selectedProjectId: id,
+      pagesLoaded: 0,
       pageEnd: false
     }, () => {
       this.setUrlLocation();
       this.fetchProjectDetails(id);
     });
-  }
-
-  handleViewAllSamples() {
-    window.location.href = '/'
   }
 
   render() {
@@ -770,7 +766,6 @@ class Samples extends React.Component {
         allProjects = { this.allProjects }
         csrf = { this.csrf }
         selectProject = { this.handleProjectSelection }
-        viewAllSamples = { this.handleViewAllSamples }
       />;
 
     return (
