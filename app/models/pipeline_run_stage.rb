@@ -180,6 +180,9 @@ class PipelineRunStage < ApplicationRecord
     pr.total_reads = (stats_array[0] || {})['total_reads'] || 0
     stats_array = stats_array.select { |entry| entry.key?("task") }
 
+    version_s3_path = "#{sample_output_s3_path}/#{PipelineRun::VERSION_JSON_NAME}"
+    pr.version = `aws s3 cp #{version_s3_path} -`
+
     # TODO(yf): remove the following line
     pr.job_stats_attributes = stats_array
 
