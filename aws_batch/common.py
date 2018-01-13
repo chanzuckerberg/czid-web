@@ -10,7 +10,6 @@ import os
 
 STATS = []
 LOGGER = None
-OUTPUT_VERSIONS = []
 
 class Updater(object):
 
@@ -172,45 +171,26 @@ def run_and_log(logparams, target_outputs, lazy_run, func_name, *args):
     global LOGGER
     LOGGER = logging.getLogger()
     LOGGER.info("========== %s ==========" % logparams.get("title"))
-
     # copy log file -- start
     LOGGER.handlers[0].flush()
     execute_command("aws s3 cp %s %s/;" % (LOGGER.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
-
-    # record version
-    version_file_s3 = logparams.get("version_file_s3")
-    if version_file_s3:
-        version_json = execute_command_with_output("aws s3 cp %s -" % version_file_s3)
-        OUTPUT_VERSIONS.append(version_json)
-
-    # upload version output
-    output_version_file = logparams.get("output_version_file")
-    if output_version_file:
-        with open(output_version_file, 'wb') as f:
-            json.dump(OUTPUT_VERSIONS, f)
-        execute_command("aws s3 cp %s %s/;" % (output_version_file, logparams["sample_s3_output_path"]))
-
     # produce the output
     if lazy_run and all(os.path.isfile(output) for output in target_outputs):
         LOGGER.info("output exists, lazy run")
     else:
         func_name(*args)
         LOGGER.info("uploaded output")
-
     # copy log file -- after work is done
     execute_command("aws s3 cp %s %s/;" % (LOGGER.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
-
     # count records
     required_params = ["before_file_name", "before_file_type", "after_file_name", "after_file_type"]
     if logparams.get("count_reads") and all(param in logparams for param in required_params):
         records_before = count_reads(logparams["before_file_name"], logparams["before_file_type"])
         records_after = count_reads(logparams["after_file_name"], logparams["after_file_type"])
         STATS.append({'task': func_name.__name__, 'reads_before': records_before, 'reads_after': records_after})
-
     # copy log file -- end
     LOGGER.handlers[0].flush()
     execute_command("aws s3 cp %s %s/;" % (LOGGER.handlers[0].baseFilename, logparams["sample_s3_output_path"]))
-
     # write stats
     stats_path = logparams.get("stats_file")
     if stats_path and os.path.isfile(stats_path):
