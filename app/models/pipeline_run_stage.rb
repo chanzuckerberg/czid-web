@@ -212,6 +212,9 @@ class PipelineRunStage < ApplicationRecord
     stats_array = JSON.parse(File.read(downloaded_stats_path))
     stats_array = stats_array.select { |entry| entry.key?("task") }
 
+    version_s3_path = "#{sample_output_s3_path}/#{PipelineRun::VERSION_JSON_NAME}"
+    pr.version = `aws s3 cp #{version_s3_path} -`
+
     # only keep species level counts
     taxon_counts_attributes_filtered = []
     pipeline_output_dict['taxon_counts_attributes'].each do |tcnt|
