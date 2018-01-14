@@ -1,13 +1,13 @@
 <div id="SampleUpload">
   <%= javascript_tag do %>
     react_component('SampleUpload', {
-      selectedSample: JSON.parse('<%= raw @sample.to_json %>'),
-      projectInfo: JSON.parse('<%= raw @project_info.to_json %>'),
-      projects: JSON.parse('<%= raw @projects.to_json %>'),
-      host_genomes: JSON.parse('<%= raw @host_genomes.to_json %>')
+      selectedSample: JSON.parse('<%= raw escape_json(@sample) %>'),
+      projectInfo: JSON.parse('<%= raw escape_json(@project_info) %>'),
+      projects: JSON.parse('<%= raw escape_json(@projects) %>'),
+      host_genomes: JSON.parse('<%= raw escape_json(@host_genomes) %>')
       csrf: '<%= form_authenticity_token %>',
-      inputFiles: JSON.parse('<%= raw @input_files.to_json %>'),
-      loggedin_user: JSON.parse('<%= raw current_user.to_json %>')
+      inputFiles: JSON.parse('<%= raw escape_json(@input_files) %>'),
+      loggedin_user: JSON.parse('<%= raw escape_json(current_user) %>')
     }, 'SampleUpload');
   <% end %>
 </div>

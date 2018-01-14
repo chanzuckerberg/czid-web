@@ -2,7 +2,7 @@
   <% if current_user && current_user.admin %>
     <%= javascript_tag do %>
       react_component('CreateUser', {
-        user: JSON.parse('<%= raw @user.to_json %>'),
+        user: JSON.parse('<%= raw escape_json(@user) %>'),
         csrf: '<%= form_authenticity_token %>',
       }, 'user_create_page');
     <% end %>

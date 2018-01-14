@@ -13,4 +13,10 @@ module ApplicationHelper
       end
     end
   end
+
+  def escape_json(hash)
+    str = hash.to_json unless hash.class == 'String'
+    str = str.gsub!("\\", "\\\\\\") if str.include? "\\"
+    str
+  end
 end
