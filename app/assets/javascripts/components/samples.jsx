@@ -13,6 +13,7 @@ class Samples extends React.Component {
     this.fetchResults = this.fetchResults.bind(this);
     this.fetchSamples = this.fetchSamples.bind(this);
     this.handleStatusFilterSelect = this.handleStatusFilterSelect.bind(this);
+    this.handleTissueFilterSelect = this.handleTissueFilterSelect.bind(this);
     this.setUrlLocation = this.setUrlLocation.bind(this);
     this.sortSamples = this.sortSamples.bind(this);
     this.switchColumn = this.switchColumn.bind(this);
@@ -25,6 +26,7 @@ class Samples extends React.Component {
       selectedProjectId: this.fetchParams('project_id') || null,
       filterParams: this.fetchParams('filter') || '',
       searchParams: this.fetchParams('search') || '',
+      tissueParams: this.fetchParams('tissue') || '',
       sampleIdsParams: this.fetchParams('ids') || [],
       allSamples: [],
       sort_by: this.fetchParams('sort_by') || 'id,desc',
@@ -351,7 +353,7 @@ class Samples extends React.Component {
 
   //fetch project, filter and search params
   getParams() {
-    let params = `filter=${this.state.filterParams}&page=${this.state.pagesLoaded+1}&search=${this.state.searchParams}&sort_by=${this.state.sort_by}`;
+    let params = `filter=${this.state.filterParams}&tissue=${this.state.tissueParams}&page=${this.state.pagesLoaded+1}&search=${this.state.searchParams}&sort_by=${this.state.sort_by}`;
     let projectId = parseInt(this.state.selectedProjectId);
 
     if(projectId) {
@@ -578,6 +580,42 @@ class Samples extends React.Component {
       </div>
     );
 
+   const filterTissueDropDown = (
+        <div className='dropdown-status-filtering'>
+        <li>
+          <a className="title">
+            <b>Filter tissue</b>
+          </a>
+        </li>
+        <li className="filter-item" data-status="Bronchoalveolar lavage" onClick={ this.handleTissueFilterSelect } ><a data-status="Bronchoalveolar lavage"className="filter-item waiting">Bronchoalveolar lavage</a><i className="filter fa fa-check hidden"></i></li>
+        <li className="filter-item" data-status="Cerebrospinal fluid" onClick={ this.handleTissueFilterSelect }><a data-status="Cerebrospinal fluid" className="filter-item uploading">Cerebrospinal fluid</a><i data-status="Cerebrospinal fluid" className="filter fa fa-check hidden"></i></li>
+        <li className="filter-item" data-status="Nasopharyngeal swab" onClick={ this.handleTissueFilterSelect }><a data-status="Nasopharyngeal swab" className="filter-item complete">Nasopharyngeal swab</a><i  data-status="Nasopharyngeal swab" className="filter fa fa-check hidden"></i></li>
+        <li className="filter-item" onClick={ this.handleTissueFilterSelect } data-status="Plasma" ><a data-status="Plasma" className="filter-item failed">Plasma</a><i data-status="Plasma" className="filter fa fa-check hidden"></i></li>
+        <li className="filter-item" data-status="Serum" onClick={ this.handleTissueFilterSelect }><a data-status="Serum" className="filter-item all">Serum</a><i data-status="Serum"  className="filter all fa fa-check hidden"></i></li>
+        <li className="filter-item" data-status="Solid tissue" onClick={ this.handleTissueFilterSelect }><a data-status="Solid tissue" className="filter-item all">Solid tissue</a><i data-status="Solid tissue" className="filter all fa fa-check hidden"></i></li>
+        <li className="filter-item" data-status="Stool" onClick={ this.handleTissueFilterSelect }><a  data-status="Stool" className="filter-item all">Stool</a><i  data-status="Stool" className="filter all fa fa-check hidden"></i></li>
+        <li className="filter-item" data-status="Synovial fluid" onClick={ this.handleTissueFilterSelect }><a data-status="Synovial fluid" className="filter-item all">Synovial fluid</a><i data-status="Synovial fluid" className="filter all fa fa-check hidden"></i></li>
+        <li className="filter-item" data-status="Whole blood" onClick={ this.handleTissueFilterSelect }><a data-status="Whole blood" className="filter-item all">Whole blood</a><i data-status="Whole blood" className="filter all fa fa-check hidden"></i></li>
+        <li className="divider"/>
+      </div>
+   )
+
+   const filterStatus = (
+        <div className='dropdown-status-filtering'>
+          <li>
+            <a className="title">
+              <b>Filter status</b>
+            </a>
+          </li>
+          <li className="filter-item" data-status="WAITING" onClick={ this.handleStatusFilterSelect } ><a data-status="WAITING" className="filter-item waiting">Waiting</a><i data-status="WAITING" className="filter fa fa-check hidden"></i></li>
+          <li className="filter-item" data-status="UPLOADING" onClick={ this.handleStatusFilterSelect }><a data-status="UPLOADING" className="filter-item uploading">In Progress</a><i data-status="UPLOADING"  className="filter fa fa-check hidden"></i></li>
+          <li className="filter-item" data-status="CHECKED" onClick={ this.handleStatusFilterSelect }><a data-status="CHECKED" className="filter-item complete">Complete</a><i data-status="CHECKED" className="filter fa fa-check hidden"></i></li>
+          <li className="filter-item" onClick={ this.handleStatusFilterSelect } data-status="FAILED" ><a data-status="FAILED" className="filter-item failed">Failed</a><i data-status="FAILED" className="filter fa fa-check hidden"></i></li>
+          <li className="filter-item" data-status="ALL" onClick={ this.handleStatusFilterSelect }><a data-status="ALL" className="filter-item all">All</a><i data-status="ALL" className="filter all fa fa-check hidden"></i></li>
+          <li className="divider"/>
+        </div>
+   )
+  
     const tableHead = (
       <div className='col s12 sample-feed-head no-padding samples-table-head'>
         <div className='samples-card white'>
@@ -603,19 +641,8 @@ class Samples extends React.Component {
 
                       <ul className='dropdown-content column-dropdown' id={`column-dropdown-${pos}`}>
                         { column_name === 'pipeline_status' ?
-                          <div className='dropdown-status-filtering'>
-                            <li>
-                              <a className="title">
-                                <b>Filter status</b>
-                              </a>
-                            </li>
-                            <li className="filter-item" data-status="WAITING" onClick={ this.handleStatusFilterSelect } ><a data-status="WAITING" className="filter-item waiting">Waiting</a><i data-status="WAITING" className="filter fa fa-check hidden"></i></li>
-                            <li className="filter-item" data-status="UPLOADING" onClick={ this.handleStatusFilterSelect }><a data-status="UPLOADING" className="filter-item uploading">In Progress</a><i data-status="UPLOADING"  className="filter fa fa-check hidden"></i></li>
-                            <li className="filter-item" data-status="CHECKED" onClick={ this.handleStatusFilterSelect }><a data-status="CHECKED" className="filter-item complete">Complete</a><i data-status="CHECKED" className="filter fa fa-check hidden"></i></li>
-                            <li className="filter-item" onClick={ this.handleStatusFilterSelect } data-status="FAILED" ><a data-status="FAILED" className="filter-item failed">Failed</a><i data-status="FAILED" className="filter fa fa-check hidden"></i></li>
-                            <li className="filter-item" data-status="ALL" onClick={ this.handleStatusFilterSelect }><a data-status="ALL" className="filter-item all">All</a><i data-status="ALL" className="filter all fa fa-check hidden"></i></li>
-                            <li className="divider"/>
-                          </div> : ''}
+                          <div>{filterStatus}</div> : ( column_name === 'tissue_type' ? <div>{filterTissueDropDown}</div> : "") 
+                        }
                         <li>
                           <a className="title">
                             <b>Switch column</b>
@@ -697,7 +724,6 @@ class Samples extends React.Component {
     // this.initializeProjectList();
     this.displayPipelineStatusFilter();
     this.initializeColumnSelect();
-
   }
 
   initializeColumnSelect() {
@@ -736,12 +762,26 @@ class Samples extends React.Component {
     });
   }
 
+  handleTissueFilterSelect(e) {
+    e.preventDefault();
+    let status = e.target.getAttribute('data-status');
+    this.setState({
+      pagesLoaded: 0,
+      pageEnd: false,
+      tissueParams: status
+    }, () => {
+      this.setUrlLocation();
+      this.fetchResults();
+    });
+  }
+
   //set Url based on requests
   setUrlLocation() {
     let projectId = parseInt(this.state.selectedProjectId);
     const params = {
       project_id: projectId ? projectId : null,
       filter: this.state.filterParams,
+      tissue: this.state.tissueParams,
       search: this.state.searchParams,
       sort_by: this.state.sort_by
     };
