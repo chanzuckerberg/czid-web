@@ -32,6 +32,10 @@ class PipelineRun < ApplicationRecord
   before_save :check_job_status
   after_create :kickoff_job
 
+  def as_json(_options = {})
+    super(except: [:command, :command_stdout, :command_error, :job_description])
+  end
+
   def check_box_label
     "#{sample.project.name} : #{sample.name} (#{id})"
   end
