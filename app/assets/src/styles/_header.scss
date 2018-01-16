@@ -1,8 +1,8 @@
-.tooltip {
+.tooltip, .tipsy {
   &.in {
     opacity: 1 !important;
   }
-  .tooltip-inner {
+  .tooltip-inner, .tipsy-inner {
     font-size: 0.80rem;
     text-align: left;
     max-width: 200px;

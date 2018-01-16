@@ -2,6 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import $ from 'jquery';
+import Tipsy from 'react-tipsy';
 import Samples from './Samples';
 import ReportFilter from './ReportFilter';
 import numberWithCommas from '../helpers/strings';
@@ -71,7 +72,6 @@ class PipelineSampleReport extends React.Component {
     this.collapseTable = this.collapseTable.bind(this);
 
     this.handleThresholdEnter = this.handleThresholdEnter.bind(this);
-    this.initializeTooltip();
   }
 
   componentWillMount() {
@@ -220,26 +220,6 @@ class PipelineSampleReport extends React.Component {
       el.offsetHeight; /* trigger reflow */
     }
     $(`.filter-message`).addClass('flash')
-  }
-
-  initializeTooltip() {
-    // only updating the tooltip offset when the component is loaded
-    $(() => {
-      const tooltipIdentifier = $("[rel='tooltip']");
-      tooltipIdentifier.tooltip({
-        delay: 0,
-        html: true,
-        placement: 'top',
-        offset: '0px 50px'
-      });
-      $('.sort-controls').hover(() => {
-        const selectTooltip = $('.tooltip');
-        const leftOffset = parseInt(selectTooltip.css('left'));
-        if(!isNaN(leftOffset)) {
-          selectTooltip.css('left', leftOffset - 15);
-        }
-      });
-    });
   }
 
   // applySort needs to be bound at time of use, not in constructor above
@@ -546,14 +526,16 @@ class PipelineSampleReport extends React.Component {
     const report_column_threshold = this.thresholdInputColumn(column_name);
     return (
       <th style={style}>
-        <div className='sort-controls left' rel='tooltip' title={tooltip_message}>
-          {this.render_sort_arrow(column_name, 'highest', 'down')}
-          {`${visible_type} `}
-          {visible_metric}
-        </div>
-        <div className='sort-controls left' rel='tooltip' data-placement='bottom' title='Threshold'>
-          {report_column_threshold}
-        </div>
+        <Tipsy content={tooltip_message} placement="top">
+          <div className='sort-controls center left'>
+            {this.render_sort_arrow(column_name, 'highest', 'down')}
+            {`${visible_type} `}
+            {visible_metric}
+          </div>
+        </Tipsy>
+        <Tipsy content='Threshold' placement="bottom">
+          { report_column_threshold }
+        </Tipsy>
       </th>
     );
   }

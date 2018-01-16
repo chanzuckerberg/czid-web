@@ -3,6 +3,7 @@ import axios from 'axios';
 import ReactDOM from 'react-dom';
 import moment from 'moment';
 import $ from 'jquery';
+import Tipsy from 'react-tipsy';
 import SortHelper from './SortHelper';
 import numberWithCommas from '../helpers/strings';
 import ProjectSelection from './ProjectSelection';
@@ -93,18 +94,6 @@ class Samples extends React.Component {
     $('.page-loading').css('display', 'none');
   }
 
-  initializeTooltip() {
-    // only updating the tooltip offset when the component is loaded
-    $(() => {
-      const tooltipIdentifier = $("[rel='tooltip']");
-      tooltipIdentifier.tooltip({
-        delay: 0,
-        html: true,
-        placement: 'top',
-        offset: '0px 50px'
-      });
-    });
-  }
 
   sortSamples() {
     this.sortCount += 1;
@@ -610,12 +599,21 @@ class Samples extends React.Component {
               { this.state.columnsShown.map((column_name, pos) => {
                 return (
                   <li key={`shown-${pos}`}>
-                    <div className='card-label column-title center-label sample-name center menu-dropdown' rel='tooltip'
-                      data-activates={`column-dropdown-${pos}`} data-placement='bottom'
-                      data-original-title={ this.COLUMN_DISPLAY_MAP[column_name].tooltip }>
-                      {this.COLUMN_DISPLAY_MAP[column_name].display_name } <i className="fa fa-caret-down"/>
-                    </div>
-
+                    {
+                      this.COLUMN_DISPLAY_MAP[column_name].tooltip ?
+                      <Tipsy position='bottom'
+                        content={this.COLUMN_DISPLAY_MAP[column_name].tooltip}>
+                        <div className='card-label column-title center-label sample-name center menu-dropdown'
+                          data-activates={`column-dropdown-${pos}`}>
+                          {this.COLUMN_DISPLAY_MAP[column_name].display_name } <i className="fa fa-caret-down"/>
+                        </div>
+                      </Tipsy>
+                      :
+                      <div className='card-label column-title center-label sample-name center menu-dropdown'
+                        data-activates={`column-dropdown-${pos}`}>
+                        {this.COLUMN_DISPLAY_MAP[column_name].display_name } <i className="fa fa-caret-down"/>
+                      </div>
+                    }
                       <ul className='dropdown-content column-dropdown' id={`column-dropdown-${pos}`}>
                         { column_name === 'pipeline_status' ?
                           <div className='dropdown-status-filtering'>
@@ -705,7 +703,6 @@ class Samples extends React.Component {
       $('body').addClass('background-cover');
     });
 
-    this.initializeTooltip();
     this.fetchProjectPageData();
     this.state.selectedProjectId ? this.fetchProjectDetails(this.state.selectedProjectId) : null;
     this.scrollDown();
