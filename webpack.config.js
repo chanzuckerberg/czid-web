@@ -30,7 +30,7 @@ const config = {
       test: /\.(sass|css|scss)$/,
       loader: extractTextPlugin.extract({
         fallback: 'style-loader',
-        use: 'css-loader!sass-loader'
+        use: 'css-loader?{"minimize":true}!sass-loader'
       })
     },
     {
