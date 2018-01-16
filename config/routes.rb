@@ -18,6 +18,8 @@ Rails.application.routes.draw do
     get :bulk_import, on: :collection
     get :nonhost_fasta, on: :member
     get :unidentified_fasta, on: :member
+    get :results_folder, on: :member
+    get :fastqs_folder, on: :member
     post :bulk_upload, on: :collection
     post :save_metadata, on: :member
   end
