@@ -190,6 +190,7 @@ module ReportHelper
   def fetch_taxon_counts(pipeline_run_id, background_id)
     pipeline_run = PipelineRun.find(pipeline_run_id)
     total_reads = pipeline_run.total_reads if pipeline_run
+    adjusted_total_reads = total_reads * pipeline_run.subsample_fraction if pipeline_run
     # Note: stdev is never 0
     # Note: connection.select_all is TWICE faster than TaxonCount.select
     # (I/O latency goes from 2 seconds -> 0.8 seconds)
@@ -202,11 +203,11 @@ module ReportHelper
         taxon_counts.name                AS  name,
         taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
         taxon_counts.count               AS  r,
-        (count / #{total_reads}.0
+        (count / #{adjusted_total_reads}.0
           * 1000000.0)                   AS  rpm,
         IF(
           stdev IS NOT NULL,
-          GREATEST(#{ZSCORE_MIN}, LEAST(#{ZSCORE_MAX}, (((count / #{total_reads}.0 * 1000000.0) - mean) / stdev))),
+          GREATEST(#{ZSCORE_MIN}, LEAST(#{ZSCORE_MAX}, (((count / #{adjusted_total_reads}.0 * 1000000.0) - mean) / stdev))),
           #{ZSCORE_WHEN_ABSENT_FROM_BACKGROUND}
         )
                                          AS  zscore,

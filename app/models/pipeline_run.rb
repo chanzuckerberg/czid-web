@@ -266,6 +266,16 @@ class PipelineRun < ApplicationRecord
     ")
   end
 
+  def subsample_fraction
+    # 'subsample' is number of read pairs to subsample to, after host filtering
+    # 'remaining_reads' is number of individual reads remaining after host filtering
+    if subsample && 2*subsample < remaining_reads
+      return (2.0*subsample) / remaining_reads
+    else
+      return 1
+    end
+  end
+
   def count_unmapped_reads
     unidentified_fasta = get_s3_file(sample.unidentified_fasta_s3_path)
     unidentified_fasta.lines.select { |line| line.start_with? '>' }.count if unidentified_fasta
