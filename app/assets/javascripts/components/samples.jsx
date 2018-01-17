@@ -714,7 +714,6 @@ class Samples extends React.Component {
       $('.filter').hide();
       $('body').addClass('background-cover');
     });
-    PipelineSampleReads.fetchTissueTypes();
     this.initializeTooltip();
     this.fetchProjectPageData();
     this.state.selectedProjectId ? this.fetchProjectDetails(this.state.selectedProjectId) : null;
