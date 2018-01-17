@@ -152,6 +152,7 @@ class PipelineRunStage < ApplicationRecord
     batch_command_env_variables = "FASTQ_BUCKET=#{sample.sample_input_s3_path} INPUT_BUCKET=#{sample.sample_output_s3_path} " \
       "OUTPUT_BUCKET=#{sample.sample_output_s3_path} FILE_TYPE=#{file_type} ENVIRONMENT=#{Rails.env} DB_SAMPLE_ID=#{sample.id} " \
       "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} "
+    batch_command_env_variables += "SUBSAMPLE=#{pipeline_run.subsample} " if pipeline_run.subsample
     batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline non_host_alignment"
     command = "aegea batch submit --command=\"#{batch_command}\" "
     queue = sample.job_queue.present? ? sample.job_queue : Sample::DEFAULT_QUEUE
