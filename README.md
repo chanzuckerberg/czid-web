@@ -3,7 +3,7 @@
 This app stores and analyzes the output from the infectious disease pipeline.
 
 
-## Setup 
+## Setup
 
 To get a local `development` instance running on a Mac OS X computer, just do:
 ```
