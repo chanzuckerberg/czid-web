@@ -2,9 +2,11 @@ class PipelineRunStage < ApplicationRecord
   include ApplicationHelper
   include PipelineOutputsHelper
   belongs_to :pipeline_run
+
   DEFAULT_MEMORY_IN_MB = 16_000
   DEFAULT_STORAGE_IN_GB = 500
   JOB_TYPE_BATCH = 1
+  COMMIT_SHA_FILE_ON_WORKER = "/mnt/idseq-pipeline/commit-sha.txt".freeze
 
   STATUS_STARTED = 'STARTED'.freeze
   STATUS_FAILED  = 'FAILED'.freeze
@@ -13,6 +15,13 @@ class PipelineRunStage < ApplicationRecord
   STATUS_ERROR = 'ERROR'.freeze
 
   before_save :check_job_status
+
+  def install_pipeline
+    "cd /mnt; " \
+    "git clone https://github.com/chanzuckerberg/idseq-pipeline.git; " \
+    "cd idseq-pipeline; git rev-parse master > #{COMMIT_SHA_FILE_ON_WORKER}; " \
+    "pip install -e .[test]"
+  end
 
   def check_job_status
     return if completed? || !started? || !id
@@ -118,21 +127,18 @@ class PipelineRunStage < ApplicationRecord
   ########### STAGE SPECIFIC FUNCTIONS BELOW ############
 
   def host_filtering_command
-    script_name = File.basename(IdSeqPipeline::S3_HOST_FILTER_SCRIPT_LOC)
-    common_script_name = File.basename(IdSeqPipeline::S3_COMMON_SCRIPT_LOC)
     sample = pipeline_run.sample
     file_type = sample.input_files.first.file_type
     batch_command_env_variables = "INPUT_BUCKET=#{sample.sample_input_s3_path} OUTPUT_BUCKET=#{sample.sample_output_s3_path} " \
-      "FILE_TYPE=#{file_type} DB_SAMPLE_ID=#{sample.id}"
+      "FILE_TYPE=#{file_type} DB_SAMPLE_ID=#{sample.id} " \
+      "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} "
     if sample.s3_star_index_path.present?
       batch_command_env_variables += " STAR_GENOME=#{sample.s3_star_index_path} "
     end
     if sample.s3_bowtie2_index_path.present?
       batch_command_env_variables += " BOWTIE2_GENOME=#{sample.s3_bowtie2_index_path} "
     end
-    batch_command = "aws s3 cp #{IdSeqPipeline::S3_HOST_FILTER_SCRIPT_LOC} .; chmod 755 #{script_name}; " \
-      "aws s3 cp #{IdSeqPipeline::S3_COMMON_SCRIPT_LOC} .; chmod 755 #{common_script_name}; " +
-                    batch_command_env_variables + " ./#{script_name}"
+    batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline host_filtering"
     command = "aegea batch submit --command=\"#{batch_command}\" "
     memory = sample.sample_memory.present? ? sample.sample_memory : Sample::DEFAULT_MEMORY
     queue =  sample.job_queue.present? ? sample.job_queue : Sample::DEFAULT_QUEUE
@@ -141,15 +147,12 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def alignment_command
-    script_name = File.basename(IdSeqPipeline::S3_ALIGNMENT_SCRIPT_LOC)
-    common_script_name = File.basename(IdSeqPipeline::S3_COMMON_SCRIPT_LOC)
     sample = pipeline_run.sample
     file_type = sample.input_files.first.file_type
     batch_command_env_variables = "FASTQ_BUCKET=#{sample.sample_input_s3_path} INPUT_BUCKET=#{sample.sample_output_s3_path} " \
-      "OUTPUT_BUCKET=#{sample.sample_output_s3_path} FILE_TYPE=#{file_type} ENVIRONMENT=#{Rails.env} DB_SAMPLE_ID=#{sample.id}"
-    batch_command = "aws s3 cp #{IdSeqPipeline::S3_ALIGNMENT_SCRIPT_LOC} .; chmod 755 #{script_name}; " \
-      "aws s3 cp #{IdSeqPipeline::S3_COMMON_SCRIPT_LOC} .; chmod 755 #{common_script_name}; " +
-                    batch_command_env_variables + " ./#{script_name}"
+      "OUTPUT_BUCKET=#{sample.sample_output_s3_path} FILE_TYPE=#{file_type} ENVIRONMENT=#{Rails.env} DB_SAMPLE_ID=#{sample.id} " \
+      "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} "
+    batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline non_host_alignment"
     command = "aegea batch submit --command=\"#{batch_command}\" "
     queue = sample.job_queue.present? ? sample.job_queue : Sample::DEFAULT_QUEUE
     command += " --storage /mnt=#{DEFAULT_STORAGE_IN_GB} --ecr-image idseq --memory #{DEFAULT_MEMORY_IN_MB} --queue #{queue} --vcpus 4"
@@ -157,14 +160,11 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def postprocess_command
-    script_name = File.basename(IdSeqPipeline::S3_POSTPROCESS_SCRIPT_LOC)
-    common_script_name = File.basename(IdSeqPipeline::S3_COMMON_SCRIPT_LOC)
     sample = pipeline_run.sample
     batch_command_env_variables = "INPUT_BUCKET=#{sample.sample_output_s3_path} " \
-      "OUTPUT_BUCKET=#{sample.sample_postprocess_s3_path} "
-    batch_command = "aws s3 cp #{IdSeqPipeline::S3_POSTPROCESS_SCRIPT_LOC} .; chmod 755 #{script_name}; " \
-      "aws s3 cp #{IdSeqPipeline::S3_COMMON_SCRIPT_LOC} .; chmod 755 #{common_script_name}; " +
-                    batch_command_env_variables + " ./#{script_name}"
+      "OUTPUT_BUCKET=#{sample.sample_postprocess_s3_path} " \
+      "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} "
+    batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline postprocess"
     command = "aegea batch submit --command=\"#{batch_command}\" "
     queue = sample.job_queue.present? ? sample.job_queue : Sample::DEFAULT_QUEUE
     command += " --storage /mnt=#{DEFAULT_STORAGE_IN_GB} --ecr-image idseq --memory #{DEFAULT_MEMORY_IN_MB} --queue #{queue} --vcpus 4"
@@ -179,6 +179,9 @@ class PipelineRunStage < ApplicationRecord
     stats_array = JSON.parse(File.read(downloaded_stats_path))
     pr.total_reads = (stats_array[0] || {})['total_reads'] || 0
     stats_array = stats_array.select { |entry| entry.key?("task") }
+
+    version_s3_path = "#{sample_output_s3_path}/#{PipelineRun::VERSION_JSON_NAME}"
+    pr.version = `aws s3 cp #{version_s3_path} -`
 
     # TODO(yf): remove the following line
     pr.job_stats_attributes = stats_array
@@ -208,6 +211,9 @@ class PipelineRunStage < ApplicationRecord
 
     stats_array = JSON.parse(File.read(downloaded_stats_path))
     stats_array = stats_array.select { |entry| entry.key?("task") }
+
+    version_s3_path = "#{sample_output_s3_path}/#{PipelineRun::VERSION_JSON_NAME}"
+    pr.version = `aws s3 cp #{version_s3_path} -`
 
     # only keep species level counts
     taxon_counts_attributes_filtered = []
