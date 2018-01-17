@@ -175,13 +175,13 @@ module SamplesHelper
       (Time.current - pipeline_run.created_at)
     end
   end
-  
+
   def filter_by_tissue_type(samples, query)
-    if query == '-'
-      samples = samples.where({sample_tissue: nil})
-    else
-      samples = samples.where(sample_tissue: query)
-    end
+    samples = if query == '-'
+                samples.where(sample_tissue: nil)
+              else
+                samples.where(sample_tissue: query)
+              end
     samples
   end
 
