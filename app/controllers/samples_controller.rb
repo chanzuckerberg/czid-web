@@ -4,7 +4,7 @@ class SamplesController < ApplicationController
   include PipelineOutputsHelper
 
   before_action :authenticate_user!, only: [:new, :index, :update, :destroy, :edit, :show, :reupload_source, :kickoff_pipeline, :bulk_new, :bulk_import, :bulk_upload]
-  before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta]
+  before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder]
   acts_as_token_authentication_handler_for User, only: [:create, :bulk_upload], fallback: :devise
   protect_from_forgery unless: -> { request.format.json? }
   PAGE_SIZE = 30
@@ -214,6 +214,18 @@ class SamplesController < ApplicationController
   def unidentified_fasta
     @unidentified_fasta = get_s3_file(@sample.unidentified_fasta_s3_path)
     send_data @unidentified_fasta, filename: @sample.name + '_unidentified.fasta'
+  end
+
+  def results_folder
+    @file_list = @sample.results_folder_files
+    @file_path = "#{@sample.sample_path}/results/"
+    render template: "samples/folder"
+  end
+
+  def fastqs_folder
+    @file_list = @sample.fastqs_folder_files
+    @file_path = "#{@sample.sample_path}/fastqs/"
+    render template: "samples/folder"
   end
 
   # GET /samples/new

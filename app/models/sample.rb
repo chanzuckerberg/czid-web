@@ -78,6 +78,33 @@ class Sample < ApplicationRecord
     end
   end
 
+  def self.get_signed_url(s3key)
+    begin
+      if s3key.present?
+        return S3_PRESIGNER.presigned_url(:get_object,
+                                          bucket: SAMPLES_BUCKET_NAME, key: s3key,
+                                          expires_in: SAMPLE_DOWNLOAD_EXPIRATION).to_s
+      end
+    rescue StandardError => e
+      Airbrake.notify("AWS presign error: #{e.inspect}")
+    end
+    nil
+  end
+
+  def results_folder_files
+    file_list = S3_CLIENT.list_objects(bucket: SAMPLES_BUCKET_NAME,
+                                       prefix: "#{sample_path}/results/",
+                                       delimiter: "/")
+    file_list.contents.map { |f| { key: f.key, url: Sample.get_signed_url(f.key) } }
+  end
+
+  def fastqs_folder_files
+    file_list = S3_CLIENT.list_objects(bucket: SAMPLES_BUCKET_NAME,
+                                       prefix: "#{sample_path}/fastqs/",
+                                       delimiter: "/")
+    file_list.contents.map { |f| { key: f.key, url: Sample.get_signed_url(f.key) } }
+  end
+
   def initiate_input_file_upload
     return unless input_files.first.source_type == InputFile::SOURCE_TYPE_S3
     Resque.enqueue(InitiateS3Cp, id)
