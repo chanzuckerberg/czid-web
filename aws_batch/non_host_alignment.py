@@ -821,13 +821,13 @@ def run_stage2(lazy_run = True):
     # run_annotate_gsnapl_m8_with_taxids
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "annotate gsnapl m8 with taxids", "count_reads": False})
-    run_and_log(logparams, TARGET_OUTPUTS["run_annotate_m8_with_taxids__1"], False, run_annotate_m8_with_taxids,
+    run_and_log(logparams, TARGET_OUTPUTS["run_annotate_m8_with_taxids__1"], lazy_run, run_annotate_m8_with_taxids,
         os.path.join(RESULT_DIR, GSNAPL_DEDUP_OUT), os.path.join(RESULT_DIR, ANNOTATE_GSNAPL_M8_WITH_TAXIDS_OUT))
 
     # run_generate_taxid_annotated_fasta_from_m8
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "generate taxid annotated fasta from m8", "count_reads": False})
-    run_and_log(logparams, TARGET_OUTPUTS["run_generate_taxid_annotated_fasta_from_m8__1"], False,
+    run_and_log(logparams, TARGET_OUTPUTS["run_generate_taxid_annotated_fasta_from_m8__1"], lazy_run,
         run_generate_taxid_annotated_fasta_from_m8, os.path.join(RESULT_DIR, GSNAPL_DEDUP_OUT),
         merged_fasta, os.path.join(RESULT_DIR, GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT), 'NT')
 
@@ -835,14 +835,14 @@ def run_stage2(lazy_run = True):
         {"title": "filter deuterostomes from m8__1", "count_reads": True,
         "before_file_name": os.path.join(RESULT_DIR, ANNOTATE_GSNAPL_M8_WITH_TAXIDS_OUT), "before_file_type": "m8",
         "after_file_name": os.path.join(RESULT_DIR, FILTER_DEUTEROSTOMES_FROM_NT_M8_OUT), "after_file_type": "m8"})
-    run_and_log(logparams, TARGET_OUTPUTS["run_filter_deuterostomes_from_m8__1"], False,
+    run_and_log(logparams, TARGET_OUTPUTS["run_filter_deuterostomes_from_m8__1"], lazy_run,
         run_filter_deuterostomes_from_m8,
         os.path.join(RESULT_DIR, ANNOTATE_GSNAPL_M8_WITH_TAXIDS_OUT),
         os.path.join(RESULT_DIR, FILTER_DEUTEROSTOMES_FROM_NT_M8_OUT))
 
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "generate taxid outputs from m8", "count_reads": False})
-    run_and_log(logparams, TARGET_OUTPUTS["run_generate_taxid_outputs_from_m8__1"], False,
+    run_and_log(logparams, TARGET_OUTPUTS["run_generate_taxid_outputs_from_m8__1"], lazy_run,
         run_generate_taxid_outputs_from_m8,
         os.path.join(RESULT_DIR, FILTER_DEUTEROSTOMES_FROM_NT_M8_OUT),
         os.path.join(RESULT_DIR, NT_M8_TO_TAXID_COUNTS_FILE_OUT),
@@ -853,7 +853,7 @@ def run_stage2(lazy_run = True):
     # filter deuterostomes
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "filter deuterostomes from FASTA", "count_reads": False})
-    run_and_log(logparams, TARGET_OUTPUTS["run_filter_deuterostomes_from_fasta"], False,
+    run_and_log(logparams, TARGET_OUTPUTS["run_filter_deuterostomes_from_fasta"], lazy_run,
         run_filter_deuterostomes_from_fasta,
         os.path.join(RESULT_DIR, GENERATE_TAXID_ANNOTATED_FASTA_FROM_M8_OUT),
         os.path.join(RESULT_DIR, FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT), 'NT')
@@ -870,13 +870,13 @@ def run_stage2(lazy_run = True):
     # run_annotate_m8_with_taxids
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "annotate m8 with taxids", "count_reads": False})
-    run_and_log(logparams, TARGET_OUTPUTS["run_annotate_m8_with_taxids__2"], False, run_annotate_m8_with_taxids,
+    run_and_log(logparams, TARGET_OUTPUTS["run_annotate_m8_with_taxids__2"], lazy_run, run_annotate_m8_with_taxids,
         os.path.join(RESULT_DIR, RAPSEARCH2_OUT), os.path.join(RESULT_DIR, ANNOTATE_RAPSEARCH2_M8_WITH_TAXIDS_OUT))
 
     # run_generate_taxid_annotated_fasta_from_m8
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "generate taxid annotated fasta from m8", "count_reads": False})
-    run_and_log(logparams, TARGET_OUTPUTS["run_generate_taxid_annotated_fasta_from_m8__2"], False,
+    run_and_log(logparams, TARGET_OUTPUTS["run_generate_taxid_annotated_fasta_from_m8__2"], lazy_run,
         run_generate_taxid_annotated_fasta_from_m8,
         RESULT_DIR + '/' + RAPSEARCH2_OUT,
         RESULT_DIR + '/' + FILTER_DEUTEROSTOME_FROM_TAXID_ANNOTATED_FASTA_OUT,
@@ -887,14 +887,14 @@ def run_stage2(lazy_run = True):
         {"title": "filter deuterostomes from m8", "count_reads": True,
         "before_file_name": os.path.join(RESULT_DIR, ANNOTATE_RAPSEARCH2_M8_WITH_TAXIDS_OUT), "before_file_type": "m8",
         "after_file_name": os.path.join(RESULT_DIR, FILTER_DEUTEROSTOMES_FROM_NR_M8_OUT), "after_file_type": "m8"})
-    run_and_log(logparams, TARGET_OUTPUTS["run_filter_deuterostomes_from_m8__2"], False,
+    run_and_log(logparams, TARGET_OUTPUTS["run_filter_deuterostomes_from_m8__2"], lazy_run,
         run_filter_deuterostomes_from_m8,
         os.path.join(RESULT_DIR, ANNOTATE_RAPSEARCH2_M8_WITH_TAXIDS_OUT),
         os.path.join(RESULT_DIR, FILTER_DEUTEROSTOMES_FROM_NR_M8_OUT))
 
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "generate taxid outputs from m8", "count_reads": False})
-    run_and_log(logparams, TARGET_OUTPUTS["run_generate_taxid_outputs_from_m8__2"], False,
+    run_and_log(logparams, TARGET_OUTPUTS["run_generate_taxid_outputs_from_m8__2"], lazy_run,
         run_generate_taxid_outputs_from_m8,
         os.path.join(RESULT_DIR, FILTER_DEUTEROSTOMES_FROM_NR_M8_OUT),
         os.path.join(RESULT_DIR, NR_M8_TO_TAXID_COUNTS_FILE_OUT),
@@ -904,7 +904,7 @@ def run_stage2(lazy_run = True):
 
     logparams = return_merged_dict(DEFAULT_LOGPARAMS,
         {"title": "combine JSON outputs", "count_reads": False})
-    run_and_log(logparams, TARGET_OUTPUTS["run_combine_json_outputs"], False,
+    run_and_log(logparams, TARGET_OUTPUTS["run_combine_json_outputs"], lazy_run,
         run_combine_json_outputs,
         RESULT_DIR + '/' + NT_TAXID_COUNTS_TO_JSON_OUT, RESULT_DIR + '/' + NR_TAXID_COUNTS_TO_JSON_OUT,
         RESULT_DIR + '/' + COMBINED_JSON_OUT)
@@ -914,7 +914,7 @@ def run_stage2(lazy_run = True):
         "before_file_name": os.path.join(RESULT_DIR, GENERATE_TAXID_ANNOTATED_FASTA_FROM_RAPSEARCH2_M8_OUT),
         "before_file_type": "fasta",
         "after_file_name": os.path.join(RESULT_DIR, UNIDENTIFIED_FASTA_OUT), "after_file_type": "fasta"})
-    run_and_log(logparams, TARGET_OUTPUTS["run_generate_unidentified_fasta"], False,
+    run_and_log(logparams, TARGET_OUTPUTS["run_generate_unidentified_fasta"], lazy_run,
         run_generate_unidentified_fasta,
         RESULT_DIR + '/' + GENERATE_TAXID_ANNOTATED_FASTA_FROM_RAPSEARCH2_M8_OUT,
         RESULT_DIR + '/' + UNIDENTIFIED_FASTA_OUT)
