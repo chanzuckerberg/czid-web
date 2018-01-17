@@ -540,7 +540,7 @@ def run_gsnapl_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_work
                               '-A', 'm8', '--batch=0', '--use-shared-memory=0',
                               '--gmap-mode=none', '--npaths=1', '--ordered',
                               '-t', '32',
-                              '--maxsearch=5', '--max-mismatches=20',
+                              '--maxsearch=5', '--max-mismatches=40',
                               '-D', remote_index_dir, '-d', 'nt_k16']
                               + [remote_work_dir+'/'+input_fa for input_fa in input_files]
                               + ['> '+remote_outfile, ';'])
