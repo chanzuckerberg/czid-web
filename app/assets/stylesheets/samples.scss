@@ -800,6 +800,12 @@ input[type=search]:focus:not([readonly]) {
       }
     }
     .projects {
+      span {
+        cursor: pointer;
+        &:hover {
+          color: #4ba4c2;
+        }
+      }
       .projects-wrapper {
         height: 300px;
         overflow: scroll;
