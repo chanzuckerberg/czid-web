@@ -80,29 +80,29 @@ class Sample < ApplicationRecord
 
   def self.get_signed_url(s3key)
     begin
-      if s3key && !s3key.empty?
+      if s3key.present?
         return S3_PRESIGNER.presigned_url(:get_object,
-          bucket: SAMPLES_BUCKET_NAME, key: s3key,
-          expires_in: SAMPLE_DOWNLOAD_EXPIRATION).to_s
+                                          bucket: SAMPLES_BUCKET_NAME, key: s3key,
+                                          expires_in: SAMPLE_DOWNLOAD_EXPIRATION).to_s
       end
-    rescue Exception => e
-      puts "AWS error: #{e.inspect}"
+    rescue StandardError => e
+      Airbrake.notify("AWS presign error: #{e.inspect}")
     end
-    return nil
+    nil
   end
 
-  def get_results_folder_files
+  def results_folder_files
     file_list = S3_CLIENT.list_objects(bucket: SAMPLES_BUCKET_NAME,
                                        prefix: "#{sample_path}/results/",
                                        delimiter: "/")
-    file_list.contents.map { |f| {key: f.key, url: Sample.get_signed_url(f.key) } }
+    file_list.contents.map { |f| { key: f.key, url: Sample.get_signed_url(f.key) } }
   end
 
-  def get_fastqs_folder_files
+  def fastqs_folder_files
     file_list = S3_CLIENT.list_objects(bucket: SAMPLES_BUCKET_NAME,
                                        prefix: "#{sample_path}/fastqs/",
                                        delimiter: "/")
-    file_list.contents.map { |f| {key: f.key, url: Sample.get_signed_url(f.key) } }
+    file_list.contents.map { |f| { key: f.key, url: Sample.get_signed_url(f.key) } }
   end
 
   def initiate_input_file_upload
@@ -190,7 +190,6 @@ class Sample < ApplicationRecord
     super(methods: [:sample_input_folder_url, :sample_output_folder_url, :sample_annotated_fasta_url, :input_files,
                     :sample_unidentified_fasta_url, :host_genome_name])
   end
-
 
   def postprocess_batch_command
     postprocess_script_name = File.basename(IdSeqPipeline::S3_POSTPROCESS_SCRIPT_LOC)

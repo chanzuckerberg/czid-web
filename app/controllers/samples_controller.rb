@@ -217,13 +217,13 @@ class SamplesController < ApplicationController
   end
 
   def results_folder
-    @file_list = @sample.get_results_folder_files
+    @file_list = @sample.results_folder_files
     @file_path = "#{@sample.sample_path}/results/"
     render template: "samples/folder"
   end
 
   def fastqs_folder
-    @file_list = @sample.get_fastqs_folder_files
+    @file_list = @sample.fastqs_folder_files
     @file_path = "#{@sample.sample_path}/fastqs/"
     render template: "samples/folder"
   end
