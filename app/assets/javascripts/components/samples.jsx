@@ -18,7 +18,8 @@ class Samples extends React.Component {
     this.sortSamples = this.sortSamples.bind(this);
     this.switchColumn = this.switchColumn.bind(this);
     this.handleProjectSelection = this.handleProjectSelection.bind(this);
-    this.pageSize = props.pageSize || 30
+    this.pageSize = props.pageSize || 30;
+    this.tissue_types = PipelineSampleReads.fetchTissueTypes();
     this.state = {
       project: null,
       totalNumber: null,
@@ -587,15 +588,12 @@ class Samples extends React.Component {
             <b>Filter tissue</b>
           </a>
         </li>
-        <li className="filter-item" data-status="Bronchoalveolar lavage" onClick={ this.handleTissueFilterSelect } ><a data-status="Bronchoalveolar lavage"className="filter-item waiting">Bronchoalveolar lavage</a><i className="filter fa fa-check hidden"></i></li>
-        <li className="filter-item" data-status="Cerebrospinal fluid" onClick={ this.handleTissueFilterSelect }><a data-status="Cerebrospinal fluid" className="filter-item uploading">Cerebrospinal fluid</a><i data-status="Cerebrospinal fluid" className="filter fa fa-check hidden"></i></li>
-        <li className="filter-item" data-status="Nasopharyngeal swab" onClick={ this.handleTissueFilterSelect }><a data-status="Nasopharyngeal swab" className="filter-item complete">Nasopharyngeal swab</a><i  data-status="Nasopharyngeal swab" className="filter fa fa-check hidden"></i></li>
-        <li className="filter-item" onClick={ this.handleTissueFilterSelect } data-status="Plasma" ><a data-status="Plasma" className="filter-item failed">Plasma</a><i data-status="Plasma" className="filter fa fa-check hidden"></i></li>
-        <li className="filter-item" data-status="Serum" onClick={ this.handleTissueFilterSelect }><a data-status="Serum" className="filter-item all">Serum</a><i data-status="Serum"  className="filter all fa fa-check hidden"></i></li>
-        <li className="filter-item" data-status="Solid tissue" onClick={ this.handleTissueFilterSelect }><a data-status="Solid tissue" className="filter-item all">Solid tissue</a><i data-status="Solid tissue" className="filter all fa fa-check hidden"></i></li>
-        <li className="filter-item" data-status="Stool" onClick={ this.handleTissueFilterSelect }><a  data-status="Stool" className="filter-item all">Stool</a><i  data-status="Stool" className="filter all fa fa-check hidden"></i></li>
-        <li className="filter-item" data-status="Synovial fluid" onClick={ this.handleTissueFilterSelect }><a data-status="Synovial fluid" className="filter-item all">Synovial fluid</a><i data-status="Synovial fluid" className="filter all fa fa-check hidden"></i></li>
-        <li className="filter-item" data-status="Whole blood" onClick={ this.handleTissueFilterSelect }><a data-status="Whole blood" className="filter-item all">Whole blood</a><i data-status="Whole blood" className="filter all fa fa-check hidden"></i></li>
+        { this.tissue_types.map((tissue, i) => {
+          <div>{tissue}nknjn</div>
+          return (
+            <li key={i} className="filter-item" data-status={tissue} onClick={ this.handleTissueFilterSelect } ><a data-status={tissue} className="filter-item">{tissue}</a><i className="filter fa fa-check hidden"></i></li>
+          )
+        }) }
         <li className="divider"/>
       </div>
    )
@@ -716,7 +714,7 @@ class Samples extends React.Component {
       $('.filter').hide();
       $('body').addClass('background-cover');
     });
-
+    PipelineSampleReads.fetchTissueTypes();
     this.initializeTooltip();
     this.fetchProjectPageData();
     this.state.selectedProjectId ? this.fetchProjectDetails(this.state.selectedProjectId) : null;

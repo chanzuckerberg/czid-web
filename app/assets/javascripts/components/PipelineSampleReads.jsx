@@ -27,11 +27,8 @@ class PipelineSampleReads extends React.Component {
       failureText: 'Sample run failed'
     };
     this.TYPE_PROMPT = "Type here...";
-    this.TISSUE_TYPES = ['-',"Bronchoalveolar lavage", "Cerebrospinal fluid",
-                         "Nasopharyngeal swab", "Plasma", "Serum", "Solid tissue",
-                         "Stool", "Synovial fluid", "Whole blood"];
     this.NUCLEOTIDE_TYPES = ['-',"DNA", "RNA"];
-    this.DROPDOWN_OPTIONS = { sample_tissue: this.TISSUE_TYPES,
+    this.DROPDOWN_OPTIONS = { sample_tissue: PipelineSampleReads.fetchTissueTypes(),
                               sample_template: this.NUCLEOTIDE_TYPES };
     this.DROPDOWN_METADATA_FIELDS = Object.keys(this.DROPDOWN_OPTIONS);
     this.handleDropdownChange = this.handleDropdownChange.bind(this);
@@ -43,7 +40,7 @@ class PipelineSampleReads extends React.Component {
       belowOrigin: true
     });
   }
-
+  
   render_metadata_dropdown(label, field) {
     let dropdown_options = this.DROPDOWN_OPTIONS[field];
     let display_value = this.sampleInfo[field] ? this.sampleInfo[field] : '-';
@@ -129,6 +126,13 @@ class PipelineSampleReads extends React.Component {
 
   static setTab(section, tab) {
     window.localStorage.setItem(section, tab);
+  }
+
+  static fetchTissueTypes() {
+    let tissue_types =  ['-',"Bronchoalveolar lavage", "Cerebrospinal fluid",
+    "Nasopharyngeal swab", "Plasma", "Serum", "Solid tissue",
+    "Stool", "Synovial fluid", "Whole blood"];
+    return tissue_types;
   }
 
   componentDidMount() {
