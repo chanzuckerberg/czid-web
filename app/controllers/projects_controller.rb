@@ -32,7 +32,8 @@ class ProjectsController < ApplicationController
 
   def project_reports_csv
     output_file = bulk_report_csvs_from_params(@project, params)
-    send_file output_file if output_file
+    return unless output_file
+    send_file output_file
   end
 
   # GET /projects/new

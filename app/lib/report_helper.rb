@@ -657,9 +657,11 @@ module ReportHelper
     tar_filename = "#{project.name}_reports.tar.gz"
     `cd #{csv_dir}; tar cvzf #{tar_filename} .`
     output_file = "#{csv_dir}/#{tar_filename}"
+    `rm #{csv_dir}/*.csv`
     # Return output file path, but first ensure project/sample names
     # were not chosen maliciously to download an arbitrary file:
     absolute_path = File.expand_path(output_file)
-    absolute_path.start_with?(csv_dir) ? output_file : nil
+    return nil unless absolute_path.start_with?(csv_dir)
+    output_file
   end
 end
