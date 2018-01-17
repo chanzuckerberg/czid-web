@@ -25,6 +25,7 @@ Rails.application.routes.draw do
 
   resources :projects do
     get :visuals, on: :member
+    get :project_reports_csv, on: :member # use 'project_reports_csv?background_id=' to select a specific background for the reports
     put :add_favorite, on: :member
     put :remove_favorite, on: :member
   end
