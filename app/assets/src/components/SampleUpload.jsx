@@ -206,6 +206,7 @@ class SampleUpload extends React.Component {
       authenticity_token: this.csrf
     })
     .then((response) => {
+      _satellite.track('uploadsample')
       this.setState({
         success: true,
         submitting: false,

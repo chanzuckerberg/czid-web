@@ -534,6 +534,7 @@ class Samples extends React.Component {
 
   viewSample(id) {
     location.href = `/samples/${id}`;
+    _satellite.track('viewsample')
   }
 
   getActiveSort(className) {
@@ -595,6 +596,11 @@ class Samples extends React.Component {
     return (
       <i data-status="favorite" data-fav={project.favorited} data-id={project.id} onClick={this.toggleFavorite} className={!project.favorited ? "favorite fa fa-star-o":  "favorite fa fa-star"}></i>
     )
+  }
+
+  downloadTable(id) {
+    location.href = `/projects/${id}/csv`;
+    _satellite.track('downloadtable');
   }
 
   renderTable(samples) {

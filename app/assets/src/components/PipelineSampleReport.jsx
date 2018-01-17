@@ -602,7 +602,8 @@ class PipelineSampleReport extends React.Component {
 
   // Download report in csv
   downloadReport(id) {
-    location.href = `/reports/${id}/csv`;
+    location.href = `/reports/${id}/csv`
+    _satellite.track('downloadreport')
   }
 
   render() {

@@ -63,6 +63,7 @@ import Samples from './Samples';
       })
       .then((res) => {
         Samples.hideLoader();
+        favStatus == 'true' ?  _satellite.track('unfavorite') : _satellite.track('favorite');
         this.checkIfProjecExistInFavorites(projectId, this.state.formattedProjectList);
       }).catch((err) => {
         Samples.hideLoader();
