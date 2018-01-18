@@ -243,8 +243,8 @@ import Samples from './Samples';
       <div className="projects">
         <span onClick={this.handleProjectClick} data-title="allprojects" className="title projects-title">All Projects</span>
         <hr/>
-        <div className="projects-wrapper">
-          { !this.state.formattedProjectList.length ? "None" : this.state.showLess ? this.state.formattedProjectList.sort(sortLogic).slice(0,7).map((project, i) => {
+        <div className="projects-wrapper" id="proj-wrapper">
+          { !this.state.formattedProjectList.length ? "None" : this.state.showLess ? this.state.formattedProjectList.sort(sortLogic).slice(0,10).map((project, i) => {
               return (
                   <div className="project-item" data-id={project.id}  key={i}><div onClick={this.handleProjectClick} data-id={project.id}><span data-id={project.id}>{project.name}</span></div>{this.addFavIconClass(project)}</div>
               )
@@ -254,13 +254,13 @@ import Samples from './Samples';
               <div className="project-item" data-id={project.id} key={i}><div onClick={this.handleProjectClick} data-id={project.id}><span data-id={project.id}>{project.name}</span></div>{this.addFavIconClass(project)}</div>
             )
           }) }
-          { this.state.formattedProjectList.length > 7 ? <div className="more" onClick={this.toggleDisplayProjects}>{this.state.showLess ? 'Show More...' : 'Show Less...'}</div> : ''}
         </div>
+          { this.state.formattedProjectList.length > 10 ? <div className="more" onClick={this.toggleDisplayProjects}>{this.state.showLess ? 'Show More...' : 'Show Less...'}</div> : ''}
       </div>
     )
     return (
       <div className="project-wrapper">
-        <div className="row">
+        <div className="">
           <div className="samples">
             <p data-title="allsamples" className="samples-title" onClick={this.handleProjectClick}>All Samples</p>
             <span onClick={this.uploadSample}><i className="fa fa-lg fa-plus-circle" aria-hidden="true"></i></span>
