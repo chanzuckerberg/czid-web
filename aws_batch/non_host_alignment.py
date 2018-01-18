@@ -672,6 +672,9 @@ def run_rapsearch_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_w
         min_column_number = float(execute_command_with_output(verification_command))
         if min_column_number != 12:
             lazy_run_adjusted = False
+            write_to_log("%s was corrupt, re-processing" % outfile_basename)
+        else:
+            write_to_log("%s was in the right format" % outfile_basename)
     ###
                               
     if not lazy_run_adjusted or not check_s3_file_presence(os.path.join(SAMPLE_S3_OUTPUT_CHUNKS_PATH, outfile_basename)):
