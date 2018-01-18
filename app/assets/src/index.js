@@ -27,8 +27,9 @@ const react_component = (componentName, props, target) => {
       React.createElement(matchedComponent, props, null),
       document.getElementById(target)
     );
+  } else {
+    throw(`Unable to find component '${componentName}'`)
   }
 };
 
 window.react_component = react_component;
-

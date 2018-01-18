@@ -1,3 +1,7 @@
+import React from 'react';
+import axios from 'axios';
+import $ from 'jquery';
+
 class Login extends React.Component {
   constructor(props, context) {
     super(props, context);
@@ -25,7 +29,7 @@ class Login extends React.Component {
   }
 
   clearError() {
-    this.setState({ 
+    this.setState({
       showFailedLogin: false,
       success: false
     })
@@ -63,19 +67,19 @@ class Login extends React.Component {
 
   isFormInValid() {
     if (this.refs.email.value === '' && this.refs.password.value === '') {
-      this.setState({ 
+      this.setState({
         showFailedLogin: true,
         errorMessage: 'Please enter email and password'
       })
       return true;
     } else if (this.refs.email.value === '') {
-      this.setState({ 
+      this.setState({
         showFailedLogin: true,
         errorMessage: 'Please enter email'
       })
       return true;
     } else if (this.refs.password.value === '') {
-      this.setState({ 
+      this.setState({
         showFailedLogin: true,
         errorMessage: 'Please enter password'
       })
@@ -90,7 +94,7 @@ class Login extends React.Component {
     this.setState({
       isChecked: checkboxValue
     })
-    this.state.isChecked = !this.state.isChecked;  
+    this.state.isChecked = !this.state.isChecked;
   }
 
   sendMail() {
@@ -126,7 +130,7 @@ class Login extends React.Component {
                   <input ref= "password" type="password" className="" onFocus={ this.clearError }   />
                   <label htmlFor="user_password">Password</label>
                 </div>
-                <div className="">  
+                <div className="">
                   <input ref="remember_me" type="checkbox" name="switch" className="filled-in" id="remember_me" onChange={ this.toggleCheckBox } value={this.state.isChecked ? 1 : 0} />
                   <label htmlFor="remember_me">Remember me</label>
                 </div>
@@ -148,3 +152,4 @@ class Login extends React.Component {
   }
 
 }
+export default Login;
