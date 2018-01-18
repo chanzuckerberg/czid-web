@@ -185,15 +185,6 @@ module SamplesHelper
     samples
   end
 
-  def filter_by_tissue_type(samples, query)
-    samples = if query == '-'
-                samples.where(sample_tissue: nil)
-              else
-                samples.where(sample_tissue: query)
-              end
-    samples
-  end
-
   def pipeline_run_info(pipeline_run)
     pipeline_run_entry = {}
     if pipeline_run
