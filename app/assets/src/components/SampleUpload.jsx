@@ -1,3 +1,9 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
+import axios from 'axios';
+import Tipsy from 'react-tipsy';
+import IconComponent from './IconComponent';
+
 class SampleUpload extends React.Component {
   constructor(props, context) {
     super(props, context);
@@ -67,24 +73,10 @@ class SampleUpload extends React.Component {
 
   componentDidMount() {
     $('body').addClass('background-cover');
-    $('.tooltipped').tooltip({ delay: 50 });
     this.initializeSelectTag();
     $(ReactDOM.findDOMNode(this.refs.projectSelect)).on('change',this.handleProjectChange);
     $(ReactDOM.findDOMNode(this.refs.hostSelect)).on('change',this.handleHostChange);
-    this.initializeTooltip();
   }
-    initializeTooltip() {
-      // only updating the tooltip offset when the component is loaded
-      $(() => {
-        const tooltipIdentifier = $("[rel='tooltip']");
-        tooltipIdentifier.tooltip({
-          delay: 0,
-          html: true,
-          placement: 'top',
-          offset: '0px 50px'
-        });
-      });
-    }
 
   handleUpload(e) {
     e.preventDefault();
@@ -541,7 +533,7 @@ class SampleUpload extends React.Component {
             </div>
         </div>
         <input className="hidden" type="submit"/>
-        { this.state.submitting ? <div className="center login-wrapper disabled"> <i className='fa fa-spinner fa-spin fa-lg'></i> </div> : 
+        { this.state.submitting ? <div className="center login-wrapper disabled"> <i className='fa fa-spinner fa-spin fa-lg'></i> </div> :
           <div onClick={ this.handleUpdate } className="center login-wrapper">Submit</div> }
       </form>
     </div>
@@ -589,32 +581,36 @@ class SampleUpload extends React.Component {
                     </div>
                   </div>
                   <div className='row input-row'>
-                    <div className='col project-list no-padding s8'
-                         title='Name of experiment or project' data-placement='top' rel='tooltip'>
-                      <select ref="projectSelect" disabled={(this.state.disableProjectSelect ? 'disabled' : '')} className="projectSelect" id="sample" onChange={ this.handleProjectChange } value={this.state.selectedProject}>
-                        <option disabled defaultValue>{this.state.selectedProject}</option>
-                        { this.state.allProjects.length ?
-                          this.state.allProjects.map((project, i) => {
-                            return <option ref= "project" key={i} id={project.id} >{project.name}</option>
-                          }) : <option>No projects to display</option>
+                    <Tipsy content='Name of experiment or project' placement='top'>
+                      <div className='col project-list no-padding s8'>
+                        <select ref="projectSelect" disabled={(this.state.disableProjectSelect ? 'disabled' : '')} className="projectSelect" id="sample" onChange={ this.handleProjectChange } value={this.state.selectedProject}>
+                          <option disabled defaultValue>{this.state.selectedProject}</option>
+                          { this.state.allProjects.length ?
+                            this.state.allProjects.map((project, i) => {
+                              return <option ref= "project" key={i} id={project.id} >{project.name}</option>
+                            }) : <option>No projects to display</option>
+                          }
+                        </select>
+                        {
+                          (this.state.errors.selectedProject) ?
+                            <div className='field-error'>
+                              {this.state.errors.selectedProject}
+                            </div> : null
                         }
-                      </select>
-                      {
-                        (this.state.errors.selectedProject) ?
-                          <div className='field-error'>
-                            {this.state.errors.selectedProject}
-                          </div> : null
-                      }
-                    </div>
+                      </div>
+                    </Tipsy>
                     <div className='col no-padding s4'>
-                      <button type='button' onClick={this.toggleNewProjectInput}
-                              title='Add your desired experiment or project name' data-placement='right' rel='tooltip'
-                              className='new-project-button new-button skyblue-button'>
-                        <i className='fa fa-plus'/>
-                        <span>
-                          New project
-                        </span>
-                      </button>
+                      <Tipsy content='Add a new desired experiment or project name'
+                        placement='right'>
+                        <button type='button'
+                          onClick={this.toggleNewProjectInput}
+                          className='new-project-button new-button skyblue-button'>
+                          <i className='fa fa-plus'/>
+                          <span>
+                            New project
+                          </span>
+                        </button>
+                      </Tipsy>
                     </div>
                     <div className='col no-padding s12 new-project-input hidden'>
                       <input type='text' onBlur={ (e) => {
@@ -635,10 +631,12 @@ class SampleUpload extends React.Component {
 
                 <div className='field'>
                   <div className='row'>
-                    <div className='col field-title no-padding s5'
-                         title='This will be subtracted by the pipeline' data-placement='left' rel='tooltip'>
-                      Select host genome
-                    </div>
+                    <Tipsy placement='left'
+                      content='This will be subtracted by the pipeline'>
+                      <div className='col field-title no-padding s5'>
+                        Select host genome
+                      </div>
+                    </Tipsy>
                     {
                       (this.userDetails.admin) ?
                         <div className='col s7 right-align no-padding right admin-genomes'>
@@ -890,3 +888,4 @@ class SampleUpload extends React.Component {
   }
 }
 
+export default SampleUpload;
