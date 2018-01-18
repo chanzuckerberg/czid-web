@@ -56,6 +56,7 @@ import Samples from './Samples';
   toggleFavorite(e) {
     let favStatus = e.target.getAttribute('data-fav');
     let projectId = e.target.getAttribute('data-id');
+    favStatus == 'true' ?  _satellite.track('unfavorite') : _satellite.track('favorite');
     Samples.showLoading(`${favStatus == 'true' ? 'Removing from' : 'Adding to' } favorites...`)
     axios
       .put(`/projects/${projectId}/${favStatus == 'true' ? 'remove_favorite' : 'add_favorite' }?`, {
@@ -63,7 +64,6 @@ import Samples from './Samples';
       })
       .then((res) => {
         Samples.hideLoader();
-        favStatus == 'true' ?  _satellite.track('unfavorite') : _satellite.track('favorite');
         this.checkIfProjecExistInFavorites(projectId, this.state.formattedProjectList);
       }).catch((err) => {
         Samples.hideLoader();

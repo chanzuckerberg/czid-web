@@ -533,8 +533,8 @@ class Samples extends React.Component {
   }
 
   viewSample(id) {
-    location.href = `/samples/${id}`;
     _satellite.track('viewsample')
+    location.href = `/samples/${id}`;
   }
 
   getActiveSort(className) {
@@ -599,8 +599,8 @@ class Samples extends React.Component {
   }
 
   downloadTable(id) {
-    location.href = `/projects/${id}/csv`;
     _satellite.track('downloadtable');
+    location.href = `/projects/${id}/csv`;
   }
 
   renderTable(samples) {
