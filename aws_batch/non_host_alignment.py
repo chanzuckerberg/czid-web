@@ -665,7 +665,7 @@ def run_rapsearch_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_w
                           ';'])
     ### DUCT TAPE -- check if existing chunk output is corrupt
     lazy_run_adjusted = lazy_run
-    if check_s3_file_presence(os.path.join(SAMPLE_S3_OUTPUT_CHUNKS_PATH, outfile_basename):
+    if check_s3_file_presence(os.path.join(SAMPLE_S3_OUTPUT_CHUNKS_PATH, outfile_basename)):
         execute_command("aws s3 cp %s/%s %s/" % (SAMPLE_S3_OUTPUT_CHUNKS_PATH, outfile_basename, CHUNKS_RESULT_DIR))
         verification_command = "grep -v '^#' %s/%s" % (CHUNKS_RESULT_DIR, outfile_basename)
         verification_command += " | awk '{print NF}' | sort -nu | head -n 1"
