@@ -32,8 +32,6 @@ class PipelineSampleReport extends React.Component {
       rows_total: 0,
       thresholded_taxons: [],
       selected_taxons: [],
-      pagesLoaded: 0,
-      pageEnd: false,
       sort_by: this.default_sort_by,
       new_filter_thresholds: (filter_thresholds) ? JSON.parse(filter_thresholds) : { NT_aggregatescore: 0.0 },
       /*
@@ -135,7 +133,6 @@ class PipelineSampleReport extends React.Component {
       new_filter_thresholds: { },
       excluded_categories: [],
       search_taxon_id: 0,
-      pagesLoaded: 0,
       thresholded_taxons: this.state.taxonomy_details,
       selected_taxons: this.state.taxonomy_details,
       rows_passing_filters: this.state.taxonomy_details.length
