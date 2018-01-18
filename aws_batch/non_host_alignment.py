@@ -663,15 +663,39 @@ def run_rapsearch_chunk(part_suffix, remote_home_dir, remote_index_dir, remote_w
                           '-q', input_path,
                           '-o', output_path[:-3],
                           ';'])
-    commands += "aws s3 cp %s %s/;" % (output_path, SAMPLE_S3_OUTPUT_CHUNKS_PATH)
-    if not lazy_run or not check_s3_file_presence(os.path.join(SAMPLE_S3_OUTPUT_CHUNKS_PATH, outfile_basename)):
-        write_to_log("waiting for server")
-        instance_ip = wait_for_server_ip('rapsearch', key_path, remote_username, ENVIRONMENT, RAPSEARCH2_MAX_CONCURRENT)
-        write_to_log("starting alignment for chunk %s on machine %s" % (chunk_id, instance_ip))
-        remote_command = 'ssh -o "StrictHostKeyChecking no" -i %s %s@%s "%s"' % (key_path, remote_username, instance_ip, commands)
-        execute_command_realtime_stdout(remote_command)
-        write_to_log("finished alignment for chunk %s" % chunk_id)
-    # move output back to local
+    ### DUCT TAPE -- check if existing chunk output is corrupt
+    lazy_run_adjusted = lazy_run
+    if check_s3_file_presence(os.path.join(SAMPLE_S3_OUTPUT_CHUNKS_PATH, outfile_basename):
+        execute_command("aws s3 cp %s/%s %s/" % (SAMPLE_S3_OUTPUT_CHUNKS_PATH, outfile_basename, CHUNKS_RESULT_DIR))
+        verification_command = "grep -v '^#' %s/%s" % (CHUNKS_RESULT_DIR, outfile_basename)
+        verification_command += " | awk '{print NF}' | sort -nu | head -n 1"
+        min_column_number = float(execute_command_with_output(verification_command))
+        if min_column_number != 12:
+            lazy_run_adjusted = False
+    ###
+                              
+    if not lazy_run_adjusted or not check_s3_file_presence(os.path.join(SAMPLE_S3_OUTPUT_CHUNKS_PATH, outfile_basename)):
+        correct_number_of_output_columns = 12
+        min_column_number = 0
+        max_tries = 2
+        try_number = 1
+        while (min_column_number != correct_number_of_output_columns and try_number <= max_tries):
+            write_to_log("waiting for server")
+            instance_ip = wait_for_server_ip('rapsearch', key_path, remote_username, ENVIRONMENT, RAPSEARCH2_MAX_CONCURRENT)
+            write_to_log("starting alignment for chunk %s on machine %s" % (chunk_id, instance_ip))
+            execute_command_realtime_stdout(remote_command(commands, key_path, remote_username, instance_ip))
+            write_to_log("finished alignment for chunk %s" % chunk_id)
+            # check if every row has correct number of columns (12) in the output file on the remote machine
+            verification_command = "grep -v '^#' %s" % output_path # first, remove header lines starting with '#'
+            verification_command += " | awk '{print NF}' | sort -nu | head -n 1"
+            min_column_number = float(execute_command_with_output(remote_command(verification_command, key_path, remote_username, instance_ip)))
+            write_to_log("Try no. %d: Smallest number of columns observed in any line was %d" % (try_number, min_column_number))
+            try_number += 1
+        # move output from remote machine to s3
+        assert min_column_number == correct_number_of_output_columns, "Chunk %s output corrupt; not copying to S3. Re-start pipeline to try again." % chunk_id
+        upload_command = "aws s3 cp %s %s/;" % (output_path, SAMPLE_S3_OUTPUT_CHUNKS_PATH)
+        execute_command(remote_command(upload_command, key_path, remote_username, instance_ip))
+    # move output from s3 to local
     time.sleep(10) # wait until the data is synced
     execute_command("aws s3 cp %s/%s %s/" % (SAMPLE_S3_OUTPUT_CHUNKS_PATH, outfile_basename, CHUNKS_RESULT_DIR))
     return os.path.join(CHUNKS_RESULT_DIR, outfile_basename)
