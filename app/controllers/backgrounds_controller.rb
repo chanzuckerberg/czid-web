@@ -1,6 +1,7 @@
 class BackgroundsController < ApplicationController
   include BackgroundsHelper
   before_action :set_background, only: [:show, :edit, :update, :destroy]
+  before_action :admin_required
 
   # GET /backgrounds
   # GET /backgrounds.json
