@@ -176,7 +176,7 @@ class PipelineRunStage < ApplicationRecord
 
   def postprocess_command
     sample = pipeline_run.sample
-    batch_command_env_variables = "INPUT_BUCKET=#{sample.alignment_output_s3_path} " \
+    batch_command_env_variables = "INPUT_BUCKET=#{alignment_output_s3_path} " \
       "OUTPUT_BUCKET=#{postprocess_output_s3_path} " \
       "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} "
     batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline postprocess"
