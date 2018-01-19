@@ -642,16 +642,22 @@ module ReportHelper
     background_id = params[:background_id] || default_background_id
     pipeline_run = sample.pipeline_runs.first
     pipeline_run_id = pipeline_run ? pipeline_run.id : nil
+    return "" if pipeline_run_id.nil?
     tax_details = taxonomy_details(pipeline_run_id, background_id, params)
     generate_report_csv(tax_details)
   end
 
   def bulk_report_csvs_from_params(project, params)
-    csv_dir = "/app/tmp/report_csvs/#{project.id}/#{project.name}"
-    `mkdir -p #{csv_dir}`
+    csv_dir = "/app/tmp/report_csvs/#{project.id}"
+    `rm -rf #{csv_dir}; mkdir #{csv_dir}`
+    sample_names_used = []
     project.samples.each do |sample|
       csv_data = report_csv_from_params(sample, params)
-      filename = "#{csv_dir}/#{sample.name}.csv"
+      clean_sample_name = sample.name.downcase.gsub(/\W/, "-").gsub(/[^0-9A-Za-z]/, '-')
+      used_before = sample_names_used.include? clean_sample_name
+      sample_names_used << clean_sample_name
+      clean_sample_name += "_#{sample.id}" if used_before
+      filename = "#{csv_dir}/#{clean_sample_name}.csv"
       File.write(filename, csv_data)
     end
     tar_filename = "#{project.name}_reports.tar.gz"
