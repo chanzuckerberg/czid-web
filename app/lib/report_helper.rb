@@ -660,7 +660,7 @@ module ReportHelper
       filename = "#{csv_dir}/#{clean_sample_name}.csv"
       File.write(filename, csv_data)
     end
-    tar_filename = "#{project.name.gsub(/\W/, "-")}_reports.tar.gz"
+    tar_filename = "#{project.name.gsub(/\W/, '-')}_reports.tar.gz"
     `cd #{csv_dir}; tar cvzf #{tar_filename} .`
     output_file = "#{csv_dir}/#{tar_filename}"
     `rm #{csv_dir}/*.csv`
