@@ -650,10 +650,15 @@ module ReportHelper
   def bulk_report_csvs_from_params(project, params)
     csv_dir = "/app/tmp/report_csvs/#{project.id}"
     `mkdir -p #{csv_dir}`
+    sample_names_used = []
     project.samples.each do |sample|
       csv_data = report_csv_from_params(sample, params)
       clean_sample_name = sample.name.downcase.gsub(/\W/, "-").gsub(/[^0-9A-Za-z]/, '-')
-      filename = "#{csv_dir}/#{clean_sample_name}.csv"
+      prior_usage = sample_names_used.count(clean_sample_name)
+      suffix = prior_usage > 0 ? "_#{prior_usage}" : ""
+      dedup_sample_name = clean_sample_name + suffix
+      sample_names_used << clean_sample_name
+      filename = "#{csv_dir}/#{dedup_sample_name}.csv"
       File.write(filename, csv_data)
     end
     tar_filename = "#{project.name}_reports.tar.gz"
