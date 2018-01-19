@@ -1,8 +1,4 @@
-class IconComponent extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
+class IconComponent {
   static mosquito(color) {
     return (
         `<svg fill='${color}' x="0px" y="0px"
@@ -312,3 +308,5 @@ class IconComponent extends React.Component {
     );
   }
 }
+
+export default IconComponent;
