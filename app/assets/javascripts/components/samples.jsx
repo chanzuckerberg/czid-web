@@ -547,9 +547,9 @@ class Samples extends React.Component {
 
   renderTable(samples) {
     let project_id = this.state.selectedProjectId ? this.state.selectedProjectId : 'all'
-    let search_field_width = (project_id != 'all') ? 'col s10' : 'col s8'
+    let search_field_width = (project_id === 'all') ? 'col s10' : 'col s8'
     let search_field = (
-      <div className={search_field_width + ' no-padding'>
+      <div className={search_field_width + ' no-padding'}>
         <div className='white'>
           <span className="icon">
             <i className="fa fa-search" aria-hidden="true"/>
@@ -578,22 +578,13 @@ class Samples extends React.Component {
         </div>
       </div>
     );
-    if (project_id != 'all') {
-      let search_box = (
-        <div className="row search-box">
-          { search_field }
-          { table_download_button }
-        </div>
-      );
-    } else {
-      let search_box = (
-        <div className="row search-box">
-          { search_field }
-          { table_download_button }
-          { reports_download_button }
-        </div>
-      );
-    }
+    const search_box = (
+      <div className="row search-box">
+        { search_field }
+        { table_download_button }
+        { project_id === 'all' ? null : reports_download_button }
+      </div>
+    );
 
     const projInfo = (
       <div className="wrapper">
