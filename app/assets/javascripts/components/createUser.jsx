@@ -202,13 +202,13 @@ class CreateUser extends React.Component {
     }
   }
 
-  renderUserForm(submitFunc) {
+  renderUserForm(submitFunc, funcName) {
     return (
       <div className="user-form">
           <div className="row">
             <form ref="form" className="new_user" id="new_user" onSubmit={ submitFunc }>
               <div className="row title">
-                <p className="col s6 signup">Update User</p>
+                <p className="col s8 signup"> { funcName } User</p>
               </div>
               { this.state.success ? <div className="success-info" >
                 <i className="fa fa-success"></i>
@@ -253,7 +253,7 @@ class CreateUser extends React.Component {
   render() {
     return (
       <div>
-        { this.props.selectedUser ? this.renderUserForm(this.handleUpdate) : this.renderUserForm(this.handleCreate) }
+        { this.props.selectedUser ? this.renderUserForm(this.handleUpdate,'Update') : this.renderUserForm(this.handleCreate, 'Create') }
         <div className="bottom">
           <span className="back" onClick={ this.props.selectedUser ? this.gotoPage.bind(this, '/users') : this.gotoPage.bind(this, '/') } >Back</span>|
           <span className="home" onClick={ this.gotoPage.bind(this, '/')}>Home</span>
