@@ -649,7 +649,7 @@ module ReportHelper
 
   def bulk_report_csvs_from_params(project, params)
     csv_dir = "/app/tmp/report_csvs/#{project.id}"
-    `rm -rf #{csv_dir}; mkdir #{csv_dir}`
+    `rm -rf #{csv_dir}; mkdir -p #{csv_dir}`
     sample_names_used = []
     project.samples.each do |sample|
       csv_data = report_csv_from_params(sample, params)
