@@ -269,10 +269,10 @@ class PipelineRun < ApplicationRecord
   def subsample_fraction
     # 'subsample' is number of read pairs to subsample to, after host filtering
     # 'remaining_reads' is number of individual reads remaining after host filtering
-    if subsample && 2*subsample < remaining_reads
-      return (2.0*subsample) / remaining_reads
+    if subsample && 2 * subsample < remaining_reads
+      (2.0 * subsample) / remaining_reads
     else
-      return 1
+      1
     end
   end
 
