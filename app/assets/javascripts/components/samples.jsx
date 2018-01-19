@@ -547,29 +547,53 @@ class Samples extends React.Component {
 
   renderTable(samples) {
     let project_id = this.state.selectedProjectId ? this.state.selectedProjectId : 'all'
-    let download_button = (
-      <a href={`/projects/${project_id}/csv`} className="download-project center">
-        <i className="fa fa-cloud-download"/>
-        <span>Download table</span>
-      </a>
-    );
-    const search_box = (
-      <div className="row search-box">
-        <div className='col s10 no-padding'>
-          <div className='white'>
-            <span className="icon">
-              <i className="fa fa-search" aria-hidden="true"/>
-            </span>
-            <input id="search" value={this.state.searchParams} onChange={this.handleSearchChange}  type="search" onKeyDown={this.handleSearch} className="search" placeholder='Search for sample'/>
-          </div>
-        </div>
-        <div className='col s2 download-table'>
-          <div className='white'>
-            { download_button }
-          </div>
+    let search_field_width = (project_id != 'all') ? 'col s10' : 'col s8'
+    let search_field = (
+      <div className={search_field_width + ' no-padding'>
+        <div className='white'>
+          <span className="icon">
+            <i className="fa fa-search" aria-hidden="true"/>
+          </span>
+          <input id="search" value={this.state.searchParams} onChange={this.handleSearchChange}  type="search" onKeyDown={this.handleSearch} className="search" placeholder='Search for sample'/>
         </div>
       </div>
     );
+    let table_download_button = (
+      <div className='col s2 download-table'>
+        <div className='white'>
+          <a href={`/projects/${project_id}/csv`} className="download-project center">
+            <i className="fa fa-cloud-download"/>
+            <span>Download table</span>
+          </a>
+        </div>
+      </div>
+    );
+    let reports_download_button = (
+      <div className='col s2 download-table'>
+        <div className='white'>
+          <a href={`/projects/${project_id}/project_reports_csv`} className="download-project center">
+            <i className="fa fa-cloud-download"/>
+            <span>Download reports</span>
+          </a>
+        </div>
+      </div>
+    );
+    if (project_id != 'all') {
+      let search_box = (
+        <div className="row search-box">
+          { search_field }
+          { table_download_button }
+        </div>
+      );
+    } else {
+      let search_box = (
+        <div className="row search-box">
+          { search_field }
+          { table_download_button }
+          { reports_download_button }
+        </div>
+      );
+    }
 
     const projInfo = (
       <div className="wrapper">
