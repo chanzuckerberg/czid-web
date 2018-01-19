@@ -1,7 +1,8 @@
 class ProjectsController < ApplicationController
   include SamplesHelper
+  include ReportHelper
 
-  before_action :set_project, only: [:show, :edit, :update, :destroy, :add_favorite, :remove_favorite]
+  before_action :set_project, only: [:show, :edit, :update, :destroy, :add_favorite, :remove_favorite, :project_reports_csv]
   clear_respond_to
   respond_to :json
   # GET /projects
@@ -27,6 +28,12 @@ class ProjectsController < ApplicationController
     formatted_samples = format_samples(samples)
     project_csv = generate_sample_list_csv(formatted_samples)
     send_data project_csv, filename: project_name + '_sample-table.csv'
+  end
+
+  def project_reports_csv
+    output_file = bulk_report_csvs_from_params(@project, params)
+    return unless output_file
+    send_file output_file
   end
 
   # GET /projects/new
