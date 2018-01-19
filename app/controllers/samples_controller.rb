@@ -95,14 +95,7 @@ class SamplesController < ApplicationController
 
   # GET /samples/1/report_csv
   def report_csv
-    params[:is_csv] = 1
-    params[:sort_by] = "highest_nt_aggregatescore"
-    default_background_id = @sample.host_genome && @sample.host_genome.default_background ? @sample.host_genome.default_background.id : nil
-    background_id = params[:background_id] || default_background_id
-    pipeline_run = @sample.pipeline_runs.first
-    pipeline_run_id = pipeline_run ? pipeline_run.id : nil
-    tax_details = taxonomy_details(pipeline_run_id, background_id, params)
-    @report_csv = generate_report_csv(tax_details)
+    @report_csv = report_csv_from_params(@sample, params)
     send_data @report_csv, filename: @sample.name + '_report.csv'
   end
 
