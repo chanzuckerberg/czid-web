@@ -1,4 +1,3 @@
-require 'logger'
 class UsersController < ApplicationController
   clear_respond_to
   respond_to :json
@@ -49,7 +48,6 @@ class UsersController < ApplicationController
         input_params.delete(:password_confirmation)
       end
       if @user.update(input_params)
-        Rails.logger.debug("User updated by #{current_user.id} #{current_user.admin} ")
         format.html { redirect_to edit_user_path(@user), notice: 'User was successfully updated.' }
         format.json { render :show, status: :ok, location: @user }
       else

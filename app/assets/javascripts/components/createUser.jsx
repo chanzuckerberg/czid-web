@@ -165,8 +165,6 @@ class CreateUser extends React.Component {
 
   updateUser() {
     var that = this;
-    console.log("handle update user ... ")
-    console.log(this.state.id)
     axios.patch(`/users/${this.state.id}.json`, {
       user: {
         name: this.state.name,
