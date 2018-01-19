@@ -40,6 +40,7 @@ class SampleUpload extends React.Component {
     };
     this.firstInput = this.selected.inputFiles.length && this.selected.inputFiles[0] ? (this.selected.inputFiles[0].source === null ? '' : this.selected.inputFiles[0].source) : '';
     this.secondInput = this.selected.inputFiles.length && this.selected.inputFiles[1] ? (this.selected.inputFiles[1].source === null ? '' : this.selected.inputFiles[1].source) : '';
+    this.toggleCheckBox = this.toggleCheckBox.bind(this);
     this.state = {
       submitting: false,
       allProjects: this.projects || [],
@@ -61,7 +62,8 @@ class SampleUpload extends React.Component {
       errors: {},
       adminGenomes,
       sampleName: '',
-      disableProjectSelect: false
+      disableProjectSelect: false,
+      omit_subsampling_checked: false
     };
   }
 
@@ -118,6 +120,11 @@ class SampleUpload extends React.Component {
     location.href = `${path}`
   }
 
+  toggleCheckBox(e) {
+    this.setState({
+      omit_subsampling_checked: e.target.value == "true" ? false : true,
+    })
+  }
 
   handleProjectSubmit(e) {
     if (e && e.preventDefault) {
@@ -186,6 +193,7 @@ class SampleUpload extends React.Component {
         job_queue: this.state.selectedJobQueue,
         sample_memory: this.state.selectedMemory,
         host_genome_id: this.state.selectedHostGenomeId,
+        subsample: this.state.omit_subsampling_checked ? 0 : 1,
         status: 'created'
       },
       authenticity_token: this.csrf
@@ -770,6 +778,23 @@ class SampleUpload extends React.Component {
                             {this.state.errors.sampleName}
                           </div> : null
                       }
+                    </div>
+                  </div>
+                </div>
+                <div className='field'>
+                  <div className='row'>
+                    <div className='col no-padding s12'>
+                      <div className='field-title'>
+                        <div className='read-count-label'>
+                          Subsampling
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className='row input-row'>
+                    <div className='col no-padding s12'>
+                      <input ref="omit_subsampling_checked" type="checkbox" name="switch" id="omit_subsampling_checked" className="filled-in" onChange={ this.toggleCheckBox } value={ this.state.omit_subsampling_checked } />
+                      <label htmlFor="omit_subsampling_checked" className="checkbox">Omit subsampling (not recommended)</label>
                     </div>
                   </div>
                 </div>

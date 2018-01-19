@@ -210,6 +210,10 @@ class Sample < ApplicationRecord
 
     pr = PipelineRun.new
     pr.sample = self
+    pr.subsample = (subsample.nil? || subsample.zero?) ? nil : PipelineRun::DEFAULT_SUBSAMPLING
+    # The subsample field of "sample" is currently used as a simple flag (UI checkbox),
+    # but was made an integer type in case we want to allow users to enter the desired number
+    # of reads to susbample to in the future
     pr.save
 
     archive_old_pipeline_runs

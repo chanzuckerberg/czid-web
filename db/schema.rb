@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180117173945) do
+ActiveRecord::Schema.define(version: 20180119200528) do
 
   create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "archive_of"
@@ -154,6 +154,8 @@ ActiveRecord::Schema.define(version: 20180117173945) do
     t.string "name", collation: "latin1_swedish_ci"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "public_access", limit: 1
+    t.integer "days_to_keep_sample_private"
     t.index ["name"], name: "index_projects_on_name", unique: true
   end
 
@@ -185,6 +187,7 @@ ActiveRecord::Schema.define(version: 20180117173945) do
     t.string "job_queue"
     t.bigint "host_genome_id"
     t.bigint "user_id"
+    t.integer "subsample"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
     t.index ["user_id"], name: "index_samples_on_user_id"
   end
