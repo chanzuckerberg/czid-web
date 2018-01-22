@@ -98,6 +98,15 @@ class Samples extends React.Component {
     });
   }
 
+  startBulkReportGeneration() {
+    axios.get(`/projects/${this.state.selectedProjectId}/project_reports_csv`).then((res) => {
+      this.setState({
+        report_download_in_progress: true
+      })
+    });
+  }
+      
+
   sortSamples() {
     this.sortCount += 1;
     let new_sort, message = '';
