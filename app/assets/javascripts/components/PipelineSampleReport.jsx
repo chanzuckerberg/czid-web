@@ -601,11 +601,16 @@ class PipelineSampleReport extends React.Component {
     var t0 = Date.now();
 
     filter_stats = this.state.rows_passing_filters + ' rows passing filters, out of ' + this.state.rows_total + ' total rows.';
+    subsampled_read_pairs = this.report_details && this.report_details.pipeline_info ? this.report_details.pipeline_info.subsample : null
+    subsampling_stats = subsampled_read_pairs ? 'Randomly subsampled to ' + 2*subsampled_read_pairs
+                                                 + ' of ' + this.report_details.pipeline_info.remaining_reads
+                                                 + ' non-host reads.'
+                                              : '';
     disable_filter = this.anyFilterSet() ? (<span className="disable" onClick={(e) => this.refs.report_filter.resetAllFilters()}><b> Disable all filters</b></span> ) : null;
     filter_row_stats = this.state.loading ? null : (
       <div id="filter-message" className="filter-message">
         <span className="count">
-          {filter_stats} {disable_filter}
+          {filter_stats} {subsampling_stats} {disable_filter}
         </span>
       </div>
     );
