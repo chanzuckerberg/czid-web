@@ -208,7 +208,7 @@ module ReportHelper
           * 1000000.0)                   AS  rpm,
         IF(
           stdev IS NOT NULL,
-          GREATEST(#{ZSCORE_MIN}, LEAST(#{ZSCORE_MAX}, (((count / #{adjusted_total_reads}.0 * 1000000.0) - mean) / stdev))),
+          GREATEST(#{ZSCORE_MIN}, LEAST(#{ZSCORE_MAX}, (((count / #{adjusted_total_reads} * 1000000.0) - mean) / stdev))),
           #{ZSCORE_WHEN_ABSENT_FROM_BACKGROUND}
         )
                                          AS  zscore,
