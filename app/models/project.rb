@@ -10,8 +10,12 @@ class Project < ApplicationRecord
     sanitize_path(path)
   end
 
+  def tar_filename
+    "#{name.gsub(/\W/, '-')}_reports.tar.gz"
+  end
+
   def report_tar
-    path = "#{csv_dir}/#{name}_reports.tar.gz"
+    path = "#{csv_dir}/#{tar_filename}"
     sanitize_path(path)
   end
 
