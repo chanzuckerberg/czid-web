@@ -72,6 +72,8 @@ class Samples extends React.Component {
       notes: { display_name: "Notes", type: "metadata" } };
     this.handleColumnSelectChange = this.handleColumnSelectChange.bind(this);
     this.columnHidden = this.columnHidden.bind(this);
+    this.startReportGeneration = this.startReportGeneration.bind(this);
+    this.checkReportDownload = this.checkReportDownload.bind(this);
     $(document).ready(function() {
       $('select').material_select();
     });

@@ -2,7 +2,7 @@ class ProjectsController < ApplicationController
   include SamplesHelper
   include ReportHelper
 
-  before_action :set_project, only: [:show, :edit, :update, :destroy, :add_favorite, :remove_favorite, :project_reports_csv]
+  before_action :set_project, only: [:show, :edit, :update, :destroy, :add_favorite, :remove_favorite, :make_project_reports_csv, :project_reports_csv_status, :get_project_reports_csv]
   clear_respond_to
   respond_to :json
   # GET /projects
@@ -30,10 +30,24 @@ class ProjectsController < ApplicationController
     send_data project_csv, filename: project_name + '_sample-table.csv'
   end
 
-  def project_reports_csv
-    output_file = bulk_report_csvs_from_params(@project, params)
-    return unless output_file
-    send_file output_file
+  def make_project_reports_csv
+    `rm -rf #{@project.csv_dir}`
+    Resque.enqueue(GenerateProjectReportsCsv, @project, params)
+    render json: { status: "Started report generation for project #{@project.id}" }
+  end
+
+  def project_reports_csv_status
+    expires_in 20.minutes
+    final_completed = `ls #{@project.report_tar} | wc -l`
+    return 'complete' if final_completed
+    csv_completed = `ls #{@project.csv_dir} | wc -l`
+    csv_total = @project.samples.count
+    percent_complete = (1.0 * csv_completed) / csv_total
+    "#{percent_complete} % of reports complete for project #{@project.id}"
+  end
+
+  def get_project_reports_csv
+    send_file "#{@project.report_tar}"
   end
 
   # GET /projects/new
