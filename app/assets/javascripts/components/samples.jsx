@@ -37,6 +37,7 @@ class Samples extends React.Component {
       loading: false,
       isRequesting: false,
       displayEmpty: false,
+      project_id_download_in_progress: null,
       columnsShown: ["total_reads",
         "nonhost_reads",
         "quality_control",
@@ -98,14 +99,43 @@ class Samples extends React.Component {
     });
   }
 
-  startBulkReportGeneration() {
-    axios.get(`/projects/${this.state.selectedProjectId}/project_reports_csv`).then((res) => {
+  startReportGeneration() {
+    axios.get(`/projects/${this.state.selectedProjectId}/make_project_reports_csv`).then((res) => {
       this.setState({
-        report_download_in_progress: true
-      })
+        project_id_download_in_progress: this.state.selectedProjectId
+      });
+
+      $('.note-saved-success')
+      .html(`<i class='fa fa-check-circle'></i> ${res.data.status}`)
+      .css('display', 'inline-block')
+      .delay(1000)
+      .slideUp(200);
+
+      this.checkDownload()
     });
   }
-      
+
+  checkReportDownload() {
+    axios.get(`/projects/${this.state.project_id_download_in_progress}/project_reports_csv_status`).then((res) => {
+      let download_status = res.data.status
+      if (download_status === 'complete') {
+        axios.get(`/projects/${this.state.project_id_download_in_progress}/get_project_reports_csv`).then((res2) => {
+          return (null)
+        })
+      } else {
+
+        $('.note-saved-success')
+        .html(`<i class='fa fa-check-circle'></i> ${download_status}`)
+        .css('display', 'inline-block')
+        .delay(1000)
+        .slideUp(200);
+        
+        setTimeout(() => {
+          this.checkDownload()
+        }, 2000)
+      }
+    })
+  }
 
   sortSamples() {
     this.sortCount += 1;
@@ -700,6 +730,12 @@ class Samples extends React.Component {
         <div className="project-info col s12">
         { projInfo }
         </div>
+
+        <div className='center'>
+          <span className='note-action-feedback note-saved-success'>
+          </span>
+        </div>
+
         <div className="sample-container col s12">
           { search_box }
           <div className="sample-table-container row">
