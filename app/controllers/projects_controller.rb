@@ -33,7 +33,7 @@ class ProjectsController < ApplicationController
   def make_project_reports_csv
     `aws s3 rm #{@project.report_tar_s3}`
     Resque.enqueue(GenerateProjectReportsCsv, params)
-    render json: { status_display: "Started report generation for project #{@project.name}" }
+    render json: { status_display: "in progress (project #{@project.name})" }
   end
 
   def project_reports_csv_status
@@ -42,7 +42,7 @@ class ProjectsController < ApplicationController
       render json: { status_display: "complete" }
       return
     end
-    render json: { status_display: "Report generation still in progress for project #{@project.name}" }
+    render json: { status_display: "in progress (project #{@project.name})" }
   end
 
   def get_project_reports_csv

@@ -267,19 +267,6 @@ $break-large: 1070px;
   border-color: #f32c1e;
 }
 
-.download-progress {
-  width: 200px;
-  height: 100px;
-  font-size: 12px;
-  color: #fff;
-  padding: 11px;
-  text-align: center;
-  display: none;
-  position: absolute;
-  background-color: #4caf50;
-  border-color: #449d48;
-}
-
 [contenteditable]:focus {
   outline: 0 solid transparent;
 }
@@ -472,6 +459,17 @@ $break-large: 1070px;
         background: #f4f4f4;
         border: 1px solid #d9d9d9;
       }
+    }
+    .download-progress {
+      cursor: pointer;
+      padding: 11px;
+      border: 1px solid transparent;
+      font-size: 12px;
+      color: #fff;
+      text-align: center;
+      display: none;
+      background-color: #4caf50;
+      border-color: #449d48;
     }
   }
   .sample-table-container {
