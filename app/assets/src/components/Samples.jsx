@@ -658,13 +658,22 @@ class Samples extends React.Component {
               { this.state.columnsShown.map((column_name, pos) => {
                 return (
                   <li key={`shown-${pos}`}>
-                    <div className='card-label column-title center-label sample-name center menu-dropdown' rel='tooltip'
-                      data-activates={`column-dropdown-${pos}`} data-placement='bottom'
-                      data-original-title={ this.COLUMN_DISPLAY_MAP[column_name].tooltip }>
-                      {this.COLUMN_DISPLAY_MAP[column_name].display_name } <i className="fa fa-caret-down"/>
-                    </div>
-
-                      <ul className='dropdown-content column-dropdown' id={`column-dropdown-${pos}`}>
+                    {
+                      this.COLUMN_DISPLAY_MAP[column_name].tooltip ?
+                      <Tipsy position='bottom'
+                        content={this.COLUMN_DISPLAY_MAP[column_name].tooltip}>
+                        <div className='card-label column-title center-label sample-name center menu-dropdown'
+                          data-activates={`column-dropdown-${pos}`}>
+                          {this.COLUMN_DISPLAY_MAP[column_name].display_name } <i className="fa fa-caret-down"/>
+                        </div>
+                      </Tipsy>
+                      :
+                      <div className='card-label column-title center-label sample-name center menu-dropdown'
+                        data-activates={`column-dropdown-${pos}`}>
+                        {this.COLUMN_DISPLAY_MAP[column_name].display_name } <i className="fa fa-caret-down"/>
+                      </div>
+                    }
+                    <ul className='dropdown-content column-dropdown' id={`column-dropdown-${pos}`}>
                         { column_name === 'pipeline_status' ?
                           <div>{filterStatus}</div> : ( column_name === 'tissue_type' ? <div>{filterTissueDropDown}</div> : "")
                         }

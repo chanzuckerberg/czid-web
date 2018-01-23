@@ -547,14 +547,16 @@ class PipelineSampleReport extends React.Component {
     const report_column_threshold = this.thresholdInputColumn(column_name);
     return (
       <th style={style}>
-        <div className="sort-controls left" rel="tooltip" title={tooltip_message}>
-          {this.render_sort_arrow(column_name, 'highest', 'down')}
-          {`${visible_type} `}
-          {visible_metric}
-        </div>
-        <div className="sort-controls left" rel="tooltip" data-placement="bottom" title="Threshold">
-          {report_column_threshold}
-        </div>
+        <Tipsy content={tooltip_message} placement="top">
+          <div className='sort-controls center left'>
+            {this.render_sort_arrow(column_name, 'highest', 'down')}
+            {`${visible_type} `}
+            {visible_metric}
+          </div>
+        </Tipsy>
+        <Tipsy content='Threshold' placement="bottom">
+          { report_column_threshold }
+        </Tipsy>
       </th>
     );
   }

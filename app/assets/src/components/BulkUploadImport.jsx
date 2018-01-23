@@ -536,31 +536,39 @@ class BulkUploadImport extends React.Component {
                     </div>
                   </div>
                   <div className='row input-row'>
-                    <div className='col project-list no-padding s8 tooltipped' data-position="top" data-delay="50" data-tooltip="Name of experiment or project">
-                      <select ref="projectSelect" disabled={(this.state.disableProjectSelect ? 'disabled' : '')} className="projectSelect" id="sample" onChange={ this.handleProjectChange } value={this.state.project}>
-                        <option disabled defaultValue>{this.state.project}</option>
-                        { this.state.allProjects.length ?
-                          this.state.allProjects.map((project, i) => {
-                            return <option ref= "project" key={i} id={project.id} >{project.name}</option>
-                          }) : <option>No projects to display</option>
-                        }
-                      </select>
-                      {
-                        (this.state.errors.project) ?
-                          <div className='field-error'>
-                            {this.state.errors.project}
-                          </div> : null
-                      }
-                    </div>
+                    <Tipsy content='Name of experiment or project' position='top'>
+                      <div className='col project-list no-padding s8' data-delay="50">
+                          <select
+                            ref="projectSelect"
+                            disabled={(this.state.disableProjectSelect ? 'disabled' : '')} className="projectSelect" id="sample" onChange={ this.handleProjectChange } value={this.state.project}>
+                              <option disabled defaultValue>{this.state.project}</option>
+                                { this.state.allProjects.length ?
+                                this.state.allProjects.map((project, i) => {
+                                  return <option ref= "project" key={i} id={project.id} >{project.name}</option>
+                                }) : <option>No projects to display</option>
+                            }
+                          </select>
+                          {
+                            (this.state.errors.project) ?
+                              <div className='field-error'>
+                                {this.state.errors.project}
+                              </div> : null
+                          }
+                      </div>
+                    </Tipsy>
                     <div className='col no-padding s4'>
-                      <button type='button' onClick={this.toggleNewProjectInput}
-                              className='new-project-button new-button skyblue-button tooltipped'
-                              data-position="right" data-delay="50" data-tooltip="Add your desired experiment or project name">
-                        <i className='fa fa-plus'/>
-                        <span>
-                          New project
-                        </span>
-                      </button>
+                      <Tipsy content='Add a new desired experiment or project name'
+                        placement='right'>
+                        <button
+                          type='button' onClick={this.toggleNewProjectInput}
+                          className='new-project-button new-button skyblue-button'
+                          data-delay="50">
+                          <i className='fa fa-plus'/>
+                          <span>
+                            New project
+                          </span>
+                        </button>
+                      </Tipsy>
                     </div>
                     <div className='col no-padding s12 new-project-input hidden'>
                       <input type='text' onBlur={ (e) => {
@@ -580,11 +588,13 @@ class BulkUploadImport extends React.Component {
                 </div>
                 <div className='field'>
                   <div className='row'>
-                    <div className='col field-title no-padding s5 tooltipped'
-                         data-position="top" data-delay="50"
-                         data-tooltip='This would be subtracted by the pipeline'>
-                      Select host genome
-                    </div>
+                    <Tipsy content='This would be subtracted by the pipeline'
+                      placement='top'>
+                      <div className='col field-title no-padding s5'
+                        data-delay="50">
+                        Select host genome
+                      </div>
+                    </Tipsy>
                     {
                       (this.userDetails.admin) ?
                         <div className='col s7 right-align no-padding right admin-genomes'>
