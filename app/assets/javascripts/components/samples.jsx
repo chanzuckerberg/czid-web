@@ -115,7 +115,7 @@ class Samples extends React.Component {
 
       setTimeout(() => {
         this.checkReportDownload()
-      }, 2000)
+      }, 5000)
 
     });
   }
@@ -126,8 +126,7 @@ class Samples extends React.Component {
       if (download_status === 'complete') {
         location.href = `/projects/${this.state.project_id_download_in_progress}/get_project_reports_csv`
       } else {
-
-        $('.note-saved-success')
+         $('.note-saved-success')
         .html(`<i class='fa fa-check-circle'></i> ${download_status}`)
         .css('display', 'inline-block')
         .delay(1000)

@@ -660,7 +660,6 @@ module ReportHelper
       File.write(filename, csv_data)
     end
     `cd #{csv_dir}; tar cvzf #{project.tar_filename} .`
-    output_file = "#{report_tar}"
     `rm #{csv_dir}/*.csv`
   end
 end
