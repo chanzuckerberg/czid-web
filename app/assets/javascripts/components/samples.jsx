@@ -105,8 +105,7 @@ class Samples extends React.Component {
   displayReportProgress(res) {
       $('.download-progress')
       .html(`${res.data.status_display}`)
-      .css('display', 'block');
-
+      .css('display', 'block')
       setTimeout(() => {
         this.checkReportDownload()
       }, 2000)
