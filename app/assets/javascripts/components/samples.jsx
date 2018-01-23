@@ -13,12 +13,13 @@ class Samples extends React.Component {
     this.fetchResults = this.fetchResults.bind(this);
     this.fetchSamples = this.fetchSamples.bind(this);
     this.handleStatusFilterSelect = this.handleStatusFilterSelect.bind(this);
+    this.handleTissueFilterSelect = this.handleTissueFilterSelect.bind(this);
     this.setUrlLocation = this.setUrlLocation.bind(this);
     this.sortSamples = this.sortSamples.bind(this);
     this.switchColumn = this.switchColumn.bind(this);
-    this.uploadSample = this.uploadSample.bind(this);
     this.handleProjectSelection = this.handleProjectSelection.bind(this);
-    this.pageSize = props.pageSize || 30
+    this.pageSize = props.pageSize || 30;
+    this.tissue_types = PipelineSampleReads.fetchTissueTypes();
     this.state = {
       project: null,
       totalNumber: null,
@@ -26,6 +27,7 @@ class Samples extends React.Component {
       selectedProjectId: this.fetchParams('project_id') || null,
       filterParams: this.fetchParams('filter') || '',
       searchParams: this.fetchParams('search') || '',
+      tissueParams: this.fetchParams('tissue') || '',
       sampleIdsParams: this.fetchParams('ids') || [],
       allSamples: [],
       sort_by: this.fetchParams('sort_by') || 'id,desc',
@@ -206,7 +208,7 @@ class Samples extends React.Component {
           <span>{status}</span>
         </div>
       );
-      const data_values = { total_reads: !derivedOutput.pipeline_output ? BLANK_TEXT : numberWithCommas(derivedOutput.pipeline_output.total_reads),
+      const data_values = { total_reads: !derivedOutput.pipeline_run ? BLANK_TEXT : numberWithCommas(derivedOutput.pipeline_run.total_reads),
         nonhost_reads: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.remaining_reads) ? BLANK_TEXT : numberWithCommas(derivedOutput.summary_stats.remaining_reads),
         nonhost_reads_percent: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? '' : <span className="percent"> {`(${derivedOutput.summary_stats.percent_remaining.toFixed(2)}%)`} </span>,
         quality_control: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? BLANK_TEXT : `${derivedOutput.summary_stats.qc_percent.toFixed(2)}%`,
@@ -262,13 +264,13 @@ class Samples extends React.Component {
                         )
                       } else if(column === 'nonhost_reads') {
                         column_data = (<li key={pos}>
-                          <div className='card-label center center-label'>
+                          <div className='card-label center center-label data-label'>
                             {data_values[column]} {data_values["nonhost_reads_percent"]}
                           </div>
                         </li>)
                       } else {
                         column_data = (<li key={pos}>
-                          <div className='card-label center center-label'>
+                          <div className='card-label center center-label data-label'>
                             {data_values[column]}
                           </div>
                         </li>)
@@ -352,7 +354,7 @@ class Samples extends React.Component {
 
   //fetch project, filter and search params
   getParams() {
-    let params = `filter=${this.state.filterParams}&page=${this.state.pagesLoaded+1}&search=${this.state.searchParams}&sort_by=${this.state.sort_by}`;
+    let params = `filter=${this.state.filterParams}&tissue=${this.state.tissueParams}&page=${this.state.pagesLoaded+1}&search=${this.state.searchParams}&sort_by=${this.state.sort_by}`;
     let projectId = parseInt(this.state.selectedProjectId);
 
     if(projectId) {
@@ -485,10 +487,6 @@ class Samples extends React.Component {
     location.href = `/samples/${id}`;
   }
 
-  uploadSample() {
-    location.href = '/samples/new'
-  }
-
   getActiveSort(className) {
     if(className) {
       const sort = SortHelper.getFilter('sort_by');
@@ -542,7 +540,7 @@ class Samples extends React.Component {
       }
     })
   }
- 
+
 
   addFavIconClass(project) {
     return (
@@ -552,39 +550,87 @@ class Samples extends React.Component {
 
   renderTable(samples) {
     let project_id = this.state.selectedProjectId ? this.state.selectedProjectId : 'all'
-    let download_button = (
-      <a href={`/projects/${project_id}/csv`} className="download-project center">
-        <i className="fa fa-cloud-download"/>
-        <span>Download table</span>
-      </a>
+    let search_field_width = (project_id === 'all') ? 'col s10' : 'col s8'
+    let search_field = (
+      <div className={search_field_width + ' no-padding'}>
+        <div className='white'>
+          <span className="icon">
+            <i className="fa fa-search" aria-hidden="true"/>
+          </span>
+          <input id="search" value={this.state.searchParams} onChange={this.handleSearchChange}  type="search" onKeyDown={this.handleSearch} className="search" placeholder='Search for sample'/>
+        </div>
+      </div>
+    );
+    let table_download_button = (
+      <div className='col s2 download-table'>
+        <div className='white'>
+          <a href={`/projects/${project_id}/csv`} className="download-project center">
+            <i className="fa fa-cloud-download"/>
+            <span>Download table</span>
+          </a>
+        </div>
+      </div>
+    );
+    let reports_download_button = (
+      <div className='col s2 download-table'>
+        <div className='white'>
+          <a href={`/projects/${project_id}/project_reports_csv`} className="download-project center">
+            <i className="fa fa-cloud-download"/>
+            <span>Download reports</span>
+          </a>
+        </div>
+      </div>
     );
     const search_box = (
       <div className="row search-box">
-        <div className='col s10 no-padding'>
-          <div className='white'>
-            <span className="icon">
-              <i className="fa fa-search" aria-hidden="true"/>
-            </span>
-            <input id="search" value={this.state.searchParams} onChange={this.handleSearchChange}  type="search" onKeyDown={this.handleSearch} className="search" placeholder='Search for sample'/>
-          </div>
-        </div>
-        <div className='col s2 download-table'>
-          <div className='white'>
-            { download_button }
-          </div>
-        </div>
+        { search_field }
+        { table_download_button }
+        { project_id === 'all' ? null : reports_download_button }
       </div>
     );
 
     const projInfo = (
-      <div>
-        <div className="proj-title">{ (!this.state.project) ? 'All projects' : this.state.project.name }</div>
+      <div className="wrapper">
+        <div className={(!this.state.project) ? "proj-title all-proj" : "proj-title"}>{ (!this.state.project) ? <div>All projects</div> : this.state.project.name }</div>
         <p>{ this.state.allSamples.length === 0 ? 'No sample found' : ( this.state.allSamples.length === 1 ? '1 sample found' : `${this.state.allSamples.length} out of ${this.state.totalNumber} samples found`) }</p>
       </div>
     );
-    
+
+   const filterTissueDropDown = (
+        <div className='dropdown-status-filtering'>
+        <li>
+          <a className="title">
+            <b>Filter tissue</b>
+          </a>
+        </li>
+        { this.tissue_types.map((tissue, i) => {
+          <div>{tissue}nknjn</div>
+          return (
+            <li key={i} className="filter-item" data-status={tissue} onClick={ this.handleTissueFilterSelect } ><a data-status={tissue} className="filter-item">{tissue}</a><i className="filter fa fa-check hidden"></i></li>
+          )
+        }) }
+        <li className="divider"/>
+      </div>
+   )
+
+   const filterStatus = (
+        <div className='dropdown-status-filtering'>
+          <li>
+            <a className="title">
+              <b>Filter status</b>
+            </a>
+          </li>
+          <li className="filter-item" data-status="WAITING" onClick={ this.handleStatusFilterSelect } ><a data-status="WAITING" className="filter-item waiting">Waiting</a><i data-status="WAITING" className="filter fa fa-check hidden"></i></li>
+          <li className="filter-item" data-status="UPLOADING" onClick={ this.handleStatusFilterSelect }><a data-status="UPLOADING" className="filter-item uploading">In Progress</a><i data-status="UPLOADING"  className="filter fa fa-check hidden"></i></li>
+          <li className="filter-item" data-status="CHECKED" onClick={ this.handleStatusFilterSelect }><a data-status="CHECKED" className="filter-item complete">Complete</a><i data-status="CHECKED" className="filter fa fa-check hidden"></i></li>
+          <li className="filter-item" onClick={ this.handleStatusFilterSelect } data-status="FAILED" ><a data-status="FAILED" className="filter-item failed">Failed</a><i data-status="FAILED" className="filter fa fa-check hidden"></i></li>
+          <li className="filter-item" data-status="ALL" onClick={ this.handleStatusFilterSelect }><a data-status="ALL" className="filter-item all">All</a><i data-status="ALL" className="filter all fa fa-check hidden"></i></li>
+          <li className="divider"/>
+        </div>
+   )
+  
     const tableHead = (
-      <div className='col s12 sample-feed no-padding samples-table-head'>
+      <div className='col s12 sample-feed-head no-padding samples-table-head'>
         <div className='samples-card white'>
           <div className='flex-container'>
             <ul className='flex-items'>
@@ -608,19 +654,8 @@ class Samples extends React.Component {
 
                       <ul className='dropdown-content column-dropdown' id={`column-dropdown-${pos}`}>
                         { column_name === 'pipeline_status' ?
-                          <div className='dropdown-status-filtering'>
-                            <li>
-                              <a className="title">
-                                <b>Filter status</b>
-                              </a>
-                            </li>
-                            <li className="filter-item" data-status="WAITING" onClick={ this.handleStatusFilterSelect } ><a data-status="WAITING" className="filter-item waiting">Waiting</a><i data-status="WAITING" className="filter fa fa-check hidden"></i></li>
-                            <li className="filter-item" data-status="UPLOADING" onClick={ this.handleStatusFilterSelect }><a data-status="UPLOADING" className="filter-item uploading">In Progress</a><i data-status="UPLOADING"  className="filter fa fa-check hidden"></i></li>
-                            <li className="filter-item" data-status="CHECKED" onClick={ this.handleStatusFilterSelect }><a data-status="CHECKED" className="filter-item complete">Complete</a><i data-status="CHECKED" className="filter fa fa-check hidden"></i></li>
-                            <li className="filter-item" onClick={ this.handleStatusFilterSelect } data-status="FAILED" ><a data-status="FAILED" className="filter-item failed">Failed</a><i data-status="FAILED" className="filter fa fa-check hidden"></i></li>
-                            <li className="filter-item" data-status="ALL" onClick={ this.handleStatusFilterSelect }><a data-status="ALL" className="filter-item all">All</a><i data-status="ALL" className="filter all fa fa-check hidden"></i></li>
-                            <li className="divider"/>
-                          </div> : ''}
+                          <div>{filterStatus}</div> : ( column_name === 'tissue_type' ? <div>{filterTissueDropDown}</div> : "") 
+                        }
                         <li>
                           <a className="title">
                             <b>Switch column</b>
@@ -694,7 +729,6 @@ class Samples extends React.Component {
       $('.filter').hide();
       $('body').addClass('background-cover');
     });
-
     this.initializeTooltip();
     this.fetchProjectPageData();
     this.state.selectedProjectId ? this.fetchProjectDetails(this.state.selectedProjectId) : null;
@@ -702,7 +736,6 @@ class Samples extends React.Component {
     // this.initializeProjectList();
     this.displayPipelineStatusFilter();
     this.initializeColumnSelect();
-
   }
 
   initializeColumnSelect() {
@@ -741,12 +774,26 @@ class Samples extends React.Component {
     });
   }
 
+  handleTissueFilterSelect(e) {
+    e.preventDefault();
+    let status = e.target.getAttribute('data-status');
+    this.setState({
+      pagesLoaded: 0,
+      pageEnd: false,
+      tissueParams: status
+    }, () => {
+      this.setUrlLocation();
+      this.fetchResults();
+    });
+  }
+
   //set Url based on requests
   setUrlLocation() {
     let projectId = parseInt(this.state.selectedProjectId);
     const params = {
       project_id: projectId ? projectId : null,
       filter: this.state.filterParams,
+      tissue: this.state.tissueParams,
       search: this.state.searchParams,
       sort_by: this.state.sort_by
     };
@@ -756,6 +803,7 @@ class Samples extends React.Component {
   handleProjectSelection(id) {
     this.setState({
       selectedProjectId: id,
+      pagesLoaded: 0,
       pageEnd: false
     }, () => {
       this.setUrlLocation();
@@ -764,14 +812,14 @@ class Samples extends React.Component {
   }
 
   render() {
-    project_section = 
+    project_section =
       <ProjectSelection
         favoriteProjects = { this.favoriteProjects }
         allProjects = { this.allProjects }
         csrf = { this.csrf }
         selectProject = { this.handleProjectSelection }
       />;
-    
+
     return (
       <div>
           <div className="row content-body">
@@ -780,7 +828,7 @@ class Samples extends React.Component {
             </div>
              <div className="col s10">
               { this.renderTable(this.state.allSamples) }
-            </div> 
+            </div>
           </div>
       </div>
     )

@@ -25,7 +25,7 @@ class BackgroundsController < ApplicationController
   # POST /backgrounds
   # POST /backgrounds.json
   def create
-    @background = Background.create(background_params)
+    @background = Background.new(background_params)
 
     respond_to do |format|
       if @background.save
@@ -41,10 +41,8 @@ class BackgroundsController < ApplicationController
   # PATCH/PUT /backgrounds/1
   # PATCH/PUT /backgrounds/1.json
   def update
-    current_data = @background.to_json(include: [{ pipeline_outputs: { only: [:id, :pipeline_run_id] } },
-                                                 { samples: { only: :id } }])
-    current_data_full_string = @background.to_json(include: [{ pipeline_outputs: { only: [:id, :pipeline_run_id] } },
-                                                             { samples: { only: :id } },
+    current_data = @background.to_json(include: [{ pipeline_runs: { only: [:id, :sample_id] } }])
+    current_data_full_string = @background.to_json(include: [{ pipeline_runs: { only: [:id, :sample_id] } },
                                                              :taxon_summaries])
     background_changed = assign_attributes_and_has_changed?(background_params)
     if background_changed
@@ -53,6 +51,7 @@ class BackgroundsController < ApplicationController
       update_successful = db_archive_successful && s3_archive_successful ? @background.save : false # this triggers recomputation of @background's taxon_summaries if archiving was successful
     else
       update_successful = true
+      @background.save # recompute
     end
     respond_to do |format|
       if update_successful
@@ -84,6 +83,6 @@ class BackgroundsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def background_params
-    params.require(:background).permit(:name, pipeline_output_ids: [], sample_ids: [])
+    params.require(:background).permit(:name, pipeline_run_ids: [])
   end
 end

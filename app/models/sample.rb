@@ -30,9 +30,8 @@ class Sample < ApplicationRecord
   belongs_to :project
   belongs_to :user, optional: true # This is the user who uploaded the sample, possibly distinct from the user(s) owning the sample's project
   belongs_to :host_genome, optional: true
-  has_many :pipeline_outputs, dependent: :destroy
   has_many :pipeline_runs, -> { order(created_at: :desc) }, dependent: :destroy
-  has_and_belongs_to_many :backgrounds
+  has_and_belongs_to_many :backgrounds, through: :pipeline_runs
   has_many :input_files, dependent: :destroy
   accepts_nested_attributes_for :input_files
   validate :input_files_checks
@@ -79,6 +78,33 @@ class Sample < ApplicationRecord
     end
   end
 
+  def self.get_signed_url(s3key)
+    begin
+      if s3key.present?
+        return S3_PRESIGNER.presigned_url(:get_object,
+                                          bucket: SAMPLES_BUCKET_NAME, key: s3key,
+                                          expires_in: SAMPLE_DOWNLOAD_EXPIRATION).to_s
+      end
+    rescue StandardError => e
+      Airbrake.notify("AWS presign error: #{e.inspect}")
+    end
+    nil
+  end
+
+  def results_folder_files
+    file_list = S3_CLIENT.list_objects(bucket: SAMPLES_BUCKET_NAME,
+                                       prefix: "#{sample_path}/results/",
+                                       delimiter: "/")
+    file_list.contents.map { |f| { key: f.key, url: Sample.get_signed_url(f.key) } }
+  end
+
+  def fastqs_folder_files
+    file_list = S3_CLIENT.list_objects(bucket: SAMPLES_BUCKET_NAME,
+                                       prefix: "#{sample_path}/fastqs/",
+                                       delimiter: "/")
+    file_list.contents.map { |f| { key: f.key, url: Sample.get_signed_url(f.key) } }
+  end
+
   def initiate_input_file_upload
     return unless input_files.first.source_type == InputFile::SOURCE_TYPE_S3
     Resque.enqueue(InitiateS3Cp, id)
@@ -102,8 +128,7 @@ class Sample < ApplicationRecord
     end
 
     self.status = STATUS_UPLOADED
-    save # this triggers pipeline
-    command
+    save # this triggers pipeline command
   end
 
   def sample_input_s3_path
@@ -165,35 +190,6 @@ class Sample < ApplicationRecord
                     :sample_unidentified_fasta_url, :host_genome_name])
   end
 
-  def postprocess_batch_command
-    postprocess_script_name = File.basename(IdSeqPipeline::S3_POSTPROCESS_SCRIPT_LOC)
-    postprocess_batch_command_env_variables = "INPUT_BUCKET=#{sample_output_s3_path} " \
-      "OUTPUT_BUCKET=#{sample_postprocess_s3_path} "
-    "aws s3 cp #{IdSeqPipeline::S3_POSTPROCESS_SCRIPT_LOC} .; chmod 755 #{postprocess_script_name}; " +
-      postprocess_batch_command_env_variables + "./#{postprocess_script_name}"
-  end
-
-  def pipeline_command
-    script_name = File.basename(IdSeqPipeline::S3_SCRIPT_LOC)
-    batch_command_env_variables = "INPUT_BUCKET=#{sample_input_s3_path} OUTPUT_BUCKET=#{sample_output_s3_path} " \
-      "FILE_TYPE=#{input_files.first.file_type} FILTER_HOST_FLAG=#{filter_host_flag} " \
-      "ENVIRONMENT=#{Rails.env} DB_SAMPLE_ID=#{id} "
-    if s3_star_index_path.present?
-      batch_command_env_variables += "STAR_GENOME=#{s3_star_index_path} "
-    end
-    if s3_bowtie2_index_path.present?
-      batch_command_env_variables += "BOWTIE2_GENOME=#{s3_bowtie2_index_path} "
-    end
-    batch_command = "aws s3 cp #{IdSeqPipeline::S3_SCRIPT_LOC} .; chmod 755 #{script_name}; " +
-                    batch_command_env_variables + "./#{script_name}"
-    batch_command += "; " + postprocess_batch_command
-    command = "aegea batch submit --command=\"#{batch_command}\" "
-    memory = sample_memory.present? ? sample_memory : DEFAULT_MEMORY
-    queue =  job_queue.present? ? job_queue : DEFAULT_QUEUE
-    command += " --storage /mnt=500 --ecr-image idseq --memory #{memory} --queue #{queue} --vcpus 4"
-    command
-  end
-
   def check_host_genome
     if host_genome.present?
       self.s3_star_index_path = host_genome.s3_star_index_path
@@ -216,11 +212,9 @@ class Sample < ApplicationRecord
     old_pipeline_runs.each do |pr|
       # Write pipeline_run data to file
       json_output = pr.to_json(include: [:pipeline_run_stages,
-                                         { pipeline_output: {
-                                           include: [:taxon_counts,
-                                                     :taxon_byteranges,
-                                                     :job_stats]
-                                         } }])
+                                         :taxon_counts,
+                                         :taxon_byteranges,
+                                         :job_stats])
       file = Tempfile.new
       file.write(json_output)
       file.close
@@ -229,11 +223,9 @@ class Sample < ApplicationRecord
       _stdout, _stderr, status = Open3.capture3("aws", "s3", "cp", file.path.to_s,
                                                 "#{pr.archive_s3_path}/#{pr_s3_file_name}")
       # Delete any taxon_counts / taxon_byteranges associated with the pipeline run
-      po = pr.pipeline_output
-      next unless po
       if !File.zero?(file.path) && status.exitstatus && status.exitstatus.zero?
-        TaxonCount.where(pipeline_output_id: po.id).delete_all
-        TaxonByterange.where(pipeline_output_id: po.id).delete_all
+        TaxonCount.where(pipeline_run_id: pr.id).delete_all
+        TaxonByterange.where(pipeline_run_id: pr.id).delete_all
       end
       file.unlink
     end

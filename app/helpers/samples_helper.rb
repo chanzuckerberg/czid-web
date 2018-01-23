@@ -18,7 +18,7 @@ module SamplesHelper
         run_info = sample_info[:run_info]
         data_values = { sample_name: db_sample ? db_sample[:name] : '',
                         upload_date: db_sample ? db_sample[:created_at] : '',
-                        total_reads: derived_output[:pipeline_output] ? derived_output[:pipeline_output][:total_reads] : '',
+                        total_reads: derived_output[:pipeline_run] ? derived_output[:pipeline_run][:total_reads] : '',
                         nonhost_reads: derived_output[:summary_stats] ? derived_output[:summary_stats][:remaining_reads] : '',
                         nonhost_reads_percent: derived_output[:summary_stats] && derived_output[:summary_stats][:percent_remaining] ? derived_output[:summary_stats][:percent_remaining].round(3) : '',
                         quality_control: derived_output[:summary_stats] && derived_output[:summary_stats][:qc_percent] ? derived_output[:summary_stats][:qc_percent].round(3) : '',
@@ -73,9 +73,9 @@ module SamplesHelper
   end
 
   def get_summary_stats(jobstats)
-    po = jobstats[0].pipeline_output unless jobstats[0].nil?
-    unmapped_reads = po.nil? ? nil : po.unmapped_reads
-    last_processed_at = po.nil? ? nil : po.created_at
+    pr = jobstats[0].pipeline_run unless jobstats[0].nil?
+    unmapped_reads = pr.nil? ? nil : pr.unmapped_reads
+    last_processed_at = pr.nil? ? nil : pr.created_at
     { remaining_reads: get_remaining_reads(jobstats),
       compression_ratio: compute_compression_ratio(jobstats),
       qc_percent: compute_qc_value(jobstats),
@@ -85,8 +85,8 @@ module SamplesHelper
   end
 
   def get_remaining_reads(jobstats)
-    po = jobstats[0].pipeline_output unless jobstats[0].nil?
-    po.remaining_reads unless po.nil?
+    pr = jobstats[0].pipeline_run unless jobstats[0].nil?
+    pr.remaining_reads unless pr.nil?
   end
 
   def compute_compression_ratio(jobstats)
@@ -100,8 +100,8 @@ module SamplesHelper
   end
 
   def compute_percentage_reads(jobstats)
-    po = jobstats[0].pipeline_output unless jobstats[0].nil?
-    (100.0 * po.remaining_reads) / po.total_reads unless po.nil?
+    pr = jobstats[0].pipeline_run unless jobstats[0].nil?
+    (100.0 * pr.remaining_reads) / pr.total_reads unless pr.nil? || pr.remaining_reads.nil? || pr.total_reads.nil?
   end
 
   def sample_status_display(sample)
@@ -155,38 +155,6 @@ module SamplesHelper
     sample_list
   end
 
-  def sample_uploaders(samples)
-    all_uploaders = []
-    samples.each do |s|
-      user = {}
-      if s.user_id.present?
-        id = s.user_id
-        user[:name] = User.find(id).name
-      else
-        user[:name] = nil
-      end
-      all_uploaders.push(user)
-    end
-    all_uploaders
-  end
-
-  def samples_output_data(samples)
-    final_result = []
-    samples.each do |output|
-      output_data = {}
-      pipeline_output = output.pipeline_runs.first ? output.pipeline_runs.first.pipeline_output : nil
-      job_stats = pipeline_output ? pipeline_output.job_stats : nil
-      summary_stats = job_stats ? get_summary_stats(job_stats) : nil
-
-      output_data[:host_genome_name] = output.host_genome ? output.host_genome.name : nil
-      output_data[:pipeline_output] = pipeline_output
-      output_data[:job_stats] = job_stats
-      output_data[:summary_stats] = summary_stats
-      final_result.push(output_data)
-    end
-    final_result
-  end
-
   def filter_samples(samples, query)
     samples = if query == 'WAITING'
                 samples.joins("LEFT OUTER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id) or pipeline_runs.id  IS NULL ").where("samples.status = ?  or pipeline_runs.job_status is NULL", 'created')
@@ -202,56 +170,84 @@ module SamplesHelper
     samples
   end
 
-  def samples_pipeline_run_info(samples)
-    pipeline_run_info = []
-    samples.each do |output|
-      pipeline_run_entry = {}
-      if output.pipeline_runs.first
-        recent_pipeline_run = output.pipeline_runs.first
-        pipeline_run_entry[:job_status_description] = 'WAITING' if recent_pipeline_run.job_status.nil?
-        if recent_pipeline_run.pipeline_run_stages.present?
-          run_stages = recent_pipeline_run.pipeline_run_stages || []
-          run_stages.each do |rs|
-            pipeline_run_entry[rs[:name]] = rs.job_status
-          end
-          pipeline_run_entry[:total_runtime] = if recent_pipeline_run.finalized?
-                                                 run_stages.map { |rs| rs.updated_at - rs.created_at }.sum # total processing time (without time spent waiting), for performance evaluation
-                                               else
-                                                 Time.current - recent_pipeline_run.created_at # time since pipeline kickoff (including time spent waiting), for run diagnostics
-                                               end
-        else
-          pipeline_run_status = recent_pipeline_run.job_status
-          pipeline_run_entry[:job_status_description] =
-            if %w[CHECKED SUCCEEDED].include?(pipeline_run_status)
-              'COMPLETE'
-            elsif %w[FAILED ERROR].include?(pipeline_run_status)
-              'FAILED'
-            elsif %w[RUNNING LOADED].include?(pipeline_run_status)
-              'IN PROGRESS'
-            elsif pipeline_run_status == 'RUNNABLE'
-              'INITIALIZING'
-            end
-        end
-      else
-        pipeline_run_entry[:job_status_description] = 'WAITING'
-      end
-      pipeline_run_entry[:finalized] = output.pipeline_runs.first ? output.pipeline_runs.first.finalized : 0
-      pipeline_run_info.push(pipeline_run_entry)
+  def get_total_runtime(pipeline_run)
+    if pipeline_run.finalized?
+      # total processing time (without time spent waiting), for performance evaluation
+      pipeline_run.pipeline_run_stages.map { |rs| rs.updated_at - rs.created_at }.sum
+    else
+      # time since pipeline kickoff (including time spent waiting), for run diagnostics
+      (Time.current - pipeline_run.created_at)
     end
-    pipeline_run_info
+  end
+
+  def filter_by_tissue_type(samples, query)
+    samples = if query == '-'
+                samples.where(sample_tissue: nil)
+              else
+                samples.where(sample_tissue: query)
+              end
+    samples
+  end
+
+  def pipeline_run_info(pipeline_run)
+    pipeline_run_entry = {}
+    if pipeline_run
+      pipeline_run_entry[:job_status_description] = 'WAITING' if pipeline_run.job_status.nil?
+      if pipeline_run.pipeline_run_stages.present?
+        run_stages = pipeline_run.pipeline_run_stages
+        run_stages.each do |rs|
+          pipeline_run_entry[rs.name] = rs.job_status
+        end
+        pipeline_run_entry[:total_runtime] = get_total_runtime(pipeline_run)
+      else
+        # old data
+        pipeline_run_status = pipeline_run.job_status
+        pipeline_run_entry[:job_status_description] =
+          if %w[CHECKED SUCCEEDED].include?(pipeline_run_status)
+            'COMPLETE'
+          elsif %w[FAILED ERROR].include?(pipeline_run_status)
+            'FAILED'
+          elsif %w[RUNNING LOADED].include?(pipeline_run_status)
+            'IN PROGRESS'
+          elsif pipeline_run_status == 'RUNNABLE'
+            'INITIALIZING'
+          end
+      end
+      pipeline_run_entry[:finalized] = pipeline_run.finalized
+    else
+      pipeline_run_entry[:job_status_description] = 'WAITING'
+      pipeline_run_entry[:finalized] = 0
+    end
+    pipeline_run_entry
+  end
+
+  def sample_uploader(sample)
+    user = {}
+    user[:name] = (sample.user.name if sample.user)
+    user
+  end
+
+  def sample_derived_data(sample)
+    output_data = {}
+    pipeline_run = sample.pipeline_runs.first
+    job_stats = pipeline_run ? pipeline_run.job_stats : nil
+    summary_stats = job_stats ? get_summary_stats(job_stats) : nil
+    output_data[:pipeline_run] = pipeline_run
+    output_data[:host_genome_name] = sample.host_genome ? sample.host_genome.name : nil
+    output_data[:job_stats] = job_stats
+    output_data[:summary_stats] = summary_stats
+
+    output_data
   end
 
   def format_samples(samples)
     formatted_samples = []
-    final_result = samples_output_data(samples)
-    pipeline_run_info = samples_pipeline_run_info(samples)
-    uploaders = sample_uploaders(samples)
-    samples.each_with_index do |_sample, i|
+    samples.each_with_index do |sample|
       job_info = {}
-      job_info[:db_sample] = samples[i]
-      job_info[:derived_sample_output] = final_result[i]
-      job_info[:run_info] = pipeline_run_info[i]
-      job_info[:uploader] = uploaders[i]
+      job_info[:db_sample] = sample
+      job_info[:derived_sample_output] = sample_derived_data(sample)
+      job_info[:run_info] = pipeline_run_info(sample.pipeline_runs.first)
+      job_info[:uploader] = sample_uploader(sample)
       formatted_samples.push(job_info)
     end
     formatted_samples

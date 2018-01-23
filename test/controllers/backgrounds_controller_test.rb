@@ -19,7 +19,7 @@ class BackgroundsControllerTest < ActionDispatch::IntegrationTest
 
   test "should create background" do
     assert_difference('Background.count') do
-      post backgrounds_url, params: { background: { name: 'new_name', pipeline_output_ids: @background.pipeline_outputs.map(&:id) } }
+      post backgrounds_url, params: { background: { name: 'new_name', pipeline_run_ids: @background.pipeline_runs.map(&:id) } }
     end
 
     assert_redirected_to background_url(Background.last)
@@ -36,7 +36,7 @@ class BackgroundsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update background" do
-    patch background_url(@background), params: { background: { name: @background.name, pipeline_output_ids: @background.pipeline_outputs.map(&:id) } }
+    patch background_url(@background), params: { background: { name: @background.name, pipeline_run_ids: @background.pipeline_runs.map(&:id) } }
     assert_redirected_to background_url(@background)
   end
 

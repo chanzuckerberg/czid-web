@@ -1,9 +1,10 @@
 class SamplesController < ApplicationController
   include ReportHelper
   include SamplesHelper
+  include PipelineOutputsHelper
 
   before_action :authenticate_user!, only: [:new, :index, :update, :destroy, :edit, :show, :reupload_source, :kickoff_pipeline, :bulk_new, :bulk_import, :bulk_upload]
-  before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata, :report_info, :search_list, :report_csv]
+  before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder]
   acts_as_token_authentication_handler_for User, only: [:create, :bulk_upload], fallback: :devise
   protect_from_forgery unless: -> { request.format.json? }
   PAGE_SIZE = 30
@@ -16,6 +17,7 @@ class SamplesController < ApplicationController
     project_id = params[:project_id]
     name_search_query = params[:search]
     filter_query = params[:filter]
+    tissue_type_query = params[:tissue]
     sort = params[:sort_by]
     samples_query = JSON.parse(params[:ids]) if params[:ids].present?
 
@@ -27,6 +29,7 @@ class SamplesController < ApplicationController
 
     results = results.search(name_search_query) if name_search_query.present?
     results = filter_samples(results, filter_query) if filter_query.present?
+    results = filter_by_tissue_type(results, tissue_type_query) if tissue_type_query.present?
 
     @samples = sort_by(results, sort).paginate(page: params[:page], per_page: params[:per_page] || PAGE_SIZE)
     @samples_count = results.size
@@ -92,14 +95,7 @@ class SamplesController < ApplicationController
 
   # GET /samples/1/report_csv
   def report_csv
-    params[:is_csv] = 1
-    params[:sort_by] = "highest_nt_aggregatescore"
-    default_background_id = @sample.host_genome && @sample.host_genome.default_background ? @sample.host_genome.default_background.id : nil
-    background_id = params[:background_id] || default_background_id
-    pipeline_output = @sample.pipeline_runs.first ? @sample.pipeline_runs.first.pipeline_output : nil
-    pipeline_output_id = pipeline_output ? pipeline_output.id : nil
-    tax_details = taxonomy_details(pipeline_output_id, background_id, params)
-    @report_csv = generate_report_csv(tax_details)
+    @report_csv = report_csv_from_params(@sample, params)
     send_data @report_csv, filename: @sample.name + '_report.csv'
   end
 
@@ -107,11 +103,9 @@ class SamplesController < ApplicationController
   # GET /samples/1.json
 
   def show
-    first_pipeline_run = @sample.pipeline_runs.first ? @sample.pipeline_runs.first : nil
-    @pipeline_run = first_pipeline_run
-    @pipeline_output = first_pipeline_run ? first_pipeline_run.pipeline_output : nil
-    @sample_status = first_pipeline_run ? first_pipeline_run.job_status : nil
-    @job_stats = @pipeline_output ? @pipeline_output.job_stats : nil
+    @pipeline_run = @sample.pipeline_runs.first
+    @sample_status = @pipeline_run ? @pipeline_run.job_status : nil
+    @job_stats = @pipeline_run ? @pipeline_run.job_stats : nil
     @summary_stats = @job_stats ? get_summary_stats(@job_stats) : nil
     @project_info = @sample.project ? @sample.project : nil
     @project_sample_ids_names = @sample.project ? get_samples_in_project(@sample.project) : nil
@@ -119,13 +113,13 @@ class SamplesController < ApplicationController
     @background_models = Background.all
 
     default_background_id = @sample.host_genome && @sample.host_genome.default_background ? @sample.host_genome.default_background.id : nil
-    if @pipeline_output &&  (@pipeline_output.remaining_reads.to_i > 0 || @pipeline_run.finalized?)
+    if @pipeline_run && (@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?
       background_id = params[:background_id] || default_background_id
       if background_id
         @report_present = 1
-        @report_ts = @pipeline_output.updated_at.to_i
+        @report_ts = @pipeline_run.updated_at.to_i
         @all_categories = all_categories
-        @report_details = report_details(@pipeline_output, Background.find(background_id))
+        @report_details = report_details(@pipeline_run, Background.find(background_id))
         @report_page_params = clean_params(params, @all_categories)
       end
     end
@@ -134,34 +128,29 @@ class SamplesController < ApplicationController
   def report_info
     expires_in 30.days
 
-    first_pipeline_run = @sample.pipeline_runs.first ? @sample.pipeline_runs.first : nil
-    @pipeline_run = first_pipeline_run
-    @pipeline_output = first_pipeline_run ? first_pipeline_run.pipeline_output : nil
+    @pipeline_run = @sample.pipeline_runs.first
 
     ##################################################
     ## Duct tape for changing background id dynamically
     ## TODO(yf): clean the following up.
     ####################################################
     background_id = nil
-    pipeline_output_id = nil
     default_background_id = @sample.host_genome && @sample.host_genome.default_background ? @sample.host_genome.default_background.id : nil
-    if @pipeline_output &&  (@pipeline_output.remaining_reads.to_i > 0 || @pipeline_run.finalized?)
+    if @pipeline_run && (@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?
       background_id = params[:background_id] || default_background_id
-      pipeline_output_id = @pipeline_output.id
+      pipeline_run_id = @pipeline_run.id
     end
 
-    @report_info = external_report_info(pipeline_output_id, background_id, params)
+    @report_info = external_report_info(pipeline_run_id, background_id, params)
     render json: @report_info
   end
 
   def search_list
     expires_in 30.days
 
-    first_pipeline_run = @sample.pipeline_runs.first ? @sample.pipeline_runs.first : nil
-    @pipeline_run = first_pipeline_run
-    @pipeline_output_id = first_pipeline_run.pipeline_output ? first_pipeline_run.pipeline_output.id : nil
-    if @pipeline_output_id
-      @search_list = fetch_lineage_info(@pipeline_output_id)
+    @pipeline_run = @sample.pipeline_runs.first
+    if @pipeline_run
+      @search_list = fetch_lineage_info(@pipeline_run.id)
       render json: @search_list
     else
       render json: { lineage_map: {}, search_list: [] }
@@ -197,6 +186,43 @@ class SamplesController < ApplicationController
     end
   end
 
+  def show_taxid_fasta
+    if params[:hit_type] == "NT_or_NR"
+      nt_array = get_taxid_fasta(@sample, params[:taxid], params[:tax_level].to_i, 'NT').split(">")
+      nr_array = get_taxid_fasta(@sample, params[:taxid], params[:tax_level].to_i, 'NR').split(">")
+      @taxid_fasta = ">" + ((nt_array | nr_array) - ['']).join(">")
+      @taxid_fasta = "Coming soon" if @taxid_fasta == ">" # Temporary fix
+    else
+      @taxid_fasta = get_taxid_fasta(@sample, params[:taxid], params[:tax_level].to_i, params[:hit_type])
+    end
+    pipeline_run = @sample.pipeline_runs.first
+    taxid_name = pipeline_run.taxon_counts.find_by(tax_id: params[:taxid], tax_level: params[:tax_level]).name
+    taxid_name_clean = taxid_name ? taxid_name.downcase.gsub(/\W/, "-") : ''
+    send_data @taxid_fasta, filename: @sample.name + '_' + taxid_name_clean + '-hits.fasta'
+  end
+
+  def nonhost_fasta
+    @nonhost_fasta = get_s3_file(@sample.annotated_fasta_s3_path)
+    send_data @nonhost_fasta, filename: @sample.name + '_nonhost.fasta'
+  end
+
+  def unidentified_fasta
+    @unidentified_fasta = get_s3_file(@sample.unidentified_fasta_s3_path)
+    send_data @unidentified_fasta, filename: @sample.name + '_unidentified.fasta'
+  end
+
+  def results_folder
+    @file_list = @sample.results_folder_files
+    @file_path = "#{@sample.sample_path}/results/"
+    render template: "samples/folder"
+  end
+
+  def fastqs_folder
+    @file_list = @sample.fastqs_folder_files
+    @file_path = "#{@sample.sample_path}/fastqs/"
+    render template: "samples/folder"
+  end
+
   # GET /samples/new
   def new
     @sample = nil
@@ -224,7 +250,7 @@ class SamplesController < ApplicationController
     @sample = Sample.new(params)
     @sample.project = project if project
     @sample.input_files.each { |f| f.name ||= File.basename(f.source) }
-    @sample.user = @user if @user
+    @sample.user = current_user if current_user
 
     respond_to do |format|
       if @sample.save

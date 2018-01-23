@@ -117,6 +117,8 @@ Note that this requires the proper ssh config to access the deployed versions of
 `bin/clam alpha 'mysqldump -h $RDS_ADDRESS -u $DB_USERNAME --password=$DB_PASSWORD idseq_alpha | gzip -c' > idseq_alpha.sql.gz`
 1. Overwrite your local `development` DB with data from given backup file:
 `docker-compose run web "gzip -dc idseq_alpha.sql.gz | mysql -h db -u root --database idseq_development"`
+1. Let RAILS know it's okay to use alpha data locally.
+`docker-compose run web bin/rails db:environment:set RAILS_ENV=development`
 
 
 ## Deployment
@@ -131,12 +133,6 @@ Note that this requires the proper ssh config to access the deployed versions of
 1. `pip install git+https://github.com/chanzuckerberg/idseq-cli.git`
 1. `idseq -t idseq1234 -p 'Awesome Project' -s test2 -u localhost:3000 -e fake@example.com --r1 <fastq1.gz> --r2 <fastq2.gz>`
 
-
-## Upload data (deprecated)
-
-There is an example of the JSON for uploading pipeline results in `test/output.json`. To test locally you can run:
-
->curl -H "Accept: application/json" -H "Content-type: application/json" -X POST -d @output.json http://localhost:3000/pipeline_outputs.json
 
 ## Dependencies
 

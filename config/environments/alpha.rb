@@ -68,7 +68,8 @@ Rails.application.configure do
   # config.action_mailer.raise_delivery_errors = false
   config.action_mailer.default_url_options = { host: 'alpha.idseq.net' }
 
-  config.action_controller.asset_host =  'alpha.idseq.net'
+  config.action_controller.asset_host = 'alpha.idseq.net'
+  config.middleware.use Rack::HostRedirect, 'www.alpha.idseq.net' => 'alpha.idseq.net'
 
   config.action_mailer.delivery_method = :mailgun
   config.action_mailer.mailgun_settings = {

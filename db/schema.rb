@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180110233619) do
+ActiveRecord::Schema.define(version: 20180117225136) do
 
   create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "archive_of"
@@ -32,6 +32,12 @@ ActiveRecord::Schema.define(version: 20180110233619) do
     t.bigint "pipeline_output_id"
     t.index ["background_id"], name: "index_backgrounds_pipeline_outputs_on_background_id"
     t.index ["pipeline_output_id"], name: "index_backgrounds_pipeline_outputs_on_pipeline_output_id"
+  end
+
+  create_table "backgrounds_pipeline_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
+    t.bigint "background_id"
+    t.bigint "pipeline_run_id"
+    t.index ["background_id", "pipeline_run_id"], name: "index_bg_pr_id", unique: true
   end
 
   create_table "backgrounds_samples", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -137,6 +143,7 @@ ActiveRecord::Schema.define(version: 20180110233619) do
     t.bigint "total_reads"
     t.bigint "remaining_reads"
     t.bigint "unmapped_reads"
+    t.text "version"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
     t.index ["pipeline_output_id"], name: "index_pipeline_runs_on_pipeline_output_id", unique: true
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
@@ -146,6 +153,8 @@ ActiveRecord::Schema.define(version: 20180110233619) do
     t.string "name", collation: "latin1_swedish_ci"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "public_access", limit: 1
+    t.integer "days_to_keep_sample_private"
     t.index ["name"], name: "index_projects_on_name", unique: true
   end
 

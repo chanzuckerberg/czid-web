@@ -66,7 +66,8 @@ Rails.application.configure do
   config.action_mailer.perform_caching = false
   config.action_mailer.default_url_options = { host: 'idseq.net' }
 
-  config.action_controller.asset_host =  'idseq.net'
+  config.action_controller.asset_host = 'idseq.net'
+  config.middleware.use Rack::HostRedirect, 'www.idseq.net' => 'idseq.net'
 
   config.action_mailer.delivery_method = :mailgun
   config.action_mailer.mailgun_settings = {
