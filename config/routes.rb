@@ -20,18 +20,18 @@ Rails.application.routes.draw do
     get :unidentified_fasta, on: :member
     get :results_folder, on: :member
     get :fastqs_folder, on: :member
-    get :user_search_list, on: :member
     post :bulk_upload, on: :collection
     post :save_metadata, on: :member
-    post :add_user_to_project, on: :member
   end
   get 'samples/:id/fasta/:tax_level/:taxid/:hit_type', to: 'samples#show_taxid_fasta'
 
   resources :projects do
     get :visuals, on: :member
-    get :project_reports_csv, on: :member # use 'project_reports_csv?background_id=' to select a specific background for the reports
+    get :project_reports_csv, on: :member
+    get :user_search_list, on: :member
     put :add_favorite, on: :member
     put :remove_favorite, on: :member
+    post :add_user_to_project, on: :member
   end
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
