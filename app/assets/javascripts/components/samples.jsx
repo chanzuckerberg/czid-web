@@ -116,7 +116,6 @@ class Samples extends React.Component {
       setTimeout(() => {
         this.checkReportDownload()
       }, 5000)
-
     });
   }
 
@@ -131,6 +130,11 @@ class Samples extends React.Component {
         .css('display', 'inline-block')
         .delay(1000)
         .slideUp(200);
+
+      setTimeout(() => {
+        this.checkReportDownload()
+      }, 2000)
+
       }
     })
   }

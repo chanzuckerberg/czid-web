@@ -42,10 +42,10 @@ class ProjectsController < ApplicationController
       render json: { status_display: "complete" }
       return
     end
-    csv_completed = `ls #{@project.csv_dir} | wc -l`.to_i
+    csv_completed = `ls #{@project.csv_dir}/*.csv | wc -l`.to_i
     csv_total = @project.samples.count
     percent_complete = (1.0 * csv_completed) / csv_total
-    render json: { status_display: "#{percent_complete} percent of reports complete for project #{@project.id}" }
+    render json: { status_display: "#{percent_complete} percent of reports complete for project #{@project.name}" }
   end
 
   def get_project_reports_csv

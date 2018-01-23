@@ -26,6 +26,7 @@ class Project < ApplicationRecord
   end
 
   def make_bulk_csv(params)
+    sleep(20)
     bulk_report_csvs_from_params(self, params)
   end
 end
