@@ -84,8 +84,9 @@ class ProjectsController < ApplicationController
   end
 
   def user_search_list
-    current_project_users = @project.users.map { |u| { id: u.id, email: u.email } }
-    other_users = User.all.reject { |u| current_project_users.include? u }.map { |u| { id: u.id, email: u.email } }
+    project_user_list = @project.users
+    current_project_users = project_user_list.map { |u| { id: u.id, email: u.email } }
+    other_users = User.all.reject { |u| project_user_list.include? u }.map { |u| { id: u.id, email: u.email } }
     render json: { current_project_users: current_project_users, other_users: other_users }
   end
 
