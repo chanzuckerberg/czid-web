@@ -37,7 +37,6 @@ class ProjectsController < ApplicationController
   end
 
   def project_reports_csv_status
-    expires_in 20.minutes
     if File.file?(@project.report_tar.to_s)
       render json: { status_display: "complete" }
       return
