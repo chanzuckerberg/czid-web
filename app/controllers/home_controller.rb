@@ -1,6 +1,7 @@
 require 'will_paginate/array'
 class HomeController < ApplicationController
   include SamplesHelper
+  before_action :login_required
 
   def index
     @favorite_projects = current_user.favorites
