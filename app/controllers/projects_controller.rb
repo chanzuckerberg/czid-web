@@ -51,8 +51,9 @@ class ProjectsController < ApplicationController
   end
 
   def send_project_reports_csv
-    `aws s3 cp #{@project.report_tar_s3(current_user.id)} #{@project.report_tar(current_user.id)}`
-    send_file @project.report_tar.to_s
+    output_file = @project.report_tar(current_user.id)
+    `aws s3 cp #{@project.report_tar_s3(current_user.id)} #{output_file}`
+    send_file output_file
   end
 
   # GET /projects/new
