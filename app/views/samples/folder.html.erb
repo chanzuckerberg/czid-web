@@ -1,0 +1,17 @@
+<h3><%= @file_path %> > </h3>
+<div>
+<% if @file_list.count == 0 %>
+No files under this directory
+<% else %>
+<ul>
+  <% @file_list.each do |file| %>
+    <li>
+      <a class="custom-button" style= "margin: 0" href=<%= file[:url] %> >
+        <i class="fa fa-cloud-download"></i>
+        <%= file[:key].split("/")[-1] %>
+      </a>
+    </li>
+  <% end %>
+</ul>
+<% end %>
+</div>

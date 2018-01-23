@@ -18,6 +18,8 @@ Rails.application.routes.draw do
     get :bulk_import, on: :collection
     get :nonhost_fasta, on: :member
     get :unidentified_fasta, on: :member
+    get :results_folder, on: :member
+    get :fastqs_folder, on: :member
     post :bulk_upload, on: :collection
     post :save_metadata, on: :member
   end
@@ -25,6 +27,7 @@ Rails.application.routes.draw do
 
   resources :projects do
     get :visuals, on: :member
+    get :project_reports_csv, on: :member # use 'project_reports_csv?background_id=' to select a specific background for the reports
     put :add_favorite, on: :member
     put :remove_favorite, on: :member
   end

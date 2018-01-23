@@ -701,6 +701,8 @@ GEM
     puma (3.11.0)
     quantile (0.2.0)
     rack (2.0.3)
+    rack-host-redirect (1.3.0)
+      rack
     rack-protection (2.0.0)
       rack
     rack-test (0.8.2)
@@ -903,6 +905,7 @@ DEPENDENCIES
   mysql2
   prometheus-client (= 0.7.1)
   puma (~> 3.7)
+  rack-host-redirect
   rails (~> 5.1.2)
   rake
   react-autocomplete-rails

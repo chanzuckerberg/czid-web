@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "docker-compose up -d && yarn install && webpack"
+    "start": "yarn install && webpack"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
@@ -29,6 +29,7 @@
     "font-awesome": "^4.7.0",
     "jquery": "^3.2.1",
     "js-cookie": "^2.2.0",
+    "material-ui": "^1.0.0-beta.29",
     "materialize-css": "^0.100.2",
     "moment": "^2.20.1",
     "prop-types": "^15.6.0",
@@ -39,4 +40,3 @@
     "react-tooltip": "^3.4.0"
   }
 }
-

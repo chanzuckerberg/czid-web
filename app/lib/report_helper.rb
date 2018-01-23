@@ -636,4 +636,40 @@ module ReportHelper
       end
     end
   end
+
+  def report_csv_from_params(sample, params)
+    params[:is_csv] = 1
+    params[:sort_by] = "highest_nt_aggregatescore"
+    default_background_id = sample.host_genome && sample.host_genome.default_background ? sample.host_genome.default_background.id : nil
+    background_id = params[:background_id] || default_background_id
+    pipeline_run = sample.pipeline_runs.first
+    pipeline_run_id = pipeline_run ? pipeline_run.id : nil
+    return "" if pipeline_run_id.nil?
+    tax_details = taxonomy_details(pipeline_run_id, background_id, params)
+    generate_report_csv(tax_details)
+  end
+
+  def bulk_report_csvs_from_params(project, params)
+    csv_dir = "/app/tmp/report_csvs/#{project.id}"
+    `rm -rf #{csv_dir}; mkdir -p #{csv_dir}`
+    sample_names_used = []
+    project.samples.each do |sample|
+      csv_data = report_csv_from_params(sample, params)
+      clean_sample_name = sample.name.downcase.gsub(/\W/, "-")
+      used_before = sample_names_used.include? clean_sample_name
+      sample_names_used << clean_sample_name
+      clean_sample_name += "_#{sample.id}" if used_before
+      filename = "#{csv_dir}/#{clean_sample_name}.csv"
+      File.write(filename, csv_data)
+    end
+    tar_filename = "#{project.name.gsub(/\W/, '-')}_reports.tar.gz"
+    `cd #{csv_dir}; tar cvzf #{tar_filename} .`
+    output_file = "#{csv_dir}/#{tar_filename}"
+    `rm #{csv_dir}/*.csv`
+    # Return output file path, but first ensure project/sample names
+    # were not chosen maliciously to download an arbitrary file:
+    absolute_path = File.expand_path(output_file)
+    return nil unless absolute_path.start_with?(csv_dir)
+    output_file
+  end
 end
