@@ -74,6 +74,7 @@ class Samples extends React.Component {
     this.columnHidden = this.columnHidden.bind(this);
     this.startReportGeneration = this.startReportGeneration.bind(this);
     this.checkReportDownload = this.checkReportDownload.bind(this);
+    this.displayReportProgress = this.displayReportProgress.bind(this);
     $(document).ready(function() {
       $('select').material_select();
     });
@@ -101,12 +102,7 @@ class Samples extends React.Component {
     });
   }
 
-  startReportGeneration() {
-    axios.get(`/projects/${this.state.selectedProjectId}/make_project_reports_csv`).then((res) => {
-      this.setState({
-        project_id_download_in_progress: this.state.selectedProjectId
-      });
-
+  displayReportProgress(res) {
       $('.download-progress')
       .html(`${res.data.status_display}`)
       .css('display', 'block');
@@ -114,6 +110,14 @@ class Samples extends React.Component {
       setTimeout(() => {
         this.checkReportDownload()
       }, 2000)
+  }
+
+  startReportGeneration() {
+    axios.get(`/projects/${this.state.selectedProjectId}/make_project_reports_csv`).then((res) => {
+      this.setState({
+        project_id_download_in_progress: this.state.selectedProjectId
+      });
+      this.displayReportProgress(res) 
     });
   }
 
@@ -126,14 +130,7 @@ class Samples extends React.Component {
           project_id_download_in_progress: null
         });
       } else {
-         $('.download-progress')
-        .html(`${download_status}`)
-        .css('display', 'block');
-
-      setTimeout(() => {
-        this.checkReportDownload()
-      }, 2000)
-
+        this.displayReportProgress(res)
       }
     })
   }
