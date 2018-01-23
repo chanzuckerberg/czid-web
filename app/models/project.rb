@@ -8,7 +8,7 @@ class Project < ApplicationRecord
   include ReportHelper
 
   def csv_dir
-    path = "/app/tmp/report_csvs/#{id}/#{name}"
+    path = "/app/tmp/report_csvs/#{id}"
     sanitize_path(path)
   end
 
