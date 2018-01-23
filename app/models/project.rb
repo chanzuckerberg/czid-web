@@ -22,4 +22,8 @@ class Project < ApplicationRecord
   def sanitize_path(path)
     return path unless path != File.expand_path(path)
   end
+
+  def make_bulk_csv(params)
+    bulk_report_csvs_from_params(self, params)
+  end
 end
