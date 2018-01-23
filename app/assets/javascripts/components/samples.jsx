@@ -124,6 +124,9 @@ class Samples extends React.Component {
       let download_status = res.data.status_display
       if (download_status === 'complete') {
         location.href = `/projects/${this.state.project_id_download_in_progress}/get_project_reports_csv`
+        this.setState({
+          project_id_download_in_progress: null
+        });
       } else {
          $('.note-saved-success')
         .html(`${download_status}`)
@@ -612,13 +615,15 @@ class Samples extends React.Component {
         </div>
       </div>
     );
+    reports_download_button_contents = this.state.project_id_download_in_progress ? <span className='note-action-feedback note-saved-success'></span>
+                                         : <a onClick={this.startReportGeneration} className="download-project center">
+                                             <i className="fa fa-cloud-download"/>
+                                             <span>Download reports</span>
+                                           </a>
     let reports_download_button = (
       <div className='col s2 download-table'>
         <div className='white'>
-          <a onClick={this.startReportGeneration} className="download-project center">
-            <i className="fa fa-cloud-download"/>
-            <span>Download reports</span>
-          </a>
+          { reports_download_button_contents }
         </div>
       </div>
     );
@@ -731,7 +736,6 @@ class Samples extends React.Component {
       <div className="row content-wrapper">
         <div className="project-info col s12">
           { projInfo }
-          <span className='note-action-feedback note-saved-success'></span>
         </div>
 
         <div className="sample-container col s12">
