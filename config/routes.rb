@@ -29,7 +29,7 @@ Rails.application.routes.draw do
     get :visuals, on: :member
     get :make_project_reports_csv, on: :member
     get :project_reports_csv_status, on: :member
-    get :get_project_reports_csv, on: :member
+    get :send_project_reports_csv, on: :member
     put :add_favorite, on: :member
     put :remove_favorite, on: :member
   end
