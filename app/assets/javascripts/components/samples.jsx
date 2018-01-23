@@ -615,7 +615,7 @@ class Samples extends React.Component {
     let reports_download_button = (
       <div className='col s2 download-table'>
         <div className='white'>
-          <a href={`/projects/${project_id}/project_reports_csv`} className="download-project center">
+          <a onClick={this.startReportGeneration} className="download-project center">
             <i className="fa fa-cloud-download"/>
             <span>Download reports</span>
           </a>
