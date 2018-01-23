@@ -38,9 +38,12 @@ class ProjectsController < ApplicationController
 
   def project_reports_csv_status
     expires_in 20.minutes
-    final_completed = `ls #{@project.report_tar} | wc -l`
-    render json: { status_display: "complete" } if final_completed
-    csv_completed = `ls #{@project.csv_dir} | wc -l`
+    final_completed = `ls #{@project.report_tar} | wc -l`.to_i
+    if final_completed == 1
+      render json: { status_display: "complete" }
+      return
+    end
+    csv_completed = `ls #{@project.csv_dir} | wc -l`.to_i
     csv_total = @project.samples.count
     percent_complete = (1.0 * csv_completed) / csv_total
     render json: { status_display: "#{percent_complete} percent of reports complete for project #{@project.id}" }
