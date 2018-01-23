@@ -13,7 +13,7 @@ class Project < ApplicationRecord
   end
 
   def tar_filename
-    "#{name.gsub(/\W/, '-')}_reports.tar.gz"
+    "#{name.downcase.gsub(/\W/, '-')}_reports.tar.gz"
   end
 
   def report_tar
