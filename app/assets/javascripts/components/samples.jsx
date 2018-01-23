@@ -109,7 +109,7 @@ class Samples extends React.Component {
 
       $('.download-progress')
       .html(`${res.data.status_display}`)
-      .css('display', 'inline-block');
+      .css('display', 'block');
 
       setTimeout(() => {
         this.checkReportDownload()
@@ -128,7 +128,7 @@ class Samples extends React.Component {
       } else {
          $('.download-progress')
         .html(`${download_status}`)
-        .css('display', 'inline-block');
+        .css('display', 'block');
 
       setTimeout(() => {
         this.checkReportDownload()
@@ -612,7 +612,7 @@ class Samples extends React.Component {
       </div>
     );
     reports_download_button_contents = this.state.project_id_download_in_progress ?
-                                         <span className='download-progress'></span>
+                                         <span className='download-progress'/>
                                          : <a onClick={this.startReportGeneration} className="download-project center">
                                              <i className="fa fa-cloud-download"/>
                                              <span>Download reports</span>

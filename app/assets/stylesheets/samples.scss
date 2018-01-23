@@ -269,9 +269,10 @@ $break-large: 1070px;
 
 .download-progress {
   width: 200px;
+  height: 100px;
+  font-size: 12px;
   color: #fff;
-  border-radius: 2px;
-  padding: 6px;
+  padding: 11px;
   text-align: center;
   display: none;
   position: absolute;
@@ -460,6 +461,7 @@ $break-large: 1070px;
   .download-table {
     padding-right: 0 !important;
     .download-project {
+      cursor: pointer;
       padding: 11px;
       display: block;
       border: 1px solid transparent;
