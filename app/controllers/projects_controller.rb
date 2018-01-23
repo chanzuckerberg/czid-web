@@ -1,6 +1,7 @@
 class ProjectsController < ApplicationController
   include SamplesHelper
   include ReportHelper
+  before_action :login_required
 
   before_action :set_project, only: [:show, :edit, :update, :destroy, :add_favorite, :remove_favorite, :project_reports_csv]
   clear_respond_to
