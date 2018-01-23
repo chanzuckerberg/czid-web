@@ -2,8 +2,8 @@ class PipelineRunStage < ApplicationRecord
   include ApplicationHelper
   include PipelineOutputsHelper
   belongs_to :pipeline_run
+  DEFAULT_MEMORY_IN_MB = 4000
 
-  DEFAULT_MEMORY_IN_MB = 16_000
   DEFAULT_STORAGE_IN_GB = 500
   JOB_TYPE_BATCH = 1
   COMMIT_SHA_FILE_ON_WORKER = "/mnt/idseq-pipeline/commit-sha.txt".freeze
@@ -19,7 +19,8 @@ class PipelineRunStage < ApplicationRecord
   def install_pipeline
     "cd /mnt; " \
     "git clone https://github.com/chanzuckerberg/idseq-pipeline.git; " \
-    "cd idseq-pipeline; git rev-parse master > #{COMMIT_SHA_FILE_ON_WORKER}; " \
+    "cd idseq-pipeline; " \
+    "git rev-parse master > #{COMMIT_SHA_FILE_ON_WORKER}; " \
     "pip install -e .[test]"
   end
 
@@ -118,6 +119,20 @@ class PipelineRunStage < ApplicationRecord
     pipeline_run.sample.sample_output_s3_path
   end
 
+  def postprocess_output_s3_path
+    sample = pipeline_run.sample
+    pipeline_run.subsample ? "#{sample.sample_postprocess_s3_path}/#{subsample_suffix}" : sample.sample_postprocess_s3_path
+  end
+
+  def alignment_output_s3_path
+    sample = pipeline_run.sample
+    pipeline_run.subsample ? "#{sample.sample_output_s3_path}/#{subsample_suffix}" : sample.sample_output_s3_path
+  end
+
+  def subsample_suffix
+    "subsample_#{pipeline_run.subsample}"
+  end
+
   def log_url
     return nil unless job_log_id
     "https://us-west-2.console.aws.amazon.com/cloudwatch/home?region=us-west-2" \
@@ -150,8 +165,9 @@ class PipelineRunStage < ApplicationRecord
     sample = pipeline_run.sample
     file_type = sample.input_files.first.file_type
     batch_command_env_variables = "FASTQ_BUCKET=#{sample.sample_input_s3_path} INPUT_BUCKET=#{sample.sample_output_s3_path} " \
-      "OUTPUT_BUCKET=#{sample.sample_output_s3_path} FILE_TYPE=#{file_type} ENVIRONMENT=#{Rails.env} DB_SAMPLE_ID=#{sample.id} " \
+      "OUTPUT_BUCKET=#{alignment_output_s3_path} FILE_TYPE=#{file_type} ENVIRONMENT=#{Rails.env} DB_SAMPLE_ID=#{sample.id} " \
       "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} "
+    batch_command_env_variables += "SUBSAMPLE=#{pipeline_run.subsample} " if pipeline_run.subsample
     batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline non_host_alignment"
     command = "aegea batch submit --command=\"#{batch_command}\" "
     queue = sample.job_queue.present? ? sample.job_queue : Sample::DEFAULT_QUEUE
@@ -161,8 +177,8 @@ class PipelineRunStage < ApplicationRecord
 
   def postprocess_command
     sample = pipeline_run.sample
-    batch_command_env_variables = "INPUT_BUCKET=#{sample.sample_output_s3_path} " \
-      "OUTPUT_BUCKET=#{sample.sample_postprocess_s3_path} " \
+    batch_command_env_variables = "INPUT_BUCKET=#{alignment_output_s3_path} " \
+      "OUTPUT_BUCKET=#{postprocess_output_s3_path} " \
       "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} "
     batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline postprocess"
     command = "aegea batch submit --command=\"#{batch_command}\" "
@@ -193,8 +209,8 @@ class PipelineRunStage < ApplicationRecord
   def db_load_alignment
     pr = pipeline_run
 
-    output_json_s3_path = "#{sample_output_s3_path}/#{PipelineRun::OUTPUT_JSON_NAME}"
-    stats_json_s3_path = "#{sample_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
+    output_json_s3_path = "#{alignment_output_s3_path}/#{PipelineRun::OUTPUT_JSON_NAME}"
+    stats_json_s3_path = "#{alignment_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
 
     # Get the file
     downloaded_json_path = PipelineRun.download_file(output_json_s3_path, pr.local_json_path)
@@ -212,7 +228,7 @@ class PipelineRunStage < ApplicationRecord
     stats_array = JSON.parse(File.read(downloaded_stats_path))
     stats_array = stats_array.select { |entry| entry.key?("task") }
 
-    version_s3_path = "#{sample_output_s3_path}/#{PipelineRun::VERSION_JSON_NAME}"
+    version_s3_path = "#{alignment_output_s3_path}/#{PipelineRun::VERSION_JSON_NAME}"
     pr.version = `aws s3 cp #{version_s3_path} -`
 
     # only keep species level counts
@@ -241,7 +257,7 @@ class PipelineRunStage < ApplicationRecord
 
   def db_load_postprocess
     pr = pipeline_run
-    byteranges_json_s3_path = "#{pr.sample.sample_postprocess_s3_path}/#{PipelineRun::TAXID_BYTERANGE_JSON_NAME}"
+    byteranges_json_s3_path = "#{postprocess_output_s3_path}/#{PipelineRun::TAXID_BYTERANGE_JSON_NAME}"
     downloaded_byteranges_path = PipelineRun.download_file(byteranges_json_s3_path, pr.local_json_path)
     taxon_byteranges_csv_file = "#{pr.local_json_path}/taxon_byteranges"
     hash_array_json2csv(downloaded_byteranges_path, taxon_byteranges_csv_file, %w[taxid hit_type first_byte last_byte])
@@ -259,12 +275,12 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def alignment_outputs
-    stats_json_s3_path = "#{sample_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
-    output_json_s3_path = "#{sample_output_s3_path}/#{PipelineRun::OUTPUT_JSON_NAME}"
+    stats_json_s3_path = "#{alignment_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
+    output_json_s3_path = "#{alignment_output_s3_path}/#{PipelineRun::OUTPUT_JSON_NAME}"
     [stats_json_s3_path, output_json_s3_path]
   end
 
   def postprocess_outputs
-    ["#{pipeline_run.sample.sample_postprocess_s3_path}/#{PipelineRun::TAXID_BYTERANGE_JSON_NAME}"]
+    ["#{postprocess_output_s3_path}/#{PipelineRun::TAXID_BYTERANGE_JSON_NAME}"]
   end
 end

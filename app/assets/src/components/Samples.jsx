@@ -1,3 +1,15 @@
+import React from 'react';
+import axios from 'axios';
+import ReactDOM from 'react-dom';
+import moment from 'moment';
+import $ from 'jquery';
+import Tipsy from 'react-tipsy';
+import SortHelper from './SortHelper';
+import numberWithCommas from '../helpers/strings';
+import ProjectSelection from './ProjectSelection';
+import ReportFilter from './ReportFilter';
+import PipelineSampleReads from './PipelineSampleReads';
+
 class Samples extends React.Component {
   constructor(props, context) {
     super(props, context);
@@ -75,6 +87,7 @@ class Samples extends React.Component {
     this.startReportGeneration = this.startReportGeneration.bind(this);
     this.checkReportDownload = this.checkReportDownload.bind(this);
     this.displayReportProgress = this.displayReportProgress.bind(this);
+
     $(document).ready(function() {
       $('select').material_select();
     });
@@ -545,9 +558,9 @@ class Samples extends React.Component {
   }
 
   findSelectedColumns(selO) {
-    var selValues = [];
-    for (i=0; i < selO.length; i++) {
-      column_name = selO.options[i].value;
+    const selValues = [];
+    for (let i=0; i < selO.length; i++) {
+      const column_name = selO.options[i].value;
       if (selO.options[i].selected && column_name !== "") {
         selValues.push(column_name);
       }
@@ -556,7 +569,7 @@ class Samples extends React.Component {
   }
 
   handleColumnSelectChange(e) {
-    selected_columns = this.findSelectedColumns(e.target);
+    const selected_columns = this.findSelectedColumns(e.target);
     this.setState({columnsShown: selected_columns});
   }
 
@@ -565,7 +578,7 @@ class Samples extends React.Component {
   }
 
   display_column_options(column_map, data_type) {
-    column_list = Object.keys(column_map)
+    const column_list = Object.keys(column_map)
     return column_list.map((option_name, i) => {
       if (column_map[option_name].type === data_type) {
         return (
@@ -607,13 +620,13 @@ class Samples extends React.Component {
         </div>
       </div>
     );
-    reports_download_button_contents = this.state.project_id_download_in_progress ?
+    const reports_download_button_contents = this.state.project_id_download_in_progress ?
                                          <span className='download-progress'/>
                                          : <a onClick={this.startReportGeneration} className="download-project center">
                                              <i className="fa fa-cloud-download"/>
                                              <span>Download reports</span>
                                            </a>
-    let reports_download_button = (
+    const reports_download_button = (
       <div className='col s2 download-table'>
         <div className='white'>
           { reports_download_button_contents }
@@ -667,7 +680,7 @@ class Samples extends React.Component {
           <li className="divider"/>
         </div>
    )
-  
+
     const tableHead = (
       <div className='col s12 sample-feed-head no-padding samples-table-head'>
         <div className='samples-card white'>
@@ -685,14 +698,24 @@ class Samples extends React.Component {
               { this.state.columnsShown.map((column_name, pos) => {
                 return (
                   <li key={`shown-${pos}`}>
-                    <div className='card-label column-title center-label sample-name center menu-dropdown' rel='tooltip'
-                      data-activates={`column-dropdown-${pos}`} data-placement='bottom'
-                      data-original-title={ this.COLUMN_DISPLAY_MAP[column_name].tooltip }>
-                      {this.COLUMN_DISPLAY_MAP[column_name].display_name } <i className="fa fa-caret-down"/>
-                    </div>
-                      <ul className='dropdown-content column-dropdown' id={`column-dropdown-${pos}`}>
+                    {
+                      this.COLUMN_DISPLAY_MAP[column_name].tooltip ?
+                      <Tipsy position='bottom'
+                        content={this.COLUMN_DISPLAY_MAP[column_name].tooltip}>
+                        <div className='card-label column-title center-label sample-name center menu-dropdown'
+                          data-activates={`column-dropdown-${pos}`}>
+                          {this.COLUMN_DISPLAY_MAP[column_name].display_name } <i className="fa fa-caret-down"/>
+                        </div>
+                      </Tipsy>
+                      :
+                      <div className='card-label column-title center-label sample-name center menu-dropdown'
+                        data-activates={`column-dropdown-${pos}`}>
+                        {this.COLUMN_DISPLAY_MAP[column_name].display_name } <i className="fa fa-caret-down"/>
+                      </div>
+                    }
+                    <ul className='dropdown-content column-dropdown' id={`column-dropdown-${pos}`}>
                         { column_name === 'pipeline_status' ?
-                          <div>{filterStatus}</div> : ( column_name === 'tissue_type' ? <div>{filterTissueDropDown}</div> : "") 
+                          <div>{filterStatus}</div> : ( column_name === 'tissue_type' ? <div>{filterTissueDropDown}</div> : "")
                         }
                         <li>
                           <a className="title">
@@ -836,7 +859,7 @@ class Samples extends React.Component {
       search: this.state.searchParams,
       sort_by: this.state.sort_by
     };
-    window.history.replaceState(null, null, `?${jQuery.param(params)}`)
+    window.history.replaceState(null, null, `?${$.param(params)}`)
   }
 
   handleProjectSelection(id) {
@@ -851,7 +874,7 @@ class Samples extends React.Component {
   }
 
   render() {
-    project_section =
+    const project_section =
       <ProjectSelection
         favoriteProjects = { this.favoriteProjects }
         allProjects = { this.allProjects }
@@ -874,4 +897,4 @@ class Samples extends React.Component {
   }
 
 }
-
+export default Samples;

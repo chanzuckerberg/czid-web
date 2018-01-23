@@ -1,3 +1,6 @@
+import React from 'react';
+import $ from 'jquery';
+
 class Header extends React.Component  {
   constructor(props, context) {
     super(props, context);
@@ -17,7 +20,7 @@ class Header extends React.Component  {
       stopPropagation: false
     });
   }
-  
+
   gotoPage(path) {
     location.href = `${path}`
   }
@@ -61,7 +64,7 @@ class Header extends React.Component  {
               <div className={ this.userSignedIn ? "right hide-on-med-and-down header-right-nav" : "right hide-on-med-and-down header-right-nav menu" }>
                 { this.userSignedIn ? <div className='profile-header-dropdown'><a className="dropdown-button profile-dropdown" data-activates="dropdown1">
                     { this.userDetails.email } <i className="fa fa-angle-down"></i>
-                    </a></div>:  (this.location === '/users/sign_in' ? null : <div className="login"><span onClick={ this.gotoPage.bind(this, '/users/sign_in') }>Login</span></div>) 
+                    </a></div>:  (this.location === '/users/sign_in' ? null : <div className="login"><span onClick={ this.gotoPage.bind(this, '/users/sign_in') }>Login</span></div>)
                  }
               </div>
             </div>
@@ -72,3 +75,5 @@ class Header extends React.Component  {
     )
   }
 }
+
+export default Header;

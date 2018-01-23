@@ -15,6 +15,7 @@ class PipelineRun < ApplicationRecord
   accepts_nested_attributes_for :job_stats
   accepts_nested_attributes_for :taxon_byteranges
 
+  DEFAULT_SUBSAMPLING = 1_000_000 # number of reads to subsample to, after host filtering
   OUTPUT_JSON_NAME = 'idseq_web_sample.json'.freeze
   STATS_JSON_NAME = 'stats.json'.freeze
   VERSION_JSON_NAME = 'versions.json'.freeze
@@ -264,6 +265,16 @@ class PipelineRun < ApplicationRecord
       WHERE taxon_counts.pipeline_run_id=#{id} AND
             taxon_lineages.taxid = taxon_counts.tax_id
     ")
+  end
+
+  def subsample_fraction
+    # 'subsample' is number of read pairs to subsample to, after host filtering
+    # 'remaining_reads' is number of individual reads remaining after host filtering
+    if subsample && 2 * subsample < remaining_reads
+      (2.0 * subsample) / remaining_reads
+    else
+      1
+    end
   end
 
   def count_unmapped_reads
