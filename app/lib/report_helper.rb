@@ -650,6 +650,7 @@ module ReportHelper
   def bulk_report_csvs_from_params(project, params)
     `rm -rf #{project.csv_dir}; mkdir -p #{project.csv_dir}`
     sample_names_used = []
+    ### TO DO: loop only through samples that current_user is allowed to see ###
     project.samples.each do |sample|
       csv_data = report_csv_from_params(sample, params)
       clean_sample_name = sample.name.downcase.gsub(/\W/, "-")

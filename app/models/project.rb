@@ -4,11 +4,10 @@ class Project < ApplicationRecord
   has_many :favorite_projects
   has_many :favorited_by, through: :favorite_projects, source: :user
   validates :name, presence: true, uniqueness: true
-
   include ReportHelper
 
-  def csv_dir
-    path = "/app/tmp/report_csvs/#{id}"
+  def csv_dir(user_id)
+    path = "/app/tmp/report_csvs/#{id}/#{user_id}"
     sanitize_path(path)
   end
 
@@ -16,13 +15,13 @@ class Project < ApplicationRecord
     "#{name.downcase.gsub(/\W/, '-')}_reports.tar.gz"
   end
 
-  def report_tar
-    path = "#{csv_dir}/#{tar_filename}"
+  def report_tar(user_id)
+    path = "#{csv_dir(user_id)}/#{tar_filename}"
     sanitize_path(path)
   end
 
-  def report_tar_s3
-    "s3://#{SAMPLES_BUCKET_NAME}/project_report_archives/#{id}/#{tar_filename}"
+  def report_tar_s3(user_id)
+    "s3://#{SAMPLES_BUCKET_NAME}/project_report_archives/#{id}/user-#{user_id}/#{tar_filename}"
   end
 
   def sanitize_path(path)

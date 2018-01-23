@@ -124,7 +124,7 @@ class Samples extends React.Component {
     axios.get(`/projects/${this.state.project_id_download_in_progress}/project_reports_csv_status`).then((res) => {
       let download_status = res.data.status_display
       if (download_status === 'complete') {
-        location.href = `/projects/${this.state.project_id_download_in_progress}/get_project_reports_csv`
+        location.href = `/projects/${this.state.project_id_download_in_progress}/send_project_reports_csv`
         this.setState({
           project_id_download_in_progress: null
         });

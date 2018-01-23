@@ -31,7 +31,7 @@ class ProjectsController < ApplicationController
   end
 
   def make_project_reports_csv
-    `aws s3 rm #{@project.report_tar_s3}`
+    `aws s3 rm #{@project.report_tar_s3(current_user.id)}`
     Resque.enqueue(GenerateProjectReportsCsv, params)
     render json: { status_display: project_reports_progress_message }
   end
@@ -41,7 +41,7 @@ class ProjectsController < ApplicationController
   end
 
   def project_reports_csv_status
-    final_complete = `aws s3 ls #{@project.report_tar_s3} | wc -l`.to_i == 1
+    final_complete = `aws s3 ls #{@project.report_tar_s3(current_user.id)} | wc -l`.to_i == 1
     if final_complete
       render json: { status_display: "complete" }
       return
@@ -49,8 +49,8 @@ class ProjectsController < ApplicationController
     render json: { status_display: project_reports_progress_message }
   end
 
-  def get_project_reports_csv
-    `aws s3 cp #{@project.report_tar_s3} #{@project.report_tar}`
+  def send_project_reports_csv
+    `aws s3 cp #{@project.report_tar_s3(current_user.id)} #{@project.report_tar(current_user.id)}`
     send_file @project.report_tar.to_s
   end
 
