@@ -1,11 +1,7 @@
-class IconComponent extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
+class IconComponent {
   static mosquito(color) {
     return (
-        `<svg fill='${color}' x="0px" y="0px"
+      `<svg fill='${color}' x="0px" y="0px"
            viewBox="0 0 463.003 463.003" style='enable-background : new 0 0 463.003 463.003'>
         <path d="M359.418,189.996c12.73-3.407,35.161-10.159,42.347-17.101c5.774-5.578,7.161-13.759,3.62-21.351
           c-5.167-11.076-18.691-17.164-34.458-15.502c-10.467,1.102-33.561,7.968-58.011,15.238c-20.258,6.023-44.515,13.235-57.914,15.777
@@ -227,7 +223,7 @@ class IconComponent extends React.Component {
       <g>
       </g>
       </svg>`
-    )
+    );
   }
 
   static bacteria(color) {
@@ -312,3 +308,5 @@ class IconComponent extends React.Component {
     );
   }
 }
+
+export default IconComponent;

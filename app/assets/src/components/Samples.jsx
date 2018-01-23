@@ -1,3 +1,15 @@
+import React from 'react';
+import axios from 'axios';
+import ReactDOM from 'react-dom';
+import moment from 'moment';
+import $ from 'jquery';
+import Tipsy from 'react-tipsy';
+import SortHelper from './SortHelper';
+import numberWithCommas from '../helpers/strings';
+import ProjectSelection from './ProjectSelection';
+import ReportFilter from './ReportFilter';
+import PipelineSampleReads from './PipelineSampleReads';
+
 class Samples extends React.Component {
   constructor(props, context) {
     super(props, context);
@@ -509,9 +521,9 @@ class Samples extends React.Component {
   }
 
   findSelectedColumns(selO) {
-    var selValues = [];
-    for (i=0; i < selO.length; i++) {
-      column_name = selO.options[i].value;
+    const selValues = [];
+    for (let i=0; i < selO.length; i++) {
+      const column_name = selO.options[i].value;
       if (selO.options[i].selected && column_name !== "") {
         selValues.push(column_name);
       }
@@ -520,7 +532,7 @@ class Samples extends React.Component {
   }
 
   handleColumnSelectChange(e) {
-    selected_columns = this.findSelectedColumns(e.target);
+    const selected_columns = this.findSelectedColumns(e.target);
     this.setState({columnsShown: selected_columns});
   }
 
@@ -529,7 +541,7 @@ class Samples extends React.Component {
   }
 
   display_column_options(column_map, data_type) {
-    column_list = Object.keys(column_map)
+    const column_list = Object.keys(column_map)
     return column_list.map((option_name, i) => {
       if (column_map[option_name].type === data_type) {
         return (
@@ -628,7 +640,7 @@ class Samples extends React.Component {
           <li className="divider"/>
         </div>
    )
-  
+
     const tableHead = (
       <div className='col s12 sample-feed-head no-padding samples-table-head'>
         <div className='samples-card white'>
@@ -654,7 +666,7 @@ class Samples extends React.Component {
 
                       <ul className='dropdown-content column-dropdown' id={`column-dropdown-${pos}`}>
                         { column_name === 'pipeline_status' ?
-                          <div>{filterStatus}</div> : ( column_name === 'tissue_type' ? <div>{filterTissueDropDown}</div> : "") 
+                          <div>{filterStatus}</div> : ( column_name === 'tissue_type' ? <div>{filterTissueDropDown}</div> : "")
                         }
                         <li>
                           <a className="title">
@@ -797,7 +809,7 @@ class Samples extends React.Component {
       search: this.state.searchParams,
       sort_by: this.state.sort_by
     };
-    window.history.replaceState(null, null, `?${jQuery.param(params)}`)
+    window.history.replaceState(null, null, `?${$.param(params)}`)
   }
 
   handleProjectSelection(id) {
@@ -812,7 +824,7 @@ class Samples extends React.Component {
   }
 
   render() {
-    project_section =
+    const project_section =
       <ProjectSelection
         favoriteProjects = { this.favoriteProjects }
         allProjects = { this.allProjects }
@@ -835,4 +847,4 @@ class Samples extends React.Component {
   }
 
 }
-
+export default Samples;

@@ -1,3 +1,8 @@
+import React from 'react';
+import axios from 'axios';
+import $ from 'jquery';
+import Samples from './Samples';
+
 /**
  @class ProjectSelection
  @desc Creates react component to handle filtering in the page
@@ -15,7 +20,7 @@
     this.handleProjectClick = this.handleProjectClick.bind(this);
     this.handleAllProjectorSamplesClick
     this.uploadSample = this.uploadSample.bind(this);
-    
+
     this.state = {
       formattedProjectList: [],
       formattedFavProjectList: [],
@@ -79,12 +84,12 @@
         if (project.favorited) {
           favProjects.push(project);
         }
-      } 
+      }
 
       return project;
     });
 
-    this.setState({ 
+    this.setState({
       formattedProjectList: formattedList,
       formattedFavProjectList: favProjects,
       favIds: favIds
@@ -119,18 +124,18 @@
     this.updateProjectsState(id, projects);
   }
 
-  
+
   // remove Projects from favorites list
   removeProjectFromFavorites(id) {
     let updatedFavouriteProjects = this.state.formattedFavProjectList.filter(project => project.id != id);
     let removedFavouriteProject = this.state.formattedFavProjectList.filter(project => project.id == id);
-    
+
     let favIds = this.state.favIds;
     let projectIdIndex = favIds.indexOf(removedFavouriteProject[0].id);
-    
+
     if (projectIdIndex > -1) {
       favIds.splice(projectIdIndex, 1);
-      this.setState({ 
+      this.setState({
         formattedFavProjectList: updatedFavouriteProjects,
         favIds
       });
@@ -152,7 +157,7 @@
     let id = e.target.getAttribute('data-id');
     let listType = e.target.getAttribute('data-type');
     if (listType == 'fav') {
-      this.highlightSelectedFavoriteProject(id) 
+      this.highlightSelectedFavoriteProject(id)
     } else {
       this.highlightSelectedProject(e, id);
     }
@@ -190,7 +195,7 @@
     this.removeHighlight();
     this.removeHighlightedText();
     $(`.fav-item[data-id="${id}"]`).addClass('highlight');
-  } 
+  }
 
 
   addFavIconClass(project) {
@@ -222,7 +227,7 @@
             return (
               <div className="fav-item" data-id={project.id}  key={i}><div onClick={this.handleProjectClick} data-id={project.id}><span data-id={project.id}>{project.name}</span></div>{this.addFavIconClass(project)}</div>
             )
-          }): 
+          }):
           this.state.formattedFavProjectList.sort(sortLogic).map((project, i) => {
             return (
               <div className="fav-item" data-id={project.id}  key={i}><div onClick={this.handleProjectClick} data-id={project.id}><span data-id={project.id}>{project.name}</span></div>{this.addFavIconClass(project)}</div>
@@ -242,7 +247,7 @@
               return (
                   <div className="project-item" data-id={project.id}  key={i}><div onClick={this.handleProjectClick} data-id={project.id}><span data-id={project.id}>{project.name}</span></div>{this.addFavIconClass(project)}</div>
               )
-            }) : 
+            }) :
             this.state.formattedProjectList.sort(sortLogic).map((project, i) => {
             return (
               <div className="project-item" data-id={project.id} key={i}><div onClick={this.handleProjectClick} data-id={project.id}><span data-id={project.id}>{project.name}</span></div>{this.addFavIconClass(project)}</div>
@@ -252,7 +257,7 @@
         </div>
       </div>
     )
-    return (  
+    return (
       <div className="project-wrapper">
         <div className="row">
           <div className="samples">
@@ -265,7 +270,7 @@
       </div>
     )
   }
-  
+
   render() {
     return (
       <div>
@@ -274,3 +279,4 @@
     )
   }
  }
+ export default ProjectSelection;

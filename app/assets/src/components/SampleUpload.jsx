@@ -1,3 +1,10 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
+import axios from 'axios';
+import $ from 'jquery';
+import Tipsy from 'react-tipsy';
+import IconComponent from './IconComponent';
+
 class SampleUpload extends React.Component {
   constructor(props, context) {
     super(props, context);
@@ -914,4 +921,4 @@ class SampleUpload extends React.Component {
     )
   }
 }
-
+export default SampleUpload;

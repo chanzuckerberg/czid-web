@@ -3,7 +3,6 @@
  * @desc a helper class to handle sorting on tables
 */
 class SortHelper {
-
   /**
     @method currentSort
     @desc this gets the current sort from the url
@@ -28,7 +27,7 @@ class SortHelper {
   */
   static getFilter(name) {
     const url = window.location.href;
-    name = name.replace(/[\[\]]/g, "\\$&");
+    name = name.replace(/[\[\]]/g, '\\$&');
     const regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`);
     const results = regex.exec(url);
     if (!results) {
@@ -88,3 +87,4 @@ class SortHelper {
     return (url.split('?').length >= 2);
   }
 }
+export default SortHelper;

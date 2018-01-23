@@ -1,3 +1,10 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
+import axios from 'axios';
+import $ from 'jquery';
+import Tipsy from 'react-tipsy';
+import SampleUpload from './SampleUpload';
+
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
     super(props, context);
@@ -93,7 +100,7 @@ class BulkUploadImport extends React.Component {
 
   initializeSelectAll() {
     $(".checkAll").click((e) => {
-      checkedStatus = e.target.checked;
+      const checkedStatus = e.target.checked;
       this.setState({
         allChecked: checkedStatus
       }, () => {
@@ -696,3 +703,5 @@ class BulkUploadImport extends React.Component {
     )
   }
 }
+
+export default BulkUploadImport;

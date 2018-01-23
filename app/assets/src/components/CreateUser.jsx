@@ -1,3 +1,6 @@
+import React from 'react';
+import axios from 'axios';
+
 class CreateUser extends React.Component {
   constructor(props, context) {
     super(props, context);
@@ -6,7 +9,6 @@ class CreateUser extends React.Component {
     this.handleCreate = this.handleCreate.bind(this);
     this.handleUpdate = this.handleUpdate.bind(this);
     this.handleEmailChange = this.handleEmailChange.bind(this);
-    this.handleNameChange = this.handleNameChange.bind(this);
     this.handlePasswordChange = this.handlePasswordChange.bind(this);
     this.handlePConfirmChange = this.handlePConfirmChange.bind(this);
     this.clearError = this.clearError.bind(this)
@@ -14,7 +16,6 @@ class CreateUser extends React.Component {
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
     this.selectedUser = {
       email: this.user ? this.user.email : '',
-      name: this.user? this.user.name : '',
       password: '',
       id: this.user ? this.user.id : null,
       password_confirmation: '',
@@ -22,14 +23,13 @@ class CreateUser extends React.Component {
     }
     this.state = {
       submitting: false,
-      isAdmin: this.selectedUser.adminStatus ? true : false,
+      isChecked: this.selectedUser.adminStatus ? true : false,
       success: false,
       showFailed: false,
       errorMessage: '',
       successMessage: '',
       serverErrors: [],
       email: this.selectedUser.email || '',
-      name: this.selectedUser.name || '',
       password: this.selectedUser.password || '',
       pConfirm: this.selectedUser.password_confirmation || '',
       adminstatus: this.selectedUser.adminStatus,
@@ -67,7 +67,7 @@ class CreateUser extends React.Component {
 
   toggleCheckBox(e) {
     this.setState({
-      isAdmin: e.target.value == "true" ? false : true,
+      isChecked: e.target.value == "true" ? false : true,
       adminstatus: e.target.value == "true" ? false : true,
     })
   }
@@ -90,27 +90,21 @@ class CreateUser extends React.Component {
     });
   }
 
-  handleNameChange(e) {
-    this.setState({
-        name: e.target.value
-    });
-  }
-
   isCreateFormInvalid() {
-    if (this.state.email === '' && this.state.password === '' && this.state.password_confirmation === '') {
+    if (this.refs.email.value === '' && this.refs.password.value === '' && this.refs.password_confirmation.value === '') {
       this.setState({
         showFailed: true,
         errorMessage: 'Please fill all fields'
       })
       return true;
-    } else if (this.state.password === '') {
+    } else if (this.refs.password.value === '') {
       this.setState({
         showFailed: true,
         errorMessage: 'Please enter password'
       })
       return true;
     }
-    else if (this.state.password_confirmation === '') {
+    else if (this.refs.password_confirmation.value === '') {
       this.setState({
         showFailed: true,
         errorMessage: 'Please re-enter password'
@@ -137,15 +131,13 @@ class CreateUser extends React.Component {
     var that = this;
     axios.post('/users.json', {
        user: {
-        name: this.state.name,
-        email: this.state.email,
-        password: this.state.password,
-        password_confirmation: this.state.password_confirmation,
-        role: this.state.isAdmin ? 1 : 0
-      }
-    },
-    { headers: { 'X-CSRF-TOKEN': this.csrf } }
-    ).then((res) => {
+        email: this.refs.email.value,
+        password: this.refs.password.value,
+        password_confirmation: this.refs.password_confirmation.value,
+        role: this.state.isChecked ? 1 : 0
+      },
+      authenticity_token: this.csrf
+    }).then((res) => {
       that.setState({
         submitting: false,
         success: true,
@@ -167,15 +159,13 @@ class CreateUser extends React.Component {
     var that = this;
     axios.patch(`/users/${this.state.id}.json`, {
       user: {
-        name: this.state.name,
         email: this.state.email,
         password: this.state.password,
         password_confirmation: this.state.pConfirm,
         role: this.state.adminstatus ? 1 : 0
-      }
-    },
-    { headers: { 'X-CSRF-TOKEN': this.csrf } }
-    ).then((res) => {
+      },
+      authentication_token: this.csrf
+    }).then((res) => {
       that.setState({
         success: true,
         submitting: false,
@@ -192,6 +182,49 @@ class CreateUser extends React.Component {
     })
   }
 
+  renderCreateUser() {
+    return (
+      <div className="user-form">
+          <div className="row">
+            <form ref="form" className="new_user" id="new_user" onSubmit={ this.handleCreate }>
+              <div className="row title">
+                <p className="col s6 signup">Create User</p>
+              </div>
+              { this.state.success ? <div className="success-info" >
+                <i className="fa fa-success"></i>
+                 <span>{this.state.successMessage}</span>
+                </div> : null }
+                <div className={this.state.showFailed ? 'error-info' : ''} >{this.displayError(this.state.showFailed, this.state.serverErrors, this.state.errorMessage)}</div>
+              <div className="row content-wrapper">
+                <div className="input-field">
+                  <i className="fa fa-envelope" aria-hidden="true"></i>
+                  <input ref= "email" type="email" className="" onFocus={ this.clearError }  />
+                  <label htmlFor="user_email">Email</label>
+                </div>
+                <div className="input-field">
+                  <i className="fa fa-key" aria-hidden="true"></i>
+                  <input ref= "password" type="password" className="" onFocus={ this.clearError }   />
+                  <label htmlFor="user_password">Password</label>
+                </div>
+                <div className="input-field">
+                  <i className="fa fa-check-circle" aria-hidden="true"></i>
+                  <input ref= "password_confirmation" type="password" className="" onFocus={ this.clearError }   />
+                  <label htmlFor="user_password_confirmation">Confirm Password</label>
+                </div>
+                <p>
+                  <input ref="admin" type="checkbox" name="switch" id="admin" className="filled-in" onChange={ this.toggleCheckBox } value={ this.state.isChecked } />
+                  <label htmlFor="admin">Admin</label>
+                </p>
+              </div>
+              <input className="hidden" type="submit"/>
+              { this.state.submitting ? <div className="center login-wrapper disabled"> <i className='fa fa-spinner fa-spin fa-lg'></i> </div> :
+                <div onClick={ this.handleCreate } className="center login-wrapper">Submit</div> }
+            </form>
+          </div>
+        </div>
+    )
+  }
+
   displayError(failedStatus, serverError, formattedError) {
     if (failedStatus) {
       return serverError.length ? serverError.map((error, i) => {
@@ -202,13 +235,13 @@ class CreateUser extends React.Component {
     }
   }
 
-  renderUserForm(submitFunc, funcName) {
+  renderUpdateUser() {
     return (
       <div className="user-form">
           <div className="row">
-            <form ref="form" className="new_user" id="new_user" onSubmit={ submitFunc }>
+            <form ref="form" className="new_user" id="new_user" onSubmit={ this.handleUpdate }>
               <div className="row title">
-                <p className="col s8 signup"> { funcName } User</p>
+                <p className="col s6 signup">Update User</p>
               </div>
               { this.state.success ? <div className="success-info" >
                 <i className="fa fa-success"></i>
@@ -221,11 +254,6 @@ class CreateUser extends React.Component {
                   <input type="email" onChange = { this.handleEmailChange } className="" onFocus={ this.clearError } value={ this.state.email } />
                   <label htmlFor="user_email">Email</label>
                 </div>
-                <div className="input-field">
-                  <i className="fa fa-envelope" aria-hidden="true"></i>
-                  <input type="text" onChange = { this.handleNameChange } className="" onFocus={ this.clearError } value={ this.state.name } />
-                  <label htmlFor="user_name">Name</label>
-                </div>
                  <div className="input-field">
                   <i className="fa fa-key" aria-hidden="true"></i>
                   <input type="password" onChange = { this.handlePasswordChange } className="" onFocus={ this.clearError }  value={ this.state.password } />
@@ -237,13 +265,13 @@ class CreateUser extends React.Component {
                   <label htmlFor="user_password_confirmation">Confirm Password</label>
                 </div>
                 <p>
-                  <input type="checkbox" id="admin" className="filled-in" checked = {this.state.isAdmin ? "checked" : ""} onChange={ this.toggleCheckBox } value={this.state.isAdmin } />
+                  <input type="checkbox" id="admin" className="filled-in" checked = {this.state.isChecked ? "checked" : ""} onChange={ this.toggleCheckBox } value={this.state.isChecked } />
                   <label htmlFor="admin">Admin</label>
                 </p>
               </div>
               <input className="hidden" type="submit"/>
               { this.state.submitting ? <div className="center login-wrapper disabled"> <i className='fa fa-spinner fa-spin fa-lg'></i> </div> :
-                <div onClick={ submitFunc } className="center login-wrapper">Submit</div> }
+                <div onClick={ this.handleUpdate } className="center login-wrapper">Submit</div> }
             </form>
           </div>
         </div>
@@ -253,7 +281,7 @@ class CreateUser extends React.Component {
   render() {
     return (
       <div>
-        { this.props.selectedUser ? this.renderUserForm(this.handleUpdate,'Update') : this.renderUserForm(this.handleCreate, 'Create') }
+        { this.props.selectedUser ? this.renderUpdateUser() : this.renderCreateUser() }
         <div className="bottom">
           <span className="back" onClick={ this.props.selectedUser ? this.gotoPage.bind(this, '/users') : this.gotoPage.bind(this, '/') } >Back</span>|
           <span className="home" onClick={ this.gotoPage.bind(this, '/')}>Home</span>
@@ -263,3 +291,4 @@ class CreateUser extends React.Component {
   }
 }
 
+export default CreateUser;
