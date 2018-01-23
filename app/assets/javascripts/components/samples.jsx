@@ -113,17 +113,18 @@ class Samples extends React.Component {
       .delay(1000)
       .slideUp(200);
 
-      this.checkDownload()
+      setTimeout(() => {
+        this.checkReportDownload()
+      }, 2000)
+
     });
   }
 
   checkReportDownload() {
     axios.get(`/projects/${this.state.project_id_download_in_progress}/project_reports_csv_status`).then((res) => {
-      let download_status = res.data.status
+      let download_status = res.data.status_display
       if (download_status === 'complete') {
-        axios.get(`/projects/${this.state.project_id_download_in_progress}/get_project_reports_csv`).then((res2) => {
-          return (null)
-        })
+        location.href = `/projects/${this.state.project_id_download_in_progress}/get_project_reports_csv`
       } else {
 
         $('.note-saved-success')
@@ -131,10 +132,6 @@ class Samples extends React.Component {
         .css('display', 'inline-block')
         .delay(1000)
         .slideUp(200);
-        
-        setTimeout(() => {
-          this.checkDownload()
-        }, 2000)
       }
     })
   }
