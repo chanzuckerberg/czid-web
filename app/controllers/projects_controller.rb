@@ -3,7 +3,7 @@ class ProjectsController < ApplicationController
   include ReportHelper
   before_action :login_required
 
-  before_action :set_project, only: [:show, :edit, :update, :destroy, :add_favorite, :remove_favorite, :project_reports_csv]
+  before_action :set_project, only: [:show, :edit, :update, :destroy, :add_favorite, :remove_favorite, :project_reports_csv, :user_search_list]
   clear_respond_to
   respond_to :json
   # GET /projects
@@ -81,6 +81,16 @@ class ProjectsController < ApplicationController
     if current_user.favorites.include? @project
       current_user.favorites.delete(@project)
     end
+  end
+
+  def user_search_list
+    current_project_users = @project.users.map { |u| { id: u.id, email: u.email } }
+    other_users = User.all.reject { |u| current_project_users.include? u }.map { |u| { id: u.id, email: u.email } }
+    render json: { current_project_users: current_project_users, other_users: other_users }
+  end
+
+  def add_user_to_project
+    @project.user_ids |= params[:user_ids_to_add]
   end
 
   # POST /projects
