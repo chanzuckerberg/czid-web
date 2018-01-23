@@ -21,6 +21,9 @@ class Project < ApplicationRecord
     sanitize_path(path)
   end
 
+  def report_tar_s3
+    "s3://#{SAMPLES_BUCKET_NAME}/project_report_archives/#{id}/#{tar_filename}"
+
   def sanitize_path(path)
     return path unless path != File.expand_path(path)
   end

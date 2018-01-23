@@ -31,24 +31,23 @@ class ProjectsController < ApplicationController
   end
 
   def make_project_reports_csv
-    `rm -rf #{@project.csv_dir}`
+    `aws s3 rm #{@project.report_tar_s3}`
     Resque.enqueue(GenerateProjectReportsCsv, params)
     render json: { status_display: "Started report generation for project #{@project.id}" }
   end
 
   def project_reports_csv_status
-    if File.file?(@project.report_tar.to_s)
+    final_complete = `aws s3 ls #{@project.report_tar_s3} | wc -l`.to_i == 1
+    if final_complete
       render json: { status_display: "complete" }
       return
     end
-    csv_completed = `ls #{@project.csv_dir}/*.csv | wc -l`.to_i
-    csv_total = @project.samples.count
-    percent_complete = (1.0 * csv_completed) / csv_total
-    render json: { status_display: "#{percent_complete} percent of reports complete for project #{@project.name}" }
+    render json: { status_display: "Report generation still in progress for project #{@project.name}" }
   end
 
   def get_project_reports_csv
-    send_file "#{@project.report_tar}"
+    `aws s3 cp #{@project.report_tar_s3} #{@project.report_tar}`
+    send_file @project.report_tar.to_s
   end
 
   # GET /projects/new

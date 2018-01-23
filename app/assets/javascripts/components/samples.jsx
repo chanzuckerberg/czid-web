@@ -108,14 +108,14 @@ class Samples extends React.Component {
       });
 
       $('.note-saved-success')
-      .html(`<i class='fa fa-check-circle'></i> ${res.data.status_display}`)
+      .html(`${res.data.status_display}`)
       .css('display', 'inline-block')
       .delay(1000)
       .slideUp(200);
 
       setTimeout(() => {
         this.checkReportDownload()
-      }, 5000)
+      }, 2000)
     });
   }
 
@@ -126,7 +126,7 @@ class Samples extends React.Component {
         location.href = `/projects/${this.state.project_id_download_in_progress}/get_project_reports_csv`
       } else {
          $('.note-saved-success')
-        .html(`<i class='fa fa-check-circle'></i> ${download_status}`)
+        .html(`${download_status}`)
         .css('display', 'inline-block')
         .delay(1000)
         .slideUp(200);

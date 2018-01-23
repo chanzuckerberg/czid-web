@@ -648,7 +648,7 @@ module ReportHelper
   end
 
   def bulk_report_csvs_from_params(project, params)
-    `mkdir -p #{project.csv_dir}`
+    `rm -rf #{project.csv_dir}; mkdir -p #{project.csv_dir}`
     sample_names_used = []
     project.samples.each do |sample|
       csv_data = report_csv_from_params(sample, params)
@@ -660,6 +660,7 @@ module ReportHelper
       File.write(filename, csv_data)
     end
     `cd #{csv_dir}; tar cvzf #{project.tar_filename} .`
-    `rm #{csv_dir}/*.csv`
+    `aws s3 cp #{project.report_tar} #{project.report_tar_s3}`
+    `rm -rf #{project.csv_dir}`
   end
 end
