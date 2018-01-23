@@ -108,7 +108,7 @@ class Samples extends React.Component {
       });
 
       $('.note-saved-success')
-      .html(`<i class='fa fa-check-circle'></i> ${res.data.status}`)
+      .html(`<i class='fa fa-check-circle'></i> ${res.data.status_display}`)
       .css('display', 'inline-block')
       .delay(1000)
       .slideUp(200);

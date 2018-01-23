@@ -33,13 +33,13 @@ class ProjectsController < ApplicationController
   def make_project_reports_csv
     `rm -rf #{@project.csv_dir}`
     Resque.enqueue(GenerateProjectReportsCsv, params)
-    render json: { status: "Started report generation for project #{@project.id}" }
+    render json: { status_display: "Started report generation for project #{@project.id}" }
   end
 
   def project_reports_csv_status
     expires_in 20.minutes
     final_completed = `ls #{@project.report_tar} | wc -l`
-    return 'complete' if final_completed
+    render json: { status_display: "complete" } if final_completed
     csv_completed = `ls #{@project.csv_dir} | wc -l`
     csv_total = @project.samples.count
     percent_complete = (1.0 * csv_completed) / csv_total
