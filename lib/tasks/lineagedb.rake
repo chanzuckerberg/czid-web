@@ -6,13 +6,9 @@ task load_lineage_db: :environment do
   host = Rails.env == 'development' ? 'db' : '$RDS_ADDRESS'
   taxid_lineages_file = 'taxid-lineages.csv'
   names_file = 'names.csv'
-  preload_s3_path = 's3://czbiohub-infectious-disease/taxonomy'
+  preload_s3_path = 's3://czbiohub-infectious-disease/references'
 
-  # Use the following steps to generate necessary files
-  # git clone https://github.com/chanzuckerberg/ncbitax2lin.git;
-  # generate CSV files with lineage and name information
-  # cd ncbitax2lin; make
-
+  # Use 'OUTPUT_PATH_S3=s3://czbiohub-infectious-disease/references idseq_pipeline lineages' to generate and upload the necessary files
   ` mkdir -p #{local_taxonomy_path};
     cd #{local_taxonomy_path};
 
