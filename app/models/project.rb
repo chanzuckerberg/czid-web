@@ -5,6 +5,8 @@ class Project < ApplicationRecord
   has_many :favorited_by, through: :favorite_projects, source: :user
   validates :name, presence: true, uniqueness: true
 
+  include ReportHelper
+
   def csv_dir
     path = "/app/tmp/report_csvs/#{id}/#{name}"
     sanitize_path(path)
