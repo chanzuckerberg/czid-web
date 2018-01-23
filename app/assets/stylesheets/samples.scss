@@ -267,6 +267,18 @@ $break-large: 1070px;
   border-color: #f32c1e;
 }
 
+.download-progress {
+  width: 200px;
+  color: #fff;
+  border-radius: 2px;
+  padding: 6px;
+  text-align: center;
+  display: none;
+  position: absolute;
+  background-color: #4caf50;
+  border-color: #449d48;
+}
+
 [contenteditable]:focus {
   outline: 0 solid transparent;
 }

@@ -107,11 +107,9 @@ class Samples extends React.Component {
         project_id_download_in_progress: this.state.selectedProjectId
       });
 
-      $('.note-saved-success')
+      $('.download-progress')
       .html(`${res.data.status_display}`)
-      .css('display', 'inline-block')
-      .delay(1000)
-      .slideUp(200);
+      .css('display', 'inline-block');
 
       setTimeout(() => {
         this.checkReportDownload()
@@ -128,11 +126,9 @@ class Samples extends React.Component {
           project_id_download_in_progress: null
         });
       } else {
-         $('.note-saved-success')
+         $('.download-progress')
         .html(`${download_status}`)
-        .css('display', 'inline-block')
-        .delay(1000)
-        .slideUp(200);
+        .css('display', 'inline-block');
 
       setTimeout(() => {
         this.checkReportDownload()
@@ -615,7 +611,8 @@ class Samples extends React.Component {
         </div>
       </div>
     );
-    reports_download_button_contents = this.state.project_id_download_in_progress ? <span className='note-action-feedback note-saved-success'></span>
+    reports_download_button_contents = this.state.project_id_download_in_progress ?
+                                         <span className='download-progress'></span>
                                          : <a onClick={this.startReportGeneration} className="download-project center">
                                              <i className="fa fa-cloud-download"/>
                                              <span>Download reports</span>
