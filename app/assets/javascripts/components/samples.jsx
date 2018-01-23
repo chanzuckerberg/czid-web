@@ -730,12 +730,8 @@ class Samples extends React.Component {
     return (
       <div className="row content-wrapper">
         <div className="project-info col s12">
-        { projInfo }
-        </div>
-
-        <div className='center'>
-          <span className='note-action-feedback note-saved-success'>
-          </span>
+          { projInfo }
+          <span className='note-action-feedback note-saved-success'></span>
         </div>
 
         <div className="sample-container col s12">
