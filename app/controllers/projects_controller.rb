@@ -32,7 +32,7 @@ class ProjectsController < ApplicationController
 
   def make_project_reports_csv
     `rm -rf #{@project.csv_dir}`
-    Resque.enqueue(GenerateProjectReportsCsv, @project, params)
+    Resque.enqueue(GenerateProjectReportsCsv, params)
     render json: { status: "Started report generation for project #{@project.id}" }
   end
 
