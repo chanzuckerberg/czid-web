@@ -32,6 +32,7 @@ class ProjectsController < ApplicationController
 
   def make_project_reports_csv
     `aws s3 rm #{@project.report_tar_s3(current_user.id)}`
+    params["user_id"] = current_user.id
     Resque.enqueue(GenerateProjectReportsCsv, params)
     render json: { status_display: project_reports_progress_message }
   end
