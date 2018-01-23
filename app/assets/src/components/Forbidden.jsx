@@ -1,3 +1,5 @@
+import React from 'react';
+
 class ForbiddenPage extends React.Component {
   constructor(props, context) {
     super(props, context);
@@ -11,3 +13,4 @@ class ForbiddenPage extends React.Component {
   }
 
 }
+export default ForbiddenPage;

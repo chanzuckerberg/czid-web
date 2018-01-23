@@ -1,5 +1,5 @@
 
-<div>
+<div id='user_create_page'>
   <% if current_user && current_user.admin %>
    <p id="notice"><%= notice %></p>
 
@@ -42,6 +42,8 @@
     </p>
 
   <% else %>
-    <%= react_component 'ForbiddenPage' %>
+    <%= javascript_tag do %>
+      react_component('ForbiddenPage', 'user_create_page');
+    <% end %>
   <% end %>
 </div>

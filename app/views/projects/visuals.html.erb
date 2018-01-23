@@ -1,1 +1,8 @@
-<%= react_component 'ProjectVisualization', csv_records: @csv_records, project_name: @project_name %>
+<div id="ProjectVisualization_page">
+  <%= javascript_tag do %>
+    react_component('ProjectVisualization', {
+      csv_records: '<%=raw escape_json(@csv_records)%>',
+      project_name: '<%= @project_name %>'
+    }, 'ProjectVisualization_page');
+  <% end %>
+</div>
