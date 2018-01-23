@@ -17,6 +17,7 @@ gem 'bcrypt', '~> 3.1.7'
 gem 'coffee-rails', '~> 4.2'
 gem 'd3-rails'
 gem 'devise', '4.3.0'
+gem 'consul'
 gem 'font-awesome-rails'
 gem "health_check"
 gem 'honeycomb-rails'

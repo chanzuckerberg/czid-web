@@ -599,6 +599,10 @@ GEM
     coffee-script-source (1.12.2)
     concurrent-ruby (1.0.5)
     connection_pool (2.2.1)
+    consul (0.13.1)
+      edge_rider (>= 0.3.0)
+      memoizer
+      rails
     coveralls (0.8.21)
       json (>= 1.8, < 3)
       simplecov (~> 0.14.1)
@@ -618,6 +622,8 @@ GEM
     docile (1.1.5)
     domain_name (0.5.20170404)
       unf (>= 0.0.5, < 1.0.0)
+    edge_rider (0.3.2)
+      activerecord
     erubi (1.7.0)
     et-orbi (1.0.8)
       tzinfo
@@ -672,6 +678,7 @@ GEM
       rest-client (>= 1.6.7)
     materialize-sass (0.100.2)
       sass (~> 3.3)
+    memoizer (1.0.3)
     method_source (0.9.0)
     mime-types (3.1)
       mime-types-data (~> 3.2015)
@@ -887,6 +894,7 @@ DEPENDENCIES
   byebug
   capybara (~> 2.13)
   coffee-rails (~> 4.2)
+  consul
   coveralls
   d3-rails
   devise (= 4.3.0)
