@@ -190,7 +190,7 @@ module ReportHelper
   def fetch_taxon_counts(pipeline_run_id, background_id)
     pipeline_run = PipelineRun.find(pipeline_run_id)
     total_reads = pipeline_run.total_reads if pipeline_run
-    adjusted_total_reads = total_reads * pipeline_run.subsample_fraction if pipeline_run
+    adjusted_total_reads = total_reads * pipeline_run.subsample_fraction if pipeline_run && total_reads
     # Note: subsample_fraction is of type 'float' so adjusted_total_reads is too
     # Note: stdev is never 0
     # Note: connection.select_all is TWICE faster than TaxonCount.select
