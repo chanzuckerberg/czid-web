@@ -642,13 +642,15 @@ class SampleUpload extends React.Component {
                       }
                     </div>
                     <div className='col no-padding s8 new-project-input hidden'>
-                      <input ref="public_checked" type="checkbox" name="switch" id="public_checked" className="filled-in" onChange={ this.toggleCheckBox }
+                      <input ref="public_checked" type="checkbox" name="switch" id="public_checked" className="col s8 filled-in" onChange={ this.toggleCheckBox }
                              value={ this.state.public_checked } />
                       <label htmlFor="public_checked" className="checkbox">Make project public</label>
+                    </div>
+                    <div className='col no-padding s4 new-project-input hidden'>
                       <button type='button'
-                              onClick={(e) => { this.handleProjectSubmit();
+                              onClick={(e) => { if (this.refs.new_project.value.trim().length) {this.handleProjectSubmit()};
                                                 $('.new-project-button').click(); }}
-                              className='col no-padding s4 new-project-button new-button skyblue-button'>
+                              className='no-padding new-button skyblue-button'>
                         <span>Create</span>
                       </button>
                     </div>
