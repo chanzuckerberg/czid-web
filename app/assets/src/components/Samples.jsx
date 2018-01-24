@@ -49,6 +49,7 @@ class Samples extends React.Component {
       loading: false,
       isRequesting: false,
       displayEmpty: false,
+      project_id_download_in_progress: null,
       columnsShown: ["total_reads",
         "nonhost_reads",
         "quality_control",
@@ -83,6 +84,10 @@ class Samples extends React.Component {
       notes: { display_name: "Notes", type: "metadata" } };
     this.handleColumnSelectChange = this.handleColumnSelectChange.bind(this);
     this.columnHidden = this.columnHidden.bind(this);
+    this.startReportGeneration = this.startReportGeneration.bind(this);
+    this.checkReportDownload = this.checkReportDownload.bind(this);
+    this.displayReportProgress = this.displayReportProgress.bind(this);
+
     $(document).ready(function() {
       $('select').material_select();
     });
@@ -108,6 +113,38 @@ class Samples extends React.Component {
         offset: '0px 50px'
       });
     });
+  }
+
+  displayReportProgress(res) {
+      $('.download-progress')
+      .html(`${res.data.status_display}`)
+      .css('display', 'block')
+      setTimeout(() => {
+        this.checkReportDownload()
+      }, 2000)
+  }
+
+  startReportGeneration() {
+    axios.get(`/projects/${this.state.selectedProjectId}/make_project_reports_csv`).then((res) => {
+      this.setState({
+        project_id_download_in_progress: this.state.selectedProjectId
+      });
+      this.displayReportProgress(res) 
+    });
+  }
+
+  checkReportDownload() {
+    axios.get(`/projects/${this.state.project_id_download_in_progress}/project_reports_csv_status`).then((res) => {
+      let download_status = res.data.status_display
+      if (download_status === 'complete') {
+        location.href = `/projects/${this.state.project_id_download_in_progress}/send_project_reports_csv`
+        this.setState({
+          project_id_download_in_progress: null
+        });
+      } else {
+        this.displayReportProgress(res)
+      }
+    })
   }
 
   sortSamples() {
@@ -583,13 +620,16 @@ class Samples extends React.Component {
         </div>
       </div>
     );
-    let reports_download_button = (
+    const reports_download_button_contents = this.state.project_id_download_in_progress ?
+                                         <span className='download-progress'/>
+                                         : <a onClick={this.startReportGeneration} className="download-project center">
+                                             <i className="fa fa-cloud-download"/>
+                                             <span>Download reports</span>
+                                           </a>
+    const reports_download_button = (
       <div className='col s2 download-table'>
         <div className='white'>
-          <a href={`/projects/${project_id}/project_reports_csv`} className="download-project center">
-            <i className="fa fa-cloud-download"/>
-            <span>Download reports</span>
-          </a>
+          { reports_download_button_contents }
         </div>
       </div>
     );
@@ -710,8 +750,9 @@ class Samples extends React.Component {
     return (
       <div className="row content-wrapper">
         <div className="project-info col s12">
-        { projInfo }
+          { projInfo }
         </div>
+
         <div className="sample-container col s12">
           { search_box }
           <div className="sample-table-container row">

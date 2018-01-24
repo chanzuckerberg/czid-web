@@ -644,15 +644,17 @@ module ReportHelper
     background_id = params[:background_id] || default_background_id
     pipeline_run = sample.pipeline_runs.first
     pipeline_run_id = pipeline_run ? pipeline_run.id : nil
-    return "" if pipeline_run_id.nil?
+    return "" if pipeline_run_id.nil? || pipeline_run.total_reads.nil?
     tax_details = taxonomy_details(pipeline_run_id, background_id, params)
     generate_report_csv(tax_details)
   end
 
   def bulk_report_csvs_from_params(project, params)
-    csv_dir = "/app/tmp/report_csvs/#{project.id}"
+    user_id = params["user_id"]
+    csv_dir = project.csv_dir(user_id)
     `rm -rf #{csv_dir}; mkdir -p #{csv_dir}`
     sample_names_used = []
+    ### TO DO: loop only through samples that current_user is allowed to see ###
     project.samples.each do |sample|
       csv_data = report_csv_from_params(sample, params)
       clean_sample_name = sample.name.downcase.gsub(/\W/, "-")
@@ -662,14 +664,8 @@ module ReportHelper
       filename = "#{csv_dir}/#{clean_sample_name}.csv"
       File.write(filename, csv_data)
     end
-    tar_filename = "#{project.name.gsub(/\W/, '-')}_reports.tar.gz"
-    `cd #{csv_dir}; tar cvzf #{tar_filename} .`
-    output_file = "#{csv_dir}/#{tar_filename}"
-    `rm #{csv_dir}/*.csv`
-    # Return output file path, but first ensure project/sample names
-    # were not chosen maliciously to download an arbitrary file:
-    absolute_path = File.expand_path(output_file)
-    return nil unless absolute_path.start_with?(csv_dir)
-    output_file
+    `cd #{csv_dir}; tar cvzf #{project.tar_filename} .`
+    `aws s3 cp #{project.report_tar(user_id)} #{project.report_tar_s3(user_id)}`
+    `rm -rf #{csv_dir}`
   end
 end

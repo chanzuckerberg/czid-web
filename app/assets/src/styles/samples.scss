@@ -448,6 +448,7 @@ $break-large: 1070px;
   .download-table {
     padding-right: 0 !important;
     .download-project {
+      cursor: pointer;
       padding: 11px;
       display: block;
       border: 1px solid transparent;
@@ -458,6 +459,17 @@ $break-large: 1070px;
         background: #f4f4f4;
         border: 1px solid #d9d9d9;
       }
+    }
+    .download-progress {
+      cursor: pointer;
+      padding: 11px;
+      border: 1px solid transparent;
+      font-size: 12px;
+      color: #fff;
+      text-align: center;
+      display: none;
+      background-color: #4caf50;
+      border-color: #449d48;
     }
   }
   .sample-table-container {
