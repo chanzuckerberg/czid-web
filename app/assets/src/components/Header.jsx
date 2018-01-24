@@ -1,5 +1,6 @@
 import React from 'react';
 import $ from 'jquery';
+import axios from 'axios';
 
 class Header extends React.Component  {
   constructor(props, context) {
@@ -8,6 +9,7 @@ class Header extends React.Component  {
     this.userDetails = this.props.userDetails || null;
     this.location = window.location.pathname;
     this.sendMail = this.sendMail.bind(this);
+    this.signOut = this.signOut.bind(this);
   }
 
 	componentDidMount() {
@@ -23,6 +25,16 @@ class Header extends React.Component  {
 
   gotoPage(path) {
     location.href = `${path}`
+  }
+
+  signOut() {
+    axios(`${this.props.signoutEndpoint}.json`,
+          { method: "DELETE",  withCredentials: true }
+    ).then(
+      (res) => {
+        this.gotoPage(this.props.signInEndpoint);
+      }
+    )
   }
 
   sendMail() {
@@ -46,7 +58,7 @@ class Header extends React.Component  {
            { this.userDetails && this.userDetails.admin ? <li onClick={ this.gotoPage.bind(this, '/users/new') }><a href="#!">Create user</a></li> : null }
             <li onClick={ this.sendMail }><a href="#!">Report Feedback</a></li>
             <li className="divider"></li>
-            <li><a rel="nofollow" data-method="delete" href={this.props.signoutEndpoint}>Logout</a></li>
+            <li onClick={this.signOut}><a href="#">Logout</a></li>
           </ul>
 
           <div>
