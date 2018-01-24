@@ -644,7 +644,7 @@ module ReportHelper
     background_id = params[:background_id] || default_background_id
     pipeline_run = sample.pipeline_runs.first
     pipeline_run_id = pipeline_run ? pipeline_run.id : nil
-    return "" if pipeline_run_id.nil?
+    return "" if pipeline_run_id.nil? || pipeline_run.total_reads.nil?
     tax_details = taxonomy_details(pipeline_run_id, background_id, params)
     generate_report_csv(tax_details)
   end
