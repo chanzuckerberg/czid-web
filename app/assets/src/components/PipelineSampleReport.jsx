@@ -24,7 +24,7 @@ class PipelineSampleReport extends React.Component {
     this.loadMore = this.loadMore.bind(this);
     const filter_thresholds = Cookies.get('filter_thresholds')
     const cached_cats = Cookies.get('excluded_categories');
-
+    
     this.state = {
       taxonomy_details: [],
       search_keys_in_sample: [],
@@ -41,24 +41,25 @@ class PipelineSampleReport extends React.Component {
       pageEnd: false,
       new_filter_thresholds: (filter_thresholds) ? JSON.parse(filter_thresholds) : { NT_aggregatescore: 0.0 },
       /*
-        NT_zscore: 0.0,
-        NT_rpm: 0.0,
-        NT_r: 0.0,
-        NT_percentidentity: 0.0,
-        NT_neglogevalue: 0.0,
-        NT_percentconcordant: 0.0,
-        NR_zscore: 0.0,
-        NR_rpm: 0.0,
-        NR_r: 0.0,
-        NR_percentidentity: 0.0,
-        NR_neglogevalue: 0.0,
-        NR_percentconcordant: 0.0,
-      }
-      */
-      excluded_categories: (cached_cats) ? JSON.parse(cached_cats) : [],
-      search_taxon_id: 0,
-      loading: true
-    };
+      NT_zscore: 0.0,
+      NT_rpm: 0.0,
+      NT_r: 0.0,
+      NT_percentidentity: 0.0,
+      NT_neglogevalue: 0.0,
+      NT_percentconcordant: 0.0,
+      NR_zscore: 0.0,
+      NR_rpm: 0.0,
+      NR_r: 0.0,
+      NR_percentidentity: 0.0,
+      NR_neglogevalue: 0.0,
+      NR_percentconcordant: 0.0,
+    }
+    */
+    excluded_categories: (cached_cats) ? JSON.parse(cached_cats) : [],
+    search_taxon_id: 0,
+    loading: true
+  };
+  
 
     this.applySearchFilter = this.applySearchFilter.bind(this);
     this.applyThresholdFilters = this.applyThresholdFilters.bind(this);
@@ -661,9 +662,9 @@ class PipelineSampleReport extends React.Component {
     const sort_column = `${parts[1]}_${parts[2]}`;
     const t0 = Date.now();
 
-    filter_stats = this.state.rows_passing_filters + ' rows passing filters, out of ' + this.state.rows_total + ' total rows.';
-    disable_filter = this.anyFilterSet() ? (<span className="disable" onClick={(e) => this.refs.report_filter.resetAllFilters()}><b> Disable all filters</b></span> ) : null;
-    filter_row_stats = this.state.loading ? null : (
+    const filter_stats = this.state.rows_passing_filters + ' rows passing filters, out of ' + this.state.rows_total + ' total rows.';
+    const disable_filter = this.anyFilterSet() ? (<span className="disable" onClick={(e) => this.refs.report_filter.resetAllFilters()}><b> Disable all filters</b></span> ) : null;
+    const filter_row_stats = this.state.loading ? null : (
       <div id="filter-message" className="filter-message">
         <span className="count">
           {filter_stats} {disable_filter}

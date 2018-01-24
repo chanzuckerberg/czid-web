@@ -149,7 +149,6 @@ class SamplesController < ApplicationController
     report_info[:count] = external_report[:taxonomy_details][1]
     report_info[:passing_filters] = external_report[:taxonomy_details][0]
     @report_info = report_info
-    p @report_info, "infoooo"
     render json: @report_info
   end
 
