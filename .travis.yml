@@ -14,12 +14,12 @@ before_install:
   - sleep 10
   - docker-compose run web rake db:create
 install:
-  - gem install brakeman 
+  - gem install brakeman
 script:
-  - docker-compose run web rails test
-  - echo "quit" | docker-compose run web rails dbconsole
-  - docker-compose run web rubocop -R --config .rubocop_todo.yml
-  - docker-compose run web rake db:drop db:create db:migrate db:seed
+  - docker-compose run --volume=[] web "rails test"
+  - echo "quit" | docker-compose run --volume=[] web "rails dbconsole"
+  - docker-compose run --volume=[] web "rubocop -R --config .rubocop_todo.yml"
+  - docker-compose run --volume=[] web "rake db:drop db:create db:migrate db:seed"
   - brakeman --no-pager || true
 env:
   global:
