@@ -17,10 +17,12 @@ class PipelineSampleReport extends React.Component {
     this.report_details = props.report_details;
     this.report_page_params = props.report_page_params;
     this.all_backgrounds = props.all_backgrounds;
-    this.max_rows_to_render = props.max_rows || 2000;
-    this.default_sort_by = this.report_page_params.sort_by.replace('highest_', '');
-    this.sort_params = {};
-    const filter_thresholds = Cookies.get('filter_thresholds');
+    this.max_rows_to_render = props.max_rows || 2000
+    this.default_sort_by = this.report_page_params.sort_by.replace('highest_', '')
+    this.sort_params = {}
+    this.pageSize = props.pageSize || 30;
+    this.loadMore = this.loadMore.bind(this);
+    const filter_thresholds = Cookies.get('filter_thresholds')
     const cached_cats = Cookies.get('excluded_categories');
 
     this.state = {
@@ -32,8 +34,11 @@ class PipelineSampleReport extends React.Component {
       rows_total: 0,
       thresholded_taxons: [],
       selected_taxons: [],
-
+      pagesLoaded: 0,
+      displayedRows: 0,
       sort_by: this.default_sort_by,
+      isRequesting: false,
+      pageEnd: false,
       new_filter_thresholds: (filter_thresholds) ? JSON.parse(filter_thresholds) : { NT_aggregatescore: 0.0 },
       /*
         NT_zscore: 0.0,
@@ -81,6 +86,7 @@ class PipelineSampleReport extends React.Component {
 
   componentDidMount() {
     this.listenThresholdChanges();
+    this.scrollDown();
   }
 
   fetchSearchList() {
@@ -96,29 +102,73 @@ class PipelineSampleReport extends React.Component {
 
   fetchReportData() {
     Samples.showLoading('Loading results...');
-    let params = `?${window.location.search.replace('?', '')}&report_ts=${this.report_ts}`;
+    let params = this.getParams();
+    axios.get(`/samples/${this.sample_id}/report_info${params}`).then((res) => {
+      Samples.hideLoader();
+      let genus_map = {}
+      for (var i = 0; i < res.data.taxonomy_details.length; i++) {
+        let taxon = res.data.taxonomy_details[i]
+        if (taxon.genus_taxid == taxon.tax_id) {
+          genus_map[taxon.genus_taxid] = taxon
+        }
+      }
+      this.setState((prevState) => ({
+        rows_passing_filters: res.data.passing_filters,
+        rows_total:  res.data.count,
+        taxonomy_details: res.data.taxonomy_details,
+        pagesLoaded: prevState.pagesLoaded+1,
+        displayedRows: res.data.taxonomy_details.length,
+        pageEnd: res.data.taxonomy_details.length >= this.pageSize ? false : true,
+        genus_map: genus_map
+      }));
+      this.applyThresholdFilters(res.data.taxonomy_details, false)
+    });
+  }
+
+  getParams() {
+    let params = `?${window.location.search.replace("?", "")}&report_ts=${this.report_ts}&page=${this.state.pagesLoaded+1}`;
     const cached_background_id = Cookies.get('background_id');
     if (cached_background_id) {
       params = params.indexOf('background_id=')
       < 0 ? `${params}&background_id=${cached_background_id}` : params;
     }
+    return params;
+  }
+
+  //load more report rows
+  loadMore() {
+    let params = this.getParams();
+    this.setState({ isRequesting: true })
     axios.get(`/samples/${this.sample_id}/report_info${params}`).then((res) => {
-      Samples.hideLoader();
-      const genus_map = {};
-      for (let i = 0; i < res.data.taxonomy_details[2].length; i++) {
-        const taxon = res.data.taxonomy_details[2][i];
+      let genus_map = {}
+      for (var i = 0; i < res.data.taxonomy_details.length; i++) {
+        let taxon = res.data.taxonomy_details[i]
         if (taxon.genus_taxid == taxon.tax_id) {
           genus_map[taxon.genus_taxid] = taxon;
         }
       }
+      this.setState((prevState) => ({
+        isRequesting: false,
+        rows_passing_filters: res.data.passing_filters,
+        rows_total: res.data.count,
+        selected_taxons: [...prevState.taxonomy_details, ...res.data.taxonomy_details],
+        taxonomy_details: [...prevState.taxonomy_details, ...res.data.taxonomy_details],
+        pagesLoaded: prevState.pagesLoaded+1,
+        displayedRows: prevState.displayedRows+ res.data.taxonomy_details.length,
+        pageEnd: res.data.taxonomy_details.length >= this.pageSize ? false : true,
+        genus_map: genus_map
+      }));
+    })
+  }
 
-      this.setState({
-        rows_passing_filters: res.data.taxonomy_details[0],
-        rows_total: res.data.taxonomy_details[1],
-        taxonomy_details: res.data.taxonomy_details[2],
-        genus_map
-      });
-      this.applyThresholdFilters(res.data.taxonomy_details[2], false);
+  //Load more rows on scroll
+  scrollDown() {
+    var that = this;
+    $(window).scroll(function() {
+      if ($(window).scrollTop() > $(document).height() - $(window).height() - 6000) {
+        { !that.state.isRequesting && !that.state.pageEnd ? that.loadMore() : null }
+        return false;
+      }
     });
   }
 
@@ -136,6 +186,8 @@ class PipelineSampleReport extends React.Component {
       search_taxon_id: 0,
       thresholded_taxons: this.state.taxonomy_details,
       selected_taxons: this.state.taxonomy_details,
+      pagesLoaded: 0,
+      pageEnd: false,
       rows_passing_filters: this.state.taxonomy_details.length
     });
     Cookies.set('filter_thresholds', '{}');
@@ -202,15 +254,15 @@ class PipelineSampleReport extends React.Component {
       selected_taxons = thresholded_taxons;
     }
 
-    // console.log(excludedCategories)
-    this.setState({
+    //console.log(excludedCategories)
+    this.setState((prevState) => ({
       loading: false,
       excluded_categories: excludedCategories,
       search_taxon_id: searchTaxonId,
-      thresholded_taxons,
-      selected_taxons,
-      rows_passing_filters: selected_taxons.length
-    });
+      thresholded_taxons: thresholded_taxons,
+      selected_taxons: selected_taxons,
+      rows_passing_filters: selected_taxons.length,
+    }))
   }
 
   flash() {
@@ -245,7 +297,6 @@ class PipelineSampleReport extends React.Component {
   // applySort needs to be bound at time of use, not in constructor above
   // TODO(yf): fix this
   applySort(sort_by) {
-    console.log(sort_by);
     if (sort_by.toLowerCase() != this.state.sort_by) {
       this.state.sort_by = sort_by.toLowerCase();
       this.sortResults();
@@ -322,10 +373,10 @@ class PipelineSampleReport extends React.Component {
     let selected_taxons = this.state.selected_taxons;
     selected_taxons = selected_taxons.sort(this.sortCompareFunction);
     this.setState({
-      selecte_taxons: selected_taxons
-    });
-    this.state.thresholded_taxons = this.state.thresholded_taxons.sort(this.sortCompareFunction);
-    this.state.taxonomy_details = this.state.taxonomy_details.sort(this.sortCompareFunction);
+      selected_taxons: selected_taxons
+    })
+    this.state.thresholded_taxons = this.state.thresholded_taxons.sort(this.sortCompareFunction)
+    this.state.taxonomy_details = this.state.taxonomy_details.sort(this.sortCompareFunction)
   }
 
   setFilterThreshold(e) {
@@ -610,9 +661,9 @@ class PipelineSampleReport extends React.Component {
     const sort_column = `${parts[1]}_${parts[2]}`;
     const t0 = Date.now();
 
-    const filter_stats = `${this.state.rows_passing_filters} rows passing filters, out of ${this.state.rows_total} total rows.`;
-    const disable_filter = this.anyFilterSet() ? (<span className="disable" onClick={e => this.refs.report_filter.resetAllFilters()}><b> Disable all filters</b></span>) : null;
-    const filter_row_stats = this.state.loading ? null : (
+    filter_stats = this.state.rows_passing_filters + ' rows passing filters, out of ' + this.state.rows_total + ' total rows.';
+    disable_filter = this.anyFilterSet() ? (<span className="disable" onClick={(e) => this.refs.report_filter.resetAllFilters()}><b> Disable all filters</b></span> ) : null;
+    filter_row_stats = this.state.loading ? null : (
       <div id="filter-message" className="filter-message">
         <span className="count">
           {filter_stats} {disable_filter}
@@ -684,8 +735,9 @@ class PipelineSampleReport extends React.Component {
                       </tr>
                     </thead>
                     <tbody>
-                      { this.state.selected_taxons.slice(0, this.max_rows_to_render).map((tax_info, i) => (
-                        <tr key={tax_info.tax_id} className={this.row_class(tax_info)}>
+                    { this.state.selected_taxons.slice(0, this.max_rows_to_render).map((tax_info, i) => {
+                      return (
+                        <tr key={i} className={this.row_class(tax_info)}>
                           <td>
                             { this.render_name(tax_info, this.report_details) }
                           </td>
@@ -703,10 +755,14 @@ class PipelineSampleReport extends React.Component {
                           { this.render_number(tax_info.NR.neglogevalue, sort_column == 'nr_neglogevalue', 0) }
                           { this.render_number(tax_info.NR.percentconcordant, sort_column == 'nr_percentconcordant', 1) }
                         </tr>
-                      ))}
+                      )})}
                     </tbody>
                   </table>
                 </div>
+                { this.state.isRequesting && this.state.displayedRows
+                  < this.state.rows_total ? <div className="center scroll">
+                  <i className='fa fa-spinner fa-spin fa-3x'></i>
+                </div> : "" }
               </div>
             </div>
           </div>

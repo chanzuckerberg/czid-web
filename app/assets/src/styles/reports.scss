@@ -254,6 +254,9 @@ margin-bottom: 0px;
   width: 100%;
   overflow: auto;
   overflow-y: hidden;
+  .scroll {
+    text-align: center;
+  }
 }
 
 .report-number {

@@ -1,3 +1,5 @@
+require 'will_paginate/array'
+
 class SamplesController < ApplicationController
   include ReportHelper
   include SamplesHelper
@@ -9,7 +11,7 @@ class SamplesController < ApplicationController
   before_action :login_required
 
   PAGE_SIZE = 30
-
+  REPORT_PAGE_SIZE = 2000
   # GET /samples
   # GET /samples.json
   def index
@@ -130,8 +132,8 @@ class SamplesController < ApplicationController
     expires_in 30.days
 
     @pipeline_run = @sample.pipeline_runs.first
-
-    ##################################################
+    report_info = {}
+    ########externalz_report_info##########################################
     ## Duct tape for changing background id dynamically
     ## TODO(yf): clean the following up.
     ####################################################
@@ -142,7 +144,12 @@ class SamplesController < ApplicationController
       pipeline_run_id = @pipeline_run.id
     end
 
-    @report_info = external_report_info(pipeline_run_id, background_id, params)
+    external_report = external_report_info(pipeline_run_id, background_id, params)
+    report_info[:taxonomy_details] = external_report[:taxonomy_details][2].paginate(page: params[:page], per_page: params[:per_page] || REPORT_PAGE_SIZE)
+    report_info[:count] = external_report[:taxonomy_details][1]
+    report_info[:passing_filters] = external_report[:taxonomy_details][0]
+    @report_info = report_info
+    p @report_info, "infoooo"
     render json: @report_info
   end
 
