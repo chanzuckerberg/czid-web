@@ -22,17 +22,25 @@ class User < ApplicationRecord
     admin
   end
 
-  def can_see_project(project)
-    project.users.include? self || project.public_access == 1
+  def can_see_project(proj)
+    visible_projects.include? proj
   end
 
   def can_see_sample(sample)
-    project = sample.project
-    return true if project.public_access == 1
-    if days_to_keep_sample_private
-      days_since_creation = (Time.current - sample.created_at).to_i / 1.day
-      return (days_since_creation > days_to_keep_sample_private)
-    end
-    false
+    visible_samples.include? sample
+  end
+
+  def visible_projects
+    Project.where(public_access: 1) | projects
+  end
+
+  def days_since_creation(sample)
+    (Time.current - sample.created_at).to_i / 1.day
+  end
+
+  def visible_samples
+    public_samples = Project.where(public_access: 1).samples
+    expired_private_samples = Sample.all.select { |s| days_since_creation(s) > s.days_to_keep_sample_private }
+    public_samples | expired_private_samples
   end
 end
