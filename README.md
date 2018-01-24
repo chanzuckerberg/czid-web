@@ -9,6 +9,7 @@ To get a local `development` instance running on a Mac OS X computer, just do:
 ```
     bin/setup
 ```
+Then run `npm start` in a separate shell and keep it running so frontend changes you make are picked up continuously.
 
 Then open `http://localhost:3000` in your browser.
 
