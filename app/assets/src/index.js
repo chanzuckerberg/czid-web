@@ -24,7 +24,6 @@ contextKeys.forEach((key) => {
 });
 /* eslint camelcase: 0 */ // Turn off camelcase rule
 const react_component = (componentName, props, target) => {
-  const temp = document.createElement('div');
   const matchedComponent = foundComponents[componentName];
   if (matchedComponent) {
     ReactDOM.render(
