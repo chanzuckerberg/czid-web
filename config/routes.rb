@@ -27,9 +27,11 @@ Rails.application.routes.draw do
 
   resources :projects do
     get :visuals, on: :member
-    get :project_reports_csv, on: :member # use 'project_reports_csv?background_id=' to select a specific background for the reports
+    get :project_reports_csv, on: :member
+    get :user_search_list, on: :member
     put :add_favorite, on: :member
     put :remove_favorite, on: :member
+    post :add_user_to_project, on: :member
   end
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
