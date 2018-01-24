@@ -7,6 +7,7 @@ import 'font-awesome/scss/font-awesome.scss';
 import StringHelper from './helpers/StringHelper';
 import './loader.scss';
 
+// autoload components for react_component method
 const context = require.context('./components', true, /\.(js|jsx)$/);
 const foundComponents = {};
 const contextKeys = context.keys();
@@ -19,6 +20,7 @@ contextKeys.forEach((key) => {
     a = context(key).default;
   }
   if (a && a.name) {
+    // map the correct component name
     foundComponents[methodName] = a;
   }
 });
@@ -28,7 +30,8 @@ const react_component = (componentName, props, target) => {
   if (matchedComponent) {
     ReactDOM.render(
       React.createElement(matchedComponent, props, null),
-      document.getElementById(target));
+      document.getElementById(target)
+    );
   }
 };
 
