@@ -15,7 +15,7 @@ gem 'bcrypt', '~> 3.1.7'
 gem 'coffee-rails', '~> 4.2'
 gem 'devise', '4.3.0'
 gem "health_check"
-gem 'honeycomb-rails'
+gem 'honeycomb-rails', '0.4.1'
 gem 'mailgun_rails'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.5'
