@@ -21,4 +21,18 @@ class User < ApplicationRecord
   def admin?
     admin
   end
+
+  def can_see_project(project)
+    project.users.include? self || project.public_access == 1
+  end
+
+  def can_see_sample(sample)
+    project = sample.project
+    return true if project.public_access == 1
+    if days_to_keep_sample_private
+      days_since_creation = (Time.current - sample.created_at).to_i / 1.day
+      return (days_since_creation > days_to_keep_sample_private)
+    end
+    false
+  end
 end
