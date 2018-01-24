@@ -133,7 +133,7 @@ class SamplesController < ApplicationController
 
     @pipeline_run = @sample.pipeline_runs.first
     report_info = {}
-    ########externalz_report_info##########################################
+    # #######externalz_report_info##########################################
     ## Duct tape for changing background id dynamically
     ## TODO(yf): clean the following up.
     ####################################################
