@@ -19,7 +19,7 @@ contextKeys.forEach((key) => {
   } else if (typeof context(key) === 'object') {
     a = context(key).default;
   }
-  if (a && a.name) {
+  if (a && methodName) {
     // map the correct component name
     foundComponents[methodName] = a;
   }

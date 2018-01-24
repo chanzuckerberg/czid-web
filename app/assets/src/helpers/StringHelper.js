@@ -5,7 +5,7 @@ class StringHelper {
   /**
    * @method baseName
    * @param {String} str
-   * @desc accepts a path and returns the filename
+   * @desc accepts a path and returns the filename without extension
    * @return {String} actual filename from the path
   */
   static baseName(str) {
