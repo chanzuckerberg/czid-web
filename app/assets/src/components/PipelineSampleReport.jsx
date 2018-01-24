@@ -505,7 +505,7 @@ class PipelineSampleReport extends React.Component {
           <i className={`fa fa-angle-right ${tax_info.tax_id}`} onClick={this.expandOrCollapseGenus} />
         </span>
       </span>);
-      const foo = (<div className="hover-wrapper">
+      foo = (<div className="hover-wrapper">
         <div className="genus-name"> {plus_or_minus} {foo}</div>
         <i className="count-info">({tax_info.species_count} {this.category_to_adjective(category_name)} species)</i>
         { this.displayTags(tax_info, report_details) }
