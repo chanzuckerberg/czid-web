@@ -682,10 +682,15 @@ class Samples extends React.Component {
     );
 
    const addUser = (
-     <div className="row search-box">
-       <input type='text' ref='add_user' className='browser-default' placeholder='User e-mail' />
-       <button onClick={this.handleAddUser}>Add to project</button>
-     </div>
+     <form>
+       <span className="input-field">
+         <input ref="add_user" id="email" type="email" class="validate"/>
+         <label data-error="Please enter a valid email address" data-success="added">Email</label>
+       </span>
+       <span>
+         <a class="waves-effect waves-light btn" onClick={this.handleAddUser}>Add to project</a>
+       </span>
+     </form>
    );
 
    const filterTissueDropDown = (
