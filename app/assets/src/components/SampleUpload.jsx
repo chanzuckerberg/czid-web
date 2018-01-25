@@ -186,6 +186,7 @@ class SampleUpload extends React.Component {
   }
 
   createSample() {
+    _satellite.track('uploadsample');
     this.setState({
       submitting: true
     });

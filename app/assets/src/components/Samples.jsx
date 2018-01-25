@@ -533,6 +533,7 @@ class Samples extends React.Component {
   }
 
   viewSample(id) {
+    _satellite.track('viewsample')
     location.href = `/samples/${id}`;
   }
 
@@ -595,6 +596,11 @@ class Samples extends React.Component {
     return (
       <i data-status="favorite" data-fav={project.favorited} data-id={project.id} onClick={this.toggleFavorite} className={!project.favorited ? "favorite fa fa-star-o":  "favorite fa fa-star"}></i>
     )
+  }
+
+  downloadTable(id) {
+    _satellite.track('downloadtable');
+    location.href = `/projects/${id}/csv`;
   }
 
   renderTable(samples) {
