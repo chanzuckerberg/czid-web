@@ -67,6 +67,11 @@ class UsersController < ApplicationController
     end
   end
 
+  def all_emails
+    email_array = User.all.map(&:email)
+    render json: email_array
+  end
+
   private
 
   # Use callbacks to share common setup or constraints between actions.

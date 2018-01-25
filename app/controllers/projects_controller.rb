@@ -3,7 +3,7 @@ class ProjectsController < ApplicationController
   include ReportHelper
   before_action :login_required
 
-  before_action :set_project, only: [:show, :edit, :update, :destroy, :add_favorite, :remove_favorite, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv]
+  before_action :set_project, only: [:show, :edit, :update, :destroy, :add_favorite, :remove_favorite, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv, :add_user_to_project]
   clear_respond_to
   respond_to :json
   # GET /projects
@@ -143,6 +143,11 @@ class ProjectsController < ApplicationController
       format.html { redirect_to projects_url, notice: 'Project was successfully destroyed.' }
       format.json { head :no_content }
     end
+  end
+
+  def add_user_to_project
+    user_ids_to_add = User.where(email: params[:user_emails_to_add])
+    @project.user_ids |= user_ids_to_add
   end
 
   private
