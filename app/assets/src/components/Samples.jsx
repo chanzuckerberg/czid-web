@@ -18,6 +18,7 @@ class Samples extends React.Component {
     this.csrf = props.csrf;
     this.favoriteProjects = props.favorites || [];
     this.allProjects = props.projects || [];
+    this.all_user_emails = props.all_user_emails;
     this.defaultSortBy = 'newest';
     const currentSort = SortHelper.currentSort();
     this.columnSorting = this.columnSorting.bind(this);
@@ -33,6 +34,7 @@ class Samples extends React.Component {
     this.handleProjectSelection = this.handleProjectSelection.bind(this);
     this.pageSize = props.pageSize || 30;
     this.tissue_types = PipelineSampleReads.fetchTissueTypes();
+    this.handleAddUser = this.handleAddUser.bind(this);
     this.state = {
       project: null,
       totalNumber: null,
@@ -189,6 +191,18 @@ class Samples extends React.Component {
     return urlParams.get(param)
   }
 
+  handleAddUser(e) {
+    let email_to_add = this.refs.add_user.value;
+    if (this.all_user_emails.includes(email_to_add)) {
+      axios.post('/projects/{this.state.selectedProjectId}/add_user_to_project', 
+                 { user_emails_to_add: [email_to_add],
+                   authenticity_token: this.csrf })
+    } else {
+      axios.post('/users.json',
+                 { user: { email: email_to_add },
+                   authenticity_token: this.csrf })
+    }
+  }
 
   handleSearchChange(e) {
     if (e.target.value !== '') {
@@ -663,6 +677,13 @@ class Samples extends React.Component {
       </div>
     );
 
+   const addUser = (
+     <div className="row search-box">
+       <input type='text' ref='add_user' className='browser-default' placeholder='User e-mail' />
+       <button onClick={this.handleAddUser}>Add to project</button>
+     </div>
+   );
+
    const filterTissueDropDown = (
         <div className='dropdown-status-filtering'>
         <li>
@@ -765,7 +786,7 @@ class Samples extends React.Component {
     return (
       <div className="row content-wrapper">
         <div className="project-info col s12">
-          { projInfo }
+          { projInfo } { this.state.project ? addUser : null }
         </div>
 
         <div className="sample-container col s12">
