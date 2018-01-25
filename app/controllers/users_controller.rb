@@ -18,8 +18,15 @@ class UsersController < ApplicationController
   # POST /users
   # POST /users.json
   def create
+    user_params_with_password = user_params
+    if user_params_with_password[:password].nil?
+      random_password = SecureRandom.hex(10)
+      user_params_with_password[:password] = random_password
+      user_params_with_password[:password_confirmation] = random_password
+    end
+
     Rails.logger.debug(user_params.inspect)
-    new_user(user_params)
+    new_user(user_params_with_password)
 
     respond_to do |format|
       if @user.save
