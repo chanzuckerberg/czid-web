@@ -30,6 +30,7 @@ class UsersController < ApplicationController
 
     respond_to do |format|
       if @user.save
+        UserMailer.added_to_projects_email_new_user(@user, current_user, @user.projects).deliver_now
         format.html { redirect_to edit_user_path(@user), notice: "User was successfully created" }
         format.json { render :show, status: :created, location: root_path }
       else
