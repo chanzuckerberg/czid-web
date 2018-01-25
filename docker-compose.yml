@@ -13,6 +13,51 @@ services:
       - '6379:6379'
     volumes:
       - ./redis-data:/var/lib/redis/data
+  webtest:
+    build: .
+    command: bash
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      - SAMPLES_BUCKET_NAME=czbiohub-idseq-samples-development
+      - IDSEQ_AIRBRAKE_PROJECT_ID
+      - IDSEQ_AIRBRAKE_PROJECT_KEY
+      - IDSEQ_HONEYCOMB_DB_DATA_SET
+      - IDSEQ_HONEYCOMB_DATA_SET
+      - IDSEQ_HONEYCOMB_WRITE_KEY
+      - MAIL_GUN_API_KEY
+      - CI
+      - CONTINUOUS_INTEGRATION
+      - RACK_ENV
+      - RAILS_ENV
+      - TRAVIS_ALLOW_FAILURE
+      - TRAVIS_BRANCH
+      - TRAVIS_BUILD_DIR
+      - TRAVIS_BUILD_ID
+      - TRAVIS_BUILD_NUMBER
+      - TRAVIS_COMMIT
+      - TRAVIS_COMMIT_MESSAGE
+      - TRAVIS_COMMIT_RANGE
+      - TRAVIS_EVENT_TYPE
+      - TRAVIS_FILTERED
+      - TRAVIS_JOB_ID
+      - TRAVIS_JOB_NUMBER
+      - TRAVIS_LANGUAGE
+      - TRAVIS_OS_NAME
+      - TRAVIS_PRE_CHEF_BOOTSTRAP_TIME
+      - TRAVIS_PULL_REQUEST_BRANCH
+      - TRAVIS_PULL_REQUEST
+      - TRAVIS_PULL_REQUEST_SHA
+      - TRAVIS_PULL_REQUEST_SLUG
+      - TRAVIS_REPO_SLUG
+      - TRAVIS_SECURE_ENV_VARS
+      - TRAVIS_TAG
+      - TRAVIS
+    volumes:
+      - ~/.aws:/root/.aws:ro
   web:
     build: .
     image: chanzuckerberg/idseq-web:compose

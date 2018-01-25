@@ -58,7 +58,6 @@ const config = {
       }
     }]
   },
-  watch: true,
   plugins: [ extractPlugin ]
 }
 

@@ -19,6 +19,7 @@
 !/tmp/.keep
 
 /node_modules
+/app/assets/dist
 /yarn-error.log
 
 # Ignore awscli bundle files

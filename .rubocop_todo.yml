@@ -49,6 +49,7 @@ AllCops:
     - 'db/**/*'
     - vendor/**/*
     - bin/*
+    - node_modules/**/*
 
 Metrics/MethodLength:
   Enabled: false
