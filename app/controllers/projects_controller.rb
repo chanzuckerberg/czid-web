@@ -146,7 +146,7 @@ class ProjectsController < ApplicationController
   end
 
   def add_user_to_project
-    user_ids_to_add = User.where(email: params[:user_emails_to_add])
+    user_ids_to_add = User.where(email: params[:user_emails_to_add]).map(&:id)
     @project.user_ids |= user_ids_to_add
   end
 
