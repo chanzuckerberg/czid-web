@@ -69,7 +69,7 @@ class UsersController < ApplicationController
 
   def all_emails
     email_array = User.all.map(&:email)
-    render json: email_array
+    render json: { emails: email_array }
   end
 
   private
