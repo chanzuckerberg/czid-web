@@ -17,7 +17,6 @@ class Samples extends React.Component {
     this.csrf = props.csrf;
     this.favoriteProjects = props.favorites || [];
     this.allProjects = props.projects || [];
-    this.all_user_emails = props.all_user_emails;
     this.defaultSortBy = 'newest';
     const currentSort = SortHelper.currentSort();
     this.columnSorting = this.columnSorting.bind(this);
@@ -183,16 +182,21 @@ class Samples extends React.Component {
   }
 
   handleAddUser(e) {
-    let email_to_add = this.refs.add_user.value;
-    if (this.all_user_emails.includes(email_to_add)) {
-      axios.post('/projects/{this.state.selectedProjectId}/add_user_to_project', 
-                 { user_emails_to_add: [email_to_add],
-                   authenticity_token: this.csrf })
-    } else {
-      axios.post('/users.json',
-                 { user: { email: email_to_add },
-                   authenticity_token: this.csrf })
-    }
+    axios.get(`/users/all_emails`).then((res) => {
+      let all_user_emails = res.data.all_user_emails;
+      let email_to_add = this.refs.add_user.value;
+      let project_id = this.state.selectedProjectId;
+      if (all_user_emails.includes(email_to_add)) {
+        axios.post(`/projects/${project_id}/add_user_to_project`, 
+                   { user_emails_to_add: [email_to_add],
+                     authenticity_token: this.csrf })
+      } else {
+        axios.post('/users.json',
+                   { user: { email: email_to_add,
+                             project_ids: [project_id] },
+                     authenticity_token: this.csrf })
+      }
+    });
   }
 
   handleSearchChange(e) {

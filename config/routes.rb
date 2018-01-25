@@ -20,6 +20,7 @@ Rails.application.routes.draw do
     get :unidentified_fasta, on: :member
     get :results_folder, on: :member
     get :fastqs_folder, on: :member
+    get :all_emails, on: :collection
     post :bulk_upload, on: :collection
     post :save_metadata, on: :member
   end
@@ -32,6 +33,7 @@ Rails.application.routes.draw do
     get :send_project_reports_csv, on: :member
     put :add_favorite, on: :member
     put :remove_favorite, on: :member
+    post :add_user_to_project, on: :member
   end
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
