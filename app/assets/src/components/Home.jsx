@@ -1,4 +1,5 @@
-
+import React from 'react';
+import Samples from './Samples';
 
 class Home extends React.Component {
   render() {
@@ -10,3 +11,4 @@ class Home extends React.Component {
   }
 }
 
+export default Home;

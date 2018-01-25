@@ -1,3 +1,6 @@
+import React from 'react';
+import SubHeader from './SubHeader';
+
 /**
  * @class ProjectVisualization
  * @desc a component to visualize sample and their species taxonomy distribution
@@ -78,3 +81,4 @@ class ProjectVisualization  extends React.Component {
     );
   }
 }
+export default ProjectVisualization;

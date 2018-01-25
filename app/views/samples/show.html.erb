@@ -1,6 +1,23 @@
-<%= react_component 'PipelineSampleReads', sampleInfo: @sample, projectInfo: @project_info, jobStatistics: @job_stats,
-  project_sample_ids_names: @project_sample_ids_names, host_genome: @host_genome, summary_stats: @summary_stats, pipelineRun: @pipeline_run,
-  reportPresent: @report_present, reportTime: @report_ts,
-  allCategories: @all_categories, reportDetails: @report_details, reportPageParams: @report_page_params,
-  sample_status: @sample_status, rerun_path: kickoff_pipeline_sample_path,
-  all_backgrounds: @background_models %>
+<div id="PipelineSampleReads_page">
+  <%= javascript_tag do %>
+    react_component('PipelineSampleReads', {
+      csrf: '<%=form_authenticity_token %>',
+      sampleInfo: JSON.parse('<%= raw escape_json(@sample) %>'),
+      pipelineOutput: JSON.parse('<%= raw escape_json(@pipeline_output) %>'),
+      projectInfo: JSON.parse('<%= raw escape_json(@project_info) %>'),
+      pipelineRun: JSON.parse('<%= raw escape_json(@pipeline_run) %>'),
+      jobStatistics: JSON.parse('<%= raw escape_json(@job_stats) %>'),
+      project_sample_ids_names: JSON.parse('<%= raw escape_json(@project_sample_ids_names) %>'),
+      host_genome: JSON.parse('<%= raw escape_json(@host_genome) %>'),
+      summary_stats: JSON.parse('<%= raw escape_json(@summary_stats) %>'),
+      reportPresent: '<%=@report_present %>',
+      reportTime: '<%=@report_ts%>',
+      allCategories: JSON.parse('<%= raw escape_json(@all_categories)%>'),
+      reportDetails: JSON.parse('<%= raw escape_json(@report_details)%>'),
+      reportPageParams: JSON.parse('<%= raw escape_json(@report_page_params) %>'),
+      sample_status: '<%= @sample_status %>',
+      rerun_path: '<%= kickoff_pipeline_sample_path %>',
+      all_backgrounds: JSON.parse('<%= raw escape_json(@background_models) %>')
+    }, 'PipelineSampleReads_page');
+  <% end %>
+</div>

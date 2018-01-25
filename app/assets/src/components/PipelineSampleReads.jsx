@@ -1,3 +1,12 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
+import moment from 'moment';
+import $ from 'jquery';
+import axios from 'axios';
+import numberWithCommas from '../helpers/strings';
+import SubHeader from './SubHeader';
+import PipelineSampleReport from './PipelineSampleReport';
+
 class PipelineSampleReads extends React.Component {
   constructor(props) {
     super(props);
@@ -32,6 +41,7 @@ class PipelineSampleReads extends React.Component {
                               sample_template: this.NUCLEOTIDE_TYPES };
     this.DROPDOWN_METADATA_FIELDS = Object.keys(this.DROPDOWN_OPTIONS);
     this.handleDropdownChange = this.handleDropdownChange.bind(this);
+    this.listenNoteChanges = this.listenNoteChanges.bind(this);
 
   }
 
@@ -40,7 +50,7 @@ class PipelineSampleReads extends React.Component {
       belowOrigin: true
     });
   }
-  
+
   render_metadata_dropdown(label, field) {
     let dropdown_options = this.DROPDOWN_OPTIONS[field];
     let display_value = this.sampleInfo[field] ? this.sampleInfo[field] : '-';
@@ -164,7 +174,7 @@ class PipelineSampleReads extends React.Component {
        <i class="fa fa-chevron-down right"/>`
       );
       axios.post('/samples/' + this.sampleInfo.id + '/save_metadata.json', {
-        field: field, value: value
+        field: field, value: value, authenticity_token: this.csrf
       })
         .then((response) => {
           if (response.data.status === 'success') {
@@ -205,8 +215,7 @@ class PipelineSampleReads extends React.Component {
       const field = e.target.id;
       if (newText !== currentText) {
         axios.post('/samples/' + this.sampleInfo.id + '/save_metadata.json', {
-          field: field,
-          value: newText
+          field: field, value: newText, authenticity_token: this.csrf
         })
         .then((response) => {
           if (response.data.status === 'success') {
@@ -362,7 +371,7 @@ class PipelineSampleReads extends React.Component {
         </div>
       );
     }
-
+    let sample_dropdown = '';
     if (this.sample_map && Object.keys(this.sample_map).length > 1) {
       sample_dropdown = (
         <div className='dropdown-button sample-select-dropdown' data-activates='sample-list'>
@@ -382,7 +391,7 @@ class PipelineSampleReads extends React.Component {
         </div>
       )
     } else {
-      sample_dropdown = <span>{ this.sampleInfo.name }</span>
+    sample_dropdown = <span>{ this.sampleInfo.name }</span>
     }
 
 
@@ -517,3 +526,4 @@ class PipelineSampleReads extends React.Component {
     )
   }
 }
+export default PipelineSampleReads;

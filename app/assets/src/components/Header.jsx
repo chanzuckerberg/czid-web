@@ -1,3 +1,7 @@
+import React from 'react';
+import $ from 'jquery';
+import axios from 'axios';
+
 class Header extends React.Component  {
   constructor(props, context) {
     super(props, context);
@@ -5,6 +9,7 @@ class Header extends React.Component  {
     this.userDetails = this.props.userDetails || null;
     this.location = window.location.pathname;
     this.sendMail = this.sendMail.bind(this);
+    this.signOut = this.signOut.bind(this);
   }
 
 	componentDidMount() {
@@ -17,9 +22,19 @@ class Header extends React.Component  {
       stopPropagation: false
     });
   }
-  
+
   gotoPage(path) {
     location.href = `${path}`
+  }
+
+  signOut() {
+    axios(`${this.props.signoutEndpoint}.json`,
+          { method: "DELETE",  withCredentials: true }
+    ).then(
+      (res) => {
+        this.gotoPage(this.props.signInEndpoint);
+      }
+    )
   }
 
   sendMail() {
@@ -43,7 +58,7 @@ class Header extends React.Component  {
            { this.userDetails && this.userDetails.admin ? <li onClick={ this.gotoPage.bind(this, '/users/new') }><a href="#!">Create user</a></li> : null }
             <li onClick={ this.sendMail }><a href="#!">Report Feedback</a></li>
             <li className="divider"></li>
-            <li><a rel="nofollow" data-method="delete" href={this.props.signoutEndpoint}>Logout</a></li>
+            <li onClick={this.signOut}><a href="#">Logout</a></li>
           </ul>
 
           <div>
@@ -61,7 +76,7 @@ class Header extends React.Component  {
               <div className={ this.userSignedIn ? "right hide-on-med-and-down header-right-nav" : "right hide-on-med-and-down header-right-nav menu" }>
                 { this.userSignedIn ? <div className='profile-header-dropdown'><a className="dropdown-button profile-dropdown" data-activates="dropdown1">
                     { this.userDetails.email } <i className="fa fa-angle-down"></i>
-                    </a></div>:  (this.location === '/users/sign_in' ? null : <div className="login"><span onClick={ this.gotoPage.bind(this, '/users/sign_in') }>Login</span></div>) 
+                    </a></div>:  (this.location === '/users/sign_in' ? null : <div className="login"><span onClick={ this.gotoPage.bind(this, '/users/sign_in') }>Login</span></div>)
                  }
               </div>
             </div>
@@ -72,3 +87,5 @@ class Header extends React.Component  {
     )
   }
 }
+
+export default Header;

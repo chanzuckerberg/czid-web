@@ -3,7 +3,7 @@ class ProjectsController < ApplicationController
   include ReportHelper
   before_action :login_required
 
-  before_action :set_project, only: [:show, :edit, :update, :destroy, :add_favorite, :remove_favorite, :project_reports_csv]
+  before_action :set_project, only: [:show, :edit, :update, :destroy, :add_favorite, :remove_favorite, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv]
   clear_respond_to
   respond_to :json
   # GET /projects
@@ -31,9 +31,31 @@ class ProjectsController < ApplicationController
     send_data project_csv, filename: project_name + '_sample-table.csv'
   end
 
-  def project_reports_csv
-    output_file = bulk_report_csvs_from_params(@project, params)
-    return unless output_file
+  def make_project_reports_csv
+    user_id = current_user.id
+    `aws s3 rm #{@project.report_tar_s3(user_id)}`
+    params["user_id"] = user_id
+    Resque.enqueue(GenerateProjectReportsCsv, params)
+    render json: { status_display: project_reports_progress_message }
+  end
+
+  def project_reports_progress_message
+    "In progress (project #{@project.name})"
+  end
+
+  def project_reports_csv_status
+    final_complete = `aws s3 ls #{@project.report_tar_s3(current_user.id)} | wc -l`.to_i == 1
+    if final_complete
+      render json: { status_display: "complete" }
+      return
+    end
+    render json: { status_display: project_reports_progress_message }
+  end
+
+  def send_project_reports_csv
+    user_id = current_user.id
+    output_file = @project.report_tar(user_id)
+    `aws s3 cp #{@project.report_tar_s3(user_id)} #{output_file}`
     send_file output_file
   end
 
