@@ -41,6 +41,7 @@ class PipelineSampleReads extends React.Component {
                               sample_template: this.NUCLEOTIDE_TYPES };
     this.DROPDOWN_METADATA_FIELDS = Object.keys(this.DROPDOWN_OPTIONS);
     this.handleDropdownChange = this.handleDropdownChange.bind(this);
+    this.listenNoteChanges = this.listenNoteChanges.bind(this);
 
   }
 
@@ -173,7 +174,7 @@ class PipelineSampleReads extends React.Component {
        <i class="fa fa-chevron-down right"/>`
       );
       axios.post('/samples/' + this.sampleInfo.id + '/save_metadata.json', {
-        field: field, value: value
+        field: field, value: value, authenticity_token: this.csrf
       })
         .then((response) => {
           if (response.data.status === 'success') {
@@ -214,8 +215,7 @@ class PipelineSampleReads extends React.Component {
       const field = e.target.id;
       if (newText !== currentText) {
         axios.post('/samples/' + this.sampleInfo.id + '/save_metadata.json', {
-          field: field,
-          value: newText
+          field: field, value: newText, authenticity_token: this.csrf
         })
         .then((response) => {
           if (response.data.status === 'success') {

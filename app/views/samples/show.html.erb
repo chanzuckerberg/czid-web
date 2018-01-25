@@ -1,6 +1,7 @@
 <div id="PipelineSampleReads_page">
   <%= javascript_tag do %>
     react_component('PipelineSampleReads', {
+      csrf: '<%=form_authenticity_token %>',
       sampleInfo: JSON.parse('<%= raw escape_json(@sample) %>'),
       pipelineOutput: JSON.parse('<%= raw escape_json(@pipeline_output) %>'),
       projectInfo: JSON.parse('<%= raw escape_json(@project_info) %>'),
