@@ -33,9 +33,10 @@ chdir APP_ROOT do
   system!('docker -v || brew cask install docker')
   puts "\n== Preparing database =="
   system! 'docker-compose build'
+  system! 'yarn install && webpack'
   system! 'docker-compose up -d db'
   sleep(10)
   system! 'docker-compose run web rake db:drop db:create db:migrate db:seed'
   system! 'docker-compose run -e RAILS_ENV=test web rake db:drop db:create'
-  system! 'docker-compose up -d'
+  system! 'docker-compose up -d db redis web resque resque_schedule'
 end
