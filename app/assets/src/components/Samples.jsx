@@ -92,6 +92,7 @@ class Samples extends React.Component {
 
     $(document).ready(function() {
       $('select').material_select();
+      $('.modal').modal();
     });
   }
 
@@ -681,17 +682,23 @@ class Samples extends React.Component {
       </div>
     );
 
-   const addUser = (
-     <form>
-       <span className="input-field">
-         <input ref="add_user" id="email" type="email" class="validate"/>
-         <label data-error="Please enter a valid email address" data-success="added">Email</label>
-       </span>
-       <span>
-         <a class="waves-effect waves-light btn" onClick={this.handleAddUser}>Add to project</a>
-       </span>
-     </form>
-   );
+    let addUserTrigger = (
+      <a class="waves-effect waves-light btn modal-trigger" href="#modal1">Share project</a>
+    );
+
+    let addUser = (
+      <div id="modal1" className="modal">
+        <div className="modal-content">
+          <form>
+            <div class="input-field">
+              <input id="email" type="email" className="validate col s11"/>
+              <label data-success="Shared successfully" data-error="Please enter a valid email address" className="active">Email</label>
+              <a className="waves-effect waves-light btn col s1" onClick={this.handleAddUser}>Add</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
 
    const filterTissueDropDown = (
         <div className='dropdown-status-filtering'>
@@ -795,7 +802,9 @@ class Samples extends React.Component {
     return (
       <div className="row content-wrapper">
         <div className="project-info col s12">
-          { projInfo } { this.state.project ? addUser : null }
+          { projInfo }
+          { this.state.project ? addUserTrigger : null }
+          { addUser }
         </div>
 
         <div className="sample-container col s12">
