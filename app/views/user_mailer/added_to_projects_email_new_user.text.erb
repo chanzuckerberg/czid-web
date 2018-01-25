@@ -1,0 +1,4 @@
+<%= @sharing_user.email %> has shared the <%= "project".pluralize(@projects.count) + " " + @projects.map(&:name).join(", ") %> with you on IDseq.
+To login, go to www.idseq.net and use the following credentials:
+  Email: <%= @new_user.email %>
+  Password: <%= @new_user.password %>
