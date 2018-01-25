@@ -20,7 +20,6 @@ Rails.application.routes.draw do
     get :unidentified_fasta, on: :member
     get :results_folder, on: :member
     get :fastqs_folder, on: :member
-    get :all_emails, on: :collection
     post :bulk_upload, on: :collection
     post :save_metadata, on: :member
   end
@@ -37,6 +36,7 @@ Rails.application.routes.draw do
   end
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
+  get 'users/all_emails', to: 'users#all_emails'
 
   mount Resque::Server.new, at: '/resque'
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
