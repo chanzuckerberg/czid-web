@@ -183,7 +183,7 @@ class Samples extends React.Component {
 
   handleAddUser(e) {
     axios.get(`/users/all_emails`).then((res) => {
-      let all_user_emails = res.data.all_user_emails;
+      let all_user_emails = res.data.emails;
       let email_to_add = this.refs.add_user.value;
       let project_id = this.state.selectedProjectId;
       if (all_user_emails.includes(email_to_add)) {
