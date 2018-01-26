@@ -36,6 +36,7 @@ class Samples extends React.Component {
     this.fetchProjectUsers = this.fetchProjectUsers.bind(this);
     this.updateProjectUserState = this.updateProjectUserState.bind(this);
     this.updateUserDisplay = this.updateUserDisplay.bind(this);
+    this.resetForm = this.resetForm.bind(this);
     this.state = {
       project: null,
       project_users: [],
@@ -188,6 +189,10 @@ class Samples extends React.Component {
 
   updateProjectUserState(email_array) {
     this.setState({project_users: email_array})
+  }
+
+  resetForm() {
+    $("form")[0].reset();
   }
 
   fetchProjectUsers(id) {
@@ -694,7 +699,7 @@ class Samples extends React.Component {
     );
 
     let addUserTrigger = (
-      <a className="waves-effect waves-light btn modal-trigger" href="#modal1">Share project</a>
+      <a className="waves-effect waves-light btn modal-trigger" href="#modal1" onClick={this.resetForm}>Share project</a>
     );
 
     let addUser = (
