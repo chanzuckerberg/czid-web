@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom';
 import moment from 'moment';
 import $ from 'jquery';
 import Tipsy from 'react-tipsy';
+import Materialize from 'materialize-css';
 import SortHelper from './SortHelper';
 import numberWithCommas from '../helpers/strings';
 import ProjectSelection from './ProjectSelection';
@@ -117,10 +118,10 @@ class Samples extends React.Component {
 
   displayReportProgress(res) {
       $('.download-progress')
-      .html(`${res.data.status_display}`)
+      .html(`<i class="fa fa-circle-o-notch fa-spin fa-fw"></i> ${res.data.status_display}`)
       .css('display', 'block')
       setTimeout(() => {
-        this.checkReportDownload()
+        this.checkReportDownload();
       }, 2000)
   }
 
@@ -129,7 +130,7 @@ class Samples extends React.Component {
       this.setState({
         project_id_download_in_progress: this.state.selectedProjectId
       });
-      this.displayReportProgress(res) 
+      this.displayReportProgress(res);
     });
   }
 
@@ -142,9 +143,17 @@ class Samples extends React.Component {
           project_id_download_in_progress: null
         });
       } else {
-        this.displayReportProgress(res)
+        this.displayReportProgress(res);
       }
-    })
+    }).catch((e) => {
+      this.setState({
+        project_id_download_in_progress: null
+      }, () => {
+        Materialize.toast(
+          `Failed to download report for '${this.state.project.name}'`, 3000,
+          'rounded');
+      });
+    });
   }
 
   sortSamples() {
@@ -627,8 +636,8 @@ class Samples extends React.Component {
       </div>
     );
     const reports_download_button_contents = this.state.project_id_download_in_progress ?
-                                         <span className='download-progress'/>
-                                         : <a onClick={this.startReportGeneration} className="download-project center">
+      <span className='download-progress'/>
+      : <a onClick={this.startReportGeneration} className="download-project center">
                                              <i className="fa fa-cloud-download"/>
                                              <span>Download reports</span>
                                            </a>
