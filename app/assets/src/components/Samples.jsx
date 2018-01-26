@@ -33,8 +33,11 @@ class Samples extends React.Component {
     this.pageSize = props.pageSize || 30;
     this.tissue_types = PipelineSampleReads.fetchTissueTypes();
     this.handleAddUser = this.handleAddUser.bind(this);
+    this.fetchProjectUsers = this.fetchProjectUsers.bind(this);
+    this.updateProjectUserState = this.updateProjectUserState.bind(this);
     this.state = {
       project: null,
+      project_users: ['None'],
       totalNumber: null,
       projectId: null,
       selectedProjectId: this.fetchParams('project_id') || null,
@@ -180,6 +183,21 @@ class Samples extends React.Component {
   fetchParams(param) {
     let urlParams = new URLSearchParams(window.location.search);
     return urlParams.get(param)
+  }
+
+  updateProjectUserState(email_array) {
+    let clean_email_array = (email_array.length > 0) ? email_array : ["None"]
+    this.setState({project_users: clean_email_array})
+  }
+
+  fetchProjectUsers(id) {
+    if (!id) {
+      this.updateProjectUserState([])
+    } else {
+      axios.get(`/projects/${id}/all_emails`).then((res) => {
+        this.updateProjectUserState(res.data.emails)
+      });
+    }
   }
 
   handleAddUser(e) {
@@ -674,6 +692,12 @@ class Samples extends React.Component {
               <a className="waves-effect waves-light btn col s1" onClick={this.handleAddUser}>Add</a>
             </div>
           </form>
+          <div className="col s12">
+            Current users:
+            <ul>
+              { this.state.project_users.map((email) => { return <li>{email}</li> }) }
+            </ul>
+          </div>
         </div>
       </div>
     );
@@ -915,10 +939,11 @@ class Samples extends React.Component {
     this.setState({
       selectedProjectId: id,
       pagesLoaded: 0,
-      pageEnd: false
+      pageEnd: false,
     }, () => {
       this.setUrlLocation();
       this.fetchProjectDetails(id);
+      this.fetchProjectUsers(id)
     });
   }
 
