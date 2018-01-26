@@ -38,7 +38,7 @@ class Samples extends React.Component {
     this.updateProjectUserState = this.updateProjectUserState.bind(this);
     this.state = {
       project: null,
-      project_users: ['None'],
+      project_users: [],
       totalNumber: null,
       projectId: null,
       selectedProjectId: this.fetchParams('project_id') || null,
@@ -195,8 +195,7 @@ class Samples extends React.Component {
   }
 
   updateProjectUserState(email_array) {
-    let clean_email_array = (email_array.length > 0) ? email_array : ["None"]
-    this.setState({project_users: clean_email_array})
+    this.setState({project_users: email_array})
   }
 
   fetchProjectUsers(id) {
@@ -224,7 +223,9 @@ class Samples extends React.Component {
                              project_ids: [project_id] },
                      authenticity_token: this.csrf })
       }
-      this.fetchProjectUsers(project_id);
+      let new_project_users = this.state.project_users
+      new_project_users.push(email_to_add)
+      this.setState({project_users: new_project_users});
     });
   }
 
@@ -711,7 +712,10 @@ class Samples extends React.Component {
           <div className="col s12">
             Current users:
             <ul>
-              { this.state.project_users.map((email) => { return <li key={email}>{email}</li> }) }
+              { this.state.project_users.length > 0 ?
+                  this.state.project_users.map((email) => { return <li key={email}>{email}</li> })
+                  : <li key="None">None</li>
+              }
             </ul>
           </div>
         </div>
