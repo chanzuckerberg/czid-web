@@ -215,6 +215,7 @@ class Samples extends React.Component {
                              project_ids: [project_id] },
                      authenticity_token: this.csrf })
       }
+      this.fetchProjectUsers(project_id);
     });
   }
 
@@ -687,7 +688,7 @@ class Samples extends React.Component {
         <div className="modal-content">
           <form>
             <div className="input-field">
-              <input id="email" type="email" className="validate col s11"/>
+              <input ref="add_user" id="email" type="email" className="validate col s11"/>
               <label data-success="Shared successfully" data-error="Please enter a valid email address" className="active">Email</label>
               <a className="waves-effect waves-light btn col s1" onClick={this.handleAddUser}>Add</a>
             </div>
@@ -695,7 +696,7 @@ class Samples extends React.Component {
           <div className="col s12">
             Current users:
             <ul>
-              { this.state.project_users.map((email) => { return <li>{email}</li> }) }
+              { this.state.project_users.map((email) => { return <li key={email}>{email}</li> }) }
             </ul>
           </div>
         </div>
