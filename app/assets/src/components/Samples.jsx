@@ -228,7 +228,7 @@ class Samples extends React.Component {
       let email_to_add = this.refs.add_user.value;
       let project_id = this.state.selectedProjectId;
       if (all_user_emails.includes(email_to_add)) {
-        axios.post(`/projects/${project_id}/add_user_to_project`, 
+        axios.post(`/projects/${project_id}/add_user_to_project`,
                    { user_emails_to_add: [email_to_add],
                      authenticity_token: this.csrf })
         .then((res) => {
@@ -588,7 +588,7 @@ class Samples extends React.Component {
       axios.get(`projects/${projId}.json`).then((res) => {
         this.setState({
           pagesLoaded: 0,
-          project: res.data,
+          project: res.data
         });
         this.fetchProjectUsers(projId);
         this.fetchResults();
@@ -741,8 +741,22 @@ class Samples extends React.Component {
     );
 
     const projInfo = (
-      <div className="wrapper">
-        <div className={(!this.state.project) ? "proj-title all-proj" : "proj-title"}>
+      <div>
+        <div className='right'>
+          <ul className='project-menu'>
+            <li>
+              <i class="tiny material-icons">lock</i> Private Project
+            </li>
+            <li>
+              <i class="tiny material-icons">people</i> 5 Members
+            </li>
+            <li>
+              <i class="tiny material-icons">add</i> Add user
+            </li>
+          </ul>
+        </div>
+        <div className="wrapper">
+          <div className={(!this.state.project) ? "proj-title all-proj" : "proj-title"}>
           { (!this.state.project) ? <div className="col s12">All projects</div>
               : <div>
                   <span className="col s10">{ this.state.project.name }</span>
@@ -750,12 +764,13 @@ class Samples extends React.Component {
                 </div>
           }
         </div>
-        <p className="col s12">
+          <p className="col s12">
           { this.state.allSamples.length === 0 ? 'No sample found'
             : ( this.state.allSamples.length === 1 ? '1 sample found'
               : `${this.state.allSamples.length} out of ${this.state.totalNumber} samples found`)
           }
         </p>
+        </div>
       </div>
     );
 
@@ -977,7 +992,7 @@ class Samples extends React.Component {
     this.setState({
       selectedProjectId: id,
       pagesLoaded: 0,
-      pageEnd: false,
+      pageEnd: false
     }, () => {
       this.setUrlLocation();
       this.fetchProjectDetails(id);
