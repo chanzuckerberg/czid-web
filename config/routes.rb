@@ -30,6 +30,7 @@ Rails.application.routes.draw do
     get :make_project_reports_csv, on: :member
     get :project_reports_csv_status, on: :member
     get :send_project_reports_csv, on: :member
+    get :all_emails, on: :member
     put :add_favorite, on: :member
     put :remove_favorite, on: :member
     post :add_user_to_project, on: :member

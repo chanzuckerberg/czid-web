@@ -3,7 +3,7 @@ class ProjectsController < ApplicationController
   include ReportHelper
   before_action :login_required
 
-  before_action :set_project, only: [:show, :edit, :update, :destroy, :add_favorite, :remove_favorite, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv, :add_user_to_project]
+  before_action :set_project, only: [:show, :edit, :update, :destroy, :add_favorite, :remove_favorite, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv, :add_user_to_project, :all_emails]
   clear_respond_to
   respond_to :json
   # GET /projects
@@ -148,6 +148,10 @@ class ProjectsController < ApplicationController
   def add_user_to_project
     user_ids_to_add = User.where(email: params[:user_emails_to_add]).map(&:id)
     @project.user_ids |= user_ids_to_add
+  end
+
+  def all_emails
+    render json: { emails: @project.users.map(&:email) }
   end
 
   private
