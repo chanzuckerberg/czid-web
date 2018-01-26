@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom';
 import moment from 'moment';
 import $ from 'jquery';
 import Tipsy from 'react-tipsy';
+import Materialize from 'materialize-css';
 import SortHelper from './SortHelper';
 import numberWithCommas from '../helpers/strings';
 import ProjectSelection from './ProjectSelection';
@@ -120,7 +121,7 @@ class Samples extends React.Component {
       .html(`<i class="fa fa-circle-o-notch fa-spin fa-fw"></i> ${res.data.status_display}`)
       .css('display', 'block')
       setTimeout(() => {
-        this.checkReportDownload()
+        this.checkReportDownload();
       }, 2000)
   }
 
@@ -129,7 +130,7 @@ class Samples extends React.Component {
       this.setState({
         project_id_download_in_progress: this.state.selectedProjectId
       });
-      this.displayReportProgress(res)
+      this.displayReportProgress(res);
     });
   }
 
@@ -142,11 +143,15 @@ class Samples extends React.Component {
           project_id_download_in_progress: null
         });
       } else {
-        this.displayReportProgress(res)
-      }a
+        this.displayReportProgress(res);
+      }
     }).catch((e) => {
       this.setState({
         project_id_download_in_progress: null
+      }, () => {
+        Materialize.toast(
+          `Failed to download report for '${this.state.project.name}'`, 3000,
+          'rounded');
       });
     });
   }
