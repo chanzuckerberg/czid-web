@@ -562,8 +562,9 @@ class Samples extends React.Component {
       axios.get(`projects/${projId}.json`).then((res) => {
         this.setState({
           pagesLoaded: 0,
-          project: res.data
+          project: res.data,
         });
+        this.fetchProjectUsers(projId);
         this.fetchResults();
       }).catch((err) => {
         this.setState({ project: null })
