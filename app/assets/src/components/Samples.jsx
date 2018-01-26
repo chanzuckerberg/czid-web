@@ -657,9 +657,24 @@ class Samples extends React.Component {
     );
 
     const projInfo = (
-      <div className="wrapper">
-        <div className={(!this.state.project) ? "proj-title all-proj" : "proj-title"}>{ (!this.state.project) ? <div>All projects</div> : this.state.project.name }</div>
-        <p>{ this.state.allSamples.length === 0 ? 'No sample found' : ( this.state.allSamples.length === 1 ? '1 sample found' : `${this.state.allSamples.length} out of ${this.state.totalNumber} samples found`) }</p>
+      <div>
+        <div className='right'>
+          <ul className='project-menu'>
+            <li>
+              <i class="tiny material-icons">lock</i> Private Project
+            </li>
+            <li>
+              <i class="tiny material-icons">people</i> 5 Members
+            </li>
+            <li>
+              <i class="tiny material-icons">add</i> Add user
+            </li>
+          </ul>
+        </div>
+        <div className="wrapper">
+          <div className={(!this.state.project) ? "proj-title all-proj" : "proj-title"}>{ (!this.state.project) ? <div>All projects</div> : this.state.project.name }</div>
+          <p>{ this.state.allSamples.length === 0 ? 'No sample found' : ( this.state.allSamples.length === 1 ? '1 sample found' : `${this.state.allSamples.length} out of ${this.state.totalNumber} samples found`) }</p>
+        </div>
       </div>
     );
 
