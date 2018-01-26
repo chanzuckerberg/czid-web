@@ -36,6 +36,7 @@ class Samples extends React.Component {
     this.handleAddUser = this.handleAddUser.bind(this);
     this.fetchProjectUsers = this.fetchProjectUsers.bind(this);
     this.updateProjectUserState = this.updateProjectUserState.bind(this);
+    this.updateUserDisplay = this.updateUserDisplay.bind(this);
     this.state = {
       project: null,
       project_users: [],
@@ -208,6 +209,14 @@ class Samples extends React.Component {
     }
   }
 
+  updateUserDisplay(email_to_add) {
+    let new_project_users = this.state.project_users
+    if (!new_project_users.includes(email_to_add)) {
+      new_project_users.push(email_to_add)
+      this.setState({project_users: new_project_users});
+    }
+  }
+
   handleAddUser(e) {
     axios.get(`/users/all_emails`).then((res) => {
       let all_user_emails = res.data.emails;
@@ -217,15 +226,18 @@ class Samples extends React.Component {
         axios.post(`/projects/${project_id}/add_user_to_project`, 
                    { user_emails_to_add: [email_to_add],
                      authenticity_token: this.csrf })
+        .then((res) => {
+          this.updateUserDisplay(email_to_add)
+        })
       } else {
         axios.post('/users.json',
                    { user: { email: email_to_add,
                              project_ids: [project_id] },
                      authenticity_token: this.csrf })
+        .then((res) => {
+          this.updateUserDisplay(email_to_add)
+        })
       }
-      let new_project_users = this.state.project_users
-      new_project_users.push(email_to_add)
-      this.setState({project_users: new_project_users});
     });
   }
 
