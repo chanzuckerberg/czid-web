@@ -660,22 +660,15 @@ class Samples extends React.Component {
       </div>
     );
 
-    const projInfo = (
-      <div className="wrapper">
-        <div className={(!this.state.project) ? "proj-title all-proj" : "proj-title"}>{ (!this.state.project) ? <div>All projects</div> : this.state.project.name }</div>
-        <p>{ this.state.allSamples.length === 0 ? 'No sample found' : ( this.state.allSamples.length === 1 ? '1 sample found' : `${this.state.allSamples.length} out of ${this.state.totalNumber} samples found`) }</p>
-      </div>
-    );
-
     let addUserTrigger = (
-      <a class="waves-effect waves-light btn modal-trigger" href="#modal1">Share project</a>
+      <a className="waves-effect waves-light btn modal-trigger" href="#modal1">Share project</a>
     );
 
     let addUser = (
       <div id="modal1" className="modal">
         <div className="modal-content">
           <form>
-            <div class="input-field">
+            <div className="input-field">
               <input id="email" type="email" className="validate col s11"/>
               <label data-success="Shared successfully" data-error="Please enter a valid email address" className="active">Email</label>
               <a className="waves-effect waves-light btn col s1" onClick={this.handleAddUser}>Add</a>
@@ -685,7 +678,26 @@ class Samples extends React.Component {
       </div>
     );
 
-   const filterTissueDropDown = (
+    const projInfo = (
+      <div className="wrapper">
+        <div className={(!this.state.project) ? "proj-title all-proj" : "proj-title"}>
+          { (!this.state.project) ? <div className="col s12">All projects</div>
+              : <div>
+                  <span className="col s10">{ this.state.project.name }</span>
+                  <span className="col s2">{ addUserTrigger }</span>
+                </div>
+          }
+        </div>
+        <p className="col s12">
+          { this.state.allSamples.length === 0 ? 'No sample found'
+            : ( this.state.allSamples.length === 1 ? '1 sample found'
+              : `${this.state.allSamples.length} out of ${this.state.totalNumber} samples found`)
+          }
+        </p>
+      </div>
+    );
+
+    const filterTissueDropDown = (
         <div className='dropdown-status-filtering'>
         <li>
           <a className="title">
@@ -787,9 +799,7 @@ class Samples extends React.Component {
     return (
       <div className="row content-wrapper">
         <div className="project-info col s12">
-          { projInfo }
-          { this.state.project ? addUserTrigger : null }
-          { addUser }
+          { projInfo } { addUser }
         </div>
 
         <div className="sample-container col s12">
