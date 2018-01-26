@@ -117,7 +117,7 @@ class Samples extends React.Component {
 
   displayReportProgress(res) {
       $('.download-progress')
-      .html(`${res.data.status_display}`)
+      .html(`<i class="fa fa-circle-o-notch fa-spin fa-fw"></i> ${res.data.status_display}`)
       .css('display', 'block')
       setTimeout(() => {
         this.checkReportDownload()
@@ -129,7 +129,7 @@ class Samples extends React.Component {
       this.setState({
         project_id_download_in_progress: this.state.selectedProjectId
       });
-      this.displayReportProgress(res) 
+      this.displayReportProgress(res)
     });
   }
 
@@ -143,8 +143,12 @@ class Samples extends React.Component {
         });
       } else {
         this.displayReportProgress(res)
-      }
-    })
+      }a
+    }).catch((e) => {
+      this.setState({
+        project_id_download_in_progress: null
+      });
+    });
   }
 
   sortSamples() {
@@ -627,8 +631,8 @@ class Samples extends React.Component {
       </div>
     );
     const reports_download_button_contents = this.state.project_id_download_in_progress ?
-                                         <span className='download-progress'/>
-                                         : <a onClick={this.startReportGeneration} className="download-project center">
+      <span className='download-progress'/>
+      : <a onClick={this.startReportGeneration} className="download-project center">
                                              <i className="fa fa-cloud-download"/>
                                              <span>Download reports</span>
                                            </a>
