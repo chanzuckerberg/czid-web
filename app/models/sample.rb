@@ -54,11 +54,7 @@ class Sample < ApplicationRecord
 
   def input_files_checks
     # validate that we have the correct number of input files
-    if host_genome && host_genome.name == HostGenome::NO_HOST_NAME
-      errors.add(:input_files, "no input files") unless input_files.size.between?(1, 2)
-    else
-      errors.add(:input_files, "file_size != 2 for sample and host subtraction not skipped") unless input_files.size == 2
-    end
+    errors.add(:input_files, "no input files") unless input_files.size.between?(1, 2)
     # validate that both input files have the same source_type and file_type
     if input_files.length == 2
       errors.add(:input_files, "file source type different") unless input_files[0].source_type == input_files[1].source_type
