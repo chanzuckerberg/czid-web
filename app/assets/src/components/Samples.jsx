@@ -656,21 +656,45 @@ class Samples extends React.Component {
       </div>
     );
 
+    const project_menu = (
+      <div className='right'>
+        <ul className='project-menu'>
+          <li>
+            { this.state.project ? (
+              this.state.project.public_access ?
+               <span>
+                 <i className="tiny material-icons">lock_open</i> Public Project
+               </span>:
+               <span>
+                 <i className="tiny material-icons">lock</i> Private Project
+               </span>
+            ) : null }
+          </li>
+          <li>
+              { this.state.project ? (
+                this.state.project.total_members ?
+                <span>
+                  <i className="tiny material-icons">people</i>
+                  `${this.state.project.total_members} Members`
+                </span>
+                : <span>
+                    No member
+                  </span>
+              ) : null }
+
+          </li>
+          <li>
+            <i className="tiny material-icons">add</i> Add user
+          </li>
+        </ul>
+      </div>
+    );
+
     const projInfo = (
       <div>
-        <div className='right'>
-          <ul className='project-menu'>
-            <li>
-              <i class="tiny material-icons">lock</i> Private Project
-            </li>
-            <li>
-              <i class="tiny material-icons">people</i> 5 Members
-            </li>
-            <li>
-              <i class="tiny material-icons">add</i> Add user
-            </li>
-          </ul>
-        </div>
+        {
+          this.state.selectedProjectId ? project_menu : null
+        }
         <div className="wrapper">
           <div className={(!this.state.project) ? "proj-title all-proj" : "proj-title"}>{ (!this.state.project) ? <div>All projects</div> : this.state.project.name }</div>
           <p>{ this.state.allSamples.length === 0 ? 'No sample found' : ( this.state.allSamples.length === 1 ? '1 sample found' : `${this.state.allSamples.length} out of ${this.state.totalNumber} samples found`) }</p>
