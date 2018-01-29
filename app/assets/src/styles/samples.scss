@@ -273,6 +273,7 @@ $break-large: 1070px;
 
 .wrapper {
   position: relative;
+  width: fit-content;
   .proj-title {
     margin-top: 18px;
     font-size: 18px;
@@ -432,6 +433,22 @@ $break-large: 1070px;
   }
 }
 
+.project-menu {
+  li {
+    cursor: pointer;
+    display: inline-block;
+    margin-left: 8px;
+    color: #a1a4a4;
+    .material-icons {
+      position: relative;
+      top: 2px;
+      font-size: 16px;
+    }
+    &:hover {
+      color: #656868;
+    }
+  }
+}
 
 .sample-container {
   .title-wrapper {
@@ -604,6 +621,7 @@ $break-large: 1070px;
   }
   .wrapper {
     margin-bottom: 0;
+
   }
   ul li {
     .filter, .filter-item {

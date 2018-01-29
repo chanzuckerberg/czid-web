@@ -228,7 +228,7 @@ class Samples extends React.Component {
       let email_to_add = this.refs.add_user.value;
       let project_id = this.state.selectedProjectId;
       if (all_user_emails.includes(email_to_add)) {
-        axios.post(`/projects/${project_id}/add_user_to_project`, 
+        axios.post(`/projects/${project_id}/add_user_to_project`,
                    { user_emails_to_add: [email_to_add],
                      authenticity_token: this.csrf })
         .then((res) => {
@@ -588,7 +588,7 @@ class Samples extends React.Component {
       axios.get(`projects/${projId}.json`).then((res) => {
         this.setState({
           pagesLoaded: 0,
-          project: res.data,
+          project: res.data
         });
         this.fetchProjectUsers(projId);
         this.fetchResults();
@@ -713,10 +713,6 @@ class Samples extends React.Component {
       </div>
     );
 
-    let addUserTrigger = (
-      <a className="waves-effect waves-light btn modal-trigger" href="#modal1" onClick={this.resetForm}>Share project</a>
-    );
-
     let addUser = (
       <div id="modal1" className="modal">
         <div className="modal-content">
@@ -740,22 +736,63 @@ class Samples extends React.Component {
       </div>
     );
 
+    const project_menu = (
+      <div className='right'>
+        <ul className='project-menu'>
+          <li>
+            { this.state.project ? (
+              this.state.project.public_access ?
+               <span>
+                 <i className="tiny material-icons">lock_open</i> Public Project
+               </span>:
+               <span>
+                 <i className="tiny material-icons">lock</i> Private Project
+               </span>
+            ) : null }
+          </li>
+          <li>
+              { this.state.project ? (
+                this.state.project.total_members ?
+                <span>
+                  <i className="tiny material-icons">people</i>
+                    {this.state.project.total_members}
+                    { (this.state.project.total_members > 1) ? 'Members' : 'Member'}
+                </span>
+                : <span>
+                    No member
+                  </span>
+              ) : null }
+
+          </li>
+          <li>
+            <a className='modal-trigger' href="#modal1" onClick={this.resetForm}>
+              <i className="tiny material-icons">add</i> Add user
+            </a>
+          </li>
+        </ul>
+      </div>
+    );
+
     const projInfo = (
-      <div className="wrapper">
-        <div className={(!this.state.project) ? "proj-title all-proj" : "proj-title"}>
+      <div>
+        {
+          this.state.selectedProjectId ? project_menu : null
+        }
+        <div className="wrapper">
+          <div className={(!this.state.project) ? "proj-title all-proj" : "proj-title"}>
           { (!this.state.project) ? <div className="col s12">All projects</div>
               : <div>
                   <span className="col s10">{ this.state.project.name }</span>
-                  <span className="col s2">{ addUserTrigger }</span>
                 </div>
           }
         </div>
-        <p className="col s12">
+          <p className="col s12">
           { this.state.allSamples.length === 0 ? 'No sample found'
             : ( this.state.allSamples.length === 1 ? '1 sample found'
               : `${this.state.allSamples.length} out of ${this.state.totalNumber} samples found`)
           }
         </p>
+        </div>
       </div>
     );
 
@@ -977,7 +1014,7 @@ class Samples extends React.Component {
     this.setState({
       selectedProjectId: id,
       pagesLoaded: 0,
-      pageEnd: false,
+      pageEnd: false
     }, () => {
       this.setUrlLocation();
       this.fetchProjectDetails(id);
