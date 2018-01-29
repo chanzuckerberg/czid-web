@@ -758,8 +758,7 @@ class Samples extends React.Component {
               { this.state.project ? (
                 this.state.project.total_members ?
                 <span>
-                  <i className="tiny material-icons">people</i>
-                  `${this.state.project.total_members} Members`
+                  <i className="tiny material-icons">people</i> {this.state.project.total_members} Member(s)
                 </span>
                 : <span>
                     No member
