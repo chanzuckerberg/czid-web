@@ -16,7 +16,7 @@ class ProjectsController < ApplicationController
   # GET /projects/1.json
   def show
     # all exisiting project are null, we ensure private projects are explicitly set to 0
-    public_access = @project.public_access.nil? ? 1 : @project.public_access
+    public_access = @project.public_access.nil? ? 0 : @project.public_access
     respond_to do |format|
       format.html
       format.json do
