@@ -750,7 +750,7 @@ class SampleUpload extends React.Component {
                     <div className='col no-padding s12'>
                       <div className='field-title'>
                         <div className='read-count-label'>
-                          Read 2
+                          Read 2 (optional)
                         </div>
                         <div className='validation-info'>
                           Accepted formats: fastq, fastq.gz, fasta, fasta.gz
