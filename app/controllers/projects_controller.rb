@@ -15,6 +15,18 @@ class ProjectsController < ApplicationController
   # GET /projects/1
   # GET /projects/1.json
   def show
+    respond_to do |format|
+      format.html
+      format.json { render json: {
+        id: @project.id,
+        name: @project.name,
+        total_members: @project.users.length,
+        public_access: @project.public_access,
+        created_at: @project.created_at
+        }
+      }
+    end
+    #id, name, created_at
   end
 
   def send_project_csv
