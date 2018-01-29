@@ -5,6 +5,7 @@ import 'materialize-css/dist/css/materialize.css';
 import 'react-tipsy/dist/react-tipsy.css';
 import 'font-awesome/scss/font-awesome.scss';
 import './loader.scss';
+
 const context = require.context('./components', true, /\.(js|jsx)$/);
 const foundComponents = {};
 const contextKeys = context.keys();
