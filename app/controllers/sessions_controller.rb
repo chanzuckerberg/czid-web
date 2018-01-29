@@ -1,6 +1,7 @@
 class SessionsController < Devise::SessionsController
   respond_to :json
   prepend_before_action :verify_user, only: [:destroy]
+  skip_before_action :verify_authenticity_token, only: [:destroy]
 
   private
 

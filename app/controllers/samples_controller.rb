@@ -6,7 +6,8 @@ class SamplesController < ApplicationController
   before_action :authenticate_user!, only: [:new, :index, :update, :destroy, :edit, :show, :reupload_source, :kickoff_pipeline, :bulk_new, :bulk_import, :bulk_upload]
   before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder]
   acts_as_token_authentication_handler_for User, only: [:create, :bulk_upload], fallback: :devise
-  protect_from_forgery unless: -> { request.format.json? }
+  before_action :login_required
+
   PAGE_SIZE = 30
 
   # GET /samples
@@ -95,14 +96,7 @@ class SamplesController < ApplicationController
 
   # GET /samples/1/report_csv
   def report_csv
-    params[:is_csv] = 1
-    params[:sort_by] = "highest_nt_aggregatescore"
-    default_background_id = @sample.host_genome && @sample.host_genome.default_background ? @sample.host_genome.default_background.id : nil
-    background_id = params[:background_id] || default_background_id
-    pipeline_run = @sample.pipeline_runs.first
-    pipeline_run_id = pipeline_run ? pipeline_run.id : nil
-    tax_details = taxonomy_details(pipeline_run_id, background_id, params)
-    @report_csv = generate_report_csv(tax_details)
+    @report_csv = report_csv_from_params(@sample, params)
     send_data @report_csv, filename: @sample.name + '_report.csv'
   end
 
@@ -333,7 +327,7 @@ class SamplesController < ApplicationController
                                    :s3_star_index_path, :s3_bowtie2_index_path, :host_genome_id,
                                    :sample_memory, :sample_location, :sample_date, :sample_tissue,
                                    :sample_template, :sample_library, :sample_sequencer,
-                                   :sample_notes, :job_queue, :search,
+                                   :sample_notes, :job_queue, :search, :subsample,
                                    input_files_attributes: [:name, :presigned_url, :source_type, :source])
   end
 

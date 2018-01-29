@@ -190,6 +190,8 @@ module ReportHelper
   def fetch_taxon_counts(pipeline_run_id, background_id)
     pipeline_run = PipelineRun.find(pipeline_run_id)
     total_reads = pipeline_run.total_reads if pipeline_run
+    adjusted_total_reads = total_reads * pipeline_run.subsample_fraction if pipeline_run
+    # Note: subsample_fraction is of type 'float' so adjusted_total_reads is too
     # Note: stdev is never 0
     # Note: connection.select_all is TWICE faster than TaxonCount.select
     # (I/O latency goes from 2 seconds -> 0.8 seconds)
@@ -202,11 +204,11 @@ module ReportHelper
         taxon_counts.name                AS  name,
         taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
         taxon_counts.count               AS  r,
-        (count / #{total_reads}.0
+        (count / #{adjusted_total_reads}
           * 1000000.0)                   AS  rpm,
         IF(
           stdev IS NOT NULL,
-          GREATEST(#{ZSCORE_MIN}, LEAST(#{ZSCORE_MAX}, (((count / #{total_reads}.0 * 1000000.0) - mean) / stdev))),
+          GREATEST(#{ZSCORE_MIN}, LEAST(#{ZSCORE_MAX}, (((count / #{adjusted_total_reads} * 1000000.0) - mean) / stdev))),
           #{ZSCORE_WHEN_ABSENT_FROM_BACKGROUND}
         )
                                          AS  zscore,
@@ -633,5 +635,37 @@ module ReportHelper
         csv << flat_tax_info_by_symbols.values_at(*attributes_as_symbols)
       end
     end
+  end
+
+  def report_csv_from_params(sample, params)
+    params[:is_csv] = 1
+    params[:sort_by] = "highest_nt_aggregatescore"
+    default_background_id = sample.host_genome && sample.host_genome.default_background ? sample.host_genome.default_background.id : nil
+    background_id = params[:background_id] || default_background_id
+    pipeline_run = sample.pipeline_runs.first
+    pipeline_run_id = pipeline_run ? pipeline_run.id : nil
+    return "" if pipeline_run_id.nil? || pipeline_run.total_reads.nil?
+    tax_details = taxonomy_details(pipeline_run_id, background_id, params)
+    generate_report_csv(tax_details)
+  end
+
+  def bulk_report_csvs_from_params(project, params)
+    user_id = params["user_id"]
+    csv_dir = project.csv_dir(user_id)
+    `rm -rf #{csv_dir}; mkdir -p #{csv_dir}`
+    sample_names_used = []
+    ### TO DO: loop only through samples that current_user is allowed to see ###
+    project.samples.each do |sample|
+      csv_data = report_csv_from_params(sample, params)
+      clean_sample_name = sample.name.downcase.gsub(/\W/, "-")
+      used_before = sample_names_used.include? clean_sample_name
+      sample_names_used << clean_sample_name
+      clean_sample_name += "_#{sample.id}" if used_before
+      filename = "#{csv_dir}/#{clean_sample_name}.csv"
+      File.write(filename, csv_data)
+    end
+    `cd #{csv_dir}; tar cvzf #{project.tar_filename} .`
+    `aws s3 cp #{project.report_tar(user_id)} #{project.report_tar_s3(user_id)}`
+    `rm -rf #{csv_dir}`
   end
 end
