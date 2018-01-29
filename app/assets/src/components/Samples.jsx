@@ -713,10 +713,6 @@ class Samples extends React.Component {
       </div>
     );
 
-    let addUserTrigger = (
-      <a className="waves-effect waves-light btn modal-trigger" href="#modal1" onClick={this.resetForm}>Share project</a>
-    );
-
     let addUser = (
       <div id="modal1" className="modal">
         <div className="modal-content">
@@ -767,7 +763,9 @@ class Samples extends React.Component {
 
           </li>
           <li>
-            <i className="tiny material-icons">add</i> Add user
+            <a className='modal-trigger' href="#modal1" onClick={this.resetForm}>
+              <i className="tiny material-icons">add</i> Add user
+            </a>
           </li>
         </ul>
       </div>
@@ -783,7 +781,6 @@ class Samples extends React.Component {
           { (!this.state.project) ? <div className="col s12">All projects</div>
               : <div>
                   <span className="col s10">{ this.state.project.name }</span>
-                  <span className="col s2">{ addUserTrigger }</span>
                 </div>
           }
         </div>
