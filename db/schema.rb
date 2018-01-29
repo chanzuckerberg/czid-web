@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180119200528) do
+ActiveRecord::Schema.define(version: 20180129204945) do
 
   create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "archive_of"
@@ -143,8 +143,8 @@ ActiveRecord::Schema.define(version: 20180119200528) do
     t.bigint "total_reads"
     t.bigint "remaining_reads"
     t.bigint "unmapped_reads"
-    t.integer "subsample"
     t.text "version"
+    t.integer "subsample"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
     t.index ["pipeline_output_id"], name: "index_pipeline_runs_on_pipeline_output_id", unique: true
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
@@ -155,7 +155,7 @@ ActiveRecord::Schema.define(version: 20180119200528) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "public_access", limit: 1
-    t.integer "days_to_keep_sample_private"
+    t.integer "days_to_keep_sample_private", default: 365, null: false
     t.index ["name"], name: "index_projects_on_name", unique: true
   end
 
