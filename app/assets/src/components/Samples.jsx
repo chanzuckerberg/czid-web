@@ -33,8 +33,14 @@ class Samples extends React.Component {
     this.handleProjectSelection = this.handleProjectSelection.bind(this);
     this.pageSize = props.pageSize || 30;
     this.tissue_types = PipelineSampleReads.fetchTissueTypes();
+    this.handleAddUser = this.handleAddUser.bind(this);
+    this.fetchProjectUsers = this.fetchProjectUsers.bind(this);
+    this.updateProjectUserState = this.updateProjectUserState.bind(this);
+    this.updateUserDisplay = this.updateUserDisplay.bind(this);
+    this.resetForm = this.resetForm.bind(this);
     this.state = {
       project: null,
+      project_users: [],
       totalNumber: null,
       projectId: null,
       selectedProjectId: this.fetchParams('project_id') || null,
@@ -91,6 +97,7 @@ class Samples extends React.Component {
 
     $(document).ready(function() {
       $('select').material_select();
+      $('.modal').modal();
     });
   }
 
@@ -189,6 +196,55 @@ class Samples extends React.Component {
     return urlParams.get(param)
   }
 
+  updateProjectUserState(email_array) {
+    this.setState({project_users: email_array})
+  }
+
+  resetForm() {
+    $("form")[0].reset();
+  }
+
+  fetchProjectUsers(id) {
+    if (!id) {
+      this.updateProjectUserState([])
+    } else {
+      axios.get(`/projects/${id}/all_emails`).then((res) => {
+        this.updateProjectUserState(res.data.emails)
+      });
+    }
+  }
+
+  updateUserDisplay(email_to_add) {
+    let new_project_users = this.state.project_users
+    if (!new_project_users.includes(email_to_add)) {
+      new_project_users.push(email_to_add)
+      this.setState({project_users: new_project_users});
+    }
+  }
+
+  handleAddUser(e) {
+    axios.get(`/users/all_emails`).then((res) => {
+      let all_user_emails = res.data.emails;
+      let email_to_add = this.refs.add_user.value;
+      let project_id = this.state.selectedProjectId;
+      if (all_user_emails.includes(email_to_add)) {
+        axios.post(`/projects/${project_id}/add_user_to_project`, 
+                   { user_emails_to_add: [email_to_add],
+                     authenticity_token: this.csrf })
+        .then((res) => {
+          this.updateUserDisplay(email_to_add)
+        })
+      } else {
+        axios.post('/users.json',
+                   { user: { email: email_to_add,
+                             project_ids: [project_id] },
+                     authenticity_token: this.csrf })
+        .then((res) => {
+          this.updateUserDisplay(email_to_add)
+        })
+      }
+    });
+  }
 
   handleSearchChange(e) {
     if (e.target.value !== '') {
@@ -532,8 +588,9 @@ class Samples extends React.Component {
       axios.get(`projects/${projId}.json`).then((res) => {
         this.setState({
           pagesLoaded: 0,
-          project: res.data
+          project: res.data,
         });
+        this.fetchProjectUsers(projId);
         this.fetchResults();
       }).catch((err) => {
         this.setState({ project: null })
@@ -656,14 +713,53 @@ class Samples extends React.Component {
       </div>
     );
 
-    const projInfo = (
-      <div className="wrapper">
-        <div className={(!this.state.project) ? "proj-title all-proj" : "proj-title"}>{ (!this.state.project) ? <div>All projects</div> : this.state.project.name }</div>
-        <p>{ this.state.allSamples.length === 0 ? 'No sample found' : ( this.state.allSamples.length === 1 ? '1 sample found' : `${this.state.allSamples.length} out of ${this.state.totalNumber} samples found`) }</p>
+    let addUserTrigger = (
+      <a className="waves-effect waves-light btn modal-trigger" href="#modal1" onClick={this.resetForm}>Share project</a>
+    );
+
+    let addUser = (
+      <div id="modal1" className="modal">
+        <div className="modal-content">
+          <form>
+            <div className="input-field">
+              <input ref="add_user" id="email" type="email" className="validate col s11"/>
+              <label data-success="Shared successfully" data-error="Please enter a valid email address" className="active">Email</label>
+              <a className="waves-effect waves-light btn col s1" onClick={this.handleAddUser}>Add</a>
+            </div>
+          </form>
+          <div className="col s12">
+            Current users:
+            <ul>
+              { this.state.project_users.length > 0 ?
+                  this.state.project_users.map((email) => { return <li key={email}>{email}</li> })
+                  : <li key="None">None</li>
+              }
+            </ul>
+          </div>
+        </div>
       </div>
     );
 
-   const filterTissueDropDown = (
+    const projInfo = (
+      <div className="wrapper">
+        <div className={(!this.state.project) ? "proj-title all-proj" : "proj-title"}>
+          { (!this.state.project) ? <div className="col s12">All projects</div>
+              : <div>
+                  <span className="col s10">{ this.state.project.name }</span>
+                  <span className="col s2">{ addUserTrigger }</span>
+                </div>
+          }
+        </div>
+        <p className="col s12">
+          { this.state.allSamples.length === 0 ? 'No sample found'
+            : ( this.state.allSamples.length === 1 ? '1 sample found'
+              : `${this.state.allSamples.length} out of ${this.state.totalNumber} samples found`)
+          }
+        </p>
+      </div>
+    );
+
+    const filterTissueDropDown = (
         <div className='dropdown-status-filtering'>
         <li>
           <a className="title">
@@ -765,7 +861,7 @@ class Samples extends React.Component {
     return (
       <div className="row content-wrapper">
         <div className="project-info col s12">
-          { projInfo }
+          { projInfo } { addUser }
         </div>
 
         <div className="sample-container col s12">
@@ -881,10 +977,11 @@ class Samples extends React.Component {
     this.setState({
       selectedProjectId: id,
       pagesLoaded: 0,
-      pageEnd: false
+      pageEnd: false,
     }, () => {
       this.setUrlLocation();
       this.fetchProjectDetails(id);
+      this.fetchProjectUsers(id)
     });
   }
 
