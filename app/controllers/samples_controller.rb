@@ -6,7 +6,7 @@ class SamplesController < ApplicationController
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata].freeze
 
-  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index]
+  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index].freeze
 
   before_action :authenticate_user!, except: [:create, :bulk_upload]
   acts_as_token_authentication_handler_for User, only: [:create, :bulk_upload], fallback: :devise
@@ -337,7 +337,9 @@ class SamplesController < ApplicationController
   end
 
   # Use callbacks to share common setup or constraints between actions.
+
   private
+
   def set_sample
     @sample = samples_scope.find(params[:id])
     assert_access
@@ -358,7 +360,6 @@ class SamplesController < ApplicationController
                                    :sample_notes, :job_queue, :search, :subsample, :pipeline_branch,
                                    input_files_attributes: [:name, :presigned_url, :source_type, :source])
   end
-
 
   def sort_by(samples, dir = nil)
     default_dir = 'id,desc'

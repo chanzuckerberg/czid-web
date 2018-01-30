@@ -2,9 +2,9 @@ class ProjectsController < ApplicationController
   include SamplesHelper
   include ReportHelper
 
-  READ_ACTIONS = [:show, :add_favorite, :remove_favorite, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv]
-  EDIT_ACTIONS = [:edit, :update, :destroy, :add_user_to_project, :all_emails, :update_project_visibility]
-  OTHER_ACTIONS = [:create, :new, :index]
+  READ_ACTIONS = [:show, :add_favorite, :remove_favorite, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv].freeze
+  EDIT_ACTIONS = [:edit, :update, :destroy, :add_user_to_project, :all_emails, :update_project_visibility].freeze
+  OTHER_ACTIONS = [:create, :new, :index].freeze
 
   power :projects, map: { EDIT_ACTIONS => :updatable_projects }, as: :projects_scope
 
@@ -69,7 +69,6 @@ class ProjectsController < ApplicationController
     Resque.enqueue(GenerateProjectReportsCsv, params)
     render json: { status_display: project_reports_progress_message }
   end
-
 
   def project_reports_csv_status
     final_complete = `aws s3 ls #{@project.report_tar_s3(current_user.id)} | wc -l`.to_i == 1
@@ -200,6 +199,7 @@ class ProjectsController < ApplicationController
   def project_params
     params.require(:project).permit(:name, :public_access, user_ids: [], sample_ids: [])
   end
+
   def project_reports_progress_message
     "In progress (project #{@project.name})"
   end
