@@ -864,7 +864,7 @@ class Samples extends React.Component {
                 </div>
           }
         </div>
-          <p className="col s12">
+          <p className="col no-padding s12">
           { this.state.allSamples.length === 0 ? 'No sample found'
             : ( this.state.allSamples.length === 1 ? '1 sample found'
               : `${this.state.allSamples.length} out of ${this.state.totalNumber} samples found`)
