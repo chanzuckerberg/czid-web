@@ -821,10 +821,10 @@ class Samples extends React.Component {
             { this.state.project ? (
               this.state.project.public_access ?
                <span>
-                 <i className="tiny material-icons">lock_open</i> Public Project
+                 <i className="tiny material-icons">lock_open</i> Public project
                </span>:
                <span>
-                 <i className="tiny material-icons">lock</i> Private Project
+                 <i className="tiny material-icons">lock</i> Private project
                </span>
             ) : null }
           </li>
@@ -834,7 +834,7 @@ class Samples extends React.Component {
                 <span>
                   <i className="tiny material-icons">people</i>
                     {this.state.project.total_members}
-                    { (this.state.project.total_members > 1) ? 'Members' : 'Member'}
+                    { (this.state.project.total_members > 1) ? ' members' : ' member'}
                 </span>
                 : <span>
                     No member
