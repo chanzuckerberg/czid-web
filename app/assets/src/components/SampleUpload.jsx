@@ -70,7 +70,8 @@ class SampleUpload extends React.Component {
       adminGenomes,
       sampleName: '',
       disableProjectSelect: false,
-      omit_subsampling_checked: false
+      omit_subsampling_checked: false,
+      public_checked: false
     };
   }
 
@@ -129,7 +130,10 @@ class SampleUpload extends React.Component {
 
   toggleCheckBox(e) {
     this.setState({
-      omit_subsampling_checked: e.target.value == "true" ? false : true,
+      [e.target.id]: e.target.value == "true" ? false : true,
+      /* Note: "[e.target.id]" indicates a "computed property name".
+         This allows us to use toggleCheckBox(event) to set different state variables
+         depending on the id attached to the event. */
     })
   }
 
@@ -147,7 +151,8 @@ class SampleUpload extends React.Component {
     var that = this;
     axios.post('/projects.json', {
       project: {
-        name: this.refs.new_project.value
+        name: this.refs.new_project.value,
+        public_access: this.state.public_checked ? 1 : 0
       },
       authenticity_token: this.csrf
     })
@@ -626,23 +631,13 @@ class SampleUpload extends React.Component {
                     <div className='col no-padding s4'>
                       <Tipsy content='Add a new desired experiment or project name'
                         placement='right'>
-                        <button type='button'
-                          onClick={this.toggleNewProjectInput}
-                          className='new-project-button new-button skyblue-button'>
-                          <i className='fa fa-plus'/>
-                          <span>
-                            New project
-                          </span>
+                        <button type='button' onClick={this.toggleNewProjectInput} className='new-project-button new-button skyblue-button'>
+                          <i className='fa fa-plus'/><span>New project</span>
                         </button>
                       </Tipsy>
                     </div>
                     <div className='col no-padding s12 new-project-input hidden'>
-                      <input type='text' onBlur={ (e) => {
-                        if (e.target.value.trim().length) {
-                          this.handleProjectSubmit();
-                        }
-                        $('.new-project-button').click();
-                      }} ref='new_project' onFocus={ this.clearError } className='browser-default' placeholder='Input new project name' />
+                      <input type='text' ref='new_project' onFocus={ this.clearError } className='browser-default' placeholder='Input new project name' />
                       {
                         (this.state.errors.new_project) ?
                           <div className='field-error'>
@@ -650,12 +645,25 @@ class SampleUpload extends React.Component {
                           </div> : null
                       }
                     </div>
+                    <div className='col no-padding s8 new-project-input hidden'>
+                      <input ref="public_checked" type="checkbox" name="switch" id="public_checked" className="col s8 filled-in" onChange={ this.toggleCheckBox }
+                             value={ this.state.public_checked } />
+                      <label htmlFor="public_checked" className="checkbox">Make project public</label>
+                    </div>
+                    <div className='col no-padding s4 new-project-input hidden'>
+                      <button type='button'
+                              onClick={(e) => { if (this.refs.new_project.value.trim().length) {this.handleProjectSubmit()};
+                                                $('.new-project-button').click(); }}
+                              className='no-padding new-button skyblue-button'>
+                        <span>Create</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
 
                 <div className='field'>
                   <div className='row'>
-                    <Tipsy content='This would be subtracted by the pipeline'
+                    <Tipsy content='This will be subtracted by the pipeline'
                       placement='top'>
                       <div className='col field-title no-padding s5'
                         data-delay="50">

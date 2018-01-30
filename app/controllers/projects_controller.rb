@@ -3,7 +3,7 @@ class ProjectsController < ApplicationController
   include ReportHelper
   before_action :login_required
 
-  before_action :set_project, only: [:show, :edit, :update, :destroy, :add_favorite, :remove_favorite, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv]
+  before_action :set_project, only: [:show, :edit, :update, :destroy, :add_favorite, :remove_favorite, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv, :add_user_to_project, :all_emails]
   clear_respond_to
   respond_to :json
   # GET /projects
@@ -15,6 +15,20 @@ class ProjectsController < ApplicationController
   # GET /projects/1
   # GET /projects/1.json
   def show
+    # all exisiting project are null, we ensure private projects are explicitly set to 0
+    public_access = @project.public_access.nil? ? 0 : @project.public_access
+    respond_to do |format|
+      format.html
+      format.json do
+        render json: {
+          id: @project.id,
+          name: @project.name,
+          total_members: @project.users.length,
+          public_access: public_access,
+          created_at: @project.created_at
+        }
+      end
+    end
   end
 
   def send_project_csv
@@ -109,6 +123,7 @@ class ProjectsController < ApplicationController
   # POST /projects.json
   def create
     @project = Project.new(project_params)
+    @project.users << current_user
 
     respond_to do |format|
       if @project.save
@@ -145,6 +160,20 @@ class ProjectsController < ApplicationController
     end
   end
 
+  def add_user_to_project
+    user_ids_to_add = User.where(email: params[:user_emails_to_add]).map(&:id)
+    actually_added_user_ids = user_ids_to_add - @project.user_ids
+    @project.user_ids |= user_ids_to_add
+    actually_added_user_ids.each do |u_id|
+      u = User.find(u_id)
+      UserMailer.added_to_projects_email(u, current_user, [@project]).deliver_now
+    end
+  end
+
+  def all_emails
+    render json: { emails: @project.users.map(&:email) }
+  end
+
   private
 
   # Use callbacks to share common setup or constraints between actions.
@@ -154,6 +183,6 @@ class ProjectsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def project_params
-    params.require(:project).permit(:name, user_ids: [], sample_ids: [])
+    params.require(:project).permit(:name, :public_access, user_ids: [], sample_ids: [])
   end
 end
