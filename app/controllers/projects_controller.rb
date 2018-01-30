@@ -15,6 +15,44 @@ class ProjectsController < ApplicationController
   # GET /projects/1
   # GET /projects/1.json
   def show
+    # all exisiting project are null, we ensure private projects are explicitly set to 0
+    public_access = @project.public_access.nil? ? 0 : @project.public_access
+    respond_to do |format|
+      format.html
+      format.json do
+        render json: {
+          id: @project.id,
+          name: @project.name,
+          total_members: @project.users.length,
+          public_access: public_access,
+          created_at: @project.created_at
+        }
+      end
+    end
+  end
+
+  def update_project_visibility
+    errors = []
+    project_id = params[:id]
+    public_access = params[:public_access] ? params[:public_access].to_i : nil
+
+    errors.push('Project id is Invalid') unless project_id.to_i
+    errors.push('Access value is empty') if public_access.nil?
+
+    if errors.empty?
+      @project = Project.find(project_id)
+      @project.update(public_access: public_access)
+      render json: {
+        message: 'Project visibility updated successfully',
+        status: :accepted
+      }
+    else
+      render json: {
+        message: 'Unable to set visibility for project',
+        status: :unprocessable_entity,
+        errors: errors
+      }
+    end
   end
 
   def send_project_csv
