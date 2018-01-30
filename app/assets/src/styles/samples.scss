@@ -435,17 +435,23 @@ $break-large: 1070px;
 
 .project-menu {
   li {
-    cursor: pointer;
     display: inline-block;
     margin-left: 8px;
-    color: #a1a4a4;
+    color: #2C2D2D;
     .material-icons {
       position: relative;
       top: 2px;
       font-size: 16px;
     }
-    &:hover {
-      color: #656868;
+
+    &.add-member {
+      cursor: pointer;
+      color: #4A90E2
+    }
+    i {
+      &.material-icons {
+        color: #767878;
+      }
     }
   }
 }

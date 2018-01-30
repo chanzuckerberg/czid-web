@@ -838,10 +838,10 @@ class Samples extends React.Component {
               ) : null }
 
           </li>
-          <li>
+          <li className='add-member'>
             { this.state.project && this.canEditProject(this.state.project.id) ? (
             <a className='modal-trigger' href="#modal1" onClick={this.resetForm}>
-              <i className="tiny material-icons">add</i> Add user
+              Add user
             </a>) : null }
           </li>
         </ul>
@@ -973,7 +973,7 @@ class Samples extends React.Component {
     return (
       <div className="row content-wrapper">
         <div className="project-info col s12">
-          { projInfo }  { addUser }
+          { projInfo } { addUser }
         </div>
 
         <div className="sample-container col s12">
