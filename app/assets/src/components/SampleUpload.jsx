@@ -902,6 +902,28 @@ class SampleUpload extends React.Component {
                           </div>
                         </div>
                       </div>
+                      <div className='field'>
+                        <div className='row'>
+                          <div className='col no-padding s12'>
+                            <div className='field-title'>
+                              <div htmlFor="sample_pipeline_branch" className='read-count-label'>
+                                Branch of idseq-pipeline to be used for processing
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className='row input-row'>
+                          <div className='col no-padding s12'>
+                            <input id='sample_pipeline_branch' type='text' className='browser-default' ref="branch" value={this.state.selectedBranch} placeholder='master' onChange={ this.handleBranchChange } />
+                            {
+                              (this.state.errors.branch) ?
+                                <div className='field-error'>
+                                  {this.state.errors.branch}
+                                </div> : null
+                            }
+                          </div>
+                        </div>
+                      </div>
                     </div> :
                     null
                 }
