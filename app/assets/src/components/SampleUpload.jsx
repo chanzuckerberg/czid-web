@@ -19,6 +19,7 @@ class SampleUpload extends React.Component {
     this.handleHostChange = this.handleHostChange.bind(this);
     this.handleQueueChange = this.handleQueueChange.bind(this);
     this.handleMemoryChange = this.handleMemoryChange.bind(this);
+    this.handleBranchChange = this.handleBranchChange.bind(this);
     this.handleResultChange = this.handleResultChange.bind(this);
     this.toggleNewProjectInput = this.toggleNewProjectInput.bind(this);
     this.projects = props.projects || [];
@@ -41,6 +42,7 @@ class SampleUpload extends React.Component {
       resultPath: this.sample ? this.sample.s3_preload_result_path : '',
       jobQueue: this.sample ? this.sample.job_queue : '',
       memory: this.sample ? this.sample.sample_memory : '',
+      branch: this.sample ? this.sample.pipeline_branch : '',
       id: this.sample.id || '',
       inputFiles: props.inputFiles && props.inputFiles.length ? props.inputFiles : [],
       status: this.sample.status
@@ -65,6 +67,7 @@ class SampleUpload extends React.Component {
       selectedResultPath: this.selected.resultPath || '',
       selectedJobQueue: this.selected.jobQueue || '',
       selectedMemory: this.selected.memory || '',
+      selectedBranch: this.selected.branch || '',
       id: this.selected.id,
       errors: {},
       adminGenomes,
@@ -205,6 +208,7 @@ class SampleUpload extends React.Component {
         s3_preload_result_path: (this.userDetails.admin) ? this.refs.s3_preload_result_path.value.trim() : '',
         job_queue: this.state.selectedJobQueue,
         sample_memory: this.state.selectedMemory,
+        pipeline_branch: this.state.selectedBranch,
         host_genome_id: this.state.selectedHostGenomeId,
         subsample: this.state.omit_subsampling_checked ? 0 : 1,
         status: 'created'
@@ -410,6 +414,13 @@ class SampleUpload extends React.Component {
   handleMemoryChange(e) {
     this.setState({
       selectedMemory: e.target.value.trim()
+    });
+    this.clearError();
+  }
+
+  handleBranchChange(e) {
+    this.setState({
+      selectedBranch: e.target.value.trim()
     });
     this.clearError();
   }
@@ -906,7 +917,7 @@ class SampleUpload extends React.Component {
                         <div className='row'>
                           <div className='col no-padding s12'>
                             <div className='field-title'>
-                              <div htmlFor="sample_pipeline_branch" className='read-count-label'>
+                              <div htmlFor="pipeline_branch" className='read-count-label'>
                                 Branch of idseq-pipeline to be used for processing
                               </div>
                             </div>
@@ -914,7 +925,7 @@ class SampleUpload extends React.Component {
                         </div>
                         <div className='row input-row'>
                           <div className='col no-padding s12'>
-                            <input id='sample_pipeline_branch' type='text' className='browser-default' ref="branch" value={this.state.selectedBranch} placeholder='master' onChange={ this.handleBranchChange } />
+                            <input id='pipeline_branch' type='text' className='browser-default' ref="branch" value={this.state.selectedBranch} placeholder='master' onChange={ this.handleBranchChange } />
                             {
                               (this.state.errors.branch) ?
                                 <div className='field-error'>
