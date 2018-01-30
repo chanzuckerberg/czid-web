@@ -21,8 +21,6 @@ en:
         subject: "Confirmation instructions"
       reset_password_instructions:
         subject: "Reset password instructions"
-      new_user_new_project:
-        subject: "New account on IDseq"
       unlock_instructions:
         subject: "Unlock instructions"
       email_changed:

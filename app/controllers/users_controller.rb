@@ -30,9 +30,8 @@ class UsersController < ApplicationController
 
     respond_to do |format|
       if @user.save
-        @projects = @user.projects
-        @sharing_user = current_user
-        @user.send_new_user_new_project
+        @custom_text = "blablabla #{@user.email} bla #{current_user.email} bla #{@user.projects.count}"
+        @user.send_reset_password_instructions
         format.html { redirect_to edit_user_path(@user), notice: "User was successfully created" }
         format.json { render :show, status: :created, location: root_path }
       else
