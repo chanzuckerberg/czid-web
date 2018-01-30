@@ -3,8 +3,8 @@ class SamplesController < ApplicationController
   include SamplesHelper
   include PipelineOutputsHelper
 
-  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder]
-  WRITE_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata ]
+  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder].freeze
+  WRITE_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata].freeze
 
   before_action :authenticate_user!, except: [:create, :bulk_upload]
   acts_as_token_authentication_handler_for User, only: [:create, :bulk_upload], fallback: :devise
@@ -12,7 +12,7 @@ class SamplesController < ApplicationController
   before_action :set_sample, only: READ_ACTIONS + WRITE_ACTIONS
   before_action :login_required # redundant. make sure it works
 
-  power :samples, map: { WRITE_ACTIONS  => ::updatable_samples }, as: :samples_scope
+  power :samples, map: { WRITE_ACTIONS => :updatable_samples }, as: :samples_scope
 
   PAGE_SIZE = 30
 
@@ -262,7 +262,7 @@ class SamplesController < ApplicationController
       project = Project.find_by(name: project_name)
     end
     if project && !current_power.updatable_project?(project)
-      format.json { render json: {status: "User not authorized to update project #{project.name}" }, status: :unprocessable_entity }
+      format.json { render json: { status: "User not authorized to update project #{project.name}" }, status: :unprocessable_entity }
 
     end
     params[:input_files_attributes] = params[:input_files_attributes].reject { |f| f["source"] == '' }

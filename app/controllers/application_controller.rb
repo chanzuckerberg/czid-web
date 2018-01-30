@@ -8,7 +8,6 @@ class ApplicationController < ActionController::Base
     Power.new(current_user)
   end
 
-
   def after_sign_out_path_for(_resource_or_scope)
     root_path
   end

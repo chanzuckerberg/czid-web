@@ -30,7 +30,7 @@ class Project < ApplicationRecord
 
   def samples
     # Disable samples function. have to go through power
-    return nil
+    nil
   end
 
   def self.editable(user)
@@ -48,11 +48,10 @@ class Project < ApplicationRecord
       where("id in (select project_id from projects_users where user_id=?)
              or
              id in (?) ",
-             user.id,
-             Sample.public_samples.select("project_id, count(1)")
-                   .group("project_id")
-                   .pluck(:project_id)
-           )
+            user.id,
+            Sample.public_samples.select("project_id, count(1)")
+                  .group("project_id")
+                  .pluck(:project_id))
     end
   end
 
@@ -60,8 +59,6 @@ class Project < ApplicationRecord
     where("id in (?)",
           Sample.public_samples.select("project_id, count(1)")
                 .group("project_id")
-                .pluck(:project_id)
-         )
+                .pluck(:project_id))
   end
-
 end

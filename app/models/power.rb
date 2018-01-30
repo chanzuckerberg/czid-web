@@ -22,7 +22,7 @@ class Power
   end
 
   power :samples do
-      Sample.viewable(@user)
+    Sample.viewable(@user)
   end
 
   power :updatable_samples do
@@ -37,9 +37,7 @@ class Power
     Sample.viewable(@user).where(project_id: project.id)
   end
 
-  power:updatable_project_samples do |project|
+  power :updatable_project_samples do |project|
     Sample.editable(@user).where(project_id: project.id)
   end
-
-
 end

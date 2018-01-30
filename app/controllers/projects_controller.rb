@@ -2,7 +2,7 @@ class ProjectsController < ApplicationController
   include SamplesHelper
   include ReportHelper
 
-  power :projects, map: { [:edit, :update, :destroy, :add_user_to_project, :all_emails] => :updatable_projects}, as: :projects_scope
+  power :projects, map: { [:edit, :update, :destroy, :add_user_to_project, :all_emails] => :updatable_projects }, as: :projects_scope
 
   before_action :set_project, only: [:show, :add_favorite, :remove_favorite, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv, :edit, :update, :destroy, :add_user_to_project, :all_emails]
 

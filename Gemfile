@@ -13,8 +13,8 @@ gem 'brakeman'
 gem 'bcrypt', '~> 3.1.7'
 # Use CoffeeScript for .coffee assets and views
 gem 'coffee-rails', '~> 4.2'
-gem 'devise', '4.3.0'
 gem 'consul'
+gem 'devise', '4.3.0'
 gem "health_check"
 gem 'honeycomb-rails', '0.4.1'
 gem 'mailgun_rails'

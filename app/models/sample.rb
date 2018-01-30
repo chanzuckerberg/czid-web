@@ -212,11 +212,11 @@ class Sample < ApplicationRecord
       all
     else
       project_ids = Project.editable(user).select("id").pluck(:id)
-      joins("INNER JOIN projects ON samples.project_id = projects.id").
-        where("(project_id in (?) or
+      joins("INNER JOIN projects ON samples.project_id = projects.id")
+        .where("(project_id in (?) or
                 projects.public_access = 1 or
                 DATE_ADD(samples.created_at, INTERVAL projects.days_to_keep_sample_private DAY) < ?)",
-              project_ids, Time.current)
+               project_ids, Time.current)
     end
   end
 
@@ -230,11 +230,10 @@ class Sample < ApplicationRecord
   end
 
   def self.public_samples
-    joins("INNER JOIN projects ON samples.project_id = projects.id").
-      where("(projects.public_access = 1 or
+    joins("INNER JOIN projects ON samples.project_id = projects.id")
+      .where("(projects.public_access = 1 or
               DATE_ADD(samples.created_at, INTERVAL projects.days_to_keep_sample_private DAY) < ?)",
-            Time.current)
-
+             Time.current)
   end
 
   def archive_old_pipeline_runs
