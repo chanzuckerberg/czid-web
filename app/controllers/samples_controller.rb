@@ -9,8 +9,13 @@ class SamplesController < ApplicationController
   before_action :authenticate_user!, except: [:create, :bulk_upload]
   acts_as_token_authentication_handler_for User, only: [:create, :bulk_upload], fallback: :devise
 
-  before_action :set_sample, only: READ_ACTIONS + WRITE_ACTIONS
   before_action :login_required # redundant. make sure it works
+
+  current_power do # Put this here for CLI
+    Power.new(current_user)
+  end
+
+  before_action :set_sample, only: READ_ACTIONS + WRITE_ACTIONS
 
   power :samples, map: { WRITE_ACTIONS => :updatable_samples }, as: :samples_scope
 
@@ -123,7 +128,7 @@ class SamplesController < ApplicationController
     @job_stats = @pipeline_run ? @pipeline_run.job_stats : nil
     @summary_stats = @job_stats ? get_summary_stats(@job_stats) : nil
     @project_info = @sample.project ? @sample.project : nil
-    @project_sample_ids_names = @sample.project ? get_samples_in_project(@sample.project) : nil
+    @project_sample_ids_names = @sample.project ? Hash[ current_power.project_samples(@sample.project).map { |s| [s.id, s.name] }]  : nil
     @host_genome = @sample.host_genome ? @sample.host_genome : nil
     @background_models = Background.all
 
