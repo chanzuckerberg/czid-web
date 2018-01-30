@@ -32,7 +32,7 @@ class UsersController < ApplicationController
       if @user.save
         @projects = @user.projects
         @sharing_user = current_user
-        @user.send_reset_password_instructions
+        @user.send_new_user_new_project
         format.html { redirect_to edit_user_path(@user), notice: "User was successfully created" }
         format.json { render :show, status: :created, location: root_path }
       else
