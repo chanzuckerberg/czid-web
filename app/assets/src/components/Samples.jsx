@@ -10,6 +10,7 @@ import numberWithCommas from '../helpers/strings';
 import ProjectSelection from './ProjectSelection';
 import ReportFilter from './ReportFilter';
 import PipelineSampleReads from './PipelineSampleReads';
+import StringHelper from '../helpers/StringHelper';
 
 class Samples extends React.Component {
   constructor(props, context) {
@@ -57,6 +58,7 @@ class Samples extends React.Component {
       isRequesting: false,
       displayEmpty: false,
       project_id_download_in_progress: null,
+      project_add_email_validation: null,
       columnsShown: ["total_reads",
         "nonhost_reads",
         "quality_control",
@@ -201,7 +203,10 @@ class Samples extends React.Component {
   }
 
   resetForm() {
-    $("form")[0].reset();
+    $('#add_user_to_project').val('');
+    this.setState({
+      project_add_email_validation: null
+    });
   }
 
   fetchProjectUsers(id) {
@@ -214,6 +219,25 @@ class Samples extends React.Component {
     }
   }
 
+  toggleProjectVisbility(projId, publicAccess) {
+    if (projId) {
+      axios.put(`/projects/${projId}.json`, {
+        public_access: publicAccess,
+        authenticity_token: this.csrf
+      })
+      .then((res) => {
+        this.setState({
+          project: Object.assign(this.state.project, { public_access: publicAccess })
+        });
+      })
+      .catch((error) => {
+        Materialize.toast(
+          `Unable to change project visibility for '${this.state.project.name}'`,
+          3000, 'rounded');
+      });
+    }
+  }
+
   updateUserDisplay(email_to_add) {
     let new_project_users = this.state.project_users
     if (!new_project_users.includes(email_to_add)) {
@@ -222,28 +246,44 @@ class Samples extends React.Component {
     }
   }
 
-  handleAddUser(e) {
-    axios.get(`/users/all_emails`).then((res) => {
-      let all_user_emails = res.data.emails;
+  handleAddUser(e, waitForEnter) {
+    if(waitForEnter && e.keyCode !== 13) {
+      return;
+    } else {
       let email_to_add = this.refs.add_user.value;
       let project_id = this.state.selectedProjectId;
-      if (all_user_emails.includes(email_to_add)) {
-        axios.post(`/projects/${project_id}/add_user_to_project`,
-                   { user_emails_to_add: [email_to_add],
-                     authenticity_token: this.csrf })
-        .then((res) => {
-          this.updateUserDisplay(email_to_add)
-        })
+      const isValidEmail = StringHelper.validateEmail(email_to_add);
+      if (isValidEmail) {
+        this.setState({
+          project_add_email_validation: null
+        });
+        axios.get(`/users/all_emails`).then((res) => {
+          let all_user_emails = res.data.emails;
+          if (all_user_emails.includes(email_to_add)) {
+            axios.post(`/projects/${project_id}/add_user_to_project`,
+              {
+                user_emails_to_add: [email_to_add],
+                authenticity_token: this.csrf
+              })
+              .then((res) => {
+                this.updateUserDisplay(email_to_add)
+            })
+          } else {
+            axios.post('/users.json',
+                       { user: { email: email_to_add,
+                                 project_ids: [project_id] },
+                         authenticity_token: this.csrf })
+            .then((res) => {
+              this.updateUserDisplay(email_to_add)
+            })
+          }
+        });
       } else {
-        axios.post('/users.json',
-                   { user: { email: email_to_add,
-                             project_ids: [project_id] },
-                     authenticity_token: this.csrf })
-        .then((res) => {
-          this.updateUserDisplay(email_to_add)
-        })
+        this.setState({
+          project_add_email_validation: 'Invalid email address, try again?'
+        });
       }
-    });
+    }
   }
 
   handleSearchChange(e) {
@@ -714,17 +754,52 @@ class Samples extends React.Component {
     );
 
     let addUser = (
-      <div id="modal1" className="modal">
+      <div id="modal1" className="modal project-popup">
         <div className="modal-content">
-          <form>
-            <div className="input-field">
-              <input ref="add_user" id="email" type="email" className="validate col s11"/>
-              <label data-success="Shared successfully" data-error="Please enter a valid email address" className="active">Email</label>
-              <a className="waves-effect waves-light btn col s1" onClick={this.handleAddUser}>Add</a>
+          <div className='project_modal_header'>
+            Project Members and Access Control
+          </div>
+          <div className='project_modal_title'>
+            { this.state.project? this.state.project.name : null }
+          </div>
+          <div className='project_modal_visiblity'>
+            {this.state.project ? (
+              this.state.project.public_access ?
+               <span>
+                  <i className="tiny material-icons">lock_open</i>
+                  <span className='label'>Public Project</span>
+                  <a href='#'
+                    onClick={() => this.toggleProjectVisbility(
+                      this.state.project.id, 0)}>
+                    Make project private
+                  </a>
+               </span>:
+               <span>
+                 <i className="tiny material-icons">lock</i>
+                    <span className='label'>Private Project</span>
+                    <a href='#'
+                      onClick={() => this.toggleProjectVisbility(
+                        this.state.project.id, 1)}>
+                      Make project public
+                    </a>
+               </span>
+            ) : null}
+          </div>
+
+          <div className='add_member row'>
+            <input ref="add_user" id='add_user_to_project' type="email"
+              placeholder='Add project members by email'
+              onKeyDown={(e) => this.handleAddUser(e, true)}
+              className="validate col s12 browser-default"/>
+            <div className='error-message'>
+              { this.state.project_add_email_validation }
             </div>
-          </form>
-          <div className="col s12">
-            Current users:
+          </div>
+
+          <div className='members_list'>
+            <div className='list_title'>
+              <i className="tiny material-icons">person_add</i> Project Members
+            </div>
             <ul>
               { this.state.project_users.length > 0 ?
                   this.state.project_users.map((email) => { return <li key={email}>{email}</li> })
@@ -732,6 +807,9 @@ class Samples extends React.Component {
               }
             </ul>
           </div>
+          <button className='modal-close'>
+            Done
+          </button>
         </div>
       </div>
     );
@@ -780,9 +858,9 @@ class Samples extends React.Component {
         }
         <div className="wrapper">
           <div className={(!this.state.project) ? "proj-title all-proj" : "proj-title"}>
-          { (!this.state.project) ? <div className="col s12">All projects</div>
+          { (!this.state.project) ? <div className="">All projects</div>
               : <div>
-                  <span className="col s10">{ this.state.project.name }</span>
+                  <span className="">{ this.state.project.name }</span>
                 </div>
           }
         </div>
