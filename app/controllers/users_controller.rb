@@ -66,14 +66,6 @@ class UsersController < ApplicationController
     end
   end
 
-  def add_user_to_project
-    @user = User.find_by(email: params[:user_email_to_add])
-    create_new_user_random_password(params[:user_email_to_add]) unless @user
-    @project = Project.find(params[:project_id])
-    UserMailer.added_to_projects_email(@user, current_user, [@project]).deliver_now unless @project.user_ids.include? @user.id
-    @project.user_ids |= [@user.id]
-  end
-
   private
 
   # Use callbacks to share common setup or constraints between actions.
@@ -83,17 +75,6 @@ class UsersController < ApplicationController
 
   def new_user(attrs = {})
     @user ||= User.new(attrs)
-  end
-
-  def create_new_user_random_password(email)
-    user_params_with_password = { email: email }
-    if user_params_with_password[:password].nil?
-      random_password = SecureRandom.hex(10)
-      user_params_with_password[:password] = random_password
-      user_params_with_password[:password_confirmation] = random_password
-    end
-    new_user(user_params_with_password)
-    @user.send_reset_password_instructions if @user.save
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
