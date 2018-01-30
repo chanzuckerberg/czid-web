@@ -257,27 +257,15 @@ class Samples extends React.Component {
         this.setState({
           project_add_email_validation: null
         });
-        axios.get(`/users/all_emails`).then((res) => {
-          let all_user_emails = res.data.emails;
-          if (all_user_emails.includes(email_to_add)) {
-            axios.post(`/projects/${project_id}/add_user_to_project`,
-              {
-                user_emails_to_add: [email_to_add],
-                authenticity_token: this.csrf
-              })
-              .then((res) => {
-                this.updateUserDisplay(email_to_add)
-            })
-          } else {
-            axios.post('/users.json',
-                       { user: { email: email_to_add,
-                                 project_ids: [project_id] },
-                         authenticity_token: this.csrf })
-            .then((res) => {
-              this.updateUserDisplay(email_to_add)
-            })
-          }
-        });
+        let all_user_emails = res.data.emails;
+        axios.post(`/projects/${project_id}/add_user_to_project`,
+          {
+             user_emails_to_add: [email_to_add],
+             authenticity_token: this.csrf
+          })
+          .then((res) => {
+            this.updateUserDisplay(email_to_add)
+        })
       } else {
         this.setState({
           project_add_email_validation: 'Invalid email address, try again?'
