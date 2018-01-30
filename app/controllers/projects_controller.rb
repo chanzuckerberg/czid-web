@@ -12,7 +12,7 @@ class ProjectsController < ApplicationController
   ##########################################
 
   READ_ACTIONS = [:show, :add_favorite, :remove_favorite, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv].freeze
-  EDIT_ACTIONS = [:edit, :update, :destroy, :add_user_to_project, :all_emails, :update_project_visibility].freeze
+  EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_emails, :update_project_visibility].freeze
   OTHER_ACTIONS = [:create, :new, :index].freeze
 
   power :projects, map: { EDIT_ACTIONS => :updatable_projects }, as: :projects_scope
@@ -182,23 +182,29 @@ class ProjectsController < ApplicationController
     end
   end
 
-  def add_user_to_project
-    user_ids_to_add = User.where(email: params[:user_emails_to_add]).map(&:id)
-    actually_added_user_ids = user_ids_to_add - @project.user_ids
-    @project.user_ids |= user_ids_to_add
-    actually_added_user_ids.each do |u_id|
-      u = User.find(u_id)
-      UserMailer.added_to_projects_email(u, current_user, [@project]).deliver_now
-    end
-  end
-
   def all_emails
     render json: { emails: @project.users.map(&:email) }
+  end
+
+  def add_user
+    @user = User.find_by(email: params[:user_email_to_add])
+    create_new_user_random_password(params[:user_email_to_add]) unless @user
+    UserMailer.added_to_projects_email(@user, current_user, [@project]).deliver_now unless @project.user_ids.include? @user.id
+    @project.user_ids |= [@user.id]
   end
 
   private
 
   # Use callbacks to share common setup or constraints between actions.
+  def create_new_user_random_password(email)
+    user_params_with_password = { email: email }
+    random_password = SecureRandom.hex(10)
+    user_params_with_password[:password] = random_password
+    user_params_with_password[:password_confirmation] = random_password
+    @user ||= User.new(user_params_with_password)
+    @user.send_reset_password_instructions if @user.save
+  end
+
   def set_project
     @project = projects_scope.find(params[:id])
     assert_access

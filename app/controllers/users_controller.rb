@@ -1,7 +1,7 @@
 class UsersController < ApplicationController
   clear_respond_to
   respond_to :json
-  before_action :admin_required, only: [:show, :edit, :update, :destroy, :new, :create, :index]
+  before_action :admin_required
   before_action :set_user, only: [:show, :edit, :update, :destroy]
 
   # GET /users
@@ -18,20 +18,10 @@ class UsersController < ApplicationController
   # POST /users
   # POST /users.json
   def create
-    user_params_with_password = user_params
-    if user_params_with_password[:password].nil?
-      random_password = SecureRandom.hex(10)
-      user_params_with_password[:password] = random_password
-      user_params_with_password[:password_confirmation] = random_password
-    end
-
-    Rails.logger.debug(user_params.inspect)
-    new_user(user_params_with_password)
+    new_user(user_params)
 
     respond_to do |format|
       if @user.save
-        UserMailer.added_to_projects_email(@user, current_user, @user.projects).deliver_now
-        @user.send_reset_password_instructions
         format.html { redirect_to edit_user_path(@user), notice: "User was successfully created" }
         format.json { render :show, status: :created, location: root_path }
       else
@@ -74,11 +64,6 @@ class UsersController < ApplicationController
       format.html { redirect_to users_url, notice: 'User was successfully destroyed.' }
       format.json { head :no_content }
     end
-  end
-
-  def all_emails
-    email_array = User.all.map(&:email)
-    render json: { emails: email_array }
   end
 
   private
