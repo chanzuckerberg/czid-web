@@ -881,4 +881,71 @@ input[type=search]:focus:not([readonly]) {
 
 .project-popup {
   width: 40%;
+  box-shadow: 1px 1px 8px 3px #fff;
+  .project_modal_header {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px
+  }
+
+  .project_modal_title {
+    font-size: 16px;
+    font-weight: bold;
+  }
+  .project_modal_visiblity {
+    font-size: 13px;
+    i.material-icons {
+      font-size: 12px;
+    }
+    .label, i{
+      color: #b4b4b4;
+    }
+    a {
+      margin-left: 5px;
+      color: #66aed6 !important;
+      &:hover{
+        color: #548fb0 !important;
+      }
+    }
+  }
+
+  .add_member {
+    margin-top: 15px;
+    input {
+      border: 1px solid #e8e8e8;
+      padding: 12px;
+      border-radius: 4px;
+    }
+    .error-message {
+      color: #d9534f;
+      float: left;
+      margin-top: 5px;
+      font-size: 12px;
+    }
+  }
+  .members_list {
+    .list_title {
+      font-size: 16px;
+      font-weight: 700;
+      i {
+        position: relative;
+        top: 4px;
+        font-size: 1.4rem;
+      }
+
+    }
+    li {
+      font-weight: 600;
+      font-size: 15px;
+    }
+  }
+  .modal-close {
+    border: 1px solid #b6d8eb;
+    background: #288ec5;
+    color: #ecf5f9;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 17px;
+    min-width: 110px;
+  }
 }
