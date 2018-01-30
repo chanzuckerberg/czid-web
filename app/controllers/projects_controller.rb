@@ -188,7 +188,7 @@ class ProjectsController < ApplicationController
     render json: { emails: @project.users.map(&:email) }
   end
 
-  def add_user_to_project
+  def add_user
     @user = User.find_by(email: params[:user_email_to_add])
     create_new_user_random_password(params[:user_email_to_add]) unless @user
     @project = Project.find(params[:project_id])
