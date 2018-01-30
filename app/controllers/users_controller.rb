@@ -22,8 +22,6 @@ class UsersController < ApplicationController
 
     respond_to do |format|
       if @user.save
-        UserMailer.added_to_projects_email(@user, current_user, @user.projects).deliver_now
-        @user.send_reset_password_instructions
         format.html { redirect_to edit_user_path(@user), notice: "User was successfully created" }
         format.json { render :show, status: :created, location: root_path }
       else
@@ -95,7 +93,9 @@ class UsersController < ApplicationController
       user_params_with_password[:password_confirmation] = random_password
     end
     new_user(user_params_with_password)
-    @user.save
+    if @user.save
+      @user.send_reset_password_instructions
+    end
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
