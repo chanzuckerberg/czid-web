@@ -38,6 +38,7 @@ Rails.application.routes.draw do
   end
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
+  post 'users/add_user_to_project', to: 'users#add_user_to_project'
 
   mount Resque::Server.new, at: '/resque'
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html

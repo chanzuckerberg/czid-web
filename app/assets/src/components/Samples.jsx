@@ -258,9 +258,10 @@ class Samples extends React.Component {
           project_add_email_validation: null
         });
         let all_user_emails = res.data.emails;
-        axios.post(`/projects/${project_id}/add_user_to_project`,
+        axios.post(`/users/add_user_to_project`,
           {
-             user_emails_to_add: [email_to_add],
+             user_email_to_add: email_to_add,
+             project_id: project_id,
              authenticity_token: this.csrf
           })
           .then((res) => {

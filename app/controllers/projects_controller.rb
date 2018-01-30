@@ -184,16 +184,6 @@ class ProjectsController < ApplicationController
     end
   end
 
-  def add_user_to_project
-    user_ids_to_add = User.where(email: params[:user_emails_to_add]).map(&:id)
-    actually_added_user_ids = user_ids_to_add - @project.user_ids
-    @project.user_ids |= user_ids_to_add
-    actually_added_user_ids.each do |u_id|
-      u = User.find(u_id)
-      UserMailer.added_to_projects_email(u, current_user, [@project]).deliver_now
-    end
-  end
-
   def all_emails
     render json: { emails: @project.users.map(&:email) }
   end

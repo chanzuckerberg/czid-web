@@ -18,15 +18,7 @@ class UsersController < ApplicationController
   # POST /users
   # POST /users.json
   def create
-    user_params_with_password = user_params
-    if user_params_with_password[:password].nil?
-      random_password = SecureRandom.hex(10)
-      user_params_with_password[:password] = random_password
-      user_params_with_password[:password_confirmation] = random_password
-    end
-
-    Rails.logger.debug(user_params.inspect)
-    new_user(user_params_with_password)
+    new_user(user_params)
 
     respond_to do |format|
       if @user.save
@@ -76,6 +68,14 @@ class UsersController < ApplicationController
     end
   end
 
+  def add_user_to_project
+    @user = User.find_by(email: params[:user_email_to_add])
+    @project = Project.find(params[:project_id])
+    create_new_user_random_password unless @user
+    UserMailer.added_to_projects_email(@user, current_user, [@project]).deliver_now unless @project.user_ids.include? @user.id
+    @project.user_ids |= [@user.id]
+  end
+
   private
 
   # Use callbacks to share common setup or constraints between actions.
@@ -85,6 +85,17 @@ class UsersController < ApplicationController
 
   def new_user(attrs = {})
     @user ||= User.new(attrs)
+  end
+
+  def create_new_user_random_password(attrs = {})
+    user_params_with_password = user_params
+    if user_params_with_password[:password].nil?
+      random_password = SecureRandom.hex(10)
+      user_params_with_password[:password] = random_password
+      user_params_with_password[:password_confirmation] = random_password
+    end
+    new_user(user_params_with_password)
+    @user.save
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
