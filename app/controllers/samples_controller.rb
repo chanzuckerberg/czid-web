@@ -2,6 +2,15 @@ class SamplesController < ApplicationController
   include ReportHelper
   include SamplesHelper
   include PipelineOutputsHelper
+  ########################################
+  # Note to developers:
+  # If you are adding a new action to the sample controller, you must classify your action into
+  # READ_ACTIONS: where current_user has read access of the sample
+  # EDIT_ACTIONS: where current_user has update access of the sample
+  # OTHER_ACTIONS: where the actions access multiple samples or non-existing samples.
+  #                access control should still be checked as neccessary through current_power
+  #
+  ##########################################
 
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata].freeze

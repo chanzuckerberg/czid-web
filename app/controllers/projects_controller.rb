@@ -1,6 +1,15 @@
 class ProjectsController < ApplicationController
   include SamplesHelper
   include ReportHelper
+  ########################################
+  # Note to developers:
+  # If you are adding a new action to the project controller, you must classify your action into
+  # READ_ACTIONS: where current_user has read access of the project
+  # EDIT_ACTIONS: where current_user has update access of the project
+  # OTHER_ACTIONS: where the actions access multiple projects or non-existing projects.
+  #                access control should still be checked as neccessary through current_power
+  #
+  ##########################################
 
   READ_ACTIONS = [:show, :add_favorite, :remove_favorite, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :add_user_to_project, :all_emails, :update_project_visibility].freeze
