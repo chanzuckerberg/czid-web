@@ -34,6 +34,7 @@ Rails.application.routes.draw do
     put :add_favorite, on: :member
     put :remove_favorite, on: :member
     post :add_user_to_project, on: :member
+    put :update_project_visibility, on: :member
   end
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]

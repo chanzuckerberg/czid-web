@@ -19,6 +19,7 @@ class SampleUpload extends React.Component {
     this.handleHostChange = this.handleHostChange.bind(this);
     this.handleQueueChange = this.handleQueueChange.bind(this);
     this.handleMemoryChange = this.handleMemoryChange.bind(this);
+    this.handleBranchChange = this.handleBranchChange.bind(this);
     this.handleResultChange = this.handleResultChange.bind(this);
     this.toggleNewProjectInput = this.toggleNewProjectInput.bind(this);
     this.projects = props.projects || [];
@@ -41,6 +42,7 @@ class SampleUpload extends React.Component {
       resultPath: this.sample ? this.sample.s3_preload_result_path : '',
       jobQueue: this.sample ? this.sample.job_queue : '',
       memory: this.sample ? this.sample.sample_memory : '',
+      branch: this.sample ? this.sample.pipeline_branch : '',
       id: this.sample.id || '',
       inputFiles: props.inputFiles && props.inputFiles.length ? props.inputFiles : [],
       status: this.sample.status
@@ -65,6 +67,7 @@ class SampleUpload extends React.Component {
       selectedResultPath: this.selected.resultPath || '',
       selectedJobQueue: this.selected.jobQueue || '',
       selectedMemory: this.selected.memory || '',
+      selectedBranch: this.selected.branch || '',
       id: this.selected.id,
       errors: {},
       adminGenomes,
@@ -205,6 +208,7 @@ class SampleUpload extends React.Component {
         s3_preload_result_path: (this.userDetails.admin) ? this.refs.s3_preload_result_path.value.trim() : '',
         job_queue: this.state.selectedJobQueue,
         sample_memory: this.state.selectedMemory,
+        pipeline_branch: this.state.selectedBranch,
         host_genome_id: this.state.selectedHostGenomeId,
         subsample: this.state.omit_subsampling_checked ? 0 : 1,
         status: 'created'
@@ -414,6 +418,13 @@ class SampleUpload extends React.Component {
     this.clearError();
   }
 
+  handleBranchChange(e) {
+    this.setState({
+      selectedBranch: e.target.value.trim()
+    });
+    this.clearError();
+  }
+
   handleNameChange(e) {
     this.setState({
       selectedName: e.target.value.trim(),
@@ -438,6 +449,7 @@ class SampleUpload extends React.Component {
 
   toggleNewProjectInput(e) {
     $('.new-project-input').slideToggle();
+    $('.new-project-input  .input-icon').slideToggle();
     $('.new-project-button').toggleClass('active');
     this.setState({
       disableProjectSelect: !this.state.disableProjectSelect
@@ -637,7 +649,14 @@ class SampleUpload extends React.Component {
                       </Tipsy>
                     </div>
                     <div className='col no-padding s12 new-project-input hidden'>
-                      <input type='text' ref='new_project' onFocus={ this.clearError } className='browser-default' placeholder='Input new project name' />
+                      <input type='text' ref='new_project' onFocus={ this.clearError } className='browser-default new_project_input' placeholder='Input new project name' />
+                      <Tipsy content='Create project'
+                        placement='right'>
+                        <i className="fa fa-check-circle input-icon hidden"
+                          onClick={(e) => { if (this.refs.new_project.value.trim().length) {this.handleProjectSubmit()};
+                            $('.new-project-button').click();}}>
+                        </i>
+                      </Tipsy>
                       {
                         (this.state.errors.new_project) ?
                           <div className='field-error'>
@@ -645,18 +664,10 @@ class SampleUpload extends React.Component {
                           </div> : null
                       }
                     </div>
-                    <div className='col no-padding s8 new-project-input hidden'>
+                    <div className='col no-padding s12 new-project-input public_access hidden'>
                       <input ref="public_checked" type="checkbox" name="switch" id="public_checked" className="col s8 filled-in" onChange={ this.toggleCheckBox }
                              value={ this.state.public_checked } />
                       <label htmlFor="public_checked" className="checkbox">Make project public</label>
-                    </div>
-                    <div className='col no-padding s4 new-project-input hidden'>
-                      <button type='button'
-                              onClick={(e) => { if (this.refs.new_project.value.trim().length) {this.handleProjectSubmit()};
-                                                $('.new-project-button').click(); }}
-                              className='no-padding new-button skyblue-button'>
-                        <span>Create</span>
-                      </button>
                     </div>
                   </div>
                 </div>
@@ -758,7 +769,7 @@ class SampleUpload extends React.Component {
                     <div className='col no-padding s12'>
                       <div className='field-title'>
                         <div className='read-count-label'>
-                          Read 2
+                          Read 2 (optional)
                         </div>
                         <div className='validation-info'>
                           Accepted formats: fastq, fastq.gz, fasta, fasta.gz
@@ -899,6 +910,22 @@ class SampleUpload extends React.Component {
                                   {this.state.errors.memory}
                                 </div> : null
                             }
+                          </div>
+                        </div>
+                      </div>
+                      <div className='field'>
+                        <div className='row'>
+                          <div className='col no-padding s12'>
+                            <div className='field-title'>
+                              <div htmlFor="pipeline_branch" className='read-count-label'>
+                                Branch of idseq-pipeline to be used for processing
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className='row input-row'>
+                          <div className='col no-padding s12'>
+                            <input id='pipeline_branch' type='text' className='browser-default' ref="pipeline_branch" value={this.state.selectedBranch} placeholder='master' onChange={ this.handleBranchChange } />
                           </div>
                         </div>
                       </div>

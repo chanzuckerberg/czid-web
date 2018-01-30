@@ -350,7 +350,7 @@ class SamplesController < ApplicationController
                                    :s3_star_index_path, :s3_bowtie2_index_path, :host_genome_id,
                                    :sample_memory, :sample_location, :sample_date, :sample_tissue,
                                    :sample_template, :sample_library, :sample_sequencer,
-                                   :sample_notes, :job_queue, :search, :subsample,
+                                   :sample_notes, :job_queue, :search, :subsample, :pipeline_branch,
                                    input_files_attributes: [:name, :presigned_url, :source_type, :source])
   end
 

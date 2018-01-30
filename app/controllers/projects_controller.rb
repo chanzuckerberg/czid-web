@@ -2,9 +2,9 @@ class ProjectsController < ApplicationController
   include SamplesHelper
   include ReportHelper
 
-  power :projects, map: { [:edit, :update, :destroy, :add_user_to_project, :all_emails] => :updatable_projects }, as: :projects_scope
+  power :projects, map: { [:edit, :update, :destroy, :add_user_to_project, :all_emails, :update_project_visibility] => :updatable_projects }, as: :projects_scope
 
-  before_action :set_project, only: [:show, :add_favorite, :remove_favorite, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv, :edit, :update, :destroy, :add_user_to_project, :all_emails]
+  before_action :set_project, only: [:show, :add_favorite, :remove_favorite, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv, :edit, :update, :destroy, :add_user_to_project, :all_emails, :update_project_visibility]
 
   clear_respond_to
   respond_to :json
@@ -19,6 +19,42 @@ class ProjectsController < ApplicationController
   # GET /projects/1.json
   def show
     @samples = current_power.project_samples(@project)
+    # all exisiting project are null, we ensure private projects are explicitly set to 0
+    respond_to do |format|
+      format.html
+      format.json do
+        render json: {
+          id: @project.id,
+          name: @project.name,
+          total_members: @project.users.length,
+          public_access: @project.public_access.to_i,
+          created_at: @project.created_at
+        }
+      end
+    end
+  end
+
+  def update_project_visibility
+    errors = []
+    project_id = params[:id]
+    public_access = params[:public_access] ? params[:public_access].to_i : nil
+
+    errors.push('Project id is Invalid') unless @project
+    errors.push('Access value is empty') if public_access.nil?
+
+    if errors.empty?
+      @project.update(public_access: public_access)
+      render json: {
+        message: 'Project visibility updated successfully',
+        status: :accepted
+      }
+    else
+      render json: {
+        message: 'Unable to set visibility for project',
+        status: :unprocessable_entity,
+        errors: errors
+      }
+    end
   end
 
   def make_project_reports_csv
