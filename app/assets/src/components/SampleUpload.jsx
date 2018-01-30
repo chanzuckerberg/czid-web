@@ -438,6 +438,7 @@ class SampleUpload extends React.Component {
 
   toggleNewProjectInput(e) {
     $('.new-project-input').slideToggle();
+    $('.new-project-input  .input-icon').slideToggle();
     $('.new-project-button').toggleClass('active');
     this.setState({
       disableProjectSelect: !this.state.disableProjectSelect
@@ -637,7 +638,14 @@ class SampleUpload extends React.Component {
                       </Tipsy>
                     </div>
                     <div className='col no-padding s12 new-project-input hidden'>
-                      <input type='text' ref='new_project' onFocus={ this.clearError } className='browser-default' placeholder='Input new project name' />
+                      <input type='text' ref='new_project' onFocus={ this.clearError } className='browser-default new_project_input' placeholder='Input new project name' />
+                      <Tipsy content='Create project'
+                        placement='right'>
+                        <i className="fa fa-check-circle input-icon hidden"
+                          onClick={(e) => { if (this.refs.new_project.value.trim().length) {this.handleProjectSubmit()};
+                            $('.new-project-button').click();}}>
+                        </i>
+                      </Tipsy>
                       {
                         (this.state.errors.new_project) ?
                           <div className='field-error'>
@@ -645,18 +653,10 @@ class SampleUpload extends React.Component {
                           </div> : null
                       }
                     </div>
-                    <div className='col no-padding s8 new-project-input hidden'>
+                    <div className='col no-padding s12 new-project-input public_access hidden'>
                       <input ref="public_checked" type="checkbox" name="switch" id="public_checked" className="col s8 filled-in" onChange={ this.toggleCheckBox }
                              value={ this.state.public_checked } />
                       <label htmlFor="public_checked" className="checkbox">Make project public</label>
-                    </div>
-                    <div className='col no-padding s4 new-project-input hidden'>
-                      <button type='button'
-                              onClick={(e) => { if (this.refs.new_project.value.trim().length) {this.handleProjectSubmit()};
-                                                $('.new-project-button').click(); }}
-                              className='no-padding new-button skyblue-button'>
-                        <span>Create</span>
-                      </button>
                     </div>
                   </div>
                 </div>
