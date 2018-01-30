@@ -2,9 +2,15 @@ class ProjectsController < ApplicationController
   include SamplesHelper
   include ReportHelper
 
-  power :projects, map: { [:edit, :update, :destroy, :add_user_to_project, :all_emails, :update_project_visibility] => :updatable_projects }, as: :projects_scope
+  READ_ACTIONS = [:show, :add_favorite, :remove_favorite, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv]
+  EDIT_ACTIONS = [:edit, :update, :destroy, :add_user_to_project, :all_emails, :update_project_visibility]
+  OTHER_ACTIONS = [:create, :new, :index]
 
-  before_action :set_project, only: [:show, :add_favorite, :remove_favorite, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv, :edit, :update, :destroy, :add_user_to_project, :all_emails, :update_project_visibility]
+  power :projects, map: { EDIT_ACTIONS => :updatable_projects }, as: :projects_scope
+
+  before_action :set_project, only: READ_ACTIONS + EDIT_ACTIONS
+  before_action :assert_access, only: OTHER_ACTIONS
+  before_action :check_access
 
   clear_respond_to
   respond_to :json
@@ -64,9 +70,6 @@ class ProjectsController < ApplicationController
     render json: { status_display: project_reports_progress_message }
   end
 
-  def project_reports_progress_message
-    "In progress (project #{@project.name})"
-  end
 
   def project_reports_csv_status
     final_complete = `aws s3 ls #{@project.report_tar_s3(current_user.id)} | wc -l`.to_i == 1
@@ -190,10 +193,14 @@ class ProjectsController < ApplicationController
   # Use callbacks to share common setup or constraints between actions.
   def set_project
     @project = projects_scope.find(params[:id])
+    assert_access
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def project_params
     params.require(:project).permit(:name, :public_access, user_ids: [], sample_ids: [])
+  end
+  def project_reports_progress_message
+    "In progress (project #{@project.name})"
   end
 end

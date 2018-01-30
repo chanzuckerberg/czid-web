@@ -4,7 +4,9 @@ class SamplesController < ApplicationController
   include PipelineOutputsHelper
 
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder].freeze
-  WRITE_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata].freeze
+  EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata].freeze
+
+  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index]
 
   before_action :authenticate_user!, except: [:create, :bulk_upload]
   acts_as_token_authentication_handler_for User, only: [:create, :bulk_upload], fallback: :devise
@@ -14,10 +16,11 @@ class SamplesController < ApplicationController
   current_power do # Put this here for CLI
     Power.new(current_user)
   end
+  power :samples, map: { EDIT_ACTIONS => :updatable_samples }, as: :samples_scope
 
-  before_action :set_sample, only: READ_ACTIONS + WRITE_ACTIONS
-
-  power :samples, map: { WRITE_ACTIONS => :updatable_samples }, as: :samples_scope
+  before_action :set_sample, only: READ_ACTIONS + EDIT_ACTIONS
+  before_action :assert_access, only: OTHER_ACTIONS # Actions which don't require access control check
+  before_action :check_access
 
   PAGE_SIZE = 30
 
@@ -334,8 +337,10 @@ class SamplesController < ApplicationController
   end
 
   # Use callbacks to share common setup or constraints between actions.
+  private
   def set_sample
     @sample = samples_scope.find(params[:id])
+    assert_access
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
@@ -353,6 +358,7 @@ class SamplesController < ApplicationController
                                    :sample_notes, :job_queue, :search, :subsample, :pipeline_branch,
                                    input_files_attributes: [:name, :presigned_url, :source_type, :source])
   end
+
 
   def sort_by(samples, dir = nil)
     default_dir = 'id,desc'
