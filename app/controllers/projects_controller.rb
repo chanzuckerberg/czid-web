@@ -31,6 +31,30 @@ class ProjectsController < ApplicationController
     end
   end
 
+  def update_project_visibility
+    errors = []
+    project_id = params[:id]
+    public_access = params[:public_access] ? params[:public_access].to_i : nil
+
+    errors.push('Project id is Invalid') unless project_id.to_i
+    errors.push('Access value is empty') if public_access.nil?
+
+    if errors.empty?
+      @project = Project.find(project_id)
+      @project.update(public_access: public_access)
+      render json: {
+        message: 'Project visibility updated successfully',
+        status: :accepted
+      }
+    else
+      render json: {
+        message: 'Unable to set visibility for project',
+        status: :unprocessable_entity,
+        errors: errors
+      }
+    end
+  end
+
   def send_project_csv
     if params[:id] == 'all'
       samples = Sample.all
