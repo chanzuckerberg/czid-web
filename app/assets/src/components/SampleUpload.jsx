@@ -925,13 +925,7 @@ class SampleUpload extends React.Component {
                         </div>
                         <div className='row input-row'>
                           <div className='col no-padding s12'>
-                            <input id='pipeline_branch' type='text' className='browser-default' ref="branch" value={this.state.selectedBranch} placeholder='master' onChange={ this.handleBranchChange } />
-                            {
-                              (this.state.errors.branch) ?
-                                <div className='field-error'>
-                                  {this.state.errors.branch}
-                                </div> : null
-                            }
+                            <input id='pipeline_branch' type='text' className='browser-default' ref="pipeline_branch" value={this.state.selectedBranch} placeholder='master' onChange={ this.handleBranchChange } />
                           </div>
                         </div>
                       </div>
