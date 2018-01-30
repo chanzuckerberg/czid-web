@@ -219,6 +219,25 @@ class Samples extends React.Component {
     }
   }
 
+  toggleProjectVisbility(projId, publicAccess) {
+    if (projId) {
+      axios.put(`/projects/${projId}.json`, {
+        public_access: publicAccess,
+        authenticity_token: this.csrf
+      })
+      .then((res) => {
+        this.setState({
+          project: Object.assign(this.state.project, { public_access: publicAccess })
+        });
+      })
+      .catch((error) => {
+        Materialize.toast(
+          `Unable to change project visibility for '${this.state.project.name}'`,
+          3000, 'rounded');
+      });
+    }
+  }
+
   updateUserDisplay(email_to_add) {
     let new_project_users = this.state.project_users
     if (!new_project_users.includes(email_to_add)) {
@@ -749,12 +768,20 @@ class Samples extends React.Component {
                <span>
                   <i className="tiny material-icons">lock_open</i>
                   <span className='label'>Public Project</span>
-                  <a href='#'>Make project private</a>
+                  <a href='#'
+                    onClick={() => this.toggleProjectVisbility(
+                      this.state.project.id, 0)}>
+                    Make project private
+                  </a>
                </span>:
                <span>
                  <i className="tiny material-icons">lock</i>
                     <span className='label'>Private Project</span>
-                    <a href='#'>Make project public</a>
+                    <a href='#'
+                      onClick={() => this.toggleProjectVisbility(
+                        this.state.project.id, 1)}>
+                      Make project public
+                    </a>
                </span>
             ) : null}
           </div>
