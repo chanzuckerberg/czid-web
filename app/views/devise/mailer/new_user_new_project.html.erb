@@ -1,0 +1,9 @@
+<p>Hello <%= @resource.email %>!</p>
+
+<p><%= @sharing_user.email %> has shared the <%= "project".pluralize(@projects.count) + " " + @projects.map(&:name).join(", ") %> with you on IDseq.</p>
+
+<p>To activate your IDseq account, please set your password using the link below.</p>
+
+<p><%= link_to 'Activate account', edit_password_url(@resource, reset_password_token: @token) %></p>
+
+<p>If you do not want to activate your account, please ignore this email.</p>
