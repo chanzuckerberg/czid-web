@@ -33,7 +33,6 @@ Rails.application.routes.draw do
     get :all_emails, on: :member
     put :add_favorite, on: :member
     put :remove_favorite, on: :member
-    post :add_user_to_project, on: :member
     put :update_project_visibility, on: :member
     put :add_user, on: :member
   end

@@ -189,7 +189,6 @@ class ProjectsController < ApplicationController
   end
 
   def add_user
-    Rails.logger.debug(params.inspect)
     @user = User.find_by(email: params[:user_email_to_add])
     create_new_user_random_password(params[:user_email_to_add]) unless @user
     UserMailer.added_to_projects_email(@user, current_user, [@project]).deliver_now unless @project.user_ids.include? @user.id
