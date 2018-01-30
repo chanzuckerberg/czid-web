@@ -5,10 +5,6 @@ class Power
     @user = user
   end
 
-  power :users do
-    User if @user.admin?
-  end
-
   power :projects do
     Project.viewable(@user)
   end

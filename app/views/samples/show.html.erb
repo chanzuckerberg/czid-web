@@ -17,6 +17,7 @@
       reportPageParams: JSON.parse('<%= raw escape_json(@report_page_params) %>'),
       sample_status: '<%= @sample_status %>',
       rerun_path: '<%= kickoff_pipeline_sample_path %>',
+      can_edit: <%= @can_edit %>,
       all_backgrounds: JSON.parse('<%= raw escape_json(@background_models) %>')
     }, 'PipelineSampleReads_page');
   <% end %>

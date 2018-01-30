@@ -143,6 +143,7 @@ class SamplesController < ApplicationController
     @project_sample_ids_names = @sample.project ? Hash[current_power.project_samples(@sample.project).map { |s| [s.id, s.name] }] : nil
     @host_genome = @sample.host_genome ? @sample.host_genome : nil
     @background_models = Background.all
+    @can_edit = current_power.updatable_sample?(@sample)
 
     default_background_id = @sample.host_genome && @sample.host_genome.default_background ? @sample.host_genome.default_background.id : nil
     if @pipeline_run && (@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?
