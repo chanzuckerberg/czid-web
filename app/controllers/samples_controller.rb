@@ -128,7 +128,7 @@ class SamplesController < ApplicationController
     @job_stats = @pipeline_run ? @pipeline_run.job_stats : nil
     @summary_stats = @job_stats ? get_summary_stats(@job_stats) : nil
     @project_info = @sample.project ? @sample.project : nil
-    @project_sample_ids_names = @sample.project ? Hash[ current_power.project_samples(@sample.project).map { |s| [s.id, s.name] }]  : nil
+    @project_sample_ids_names = @sample.project ? Hash[current_power.project_samples(@sample.project).map { |s| [s.id, s.name] }] : nil
     @host_genome = @sample.host_genome ? @sample.host_genome : nil
     @background_models = Background.all
 

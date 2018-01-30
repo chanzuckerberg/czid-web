@@ -36,7 +36,6 @@ class ProjectsController < ApplicationController
 
   def update_project_visibility
     errors = []
-    project_id = params[:id]
     public_access = params[:public_access] ? params[:public_access].to_i : nil
 
     errors.push('Project id is Invalid') unless @project
