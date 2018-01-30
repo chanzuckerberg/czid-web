@@ -28,11 +28,12 @@ class Project < ApplicationRecord
     return path unless path != File.expand_path(path)
   end
 
-  def make_bulk_csv(params)
-    bulk_report_csvs_from_params(self, params)
+  def samples
+    # Disable samples function. have to go through power
+    return nil
   end
 
-  def self.editable (user)
+  def self.editable(user)
     if user.admin?
       all
     else
@@ -40,7 +41,7 @@ class Project < ApplicationRecord
     end
   end
 
-  def self.viewable (user)
+  def self.viewable(user)
     if user.admin?
       all
     else
@@ -62,4 +63,5 @@ class Project < ApplicationRecord
                 .pluck(:project_id)
          )
   end
+
 end

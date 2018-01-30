@@ -211,7 +211,7 @@ class Sample < ApplicationRecord
     if user.admin?
       all
     else
-      project_ids = user.projects.select("id").pluck(:id)
+      project_ids = Project.editable(user).select("id").pluck(:id)
       joins("INNER JOIN projects ON samples.project_id = projects.id").
         where("(project_id in (?) or
                 projects.public_access = 1 or
@@ -224,7 +224,7 @@ class Sample < ApplicationRecord
     if user.admin?
       all
     else
-      project_ids = user.projects.select("id").pluck(:id)
+      project_ids = Project.editable(user).select("id").pluck(:id)
       where("project_id in (?)", project_ids)
     end
   end

@@ -1,34 +1,24 @@
 class ProjectsController < ApplicationController
   include SamplesHelper
   include ReportHelper
-  before_action :login_required
 
-  before_action :set_project, only: [:show, :edit, :update, :destroy, :add_favorite, :remove_favorite, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv, :add_user_to_project, :all_emails]
+  power :projects, map: { [:edit, :update, :destroy, :add_user_to_project, :all_emails] => :updatable_projects}, as: :projects_scope
+
+  before_action :set_project, only: [:show, :add_favorite, :remove_favorite, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv, :edit, :update, :destroy, :add_user_to_project, :all_emails]
+
   clear_respond_to
   respond_to :json
+
   # GET /projects
   # GET /projects.json
   def index
-    @projects = Project.all
+    @projects = current_power.projects
   end
 
   # GET /projects/1
   # GET /projects/1.json
   def show
-  end
-
-  def send_project_csv
-    if params[:id] == 'all'
-      samples = Sample.all
-      project_name = "all-projects"
-    else
-      project = Project.find(params[:id])
-      samples = project ? project.samples : nil
-      project_name = project && project.name ? "project-#{project.name.downcase.split(' ').join('_')}" : "project"
-    end
-    formatted_samples = format_samples(samples)
-    project_csv = generate_sample_list_csv(formatted_samples)
-    send_data project_csv, filename: project_name + '_sample-table.csv'
+    @samples = current_power.project_samples(@project)
   end
 
   def make_project_reports_csv
@@ -164,7 +154,7 @@ class ProjectsController < ApplicationController
 
   # Use callbacks to share common setup or constraints between actions.
   def set_project
-    @project = Project.find(params[:id])
+    @project = projects_scope.find(params[:id])
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
