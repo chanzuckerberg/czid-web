@@ -97,8 +97,8 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def add_failed_job
-    existing_failed_jobs = self.failed_jobs ? "#{self.failed_jobs}, " : ""
-    new_failed_job = "[#{self.job_id}, #{self.job_log_id}]"
+    existing_failed_jobs = failed_jobs ? "#{failed_jobs}, " : ""
+    new_failed_job = "[#{job_id}, #{job_log_id}]"
     self.failed_jobs = existing_failed_jobs + new_failed_job
   end
 
