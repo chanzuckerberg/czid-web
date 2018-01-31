@@ -255,6 +255,7 @@ class SamplesController < ApplicationController
 
     respond_to do |format|
       if @sample.save
+        @sample.input_files.map!(&:set_presigned_url_for_local_upload)
         format.html { redirect_to @sample, notice: 'Sample was successfully created.' }
         format.json { render :show, status: :created, location: @sample }
       else
