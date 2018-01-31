@@ -29,12 +29,12 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'non admin shouldnt create user ' do
-    post users_url, params: { user: {email: "test@gmail.com", password: "password3", password_confirmation: "password3"} }
+    post users_url, params: { user: { email: "test@gmail.com", password: "password3", password_confirmation: "password3" } }
     assert_redirected_to root_url
   end
 
   test 'non admin shouldnt update user' do
-    put user_url@user, params: { user: {name: "abc xyz"} }
+    put user_url @user, params: { user: { name: "abc xyz" } }
     assert_redirected_to root_url
   end
 
@@ -61,7 +61,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'host genome -non admin shouldnt update ' do
-    put host_genome_url @host_genome, params: { host_genome: {name: "abc xyz"} }
+    put host_genome_url @host_genome, params: { host_genome: { name: "abc xyz" } }
     assert_redirected_to root_url
   end
 
@@ -71,10 +71,9 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'host genome -non admin shouldnt create ' do
-    post host_genomes_url, params: { host_genome: {name: "dsfsdfd"} }
+    post host_genomes_url, params: { host_genome: { name: "dsfsdfd" } }
     assert_redirected_to root_url
   end
-
 
   # Backgrounds
 
@@ -99,7 +98,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
   end
 
   test ' background -non admin shouldnt update ' do
-    put background_url @background, params: { background: {name: "abc xyz"} }
+    put background_url @background, params: { background: { name: "abc xyz" } }
     assert_redirected_to root_url
   end
 
@@ -109,8 +108,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
   end
 
   test ' background -non admin shouldnt create ' do
-    post backgrounds_url, params: { background: {name: "dsfsdfd"} }
+    post backgrounds_url, params: { background: { name: "dsfsdfd" } }
     assert_redirected_to root_url
   end
-
 end
