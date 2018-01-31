@@ -20,7 +20,8 @@ class PipelineRunStage < ApplicationRecord
     "cd /mnt; " \
     "git clone https://github.com/chanzuckerberg/idseq-pipeline.git; " \
     "cd idseq-pipeline; " \
-    "git rev-parse master > #{COMMIT_SHA_FILE_ON_WORKER}; " \
+    "git checkout #{pipeline_run.pipeline_branch}; " \
+    "git rev-parse #{pipeline_run.pipeline_branch} > #{COMMIT_SHA_FILE_ON_WORKER}; " \
     "pip install -e .[test]"
   end
 
