@@ -3,7 +3,7 @@ class PipelineRunStage < ApplicationRecord
   include PipelineOutputsHelper
   belongs_to :pipeline_run
   DEFAULT_MEMORY_IN_MB = 4000
-  DEFAULT_RETRIES = 2
+
   DEFAULT_STORAGE_IN_GB = 500
   JOB_TYPE_BATCH = 1
   COMMIT_SHA_FILE_ON_WORKER = "/mnt/idseq-pipeline/commit-sha.txt".freeze
@@ -25,10 +25,10 @@ class PipelineRunStage < ApplicationRecord
     "pip install -e .[test]"
   end
 
-  def aegea_batch_submit_command(base_command, memory=Sample::DEFAULT_MEMORY)
+  def aegea_batch_submit_command(base_command, memory = Sample::DEFAULT_MEMORY)
     command = "aegea batch submit --command=\"#{base_command}\" "
     queue = sample.job_queue.present? ? sample.job_queue : Sample::DEFAULT_QUEUE
-    command += "--retry_attempts #{DEFAULT_RETRIES} --storage /mnt=#{DEFAULT_STORAGE_IN_GB} --ecr-image idseq --memory #{memory} --queue #{queue} --vcpus 4"
+    command += " --storage /mnt=#{DEFAULT_STORAGE_IN_GB} --ecr-image idseq --memory #{memory} --queue #{queue} --vcpus 4"
     command
   end
 
@@ -90,6 +90,12 @@ class PipelineRunStage < ApplicationRecord
     pipeline_run.update_job_status
   end
 
+  def instance_terminated?(job_hash)
+    job_hash['status'] == STATUS_FAILED &&
+      job_hash['statusReason'].start_with?("Host EC2 (instance") &&
+      job_hash['statusReason'].end_with?(") terminated.")
+  end
+
   def update_job_status
     return if completed?
     stdout, stderr, status = Open3.capture3("aegea", "batch", "describe", job_id.to_s)
@@ -100,6 +106,7 @@ class PipelineRunStage < ApplicationRecord
       if job_hash['container'] && job_hash['container']['logStreamName']
         self.job_log_id = job_hash['container']['logStreamName']
       end
+      run_job if instance_terminated?(job_hash) # retry if necessary
     else
       Airbrake.notify("Error for update job status for pipeline run #{id} with error #{stderr}")
       self.job_status = STATUS_ERROR
@@ -178,7 +185,6 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def postprocess_command
-    sample = pipeline_run.sample
     batch_command_env_variables = "INPUT_BUCKET=#{alignment_output_s3_path} " \
       "OUTPUT_BUCKET=#{postprocess_output_s3_path} " \
       "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} "
