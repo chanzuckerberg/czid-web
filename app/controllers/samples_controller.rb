@@ -2,18 +2,41 @@ class SamplesController < ApplicationController
   include ReportHelper
   include SamplesHelper
   include PipelineOutputsHelper
+  ########################################
+  # Note to developers:
+  # If you are adding a new action to the sample controller, you must classify your action into
+  # READ_ACTIONS: where current_user has read access of the sample
+  # EDIT_ACTIONS: where current_user has update access of the sample
+  # OTHER_ACTIONS: where the actions access multiple samples or non-existing samples.
+  #                access control should still be checked as neccessary through current_power
+  #
+  ##########################################
 
-  before_action :authenticate_user!, only: [:new, :index, :update, :destroy, :edit, :show, :reupload_source, :kickoff_pipeline, :bulk_new, :bulk_import, :bulk_upload]
-  before_action :set_sample, only: [:show, :edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder]
+  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder].freeze
+  EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata].freeze
+
+  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index].freeze
+
+  before_action :authenticate_user!, except: [:create, :bulk_upload]
   acts_as_token_authentication_handler_for User, only: [:create, :bulk_upload], fallback: :devise
-  before_action :login_required
+
+  before_action :login_required # redundant. make sure it works
+
+  current_power do # Put this here for CLI
+    Power.new(current_user)
+  end
+  power :samples, map: { EDIT_ACTIONS => :updatable_samples }, as: :samples_scope
+
+  before_action :set_sample, only: READ_ACTIONS + EDIT_ACTIONS
+  before_action :assert_access, only: OTHER_ACTIONS # Actions which don't require access control check
+  before_action :check_access
 
   PAGE_SIZE = 30
 
   # GET /samples
   # GET /samples.json
   def index
-    @all_project = Project.all
+    @all_project = current_power.projects
     @page_size = PAGE_SIZE
     project_id = params[:project_id]
     name_search_query = params[:search]
@@ -22,7 +45,7 @@ class SamplesController < ApplicationController
     sort = params[:sort_by]
     samples_query = JSON.parse(params[:ids]) if params[:ids].present?
 
-    results = Sample.includes(:pipeline_runs)
+    results = current_power.samples.includes(:pipeline_runs)
 
     results = results.where(id: samples_query) if samples_query.present?
 
@@ -41,20 +64,26 @@ class SamplesController < ApplicationController
 
   def all
     @samples = if params[:ids].present?
-                 Sample.where(["id in (?)", params[:ids].to_s])
+                 current_power.samples.where(["id in (?)", params[:ids].to_s])
                else
-                 Sample.all
+                 current_power.samples
                end
   end
 
   # GET /samples/bulk_new
   def bulk_new
-    @projects = Project.all
+    @projects = current_power.projects
     @host_genomes = HostGenome.all
   end
 
   def bulk_import
     @project_id = params[:project_id]
+    @project = Project.find(@project_id)
+    unless current_power.updatable_project?(@project)
+      render json: { status: "user is not authorized to update to project #{@project.name}" }, status: :unprocessable_entity
+      return
+    end
+
     @host_genome_id = params[:host_genome_id]
     @bulk_path = params[:bulk_path]
     @samples = parsed_samples_for_s3_path(@bulk_path, @project_id, @host_genome_id)
@@ -72,10 +101,12 @@ class SamplesController < ApplicationController
   # POST /samples/bulk_upload
   def bulk_upload
     samples = samples_params || []
+    editable_project_ids = current_power.updatable_projects.pluck(:id)
     @samples = []
     @errors = []
     samples.each do |sample_attributes|
       sample = Sample.new(sample_attributes)
+      next unless editable_project_ids.include?(sample.project_id)
       sample.bulk_mode = true
       sample.user = @user if @user
       if sample.save
@@ -86,7 +117,7 @@ class SamplesController < ApplicationController
     end
 
     respond_to do |format|
-      if @errors.empty?
+      if @errors.empty? && !@samples.empty?
         format.json { render json: { samples: @samples, sample_ids: @samples.pluck(:id) } }
       else
         format.json { render json: { samples: @samples, errors: @errors }, status: :unprocessable_entity }
@@ -109,9 +140,10 @@ class SamplesController < ApplicationController
     @job_stats = @pipeline_run ? @pipeline_run.job_stats : nil
     @summary_stats = @job_stats ? get_summary_stats(@job_stats) : nil
     @project_info = @sample.project ? @sample.project : nil
-    @project_sample_ids_names = @sample.project ? get_samples_in_project(@sample.project) : nil
+    @project_sample_ids_names = @sample.project ? Hash[current_power.project_samples(@sample.project).map { |s| [s.id, s.name] }] : nil
     @host_genome = @sample.host_genome ? @sample.host_genome : nil
     @background_models = Background.all
+    @can_edit = current_power.updatable_sample?(@sample)
 
     default_background_id = @sample.host_genome && @sample.host_genome.default_background ? @sample.host_genome.default_background.id : nil
     if @pipeline_run && (@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?
@@ -227,7 +259,7 @@ class SamplesController < ApplicationController
   # GET /samples/new
   def new
     @sample = nil
-    @projects = Project.all
+    @projects = current_power.updatable_projects
     @host_genomes = host_genomes_list ? host_genomes_list : nil
   end
 
@@ -235,7 +267,7 @@ class SamplesController < ApplicationController
   def edit
     @project_info = @sample.project ? @sample.project : nil
     @host_genomes = host_genomes_list ? host_genomes_list : nil
-    @projects = Project.all
+    @projects = current_power.updatable_projects
     @input_files = @sample.input_files
   end
 
@@ -246,6 +278,10 @@ class SamplesController < ApplicationController
     if params[:project_name]
       project_name = params.delete(:project_name)
       project = Project.find_by(name: project_name)
+    end
+    if project && !current_power.updatable_project?(project)
+      format.json { render json: { status: "User not authorized to update project #{project.name}" }, status: :unprocessable_entity }
+
     end
     params[:input_files_attributes] = params[:input_files_attributes].reject { |f| f["source"] == '' }
     @sample = Sample.new(params)
@@ -311,8 +347,12 @@ class SamplesController < ApplicationController
   end
 
   # Use callbacks to share common setup or constraints between actions.
+
+  private
+
   def set_sample
-    @sample = Sample.find(params[:id])
+    @sample = samples_scope.find(params[:id])
+    assert_access
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.

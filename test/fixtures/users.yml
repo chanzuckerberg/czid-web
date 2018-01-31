@@ -8,4 +8,5 @@ one:
 
 two:
   email: email2@example.com
+  encrypted_password: <%= Devise::Encryptor.digest(User, "password2") %>
   name: User 2
