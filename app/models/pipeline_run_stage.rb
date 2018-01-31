@@ -106,7 +106,10 @@ class PipelineRunStage < ApplicationRecord
       if job_hash['container'] && job_hash['container']['logStreamName']
         self.job_log_id = job_hash['container']['logStreamName']
       end
-      run_job if instance_terminated?(job_hash) # retry if necessary
+      if instance_terminated?(job_hash)
+        run_job # retry if necessary
+        return
+      end
     else
       Airbrake.notify("Error for update job status for pipeline run #{id} with error #{stderr}")
       self.job_status = STATUS_ERROR
