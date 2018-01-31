@@ -7,3 +7,15 @@ one:
 two:
   name: sample2
   project: two
+expired_sample:
+  name: sample3
+  created_at: 18.months.ago
+  project: two
+
+public_sample:
+  name: sample4
+  project: public_project
+
+joe_sample:
+  name: sample Joe
+  project: joe_project
