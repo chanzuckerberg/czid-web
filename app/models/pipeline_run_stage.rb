@@ -96,6 +96,12 @@ class PipelineRunStage < ApplicationRecord
       job_hash['statusReason'].end_with?(") terminated.")
   end
 
+  def add_failed_job
+    existing_failed_jobs = self.failed_jobs ? "#{self.failed_jobs}, " : ""
+    new_failed_job = "[#{self.job_id}, #{self.job_log_id}]"
+    self.failed_jobs = existing_failed_jobs + new_failed_job
+  end
+
   def update_job_status
     return if completed?
     stdout, stderr, status = Open3.capture3("aegea", "batch", "describe", job_id.to_s)
@@ -107,6 +113,7 @@ class PipelineRunStage < ApplicationRecord
         self.job_log_id = job_hash['container']['logStreamName']
       end
       if instance_terminated?(job_hash)
+        add_failed_job
         run_job # retry if necessary
         return
       end
