@@ -28,7 +28,7 @@ class InputFile < ApplicationRecord
   def set_presigned_url_for_local_upload
     if sample && source_type == 'local'
       # TODO: investigate the content-md5 stuff https://github.com/aws/aws-sdk-js/issues/151 https://gist.github.com/algorist/385616
-      self.update(presigned_url: S3_PRESIGNER.presigned_url(:put_object, bucket: SAMPLES_BUCKET_NAME, key: file_path))
+      update(presigned_url: S3_PRESIGNER.presigned_url(:put_object, bucket: SAMPLES_BUCKET_NAME, key: file_path))
     end
   end
 
