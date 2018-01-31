@@ -13,7 +13,7 @@ class ProjectsController < ApplicationController
 
   READ_ACTIONS = [:show, :add_favorite, :remove_favorite, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_emails, :update_project_visibility].freeze
-  OTHER_ACTIONS = [:create, :new, :index].freeze
+  OTHER_ACTIONS = [:create, :new, :index, :send_project_csv].freeze
 
   power :projects, map: { EDIT_ACTIONS => :updatable_projects }, as: :projects_scope
 
@@ -47,6 +47,20 @@ class ProjectsController < ApplicationController
         }
       end
     end
+  end
+
+  def send_project_csv
+    if params[:id] == 'all'
+      samples = current_power.samples
+      project_name = "all-projects"
+    else
+      project = current_power.projects.find(params[:id])
+      samples = current_power.project_samples(project)
+      project_name = "project-#{project.name.downcase.split(' ').join('_')}"
+    end
+    formatted_samples = format_samples(samples)
+    project_csv = generate_sample_list_csv(formatted_samples)
+    send_data project_csv, filename: project_name + '_sample-table.csv'
   end
 
   def update_project_visibility

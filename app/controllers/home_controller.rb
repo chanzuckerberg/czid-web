@@ -7,6 +7,7 @@ class HomeController < ApplicationController
   def index
     @favorite_projects = current_user.favorites
     @projects = current_power.projects
+    @editable_project_ids = current_power.updatable_projects.pluck(:id)
     render 'home'
   end
 
