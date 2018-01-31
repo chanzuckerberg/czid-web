@@ -39,6 +39,7 @@ class Sample < ApplicationRecord
   validates :name, uniqueness: { scope: :project_id }
 
   before_save :check_host_genome, :check_status
+  after_save :set_presigned_url_for_local_upload
 
   # getter
   attr_reader :bulk_mode
@@ -64,6 +65,15 @@ class Sample < ApplicationRecord
       end
     end
     # TODO: for s3 input types, test permissions before saving, by making a HEAD request
+  end
+
+  def set_presigned_url_for_local_upload
+    input_files.each do |f|
+      if f.source_type == 'local'
+        # TODO: investigate the content-md5 stuff https://github.com/aws/aws-sdk-js/issues/151 https://gist.github.com/algorist/385616
+        f.update(presigned_url: S3_PRESIGNER.presigned_url(:put_object, bucket: SAMPLES_BUCKET_NAME, key: f.file_path))
+      end
+    end
   end
 
   def self.search(search)
