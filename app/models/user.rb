@@ -8,6 +8,7 @@ class User < ApplicationRecord
   has_many :samples
   has_many :favorite_projects
   has_many :favorites, through: :favorite_projects, source: :project
+  attr_accessor :email_template
   ROLE_ADMIN = 1
 
   def as_json(options = {})

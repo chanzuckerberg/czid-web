@@ -204,6 +204,7 @@ class ProjectsController < ApplicationController
     user_params_with_password[:password] = random_password
     user_params_with_password[:password_confirmation] = random_password
     @user ||= User.new(user_params_with_password)
+    @user.email_template = 'new_user_new_project'
     @user.send_reset_password_instructions if @user.save
   end
 
