@@ -22,7 +22,7 @@ class SamplesController < ApplicationController
   acts_as_token_authentication_handler_for User, only: [:create, :bulk_upload], fallback: :devise
 
   before_action :login_required # redundant. make sure it works
-  skip_before_action :verify_authenticity_token, only: [:create] # for CLI
+  skip_before_action :verify_authenticity_token, only: [:create, :kickoff_pipeline] # for CLI
 
   current_power do # Put this here for CLI
     Power.new(current_user)
