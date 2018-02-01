@@ -61,6 +61,7 @@ class Samples extends React.Component {
       displayEmpty: false,
       project_id_download_in_progress: null,
       project_add_email_validation: null,
+      projectType: this.fetchParams('type') || 'all',
       columnsShown: ["total_reads",
         "nonhost_reads",
         "quality_control",
@@ -709,12 +710,15 @@ class Samples extends React.Component {
     let project_id = this.state.selectedProjectId ? this.state.selectedProjectId : 'all'
     let search_field_width = (project_id === 'all') ? 'col s10' : 'col s8'
     let search_field = (
-      <div className={search_field_width + ' no-padding'}>
-        <div className='white'>
-          <span className="icon">
-            <i className="fa fa-search" aria-hidden="true"/>
-          </span>
-          <input id="search" value={this.state.searchParams} onChange={this.handleSearchChange}  type="search" onKeyDown={this.handleSearch} className="search" placeholder='Search for sample'/>
+      <div className={search_field_width + ' search-field'}>
+        <div className='row'>
+          <i className="fa search-icon left fa-search"></i>
+          <input id="search"
+            value={this.state.searchParams}
+            onChange={this.handleSearchChange}
+            onKeyDown={this.handleSearch}
+            className="search col s12"
+            placeholder='Search for sample'/>
         </div>
       </div>
     );
@@ -830,7 +834,7 @@ class Samples extends React.Component {
                 <span>
                   <i className="tiny material-icons">people</i>
                     {this.state.project.total_members}
-                    { (this.state.project.total_members > 1) ? 'Members' : 'Member'}
+                    { (this.state.project.total_members > 1) ? ' Members' : ' Member'}
                 </span>
                 : <span>
                     No member
@@ -838,10 +842,10 @@ class Samples extends React.Component {
               ) : null }
 
           </li>
-          <li>
+          <li className='add-member'>
             { this.state.project && this.canEditProject(this.state.project.id) ? (
             <a className='modal-trigger' href="#modal1" onClick={this.resetForm}>
-              <i className="tiny material-icons">add</i> Add user
+              Add user
             </a>) : null }
           </li>
         </ul>
@@ -864,7 +868,8 @@ class Samples extends React.Component {
           <p className="col no-padding s12">
           { this.state.allSamples.length === 0 ? 'No sample found'
             : ( this.state.allSamples.length === 1 ? '1 sample found'
-              : `${this.state.allSamples.length} out of ${this.state.totalNumber} samples found`)
+              : `Currently viewing ${this.state.allSamples.length} out of
+              ${this.state.totalNumber} samples`)
           }
         </p>
         </div>
@@ -973,10 +978,10 @@ class Samples extends React.Component {
     return (
       <div className="row content-wrapper">
         <div className="project-info col s12">
-          { projInfo }  { addUser }
+          { projInfo } { addUser }
         </div>
 
-        <div className="sample-container col s12">
+        <div className="sample-container no-padding col s12">
           { search_box }
           <div className="sample-table-container row">
             { tableHead }
@@ -1080,16 +1085,18 @@ class Samples extends React.Component {
       filter: this.state.filterParams,
       tissue: this.state.tissueParams,
       search: this.state.searchParams,
-      sort_by: this.state.sort_by
+      sort_by: this.state.sort_by,
+      type: this.state.projectType
     };
     window.history.replaceState(null, null, `?${$.param(params)}`)
   }
 
-  handleProjectSelection(id) {
+  handleProjectSelection(id, listType) {
     this.setState({
       selectedProjectId: id,
       pagesLoaded: 0,
-      pageEnd: false
+      pageEnd: false,
+      projectType: listType
     }, () => {
       this.setUrlLocation();
       this.fetchProjectDetails(id);
@@ -1109,10 +1116,10 @@ class Samples extends React.Component {
     return (
       <div>
           <div className="row content-body">
-            <div className="col s2 sidebar">
+            <div className="col s2 no-padding sidebar">
               { project_section }
             </div>
-             <div className="col s10">
+             <div className="col no-padding samples-content s10">
               { this.renderTable(this.state.allSamples) }
             </div>
           </div>

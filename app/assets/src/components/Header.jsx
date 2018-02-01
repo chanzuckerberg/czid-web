@@ -44,14 +44,14 @@ class Header extends React.Component  {
 
   render() {
     return (
-      <div>
+      <div className='header-row row'>
         <div className="page-loading">
           <div className="btn disabled">
             <i className="fa fa-spinner fa-spin"/>
             <span className='spinner-label'></span>
           </div>
         </div>
-        <div className="site-header">
+        <div className="site-header col s12">
           {/* Dropdown menu */}
           <ul id="dropdown1" className="dropdown-content">
             <li onClick={ this.gotoPage.bind(this, '/samples/new') }><a href="#!">New sample</a></li>
@@ -63,15 +63,17 @@ class Header extends React.Component  {
 
           <div>
             <div className="">
-              <a href="/" className="left brand-details">
-                <div className="brand-short">
+              <div href="/" className="left brand-details">
+                { /* <i className='fa sidebar-drawer fa-indent'></i> */ }
+                <a href='/'>
+                  <div className="brand-short">
                     ID.seq
-                </div>
-
-                <div className="brand-long">
-                  Infectious Disease Platform
-                </div>
-              </a>
+                  </div>
+                  <div className="brand-long">
+                    Infectious Disease Platform
+                  </div>
+                </a>
+              </div>
 
               <div className={ this.userSignedIn ? "right hide-on-med-and-down header-right-nav" : "right hide-on-med-and-down header-right-nav menu" }>
                 { this.userSignedIn ? <div className='profile-header-dropdown'><a className="dropdown-button profile-dropdown" data-activates="dropdown1">

@@ -23,3 +23,39 @@ four:
   sample: two
   source_type: local
   source: file4.fastq.gz
+
+expired_sample_file_1:
+  name: file3.fastq.gz
+  sample: expired_sample
+  source_type: local
+  source: file3.fastq.gz
+
+expired_sample_file_2:
+  name: file4.fastq.gz
+  sample: expired_sample
+  source_type: local
+  source: file4.fastq.gz
+
+public_sample_file_1:
+  name: file3.fastq.gz
+  sample: public_sample
+  source_type: local
+  source: file3.fastq.gz
+
+public_sample_file_2:
+  name: file4.fastq.gz
+  sample: public_sample
+  source_type: local
+  source: file4.fastq.gz
+
+joe_sample_file_1:
+  name: file3.fastq.gz
+  sample: joe_sample
+  source_type: local
+  source: file3.fastq.gz
+
+joe_sample_file_2:
+  name: file4.fastq.gz
+  sample: joe_sample
+  source_type: local
+  source: file4.fastq.gz

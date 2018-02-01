@@ -2,6 +2,7 @@ class SamplesController < ApplicationController
   include ReportHelper
   include SamplesHelper
   include PipelineOutputsHelper
+
   ########################################
   # Note to developers:
   # If you are adding a new action to the sample controller, you must classify your action into
@@ -11,14 +12,15 @@ class SamplesController < ApplicationController
   #                access control should still be checked as neccessary through current_power
   #
   ##########################################
+  skip_before_action :verify_authenticity_token, only: [:create, :update]
 
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata].freeze
 
-  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index].freeze
+  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all].freeze
 
-  before_action :authenticate_user!, except: [:create, :bulk_upload]
-  acts_as_token_authentication_handler_for User, only: [:create, :bulk_upload], fallback: :devise
+  before_action :authenticate_user!, except: [:create, :update, :bulk_upload]
+  acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload], fallback: :devise
 
   before_action :login_required # redundant. make sure it works
 
@@ -280,9 +282,13 @@ class SamplesController < ApplicationController
       project = Project.find_by(name: project_name)
     end
     if project && !current_power.updatable_project?(project)
-      format.json { render json: { status: "User not authorized to update project #{project.name}" }, status: :unprocessable_entity }
-
+      respond_to do |format|
+        format.json { render json: { status: "User not authorized to update project #{project.name}" }, status: :unprocessable_entity }
+        format.html { render json: { status: "User not authorized to update project #{project.name}" }, status: :unprocessable_entity }
+      end
+      return
     end
+
     params[:input_files_attributes] = params[:input_files_attributes].reject { |f| f["source"] == '' }
     @sample = Sample.new(params)
     @sample.project = project if project
@@ -338,8 +344,13 @@ class SamplesController < ApplicationController
     @sample.status = Sample::STATUS_RERUN
     @sample.save
     respond_to do |format|
-      format.html { redirect_to samples_url, notice: 'A pipeline run is  in progress.' }
-      format.json { head :no_content }
+      if !@sample.pipeline_runs.empty?
+        format.html { redirect_to samples_url, notice: 'A pipeline run is in progress.' }
+        format.json { head :no_content }
+      else
+        format.html { redirect_to samples_url, notice: 'No pipeline run in progress.' }
+        format.json { render json: @sample.errors.full_messages, status: :unprocessable_entity }
+      end
     end
   end
 
