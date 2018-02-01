@@ -32,7 +32,10 @@ import Samples from './Samples';
   }
 
   componentDidMount() {
-    this.reformatProjectList(this.favoriteProjects, this.allProjects)
+    this.reformatProjectList(this.favoriteProjects, this.allProjects);
+    $(() => {
+      this.highlightSelectedProject(this.state.selectedProjectId);
+    });
   }
 
   fetchParams(param) {
@@ -156,52 +159,38 @@ import Samples from './Samples';
 
   handleProjectClick(e) {
     let id = e.target.getAttribute('data-id');
-    let listType = e.target.getAttribute('data-type');
-    if (listType == 'fav') {
-      this.highlightSelectedFavoriteProject(id)
-    } else {
-      this.highlightSelectedProject(e, id);
-    }
-    this.props.selectProject(id);
+    let listType = e.target.getAttribute('data-type') || null;
+    this.props.selectProject(id, listType);
+    this.highlightSelectedProject(id, listType);
   }
 
-  highlightSelectedProject(e, id) {
+  highlightSelectedProject(id, type) {
     this.removeHighlight();
-    this.removeHighlightedText();
-    id ? $(`.project-item[data-id="${id}"]`).addClass('highlight') : this.highlightAllSamplesorAllProject(e)
-  }
-
-  highlightAllSamplesorAllProject(e) {
-    this.removeHighlightedText();
-    let tagAttribute =  e.target.getAttribute('data-title')
-    if (tagAttribute === "allsamples") {
-      $('.samples-title').addClass('highlight-text')
+    const isFavoriteSelected =
+    this.fetchParams('type') === 'favorite' || type === 'favorite';
+    console.log(isFavoriteSelected, 'Adding class');
+    if (id && isFavoriteSelected) {
+      $(`.fav-item.project-item[data-id="${id}"]`).addClass('highlight');
+      console.log(isFavoriteSelected, `.fav-item.project-item[data-id="${id}"]`, 'Adding class');
+    } else if (id){
+      $(`.all.project-item[data-id="${id}"]`).addClass('highlight');
     } else {
-      $('.projects-title').addClass('highlight-text')
+      $(`.all-samples.project-item`).addClass('highlight');
     }
   }
-
-  removeHighlightedText() {
-    $('.samples-title').removeClass('highlight-text')
-    $('.projects-title').removeClass('highlight-text')
-  }
-
 
   removeHighlight() {
-    $('.fav-item').removeClass('highlight')
     $('.project-item').removeClass('highlight')
   }
 
-  highlightSelectedFavoriteProject(id) {
-    this.removeHighlight();
-    this.removeHighlightedText();
-    $(`.fav-item[data-id="${id}"]`).addClass('highlight');
-  }
-
-
   addFavIconClass(project) {
     return (
-      <i data-status="favorite" data-fav={project.favorited} data-id={project.id} onClick={this.toggleFavorite} className={!project.favorited ? "favorite fa fa-star-o":  "favorite fa fa-star"}></i>
+      <i data-status="favorite"
+        data-fav={project.favorited}
+        data-id={project.id}
+        onClick={this.toggleFavorite}
+        className={!project.favorited ?
+          "favorite fa fa-star-o right hidden" : "favorite fa fa-star right hidden"}></i>
     )
   }
 
@@ -222,38 +211,79 @@ import Samples from './Samples';
     const fav_section = (
       <div className="row fav-row">
         <span className="title">Favorite Projects</span>
-        <hr/>
-        <div className="fav-projects-wrapper">
-          {!this.state.formattedFavProjectList.length ? <div className="none">None</div>: this.state.showLessFavorites ? this.state.formattedFavProjectList.sort(sortLogic).slice(0,4).map((project, i) => {
-            return (
-              <div className="fav-item" data-id={project.id}  key={i}><div onClick={this.handleProjectClick} data-id={project.id}><span data-id={project.id}>{project.name}</span></div>{this.addFavIconClass(project)}</div>
-            )
+        <div className='divider'></div>
+        <div className="fav-projects-wrapper  projects-wrapper">
+          {!this.state.formattedFavProjectList.length ?
+            <div className="none">None</div> :
+              this.state.showLessFavorites ?
+              this.state.formattedFavProjectList
+              .sort(sortLogic)
+              .slice(0,4)
+              .map((project, i) => {
+                return (
+                  <div className="project-item fav-item" data-id={project.id} key={i}>
+                    <span className='project-label'
+                      onClick={this.handleProjectClick} data-type='favorite'
+                      data-id={project.id}>
+                      {project.name}
+                    </span>
+                    {this.addFavIconClass(project)}
+                  </div>
+                )
           }):
-          this.state.formattedFavProjectList.sort(sortLogic).map((project, i) => {
+          this.state.formattedFavProjectList
+          .sort(sortLogic)
+          .map((project, i) => {
             return (
-              <div className="fav-item" data-id={project.id}  key={i}><div onClick={this.handleProjectClick} data-id={project.id}><span data-id={project.id}>{project.name}</span></div>{this.addFavIconClass(project)}</div>
+              <div className="project-item fav-item" data-id={project.id} key={i}>
+                <span className='project-label'
+                  onClick={this.handleProjectClick} data-type='favorite'
+                  data-id={project.id}>
+                  {project.name}
+                </span>
+                { this.addFavIconClass(project) }
+              </div>
             )
-          }) }
-          { this.state.formattedFavProjectList.length > 4 ? <div className="more" onClick={this.toggleDisplayFavProjects}>{this.state.showLessFavorites ? 'Show More...' : 'Show Less...'}</div> : ''}
+          })
+        }
+        { (this.state.formattedFavProjectList.length > 4)
+          ? <div className="more"
+          onClick={this.toggleDisplayFavProjects}>
+            {this.state.showLessFavorites ? 'Show More...' : 'Show Less...'}
+          </div>
+          : null
+        }
         </div>
       </div>
     )
 
     const all_projects_section = (
       <div className="projects">
-        <span onClick={this.handleProjectClick} data-title="allprojects" className="title projects-title">All Projects</span>
-        <hr/>
+        <span data-title="allprojects" className="title">All Projects</span>
+        <div className='divider'></div>
         <div className="projects-wrapper">
           { !this.state.formattedProjectList.length ? "None" : this.state.showLess ? this.state.formattedProjectList.sort(sortLogic).slice(0,7).map((project, i) => {
               return (
-                  <div className="project-item" data-id={project.id}  key={i}><div onClick={this.handleProjectClick} data-id={project.id}><span data-id={project.id}>{project.name}</span></div>{this.addFavIconClass(project)}</div>
+                  <div className="all project-item" data-id={project.id}  key={i}>
+                    <span className='project-label'
+                      onClick={this.handleProjectClick} data-id={project.id}>
+                      {project.name}
+                    </span>
+                    {this.addFavIconClass(project)}
+                  </div>
               )
             }) :
             this.state.formattedProjectList.sort(sortLogic).map((project, i) => {
             return (
-              <div className="project-item" data-id={project.id} key={i}><div onClick={this.handleProjectClick} data-id={project.id}><span data-id={project.id}>{project.name}</span></div>{this.addFavIconClass(project)}</div>
+              <div className="all project-item" data-id={project.id} key={i}>
+                <span className='project-label'
+                  onClick={this.handleProjectClick} data-id={project.id}>
+                  {project.name}
+                </span>
+                {this.addFavIconClass(project)}
+              </div>
             )
-          }) }
+          })}
           { this.state.formattedProjectList.length > 7 ? <div className="more" onClick={this.toggleDisplayProjects}>{this.state.showLess ? 'Show More...' : 'Show Less...'}</div> : ''}
         </div>
       </div>
@@ -261,9 +291,16 @@ import Samples from './Samples';
     return (
       <div className="project-wrapper">
         <div className="row">
-          <div className="samples">
-            <p data-title="allsamples" className="samples-title" onClick={this.handleProjectClick}>All Samples</p>
-            <span onClick={this.uploadSample}><i className="fa fa-lg fa-plus-circle" aria-hidden="true"></i></span>
+          <div className='col no-padding s12'>
+            <div className="projects-wrapper">
+              <div className="all-samples project-item">
+                <span className='project-label'
+                  onClick={this.handleProjectClick}>
+                  All Samples
+                </span>
+              </div>
+            </div>
+
           </div>
           { fav_section }
           { all_projects_section }
