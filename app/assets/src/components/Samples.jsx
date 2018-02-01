@@ -879,7 +879,6 @@ class Samples extends React.Component {
           </a>
         </li>
         { this.tissue_types.map((tissue, i) => {
-          <div>{tissue}nknjn</div>
           return (
             <li key={i} className="filter-item" data-status={tissue} onClick={ this.handleTissueFilterSelect } ><a data-status={tissue} className="filter-item">{tissue}</a><i className="filter fa fa-check hidden"></i></li>
           )
@@ -1014,6 +1013,7 @@ class Samples extends React.Component {
       $('.filter').hide();
       $('body').addClass('background-cover');
     });
+    PipelineSampleReads.fetchTissueTypes();
     this.initializeTooltip();
     this.fetchProjectPageData();
     this.state.selectedProjectId ? this.fetchProjectDetails(this.state.selectedProjectId) : null;

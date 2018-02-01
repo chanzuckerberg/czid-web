@@ -792,15 +792,19 @@ input[type=search]:focus:not([readonly]) {
 }
 
 .content-body {
+  margin-bottom: 0 !important;
   .sidebar {
-    height: 100vh;
-    border-right: 1px solid #eaeaea;
-    background: #F8F9F9;
     position: sticky;
     top: -10px;
-    padding: 10px 20px !important;
-    font-size: 14px;
+    // padding: 10px 20px !important;
+    // font-size: 14px;
     position: sticky;
+    background: #F8F9F9;
+    position: sticky;
+    z-index: 1;
+    top: 10px;
+    min-height: -webkit-fill-available !important;
+    border-right: 1px solid #d4d4d4;
     .title {
       font-weight: 600;
       hr {
@@ -845,8 +849,9 @@ input[type=search]:focus:not([readonly]) {
         }
       }
       .projects-wrapper {
-        height: 300px;
-        overflow: scroll;
+        max-height: 500px;
+        // overflow: scroll;
+        overflow-y:scroll !important;
       }
     }
     .project-item, .fav-item {
@@ -873,6 +878,7 @@ input[type=search]:focus:not([readonly]) {
     }
     .more {
       font-size: 12px;
+      padding: 10px 0;
       cursor: pointer;
       padding: 0 5px;
       text-decoration: underline;

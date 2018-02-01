@@ -23,7 +23,6 @@ class PipelineSampleReads extends React.Component {
     this.allCategories  = props.allCategories;
     this.reportDetails  = props.reportDetails;
     this.reportPageParams  = props.reportPageParams;
-
     this.jobStatistics = props.jobStatistics;
     this.summary_stats = props.summary_stats;
     this.gotoReport = this.gotoReport.bind(this);
