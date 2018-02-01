@@ -474,15 +474,15 @@ $break-large: 1070px;
       cursor: pointer;
       padding: 11px;
       display: block;
-      border: 1px solid #adadad;
-      background: #d8d8d8;
+      background: #f4f4f4;
+      border: 1px solid #d9d9d9;
       color: #525f6a !important;
       i {
         margin-right: 4px;
       }
       &:hover {
-        background: #f4f4f4;
-        border: 1px solid #d9d9d9;
+        border: 1px solid #adadad;
+        background: #f1f0f0;
       }
     }
     .download-progress {
@@ -688,7 +688,14 @@ $break-large: 1070px;
     border-radius: 3px;
     .search-field {
       padding-left: 20px;
+      .search-icon {
+        position: absolute;
+        margin-left: 10px;
+        margin-top: 14px;
+        font-size: 18px;
+      }
     }
+
     .icon {
       padding-top: 12px;
       display: inline-block;
@@ -697,7 +704,7 @@ $break-large: 1070px;
     .search {
       width: 92% !important;
       border: 2px solid #d5dae1;
-      margin-left: 20px
+      padding-left: 32px;
       &::placeholder {
         color: #d0d9de;
       }

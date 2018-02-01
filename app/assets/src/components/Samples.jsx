@@ -712,6 +712,7 @@ class Samples extends React.Component {
     let search_field = (
       <div className={search_field_width + ' search-field'}>
         <div className='row'>
+          <i className="fa search-icon left fa-search"></i>
           <input id="search"
             value={this.state.searchParams}
             onChange={this.handleSearchChange}
