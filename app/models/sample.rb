@@ -39,6 +39,7 @@ class Sample < ApplicationRecord
   validates :name, uniqueness: { scope: :project_id }
 
   before_save :check_host_genome, :check_status
+  after_save :set_presigned_url_for_local_upload
 
   # getter
   attr_reader :bulk_mode
@@ -64,6 +65,15 @@ class Sample < ApplicationRecord
       end
     end
     # TODO: for s3 input types, test permissions before saving, by making a HEAD request
+  end
+
+  def set_presigned_url_for_local_upload
+    input_files.each do |f|
+      if f.source_type == 'local'
+        # TODO: investigate the content-md5 stuff https://github.com/aws/aws-sdk-js/issues/151 https://gist.github.com/algorist/385616
+        f.update(presigned_url: S3_PRESIGNER.presigned_url(:put_object, bucket: SAMPLES_BUCKET_NAME, key: f.file_path))
+      end
+    end
   end
 
   def self.search(search)
@@ -201,6 +211,35 @@ class Sample < ApplicationRecord
     return unless [STATUS_UPLOADED, STATUS_RERUN].include?(status)
     self.status = STATUS_CHECKED
     kickoff_pipeline
+  end
+
+  def self.viewable(user)
+    if user.admin?
+      all
+    else
+      project_ids = Project.editable(user).select("id").pluck(:id)
+      joins("INNER JOIN projects ON samples.project_id = projects.id")
+        .where("(project_id in (?) or
+                projects.public_access = 1 or
+                DATE_ADD(samples.created_at, INTERVAL projects.days_to_keep_sample_private DAY) < ?)",
+               project_ids, Time.current)
+    end
+  end
+
+  def self.editable(user)
+    if user.admin?
+      all
+    else
+      project_ids = Project.editable(user).select("id").pluck(:id)
+      where("project_id in (?)", project_ids)
+    end
+  end
+
+  def self.public_samples
+    joins("INNER JOIN projects ON samples.project_id = projects.id")
+      .where("(projects.public_access = 1 or
+              DATE_ADD(samples.created_at, INTERVAL projects.days_to_keep_sample_private DAY) < ?)",
+             Time.current)
   end
 
   def archive_old_pipeline_runs

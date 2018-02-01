@@ -1,22 +1,40 @@
 class ProjectsController < ApplicationController
   include SamplesHelper
   include ReportHelper
-  before_action :login_required
+  ########################################
+  # Note to developers:
+  # If you are adding a new action to the project controller, you must classify your action into
+  # READ_ACTIONS: where current_user has read access of the project
+  # EDIT_ACTIONS: where current_user has update access of the project
+  # OTHER_ACTIONS: where the actions access multiple projects or non-existing projects.
+  #                access control should still be checked as neccessary through current_power
+  #
+  ##########################################
 
-  before_action :set_project, only: [:show, :edit, :update, :destroy, :add_favorite, :remove_favorite, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv, :add_user, :all_emails]
+  READ_ACTIONS = [:show, :add_favorite, :remove_favorite, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv].freeze
+  EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_emails, :update_project_visibility].freeze
+  OTHER_ACTIONS = [:create, :new, :index, :send_project_csv].freeze
+
+  power :projects, map: { EDIT_ACTIONS => :updatable_projects }, as: :projects_scope
+
+  before_action :set_project, only: READ_ACTIONS + EDIT_ACTIONS
+  before_action :assert_access, only: OTHER_ACTIONS
+  before_action :check_access
+
   clear_respond_to
   respond_to :json
+
   # GET /projects
   # GET /projects.json
   def index
-    @projects = Project.all
+    @projects = current_power.projects
   end
 
   # GET /projects/1
   # GET /projects/1.json
   def show
+    @samples = current_power.project_samples(@project)
     # all exisiting project are null, we ensure private projects are explicitly set to 0
-    public_access = @project.public_access.nil? ? 0 : @project.public_access
     respond_to do |format|
       format.html
       format.json do
@@ -24,23 +42,35 @@ class ProjectsController < ApplicationController
           id: @project.id,
           name: @project.name,
           total_members: @project.users.length,
-          public_access: public_access,
+          public_access: @project.public_access.to_i,
           created_at: @project.created_at
         }
       end
     end
   end
 
+  def send_project_csv
+    if params[:id] == 'all'
+      samples = current_power.samples
+      project_name = "all-projects"
+    else
+      project = current_power.projects.find(params[:id])
+      samples = current_power.project_samples(project)
+      project_name = "project-#{project.name.downcase.split(' ').join('_')}"
+    end
+    formatted_samples = format_samples(samples)
+    project_csv = generate_sample_list_csv(formatted_samples)
+    send_data project_csv, filename: project_name + '_sample-table.csv'
+  end
+
   def update_project_visibility
     errors = []
-    project_id = params[:id]
     public_access = params[:public_access] ? params[:public_access].to_i : nil
 
-    errors.push('Project id is Invalid') unless project_id.to_i
+    errors.push('Project id is Invalid') unless @project
     errors.push('Access value is empty') if public_access.nil?
 
     if errors.empty?
-      @project = Project.find(project_id)
       @project.update(public_access: public_access)
       render json: {
         message: 'Project visibility updated successfully',
@@ -55,30 +85,12 @@ class ProjectsController < ApplicationController
     end
   end
 
-  def send_project_csv
-    if params[:id] == 'all'
-      samples = Sample.all
-      project_name = "all-projects"
-    else
-      project = Project.find(params[:id])
-      samples = project ? project.samples : nil
-      project_name = project && project.name ? "project-#{project.name.downcase.split(' ').join('_')}" : "project"
-    end
-    formatted_samples = format_samples(samples)
-    project_csv = generate_sample_list_csv(formatted_samples)
-    send_data project_csv, filename: project_name + '_sample-table.csv'
-  end
-
   def make_project_reports_csv
     user_id = current_user.id
     `aws s3 rm #{@project.report_tar_s3(user_id)}`
     params["user_id"] = user_id
     Resque.enqueue(GenerateProjectReportsCsv, params)
     render json: { status_display: project_reports_progress_message }
-  end
-
-  def project_reports_progress_message
-    "In progress (project #{@project.name})"
   end
 
   def project_reports_csv_status
@@ -219,11 +231,16 @@ class ProjectsController < ApplicationController
   end
 
   def set_project
-    @project = Project.find(params[:id])
+    @project = projects_scope.find(params[:id])
+    assert_access
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def project_params
     params.require(:project).permit(:name, :public_access, user_ids: [], sample_ids: [])
+  end
+
+  def project_reports_progress_message
+    "In progress (project #{@project.name})"
   end
 end

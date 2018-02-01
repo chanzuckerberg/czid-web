@@ -5,3 +5,11 @@ one:
 
 two:
   name: Project 2
+
+public_project:
+  name: Public Project
+  public_access: 1
+
+joe_project:
+  name: Project 3
+  users: [joe]

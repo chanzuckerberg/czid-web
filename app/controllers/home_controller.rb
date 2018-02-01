@@ -2,10 +2,12 @@ require 'will_paginate/array'
 class HomeController < ApplicationController
   include SamplesHelper
   before_action :login_required
+  power :projects
 
   def index
     @favorite_projects = current_user.favorites
-    @projects = Project.all
+    @projects = current_power.projects
+    @editable_project_ids = current_power.updatable_projects.pluck(:id)
     render 'home'
   end
 

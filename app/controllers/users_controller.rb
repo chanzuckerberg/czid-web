@@ -1,7 +1,7 @@
 class UsersController < ApplicationController
   clear_respond_to
   respond_to :json
-  before_action :admin_required, only: [:show, :edit, :update, :destroy, :new, :create, :index]
+  before_action :admin_required
   before_action :set_user, only: [:show, :edit, :update, :destroy]
 
   # GET /users

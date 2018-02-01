@@ -35,6 +35,8 @@ class Samples extends React.Component {
     this.pageSize = props.pageSize || 30;
     this.tissue_types = PipelineSampleReads.fetchTissueTypes();
     this.handleAddUser = this.handleAddUser.bind(this);
+    this.editableProjects = props.editableProjects
+    this.canEditProject = this.canEditProject.bind(this)
     this.fetchProjectUsers = this.fetchProjectUsers.bind(this);
     this.updateProjectUserState = this.updateProjectUserState.bind(this);
     this.updateUserDisplay = this.updateUserDisplay.bind(this);
@@ -125,6 +127,10 @@ class Samples extends React.Component {
     });
   }
 
+  canEditProject(projectId) {
+    return (this.editableProjects.indexOf(parseInt(projectId)) > -1)
+  }
+
   displayReportProgress(res) {
       $('.download-progress')
       .html(`<i class="fa fa-circle-o-notch fa-spin fa-fw"></i> ${res.data.status_display}`)
@@ -210,11 +216,14 @@ class Samples extends React.Component {
   }
 
   fetchProjectUsers(id) {
-    if (!id) {
+    if (!id || !this.canEditProject(id)) {
       this.updateProjectUserState([])
     } else {
-      axios.get(`/projects/${id}/all_emails`).then((res) => {
+      axios.get(`/projects/${id}/all_emails.json`).then((res) => {
         this.updateProjectUserState(res.data.emails)
+      }).catch((error) => {
+        this.updateProjectUserState([])
+        // console.log(error.response.data)
       });
     }
   }
@@ -816,7 +825,7 @@ class Samples extends React.Component {
             ) : null }
           </li>
           <li>
-              { this.state.project ? (
+              { this.state.project && this.canEditProject(this.state.project.id) ? (
                 this.state.project.total_members ?
                 <span>
                   <i className="tiny material-icons">people</i>
@@ -829,10 +838,11 @@ class Samples extends React.Component {
               ) : null }
 
           </li>
-          <li>
+          <li className='add-member'>
+            { this.state.project && this.canEditProject(this.state.project.id) ? (
             <a className='modal-trigger' href="#modal1" onClick={this.resetForm}>
-              <i className="tiny material-icons">add</i> Add user
-            </a>
+              Add user
+            </a>) : null }
           </li>
         </ul>
       </div>
