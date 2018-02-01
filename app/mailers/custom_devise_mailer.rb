@@ -4,34 +4,25 @@ class CustomDeviseMailer < Devise::Mailer
   default template_path: 'devise/mailer'
 
   def reset_password_instructions(record, token, opts = {})
-    assign_email_template record
-    opts[:template_name] = @template if @template
-    opts[:subject] = @subject if @subject
+    assign_email_arguments record
+    opts[:template_name] = @email_arguments[:email_template] if @email_arguments[:email_template]
+    opts[:subject] = @email_arguments[:email_subject] if @email_arguments[:email_subject]
+    @sharing_user_email = begin
+                            User.find(@email_arguments[:sharing_user_id]).email
+                          rescue
+                            nil
+                          end
+    @shared_project_name = begin
+                             Project.find(@email_arguments[:shared_project_id]).name
+                           rescue
+                             nil
+                           end
     super
   end
 
   private
 
-  def assign_email_template(user)
-    @sharing_user_email = begin
-                            User.find(user.email_arguments[:sharing_user_id]).email
-                          rescue
-                            nil
-                          end
-    @shared_project_name = begin
-                             Project.find(user.email_arguments[:shared_project_id]).name
-                           rescue
-                             nil
-                           end
-    @template = begin
-                  user.email_arguments[:email_template]
-                rescue
-                  nil
-                end
-    @subject = begin
-                  user.email_arguments[:email_subject]
-                rescue
-                  nil
-                end
+  def assign_email_arguments(user)
+    @email_arguments = user.email_arguments
   end
 end
