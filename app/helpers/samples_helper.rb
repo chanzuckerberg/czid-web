@@ -48,10 +48,6 @@ module SamplesHelper
     end
   end
 
-  def get_samples_in_project(project)
-    Hash[project.samples.map { |s| [s.id, s.name] }]
-  end
-
   def populate_metadata_bulk(csv_s3_path)
     # CSV should have columns "sample_name", "project_name", and any desired columns from Sample::METADATA_FIELDS
     csv = get_s3_file(csv_s3_path)

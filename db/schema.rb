@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180119200528) do
+ActiveRecord::Schema.define(version: 20180131225646) do
 
   create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "archive_of"
@@ -121,6 +121,7 @@ ActiveRecord::Schema.define(version: 20180119200528) do
     t.string "job_id"
     t.string "output_func"
     t.string "name"
+    t.text "failed_jobs"
     t.index ["pipeline_run_id", "step_number"], name: "index_pipeline_run_stages_on_pipeline_run_id_and_step_number"
     t.index ["pipeline_run_id"], name: "index_pipeline_run_stages_on_pipeline_run_id"
   end
@@ -143,8 +144,9 @@ ActiveRecord::Schema.define(version: 20180119200528) do
     t.bigint "total_reads"
     t.bigint "remaining_reads"
     t.bigint "unmapped_reads"
-    t.integer "subsample"
     t.text "version"
+    t.integer "subsample"
+    t.string "pipeline_branch"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
     t.index ["pipeline_output_id"], name: "index_pipeline_runs_on_pipeline_output_id", unique: true
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
@@ -155,7 +157,7 @@ ActiveRecord::Schema.define(version: 20180119200528) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "public_access", limit: 1
-    t.integer "days_to_keep_sample_private"
+    t.integer "days_to_keep_sample_private", default: 365, null: false
     t.index ["name"], name: "index_projects_on_name", unique: true
   end
 
@@ -188,6 +190,7 @@ ActiveRecord::Schema.define(version: 20180119200528) do
     t.bigint "host_genome_id"
     t.bigint "user_id"
     t.integer "subsample"
+    t.string "pipeline_branch"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
     t.index ["user_id"], name: "index_samples_on_user_id"
   end

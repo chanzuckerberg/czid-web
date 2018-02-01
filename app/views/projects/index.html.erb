@@ -22,7 +22,7 @@
         <% end %>
         <%= link_to project.users.last.name, project.users.last if project.users.last %>
         </td>
-        <td><%= project.samples.count %></td>
+        <td><%= current_power.project_samples(project).count %></td>
         <td><%= project.created_at %></td>
         <td><%= button_to 'Show', project_path(project), method: :get %></td>
       </tr>
