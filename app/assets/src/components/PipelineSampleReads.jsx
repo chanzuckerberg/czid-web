@@ -10,6 +10,7 @@ import PipelineSampleReport from './PipelineSampleReport';
 class PipelineSampleReads extends React.Component {
   constructor(props) {
     super(props);
+    this.can_edit = props.can_edit
     this.csrf = props.csrf;
     this.allBackgrounds = props.all_backgrounds;
     this.rerunPath = props.rerun_path;
@@ -35,7 +36,7 @@ class PipelineSampleReads extends React.Component {
       rerun: false,
       failureText: 'Sample run failed'
     };
-    this.TYPE_PROMPT = "Type here...";
+    this.TYPE_PROMPT = this.can_edit ? "Type here..." : "-" ;
     this.NUCLEOTIDE_TYPES = ['-',"DNA", "RNA"];
     this.DROPDOWN_OPTIONS = { sample_tissue: PipelineSampleReads.fetchTissueTypes(),
                               sample_template: this.NUCLEOTIDE_TYPES };
@@ -67,15 +68,16 @@ class PipelineSampleReads extends React.Component {
               </div>
               <i className="fa fa-chevron-down right"/>
             </div>
-
-            <ul id={field} className='dropdown-content details-dropdown'>
-              {
-                dropdown_options.map((option_value, i) => {
-                  return <li onClick={(e) => {this.handleDropdownChange(field, i, e)}} ref={field}
-                    key={i}>{option_value}</li>
-                })
-              }
-            </ul>
+            {this.can_edit ? (
+              <ul id={field} className='dropdown-content details-dropdown'>
+                {
+                  dropdown_options.map((option_value, i) => {
+                    return <li onClick={(e) => {this.handleDropdownChange(field, i, e)}} ref={field}
+                      key={i}>{option_value}</li>
+                  })
+                }
+              </ul>
+            ) : null }
           </div>
         </div>
       </div>
@@ -91,7 +93,7 @@ class PipelineSampleReads extends React.Component {
         </div>
         <div className='col s6 no-padding'>
           <div className="details-value sample-notes">
-            <pre suppressContentEditableWarning={true} contentEditable={true} id={field}>
+            <pre suppressContentEditableWarning={true} contentEditable={this.can_edit} id={field}>
               {display_value}
             </pre>
           </div>
@@ -202,6 +204,10 @@ class PipelineSampleReads extends React.Component {
   }
 
   listenNoteChanges() {
+    if (!this.can_edit) {
+
+      return ;
+    }
     let currentText = '';
     $('.sample-notes').focusin((e) => {
       currentText = e.target.innerText.trim();
@@ -260,8 +266,8 @@ class PipelineSampleReads extends React.Component {
       d_report = <div className="center-align text-grey text-lighten-2 no-report">{ this.pipelineInProgress() ? <div>Sample Waiting ...<p><i className='fa fa-spinner fa-spin fa-3x'></i></p></div> :
         <div>
           <h6 className="failed"><i className="fa fa-frown-o"></i>  {this.state.failureText}  </h6>
-          <p>
-           { !this.state.rerun ? <a onClick={ this.rerunPipeline }className="custom-button small"><i className="fa fa-repeat left"></i>RERUN PIPELINE</a>
+          <p>'
+           { !this.state.rerun && this.can_edit ? <a onClick={ this.rerunPipeline }className="custom-button small"><i className="fa fa-repeat left"></i>RERUN PIPELINE</a>
             : null }
             </p>
         </div> }
@@ -470,7 +476,7 @@ class PipelineSampleReads extends React.Component {
                             </div>
                             <div className='col s7 '>
                               <div className="details-value label sample-notes">
-                                <pre suppressContentEditableWarning={true} contentEditable={true} id='sample_host'>
+                                <pre suppressContentEditableWarning={true} contentEditable={this.can_edit} id='sample_host'>
                                   {this.sampleInfo['sample_host'] && this.sampleInfo['sample_host'].trim() !== "" ?
                                     this.sampleInfo['sample_host'] : this.TYPE_PROMPT
                                   }
@@ -486,7 +492,7 @@ class PipelineSampleReads extends React.Component {
                             Notes
                           </div>
                           <div className="sample-notes note">
-                            <pre className='details-value' suppressContentEditableWarning={true} contentEditable={true} id='sample_notes'>
+                            <pre className='details-value' suppressContentEditableWarning={true} contentEditable={this.can_edit} id='sample_notes'>
                               {this.sampleInfo['sample_notes'] && this.sampleInfo['sample_notes'].trim() !== "" ? this.sampleInfo['sample_notes'] : this.TYPE_PROMPT}
                             </pre>
                           </div>

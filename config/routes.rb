@@ -36,11 +36,12 @@ Rails.application.routes.draw do
     put :update_project_visibility, on: :member
     put :add_user, on: :member
   end
+  get 'projects/:id/csv', to: 'projects#send_project_csv'
+
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
 
   mount Resque::Server.new, at: '/resque'
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
   root to: 'home#index'
-  get 'projects/:id/csv', to: 'projects#send_project_csv'
 end

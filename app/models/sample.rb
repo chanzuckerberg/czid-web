@@ -213,6 +213,35 @@ class Sample < ApplicationRecord
     kickoff_pipeline
   end
 
+  def self.viewable(user)
+    if user.admin?
+      all
+    else
+      project_ids = Project.editable(user).select("id").pluck(:id)
+      joins("INNER JOIN projects ON samples.project_id = projects.id")
+        .where("(project_id in (?) or
+                projects.public_access = 1 or
+                DATE_ADD(samples.created_at, INTERVAL projects.days_to_keep_sample_private DAY) < ?)",
+               project_ids, Time.current)
+    end
+  end
+
+  def self.editable(user)
+    if user.admin?
+      all
+    else
+      project_ids = Project.editable(user).select("id").pluck(:id)
+      where("project_id in (?)", project_ids)
+    end
+  end
+
+  def self.public_samples
+    joins("INNER JOIN projects ON samples.project_id = projects.id")
+      .where("(projects.public_access = 1 or
+              DATE_ADD(samples.created_at, INTERVAL projects.days_to_keep_sample_private DAY) < ?)",
+             Time.current)
+  end
+
   def archive_old_pipeline_runs
     old_pipeline_runs = pipeline_runs.order('id desc').offset(1)
     old_pipeline_runs.each do |pr|

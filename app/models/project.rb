@@ -28,7 +28,37 @@ class Project < ApplicationRecord
     return path unless path != File.expand_path(path)
   end
 
-  def make_bulk_csv(params)
-    bulk_report_csvs_from_params(self, params)
+  def samples
+    # Disable samples function. have to go through power
+    nil
+  end
+
+  def self.editable(user)
+    if user.admin?
+      all
+    else
+      where("id in (select project_id from projects_users where user_id=?)", user.id)
+    end
+  end
+
+  def self.viewable(user)
+    if user.admin?
+      all
+    else
+      where("id in (select project_id from projects_users where user_id=?)
+             or
+             id in (?) ",
+            user.id,
+            Sample.public_samples.select("project_id, count(1)")
+                  .group("project_id")
+                  .pluck(:project_id))
+    end
+  end
+
+  def self.public_projects
+    where("id in (?)",
+          Sample.public_samples.select("project_id, count(1)")
+                .group("project_id")
+                .pluck(:project_id))
   end
 end
