@@ -435,17 +435,23 @@ $break-large: 1070px;
 
 .project-menu {
   li {
-    cursor: pointer;
     display: inline-block;
     margin-left: 8px;
-    color: #a1a4a4;
+    color: #2C2D2D;
     .material-icons {
       position: relative;
       top: 2px;
       font-size: 16px;
     }
-    &:hover {
-      color: #656868;
+
+    &.add-member {
+      cursor: pointer;
+      color: #4A90E2
+    }
+    i {
+      &.material-icons {
+        color: #767878;
+      }
     }
   }
 }
@@ -880,8 +886,11 @@ input[type=search]:focus:not([readonly]) {
 }
 
 .project-popup {
-  width: 40%;
-  box-shadow: 1px 1px 8px 3px #fff;
+  width: 30%;
+  box-shadow: 1px 1px 7px 2px #fff;
+  color: #353535;
+  border-radius: 0px;
+  top: 25% !important;
   .project_modal_header {
     font-size: 18px;
     font-weight: bold;
@@ -893,12 +902,15 @@ input[type=search]:focus:not([readonly]) {
     font-weight: bold;
   }
   .project_modal_visiblity {
-    font-size: 13px;
     i.material-icons {
-      font-size: 12px;
+      font-size: 15px;
+      position: relative;
+      top: 2px;
+      color: #b8b8b8;
     }
-    .label, i{
-      color: #b4b4b4;
+    .label{
+      color: #949494;
+      margin-left: 5px;
     }
     a {
       margin-left: 5px;
@@ -914,7 +926,11 @@ input[type=search]:focus:not([readonly]) {
     input {
       border: 1px solid #e8e8e8;
       padding: 12px;
-      border-radius: 4px;
+      border-radius: 3px;
+      &::placeholder {
+        color: #c0c0c0;
+        font-weight: 400;
+      }
     }
     .error-message {
       color: #d9534f;
