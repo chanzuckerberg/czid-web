@@ -214,7 +214,7 @@ import Samples from './Samples';
         <div className='divider'></div>
         <div className="fav-projects-wrapper  projects-wrapper">
           {!this.state.formattedFavProjectList.length ?
-            <div className="none">None</div> :
+            <div className='title'>None</div> :
               this.state.showLessFavorites ?
               this.state.formattedFavProjectList
               .sort(sortLogic)
@@ -262,16 +262,21 @@ import Samples from './Samples';
         <span data-title="allprojects" className="title">All Projects</span>
         <div className='divider'></div>
         <div className="projects-wrapper">
-          { !this.state.formattedProjectList.length ? "None" : this.state.showLess ? this.state.formattedProjectList.sort(sortLogic).slice(0,7).map((project, i) => {
-              return (
-                  <div className="all project-item" data-id={project.id}  key={i}>
-                    <span className='project-label'
-                      onClick={this.handleProjectClick} data-id={project.id}>
-                      {project.name}
-                    </span>
-                    {this.addFavIconClass(project)}
-                  </div>
-              )
+          { !this.state.formattedProjectList.length ?
+             <div className='title'>None</div> :
+               this.state.showLess ? this.state.formattedProjectList
+               .sort(sortLogic)
+               .slice(0,7)
+               .map((project, i) => {
+                return (
+                    <div className="all project-item" data-id={project.id}  key={i}>
+                      <span className='project-label'
+                        onClick={this.handleProjectClick} data-id={project.id}>
+                        {project.name}
+                      </span>
+                      {this.addFavIconClass(project)}
+                    </div>
+                )
             }) :
             this.state.formattedProjectList.sort(sortLogic).map((project, i) => {
             return (

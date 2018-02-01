@@ -833,7 +833,7 @@ class Samples extends React.Component {
                 <span>
                   <i className="tiny material-icons">people</i>
                     {this.state.project.total_members}
-                    { (this.state.project.total_members > 1) ? 'Members' : 'Member'}
+                    { (this.state.project.total_members > 1) ? ' Members' : ' Member'}
                 </span>
                 : <span>
                     No member
