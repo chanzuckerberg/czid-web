@@ -12,17 +12,17 @@ class SamplesController < ApplicationController
   #                access control should still be checked as neccessary through current_power
   #
   ##########################################
+  skip_before_action :verify_authenticity_token, only: [:create, :update]
 
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all].freeze
 
-  before_action :authenticate_user!, except: [:create, :kickoff_pipeline, :bulk_upload]
-  acts_as_token_authentication_handler_for User, only: [:create, :kickoff_pipeline, :bulk_upload], fallback: :devise
+  before_action :authenticate_user!, except: [:create, :update, :bulk_upload]
+  acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload], fallback: :devise
 
   before_action :login_required # redundant. make sure it works
-  skip_before_action :verify_authenticity_token, only: [:create, :kickoff_pipeline] # for CLI
 
   current_power do # Put this here for CLI
     Power.new(current_user)
