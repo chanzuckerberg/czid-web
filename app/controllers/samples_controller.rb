@@ -282,9 +282,13 @@ class SamplesController < ApplicationController
       project = Project.find_by(name: project_name)
     end
     if project && !current_power.updatable_project?(project)
-      format.json { render json: { status: "User not authorized to update project #{project.name}" }, status: :unprocessable_entity }
-
+      respond_to do |format|
+        format.json { render json: { status: "User not authorized to update project #{project.name}" }, status: :unprocessable_entity }
+        format.html { render json: { status: "User not authorized to update project #{project.name}" }, status: :unprocessable_entity }
+      end
+      return
     end
+
     params[:input_files_attributes] = params[:input_files_attributes].reject { |f| f["source"] == '' }
     @sample = Sample.new(params)
     @sample.project = project if project
