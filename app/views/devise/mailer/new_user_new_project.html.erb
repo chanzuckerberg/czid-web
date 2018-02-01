@@ -1,2 +1,2 @@
-<p><%= @sharing_user.email %> has shared the <%= "project".pluralize(@projects.count) + " " + @projects.map(&:name).join(", ") %> with you on IDseq.</p>
+<p><%= Someone has shared a project with you on IDseq!%></p>
 <p><%= link_to 'Activate your account', edit_password_url(@user, reset_password_token: @token) %></p>
