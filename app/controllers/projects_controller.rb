@@ -211,7 +211,7 @@ class ProjectsController < ApplicationController
     @user.send_reset_password_instructions if @user.save
   end
 
-  def shared_project_email_arguments(email_template=nil)
+  def shared_project_email_arguments(email_template = nil)
     { email_subject: 'New project on IDseq',
       email_template: email_template,
       sharing_user_id: current_user.id,
