@@ -25,6 +25,13 @@ class PipelineRunStage < ApplicationRecord
     "pip install -e .[test]"
   end
 
+  def aegea_batch_submit_command(base_command, memory = Sample::DEFAULT_MEMORY)
+    command = "aegea batch submit --command=\"#{base_command}\" "
+    queue = pipeline_run.sample.job_queue.present? ? pipeline_run.sample.job_queue : Sample::DEFAULT_QUEUE
+    command += " --storage /mnt=#{DEFAULT_STORAGE_IN_GB} --ecr-image idseq --memory #{memory} --queue #{queue} --vcpus 4"
+    command
+  end
+
   def check_job_status
     return if completed? || !started? || !id
     if output_ready?
@@ -83,6 +90,18 @@ class PipelineRunStage < ApplicationRecord
     pipeline_run.update_job_status
   end
 
+  def instance_terminated?(job_hash)
+    job_hash['status'] == STATUS_FAILED &&
+      job_hash['statusReason'].start_with?("Host EC2 (instance") &&
+      job_hash['statusReason'].end_with?(") terminated.")
+  end
+
+  def add_failed_job
+    existing_failed_jobs = failed_jobs ? "#{failed_jobs}, " : ""
+    new_failed_job = "[#{job_id}, #{job_log_id}]"
+    self.failed_jobs = existing_failed_jobs + new_failed_job
+  end
+
   def update_job_status
     return if completed?
     stdout, stderr, status = Open3.capture3("aegea", "batch", "describe", job_id.to_s)
@@ -92,6 +111,11 @@ class PipelineRunStage < ApplicationRecord
       self.job_status = job_hash['status']
       if job_hash['container'] && job_hash['container']['logStreamName']
         self.job_log_id = job_hash['container']['logStreamName']
+      end
+      if instance_terminated?(job_hash)
+        add_failed_job
+        run_job # retry if necessary
+        return
       end
     else
       Airbrake.notify("Error for update job status for pipeline run #{id} with error #{stderr}")
@@ -155,11 +179,8 @@ class PipelineRunStage < ApplicationRecord
       batch_command_env_variables += " BOWTIE2_GENOME=#{sample.s3_bowtie2_index_path} "
     end
     batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline host_filtering"
-    command = "aegea batch submit --command=\"#{batch_command}\" "
     memory = sample.sample_memory.present? ? sample.sample_memory : Sample::DEFAULT_MEMORY
-    queue =  sample.job_queue.present? ? sample.job_queue : Sample::DEFAULT_QUEUE
-    command += " --storage /mnt=#{DEFAULT_STORAGE_IN_GB} --ecr-image idseq --memory #{memory} --queue #{queue} --vcpus 4"
-    command
+    aegea_batch_submit_command(batch_command, memory)
   end
 
   def alignment_command
@@ -170,22 +191,15 @@ class PipelineRunStage < ApplicationRecord
       "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} "
     batch_command_env_variables += "SUBSAMPLE=#{pipeline_run.subsample} " if pipeline_run.subsample
     batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline non_host_alignment"
-    command = "aegea batch submit --command=\"#{batch_command}\" "
-    queue = sample.job_queue.present? ? sample.job_queue : Sample::DEFAULT_QUEUE
-    command += " --storage /mnt=#{DEFAULT_STORAGE_IN_GB} --ecr-image idseq --memory #{DEFAULT_MEMORY_IN_MB} --queue #{queue} --vcpus 4"
-    command
+    aegea_batch_submit_command(batch_command)
   end
 
   def postprocess_command
-    sample = pipeline_run.sample
     batch_command_env_variables = "INPUT_BUCKET=#{alignment_output_s3_path} " \
       "OUTPUT_BUCKET=#{postprocess_output_s3_path} " \
       "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} "
     batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline postprocess"
-    command = "aegea batch submit --command=\"#{batch_command}\" "
-    queue = sample.job_queue.present? ? sample.job_queue : Sample::DEFAULT_QUEUE
-    command += " --storage /mnt=#{DEFAULT_STORAGE_IN_GB} --ecr-image idseq --memory #{DEFAULT_MEMORY_IN_MB} --queue #{queue} --vcpus 4"
-    command
+    aegea_batch_submit_command(batch_command)
   end
 
   def db_load_host_filtering
