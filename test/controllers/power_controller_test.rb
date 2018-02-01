@@ -13,13 +13,13 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
 
   test 'joe can add users to joe_project ' do
     @joe_project = projects(:joe_project)
-    put add_user_project_url(@joe_project), params: { user_email_to_add: "abc@xyz.com"  }
+    put add_user_project_url(@joe_project), params: { user_email_to_add: "abc@xyz.com" }
     assert_response :success
   end
 
   test 'joe can change project visibility to joe_project ' do
     @joe_project = projects(:joe_project)
-    put update_project_visibility_project_url(@joe_project), params: { public_access: 0  }
+    put update_project_visibility_project_url(@joe_project), params: { public_access: 0 }
     assert_response :success
   end
 
@@ -39,7 +39,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
 
   test 'joe can update sample to joe_project' do
     @joe_sample = samples(:joe_sample)
-    post "#{save_metadata_sample_url(@joe_sample)}.json", params: {field: 'sample_tissue', value: 'bone'}
+    post "#{save_metadata_sample_url(@joe_sample)}.json", params: { field: 'sample_tissue', value: 'bone' }
     assert_response :success
     @joe_sample.reload
     assert @joe_sample.sample_tissue == 'bone'
@@ -49,7 +49,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     @joe_project = projects(:joe_project)
     get "/samples.json?project_id=#{@joe_project.id}"
     assert_response :success
-    assert JSON::parse(@response.body)["total_count"] == 1
+    assert JSON.parse(@response.body)["total_count"] == 1
   end
 
   test 'joe can see joe_sample' do
@@ -91,7 +91,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
   test 'joe cannot update sample to public_project' do
     @public_sample = samples(:public_sample)
     assert_raises(ActiveRecord::RecordNotFound) do
-      post "#{save_metadata_sample_url(@public_sample)}.json", params: {field: 'sample_tissue', value: 'bone'}
+      post "#{save_metadata_sample_url(@public_sample)}.json", params: { field: 'sample_tissue', value: 'bone' }
     end
     @public_sample.reload
     assert @public_sample.sample_tissue != 'bone'
@@ -101,7 +101,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     @public_project = projects(:public_project)
     get "/samples.json?project_id=#{@public_project.id}"
     assert_response :success
-    assert JSON::parse(@response.body)["total_count"] == 1
+    assert JSON.parse(@response.body)["total_count"] == 1
   end
 
   test 'joe can see public_sample' do
@@ -117,7 +117,6 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     assert_raises(ActiveRecord::RecordNotFound) do
       put add_user_project_url(@project), params: { user_email_to_add: "abc@xyz.com"  }
     end
-
   end
 
   test 'joe cannot change project visibility to project one ' do
@@ -125,7 +124,6 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     assert_raises(ActiveRecord::RecordNotFound) do
       put update_project_visibility_project_url(@project), params: { public_access: 0 }
     end
-
   end
 
   test 'joe cannot create sample to project one' do
@@ -145,19 +143,17 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
   test 'joe cannot update sample to project one' do
     @sample = samples(:one)
     assert_raises(ActiveRecord::RecordNotFound) do
-      post "#{save_metadata_sample_url(@sample)}.json", params: {field: 'sample_tissue', value: 'bone'}
+      post "#{save_metadata_sample_url(@sample)}.json", params: { field: 'sample_tissue', value: 'bone' }
     end
     @sample.reload
     assert @sample.sample_tissue != 'bone'
-
   end
 
   test 'joe cannot see samples in project one' do
     @project = projects(:one)
     get "/samples.json?project_id=#{@project.id}"
     assert_response :success
-    assert JSON::parse(@response.body)["total_count"] == 0
-
+    assert JSON.parse(@response.body)["total_count"].zero?
   end
 
   test 'joe cannot see sample one' do
@@ -172,7 +168,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
   test 'joe cannot add users to project two ' do
     @project = projects(:two)
     assert_raises(ActiveRecord::RecordNotFound) do
-      put add_user_project_url(@project), params: { user_email_to_add: "abc@xyz.com"  }
+      put add_user_project_url(@project), params: { user_email_to_add: "abc@xyz.com" }
     end
   end
 
@@ -188,13 +184,12 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
       post "#{samples_url}.json", params: { sample: { name: 'joe new sample', project_name: @project.name, input_files_attributes: input_files } }
     end
     assert_response 422
-
   end
 
   test 'joe cannot update expired_sample' do
     @sample = samples(:expired_sample)
     assert_raises(ActiveRecord::RecordNotFound) do
-      post "#{save_metadata_sample_url(@sample)}.json", params: {field: 'sample_tissue', value: 'bone'}
+      post "#{save_metadata_sample_url(@sample)}.json", params: { field: 'sample_tissue', value: 'bone' }
     end
     @sample.reload
     assert @sample.sample_tissue != 'bone'
@@ -204,14 +199,12 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     @project = projects(:two)
     get "/samples.json?project_id=#{@project.id}"
     assert_response :success
-    assert JSON::parse(@response.body)["total_count"] == 1
+    assert JSON.parse(@response.body)["total_count"] == 1
   end
 
   test 'joe can see expired_sample' do
     @expired_sample = samples(:expired_sample)
     get sample_url(@expired_sample)
     assert_response :success
-
   end
-
 end
