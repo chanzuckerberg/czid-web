@@ -1,12 +1,17 @@
-class DeviseMailer < Devise::Mailer   
+class CustomDeviseMailer < Devise::Mailer   
   helper :application
   include Devise::Controllers::UrlHelpers
   default template_path: 'devise/mailer'
 
-  def new_user_new_project_email(new_user, sharing_user, projects)
-    @new_user = new_user
-    @sharing_user = sharing_user
-    @projects = projects
-    mail(to: @new_user.email, from: @sharing_user.email, subject: "New project on IDseq")
+  def reset_password_instructions(record, token, opts={})
+    set_email_template record
+    opts[:template_name] = @template if @template
+    super
+  end
+
+  private
+
+  def set_email_template(user)
+    @template = user.email_template rescue nil
   end
 end
