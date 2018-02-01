@@ -1,19 +1,8 @@
-<div class="center">
-  <h5><%= @file_path %></h5>
-  <div>
-  <% if @file_list.count == 0 %>
-  No files under this directory
-  <% else %>
-  <ul>
-    <% @file_list.each do |file| %>
-      <li>
-        <a class="custom-button" style= "margin: 0" href=<%= file[:url] %> >
-          <i class="fa fa-cloud-download"></i>
-          <%= file[:key].split("/")[-1] %>
-        </a>
-      </li>
-    <% end %>
-  </ul>
+<div id="ResultsFolder">
+  <%= javascript_tag do %>
+    react_component('ResultsFolder', {
+      filePath: JSON.parse('<%= raw escape_json(@file_path) %>'),
+      fileList: JSON.parse('<%= raw escape_json(@file_list) %>')
+    }, 'ResultsFolder');
   <% end %>
-  </div>
 </div>
