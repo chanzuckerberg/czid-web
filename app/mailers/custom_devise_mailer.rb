@@ -6,6 +6,7 @@ class CustomDeviseMailer < Devise::Mailer
   def reset_password_instructions(record, token, opts = {})
     assign_email_template record
     opts[:template_name] = @template if @template
+    opts[:subject] = @subject if @subject
     super
   end
 
@@ -24,6 +25,11 @@ class CustomDeviseMailer < Devise::Mailer
                            end
     @template = begin
                   user.email_template
+                rescue
+                  nil
+                end
+    @subject = begin
+                  user.email_subject
                 rescue
                   nil
                 end

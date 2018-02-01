@@ -207,6 +207,7 @@ class ProjectsController < ApplicationController
     user_params_with_password[:password] = random_password
     user_params_with_password[:password_confirmation] = random_password
     @user ||= User.new(user_params_with_password)
+    @user.email_subject = 'New project on IDseq'
     @user.email_template = 'new_user_new_project'
     @user.sharing_user_id = current_user.id
     @user.shared_project_id = @project.id
