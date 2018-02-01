@@ -212,12 +212,10 @@ class ProjectsController < ApplicationController
   end
 
   def shared_project_email_arguments(email_template=nil)
-    h = {}
-    h[:email_subject] = 'New project on IDseq'
-    h[:email_template] = email_template
-    h[:sharing_user_id] = current_user.id
-    h[:shared_project_id] = @project.id
-    h
+    { email_subject: 'New project on IDseq',
+      email_template: email_template,
+      sharing_user_id: current_user.id,
+      shared_project_id: @project.id }
   end
 
   def set_project
