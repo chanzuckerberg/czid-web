@@ -18,8 +18,8 @@ class SamplesController < ApplicationController
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all].freeze
 
-  before_action :authenticate_user!, except: [:create, :bulk_upload]
-  acts_as_token_authentication_handler_for User, only: [:create, :bulk_upload], fallback: :devise
+  before_action :authenticate_user!, except: [:create, :kickoff_pipeline, :bulk_upload]
+  acts_as_token_authentication_handler_for User, only: [:create, :kickoff_pipeline, :bulk_upload], fallback: :devise
 
   before_action :login_required # redundant. make sure it works
   skip_before_action :verify_authenticity_token, only: [:create, :kickoff_pipeline] # for CLI
