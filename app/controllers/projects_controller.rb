@@ -190,8 +190,11 @@ class ProjectsController < ApplicationController
 
   def add_user
     @user = User.find_by(email: params[:user_email_to_add])
-    create_new_user_random_password(params[:user_email_to_add]) unless @user
-    UserMailer.added_to_projects_email(@user, current_user, [@project]).deliver_now unless @project.user_ids.include? @user.id
+    if @user
+      UserMailer.added_to_projects_email(@user, current_user, [@project]).deliver_now unless @project.user_ids.include? @user.id
+    else
+      create_new_user_random_password(params[:user_email_to_add])
+    end
     @project.user_ids |= [@user.id]
   end
 
@@ -205,6 +208,8 @@ class ProjectsController < ApplicationController
     user_params_with_password[:password_confirmation] = random_password
     @user ||= User.new(user_params_with_password)
     @user.email_template = 'new_user_new_project'
+    @user.sharing_user_id = current_user.id
+    @user.shared_project_id = @project.id
     @user.send_reset_password_instructions if @user.save
   end
 
