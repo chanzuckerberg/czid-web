@@ -191,7 +191,7 @@ class ProjectsController < ApplicationController
   def add_user
     @user = User.find_by(email: params[:user_email_to_add])
     if @user
-      UserMailer.added_to_projects_email(@user, current_user, [@project]).deliver_now unless @project.user_ids.include? @user.id
+      UserMailer.added_to_projects_email(@user.id, current_user.id, @project.id).deliver_now unless @project.user_ids.include? @user.id
     else
       create_new_user_random_password(params[:user_email_to_add])
     end
