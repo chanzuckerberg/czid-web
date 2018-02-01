@@ -14,22 +14,22 @@ class CustomDeviseMailer < Devise::Mailer
 
   def assign_email_template(user)
     @sharing_user_email = begin
-                            User.find(user.sharing_user_id).email
+                            User.find(user.email_arguments[:sharing_user_id]).email
                           rescue
                             nil
                           end
     @shared_project_name = begin
-                             Project.find(user.shared_project_id).name
+                             Project.find(user.email_arguments[:shared_project_id]).name
                            rescue
                              nil
                            end
     @template = begin
-                  user.email_template
+                  user.email_arguments[:email_template]
                 rescue
                   nil
                 end
     @subject = begin
-                  user.email_subject
+                  user.email_arguments[:email_subject]
                 rescue
                   nil
                 end
