@@ -340,8 +340,13 @@ class SamplesController < ApplicationController
     @sample.status = Sample::STATUS_RERUN
     @sample.save
     respond_to do |format|
-      format.html { redirect_to samples_url, notice: 'A pipeline run is  in progress.' }
-      format.json { head :no_content }
+      if !@sample.pipeline_runs.empty?
+        format.html { redirect_to samples_url, notice: 'A pipeline run is in progress.' }
+        format.json { head :no_content }
+      else
+        format.html { redirect_to samples_url, notice: 'No pipeline run in progress.' }
+        format.json { render json: @sample.errors.full_messages, status: :unprocessable_entity }
+      end
     end
   end
 
