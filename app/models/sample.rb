@@ -111,18 +111,20 @@ class Sample < ApplicationRecord
     file_list.contents.map { |f| { key: f.key, url: Sample.get_signed_url(f.key) } }
   end
 
-  def adjust_extension
+  def adjust_extensions
+    input_files.each do |input_file|
     # change extension to one allowed by the pipeline
-    basename = File.basename(input_file.source)
-    basename.sub!(/fq\z/, "fastq")
-    basename.sub!(/fq.gz\z/, "fastq.gz")
-    basename.sub!(/fa\z/, "fasta")
-    basename.sub!(/fa.gz\z/, "fasta.gz")
-    input_file.update(name: basename)
+      basename = File.basename(input_file.source)
+      basename.sub!(/fq\z/, "fastq")
+      basename.sub!(/fq.gz\z/, "fastq.gz")
+      basename.sub!(/fa\z/, "fasta")
+      basename.sub!(/fa.gz\z/, "fasta.gz")
+      input_file.update(name: basename)
+    end
   end
 
   def initiate_input_file_upload
-    adjust_extension
+    adjust_extensions
     return unless input_files.first.source_type == InputFile::SOURCE_TYPE_S3
     Resque.enqueue(InitiateS3Cp, id)
   end
