@@ -648,12 +648,13 @@ class SampleUpload extends React.Component {
                     </div>
                     <div className='col no-padding s12 new-project-input hidden'>
                       <input type='text' ref='new_project' onFocus={ this.clearError } className='browser-default new_project_input' placeholder='Input new project name' />
-                      <Tipsy content='Create project'
+                      <Tipsy content='Add new project name'
                         placement='right'>
-                        <i className="fa fa-check-circle input-icon hidden"
+                        <span className="input-icon hidden"
                           onClick={(e) => { if (this.refs.new_project.value.trim().length) {this.handleProjectSubmit()};
                             $('.new-project-button').click();}}>
-                        </i>
+                            Create project
+                        </span>
                       </Tipsy>
                       {
                         (this.state.errors.new_project) ?
