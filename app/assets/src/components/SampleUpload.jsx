@@ -602,6 +602,7 @@ class SampleUpload extends React.Component {
             <p> --r1 <span className="code-to-edit">your_sample_R1</span>.fastq.gz --r2 <span className="code-to-edit">your_sample_R2</span>.fastq.gz</p>
           </div>
           <p>The project you specify must already exist on IDseq: you can create it using the <span className="code">+ New project</span> button on the sample upload page.</p>
+          <p className='upload-question'>For more information on the IDseq CLI, have a look at its <a href='https://github.com/chanzuckerberg/idseq-web/blob/master/README.md' target='_blank'>GitHub repository</a>.</p>
           <button className='modal-close'>
             Done
           </button>
