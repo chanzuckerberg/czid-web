@@ -78,7 +78,7 @@ class Sample < ApplicationRecord
 
   def self.search(search)
     if search
-      where('name LIKE ?', "%#{search}%")
+      where('samples.name LIKE ?', "%#{search}%")
     else
       scoped
     end
