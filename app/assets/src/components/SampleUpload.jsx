@@ -11,6 +11,8 @@ class SampleUpload extends React.Component {
     this.handleUpload = this.handleUpload.bind(this);
     this.handleUpdate = this.handleUpdate.bind(this);
     this.csrf = props.csrf;
+    this.user_auth_token = props.user_auth_token;
+    this.user_email = props.user_email;
     this.project = props.projectInfo ? props.projectInfo : null;
     this.handleProjectSubmit = this.handleProjectSubmit.bind(this);
     this.clearError = this.clearError.bind(this);
@@ -76,6 +78,9 @@ class SampleUpload extends React.Component {
       omit_subsampling_checked: false,
       public_checked: false
     };
+    $(document).ready(function() {
+      $('.modal').modal();
+    });
   }
 
   componentDidMount() {
@@ -583,6 +588,27 @@ class SampleUpload extends React.Component {
 
 
   renderSampleForm() {
+    let cli_instructions = (
+      <div id="cli_modal" className="modal project-popup">
+        <div className="modal-content">
+          <p>1. Make sure your AWS CLI is properly configured:</p>
+          <p><span className="code">~/.aws/credentials</span> and <span className="code">~/.aws/config</span> must be set up correctly (you may need to follow site-specific instructions for how to do that).</p>
+          <p>2. Install the IDseq CLI:</p>
+          <p><span className="code">pip install git+https://github.com/chanzuckerberg/idseq-cli.git</span></p>
+          <p>3. Upload a sample using a command of the form:</p>
+          <div className="code">
+            <p>idseq -p '<span className="code-to-edit">Your Project Name</span>' -s '<span className="code-to-edit">Your Sample Name</span>' \</p>
+            <p> -u https://idseq.net -e <span className="code-personal">{this.user_email}</span> -t <span className="code-personal">{this.user_auth_token}</span> \</p>
+            <p> --r1 <span className="code-to-edit">your_sample_R1</span>.fastq.gz --r2 <span className="code-to-edit">your_sample_R2</span>.fastq.gz</p>
+          </div>
+          <p>The project you specify must already exist on IDseq: you can create it using the <span className="code">+ New project</span> button on the sample upload page.</p>
+          <button className='modal-close'>
+            Done
+          </button>
+        </div>
+      </div>
+    );
+
     return (
       <div id='samplesUploader' className='row'>
         <div className='col s4 valign-wrapper offset-s4 upload-form-container'>
@@ -599,8 +625,9 @@ class SampleUpload extends React.Component {
               <p className='upload-question'>
                 Want to upload multiple samples at once? <a href='/samples/bulk_new'>Click here.</a>
                 <br/>
-                Rather use our CLI? <a href='https://github.com/chanzuckerberg/idseq-web/blob/master/README.md#submit-a-sample' target='_blank'>Read documentation here.</a>
+                Rather use our CLI? <a className="modal-trigger" href='#cli_modal'>Instructions here.</a>
               </p>
+              { cli_instructions }
             </div>
             { this.state.success ?
               <div className="form-feedback success-message" >
