@@ -52,7 +52,7 @@ class SampleUpload extends React.Component {
     this.firstInput = this.selected.inputFiles.length && this.selected.inputFiles[0] ? (this.selected.inputFiles[0].source === null ? '' : this.selected.inputFiles[0].source) : '';
     this.secondInput = this.selected.inputFiles.length && this.selected.inputFiles[1] ? (this.selected.inputFiles[1].source === null ? '' : this.selected.inputFiles[1].source) : '';
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
-    this.cli_instructions = SampleUpload.FetchCliInstructions();
+    this.cli_instructions = SampleUpload.fetchCliInstructions('HI', 'HII');
     this.state = {
       submitting: false,
       allProjects: this.projects || [],
@@ -587,7 +587,7 @@ class SampleUpload extends React.Component {
     )
   }
 
-  static FetchCliInstructions() {
+  static fetchCliInstructions(user_email, user_auth_token) {
     return (
       <div>
         <p>1. Install and configure the Amazon Web Services Command Line Interface (AWS CLI).</p>
@@ -596,7 +596,7 @@ class SampleUpload extends React.Component {
         <p>3. Upload a sample using a command of the form:</p>
         <div className="code">
           <p>idseq -p '<span className="code-to-edit">Your Project Name</span>' -s '<span className="code-to-edit">Your Sample Name</span>' \</p>
-          <p> -u https://idseq.net -e <span className="code-personal">{this.user_email}</span> -t <span className="code-personal">{this.user_auth_token}</span> \</p>
+          <p> -u https://idseq.net -e <span className="code-personal">{user_email}</span> -t <span className="code-personal">{user_auth_token}</span> \</p>
           <p> --r1 <span className="code-to-edit">your_sample_R1</span>.fastq.gz --r2 <span className="code-to-edit">your_sample_R2</span>.fastq.gz</p>
         </div>
         <p>The project you specify must already exist on IDseq: you can create it using the <span className="code">+ New project</span> button on the sample upload page.</p>
