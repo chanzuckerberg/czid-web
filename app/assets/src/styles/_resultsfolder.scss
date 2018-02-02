@@ -1,0 +1,29 @@
+.header {
+  margin: 25px 75px;
+  .title {
+  font-size: 22px;
+  color: #03a9f4;
+  .path {
+    margin: 20px;
+    color: #000;
+    font-weight: 100
+    }
+    .back {
+      cursor: pointer;
+      &:hover {
+        text-decoration: underline
+      }
+    }
+  }
+  tr {
+    cursor: pointer;
+    td {
+      &:hover {
+        color: #5abcd6;
+      }
+    }
+  }
+  i.fa-file {
+    margin-right: 15px;
+  }
+}  

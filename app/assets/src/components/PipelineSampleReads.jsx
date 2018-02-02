@@ -363,7 +363,7 @@ class PipelineSampleReads extends React.Component {
           <i className="fa fa-cloud-download"></i>
           Download Unmapped Reads
         </a>
-        <a className="custom-button" href= { this.sampleInfo.sample_output_folder_url }>
+        <a className="custom-button" href= { `/samples/${this.sampleInfo.id}/results_folder` }>
           <i className="fa fa-folder-open"/>
           Navigate to Results Folder
         </a>
@@ -516,7 +516,7 @@ class PipelineSampleReads extends React.Component {
                 <div className='download-title'>
                   Downloads Reads
                 </div>
-                <a className="custom-button" href={ this.sampleInfo.sample_input_folder_url }>
+                <a className="custom-button" href={ `/samples/${this.sampleInfo.id}/fastqs_folder`  }>
                   <i className="fa fa-folder-open"/>
                   Go To Source Data
                 </a>
