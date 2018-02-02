@@ -121,7 +121,13 @@ class Sample < ApplicationRecord
     stderr_array = []
     input_files.each do |input_file|
       fastq = input_file.source
-      _stdout, stderr, status = Open3.capture3("aws", "s3", "cp", fastq.to_s, "#{sample_input_s3_path}/")
+      # change extension to one allowed by the pipeline
+      basename = File.basename(fastq)
+      basename.sub!(/fq\z/, "fastq")
+      basename.sub!(/fq.gz\z/, "fastq.gz")
+      basename.sub!(/fa\z/, "fasta")
+      basename.sub!(/fa.gz\z/, "fasta.gz")
+      _stdout, stderr, status = Open3.capture3("aws", "s3", "cp", fastq.to_s, "#{sample_input_s3_path}/#{basename}")
       stderr_array << stderr unless status.exitstatus.zero?
     end
     if s3_preload_result_path.present? && s3_preload_result_path[0..4] == 's3://'

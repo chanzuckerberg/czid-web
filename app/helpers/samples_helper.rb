@@ -129,7 +129,7 @@ module SamplesHelper
     entries = s3_output.split("\n").reject { |line| line.include? "Undetermined" }.select { |line| line.include? "fast" }
     samples = {}
     entries.each do |file_name|
-      matched = /([^ ]*)_R(\d)_001.(fastq.gz|fastq|fasta.gz|fasta)\z/.match(file_name)
+      matched = /([^ ]*)_R(\d)_001.(fastq.gz|fq.gz|fastq|fq|fasta.gz|fa.gz|fasta|fa)\z/.match(file_name)
       next unless matched
       source = matched[0]
       name = matched[1]
