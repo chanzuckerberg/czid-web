@@ -18,8 +18,6 @@ import Samples from './Samples';
     this.toggleDisplayFavProjects = this.toggleDisplayFavProjects.bind(this);
     this.toggleFavorite = this.toggleFavorite.bind(this);
     this.handleProjectClick = this.handleProjectClick.bind(this);
-    this.handleAllProjectorSamplesClick
-    this.uploadSample = this.uploadSample.bind(this);
 
     this.state = {
       formattedProjectList: [],
@@ -47,10 +45,6 @@ import Samples from './Samples';
     this.setState((prevState) => ({ showLess: !prevState.showLess }))
   }
 
-
-  uploadSample() {
-    location.href = '/samples/new'
-  }
 
   toggleDisplayFavProjects() {
     this.setState((prevState) => ({ showLessFavorites: !prevState.showLessFavorites }))
