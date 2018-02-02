@@ -591,8 +591,7 @@ class SampleUpload extends React.Component {
     let cli_instructions = (
       <div id="cli_modal" className="modal project-popup">
         <div className="modal-content">
-          <p>1. Make sure your AWS CLI is properly configured:</p>
-          <p><span className="code">~/.aws/credentials</span> and <span className="code">~/.aws/config</span> must be set up correctly (you may need to follow site-specific instructions for how to do that).</p>
+          <p>1. Install and configure the Amazon Web Services Command Line Interface (AWS CLI).</p>
           <p>2. Install the IDseq CLI:</p>
           <p><span className="code">pip install git+https://github.com/chanzuckerberg/idseq-cli.git</span></p>
           <p>3. Upload a sample using a command of the form:</p>
@@ -626,7 +625,7 @@ class SampleUpload extends React.Component {
               <p className='upload-question'>
                 Want to upload multiple samples at once? <a href='/samples/bulk_new'>Click here.</a>
                 <br/>
-                Rather use our CLI? <a className="modal-trigger" href='#cli_modal'>Instructions here.</a>
+                Rather use our command-line interface (CLI)? <a className="modal-trigger" href='#cli_modal'>Instructions here.</a>
               </p>
               { cli_instructions }
             </div>
