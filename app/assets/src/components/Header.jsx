@@ -1,6 +1,7 @@
 import React from 'react';
 import $ from 'jquery';
 import axios from 'axios';
+import SampleUpload from './SampleUpload';
 
 class Header extends React.Component  {
   constructor(props, context) {
@@ -10,9 +11,14 @@ class Header extends React.Component  {
     this.location = window.location.pathname;
     this.sendMail = this.sendMail.bind(this);
     this.signOut = this.signOut.bind(this);
+    this.cli_instructions = SampleUpload.FetchCliInstructions();
+    this.openCliModal = this.openCliModal.bind(this);
+    $(document).ready(function() {
+      $('.modal').modal();
+    });
   }
 
-	componentDidMount() {
+  componentDidMount() {
    this.displayProfileMenu();
   }
 
@@ -42,7 +48,19 @@ class Header extends React.Component  {
     window.location.href = link;
   }
 
+  openCliModal() {
+    $('#cli_modal').modal('open');
+  }
+
   render() {
+    let cli_modal = (
+      <div id="cli_modal" className="modal project-popup">
+        <div className="modal-content">
+          { this.cli_instructions }
+          <button className='modal-close'>Done</button>
+        </div>
+      </div>
+    );
     return (
       <div>
         <div className="page-loading">
@@ -55,12 +73,13 @@ class Header extends React.Component  {
           {/* Dropdown menu */}
           <ul id="dropdown1" className="dropdown-content">
             <li onClick={ this.gotoPage.bind(this, '/samples/new') }><a href="#!">New sample</a></li>
-           { this.userDetails && this.userDetails.admin ? <li onClick={ this.gotoPage.bind(this, '/users/new') }><a href="#!">Create user</a></li> : null }
+            <li><a onClick={ this.openCliModal } href="#!">New sample (command line)</a></li>
+            { this.userDetails && this.userDetails.admin ? <li onClick={ this.gotoPage.bind(this, '/users/new') }><a href="#!">Create user</a></li> : null }
             <li onClick={ this.sendMail }><a href="#!">Report Feedback</a></li>
             <li className="divider"></li>
             <li onClick={this.signOut}><a href="#">Logout</a></li>
           </ul>
-
+          { cli_modal }
           <div>
             <div className="">
               <a href="/" className="left brand-details">
