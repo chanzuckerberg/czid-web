@@ -612,8 +612,9 @@ class PipelineSampleReport extends React.Component {
     const t0 = Date.now();
 
     const filter_stats = `${this.state.rows_passing_filters} rows passing filters, out of ${this.state.rows_total} total rows.`;
-    subsampled_read_pairs = this.report_details && this.report_details.pipeline_info ? this.report_details.pipeline_info.subsample : null
-    subsampling_stats = subsampled_read_pairs ? 'Randomly subsampled to ' + 2*subsampled_read_pairs
+    let subsampled_read_pairs = this.report_details && this.report_details.pipeline_info ? this.report_details.pipeline_info.subsample : null
+    let subsampling_stats = subsampled_read_pairs && 2*subsampled_read_pairs < this.report_details.pipeline_info.remaining_reads ?
+                                                 'Randomly subsampled to ' + 2*subsampled_read_pairs
                                                  + ' of ' + this.report_details.pipeline_info.remaining_reads
                                                  + ' non-host reads.'
                                               : '';
