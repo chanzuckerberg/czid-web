@@ -26,7 +26,7 @@ class InputFile < ApplicationRecord
   end
 
   def file_path
-    File.join(sample.sample_path, 'fastqs', name)
+    File.join(sample.sample_input_s3_path, name)
   end
 
   def file_type
