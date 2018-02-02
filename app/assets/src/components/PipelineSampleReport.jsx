@@ -32,7 +32,6 @@ class PipelineSampleReport extends React.Component {
       rows_total: 0,
       thresholded_taxons: [],
       selected_taxons: [],
-
       sort_by: this.default_sort_by,
       new_filter_thresholds: (filter_thresholds) ? JSON.parse(filter_thresholds) : { NT_aggregatescore: 0.0 },
       /*
