@@ -168,7 +168,6 @@ import Samples from './Samples';
     this.removeHighlight();
     const isFavoriteSelected =
     this.fetchParams('type') === 'favorite' || type === 'favorite';
-    console.log(isFavoriteSelected, 'Adding class');
     if (id && isFavoriteSelected) {
       $(`.fav-item.project-item[data-id="${id}"]`).addClass('highlight');
       console.log(isFavoriteSelected, `.fav-item.project-item[data-id="${id}"]`, 'Adding class');
