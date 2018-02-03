@@ -581,7 +581,6 @@ class SampleUpload extends React.Component {
     )
   }
 
-
   renderSampleForm() {
     return (
       <div id='samplesUploader' className='row'>
@@ -599,7 +598,6 @@ class SampleUpload extends React.Component {
               <p className='upload-question'>
                 Want to upload multiple samples at once? <a href='/samples/bulk_new'>Click here.</a>
                 <br/>
-                Rather use our CLI? <a href='https://github.com/chanzuckerberg/idseq-web/blob/master/README.md#submit-a-sample' target='_blank'>Read documentation here.</a>
               </p>
             </div>
             { this.state.success ?
@@ -828,7 +826,7 @@ class SampleUpload extends React.Component {
                   <div className='row input-row'>
                     <div className='col no-padding s12'>
                       <input ref="omit_subsampling_checked" type="checkbox" name="switch" id="omit_subsampling_checked" className="filled-in" onChange={ this.toggleCheckBox } value={ this.state.omit_subsampling_checked } />
-                      <label htmlFor="omit_subsampling_checked" className="checkbox">Skip subsampling (not recommended)</label>
+                      <label htmlFor="omit_subsampling_checked" className="checkbox">Skip subsampling (not recommended: slow mode)</label>
                     </div>
                   </div>
                 </div>

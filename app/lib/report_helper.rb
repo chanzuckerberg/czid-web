@@ -176,6 +176,7 @@ module ReportHelper
   def report_details(pipeline_run, background)
     {
       pipeline_info: pipeline_run,
+      subsampled_reads: pipeline_run.subsampled_reads,
       sample_info: pipeline_run.sample,
       project_info: pipeline_run.sample.project,
       background_model: background,
