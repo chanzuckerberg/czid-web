@@ -202,8 +202,11 @@ class ProjectsController < ApplicationController
 
   def add_user
     @user = User.find_by(email: params[:user_email_to_add])
-    create_new_user_random_password(params[:user_email_to_add]) unless @user
-    UserMailer.added_to_projects_email(@user, current_user, [@project]).deliver_now unless @project.user_ids.include? @user.id
+    if @user
+      UserMailer.added_to_projects_email(@user.id, shared_project_email_arguments).deliver_now unless @project.user_ids.include? @user.id
+    else
+      create_new_user_random_password(params[:user_email_to_add])
+    end
     @project.user_ids |= [@user.id]
   end
 
@@ -216,7 +219,15 @@ class ProjectsController < ApplicationController
     user_params_with_password[:password] = random_password
     user_params_with_password[:password_confirmation] = random_password
     @user ||= User.new(user_params_with_password)
+    @user.email_arguments = shared_project_email_arguments('new_user_new_project')
     @user.send_reset_password_instructions if @user.save
+  end
+
+  def shared_project_email_arguments(email_template = nil)
+    { email_subject: 'New project on IDseq',
+      email_template: email_template,
+      sharing_user_id: current_user.id,
+      shared_project_id: @project.id }
   end
 
   def set_project
