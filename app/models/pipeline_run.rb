@@ -269,8 +269,7 @@ class PipelineRun < ApplicationRecord
 
   def subsampled_reads
     return remaining_reads unless subsample
-    n_reads = subsample
-    sample.input_files.count * nreads
+    subsample * sample.input_files.count
     # 'subsample' is number of reads, respectively read pairs, to sample after host filtering
     # 'remaining_reads'a is number of individual reads remaining after host filtering
   end
