@@ -113,7 +113,7 @@ class Sample < ApplicationRecord
 
   def adjust_extensions
     input_files.each do |input_file|
-    # change extension to one allowed by the pipeline
+      # change extension to one allowed by the pipeline
       basename = File.basename(input_file.source)
       basename.sub!(/fq\z/, "fastq")
       basename.sub!(/fq.gz\z/, "fastq.gz")
