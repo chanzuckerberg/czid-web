@@ -581,7 +581,6 @@ class SampleUpload extends React.Component {
     )
   }
 
-
   renderSampleForm() {
     return (
       <div id='samplesUploader' className='row'>
@@ -599,7 +598,6 @@ class SampleUpload extends React.Component {
               <p className='upload-question'>
                 Want to upload multiple samples at once? <a href='/samples/bulk_new'>Click here.</a>
                 <br/>
-                Rather use our CLI? <a href='https://github.com/chanzuckerberg/idseq-web/blob/master/README.md#submit-a-sample' target='_blank'>Read documentation here.</a>
               </p>
             </div>
             { this.state.success ?
