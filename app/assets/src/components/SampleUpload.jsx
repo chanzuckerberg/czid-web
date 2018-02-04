@@ -584,7 +584,7 @@ class SampleUpload extends React.Component {
   renderSampleForm() {
     return (
       <div id='samplesUploader' className='row'>
-        <div className='col s4 valign-wrapper offset-s4 upload-form-container'>
+        <div className='col s6 offset-s3 upload-form-container'>
           <div className='content'>
             <div>
               <div className='form-title'>
