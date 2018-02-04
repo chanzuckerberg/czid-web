@@ -824,7 +824,7 @@ input[type="button"] {
           border-left: 6px solid transparent;
           padding: 10px 15px !important;
           font-weight: 400;
-          font-size: 16px;
+          font-size: 14px;
           &:hover {
             background: #eff0f2;
             i {
@@ -915,12 +915,30 @@ input[type="button"] {
   .add_member {
     margin-top: 15px;
     input {
-      border: 1px solid #e8e8e8;
+      border: 1px solid #ced4da;
       padding: 12px;
       border-radius: 3px;
+      padding-right: 110px;
       &::placeholder {
         color: #c0c0c0;
         font-weight: 400;
+      }
+    }
+    .add_member_action {
+      position: absolute;
+      margin-left: -100px;
+      margin-top: 1px;
+      background: #e9ecef;
+      padding: 12px;
+      font-size: 12px;
+      border-top-right-radius: 2px;
+      border-bottom-right-radius: 2px;
+      border: 1px solid #ced4da;
+      color: #495057;
+      &:hover {
+        background: #d9dbdd;
+        border-color: #c3c8cc;
+        cursor: pointer;
       }
     }
     .error-message {
@@ -928,6 +946,13 @@ input[type="button"] {
       float: left;
       margin-top: 5px;
       font-size: 12px;
+    }
+    .status-message {
+      float: left;
+      width: 100%;
+      font-size: 13px;
+      margin-top: 5px;
+      color: #6b6b6b;
     }
   }
   .members_list {
