@@ -165,9 +165,3 @@ small,
 .text-muted {
   color: $id-text-color-muted;
 }
-
-.bg-primary {
-  // Given the contrast here, this is the only class to have its color inverted
-  // automatically.
-  color: #fff;
-}
