@@ -294,6 +294,9 @@ class SamplesController < ApplicationController
     @sample.project = project if project
     @sample.input_files.each { |f| f.name ||= File.basename(f.source) }
     @sample.user = current_user if current_user
+    if params[:host_genome_name] && @sample.host_genome.nil?
+      @sample.host_genome = HostGenome.find_by(name: params[:host_genome_name]) || HostGenome.first
+    end
 
     respond_to do |format|
       if @sample.save
@@ -375,7 +378,7 @@ class SamplesController < ApplicationController
 
   def sample_params
     params.require(:sample).permit(:name, :project_name, :project_id, :status, :s3_preload_result_path,
-                                   :s3_star_index_path, :s3_bowtie2_index_path, :host_genome_id,
+                                   :s3_star_index_path, :s3_bowtie2_index_path, :host_genome_id, :host_genome_name,
                                    :sample_memory, :sample_location, :sample_date, :sample_tissue,
                                    :sample_template, :sample_library, :sample_sequencer,
                                    :sample_notes, :job_queue, :search, :subsample, :pipeline_branch,
