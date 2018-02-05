@@ -42,6 +42,7 @@ class Samples extends React.Component {
     this.updateUserDisplay = this.updateUserDisplay.bind(this);
     this.resetForm = this.resetForm.bind(this);
     this.state = {
+      invite_status: null,
       project: null,
       project_users: [],
       totalNumber: null,
@@ -212,7 +213,8 @@ class Samples extends React.Component {
   resetForm() {
     $('#add_user_to_project').val('');
     this.setState({
-      project_add_email_validation: null
+      project_add_email_validation: null,
+      invite_status: null
     });
   }
 
@@ -265,15 +267,18 @@ class Samples extends React.Component {
       const isValidEmail = StringHelper.validateEmail(email_to_add);
       if (isValidEmail) {
         this.setState({
-          project_add_email_validation: null
+          project_add_email_validation: null,
+          invite_status: 'sending'
         });
-        axios.put(`/projects/${project_id}/add_user`,
-          {
+        axios.put(`/projects/${project_id}/add_user`, {
              user_email_to_add: email_to_add,
              authenticity_token: this.csrf
           })
           .then((res) => {
-            this.updateUserDisplay(email_to_add)
+            this.updateUserDisplay(email_to_add);
+            this.setState({
+              invite_status: 'sent'
+            });
         })
       } else {
         this.setState({
@@ -791,9 +796,25 @@ class Samples extends React.Component {
               placeholder='Add project members by email'
               onKeyDown={(e) => this.handleAddUser(e, true)}
               className="validate col s12 browser-default"/>
+            <span className='add_member_action'
+              onClick={ this.handleAddUser }>Add member</span>
             <div className='error-message'>
               { this.state.project_add_email_validation }
             </div>
+            {
+              (this.state.invite_status === 'sending') ?
+              <div className='status-message'>
+                <i className="fa fa-circle-o-notch fa-spin fa-fw"></i>
+                 Hang tight, sending invitation...
+              </div> : null
+            }
+            {
+              (this.state.invite_status === 'sent') ?
+              <div className='status-message success teal-text text-darken-2'>
+                <i className="fa fa-smile-o fa-fw"></i>
+                 Yay! User has been added
+              </div> : null
+            }
           </div>
 
           <div className='members_list'>
@@ -808,7 +829,7 @@ class Samples extends React.Component {
             </ul>
           </div>
           <button className='modal-close'>
-            Done
+            Close
           </button>
         </div>
       </div>
@@ -868,8 +889,7 @@ class Samples extends React.Component {
           <p className="col no-padding s12">
           { this.state.allSamples.length === 0 ? 'No sample found'
             : ( this.state.allSamples.length === 1 ? '1 sample found'
-              : `Currently viewing ${this.state.allSamples.length} out of
-              ${this.state.totalNumber} samples`)
+              : `Showing ${this.state.allSamples.length} out of ${this.state.totalNumber} total samples`)
           }
         </p>
         </div>
