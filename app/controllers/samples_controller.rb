@@ -281,6 +281,10 @@ class SamplesController < ApplicationController
       project_name = params.delete(:project_name)
       project = Project.find_by(name: project_name)
     end
+    if params[:host_genome_name]
+      host_genome_name = params.delete(:host_genome_name)
+      host_genome = HostGenome.find_by(name: host_genome_name)
+    end
     if project && !current_power.updatable_project?(project)
       respond_to do |format|
         format.json { render json: { status: "User not authorized to update project #{project.name}" }, status: :unprocessable_entity }
@@ -294,9 +298,7 @@ class SamplesController < ApplicationController
     @sample.project = project if project
     @sample.input_files.each { |f| f.name ||= File.basename(f.source) }
     @sample.user = current_user if current_user
-    if params[:host_genome_name] && @sample.host_genome.nil?
-      @sample.host_genome = HostGenome.find_by(name: params[:host_genome_name]) || HostGenome.first
-    end
+    @sample.host_genome ||= (host_genome || HostGenome.first)
 
     respond_to do |format|
       if @sample.save
