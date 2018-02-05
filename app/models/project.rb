@@ -33,6 +33,26 @@ class Project < ApplicationRecord
     nil
   end
 
+  def bulk_report_csvs_from_params(params)
+    user_id = params["user_id"]
+    current_power = Power.new(User.find(user_id))
+    user_csv_dir = csv_dir(user_id)
+    `rm -rf #{user_csv_dir}; mkdir -p #{user_csv_dir}`
+    sample_names_used = []
+    current_power.project_samples(self).each do |sample|
+      csv_data = report_csv_from_params(sample, params)
+      clean_sample_name = sample.name.downcase.gsub(/\W/, "-")
+      used_before = sample_names_used.include? clean_sample_name
+      sample_names_used << clean_sample_name
+      clean_sample_name += "_#{sample.id}" if used_before
+      filename = "#{user_csv_dir}/#{clean_sample_name}.csv"
+      File.write(filename, csv_data)
+    end
+    `cd #{user_csv_dir}; tar cvzf #{tar_filename} .`
+    `aws s3 cp #{report_tar(user_id)} #{report_tar_s3(user_id)}`
+    `rm -rf #{user_csv_dir}`
+  end
+
   def self.editable(user)
     if user.admin?
       all
