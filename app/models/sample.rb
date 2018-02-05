@@ -17,8 +17,16 @@ class Sample < ApplicationRecord
   SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR = 'taxid_annot_sorted_family_nr.fasta'.freeze
 
   LOG_BASENAME = 'log.txt'.freeze
-  DEFAULT_MEMORY = 64_000
-  DEFAULT_QUEUE = 'aegea_batch_ondemand'.freeze
+
+  # TODO: Make all these params configurable without code change
+  DEFAULT_STORAGE_IN_GB = 500
+  DEFAULT_MEMORY_IN_MB = 30_000
+
+  DEFAULT_QUEUE = 'idseq'.freeze
+  DEFAULT_VCPUS = 4
+
+  DEFAULT_QUEUE_HIMEM = 'idseq_himem'.freeze
+  DEFAULT_VCPUS_HIMEM = 8
 
   METADATA_FIELDS = [:sample_host, # this has been repurposed to be patient ID (nothing to do with host genome)
                      :sample_location, :sample_date, :sample_tissue,
