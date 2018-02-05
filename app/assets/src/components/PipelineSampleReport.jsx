@@ -78,6 +78,15 @@ class PipelineSampleReport extends React.Component {
 
   }
 
+  componentWillUpdate(nextProps, nextState) {
+    this.state.rendering = true;
+  }
+
+
+  componentDidUpdate(prevProps, prevState) {
+    this.state.rendering = false;
+  }
+
   componentWillMount() {
     this.fetchReportData();
     this.fetchSearchList();
@@ -147,12 +156,7 @@ class PipelineSampleReport extends React.Component {
       selected_taxons_top: this.state.taxonomy_details.slice(0,  this.max_rows_to_render),
       pagesRendered: 1,
       rows_passing_filters: this.state.taxonomy_details.length,
-      rendering: true,
-    },
-    () => {
-      this.setState({rendering: false})
-    }
-    );
+    });
     Cookies.set('filter_thresholds', '{}');
     Cookies.set('excluded_categories', '[]');
     $('.metric-thresholds').val('');
@@ -226,13 +230,8 @@ class PipelineSampleReport extends React.Component {
       selected_taxons,
       selected_taxons_top: selected_taxons.slice(0,  this.max_rows_to_render),
       pagesRendered: 1,
-      rendering: true,
       rows_passing_filters: selected_taxons.length
-    },
-    () => {
-      this.setState({rendering: false})
-    }
-    );
+    });
   }
 
   //Load more samples on scroll
@@ -256,12 +255,7 @@ class PipelineSampleReport extends React.Component {
       this.setState((prevState) => ({
         selected_taxons_top: [...prevState.selected_taxons_top, ...next_page],
         pagesRendered: (currentPage + 1),
-        rendering: true
-      }),
-      () => {
-        this.setState({rendering: false})
-        //console.log([this.state.selected_taxons_top.length, this.state.pagesRendered])
-      }
+      })
       )
     }
   }
@@ -379,12 +373,7 @@ class PipelineSampleReport extends React.Component {
       selected_taxons: selected_taxons,
       selected_taxons_top: selected_taxons.slice(0, this.max_rows_to_render),
       pagesRendered: 1,
-      rendering: true,
-    },
-    () => {
-      this.setState({rendering: false})
-    }
-    );
+    });
     this.state.thresholded_taxons = this.state.thresholded_taxons.sort(this.sortCompareFunction);
     this.state.taxonomy_details = this.state.taxonomy_details.sort(this.sortCompareFunction);
   }
