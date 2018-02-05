@@ -1,6 +1,9 @@
 @import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400,400i,600,600i,700,700i,800');
 
 $grid-size: 10px !default;
+$body-color: #212B36;
+$headings-color: $headings-color;
+$subdued-color: #637381;
 //== Typography
 //## Font, line-height, and color for body text, headings, and more.
 $font-family-sans-serif:  'Open Sans', Helvetica, Arial, sans-serif !default;
@@ -45,7 +48,6 @@ $headings-color:          $body-color !default;
 $id-line-height: ($grid-size * 1.8) / $font-size-base + 0.0001 !default;
 
 // Icon variables
-
 $icons16-family: "Icons16" !default;
 $icons20-family: "Icons20" !default;
 
@@ -163,5 +165,5 @@ small,
 
 //Contextual colors
 .text-muted {
-  color: $id-text-color-muted;
+  color: $subdued-color;
 }
