@@ -275,7 +275,7 @@ class SampleUpload extends React.Component {
 
   filePathValid(str) {
     const regexPrefix = /s3:\/\//;
-    const regexSuffix = /(\.fastq|\.fastq.gz|\.fasta|\.fasta.gz)/igm;
+    const regexSuffix = /(\.fastq|\.fq|\.fastq.gz|\.fq.gz|\.fasta|\.fa|\.fasta.gz\.fa.gz)/igm;
     return (str.match(regexPrefix) && str.match(regexSuffix));
   }
 
@@ -485,7 +485,7 @@ class SampleUpload extends React.Component {
       if((value.length && value.indexOf('/'))) {
         if(!this.refs.sample_name.value.trim().length) {
           let base = this.baseName(value);
-          let fastqLabel = /.fastq*$|.fasta*$|.gz*$/igm;
+          let fastqLabel = /.fastq*$|.fq*$|.fasta*$|.fa*$|.gz*$/igm;
           let readLabel = /_R1.*$|_R2.*$/ig;
           base = base.replace(fastqLabel, '').replace(readLabel, '');
           this.refs.sample_name.value = base;
@@ -548,12 +548,12 @@ class SampleUpload extends React.Component {
               <div className="field-row input-field align">
                 <i className="sample fa fa-link" aria-hidden="true"></i>
                 <input ref= "first_file_source" type="text" className="no-edit" onFocus={ this.clearError } placeholder="Required" value={ this.firstInput } readOnly/>
-                <label htmlFor="sample_first_file_source">Read 1 fastq s3 path</label>
+                <label htmlFor="sample_first_file_source">Read 1 s3 path</label>
               </div>
               <div className="field-row input-field align" >
                 <i className="sample fa fa-link" aria-hidden="true"></i>
                 <input ref= "second_file_source" type="text" className="no-edit" onFocus={ this.clearError } placeholder="Required" value={ this.secondInput } readOnly/>
-                <label htmlFor="sample_second_file_source">Read 2 fastq s3 path</label>
+                <label htmlFor="sample_second_file_source">Read 2 s3 path</label>
               </div>
               <div className="row field-row">
                 <div className={ this.userDetails.admin ? "col s4 input-field" : "col s12 input-field"}>
@@ -742,7 +742,7 @@ class SampleUpload extends React.Component {
                           Read 1
                         </div>
                         <div className='validation-info'>
-                          Accepted formats: fastq, fastq.gz, fasta, fasta.gz
+                          Accepted formats: fastq (fq), fastq.gz (fq.gz), fasta (fa), fasta.gz (fa.gz)
                         </div>
                         <div className='example-link'>
                           Example: s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz
@@ -770,7 +770,7 @@ class SampleUpload extends React.Component {
                           Read 2 (optional)
                         </div>
                         <div className='validation-info'>
-                          Accepted formats: fastq, fastq.gz, fasta, fasta.gz
+                          Accepted formats: fastq (fq), fastq.gz (fq.gz), fasta (fa), fasta.gz (fa.gz)
                         </div>
                         <div className='example-link'>
                           Example: s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R2_001.fastq.gz

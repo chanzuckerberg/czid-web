@@ -164,7 +164,6 @@ import Samples from './Samples';
     this.fetchParams('type') === 'favorite' || type === 'favorite';
     if (id && isFavoriteSelected) {
       $(`.fav-item.project-item[data-id="${id}"]`).addClass('highlight');
-      console.log(isFavoriteSelected, `.fav-item.project-item[data-id="${id}"]`, 'Adding class');
     } else if (id){
       $(`.all.project-item[data-id="${id}"]`).addClass('highlight');
     } else {

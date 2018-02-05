@@ -111,7 +111,20 @@ class Sample < ApplicationRecord
     file_list.contents.map { |f| { key: f.key, url: Sample.get_signed_url(f.key) } }
   end
 
+  def adjust_extensions
+    input_files.each do |input_file|
+      # change extension to one allowed by the pipeline
+      basename = File.basename(input_file.source)
+      basename.sub!(/fq\z/, "fastq")
+      basename.sub!(/fq.gz\z/, "fastq.gz")
+      basename.sub!(/fa\z/, "fasta")
+      basename.sub!(/fa.gz\z/, "fasta.gz")
+      input_file.update(name: basename)
+    end
+  end
+
   def initiate_input_file_upload
+    adjust_extensions
     return unless input_files.first.source_type == InputFile::SOURCE_TYPE_S3
     Resque.enqueue(InitiateS3Cp, id)
   end
@@ -121,7 +134,7 @@ class Sample < ApplicationRecord
     stderr_array = []
     input_files.each do |input_file|
       fastq = input_file.source
-      _stdout, stderr, status = Open3.capture3("aws", "s3", "cp", fastq.to_s, "#{sample_input_s3_path}/")
+      _stdout, stderr, status = Open3.capture3("aws", "s3", "cp", fastq.to_s, "#{sample_input_s3_path}/{input_file.name}")
       stderr_array << stderr unless status.exitstatus.zero?
     end
     if s3_preload_result_path.present? && s3_preload_result_path[0..4] == 's3://'
