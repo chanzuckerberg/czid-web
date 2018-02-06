@@ -2,9 +2,7 @@ class PipelineRunStage < ApplicationRecord
   include ApplicationHelper
   include PipelineOutputsHelper
   belongs_to :pipeline_run
-  DEFAULT_MEMORY_IN_MB = 30_000
 
-  DEFAULT_STORAGE_IN_GB = 500
   JOB_TYPE_BATCH = 1
   COMMIT_SHA_FILE_ON_WORKER = "/mnt/idseq-pipeline/commit-sha.txt".freeze
 
@@ -25,10 +23,19 @@ class PipelineRunStage < ApplicationRecord
     "pip install -e .[test]"
   end
 
-  def aegea_batch_submit_command(base_command, memory = Sample::DEFAULT_MEMORY)
+  def aegea_batch_submit_command(base_command, memory = Sample::DEFAULT_MEMORY_IN_MB)
     command = "aegea batch submit --command=\"#{base_command}\" "
-    queue = pipeline_run.sample.job_queue.present? ? pipeline_run.sample.job_queue : Sample::DEFAULT_QUEUE
-    command += " --storage /mnt=#{DEFAULT_STORAGE_IN_GB} --ecr-image idseq --memory #{memory} --queue #{queue} --vcpus 4"
+    if memory <= Sample::DEFAULT_MEMORY_IN_MB
+      vcpus = Sample::DEFAULT_VCPUS
+      queue = Sample::DEFAULT_QUEUE
+    else
+      vcpus = Sample::DEFAULT_VCPUS_HIMEM
+      queue = Sample::DEFAULT_QUEUE_HIMEM
+    end
+    if pipeline_run.sample.job_queue.present?
+      queue = pipeline_run.sample.job_queue
+    end
+    command += " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --ecr-image idseq --memory #{memory} --queue #{queue} --vcpus #{vcpus}"
     command
   end
 
@@ -179,7 +186,7 @@ class PipelineRunStage < ApplicationRecord
       batch_command_env_variables += " BOWTIE2_GENOME=#{sample.s3_bowtie2_index_path} "
     end
     batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline host_filtering"
-    memory = sample.sample_memory.present? ? sample.sample_memory : Sample::DEFAULT_MEMORY
+    memory = sample.sample_memory.present? ? sample.sample_memory : Sample::DEFAULT_MEMORY_IN_MB
     aegea_batch_submit_command(batch_command, memory)
   end
 
