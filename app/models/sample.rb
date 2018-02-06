@@ -134,7 +134,7 @@ class Sample < ApplicationRecord
     stderr_array = []
     input_files.each do |input_file|
       fastq = input_file.source
-      _stdout, stderr, status = Open3.capture3("aws", "s3", "cp", fastq.to_s, "#{sample_input_s3_path}/{input_file.name}")
+      _stdout, stderr, status = Open3.capture3("aws", "s3", "cp", fastq.to_s, "#{sample_input_s3_path}/#{input_file.name}")
       stderr_array << stderr unless status.exitstatus.zero?
     end
     if s3_preload_result_path.present? && s3_preload_result_path[0..4] == 's3://'
