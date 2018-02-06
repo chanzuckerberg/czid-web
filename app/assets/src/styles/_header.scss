@@ -211,6 +211,10 @@ a {
 .code {
   background-color: #edf1f2;
   white-space:nowrap;
+  &.center-code {
+    width: -webki-fit-content;
+    width: fit-content;
+  }
 }
 
 .code-to-edit {
@@ -223,5 +227,7 @@ a {
 }
 
 #cli_modal {
-  width: fit-content !important;
+  width: -webki-fit-content;
+  width: fit-content;
+  max-width: 100%
 }
