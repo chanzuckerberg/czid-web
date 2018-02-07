@@ -1,3 +1,5 @@
+@import "variables";
+
 .tooltip, .Tipsy {
   &.in {
     opacity: 1 !important;
@@ -17,7 +19,7 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Open Sans';
+  font-family: $font-family-sans-serif;
   color:rgb(100, 100, 100);
   max-width: 100%;
   overflow-x: hidden;
@@ -37,7 +39,7 @@ a {
   margin: 0 auto;
   padding: 10px 5px;
   border: 1px solid rgba(160, 11, 64, 0.16);
-  font-size: 12px;
+  font-size: $font-size-small;
   transition: .2s width ease-out;
   text-align: center;
 }
@@ -48,7 +50,7 @@ a {
   margin: 0 auto;
   padding: 10px 5px;
   border: 1px solid rgba(160, 11, 64, 0.16);
-  font-size: 12px;
+  font-size: $font-size-small;
   transition: .2s width ease-out;
   text-align: center;
 }
@@ -73,7 +75,7 @@ a {
   height: 50px;
   background-color: #313e49;
   color: #a6b7c1;
-  font-size: 14px;
+  font-size: $font-size-base;
   .menu {
     margin: 12px;
     .login {
@@ -93,7 +95,7 @@ a {
 }
 .sidebar-drawer {
   color: #999b9b;
-  font-size: 20px;
+  font-size: $font-size-h4;
   position: relative;
   top: 2px;
 }
@@ -102,8 +104,8 @@ a {
     color: #f5f5f5;
     border-right: 1px solid #535353;
     padding: 12px;
-    font-size: 16px;
-    font-weight: bold;
+    font-size: $font-size-h6;
+    font-weight: $font-weight-bold;
   }
 
   .brand-short, .brand-long, .header-right-nav div {
@@ -112,7 +114,7 @@ a {
 
   .brand-long {
     padding: 13px;
-    font-size: 14px;
+    font-size: $font-size-base;
     color: #a6b7c1;
   }
 }
@@ -148,12 +150,12 @@ a {
 
 .sub-header .title {
   color: #9B9B9B;
-  font-size: 12px;
+  font-size: $font-size-small;
 }
 
 .sub-header .sub-title {
   color: #333333;
-  font-size: 28px;
+  font-size: $font-size-h2;
 
 }
 .sub-header .sub-title a:hover{
@@ -177,7 +179,7 @@ a {
     cursor: pointer;
     i {
       display: inline-block;
-      font-size: 14px;
+      font-size: $font-size-base;
       margin-top: 15px;
     }
   }
@@ -191,17 +193,17 @@ a {
   // background-color: #D9E0E4;
   .title-filter {
     color: #9B9B9B;
-    font-size: 14px;
+    font-size: $font-size-base;
   }
 }
 
 .upload-question {
   color: #313E49;
-  font-size: 12px;
+  font-size: $font-size-small;
   margin-top: 20px;
   margin-bottom: 25px;
   a {
-    font-weight: 600;
+    font-weight: $font-weight-semibold;
   }
   a:hover {
     color: #5ABCD6 !important;
@@ -219,11 +221,11 @@ a {
 
 .code-to-edit {
   color: #3D8CAD;
-  font-weight: bold;
+  font-weight: $font-weight-bold;
 }
 
 .code-personal {
-  font-weight: bold;
+  font-weight: $font-weight-bold;
 }
 
 #cli_modal {

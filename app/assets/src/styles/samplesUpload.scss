@@ -1,3 +1,4 @@
+@import "variables";
 .background-cover {
   background-color: #edf1f2;
 }
@@ -12,12 +13,12 @@
       // border: 1px solid;
       margin: 25px;
       .form-feedback {
-        font-size: 14px;
+        font-size: $font-size-base;
         margin-bottom: 15px;
         p {
           word-wrap: break-word;
           margin: 0;
-          font-size: 12px;
+          font-size: $font-size-small;
         }
       }
       .success-message {
@@ -27,22 +28,22 @@
         color: #D0021B;
       }
       .form-title {
-        font-size: 21px;
+        font-size: $font-size-h3;
         color: #333E48;
-        font-weight: 700;
+        font-weight: $font-weight-bold;
         letter-spacing: 0.28px;
       }
       .upload-info {
         color: #677986;
-        font-size: 14px;
+        font-size: $font-size-base;
       }
       .upload-question {
         color: #313E49;
-        font-size: 12px;
+        font-size: $font-size-small;
         margin-top: 20px;
         margin-bottom: 25px;
         a {
-          font-weight: 600;
+          font-weight: $font-weight-semibold;
         }
         a:hover {
           color: #5ABCD6 !important;
@@ -66,8 +67,8 @@
                 }
               }
               .checkbox {
-                font-size: 12px;
-                font-weight: 600;
+                font-size: $font-size-small;
+                font-weight: $font-weight-semibold;
                 color: #677986;
               }
               [disabled] {
@@ -95,22 +96,22 @@
 
             .field-title {
               color: #000;
-              font-size: 12px;
-              font-weight: 600;
+              font-size: $font-size-small;
+              font-weight: $font-weight-semibold;
               .validation-info {
                 color: #677986;
               }
             }
             .field-error {
               color: #d9534f;
-              font-size: 12px;
+              font-size: $font-size-small;
             }
             .no-padding {
               padding: 0;
             }
             .example-link {
               color: #3D8CAD !important;
-              font-size: 11px;
+              font-size: $font-size-small;
             }
             .new-button {
               padding: 10px;
@@ -135,7 +136,7 @@
               &.new-project-button {
                 width: 92%;
                 float: right;
-                font-size: 13px;
+                font-size: $font-size-base;
                 height:48px;
                 background:#e9ecf1;
                 border-color: #e9ecf1;
@@ -176,7 +177,7 @@
                 .genome-label {
                   color: #95A1AB;
                   text-align: center;
-                  font-size: 0.75em;
+                  font-size: $font-size-small;
                   margin-top: 5px;
                 }
                 &.active, &:hover {
@@ -224,7 +225,7 @@
             .admin-genomes {
               .genome-label {
                 // float: right;
-                font-size: 0.75em;
+                font-size: $font-size-small;
                 color: #313E49;
                 display: inline-block;
                 border-right: 1px solid #313E49;
@@ -263,7 +264,7 @@
           }
           i {
               color: #BAC7CF;
-              font-weight: bold;
+              font-weight: $font-weight-semibold;
             }
           svg {
             width: 35px;
@@ -285,7 +286,7 @@
         }
         .admin-input-title {
           color: #677986;
-          font-size: 13px;
+          font-size: $font-size-base;
         }
         [type="checkbox"].filled-in:checked + label:after {
           border: 2px solid #2786C1;
