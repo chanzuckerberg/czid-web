@@ -649,25 +649,4 @@ module ReportHelper
     tax_details = taxonomy_details(pipeline_run_id, background_id, params)
     generate_report_csv(tax_details)
   end
-
-  def bulk_report_csvs_from_params(project, params)
-    user_id = params["user_id"]
-    current_power = Power.new(User.find(user_id))
-    csv_dir = project.csv_dir(user_id)
-    `rm -rf #{csv_dir}; mkdir -p #{csv_dir}`
-    sample_names_used = []
-    ### TO DO: loop only through samples that current_user is allowed to see ###
-    current_power.project_samples(project).each do |sample|
-      csv_data = report_csv_from_params(sample, params)
-      clean_sample_name = sample.name.downcase.gsub(/\W/, "-")
-      used_before = sample_names_used.include? clean_sample_name
-      sample_names_used << clean_sample_name
-      clean_sample_name += "_#{sample.id}" if used_before
-      filename = "#{csv_dir}/#{clean_sample_name}.csv"
-      File.write(filename, csv_data)
-    end
-    `cd #{csv_dir}; tar cvzf #{project.tar_filename} .`
-    `aws s3 cp #{project.report_tar(user_id)} #{project.report_tar_s3(user_id)}`
-    `rm -rf #{csv_dir}`
-  end
 end

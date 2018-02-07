@@ -17,7 +17,7 @@ class PipelineSampleReport extends React.Component {
     this.report_details = props.report_details;
     this.report_page_params = props.report_page_params;
     this.all_backgrounds = props.all_backgrounds;
-    this.max_rows_to_render = props.max_rows || 2000;
+    this.max_rows_to_render = props.max_rows || 1500;
     this.default_sort_by = this.report_page_params.sort_by.replace('highest_', '');
     this.sort_params = {};
     const filter_thresholds = Cookies.get('filter_thresholds');
@@ -32,6 +32,8 @@ class PipelineSampleReport extends React.Component {
       rows_total: 0,
       thresholded_taxons: [],
       selected_taxons: [],
+      selected_taxons_top: [],
+      pagesRendered: 0,
       sort_by: this.default_sort_by,
       new_filter_thresholds: (filter_thresholds) ? JSON.parse(filter_thresholds) : { NT_aggregatescore: 0.0 },
       /*
@@ -51,6 +53,7 @@ class PipelineSampleReport extends React.Component {
       */
       excluded_categories: (cached_cats) ? JSON.parse(cached_cats) : [],
       search_taxon_id: 0,
+      rendering: false,
       loading: true
     };
 
@@ -70,7 +73,18 @@ class PipelineSampleReport extends React.Component {
     this.downloadFastaUrl = this.downloadFastaUrl.bind(this);
 
     this.handleThresholdEnter = this.handleThresholdEnter.bind(this);
+    this.renderMore = this.renderMore.bind(this)
     this.initializeTooltip();
+
+  }
+
+  componentWillUpdate(nextProps, nextState) {
+    this.state.rendering = true;
+  }
+
+
+  componentDidUpdate(prevProps, prevState) {
+    this.state.rendering = false;
   }
 
   componentWillMount() {
@@ -80,6 +94,7 @@ class PipelineSampleReport extends React.Component {
 
   componentDidMount() {
     this.listenThresholdChanges();
+    this.scrollDown()
   }
 
   fetchSearchList() {
@@ -116,8 +131,11 @@ class PipelineSampleReport extends React.Component {
         rows_total: res.data.taxonomy_details[1],
         taxonomy_details: res.data.taxonomy_details[2],
         genus_map
-      });
-      this.applyThresholdFilters(res.data.taxonomy_details[2], false);
+      },
+      () => {
+        this.applyThresholdFilters(res.data.taxonomy_details[2], false);
+      }
+      )
     });
   }
 
@@ -135,7 +153,9 @@ class PipelineSampleReport extends React.Component {
       search_taxon_id: 0,
       thresholded_taxons: this.state.taxonomy_details,
       selected_taxons: this.state.taxonomy_details,
-      rows_passing_filters: this.state.taxonomy_details.length
+      selected_taxons_top: this.state.taxonomy_details.slice(0,  this.max_rows_to_render),
+      pagesRendered: 1,
+      rows_passing_filters: this.state.taxonomy_details.length,
     });
     Cookies.set('filter_thresholds', '{}');
     Cookies.set('excluded_categories', '[]');
@@ -208,8 +228,36 @@ class PipelineSampleReport extends React.Component {
       search_taxon_id: searchTaxonId,
       thresholded_taxons,
       selected_taxons,
+      selected_taxons_top: selected_taxons.slice(0,  this.max_rows_to_render),
+      pagesRendered: 1,
       rows_passing_filters: selected_taxons.length
     });
+  }
+
+  //Load more samples on scroll
+  scrollDown() {
+    var that = this;
+    $(window).scroll(function() {
+      if ($(window).scrollTop() > $(document).height() - $(window).height() - 6000) {
+        {that.state.rows_total > 0 && !that.state.rendering ? that.renderMore() : null }
+        return false;
+      }
+    });
+  }
+
+
+  renderMore() {
+    let selected_taxons = this.state.selected_taxons
+    let currentPage = this.state.pagesRendered
+    let rowsPerPage = this.max_rows_to_render
+    if (selected_taxons.length > currentPage * this.max_rows_to_render) {
+      let next_page = selected_taxons.slice(currentPage * rowsPerPage, rowsPerPage * (currentPage +1))
+      this.setState((prevState) => ({
+        selected_taxons_top: [...prevState.selected_taxons_top, ...next_page],
+        pagesRendered: (currentPage + 1),
+      })
+      )
+    }
   }
 
   flash() {
@@ -316,12 +364,15 @@ class PipelineSampleReport extends React.Component {
     };
   }
 
+
   sortResults() {
     this.setSortParams();
     let selected_taxons = this.state.selected_taxons;
     selected_taxons = selected_taxons.sort(this.sortCompareFunction);
     this.setState({
-      selecte_taxons: selected_taxons
+      selected_taxons: selected_taxons,
+      selected_taxons_top: selected_taxons.slice(0, this.max_rows_to_render),
+      pagesRendered: 1,
     });
     this.state.thresholded_taxons = this.state.thresholded_taxons.sort(this.sortCompareFunction);
     this.state.taxonomy_details = this.state.taxonomy_details.sort(this.sortCompareFunction);
@@ -690,7 +741,7 @@ class PipelineSampleReport extends React.Component {
                       </tr>
                     </thead>
                     <tbody>
-                      { this.state.selected_taxons.slice(0, this.max_rows_to_render).map((tax_info, i) => (
+                      { this.state.selected_taxons_top.map((tax_info, i) => (
                         <tr key={tax_info.tax_id} className={this.row_class(tax_info)}>
                           <td>
                             { this.render_name(tax_info, this.report_details) }
