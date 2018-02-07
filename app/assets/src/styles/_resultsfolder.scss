@@ -1,12 +1,14 @@
+@import "variables";
+
 .header {
   margin: 25px 75px;
   .title {
-  font-size: 22px;
+  font-size: $font-size-h3;
   color: #03a9f4;
   .path {
     margin: 20px;
     color: #000;
-    font-weight: 100
+    font-weight: $font-weight-thin
     }
     .back {
       cursor: pointer;
@@ -15,9 +17,13 @@
       }
     }
   }
+  th {
+    color: $headings-color;
+  }
   tr {
     cursor: pointer;
     td {
+      color: $body-color;
       &:hover {
         color: #5abcd6;
       }

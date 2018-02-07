@@ -1,4 +1,6 @@
+@import "variables";
 /* TODO: refactor stylesheet into scss */
+
 .samples-table {
   td {
     cursor: pointer;
@@ -27,7 +29,7 @@ $break-large: 1070px;
 
   .tab a {
     color: #333333;
-    font-size: 14px;
+    font-size: $font-size-base;
     padding: 0 !important;
     margin-right: 30px;
     text-transform: none !important;
@@ -43,14 +45,9 @@ $break-large: 1070px;
 .tab-screen-content {
   .content-title{
     color: #313E49;
-    font-size: 16px;
-    font-weight: 600;
+    font-size: $font-size-h5;
+    font-weight: $headings-font-weight;
     margin: 25px 0;
-  }
-  .download-title{
-    margin: 25px 0 0;
-    font-size: 13px;
-    font-weight: 600;
   }
 }
 
@@ -276,8 +273,8 @@ $break-large: 1070px;
   width: fit-content;
   .proj-title {
     margin-top: 18px;
-    font-size: 18px;
-    font-weight: 600;
+    font-size: $font-size-h3;
+    font-weight: $headings-font-weight;
     &.all-proj {
       margin-top: 7px;
     }
@@ -370,7 +367,7 @@ $break-large: 1070px;
     font-size: 20px;
     cursor: pointer;
     &.disabled {
-      background: #c7c8ca;
+      background: $subdued-color;
       cursor: none;
     }
   }
@@ -510,6 +507,7 @@ $break-large: 1070px;
       position: -webkit-sticky;
       position: sticky;
       top: -1px;
+      color: $headings-color;
     }
   }
 
@@ -823,7 +821,7 @@ input[type="button"] {
           border-left: 6px solid transparent;
           padding: 10px 15px !important;
           font-weight: 400;
-          font-size: 14px;
+          font-size: $font-size-base;
           &:hover {
             background: #eff0f2;
             i {
@@ -855,7 +853,7 @@ input[type="button"] {
       color: #2d93d2;
     }
     .more {
-      font-size: 12px;
+      font-size: $font-size-small;
       cursor: pointer;
       padding: 0 20px;
       color: #4ba4c2;
@@ -882,18 +880,18 @@ input[type="button"] {
   border-radius: 0px;
   top: 25% !important;
   .project_modal_header {
-    font-size: 18px;
+    font-size: $font-size-large;
     font-weight: bold;
     margin-bottom: 10px
   }
 
   .project_modal_title {
-    font-size: 16px;
+    font-size: $font-size-h6;
     font-weight: bold;
   }
   .project_modal_visiblity {
     i.material-icons {
-      font-size: 15px;
+      font-size: $font-size-base;
       position: relative;
       top: 2px;
       color: #b8b8b8;
@@ -929,7 +927,7 @@ input[type="button"] {
       margin-top: 1px;
       background: #e9ecef;
       padding: 12px;
-      font-size: 12px;
+      font-size: $font-size-small;
       border-top-right-radius: 2px;
       border-bottom-right-radius: 2px;
       border: 1px solid #ced4da;
@@ -944,20 +942,20 @@ input[type="button"] {
       color: #d9534f;
       float: left;
       margin-top: 5px;
-      font-size: 12px;
+      font-size: $font-size-small;
     }
     .status-message {
       float: left;
       width: 100%;
-      font-size: 13px;
+      font-size: $font-size-small;
       margin-top: 5px;
       color: #6b6b6b;
     }
   }
   .members_list {
     .list_title {
-      font-size: 16px;
-      font-weight: 700;
+      font-size: $font-size-h5;
+      font-weight: $font-weight-bold;
       i {
         position: relative;
         top: 4px;
@@ -967,7 +965,7 @@ input[type="button"] {
     }
     li {
       font-weight: 600;
-      font-size: 15px;
+      font-size: $font-size-small;
     }
   }
   .modal-close {
@@ -976,7 +974,7 @@ input[type="button"] {
     color: #ecf5f9;
     padding: 5px;
     border-radius: 4px;
-    font-size: 17px;
+    font-size: $font-size-base;
     min-width: 110px;
   }
 }
