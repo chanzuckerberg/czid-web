@@ -1037,7 +1037,6 @@ class Samples extends React.Component {
         }
       });
       $('.filter').hide();
-      $('body').addClass('background-cover');
     });
     this.initializeTooltip();
     this.fetchProjectPageData();
