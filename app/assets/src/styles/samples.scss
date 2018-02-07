@@ -46,7 +46,7 @@ $break-large: 1070px;
   .content-title{
     color: #313E49;
     font-size: $font-size-h5;
-    font-weight: 600;
+    font-weight: $headings-font-weight;
     margin: 25px 0;
   }
 }
