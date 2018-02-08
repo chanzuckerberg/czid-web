@@ -867,16 +867,13 @@ class SampleUpload extends React.Component {
                               <div className='read-count-label' htmlFor="sample_job_queue">
                                 Job queue
                               </div>
-                              <div className='validation-info'>
-                                Example: aegea_batch_ondemand
-                              </div>
                             </div>
                           </div>
                         </div>
                         <div className='row input-row'>
                           <div className='col no-padding s12'>
                             <input id='sample_job_queue' ref= "job_queue" type='text' className='browser-default'
-                                   placeholder='queue' value={this.state.selectedJobQueue}
+                                   placeholder='idseq_himem' value={this.state.selectedJobQueue}
                                    onChange={ this.handleQueueChange } />
                             {
                               (this.state.errors.job_queue) ?
