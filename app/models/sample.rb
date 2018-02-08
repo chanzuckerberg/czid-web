@@ -116,7 +116,7 @@ class Sample < ApplicationRecord
                                               prefix: "#{stage2_results_prefix}/",
                                               delimiter: "/")
     stage1_files = stage1_file_list.contents.map { |f| { key: f.key, display_name: f.key.split("/")[-1], url: Sample.get_signed_url(f.key) } }
-    stage2_files = stage2_file_list.contents.map { |f| { key: f.key, display_name: #{f.key.split("/")[-2]}/#{f.key.split("/")[-1]}", url: Sample.get_signed_url(f.key) } }
+    stage2_files = stage2_file_list.contents.map { |f| { key: f.key, display_name: "#{f.key.split('/')[-2]}/#{f.key.split('/')[-1]}", url: Sample.get_signed_url(f.key) } }
     stage1_files + stage2_files
   end
 
