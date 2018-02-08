@@ -879,14 +879,14 @@ class Samples extends React.Component {
           this.state.selectedProjectId ? project_menu : null
         }
         <div className="wrapper">
-          <div className={(!this.state.project) ? "proj-title all-proj" : "proj-title"}>
-          { (!this.state.project) ? <div className="">All projects</div>
+          <div className={(!this.state.project) ? "proj-title heading all-proj" : "heading proj-title"}>
+          { (!this.state.project) ? <div className="">All Projects</div>
               : <div>
                   <span className="">{ this.state.project.name }</span>
                 </div>
           }
         </div>
-          <p className="col no-padding s12">
+          <p className="subheading col no-padding s12">
           { this.state.allSamples.length === 0 ? 'No sample found'
             : ( this.state.allSamples.length === 1 ? '1 sample found'
               : `Showing ${this.state.allSamples.length} out of ${this.state.totalNumber} total samples`)

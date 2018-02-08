@@ -22,7 +22,7 @@ services:
       - db
       - redis
     environment:
-      - SAMPLES_BUCKET_NAME=czbiohub-idseq-samples-development
+      - SAMPLES_BUCKET_NAME=idseq-samples-development
       - IDSEQ_AIRBRAKE_PROJECT_ID
       - IDSEQ_AIRBRAKE_PROJECT_KEY
       - IDSEQ_HONEYCOMB_DB_DATA_SET
@@ -71,7 +71,7 @@ services:
       - db
       - redis
     environment:
-      - SAMPLES_BUCKET_NAME=czbiohub-idseq-samples-development
+      - SAMPLES_BUCKET_NAME=idseq-samples-development
       - IDSEQ_AIRBRAKE_PROJECT_ID
       - IDSEQ_AIRBRAKE_PROJECT_KEY
       - IDSEQ_HONEYCOMB_DB_DATA_SET
@@ -114,7 +114,7 @@ services:
       - db
       - redis
     environment:
-      - SAMPLES_BUCKET_NAME=czbiohub-idseq-samples-development
+      - SAMPLES_BUCKET_NAME=idseq-samples-development
       - CI
       - CONTINUOUS_INTEGRATION
       - RACK_ENV
@@ -152,7 +152,7 @@ services:
       - db
       - redis
     environment:
-      - SAMPLES_BUCKET_NAME=czbiohub-idseq-samples-development
+      - SAMPLES_BUCKET_NAME=idseq-samples-development
       - CI
       - CONTINUOUS_INTEGRATION
       - RACK_ENV
