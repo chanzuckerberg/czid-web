@@ -268,14 +268,16 @@ class PipelineRun < ApplicationRecord
   end
 
   def subsampled_reads
+    # number of non-host reads that actually went through non-host alignment
     return remaining_reads unless subsample
     result = subsample * sample.input_files.count
-    (remaining_reads < result) ? remaining_reads : result
+    remaining_reads < result ? remaining_reads : result
     # 'subsample' is number of reads, respectively read pairs, to sample after host filtering
     # 'remaining_reads'a is number of individual reads remaining after host filtering
   end
 
   def subsample_fraction
+    # fraction of non-host ("remaining") reads that actually went through non-host alignment
     (1.0 * subsampled_reads) / remaining_reads
   end
 
