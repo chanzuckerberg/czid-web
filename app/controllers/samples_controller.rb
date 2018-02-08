@@ -17,7 +17,7 @@ class SamplesController < ApplicationController
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata].freeze
 
-  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all].freeze
+  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :samples_taxons].freeze
 
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload]
   acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload], fallback: :devise
@@ -157,6 +157,21 @@ class SamplesController < ApplicationController
         @report_details = report_details(@pipeline_run, Background.find(background_id))
         @report_page_params = clean_params(params, @all_categories)
       end
+    end
+  end
+
+  def samples_taxons
+    sample_ids = params[:sample_ids].split(",").map(&:to_i) || []
+    taxon_ids = params[:taxon_ids].split(",").map(&:to_i) || []
+    samples = current_power.samples.where(id: sample_ids)
+    if sample_ids.first && taxon_ids.first && samples.first
+      first_sample = samples.first
+      default_background_id = first_sample.host_genome && first_sample.host_genome.default_background ? first_sample.host_genome.default_background.id : nil
+      background_id = params[:background_id] || default_background_id || Background.first
+      @sample_taxons_dict = samples_taxons_details(samples, taxon_ids, background_id)
+      render json: @sample_taxons_dict
+    else
+      render json: {}
     end
   end
 

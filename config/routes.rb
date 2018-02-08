@@ -22,6 +22,7 @@ Rails.application.routes.draw do
     get :fastqs_folder, on: :member
     post :bulk_upload, on: :collection
     post :save_metadata, on: :member
+    get :samples_taxons, on: :collection
   end
   get 'samples/:id/fasta/:tax_level/:taxid/:hit_type', to: 'samples#show_taxid_fasta'
 
