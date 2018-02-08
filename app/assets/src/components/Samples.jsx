@@ -280,7 +280,10 @@ class Samples extends React.Component {
           .then((res) => {
             this.updateUserDisplay(email_to_add);
             this.setState({
-              invite_status: 'sent'
+              invite_status: 'sent',
+              project: Object.assign(this.state.project, {
+                total_members: this.state.project.total_members + 1
+              })
             });
         })
       } else {
