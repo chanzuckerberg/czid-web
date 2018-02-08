@@ -106,13 +106,18 @@ class Sample < ApplicationRecord
   end
 
   def results_folder_files
-    file_list = S3_CLIENT.list_objects(bucket: SAMPLES_BUCKET_NAME,
-                                       prefix: "#{sample_path}/results/",
-                                       delimiter: "s/")
-    # Setting delimiter to 's/' is a hack. It works because both "results" and "chunks" end in 's'.
-    # Therefore, file_list will include files in "results/" and "results/subsample_1000000",
-    # but not the large number of irrelevant files in "results/subsample_1000000/chunks/".
-    file_list.contents.map { |f| { key: f.key, url: Sample.get_signed_url(f.key) } }
+    prs = pipeline_runs.first.pipeline_run_stages.first
+    stage1_results_prefix = prs.sample_output_s3_path.split("#{Sample::SAMPLES_BUCKET_NAME}/")[1]
+    stage1_file_list = S3_CLIENT.list_objects(bucket: SAMPLES_BUCKET_NAME,
+                                              prefix: "#{stage1_results_prefix}/",
+                                              delimiter: "/")
+    stage2_results_prefix = prs.alignment_output_s3_path.split("#{Sample::SAMPLES_BUCKET_NAME}/")[1]
+    stage2_file_list = S3_CLIENT.list_objects(bucket: SAMPLES_BUCKET_NAME,
+                                              prefix: "#{stage2_results_prefix}/",
+                                              delimiter: "/")
+    stage1_files = stage1_file_list.contents.map { |f| { key: f.key, url: Sample.get_signed_url(f.key) } }
+    stage2_files = stage2_file_list.contents.map { |f| { key: f.key, url: Sample.get_signed_url(f.key) } }
+    stage1_files + stage2_files
   end
 
   def fastqs_folder_files
