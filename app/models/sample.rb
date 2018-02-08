@@ -108,7 +108,10 @@ class Sample < ApplicationRecord
   def results_folder_files
     file_list = S3_CLIENT.list_objects(bucket: SAMPLES_BUCKET_NAME,
                                        prefix: "#{sample_path}/results/",
-                                       delimiter: "/")
+                                       delimiter: "s/")
+    # Setting delimiter to 's/' is a hack. It works because both "results" and "chunks" end in 's'.
+    # Therefore, file_list will include files in "results/" and "results/subsample_1000000",
+    # but not the large number of irrelevant files in "results/subsample_1000000/chunks/".
     file_list.contents.map { |f| { key: f.key, url: Sample.get_signed_url(f.key) } }
   end
 
