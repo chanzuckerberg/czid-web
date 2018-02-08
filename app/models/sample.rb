@@ -105,18 +105,24 @@ class Sample < ApplicationRecord
     nil
   end
 
+  def path_end(key, n = 1)
+    parts = key.split('/')
+    return "#{parts[-2]}/#{parts[-1]}" if n == 2
+    parts[-1]
+  end
+
+  def list_outputs(s3_path, display_prefix = 1)
+    prefix = s3_path.split("#{Sample::SAMPLES_BUCKET_NAME}/")[1]
+    file_list = S3_CLIENT.list_objects(bucket: SAMPLES_BUCKET_NAME,
+                                       prefix: "#{prefix}/",
+                                       delimiter: "/")
+    file_list.contents.map { |f| { key: f.key, display_name: path_end(f.key, display_prefix), url: Sample.get_signed_url(f.key) } }
+  end
+
   def results_folder_files
     prs = pipeline_runs.first.pipeline_run_stages.first
-    stage1_results_prefix = prs.sample_output_s3_path.split("#{Sample::SAMPLES_BUCKET_NAME}/")[1]
-    stage1_file_list = S3_CLIENT.list_objects(bucket: SAMPLES_BUCKET_NAME,
-                                              prefix: "#{stage1_results_prefix}/",
-                                              delimiter: "/")
-    stage2_results_prefix = prs.alignment_output_s3_path.split("#{Sample::SAMPLES_BUCKET_NAME}/")[1]
-    stage2_file_list = S3_CLIENT.list_objects(bucket: SAMPLES_BUCKET_NAME,
-                                              prefix: "#{stage2_results_prefix}/",
-                                              delimiter: "/")
-    stage1_files = stage1_file_list.contents.map { |f| { key: f.key, display_name: f.key.split("/")[-1], url: Sample.get_signed_url(f.key) } }
-    stage2_files = stage2_file_list.contents.map { |f| { key: f.key, display_name: "#{f.key.split('/')[-2]}/#{f.key.split('/')[-1]}", url: Sample.get_signed_url(f.key) } }
+    stage1_files = list_outputs(prs.sample_output_s3_path)
+    stage2_files = list_outputs(prs.alignment_output_s3_path, 2)
     stage1_files + stage2_files
   end
 
