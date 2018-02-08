@@ -17,8 +17,16 @@ class Sample < ApplicationRecord
   SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR = 'taxid_annot_sorted_family_nr.fasta'.freeze
 
   LOG_BASENAME = 'log.txt'.freeze
-  DEFAULT_MEMORY = 64_000
-  DEFAULT_QUEUE = 'aegea_batch_ondemand'.freeze
+
+  # TODO: Make all these params configurable without code change
+  DEFAULT_STORAGE_IN_GB = 500
+  DEFAULT_MEMORY_IN_MB = 30_000
+
+  DEFAULT_QUEUE = 'idseq'.freeze
+  DEFAULT_VCPUS = 4
+
+  DEFAULT_QUEUE_HIMEM = 'idseq_himem'.freeze
+  DEFAULT_VCPUS_HIMEM = 8
 
   METADATA_FIELDS = [:sample_host, # this has been repurposed to be patient ID (nothing to do with host genome)
                      :sample_location, :sample_date, :sample_tissue,
@@ -111,7 +119,20 @@ class Sample < ApplicationRecord
     file_list.contents.map { |f| { key: f.key, url: Sample.get_signed_url(f.key) } }
   end
 
+  def adjust_extensions
+    input_files.each do |input_file|
+      # change extension to one allowed by the pipeline
+      basename = File.basename(input_file.source)
+      basename.sub!(/fq\z/, "fastq")
+      basename.sub!(/fq.gz\z/, "fastq.gz")
+      basename.sub!(/fa\z/, "fasta")
+      basename.sub!(/fa.gz\z/, "fasta.gz")
+      input_file.update(name: basename)
+    end
+  end
+
   def initiate_input_file_upload
+    adjust_extensions
     return unless input_files.first.source_type == InputFile::SOURCE_TYPE_S3
     Resque.enqueue(InitiateS3Cp, id)
   end
@@ -121,7 +142,7 @@ class Sample < ApplicationRecord
     stderr_array = []
     input_files.each do |input_file|
       fastq = input_file.source
-      _stdout, stderr, status = Open3.capture3("aws", "s3", "cp", fastq.to_s, "#{sample_input_s3_path}/")
+      _stdout, stderr, status = Open3.capture3("aws", "s3", "cp", fastq.to_s, "#{sample_input_s3_path}/#{input_file.name}")
       stderr_array << stderr unless status.exitstatus.zero?
     end
     if s3_preload_result_path.present? && s3_preload_result_path[0..4] == 's3://'

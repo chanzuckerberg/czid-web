@@ -50,7 +50,7 @@ margin-bottom: 0px;
 .sidebar-title {
   padding: 15px 0 10px 0;
   color: #002238;
-  font-size: 18px;
+  font-size: $font-size-large;
   border-bottom: 1px solid #c8c8c8;
   margin: 0 10px 15px
 
@@ -72,7 +72,7 @@ margin-bottom: 0px;
       }
       a {
         text-align: center !important;
-        font-size: 12px !important;
+        font-size: $font-size-small !important;
       }
     }
 
@@ -106,7 +106,7 @@ margin-bottom: 0px;
           z-index: 50;
           top: 31%;
           right:2px;
-          font-size: 18px;
+          font-size: $font-size-large;
           color: #444242;
         }
         .select-wrapper{
@@ -115,7 +115,7 @@ margin-bottom: 0px;
             padding-left: 0px !important;
              li > span{
                color: black !important;
-               font-size: 14px !important;
+               font-size: $font-size-base !important;
              }
           }
         }
@@ -125,7 +125,7 @@ margin-bottom: 0px;
           padding-left: 8px;
           border: 1px solid #A6B7C1;
           width: 100%;
-          font-size: 14px;
+          font-size: $font-size-base;
         }
       }
     }
@@ -138,18 +138,18 @@ margin-bottom: 0px;
 
   .report-data div:nth-child(odd) {
     color: #677986;
-    font-size: 16px;
-    font-weight: 400;
+    font-size: $font-size-large;
+    font-weight: $font-weight-regular;
   }
 
   .report-data div:nth-child(even) {
     color: #1B232A;
     margin-bottom: 10px;
-    font-size: 14px;
+    font-size: $font-size-base;
   }
 
   .report-title {
-    font-size: 14px;
+    font-size: $font-size-base;
     color: #333333;
   }
 
@@ -158,7 +158,7 @@ margin-bottom: 0px;
     .filter-title {
       padding: 15px;
       color: #B8B8B8;
-      font-size: 12px;
+      font-size: $font-size-small;
       border-bottom: 1px solid #D6D6D6;
     }
 
@@ -205,7 +205,7 @@ margin-bottom: 0px;
         text-align: right;
         margin-top: 15px;
         label {
-          font-size: 13px;
+          font-size: $font-size-small;
           color: #464343;
         }
       }
@@ -262,7 +262,7 @@ margin-bottom: 0px;
 
 .report-number-blank {
   text-align: right;
-  color: #DDDDDD;
+  color: $subdued-color;
 }
 
 .report-row-genus {
@@ -280,7 +280,7 @@ margin-bottom: 0px;
 
 .slider-title {
   color: #535353;
-  font-size: 12px;
+  font-size: $font-size-small;
   margin: 35px 0 15px;
 }
 
@@ -288,7 +288,7 @@ margin-bottom: 0px;
   display: inline-block;
   margin-bottom: 15px;
   color: #9B9B9B;
-  font-size: 12px;
+  font-size: $font-size-small;
   border: 1px solid rgb(200, 200,200);
   padding: 0 5px;
   background: white;
@@ -299,7 +299,7 @@ margin-bottom: 0px;
 
 .report-table {
   // min-width: 1000px;
-  font-size: 12px;
+  font-size: $font-size-small;
 }
 
 .report-table .link:hover {
@@ -319,7 +319,7 @@ margin-bottom: 0px;
   .fa {
     margin-left: 2px;
     margin-right: 5px;
-    font-size: 20px;
+    font-size: $font-size-h4;
     width: 10px;
     &:hover {
       color: #444242;
@@ -342,7 +342,7 @@ margin-bottom: 0px;
 
 #sort-report {
   a {
-    font-size: 14px;
+    font-size: $font-size-base;
     padding: 6px;
 
     .sort-title {
@@ -361,12 +361,12 @@ margin-bottom: 0px;
     text-transform: capitalize;
     &.sort-value {
       color: #929292;
-      font-size: 14px;
+      font-size: $font-size-base;
       margin: 0 5px;
     }
   }
   &.btn-flat {
-    font-size: 14px;
+    font-size: $font-size-base;
     i {
       font-size: 13px;
     }
@@ -381,9 +381,9 @@ margin-bottom: 0px;
   min-width: 50px;
   white-space: nowrap;
   overflow: hidden;
-  font-weight: 600;
+  font-weight: $font-weight-semibold;
   i {
-    font-size: 20px;
+    font-size: $font-size-h4;
     float: right;
     display: block;
     margin-right: 3px;
@@ -406,13 +406,13 @@ margin-bottom: 0px;
   td, th {
     width: 75px;
     min-width:50px;
-    font-size:12px;
+    font-size:$font-size-small;
   }
 
   td:first-child {
     min-width:350px;
     width:350px;
-    font-size:14px;
+    font-size: $font-size-base;
   }
 
   td:last-child {
@@ -421,7 +421,7 @@ margin-bottom: 0px;
   th:first-child {
     min-width: 350px;
     width: 350px;
-    font-size:14px;
+    font-size: $font-size-base;
   }
   th:last-child {
     padding-right: 50px;
@@ -450,7 +450,7 @@ margin-bottom: 0px;
   .thresh-values {
     color: #677986;
     padding: 18px;
-    font-weight: 500;
+    font-weight: $font-weight-semibold;
   }
 }
 .genus-autocomplete-container {
@@ -506,7 +506,7 @@ margin-bottom: 0px;
     .download-report {
       background: #edf8ff;
       color: rgb(3, 169, 244) !important;
-      font-weight: 600;
+      font-weight: $font-weight-semibold;
       cursor: pointer;
       margin: 10px 40px;
       display: inline-block;
@@ -549,14 +549,14 @@ margin-bottom: 0px;
     visibility: hidden;
     padding: 10px;
     color: #84d4fa;
-    font-size: 15px;
+    font-size: $font-size-base;
     cursor: pointer;
     .fa-download {
       margin-left:12px;
     }
     .cloud {
       color: #84d4fa;
-      font-size: 15px;
+      font-size: $font-size-base;
       &:hover {
         color: #414367
       }
