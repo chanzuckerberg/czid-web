@@ -274,20 +274,20 @@ module ReportHelper
 
     # calculating rpm and zscore, organizing the results by pipeline_run_id
     result_hash = {}
-    sql_results.each { |row|
+    sql_results.each do |row|
       pipeline_run_id = row["pipeline_run_id"]
       if result_hash[pipeline_run_id]
         pr = result_hash[pipeline_run_id]["pr"]
       else
         pr = PipelineRun.find(pipeline_run_id)
-        result_hash[pipeline_run_id] = {"pr" => pr, "taxon_counts" => [] }
+        result_hash[pipeline_run_id] = { "pr" => pr, "taxon_counts" => [] }
       end
-      row["rpm"] = row["r"] / (pr.total_reads * pr.subsample_fraction) * 1000000.0
+      row["rpm"] = row["r"] / (pr.total_reads * pr.subsample_fraction) * 1_000_000.0
       row["zscore"] = (row["rpm"] - row["mean"]) / row["stdev"]
       row["zscore"] = ZSCORE_MAX if row["zscore"] > ZSCORE_MAX
       row["zcore"] = ZSCORE_MIN if row["zscore"] < ZSCORE_MIN
       result_hash[pipeline_run_id]["taxon_counts"] << row
-    }
+    end
 
     result_hash
   end
@@ -307,9 +307,9 @@ module ReportHelper
       compute_genera_aggregate_scores!(rows, tax_2d)
 
       filtered_rows = []
-      rows.each { |row|
+      rows.each do |row|
         filtered_rows << row if taxon_ids.include?(row["tax_id"])
-      }
+      end
 
       results[sample_id] = filtered_rows
     end
@@ -663,7 +663,6 @@ module ReportHelper
 
     # Compute all species aggregate scores.  These are used in filtering.
     compute_species_aggregate_scores!(rows, tax_2d)
-
 
     # Compute all genus aggregate scores.  These are used only in sorting.
     compute_genera_aggregate_scores!(rows, tax_2d)

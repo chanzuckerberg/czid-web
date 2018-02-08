@@ -161,10 +161,10 @@ class SamplesController < ApplicationController
   end
 
   def samples_taxons
-    sample_ids = params[:sample_ids].split(",").map {|u| u.to_i } || []
-    taxon_ids = params[:taxon_ids].split(",").map {|u| u.to_i } || []
+    sample_ids = params[:sample_ids].split(",").map(&:to_i) || []
+    taxon_ids = params[:taxon_ids].split(",").map(&:to_i) || []
     samples = current_power.samples.where(id: sample_ids)
-    if sample_ids.first &&  taxon_ids.first && samples.first
+    if sample_ids.first && taxon_ids.first && samples.first
       first_sample = samples.first
       default_background_id = first_sample.host_genome && first_sample.host_genome.default_background ? first_sample.host_genome.default_background.id : nil
       background_id = params[:background_id] || default_background_id || Background.first
