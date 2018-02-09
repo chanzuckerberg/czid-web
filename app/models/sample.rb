@@ -105,18 +105,28 @@ class Sample < ApplicationRecord
     nil
   end
 
-  def results_folder_files
+  def end_path(key, n = 1)
+    parts = key.split('/')
+    n == 2 ? "#{parts[-2]}/#{parts[-1]}" : parts[-1]
+  end
+
+  def list_outputs(s3_path, display_prefix = 1)
+    prefix = s3_path.split("#{Sample::SAMPLES_BUCKET_NAME}/")[1]
     file_list = S3_CLIENT.list_objects(bucket: SAMPLES_BUCKET_NAME,
-                                       prefix: "#{sample_path}/results/",
+                                       prefix: "#{prefix}/",
                                        delimiter: "/")
-    file_list.contents.map { |f| { key: f.key, url: Sample.get_signed_url(f.key) } }
+    file_list.contents.map { |f| { key: f.key, display_name: end_path(f.key, display_prefix), url: Sample.get_signed_url(f.key) } }
+  end
+
+  def results_folder_files
+    prs = pipeline_runs.first.pipeline_run_stages.first
+    stage1_files = list_outputs(prs.sample_output_s3_path)
+    stage2_files = list_outputs(prs.alignment_output_s3_path, 2)
+    stage1_files + stage2_files
   end
 
   def fastqs_folder_files
-    file_list = S3_CLIENT.list_objects(bucket: SAMPLES_BUCKET_NAME,
-                                       prefix: "#{sample_path}/fastqs/",
-                                       delimiter: "/")
-    file_list.contents.map { |f| { key: f.key, url: Sample.get_signed_url(f.key) } }
+    list_outputs(sample_input_s3_path)
   end
 
   def adjust_extensions
