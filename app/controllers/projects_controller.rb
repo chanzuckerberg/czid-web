@@ -11,7 +11,7 @@ class ProjectsController < ApplicationController
   #
   ##########################################
 
-  READ_ACTIONS = [:show, :add_favorite, :remove_favorite, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv].freeze
+  READ_ACTIONS = [:show, :add_favorite, :remove_favorite, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv, :visuals].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_emails, :update_project_visibility].freeze
   OTHER_ACTIONS = [:create, :new, :index, :send_project_csv].freeze
 
@@ -119,28 +119,6 @@ class ProjectsController < ApplicationController
 
   # Get /projects/1/visuals
   def visuals
-    # TODO(cyril/yf): the following no longer work because Report model is gone
-    # project_id = params[:id]
-    # if project_id
-    #  project_info = Project.select('name').where(id: project_id)
-    # @project_name = project_info[0].name if project_info[0]
-    # we can avoid many joins, when we create a relationship between reports and projects, or with the samples
-    # time_start = Time.now
-    # sql = <<-SQL
-    # SELECT samples.name, reports.id FROM projects
-    # INNER JOIN samples ON projects.id = samples.project_id
-    # INNER JOIN pipeline_outputs ON samples.id = pipeline_outputs.sample_id
-    # INNER JOIN reports ON reports.pipeline_output_id = pipeline_outputs.id
-    # WHERE projects.id = ?
-    # SQL
-    # @csv_records = []
-    # find_reports = ActiveRecord::Base.connection.raw_connection.prepare(sql).execute(project_id)
-    # time_end = Time.now
-    # p 'Query took', "#{(time_end - time_start)} seconds"
-    # find_reports.each do |record|
-    #  @csv_records.push(name: record.first, link: fetch_csv_url(record.last))
-    # end
-    # end
   end
 
   def add_favorite
