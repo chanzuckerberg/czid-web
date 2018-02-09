@@ -454,7 +454,7 @@ class SampleUpload extends React.Component {
     $('.new-project-input  .input-icon').slideToggle();
     $('.new-project-button').toggleClass('active');
     this.setState({
-      disableProjectSelect: !this.state.disableProjectSelectx
+      disableProjectSelect: !this.state.disableProjectSelect
     }, () => {
       this.initializeSelectTag();
     });
