@@ -197,6 +197,7 @@ class PipelineRunStage < ApplicationRecord
       "OUTPUT_BUCKET=#{alignment_output_s3_path} FILE_TYPE=#{file_type} ENVIRONMENT=#{Rails.env} DB_SAMPLE_ID=#{sample.id} " \
       "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} "
     batch_command_env_variables += "SUBSAMPLE=#{pipeline_run.subsample} " if pipeline_run.subsample
+    batch_command_env_variables += "SKIP_DEUTERO_FILTER=1 " if sample.skip_deutero_filter_flag
     batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline non_host_alignment"
     aegea_batch_submit_command(batch_command)
   end

@@ -166,6 +166,10 @@ class Sample < ApplicationRecord
     host_genome && host_genome.name == HostGenome::NO_HOST_NAME ? 0 : 1
   end
 
+  def skip_deutero_filter_flag
+    !host_genome || host_genome.skip_deutero_filter == 1 ? 1 : 0
+  end
+
   def sample_output_s3_path
     "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/results"
   end
