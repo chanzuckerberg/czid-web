@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180131225646) do
+ActiveRecord::Schema.define(version: 20180209001352) do
 
   create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "archive_of"
@@ -63,6 +63,7 @@ ActiveRecord::Schema.define(version: 20180131225646) do
     t.datetime "updated_at", null: false
     t.integer "sample_memory"
     t.string "job_queue"
+    t.integer "skip_deutero_filter"
   end
 
   create_table "input_files", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
