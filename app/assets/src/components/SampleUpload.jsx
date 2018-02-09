@@ -123,7 +123,8 @@ class SampleUpload extends React.Component {
   clearError() {
     this.setState({
       invalid: false,
-      success: false
+      success: false,
+      errors: {}
      })
   }
 
@@ -448,11 +449,12 @@ class SampleUpload extends React.Component {
   }
 
   toggleNewProjectInput(e) {
+    this.clearError();
     $('.new-project-input').slideToggle();
     $('.new-project-input  .input-icon').slideToggle();
     $('.new-project-button').toggleClass('active');
     this.setState({
-      disableProjectSelect: !this.state.disableProjectSelect
+      disableProjectSelect: !this.state.disableProjectSelectx
     }, () => {
       this.initializeSelectTag();
     });
