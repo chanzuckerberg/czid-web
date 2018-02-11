@@ -103,7 +103,10 @@ class Samples extends React.Component {
 
     $(document).ready(function() {
       $('select').material_select();
-      $('.modal').modal();
+      $('.modal').modal({
+        inDuration: 0,
+        outDuration: 0
+      });
     });
   }
 
