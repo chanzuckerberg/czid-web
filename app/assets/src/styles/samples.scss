@@ -833,6 +833,9 @@ input[type="button"] {
           font-weight: 400;
           font-size: $font-size-base;
           color: $body-color;
+          .favorite.fa {
+            margin-top: 4px;
+          }
           &:hover {
             background: #eff0f2;
             i {
