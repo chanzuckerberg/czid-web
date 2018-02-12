@@ -32,7 +32,7 @@ module ReportHelper
   # We do not allow underscores in metric names, sorry!
   METRICS = %w[r rpm zscore percentidentity alignmentlength neglogevalue percentconcordant aggregatescore].freeze
   COUNT_TYPES = %w[NT NR].freeze
-  PROPERTIES_OF_TAXID = %w[tax_id name tax_level genus_taxid superkingdom_taxid category_name].freeze # note: no underscore in sortable column names
+  PROPERTIES_OF_TAXID = %w[tax_id name common_name tax_level genus_taxid superkingdom_taxid category_name].freeze # note: no underscore in sortable column names
   UNUSED_IN_UI_FIELDS = ['superkingdom_taxid', :sort_key].freeze
 
   # This query takes 1.4 seconds and the results are static, so we hardcoded it
@@ -401,6 +401,7 @@ module ReportHelper
     #       genus_taxid,
     #       species_count,
     #       name,
+    #       common_name,
     #       category_name,
     #       NR => {
     #         count_type,
