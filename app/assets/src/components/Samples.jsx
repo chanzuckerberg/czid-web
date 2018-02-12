@@ -1032,12 +1032,54 @@ class Samples extends React.Component {
   componentDidMount() {
     $(() => {
       const samplesHeader = $('.sample-table-container');
+      const projectWrapper = $('.project-wrapper');
+      const projectWrapperOffset = projectWrapper.offset().top;
+
+      const windowHeight = $(window).height();
+      let prevScrollTop = 0;
+      let initialScroll = 0;
+      let projectWrapperHeight = projectWrapper.height();
+      let heightDiff = projectWrapperHeight - windowHeight;
       $(window).scroll(() => {
-        if ($(window).scrollTop() > samplesHeader.offset().top) {
+        let scrollTop = $(window).scrollTop();
+        let jumpDiff = Math.abs(scrollTop - prevScrollTop);
+        if (projectWrapper.height() !== projectWrapperHeight) {
+          projectWrapperHeight = projectWrapper.height();
+          heightDiff = projectWrapperHeight - windowHeight;
+        }
+        // we only want to scroll the content of the sidebar when it overflows
+        if (heightDiff > 0) {
+          if (scrollTop >= prevScrollTop) {
+            if (scrollTop > 55) {
+              //scroll passed the header
+              if(Math.abs(initialScroll) < heightDiff) {
+                initialScroll -= jumpDiff;
+              }
+            }
+          } else {
+            if (scrollTop > 55) {
+              //scroll passed the header
+              if(initialScroll < 0) {
+                initialScroll += jumpDiff;
+              }
+            }
+          }
+          console.log('Final initial scroll', initialScroll);
+          if (Math.abs(initialScroll) > heightDiff) {
+            initialScroll = -(heightDiff);
+          } else if (initialScroll > 0) {
+            initialScroll = 0;
+          }
+          projectWrapper.css({
+            top: `${initialScroll}px`
+          });
+        }
+        if (scrollTop > samplesHeader.offset().top) {
           samplesHeader.addClass('shadow');
         } else {
           samplesHeader.removeClass('shadow');
         }
+        prevScrollTop = scrollTop;
       });
       $('.filter').hide();
     });
@@ -1136,15 +1178,13 @@ class Samples extends React.Component {
       />;
 
     return (
-      <div>
-          <div className="row content-body">
-            <div className="col s2 no-padding sidebar">
-              { project_section }
-            </div>
-             <div className="col no-padding samples-content s10">
-              { this.renderTable(this.state.allSamples) }
-            </div>
-          </div>
+      <div className="row content-body">
+        <div className='col no-padding s2 sidebar'>
+           { project_section }
+        </div>
+        <div className="col no-padding samples-content s10">
+          { this.renderTable(this.state.allSamples) }
+        </div>
       </div>
     )
   }
