@@ -202,6 +202,7 @@ module ReportHelper
         taxon_counts.tax_level           AS  tax_level,
         taxon_counts.genus_taxid         AS  genus_taxid,
         taxon_counts.name                AS  name,
+        taxon_counts.common_name                AS  common_name,
         taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
         taxon_counts.count               AS  r,
         (count / #{adjusted_total_reads}
