@@ -59,6 +59,7 @@ class PipelineSampleReport extends React.Component {
       loading: true
     };
 
+    this.applyNameType = this.applyNameType.bind(this);
     this.applySearchFilter = this.applySearchFilter.bind(this);
     this.applyThresholdFilters = this.applyThresholdFilters.bind(this);
     this.anyFilterSet = this.anyFilterSet.bind(this);
@@ -163,6 +164,12 @@ class PipelineSampleReport extends React.Component {
     Cookies.set('excluded_categories', '[]');
     $('.metric-thresholds').val('');
     this.flash();
+  }
+
+  applyNameType(name_type) {
+    this.setState({ name_type: name_type }, () => {
+      Cookies.set('name_type', name_type);
+    });
   }
 
   applySearchFilter(searchTaxonId, excludedCategories, input_taxons) {
@@ -688,6 +695,7 @@ class PipelineSampleReport extends React.Component {
         background_model={this.report_details.background_model}
         report_title={this.report_details.sample_info.name}
         report_page_params={this.report_page_params}
+        applyNameType={this.applyNameType}
         applyExcludedCategories={this.applyExcludedCategories}
         applySearchFilter={this.applySearchFilter}
         flash={this.flash}

@@ -23,6 +23,7 @@ class ReportFilter extends React.Component {
 
     this.handleBackgroundModelChange = this.handleBackgroundModelChange.bind(this);
     this.handleNameTypeChange = this.handleNameTypeChange.bind(this);
+    this.applyNameType = this.applyNameType.bind(this);
     const cached_cats = Cookies.get('excluded_categories');
     this.state = {
       searchKey: '',
@@ -80,8 +81,12 @@ class ReportFilter extends React.Component {
     const name_type = e.target.value;
     this.setState({ name_type: name_type }, () => {
       Cookies.set('name_type', name_type);
-      this.refreshPage({name_type: name_type});
+      this.applyNameType(name_type);
     });
+  }
+
+  applyNameType(name_type) {
+    this.props.applyNameType(name_type);
   }
 
   resizeFilterHeight() {
