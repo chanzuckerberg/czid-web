@@ -29,6 +29,7 @@ class ReportFilter extends React.Component {
       excluded_categories: (cached_cats) ? JSON.parse(cached_cats) : [] ,
       backgroundName: Cookies.get('background_name') || this.background_model.name ,
       backgroundParams: Cookies.get('background_id') || this.background_model.id,
+      name_type: Cookies.get('name_type') || 'scientific',
       search_items: props.search_keys_in_sample
     };
   }
@@ -70,6 +71,14 @@ class ReportFilter extends React.Component {
       Cookies.set('background_name', backgroundName);
       Cookies.set('background_id', backgroundParams);
       this.refreshPage({background_id: backgroundParams});
+    });
+  }
+
+  handleNameTypeChange(e) {
+    const name_type = e.target.value;
+    this.setState({ name_type: name_type }, () => {
+      Cookies.set('name_type', name_type);
+      this.refreshPage({name_type: name_type});
     });
   }
 
@@ -208,18 +217,30 @@ class ReportFilter extends React.Component {
                     <div className="report-title">
                       Select background model
                     </div>
-                      <div className="input-field">
+                    <div className="input-field">
                       <i className="fa fa-angle-down right"/>
-                        <select ref="background" name="background" className="" id="background"
-                                onChange={ this.handleBackgroundModelChange }
-                                defaultValue={ this.state.backgroundName }>
-                          { this.backgroundModels.length ?
-                              this.backgroundModels.map((background, i) => {
-                                return <option ref= "background" key={i}  >{background.name}</option>
-                              }) : <option>No background models to display</option>
-                            }
-                        </select>
-                      </div>
+                      <select ref="background" name="background" className="" id="background"
+                              onChange={ this.handleBackgroundModelChange }
+                              defaultValue={ this.state.backgroundName }>
+                        { this.backgroundModels.length ?
+                            this.backgroundModels.map((background, i) => {
+                              return <option ref= "background" key={i}  >{background.name}</option>
+                            }) : <option>No background models to display</option>
+                          }
+                      </select>
+                    </div>
+                    <div className="report-title">
+                      Select name type
+                    </div>
+                    <div className="input-field">
+                      <i className="fa fa-angle-down right"/>
+                      <select ref="name_type" name="name_type" className="" id="name_type"
+                              onChange={ this.handleNameTypeChange }
+                              defaultValue={ this.state.name_type }>
+                        <option ref="name_type" key="scientific">scientific</option>
+                        <option ref="name_type" key="common">common</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
               </div>

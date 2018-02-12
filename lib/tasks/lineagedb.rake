@@ -14,7 +14,6 @@ task load_lineage_db: :environment do
 
     aws s3 cp #{preload_s3_path}/#{taxid_lineages_file}.gz .
     aws s3 cp #{preload_s3_path}/#{names_file}.gz .
-    aws s3 cp #{preload_s3_path}/#{common_names_file}.gz .
 
     # import to database
     gunzip -f *.csv.gz;
