@@ -22,6 +22,7 @@ class PipelineSampleReport extends React.Component {
     this.sort_params = {};
     const filter_thresholds = Cookies.get('filter_thresholds');
     const cached_cats = Cookies.get('excluded_categories');
+    const cached_name_type = Cookies.get('name_type');
 
     this.state = {
       taxonomy_details: [],
@@ -52,6 +53,7 @@ class PipelineSampleReport extends React.Component {
       }
       */
       excluded_categories: (cached_cats) ? JSON.parse(cached_cats) : [],
+      name_type: cached_name_type ? cached_name_type : 'scientific',
       search_taxon_id: 0,
       rendering: false,
       loading: true
@@ -526,12 +528,13 @@ class PipelineSampleReport extends React.Component {
   }
 
   render_name(tax_info, report_details) {
-    let foo = <i>{tax_info.name}</i>;
+    let name_field = this.state.name_type == 'common' ? 'common_name' : 'name';
+    let foo = <i>{tax_info[name_field]}</i>;
     if (tax_info.tax_id > 0) {
       if (report_details.taxon_fasta_flag) {
-        foo = <span className="link"><a>{tax_info.name}</a></span>;
+        foo = <span className="link"><a>{tax_info[name_field]}</a></span>;
       } else {
-        foo = <span>{tax_info.name}</span>;
+        foo = <span>{tax_info[name_field]}</span>;
       }
     }
     if (tax_info.tax_level == 1) {

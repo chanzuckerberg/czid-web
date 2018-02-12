@@ -22,6 +22,7 @@ class ReportFilter extends React.Component {
     this.resetAllFilters = this.resetAllFilters.bind(this);
 
     this.handleBackgroundModelChange = this.handleBackgroundModelChange.bind(this);
+    this.handleNameTypeChange = this.handleNameTypeChange.bind(this);
     const cached_cats = Cookies.get('excluded_categories');
     this.state = {
       searchKey: '',
@@ -40,6 +41,7 @@ class ReportFilter extends React.Component {
   componentDidMount() {
     this.initializeSelectTag();
     $(ReactDOM.findDOMNode(this.refs.background)).on('change',this.handleBackgroundModelChange);
+    $(ReactDOM.findDOMNode(this.refs.name_type)).on('change',this.handleNameTypeChange);
     // a polyfill for firefox, but disbaled for now
     // $(window).resize(() => {
     //   this.resizeFilterHeight();
