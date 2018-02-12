@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180212180801) do
+ActiveRecord::Schema.define(version: 20180212210554) do
 
   create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "archive_of"
@@ -247,6 +247,7 @@ ActiveRecord::Schema.define(version: 20180212180801) do
     t.float "genus_total_concordant", limit: 24
     t.float "family_total_concordant", limit: 24
     t.bigint "pipeline_run_id"
+    t.string "common_name"
     t.index ["pipeline_output_id", "tax_id", "count_type"], name: "new_index_taxon_counts", unique: true
     t.index ["pipeline_output_id", "tax_level", "count_type", "tax_id"], name: "index_taxon_counts", unique: true
     t.index ["pipeline_output_id"], name: "index_taxon_counts_on_pipeline_output_id"
