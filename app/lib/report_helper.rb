@@ -347,8 +347,9 @@ module ReportHelper
   end
 
   def samples_taxons_details(samples, taxon_ids, background_id)
+    samples_by_id = Hash[samples.map {|s| [s.id, s]}]
     results_by_pr = fetch_samples_taxons_counts(samples, taxon_ids, background_id)
-    results = {}
+    results = []
     results_by_pr.each do |_pr_id, res|
       pr = res["pr"]
       taxon_counts = res["taxon_counts"]
@@ -365,7 +366,11 @@ module ReportHelper
         filtered_rows << row if taxon_ids.include?(row["tax_id"])
       end
 
-      results[sample_id] = filtered_rows
+      results << {
+        sample_id: sample_id,
+        name: samples_by_id[sample_id].name,
+        taxons: filtered_rows,
+      }
     end
     results
   end
