@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180209001352) do
+ActiveRecord::Schema.define(version: 20180212180801) do
 
   create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "archive_of"
@@ -286,6 +286,13 @@ ActiveRecord::Schema.define(version: 20180209001352) do
     t.string "family_name"
     t.string "genus_name"
     t.string "species_name"
+    t.string "superkingdom_common_name"
+    t.string "phylum_common_name"
+    t.string "class_common_name"
+    t.string "order_common_name"
+    t.string "family_common_name"
+    t.string "genus_common_name"
+    t.string "species_common_name"
     t.index ["class_taxid"], name: "index_taxon_lineages_on_class_taxid"
     t.index ["family_taxid"], name: "index_taxon_lineages_on_family_taxid"
     t.index ["genus_taxid"], name: "index_taxon_lineages_on_genus_taxid"
@@ -301,6 +308,7 @@ ActiveRecord::Schema.define(version: 20180209001352) do
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "common_name"
     t.index ["taxid"], name: "index_taxon_names_on_taxid", unique: true
   end
 
