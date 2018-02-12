@@ -11,6 +11,7 @@ import ProjectSelection from './ProjectSelection';
 import ReportFilter from './ReportFilter';
 import PipelineSampleReads from './PipelineSampleReads';
 import StringHelper from '../helpers/StringHelper';
+import StickySidebar from './StickySidebar';
 
 class Samples extends React.Component {
   constructor(props, context) {
@@ -229,7 +230,6 @@ class Samples extends React.Component {
         this.updateProjectUserState(res.data.emails)
       }).catch((error) => {
         this.updateProjectUserState([])
-        // console.log(error.response.data)
       });
     }
   }
@@ -1031,55 +1031,15 @@ class Samples extends React.Component {
 
   componentDidMount() {
     $(() => {
+      const win = $(window);
       const samplesHeader = $('.sample-table-container');
-      const projectWrapper = $('.project-wrapper');
-      const projectWrapperOffset = projectWrapper.offset().top;
-
-      const windowHeight = $(window).height();
-      let prevScrollTop = 0;
-      let initialScroll = 0;
-      let projectWrapperHeight = projectWrapper.height();
-      let heightDiff = projectWrapperHeight - windowHeight;
-      $(window).scroll(() => {
+      win.scroll(() => {
         let scrollTop = $(window).scrollTop();
-        let jumpDiff = Math.abs(scrollTop - prevScrollTop);
-        if (projectWrapper.height() !== projectWrapperHeight) {
-          projectWrapperHeight = projectWrapper.height();
-          heightDiff = projectWrapperHeight - windowHeight;
-        }
-        // we only want to scroll the content of the sidebar when it overflows
-        if (heightDiff > 0) {
-          if (scrollTop >= prevScrollTop) {
-            if (scrollTop > 55) {
-              //scroll passed the header
-              if(Math.abs(initialScroll) < heightDiff) {
-                initialScroll -= jumpDiff;
-              }
-            }
-          } else {
-            if (scrollTop > 55) {
-              //scroll passed the header
-              if(initialScroll < 0) {
-                initialScroll += jumpDiff;
-              }
-            }
-          }
-          console.log('Final initial scroll', initialScroll);
-          if (Math.abs(initialScroll) > heightDiff) {
-            initialScroll = -(heightDiff);
-          } else if (initialScroll > 0) {
-            initialScroll = 0;
-          }
-          projectWrapper.css({
-            top: `${initialScroll}px`
-          });
-        }
         if (scrollTop > samplesHeader.offset().top) {
           samplesHeader.addClass('shadow');
         } else {
           samplesHeader.removeClass('shadow');
         }
-        prevScrollTop = scrollTop;
       });
       $('.filter').hide();
     });
@@ -1180,7 +1140,9 @@ class Samples extends React.Component {
     return (
       <div className="row content-body">
         <div className='col no-padding s2 sidebar'>
-           { project_section }
+          <StickySidebar>
+            { project_section }
+          </StickySidebar>
         </div>
         <div className="col no-padding samples-content s10">
           { this.renderTable(this.state.allSamples) }
