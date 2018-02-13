@@ -17,22 +17,46 @@ class SampleHeatmapTooltip extends React.Component {
     if (!taxon) {
       return
     }
-
-    return [
-      <dt key="taxon-name-label">Taxon</dt>,
-      <dd key="taxon-name-value">{taxon.name}</dd>,
-      <dt key="taxon-aggscore-label">NT Agg Score</dt>,
-      <dd key="taxon-aggscore-value">{Math.round(taxon.NT.aggregatescore)}</dd>,
+    
+    let valueMap = {
+        'NT Score': 'NT.aggregatescore',
+        'NT RPM': 'NT.rpm',
+        'NT Z': 'NT.zscore',
+        'NR Score': 'NR.aggregatescore',
+        'NR RPM': 'NR.rpm',
+        'NR Z': 'NR.zscore',
+    }
+    let ret = [
+      <li className="col s12" key="taxon-name">
+        <label>Taxon:</label>{taxon.name}
+      </li>
     ];
+    Object.keys(valueMap).forEach(function (key) {
+      let value = valueMap[key];
+      let parts = value.split("."),
+            base = taxon;
+
+      for (var part of parts) {
+        base = base[part];
+      }
+      ret.push(<li className="col s6" key={"taxon-" + value + "-value"}>
+        <label>{key}:</label>
+        {base.toFixed(1)}
+      </li>);
+    });
+    return (
+      <ul className="row">
+        {ret}
+      </ul>
+    );
   }
   render () {
     let sample = this.props.sample;
     return (
-      <dl>
-        <dt>Sample</dt>
-        <dd>{sample.name}</dd>
+      <div className="heatmap-tooltips">
+        {sample.name}
         {this.renderTaxons()}
-      </dl>
+      </div>
     )
   }
 }
@@ -228,7 +252,8 @@ class D3Heatmap extends React.Component {
       .style("fill", function(d, i) { return that.colors[i]; });
 
 	this.svg.append("rect")
-        .style("stroke", "#eee")
+        .attr("stroke", "#aaa")
+        .attr("stroke-width", "0.25")
         .style("fill", "none")
         .attr("x", 0)
         .attr("y", that.cellSize * (that.row_number + 1)) 
@@ -363,6 +388,7 @@ class ProjectVisualization extends React.Component {
       loading: false,
       data: undefined,
       dataType: "NT.aggregatescore",
+      dataThreshold: 3,
     };
 
     this.dataTypes = ["NT.aggregatescore", "NT.rpm", "NT.zscore", "NR.aggregatescore", "NR.rpm", "NR.zscore"];
@@ -373,6 +399,7 @@ class ProjectVisualization extends React.Component {
   }
 
   makeDataGetter (dataType) {
+    let that = this;
     return function (row, col) {
       let taxon = this.getTaxonFor(row, col);
       if (taxon) {
@@ -382,7 +409,10 @@ class ProjectVisualization extends React.Component {
         for (var part of parts) {
           base = base[part];
         }
-        return base;
+
+        if (base >= that.state.dataThreshold) {
+          return base;
+        }
       }
     }
   }
