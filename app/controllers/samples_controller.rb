@@ -17,7 +17,7 @@ class SamplesController < ApplicationController
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata].freeze
 
-  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :samples_taxons].freeze
+  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :samples_taxons, :top_taxons].freeze
 
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload]
   acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload], fallback: :devise
@@ -160,14 +160,35 @@ class SamplesController < ApplicationController
     end
   end
 
-  def samples_taxons
+  def top_taxons
     sample_ids = params[:sample_ids].split(",").map(&:to_i) || []
-    taxon_ids = params[:taxon_ids].split(",").map(&:to_i) || []
+    num_results = params[:n].to_i || 100
+    sort_by = params[:sort_by] || "highest_nt_aggregatescore"
     samples = current_power.samples.where(id: sample_ids)
-    if sample_ids.first && taxon_ids.first && samples.first
+    if samples.first
       first_sample = samples.first
       default_background_id = first_sample.host_genome && first_sample.host_genome.default_background ? first_sample.host_genome.default_background.id : nil
       background_id = params[:background_id] || default_background_id || Background.first
+      @top_taxons = top_taxons_details(samples, background_id, num_results, sort_by)
+      render json: @top_taxons
+    else
+      render json: {}
+    end
+  end
+
+  def samples_taxons
+    sample_ids = params[:sample_ids].to_s.split(",").map(&:to_i) || []
+    taxon_ids = params[:taxon_ids].to_s.split(",").map(&:to_i) || []
+    num_results = params[:n].to_i || 100
+    sort_by = params[:sort_by] || "highest_nt_aggregatescore"
+    samples = current_power.samples.where(id: sample_ids)
+    if samples.first
+      first_sample = samples.first
+      default_background_id = first_sample.host_genome && first_sample.host_genome.default_background ? first_sample.host_genome.default_background.id : nil
+      background_id = params[:background_id] || default_background_id || Background.first
+      if taxon_ids.empty?
+        taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by).pluck("tax_id")
+      end
       @sample_taxons_dict = samples_taxons_details(samples, taxon_ids, background_id)
       render json: @sample_taxons_dict
     else
