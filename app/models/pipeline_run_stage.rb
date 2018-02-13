@@ -33,7 +33,11 @@ class PipelineRunStage < ApplicationRecord
       queue = Sample::DEFAULT_QUEUE_HIMEM
     end
     if pipeline_run.sample.job_queue.present?
-      queue = pipeline_run.sample.job_queue
+      if Sample::DEPRECATED_QUEUES.include? pipeline_run.sample.job_queue
+        Rails.logger.info "Overriding deprecated queue #{pipeline_run.sample.job_queue} with #{queue}"
+      else
+        queue = pipeline_run.sample.job_queue
+      end
     end
     command += " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --ecr-image idseq --memory #{memory} --queue #{queue} --vcpus #{vcpus} --job-role idseq-pipeline "
     command
