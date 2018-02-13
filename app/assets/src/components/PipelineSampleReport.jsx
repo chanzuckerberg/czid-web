@@ -535,13 +535,17 @@ class PipelineSampleReport extends React.Component {
   }
 
   render_name(tax_info, report_details) {
-    let name_field = this.state.name_type == 'common' ? 'common_name' : 'name';
-    let foo = <i>{tax_info[name_field]}</i>;
+    let tax_scientific_name = tax_info['name']
+    let tax_common_name = tax_info['common_name']
+    let tax_name = this.state.name_type == 'common' ?
+                     !tax_common_name || tax_common_name.trim() == "" ? <span className="count-info">{tax_scientific_name}</span> : <span>{tax_common_name}</span>
+                     : <span>{tax_scientific_name}</span>
+    let foo = <i>{tax_name}</i>;
     if (tax_info.tax_id > 0) {
       if (report_details.taxon_fasta_flag) {
-        foo = <span className="link"><a>{tax_info[name_field]}</a></span>;
+        foo = <span className="link"><a>{tax_name}</a></span>;
       } else {
-        foo = <span>{tax_info[name_field]}</span>;
+        foo = <span>{tax_name}</span>;
       }
     }
     if (tax_info.tax_level == 1) {
