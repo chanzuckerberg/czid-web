@@ -43,8 +43,8 @@ Rails.application.routes.draw do
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
 
-  authenticate :user, lambda {|u| u.admin? } do
-    mount Resque::Server.new, :at => "/resque"
+  authenticate :user, ->(u) { u.admin? } do
+    mount Resque::Server.new, at: "/resque"
   end
 
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
