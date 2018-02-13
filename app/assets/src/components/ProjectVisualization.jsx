@@ -196,6 +196,21 @@ class D3Heatmap extends React.Component {
   }
   renderLegend () {
     let that = this;
+    this.svg.selectAll(".legend-text-min")
+        .data([this.min])
+        .enter().append("text")
+        .attr("x", function (d, i) { return 0; })
+        .attr("y", function (d, i) { return that.cellSize * (that.row_number + 2); })
+        .text(Math.round(this.min));
+    
+    this.svg.selectAll(".legend-text-max")
+        .data([this.max])
+        .enter().append("text")
+        .attr("x", function (d, i) { return that.legendElementWidth * that.colors.length; })
+        .attr("y", function (d, i) { return that.cellSize * (that.row_number + 2); })
+        .text(Math.round(this.max))
+        .style("text-anchor", "end");
+
     var legend = this.svg.selectAll(".legend")
       .data(this.colors)
       .enter().append("g")
