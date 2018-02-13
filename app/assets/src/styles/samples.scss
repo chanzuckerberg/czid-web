@@ -517,6 +517,7 @@ $break-large: 1070px;
 
   .sample-feed, .sample-feed-head {
     border-bottom: 2px solid #edf1f2;
+    z-index: 10;
     .samples-card {
       padding: 5px 20px;
       .dropdown-status-filtering li {
@@ -685,10 +686,19 @@ $break-large: 1070px;
   }
 
   .search-box {
+    padding-left: 20px;
     display: inline-block;
     width: inherit;
     margin: 20px 0 5px;
     border-radius: 3px;
+    .check-all {
+      border: 1px solid #ddd;
+      padding: 8px 15px;
+      label {
+        vertical-align: middle;
+        margin-left: 10px;
+      }
+    }
     .search-field {
       padding-left: 20px;
       .search-icon {
