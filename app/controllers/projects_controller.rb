@@ -20,6 +20,7 @@ class ProjectsController < ApplicationController
   before_action :set_project, only: READ_ACTIONS + EDIT_ACTIONS
   before_action :assert_access, only: OTHER_ACTIONS
   before_action :check_access
+  before_action :no_demo_user, only: [:create, :new]
 
   clear_respond_to
   respond_to :json
@@ -157,6 +158,7 @@ class ProjectsController < ApplicationController
   # POST /projects
   # POST /projects.json
   def create
+
     @project = Project.new(project_params)
     @project.users << current_user
 

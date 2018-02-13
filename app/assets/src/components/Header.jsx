@@ -6,6 +6,7 @@ import SampleUpload from './SampleUpload';
 class Header extends React.Component  {
   constructor(props, context) {
     super(props, context);
+    this.demoUser = this.props.demoUser;
     this.userSignedIn = this.props.userSignedIn;
     this.userDetails = this.props.userDetails || null;
     this.location = window.location.pathname;
@@ -55,7 +56,7 @@ class Header extends React.Component  {
 
   render() {
     let host_genome_names = this.host_genome_names;
-    let cli_modal = (
+    let cli_modal = this.demoUser != 1 ? (
       <div id="cli_modal" className="modal project-popup">
         <div className="modal-content">
           <p>1. Install and configure the Amazon Web Services Command Line Interface (AWS CLI).</p>
@@ -79,7 +80,7 @@ class Header extends React.Component  {
           <button className='modal-close'>Done</button>
         </div>
       </div>
-    );
+    ):null;
     return (
       <div className='header-row row'>
         <div className="page-loading">
@@ -91,8 +92,8 @@ class Header extends React.Component  {
         <div className="site-header col s12">
           {/* Dropdown menu */}
           <ul id="dropdown1" className="dropdown-content">
-            <li onClick={ this.gotoPage.bind(this, '/samples/new') }><a href="#!">New sample</a></li>
-            <li><a onClick={ this.openCliModal } href="#!">New sample (command line)</a></li>
+            { this.demoUser != 1 ?  <li onClick={ this.gotoPage.bind(this, '/samples/new') }><a href="#!">New sample</a></li> : null }
+            { this.demoUser != 1 ? <li><a onClick={ this.openCliModal } href="#!">New sample (command line)</a></li> : null }
             { this.userDetails && this.userDetails.admin ? <li onClick={ this.gotoPage.bind(this, '/users/new') }><a href="#!">Create user</a></li> : null }
             <li onClick={ this.sendMail }><a href="#!">Report Feedback</a></li>
             <li className="divider"></li>

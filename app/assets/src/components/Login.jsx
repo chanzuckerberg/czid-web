@@ -111,6 +111,10 @@ class Login extends React.Component {
                 <p className="col s6 signup">Login</p>
               </div>
               <div className="mail"><p>To request access to IDseq, please email us<span onClick={ this.sendMail }> here</span></p></div>
+              <div className="mail">Or login with the following demo account:
+                <p> Email: idseq.guest@chanzuckerberg.com </p>
+                <p> Password: idseqisawesome</p>
+              </div>
               { this.state.success ? <div className="success-info" >
                 <i className="fa fa-success"></i>
                  <span>{this.state.successMessage}</span>
