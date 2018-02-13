@@ -23,6 +23,7 @@ class SamplesController < ApplicationController
   acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload], fallback: :devise
 
   before_action :login_required # redundant. make sure it works
+  before_action :no_demo_user, only: [:create, :bulk_new, :bulk_upload, :bulk_import, :new]
 
   current_power do # Put this here for CLI
     Power.new(current_user)
