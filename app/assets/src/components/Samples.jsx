@@ -43,7 +43,10 @@ class Samples extends React.Component {
     this.updateUserDisplay = this.updateUserDisplay.bind(this);
     this.resetForm = this.resetForm.bind(this);
     this.selectSample = this.selectSample.bind(this);
+<<<<<<< HEAD
     this.compareSamples = this.compareSamples.bind(this);
+=======
+>>>>>>> Add sample selection UI + logic
     this.state = {
       invite_status: null,
       project: null,
@@ -383,36 +386,36 @@ class Samples extends React.Component {
         notes: dbSample && dbSample.sample_notes ? dbSample.sample_notes : BLANK_TEXT };
 
       return (
-        <a className='col s12 no-padding sample-feed' key={i} href={`/samples/${dbSample.id}`}>
+        <a className='col s12 no-padding sample-feed' key={i}>
           <div>
             <div className='samples-card white'>
               <div className='flex-container'>
                 <ul className='flex-items'>
                   <li className='check-box-container'>
-                    {/* <input type="checkbox" id={i}
-                      className="filled-in checkbox" value={ this.state.selectedSampleIndices.indexOf(i) != -1 }
-                      onChange = { this.selectSample }  
-                      />
-                    <label htmlFor={i}>
-                      
-                    </label> */}
-                    <span className='sample-name-info'>
-                        <div className='card-label top-label'>
-                          {/*<span className='project-name'>*/}
-                          {/*Mosquito*/}
-                          {/*</span>*/}
-                          <span className='upload-date'>
-                              Uploaded {moment(dbSample.created_at).startOf('second').fromNow()}
-                            </span>
-                        </div>
-                        <div className='card-label center-label sample-name'>
-                          {dbSample.name}
-                        </div>
-                        <div className='card-label author bottom-label author'>
-                          { !uploader || uploader === '' ? '' : <span>Uploaded by: {uploader}</span>}
-                        </div>
+                      <input type="checkbox" id={i}
+                        className="filled-in checkbox" value={ this.state.selectedSampleIndices.indexOf(i) < 0? 0:1 }
+                        onChange = { this.selectSample }  
+                        />
+                      <label htmlFor={i}>
+                  <span className='sample-name-info'>
+                    <div className='card-label top-label'>
+                      {/*<span className='project-name'>*/}
+                      {/*Mosquito*/}
+                      {/*</span>*/}
+                      <span className='upload-date'>
+                        Uploaded {moment(dbSample.created_at).startOf('second').fromNow()}
                       </span>
-                  </li>
+                    </div>
+                    <div className='card-label center-label sample-name'>
+                      {dbSample.name}
+                    </div>
+                    <div className='card-label author bottom-label author'>
+                      { !uploader || uploader === '' ? '' : <span>Uploaded by: {uploader}</span>}
+                    </div>
+                  </span>
+                      </label>
+                    </li>
+                  
                   {
                     this.state.columnsShown.map((column, pos) => {
                       let column_data = '';
@@ -857,9 +860,19 @@ class Samples extends React.Component {
         </div>
       </div>
     );
+    const check_all = (
+      <div className="col s1 check-all">
+          <input type="checkbox"
+            id="checkAll"
+            className="filled-in checkAll"
+            />
+          <label htmlFor="checkAll"></label>
+          <i className="fa fa-angle-down"></i>    
+      </div>
+    );
     const search_box = (
       <div className="row search-box">
-        {/* { check_all } */}
+        { check_all }
         { search_field }
         { table_download_button }
         {/* { compare_button } */}
