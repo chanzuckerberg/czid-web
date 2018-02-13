@@ -240,7 +240,8 @@ class PipelineRun < ApplicationRecord
       level_id = TaxonCount::NAME_2_LEVEL[level]
       TaxonCount.connection.execute("
         UPDATE taxon_counts, taxon_lineages
-        SET taxon_counts.name = taxon_lineages.#{level}_name
+        SET taxon_counts.name = taxon_lineages.#{level}_name,
+            taxon_counts.common_name = taxon_lineages.#{level}_common_name
         WHERE taxon_counts.pipeline_run_id=#{id} AND
               taxon_counts.tax_level=#{level_id} AND
               taxon_counts.tax_id = taxon_lineages.taxid AND
