@@ -28,6 +28,9 @@ class Sample < ApplicationRecord
   DEFAULT_QUEUE_HIMEM = 'idseq_himem'.freeze
   DEFAULT_VCPUS_HIMEM = 8
 
+  # These zombies keep coming back, so we now expressly fail submissions to them.
+  DEPRECATED_QUEUES = %w[idseq_alpha_stg1 aegea_batch_ondemand idseq_production_high_pri_stg1].freeze
+
   METADATA_FIELDS = [:sample_host, # this has been repurposed to be patient ID (nothing to do with host genome)
                      :sample_location, :sample_date, :sample_tissue,
                      :sample_template, # this refers to nucleotide type (RNA or DNA)
@@ -237,7 +240,6 @@ class Sample < ApplicationRecord
       self.s3_star_index_path = host_genome.s3_star_index_path
       self.s3_bowtie2_index_path = host_genome.s3_bowtie2_index_path
       self.sample_memory ||= host_genome.sample_memory
-      self.job_queue = host_genome.job_queue if job_queue.blank?
     end
     s3_preload_result_path ||= ''
     s3_preload_result_path.strip!
