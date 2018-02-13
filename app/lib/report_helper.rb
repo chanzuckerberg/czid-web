@@ -230,7 +230,8 @@ module ReportHelper
         taxon_counts.count_type IN ('NT', 'NR')
     ").to_hash
   end
-  def fetch_top_taxons(samples, background_id, filters = {})
+
+  def fetch_top_taxons(samples, background_id, _filters = {})
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
 
     sql_results = TaxonCount.connection.select_all("
@@ -388,15 +389,15 @@ module ReportHelper
       compute_genera_aggregate_scores!(rows, tax_2d)
       rows = rows.select { |row| row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD }
 
-      rows.sort_by! { |tax_info| ((tax_info[count_type] || {})[metric] || 0.0)*-1.0 }
+      rows.sort_by! { |tax_info| ((tax_info[count_type] || {})[metric] || 0.0) * -1.0 }
       count = 1
       # get the top N for each sample
       rows.each do |row|
-        if candidate_taxons[row["tax_id"]]
-          taxon = candidate_taxons[row["tax_id"]]
-        else
-          taxon = { "tax_id" => row["tax_id"], "samples" => {}}
-        end
+        taxon = if candidate_taxons[row["tax_id"]]
+                  candidate_taxons[row["tax_id"]]
+                else
+                  { "tax_id" => row["tax_id"], "samples" => {} }
+                end
         taxon["max_aggregate_score"] = row[sort_by[:count_type]][sort_by[:metric]] if taxon["max_aggregate_score"].to_f < row[sort_by[:count_type]][sort_by[:metric]].to_f
         taxon["samples"][sample_id] = [count, row["tax_level"], row["NT"]["zscore"], row["NR"]["zscore"]]
         candidate_taxons[row["tax_id"]] = taxon
@@ -405,8 +406,7 @@ module ReportHelper
       end
     end
 
-    top_taxons = candidate_taxons.values.sort_by { |taxon| -1.0*(taxon["max_aggregate_score"].to_f)}[0..(num_results-1)]
-
+    candidate_taxons.values.sort_by { |taxon| -1.0 * taxon["max_aggregate_score"].to_f }[0..(num_results - 1)]
   end
 
   def zero_metrics(count_type)
