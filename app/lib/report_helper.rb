@@ -14,6 +14,9 @@ module ReportHelper
   DEFAULT_SAMPLE_ALIGNMENTLENGTH = 0.0
   DEFAULT_SAMPLE_PERCENTCONCORDANT = 0.0
 
+  MINIMUM_READ_THRESHOLD = 5
+  MINIMUM_ZSCORE_THRESHOLD = 1.7
+
   # For taxon_count 'species' rows without a corresponding 'genus' rows,
   # we create a fake singleton genus containing just that species;
   # the fake genus IDs start here:
@@ -30,7 +33,7 @@ module ReportHelper
 
   SORT_DIRECTIONS = %w[highest lowest].freeze
   # We do not allow underscores in metric names, sorry!
-  METRICS = %w[r rpm zscore percentidentity alignmentlength neglogevalue percentconcordant aggregatescore].freeze
+  METRICS = %w[r rpm zscore percentidentity alignmentlength neglogevalue percentconcordant aggregatescore maxzscore].freeze
   COUNT_TYPES = %w[NT NR].freeze
   PROPERTIES_OF_TAXID = %w[tax_id name tax_level genus_taxid superkingdom_taxid category_name].freeze # note: no underscore in sortable column names
   UNUSED_IN_UI_FIELDS = ['superkingdom_taxid', :sort_key].freeze
@@ -191,10 +194,6 @@ module ReportHelper
   def fetch_taxon_counts(pipeline_run_id, background_id)
     pipeline_run = PipelineRun.find(pipeline_run_id)
     adjusted_total_reads = pipeline_run.total_reads * pipeline_run.subsample_fraction
-    # Note: subsample_fraction is of type 'float' so adjusted_total_reads is too
-    # Note: stdev is never 0
-    # Note: connection.select_all is TWICE faster than TaxonCount.select
-    # (I/O latency goes from 2 seconds -> 0.8 seconds)
     TaxonCount.connection.select_all("
       SELECT
         taxon_counts.tax_id              AS  tax_id,
@@ -230,6 +229,60 @@ module ReportHelper
         pipeline_run_id = #{pipeline_run_id} AND
         taxon_counts.count_type IN ('NT', 'NR')
     ").to_hash
+  end
+
+  def fetch_top_taxons(samples, background_id, _filters = {})
+    pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
+
+    sql_results = TaxonCount.connection.select_all("
+      SELECT
+        taxon_counts.pipeline_run_id     AS  pipeline_run_id,
+        taxon_counts.tax_id              AS  tax_id,
+        taxon_counts.count_type          AS  count_type,
+        taxon_counts.tax_level           AS  tax_level,
+        taxon_counts.genus_taxid         AS  genus_taxid,
+        taxon_counts.name                AS  name,
+        taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
+        taxon_counts.count               AS  r,
+        taxon_summaries.stdev            AS stdev,
+        taxon_summaries.mean             AS mean,
+        taxon_counts.percent_identity    AS  percentidentity,
+        taxon_counts.alignment_length    AS  alignmentlength,
+        IF(
+          taxon_counts.e_value IS NOT NULL,
+          (0.0 - taxon_counts.e_value),
+          #{DEFAULT_SAMPLE_NEGLOGEVALUE}
+        )                                AS  neglogevalue,
+        taxon_counts.percent_concordant  AS  percentconcordant
+      FROM taxon_counts
+      LEFT OUTER JOIN taxon_summaries ON
+        #{background_id}        = taxon_summaries.background_id   AND
+        taxon_counts.count_type = taxon_summaries.count_type      AND
+        taxon_counts.tax_level  = taxon_summaries.tax_level       AND
+        taxon_counts.tax_id     = taxon_summaries.tax_id
+      WHERE
+        pipeline_run_id in (#{pipeline_run_ids.join(',')}) AND
+        taxon_counts.count >= #{MINIMUM_READ_THRESHOLD} AND
+        taxon_counts.count_type IN ('NT', 'NR')
+       ").to_hash
+
+    # calculating rpm and zscore, organizing the results by pipeline_run_id
+    result_hash = {}
+    sql_results.each do |row|
+      pipeline_run_id = row["pipeline_run_id"]
+      if result_hash[pipeline_run_id]
+        pr = result_hash[pipeline_run_id]["pr"]
+      else
+        pr = PipelineRun.find(pipeline_run_id)
+        result_hash[pipeline_run_id] = { "pr" => pr, "taxon_counts" => [] }
+      end
+      row["rpm"] = row["r"] / (pr.total_reads * pr.subsample_fraction) * 1_000_000.0
+      row["zscore"] = (row["rpm"] - row["mean"]) / row["stdev"]
+      row["zscore"] = ZSCORE_MAX if row["zscore"] > ZSCORE_MAX
+      row["zcore"] = ZSCORE_MIN if row["zscore"] < ZSCORE_MIN
+      result_hash[pipeline_run_id]["taxon_counts"] << row
+    end
+    result_hash
   end
 
   def fetch_samples_taxons_counts(samples, taxon_ids, background_id)
@@ -314,6 +367,46 @@ module ReportHelper
       results[sample_id] = filtered_rows
     end
     results
+  end
+
+  def top_taxons_details(samples, background_id, num_results, sort_by_key = DEFAULT_SORT_PARAM, filters = {})
+    results_by_pr = fetch_top_taxons(samples, background_id, filters)
+    sort_by = decode_sort_by(sort_by_key)
+    count_type = sort_by[:count_type]
+    metric = sort_by[:metric]
+    candidate_taxons = {}
+    results_by_pr.each do |_pr_id, res|
+      pr = res["pr"]
+      taxon_counts = res["taxon_counts"]
+      sample_id = pr.sample_id
+      tax_2d = cleanup_all!(convert_2d(taxon_counts))
+      count_species_per_genus!(tax_2d)
+      rows = []
+      tax_2d.each do |_tax_id, tax_info|
+        rows << tax_info
+      end
+      compute_species_aggregate_scores!(rows, tax_2d)
+      compute_genera_aggregate_scores!(rows, tax_2d)
+      rows = rows.select { |row| row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD }
+
+      rows.sort_by! { |tax_info| ((tax_info[count_type] || {})[metric] || 0.0) * -1.0 }
+      count = 1
+      # get the top N for each sample
+      rows.each do |row|
+        taxon = if candidate_taxons[row["tax_id"]]
+                  candidate_taxons[row["tax_id"]]
+                else
+                  { "tax_id" => row["tax_id"], "samples" => {} }
+                end
+        taxon["max_aggregate_score"] = row[sort_by[:count_type]][sort_by[:metric]] if taxon["max_aggregate_score"].to_f < row[sort_by[:count_type]][sort_by[:metric]].to_f
+        taxon["samples"][sample_id] = [count, row["tax_level"], row["NT"]["zscore"], row["NR"]["zscore"]]
+        candidate_taxons[row["tax_id"]] = taxon
+        break if count >= num_results
+        count += 1
+      end
+    end
+
+    candidate_taxons.values.sort_by { |taxon| -1.0 * taxon["max_aggregate_score"].to_f }[0..(num_results - 1)]
   end
 
   def zero_metrics(count_type)
@@ -604,6 +697,8 @@ module ReportHelper
 
   def compute_species_aggregate_scores!(rows, tax_2d)
     rows.each do |species_info|
+      species_info['NT']['maxzscore'] = [species_info['NT']['zscore'], species_info['NR']['zscore']].max
+      species_info['NR']['maxzscore'] = [species_info['NR']['zscore'], species_info['NR']['zscore']].max
       next unless species_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
       genus_id = species_info['genus_taxid']
       genus_info = tax_2d[genus_id]

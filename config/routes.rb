@@ -23,6 +23,7 @@ Rails.application.routes.draw do
     post :bulk_upload, on: :collection
     post :save_metadata, on: :member
     get :samples_taxons, on: :collection
+    get :top_taxons, on: :collection
   end
   get 'samples/:id/fasta/:tax_level/:taxid/:hit_type', to: 'samples#show_taxid_fasta'
 
