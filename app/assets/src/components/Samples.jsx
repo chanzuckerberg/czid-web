@@ -854,11 +854,11 @@ class Samples extends React.Component {
           </li>
           <li>
               { this.state.project && this.canEditProject(this.state.project.id) ? (
-                this.state.project.total_members ?
+                this.state.project_users.length ?
                 <span>
                   <i className="tiny material-icons">people</i>
-                    {this.state.project.total_members}
-                    { (this.state.project.total_members > 1) ? ' members' : ' member'}
+                    {this.state.project_users.length}
+                    { (this.state.project_users.length > 1) ? ' members' : ' member'}
                 </span>
                 : <span>
                     No member
