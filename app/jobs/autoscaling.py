@@ -12,6 +12,7 @@ from functools import wraps
 # As opposed to "development", where different containers belong to different developers.
 MULTICONTAINER_ENVIRONMENTS = ["production", "alpha"]
 
+
 # If you are running into problems with this autoscaler, just delete this tag from
 # any affected autoscaling group, and it will be left alone.  The value is a list
 # of environments permitted to trigger scaling, usually just "production".
@@ -106,12 +107,16 @@ def set_metric_value(asg, value, my_environment):
     return (tag_key, tag_value)
 
 
+def environment(tag):
+    return tag[len(SCALING_METRIC_TAG_PREFIX):]
+
+
 def delete_expired_metric_tags(asg, garbage_tag_keys):
     # Gargbage collect expired development (non-cloud) environment tags so as to stay below the aws 50 tags limit.
     garbage_tags = []
     tag_pattern = "ResourceId={asg_name},ResourceType=auto-scaling-group,Key={key}"
     for gtk in garbage_tag_keys:
-        if gtk.split("_", 1) not in MULTICONTAINER_ENVIRONMENTS:
+        if environment(gtk) not in MULTICONTAINER_ENVIRONMENTS:
             garbage_tags.append(tag_pattern.format(asg_name=asg['AutoScalingGroupName'], key=gtk))
     if garbage_tags:
         cmd = "aws autoscaling delete-tags --tags " + " ".join(garbage_tags)
