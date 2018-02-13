@@ -19,6 +19,7 @@ class ApplicationController < ActionController::Base
   def admin_required
     redirect_to root_path unless current_user && current_user.admin?
   end
+
   def no_demo_user
     login_required
     redirect_to root_path if current_user.demo_user?

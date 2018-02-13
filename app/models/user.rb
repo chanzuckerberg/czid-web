@@ -10,7 +10,7 @@ class User < ApplicationRecord
   has_many :favorites, through: :favorite_projects, source: :project
   attr_accessor :email_arguments
   ROLE_ADMIN = 1
-  DEMO_USER_EMAILS = [ 'idseq.guest@chanzuckerberg.com']
+  DEMO_USER_EMAILS = ['idseq.guest@chanzuckerberg.com'].freeze
 
   def as_json(options = {})
     super({ except: [:authentication_token], methods: [:admin] }.merge(options))
