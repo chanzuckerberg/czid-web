@@ -388,7 +388,7 @@ class ProjectVisualization extends React.Component {
       loading: false,
       data: undefined,
       dataType: "NT.aggregatescore",
-      dataThreshold: 3,
+      dataThreshold: -99999999999,
     };
 
     this.dataTypes = ["NT.aggregatescore", "NT.rpm", "NT.zscore", "NR.aggregatescore", "NR.rpm", "NR.zscore"];
@@ -398,20 +398,24 @@ class ProjectVisualization extends React.Component {
     }
   }
 
+  getDataProperty (data, property) {
+    let parts = property.split("."),
+        base = data;
+
+    for (var part of parts) {
+      base = base[part];
+    }
+    return base;
+  }
+
   makeDataGetter (dataType) {
     let that = this;
     return function (row, col) {
       let taxon = this.getTaxonFor(row, col);
       if (taxon) {
-        let parts = dataType.split("."),
-            base = taxon;
-
-        for (var part of parts) {
-          base = base[part];
-        }
-
-        if (base >= that.state.dataThreshold) {
-          return base;
+        let value = this.getDataProperty(taxon, dataType);
+        if (value >= that.state.dataThreshold) {
+          return value;
         }
       }
     }
@@ -426,12 +430,32 @@ class ProjectVisualization extends React.Component {
     this.request && this.request.cancel();
     this.request = axios.get("/samples/samples_taxons.json?sample_ids=" + this.sample_ids + "&taxon_ids=" + this.taxon_ids)
     .then((response) => {
+      this.updateMinMax(response.data, this.state.dataType);
       this.setState({
         data: response.data,
         taxons: this.extractTaxons(response.data),
       });
     }).then(() => {
-      this.setState({loading: false});
+      this.setState({ loading: false });
+    });
+  }
+
+  updateMinMax (data, dataType) {
+    let taxon_lists = [];
+    for (let sample of data){
+      taxon_lists.push(sample.taxons);
+    }
+    let taxons = [].concat.apply([], taxon_lists);
+
+    let min = d3.min(taxons, (d) => {
+      return this.getDataProperty(d, dataType);
+    });
+    let max = d3.max(taxons, (d) => {
+      return this.getDataProperty(d, dataType);
+    });
+    this.setState({
+      min: min,
+      max: max,
     });
   }
 
@@ -512,7 +536,9 @@ class ProjectVisualization extends React.Component {
   }
 
   updateDataType (e) {
-    this.setState({dataType: e.target.innerText});
+    let newDataType = e.target.innerText;
+    this.setState({dataType: newDataType});
+    this.updateMinMax(this.state.data, newDataType);
   }
 
   renderTypePickers () {
@@ -524,7 +550,24 @@ class ProjectVisualization extends React.Component {
     }
     return ret
   }
+  
+  updateDataThreshold (e) {
+    this.setState({dataThreshold: e.target.value});
+  }
 
+  renderThresholdSlider () {
+    if (!this.state.data) {
+      return;
+    }
+    return (
+      <div>
+        {this.state.min}
+        <input min={this.state.min} max={this.state.max + 1} type="range" onChange={this.updateDataThreshold.bind(this)} value={this.state.dataThreshold}/>
+        {this.max}
+      </div>
+    )
+  }
+  
   render () {
     return (
       <div id="project-visualization">
@@ -538,6 +581,9 @@ class ProjectVisualization extends React.Component {
             </div>
             <div>
               {this.renderTypePickers()}
+            </div>
+            <div>
+              {this.renderThresholdSlider()}
             </div>
           </div>
         </SubHeader>
