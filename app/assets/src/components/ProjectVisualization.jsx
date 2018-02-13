@@ -20,7 +20,9 @@ class SampleHeatmapTooltip extends React.Component {
 
     return [
       <dt key="taxon-name-label">Taxon</dt>,
-      <dd key="taxon-name-value">{taxon.name}</dd>
+      <dd key="taxon-name-value">{taxon.name}</dd>,
+      <dt key="taxon-aggscore-label">NT Agg Score</dt>,
+      <dd key="taxon-aggscore-value">{Math.round(taxon.NT.aggregatescore)}</dd>,
     ];
   }
   render () {
@@ -195,7 +197,9 @@ class D3Heatmap extends React.Component {
 
   }
   renderLegend () {
-    let that = this;
+    let that = this,
+        height = 20;
+
     this.svg.selectAll(".legend-text-min")
         .data([this.min])
         .enter().append("text")
@@ -220,8 +224,16 @@ class D3Heatmap extends React.Component {
       .attr("x", function(d, i) { return that.legendElementWidth * i; })
       .attr("y", this.cellSize * (this.row_number + 1))
       .attr("width", this.legendElementWidth)
-      .attr("height", 20)
+      .attr("height", height)
       .style("fill", function(d, i) { return that.colors[i]; });
+
+	this.svg.append("rect")
+        .style("stroke", "#eee")
+        .style("fill", "none")
+        .attr("x", 0)
+        .attr("y", that.cellSize * (that.row_number + 1)) 
+        .attr("width", that.legendElementWidth * that.colors.length)  
+        .attr("height", height);    
   }
 
   renderRowLabels () {
