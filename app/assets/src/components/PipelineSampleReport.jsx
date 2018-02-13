@@ -6,6 +6,7 @@ import Tipsy from 'react-tipsy';
 import Samples from './Samples';
 import ReportFilter from './ReportFilter';
 import numberWithCommas from '../helpers/strings';
+import StringHelper from '../helpers/StringHelper';
 
 class PipelineSampleReport extends React.Component {
   constructor(props) {
@@ -538,7 +539,7 @@ class PipelineSampleReport extends React.Component {
     let tax_scientific_name = tax_info['name']
     let tax_common_name = tax_info['common_name']
     let tax_name = this.state.name_type == 'common' ?
-                     !tax_common_name || tax_common_name.trim() == "" ? <span className="count-info">{tax_scientific_name}</span> : <span>{tax_common_name}</span>
+                     !tax_common_name || tax_common_name.trim() == "" ? <span className="count-info">{tax_scientific_name}</span> : <span>{StringHelper.capitalizeFirstLetter(tax_common_name)}</span>
                      : <span>{tax_scientific_name}</span>
     let foo = <i>{tax_name}</i>;
     if (tax_info.tax_id > 0) {
