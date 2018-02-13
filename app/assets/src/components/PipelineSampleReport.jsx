@@ -292,7 +292,6 @@ class PipelineSampleReport extends React.Component {
   // applySort needs to be bound at time of use, not in constructor above
   // TODO(yf): fix this
   applySort(sort_by) {
-    console.log(sort_by);
     if (sort_by.toLowerCase() != this.state.sort_by) {
       this.state.sort_by = sort_by.toLowerCase();
       this.sortResults();
@@ -576,18 +575,18 @@ class PipelineSampleReport extends React.Component {
     return (<td className={className}>{y}</td>);
   }
 
+  isSortedActive(columnName) {
+    const desiredSort = columnName.toLowerCase();
+    return (this.state.sort_by == desiredSort) ? 'active' : '';
+  }
+
   render_sort_arrow(column, desired_sort_direction, arrow_direction) {
-    const desired_sort = column.toLowerCase();
-    let className = `fa fa-caret-${arrow_direction}`;
-    const current_sort = this.state.sort_by;
-    if (current_sort == desired_sort) {
-      className = `active ${className}`;
-    }
+    let className = ` ${this.isSortedActive(column)} fa fa-caret-${arrow_direction}`;
     return (
       <i
         onClick={this.applySort.bind(this, column)}
         className={className}
-        key={desired_sort}
+        key={column.toLowerCase()}
       />
     );
   }
@@ -746,19 +745,19 @@ class PipelineSampleReport extends React.Component {
                           <td>
                             { this.render_name(tax_info, this.report_details) }
                           </td>
-                          { this.render_number(tax_info.NT.aggregatescore, sort_column == 'nt_aggregatescore', 0) }
-                          { this.render_number(tax_info.NT.zscore, sort_column == 'nt_zscore', 1) }
-                          { this.render_number(tax_info.NT.rpm, sort_column == 'nt_rpm', 1) }
-                          { this.render_number(tax_info.NT.r, sort_column == 'nt_r', 0) }
-                          { this.render_number(tax_info.NT.percentidentity, sort_column == 'nt_percentidentity', 1) }
-                          { this.render_number(tax_info.NT.neglogevalue, sort_column == 'nt_neglogevalue', 0) }
-                          { this.render_number(tax_info.NT.percentconcordant, sort_column == 'nt_percentconcordant', 1) }
-                          { this.render_number(tax_info.NR.zscore, sort_column == 'nr_zscore', 1) }
-                          { this.render_number(tax_info.NR.rpm, sort_column == 'nr_rpm', 1) }
-                          { this.render_number(tax_info.NR.r, sort_column == 'nr_r', 0) }
-                          { this.render_number(tax_info.NR.percentidentity, sort_column == 'nr_percentidentity', 1) }
-                          { this.render_number(tax_info.NR.neglogevalue, sort_column == 'nr_neglogevalue', 0) }
-                          { this.render_number(tax_info.NR.percentconcordant, sort_column == 'nr_percentconcordant', 1) }
+                          { this.render_number(tax_info.NT.aggregatescore, this.isSortedActive('nt_aggregatescore'), 0) }
+                          { this.render_number(tax_info.NT.zscore, this.isSortedActive('nt_zscore'), 1) }
+                          { this.render_number(tax_info.NT.rpm, this.isSortedActive('nt_rpm'), 1) }
+                          { this.render_number(tax_info.NT.r, this.isSortedActive('nt_r'), 0) }
+                          { this.render_number(tax_info.NT.percentidentity, this.isSortedActive('nt_percentidentity'), 1) }
+                          { this.render_number(tax_info.NT.neglogevalue, this.isSortedActive('nt_neglogevalue'), 0) }
+                          { this.render_number(tax_info.NT.percentconcordant, this.isSortedActive('nt_percentconcordant'), 1) }
+                          { this.render_number(tax_info.NR.zscore, this.isSortedActive('nr_zscore'), 1) }
+                          { this.render_number(tax_info.NR.rpm, this.isSortedActive('nr_rpm'), 1) }
+                          { this.render_number(tax_info.NR.r, this.isSortedActive('nr_r'), 0) }
+                          { this.render_number(tax_info.NR.percentidentity, this.isSortedActive('nr_percentidentity'), 1) }
+                          { this.render_number(tax_info.NR.neglogevalue, this.isSortedActive('nr_neglogevalue'), 0) }
+                          { this.render_number(tax_info.NR.percentconcordant, this.isSortedActive('nr_percentconcordant'), 1) }
                         </tr>
                       ))}
                     </tbody>
