@@ -537,7 +537,10 @@ class ProjectVisualization extends React.Component {
 
   updateDataType (e) {
     let newDataType = e.target.innerText;
-    this.setState({dataType: newDataType});
+    this.setState({
+      dataType: newDataType,
+      dataThreshold: -99999999999,
+    });
     this.updateMinMax(this.state.data, newDataType);
   }
 
@@ -563,7 +566,7 @@ class ProjectVisualization extends React.Component {
       <div>
         {this.state.min}
         <input min={this.state.min} max={this.state.max + 1} type="range" onChange={this.updateDataThreshold.bind(this)} value={this.state.dataThreshold}/>
-        {this.max}
+        {this.state.max}
       </div>
     )
   }
