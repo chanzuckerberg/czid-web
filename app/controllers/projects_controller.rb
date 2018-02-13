@@ -41,7 +41,6 @@ class ProjectsController < ApplicationController
         render json: {
           id: @project.id,
           name: @project.name,
-          total_members: @project.users.length,
           public_access: @project.public_access.to_i,
           created_at: @project.created_at
         }
