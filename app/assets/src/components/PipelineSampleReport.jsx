@@ -715,11 +715,11 @@ class PipelineSampleReport extends React.Component {
       />);
     let param_background_id = this.fetchParams("background_id")
     let cookie_background_id = Cookies.get('background_id')
-    let csv_background_id = param_background_id ? param_background_id :
-                              cookie_background_id ? cookie_background_id :
-                                this.report_details.background_model.id
+    let csv_background_id_param = param_background_id ? '?background_id=' + param_background_id :
+                                    cookie_background_id ? '?background_id=' + cookie_background_id :
+                                      ''
     const download_button = (
-      <a href={`/samples/${this.sample_id}/report_csv?background_id=${csv_background_id}`} className="download-report right">
+      <a href={`/samples/${this.sample_id}/report_csv${csv_background_id_param}`} className="download-report right">
         <div className="fa fa-cloud-download" />
         <div>Download report</div>
       </a>
