@@ -29,7 +29,7 @@ module ReportHelper
 
   IGNORED_PARAMS = [:controller, :action, :id].freeze
 
-  IGNORE_IN_DOWNLOAD = [[:species_count], [:NT, :count_type], [:NR, :count_type]].freeze
+  IGNORE_IN_DOWNLOAD = [[:species_count], [:NT, :count_type], [:NR, :count_type], [:NR, :aggregatescore]].freeze
 
   SORT_DIRECTIONS = %w[highest lowest].freeze
   # We do not allow underscores in metric names, sorry!
@@ -809,6 +809,7 @@ module ReportHelper
     flat_keys_symbols = flat_keys.map { |array_key| array_key.map(&:to_sym) }
     attributes_as_symbols = flat_keys_symbols - IGNORE_IN_DOWNLOAD
     attribute_names = attributes_as_symbols.map { |k| k.map(&:to_s).join("_") }
+    attribute_names = attribute_names.map { |a| a == 'NT_aggregatescore' ? 'aggregatescore' : a }
     CSV.generate(headers: true) do |csv|
       csv << attribute_names
       rows.each do |tax_info|
