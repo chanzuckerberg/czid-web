@@ -400,13 +400,23 @@ class PipelineSampleReads extends React.Component {
     sample_dropdown = <span>{ this.sampleInfo.name }</span>
     }
 
+    let version_display = !this.pipelineRun ? '' :
+                            !this.pipelineRun.version ? '' :
+                              !this.pipelineRun.version.pipeline ? '' :
+                                'v' + this.pipelineRun.version.pipeline
+    if (version_display != '' && this.pipelineRun.version.nt) {
+      version_display = version_display + ', NT v' + this.pipelineRun.version.nt
+    }
+    if (version_display != '' && this.pipelineRun.version.nr) {
+      version_display = version_display + ', NR v' + this.pipelineRun.version.nr
+    }
 
     return (
       <div>
         <SubHeader>
           <div className="sub-header">
             <div className="title">
-              PIPELINE
+              PIPELINE {version_display}
             </div>
 
             <div className="sub-title">

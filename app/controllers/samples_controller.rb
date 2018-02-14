@@ -139,6 +139,7 @@ class SamplesController < ApplicationController
 
   def show
     @pipeline_run = @sample.pipeline_runs.first
+    @pipeline_run_display = curate_pipeline_run_display(@pipeline_run)
     @sample_status = @pipeline_run ? @pipeline_run.job_status : nil
     @job_stats = @pipeline_run ? @pipeline_run.job_stats : nil
     @summary_stats = @job_stats ? get_summary_stats(@job_stats) : nil
