@@ -137,7 +137,7 @@ class D3Heatmap extends React.Component {
       }
     }
     this.margin ={
-      top:  char_width * longest_col_label * 0.75,
+      top:  char_width * longest_col_label * 0.66,
       right: 10,
       bottom: 50,
       left: char_width * longest_row_label
@@ -382,7 +382,7 @@ class D3Heatmap extends React.Component {
 class ProjectVisualization extends React.Component {
   constructor(props) {
     super(props);
-    this.sample_ids = [14,15,16,17,18,19,20,21,22];
+    this.sample_ids = [14,15,16,17,18,19,20,21,22, 334, 335, 336, 337, 338, 339, 340, 341, 342, 343];
     this.taxon_ids = [29448, 329, 658664, 374, 375, 305, 308, 44255, 1217052, 1842450, 1230476];
     this.state = {
       loading: false,
