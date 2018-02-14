@@ -11,6 +11,7 @@ module PipelineOutputsHelper
   end
 
   def select_version_aspect(pipeline_run, aspect)
+    return nil unless pipeline_run.version
     version_hash = JSON.parse(pipeline_run.version)
     aspect_hash = version_hash.select { |item| item["name"] == aspect }[0]
     version_key = %w[nt_k16 nr_rapsearch].include?(aspect) ? "source_version" : "version"
