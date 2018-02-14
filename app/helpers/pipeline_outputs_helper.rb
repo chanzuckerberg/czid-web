@@ -14,8 +14,9 @@ module PipelineOutputsHelper
     return nil unless pipeline_run.version
     version_hash = JSON.parse(pipeline_run.version)
     aspect_hash = version_hash.select { |item| item["name"] == aspect }[0]
+    return nil unless aspect_hash
     version_key = %w[nt_k16 nr_rapsearch].include?(aspect) ? "source_version" : "version"
-    aspect_hash[version_key]
+    aspect_hash.key?(version_key) ? aspect_hash[version_key] : nil
   end
 
   def get_taxid_fasta(sample, taxid, tax_level, hit_type)
