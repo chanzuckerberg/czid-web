@@ -406,7 +406,7 @@ class PipelineSampleReads extends React.Component {
         <SubHeader>
           <div className="sub-header">
             <div className="title">
-              PIPELINE
+              PIPELINE v{this.pipelineRun.version.pipeline}, NT v{this.pipelineRun.version.nt}, NR v{this.pipelineRun.version.nr}
             </div>
 
             <div className="sub-title">

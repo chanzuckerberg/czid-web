@@ -1,6 +1,21 @@
 module PipelineOutputsHelper
   Client = Aws::S3::Client.new
 
+  def curate_pipeline_run_display(pipeline_run)
+    pipeline_run_display = pipeline_run.as_json.except("version")
+    pipeline_run_display["version"] = { pipeline: select_version_aspect(pipeline_run, "idseq-pipeline"),
+                                        nt: select_version_aspect(pipeline_run, "nt_k16"),
+                                        nr: select_version_aspect(pipeline_run, "nr_rapsearch") }
+    pipeline_run_display
+  end
+
+  def select_version_aspect(pipeline_run, aspect)
+    version_hash = JSON.parse(@pipeline_run.version)
+    aspect_hash = version_hash.select { |item| item["name"] == aspect }[0]
+    version_key = ["nt_k16", "nr_rapsearch"].include? aspect ? "source_version" : "version"
+    aspect_hash[version_key]
+  end
+
   def get_taxid_fasta(sample, taxid, tax_level, hit_type)
     uri = sample.s3_paths_for_taxon_byteranges[tax_level][hit_type]
     # e.g. "s3://czbiohub-idseq-samples-development/samples/8/74/postprocess/taxid_annot_sorted_genus_nt.fasta"
