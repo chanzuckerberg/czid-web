@@ -137,12 +137,12 @@ class D3Heatmap extends React.Component {
       }
     }
     this.margin ={
-      top:  char_width * longest_col_label * 0.66,
-      right: 10,
+      top:  char_width * longest_col_label * 0.7,
+      left: 10,
       bottom: 50,
-      left: char_width * longest_row_label
+      right: char_width * longest_row_label
     };
-
+    console.log(this.margin);
     this.cellSize = Math.min(900 / this.col_number, 400 / this.row_number);
     this.cellSize = parseInt(Math.max(this.cellSize, 20), 10);
 
@@ -160,8 +160,8 @@ class D3Heatmap extends React.Component {
     let that = this
 
     this.svg = d3.select(this.container).append("svg")
-      .attr("width", this.width + this.margin.left + this.margin.right)
-      .attr("height", this.height + this.margin.top + this.margin.bottom)
+      .attr("width", this.width)
+      .attr("height", this.height)
       .append("g")
       .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
 
@@ -270,12 +270,11 @@ class D3Heatmap extends React.Component {
         .enter()
         .append("text")
         .text(function (d) { return d; })
-        .attr("x", 0)
+        .attr("x", this.cellSize * this.col_number)
         .attr("y", function (d, i) {
           return i * that.cellSize;
         })
-        .style("text-anchor", "end")
-        .attr("transform", "translate(-6," + this.cellSize / 1.5 + ")")
+        .attr("transform", "translate(8," + this.cellSize / 1.5 + ")")
         .attr("class", function (d,i) {
           return "rowLabel mono r"+i;}
         )
