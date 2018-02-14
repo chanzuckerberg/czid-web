@@ -69,6 +69,7 @@ class PipelineSampleReport extends React.Component {
     this.sortCompareFunction = this.sortCompareFunction.bind(this);
     this.setSortParams = this.setSortParams.bind(this);
     this.flash = this.flash.bind(this);
+    this.fetchParams = this.fetchParams.bind(this);
 
     this.taxonPassThresholdFilter = this.taxonPassThresholdFilter.bind(this);
     this.expandOrCollapseGenus = this.expandOrCollapseGenus.bind(this);
@@ -99,6 +100,11 @@ class PipelineSampleReport extends React.Component {
   componentDidMount() {
     this.listenThresholdChanges();
     this.scrollDown()
+  }
+
+  fetchParams(param) {
+    let urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param)
   }
 
   fetchSearchList() {
@@ -707,8 +713,13 @@ class PipelineSampleReport extends React.Component {
         enableFilters={this.enableFilters}
         resetAllFilters={this.resetAllFilters}
       />);
+    let param_background_id = this.fetchParams("background_id")
+    let cookie_background_id = Cookies.get('background_id')
+    let csv_background_id = param_background_id ? param_background_id :
+                              cookie_background_id ? cookie_background_id :
+                                this.report_details.background_model.id
     const download_button = (
-      <a href={`/samples/${this.sample_id}/report_csv?background_id=${this.report_details.background_model.id}`} className="download-report right">
+      <a href={`/samples/${this.sample_id}/report_csv?background_id=${csv_background_id}`} className="download-report right">
         <div className="fa fa-cloud-download" />
         <div>Download report</div>
       </a>
