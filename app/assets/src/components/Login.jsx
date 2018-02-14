@@ -138,6 +138,10 @@ class Login extends React.Component {
                   <input ref="remember_me" type="checkbox" name="switch" className="filled-in" id="remember_me" onChange={ this.toggleCheckBox } value={this.state.isChecked ? 1 : 0} />
                   <label htmlFor="remember_me">Remember me</label>
                 </div>
+                <div>
+                  <br/>
+                  <a href="/users/password/new">Forgot password?</a>
+                </div>
               </div>
               <input className="hidden" type="submit"/>
               <div onClick={ this.handleSubmit } className="center-align login-wrapper">Submit</div>
