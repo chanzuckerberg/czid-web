@@ -12,8 +12,13 @@ module PipelineOutputsHelper
 
   def select_version_aspect(pipeline_run, aspect)
     return nil unless pipeline_run.version
-    version_hash = JSON.parse(pipeline_run.version)
-    aspect_hash = version_hash.select { |item| item["name"] == aspect }[0]
+    version_hashes = JSON.parse(pipeline_run.version)
+    # example for version_hashes:
+    #   [{"name"=>"job_id", "version"=>"023e1f7d-8f96-42cc-ab07-6c233254f113"},
+    #    {"name"=>"idseq-pipeline", "version"=>"1.0.9", "commit-sha"=>"d99a5e5c343a741cef7ea9ef888ead69f440c23d"},
+    #    {"name"=>"nt_k16", "source_file"=>"/blast/db/FASTA/nt.gz", "source_version"=>8, "indexing_version"=>"1.0.0"},
+    #    {"name"=>"nr_rapsearch", "source_file"=>"/blast/db/FASTA/nr.gz", "source_version"=>12, "indexing_version"=>"1.0.0"}]
+    aspect_hash = version_hashes.select { |item| item["name"] == aspect }[0]
     return nil unless aspect_hash
     version_key = %w[nt_k16 nr_rapsearch].include?(aspect) ? "source_version" : "version"
     aspect_hash.key?(version_key) ? aspect_hash[version_key] : nil
