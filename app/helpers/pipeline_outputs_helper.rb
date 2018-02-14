@@ -2,6 +2,7 @@ module PipelineOutputsHelper
   Client = Aws::S3::Client.new
 
   def curate_pipeline_run_display(pipeline_run)
+    return nil unless pipeline_run
     pipeline_run_display = pipeline_run.as_json.except("version")
     pipeline_run_display["version"] = { pipeline: select_version_aspect(pipeline_run, "idseq-pipeline"),
                                         nt: select_version_aspect(pipeline_run, "nt_k16"),
