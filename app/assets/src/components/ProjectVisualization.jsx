@@ -66,7 +66,7 @@ class D3Heatmap extends React.Component {
     super(props);
 
     this.state = {}
-    this.colors = [
+    this.colors = this.props.colors || [
       '#FFFFFF',
       '#F9F1F4',
       '#F3E4EA',
@@ -382,8 +382,7 @@ class D3Heatmap extends React.Component {
 class ProjectVisualization extends React.Component {
   constructor(props) {
     super(props);
-    this.sample_ids = [14,15,16,17,18,19,20,21,22, 334, 335, 336, 337, 338, 339, 340, 341, 342, 343];
-    this.taxon_ids = [29448, 329, 658664, 374, 375, 305, 308, 44255, 1217052, 1842450, 1230476];
+    this.sample_ids = this.props.sample_ids;
     this.state = {
       loading: false,
       data: undefined,
@@ -428,7 +427,7 @@ class ProjectVisualization extends React.Component {
   fetchDataFromServer () {
     this.setState({loading: true})
     this.request && this.request.cancel();
-    this.request = axios.get("/samples/samples_taxons.json?sample_ids=" + this.sample_ids + "&taxon_ids=" + this.taxon_ids)
+    this.request = axios.get("/samples/samples_taxons.json?sample_ids=" + this.sample_ids)
     .then((response) => {
       this.updateMinMax(response.data, this.state.dataType);
       this.setState({
@@ -531,6 +530,7 @@ class ProjectVisualization extends React.Component {
         getColumnLabel={this.getColumnLabel.bind(this)}
         getCellValue={this.dataGetters[this.state.dataType].bind(this)}
         getTooltip={this.getTooltip.bind(this)}
+        colors={["rgb(255,255,255)", "rgb(255,255,173)", "rgb(254,221,11)", "rgb(252,104,117)", "rgb(251, 0, 243)", "rgb(140, 0, 236)"]}
       />
     )
   }

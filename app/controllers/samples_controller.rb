@@ -17,7 +17,7 @@ class SamplesController < ApplicationController
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata].freeze
 
-  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :samples_taxons, :top_taxons].freeze
+  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :samples_taxons, :top_taxons, :heatmap].freeze
 
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload]
   acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload], fallback: :devise
@@ -174,6 +174,10 @@ class SamplesController < ApplicationController
     else
       render json: {}
     end
+  end
+  
+  def heatmap
+    @sample_ids = params[:sample_ids].to_s.split(",").map(&:to_i) || []
   end
 
   def samples_taxons

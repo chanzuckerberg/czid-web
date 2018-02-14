@@ -117,10 +117,6 @@ class ProjectsController < ApplicationController
   def edit
   end
 
-  # Get /projects/1/visuals
-  def visuals
-  end
-
   def add_favorite
     remove_favorite
     current_user.favorites << @project

@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "axios": "^0.17.1",
+    "clusterfck": "^0.6.0",
     "d3": "^3.5.17",
     "font-awesome": "^4.7.0",
     "jquery": "^3.2.1",
