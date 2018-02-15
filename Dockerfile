@@ -40,6 +40,9 @@ RUN yarn install
 RUN npm rebuild node-sass
 RUN mkdir -p app/assets/dist &&  webpack && ls -l app/assets/dist/
 
+ARG GIT_COMMIT
+ENV GIT_VERSION ${GIT_COMMIT}
+
 # Expose port 3000 to the Docker host, so we can access it
 # from the outside.
 EXPOSE 3000

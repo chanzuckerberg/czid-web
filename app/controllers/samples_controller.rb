@@ -148,6 +148,8 @@ class SamplesController < ApplicationController
     @host_genome = @sample.host_genome ? @sample.host_genome : nil
     @background_models = Background.all
     @can_edit = current_power.updatable_sample?(@sample)
+    @git_version = ENV['GIT_VERSION'] || ""
+    @git_version = Time.current.to_i if @git_version.nil? || @git_version.empty?
 
     default_background_id = @sample.host_genome && @sample.host_genome.default_background ? @sample.host_genome.default_background.id : nil
     if @pipeline_run && (@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?

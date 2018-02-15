@@ -13,6 +13,7 @@ class PipelineSampleReport extends React.Component {
     super(props);
     this.report_ts = props.report_ts;
     this.sample_id = props.sample_id;
+    this.gitVersion = props.git_version
 
     this.all_categories = props.all_categories;
     this.report_details = props.report_details;
@@ -108,7 +109,7 @@ class PipelineSampleReport extends React.Component {
   }
 
   fetchSearchList() {
-    axios.get(`/samples/${this.sample_id}/search_list?report_ts=${this.report_ts}`).then((res) => {
+    axios.get(`/samples/${this.sample_id}/search_list?report_ts=${this.report_ts}&version=${this.gitVersion}`).then((res) => {
       const search_list = res.data.search_list;
       search_list.splice(0, 0, ['All', 0]);
       this.setState({
@@ -120,7 +121,7 @@ class PipelineSampleReport extends React.Component {
 
   fetchReportData() {
     Samples.showLoading('Loading results...');
-    let params = `?${window.location.search.replace('?', '')}&report_ts=${this.report_ts}`;
+    let params = `?${window.location.search.replace('?', '')}&report_ts=${this.report_ts}&version=${this.gitVersion}`;
     const cached_background_id = Cookies.get('background_id');
     if (cached_background_id) {
       params = params.indexOf('background_id=')
