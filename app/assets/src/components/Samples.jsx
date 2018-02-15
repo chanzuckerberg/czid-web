@@ -27,8 +27,10 @@ class Samples extends React.Component {
     this.loadMore = this.loadMore.bind(this);
     this.fetchResults = this.fetchResults.bind(this);
     this.fetchSamples = this.fetchSamples.bind(this);
+    this.hostGenomes = props.hostGenomes || [];
     this.handleStatusFilterSelect = this.handleStatusFilterSelect.bind(this);
     this.handleTissueFilterSelect = this.handleTissueFilterSelect.bind(this);
+    this.handleHostFilterSelect = this.handleHostFilterSelect.bind(this);
     this.setUrlLocation = this.setUrlLocation.bind(this);
     this.sortSamples = this.sortSamples.bind(this);
     this.switchColumn = this.switchColumn.bind(this);
@@ -55,6 +57,7 @@ class Samples extends React.Component {
       filterParams: this.fetchParams('filter') || '',
       searchParams: this.fetchParams('search') || '',
       tissueParams: this.fetchParams('tissue') || '',
+      hostParams: this.fetchParams('host') || '',
       sampleIdsParams: this.fetchParams('ids') || [],
       allSamples: [],
       sort_by: this.fetchParams('sort_by') || 'id,desc',
@@ -145,7 +148,7 @@ class Samples extends React.Component {
 
   displayReportProgress(res) {
       $('.download-progress')
-      .html(`<i class="fa fa-circle-o-notch fa-spin fa-fw"></i> ${res.data.status_display}`)
+      .html(`<i className="fa fa-circle-o-notch fa-spin fa-fw"></i> ${res.data.status_display}`)
       .css('display', 'block')
       setTimeout(() => {
         this.checkReportDownload();
@@ -535,7 +538,7 @@ class Samples extends React.Component {
 
   //fetch project, filter and search params
   getParams() {
-    let params = `filter=${this.state.filterParams}&tissue=${this.state.tissueParams}&page=${this.state.pagesLoaded+1}&search=${this.state.searchParams}&sort_by=${this.state.sort_by}`;
+    let params = `filter=${this.state.filterParams}&tissue=${this.state.tissueParams}&host=${this.state.hostParams}&page=${this.state.pagesLoaded+1}&search=${this.state.searchParams}&sort_by=${this.state.sort_by}`;
     let projectId = parseInt(this.state.selectedProjectId);
 
     if(projectId) {
@@ -727,6 +730,7 @@ class Samples extends React.Component {
   }
 
 
+
   addFavIconClass(project) {
     return (
       <i data-status="favorite" data-fav={project.favorited} data-id={project.id} onClick={this.toggleFavorite} className={!project.favorited ? "favorite fa fa-star-o":  "favorite fa fa-star"}></i>
@@ -870,10 +874,48 @@ class Samples extends React.Component {
         </div>
       </div>
     );
+
+    const metaDataFilter = (
+      <div>
+        <div className="col s1 metadata">
+          <div className='metadata-dropdown' data-activates='dropdown2'>
+          Metadata <i className="fa fa-angle-down"></i>
+          </div>
+           <div id='dropdown2' className='row dropdown-content'>
+             <div className="col s6">
+              <h6>Host</h6>
+              { this.hostGenomes.map((host, i) => {
+                return (
+                  <div key={i} className="options-wrapper">
+                    <input name="host" type="radio" data-id={host.id} onChange={this.handleHostFilterSelect}
+                      id={host.id} className="filled-in human" />
+                    <label htmlFor={host.id}>{host.name}</label>
+                  </div>
+                )
+              })}
+              </div>
+             <div className="col s6">
+             <h6>Tissue type</h6>
+              {this.tissue_types.map((tissue, i) => {
+                return (
+                  <div key={i} className="options-wrapper"> 
+                  <input name="tissue" type="radio" 
+                  id={tissue} className="filled-in" data-status={tissue} onChange={this.handleTissueFilterSelect} />
+                  <label htmlFor={tissue}>{tissue}</label>
+                </div>  
+                )
+              })}
+             </div>
+          </div>
+        </div>
+      </div>
+    )
+    
     const search_box = (
       <div className="row search-box">
         { this.state.displaySelectSamplees ? check_all : null }
         { search_field }
+        { metaDataFilter  }
         { table_download_button }
          { this.state.checkedBoxes > 0  ? compare_button : null }
         { project_id === 'all' ? null : reports_download_button }
@@ -1208,17 +1250,29 @@ class Samples extends React.Component {
     });
   }
 
-  handleTissueFilterSelect(e) {
-    e.preventDefault();
-    let status = e.target.getAttribute('data-status');
+  //handle filtering when a host filter is selected from list
+  handleHostFilterSelect(e) {
+    let id = e.target.getAttribute('data-id');
     this.setState({
       pagesLoaded: 0,
       pageEnd: false,
-      tissueParams: status
+      hostParams: parseInt(id)
     }, () => {
       this.setUrlLocation();
       this.fetchResults();
     });
+  }
+
+  handleTissueFilterSelect(e) {
+      let status = e.target.getAttribute('data-status');
+      this.setState({
+        pagesLoaded: 0,
+        pageEnd: false,
+        tissueParams: status
+      }, () => {
+        this.setUrlLocation();
+        this.fetchResults();
+      });
   }
 
   //set Url based on requests
@@ -1228,6 +1282,7 @@ class Samples extends React.Component {
       project_id: projectId ? projectId : null,
       filter: this.state.filterParams,
       tissue: this.state.tissueParams,
+      host: this.state.hostParams,
       search: this.state.searchParams,
       sort_by: this.state.sort_by,
       type: this.state.projectType

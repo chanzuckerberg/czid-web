@@ -459,6 +459,22 @@ $break-large: 1070px;
 }
 
 .sample-container {
+  .metadata {
+    cursor:pointer;
+    padding: 11px;
+    border: 1px solid #cfd9e4;
+    .dropdown-content {
+      width:700px !important; 
+      .col.s6 {
+        .options-wrapper {
+          // margin: 10px;
+          label {
+            margin: 10px 0;
+          }
+        }
+      }
+    }
+  }
   .title-wrapper {
     margin-bottom: 50px;
     .title {
