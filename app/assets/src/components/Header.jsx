@@ -75,7 +75,7 @@ class Header extends React.Component  {
           <p>By default, the host genome to be subtracted out is "Human".<br/>
              You can change it by adding <span className="code">--host_genome_name <span className="code-to-edit">'Your Chosen Host'</span></span> to the command.<br/>
              Current possibilities for <span className="code-to-edit">'Your Chosen Host'</span>:<br/>
-             {host_genome_names.map((hgn, i) => <span className="code-personal" key={i}>'{hgn}'</span>).reduce((prev, curr) => [prev, ' / ', curr])}).</p>
+             {host_genome_names.map((hgn, i) => <span className="code-personal" key={i}>'{hgn}'</span>).reduce((prev, curr) => [prev, ' / ', curr])}.</p>
           <p className='upload-question'>For more information on the IDseq CLI, have a look at its <a href='https://github.com/chanzuckerberg/idseq-web/blob/master/README.md' target='_blank'>GitHub repository</a>.</p>
           <button className='modal-close'>Done</button>
         </div>
