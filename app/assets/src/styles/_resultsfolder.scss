@@ -1,25 +1,14 @@
-<<<<<<< HEAD
 @import "variables";
 
 .header {
   margin: 25px 75px;
   .title {
   font-size: $font-size-h3;
-=======
-.header {
-  margin: 25px 75px;
-  .title {
-  font-size: 22px;
->>>>>>> undo reset
   color: #03a9f4;
   .path {
     margin: 20px;
     color: #000;
-<<<<<<< HEAD
     font-weight: $font-weight-thin
-=======
-    font-weight: 100
->>>>>>> undo reset
     }
     .back {
       cursor: pointer;
@@ -28,7 +17,6 @@
       }
     }
   }
-<<<<<<< HEAD
   th {
     color: $headings-color;
   }
@@ -36,21 +24,12 @@
     cursor: pointer;
     td {
       color: $body-color;
-=======
-  tr {
-    cursor: pointer;
-    td {
->>>>>>> undo reset
       &:hover {
         color: #5abcd6;
       }
     }
   }
-<<<<<<< HEAD
   i.fa-file {
-=======
-  i.fa-folder-open {
->>>>>>> undo reset
     margin-right: 15px;
   }
 }  
