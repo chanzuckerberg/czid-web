@@ -207,10 +207,8 @@ class SamplesController < ApplicationController
     ## Duct tape for changing background id dynamically
     ## TODO(yf): clean the following up.
     ####################################################
-    background_id = nil
-    default_background_id = @sample.host_genome && @sample.host_genome.default_background ? @sample.host_genome.default_background.id : nil
     if @pipeline_run && (@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?
-      background_id = params[:background_id] || default_background_id
+      background_id = params[:background_id] || @sample.default_background_id
       pipeline_run_id = @pipeline_run.id
     end
 
