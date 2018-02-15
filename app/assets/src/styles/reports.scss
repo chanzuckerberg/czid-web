@@ -506,8 +506,7 @@ margin-bottom: 0px;
     }
     .count {
       display: inline-block;
-      margin: 20px 0 18px 20px;
-
+      margin: 20px 0 0px 17px;
     }
     .download {
       float: right;
@@ -549,6 +548,7 @@ margin-bottom: 0px;
               padding: 8px;
               position: relative;
               top: -3px;
+              text-align: center;
             }
           }
           &.search-box {
