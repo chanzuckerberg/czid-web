@@ -758,27 +758,8 @@ class PipelineSampleReport extends React.Component {
         </span>
       </div>
     );
-<<<<<<< HEAD
-    const report_filter =
-      (<ReportFilter
-        ref="report_filter"
-        all_categories={this.all_categories}
-        all_backgrounds={this.all_backgrounds}
-        search_keys_in_sample={this.state.search_keys_in_sample}
-        default_background={this.report_details.default_background}
-        report_title={this.report_details.sample_info.name}
-        report_page_params={this.report_page_params}
-        applyNameType={this.applyNameType}
-        applyExcludedCategories={this.applyExcludedCategories}
-        applySearchFilter={this.applySearchFilter}
-        flash={this.flash}
-        filter_row_stats={filter_row_stats}
-        enableFilters={this.enableFilters}
-        resetAllFilters={this.resetAllFilters}
-=======
     const report_filter = (<ReportFilter ref="report_filter"
         filter_row_stats={ filter_row_stats }
->>>>>>> restructure top filters
       />);
     let param_background_id = this.fetchParams("background_id")
     let cookie_background_id = Cookies.get('background_id')
@@ -797,10 +778,10 @@ class PipelineSampleReport extends React.Component {
         <div id="reports" className="reports-screen tab-screen col s12">
           <div className="tab-screen-content">
             <div className="row reports-container">
-              {/* <div className="col s2 reports-sidebar">
+              <div className="col s2 reports-sidebar">
                 {report_filter}
-              </div> */}
-              <div className="col s12 reports-section">
+              </div>
+              <div className="col s10 reports-section">
                 <div className="reports-count">
                   { filter_row_stats }
                   <div className='report-top-filters'>
