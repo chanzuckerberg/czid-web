@@ -33,7 +33,7 @@ class ReportFilter extends React.Component {
           <div className="row">
             <div className="col s12 sidebar-full-container">
               <div id="filters-pane" className="pane col s12">
-                {this.props.filter_row_stats}
+
               </div>
             </div>
           </div>
