@@ -27,3 +27,21 @@ four:
   tax_level: 1
   name: 'some species'
   count: 2
+
+five:
+  pipeline_run: six
+  tax_id: 573
+  tax_level: 1
+  count: 69
+  name: "Klebsiella pneumoniae"
+  count_type: "NR"
+  percent_identity: 97.8565
+  alignment_length: 46.3623
+  e_value: -16.9101
+  genus_taxid: 570
+  superkingdom_taxid: 2
+  percent_concordant: 66.6667
+  species_total_concordant: 46.0
+  genus_total_concordant: 82.0
+  family_total_concordant: 162.0
+  common_name: ""
