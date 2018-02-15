@@ -460,10 +460,10 @@ class PipelineSampleReads extends React.Component {
               <div className="nav-content">
                 <ul className="tabs tabs-transparent">
                   <li className="tab">
-                    <a href="#details" className=''>Details</a>
+                    <a href="#reports" className='active'>Report</a>
                   </li>
                   <li className="tab">
-                    <a href="#reports" className='active'>Report</a>
+                    <a href="#details" className=''>Details</a>
                   </li>
                 </ul>
               </div>
