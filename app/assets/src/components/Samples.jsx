@@ -208,12 +208,12 @@ class Samples extends React.Component {
   startReportGeneration() {
     Samples.showLoading('Downloading reports...');
     axios.get(`/projects/${this.state.selectedProjectId}/make_project_reports_csv`).then((res) => {
+      Samples.hideLoader();
       this.setState({
         project_id_download_in_progress: this.state.selectedProjectId
       });
       this.displayReportProgress(res);
     }).catch((err) => {
-      console.log(err);
     });
   }
 
@@ -906,48 +906,16 @@ class Samples extends React.Component {
         </div>
       </div>
     );
-    let table_download_button = (
-      <div className='col s2 download-table'>
-        <div className='white'>
-          <a href={`/projects/${project_id}/csv`} className="download-project center">
-            <i className="fa fa-cloud-download"/>
-            <span>Download table</span>
-          </a>
-        </div>
-      </div>
-    );
 
-    let check_all = (
-      <div className="check-all">
-          <input type="checkbox"
-            id="checkAll"
-            className="filled-in checkAll"
-            />
-          <label htmlFor="checkAll"></label>
-          <i className="fa fa-caret-down"></i>    
-      </div>
-    );
-
-    let compare_button = (
-      <div className='col s2 download-table'>
-        <div className='white'>
-          <a onClick={this.compareSamples} className="compare center">
-            <span>Compare</span>
-          </a>
-        </div>
-      </div>
-    )
-
-    const reports_download_button_contents = this.state.project_id_download_in_progress ?
-      <span className='download-progress'/>
-      : <a onClick={this.startReportGeneration} className="download-project center">
-                                             <i className="fa fa-cloud-download"/>
-                                             <span>Download reports</span>
-                                           </a>
-    const reports_download_button = (
-      <div className='col s2 download-table'>
-        <div className='white'>
-          { reports_download_button_contents }
+    let table_download_dropdown = (
+      <div>
+        <div className='col s2 download-table download-dropdown' data-activates='download-dropdown'>
+          <div className='white'  data-activates='download-dropdown'>
+            <a className="download-project center">
+              <span>Download</span>
+              <i className="fa fa-angle-down"></i>
+            </a>
+          </div>
         </div>
         {/*Dropdown menu*/}
         <ul id='download-dropdown' className='dropdown-content'>
@@ -1271,6 +1239,7 @@ class Samples extends React.Component {
       $('.filter').hide();
     });
     this.initializeSelectAll();
+    this.displayDownloadDropdown();
     this.initializeTooltip();
     this.fetchProjectPageData();
     this.state.selectedProjectId ? this.fetchProjectDetails(this.state.selectedProjectId) : null;
