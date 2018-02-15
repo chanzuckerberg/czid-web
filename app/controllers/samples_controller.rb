@@ -164,7 +164,7 @@ class SamplesController < ApplicationController
 
   def top_taxons
     sample_ids = params[:sample_ids].split(",").map(&:to_i) || []
-    num_results = params[:n].to_i || 100
+    num_results = params[:n] ? params[:n].to_i : 100
     sort_by = params[:sort_by] || "highest_nt_aggregatescore"
     samples = current_power.samples.where(id: sample_ids)
     if samples.first
@@ -180,8 +180,8 @@ class SamplesController < ApplicationController
 
   def samples_taxons
     sample_ids = params[:sample_ids].to_s.split(",").map(&:to_i) || []
+    num_results = params[:n] ? params[:n].to_i : 100
     taxon_ids = params[:taxon_ids].to_s.split(",").map(&:to_i) || []
-    num_results = params[:n].to_i || 100
     sort_by = params[:sort_by] || "highest_nt_aggregatescore"
     samples = current_power.samples.where(id: sample_ids)
     if samples.first
@@ -191,8 +191,12 @@ class SamplesController < ApplicationController
       if taxon_ids.empty?
         taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by).pluck("tax_id")
       end
-      @sample_taxons_dict = samples_taxons_details(samples, taxon_ids, background_id)
-      render json: @sample_taxons_dict
+      if taxon_ids.empty?
+        render json: {}
+      else
+        @sample_taxons_dict = samples_taxons_details(samples, taxon_ids, background_id)
+        render json: @sample_taxons_dict
+      end
     else
       render json: {}
     end
