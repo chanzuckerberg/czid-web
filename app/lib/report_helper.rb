@@ -176,10 +176,11 @@ module ReportHelper
     data
   end
 
-  def report_details(pipeline_run, _background)
-    # Gives some auxiliary information on pipeline_run.
-    # Not actually anything to do with report-specific data and does not use background argument.
+  def report_details(pipeline_run, _background = nil)
+    # Provides some auxiliary information on pipeline_run.
+    # Not actually anything to do with report-specific data and does not use _background argument.
     {
+      pipeline_info: pipeline_run,
       subsampled_reads: pipeline_run.subsampled_reads,
       sample_info: pipeline_run.sample,
       taxon_fasta_flag: pipeline_run.finalized?
