@@ -206,11 +206,16 @@ class Samples extends React.Component {
   }
 
   startReportGeneration() {
+    Samples.showLoading('Downloading reports...');
     axios.get(`/projects/${this.state.selectedProjectId}/make_project_reports_csv`).then((res) => {
+      Samples.hideLoader();
       this.setState({
         project_id_download_in_progress: this.state.selectedProjectId
       });
       this.displayReportProgress(res);
+    }).catch((err) => {
+      Samples.hideLoader();
+      console.log(err);
     });
   }
 
@@ -761,6 +766,16 @@ class Samples extends React.Component {
     )
   }
 
+ displayDownloadDropdown() {
+  $('.download-dropdown').dropdown({
+    constrainWidth: false, // Does not change width of dropdown to that of the activator
+    gutter: 0, // Spacing from edge
+    belowOrigin: true, // Displays dropdown below the button
+    alignment: 'left', // Displays dropdown with edge aligned to the left of button
+    stopPropagation: true // Stops event propagation
+  });
+ }
+
   findSelectedColumns(selO) {
     const selValues = [];
     for (let i=0; i < selO.length; i++) {
@@ -935,6 +950,11 @@ class Samples extends React.Component {
         <div className='white'>
           { reports_download_button_contents }
         </div>
+        {/*Dropdown menu*/}
+        <ul id='download-dropdown' className='dropdown-content'>
+          <li><a href={`/projects/${project_id}/csv`}>Download Table</a></li>
+          { project_id === 'all' ? null : <li><a onClick={this.startReportGeneration}> Download Reports</a></li> }
+        </ul>
       </div>
     );
 
@@ -1237,6 +1257,7 @@ class Samples extends React.Component {
   }
 
   componentDidMount() {
+    const textSize = 14;
     $(() => {
       const win = $(window);
       const samplesHeader = $('.sample-table-container');
@@ -1258,6 +1279,7 @@ class Samples extends React.Component {
     // this.initializeProjectList();
     this.displayPipelineStatusFilter();
     this.initializeColumnSelect();
+    $(".dropdown-content>li>a").css("font-size", textSize)
   }
 
   initializeColumnSelect() {
@@ -1269,13 +1291,11 @@ class Samples extends React.Component {
 
   // initialize filter dropdown
   displayPipelineStatusFilter() {
-    const textSize = 14;
     $('.status-dropdown, .menu-dropdown').dropdown({
       belowOrigin: true,
       stopPropagation: false,
       constrainWidth: false
     });
-    $(".dropdown-content>li>a").css("font-size", textSize)
   }
 
   displayCheckMarks(filter) {

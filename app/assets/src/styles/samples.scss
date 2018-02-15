@@ -506,6 +506,7 @@ $break-large: 1070px;
   .download-table {
     float: right;
     padding-right: 10px;
+    float: right;
     .download-project {
       cursor: pointer;
       padding: 11px;
@@ -513,6 +514,9 @@ $break-large: 1070px;
       background: #f4f4f4;
       border: 1px solid #d9d9d9;
       color: #525f6a !important;
+      span {
+        margin: 10px;
+      }
       i {
         margin-right: 4px;
       }
