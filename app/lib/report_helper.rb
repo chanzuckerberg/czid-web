@@ -24,7 +24,7 @@ module ReportHelper
 
   DECIMALS = 1
 
-  DEFAULT_SORT_PARAM = 'highest_nt_aggregatescore'.freeze
+  DEFAULT_SORT_PARAM = 'highest_nt_maxzscore'.freeze
   DEFAULT_PARAMS = { sort_by: DEFAULT_SORT_PARAM }.freeze
 
   IGNORED_PARAMS = [:controller, :action, :id].freeze
@@ -232,9 +232,12 @@ module ReportHelper
     ").to_hash
   end
 
-  def fetch_top_taxons(samples, background_id, _filters = {})
+  def fetch_top_taxons(samples, background_id, include_species, filters = {})
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
 
+    unless include_species
+      tax_level_str = " AND taxon_counts.tax_level = #{TaxonCount::TAX_LEVEL_GENUS}"
+    end
     sql_results = TaxonCount.connection.select_all("
       SELECT
         taxon_counts.pipeline_run_id     AS  pipeline_run_id,
@@ -265,6 +268,7 @@ module ReportHelper
         pipeline_run_id in (#{pipeline_run_ids.join(',')}) AND
         taxon_counts.count >= #{MINIMUM_READ_THRESHOLD} AND
         taxon_counts.count_type IN ('NT', 'NR')
+        #{tax_level_str}
        ").to_hash
 
     # calculating rpm and zscore, organizing the results by pipeline_run_id
@@ -370,8 +374,8 @@ module ReportHelper
     results
   end
 
-  def top_taxons_details(samples, background_id, num_results, sort_by_key = DEFAULT_SORT_PARAM, filters = {})
-    results_by_pr = fetch_top_taxons(samples, background_id, filters)
+  def top_taxons_details(samples, background_id, num_results, sort_by_key, include_species, filters = {})
+    results_by_pr = fetch_top_taxons(samples, background_id, include_species,filters)
     sort_by = decode_sort_by(sort_by_key)
     count_type = sort_by[:count_type]
     metric = sort_by[:metric]
