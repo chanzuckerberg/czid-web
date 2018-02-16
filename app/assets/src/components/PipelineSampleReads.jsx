@@ -12,6 +12,7 @@ class PipelineSampleReads extends React.Component {
     super(props);
     this.can_edit = props.can_edit
     this.csrf = props.csrf;
+    this.gitVersion = props.gitVersion
     this.allBackgrounds = props.all_backgrounds;
     this.rerunPath = props.rerun_path;
     this.sampleInfo = props.sampleInfo;
@@ -257,6 +258,7 @@ class PipelineSampleReads extends React.Component {
       d_report = <PipelineSampleReport
         sample_id = {this.sampleId}
         report_ts = {this.reportTime}
+        git_version = {this.gitVersion}
         all_categories = {this.allCategories}
         all_backgrounds = {this.allBackgrounds}
         report_details = {this.reportDetails}
