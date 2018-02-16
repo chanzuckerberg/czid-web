@@ -714,22 +714,16 @@ $break-large: 1070px;
     margin: 20px 0 5px;
     border-radius: 3px;
     .check-all {
-<<<<<<< HEAD
       display: inline-block;
       float: left;
       border: 1px solid #ddd;
       padding: 9px 12px;
       label {
         vertical-align: middle;
-=======
       border: 1px solid #ddd;
-      padding: 8px 15px;
-      label {
-        vertical-align: middle;
-        margin-left: 10px;
->>>>>>> Add sample selection UI + logic
-      }
+      padding: 9px 12px;
     }
+  }
     .search-field {
       padding-left: 20px;
       .search-icon {
