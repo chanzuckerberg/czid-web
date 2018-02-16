@@ -63,3 +63,21 @@ six:
   genus_total_concordant: 216.0
   family_total_concordant: 232.0
   common_name: ""
+
+seven:
+  pipeline_run: six
+  tax_id: 570
+  tax_level: 2
+  count: 
+  name:
+  count_type:
+  percent_identity:
+  alignment_length:
+  e_value:
+  genus_taxid:
+  superkingdom_taxid:
+  percent_concordant:
+  species_total_concordant:
+  genus_total_concordant:
+  family_total_concordant:
+  common_name: ""
