@@ -98,7 +98,14 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'should get correct report' do
-    #get ...
+    get "/samples/#{@sample.id}/report_info"
+    json_response = JSON.parse(response.body)
+    assert_equal json_response["taxonomy_details"][2][0]["NT"]["r"], 209.0
+    assert_equal json_response["taxonomy_details"][2][0]["NT"]["rpm"], "186274.5"
+    assert_equal json_response["taxonomy_details"][2][0]["NT"]["zscore"], 99.0
+    assert_equal json_response["taxonomy_details"][2][0]["NR"]["r"], 69.0
+    assert_equal json_response["taxonomy_details"][2][0]["NR"]["rpm"], "61497.3"
+    assert_equal json_response["taxonomy_details"][2][0]["NR"]["zscore"], 99.0
   end
 
   test 'should get edit' do
