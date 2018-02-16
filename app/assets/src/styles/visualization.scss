@@ -56,7 +56,7 @@
   }
 
   rect.cell-border {
-    stroke: #eee;
+    stroke: #ddd;
     stroke-width:0.25px;
   }
 
@@ -68,6 +68,7 @@
   rect.cell-hover {
     stroke: #F00;
     stroke-width:0.25px;
+    cursor: pointer;
   }
 
   text.mono {

@@ -210,6 +210,7 @@ class D3Heatmap extends React.Component {
         }
         return colorScale(d.value);
       })
+      .on("click", this.props.onCellClick)
       .on("mouseover", function(d){
          //highlight text
          d3.select(this).classed("cell-hover",true);
@@ -681,6 +682,11 @@ class ProjectVisualization extends React.Component {
   renderLoading () {
     return (<p className="loading-indicator">Loading...</p>);
   }
+  
+  onCellClick (d) {
+    let sample = this.state.data[d.col];
+    window.location.href = "/samples/" + sample.sample_id;
+  }
 
   renderHeatmap () {
     if (!this.state.data) {
@@ -696,6 +702,7 @@ class ProjectVisualization extends React.Component {
         getColumnLabel={this.getColumnLabel.bind(this)}
         getCellValue={this.dataGetters[this.state.dataType].bind(this)}
         getTooltip={this.getTooltip.bind(this)}
+        onCellClick={this.onCellClick.bind(this)}
         colors={["rgb(255,255,255)", "rgb(255,255,173)", "rgb(254,221,11)", "rgb(252,104,117)", "rgb(251, 0, 243)", "rgb(140, 0, 236)"]}
       />
     )
