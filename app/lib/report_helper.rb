@@ -412,7 +412,7 @@ module ReportHelper
       end
     end
 
-    candidate_taxons.values.sort_by { |taxon| -1.0 * taxon["max_aggregate_score"].to_f }[0..(num_results - 1)]
+    candidate_taxons.values.sort_by { |taxon| -1.0 * taxon["max_aggregate_score"].to_f }
   end
 
   def zero_metrics(count_type)
