@@ -2,6 +2,7 @@ require 'test_helper'
 
 class SamplesControllerTest < ActionDispatch::IntegrationTest
   setup do
+    @background = backgrounds(:three)
     @sample = samples(:one)
     @project = projects(:one)
     @user = users(:one)
@@ -98,7 +99,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'should get correct report' do
-    get "/samples/#{@sample.id}/report_info"
+    get "/samples/#{@sample.id}/report_info&background_id=#{@background}"
     json_response = JSON.parse(response.body)
     assert_equal json_response["taxonomy_details"][2][0]["NT"]["r"], 209.0
     assert_equal json_response["taxonomy_details"][2][0]["NT"]["rpm"], "186274.5"
