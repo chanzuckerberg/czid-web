@@ -635,7 +635,7 @@ class ProjectVisualization extends React.Component {
       }
     }
 
-    return Object.values(taxons);
+    return Object.values(taxons).sort();
   }
 
   getColumnLabel (column_index) {
