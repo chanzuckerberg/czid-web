@@ -13,7 +13,7 @@ class ReportFilter extends React.Component {
   constructor(props) {
     super(props);
     this.sample_id = props.sample_id;
-    this.background_model = props.background_model || 'N/A';
+    this.default_background = props.default_background || 'N/A';
     this.backgroundModels = props.all_backgrounds || [];
     this.all_categories = props.all_categories || [];
     this.applyExcludedCategories = this.applyExcludedCategories.bind(this);
@@ -29,8 +29,8 @@ class ReportFilter extends React.Component {
       searchKey: '',
       searchId: 0,
       excluded_categories: (cached_cats) ? JSON.parse(cached_cats) : [] ,
-      backgroundName: Cookies.get('background_name') || this.background_model.name ,
-      backgroundParams: Cookies.get('background_id') || this.background_model.id,
+      backgroundName: Cookies.get('background_name') || this.default_background.name ,
+      backgroundParams: Cookies.get('background_id') || this.default_background.id,
       name_type: Cookies.get('name_type') || 'scientific',
       search_items: props.search_keys_in_sample
     };
