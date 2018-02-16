@@ -1,2 +1,6 @@
 one:
   name: host genome 1
+
+two:
+  name: Human
+  default_background_id: 1

@@ -102,6 +102,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     post user_session_path, params: @user_params
     get "/samples/#{@sample.id}/report_info?background_id=#{@background.id}"
     json_response = JSON.parse(response.body)
+    puts json_response
     assert_equal 209.0, json_response["taxonomy_details"][2][0]["NT"]["r"]
     assert_equal "186274.5", json_response["taxonomy_details"][2][0]["NT"]["rpm"]
     assert_equal 99.0, json_response["taxonomy_details"][2][0]["NT"]["zscore"]

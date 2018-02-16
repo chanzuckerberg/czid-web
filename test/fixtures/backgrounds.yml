@@ -9,5 +9,6 @@ two:
   pipeline_runs: [three, four]
 
 three:
+  id: 1
   name: "NID human CSF"
   pipeline_runs: [three, four]

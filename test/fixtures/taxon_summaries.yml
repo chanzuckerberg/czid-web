@@ -12,3 +12,17 @@ two:
   tax_level: 1
   mean: 9.35068
   stdev: 26.4471
+three:
+  background: three
+  tax_id: 570
+  count_type: "NR"
+  tax_level: 2
+  mean: 35.0207
+  stdev: 238.639
+four:
+  background: three
+  tax_id: 570
+  count_type: "NT"
+  tax_level: 2
+  mean: 18.3311
+  stdev: 64.2056
