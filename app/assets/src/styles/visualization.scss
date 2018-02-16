@@ -1,94 +1,123 @@
-#visualization-sidebar {
-  .select-pathogens {
-    background: #fff;
-    .loading-pathogens {
-      display: none;
-      font-size: 13px;
-      margin-bottom: 7px;
-      padding-bottom: 15px;
-    }
-    .select-focus {
-      padding: 10px;
-    }
-    .search-pathogen {
-      border-bottom: 3px solid #414366;
-      font-weight: bolder;
-      font-size: 17px;
-      .search-row {
-        margin-bottom: 0;
-        input {
-          margin: 0;
-          border: 0;
-          &:focus {
-            border: 0;
-            box-shadow: inherit;
-          }
-        }
-        .add-pathogen-icon {
-          padding: 5px;
-          margin-top: 9px;
-          font-size: 20px;
-          color: #6c6f84;
-        }
-      }
-    }
-    .selected-pathogens {
-      .checked-pathogens {
-        div {
-          display: inline-block;
-          &.pathogen-label {
-            width: 80%;
-          }
-        }
-      }
-      .title {
-        padding: 15px 23px 0;
-        font-size: 16px;
-        small {
-          margin-left: 10px;
-          font-weight: bold
-        }
-      }
-      .pagination-controls {
-        div {
-          display: inline-block;
-          padding: 15px 20px 0px 20px;
-        }
-      }
-      ul li {
-        padding: 6px 20px;
-        [type="checkbox"] + label {
-          line-height: 20px;
-        }
+#project-visualization {
+  select {
+    display: block;
+  }
+  .sub-menu {
+    padding-bottom: 20px;
+  }
+}
+.D3Heatmap {
+	.node circle {
+		fill: #fff;
+		stroke: steelblue;
+		stroke-width: 1.5px;
+	}
+		
+	.node {
+		font: 10px sans-serif;
+	}
+	.link {
+		padding: 5px;
+		fill: #fff;
+		stroke: rgb(220, 221, 224);
+		stroke-width: 1px;
+		&.link-hover {
+			stroke: rgb(82,131,211);
+		}
+	}
 
-        [type="checkbox"]:checked + label:after {
-          border-color: #565886;
-          background-color: #565886;
-        }
+  svg {
+    display: block;
+    margin: 0 auto;
+  }
+  /* disable text selection */
+  svg *::selection {
+     background : transparent;
+  }
 
-        .row {
-          margin-bottom: 0;
-        }
-        div {
-          &.pathogen-label {
-            &.samples {
-              font-size: 13px;
-              div {
-                text-overflow: ellipsis;
-                overflow: hidden;
-              }
-            }
-            &.selectable {
-              cursor: pointer;
-            }
-            .selected {
-              color: #cccccc;
-            }
-          }
-          &.remove-icon {
-            padding: 4px;
-            margin-top: -4px;
-          }
+  svg *::-moz-selection {
+     background:transparent;
+  }
+
+  svg *::-webkit-selection {
+     background:transparent;
+  }
+  rect.selection {
+    stroke          : #333;
+    stroke-dasharray: 4px;
+    stroke-opacity  : 0.5;
+    fill            : transparent;
+  }
+  &.highlighting .cell {
+    opacity: 0.05;
+    &.highlight {
+      opacity: 1;
+    }
+  }
+
+  rect.cell-border {
+    stroke: #ddd;
+    stroke-width:0.25px;
+  }
+
+  rect.cell-selected {
+    stroke: rgb(51,102,153);
+    stroke-width:0.5px;
+  }
+
+  rect.cell-hover {
+    stroke: #F00;
+    stroke-width:0.25px;
+    cursor: pointer;
+  }
+
+  text.mono {
+    font-size: 9pt;
+    fill: #aaa;
+  }
+
+  text.text-selected {
+    fill: #000;
+  }
+  text.text-hover, text.text-highlight {
+		fill: rgb(82,131,211);
+  }
+  .heatmap-tooltip {
+    position: absolute;
+    min-width: 200px;
+    height: auto;
+    padding: 10px;
+    background-color: rgba(255,255,255, 0.95);
+    border-radius: 5px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    pointer-events: none;
+  }
+
+  #tooltip.hidden {
+    display: none;
+  }
+
+  #tooltip p {
+    margin: 0;
+    font-size: 10px;
+    line-height: 20px;
+  }
+
+  .heatmap-tooltips {
+    max-width: 300px;
+    font-size: 0.9rem;
+    ul {
+      margin: 0.5em 0 0 0;
+      padding: 0;
+      list-style: none;
+      li {
+        margin: 0; 
+        padding: 0;
+        font-size: 0.9em;
+        label {
+          display: inline-block;
+          width: 70px;
+          font-weight: 600;
         }
       }
     }

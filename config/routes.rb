@@ -24,11 +24,11 @@ Rails.application.routes.draw do
     post :save_metadata, on: :member
     get :samples_taxons, on: :collection
     get :top_taxons, on: :collection
+    get :heatmap, on: :collection
   end
   get 'samples/:id/fasta/:tax_level/:taxid/:hit_type', to: 'samples#show_taxid_fasta'
 
   resources :projects do
-    get :visuals, on: :member
     get :make_project_reports_csv, on: :member
     get :project_reports_csv_status, on: :member
     get :send_project_reports_csv, on: :member
