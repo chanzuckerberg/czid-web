@@ -208,7 +208,6 @@ class Samples extends React.Component {
   startReportGeneration() {
     Samples.showLoading('Downloading reports...');
     axios.get(`/projects/${this.state.selectedProjectId}/make_project_reports_csv`).then((res) => {
-      Samples.hideLoader();
       this.setState({
         project_id_download_in_progress: this.state.selectedProjectId
       });
