@@ -6,7 +6,7 @@
         userDetails: JSON.parse('<%=raw escape_json(current_user)%>'),
         user_auth_token: '<%= current_user.authentication_token %>',
         demoUser: <%= current_user.demo_user? ? 1: 0 %>,
-        host_genome_names: JSON.parse('<%= raw escape_json(HostGenome.all.map(&:name).reject {|n| n.downcase.include?("test")}) %>'),
+        host_genome_names: JSON.parse('<%= raw escape_json(HostGenome.all.map(&:name).reject {|n| n.downcase.include?("__test__")}) %>'),
         signoutEndpoint: '<%=destroy_user_session_path%>',
         signInEndpoint: '<%=new_user_session_path%>' }, 'page_header')
     <% end %>
