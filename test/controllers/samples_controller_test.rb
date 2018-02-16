@@ -102,13 +102,25 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     post user_session_path, params: @user_params
     get "/samples/#{samples(:six).id}/report_info?background_id=#{@background.id}"
     json_response = JSON.parse(response.body)
-    puts json_response
-    assert_equal 209.0, json_response["taxonomy_details"][2][0]["NT"]["r"]
-    assert_equal "186274.5", json_response["taxonomy_details"][2][0]["NT"]["rpm"]
-    assert_equal 99.0, json_response["taxonomy_details"][2][0]["NT"]["zscore"]
-    assert_equal 69.0, json_response["taxonomy_details"][2][0]["NR"]["r"]
-    assert_equal "61497.3", json_response["taxonomy_details"][2][0]["NR"]["rpm"]
-    assert_equal 99.0, json_response["taxonomy_details"][2][0]["NR"]["zscore"]
+    species_result = json_response["taxonomy_details"][2].select { |entry| entry["tax_id"] == 573 }[0]
+    genus_result = json_response["taxonomy_details"][2].select { |entry| entry["tax_id"] == 570 }[0]
+
+    puts species_result
+    puts genus_result
+
+    assert_equal 209.0, species_result["NT"]["r"]
+    assert_equal "186274.5", species_result["NT"]["rpm"]
+    assert_equal 99.0, species_result["NT"]["zscore"]
+    assert_equal 69.0, species_result["NR"]["r"]
+    assert_equal "61497.3", species_result["NR"]["rpm"]
+    assert_equal 99.0, species_result["NR"]["zscore"]
+
+    assert_equal 217.0, genus_result["NT"]["r"]
+    assert_equal "193404.6", genus_result["NT"]["rpm"]
+    assert_equal 99.0, genus_result["NT"]["zscore"]
+    assert_equal 87.0, genus_result["NR"]["r"]
+    assert_equal "77540.1", genus_result["NR"]["rpm"]
+    assert_equal 99.0, genus_result["NR"]["zscore"]
   end
 
   test 'should get edit' do
