@@ -1,0 +1,14 @@
+one:
+  background: three
+  tax_id: 573
+  count_type: "NR"
+  tax_level: 1
+  mean: 29.9171
+  stdev: 236.332
+two:
+  background: three
+  tax_id: 573
+  count_type: "NT"
+  tax_level: 1
+  mean: 9.35068
+  stdev: 26.4471

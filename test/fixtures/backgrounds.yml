@@ -7,3 +7,7 @@ one:
 two:
   name: MyString
   pipeline_runs: [three, four]
+
+three:
+  name: "NID human CSF"
+  pipeline_runs: [three, four]

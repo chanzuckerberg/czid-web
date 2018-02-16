@@ -45,3 +45,21 @@ five:
   genus_total_concordant: 82.0
   family_total_concordant: 162.0
   common_name: ""
+
+six:
+  pipeline_run: six
+  tax_id: 573
+  tax_level: 1
+  count: 209
+  name: "Klebsiella pneumoniae"
+  count_type: "NT"
+  percent_identity: 99.6995
+  alignment_length: 149.402
+  e_value: -89.5641
+  genus_taxid: 570
+  superkingdom_taxid: 2
+  percent_concordant: 98.5646
+  species_total_concordant: 206.0
+  genus_total_concordant: 216.0
+  family_total_concordant: 232.0
+  common_name: ""

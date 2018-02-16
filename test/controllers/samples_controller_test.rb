@@ -97,6 +97,10 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test 'should get correct report' do
+    #get ...
+  end
+
   test 'should get edit' do
     post user_session_path, params: @user_params
     get edit_sample_url(@sample)
