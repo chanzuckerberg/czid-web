@@ -164,7 +164,7 @@ class SamplesController < ApplicationController
 
   def top_taxons
     sample_ids = params[:sample_ids].split(",").map(&:to_i) || []
-    num_results = params[:n] ? params[:n].to_i : 100
+    num_results = params[:n] ? params[:n].to_i : 20
     sort_by = params[:sort_by] || ReportHelper::DEFAULT_SORT_PARAM
     samples = current_power.samples.where(id: sample_ids)
     include_species = params[:species]
@@ -181,7 +181,7 @@ class SamplesController < ApplicationController
 
   def samples_taxons
     sample_ids = params[:sample_ids].to_s.split(",").map(&:to_i) || []
-    num_results = params[:n] ? params[:n].to_i : 100
+    num_results = params[:n] ? params[:n].to_i : 20
     taxon_ids = params[:taxon_ids].to_s.split(",").map(&:to_i) || []
     sort_by = params[:sort_by] || ReportHelper::DEFAULT_SORT_PARAM
     include_species = params[:species]
