@@ -150,13 +150,13 @@ class D3Heatmap extends React.Component {
       bottom: 100,
       right: char_width * longest_row_label
     };
-    this.cellSize = Math.min(900 / this.col_number, 400 / this.row_number);
-    this.cellSize = parseInt(Math.max(this.cellSize, 20), 10);
+    this.cellWidth = Math.max(900 / this.col_number, 20);
+    this.cellHeight = Math.max(400 / this.row_number, 15);
 
-    this.width = this.cellSize * this.col_number + this.margin.left + this.margin.right;
-    this.height = this.cellSize * this.row_number + this.margin.top + this.margin.bottom;
+    this.width = this.cellWidth * this.col_number + this.margin.left + this.margin.right;
+    this.height = this.cellHeight * this.row_number + this.margin.top + this.margin.bottom;
 
-    this.legendElementWidth = this.col_number * this.cellSize / this.colors.length;
+    this.legendElementWidth = this.col_number * this.cellWidth / this.colors.length;
   }
 
   componentDidMount () {
@@ -193,11 +193,11 @@ class D3Heatmap extends React.Component {
       })
       .enter()
       .append("rect")
-      .attr("x", function(d, i) { return d.col * that.cellSize; })
-      .attr("y", function(d) { return d.row * that.cellSize; })
+      .attr("x", function(d, i) { return d.col * that.cellWidth; })
+      .attr("y", function(d) { return d.row * that.cellHeight; })
       .attr("class", function(d){return "cell cell-border cr"+d.row+" cc"+d.col })
-      .attr("width", this.cellSize)
-      .attr("height", this.cellSize)
+      .attr("width", this.cellWidth)
+      .attr("height", this.cellHeight)
       .style("fill", function(d) {
         if (d.value === undefined) {
           return "#f6f6f6";
@@ -230,7 +230,7 @@ class D3Heatmap extends React.Component {
   }
 
   renderDendrogram () {
-		let width = this.cellSize * this.col_number,
+		let width = this.cellWidth * this.col_number,
 				height = this.margin.top - 20;
  
 		var cluster = d3.layout.cluster()
@@ -325,14 +325,14 @@ class D3Heatmap extends React.Component {
         .data([this.min])
         .enter().append("text")
         .attr("x", function (d, i) { return 0; })
-        .attr("y", function (d, i) { return that.cellSize * (that.row_number + 2) - 15; })
+        .attr("y", function (d, i) { return that.cellHeight * (that.row_number + 2) - 15; })
         .text(Math.round(this.min));
     
     this.svg.selectAll(".legend-text-max")
         .data([this.max])
         .enter().append("text")
         .attr("x", function (d, i) { return that.legendElementWidth * that.colors.length; })
-        .attr("y", function (d, i) { return that.cellSize * (that.row_number + 2) - 15; })
+        .attr("y", function (d, i) { return that.cellHeight * (that.row_number + 2) - 15; })
         .text(Math.round(this.max))
         .style("text-anchor", "end");
 
@@ -343,7 +343,7 @@ class D3Heatmap extends React.Component {
 
     legend.append("rect")
       .attr("x", function(d, i) { return that.legendElementWidth * i; })
-      .attr("y", this.cellSize * (this.row_number + 1))
+      .attr("y", this.cellHeight * (this.row_number + 1))
       .attr("width", this.legendElementWidth)
       .attr("height", height)
       .style("fill", function(d, i) { return that.colors[i]; });
@@ -353,7 +353,7 @@ class D3Heatmap extends React.Component {
         .attr("stroke-width", "0.25")
         .style("fill", "none")
         .attr("x", 0)
-        .attr("y", that.cellSize * (that.row_number + 1)) 
+        .attr("y", that.cellHeight * (that.row_number + 1)) 
         .attr("width", that.legendElementWidth * that.colors.length)  
         .attr("height", height);    
   }
@@ -367,11 +367,11 @@ class D3Heatmap extends React.Component {
         .enter()
         .append("text")
         .text(function (d) { return d; })
-        .attr("x", this.cellSize * this.col_number)
+        .attr("x", this.cellWidth * this.col_number)
         .attr("y", function (d, i) {
-          return i * that.cellSize;
+          return i * that.cellHeight;
         })
-        .attr("transform", "translate(8," + this.cellSize / 1.5 + ")")
+        .attr("transform", "translate(8," + this.cellHeight / 1.5 + ")")
         .attr("class", function (d,i) {
           return "rowLabel mono r"+i;}
         )
@@ -396,14 +396,14 @@ class D3Heatmap extends React.Component {
       .enter()
       .append("g")
       .attr("transform", function (d, i) {
-        return "translate(" + that.cellSize * i + ",-6)"
+        return "translate(" + that.cellWidth * i + ",-6)"
       })
       .append("text")
       .text(function (d) { return d; })
       .attr("x", 0)
       .attr("y", 0)
       .style("text-anchor", "left")
-      .attr("transform", "translate("+this.cellSize/2 + ",-6) rotate (-45)")
+      .attr("transform", "translate("+this.cellWidth/2 + ",-6) rotate (-45)")
       .attr("class",  function (d,i) { return "colLabel mono c"+i;} )
       .on("mouseover", function(d) {d3.select(this).classed("text-hover",true);})
       .on("mouseout" , function(d) {d3.select(this).classed("text-hover",false);})
@@ -424,18 +424,18 @@ class D3Heatmap extends React.Component {
     if (rORc=="r") { // sort log2ratio of a gene
      sorted=d3.range(that.col_number).sort(function(a,b){ if(sortOrder){ return log2r[b]-log2r[a];}else{ return log2r[a]-log2r[b];}});
      t.selectAll(".cell")
-       .attr("x", function(d) { return sorted.indexOf(d.col) * that.cellSize; })
+       .attr("x", function(d) { return sorted.indexOf(d.col) * that.cellWidth; })
        ;
      t.selectAll(".colLabel")
-      .attr("y", function (d, i) { return sorted.indexOf(i) * that.cellSize; })
+      .attr("y", function (d, i) { return sorted.indexOf(i) * that.cellHeight; })
      ;
     }else{ // sort log2ratio of a contrast
      sorted=d3.range(that.row_number).sort(function(a,b){if(sortOrder){ return log2r[b]-log2r[a];}else{ return log2r[a]-log2r[b];}});
      t.selectAll(".cell")
-       .attr("y", function(d) { return sorted.indexOf(d.row) * that.cellSize; })
+       .attr("y", function(d) { return sorted.indexOf(d.row) * that.cellHeight; })
        ;
      t.selectAll(".rowLabel")
-      .attr("y", function (d, i) { return sorted.indexOf(i) * that.cellSize; })
+      .attr("y", function (d, i) { return sorted.indexOf(i) * that.cellHeight; })
      ;
     }
   }
