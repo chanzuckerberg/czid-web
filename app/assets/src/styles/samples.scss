@@ -471,6 +471,7 @@ $break-large: 1070px;
     }
   }
   .download-table {
+    float: right;
     padding-right: 10px;
     .download-project {
       cursor: pointer;
@@ -486,6 +487,15 @@ $break-large: 1070px;
         border: 1px solid #adadad;
         background: #f1f0f0;
       }
+    }
+
+    .compare {
+      cursor: pointer;
+      padding: 11px;
+      display: block;
+      background: #edf8ff;
+      border: 1px solid #d9d9d9;
+      color:  rgb(3, 169, 244) !important;
     }
     .download-progress {
       cursor: pointer;
@@ -542,6 +552,14 @@ $break-large: 1070px;
         flex-direction: row;
         flex-wrap: nowrap;
         justify-content: space-between;
+        .check-box-container {
+          .check {
+            display: inline-block
+          }
+        }
+        .sample-name-info {
+          display: inline-block;
+        }
         li {
           flex: 1;
           overflow: hidden;
@@ -696,11 +714,12 @@ $break-large: 1070px;
     margin: 20px 0 5px;
     border-radius: 3px;
     .check-all {
+      display: inline-block;
+      float: left;
       border: 1px solid #ddd;
-      padding: 8px 15px;
+      padding: 9px 12px;
       label {
         vertical-align: middle;
-        margin-left: 10px;
       }
     }
     .search-field {

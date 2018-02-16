@@ -43,6 +43,7 @@ class Samples extends React.Component {
     this.updateUserDisplay = this.updateUserDisplay.bind(this);
     this.resetForm = this.resetForm.bind(this);
     this.selectSample = this.selectSample.bind(this);
+    this.compareSamples = this.compareSamples.bind(this);
     this.state = {
       invite_status: null,
       project: null,
@@ -382,36 +383,35 @@ class Samples extends React.Component {
         notes: dbSample && dbSample.sample_notes ? dbSample.sample_notes : BLANK_TEXT };
 
       return (
-        <a className='col s12 no-padding sample-feed' key={i}>
+        <a className='col s12 no-padding sample-feed' key={i} >
           <div>
             <div className='samples-card white'>
               <div className='flex-container'>
                 <ul className='flex-items'>
                   <li className='check-box-container'>
-                      <input type="checkbox" id={i}
-                        className="filled-in checkbox" value={ this.state.selectedSampleIndices.indexOf(i) < 0? 0:1 }
-                        onChange = { this.selectSample }  
-                        />
-                      <label htmlFor={i}>
-                  <span className='sample-name-info'>
-                    <div className='card-label top-label'>
-                      {/*<span className='project-name'>*/}
-                      {/*Mosquito*/}
-                      {/*</span>*/}
-                      <span className='upload-date'>
-                        Uploaded {moment(dbSample.created_at).startOf('second').fromNow()}
+                    <input type="checkbox" id={i}
+                      className="filled-in checkbox" value={ this.state.selectedSampleIndices.indexOf(i) != -1 }
+                      onChange = { this.selectSample }  
+                      />
+                    <label htmlFor={i}>
+                      <span className='sample-name-info'>
+                        <div className='card-label top-label'>
+                          {/*<span className='project-name'>*/}
+                          {/*Mosquito*/}
+                          {/*</span>*/}
+                          <span className='upload-date'>
+                              Uploaded {moment(dbSample.created_at).startOf('second').fromNow()}
+                            </span>
+                        </div>
+                        <div className='card-label center-label sample-name'>
+                          {dbSample.name}
+                        </div>
+                        <div className='card-label author bottom-label author'>
+                          { !uploader || uploader === '' ? '' : <span>Uploaded by: {uploader}</span>}
+                        </div>
                       </span>
-                    </div>
-                    <div className='card-label center-label sample-name'>
-                      {dbSample.name}
-                    </div>
-                    <div className='card-label author bottom-label author'>
-                      { !uploader || uploader === '' ? '' : <span>Uploaded by: {uploader}</span>}
-                    </div>
-                  </span>
-                      </label>
-                    </li>
-                  
+                    </label>
+                  </li>
                   {
                     this.state.columnsShown.map((column, pos) => {
                       let column_data = '';
@@ -481,7 +481,7 @@ class Samples extends React.Component {
         displayEmpty: false,
         pagesLoaded: prevState.pagesLoaded+1,
         totalNumber: res.data.total_count,
-        pageEnd: res.data.samples.length >= this.pageSize ? false : true,
+        pageEnd: res.data.samples.length < this.pageSize
       }));
       if (!this.state.allSamples.length) {
         this.setState({ displayEmpty: true });
@@ -511,7 +511,7 @@ class Samples extends React.Component {
         isRequesting: false,
         allSamples: [...prevState.allSamples, ...res.data.samples],
         pagesLoaded: prevState.pagesLoaded+1,
-        pageEnd: res.data.samples.length >= this.pageSize ? false : true
+        pageEnd: res.data.samples.length < this.pageSize
       }))
     }).catch((err) => {
       this.setState((prevState) => ({
@@ -550,7 +550,7 @@ class Samples extends React.Component {
         displayEmpty: false,
         totalNumber: res.data.total_count,
         pagesLoaded: prevState.pagesLoaded+1,
-        pageEnd: res.data.samples.length >= this.pageSize ? false : true,
+        pageEnd: res.data.samples.length < this.pageSize
       }));
       if (!this.state.allSamples.length) {
         this.setState({ displayEmpty: true });
@@ -656,7 +656,7 @@ class Samples extends React.Component {
   }
 
   viewSample(id) {
-    _satellite.track('viewsample')
+    // _satellite.track('viewsample')
     location.href = `/samples/${id}`;
   }
 
@@ -725,7 +725,6 @@ class Samples extends React.Component {
     // select all checkboxes
     var that = this;
     $('.checkAll').click(function(e) {
-      console.log('got clicked all', e.currentTarget.checked)
       var checked = e.currentTarget.checked;
       $('.checkbox').prop('checked', checked);
       that.setState({
@@ -753,7 +752,19 @@ class Samples extends React.Component {
     });
   }
 
+  compareSamples() {
+    let params;
+    if(this.state.allChecked) {
+      this.fetchAllSelectedIds(this.state.allChecked);
+    } 
+    if(this.state.selectedSampleIndices.length) {
+      let sampleParams = this.state.selectedSampleIndices;
+      location.href = `/samples/heatmap?sample_ids=${sampleParams}`
+    }
+  }
+
   selectSample(e) {
+    e.stopPropagation();
     $(".checkAll").prop('checked', false);
     this.setState({
       allChecked: false
@@ -786,7 +797,7 @@ class Samples extends React.Component {
 
   renderTable(samples) {
     let project_id = this.state.selectedProjectId ? this.state.selectedProjectId : 'all'
-    let search_field_width = (project_id === 'all') ? 'col s9' : 'col s7'
+    let search_field_width = (project_id === 'all') ? 'col s4' : 'col s2'
     let search_field = (
       <div className={search_field_width + ' search-field'}>
         <div className='row'>
@@ -796,7 +807,7 @@ class Samples extends React.Component {
             onChange={this.handleSearchChange}
             onKeyDown={this.handleSearch}
             className="search col s12"
-            placeholder='Search for sample'/>
+            placeholder='Search'/>
         </div>
       </div>
     );
@@ -810,6 +821,28 @@ class Samples extends React.Component {
         </div>
       </div>
     );
+
+    let check_all = (
+      <div className="check-all">
+          <input type="checkbox"
+            id="checkAll"
+            className="filled-in checkAll"
+            />
+          <label htmlFor="checkAll"></label>
+          <i className="fa fa-caret-down"></i>    
+      </div>
+    );
+
+    let compare_button = (
+      <div className='col s2 download-table'>
+        <div className='white'>
+          <a onClick={this.compareSamples} className="compare center">
+            <span>Compare</span>
+          </a>
+        </div>
+      </div>
+    )
+
     const reports_download_button_contents = this.state.project_id_download_in_progress ?
       <span className='download-progress'/>
       : <a onClick={this.startReportGeneration} className="download-project center">
@@ -823,21 +856,13 @@ class Samples extends React.Component {
         </div>
       </div>
     );
-    const check_all = (
-      <div className="col s1 check-all">
-          <input type="checkbox"
-            id="checkAll"
-            className="filled-in checkAll"
-            />
-          <label htmlFor="checkAll"></label>
-          <i className="fa fa-angle-down"></i>    
-      </div>
-    );
+
     const search_box = (
       <div className="row search-box">
         { check_all }
         { search_field }
         { table_download_button }
+        { compare_button }
         { project_id === 'all' ? null : reports_download_button }
       </div>
     );
