@@ -48,10 +48,6 @@
     stroke-opacity  : 0.5;
     fill            : transparent;
   }
-  .cell {
-    transition: opacity 0.25s;
-    opacity: 1;
-  }
   &.highlighting .cell {
     opacity: 0.05;
     &.highlight {
