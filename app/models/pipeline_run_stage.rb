@@ -72,6 +72,10 @@ class PipelineRunStage < ApplicationRecord
     failed? || succeeded?
   end
 
+  def checked?
+    job_status == STATUS_CHECKED
+  end
+
   def output_ready?
     s3_output_list = send(output_func)
     s3_output_list.each do |out_f|
@@ -127,7 +131,7 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def update_job_status
-    return if completed?
+    return if completed? || checked?
     return unless due_for_aegea_check? || output_ready?
     skip_save = false
     stdout, stderr, status = Open3.capture3("aegea", "batch", "describe", job_id.to_s)
