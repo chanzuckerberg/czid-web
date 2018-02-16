@@ -965,9 +965,8 @@ class Samples extends React.Component {
         { this.state.displaySelectSamplees ? check_all : null }
         { search_field }
         { metaDataFilter  }
-        { table_download_button }
+        { table_download_dropdown }
          { this.state.checkedBoxes > 0  ? compare_button : null }
-        { project_id === 'all' ? null : reports_download_button }
       </div>
     );
 
