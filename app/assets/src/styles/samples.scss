@@ -460,14 +460,31 @@ $break-large: 1070px;
 
 .sample-container {
   .metadata {
+    position: relative;    
+    .metadata-dropdown {
+      display: inline-block;
+    }
+    i {
+      float: right;
+      vertical-align: middle;
+      padding-top: 4px;
+    }
     cursor:pointer;
     padding: 11px;
     border: 1px solid #cfd9e4;
-    .dropdown-content {
-      width:700px !important; 
+    .metadata-options {
+      margin-top: 12px;
+      padding: 15px;
+      width: 500px!important;
+      position: absolute;
+      background-color: #f9f9f9;
+      z-index: 1;
+      border-radius: 3px;
+      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+      height: 300px;
+      overflow: scroll;
       .col.s6 {
         .options-wrapper {
-          // margin: 10px;
           label {
             margin: 10px 0;
           }
