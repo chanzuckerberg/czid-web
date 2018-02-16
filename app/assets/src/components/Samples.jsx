@@ -856,7 +856,6 @@ class Samples extends React.Component {
         </div>
       </div>
     );
-
     const search_box = (
       <div className="row search-box">
         { check_all }
