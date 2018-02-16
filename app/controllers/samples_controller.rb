@@ -151,14 +151,16 @@ class SamplesController < ApplicationController
     @git_version = ENV['GIT_VERSION'] || ""
     @git_version = Time.current.to_i if @git_version.blank?
 
-    default_background_id = @sample.host_genome && @sample.host_genome.default_background ? @sample.host_genome.default_background.id : nil
     if @pipeline_run && (@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?
-      background_id = params[:background_id] || default_background_id
+      background_id = params[:background_id] || @sample.default_background_id
+      # Here background_id is only used to decide whether a report can be shown.
+      # No report/background-specific data is actually being shown.
+      # Background selection is used in report_info action, which fetches the actual report data.
       if background_id
         @report_present = 1
         @report_ts = @pipeline_run.updated_at.to_i
         @all_categories = all_categories
-        @report_details = report_details(@pipeline_run, Background.find(background_id))
+        @report_details = report_details(@pipeline_run)
         @report_page_params = clean_params(params, @all_categories)
       end
     end
@@ -215,10 +217,8 @@ class SamplesController < ApplicationController
     ## Duct tape for changing background id dynamically
     ## TODO(yf): clean the following up.
     ####################################################
-    background_id = nil
-    default_background_id = @sample.host_genome && @sample.host_genome.default_background ? @sample.host_genome.default_background.id : nil
     if @pipeline_run && (@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?
-      background_id = params[:background_id] || default_background_id
+      background_id = params[:background_id] || @sample.default_background_id
       pipeline_run_id = @pipeline_run.id
     end
 

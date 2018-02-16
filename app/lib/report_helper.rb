@@ -176,13 +176,13 @@ module ReportHelper
     data
   end
 
-  def report_details(pipeline_run, background)
+  def report_details(pipeline_run, _background = nil)
+    # Provides some auxiliary information on pipeline_run.
+    # Not actually anything to do with report-specific data and does not use _background argument.
     {
       pipeline_info: pipeline_run,
       subsampled_reads: pipeline_run.subsampled_reads,
       sample_info: pipeline_run.sample,
-      project_info: pipeline_run.sample.project,
-      background_model: background,
       taxon_fasta_flag: pipeline_run.finalized?
     }
   end
@@ -827,8 +827,7 @@ module ReportHelper
   def report_csv_from_params(sample, params)
     params[:is_csv] = 1
     params[:sort_by] = "highest_nt_aggregatescore"
-    default_background_id = sample.host_genome && sample.host_genome.default_background ? sample.host_genome.default_background.id : nil
-    background_id = params[:background_id] || default_background_id
+    background_id = params[:background_id] || sample.default_background_id
     pipeline_run = sample.pipeline_runs.first
     pipeline_run_id = pipeline_run ? pipeline_run.id : nil
     return "" if pipeline_run_id.nil? || pipeline_run.total_reads.nil?
