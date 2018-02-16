@@ -626,17 +626,30 @@ class ProjectVisualization extends React.Component {
   }
 
   extractTaxons (data) {
-    let taxons = {};
+    let taxon_scores = {};
     for (var i = 0, len = data.length; i < len; i += 1) {
       let sample = data[i];
 
       for (var j = 0; j < sample.taxons.length; j+= 1) {
         let taxon = sample.taxons[j];
-        taxons[taxon.tax_id] = taxon.name;
+        if (taxon_scores[taxon.name] === undefined) {
+          taxon_scores[taxon.name] = 0;
+        }
+        taxon_scores[taxon.name] += Math.abs(taxon.NT.aggregatescore);
       }
     }
-
-    return Object.values(taxons).sort();
+    let arr = [];
+    for(let key of Object.keys(taxon_scores)) {
+      arr.push([taxon_scores[key], key]);
+    }
+    let ret = [];
+    arr.sort(function (a, b) {
+      return b[0] - a[0];
+    });
+    for(let pair of arr) {
+      ret.push(pair[1]);
+    }
+    return ret;
   }
 
   getColumnLabel (column_index) {
@@ -680,7 +693,7 @@ class ProjectVisualization extends React.Component {
   }
 
   renderLoading () {
-    return (<p className="loading-indicator">Loading...</p>);
+    return (<p className="loading-indicator text-center">Loading...</p>);
   }
   
   onCellClick (d) {
