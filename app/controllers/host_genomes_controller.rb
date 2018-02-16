@@ -71,7 +71,7 @@ class HostGenomesController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def host_genome_params
-    params.require(:host_genome).permit(:name, :sample_memory, :job_queue, :s3_star_index_path,
+    params.require(:host_genome).permit(:name, :sample_memory, :s3_star_index_path,
                                         :s3_bowtie2_index_path, :default_background_id)
   end
 end

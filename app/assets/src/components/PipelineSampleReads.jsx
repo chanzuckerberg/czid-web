@@ -12,6 +12,7 @@ class PipelineSampleReads extends React.Component {
     super(props);
     this.can_edit = props.can_edit
     this.csrf = props.csrf;
+    this.gitVersion = props.gitVersion
     this.allBackgrounds = props.all_backgrounds;
     this.rerunPath = props.rerun_path;
     this.sampleInfo = props.sampleInfo;
@@ -257,6 +258,7 @@ class PipelineSampleReads extends React.Component {
       d_report = <PipelineSampleReport
         sample_id = {this.sampleId}
         report_ts = {this.reportTime}
+        git_version = {this.gitVersion}
         all_categories = {this.allCategories}
         all_backgrounds = {this.allBackgrounds}
         report_details = {this.reportDetails}
@@ -400,13 +402,23 @@ class PipelineSampleReads extends React.Component {
     sample_dropdown = <span>{ this.sampleInfo.name }</span>
     }
 
+    let version_display = !this.pipelineRun ? '' :
+                            !this.pipelineRun.version ? '' :
+                              !this.pipelineRun.version.pipeline ? '' :
+                                'v' + this.pipelineRun.version.pipeline
+    if (version_display != '' && this.pipelineRun.version.nt) {
+      version_display = version_display + ', NT v' + this.pipelineRun.version.nt
+    }
+    if (version_display != '' && this.pipelineRun.version.nr) {
+      version_display = version_display + ', NR v' + this.pipelineRun.version.nr
+    }
 
     return (
       <div>
         <SubHeader>
           <div className="sub-header">
             <div className="title">
-              PIPELINE
+              PIPELINE {version_display}
             </div>
 
             <div className="sub-title">

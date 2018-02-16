@@ -6,6 +6,7 @@ import SampleUpload from './SampleUpload';
 class Header extends React.Component  {
   constructor(props, context) {
     super(props, context);
+    this.demoUser = this.props.demoUser;
     this.userSignedIn = this.props.userSignedIn;
     this.userDetails = this.props.userDetails || null;
     this.location = window.location.pathname;
@@ -55,7 +56,7 @@ class Header extends React.Component  {
 
   render() {
     let host_genome_names = this.host_genome_names;
-    let cli_modal = (
+    let cli_modal = this.demoUser != 1 ? (
       <div id="cli_modal" className="modal project-popup">
         <div className="modal-content">
           <p>1. Install and configure the Amazon Web Services Command Line Interface (AWS CLI).</p>
@@ -74,12 +75,12 @@ class Header extends React.Component  {
           <p>By default, the host genome to be subtracted out is "Human".<br/>
              You can change it by adding <span className="code">--host_genome_name <span className="code-to-edit">'Your Chosen Host'</span></span> to the command.<br/>
              Current possibilities for <span className="code-to-edit">'Your Chosen Host'</span>:<br/>
-             {host_genome_names.map((hgn, i) => <span className="code-personal" key={i}>'{hgn}'</span>).reduce((prev, curr) => [prev, ' / ', curr])}).</p>
+             {host_genome_names.map((hgn, i) => <span className="code-personal" key={i}>'{hgn}'</span>).reduce((prev, curr) => [prev, ' / ', curr])}.</p>
           <p className='upload-question'>For more information on the IDseq CLI, have a look at its <a href='https://github.com/chanzuckerberg/idseq-web/blob/master/README.md' target='_blank'>GitHub repository</a>.</p>
           <button className='modal-close'>Done</button>
         </div>
       </div>
-    );
+    ):null;
     return (
       <div className='header-row row'>
         <div className="page-loading">
@@ -91,8 +92,8 @@ class Header extends React.Component  {
         <div className="site-header col s12">
           {/* Dropdown menu */}
           <ul id="dropdown1" className="dropdown-content">
-            <li onClick={ this.gotoPage.bind(this, '/samples/new') }><a href="#!">New sample</a></li>
-            <li><a onClick={ this.openCliModal } href="#!">New sample (command line)</a></li>
+            { this.demoUser != 1 ?  <li onClick={ this.gotoPage.bind(this, '/samples/new') }><a href="#!">New sample</a></li> : null }
+            { this.demoUser != 1 ? <li><a onClick={ this.openCliModal } href="#!">New sample (command line)</a></li> : null }
             { this.userDetails && this.userDetails.admin ? <li onClick={ this.gotoPage.bind(this, '/users/new') }><a href="#!">Create user</a></li> : null }
             <li onClick={ this.sendMail }><a href="#!">Report Feedback</a></li>
             <li className="divider"></li>

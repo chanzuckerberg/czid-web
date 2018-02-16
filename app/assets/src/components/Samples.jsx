@@ -11,6 +11,7 @@ import ProjectSelection from './ProjectSelection';
 import ReportFilter from './ReportFilter';
 import PipelineSampleReads from './PipelineSampleReads';
 import StringHelper from '../helpers/StringHelper';
+import StickySidebar from './StickySidebar';
 
 class Samples extends React.Component {
   constructor(props, context) {
@@ -229,7 +230,6 @@ class Samples extends React.Component {
         this.updateProjectUserState(res.data.emails)
       }).catch((error) => {
         this.updateProjectUserState([])
-        // console.log(error.response.data)
       });
     }
   }
@@ -1031,9 +1031,11 @@ class Samples extends React.Component {
 
   componentDidMount() {
     $(() => {
+      const win = $(window);
       const samplesHeader = $('.sample-table-container');
-      $(window).scroll(() => {
-        if ($(window).scrollTop() > samplesHeader.offset().top) {
+      win.scroll(() => {
+        let scrollTop = $(window).scrollTop();
+        if (scrollTop > samplesHeader.offset().top) {
           samplesHeader.addClass('shadow');
         } else {
           samplesHeader.removeClass('shadow');
@@ -1136,15 +1138,15 @@ class Samples extends React.Component {
       />;
 
     return (
-      <div>
-          <div className="row content-body">
-            <div className="col s2 no-padding sidebar">
-              { project_section }
-            </div>
-             <div className="col no-padding samples-content s10">
-              { this.renderTable(this.state.allSamples) }
-            </div>
-          </div>
+      <div className="row content-body">
+        <div className='col no-padding s2 sidebar'>
+          <StickySidebar>
+            { project_section }
+          </StickySidebar>
+        </div>
+        <div className="col no-padding samples-content s10">
+          { this.renderTable(this.state.allSamples) }
+        </div>
       </div>
     )
   }

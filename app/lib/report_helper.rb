@@ -24,12 +24,12 @@ module ReportHelper
 
   DECIMALS = 1
 
-  DEFAULT_SORT_PARAM = 'highest_nt_aggregatescore'.freeze
+  DEFAULT_SORT_PARAM = 'highest_nt_maxzscore'.freeze
   DEFAULT_PARAMS = { sort_by: DEFAULT_SORT_PARAM }.freeze
 
   IGNORED_PARAMS = [:controller, :action, :id].freeze
 
-  IGNORE_IN_DOWNLOAD = [[:species_count], [:NT, :count_type], [:NR, :count_type]].freeze
+  IGNORE_IN_DOWNLOAD = [[:species_count], [:NT, :count_type], [:NR, :count_type], [:NR, :aggregatescore]].freeze
 
   SORT_DIRECTIONS = %w[highest lowest].freeze
   # We do not allow underscores in metric names, sorry!
@@ -176,13 +176,14 @@ module ReportHelper
     data
   end
 
-  def report_details(pipeline_run, background)
+  def report_details(pipeline_run)
+    # Provides some auxiliary information on pipeline_run, including default background for sample.
+    # No report-specific scores though.
     {
       pipeline_info: pipeline_run,
       subsampled_reads: pipeline_run.subsampled_reads,
       sample_info: pipeline_run.sample,
-      project_info: pipeline_run.sample.project,
-      background_model: background,
+      default_background: Background.find(pipeline_run.sample.default_background_id),
       taxon_fasta_flag: pipeline_run.finalized?
     }
   end
@@ -232,9 +233,12 @@ module ReportHelper
     ").to_hash
   end
 
-  def fetch_top_taxons(samples, background_id, _filters = {})
+  def fetch_top_taxons(samples, background_id, include_species)
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
 
+    unless include_species
+      tax_level_str = " AND taxon_counts.tax_level = #{TaxonCount::TAX_LEVEL_GENUS}"
+    end
     sql_results = TaxonCount.connection.select_all("
       SELECT
         taxon_counts.pipeline_run_id     AS  pipeline_run_id,
@@ -265,6 +269,7 @@ module ReportHelper
         pipeline_run_id in (#{pipeline_run_ids.join(',')}) AND
         taxon_counts.count >= #{MINIMUM_READ_THRESHOLD} AND
         taxon_counts.count_type IN ('NT', 'NR')
+        #{tax_level_str}
        ").to_hash
 
     # calculating rpm and zscore, organizing the results by pipeline_run_id
@@ -375,8 +380,8 @@ module ReportHelper
     results
   end
 
-  def top_taxons_details(samples, background_id, num_results, sort_by_key = DEFAULT_SORT_PARAM, filters = {})
-    results_by_pr = fetch_top_taxons(samples, background_id, filters)
+  def top_taxons_details(samples, background_id, num_results, sort_by_key, include_species)
+    results_by_pr = fetch_top_taxons(samples, background_id, include_species)
     sort_by = decode_sort_by(sort_by_key)
     count_type = sort_by[:count_type]
     metric = sort_by[:metric]
@@ -814,6 +819,7 @@ module ReportHelper
     flat_keys_symbols = flat_keys.map { |array_key| array_key.map(&:to_sym) }
     attributes_as_symbols = flat_keys_symbols - IGNORE_IN_DOWNLOAD
     attribute_names = attributes_as_symbols.map { |k| k.map(&:to_s).join("_") }
+    attribute_names = attribute_names.map { |a| a == 'NT_aggregatescore' ? 'aggregatescore' : a }
     CSV.generate(headers: true) do |csv|
       csv << attribute_names
       rows.each do |tax_info|
@@ -827,8 +833,7 @@ module ReportHelper
   def report_csv_from_params(sample, params)
     params[:is_csv] = 1
     params[:sort_by] = "highest_nt_aggregatescore"
-    default_background_id = sample.host_genome && sample.host_genome.default_background ? sample.host_genome.default_background.id : nil
-    background_id = params[:background_id] || default_background_id
+    background_id = params[:background_id] || sample.default_background_id
     pipeline_run = sample.pipeline_runs.first
     pipeline_run_id = pipeline_run ? pipeline_run.id : nil
     return "" if pipeline_run_id.nil? || pipeline_run.total_reads.nil?

@@ -28,6 +28,9 @@ class Sample < ApplicationRecord
   DEFAULT_QUEUE_HIMEM = 'idseq_himem'.freeze
   DEFAULT_VCPUS_HIMEM = 8
 
+  # These zombies keep coming back, so we now expressly fail submissions to them.
+  DEPRECATED_QUEUES = %w[idseq_alpha_stg1 aegea_batch_ondemand idseq_production_high_pri_stg1].freeze
+
   METADATA_FIELDS = [:sample_host, # this has been repurposed to be patient ID (nothing to do with host genome)
                      :sample_location, :sample_date, :sample_tissue,
                      :sample_template, # this refers to nucleotide type (RNA or DNA)
@@ -185,6 +188,14 @@ class Sample < ApplicationRecord
     "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/results"
   end
 
+  def sample_alignment_output_s3_path
+    pr = pipeline_runs.first
+    prs = pr.pipeline_run_stages.first
+    return prs.alignment_output_s3_path
+  rescue
+    return sample_output_s3_path
+  end
+
   def sample_postprocess_s3_path
     "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/postprocess"
   end
@@ -200,11 +211,11 @@ class Sample < ApplicationRecord
   end
 
   def annotated_fasta_s3_path
-    "#{sample_output_s3_path}/#{HIT_FASTA_BASENAME}"
+    "#{sample_alignment_output_s3_path}/#{HIT_FASTA_BASENAME}"
   end
 
   def unidentified_fasta_s3_path
-    "#{sample_output_s3_path}/#{UNIDENTIFIED_FASTA_BASENAME}"
+    "#{sample_alignment_output_s3_path}/#{UNIDENTIFIED_FASTA_BASENAME}"
   end
 
   def sample_annotated_fasta_url
@@ -227,6 +238,10 @@ class Sample < ApplicationRecord
     host_genome.name if host_genome
   end
 
+  def default_background_id
+    host_genome && host_genome.default_background ? host_genome.default_background.id : Background.first.id
+  end
+
   def as_json(_options = {})
     super(methods: [:sample_input_folder_url, :sample_output_folder_url, :sample_annotated_fasta_url, :input_files,
                     :sample_unidentified_fasta_url, :host_genome_name])
@@ -237,7 +252,6 @@ class Sample < ApplicationRecord
       self.s3_star_index_path = host_genome.s3_star_index_path
       self.s3_bowtie2_index_path = host_genome.s3_bowtie2_index_path
       self.sample_memory ||= host_genome.sample_memory
-      self.job_queue = host_genome.job_queue if job_queue.blank?
     end
     s3_preload_result_path ||= ''
     s3_preload_result_path.strip!

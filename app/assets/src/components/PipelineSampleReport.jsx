@@ -13,6 +13,7 @@ class PipelineSampleReport extends React.Component {
     super(props);
     this.report_ts = props.report_ts;
     this.sample_id = props.sample_id;
+    this.gitVersion = props.git_version
 
     this.all_categories = props.all_categories;
     this.report_details = props.report_details;
@@ -69,6 +70,7 @@ class PipelineSampleReport extends React.Component {
     this.sortCompareFunction = this.sortCompareFunction.bind(this);
     this.setSortParams = this.setSortParams.bind(this);
     this.flash = this.flash.bind(this);
+    this.fetchParams = this.fetchParams.bind(this);
 
     this.taxonPassThresholdFilter = this.taxonPassThresholdFilter.bind(this);
     this.expandOrCollapseGenus = this.expandOrCollapseGenus.bind(this);
@@ -101,8 +103,13 @@ class PipelineSampleReport extends React.Component {
     this.scrollDown()
   }
 
+  fetchParams(param) {
+    let urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param)
+  }
+
   fetchSearchList() {
-    axios.get(`/samples/${this.sample_id}/search_list?report_ts=${this.report_ts}`).then((res) => {
+    axios.get(`/samples/${this.sample_id}/search_list?report_ts=${this.report_ts}&version=${this.gitVersion}`).then((res) => {
       const search_list = res.data.search_list;
       search_list.splice(0, 0, ['All', 0]);
       this.setState({
@@ -114,7 +121,7 @@ class PipelineSampleReport extends React.Component {
 
   fetchReportData() {
     Samples.showLoading('Loading results...');
-    let params = `?${window.location.search.replace('?', '')}&report_ts=${this.report_ts}`;
+    let params = `?${window.location.search.replace('?', '')}&report_ts=${this.report_ts}&version=${this.gitVersion}`;
     const cached_background_id = Cookies.get('background_id');
     if (cached_background_id) {
       params = params.indexOf('background_id=')
@@ -696,7 +703,7 @@ class PipelineSampleReport extends React.Component {
         all_categories={this.all_categories}
         all_backgrounds={this.all_backgrounds}
         search_keys_in_sample={this.state.search_keys_in_sample}
-        background_model={this.report_details.background_model}
+        default_background={this.report_details.default_background}
         report_title={this.report_details.sample_info.name}
         report_page_params={this.report_page_params}
         applyNameType={this.applyNameType}
@@ -707,8 +714,13 @@ class PipelineSampleReport extends React.Component {
         enableFilters={this.enableFilters}
         resetAllFilters={this.resetAllFilters}
       />);
+    let param_background_id = this.fetchParams("background_id")
+    let cookie_background_id = Cookies.get('background_id')
+    let csv_background_id_param = param_background_id ? '?background_id=' + param_background_id :
+                                    cookie_background_id ? '?background_id=' + cookie_background_id :
+                                      ''
     const download_button = (
-      <a href={`/samples/${this.sample_id}/report_csv?background_id=${this.report_details.background_model.id}`} className="download-report right">
+      <a href={`/samples/${this.sample_id}/report_csv${csv_background_id_param}`} className="download-report right">
         <div className="fa fa-cloud-download" />
         <div>Download report</div>
       </a>

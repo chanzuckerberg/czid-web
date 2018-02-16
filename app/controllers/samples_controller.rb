@@ -23,6 +23,7 @@ class SamplesController < ApplicationController
   acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload], fallback: :devise
 
   before_action :login_required # redundant. make sure it works
+  before_action :no_demo_user, only: [:create, :bulk_new, :bulk_upload, :bulk_import, :new]
 
   current_power do # Put this here for CLI
     Power.new(current_user)
@@ -138,6 +139,7 @@ class SamplesController < ApplicationController
 
   def show
     @pipeline_run = @sample.pipeline_runs.first
+    @pipeline_run_display = curate_pipeline_run_display(@pipeline_run)
     @sample_status = @pipeline_run ? @pipeline_run.job_status : nil
     @job_stats = @pipeline_run ? @pipeline_run.job_stats : nil
     @summary_stats = @job_stats ? get_summary_stats(@job_stats) : nil
@@ -146,15 +148,19 @@ class SamplesController < ApplicationController
     @host_genome = @sample.host_genome ? @sample.host_genome : nil
     @background_models = Background.all
     @can_edit = current_power.updatable_sample?(@sample)
+    @git_version = ENV['GIT_VERSION'] || ""
+    @git_version = Time.current.to_i if @git_version.blank?
 
-    default_background_id = @sample.host_genome && @sample.host_genome.default_background ? @sample.host_genome.default_background.id : nil
     if @pipeline_run && (@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?
-      background_id = params[:background_id] || default_background_id
+      background_id = params[:background_id] || @sample.default_background_id
+      # Here background_id is only used to decide whether a report can be shown.
+      # No report/background-specific data is actually being shown.
+      # Background selection is used in report_info action, which fetches the actual report data.
       if background_id
         @report_present = 1
         @report_ts = @pipeline_run.updated_at.to_i
         @all_categories = all_categories
-        @report_details = report_details(@pipeline_run, Background.find(background_id))
+        @report_details = report_details(@pipeline_run)
         @report_page_params = clean_params(params, @all_categories)
       end
     end
@@ -162,14 +168,15 @@ class SamplesController < ApplicationController
 
   def top_taxons
     sample_ids = params[:sample_ids].split(",").map(&:to_i) || []
-    num_results = params[:n].to_i || 100
-    sort_by = params[:sort_by] || "highest_nt_aggregatescore"
+    num_results = params[:n] ? params[:n].to_i : 100
+    sort_by = params[:sort_by] || ReportHelper::DEFAULT_SORT_PARAM
     samples = current_power.samples.where(id: sample_ids)
+    include_species = params[:species]
     if samples.first
       first_sample = samples.first
       default_background_id = first_sample.host_genome && first_sample.host_genome.default_background ? first_sample.host_genome.default_background.id : nil
       background_id = params[:background_id] || default_background_id || Background.first
-      @top_taxons = top_taxons_details(samples, background_id, num_results, sort_by)
+      @top_taxons = top_taxons_details(samples, background_id, num_results, sort_by, include_species)
       render json: @top_taxons
     else
       render json: {}
@@ -182,19 +189,24 @@ class SamplesController < ApplicationController
 
   def samples_taxons
     sample_ids = params[:sample_ids].to_s.split(",").map(&:to_i) || []
+    num_results = params[:n] ? params[:n].to_i : 100
     taxon_ids = params[:taxon_ids].to_s.split(",").map(&:to_i) || []
-    num_results = params[:n].to_i || 100
-    sort_by = params[:sort_by] || "highest_nt_aggregatescore"
+    sort_by = params[:sort_by] || ReportHelper::DEFAULT_SORT_PARAM
+    include_species = params[:species]
     samples = current_power.samples.where(id: sample_ids)
     if samples.first
       first_sample = samples.first
       default_background_id = first_sample.host_genome && first_sample.host_genome.default_background ? first_sample.host_genome.default_background.id : nil
       background_id = params[:background_id] || default_background_id || Background.first
       if taxon_ids.empty?
-        taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by).pluck("tax_id")
+        taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, include_species).pluck("tax_id")
       end
-      @sample_taxons_dict = samples_taxons_details(samples, taxon_ids, background_id)
-      render json: @sample_taxons_dict
+      if taxon_ids.empty?
+        render json: {}
+      else
+        @sample_taxons_dict = samples_taxons_details(samples, taxon_ids, background_id)
+        render json: @sample_taxons_dict
+      end
     else
       render json: {}
     end
@@ -209,10 +221,8 @@ class SamplesController < ApplicationController
     ## Duct tape for changing background id dynamically
     ## TODO(yf): clean the following up.
     ####################################################
-    background_id = nil
-    default_background_id = @sample.host_genome && @sample.host_genome.default_background ? @sample.host_genome.default_background.id : nil
     if @pipeline_run && (@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?
-      background_id = params[:background_id] || default_background_id
+      background_id = params[:background_id] || @sample.default_background_id
       pipeline_run_id = @pipeline_run.id
     end
 
