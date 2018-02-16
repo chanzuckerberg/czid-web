@@ -278,7 +278,19 @@ class D3Heatmap extends React.Component {
       .attr("class", function (e) { 
         return "link link-" + e.source.id + "-" + e.target.id; 
       })
-      .attr("d", diagonal)
+      .attr("d", diagonal);
+
+    var hovers = vis.selectAll("rect.hover-target")
+      .data(cluster.links(nodes))
+      .enter().append("rect")
+      .attr("class", function (e) { 
+        return "hover-target hover-" + e.source.id + "-" + e.target.id; 
+      })
+      .attr("x", function(d, i) { return Math.min(d.source.y, d.target.y); })
+      .attr("y", function(d, i) { return Math.min(d.source.x, d.target.x); })
+      .attr("width", function (d, i) { return Math.abs(d.target.y - d.source.y); })
+      .attr("height", function (d, i) { return Math.abs(d.target.x - d.source.x); })
+      .attr("fill", "rgba(0,0,0,0)")
       .on("mouseover", (d) => {
         d3.selectAll(".D3Heatmap").classed("highlighting", true);
         let base = d.source.children.slice();
