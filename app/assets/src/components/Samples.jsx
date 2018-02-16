@@ -214,7 +214,6 @@ class Samples extends React.Component {
       });
       this.displayReportProgress(res);
     }).catch((err) => {
-      Samples.hideLoader();
       console.log(err);
     });
   }
@@ -223,6 +222,7 @@ class Samples extends React.Component {
     axios.get(`/projects/${this.state.project_id_download_in_progress}/project_reports_csv_status`).then((res) => {
       let download_status = res.data.status_display
       if (download_status === 'complete') {
+        Samples.hideLoader();
         location.href = `/projects/${this.state.project_id_download_in_progress}/send_project_reports_csv`
         this.setState({
           project_id_download_in_progress: null
