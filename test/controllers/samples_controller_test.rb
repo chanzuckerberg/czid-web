@@ -99,14 +99,15 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'should get correct report' do
+    post user_session_path, params: @user_params
     get "/samples/#{@sample.id}/report_info?background_id=#{@background.id}"
     json_response = JSON.parse(response.body)
-    assert_equal json_response["taxonomy_details"][2][0]["NT"]["r"], 209.0
-    assert_equal json_response["taxonomy_details"][2][0]["NT"]["rpm"], "186274.5"
-    assert_equal json_response["taxonomy_details"][2][0]["NT"]["zscore"], 99.0
-    assert_equal json_response["taxonomy_details"][2][0]["NR"]["r"], 69.0
-    assert_equal json_response["taxonomy_details"][2][0]["NR"]["rpm"], "61497.3"
-    assert_equal json_response["taxonomy_details"][2][0]["NR"]["zscore"], 99.0
+    assert_equal 209.0, json_response["taxonomy_details"][2][0]["NT"]["r"]
+    assert_equal "186274.5", json_response["taxonomy_details"][2][0]["NT"]["rpm"]
+    assert_equal 99.0, json_response["taxonomy_details"][2][0]["NT"]["zscore"]
+    assert_equal 69.0, json_response["taxonomy_details"][2][0]["NR"]["r"]
+    assert_equal "61497.3", json_response["taxonomy_details"][2][0]["NR"]["rpm"]
+    assert_equal 99.0, json_response["taxonomy_details"][2][0]["NR"]["zscore"]
   end
 
   test 'should get edit' do
