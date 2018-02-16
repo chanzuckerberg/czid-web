@@ -231,7 +231,7 @@ class Sample < ApplicationRecord
   end
 
   def default_background_id
-    host_genome && host_genome.default_background ? host_genome.default_background.id : nil
+    host_genome && host_genome.default_background ? host_genome.default_background.id : Background.first.id
   end
 
   def as_json(_options = {})

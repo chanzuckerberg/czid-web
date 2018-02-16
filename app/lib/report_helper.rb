@@ -176,13 +176,14 @@ module ReportHelper
     data
   end
 
-  def report_details(pipeline_run, _background = nil)
-    # Provides some auxiliary information on pipeline_run.
-    # Not actually anything to do with report-specific data and does not use _background argument.
+  def report_details(pipeline_run)
+    # Provides some auxiliary information on pipeline_run, including default background for sample.
+    # No report-specific scores though.
     {
       pipeline_info: pipeline_run,
       subsampled_reads: pipeline_run.subsampled_reads,
       sample_info: pipeline_run.sample,
+      default_background: Background.find(pipeline_run.sample.default_background_id),
       taxon_fasta_flag: pipeline_run.finalized?
     }
   end

@@ -703,7 +703,7 @@ class PipelineSampleReport extends React.Component {
         all_categories={this.all_categories}
         all_backgrounds={this.all_backgrounds}
         search_keys_in_sample={this.state.search_keys_in_sample}
-        background_model={this.report_details.background_model}
+        default_background={this.report_details.default_background}
         report_title={this.report_details.sample_info.name}
         report_page_params={this.report_page_params}
         applyNameType={this.applyNameType}
