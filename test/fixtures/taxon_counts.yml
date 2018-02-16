@@ -68,16 +68,35 @@ seven:
   pipeline_run: six
   tax_id: 570
   tax_level: 2
-  count: 
-  name:
-  count_type:
-  percent_identity:
-  alignment_length:
-  e_value:
-  genus_taxid:
-  superkingdom_taxid:
-  percent_concordant:
-  species_total_concordant:
-  genus_total_concordant:
-  family_total_concordant:
+  count: 87
+  name: "Klebsiella"
+  count_type: "NR"
+  percent_identity: 97.9598
+  alignment_length: 46.4253
+  e_value: -16.9874
+  genus_taxid: 570
+  superkingdom_taxid: 2
+  percent_concordant: 94.2529
+  species_total_concordant: 11.2
+  genus_total_concordant: 82.0
+  family_total_concordant: 162.0
+  common_name: ""
+
+eight:
+  pipeline_run: six
+  tax_id: 570
+  tax_level: 2
+  count: 217
+  name: "Klebsiella"
+  count_type: "NT"
+  percent_identity: 99.7014
+  alignment_length: 149.424
+  e_value: -89.5822
+  genus_taxid: 570
+  superkingdom_taxid: 2
+  percent_concordant: 99.5392
+  species_total_concordant: 42.0
+  genus_total_concordant: 216.0
+  family_total_concordant: 232.0
+  pipeline_run_id: 2661
   common_name: ""
