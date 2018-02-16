@@ -100,7 +100,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
 
   test 'should get correct report' do
     post user_session_path, params: @user_params
-    get "/samples/#{@sample.id}/report_info?background_id=#{@background.id}"
+    get "/samples/#{samples(:six).id}/report_info?background_id=#{@background.id}"
     json_response = JSON.parse(response.body)
     puts json_response
     assert_equal 209.0, json_response["taxonomy_details"][2][0]["NT"]["r"]
