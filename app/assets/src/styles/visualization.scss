@@ -78,12 +78,8 @@
   text.text-selected {
     fill: #000;
   }
-
-  text.text-highlight {
-    fill: #c00;
-  }
-  text.text-hover {
-    fill: #00C;
+  text.text-hover, text.text-highlight {
+		fill: rgb(82,131,211);
   }
   .heatmap-tooltip {
     position: absolute;

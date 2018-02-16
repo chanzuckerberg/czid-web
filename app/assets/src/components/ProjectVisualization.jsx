@@ -1,10 +1,7 @@
 /*
  * TODO
- * 1. Correctly order the tooltip and provide the right data
- * 2. Fix font and color for labels
- * 3. Make the datatype picker only show up after data is loaded
- * 4. Use standard loading screen
- * 5. Make the dondegram leafs be in the middle of the columns
+ * - Use standard loading screen
+ * - Make the dondegram leafs be in the middle of the columns
  */
 
 import React from 'react';
@@ -26,21 +23,30 @@ class SampleHeatmapTooltip extends React.Component {
       return
     }
     
-    let valueMap = {
-        'NT Score': 'NT.aggregatescore',
-        'NT RPM': 'NT.rpm',
-        'NT Z': 'NT.zscore',
-        'NR Score': 'NR.aggregatescore',
-        'NR RPM': 'NR.rpm',
-        'NR Z': 'NR.zscore',
-    }
+    let valueMap = [
+        ['Agg Score', 'NT.aggregatescore'],
+        null,
+        ['NT RPM', 'NT.rpm'],
+        ['NR RPM', 'NR.rpm'],
+        ['NT R', 'NT.r'],
+        ['NR R', 'NR.r'],
+        ['NT ZScore', 'NT.zscore'],
+        ['NR ZScore', 'NR.zscore'],
+    ]
     let ret = [
       <li className="col s12" key="taxon-name">
         <label>Taxon:</label>{taxon.name}
       </li>
     ];
-    Object.keys(valueMap).forEach(function (key) {
-      let value = valueMap[key];
+    valueMap.forEach(function (pair) {
+      if (!pair) {
+        ret.push(<li key="blank" className="col s6">&nbsp;</li>);
+        return;
+      }
+
+      let key = pair[0],
+          value = pair[1];
+
       let parts = value.split("."),
             base = taxon;
 
@@ -156,7 +162,7 @@ class D3Heatmap extends React.Component {
     this.width = this.cellWidth * this.col_number + this.margin.left + this.margin.right;
     this.height = this.cellHeight * this.row_number + this.margin.top + this.margin.bottom;
 
-    this.legendElementWidth = this.col_number * this.cellWidth / this.colors.length;
+    this.legendElementWidth = this.margin.right / this.colors.length;
   }
 
   componentDidMount () {
@@ -319,20 +325,23 @@ class D3Heatmap extends React.Component {
   
   renderLegend () {
     let that = this,
-        height = 20;
+        height = 20,
+        x_offset = this.cellWidth * this.col_number;
 
     this.svg.selectAll(".legend-text-min")
         .data([this.min])
         .enter().append("text")
-        .attr("x", function (d, i) { return 0; })
-        .attr("y", function (d, i) { return that.cellHeight * (that.row_number + 2) - 15; })
+        .attr("x", x_offset)
+        .attr("y", -33)
+        .attr("class", "mono")
         .text(Math.round(this.min));
     
     this.svg.selectAll(".legend-text-max")
         .data([this.max])
         .enter().append("text")
-        .attr("x", function (d, i) { return that.legendElementWidth * that.colors.length; })
-        .attr("y", function (d, i) { return that.cellHeight * (that.row_number + 2) - 15; })
+        .attr("class", "mono")
+        .attr("x", function (d, i) { return x_offset + that.legendElementWidth * that.colors.length; })
+        .attr("y", -33)
         .text(Math.round(this.max))
         .style("text-anchor", "end");
 
@@ -342,18 +351,18 @@ class D3Heatmap extends React.Component {
       .attr("class", "legend");
 
     legend.append("rect")
-      .attr("x", function(d, i) { return that.legendElementWidth * i; })
-      .attr("y", this.cellHeight * (this.row_number + 1))
+      .attr("x", function(d, i) { return x_offset + that.legendElementWidth * i; })
+      .attr("y", -10 - height)
       .attr("width", this.legendElementWidth)
       .attr("height", height)
       .style("fill", function(d, i) { return that.colors[i]; });
 
 	this.svg.append("rect")
+        .attr("x", function(d, i) { return x_offset + that.legendElementWidth * i; })
         .attr("stroke", "#aaa")
         .attr("stroke-width", "0.25")
         .style("fill", "none")
-        .attr("x", 0)
-        .attr("y", that.cellHeight * (that.row_number + 1)) 
+        .attr("y", -10 - height)
         .attr("width", that.legendElementWidth * that.colors.length)  
         .attr("height", height);    
   }
@@ -690,6 +699,10 @@ class ProjectVisualization extends React.Component {
   }
 
   renderTypePickers () {
+   if (!this.state.data) {
+      return;
+    }
+
     let ret = [];
     for (var dataType of this.dataTypes) {
       ret.push(
