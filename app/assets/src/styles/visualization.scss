@@ -1,4 +1,31 @@
+#project-visualization {
+  select {
+    display: block;
+  }
+  .sub-menu {
+    padding-bottom: 20px;
+  }
+}
 .D3Heatmap {
+	.node circle {
+		fill: #fff;
+		stroke: steelblue;
+		stroke-width: 1.5px;
+	}
+		
+	.node {
+		font: 10px sans-serif;
+	}
+	.link {
+		padding: 5px;
+		fill: #fff;
+		stroke: rgb(220, 221, 224);
+		stroke-width: 1px;
+		&.link-hover {
+			stroke: rgb(82,131,211);
+		}
+	}
+
   svg {
     display: block;
     margin: 0 auto;
@@ -20,6 +47,12 @@
     stroke-dasharray: 4px;
     stroke-opacity  : 0.5;
     fill            : transparent;
+  }
+  &.highlighting .cell {
+    opacity: 0.05;
+    &.highlight {
+      opacity: 1;
+    }
   }
 
   rect.cell-border {
@@ -57,7 +90,7 @@
     min-width: 200px;
     height: auto;
     padding: 10px;
-    background-color: rgba(255,255,255, 0.85);
+    background-color: rgba(255,255,255, 0.95);
     border-radius: 5px;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
     pointer-events: none;

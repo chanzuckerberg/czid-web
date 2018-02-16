@@ -1,3 +1,11 @@
+/*
+ * TODO
+ * 1. Correctly order the tooltip and provide the right data
+ * 2. Fix font and color for labels
+ * 3. Make the datatype picker only show up after data is loaded
+ * 4. Use standard loading screen
+ * 5. Make the dondegram leafs be in the middle of the columns
+ */
 
 import React from 'react';
 import {withFauxDOM} from 'react-faux-dom';
@@ -6,7 +14,7 @@ import * as d3 from 'd3';
 import {event as currentEvent} from 'd3';
 import axios from 'axios';
 import ObjectHelper from '../helpers/ObjectHelper';
-
+import clusterfck from 'clusterfck';
 class SampleHeatmapTooltip extends React.Component {
   constructor(props) {
     super(props);
@@ -44,18 +52,18 @@ class SampleHeatmapTooltip extends React.Component {
         {base.toFixed(1)}
       </li>);
     });
-    return (
-      <ul className="row">
-        {ret}
-      </ul>
-    );
+    return ret;
   }
   render () {
     let sample = this.props.sample;
     return (
       <div className="heatmap-tooltips">
-        {sample.name}
-        {this.renderTaxons()}
+        <ul className="row">
+          <li className="col s12">
+            <label>Sample:</label>{sample.name}
+          </li>
+          {this.renderTaxons()}
+        </ul>
       </div>
     )
   }
@@ -137,12 +145,11 @@ class D3Heatmap extends React.Component {
       }
     }
     this.margin ={
-      top:  char_width * longest_col_label * 0.7,
+      top: 80, // char_width * longest_col_label * 0.7,
       left: 10,
-      bottom: 50,
+      bottom: 100,
       right: char_width * longest_row_label
     };
-    console.log(this.margin);
     this.cellSize = Math.min(900 / this.col_number, 400 / this.row_number);
     this.cellSize = parseInt(Math.max(this.cellSize, 20), 10);
 
@@ -167,9 +174,10 @@ class D3Heatmap extends React.Component {
 
 
     this.renderRowLabels();
-    this.renderColLabels();
+    //this.renderColLabels();
     this.renderHeatmap();
     this.renderLegend();
+    this.renderDendrogram();
   }
 
   renderHeatmap () {
@@ -220,6 +228,95 @@ class D3Heatmap extends React.Component {
       ;
 
   }
+
+  renderDendrogram () {
+		let width = this.cellSize * this.col_number,
+				height = this.margin.top - 20;
+ 
+		var cluster = d3.layout.cluster()
+    		.size([width, height]);
+
+		let diagonal = (d, i) => {
+    	return "M" + d.source.y + "," + d.source.x + "V" + d.target.x + "H" + d.target.y;
+		}
+		
+		//var diagonal = d3.svg.diagonal()
+    //		.projection(function(d) { return [d.y, d.x]; });
+
+    //set up the visualisation:
+    var vis = this.svg.append("g")
+      .attr("width", width)
+      .attr("height", height)
+      .attr("transform", "rotate(90) translate(-" + (height + 10) + ", -" + width + ")")
+      .append("g")
+    
+    cluster.children(function (d) {
+      let children = [];
+      if (d.left) {
+        children.push(d.left);
+      }
+      if (d.right) {
+        children.push(d.right);
+      }
+      return children;
+    });
+    var nodes = cluster.nodes(this.props.tree);
+    let i = 0;
+    for (let n of nodes) {
+      n.id = i;
+      i += 1;
+    }
+    var link = vis.selectAll("path.link")
+      .data(cluster.links(nodes))
+      .enter().append("path")
+      .attr("class", function (e) { 
+        return "link link-" + e.source.id + "-" + e.target.id; 
+      })
+      .attr("d", diagonal)
+      .on("mouseover", (d) => {
+        d3.selectAll(".D3Heatmap").classed("highlighting", true);
+        let base = d.source.children.slice();
+        let to_visit = base;
+        while(to_visit.length > 0) {
+          let node = to_visit.pop();
+          if(node.left) { to_visit.push(node.left); }
+          if(node.right) { to_visit.push(node.right); }
+          let cls = ".link-" + node.parent.id + "-" + node.id;
+          d3.selectAll(cls).classed("link-hover", true);i
+
+          if(node.sample) {
+            let col = this.colLabel.indexOf(node.sample.name);
+            d3.selectAll(".cc" + col).classed("highlight", true);
+          }
+        }
+      })
+      .on("mouseout", function (d) {
+          d3.selectAll(".D3Heatmap").classed("highlighting", false);
+          d3.selectAll(".link").classed("link-hover", false);
+          d3.selectAll(".D3Heatmap .highlight").classed("highlight", false);
+      });
+
+		/*
+		var node = vis.selectAll("g.node")
+				.data(nodes)
+			.enter().append("g")
+				.attr("class", "node")
+				.attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; })
+
+		node.append("circle")
+			.attr("r", 4.5);
+  	node.append("text")
+      .attr("dy", 3)
+      .attr("x", function(d) { return d.children ? -8 : 8; })
+      .style("text-anchor", function(d) { return d.children ? "end" : "start"; })
+      .text(function(d) {
+				if (d.sample) {
+					return d.sample.name; 
+				}
+			});
+		*/
+  }
+  
   renderLegend () {
     let that = this,
         height = 20;
@@ -228,14 +325,14 @@ class D3Heatmap extends React.Component {
         .data([this.min])
         .enter().append("text")
         .attr("x", function (d, i) { return 0; })
-        .attr("y", function (d, i) { return that.cellSize * (that.row_number + 2); })
+        .attr("y", function (d, i) { return that.cellSize * (that.row_number + 2) - 15; })
         .text(Math.round(this.min));
     
     this.svg.selectAll(".legend-text-max")
         .data([this.max])
         .enter().append("text")
         .attr("x", function (d, i) { return that.legendElementWidth * that.colors.length; })
-        .attr("y", function (d, i) { return that.cellSize * (that.row_number + 2); })
+        .attr("y", function (d, i) { return that.cellSize * (that.row_number + 2) - 15; })
         .text(Math.round(this.max))
         .style("text-anchor", "end");
 
@@ -389,7 +486,7 @@ class ProjectVisualization extends React.Component {
       dataThreshold: -99999999999,
     };
 
-    this.dataTypes = ["NT.aggregatescore", "NT.rpm", "NT.zscore", "NR.aggregatescore", "NR.rpm", "NR.zscore"];
+    this.dataTypes = ["NT.aggregatescore", "NT.rpm", "NT.r", "NT.zscore", "NR.rpm", "NR.r", "NR.zscore"];
     this.dataGetters = {}
     for (var dataType of this.dataTypes) {
       this.dataGetters[dataType] = this.makeDataGetter(dataType);
@@ -428,9 +525,12 @@ class ProjectVisualization extends React.Component {
     this.request && this.request.cancel();
     this.request = axios.get("/samples/samples_taxons.json?sample_ids=" + this.sample_ids)
     .then((response) => {
+      let taxons = this.extractTaxons(response.data);
+      let clustered_data = this.cluster(response.data, taxons);
       this.updateMinMax(response.data, this.state.dataType);
       this.setState({
-        data: response.data,
+        data: clustered_data.flat,
+        tree: clustered_data.tree,
         taxons: this.extractTaxons(response.data),
       });
     }).then(() => {
@@ -457,9 +557,54 @@ class ProjectVisualization extends React.Component {
     });
   }
 
+  cluster (data, taxons) {
+    let vector_to_sample = {};
+    // vectorize
+    let vectors = [];
+    for (let sample of data) {
+      let vector = [];
+      for (let taxon_name of taxons) {
+        let value = null;
+        for(let taxon of sample.taxons) {
+          if (taxon.name == taxon_name) {
+            value = this.getDataProperty(taxon, this.state.dataType);
+            break;
+          }
+        }
+        vector.push(value);
+      }
+      vector_to_sample[vector] = sample;
+      vectors.push(vector);
+    }
+    // cluster
+    let cluster = clusterfck.hcluster(vectors);
+    
+    // Create vectors
+    let clustered_samples = [];
+    let to_visit = [cluster];
+    while (to_visit.length > 0) {
+      let node = to_visit.pop();
+      if (node.right) {
+        to_visit.push(node.right); 
+      } 
+      if (node.left) {
+        to_visit.push(node.left);
+      }
+
+      if (node.value) {
+				node.sample = vector_to_sample[node.value];
+        clustered_samples.push(vector_to_sample[node.value]);
+      }
+    }
+    
+    return {
+      tree: cluster,
+      flat: clustered_samples.reverse(),
+    }
+  }
+
   extractTaxons (data) {
     let taxons = {};
-
     for (var i = 0, len = data.length; i < len; i += 1) {
       let sample = data[i];
 
@@ -523,6 +668,7 @@ class ProjectVisualization extends React.Component {
 
     return (
       <D3Heatmap
+        tree={this.state.tree}
         rows={this.state.taxons.length}
         columns={this.state.data.length}
         getRowLabel={this.getRowLabel.bind(this)}
@@ -535,7 +681,7 @@ class ProjectVisualization extends React.Component {
   }
 
   updateDataType (e) {
-    let newDataType = e.target.innerText;
+    let newDataType = e.target.value;
     this.setState({
       dataType: newDataType,
       dataThreshold: -99999999999,
@@ -547,10 +693,14 @@ class ProjectVisualization extends React.Component {
     let ret = [];
     for (var dataType of this.dataTypes) {
       ret.push(
-        <button key={dataType} onClick={this.updateDataType.bind(this)}>{dataType}</button>
+        <option key={dataType} value={dataType}>{dataType}</option>
       )
     }
-    return ret
+    return (
+      <select value={this.state.dataType} onChange={this.updateDataType.bind(this)}>
+        {ret}
+      </select>
+    )
   }
   
   updateDataThreshold (e) {
@@ -562,10 +712,9 @@ class ProjectVisualization extends React.Component {
       return;
     }
     return (
-      <div>
-        {this.state.min}
+      <div className="range-field">
+        <label>Threshold</label>
         <input min={this.state.min} max={this.state.max + 1} type="range" onChange={this.updateDataThreshold.bind(this)} value={this.state.dataThreshold}/>
-        {this.state.max}
       </div>
     )
   }
@@ -575,17 +724,14 @@ class ProjectVisualization extends React.Component {
       <div id="project-visualization">
         <SubHeader>
           <div className="sub-header">
-            <div className="title">
-              Project Visualization
-            </div>
-            <div className="sub-title">
-              Track pathogen distribution across samples
-            </div>
-            <div>
-              {this.renderTypePickers()}
-            </div>
-            <div>
-              {this.renderThresholdSlider()}
+            <div className="row sub-menu">
+              <div className="col s6">
+                <label>Data Type</label>
+                {this.renderTypePickers()}
+              </div>
+              <div className="col s6">
+                {this.renderThresholdSlider()}
+              </div>
             </div>
           </div>
         </SubHeader>
