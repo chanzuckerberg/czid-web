@@ -188,6 +188,14 @@ class Sample < ApplicationRecord
     "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/results"
   end
 
+  def sample_alignment_output_s3_path
+    pr = pipeline_runs.first
+    prs = pr.pipeline_run_stages.first
+    return prs.alignment_output_s3_path
+  rescue
+    return sample_output_s3_path
+  end
+
   def sample_postprocess_s3_path
     "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/postprocess"
   end
@@ -203,11 +211,11 @@ class Sample < ApplicationRecord
   end
 
   def annotated_fasta_s3_path
-    "#{sample_output_s3_path}/#{HIT_FASTA_BASENAME}"
+    "#{sample_alignment_output_s3_path}/#{HIT_FASTA_BASENAME}"
   end
 
   def unidentified_fasta_s3_path
-    "#{sample_output_s3_path}/#{UNIDENTIFIED_FASTA_BASENAME}"
+    "#{sample_alignment_output_s3_path}/#{UNIDENTIFIED_FASTA_BASENAME}"
   end
 
   def sample_annotated_fasta_url
