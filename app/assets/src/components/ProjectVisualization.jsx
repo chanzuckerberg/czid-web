@@ -30,8 +30,10 @@ class SampleHeatmapTooltip extends React.Component {
         ['NR RPM', 'NR.rpm'],
         ['NT R', 'NT.r'],
         ['NR R', 'NR.r'],
-        ['NT ZScore', 'NT.zscore'],
-        ['NR ZScore', 'NR.zscore'],
+        ['NT Z', 'NT.zscore'],
+        ['NR Z', 'NR.zscore'],
+        ['NT Max Z', 'NT.maxzscore'],
+        ['NR Max Z', 'NR.maxzscore'],
     ]
     let ret = [
       <li className="col s12" key="taxon-name">
@@ -508,7 +510,7 @@ class ProjectVisualization extends React.Component {
       dataThreshold: -99999999999,
     };
 
-    this.dataTypes = ["NT.aggregatescore", "NT.rpm", "NT.r", "NT.zscore", "NR.rpm", "NR.r", "NR.zscore"];
+    this.dataTypes = ["NT.aggregatescore", "NT.rpm", "NT.r", "NT.zscore", "NT.maxzscore", "NR.rpm", "NR.r", "NR.zscore", "NR.maxzscore"];
     this.dataGetters = {}
     for (var dataType of this.dataTypes) {
       this.dataGetters[dataType] = this.makeDataGetter(dataType);
