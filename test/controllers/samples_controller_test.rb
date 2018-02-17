@@ -105,8 +105,10 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     species_result = json_response["taxonomy_details"][2].select { |entry| entry["tax_id"] == 573 }[0]
     genus_result = json_response["taxonomy_details"][2].select { |entry| entry["tax_id"] == 570 }[0]
 
-    puts species_result
-    puts genus_result
+    puts "background.id: #{@background.id}"
+    puts "background.name: #{@background.name}"
+    #puts species_result
+    #puts genus_result
 
     assert_equal 209.0, species_result["NT"]["r"]
     assert_equal "186274.5", species_result["NT"]["rpm"]
