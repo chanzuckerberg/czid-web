@@ -189,9 +189,9 @@ class D3Heatmap extends React.Component {
   }
 
   renderHeatmap () {
-    let colorScale = d3.scale.quantile()
-        .domain([this.min, this.max])
-        .range(this.colors);
+    let colorScale = d3.scale.log()
+        .domain([0.1, this.max])
+        .range([0, this.colors.length-1]);
 
     let that = this;
     var heatMap = this.svg.append("g").attr("class","g3")
@@ -210,7 +210,10 @@ class D3Heatmap extends React.Component {
         if (d.value === undefined) {
           return "#f6f6f6";
         }
-        return colorScale(d.value);
+        if (d.value > 0) {
+          return that.colors[parseInt(colorScale(d.value))];
+        }
+        return that.colors[0];
       })
       .on("click", this.props.onCellClick)
       .on("mouseover", function(d){
