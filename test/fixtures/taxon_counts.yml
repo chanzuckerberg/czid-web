@@ -27,3 +27,148 @@ four:
   tax_level: 1
   name: 'some species'
   count: 2
+
+five:
+  pipeline_run: six
+  tax_id: 573
+  tax_level: 1
+  count: 69
+  name: "Klebsiella pneumoniae"
+  count_type: "NR"
+  percent_identity: 97.8565
+  alignment_length: 46.3623
+  e_value: -16.9101
+  genus_taxid: 570
+  superkingdom_taxid: 2
+  percent_concordant: 66.6667
+  species_total_concordant: 46.0
+  genus_total_concordant: 82.0
+  family_total_concordant: 162.0
+  common_name: ""
+
+six:
+  pipeline_run: six
+  tax_id: 573
+  tax_level: 1
+  count: 209
+  name: "Klebsiella pneumoniae"
+  count_type: "NT"
+  percent_identity: 99.6995
+  alignment_length: 149.402
+  e_value: -89.5641
+  genus_taxid: 570
+  superkingdom_taxid: 2
+  percent_concordant: 98.5646
+  species_total_concordant: 206.0
+  genus_total_concordant: 216.0
+  family_total_concordant: 232.0
+  common_name: ""
+
+seven:
+  pipeline_run: six
+  tax_id: 570
+  tax_level: 2
+  count: 87
+  name: "Klebsiella"
+  count_type: "NR"
+  percent_identity: 97.9598
+  alignment_length: 46.4253
+  e_value: -16.9874
+  genus_taxid: 570
+  superkingdom_taxid: 2
+  percent_concordant: 94.2529
+  species_total_concordant: 11.2
+  genus_total_concordant: 82.0
+  family_total_concordant: 162.0
+  common_name: ""
+
+eight:
+  pipeline_run: six
+  tax_id: 570
+  tax_level: 2
+  count: 217
+  name: "Klebsiella"
+  count_type: "NT"
+  percent_identity: 99.7014
+  alignment_length: 149.424
+  e_value: -89.5822
+  genus_taxid: 570
+  superkingdom_taxid: 2
+  percent_concordant: 99.5392
+  species_total_concordant: 42.0
+  genus_total_concordant: 216.0
+  family_total_concordant: 232.0
+  pipeline_run_id: 2661
+  common_name: ""
+
+nine:
+  pipeline_run: six
+  tax_id: 1313
+  tax_level: 1
+  count: 2
+  name: "Streptococcus pneumoniae"
+  count_type: "NR"
+  percent_identity: 96.9
+  alignment_length: 32.0
+  e_value: -9.3
+  genus_taxid: 1301
+  superkingdom_taxid: 2
+  percent_concordant: 0.0
+  species_total_concordant: 0.0
+  genus_total_concordant: 4.0
+  family_total_concordant: 4.0
+  common_name: ""
+
+ten:
+  pipeline_run: six
+  tax_id: 1301
+  tax_level: 2
+  count: 2
+  name: "Streptococcus"
+  count_type: "NR"
+  percent_identity: 96.9
+  alignment_length: 32.0
+  e_value: -9.3
+  genus_taxid: 1301
+  superkingdom_taxid: 2
+  percent_concordant: 200.0
+  species_total_concordant: 0.0
+  genus_total_concordant: 4.0
+  family_total_concordant: 4.0
+  common_name: ""
+
+eleven:
+  pipeline_run: six
+  tax_id: 1301
+  tax_level: 2
+  count: 4
+  name: "Streptococcus"
+  count_type: "NT"
+  percent_identity: 95.65
+  alignment_length: 149.75
+  e_value: -81.478
+  genus_taxid: 1301
+  superkingdom_taxid: 2
+  percent_concordant: 100.0
+  species_total_concordant: 4.0
+  genus_total_concordant: 4.0
+  family_total_concordant: 4.0
+  common_name: ""
+
+twelve:
+  pipeline_run: six
+  tax_id: 28037
+  tax_level: 1
+  count: 4
+  name: "Streptococcus mitis"
+  count_type: "NT"
+  percent_identity: 95.65
+  alignment_length: 149.75
+  e_value: -81.478
+  genus_taxid: 1301
+  superkingdom_taxid: 2
+  percent_concordant: 100.0
+  species_total_concordant: 4.0
+  genus_total_concordant: 4.0
+  family_total_concordant: 4.0
+  common_name: ""

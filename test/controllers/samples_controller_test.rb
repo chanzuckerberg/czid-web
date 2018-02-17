@@ -2,6 +2,7 @@ require 'test_helper'
 
 class SamplesControllerTest < ActionDispatch::IntegrationTest
   setup do
+    @background = backgrounds(:real_background)
     @sample = samples(:one)
     @project = projects(:one)
     @user = users(:one)
@@ -95,6 +96,65 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     post user_session_path, params: @user_params
     get sample_url(@sample)
     assert_response :success
+  end
+
+  test 'should get correct report' do
+    post user_session_path, params: @user_params
+    get "/samples/#{samples(:six).id}/report_info?background_id=#{@background.id}"
+    json_response = JSON.parse(response.body)
+
+    # Examples pulled from sample 1299 on prod
+    # Test species taxid 573, which has genus taxid 570
+    species_result = json_response["taxonomy_details"][2].select { |entry| entry["tax_id"] == 573 }[0]
+    genus_result = json_response["taxonomy_details"][2].select { |entry| entry["tax_id"] == 570 }[0]
+
+    assert_equal 209.0, species_result["NT"]["r"]
+    assert_equal "186274.5", species_result["NT"]["rpm"]
+    assert_equal 99.0, species_result["NT"]["zscore"]
+    assert_equal 2_428_411_411.8, species_result["NT"]["aggregatescore"]
+    assert_equal 89.6, species_result["NT"]["neglogevalue"]
+    assert_equal 69.0, species_result["NR"]["r"]
+    assert_equal "61497.3", species_result["NR"]["rpm"]
+    assert_equal 99.0, species_result["NR"]["zscore"]
+    assert_equal 2_428_411_411.8, species_result["NR"]["aggregatescore"]
+    assert_equal 16.9, species_result["NR"]["neglogevalue"]
+
+    assert_equal 217.0, genus_result["NT"]["r"]
+    assert_equal "193404.6", genus_result["NT"]["rpm"]
+    assert_equal 99.0, genus_result["NT"]["zscore"]
+    assert_equal 2_428_411_411.8, genus_result["NT"]["aggregatescore"]
+    assert_equal 89.6, genus_result["NT"]["neglogevalue"]
+    assert_equal 87.0, genus_result["NR"]["r"]
+    assert_equal "77540.1", genus_result["NR"]["rpm"]
+    assert_equal 99.0, genus_result["NR"]["zscore"]
+    assert_equal 2_428_411_411.8, genus_result["NR"]["aggregatescore"]
+    assert_equal 17.0, genus_result["NR"]["neglogevalue"]
+
+    # Test species taxid 1313, which has genus taxid 1301
+    species_result = json_response["taxonomy_details"][2].select { |entry| entry["tax_id"] == 1313 }[0]
+    genus_result = json_response["taxonomy_details"][2].select { |entry| entry["tax_id"] == 1301 }[0]
+
+    assert_equal 0, species_result["NT"]["r"]
+    assert_equal 0, species_result["NT"]["rpm"]
+    assert_equal(-100, species_result["NT"]["zscore"])
+    assert_equal 12_727.05, species_result["NT"]["aggregatescore"]
+    assert_equal 0.0, species_result["NT"]["neglogevalue"]
+    assert_equal 2.0, species_result["NR"]["r"]
+    assert_equal "1782.5", species_result["NR"]["rpm"]
+    assert_equal 4.2, species_result["NR"]["zscore"]
+    assert_equal 12_727.05, species_result["NR"]["aggregatescore"]
+    assert_equal 9.3, species_result["NR"]["neglogevalue"]
+
+    assert_equal 4.0, genus_result["NT"]["r"]
+    assert_equal "3565.1", genus_result["NT"]["rpm"]
+    assert_equal 2.2, genus_result["NT"]["zscore"]
+    assert_equal 72_941.946, genus_result["NT"]["aggregatescore"]
+    assert_equal 81.5, genus_result["NT"]["neglogevalue"]
+    assert_equal 2.0, genus_result["NR"]["r"]
+    assert_equal "1782.5", genus_result["NR"]["rpm"]
+    assert_equal 1.7, genus_result["NR"]["zscore"]
+    assert_equal 72_941.946, genus_result["NR"]["aggregatescore"]
+    assert_equal 9.3, genus_result["NR"]["neglogevalue"]
   end
 
   test 'should get edit' do

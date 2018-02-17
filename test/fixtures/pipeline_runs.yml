@@ -26,3 +26,10 @@ five:
   job_id: 'five'
   total_reads: 1
   remaining_reads: 1
+six:
+  sample: six
+  job_status: "CHECKED"
+  finalized: 1
+  total_reads: 1122
+  remaining_reads: 316
+  subsample: 1000000

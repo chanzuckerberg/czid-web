@@ -20,3 +20,8 @@ public_sample:
 joe_sample:
   name: sample Joe
   project: joe_project
+
+six:
+  name: RR004_water_2_S23-20180208
+  project: one
+  host_genome: two
