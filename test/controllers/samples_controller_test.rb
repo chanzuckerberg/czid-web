@@ -100,32 +100,32 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
 
   test 'should get correct report' do
     post user_session_path, params: @user_params
-    #@background.taxon_summaries << @background.taxon_summaries + [taxon_summaries(:one),taxon_summaries(:two)]
-    #@background.save
     get "/samples/#{samples(:six).id}/report_info?background_id=#{@background.id}"
     json_response = JSON.parse(response.body)
     species_result = json_response["taxonomy_details"][2].select { |entry| entry["tax_id"] == 573 }[0]
     genus_result = json_response["taxonomy_details"][2].select { |entry| entry["tax_id"] == 570 }[0]
 
-    puts "background.id: #{@background.id}"
-    puts "background.name: #{@background.name}"
-    puts "taxon_summary: #{@background.taxon_summaries[0].to_json}"
-    #puts species_result
-    #puts genus_result
-
     assert_equal 209.0, species_result["NT"]["r"]
     assert_equal "186274.5", species_result["NT"]["rpm"]
     assert_equal 99.0, species_result["NT"]["zscore"]
+    assert_equal 2428411411.8, species_result["NT"]["aggregatescore"]
+    assert_equal 89.6, species_result["NT"]["neglogevalue"]
     assert_equal 69.0, species_result["NR"]["r"]
     assert_equal "61497.3", species_result["NR"]["rpm"]
     assert_equal 99.0, species_result["NR"]["zscore"]
+    assert_equal 2428411411.8, species_result["NR"]["aggregatescore"]
+    assert_equal 16.9, species_result["NR"]["neglogevalue"]
 
     assert_equal 217.0, genus_result["NT"]["r"]
     assert_equal "193404.6", genus_result["NT"]["rpm"]
     assert_equal 99.0, genus_result["NT"]["zscore"]
+    assert_equal 2428411411.8, genus_result["NT"]["aggregatescore"]
+    assert_equal 89.6, genus_result["NT"]["neglogevalue"]
     assert_equal 87.0, genus_result["NR"]["r"]
     assert_equal "77540.1", genus_result["NR"]["rpm"]
     assert_equal 99.0, genus_result["NR"]["zscore"]
+    assert_equal 2428411411.8, genus_result["NR"]["aggregatescore"]
+    assert_equal 17.0, genus_result["NR"]["neglogevalue"]
   end
 
   test 'should get edit' do
