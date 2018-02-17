@@ -8,7 +8,6 @@ two:
   name: MyString
   pipeline_runs: [three, four]
 
-three:
-  id: 1
+real_background:
   name: "NID human CSF"
   pipeline_runs: [three, four]

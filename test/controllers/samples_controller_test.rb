@@ -2,7 +2,7 @@ require 'test_helper'
 
 class SamplesControllerTest < ActionDispatch::IntegrationTest
   setup do
-    @background = backgrounds(:three)
+    @background = backgrounds(:real_background)
     @sample = samples(:one)
     @project = projects(:one)
     @user = users(:one)
@@ -100,6 +100,8 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
 
   test 'should get correct report' do
     post user_session_path, params: @user_params
+    #@background.taxon_summaries << @background.taxon_summaries + [taxon_summaries(:one),taxon_summaries(:two)]
+    #@background.save
     get "/samples/#{samples(:six).id}/report_info?background_id=#{@background.id}"
     json_response = JSON.parse(response.body)
     species_result = json_response["taxonomy_details"][2].select { |entry| entry["tax_id"] == 573 }[0]
@@ -107,6 +109,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
 
     puts "background.id: #{@background.id}"
     puts "background.name: #{@background.name}"
+    puts "taxon_summary: #{@background.taxon_summaries[0].to_json}"
     #puts species_result
     #puts genus_result
 
