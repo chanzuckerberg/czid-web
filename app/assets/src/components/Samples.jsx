@@ -383,18 +383,20 @@ class Samples extends React.Component {
         notes: dbSample && dbSample.sample_notes ? dbSample.sample_notes : BLANK_TEXT };
 
       return (
-        <a className='col s12 no-padding sample-feed' key={i} >
+        <a className='col s12 no-padding sample-feed' key={i} href={`/samples/${dbSample.id}`}>
           <div>
             <div className='samples-card white'>
               <div className='flex-container'>
                 <ul className='flex-items'>
                   <li className='check-box-container'>
-                    <input type="checkbox" id={i}
+                    {/* <input type="checkbox" id={i}
                       className="filled-in checkbox" value={ this.state.selectedSampleIndices.indexOf(i) != -1 }
                       onChange = { this.selectSample }  
                       />
                     <label htmlFor={i}>
-                      <span className='sample-name-info'>
+                      
+                    </label> */}
+                    <span className='sample-name-info'>
                         <div className='card-label top-label'>
                           {/*<span className='project-name'>*/}
                           {/*Mosquito*/}
@@ -410,7 +412,6 @@ class Samples extends React.Component {
                           { !uploader || uploader === '' ? '' : <span>Uploaded by: {uploader}</span>}
                         </div>
                       </span>
-                    </label>
                   </li>
                   {
                     this.state.columnsShown.map((column, pos) => {
@@ -797,7 +798,7 @@ class Samples extends React.Component {
 
   renderTable(samples) {
     let project_id = this.state.selectedProjectId ? this.state.selectedProjectId : 'all'
-    let search_field_width = (project_id === 'all') ? 'col s4' : 'col s2'
+    let search_field_width = (project_id === 'all') ? 'col s4 no-padding' : 'col s2 no-padding'
     let search_field = (
       <div className={search_field_width + ' search-field'}>
         <div className='row'>
@@ -858,10 +859,10 @@ class Samples extends React.Component {
     );
     const search_box = (
       <div className="row search-box">
-        { check_all }
+        {/* { check_all } */}
         { search_field }
         { table_download_button }
-        { compare_button }
+        {/* { compare_button } */}
         { project_id === 'all' ? null : reports_download_button }
       </div>
     );
