@@ -418,7 +418,7 @@ class Samples extends React.Component {
                       let column_data = '';
                       if (column === 'pipeline_status') {
                         column_data = (
-                          <li  key={pos}>
+                          <li  key={pos} onClick={this.viewSample.bind(this, dbSample.id)} >
                             <div className='card-label top-label'>
                               { rowWithChunkStatus }
                             </div>
@@ -435,13 +435,13 @@ class Samples extends React.Component {
                           </li>
                         )
                       } else if(column === 'nonhost_reads') {
-                        column_data = (<li key={pos}>
+                        column_data = (<li key={pos} onClick={this.viewSample.bind(this, dbSample.id)} >
                           <div className='card-label center center-label data-label'>
                             {data_values[column]} {data_values["nonhost_reads_percent"]}
                           </div>
                         </li>)
                       } else {
-                        column_data = (<li key={pos}>
+                        column_data = (<li key={pos} onClick={this.viewSample.bind(this, dbSample.id)} >
                           <div className='card-label center center-label data-label'>
                             {data_values[column]}
                           </div>
