@@ -59,6 +59,7 @@ class Samples extends React.Component {
       sort_by: this.fetchParams('sort_by') || 'id,desc',
       pagesLoaded: 0,
       pageEnd: false,
+      checkedBoxes: 0,
       allChecked: false,
       selectedSampleIndices: [],
       initialFetchedSamples: [],
@@ -727,13 +728,12 @@ class Samples extends React.Component {
     $('.checkAll').click(function(e) {
       var checked = e.currentTarget.checked;
       $('.checkbox').prop('checked', checked);
+      var checkedCount = $("input:checkbox:checked").length
       that.setState({
-        allChecked: checked
+        allChecked: checked,
+        checkedBoxes: checkedCount
       });
-      // to be used in comparison method
-      // that.fetchAllSelectedIds(that.state.allChecked);
     }); 
-
   }
 
 
@@ -774,7 +774,6 @@ class Samples extends React.Component {
 
     let index
     // check if the check box is checked or unchecked
-
  
     if (e.target.checked) {
       // add the numerical value of the checkbox to options array
@@ -784,9 +783,12 @@ class Samples extends React.Component {
       index = sampleList.indexOf(+e.target.id)
       sampleList.splice(index, 1)
     }
-
+    var checkedCount = $("input:checkbox:checked").length
     // update the state with the new array of options
-    this.setState({ selectedSampleIndices: sampleList })
+    this.setState({ 
+      selectedSampleIndices: sampleList,
+      checkedBoxes: checkedCount
+     })
   }
 
 
@@ -862,7 +864,7 @@ class Samples extends React.Component {
         { check_all }
         { search_field }
         { table_download_button }
-        { compare_button }
+        { this.state.checkedBoxes > 0  ? compare_button : null }
         { project_id === 'all' ? null : reports_download_button }
       </div>
     );
