@@ -871,7 +871,7 @@ input[type="button"] {
           font-size: $font-size-base;
           color: $body-color;
           &:hover {
-            background: #eff0f2;
+            background: $gray5;
             i {
               &.favorite.fa {
                 display: inline;
