@@ -34,8 +34,8 @@ class PipelineSampleReads extends React.Component {
     this.pipelineRun = props.pipelineRun;
     this.rerunPipeline = this.rerunPipeline.bind(this);
     this.state = {
-      rerun: false,
-      failureText: 'Sample run failed'
+      rerunStatus: 'failed',
+      rerunStatusMessage: 'Sample run failed'
     };
     this.TYPE_PROMPT = this.can_edit ? "Type here..." : "-" ;
     this.NUCLEOTIDE_TYPES = ['-',"DNA", "RNA"];
@@ -116,20 +116,32 @@ class PipelineSampleReads extends React.Component {
     }
     return true;
   }
-
+// class="fa fa-circle-o-notch fa-spin fa-fw"
   rerunPipeline() {
     this.setState({
-      rerun: true
+      rerunStatus: 'waiting',
+      rerunStatusMessage: <span>
+          <br/>
+          <i className="fa fa-circle-o-notch fa-spin fa-fw"></i>
+          Adding sample to qeue ...
+          </span>
     })
     axios.put(`${this.rerunPath}.json`, {
       authenticity_token: this.csrf
     }).then((response) => {
+      this.setState({
+        rerunStatus: 'success',
+        rerunStatusMessage: 'Rerunning sample'
+      });
     // this should set status to UPLOADING/IN PROGRESS after rerun
     }).catch((error) => {
       this.setState({
-        rerun: false,
-        failureText: 'Failed to re-run Pipeline'
-      })
+        rerunStatus: 'failed',
+        rerunStatusMessage: <span>
+          <br/>
+          <i className="fa fa-frown-o fa-fw"></i>Failed to re-run Pipeline
+          </span>
+      });
     })
   }
 
@@ -264,16 +276,39 @@ class PipelineSampleReads extends React.Component {
         report_details = {this.reportDetails}
         report_page_params = {this.reportPageParams}
       />;
-    } else {
-      d_report = <div className="center-align text-grey text-lighten-2 no-report">{ this.pipelineInProgress() ? <div>Sample Waiting ...<p><i className='fa fa-spinner fa-spin fa-3x'></i></p></div> :
-        <div>
-          <h6 className="failed"><i className="fa fa-frown-o"></i>  {this.state.failureText}  </h6>
-          <p>'
-           { !this.state.rerun && this.can_edit ? <a onClick={ this.rerunPipeline }className="custom-button small"><i className="fa fa-repeat left"></i>RERUN PIPELINE</a>
-            : null }
+    } else if(this.pipelineInProgress()) {
+      d_report =
+        <div className="center-align text-grey text-lighten-2 no-report">
+          <div>
+            Sample Waiting ...
+            <p>
+              <i className='fa fa-spinner fa-spin fa-3x'></i>
             </p>
-        </div> }
-      </div>
+          </div>
+        </div>;
+    } else {
+      d_report =
+      <div className="center-align text-grey text-lighten-2 no-report">
+        <h6 className={this.state.rerunStatus}>
+          { (this.state.rerunStatus === 'success') ?
+            <div>
+              Sample Waiting ...
+              <p>
+                <i className='fa fa-spinner fa-spin fa-3x'></i>
+              </p>
+            </div> : this.state.rerunStatusMessage
+          }
+        </h6>
+        <p>
+          {
+            (this.state.rerunStatus === 'failed' && this.can_edit) ?
+            <a onClick={ this.rerunPipeline }className="custom-button small">
+              <i className="fa fa-repeat left"></i>
+              RERUN PIPELINE
+            </a> : null
+          }
+        </p>
+      </div>;
     }
 
     let pipeline_run = null;
