@@ -116,14 +116,13 @@ class PipelineSampleReads extends React.Component {
     }
     return true;
   }
-// class="fa fa-circle-o-notch fa-spin fa-fw"
   rerunPipeline() {
     this.setState({
       rerunStatus: 'waiting',
       rerunStatusMessage: <span>
           <br/>
           <i className="fa fa-circle-o-notch fa-spin fa-fw"></i>
-          Adding sample to qeue ...
+          Adding sample to queue ...
           </span>
     })
     axios.put(`${this.rerunPath}.json`, {
@@ -266,6 +265,13 @@ class PipelineSampleReads extends React.Component {
 
   render() {
     let d_report = null;
+    let waitingSpinner = 
+      <div>
+        Sample Waiting ...
+        <p>
+          <i className='fa fa-spinner fa-spin fa-3x'></i>
+        </p>
+      </div>;
     if(this.reportPresent) {
       d_report = <PipelineSampleReport
         sample_id = {this.sampleId}
@@ -279,24 +285,14 @@ class PipelineSampleReads extends React.Component {
     } else if(this.pipelineInProgress()) {
       d_report =
         <div className="center-align text-grey text-lighten-2 no-report">
-          <div>
-            Sample Waiting ...
-            <p>
-              <i className='fa fa-spinner fa-spin fa-3x'></i>
-            </p>
-          </div>
+          {waitingSpinner}
         </div>;
     } else {
       d_report =
       <div className="center-align text-grey text-lighten-2 no-report">
         <h6 className={this.state.rerunStatus}>
           { (this.state.rerunStatus === 'success') ?
-            <div>
-              Sample Waiting ...
-              <p>
-                <i className='fa fa-spinner fa-spin fa-3x'></i>
-              </p>
-            </div> : this.state.rerunStatusMessage
+            waitingSpinner : this.state.rerunStatusMessage
           }
         </h6>
         <p>
