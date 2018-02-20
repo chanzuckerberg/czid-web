@@ -1,0 +1,11 @@
+<div id="samples_page">
+  <%= javascript_tag do %>
+    react_component('Select', {
+      pageSize: '<%=@page_size%>',
+      csrf: '<%= form_authenticity_token %>',
+      editableProjects: <%= @editable_project_ids %>,
+      favorites: JSON.parse('<%= raw escape_json(@favorite_projects) %>'),
+      projects: JSON.parse('<%= raw escape_json(@projects)%>')
+    }, 'samples_page');
+  <% end %>
+</div>
