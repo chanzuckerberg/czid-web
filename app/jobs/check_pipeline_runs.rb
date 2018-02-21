@@ -2,6 +2,10 @@
 require 'logger'
 require 'resque/plugins/lock'
 
+Signal.trap("TERM") do
+  CheckPipelineRuns.shutdown_requested = true
+end
+
 class CheckPipelineRuns
   extend Resque::Plugins::Lock
   @queue = :q03_pipeline_run
@@ -10,13 +14,19 @@ class CheckPipelineRuns
   # A fresh CheckPipelineRuns should run every 5 minutes.
   # This should match resque_schedule.yml.
   @cron_period = 5 * 60
-  @cron_drift = 5 # up to 5 seconds, prevents piling up of queued events
+  @cron_drift = 5 # prevents small cron overlap
 
   # Don't poll faster than this, in seconds.
   @min_refresh_interval = 20
 
+  # Wake up from sleep every this many seconds to check if we've been asked to shutdown
+  @sigterm_poll_interval = 5.0
+
+  @shutdown_requested = false
+
   def self.update_jobs(silent)
     PipelineRun.in_progress.each do |pr|
+      break if @shutdown_requested
       @logger.info("  Checking pipeline run #{pr.id} for sample #{pr.sample_id}") unless silent
       pr.update_job_status
     end
@@ -44,7 +54,8 @@ class CheckPipelineRuns
     autoscaling_state = nil
     max_work_duration = 0
     iteration_count = 0
-    loop do
+    out_of_time = false
+    until @shutdown_requested || out_of_time
       iteration_count += 1
       t_iteration_start = t_now
       update_jobs(iteration_count != 1)
@@ -52,16 +63,19 @@ class CheckPipelineRuns
       t_now = Time.now.to_f
       max_work_duration = [t_now - t_iteration_start, max_work_duration].max
       t_iteration_end = [t_now, t_iteration_start + @min_refresh_interval].max
-      if t_iteration_end + max_work_duration > t_end
-        # we won't have time to complete another iteration before t_end
-        @logger.info("Exiting loop after #{iteration_count} iterations.")
-        break
-      end
-      if t_now < t_iteration_end
-        # @logger.info("Sleeping for #{t_iteration_end - t_now} seconds.")
-        sleep t_iteration_end - t_now
-        t_now = Time.now.to_f
+      out_of_time = t_iteration_end + max_work_duration > t_end
+      unless out_of_time
+        loop do
+          wait_time = [t_iteration_end - t_now, sigterm_poll_interval].min
+          break if wait_time <= 0 || @shutdown_requested
+          sleep wait_time
+          t_now = Time.now.to_f
+        end
       end
     end
+    reason = nil
+    reason ||= "shutdown requested" if @shutdown_requsted
+    reason ||= "fewer than #{max_work_duration} seconds remain until cron rebirth" if @out_of_time
+    @logger.info("Exited loop after #{iteration_count} iterations because #{reason}.")
   end
 end
