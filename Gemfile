@@ -14,7 +14,7 @@ gem 'bcrypt', '~> 3.1.7'
 # Use CoffeeScript for .coffee assets and views
 gem 'coffee-rails', '~> 4.2', '>= 4.2.2'
 gem 'consul', '>= 0.13.1'
-gem 'devise', '4.3.0'
+gem 'devise', '4.4.0'
 gem "health_check", ">= 2.7.0"
 gem 'honeycomb-rails', '0.4.1'
 gem 'mailgun_rails', '>= 0.9.0'
