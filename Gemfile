@@ -4,6 +4,8 @@ git_source(:github) do |repo_name|
   repo_name = "#{repo_name}/#{repo_name}" unless repo_name.include?('/')
   "https://github.com/#{repo_name}.git"
 end
+
+
 gem 'airbrake', '~> 7.0'
 gem 'airbrake-ruby'
 gem 'aws-sdk-ecs'
@@ -59,6 +61,7 @@ group :development, :test do
   gem 'rspec-rails', '>= 3.7.2'
   gem 'rubocop', '=0.49.1'
   gem 'selenium-webdriver'
+  gem 'bundler-audit'
 end
 
 group :development do
