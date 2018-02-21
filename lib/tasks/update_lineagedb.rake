@@ -18,12 +18,12 @@ task update_lineage_db: :environment do
    cd #{local_taxonomy_path};
 
    ## Get old lineage file
-   mysql -h #{host} -u $DB_USERNAME --password=$DB_PASSWORD -e "SELECT #{column_names} FROM idseq_#{Rails.env}.taxon_lineages WHERE ended_at = #{maximum_ended_at};" | tr "\t" "," > old_taxon_lineages.csv
+   mysql -h #{host} -u $DB_USERNAME --password=$DB_PASSWORD -e "SELECT #{column_names} FROM idseq_#{Rails.env}.taxon_lineages WHERE ended_at = #{maximum_ended_at};" | tr "\t" "," | tail -n +2 > old_taxon_lineages.csv
 
    ## Get new lineage file
-   # Download new references
-   aws s3 cp #{reference_s3_path}/#{taxid_lineages_file}.gz - | gunzip > taxid-lineages.csv
-   aws s3 cp #{reference_s3_path}/#{names_file}.gz - | gunzip > names.csv
+   # Download new references, extract and remove header line
+   aws s3 cp #{reference_s3_path}/#{taxid_lineages_file}.gz - | gunzip | tail -n +2 > taxid-lineages.csv
+   aws s3 cp #{reference_s3_path}/#{names_file}.gz - | gunzip | tail -n +2 > names.csv
    # names.csv has columns: tax_id,name_txt,name_txt_common
    # taxid-lineages.csv has columns: tax_id,superkingdom,phylum,class,order,family,genus,species
    # Now perform series of joins to produce the format in column_names.
@@ -39,8 +39,8 @@ task update_lineage_db: :environment do
 
    ## Determine changes to make to taxon_lineages
    # Sort and remove header line
-   sort old_taxon_lineages.csv | tail -n +2 > old_taxon_lineages_sorted.csv
-   sort taxid-lineages.csv| tail -n +2 > new_taxon_lineages_sorted.csv
+   sort old_taxon_lineages.csv > old_taxon_lineages_sorted.csv
+   sort taxid-lineages.csv > new_taxon_lineages_sorted.csv
    # Find deleted lines and added lines
    comm -23 old_taxon_lineages_sorted.csv new_taxon_lineages_sorted.csv > records_to_retire.csv
    comm -13 old_taxon_lineages_sorted.csv new_taxon_lineages_sorted.csv > records_to_insert.csv
