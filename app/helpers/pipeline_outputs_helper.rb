@@ -11,22 +11,20 @@ module PipelineOutputsHelper
   end
 
   def select_version_aspect(pipeline_run, aspect)
-    begin
-      version_hashes = JSON.parse(pipeline_run.version)
-      # example for version_hashes:
-      #   [{"name"=>"job_id", "version"=>"023e1f7d-8f96-42cc-ab07-6c233254f113"},
-      #    {"name"=>"idseq-pipeline", "version"=>"1.0.9", "commit-sha"=>"d99a5e5c343a741cef7ea9ef888ead69f440c23d"},
-      #    {"name"=>"nt_k16", "source_file"=>"/blast/db/FASTA/nt.gz", "source_version"=>8, "generation_date"=>"2018-02-20T00:23:45.299465", "indexing_version"=>"1.0.0"},
-      #    {"name"=>"nr_rapsearch", "source_file"=>"/blast/db/FASTA/nr.gz", "source_version"=>12, "generation_date"=>"2018-02-20T00:23:45.299465", "indexing_version"=>"1.0.0"}]
-      aspect_hash = version_hashes.select { |item| item["name"] == aspect }[0]
-      result = if %w[nt_k16 nr_rapsearch].include?(aspect)
-                 DateTime.parse(aspect_hash["generation_date"]).strftime("%m-%Y")
-               else
-                 aspect_hash["version"]
-               end
-    rescue
-      return nil
+    version_hashes = JSON.parse(pipeline_run.version)
+    # example for version_hashes:
+    #   [{"name"=>"job_id", "version"=>"023e1f7d-8f96-42cc-ab07-6c233254f113"},
+    #    {"name"=>"idseq-pipeline", "version"=>"1.0.9", "commit-sha"=>"d99a5e5c343a741cef7ea9ef888ead69f440c23d"},
+    #    {"name"=>"nt_k16", "source_file"=>"/blast/db/FASTA/nt.gz", "source_version"=>8, "generation_date"=>"2018-02-20T00:23:45.299465", "indexing_version"=>"1.0.0"},
+    #    {"name"=>"nr_rapsearch", "source_file"=>"/blast/db/FASTA/nr.gz", "source_version"=>12, "generation_date"=>"2018-02-20T00:23:45.299465", "indexing_version"=>"1.0.0"}]
+    aspect_hash = version_hashes.select { |item| item["name"] == aspect }[0]
+    if %w[nt_k16 nr_rapsearch].include?(aspect)
+      return DateTime.parse(aspect_hash["generation_date"]).utc.strftime("%m-%Y")
+    else
+      return aspect_hash["version"]
     end
+  rescue
+    return nil
   end
 
   def get_taxid_fasta(sample, taxid, tax_level, hit_type)
