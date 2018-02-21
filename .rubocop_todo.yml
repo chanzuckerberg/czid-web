@@ -112,4 +112,4 @@ Style/Next:
   EnforcedStyle: skip_modifier_ifs
   # `MinBodyLength` defines the number of lines of the a body of an if / unless
   # needs to have to trigger this cop
-  MinBodyLength: 5
+  MinBodyLength: 25
