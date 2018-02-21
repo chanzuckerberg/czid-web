@@ -53,10 +53,10 @@ task update_lineage_db: :environment do
    ## Import changes to taxon_lineages
    # retired records:
    mv records_to_retire.csv taxon_lineages
-   mysqlimport --replace --local --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --columns=#{column_names},ended_at --fields-terminated-by=',' idseq_#{Rails.env} taxon_lineages;
+   mysqlimport --replace --local --user=$DB_USERNAME --host=#{host} --password=$DB_PASSWORD --columns=#{column_names},ended_at --fields-terminated-by=',' idseq_#{Rails.env} taxon_lineages;
    # new records:
    mv records_to_insert.csv taxon_lineages
-   mysqlimport --local --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --columns=#{column_names},started_at --fields-terminated-by=',' idseq_#{Rails.env} taxon_lineages;
+   mysqlimport --local --user=$DB_USERNAME --host=#{host} --password=$DB_PASSWORD --columns=#{column_names},started_at --fields-terminated-by=',' idseq_#{Rails.env} taxon_lineages;
 
    ## Clean up
    rm -rf #{local_taxonomy_path};
