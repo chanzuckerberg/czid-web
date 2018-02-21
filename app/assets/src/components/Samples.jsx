@@ -50,6 +50,7 @@ class Samples extends React.Component {
       project_users: [],
       totalNumber: null,
       projectId: null,
+      displaySelectSamples: this.checkURLContent(),
       selectedProjectId: this.fetchParams('project_id') || null,
       filterParams: this.fetchParams('filter') || '',
       searchParams: this.fetchParams('search') || '',
@@ -59,6 +60,7 @@ class Samples extends React.Component {
       sort_by: this.fetchParams('sort_by') || 'id,desc',
       pagesLoaded: 0,
       pageEnd: false,
+      checkedBoxes: 0,
       allChecked: false,
       selectedSampleIndices: [],
       initialFetchedSamples: [],
@@ -371,6 +373,25 @@ class Samples extends React.Component {
           <span>{status}</span>
         </div>
       );
+
+      const sample_name_info = (
+        <span className='sample-name-info'>
+          <div className='card-label top-label'>
+            {/*<span className='project-name'>*/}
+            {/*Mosquito*/}
+            {/*</span>*/}
+            <span className='upload-date'>
+                Uploaded {moment(dbSample.created_at).startOf('second').fromNow()}
+              </span>
+          </div>
+          <div className='card-label center-label sample-name'>
+            {dbSample.name}
+          </div>
+          <div className='card-label author bottom-label author'>
+            { !uploader || uploader === '' ? '' : <span>Uploaded by: {uploader}</span>}
+          </div>
+        </span>
+      )
       const data_values = { total_reads: !derivedOutput.pipeline_run ? BLANK_TEXT : numberWithCommas(derivedOutput.pipeline_run.total_reads),
         nonhost_reads: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.remaining_reads) ? BLANK_TEXT : numberWithCommas(derivedOutput.summary_stats.remaining_reads),
         nonhost_reads_percent: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? '' : <span className="percent"> {`(${derivedOutput.summary_stats.percent_remaining.toFixed(2)}%)`} </span>,
@@ -383,35 +404,16 @@ class Samples extends React.Component {
         notes: dbSample && dbSample.sample_notes ? dbSample.sample_notes : BLANK_TEXT };
 
       return (
-        <a className='col s12 no-padding sample-feed' key={i} href={`/samples/${dbSample.id}`}>
+        <a className='col s12 no-padding sample-feed' key={i} >
           <div>
             <div className='samples-card white'>
               <div className='flex-container'>
                 <ul className='flex-items'>
                   <li className='check-box-container'>
-                    {/* <input type="checkbox" id={i}
+                    { this.state.displaySelectSamples ? <div><input type="checkbox" id={i}
                       className="filled-in checkbox" value={ this.state.selectedSampleIndices.indexOf(i) != -1 }
                       onChange = { this.selectSample }  
-                      />
-                    <label htmlFor={i}>
-                      
-                    </label> */}
-                    <span className='sample-name-info'>
-                        <div className='card-label top-label'>
-                          {/*<span className='project-name'>*/}
-                          {/*Mosquito*/}
-                          {/*</span>*/}
-                          <span className='upload-date'>
-                              Uploaded {moment(dbSample.created_at).startOf('second').fromNow()}
-                            </span>
-                        </div>
-                        <div className='card-label center-label sample-name'>
-                          {dbSample.name}
-                        </div>
-                        <div className='card-label author bottom-label author'>
-                          { !uploader || uploader === '' ? '' : <span>Uploaded by: {uploader}</span>}
-                        </div>
-                      </span>
+                      /> <label htmlFor={i}>{sample_name_info}</label></div> : sample_name_info }
                   </li>
                   {
                     this.state.columnsShown.map((column, pos) => {
@@ -522,6 +524,14 @@ class Samples extends React.Component {
         pageEnd: prevState.pageEnd
       }))
     })
+  }
+
+  checkURLContent() {
+    if(window.location.href.indexOf("select") > -1) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   //fetch project, filter and search params
@@ -728,13 +738,12 @@ class Samples extends React.Component {
     $('.checkAll').click(function(e) {
       var checked = e.currentTarget.checked;
       $('.checkbox').prop('checked', checked);
+      var checkedCount = $("input:checkbox:checked").length
       that.setState({
-        allChecked: checked
+        allChecked: checked,
+        checkedBoxes: checkedCount
       });
-      // to be used in comparison method
-      // that.fetchAllSelectedIds(that.state.allChecked);
     }); 
-
   }
 
 
@@ -765,6 +774,7 @@ class Samples extends React.Component {
   }
 
   selectSample(e) {
+    console.log('got called');
     e.stopPropagation();
     $(".checkAll").prop('checked', false);
     this.setState({
@@ -775,7 +785,6 @@ class Samples extends React.Component {
 
     let index
     // check if the check box is checked or unchecked
-
  
     if (e.target.checked) {
       // add the numerical value of the checkbox to options array
@@ -785,9 +794,12 @@ class Samples extends React.Component {
       index = sampleList.indexOf(+e.target.id)
       sampleList.splice(index, 1)
     }
-
+    var checkedCount = $("input:checkbox:checked").length
     // update the state with the new array of options
-    this.setState({ selectedSampleIndices: sampleList })
+    this.setState({ 
+      selectedSampleIndices: sampleList,
+      checkedBoxes: checkedCount
+     })
   }
 
 
@@ -859,10 +871,10 @@ class Samples extends React.Component {
     );
     const search_box = (
       <div className="row search-box">
-        {/* { check_all } */}
+        { this.state.displaySelectSamples ? check_all : null }
         { search_field }
         { table_download_button }
-        {/* { compare_button } */}
+         { this.state.checkedBoxes > 0  ? compare_button : null }
         { project_id === 'all' ? null : reports_download_button }
       </div>
     );
