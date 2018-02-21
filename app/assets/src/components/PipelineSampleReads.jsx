@@ -407,10 +407,10 @@ class PipelineSampleReads extends React.Component {
                               !this.pipelineRun.version.pipeline ? '' :
                                 'v' + this.pipelineRun.version.pipeline
     if (version_display != '' && this.pipelineRun.version.nt) {
-      version_display = version_display + ', NT v' + this.pipelineRun.version.nt
+      version_display = version_display + ', NT ' + this.pipelineRun.version.nt
     }
     if (version_display != '' && this.pipelineRun.version.nr) {
-      version_display = version_display + ', NR v' + this.pipelineRun.version.nr
+      version_display = version_display + ', NR ' + this.pipelineRun.version.nr
     }
 
     return (
