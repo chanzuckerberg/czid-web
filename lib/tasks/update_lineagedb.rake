@@ -37,13 +37,10 @@ task load_lineage_db: :environment do
    done;
 
    ## Compute diff
-   # Sort files in the same manner
-   sort -t, -k2 old_taxon_lineages.csv > old_taxon_lineages_sorted.csv
-   sort -t, -k2 taxid-lineages.csv > new_taxon_lineages_sorted.csv
-   # Get diff with no contextual information, only lines starting with - (deleted) or + (inserted)
-   diff -U 0 --minimal old_taxon_lineages_sorted.csv new_taxon_lineages_sorted.csv | grep -v '^---' | grep -v '^+++' | grep -v '^@@' > diff.txt
-   # Produce file of records to update with end-date in taxon_lineages: ...
-   # Produce file of records to insert in taxon_lineages: ...
+   sort old_taxon_lineages.csv > old_taxon_lineages_sorted.csv
+   sort taxid-lineages.csv > new_taxon_lineages_sorted.csv
+   comm -23 old_taxon_lineages_sorted.csv new_taxon_lineages_sorted.csv > records_to_retire.csv
+   comm -13 old_taxon_lineages_sorted.csv new_taxon_lineages_sorted.csv > records_to_insert.csv
 
    ## mysqlimport...
 
