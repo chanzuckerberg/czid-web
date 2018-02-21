@@ -1,9 +1,8 @@
 require 'open3'
 require 'csv'
 require 'English'
-task load_lineage_db: :environment do
+task update_lineage_db: :environment do
   local_taxonomy_path = "/app/tmp/taxonomy"
-  old_lineage_csv = "#{local_taxonomy_path}/taxon_lineages.csv"
   column_names = "taxid,superkingdom_taxid,phylum_taxid,class_taxid,order_taxid,family_taxid,genus_taxid,species_taxid," \
     "superkingdom_name,superkingdom_common_name,phylum_name,phylum_common_name,class_name,class_common_name," \
     "order_name,order_common_name,family_name,family_common_name,genus_name,genus_common_name,species_name,species_common_name"
