@@ -53,6 +53,7 @@ gem 'rack-host-redirect'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
+  gem 'bundler-audit'
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
   # Adds support for Capybara system testing and selenium driver
   gem 'capybara', '~> 2.17', '>= 2.17.0'
@@ -60,7 +61,6 @@ group :development, :test do
   gem 'rspec-rails', '>= 3.7.2'
   gem 'rubocop', '=0.49.1'
   gem 'selenium-webdriver'
-  gem 'bundler-audit'
 end
 
 group :development do
