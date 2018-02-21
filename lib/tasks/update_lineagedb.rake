@@ -10,7 +10,7 @@ task update_lineage_db: :environment do
   taxid_lineages_file = 'taxid-lineages.csv'
   names_file = 'names.csv'
   reference_s3_path = 's3://czbiohub-infectious-disease/references'
-  current_date = DateTime.now
+  current_date = DateTime.current
   `
    ## Set work directory
    mkdir -p #{local_taxonomy_path};
@@ -58,5 +58,5 @@ task update_lineage_db: :environment do
    ## Clean up
    rm -rf #{local_taxonomy_path};
   `
-  raise "lineage database import failed" unless $CHILD_STATUS.success?
+  raise "lineage database update failed" unless $CHILD_STATUS.success?
 end

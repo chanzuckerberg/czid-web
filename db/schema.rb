@@ -302,7 +302,7 @@ ActiveRecord::Schema.define(version: 20180221220717) do
     t.index ["phylum_taxid"], name: "index_taxon_lineages_on_phylum_taxid"
     t.index ["species_taxid"], name: "index_taxon_lineages_on_species_taxid"
     t.index ["superkingdom_taxid"], name: "index_taxon_lineages_on_superkingdom_taxid"
-    t.index ["taxid"], name: "index_taxon_lineages_on_taxid", unique: true
+    t.index ["taxid", "ended_at", "started_at"], name: "index_taxon_lineages_on_taxid_and_dates", unique: true
   end
 
   create_table "taxon_names", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
