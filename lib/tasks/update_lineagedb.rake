@@ -11,13 +11,14 @@ task load_lineage_db: :environment do
   taxid_lineages_file = 'taxid-lineages.csv'
   names_file = 'names.csv'
   reference_s3_path = 's3://czbiohub-infectious-disease/references'
+  current_date = DateTime.now
   `
    ## Set work directory
    mkdir -p #{local_taxonomy_path};
    cd #{local_taxonomy_path};
 
    ## Get old lineage file
-   mysql -h #{host} -u $DB_USERNAME --password=$DB_PASSWORD -e "SELECT #{column_names} FROM idseq_#{Rails.env}.taxon_lineages;" | tr "\t" "," > old_taxon_lineages.csv
+   mysql -h #{host} -u $DB_USERNAME --password=$DB_PASSWORD -e "SELECT #{column_names} FROM idseq_#{Rails.env}.taxon_lineages WHERE ended_at IS NULL;" | tr "\t" "," > old_taxon_lineages.csv
 
    ## Get new lineage file
    # Download new references
@@ -36,13 +37,24 @@ task load_lineage_db: :environment do
      file1_ncol=$((${file1_ncol}+2));
    done;
 
-   ## Compute diff
-   sort old_taxon_lineages.csv > old_taxon_lineages_sorted.csv
-   sort taxid-lineages.csv > new_taxon_lineages_sorted.csv
+   ## Determine changes to make to taxon_lineages
+   # Sort and remove header line
+   sort old_taxon_lineages.csv | tail -n +2 > old_taxon_lineages_sorted.csv
+   sort taxid-lineages.csv| tail -n +2 > new_taxon_lineages_sorted.csv
+   # Find deleted lines and added lines
    comm -23 old_taxon_lineages_sorted.csv new_taxon_lineages_sorted.csv > records_to_retire.csv
    comm -13 old_taxon_lineages_sorted.csv new_taxon_lineages_sorted.csv > records_to_insert.csv
+   # Add ended_at column for retired records, started_at column for new records
+   sed -e 's/$/,#{current_date}/' -i records_to_retire.csv
+   sed -e 's/$/,#{current_date}/' -i records_to_insert.csv
 
-   ## mysqlimport...
+   ## Import changes to taxon_lineages
+   # retired records:
+   mv records_to_retire.csv taxon_lineages
+   mysqlimport --replace --local --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --columns=#{column_names},ended_at --fields-terminated-by=',' idseq_#{Rails.env} taxon_lineages;
+   # new records:
+   mv records_to_insert.csv taxon_lineages
+   mysqlimport --local --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --columns=#{column_names},started_at --fields-terminated-by=',' idseq_#{Rails.env} taxon_lineages;
 
    ## Clean up
    rm -rf #{local_taxonomy_path};
