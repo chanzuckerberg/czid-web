@@ -774,7 +774,6 @@ class Samples extends React.Component {
   }
 
   selectSample(e) {
-    console.log('got called');
     e.stopPropagation();
     $(".checkAll").prop('checked', false);
     this.setState({
