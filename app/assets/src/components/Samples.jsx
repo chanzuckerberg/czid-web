@@ -96,7 +96,6 @@ class Samples extends React.Component {
         'location',
         'pipeline_status',
         'notes',
-        'tissue_type',
         'nucleotide_type'
       ]
     };
@@ -107,7 +106,6 @@ class Samples extends React.Component {
       quality_control: { display_name: "Passed QC", tooltip: "Passed quality control", type: "pipeline_data" },
       compression_ratio: { display_name: "DCR", tooltip: "Duplicate compression ratio", type: "pipeline_data" },
       pipeline_status: { display_name: "Status", type: "pipeline_data" },
-      tissue_type: { display_name: "Tissue type", type: "metadata" },
       nucleotide_type: { display_name: "Nucleotide type", type: "metadata" },
       location: { display_name: "Location", type: "metadata" },
       host_genome: { display_name: "Host", type: "metadata" },
@@ -169,6 +167,7 @@ class Samples extends React.Component {
   }
 
   selectHostFilter(e) {
+    console.log(e.target.getAttribute('data-i'), e.target.checked, this.state.selectedHostIndices, 'select host');
     // current array of options
     const hostList = this.state.selectedHostIndices
 
@@ -177,6 +176,7 @@ class Samples extends React.Component {
     if (e.target.checked) {
       // add the numerical value of the checkbox to options array
       hostList.push(+e.target.id)
+      console.log(hostList, 'hostlist');
     } else {
       // or remove the value from the unchecked checkbox from the array
       index = hostList.indexOf(+e.target.id)
@@ -454,7 +454,6 @@ class Samples extends React.Component {
         nonhost_reads_percent: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? '' : <span className="percent"> {`(${derivedOutput.summary_stats.percent_remaining.toFixed(2)}%)`} </span>,
         quality_control: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? BLANK_TEXT : `${derivedOutput.summary_stats.qc_percent.toFixed(2)}%`,
         compression_ratio: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.compression_ratio) ? BLANK_TEXT : derivedOutput.summary_stats.compression_ratio.toFixed(2),
-        tissue_type: dbSample && dbSample.sample_tissue ? dbSample.sample_tissue : BLANK_TEXT,
         nucleotide_type: dbSample && dbSample.sample_template ? dbSample.sample_template : BLANK_TEXT,
         location: dbSample && dbSample.sample_location ? dbSample.sample_location : BLANK_TEXT,
         host_genome: derivedOutput && derivedOutput.host_genome_name ? derivedOutput.host_genome_name : BLANK_TEXT,
@@ -949,7 +948,7 @@ class Samples extends React.Component {
                 { this.hostGenomes.map((host, i) => {
                   return (
                     <div key={i} className="options-wrapper">
-                      <input name="host" type="checkbox" data-id={host.id} value={ this.state.selectedHostIndices.indexOf(i) != -1 }onChange={this.selectHostFilter}
+                      <input name="host" type="checkbox" data-id={host.id}  checked={this.state.selectedHostIndices.indexOf(i) != -1 ? "checked" : "" } value={this.state.selectedHostIndices.indexOf(i) != -1 } onChange={this.selectHostFilter}
                         id={host.id} className="filled-in human" />
                       <label htmlFor={host.id}>{host.name}</label>
                     </div>
@@ -1122,22 +1121,6 @@ class Samples extends React.Component {
       </div>
     );
 
-    const filterTissueDropDown = (
-        <div className='dropdown-status-filtering'>
-        <li>
-          <a className="title">
-            <b>Filter tissue</b>
-          </a>
-        </li>
-        { this.tissue_types.map((tissue, i) => {
-          <div>{tissue}nknjn</div>
-          return (
-            <li key={i} className="filter-item" data-status={tissue} onClick={ this.handleTissueFilterSelect } ><a data-status={tissue} className="filter-item">{tissue}</a><i className="filter fa fa-check hidden"></i></li>
-          )
-        }) }
-        <li className="divider"/>
-      </div>
-   )
 
    const filterStatus = (
         <div className='dropdown-status-filtering'>
@@ -1189,7 +1172,7 @@ class Samples extends React.Component {
                     }
                     <ul className='dropdown-content column-dropdown' id={`column-dropdown-${pos}`}>
                         { column_name === 'pipeline_status' ?
-                          <div>{filterStatus}</div> : ( column_name === 'tissue_type' ? <div>{filterTissueDropDown}</div> : "")
+                          <div>{filterStatus}</div> : null 
                         }
                         <li>
                           <a className="title">
