@@ -3,7 +3,7 @@ sudo: required
 env:
   CI: yes
 rvm:
-- 2.4
+- 2.5.0
 services:
   - docker
 before_install:
