@@ -8,7 +8,7 @@ class HomeController < ApplicationController
     @favorite_projects = current_user.favorites
     @projects = current_power.projects
     @editable_project_ids = current_power.updatable_projects.pluck(:id)
-    @host_genomes = HostGenome.all
+    @host_genomes = HostGenome.all.reject {|hg| hg.name.downcase.include?("__test__")}
     render 'home'
   end
 
@@ -17,4 +17,3 @@ class HomeController < ApplicationController
     dir ||= default_dir
     dir == 'newest' ? samples.order(id: :desc) : samples.order(id: :asc)
   end
-end
