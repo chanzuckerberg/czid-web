@@ -5,18 +5,8 @@ require 'English'
 class CheckPipelineRuns
   @logger = Logger.new(STDOUT)
 
-  # A fresh CheckPipelineRuns should run every 5 minutes.
-  @cron_period = 5 * 60
-
-  # Don't poll faster than this, in seconds.
-  @min_refresh_interval = 20
-
-  def self.time_padding_success
-    5
-  end
-
-  def self.time_padding_failure
-    15
+  class << self
+    attr_reader :logger
   end
 
   def self.update_jobs(silent)
@@ -40,11 +30,13 @@ class CheckPipelineRuns
     new_job_count
   end
 
-  def self.perform
-    @logger.info("Checking the active pipeline runs every #{@min_refresh_interval} seconds over the next #{@cron_period / 60} minutes.")
+  def self.run(duration, min_refresh_interval)
+    @logger.info("Checking the active pipeline runs every #{min_refresh_interval} seconds over the next #{duration / 60} minutes.")
     t_now = Time.now.to_f # unixtime
-    t_end = t_now + @cron_period - time_padding_success
+    # Will try to return as soon as duration seconds have elapsed, but not any sooner.
+    t_end = t_now + duration
     autoscaling_state = nil
+    # The duration of the longest update so far.
     max_work_duration = 0
     iter_count = 0
     loop do
@@ -54,28 +46,44 @@ class CheckPipelineRuns
       autoscaling_state = autoscaling_update(autoscaling_state)
       t_now = Time.now.to_f
       max_work_duration = [t_now - t_iter_start, max_work_duration].max
-      t_iter_end = [t_now, t_iter_start + @min_refresh_interval].max
+      t_iter_end = [t_now, t_iter_start + min_refresh_interval].max
       break unless t_iter_end + max_work_duration < t_end
       while t_now < t_iter_end
+        # Ensure no iteration is shorter than min_refresh_interval.
         sleep t_iter_end - t_now
         t_now = Time.now.to_f
       end
+    end
+    while t_now < t_end
+      # In this case (t_end - t_now) < max_work_duration.
+      sleep t_end - t_now
+      t_now = Time.now.to_f
     end
     @logger.info("Exited loop after #{iter_count} iterations.")
   end
 end
 
-task "pipeline_monitor", [:lifetype] => :environment do |_t, args|
-  if args[:lifetype] == "incarnation"
-    CheckPipelineRuns.perform
+task "pipeline_monitor", [:agent_type] => :environment do |_t, args|
+  # spawn a new "angel" process every 15 minutes
+  # do not exceed autoscaling.EXPIRATION_PERIOD_MINUTES - epsilon
+  respawn_interval = 15 * 60
+  # rate-limit status updates
+  checks_per_minute = 3.0
+  # make sure the system is not overwhelmed under any cirmustances
+  wait_before_respawn = 5
+  additional_wait_after_failure = 25
+  if args[:agent_type] == "angel"
+    CheckPipelineRuns.run(respawn_interval - wait_before_respawn, 60.0 / checks_per_minute)
   else
-    # daemon
+    # If not an angel, must be a daemon.
+    # HACK
+    CheckPipelineRuns.logger.info("HACK: Sleeping 60 seconds on daemon startup for any prior incarnations to exit.")
+    sleep 60
     loop do
-      system("rake pipeline_monitor[incarnation]")
-      if $CHILD_STATUS.exitstatus.zero?
-        sleep CheckPipelineRuns.time_padding_success
-      else
-        sleep CheckPipelineRuns.time_padding_failure
+      system("rake pipeline_monitor[angel]")
+      sleep wait_before_respawn
+      unless $CHILD_STATUS.exitstatus.zero?
+        sleep additional_wait_after_failure
       end
     end
   end
