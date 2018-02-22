@@ -53,7 +53,7 @@ task update_lineage_db: :environment do
    # Add started_at column for retired records to make sure they violate [taxid, started_at] uniqueness and overwrite the correct record
    sort records_to_retire.csv > records_to_retire_sorted.csv
    sort taxid_to_started_at.csv > taxid_to_started_at_sorted.csv
-   join -t, -1 1 -2 1 -a 1 -o${file1_output_cols},2.2 records_to_retire_sorted.csv taxid_to_started_at_sorted.csv > records_to_retire.csv
+   join -t, -1 1 -2 1 -a 1 -o${file1_output_cols},1.$((${file1_ncol}+1)),2.2 records_to_retire_sorted.csv taxid_to_started_at_sorted.csv > records_to_retire.csv
 
    ## Import changes to taxon_lineages
    # retired records:
