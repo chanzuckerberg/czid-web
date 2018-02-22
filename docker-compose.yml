@@ -180,4 +180,4 @@ services:
       - TRAVIS_SECURE_ENV_VARS
       - TRAVIS_TAG
       - TRAVIS
-    command: bundle exec "QUEUE=* rake resque:scheduler"
+    command: bundle exec "rake pipeline_monitor"
