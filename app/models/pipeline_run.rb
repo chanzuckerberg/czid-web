@@ -223,8 +223,8 @@ class PipelineRun < ApplicationRecord
                 WHEN #{TaxonCount::TAX_LEVEL_GENUS} THEN AVG(100.0 * taxon_counts.genus_total_concordant) / sum(taxon_counts.count)
                 WHEN #{TaxonCount::TAX_LEVEL_FAMILY} THEN AVG(100.0 * taxon_counts.family_total_concordant) / sum(taxon_counts.count)
               END,
-              '#{current_date}',
-              '#{current_date}'
+              CONVERT(DATETIME, '#{current_date}'),
+              CONVERT(DATETIME, '#{current_date}')
        FROM  taxon_lineages, taxon_counts
        WHERE (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at) AND
              taxon_lineages.taxid = taxon_counts.tax_id AND
