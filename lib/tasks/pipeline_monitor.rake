@@ -1,5 +1,6 @@
 # Jos to check the status of pipeline runs
 require 'logger'
+require 'English'
 
 class CheckPipelineRuns
   @logger = Logger.new(STDOUT)
@@ -42,7 +43,7 @@ class CheckPipelineRuns
   def self.perform
     @logger.info("Checking the active pipeline runs every #{@min_refresh_interval} seconds over the next #{@cron_period / 60} minutes.")
     t_now = Time.now.to_f # unixtime
-    t_end = t_now + @cron_period - self.time_padding_success
+    t_end = t_now + @cron_period - time_padding_success
     autoscaling_state = nil
     max_work_duration = 0
     iter_count = 0
@@ -55,7 +56,7 @@ class CheckPipelineRuns
       max_work_duration = [t_now - t_iter_start, max_work_duration].max
       t_iter_end = [t_now, t_iter_start + @min_refresh_interval].max
       break unless t_iter_end + max_work_duration < t_end
-      while t_now < t_iter_end do
+      while t_now < t_iter_end
         sleep t_iter_end - t_now
         t_now = Time.now.to_f
       end
@@ -64,14 +65,14 @@ class CheckPipelineRuns
   end
 end
 
-task "pipeline_monitor", [:lifetype] => :environment do |t, args|
+task "pipeline_monitor", [:lifetype] => :environment do |_t, args|
   if args[:lifetype] == "incarnation"
     CheckPipelineRuns.perform
   else
     # daemon
     loop do
       system("rake pipeline_monitor[incarnation]")
-      if $?.exitstatus == 0
+      if $CHILD_STATUS.exitstatus.zero?
         sleep CheckPipelineRuns.time_padding_success
       else
         sleep CheckPipelineRuns.time_padding_failure
