@@ -10,7 +10,7 @@ task update_lineage_db: :environment do
   taxid_lineages_file = 'taxid-lineages.csv'
   names_file = 'names.csv'
   reference_s3_path = 's3://czbiohub-infectious-disease/references'
-  current_date = ActiveRecord::Base.connection.select_value("SELECT CURRENT_TIME")
+  current_date = Time.now.getlocal
   `
    ## Set work directory
    mkdir -p #{local_taxonomy_path};
@@ -54,7 +54,7 @@ task update_lineage_db: :environment do
    sort records_to_retire.csv > records_to_retire_sorted.csv
    sort taxid_to_started_at.csv > taxid_to_started_at_sorted.csv
    join -t, -1 1 -2 1 -a 1 -o${file1_output_cols},2.2 records_to_retire_sorted.csv taxid_to_started_at_sorted.csv > records_to_retire.csv
-   
+
 
    ## Import changes to taxon_lineages
    # retired records:
