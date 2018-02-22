@@ -89,7 +89,11 @@ class Sample < ApplicationRecord
 
   def self.search(search)
     if search
-      where('samples.name LIKE ?', "%#{search}%")
+      where('samples.name LIKE :search
+        OR samples.sample_tissue LIKE :search
+        OR samples.sample_location LIKE :search
+        OR samples.sample_notes LIKE :search
+        OR samples.sample_host', search: "%#{search}%")
     else
       scoped
     end

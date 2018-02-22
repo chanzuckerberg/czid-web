@@ -496,6 +496,9 @@ $break-large: 1070px;
       background: #edf8ff;
       border: 1px solid #d9d9d9;
       color:  rgb(3, 169, 244) !important;
+        &:hover {
+          background: rgb(178, 235, 242)
+        }
     }
     .download-progress {
       cursor: pointer;
@@ -718,6 +721,7 @@ $break-large: 1070px;
       float: left;
       border: 1px solid #ddd;
       padding: 9px 12px;
+      margin: 0 10px 0px 0px;
       label {
         vertical-align: middle;
       }
@@ -729,6 +733,7 @@ $break-large: 1070px;
         margin-left: 10px;
         margin-top: 14px;
         font-size: 18px;
+        color: $subdued-color;
       }
     }
 
@@ -1025,4 +1030,21 @@ input[type="button"] {
     font-size: $font-size-base;
     min-width: 110px;
   }
+}
+
+[type=checkbox].filled-in:not(:checked)+label:after {
+    height: 16px;
+    width: 16px;
+    background-color: transparent;
+    border: 2px solid #5a5a5a;
+    top: 4px;
+    z-index: 0;
+}
+
+[type=checkbox].filled-in:checked+label:after {
+    top: 0;
+    width: 16px;
+    height: 16px;
+    border: 10px solid #188fd8;
+    background-color: #188fd8;
 }

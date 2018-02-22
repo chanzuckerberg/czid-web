@@ -4,6 +4,7 @@ git_source(:github) do |repo_name|
   repo_name = "#{repo_name}/#{repo_name}" unless repo_name.include?('/')
   "https://github.com/#{repo_name}.git"
 end
+
 gem 'airbrake', '~> 7.0'
 gem 'airbrake-ruby'
 gem 'aws-sdk-ecs'
@@ -52,6 +53,7 @@ gem 'rack-host-redirect'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
+  gem 'bundler-audit'
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
   # Adds support for Capybara system testing and selenium driver
   gem 'capybara', '~> 2.17', '>= 2.17.0'
