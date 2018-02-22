@@ -924,6 +924,27 @@ class Samples extends React.Component {
       </div>
     );
 
+    let check_all = (
+      <div className="check-all">
+          <input type="checkbox"
+            id="checkAll"
+            className="filled-in checkAll"
+            />
+          <label htmlFor="checkAll"></label>
+          <i className="fa fa-caret-down"></i>    
+      </div>
+    );
+
+    let compare_button = (
+      <div className='col s2 download-table'>
+        <div className='white'>
+          <a onClick={this.compareSamples} className="compare center">
+            <span>Compare</span>
+          </a>
+        </div>
+      </div>
+    )
+
     const metaDataFilter = (
       <div>
         <div className="col s2 metadata">
