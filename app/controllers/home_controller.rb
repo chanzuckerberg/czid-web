@@ -17,3 +17,4 @@ class HomeController < ApplicationController
     dir ||= default_dir
     dir == 'newest' ? samples.order(id: :desc) : samples.order(id: :asc)
   end
+end

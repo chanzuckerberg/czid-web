@@ -167,7 +167,7 @@ class Samples extends React.Component {
   }
 
   selectHostFilter(e) {
-    console.log(e.target.getAttribute('data-i'), e.target.checked, this.state.selectedHostIndices, 'select host');
+    
     // current array of options
     const hostList = this.state.selectedHostIndices
 
@@ -188,6 +188,7 @@ class Samples extends React.Component {
     }, () => {
       this.handleHostFilterSelect(this.state.selectedHostIndices);
     })
+    console.log(this.state.selectedHostIndices, 'select host');
   }
   
 
@@ -948,7 +949,7 @@ class Samples extends React.Component {
                 { this.hostGenomes.map((host, i) => {
                   return (
                     <div key={i} className="options-wrapper">
-                      <input name="host" type="checkbox" data-id={host.id}  checked={this.state.selectedHostIndices.indexOf(i) != -1 ? "checked" : "" } value={this.state.selectedHostIndices.indexOf(i) != -1 } onChange={this.selectHostFilter}
+                      <input name="host" type="checkbox" data-id={host.id} checked={this.state.selectedHostIndices.indexOf(host.id) < 0 ? "" : "checked"} value={this.state.selectedHostIndices.indexOf(i) != -1 } onChange={this.selectHostFilter}
                         id={host.id} className="filled-in human" />
                       <label htmlFor={host.id}>{host.name}</label>
                     </div>
@@ -961,7 +962,7 @@ class Samples extends React.Component {
                   return (
                     <div key={i} className="options-wrapper"> 
                     <input name="tissue" type="checkbox"
-                    id={tissue} className="filled-in" data-status={tissue} onChange={this.selectTissueFilter} />
+                    id={tissue} className="filled-in" data-status={tissue} checked={this.state.selectedTissueFilters.indexOf(tissue) < 0 ? "" : "checked"} onChange={this.selectTissueFilter} />
                     <label htmlFor={tissue}>{tissue}</label>
                   </div>  
                   )
