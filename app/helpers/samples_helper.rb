@@ -186,8 +186,7 @@ module SamplesHelper
   end
 
   def filter_by_host(samples, query)
-    samples = samples.where(host_genome_id: query)
-    samples
+   samples.where(host_genome_id: query)
   end
 
   def pipeline_run_info(pipeline_run)
