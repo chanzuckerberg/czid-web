@@ -183,7 +183,6 @@ class PipelineRun < ApplicationRecord
   end
 
   def generate_aggregate_counts(tax_level_name)
-    current_date = Time.zone.now.strftime("%Y-%m-%d")
     tax_level_id = TaxonCount::NAME_2_LEVEL[tax_level_name]
     # The unctagorizable_name chosen here is not important. The report page
     # endpoint makes its own choice about what to display in this case.  It
@@ -196,7 +195,7 @@ class PipelineRun < ApplicationRecord
                                 tax_level, count_type, count,
                                 percent_identity, alignment_length, e_value,
                                 species_total_concordant, genus_total_concordant, family_total_concordant,
-                                percent_concordant, created_at, updated_at)
+                                percent_concordant)
        SELECT #{id},
               IF(
                 taxon_lineages.#{tax_level_name}_taxid IS NOT NULL,
@@ -223,10 +222,9 @@ class PipelineRun < ApplicationRecord
                 WHEN #{TaxonCount::TAX_LEVEL_GENUS} THEN AVG(100.0 * taxon_counts.genus_total_concordant) / sum(taxon_counts.count)
                 WHEN #{TaxonCount::TAX_LEVEL_FAMILY} THEN AVG(100.0 * taxon_counts.family_total_concordant) / sum(taxon_counts.count)
               END,
-              '#{current_date}',
-              '#{current_date}'
        FROM  taxon_lineages, taxon_counts
-       WHERE taxon_lineages.taxid = taxon_counts.tax_id AND
+       WHERE (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at) AND
+             taxon_lineages.taxid = taxon_counts.tax_id AND
              taxon_counts.pipeline_run_id = #{id} AND
              taxon_counts.tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}
       GROUP BY 1,2,3,4,5"
@@ -245,6 +243,7 @@ class PipelineRun < ApplicationRecord
         WHERE taxon_counts.pipeline_run_id=#{id} AND
               taxon_counts.tax_level=#{level_id} AND
               taxon_counts.tax_id = taxon_lineages.taxid AND
+              (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at) AND
               taxon_lineages.#{level}_name IS NOT NULL
       ")
     end
@@ -264,6 +263,7 @@ class PipelineRun < ApplicationRecord
       SET taxon_counts.genus_taxid = taxon_lineages.genus_taxid,
           taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
       WHERE taxon_counts.pipeline_run_id=#{id} AND
+            (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at) AND
             taxon_lineages.taxid = taxon_counts.tax_id
     ")
   end

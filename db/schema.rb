@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180213225338) do
+ActiveRecord::Schema.define(version: 20180221220717) do
 
   create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "archive_of"
@@ -293,6 +293,8 @@ ActiveRecord::Schema.define(version: 20180213225338) do
     t.string "family_common_name"
     t.string "genus_common_name"
     t.string "species_common_name"
+    t.datetime "started_at", default: "2000-01-01 00:00:00", null: false
+    t.datetime "ended_at", default: "3000-01-01 00:00:00", null: false
     t.index ["class_taxid"], name: "index_taxon_lineages_on_class_taxid"
     t.index ["family_taxid"], name: "index_taxon_lineages_on_family_taxid"
     t.index ["genus_taxid"], name: "index_taxon_lineages_on_genus_taxid"
@@ -300,7 +302,8 @@ ActiveRecord::Schema.define(version: 20180213225338) do
     t.index ["phylum_taxid"], name: "index_taxon_lineages_on_phylum_taxid"
     t.index ["species_taxid"], name: "index_taxon_lineages_on_species_taxid"
     t.index ["superkingdom_taxid"], name: "index_taxon_lineages_on_superkingdom_taxid"
-    t.index ["taxid"], name: "index_taxon_lineages_on_taxid", unique: true
+    t.index ["taxid", "ended_at"], name: "index_taxon_lineages_on_taxid_and_end", unique: true
+    t.index ["taxid", "started_at"], name: "index_taxon_lineages_on_taxid_and_start", unique: true
   end
 
   create_table "taxon_names", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
