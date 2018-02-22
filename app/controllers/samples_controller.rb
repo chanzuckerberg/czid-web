@@ -44,7 +44,8 @@ class SamplesController < ApplicationController
     project_id = params[:project_id]
     name_search_query = params[:search]
     filter_query = params[:filter]
-    tissue_type_query = params[:tissue]
+    tissue_type_query = params[:tissue].split(',') if params[:tissue].present?
+    host_query = params[:host].split(',') if params[:host].present?
     sort = params[:sort_by]
     samples_query = JSON.parse(params[:ids]) if params[:ids].present?
 
@@ -57,6 +58,7 @@ class SamplesController < ApplicationController
     results = results.search(name_search_query) if name_search_query.present?
     results = filter_samples(results, filter_query) if filter_query.present?
     results = filter_by_tissue_type(results, tissue_type_query) if tissue_type_query.present?
+    results = filter_by_host(results, host_query) if host_query.present?
 
     @samples = sort_by(results, sort).paginate(page: params[:page], per_page: params[:per_page] || PAGE_SIZE)
     @samples_count = results.size

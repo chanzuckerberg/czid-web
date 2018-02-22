@@ -27,8 +27,10 @@ class Samples extends React.Component {
     this.loadMore = this.loadMore.bind(this);
     this.fetchResults = this.fetchResults.bind(this);
     this.fetchSamples = this.fetchSamples.bind(this);
+    this.hostGenomes = props.hostGenomes || [];
     this.handleStatusFilterSelect = this.handleStatusFilterSelect.bind(this);
     this.handleTissueFilterSelect = this.handleTissueFilterSelect.bind(this);
+    this.handleHostFilterSelect = this.handleHostFilterSelect.bind(this);
     this.setUrlLocation = this.setUrlLocation.bind(this);
     this.sortSamples = this.sortSamples.bind(this);
     this.switchColumn = this.switchColumn.bind(this);
@@ -44,6 +46,9 @@ class Samples extends React.Component {
     this.resetForm = this.resetForm.bind(this);
     this.selectSample = this.selectSample.bind(this);
     this.compareSamples = this.compareSamples.bind(this);
+    this.selectTissueFilter = this.selectTissueFilter.bind(this);
+    this.selectHostFilter = this.selectHostFilter.bind(this);
+    this.displayMetaDataDropdown = this.displayMetaDataDropdown.bind(this);
     this.state = {
       invite_status: null,
       project: null,
@@ -54,7 +59,8 @@ class Samples extends React.Component {
       selectedProjectId: this.fetchParams('project_id') || null,
       filterParams: this.fetchParams('filter') || '',
       searchParams: this.fetchParams('search') || '',
-      tissueParams: this.fetchParams('tissue') || '',
+      tissueParams: this.fetchParams('tissue') || [],
+      hostParams: this.fetchParams('host') || [],
       sampleIdsParams: this.fetchParams('ids') || [],
       allSamples: [],
       sort_by: this.fetchParams('sort_by') || 'id,desc',
@@ -63,6 +69,10 @@ class Samples extends React.Component {
       checkedBoxes: 0,
       allChecked: false,
       selectedSampleIndices: [],
+      displayDropdown: false,
+      selectedTissueFilters: [],
+      selectedTissueIndices: [],
+      selectedHostIndices: [],
       initialFetchedSamples: [],
       loading: false,
       isRequesting: false,
@@ -86,7 +96,6 @@ class Samples extends React.Component {
         'location',
         'pipeline_status',
         'notes',
-        'tissue_type',
         'nucleotide_type'
       ]
     };
@@ -97,7 +106,6 @@ class Samples extends React.Component {
       quality_control: { display_name: "Passed QC", tooltip: "Passed quality control", type: "pipeline_data" },
       compression_ratio: { display_name: "DCR", tooltip: "Duplicate compression ratio", type: "pipeline_data" },
       pipeline_status: { display_name: "Status", type: "pipeline_data" },
-      tissue_type: { display_name: "Tissue type", type: "metadata" },
       nucleotide_type: { display_name: "Nucleotide type", type: "metadata" },
       location: { display_name: "Location", type: "metadata" },
       host_genome: { display_name: "Host", type: "metadata" },
@@ -139,13 +147,58 @@ class Samples extends React.Component {
     });
   }
 
+  selectTissueFilter(e) {
+    const filterList = this.state.selectedTissueFilters;
+
+    let filter, filterIndex;
+    let selectedFilter = e.target.getAttribute('data-status');
+
+    if(e.target.checked) {
+      filterList.push(selectedFilter);
+    } else {
+      filterIndex = filterList.indexOf(selectedFilter);
+      filterList.splice(filterIndex, 1);
+    }
+    this.setState({ 
+      selectedTissueFilters: filterList
+    }, () => {
+      this.handleTissueFilterSelect(this.state.selectedTissueFilters);
+    });
+  }
+
+  selectHostFilter(e) {
+    
+    // current array of options
+    const hostList = this.state.selectedHostIndices
+
+    let index;
+    // check if the check box is checked or unchecked
+    if (e.target.checked) {
+      // add the numerical value of the checkbox to options array
+      hostList.push(+e.target.id)
+      console.log(hostList, 'hostlist');
+    } else {
+      // or remove the value from the unchecked checkbox from the array
+      index = hostList.indexOf(+e.target.id)
+      hostList.splice(index, 1)
+    }
+    // update the state with the new array of options
+    this.setState({ 
+      selectedHostIndices: hostList 
+    }, () => {
+      this.handleHostFilterSelect(this.state.selectedHostIndices);
+    })
+    console.log(this.state.selectedHostIndices, 'select host');
+  }
+  
+
   canEditProject(projectId) {
     return (this.editableProjects.indexOf(parseInt(projectId)) > -1)
   }
 
   displayReportProgress(res) {
       $('.download-progress')
-      .html(`<i class="fa fa-circle-o-notch fa-spin fa-fw"></i> ${res.data.status_display}`)
+      .html(`<i className="fa fa-circle-o-notch fa-spin fa-fw"></i> ${res.data.status_display}`)
       .css('display', 'block')
       setTimeout(() => {
         this.checkReportDownload();
@@ -259,6 +312,11 @@ class Samples extends React.Component {
     }
   }
 
+  displayMetaDataDropdown() {
+    this.setState({
+      displayDropdown: !this.state.displayDropdown
+    });
+  }
   updateUserDisplay(email_to_add) {
     let new_project_users = this.state.project_users
     if (!new_project_users.includes(email_to_add)) {
@@ -397,7 +455,6 @@ class Samples extends React.Component {
         nonhost_reads_percent: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? '' : <span className="percent"> {`(${derivedOutput.summary_stats.percent_remaining.toFixed(2)}%)`} </span>,
         quality_control: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? BLANK_TEXT : `${derivedOutput.summary_stats.qc_percent.toFixed(2)}%`,
         compression_ratio: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.compression_ratio) ? BLANK_TEXT : derivedOutput.summary_stats.compression_ratio.toFixed(2),
-        tissue_type: dbSample && dbSample.sample_tissue ? dbSample.sample_tissue : BLANK_TEXT,
         nucleotide_type: dbSample && dbSample.sample_template ? dbSample.sample_template : BLANK_TEXT,
         location: dbSample && dbSample.sample_location ? dbSample.sample_location : BLANK_TEXT,
         host_genome: derivedOutput && derivedOutput.host_genome_name ? derivedOutput.host_genome_name : BLANK_TEXT,
@@ -535,7 +592,7 @@ class Samples extends React.Component {
 
   //fetch project, filter and search params
   getParams() {
-    let params = `filter=${this.state.filterParams}&tissue=${this.state.tissueParams}&page=${this.state.pagesLoaded+1}&search=${this.state.searchParams}&sort_by=${this.state.sort_by}`;
+    let params = `filter=${this.state.filterParams}&page=${this.state.pagesLoaded+1}&search=${this.state.searchParams}&sort_by=${this.state.sort_by}`;
     let projectId = parseInt(this.state.selectedProjectId);
 
     if(projectId) {
@@ -544,6 +601,16 @@ class Samples extends React.Component {
     if(this.state.sampleIdsParams.length) {
       let sampleParams = this.state.sampleIdsParams;
       params += `&ids=${sampleParams}`
+    }
+
+    if(this.state.selectedTissueFilters.length) {
+      let tissueParams = this.state.selectedTissueFilters;
+      params += `&tissue=${tissueParams.join(',')}`
+    }
+
+    if(this.state.selectedHostIndices.length) {
+      let hostParams = this.state.selectedHostIndices;
+      params += `&host=${hostParams.join(',')}`
     }
     return params;
   }
@@ -569,6 +636,7 @@ class Samples extends React.Component {
         cb();
       }
     }).catch((err) => {
+      Samples.hideLoader();
       this.setState({
         initialFetchedSamples: [],
         allSamples: [],
@@ -726,7 +794,6 @@ class Samples extends React.Component {
     })
   }
 
-
   addFavIconClass(project) {
     return (
       <i data-status="favorite" data-fav={project.favorited} data-id={project.id} onClick={this.toggleFavorite} className={!project.favorited ? "favorite fa fa-star-o":  "favorite fa fa-star"}></i>
@@ -870,10 +937,47 @@ class Samples extends React.Component {
         </div>
       </div>
     );
+
+    const metaDataFilter = (
+      <div>
+        <div className="col s2 metadata">
+            <div className='metadata-dropdown' onClick={this.displayMetaDataDropdown}>
+            Metadata </div><i className="fa fa-angle-down" onClick={this.displayMetaDataDropdown}></i>
+              { this.state.displayDropdown ? <div className="row metadata-options">
+                <div className="col s6">
+                  <h6>Host</h6>
+                { this.hostGenomes.map((host, i) => {
+                  return (
+                    <div key={i} className="options-wrapper">
+                      <input name="host" type="checkbox" data-id={host.id} checked={this.state.selectedHostIndices.indexOf(host.id) < 0 ? "" : "checked"} value={this.state.selectedHostIndices.indexOf(i) != -1 } onChange={this.selectHostFilter}
+                        id={host.id} className="filled-in human" />
+                      <label htmlFor={host.id}>{host.name}</label>
+                    </div>
+                  )
+                })}
+                  </div>
+              <div className="col s6">
+              <h6>Tissue type</h6>
+                {this.tissue_types.map((tissue, i) => {
+                  return (
+                    <div key={i} className="options-wrapper"> 
+                    <input name="tissue" type="checkbox"
+                    id={tissue} className="filled-in" data-status={tissue} checked={this.state.selectedTissueFilters.indexOf(tissue) < 0 ? "" : "checked"} onChange={this.selectTissueFilter} />
+                    <label htmlFor={tissue}>{tissue}</label>
+                  </div>  
+                  )
+                })}
+              </div>
+            </div> : null }
+      </div>
+      </div>
+    )
+    
     const search_box = (
       <div className="row search-box">
         { this.state.displaySelectSamplees ? check_all : null }
         { search_field }
+        { metaDataFilter  }
         { table_download_button }
          { this.state.checkedBoxes > 0  ? compare_button : null }
         { project_id === 'all' ? null : reports_download_button }
@@ -1018,22 +1122,6 @@ class Samples extends React.Component {
       </div>
     );
 
-    const filterTissueDropDown = (
-        <div className='dropdown-status-filtering'>
-        <li>
-          <a className="title">
-            <b>Filter tissue</b>
-          </a>
-        </li>
-        { this.tissue_types.map((tissue, i) => {
-          <div>{tissue}nknjn</div>
-          return (
-            <li key={i} className="filter-item" data-status={tissue} onClick={ this.handleTissueFilterSelect } ><a data-status={tissue} className="filter-item">{tissue}</a><i className="filter fa fa-check hidden"></i></li>
-          )
-        }) }
-        <li className="divider"/>
-      </div>
-   )
 
    const filterStatus = (
         <div className='dropdown-status-filtering'>
@@ -1085,7 +1173,7 @@ class Samples extends React.Component {
                     }
                     <ul className='dropdown-content column-dropdown' id={`column-dropdown-${pos}`}>
                         { column_name === 'pipeline_status' ?
-                          <div>{filterStatus}</div> : ( column_name === 'tissue_type' ? <div>{filterTissueDropDown}</div> : "")
+                          <div>{filterStatus}</div> : null 
                         }
                         <li>
                           <a className="title">
@@ -1185,7 +1273,7 @@ class Samples extends React.Component {
     $('.status-dropdown, .menu-dropdown').dropdown({
       belowOrigin: true,
       stopPropagation: false,
-      constrainWidth: true
+      constrainWidth: false
     });
     $(".dropdown-content>li>a").css("font-size", textSize)
   }
@@ -1208,17 +1296,27 @@ class Samples extends React.Component {
     });
   }
 
-  handleTissueFilterSelect(e) {
-    e.preventDefault();
-    let status = e.target.getAttribute('data-status');
+  //handle filtering when a host filter is selected from list
+  handleHostFilterSelect(hostParams) {
     this.setState({
       pagesLoaded: 0,
       pageEnd: false,
-      tissueParams: status
+      hostParams: hostParams
     }, () => {
       this.setUrlLocation();
       this.fetchResults();
     });
+  }
+
+  handleTissueFilterSelect(tissueParams) {
+      this.setState({
+        pagesLoaded: 0,
+        pageEnd: false,
+        tissueParams: tissueParams
+      }, () => {
+        this.setUrlLocation();
+        this.fetchResults();
+      });
   }
 
   //set Url based on requests
@@ -1228,6 +1326,7 @@ class Samples extends React.Component {
       project_id: projectId ? projectId : null,
       filter: this.state.filterParams,
       tissue: this.state.tissueParams,
+      host: this.state.hostParams,
       search: this.state.searchParams,
       sort_by: this.state.sort_by,
       type: this.state.projectType
