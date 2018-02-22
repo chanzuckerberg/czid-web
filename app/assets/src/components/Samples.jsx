@@ -50,7 +50,7 @@ class Samples extends React.Component {
       project_users: [],
       totalNumber: null,
       projectId: null,
-      displaySelectSamples: this.checkURLContent(),
+      displaySelectSamplees: this.checkURLContent(),
       selectedProjectId: this.fetchParams('project_id') || null,
       filterParams: this.fetchParams('filter') || '',
       searchParams: this.fetchParams('search') || '',
@@ -375,7 +375,7 @@ class Samples extends React.Component {
       );
 
       const sample_name_info = (
-        <span className='sample-name-info'>
+        <span onClick={(e) => this.viewSample(dbSample.id, e)} className='sample-name-info'>
           <div className='card-label top-label'>
             {/*<span className='project-name'>*/}
             {/*Mosquito*/}
@@ -410,9 +410,8 @@ class Samples extends React.Component {
               <div className='flex-container'>
                 <ul className='flex-items'>
                   <li className='check-box-container'>
-                    { this.state.displaySelectSamples ? <div><input type="checkbox" id={i}
+                    { this.state.displaySelectSamplees ? <div><input type="checkbox" id={i} onClick = { this.selectSample }
                       className="filled-in checkbox" value={ this.state.selectedSampleIndices.indexOf(i) != -1 }
-                      onChange = { this.selectSample }  
                       /> <label htmlFor={i}>{sample_name_info}</label></div> : sample_name_info }
                   </li>
                   {
@@ -420,7 +419,7 @@ class Samples extends React.Component {
                       let column_data = '';
                       if (column === 'pipeline_status') {
                         column_data = (
-                          <li  key={pos}>
+                          <li  key={pos} onClick={this.viewSample.bind(this, dbSample.id)} >
                             <div className='card-label top-label'>
                               { rowWithChunkStatus }
                             </div>
@@ -443,7 +442,7 @@ class Samples extends React.Component {
                           </div>
                         </li>)
                       } else {
-                        column_data = (<li key={pos}>
+                        column_data = (<li key={pos} onClick={this.viewSample.bind(this, dbSample.id)} >
                           <div className='card-label center center-label data-label'>
                             {data_values[column]}
                           </div>
@@ -666,8 +665,10 @@ class Samples extends React.Component {
     }
   }
 
-  viewSample(id) {
+  viewSample(id, e) {
+    e.preventDefault();
     // _satellite.track('viewsample')
+    $(".checkAll, .checkbox").prop('checked', false);
     location.href = `/samples/${id}`;
   }
 
@@ -774,6 +775,7 @@ class Samples extends React.Component {
   }
 
   selectSample(e) {
+    console.log('got called');
     e.stopPropagation();
     $(".checkAll").prop('checked', false);
     this.setState({
@@ -870,7 +872,7 @@ class Samples extends React.Component {
     );
     const search_box = (
       <div className="row search-box">
-        { this.state.displaySelectSamples ? check_all : null }
+        { this.state.displaySelectSamplees ? check_all : null }
         { search_field }
         { table_download_button }
          { this.state.checkedBoxes > 0  ? compare_button : null }
