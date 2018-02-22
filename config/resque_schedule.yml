@@ -1,5 +1,0 @@
-check_pipeline_run:
-  cron: "*/5 * * * *"
-  class: CheckPipelineRuns
-  args:
-  description: check pipeline runs every 5m
