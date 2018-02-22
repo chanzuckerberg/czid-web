@@ -59,6 +59,7 @@ class Samples extends React.Component {
       sort_by: this.fetchParams('sort_by') || 'id,desc',
       pagesLoaded: 0,
       pageEnd: false,
+      checkedBoxes: 0,
       allChecked: false,
       selectedSampleIndices: [],
       initialFetchedSamples: [],
@@ -383,20 +384,18 @@ class Samples extends React.Component {
         notes: dbSample && dbSample.sample_notes ? dbSample.sample_notes : BLANK_TEXT };
 
       return (
-        <a className='col s12 no-padding sample-feed' key={i} href={`/samples/${dbSample.id}`}>
+        <a className='col s12 no-padding sample-feed' key={i} >
           <div>
             <div className='samples-card white'>
               <div className='flex-container'>
                 <ul className='flex-items'>
                   <li className='check-box-container'>
-                    {/* <input type="checkbox" id={i}
+                    <input type="checkbox" id={i}
                       className="filled-in checkbox" value={ this.state.selectedSampleIndices.indexOf(i) != -1 }
                       onChange = { this.selectSample }  
                       />
                     <label htmlFor={i}>
-                      
-                    </label> */}
-                    <span className='sample-name-info'>
+                      <span className='sample-name-info'>
                         <div className='card-label top-label'>
                           {/*<span className='project-name'>*/}
                           {/*Mosquito*/}
@@ -412,13 +411,14 @@ class Samples extends React.Component {
                           { !uploader || uploader === '' ? '' : <span>Uploaded by: {uploader}</span>}
                         </div>
                       </span>
+                    </label>
                   </li>
                   {
                     this.state.columnsShown.map((column, pos) => {
                       let column_data = '';
                       if (column === 'pipeline_status') {
                         column_data = (
-                          <li  key={pos}>
+                          <li  key={pos} onClick={this.viewSample.bind(this, dbSample.id)} >
                             <div className='card-label top-label'>
                               { rowWithChunkStatus }
                             </div>
@@ -435,13 +435,13 @@ class Samples extends React.Component {
                           </li>
                         )
                       } else if(column === 'nonhost_reads') {
-                        column_data = (<li key={pos}>
+                        column_data = (<li key={pos} onClick={this.viewSample.bind(this, dbSample.id)} >
                           <div className='card-label center center-label data-label'>
                             {data_values[column]} {data_values["nonhost_reads_percent"]}
                           </div>
                         </li>)
                       } else {
-                        column_data = (<li key={pos}>
+                        column_data = (<li key={pos} onClick={this.viewSample.bind(this, dbSample.id)} >
                           <div className='card-label center center-label data-label'>
                             {data_values[column]}
                           </div>
@@ -728,13 +728,12 @@ class Samples extends React.Component {
     $('.checkAll').click(function(e) {
       var checked = e.currentTarget.checked;
       $('.checkbox').prop('checked', checked);
+      var checkedCount = $("input:checkbox:checked").length
       that.setState({
-        allChecked: checked
+        allChecked: checked,
+        checkedBoxes: checkedCount
       });
-      // to be used in comparison method
-      // that.fetchAllSelectedIds(that.state.allChecked);
     }); 
-
   }
 
 
@@ -775,7 +774,6 @@ class Samples extends React.Component {
 
     let index
     // check if the check box is checked or unchecked
-
  
     if (e.target.checked) {
       // add the numerical value of the checkbox to options array
@@ -785,9 +783,12 @@ class Samples extends React.Component {
       index = sampleList.indexOf(+e.target.id)
       sampleList.splice(index, 1)
     }
-
+    var checkedCount = $("input:checkbox:checked").length
     // update the state with the new array of options
-    this.setState({ selectedSampleIndices: sampleList })
+    this.setState({ 
+      selectedSampleIndices: sampleList,
+      checkedBoxes: checkedCount
+     })
   }
 
 
@@ -798,7 +799,7 @@ class Samples extends React.Component {
 
   renderTable(samples) {
     let project_id = this.state.selectedProjectId ? this.state.selectedProjectId : 'all'
-    let search_field_width = (project_id === 'all') ? 'col s4 no-padding' : 'col s2 no-padding'
+    let search_field_width = (project_id === 'all') ? 'col s4' : 'col s2'
     let search_field = (
       <div className={search_field_width + ' search-field'}>
         <div className='row'>
@@ -857,12 +858,13 @@ class Samples extends React.Component {
         </div>
       </div>
     );
+
     const search_box = (
       <div className="row search-box">
-        {/* { check_all } */}
+        { check_all }
         { search_field }
         { table_download_button }
-        {/* { compare_button } */}
+        { this.state.checkedBoxes > 0  ? compare_button : null }
         { project_id === 'all' ? null : reports_download_button }
       </div>
     );
