@@ -17,7 +17,9 @@ task update_lineage_db: :environment do
    cd #{local_taxonomy_path};
 
    ## Get old lineage file
-   mysql -h #{host} -u $DB_USERNAME --password=$DB_PASSWORD -e "SELECT #{column_names} FROM idseq_#{Rails.env}.taxon_lineages WHERE ended_at = (SELECT MAX(ended_at) FROM idseq_#{Rails.env}.taxon_lineages);" | tr "\t" "," | tail -n +2 > old_taxon_lineages.csv
+   mysql -h #{host} -u $DB_USERNAME --password=$DB_PASSWORD -e "SELECT #{column_names},started_at FROM idseq_#{Rails.env}.taxon_lineages WHERE ended_at = (SELECT MAX(ended_at) FROM idseq_#{Rails.env}.taxon_lineages);" | tr "\t" "," | tail -n +2 > old_taxon_lineages_with_started_at.csv
+   cut -d, -f1-21 old_taxon_lineages_with_started_at.csv > old_taxon_lineages.csv
+   cut -d, -f1,22 old_taxon_lineages_with_started_at.csv > taxid_to_started_at.csv
 
    ## Get new lineage file
    # Download new references, extract and remove header line
@@ -48,11 +50,16 @@ task update_lineage_db: :environment do
    # Add ended_at column for retired records, started_at column for new records
    sed -e 's/$/,#{current_date}/' -i records_to_retire.csv
    sed -e 's/$/,#{current_date}/' -i records_to_insert.csv
+   # Add started_at column for retired records to make sure they violate [taxid, started_at] uniqueness and overwrite the correct record
+   sort records_to_retire.csv > records_to_retire_sorted.csv
+   sort taxid_to_started_at.csv > taxid_to_started_at_sorted.csv
+   join -t, -1 1 -2 1 -a 1 -o${file1_output_cols},2.2 records_to_retire_sorted.csv taxid_to_started_at_sorted.csv > records_to_retire.csv
+   
 
    ## Import changes to taxon_lineages
    # retired records:
    mv records_to_retire.csv taxon_lineages
-   mysqlimport --replace --local --user=$DB_USERNAME --host=#{host} --password=$DB_PASSWORD --columns=#{column_names},ended_at --fields-terminated-by=',' idseq_#{Rails.env} taxon_lineages;
+   mysqlimport --replace --local --user=$DB_USERNAME --host=#{host} --password=$DB_PASSWORD --columns=#{column_names},ended_at,started_at --fields-terminated-by=',' idseq_#{Rails.env} taxon_lineages;
    # new records:
    mv records_to_insert.csv taxon_lineages
    mysqlimport --local --user=$DB_USERNAME --host=#{host} --password=$DB_PASSWORD --columns=#{column_names},started_at --fields-terminated-by=',' idseq_#{Rails.env} taxon_lineages;
