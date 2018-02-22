@@ -10,17 +10,15 @@ task update_lineage_db: :environment do
   taxid_lineages_file = 'taxid-lineages.csv'
   names_file = 'names.csv'
   reference_s3_path = 's3://czbiohub-infectious-disease/references'
-  current_date = Time.now.getlocal
+  current_date = Time.now.utc
   `
    ## Set work directory
    mkdir -p #{local_taxonomy_path};
    cd #{local_taxonomy_path};
-
    ## Get old lineage file
    mysql -h #{host} -u $DB_USERNAME --password=$DB_PASSWORD -e "SELECT #{column_names},started_at FROM idseq_#{Rails.env}.taxon_lineages WHERE ended_at = (SELECT MAX(ended_at) FROM idseq_#{Rails.env}.taxon_lineages);" | tr "\t" "," | tail -n +2 > old_taxon_lineages_with_started_at.csv
    cut -d, -f1-22 old_taxon_lineages_with_started_at.csv > old_taxon_lineages.csv
    cut -d, -f1,23 old_taxon_lineages_with_started_at.csv > taxid_to_started_at.csv
-
    ## Get new lineage file
    # Download new references, extract and remove header line
    aws s3 cp #{reference_s3_path}/#{taxid_lineages_file}.gz - | gunzip | tail -n +2 > taxid-lineages.csv
@@ -37,7 +35,6 @@ task update_lineage_db: :environment do
      file1_output_cols=${file1_output_cols},1.$((${file1_ncol}+1)),1.$((${file1_ncol}+2));
      file1_ncol=$((${file1_ncol}+2));
    done;
-
    ## Determine changes to make to taxon_lineages
    # Sort in view of using "comm" command
    sort old_taxon_lineages.csv > old_taxon_lineages_sorted.csv
@@ -53,8 +50,7 @@ task update_lineage_db: :environment do
    # Add started_at column for retired records to make sure they violate [taxid, started_at] uniqueness and overwrite the correct record
    sort records_to_retire.csv > records_to_retire_sorted.csv
    sort taxid_to_started_at.csv > taxid_to_started_at_sorted.csv
-   join -t, -1 1 -2 1 -a 1 -o${file1_output_cols},2.2 records_to_retire_sorted.csv taxid_to_started_at_sorted.csv > records_to_retire.csv
-
+   join -t, -1 1 -2 1 -a 1 -o${file1_output_cols},1.$((${file1_ncol}+1)),2.2 records_to_retire_sorted.csv taxid_to_started_at_sorted.csv > records_to_retire.csv
    ## Import changes to taxon_lineages
    # retired records:
    mv records_to_retire.csv taxon_lineages
@@ -62,7 +58,6 @@ task update_lineage_db: :environment do
    # new records:
    mv records_to_insert.csv taxon_lineages
    mysqlimport --local --user=$DB_USERNAME --host=#{host} --password=$DB_PASSWORD --columns=#{column_names},started_at --fields-terminated-by=',' idseq_#{Rails.env} taxon_lineages;
-
    ## Clean up
    rm -rf #{local_taxonomy_path};
   `
