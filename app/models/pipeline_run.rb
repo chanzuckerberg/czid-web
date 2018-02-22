@@ -183,7 +183,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def generate_aggregate_counts(tax_level_name)
-    current_date = Time.zone.now.strftime("%Y-%m-%d")
+    current_date = Time.now.getlocal
     tax_level_id = TaxonCount::NAME_2_LEVEL[tax_level_name]
     # The unctagorizable_name chosen here is not important. The report page
     # endpoint makes its own choice about what to display in this case.  It
