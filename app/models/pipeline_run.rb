@@ -226,7 +226,8 @@ class PipelineRun < ApplicationRecord
               '#{current_date}',
               '#{current_date}'
        FROM  taxon_lineages, taxon_counts
-       WHERE taxon_lineages.taxid = taxon_counts.tax_id AND
+       WHERE (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at) AND
+             taxon_lineages.taxid = taxon_counts.tax_id AND
              taxon_counts.pipeline_run_id = #{id} AND
              taxon_counts.tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}
       GROUP BY 1,2,3,4,5"
@@ -245,6 +246,7 @@ class PipelineRun < ApplicationRecord
         WHERE taxon_counts.pipeline_run_id=#{id} AND
               taxon_counts.tax_level=#{level_id} AND
               taxon_counts.tax_id = taxon_lineages.taxid AND
+              (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at) AND
               taxon_lineages.#{level}_name IS NOT NULL
       ")
     end
@@ -264,6 +266,7 @@ class PipelineRun < ApplicationRecord
       SET taxon_counts.genus_taxid = taxon_lineages.genus_taxid,
           taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
       WHERE taxon_counts.pipeline_run_id=#{id} AND
+            (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at) AND
             taxon_lineages.taxid = taxon_counts.tax_id
     ")
   end
