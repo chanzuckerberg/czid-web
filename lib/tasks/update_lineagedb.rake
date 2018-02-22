@@ -10,7 +10,7 @@ task update_lineage_db: :environment do
   taxid_lineages_file = 'taxid-lineages.csv'
   names_file = 'names.csv'
   reference_s3_path = 's3://czbiohub-infectious-disease/references'
-  current_date = Time.now.getlocal
+  current_date = Time.now.utc
   `
    ## Set work directory
    mkdir -p #{local_taxonomy_path};
