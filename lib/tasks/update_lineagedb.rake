@@ -55,7 +55,6 @@ task update_lineage_db: :environment do
    sort taxid_to_started_at.csv > taxid_to_started_at_sorted.csv
    join -t, -1 1 -2 1 -a 1 -o${file1_output_cols},2.2 records_to_retire_sorted.csv taxid_to_started_at_sorted.csv > records_to_retire.csv
 
-
    ## Import changes to taxon_lineages
    # retired records:
    mv records_to_retire.csv taxon_lineages
