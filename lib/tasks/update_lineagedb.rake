@@ -38,7 +38,7 @@ task update_lineage_db: :environment do
    done;
 
    ## Determine changes to make to taxon_lineages
-   # Sort and remove header line
+   # Sort in view of using "comm" command
    sort old_taxon_lineages.csv > old_taxon_lineages_sorted.csv
    sort taxid-lineages.csv > new_taxon_lineages_sorted.csv
    # Replace "NULL" by "" in old_taxon_lineages_sorted.csv to match new_taxon_lineages_sorted.csv
