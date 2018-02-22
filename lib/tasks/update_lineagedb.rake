@@ -11,14 +11,13 @@ task update_lineage_db: :environment do
   names_file = 'names.csv'
   reference_s3_path = 's3://czbiohub-infectious-disease/references'
   current_date = Time.now.getlocal
-  maximum_ended_at = TaxonLineage.column_defaults["ended_at"]
   `
    ## Set work directory
    mkdir -p #{local_taxonomy_path};
    cd #{local_taxonomy_path};
 
    ## Get old lineage file
-   mysql -h #{host} -u $DB_USERNAME --password=$DB_PASSWORD -e "SELECT #{column_names} FROM idseq_#{Rails.env}.taxon_lineages WHERE ended_at = #{maximum_ended_at};" | tr "\t" "," | tail -n +2 > old_taxon_lineages.csv
+   mysql -h #{host} -u $DB_USERNAME --password=$DB_PASSWORD -e "SELECT #{column_names} FROM idseq_#{Rails.env}.taxon_lineages WHERE ended_at = (SELECT MAX(ended_at) FROM idseq_#{Rails.env}.taxon_lineages);" | tr "\t" "," | tail -n +2 > old_taxon_lineages.csv
 
    ## Get new lineage file
    # Download new references, extract and remove header line
