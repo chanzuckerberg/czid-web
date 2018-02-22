@@ -183,6 +183,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def generate_aggregate_counts(tax_level_name)
+    current_date = Time.now.utc
     tax_level_id = TaxonCount::NAME_2_LEVEL[tax_level_name]
     # The unctagorizable_name chosen here is not important. The report page
     # endpoint makes its own choice about what to display in this case.  It
@@ -195,7 +196,7 @@ class PipelineRun < ApplicationRecord
                                 tax_level, count_type, count,
                                 percent_identity, alignment_length, e_value,
                                 species_total_concordant, genus_total_concordant, family_total_concordant,
-                                percent_concordant)
+                                percent_concordant, created_at, updated_at)
        SELECT #{id},
               IF(
                 taxon_lineages.#{tax_level_name}_taxid IS NOT NULL,
@@ -221,7 +222,9 @@ class PipelineRun < ApplicationRecord
                 WHEN #{TaxonCount::TAX_LEVEL_SPECIES} THEN AVG(100.0 * taxon_counts.species_total_concordant) / sum(taxon_counts.count)
                 WHEN #{TaxonCount::TAX_LEVEL_GENUS} THEN AVG(100.0 * taxon_counts.genus_total_concordant) / sum(taxon_counts.count)
                 WHEN #{TaxonCount::TAX_LEVEL_FAMILY} THEN AVG(100.0 * taxon_counts.family_total_concordant) / sum(taxon_counts.count)
-              END
+              END,
+              '#{current_date}',
+              '#{current_date}'
        FROM  taxon_lineages, taxon_counts
        WHERE (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at) AND
              taxon_lineages.taxid = taxon_counts.tax_id AND
