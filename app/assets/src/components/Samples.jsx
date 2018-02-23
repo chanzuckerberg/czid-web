@@ -206,11 +206,13 @@ class Samples extends React.Component {
   }
 
   startReportGeneration() {
+    Samples.showLoading('Downloading reports...');
     axios.get(`/projects/${this.state.selectedProjectId}/make_project_reports_csv`).then((res) => {
       this.setState({
         project_id_download_in_progress: this.state.selectedProjectId
       });
       this.displayReportProgress(res);
+    }).catch((err) => {
     });
   }
 
@@ -218,6 +220,7 @@ class Samples extends React.Component {
     axios.get(`/projects/${this.state.project_id_download_in_progress}/project_reports_csv_status`).then((res) => {
       let download_status = res.data.status_display
       if (download_status === 'complete') {
+        Samples.hideLoader();
         location.href = `/projects/${this.state.project_id_download_in_progress}/send_project_reports_csv`
         this.setState({
           project_id_download_in_progress: null
@@ -761,6 +764,16 @@ class Samples extends React.Component {
     )
   }
 
+ displayDownloadDropdown() {
+  $('.download-dropdown').dropdown({
+    constrainWidth: false, // Does not change width of dropdown to that of the activator
+    gutter: 0, // Spacing from edge
+    belowOrigin: true, // Displays dropdown below the button
+    alignment: 'left', // Displays dropdown with edge aligned to the left of button
+    stopPropagation: true // Stops event propagation
+  });
+ }
+
   findSelectedColumns(selO) {
     const selValues = [];
     for (let i=0; i < selO.length; i++) {
@@ -892,14 +905,22 @@ class Samples extends React.Component {
         </div>
       </div>
     );
-    let table_download_button = (
-      <div className='col s2 download-table'>
-        <div className='white'>
-          <a href={`/projects/${project_id}/csv`} className="download-project center">
-            <i className="fa fa-cloud-download"/>
-            <span>Download table</span>
-          </a>
+
+    let table_download_dropdown = (
+      <div>
+        <div className='col s2 download-table download-dropdown' data-activates='download-dropdown'>
+          <div className='white'  data-activates='download-dropdown'>
+            <a className="download-project center">
+              <span>Download</span>
+              <i className="fa fa-angle-down"></i>
+            </a>
+          </div>
         </div>
+        {/*Dropdown menu*/}
+        <ul id='download-dropdown' className='dropdown-content'>
+          <li><a href={`/projects/${project_id}/csv`}>Download Table</a></li>
+          { project_id === 'all' ? null : <li><a onClick={this.startReportGeneration}> Download Reports</a></li> }
+        </ul>
       </div>
     );
 
@@ -923,20 +944,6 @@ class Samples extends React.Component {
         </div>
       </div>
     )
-
-    const reports_download_button_contents = this.state.project_id_download_in_progress ?
-      <span className='download-progress'/>
-      : <a onClick={this.startReportGeneration} className="download-project center">
-                                             <i className="fa fa-cloud-download"/>
-                                             <span>Download reports</span>
-                                           </a>
-    const reports_download_button = (
-      <div className='col s2 download-table'>
-        <div className='white'>
-          { reports_download_button_contents }
-        </div>
-      </div>
-    );
 
     const metaDataFilter = (
       <div>
@@ -978,9 +985,8 @@ class Samples extends React.Component {
         { this.state.displaySelectSamplees ? check_all : null }
         { search_field }
         { metaDataFilter  }
-        { table_download_button }
-         { this.state.checkedBoxes > 0  ? compare_button : null }
-        { project_id === 'all' ? null : reports_download_button }
+        { table_download_dropdown }
+        { this.state.checkedBoxes > 0  ? compare_button : null }
       </div>
     );
 
@@ -1237,6 +1243,7 @@ class Samples extends React.Component {
   }
 
   componentDidMount() {
+    const textSize = 14;
     $(() => {
       const win = $(window);
       const samplesHeader = $('.sample-table-container');
@@ -1251,6 +1258,7 @@ class Samples extends React.Component {
       $('.filter').hide();
     });
     this.initializeSelectAll();
+    this.displayDownloadDropdown();
     this.initializeTooltip();
     this.fetchProjectPageData();
     this.state.selectedProjectId ? this.fetchProjectDetails(this.state.selectedProjectId) : null;
@@ -1258,6 +1266,7 @@ class Samples extends React.Component {
     // this.initializeProjectList();
     this.displayPipelineStatusFilter();
     this.initializeColumnSelect();
+    $(".dropdown-content>li>a").css("font-size", textSize)
   }
 
   initializeColumnSelect() {
@@ -1269,13 +1278,11 @@ class Samples extends React.Component {
 
   // initialize filter dropdown
   displayPipelineStatusFilter() {
-    const textSize = 14;
     $('.status-dropdown, .menu-dropdown').dropdown({
       belowOrigin: true,
       stopPropagation: false,
       constrainWidth: false
     });
-    $(".dropdown-content>li>a").css("font-size", textSize)
   }
 
   displayCheckMarks(filter) {
