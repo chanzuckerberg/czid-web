@@ -162,8 +162,6 @@ class Samples extends React.Component {
     }
     this.setState({ 
       selectedTissueFilters: filterList
-    }, () => {
-      this.handleTissueFilterSelect(this.state.selectedTissueFilters);
     });
   }
 
@@ -172,7 +170,7 @@ class Samples extends React.Component {
     // current array of options
     const hostList = this.state.selectedHostIndices
 
-    let index;
+    let index; 
     // check if the check box is checked or unchecked
     if (e.target.checked) {
       // add the numerical value of the checkbox to options array
@@ -185,8 +183,6 @@ class Samples extends React.Component {
     // update the state with the new array of options
     this.setState({ 
       selectedHostIndices: hostList 
-    }, () => {
-      this.handleHostFilterSelect(this.state.selectedHostIndices);
     })
   }
   
@@ -318,7 +314,20 @@ class Samples extends React.Component {
     this.setState({
       displayDropdown: !this.state.displayDropdown
     });
+    if(this.state.displayDropdown) {
+      this.applyFilters();
+    }
   }
+
+  applyFilters() {
+    if(this.state.selectedHostIndices) {
+      this.handleHostFilterSelect(this.state.selectedHostIndices);
+    }
+    if(this.state.selectedTissueFilters) {
+      this.handleTissueFilterSelect(this.state.selectedTissueFilters);
+    }
+  }
+
   updateUserDisplay(email_to_add) {
     let new_project_users = this.state.project_users
     if (!new_project_users.includes(email_to_add)) {
@@ -944,7 +953,6 @@ class Samples extends React.Component {
             className="filled-in checkAll"
             />
           <label htmlFor="checkAll"></label>
-          <i className="fa fa-caret-down"></i>    
       </div>
     );
 
@@ -972,7 +980,7 @@ class Samples extends React.Component {
       <div>
         <div className="col s2 metadata">
             <div className='metadata-dropdown' onClick={this.displayMetaDataDropdown}>
-            Metadata </div><i className="fa fa-angle-down" onClick={this.displayMetaDataDropdown}></i>
+            Filter </div><i className="fa fa-angle-down" onClick={this.displayMetaDataDropdown}></i>
               { this.state.displayDropdown ? <div className="row metadata-options">
                 <div className="col s6">
                   <h6>Host</h6>
@@ -1275,6 +1283,7 @@ class Samples extends React.Component {
       });
       $('.filter').hide();
     });
+    this.closeMetaDataDropdown();
     this.initializeSelectAll();
     this.displayDownloadDropdown();
     this.initializeTooltip();
@@ -1369,6 +1378,19 @@ class Samples extends React.Component {
       this.setUrlLocation();
       this.fetchProjectDetails(id);
       this.fetchProjectUsers(id)
+    });
+  }
+
+  closeMetaDataDropdown() {
+    let that = this;
+    $(document).on("click", function(event) {
+      if ($(event.target).has(".metadata").length) {
+        that.setState({
+          displayDropdown: false
+        }, () => {
+          that.applyFilters();
+        });
+      }
     });
   }
 
