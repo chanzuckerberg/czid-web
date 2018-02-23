@@ -35,7 +35,7 @@ class PipelineSampleReport extends React.Component {
 
     this.state = {
       taxonomy_details: [],
-      backgroundName: Cookies.get('background_name') || this.report_details.background_model.name,
+      backgroundName: Cookies.get('background_name') || this.report_details.default_background.name,
       searchId: 0,
       searchKey: '',
       search_keys_in_sample: [],
