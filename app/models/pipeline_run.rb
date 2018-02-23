@@ -51,6 +51,10 @@ class PipelineRun < ApplicationRecord
       .where(finalized: 0)
   end
 
+  def self.in_progress_at_stage_1_or_2
+    in_progress.where("job_status NOT LIKE '3.%' AND job_status NOT LIKE '4.%'")
+  end
+
   def finalized?
     finalized == 1
   end
