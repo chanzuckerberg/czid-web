@@ -103,10 +103,15 @@ class PipelineRunStage < ApplicationRecord
   def run_load_db
     return unless output_ready?
     return if completed?
-
-    send(load_db_command_func)
-    update(db_load_status: 1, job_status: STATUS_LOADED)
-    pipeline_run.update_job_status
+    begin
+      send(load_db_command_func)
+      update(db_load_status: 1, job_status: STATUS_LOADED)
+    rescue
+      update(job_status: STATUS_FAILED)
+      raise
+    ensure
+      pipeline_run.update_job_status
+    end
   end
 
   def instance_terminated?(job_hash)
@@ -127,7 +132,7 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def due_for_aegea_check?
-    rand < 0.2
+    rand < 0.1
   end
 
   def update_job_status
