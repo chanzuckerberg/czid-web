@@ -101,6 +101,9 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def run_load_db
+    return unless output_ready?
+    return if completed?
+
     send(load_db_command_func)
     update(db_load_status: 1, job_status: STATUS_LOADED)
     pipeline_run.update_job_status
