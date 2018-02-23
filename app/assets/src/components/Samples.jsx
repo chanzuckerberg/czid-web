@@ -96,7 +96,8 @@ class Samples extends React.Component {
         'location',
         'pipeline_status',
         'notes',
-        'nucleotide_type'
+        'nucleotide_type',
+        'tissue_type'
       ]
     };
     this.sortCount = 0;
@@ -109,6 +110,7 @@ class Samples extends React.Component {
       nucleotide_type: { display_name: "Nucleotide type", type: "metadata" },
       location: { display_name: "Location", type: "metadata" },
       host_genome: { display_name: "Host", type: "metadata" },
+      tissue_type: { display_name: "Tissue type", type: "metadata" },
       notes: { display_name: "Notes", type: "metadata" } };
     this.handleColumnSelectChange = this.handleColumnSelectChange.bind(this);
     this.columnHidden = this.columnHidden.bind(this);
@@ -458,6 +460,7 @@ class Samples extends React.Component {
         nonhost_reads_percent: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? '' : <span className="percent"> {`(${derivedOutput.summary_stats.percent_remaining.toFixed(2)}%)`} </span>,
         quality_control: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.qc_percent) ? BLANK_TEXT : `${derivedOutput.summary_stats.qc_percent.toFixed(2)}%`,
         compression_ratio: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.compression_ratio) ? BLANK_TEXT : derivedOutput.summary_stats.compression_ratio.toFixed(2),
+        tissue_type: dbSample && dbSample.sample_tissue ? dbSample.sample_tissue : BLANK_TEXT,
         nucleotide_type: dbSample && dbSample.sample_template ? dbSample.sample_template : BLANK_TEXT,
         location: dbSample && dbSample.sample_location ? dbSample.sample_location : BLANK_TEXT,
         host_genome: derivedOutput && derivedOutput.host_genome_name ? derivedOutput.host_genome_name : BLANK_TEXT,
