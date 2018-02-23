@@ -2,6 +2,10 @@ require 'open3'
 require 'csv'
 require 'English'
 task update_lineage_db: :environment do
+  ### Usage: REFERENCE_S3_FOLDER=s3://czbiohub-infectious-disease/references rake update_lineage_db
+  ### REFERENCE_S3_FOLDER needs to contain names.csv.gz and taxid-lineages.csv.gz
+
+  reference_s3_path = ENV['REFERENCE_S3_FOLDER'].gsub(%r{([/]*$)}, '') # trim any trailing '/'
   local_taxonomy_path = "/app/tmp/taxonomy"
   column_names = "taxid,superkingdom_taxid,phylum_taxid,class_taxid,order_taxid,family_taxid,genus_taxid,species_taxid," \
     "superkingdom_name,superkingdom_common_name,phylum_name,phylum_common_name,class_name,class_common_name," \
@@ -9,7 +13,6 @@ task update_lineage_db: :environment do
   host = Rails.env == 'development' ? 'db' : '$RDS_ADDRESS'
   taxid_lineages_file = 'taxid-lineages.csv'
   names_file = 'names.csv'
-  reference_s3_path = 's3://czbiohub-infectious-disease/references'
   current_date = Time.now.utc
   `
    ## Set work directory
