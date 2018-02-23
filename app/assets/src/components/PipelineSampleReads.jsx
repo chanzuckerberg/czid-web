@@ -10,7 +10,7 @@ import PipelineSampleReport from './PipelineSampleReport';
 class PipelineSampleReads extends React.Component {
   constructor(props) {
     super(props);
-    this.can_edit = props.can_edit
+    this.can_edit = props.can_edit;
     this.csrf = props.csrf;
     this.gitVersion = props.gitVersion
     this.allBackgrounds = props.all_backgrounds;
@@ -451,9 +451,28 @@ class PipelineSampleReads extends React.Component {
             <div className="title">
               PIPELINE {version_display}
             </div>
-
-            <div className="sub-title">
-              <a href={`/?project_id=${this.projectInfo.id}`}> {this.projectInfo.name} </a> > { sample_dropdown }
+            <div className="row">
+              <div className="sub-title col s9">
+                <a
+                href={`/?project_id=${this.projectInfo.id}`}>
+                  {this.projectInfo.name}
+                </a>
+                > { sample_dropdown }
+              </div>
+              <div className="col no-padding s3">
+                <ul className="report-action-buttons">
+                  <li>
+                    <button>
+                      Compare
+                    </button>
+                  </li>
+                  <li>
+                    <button className='o'>
+                      <i className="fa fa-cloud-download fa-fw" />Download
+                    </button>
+                  </li>
+                </ul>
+              </div>
             </div>
 
             <div className="sub-header-navigation">
@@ -568,7 +587,7 @@ class PipelineSampleReads extends React.Component {
             </div>
           </div>
         </div>
-        <div id="reports" className="reports-screen tab-screen col s12">
+        <div id="reports" className="reports-screen container tab-screen col s12">
           { d_report }
         </div>
       </div>

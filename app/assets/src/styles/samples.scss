@@ -24,7 +24,8 @@ $break-large: 1070px;
   }
 
   .indicator {
-    background: #4BA4C1 !important;
+    height: 4px;
+    background: #3867fa !important;
   }
 
   .tab a {
@@ -33,7 +34,7 @@ $break-large: 1070px;
     padding: 0 !important;
     margin-right: 30px;
     text-transform: none !important;
-    text-align: left;
+    text-align: center;
   }
 }
 

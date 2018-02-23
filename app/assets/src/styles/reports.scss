@@ -532,7 +532,7 @@ margin-bottom: 0px;
             background: #fbfbfb;
             cursor: pointer;
           }
-          &.top-filter-dropdown {
+          &.top-filter-dropdown, &.top-filter {
             padding: 5px 15px;
             border: 1px solid #dce0e7;
             .filter-label {
@@ -621,5 +621,46 @@ margin-bottom: 0px;
         color: #414367
       }
     }
+  }
+}
+.report-action-buttons {
+  li {
+    display: inline-block;
+    width: 45%;
+    margin-right: .5em;
+    button {
+      border: 1px solid #3867fa;
+      padding: 10px;
+      border-radius: 30px;
+      background: #3867fa;
+      color: #fff;
+      font-size: 16px;
+      width: 100%;
+      &.o {
+        background: #fff;
+        color: #3867fa;
+      }
+    }
+  }
+}
+
+.advanced-filters-modal {
+  display: none;
+  position: absolute;
+  background: #fff;
+  box-shadow: 1px 3px 3px 2px #c8c8c8;
+  margin-left: -16px;
+  margin-top: 8px;
+  padding: 10px;
+  cursor: auto;
+  .metric-thresholds {
+    width: 100%;
+  }
+  .add-threshold-filter {
+    background: #f7f7f7;
+    padding: 5px;
+    width: 175px;
+    text-align: center;
+    cursor: pointer;
   }
 }

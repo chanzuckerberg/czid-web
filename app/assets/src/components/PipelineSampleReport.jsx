@@ -26,6 +26,12 @@ class PipelineSampleReport extends React.Component {
     const filter_thresholds = Cookies.get('filter_thresholds');
     const cached_cats = Cookies.get('excluded_categories');
     const cached_name_type = Cookies.get('name_type');
+    const savedThresholdFilters = this.getSavedThresholdFilters();
+    this.defaultThresholdValues = (savedThresholdFilters.length) ? savedThresholdFilters : [{
+      label: 'NT_aggregatescore',
+      operator: '<',
+      value: Infinity
+    }]; // all data should pass default threshold, reason for infinity
 
     this.state = {
       taxonomy_details: [],
@@ -62,11 +68,51 @@ class PipelineSampleReport extends React.Component {
       name_type: cached_name_type ? cached_name_type : 'Scientific Name',
       search_taxon_id: 0,
       rendering: false,
-      loading: true
-    };
-
+      loading: true,
+      activeThresholds: this.defaultThresholdValues,
+      allThresholds: [
+        {
+          name: 'Score',
+          value: 'NT_aggregatescore'
+        }, {
+          name: 'NT Z Score',
+          value: 'NT_zscore'
+        }, {
+          name: 'NT rPM',
+          value: 'NT_rpm'
+        }, {
+          name: 'NT r (total reads)',
+          value: 'NT_r'
+        }, {
+          name: 'NT %id',
+          value: 'NT_percentidentity'
+        }, {
+          name: 'NT log(1/e)',
+          value: 'NT_neglogevalue'
+        }, {
+          name: 'NT %conc',
+          value: 'NT_percentconcordant'
+        }, {
+          name: 'NR Z Score',
+          value: 'NR_zscore'
+        }, {
+          name: 'NR r (total reads)',
+          value: 'NR_r'
+        }, {
+          name: 'NR rPM',
+          value: 'NR_rpm'
+        }, {
+          name: 'NR %id',
+          value: 'NR_percentidentity'
+        }, {
+          name: 'R log(1/e)',
+          value: 'NR_neglogevalue'
+        }, {
+          name: 'NR %conc',
+          value: 'NR_percentconcordant'
+        }]
+      };
     this.applySearchFilter = this.applySearchFilter.bind(this);
-    this.applyThresholdFilters = this.applyThresholdFilters.bind(this);
     this.anyFilterSet = this.anyFilterSet.bind(this);
     this.resetAllFilters = this.resetAllFilters.bind(this);
     this.sortResults = this.sortResults.bind(this);
@@ -75,7 +121,6 @@ class PipelineSampleReport extends React.Component {
     this.flash = this.flash.bind(this);
     this.fetchParams = this.fetchParams.bind(this);
 
-    this.taxonPassThresholdFilter = this.taxonPassThresholdFilter.bind(this);
     this.expandOrCollapseGenus = this.expandOrCollapseGenus.bind(this);
     this.expandTable = this.expandTable.bind(this);
     this.collapseTable = this.collapseTable.bind(this);
@@ -84,7 +129,6 @@ class PipelineSampleReport extends React.Component {
     this.handleThresholdEnter = this.handleThresholdEnter.bind(this);
     this.renderMore = this.renderMore.bind(this)
     this.initializeTooltip();
-
   }
 
   componentWillUpdate(nextProps, nextState) {
@@ -110,7 +154,13 @@ class PipelineSampleReport extends React.Component {
       constrainWidth: true,
       stopPropagation: false
     });
-    // const content = $('.top-filter-dropdown + .stop-propagation');
+    const advancedFiltersModal = $('.advanced-filters-modal');
+    const advancedFiltersActivate = $('.advanced-filters-activate');
+
+    advancedFiltersActivate.on('click', (e) => {
+      e.stopPropagation();
+      advancedFiltersModal.slideToggle(300);
+    });
   }
 
   fetchParams(param) {
@@ -154,7 +204,7 @@ class PipelineSampleReport extends React.Component {
         genus_map
       },
       () => {
-        this.applyThresholdFilters(res.data.taxonomy_details[2], false);
+        this.applyThresholdFilters(res.data.taxonomy_details[2], [], false);
       }
       )
     });
@@ -169,7 +219,7 @@ class PipelineSampleReport extends React.Component {
 
   resetAllFilters() {
     this.setState({
-      new_filter_thresholds: { },
+      activeThresholds: this.defaultThresholdValues,
       excluded_categories: [],
       search_taxon_id: 0,
       thresholded_taxons: this.state.taxonomy_details,
@@ -178,7 +228,7 @@ class PipelineSampleReport extends React.Component {
       pagesRendered: 1,
       rows_passing_filters: this.state.taxonomy_details.length,
     });
-    Cookies.set('filter_thresholds', '{}');
+    this.saveThresholdFilters();
     Cookies.set('excluded_categories', '[]');
     $('.metric-thresholds').val('');
     this.flash();
@@ -386,7 +436,6 @@ class PipelineSampleReport extends React.Component {
 
   applyExcludedCategories(e) {
     e.stopPropagation();
-    console.log('E::', e);
     let excluded_categories = this.state.excluded_categories;
     if (e.target.checked) {
       const ridx = excluded_categories.indexOf(e.target.value);
@@ -421,81 +470,96 @@ class PipelineSampleReport extends React.Component {
     this.state.taxonomy_details = this.state.taxonomy_details.sort(this.sortCompareFunction);
   }
 
-  setFilterThreshold(e) {
-    const threshold_name = e.target.id;
-    const val = parseFloat(e.target.value.trim());
-    if (isNaN(val)) {
-      delete this.state.new_filter_thresholds[threshold_name];
+  setThresholdProperty(index, property, value) {
+    const stateCopy = Object.assign([], this.state.activeThresholds);
+    stateCopy[index][property] = value;
+    this.setState({ activeThresholds: stateCopy });
+  }
+
+  appendThresholdFilter() {
+    const stateCopy = Object.assign([], this.state.activeThresholds);
+    stateCopy.push({ label: '', operator: '>', value: '' });
+    this.setState({
+      activeThresholds: stateCopy
+    });
+  }
+
+  removeThresholdFilter(pos) {
+    const stateCopy = Object.assign([], this.state.activeThresholds);
+    stateCopy.splice(pos, 1);
+    this.setState({
+      activeThresholds: stateCopy
+    });
+  }
+
+  saveThresholdFilters() {
+    // prevent saving threshold with invalid values
+    const activeThresholds = this.state.activeThresholds.filter((threshold) => {
+      const label = threshold.label, value = parseFloat(threshold.value);
+      console.log('express', threshold, label.length > 0 && !isNaN(value) && value !== Infinity);
+      return (label.length > 0 && !isNaN(value) && value !== Infinity);
+    });
+    window.localStorage.setItem('activeThresholds', JSON.stringify(activeThresholds));
+    $('.advanced-filters-modal').slideToggle(200);
+    this.applyThresholdFilters(this.state.taxonomy_details, this.state.activeThresholds, true);
+  }
+
+  getSavedThresholdFilters() {
+    const activeThresholds = window.localStorage.getItem('activeThresholds');
+    return (activeThresholds) ? JSON.parse(activeThresholds) : [];
+  }
+
+  applyThresholdFilters(candidateTaxons, rules, animate = true) {
+    let filteredTaxons;
+    if (rules.length) {
+       filteredTaxons = candidateTaxons.filter((taxon) => {
+        let passedFilter = false;
+        for (let rule of rules) {
+          let { label, operator, value } = rule;
+          // skip invalid rules
+          if (label.trim().length < 1 || operator.length < 1 || isNaN(parseFloat(value))) {
+            continue;
+          }
+          const [fieldType, fieldTitle] = label.split('_');
+          const taxonValue = (taxon[fieldType] || {})[fieldTitle];
+          value = parseFloat(value);
+          switch (operator) {
+            case '>':
+              passedFilter = taxonValue > value;
+            break;
+            case '<':
+              passedFilter = taxonValue < value;
+            break;
+            case '==':
+              passedFilter = taxonValue === value;
+            break;
+            default:
+              passedFilter = taxonValue > value;
+          }
+          // to ensure a taxon pass all rules if a taxon failed any rule skip the rest of the rules
+          if (!passedFilter) {
+            break;
+          }
+        }
+        return passedFilter;
+      });
     } else {
-      this.state.new_filter_thresholds[threshold_name] = val;
+      filteredTaxons = candidateTaxons;
     }
-    Cookies.set('filter_thresholds', JSON.stringify(this.state.new_filter_thresholds));
-  }
-
-  taxonPassThresholdFilter(taxon) {
-    // console.log(taxon)
-    if (Object.keys(taxon).length <= 0) {
-      return false;
-    }
-    for (const filter_key in this.state.new_filter_thresholds) {
-      const threshold = this.state.new_filter_thresholds[filter_key];
-      const key_parts = filter_key.split('_');
-      const val = (taxon[key_parts[0]] || {})[key_parts[1]];
-      if (val < threshold) {
-        // console.log([val, threshold, filter_key])
-        return false;
-      }
-    }
-    return true;
-  }
-
-  applyThresholdFilters(candidate_taxons, play_animation = true) {
-    let thresholded_taxons = [];
-    let genus_taxon = {};
-    let matched_taxons = [];
-    for (let i = 0; i < candidate_taxons.length; i++) {
-      const taxon = candidate_taxons[i];
-      if (taxon.genus_taxid == taxon.tax_id) {
-        // genus
-        if (matched_taxons.length > 0) {
-          thresholded_taxons.push(genus_taxon);
-          thresholded_taxons = thresholded_taxons.concat(matched_taxons);
-        } else if (this.taxonPassThresholdFilter(genus_taxon)) {
-          thresholded_taxons.push(genus_taxon);
-        }
-        genus_taxon = taxon;
-        matched_taxons = [];
-      } else {
-        // species
-        if (this.taxonPassThresholdFilter(taxon)) {
-          matched_taxons.push(taxon);
-        }
-      }
-    }
-
-    if (matched_taxons.length > 0) {
-      thresholded_taxons.push(genus_taxon);
-      thresholded_taxons = thresholded_taxons.concat(matched_taxons);
-    } else if (this.taxonPassThresholdFilter(genus_taxon)) {
-      thresholded_taxons.push(genus_taxon);
-    }
-
-    this.applySearchFilter(0, this.state.excluded_categories, thresholded_taxons);
-
-    if (play_animation) {
-      this.flash();
-    }
+    console.log(filteredTaxons, candidateTaxons, rules);
+    this.applySearchFilter(0, this.state.excluded_categories, filteredTaxons);
+    (animate) ? this.flash() : null;
   }
 
   handleThresholdEnter(event) {
-    if (event.keyCode == 13) {
-      this.applyThresholdFilters(this.state.taxonomy_details);
+    if (event.keyCode === 13) {
+      this.applyThresholdFilters(this.state.taxonomy_details, this.state.activeThresholds, true);
     }
   }
 
   listenThresholdChanges() {
     $('.metric-thresholds').focusout((e) => {
-      this.applyThresholdFilters(this.state.taxonomy_details);
+      this.applyThresholdFilters(this.state.taxonomy_details, this.state.activeThresholds, true);
     });
   }
 
@@ -519,21 +583,6 @@ class PipelineSampleReport extends React.Component {
       Cookies.set('name_type', name_type);
     });
   }
-
-  thresholdInputColumn(metric_token) {
-    return (
-      <input
-        className="browser-default metric-thresholds"
-        onChange={this.setFilterThreshold.bind(this)}
-        onKeyDown={this.handleThresholdEnter}
-        name="group2"
-        defaultValue={this.state.new_filter_thresholds[metric_token]}
-        id={metric_token}
-        type="number"
-      />
-    );
-  }
-
 
   // path to NCBI
   gotoNCBI(e) {
@@ -657,7 +706,6 @@ class PipelineSampleReport extends React.Component {
 
   render_column_header(visible_type, visible_metric, column_name, tooltip_message) {
     const style = { textAlign: 'left', cursor: 'pointer' };
-    const report_column_threshold = this.thresholdInputColumn(column_name);
     return (
       <th style={style}>
         <Tipsy content={tooltip_message} placement="top">
@@ -666,9 +714,6 @@ class PipelineSampleReport extends React.Component {
             {`${visible_type} `}
             {visible_metric}
           </div>
-        </Tipsy>
-        <Tipsy content='Threshold' placement="bottom">
-          { report_column_threshold }
         </Tipsy>
       </th>
     );
@@ -737,6 +782,14 @@ class PipelineSampleReport extends React.Component {
     });
   }
 
+  getDownloadLink() {
+    const param_background_id = this.fetchParams("background_id");
+    const cookie_background_id = Cookies.get('background_id');
+    const defaultBackground = cookie_background_id ? `?background_id=${cookie_background_id}` : '';
+    const csv_background_id_param =
+      param_background_id ? `?background_id=${param_background_id}` : defaultBackground;
+    return `/samples/${this.sample_id}/report_csv${csv_background_id_param}`;
+  }
 
   render() {
     const parts = this.report_page_params.sort_by.split('_');
@@ -758,18 +811,10 @@ class PipelineSampleReport extends React.Component {
         </span>
       </div>
     );
-    const report_filter = (<ReportFilter ref="report_filter"
-        filter_row_stats={ filter_row_stats }
-      />);
-    let param_background_id = this.fetchParams("background_id")
-    let cookie_background_id = Cookies.get('background_id')
-    let csv_background_id_param = param_background_id ? '?background_id=' + param_background_id :
-                                    cookie_background_id ? '?background_id=' + cookie_background_id :
-                                      ''
     const download_button = (
-      <a href={`/samples/${this.sample_id}/report_csv${csv_background_id_param}`} className="download-report right">
-        <div className="fa fa-cloud-download" />
-        <div>Download report</div>
+      <a href={this.getDownloadLink()} className="">
+        <i className="fa fa-cloud-download fa-fw" />
+        <span>Download report</span>
       </a>
     );
     const right_arrow_initial_visibility = '';
@@ -778,10 +823,7 @@ class PipelineSampleReport extends React.Component {
         <div id="reports" className="reports-screen tab-screen col s12">
           <div className="tab-screen-content">
             <div className="row reports-container">
-              <div className="col s2 reports-sidebar">
-                {report_filter}
-              </div>
-              <div className="col s10 reports-section">
+              <div className="col s12 reports-section">
                 <div className="reports-count">
                   { filter_row_stats }
                   <div className='report-top-filters'>
@@ -874,7 +916,7 @@ class PipelineSampleReport extends React.Component {
                                   className="filled-in cat-filter"
                                   id={category.name}
                                   value={category.name}
-                                  onClick={(e) => {e.stopPropagation(); console.log('Retarded'); this.applyExcludedCategories(e)}}
+                                  onClick={(e) => {this.applyExcludedCategories(e)}}
                                   onChange={(e) => {}}
                                   checked={this.state.excluded_categories.indexOf(category.name) < 0}/>
                                   <label htmlFor={ category.name }>{ category.name }</label>
@@ -887,15 +929,91 @@ class PipelineSampleReport extends React.Component {
                         </div>
                       </li>
                       <li className='download-report-button top-filter-dropdown'>
-                        <a href={`/samples/${this.sample_id}/report_csv?background_id=${this.report_details.background_model.id}`} className="">
-                          <i className="fa fa-cloud-download fa-fw" />
-                          <span>Download report</span>
-                        </a>
+                        {download_button}
+                      </li>
+                      <li className="top-filter ">
+                        <div className="advanced-filters-activate">
+                          <span className="filter-label">
+                            Advanced Filtering
+                          </span>
+                          <i className="fa fa-angle-down right" />
+                        </div>
+                        <div className="advanced-filters-modal">
+                          <div className="filter-inputs">
+                            {
+                              this.state.activeThresholds.map((activeThreshold, index) => {
+                                return (
+                                  <div key={index} className="row">
+                                    <div className=" col s5">
+                                      <select
+                                        value={activeThreshold.label}
+                                        onChange={(e) => this.setThresholdProperty(index, 'label', e.target.value) }
+                                        className="browser-default">
+                                        <option value="">Select threshold</option>
+                                        {
+                                          this.state.allThresholds.map((thresholdObject) => {
+                                            return (
+                                              <option
+                                                key={thresholdObject.value}
+                                                value={thresholdObject.value}>
+                                                {thresholdObject.name}
+                                              </option>
+                                            )
+                                          })
+                                        }
+                                      </select>
+                                    </div>
+                                    <div className="col s3">
+                                      <select
+                                        value={activeThreshold.operator}
+                                        onChange={(e) => this.setThresholdProperty(index, 'operator', e.target.value)}
+                                        className="browser-default">
+                                        <option value=">">
+                                          Greater than
+                                        </option>
+                                        <option value="<">
+                                          Less than
+                                        </option>
+                                        <option value="==">
+                                          Equals
+                                        </option>
+                                      </select>
+                                    </div>
+                                    <div className="col s3">
+                                      <input
+                                        className="metric-thresholds browser-default"
+                                        onChange={(e) => this.setThresholdProperty(index, 'value', e.target.value)}
+                                        onKeyDown={(e) => this.handleThresholdEnter(e, index)}
+                                        name="group2"
+                                        value={ activeThreshold.value }
+                                        id={activeThreshold.label}
+                                        type="number"
+                                      />
+                                    </div>
+                                    <div className="col s1" onClick={() => this.removeThresholdFilter(index)}>
+                                      <i className="fa fa-close " data-ng={index} />
+                                    </div>
+                                  </div>
+                                )
+                              })
+                            }
+                          </div>
+                          <div className="add-threshold-filter" onClick={ () => this.appendThresholdFilter() }>
+                            <i className="fa fa-plus-circle" /> Add threshold
+                          </div>
+                          <br/>
+                          <div className="" >
+                            <button className="btn" onClick={ () => this.saveThresholdFilters()}>
+                              Save
+                            </button>
+                          </div>
+                        </div>
                       </li>
                     </ul>
                   </div>
                   {/* { filter_row_stats } */}
                 </div>
+
                 <div className="reports-main">
                   <table id="report-table" className="bordered report-table">
                     <thead>
