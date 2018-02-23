@@ -752,7 +752,7 @@ class PipelineSampleReport extends React.Component {
                           </span>
                         Taxonomy
                         </th>
-                        {this.render_column_header('', 'Score', 'NT_aggregatescore', 'Aggregate score') }
+                        {this.render_column_header('', 'Score', 'NT_aggregatescore', 'Aggregate score: ( |genus.NT.Z| * species.NT.Z * species.NT.rPM ) + ( |genus.NR.Z| * species.NR.Z * species.NR.rPM )') }
                         {this.render_column_header('NT', 'Z', 'NT_zscore', 'Z-score relative to background model for alignments to NCBI NT') }
                         {this.render_column_header('NT', 'rPM', 'NT_rpm', 'Number of reads aligning to the taxon in the NCBI NT database per million total input reads')}
                         {this.render_column_header('NT', 'r', 'NT_r', 'Number of reads aligning to the taxon in the NCBI NT database')}
