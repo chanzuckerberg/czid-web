@@ -28,10 +28,10 @@ class PipelineSampleReport extends React.Component {
     const cached_name_type = Cookies.get('name_type');
     const savedThresholdFilters = this.getSavedThresholdFilters();
     this.defaultThresholdValues = (savedThresholdFilters.length) ? savedThresholdFilters : [{
-      label: 'NT_aggregatescore',
-      operator: '<',
-      value: Infinity
-    }]; // all data should pass default threshold, reason for infinity
+      label: '',
+      operator: '',
+      value: ''
+    }]; // all data should pass default threshold, reason for negative max value
 
     this.state = {
       taxonomy_details: [],
@@ -204,7 +204,7 @@ class PipelineSampleReport extends React.Component {
         genus_map
       },
       () => {
-        this.applyThresholdFilters(res.data.taxonomy_details[2], [], false);
+        this.applyThresholdFilters(res.data.taxonomy_details[2], this.state.activeThresholds, false);
       }
       )
     });
@@ -496,8 +496,7 @@ class PipelineSampleReport extends React.Component {
     // prevent saving threshold with invalid values
     const activeThresholds = this.state.activeThresholds.filter((threshold) => {
       const label = threshold.label, value = parseFloat(threshold.value);
-      console.log('express', threshold, label.length > 0 && !isNaN(value) && value !== Infinity);
-      return (label.length > 0 && !isNaN(value) && value !== Infinity);
+      return (label.length > 0 && !isNaN(value) && value !== '');
     });
     window.localStorage.setItem('activeThresholds', JSON.stringify(activeThresholds));
     $('.advanced-filters-modal').slideToggle(200);
@@ -516,8 +515,9 @@ class PipelineSampleReport extends React.Component {
         let passedFilter = false;
         for (let rule of rules) {
           let { label, operator, value } = rule;
-          // skip invalid rules
           if (label.trim().length < 1 || operator.length < 1 || isNaN(parseFloat(value))) {
+            // a taxon should not be eliminated when rule is invalid
+            passedFilter = true;
             continue;
           }
           const [fieldType, fieldTitle] = label.split('_');
