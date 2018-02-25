@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import moment from 'moment';
 import $ from 'jquery';
 import axios from 'axios';
+import Cookies from 'js-cookie';
 import numberWithCommas from '../helpers/strings';
 import SubHeader from './SubHeader';
 import PipelineSampleReport from './PipelineSampleReport';
@@ -157,6 +158,20 @@ class PipelineSampleReads extends React.Component {
     "Nasopharyngeal swab", "Plasma", "Serum", "Solid tissue",
     "Stool", "Synovial fluid", "Whole blood"];
     return tissue_types;
+  }
+
+  fetchParams(param) {
+    let urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+  }
+
+  getDownloadLink() {
+    const param_background_id = this.fetchParams("background_id");
+    const cookie_background_id = Cookies.get('background_id');
+    const defaultBackground = cookie_background_id ? `?background_id=${cookie_background_id}` : '';
+    const csv_background_id_param =
+      param_background_id ? `?background_id=${param_background_id}` : defaultBackground;
+    return `/samples/${this.sampleId}/report_csv${csv_background_id_param}`;
   }
 
   componentDidMount() {
@@ -462,14 +477,11 @@ class PipelineSampleReads extends React.Component {
               <div className="col no-padding s3">
                 <ul className="report-action-buttons">
                   <li>
-                    <button>
-                      Compare
-                    </button>
-                  </li>
-                  <li>
-                    <button className='o'>
-                      <i className="fa fa-cloud-download fa-fw" />Download
-                    </button>
+                    <a href={this.getDownloadLink()}>
+                      <button className='o'>
+                        <i className="fa fa-cloud-download fa-fw" />Download
+                      </button>
+                    </a>
                   </li>
                 </ul>
               </div>
