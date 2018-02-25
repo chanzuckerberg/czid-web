@@ -31,7 +31,7 @@ class PipelineSampleReport extends React.Component {
       label: '',
       operator: '',
       value: ''
-    }]; // all data should pass default threshold, reason for negative max value
+    }]; // all taxons will pass this default filter
 
     this.state = {
       taxonomy_details: [],
@@ -119,8 +119,6 @@ class PipelineSampleReport extends React.Component {
     this.sortCompareFunction = this.sortCompareFunction.bind(this);
     this.setSortParams = this.setSortParams.bind(this);
     this.flash = this.flash.bind(this);
-    this.fetchParams = this.fetchParams.bind(this);
-
     this.expandOrCollapseGenus = this.expandOrCollapseGenus.bind(this);
     this.expandTable = this.expandTable.bind(this);
     this.collapseTable = this.collapseTable.bind(this);
@@ -161,11 +159,6 @@ class PipelineSampleReport extends React.Component {
       e.stopPropagation();
       advancedFiltersModal.slideToggle(300);
     });
-  }
-
-  fetchParams(param) {
-    let urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(param)
   }
 
   fetchSearchList() {
@@ -782,14 +775,7 @@ class PipelineSampleReport extends React.Component {
     });
   }
 
-  getDownloadLink() {
-    const param_background_id = this.fetchParams("background_id");
-    const cookie_background_id = Cookies.get('background_id');
-    const defaultBackground = cookie_background_id ? `?background_id=${cookie_background_id}` : '';
-    const csv_background_id_param =
-      param_background_id ? `?background_id=${param_background_id}` : defaultBackground;
-    return `/samples/${this.sample_id}/report_csv${csv_background_id_param}`;
-  }
+
 
   render() {
     const parts = this.report_page_params.sort_by.split('_');
@@ -812,7 +798,7 @@ class PipelineSampleReport extends React.Component {
       </div>
     );
     const download_button = (
-      <a href={this.getDownloadLink()} className="">
+      <a href={''} className="">
         <i className="fa fa-cloud-download fa-fw" />
         <span>Download report</span>
       </a>
@@ -927,9 +913,6 @@ class PipelineSampleReport extends React.Component {
                             { this.all_categories.length < 1 ? <p>None found</p> : null }
                           </div>
                         </div>
-                      </li>
-                      <li className='download-report-button top-filter-dropdown'>
-                        {download_button}
                       </li>
                       <li className="top-filter ">
                         <div className="advanced-filters-activate">
