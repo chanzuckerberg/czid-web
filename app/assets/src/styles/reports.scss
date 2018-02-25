@@ -639,6 +639,10 @@ margin-bottom: 0px;
       &.o {
         background: #fff;
         color: #3867fa;
+        &:hover {
+          background: #3867fa;
+          color: #fff;
+        }
       }
     }
   }
