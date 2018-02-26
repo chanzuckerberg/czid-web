@@ -513,11 +513,12 @@ class PipelineSampleReport extends React.Component {
   }
 
   applyThresholdFilters(candidateTaxons, rules, animate = true) {
-    let filteredTaxons;
-    if (rules.length) {
+    let filteredTaxons, rulesLength = rules.length;
+    if (rulesLength) {
        filteredTaxons = candidateTaxons.filter((taxon) => {
         let passedFilter = false;
-        for (let rule of rules) {
+        for (let i = 0; i < rulesLength; i += 1) {
+          let rule = rules[i];
           if (this.isThresholdValid(rule)) {
             let { label, operator, value } = rule;
             value = parseFloat(value);
