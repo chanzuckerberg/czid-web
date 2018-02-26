@@ -75,13 +75,22 @@
     font-size: 9pt;
     fill: #aaa;
   }
-
+  .rowLabelg {
+    .removeLink {
+      display: none;
+    }
+    &.text-hover .removeLink {
+      display: block;
+      cursor: pointer;
+    }
+  }
   text.text-selected {
     fill: #000;
   }
-  text.text-hover, text.text-highlight {
+ .text-hover text, text.text-highlight {
 		fill: rgb(82,131,211);
   }
+
   .heatmap-tooltip {
     position: absolute;
     min-width: 200px;

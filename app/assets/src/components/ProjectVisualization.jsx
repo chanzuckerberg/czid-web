@@ -211,7 +211,8 @@ class D3Heatmap extends React.Component {
           return "#f6f6f6";
         }
         if (d.value > 0) {
-          return that.colors[parseInt(colorScale(d.value))];
+          let colorIndex = parseInt(colorScale(d.value));
+          return that.colors[colorIndex];
         }
         return that.colors[0];
       })
@@ -391,10 +392,28 @@ class D3Heatmap extends React.Component {
     let rowLabels = this.svg.append("g")
         .selectAll(".rowLabelg")
         .data(this.rowLabel)
-        .enter()
-        .append("text")
+        .enter();
+    
+    let groups = rowLabels.append("g")
+        .attr("class", "rowLabelg")
+        .attr("transform", "translate(" + (this.cellWidth * this.col_number) + ", 0)")
+        .on("mouseover", function(d) {
+          d3.select(this).classed("text-hover",true);
+        })
+        .on("mouseout" , function(d) {
+          d3.select(this).classed("text-hover",false);
+        });
+    
+    groups.append("rect")
+        .attr("y", function (d, i) {
+          return i * that.cellHeight;
+        })
+        .attr("width", this.margin.right)
+        .attr("height", this.cellHeight)
+        .style("fill", "#fff");
+
+    groups.append("text")
         .text(function (d) { return d; })
-        .attr("x", this.cellWidth * this.col_number)
         .attr("y", function (d, i) {
           return i * that.cellHeight;
         })
@@ -402,16 +421,18 @@ class D3Heatmap extends React.Component {
         .attr("class", function (d,i) {
           return "rowLabel mono r"+i;}
         )
-        .on("mouseover", function(d) {
-          d3.select(this).classed("text-hover",true);
+      
+    groups.append("text")
+        .attr("class", "removeLink mono")
+        .text("x")
+        .attr("y", function (d, i) {
+          return i * that.cellHeight;
         })
-        .on("mouseout" , function(d) {
-          d3.select(this).classed("text-hover",false);
-        })
-        // .on("click", function(d,i) {
-        //   rowSortOrder=!rowSortOrder;
-        //   that.sortbylabel("r",i,rowSortOrder);
-        // });
+        .attr("transform", "translate(" + this.margin.right + "," + this.cellHeight / 1.5 + ")")
+        .style("text-anchor", "end")
+        .on("click", (d,i) => {
+          this.props.onRemoveRow(d);
+        });
   }
 
   renderColLabels () {
@@ -553,38 +574,52 @@ class ProjectVisualization extends React.Component {
     this.request = axios.get("/samples/samples_taxons.json?sample_ids=" + this.sample_ids)
     .then((response) => {
       let taxons = this.extractTaxons(response.data);
-      let clustered_data = this.cluster(response.data, taxons);
-      this.updateMinMax(response.data, this.state.dataType);
-      this.setState({
-        data: clustered_data.flat,
-        tree: clustered_data.tree,
-        taxons: this.extractTaxons(response.data),
-      });
+      this.updateData(response.data, this.state.dataType, taxons);
     }).then(() => {
       this.setState({ loading: false });
     });
   }
+  
+  updateData (data, dataType, taxons) {
+    let minMax = this.getMinMax(data, dataType, taxons);
+    let clustered_data = this.cluster(data, dataType, taxons);
 
-  updateMinMax (data, dataType) {
+    this.setState({
+      data: clustered_data.flat,
+      tree: clustered_data.tree,
+      taxons: taxons,
+      min: minMax.min,
+      max: minMax.max,
+      dataType: dataType,
+    });
+  }
+
+  getMinMax (data, dataType, taxon_names) {
     let taxon_lists = [];
-    for (let sample of data){
-      taxon_lists.push(sample.taxons);
+    taxon_names = new Set(taxon_names);
+    for (let sample of data) {
+      let sample_taxons = [];
+      for (let taxon of sample.taxons) {
+        if (taxon_names.has(taxon.name)) {
+          taxon_lists.push(sample.taxons);
+        }
+      }
+      taxon_lists.push(sample_taxons);
     }
     let taxons = [].concat.apply([], taxon_lists);
-
     let min = d3.min(taxons, (d) => {
       return this.getDataProperty(d, dataType);
     });
     let max = d3.max(taxons, (d) => {
       return this.getDataProperty(d, dataType);
     });
-    this.setState({
+    return {
       min: min,
       max: max,
-    });
+    };
   }
 
-  cluster (data, taxons) {
+  cluster (data, dataType, taxons) {
     let vector_to_sample = {};
     // vectorize
     let vectors = [];
@@ -594,7 +629,7 @@ class ProjectVisualization extends React.Component {
         let value = null;
         for(let taxon of sample.taxons) {
           if (taxon.name == taxon_name) {
-            value = this.getDataProperty(taxon, this.state.dataType);
+            value = this.getDataProperty(taxon, dataType);
             break;
           }
         }
@@ -706,6 +741,14 @@ class ProjectVisualization extends React.Component {
     window.location.href = "/samples/" + sample.sample_id;
   }
 
+  onRemoveRow (rowLabel) {
+    let idx = this.state.taxons.indexOf(rowLabel);
+    if (idx > -1) {
+      this.state.taxons.splice(idx, 1);
+    }
+    this.updateData(this.state.data, this.state.dataType, this.state.taxons); 
+  }
+
   renderHeatmap () {
     if (!this.state.data) {
       return;
@@ -722,17 +765,17 @@ class ProjectVisualization extends React.Component {
         getTooltip={this.getTooltip.bind(this)}
         onCellClick={this.onCellClick.bind(this)}
         colors={["rgb(255,255,255)", "rgb(255,255,173)", "rgb(254,221,11)", "rgb(252,104,117)", "rgb(251, 0, 243)", "rgb(140, 0, 236)"]}
+        onRemoveRow={this.onRemoveRow.bind(this)}
       />
     )
   }
 
   updateDataType (e) {
     let newDataType = e.target.value;
+    this.updateData(this.state.data, newDataType, this.state.taxons);
     this.setState({
-      dataType: newDataType,
       dataThreshold: -99999999999,
     });
-    this.updateMinMax(this.state.data, newDataType);
   }
 
   renderTypePickers () {
