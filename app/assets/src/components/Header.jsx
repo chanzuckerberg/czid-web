@@ -57,8 +57,8 @@ class Header extends React.Component  {
   render() {
     let host_genome_names = this.host_genome_names;
     let cli_modal;
-    if (this.userSignedIn) {
-      cli_modal = (this.demoUser !== 1) ? (
+    if (this.userSignedIn && this.demoUser !== 1) {
+      cli_modal =
         <div id="cli_modal" className="modal project-popup">
           <div className="modal-content">
             <p>1. Install and configure the Amazon Web Services Command Line Interface (AWS CLI).</p>
@@ -83,8 +83,7 @@ class Header extends React.Component  {
             <p className='upload-question'>For more information on the IDseq CLI, have a look at its <a href='https://github.com/chanzuckerberg/idseq-web/blob/master/README.md' target='_blank'>GitHub repository</a>.</p>
             <button className='modal-close'>Done</button>
           </div>
-        </div>
-      ): null;
+        </div>;
     }
     return (
       <div className='header-row row'>
