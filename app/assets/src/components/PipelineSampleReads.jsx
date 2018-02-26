@@ -429,7 +429,8 @@ class PipelineSampleReads extends React.Component {
     if (this.sample_map && Object.keys(this.sample_map).length > 1) {
       sample_dropdown = (
         <div className='dropdown-button sample-select-dropdown' data-activates='sample-list'>
-          { this.sampleInfo.name }<i className="fa fa-chevron-down right"/>
+          <span className='sample-name-label'>{ this.sampleInfo.name }</span>
+          <i className="fa fa-chevron-down right"/>
 
           <ul id='sample-list' className='dropdown-content sample-dropdown-content'>
            { Object.keys(this.sample_map).map((sample_id, i) => {
@@ -445,7 +446,7 @@ class PipelineSampleReads extends React.Component {
         </div>
       )
     } else {
-    sample_dropdown = <span>{ this.sampleInfo.name }</span>
+    sample_dropdown = <span className='sample-name-label'>{ this.sampleInfo.name }</span>
     }
 
     let version_display = !this.pipelineRun ? '' :
@@ -474,7 +475,7 @@ class PipelineSampleReads extends React.Component {
                 </a>
                 > { sample_dropdown }
               </div>
-              <div className="col no-padding s3">
+              <div className="col no-padding s3 right-align">
                 <ul className="report-action-buttons">
                   <li>
                     <a href={this.getDownloadLink()}>

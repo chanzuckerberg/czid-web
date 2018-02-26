@@ -23,15 +23,16 @@ class PipelineSampleReport extends React.Component {
     this.max_rows_to_render = props.max_rows || 1500;
     this.default_sort_by = this.report_page_params.sort_by.replace('highest_', '');
     this.sort_params = {};
-    const filter_thresholds = Cookies.get('filter_thresholds');
     const cached_cats = Cookies.get('excluded_categories');
     const cached_name_type = Cookies.get('name_type');
     const savedThresholdFilters = this.getSavedThresholdFilters();
-    this.defaultThresholdValues = (savedThresholdFilters.length) ? savedThresholdFilters : [{
+    this.emptyThresholdFilter = [{
       label: '',
       operator: '',
       value: ''
-    }]; // all taxons will pass this default filter
+    }];
+    this.defaultThresholdValues = (savedThresholdFilters.length)
+      ? savedThresholdFilters : this.emptyThresholdFilter; // all taxons will pass this default filter
 
     this.state = {
       taxonomy_details: [],
@@ -48,7 +49,6 @@ class PipelineSampleReport extends React.Component {
       selected_taxons_top: [],
       pagesRendered: 0,
       sort_by: this.default_sort_by,
-      new_filter_thresholds: (filter_thresholds) ? JSON.parse(filter_thresholds) : { NT_aggregatescore: 0.0 },
       /*
         NT_zscore: 0.0,
         NT_rpm: 0.0,
@@ -157,7 +157,7 @@ class PipelineSampleReport extends React.Component {
 
     advancedFiltersActivate.on('click', (e) => {
       e.stopPropagation();
-      advancedFiltersModal.slideToggle(300);
+      advancedFiltersModal.slideToggle(200);
     });
   }
 
@@ -203,8 +203,11 @@ class PipelineSampleReport extends React.Component {
     });
   }
 
+
   anyFilterSet() {
-    if (this.state.search_taxon_id > 0 || this.state.excluded_categories.length > 0 || Object.keys(this.state.new_filter_thresholds).length > 0) {
+    if (this.state.search_taxon_id > 0
+      || this.state.excluded_categories.length > 0
+      || (this.state.activeThresholds.length > 0 && this.isThresholdValid(this.state.activeThresholds[0]))) {
       return true;
     }
     return false;
@@ -212,7 +215,7 @@ class PipelineSampleReport extends React.Component {
 
   resetAllFilters() {
     this.setState({
-      activeThresholds: this.defaultThresholdValues,
+      activeThresholds: this.emptyThresholdFilter,
       excluded_categories: [],
       search_taxon_id: 0,
       thresholded_taxons: this.state.taxonomy_details,
@@ -220,11 +223,11 @@ class PipelineSampleReport extends React.Component {
       selected_taxons_top: this.state.taxonomy_details.slice(0,  this.max_rows_to_render),
       pagesRendered: 1,
       rows_passing_filters: this.state.taxonomy_details.length,
+    }, () => {
+      this.saveThresholdFilters();
+      Cookies.set('excluded_categories', '[]');
+      this.flash();
     });
-    this.saveThresholdFilters();
-    Cookies.set('excluded_categories', '[]');
-    $('.metric-thresholds').val('');
-    this.flash();
   }
 
   applySearchFilter(searchTaxonId, excludedCategories, input_taxons) {
@@ -285,7 +288,6 @@ class PipelineSampleReport extends React.Component {
       selected_taxons = thresholded_taxons;
     }
 
-    // console.log(excludedCategories)
     this.setState({
       loading: false,
       excluded_categories: excludedCategories,
@@ -428,7 +430,6 @@ class PipelineSampleReport extends React.Component {
   }
 
   applyExcludedCategories(e) {
-    e.stopPropagation();
     let excluded_categories = this.state.excluded_categories;
     if (e.target.checked) {
       const ridx = excluded_categories.indexOf(e.target.value);
@@ -471,7 +472,7 @@ class PipelineSampleReport extends React.Component {
 
   appendThresholdFilter() {
     const stateCopy = Object.assign([], this.state.activeThresholds);
-    stateCopy.push({ label: '', operator: '>', value: '' });
+    stateCopy.push({ label: '', operator: '', value: '' });
     this.setState({
       activeThresholds: stateCopy
     });
@@ -485,14 +486,24 @@ class PipelineSampleReport extends React.Component {
     });
   }
 
+  isThresholdValid(threshold) {
+    if (threshold.hasOwnProperty('label')
+      && threshold.hasOwnProperty('operator')
+      && threshold.hasOwnProperty('value')) {
+        return ((threshold.label.length > 0)
+        && (threshold.operator.length > 0)
+        && (threshold.value != '' && !isNaN(threshold.value)));
+    }
+    return false;
+  }
+
   saveThresholdFilters() {
     // prevent saving threshold with invalid values
     const activeThresholds = this.state.activeThresholds.filter((threshold) => {
-      const label = threshold.label, value = parseFloat(threshold.value);
-      return (label.length > 0 && !isNaN(value) && value !== '');
+      return this.isThresholdValid(threshold);
     });
     window.localStorage.setItem('activeThresholds', JSON.stringify(activeThresholds));
-    $('.advanced-filters-modal').slideToggle(200);
+    $('.advanced-filters-modal').slideUp(300);
     this.applyThresholdFilters(this.state.taxonomy_details, this.state.activeThresholds, true);
   }
 
@@ -507,27 +518,28 @@ class PipelineSampleReport extends React.Component {
        filteredTaxons = candidateTaxons.filter((taxon) => {
         let passedFilter = false;
         for (let rule of rules) {
-          let { label, operator, value } = rule;
-          if (label.trim().length < 1 || operator.length < 1 || isNaN(parseFloat(value))) {
+          if (this.isThresholdValid(rule)) {
+            let { label, operator, value } = rule;
+            value = parseFloat(value);
+            const [fieldType, fieldTitle] = label.split('_');
+            const taxonValue = (taxon[fieldType] || {})[fieldTitle];
+            switch (operator) {
+              case '>':
+                passedFilter = taxonValue > value;
+              break;
+              case '<':
+                passedFilter = taxonValue < value;
+              break;
+              case '==':
+                passedFilter = taxonValue === value;
+              break;
+              default:
+                passedFilter = taxonValue > value;
+            }
+          } else {
             // a taxon should not be eliminated when rule is invalid
             passedFilter = true;
             continue;
-          }
-          const [fieldType, fieldTitle] = label.split('_');
-          const taxonValue = (taxon[fieldType] || {})[fieldTitle];
-          value = parseFloat(value);
-          switch (operator) {
-            case '>':
-              passedFilter = taxonValue > value;
-            break;
-            case '<':
-              passedFilter = taxonValue < value;
-            break;
-            case '==':
-              passedFilter = taxonValue === value;
-            break;
-            default:
-              passedFilter = taxonValue > value;
           }
           // to ensure a taxon pass all rules if a taxon failed any rule skip the rest of the rules
           if (!passedFilter) {
@@ -539,7 +551,6 @@ class PipelineSampleReport extends React.Component {
     } else {
       filteredTaxons = candidateTaxons;
     }
-    console.log(filteredTaxons, candidateTaxons, rules);
     this.applySearchFilter(0, this.state.excluded_categories, filteredTaxons);
     (animate) ? this.flash() : null;
   }
@@ -628,7 +639,7 @@ class PipelineSampleReport extends React.Component {
   render_name(tax_info, report_details) {
     let tax_scientific_name = tax_info['name']
     let tax_common_name = tax_info['common_name']
-    let tax_name = this.state.name_type == 'common' ?
+    let tax_name = this.state.name_type.toLowerCase() == 'common name' ?
                      !tax_common_name || tax_common_name.trim() == "" ? <span className="count-info">{tax_scientific_name}</span> : <span>{StringHelper.capitalizeFirstLetter(tax_common_name)}</span>
                      : <span>{tax_scientific_name}</span>
     let foo = <i>{tax_name}</i>;
@@ -797,12 +808,7 @@ class PipelineSampleReport extends React.Component {
         </span>
       </div>
     );
-    const download_button = (
-      <a href={''} className="">
-        <i className="fa fa-cloud-download fa-fw" />
-        <span>Download report</span>
-      </a>
-    );
+
     const right_arrow_initial_visibility = '';
     const result = (
       <div>
@@ -851,12 +857,12 @@ class PipelineSampleReport extends React.Component {
                               Select name type
                             </li>
                             <li
-                              onClick={() => this.handleNameTypeChange('scientific')}
+                              onClick={() => this.handleNameTypeChange('Scientific name')}
                               ref= "name_type">
                               Scientific Name
                             </li>
                             <li
-                              onClick={() => this.handleNameTypeChange('common')}
+                              onClick={() => this.handleNameTypeChange('Common name')}
                               ref= "name_type">
                               Common Name
                             </li>
@@ -951,6 +957,9 @@ class PipelineSampleReport extends React.Component {
                                         value={activeThreshold.operator}
                                         onChange={(e) => this.setThresholdProperty(index, 'operator', e.target.value)}
                                         className="browser-default">
+                                        <option>
+                                          Select operator
+                                        </option>
                                         <option value=">">
                                           Greater than
                                         </option>
@@ -1056,7 +1065,6 @@ class PipelineSampleReport extends React.Component {
       </div>
     );
     const t1 = Date.now();
-    // console.log(`Table render took ${t1 - t0} milliseconds.`);
     return result;
   }
 }
