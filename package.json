@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "start": "yarn install && webpack --watch"
+    "start": "yarn install && webpack --watch",
+    "build-img": "webpack"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",

@@ -9,8 +9,7 @@ RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
 
 
-RUN wget -qO- https://deb.nodesource.com/setup_4.x | bash -
-
+RUN curl -sL https://deb.nodesource.com/setup_9.x | bash -
 RUN apt-get update && apt-get install -y nodejs yarn
 RUN pip install --upgrade pip
 RUN pip install --upgrade pyOpenSSL
@@ -30,15 +29,14 @@ WORKDIR /app
 COPY Gemfile Gemfile.lock ./
 RUN gem install bundler && bundle install --jobs 20 --retry 5
 
-
-RUN npm install webpack -g
+RUN npm update -g
 
 # Copy the main application.
 COPY . ./
 
 RUN yarn install
 RUN npm rebuild node-sass
-RUN mkdir -p app/assets/dist &&  webpack && ls -l app/assets/dist/
+RUN mkdir -p app/assets/dist &&  npm run build-img && ls -l app/assets/dist/
 
 ARG GIT_COMMIT
 ENV GIT_VERSION ${GIT_COMMIT}
