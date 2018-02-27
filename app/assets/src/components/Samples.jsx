@@ -909,7 +909,7 @@ class Samples extends React.Component {
 
   renderTable(samples) {
     let project_id = this.state.selectedProjectId ? this.state.selectedProjectId : 'all'
-    let search_field_width = (project_id === 'all') ? 'col s4 no-padding' : 'col s2 no-padding'
+    let search_field_width = 'col s3 no-padding'
     let search_field = (
       <div className={search_field_width + ' search-field'}>
         <div className='row'>
