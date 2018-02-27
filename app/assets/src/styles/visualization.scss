@@ -7,14 +7,29 @@
   }
   .slider-container {
     margin-top: 1em;
-    
+    .noUi-handle {
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      &:before {
+        left: 11px;
+      }
+      &:after {
+        left: 14px;
+      }
+    }
     .noUi-tooltip {
       display: none;
       top: 120%;
       bottom: auto;
-      font-size: 9pt;
+      font-size: 8.5pt;
+      padding: 2px 5px;
+      color: #aaa;
     }
     .noUi-active {
+      &:focus {
+        outline: none;
+      }
       .noUi-tooltip {
         display: block;
       }
