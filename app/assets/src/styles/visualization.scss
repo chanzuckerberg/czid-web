@@ -5,6 +5,21 @@
   .sub-menu {
     padding-bottom: 20px;
   }
+  .slider-container {
+    margin-top: 1em;
+    
+    .noUi-tooltip {
+      display: none;
+      top: 120%;
+      bottom: auto;
+      font-size: 9pt;
+    }
+    .noUi-active {
+      .noUi-tooltip {
+        display: block;
+      }
+    }
+  }
 }
 .D3Heatmap {
 	.node circle {

@@ -5,13 +5,14 @@
  */
 
 import React from 'react';
-import {withFauxDOM} from 'react-faux-dom';
 import SubHeader from './SubHeader';
 import * as d3 from 'd3';
 import {event as currentEvent} from 'd3';
 import axios from 'axios';
 import ObjectHelper from '../helpers/ObjectHelper';
 import clusterfck from 'clusterfck';
+import ReactNouislider from './ReactNouislider';
+
 class SampleHeatmapTooltip extends React.Component {
   constructor(props) {
     super(props);
@@ -798,7 +799,7 @@ class ProjectVisualization extends React.Component {
   }
   
   updateDataThreshold (e) {
-    this.setState({dataThreshold: e.target.value});
+    this.setState({dataThreshold: parseFloat(e[0])});
   }
 
   renderThresholdSlider () {
@@ -808,7 +809,15 @@ class ProjectVisualization extends React.Component {
     return (
       <div className="range-field">
         <label>Threshold</label>
-        <input min={this.state.min} max={this.state.max + 1} type="range" onChange={this.updateDataThreshold.bind(this)} value={this.state.dataThreshold}/>
+        <div className="slider-container">
+          <ReactNouislider
+            range={{min: this.state.min, max: this.state.max + 1}}
+            start={[this.state.dataThreshold, this.state.max + 1]}
+            connect={[false, true, false]}
+            onChange={this.updateDataThreshold.bind(this)}
+            tooltips
+          />
+        </div>
       </div>
     )
   }
