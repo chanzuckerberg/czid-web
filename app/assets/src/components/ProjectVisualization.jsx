@@ -163,7 +163,8 @@ class D3Heatmap extends React.Component {
 
     this.width = this.cellWidth * this.col_number + this.margin.left + this.margin.right;
     this.height = this.cellHeight * this.row_number + this.margin.top + this.margin.bottom;
-
+    
+    this.tree = props.tree;
     this.legendElementWidth = this.margin.right / this.colors.length;
   }
 
@@ -273,7 +274,9 @@ class D3Heatmap extends React.Component {
       }
       return children;
     });
-    var nodes = cluster.nodes(this.props.tree);
+
+    var nodes = cluster.nodes(this.tree);
+
     let i = 0;
     for (let n of nodes) {
       n.id = i;
@@ -320,8 +323,7 @@ class D3Heatmap extends React.Component {
           d3.selectAll(".link").classed("link-hover", false);
           d3.selectAll(".D3Heatmap .highlight").classed("highlight", false);
       });
-
-		/*
+    /*
 		var node = vis.selectAll("g.node")
 				.data(nodes)
 			.enter().append("g")
@@ -339,7 +341,7 @@ class D3Heatmap extends React.Component {
 					return d.sample.name; 
 				}
 			});
-		*/
+      */
   }
   
   renderLegend () {
@@ -583,7 +585,6 @@ class ProjectVisualization extends React.Component {
   updateData (data, dataType, taxons) {
     let minMax = this.getMinMax(data, dataType, taxons);
     let clustered_data = this.cluster(data, dataType, taxons);
-
     this.setState({
       data: clustered_data.flat,
       tree: clustered_data.tree,
