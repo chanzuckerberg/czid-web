@@ -101,11 +101,13 @@ class PipelineRun < ApplicationRecord
         self.finalized = 1
         self.job_status = "#{prs.step_number}.#{prs.name}-#{STATUS_FAILED}"
         Airbrake.notify("Sample #{sample.id} failed #{prs.name}")
+        save
         return nil
       elsif prs.succeeded?
         next
       else # still running
         self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
+        save
         return nil
       end
     end
@@ -166,11 +168,6 @@ class PipelineRun < ApplicationRecord
     rescue
       return nil
     end
-  end
-
-  def terminate_job
-    command = "aegea batch terminate #{job_id}"
-    _stdout, _stderr, _status = Open3.capture3(command)
   end
 
   def generate_aggregate_counts(tax_level_name)
