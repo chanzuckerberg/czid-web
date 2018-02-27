@@ -15,8 +15,6 @@ class PipelineRunStage < ApplicationRecord
   # Max number of times we resubmit a job when it gets killed by EC2.
   MAX_RETRIES = 5
 
-  before_save :check_job_status
-
   def install_pipeline
     "cd /mnt; " \
     "git clone https://github.com/chanzuckerberg/idseq-pipeline.git; " \
@@ -44,16 +42,6 @@ class PipelineRunStage < ApplicationRecord
     end
     command += " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --ecr-image idseq --memory #{memory} --queue #{queue} --vcpus #{vcpus} --job-role idseq-pipeline "
     command
-  end
-
-  def check_job_status
-    return if completed? || !started? || !id
-    if output_ready?
-      Airbrake.notify("LoadResultForRunStage #{id} may be repeated.") unless job_status != STATUS_CHECKED
-      self.job_status = STATUS_CHECKED
-      Resque.enqueue(LoadResultForRunStage, id)
-      terminate_job
-    end
   end
 
   def started?
@@ -86,7 +74,7 @@ class PipelineRunStage < ApplicationRecord
 
   def run_job
     # Check output for the run and decide if we should run this stage
-    return if job_command.present? && job_status != 'FAILED' # job has been started successfully
+    return if started? && !failed? # job has been started successfully
     self.job_command = send(job_command_func)
     self.command_stdout, self.command_stderr, status = Open3.capture3(job_command)
     if status.exitstatus.zero?
@@ -110,7 +98,8 @@ class PipelineRunStage < ApplicationRecord
       update(job_status: STATUS_FAILED)
       raise
     ensure
-      pipeline_run.update_job_status
+      pipeline_run.check_job_status # this does pipeline_run.save
+      terminate_job
     end
   end
 
@@ -136,33 +125,51 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def update_job_status
-    return if completed? || checked?
-    return unless due_for_aegea_check? || output_ready?
-    skip_save = false
-    stdout, stderr, status = Open3.capture3("aegea", "batch", "describe", job_id.to_s)
-    if status.exitstatus.zero?
-      self.job_description = stdout
-      job_hash = JSON.parse(job_description)
-      self.job_status = job_hash['status']
-      if job_hash['container'] && job_hash['container']['logStreamName']
-        self.job_log_id = job_hash['container']['logStreamName']
-      end
-      if instance_terminated?(job_hash)
-        # note failed attempt and retry
-        add_failed_job
-        if count_failed_tries <= MAX_RETRIES
-          run_job # this saves
-          skip_save = true
-        else
-          Airbrake.notify("Job #{job_id} for pipeline run #{id} was killed #{MAX_RETRIES} times.")
-        end
-      end
-    else
-      Airbrake.notify("Error for update job status for pipeline run #{id} with error #{stderr}")
-      self.job_status = STATUS_ERROR
-      self.job_status = STATUS_FAILED if stderr =~ /IndexError/ # job no longer exists
+    if !id || !started? || succeeded? || failed?
+      # This is called only from PipelineRun.update_status and only when the guard above is false.
+      Airbrake.notify("Invalid precondition for PipelineRunStage.update_job_status #{id} #{job_id} #{job_status}.")
+      return
     end
-    save unless skip_save
+    if checked?
+      # This can happen due to overly-eager frequent calls from pipeline_monitor through PipelineRun.update_job_status.
+      Rails.logger.info "Job #{id} #{job_id} checked and waiting to load results."
+      return
+    end
+    if output_ready?
+      self.job_status = STATUS_CHECKED
+      # save before enqueue, to prevent minor race
+      save
+      Resque.enqueue(LoadResultForRunStage, id)
+      return
+    end
+    # The job appears to be in progress.  Check to make sure it hasn't been killed in AWS.   But not too frequently.
+    return unless due_for_aegea_check?
+    stdout, stderr, status = Open3.capture3("aegea", "batch", "describe", job_id.to_s)
+    unless status.exitstatus.zero?
+      Airbrake.notify("Error for update job status for pipeline run #{id} with error #{stderr}")
+      self.job_status = STATUS_ERROR # transient error, job is still "in progress"
+      self.job_status = STATUS_FAILED if stderr =~ /IndexError/ # job no longer exists
+      save
+      return
+    end
+    self.job_description = stdout
+    job_hash = JSON.parse(job_description)
+    self.job_status = job_hash['status']
+    if job_hash['container'] && job_hash['container']['logStreamName']
+      self.job_log_id = job_hash['container']['logStreamName']
+    end
+    unless instance_terminated?(job_hash)
+      save
+      return
+    end
+    # note failed attempt and retry
+    add_failed_job
+    unless count_failed_tries <= MAX_RETRIES
+      Airbrake.notify("Job #{job_id} for pipeline run #{id} was killed #{MAX_RETRIES} times.")
+      save
+      return
+    end
+    run_job # this saves
   end
 
   def file_generated_since_run(s3_path)
