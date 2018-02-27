@@ -534,7 +534,8 @@ class ProjectVisualization extends React.Component {
       loading: false,
       data: undefined,
       dataType: "NT.aggregatescore",
-      dataThreshold: -99999999999,
+      minDataThreshold: -99999999999,
+      maxDataThreshold: 99999999999,
     };
 
     this.dataTypes = ["NT.aggregatescore", "NT.rpm", "NT.r", "NT.zscore", "NT.maxzscore", "NR.rpm", "NR.r", "NR.zscore", "NR.maxzscore"];
@@ -560,7 +561,7 @@ class ProjectVisualization extends React.Component {
       let taxon = this.getTaxonFor(row, col);
       if (taxon) {
         let value = this.getDataProperty(taxon, dataType);
-        if (value >= that.state.dataThreshold) {
+        if (value >= that.state.minDataThreshold && value <= this.state.maxDataThreshold) {
           return value;
         }
       }
@@ -776,7 +777,8 @@ class ProjectVisualization extends React.Component {
     let newDataType = e.target.value;
     this.updateData(this.state.data, newDataType, this.state.taxons);
     this.setState({
-      dataThreshold: -99999999999,
+      minDataThreshold: -99999999999,
+      maxDataThreshold: 99999999999,
     });
   }
 
@@ -799,7 +801,10 @@ class ProjectVisualization extends React.Component {
   }
   
   updateDataThreshold (e) {
-    this.setState({dataThreshold: parseFloat(e[0])});
+    this.setState({
+      minDataThreshold: parseFloat(e[0]),
+      maxDataThreshold: parseFloat(e[1])
+    });
   }
 
   renderThresholdSlider () {
@@ -812,7 +817,7 @@ class ProjectVisualization extends React.Component {
         <div className="slider-container">
           <ReactNouislider
             range={{min: this.state.min, max: this.state.max + 1}}
-            start={[this.state.dataThreshold, this.state.max + 1]}
+            start={[this.state.minDataThreshold, this.state.maxDataThreshold]}
             connect={[false, true, false]}
             onChange={this.updateDataThreshold.bind(this)}
             tooltips
