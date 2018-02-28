@@ -47,8 +47,8 @@ module PipelineOutputsHelper
         reversed = 1
       end
       aligned_portion = read_seq[(metrics[4]-1)..(metrics[5]-1)]
-      left_portion = read_seq[0..(metrics[4]-2)]
-      right_portion = read_seq[(metrics[5])..(read_seq.size - 1)]
+      left_portion = (metrics[4] - 2) >= 0 ? read_seq[0..(metrics[4]-2)] : ""
+      right_portion = metrics[5] < read_seq.size ? read_seq[(metrics[5])..(read_seq.size - 1)]: ""
       if ref_seq[0].size > left_portion.size
           # pad left_portion
         while ref_seq[0].size > left_portion.size
@@ -82,15 +82,23 @@ module PipelineOutputsHelper
     end
     return results
   end
+  def parse_tree(results, key, current_dict)
+    if current_dict["reads"]
+      results[key] = parse_accession(current_dict)
+    else
+      current_dict.each do |key, val|
+        parse_tree(results, key, val)
+      end
+    end
+  end
 
   def parse_alignment_results(taxid, tax_level, alignment_data)
     taxon = TaxonLineage.find_by(taxid: taxid)
-    title = taxon["#{tax_level}_name"].to_s + "(#{tax_level}) Alignment Details"
-    results = {"title" => title, "details" => {}}
-    alignment_data.each do |key, val|
-      results['details'][key] = parse_accession(val)
-    end
-    return results
+    results = {}
+    parse_tree(results, taxid, alignment_data)
+
+    title = taxon["#{tax_level}_name"].to_s + "(#{tax_level}) Alignment (#{results.size} unique accessions)"
+    return {"title" => title, "details" => results}
   end
 
   def get_taxid_fasta(sample, taxid, tax_level, hit_type)
