@@ -26,14 +26,58 @@ class PipelineSampleReport extends React.Component {
     const cached_cats = Cookies.get('excluded_categories');
     const cached_name_type = Cookies.get('name_type');
     const savedThresholdFilters = this.getSavedThresholdFilters();
-    this.emptyThresholdFilter = [{
-      label: '',
-      operator: '',
-      value: ''
-    }];
-    this.defaultThresholdValues = (savedThresholdFilters.length)
-      ? savedThresholdFilters : this.emptyThresholdFilter; // all taxons will pass this default filter
+    this.allThresholds = [
+      {
+        name: 'Score',
+        value: 'NT_aggregatescore'
+      }, {
+        name: 'NT Z Score',
+        value: 'NT_zscore'
+      }, {
+        name: 'NT rPM',
+        value: 'NT_rpm'
+      }, {
+        name: 'NT r (total reads)',
+        value: 'NT_r'
+      }, {
+        name: 'NT %id',
+        value: 'NT_percentidentity'
+      }, {
+        name: 'NT log(1/e)',
+        value: 'NT_neglogevalue'
+      }, {
+        name: 'NT %conc',
+        value: 'NT_percentconcordant'
+      }, {
+        name: 'NR Z Score',
+        value: 'NR_zscore'
+      }, {
+        name: 'NR r (total reads)',
+        value: 'NR_r'
+      }, {
+        name: 'NR rPM',
+        value: 'NR_rpm'
+      }, {
+        name: 'NR %id',
+        value: 'NR_percentidentity'
+      }, {
+        name: 'R log(1/e)',
+        value: 'NR_neglogevalue'
+      }, {
+        name: 'NR %conc',
+        value: 'NR_percentconcordant'
+      }
+    ];
+    this.genus_map = {};
 
+    this.defaultThresholdValues = (savedThresholdFilters.length)
+      ? savedThresholdFilters : [{
+        label: '',
+        operator: '>=',
+        value: ''
+      }]; // all taxons will pass this default filter
+
+    // we should only keep dynamic data in the state
     this.state = {
       taxonomy_details: [],
       backgroundName: Cookies.get('background_name') || this.report_details.default_background.name,
@@ -41,7 +85,6 @@ class PipelineSampleReport extends React.Component {
       searchKey: '',
       search_keys_in_sample: [],
       lineage_map: {},
-      genus_map: {},
       rows_passing_filters: 0,
       rows_total: 0,
       thresholded_taxons: [],
@@ -49,69 +92,13 @@ class PipelineSampleReport extends React.Component {
       selected_taxons_top: [],
       pagesRendered: 0,
       sort_by: this.default_sort_by,
-      /*
-        NT_zscore: 0.0,
-        NT_rpm: 0.0,
-        NT_r: 0.0,
-        NT_percentidentity: 0.0,
-        NT_neglogevalue: 0.0,
-        NT_percentconcordant: 0.0,
-        NR_zscore: 0.0,
-        NR_rpm: 0.0,
-        NR_r: 0.0,
-        NR_percentidentity: 0.0,
-        NR_neglogevalue: 0.0,
-        NR_percentconcordant: 0.0,
-      }
-      */
       excluded_categories: (cached_cats) ? JSON.parse(cached_cats) : [],
       name_type: cached_name_type ? cached_name_type : 'Scientific Name',
       search_taxon_id: 0,
       rendering: false,
       loading: true,
-      activeThresholds: this.defaultThresholdValues,
-      allThresholds: [
-        {
-          name: 'Score',
-          value: 'NT_aggregatescore'
-        }, {
-          name: 'NT Z Score',
-          value: 'NT_zscore'
-        }, {
-          name: 'NT rPM',
-          value: 'NT_rpm'
-        }, {
-          name: 'NT r (total reads)',
-          value: 'NT_r'
-        }, {
-          name: 'NT %id',
-          value: 'NT_percentidentity'
-        }, {
-          name: 'NT log(1/e)',
-          value: 'NT_neglogevalue'
-        }, {
-          name: 'NT %conc',
-          value: 'NT_percentconcordant'
-        }, {
-          name: 'NR Z Score',
-          value: 'NR_zscore'
-        }, {
-          name: 'NR r (total reads)',
-          value: 'NR_r'
-        }, {
-          name: 'NR rPM',
-          value: 'NR_rpm'
-        }, {
-          name: 'NR %id',
-          value: 'NR_percentidentity'
-        }, {
-          name: 'R log(1/e)',
-          value: 'NR_neglogevalue'
-        }, {
-          name: 'NR %conc',
-          value: 'NR_percentconcordant'
-        }]
-      };
+      activeThresholds: this.defaultThresholdValues
+    };
     this.applySearchFilter = this.applySearchFilter.bind(this);
     this.anyFilterSet = this.anyFilterSet.bind(this);
     this.resetAllFilters = this.resetAllFilters.bind(this);
@@ -189,17 +176,16 @@ class PipelineSampleReport extends React.Component {
           genus_map[taxon.genus_taxid] = taxon;
         }
       }
-
+      // the genus_map never changes, so we move it out from the react state, to reduce perfomance cost
+      this.genus_map = genus_map;
       this.setState({
         rows_passing_filters: res.data.taxonomy_details[0],
         rows_total: res.data.taxonomy_details[1],
-        taxonomy_details: res.data.taxonomy_details[2],
-        genus_map
+        taxonomy_details: res.data.taxonomy_details[2]
       },
       () => {
-        this.applyThresholdFilters(res.data.taxonomy_details[2], this.state.activeThresholds, false);
-      }
-      )
+        this.applyThresholdFilters(this.state.taxonomy_details, this.state.activeThresholds, false);
+      });
     });
   }
 
@@ -215,8 +201,14 @@ class PipelineSampleReport extends React.Component {
 
   resetAllFilters() {
     this.setState({
-      activeThresholds: this.emptyThresholdFilter,
+      activeThresholds: [{
+        label: '',
+        operator: '>=',
+        value: ''
+      }],
       excluded_categories: [],
+      searchId: 0,
+      searchKey: '',
       search_taxon_id: 0,
       thresholded_taxons: this.state.taxonomy_details,
       selected_taxons: this.state.taxonomy_details,
@@ -234,11 +226,11 @@ class PipelineSampleReport extends React.Component {
     let selected_taxons = [];
     const thresholded_taxons = input_taxons || this.state.thresholded_taxons;
     if (searchTaxonId > 0) {
-      // ignore all the thresholds
+      // search only the thresholded taxons
       let genus_taxon = {};
       let matched_taxons = [];
-      for (let i = 0; i < this.state.taxonomy_details.length; i++) {
-        const taxon = this.state.taxonomy_details[i];
+      for (let i = 0; i < thresholded_taxons.length; i++) {
+        const taxon = thresholded_taxons[i];
         if (taxon.genus_taxid == taxon.tax_id) {
           if (matched_taxons.length > 0) {
             selected_taxons.push(genus_taxon);
@@ -258,7 +250,8 @@ class PipelineSampleReport extends React.Component {
         selected_taxons.push(genus_taxon);
         selected_taxons = selected_taxons.concat(matched_taxons);
       }
-    } else if (excludedCategories.length > 0) {
+    }
+    if (excludedCategories.length > 0) {
       for (var i = 0; i < thresholded_taxons.length; i++) {
         let taxon = thresholded_taxons[i];
         if (excludedCategories.indexOf(taxon.category_name) < 0) {
@@ -284,8 +277,10 @@ class PipelineSampleReport extends React.Component {
           i--;
         }
       }
-    } else {
-      selected_taxons = thresholded_taxons;
+    }
+
+    if(searchTaxonId < 1 && excludedCategories.length < 1) {
+      selected_taxons = input_taxons;
     }
 
     this.setState({
@@ -367,8 +362,8 @@ class PipelineSampleReport extends React.Component {
   sortCompareFunction(a, b) {
     const [ptype, pmetric] = this.sortParams.primary;
     const [stype, smetric] = this.sortParams.secondary;
-    const genus_a = this.state.genus_map[a.genus_taxid];
-    const genus_b = this.state.genus_map[b.genus_taxid];
+    const genus_a = this.genus_map[a.genus_taxid];
+    const genus_b = this.genus_map[b.genus_taxid];
 
     const genus_a_p_val = parseFloat(genus_a[ptype][pmetric]);
     const genus_a_s_val = parseFloat(genus_a[stype][smetric]);
@@ -445,7 +440,8 @@ class PipelineSampleReport extends React.Component {
       searchKey: ''
     }, () => {
       Cookies.set('excluded_categories', JSON.stringify(excluded_categories));
-      this.applySearchFilter(0, excluded_categories);
+      // this.applySearchFilter(0, excluded_categories);
+      this.applyThresholdFilters(this.state.taxonomy_details, this.state.activeThresholds, true);
       this.flash();
     });
   }
@@ -472,7 +468,7 @@ class PipelineSampleReport extends React.Component {
 
   appendThresholdFilter() {
     const stateCopy = Object.assign([], this.state.activeThresholds);
-    stateCopy.push({ label: '', operator: '', value: '' });
+    stateCopy.push({ label: '', operator: '>=', value: '' });
     this.setState({
       activeThresholds: stateCopy
     });
@@ -483,6 +479,8 @@ class PipelineSampleReport extends React.Component {
     stateCopy.splice(pos, 1);
     this.setState({
       activeThresholds: stateCopy
+    }, () => {
+      this.saveThresholdFilters();
     });
   }
 
@@ -525,17 +523,14 @@ class PipelineSampleReport extends React.Component {
             const [fieldType, fieldTitle] = label.split('_');
             const taxonValue = (taxon[fieldType] || {})[fieldTitle];
             switch (operator) {
-              case '>':
-                passedFilter = taxonValue > value;
+              case '>=':
+                passedFilter = taxonValue >= value;
               break;
-              case '<':
-                passedFilter = taxonValue < value;
-              break;
-              case '==':
-                passedFilter = taxonValue === value;
+              case '<=':
+                passedFilter = taxonValue <= value;
               break;
               default:
-                passedFilter = taxonValue > value;
+                passedFilter = taxonValue >= value;
             }
           } else {
             // a taxon should not be eliminated when rule is invalid
@@ -552,7 +547,7 @@ class PipelineSampleReport extends React.Component {
     } else {
       filteredTaxons = candidateTaxons;
     }
-    this.applySearchFilter(0, this.state.excluded_categories, filteredTaxons);
+    this.applySearchFilter(this.state.searchId, this.state.excluded_categories, filteredTaxons);
     (animate) ? this.flash() : null;
   }
 
@@ -783,7 +778,8 @@ class PipelineSampleReport extends React.Component {
       excluded_categories: [],
       searchKey: item[0]
     }, () => {
-      this.applySearchFilter(searchId, []);
+      // this.applySearchFilter(searchId, []);
+      this.applyThresholdFilters(this.state.taxonomy_details, this.state.activeThresholds, true);
     });
   }
 
@@ -939,9 +935,9 @@ class PipelineSampleReport extends React.Component {
                                         value={activeThreshold.label}
                                         onChange={(e) => this.setThresholdProperty(index, 'label', e.target.value) }
                                         className="browser-default">
-                                        <option value="">Select threshold</option>
+                                        <option value="">Count type</option>
                                         {
-                                          this.state.allThresholds.map((thresholdObject) => {
+                                          this.allThresholds.map((thresholdObject) => {
                                             return (
                                               <option
                                                 key={thresholdObject.value}
@@ -958,17 +954,11 @@ class PipelineSampleReport extends React.Component {
                                         value={activeThreshold.operator}
                                         onChange={(e) => this.setThresholdProperty(index, 'operator', e.target.value)}
                                         className="browser-default">
-                                        <option>
-                                          Select operator
+                                        <option value=">=">
+                                          >=
                                         </option>
-                                        <option value=">">
-                                          Greater than
-                                        </option>
-                                        <option value="<">
-                                          Less than
-                                        </option>
-                                        <option value="==">
-                                          Equals
+                                        <option value="<=">
+                                          &lt;=
                                         </option>
                                       </select>
                                     </div>
