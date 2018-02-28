@@ -166,7 +166,6 @@ class Samples extends React.Component {
   }
 
   selectHostFilter(e) {
-    
     // current array of options
     const hostList = this.state.selectedHostIndices
 
@@ -977,10 +976,11 @@ class Samples extends React.Component {
     )
 
     const metaDataFilter = (
-      <div>
-        <div className="col s2 metadata">
-            <div className='metadata-dropdown' onClick={this.displayMetaDataDropdown}>
-            Filter </div><i className="fa fa-angle-down" onClick={this.displayMetaDataDropdown}></i>
+      <div className="col s2 wrapper">
+        <div className="metadata" onClick={this.displayMetaDataDropdown}>
+            <div className='metadata-dropdown'>
+            Filter </div><i className="fa fa-angle-down"></i>
+        </div>
               { this.state.displayDropdown ? <div className="row metadata-options">
                 <div className="col s6">
                   <h6>Host</h6>
@@ -1007,7 +1007,6 @@ class Samples extends React.Component {
                 })}
               </div>
             </div> : null }
-      </div>
       </div>
     )
     
@@ -1384,12 +1383,14 @@ class Samples extends React.Component {
   closeMetaDataDropdown() {
     let that = this;
     $(document).on("click", function(event) {
-      if ($(event.target).has(".metadata").length) {
-        that.setState({
-          displayDropdown: false
-        }, () => {
-          that.applyFilters();
-        });
+      if ($(event.target).has(".wrapper").length) {
+        if(that.state.displayDropdown) {
+          that.setState({
+            displayDropdown: false
+          }, () => {
+            that.applyFilters();
+          });
+        }
       }
     });
   }
