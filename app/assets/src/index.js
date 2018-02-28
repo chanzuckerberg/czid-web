@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import 'materialize-css';
 import 'materialize-css/dist/css/materialize.css';
+import 'nouislider/distribute/nouislider.css';
 import 'react-tipsy/dist/react-tipsy.css';
 import 'font-awesome/scss/font-awesome.scss';
 import './loader.scss';

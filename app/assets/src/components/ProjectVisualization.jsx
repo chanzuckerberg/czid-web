@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import {withFauxDOM} from 'react-faux-dom';
 import SubHeader from './SubHeader';
 import symlog from './symlog';
 import * as d3 from 'd3';
@@ -13,6 +12,8 @@ import {event as currentEvent} from 'd3';
 import axios from 'axios';
 import ObjectHelper from '../helpers/ObjectHelper';
 import clusterfck from 'clusterfck';
+import ReactNouislider from './ReactNouislider';
+
 class SampleHeatmapTooltip extends React.Component {
   constructor(props) {
     super(props);
@@ -538,8 +539,9 @@ class ProjectVisualization extends React.Component {
       loading: false,
       data: undefined,
       dataType: "NT.aggregatescore",
-      dataThreshold: -99999999999,
       dataScaleIdx: 0,
+      minDataThreshold: -99999999999,
+      maxDataThreshold: 99999999999,
     };
 
     this.dataTypes = ["NT.aggregatescore", "NT.rpm", "NT.r", "NT.zscore", "NT.maxzscore", "NR.rpm", "NR.r", "NR.zscore", "NR.maxzscore"];
@@ -565,7 +567,7 @@ class ProjectVisualization extends React.Component {
       let taxon = this.getTaxonFor(row, col);
       if (taxon) {
         let value = this.getDataProperty(taxon, dataType);
-        if (value >= that.state.dataThreshold) {
+        if (value >= that.state.minDataThreshold && value <= this.state.maxDataThreshold) {
           return value;
         }
       }
@@ -806,7 +808,8 @@ class ProjectVisualization extends React.Component {
     let newDataType = e.target.value;
     this.updateData(this.state.data, newDataType, this.state.taxons);
     this.setState({
-      dataThreshold: -99999999999,
+      minDataThreshold: -99999999999,
+      maxDataThreshold: 99999999999,
     });
   }
 
@@ -829,7 +832,10 @@ class ProjectVisualization extends React.Component {
   }
   
   updateDataThreshold (e) {
-    this.setState({dataThreshold: e.target.value});
+    this.setState({
+      minDataThreshold: parseFloat(e[0]),
+      maxDataThreshold: parseFloat(e[1])
+    });
   }
 
   renderThresholdSlider () {
@@ -839,7 +845,15 @@ class ProjectVisualization extends React.Component {
     return (
       <div className="range-field">
         <label>Threshold</label>
-        <input min={this.state.min} max={this.state.max + 1} type="range" onChange={this.updateDataThreshold.bind(this)} value={this.state.dataThreshold}/>
+        <div className="slider-container">
+          <ReactNouislider
+            range={{min: this.state.min, max: this.state.max + 1}}
+            start={[this.state.minDataThreshold, this.state.maxDataThreshold]}
+            connect={[false, true, false]}
+            onChange={this.updateDataThreshold.bind(this)}
+            tooltips
+          />
+        </div>
       </div>
     )
   }
