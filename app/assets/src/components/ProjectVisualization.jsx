@@ -755,6 +755,30 @@ class ProjectVisualization extends React.Component {
       return;
     }
 
+    let colors=[
+      "rgb(255,255,255)", 
+      "rgb(255,255,235)",
+      "rgb(255,255,214)",
+      "rgb(255,255,194)",
+      "rgb(255,255,173)",
+      "rgb(255,247,133)",
+      "rgb(255,238,92)",
+      "rgb(254,230,52)",
+      "rgb(254,221,11)",
+      "rgb(254,192,38)",
+      "rgb(253,163,64)",
+      "rgb(253,133,91)",
+      "rgb(252,104,117)",
+      "rgb(252,78,149)",
+      "rgb(252,52,180)",
+      "rgb(251,26,212)",
+      "rgb(251, 0, 243)",
+      "rgb(223,0,241)",
+      "rgb(196,0,240)",
+      "rgb(168,0,238)",
+      "rgb(140, 0, 236)"
+    ];
+
     return (
       <D3Heatmap
         tree={this.state.tree}
@@ -765,8 +789,8 @@ class ProjectVisualization extends React.Component {
         getCellValue={this.dataGetters[this.state.dataType].bind(this)}
         getTooltip={this.getTooltip.bind(this)}
         onCellClick={this.onCellClick.bind(this)}
-        colors={["rgb(255,255,255)", "rgb(255,255,173)", "rgb(254,221,11)", "rgb(252,104,117)", "rgb(251, 0, 243)", "rgb(140, 0, 236)"]}
         onRemoveRow={this.onRemoveRow.bind(this)}
+        colors={colors}
       />
     )
   }
