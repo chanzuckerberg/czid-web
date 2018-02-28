@@ -106,7 +106,7 @@ class Header extends React.Component  {
                 { /* <i className='fa sidebar-drawer fa-indent'></i> */ }
                 <a href='/'>
                   <div className="brand-short">
-                    ID.seq
+                    IDseq
                   </div>
                   <div className="brand-long">
                     Infectious Disease Platform
