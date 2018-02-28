@@ -6,6 +6,7 @@
 
 import React from 'react';
 import SubHeader from './SubHeader';
+import symlog from './symlog';
 import * as d3 from 'd3';
 import {event as currentEvent} from 'd3';
 import axios from 'axios';
@@ -166,6 +167,7 @@ class D3Heatmap extends React.Component {
     this.height = this.cellHeight * this.row_number + this.margin.top + this.margin.bottom;
     
     this.tree = props.tree;
+    this.scale = props.scale;
     this.legendElementWidth = this.margin.right / this.colors.length;
   }
 
@@ -191,8 +193,8 @@ class D3Heatmap extends React.Component {
   }
 
   renderHeatmap () {
-    let colorScale = d3.scale.log()
-        .domain([0.1, this.max])
+    let colorScale = this.scale()
+        .domain([this.min, this.max])
         .range([0, this.colors.length-1]);
 
     let that = this;
@@ -212,11 +214,8 @@ class D3Heatmap extends React.Component {
         if (d.value === undefined) {
           return "#f6f6f6";
         }
-        if (d.value > 0) {
-          let colorIndex = parseInt(colorScale(d.value));
-          return that.colors[colorIndex];
-        }
-        return that.colors[0];
+        let colorIndex = colorScale(d.value);
+        return that.colors[Math.round(colorIndex)];
       })
       .on("click", this.props.onCellClick)
       .on("mouseover", function(d){
@@ -530,10 +529,17 @@ class ProjectVisualization extends React.Component {
   constructor(props) {
     super(props);
     this.sample_ids = this.props.sample_ids;
+
+    this.scales = [
+      ["Symmetric Log", symlog],
+      ["Linear", d3.scale.linear], 
+    ];
+
     this.state = {
       loading: false,
       data: undefined,
       dataType: "NT.aggregatescore",
+      dataScaleIdx: 0,
       minDataThreshold: -99999999999,
       maxDataThreshold: 99999999999,
     };
@@ -792,6 +798,7 @@ class ProjectVisualization extends React.Component {
         getTooltip={this.getTooltip.bind(this)}
         onCellClick={this.onCellClick.bind(this)}
         onRemoveRow={this.onRemoveRow.bind(this)}
+        scale={this.scales[this.state.dataScaleIdx][1]}
         colors={colors}
       />
     )
@@ -850,18 +857,46 @@ class ProjectVisualization extends React.Component {
       </div>
     )
   }
-  
+
+  updateDataScale (e) {
+    this.setState({ dataScaleIdx: e.target.value });
+  }
+
+  renderScalePicker () {
+    if (!this.state.data) {
+      return;
+    }
+
+    let ret = [];
+
+    for (let i = 0; i < this.scales.length; i += 1) {
+      let scale = this.scales[i];
+      ret.push(
+        <option key={i} value={i}>{scale[0]}</option>
+      )
+    }
+    return (
+      <select value={this.state.dataScaleIdx} onChange={this.updateDataScale.bind(this)}>
+        {ret}
+      </select>
+    )
+ }
+
   render () {
     return (
       <div id="project-visualization">
         <SubHeader>
           <div className="sub-header">
             <div className="row sub-menu">
-              <div className="col s6">
+              <div className="col s4">
+                <label>Data Scale</label>
+                {this.renderScalePicker()}
+              </div>
+              <div className="col s4">
                 <label>Data Type</label>
                 {this.renderTypePickers()}
               </div>
-              <div className="col s6">
+              <div className="col s4">
                 {this.renderThresholdSlider()}
               </div>
             </div>
