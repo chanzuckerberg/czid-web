@@ -46,6 +46,7 @@ class Samples extends React.Component {
     this.resetForm = this.resetForm.bind(this);
     this.selectSample = this.selectSample.bind(this);
     this.compareSamples = this.compareSamples.bind(this);
+    this.clearAllFilters = this.clearAllFilters.bind(this);
     this.selectTissueFilter = this.selectTissueFilter.bind(this);
     this.selectHostFilter = this.selectHostFilter.bind(this);
     this.displayMetaDataDropdown = this.displayMetaDataDropdown.bind(this);
@@ -59,8 +60,6 @@ class Samples extends React.Component {
       selectedProjectId: this.fetchParams('project_id') || null,
       filterParams: this.fetchParams('filter') || '',
       searchParams: this.fetchParams('search') || '',
-      tissueParams: this.fetchParams('tissue') || [],
-      hostParams: this.fetchParams('host') || [],
       sampleIdsParams: this.fetchParams('ids') || [],
       allSamples: [],
       sort_by: this.fetchParams('sort_by') || 'id,desc',
@@ -70,9 +69,9 @@ class Samples extends React.Component {
       allChecked: false,
       selectedSampleIndices: [],
       displayDropdown: false,
-      selectedTissueFilters: [],
+      selectedTissueFilters:this.fetchParams('tissue') || [],
       selectedTissueIndices: [],
-      selectedHostIndices: [],
+      selectedHostIndices: this.fetchParams('host') || [],
       initialFetchedSamples: [],
       loading: false,
       isRequesting: false,
@@ -178,7 +177,6 @@ class Samples extends React.Component {
     if (e.target.checked) {
       // add the numerical value of the checkbox to options array
       hostList.push(+e.target.id)
-      console.log(hostList, 'hostlist');
     } else {
       // or remove the value from the unchecked checkbox from the array
       index = hostList.indexOf(+e.target.id)
@@ -190,7 +188,6 @@ class Samples extends React.Component {
     }, () => {
       this.handleHostFilterSelect(this.state.selectedHostIndices);
     })
-    console.log(this.state.selectedHostIndices, 'select host');
   }
   
 
@@ -857,6 +854,20 @@ class Samples extends React.Component {
     }
   }
 
+  clearAllFilters() {
+    this.setState({
+      filterParams: '',
+      pagesLoaded: 0,
+      searchParams:'',
+      sampleIdsParams: [],
+      selectedTissueFilters: [],
+      selectedHostIndices: []
+    }, () => {
+      this.setUrlLocation();
+      this.fetchProjectPageData();
+    })
+  }
+
   selectSample(e) {
     e.stopPropagation();
     $(".checkAll").prop('checked', false);
@@ -937,6 +948,16 @@ class Samples extends React.Component {
       </div>
     );
 
+    // let clear_filters = (
+    //   <div className='col s2 download-table'>
+    //     <div className='white'>
+    //       <a onClick={this.clearAllFilters} className="compare center">
+    //         <span>Clear all</span>
+    //       </a>
+    //     </div>
+    //   </div>
+    // )
+
     let compare_button = (
       <div className='col s2 download-table'>
         <div className='white'>
@@ -985,6 +1006,7 @@ class Samples extends React.Component {
     const search_box = (
       <div className="row search-box">
         { this.state.displaySelectSamplees ? check_all : null }
+        {/* { clear_filters } */}
         { search_field }
         { metaDataFilter  }
         { table_download_dropdown }
@@ -1310,7 +1332,7 @@ class Samples extends React.Component {
     this.setState({
       pagesLoaded: 0,
       pageEnd: false,
-      hostParams: hostParams
+      selectedHostIndices: hostParams
     }, () => {
       this.setUrlLocation();
       this.fetchResults();
@@ -1321,7 +1343,7 @@ class Samples extends React.Component {
       this.setState({
         pagesLoaded: 0,
         pageEnd: false,
-        tissueParams: tissueParams
+        selectedTissueFilters: tissueParams
       }, () => {
         this.setUrlLocation();
         this.fetchResults();
@@ -1334,9 +1356,10 @@ class Samples extends React.Component {
     const params = {
       project_id: projectId ? projectId : null,
       filter: this.state.filterParams,
-      tissue: this.state.tissueParams,
-      host: this.state.hostParams,
+      tissue: this.state.selectedTissueFilters,
+      host: this.state.selectedHostIndices,
       search: this.state.searchParams,
+      ids: this.state.sampleIdsParams,
       sort_by: this.state.sort_by,
       type: this.state.projectType
     };
