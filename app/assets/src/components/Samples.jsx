@@ -1246,7 +1246,6 @@ class Samples extends React.Component {
   }
 
   componentDidMount() {
-    const textSize = 14;
     $(() => {
       const win = $(window);
       const samplesHeader = $('.sample-table-container');
@@ -1269,7 +1268,6 @@ class Samples extends React.Component {
     // this.initializeProjectList();
     this.displayPipelineStatusFilter();
     this.initializeColumnSelect();
-    $(".dropdown-content>li>a").css("font-size", textSize)
   }
 
   initializeColumnSelect() {
