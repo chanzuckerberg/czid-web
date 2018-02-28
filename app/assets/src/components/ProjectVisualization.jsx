@@ -156,7 +156,7 @@ class D3Heatmap extends React.Component {
     }
     this.margin ={
       top: 80, // char_width * longest_col_label * 0.7,
-      left: 10,
+      left: Math.ceil(Math.sqrt(this.row_number)) * 10,
       bottom: 100,
       right: char_width * longest_row_label
     };
@@ -167,6 +167,7 @@ class D3Heatmap extends React.Component {
     this.height = this.cellHeight * this.row_number + this.margin.top + this.margin.bottom;
     
     this.colTree = props.colTree;
+    this.rowTree = props.rowTree;
     this.scale = props.scale;
     this.legendElementWidth = this.margin.right / this.colors.length;
   }
@@ -180,8 +181,9 @@ class D3Heatmap extends React.Component {
 
     this.svg = d3.select(this.container).append("svg")
       .attr("width", this.width)
-      .attr("height", this.height)
-      .append("g")
+      .attr("height", this.height);
+
+    this.offsetCanvas = this.svg.append("g")
       .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
 
 
@@ -189,7 +191,8 @@ class D3Heatmap extends React.Component {
     //this.renderColLabels();
     this.renderHeatmap();
     this.renderLegend();
-    this.renderDendrogram();
+    this.renderColDendrogram();
+    this.renderRowDendrogram();
   }
 
   renderHeatmap () {
@@ -198,7 +201,7 @@ class D3Heatmap extends React.Component {
         .range([0, this.colors.length-1]);
 
     let that = this;
-    var heatMap = this.svg.append("g").attr("class","g3")
+    var heatMap = this.offsetCanvas.append("g").attr("class","g3")
       .selectAll(".cellg")
       .data(this.data, function (d) {
         return d.row + ":" + d.col;
@@ -242,11 +245,24 @@ class D3Heatmap extends React.Component {
       ;
 
   }
-
-  renderDendrogram () {
+  
+  renderColDendrogram () {
 		let width = this.cellWidth * this.col_number,
 				height = this.margin.top - 20;
- 
+    
+    let container = this.renderDendrogram(this.colTree, width, height, "cc", this.colLabel);
+    container.attr("transform", "rotate(90) translate(0, -" + (width + this.margin.left) + ")")
+  }
+
+  renderRowDendrogram () {
+    let height = this.margin.left - 20,
+        width = this.cellHeight * this.row_number;
+    
+    let container = this.renderDendrogram(this.rowTree, width, height, "cr", this.rowLabel);
+    container.attr("transform", "translate(0, " + this.margin.top + ")")
+  }
+
+  renderDendrogram (tree, width, height, cssClass, labels) {
 		var cluster = d3.layout.cluster()
     		.size([width, height]);
 
@@ -258,11 +274,11 @@ class D3Heatmap extends React.Component {
     //		.projection(function(d) { return [d.y, d.x]; });
 
     //set up the visualisation:
-    var vis = this.svg.append("g")
+    let visContainer = this.svg.append("g")
       .attr("width", width)
       .attr("height", height)
-      .attr("transform", "rotate(90) translate(-" + (height + 10) + ", -" + width + ")")
-      .append("g")
+
+    let vis = visContainer.append("g")
     
     cluster.children(function (d) {
       let children = [];
@@ -275,26 +291,26 @@ class D3Heatmap extends React.Component {
       return children;
     });
 
-    var nodes = cluster.nodes(this.colTree);
+    var nodes = cluster.nodes(tree);
 
     let i = 0;
     for (let n of nodes) {
       n.id = i;
       i += 1;
     }
-    var link = vis.selectAll("path.link")
+    var link = vis.selectAll("path.link." + cssClass + "-link")
       .data(cluster.links(nodes))
       .enter().append("path")
       .attr("class", function (e) { 
-        return "link link-" + e.source.id + "-" + e.target.id; 
+        return "link " + cssClass + "-link " + cssClass + "-link-" + e.source.id + "-" + e.target.id; 
       })
       .attr("d", diagonal);
 
-    var hovers = vis.selectAll("rect.hover-target")
+    var hovers = vis.selectAll("rect.hover-target." + cssClass + "-hover-target")
       .data(cluster.links(nodes))
       .enter().append("rect")
       .attr("class", function (e) { 
-        return "hover-target hover-" + e.source.id + "-" + e.target.id; 
+        return "hover-target " + cssClass + "-hover-target " + cssClass + "-hover-" + e.source.id + "-" + e.target.id; 
       })
       .attr("x", function(d, i) { return Math.min(d.source.y, d.target.y); })
       .attr("y", function(d, i) { return Math.min(d.source.x, d.target.x); })
@@ -309,18 +325,20 @@ class D3Heatmap extends React.Component {
           let node = to_visit.pop();
           if(node.left) { to_visit.push(node.left); }
           if(node.right) { to_visit.push(node.right); }
-          let cls = ".link-" + node.parent.id + "-" + node.id;
+          let cls = "." + cssClass + "-link-" + node.parent.id + "-" + node.id;
           d3.selectAll(cls).classed("link-hover", true);i
 
-          if(node.sample) {
-            let col = this.colLabel.indexOf(node.sample.name);
-            d3.selectAll(".cc" + col).classed("highlight", true);
+          if(node.label) {
+            let idx = labels.indexOf(node.label);
+            let selector = "." + cssClass + idx;
+            console.log("highlighting", selector);
+            d3.selectAll(selector).classed("highlight", true);
           }
         }
       })
       .on("mouseout", function (d) {
           d3.selectAll(".D3Heatmap").classed("highlighting", false);
-          d3.selectAll(".link").classed("link-hover", false);
+          d3.selectAll("." + cssClass + "-link").classed("link-hover", false);
           d3.selectAll(".D3Heatmap .highlight").classed("highlight", false);
       });
     /*
@@ -342,6 +360,7 @@ class D3Heatmap extends React.Component {
 				}
 			});
       */
+    return visContainer;
   }
   
   renderLegend () {
@@ -349,7 +368,7 @@ class D3Heatmap extends React.Component {
         height = 20,
         x_offset = this.cellWidth * this.col_number;
 
-    this.svg.selectAll(".legend-text-min")
+    this.offsetCanvas.selectAll(".legend-text-min")
         .data([this.min])
         .enter().append("text")
         .attr("x", x_offset)
@@ -357,7 +376,7 @@ class D3Heatmap extends React.Component {
         .attr("class", "mono")
         .text(Math.round(this.min));
     
-    this.svg.selectAll(".legend-text-max")
+    this.offsetCanvas.selectAll(".legend-text-max")
         .data([this.max])
         .enter().append("text")
         .attr("class", "mono")
@@ -366,7 +385,7 @@ class D3Heatmap extends React.Component {
         .text(Math.round(this.max))
         .style("text-anchor", "end");
 
-    var legend = this.svg.selectAll(".legend")
+    var legend = this.offsetCanvas.selectAll(".legend")
       .data(this.colors)
       .enter().append("g")
       .attr("class", "legend");
@@ -378,7 +397,7 @@ class D3Heatmap extends React.Component {
       .attr("height", height)
       .style("fill", function(d, i) { return that.colors[i]; });
 
-	this.svg.append("rect")
+	this.offsetCanvas.append("rect")
         .attr("x", function(d, i) { return x_offset + that.legendElementWidth * i; })
         .attr("stroke", "#aaa")
         .attr("stroke-width", "0.25")
@@ -391,7 +410,7 @@ class D3Heatmap extends React.Component {
   renderRowLabels () {
     let rowSortOrder=false;
     let that = this;
-    let rowLabels = this.svg.append("g")
+    let rowLabels = this.offsetCanvas.append("g")
         .selectAll(".rowLabelg")
         .data(this.rowLabel)
         .enter();
@@ -440,7 +459,7 @@ class D3Heatmap extends React.Component {
   renderColLabels () {
     let colSortOrder = false;
     let that = this;
-    let colLabels = this.svg.append("g")
+    let colLabels = this.offsetCanvas.append("g")
       .selectAll(".colLabelg")
       .data(this.colLabel)
       .enter()
@@ -662,7 +681,7 @@ class ProjectVisualization extends React.Component {
       }
 
       if (node.value) {
-				node.sample = node.value.sample;
+				node.label = node.value.sample.name;
         clustered_samples.push(node.value.sample);
       }
     }
@@ -722,13 +741,14 @@ class ProjectVisualization extends React.Component {
       }
 
       if (node.value) {
+				node.label = node.value.taxon_name;
         clustered_taxons.push(node.value.taxon_name);
       }
     }
      
     return {
       tree: cluster,
-      flat: clustered_taxons.reverse(),
+      flat: clustered_taxons,
     }
   }
 
@@ -821,6 +841,7 @@ class ProjectVisualization extends React.Component {
     return (
       <D3Heatmap
         colTree={this.state.clustered_samples.tree}
+        rowTree={this.state.clustered_taxons.tree}
         rows={this.state.taxons.length}
         columns={this.state.data.length}
         getRowLabel={this.getRowLabel.bind(this)}
