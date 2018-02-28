@@ -166,7 +166,7 @@ class D3Heatmap extends React.Component {
     this.width = this.cellWidth * this.col_number + this.margin.left + this.margin.right;
     this.height = this.cellHeight * this.row_number + this.margin.top + this.margin.bottom;
     
-    this.tree = props.tree;
+    this.colTree = props.colTree;
     this.scale = props.scale;
     this.legendElementWidth = this.margin.right / this.colors.length;
   }
@@ -275,7 +275,7 @@ class D3Heatmap extends React.Component {
       return children;
     });
 
-    var nodes = cluster.nodes(this.tree);
+    var nodes = cluster.nodes(this.colTree);
 
     let i = 0;
     for (let n of nodes) {
@@ -592,11 +592,11 @@ class ProjectVisualization extends React.Component {
   
   updateData (data, dataType, taxons) {
     let minMax = this.getMinMax(data, dataType, taxons);
-    let clustered_data = this.cluster(data, dataType, taxons);
+    let clustered_samples = this.clusterSamples(data, dataType, taxons);
     let clustered_taxons = this.clusterTaxons(data, dataType, taxons);
     this.setState({
-      data: clustered_data.flat,
-      tree: clustered_data.tree,
+      data: data,
+      clustered_samples: clustered_samples,
       min: minMax.min,
       max: minMax.max,
       dataType: dataType,
@@ -630,8 +630,7 @@ class ProjectVisualization extends React.Component {
     };
   }
 
-  cluster (data, dataType, taxons) {
-    // vectorize
+  clusterSamples (data, dataType, taxons) {
     let vectors = [];
     for (let sample of data) {
       let vector = [];
@@ -648,10 +647,9 @@ class ProjectVisualization extends React.Component {
       vector.sample = sample;
       vectors.push(vector);
     }
-    // cluster
+    
     let cluster = clusterfck.hcluster(vectors);
     
-    // Create vectors
     let clustered_samples = [];
     let to_visit = [cluster];
     while (to_visit.length > 0) {
@@ -727,20 +725,24 @@ class ProjectVisualization extends React.Component {
         clustered_taxons.push(node.value.taxon_name);
       }
     }
-    return clustered_taxons.reverse();
+     
+    return {
+      tree: cluster,
+      flat: clustered_taxons.reverse(),
+    }
   }
 
   getColumnLabel (column_index) {
-    return this.state.data[column_index].name;
+    return this.state.clustered_samples.flat[column_index].name;
   }
 
   getRowLabel (row_index) {
-    return this.state.clustered_taxons[row_index];
+    return this.state.clustered_taxons.flat[row_index];
   }
 
   getTaxonFor (row_index, column_index) {
-    let d = this.state.data[column_index];
-    let taxon_name = this.state.clustered_taxons[row_index];
+    let d = this.state.clustered_samples.flat[column_index];
+    let taxon_name = this.state.clustered_taxons.flat[row_index];
 
     for (let i = 0; i < d.taxons.length; i += 1) {
       let taxon = d.taxons[i];
@@ -752,8 +754,8 @@ class ProjectVisualization extends React.Component {
   }
 
   getTooltip (row_index, column_index) {
-    let sample = this.state.data[column_index],
-        taxon_name = this.state.clustered_taxons[row_index],
+    let sample = this.state.clustered_samples.flat[column_index],
+        taxon_name = this.state.clustered_taxons.flat[row_index],
         taxon;
 
     for (let i = 0; i < sample.taxons.length; i += 1) {
@@ -775,7 +777,7 @@ class ProjectVisualization extends React.Component {
   }
   
   onCellClick (d) {
-    let sample = this.state.data[d.col];
+    let sample = this.state.clustered_samples.flat[d.col];
     window.location.href = "/samples/" + sample.sample_id;
   }
 
@@ -818,7 +820,7 @@ class ProjectVisualization extends React.Component {
 
     return (
       <D3Heatmap
-        tree={this.state.tree}
+        colTree={this.state.clustered_samples.tree}
         rows={this.state.taxons.length}
         columns={this.state.data.length}
         getRowLabel={this.getRowLabel.bind(this)}
