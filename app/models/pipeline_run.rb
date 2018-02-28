@@ -277,9 +277,7 @@ class PipelineRun < ApplicationRecord
     subsample? ? "/subsample_#{subsample}" : ""
   end
 
-  def sample_output_s3_path
-    sample.sample_output_s3_path
-  end
+  delegate :sample_output_s3_path, to: :sample
 
   def postprocess_output_s3_path
     "#{sample.sample_postprocess_s3_path}#{subsample_suffix}"

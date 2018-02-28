@@ -187,7 +187,6 @@ class PipelineRunStage < ApplicationRecord
     _stdout, _stderr, _status = Open3.capture3("aegea", "batch", "terminate", job_id.to_s)
   end
 
-
   def log_url
     return nil unless job_log_id
     "https://us-west-2.console.aws.amazon.com/cloudwatch/home?region=us-west-2" \

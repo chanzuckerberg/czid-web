@@ -291,19 +291,18 @@ class SamplesController < ApplicationController
   end
 
   def show_taxid_alignment
-    @taxon_info = params[:taxon_info].gsub("_",".")
+    @taxon_info = params[:taxon_info].tr("_", ".")
     pr = @sample.pipeline_runs.first
     s3_file_path = "#{pr.postprocess_output_s3_path}/align_viz/#{@taxon_info}.align_viz.json"
-    print s3_file_path
-    alignment_data = JSON::parse(get_s3_file(s3_file_path))
+    alignment_data = JSON.parse(get_s3_file(s3_file_path) || "{}")
     @taxid = @taxon_info.split(".")[2].to_i
     @tax_level = @taxon_info.split(".")[1]
     @parsed_alignment_results = parse_alignment_results(@taxid, @tax_level, alignment_data)
 
-      respond_to do |format|
-        format.json { render json: @parsed_alignment_results }
-        format.html { @title = @parsed_alignment_results['title'] }
-      end
+    respond_to do |format|
+      format.json { render json: @parsed_alignment_results }
+      format.html { @title = @parsed_alignment_results['title'] }
+    end
   end
 
   def nonhost_fasta
