@@ -157,7 +157,6 @@ class D3Heatmap extends React.Component {
     this.margin ={
       top: 80, // char_width * longest_col_label * 0.7,
       left: Math.ceil(Math.sqrt(this.row_number)) * 10,
-      left: Math.ceil(Math.sqrt(this.row_number)) * 10,
       bottom: 100,
       right: char_width * longest_row_label
     };
