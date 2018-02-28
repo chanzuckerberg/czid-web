@@ -31,8 +31,6 @@ class PipelineRun < ApplicationRecord
   POSTPROCESS_STATUS_LOADED = 'LOADED'.freeze
 
   before_create :create_run_stages
-  before_save :check_job_status
-  after_create :kickoff_job
 
   def as_json(_options = {})
     super(except: [:command, :command_stdout, :command_error, :job_description])
@@ -61,10 +59,6 @@ class PipelineRun < ApplicationRecord
 
   def failed?
     /FAILED/ =~ job_status
-  end
-
-  def kickoff_job
-    pipeline_run_stages.first.run_job
   end
 
   def create_run_stages
@@ -107,25 +101,20 @@ class PipelineRun < ApplicationRecord
         self.finalized = 1
         self.job_status = "#{prs.step_number}.#{prs.name}-#{STATUS_FAILED}"
         Airbrake.notify("Sample #{sample.id} failed #{prs.name}")
+        save
         return nil
       elsif prs.succeeded?
         next
       else # still running
         self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
+        save
         return nil
       end
     end
     # All done
     self.finalized = 1
     self.job_status = STATUS_CHECKED
-  end
-
-  def output_ready?
-    output_json_s3_path = "#{sample.sample_output_s3_path}/#{OUTPUT_JSON_NAME}"
-    stats_json_s3_path = "#{sample.sample_output_s3_path}/#{STATS_JSON_NAME}"
-    byteranges_json_s3_path = "#{sample.sample_postprocess_s3_path}/#{TAXID_BYTERANGE_JSON_NAME}"
-    # check the existence of all 3 and make sure they are all generated after pr.created_at
-    file_generated_since_run(output_json_s3_path) && file_generated_since_run(stats_json_s3_path) && file_generated_since_run(byteranges_json_s3_path)
+    save
   end
 
   def completed?
@@ -155,7 +144,7 @@ class PipelineRun < ApplicationRecord
         break
       end
     end
-    save
+    check_job_status
   end
 
   def local_json_path
@@ -179,11 +168,6 @@ class PipelineRun < ApplicationRecord
     rescue
       return nil
     end
-  end
-
-  def terminate_job
-    command = "aegea batch terminate #{job_id}"
-    _stdout, _stderr, _status = Open3.capture3(command)
   end
 
   def generate_aggregate_counts(tax_level_name)
