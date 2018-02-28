@@ -265,7 +265,8 @@ class D3Heatmap extends React.Component {
 
   renderDendrogram (tree, width, height, cssClass, labels) {
 		var cluster = d3.layout.cluster()
-    		.size([width, height]);
+    		.size([width, height])
+        .separation(function () { return 1; });
 
 		let diagonal = (d, i) => {
     	return "M" + d.source.y + "," + d.source.x + "V" + d.target.x + "H" + d.target.y;
