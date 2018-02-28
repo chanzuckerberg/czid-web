@@ -593,13 +593,15 @@ class ProjectVisualization extends React.Component {
   updateData (data, dataType, taxons) {
     let minMax = this.getMinMax(data, dataType, taxons);
     let clustered_data = this.cluster(data, dataType, taxons);
+    let clustered_taxons = this.clusterTaxons(data, dataType, taxons);
     this.setState({
       data: clustered_data.flat,
       tree: clustered_data.tree,
-      taxons: taxons,
       min: minMax.min,
       max: minMax.max,
       dataType: dataType,
+      taxons: taxons,
+      clustered_taxons: clustered_taxons,
     });
   }
 
@@ -675,30 +677,58 @@ class ProjectVisualization extends React.Component {
   }
 
   extractTaxons (data) {
-    let taxon_scores = {};
+    let taxon_names = new Set();
+
     for (var i = 0, len = data.length; i < len; i += 1) {
       let sample = data[i];
-
       for (var j = 0; j < sample.taxons.length; j+= 1) {
         let taxon = sample.taxons[j];
-        if (taxon_scores[taxon.name] === undefined) {
-          taxon_scores[taxon.name] = 0;
-        }
-        taxon_scores[taxon.name] += Math.abs(taxon.NT.aggregatescore);
+        taxon_names.add(taxon.name);
       }
     }
-    let arr = [];
+    return Array.from(taxon_names);
+  }
+
+  clusterTaxons (data, dataType, taxon_names) {
+    let taxon_scores = {};
+    for (let taxon of taxon_names) {
+      taxon_scores[taxon] = [];
+
+      for (let sample of data) {
+        let value = null;
+        for (let sample_taxon of sample.taxons) {
+          if (sample_taxon.name == taxon) {
+            value = this.getDataProperty(sample_taxon, dataType);
+            break;
+          }
+        }
+        taxon_scores[taxon].push(value);
+      }
+    }
+
+    let vectors = [];
     for(let key of Object.keys(taxon_scores)) {
-      arr.push([taxon_scores[key], key]);
+      let vector = taxon_scores[key];
+      vector.taxon_name = key;
+      vectors.push(vector);
     }
-    let ret = [];
-    arr.sort(function (a, b) {
-      return b[0] - a[0];
-    });
-    for(let pair of arr) {
-      ret.push(pair[1]);
+    let cluster = clusterfck.hcluster(vectors);
+    let clustered_taxons = [];
+    let to_visit = [cluster];
+    while (to_visit.length > 0) {
+      let node = to_visit.pop();
+      if (node.right) {
+        to_visit.push(node.right); 
+      } 
+      if (node.left) {
+        to_visit.push(node.left);
+      }
+
+      if (node.value) {
+        clustered_taxons.push(node.value.taxon_name);
+      }
     }
-    return ret;
+    return clustered_taxons.reverse();
   }
 
   getColumnLabel (column_index) {
@@ -706,12 +736,12 @@ class ProjectVisualization extends React.Component {
   }
 
   getRowLabel (row_index) {
-    return this.state.taxons[row_index];
+    return this.state.clustered_taxons[row_index];
   }
 
   getTaxonFor (row_index, column_index) {
     let d = this.state.data[column_index];
-    let taxon_name = this.state.taxons[row_index];
+    let taxon_name = this.state.clustered_taxons[row_index];
 
     for (let i = 0; i < d.taxons.length; i += 1) {
       let taxon = d.taxons[i];
@@ -724,7 +754,7 @@ class ProjectVisualization extends React.Component {
 
   getTooltip (row_index, column_index) {
     let sample = this.state.data[column_index],
-        taxon_name = this.state.taxons[row_index],
+        taxon_name = this.state.clustered_taxons[row_index],
         taxon;
 
     for (let i = 0; i < sample.taxons.length; i += 1) {
