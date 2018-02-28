@@ -333,7 +333,6 @@ class D3Heatmap extends React.Component {
           if(node.label) {
             let idx = labels.indexOf(node.label);
             let selector = "." + cssClass + idx;
-            console.log("highlighting", selector);
             d3.selectAll(selector).classed("highlight", true);
           }
         }
