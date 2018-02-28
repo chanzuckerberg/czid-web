@@ -631,7 +631,6 @@ class ProjectVisualization extends React.Component {
   }
 
   cluster (data, dataType, taxons) {
-    let vector_to_sample = {};
     // vectorize
     let vectors = [];
     for (let sample of data) {
@@ -646,7 +645,7 @@ class ProjectVisualization extends React.Component {
         }
         vector.push(value);
       }
-      vector_to_sample[vector] = sample;
+      vector.sample = sample;
       vectors.push(vector);
     }
     // cluster
@@ -665,8 +664,8 @@ class ProjectVisualization extends React.Component {
       }
 
       if (node.value) {
-				node.sample = vector_to_sample[node.value];
-        clustered_samples.push(vector_to_sample[node.value]);
+				node.sample = node.value.sample;
+        clustered_samples.push(node.value.sample);
       }
     }
     
