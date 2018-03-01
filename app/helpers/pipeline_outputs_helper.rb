@@ -111,10 +111,12 @@ module PipelineOutputsHelper
   def generate_quality_string(ref_string, seq_string)
     i = 0
     i += 1 while [ref_string[i], seq_string[i]].include?('N')
-    if ref_string[i] != seq_string[i]
+    str_size = ref_string.size
+    j = str_size - 1
+    j -= 1 while [ref_string[j], seq_string[j]].include?('N')
+    if (ref_string[i] != seq_string[i]) && (ref_string[j] != seq_string[j])
       seq_string = complement_seq(seq_string)
     end
-    str_size = ref_string.size
     quality_string = ''
     i = 0
     while i < str_size
