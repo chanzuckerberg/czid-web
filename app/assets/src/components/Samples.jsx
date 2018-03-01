@@ -1029,11 +1029,6 @@ class Samples extends React.Component {
                <span>
                   <i className="tiny material-icons">lock_open</i>
                   <span className='label'>Public Project</span>
-                  <a href='#'
-                    onClick={() => this.toggleProjectVisbility(
-                      this.state.project.id, 0)}>
-                    Make project private
-                  </a>
                </span>:
                <span>
                  <i className="tiny material-icons">lock</i>
