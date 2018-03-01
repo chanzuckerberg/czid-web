@@ -58,7 +58,7 @@ class PipelineSampleReport extends React.Component {
       }
       */
       excluded_categories: (cached_cats) ? JSON.parse(cached_cats) : [],
-      name_type: cached_name_type ? cached_name_type : 'scientific',
+      name_type: cached_name_type ? cached_name_type : 'Scientific name',
       search_taxon_id: 0,
       rendering: false,
       loading: true,
@@ -529,9 +529,11 @@ class PipelineSampleReport extends React.Component {
   }
 
   handleNameTypeChange(name_type) {
-    this.setState({ name_type: name_type }, () => {
-      Cookies.set('name_type', name_type);
-    });
+    if (name_type !== this.state.name_type) {
+      this.setState({ name_type: name_type }, () => {
+        Cookies.set('name_type', name_type);
+      });
+    }
   }
 
   // path to NCBI
@@ -813,7 +815,7 @@ class PipelineSampleReport extends React.Component {
                 <div className="top-filters">
                   <Search
                     placeholder="Search"
-                    className="search-input filter"
+                    className="search-input top-filter-item"
                     minCharacters={3}
                     size="small"
                     noResultsDescription="No taxon matches search term"
@@ -829,7 +831,7 @@ class PipelineSampleReport extends React.Component {
                     })}
                   />
                   <Dropdown
-                    className="filter"
+                    className="top-filter-item"
                     text={ this.state.backgroundName }
                     selection
                     onChange={(e, {options, value}) => this.handleBackgroundModelChange(options[value].text, options[value].key)}
@@ -842,10 +844,9 @@ class PipelineSampleReport extends React.Component {
                     })}
                      />
                   <Dropdown
-                    size="big"
-                    className='categories-selection filter'
+                    className="categories-selection top-filter-item"
                     closeOnChange={false}
-                    text='Categories'
+                    text="Categories"
                     selection
                     options={this.all_categories.map((cat) => {
                       return {
@@ -858,6 +859,17 @@ class PipelineSampleReport extends React.Component {
                         value: cat.taxid
                       };
                     })}
+                  />
+                  <Dropdown
+                    className="top-filter-item"
+                    text={this.state.name_type}
+                    selection
+                    onChange={(e, {value}) => this.handleNameTypeChange(value)}
+                    options={[{
+                      text: 'Scientific name',
+                      value: 'Scientific name',
+                      key: 1
+                    }, { text: 'Common name', value: 'Common name', key: 2 }]}
                      />
                 </div>
                 <Divider />
