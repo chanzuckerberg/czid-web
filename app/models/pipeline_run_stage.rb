@@ -98,7 +98,6 @@ class PipelineRunStage < ApplicationRecord
       update(job_status: STATUS_FAILED)
       raise
     ensure
-      pipeline_run.check_job_status # this does pipeline_run.save
       terminate_job
     end
   end
