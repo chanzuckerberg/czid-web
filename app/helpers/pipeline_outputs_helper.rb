@@ -74,8 +74,8 @@ module PipelineOutputsHelper
       end
 
       quality_string = generate_quality_string(ref_seq[1], aligned_portion)
-      white_space_left = left_portion.split("").map { |c| ' '}.join("")
-      white_space_right = right_portion.split("").map { |c| ' '}.join("")
+      white_space_left = left_portion.split("").map { |_c| ' ' }.join("")
+      white_space_right = right_portion.split("").map { |_c| ' ' }.join("")
 
       ref_seq_display = "#{ref_seq[0]}|#{ref_seq[1]}|#{ref_seq[2]}"
       read_seq_display = "#{left_portion}|#{aligned_portion}|#{right_portion}"
@@ -86,8 +86,7 @@ module PipelineOutputsHelper
                             "reversed" => reversed,
                             "alignment" => [ref_seq_display,
                                             read_seq_display,
-                                            quality_string_display]
-                           }
+                                            quality_string_display] }
     end
     results
   end
@@ -111,9 +110,7 @@ module PipelineOutputsHelper
 
   def generate_quality_string(ref_string, seq_string)
     i = 0
-    while [ref_string[i], seq_string[i]].include?('N')
-      i += 1
-    end
+    i += 1 while [ref_string[i], seq_string[i]].include?('N')
     if ref_string[i] != seq_string[i]
       seq_string = complement_seq(seq_string)
     end
@@ -121,11 +118,11 @@ module PipelineOutputsHelper
     quality_string = ''
     i = 0
     while i < str_size
-      if (seq_string[i] == ref_string[i]) || ([seq_string[i], ref_string[i]].include?('N'))
-        quality_string += ' '
-      else
-        quality_string += 'X'
-      end
+      quality_string += if (seq_string[i] == ref_string[i]) || [seq_string[i], ref_string[i]].include?('N')
+                          ' '
+                        else
+                          'X'
+                        end
       i += 1
     end
     quality_string
