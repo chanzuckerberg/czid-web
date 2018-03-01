@@ -273,6 +273,20 @@ class PipelineRun < ApplicationRecord
     (1.0 * subsampled_reads) / remaining_reads
   end
 
+  def subsample_suffix
+    subsample? ? "/subsample_#{subsample}" : ""
+  end
+
+  delegate :sample_output_s3_path, to: :sample
+
+  def postprocess_output_s3_path
+    "#{sample.sample_postprocess_s3_path}#{subsample_suffix}"
+  end
+
+  def alignment_output_s3_path
+    "#{sample.sample_output_s3_path}#{subsample_suffix}"
+  end
+
   def count_unmapped_reads
     unidentified_fasta = get_s3_file(sample.unidentified_fasta_s3_path)
     unidentified_fasta.lines.select { |line| line.start_with? '>' }.count if unidentified_fasta

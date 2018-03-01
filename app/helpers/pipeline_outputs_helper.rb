@@ -27,6 +27,81 @@ module PipelineOutputsHelper
     return nil
   end
 
+  def parse_accession(accession_details)
+    results = accession_details
+    reads = results.delete("reads")
+    results["reads"] = []
+    reads.each do |read_info|
+      read_id = read_info[0]
+      read_part = read_id.split("/")[1].to_i
+      read_seq = read_info[1]
+      metrics = read_info[2]
+      ref_seq = read_info[3]
+      reversed = 0
+
+      metrics[1..7] = metrics[1..7].map(&:to_i)
+      metrics[0] = metrics[0].to_f
+      metrics[8..9] = metrics[8..9].map(&:to_f)
+
+      if metrics[6] > metrics[7] # high to low ref_seq match
+        read_seq = read_seq.reverse
+        reversed = 1
+      end
+
+      if (reversed == 1 && read_part == 1) || (reversed.zero? && read_part == 2)
+        metrics[4..5] = [read_seq.size - metrics[5] + 1, read_seq.size - metrics[4] + 1]
+      end
+
+      aligned_portion = read_seq[(metrics[4] - 1)..(metrics[5] - 1)]
+      left_portion = (metrics[4] - 2) >= 0 ? read_seq[0..(metrics[4] - 2)] : ""
+      right_portion = metrics[5] < read_seq.size ? read_seq[(metrics[5])..(read_seq.size - 1)] : ""
+      if ref_seq[0].size > left_portion.size
+        # pad left_portion
+        while ref_seq[0].size > left_portion.size
+          left_portion = ' ' + left_portion
+        end
+      else
+        # pad ref_seq[0]
+        ref_seq[0] = ' ' + ref_seq[0] while ref_seq[0].size < left_portion.size
+      end
+
+      if ref_seq[2].size > right_portion.size
+        # pad right portion
+        right_portion += ' ' while ref_seq[2].size > right_portion.size
+      else
+        # pad ref_seq[2]
+        ref_seq[2] += ' ' while ref_seq[2].size < right_portion.size
+      end
+      ref_seq_display = "#{ref_seq[0]}|#{ref_seq[1]}|#{ref_seq[2]}"
+      read_seq_display = "#{left_portion}|#{aligned_portion}|#{right_portion}"
+
+      results["reads"] << { "read_id" => read_id,
+                            "metrics" => metrics,
+                            "reversed" => reversed,
+                            "alignment" => [ref_seq_display, read_seq_display] }
+    end
+    results
+  end
+
+  def parse_tree(results, key, current_dict)
+    if current_dict["reads"]
+      results[key] = parse_accession(current_dict)
+    else
+      current_dict.each do |key2, val|
+        parse_tree(results, key2, val)
+      end
+    end
+  end
+
+  def parse_alignment_results(taxid, tax_level, alignment_data)
+    taxon = TaxonLineage.find_by(taxid: taxid)
+    results = {}
+    parse_tree(results, taxid, alignment_data)
+
+    title = taxon["#{tax_level}_name"].to_s + "(#{tax_level}) Alignment (#{results.size} unique accessions)"
+    { "title" => title, "details" => results }
+  end
+
   def get_taxid_fasta(sample, taxid, tax_level, hit_type)
     uri = sample.s3_paths_for_taxon_byteranges[tax_level][hit_type]
     # e.g. "s3://czbiohub-idseq-samples-development/samples/8/74/postprocess/taxid_annot_sorted_genus_nt.fasta"

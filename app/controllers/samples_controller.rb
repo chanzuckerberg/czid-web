@@ -14,7 +14,7 @@ class SamplesController < ApplicationController
   ##########################################
   skip_before_action :verify_authenticity_token, only: [:create, :update]
 
-  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder].freeze
+  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder, :show_taxid_alignment].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :samples_taxons, :top_taxons, :heatmap].freeze
@@ -288,6 +288,21 @@ class SamplesController < ApplicationController
     taxid_name = pipeline_run.taxon_counts.find_by(tax_id: params[:taxid], tax_level: params[:tax_level]).name
     taxid_name_clean = taxid_name ? taxid_name.downcase.gsub(/\W/, "-") : ''
     send_data @taxid_fasta, filename: @sample.name + '_' + taxid_name_clean + '-hits.fasta'
+  end
+
+  def show_taxid_alignment
+    @taxon_info = params[:taxon_info].tr("_", ".")
+    pr = @sample.pipeline_runs.first
+    s3_file_path = "#{pr.postprocess_output_s3_path}/align_viz/#{@taxon_info}.align_viz.json"
+    alignment_data = JSON.parse(get_s3_file(s3_file_path) || "{}")
+    @taxid = @taxon_info.split(".")[2].to_i
+    @tax_level = @taxon_info.split(".")[1]
+    @parsed_alignment_results = parse_alignment_results(@taxid, @tax_level, alignment_data)
+
+    respond_to do |format|
+      format.json { render json: @parsed_alignment_results }
+      format.html { @title = @parsed_alignment_results['title'] }
+    end
   end
 
   def nonhost_fasta

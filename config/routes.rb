@@ -27,6 +27,7 @@ Rails.application.routes.draw do
     get :heatmap, on: :collection
   end
   get 'samples/:id/fasta/:tax_level/:taxid/:hit_type', to: 'samples#show_taxid_fasta'
+  get 'samples/:id/alignment/:taxon_info', to: 'samples#show_taxid_alignment'
   get 'select', to: 'home#index'
 
   resources :projects do

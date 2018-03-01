@@ -187,24 +187,6 @@ class PipelineRunStage < ApplicationRecord
     _stdout, _stderr, _status = Open3.capture3("aegea", "batch", "terminate", job_id.to_s)
   end
 
-  def sample_output_s3_path
-    pipeline_run.sample.sample_output_s3_path
-  end
-
-  def postprocess_output_s3_path
-    sample = pipeline_run.sample
-    pipeline_run.subsample ? "#{sample.sample_postprocess_s3_path}/#{subsample_suffix}" : sample.sample_postprocess_s3_path
-  end
-
-  def alignment_output_s3_path
-    sample = pipeline_run.sample
-    pipeline_run.subsample ? "#{sample.sample_output_s3_path}/#{subsample_suffix}" : sample.sample_output_s3_path
-  end
-
-  def subsample_suffix
-    "subsample_#{pipeline_run.subsample}"
-  end
-
   def log_url
     return nil unless job_log_id
     "https://us-west-2.console.aws.amazon.com/cloudwatch/home?region=us-west-2" \
@@ -234,7 +216,7 @@ class PipelineRunStage < ApplicationRecord
     sample = pipeline_run.sample
     file_type = sample.input_files.first.file_type
     batch_command_env_variables = "FASTQ_BUCKET=#{sample.sample_input_s3_path} INPUT_BUCKET=#{sample.sample_output_s3_path} " \
-      "OUTPUT_BUCKET=#{alignment_output_s3_path} FILE_TYPE=#{file_type} ENVIRONMENT=#{Rails.env} DB_SAMPLE_ID=#{sample.id} " \
+      "OUTPUT_BUCKET=#{pipeline_run.alignment_output_s3_path} FILE_TYPE=#{file_type} ENVIRONMENT=#{Rails.env} DB_SAMPLE_ID=#{sample.id} " \
       "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} SKIP_DEUTERO_FILTER=#{sample.skip_deutero_filter_flag} "
     batch_command_env_variables += "SUBSAMPLE=#{pipeline_run.subsample} " if pipeline_run.subsample
     batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline non_host_alignment"
@@ -242,8 +224,8 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def postprocess_command
-    batch_command_env_variables = "INPUT_BUCKET=#{alignment_output_s3_path} " \
-      "OUTPUT_BUCKET=#{postprocess_output_s3_path} " \
+    batch_command_env_variables = "INPUT_BUCKET=#{pipeline_run.alignment_output_s3_path} " \
+      "OUTPUT_BUCKET=#{pipeline_run.postprocess_output_s3_path} " \
       "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} "
     batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline postprocess"
     aegea_batch_submit_command(batch_command)
@@ -252,13 +234,13 @@ class PipelineRunStage < ApplicationRecord
   def db_load_host_filtering
     pr = pipeline_run
 
-    stats_json_s3_path = "#{sample_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
+    stats_json_s3_path = "#{pr.sample_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
     downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, pr.local_json_path)
     stats_array = JSON.parse(File.read(downloaded_stats_path))
     pr.total_reads = (stats_array[0] || {})['total_reads'] || 0
     stats_array = stats_array.select { |entry| entry.key?("task") }
 
-    version_s3_path = "#{sample_output_s3_path}/#{PipelineRun::VERSION_JSON_NAME}"
+    version_s3_path = "#{pr.sample_output_s3_path}/#{PipelineRun::VERSION_JSON_NAME}"
     pr.version = `aws s3 cp #{version_s3_path} -`
 
     # TODO(yf): remove the following line
@@ -271,8 +253,8 @@ class PipelineRunStage < ApplicationRecord
   def db_load_alignment
     pr = pipeline_run
 
-    output_json_s3_path = "#{alignment_output_s3_path}/#{PipelineRun::OUTPUT_JSON_NAME}"
-    stats_json_s3_path = "#{alignment_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
+    output_json_s3_path = "#{pipeline_run.alignment_output_s3_path}/#{PipelineRun::OUTPUT_JSON_NAME}"
+    stats_json_s3_path = "#{pipeline_run.alignment_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
 
     # Get the file
     downloaded_json_path = PipelineRun.download_file(output_json_s3_path, pr.local_json_path)
@@ -290,7 +272,7 @@ class PipelineRunStage < ApplicationRecord
     stats_array = JSON.parse(File.read(downloaded_stats_path))
     stats_array = stats_array.select { |entry| entry.key?("task") }
 
-    version_s3_path = "#{alignment_output_s3_path}/#{PipelineRun::VERSION_JSON_NAME}"
+    version_s3_path = "#{pipeline_run.alignment_output_s3_path}/#{PipelineRun::VERSION_JSON_NAME}"
     pr.version = `aws s3 cp #{version_s3_path} -`
 
     # only keep species level counts
@@ -319,7 +301,7 @@ class PipelineRunStage < ApplicationRecord
 
   def db_load_postprocess
     pr = pipeline_run
-    byteranges_json_s3_path = "#{postprocess_output_s3_path}/#{PipelineRun::TAXID_BYTERANGE_JSON_NAME}"
+    byteranges_json_s3_path = "#{pipeline_run.postprocess_output_s3_path}/#{PipelineRun::TAXID_BYTERANGE_JSON_NAME}"
     downloaded_byteranges_path = PipelineRun.download_file(byteranges_json_s3_path, pr.local_json_path)
     taxon_byteranges_csv_file = "#{pr.local_json_path}/taxon_byteranges"
     hash_array_json2csv(downloaded_byteranges_path, taxon_byteranges_csv_file, %w[taxid hit_type first_byte last_byte])
@@ -331,18 +313,18 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def host_filtering_outputs
-    stats_json_s3_path = "#{sample_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
-    unmapped_fasta_s3_path = "#{sample_output_s3_path}/unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.merged.fasta"
+    stats_json_s3_path = "#{pipeline_run.sample_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
+    unmapped_fasta_s3_path = "#{pipeline_run.sample_output_s3_path}/unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.merged.fasta"
     [stats_json_s3_path, unmapped_fasta_s3_path]
   end
 
   def alignment_outputs
-    stats_json_s3_path = "#{alignment_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
-    output_json_s3_path = "#{alignment_output_s3_path}/#{PipelineRun::OUTPUT_JSON_NAME}"
+    stats_json_s3_path = "#{pipeline_run.alignment_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
+    output_json_s3_path = "#{pipeline_run.alignment_output_s3_path}/#{PipelineRun::OUTPUT_JSON_NAME}"
     [stats_json_s3_path, output_json_s3_path]
   end
 
   def postprocess_outputs
-    ["#{postprocess_output_s3_path}/#{PipelineRun::TAXID_BYTERANGE_JSON_NAME}"]
+    ["#{pipeline_run.postprocess_output_s3_path}/#{PipelineRun::TAXID_BYTERANGE_JSON_NAME}"]
   end
 end
