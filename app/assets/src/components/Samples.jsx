@@ -29,8 +29,6 @@ class Samples extends React.Component {
     this.fetchSamples = this.fetchSamples.bind(this);
     this.hostGenomes = props.hostGenomes || [];
     this.handleStatusFilterSelect = this.handleStatusFilterSelect.bind(this);
-    this.handleTissueFilterSelect = this.handleTissueFilterSelect.bind(this);
-    this.handleHostFilterSelect = this.handleHostFilterSelect.bind(this);
     this.setUrlLocation = this.setUrlLocation.bind(this);
     this.sortSamples = this.sortSamples.bind(this);
     this.switchColumn = this.switchColumn.bind(this);
@@ -65,6 +63,8 @@ class Samples extends React.Component {
       sort_by: this.fetchParams('sort_by') || 'id,desc',
       pagesLoaded: 0,
       pageEnd: false,
+      hostFilterChange: false,
+      tissueFilterChange: false,
       checkedBoxes: 0,
       allChecked: false,
       selectedSampleIndices: [],
@@ -149,7 +149,7 @@ class Samples extends React.Component {
   }
 
   selectTissueFilter(e) {
-    const filterList = this.state.selectedTissueFilters;
+    const filterList = this.state.selectedTissueFilters.slice(0);
 
     let filter, filterIndex;
     let selectedFilter = e.target.getAttribute('data-status');
@@ -161,14 +161,17 @@ class Samples extends React.Component {
       filterList.splice(filterIndex, 1);
     }
     this.setState({ 
-      selectedTissueFilters: filterList
+      selectedTissueFilters: filterList,
+      pagesLoaded: 0,
+      pageEnd: false,
+    }, () => {
+      this.setUrlLocation();
     });
   }
 
   selectHostFilter(e) {
     // current array of options
-    const hostList = this.state.selectedHostIndices
-
+    const hostList = this.state.selectedHostIndices.slice(0);
     let index; 
     // check if the check box is checked or unchecked
     if (e.target.checked) {
@@ -180,8 +183,12 @@ class Samples extends React.Component {
       hostList.splice(index, 1)
     }
     // update the state with the new array of options
-    this.setState({ 
-      selectedHostIndices: hostList 
+    this.setState({
+      selectedHostIndices: hostList,
+      pagesLoaded: 0,
+      pageEnd: false
+    }, () => {
+      this.setUrlLocation();
     })
   }
   
@@ -313,18 +320,6 @@ class Samples extends React.Component {
     this.setState({
       displayDropdown: !this.state.displayDropdown
     });
-    if(this.state.displayDropdown) {
-      this.applyFilters();
-    }
-  }
-
-  applyFilters() {
-    if(this.state.selectedHostIndices) {
-      this.handleHostFilterSelect(this.state.selectedHostIndices);
-    }
-    if(this.state.selectedTissueFilters) {
-      this.handleTissueFilterSelect(this.state.selectedTissueFilters);
-    }
   }
 
   updateUserDisplay(email_to_add) {
@@ -1263,12 +1258,43 @@ class Samples extends React.Component {
   componentDidUpdate(prevProps, prevState) {
     const prevStatus = prevState.filterParams;
     const currentStatus = this.state.filterParams;
+    const prevHostIndices = prevState.selectedHostIndices;
+    const prevTissueFilters = prevState.selectedTissueFilters;
     if(prevStatus !== currentStatus) {
       $(`i[data-status="${prevStatus}"]`).removeClass('active');
     } else {
       $(`i[data-status="${currentStatus}"]`).addClass('active');
     }
+
+    if(prevHostIndices.length !== this.state.selectedHostIndices.length) {
+      this.setState({
+        hostFilterChange: true
+      })
+    }
+
+    if(prevTissueFilters.length !== this.state.selectedTissueFilters.length) {
+      this.setState({
+        tissueFilterChange: true
+      })
+    }
+
+    if(!this.state.displayDropdown) {
+      if (this.state.hostFilterChange) {
+        this.fetchResults();
+        this.setState({
+          hostFilterChange: false
+        })
+      }
+
+      if (this.state.tissueFilterChange) {
+        this.fetchResults();
+        this.setState({
+          tissueFilterChange: false
+        })
+      }
+    }
   }
+
 
   componentDidMount() {
     $(() => {
@@ -1330,29 +1356,6 @@ class Samples extends React.Component {
     });
   }
 
-  //handle filtering when a host filter is selected from list
-  handleHostFilterSelect(hostParams) {
-    this.setState({
-      pagesLoaded: 0,
-      pageEnd: false,
-      selectedHostIndices: hostParams
-    }, () => {
-      this.setUrlLocation();
-      this.fetchResults();
-    });
-  }
-
-  handleTissueFilterSelect(tissueParams) {
-      this.setState({
-        pagesLoaded: 0,
-        pageEnd: false,
-        selectedTissueFilters: tissueParams
-      }, () => {
-        this.setUrlLocation();
-        this.fetchResults();
-      });
-  }
-
   //set Url based on requests
   setUrlLocation() {
     let projectId = parseInt(this.state.selectedProjectId);
@@ -1389,8 +1392,6 @@ class Samples extends React.Component {
         if(that.state.displayDropdown) {
           that.setState({
             displayDropdown: false
-          }, () => {
-            that.applyFilters();
           });
         }
       }
