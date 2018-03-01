@@ -1,9 +1,3 @@
-/*
- * TODO
- * - Use standard loading screen
- * - Make the dondegram leafs be in the middle of the columns
- */
-
 import React from 'react';
 import SubHeader from './SubHeader';
 import symlog from './symlog';
@@ -24,7 +18,7 @@ class SampleHeatmapTooltip extends React.Component {
     if (!taxon) {
       return
     }
-    
+
     let valueMap = [
         ['Agg Score', 'NT.aggregatescore'],
         null,
@@ -165,7 +159,7 @@ class D3Heatmap extends React.Component {
 
     this.width = this.cellWidth * this.col_number + this.margin.left + this.margin.right;
     this.height = this.cellHeight * this.row_number + this.margin.top + this.margin.bottom;
-    
+
     this.colTree = props.colTree;
     this.rowTree = props.rowTree;
     this.scale = props.scale;
@@ -245,11 +239,11 @@ class D3Heatmap extends React.Component {
       ;
 
   }
-  
+
   renderColDendrogram () {
 		let width = this.cellWidth * this.col_number,
 				height = this.margin.top - 20;
-    
+
     let container = this.renderDendrogram(this.colTree, width, height, "cc", this.colLabel);
     container.attr("transform", "rotate(90) translate(0, -" + (width + this.margin.left) + ")")
   }
@@ -257,7 +251,7 @@ class D3Heatmap extends React.Component {
   renderRowDendrogram () {
     let height = this.margin.left - 20,
         width = this.cellHeight * this.row_number;
-    
+
     let container = this.renderDendrogram(this.rowTree, width, height, "cr", this.rowLabel);
     container.attr("transform", "translate(0, " + this.margin.top + ")")
   }
@@ -270,7 +264,7 @@ class D3Heatmap extends React.Component {
 		let diagonal = (d, i) => {
     	return "M" + d.source.y + "," + d.source.x + "V" + d.target.x + "H" + d.target.y;
 		}
-		
+
 		//var diagonal = d3.svg.diagonal()
     //		.projection(function(d) { return [d.y, d.x]; });
 
@@ -280,7 +274,7 @@ class D3Heatmap extends React.Component {
       .attr("height", height)
 
     let vis = visContainer.append("g")
-    
+
     cluster.children(function (d) {
       let children = [];
       if (d.left) {
@@ -302,20 +296,23 @@ class D3Heatmap extends React.Component {
     var link = vis.selectAll("path.link." + cssClass + "-link")
       .data(cluster.links(nodes))
       .enter().append("path")
-      .attr("class", function (e) { 
-        return "link " + cssClass + "-link " + cssClass + "-link-" + e.source.id + "-" + e.target.id; 
+      .attr("class", function (e) {
+        return "link " + cssClass + "-link " + cssClass + "-link-" + e.source.id + "-" + e.target.id;
       })
       .attr("d", diagonal);
 
     var hovers = vis.selectAll("rect.hover-target." + cssClass + "-hover-target")
       .data(cluster.links(nodes))
       .enter().append("rect")
-      .attr("class", function (e) { 
-        return "hover-target " + cssClass + "-hover-target " + cssClass + "-hover-" + e.source.id + "-" + e.target.id; 
+      .attr("class", function (e) {
+        return "hover-target " + cssClass + "-hover-target " + cssClass + "-hover-" + e.source.id + "-" + e.target.id;
       })
       .attr("x", function(d, i) { return Math.min(d.source.y, d.target.y); })
       .attr("y", function(d, i) { return Math.min(d.source.x, d.target.x); })
-      .attr("width", function (d, i) { return Math.abs(d.target.y - d.source.y); })
+      .attr("width", function (d, i) {
+        let targetY = Math.max(d.source.left.y, d.source.right.y)
+        return Math.abs(targetY - d.source.y);
+      })
       .attr("height", function (d, i) { return Math.abs(d.target.x - d.source.x); })
       .attr("fill", "rgba(0,0,0,0)")
       .on("mouseover", (d) => {
@@ -356,13 +353,13 @@ class D3Heatmap extends React.Component {
       .style("text-anchor", function(d) { return d.children ? "end" : "start"; })
       .text(function(d) {
 				if (d.sample) {
-					return d.sample.name; 
+					return d.sample.name;
 				}
 			});
       */
     return visContainer;
   }
-  
+
   renderLegend () {
     let that = this,
         height = 20,
@@ -375,7 +372,7 @@ class D3Heatmap extends React.Component {
         .attr("y", -33)
         .attr("class", "mono")
         .text(Math.round(this.min));
-    
+
     this.offsetCanvas.selectAll(".legend-text-max")
         .data([this.max])
         .enter().append("text")
@@ -391,9 +388,9 @@ class D3Heatmap extends React.Component {
       .attr("class", "legend");
 
     legend.append("rect")
-      .attr("x", function(d, i) { return x_offset + that.legendElementWidth * i; })
+      .attr("x", function(d, i) { return Math.floor(x_offset + that.legendElementWidth * i); })
       .attr("y", -10 - height)
-      .attr("width", this.legendElementWidth)
+      .attr("width", Math.ceil(this.legendElementWidth))
       .attr("height", height)
       .style("fill", function(d, i) { return that.colors[i]; });
 
@@ -403,8 +400,8 @@ class D3Heatmap extends React.Component {
         .attr("stroke-width", "0.25")
         .style("fill", "none")
         .attr("y", -10 - height)
-        .attr("width", that.legendElementWidth * that.colors.length)  
-        .attr("height", height);    
+        .attr("width", that.legendElementWidth * that.colors.length)
+        .attr("height", height);
   }
 
   renderRowLabels () {
@@ -414,7 +411,7 @@ class D3Heatmap extends React.Component {
         .selectAll(".rowLabelg")
         .data(this.rowLabel)
         .enter();
-    
+
     let groups = rowLabels.append("g")
         .attr("class", "rowLabelg")
         .attr("transform", "translate(" + (this.cellWidth * this.col_number) + ", 0)")
@@ -424,7 +421,7 @@ class D3Heatmap extends React.Component {
         .on("mouseout" , function(d) {
           d3.select(this).classed("text-hover",false);
         });
-    
+
     groups.append("rect")
         .attr("y", function (d, i) {
           return i * that.cellHeight;
@@ -442,7 +439,7 @@ class D3Heatmap extends React.Component {
         .attr("class", function (d,i) {
           return "rowLabel mono r"+i;}
         )
-      
+
     groups.append("text")
         .attr("class", "removeLink mono")
         .text("x")
@@ -551,7 +548,7 @@ class ProjectVisualization extends React.Component {
 
     this.scales = [
       ["Symmetric Log", symlog],
-      ["Linear", d3.scale.linear], 
+      ["Linear", d3.scale.linear],
     ];
 
     this.state = {
@@ -608,7 +605,7 @@ class ProjectVisualization extends React.Component {
       this.setState({ loading: false });
     });
   }
-  
+
   updateData (data, dataType, taxons) {
     let minMax = this.getMinMax(data, dataType, taxons);
     let clustered_samples = this.clusterSamples(data, dataType, taxons);
@@ -666,16 +663,16 @@ class ProjectVisualization extends React.Component {
       vector.sample = sample;
       vectors.push(vector);
     }
-    
+
     let cluster = clusterfck.hcluster(vectors);
-    
+
     let clustered_samples = [];
     let to_visit = [cluster];
     while (to_visit.length > 0) {
       let node = to_visit.pop();
       if (node.right) {
-        to_visit.push(node.right); 
-      } 
+        to_visit.push(node.right);
+      }
       if (node.left) {
         to_visit.push(node.left);
       }
@@ -685,7 +682,7 @@ class ProjectVisualization extends React.Component {
         clustered_samples.push(node.value.sample);
       }
     }
-    
+
     return {
       tree: cluster,
       flat: clustered_samples.reverse(),
@@ -734,8 +731,8 @@ class ProjectVisualization extends React.Component {
     while (to_visit.length > 0) {
       let node = to_visit.pop();
       if (node.right) {
-        to_visit.push(node.right); 
-      } 
+        to_visit.push(node.right);
+      }
       if (node.left) {
         to_visit.push(node.left);
       }
@@ -745,7 +742,7 @@ class ProjectVisualization extends React.Component {
         clustered_taxons.push(node.value.taxon_name);
       }
     }
-     
+
     return {
       tree: cluster,
       flat: clustered_taxons,
@@ -795,7 +792,7 @@ class ProjectVisualization extends React.Component {
   renderLoading () {
     return (<p className="loading-indicator text-center">Loading...</p>);
   }
-  
+
   onCellClick (d) {
     let sample = this.state.clustered_samples.flat[d.col];
     window.location.href = "/samples/" + sample.sample_id;
@@ -806,7 +803,7 @@ class ProjectVisualization extends React.Component {
     if (idx > -1) {
       this.state.taxons.splice(idx, 1);
     }
-    this.updateData(this.state.data, this.state.dataType, this.state.taxons); 
+    this.updateData(this.state.data, this.state.dataType, this.state.taxons);
   }
 
   renderHeatmap () {
@@ -942,7 +939,7 @@ class ProjectVisualization extends React.Component {
       </select>
     )
   }
-  
+
   updateDataThreshold (e) {
     this.setState({
       minDataThreshold: parseFloat(e[0]),
