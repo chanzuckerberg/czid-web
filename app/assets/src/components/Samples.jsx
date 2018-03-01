@@ -29,8 +29,6 @@ class Samples extends React.Component {
     this.fetchSamples = this.fetchSamples.bind(this);
     this.hostGenomes = props.hostGenomes || [];
     this.handleStatusFilterSelect = this.handleStatusFilterSelect.bind(this);
-    this.handleTissueFilterSelect = this.handleTissueFilterSelect.bind(this);
-    this.handleHostFilterSelect = this.handleHostFilterSelect.bind(this);
     this.setUrlLocation = this.setUrlLocation.bind(this);
     this.sortSamples = this.sortSamples.bind(this);
     this.switchColumn = this.switchColumn.bind(this);
@@ -65,13 +63,15 @@ class Samples extends React.Component {
       sort_by: this.fetchParams('sort_by') || 'id,desc',
       pagesLoaded: 0,
       pageEnd: false,
+      hostFilterChange: false,
+      tissueFilterChange: false,
       checkedBoxes: 0,
       allChecked: false,
       selectedSampleIndices: [],
       displayDropdown: false,
-      selectedTissueFilters:this.fetchParams('tissue') || [],
+      selectedTissueFilters: this.fetchParams('tissue') ? this.fetchParams('tissue').split(',') : [],
       selectedTissueIndices: [],
-      selectedHostIndices: this.fetchParams('host') || [],
+      selectedHostIndices: this.fetchParams('host') ? this.fetchParams('host').split(',').map(Number) : [],
       initialFetchedSamples: [],
       loading: false,
       isRequesting: false,
@@ -149,7 +149,7 @@ class Samples extends React.Component {
   }
 
   selectTissueFilter(e) {
-    const filterList = this.state.selectedTissueFilters;
+    const filterList = this.state.selectedTissueFilters.slice(0);
 
     let filter, filterIndex;
     let selectedFilter = e.target.getAttribute('data-status');
@@ -161,18 +161,18 @@ class Samples extends React.Component {
       filterList.splice(filterIndex, 1);
     }
     this.setState({ 
-      selectedTissueFilters: filterList
+      selectedTissueFilters: filterList,
+      pagesLoaded: 0,
+      pageEnd: false,
     }, () => {
-      this.handleTissueFilterSelect(this.state.selectedTissueFilters);
+      this.setUrlLocation();
     });
   }
 
   selectHostFilter(e) {
-    
     // current array of options
-    const hostList = this.state.selectedHostIndices
-
-    let index;
+    const hostList = this.state.selectedHostIndices.slice(0);
+    let index; 
     // check if the check box is checked or unchecked
     if (e.target.checked) {
       // add the numerical value of the checkbox to options array
@@ -183,10 +183,12 @@ class Samples extends React.Component {
       hostList.splice(index, 1)
     }
     // update the state with the new array of options
-    this.setState({ 
-      selectedHostIndices: hostList 
+    this.setState({
+      selectedHostIndices: hostList,
+      pagesLoaded: 0,
+      pageEnd: false
     }, () => {
-      this.handleHostFilterSelect(this.state.selectedHostIndices);
+      this.setUrlLocation();
     })
   }
   
@@ -319,6 +321,7 @@ class Samples extends React.Component {
       displayDropdown: !this.state.displayDropdown
     });
   }
+
   updateUserDisplay(email_to_add) {
     let new_project_users = this.state.project_users
     if (!new_project_users.includes(email_to_add)) {
@@ -607,13 +610,13 @@ class Samples extends React.Component {
     }
 
     if(this.state.selectedTissueFilters.length) {
-      let tissueParams = this.state.selectedTissueFilters;
-      params += `&tissue=${tissueParams.join(',')}`
+      let tissueParams = this.state.selectedTissueFilters.join(',');
+      params += `&tissue=${tissueParams}`
     }
 
     if(this.state.selectedHostIndices.length) {
-      let hostParams = this.state.selectedHostIndices;
-      params += `&host=${hostParams.join(',')}`
+      let hostParams = this.state.selectedHostIndices.join(',');
+      params += `&host=${hostParams}`
     }
     return params;
   }
@@ -902,6 +905,8 @@ class Samples extends React.Component {
     location.href = `/projects/${id}/csv`;
   }
 
+
+
   renderTable(samples) {
     let project_id = this.state.selectedProjectId ? this.state.selectedProjectId : 'all'
     let search_field_width = (project_id === 'all') ? 'col s4 no-padding' : 'col s2 no-padding'
@@ -944,7 +949,6 @@ class Samples extends React.Component {
             className="filled-in checkAll"
             />
           <label htmlFor="checkAll"></label>
-          <i className="fa fa-caret-down"></i>    
       </div>
     );
 
@@ -969,10 +973,11 @@ class Samples extends React.Component {
     )
 
     const metaDataFilter = (
-      <div>
-        <div className="col s2 metadata">
-            <div className='metadata-dropdown' onClick={this.displayMetaDataDropdown}>
-            Metadata </div><i className="fa fa-angle-down" onClick={this.displayMetaDataDropdown}></i>
+      <div className="col s2 wrapper">
+        <div className="metadata" onClick={this.displayMetaDataDropdown}>
+            <div className='metadata-dropdown'>
+            Filter </div><i className="fa fa-angle-down"></i>
+        </div>
               { this.state.displayDropdown ? <div className="row metadata-options">
                 <div className="col s6">
                   <h6>Host</h6>
@@ -999,7 +1004,6 @@ class Samples extends React.Component {
                 })}
               </div>
             </div> : null }
-      </div>
       </div>
     )
     
@@ -1254,12 +1258,43 @@ class Samples extends React.Component {
   componentDidUpdate(prevProps, prevState) {
     const prevStatus = prevState.filterParams;
     const currentStatus = this.state.filterParams;
+    const prevHostIndices = prevState.selectedHostIndices;
+    const prevTissueFilters = prevState.selectedTissueFilters;
     if(prevStatus !== currentStatus) {
       $(`i[data-status="${prevStatus}"]`).removeClass('active');
     } else {
       $(`i[data-status="${currentStatus}"]`).addClass('active');
     }
+
+    if(prevHostIndices.length !== this.state.selectedHostIndices.length) {
+      this.setState({
+        hostFilterChange: true
+      })
+    }
+
+    if(prevTissueFilters.length !== this.state.selectedTissueFilters.length) {
+      this.setState({
+        tissueFilterChange: true
+      })
+    }
+
+    if(!this.state.displayDropdown) {
+      if (this.state.hostFilterChange) {
+        this.fetchResults();
+        this.setState({
+          hostFilterChange: false
+        })
+      }
+
+      if (this.state.tissueFilterChange) {
+        this.fetchResults();
+        this.setState({
+          tissueFilterChange: false
+        })
+      }
+    }
   }
+
 
   componentDidMount() {
     $(() => {
@@ -1275,6 +1310,7 @@ class Samples extends React.Component {
       });
       $('.filter').hide();
     });
+    this.closeMetaDataDropdown();
     this.initializeSelectAll();
     this.displayDownloadDropdown();
     this.initializeTooltip();
@@ -1320,37 +1356,14 @@ class Samples extends React.Component {
     });
   }
 
-  //handle filtering when a host filter is selected from list
-  handleHostFilterSelect(hostParams) {
-    this.setState({
-      pagesLoaded: 0,
-      pageEnd: false,
-      selectedHostIndices: hostParams
-    }, () => {
-      this.setUrlLocation();
-      this.fetchResults();
-    });
-  }
-
-  handleTissueFilterSelect(tissueParams) {
-      this.setState({
-        pagesLoaded: 0,
-        pageEnd: false,
-        selectedTissueFilters: tissueParams
-      }, () => {
-        this.setUrlLocation();
-        this.fetchResults();
-      });
-  }
-
   //set Url based on requests
   setUrlLocation() {
     let projectId = parseInt(this.state.selectedProjectId);
     const params = {
       project_id: projectId ? projectId : null,
       filter: this.state.filterParams,
-      tissue: this.state.selectedTissueFilters,
-      host: this.state.selectedHostIndices,
+      tissue: this.state.selectedTissueFilters.join(','),
+      host: this.state.selectedHostIndices.join(','),
       search: this.state.searchParams,
       ids: this.state.sampleIdsParams,
       sort_by: this.state.sort_by,
@@ -1369,6 +1382,19 @@ class Samples extends React.Component {
       this.setUrlLocation();
       this.fetchProjectDetails(id);
       this.fetchProjectUsers(id)
+    });
+  }
+
+  closeMetaDataDropdown() {
+    let that = this;
+    $(document).on("click", function(event) {
+      if ($(event.target).has(".wrapper").length) {
+        if(that.state.displayDropdown) {
+          that.setState({
+            displayDropdown: false
+          });
+        }
+      }
     });
   }
 
