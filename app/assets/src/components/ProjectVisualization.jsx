@@ -1,9 +1,3 @@
-/*
- * TODO
- * - Use standard loading screen
- * - Make the dondegram leafs be in the middle of the columns
- */
-
 import React from 'react';
 import SubHeader from './SubHeader';
 import symlog from './symlog';
