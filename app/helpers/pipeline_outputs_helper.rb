@@ -33,6 +33,7 @@ module PipelineOutputsHelper
     results["reads"] = []
     reads.each do |read_info|
       read_id = read_info[0]
+      read_part = read_id.split("/")[1].to_i
       read_seq = read_info[1]
       metrics = read_info[2]
       ref_seq = read_info[3]
@@ -46,6 +47,11 @@ module PipelineOutputsHelper
         read_seq = read_seq.reverse
         reversed = 1
       end
+
+      if (reversed == 1 && read_part == 1) || (reversed.zero? && read_part == 2)
+        metrics[4..5] = [read_seq.size - metrics[5] + 1, read_seq.size - metrics[4] + 1]
+      end
+
       aligned_portion = read_seq[(metrics[4] - 1)..(metrics[5] - 1)]
       left_portion = (metrics[4] - 2) >= 0 ? read_seq[0..(metrics[4] - 2)] : ""
       right_portion = metrics[5] < read_seq.size ? read_seq[(metrics[5])..(read_seq.size - 1)] : ""
