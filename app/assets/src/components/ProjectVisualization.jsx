@@ -388,9 +388,9 @@ class D3Heatmap extends React.Component {
       .attr("class", "legend");
 
     legend.append("rect")
-      .attr("x", function(d, i) { return x_offset + that.legendElementWidth * i; })
+      .attr("x", function(d, i) { return Math.floor(x_offset + that.legendElementWidth * i); })
       .attr("y", -10 - height)
-      .attr("width", this.legendElementWidth)
+      .attr("width", Math.ceil(this.legendElementWidth))
       .attr("height", height)
       .style("fill", function(d, i) { return that.colors[i]; });
 
