@@ -72,15 +72,58 @@ module PipelineOutputsHelper
         # pad ref_seq[2]
         ref_seq[2] += ' ' while ref_seq[2].size < right_portion.size
       end
+
+      quality_string1, mis_matches1 = generate_quality_string(ref_seq[1], aligned_portion)
+      quality_string2, mis_matches2 = generate_quality_string(ref_seq[1], complement_seq(aligned_portion))
+      quality_string = mis_matches1 < mis_matches2 ? quality_string1 : quality_string2
+      white_space_left = left_portion.split("").map { |_c| ' ' }.join("")
+      white_space_right = right_portion.split("").map { |_c| ' ' }.join("")
+
       ref_seq_display = "#{ref_seq[0]}|#{ref_seq[1]}|#{ref_seq[2]}"
       read_seq_display = "#{left_portion}|#{aligned_portion}|#{right_portion}"
+      quality_string_display = "#{white_space_left}|#{quality_string}|#{white_space_right}"
 
       results["reads"] << { "read_id" => read_id,
                             "metrics" => metrics,
                             "reversed" => reversed,
-                            "alignment" => [ref_seq_display, read_seq_display] }
+                            "alignment" => [ref_seq_display,
+                                            read_seq_display,
+                                            quality_string_display] }
     end
     results
+  end
+
+  def complement_seq(seq_string)
+    seq_string.split("").map do |c|
+      case c
+      when 'A'
+        'T'
+      when 'T'
+        'A'
+      when 'C'
+        'G'
+      when 'G'
+        'C'
+      else
+        c
+      end
+    end.join("")
+  end
+
+  def generate_quality_string(ref_string, seq_string)
+    mis_matches = 0
+    i = 0
+    quality_string = ''
+    while i < ref_string.size
+      if (seq_string[i] == ref_string[i]) || [seq_string[i], ref_string[i]].include?('N')
+        quality_string += ' '
+      else
+        mis_matches += 1
+        quality_string += 'X'
+      end
+      i += 1
+    end
+    [quality_string, mis_matches]
   end
 
   def parse_tree(results, key, current_dict)

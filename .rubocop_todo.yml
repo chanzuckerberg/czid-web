@@ -82,7 +82,7 @@ Metrics/MethodLength:
   Enabled: false
 
 Metrics/AbcSize:
-  Max: 100
+  Max: 300
 
 Rails/ReversibleMigration:
   Enabled: false
@@ -106,7 +106,7 @@ Style/GuardClause:
   Enabled: false
 
 Style/IfUnlessModifier:
-  Enabled: false  
+  Enabled: false
 
 Style/Next:
   # With `always` all conditions at the end of an iteration needs to be

@@ -14,8 +14,9 @@
         Reference Alignment Range: <%= "#{number_with_delimiter(read_info['metrics'][6])} - #{number_with_delimiter(read_info['metrics'][7])}" %> <br/>
 
         <div style="white-space: pre;font-family: monospace; overflow:scroll;">
-Reference:          <%= read_info['alignment'][0] %>
-Read:               <%= read_info['alignment'][1] %>
+Reference:    <%= read_info['alignment'][0] %>
+Read:         <%= read_info['alignment'][1] %>
+Mismatches:   <%= read_info['alignment'][2] %>
         </div>
       </div>
       <% end %>
