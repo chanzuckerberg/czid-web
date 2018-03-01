@@ -69,9 +69,9 @@ class Samples extends React.Component {
       allChecked: false,
       selectedSampleIndices: [],
       displayDropdown: false,
-      selectedTissueFilters:this.fetchParams('tissue') || [],
+      selectedTissueFilters: this.fetchParams('tissue') ? this.fetchParams('tissue').split(',') : [],
       selectedTissueIndices: [],
-      selectedHostIndices: this.fetchParams('host') || [],
+      selectedHostIndices: this.fetchParams('host') ? this.fetchParams('host').split(',').map(Number) : [],
       initialFetchedSamples: [],
       loading: false,
       isRequesting: false,
@@ -615,13 +615,13 @@ class Samples extends React.Component {
     }
 
     if(this.state.selectedTissueFilters.length) {
-      let tissueParams = this.state.selectedTissueFilters;
-      params += `&tissue=${tissueParams.join(',')}`
+      let tissueParams = this.state.selectedTissueFilters.join(',');
+      params += `&tissue=${tissueParams}`
     }
 
     if(this.state.selectedHostIndices.length) {
-      let hostParams = this.state.selectedHostIndices;
-      params += `&host=${hostParams.join(',')}`
+      let hostParams = this.state.selectedHostIndices.join(',');
+      params += `&host=${hostParams}`
     }
     return params;
   }
@@ -909,6 +909,8 @@ class Samples extends React.Component {
     _satellite.track('downloadtable');
     location.href = `/projects/${id}/csv`;
   }
+
+
 
   renderTable(samples) {
     let project_id = this.state.selectedProjectId ? this.state.selectedProjectId : 'all'
@@ -1357,8 +1359,8 @@ class Samples extends React.Component {
     const params = {
       project_id: projectId ? projectId : null,
       filter: this.state.filterParams,
-      tissue: this.state.selectedTissueFilters,
-      host: this.state.selectedHostIndices,
+      tissue: this.state.selectedTissueFilters.join(','),
+      host: this.state.selectedHostIndices.join(','),
       search: this.state.searchParams,
       ids: this.state.sampleIdsParams,
       sort_by: this.state.sort_by,
