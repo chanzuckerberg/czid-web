@@ -73,9 +73,9 @@ module PipelineOutputsHelper
         ref_seq[2] += ' ' while ref_seq[2].size < right_portion.size
       end
 
-      quality_string_1, mis_matches_1 = generate_quality_string(ref_seq[1], aligned_portion)
-      quality_string_2, mis_matches_2 = generate_quality_string(ref_seq[1], complement_seq(aligned_portion))
-      quality_string = (mis_matches_1 < mis_matches_2) ? quality_string_1 : quality_string_2
+      quality_string1, mis_matches1 = generate_quality_string(ref_seq[1], aligned_portion)
+      quality_string2, mis_matches2 = generate_quality_string(ref_seq[1], complement_seq(aligned_portion))
+      quality_string = mis_matches1 < mis_matches2 ? quality_string1 : quality_string2
       white_space_left = left_portion.split("").map { |_c| ' ' }.join("")
       white_space_right = right_portion.split("").map { |_c| ' ' }.join("")
 
