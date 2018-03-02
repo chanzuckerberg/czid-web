@@ -270,6 +270,10 @@ class PipelineRun < ApplicationRecord
     "#{sample.sample_postprocess_s3_path}#{subsample_suffix}"
   end
 
+  def alignment_viz_output_s3_path
+    "#{sample.sample_postprocess_s3_path}#{subsample_suffix}/align_viz"
+  end
+
   def alignment_output_s3_path
     "#{sample.sample_output_s3_path}#{subsample_suffix}"
   end
