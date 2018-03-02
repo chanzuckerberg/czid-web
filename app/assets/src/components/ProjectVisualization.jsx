@@ -596,7 +596,7 @@ class ProjectVisualization extends React.Component {
     let sp = new URL(window.location).searchParams;
 
     let ion = function(x) {
-      return (x == null) ? null : parseInt(x, 10);
+      return (x == null) ? null : parseFloat(x);
     }
 
     let lon = function (x) {
