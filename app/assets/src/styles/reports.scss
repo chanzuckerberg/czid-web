@@ -554,9 +554,20 @@ margin-bottom: 0px;
   }
 }
 
+.download-link-btn {
+  border-radius: 3em;
+}
 .top-filters {
+  .filter-fields-container {
+    min-height: 10em;
+  }
   .top-filter-item {
     margin-right: 10px;
+    &.advanced-filtering {
+      border: 1px solid #dededf;
+      padding: .78571429em 2.1em .78571429em 1em;
+      line-height: 1em;
+    }
   }
   .categories-selection {
     [type=checkbox]:checked+label:before {
@@ -578,6 +589,18 @@ margin-bottom: 0px;
         box-shadow: none !important;
         border-bottom: 1px solid #85b7d9 !important;
       }
+    }
+  }
+}
+.semantic-input {
+  input {
+    height: inherit !important;
+    width: inherit !important;
+    font-size: inherit !important;
+    &:focus {
+      border-color: #85b7d9;
+      box-shadow: none !important;
+      border-bottom: 1px solid #85b7d9 !important;
     }
   }
 }

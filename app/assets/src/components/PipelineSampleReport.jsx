@@ -3,7 +3,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import $ from 'jquery';
 import Tipsy from 'react-tipsy';
-import { Dropdown, Divider, Menu, Checkbox, Search} from 'semantic-ui-react';
+import { Dropdown, Divider, Menu, Checkbox, Search, Grid, Input} from 'semantic-ui-react';
 import Samples from './Samples';
 import ReportFilter from './ReportFilter';
 import numberWithCommas from '../helpers/strings';
@@ -815,9 +815,8 @@ class PipelineSampleReport extends React.Component {
                 <div className="top-filters">
                   <Search
                     placeholder="Search"
-                    className="search-input top-filter-item"
+                    className="search-input top-filter-item browser-default"
                     minCharacters={3}
-                    size="small"
                     noResultsDescription="No taxon matches search term"
                     loading={this.state.searching}
                     value={this.state.searchKey}
@@ -843,21 +842,22 @@ class PipelineSampleReport extends React.Component {
                       };
                     })}
                      />
-                  <Dropdown
-                    className="categories-selection top-filter-item"
-                    closeOnChange={false}
-                    text="Categories"
-                    selection
-                    options={this.all_categories.map((cat) => {
-                      return {
-                        key: cat.taxid,
-                        text: <span>
-                            <input type="checkbox" onChange={(e) => this.applyExcludedCategories(e)} id={cat.name} value={cat.name} className="filled-in cat-filter"
-                              checked={this.state.excluded_categories.indexOf(cat.name) < 0} />
-                            <label htmlFor={cat.name}>{cat.name}</label>
-                          </span>,
-                        value: cat.taxid
-                      };
+                    <Dropdown
+                      className="categories-selection top-filter-item"
+                      closeOnChange={false}
+                      closeOnBlur={false}
+                      text="Categories"
+                      selection
+                      options={this.all_categories.map((cat) => {
+                        return {
+                          key: cat.taxid,
+                          text: <span>
+                              <input type="checkbox" onChange={(e) => this.applyExcludedCategories(e)} id={cat.name} value={cat.name} className="filled-in cat-filter"
+                                checked={this.state.excluded_categories.indexOf(cat.name) < 0} />
+                              <label htmlFor={cat.name}>{cat.name}</label>
+                            </span>,
+                          value: cat.taxid
+                        };
                     })}
                   />
                   <Dropdown
@@ -871,6 +871,36 @@ class PipelineSampleReport extends React.Component {
                       key: 1
                     }, { text: 'Common name', value: 'Common name', key: 2 }]}
                      />
+                    <Dropdown
+                      className="top-filter-item advanced-filtering"
+                      closeOnBlur={false}
+                      closeOnChange={false}
+                      item
+                      text='Advanced filtering' >
+                      <Dropdown.Menu>
+                        <div className='filter-fields-container' onClick={(e) => e.stopPropagation()}>
+                          <Grid columns={3}>
+                            <Grid.Column>
+                              <Dropdown
+                                text={'Select threshold'}
+                                selection
+                                options={[{key: 'Nt_zscore', text: 'NT zscore', value:'Nt_zscore'}]}
+                              />
+                            </Grid.Column>
+                            <Grid.Column>
+                              <Dropdown
+                                text={'Select threshold'}
+                                selection
+                                options={[{key: 'Nt_zscore', text: 'NT zscore', value:'Nt_zscore'}]}
+                              />
+                            </Grid.Column>
+                            <Grid.Column>
+                              <Input className="semantic-input" placeholder='Enter value...' />
+                            </Grid.Column>
+                          </Grid>
+                        </div>
+                      </Dropdown.Menu>
+                    </Dropdown>
                 </div>
                 <Divider />
                 <div className="reports-main">

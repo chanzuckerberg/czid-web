@@ -483,7 +483,7 @@ class PipelineSampleReads extends React.Component {
                 <ul className="report-action-buttons">
                   <li>
                     <a href={this.getDownloadLink()}>
-                      <Button icon='download' basic color='blue' content='Download' />
+                      <Button className="download-link-btn" icon='download' basic color='blue' content='Download' />
                     </a>
                   </li>
                 </ul>
