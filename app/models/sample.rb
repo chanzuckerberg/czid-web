@@ -21,13 +21,13 @@ class Sample < ApplicationRecord
   # TODO: Make all these params configurable without code change
   DEFAULT_STORAGE_IN_GB = 500
   DEFAULT_MEMORY_IN_MB = 30_000
-  HOST_FILTERING_MEMORY_IN_MB = 71_000
+  HOST_FILTERING_MEMORY_IN_MB = 60_000
 
   DEFAULT_QUEUE = 'idseq'.freeze
   DEFAULT_VCPUS = 4
 
   DEFAULT_QUEUE_HIMEM = 'idseq_himem'.freeze
-  DEFAULT_VCPUS_HIMEM = 36
+  DEFAULT_VCPUS_HIMEM = 32
 
   # These zombies keep coming back, so we now expressly fail submissions to them.
   DEPRECATED_QUEUES = %w[idseq_alpha_stg1 aegea_batch_ondemand idseq_production_high_pri_stg1].freeze

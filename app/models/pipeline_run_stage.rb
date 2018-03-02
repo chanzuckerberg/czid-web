@@ -16,6 +16,7 @@ class PipelineRunStage < ApplicationRecord
   MAX_RETRIES = 5
 
   def install_pipeline
+    "pip install --upgrade git+git://github.com/chanzuckerberg/s3mi.git; " \
     "cd /mnt; " \
     "git clone https://github.com/chanzuckerberg/idseq-pipeline.git; " \
     "cd idseq-pipeline; " \
