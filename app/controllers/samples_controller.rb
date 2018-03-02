@@ -154,8 +154,8 @@ class SamplesController < ApplicationController
     @git_version = Time.current.to_i if @git_version.blank?
 
     @align_viz = false
-    align_summary_file = "#{@pipeline_run.alignment_viz_output_s3_path}.summary"
-    @align_viz = true if params[:align_viz] && get_s3_file(align_summary_file)
+    align_summary_file = @pipeline_run ? "#{@pipeline_run.alignment_viz_output_s3_path}.summary" : nil
+    @align_viz = true if params[:align_viz] && align_summary_file && get_s3_file(align_summary_file)
 
     if @pipeline_run && (@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?
       background_id = params[:background_id] || @sample.default_background_id
