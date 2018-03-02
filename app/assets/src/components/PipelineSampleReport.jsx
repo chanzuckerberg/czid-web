@@ -14,6 +14,7 @@ class PipelineSampleReport extends React.Component {
     this.report_ts = props.report_ts;
     this.sample_id = props.sample_id;
     this.gitVersion = props.git_version
+    this.canSeeAlignViz = props.can_see_align_viz
 
     this.all_categories = props.all_categories;
     this.report_details = props.report_details;
@@ -77,6 +78,7 @@ class PipelineSampleReport extends React.Component {
     this.expandTable = this.expandTable.bind(this);
     this.collapseTable = this.collapseTable.bind(this);
     this.downloadFastaUrl = this.downloadFastaUrl.bind(this);
+    this.gotoAlignmentVizLink = this.gotoAlignmentVizLink.bind(this);
 
     this.handleThresholdEnter = this.handleThresholdEnter.bind(this);
     this.renderMore = this.renderMore.bind(this)
@@ -507,7 +509,14 @@ class PipelineSampleReport extends React.Component {
     location.href = `/samples/${this.sample_id}/fasta/${taxLevel}/${taxId}/NT_or_NR`;
   }
 
+  gotoAlignmentVizLink(e) {
+    const taxId = e.target.getAttribute('data-tax-id');
+    const taxLevel = e.target.getAttribute('data-tax-level');
+    window.open(`/samples/${this.sample_id}/alignment/nt_${taxLevel}_${taxId}`, '_blank');
+  }
+
   displayTags(taxInfo, reportDetails) {
+    const tax_level_str = (taxInfo.tax_level == 1) ? 'species' : 'genus';
     return (
       <span className="link-tag">
         { taxInfo.tax_id > 0 ? <i data-tax-id={taxInfo.tax_id} onClick={this.gotoNCBI} className="fa fa-link cloud" aria-hidden="true" /> : null }
@@ -516,6 +525,14 @@ class PipelineSampleReport extends React.Component {
           data-tax-id={taxInfo.tax_id}
           onClick={this.downloadFastaUrl}
           className="fa fa-download cloud"
+          aria-hidden="true"
+        /> : null }
+        {
+          this.canSeeAlignViz && taxInfo.tax_id > 0 && taxInfo.NT.r > 0 ?  <i
+          data-tax-level={tax_level_str}
+          data-tax-id={taxInfo.tax_id}
+          onClick={this.gotoAlignmentVizLink}
+          className="fa fa-bars fa-1"
           aria-hidden="true"
         /> : null }
       </span>
@@ -548,6 +565,7 @@ class PipelineSampleReport extends React.Component {
                      !tax_common_name || tax_common_name.trim() == "" ? <span className="count-info">{tax_scientific_name}</span> : <span>{StringHelper.capitalizeFirstLetter(tax_common_name)}</span>
                      : <span>{tax_scientific_name}</span>
     let foo = <i>{tax_name}</i>;
+
     if (tax_info.tax_id > 0) {
       if (report_details.taxon_fasta_flag) {
         foo = <span className="link"><a>{tax_name}</a></span>;
