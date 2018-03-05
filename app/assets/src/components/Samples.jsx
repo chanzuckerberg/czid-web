@@ -430,6 +430,7 @@ class Samples extends React.Component {
       let uploader = sample.uploader.name;
       let statusClass = !runInfo.job_status_description ? this.applyChunkStatusClass(runInfo) : this.applyClass(runInfo.job_status_description)
       let status = !runInfo.job_status_description ? this.getChunkedStage(runInfo) : runInfo.job_status_description;
+
       const rowWithChunkStatus = (
         <div className={`${statusClass} status`}>
           {this.appendStatusIcon(status)}
@@ -475,6 +476,7 @@ class Samples extends React.Component {
                   <li className='check-box-container'>
                     { this.state.displaySelectSamplees ? <div><input type="checkbox" id={i} onClick = { this.selectSample }
                       className="filled-in checkbox" value={ this.state.selectedSampleIndices.indexOf(i) != -1 }
+                      disabled={status != "COMPLETE"}
                       /> <label htmlFor={i}>{sample_name_info}</label></div> : sample_name_info }
                   </li>
                   {
@@ -821,7 +823,7 @@ class Samples extends React.Component {
     var that = this;
     $('.checkAll').click(function(e) {
       var checked = e.currentTarget.checked;
-      $('.checkbox').prop('checked', checked);
+      $('.checkbox:enabled').prop('checked', checked);
       var checkedCount = $("input:checkbox:checked").length
       that.setState({
         allChecked: checked,
