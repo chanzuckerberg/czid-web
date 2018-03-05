@@ -561,12 +561,16 @@ margin-bottom: 0px;
   .filter-fields-container {
     min-height: 10em;
   }
-  .top-filter-item {
+  .top-filter-item, .ui.active.selection.dropdown {
     margin-right: 10px;
+    border-radius: 500rem !important;
     &.advanced-filtering {
       border: 1px solid #dededf;
       padding: .78571429em 2.1em .78571429em 1em;
       line-height: 1em;
+    }
+    .menu.transition {
+      margin-top: 7px !important;
     }
   }
   .categories-selection {
