@@ -749,7 +749,8 @@ class ProjectVisualization extends React.Component {
 
   extractTaxons (data) {
     let id_to_name = {},
-        name_to_id = {};
+        name_to_id = {},
+        ids = new Set();
 
     for (var i = 0, len = data.length; i < len; i += 1) {
       let sample = data[i];
@@ -757,12 +758,14 @@ class ProjectVisualization extends React.Component {
         let taxon = sample.taxons[j];
         id_to_name[taxon.tax_id] = taxon.name;
         name_to_id[taxon.name] = taxon.tax_id;
+        ids.add(taxon.tax_id);
       }
     }
+
     return {
       id_to_name: id_to_name,
       name_to_id: name_to_id,
-      ids: Object.keys(id_to_name),
+      ids: Array.from(ids),
       names: Object.keys(name_to_id),
     };
   }
