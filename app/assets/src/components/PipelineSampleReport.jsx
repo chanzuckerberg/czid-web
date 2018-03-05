@@ -106,7 +106,26 @@ class PipelineSampleReport extends React.Component {
 
   componentDidMount() {
     this.listenThresholdChanges();
-    this.scrollDown()
+    this.scrollDown();
+    // dropdown
+    const filterContent =
+      document.querySelector('.advanced-filter-dropdown-content');
+    const activator = $('.advanced-filter-activator');
+
+    const $filterContent = $(filterContent);
+    const body = $('body');
+    activator.click((e) => {
+      e.stopPropagation();
+      $filterContent.slideToggle(0);
+    });
+    body.click((e) => {
+      const targetClassName = e.target.className;
+      if (targetClassName === filterContent.className || filterContent.contains(e.target)) {
+        // console.log('Dont close dropdown');
+      } else {
+        $filterContent.slideUp(0);
+      }
+    });
   }
 
   fetchParams(param) {
@@ -871,36 +890,41 @@ class PipelineSampleReport extends React.Component {
                       key: 1
                     }, { text: 'Common name', value: 'Common name', key: 2 }]}
                      />
+                  <div className="top-filter-item advanced-filter-container">
                     <Dropdown
-                      className="top-filter-item advanced-filtering"
-                      closeOnBlur={false}
-                      closeOnChange={false}
+                      className="advanced-filtering advanced-filter-activator"
                       item
                       text='Advanced filtering' >
-                      <Dropdown.Menu>
-                        <div className='filter-fields-container' onClick={(e) => e.stopPropagation()}>
-                          <Grid columns={3}>
-                            <Grid.Column>
-                              <Dropdown
-                                text={'Select threshold'}
-                                selection
-                                options={[{key: 'Nt_zscore', text: 'NT zscore', value:'Nt_zscore'}]}
-                              />
-                            </Grid.Column>
-                            <Grid.Column>
-                              <Dropdown
-                                text={'Select threshold'}
-                                selection
-                                options={[{key: 'Nt_zscore', text: 'NT zscore', value:'Nt_zscore'}]}
-                              />
-                            </Grid.Column>
-                            <Grid.Column>
-                              <Input className="semantic-input" placeholder='Enter value...' />
-                            </Grid.Column>
-                          </Grid>
-                        </div>
-                      </Dropdown.Menu>
                     </Dropdown>
+                    <div className="advanced-filter-dropdown-content">
+                      <div className="row threshold-fields">
+                        <div className="col s4">
+                          <Dropdown
+                              className="small"
+                              text={'Select threshold'}
+                              selection
+                              options={[{key: 'Nt_zscore', text: 'NT zscore', value:'Nt_zscore'}]}
+                            />
+                        </div>
+                        <div className="col s4">
+                          <Dropdown
+                              className="small"
+                                text={'Select threshold'}
+                                selection
+                                options={[{key: 'Nt_zscore', text: 'NT zscore', value:'Nt_zscore'}]}
+                              />
+                        </div>
+                        <div className="col s4">
+                          <Input 
+                            type="number" 
+                            label="0.00" 
+                            labelPosition="right"
+                            className="semantic-input small"
+                             placeholder="Enter value..." />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <Divider />
                 <div className="reports-main">

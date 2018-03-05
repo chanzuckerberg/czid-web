@@ -561,16 +561,61 @@ margin-bottom: 0px;
   .filter-fields-container {
     min-height: 10em;
   }
-  .top-filter-item, .ui.active.selection.dropdown {
+  .top-filter-item, .ui.selection.dropdown, .ui.active.selection.dropdown {
     margin-right: 10px;
     border-radius: 500rem !important;
-    &.advanced-filtering {
-      border: 1px solid #dededf;
-      padding: .78571429em 2.1em .78571429em 1em;
-      line-height: 1em;
+    &.advanced-filter-container {
+      display: inline-block;
+      &:hover {
+        .advanced-filtering {
+          border-color: #96c8da;
+          box-shadow: 0 2px 3px 0 rgba(34,36,38,.15);
+        }
+      }
+      .advanced-filtering {
+        border: 1px solid #dededf;
+        padding: .78571429em 2.1em .78571429em 1em;
+        line-height: 1em;
+        border-radius: 500rem;
+        &:hover {
+          border-color: rgba(34,36,38,.35);
+        }
+        &:active {
+          border-color: #96c8da;
+          box-shadow: 0 2px 3px 0 rgba(34,36,38,.15);
+        }
+      }
+      .advanced-filter-dropdown-content {
+        display: none;
+        border: 1px solid #dededf;
+        position: absolute;
+        margin-top: 6px;
+        width: auto;
+        max-width: 30%;
+        margin-left: 8px;
+        background: #fff;
+        padding: 10px;
+        color: #212121;
+        min-height: 150px;
+        .threshold-fields {
+          .semantic-input {
+            border-radius: 56rem;
+            input {
+              flex: unset;
+              border-radius: 56rem;
+            }
+            .ui.label {
+              border-top-right-radius: 56rem;
+              border-bottom-right-radius: 56rem;
+            }
+          }
+        }
+      }
     }
     .menu.transition {
       margin-top: 7px !important;
+      border: 1px solid #dededf !important;
+      border-radius: 0 !important;
     }
   }
   .categories-selection {
@@ -599,7 +644,6 @@ margin-bottom: 0px;
 .semantic-input {
   input {
     height: inherit !important;
-    width: inherit !important;
     font-size: inherit !important;
     &:focus {
       border-color: #85b7d9;
