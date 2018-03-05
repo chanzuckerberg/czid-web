@@ -15,9 +15,7 @@
 <%= javascript_tag do %>
   react_component(
     'ProjectVisualization', 
-    {
-      sample_ids: <%= raw json_escape(@sample_ids.to_json) %>,
-    }, 
+    {}, 
     'ProjectVisualization_page'
   );
 <% end %>
