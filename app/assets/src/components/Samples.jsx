@@ -160,7 +160,7 @@ class Samples extends React.Component {
       filterIndex = filterList.indexOf(selectedFilter);
       filterList.splice(filterIndex, 1);
     }
-    this.setState({ 
+    this.setState({
       selectedTissueFilters: filterList,
       pagesLoaded: 0,
       pageEnd: false,
@@ -172,7 +172,7 @@ class Samples extends React.Component {
   selectHostFilter(e) {
     // current array of options
     const hostList = this.state.selectedHostIndices.slice(0);
-    let index; 
+    let index;
     // check if the check box is checked or unchecked
     if (e.target.checked) {
       // add the numerical value of the checkbox to options array
@@ -191,7 +191,7 @@ class Samples extends React.Component {
       this.setUrlLocation();
     })
   }
-  
+
 
   canEditProject(projectId) {
     return (this.editableProjects.indexOf(parseInt(projectId)) > -1)
@@ -827,7 +827,7 @@ class Samples extends React.Component {
         allChecked: checked,
         checkedBoxes: checkedCount
       });
-    }); 
+    });
   }
 
 
@@ -850,10 +850,13 @@ class Samples extends React.Component {
     let params;
     if(this.state.allChecked) {
       this.fetchAllSelectedIds(this.state.allChecked);
-    } 
+    }
     if(this.state.selectedSampleIndices.length) {
       let sampleParams = this.state.selectedSampleIndices;
-      location.href = `/samples/heatmap?sample_ids=${sampleParams}`
+      let sampleIds = this.state.selectedSampleIndices.map((idx) => {
+        return this.state.allSamples[idx].db_sample.id;
+      });
+      location.href = `/samples/heatmap?sample_ids=${sampleIds}`
     }
   }
 
@@ -882,7 +885,7 @@ class Samples extends React.Component {
 
     let index
     // check if the check box is checked or unchecked
- 
+
     if (e.target.checked) {
       // add the numerical value of the checkbox to options array
       sampleList.push(+e.target.id)
@@ -893,7 +896,7 @@ class Samples extends React.Component {
     }
     var checkedCount = $("input:checkbox:checked").length
     // update the state with the new array of options
-    this.setState({ 
+    this.setState({
       selectedSampleIndices: sampleList,
       checkedBoxes: checkedCount
      })
@@ -995,18 +998,18 @@ class Samples extends React.Component {
               <h6>Tissue type</h6>
                 {this.tissue_types.map((tissue, i) => {
                   return (
-                    <div key={i} className="options-wrapper"> 
+                    <div key={i} className="options-wrapper">
                     <input name="tissue" type="checkbox"
                     id={tissue} className="filled-in" data-status={tissue} checked={this.state.selectedTissueFilters.indexOf(tissue) < 0 ? "" : "checked"} onChange={this.selectTissueFilter} />
                     <label htmlFor={tissue}>{tissue}</label>
-                  </div>  
+                  </div>
                   )
                 })}
               </div>
             </div> : null }
       </div>
     )
-    
+
     const search_box = (
       <div className="row search-box">
         { this.state.displaySelectSamplees ? check_all : null }
@@ -1202,7 +1205,7 @@ class Samples extends React.Component {
                     }
                     <ul className='dropdown-content column-dropdown' id={`column-dropdown-${pos}`}>
                         { column_name === 'pipeline_status' ?
-                          <div>{filterStatus}</div> : null 
+                          <div>{filterStatus}</div> : null
                         }
                         <li>
                           <a className="title">
