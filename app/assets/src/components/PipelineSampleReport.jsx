@@ -184,7 +184,7 @@ class PipelineSampleReport extends React.Component {
         taxonomy_details: res.data.taxonomy_details[2]
       },
       () => {
-        this.applyThresholdFilters(this.state.taxonomy_details, this.state.activeThresholds, false);
+        this.applyThresholdFilters(this.state.taxonomy_details, false);
       });
     });
   }
@@ -441,7 +441,7 @@ class PipelineSampleReport extends React.Component {
     }, () => {
       Cookies.set('excluded_categories', JSON.stringify(excluded_categories));
       // this.applySearchFilter(0, excluded_categories);
-      this.applyThresholdFilters(this.state.taxonomy_details, this.state.activeThresholds, true);
+      this.applyThresholdFilters(this.state.taxonomy_details, true);
       this.flash();
     });
   }
@@ -502,7 +502,7 @@ class PipelineSampleReport extends React.Component {
     });
     window.localStorage.setItem('activeThresholds', JSON.stringify(activeThresholds));
     $('.advanced-filters-modal').slideUp(300);
-    this.applyThresholdFilters(this.state.taxonomy_details, this.state.activeThresholds, true);
+    this.applyThresholdFilters(this.state.taxonomy_details, true);
   }
 
   getSavedThresholdFilters() {
@@ -510,56 +510,84 @@ class PipelineSampleReport extends React.Component {
     return (activeThresholds) ? JSON.parse(activeThresholds) : [];
   }
 
-  applyThresholdFilters(candidateTaxons, rules, animate = true) {
-    let filteredTaxons, rulesLength = rules.length;
-    if (rulesLength) {
-       filteredTaxons = candidateTaxons.filter((taxon) => {
-        let passedFilter = false;
-        for (let i = 0; i < rulesLength; i += 1) {
-          let rule = rules[i];
-          if (this.isThresholdValid(rule)) {
-            let { label, operator, value } = rule;
-            value = parseFloat(value);
-            const [fieldType, fieldTitle] = label.split('_');
-            const taxonValue = (taxon[fieldType] || {})[fieldTitle];
-            switch (operator) {
-              case '>=':
-                passedFilter = taxonValue >= value;
-              break;
-              case '<=':
-                passedFilter = taxonValue <= value;
-              break;
-              default:
-                passedFilter = taxonValue >= value;
-            }
-          } else {
-            // a taxon should not be eliminated when rule is invalid
-            passedFilter = true;
-            continue;
-          }
-          // to ensure a taxon pass all rules if a taxon failed any rule skip the rest of the rules
-          if (!passedFilter) {
-            break;
-          }
+  applyThresholdFilters(candidate_taxons, play_animation = true) {
+    let thresholded_taxons = [];
+    let genus_taxon = {};
+    let matched_taxons = [];
+    for (let i = 0; i < candidate_taxons.length; i++) {
+      const taxon = candidate_taxons[i];
+      if (taxon.genus_taxid == taxon.tax_id) {
+        // genus
+        if (matched_taxons.length > 0) {
+          thresholded_taxons.push(genus_taxon);
+          thresholded_taxons = thresholded_taxons.concat(matched_taxons);
+        } else if (this.taxonPassThresholdFilter(genus_taxon, this.state.activeThresholds)) {
+          thresholded_taxons.push(genus_taxon);
         }
-        return passedFilter;
-      });
-    } else {
-      filteredTaxons = candidateTaxons;
+        genus_taxon = taxon;
+        matched_taxons = [];
+      } else {
+        // species
+        if (this.taxonPassThresholdFilter(taxon, this.state.activeThresholds)) {
+          matched_taxons.push(taxon);
+        }
+      }
     }
-    this.applySearchFilter(this.state.searchId, this.state.excluded_categories, filteredTaxons);
-    (animate) ? this.flash() : null;
+
+    if (matched_taxons.length > 0) {
+      thresholded_taxons.push(genus_taxon);
+      thresholded_taxons = thresholded_taxons.concat(matched_taxons);
+    } else if (this.taxonPassThresholdFilter(genus_taxon, this.state.activeThresholds)) {
+      thresholded_taxons.push(genus_taxon);
+    }
+
+    this.applySearchFilter(0, this.state.excluded_categories, thresholded_taxons);
+
+    if (play_animation) {
+      this.flash();
+    }
+  }
+
+  taxonPassThresholdFilter(taxon, rules) {
+    if (Object.keys(taxon).length <= 0) {
+      return false;
+    }
+
+	for (let i = 0; i < rules.length; i += 1) {
+	  let rule = rules[i];
+	  if (this.isThresholdValid(rule)) {
+		let { label, operator, value } = rule;
+		let threshold = parseFloat(value);
+		const [fieldType, fieldTitle] = label.split('_');
+		const taxonValue = (taxon[fieldType] || {})[fieldTitle];
+		switch (operator) {
+		  case '>=':
+			if (taxonValue < threshold) {
+			  return false;
+			}
+		  case '<=':
+			if (taxonValue > threshold) {
+			  return false;
+			}
+		  default: // '>='
+			if (taxonValue < threshold) {
+			  return false;
+			}
+		}
+	  }
+	}
+    return true;
   }
 
   handleThresholdEnter(event) {
     if (event.keyCode === 13) {
-      this.applyThresholdFilters(this.state.taxonomy_details, this.state.activeThresholds, true);
+      this.applyThresholdFilters(this.state.taxonomy_details, true);
     }
   }
 
   listenThresholdChanges() {
     $('.metric-thresholds').focusout((e) => {
-      this.applyThresholdFilters(this.state.taxonomy_details, this.state.activeThresholds, true);
+      this.applyThresholdFilters(this.state.taxonomy_details, true);
     });
   }
 
@@ -779,7 +807,7 @@ class PipelineSampleReport extends React.Component {
       searchKey: item[0]
     }, () => {
       // this.applySearchFilter(searchId, []);
-      this.applyThresholdFilters(this.state.taxonomy_details, this.state.activeThresholds, true);
+      this.applyThresholdFilters(this.state.taxonomy_details, true);
     });
   }
 
