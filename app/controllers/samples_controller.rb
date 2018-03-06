@@ -97,7 +97,7 @@ class SamplesController < ApplicationController
         if @samples.present?
           render json: { samples: @samples }
         else
-          render json: { status: "No samples imported under #{@bulk_path}" }, status: :unprocessable_entity
+          render json: { status: "No samples imported under #{@bulk_path}. File names must match format '#{InputFile::BULK_FILE_REGEX}', e.g. my_sample_R1.fastq.gz / my_sample_R2.fastq.gz." }, status: :unprocessable_entity
         end
       end
     end

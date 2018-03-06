@@ -259,7 +259,8 @@ class BulkUploadImport extends React.Component {
       samples.push(this.state.samples[idx])
     })
     axios.post('/samples/bulk_upload.json', {
-      samples: samples
+      samples: samples,
+      authenticity_token: this.csrf
     })
     .then((response) => {
       that.setState({
@@ -271,7 +272,7 @@ class BulkUploadImport extends React.Component {
         that.setState({
           submitting: false
         });
-        that.gotoPage(`/?ids=${that.state.createdSampleIds.join(',')}`);
+        that.gotoPage(`/?project_id=${that.state.projectId}`);
       }, 2000)
     }).catch((error) => {
      that.setState({
