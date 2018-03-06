@@ -124,10 +124,8 @@ class BulkUploadImport extends React.Component {
   }
 
   handleUploadSubmit(e) {
-    console.log('handleUploadSubmit')
     e.preventDefault();
     $('html, body').stop().animate({ scrollTop: 0 }, 200, 'swing', () => {
-      console.log('inside');
       this.clearError();
     });
     if(!this.isUploadFormInvalid()) {
@@ -255,7 +253,6 @@ class BulkUploadImport extends React.Component {
   }
 
   bulkUploadSubmit() {
-    console.log('bulkUploadSubmit')
     var that = this;
     var samples = []
     this.state.selectedSampleIndices.map((idx) => {
