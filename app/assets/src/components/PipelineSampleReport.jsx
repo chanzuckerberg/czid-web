@@ -487,9 +487,13 @@ class PipelineSampleReport extends React.Component {
   removeThresholdFilter(pos) {
     const stateCopy = Object.assign([], this.state.activeThresholds);
     stateCopy.splice(pos, 1);
+    let closeWindow = true
+    if (stateCopy.length > 0) {
+      closeWindow = false
+    }
     this.setState({
       activeThresholds: stateCopy
-    })
+    }, () => { this.saveThresholdFilters(closeWindow); } )
   }
 
   isThresholdValid(threshold) {
@@ -503,14 +507,16 @@ class PipelineSampleReport extends React.Component {
     return false;
   }
 
-  saveThresholdFilters() {
+  saveThresholdFilters(closeWindow = true) {
     this.applyThresholdFilters(this.state.taxonomy_details, true);
     // prevent saving threshold with invalid values
     const activeThresholds = this.state.activeThresholds.filter((threshold) => {
       return this.isThresholdValid(threshold);
     });
     window.localStorage.setItem('activeThresholds', JSON.stringify(activeThresholds));
-    $('.advanced-filters-modal').slideUp(300);
+    if (closeWindow) {
+      $('.advanced-filters-modal').slideUp(300);
+    }
   }
 
   getSavedThresholdFilters() {
