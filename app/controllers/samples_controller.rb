@@ -105,7 +105,6 @@ class SamplesController < ApplicationController
 
   # POST /samples/bulk_upload
   def bulk_upload
-    logger.warn "HELLO"
     samples = samples_params || []
     editable_project_ids = current_power.updatable_projects.pluck(:id)
     @samples = []
