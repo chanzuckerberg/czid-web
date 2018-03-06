@@ -478,7 +478,8 @@ class PipelineSampleReport extends React.Component {
 
   appendThresholdFilter() {
     const stateCopy = Object.assign([], this.state.activeThresholds);
-    stateCopy.push({ label: '', operator: '>=', value: '' });
+    const firstThreshold = this.allThresholds[0]
+    stateCopy.push({ label: firstThreshold['value'], operator: '>=', value: '' });
     this.setState({
       activeThresholds: stateCopy
     });
@@ -1019,7 +1020,6 @@ class PipelineSampleReport extends React.Component {
                                         value={activeThreshold.label}
                                         onChange={(e) => this.setThresholdProperty(index, 'label', e.target.value) }
                                         className="browser-default">
-                                        <option value="">Count type</option>
                                         {
                                           this.allThresholds.map((thresholdObject) => {
                                             return (
