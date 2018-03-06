@@ -100,6 +100,8 @@ class PipelineSampleReport extends React.Component {
       loading: true,
       activeThresholds: this.defaultThresholdValues
     };
+    this.expandAll = false;
+    this.expandedGenera = [];
     this.applySearchFilter = this.applySearchFilter.bind(this);
     this.anyFilterSet = this.anyFilterSet.bind(this);
     this.resetAllFilters = this.resetAllFilters.bind(this);
@@ -107,7 +109,8 @@ class PipelineSampleReport extends React.Component {
     this.sortCompareFunction = this.sortCompareFunction.bind(this);
     this.setSortParams = this.setSortParams.bind(this);
     this.flash = this.flash.bind(this);
-    this.expandOrCollapseGenus = this.expandOrCollapseGenus.bind(this);
+    this.collapseGenus = this.collapseGenus.bind(this);
+    this.expandGenus = this.expandGenus.bind(this);
     this.expandTable = this.expandTable.bind(this);
     this.collapseTable = this.collapseTable.bind(this);
     this.downloadFastaUrl = this.downloadFastaUrl.bind(this);
@@ -712,10 +715,10 @@ class PipelineSampleReport extends React.Component {
       const down_arrow_initial_visibility = 'hidden';
       const plus_or_minus = (<span>
         <span className={`report-arrow-down report-arrow ${tax_info.tax_id} ${fake_or_real} ${down_arrow_initial_visibility}`}>
-          <i className={`fa fa-angle-down ${tax_info.tax_id}`} onClick={this.expandOrCollapseGenus} />
+          <i className={`fa fa-angle-down ${tax_info.tax_id}`} onClick={this.collapseGenus} />
         </span>
         <span className={`report-arrow-right report-arrow ${tax_info.tax_id} ${fake_or_real} ${right_arrow_initial_visibility}`}>
-          <i className={`fa fa-angle-right ${tax_info.tax_id}`} onClick={this.expandOrCollapseGenus} />
+          <i className={`fa fa-angle-right ${tax_info.tax_id}`} onClick={this.expandGenus} />
         </span>
       </span>);
        foo = (<div className="hover-wrapper">
@@ -777,24 +780,45 @@ class PipelineSampleReport extends React.Component {
       }
       return `report-row-genus ${tax_info.genus_taxid} real-genus`;
     }
-    const initial_visibility = 'hidden';
+    let initial_visibility = 'hidden';
+    if ((this.expandAll && tax_info.genus_taxid > 0) || this.expandedGenera.indexOf(tax_info.genus_taxid.toString()) >= 0) {
+      initial_visibility = '';
+    }
     if (tax_info.genus_taxid < 0) {
       return `report-row-species ${tax_info.genus_taxid} fake-genus ${initial_visibility}`;
     }
     return `report-row-species ${tax_info.genus_taxid} real-genus ${initial_visibility}`;
   }
 
-  expandOrCollapseGenus(e) {
-    // className as set in render_name() is like 'fa fa-angle-right ${taxId}'
+  expandGenus(e) {
     const className = e.target.attributes.class.nodeValue;
     const attr = className.split(' ');
     const taxId = attr[2];
-    $(`.report-row-species.${taxId}`).toggleClass('hidden');
+    const taxIdIdx = this.expandedGenera.indexOf(taxId)
+    if (taxIdIdx < 0) {
+      this.expandedGenera.push(taxId)
+    }
+    $(`.report-row-species.${taxId}`).removeClass('hidden');
     $(`.report-arrow.${taxId}`).toggleClass('hidden');
+  }
+
+  collapseGenus(e) {
+    const className = e.target.attributes.class.nodeValue;
+    const attr = className.split(' ');
+    const taxId = attr[2];
+    const taxIdIdx = this.expandedGenera.indexOf(taxId)
+    if (taxIdIdx >= 0) {
+       this.expandedGenera.splice(taxIdIdx, 1)
+    }
+    $(`.report-row-species.${taxId}`).addClass('hidden');
+    $(`.report-arrow.${taxId}`).toggleClass('hidden');
+
   }
 
   expandTable(e) {
     // expand all real genera
+    this.expandAll = true;
+    this.expandedGenera = [];
     $('.report-row-species.real-genus').removeClass('hidden');
     $('.report-arrow-down.real-genus').removeClass('hidden');
     $('.report-arrow-right.real-genus').addClass('hidden');
@@ -803,6 +827,8 @@ class PipelineSampleReport extends React.Component {
 
   collapseTable(e) {
     // collapse all genera (real or negative)
+    this.expandAll = false;
+    this.expandedGenera = [];
     $('.report-row-species').addClass('hidden');
     $('.report-arrow-down').addClass('hidden');
     $('.report-arrow-right').removeClass('hidden');
