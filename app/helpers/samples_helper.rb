@@ -177,7 +177,7 @@ module SamplesHelper
   end
 
   def filter_by_tissue_type(samples, query)
-    samples = if query == '-'
+    samples = if query == ['-']
                 samples.where(sample_tissue: nil)
               else
                 samples.where(sample_tissue: query)

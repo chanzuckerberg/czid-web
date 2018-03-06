@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "axios": "^0.17.1",
-    "clusterfck": "^0.6.0",
+    "clusterfck": "git+https://github.com/chanzuckerberg/clusterfck.git#master",
     "d3": "^3.5.17",
     "font-awesome": "^4.7.0",
     "jquery": "^3.2.1",
@@ -35,11 +35,11 @@
     "material-ui": "^1.0.0-beta.29",
     "materialize-css": "^0.100.2",
     "moment": "^2.20.1",
+    "nouislider": "^11.0.3",
     "prop-types": "^15.6.0",
     "react": "^16.2.0",
     "react-autocomplete": "^1.7.2",
     "react-dom": "^16.2.0",
-    "react-faux-dom": "^4.1.0",
     "react-tipsy": "^0.6.2",
     "react-tooltip": "^3.4.0"
   }

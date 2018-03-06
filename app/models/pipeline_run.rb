@@ -93,30 +93,6 @@ class PipelineRun < ApplicationRecord
     self.pipeline_run_stages = run_stages
   end
 
-  def check_job_status
-    # only update the pipeline_run info. do not update pipeline_run_stage info
-    return if finalized? || id.nil?
-    pipeline_run_stages.order(:step_number).each do |prs|
-      if prs.failed?
-        self.finalized = 1
-        self.job_status = "#{prs.step_number}.#{prs.name}-#{STATUS_FAILED}"
-        Airbrake.notify("Sample #{sample.id} failed #{prs.name}")
-        save
-        return nil
-      elsif prs.succeeded?
-        next
-      else # still running
-        self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
-        save
-        return nil
-      end
-    end
-    # All done
-    self.finalized = 1
-    self.job_status = STATUS_CHECKED
-    save
-  end
-
   def completed?
     return true if finalized?
     # Old version before run stages
@@ -129,22 +105,33 @@ class PipelineRun < ApplicationRecord
       "#logEventViewer:group=/aws/batch/job;stream=#{job_log_id}"
   end
 
-  def update_job_status
+  def active_stage
     pipeline_run_stages.order(:step_number).each do |prs|
-      if !prs.started? # Not started yet
-        prs.run_job
-        break
-      elsif prs.succeeded?
-        # great do nothing. go to the next step.
-        next
-      elsif prs.failed?
-        break
-      else # This step is still running
-        prs.update_job_status
-        break
-      end
+      return prs unless prs.succeeded?
     end
-    check_job_status
+    # All stages have succeded
+    nil
+  end
+
+  def update_job_status
+    prs = active_stage
+    all_stages_succeeded = prs.nil?
+    if all_stages_succeeded
+      self.finalized = 1
+      self.job_status = STATUS_CHECKED
+    else
+      if prs.failed?
+        self.finalized = 1
+        Airbrake.notify("Sample #{sample.id} failed #{prs.name}")
+      elsif !prs.started?
+        prs.run_job
+      else
+        # still running
+        prs.update_job_status
+      end
+      self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
+    end
+    save
   end
 
   def local_json_path
@@ -271,6 +258,24 @@ class PipelineRun < ApplicationRecord
   def subsample_fraction
     # fraction of non-host ("remaining") reads that actually went through non-host alignment
     (1.0 * subsampled_reads) / remaining_reads
+  end
+
+  def subsample_suffix
+    subsample? ? "/subsample_#{subsample}" : ""
+  end
+
+  delegate :sample_output_s3_path, to: :sample
+
+  def postprocess_output_s3_path
+    "#{sample.sample_postprocess_s3_path}#{subsample_suffix}"
+  end
+
+  def alignment_viz_output_s3_path
+    "#{sample.sample_postprocess_s3_path}#{subsample_suffix}/align_viz"
+  end
+
+  def alignment_output_s3_path
+    "#{sample.sample_output_s3_path}#{subsample_suffix}"
   end
 
   def count_unmapped_reads

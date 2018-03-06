@@ -34,6 +34,7 @@ class PipelineSampleReads extends React.Component {
     this.pipelineStatus = props.sample_status;
     this.pipelineRun = props.pipelineRun;
     this.rerunPipeline = this.rerunPipeline.bind(this);
+    this.canSeeAlignViz = props.can_see_align_viz;
     this.state = {
       rerunStatus: 'failed',
       rerunStatusMessage: 'Sample run failed'
@@ -280,7 +281,7 @@ class PipelineSampleReads extends React.Component {
 
   render() {
     let d_report = null;
-    let waitingSpinner = 
+    let waitingSpinner =
       <div>
         Sample Waiting ...
         <p>
@@ -296,6 +297,7 @@ class PipelineSampleReads extends React.Component {
         all_backgrounds = {this.allBackgrounds}
         report_details = {this.reportDetails}
         report_page_params = {this.reportPageParams}
+        can_see_align_viz = {this.canSeeAlignViz}
       />;
     } else if(this.pipelineInProgress()) {
       d_report =

@@ -461,7 +461,8 @@ $break-large: 1070px;
 
 .sample-container {
   .metadata {
-    position: relative;    
+    position: relative;   
+    background: #f4f4f4; 
     .metadata-dropdown {
       display: inline-block;
     }
@@ -473,25 +474,6 @@ $break-large: 1070px;
     cursor:pointer;
     padding: 11px;
     border: 1px solid #cfd9e4;
-    .metadata-options {
-      margin-top: 12px;
-      padding: 15px;
-      width: 500px!important;
-      position: absolute;
-      background-color: #f9f9f9;
-      z-index: 100;
-      border-radius: 3px;
-      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-      height: 300px;
-      overflow: scroll;
-      .col.s6 {
-        .options-wrapper {
-          label {
-            margin: 10px 0;
-          }
-        }
-      }
-    }
   }
   .title-wrapper {
     margin-bottom: 50px;
@@ -754,14 +736,35 @@ $break-large: 1070px;
     width: inherit;
     margin: 20px 0 5px;
     border-radius: 3px;
+    .wrapper {
+      .metadata-options {
+        padding: 15px;
+        width: 500px!important;
+        position: absolute;
+        background-color: #f9f9f9;
+        z-index: 100;
+        border-radius: 3px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        height: 300px;
+        overflow: scroll;
+        .col.s6 {
+          .options-wrapper {
+            label {
+              margin: 10px 0;
+            }
+          }
+        }
+      }
+    }
     .check-all {
       display: inline-block;
       float: left;
       border: 1px solid #ddd;
-      padding: 9px 12px;
+      padding: 9px 17px;
       margin: 0 10px 0px 0px;
       label {
         vertical-align: middle;
+        padding-left: 16px;
       }
     }
     .search-field {
@@ -972,14 +975,14 @@ input[type="button"] {
   border-radius: 0px;
   top: 25% !important;
   .project_modal_header {
-    font-size: $font-size-large;
-    font-weight: bold;
-    margin-bottom: 10px
+    font-size: $font-size-h5;
+    font-weight: $font-weight-semibold;
+    margin-bottom: 10px;
   }
 
   .project_modal_title {
-    font-size: $font-size-h6;
-    font-weight: bold;
+    font-size: $font-size-h4;
+    font-weight: $font-weight-bold;
   }
   .project_modal_visiblity {
     i.material-icons {
@@ -1046,8 +1049,8 @@ input[type="button"] {
   }
   .members_list {
     .list_title {
-      font-size: $font-size-h5;
-      font-weight: $font-weight-bold;
+      font-size: 16px;
+      font-weight: $font-weight-semibold;
       i {
         position: relative;
         top: 4px;
@@ -1072,8 +1075,8 @@ input[type="button"] {
 }
 
 [type=checkbox].filled-in:not(:checked)+label:after {
-    height: 16px;
-    width: 16px;
+    height: 16px !important;
+    width: 16px !important;
     background-color: transparent;
     border: 2px solid #5a5a5a;
     top: 4px;
@@ -1082,8 +1085,14 @@ input[type="button"] {
 
 [type=checkbox].filled-in:checked+label:after {
     top: 0;
-    width: 16px;
-    height: 16px;
+    width: 16px !important;
+    height: 16px !important;
     border: 10px solid #188fd8;
     background-color: #188fd8;
+    &.check-all {
+      padding: 10px 21px 8px 16px;
+    }
+}
+.dropdown-content li>a, .dropdown-content li>span {
+  font-size: 14px;
 }
