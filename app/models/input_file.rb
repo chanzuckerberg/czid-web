@@ -6,7 +6,8 @@ class InputFile < ApplicationRecord
   SOURCE_TYPE_S3 = 's3'.freeze
 
   FILE_REGEX = %r{\A[^\s\/]+\.(fastq|fq|fastq.gz|fq.gz|fasta|fa|fasta.gz|fa.gz)\z}
-  BULK_FILE_REGEX = /([^ ]*)_R(\d)(_001)?.(fastq.gz|fq.gz|fastq|fq|fasta.gz|fa.gz|fasta|fa)\z/
+  BULK_FILE_PAIRED_REGEX = /([^ ]*)_R(\d)(_001)?.(fastq.gz|fq.gz|fastq|fq|fasta.gz|fa.gz|fasta|fa)\z/
+  BULK_FILE_SINGLE_REGEX.match = /([^ ]*).(fastq.gz|fq.gz|fastq|fq|fasta.gz|fa.gz|fasta|fa)\z/
   validates :name, presence: true, format: { with: FILE_REGEX, message: "file must match format '#{FILE_REGEX}'" }
   validates :source_type, presence: true, inclusion: { in: %w[local s3] }
   validate :s3_source_check, on: :create

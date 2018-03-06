@@ -129,16 +129,25 @@ module SamplesHelper
     entries = s3_output.split("\n").reject { |line| line.include? "Undetermined" }
     samples = {}
     entries.each do |file_name|
-      matched = InputFile::BULK_FILE_REGEX.match(file_name)
-      next unless matched
+      matched_paired = InputFile::BULK_FILE_PAIRED_REGEX.match(file_name)
+      matched_single = InputFile::BULK_FILE_SINGLE_REGEX.match(file_name)
+      if matched_paired
+        matched = matched_paired
+        read_idx = matched[2].to_i - 1
+      elsif matched_single
+        matched = matched_single
+        read_idx = 0
+      else
+        next
+      end
       source = matched[0]
       name = matched[1]
-      read_idx = matched[2].to_i - 1
       samples[name] ||= default_attributes.clone
       samples[name][:input_files_attributes] ||= []
       samples[name][:input_files_attributes][read_idx] = { name: source,
                                                            source: "#{s3_path}/#{source}",
                                                            source_type: InputFile::SOURCE_TYPE_S3 }
+
     end
 
     sample_list = []
