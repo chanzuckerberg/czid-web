@@ -537,11 +537,7 @@ class D3Heatmap extends React.Component {
   }
 }
 
-/**
- * @class ProjectVisualization
- * @desc a component to visualize sample and their species taxonomy distribution
- */
-class ProjectVisualization extends React.Component {
+class SamplesHeatmap extends React.Component {
   constructor(props) {
     super(props);
 
@@ -1096,4 +1092,4 @@ class ProjectVisualization extends React.Component {
   }
 }
 
-export default ProjectVisualization;
+export default SamplesHeatmap;

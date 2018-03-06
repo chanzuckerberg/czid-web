@@ -192,7 +192,6 @@ class SamplesController < ApplicationController
   end
 
   def heatmap
-    @sample_ids = params[:sample_ids].to_s.split(",").map(&:to_i) || []
   end
 
   def samples_taxons
