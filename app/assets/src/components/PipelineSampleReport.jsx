@@ -227,12 +227,13 @@ class PipelineSampleReport extends React.Component {
   applySearchFilter(searchTaxonId, excludedCategories, input_taxons) {
     let selected_taxons = [];
     const thresholded_taxons = input_taxons || this.state.thresholded_taxons;
+    const active_thresholds = this.state.activeThresholds
     if (searchTaxonId > 0) {
-      // search only the thresholded taxons
+      // ignore all the thresholds
       let genus_taxon = {};
       let matched_taxons = [];
-      for (let i = 0; i < thresholded_taxons.length; i++) {
-        const taxon = thresholded_taxons[i];
+      for (let i = 0; i < this.state.taxonomy_details.length; i++) {
+        const taxon = this.state.taxonomy_details[i];
         if (taxon.genus_taxid == taxon.tax_id) {
           if (matched_taxons.length > 0) {
             selected_taxons.push(genus_taxon);
@@ -252,8 +253,7 @@ class PipelineSampleReport extends React.Component {
         selected_taxons.push(genus_taxon);
         selected_taxons = selected_taxons.concat(matched_taxons);
       }
-    }
-    if (excludedCategories.length > 0) {
+    } else if (excludedCategories.length > 0) {
       for (var i = 0; i < thresholded_taxons.length; i++) {
         let taxon = thresholded_taxons[i];
         if (excludedCategories.indexOf(taxon.category_name) < 0) {
@@ -279,16 +279,22 @@ class PipelineSampleReport extends React.Component {
           i--;
         }
       }
+    } else {
+      selected_taxons = thresholded_taxons;
     }
 
-    if(searchTaxonId < 1 && excludedCategories.length < 1) {
-      selected_taxons = input_taxons;
+    let searchKey = this.state.searchKey
+    if (searchTaxonId <= 0) {
+      searchKey = ""
     }
 
+    // console.log(excludedCategories)
     this.setState({
       loading: false,
       excluded_categories: excludedCategories,
       search_taxon_id: searchTaxonId,
+      activeThresholds: active_thresholds,
+      searchKey,
       thresholded_taxons,
       selected_taxons,
       selected_taxons_top: selected_taxons.slice(0,  this.max_rows_to_render),
@@ -442,8 +448,7 @@ class PipelineSampleReport extends React.Component {
       searchKey: ''
     }, () => {
       Cookies.set('excluded_categories', JSON.stringify(excluded_categories));
-      // this.applySearchFilter(0, excluded_categories);
-      this.applyThresholdFilters(this.state.taxonomy_details, true);
+      this.applySearchFilter(0, excluded_categories);
       this.flash();
     });
   }
@@ -481,9 +486,7 @@ class PipelineSampleReport extends React.Component {
     stateCopy.splice(pos, 1);
     this.setState({
       activeThresholds: stateCopy
-    }, () => {
-      this.saveThresholdFilters();
-    });
+    })
   }
 
   isThresholdValid(threshold) {
@@ -498,13 +501,13 @@ class PipelineSampleReport extends React.Component {
   }
 
   saveThresholdFilters() {
+    this.applyThresholdFilters(this.state.taxonomy_details, true);
     // prevent saving threshold with invalid values
     const activeThresholds = this.state.activeThresholds.filter((threshold) => {
       return this.isThresholdValid(threshold);
     });
     window.localStorage.setItem('activeThresholds', JSON.stringify(activeThresholds));
     $('.advanced-filters-modal').slideUp(300);
-    this.applyThresholdFilters(this.state.taxonomy_details, true);
   }
 
   getSavedThresholdFilters() {
@@ -567,10 +570,12 @@ class PipelineSampleReport extends React.Component {
 			if (taxonValue < threshold) {
 			  return false;
 			}
+            break;
 		  case '<=':
 			if (taxonValue > threshold) {
 			  return false;
 			}
+            break;
 		  default: // '>='
 			if (taxonValue < threshold) {
 			  return false;
@@ -822,10 +827,11 @@ class PipelineSampleReport extends React.Component {
     this.setState({
       searchId,
       excluded_categories: [],
-      searchKey: item[0]
+      searchKey: item[0],
+      activeThresholds: []
+
     }, () => {
-      // this.applySearchFilter(searchId, []);
-      this.applyThresholdFilters(this.state.taxonomy_details, true);
+      this.applySearchFilter(searchId, []);
     });
   }
 
