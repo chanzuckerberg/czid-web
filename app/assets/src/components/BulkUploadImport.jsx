@@ -259,7 +259,8 @@ class BulkUploadImport extends React.Component {
       samples.push(this.state.samples[idx])
     })
     axios.post('/samples/bulk_upload.json', {
-      samples: samples
+      samples: samples,
+      authenticity_token: this.csrf
     })
     .then((response) => {
       that.setState({
