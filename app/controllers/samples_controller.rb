@@ -19,8 +19,8 @@ class SamplesController < ApplicationController
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :samples_taxons, :top_taxons, :heatmap].freeze
 
-  before_action :authenticate_user!, except: [:create, :update, :bulk_upload]
-  acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload], fallback: :devise
+  before_action :authenticate_user!, except: [:create, :update]
+  acts_as_token_authentication_handler_for User, only: [:create, :update], fallback: :devise
 
   before_action :login_required # redundant. make sure it works
   before_action :no_demo_user, only: [:create, :bulk_new, :bulk_upload, :bulk_import, :new]
