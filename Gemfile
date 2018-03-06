@@ -35,9 +35,9 @@ gem 'puma', '~> 3.7'
 gem 'rails', '~> 5.1.4'
 gem 'rake'
 # Worker/Scheduler management
-gem 'resque'
+gem 'resque', '>= 1.27.4'
 gem 'resque-lock'
-gem 'resque-scheduler'
+gem 'resque-scheduler', '>= 4.3.1'
 # Use SCSS for stylesheets
 gem 'simple_token_authentication', '~> 1.15', '>= 1.15.1' # see semver.org
 gem 'sprockets-es6'
