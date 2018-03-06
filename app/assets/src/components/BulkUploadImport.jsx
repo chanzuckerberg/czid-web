@@ -672,7 +672,10 @@ class BulkUploadImport extends React.Component {
                     <div className='col no-padding s12'>
                       <div className='field-title'>
                         <div className='read-count-label'>
-                          Path to Samples Folder
+                          Path to Samples Folder<br/>
+                          <i>Files in folder must have one of the following extensions to be considered:<br/>
+                          fastq.gz / fq.gz / fastq / fq / fasta.gz / fa.gz / fasta / fa.<br/>
+                          Paired files must be labeled "_R1" or "_R2" at the end of the basename.</i>
                         </div>
                         <div className='example-link'>
                           Example: s3://czbiohub-seqbot/fastqs/171018_NB501961_0022_AHL2TVBGX3/rawdata
