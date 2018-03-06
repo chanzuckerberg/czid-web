@@ -548,9 +548,10 @@ class SamplesHeatmap extends React.Component {
 
     this.dataTypes = ["NT.aggregatescore", "NT.rpm", "NT.r", "NT.zscore", "NT.maxzscore", "NR.rpm", "NR.r", "NR.zscore", "NR.maxzscore"];
     this.dataGetters = {}
-
+    this.dataAccessorKeys = {};
     for (var dataType of this.dataTypes) {
       this.dataGetters[dataType] = this.makeDataGetter(dataType);
+      this.dataAccessorKeys[dataType] = dataType.split(".");
     }
 
     let urlParams = this.fetchParamsFromUrl();
@@ -610,13 +611,8 @@ class SamplesHeatmap extends React.Component {
   }
 
   getDataProperty (data, property) {
-    let parts = property.split("."),
-        base = data;
-
-    for (var part of parts) {
-      base = base[part];
-    }
-    return base;
+    let keys = this.dataAccessorKeys[property];
+    return data[keys[0]][keys[1]];
   }
 
   makeDataGetter (dataType) {
