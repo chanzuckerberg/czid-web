@@ -202,7 +202,10 @@ class Sample < ApplicationRecord
   end
 
   def sample_postprocess_s3_path
-    "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/postprocess"
+    pr = pipeline_runs.first
+    return pr.postprocess_output_s3_path
+  rescue
+    return sample_postprocess_s3_path
   end
 
   def s3_paths_for_taxon_byteranges
