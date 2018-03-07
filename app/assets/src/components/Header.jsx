@@ -63,11 +63,11 @@ class Header extends React.Component  {
           <p>2. Install the IDseq CLI:</p>
           <p><span className="code">pip install git+https://github.com/chanzuckerberg/idseq-cli.git</span></p>
           <p>3. Upload a sample using a command of the form:</p>
-          <div className="code center-code">
+          <div className="code center-code"><p>
             idseq -p '<span className="code-to-edit">Your Project Name</span>' -s '<span className="code-to-edit">Your Sample Name</span>' \<br/>
             -u https://idseq.net -e <span className="code-personal">{this.userDetails.email}</span> -t <span className="code-personal">{this.user_auth_token}</span> \<br/>
             --r1 <span className="code-to-edit">your_sample_R1</span>.fastq.gz --r2 <span className="code-to-edit">your_sample_R2</span>.fastq.gz
-          </div>
+          </p></div>
           <p>The project you specify (<span className="code-to-edit">Your Project Name</span>) must already exist on IDseq: you can create it using the
             <br/>
             <span className="code">+ New project</span> button on the sample upload page.</p>
