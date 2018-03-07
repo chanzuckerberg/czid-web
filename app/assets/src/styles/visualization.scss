@@ -7,6 +7,9 @@
   }
   .slider-container {
     margin-top: 1em;
+    .noUi-connect {
+      background: rgb(78, 173, 73);
+    }
     .noUi-handle {
       border-radius: 50%;
       width: 28px;
@@ -87,7 +90,7 @@
   }
 
   rect.cell-border {
-    stroke: #ddd;
+    stroke: #fff;
     stroke-width:0.25px;
   }
 
@@ -103,7 +106,7 @@
   }
 
   text.mono {
-    font-size: 9pt;
+    font-size: 8pt;
     fill: #aaa;
   }
   .rowLabelg {

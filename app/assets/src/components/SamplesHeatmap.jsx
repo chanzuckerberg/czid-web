@@ -149,9 +149,9 @@ class D3Heatmap extends React.Component {
       }
     }
     this.margin ={
-      top: 80, // char_width * longest_col_label * 0.7,
+      top: char_width * longest_col_label * 0.75,
       left: Math.ceil(Math.sqrt(this.row_number)) * 10,
-      bottom: 100,
+      bottom: 80,
       right: char_width * longest_row_label
     };
     this.cellWidth = Math.max(900 / this.col_number, 20);
@@ -182,9 +182,9 @@ class D3Heatmap extends React.Component {
 
 
     this.renderRowLabels();
-    //this.renderColLabels();
+    this.renderColLabels();
     this.renderHeatmap();
-    this.renderLegend();
+    // this.renderLegend();
     this.renderColDendrogram();
     this.renderRowDendrogram();
   }
@@ -209,7 +209,7 @@ class D3Heatmap extends React.Component {
       .attr("height", this.cellHeight)
       .style("fill", function(d) {
         if (d.value === undefined) {
-          return "#f6f6f6";
+          return "rgb(238, 241, 244)";
         }
         let colorIndex = colorScale(d.value);
         return that.colors[Math.round(colorIndex)];
@@ -242,10 +242,12 @@ class D3Heatmap extends React.Component {
 
   renderColDendrogram () {
 		let width = this.cellWidth * this.col_number,
-				height = this.margin.top - 20;
+				height = this.margin.bottom - 20;
 
+    let top_offset = this.margin.top + (this.cellHeight * this.row_number) + 10;
     let container = this.renderDendrogram(this.colTree, width, height, "cc", this.colLabel);
-    container.attr("transform", "rotate(90) translate(0, -" + (width + this.margin.left) + ")")
+    container.attr("transform", "rotate(90) translate(" + top_offset + ", -" + (width + this.margin.left) + ")");
+    container.select("g").attr("transform", "scale(-1, 1) translate(-" + (this.margin.bottom - 15) + ", 0)");
   }
 
   renderRowDendrogram () {
@@ -469,7 +471,7 @@ class D3Heatmap extends React.Component {
       .attr("x", 0)
       .attr("y", 0)
       .style("text-anchor", "left")
-      .attr("transform", "translate("+this.cellWidth/2 + ",-6) rotate (-45)")
+      .attr("transform", "translate("+this.cellWidth/2 + ",-6) rotate (-65)")
       .attr("class",  function (d,i) { return "colLabel mono c"+i;} )
       .on("mouseover", function(d) {d3.select(this).classed("text-hover",true);})
       .on("mouseout" , function(d) {d3.select(this).classed("text-hover",false);})
@@ -878,7 +880,7 @@ class SamplesHeatmap extends React.Component {
     if (!this.state.data) {
       return;
     }
-
+    /*
     let colors = [
       "rgb(255, 255, 255)",
       "rgb(255, 255, 250)",
@@ -962,7 +964,26 @@ class SamplesHeatmap extends React.Component {
       "rgb(147, 0, 236)",
       "rgb(140, 0, 236)",
     ];
-
+    */
+		let colors = [
+    "rgb(255, 255, 255)",
+    "rgb(243, 249, 243)",
+    "rgb(232, 244, 232)",
+    "rgb(221, 239, 220)",
+    "rgb(210, 234, 209)",
+    "rgb(199, 229, 197)",
+    "rgb(188, 224, 186)",
+    "rgb(177, 219, 175)",
+    "rgb(166, 214, 164)",
+    "rgb(155, 208, 152)",
+    "rgb(144, 203, 141)",
+    "rgb(133, 198, 129)",
+    "rgb(122, 193, 118)",
+    "rgb(111, 188, 106)",
+    "rgb(100, 183, 95)",
+    "rgb(89, 178, 84)",
+    "rgb(78, 173, 73)",
+		];
     return (
       <D3Heatmap
         colTree={this.state.clustered_samples.tree}
@@ -1063,22 +1084,23 @@ class SamplesHeatmap extends React.Component {
     return (
       <div id="project-visualization">
         <SubHeader>
-          <div className="sub-header">
-            <div className="row sub-menu">
-              <div className="col s4">
-                <label>Data Scale</label>
-                {this.renderScalePicker()}
-              </div>
-              <div className="col s4">
-                <label>Data Type</label>
-                {this.renderTypePickers()}
-              </div>
-              <div className="col s4">
-                {this.renderThresholdSlider()}
-              </div>
+          <h3>Comparing samples</h3>
+        </SubHeader>
+        <div className="container">
+          <div className="row sub-menu">
+            <div className="col s4">
+              <label>Data Scale</label>
+              {this.renderScalePicker()}
+            </div>
+            <div className="col s4">
+              <label>Data Type</label>
+              {this.renderTypePickers()}
+            </div>
+            <div className="col s4">
+              {this.renderThresholdSlider()}
             </div>
           </div>
-        </SubHeader>
+        </div>
         <div className="row visualization-content">
           {this.state.loading && this.renderLoading()}
           {this.renderHeatmap()}
