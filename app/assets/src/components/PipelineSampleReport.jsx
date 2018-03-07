@@ -144,12 +144,18 @@ class PipelineSampleReport extends React.Component {
       constrainWidth: true,
       stopPropagation: false
     });
-    const advancedFiltersModal = $('.advanced-filters-modal');
-    const advancedFiltersActivate = $('.advanced-filters-activate');
 
-    advancedFiltersActivate.on('click', (e) => {
+    this.setupFilterModal('.advanced-filters-activate', '.advanced-filters-modal')
+    this.setupFilterModal('.categories-filters-activate', '.categories-filters-modal')
+  }
+
+  setupFilterModal(activateDiv, modalDiv) {
+    const filtersModal = $(modalDiv);
+    const filtersActivate = $(activateDiv);
+
+    filtersActivate.on('click', (e) => {
       e.stopPropagation();
-      advancedFiltersModal.slideToggle(200);
+      filtersModal.slideToggle(200);
     });
   }
 
@@ -976,11 +982,12 @@ class PipelineSampleReport extends React.Component {
                           </ul>
                         </div>
                       </li>
-                      <li className='categories-dropdown top-filter-dropdown'
-                        data-activates='categories-dropdown' >
-                        <span className='filter-label'>Categories</span>
-                        <i className='fa fa-angle-down right'></i>
-                        <div id='categories-dropdown' className='dropdown-content stop-propagation'>
+                      <li className='categories-dropdown top-filter' >
+                        <div className="categories-filters-activate">
+                          <span className='filter-label'>Categories</span>
+                          <i className='fa fa-angle-down right'></i>
+                        </div>
+                        <div className='categories-filters-modal'>
                           <div className="categories">
                             <ul>
                             { this.all_categories.map((category, i) => {
@@ -990,8 +997,8 @@ class PipelineSampleReport extends React.Component {
                                   className="filled-in cat-filter"
                                   id={category.name}
                                   value={category.name}
-                                  onClick={(e) => {this.applyExcludedCategories(e)}}
                                   onChange={(e) => {}}
+                                  onClick={(e) =>{this.applyExcludedCategories(e);}}
                                   checked={this.state.excluded_categories.indexOf(category.name) < 0}/>
                                   <label htmlFor={ category.name }>{ category.name }</label>
                                 </li>
