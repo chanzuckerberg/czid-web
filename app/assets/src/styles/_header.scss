@@ -76,6 +76,8 @@ a {
   background-color: #000000;
   color: #a6b7c1;
   font-size: $font-size-base;
+  position: relative;
+  z-index: 1000;
   .menu {
     margin: 12px;
     .login {

@@ -5,13 +5,14 @@ import moment from 'moment';
 import $ from 'jquery';
 import Tipsy from 'react-tipsy';
 import Materialize from 'materialize-css';
+import {Sidebar, Grid} from 'semantic-ui-react';
+import Sticky from 'react-stickynode';
 import SortHelper from './SortHelper';
 import numberWithCommas from '../helpers/strings';
 import ProjectSelection from './ProjectSelection';
 import ReportFilter from './ReportFilter';
 import PipelineSampleReads from './PipelineSampleReads';
 import StringHelper from '../helpers/StringHelper';
-import StickySidebar from './StickySidebar';
 import { Dropdown } from 'semantic-ui-react'
 
 class Samples extends React.Component {
@@ -1410,11 +1411,16 @@ class Samples extends React.Component {
 
     return (
       <div className="row content-body">
-        <div className='col no-padding s2 sidebar'>
-          <StickySidebar>
-            { project_section }
-          </StickySidebar>
+        <div className="col no-padding s2 sidebar">
+          <Sticky
+            enabled={true}
+            top={0}
+            enableTransforms={false}
+            bottomBoundary={0}>
+            {project_section}
+          </Sticky>
         </div>
+
         <div className="col no-padding samples-content s10">
           { this.renderTable(this.state.allSamples) }
         </div>

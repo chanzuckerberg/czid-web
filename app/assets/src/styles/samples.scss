@@ -840,16 +840,12 @@ input[type="button"] {
 
 .content-body {
   .sidebar {
-    background-color: #333333;
-    position: sticky;
-    z-index: 1;
-    position: -webkit-sticky;
-    position: -moz-sticky;
-    position: -o-sticky;
-    position: -ms-sticky;
-    top: 0;
-    min-height: -webkit-fill-available !important;
+    box-shadow: none !important;
+    background: $light-gray4;
     border-right: 1px solid #eaeaea;
+    .sticky-inner-wrapper {
+      background: $light-gray4;
+    }
     .title {
       color: $gray3;
       font-weight: 600;
@@ -865,6 +861,7 @@ input[type="button"] {
       background-color: $light-gray3;
     }
     .project-wrapper {
+      min-height: 100vh;
       .fav-row {
         .title {
           color: #f1f1f1;
