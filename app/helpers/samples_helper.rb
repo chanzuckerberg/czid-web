@@ -126,14 +126,22 @@ module SamplesHelper
     s3_output, _stderr, status = Open3.capture3("aws", "s3", "ls", "#{s3_path}/")
     return unless status.exitstatus.zero?
     s3_output.chomp!
-    entries = s3_output.split("\n").reject { |line| line.include? "Undetermined" }.select { |line| line.include? "fast" }
+    entries = s3_output.split("\n").reject { |line| line.include? "Undetermined" }
     samples = {}
     entries.each do |file_name|
-      matched = /([^ ]*)_R(\d)_001.(fastq.gz|fq.gz|fastq|fq|fasta.gz|fa.gz|fasta|fa)\z/.match(file_name)
-      next unless matched
+      matched_paired = InputFile::BULK_FILE_PAIRED_REGEX.match(file_name)
+      matched_single = InputFile::BULK_FILE_SINGLE_REGEX.match(file_name)
+      if matched_paired
+        matched = matched_paired
+        read_idx = matched[2].to_i - 1
+      elsif matched_single
+        matched = matched_single
+        read_idx = 0
+      else
+        next
+      end
       source = matched[0]
       name = matched[1]
-      read_idx = matched[2].to_i - 1
       samples[name] ||= default_attributes.clone
       samples[name][:input_files_attributes] ||= []
       samples[name][:input_files_attributes][read_idx] = { name: source,
@@ -144,7 +152,7 @@ module SamplesHelper
     sample_list = []
     samples.each do |name, sample_attributes|
       sample_attributes[:name] = name
-      if sample_attributes[:input_files_attributes].size == 2
+      if sample_attributes[:input_files_attributes].size.between?(1, 2)
         sample_list << sample_attributes
       end
     end
