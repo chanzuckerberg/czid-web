@@ -3,6 +3,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import $ from 'jquery';
 import Tipsy from 'react-tipsy';
+import { Dropdown, Divider, Menu, Checkbox, Search, Grid, Input} from 'semantic-ui-react';
 import Samples from './Samples';
 import ReportFilter from './ReportFilter';
 import numberWithCommas from '../helpers/strings';
@@ -28,6 +29,7 @@ class PipelineSampleReport extends React.Component {
     const cached_name_type = Cookies.get('name_type');
 
     this.state = {
+      backgroundName: Cookies.get('background_name') || this.report_details.default_background.name,
       taxonomy_details: [],
       search_keys_in_sample: [],
       lineage_map: {},
@@ -56,10 +58,12 @@ class PipelineSampleReport extends React.Component {
       }
       */
       excluded_categories: (cached_cats) ? JSON.parse(cached_cats) : [],
-      name_type: cached_name_type ? cached_name_type : 'scientific',
+      name_type: cached_name_type ? cached_name_type : 'Scientific name',
       search_taxon_id: 0,
       rendering: false,
-      loading: true
+      loading: true,
+      searching: false,
+      searchResults: []
     };
 
     this.applyNameType = this.applyNameType.bind(this);
@@ -102,7 +106,26 @@ class PipelineSampleReport extends React.Component {
 
   componentDidMount() {
     this.listenThresholdChanges();
-    this.scrollDown()
+    this.scrollDown();
+    // dropdown
+    const filterContent =
+      document.querySelector('.advanced-filter-dropdown-content');
+    const activator = $('.advanced-filter-activator');
+
+    const $filterContent = $(filterContent);
+    const body = $('body');
+    activator.click((e) => {
+      e.stopPropagation();
+      $filterContent.slideToggle(0);
+    });
+    body.click((e) => {
+      const targetClassName = e.target.className;
+      if (targetClassName === filterContent.className || filterContent.contains(e.target)) {
+        // console.log('Dont close dropdown');
+      } else {
+        $filterContent.slideUp(0);
+      }
+    });
   }
 
   fetchParams(param) {
@@ -163,6 +186,8 @@ class PipelineSampleReport extends React.Component {
     this.setState({
       new_filter_thresholds: { },
       excluded_categories: [],
+      searchId: 0,
+      searchKey: '',
       search_taxon_id: 0,
       thresholded_taxons: this.state.taxonomy_details,
       selected_taxons: this.state.taxonomy_details,
@@ -240,7 +265,6 @@ class PipelineSampleReport extends React.Component {
       selected_taxons = thresholded_taxons;
     }
 
-    // console.log(excludedCategories)
     this.setState({
       loading: false,
       excluded_categories: excludedCategories,
@@ -371,6 +395,27 @@ class PipelineSampleReport extends React.Component {
     }
   }
 
+  applyExcludedCategories(e) {
+    let excluded_categories = this.state.excluded_categories;
+    if (e.target.checked) {
+      const ridx = excluded_categories.indexOf(e.target.value);
+      if (ridx > -1) {
+        excluded_categories.splice(ridx, 1);
+      }
+    } else {
+      excluded_categories.push(e.target.value);
+    }
+    this.setState({
+      excluded_categories: excluded_categories,
+      searchId: 0,
+      searchKey: ''
+    }, () => {
+      Cookies.set('excluded_categories', JSON.stringify(excluded_categories));
+      this.applySearchFilter(0, excluded_categories);
+      this.flash();
+    });
+  }
+
   setSortParams() {
     const primary_sort = this.state.sort_by.split('_');
     primary_sort[0] = primary_sort[0].toUpperCase();
@@ -408,7 +453,6 @@ class PipelineSampleReport extends React.Component {
   }
 
   taxonPassThresholdFilter(taxon) {
-    // console.log(taxon)
     if (Object.keys(taxon).length <= 0) {
       return false;
     }
@@ -417,7 +461,6 @@ class PipelineSampleReport extends React.Component {
       const key_parts = filter_key.split('_');
       const val = (taxon[key_parts[0]] || {})[key_parts[1]];
       if (val < threshold) {
-        // console.log([val, threshold, filter_key])
         return false;
       }
     }
@@ -494,6 +537,23 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
+  handleBackgroundModelChange(backgroundName, backgroundParams) {
+    if (backgroundName !== this.state.backgroundName) {
+      this.setState({ backgroundName, backgroundParams }, () => {
+        Cookies.set('background_name', backgroundName);
+        Cookies.set('background_id', backgroundParams);
+        this.refreshPage({background_id: backgroundParams});
+      });
+    }
+  }
+
+  handleNameTypeChange(name_type) {
+    if (name_type !== this.state.name_type) {
+      this.setState({ name_type: name_type }, () => {
+        Cookies.set('name_type', name_type);
+      });
+    }
+  }
 
   // path to NCBI
   gotoNCBI(e) {
@@ -561,7 +621,7 @@ class PipelineSampleReport extends React.Component {
   render_name(tax_info, report_details) {
     let tax_scientific_name = tax_info['name']
     let tax_common_name = tax_info['common_name']
-    let tax_name = this.state.name_type == 'common' ?
+    let tax_name = this.state.name_type.toLowerCase() == 'common name' ?
                      !tax_common_name || tax_common_name.trim() == "" ? <span className="count-info">{tax_scientific_name}</span> : <span>{StringHelper.capitalizeFirstLetter(tax_common_name)}</span>
                      : <span>{tax_scientific_name}</span>
     let foo = <i>{tax_name}</i>;
@@ -689,6 +749,34 @@ class PipelineSampleReport extends React.Component {
     $('.table-arrow').toggleClass('hidden');
   }
 
+  handleSearch(e, value) {
+    let matchFound = 0;
+    const searchLimit = 10;
+    const filteredKeys = this.state.search_keys_in_sample.filter((item) => {
+      if(item[0] === 'All' || item[0].toLowerCase().indexOf(value.toLowerCase()) > -1) {
+        matchFound += 1;
+        return (matchFound <= searchLimit);
+      } else {
+        return false;
+      }
+    });
+    this.setState({
+      searchKey: value,
+      searchResults: filteredKeys.map((key) => { return { title: key[0], value: key[1]} })
+    })
+  }
+
+  searchSelectedTaxon(tilte, value ) {
+    let searchId = value;
+    this.setState({
+      searchId,
+      excluded_categories: [],
+      searchKey: tilte
+    }, () => {
+      this.applySearchFilter(searchId, []);
+    });
+  }
+
   // Download report in csv
   downloadReport(id) {
     _satellite.track('downloadreport')
@@ -707,7 +795,7 @@ class PipelineSampleReport extends React.Component {
                               + ' out of ' + this.report_details.pipeline_info.remaining_reads
                               + ' non-host reads.'
                               : '';
-    const disable_filter = this.anyFilterSet() ? (<span className="disable" onClick={e => this.refs.report_filter.resetAllFilters()}><b> Disable all filters</b></span>) : null;
+    const disable_filter = this.anyFilterSet() ? (<span className="disable" onClick={e => this.resetAllFilters()}><b> Disable all filters</b></span>) : null;
     const filter_row_stats = this.state.loading ? null : (
       <div id="filter-message" className="filter-message">
         <span className="count">
@@ -732,31 +820,113 @@ class PipelineSampleReport extends React.Component {
         enableFilters={this.enableFilters}
         resetAllFilters={this.resetAllFilters}
       />);
-    let param_background_id = this.fetchParams("background_id")
-    let cookie_background_id = Cookies.get('background_id')
-    let csv_background_id_param = param_background_id ? '?background_id=' + param_background_id :
-                                    cookie_background_id ? '?background_id=' + cookie_background_id :
-                                      ''
-    const download_button = (
-      <a href={`/samples/${this.sample_id}/report_csv${csv_background_id_param}`} className="download-report right">
-        <div className="fa fa-cloud-download" />
-        <div>Download report</div>
-      </a>
-    );
     const right_arrow_initial_visibility = '';
     const result = (
       <div>
         <div id="reports" className="reports-screen tab-screen col s12">
-          <div className="tab-screen-content">
+          <div className="tab-screen-content container">
             <div className="row reports-container">
-              <div className="col s2 reports-sidebar">
-                {report_filter}
-              </div>
-              <div className="col s10 reports-section">
+              <div className="col s12 reports-section">
                 <div className="reports-count">
-                  { download_button }
                   { filter_row_stats }
                 </div>
+                <br />
+                <div className="top-filters">
+                  <Search
+                    placeholder="Search"
+                    className="search-input top-filter-item browser-default"
+                    minCharacters={3}
+                    noResultsDescription="No taxon matches search term"
+                    loading={this.state.searching}
+                    value={this.state.searchKey}
+                    onResultSelect={(e, {result}) => this.searchSelectedTaxon(result.title, result.value)}
+                    onSearchChange={(e, {value}) => this.handleSearch(e, value)}
+                    results={this.state.searchResults.map((result, i) => {
+                      return {
+                        title: result.title,
+                        value: result.value
+                      }
+                    })}
+                  />
+                  <Dropdown
+                    className="top-filter-item"
+                    text={ this.state.backgroundName }
+                    selection
+                    onChange={(e, {options, value}) => this.handleBackgroundModelChange(options[value].text, options[value].key)}
+                    options={this.all_backgrounds.map((bg, i) => {
+                      return {
+                        key: bg.id,
+                        text: bg.name,
+                        value: i
+                      };
+                    })}
+                     />
+                    <Dropdown
+                      className="categories-selection top-filter-item"
+                      closeOnChange={false}
+                      closeOnBlur={false}
+                      text="Categories"
+                      selection
+                      options={this.all_categories.map((cat) => {
+                        return {
+                          key: cat.taxid,
+                          text: <span>
+                              <input type="checkbox" onChange={(e) => this.applyExcludedCategories(e)} id={cat.name} value={cat.name} className="filled-in cat-filter"
+                                checked={this.state.excluded_categories.indexOf(cat.name) < 0} />
+                              <label htmlFor={cat.name}>{cat.name}</label>
+                            </span>,
+                          value: cat.taxid
+                        };
+                    })}
+                  />
+                  <Dropdown
+                    className="top-filter-item"
+                    text={this.state.name_type}
+                    selection
+                    onChange={(e, {value}) => this.handleNameTypeChange(value)}
+                    options={[{
+                      text: 'Scientific name',
+                      value: 'Scientific name',
+                      key: 1
+                    }, { text: 'Common name', value: 'Common name', key: 2 }]}
+                     />
+                  <div className="top-filter-item advanced-filter-container">
+                    <Dropdown
+                      className="advanced-filtering advanced-filter-activator"
+                      item
+                      text='Advanced filtering' >
+                    </Dropdown>
+                    <div className="advanced-filter-dropdown-content">
+                      <div className="row threshold-fields">
+                        <div className="col s4">
+                          <Dropdown
+                              className="small"
+                              text={'Select threshold'}
+                              selection
+                              options={[{key: 'Nt_zscore', text: 'NT zscore', value:'Nt_zscore'}]}
+                            />
+                        </div>
+                        <div className="col s4">
+                          <Dropdown
+                              className="small"
+                                text={'Select threshold'}
+                                selection
+                                options={[{key: 'Nt_zscore', text: 'NT zscore', value:'Nt_zscore'}]}
+                              />
+                        </div>
+                        <div className="col s4">
+                          <Input 
+                            type="number" 
+                            label="0.00" 
+                            labelPosition="right"
+                            className="semantic-input small"
+                             placeholder="Enter value..." />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <Divider />
                 <div className="reports-main">
                   <table id="report-table" className="bordered report-table">
                     <thead>
