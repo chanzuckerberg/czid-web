@@ -83,7 +83,7 @@ class Sample < ApplicationRecord
     input_files.each do |f|
       if f.source_type == 'local'
         # TODO: investigate the content-md5 stuff https://github.com/aws/aws-sdk-js/issues/151 https://gist.github.com/algorist/385616
-        f.update(presigned_url: S3_PRESIGNER.presigned_url(:put_object, bucket: SAMPLES_BUCKET_NAME, key: f.file_path))
+        f.update(presigned_url: S3_PRESIGNER.presigned_url(:put_object, bucket: SAMPLES_BUCKET_NAME, key: f.file_path, expires_in: 86400))
       end
     end
   end
