@@ -267,11 +267,11 @@ class PipelineRun < ApplicationRecord
   delegate :sample_output_s3_path, to: :sample
 
   def postprocess_output_s3_path
-    "#{sample.sample_postprocess_s3_path}#{subsample_suffix}"
+    sample.sample_postprocess_s3_path
   end
 
   def alignment_viz_output_s3_path
-    "#{sample.sample_postprocess_s3_path}#{subsample_suffix}/align_viz"
+    "#{sample.sample_postprocess_s3_path}/align_viz"
   end
 
   def alignment_output_s3_path
