@@ -12,6 +12,7 @@ import ReportFilter from './ReportFilter';
 import PipelineSampleReads from './PipelineSampleReads';
 import StringHelper from '../helpers/StringHelper';
 import StickySidebar from './StickySidebar';
+import { Dropdown } from 'semantic-ui-react'
 
 class Samples extends React.Component {
   constructor(props, context) {
@@ -930,20 +931,13 @@ class Samples extends React.Component {
     );
 
     let table_download_dropdown = (
-      <div>
-        <div className='col s2 download-table download-dropdown' data-activates='download-dropdown'>
-          <div className='white'  data-activates='download-dropdown'>
-            <a className="download-project center">
-              <span>Download</span>
-              <i className="fa fa-angle-down"></i>
-            </a>
-          </div>
-        </div>
-        {/*Dropdown menu*/}
-        <ul id='download-dropdown' className='dropdown-content'>
-          <li><a href={`/projects/${project_id}/csv`}>Download Table</a></li>
-          { project_id === 'all' ? null : <li><a onClick={this.startReportGeneration}> Download Reports</a></li> }
-        </ul>
+      <div className="col s2 download-wrapper">
+        <Dropdown text='Download' className='link item'>
+          <Dropdown.Menu>
+            <Dropdown.Item href={`/projects/${project_id}/csv`}>Download Table</Dropdown.Item>
+            { project_id === 'all' ? null : <Dropdown.Item onClick={this.startReportGeneration}>Download Reports</Dropdown.Item> }
+          </Dropdown.Menu>
+       </Dropdown>
       </div>
     );
 
@@ -979,9 +973,9 @@ class Samples extends React.Component {
 
     const metaDataFilter = (
       <div className="col s2 wrapper">
-        <div className="metadata" onClick={this.displayMetaDataDropdown}>
+        <div className={this.state.displayDropdown ? "metadata metadata-active" : "metadata"} onClick={this.displayMetaDataDropdown}>
             <div className='metadata-dropdown'>
-            Filter </div><i className="fa fa-angle-down"></i>
+            Filter </div><i className={this.state.displayDropdown ? "fa fa-angle-up" : "fa fa-angle-down" }></i>
         </div>
               { this.state.displayDropdown ? <div className="row metadata-options">
                 <div className="col s6">
@@ -1018,8 +1012,6 @@ class Samples extends React.Component {
         {/* { clear_filters } */}
         { search_field }
         { metaDataFilter  }
-        { table_download_dropdown }
-        { this.state.checkedBoxes > 0  ? compare_button : null }
       </div>
     );
 
@@ -1134,11 +1126,11 @@ class Samples extends React.Component {
     );
 
     const projInfo = (
-      <div>
+      <div className="row download-section">
         {
           this.state.selectedProjectId ? project_menu : null
         }
-        <div className="wrapper">
+        <div className={ project_id === 'all' ? "col s7 wrapper" : "col s5 wrapper" }>
           <div className={(!this.state.project) ? "proj-title heading all-proj" : "heading proj-title"}>
           { (!this.state.project) ? <div className="">All Projects</div>
               : <div>
@@ -1153,6 +1145,10 @@ class Samples extends React.Component {
           }
         </p>
         </div>
+        {/* <div className="col s4 download-section"> */}
+        { table_download_dropdown }
+        { this.state.checkedBoxes > 0  ? compare_button : null }
+        {/* </div> */}
       </div>
     );
 
@@ -1244,7 +1240,7 @@ class Samples extends React.Component {
         <div className="project-info col s12">
           { projInfo } { addUser }
         </div>
-
+        <div className="divider"></div>
         <div className="sample-container no-padding col s12">
           { search_box }
           <div className="sample-table-container row">

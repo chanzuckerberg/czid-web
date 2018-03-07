@@ -105,11 +105,12 @@ class Header extends React.Component  {
               <div href="/" className="left brand-details">
                 { /* <i className='fa sidebar-drawer fa-indent'></i> */ }
                 <a href='/'>
-                  <div className="brand-short">
-                    IDseq
+                  <div className="row">
+                  <div className="col s1 logo">
                   </div>
-                  <div className="brand-long">
-                    Infectious Disease Platform
+                    <span className="col s1 logo-label">
+                      IDseq
+                    </span>
                   </div>
                 </a>
               </div>
