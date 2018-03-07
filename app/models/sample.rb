@@ -201,8 +201,13 @@ class Sample < ApplicationRecord
     return sample_output_s3_path
   end
 
+  def subsample_suffix
+    pr = pipeline_runs.first
+    pr.subsample_suffix
+  end
+
   def sample_postprocess_s3_path
-    "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/postprocess"
+    "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/postprocess#{subsample_suffix}"
   end
 
   def s3_paths_for_taxon_byteranges
