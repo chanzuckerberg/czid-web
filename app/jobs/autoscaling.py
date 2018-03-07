@@ -213,11 +213,11 @@ def autoscaling_update(my_num_jobs, my_environment="development"):
         set_desired_capacity(gsnap_asg, exactly(0), my_environment)
         set_desired_capacity(rapsearch2_asg, exactly(0), my_environment)
     elif 1 <= num_jobs <= 5:
-        set_desired_capacity(gsnap_asg, at_least(1), my_environment)
-        set_desired_capacity(rapsearch2_asg, at_least(2), my_environment)
+        set_desired_capacity(gsnap_asg, at_least(4), my_environment)
+        set_desired_capacity(rapsearch2_asg, at_least(12), my_environment)
     else:
-        set_desired_capacity(gsnap_asg, at_least(3), my_environment)
-        set_desired_capacity(rapsearch2_asg, at_least(7), my_environment)
+        set_desired_capacity(gsnap_asg, at_least(12), my_environment)
+        set_desired_capacity(rapsearch2_asg, at_least(36), my_environment)
 
 
 if __name__ == "__main__":
