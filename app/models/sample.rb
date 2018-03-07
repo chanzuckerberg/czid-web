@@ -202,10 +202,7 @@ class Sample < ApplicationRecord
   end
 
   def sample_postprocess_s3_path
-    pr = pipeline_runs.first
-    return pr.postprocess_output_s3_path
-  rescue
-    return sample_postprocess_s3_path
+    pipeline_runs.first.postprocess_output_s3_path
   end
 
   def s3_paths_for_taxon_byteranges
