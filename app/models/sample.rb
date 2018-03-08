@@ -287,7 +287,7 @@ class Sample < ApplicationRecord
         source_parts << source_part
         S3_CLIENT.upload_part_copy(bucket: SAMPLES_BUCKET_NAME, key: f.file_path,
                                    copy_source: source_part,
-                                   part_number: index, upload_id: upload_id)
+                                   part_number: index + 1, upload_id: upload_id)
       end
       S3_CLIENT.complete_multipart_upload(resp0.to_h)
       source_parts.each do |source_part|
