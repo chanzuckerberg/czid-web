@@ -204,7 +204,7 @@ class SamplesController < ApplicationController
     if samples.first
       first_sample = samples.first
       default_background_id = first_sample.host_genome && first_sample.host_genome.default_background ? first_sample.host_genome.default_background.id : nil
-      background_id = params[:background_id] || default_background_id || Background.first
+      background_id = params[:background_id] || default_background_id || Background.first.id
       if taxon_ids.empty?
         taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, include_species).pluck("tax_id")
       end
