@@ -196,7 +196,7 @@ def count_running_batch_jobs():
     errors = []
     def list_jobs(q):
         try:
-            job_list = aws_command("aws batch list-jobs --job-queue {q}".format(q=q))
+            job_list = aws_command("aws batch list-jobs --job-queue {q} --job-status RUNNING".format(q=q))
             with queues_lock:
                 queues[q] = json.loads(job_list)
         except:
@@ -251,9 +251,10 @@ def autoscaling_update(my_num_jobs, my_environment="development"):
     elif num_real_jobs == 0 and num_development_jobs > 0:
         count_running_servers = get_previous_desired(gsnap_asg) + get_previous_desired(rapsearch2_asg)
         print "Only development environments are reporting in-progress jobs, and {crs} servers are running.".format(crs=count_running_servers)
-        if count_running_servers > 1 or random.random() < 0.2:
+        if count_running_servers > 2 or random.random() < 0.2:
             crbj = count_running_batch_jobs()
             if crbj:
+                print "{crbj} jobs are running in aws batch queues".format(crbj=crbj)
                 # This is an unsafe scaling operation, but the only jobs that can get hurt
                 # are development jobs.  Just rerun those.
                 set_desired_capacity(gsnap_asg, exactly(1), can_scale)
