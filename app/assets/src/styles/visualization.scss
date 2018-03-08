@@ -1,12 +1,19 @@
+.mono {
+  font-size: 8pt;
+  fill: #aaa;
+  color: #aaa;
+}
+
 #project-visualization {
+  .heatmap-legend {
+    padding: 12px 0 0 0;
+  }
   select {
     display: block;
   }
-  .sub-menu {
-    padding-bottom: 20px;
-  }
   .slider-container {
     margin-top: 1em;
+    padding: 0 0.5em;
     .noUi-connect {
       background: rgb(78, 173, 73);
     }
@@ -90,7 +97,7 @@
   }
 
   rect.cell-border {
-    stroke: #fff;
+    stroke: #ddd;
     stroke-width:0.25px;
   }
 
@@ -105,10 +112,6 @@
     cursor: pointer;
   }
 
-  text.mono {
-    font-size: 8pt;
-    fill: #aaa;
-  }
   .rowLabelg {
     .removeLink {
       display: none;

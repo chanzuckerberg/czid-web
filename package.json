@@ -36,6 +36,7 @@
     "materialize-css": "^0.100.2",
     "moment": "^2.20.1",
     "nouislider": "^11.0.3",
+    "number-abbreviate": "^2.0.0",
     "prop-types": "^15.6.0",
     "react": "^16.2.0",
     "react-autocomplete": "^1.7.2",

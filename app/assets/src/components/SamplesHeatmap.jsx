@@ -7,6 +7,7 @@ import axios from 'axios';
 import ObjectHelper from '../helpers/ObjectHelper';
 import clusterfck from 'clusterfck';
 import ReactNouislider from './ReactNouislider';
+import NumAbbreviate from 'number-abbreviate';
 
 class SampleHeatmapTooltip extends React.Component {
   constructor(props) {
@@ -149,7 +150,7 @@ class D3Heatmap extends React.Component {
       }
     }
     this.margin ={
-      top: char_width * longest_col_label * 0.75,
+      top: char_width * longest_col_label * 0.8,
       left: Math.ceil(Math.sqrt(this.row_number)) * 10,
       bottom: 80,
       right: char_width * longest_row_label
@@ -184,7 +185,7 @@ class D3Heatmap extends React.Component {
     this.renderRowLabels();
     this.renderColLabels();
     this.renderHeatmap();
-    this.renderLegend();
+    //this.renderLegend();
     this.renderColDendrogram();
     this.renderRowDendrogram();
   }
@@ -643,7 +644,7 @@ class SamplesHeatmap extends React.Component {
       let taxon = this.getTaxonFor(row, col);
       if (taxon) {
         let value = this.getDataProperty(taxon, dataType);
-        if (value >= that.state.minDataThreshold && value <= this.state.maxDataThreshold) {
+        if (value >= this.state.minDataThreshold && value <= this.state.maxDataThreshold) {
           return value;
         }
       }
@@ -678,22 +679,21 @@ class SamplesHeatmap extends React.Component {
   }
 
   updateData (data, dataType, taxons) {
-    let minMax = this.getMinMax(data, dataType, taxons.names);
     let clustered_samples = this.clusterSamples(data, dataType, taxons.names);
     let clustered_taxons = this.clusterTaxons(data, dataType, taxons.names);
-
     this.setState({
       data: data,
       clustered_samples: clustered_samples,
-      min: minMax.min,
-      max: minMax.max,
       dataType: dataType,
       taxons: taxons,
       clustered_taxons: clustered_taxons,
     });
   }
 
-  getMinMax (data, dataType, taxon_names) {
+  getMinMax () {
+    let data = this.state.data;
+    let dataType = this.state.dataType;
+    let taxon_names = this.state.taxons.names;
     let taxon_lists = [];
     taxon_names = new Set(taxon_names);
     for (let sample of data) {
@@ -712,9 +712,28 @@ class SamplesHeatmap extends React.Component {
     let max = d3.max(taxons, (d) => {
       return this.getDataProperty(d, dataType);
     });
+
+    let thresholdMin = d3.min(taxons, (d) => {
+      let value = this.getDataProperty(d, dataType);
+      if (value >= this.state.minDataThreshold && value <= this.state.maxDataThreshold) {
+        return value;
+      }
+      return null;
+    });
+
+    let thresholdMax = d3.max(taxons, (d) => {
+      let value = this.getDataProperty(d, dataType);
+      if (value >= this.state.minDataThreshold && value <= this.state.maxDataThreshold) {
+        return value;
+      }
+      return null;
+    });
+
     return {
       min: min,
       max: max,
+      thresholdMin: thresholdMin,
+      thresholdMax: thresholdMax,
     };
   }
 
@@ -1043,10 +1062,9 @@ class SamplesHeatmap extends React.Component {
     }
     return (
       <div className="range-field">
-        <label>Threshold</label>
         <div className="slider-container">
           <ReactNouislider
-            range={{min: this.state.min, max: this.state.max + 1}}
+            range={{min: this.minMax.min, max: this.minMax.max + 1}}
             start={[this.state.minDataThreshold, this.state.maxDataThreshold]}
             connect={[false, true, false]}
             onChange={this.updateDataThreshold.bind(this)}
@@ -1084,9 +1102,13 @@ class SamplesHeatmap extends React.Component {
     if (!this.state.data) {
       return;
     }
-    return <D3HeatmapLegend colors={this.colors} min={this.state.min} max={this.state.max} />
+    return <D3HeatmapLegend colors={this.colors} min={this.minMax.thresholdMin} max={this.minMax.thresholdMax} />
   }
+
   render () {
+    if (this.state.data) {
+      this.minMax = this.getMinMax();
+    }
     return (
       <div id="project-visualization">
         <SubHeader>
@@ -1103,9 +1125,11 @@ class SamplesHeatmap extends React.Component {
               {this.renderTypePickers()}
             </div>
             <div className="col s3">
+              <label>Thresholds</label>
               {this.renderThresholdSlider()}
             </div>
             <div className="col s3">
+              <label>Legend</label>
               {this.renderLegend()}
             </div>
           </div>
@@ -1121,38 +1145,37 @@ class SamplesHeatmap extends React.Component {
 
 class D3HeatmapLegend extends React.Component {
   componentDidMount () {
-    this.renderD3();
+    this.renderD3(this.props);
   }
 
-  renderD3 () {
-    console.log(this.props.min, this.props.max);
+  renderD3 (props) {
     this.svg = d3.select(this.container).append("svg")
         .attr("width", "100%")
         .attr("height", "50");
 
     let that = this,
         height = 20,
-        legendElementWidth = 100 / this.props.colors.length;
+        legendElementWidth = 100 / props.colors.length;
 
     this.svg.selectAll(".legend-text-min")
         .data([this.min])
         .enter().append("text")
         .attr("x", 0)
-        .attr("y", 40)
+        .attr("y", 35)
         .attr("class", "mono")
-        .text(Math.round(this.props.min));
+        .text(NumAbbreviate(Math.round(props.min)));
 
     this.svg.selectAll(".legend-text-max")
-        .data([this.props.max])
+        .data([props.max])
         .enter().append("text")
         .attr("class", "mono")
         .attr("x", "100%")
-        .attr("y", 40)
-        .text(Math.round(this.props.max))
+        .attr("y", 35)
+        .text(NumAbbreviate(Math.round(props.max)))
         .style("text-anchor", "end");
 
     var legend = this.svg.selectAll(".legend")
-      .data(this.props.colors)
+      .data(props.colors)
       .enter().append("g")
       .attr("class", "legend");
 
@@ -1179,12 +1202,12 @@ class D3HeatmapLegend extends React.Component {
       return;
     }
     d3.select(this.container).select("svg").remove();
-    this.renderD3();
+    this.renderD3(nextProps);
   }
 
   render () {
     return (
-      <div ref={(container) => { this.container = container; }} >
+      <div className="heatmap-legend" ref={(container) => { this.container = container; }} >
       </div>
     );
   }
