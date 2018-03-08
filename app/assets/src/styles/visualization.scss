@@ -121,7 +121,7 @@
   text.text-selected {
     fill: #000;
   }
- .text-hover text, text.text-highlight {
+ .text-hover.mono, .text-hover text, text.text-highlight {
 		fill: rgb(82,131,211);
   }
 
