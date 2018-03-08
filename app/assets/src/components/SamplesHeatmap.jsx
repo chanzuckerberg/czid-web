@@ -1121,7 +1121,7 @@ class SamplesHeatmap extends React.Component {
           <div>
             <Popup
               trigger={<Button className="right" primary onClick={this.onShareClick.bind(this)}>Share</Button>}
-              content='Sharable heatmap URL has been copied to your clipboard'
+              content='A shareable URL has been copied to your clipboard!'
               on='click'
               hideOnScroll
             />
