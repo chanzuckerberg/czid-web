@@ -145,7 +145,6 @@ class PipelineSampleReport extends React.Component {
   }
 
   componentDidMount() {
-    this.listenThresholdChanges();
     this.scrollDown();
     const topFilterHandler = $('.top-filter-dropdown');
     topFilterHandler.dropdown({
@@ -163,7 +162,6 @@ class PipelineSampleReport extends React.Component {
     const filtersActivate = $(activateDiv);
 
     filtersActivate.on('click', (e) => {
-      e.stopPropagation();
       filtersModal.slideToggle(200);
     });
   }
@@ -635,12 +633,6 @@ class PipelineSampleReport extends React.Component {
     }
   }
 
-  listenThresholdChanges() {
-    $('.metric-thresholds').focusout((e) => {
-      this.applyThresholdFilters(this.state.taxonomy_details, true);
-    });
-  }
-
   // only for background model
   refreshPage(overrides) {
     ReportFilter.showLoading('Fetching results for new background...');
@@ -1056,7 +1048,7 @@ class PipelineSampleReport extends React.Component {
                         </div>
                       </li>
                       <li className="top-filter ">
-                        <div className="advanced-filters-activate">
+                        <div className="advanced-filters-activate" onClick= {(e) => {this.saveThresholdFilters(false);} } >
                           <span className="filter-label">
                             Advanced Filtering
                           </span>
@@ -1102,7 +1094,7 @@ class PipelineSampleReport extends React.Component {
                                     </div>
                                     <div className="col s3">
                                       <input
-                                        className="metric-thresholds browser-default"
+                                        className="browser-default metric-thresholds"
                                         onChange={(e) => this.setThresholdProperty(index, 'value', e.target.value)}
                                         onKeyDown={(e) => this.handleThresholdEnter(e, index)}
                                         name="group2"
