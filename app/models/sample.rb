@@ -1,6 +1,7 @@
 require 'open3'
 require 'json'
 require 'tempfile'
+require 'aws-sdk'
 
 class Sample < ApplicationRecord
   STATUS_CREATED  = 'created'.freeze
@@ -50,7 +51,7 @@ class Sample < ApplicationRecord
   after_create :initiate_input_file_upload
   validates :name, uniqueness: { scope: :project_id }
 
-  before_save :check_host_genome, :check_status
+  before_save :check_host_genome, :concatenate_input_parts, :check_status
   after_save :set_presigned_url_for_local_upload
 
   # getter
@@ -268,6 +269,27 @@ class Sample < ApplicationRecord
     end
     s3_preload_result_path ||= ''
     s3_preload_result_path.strip!
+  end
+
+  def concatenate_input_parts
+    input_files.each do |f|
+      next unless f.source_type == 'local'
+      parts = f.parts.split(", ")
+      resp0 = S3_CLIENT.create_multipart_upload({bucket: SAMPLES_BUCKET_NAME, key: f.file_path})
+      upload_id = resp0.to_h[:upload_id]
+      source_parts = []
+      parts.each_with_index do |part, index|
+        source_part = File.join(File.dirname(f.file_path), File.basename(part))
+        source_parts << source_part
+        S3_CLIENT.upload_part_copy({bucket: SAMPLES_BUCKET_NAME, key: f.file_path,
+          copy_source: source_part,
+          part_number: index, upload_id: upload_id})
+      end
+      resp1 = S3_CLIENT.complete_multipart_upload(resp0.to_h)
+    end
+    source_parts.each do |source_part|
+      `aws s3 rm #{source_part}`
+    end
   end
 
   def check_status
