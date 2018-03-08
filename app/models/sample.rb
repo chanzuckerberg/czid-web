@@ -274,6 +274,7 @@ class Sample < ApplicationRecord
   end
 
   def concatenate_input_parts
+    return unless [STATUS_CREATED, STATUS_UPLOADED].include?(status)
     input_files.each do |f|
       next unless f.source_type == 'local'
       parts = f.parts.split(", ")
