@@ -84,7 +84,7 @@ class PipelineSampleReport extends React.Component {
     };
 
     this.defaultThresholdValues = (savedThresholdFilters.length)
-      ? savedThresholdFilters : [this.defaultThreshold]; // all taxons will pass this default filter
+      ? savedThresholdFilters : [Object.assign({}, this.defaultThreshold)]; // all taxons will pass this default filter
 
     // we should only keep dynamic data in the state
     this.state = {
@@ -221,7 +221,7 @@ class PipelineSampleReport extends React.Component {
 
   resetAllFilters() {
     this.setState({
-      activeThresholds: [this.defaultThreshold],
+      activeThresholds: [Object.assign({}, this.defaultThreshold)],
       excluded_categories: [],
       searchId: 0,
       searchKey: '',
@@ -502,7 +502,7 @@ class PipelineSampleReport extends React.Component {
 
   appendThresholdFilter() {
     const stateCopy = Object.assign([], this.state.activeThresholds);
-    stateCopy.push(this.defaultThreshold);
+    stateCopy.push(Object.assign({}, this.defaultThreshold));
     this.setState({
       activeThresholds: stateCopy
     });
