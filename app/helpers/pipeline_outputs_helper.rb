@@ -1,5 +1,6 @@
 module PipelineOutputsHelper
   Client = Aws::S3::Client.new
+  MAX_ALGIN_VIZ_READS_PER_ACCESSION = 20
 
   def curate_pipeline_run_display(pipeline_run)
     return nil unless pipeline_run
@@ -31,6 +32,10 @@ module PipelineOutputsHelper
     results = accession_details
     reads = results.delete("reads")
     results["reads"] = []
+    results["reads_count"] = reads.size
+    if reads.size > MAX_ALGIN_VIZ_READS_PER_ACCESSION # only sample 20 reads
+      reads = reads.sample(MAX_ALGIN_VIZ_READS_PER_ACCESSION)
+    end
     reads.each do |read_info|
       read_id = read_info[0]
       read_part = read_id.split("/")[1].to_i
@@ -56,10 +61,8 @@ module PipelineOutputsHelper
       left_portion = (metrics[4] - 2) >= 0 ? read_seq[0..(metrics[4] - 2)] : ""
       right_portion = metrics[5] < read_seq.size ? read_seq[(metrics[5])..(read_seq.size - 1)] : ""
       if ref_seq[0].size > left_portion.size
-        # pad left_portion
-        while ref_seq[0].size > left_portion.size
-          left_portion = ' ' + left_portion
-        end
+        # trim ref_seq[0]
+        ref_seq[0] = ref_seq[0].reverse[0...left_portion.size].reverse
       else
         # pad ref_seq[0]
         ref_seq[0] = ' ' + ref_seq[0] while ref_seq[0].size < left_portion.size
