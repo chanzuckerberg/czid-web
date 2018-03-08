@@ -106,7 +106,8 @@ class PipelineSampleReport extends React.Component {
       search_taxon_id: 0,
       rendering: false,
       loading: true,
-      activeThresholds: this.defaultThresholdValues
+      activeThresholds: this.defaultThresholdValues,
+      countType: 'NT'
     };
     this.expandAll = false;
     this.expandedGenera = [];
@@ -762,16 +763,32 @@ class PipelineSampleReport extends React.Component {
     return foo;
   }
 
-  render_number(x, emphasize, num_decimals) {
-    const is_blank = (x == 0) || (x == -100);
-    let y = Number(x);
-    y = y.toFixed(num_decimals);
-    y = numberWithCommas(y);
-    if (emphasize) {
-      y = <b>{y}</b>;
-    }
-    const className = is_blank ? 'report-number-blank' : 'report-number';
-    return (<td className={className}>{y}</td>);
+  render_number(ntCount, nrCount, num_decimals, isAggregate = false) {
+    const isNtCountBlank = (ntCount === 0) || (ntCount === -100);
+    const isNrCountBlank =  (nrCount === 0) || (nrCount === -100);
+
+    ntCount = numberWithCommas(Number(ntCount).toFixed(num_decimals));
+    nrCount = (nrCount !== null) ? numberWithCommas(Number(nrCount).toFixed(num_decimals)) : null;
+
+    const ntClassName = `${(this.state.countType === 'NT') ? 'active count-type' : 'count-type'}
+    ${(isNtCountBlank && this.state.countType === 'NT') ? 'blank' : ''}`;
+    const nrClassName = `${(this.state.countType === 'NR') ? 'active count-type' : 'count-type'}
+    ${(isNrCountBlank && this.state.countType === 'NR') ? 'blank' : ''}`;
+
+    const ntCountLabel = (isAggregate) ?
+      <div className={`active count-type ${ (isNtCountBlank) ? 'blank' : ''}`}>
+        {ntCount}
+      </div> : <div className={ntClassName}>{ntCount}</div>;
+    const nrCountLabel = (nrCount) ?
+      <div className={nrClassName}>
+        {nrCount}
+      </div> : null
+    return(
+      <td className='report-number'>
+        {ntCountLabel}
+        {nrCountLabel}
+      </td>
+    );
   }
 
   isSortedActive(columnName) {
@@ -780,7 +797,7 @@ class PipelineSampleReport extends React.Component {
   }
 
   render_sort_arrow(column, desired_sort_direction, arrow_direction) {
-    let className = ` ${this.isSortedActive(column)} fa fa-caret-${arrow_direction}`;
+    let className = `${this.isSortedActive(column)} fa fa-chevron-${arrow_direction}`;
     return (
       <i
         onClick={this.applySort.bind(this, column)}
@@ -790,15 +807,15 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
-  render_column_header(visible_type, visible_metric, column_name, tooltip_message) {
-    const style = { textAlign: 'left', cursor: 'pointer' };
+  render_column_header(visible_metric, column_name, tooltip_message) {
     return (
-      <th style={style}>
+      <th>
         <Tipsy content={tooltip_message} placement="top">
-          <div className='sort-controls center left'>
-            {this.render_sort_arrow(column_name, 'highest', 'down')}
-            {`${visible_type} `}
-            {visible_metric}
+          <div className='sort-controls' onClick={this.applySort.bind(this, column_name)}>
+            <span className={`${this.isSortedActive(column_name)} table-head-label`}>
+              {visible_metric}
+            </span>
+            {this.render_sort_arrow(column_name, 'highest', 'up')}
           </div>
         </Tipsy>
       </th>
@@ -1143,19 +1160,21 @@ class PipelineSampleReport extends React.Component {
                           </span>
                         Taxonomy
                         </th>
-                        {this.render_column_header('', 'Score', 'NT_aggregatescore', 'Aggregate score: ( |genus.NT.Z| * species.NT.Z * species.NT.rPM ) + ( |genus.NR.Z| * species.NR.Z * species.NR.rPM )') }
-                        {this.render_column_header('NT', 'Z', 'NT_zscore', 'Z-score relative to background model for alignments to NCBI NT') }
-                        {this.render_column_header('NT', 'rPM', 'NT_rpm', 'Number of reads aligning to the taxon in the NCBI NT database per million total input reads')}
-                        {this.render_column_header('NT', 'r', 'NT_r', 'Number of reads aligning to the taxon in the NCBI NT database')}
-                        {this.render_column_header('NT', '%id', 'NT_percentidentity', 'Average percent-identity of alignments to NCBI NT')}
-                        {this.render_column_header('NT', 'log(1/E)', 'NT_neglogevalue', 'Average log-10-transformed expect value for alignments to NCBI NT')}
-                        {this.render_column_header('NT', '%conc', 'NT_percentconcordant', 'Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NT)')}
-                        {this.render_column_header('NR', 'Z', 'NR_zscore', 'Z-score relative to background model for alignments to NCBI NR') }
-                        {this.render_column_header('NR', 'rPM', 'NR_rpm', 'Number of reads aligning to the taxon in the NCBI NR database per million total input reads')}
-                        {this.render_column_header('NR', 'r', 'NR_r', 'Number of reads aligning to the taxon in the NCBI NR database')}
-                        {this.render_column_header('NR', '%id', 'NR_percentidentity', 'Average percent-identity of alignments to NCBI NR')}
-                        {this.render_column_header('NR', 'log(1/E)', 'NR_neglogevalue', 'Average log-10-transformed expect value for alignments to NCBI NR')}
-                        {this.render_column_header('NR', '%conc', 'NR_percentconcordant', 'Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NR)')}
+                        {this.render_column_header('Score', `NT_aggregatescore`, 'Aggregate score: ( |genus.NT.Z| * species.NT.Z * species.NT.rPM ) + ( |genus.NR.Z| * species.NR.Z * species.NR.rPM )') }
+                        {this.render_column_header('Z', `${this.state.countType}_zscore`, `Z-score relative to background model for alignments to NCBI ${this.state.countType}`) }
+                        {this.render_column_header('rPM', `${this.state.countType}_rpm`, `Number of reads aligning to the taxon in the NCBI ${this.state.countType} database per million total input reads`)} 
+                        {this.render_column_header('r', `${this.state.countType}_r`, `Number of reads aligning to the taxon in the NCBI ${this.state.countType} database`)}
+                        {this.render_column_header('%id', `${this.state.countType}_percentidentity`, `Average percent-identity of alignments to NCBI ${this.state.countType}`)}
+                        {this.render_column_header('log(1/E)', `${this.state.countType}_neglogevalue`, `Average log-10-transformed expect value for alignments to NCBI ${this.state.countType}`)}
+                        {this.render_column_header('%conc', `${this.state.countType}_percentconcordant`, `Percentage of aligned reads belonging to a concordantly mappped pair (NCBI ${this.state.countType})`)}
+                        <th>
+                          <Tipsy content='Switch count type' placement="top">
+                            <div className='sort-controls center left'>
+                              <div className={this.state.countType === "NT" ? 'active column-switcher' : 'column-switcher'} onClick={() => {this.setState({countType: 'NT'}); }}>NT</div>
+                              <div className={this.state.countType === "NR" ? 'active column-switcher' : 'column-switcher'} onClick={() => {this.setState({countType: 'NR'}); }}>NR</div>
+                            </div>
+                          </Tipsy>
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1164,19 +1183,14 @@ class PipelineSampleReport extends React.Component {
                           <td>
                             { this.render_name(tax_info, this.report_details) }
                           </td>
-                          { this.render_number(tax_info.NT.aggregatescore, this.isSortedActive('nt_aggregatescore'), 0) }
-                          { this.render_number(tax_info.NT.zscore, this.isSortedActive('nt_zscore'), 1) }
-                          { this.render_number(tax_info.NT.rpm, this.isSortedActive('nt_rpm'), 1) }
-                          { this.render_number(tax_info.NT.r, this.isSortedActive('nt_r'), 0) }
-                          { this.render_number(tax_info.NT.percentidentity, this.isSortedActive('nt_percentidentity'), 1) }
-                          { this.render_number(tax_info.NT.neglogevalue, this.isSortedActive('nt_neglogevalue'), 0) }
-                          { this.render_number(tax_info.NT.percentconcordant, this.isSortedActive('nt_percentconcordant'), 1) }
-                          { this.render_number(tax_info.NR.zscore, this.isSortedActive('nr_zscore'), 1) }
-                          { this.render_number(tax_info.NR.rpm, this.isSortedActive('nr_rpm'), 1) }
-                          { this.render_number(tax_info.NR.r, this.isSortedActive('nr_r'), 0) }
-                          { this.render_number(tax_info.NR.percentidentity, this.isSortedActive('nr_percentidentity'), 1) }
-                          { this.render_number(tax_info.NR.neglogevalue, this.isSortedActive('nr_neglogevalue'), 0) }
-                          { this.render_number(tax_info.NR.percentconcordant, this.isSortedActive('nr_percentconcordant'), 1) }
+                          { this.render_number(tax_info.NT.aggregatescore, null, 0, true) }
+                          { this.render_number(tax_info.NT.zscore, tax_info.NR.zscore, 1) }
+                          { this.render_number(tax_info.NT.rpm, tax_info.NR.rpm, 1) }
+                          { this.render_number(tax_info.NT.r, tax_info.NR.r, 0) }
+                          { this.render_number(tax_info.NT.percentidentity, tax_info.NR.percentidentity, 1) }
+                          { this.render_number(tax_info.NT.neglogevalue, tax_info.NR.neglogevalue, 0) }
+                          { this.render_number(tax_info.NT.percentconcordant, tax_info.NR.percentconcordant, 1) }
+                          <td>&nbsp;</td>
                         </tr>
                       ))}
                     </tbody>

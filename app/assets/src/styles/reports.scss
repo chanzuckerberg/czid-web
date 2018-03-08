@@ -290,6 +290,20 @@ margin-bottom: 0px;
 .report-table {
   // min-width: 1000px;
   font-size: $font-size-small;
+  .count-type {
+    text-align: right;
+    font-weight: normal;
+    color:  #999999;
+    &.active {
+      font-weight: bolder;
+      color: #333333;
+    }
+  }
+  .blank {
+    font-style: italic;
+    color: #d1d1d2 !important;
+    font-weight: normal !important;
+  }
 }
 
 .report-table .link:hover {
@@ -372,13 +386,29 @@ margin-bottom: 0px;
   white-space: nowrap;
   overflow: hidden;
   font-weight: $font-weight-semibold;
+  text-align: center;
+  .table-head-label {
+    cursor: pointer;
+    &.active {
+      color: $id-blue;
+    }
+  }
   i {
-    font-size: $font-size-h4;
-    float: right;
-    display: block;
-    margin-right: 3px;
+    font-size: $font-size-small;
+    width: 7.9px;
+    height: 4.7px;
+    cursor: pointer;
     &:hover, &.active {
-      color: #09c;
+      color: $id-blue;
+    }
+  }
+  .column-switcher {
+    color: #999999;
+    cursor: pointer;
+    font-weight: normal;
+    &.active {
+      color: #333333;
+      font-weight: bolder;
     }
   }
 }
