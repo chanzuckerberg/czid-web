@@ -85,8 +85,10 @@ class Sample < ApplicationRecord
       if f.source_type == 'local'
         # TODO: investigate the content-md5 stuff https://github.com/aws/aws-sdk-js/issues/151 https://gist.github.com/algorist/385616
         parts = f.parts.split(", ")
-        presigned_urls = parts.map { |part| S3_PRESIGNER.presigned_url(:put_object, bucket: SAMPLES_BUCKET_NAME,
-                                                                       key: File.join(File.dirname(f.file_path), File.basename(part))) }
+        presigned_urls = parts.map do |part|
+          S3_PRESIGNER.presigned_url(:put_object, bucket: SAMPLES_BUCKET_NAME,
+                                                  key: File.join(File.dirname(f.file_path), File.basename(part)))
+        end
         f.update(presigned_url: presigned_urls.join(", "))
       end
     end
@@ -275,17 +277,17 @@ class Sample < ApplicationRecord
     input_files.each do |f|
       next unless f.source_type == 'local'
       parts = f.parts.split(", ")
-      resp0 = S3_CLIENT.create_multipart_upload({bucket: SAMPLES_BUCKET_NAME, key: f.file_path})
+      resp0 = S3_CLIENT.create_multipart_upload(bucket: SAMPLES_BUCKET_NAME, key: f.file_path)
       upload_id = resp0.to_h[:upload_id]
       source_parts = []
       parts.each_with_index do |part, index|
         source_part = File.join(File.dirname(f.file_path), File.basename(part))
         source_parts << source_part
-        S3_CLIENT.upload_part_copy({bucket: SAMPLES_BUCKET_NAME, key: f.file_path,
-          copy_source: source_part,
-          part_number: index, upload_id: upload_id})
+        S3_CLIENT.upload_part_copy(bucket: SAMPLES_BUCKET_NAME, key: f.file_path,
+                                   copy_source: source_part,
+                                   part_number: index, upload_id: upload_id)
       end
-      resp1 = S3_CLIENT.complete_multipart_upload(resp0.to_h)
+      S3_CLIENT.complete_multipart_upload(resp0.to_h)
     end
     source_parts.each do |source_part|
       `aws s3 rm #{source_part}`
