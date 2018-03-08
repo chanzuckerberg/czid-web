@@ -497,8 +497,6 @@ class PipelineSampleReport extends React.Component {
   setThresholdProperty(index, property, value) {
     const stateCopy = Object.assign([], this.state.activeThresholds);
     stateCopy[index][property] = value;
-    if (property == 'label') {
-    }
     this.setState({ activeThresholds: stateCopy });
   }
 
