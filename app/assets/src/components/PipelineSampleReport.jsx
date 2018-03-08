@@ -71,12 +71,20 @@ class PipelineSampleReport extends React.Component {
     ];
     this.genus_map = {};
 
+    this.thresholdLabel2Name = {}
+    for(let i = 0; i < this.allThresholds.length; i+=1) {
+      const threshold = this.allThresholds[i]
+      this.thresholdLabel2Name[threshold['value']] = threshold['name']
+    }
+
+    this.defaultThreshold = {
+      label: this.allThresholds[0]['value'],
+      operator: '>=',
+      value: ''
+    };
+
     this.defaultThresholdValues = (savedThresholdFilters.length)
-      ? savedThresholdFilters : [{
-        label: '',
-        operator: '>=',
-        value: ''
-      }]; // all taxons will pass this default filter
+      ? savedThresholdFilters : [this.defaultThreshold]; // all taxons will pass this default filter
 
     // we should only keep dynamic data in the state
     this.state = {
@@ -105,6 +113,7 @@ class PipelineSampleReport extends React.Component {
     this.applySearchFilter = this.applySearchFilter.bind(this);
     this.anyFilterSet = this.anyFilterSet.bind(this);
     this.resetAllFilters = this.resetAllFilters.bind(this);
+    this.displayedCategories = this.displayedCategories.bind(this);
     this.sortResults = this.sortResults.bind(this);
     this.sortCompareFunction = this.sortCompareFunction.bind(this);
     this.setSortParams = this.setSortParams.bind(this);
@@ -212,11 +221,7 @@ class PipelineSampleReport extends React.Component {
 
   resetAllFilters() {
     this.setState({
-      activeThresholds: [{
-        label: '',
-        operator: '>=',
-        value: ''
-      }],
+      activeThresholds: [this.defaultThreshold],
       excluded_categories: [],
       searchId: 0,
       searchKey: '',
@@ -441,9 +446,22 @@ class PipelineSampleReport extends React.Component {
     };
   }
 
+  displayedCategories(excludedCategories) {
+    let displayed_categories = []
+    for (let i = 0; i < this.all_categories.length; i+=1) {
+      if (excludedCategories.indexOf(this.all_categories[i]['name']) < 0) {
+        displayed_categories.push(this.all_categories[i]['name']);
+      }
+    }
+    return displayed_categories;
+  }
+
   applyExcludedCategories(e) {
     let excluded_categories = this.state.excluded_categories;
-    if (e.target.checked) {
+    const category = e.target.getAttribute('data-exclude-category')
+    if (category && category.length > 0) { //trigger through the tag X click
+      excluded_categories.push(category)
+    } else if (e.target.checked) {
       const ridx = excluded_categories.indexOf(e.target.value);
       if (ridx > -1) {
         excluded_categories.splice(ridx, 1);
@@ -479,13 +497,14 @@ class PipelineSampleReport extends React.Component {
   setThresholdProperty(index, property, value) {
     const stateCopy = Object.assign([], this.state.activeThresholds);
     stateCopy[index][property] = value;
+    if (property == 'label') {
+    }
     this.setState({ activeThresholds: stateCopy });
   }
 
   appendThresholdFilter() {
     const stateCopy = Object.assign([], this.state.activeThresholds);
-    const firstThreshold = this.allThresholds[0]
-    stateCopy.push({ label: firstThreshold['value'], operator: '>=', value: '' });
+    stateCopy.push(this.defaultThreshold);
     this.setState({
       activeThresholds: stateCopy
     });
@@ -501,6 +520,16 @@ class PipelineSampleReport extends React.Component {
     this.setState({
       activeThresholds: stateCopy
     }, () => { this.saveThresholdFilters(closeWindow); } )
+  }
+
+  validThresholdCount(thresholds) {
+    let cnt = 0
+    for (let i= 0; i < thresholds.length; i+= 1) {
+      if (this.isThresholdValid(thresholds[i])) {
+        cnt += 1
+      }
+    }
+    return cnt
   }
 
   isThresholdValid(threshold) {
@@ -786,6 +815,7 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
+
   row_class(tax_info) {
     if (tax_info.tax_level == 2) {
       if (tax_info.tax_id < 0) {
@@ -897,6 +927,23 @@ class PipelineSampleReport extends React.Component {
       </div>
     );
 
+    const advanced_filter_tag_list = this.state.activeThresholds.map((threshold, i) => {
+      return this.isThresholdValid(threshold) ? (
+        <span className="filter-tag" key={`advanced_filter_tag_${i}`}>
+        <span className='filter-tag-name'>{this.thresholdLabel2Name[threshold['label']]} { threshold['operator'] } {threshold['value'] }</span>
+        <span className='filter-tag-x' onClick= {() => {this.removeThresholdFilter(i);}} >X</span>
+        </span>
+        ) : null;
+    });
+
+    const categories_filter_tag_list = this.displayedCategories(this.state.excluded_categories).map((category, i) => {
+      return (
+        <span className="filter-tag" key={`category_tag_${i}`}>
+        <span className='filter-tag-name'> {category} </span>
+        <span className='filter-tag-x' data-exclude-category={category} onClick= { (e) => { this.applyExcludedCategories(e);} }  >X</span>
+        </span>
+      );
+    });
     const right_arrow_initial_visibility = '';
     const result = (
       <div>
@@ -985,6 +1032,7 @@ class PipelineSampleReport extends React.Component {
                       <li className='categories-dropdown top-filter' >
                         <div className="categories-filters-activate">
                           <span className='filter-label'>Categories</span>
+                          <span className='filter-label-count'>{(this.all_categories.length-this.state.excluded_categories.length)} </span>
                           <i className='fa fa-angle-down right'></i>
                         </div>
                         <div className='categories-filters-modal'>
@@ -1014,6 +1062,7 @@ class PipelineSampleReport extends React.Component {
                           <span className="filter-label">
                             Advanced Filtering
                           </span>
+                          <span className='filter-label-count'>{this.validThresholdCount(this.state.activeThresholds)} </span>
                           <i className="fa fa-angle-down right" />
                         </div>
                         <div className="advanced-filters-modal">
@@ -1084,6 +1133,9 @@ class PipelineSampleReport extends React.Component {
                         </div>
                       </li>
                     </ul>
+                  </div>
+                  <div className="filter-tags-list">
+                    { advanced_filter_tag_list } { categories_filter_tag_list }
                   </div>
                   {/* { filter_row_stats } */}
                 </div>

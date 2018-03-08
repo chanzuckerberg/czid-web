@@ -518,6 +518,36 @@ margin-bottom: 0px;
         color: #84d4fa;
       }
     }
+    .filter-tags-list {
+      margin-left: 15px;
+      .filter-tag {
+        border-radius: 6px;
+        background-color: #3867fa;
+        margin-left: 5px;
+        padding-left: 5px;
+        padding-right: 5px;
+        color: #ffffff;
+        .filter-tag-name {
+          font-family: OpenSans;
+          font-size: 12px;
+          font-weight: 600;
+          font-style: normal;
+          font-stretch: normal;
+          line-height: normal;
+          letter-spacing: 1.4px;
+          text-align: left;
+        }
+        .filter-tag-x {
+          font-size: 10px;
+          font-weight: 600;
+          margin-left: 12px;
+          width: 8px;
+          height: 8px;
+          cursor: pointer;
+          object-fit: contain;
+        }
+      }
+    }
     .report-top-filters {
       .filter-lists {
         margin-left: 15px;
@@ -540,9 +570,24 @@ margin-bottom: 0px;
               white-space: nowrap;
               text-overflow: ellipsis;
               overflow: hidden;
-              width: 87%;
+              width: 80%;
               position: relative;
               top: 4px;
+            }
+            .filter-label-count {
+                width: 24px;
+                height: 24px;
+                border-radius: 14px;
+                background-color: #f8f8f8;
+                font-family: OpenSans;
+                font-size: 12px;
+                font-weight: 600;
+                font-style: normal;
+                font-stretch: normal;
+                line-height: normal;
+                letter-spacing: 1.4px;
+                text-align: left;
+                color: #3867fa;
             }
             &.download-report-button {
               padding: 8px;
