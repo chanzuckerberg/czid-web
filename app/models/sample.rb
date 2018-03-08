@@ -278,6 +278,7 @@ class Sample < ApplicationRecord
     input_files.each do |f|
       next unless f.source_type == 'local'
       parts = f.parts.split(", ")
+      next unless parts.length > 1
       resp0 = S3_CLIENT.create_multipart_upload(bucket: SAMPLES_BUCKET_NAME, key: f.file_path)
       upload_id = resp0.to_h[:upload_id]
       source_parts = []
@@ -289,9 +290,9 @@ class Sample < ApplicationRecord
                                    part_number: index, upload_id: upload_id)
       end
       S3_CLIENT.complete_multipart_upload(resp0.to_h)
-    end
-    source_parts.each do |source_part|
-      `aws s3 rm #{source_part}`
+      source_parts.each do |source_part|
+        `aws s3 rm #{source_part}`
+      end
     end
   end
 
