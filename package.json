@@ -45,6 +45,7 @@
     "react-tipsy": "^0.6.2",
     "react-tooltip": "^3.4.0",
     "semantic-ui-css": "^2.3.0",
-    "semantic-ui-react": "^0.78.3"
+    "semantic-ui-react": "^0.78.3",
+    "text-width": "^1.2.0"
   }
 }

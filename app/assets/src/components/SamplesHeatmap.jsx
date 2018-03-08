@@ -10,6 +10,7 @@ import ReactNouislider from './ReactNouislider';
 import NumAbbreviate from 'number-abbreviate';
 import { Button, Popup } from 'semantic-ui-react'
 import copy from 'copy-to-clipboard';
+import width from 'text-width';
 
 class SampleHeatmapTooltip extends React.Component {
   constructor(props) {
@@ -122,13 +123,20 @@ class D3Heatmap extends React.Component {
     for (let i = 0; i < this.row_number; i += 1) {
       let label = props.getRowLabel(i)
       this.rowLabel.push(label);
-      longest_row_label = Math.max(longest_row_label, label.length);
+      let row_width = width(label, {
+        size: '8pt',
+      });
+
+      longest_row_label = Math.max(longest_row_label, row_width);
     }
 
     for (let j = 0; j < this.col_number; j += 1) {
       let label = props.getColumnLabel(j);
       this.colLabel.push(label);
-      longest_col_label = Math.max(longest_col_label, label.length);
+      let col_width = width(label, {
+        size: '8pt',
+      });
+      longest_col_label = Math.max(longest_col_label, col_width);
     }
 
     // Generate the grid data
@@ -152,10 +160,10 @@ class D3Heatmap extends React.Component {
       }
     }
     this.margin ={
-      top: char_width * longest_col_label * 0.8,
+      top: longest_col_label * Math.sin(65) + 20,
       left: Math.ceil(Math.sqrt(this.row_number)) * 10,
       bottom: 80,
-      right: char_width * longest_row_label
+      right: longest_row_label + 20
     };
     this.cellWidth = Math.max(900 / this.col_number, 20);
     this.cellHeight = Math.max(400 / this.row_number, 15);
@@ -1165,7 +1173,7 @@ class D3HeatmapLegend extends React.Component {
   renderD3 (props) {
     this.svg = d3.select(this.container).append("svg")
         .attr("width", "100%")
-        .attr("height", "50");
+        .attr("height", "35");
 
     let that = this,
         height = 20,

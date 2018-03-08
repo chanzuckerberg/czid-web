@@ -7,9 +7,12 @@
 #project-visualization {
   .heatmap-legend {
     padding: 12px 0 0 0;
+    margin-bottom: -10px;
   }
   .sub-menu {
     margin-top: 1em;
+    padding-bottom: 1em;
+    border-bottom: 1px solid #eee;
   }
   select {
     display: block;
