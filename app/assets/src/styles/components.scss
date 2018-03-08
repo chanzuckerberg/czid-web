@@ -1,0 +1,13 @@
+.ui.button.primary {
+  padding: 7px 30px;
+  border-radius: 40px;
+  border: 1px solid #3867fa;
+  cursor: pointer;
+  display: block;
+  background: #3867fa !important;
+  color: #ffffff !important;
+  &:hover {
+    background: #ffffff !important;
+    color: #3867fa !important;
+  }
+}
