@@ -294,7 +294,7 @@ margin-bottom: 0px;
 
 .report-table .link:hover {
   color: #0099cc;
-  cursor: pointer;
+  cursor: text;
 }
 
 .report-table .count-info {
@@ -647,7 +647,7 @@ margin-bottom: 0px;
 }
 
 .hover-wrapper {
-  cursor: pointer;
+  cursor: text;
   &:hover {
     .link-tag {
       visibility: visible;
@@ -658,7 +658,7 @@ margin-bottom: 0px;
     padding: 10px;
     color: #84d4fa;
     font-size: $font-size-base;
-    cursor: pointer;
+    cursor: text;
     .fa-download {
       margin-left:12px;
     }

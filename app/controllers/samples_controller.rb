@@ -97,7 +97,7 @@ class SamplesController < ApplicationController
         if @samples.present?
           render json: { samples: @samples }
         else
-          render json: { status: "No samples imported under #{@bulk_path}" }, status: :unprocessable_entity
+          render json: { status: "No samples imported under #{@bulk_path}. Files must have extension fastq.gz/fq.gz/fastq/fq/fasta.gz/fa.gz/fasta/fa." }, status: :unprocessable_entity
         end
       end
     end
@@ -192,7 +192,6 @@ class SamplesController < ApplicationController
   end
 
   def heatmap
-    @sample_ids = params[:sample_ids].to_s.split(",").map(&:to_i) || []
   end
 
   def samples_taxons

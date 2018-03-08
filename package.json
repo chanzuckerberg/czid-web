@@ -9,20 +9,20 @@
     "babel-preset-env": "^1.6.1",
     "babel-preset-react": "^6.24.1",
     "coveralls": "^3.0.0",
-    "css-loader": "^0.28.8",
+    "css-loader": "^0.28.10",
     "eslint": "^4.15.0",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-jsx-a11y": "^6.0.3",
     "eslint-plugin-react": "^7.5.1",
     "extract-text-webpack-plugin": "^3.0.2",
-    "file-loader": "^1.1.6",
+    "file-loader": "^1.1.11",
     "import-glob-loader": "^1.1.0",
     "node-sass": "^4.7.2",
     "sass-loader": "^6.0.6",
-    "style-loader": "^0.19.1",
+    "style-loader": "^0.20.2",
     "uglifyjs-webpack-plugin": "^1.1.6",
-    "url-loader": "^0.6.2",
+    "url-loader": "^1.0.1",
     "webpack": "^3.10.0"
   },
   "dependencies": {
@@ -42,6 +42,7 @@
     "react-dom": "^16.2.0",
     "react-tipsy": "^0.6.2",
     "react-tooltip": "^3.4.0",
+    "semantic-ui-css": "^2.3.0",
     "semantic-ui-react": "^0.78.3"
   }
 }

@@ -6,6 +6,7 @@ import subprocess
 import time
 import hashlib
 import random
+import threading
 from functools import wraps
 
 
@@ -164,11 +165,14 @@ def count_healthy_instances(asg):
     return num_healthy
 
 
-def set_desired_capacity(asg, compute_desired_instances, my_environment):
-    can_scale = permission_to_scale(asg, my_environment)
+def get_previous_desired(asg):
+    return int(asg.get("DesiredCapacity", asg.get("MinSize", 0)))
+
+
+def set_desired_capacity(asg, compute_desired_instances, can_scale=True):
     asg_name = asg['AutoScalingGroupName']
     num_healthy = count_healthy_instances(asg)
-    previous_desired = int(asg.get("DesiredCapacity", asg.get("MinSize", 0)))
+    previous_desired = get_previous_desired(asg)
     # Manually input DesiredCapacity will never be reduced so long as there are pending jobs.
     num_desired = compute_desired_instances(previous_desired)
     if num_desired == previous_desired:
@@ -178,13 +182,34 @@ def set_desired_capacity(asg, compute_desired_instances, my_environment):
     cmd = "aws autoscaling set-desired-capacity --auto-scaling-group-name {asg_name} --desired-capacity {num_desired}"
     cmd = cmd.format(asg_name=asg_name, num_desired=num_desired)
     msg = "Autoscaling group {asg_name} has {num_healthy} healthy instance(s). Desired capacity {action} {num_desired}."
-    if not can_scale:
-        msg += " However, scaling by agents of {} is not permitted.".format(my_environment)
     print msg.format(asg_name=asg_name, num_healthy=num_healthy, action=action, num_desired=num_desired)
     if can_scale:
         if DEBUG:
             print cmd
         aws_command(cmd)
+
+
+def count_running_batch_jobs():
+    queues_lock = threading.RLock()
+    queues = {"idseq_himem": [],
+              "idseq": []}
+    errors = []
+    def list_jobs(q):
+        try:
+            job_list = aws_command("aws batch list-jobs --job-queue {q} --job-status RUNNING".format(q=q))
+            with queues_lock:
+                queues[q] = json.loads(job_list)
+        except:
+            with queues_lock:
+                errors.append(q)
+    threads = [threading.Thread(target=list_jobs, args=[q]) for q in queues]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    if errors:
+        return None
+    return sum(len(job_list["jobSummaryList"]) for job_list in queues.itervalues())
 
 
 def autoscaling_update(my_num_jobs, my_environment="development"):
@@ -201,23 +226,55 @@ def autoscaling_update(my_num_jobs, my_environment="development"):
     asg_list = json.loads(asg_json).get('AutoScalingGroups', [])
     gsnap_asg = find_asg(asg_list, "gsnapl-asg-production")
     rapsearch2_asg = find_asg(asg_list, "rapsearch2-asg-production")
-    mvals = update_metric_values(gsnap_asg, my_num_jobs, my_environment)
-    num_jobs = sum(mvals.values())
-    print json.dumps(mvals, indent=2)
-    print "ASG tags indicate {num_jobs} running job(s) across {num_env} environments above.".format(num_jobs=num_jobs, num_env=len(mvals))
     if DEBUG:
         print json.dumps(gsnap_asg, indent=2)
         print json.dumps(rapsearch2_asg, indent=2)
-    # This is a very basic heuristic.
-    if num_jobs == 0:
-        set_desired_capacity(gsnap_asg, exactly(0), my_environment)
-        set_desired_capacity(rapsearch2_asg, exactly(0), my_environment)
-    elif 1 <= num_jobs <= 5:
-        set_desired_capacity(gsnap_asg, at_least(1), my_environment)
-        set_desired_capacity(rapsearch2_asg, at_least(2), my_environment)
+    mvals = update_metric_values(gsnap_asg, my_num_jobs, my_environment)
+    if not DEBUG:
+        # when debugging is enabled this would be a duplicate print...
+        print json.dumps(mvals, indent=2)
+    num_development_jobs = sum(v for k, v in mvals.iteritems() if "development" in k)
+    num_real_jobs = sum(mvals.itervalues()) - num_development_jobs
+    print "ASG tags indicate {num_jobs} in-progress job(s) across {num_env} environments.".format(num_jobs=num_real_jobs + num_development_jobs, num_env=len(mvals))
+    print "From cloud environments: {num_real_jobs}".format(num_real_jobs=num_real_jobs)
+    print "From development environments: {num_development_jobs}".format(num_development_jobs=num_development_jobs)
+    can_scale = permission_to_scale(gsnap_asg, my_environment)
+    if not can_scale:
+        print "Scaling by agents of {my_environment} is not permitted.".format(my_environment=my_environment)
+        # when debugging is enabled and we can't scale we print the scaling commands without executing them
+        # when debugging is disabled and we can't scale we exit early here
+        if not DEBUG:
+            return
+    if num_real_jobs == 0 and num_development_jobs == 0:
+        set_desired_capacity(gsnap_asg, exactly(0), can_scale)
+        set_desired_capacity(rapsearch2_asg, exactly(0), can_scale)
+    elif num_real_jobs == 0 and num_development_jobs > 0:
+        count_running_servers = get_previous_desired(gsnap_asg) + get_previous_desired(rapsearch2_asg)
+        print "Only development environments are reporting in-progress jobs, and {crs} servers are running.".format(crs=count_running_servers)
+        if count_running_servers > 2 or random.random() < 0.2:
+            crbj = count_running_batch_jobs()
+            if crbj:
+                print "{crbj} jobs are running in aws batch queues".format(crbj=crbj)
+                # This is an unsafe scaling operation, but the only jobs that can get hurt
+                # are development jobs.  Just rerun those.
+                set_desired_capacity(gsnap_asg, exactly(1), can_scale)
+                set_desired_capacity(rapsearch2_asg, exactly(1), can_scale)
+            elif crbj == 0:
+                print "No jobs are running in batch."
+                # in this case num_development_jobs are either zombies or jobs caught in transition
+                # between pipeline stages;  the non-zombies won't be hurt, only delayed by this
+                set_desired_capacity(gsnap_asg, exactly(0), can_scale)
+                set_desired_capacity(rapsearch2_asg, exactly(0), can_scale)
+            else:
+                print "Failed to get information about running jobs in aws batch.  Deferring scaling decision."
+        else:
+            print "Deferring scaling decision to stay under the rate limit for 'aws batch list-jobs'."
+    elif 1 <= num_real_jobs <= 5:
+        set_desired_capacity(gsnap_asg, at_least(4), can_scale)
+        set_desired_capacity(rapsearch2_asg, at_least(12), can_scale)
     else:
-        set_desired_capacity(gsnap_asg, at_least(3), my_environment)
-        set_desired_capacity(rapsearch2_asg, at_least(7), my_environment)
+        set_desired_capacity(gsnap_asg, at_least(12), can_scale)
+        set_desired_capacity(rapsearch2_asg, at_least(36), can_scale)
 
 
 if __name__ == "__main__":

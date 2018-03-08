@@ -2,7 +2,6 @@ import React from 'react';
 import axios from 'axios';
 import $ from 'jquery';
 import Samples from './Samples';
-
 /**
  @class ProjectSelection
  @desc Creates react component to handle filtering in the page
@@ -202,8 +201,7 @@ import Samples from './Samples';
 
     const fav_section = (
       <div className="row fav-row">
-        <span className="title">Favorite Projects</span>
-        <div className='divider'></div>
+        <div className="title">Favorite Projects</div>
         <div className="fav-projects-wrapper  projects-wrapper">
           {!this.state.formattedFavProjectList.length ?
             <div className='title'>None</div> :
@@ -251,8 +249,7 @@ import Samples from './Samples';
 
     const all_projects_section = (
       <div className="projects">
-        <span data-title="allprojects" className="title">All Projects</span>
-        <div className='divider'></div>
+        <div data-title="allprojects" className="title">All Projects</div>
         <div className="projects-wrapper">
           { !this.state.formattedProjectList.length ?
              <div className='title'>None</div> :
@@ -305,6 +302,7 @@ import Samples from './Samples';
       </div>
     )
   }
+
 
   render() {
     return (

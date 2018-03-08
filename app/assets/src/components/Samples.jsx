@@ -12,6 +12,7 @@ import ReportFilter from './ReportFilter';
 import PipelineSampleReads from './PipelineSampleReads';
 import StringHelper from '../helpers/StringHelper';
 import StickySidebar from './StickySidebar';
+import { Dropdown } from 'semantic-ui-react'
 
 class Samples extends React.Component {
   constructor(props, context) {
@@ -160,7 +161,7 @@ class Samples extends React.Component {
       filterIndex = filterList.indexOf(selectedFilter);
       filterList.splice(filterIndex, 1);
     }
-    this.setState({ 
+    this.setState({
       selectedTissueFilters: filterList,
       pagesLoaded: 0,
       pageEnd: false,
@@ -172,7 +173,7 @@ class Samples extends React.Component {
   selectHostFilter(e) {
     // current array of options
     const hostList = this.state.selectedHostIndices.slice(0);
-    let index; 
+    let index;
     // check if the check box is checked or unchecked
     if (e.target.checked) {
       // add the numerical value of the checkbox to options array
@@ -191,7 +192,7 @@ class Samples extends React.Component {
       this.setUrlLocation();
     })
   }
-  
+
 
   canEditProject(projectId) {
     return (this.editableProjects.indexOf(parseInt(projectId)) > -1)
@@ -430,6 +431,7 @@ class Samples extends React.Component {
       let uploader = sample.uploader.name;
       let statusClass = !runInfo.job_status_description ? this.applyChunkStatusClass(runInfo) : this.applyClass(runInfo.job_status_description)
       let status = !runInfo.job_status_description ? this.getChunkedStage(runInfo) : runInfo.job_status_description;
+
       const rowWithChunkStatus = (
         <div className={`${statusClass} status`}>
           {this.appendStatusIcon(status)}
@@ -475,6 +477,7 @@ class Samples extends React.Component {
                   <li className='check-box-container'>
                     { this.state.displaySelectSamplees ? <div><input type="checkbox" id={i} onClick = { this.selectSample }
                       className="filled-in checkbox" value={ this.state.selectedSampleIndices.indexOf(i) != -1 }
+                      disabled={status != "COMPLETE"}
                       /> <label htmlFor={i}>{sample_name_info}</label></div> : sample_name_info }
                   </li>
                   {
@@ -821,13 +824,13 @@ class Samples extends React.Component {
     var that = this;
     $('.checkAll').click(function(e) {
       var checked = e.currentTarget.checked;
-      $('.checkbox').prop('checked', checked);
+      $('.checkbox:enabled').prop('checked', checked);
       var checkedCount = $("input:checkbox:checked").length
       that.setState({
         allChecked: checked,
         checkedBoxes: checkedCount
       });
-    }); 
+    });
   }
 
 
@@ -850,10 +853,13 @@ class Samples extends React.Component {
     let params;
     if(this.state.allChecked) {
       this.fetchAllSelectedIds(this.state.allChecked);
-    } 
+    }
     if(this.state.selectedSampleIndices.length) {
       let sampleParams = this.state.selectedSampleIndices;
-      location.href = `/samples/heatmap?sample_ids=${sampleParams}`
+      let sampleIds = this.state.selectedSampleIndices.map((idx) => {
+        return this.state.allSamples[idx].db_sample.id;
+      });
+      location.href = `/samples/heatmap?sample_ids=${sampleIds}`
     }
   }
 
@@ -882,7 +888,7 @@ class Samples extends React.Component {
 
     let index
     // check if the check box is checked or unchecked
- 
+
     if (e.target.checked) {
       // add the numerical value of the checkbox to options array
       sampleList.push(+e.target.id)
@@ -893,7 +899,7 @@ class Samples extends React.Component {
     }
     var checkedCount = $("input:checkbox:checked").length
     // update the state with the new array of options
-    this.setState({ 
+    this.setState({
       selectedSampleIndices: sampleList,
       checkedBoxes: checkedCount
      })
@@ -925,20 +931,13 @@ class Samples extends React.Component {
     );
 
     let table_download_dropdown = (
-      <div>
-        <div className='col s2 download-table download-dropdown' data-activates='download-dropdown'>
-          <div className='white'  data-activates='download-dropdown'>
-            <a className="download-project center">
-              <span>Download</span>
-              <i className="fa fa-angle-down"></i>
-            </a>
-          </div>
-        </div>
-        {/*Dropdown menu*/}
-        <ul id='download-dropdown' className='dropdown-content'>
-          <li><a href={`/projects/${project_id}/csv`}>Download Table</a></li>
-          { project_id === 'all' ? null : <li><a onClick={this.startReportGeneration}> Download Reports</a></li> }
-        </ul>
+      <div className="col s2 download-wrapper">
+        <Dropdown text='Download' className='link item'>
+          <Dropdown.Menu>
+            <Dropdown.Item href={`/projects/${project_id}/csv`}>Download Table</Dropdown.Item>
+            { project_id === 'all' ? null : <Dropdown.Item onClick={this.startReportGeneration}>Download Reports</Dropdown.Item> }
+          </Dropdown.Menu>
+       </Dropdown>
       </div>
     );
 
@@ -974,9 +973,9 @@ class Samples extends React.Component {
 
     const metaDataFilter = (
       <div className="col s2 wrapper">
-        <div className="metadata" onClick={this.displayMetaDataDropdown}>
+        <div className={this.state.displayDropdown ? "metadata metadata-active" : "metadata"} onClick={this.displayMetaDataDropdown}>
             <div className='metadata-dropdown'>
-            Filter </div><i className="fa fa-angle-down"></i>
+            Filter </div><i className={this.state.displayDropdown ? "fa fa-angle-up" : "fa fa-angle-down" }></i>
         </div>
               { this.state.displayDropdown ? <div className="row metadata-options">
                 <div className="col s6">
@@ -995,26 +994,24 @@ class Samples extends React.Component {
               <h6>Tissue type</h6>
                 {this.tissue_types.map((tissue, i) => {
                   return (
-                    <div key={i} className="options-wrapper"> 
+                    <div key={i} className="options-wrapper">
                     <input name="tissue" type="checkbox"
                     id={tissue} className="filled-in" data-status={tissue} checked={this.state.selectedTissueFilters.indexOf(tissue) < 0 ? "" : "checked"} onChange={this.selectTissueFilter} />
                     <label htmlFor={tissue}>{tissue}</label>
-                  </div>  
+                  </div>
                   )
                 })}
               </div>
             </div> : null }
       </div>
     )
-    
+
     const search_box = (
       <div className="row search-box">
         { this.state.displaySelectSamplees ? check_all : null }
         {/* { clear_filters } */}
         { search_field }
         { metaDataFilter  }
-        { table_download_dropdown }
-        { this.state.checkedBoxes > 0  ? compare_button : null }
       </div>
     );
 
@@ -1129,11 +1126,11 @@ class Samples extends React.Component {
     );
 
     const projInfo = (
-      <div>
+      <div className="row download-section">
         {
           this.state.selectedProjectId ? project_menu : null
         }
-        <div className="wrapper">
+        <div className={ project_id === 'all' ? "col s7 wrapper" : "col s5 wrapper" }>
           <div className={(!this.state.project) ? "proj-title heading all-proj" : "heading proj-title"}>
           { (!this.state.project) ? <div className="">All Projects</div>
               : <div>
@@ -1148,6 +1145,10 @@ class Samples extends React.Component {
           }
         </p>
         </div>
+        {/* <div className="col s4 download-section"> */}
+        { table_download_dropdown }
+        { this.state.checkedBoxes > 0  ? compare_button : null }
+        {/* </div> */}
       </div>
     );
 
@@ -1202,7 +1203,7 @@ class Samples extends React.Component {
                     }
                     <ul className='dropdown-content column-dropdown' id={`column-dropdown-${pos}`}>
                         { column_name === 'pipeline_status' ?
-                          <div>{filterStatus}</div> : null 
+                          <div>{filterStatus}</div> : null
                         }
                         <li>
                           <a className="title">
@@ -1239,7 +1240,7 @@ class Samples extends React.Component {
         <div className="project-info col s12">
           { projInfo } { addUser }
         </div>
-
+        <div className="divider"></div>
         <div className="sample-container no-padding col s12">
           { search_box }
           <div className="sample-table-container row">

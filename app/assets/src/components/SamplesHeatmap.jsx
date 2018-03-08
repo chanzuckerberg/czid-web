@@ -537,44 +537,82 @@ class D3Heatmap extends React.Component {
   }
 }
 
-/**
- * @class ProjectVisualization
- * @desc a component to visualize sample and their species taxonomy distribution
- */
-class ProjectVisualization extends React.Component {
+class SamplesHeatmap extends React.Component {
   constructor(props) {
     super(props);
-    this.sample_ids = this.props.sample_ids;
 
     this.scales = [
       ["Symmetric Log", symlog],
       ["Linear", d3.scale.linear],
     ];
 
+    this.dataTypes = ["NT.aggregatescore", "NT.rpm", "NT.r", "NT.zscore", "NT.maxzscore", "NR.rpm", "NR.r", "NR.zscore", "NR.maxzscore"];
+    this.dataGetters = {}
+    this.dataAccessorKeys = {};
+    for (var dataType of this.dataTypes) {
+      this.dataGetters[dataType] = this.makeDataGetter(dataType);
+      this.dataAccessorKeys[dataType] = dataType.split(".");
+    }
+
+    let urlParams = this.fetchParamsFromUrl();
     this.state = {
       loading: false,
       data: undefined,
-      dataType: "NT.aggregatescore",
-      dataScaleIdx: 0,
-      minDataThreshold: -99999999999,
-      maxDataThreshold: 99999999999,
+      dataType: urlParams.dataType || "NT.aggregatescore",
+      dataScaleIdx: urlParams.dataScaleIdx || 0,
+      minDataThreshold: urlParams.minDataThreshold || -99999999999,
+      maxDataThreshold: urlParams.maxDataThreshold || 99999999999,
+      sample_ids: urlParams.sample_ids || [],
+      taxon_ids: urlParams.taxon_ids || [],
     };
+    this.updateUrlParams();
+  }
 
-    this.dataTypes = ["NT.aggregatescore", "NT.rpm", "NT.r", "NT.zscore", "NT.maxzscore", "NR.rpm", "NR.r", "NR.zscore", "NR.maxzscore"];
-    this.dataGetters = {}
-    for (var dataType of this.dataTypes) {
-      this.dataGetters[dataType] = this.makeDataGetter(dataType);
+  updateUrlParams (newParams) {
+    newParams = {};
+    let url = new URL(window.location);
+    let sp = url.searchParams;
+
+    let lst_to_comma = function (l) {
+      if (l == null) {
+        return null;
+      } else {
+        return l.join(",");
+      }
+    };
+    sp.set("dataType", newParams["dataType"] || this.state.dataType);
+    sp.set("dataScaleIdx", newParams["dataScaleIdx"] || this.state.dataScaleIdx);
+    sp.set("minDataThreshold", newParams["minDataThreshold"] || this.state.minDataThreshold);
+    sp.set("maxDataThreshold", newParams["maxDataThreshold"] || this.state.maxDataThreshold);
+    sp.set("sample_ids", lst_to_comma(newParams["sample_ids"]) || this.state.sample_ids);
+    sp.set("taxon_ids", lst_to_comma(newParams["taxon_ids"]) || this.state.taxon_ids);
+    window.history.replaceState(null, null, url.toString());
+  }
+
+  fetchParamsFromUrl () {
+    let sp = new URL(window.location).searchParams;
+
+    let ion = function(x) {
+      return (x == null) ? null : parseFloat(x);
+    }
+
+    let lon = function (x) {
+      return (x == null) ? null : x.split(",").map(function(j) { return parseInt(j, 10); });
+    }
+
+    return {
+      dataType: sp.get("dataType"),
+      dataScaleIdx: ion(sp.get("dataScaleIdx")),
+      minDataThreshold: ion(sp.get("minDataThreshold")),
+      maxDataThreshold: ion(sp.get("maxDataThreshold")),
+      sample_ids: lon(sp.get("sample_ids")),
+      taxon_ids: lon(sp.get("taxon_ids")),
     }
   }
 
   getDataProperty (data, property) {
-    let parts = property.split("."),
-        base = data;
-
-    for (var part of parts) {
-      base = base[part];
-    }
-    return base;
+    let keys = this.dataAccessorKeys[property];
+    return data[keys[0]][keys[1]];
   }
 
   makeDataGetter (dataType) {
@@ -594,12 +632,23 @@ class ProjectVisualization extends React.Component {
     this.fetchDataFromServer();
   }
 
+  componentDidUpdate () {
+    this.updateUrlParams(this.state);
+  }
+
   fetchDataFromServer () {
     this.setState({loading: true})
     this.request && this.request.cancel();
-    this.request = axios.get("/samples/samples_taxons.json?sample_ids=" + this.sample_ids)
+
+    let url = "/samples/samples_taxons.json?sample_ids=" + this.state.sample_ids;
+    if (this.state.taxon_ids) {
+      url += "&taxon_ids=" + this.state.taxon_ids;
+    }
+
+    this.request = axios.get(url)
     .then((response) => {
       let taxons = this.extractTaxons(response.data);
+      this.setState({taxon_ids: taxons.ids});
       this.updateData(response.data, this.state.dataType, taxons);
     }).then(() => {
       this.setState({ loading: false });
@@ -607,9 +656,10 @@ class ProjectVisualization extends React.Component {
   }
 
   updateData (data, dataType, taxons) {
-    let minMax = this.getMinMax(data, dataType, taxons);
-    let clustered_samples = this.clusterSamples(data, dataType, taxons);
-    let clustered_taxons = this.clusterTaxons(data, dataType, taxons);
+    let minMax = this.getMinMax(data, dataType, taxons.names);
+    let clustered_samples = this.clusterSamples(data, dataType, taxons.names);
+    let clustered_taxons = this.clusterTaxons(data, dataType, taxons.names);
+
     this.setState({
       data: data,
       clustered_samples: clustered_samples,
@@ -690,16 +740,26 @@ class ProjectVisualization extends React.Component {
   }
 
   extractTaxons (data) {
-    let taxon_names = new Set();
+    let id_to_name = {},
+        name_to_id = {},
+        ids = new Set();
 
     for (var i = 0, len = data.length; i < len; i += 1) {
       let sample = data[i];
       for (var j = 0; j < sample.taxons.length; j+= 1) {
         let taxon = sample.taxons[j];
-        taxon_names.add(taxon.name);
+        id_to_name[taxon.tax_id] = taxon.name;
+        name_to_id[taxon.name] = taxon.tax_id;
+        ids.add(taxon.tax_id);
       }
     }
-    return Array.from(taxon_names);
+
+    return {
+      id_to_name: id_to_name,
+      name_to_id: name_to_id,
+      ids: Array.from(ids),
+      names: Object.keys(name_to_id),
+    };
   }
 
   clusterTaxons (data, dataType, taxon_names) {
@@ -799,11 +859,19 @@ class ProjectVisualization extends React.Component {
   }
 
   onRemoveRow (rowLabel) {
-    let idx = this.state.taxons.indexOf(rowLabel);
-    if (idx > -1) {
-      this.state.taxons.splice(idx, 1);
-    }
-    this.updateData(this.state.data, this.state.dataType, this.state.taxons);
+    let taxons = this.state.taxons;
+    let id = taxons.name_to_id[rowLabel];
+
+    let idx = taxons.names.indexOf(rowLabel);
+    taxons.names.splice(idx, 1);
+
+    idx = taxons.ids.indexOf(id);
+    taxons.ids.splice(idx, 1);
+
+    delete taxons.name_to_id[rowLabel];
+    delete taxons.id_to_name[id];
+    this.updateData(this.state.data, this.state.dataType, taxons);
+    this.setState({ taxon_ids: taxons.ids });
   }
 
   renderHeatmap () {
@@ -899,7 +967,7 @@ class ProjectVisualization extends React.Component {
       <D3Heatmap
         colTree={this.state.clustered_samples.tree}
         rowTree={this.state.clustered_taxons.tree}
-        rows={this.state.taxons.length}
+        rows={this.state.taxons.ids.length}
         columns={this.state.data.length}
         getRowLabel={this.getRowLabel.bind(this)}
         getColumnLabel={this.getColumnLabel.bind(this)}
@@ -1020,4 +1088,4 @@ class ProjectVisualization extends React.Component {
   }
 }
 
-export default ProjectVisualization;
+export default SamplesHeatmap;
