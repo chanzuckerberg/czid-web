@@ -456,7 +456,7 @@ class SamplesController < ApplicationController
                                    :sample_memory, :sample_location, :sample_date, :sample_tissue,
                                    :sample_template, :sample_library, :sample_sequencer,
                                    :sample_notes, :job_queue, :search, :subsample, :pipeline_branch,
-                                   input_files_attributes: [:name, :presigned_url, :source_type, :source])
+                                   input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts])
   end
 
   def sort_by(samples, dir = nil)
