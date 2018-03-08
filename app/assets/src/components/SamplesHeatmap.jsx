@@ -8,6 +8,8 @@ import ObjectHelper from '../helpers/ObjectHelper';
 import clusterfck from 'clusterfck';
 import ReactNouislider from './ReactNouislider';
 import NumAbbreviate from 'number-abbreviate';
+import { Button, Popup } from 'semantic-ui-react'
+import copy from 'copy-to-clipboard';
 
 class SampleHeatmapTooltip extends React.Component {
   constructor(props) {
@@ -1105,6 +1107,10 @@ class SamplesHeatmap extends React.Component {
     return <D3HeatmapLegend colors={this.colors} min={this.minMax.thresholdMin} max={this.minMax.thresholdMax} />
   }
 
+  onShareClick () {
+    copy(window.location);
+  }
+
   render () {
     if (this.state.data) {
       this.minMax = this.getMinMax();
@@ -1112,7 +1118,15 @@ class SamplesHeatmap extends React.Component {
     return (
       <div id="project-visualization">
         <SubHeader>
-          <h3>Comparing samples</h3>
+          <div>
+            <Popup
+              trigger={<Button className="right" primary onClick={this.onShareClick.bind(this)}>Share</Button>}
+              content='Sharable heatmap URL has been copied to your clipboard'
+              on='click'
+              hideOnScroll
+            />
+           <h2>Comparing {this.state.data ? this.state.data.length : ''} samples</h2>
+          </div>
         </SubHeader>
         <div className="container">
           <div className="row sub-menu">
