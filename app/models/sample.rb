@@ -84,7 +84,7 @@ class Sample < ApplicationRecord
 
   def set_presigned_url_for_local_upload
     input_files.each do |f|
-      if f.source_type == 'local'
+      if f.source_type == 'local' && f.parts
         # TODO: investigate the content-md5 stuff https://github.com/aws/aws-sdk-js/issues/151 https://gist.github.com/algorist/385616
         parts = f.parts.split(", ")
         presigned_urls = parts.map do |part|
