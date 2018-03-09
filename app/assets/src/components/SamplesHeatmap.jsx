@@ -591,6 +591,7 @@ class SamplesHeatmap extends React.Component {
     this.state = {
       loading: false,
       data: undefined,
+      species: urlParams.species || "0",
       dataType: urlParams.dataType || "NT.aggregatescore",
       dataScaleIdx: urlParams.dataScaleIdx || 0,
       minDataThreshold: urlParams.minDataThreshold || -99999999999,
@@ -613,6 +614,7 @@ class SamplesHeatmap extends React.Component {
         return l.join(",");
       }
     };
+    sp.set("species", newParams["species"] || this.state.species);
     sp.set("dataType", newParams["dataType"] || this.state.dataType);
     sp.set("dataScaleIdx", newParams["dataScaleIdx"] || this.state.dataScaleIdx);
     sp.set("minDataThreshold", newParams["minDataThreshold"] || this.state.minDataThreshold);
@@ -634,6 +636,7 @@ class SamplesHeatmap extends React.Component {
     }
 
     return {
+      species: sp.get("species"),
       dataType: sp.get("dataType"),
       dataScaleIdx: ion(sp.get("dataScaleIdx")),
       minDataThreshold: ion(sp.get("minDataThreshold")),
@@ -662,22 +665,23 @@ class SamplesHeatmap extends React.Component {
   }
 
   componentDidMount () {
-    this.fetchDataFromServer();
+    this.fetchDataFromServer(this.state.taxon_ids, this.state.species);
   }
 
   componentDidUpdate () {
     this.updateUrlParams(this.state);
   }
 
-  fetchDataFromServer () {
+  fetchDataFromServer (taxon_ids, species) {
     this.setState({loading: true})
-    this.request && this.request.cancel();
 
     let url = "/samples/samples_taxons.json?sample_ids=" + this.state.sample_ids;
-    if (this.state.taxon_ids) {
-      url += "&taxon_ids=" + this.state.taxon_ids;
+    if (taxon_ids) {
+      url += "&taxon_ids=" + taxon_ids;
     }
-
+    if (species == "1") {
+      url += "&species=1"
+    }
     this.request = axios.get(url)
     .then((response) => {
       let taxons = this.extractTaxons(response.data);
@@ -1085,6 +1089,23 @@ class SamplesHeatmap extends React.Component {
     )
   }
 
+  taxonLevelChanged (e) {
+    this.setState({ species: e.target.value, data: null });
+    this.fetchDataFromServer(null, e.target.value);
+  }
+
+  renderTaxonLevelPicker () {
+    if (!this.state.data) {
+      return;
+    }
+    return (
+      <select value={this.state.species} onChange={this.taxonLevelChanged.bind(this)}>
+        <option value="0">Genus</option>
+        <option value="1">Species</option>
+      </select>
+    );
+  }
+
   updateDataScale (e) {
     this.setState({ dataScaleIdx: e.target.value });
   }
@@ -1138,11 +1159,15 @@ class SamplesHeatmap extends React.Component {
         </SubHeader>
         <div className="container">
           <div className="row sub-menu">
-            <div className="col s3">
+            <div className="col s2">
+              <label>Taxon Level</label>
+              {this.renderTaxonLevelPicker()}
+            </div>
+            <div className="col s2">
               <label>Data Scale</label>
               {this.renderScalePicker()}
             </div>
-            <div className="col s3">
+            <div className="col s2">
               <label>Data Type</label>
               {this.renderTypePickers()}
             </div>
