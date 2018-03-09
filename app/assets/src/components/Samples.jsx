@@ -5,8 +5,7 @@ import moment from 'moment';
 import $ from 'jquery';
 import Tipsy from 'react-tipsy';
 import Materialize from 'materialize-css';
-import {Sidebar, Grid} from 'semantic-ui-react';
-import Sticky from 'react-stickynode';
+import {Sidebar, Grid, Segment} from 'semantic-ui-react';
 import SortHelper from './SortHelper';
 import numberWithCommas from '../helpers/strings';
 import ProjectSelection from './ProjectSelection';
@@ -1302,13 +1301,27 @@ class Samples extends React.Component {
     $(() => {
       const win = $(window);
       const samplesHeader = $('.sample-table-container');
+      const siteHeaderHeight = $('.site-header').height();
+      const projectWrapper = $('.project-wrapper');
+      let prevScrollTop = 0;
+      let marginTop = 0;
       win.scroll(() => {
-        let scrollTop = $(window).scrollTop();
+        const scrollTop = win.scrollTop();
+        const scrollDirection = (scrollTop >= prevScrollTop) ? 'downward' : 'upward';
         if (scrollTop > samplesHeader.offset().top) {
           samplesHeader.addClass('shadow');
         } else {
           samplesHeader.removeClass('shadow');
         }
+        if (scrollDirection === 'downward') {
+          const scrollDiff = siteHeaderHeight - scrollTop;
+          marginTop = (scrollDiff > 0) ? scrollDiff : 0;
+        } else {
+          const scrollDiff = siteHeaderHeight - scrollTop;
+          marginTop = (scrollDiff < 0) ? 0 : Math.abs(scrollTop - siteHeaderHeight);
+        }
+        projectWrapper.css({ marginTop });
+        prevScrollTop = scrollTop;
       });
       $('.filter').hide();
     });
@@ -1411,19 +1424,16 @@ class Samples extends React.Component {
 
     return (
       <div className="row content-body">
-        <div className="col no-padding s2 sidebar">
-          <Sticky
-            enabled={true}
-            top={0}
-            enableTransforms={false}
-            bottomBoundary={0}>
+        <Sidebar 
+          className="col no-padding s2 sidebar" animation='push'  visible={true} icon='labeled'>
+          <div>
             {project_section}
-          </Sticky>
-        </div>
+          </div>
+        </Sidebar>
 
-        <div className="col no-padding samples-content s10">
+        <Sidebar.Pusher className="col no-padding samples-content s10">
           { this.renderTable(this.state.allSamples) }
-        </div>
+        </Sidebar.Pusher>
       </div>
     )
   }
