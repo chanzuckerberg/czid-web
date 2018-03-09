@@ -284,11 +284,11 @@ class Sample < ApplicationRecord
       source_parts = []
       local_path = "#{LOCAL_INPUT_PART_PATH}/#{id}/#{f.id}"
       parts.each_with_index do |part, index|
-        source_part = File.join(File.dirname(f.file_path), File.basename(part))
+        source_part = File.join("s3://#{SAMPLES_BUCKET_NAME}", File.dirname(f.file_path), File.basename(part))
         source_parts << source_part
         `aws s3 cp #{source_part} #{local_path}/#{index}`
       end
-      `cd #{local_path}; cat * > complete_file; aws s3 cp complete_file #{f.file_path}`
+      `cd #{local_path}; cat * > complete_file; aws s3 cp complete_file s3://#{SAMPLES_BUCKET_NAME}/#{f.file_path}`
       `rm -rf #{local_path}`
       source_parts.each do |source_part|
         `aws s3 rm #{source_part}`
