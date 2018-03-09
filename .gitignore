@@ -20,6 +20,7 @@
 
 /node_modules
 /app/assets/dist
+/app/assets/fonts
 /yarn-error.log
 
 # Ignore awscli bundle files
