@@ -7,13 +7,28 @@ task update_lineage_db: :environment do
 
   reference_s3_path = ENV['REFERENCE_S3_FOLDER'].gsub(%r{([/]*$)}, '') # trim any trailing '/'
   local_taxonomy_path = "/app/tmp/taxonomy"
-  column_names = "taxid,superkingdom_taxid,phylum_taxid,class_taxid,order_taxid,family_taxid,genus_taxid,species_taxid," \
-    "superkingdom_name,superkingdom_common_name,phylum_name,phylum_common_name,class_name,class_common_name," \
-    "order_name,order_common_name,family_name,family_common_name,genus_name,genus_common_name,species_name,species_common_name"
+  name_column_array = %w[superkingdom_name superkingdom_common_name phylum_name phylum_common_name class_name class_common_name
+    order_name order_common_name family_name family_common_name genus_name genus_common_name species_name species_common_name]
+  column_names = "taxid,superkingdom_taxid,phylum_taxid,class_taxid,order_taxid,family_taxid,genus_taxid,species_taxid," +
+    name_column_array.join(",")
   host = Rails.env == 'development' ? 'db' : '$RDS_ADDRESS'
   taxid_lineages_file = 'taxid-lineages.csv'
   names_file = 'names.csv'
   current_date = Time.now.utc
+
+  ## Convert NULL to empty string in all name columns for consistency
+  ## using query:
+  #   UPDATE TaxonLineage
+  #   SET
+  #     superkingdom_name = CASE superkingdom_name WHEN NULL THEN '' ELSE superkingdom_name END,
+  #     superkingdom_common_name = CASE superkingdom_common_name WHEN NULL THEN '' ELSE superkingdom_common_name END
+  #     ...
+  #     species_name = CASE species_name WHEN NULL THEN '' ELSE species_name END,
+  #     species_common_name = CASE species_common_name WHEN NULL THEN '' ELSE species_common_name END
+  replacements = name_column_array.map { |column| "#{column} = CASE #{column} WHEN NULL THEN '' ELSE #{column}" }
+  query = "UPDATE TaxonLineage SET " + replacements.join(" END, ") + " END"
+  ActiveRecord::Base.connection.execute(query)
+
   `
    ## Set work directory
    mkdir -p #{local_taxonomy_path};
