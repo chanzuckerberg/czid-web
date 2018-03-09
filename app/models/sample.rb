@@ -282,7 +282,7 @@ class Sample < ApplicationRecord
       parts = f.parts.split(", ")
       next unless parts.length > 1
       source_parts = []
-      local_path = "#{LOCAL_INPUT_PART_PATH}/#{sample.id}/#{f.id}"
+      local_path = "#{LOCAL_INPUT_PART_PATH}/#{id}/#{f.id}"
       parts.each_with_index do |part, index|
         source_part = File.join(File.dirname(f.file_path), File.basename(part))
         source_parts << source_part
