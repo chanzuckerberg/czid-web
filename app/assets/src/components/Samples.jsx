@@ -1261,6 +1261,11 @@ class Samples extends React.Component {
     const currentStatus = this.state.filterParams;
     const prevHostIndices = prevState.selectedHostIndices;
     const prevTissueFilters = prevState.selectedTissueFilters;
+    const prevSelectedProject = prevState.selectedProjectId;
+
+    if(prevSelectedProject !== this.state.selectedProjectId) {
+      window.scrollTo(0, 0)
+    }
     if(prevStatus !== currentStatus) {
       $(`i[data-status="${prevStatus}"]`).removeClass('active');
     } else {
