@@ -34,7 +34,7 @@ const config = {
       })
     },
     {
-      test: /\.(eot|ttf|svg)$/,
+      test: /\.(png|eot|ttf|svg)$/,
       loader: 'url-loader',
       options: {
         limit: 10000,
