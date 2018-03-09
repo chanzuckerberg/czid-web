@@ -1158,12 +1158,12 @@ class PipelineSampleReport extends React.Component {
                         Taxonomy
                         </th>
                         {this.render_column_header('Score', `NT_aggregatescore`, 'Aggregate score: ( |genus.NT.Z| * species.NT.Z * species.NT.rPM ) + ( |genus.NR.Z| * species.NR.Z * species.NR.rPM )') }
-                        {this.render_column_header('Z', `${this.state.countType}_zscore`, `Z-score relative to background model for alignments to NCBI ${this.state.countType}`) }
-                        {this.render_column_header('rPM', `${this.state.countType}_rpm`, `Number of reads aligning to the taxon in the NCBI ${this.state.countType} database per million total input reads`)} 
-                        {this.render_column_header('r', `${this.state.countType}_r`, `Number of reads aligning to the taxon in the NCBI ${this.state.countType} database`)}
-                        {this.render_column_header('%id', `${this.state.countType}_percentidentity`, `Average percent-identity of alignments to NCBI ${this.state.countType}`)}
-                        {this.render_column_header('log(1/E)', `${this.state.countType}_neglogevalue`, `Average log-10-transformed expect value for alignments to NCBI ${this.state.countType}`)}
-                        {this.render_column_header('%conc', `${this.state.countType}_percentconcordant`, `Percentage of aligned reads belonging to a concordantly mappped pair (NCBI ${this.state.countType})`)}
+                        {this.render_column_header('Z', `${this.state.countType}_zscore`, `Z-score relative to background model for alignments to NCBI NT/NR`) }
+                        {this.render_column_header('rPM', `${this.state.countType}_rpm`, `Number of reads aligning to the taxon in the NCBI NT/NR database per million total input reads`)} 
+                        {this.render_column_header('r', `${this.state.countType}_r`, `Number of reads aligning to the taxon in the NCBI NT/NR database`)}
+                        {this.render_column_header('%id', `${this.state.countType}_percentidentity`, `Average percent-identity of alignments to NCBI NT/NR`)}
+                        {this.render_column_header('log(1/E)', `${this.state.countType}_neglogevalue`, `Average log-10-transformed expect value for alignments to NCBI NT/NR`)}
+                        {this.render_column_header('%conc', `${this.state.countType}_percentconcordant`, `Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NT/NR)`)}
                         <th>
                           <Tipsy content='Switch count type' placement="top">
                             <div className='sort-controls center left'>
