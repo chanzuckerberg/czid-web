@@ -26,7 +26,7 @@ task update_lineage_db: :environment do
   #     species_name = CASE species_name WHEN NULL THEN '' ELSE species_name END,
   #     species_common_name = CASE species_common_name WHEN NULL THEN '' ELSE species_common_name END
   replacements = name_column_array.map { |column| "#{column} = CASE #{column} WHEN NULL THEN '' ELSE #{column}" }
-  query = "UPDATE TaxonLineage SET " + replacements.join(" END, ") + " END"
+  query = "UPDATE taxon_lineages SET " + replacements.join(" END, ") + " END"
   ActiveRecord::Base.connection.execute(query)
 
   `
