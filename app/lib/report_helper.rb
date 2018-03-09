@@ -234,10 +234,12 @@ module ReportHelper
     ").to_hash
   end
 
-  def fetch_top_taxons(samples, background_id, include_species)
+  def fetch_top_taxons(samples, background_id, only_species)
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
 
-    unless include_species
+    if only_species
+      tax_level_str = " AND taxon_counts.tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}"
+    else
       tax_level_str = " AND taxon_counts.tax_level = #{TaxonCount::TAX_LEVEL_GENUS}"
     end
     sql_results = TaxonCount.connection.select_all("
@@ -381,8 +383,8 @@ module ReportHelper
     results
   end
 
-  def top_taxons_details(samples, background_id, num_results, sort_by_key, include_species)
-    results_by_pr = fetch_top_taxons(samples, background_id, include_species)
+  def top_taxons_details(samples, background_id, num_results, sort_by_key, only_species)
+    results_by_pr = fetch_top_taxons(samples, background_id, only_species)
     sort_by = decode_sort_by(sort_by_key)
     count_type = sort_by[:count_type]
     metric = sort_by[:metric]
