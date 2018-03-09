@@ -764,24 +764,15 @@ class PipelineSampleReport extends React.Component {
   }
 
   render_number(ntCount, nrCount, num_decimals, isAggregate = false) {
-    const isNtCountBlank = (ntCount === 0) || (ntCount === -100);
-    const isNrCountBlank =  (nrCount === 0) || (nrCount === -100);
-
-    ntCount = numberWithCommas(Number(ntCount).toFixed(num_decimals));
-    nrCount = (nrCount !== null) ? numberWithCommas(Number(nrCount).toFixed(num_decimals)) : null;
-
-    const ntClassName = `${(this.state.countType === 'NT') ? 'active count-type' : 'count-type'}
-    ${(isNtCountBlank && this.state.countType === 'NT') ? 'blank' : ''}`;
-    const nrClassName = `${(this.state.countType === 'NR') ? 'active count-type' : 'count-type'}
-    ${(isNrCountBlank && this.state.countType === 'NR') ? 'blank' : ''}`;
-
+    let ntCountStr = numberWithCommas(Number(ntCount).toFixed(num_decimals));
+    let nrCountStr = (nrCount !== null) ? numberWithCommas(Number(nrCount).toFixed(num_decimals)) : null;
     const ntCountLabel = (isAggregate) ?
-      <div className={`active count-type ${ (isNtCountBlank) ? 'blank' : ''}`}>
-        {ntCount}
-      </div> : <div className={ntClassName}>{ntCount}</div>;
-    const nrCountLabel = (nrCount) ?
-      <div className={nrClassName}>
-        {nrCount}
+      <div className={`active ${this.switchClassName('NT', ntCount)}`}>
+        {ntCountStr}
+      </div> : <div className={`${this.switchClassName('NT', ntCount)}`}>{ntCountStr}</div>;
+    const nrCountLabel = (nrCountStr) ?
+      <div className={`${this.switchClassName('NR', nrCount)}`}>
+        {nrCountStr}
       </div> : null
     return(
       <td className='report-number'>
@@ -789,6 +780,12 @@ class PipelineSampleReport extends React.Component {
         {nrCountLabel}
       </td>
     );
+  }
+
+  switchClassName (countType, countValue) {
+    const isCountBlank = ((countValue === 0) || (countValue === -100)) ? 'blank' : '';
+    const isActive = (this.state.countType === countType) ? 'active' : '';
+    return `${isActive} ${isCountBlank} count-type`;
   }
 
   isSortedActive(columnName) {
