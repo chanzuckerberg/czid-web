@@ -7,6 +7,10 @@ import axios from 'axios';
 import ObjectHelper from '../helpers/ObjectHelper';
 import clusterfck from 'clusterfck';
 import ReactNouislider from './ReactNouislider';
+import NumAbbreviate from 'number-abbreviate';
+import { Button, Popup } from 'semantic-ui-react'
+import copy from 'copy-to-clipboard';
+import width from 'text-width';
 
 class SampleHeatmapTooltip extends React.Component {
   constructor(props) {
@@ -119,13 +123,20 @@ class D3Heatmap extends React.Component {
     for (let i = 0; i < this.row_number; i += 1) {
       let label = props.getRowLabel(i)
       this.rowLabel.push(label);
-      longest_row_label = Math.max(longest_row_label, label.length);
+      let row_width = width(label, {
+        size: '8pt',
+      });
+
+      longest_row_label = Math.max(longest_row_label, row_width);
     }
 
     for (let j = 0; j < this.col_number; j += 1) {
       let label = props.getColumnLabel(j);
       this.colLabel.push(label);
-      longest_col_label = Math.max(longest_col_label, label.length);
+      let col_width = width(label, {
+        size: '8pt',
+      });
+      longest_col_label = Math.max(longest_col_label, col_width);
     }
 
     // Generate the grid data
@@ -149,10 +160,10 @@ class D3Heatmap extends React.Component {
       }
     }
     this.margin ={
-      top: 80, // char_width * longest_col_label * 0.7,
+      top: longest_col_label * Math.cos(25 * (Math.PI / 180)) + 10,
       left: Math.ceil(Math.sqrt(this.row_number)) * 10,
-      bottom: 100,
-      right: char_width * longest_row_label
+      bottom: 80,
+      right: longest_row_label + 20
     };
     this.cellWidth = Math.max(900 / this.col_number, 20);
     this.cellHeight = Math.max(400 / this.row_number, 15);
@@ -182,9 +193,9 @@ class D3Heatmap extends React.Component {
 
 
     this.renderRowLabels();
-    //this.renderColLabels();
+    this.renderColLabels();
     this.renderHeatmap();
-    this.renderLegend();
+    //this.renderLegend();
     this.renderColDendrogram();
     this.renderRowDendrogram();
   }
@@ -209,7 +220,7 @@ class D3Heatmap extends React.Component {
       .attr("height", this.cellHeight)
       .style("fill", function(d) {
         if (d.value === undefined) {
-          return "#f6f6f6";
+          return "rgb(238, 241, 244)";
         }
         let colorIndex = colorScale(d.value);
         return that.colors[Math.round(colorIndex)];
@@ -242,10 +253,12 @@ class D3Heatmap extends React.Component {
 
   renderColDendrogram () {
 		let width = this.cellWidth * this.col_number,
-				height = this.margin.top - 20;
+				height = this.margin.bottom - 20;
 
+    let top_offset = this.margin.top + (this.cellHeight * this.row_number) + 10;
     let container = this.renderDendrogram(this.colTree, width, height, "cc", this.colLabel);
-    container.attr("transform", "rotate(90) translate(0, -" + (width + this.margin.left) + ")")
+    container.attr("transform", "rotate(90) translate(" + top_offset + ", -" + (width + this.margin.left) + ")");
+    container.select("g").attr("transform", "scale(-1, 1) translate(-" + (this.margin.bottom - 20) + ", 0)");
   }
 
   renderRowDendrogram () {
@@ -253,7 +266,7 @@ class D3Heatmap extends React.Component {
         width = this.cellHeight * this.row_number;
 
     let container = this.renderDendrogram(this.rowTree, width, height, "cr", this.rowLabel);
-    container.attr("transform", "translate(0, " + this.margin.top + ")")
+    container.attr("transform", "translate(10, " + this.margin.top + ")")
   }
 
   renderDendrogram (tree, width, height, cssClass, labels) {
@@ -394,7 +407,7 @@ class D3Heatmap extends React.Component {
       .attr("height", height)
       .style("fill", function(d, i) { return that.colors[i]; });
 
-	this.offsetCanvas.append("rect")
+	  this.offsetCanvas.append("rect")
         .attr("x", function(d, i) { return x_offset + that.legendElementWidth * i; })
         .attr("stroke", "#aaa")
         .attr("stroke-width", "0.25")
@@ -469,7 +482,7 @@ class D3Heatmap extends React.Component {
       .attr("x", 0)
       .attr("y", 0)
       .style("text-anchor", "left")
-      .attr("transform", "translate("+this.cellWidth/2 + ",-6) rotate (-45)")
+      .attr("transform", "translate("+this.cellWidth/2 + ",-6) rotate (-65)")
       .attr("class",  function (d,i) { return "colLabel mono c"+i;} )
       .on("mouseover", function(d) {d3.select(this).classed("text-hover",true);})
       .on("mouseout" , function(d) {d3.select(this).classed("text-hover",false);})
@@ -510,7 +523,7 @@ class D3Heatmap extends React.Component {
     if (ObjectHelper.shallowEquals(nextProps, this.props)) {
       return;
     }
-    d3.select("svg").remove();
+    d3.select(".D3Heatmap svg").remove();
     this.initializeData(nextProps);
     this.renderD3();
   }
@@ -545,6 +558,26 @@ class SamplesHeatmap extends React.Component {
       ["Symmetric Log", symlog],
       ["Linear", d3.scale.linear],
     ];
+
+    this.colors = [
+      "rgb(255, 255, 255)",
+      "rgb(243, 249, 243)",
+      "rgb(232, 244, 232)",
+      "rgb(221, 239, 220)",
+      "rgb(210, 234, 209)",
+      "rgb(199, 229, 197)",
+      "rgb(188, 224, 186)",
+      "rgb(177, 219, 175)",
+      "rgb(166, 214, 164)",
+      "rgb(155, 208, 152)",
+      "rgb(144, 203, 141)",
+      "rgb(133, 198, 129)",
+      "rgb(122, 193, 118)",
+      "rgb(111, 188, 106)",
+      "rgb(100, 183, 95)",
+      "rgb(89, 178, 84)",
+      "rgb(78, 173, 73)",
+		];
 
     this.dataTypes = ["NT.aggregatescore", "NT.rpm", "NT.r", "NT.zscore", "NT.maxzscore", "NR.rpm", "NR.r", "NR.zscore", "NR.maxzscore"];
     this.dataGetters = {}
@@ -621,7 +654,7 @@ class SamplesHeatmap extends React.Component {
       let taxon = this.getTaxonFor(row, col);
       if (taxon) {
         let value = this.getDataProperty(taxon, dataType);
-        if (value >= that.state.minDataThreshold && value <= this.state.maxDataThreshold) {
+        if (value >= this.state.minDataThreshold && value <= this.state.maxDataThreshold) {
           return value;
         }
       }
@@ -656,22 +689,21 @@ class SamplesHeatmap extends React.Component {
   }
 
   updateData (data, dataType, taxons) {
-    let minMax = this.getMinMax(data, dataType, taxons.names);
     let clustered_samples = this.clusterSamples(data, dataType, taxons.names);
     let clustered_taxons = this.clusterTaxons(data, dataType, taxons.names);
-
     this.setState({
       data: data,
       clustered_samples: clustered_samples,
-      min: minMax.min,
-      max: minMax.max,
       dataType: dataType,
       taxons: taxons,
       clustered_taxons: clustered_taxons,
     });
   }
 
-  getMinMax (data, dataType, taxon_names) {
+  getMinMax () {
+    let data = this.state.data;
+    let dataType = this.state.dataType;
+    let taxon_names = this.state.taxons.names;
     let taxon_lists = [];
     taxon_names = new Set(taxon_names);
     for (let sample of data) {
@@ -690,9 +722,28 @@ class SamplesHeatmap extends React.Component {
     let max = d3.max(taxons, (d) => {
       return this.getDataProperty(d, dataType);
     });
+
+    let thresholdMin = d3.min(taxons, (d) => {
+      let value = this.getDataProperty(d, dataType);
+      if (value >= this.state.minDataThreshold && value <= this.state.maxDataThreshold) {
+        return value;
+      }
+      return null;
+    });
+
+    let thresholdMax = d3.max(taxons, (d) => {
+      let value = this.getDataProperty(d, dataType);
+      if (value >= this.state.minDataThreshold && value <= this.state.maxDataThreshold) {
+        return value;
+      }
+      return null;
+    });
+
     return {
       min: min,
       max: max,
+      thresholdMin: thresholdMin,
+      thresholdMax: thresholdMax,
     };
   }
 
@@ -878,7 +929,7 @@ class SamplesHeatmap extends React.Component {
     if (!this.state.data) {
       return;
     }
-
+    /*
     let colors = [
       "rgb(255, 255, 255)",
       "rgb(255, 255, 250)",
@@ -962,8 +1013,8 @@ class SamplesHeatmap extends React.Component {
       "rgb(147, 0, 236)",
       "rgb(140, 0, 236)",
     ];
-
-    return (
+    */
+		return (
       <D3Heatmap
         colTree={this.state.clustered_samples.tree}
         rowTree={this.state.clustered_taxons.tree}
@@ -976,7 +1027,7 @@ class SamplesHeatmap extends React.Component {
         onCellClick={this.onCellClick.bind(this)}
         onRemoveRow={this.onRemoveRow.bind(this)}
         scale={this.scales[this.state.dataScaleIdx][1]}
-        colors={colors}
+        colors={this.colors}
       />
     )
   }
@@ -1021,10 +1072,9 @@ class SamplesHeatmap extends React.Component {
     }
     return (
       <div className="range-field">
-        <label>Threshold</label>
         <div className="slider-container">
           <ReactNouislider
-            range={{min: this.state.min, max: this.state.max + 1}}
+            range={{min: this.minMax.min, max: this.minMax.max + 1}}
             start={[this.state.minDataThreshold, this.state.maxDataThreshold]}
             connect={[false, true, false]}
             onChange={this.updateDataThreshold.bind(this)}
@@ -1058,27 +1108,54 @@ class SamplesHeatmap extends React.Component {
       </select>
     )
  }
+  renderLegend () {
+    if (!this.state.data) {
+      return;
+    }
+    return <D3HeatmapLegend colors={this.colors} min={this.minMax.thresholdMin} max={this.minMax.thresholdMax} />
+  }
+
+  onShareClick () {
+    copy(window.location);
+  }
 
   render () {
+    if (this.state.data) {
+      this.minMax = this.getMinMax();
+    }
     return (
       <div id="project-visualization">
         <SubHeader>
-          <div className="sub-header">
-            <div className="row sub-menu">
-              <div className="col s4">
-                <label>Data Scale</label>
-                {this.renderScalePicker()}
-              </div>
-              <div className="col s4">
-                <label>Data Type</label>
-                {this.renderTypePickers()}
-              </div>
-              <div className="col s4">
-                {this.renderThresholdSlider()}
-              </div>
-            </div>
+          <div>
+            <Popup
+              trigger={<Button className="right" primary onClick={this.onShareClick.bind(this)}>Share</Button>}
+              content='A shareable URL has been copied to your clipboard!'
+              on='click'
+              hideOnScroll
+            />
+           <h2>Comparing {this.state.data ? this.state.data.length : ''} samples</h2>
           </div>
         </SubHeader>
+        <div className="container">
+          <div className="row sub-menu">
+            <div className="col s3">
+              <label>Data Scale</label>
+              {this.renderScalePicker()}
+            </div>
+            <div className="col s3">
+              <label>Data Type</label>
+              {this.renderTypePickers()}
+            </div>
+            <div className="col s3">
+              <label>Thresholds</label>
+              {this.renderThresholdSlider()}
+            </div>
+            <div className="col s3">
+              <label>Legend</label>
+              {this.renderLegend()}
+            </div>
+          </div>
+        </div>
         <div className="row visualization-content">
           {this.state.loading && this.renderLoading()}
           {this.renderHeatmap()}
@@ -1088,4 +1165,73 @@ class SamplesHeatmap extends React.Component {
   }
 }
 
+class D3HeatmapLegend extends React.Component {
+  componentDidMount () {
+    this.renderD3(this.props);
+  }
+
+  renderD3 (props) {
+    this.svg = d3.select(this.container).append("svg")
+        .attr("width", "100%")
+        .attr("height", "35");
+
+    let that = this,
+        height = 20,
+        legendElementWidth = 100 / props.colors.length;
+
+    this.svg.selectAll(".legend-text-min")
+        .data([this.min])
+        .enter().append("text")
+        .attr("x", 0)
+        .attr("y", 35)
+        .attr("class", "mono")
+        .text(NumAbbreviate(Math.round(props.min)));
+
+    this.svg.selectAll(".legend-text-max")
+        .data([props.max])
+        .enter().append("text")
+        .attr("class", "mono")
+        .attr("x", "100%")
+        .attr("y", 35)
+        .text(NumAbbreviate(Math.round(props.max)))
+        .style("text-anchor", "end");
+
+    var legend = this.svg.selectAll(".legend")
+      .data(props.colors)
+      .enter().append("g")
+      .attr("class", "legend");
+
+    legend.append("rect")
+      .attr("x", function(d, i) { return Math.floor(legendElementWidth * i) + "%"; })
+      .attr("y", 0)
+      .attr("width", Math.ceil(legendElementWidth) + "%")
+      .attr("height", height)
+      .style("fill", function(d, i) { return that.props.colors[i]; });
+
+	  this.svg.append("rect")
+        .attr("x", "0")
+        .attr("stroke", "#aaa")
+        .attr("stroke-width", "0.25")
+        .style("fill", "none")
+        .attr("y", 0)
+        .attr("width", "100%")
+        .attr("height", height);
+
+
+  }
+  componentWillReceiveProps (nextProps) {
+    if (ObjectHelper.shallowEquals(nextProps, this.props)) {
+      return;
+    }
+    d3.select(this.container).select("svg").remove();
+    this.renderD3(nextProps);
+  }
+
+  render () {
+    return (
+      <div className="heatmap-legend" ref={(container) => { this.container = container; }} >
+      </div>
+    );
+  }
+}
 export default SamplesHeatmap;

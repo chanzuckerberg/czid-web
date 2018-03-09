@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import moment from 'moment';
 import $ from 'jquery';
 import axios from 'axios';
+import Cookies from 'js-cookie';
 import numberWithCommas from '../helpers/strings';
 import SubHeader from './SubHeader';
 import PipelineSampleReport from './PipelineSampleReport';
@@ -10,7 +11,7 @@ import PipelineSampleReport from './PipelineSampleReport';
 class PipelineSampleReads extends React.Component {
   constructor(props) {
     super(props);
-    this.can_edit = props.can_edit
+    this.can_edit = props.can_edit;
     this.csrf = props.csrf;
     this.gitVersion = props.gitVersion
     this.allBackgrounds = props.all_backgrounds;
@@ -158,6 +159,20 @@ class PipelineSampleReads extends React.Component {
     "Nasopharyngeal swab", "Plasma", "Serum", "Solid tissue",
     "Stool", "Synovial fluid", "Whole blood"];
     return tissue_types;
+  }
+
+  fetchParams(param) {
+    let urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+  }
+
+  getDownloadLink() {
+    const param_background_id = this.fetchParams("background_id");
+    const cookie_background_id = Cookies.get('background_id');
+    const defaultBackground = cookie_background_id ? `?background_id=${cookie_background_id}` : '';
+    const csv_background_id_param =
+      param_background_id ? `?background_id=${param_background_id}` : defaultBackground;
+    return `/samples/${this.sampleId}/report_csv${csv_background_id_param}`;
   }
 
   componentDidMount() {
@@ -416,7 +431,8 @@ class PipelineSampleReads extends React.Component {
     if (this.sample_map && Object.keys(this.sample_map).length > 1) {
       sample_dropdown = (
         <div className='dropdown-button sample-select-dropdown' data-activates='sample-list'>
-          { this.sampleInfo.name }<i className="fa fa-chevron-down right"/>
+          <span className='sample-name-label'>{ this.sampleInfo.name }</span>
+          <i className="fa fa-chevron-down right"/>
 
           <ul id='sample-list' className='dropdown-content sample-dropdown-content'>
            { Object.keys(this.sample_map).map((sample_id, i) => {
@@ -432,7 +448,7 @@ class PipelineSampleReads extends React.Component {
         </div>
       )
     } else {
-    sample_dropdown = <span>{ this.sampleInfo.name }</span>
+    sample_dropdown = <span className='sample-name-label'>{ this.sampleInfo.name }</span>
     }
 
     let version_display = !this.pipelineRun ? '' :
@@ -453,19 +469,35 @@ class PipelineSampleReads extends React.Component {
             <div className="title">
               PIPELINE {version_display}
             </div>
-
-            <div className="sub-title">
-              <a href={`/?project_id=${this.projectInfo.id}`}> {this.projectInfo.name} </a> > { sample_dropdown }
+            <div className="row">
+              <div className="sub-title col s9">
+                <a
+                href={`/?project_id=${this.projectInfo.id}`}>
+                  {this.projectInfo.name}
+                </a>
+                > { sample_dropdown }
+              </div>
+              <div className="col no-padding s3 right-align">
+                <ul className="report-action-buttons">
+                  <li>
+                    <a href={this.getDownloadLink()}>
+                      <button className='o'>
+                        <i className="fa fa-cloud-download fa-fw" />Download
+                      </button>
+                    </a>
+                  </li>
+                </ul>
+              </div>
             </div>
 
             <div className="sub-header-navigation">
               <div className="nav-content">
                 <ul className="tabs tabs-transparent">
                   <li className="tab">
-                    <a href="#details" className=''>Details</a>
+                    <a href="#reports" className='active'>Report</a>
                   </li>
                   <li className="tab">
-                    <a href="#reports" className='active'>Report</a>
+                    <a href="#details" className=''>Details</a>
                   </li>
                 </ul>
               </div>
@@ -570,7 +602,7 @@ class PipelineSampleReads extends React.Component {
             </div>
           </div>
         </div>
-        <div id="reports" className="reports-screen tab-screen col s12">
+        <div id="reports" className="reports-screen container tab-screen col s12">
           { d_report }
         </div>
       </div>

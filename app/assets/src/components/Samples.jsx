@@ -55,7 +55,7 @@ class Samples extends React.Component {
       project_users: [],
       totalNumber: null,
       projectId: null,
-      displaySelectSamplees: this.checkURLContent(),
+      displaySelectSamplees: true, // this.checkURLContent(),
       selectedProjectId: this.fetchParams('project_id') || null,
       filterParams: this.fetchParams('filter') || '',
       searchParams: this.fetchParams('search') || '',
