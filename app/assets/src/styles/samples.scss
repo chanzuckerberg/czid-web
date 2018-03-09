@@ -864,8 +864,7 @@ input[type="button"] {
       .fav-row {
         .title {
           color: #f1f1f1;
-          letter-spacing: 1.5px;
-          padding: 21px 21px 10px 21px;
+          padding: 21px 21px 0 21px;
           font-size: 14px;
         }
       }
@@ -1159,4 +1158,8 @@ input[type="button"] {
 
 .dropdown-content li>a, .dropdown-content li>span {
   font-size: 14px;
+}
+
+.nanobar .bar {
+  background-color: #3687fa;
 }

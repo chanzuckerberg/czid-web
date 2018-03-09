@@ -12,11 +12,17 @@ import ProjectSelection from './ProjectSelection';
 import ReportFilter from './ReportFilter';
 import PipelineSampleReads from './PipelineSampleReads';
 import StringHelper from '../helpers/StringHelper';
-import { Dropdown } from 'semantic-ui-react'
+import StickySidebar from './StickySidebar';
+import { Dropdown } from 'semantic-ui-react';
+import Nanobar from 'nanobar';
 
 class Samples extends React.Component {
   constructor(props, context) {
     super(props, context);
+    this.nanobar = new Nanobar({
+      id: 'prog-bar',
+      class: 'prog-bar'
+    });
     this.handleSearch = this.handleSearch.bind(this);
     this.csrf = props.csrf;
     this.favoriteProjects = props.favorites || [];
@@ -127,10 +133,6 @@ class Samples extends React.Component {
     });
   }
 
-  static showLoading(message) {
-    $('.page-loading .spinner-label').text(message);
-    $('.page-loading').css('display', 'flex');
-  }
 
   static hideLoader() {
     $('.page-loading').css('display', 'none');
@@ -208,7 +210,7 @@ class Samples extends React.Component {
   }
 
   startReportGeneration() {
-    Samples.showLoading('Downloading reports...');
+    this.nanobar.go(30);
     axios.get(`/projects/${this.state.selectedProjectId}/make_project_reports_csv`).then((res) => {
       this.setState({
         project_id_download_in_progress: this.state.selectedProjectId
@@ -222,7 +224,6 @@ class Samples extends React.Component {
     axios.get(`/projects/${this.state.project_id_download_in_progress}/project_reports_csv_status`).then((res) => {
       let download_status = res.data.status_display
       if (download_status === 'complete') {
-        Samples.hideLoader();
         location.href = `/projects/${this.state.project_id_download_in_progress}/send_project_reports_csv`
         this.setState({
           project_id_download_in_progress: null
@@ -232,7 +233,7 @@ class Samples extends React.Component {
       }
     }).catch((e) => {
       this.setState({
-        project_id_download_in_progress: null
+        project_id_download_in_progress: null,
       }, () => {
         Materialize.toast(
           `Failed to download report for '${this.state.project.name}'`, 3000,
@@ -254,7 +255,7 @@ class Samples extends React.Component {
     }
     this.setState({ sort_by: new_sort, pagesLoaded: 0, pageEnd: false }, () => {
       this.setUrlLocation();
-      ReportFilter.showLoading(message);
+      this.nanobar.go(30);
       this.fetchResults(() => {
         ReportFilter.hideLoading();
       });
@@ -539,10 +540,10 @@ class Samples extends React.Component {
 
   //fetch first set of samples
   fetchSamples() {
-    Samples.showLoading('Fetching samples...');
+    this.nanobar.go(30);
     const params = this.getParams();
     axios.get(`/samples?${params}`).then((res) => {
-      Samples.hideLoader();
+      this.nanobar.go(100);
       this.setState((prevState) => ({
         initialFetchedSamples: res.data.samples,
         allSamples: res.data.samples,
@@ -557,7 +558,6 @@ class Samples extends React.Component {
         this.setState({ displayEmpty: true });
       }
     }).catch((err) => {
-      Samples.hideLoader();
       this.setState((prevState) => ({
         allSamples: [],
         displayEmpty: true,
@@ -628,10 +628,10 @@ class Samples extends React.Component {
 
   //fetch results from filtering, search or switching projects
   fetchResults(cb) {
-    Samples.showLoading('Fetching samples...');
+    this.nanobar.go(30);
     const params = this.getParams();
     axios.get(`/samples?${params}`).then((res) => {
-      Samples.hideLoader();
+      this.nanobar.go(100);
       this.setState((prevState) => ({
         initialFetchedSamples: res.data.samples,
         allSamples: res.data.samples,
@@ -649,7 +649,6 @@ class Samples extends React.Component {
         cb();
       }
     }).catch((err) => {
-      Samples.hideLoader();
       this.setState({
         initialFetchedSamples: [],
         allSamples: [],
@@ -711,13 +710,12 @@ class Samples extends React.Component {
   //handle search when query is passed
   handleSearch(e) {
     if (e.target.value !== '' && e.key === 'Enter') {
-      Samples.showLoading(`Searching for samples that match ${e.target.value}...`)
+      this.nanobar.go(30);
       this.setState({
         pagesLoaded: 0,
         pageEnd: false,
         searchParams: e.target.value
       }, () => {
-        Samples.hideLoader();
         this.setUrlLocation();
         this.fetchResults();
       });
@@ -1072,7 +1070,7 @@ class Samples extends React.Component {
             }
             {
               (this.state.invite_status === 'sent') ?
-              <div className='status-message success teal-text text-darken-2'>
+              <div className='status-message status teal-text text-darken-2'>
                 <i className="fa fa-smile-o fa-fw"></i>
                  Yay! User has been added
               </div> : null
