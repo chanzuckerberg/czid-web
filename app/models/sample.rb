@@ -19,6 +19,8 @@ class Sample < ApplicationRecord
 
   LOG_BASENAME = 'log.txt'.freeze
 
+  LOCAL_INPUT_PART_PATH = '/app/tmp/input_parts'.freeze
+
   # TODO: Make all these params configurable without code change
   DEFAULT_STORAGE_IN_GB = 500
   DEFAULT_MEMORY_IN_MB = 30_000
@@ -279,17 +281,15 @@ class Sample < ApplicationRecord
       next unless f.source_type == 'local'
       parts = f.parts.split(", ")
       next unless parts.length > 1
-      resp0 = S3_CLIENT.create_multipart_upload(bucket: SAMPLES_BUCKET_NAME, key: f.file_path)
-      upload_id = resp0.to_h[:upload_id]
       source_parts = []
+      local_path = "#{LOCAL_INPUT_PART_PATH}/#{sample.id}/#{f.id}"
       parts.each_with_index do |part, index|
         source_part = File.join(File.dirname(f.file_path), File.basename(part))
         source_parts << source_part
-        S3_CLIENT.upload_part_copy(bucket: SAMPLES_BUCKET_NAME, key: f.file_path,
-                                   copy_source: source_part,
-                                   part_number: index + 1, upload_id: upload_id)
+        `aws s3 cp #{source_part} #{local_path}/#{index}`
       end
-      S3_CLIENT.complete_multipart_upload(resp0.to_h)
+      `cd #{local_path}; cat * > complete_file; aws s3 cp complete_file #{f.file_path}`
+      `rm -rf #{local_path}`
       source_parts.each do |source_part|
         `aws s3 rm #{source_part}`
       end
