@@ -237,11 +237,11 @@ module ReportHelper
   def fetch_top_taxons(samples, background_id, only_species)
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
 
-    if only_species
-      tax_level_str = " AND taxon_counts.tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}"
-    else
-      tax_level_str = " AND taxon_counts.tax_level = #{TaxonCount::TAX_LEVEL_GENUS}"
-    end
+    tax_level_str = if only_species
+                      " AND taxon_counts.tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}"
+                    else
+                      " AND taxon_counts.tax_level = #{TaxonCount::TAX_LEVEL_GENUS}"
+                    end
     sql_results = TaxonCount.connection.select_all("
       SELECT
         taxon_counts.pipeline_run_id     AS  pipeline_run_id,
