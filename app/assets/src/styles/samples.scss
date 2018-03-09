@@ -840,11 +840,10 @@ input[type="button"] {
 
 .content-body {
   .sidebar {
-    box-shadow: none !important;
-    background: $light-gray4;
+    background-color: #333333;
     border-right: 1px solid #eaeaea;
     .sticky-inner-wrapper {
-      background: $light-gray4;
+      background: #333333;
     }
     .title {
       color: $gray3;
