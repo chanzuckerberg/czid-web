@@ -9,6 +9,7 @@ Rails.application.routes.draw do
   resources :samples do
     put :reupload_source, on: :member
     put :kickoff_pipeline, on: :member
+    put :resume_pipeline, on: :member
     get :all, on: :collection
     get :pipeline_runs, on: :member
     get :report_info, on: :member

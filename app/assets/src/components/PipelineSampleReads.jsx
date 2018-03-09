@@ -25,6 +25,7 @@ class PipelineSampleReads extends React.Component {
     this.allCategories  = props.allCategories;
     this.reportDetails  = props.reportDetails;
     this.reportPageParams  = props.reportPageParams;
+    this.pipelineRunResumable = props.pipelineRunResumable;
 
     this.jobStatistics = props.jobStatistics;
     this.summary_stats = props.summary_stats;
@@ -45,7 +46,6 @@ class PipelineSampleReads extends React.Component {
                               sample_template: this.NUCLEOTIDE_TYPES };
     this.DROPDOWN_METADATA_FIELDS = Object.keys(this.DROPDOWN_OPTIONS);
     this.handleDropdownChange = this.handleDropdownChange.bind(this);
-    this.listenNoteChanges = this.listenNoteChanges.bind(this);
 
   }
 
@@ -462,6 +462,30 @@ class PipelineSampleReads extends React.Component {
       version_display = version_display + ', NR ' + this.pipelineRun.version.nr
     }
 
+    let resumable = this.pipelineRunResumable ? (
+      <div className="row">
+        <div className="col s12">
+          <div className="content-title">
+            Resume Pipeline
+          </div>
+        <h6 className={this.state.rerunStatus}>
+          { (this.state.rerunStatus === 'success') ?
+            waitingSpinner : null
+          }
+        </h6>
+        <p>
+          Pipeline was not 100% successful. Sample status: <b>{ this.pipelineStatus }</b>
+          {
+            (this.state.rerunStatus === 'failed' && this.can_edit) ?
+            <a onClick={ this.rerunPipeline }className="custom-button small">
+              <i className="fa fa-repeat"></i>
+              RESUME PIPELINE
+            </a> : null
+          }
+        </p>
+        </div>
+      </div>) : null;
+
     return (
       <div>
         <SubHeader>
@@ -587,6 +611,8 @@ class PipelineSampleReads extends React.Component {
                     { pipeline_run }
                   </div>
                 </div>
+                { resumable }
+
               </div>
 
               <div className="col s3 download-area">
