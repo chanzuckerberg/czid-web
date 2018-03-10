@@ -18,15 +18,15 @@ task update_lineage_db: :environment do
 
   ## Convert NULL to empty string in all name columns for consistency
   ## using query:
-  #   UPDATE TaxonLineage
+  #   UPDATE taxon_lineages
   #   SET
-  #     superkingdom_name = CASE superkingdom_name WHEN NULL THEN '' ELSE superkingdom_name END,
-  #     superkingdom_common_name = CASE superkingdom_common_name WHEN NULL THEN '' ELSE superkingdom_common_name END
+  #     superkingdom_name = IFNULL(superkingdom_name, ''),
+  #     superkingdom_common_name = IFNULL(superkingdom_common_name, ''),
   #     ...
-  #     species_name = CASE species_name WHEN NULL THEN '' ELSE species_name END,
-  #     species_common_name = CASE species_common_name WHEN NULL THEN '' ELSE species_common_name END
-  replacements = name_column_array.map { |column| "#{column} = CASE #{column} WHEN NULL THEN '' ELSE #{column}" }
-  query = "UPDATE taxon_lineages SET " + replacements.join(" END, ") + " END"
+  #     species_name = IFNULL(species_name, ''),
+  #     species_common_name = IFNULL(species_common_name, '')
+  replacements = name_column_array.map { |column| "#{column} = IFNULL(#{column}, '')" }
+  query = "UPDATE taxon_lineages SET " + replacements.join(", ")
   ActiveRecord::Base.connection.execute(query)
 
   `
