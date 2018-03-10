@@ -6,8 +6,8 @@ class Sample < ApplicationRecord
   STATUS_CREATED  = 'created'.freeze
   STATUS_UPLOADED = 'uploaded'.freeze
   STATUS_RERUN    = 'need_rerun'.freeze
-  STATUS_RETRY_PR   = 'retry_pr'.freeze # retry existing pipeline run
-  STATUS_CHECKED  = 'checked'.freeze # status regarding pipeline kickoff is checked
+  STATUS_RETRY_PR = 'retry_pr'.freeze # retry existing pipeline run
+  STATUS_CHECKED = 'checked'.freeze # status regarding pipeline kickoff is checked
   HIT_FASTA_BASENAME = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.fasta'.freeze
   UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fasta'.freeze
   SORTED_TAXID_ANNOTATED_FASTA = 'taxid_annot_sorted_nt.fasta'.freeze
@@ -271,11 +271,12 @@ class Sample < ApplicationRecord
   def check_status
     return unless [STATUS_UPLOADED, STATUS_RERUN, STATUS_RETRY_PR].include?(status)
     pr = pipeline_runs.first
-    if status == STATUS_RETRY_PR && pr
-      self.status = STATUS_CHECKED
+    transient_status = status
+    self.status = STATUS_CHECKED
+
+    if transient_status == STATUS_RETRY_PR && pr
       pr.retry
     else
-      self.status = STATUS_CHECKED
       kickoff_pipeline
     end
   end

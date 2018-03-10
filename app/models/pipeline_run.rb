@@ -120,7 +120,7 @@ class PipelineRun < ApplicationRecord
     self.finalized = 0
     prs = active_stage
     prs.run_job
-    self.update_job_status
+    update_job_status
   end
 
   def report_ready?
