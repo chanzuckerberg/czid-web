@@ -1,6 +1,7 @@
 require 'open3'
 require 'json'
 require 'tempfile'
+require 'aws-sdk'
 
 class Sample < ApplicationRecord
   STATUS_CREATED  = 'created'.freeze
@@ -18,6 +19,8 @@ class Sample < ApplicationRecord
   SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR = 'taxid_annot_sorted_family_nr.fasta'.freeze
 
   LOG_BASENAME = 'log.txt'.freeze
+
+  LOCAL_INPUT_PART_PATH = '/app/tmp/input_parts'.freeze
 
   # TODO: Make all these params configurable without code change
   DEFAULT_STORAGE_IN_GB = 500
@@ -51,7 +54,7 @@ class Sample < ApplicationRecord
   after_create :initiate_input_file_upload
   validates :name, uniqueness: { scope: :project_id }
 
-  before_save :check_host_genome, :check_status
+  before_save :check_host_genome, :concatenate_input_parts, :check_status
   after_save :set_presigned_url_for_local_upload
 
   # getter
@@ -82,9 +85,14 @@ class Sample < ApplicationRecord
 
   def set_presigned_url_for_local_upload
     input_files.each do |f|
-      if f.source_type == 'local'
+      if f.source_type == 'local' && f.parts
         # TODO: investigate the content-md5 stuff https://github.com/aws/aws-sdk-js/issues/151 https://gist.github.com/algorist/385616
-        f.update(presigned_url: S3_PRESIGNER.presigned_url(:put_object, bucket: SAMPLES_BUCKET_NAME, key: f.file_path, expires_in: 86_400))
+        parts = f.parts.split(", ")
+        presigned_urls = parts.map do |part|
+          S3_PRESIGNER.presigned_url(:put_object, expires_in: 86_400, bucket: SAMPLES_BUCKET_NAME,
+                                                  key: File.join(File.dirname(f.file_path), File.basename(part)))
+        end
+        f.update(presigned_url: presigned_urls.join(", "))
       end
     end
   end
@@ -266,6 +274,27 @@ class Sample < ApplicationRecord
     end
     s3_preload_result_path ||= ''
     s3_preload_result_path.strip!
+  end
+
+  def concatenate_input_parts
+    return unless status == STATUS_UPLOADED
+    input_files.each do |f|
+      next unless f.source_type == 'local'
+      parts = f.parts.split(", ")
+      next unless parts.length > 1
+      source_parts = []
+      local_path = "#{LOCAL_INPUT_PART_PATH}/#{id}/#{f.id}"
+      parts.each_with_index do |part, index|
+        source_part = File.join("s3://#{SAMPLES_BUCKET_NAME}", File.dirname(f.file_path), File.basename(part))
+        source_parts << source_part
+        `aws s3 cp #{source_part} #{local_path}/#{index}`
+      end
+      `cd #{local_path}; cat * > complete_file; aws s3 cp complete_file s3://#{SAMPLES_BUCKET_NAME}/#{f.file_path}`
+      `rm -rf #{local_path}`
+      source_parts.each do |source_part|
+        `aws s3 rm #{source_part}`
+      end
+    end
   end
 
   def check_status

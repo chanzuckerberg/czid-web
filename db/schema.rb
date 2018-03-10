@@ -73,6 +73,7 @@ ActiveRecord::Schema.define(version: 20180309193548) do
     t.datetime "updated_at", null: false
     t.string "source_type", null: false
     t.text "source"
+    t.text "parts"
     t.index ["sample_id"], name: "index_input_files_on_sample_id"
   end
 

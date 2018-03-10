@@ -183,12 +183,12 @@ class SamplesController < ApplicationController
     sort_by = params[:sort_by] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
 
     samples = current_power.samples.where(id: sample_ids)
-    include_species = params[:species]
+    only_species = params[:species] == "1"
     if samples.first
       first_sample = samples.first
       default_background_id = first_sample.host_genome && first_sample.host_genome.default_background ? first_sample.host_genome.default_background.id : nil
       background_id = params[:background_id] || default_background_id || Background.first
-      @top_taxons = top_taxons_details(samples, background_id, num_results, sort_by, include_species)
+      @top_taxons = top_taxons_details(samples, background_id, num_results, sort_by, only_species)
       render json: @top_taxons
     else
       render json: {}
@@ -203,14 +203,14 @@ class SamplesController < ApplicationController
     num_results = params[:n] ? params[:n].to_i : 20
     taxon_ids = params[:taxon_ids].to_s.split(",").map(&:to_i) || []
     sort_by = params[:sort_by] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
-    include_species = params[:species]
+    only_species = params[:species] == "1"
     samples = current_power.samples.where(id: sample_ids)
     if samples.first
       first_sample = samples.first
       default_background_id = first_sample.host_genome && first_sample.host_genome.default_background ? first_sample.host_genome.default_background.id : nil
       background_id = params[:background_id] || default_background_id || Background.first.id
       if taxon_ids.empty?
-        taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, include_species).pluck("tax_id")
+        taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, only_species).pluck("tax_id")
       end
       if taxon_ids.empty?
         render json: {}
@@ -475,7 +475,7 @@ class SamplesController < ApplicationController
                                    :sample_memory, :sample_location, :sample_date, :sample_tissue,
                                    :sample_template, :sample_library, :sample_sequencer,
                                    :sample_notes, :job_queue, :search, :subsample, :pipeline_branch,
-                                   input_files_attributes: [:name, :presigned_url, :source_type, :source])
+                                   input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts])
   end
 
   def sort_by(samples, dir = nil)
