@@ -25,7 +25,7 @@ class PipelineSampleReads extends React.Component {
     this.allCategories  = props.allCategories;
     this.reportDetails  = props.reportDetails;
     this.reportPageParams  = props.reportPageParams;
-    this.pipelineRunResumable = props.pipelineRunResumable;
+    this.pipelineRunRetriable = props.pipelineRunRetriable;
 
     this.jobStatistics = props.jobStatistics;
     this.summary_stats = props.summary_stats;
@@ -462,11 +462,11 @@ class PipelineSampleReads extends React.Component {
       version_display = version_display + ', NR ' + this.pipelineRun.version.nr
     }
 
-    let resumable = this.pipelineRunResumable ? (
+    let retriable = this.pipelineRunRetriable ? (
       <div className="row">
         <div className="col s12">
           <div className="content-title">
-            Resume Pipeline
+            Retry Pipeline
           </div>
         <h6 className={this.state.rerunStatus}>
           { (this.state.rerunStatus === 'success') ?
@@ -474,12 +474,12 @@ class PipelineSampleReads extends React.Component {
           }
         </h6>
         <p>
-          Pipeline was not 100% successful. Sample status: <b>{ this.pipelineStatus }</b>
+          Pipeline was not 100% successful. Sample status: <b>{ this.pipelineStatus }</b> <br/>
           {
             (this.state.rerunStatus === 'failed' && this.can_edit) ?
             <a onClick={ this.rerunPipeline }className="custom-button small">
               <i className="fa fa-repeat"></i>
-              RESUME PIPELINE
+              RETRY PIPELINE
             </a> : null
           }
         </p>
@@ -611,7 +611,7 @@ class PipelineSampleReads extends React.Component {
                     { pipeline_run }
                   </div>
                 </div>
-                { resumable }
+                { retriable }
 
               </div>
 

@@ -115,7 +115,7 @@ class PipelineRun < ApplicationRecord
     nil
   end
 
-  def resume
+  def retry
     return unless failed? # only resuming from a failed job
     self.finalized = 0
     prs = active_stage

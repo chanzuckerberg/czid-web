@@ -6,7 +6,7 @@
       sampleInfo: JSON.parse('<%= raw escape_json(@sample) %>'),
       projectInfo: JSON.parse('<%= raw escape_json(@project_info) %>'),
       pipelineRun: JSON.parse('<%= raw escape_json(@pipeline_run_display) %>'),
-      pipelineRunResumable: <%= @pipeline_run_resumable ? true : false  %>,
+      pipelineRunRetriable: <%= @pipeline_run_retriable ? true : false  %>,
       jobStatistics: JSON.parse('<%= raw escape_json(@job_stats) %>'),
       project_sample_ids_names: JSON.parse('<%= raw escape_json(@project_sample_ids_names) %>'),
       host_genome: JSON.parse('<%= raw escape_json(@host_genome) %>'),
@@ -17,7 +17,7 @@
       reportDetails: JSON.parse('<%= raw escape_json(@report_details)%>'),
       reportPageParams: JSON.parse('<%= raw escape_json(@report_page_params) %>'),
       sample_status: '<%= @sample_status %>',
-      rerun_path: '<%= resume_pipeline_sample_path %>',
+      rerun_path: '<%= retry_pipeline_sample_path %>',
       can_edit: <%= @can_edit %>,
       can_see_align_viz: <%= !!@align_viz %>,
       all_backgrounds: JSON.parse('<%= raw escape_json(@background_models) %>')
