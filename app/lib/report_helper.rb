@@ -224,12 +224,12 @@ module ReportHelper
         taxon_counts.percent_concordant  AS  percentconcordant
       FROM taxon_counts
       LEFT OUTER JOIN taxon_summaries ON
-        #{background_id}        = taxon_summaries.background_id   AND
+        #{background_id.to_i}   = taxon_summaries.background_id   AND
         taxon_counts.count_type = taxon_summaries.count_type      AND
         taxon_counts.tax_level  = taxon_summaries.tax_level       AND
         taxon_counts.tax_id     = taxon_summaries.tax_id
       WHERE
-        pipeline_run_id = #{pipeline_run_id} AND
+        pipeline_run_id = #{pipeline_run_id.to_i} AND
         taxon_counts.count_type IN ('NT', 'NR')
     ").to_hash
   end
@@ -264,7 +264,7 @@ module ReportHelper
         taxon_counts.percent_concordant  AS  percentconcordant
       FROM taxon_counts
       LEFT OUTER JOIN taxon_summaries ON
-        #{background_id}        = taxon_summaries.background_id   AND
+        #{background_id.to_i}   = taxon_summaries.background_id   AND
         taxon_counts.count_type = taxon_summaries.count_type      AND
         taxon_counts.tax_level  = taxon_summaries.tax_level       AND
         taxon_counts.tax_id     = taxon_summaries.tax_id
@@ -324,7 +324,7 @@ module ReportHelper
         taxon_counts.percent_concordant  AS  percentconcordant
       FROM taxon_counts
       LEFT OUTER JOIN taxon_summaries ON
-        #{background_id}        = taxon_summaries.background_id   AND
+        #{background_id.to_i}   = taxon_summaries.background_id   AND
         taxon_counts.count_type = taxon_summaries.count_type      AND
         taxon_counts.tax_level  = taxon_summaries.tax_level       AND
         taxon_counts.tax_id     = taxon_summaries.tax_id
