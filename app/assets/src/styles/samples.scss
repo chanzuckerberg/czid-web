@@ -1111,25 +1111,31 @@ input[type="button"] {
   }
 }
 
+[type=checkbox].filled-in {
+    height: 20px !important;
+    width: 20px !important;
+}
+
 [type=checkbox].filled-in:not(:checked)+label:after {
-    height: 16px !important;
-    width: 16px !important;
+    top: 4px;
     background-color: transparent;
     border: 2px solid #5a5a5a;
-    top: 4px;
     z-index: 0;
 }
 
 [type=checkbox].filled-in:checked+label:after {
-    top: 0;
-    width: 16px !important;
-    height: 16px !important;
+    top: 4px;
     border: 10px solid #188fd8;
     background-color: #188fd8;
     &.check-all {
       padding: 10px 21px 8px 16px;
     }
 }
+
+[type=checkbox].filled-in:checked+label:before {
+    top: 4px;
+}
+
 .dropdown-content li>a, .dropdown-content li>span {
   font-size: 14px;
 }
