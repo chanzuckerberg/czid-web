@@ -497,7 +497,7 @@ class PipelineSampleReads extends React.Component {
               <div className="sub-title col s9">
                 <a
                 href={`/?project_id=${this.projectInfo.id}`}>
-                  {this.projectInfo.name}
+                  {this.projectInfo.name + ' '}
                 </a>
                 > { sample_dropdown }
               </div>
