@@ -9,6 +9,7 @@ Rails.application.routes.draw do
   resources :samples do
     put :reupload_source, on: :member
     put :kickoff_pipeline, on: :member
+    put :retry_pipeline, on: :member
     get :all, on: :collection
     get :pipeline_runs, on: :member
     get :report_info, on: :member
@@ -27,6 +28,8 @@ Rails.application.routes.draw do
     get :heatmap, on: :collection
   end
   get 'samples/:id/fasta/:tax_level/:taxid/:hit_type', to: 'samples#show_taxid_fasta'
+  get 'samples/:id/alignment/:taxon_info', to: 'samples#show_taxid_alignment'
+  get 'select', to: 'home#index'
 
   resources :projects do
     get :make_project_reports_csv, on: :member

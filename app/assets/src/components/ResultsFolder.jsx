@@ -6,6 +6,8 @@ class ResultsFolder extends React.Component {
     this.fileUrl = props.filePath;
     this.filePath = this.fileUrl.split('/');
     this.fileList = props.fileList;
+    this.sampleName = props.sampleName;
+    this.projectName = props.projectName;
   }
 
   gotoPath(path) {
@@ -23,9 +25,9 @@ class ResultsFolder extends React.Component {
           <span className="title">
             <span className="back" onClick={this.gotoPath.bind(this, '/')}>{this.filePath[0]}</span>
             <span className="path">></span>
-            <span className="back" onClick={this.gotoPath.bind(this, `/?project_id=${this.filePath[1]}`)}>{this.filePath[1]}</span>
+            <span className="back" onClick={this.gotoPath.bind(this, `/?project_id=${this.filePath[1]}`)}>{this.projectName}</span>
             <span className="path">/</span>
-            <span className="back" onClick={this.gotoPath.bind(this, `/samples/${this.filePath[2]}`)}>{this.filePath[2]}</span>
+            <span className="back" onClick={this.gotoPath.bind(this, `/samples/${this.filePath[2]}`)}>{this.sampleName}</span>
             <span className="path">/</span>
             {this.filePath[3]}
           </span>

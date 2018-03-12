@@ -5,13 +5,14 @@ import moment from 'moment';
 import $ from 'jquery';
 import Tipsy from 'react-tipsy';
 import Materialize from 'materialize-css';
+import {Sidebar, Grid, Segment} from 'semantic-ui-react';
 import SortHelper from './SortHelper';
 import numberWithCommas from '../helpers/strings';
 import ProjectSelection from './ProjectSelection';
 import ReportFilter from './ReportFilter';
 import PipelineSampleReads from './PipelineSampleReads';
 import StringHelper from '../helpers/StringHelper';
-import StickySidebar from './StickySidebar';
+import { Dropdown } from 'semantic-ui-react'
 
 class Samples extends React.Component {
   constructor(props, context) {
@@ -27,8 +28,8 @@ class Samples extends React.Component {
     this.loadMore = this.loadMore.bind(this);
     this.fetchResults = this.fetchResults.bind(this);
     this.fetchSamples = this.fetchSamples.bind(this);
+    this.hostGenomes = props.hostGenomes || [];
     this.handleStatusFilterSelect = this.handleStatusFilterSelect.bind(this);
-    this.handleTissueFilterSelect = this.handleTissueFilterSelect.bind(this);
     this.setUrlLocation = this.setUrlLocation.bind(this);
     this.sortSamples = this.sortSamples.bind(this);
     this.switchColumn = this.switchColumn.bind(this);
@@ -44,23 +45,34 @@ class Samples extends React.Component {
     this.resetForm = this.resetForm.bind(this);
     this.selectSample = this.selectSample.bind(this);
     this.compareSamples = this.compareSamples.bind(this);
+    this.clearAllFilters = this.clearAllFilters.bind(this);
+    this.selectTissueFilter = this.selectTissueFilter.bind(this);
+    this.selectHostFilter = this.selectHostFilter.bind(this);
+    this.displayMetaDataDropdown = this.displayMetaDataDropdown.bind(this);
     this.state = {
       invite_status: null,
       project: null,
       project_users: [],
       totalNumber: null,
       projectId: null,
+      displaySelectSamplees: true, // this.checkURLContent(),
       selectedProjectId: this.fetchParams('project_id') || null,
       filterParams: this.fetchParams('filter') || '',
       searchParams: this.fetchParams('search') || '',
-      tissueParams: this.fetchParams('tissue') || '',
       sampleIdsParams: this.fetchParams('ids') || [],
       allSamples: [],
       sort_by: this.fetchParams('sort_by') || 'id,desc',
       pagesLoaded: 0,
       pageEnd: false,
+      hostFilterChange: false,
+      tissueFilterChange: false,
+      checkedBoxes: 0,
       allChecked: false,
       selectedSampleIndices: [],
+      displayDropdown: false,
+      selectedTissueFilters: this.fetchParams('tissue') ? this.fetchParams('tissue').split(',') : [],
+      selectedTissueIndices: [],
+      selectedHostIndices: this.fetchParams('host') ? this.fetchParams('host').split(',').map(Number) : [],
       initialFetchedSamples: [],
       loading: false,
       isRequesting: false,
@@ -84,8 +96,8 @@ class Samples extends React.Component {
         'location',
         'pipeline_status',
         'notes',
-        'tissue_type',
-        'nucleotide_type'
+        'nucleotide_type',
+        'tissue_type'
       ]
     };
     this.sortCount = 0;
@@ -95,10 +107,10 @@ class Samples extends React.Component {
       quality_control: { display_name: "Passed QC", tooltip: "Passed quality control", type: "pipeline_data" },
       compression_ratio: { display_name: "DCR", tooltip: "Duplicate compression ratio", type: "pipeline_data" },
       pipeline_status: { display_name: "Status", type: "pipeline_data" },
-      tissue_type: { display_name: "Tissue type", type: "metadata" },
       nucleotide_type: { display_name: "Nucleotide type", type: "metadata" },
       location: { display_name: "Location", type: "metadata" },
       host_genome: { display_name: "Host", type: "metadata" },
+      tissue_type: { display_name: "Tissue type", type: "metadata" },
       notes: { display_name: "Notes", type: "metadata" } };
     this.handleColumnSelectChange = this.handleColumnSelectChange.bind(this);
     this.columnHidden = this.columnHidden.bind(this);
@@ -137,13 +149,58 @@ class Samples extends React.Component {
     });
   }
 
+  selectTissueFilter(e) {
+    const filterList = this.state.selectedTissueFilters.slice(0);
+
+    let filter, filterIndex;
+    let selectedFilter = e.target.getAttribute('data-status');
+
+    if(e.target.checked) {
+      filterList.push(selectedFilter);
+    } else {
+      filterIndex = filterList.indexOf(selectedFilter);
+      filterList.splice(filterIndex, 1);
+    }
+    this.setState({
+      selectedTissueFilters: filterList,
+      pagesLoaded: 0,
+      pageEnd: false,
+    }, () => {
+      this.setUrlLocation();
+    });
+  }
+
+  selectHostFilter(e) {
+    // current array of options
+    const hostList = this.state.selectedHostIndices.slice(0);
+    let index;
+    // check if the check box is checked or unchecked
+    if (e.target.checked) {
+      // add the numerical value of the checkbox to options array
+      hostList.push(+e.target.id)
+    } else {
+      // or remove the value from the unchecked checkbox from the array
+      index = hostList.indexOf(+e.target.id)
+      hostList.splice(index, 1)
+    }
+    // update the state with the new array of options
+    this.setState({
+      selectedHostIndices: hostList,
+      pagesLoaded: 0,
+      pageEnd: false
+    }, () => {
+      this.setUrlLocation();
+    })
+  }
+
+
   canEditProject(projectId) {
     return (this.editableProjects.indexOf(parseInt(projectId)) > -1)
   }
 
   displayReportProgress(res) {
       $('.download-progress')
-      .html(`<i class="fa fa-circle-o-notch fa-spin fa-fw"></i> ${res.data.status_display}`)
+      .html(`<i className="fa fa-circle-o-notch fa-spin fa-fw"></i> ${res.data.status_display}`)
       .css('display', 'block')
       setTimeout(() => {
         this.checkReportDownload();
@@ -151,11 +208,13 @@ class Samples extends React.Component {
   }
 
   startReportGeneration() {
+    Samples.showLoading('Downloading reports...');
     axios.get(`/projects/${this.state.selectedProjectId}/make_project_reports_csv`).then((res) => {
       this.setState({
         project_id_download_in_progress: this.state.selectedProjectId
       });
       this.displayReportProgress(res);
+    }).catch((err) => {
     });
   }
 
@@ -163,6 +222,7 @@ class Samples extends React.Component {
     axios.get(`/projects/${this.state.project_id_download_in_progress}/project_reports_csv_status`).then((res) => {
       let download_status = res.data.status_display
       if (download_status === 'complete') {
+        Samples.hideLoader();
         location.href = `/projects/${this.state.project_id_download_in_progress}/send_project_reports_csv`
         this.setState({
           project_id_download_in_progress: null
@@ -255,6 +315,12 @@ class Samples extends React.Component {
           3000, 'rounded');
       });
     }
+  }
+
+  displayMetaDataDropdown() {
+    this.setState({
+      displayDropdown: !this.state.displayDropdown
+    });
   }
 
   updateUserDisplay(email_to_add) {
@@ -365,12 +431,32 @@ class Samples extends React.Component {
       let uploader = sample.uploader.name;
       let statusClass = !runInfo.job_status_description ? this.applyChunkStatusClass(runInfo) : this.applyClass(runInfo.job_status_description)
       let status = !runInfo.job_status_description ? this.getChunkedStage(runInfo) : runInfo.job_status_description;
+
       const rowWithChunkStatus = (
         <div className={`${statusClass} status`}>
           {this.appendStatusIcon(status)}
           <span>{status}</span>
         </div>
       );
+
+      const sample_name_info = (
+        <span onClick={(e) => this.viewSample(dbSample.id, e)} className='sample-name-info'>
+          <div className='card-label top-label'>
+            {/*<span className='project-name'>*/}
+            {/*Mosquito*/}
+            {/*</span>*/}
+            <span className='upload-date'>
+                Uploaded {moment(dbSample.created_at).startOf('second').fromNow()}
+              </span>
+          </div>
+          <div className='card-label center-label sample-name'>
+            {dbSample.name}
+          </div>
+          <div className='card-label author bottom-label author'>
+            { !uploader || uploader === '' ? '' : <span>Uploaded by: {uploader}</span>}
+          </div>
+        </span>
+      )
       const data_values = { total_reads: !derivedOutput.pipeline_run ? BLANK_TEXT : numberWithCommas(derivedOutput.pipeline_run.total_reads),
         nonhost_reads: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.remaining_reads) ? BLANK_TEXT : numberWithCommas(derivedOutput.summary_stats.remaining_reads),
         nonhost_reads_percent: (!derivedOutput.summary_stats || !derivedOutput.summary_stats.percent_remaining) ? '' : <span className="percent"> {`(${derivedOutput.summary_stats.percent_remaining.toFixed(2)}%)`} </span>,
@@ -389,35 +475,17 @@ class Samples extends React.Component {
               <div className='flex-container'>
                 <ul className='flex-items'>
                   <li className='check-box-container'>
-                    <input type="checkbox" id={i}
+                    { this.state.displaySelectSamplees ? <div><input type="checkbox" id={i} onClick = { this.selectSample }
                       className="filled-in checkbox" value={ this.state.selectedSampleIndices.indexOf(i) != -1 }
-                      onChange = { this.selectSample }  
-                      />
-                    <label htmlFor={i}>
-                      <span className='sample-name-info'>
-                        <div className='card-label top-label'>
-                          {/*<span className='project-name'>*/}
-                          {/*Mosquito*/}
-                          {/*</span>*/}
-                          <span className='upload-date'>
-                              Uploaded {moment(dbSample.created_at).startOf('second').fromNow()}
-                            </span>
-                        </div>
-                        <div className='card-label center-label sample-name'>
-                          {dbSample.name}
-                        </div>
-                        <div className='card-label author bottom-label author'>
-                          { !uploader || uploader === '' ? '' : <span>Uploaded by: {uploader}</span>}
-                        </div>
-                      </span>
-                    </label>
+                      disabled={status != "COMPLETE"}
+                      /> <label htmlFor={i}>{sample_name_info}</label></div> : sample_name_info }
                   </li>
                   {
                     this.state.columnsShown.map((column, pos) => {
                       let column_data = '';
                       if (column === 'pipeline_status') {
                         column_data = (
-                          <li  key={pos}>
+                          <li  key={pos} onClick={this.viewSample.bind(this, dbSample.id)} >
                             <div className='card-label top-label'>
                               { rowWithChunkStatus }
                             </div>
@@ -440,7 +508,7 @@ class Samples extends React.Component {
                           </div>
                         </li>)
                       } else {
-                        column_data = (<li key={pos}>
+                        column_data = (<li key={pos} onClick={this.viewSample.bind(this, dbSample.id)} >
                           <div className='card-label center center-label data-label'>
                             {data_values[column]}
                           </div>
@@ -523,9 +591,17 @@ class Samples extends React.Component {
     })
   }
 
+  checkURLContent() {
+    if(window.location.href.indexOf("select") > -1) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   //fetch project, filter and search params
   getParams() {
-    let params = `filter=${this.state.filterParams}&tissue=${this.state.tissueParams}&page=${this.state.pagesLoaded+1}&search=${this.state.searchParams}&sort_by=${this.state.sort_by}`;
+    let params = `filter=${this.state.filterParams}&page=${this.state.pagesLoaded+1}&search=${this.state.searchParams}&sort_by=${this.state.sort_by}`;
     let projectId = parseInt(this.state.selectedProjectId);
 
     if(projectId) {
@@ -534,6 +610,16 @@ class Samples extends React.Component {
     if(this.state.sampleIdsParams.length) {
       let sampleParams = this.state.sampleIdsParams;
       params += `&ids=${sampleParams}`
+    }
+
+    if(this.state.selectedTissueFilters.length) {
+      let tissueParams = this.state.selectedTissueFilters.join(',');
+      params += `&tissue=${tissueParams}`
+    }
+
+    if(this.state.selectedHostIndices.length) {
+      let hostParams = this.state.selectedHostIndices.join(',');
+      params += `&host=${hostParams}`
     }
     return params;
   }
@@ -559,6 +645,7 @@ class Samples extends React.Component {
         cb();
       }
     }).catch((err) => {
+      Samples.hideLoader();
       this.setState({
         initialFetchedSamples: [],
         allSamples: [],
@@ -599,11 +686,13 @@ class Samples extends React.Component {
     let postProcess = runInfo['Post Processing']
     let hostFiltering = runInfo['Host Filtering']
     let alignment = runInfo['GSNAPL/RAPSEARCH alignment']
-    if (postProcess === 'FAILED' || alignment === 'FAILED' || hostFiltering === 'FAILED') {
+    if (alignment === 'FAILED' || hostFiltering === 'FAILED') {
       return 'FAILED';
     } else if (postProcess) {
       if (postProcess === 'LOADED')
         return 'COMPLETE';
+      else if (postProcess === 'FAILED')
+        return 'COMPLETE*'
       else
         return  'POST PROCESSING';
     } else if (alignment) {
@@ -655,8 +744,10 @@ class Samples extends React.Component {
     }
   }
 
-  viewSample(id) {
+  viewSample(id, e) {
+    e.preventDefault();
     // _satellite.track('viewsample')
+    $(".checkAll, .checkbox").prop('checked', false);
     location.href = `/samples/${id}`;
   }
 
@@ -680,6 +771,16 @@ class Samples extends React.Component {
       <div className="center-align"><i className='fa fa-frown-o'> No result found</i></div>
     )
   }
+
+ displayDownloadDropdown() {
+  $('.download-dropdown').dropdown({
+    constrainWidth: false, // Does not change width of dropdown to that of the activator
+    gutter: 0, // Spacing from edge
+    belowOrigin: true, // Displays dropdown below the button
+    alignment: 'left', // Displays dropdown with edge aligned to the left of button
+    stopPropagation: true // Stops event propagation
+  });
+ }
 
   findSelectedColumns(selO) {
     const selValues = [];
@@ -714,7 +815,6 @@ class Samples extends React.Component {
     })
   }
 
-
   addFavIconClass(project) {
     return (
       <i data-status="favorite" data-fav={project.favorited} data-id={project.id} onClick={this.toggleFavorite} className={!project.favorited ? "favorite fa fa-star-o":  "favorite fa fa-star"}></i>
@@ -726,14 +826,13 @@ class Samples extends React.Component {
     var that = this;
     $('.checkAll').click(function(e) {
       var checked = e.currentTarget.checked;
-      $('.checkbox').prop('checked', checked);
+      $('.checkbox:enabled').prop('checked', checked);
+      var checkedCount = $("input:checkbox:checked").length
       that.setState({
-        allChecked: checked
+        allChecked: checked,
+        checkedBoxes: checkedCount
       });
-      // to be used in comparison method
-      // that.fetchAllSelectedIds(that.state.allChecked);
-    }); 
-
+    });
   }
 
 
@@ -756,11 +855,28 @@ class Samples extends React.Component {
     let params;
     if(this.state.allChecked) {
       this.fetchAllSelectedIds(this.state.allChecked);
-    } 
+    }
     if(this.state.selectedSampleIndices.length) {
       let sampleParams = this.state.selectedSampleIndices;
-      location.href = `/samples/heatmap?sample_ids=${sampleParams}`
+      let sampleIds = this.state.selectedSampleIndices.map((idx) => {
+        return this.state.allSamples[idx].db_sample.id;
+      });
+      location.href = `/samples/heatmap?sample_ids=${sampleIds}`
     }
+  }
+
+  clearAllFilters() {
+    this.setState({
+      filterParams: '',
+      pagesLoaded: 0,
+      searchParams:'',
+      sampleIdsParams: [],
+      selectedTissueFilters: [],
+      selectedHostIndices: []
+    }, () => {
+      this.setUrlLocation();
+      this.fetchProjectPageData();
+    })
   }
 
   selectSample(e) {
@@ -775,7 +891,6 @@ class Samples extends React.Component {
     let index
     // check if the check box is checked or unchecked
 
- 
     if (e.target.checked) {
       // add the numerical value of the checkbox to options array
       sampleList.push(+e.target.id)
@@ -784,9 +899,12 @@ class Samples extends React.Component {
       index = sampleList.indexOf(+e.target.id)
       sampleList.splice(index, 1)
     }
-
+    var checkedCount = $("input:checkbox:checked").length
     // update the state with the new array of options
-    this.setState({ selectedSampleIndices: sampleList })
+    this.setState({
+      selectedSampleIndices: sampleList,
+      checkedBoxes: checkedCount
+     })
   }
 
 
@@ -795,9 +913,11 @@ class Samples extends React.Component {
     location.href = `/projects/${id}/csv`;
   }
 
+
+
   renderTable(samples) {
     let project_id = this.state.selectedProjectId ? this.state.selectedProjectId : 'all'
-    let search_field_width = (project_id === 'all') ? 'col s4' : 'col s2'
+    let search_field_width = 'col s3 no-padding'
     let search_field = (
       <div className={search_field_width + ' search-field'}>
         <div className='row'>
@@ -811,14 +931,15 @@ class Samples extends React.Component {
         </div>
       </div>
     );
-    let table_download_button = (
-      <div className='col s2 download-table'>
-        <div className='white'>
-          <a href={`/projects/${project_id}/csv`} className="download-project center">
-            <i className="fa fa-cloud-download"/>
-            <span>Download table</span>
-          </a>
-        </div>
+
+    let table_download_dropdown = (
+      <div className="col s2 download-wrapper">
+        <Dropdown text='Download' className='link item'>
+          <Dropdown.Menu>
+            <Dropdown.Item href={`/projects/${project_id}/csv`}>Download Table</Dropdown.Item>
+            { project_id === 'all' ? null : <Dropdown.Item onClick={this.startReportGeneration}>Download Reports</Dropdown.Item> }
+          </Dropdown.Menu>
+       </Dropdown>
       </div>
     );
 
@@ -829,9 +950,18 @@ class Samples extends React.Component {
             className="filled-in checkAll"
             />
           <label htmlFor="checkAll"></label>
-          <i className="fa fa-caret-down"></i>    
       </div>
     );
+
+    // let clear_filters = (
+    //   <div className='col s2 download-table'>
+    //     <div className='white'>
+    //       <a onClick={this.clearAllFilters} className="compare center">
+    //         <span>Clear all</span>
+    //       </a>
+    //     </div>
+    //   </div>
+    // )
 
     let compare_button = (
       <div className='col s2 download-table'>
@@ -843,26 +973,47 @@ class Samples extends React.Component {
       </div>
     )
 
-    const reports_download_button_contents = this.state.project_id_download_in_progress ?
-      <span className='download-progress'/>
-      : <a onClick={this.startReportGeneration} className="download-project center">
-                                             <i className="fa fa-cloud-download"/>
-                                             <span>Download reports</span>
-                                           </a>
-    const reports_download_button = (
-      <div className='col s2 download-table'>
-        <div className='white'>
-          { reports_download_button_contents }
+    const metaDataFilter = (
+      <div className="col s2 wrapper">
+        <div className={this.state.displayDropdown ? "metadata metadata-active" : "metadata"} onClick={this.displayMetaDataDropdown}>
+            <div className='metadata-dropdown'>
+            Filter </div><i className={this.state.displayDropdown ? "fa fa-angle-up" : "fa fa-angle-down" }></i>
         </div>
+              { this.state.displayDropdown ? <div className="row metadata-options">
+                <div className="col s6">
+                  <h6>Host</h6>
+                { this.hostGenomes.map((host, i) => {
+                  return (
+                    <div key={i} className="options-wrapper">
+                      <input name="host" type="checkbox" data-id={host.id} checked={this.state.selectedHostIndices.indexOf(host.id) < 0 ? "" : "checked"} value={this.state.selectedHostIndices.indexOf(i) != -1 } onChange={this.selectHostFilter}
+                        id={host.id} className="filled-in human" />
+                      <label htmlFor={host.id}>{host.name}</label>
+                    </div>
+                  )
+                })}
+                  </div>
+              <div className="col s6">
+              <h6>Tissue type</h6>
+                {this.tissue_types.map((tissue, i) => {
+                  return (
+                    <div key={i} className="options-wrapper">
+                    <input name="tissue" type="checkbox"
+                    id={tissue} className="filled-in" data-status={tissue} checked={this.state.selectedTissueFilters.indexOf(tissue) < 0 ? "" : "checked"} onChange={this.selectTissueFilter} />
+                    <label htmlFor={tissue}>{tissue}</label>
+                  </div>
+                  )
+                })}
+              </div>
+            </div> : null }
       </div>
-    );
+    )
+
     const search_box = (
       <div className="row search-box">
-        { check_all }
+        { this.state.displaySelectSamplees ? check_all : null }
+        {/* { clear_filters } */}
         { search_field }
-        { table_download_button }
-        { compare_button }
-        { project_id === 'all' ? null : reports_download_button }
+        { metaDataFilter  }
       </div>
     );
 
@@ -881,11 +1032,6 @@ class Samples extends React.Component {
                <span>
                   <i className="tiny material-icons">lock_open</i>
                   <span className='label'>Public Project</span>
-                  <a href='#'
-                    onClick={() => this.toggleProjectVisbility(
-                      this.state.project.id, 0)}>
-                    Make project private
-                  </a>
                </span>:
                <span>
                  <i className="tiny material-icons">lock</i>
@@ -982,11 +1128,11 @@ class Samples extends React.Component {
     );
 
     const projInfo = (
-      <div>
+      <div className="row download-section">
         {
           this.state.selectedProjectId ? project_menu : null
         }
-        <div className="wrapper">
+        <div className={ project_id === 'all' ? "col s7 wrapper" : "col s5 wrapper" }>
           <div className={(!this.state.project) ? "proj-title heading all-proj" : "heading proj-title"}>
           { (!this.state.project) ? <div className="">All Projects</div>
               : <div>
@@ -1001,25 +1147,13 @@ class Samples extends React.Component {
           }
         </p>
         </div>
+        {/* <div className="col s4 download-section"> */}
+        { table_download_dropdown }
+        { this.state.checkedBoxes > 0  ? compare_button : null }
+        {/* </div> */}
       </div>
     );
 
-    const filterTissueDropDown = (
-        <div className='dropdown-status-filtering'>
-        <li>
-          <a className="title">
-            <b>Filter tissue</b>
-          </a>
-        </li>
-        { this.tissue_types.map((tissue, i) => {
-          <div>{tissue}nknjn</div>
-          return (
-            <li key={i} className="filter-item" data-status={tissue} onClick={ this.handleTissueFilterSelect } ><a data-status={tissue} className="filter-item">{tissue}</a><i className="filter fa fa-check hidden"></i></li>
-          )
-        }) }
-        <li className="divider"/>
-      </div>
-   )
 
    const filterStatus = (
         <div className='dropdown-status-filtering'>
@@ -1071,7 +1205,7 @@ class Samples extends React.Component {
                     }
                     <ul className='dropdown-content column-dropdown' id={`column-dropdown-${pos}`}>
                         { column_name === 'pipeline_status' ?
-                          <div>{filterStatus}</div> : ( column_name === 'tissue_type' ? <div>{filterTissueDropDown}</div> : "")
+                          <div>{filterStatus}</div> : null
                         }
                         <li>
                           <a className="title">
@@ -1108,7 +1242,7 @@ class Samples extends React.Component {
         <div className="project-info col s12">
           { projInfo } { addUser }
         </div>
-
+        <div className="divider"></div>
         <div className="sample-container no-padding col s12">
           { search_box }
           <div className="sample-table-container row">
@@ -1127,28 +1261,80 @@ class Samples extends React.Component {
   componentDidUpdate(prevProps, prevState) {
     const prevStatus = prevState.filterParams;
     const currentStatus = this.state.filterParams;
+    const prevHostIndices = prevState.selectedHostIndices;
+    const prevTissueFilters = prevState.selectedTissueFilters;
+    const prevSelectedProject = prevState.selectedProjectId;
+
+    if(prevSelectedProject !== this.state.selectedProjectId) {
+      window.scrollTo(0, 0)
+    }
     if(prevStatus !== currentStatus) {
       $(`i[data-status="${prevStatus}"]`).removeClass('active');
     } else {
       $(`i[data-status="${currentStatus}"]`).addClass('active');
     }
+
+    if(prevHostIndices.length !== this.state.selectedHostIndices.length) {
+      this.setState({
+        hostFilterChange: true
+      })
+    }
+
+    if(prevTissueFilters.length !== this.state.selectedTissueFilters.length) {
+      this.setState({
+        tissueFilterChange: true
+      })
+    }
+
+    if(!this.state.displayDropdown) {
+      if (this.state.hostFilterChange) {
+        this.fetchResults();
+        this.setState({
+          hostFilterChange: false
+        })
+      }
+
+      if (this.state.tissueFilterChange) {
+        this.fetchResults();
+        this.setState({
+          tissueFilterChange: false
+        })
+      }
+    }
   }
+
 
   componentDidMount() {
     $(() => {
       const win = $(window);
       const samplesHeader = $('.sample-table-container');
+      const siteHeaderHeight = $('.site-header').height();
+      const projectWrapper = $('.project-wrapper');
+      let prevScrollTop = 0;
+      let marginTop = 0;
       win.scroll(() => {
-        let scrollTop = $(window).scrollTop();
+        const scrollTop = win.scrollTop();
+        const scrollDirection = (scrollTop >= prevScrollTop) ? 'downward' : 'upward';
         if (scrollTop > samplesHeader.offset().top) {
           samplesHeader.addClass('shadow');
         } else {
           samplesHeader.removeClass('shadow');
         }
+        if (scrollDirection === 'downward') {
+          const scrollDiff = siteHeaderHeight - scrollTop;
+          marginTop = (scrollDiff > 0) ? scrollDiff : 0;
+        } else {
+          const scrollDiff = siteHeaderHeight - scrollTop;
+          marginTop = (scrollDiff < 0) ? 0 : Math.abs(scrollTop - siteHeaderHeight);
+        }
+        projectWrapper.css({ marginTop });
+        prevScrollTop = scrollTop;
       });
       $('.filter').hide();
     });
+    this.closeMetaDataDropdown();
     this.initializeSelectAll();
+    this.displayDownloadDropdown();
     this.initializeTooltip();
     this.fetchProjectPageData();
     this.state.selectedProjectId ? this.fetchProjectDetails(this.state.selectedProjectId) : null;
@@ -1167,13 +1353,11 @@ class Samples extends React.Component {
 
   // initialize filter dropdown
   displayPipelineStatusFilter() {
-    const textSize = 14;
     $('.status-dropdown, .menu-dropdown').dropdown({
       belowOrigin: true,
       stopPropagation: false,
-      constrainWidth: true
+      constrainWidth: false
     });
-    $(".dropdown-content>li>a").css("font-size", textSize)
   }
 
   displayCheckMarks(filter) {
@@ -1194,27 +1378,16 @@ class Samples extends React.Component {
     });
   }
 
-  handleTissueFilterSelect(e) {
-    e.preventDefault();
-    let status = e.target.getAttribute('data-status');
-    this.setState({
-      pagesLoaded: 0,
-      pageEnd: false,
-      tissueParams: status
-    }, () => {
-      this.setUrlLocation();
-      this.fetchResults();
-    });
-  }
-
   //set Url based on requests
   setUrlLocation() {
     let projectId = parseInt(this.state.selectedProjectId);
     const params = {
       project_id: projectId ? projectId : null,
       filter: this.state.filterParams,
-      tissue: this.state.tissueParams,
+      tissue: this.state.selectedTissueFilters.join(','),
+      host: this.state.selectedHostIndices.join(','),
       search: this.state.searchParams,
+      ids: this.state.sampleIdsParams,
       sort_by: this.state.sort_by,
       type: this.state.projectType
     };
@@ -1234,6 +1407,19 @@ class Samples extends React.Component {
     });
   }
 
+  closeMetaDataDropdown() {
+    let that = this;
+    $(document).on("click", function(event) {
+      if ($(event.target).has(".wrapper").length) {
+        if(that.state.displayDropdown) {
+          that.setState({
+            displayDropdown: false
+          });
+        }
+      }
+    });
+  }
+
   render() {
     const project_section =
       <ProjectSelection
@@ -1245,14 +1431,16 @@ class Samples extends React.Component {
 
     return (
       <div className="row content-body">
-        <div className='col no-padding s2 sidebar'>
-          <StickySidebar>
-            { project_section }
-          </StickySidebar>
-        </div>
-        <div className="col no-padding samples-content s10">
+        <Sidebar
+          className="col no-padding s2 sidebar" animation='push'  visible={true} icon='labeled'>
+          <div>
+            {project_section}
+          </div>
+        </Sidebar>
+
+        <Sidebar.Pusher className="col no-padding samples-content s10">
           { this.renderTable(this.state.allSamples) }
-        </div>
+        </Sidebar.Pusher>
       </div>
     )
   }

@@ -1,12 +1,59 @@
+.mono {
+  font-size: 8pt;
+  fill: #aaa;
+  color: #aaa;
+}
+
 #project-visualization {
+  .heatmap-legend {
+    padding: 12px 0 0 0;
+    margin-bottom: -10px;
+  }
+  .sub-menu {
+    margin-top: 1em;
+    padding-bottom: 1em;
+    border-bottom: 1px solid #eee;
+  }
   select {
     display: block;
   }
-  .sub-menu {
-    padding-bottom: 20px;
+  .slider-container {
+    margin-top: 1em;
+    padding: 0 0.5em;
+    .noUi-connect {
+      background: rgb(78, 173, 73);
+    }
+    .noUi-handle {
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      &:before {
+        left: 11px;
+      }
+      &:after {
+        left: 14px;
+      }
+    }
+    .noUi-tooltip {
+      display: none;
+      top: 120%;
+      bottom: auto;
+      font-size: 8.5pt;
+      padding: 2px 5px;
+      color: #aaa;
+    }
+    .noUi-active {
+      &:focus {
+        outline: none;
+      }
+      .noUi-tooltip {
+        display: block;
+      }
+    }
   }
 }
 .D3Heatmap {
+  overflow:auto;
 	.node circle {
 		fill: #fff;
 		stroke: steelblue;
@@ -71,17 +118,22 @@
     cursor: pointer;
   }
 
-  text.mono {
-    font-size: 9pt;
-    fill: #aaa;
+  .rowLabelg {
+    .removeLink {
+      display: none;
+    }
+    &.text-hover .removeLink {
+      display: block;
+      cursor: pointer;
+    }
   }
-
   text.text-selected {
     fill: #000;
   }
-  text.text-hover, text.text-highlight {
+ .text-hover.mono, .text-hover text, text.text-highlight {
 		fill: rgb(82,131,211);
   }
+
   .heatmap-tooltip {
     position: absolute;
     min-width: 200px;

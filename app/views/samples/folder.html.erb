@@ -2,7 +2,9 @@
   <%= javascript_tag do %>
     react_component('ResultsFolder', {
       filePath: JSON.parse('<%= raw escape_json(@file_path) %>'),
-      fileList: JSON.parse('<%= raw escape_json(@file_list) %>')
+      fileList: JSON.parse('<%= raw escape_json(@file_list) %>'),
+      sampleName: '<%= @sample.name %>',
+      projectName: '<%= @sample.project.name %>'
     }, 'ResultsFolder');
   <% end %>
 </div>

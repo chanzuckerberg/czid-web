@@ -28,11 +28,10 @@ class PipelineRun < ApplicationRecord
   STATUS_RUNNABLE = 'RUNNABLE'.freeze
   STATUS_ERROR = 'ERROR'.freeze # when aegea batch describe failed
   STATUS_LOADED = 'LOADED'.freeze
+  STATUS_READY = 'READY'.freeze
   POSTPROCESS_STATUS_LOADED = 'LOADED'.freeze
 
   before_create :create_run_stages
-  before_save :check_job_status
-  after_create :kickoff_job
 
   def as_json(_options = {})
     super(except: [:command, :command_stdout, :command_error, :job_description])
@@ -51,16 +50,16 @@ class PipelineRun < ApplicationRecord
       .where(finalized: 0)
   end
 
+  def self.in_progress_at_stage_1_or_2
+    in_progress.where("job_status NOT LIKE '3.%' AND job_status NOT LIKE '4.%'")
+  end
+
   def finalized?
     finalized == 1
   end
 
   def failed?
     /FAILED/ =~ job_status
-  end
-
-  def kickoff_job
-    pipeline_run_stages.first.run_job
   end
 
   def create_run_stages
@@ -93,35 +92,7 @@ class PipelineRun < ApplicationRecord
       output_func: 'postprocess_outputs'
     )
     self.pipeline_run_stages = run_stages
-  end
-
-  def check_job_status
-    # only update the pipeline_run info. do not update pipeline_run_stage info
-    return if finalized? || id.nil?
-    pipeline_run_stages.order(:step_number).each do |prs|
-      if prs.failed?
-        self.finalized = 1
-        self.job_status = "#{prs.step_number}.#{prs.name}-#{STATUS_FAILED}"
-        Airbrake.notify("Sample #{sample.id} failed #{prs.name}")
-        return nil
-      elsif prs.succeeded?
-        next
-      else # still running
-        self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
-        return nil
-      end
-    end
-    # All done
-    self.finalized = 1
-    self.job_status = STATUS_CHECKED
-  end
-
-  def output_ready?
-    output_json_s3_path = "#{sample.sample_output_s3_path}/#{OUTPUT_JSON_NAME}"
-    stats_json_s3_path = "#{sample.sample_output_s3_path}/#{STATS_JSON_NAME}"
-    byteranges_json_s3_path = "#{sample.sample_postprocess_s3_path}/#{TAXID_BYTERANGE_JSON_NAME}"
-    # check the existence of all 3 and make sure they are all generated after pr.created_at
-    file_generated_since_run(output_json_s3_path) && file_generated_since_run(stats_json_s3_path) && file_generated_since_run(byteranges_json_s3_path)
+    self.ready_step = 2
   end
 
   def completed?
@@ -136,20 +107,47 @@ class PipelineRun < ApplicationRecord
       "#logEventViewer:group=/aws/batch/job;stream=#{job_log_id}"
   end
 
-  def update_job_status
+  def active_stage
     pipeline_run_stages.order(:step_number).each do |prs|
-      if !prs.started? # Not started yet
+      return prs unless prs.succeeded?
+    end
+    # All stages have succeded
+    nil
+  end
+
+  def retry
+    return unless failed? # only retry from a failed job
+    prs = active_stage
+    prs.job_status = nil
+    prs.job_command = nil
+    prs.db_load_status = 0
+    prs.save
+    self.finalized = 0
+    save
+  end
+
+  def report_ready?
+    job_status == STATUS_CHECKED || (ready_step && active_stage && active_stage.step_number > ready_step)
+  end
+
+  def update_job_status
+    prs = active_stage
+    all_stages_succeeded = prs.nil?
+    if all_stages_succeeded
+      self.finalized = 1
+      self.job_status = STATUS_CHECKED
+    else
+      if prs.failed?
+        self.finalized = 1
+        Airbrake.notify("Sample #{sample.id} failed #{prs.name}")
+      elsif !prs.started?
         prs.run_job
-        break
-      elsif prs.succeeded?
-        # great do nothing. go to the next step.
-        next
-      elsif prs.failed?
-        break
-      else # This step is still running
+      else
+        # still running
         prs.update_job_status
-        break
       end
+      self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
+      self.job_status += "|#{STATUS_READY}" if report_ready?
     end
     save
   end
@@ -177,13 +175,8 @@ class PipelineRun < ApplicationRecord
     end
   end
 
-  def terminate_job
-    command = "aegea batch terminate #{job_id}"
-    _stdout, _stderr, _status = Open3.capture3(command)
-  end
-
   def generate_aggregate_counts(tax_level_name)
-    current_date = Time.zone.now.strftime("%Y-%m-%d")
+    current_date = Time.now.utc.to_s(:db)
     tax_level_id = TaxonCount::NAME_2_LEVEL[tax_level_name]
     # The unctagorizable_name chosen here is not important. The report page
     # endpoint makes its own choice about what to display in this case.  It
@@ -226,7 +219,8 @@ class PipelineRun < ApplicationRecord
               '#{current_date}',
               '#{current_date}'
        FROM  taxon_lineages, taxon_counts
-       WHERE taxon_lineages.taxid = taxon_counts.tax_id AND
+       WHERE (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at) AND
+             taxon_lineages.taxid = taxon_counts.tax_id AND
              taxon_counts.pipeline_run_id = #{id} AND
              taxon_counts.tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}
       GROUP BY 1,2,3,4,5"
@@ -245,6 +239,7 @@ class PipelineRun < ApplicationRecord
         WHERE taxon_counts.pipeline_run_id=#{id} AND
               taxon_counts.tax_level=#{level_id} AND
               taxon_counts.tax_id = taxon_lineages.taxid AND
+              (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at) AND
               taxon_lineages.#{level}_name IS NOT NULL
       ")
     end
@@ -264,6 +259,7 @@ class PipelineRun < ApplicationRecord
       SET taxon_counts.genus_taxid = taxon_lineages.genus_taxid,
           taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
       WHERE taxon_counts.pipeline_run_id=#{id} AND
+            (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at) AND
             taxon_lineages.taxid = taxon_counts.tax_id
     ")
   end
@@ -280,6 +276,24 @@ class PipelineRun < ApplicationRecord
   def subsample_fraction
     # fraction of non-host ("remaining") reads that actually went through non-host alignment
     (1.0 * subsampled_reads) / remaining_reads
+  end
+
+  def subsample_suffix
+    subsample? ? "/subsample_#{subsample}" : ""
+  end
+
+  delegate :sample_output_s3_path, to: :sample
+
+  def postprocess_output_s3_path
+    sample.sample_postprocess_s3_path
+  end
+
+  def alignment_viz_output_s3_path
+    "#{sample.sample_postprocess_s3_path}/align_viz"
+  end
+
+  def alignment_output_s3_path
+    "#{sample.sample_output_s3_path}#{subsample_suffix}"
   end
 
   def count_unmapped_reads

@@ -4,6 +4,7 @@ git_source(:github) do |repo_name|
   repo_name = "#{repo_name}/#{repo_name}" unless repo_name.include?('/')
   "https://github.com/#{repo_name}.git"
 end
+
 gem 'airbrake', '~> 7.0'
 gem 'airbrake-ruby'
 gem 'aws-sdk-ecs'
@@ -34,9 +35,9 @@ gem 'puma', '~> 3.7'
 gem 'rails', '~> 5.1.4'
 gem 'rake'
 # Worker/Scheduler management
-gem 'resque'
+gem 'resque', '>= 1.27.4'
 gem 'resque-lock'
-gem 'resque-scheduler'
+gem 'resque-scheduler', '>= 4.3.1'
 # Use SCSS for stylesheets
 gem 'simple_token_authentication', '~> 1.15', '>= 1.15.1' # see semver.org
 gem 'sprockets-es6'
@@ -52,6 +53,7 @@ gem 'rack-host-redirect'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
+  gem 'bundler-audit'
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
   # Adds support for Capybara system testing and selenium driver
   gem 'capybara', '~> 2.17', '>= 2.17.0'

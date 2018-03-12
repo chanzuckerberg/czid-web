@@ -14,8 +14,8 @@ class SamplesController < ApplicationController
   ##########################################
   skip_before_action :verify_authenticity_token, only: [:create, :update]
 
-  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder].freeze
-  EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata].freeze
+  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder, :show_taxid_alignment].freeze
+  EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :samples_taxons, :top_taxons, :heatmap].freeze
 
@@ -44,7 +44,8 @@ class SamplesController < ApplicationController
     project_id = params[:project_id]
     name_search_query = params[:search]
     filter_query = params[:filter]
-    tissue_type_query = params[:tissue]
+    tissue_type_query = params[:tissue].split(',') if params[:tissue].present?
+    host_query = params[:host].split(',') if params[:host].present?
     sort = params[:sort_by]
     samples_query = JSON.parse(params[:ids]) if params[:ids].present?
 
@@ -57,6 +58,7 @@ class SamplesController < ApplicationController
     results = results.search(name_search_query) if name_search_query.present?
     results = filter_samples(results, filter_query) if filter_query.present?
     results = filter_by_tissue_type(results, tissue_type_query) if tissue_type_query.present?
+    results = filter_by_host(results, host_query) if host_query.present?
 
     @samples = sort_by(results, sort).paginate(page: params[:page], per_page: params[:per_page] || PAGE_SIZE)
     @samples_count = results.size
@@ -95,7 +97,7 @@ class SamplesController < ApplicationController
         if @samples.present?
           render json: { samples: @samples }
         else
-          render json: { status: "No samples imported under #{@bulk_path}" }, status: :unprocessable_entity
+          render json: { status: "No samples imported under #{@bulk_path}. Files must have extension fastq.gz/fq.gz/fastq/fq/fasta.gz/fa.gz/fasta/fa." }, status: :unprocessable_entity
         end
       end
     end
@@ -151,7 +153,11 @@ class SamplesController < ApplicationController
     @git_version = ENV['GIT_VERSION'] || ""
     @git_version = Time.current.to_i if @git_version.blank?
 
-    if @pipeline_run && (@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?
+    @align_viz = false
+    align_summary_file = @pipeline_run ? "#{@pipeline_run.alignment_viz_output_s3_path}.summary" : nil
+    @align_viz = true if params[:align_viz] && align_summary_file && get_s3_file(align_summary_file)
+
+    if @pipeline_run && (((@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?) || @pipeline_run.report_ready?)
       background_id = params[:background_id] || @sample.default_background_id
       # Here background_id is only used to decide whether a report can be shown.
       # No report/background-specific data is actually being shown.
@@ -163,6 +169,10 @@ class SamplesController < ApplicationController
         @report_details = report_details(@pipeline_run)
         @report_page_params = clean_params(params, @all_categories)
       end
+
+      if @pipeline_run.failed?
+        @pipeline_run_retriable = true
+      end
     end
   end
 
@@ -173,12 +183,12 @@ class SamplesController < ApplicationController
     sort_by = params[:sort_by] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
 
     samples = current_power.samples.where(id: sample_ids)
-    include_species = params[:species]
+    only_species = params[:species] == "1"
     if samples.first
       first_sample = samples.first
       default_background_id = first_sample.host_genome && first_sample.host_genome.default_background ? first_sample.host_genome.default_background.id : nil
       background_id = params[:background_id] || default_background_id || Background.first
-      @top_taxons = top_taxons_details(samples, background_id, num_results, sort_by, include_species)
+      @top_taxons = top_taxons_details(samples, background_id, num_results, sort_by, only_species)
       render json: @top_taxons
     else
       render json: {}
@@ -186,7 +196,6 @@ class SamplesController < ApplicationController
   end
 
   def heatmap
-    @sample_ids = params[:sample_ids].to_s.split(",").map(&:to_i) || []
   end
 
   def samples_taxons
@@ -194,14 +203,14 @@ class SamplesController < ApplicationController
     num_results = params[:n] ? params[:n].to_i : 20
     taxon_ids = params[:taxon_ids].to_s.split(",").map(&:to_i) || []
     sort_by = params[:sort_by] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
-    include_species = params[:species]
+    only_species = params[:species] == "1"
     samples = current_power.samples.where(id: sample_ids)
     if samples.first
       first_sample = samples.first
       default_background_id = first_sample.host_genome && first_sample.host_genome.default_background ? first_sample.host_genome.default_background.id : nil
-      background_id = params[:background_id] || default_background_id || Background.first
+      background_id = params[:background_id] || default_background_id || Background.first.id
       if taxon_ids.empty?
-        taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, include_species).pluck("tax_id")
+        taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, only_species).pluck("tax_id")
       end
       if taxon_ids.empty?
         render json: {}
@@ -223,7 +232,7 @@ class SamplesController < ApplicationController
     ## Duct tape for changing background id dynamically
     ## TODO(yf): clean the following up.
     ####################################################
-    if @pipeline_run && (@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?
+    if @pipeline_run && (((@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?) || @pipeline_run.report_ready?)
       background_id = params[:background_id] || @sample.default_background_id
       pipeline_run_id = @pipeline_run.id
     end
@@ -286,6 +295,21 @@ class SamplesController < ApplicationController
     taxid_name = pipeline_run.taxon_counts.find_by(tax_id: params[:taxid], tax_level: params[:tax_level]).name
     taxid_name_clean = taxid_name ? taxid_name.downcase.gsub(/\W/, "-") : ''
     send_data @taxid_fasta, filename: @sample.name + '_' + taxid_name_clean + '-hits.fasta'
+  end
+
+  def show_taxid_alignment
+    @taxon_info = params[:taxon_info].tr("_", ".")
+    pr = @sample.pipeline_runs.first
+    s3_file_path = "#{pr.alignment_viz_output_s3_path}/#{@taxon_info}.align_viz.json"
+    alignment_data = JSON.parse(get_s3_file(s3_file_path) || "{}")
+    @taxid = @taxon_info.split(".")[2].to_i
+    @tax_level = @taxon_info.split(".")[1]
+    @parsed_alignment_results = parse_alignment_results(@taxid, @tax_level, alignment_data)
+
+    respond_to do |format|
+      format.json { render json: @parsed_alignment_results }
+      format.html { @title = @parsed_alignment_results['title'] }
+    end
   end
 
   def nonhost_fasta
@@ -411,6 +435,21 @@ class SamplesController < ApplicationController
     end
   end
 
+  # PUT /samples/:id/kickoff_pipeline
+  def retry_pipeline
+    @sample.status = Sample::STATUS_RETRY_PR
+    @sample.save
+    respond_to do |format|
+      if !@sample.pipeline_runs.empty?
+        format.html { redirect_to samples_url, notice: 'A pipeline run is in progress.' }
+        format.json { head :no_content }
+      else
+        format.html { redirect_to samples_url, notice: 'No pipeline run in progress.' }
+        format.json { render json: @sample.errors.full_messages, status: :unprocessable_entity }
+      end
+    end
+  end
+
   def pipeline_runs
   end
 
@@ -436,7 +475,7 @@ class SamplesController < ApplicationController
                                    :sample_memory, :sample_location, :sample_date, :sample_tissue,
                                    :sample_template, :sample_library, :sample_sequencer,
                                    :sample_notes, :job_queue, :search, :subsample, :pipeline_branch,
-                                   input_files_attributes: [:name, :presigned_url, :source_type, :source])
+                                   input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts])
   end
 
   def sort_by(samples, dir = nil)
