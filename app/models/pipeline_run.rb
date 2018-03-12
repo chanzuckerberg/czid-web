@@ -116,11 +116,14 @@ class PipelineRun < ApplicationRecord
   end
 
   def retry
-    return unless failed? # only resuming from a failed job
-    self.finalized = 0
+    return unless failed? # only retry from a failed job
     prs = active_stage
-    prs.run_job
-    update_job_status
+    prs.job_status = nil
+    prs.job_command = nil
+    prs.db_load_status = 0
+    prs.save
+    self.finalized = 0
+    save
   end
 
   def report_ready?
