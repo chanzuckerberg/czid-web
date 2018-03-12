@@ -685,22 +685,13 @@ class SamplesHeatmap extends React.Component {
     this.request = axios.get(url)
     .then((response) => {
       let taxons = this.extractTaxons(response.data);
-      this.setState({taxon_ids: taxons.ids});
-      this.updateData(response.data, this.state.dataType, taxons);
+      this.setState({
+        taxon_ids: taxons.ids,
+        data: response.data,
+        taxons: taxons,
+      });
     }).then(() => {
       this.setState({ loading: false });
-    });
-  }
-
-  updateData (data, dataType, taxons) {
-    let clustered_samples = this.clusterSamples(data, dataType, taxons.names);
-    let clustered_taxons = this.clusterTaxons(data, dataType, taxons.names);
-    this.setState({
-      data: data,
-      clustered_samples: clustered_samples,
-      dataType: dataType,
-      taxons: taxons,
-      clustered_taxons: clustered_taxons,
     });
   }
 
@@ -714,7 +705,7 @@ class SamplesHeatmap extends React.Component {
       let sample_taxons = [];
       for (let taxon of sample.taxons) {
         if (taxon_names.has(taxon.name)) {
-          taxon_lists.push(sample.taxons);
+          taxon_lists.push(taxon);
         }
       }
       taxon_lists.push(sample_taxons);
@@ -726,7 +717,6 @@ class SamplesHeatmap extends React.Component {
     let max = d3.max(taxons, (d) => {
       return this.getDataProperty(d, dataType);
     });
-
     let thresholdMin = d3.min(taxons, (d) => {
       let value = this.getDataProperty(d, dataType);
       if (value >= this.state.minDataThreshold && value <= this.state.maxDataThreshold) {
@@ -865,16 +855,16 @@ class SamplesHeatmap extends React.Component {
   }
 
   getColumnLabel (column_index) {
-    return this.state.clustered_samples.flat[column_index].name;
+    return this.clustered_samples.flat[column_index].name;
   }
 
   getRowLabel (row_index) {
-    return this.state.clustered_taxons.flat[row_index];
+    return this.clustered_taxons.flat[row_index];
   }
 
   getTaxonFor (row_index, column_index) {
-    let d = this.state.clustered_samples.flat[column_index];
-    let taxon_name = this.state.clustered_taxons.flat[row_index];
+    let d = this.clustered_samples.flat[column_index];
+    let taxon_name = this.clustered_taxons.flat[row_index];
 
     for (let i = 0; i < d.taxons.length; i += 1) {
       let taxon = d.taxons[i];
@@ -886,8 +876,8 @@ class SamplesHeatmap extends React.Component {
   }
 
   getTooltip (row_index, column_index) {
-    let sample = this.state.clustered_samples.flat[column_index],
-        taxon_name = this.state.clustered_taxons.flat[row_index],
+    let sample = this.clustered_samples.flat[column_index],
+        taxon_name = this.clustered_taxons.flat[row_index],
         taxon;
 
     for (let i = 0; i < sample.taxons.length; i += 1) {
@@ -909,7 +899,7 @@ class SamplesHeatmap extends React.Component {
   }
 
   onCellClick (d) {
-    let sample = this.state.clustered_samples.flat[d.col];
+    let sample = this.clustered_samples.flat[d.col];
     window.location.href = "/samples/" + sample.sample_id;
   }
 
@@ -925,103 +915,20 @@ class SamplesHeatmap extends React.Component {
 
     delete taxons.name_to_id[rowLabel];
     delete taxons.id_to_name[id];
-    this.updateData(this.state.data, this.state.dataType, taxons);
-    this.setState({ taxon_ids: taxons.ids });
+    this.setState({
+      taxon_ids: taxons.ids,
+      taxons: taxons,
+    });
   }
 
   renderHeatmap () {
     if (!this.state.data) {
       return;
     }
-    /*
-    let colors = [
-      "rgb(255, 255, 255)",
-      "rgb(255, 255, 250)",
-      "rgb(255, 255, 245)",
-      "rgb(255, 255, 240)",
-      "rgb(255, 255, 235)",
-      "rgb(255, 255, 229)",
-      "rgb(255, 255, 224)",
-      "rgb(255, 255, 219)",
-      "rgb(255, 255, 214)",
-      "rgb(255, 255, 209)",
-      "rgb(255, 255, 204)",
-      "rgb(255, 255, 199)",
-      "rgb(255, 255, 194)",
-      "rgb(255, 255, 188)",
-      "rgb(255, 255, 183)",
-      "rgb(255, 255, 178)",
-      "rgb(255, 255, 173)",
-      "rgb(255, 253, 163)",
-      "rgb(255, 251, 153)",
-      "rgb(255, 249, 143)",
-      "rgb(255, 247, 133)",
-      "rgb(255, 244, 122)",
-      "rgb(255, 242, 112)",
-      "rgb(255, 240, 102)",
-      "rgb(255, 238, 92)",
-      "rgb(254, 236, 82)",
-      "rgb(254, 234, 72)",
-      "rgb(254, 232, 62)",
-      "rgb(254, 230, 52)",
-      "rgb(254, 227, 41)",
-      "rgb(254, 225, 31)",
-      "rgb(254, 223, 21)",
-      "rgb(254, 221, 11)",
-      "rgb(254, 213, 17)",
-      "rgb(254, 206, 24)",
-      "rgb(254, 199, 31)",
-      "rgb(254, 192, 38)",
-      "rgb(253, 184, 44)",
-      "rgb(253, 177, 51)",
-      "rgb(253, 170, 57)",
-      "rgb(253, 163, 64)",
-      "rgb(253, 155, 70)",
-      "rgb(253, 148, 77)",
-      "rgb(253, 140, 84)",
-      "rgb(253, 133, 91)",
-      "rgb(252, 125, 97)",
-      "rgb(252, 118, 104)",
-      "rgb(252, 111, 110)",
-      "rgb(252, 104, 117)",
-      "rgb(252, 97, 125)",
-      "rgb(252, 91, 133)",
-      "rgb(252, 84, 141)",
-      "rgb(252, 78, 149)",
-      "rgb(252, 71, 156)",
-      "rgb(252, 65, 164)",
-      "rgb(252, 58, 172)",
-      "rgb(252, 52, 180)",
-      "rgb(251, 45, 188)",
-      "rgb(251, 39, 196)",
-      "rgb(251, 32, 204)",
-      "rgb(251, 26, 212)",
-      "rgb(251, 19, 219)",
-      "rgb(251, 13, 227)",
-      "rgb(251, 6, 235)",
-      "rgb(251, 0, 243)",
-      "rgb(244, 0, 242)",
-      "rgb(237, 0, 242)",
-      "rgb(230, 0, 241)",
-      "rgb(223, 0, 241)",
-      "rgb(216, 0, 240)",
-      "rgb(209, 0, 240)",
-      "rgb(202, 0, 240)",
-      "rgb(196, 0, 240)",
-      "rgb(189, 0, 239)",
-      "rgb(182, 0, 239)",
-      "rgb(175, 0, 238)",
-      "rgb(168, 0, 238)",
-      "rgb(161, 0, 237)",
-      "rgb(154, 0, 237)",
-      "rgb(147, 0, 236)",
-      "rgb(140, 0, 236)",
-    ];
-    */
-		return (
+    return (
       <D3Heatmap
-        colTree={this.state.clustered_samples.tree}
-        rowTree={this.state.clustered_taxons.tree}
+        colTree={this.clustered_samples.tree}
+        rowTree={this.clustered_taxons.tree}
         rows={this.state.taxons.ids.length}
         columns={this.state.data.length}
         getRowLabel={this.getRowLabel.bind(this)}
@@ -1038,8 +945,8 @@ class SamplesHeatmap extends React.Component {
 
   updateDataType (e) {
     let newDataType = e.target.value;
-    this.updateData(this.state.data, newDataType, this.state.taxons);
     this.setState({
+      dataType: newDataType,
       minDataThreshold: -99999999999,
       maxDataThreshold: 99999999999,
     });
@@ -1142,6 +1049,8 @@ class SamplesHeatmap extends React.Component {
 
   render () {
     if (this.state.data) {
+      this.clustered_samples = this.clusterSamples(this.state.data, this.state.dataType, this.state.taxons.names);
+      this.clustered_taxons = this.clusterTaxons(this.state.data, this.state.dataType, this.state.taxons.names);
       this.minMax = this.getMinMax();
     }
     return (
@@ -1175,7 +1084,7 @@ class SamplesHeatmap extends React.Component {
               <label>Thresholds</label>
               {this.renderThresholdSlider()}
             </div>
-            <div className="col s3">
+            <div className="col s2">
               <label>Legend</label>
               {this.renderLegend()}
             </div>
