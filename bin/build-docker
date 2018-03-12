@@ -14,7 +14,7 @@ echo $REPO
 echo $TAG
 echo '--'
 
-docker-compose build web
+docker-compose build --build-arg GIT_COMMIT=${COMMIT} web
 
 if [ "$BRANCH" == "master" ]; then
   docker tag $COMPOSE_TAG $REPO:"latest"

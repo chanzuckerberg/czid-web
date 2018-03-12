@@ -59,3 +59,15 @@ joe_sample_file_2:
   sample: joe_sample
   source_type: local
   source: file4.fastq.gz
+
+RR004_file_1:
+  name: RR004_R1.fastq.gz
+  sample: six
+  source_type: local
+  source: RR004_R1.fastq.gz
+
+RR004_file_2:
+  name: RR004_R2.fastq.gz
+  sample: six
+  source_type: local
+  source: RR004_R2.fastq.gz

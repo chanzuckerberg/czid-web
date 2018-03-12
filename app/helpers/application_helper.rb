@@ -18,6 +18,7 @@ module ApplicationHelper
     # using json_escape to prevent XSS vulnerability
     str = json_escape(hash.to_json) unless hash.class == 'String'
     str = str.gsub!("\\", "\\\\\\") if str.include? "\\"
+    str = str.gsub("'", "\\\\'")
     str
   end
 end

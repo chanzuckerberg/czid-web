@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180209001352) do
+ActiveRecord::Schema.define(version: 20180309193548) do
 
   create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "archive_of"
@@ -62,7 +62,6 @@ ActiveRecord::Schema.define(version: 20180209001352) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "sample_memory"
-    t.string "job_queue"
     t.integer "skip_deutero_filter"
   end
 
@@ -74,6 +73,7 @@ ActiveRecord::Schema.define(version: 20180209001352) do
     t.datetime "updated_at", null: false
     t.string "source_type", null: false
     t.text "source"
+    t.text "parts"
     t.index ["sample_id"], name: "index_input_files_on_sample_id"
   end
 
@@ -148,6 +148,7 @@ ActiveRecord::Schema.define(version: 20180209001352) do
     t.text "version"
     t.integer "subsample"
     t.string "pipeline_branch"
+    t.integer "ready_step"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
     t.index ["pipeline_output_id"], name: "index_pipeline_runs_on_pipeline_output_id", unique: true
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
@@ -247,6 +248,7 @@ ActiveRecord::Schema.define(version: 20180209001352) do
     t.float "genus_total_concordant", limit: 24
     t.float "family_total_concordant", limit: 24
     t.bigint "pipeline_run_id"
+    t.string "common_name"
     t.index ["pipeline_output_id", "tax_id", "count_type"], name: "new_index_taxon_counts", unique: true
     t.index ["pipeline_output_id", "tax_level", "count_type", "tax_id"], name: "index_taxon_counts", unique: true
     t.index ["pipeline_output_id"], name: "index_taxon_counts_on_pipeline_output_id"
@@ -286,6 +288,15 @@ ActiveRecord::Schema.define(version: 20180209001352) do
     t.string "family_name"
     t.string "genus_name"
     t.string "species_name"
+    t.string "superkingdom_common_name"
+    t.string "phylum_common_name"
+    t.string "class_common_name"
+    t.string "order_common_name"
+    t.string "family_common_name"
+    t.string "genus_common_name"
+    t.string "species_common_name"
+    t.datetime "started_at", default: "2000-01-01 00:00:00", null: false
+    t.datetime "ended_at", default: "3000-01-01 00:00:00", null: false
     t.index ["class_taxid"], name: "index_taxon_lineages_on_class_taxid"
     t.index ["family_taxid"], name: "index_taxon_lineages_on_family_taxid"
     t.index ["genus_taxid"], name: "index_taxon_lineages_on_genus_taxid"
@@ -293,7 +304,8 @@ ActiveRecord::Schema.define(version: 20180209001352) do
     t.index ["phylum_taxid"], name: "index_taxon_lineages_on_phylum_taxid"
     t.index ["species_taxid"], name: "index_taxon_lineages_on_species_taxid"
     t.index ["superkingdom_taxid"], name: "index_taxon_lineages_on_superkingdom_taxid"
-    t.index ["taxid"], name: "index_taxon_lineages_on_taxid", unique: true
+    t.index ["taxid", "ended_at"], name: "index_taxon_lineages_on_taxid_and_end", unique: true
+    t.index ["taxid", "started_at"], name: "index_taxon_lineages_on_taxid_and_start", unique: true
   end
 
   create_table "taxon_names", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -301,6 +313,7 @@ ActiveRecord::Schema.define(version: 20180209001352) do
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "common_name"
     t.index ["taxid"], name: "index_taxon_names_on_taxid", unique: true
   end
 

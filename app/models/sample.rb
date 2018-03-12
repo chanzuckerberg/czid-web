@@ -1,12 +1,14 @@
 require 'open3'
 require 'json'
 require 'tempfile'
+require 'aws-sdk'
 
 class Sample < ApplicationRecord
   STATUS_CREATED  = 'created'.freeze
   STATUS_UPLOADED = 'uploaded'.freeze
   STATUS_RERUN    = 'need_rerun'.freeze
-  STATUS_CHECKED  = 'checked'.freeze # status regarding pipeline kickoff is checked
+  STATUS_RETRY_PR = 'retry_pr'.freeze # retry existing pipeline run
+  STATUS_CHECKED = 'checked'.freeze # status regarding pipeline kickoff is checked
   HIT_FASTA_BASENAME = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.fasta'.freeze
   UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fasta'.freeze
   SORTED_TAXID_ANNOTATED_FASTA = 'taxid_annot_sorted_nt.fasta'.freeze
@@ -18,15 +20,21 @@ class Sample < ApplicationRecord
 
   LOG_BASENAME = 'log.txt'.freeze
 
+  LOCAL_INPUT_PART_PATH = '/app/tmp/input_parts'.freeze
+
   # TODO: Make all these params configurable without code change
   DEFAULT_STORAGE_IN_GB = 500
   DEFAULT_MEMORY_IN_MB = 30_000
+  HOST_FILTERING_MEMORY_IN_MB = 60_000
 
   DEFAULT_QUEUE = 'idseq'.freeze
   DEFAULT_VCPUS = 4
 
   DEFAULT_QUEUE_HIMEM = 'idseq_himem'.freeze
-  DEFAULT_VCPUS_HIMEM = 8
+  DEFAULT_VCPUS_HIMEM = 32
+
+  # These zombies keep coming back, so we now expressly fail submissions to them.
+  DEPRECATED_QUEUES = %w[idseq_alpha_stg1 aegea_batch_ondemand idseq_production_high_pri_stg1].freeze
 
   METADATA_FIELDS = [:sample_host, # this has been repurposed to be patient ID (nothing to do with host genome)
                      :sample_location, :sample_date, :sample_tissue,
@@ -46,7 +54,7 @@ class Sample < ApplicationRecord
   after_create :initiate_input_file_upload
   validates :name, uniqueness: { scope: :project_id }
 
-  before_save :check_host_genome, :check_status
+  before_save :check_host_genome, :concatenate_input_parts, :check_status
   after_save :set_presigned_url_for_local_upload
 
   # getter
@@ -77,16 +85,25 @@ class Sample < ApplicationRecord
 
   def set_presigned_url_for_local_upload
     input_files.each do |f|
-      if f.source_type == 'local'
+      if f.source_type == 'local' && f.parts
         # TODO: investigate the content-md5 stuff https://github.com/aws/aws-sdk-js/issues/151 https://gist.github.com/algorist/385616
-        f.update(presigned_url: S3_PRESIGNER.presigned_url(:put_object, bucket: SAMPLES_BUCKET_NAME, key: f.file_path))
+        parts = f.parts.split(", ")
+        presigned_urls = parts.map do |part|
+          S3_PRESIGNER.presigned_url(:put_object, expires_in: 86_400, bucket: SAMPLES_BUCKET_NAME,
+                                                  key: File.join(File.dirname(f.file_path), File.basename(part)))
+        end
+        f.update(presigned_url: presigned_urls.join(", "))
       end
     end
   end
 
   def self.search(search)
     if search
-      where('samples.name LIKE ?', "%#{search}%")
+      where('samples.name LIKE :search
+        OR samples.sample_tissue LIKE :search
+        OR samples.sample_location LIKE :search
+        OR samples.sample_notes LIKE :search
+        OR samples.sample_host', search: "%#{search}%")
     else
       scoped
     end
@@ -119,9 +136,10 @@ class Sample < ApplicationRecord
   end
 
   def results_folder_files
-    prs = pipeline_runs.first.pipeline_run_stages.first
-    stage1_files = list_outputs(prs.sample_output_s3_path)
-    stage2_files = list_outputs(prs.alignment_output_s3_path, 2)
+    pr = pipeline_runs.first
+    return list_outputs(sample_output_s3_path) unless pr
+    stage1_files = list_outputs(pr.sample_output_s3_path)
+    stage2_files = list_outputs(pr.alignment_output_s3_path, 2)
     stage1_files + stage2_files
   end
 
@@ -184,8 +202,21 @@ class Sample < ApplicationRecord
     "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/results"
   end
 
+  def sample_alignment_output_s3_path
+    pr = pipeline_runs.first
+    prs = pr.pipeline_run_stages.first
+    return prs.alignment_output_s3_path
+  rescue
+    return sample_output_s3_path
+  end
+
+  def subsample_suffix
+    pr = pipeline_runs.first
+    pr.subsample_suffix
+  end
+
   def sample_postprocess_s3_path
-    "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/postprocess"
+    "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/postprocess#{subsample_suffix}"
   end
 
   def s3_paths_for_taxon_byteranges
@@ -199,11 +230,11 @@ class Sample < ApplicationRecord
   end
 
   def annotated_fasta_s3_path
-    "#{sample_output_s3_path}/#{HIT_FASTA_BASENAME}"
+    "#{sample_alignment_output_s3_path}/#{HIT_FASTA_BASENAME}"
   end
 
   def unidentified_fasta_s3_path
-    "#{sample_output_s3_path}/#{UNIDENTIFIED_FASTA_BASENAME}"
+    "#{sample_alignment_output_s3_path}/#{UNIDENTIFIED_FASTA_BASENAME}"
   end
 
   def sample_annotated_fasta_url
@@ -226,6 +257,10 @@ class Sample < ApplicationRecord
     host_genome.name if host_genome
   end
 
+  def default_background_id
+    host_genome && host_genome.default_background ? host_genome.default_background.id : Background.first.id
+  end
+
   def as_json(_options = {})
     super(methods: [:sample_input_folder_url, :sample_output_folder_url, :sample_annotated_fasta_url, :input_files,
                     :sample_unidentified_fasta_url, :host_genome_name])
@@ -235,17 +270,44 @@ class Sample < ApplicationRecord
     if host_genome.present?
       self.s3_star_index_path = host_genome.s3_star_index_path
       self.s3_bowtie2_index_path = host_genome.s3_bowtie2_index_path
-      self.sample_memory ||= host_genome.sample_memory
-      self.job_queue = host_genome.job_queue if job_queue.blank?
+      self.sample_memory ||= HOST_FILTERING_MEMORY_IN_MB
     end
     s3_preload_result_path ||= ''
     s3_preload_result_path.strip!
   end
 
+  def concatenate_input_parts
+    return unless status == STATUS_UPLOADED
+    input_files.each do |f|
+      next unless f.source_type == 'local'
+      parts = f.parts.split(", ")
+      next unless parts.length > 1
+      source_parts = []
+      local_path = "#{LOCAL_INPUT_PART_PATH}/#{id}/#{f.id}"
+      parts.each_with_index do |part, index|
+        source_part = File.join("s3://#{SAMPLES_BUCKET_NAME}", File.dirname(f.file_path), File.basename(part))
+        source_parts << source_part
+        `aws s3 cp #{source_part} #{local_path}/#{index}`
+      end
+      `cd #{local_path}; cat * > complete_file; aws s3 cp complete_file s3://#{SAMPLES_BUCKET_NAME}/#{f.file_path}`
+      `rm -rf #{local_path}`
+      source_parts.each do |source_part|
+        `aws s3 rm #{source_part}`
+      end
+    end
+  end
+
   def check_status
-    return unless [STATUS_UPLOADED, STATUS_RERUN].include?(status)
+    return unless [STATUS_UPLOADED, STATUS_RERUN, STATUS_RETRY_PR].include?(status)
+    pr = pipeline_runs.first
+    transient_status = status
     self.status = STATUS_CHECKED
-    kickoff_pipeline
+
+    if transient_status == STATUS_RETRY_PR && pr
+      pr.retry
+    else
+      kickoff_pipeline
+    end
   end
 
   def self.viewable(user)

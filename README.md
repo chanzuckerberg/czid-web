@@ -36,6 +36,26 @@ irb(main):001:0> User.create(email: 'your@email.com', password: 'yourpass', pass
 
 You can then log in with the emaill/password you specified.
 
+## Render a react component
+Since rails is serving the bundled js file, you have access to the global `window.react_component` function provided.
+Here's an example to render a react component from rails views.
+
+```
+<div id="demo_component">
+  <%= javascript_tag do %>
+    react_component('Demo', {
+      pageSize: '<%=@page_size%>',
+      pageDescription: '<%= @page_description %>',
+      items: JSON.parse('<%= raw escape_json(@items)%>')
+    }, 'demo_component');
+  <% end %>
+</div>
+```
+
+Calling the react_component method autoloads the component called `Demo` from the components directory, second parameters is the props you want passed to that component.
+And last but not least, the `div` id `demo_component`, was passed as a third parameter, to tell the function where to render the said component. In our case the current div
+
+
 ## Testing
 
 ```
@@ -110,7 +130,7 @@ Sometimes you may be prompted to run a migration or configuration command like `
 
 ## DB backup/restore within and across environments
 
-Note that this requires the proper ssh config to access the deployed versions of the site. That info is deployment specific, so check with a teammate.
+Note that this requires the proper ssh config to access the deployed versions of the site. (Run chanzuckerberg/shared-infra/tools/ssh_config, then `sed -i.bak '/bastion-alpha.idseq.net/d' ~/.ssh/known_hosts` and `sed -i.bak '/bastion-production.idseq.net/d' ~/.ssh/known_hosts`, then get the pem keys from a teammate, then `ssh-add <pem key>`.)
 
 1. Backup your local `development` DB into a local file:
 `docker-compose exec web mysqldump -h db -u root idseq_development | gzip -c > idseq_development.sql.gz`

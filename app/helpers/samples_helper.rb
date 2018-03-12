@@ -126,14 +126,22 @@ module SamplesHelper
     s3_output, _stderr, status = Open3.capture3("aws", "s3", "ls", "#{s3_path}/")
     return unless status.exitstatus.zero?
     s3_output.chomp!
-    entries = s3_output.split("\n").reject { |line| line.include? "Undetermined" }.select { |line| line.include? "fast" }
+    entries = s3_output.split("\n").reject { |line| line.include? "Undetermined" }
     samples = {}
     entries.each do |file_name|
-      matched = /([^ ]*)_R(\d)_001.(fastq.gz|fq.gz|fastq|fq|fasta.gz|fa.gz|fasta|fa)\z/.match(file_name)
-      next unless matched
+      matched_paired = InputFile::BULK_FILE_PAIRED_REGEX.match(file_name)
+      matched_single = InputFile::BULK_FILE_SINGLE_REGEX.match(file_name)
+      if matched_paired
+        matched = matched_paired
+        read_idx = matched[2].to_i - 1
+      elsif matched_single
+        matched = matched_single
+        read_idx = 0
+      else
+        next
+      end
       source = matched[0]
       name = matched[1]
-      read_idx = matched[2].to_i - 1
       samples[name] ||= default_attributes.clone
       samples[name][:input_files_attributes] ||= []
       samples[name][:input_files_attributes][read_idx] = { name: source,
@@ -144,7 +152,7 @@ module SamplesHelper
     sample_list = []
     samples.each do |name, sample_attributes|
       sample_attributes[:name] = name
-      if sample_attributes[:input_files_attributes].size == 2
+      if sample_attributes[:input_files_attributes].size.between?(1, 2)
         sample_list << sample_attributes
       end
     end
@@ -159,7 +167,7 @@ module SamplesHelper
               elsif query == 'UPLOADING'
                 samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status NOT IN (?) and pipeline_runs.finalized != 1", %w[CHECKED FAILED])
               elsif query == 'CHECKED'
-                samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status IN (?) and pipeline_runs.finalized = 1", query)
+                samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("(pipeline_runs.job_status IN (?) or pipeline_runs.job_status like '%READY') and pipeline_runs.finalized = 1", query)
               else
                 samples
               end
@@ -169,7 +177,7 @@ module SamplesHelper
   def get_total_runtime(pipeline_run)
     if pipeline_run.finalized?
       # total processing time (without time spent waiting), for performance evaluation
-      pipeline_run.pipeline_run_stages.map { |rs| rs.updated_at - rs.created_at }.sum
+      pipeline_run.pipeline_run_stages.map { |rs| pipeline_run.ready_step && rs.step_number > pipeline_run.ready_step ? 0 : (rs.updated_at - rs.created_at) }.sum
     else
       # time since pipeline kickoff (including time spent waiting), for run diagnostics
       (Time.current - pipeline_run.created_at)
@@ -177,12 +185,12 @@ module SamplesHelper
   end
 
   def filter_by_tissue_type(samples, query)
-    samples = if query == '-'
-                samples.where(sample_tissue: nil)
-              else
-                samples.where(sample_tissue: query)
-              end
-    samples
+    updated_query = query.map { |x| x == '-' ? nil : x }
+    samples.where(sample_tissue: updated_query)
+  end
+
+  def filter_by_host(samples, query)
+    samples.where(host_genome_id: query)
   end
 
   def pipeline_run_info(pipeline_run)
@@ -210,6 +218,7 @@ module SamplesHelper
           end
       end
       pipeline_run_entry[:finalized] = pipeline_run.finalized
+      pipeline_run_entry[:report_ready] = pipeline_run.report_ready? ? 1 : 0
     else
       pipeline_run_entry[:job_status_description] = 'WAITING'
       pipeline_run_entry[:finalized] = 0

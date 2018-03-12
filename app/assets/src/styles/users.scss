@@ -67,3 +67,32 @@ $break-large: 1460px;
     margin: 0;
   }
 }
+
+// Forgot password error style
+
+.forgot-password {
+  .form-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #414367;
+    margin-top: 9px;
+    text-align: left;
+  }
+  .devise-errors {
+    h2 {
+      display: none;
+    }
+    ul {
+      li {
+        background: rgba(208,2,27,.07);
+        border-radius: 5px;
+        color: #d0021b;
+        margin: 0 auto;
+        padding: 10px 5px;
+        border: 1px solid rgba(160,11,64,.16);
+        font-size: 12px;
+        transition: width .2s ease-out;
+      }
+    }
+  }
+}

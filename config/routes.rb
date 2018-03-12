@@ -9,6 +9,7 @@ Rails.application.routes.draw do
   resources :samples do
     put :reupload_source, on: :member
     put :kickoff_pipeline, on: :member
+    put :retry_pipeline, on: :member
     get :all, on: :collection
     get :pipeline_runs, on: :member
     get :report_info, on: :member
@@ -23,11 +24,14 @@ Rails.application.routes.draw do
     post :bulk_upload, on: :collection
     post :save_metadata, on: :member
     get :samples_taxons, on: :collection
+    get :top_taxons, on: :collection
+    get :heatmap, on: :collection
   end
   get 'samples/:id/fasta/:tax_level/:taxid/:hit_type', to: 'samples#show_taxid_fasta'
+  get 'samples/:id/alignment/:taxon_info', to: 'samples#show_taxid_alignment'
+  get 'select', to: 'home#index'
 
   resources :projects do
-    get :visuals, on: :member
     get :make_project_reports_csv, on: :member
     get :project_reports_csv_status, on: :member
     get :send_project_reports_csv, on: :member
@@ -42,7 +46,10 @@ Rails.application.routes.draw do
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
 
-  mount Resque::Server.new, at: '/resque'
+  authenticate :user, ->(u) { u.admin? } do
+    mount Resque::Server.new, at: "/resque"
+  end
+
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
   root to: 'home#index'
 end

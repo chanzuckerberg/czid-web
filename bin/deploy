@@ -80,6 +80,7 @@ def run_task(client, cluster, service, task_revision, container, command)
 
   loop do
     resp2 = client.describe_tasks(cluster: cluster, tasks: [migrate_task_arn])
+    sleep 5
 
     print "migration task: #{resp2.tasks[0].last_status}\r"
     if resp2.tasks[0].last_status == 'STOPPED'
@@ -92,7 +93,6 @@ def run_task(client, cluster, service, task_revision, container, command)
         exit
       end
     end
-    sleep(5)
   end
 end
 

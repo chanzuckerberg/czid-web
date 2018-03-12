@@ -1,0 +1,70 @@
+one:
+  background: real_background
+  tax_id: 573
+  count_type: "NR"
+  tax_level: 1
+  mean: 29.9171
+  stdev: 236.332
+two:
+  background: real_background
+  tax_id: 573
+  count_type: "NT"
+  tax_level: 1
+  mean: 9.35068
+  stdev: 26.4471
+three:
+  background: real_background
+  tax_id: 570
+  count_type: "NR"
+  tax_level: 2
+  mean: 35.0207
+  stdev: 238.639
+four:
+  background: real_background
+  tax_id: 570
+  count_type: "NT"
+  tax_level: 2
+  mean: 18.3311
+  stdev: 64.2056
+five:
+  background: real_background
+  tax_id: 1313
+  count_type: "NR"
+  tax_level: 1
+  mean: 81.3845
+  stdev: 404.076
+six:
+  background: real_background
+  tax_id: 1313
+  count_type: "NT"
+  tax_level: 1
+  mean: 81.6257
+  stdev: 442.207
+seven:
+  background: real_background
+  tax_id: 1301
+  count_type: "NR"
+  tax_level: 2
+  mean: 201.318
+  stdev: 942.975
+eight:
+  background: real_background
+  tax_id: 1301
+  count_type: "NT"
+  tax_level: 2
+  mean: 290.481
+  stdev: 1482.97
+nine:
+  background: real_background
+  tax_id: 28037
+  count_type: "NR"
+  tax_level: 1
+  mean: 25.6849
+  stdev: 139.526
+ten:
+  background: real_background
+  tax_id: 28037
+  count_type: "NT"
+  tax_level: 1
+  mean: 65.9058
+  stdev: 374.243

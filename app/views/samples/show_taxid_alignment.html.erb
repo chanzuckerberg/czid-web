@@ -1,0 +1,25 @@
+<div style="margin:15px;">
+  <h2> <%= @title %> </h1>
+  <% @parsed_alignment_results['details'].each do |accession_id, data| %>
+  <div style="overflow:scroll;">
+    <b>Accession Id:</b> <%= accession_id %>, <b># Reads: </b> <%= data["reads_count"] %> <br/>
+    <b>Reference Sequence:</b> <%= data['ref_seq'] %> <br/>
+    <b>Reference Sequence Length:</b> <%= data['ref_seq_len'] %>, <b><%= link_to('NCBI URL', data['ref_link']) %></b> <br/>
+      <p>
+      <% data["reads"].each do |read_info| %>
+      <div style="border:1px; border-style: solid;">
+        Read Name: <%= read_info['read_id'] %> <br/>
+        Percentage Matched: <%= read_info["metrics"][0] %> %, Alignment  Length:  <%= read_info["metrics"][1] %>, # Mismatches: <%= read_info["metrics"][2] %>, # Gap Openings: <%= read_info["metrics"][3] %> <br/>
+        E-value: <%= read_info["metrics"][8] %>, Bit Score: <%= read_info["metrics"][9] %> <br/>
+        Reference Alignment Range: <%= "#{number_with_delimiter(read_info['metrics'][6])} - #{number_with_delimiter(read_info['metrics'][7])}" %> <br/>
+
+        <div style="white-space: pre;font-family: monospace; overflow:scroll;">
+Reference:    <%= read_info['alignment'][0] %>
+Read:         <%= read_info['alignment'][1] %>
+Mismatches:   <%= read_info['alignment'][2] %>
+        </div>
+      </div>
+      <% end %>
+  </div>
+  <% end %>
+</div>
