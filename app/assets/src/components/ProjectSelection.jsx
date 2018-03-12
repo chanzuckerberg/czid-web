@@ -295,9 +295,9 @@ import Samples from './Samples';
         <div className="row">
           <div className='col no-padding s12'>
             <div className="projects-wrapper">
-              <div className="all-samples project-item">
-                <span className='project-label'
-                  onClick={this.handleProjectClick}>
+              <div className="all-samples project-item"
+                   onClick={this.handleProjectClick} >
+                <span className='project-label'>
                   All Samples
                 </span>
               </div>
