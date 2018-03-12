@@ -185,12 +185,8 @@ module SamplesHelper
   end
 
   def filter_by_tissue_type(samples, query)
-    samples = if query == ['-']
-                samples.where(sample_tissue: nil)
-              else
-                samples.where(sample_tissue: query)
-              end
-    samples
+    updated_query = query.map { |x| x == '-' ? nil : x }
+    samples.where(sample_tissue: updated_query)
   end
 
   def filter_by_host(samples, query)
