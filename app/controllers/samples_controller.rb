@@ -15,7 +15,7 @@ class SamplesController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:create, :update]
 
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder, :show_taxid_alignment].freeze
-  EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :pipeline_runs, :save_metadata].freeze
+  EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :samples_taxons, :top_taxons, :heatmap].freeze
 
@@ -157,7 +157,7 @@ class SamplesController < ApplicationController
     align_summary_file = @pipeline_run ? "#{@pipeline_run.alignment_viz_output_s3_path}.summary" : nil
     @align_viz = true if params[:align_viz] && align_summary_file && get_s3_file(align_summary_file)
 
-    if @pipeline_run && (@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?
+    if @pipeline_run && (((@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?) || @pipeline_run.report_ready?)
       background_id = params[:background_id] || @sample.default_background_id
       # Here background_id is only used to decide whether a report can be shown.
       # No report/background-specific data is actually being shown.
@@ -168,6 +168,10 @@ class SamplesController < ApplicationController
         @all_categories = all_categories
         @report_details = report_details(@pipeline_run)
         @report_page_params = clean_params(params, @all_categories)
+      end
+
+      if @pipeline_run.failed?
+        @pipeline_run_retriable = true
       end
     end
   end
@@ -228,7 +232,7 @@ class SamplesController < ApplicationController
     ## Duct tape for changing background id dynamically
     ## TODO(yf): clean the following up.
     ####################################################
-    if @pipeline_run && (@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?
+    if @pipeline_run && (((@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?) || @pipeline_run.report_ready?)
       background_id = params[:background_id] || @sample.default_background_id
       pipeline_run_id = @pipeline_run.id
     end
@@ -419,6 +423,21 @@ class SamplesController < ApplicationController
   # PUT /samples/:id/kickoff_pipeline
   def kickoff_pipeline
     @sample.status = Sample::STATUS_RERUN
+    @sample.save
+    respond_to do |format|
+      if !@sample.pipeline_runs.empty?
+        format.html { redirect_to samples_url, notice: 'A pipeline run is in progress.' }
+        format.json { head :no_content }
+      else
+        format.html { redirect_to samples_url, notice: 'No pipeline run in progress.' }
+        format.json { render json: @sample.errors.full_messages, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  # PUT /samples/:id/kickoff_pipeline
+  def retry_pipeline
+    @sample.status = Sample::STATUS_RETRY_PR
     @sample.save
     respond_to do |format|
       if !@sample.pipeline_runs.empty?

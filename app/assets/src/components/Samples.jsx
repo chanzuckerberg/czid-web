@@ -686,11 +686,13 @@ class Samples extends React.Component {
     let postProcess = runInfo['Post Processing']
     let hostFiltering = runInfo['Host Filtering']
     let alignment = runInfo['GSNAPL/RAPSEARCH alignment']
-    if (postProcess === 'FAILED' || alignment === 'FAILED' || hostFiltering === 'FAILED') {
+    if (alignment === 'FAILED' || hostFiltering === 'FAILED') {
       return 'FAILED';
     } else if (postProcess) {
       if (postProcess === 'LOADED')
         return 'COMPLETE';
+      else if (postProcess === 'FAILED')
+        return 'COMPLETE*'
       else
         return  'POST PROCESSING';
     } else if (alignment) {
@@ -1429,7 +1431,7 @@ class Samples extends React.Component {
 
     return (
       <div className="row content-body">
-        <Sidebar 
+        <Sidebar
           className="col no-padding s2 sidebar" animation='push'  visible={true} icon='labeled'>
           <div>
             {project_section}

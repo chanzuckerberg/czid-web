@@ -167,7 +167,7 @@ module SamplesHelper
               elsif query == 'UPLOADING'
                 samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status NOT IN (?) and pipeline_runs.finalized != 1", %w[CHECKED FAILED])
               elsif query == 'CHECKED'
-                samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status IN (?) and pipeline_runs.finalized = 1", query)
+                samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("(pipeline_runs.job_status IN (?) or pipeline_runs.job_status like '%READY') and pipeline_runs.finalized = 1", query)
               else
                 samples
               end
@@ -177,7 +177,7 @@ module SamplesHelper
   def get_total_runtime(pipeline_run)
     if pipeline_run.finalized?
       # total processing time (without time spent waiting), for performance evaluation
-      pipeline_run.pipeline_run_stages.map { |rs| rs.updated_at - rs.created_at }.sum
+      pipeline_run.pipeline_run_stages.map { |rs| pipeline_run.ready_step && rs.step_number > pipeline_run.ready_step ? 0 : (rs.updated_at - rs.created_at) }.sum
     else
       # time since pipeline kickoff (including time spent waiting), for run diagnostics
       (Time.current - pipeline_run.created_at)
@@ -218,6 +218,7 @@ module SamplesHelper
           end
       end
       pipeline_run_entry[:finalized] = pipeline_run.finalized
+      pipeline_run_entry[:report_ready] = pipeline_run.report_ready? ? 1 : 0
     else
       pipeline_run_entry[:job_status_description] = 'WAITING'
       pipeline_run_entry[:finalized] = 0

@@ -28,6 +28,7 @@ class PipelineRun < ApplicationRecord
   STATUS_RUNNABLE = 'RUNNABLE'.freeze
   STATUS_ERROR = 'ERROR'.freeze # when aegea batch describe failed
   STATUS_LOADED = 'LOADED'.freeze
+  STATUS_READY = 'READY'.freeze
   POSTPROCESS_STATUS_LOADED = 'LOADED'.freeze
 
   before_create :create_run_stages
@@ -91,6 +92,7 @@ class PipelineRun < ApplicationRecord
       output_func: 'postprocess_outputs'
     )
     self.pipeline_run_stages = run_stages
+    self.ready_step = 2
   end
 
   def completed?
@@ -113,6 +115,21 @@ class PipelineRun < ApplicationRecord
     nil
   end
 
+  def retry
+    return unless failed? # only retry from a failed job
+    prs = active_stage
+    prs.job_status = nil
+    prs.job_command = nil
+    prs.db_load_status = 0
+    prs.save
+    self.finalized = 0
+    save
+  end
+
+  def report_ready?
+    job_status == STATUS_CHECKED || (ready_step && active_stage && active_stage.step_number > ready_step)
+  end
+
   def update_job_status
     prs = active_stage
     all_stages_succeeded = prs.nil?
@@ -130,6 +147,7 @@ class PipelineRun < ApplicationRecord
         prs.update_job_status
       end
       self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
+      self.job_status += "|#{STATUS_READY}" if report_ready?
     end
     save
   end
