@@ -733,10 +733,10 @@ $break-large: 1070px;
       padding-left: 20px;
       margin-right: 10px;
       .search-icon {
-        position: absolute;
+        position: relative;
         margin-left: 10px;
-        margin-top: 14px;
         font-size: 18px;
+        top: 0.7em;
         color: $subdued-color;
       }
     }
@@ -750,6 +750,8 @@ $break-large: 1070px;
       border-radius: 40px;
       border: solid 1px #cccccc;
       padding-left: 32px;
+      position: relative;
+      top: -1.2em;
       &::placeholder {
         color: #d0d9de;
       }
