@@ -886,6 +886,10 @@ input[type="button"] {
           font-weight: 400;
           font-size: $font-size-base;
           color: #f1f1f1;
+          .favorite.fa {
+            margin-top: 4px;
+          }
+
           &:hover {
             background: #999999;
             i {
