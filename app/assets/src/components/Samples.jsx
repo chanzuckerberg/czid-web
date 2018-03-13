@@ -28,14 +28,12 @@ class Samples extends React.Component {
     this.loadMore = this.loadMore.bind(this);
     this.fetchResults = this.fetchResults.bind(this);
     this.fetchSamples = this.fetchSamples.bind(this);
-    this.hostGenomes = props.hostGenomes || [];
     this.handleStatusFilterSelect = this.handleStatusFilterSelect.bind(this);
     this.setUrlLocation = this.setUrlLocation.bind(this);
     this.sortSamples = this.sortSamples.bind(this);
     this.switchColumn = this.switchColumn.bind(this);
     this.handleProjectSelection = this.handleProjectSelection.bind(this);
     this.pageSize = props.pageSize || 30;
-    this.tissue_types = PipelineSampleReads.fetchTissueTypes();
     this.handleAddUser = this.handleAddUser.bind(this);
     this.editableProjects = props.editableProjects
     this.canEditProject = this.canEditProject.bind(this)
@@ -61,6 +59,8 @@ class Samples extends React.Component {
       searchParams: this.fetchParams('search') || '',
       sampleIdsParams: this.fetchParams('ids') || [],
       allSamples: [],
+      tissueTypes: [],
+      hostGenomes: [],
       sort_by: this.fetchParams('sort_by') || 'id,desc',
       pagesLoaded: 0,
       pageEnd: false,
@@ -546,6 +546,8 @@ class Samples extends React.Component {
       this.setState((prevState) => ({
         initialFetchedSamples: res.data.samples,
         allSamples: res.data.samples,
+        tissueTypes: res.data.tissue_types,
+        hostGenomes: res.data.host_genomes,
         displayEmpty: false,
         pagesLoaded: prevState.pagesLoaded+1,
         totalNumber: res.data.total_count,
@@ -633,6 +635,8 @@ class Samples extends React.Component {
       this.setState((prevState) => ({
         initialFetchedSamples: res.data.samples,
         allSamples: res.data.samples,
+        tissueTypes: res.data.tissue_types,
+        hostGenomes: res.data.host_genomes,
         displayEmpty: false,
         totalNumber: res.data.total_count,
         pagesLoaded: prevState.pagesLoaded+1,
@@ -913,7 +917,35 @@ class Samples extends React.Component {
     location.href = `/projects/${id}/csv`;
   }
 
+  applyExcludedHost(e) {
+    const host_id = e.target.getAttribute('data-exclude-host')
+    let hostList = this.state.selectedHostIndices.splice(0);
+    let index;
+    index = hostList.indexOf(+host_id);
+    hostList.splice(index, 1);
+    this.setState({
+      selectedHostIndices: hostList,
+      pagesLoaded: 0,
+      pageEnd: false
+    }, () => {
+      this.setUrlLocation();
+    })
+  }
 
+  applyExcludedTissue(e) {
+    const tissue = e.target.getAttribute('data-exclude-tissue')
+    let list = this.state.selectedTissueFilters.splice(0);
+    let index;
+    index = list.indexOf(+tissue);
+    list.splice(index, 1);
+    this.setState({
+      selectedTissueFilters: list,
+      pagesLoaded: 0,
+      pageEnd: false
+    }, () => {
+      this.setUrlLocation();
+    })
+  }
 
   renderTable(samples) {
     let project_id = this.state.selectedProjectId ? this.state.selectedProjectId : 'all'
@@ -973,6 +1005,32 @@ class Samples extends React.Component {
       </div>
     )
 
+    const host_filter_tag_list = this.state.hostGenomes.map((host_genome, i) => {
+      if (this.state.selectedHostIndices.indexOf(host_genome.id) >= 0) {
+        return (
+          <span className="filter-tag" key={`host_tag_${i}`}>
+          <span className='filter-tag-name'> {host_genome.name} </span>
+          <span className='filter-tag-x' data-exclude-host={host_genome.id} onClick= { (e) => { this.applyExcludedHost(e);} }  >X</span>
+          </span>
+        );
+    } else {
+        return null;
+    }
+    });
+
+    const tissue_filter_tag_list = this.state.tissueTypes.map((tissue, i) => {
+      if (this.state.selectedTissueFilters.indexOf(tissue) >= 0) {
+        return (
+          <span className="filter-tag" key={`tissue_tag_${i}`}>
+          <span className='filter-tag-name'> {tissue} </span>
+          <span className='filter-tag-x' data-exclude-host={tissue} onClick= { (e) => { this.applyExcludedTissue(e);} }  >X</span>
+          </span>
+        );
+    } else {
+        return null;
+    }
+    });
+
     const metaDataFilter = (
       <div className="col s2 wrapper">
         <div className={this.state.displayDropdown ? "metadata metadata-active" : "metadata"} onClick={this.displayMetaDataDropdown}>
@@ -982,30 +1040,34 @@ class Samples extends React.Component {
               { this.state.displayDropdown ? <div className="row metadata-options">
                 <div className="col s6">
                   <h6>Host</h6>
-                { this.hostGenomes.map((host, i) => {
-                  return (
-                    <div key={i} className="options-wrapper">
-                      <input name="host" type="checkbox" data-id={host.id} checked={this.state.selectedHostIndices.indexOf(host.id) < 0 ? "" : "checked"} value={this.state.selectedHostIndices.indexOf(i) != -1 } onChange={this.selectHostFilter}
-                        id={host.id} className="filled-in human" />
-                      <label htmlFor={host.id}>{host.name}</label>
-                    </div>
-                  )
+                { this.state.hostGenomes.length == 0 ?
+                    <div className="options-wrapper"><label>No host genome data present</label></div> :
+                    this.state.hostGenomes.map((host, i) => {
+                      return (
+                        <div key={i} className="options-wrapper">
+                          <input name="host" type="checkbox" data-id={host.id} checked={this.state.selectedHostIndices.indexOf(host.id) < 0 ? "" : "checked"} value={this.state.selectedHostIndices.indexOf(i) != -1 } onChange={this.selectHostFilter}
+                            id={host.id} className="filled-in human" />
+                          <label htmlFor={host.id}>{host.name}</label>
+                        </div>
+                      )
                 })}
                   </div>
               <div className="col s6">
               <h6>Tissue type</h6>
-                {this.tissue_types.map((tissue, i) => {
-                  return (
-                    <div key={i} className="options-wrapper">
-                    <input name="tissue" type="checkbox"
-                    id={tissue} className="filled-in" data-status={tissue} checked={this.state.selectedTissueFilters.indexOf(tissue) < 0 ? "" : "checked"} onChange={this.selectTissueFilter} />
-                    <label htmlFor={tissue}>{tissue}</label>
-                  </div>
-                  )
+                {this.state.tissueTypes.length == 0 ? 
+                   <div className="options-wrapper"><label>No tissue type data present</label></div> :
+                   this.state.tissueTypes.map((tissue, i) => {
+                     return (
+                       <div key={i} className="options-wrapper">
+                       <input name="tissue" type="checkbox"
+                       id={tissue} className="filled-in" data-status={tissue} checked={this.state.selectedTissueFilters.indexOf(tissue) < 0 ? "" : "checked"} onChange={this.selectTissueFilter} />
+                       <label htmlFor={tissue}>{tissue}</label>
+                     </div>
+                     )
                 })}
               </div>
             </div> : null }
-      </div>
+        </div>
     )
 
     const search_box = (
@@ -1134,7 +1196,7 @@ class Samples extends React.Component {
         }
         <div className={ project_id === 'all' ? "col s7 wrapper" : "col s5 wrapper" }>
           <div className={(!this.state.project) ? "proj-title heading all-proj" : "heading proj-title"}>
-          { (!this.state.project) ? <div className="">All Samples</div>
+          { (!this.state.project) ? <div className="">All Projects</div>
               : <div>
                   <span className="">{ this.state.project.name }</span>
                 </div>
@@ -1245,6 +1307,9 @@ class Samples extends React.Component {
         <div className="divider"></div>
         <div className="sample-container no-padding col s12">
           { search_box }
+          <div className="filter-tags-list">
+            { host_filter_tag_list } { tissue_filter_tag_list }
+          </div>
           <div className="sample-table-container row">
             { tableHead }
             { !samples.length && this.state.displayEmpty ? this.renderEmptyTable() : this.renderPipelineOutput(samples)  }
@@ -1399,7 +1464,12 @@ class Samples extends React.Component {
       selectedProjectId: id,
       pagesLoaded: 0,
       pageEnd: false,
-      projectType: listType
+      projectType: listType,
+      filterParams: '',
+      searchParams:'',
+      sampleIdsParams: [],
+      selectedTissueFilters: [],
+      selectedHostIndices: []
     }, () => {
       this.setUrlLocation();
       this.fetchProjectDetails(id);
