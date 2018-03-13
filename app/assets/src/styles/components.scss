@@ -28,3 +28,16 @@
     margin-top: 5px !important;
   }
 }
+
+.ui.dropdown.labeled-filter-dropdown {
+  input[type=checkbox] {
+    opacity: 1;
+    position: static;
+    margin-right: 0.5em;
+  }
+  .label {
+    padding: 0.2em 0.4em;
+    font-weight: normal;
+    font-size: inherit;
+  }
+}
