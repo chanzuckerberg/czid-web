@@ -917,21 +917,26 @@ class Samples extends React.Component {
     location.href = `/projects/${id}/csv`;
   }
 
-  applyExcludedHost(e) {
-    const host_id = e.target.getAttribute('data-exclude-host')
-    let hostList = this.state.selectedHostIndices.splice(0);
+  applyExcluded(e, type=null, state_var=null) {
+    let id = e.target.getAttribute('data-exclude')
+    if (type === "int") {
+      id = +id
+    }
+    let list = this.state[state_var].splice(0);
     let index;
-    console.log(host_id)
-    index = hostList.indexOf(host_id);
-    console.log(hostList)
+    console.log(id)
+    index = list.indexOf(id);
+    console.log(list)
     console.log(index)
-    hostList.splice(index, 1);
-    console.log(hostList)
-    this.setState({
-      selectedHostIndices: hostList,
+    list.splice(index, 1);
+    console.log(list)
+    let new_state = {
+      [`${state_var}`]: list,
       pagesLoaded: 0,
       pageEnd: false
-    }, () => {
+    }
+    console.log(new_state)
+    this.setState(new_state, () => {
       this.setUrlLocation();
     })
   }
@@ -1018,7 +1023,7 @@ class Samples extends React.Component {
         return (
           <span className="filter-tag" key={`host_tag_${i}`}>
           <span className='filter-tag-name'> {host_genome.name} </span>
-          <span className='filter-tag-x' data-exclude-host={host_genome.id} onClick= { (e) => { this.applyExcludedHost(e);} }  >X</span>
+          <span className='filter-tag-x' data-exclude={host_genome.id} onClick= { (e) => { this.applyExcluded(e, "int", "selectedHostIndices");} }  >X</span>
           </span>
         );
     } else {
@@ -1031,7 +1036,7 @@ class Samples extends React.Component {
         return (
           <span className="filter-tag" key={`tissue_tag_${i}`}>
           <span className='filter-tag-name'> {tissue} </span>
-          <span className='filter-tag-x' data-exclude-tissue={tissue} onClick= { (e) => { this.applyExcludedTissue(e);} }  >X</span>
+          <span className='filter-tag-x' data-exclude={tissue} onClick= { (e) => { this.applyExcluded(e, "string", "selectedTissueFilters");} }  >X</span>
           </span>
         );
     } else {
