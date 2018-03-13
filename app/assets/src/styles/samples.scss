@@ -930,6 +930,9 @@ input[type="button"] {
   }
   .samples-content {
     background: #fff;
+    -webkit-transform: unset !important;
+    transform: unset !important;
+    margin-left: 260px !important;
     .content-wrapper {
       .divider {
         height: 3px;
@@ -1020,6 +1023,7 @@ input[type="button"] {
   .project_modal_title {
     font-size: $font-size-h4;
     font-weight: $font-weight-bold;
+    margin-bottom: 10px;
   }
   .project_modal_visiblity {
     i.material-icons {
@@ -1055,11 +1059,11 @@ input[type="button"] {
     }
     .add_member_action {
       position: absolute;
-      margin-left: -100px;
+      margin-left: -95px;
       margin-top: 1px;
       background: #e9ecef;
-      padding: 12px;
-      font-size: $font-size-small;
+      padding: 10px;
+      font-size: 12px;
       border-top-right-radius: 2px;
       border-bottom-right-radius: 2px;
       border: 1px solid #ced4da;
