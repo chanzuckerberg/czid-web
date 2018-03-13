@@ -35,7 +35,6 @@ class Samples extends React.Component {
     this.switchColumn = this.switchColumn.bind(this);
     this.handleProjectSelection = this.handleProjectSelection.bind(this);
     this.pageSize = props.pageSize || 30;
-    this.tissue_types = PipelineSampleReads.fetchTissueTypes();
     this.handleAddUser = this.handleAddUser.bind(this);
     this.editableProjects = props.editableProjects
     this.canEditProject = this.canEditProject.bind(this)
@@ -61,6 +60,7 @@ class Samples extends React.Component {
       searchParams: this.fetchParams('search') || '',
       sampleIdsParams: this.fetchParams('ids') || [],
       allSamples: [],
+      tissueTypes: [],
       sort_by: this.fetchParams('sort_by') || 'id,desc',
       pagesLoaded: 0,
       pageEnd: false,
@@ -546,6 +546,7 @@ class Samples extends React.Component {
       this.setState((prevState) => ({
         initialFetchedSamples: res.data.samples,
         allSamples: res.data.samples,
+        tissueTypes: res.data.tissue_types,
         displayEmpty: false,
         pagesLoaded: prevState.pagesLoaded+1,
         totalNumber: res.data.total_count,
@@ -633,6 +634,7 @@ class Samples extends React.Component {
       this.setState((prevState) => ({
         initialFetchedSamples: res.data.samples,
         allSamples: res.data.samples,
+        tissueTypes: res.data.tissue_types,
         displayEmpty: false,
         totalNumber: res.data.total_count,
         pagesLoaded: prevState.pagesLoaded+1,
@@ -994,14 +996,16 @@ class Samples extends React.Component {
                   </div>
               <div className="col s6">
               <h6>Tissue type</h6>
-                {this.tissue_types.map((tissue, i) => {
-                  return (
-                    <div key={i} className="options-wrapper">
-                    <input name="tissue" type="checkbox"
-                    id={tissue} className="filled-in" data-status={tissue} checked={this.state.selectedTissueFilters.indexOf(tissue) < 0 ? "" : "checked"} onChange={this.selectTissueFilter} />
-                    <label htmlFor={tissue}>{tissue}</label>
-                  </div>
-                  )
+                {this.state.tissueTypes.length == 0 ? 
+                   <div className="options-wrapper"><label>No tissue type data present</label></div> :
+                   this.state.tissueTypes.map((tissue, i) => {
+                     return (
+                       <div key={i} className="options-wrapper">
+                       <input name="tissue" type="checkbox"
+                       id={tissue} className="filled-in" data-status={tissue} checked={this.state.selectedTissueFilters.indexOf(tissue) < 0 ? "" : "checked"} onChange={this.selectTissueFilter} />
+                       <label htmlFor={tissue}>{tissue}</label>
+                     </div>
+                     )
                 })}
               </div>
             </div> : null }
