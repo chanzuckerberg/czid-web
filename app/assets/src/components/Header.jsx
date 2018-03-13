@@ -61,9 +61,10 @@ class Header extends React.Component  {
       cli_modal =
         <div id="cli_modal" className="modal project-popup">
           <div className="modal-content">
-            <p>1. Install and configure the Amazon Web Services Command Line Interface (AWS CLI).</p>
+            <p>1. Install and configure the Amazon Web Services Command Line Interface (AWS CLI).
+               Verify it works by running <span className="code">aws help</span>, which should display usage instructions.</p>
             <p>2. Install the IDseq CLI:</p>
-            <p><span className="code">pip install git+https://github.com/chanzuckerberg/idseq-cli.git</span></p>
+            <p><span className="code">pip install git+https://github.com/chanzuckerberg/idseq-cli.git --upgrade</span></p>
             <p>3. Upload a sample using a command of the form:</p>
             <div className="code center-code">
               <p>
@@ -75,6 +76,14 @@ class Header extends React.Component  {
             <p>The project you specify (<span className="code-to-edit">Your Project Name</span>) must already exist on IDseq: you can create it using the
               <br/>
               <span className="code">+ New project</span> button on the sample upload page.</p>
+            <p>4. You can also upload samples in bulk by specifying a folder as follows:</p>
+            <div className="code center-code">
+              <p>
+                idseq -p '<span className="code-to-edit">Your Project Name</span>' \
+                <br/> -u https://idseq.net -e <span className="code-personal">{this.userDetails.email}</span> -t <span className="code-personal">{this.user_auth_token}</span> \
+                <br/> --bulk <span className="code-to-edit">/path/to/your/folder</span>
+              </p>
+            </div>
             <div className="divider"></div>
             <p>By default, the host genome to be subtracted out is "Human".<br/>
                You can change it by adding <span className="code">--host_genome_name <span className="code-to-edit">'Your Chosen Host'</span></span> to the command.<br/>
