@@ -960,6 +960,23 @@ class Samples extends React.Component {
     })
   }
 
+  generateTagList(state_all_options, state_selected_options, id_field=null, name_field=null, id_type=null) {
+    return this.state[state_all_options].map((entry, i) => {
+      let id = id_field ? entry[id_field] : entry
+      let name = name_field ? entry[name_field] : entry
+      if (this.state[state_selected_options].indexOf(id) >= 0) {
+        return (
+          <span className="filter-tag" key={`${state_all_options}_tag_${i}`}>
+          <span className='filter-tag-name'> {`${name}`} </span>
+          <span className='filter-tag-x' data-exclude={id} onClick= { (e) => { this.applyExcluded(e, id_type, state_selected_options);} }  >X</span>
+          </span>
+        );
+    } else {
+        return null;
+    }
+    });
+  }
+
   renderTable(samples) {
     let project_id = this.state.selectedProjectId ? this.state.selectedProjectId : 'all'
     let search_field_width = 'col s3 no-padding'
@@ -1018,31 +1035,8 @@ class Samples extends React.Component {
       </div>
     )
 
-    const host_filter_tag_list = this.state.hostGenomes.map((host_genome, i) => {
-      if (this.state.selectedHostIndices.indexOf(host_genome.id) >= 0) {
-        return (
-          <span className="filter-tag" key={`host_tag_${i}`}>
-          <span className='filter-tag-name'> {host_genome.name} </span>
-          <span className='filter-tag-x' data-exclude={host_genome.id} onClick= { (e) => { this.applyExcluded(e, "int", "selectedHostIndices");} }  >X</span>
-          </span>
-        );
-    } else {
-        return null;
-    }
-    });
-
-    const tissue_filter_tag_list = this.state.tissueTypes.map((tissue, i) => {
-      if (this.state.selectedTissueFilters.indexOf(tissue) >= 0) {
-        return (
-          <span className="filter-tag" key={`tissue_tag_${i}`}>
-          <span className='filter-tag-name'> {tissue} </span>
-          <span className='filter-tag-x' data-exclude={tissue} onClick= { (e) => { this.applyExcluded(e, "string", "selectedTissueFilters");} }  >X</span>
-          </span>
-        );
-    } else {
-        return null;
-    }
-    });
+    const host_filter_tag_list = this.generateTagList("hostGenomes", "selectedHostIndices", "id", "name", "int")
+    const tissue_filter_tag_list = this.generateTagList("tissueTypes", "selectedTissueFilters")
 
     const metaDataFilter = (
       <div className="col s2 wrapper">
