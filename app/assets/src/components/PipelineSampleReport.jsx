@@ -563,7 +563,7 @@ class PipelineSampleReport extends React.Component {
     });
     window.localStorage.setItem('activeThresholds', JSON.stringify(activeThresholds));
     if (closeWindow) {
-      $('.advanced-filters-modal').slideUp(300);
+      this.refs.advancedFilters.closeDropdown();
     }
   }
 
@@ -1058,6 +1058,7 @@ class PipelineSampleReport extends React.Component {
                     </div>
                   </DropdownWithHtml>
                   <DropdownWithHtml
+                    ref="advancedFilters"
                     className="top-filter-item advanced-filtering"
                     text={`Advanced ${this.validThresholdCount(this.state.activeThresholds) > 0 ? this.validThresholdCount(this.state.activeThresholds) : ''}`}>
                     <div className="">
@@ -1112,7 +1113,7 @@ class PipelineSampleReport extends React.Component {
                         <Icon name='plus' /> Add threshold
                       </Label>
                       <br/><br/>
-                      <Button className="save-thresholds" onClick={ () => this.saveThresholdFilters()}>
+                      <Button className="save-thresholds" onClick={ () => this.saveThresholdFilters(true)}>
                         Save
                       </Button>
                     </div>

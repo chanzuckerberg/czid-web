@@ -9,7 +9,21 @@ class DropdownWithHtml extends React.Component {
     this.state = {
       active: false
     };
+    this.filterContent;
   }
+
+  closeDropdown() {
+    if(this.filterContent) {
+      this.filterContent.slideUp(this.props.slideSpeed);
+    }
+  }
+
+  openDropDown() {
+    if(this.filterContent) {
+      this.filterContent.slideDown(this.props.slideSpeed);
+    }
+  }
+
   componentDidMount() {
     // dropdown
     const { compact, slideSpeed } = this.props;
@@ -17,10 +31,10 @@ class DropdownWithHtml extends React.Component {
     const dropDowncontainer = $(this.refs._dropdown_container);
     const activator = this.refs._dropdown_activator;
     const filterContent = this.refs._dropdown_content;
-    const $filterContent = $(filterContent);
+    this.filterContent = $(filterContent);
     const body = document.querySelector('body');
     activator.handleClick = (e) => {
-      $filterContent.slideToggle(slideSpeed);
+      this.filterContent.slideToggle(slideSpeed);
     }
     body.addEventListener('click', (e) => {
       const targetClassName = e.target.className;
@@ -31,7 +45,7 @@ class DropdownWithHtml extends React.Component {
         || activator.ref.contains(e.target) ) {
         return false;
       }
-      $filterContent.slideUp(slideSpeed);
+      this.filterContent.slideUp(slideSpeed);
     });
     if (compact) {
       filterContent.style.minWidth = `${dropDowncontainer.width()}px`;
