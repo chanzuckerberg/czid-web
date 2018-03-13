@@ -60,6 +60,7 @@ class Samples extends React.Component {
       sampleIdsParams: this.fetchParams('ids') || [],
       allSamples: [],
       tissueTypes: [],
+      hostGenomes: [],
       sort_by: this.fetchParams('sort_by') || 'id,desc',
       pagesLoaded: 0,
       pageEnd: false,

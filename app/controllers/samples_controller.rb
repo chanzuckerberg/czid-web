@@ -59,7 +59,6 @@ class SamplesController < ApplicationController
     @tissue_types = results.map(&:sample_tissue).uniq.compact.sort
     host_genome_ids = results.map(&:host_genome_id).uniq.compact
     @host_genomes = HostGenome.find(host_genome_ids)
-    #
 
     results = results.search(name_search_query) if name_search_query.present?
     results = filter_samples(results, filter_query) if filter_query.present?
