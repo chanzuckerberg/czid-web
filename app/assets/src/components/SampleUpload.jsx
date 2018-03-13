@@ -50,6 +50,7 @@ class SampleUpload extends React.Component {
     this.firstInput = this.selected.inputFiles.length && this.selected.inputFiles[0] ? (this.selected.inputFiles[0].source === null ? '' : this.selected.inputFiles[0].source) : '';
     this.secondInput = this.selected.inputFiles.length && this.selected.inputFiles[1] ? (this.selected.inputFiles[1].source === null ? '' : this.selected.inputFiles[1].source) : '';
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
+    this.openCliModal = this.openCliModal.bind(this);
     this.state = {
       submitting: false,
       allProjects: this.projects || [],
@@ -583,6 +584,10 @@ class SampleUpload extends React.Component {
     )
   }
 
+  openCliModal() {
+    $('#cli_modal').modal('open');
+  }
+
   renderSampleForm() {
     return (
       <div id='samplesUploader' className='row'>
@@ -599,7 +604,8 @@ class SampleUpload extends React.Component {
             <div>
               <p className='upload-question'>
                 Want to upload multiple samples at once? <a href='/samples/bulk_new'>Click here.</a>
-                <br/>
+                <br></br>Rather use our command-line interface?
+                { <a onClick={ this.openCliModal } href="#!"> Instructions here.</a> }
               </p>
             </div>
             { this.state.success ?
