@@ -1023,7 +1023,7 @@ class Samples extends React.Component {
         return (
           <span className="filter-tag" key={`tissue_tag_${i}`}>
           <span className='filter-tag-name'> {tissue} </span>
-          <span className='filter-tag-x' data-exclude-host={tissue} onClick= { (e) => { this.applyExcludedTissue(e);} }  >X</span>
+          <span className='filter-tag-x' data-exclude-tissue={tissue} onClick= { (e) => { this.applyExcludedTissue(e);} }  >X</span>
           </span>
         );
     } else {
