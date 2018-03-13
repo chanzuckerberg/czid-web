@@ -921,8 +921,12 @@ class Samples extends React.Component {
     const host_id = e.target.getAttribute('data-exclude-host')
     let hostList = this.state.selectedHostIndices.splice(0);
     let index;
-    index = hostList.indexOf(+host_id);
+    console.log(host_id)
+    index = hostList.indexOf(host_id);
+    console.log(hostList)
+    console.log(index)
     hostList.splice(index, 1);
+    console.log(hostList)
     this.setState({
       selectedHostIndices: hostList,
       pagesLoaded: 0,
@@ -936,8 +940,12 @@ class Samples extends React.Component {
     const tissue = e.target.getAttribute('data-exclude-tissue')
     let list = this.state.selectedTissueFilters.splice(0);
     let index;
-    index = list.indexOf(+tissue);
+    console.log(tissue)
+    index = list.indexOf(tissue);
+    console.log(list)
+    console.log(index)
     list.splice(index, 1);
+    console.log(list)
     this.setState({
       selectedTissueFilters: list,
       pagesLoaded: 0,
