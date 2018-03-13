@@ -1406,7 +1406,12 @@ class Samples extends React.Component {
       selectedProjectId: id,
       pagesLoaded: 0,
       pageEnd: false,
-      projectType: listType
+      projectType: listType,
+      filterParams: '',
+      searchParams:'',
+      sampleIdsParams: [],
+      selectedTissueFilters: [],
+      selectedHostIndices: []
     }, () => {
       this.setUrlLocation();
       this.fetchProjectDetails(id);
