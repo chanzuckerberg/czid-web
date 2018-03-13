@@ -11,3 +11,17 @@
     color: #3867fa !important;
   }
 }
+
+.ui.dropdown {
+  border: 1px solid rgb(228,228,228);
+  padding: 5px 10px;
+  border-radius: 999999px;
+
+  .menu {
+    margin-top: 2px;
+    width: 100%;
+  }
+  .text {
+    font-size: 8pt;
+  }
+}
