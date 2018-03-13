@@ -867,13 +867,14 @@ input[type="button"] {
         .title {
           color: #f1f1f1;
           letter-spacing: 1.5px;
-          padding: 21px 21px 0 21px;
+          padding: 21px 21px 10px 21px;
           font-size: 14px;
         }
       }
       .projects {
         .title {
           color: #f1f1f1;
+          margin-bottom: 10px !important;
         }
       }
       .projects-wrapper {
