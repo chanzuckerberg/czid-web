@@ -8,6 +8,7 @@ import ObjectHelper from '../helpers/ObjectHelper';
 import clusterfck from 'clusterfck';
 import ReactNouislider from './ReactNouislider';
 import LabeledDropdown from './LabeledDropdown';
+import LabeledFilterDropdown from './LabeledFilterDropdown';
 import NumAbbreviate from 'number-abbreviate';
 import { Button, Popup } from 'semantic-ui-react'
 import copy from 'copy-to-clipboard';
@@ -163,7 +164,7 @@ class D3Heatmap extends React.Component {
     }
     this.margin ={
       top: longest_col_label * Math.cos(25 * (Math.PI / 180)) + 10,
-      left: Math.ceil(Math.sqrt(this.row_number)) * 10,
+      left: Math.max(Math.ceil(Math.sqrt(this.row_number)) * 10, 40),
       bottom: 80,
       right: longest_row_label + 20
     };
@@ -600,6 +601,7 @@ class SamplesHeatmap extends React.Component {
       maxDataThreshold: urlParams.maxDataThreshold || 99999999999,
       sample_ids: urlParams.sample_ids || [],
       taxon_ids: urlParams.taxon_ids || [],
+      categories: urlParams.categories,
     };
     this.updateUrlParams();
   }
@@ -623,6 +625,7 @@ class SamplesHeatmap extends React.Component {
     sp.set("maxDataThreshold", newParams["maxDataThreshold"] || this.state.maxDataThreshold);
     sp.set("sample_ids", lst_to_comma(newParams["sample_ids"]) || this.state.sample_ids);
     sp.set("taxon_ids", lst_to_comma(newParams["taxon_ids"]) || this.state.taxon_ids);
+    sp.set("categories", lst_to_comma(newParams["categories"]) || this.state.categories);
     window.history.replaceState(null, null, url.toString());
   }
 
@@ -636,7 +639,9 @@ class SamplesHeatmap extends React.Component {
     let lon = function (x) {
       return (x == null) ? null : x.split(",").map(function(j) { return parseInt(j, 10); });
     }
-
+    let ton = function (x) {
+      return (x == null) ? null : x.split(",");
+    }
     return {
       species: sp.get("species"),
       dataType: sp.get("dataType"),
@@ -645,6 +650,7 @@ class SamplesHeatmap extends React.Component {
       maxDataThreshold: ion(sp.get("maxDataThreshold")),
       sample_ids: lon(sp.get("sample_ids")),
       taxon_ids: lon(sp.get("taxon_ids")),
+      categories: ton(sp.get("categories")),
     }
   }
 
@@ -691,16 +697,16 @@ class SamplesHeatmap extends React.Component {
         taxon_ids: taxons.ids,
         data: response.data,
         taxons: taxons,
+        categories: this.state.categories || taxons.categories,
       });
     }).then(() => {
       this.setState({ loading: false });
     });
   }
 
-  getMinMax () {
+  getMinMax (taxon_names) {
     let data = this.state.data;
     let dataType = this.state.dataType;
-    let taxon_names = this.state.taxons.names;
     let taxon_lists = [];
     taxon_names = new Set(taxon_names);
     for (let sample of data) {
@@ -788,24 +794,30 @@ class SamplesHeatmap extends React.Component {
 
   extractTaxons (data) {
     let id_to_name = {},
+        id_to_category = {},
         name_to_id = {},
-        ids = new Set();
+        ids = new Set(),
+        categories = new Set();
 
     for (var i = 0, len = data.length; i < len; i += 1) {
       let sample = data[i];
       for (var j = 0; j < sample.taxons.length; j+= 1) {
         let taxon = sample.taxons[j];
         id_to_name[taxon.tax_id] = taxon.name;
+        id_to_category[taxon.tax_id] = taxon.category_name;
         name_to_id[taxon.name] = taxon.tax_id;
         ids.add(taxon.tax_id);
+        categories.add(taxon.category_name);
       }
     }
 
     return {
       id_to_name: id_to_name,
+      id_to_category: id_to_category,
       name_to_id: name_to_id,
       ids: Array.from(ids),
       names: Object.keys(name_to_id),
+      categories: Array.from(categories).sort(),
     };
   }
 
@@ -931,7 +943,7 @@ class SamplesHeatmap extends React.Component {
       <D3Heatmap
         colTree={this.clustered_samples.tree}
         rowTree={this.clustered_taxons.tree}
-        rows={this.state.taxons.ids.length}
+        rows={this.filteredTaxonsNames.length}
         columns={this.state.data.length}
         getRowLabel={this.getRowLabel.bind(this)}
         getColumnLabel={this.getColumnLabel.bind(this)}
@@ -973,7 +985,7 @@ class SamplesHeatmap extends React.Component {
         options={options}
         onChange={this.updateDataType.bind(this)}
         value={this.state.dataType}
-        label="Data:"
+        label="Data Type:"
       />
     );
   }
@@ -1005,8 +1017,6 @@ class SamplesHeatmap extends React.Component {
   }
 
   taxonLevelChanged (e, d) {
-    d.text = "YO";
-    console.log(e, d);
     this.setState({ species: d.value, species_label: d.label, data: null });
     this.fetchDataFromServer(null, d.value);
   }
@@ -1028,7 +1038,7 @@ class SamplesHeatmap extends React.Component {
         options={options}
         onChange={this.taxonLevelChanged.bind(this)}
         value={this.state.species}
-        label="Taxons:"
+        label="Taxon Level:"
       />
     );
     /*
@@ -1065,7 +1075,7 @@ class SamplesHeatmap extends React.Component {
         value={this.state.dataScaleIdx}
         onChange={this.updateDataScale.bind(this)}
         options={options}
-        label="Scale:"
+        label="Data Scale:"
       />
     )
  }
@@ -1080,15 +1090,101 @@ class SamplesHeatmap extends React.Component {
     copy(window.location);
   }
 
-  render () {
-    if (this.state.data) {
-      this.clustered_samples = this.clusterSamples(this.state.data, this.state.dataType, this.state.taxons.names);
-      this.clustered_taxons = this.clusterTaxons(this.state.data, this.state.dataType, this.state.taxons.names);
-      this.minMax = this.getMinMax();
+  onCategoryChanged (e, value) {
+    let newValue = value.length ? value : this.state.categories;
+    this.setState({
+      categories: newValue,
+    });
+  }
+
+  renderCategoryFilter () {
+    if (!this.state.data) {
+      return;
     }
+
+    let options = [];
+    for (let category of this.state.taxons.categories) {
+      options.push({
+        text: category,
+        value: category,
+      });
+    }
+
+    return (
+      <LabeledFilterDropdown
+        fluid
+        options={options}
+        onChange={this.onCategoryChanged.bind(this)}
+        value={this.state.categories}
+        label="Taxon Categories:"
+      />
+    );
+  }
+
+  renderSubMenu (sticky) {
+    return (
+      <div className="row sub-menu" style={sticky.style}>
+        <div className="col s2">
+          {this.renderTaxonLevelPicker()}
+        </div>
+        <div className="col s2">
+          {this.renderCategoryFilter()}
+        </div>
+        <div className="col s2">
+          {this.renderScalePicker()}
+        </div>
+        <div className="col s2">
+          {this.renderTypePickers()}
+        </div>
+        <div className="col s2">
+          {this.renderThresholdSlider()}
+        </div>
+        <div className="col s2">
+          {this.renderLegend()}
+        </div>
+      </div>
+    );
+  }
+
+  filterTaxons () {
+    let filtered_names = [],
+        categories = new Set(this.state.categories);
+
+    for (let name of this.state.taxons.names) {
+      let id = this.state.taxons.name_to_id[name];
+      let category = this.state.taxons.id_to_category[id];
+      if (categories.has(category)) {
+        filtered_names.push(name)
+      }
+    }
+    return filtered_names;
+  }
+
+  renderVisualization () {
+    if (this.state.data) {
+      this.filteredTaxonsNames = this.filterTaxons();
+      this.clustered_samples = this.clusterSamples(this.state.data, this.state.dataType, this.filteredTaxonsNames);
+      this.clustered_taxons = this.clusterTaxons(this.state.data, this.state.dataType, this.filteredTaxonsNames);
+      this.minMax = this.getMinMax(this.filteredTaxonsNames);
+    }
+
+    return (
+      <StickyContainer>
+        <Sticky>
+          {this.renderSubMenu.bind(this)}
+        </Sticky>
+        <div className="row visualization-content">
+          {this.state.loading && this.renderLoading()}
+          {this.renderHeatmap()}
+        </div>
+      </StickyContainer>
+    );
+  }
+
+  render () {
     return (
       <div id="project-visualization">
-				<div class="menu">
+				<div className="heatmap-header">
 					<Popup
 						trigger={<Button className="right" primary onClick={this.onShareClick.bind(this)}>Share</Button>}
 						content='A shareable URL has been copied to your clipboard!'
@@ -1097,46 +1193,7 @@ class SamplesHeatmap extends React.Component {
 					/>
 				 	<h2>Comparing {this.state.data ? this.state.data.length : ''} samples</h2>
 				</div>
-        <StickyContainer>
-          <Sticky>
-						{
-							({
-								style,
-
-								// the following are also available but unused in this example
-								isSticky,
-								wasSticky,
-								distanceFromTop,
-								distanceFromBottom,
-								calculatedHeight
-							}) => {
-								return (
-								 	<div className="row sub-menu" style={style}>
-										<div className="col s2">
-											{this.renderTaxonLevelPicker()}
-										</div>
-										<div className="col s2">
-											{this.renderScalePicker()}
-										</div>
-										<div className="col s2">
-											{this.renderTypePickers()}
-										</div>
-										<div className="col s3">
-											{this.renderThresholdSlider()}
-										</div>
-										<div className="col s3">
-											{this.renderLegend()}
-										</div>
-									</div>
-								)
-							}
-          }
-          </Sticky>
-          <div className="row visualization-content">
-            {this.state.loading && this.renderLoading()}
-            {this.renderHeatmap()}
-          </div>
-        </StickyContainer>
+        {this.renderVisualization()}
       </div>
     );
   }
