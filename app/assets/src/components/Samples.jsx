@@ -938,12 +938,15 @@ class Samples extends React.Component {
 
     let table_download_dropdown = (
       <div className="col s2 download-wrapper">
-        <Dropdown text='Download' className='link item'>
-          <Dropdown.Menu>
-            <Dropdown.Item href={`/projects/${project_id}/csv`}>Download Table</Dropdown.Item>
-            { project_id === 'all' ? null : <Dropdown.Item onClick={this.startReportGeneration}>Download Reports</Dropdown.Item> }
-          </Dropdown.Menu>
-       </Dropdown>
+        <ul className="report-action-buttons">
+          <li>
+            <a href={`/projects/${project_id}/csv`}>
+              <button className='o'>
+                <i className="fa fa-cloud-download fa-fw"/> Download
+              </button>
+            </a>
+          </li>
+        </ul>
       </div>
     );
 
