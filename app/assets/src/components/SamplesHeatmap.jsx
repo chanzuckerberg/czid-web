@@ -9,9 +9,10 @@ import clusterfck from 'clusterfck';
 import ReactNouislider from './ReactNouislider';
 import LabeledDropdown from './LabeledDropdown';
 import NumAbbreviate from 'number-abbreviate';
-import { Button, Popup, Sticky } from 'semantic-ui-react'
+import { Button, Popup } from 'semantic-ui-react'
 import copy from 'copy-to-clipboard';
 import width from 'text-width';
+import { StickyContainer, Sticky } from 'react-sticky';
 
 class SampleHeatmapTooltip extends React.Component {
   constructor(props) {
@@ -1087,40 +1088,55 @@ class SamplesHeatmap extends React.Component {
     }
     return (
       <div id="project-visualization">
-        <SubHeader>
-          <div>
-            <Popup
-              trigger={<Button className="right" primary onClick={this.onShareClick.bind(this)}>Share</Button>}
-              content='A shareable URL has been copied to your clipboard!'
-              on='click'
-              hideOnScroll
-            />
-           <h2>Comparing {this.state.data ? this.state.data.length : ''} samples</h2>
+				<div class="menu">
+					<Popup
+						trigger={<Button className="right" primary onClick={this.onShareClick.bind(this)}>Share</Button>}
+						content='A shareable URL has been copied to your clipboard!'
+						on='click'
+						hideOnScroll
+					/>
+				 	<h2>Comparing {this.state.data ? this.state.data.length : ''} samples</h2>
+				</div>
+        <StickyContainer>
+          <Sticky>
+						{
+							({
+								style,
+
+								// the following are also available but unused in this example
+								isSticky,
+								wasSticky,
+								distanceFromTop,
+								distanceFromBottom,
+								calculatedHeight
+							}) => {
+								return (
+								 	<div className="row sub-menu" style={style}>
+										<div className="col s2">
+											{this.renderTaxonLevelPicker()}
+										</div>
+										<div className="col s2">
+											{this.renderScalePicker()}
+										</div>
+										<div className="col s2">
+											{this.renderTypePickers()}
+										</div>
+										<div className="col s3">
+											{this.renderThresholdSlider()}
+										</div>
+										<div className="col s3">
+											{this.renderLegend()}
+										</div>
+									</div>
+								)
+							}
+          }
+          </Sticky>
+          <div className="row visualization-content">
+            {this.state.loading && this.renderLoading()}
+            {this.renderHeatmap()}
           </div>
-        </SubHeader>
-        <div>
-          <div className="row sub-menu">
-            <div className="col s2">
-              {this.renderTaxonLevelPicker()}
-            </div>
-            <div className="col s2">
-              {this.renderScalePicker()}
-            </div>
-            <div className="col s2">
-              {this.renderTypePickers()}
-            </div>
-            <div className="col s3">
-              {this.renderThresholdSlider()}
-            </div>
-            <div className="col s3">
-              {this.renderLegend()}
-            </div>
-          </div>
-        </div>
-        <div className="row visualization-content">
-          {this.state.loading && this.renderLoading()}
-          {this.renderHeatmap()}
-        </div>
+        </StickyContainer>
       </div>
     );
   }

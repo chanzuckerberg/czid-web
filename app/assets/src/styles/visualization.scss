@@ -9,10 +9,24 @@
     padding: 5px 0 0 0;
     margin-bottom: -10px;
   }
+  .menu {
+    padding: 10px 2em 30px 2em;
+    .button {
+      margin-top: 20px;
+    }
+    h2 {
+      font-size: 24px;
+    }
+  }
   .sub-menu {
-    margin-top: 1em;
-    padding-bottom: 1em;
-    border-bottom: 1px solid #eee;
+    padding: 1em;
+    border: 1px solid #eee;
+    border-width: 1px 0;
+    background: #fff;
+    margin: 0;
+  }
+  .visualization-content {
+    margin-top: 2em;
   }
   select {
     display: block;
