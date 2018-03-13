@@ -7,8 +7,9 @@ import axios from 'axios';
 import ObjectHelper from '../helpers/ObjectHelper';
 import clusterfck from 'clusterfck';
 import ReactNouislider from './ReactNouislider';
+import LabeledDropdown from './LabeledDropdown';
 import NumAbbreviate from 'number-abbreviate';
-import { Button, Popup } from 'semantic-ui-react'
+import { Button, Popup, Sticky } from 'semantic-ui-react'
 import copy from 'copy-to-clipboard';
 import width from 'text-width';
 
@@ -943,8 +944,8 @@ class SamplesHeatmap extends React.Component {
     )
   }
 
-  updateDataType (e) {
-    let newDataType = e.target.value;
+  updateDataType (e, d) {
+    let newDataType = d.value;
     this.setState({
       dataType: newDataType,
       minDataThreshold: -99999999999,
@@ -957,17 +958,23 @@ class SamplesHeatmap extends React.Component {
       return;
     }
 
-    let ret = [];
-    for (var dataType of this.dataTypes) {
-      ret.push(
-        <option key={dataType} value={dataType}>{dataType}</option>
-      )
+    let options = [];
+    for (let dataType of this.dataTypes) {
+      options.push({
+        value: dataType,
+        text: dataType,
+      });
     }
+
     return (
-      <select value={this.state.dataType} onChange={this.updateDataType.bind(this)}>
-        {ret}
-      </select>
-    )
+      <LabeledDropdown
+        fluid
+        options={options}
+        onChange={this.updateDataType.bind(this)}
+        value={this.state.dataType}
+        label="Data:"
+      />
+    );
   }
 
   updateDataThreshold (e) {
@@ -996,25 +1003,45 @@ class SamplesHeatmap extends React.Component {
     )
   }
 
-  taxonLevelChanged (e) {
-    this.setState({ species: e.target.value, data: null });
-    this.fetchDataFromServer(null, e.target.value);
+  taxonLevelChanged (e, d) {
+    d.text = "YO";
+    console.log(e, d);
+    this.setState({ species: d.value, species_label: d.label, data: null });
+    this.fetchDataFromServer(null, d.value);
   }
 
   renderTaxonLevelPicker () {
     if (!this.state.data) {
       return;
     }
+    let options = [{
+      'text': 'Genus',
+      'value': '0',
+    }, {
+      'text': 'Species',
+      'value': '1',
+    }];
+    return (
+      <LabeledDropdown
+        fluid
+        options={options}
+        onChange={this.taxonLevelChanged.bind(this)}
+        value={this.state.species}
+        label="Taxons:"
+      />
+    );
+    /*
     return (
       <select value={this.state.species} onChange={this.taxonLevelChanged.bind(this)}>
         <option value="0">Genus</option>
         <option value="1">Species</option>
       </select>
     );
+    */
   }
 
-  updateDataScale (e) {
-    this.setState({ dataScaleIdx: e.target.value });
+  updateDataScale (e, d) {
+    this.setState({ dataScaleIdx: d.value });
   }
 
   renderScalePicker () {
@@ -1022,18 +1049,23 @@ class SamplesHeatmap extends React.Component {
       return;
     }
 
-    let ret = [];
+    let options = [];
 
     for (let i = 0; i < this.scales.length; i += 1) {
       let scale = this.scales[i];
-      ret.push(
-        <option key={i} value={i}>{scale[0]}</option>
-      )
+      options.push({
+        value: i,
+        text: scale[0],
+      });
     }
     return (
-      <select value={this.state.dataScaleIdx} onChange={this.updateDataScale.bind(this)}>
-        {ret}
-      </select>
+      <LabeledDropdown
+        fluid
+        value={this.state.dataScaleIdx}
+        onChange={this.updateDataScale.bind(this)}
+        options={options}
+        label="Scale:"
+      />
     )
  }
   renderLegend () {
@@ -1066,26 +1098,21 @@ class SamplesHeatmap extends React.Component {
            <h2>Comparing {this.state.data ? this.state.data.length : ''} samples</h2>
           </div>
         </SubHeader>
-        <div className="container">
+        <div>
           <div className="row sub-menu">
             <div className="col s2">
-              <label>Taxon Level</label>
               {this.renderTaxonLevelPicker()}
             </div>
             <div className="col s2">
-              <label>Data Scale</label>
               {this.renderScalePicker()}
             </div>
             <div className="col s2">
-              <label>Data Type</label>
               {this.renderTypePickers()}
             </div>
             <div className="col s3">
-              <label>Thresholds</label>
               {this.renderThresholdSlider()}
             </div>
-            <div className="col s2">
-              <label>Legend</label>
+            <div className="col s3">
               {this.renderLegend()}
             </div>
           </div>
