@@ -10,9 +10,15 @@
     margin-bottom: -10px;
   }
   .sub-menu {
-    margin-top: 1em;
+    padding-top: 1em;
     padding-bottom: 1em;
-    border-bottom: 1px solid #eee;
+    border: 1px solid #eee;
+    border-width: 1px 0;
+    background: #fff;
+    margin: 0;
+  }
+  .visualization-content {
+    margin-top: 2em;
   }
   select {
     display: block;

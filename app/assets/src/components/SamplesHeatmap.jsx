@@ -9,9 +9,10 @@ import clusterfck from 'clusterfck';
 import ReactNouislider from './ReactNouislider';
 import LabeledDropdown from './LabeledDropdown';
 import NumAbbreviate from 'number-abbreviate';
-import { Button, Popup, Sticky } from 'semantic-ui-react'
+import { Button, Popup } from 'semantic-ui-react'
 import copy from 'copy-to-clipboard';
 import width from 'text-width';
+import { StickyContainer, Sticky } from 'react-sticky';
 
 class SampleHeatmapTooltip extends React.Component {
   constructor(props) {
@@ -1098,29 +1099,46 @@ class SamplesHeatmap extends React.Component {
            <h2>Comparing {this.state.data ? this.state.data.length : ''} samples</h2>
           </div>
         </SubHeader>
-        <div>
-          <div className="row sub-menu">
-            <div className="col s2">
-              {this.renderTaxonLevelPicker()}
-            </div>
-            <div className="col s2">
-              {this.renderScalePicker()}
-            </div>
-            <div className="col s2">
-              {this.renderTypePickers()}
-            </div>
-            <div className="col s3">
-              {this.renderThresholdSlider()}
-            </div>
-            <div className="col s3">
-              {this.renderLegend()}
-            </div>
+        <StickyContainer>
+          <Sticky>
+						{
+							({
+								style,
+
+								// the following are also available but unused in this example
+								isSticky,
+								wasSticky,
+								distanceFromTop,
+								distanceFromBottom,
+								calculatedHeight
+							}) => {
+								return (
+								 	<div className="row sub-menu" style={style}>
+										<div className="col s2">
+											{this.renderTaxonLevelPicker()}
+										</div>
+										<div className="col s2">
+											{this.renderScalePicker()}
+										</div>
+										<div className="col s2">
+											{this.renderTypePickers()}
+										</div>
+										<div className="col s3">
+											{this.renderThresholdSlider()}
+										</div>
+										<div className="col s3">
+											{this.renderLegend()}
+										</div>
+									</div>
+								)
+							}
+          }
+          </Sticky>
+          <div className="row visualization-content">
+            {this.state.loading && this.renderLoading()}
+            {this.renderHeatmap()}
           </div>
-        </div>
-        <div className="row visualization-content">
-          {this.state.loading && this.renderLoading()}
-          {this.renderHeatmap()}
-        </div>
+        </StickyContainer>
       </div>
     );
   }
