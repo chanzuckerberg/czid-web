@@ -28,7 +28,7 @@ class Samples extends React.Component {
     this.loadMore = this.loadMore.bind(this);
     this.fetchResults = this.fetchResults.bind(this);
     this.fetchSamples = this.fetchSamples.bind(this);
-    this.hostGenomes = props.hostGenomes || [];
+      this.hostGenomes = props.hostGenomes || [];
     this.handleStatusFilterSelect = this.handleStatusFilterSelect.bind(this);
     this.setUrlLocation = this.setUrlLocation.bind(this);
     this.sortSamples = this.sortSamples.bind(this);
@@ -547,6 +547,7 @@ class Samples extends React.Component {
         initialFetchedSamples: res.data.samples,
         allSamples: res.data.samples,
         tissueTypes: res.data.tissue_types,
+        hostGenomes: res.data.host_genomes,
         displayEmpty: false,
         pagesLoaded: prevState.pagesLoaded+1,
         totalNumber: res.data.total_count,
@@ -635,6 +636,7 @@ class Samples extends React.Component {
         initialFetchedSamples: res.data.samples,
         allSamples: res.data.samples,
         tissueTypes: res.data.tissue_types,
+        hostGenomes: res.data.host_genomes,
         displayEmpty: false,
         totalNumber: res.data.total_count,
         pagesLoaded: prevState.pagesLoaded+1,
@@ -984,14 +986,16 @@ class Samples extends React.Component {
               { this.state.displayDropdown ? <div className="row metadata-options">
                 <div className="col s6">
                   <h6>Host</h6>
-                { this.hostGenomes.map((host, i) => {
-                  return (
-                    <div key={i} className="options-wrapper">
-                      <input name="host" type="checkbox" data-id={host.id} checked={this.state.selectedHostIndices.indexOf(host.id) < 0 ? "" : "checked"} value={this.state.selectedHostIndices.indexOf(i) != -1 } onChange={this.selectHostFilter}
-                        id={host.id} className="filled-in human" />
-                      <label htmlFor={host.id}>{host.name}</label>
-                    </div>
-                  )
+                { this.state.hostGenomes.length == 0 ?
+                    <div className="options-wrapper"><label>No host genome data present</label></div> :
+                    this.state.hostGenomes.map((host, i) => {
+                      return (
+                        <div key={i} className="options-wrapper">
+                          <input name="host" type="checkbox" data-id={host.id} checked={this.state.selectedHostIndices.indexOf(host.id) < 0 ? "" : "checked"} value={this.state.selectedHostIndices.indexOf(i) != -1 } onChange={this.selectHostFilter}
+                            id={host.id} className="filled-in human" />
+                          <label htmlFor={host.id}>{host.name}</label>
+                        </div>
+                      )
                 })}
                   </div>
               <div className="col s6">
