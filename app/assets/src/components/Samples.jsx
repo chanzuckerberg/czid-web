@@ -28,7 +28,6 @@ class Samples extends React.Component {
     this.loadMore = this.loadMore.bind(this);
     this.fetchResults = this.fetchResults.bind(this);
     this.fetchSamples = this.fetchSamples.bind(this);
-      this.hostGenomes = props.hostGenomes || [];
     this.handleStatusFilterSelect = this.handleStatusFilterSelect.bind(this);
     this.setUrlLocation = this.setUrlLocation.bind(this);
     this.sortSamples = this.sortSamples.bind(this);
