@@ -964,7 +964,7 @@ input[type="button"] {
           margin-left: 0.4em !important;
         }
         .ui.dropdown.link.item {
-          padding: 7px 30px;
+          padding: 8px 16px;
           border-radius: 40px;
           border: solid 1px #3867fa;
           .text {
@@ -992,6 +992,18 @@ input[type="button"] {
           color: #3867fa;
         }
       }
+      .download-section-btns {
+        padding-right: 12px;
+        .right {
+          padding: 0 16px;
+          width: 100%;
+          text-align: right;
+          ul.project-menu {
+            margin-bottom: 0;
+          }
+        }
+      }
+      
       padding-top: 15px;
       .download-table {
         float: right;

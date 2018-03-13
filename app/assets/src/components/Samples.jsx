@@ -1012,7 +1012,7 @@ class Samples extends React.Component {
     // )
 
     let compare_button = (
-      <div className='col s2 download-table'>
+      <div className='col s3 download-table'>
         <div className='white'>
           <a onClick={this.compareSamples} className="compare center">
             <span>Compare</span>
@@ -1145,7 +1145,7 @@ class Samples extends React.Component {
     );
 
     const project_menu = (
-      <div className='right'>
+      <div className='right col s12'>
         <ul className='project-menu'>
           <li>
             { this.state.project ? (
@@ -1184,10 +1184,7 @@ class Samples extends React.Component {
 
     const projInfo = (
       <div className="row download-section">
-        {
-          this.state.selectedProjectId ? project_menu : null
-        }
-        <div className={ project_id === 'all' ? "col s7 wrapper" : "col s5 wrapper" }>
+        <div className="col s6 wrapper">
           <div className={(!this.state.project) ? "proj-title heading all-proj" : "heading proj-title"}>
           { (!this.state.project) ? <div className="">All Samples</div>
               : <div>
@@ -1202,10 +1199,11 @@ class Samples extends React.Component {
           }
         </p>
         </div>
-        {/* <div className="col s4 download-section"> */}
-        { table_download_dropdown }
-        { this.state.checkedBoxes > 0  ? compare_button : null }
-        {/* </div> */}
+        <div className="col s6 download-section-btns">
+            { this.state.selectedProjectId ? project_menu : null }
+            { table_download_dropdown }
+            { this.state.checkedBoxes > 0  ? compare_button : null }
+        </div>
       </div>
     );
 
