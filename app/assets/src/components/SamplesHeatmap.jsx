@@ -1088,17 +1088,15 @@ class SamplesHeatmap extends React.Component {
     }
     return (
       <div id="project-visualization">
-        <SubHeader>
-          <div>
-            <Popup
-              trigger={<Button className="right" primary onClick={this.onShareClick.bind(this)}>Share</Button>}
-              content='A shareable URL has been copied to your clipboard!'
-              on='click'
-              hideOnScroll
-            />
-           <h2>Comparing {this.state.data ? this.state.data.length : ''} samples</h2>
-          </div>
-        </SubHeader>
+				<div class="menu">
+					<Popup
+						trigger={<Button className="right" primary onClick={this.onShareClick.bind(this)}>Share</Button>}
+						content='A shareable URL has been copied to your clipboard!'
+						on='click'
+						hideOnScroll
+					/>
+				 	<h2>Comparing {this.state.data ? this.state.data.length : ''} samples</h2>
+				</div>
         <StickyContainer>
           <Sticky>
 						{
