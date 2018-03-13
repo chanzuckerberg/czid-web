@@ -9,10 +9,8 @@ import {Sidebar, Grid, Segment} from 'semantic-ui-react';
 import SortHelper from './SortHelper';
 import numberWithCommas from '../helpers/strings';
 import ProjectSelection from './ProjectSelection';
-import ReportFilter from './ReportFilter';
 import PipelineSampleReads from './PipelineSampleReads';
 import StringHelper from '../helpers/StringHelper';
-import StickySidebar from './StickySidebar';
 import { Dropdown } from 'semantic-ui-react';
 import Nanobar from 'nanobar';
 
@@ -256,9 +254,7 @@ class Samples extends React.Component {
     this.setState({ sort_by: new_sort, pagesLoaded: 0, pageEnd: false }, () => {
       this.setUrlLocation();
       this.nanobar.go(30);
-      this.fetchResults(() => {
-        ReportFilter.hideLoading();
-      });
+      this.fetchResults();
     });
   }
 

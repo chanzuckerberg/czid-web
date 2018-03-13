@@ -5,7 +5,6 @@ import $ from 'jquery';
 import Tipsy from 'react-tipsy';
 import ReactAutocomplete from 'react-autocomplete';
 import Samples from './Samples';
-import ReportFilter from './ReportFilter';
 import numberWithCommas from '../helpers/strings';
 import StringHelper from '../helpers/StringHelper';
 import Nanobar from 'nanobar';
@@ -641,7 +640,7 @@ class PipelineSampleReport extends React.Component {
 
   // only for background model
   refreshPage(overrides) {
-    ReportFilter.showLoading('Fetching results for new background...');
+    this.nanobar.go(100);
     const new_params = Object.assign({}, this.props.report_page_params, overrides);
     window.location = location.protocol + '//' + location.host + location.pathname + '?' + $.param(new_params);
   }
@@ -900,7 +899,6 @@ class PipelineSampleReport extends React.Component {
   }
 
   searchSelectedTaxon(value, item) {
-    //ReportFilter.showLoading(`Filtering for '${value}'...`);
     let searchId = item[1];
     this.setState({
       searchId,
