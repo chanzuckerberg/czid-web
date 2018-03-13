@@ -1,0 +1,10 @@
+.__custom._dropdown-rounded-corners {
+  &.ui.selection.dropdown, .ui.active.selection.dropdown {
+    border-radius: 500em !important;
+  }
+  .menu.transition {
+    margin-top: 7px !important;
+    border: 1px solid #dededf !important;
+    border-radius: 0 !important;
+  }
+}
