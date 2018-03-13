@@ -50,6 +50,7 @@ import Samples from './Samples';
   }
 
   toggleFavorite(e) {
+    e.stopPropagation();
     let favStatus = e.target.getAttribute('data-fav');
     let projectId = e.target.getAttribute('data-id');
     favStatus == 'true' ?  _satellite.track('unfavorite') : _satellite.track('favorite');
@@ -211,9 +212,11 @@ import Samples from './Samples';
               .slice(0,4)
               .map((project, i) => {
                 return (
-                  <div className="project-item fav-item" data-id={project.id} key={i}>
+                  <div className="project-item fav-item"
+                       onClick={this.handleProjectClick} data-type='favorite'
+                       data-id={project.id} key={i}>
                     <span className='project-label'
-                      onClick={this.handleProjectClick} data-type='favorite'
+                      data-type='favorite'
                       data-id={project.id}>
                       {project.name}
                     </span>
@@ -225,9 +228,11 @@ import Samples from './Samples';
           .sort(sortLogic)
           .map((project, i) => {
             return (
-              <div className="project-item fav-item" data-id={project.id} key={i}>
+              <div className="project-item fav-item"
+                   onClick={this.handleProjectClick} data-type='favorite'
+                   data-id={project.id} key={i}>
                 <span className='project-label'
-                  onClick={this.handleProjectClick} data-type='favorite'
+                  data-type='favorite'
                   data-id={project.id}>
                   {project.name}
                 </span>
@@ -258,9 +263,11 @@ import Samples from './Samples';
                .slice(0,7)
                .map((project, i) => {
                 return (
-                    <div className="all project-item" data-id={project.id}  key={i}>
+                    <div className="all project-item"
+                         onClick={this.handleProjectClick}
+                         data-id={project.id}  key={i}>
                       <span className='project-label'
-                        onClick={this.handleProjectClick} data-id={project.id}>
+                        data-id={project.id}>
                         {project.name}
                       </span>
                       {this.addFavIconClass(project)}
@@ -269,9 +276,11 @@ import Samples from './Samples';
             }) :
             this.state.formattedProjectList.sort(sortLogic).map((project, i) => {
             return (
-              <div className="all project-item" data-id={project.id} key={i}>
+              <div className="all project-item"
+                   onClick={this.handleProjectClick}
+                   data-id={project.id} key={i}>
                 <span className='project-label'
-                  onClick={this.handleProjectClick} data-id={project.id}>
+                  data-id={project.id}>
                   {project.name}
                 </span>
                 {this.addFavIconClass(project)}
@@ -287,9 +296,9 @@ import Samples from './Samples';
         <div className="row">
           <div className='col no-padding s12'>
             <div className="projects-wrapper">
-              <div className="all-samples project-item">
-                <span className='project-label'
-                  onClick={this.handleProjectClick}>
+              <div className="all-samples project-item"
+                   onClick={this.handleProjectClick} >
+                <span className='project-label'>
                   All Samples
                 </span>
               </div>
