@@ -941,25 +941,6 @@ class Samples extends React.Component {
     })
   }
 
-  applyExcludedTissue(e) {
-    const tissue = e.target.getAttribute('data-exclude-tissue')
-    let list = this.state.selectedTissueFilters.splice(0);
-    let index;
-    console.log(tissue)
-    index = list.indexOf(tissue);
-    console.log(list)
-    console.log(index)
-    list.splice(index, 1);
-    console.log(list)
-    this.setState({
-      selectedTissueFilters: list,
-      pagesLoaded: 0,
-      pageEnd: false
-    }, () => {
-      this.setUrlLocation();
-    })
-  }
-
   generateTagList(state_all_options, state_selected_options, id_field=null, name_field=null, id_type=null) {
     return this.state[state_all_options].map((entry, i) => {
       let id = id_field ? entry[id_field] : entry
