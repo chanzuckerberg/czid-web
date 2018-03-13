@@ -50,6 +50,7 @@ import Samples from './Samples';
   }
 
   toggleFavorite(e) {
+    e.stopPropagation();
     let favStatus = e.target.getAttribute('data-fav');
     let projectId = e.target.getAttribute('data-id');
     favStatus == 'true' ?  _satellite.track('unfavorite') : _satellite.track('favorite');
