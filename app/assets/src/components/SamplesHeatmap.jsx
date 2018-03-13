@@ -556,7 +556,7 @@ class SamplesHeatmap extends React.Component {
     super(props);
 
     this.scales = [
-      ["Sym Log", symlog],
+      ["Symmetric Log", symlog],
       ["Linear", d3.scale.linear],
     ];
 
