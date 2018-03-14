@@ -546,7 +546,7 @@ class Samples extends React.Component {
       this.setState((prevState) => ({
         initialFetchedSamples: res.data.samples,
         allSamples: res.data.samples,
-        tissueTypes: res.data.tissue_types,
+        tissueTypes: ['-', ...res.data.tissue_types],
         hostGenomes: res.data.host_genomes,
         displayEmpty: false,
         pagesLoaded: prevState.pagesLoaded+1,
@@ -635,7 +635,7 @@ class Samples extends React.Component {
       this.setState((prevState) => ({
         initialFetchedSamples: res.data.samples,
         allSamples: res.data.samples,
-        tissueTypes: res.data.tissue_types,
+        tissueTypes: ['-', ...res.data.tissue_types],
         hostGenomes: res.data.host_genomes,
         displayEmpty: false,
         totalNumber: res.data.total_count,
