@@ -1017,6 +1017,9 @@ class SamplesHeatmap extends React.Component {
   }
 
   taxonLevelChanged (e, d) {
+    if (this.state.species == d.value) {
+      return;
+    }
     this.setState({ species: d.value, species_label: d.label, data: null });
     this.fetchDataFromServer(null, d.value);
   }
@@ -1041,14 +1044,6 @@ class SamplesHeatmap extends React.Component {
         label="Taxon Level:"
       />
     );
-    /*
-    return (
-      <select value={this.state.species} onChange={this.taxonLevelChanged.bind(this)}>
-        <option value="0">Genus</option>
-        <option value="1">Species</option>
-      </select>
-    );
-    */
   }
 
   updateDataScale (e, d) {
