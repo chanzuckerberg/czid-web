@@ -701,6 +701,7 @@ margin-bottom: 0px;
     }
   }
 }
+
 .report-action-buttons {
   li {
     display: inline-block;
@@ -713,7 +714,7 @@ margin-bottom: 0px;
       background: #3867fa;
       color: #fff;
       font-size: 16px;
-      width: 100%;
+      width: 150px;
       &.o {
         background: #fff;
         color: #3867fa;
@@ -721,8 +722,29 @@ margin-bottom: 0px;
           background: #3867fa;
           color: #fff;
         }
+        i.fa {
+          padding-right: 30px;
+          font-size: 1.2em;
+        }
       }
     }
+  }
+  .ui.labeled.icon.button>.icon { // Actual icon in the button
+    background-color: transparent;
+    font-size: 1.3em;
+    margin-left: 0.4em !important;
+  }
+  .download-btn { // The whole button
+    color: #3867fa !important;
+    background-color: transparent !important;
+    padding-left: 5em !important;
+    border: 1px solid #e4e4e4;
+    //padding: 5px 1em;
+    border-radius: 999999px;
+  }
+  .ui.dropdown .text { // The text in the button
+    font-size: 1.2em;
+    padding: 0.05em;
   }
 }
 
