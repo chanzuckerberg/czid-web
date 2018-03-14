@@ -4,6 +4,20 @@ import Cookies from 'js-cookie';
 import $ from 'jquery';
 import Tipsy from 'react-tipsy';
 import ReactAutocomplete from 'react-autocomplete';
+import {
+  Dropdown,
+  Divider,
+  Menu,
+  Checkbox,
+  Search,
+  Grid,
+  Input,
+  Button,
+  Label,
+  Icon
+} from 'semantic-ui-react';
+import DropdownWithHtml from './shared/DropdownWithHtml';
+import RoundedDropdown from './shared/RoundedDropdown';
 import Samples from './Samples';
 import ReportFilter from './ReportFilter';
 import numberWithCommas from '../helpers/strings';
@@ -107,7 +121,8 @@ class PipelineSampleReport extends React.Component {
       rendering: false,
       loading: true,
       activeThresholds: this.defaultThresholdValues,
-      countType: 'NT'
+      countType: 'NT',
+      searchResults: []
     };
     this.expandAll = false;
     this.expandedGenera = [];
@@ -547,9 +562,6 @@ class PipelineSampleReport extends React.Component {
       return this.isThresholdValid(threshold);
     });
     window.localStorage.setItem('activeThresholds', JSON.stringify(activeThresholds));
-    if (closeWindow) {
-      $('.advanced-filters-modal').slideUp(300);
-    }
   }
 
   getSavedThresholdFilters() {
@@ -642,17 +654,21 @@ class PipelineSampleReport extends React.Component {
   }
 
   handleBackgroundModelChange(backgroundName, backgroundParams) {
-    this.setState({ backgroundName, backgroundParams }, () => {
-      Cookies.set('background_name', backgroundName);
-      Cookies.set('background_id', backgroundParams);
-      this.refreshPage({background_id: backgroundParams});
-    });
+    if (backgroundName !== this.state.backgroundName) {
+      this.setState({ backgroundName, backgroundParams }, () => {
+        Cookies.set('background_name', backgroundName);
+        Cookies.set('background_id', backgroundParams);
+        this.refreshPage({background_id: backgroundParams});
+      });
+    }
   }
 
   handleNameTypeChange(name_type) {
-    this.setState({ name_type: name_type }, () => {
-      Cookies.set('name_type', name_type);
-    });
+    if (name_type !== this.state.name_type) {
+      this.setState({ name_type: name_type }, () => {
+        Cookies.set('name_type', name_type);
+      });
+    }
   }
 
   // path to NCBI
@@ -888,21 +904,30 @@ class PipelineSampleReport extends React.Component {
     location.href = `/reports/${id}/csv`
   }
 
-  handleSearch(e) {
+  handleSearch(e, value) {
+    let matchFound = 0;
+    const searchLimit = 10;
+    const filteredKeys = this.state.search_keys_in_sample.filter((item) => {
+      if(item[0] === 'All' || item[0].toLowerCase().indexOf(value.toLowerCase()) > -1) {
+        matchFound += 1;
+        return (matchFound <= searchLimit);
+      } else {
+        return false;
+      }
+    });
     this.setState({
-      searchKey: e.target.value,
+      searchKey: value,
+      searchResults: filteredKeys.map((key) => { return { title: key[0], value: key[1]} })
     })
   }
 
-  searchSelectedTaxon(value, item) {
-    //ReportFilter.showLoading(`Filtering for '${value}'...`);
-    let searchId = item[1];
+  searchSelectedTaxon(title, value ) {
+    let searchId = value;
     this.setState({
       searchId,
       excluded_categories: [],
-      searchKey: item[0],
+      searchKey: title,
       activeThresholds: []
-
     }, () => {
       this.applySearchFilter(searchId, []);
     });
@@ -915,37 +940,42 @@ class PipelineSampleReport extends React.Component {
     const sort_column = `${parts[1]}_${parts[2]}`;
     const t0 = Date.now();
 
-    const filter_stats = `${this.state.rows_passing_filters} rows passing filters, out of ${this.state.rows_total} total rows.`;
+    const filter_stats = `Showing ${this.state.rows_passing_filters} of ${this.state.rows_total}`;
     let subsampled_reads = this.report_details ? this.report_details.subsampled_reads : null
     let subsampling_stats = subsampled_reads && subsampled_reads < this.report_details.pipeline_info.remaining_reads ?
                               'Randomly subsampled to ' + subsampled_reads
                               + ' out of ' + this.report_details.pipeline_info.remaining_reads
                               + ' non-host reads.'
                               : '';
-    const disable_filter = this.anyFilterSet() ? (<span className="disable" onClick={e => this.resetAllFilters()}><b> Disable all filters</b></span>) : null;
+    const disable_filter = this.anyFilterSet() ? (<span className="disable" onClick={e => this.resetAllFilters()}>Clear All</span>) : null;
     const filter_row_stats = this.state.loading ? null : (
-      <div id="filter-message" className="filter-message">
+      <span id="filter-message" className="filter-message">
         <span className="count">
-          {filter_stats} {subsampling_stats} {disable_filter}
+          {disable_filter}
         </span>
-      </div>
+        <span className="stats-value">
+          {filter_stats}
+        </span>
+      </span>
     );
 
     const advanced_filter_tag_list = this.state.activeThresholds.map((threshold, i) => {
       return this.isThresholdValid(threshold) ? (
-        <span className="filter-tag" key={`advanced_filter_tag_${i}`}>
-        <span className='filter-tag-name'>{this.thresholdLabel2Name[threshold['label']]} { threshold['operator'] } {threshold['value'] }</span>
-        <span className='filter-tag-x' onClick= {() => {this.removeThresholdFilter(i);}} >X</span>
-        </span>
+        <Label className="label-tags" size="tiny" key={`advanced_filter_tag_${i}`}>
+          {this.thresholdLabel2Name[threshold['label']]}
+          { threshold['operator'] }
+          {threshold['value'] }
+          <Icon name='close' onClick= {() => {this.removeThresholdFilter(i);}}/>
+        </Label>
         ) : null;
     });
 
     const categories_filter_tag_list = this.displayedCategories(this.state.excluded_categories).map((category, i) => {
       return (
-        <span className="filter-tag" key={`category_tag_${i}`}>
-        <span className='filter-tag-name'> {category} </span>
-        <span className='filter-tag-x' data-exclude-category={category} onClick= { (e) => { this.applyExcludedCategories(e);} }  >X</span>
-        </span>
+        <Label className="label-tags" size="tiny" key={`category_tag_${i}`}>
+          {category}
+          <Icon name='close' data-exclude-category={category} onClick= { (e) => { this.applyExcludedCategories(e);} } />
+        </Label>
       );
     });
     const right_arrow_initial_visibility = '';
@@ -956,192 +986,142 @@ class PipelineSampleReport extends React.Component {
             <div className="row reports-container">
               <div className="col s12 reports-section">
                 <div className="reports-count">
-                  { filter_row_stats }
-                  <div className='report-top-filters'>
-                    <ul className='filter-lists'>
-                      <li className='search-box genus-autocomplete-container'>
-                         <ReactAutocomplete
-                          inputProps={{ placeholder: 'Search' }}
-                          items={this.state.search_keys_in_sample}
-                          shouldItemRender={(item, value) => (item[0] == 'All') || (value.length > 2 && item[0].toLowerCase().indexOf(value.toLowerCase()) > -1)}
-                          getItemValue={item => item[0]}
-                          renderItem={(item, highlighted) =>
-                            <div
-                              key={item[1]}
-                              style={{ backgroundColor: highlighted ? '#eee' : 'transparent'}}
-                            >
-                              {item[0]}
-                            </div>
-                          }
-                          value={ this.state.searchKey }
-                          onChange={(e) => this.handleSearch(e)}
-                          onSelect={(value, item) => this.searchSelectedTaxon(value, item)}
-                        />
-                        <i className='fa fa-search'></i>
-                      </li>
-
-                      <li className='name-type-dropdown top-filter-dropdown'
-                        data-activates='name-type-dropdown'>
-                        <span className='filter-label'>
-                          {
-                            this.state.name_type ? this.state.name_type : 'Select name type'
-                          }
-                        </span>
-                        <i className='fa fa-angle-down right'></i>
-                        <div id='name-type-dropdown' className='dropdown-content'>
-                          <ul>
-                          <li
-                              onClick={() => this.handleNameTypeChange('')}
-                              ref= "name_type">
-                              Select name type
+                  {subsampling_stats}
+                </div>
+                <div className="top-filters">
+                  <Search
+                    placeholder="Search"
+                    className="search-input top-filter-item semantic-input"
+                    minCharacters={3}
+                    noResultsDescription="No taxon matches search term"
+                    loading={this.state.searching}
+                    value={this.state.searchKey}
+                    onResultSelect={(e, {result}) => this.searchSelectedTaxon(result.title, result.value)}
+                    onSearchChange={(e, {value}) => this.handleSearch(e, value)}
+                    results={this.state.searchResults.map((result, i) => {
+                      return {
+                        title: result.title,
+                        value: result.value
+                      }
+                    })}
+                  />
+                  <RoundedDropdown
+                    className='top-filter-item'
+                    text={ this.state.backgroundName }
+                    selection
+                    onChange={(e, {options, value}) =>
+                      this.handleBackgroundModelChange(options[value].text, options[value].key)}
+                    options={this.all_backgrounds.map((bg, i) => {
+                      return {
+                        key: bg.id,
+                        text: bg.name,
+                        value: i
+                        };
+                    })}
+                  />
+                  <RoundedDropdown
+                    className='top-filter-item'
+                    text={this.state.name_type}
+                    selection
+                    onChange={(e, {value}) => this.handleNameTypeChange(value)}
+                    options={[{
+                      text: 'Scientific name',
+                      value: 'Scientific name',
+                      key: 1
+                    }, { text: 'Common name', value: 'Common name', key: 2 }]}
+                  />
+                  <DropdownWithHtml
+                  className="top-filter-item"
+                  text={<span> Categories <Label circular size='mini'>{(this.all_categories.length-this.state.excluded_categories.length)}</Label> </span>}>
+                    <div>
+                      <ul>
+                        { this.all_categories.map((category, i) => {
+                          return (
+                            <li key={i}>
+                              <input type="checkbox"
+                                className="filled-in cat-filter"
+                                id={category.name}
+                                value={category.name}
+                                onChange={(e) => {}}
+                                onClick={(e) =>{this.applyExcludedCategories(e);}}
+                                checked={this.state.excluded_categories.indexOf(category.name) < 0}
+                              />
+                              <label htmlFor={ category.name }>{ category.name }</label>
                             </li>
-                            <li
-                              onClick={() => this.handleNameTypeChange('Scientific name')}
-                              ref= "name_type">
-                              Scientific Name
-                            </li>
-                            <li
-                              onClick={() => this.handleNameTypeChange('Common name')}
-                              ref= "name_type">
-                              Common Name
-                            </li>
-                          </ul>
-                        </div>
-                      </li>
-                      <li className='background-model-dropdown top-filter-dropdown'
-                        data-activates='background-model-dropdown'>
-                        <span className='filter-label'>
-                          {
-                            this.state.backgroundName ? this.state.backgroundName : 'Background model'
-                          }
-                        </span>
-                        <i className='fa fa-angle-down right'></i>
-                        <div id='background-model-dropdown' className='dropdown-content'>
-                          <ul>
-                            {
-                              this.all_backgrounds.length ?
-                              this.all_backgrounds.map((background, i) => {
-                                return (
-                                  <li
-                                  onClick={() => this.handleBackgroundModelChange(background.name, background.id)}
-                                  ref= "background" key={i}>
-                                    {background.name}
-                                  </li>);
-                                })
-                                : <li>No background models to display</li>
-                            }
-                          </ul>
-                        </div>
-                      </li>
-                      <li className='categories-dropdown top-filter' >
-                        <div className="categories-filters-activate">
-                          <span className='filter-label'>Categories</span>
-                          <span className='filter-label-count'>{(this.all_categories.length-this.state.excluded_categories.length)} </span>
-                          <i className='fa fa-angle-down right'></i>
-                        </div>
-                        <div className='categories-filters-modal'>
-                          <div className="categories">
-                            <ul>
-                            { this.all_categories.map((category, i) => {
-                              return (
-                                <li key={i}>
-                                  <input type="checkbox"
-                                  className="filled-in cat-filter"
-                                  id={category.name}
-                                  value={category.name}
-                                  onChange={(e) => {}}
-                                  onClick={(e) =>{this.applyExcludedCategories(e);}}
-                                  checked={this.state.excluded_categories.indexOf(category.name) < 0}/>
-                                  <label htmlFor={ category.name }>{ category.name }</label>
-                                </li>
-                              )
-                            })}
-                            </ul>
-                            { this.all_categories.length < 1 ? <p>None found</p> : null }
+                          )
+                        })}
+                      </ul>
+                      { this.all_categories.length < 1 ? <p>None found</p> : null }
+                    </div>
+                  </DropdownWithHtml>
+                  <DropdownWithHtml
+                    ref="advancedFilters"
+                    className="top-filter-item advanced-filtering"
+                    onClose={() => this.saveThresholdFilters()}
+                    text={<span> Advanced Filters { <Label circular size='mini' >{this.validThresholdCount(this.state.activeThresholds)}</Label> }</span>}>
+                    <div className="threshold-fields">
+                      {this.state.activeThresholds.map((activeThreshold, index) =>
+                        <div className="row" key={index}>
+                          <div className="col s4">
+                            <RoundedDropdown
+                              className="small threshold-dropdown"
+                              selection
+                              onChange={(e, {value}) => this.setThresholdProperty(index, 'label', value)}
+                              value={activeThreshold.label}
+                              options={this.allThresholds.map((thresholdObject) => {
+                                return {
+                                  key: thresholdObject.value,
+                                  text: thresholdObject.name,
+                                  value: thresholdObject.value
+                                }
+                              })}
+                            />
+                          </div>
+                          <div className="col s4">
+                            <RoundedDropdown
+                              className="small threshold-dropdown"
+                              selection
+                              onChange={(e, {value}) => this.setThresholdProperty(index, 'operator', value)}
+                              value={activeThreshold.operator}
+                              options={[{key: '>=', text: '>=', value:'>='}, {key: '<=', text: '<=', value:'<='}]}
+                            />
+                          </div>
+                          <div className="col s4">
+                            <Input
+                              type="number"
+                              label={{ basic: true, content: <Icon
+                                name="close"
+                                onClick={() => this.removeThresholdFilter(index)} /> }}
+                              labelPosition="right"
+                              onChange={(e) => this.setThresholdProperty(index, 'value', e.target.value)}
+                              onKeyDown={(e) => this.handleThresholdEnter(e, index)}
+                              size="mini"
+                              value={ activeThreshold.value }
+                              className="semantic-input threshold-value"
+                              placeholder="Enter value..."
+                            />
                           </div>
                         </div>
-                      </li>
-                      <li className="top-filter ">
-                        <div className="advanced-filters-activate" onClick= {(e) => {this.saveThresholdFilters(false);} } >
-                          <span className="filter-label">
-                            Advanced Filtering
-                          </span>
-                          <span className='filter-label-count'>{this.validThresholdCount(this.state.activeThresholds)} </span>
-                          <i className="fa fa-angle-down right" />
-                        </div>
-                        <div className="advanced-filters-modal">
-                          <div className="filter-inputs">
-                            {
-                              this.state.activeThresholds.map((activeThreshold, index) => {
-                                return (
-                                  <div key={index} className="row">
-                                    <div className=" col s5">
-                                      <select
-                                        value={activeThreshold.label}
-                                        onChange={(e) => this.setThresholdProperty(index, 'label', e.target.value) }
-                                        className="browser-default">
-                                        {
-                                          this.allThresholds.map((thresholdObject) => {
-                                            return (
-                                              <option
-                                                key={thresholdObject.value}
-                                                value={thresholdObject.value}>
-                                                {thresholdObject.name}
-                                              </option>
-                                            )
-                                          })
-                                        }
-                                      </select>
-                                    </div>
-                                    <div className="col s3">
-                                      <select
-                                        value={activeThreshold.operator}
-                                        onChange={(e) => this.setThresholdProperty(index, 'operator', e.target.value)}
-                                        className="browser-default">
-                                        <option value=">=">
-                                          >=
-                                        </option>
-                                        <option value="<=">
-                                          &lt;=
-                                        </option>
-                                      </select>
-                                    </div>
-                                    <div className="col s3">
-                                      <input
-                                        className="browser-default metric-thresholds"
-                                        onChange={(e) => this.setThresholdProperty(index, 'value', e.target.value)}
-                                        onKeyDown={(e) => this.handleThresholdEnter(e, index)}
-                                        name="group2"
-                                        value={ activeThreshold.value }
-                                        id={activeThreshold.label}
-                                        type="number"
-                                      />
-                                    </div>
-                                    <div className="col s1" onClick={() => this.removeThresholdFilter(index)}>
-                                      <i className="fa fa-close " data-ng={index} />
-                                    </div>
-                                  </div>
-                                )
-                              })
-                            }
-                          </div>
-                          <div className="add-threshold-filter" onClick={ () => this.appendThresholdFilter() }>
-                            <i className="fa fa-plus-circle" /> Add threshold
-                          </div>
-                          <br/>
-                          <div className="" >
-                            <button className="btn" onClick={ () => this.saveThresholdFilters()}>
-                              Save
-                            </button>
-                          </div>
-                        </div>
-                      </li>
-                    </ul>
-                  </div>
-                  <div className="filter-tags-list">
-                    { advanced_filter_tag_list } { categories_filter_tag_list }
-                  </div>
-                  {/* { filter_row_stats } */}
+                      )}
+                      <Label
+                        className="add-threshold"
+                        onClick={ () => this.appendThresholdFilter() }
+                        basic
+                        size="small">
+                        <Icon name='plus' /> Add threshold
+                      </Label>
+                      <br/><br/>
+                      <Button className="save-thresholds" onClick={ () => this.saveThresholdFilters(true)}>
+                        Save
+                      </Button>
+                    </div>
+                  </DropdownWithHtml>
+                </div>
+                <div className="filter-tags-list">
+                  { advanced_filter_tag_list } { categories_filter_tag_list }
+                  <span className="reports-count">
+                    { filter_row_stats }
+                  </span>
                 </div>
 
                 <div className="reports-main">
