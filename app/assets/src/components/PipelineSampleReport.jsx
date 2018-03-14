@@ -1063,7 +1063,7 @@ class PipelineSampleReport extends React.Component {
                           <span className='filter-label-count'>{this.validThresholdCount(this.state.activeThresholds)} </span>
                           <i className="fa fa-angle-down right down-box" />
                         </div>
-                        <div className="advanced-filters-modal">
+                        <div className="advanced-filters-modal round-me">
                           <div className="filter-inputs">
                             {
                               this.state.activeThresholds.map((activeThreshold, index) => {
@@ -1073,7 +1073,7 @@ class PipelineSampleReport extends React.Component {
                                       <select
                                         value={activeThreshold.label}
                                         onChange={(e) => this.setThresholdProperty(index, 'label', e.target.value) }
-                                        className="browser-default">
+                                        className="browser-default inner-menus">
                                         {
                                           this.allThresholds.map((thresholdObject) => {
                                             return (
@@ -1091,7 +1091,7 @@ class PipelineSampleReport extends React.Component {
                                       <select
                                         value={activeThreshold.operator}
                                         onChange={(e) => this.setThresholdProperty(index, 'operator', e.target.value)}
-                                        className="browser-default">
+                                        className="browser-default inner-menus">
                                         <option value=">=">
                                           >=
                                         </option>
@@ -1102,7 +1102,7 @@ class PipelineSampleReport extends React.Component {
                                     </div>
                                     <div className="col s3">
                                       <input
-                                        className="browser-default metric-thresholds"
+                                        className="browser-default metric-thresholds inner-menus"
                                         onChange={(e) => this.setThresholdProperty(index, 'value', e.target.value)}
                                         onKeyDown={(e) => this.handleThresholdEnter(e, index)}
                                         name="group2"
@@ -1119,12 +1119,12 @@ class PipelineSampleReport extends React.Component {
                               })
                             }
                           </div>
-                          <div className="add-threshold-filter" onClick={ () => this.appendThresholdFilter() }>
+                          <div className="add-threshold-filter inner-menus" onClick={ () => this.appendThresholdFilter() }>
                             <i className="fa fa-plus-circle" /> Add threshold
                           </div>
                           <br/>
                           <div className="" >
-                            <button className="btn" onClick={ () => this.saveThresholdFilters()}>
+                            <button className="inner-menus save-btn" onClick={ () => this.saveThresholdFilters()}>
                               Save
                             </button>
                           </div>

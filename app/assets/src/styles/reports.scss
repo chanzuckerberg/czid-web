@@ -760,11 +760,12 @@ margin-bottom: 0px;
   display: none;
   position: absolute;
   background: #fff;
-  box-shadow: 1px 3px 3px 2px #c8c8c8;
+  box-shadow: 1px 2px 2px 2px #c8c8c8;
   margin-left: -16px;
   margin-top: 8px;
   padding: 10px;
   cursor: auto;
+  border-radius: 10px;
   .metric-thresholds {
     width: 100%;
   }
@@ -774,6 +775,21 @@ margin-bottom: 0px;
     width: 175px;
     text-align: center;
     cursor: pointer;
+  }
+  .round-me {
+    border-radius: 10px;
+  }
+  .inner-menus {
+    font-family: Open Sans, Helvetica, Arial, sans-serif;
+    border-radius: 20px;
+    font-size: 10pt;
+    height: 30px;
+  }
+  .save-btn {
+    background: #3867fa;
+    color: white;
+    padding-left: 20px;
+    padding-right: 20px;
   }
 }
 
