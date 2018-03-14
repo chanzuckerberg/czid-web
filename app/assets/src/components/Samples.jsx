@@ -631,6 +631,7 @@ class Samples extends React.Component {
   fetchResults(cb, reset_filters=false) {
     Samples.showLoading('Fetching samples...');
     const params = this.getParams();
+    console.log(params);
     axios.get(`/samples?${params}`).then((res) => {
       Samples.hideLoader();
       this.setState((prevState) => ({
@@ -741,7 +742,7 @@ class Samples extends React.Component {
       axios.get(`projects/${projId}.json`).then((res) => {
         this.setState({
           pagesLoaded: 0,
-          project: res.data
+          project: res.data,
         });
         this.fetchProjectUsers(projId);
         this.fetchResults(null, true);
