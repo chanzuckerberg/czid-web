@@ -937,8 +937,8 @@ class Samples extends React.Component {
         pageEnd: false
       }
       this.setState(new_state, () => {
-        this.fetchResults();
         this.setUrlLocation();
+        this.fetchResults();
       })
     }
   }
@@ -1044,7 +1044,7 @@ class Samples extends React.Component {
                   </div>
               <div className="col s6">
               <h6>Tissue</h6>
-                {this.state.tissueTypes.length == 0 ? 
+                {this.state.tissueTypes.length == 0 ?
                    <div className="options-wrapper"><label>No tissue data present</label></div> :
                    this.state.tissueTypes.map((tissue, i) => {
                      return (
@@ -1331,33 +1331,27 @@ class Samples extends React.Component {
 
     if(prevHostIndices.length !== this.state.selectedHostIndices.length) {
       this.setState({
+        pagesLoaded: 0,
+        pageEnd: false,
         hostFilterChange: true
       })
     }
 
     if(prevTissueFilters.length !== this.state.selectedTissueFilters.length) {
       this.setState({
+        pagesLoaded: 0,
+        pageEnd: false,
         tissueFilterChange: true
       })
     }
 
-    if(!this.state.displayDropdown) {
-      if (this.state.hostFilterChange) {
-        this.fetchResults();
-        this.setState({
-          hostFilterChange: false
-        })
-      }
 
-      if (this.state.tissueFilterChange) {
-        this.fetchResults();
-        this.setState({
-          tissueFilterChange: false
-        })
-      }
+    if (!this.state.displayDropdown && (this.state.hostFilterChange || this.state.tissueFilterChange)) {
+      this.fetchResults();
+      this.state.hostFilterChange = false;
+      this.state.tissueFilterChange = false;
     }
   }
-
 
   componentDidMount() {
     $(() => {
@@ -1392,8 +1386,8 @@ class Samples extends React.Component {
     this.displayDownloadDropdown();
     this.initializeTooltip();
     this.fetchProjectPageData();
-    this.state.selectedProjectId ? this.fetchProjectDetails(this.state.selectedProjectId) : null;
-    this.scrollDown();
+    //this.state.selectedProjectId ? this.fetchProjectUsers(this.state.selectedProjectId) : null;
+    //this.scrollDown();
     // this.initializeProjectList();
     this.displayPipelineStatusFilter();
     this.initializeColumnSelect();
