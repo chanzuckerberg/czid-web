@@ -42,7 +42,15 @@ class DropdownWithHtml extends React.Component {
     this.filterContent = $(filterContent);
     const body = document.querySelector('body');
     activator.handleClick = (e) => {
-      this.filterContent.slideToggle(slideSpeed);
+      this.setState({
+        active: !this.state.active
+      }, () => {
+        this.filterContent.slideToggle(slideSpeed);
+        if (!this.state.active) {
+          this.onClose();
+        }
+      })
+      
     }
     body.addEventListener('click', (e) => {
       const targetClassName = e.target.className;
