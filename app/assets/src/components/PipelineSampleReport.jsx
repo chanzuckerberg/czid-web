@@ -1035,7 +1035,7 @@ class PipelineSampleReport extends React.Component {
                   />
                   <DropdownWithHtml
                   className="top-filter-item"
-                  text={<span> Categories <Label circular size='mini' color='blue' >{(this.all_categories.length-this.state.excluded_categories.length)}</Label> </span>}>
+                  text={<span> Categories <Label circular size='mini'>{(this.all_categories.length-this.state.excluded_categories.length)}</Label> </span>}>
                     <div>
                       <ul>
                         { this.all_categories.map((category, i) => {
@@ -1060,7 +1060,7 @@ class PipelineSampleReport extends React.Component {
                   <DropdownWithHtml
                     ref="advancedFilters"
                     className="top-filter-item advanced-filtering"
-                    text={<span> Advanced Filters {this.validThresholdCount(this.state.activeThresholds) > 0 ?  <Label circular size='mini' color='blue' >{this.validThresholdCount(this.state.activeThresholds)}</Label> : ''} </span>}>
+                      text={<span> Advanced Filters { <Label circular size='mini' >{this.validThresholdCount(this.state.activeThresholds)}</Label> }</span>}>
                     <div className="threshold-fields">
                       {this.state.activeThresholds.map((activeThreshold, index) =>
                         <div className="row" key={index}>
