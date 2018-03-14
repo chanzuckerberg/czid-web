@@ -924,18 +924,13 @@ class Samples extends React.Component {
     }
     let list = this.state[state_var].splice(0);
     let index;
-    console.log(id)
     index = list.indexOf(id);
-    console.log(list)
-    console.log(index)
     list.splice(index, 1);
-    console.log(list)
     let new_state = {
       [`${state_var}`]: list,
       pagesLoaded: 0,
       pageEnd: false
     }
-    console.log(new_state)
     this.setState(new_state, () => {
       this.fetchResults();
       this.setUrlLocation();
