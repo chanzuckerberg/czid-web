@@ -14,7 +14,7 @@
 
 .ui.dropdown {
   border: 1px solid rgb(228,228,228);
-  padding: 5px 1em;
+  padding: 5px 1.75em 5px 1em;
   border-radius: 999999px;
 
   .menu {
@@ -22,10 +22,15 @@
     width: 100%;
   }
   .text {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
     font-size: 8pt;
   }
   .icon {
-    margin-top: 5px !important;
+    position: absolute !important;
+    top: 8px;
+    right: 10px;
   }
 }
 
