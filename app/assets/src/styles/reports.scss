@@ -581,6 +581,7 @@ margin-bottom: 0px;
     .filter-btn {
       margin: 10px;
       height: 30px !important;
+      margin-left: auto !important;
     }
     .report-top-filters {
       .filter-lists {
@@ -606,23 +607,26 @@ margin-bottom: 0px;
               overflow: hidden;
               width: 80%;
               position: relative;
-              top: 4px;
               font-size: 8pt;
             }
             .filter-label-count {
-                width: 24px;
-                height: 24px;
-                border-radius: 14px;
-                background-color: #f8f8f8;
-                font-family: OpenSans;
-                font-size: 12px;
-                font-weight: 600;
-                font-style: normal;
-                font-stretch: normal;
-                line-height: normal;
-                letter-spacing: 1.4px;
-                text-align: left;
-                color: #3867fa;
+              width: 24px;
+              height: 24px;
+              border-radius: 14px;
+              background-color: #f8f8f8;
+              font-family: OpenSans;
+              font-size: 12px;
+              font-weight: 600;
+              font-style: normal;
+              font-stretch: normal;
+              line-height: normal;
+              letter-spacing: 1.4px;
+              text-align: left;
+              color: #3867fa;
+              vertical-align: top;
+            }
+            .down-box {
+              position: initial !important;
             }
             &.download-report-button {
               padding: 8px;
@@ -753,7 +757,6 @@ margin-bottom: 0px;
 
 .advanced-filters-modal {
   width: 500px !important;
-  height: 170px !important;
   display: none;
   position: absolute;
   background: #fff;

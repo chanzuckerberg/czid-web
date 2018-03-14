@@ -1030,7 +1030,7 @@ class PipelineSampleReport extends React.Component {
                         <div className="categories-filters-activate">
                           <span className='filter-label'>Categories</span>
                           <span className='filter-label-count'>{(this.all_categories.length-this.state.excluded_categories.length)} </span>
-                          <i className='fa fa-angle-down right'></i>
+                          <i className='fa fa-angle-down right down-box'></i>
                         </div>
                         <div className='categories-filters-modal'>
                           <div className="categories">
@@ -1061,7 +1061,7 @@ class PipelineSampleReport extends React.Component {
                             Advanced Filters
                           </span>
                           <span className='filter-label-count'>{this.validThresholdCount(this.state.activeThresholds)} </span>
-                          <i className="fa fa-angle-down right" />
+                          <i className="fa fa-angle-down right down-box" />
                         </div>
                         <div className="advanced-filters-modal">
                           <div className="filter-inputs">
