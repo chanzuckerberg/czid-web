@@ -8,7 +8,7 @@
   }
   .__custom._dropdown-activator {
     border: 1px solid #dededf;
-    padding: .78571429em 2.1em .78571429em 1em;
+    padding: .78571429em 1.1em .49971429em 1em;
     line-height: 1em;
     border-radius: 500rem;
     &:hover {
@@ -17,6 +17,11 @@
     &:active {
       border-color: #96c8da;
       box-shadow: 0 2px 3px 0 rgba(34,36,38,.15);
+    }
+    .ui.label {
+      position: relative;
+      top: -2px;
+      left: 2px;
     }
   }
   .__custom._dropdown-content {
