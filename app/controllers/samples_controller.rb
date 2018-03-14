@@ -55,6 +55,11 @@ class SamplesController < ApplicationController
 
     results = results.where(project_id: project_id) if project_id.present?
 
+    # Get tissue types and host genomes that are present in the sample list
+    @tissue_types = results.map(&:sample_tissue).uniq.compact.sort
+    host_genome_ids = results.map(&:host_genome_id).uniq.compact
+    @host_genomes = HostGenome.find(host_genome_ids)
+
     results = results.search(name_search_query) if name_search_query.present?
     results = filter_samples(results, filter_query) if filter_query.present?
     results = filter_by_tissue_type(results, tissue_type_query) if tissue_type_query.present?
@@ -64,7 +69,8 @@ class SamplesController < ApplicationController
     @samples_count = results.size
     @all_samples = format_samples(@samples)
 
-    render json: { samples: @all_samples, total_count: @samples_count }
+    render json: { samples: @all_samples, total_count: @samples_count,
+                   tissue_types: @tissue_types, host_genomes: @host_genomes }
   end
 
   def all

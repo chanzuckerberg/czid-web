@@ -28,14 +28,12 @@ class Samples extends React.Component {
     this.loadMore = this.loadMore.bind(this);
     this.fetchResults = this.fetchResults.bind(this);
     this.fetchSamples = this.fetchSamples.bind(this);
-    this.hostGenomes = props.hostGenomes || [];
     this.handleStatusFilterSelect = this.handleStatusFilterSelect.bind(this);
     this.setUrlLocation = this.setUrlLocation.bind(this);
     this.sortSamples = this.sortSamples.bind(this);
     this.switchColumn = this.switchColumn.bind(this);
     this.handleProjectSelection = this.handleProjectSelection.bind(this);
     this.pageSize = props.pageSize || 30;
-    this.tissue_types = PipelineSampleReads.fetchTissueTypes();
     this.handleAddUser = this.handleAddUser.bind(this);
     this.editableProjects = props.editableProjects
     this.canEditProject = this.canEditProject.bind(this)
@@ -61,6 +59,8 @@ class Samples extends React.Component {
       searchParams: this.fetchParams('search') || '',
       sampleIdsParams: this.fetchParams('ids') || [],
       allSamples: [],
+      tissueTypes: [],
+      hostGenomes: [],
       sort_by: this.fetchParams('sort_by') || 'id,desc',
       pagesLoaded: 0,
       pageEnd: false,
@@ -546,6 +546,8 @@ class Samples extends React.Component {
       this.setState((prevState) => ({
         initialFetchedSamples: res.data.samples,
         allSamples: res.data.samples,
+        tissueTypes: res.data.tissue_types,
+        hostGenomes: res.data.host_genomes,
         displayEmpty: false,
         pagesLoaded: prevState.pagesLoaded+1,
         totalNumber: res.data.total_count,
@@ -633,6 +635,8 @@ class Samples extends React.Component {
       this.setState((prevState) => ({
         initialFetchedSamples: res.data.samples,
         allSamples: res.data.samples,
+        tissueTypes: res.data.tissue_types,
+        hostGenomes: res.data.host_genomes,
         displayEmpty: false,
         totalNumber: res.data.total_count,
         pagesLoaded: prevState.pagesLoaded+1,
@@ -982,26 +986,30 @@ class Samples extends React.Component {
               { this.state.displayDropdown ? <div className="row metadata-options">
                 <div className="col s6">
                   <h6>Host</h6>
-                { this.hostGenomes.map((host, i) => {
-                  return (
-                    <div key={i} className="options-wrapper">
-                      <input name="host" type="checkbox" data-id={host.id} checked={this.state.selectedHostIndices.indexOf(host.id) < 0 ? "" : "checked"} value={this.state.selectedHostIndices.indexOf(i) != -1 } onChange={this.selectHostFilter}
-                        id={host.id} className="filled-in human" />
-                      <label htmlFor={host.id}>{host.name}</label>
-                    </div>
-                  )
+                { this.state.hostGenomes.length == 0 ?
+                    <div className="options-wrapper"><label>No host genome data present</label></div> :
+                    this.state.hostGenomes.map((host, i) => {
+                      return (
+                        <div key={i} className="options-wrapper">
+                          <input name="host" type="checkbox" data-id={host.id} checked={this.state.selectedHostIndices.indexOf(host.id) < 0 ? "" : "checked"} value={this.state.selectedHostIndices.indexOf(i) != -1 } onChange={this.selectHostFilter}
+                            id={host.id} className="filled-in human" />
+                          <label htmlFor={host.id}>{host.name}</label>
+                        </div>
+                      )
                 })}
                   </div>
               <div className="col s6">
               <h6>Tissue type</h6>
-                {this.tissue_types.map((tissue, i) => {
-                  return (
-                    <div key={i} className="options-wrapper">
-                    <input name="tissue" type="checkbox"
-                    id={tissue} className="filled-in" data-status={tissue} checked={this.state.selectedTissueFilters.indexOf(tissue) < 0 ? "" : "checked"} onChange={this.selectTissueFilter} />
-                    <label htmlFor={tissue}>{tissue}</label>
-                  </div>
-                  )
+                {this.state.tissueTypes.length == 0 ? 
+                   <div className="options-wrapper"><label>No tissue type data present</label></div> :
+                   this.state.tissueTypes.map((tissue, i) => {
+                     return (
+                       <div key={i} className="options-wrapper">
+                       <input name="tissue" type="checkbox"
+                       id={tissue} className="filled-in" data-status={tissue} checked={this.state.selectedTissueFilters.indexOf(tissue) < 0 ? "" : "checked"} onChange={this.selectTissueFilter} />
+                       <label htmlFor={tissue}>{tissue}</label>
+                     </div>
+                     )
                 })}
               </div>
             </div> : null }
@@ -1399,7 +1407,12 @@ class Samples extends React.Component {
       selectedProjectId: id,
       pagesLoaded: 0,
       pageEnd: false,
-      projectType: listType
+      projectType: listType,
+      filterParams: '',
+      searchParams:'',
+      sampleIdsParams: [],
+      selectedTissueFilters: [],
+      selectedHostIndices: []
     }, () => {
       this.setUrlLocation();
       this.fetchProjectDetails(id);
