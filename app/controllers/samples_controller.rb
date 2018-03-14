@@ -361,7 +361,8 @@ class SamplesController < ApplicationController
     params = sample_params
     if params[:project_name]
       project_name = params.delete(:project_name)
-      project = Project.find_or_create_by(name: project_name)
+      project = Project.find_or_create_by(name: project_name, public_access: 0)
+      project.users << current_user if project && current_user
     end
     if params[:host_genome_name]
       host_genome_name = params.delete(:host_genome_name)
@@ -388,7 +389,10 @@ class SamplesController < ApplicationController
         format.json { render :show, status: :created, location: @sample }
       else
         format.html { render :new }
-        format.json { render json: @sample.errors.full_messages, status: :unprocessable_entity }
+        format.json do
+          render json: @sample.errors.full_messages + @project.errors.full_messages,
+                 status: :unprocessable_entity
+        end
       end
     end
   end
