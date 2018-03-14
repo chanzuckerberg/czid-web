@@ -938,14 +938,14 @@ class Samples extends React.Component {
     }
   }
 
-  generateTagList(state_all_options, state_selected_options, id_field=null, name_field=null, id_type=null) {
+  generateTagList(state_all_options, state_selected_options, prefix, id_field=null, name_field=null, id_type=null) {
     return this.state[state_all_options].map((entry, i) => {
       let id = id_field ? entry[id_field] : entry
       let name = name_field ? entry[name_field] : entry
       if (this.state[state_selected_options].indexOf(id) >= 0) {
         return (
           <Label className="label-tags" size="tiny" key={`${state_all_options}_tag_${i}`}>
-            {`${name}`}
+            {`${prefix}${name}`}
             <Icon name='close' data-exclude={id} onClick= { (e) => { this.applyExcluded(e, id_type, state_selected_options);} }/>
           </Label>
         );
@@ -1013,8 +1013,8 @@ class Samples extends React.Component {
       </div>
     )
 
-    const host_filter_tag_list = this.generateTagList("hostGenomes", "selectedHostIndices", "id", "name", "int")
-    const tissue_filter_tag_list = this.generateTagList("tissueTypes", "selectedTissueFilters")
+    const host_filter_tag_list = this.generateTagList("hostGenomes", "selectedHostIndices", "Host: ", "id", "name", "int")
+    const tissue_filter_tag_list = this.generateTagList("tissueTypes", "selectedTissueFilters", "Tissue: ")
 
     const metaDataFilter = (
       <div className="col s2 wrapper">
@@ -1038,9 +1038,9 @@ class Samples extends React.Component {
                 })}
                   </div>
               <div className="col s6">
-              <h6>Tissue type</h6>
+              <h6>Tissue</h6>
                 {this.state.tissueTypes.length == 0 ? 
-                   <div className="options-wrapper"><label>No tissue type data present</label></div> :
+                   <div className="options-wrapper"><label>No tissue data present</label></div> :
                    this.state.tissueTypes.map((tissue, i) => {
                      return (
                        <div key={i} className="options-wrapper">
