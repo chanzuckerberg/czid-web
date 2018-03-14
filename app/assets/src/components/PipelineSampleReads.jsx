@@ -157,7 +157,8 @@ class PipelineSampleReads extends React.Component {
   static fetchTissueTypes() {
     let tissue_types =  ['-',"Bronchoalveolar lavage", "Cerebrospinal fluid",
     "Nasopharyngeal swab", "Plasma", "Serum", "Solid tissue",
-    "Stool", "Synovial fluid", "Whole blood"];
+    "Stool", "Synovial fluid", "Whole blood",
+    "Whole insect", "Insect abdomen", "Insect engorged abdomen", "Insect head"];
     return tissue_types;
   }
 
