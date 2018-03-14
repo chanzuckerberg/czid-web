@@ -508,7 +508,7 @@ class PipelineSampleReads extends React.Component {
                   <li>
                     <a href={this.getDownloadLink()}>
                       <Button icon labelPosition="left" className="icon link download-btn">
-                        <Icon name="cloud download" />
+                        <Icon className="cloud download alternate" />
                         Download
                       </Button>
                     </a>
