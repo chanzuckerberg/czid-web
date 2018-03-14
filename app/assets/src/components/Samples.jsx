@@ -1184,7 +1184,7 @@ class Samples extends React.Component {
         }
         <div className={ project_id === 'all' ? "col s7 wrapper" : "col s5 wrapper" }>
           <div className={(!this.state.project) ? "proj-title heading all-proj" : "heading proj-title"}>
-          { (!this.state.project) ? <div className="">All Projects</div>
+          { (!this.state.project) ? <div className="">All Samples</div>
               : <div>
                   <span className="">{ this.state.project.name }</span>
                 </div>
