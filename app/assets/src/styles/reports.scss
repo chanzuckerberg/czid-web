@@ -741,6 +741,9 @@ margin-bottom: 0px;
     display: inline-block;
     margin-right: 10px;
     &.advanced-filtering {
+      .threshold-dropdown {
+        min-width: 12em;
+      }
       .threshold-value {
         input {
           width: 100% !important;

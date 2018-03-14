@@ -11,38 +11,21 @@
     color: #3867fa !important;
   }
 }
+// Not sure we still need this rules, they are conflicting with the standard dropdowns
+// maybe create a namespace for custom rules
+// .ui.dropdown {
+//   border: 1px solid rgb(228,228,228);
+//   padding: 5px 1em;
+//   border-radius: 999999px;
 
-.ui.dropdown {
-  border: 1px solid rgb(228,228,228);
-  padding: 5px 1.75em 5px 1em;
-  border-radius: 999999px;
-
-  .menu {
-    margin-top: 2px;
-    width: 100%;
-  }
-  .text {
-    display: block;
-    white-space: nowrap;
-    overflow: hidden;
-    font-size: 8pt;
-  }
-  .icon {
-    position: absolute !important;
-    top: 8px;
-    right: 10px;
-  }
-}
-
-.ui.dropdown.labeled-filter-dropdown {
-  input[type=checkbox] {
-    opacity: 1;
-    position: static;
-    margin-right: 0.5em;
-  }
-  .label {
-    padding: 0.2em 0.4em;
-    font-weight: normal;
-    font-size: inherit;
-  }
-}
+//   .menu {
+//     margin-top: 2px;
+//     width: 100%;
+//   }
+//   .text {
+//     font-size: 8pt;
+//   }
+//   .icon {
+//     margin-top: 5px !important;
+//   }
+// }

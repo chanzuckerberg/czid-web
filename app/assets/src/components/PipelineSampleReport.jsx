@@ -1060,13 +1060,13 @@ class PipelineSampleReport extends React.Component {
                   <DropdownWithHtml
                     ref="advancedFilters"
                     className="top-filter-item advanced-filtering"
-                    text={`Advanced ${this.validThresholdCount(this.state.activeThresholds) > 0 ? this.validThresholdCount(this.state.activeThresholds) : ''}`}>
-                    <div className="">
+                    text={`Advanced Filters ${this.validThresholdCount(this.state.activeThresholds) > 0 ? this.validThresholdCount(this.state.activeThresholds) : ''}`}>
+                    <div className="threshold-fields">
                       {this.state.activeThresholds.map((activeThreshold, index) =>
                         <div className="row" key={index}>
                           <div className="col s4">
                             <RoundedDropdown
-                              className="small"
+                              className="small threshold-dropdown"
                               selection
                               onChange={(e, {value}) => this.setThresholdProperty(index, 'label', value)}
                               value={activeThreshold.label}
@@ -1081,7 +1081,7 @@ class PipelineSampleReport extends React.Component {
                           </div>
                           <div className="col s4">
                             <RoundedDropdown
-                              className="small"
+                              className="small threshold-dropdown"
                               selection
                               onChange={(e, {value}) => this.setThresholdProperty(index, 'operator', value)}
                               value={activeThreshold.operator}
