@@ -2,6 +2,8 @@ import React from 'react';
 import axios from 'axios';
 import $ from 'jquery';
 import Samples from './Samples';
+import Nanobar from 'nanobar';
+
 /**
  @class ProjectSelection
  @desc Creates react component to handle filtering in the page
@@ -10,6 +12,10 @@ import Samples from './Samples';
  class ProjectSelection extends React.Component {
   constructor(props) {
     super(props);
+    this.nanobar = new Nanobar({
+      id: 'prog-bar',
+      class: 'prog-bar'
+    });
     this.csrf = props.csrf;
     this.favoriteProjects = props.favoriteProjects;
     this.allProjects = props.allProjects;
@@ -54,13 +60,13 @@ import Samples from './Samples';
     let favStatus = e.target.getAttribute('data-fav');
     let projectId = e.target.getAttribute('data-id');
     favStatus == 'true' ?  _satellite.track('unfavorite') : _satellite.track('favorite');
-    Samples.nanobar.go(30);
+    this.nanobar.go(30);
     axios
       .put(`/projects/${projectId}/${favStatus == 'true' ? 'remove_favorite' : 'add_favorite' }?`, {
         authenticity_token: this.csrf
       })
       .then((res) => {
-        Samples.nanobar.go(100);
+        this.nanobar.go(100);
         this.checkIfProjecExistInFavorites(projectId, this.state.formattedProjectList);
       }).catch((err) => {
     })
