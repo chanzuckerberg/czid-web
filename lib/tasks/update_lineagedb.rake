@@ -7,13 +7,28 @@ task update_lineage_db: :environment do
 
   reference_s3_path = ENV['REFERENCE_S3_FOLDER'].gsub(%r{([/]*$)}, '') # trim any trailing '/'
   local_taxonomy_path = "/app/tmp/taxonomy"
-  column_names = "taxid,superkingdom_taxid,phylum_taxid,class_taxid,order_taxid,family_taxid,genus_taxid,species_taxid," \
-    "superkingdom_name,superkingdom_common_name,phylum_name,phylum_common_name,class_name,class_common_name," \
-    "order_name,order_common_name,family_name,family_common_name,genus_name,genus_common_name,species_name,species_common_name"
+  name_column_array = %w[superkingdom_name superkingdom_common_name phylum_name phylum_common_name class_name class_common_name
+                         order_name order_common_name family_name family_common_name genus_name genus_common_name species_name species_common_name]
+  column_names = "taxid,superkingdom_taxid,phylum_taxid,class_taxid,order_taxid,family_taxid,genus_taxid,species_taxid," +
+                 name_column_array.join(",")
   host = Rails.env == 'development' ? 'db' : '$RDS_ADDRESS'
   taxid_lineages_file = 'taxid-lineages.csv'
   names_file = 'names.csv'
   current_date = Time.now.utc
+
+  ## Convert NULL to empty string in all name columns for consistency
+  ## using query:
+  #   UPDATE taxon_lineages
+  #   SET
+  #     superkingdom_name = IFNULL(superkingdom_name, ''),
+  #     superkingdom_common_name = IFNULL(superkingdom_common_name, ''),
+  #     ...
+  #     species_name = IFNULL(species_name, ''),
+  #     species_common_name = IFNULL(species_common_name, '')
+  replacements = name_column_array.map { |column| "#{column} = IFNULL(#{column}, '')" }
+  query = "UPDATE taxon_lineages SET " + replacements.join(", ")
+  ActiveRecord::Base.connection.execute(query)
+
   `
    ## Set work directory
    mkdir -p #{local_taxonomy_path};
@@ -70,4 +85,17 @@ task update_lineage_db: :environment do
    rm -rf #{local_taxonomy_path};
   `
   raise "lineage database update failed" unless $CHILD_STATUS.success?
+
+  ## Convert empty strings back to NULL
+  ## using query:
+  #   UPDATE taxon_lineages
+  #   SET
+  #     superkingdom_name = NULLIF(superkingdom_name, ''),
+  #     superkingdom_common_name = NULLIF(superkingdom_common_name, ''),
+  #     ...
+  #     species_name = NULLIF(species_name, ''),
+  #     species_common_name = NULLIF(species_common_name, '')
+  replacements = name_column_array.map { |column| "#{column} = NULLIF(#{column}, '')" }
+  query = "UPDATE taxon_lineages SET " + replacements.join(", ")
+  ActiveRecord::Base.connection.execute(query)
 end
