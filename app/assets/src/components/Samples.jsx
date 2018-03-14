@@ -71,7 +71,6 @@ class Samples extends React.Component {
       selectedSampleIndices: [],
       displayDropdown: false,
       selectedTissueFilters: this.fetchParams('tissue') ? this.fetchParams('tissue').split(',') : [],
-      selectedTissueIndices: [],
       selectedHostIndices: this.fetchParams('host') ? this.fetchParams('host').split(',').map(Number) : [],
       initialFetchedSamples: [],
       loading: false,
