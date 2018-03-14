@@ -628,7 +628,7 @@ class Samples extends React.Component {
   }
 
   //fetch results from filtering, search or switching projects
-  fetchResults(cb) {
+  fetchResults(cb, reset_filters=false) {
     Samples.showLoading('Fetching samples...');
     const params = this.getParams();
     axios.get(`/samples?${params}`).then((res) => {
@@ -637,7 +637,9 @@ class Samples extends React.Component {
         initialFetchedSamples: res.data.samples,
         allSamples: res.data.samples,
         tissueTypes: ['-', ...res.data.tissue_types],
+        selectedTissueFilters: reset_filters ? ['-', ...res.data.tissue_types] : prevState.selectedTissueFilters,
         hostGenomes: res.data.host_genomes,
+        selectedHostIndices: reset_filters ? res.data.host_genomes.map(h => h.id) : prevState.selectedHostIndices,
         displayEmpty: false,
         totalNumber: res.data.total_count,
         pagesLoaded: prevState.pagesLoaded+1,
@@ -742,7 +744,7 @@ class Samples extends React.Component {
           project: res.data
         });
         this.fetchProjectUsers(projId);
-        this.fetchResults();
+        this.fetchResults(null, true);
       }).catch((err) => {
         this.setState({ project: null })
       })
@@ -1459,9 +1461,6 @@ class Samples extends React.Component {
       this.setUrlLocation();
       this.fetchProjectDetails(id);
       this.fetchProjectUsers(id);
-      this.setState({ selectedTissueFilters: this.state.tissueTypes,
-        selectedHostIndices: this.state.hostGenomes.map(h => h.id)
-      })
     });
   }
 
