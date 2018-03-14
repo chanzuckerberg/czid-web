@@ -562,9 +562,6 @@ class PipelineSampleReport extends React.Component {
       return this.isThresholdValid(threshold);
     });
     window.localStorage.setItem('activeThresholds', JSON.stringify(activeThresholds));
-    if (closeWindow) {
-      this.refs.advancedFilters.closeDropdown();
-    }
   }
 
   getSavedThresholdFilters() {
@@ -1060,7 +1057,8 @@ class PipelineSampleReport extends React.Component {
                   <DropdownWithHtml
                     ref="advancedFilters"
                     className="top-filter-item advanced-filtering"
-                      text={<span> Advanced Filters { <Label circular size='mini' >{this.validThresholdCount(this.state.activeThresholds)}</Label> }</span>}>
+                    onClose={() => this.saveThresholdFilters()}
+                    text={<span> Advanced Filters { <Label circular size='mini' >{this.validThresholdCount(this.state.activeThresholds)}</Label> }</span>}>
                     <div className="threshold-fields">
                       {this.state.activeThresholds.map((activeThreshold, index) =>
                         <div className="row" key={index}>

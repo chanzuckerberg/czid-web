@@ -15,6 +15,14 @@ class DropdownWithHtml extends React.Component {
   closeDropdown() {
     if(this.filterContent) {
       this.filterContent.slideUp(this.props.slideSpeed);
+      this.onClose();
+    }
+  }
+
+  onClose() {
+    const { onClose } = this.props;
+    if (typeof onClose === 'function') {
+      onClose();
     }
   }
 
@@ -45,7 +53,7 @@ class DropdownWithHtml extends React.Component {
         || activator.ref.contains(e.target) ) {
         return false;
       }
-      this.filterContent.slideUp(slideSpeed);
+      this.closeDropdown();
     });
     if (compact) {
       filterContent.style.minWidth = `${dropDowncontainer.width()}px`;
