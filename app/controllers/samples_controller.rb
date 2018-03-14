@@ -361,7 +361,7 @@ class SamplesController < ApplicationController
     params = sample_params
     if params[:project_name]
       project_name = params.delete(:project_name)
-      project = Project.find_by(name: project_name)
+      project = Project.find_or_create_by(name: project_name)
     end
     if params[:host_genome_name]
       host_genome_name = params.delete(:host_genome_name)
