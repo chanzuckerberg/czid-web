@@ -546,6 +546,7 @@ class Samples extends React.Component {
         initialFetchedSamples: res.data.samples,
         allSamples: res.data.samples,
         tissueTypes: ['-', ...res.data.tissue_types],
+        selectedTissueFilters: ['-', ...res.data.tissue_types],
         hostGenomes: res.data.host_genomes,
         displayEmpty: false,
         pagesLoaded: prevState.pagesLoaded+1,
@@ -1453,12 +1454,12 @@ class Samples extends React.Component {
       filterParams: '',
       searchParams:'',
       sampleIdsParams: [],
-      selectedTissueFilters: [],
       selectedHostIndices: []
     }, () => {
       this.setUrlLocation();
       this.fetchProjectDetails(id);
-      this.fetchProjectUsers(id)
+      this.fetchProjectUsers(id);
+      this.setState({ selectedTissueFilters: this.state.tissueTypes })
     });
   }
 
