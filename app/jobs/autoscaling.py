@@ -169,12 +169,22 @@ def get_previous_desired(asg):
     return int(asg.get("DesiredCapacity", asg.get("MinSize", 0)))
 
 
+def clamp_to_valid_range(asg, desired_capacity):
+    min_size = int(asg.get("MinSize", desired_capacity))
+    max_size = int(asg.get("MaxSize", desired_capacity))
+    if desired_capacity < min_size:
+        desired_capacity = min_size
+    if desired_capacity > max_size:
+        desired_capacity = max_size
+    return desired_capacity
+
+
 def set_desired_capacity(asg, compute_desired_instances, can_scale=True):
     asg_name = asg['AutoScalingGroupName']
     num_healthy = count_healthy_instances(asg)
     previous_desired = get_previous_desired(asg)
     # Manually input DesiredCapacity will never be reduced so long as there are pending jobs.
-    num_desired = compute_desired_instances(previous_desired)
+    num_desired = clamp_to_valid_range(asg, compute_desired_instances(previous_desired))
     if num_desired == previous_desired:
         action = "should remain"
     else:
@@ -269,12 +279,12 @@ def autoscaling_update(my_num_jobs, my_environment="development"):
                 print "Failed to get information about running jobs in aws batch.  Deferring scaling decision."
         else:
             print "Deferring scaling decision to stay under the rate limit for 'aws batch list-jobs'."
-    elif 1 <= num_real_jobs <= 5:
+    elif 1 <= num_real_jobs <= 6:
         set_desired_capacity(gsnap_asg, at_least(4), can_scale)
         set_desired_capacity(rapsearch2_asg, at_least(12), can_scale)
     else:
-        set_desired_capacity(gsnap_asg, at_least(12), can_scale)
-        set_desired_capacity(rapsearch2_asg, at_least(36), can_scale)
+        set_desired_capacity(gsnap_asg, at_least(8), can_scale)
+        set_desired_capacity(rapsearch2_asg, at_least(24), can_scale)
 
 
 if __name__ == "__main__":
