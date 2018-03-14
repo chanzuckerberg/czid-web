@@ -247,3 +247,9 @@ a {
 .modal-overlay {
   z-index: 999 !important;
 }
+
+.content-body {
+  .progress {
+    margin: 0;
+  }
+}

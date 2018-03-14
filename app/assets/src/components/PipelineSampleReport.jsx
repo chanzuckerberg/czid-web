@@ -5,14 +5,17 @@ import $ from 'jquery';
 import Tipsy from 'react-tipsy';
 import ReactAutocomplete from 'react-autocomplete';
 import { Dropdown } from 'semantic-ui-react'
-import Samples from './Samples';
-import ReportFilter from './ReportFilter';
 import numberWithCommas from '../helpers/strings';
 import StringHelper from '../helpers/StringHelper';
+import Nanobar from 'nanobar';
 
 class PipelineSampleReport extends React.Component {
   constructor(props) {
     super(props);
+    this.nanobar = new Nanobar({
+      id: 'prog-bar',
+      class: 'prog-bar'
+    });
     this.report_ts = props.report_ts;
     this.sample_id = props.sample_id;
     this.gitVersion = props.git_version
@@ -180,7 +183,7 @@ class PipelineSampleReport extends React.Component {
   }
 
   fetchReportData() {
-    Samples.showLoading('Loading results...');
+    this.nanobar.go(30);
     let params = `?${window.location.search.replace('?', '')}&report_ts=${this.report_ts}&version=${this.gitVersion}`;
     const cached_background_id = Cookies.get('background_id');
     if (cached_background_id) {
@@ -188,7 +191,7 @@ class PipelineSampleReport extends React.Component {
       < 0 ? `${params}&background_id=${cached_background_id}` : params;
     }
     axios.get(`/samples/${this.sample_id}/report_info${params}`).then((res) => {
-      Samples.hideLoader();
+      this.nanobar.go(100);
       const genus_map = {};
       for (let i = 0; i < res.data.taxonomy_details[2].length; i++) {
         const taxon = res.data.taxonomy_details[2][i];
@@ -637,7 +640,7 @@ class PipelineSampleReport extends React.Component {
 
   // only for background model
   refreshPage(overrides) {
-    ReportFilter.showLoading('Fetching results for new background...');
+    this.nanobar.go(100);
     const new_params = Object.assign({}, this.props.report_page_params, overrides);
     window.location = location.protocol + '//' + location.host + location.pathname + '?' + $.param(new_params);
   }
@@ -896,7 +899,6 @@ class PipelineSampleReport extends React.Component {
   }
 
   searchSelectedTaxon(value, item) {
-    //ReportFilter.showLoading(`Filtering for '${value}'...`);
     let searchId = item[1];
     this.setState({
       searchId,
@@ -1153,7 +1155,7 @@ class PipelineSampleReport extends React.Component {
                         </th>
                         {this.render_column_header('Score', `NT_aggregatescore`, 'Aggregate score: ( |genus.NT.Z| * species.NT.Z * species.NT.rPM ) + ( |genus.NR.Z| * species.NR.Z * species.NR.rPM )') }
                         {this.render_column_header('Z', `${this.state.countType}_zscore`, `Z-score relative to background model for alignments to NCBI NT/NR`) }
-                        {this.render_column_header('rPM', `${this.state.countType}_rpm`, `Number of reads aligning to the taxon in the NCBI NT/NR database per million total input reads`)} 
+                        {this.render_column_header('rPM', `${this.state.countType}_rpm`, `Number of reads aligning to the taxon in the NCBI NT/NR database per million total input reads`)}
                         {this.render_column_header('r', `${this.state.countType}_r`, `Number of reads aligning to the taxon in the NCBI NT/NR database`)}
                         {this.render_column_header('%id', `${this.state.countType}_percentidentity`, `Average percent-identity of alignments to NCBI NT/NR`)}
                         {this.render_column_header('log(1/E)', `${this.state.countType}_neglogevalue`, `Average log-10-transformed expect value for alignments to NCBI NT/NR`)}
