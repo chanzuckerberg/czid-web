@@ -922,19 +922,21 @@ class Samples extends React.Component {
     if (type === "int") {
       id = +id
     }
-    let list = this.state[state_var].splice(0);
+    let list = Object.assign([], this.state[state_var]);
     let index;
     index = list.indexOf(id);
     list.splice(index, 1);
-    let new_state = {
-      [`${state_var}`]: list,
-      pagesLoaded: 0,
-      pageEnd: false
+    if (index >= 0) {
+      let new_state = {
+        [`${state_var}`]: list,
+        pagesLoaded: 0,
+        pageEnd: false
+      }
+      this.setState(new_state, () => {
+        this.fetchResults();
+        this.setUrlLocation();
+      })
     }
-    this.setState(new_state, () => {
-      this.fetchResults();
-      this.setUrlLocation();
-    })
   }
 
   generateTagList(state_all_options, state_selected_options, id_field=null, name_field=null, id_type=null) {
