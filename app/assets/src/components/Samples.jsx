@@ -1012,7 +1012,7 @@ class Samples extends React.Component {
     // )
 
     let compare_button = (
-      <div className='col s3 download-table'>
+      <div className='download-table'>
         <div className='white'>
           <a onClick={this.compareSamples} className="compare center">
             <span>Compare</span>

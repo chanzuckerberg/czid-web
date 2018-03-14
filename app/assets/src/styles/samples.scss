@@ -958,6 +958,9 @@ input[type="button"] {
       .download-wrapper {
         float: right;
         padding-top: 20px;
+        .download-btn {
+          padding: 9px;
+        }
         .ui.labeled.icon.button>.icon { // Actual icon in the button
           background-color: transparent;
           font-size: 1.3em;
