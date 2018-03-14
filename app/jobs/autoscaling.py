@@ -173,8 +173,10 @@ def clamp_to_valid_range(asg, desired_capacity):
     min_size = int(asg.get("MinSize", desired_capacity))
     max_size = int(asg.get("MaxSize", desired_capacity))
     if desired_capacity < min_size:
+        print "Clamping {} up to {}".format(desired_capacity, min_size)
         desired_capacity = min_size
     if desired_capacity > max_size:
+        print "Clamping {} down to {}".format(desired_capacity, max_size)
         desired_capacity = max_size
     return desired_capacity
 
