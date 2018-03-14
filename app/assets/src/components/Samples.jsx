@@ -994,7 +994,7 @@ class Samples extends React.Component {
                   </div>
               <div className="col s6">
               <h6>Tissue type</h6>
-                {this.state.tissueTypes.length == 0 ? 
+                {this.state.tissueTypes.length == 0 ?
                    <div className="options-wrapper"><label>No tissue type data present</label></div> :
                    this.state.tissueTypes.map((tissue, i) => {
                      return (
