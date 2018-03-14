@@ -942,16 +942,17 @@ input[type="button"] {
     }
   }
 
-  .download.icon {
-    font-size: 1.5em;
-  }
-
   .project-info {
     padding-left: 20px;
     .download-section {
       .download-wrapper {
         float: right;
         padding-top: 20px;
+        .ui.labeled.icon.button>.icon { // Actual icon in the button
+          background-color: transparent;
+          font-size: 1.3em;
+          margin-left: 0.4em !important;
+        }
         .ui.dropdown.link.item {
           padding: 7px 30px;
           border-radius: 40px;
@@ -967,6 +968,15 @@ input[type="button"] {
          a.item {
             color: #000000
           }
+        }
+        .ui.dropdown .text { // The text in the button
+          font-size: 1.2em;
+          padding: 0.05em;
+        }
+        .download-btn { // The whole button
+          color: #3867fa;
+          background-color: transparent;
+          padding-left: 5em;
         }
       }
       padding-top: 15px;
