@@ -917,7 +917,7 @@ class Samples extends React.Component {
     location.href = `/projects/${id}/csv`;
   }
 
-  applyExcluded(e, type=null, state_var=null) {
+  applyExcluded(e, type, state_var) {
     let id = e.target.getAttribute('data-exclude')
     if (type === "int") {
       id = +id
@@ -937,6 +937,7 @@ class Samples extends React.Component {
     }
     console.log(new_state)
     this.setState(new_state, () => {
+      this.fetchResults();
       this.setUrlLocation();
     })
   }
