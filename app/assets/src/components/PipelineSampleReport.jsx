@@ -4,6 +4,7 @@ import Cookies from 'js-cookie';
 import $ from 'jquery';
 import Tipsy from 'react-tipsy';
 import ReactAutocomplete from 'react-autocomplete';
+import { Dropdown } from 'semantic-ui-react'
 import Samples from './Samples';
 import ReportFilter from './ReportFilter';
 import numberWithCommas from '../helpers/strings';
@@ -980,64 +981,56 @@ class PipelineSampleReport extends React.Component {
                         <i className='fa fa-search'></i>
                       </li>
 
-                      <li className='name-type-dropdown top-filter-dropdown'
-                        data-activates='name-type-dropdown'>
-                        <span className='filter-label'>
+                      <Dropdown
+                        text={
+                          this.state.name_type ? this.state.name_type : 'Select name type'
+                        }
+                        className="filter-btn"
+                      >
+                        <Dropdown.Menu>
+                          <Dropdown.Item
+                            text="Scientific Name"
+                            onClick={() => this.handleNameTypeChange('Scientific name')}
+                          />
+                          <Dropdown.Item
+                            text="Common Name"
+                            onClick={() => this.handleNameTypeChange('Common name')}
+                          />
+                        </Dropdown.Menu>
+                      </Dropdown>
+
+                      <Dropdown
+                        text={
+                          this.state.backgroundName ? this.state.backgroundName : 'Background model'
+                        }
+                        className={"filter-btn"}
+                      >
+                        <Dropdown.Menu>
                           {
-                            this.state.name_type ? this.state.name_type : 'Select name type'
-                          }
-                        </span>
-                        <i className='fa fa-angle-down right'></i>
-                        <div id='name-type-dropdown' className='dropdown-content'>
-                          <ul>
-                          <li
-                              onClick={() => this.handleNameTypeChange('')}
-                              ref= "name_type">
-                              Select name type
-                            </li>
-                            <li
-                              onClick={() => this.handleNameTypeChange('Scientific name')}
-                              ref= "name_type">
-                              Scientific Name
-                            </li>
-                            <li
-                              onClick={() => this.handleNameTypeChange('Common name')}
-                              ref= "name_type">
-                              Common Name
-                            </li>
-                          </ul>
-                        </div>
-                      </li>
-                      <li className='background-model-dropdown top-filter-dropdown'
-                        data-activates='background-model-dropdown'>
-                        <span className='filter-label'>
-                          {
-                            this.state.backgroundName ? this.state.backgroundName : 'Background model'
-                          }
-                        </span>
-                        <i className='fa fa-angle-down right'></i>
-                        <div id='background-model-dropdown' className='dropdown-content'>
-                          <ul>
-                            {
-                              this.all_backgrounds.length ?
-                              this.all_backgrounds.map((background, i) => {
+                            this.all_backgrounds.length ?
+                              this.all_backgrounds.slice(0, -1).map((background, i) => {
                                 return (
-                                  <li
-                                  onClick={() => this.handleBackgroundModelChange(background.name, background.id)}
-                                  ref= "background" key={i}>
-                                    {background.name}
-                                  </li>);
-                                })
-                                : <li>No background models to display</li>
-                            }
-                          </ul>
-                        </div>
-                      </li>
-                      <li className='categories-dropdown top-filter' >
+                                  <Dropdown.Item
+                                    text={background.name}
+                                    ref="background"
+                                    key={i}
+                                    onClick={() => this.handleBackgroundModelChange(background.name, background.id)}
+                                  />
+                                );
+                              })
+                            :
+                              <Dropdown.Item
+                                text="No background models to display"
+                              />
+                          }
+                        </Dropdown.Menu>
+                      </Dropdown>
+
+                      <li className='categories-dropdown top-filter ui dropdown filter-btn' >
                         <div className="categories-filters-activate">
                           <span className='filter-label'>Categories</span>
                           <span className='filter-label-count'>{(this.all_categories.length-this.state.excluded_categories.length)} </span>
-                          <i className='fa fa-angle-down right'></i>
+                          <i className='fa fa-angle-down right down-box'></i>
                         </div>
                         <div className='categories-filters-modal'>
                           <div className="categories">
@@ -1061,15 +1054,16 @@ class PipelineSampleReport extends React.Component {
                           </div>
                         </div>
                       </li>
-                      <li className="top-filter ">
+
+                      <li className="advanced-filter-top top-filter ui dropdown filter-btn">
                         <div className="advanced-filters-activate" onClick= {(e) => {this.saveThresholdFilters(false);} } >
                           <span className="filter-label">
-                            Advanced Filtering
+                            Advanced Filters
                           </span>
                           <span className='filter-label-count'>{this.validThresholdCount(this.state.activeThresholds)} </span>
-                          <i className="fa fa-angle-down right" />
+                          <i className="fa fa-angle-down right down-box" />
                         </div>
-                        <div className="advanced-filters-modal">
+                        <div className="advanced-filters-modal round-me">
                           <div className="filter-inputs">
                             {
                               this.state.activeThresholds.map((activeThreshold, index) => {
@@ -1079,7 +1073,7 @@ class PipelineSampleReport extends React.Component {
                                       <select
                                         value={activeThreshold.label}
                                         onChange={(e) => this.setThresholdProperty(index, 'label', e.target.value) }
-                                        className="browser-default">
+                                        className="browser-default inner-menus">
                                         {
                                           this.allThresholds.map((thresholdObject) => {
                                             return (
@@ -1097,7 +1091,7 @@ class PipelineSampleReport extends React.Component {
                                       <select
                                         value={activeThreshold.operator}
                                         onChange={(e) => this.setThresholdProperty(index, 'operator', e.target.value)}
-                                        className="browser-default">
+                                        className="browser-default inner-menus">
                                         <option value=">=">
                                           >=
                                         </option>
@@ -1108,7 +1102,7 @@ class PipelineSampleReport extends React.Component {
                                     </div>
                                     <div className="col s3">
                                       <input
-                                        className="browser-default metric-thresholds"
+                                        className="browser-default metric-thresholds inner-menus"
                                         onChange={(e) => this.setThresholdProperty(index, 'value', e.target.value)}
                                         onKeyDown={(e) => this.handleThresholdEnter(e, index)}
                                         name="group2"
@@ -1125,12 +1119,12 @@ class PipelineSampleReport extends React.Component {
                               })
                             }
                           </div>
-                          <div className="add-threshold-filter" onClick={ () => this.appendThresholdFilter() }>
+                          <div className="add-threshold-filter inner-menus" onClick={ () => this.appendThresholdFilter() }>
                             <i className="fa fa-plus-circle" /> Add threshold
                           </div>
                           <br/>
                           <div className="" >
-                            <button className="btn" onClick={ () => this.saveThresholdFilters()}>
+                            <button className="inner-menus save-btn" onClick={ () => this.saveThresholdFilters()}>
                               Save
                             </button>
                           </div>

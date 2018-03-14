@@ -938,7 +938,7 @@ class Samples extends React.Component {
 
     let table_download_dropdown = (
       <div className="col s2 download-wrapper">
-        <Dropdown button className="icon link download-btn" labeled icon="cloud download alternate" text="Download">
+        <Dropdown button className="icon link download-btn" labeled icon="cloud download" text="Download">
           <Dropdown.Menu>
             <Dropdown.Item href={`/projects/${project_id}/csv`}>Download Table</Dropdown.Item>
             { project_id === 'all' ? null : <Dropdown.Item onClick={this.startReportGeneration} className="download-reports">Download Reports</Dropdown.Item> }
