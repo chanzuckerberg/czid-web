@@ -12,7 +12,7 @@ import ProjectSelection from './ProjectSelection';
 import ReportFilter from './ReportFilter';
 import PipelineSampleReads from './PipelineSampleReads';
 import StringHelper from '../helpers/StringHelper';
-import { Dropdown } from 'semantic-ui-react'
+import { Dropdown, Label, Icon } from 'semantic-ui-react'
 
 class Samples extends React.Component {
   constructor(props, context) {
@@ -943,10 +943,10 @@ class Samples extends React.Component {
       let name = name_field ? entry[name_field] : entry
       if (this.state[state_selected_options].indexOf(id) >= 0) {
         return (
-          <span className="filter-tag" key={`${state_all_options}_tag_${i}`}>
-          <span className='filter-tag-name'> {`${name}`} </span>
-          <span className='filter-tag-x' data-exclude={id} onClick= { (e) => { this.applyExcluded(e, id_type, state_selected_options);} }  >X</span>
-          </span>
+          <Label className="label-tags" size="tiny" key={`${state_all_options}_tag_${i}`}>
+            {`${name}`}
+            <Icon name='close' data-exclude={id} onClick= { (e) => { this.applyExcluded(e, id_type, state_selected_options);} }/>
+          </Label>
         );
     } else {
         return null;
