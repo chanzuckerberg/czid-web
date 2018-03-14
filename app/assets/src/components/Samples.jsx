@@ -1056,7 +1056,7 @@ class Samples extends React.Component {
                 })}
               </div>
             </div> : null }
-        </div>
+      </div>
     )
 
     const search_box = (
