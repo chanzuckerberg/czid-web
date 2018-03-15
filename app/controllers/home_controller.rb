@@ -10,8 +10,9 @@ class HomeController < ApplicationController
     @projects = []
     project_records.each do |p_r|
       p = p_r.as_json
-      p["is_empty"] = p_r.can_delete?(current_user)
+      p["can_delete"] = p_r.can_delete?(current_user) ? 1 : 0
       @projects << p
+    end
     logger.warn @projects
     @editable_project_ids = current_power.updatable_projects.pluck(:id)
     @host_genomes = HostGenome.all.reject { |hg| hg.name.downcase.include?("__test__") }

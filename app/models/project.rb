@@ -33,7 +33,7 @@ class Project < ApplicationRecord
     current_power = Power.new(user)
     return false unless current_power.updatable_projects.include?(self)
     non_empty_sample_count = current_power.project_samples(self).select { |s| s.status != Sample::STATUS_CREATED }.count
-    non_empty_sample_count > 0
+    non_empty_sample_count == 0
   end
 
   def samples

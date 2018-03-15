@@ -270,10 +270,10 @@ import Samples from './Samples';
                     <div className="all project-item"
                          onClick={this.handleProjectClick}
                          data-id={project.id}  key={i}>
-                      {project.is_empty ? delete_icon : null}
+                      {project.can_delete ? delete_icon : null}
                       <span className='project-label'
                         data-id={project.id}>
-                        {project.is_empty} {project.name}
+                        {project.name}
                       </span>
                       {this.addFavIconClass(project)}
                     </div>
@@ -284,10 +284,10 @@ import Samples from './Samples';
               <div className="all project-item"
                    onClick={this.handleProjectClick}
                    data-id={project.id} key={i}>
-                {project.is_empty ? delete_icon : null}
+                {project.can_delete ? delete_icon : null}
                 <span className='project-label'
                   data-id={project.id}>
-                  {project.is_empty} {project.name}
+                  {project.name}
                 </span>
                 {this.addFavIconClass(project)}
               </div>
