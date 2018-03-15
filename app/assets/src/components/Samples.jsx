@@ -1465,6 +1465,8 @@ class Samples extends React.Component {
       projectType: listType,
       filterParams: '',
       searchParams:'',
+      selectedTissueFilters: [],
+      selectedHostIndices: [],
       sampleIdsParams: []
     }, () => {
       this.setUrlLocation();
