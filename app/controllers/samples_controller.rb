@@ -56,6 +56,9 @@ class SamplesController < ApplicationController
     results = results.where(project_id: project_id) if project_id.present?
 
     # Get tissue types and host genomes that are present in the sample list
+    # TODO(yf) : the following tissue_types, host_genomes have performance
+    # impact that it should be moved to different dedicated functions. Not
+    # parsina the whole results.
     @tissue_types = results.map(&:sample_tissue).uniq.compact.sort
     host_genome_ids = results.map(&:host_genome_id).uniq.compact
     @host_genomes = HostGenome.find(host_genome_ids)
