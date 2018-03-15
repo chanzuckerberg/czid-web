@@ -546,8 +546,8 @@ class Samples extends React.Component {
         initialFetchedSamples: res.data.samples,
         allSamples: res.data.samples,
         tissueTypes: ['-', ...res.data.tissue_types],
-        selectedTissueFilters: ['-', ...res.data.tissue_types],
-        selectedHostIndices: res.data.host_genomes.map(h => h.id),
+        selectedTissueFilters: this.state.selectedTissueFilters.length == 0 ? ['-', ...res.data.tissue_types] : this.state.selectedTissueFilters,
+        selectedHostIndices: this.state.selectedHostIndices.length == 0 ? res.data.host_genomes.map(h => h.id) : this.state.selectedHostIndices,
         hostGenomes: res.data.host_genomes,
         displayEmpty: false,
         pagesLoaded: prevState.pagesLoaded+1,
@@ -1347,6 +1347,7 @@ class Samples extends React.Component {
 
 
     if (!this.state.displayDropdown && (this.state.hostFilterChange || this.state.tissueFilterChange)) {
+      this.setUrlLocation();
       this.fetchResults();
       this.state.hostFilterChange = false;
       this.state.tissueFilterChange = false;
