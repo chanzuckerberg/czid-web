@@ -74,21 +74,10 @@ import Samples from './Samples';
       })
       .then((res) => {
         project_list = Object.assign([], this.state.formattedProjectList)
-        index = project_list.indexOf(
-
-
-    let updatedList = projects.map(project => {
-      if (project.id == id) {
-        project.favorited = !project.favorited
-      }
-
-      return project;
-    });
-
-    this.setState({ formattedProjectList: updatedList });
-
-
-
+        project_id_list = project_list.map(p => p.id)
+        index = project_id_list.indexOf(projectId)
+        project_list.splice(index, 1)
+        this.setState({ formattedProjectList: project_list })
       }).catch((err) => {
     })
   }
