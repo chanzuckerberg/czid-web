@@ -242,8 +242,6 @@ margin-bottom: 0px;
 
 .reports-main {
   width: 100%;
-  overflow: auto;
-  overflow-y: hidden;
 }
 
 .report-number {
@@ -444,7 +442,7 @@ margin-bottom: 0px;
     font-size: $font-size-base;
   }
   th:last-child {
-    padding-right: 50px;
+    padding-right: 0px;
   }
 
   input.browser-default {
