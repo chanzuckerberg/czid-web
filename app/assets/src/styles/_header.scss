@@ -139,6 +139,14 @@ a {
   }
 }
 
+.profile-header-dropdown {
+  border: none !important;
+  margin-top: 0.75em;
+  .text {
+    font-size: 1em !important;
+  }
+}
+
 .profile-header-dropdown:hover {
   color: #cfcfcf;
 }
