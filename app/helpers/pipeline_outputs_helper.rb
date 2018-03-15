@@ -143,9 +143,10 @@ module PipelineOutputsHelper
     taxon = TaxonLineage.find_by(taxid: taxid)
     results = {}
     parse_tree(results, taxid, alignment_data)
+    accession_ids = results.keys.sort_by { |k| -results[k]['reads_count'] }
 
     title = taxon["#{tax_level}_name"].to_s + "(#{tax_level}) Alignment (#{results.size} unique accessions)"
-    { "title" => title, "details" => results }
+    { "title" => title, "details" => results, "accessions" => accession_ids }
   end
 
   def get_taxid_fasta(sample, taxid, tax_level, hit_type)
