@@ -66,6 +66,33 @@ import Samples from './Samples';
     })
   }
 
+  deleteProject(e) {
+    let projectId = e.target.getAttribute('project-id');
+    axios
+      .destroy(`/projects/${projectId}`, {
+        authenticity_token: this.csrf
+      })
+      .then((res) => {
+        project_list = Object.assign([], this.state.formattedProjectList)
+        index = project_list.indexOf(
+
+
+    let updatedList = projects.map(project => {
+      if (project.id == id) {
+        project.favorited = !project.favorited
+      }
+
+      return project;
+    });
+
+    this.setState({ formattedProjectList: updatedList });
+
+
+
+      }).catch((err) => {
+    })
+  }
+
   reformatProjectList(favorites, allProjects) {
     let favProjects = [];
     let favIds = [];
@@ -252,10 +279,6 @@ import Samples from './Samples';
       </div>);
     }
 
-    const delete_icon = (
-      <span><i className="fa fa-close"/> </span>
-    );
-
     const all_projects_section = (
       <div className="projects">
         <div data-title="allprojects" className="title">All Projects</div>
@@ -270,7 +293,6 @@ import Samples from './Samples';
                     <div className="all project-item"
                          onClick={this.handleProjectClick}
                          data-id={project.id}  key={i}>
-                      {project.can_delete ? delete_icon : null}
                       <span className='project-label'
                         data-id={project.id}>
                         {project.name}
@@ -284,7 +306,12 @@ import Samples from './Samples';
               <div className="all project-item"
                    onClick={this.handleProjectClick}
                    data-id={project.id} key={i}>
-                {project.can_delete ? delete_icon : null}
+                {
+                  project.can_delete ?
+                    <span><i className="fa fa-close" project-id={project.id}
+                             onClick={this.deleteProject}/> </span>
+                    : null
+                }
                 <span className='project-label'
                   data-id={project.id}>
                   {project.name}
