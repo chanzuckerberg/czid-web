@@ -461,8 +461,7 @@ $break-large: 1070px;
 
 .sample-container {
   .metadata {
-    position: relative;   
-    background: #f4f4f4; 
+    position: relative;
     border-radius: 40px;
     border: solid 1px #cccccc;
     .metadata-dropdown {
@@ -689,6 +688,7 @@ $break-large: 1070px;
     width: inherit;
     margin: 20px 0 5px;
     border-radius: 3px;
+    padding-left: 6px;
     .wrapper {
       .metadata {
         border-radius: 40px;
@@ -851,7 +851,6 @@ input[type="button"] {
       font-size: 14px;
       padding-top: 20px;
       padding: 21px 21px 0 21px;
-      // color: $subdued-color;
       text-transform: uppercase;
     }
     .divider {
@@ -861,6 +860,9 @@ input[type="button"] {
     }
     .project-wrapper {
       margin-top: 50px;
+      .fav-title {
+        padding-bottom: 10px !important;
+      }
       .fav-row {
         .title {
           color: #f1f1f1;
@@ -1022,6 +1024,10 @@ input[type="button"] {
 .fa-star{
   margin-top: 4px;
   color: #3867fa;
+}
+
+.fa-star-o {
+  margin-top: 4px;
 }
 
 .project-popup {

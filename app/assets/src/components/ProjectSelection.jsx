@@ -209,7 +209,7 @@ import Nanobar from 'nanobar';
     var fav_section = (<div></div>)
     if (favProjLen) {
       fav_section = (<div className="row fav-row">
-        <div className="title">Favorite Projects</div>
+        <div className="title fav-title">Favorite Projects</div>
         <div className="fav-projects-wrapper  projects-wrapper">
           {
             this.state.showLessFavorites ?

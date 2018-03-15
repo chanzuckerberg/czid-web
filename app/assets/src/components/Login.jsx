@@ -110,7 +110,7 @@ class Login extends React.Component {
               <div className="row title">
                 <p className="col s6 signup">Login</p>
               </div>
-              <div className="mail"><p>To request access to IDseq, please email us<span onClick={ this.sendMail }> here</span></p></div>
+              <div className="mail"><p>To request access to the IDseq platform, please email us<span onClick={ this.sendMail }> here.</span></p></div>
               <div className="mail">Or login with the following demo account:
                 <p> Email: idseq.guest@chanzuckerberg.com </p>
                 <p> Password: idseqisawesome</p>
@@ -144,7 +144,7 @@ class Login extends React.Component {
                 </div>
               </div>
               <input className="hidden" type="submit"/>
-              <div onClick={ this.handleSubmit } className="center-align login-wrapper">Submit</div>
+              <div onClick={ this.handleSubmit } className="center-align login-wrapper">Login</div>
             </form>
           </div>
         </div>
