@@ -981,7 +981,7 @@ class Samples extends React.Component {
     );
 
     let table_download_dropdown = (
-      <div className="col s2 download-wrapper">
+      <div className="download-wrapper">
         <Dropdown button className="icon link download-btn" labeled icon={{ className: 'cloud download alternate'}} text="Download">
           <Dropdown.Menu>
             <Dropdown.Item href={`/projects/${project_id}/csv`}>Download Table</Dropdown.Item>
