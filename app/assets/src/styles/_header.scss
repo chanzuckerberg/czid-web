@@ -139,6 +139,14 @@ a {
   }
 }
 
+.profile-header-dropdown {
+  border: none !important;
+  margin-top: 0.75em;
+  .text {
+    font-size: 1em !important;
+  }
+}
+
 .profile-header-dropdown:hover {
   color: #cfcfcf;
 }
@@ -228,14 +236,19 @@ a {
     width: -webki-fit-content;
     width: fit-content;
   }
+  p {
+    font-family: monospace;
+  }
 }
 
 .code-to-edit {
   color: #3D8CAD;
+  font-family: monospace;
   font-weight: $font-weight-bold;
 }
 
 .code-personal {
+  font-family: monospace;
   font-weight: $font-weight-bold;
 }
 
