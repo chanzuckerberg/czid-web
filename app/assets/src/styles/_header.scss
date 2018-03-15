@@ -231,6 +231,7 @@ a {
 
 .code {
   background-color: #edf1f2;
+  font-family: monospace;
   white-space:nowrap;
   &.center-code {
     width: -webki-fit-content;
@@ -245,6 +246,7 @@ a {
 }
 
 .code-personal {
+  font-family: monospace;
   font-weight: $font-weight-bold;
 }
 
