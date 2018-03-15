@@ -1437,14 +1437,18 @@ class Samples extends React.Component {
     });
   }
 
+  selectionToParamsOrNone(selected_options) {
+    return selected_options.length == 0 ? "none" : selected_options.join(",")
+  }
+
   //set Url based on requests
   setUrlLocation() {
     let projectId = parseInt(this.state.selectedProjectId);
     const params = {
       project_id: projectId ? projectId : null,
       filter: this.state.filterParams,
-      tissue: this.state.selectedTissueFilters.join(','),
-      host: this.state.selectedHostIndices.join(','),
+      tissue: this.selectionToParamsOrNone(this.state.selectedTissueFilters),
+      host: this.selectionToParamsOrNone(this.state.selectedHostIndices),
       search: this.state.searchParams,
       ids: this.state.sampleIdsParams,
       sort_by: this.state.sort_by,
