@@ -88,6 +88,8 @@ class Samples extends React.Component {
       isRequesting: false,
       displayEmpty: false,
       checkInUpdate: true,
+      resetTissues: this.fetchParams('tissue') && this.fetchParams('tissue').length > 0 ? false : true,
+      resetHosts:  this.fetchParams('host') && this.fetchParams('host').length > 0 ? false : true,
       project_id_download_in_progress: null,
       project_add_email_validation: null,
       projectType: this.fetchParams('type') || 'all',
@@ -111,6 +113,7 @@ class Samples extends React.Component {
         'tissue_type'
       ]
     };
+
     this.sortCount = 0;
     this.COLUMN_DISPLAY_MAP = {
       total_reads: { display_name: "Total reads", type: "pipeline_data" },
@@ -164,9 +167,7 @@ class Samples extends React.Component {
       filterList.splice(filterIndex, 1);
     }
     this.setState({
-      selectedTissueFilters: filterList,
-      pagesLoaded: 0,
-      pageEnd: false,
+      selectedTissueFilters: filterList
     }, () => {
       this.setUrlLocation("none");
     });
@@ -187,9 +188,7 @@ class Samples extends React.Component {
     }
     // update the state with the new array of options
     this.setState({
-      selectedHostIndices: hostList,
-      pagesLoaded: 0,
-      pageEnd: false
+      selectedHostIndices: hostList
     }, () => {
       this.setUrlLocation("none");
     })
@@ -253,7 +252,7 @@ class Samples extends React.Component {
       new_sort = (this.state.sort_by === 'name,asc') ? 'name,desc' :  'name,asc';
       message = (new_sort === 'name,asc') ? 'Sorting samples by name (A-Z)...' : 'Sorting samples by name (Z-A)...';
     }
-    this.setState({ sort_by: new_sort, pagesLoaded: 0, pageEnd: false }, () => {
+    this.setState({ sort_by: new_sort}, () => {
       this.setUrlLocation();
       this.nanobar.go(30);
       this.fetchResults();
@@ -365,9 +364,7 @@ class Samples extends React.Component {
       this.setState({ searchParams: e.target.value });
     } else {
       this.setState({
-        searchParams: '',
-        pageEnd: false,
-        pagesLoaded: 0
+        searchParams: ''
       }, () => {
         this.setUrlLocation();
         this.fetchResults();
@@ -602,22 +599,28 @@ class Samples extends React.Component {
   //fetch results from filtering, search or switching projects
   fetchResults(cb, reset_filters=false) {
     this.nanobar.go(30);
+    // always fetch from page one
+    this.state.pagesLoaded = 0;
+    this.state.pageEnd = false;
+    this.state.isRequesting = true;
     const params = this.getParams();
-    console.log(params);
     axios.get(`/samples?${params}`).then((res) => {
       this.nanobar.go(100);
       this.setState((prevState) => ({
         initialFetchedSamples: res.data.samples,
         allSamples: res.data.samples,
         tissueTypes: this.allTissueTypes(res.data.tissue_types),
-        selectedTissueFilters: reset_filters ? this.allTissueTypes(res.data.tissue_types) : prevState.selectedTissueFilters,
+        selectedTissueFilters: reset_filters || prevState.resetTissues ? this.allTissueTypes(res.data.tissue_types) : prevState.selectedTissueFilters,
         hostGenomes: res.data.host_genomes,
-        selectedHostIndices: reset_filters ? res.data.host_genomes.map(h => h.id) : prevState.selectedHostIndices,
+        selectedHostIndices: reset_filters || prevState.resetHosts ? res.data.host_genomes.map(h => h.id) : prevState.selectedHostIndices,
         displayEmpty: false,
         checkInUpdate: false, //don't trigger more update if it's from the fetchResults
+        resetTissues: false,
+        resetHosts: false,
         totalNumber: res.data.total_count,
         pagesLoaded: prevState.pagesLoaded+1,
-        pageEnd: res.data.samples.length < this.pageSize
+        pageEnd: res.data.samples.length < this.pageSize,
+        isRequesting: false
       }));
       if (!this.state.allSamples.length) {
         this.setState({ displayEmpty: true });
@@ -689,8 +692,6 @@ class Samples extends React.Component {
     if (e.target.value !== '' && e.key === 'Enter') {
       this.nanobar.go(30);
       this.setState({
-        pagesLoaded: 0,
-        pageEnd: false,
         searchParams: e.target.value
       }, () => {
         this.setUrlLocation();
@@ -703,17 +704,14 @@ class Samples extends React.Component {
     if (!projId) {
       this.setState({
         selectedProjectId: null,
-        project: null,
-        pagesLoaded: 0,
-        pageEnd: false,
+        project: null
       });
       this.fetchResults(null, true);
     } else {
       projId = parseInt(projId);
       axios.get(`projects/${projId}.json`).then((res) => {
         this.setState({
-          pagesLoaded: 0,
-          project: res.data,
+          project: res.data
         });
         this.fetchProjectUsers(projId);
         this.fetchResults(null, true);
@@ -847,7 +845,6 @@ class Samples extends React.Component {
   clearAllFilters() {
     this.setState({
       filterParams: '',
-      pagesLoaded: 0,
       searchParams:'',
       sampleIdsParams: [],
       selectedTissueFilters: [],
@@ -903,9 +900,7 @@ class Samples extends React.Component {
     list.splice(index, 1);
     if (index >= 0) {
       let new_state = {
-        [`${state_var}`]: list,
-        pagesLoaded: 0,
-        pageEnd: false
+        [`${state_var}`]: list
       }
       this.setState(new_state, () => {
         this.setUrlLocation("none");
@@ -1301,16 +1296,12 @@ class Samples extends React.Component {
     if (this.state.checkInUpdate) { //fetchResults hasn't run since the host/tissue change
       if(prevHostIndices.length !== this.state.selectedHostIndices.length) {
         this.setState({
-          pagesLoaded: 0,
-          pageEnd: false,
           hostFilterChange: true
         })
       }
 
       if(prevTissueFilters.length !== this.state.selectedTissueFilters.length) {
         this.setState({
-          pagesLoaded: 0,
-          pageEnd: false,
           tissueFilterChange: true
         })
       }
@@ -1389,8 +1380,6 @@ class Samples extends React.Component {
   handleStatusFilterSelect(e) {
     let status = e.target.getAttribute('data-status');
     this.setState({
-      pagesLoaded: 0,
-      pageEnd: false,
       filterParams: status
     }, () => {
       this.setUrlLocation();
@@ -1421,8 +1410,6 @@ class Samples extends React.Component {
   handleProjectSelection(id, listType) {
     this.setState({
       selectedProjectId: id,
-      pagesLoaded: 0,
-      pageEnd: false,
       projectType: listType,
       filterParams: '',
       searchParams:'',
