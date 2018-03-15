@@ -1391,7 +1391,7 @@ class Samples extends React.Component {
     this.initializeTooltip();
     this.fetchProjectPageData();
     //this.state.selectedProjectId ? this.fetchProjectUsers(this.state.selectedProjectId) : null;
-    //this.scrollDown();
+    this.scrollDown();
     // this.initializeProjectList();
     this.displayPipelineStatusFilter();
     this.initializeColumnSelect();
