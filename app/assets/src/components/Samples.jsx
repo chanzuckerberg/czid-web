@@ -545,8 +545,8 @@ class Samples extends React.Component {
       this.setState((prevState) => ({
         initialFetchedSamples: res.data.samples,
         allSamples: res.data.samples,
-        tissueTypes: ['-', ...res.data.tissue_types],
-        selectedTissueFilters: this.state.selectedTissueFilters.length == 0 ? ['-', ...res.data.tissue_types] : this.state.selectedTissueFilters,
+        tissueTypes: this.allTissueTypes(res.data.tissue_types),
+        selectedTissueFilters: this.state.selectedTissueFilters.length == 0 ? this.allTissueTypes(res.data.tissue_types) : this.state.selectedTissueFilters,
         selectedHostIndices: this.state.selectedHostIndices.length == 0 ? res.data.host_genomes.map(h => h.id) : this.state.selectedHostIndices,
         hostGenomes: res.data.host_genomes,
         displayEmpty: false,
@@ -615,16 +615,25 @@ class Samples extends React.Component {
       params += `&ids=${sampleParams}`
     }
 
-    if(this.state.selectedTissueFilters.length) {
+    if (this.state.selectedTissueFilters.length) {
       let tissueParams = this.state.selectedTissueFilters.join(',');
       params += `&tissue=${tissueParams}`
+    } else {
+      params += "&tissue=none"
     }
 
-    if(this.state.selectedHostIndices.length) {
+    if (this.state.selectedHostIndices.length) {
       let hostParams = this.state.selectedHostIndices.join(',');
       params += `&host=${hostParams}`
+    } else {
+      params += "&host=none"
     }
+
     return params;
+  }
+
+  allTissueTypes(all_tissues) {
+    return (all_tissues.length == 0) ? all_tissues : ['-', ...all_tissues]
   }
 
   //fetch results from filtering, search or switching projects
@@ -637,8 +646,8 @@ class Samples extends React.Component {
       this.setState((prevState) => ({
         initialFetchedSamples: res.data.samples,
         allSamples: res.data.samples,
-        tissueTypes: ['-', ...res.data.tissue_types],
-        selectedTissueFilters: reset_filters ? ['-', ...res.data.tissue_types] : prevState.selectedTissueFilters,
+        tissueTypes: this.allTissueTypes(res.data.tissue_types),
+        selectedTissueFilters: reset_filters ? this.allTissueTypes(res.data.tissue_types) : prevState.selectedTissueFilters,
         hostGenomes: res.data.host_genomes,
         selectedHostIndices: reset_filters ? res.data.host_genomes.map(h => h.id) : prevState.selectedHostIndices,
         displayEmpty: false,
