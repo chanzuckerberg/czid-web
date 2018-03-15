@@ -79,7 +79,7 @@ class Samples extends React.Component {
       tissueFilterChange: false,
       checkedBoxes: 0,
       allChecked: false,
-      selectedSampleIndices: [],
+      selectedSampleIds: [],
       displayDropdown: false,
       selectedTissueFilters: this.fetchParams('tissue') ? this.fetchParams('tissue').split(',') : [],
       selectedHostIndices: this.fetchParams('host') ? this.fetchParams('host').split(',').map(Number) : [],
@@ -471,8 +471,8 @@ class Samples extends React.Component {
               <div className='flex-container'>
                 <ul className='flex-items'>
                   <li className='check-box-container'>
-                    { this.state.displaySelectSamplees ? <div><input type="checkbox" id={i} onClick = { this.selectSample }
-                      className="filled-in checkbox" value={ this.state.selectedSampleIndices.indexOf(i) != -1 }
+                    { this.state.displaySelectSamplees ? <div><input type="checkbox" id={dbSample.id} onClick = { this.selectSample }
+                      className="filled-in checkbox" value={ this.state.selectedSampleIds.indexOf(dbSample.id) != -1 }
                       disabled={status != "COMPLETE"}
                       /> <label htmlFor={i}>{sample_name_info}</label></div> : sample_name_info }
                   </li>
@@ -816,7 +816,7 @@ class Samples extends React.Component {
   fetchAllSelectedIds(checked) {
     var that = this;
     $('.checkbox').each((id, element) => {
-      let sampleList = that.state.selectedSampleIndices;
+      let sampleList = that.state.selectedSampleIds;
       if (checked) {
         if (sampleList.indexOf(id) === -1) {
           sampleList.push(+id);
@@ -824,7 +824,7 @@ class Samples extends React.Component {
       } else {
         sampleList = []
       }
-    that.setState({ selectedSampleIndices: sampleList })
+    that.setState({ selectedSampleIds: sampleList })
     });
   }
 
@@ -833,12 +833,8 @@ class Samples extends React.Component {
     if(this.state.allChecked) {
       this.fetchAllSelectedIds(this.state.allChecked);
     }
-    if(this.state.selectedSampleIndices.length) {
-      let sampleParams = this.state.selectedSampleIndices;
-      let sampleIds = this.state.selectedSampleIndices.map((idx) => {
-        return this.state.allSamples[idx].db_sample.id;
-      });
-      location.href = `/samples/heatmap?sample_ids=${sampleIds}`
+    if(this.state.selectedSampleIds.length) {
+      location.href = `/samples/heatmap?sample_ids=${this.state.selectedSampleIds}`
     }
   }
 
@@ -862,7 +858,7 @@ class Samples extends React.Component {
       allChecked: false
     });
     // current array of options
-    const sampleList = this.state.selectedSampleIndices
+    const sampleList = this.state.selectedSampleIds
 
     let index
     // check if the check box is checked or unchecked
@@ -878,7 +874,7 @@ class Samples extends React.Component {
     var checkedCount = $("input:checkbox:checked").length
     // update the state with the new array of options
     this.setState({
-      selectedSampleIndices: sampleList,
+      selectedSampleIds: sampleList,
       checkedBoxes: checkedCount
      })
   }
