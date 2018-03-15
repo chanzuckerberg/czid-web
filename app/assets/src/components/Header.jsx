@@ -73,6 +73,7 @@ class Header extends React.Component  {
                 <br/> --r1 <span className="code-to-edit">your_sample_R1</span>.fastq.gz --r2 <span className="code-to-edit">your_sample_R2</span>.fastq.gz
               </p>
             </div>
+            <br/>
             <p>4. You can also upload samples in bulk by specifying a folder as follows:</p>
             <div className="code center-code">
               <p>
@@ -81,7 +82,9 @@ class Header extends React.Component  {
                 <br/> --bulk <span className="code-to-edit">/path/to/your/folder</span>
               </p>
             </div>
+            <br/>
             <div className="divider"></div>
+            <br/>
             <p>By default, the host genome to be subtracted out is "Human".<br/>
                You can change it by adding <span className="code">--host_genome_name <span className="code-to-edit">'Your Chosen Host'</span></span> to the command.<br/>
                Current possibilities for <span className="code-to-edit">'Your Chosen Host'</span>:<br/>

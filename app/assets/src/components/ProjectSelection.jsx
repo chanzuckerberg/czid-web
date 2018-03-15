@@ -252,6 +252,10 @@ import Samples from './Samples';
       </div>);
     }
 
+    const delete_icon = (
+      <span><i className="fa fa-close"/> </span>
+    );
+
     const all_projects_section = (
       <div className="projects">
         <div data-title="allprojects" className="title">All Projects</div>
@@ -266,6 +270,7 @@ import Samples from './Samples';
                     <div className="all project-item"
                          onClick={this.handleProjectClick}
                          data-id={project.id}  key={i}>
+                      {delete_icon}
                       <span className='project-label'
                         data-id={project.id}>
                         {project.name}
@@ -279,6 +284,7 @@ import Samples from './Samples';
               <div className="all project-item"
                    onClick={this.handleProjectClick}
                    data-id={project.id} key={i}>
+                {delete_icon}
                 <span className='project-label'
                   data-id={project.id}>
                   {project.name}
