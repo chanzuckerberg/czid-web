@@ -686,6 +686,7 @@ $break-large: 1070px;
   .search-box {
     display: inline-block;
     width: inherit;
+    height: 50px;
     margin: 20px 0 5px;
     border-radius: 3px;
     padding-left: 6px;
@@ -939,6 +940,15 @@ input[type="button"] {
         border: solid 4px #f8f8f8;
       }
     }
+
+   .filter-tags-list {
+     padding-left: 20px;
+     .label-tags {
+        background: #3867fa !important;
+        border-color: #3867fa !important;
+        color: #fff;
+     }
+   }
   }
 
   .project-info {

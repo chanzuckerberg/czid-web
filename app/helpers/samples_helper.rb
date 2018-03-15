@@ -185,11 +185,13 @@ module SamplesHelper
   end
 
   def filter_by_tissue_type(samples, query)
+    return samples.where("false") if query == ["none"]
     updated_query = query.map { |x| x == '-' ? nil : x }
     samples.where(sample_tissue: updated_query)
   end
 
   def filter_by_host(samples, query)
+    return samples.where("false") if query == ["none"]
     samples.where(host_genome_id: query)
   end
 

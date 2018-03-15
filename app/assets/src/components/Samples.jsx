@@ -11,7 +11,7 @@ import numberWithCommas from '../helpers/strings';
 import ProjectSelection from './ProjectSelection';
 import PipelineSampleReads from './PipelineSampleReads';
 import StringHelper from '../helpers/StringHelper';
-import { Dropdown } from 'semantic-ui-react';
+import { Dropdown, Label, Icon } from 'semantic-ui-react';
 import Nanobar from 'nanobar';
 
 class Samples extends React.Component {
@@ -75,7 +75,6 @@ class Samples extends React.Component {
       selectedSampleIndices: [],
       displayDropdown: false,
       selectedTissueFilters: this.fetchParams('tissue') ? this.fetchParams('tissue').split(',') : [],
-      selectedTissueIndices: [],
       selectedHostIndices: this.fetchParams('host') ? this.fetchParams('host').split(',').map(Number) : [],
       initialFetchedSamples: [],
       loading: false,
@@ -166,7 +165,7 @@ class Samples extends React.Component {
       pagesLoaded: 0,
       pageEnd: false,
     }, () => {
-      this.setUrlLocation();
+      this.setUrlLocation("none");
     });
   }
 
@@ -189,7 +188,7 @@ class Samples extends React.Component {
       pagesLoaded: 0,
       pageEnd: false
     }, () => {
-      this.setUrlLocation();
+      this.setUrlLocation("none");
     })
   }
 
@@ -543,7 +542,9 @@ class Samples extends React.Component {
       this.setState((prevState) => ({
         initialFetchedSamples: res.data.samples,
         allSamples: res.data.samples,
-        tissueTypes: res.data.tissue_types,
+        tissueTypes: this.allTissueTypes(res.data.tissue_types),
+        selectedTissueFilters: this.state.selectedTissueFilters.length == 0 ? this.allTissueTypes(res.data.tissue_types) : this.state.selectedTissueFilters,
+        selectedHostIndices: this.state.selectedHostIndices.length == 0 ? res.data.host_genomes.map(h => h.id) : this.state.selectedHostIndices,
         hostGenomes: res.data.host_genomes,
         displayEmpty: false,
         pagesLoaded: prevState.pagesLoaded+1,
@@ -610,29 +611,41 @@ class Samples extends React.Component {
       params += `&ids=${sampleParams}`
     }
 
-    if(this.state.selectedTissueFilters.length) {
+    if (this.state.selectedTissueFilters.length) {
       let tissueParams = this.state.selectedTissueFilters.join(',');
       params += `&tissue=${tissueParams}`
+    } else if (this.state.tissueTypes.length > 0) {
+      params += "&tissue=none"
     }
 
-    if(this.state.selectedHostIndices.length) {
+    if (this.state.selectedHostIndices.length) {
       let hostParams = this.state.selectedHostIndices.join(',');
       params += `&host=${hostParams}`
+    } else {
+      params += "&host=none"
     }
+
     return params;
   }
 
+  allTissueTypes(all_tissues) {
+    return (all_tissues.length == 0) ? all_tissues : ['-', ...all_tissues]
+  }
+
   //fetch results from filtering, search or switching projects
-  fetchResults(cb) {
+  fetchResults(cb, reset_filters=false) {
     this.nanobar.go(30);
     const params = this.getParams();
+    console.log(params);
     axios.get(`/samples?${params}`).then((res) => {
       this.nanobar.go(100);
       this.setState((prevState) => ({
         initialFetchedSamples: res.data.samples,
         allSamples: res.data.samples,
-        tissueTypes: res.data.tissue_types,
+        tissueTypes: this.allTissueTypes(res.data.tissue_types),
+        selectedTissueFilters: reset_filters ? this.allTissueTypes(res.data.tissue_types) : prevState.selectedTissueFilters,
         hostGenomes: res.data.host_genomes,
+        selectedHostIndices: reset_filters ? res.data.host_genomes.map(h => h.id) : prevState.selectedHostIndices,
         displayEmpty: false,
         totalNumber: res.data.total_count,
         pagesLoaded: prevState.pagesLoaded+1,
@@ -732,10 +745,10 @@ class Samples extends React.Component {
       axios.get(`projects/${projId}.json`).then((res) => {
         this.setState({
           pagesLoaded: 0,
-          project: res.data
+          project: res.data,
         });
         this.fetchProjectUsers(projId);
-        this.fetchResults();
+        this.fetchResults(null, true);
       }).catch((err) => {
         this.setState({ project: null })
       })
@@ -911,7 +924,44 @@ class Samples extends React.Component {
     location.href = `/projects/${id}/csv`;
   }
 
+  applyExcluded(e, type, state_var) {
+    let id = e.target.getAttribute('data-exclude')
+    if (type === "int") {
+      id = +id
+    }
+    let list = Object.assign([], this.state[state_var]);
+    let index;
+    index = list.indexOf(id);
+    list.splice(index, 1);
+    if (index >= 0) {
+      let new_state = {
+        [`${state_var}`]: list,
+        pagesLoaded: 0,
+        pageEnd: false
+      }
+      this.setState(new_state, () => {
+        this.setUrlLocation("none");
+        this.fetchResults();
+      })
+    }
+  }
 
+  generateTagList(state_all_options, state_selected_options, prefix, id_field=null, name_field=null, id_type=null) {
+    return this.state[state_all_options].map((entry, i) => {
+      let id = id_field ? entry[id_field] : entry
+      let name = name_field ? entry[name_field] : entry
+      if (this.state[state_selected_options].indexOf(id) >= 0) {
+        return (
+          <Label className="label-tags" size="tiny" key={`${state_all_options}_tag_${i}`}>
+            {`${prefix}${name}`}
+            <Icon name='close' data-exclude={id} onClick= { (e) => { this.applyExcluded(e, id_type, state_selected_options);} }/>
+          </Label>
+        );
+    } else {
+        return null;
+    }
+    });
+  }
 
   renderTable(samples) {
     let project_id = this.state.selectedProjectId ? this.state.selectedProjectId : 'all'
@@ -971,6 +1021,9 @@ class Samples extends React.Component {
       </div>
     )
 
+    const host_filter_tag_list = this.generateTagList("hostGenomes", "selectedHostIndices", "Host: ", "id", "name", "int")
+    const tissue_filter_tag_list = this.generateTagList("tissueTypes", "selectedTissueFilters", "Tissue: ")
+
     const metaDataFilter = (
       <div className="col s2 wrapper">
         <div className={this.state.displayDropdown ? "metadata metadata-active" : "metadata"} onClick={this.displayMetaDataDropdown}>
@@ -993,9 +1046,9 @@ class Samples extends React.Component {
                 })}
                   </div>
               <div className="col s6">
-              <h6>Tissue type</h6>
+              <h6>Tissue</h6>
                 {this.state.tissueTypes.length == 0 ?
-                   <div className="options-wrapper"><label>No tissue type data present</label></div> :
+                   <div className="options-wrapper"><label>No tissue data present</label></div> :
                    this.state.tissueTypes.map((tissue, i) => {
                      return (
                        <div key={i} className="options-wrapper">
@@ -1247,6 +1300,9 @@ class Samples extends React.Component {
         <div className="divider"></div>
         <div className="sample-container no-padding col s12">
           { search_box }
+          <div className="filter-tags-list">
+            { host_filter_tag_list } { tissue_filter_tag_list }
+          </div>
           <div className="sample-table-container row">
             { tableHead }
             { !samples.length && this.state.displayEmpty ? this.renderEmptyTable() : this.renderPipelineOutput(samples)  }
@@ -1278,33 +1334,28 @@ class Samples extends React.Component {
 
     if(prevHostIndices.length !== this.state.selectedHostIndices.length) {
       this.setState({
+        pagesLoaded: 0,
+        pageEnd: false,
         hostFilterChange: true
       })
     }
 
     if(prevTissueFilters.length !== this.state.selectedTissueFilters.length) {
       this.setState({
+        pagesLoaded: 0,
+        pageEnd: false,
         tissueFilterChange: true
       })
     }
 
-    if(!this.state.displayDropdown) {
-      if (this.state.hostFilterChange) {
-        this.fetchResults();
-        this.setState({
-          hostFilterChange: false
-        })
-      }
 
-      if (this.state.tissueFilterChange) {
-        this.fetchResults();
-        this.setState({
-          tissueFilterChange: false
-        })
-      }
+    if (!this.state.displayDropdown && (this.state.hostFilterChange || this.state.tissueFilterChange)) {
+      this.setUrlLocation("none");
+      this.fetchResults();
+      this.state.hostFilterChange = false;
+      this.state.tissueFilterChange = false;
     }
   }
-
 
   componentDidMount() {
     $(() => {
@@ -1339,8 +1390,8 @@ class Samples extends React.Component {
     this.displayDownloadDropdown();
     this.initializeTooltip();
     this.fetchProjectPageData();
-    this.state.selectedProjectId ? this.fetchProjectDetails(this.state.selectedProjectId) : null;
-    this.scrollDown();
+    //this.state.selectedProjectId ? this.fetchProjectUsers(this.state.selectedProjectId) : null;
+    //this.scrollDown();
     // this.initializeProjectList();
     this.displayPipelineStatusFilter();
     this.initializeColumnSelect();
@@ -1380,14 +1431,18 @@ class Samples extends React.Component {
     });
   }
 
+  selectionToParamsOrNone(selected_options, value_when_empty = "") {
+    return selected_options.length == 0 ? value_when_empty : selected_options.join(",")
+  }
+
   //set Url based on requests
-  setUrlLocation() {
+  setUrlLocation(value_when_empty="") {
     let projectId = parseInt(this.state.selectedProjectId);
     const params = {
       project_id: projectId ? projectId : null,
       filter: this.state.filterParams,
-      tissue: this.state.selectedTissueFilters.join(','),
-      host: this.state.selectedHostIndices.join(','),
+      tissue: this.selectionToParamsOrNone(this.state.selectedTissueFilters, value_when_empty),
+      host: this.selectionToParamsOrNone(this.state.selectedHostIndices, value_when_empty),
       search: this.state.searchParams,
       ids: this.state.sampleIdsParams,
       sort_by: this.state.sort_by,
@@ -1404,13 +1459,13 @@ class Samples extends React.Component {
       projectType: listType,
       filterParams: '',
       searchParams:'',
-      sampleIdsParams: [],
       selectedTissueFilters: [],
-      selectedHostIndices: []
+      selectedHostIndices: [],
+      sampleIdsParams: []
     }, () => {
       this.setUrlLocation();
       this.fetchProjectDetails(id);
-      this.fetchProjectUsers(id)
+      this.fetchProjectUsers(id);
     });
   }
 
