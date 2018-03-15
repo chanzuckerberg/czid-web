@@ -461,8 +461,7 @@ $break-large: 1070px;
 
 .sample-container {
   .metadata {
-    position: relative;   
-    background: #f4f4f4; 
+    position: relative;
     border-radius: 40px;
     border: solid 1px #cccccc;
     .metadata-dropdown {
@@ -685,12 +684,12 @@ $break-large: 1070px;
   }
 
   .search-box {
-    padding-left: 20px;
     display: inline-block;
     width: inherit;
     height: 50px;
     margin: 20px 0 5px;
     border-radius: 3px;
+    padding-left: 6px;
     .wrapper {
       .metadata {
         border-radius: 40px;
@@ -722,7 +721,6 @@ $break-large: 1070px;
     .check-all {
       display: inline-block;
       float: left;
-      border: 1px solid #ddd;
       padding: 9px 17px;
       margin: 0 10px 0px 0px;
       label {
@@ -854,7 +852,6 @@ input[type="button"] {
       font-size: 14px;
       padding-top: 20px;
       padding: 21px 21px 0 21px;
-      // color: $subdued-color;
       text-transform: uppercase;
     }
     .divider {
@@ -864,11 +861,13 @@ input[type="button"] {
     }
     .project-wrapper {
       margin-top: 50px;
+      .fav-title {
+        padding-bottom: 10px !important;
+      }
       .fav-row {
         .title {
           color: #f1f1f1;
-          letter-spacing: 1.5px;
-          padding: 21px 21px 10px 21px;
+          padding: 21px 21px 0 21px;
           font-size: 14px;
         }
       }
@@ -951,12 +950,18 @@ input[type="button"] {
      }
    }
   }
+
   .project-info {
     padding-left: 20px;
     .download-section {
       .download-wrapper {
         float: right;
         padding-top: 20px;
+        .ui.labeled.icon.button>.icon { // Actual icon in the button
+          background-color: transparent;
+          font-size: 1.3em;
+          margin-left: 0.4em !important;
+        }
         .ui.dropdown.link.item {
           padding: 7px 30px;
           border-radius: 40px;
@@ -972,6 +977,18 @@ input[type="button"] {
          a.item {
             color: #000000
           }
+        }
+        .ui.dropdown .text { // The text in the button
+          font-size: 1.2em;
+          padding: 0.05em;
+        }
+        .download-btn { // The whole button
+          color: #3867fa;
+          background-color: transparent;
+          padding-left: 5em;
+        }
+        .download-reports {
+          color: #3867fa;
         }
       }
       padding-top: 15px;
@@ -1017,6 +1034,10 @@ input[type="button"] {
 .fa-star{
   margin-top: 4px;
   color: #3867fa;
+}
+
+.fa-star-o {
+  margin-top: 4px;
 }
 
 .project-popup {
@@ -1153,4 +1174,8 @@ input[type="button"] {
 
 .dropdown-content li>a, .dropdown-content li>span {
   font-size: 14px;
+}
+
+.nanobar .bar {
+  background-color: #3687fa;
 }

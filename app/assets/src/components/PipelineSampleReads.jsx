@@ -4,6 +4,7 @@ import moment from 'moment';
 import $ from 'jquery';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import { Button, Icon } from 'semantic-ui-react'
 import numberWithCommas from '../helpers/strings';
 import SubHeader from './SubHeader';
 import PipelineSampleReport from './PipelineSampleReport';
@@ -157,7 +158,8 @@ class PipelineSampleReads extends React.Component {
   static fetchTissueTypes() {
     let tissue_types =  ['-',"Bronchoalveolar lavage", "Cerebrospinal fluid",
     "Nasopharyngeal swab", "Plasma", "Serum", "Solid tissue",
-    "Stool", "Synovial fluid", "Whole blood"];
+    "Stool", "Synovial fluid", "Whole blood",
+    "Whole insect", "Insect abdomen", "Insect engorged abdomen", "Insect head"];
     return tissue_types;
   }
 
@@ -505,9 +507,10 @@ class PipelineSampleReads extends React.Component {
                 <ul className="report-action-buttons">
                   <li>
                     <a href={this.getDownloadLink()}>
-                      <button className='o'>
-                        <i className="fa fa-cloud-download fa-fw" />Download
-                      </button>
+                      <Button icon labelPosition="left" className="icon link download-btn">
+                        <Icon className="cloud download alternate" />
+                        Download
+                      </Button>
                     </a>
                   </li>
                 </ul>

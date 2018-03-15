@@ -475,6 +475,7 @@ margin-bottom: 0px;
 }
 .genus-autocomplete-container {
   padding: 0 !important;
+  height: 30px !important;
   &:hover {
     background: inherit !important;
   }
@@ -500,14 +501,10 @@ margin-bottom: 0px;
     [role='combobox'] {
       padding-left: 8px;
       width: inherit;
-      height: inherit;
+      height: 20px !important;
       outline: none;
       &::placeholder, &::-webkit-input-placeholder, &:-moz-placeholder, &::placeholder {
         color: #BAC7CF
-      }
-      &:focus {
-        box-shadow: 0 0 5px #00a9f4 !important;
-        border: 1px solid #00a9f4 !important;
       }
     }
   }
@@ -561,7 +558,7 @@ margin-bottom: 0px;
 
         color: #ffffff;
         .filter-tag-name {
-          font-family: OpenSans;
+          font-family: Open Sans, Helvetica, Arial, sans-serif;
           font-size: 12px;
           font-weight: 600;
           font-style: normal;
@@ -580,6 +577,11 @@ margin-bottom: 0px;
           object-fit: contain;
         }
       }
+    }
+    .filter-btn {
+      margin: 10px;
+      height: 30px !important;
+      margin-left: auto !important;
     }
     .report-top-filters {
       .filter-lists {
@@ -605,22 +607,26 @@ margin-bottom: 0px;
               overflow: hidden;
               width: 80%;
               position: relative;
-              top: 4px;
+              font-size: 8pt;
             }
             .filter-label-count {
-                width: 24px;
-                height: 24px;
-                border-radius: 14px;
-                background-color: #f8f8f8;
-                font-family: OpenSans;
-                font-size: 12px;
-                font-weight: 600;
-                font-style: normal;
-                font-stretch: normal;
-                line-height: normal;
-                letter-spacing: 1.4px;
-                text-align: left;
-                color: #3867fa;
+              width: 24px;
+              height: 24px;
+              border-radius: 14px;
+              background-color: #f8f8f8;
+              font-family: OpenSans;
+              font-size: 12px;
+              font-weight: 600;
+              font-style: normal;
+              font-stretch: normal;
+              line-height: normal;
+              letter-spacing: 1.4px;
+              text-align: left;
+              color: #3867fa;
+              vertical-align: top;
+            }
+            .down-box {
+              position: initial !important;
             }
             &.download-report-button {
               padding: 8px;
@@ -638,7 +644,8 @@ margin-bottom: 0px;
               position: relative;
               top: -5px;
               margin: 0;
-              height: 31px;
+              height: 14px !important;
+              border-radius: 75px;
             }
             i {
               color: #878787;
@@ -701,6 +708,7 @@ margin-bottom: 0px;
     }
   }
 }
+
 .report-action-buttons {
   li {
     display: inline-block;
@@ -713,7 +721,7 @@ margin-bottom: 0px;
       background: #3867fa;
       color: #fff;
       font-size: 16px;
-      width: 100%;
+      width: 150px;
       &.o {
         background: #fff;
         color: #3867fa;
@@ -721,12 +729,71 @@ margin-bottom: 0px;
           background: #3867fa;
           color: #fff;
         }
+        i.fa {
+          padding-right: 30px;
+          font-size: 1.2em;
+        }
       }
     }
   }
+  .ui.labeled.icon.button>.icon { // Actual icon in the button
+    background-color: transparent;
+    font-size: 1.3em;
+    margin-left: 0.4em !important;
+  }
+  .download-btn { // The whole button
+    color: #3867fa !important;
+    background-color: transparent !important;
+    padding-left: 5em !important;
+    border: 1px solid #e4e4e4;
+    //padding: 5px 1em;
+    border-radius: 999999px;
+  }
+  .ui.dropdown .text { // The text in the button
+    font-size: 1.2em;
+    padding: 0.05em;
+  }
 }
 
-.advanced-filters-modal, .categories-filters-modal {
+.advanced-filters-modal {
+  width: 500px !important;
+  display: none;
+  position: absolute;
+  background: #fff;
+  box-shadow: 1px 2px 2px 2px #c8c8c8;
+  margin-left: -16px;
+  margin-top: 8px;
+  padding: 10px;
+  cursor: auto;
+  border-radius: 10px;
+  .metric-thresholds {
+    width: 100%;
+  }
+  .add-threshold-filter {
+    background: #f7f7f7;
+    padding: 5px;
+    width: 175px;
+    text-align: center;
+    cursor: pointer;
+  }
+  .round-me {
+    border-radius: 10px;
+  }
+  .inner-menus {
+    font-family: Open Sans, Helvetica, Arial, sans-serif;
+    border-radius: 20px;
+    font-size: 10pt;
+    height: 30px;
+  }
+  .save-btn {
+    background: #3867fa;
+    color: white;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+.categories-filters-modal {
   display: none;
   position: absolute;
   background: #fff;

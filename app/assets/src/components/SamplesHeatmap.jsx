@@ -659,15 +659,19 @@ class SamplesHeatmap extends React.Component {
     return data[keys[0]][keys[1]];
   }
 
+  getThresholdedDataProperty(data, property) {
+    let value = this.getDataProperty(data, property);
+    if (value >= this.state.minDataThreshold && value <= this.state.maxDataThreshold) {
+      return value;
+    }
+  }
+
   makeDataGetter (dataType) {
     let that = this;
     return function (row, col) {
       let taxon = this.getTaxonFor(row, col);
       if (taxon) {
-        let value = this.getDataProperty(taxon, dataType);
-        if (value >= this.state.minDataThreshold && value <= this.state.maxDataThreshold) {
-          return value;
-        }
+        return this.getThresholdedDataProperty(taxon, dataType);
       }
     }
   }
@@ -726,19 +730,11 @@ class SamplesHeatmap extends React.Component {
       return this.getDataProperty(d, dataType);
     });
     let thresholdMin = d3.min(taxons, (d) => {
-      let value = this.getDataProperty(d, dataType);
-      if (value >= this.state.minDataThreshold && value <= this.state.maxDataThreshold) {
-        return value;
-      }
-      return null;
+      return this.getThresholdedDataProperty(d, dataType);
     });
 
     let thresholdMax = d3.max(taxons, (d) => {
-      let value = this.getDataProperty(d, dataType);
-      if (value >= this.state.minDataThreshold && value <= this.state.maxDataThreshold) {
-        return value;
-      }
-      return null;
+      return this.getThresholdedDataProperty(d, dataType);
     });
 
     return {
@@ -757,7 +753,7 @@ class SamplesHeatmap extends React.Component {
         let value = null;
         for(let taxon of sample.taxons) {
           if (taxon.name == taxon_name) {
-            value = this.getDataProperty(taxon, dataType);
+            value = this.getThresholdedDataProperty(taxon, dataType);
             break;
           }
         }
@@ -830,7 +826,7 @@ class SamplesHeatmap extends React.Component {
         let value = null;
         for (let sample_taxon of sample.taxons) {
           if (sample_taxon.name == taxon) {
-            value = this.getDataProperty(sample_taxon, dataType);
+            value = this.getThresholdedDataProperty(sample_taxon, dataType);
             break;
           }
         }
@@ -1017,6 +1013,9 @@ class SamplesHeatmap extends React.Component {
   }
 
   taxonLevelChanged (e, d) {
+    if (this.state.species == d.value) {
+      return;
+    }
     this.setState({ species: d.value, species_label: d.label, data: null });
     this.fetchDataFromServer(null, d.value);
   }
@@ -1041,14 +1040,6 @@ class SamplesHeatmap extends React.Component {
         label="Taxon Level:"
       />
     );
-    /*
-    return (
-      <select value={this.state.species} onChange={this.taxonLevelChanged.bind(this)}>
-        <option value="0">Genus</option>
-        <option value="1">Species</option>
-      </select>
-    );
-    */
   }
 
   updateDataScale (e, d) {

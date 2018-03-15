@@ -1,8 +1,9 @@
 <div style="margin:15px;">
   <h2> <%= @title %> </h1>
-  <% @parsed_alignment_results['details'].each do |accession_id, data| %>
+  <% @parsed_alignment_results['accessions'].each do |accession_id| %>
+  <% data = @parsed_alignment_results['details'][accession_id] %>
   <div style="overflow:scroll;">
-    <b>Accession Id:</b> <%= accession_id %>, <b># Reads: </b> <%= data["reads_count"] %> <br/>
+    <b>Accession :</b> <%= accession_id %> <%= data['name'] %>, <b># Reads: </b> <%= data["reads_count"] %> <br/>
     <b>Reference Sequence:</b> <%= data['ref_seq'] %> <br/>
     <b>Reference Sequence Length:</b> <%= data['ref_seq_len'] %>, <b><%= link_to('NCBI URL', data['ref_link']) %></b> <br/>
       <p>
