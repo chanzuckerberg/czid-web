@@ -165,7 +165,7 @@ class Samples extends React.Component {
       pagesLoaded: 0,
       pageEnd: false,
     }, () => {
-      this.setUrlLocation(true);
+      this.setUrlLocation("none");
     });
   }
 
@@ -188,7 +188,7 @@ class Samples extends React.Component {
       pagesLoaded: 0,
       pageEnd: false
     }, () => {
-      this.setUrlLocation(true);
+      this.setUrlLocation("none");
     })
   }
 
@@ -618,7 +618,7 @@ class Samples extends React.Component {
     if (this.state.selectedTissueFilters.length) {
       let tissueParams = this.state.selectedTissueFilters.join(',');
       params += `&tissue=${tissueParams}`
-    } else {
+    } else if (this.state.tissueTypes.length > 0) {
       params += "&tissue=none"
     }
 
@@ -946,7 +946,7 @@ class Samples extends React.Component {
         pageEnd: false
       }
       this.setState(new_state, () => {
-        this.setUrlLocation(true);
+        this.setUrlLocation("none");
         this.fetchResults();
       })
     }
@@ -1356,7 +1356,7 @@ class Samples extends React.Component {
 
 
     if (!this.state.displayDropdown && (this.state.hostFilterChange || this.state.tissueFilterChange)) {
-      this.setUrlLocation(true);
+      this.setUrlLocation("none");
       this.fetchResults();
       this.state.hostFilterChange = false;
       this.state.tissueFilterChange = false;
@@ -1437,18 +1437,18 @@ class Samples extends React.Component {
     });
   }
 
-  selectionToParamsOrNone(selected_options) {
-    return selected_options.length == 0 ? "none" : selected_options.join(",")
+  selectionToParamsOrNone(selected_options, value_when_empty = "") {
+    return selected_options.length == 0 ? value_when_empty : selected_options.join(",")
   }
 
   //set Url based on requests
-  setUrlLocation(set_to_none_if_empty=false) {
+  setUrlLocation(value_when_empty="") {
     let projectId = parseInt(this.state.selectedProjectId);
     const params = {
       project_id: projectId ? projectId : null,
       filter: this.state.filterParams,
-      tissue: set_to_none_if_empty ? this.selectionToParamsOrNone(this.state.selectedTissueFilters) : this.state.selectedTissueFilters,
-      host: set_to_none_if_empty ? this.selectionToParamsOrNone(this.state.selectedHostIndices) : this.state.selectedTissueFilters,
+      tissue: this.selectionToParamsOrNone(this.state.selectedTissueFilters, value_when_empty),
+      host: this.selectionToParamsOrNone(this.state.selectedHostIndices, value_when_empty),
       search: this.state.searchParams,
       ids: this.state.sampleIdsParams,
       sort_by: this.state.sort_by,
