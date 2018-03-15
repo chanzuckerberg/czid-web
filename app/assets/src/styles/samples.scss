@@ -944,9 +944,10 @@ input[type="button"] {
    .filter-tags-list {
      padding-left: 20px;
      .label-tags {
-        background: #3867fa !important;
-        border-color: #3867fa !important;
-        color: #fff;
+       background: #3867fa !important;
+       border-color: #3867fa !important;
+       color: #fff;
+       margin: 0.4em;
      }
    }
   }
