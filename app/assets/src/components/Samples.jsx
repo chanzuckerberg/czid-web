@@ -3,15 +3,13 @@ import axios from 'axios';
 import ReactDOM from 'react-dom';
 import moment from 'moment';
 import $ from 'jquery';
-import Tipsy from 'react-tipsy';
 import Materialize from 'materialize-css';
-import {Sidebar, Grid, Segment} from 'semantic-ui-react';
+import {Sidebar, Grid, Segment, Popup, Dropdown} from 'semantic-ui-react';
 import SortHelper from './SortHelper';
 import numberWithCommas from '../helpers/strings';
 import ProjectSelection from './ProjectSelection';
 import PipelineSampleReads from './PipelineSampleReads';
 import StringHelper from '../helpers/StringHelper';
-import { Dropdown } from 'semantic-ui-react';
 import Nanobar from 'nanobar';
 
 class Samples extends React.Component {
@@ -1188,22 +1186,23 @@ class Samples extends React.Component {
                 </div>
               </li>
               { this.state.columnsShown.map((column_name, pos) => {
+
                 return (
                   <li key={`shown-${pos}`}>
                     {
-                      this.COLUMN_DISPLAY_MAP[column_name].tooltip ?
-                      <Tipsy position='bottom'
-                        content={this.COLUMN_DISPLAY_MAP[column_name].tooltip}>
-                        <div className='card-label column-title center-label sample-name center menu-dropdown'
-                          data-activates={`column-dropdown-${pos}`}>
-                          {this.COLUMN_DISPLAY_MAP[column_name].display_name } <i className="fa fa-caret-down"/>
-                        </div>
-                      </Tipsy>
-                      :
-                      <div className='card-label column-title center-label sample-name center menu-dropdown'
-                        data-activates={`column-dropdown-${pos}`}>
-                        {this.COLUMN_DISPLAY_MAP[column_name].display_name } <i className="fa fa-caret-down"/>
-                      </div>
+                      <Popup
+                        trigger = {
+                          <div className='card-label column-title center-label sample-name center menu-dropdown'
+                            data-activates={`column-dropdown-${pos}`}>
+                            {this.COLUMN_DISPLAY_MAP[column_name].display_name } <i className="fa fa-caret-down"/>
+                          </div>
+                        }
+                        size="mini"
+                        className={!this.COLUMN_DISPLAY_MAP[column_name].tooltip ? "hidden-popup" : ""}
+                        content={this.COLUMN_DISPLAY_MAP[column_name].tooltip}
+                        hideOnScroll
+                        inverted
+                      />
                     }
                     <ul className='dropdown-content column-dropdown' id={`column-dropdown-${pos}`}>
                         { column_name === 'pipeline_status' ?
