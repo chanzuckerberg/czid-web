@@ -3,6 +3,7 @@ class Project < ApplicationRecord
   has_many :samples
   has_many :favorite_projects
   has_many :favorited_by, through: :favorite_projects, source: :user
+  attr_accessor :is_empty
   validates :name, presence: true, uniqueness: true
   include ReportHelper
 
@@ -26,6 +27,13 @@ class Project < ApplicationRecord
 
   def sanitize_path(path)
     return path unless path != File.expand_path(path)
+  end
+
+  def can_delete?(user)
+    current_power = Power.new(user)
+    return false unless current_power.updatable_projects.include?(self)
+    non_empty_sample_count = current_power.project_samples(self).select { |s| s.status != Sample::STATUS_CREATED }.count
+    non_empty_sample_count > 0
   end
 
   def samples
