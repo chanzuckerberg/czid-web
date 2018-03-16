@@ -21,23 +21,24 @@ class Samples extends React.Component {
       id: 'prog-bar',
       class: 'prog-bar'
     });
-    this.handleSearch = this.handleSearch.bind(this);
     this.csrf = props.csrf;
     this.favoriteProjects = props.favorites || [];
     this.allProjects = props.projects || [];
     this.defaultSortBy = 'newest';
     const currentSort = SortHelper.currentSort();
+    this.pageSize = props.pageSize || 30;
+
+    this.handleSearch = this.handleSearch.bind(this);
     this.columnSorting = this.columnSorting.bind(this);
     this.handleSearchChange = this.handleSearchChange.bind(this);
     this.loadMore = this.loadMore.bind(this);
+    this.scrollDown = this.scrollDown.bind(this);
     this.fetchResults = this.fetchResults.bind(this);
-    this.fetchSamples = this.fetchSamples.bind(this);
     this.handleStatusFilterSelect = this.handleStatusFilterSelect.bind(this);
     this.setUrlLocation = this.setUrlLocation.bind(this);
     this.sortSamples = this.sortSamples.bind(this);
     this.switchColumn = this.switchColumn.bind(this);
     this.handleProjectSelection = this.handleProjectSelection.bind(this);
-    this.pageSize = props.pageSize || 30;
     this.handleAddUser = this.handleAddUser.bind(this);
     this.editableProjects = props.editableProjects
     this.canEditProject = this.canEditProject.bind(this)
@@ -51,6 +52,12 @@ class Samples extends React.Component {
     this.selectTissueFilter = this.selectTissueFilter.bind(this);
     this.selectHostFilter = this.selectHostFilter.bind(this);
     this.displayMetaDataDropdown = this.displayMetaDataDropdown.bind(this);
+    this.handleColumnSelectChange = this.handleColumnSelectChange.bind(this);
+    this.columnHidden = this.columnHidden.bind(this);
+    this.startReportGeneration = this.startReportGeneration.bind(this);
+    this.checkReportDownload = this.checkReportDownload.bind(this);
+    this.displayReportProgress = this.displayReportProgress.bind(this);
+
     this.state = {
       invite_status: null,
       project: null,
@@ -80,6 +87,9 @@ class Samples extends React.Component {
       loading: false,
       isRequesting: false,
       displayEmpty: false,
+      checkInUpdate: true,
+      resetTissues: this.fetchParams('tissue') && this.fetchParams('tissue').length > 0 ? false : true,
+      resetHosts:  this.fetchParams('host') && this.fetchParams('host').length > 0 ? false : true,
       project_id_download_in_progress: null,
       project_add_email_validation: null,
       projectType: this.fetchParams('type') || 'all',
@@ -103,9 +113,10 @@ class Samples extends React.Component {
         'tissue_type'
       ]
     };
-    this.sortCount = 0;
 
-    this.COLUMN_DISPLAY_MAP = { total_reads: { display_name: "Total reads", type: "pipeline_data" },
+    this.sortCount = 0;
+    this.COLUMN_DISPLAY_MAP = {
+      total_reads: { display_name: "Total reads", type: "pipeline_data" },
       nonhost_reads: { display_name: "Non-host reads", type: "pipeline_data" },
       quality_control: { display_name: "Passed QC", tooltip: "Passed quality control", type: "pipeline_data" },
       compression_ratio: { display_name: "DCR", tooltip: "Duplicate compression ratio", type: "pipeline_data" },
@@ -114,12 +125,8 @@ class Samples extends React.Component {
       location: { display_name: "Location", type: "metadata" },
       host_genome: { display_name: "Host", type: "metadata" },
       tissue_type: { display_name: "Tissue type", type: "metadata" },
-      notes: { display_name: "Notes", type: "metadata" } };
-    this.handleColumnSelectChange = this.handleColumnSelectChange.bind(this);
-    this.columnHidden = this.columnHidden.bind(this);
-    this.startReportGeneration = this.startReportGeneration.bind(this);
-    this.checkReportDownload = this.checkReportDownload.bind(this);
-    this.displayReportProgress = this.displayReportProgress.bind(this);
+      notes: { display_name: "Notes", type: "metadata" }
+    };
 
     $(document).ready(function() {
       $('select').material_select();
@@ -129,7 +136,6 @@ class Samples extends React.Component {
       });
     });
   }
-
 
   static hideLoader() {
     $('.page-loading').css('display', 'none');
@@ -161,9 +167,7 @@ class Samples extends React.Component {
       filterList.splice(filterIndex, 1);
     }
     this.setState({
-      selectedTissueFilters: filterList,
-      pagesLoaded: 0,
-      pageEnd: false,
+      selectedTissueFilters: filterList
     }, () => {
       this.setUrlLocation("none");
     });
@@ -184,9 +188,7 @@ class Samples extends React.Component {
     }
     // update the state with the new array of options
     this.setState({
-      selectedHostIndices: hostList,
-      pagesLoaded: 0,
-      pageEnd: false
+      selectedHostIndices: hostList
     }, () => {
       this.setUrlLocation("none");
     })
@@ -250,7 +252,7 @@ class Samples extends React.Component {
       new_sort = (this.state.sort_by === 'name,asc') ? 'name,desc' :  'name,asc';
       message = (new_sort === 'name,asc') ? 'Sorting samples by name (A-Z)...' : 'Sorting samples by name (Z-A)...';
     }
-    this.setState({ sort_by: new_sort, pagesLoaded: 0, pageEnd: false }, () => {
+    this.setState({ sort_by: new_sort}, () => {
       this.setUrlLocation();
       this.nanobar.go(30);
       this.fetchResults();
@@ -362,9 +364,7 @@ class Samples extends React.Component {
       this.setState({ searchParams: e.target.value });
     } else {
       this.setState({
-        searchParams: '',
-        pageEnd: false,
-        pagesLoaded: 0
+        searchParams: ''
       }, () => {
         this.setUrlLocation();
         this.fetchResults();
@@ -533,42 +533,6 @@ class Samples extends React.Component {
     });
   }
 
-  //fetch first set of samples
-  fetchSamples() {
-    this.nanobar.go(30);
-    const params = this.getParams();
-    axios.get(`/samples?${params}`).then((res) => {
-      this.nanobar.go(100);
-      this.setState((prevState) => ({
-        initialFetchedSamples: res.data.samples,
-        allSamples: res.data.samples,
-        tissueTypes: this.allTissueTypes(res.data.tissue_types),
-        selectedTissueFilters: this.state.selectedTissueFilters.length == 0 ? this.allTissueTypes(res.data.tissue_types) : this.state.selectedTissueFilters,
-        selectedHostIndices: this.state.selectedHostIndices.length == 0 ? res.data.host_genomes.map(h => h.id) : this.state.selectedHostIndices,
-        hostGenomes: res.data.host_genomes,
-        displayEmpty: false,
-        pagesLoaded: prevState.pagesLoaded+1,
-        totalNumber: res.data.total_count,
-        pageEnd: res.data.samples.length < this.pageSize
-      }));
-      if (!this.state.allSamples.length) {
-        this.setState({ displayEmpty: true });
-      }
-    }).catch((err) => {
-      this.setState((prevState) => ({
-        allSamples: [],
-        displayEmpty: true,
-        pagesLoaded: 0,
-        pageEnd: prevState.pageEnd
-      }))
-    })
-  }
-
-  //fetch data used by projects page
-  fetchProjectPageData() {
-    this.fetchSamples();
-  }
-
   //load more paginated samples
   loadMore() {
     const params = this.getParams();
@@ -614,14 +578,14 @@ class Samples extends React.Component {
     if (this.state.selectedTissueFilters.length) {
       let tissueParams = this.state.selectedTissueFilters.join(',');
       params += `&tissue=${tissueParams}`
-    } else if (this.state.tissueTypes.length > 0) {
+    } else if (this.state.tissueTypes.length > 0) { // initializing or all the tissue types are NA
       params += "&tissue=none"
     }
 
     if (this.state.selectedHostIndices.length) {
       let hostParams = this.state.selectedHostIndices.join(',');
       params += `&host=${hostParams}`
-    } else {
+    } else if (this.state.hostGenomes.length > 0) { // initializing (before first results are selected)
       params += "&host=none"
     }
 
@@ -635,21 +599,28 @@ class Samples extends React.Component {
   //fetch results from filtering, search or switching projects
   fetchResults(cb, reset_filters=false) {
     this.nanobar.go(30);
+    // always fetch from page one
+    this.state.pagesLoaded = 0;
+    this.state.pageEnd = false;
+    this.state.isRequesting = true;
     const params = this.getParams();
-    console.log(params);
     axios.get(`/samples?${params}`).then((res) => {
       this.nanobar.go(100);
       this.setState((prevState) => ({
         initialFetchedSamples: res.data.samples,
         allSamples: res.data.samples,
         tissueTypes: this.allTissueTypes(res.data.tissue_types),
-        selectedTissueFilters: reset_filters ? this.allTissueTypes(res.data.tissue_types) : prevState.selectedTissueFilters,
+        selectedTissueFilters: reset_filters || prevState.resetTissues ? this.allTissueTypes(res.data.tissue_types) : prevState.selectedTissueFilters,
         hostGenomes: res.data.host_genomes,
-        selectedHostIndices: reset_filters ? res.data.host_genomes.map(h => h.id) : prevState.selectedHostIndices,
+        selectedHostIndices: reset_filters || prevState.resetHosts ? res.data.host_genomes.map(h => h.id) : prevState.selectedHostIndices,
         displayEmpty: false,
+        checkInUpdate: false, //don't trigger more update if it's from the fetchResults
+        resetTissues: false,
+        resetHosts: false,
         totalNumber: res.data.total_count,
         pagesLoaded: prevState.pagesLoaded+1,
-        pageEnd: res.data.samples.length < this.pageSize
+        pageEnd: res.data.samples.length < this.pageSize,
+        isRequesting: false
       }));
       if (!this.state.allSamples.length) {
         this.setState({ displayEmpty: true });
@@ -721,8 +692,6 @@ class Samples extends React.Component {
     if (e.target.value !== '' && e.key === 'Enter') {
       this.nanobar.go(30);
       this.setState({
-        pagesLoaded: 0,
-        pageEnd: false,
         searchParams: e.target.value
       }, () => {
         this.setUrlLocation();
@@ -735,17 +704,14 @@ class Samples extends React.Component {
     if (!projId) {
       this.setState({
         selectedProjectId: null,
-        project: null,
-        pagesLoaded: 0,
-        pageEnd: false,
+        project: null
       });
-      this.fetchSamples();
+      this.fetchResults(null, true);
     } else {
       projId = parseInt(projId);
       axios.get(`projects/${projId}.json`).then((res) => {
         this.setState({
-          pagesLoaded: 0,
-          project: res.data,
+          project: res.data
         });
         this.fetchProjectUsers(projId);
         this.fetchResults(null, true);
@@ -875,14 +841,13 @@ class Samples extends React.Component {
   clearAllFilters() {
     this.setState({
       filterParams: '',
-      pagesLoaded: 0,
       searchParams:'',
       sampleIdsParams: [],
       selectedTissueFilters: [],
       selectedHostIndices: []
     }, () => {
       this.setUrlLocation();
-      this.fetchProjectPageData();
+      this.fetchResults(null, true);
     })
   }
 
@@ -932,9 +897,7 @@ class Samples extends React.Component {
     list.splice(index, 1);
     if (index >= 0) {
       let new_state = {
-        [`${state_var}`]: list,
-        pagesLoaded: 0,
-        pageEnd: false
+        [`${state_var}`]: list
       }
       this.setState(new_state, () => {
         this.setUrlLocation("none");
@@ -1327,28 +1290,27 @@ class Samples extends React.Component {
       $(`i[data-status="${currentStatus}"]`).addClass('active');
     }
 
-    if(prevHostIndices.length !== this.state.selectedHostIndices.length) {
-      this.setState({
-        pagesLoaded: 0,
-        pageEnd: false,
-        hostFilterChange: true
-      })
-    }
+    if (this.state.checkInUpdate) { //fetchResults hasn't run since the host/tissue change
+      if(prevHostIndices.length !== this.state.selectedHostIndices.length) {
+        this.setState({
+          hostFilterChange: true
+        })
+      }
 
-    if(prevTissueFilters.length !== this.state.selectedTissueFilters.length) {
-      this.setState({
-        pagesLoaded: 0,
-        pageEnd: false,
-        tissueFilterChange: true
-      })
-    }
+      if(prevTissueFilters.length !== this.state.selectedTissueFilters.length) {
+        this.setState({
+          tissueFilterChange: true
+        })
+      }
 
-
-    if (!this.state.displayDropdown && (this.state.hostFilterChange || this.state.tissueFilterChange)) {
-      this.setUrlLocation("none");
-      this.fetchResults();
-      this.state.hostFilterChange = false;
-      this.state.tissueFilterChange = false;
+      if (!this.state.displayDropdown && (this.state.hostFilterChange || this.state.tissueFilterChange)) {
+        this.setUrlLocation("none");
+        this.fetchResults();
+        this.state.hostFilterChange = false;
+        this.state.tissueFilterChange = false;
+      }
+    } else {
+      this.state.checkInUpdate = true;
     }
   }
 
@@ -1384,10 +1346,8 @@ class Samples extends React.Component {
     this.initializeSelectAll();
     this.displayDownloadDropdown();
     this.initializeTooltip();
-    this.fetchProjectPageData();
-    //this.state.selectedProjectId ? this.fetchProjectUsers(this.state.selectedProjectId) : null;
+    this.fetchProjectDetails(this.state.selectedProjectId);
     this.scrollDown();
-    // this.initializeProjectList();
     this.displayPipelineStatusFilter();
     this.initializeColumnSelect();
   }
@@ -1417,8 +1377,6 @@ class Samples extends React.Component {
   handleStatusFilterSelect(e) {
     let status = e.target.getAttribute('data-status');
     this.setState({
-      pagesLoaded: 0,
-      pageEnd: false,
       filterParams: status
     }, () => {
       this.setUrlLocation();
@@ -1449,18 +1407,18 @@ class Samples extends React.Component {
   handleProjectSelection(id, listType) {
     this.setState({
       selectedProjectId: id,
-      pagesLoaded: 0,
-      pageEnd: false,
       projectType: listType,
       filterParams: '',
       searchParams:'',
+      checkInUpdate: false,
       selectedTissueFilters: [],
       selectedHostIndices: [],
+      tissueTypes: [],
+      hostGenomes: [],
       sampleIdsParams: []
     }, () => {
       this.setUrlLocation();
       this.fetchProjectDetails(id);
-      this.fetchProjectUsers(id);
     });
   }
 
