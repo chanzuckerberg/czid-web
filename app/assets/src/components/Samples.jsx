@@ -1179,7 +1179,7 @@ class Samples extends React.Component {
         <div className="col s6 download-section-btns">
             { this.state.selectedProjectId ? project_menu : null }
             { table_download_dropdown }
-            { this.state.checkedBoxes > 0  ? compare_button : null }
+            { this.state.selectedSampleIds.length > 0  ? compare_button : null }
         </div>
       </div>
     );
