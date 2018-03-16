@@ -76,14 +76,16 @@ import Nanobar from 'nanobar';
   deleteProject(e) {
     e.stopPropagation();
     let projectId = e.target.getAttribute('project-id');
+    this.nanobar.go(30);
     axios
       .delete(`/projects/${projectId}`, {
         data: { authenticity_token: this.csrf }
       })
       .then((res) => {
-        project_list = Object.assign([], this.state.formattedProjectList)
-        project_id_list = project_list.map(p => p.id)
-        index = project_id_list.indexOf(projectId)
+        this.nanobar.go(100);
+        let project_list = Object.assign([], this.state.formattedProjectList)
+        let project_id_list = project_list.map(p => p.id)
+        let index = project_id_list.indexOf(+projectId)
         project_list.splice(index, 1)
         this.setState({ formattedProjectList: project_list })
       }).catch((err) => {
