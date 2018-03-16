@@ -5,7 +5,6 @@ import $ from 'jquery';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { Button, Icon } from 'semantic-ui-react'
-import Button from 'semantic-ui-react'
 import numberWithCommas from '../helpers/strings';
 import SubHeader from './SubHeader';
 import PipelineSampleReport from './PipelineSampleReport';
