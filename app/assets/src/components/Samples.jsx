@@ -804,6 +804,7 @@ class Samples extends React.Component {
     var that = this;
     $('.checkAll').click(function(e) {
       var checked = e.currentTarget.checked;
+      console.log(checked);
       $('.checkbox:enabled').prop('checked', checked);
       var checkedCount = $("input:checkbox:checked").length
       that.setState({
@@ -831,9 +832,9 @@ class Samples extends React.Component {
 
   fetchAllSelectedIds(checked) {
     var that = this;
+    let sampleList = that.state.selectedSampleIds;
     $('.checkbox').each((id, element) => {
-      let sample_id = element.getAttribute('data-sample-id')
-      let sampleList = that.state.selectedSampleIds;
+      let sample_id = parseInt(element.getAttribute('data-sample-id'))
       if (checked) {
         if (sampleList.indexOf(sample_id) === -1) {
           sampleList.push(+sample_id);
@@ -843,8 +844,8 @@ class Samples extends React.Component {
           sampleList.splice(sampleList.indexOf(sample_id), 1);
         }
       }
-    that.setState({ selectedSampleIds: sampleList })
     });
+    that.setState({ selectedSampleIds: sampleList })
   }
 
   compareSamples() {
@@ -876,7 +877,7 @@ class Samples extends React.Component {
     // current array of options
     const sampleList = this.state.selectedSampleIds
 
-    let sample_id = e.target.getAttribute('data-sample-id')
+    let sample_id = parseInt(e.target.getAttribute('data-sample-id'))
     let index
     // check if the check box is checked or unchecked
 
