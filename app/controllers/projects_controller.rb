@@ -163,7 +163,17 @@ class ProjectsController < ApplicationController
   # DELETE /projects/1
   # DELETE /projects/1.json
   def destroy
-    @project.destroy
+    deletable = @project.can_delete?(current_user)
+    @project.destroy if deletable
+    respond_to do |format|
+      if deletable
+        format.html { redirect_to projects_url, notice: 'Project was successfully destroyed.' }
+        format.json { head :no_content }
+      else
+        format.html { render :edit }
+        format.json { render json: @project.errors.full_messages, status: :unprocessable_entity }
+      end
+    end
   end
 
   def all_emails
