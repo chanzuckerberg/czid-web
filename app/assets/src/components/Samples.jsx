@@ -1349,7 +1349,7 @@ class Samples extends React.Component {
     this.initializeSelectAll();
     this.displayDownloadDropdown();
     this.initializeTooltip();
-    this.fetchResults();
+    this.fetchProjectDetails(this.state.selectedProjectId);
     this.scrollDown();
     this.displayPipelineStatusFilter();
     this.initializeColumnSelect();
