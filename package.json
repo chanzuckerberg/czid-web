@@ -1,7 +1,8 @@
 {
   "scripts": {
     "start": "yarn install && webpack --watch",
-    "build-img": "webpack"
+    "build-img": "webpack",
+    "lint": "./node_modules/.bin/eslint . ./**/*.js"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",

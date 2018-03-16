@@ -50,12 +50,6 @@ class PipelineSampleReads extends React.Component {
 
   }
 
-  componentDidMount() {
-    $('.dropdown-button').dropdown({
-      belowOrigin: true
-    });
-  }
-
   render_metadata_dropdown(label, field) {
     let dropdown_options = this.DROPDOWN_OPTIONS[field];
     let display_value = this.sampleInfo[field] ? this.sampleInfo[field] : '-';
@@ -178,6 +172,10 @@ class PipelineSampleReads extends React.Component {
   }
 
   componentDidMount() {
+    $('.dropdown-button').dropdown({
+      belowOrigin: true
+    });
+
     $('ul.tabs').tabs();
     this.listenNoteChanges();
     this.initializeSelectTag();
