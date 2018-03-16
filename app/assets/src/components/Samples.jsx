@@ -471,7 +471,7 @@ class Samples extends React.Component {
               <div className='flex-container'>
                 <ul className='flex-items'>
                   <li className='check-box-container'>
-                    { this.state.displaySelectSamplees ? <div><input type="checkbox" sample-id={dbSample.id} id={i} onClick = { this.selectSample }
+                    { this.state.displaySelectSamplees ? <div><input type="checkbox" data-sample-id={dbSample.id} id={i} onClick = { this.selectSample }
                       className="filled-in checkbox" value={ this.state.selectedSampleIds.indexOf(dbSample.id) != -1 }
                       disabled={status != "COMPLETE"}
                       /> <label htmlFor={i}>{sample_name_info}</label></div> : sample_name_info }
@@ -860,7 +860,7 @@ class Samples extends React.Component {
     // current array of options
     const sampleList = this.state.selectedSampleIds
 
-    let sample_id = e.target.getAttribute('sample-id')
+    let sample_id = e.target.getAttribute('data-sample-id')
     let index
     // check if the check box is checked or unchecked
 
