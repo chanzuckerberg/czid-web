@@ -594,7 +594,7 @@ class Samples extends React.Component {
   }
 
   allTissueTypes(all_tissues) {
-    return (all_tissues.length == 0) ? all_tissues : ['-', ...all_tissues]
+    return (all_tissues.length == 0 || all_tissues.indexOf('-') >= 0) ? all_tissues : ['-', ...all_tissues]
   }
 
   //fetch results from filtering, search or switching projects
@@ -817,7 +817,7 @@ class Samples extends React.Component {
     if (this.state.allChecked) {
       $('.checkbox').each((id, element) => {
         element.checked = true;
-      }
+      })
       return;
     }
     var that = this;
