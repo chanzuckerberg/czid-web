@@ -807,21 +807,15 @@ class Samples extends React.Component {
       $('.checkbox:enabled').prop('checked', checked);
       var checkedCount = $("input:checkbox:checked").length
       that.setState({
-        allChecked: checked,
-        checkedBoxes: checkedCount
+        allChecked: checked
       });
+      that.fetchAllSelectedIds(checked);
     });
   }
 
   checkTheRightBoxes() {
-    if (this.state.allChecked) {
-      $('.checkbox').each((id, element) => {
-        element.checked = true;
-      }
-      return;
-    }
     var that = this;
-    $('.checkbox').each((id, element) => {
+    $('.checkbox:enabled').each((id, element) => {
       let sample_id = element.getAttribute('data-sample-id');
       const sampleList = that.state.selectedSampleIds;
       if (!sample_id) {
@@ -846,7 +840,9 @@ class Samples extends React.Component {
           sampleList.push(+sample_id);
         }
       } else {
-        sampleList = []
+        if (sampleList.indexOf(sample_id) >= 0) {
+          sampleList.splice(sampleList.indexOf(sample_id), 1);
+        }
       }
     that.setState({ selectedSampleIds: sampleList })
     });
@@ -854,9 +850,6 @@ class Samples extends React.Component {
 
   compareSamples() {
     let params;
-    if(this.state.allChecked) {
-      this.fetchAllSelectedIds(this.state.allChecked);
-    }
     if(this.state.selectedSampleIds.length) {
       location.href = `/samples/heatmap?sample_ids=${this.state.selectedSampleIds}`
     }
