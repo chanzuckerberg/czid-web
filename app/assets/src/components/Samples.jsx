@@ -28,6 +28,7 @@ class Samples extends React.Component {
     const currentSort = SortHelper.currentSort();
     this.pageSize = props.pageSize || 30;
 
+    this.checkTheRightBoxes = this.checkTheRightBoxes.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
     this.columnSorting = this.columnSorting.bind(this);
     this.handleSearchChange = this.handleSearchChange.bind(this);
@@ -812,11 +813,27 @@ class Samples extends React.Component {
     });
   }
 
+  checkTheRightBoxes() {
+    var that = this;
+    $('.checkbox').each((id, element) => {
+      let sample_id = element.getAttribute('data-sample-id');
+      const sampleList = that.state.selectedSampleIds;
+      if (!sample_id) {
+        return;
+      }
+      if (sampleList.indexOf(parseInt(sample_id)) >= 0) {
+        element.checked = true;
+      } else {
+        element.checked = false;
+      }
+    });
+
+  }
 
   fetchAllSelectedIds(checked) {
     var that = this;
     $('.checkbox').each((id, element) => {
-      sample_id = element.getAttribute('data-sample-id')
+      let sample_id = element.getAttribute('data-sample-id')
       let sampleList = that.state.selectedSampleIds;
       if (checked) {
         if (sampleList.indexOf(sample_id) === -1) {
@@ -1282,6 +1299,7 @@ class Samples extends React.Component {
     const prevTissueFilters = prevState.selectedTissueFilters;
     const prevSelectedProject = prevState.selectedProjectId;
 
+
     if(prevSelectedProject !== this.state.selectedProjectId) {
       window.scrollTo(0, 0)
     }
@@ -1313,6 +1331,7 @@ class Samples extends React.Component {
     } else {
       this.state.checkInUpdate = true;
     }
+    this.checkTheRightBoxes();
   }
 
   componentDidMount() {
