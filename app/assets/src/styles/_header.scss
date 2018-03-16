@@ -162,7 +162,12 @@ a {
   min-height: 120px;
   padding-top: 20px;
   box-shadow: 1px 2px 5px 2px #eaeaea;
+}
 
+.sub-header-component {
+  .container {
+    width: 90%;
+  }
 }
 
 /* SubHeader styles */
