@@ -193,16 +193,17 @@ a {
   padding: 8px;
   display: inline-block;
   i {
-    display: none
+    visibility: hidden;
+    font-size: .7em;
+    font-weight: normal;
+    margin: .1em;
   }
   border: 1px solid transparent;
   &:hover, &.active {
     color: #5ABCD6;
     cursor: pointer;
     i {
-      display: inline-block;
-      font-size: $font-size-base;
-      margin-top: 15px;
+      visibility: visible;
     }
   }
 }
