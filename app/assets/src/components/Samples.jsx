@@ -9,7 +9,6 @@ import SortHelper from './SortHelper';
 import numberWithCommas from '../helpers/strings';
 import ProjectSelection from './ProjectSelection';
 import StringHelper from '../helpers/StringHelper';
-import { Dropdown, Label, Icon } from 'semantic-ui-react';
 import Nanobar from 'nanobar';
 
 class Samples extends React.Component {
