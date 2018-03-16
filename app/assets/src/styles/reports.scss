@@ -242,8 +242,6 @@ margin-bottom: 0px;
 
 .reports-main {
   width: 100%;
-  overflow: auto;
-  overflow-y: hidden;
 }
 
 .report-number {
@@ -444,7 +442,7 @@ margin-bottom: 0px;
     font-size: $font-size-base;
   }
   th:last-child {
-    padding-right: 50px;
+    padding-right: 0px;
   }
 
   input.browser-default {
@@ -462,6 +460,7 @@ margin-bottom: 0px;
 .genus-search-row {
   padding-left: 0 !important;
 }
+
 .threshold-row {
   background: #fff;
   border: 1px solid #D9E0E4;
@@ -510,6 +509,16 @@ margin-bottom: 0px;
   }
 }
 
+.advanced-filters-activate, .categories-filters-activate {
+  span {
+    font-size: 10pt !important;
+  }
+}
+
+.ui.dropdown .text {
+  font-size: 10pt !important;
+}
+
 .reports-section {
   padding: 0 !important;
   .reports-count {
@@ -544,6 +553,9 @@ margin-bottom: 0px;
       &:hover {
         color: #84d4fa;
       }
+    }
+    div.text {
+      font-size: 1em !important;
     }
     .filter-tags-list {
       margin-left: 15px;
@@ -766,6 +778,9 @@ margin-bottom: 0px;
   padding: 10px;
   cursor: auto;
   border-radius: 10px;
+  span.filter-label {
+    font-size: 1em !important;
+  }
   .metric-thresholds {
     width: 100%;
   }
