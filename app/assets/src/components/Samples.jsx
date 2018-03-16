@@ -814,6 +814,12 @@ class Samples extends React.Component {
   }
 
   checkTheRightBoxes() {
+    if (this.state.allChecked) {
+      $('.checkbox').each((id, element) => {
+        element.checked = true;
+      }
+      return;
+    }
     var that = this;
     $('.checkbox').each((id, element) => {
       let sample_id = element.getAttribute('data-sample-id');
