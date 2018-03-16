@@ -1195,3 +1195,7 @@ input[type="button"] {
 .nanobar .bar {
   background-color: #3687fa;
 }
+
+.ui.popup.hidden-popup {
+  display: none !important;
+}
