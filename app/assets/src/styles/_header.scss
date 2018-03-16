@@ -139,8 +139,16 @@ a {
   }
 }
 
+.profile-header-dropdown {
+  border: none !important;
+  margin-top: 0.75em;
+  .text {
+    font-size: 1em !important;
+  }
+}
+
 .profile-header-dropdown:hover {
-  color: #656565;
+  color: #cfcfcf;
 }
 
 .profile-dropdown {
@@ -167,6 +175,9 @@ a {
 .sub-header .sub-title {
   color: #333333;
   font-size: $font-size-h3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sub-header .sub-title a:hover{
@@ -182,16 +193,17 @@ a {
   padding: 8px;
   display: inline-block;
   i {
-    display: none
+    visibility: hidden;
+    font-size: .7em;
+    font-weight: normal;
+    margin: .1em;
   }
   border: 1px solid transparent;
   &:hover, &.active {
     color: #5ABCD6;
     cursor: pointer;
     i {
-      display: inline-block;
-      font-size: $font-size-base;
-      margin-top: 15px;
+      visibility: visible;
     }
   }
 }
@@ -228,14 +240,19 @@ a {
     width: -webki-fit-content;
     width: fit-content;
   }
+  p {
+    font-family: monospace;
+  }
 }
 
 .code-to-edit {
   color: #3D8CAD;
+  font-family: monospace;
   font-weight: $font-weight-bold;
 }
 
 .code-personal {
+  font-family: monospace;
   font-weight: $font-weight-bold;
 }
 

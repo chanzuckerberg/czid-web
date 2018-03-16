@@ -3,15 +3,13 @@ import axios from 'axios';
 import ReactDOM from 'react-dom';
 import moment from 'moment';
 import $ from 'jquery';
-import Tipsy from 'react-tipsy';
 import Materialize from 'materialize-css';
-import {Sidebar, Grid, Segment} from 'semantic-ui-react';
+import {Sidebar, Popup, Dropdown, Label, Icon} from 'semantic-ui-react';
 import SortHelper from './SortHelper';
 import numberWithCommas from '../helpers/strings';
 import ProjectSelection from './ProjectSelection';
-import PipelineSampleReads from './PipelineSampleReads';
 import StringHelper from '../helpers/StringHelper';
-import { Dropdown } from 'semantic-ui-react';
+import { Dropdown, Label, Icon } from 'semantic-ui-react';
 import Nanobar from 'nanobar';
 
 class Samples extends React.Component {
@@ -21,23 +19,25 @@ class Samples extends React.Component {
       id: 'prog-bar',
       class: 'prog-bar'
     });
-    this.handleSearch = this.handleSearch.bind(this);
     this.csrf = props.csrf;
     this.favoriteProjects = props.favorites || [];
     this.allProjects = props.projects || [];
     this.defaultSortBy = 'newest';
     const currentSort = SortHelper.currentSort();
+    this.pageSize = props.pageSize || 30;
+
+    this.checkTheRightBoxes = this.checkTheRightBoxes.bind(this);
+    this.handleSearch = this.handleSearch.bind(this);
     this.columnSorting = this.columnSorting.bind(this);
     this.handleSearchChange = this.handleSearchChange.bind(this);
     this.loadMore = this.loadMore.bind(this);
+    this.scrollDown = this.scrollDown.bind(this);
     this.fetchResults = this.fetchResults.bind(this);
-    this.fetchSamples = this.fetchSamples.bind(this);
     this.handleStatusFilterSelect = this.handleStatusFilterSelect.bind(this);
     this.setUrlLocation = this.setUrlLocation.bind(this);
     this.sortSamples = this.sortSamples.bind(this);
     this.switchColumn = this.switchColumn.bind(this);
     this.handleProjectSelection = this.handleProjectSelection.bind(this);
-    this.pageSize = props.pageSize || 30;
     this.handleAddUser = this.handleAddUser.bind(this);
     this.editableProjects = props.editableProjects
     this.canEditProject = this.canEditProject.bind(this)
@@ -51,6 +51,12 @@ class Samples extends React.Component {
     this.selectTissueFilter = this.selectTissueFilter.bind(this);
     this.selectHostFilter = this.selectHostFilter.bind(this);
     this.displayMetaDataDropdown = this.displayMetaDataDropdown.bind(this);
+    this.handleColumnSelectChange = this.handleColumnSelectChange.bind(this);
+    this.columnHidden = this.columnHidden.bind(this);
+    this.startReportGeneration = this.startReportGeneration.bind(this);
+    this.checkReportDownload = this.checkReportDownload.bind(this);
+    this.displayReportProgress = this.displayReportProgress.bind(this);
+
     this.state = {
       invite_status: null,
       project: null,
@@ -72,15 +78,17 @@ class Samples extends React.Component {
       tissueFilterChange: false,
       checkedBoxes: 0,
       allChecked: false,
-      selectedSampleIndices: [],
+      selectedSampleIds: [],
       displayDropdown: false,
       selectedTissueFilters: this.fetchParams('tissue') ? this.fetchParams('tissue').split(',') : [],
-      selectedTissueIndices: [],
       selectedHostIndices: this.fetchParams('host') ? this.fetchParams('host').split(',').map(Number) : [],
       initialFetchedSamples: [],
       loading: false,
       isRequesting: false,
       displayEmpty: false,
+      checkInUpdate: true,
+      resetTissues: this.fetchParams('tissue') && this.fetchParams('tissue').length > 0 ? false : true,
+      resetHosts:  this.fetchParams('host') && this.fetchParams('host').length > 0 ? false : true,
       project_id_download_in_progress: null,
       project_add_email_validation: null,
       projectType: this.fetchParams('type') || 'all',
@@ -104,9 +112,10 @@ class Samples extends React.Component {
         'tissue_type'
       ]
     };
-    this.sortCount = 0;
 
-    this.COLUMN_DISPLAY_MAP = { total_reads: { display_name: "Total reads", type: "pipeline_data" },
+    this.sortCount = 0;
+    this.COLUMN_DISPLAY_MAP = {
+      total_reads: { display_name: "Total reads", type: "pipeline_data" },
       nonhost_reads: { display_name: "Non-host reads", type: "pipeline_data" },
       quality_control: { display_name: "Passed QC", tooltip: "Passed quality control", type: "pipeline_data" },
       compression_ratio: { display_name: "DCR", tooltip: "Duplicate compression ratio", type: "pipeline_data" },
@@ -115,12 +124,8 @@ class Samples extends React.Component {
       location: { display_name: "Location", type: "metadata" },
       host_genome: { display_name: "Host", type: "metadata" },
       tissue_type: { display_name: "Tissue type", type: "metadata" },
-      notes: { display_name: "Notes", type: "metadata" } };
-    this.handleColumnSelectChange = this.handleColumnSelectChange.bind(this);
-    this.columnHidden = this.columnHidden.bind(this);
-    this.startReportGeneration = this.startReportGeneration.bind(this);
-    this.checkReportDownload = this.checkReportDownload.bind(this);
-    this.displayReportProgress = this.displayReportProgress.bind(this);
+      notes: { display_name: "Notes", type: "metadata" }
+    };
 
     $(document).ready(function() {
       $('select').material_select();
@@ -130,7 +135,6 @@ class Samples extends React.Component {
       });
     });
   }
-
 
   static hideLoader() {
     $('.page-loading').css('display', 'none');
@@ -162,11 +166,9 @@ class Samples extends React.Component {
       filterList.splice(filterIndex, 1);
     }
     this.setState({
-      selectedTissueFilters: filterList,
-      pagesLoaded: 0,
-      pageEnd: false,
+      selectedTissueFilters: filterList
     }, () => {
-      this.setUrlLocation();
+      this.setUrlLocation("none");
     });
   }
 
@@ -185,11 +187,9 @@ class Samples extends React.Component {
     }
     // update the state with the new array of options
     this.setState({
-      selectedHostIndices: hostList,
-      pagesLoaded: 0,
-      pageEnd: false
+      selectedHostIndices: hostList
     }, () => {
-      this.setUrlLocation();
+      this.setUrlLocation("none");
     })
   }
 
@@ -251,7 +251,7 @@ class Samples extends React.Component {
       new_sort = (this.state.sort_by === 'name,asc') ? 'name,desc' :  'name,asc';
       message = (new_sort === 'name,asc') ? 'Sorting samples by name (A-Z)...' : 'Sorting samples by name (Z-A)...';
     }
-    this.setState({ sort_by: new_sort, pagesLoaded: 0, pageEnd: false }, () => {
+    this.setState({ sort_by: new_sort}, () => {
       this.setUrlLocation();
       this.nanobar.go(30);
       this.fetchResults();
@@ -363,9 +363,7 @@ class Samples extends React.Component {
       this.setState({ searchParams: e.target.value });
     } else {
       this.setState({
-        searchParams: '',
-        pageEnd: false,
-        pagesLoaded: 0
+        searchParams: ''
       }, () => {
         this.setUrlLocation();
         this.fetchResults();
@@ -472,8 +470,8 @@ class Samples extends React.Component {
               <div className='flex-container'>
                 <ul className='flex-items'>
                   <li className='check-box-container'>
-                    { this.state.displaySelectSamplees ? <div><input type="checkbox" id={i} onClick = { this.selectSample }
-                      className="filled-in checkbox" value={ this.state.selectedSampleIndices.indexOf(i) != -1 }
+                    { this.state.displaySelectSamplees ? <div><input type="checkbox" data-sample-id={dbSample.id} id={i} onClick = { this.selectSample }
+                      className="filled-in checkbox" value={ this.state.selectedSampleIds.indexOf(dbSample.id) != -1 }
                       disabled={status != "COMPLETE"}
                       /> <label htmlFor={i}>{sample_name_info}</label></div> : sample_name_info }
                   </li>
@@ -534,40 +532,6 @@ class Samples extends React.Component {
     });
   }
 
-  //fetch first set of samples
-  fetchSamples() {
-    this.nanobar.go(30);
-    const params = this.getParams();
-    axios.get(`/samples?${params}`).then((res) => {
-      this.nanobar.go(100);
-      this.setState((prevState) => ({
-        initialFetchedSamples: res.data.samples,
-        allSamples: res.data.samples,
-        tissueTypes: res.data.tissue_types,
-        hostGenomes: res.data.host_genomes,
-        displayEmpty: false,
-        pagesLoaded: prevState.pagesLoaded+1,
-        totalNumber: res.data.total_count,
-        pageEnd: res.data.samples.length < this.pageSize
-      }));
-      if (!this.state.allSamples.length) {
-        this.setState({ displayEmpty: true });
-      }
-    }).catch((err) => {
-      this.setState((prevState) => ({
-        allSamples: [],
-        displayEmpty: true,
-        pagesLoaded: 0,
-        pageEnd: prevState.pageEnd
-      }))
-    })
-  }
-
-  //fetch data used by projects page
-  fetchProjectPageData() {
-    this.fetchSamples();
-  }
-
   //load more paginated samples
   loadMore() {
     const params = this.getParams();
@@ -610,33 +574,52 @@ class Samples extends React.Component {
       params += `&ids=${sampleParams}`
     }
 
-    if(this.state.selectedTissueFilters.length) {
+    if (this.state.selectedTissueFilters.length) {
       let tissueParams = this.state.selectedTissueFilters.join(',');
       params += `&tissue=${tissueParams}`
+    } else if (this.state.tissueTypes.length > 0) { // initializing or all the tissue types are NA
+      params += "&tissue=none"
     }
 
-    if(this.state.selectedHostIndices.length) {
+    if (this.state.selectedHostIndices.length) {
       let hostParams = this.state.selectedHostIndices.join(',');
       params += `&host=${hostParams}`
+    } else if (this.state.hostGenomes.length > 0) { // initializing (before first results are selected)
+      params += "&host=none"
     }
+
     return params;
   }
 
+  allTissueTypes(all_tissues) {
+    return (all_tissues.length == 0 || all_tissues.indexOf('-') >= 0) ? all_tissues : ['-', ...all_tissues]
+  }
+
   //fetch results from filtering, search or switching projects
-  fetchResults(cb) {
+  fetchResults(cb, reset_filters=false) {
     this.nanobar.go(30);
+    // always fetch from page one
+    this.state.pagesLoaded = 0;
+    this.state.pageEnd = false;
+    this.state.isRequesting = true;
     const params = this.getParams();
     axios.get(`/samples?${params}`).then((res) => {
       this.nanobar.go(100);
       this.setState((prevState) => ({
         initialFetchedSamples: res.data.samples,
         allSamples: res.data.samples,
-        tissueTypes: res.data.tissue_types,
+        tissueTypes: this.allTissueTypes(res.data.tissue_types),
+        selectedTissueFilters: reset_filters || prevState.resetTissues ? this.allTissueTypes(res.data.tissue_types) : prevState.selectedTissueFilters,
         hostGenomes: res.data.host_genomes,
+        selectedHostIndices: reset_filters || prevState.resetHosts ? res.data.host_genomes.map(h => h.id) : prevState.selectedHostIndices,
         displayEmpty: false,
+        checkInUpdate: false, //don't trigger more update if it's from the fetchResults
+        resetTissues: false,
+        resetHosts: false,
         totalNumber: res.data.total_count,
         pagesLoaded: prevState.pagesLoaded+1,
-        pageEnd: res.data.samples.length < this.pageSize
+        pageEnd: res.data.samples.length < this.pageSize,
+        isRequesting: false
       }));
       if (!this.state.allSamples.length) {
         this.setState({ displayEmpty: true });
@@ -708,8 +691,6 @@ class Samples extends React.Component {
     if (e.target.value !== '' && e.key === 'Enter') {
       this.nanobar.go(30);
       this.setState({
-        pagesLoaded: 0,
-        pageEnd: false,
         searchParams: e.target.value
       }, () => {
         this.setUrlLocation();
@@ -718,24 +699,21 @@ class Samples extends React.Component {
     }
   }
 
-  fetchProjectDetails(projId) {
+  fetchProjectDetails(projId, resetFilters = true) {
     if (!projId) {
       this.setState({
         selectedProjectId: null,
-        project: null,
-        pagesLoaded: 0,
-        pageEnd: false,
+        project: null
       });
-      this.fetchSamples();
+      this.fetchResults(null, resetFilters);
     } else {
       projId = parseInt(projId);
       axios.get(`projects/${projId}.json`).then((res) => {
         this.setState({
-          pagesLoaded: 0,
           project: res.data
         });
         this.fetchProjectUsers(projId);
-        this.fetchResults();
+        this.fetchResults(null, resetFilters);
       }).catch((err) => {
         this.setState({ project: null })
       })
@@ -824,56 +802,67 @@ class Samples extends React.Component {
     var that = this;
     $('.checkAll').click(function(e) {
       var checked = e.currentTarget.checked;
+      console.log(checked);
       $('.checkbox:enabled').prop('checked', checked);
       var checkedCount = $("input:checkbox:checked").length
       that.setState({
-        allChecked: checked,
-        checkedBoxes: checkedCount
+        allChecked: checked
       });
+      that.fetchAllSelectedIds(checked);
     });
   }
 
+  checkTheRightBoxes() {
+    var that = this;
+    $('.checkbox:enabled').each((id, element) => {
+      let sample_id = element.getAttribute('data-sample-id');
+      const sampleList = that.state.selectedSampleIds;
+      if (!sample_id) {
+        return;
+      }
+      if (sampleList.indexOf(parseInt(sample_id)) >= 0) {
+        element.checked = true;
+      } else {
+        element.checked = false;
+      }
+    });
+  }
 
   fetchAllSelectedIds(checked) {
     var that = this;
+    let sampleList = that.state.selectedSampleIds;
     $('.checkbox').each((id, element) => {
-      let sampleList = that.state.selectedSampleIndices;
+      let sample_id = parseInt(element.getAttribute('data-sample-id'))
       if (checked) {
-        if (sampleList.indexOf(id) === -1) {
-          sampleList.push(+id);
+        if (sampleList.indexOf(sample_id) === -1) {
+          sampleList.push(+sample_id);
         }
       } else {
-        sampleList = []
+        if (sampleList.indexOf(sample_id) >= 0) {
+          sampleList.splice(sampleList.indexOf(sample_id), 1);
+        }
       }
-    that.setState({ selectedSampleIndices: sampleList })
     });
+    that.setState({ selectedSampleIds: sampleList })
   }
 
   compareSamples() {
     let params;
-    if(this.state.allChecked) {
-      this.fetchAllSelectedIds(this.state.allChecked);
-    }
-    if(this.state.selectedSampleIndices.length) {
-      let sampleParams = this.state.selectedSampleIndices;
-      let sampleIds = this.state.selectedSampleIndices.map((idx) => {
-        return this.state.allSamples[idx].db_sample.id;
-      });
-      location.href = `/samples/heatmap?sample_ids=${sampleIds}`
+    if(this.state.selectedSampleIds.length) {
+      location.href = `/samples/heatmap?sample_ids=${this.state.selectedSampleIds}`
     }
   }
 
   clearAllFilters() {
     this.setState({
       filterParams: '',
-      pagesLoaded: 0,
       searchParams:'',
       sampleIdsParams: [],
       selectedTissueFilters: [],
       selectedHostIndices: []
     }, () => {
       this.setUrlLocation();
-      this.fetchProjectPageData();
+      this.fetchResults(null, true);
     })
   }
 
@@ -884,23 +873,24 @@ class Samples extends React.Component {
       allChecked: false
     });
     // current array of options
-    const sampleList = this.state.selectedSampleIndices
+    const sampleList = this.state.selectedSampleIds
 
+    let sample_id = parseInt(e.target.getAttribute('data-sample-id'))
     let index
     // check if the check box is checked or unchecked
 
     if (e.target.checked) {
       // add the numerical value of the checkbox to options array
-      sampleList.push(+e.target.id)
+      sampleList.push(+sample_id)
     } else {
       // or remove the value from the unchecked checkbox from the array
-      index = sampleList.indexOf(+e.target.id)
+      index = sampleList.indexOf(+sample_id)
       sampleList.splice(index, 1)
     }
     var checkedCount = $("input:checkbox:checked").length
     // update the state with the new array of options
     this.setState({
-      selectedSampleIndices: sampleList,
+      selectedSampleIds: sampleList,
       checkedBoxes: checkedCount
      })
   }
@@ -911,7 +901,42 @@ class Samples extends React.Component {
     location.href = `/projects/${id}/csv`;
   }
 
+  applyExcluded(e, type, state_var) {
+    let id = e.target.getAttribute('data-exclude')
+    if (type === "int") {
+      id = +id
+    }
+    let list = Object.assign([], this.state[state_var]);
+    let index;
+    index = list.indexOf(id);
+    list.splice(index, 1);
+    if (index >= 0) {
+      let new_state = {
+        [`${state_var}`]: list
+      }
+      this.setState(new_state, () => {
+        this.setUrlLocation("none");
+        this.fetchResults();
+      })
+    }
+  }
 
+  generateTagList(state_all_options, state_selected_options, prefix, id_field=null, name_field=null, id_type=null) {
+    return this.state[state_all_options].map((entry, i) => {
+      let id = id_field ? entry[id_field] : entry
+      let name = name_field ? entry[name_field] : entry
+      if (this.state[state_selected_options].indexOf(id) >= 0) {
+        return (
+          <Label className="label-tags" size="tiny" key={`${state_all_options}_tag_${i}`}>
+            {`${prefix}${name}`}
+            <Icon name='close' data-exclude={id} onClick= { (e) => { this.applyExcluded(e, id_type, state_selected_options);} }/>
+          </Label>
+        );
+    } else {
+        return null;
+    }
+    });
+  }
 
   renderTable(samples) {
     let project_id = this.state.selectedProjectId ? this.state.selectedProjectId : 'all'
@@ -931,7 +956,7 @@ class Samples extends React.Component {
     );
 
     let table_download_dropdown = (
-      <div className="col s2 download-wrapper">
+      <div className="download-wrapper">
         <Dropdown button className="icon link download-btn" labeled icon={{ className: 'cloud download alternate'}} text="Download">
           <Dropdown.Menu>
             <Dropdown.Item href={`/projects/${project_id}/csv`}>Download Table</Dropdown.Item>
@@ -962,7 +987,7 @@ class Samples extends React.Component {
     // )
 
     let compare_button = (
-      <div className='col s2 download-table'>
+      <div className='download-table'>
         <div className='white'>
           <a onClick={this.compareSamples} className="compare center">
             <span>Compare</span>
@@ -970,6 +995,9 @@ class Samples extends React.Component {
         </div>
       </div>
     )
+
+    const host_filter_tag_list = this.generateTagList("hostGenomes", "selectedHostIndices", "Host: ", "id", "name", "int")
+    const tissue_filter_tag_list = this.generateTagList("tissueTypes", "selectedTissueFilters", "Tissue: ")
 
     const metaDataFilter = (
       <div className="col s2 wrapper">
@@ -993,9 +1021,9 @@ class Samples extends React.Component {
                 })}
                   </div>
               <div className="col s6">
-              <h6>Tissue type</h6>
+              <h6>Tissue</h6>
                 {this.state.tissueTypes.length == 0 ?
-                   <div className="options-wrapper"><label>No tissue type data present</label></div> :
+                   <div className="options-wrapper"><label>No tissue data present</label></div> :
                    this.state.tissueTypes.map((tissue, i) => {
                      return (
                        <div key={i} className="options-wrapper">
@@ -1092,7 +1120,7 @@ class Samples extends React.Component {
     );
 
     const project_menu = (
-      <div className='right'>
+      <div className='right col s12'>
         <ul className='project-menu'>
           <li>
             { this.state.project ? (
@@ -1131,10 +1159,7 @@ class Samples extends React.Component {
 
     const projInfo = (
       <div className="row download-section">
-        {
-          this.state.selectedProjectId ? project_menu : null
-        }
-        <div className={ project_id === 'all' ? "col s7 wrapper" : "col s5 wrapper" }>
+        <div className="col s6 wrapper">
           <div className={(!this.state.project) ? "proj-title heading all-proj" : "heading proj-title"}>
           { (!this.state.project) ? <div className="">All Samples</div>
               : <div>
@@ -1149,10 +1174,11 @@ class Samples extends React.Component {
           }
         </p>
         </div>
-        {/* <div className="col s4 download-section"> */}
-        { table_download_dropdown }
-        { this.state.checkedBoxes > 0  ? compare_button : null }
-        {/* </div> */}
+        <div className="col s6 download-section-btns">
+            { this.state.selectedProjectId ? project_menu : null }
+            { table_download_dropdown }
+            { this.state.selectedSampleIds.length > 0  ? compare_button : null }
+        </div>
       </div>
     );
 
@@ -1188,22 +1214,23 @@ class Samples extends React.Component {
                 </div>
               </li>
               { this.state.columnsShown.map((column_name, pos) => {
+
                 return (
                   <li key={`shown-${pos}`}>
                     {
-                      this.COLUMN_DISPLAY_MAP[column_name].tooltip ?
-                      <Tipsy position='bottom'
-                        content={this.COLUMN_DISPLAY_MAP[column_name].tooltip}>
-                        <div className='card-label column-title center-label sample-name center menu-dropdown'
-                          data-activates={`column-dropdown-${pos}`}>
-                          {this.COLUMN_DISPLAY_MAP[column_name].display_name } <i className="fa fa-caret-down"/>
-                        </div>
-                      </Tipsy>
-                      :
-                      <div className='card-label column-title center-label sample-name center menu-dropdown'
-                        data-activates={`column-dropdown-${pos}`}>
-                        {this.COLUMN_DISPLAY_MAP[column_name].display_name } <i className="fa fa-caret-down"/>
-                      </div>
+                      <Popup
+                        trigger = {
+                          <div className='card-label column-title center-label sample-name center menu-dropdown'
+                            data-activates={`column-dropdown-${pos}`}>
+                            {this.COLUMN_DISPLAY_MAP[column_name].display_name } <i className="fa fa-caret-down"/>
+                          </div>
+                        }
+                        size="mini"
+                        className={!this.COLUMN_DISPLAY_MAP[column_name].tooltip ? "hidden-popup" : ""}
+                        content={this.COLUMN_DISPLAY_MAP[column_name].tooltip}
+                        hideOnScroll
+                        inverted
+                      />
                     }
                     <ul className='dropdown-content column-dropdown' id={`column-dropdown-${pos}`}>
                         { column_name === 'pipeline_status' ?
@@ -1247,6 +1274,9 @@ class Samples extends React.Component {
         <div className="divider"></div>
         <div className="sample-container no-padding col s12">
           { search_box }
+          <div className="filter-tags-list">
+            { host_filter_tag_list } { tissue_filter_tag_list }
+          </div>
           <div className="sample-table-container row">
             { tableHead }
             { !samples.length && this.state.displayEmpty ? this.renderEmptyTable() : this.renderPipelineOutput(samples)  }
@@ -1267,6 +1297,7 @@ class Samples extends React.Component {
     const prevTissueFilters = prevState.selectedTissueFilters;
     const prevSelectedProject = prevState.selectedProjectId;
 
+
     if(prevSelectedProject !== this.state.selectedProjectId) {
       window.scrollTo(0, 0)
     }
@@ -1276,35 +1307,30 @@ class Samples extends React.Component {
       $(`i[data-status="${currentStatus}"]`).addClass('active');
     }
 
-    if(prevHostIndices.length !== this.state.selectedHostIndices.length) {
-      this.setState({
-        hostFilterChange: true
-      })
-    }
-
-    if(prevTissueFilters.length !== this.state.selectedTissueFilters.length) {
-      this.setState({
-        tissueFilterChange: true
-      })
-    }
-
-    if(!this.state.displayDropdown) {
-      if (this.state.hostFilterChange) {
-        this.fetchResults();
+    if (this.state.checkInUpdate) { //fetchResults hasn't run since the host/tissue change
+      if(prevHostIndices.length !== this.state.selectedHostIndices.length) {
         this.setState({
-          hostFilterChange: false
+          hostFilterChange: true
         })
       }
 
-      if (this.state.tissueFilterChange) {
-        this.fetchResults();
+      if(prevTissueFilters.length !== this.state.selectedTissueFilters.length) {
         this.setState({
-          tissueFilterChange: false
+          tissueFilterChange: true
         })
       }
+
+      if (!this.state.displayDropdown && (this.state.hostFilterChange || this.state.tissueFilterChange)) {
+        this.setUrlLocation("none");
+        this.fetchResults();
+        this.state.hostFilterChange = false;
+        this.state.tissueFilterChange = false;
+      }
+    } else {
+      this.state.checkInUpdate = true;
     }
+    this.checkTheRightBoxes();
   }
-
 
   componentDidMount() {
     $(() => {
@@ -1338,10 +1364,8 @@ class Samples extends React.Component {
     this.initializeSelectAll();
     this.displayDownloadDropdown();
     this.initializeTooltip();
-    this.fetchProjectPageData();
-    this.state.selectedProjectId ? this.fetchProjectDetails(this.state.selectedProjectId) : null;
+    this.fetchProjectDetails(this.state.selectedProjectId, false);
     this.scrollDown();
-    // this.initializeProjectList();
     this.displayPipelineStatusFilter();
     this.initializeColumnSelect();
   }
@@ -1371,8 +1395,6 @@ class Samples extends React.Component {
   handleStatusFilterSelect(e) {
     let status = e.target.getAttribute('data-status');
     this.setState({
-      pagesLoaded: 0,
-      pageEnd: false,
       filterParams: status
     }, () => {
       this.setUrlLocation();
@@ -1380,14 +1402,22 @@ class Samples extends React.Component {
     });
   }
 
+  selectionToParamsOrNone(selected_options, value_when_empty = "") {
+    return selected_options.length == 0 ? value_when_empty : selected_options.join(",")
+  }
+
   //set Url based on requests
-  setUrlLocation() {
+  setUrlLocation(value_when_empty="") {
     let projectId = parseInt(this.state.selectedProjectId);
+    let tissueFilter = this.selectionToParamsOrNone(this.state.selectedTissueFilters, value_when_empty);
+    if (this.state.tissueTypes.length == 0) {
+      tissueFilter = "";
+    }
     const params = {
       project_id: projectId ? projectId : null,
       filter: this.state.filterParams,
-      tissue: this.state.selectedTissueFilters.join(','),
-      host: this.state.selectedHostIndices.join(','),
+      tissue: tissueFilter,
+      host: this.selectionToParamsOrNone(this.state.selectedHostIndices, value_when_empty),
       search: this.state.searchParams,
       ids: this.state.sampleIdsParams,
       sort_by: this.state.sort_by,
@@ -1399,18 +1429,18 @@ class Samples extends React.Component {
   handleProjectSelection(id, listType) {
     this.setState({
       selectedProjectId: id,
-      pagesLoaded: 0,
-      pageEnd: false,
       projectType: listType,
       filterParams: '',
       searchParams:'',
-      sampleIdsParams: [],
+      checkInUpdate: false,
       selectedTissueFilters: [],
-      selectedHostIndices: []
+      selectedHostIndices: [],
+      tissueTypes: [],
+      hostGenomes: [],
+      sampleIdsParams: []
     }, () => {
       this.setUrlLocation();
       this.fetchProjectDetails(id);
-      this.fetchProjectUsers(id)
     });
   }
 

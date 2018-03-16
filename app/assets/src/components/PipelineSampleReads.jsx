@@ -504,16 +504,14 @@ class PipelineSampleReads extends React.Component {
                 > { sample_dropdown }
               </div>
               <div className="col no-padding s3 right-align">
-                <ul className="report-action-buttons">
-                  <li>
-                    <a href={this.getDownloadLink()}>
-                      <Button icon labelPosition="left" className="icon link download-btn">
-                        <Icon className="cloud download alternate" />
+                <div className="report-action-buttons">
+                  <a className="right" href={this.getDownloadLink()}>
+                    <Button icon labelPosition="left" className="icon link download-btn">
+                      <Icon className="cloud download alternate" />
                         Download
-                      </Button>
-                    </a>
-                  </li>
-                </ul>
+                    </Button>
+                  </a>
+                </div>
               </div>
             </div>
 

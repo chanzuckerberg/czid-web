@@ -242,8 +242,6 @@ margin-bottom: 0px;
 
 .reports-main {
   width: 100%;
-  overflow: auto;
-  overflow-y: hidden;
 }
 
 .report-number {
@@ -444,7 +442,7 @@ margin-bottom: 0px;
     font-size: $font-size-base;
   }
   th:last-child {
-    padding-right: 50px;
+    padding-right: 0px;
   }
 
   input.browser-default {
@@ -462,6 +460,7 @@ margin-bottom: 0px;
 .genus-search-row {
   padding-left: 0 !important;
 }
+
 .threshold-row {
   background: #fff;
   border: 1px solid #D9E0E4;
@@ -510,6 +509,16 @@ margin-bottom: 0px;
   }
 }
 
+.advanced-filters-activate, .categories-filters-activate {
+  span {
+    font-size: 10pt !important;
+  }
+}
+
+.ui.dropdown .text {
+  font-size: 10pt !important;
+}
+
 .reports-section {
   padding: 0 !important;
   .reports-count {
@@ -544,6 +553,9 @@ margin-bottom: 0px;
       &:hover {
         color: #84d4fa;
       }
+    }
+    div.text {
+      font-size: 1em !important;
     }
     .filter-tags-list {
       margin-left: 15px;
@@ -710,44 +722,22 @@ margin-bottom: 0px;
 }
 
 .report-action-buttons {
-  li {
-    display: inline-block;
-    width: 45%;
-    margin-right: .5em;
-    button {
-      border: 1px solid #3867fa;
-      padding: 10px;
-      border-radius: 30px;
-      background: #3867fa;
-      color: #fff;
-      font-size: 16px;
-      width: 150px;
-      &.o {
-        background: #fff;
-        color: #3867fa;
-        &:hover {
-          background: #3867fa;
-          color: #fff;
-        }
-        i.fa {
-          padding-right: 30px;
-          font-size: 1.2em;
-        }
-      }
-    }
-  }
   .ui.labeled.icon.button>.icon { // Actual icon in the button
     background-color: transparent;
     font-size: 1.3em;
     margin-left: 0.4em !important;
   }
   .download-btn { // The whole button
-    color: #3867fa !important;
-    background-color: transparent !important;
+    color: #3867fa;
+    background-color: #fff;
     padding-left: 5em !important;
     border: 1px solid #e4e4e4;
     //padding: 5px 1em;
     border-radius: 999999px;
+    &:hover {
+      background-color: #3867fa !important;
+      color: #fff;
+    }
   }
   .ui.dropdown .text { // The text in the button
     font-size: 1.2em;
@@ -766,6 +756,9 @@ margin-bottom: 0px;
   padding: 10px;
   cursor: auto;
   border-radius: 10px;
+  span.filter-label {
+    font-size: 1em !important;
+  }
   .metric-thresholds {
     width: 100%;
   }
