@@ -171,7 +171,7 @@ class ProjectsController < ApplicationController
         format.json { head :no_content }
       else
         format.html { render :edit }
-        format.json { render json: @project.errors.full_messages, status: :unprocessable_entity }
+        format.json { render json: { message: 'Cannot delete this project' }, status: :unprocessable_entity }
       end
     end
   end
