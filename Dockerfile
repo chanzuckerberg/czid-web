@@ -29,6 +29,7 @@ WORKDIR /app
 COPY Gemfile Gemfile.lock ./
 RUN gem install bundler && bundle install --jobs 20 --retry 5
 
+RUN npm install -g eslint
 RUN npm update -g
 
 # Copy the main application.
