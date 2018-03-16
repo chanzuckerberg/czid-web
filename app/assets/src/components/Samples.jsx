@@ -701,13 +701,13 @@ class Samples extends React.Component {
     }
   }
 
-  fetchProjectDetails(projId) {
+  fetchProjectDetails(projId, resetFilters = true) {
     if (!projId) {
       this.setState({
         selectedProjectId: null,
         project: null
       });
-      this.fetchResults(null, true);
+      this.fetchResults(null, resetFilters);
     } else {
       projId = parseInt(projId);
       axios.get(`projects/${projId}.json`).then((res) => {
@@ -715,7 +715,7 @@ class Samples extends React.Component {
           project: res.data
         });
         this.fetchProjectUsers(projId);
-        this.fetchResults(null, true);
+        this.fetchResults(null, resetFilters);
       }).catch((err) => {
         this.setState({ project: null })
       })
@@ -1372,7 +1372,7 @@ class Samples extends React.Component {
     this.initializeSelectAll();
     this.displayDownloadDropdown();
     this.initializeTooltip();
-    this.fetchProjectDetails(this.state.selectedProjectId);
+    this.fetchProjectDetails(this.state.selectedProjectId, false);
     this.scrollDown();
     this.displayPipelineStatusFilter();
     this.initializeColumnSelect();
@@ -1417,10 +1417,14 @@ class Samples extends React.Component {
   //set Url based on requests
   setUrlLocation(value_when_empty="") {
     let projectId = parseInt(this.state.selectedProjectId);
+    let tissueFilter = this.selectionToParamsOrNone(this.state.selectedTissueFilters, value_when_empty);
+    if (this.state.tissueTypes.length == 0) {
+      tissueFilter = "";
+    }
     const params = {
       project_id: projectId ? projectId : null,
       filter: this.state.filterParams,
-      tissue: this.selectionToParamsOrNone(this.state.selectedTissueFilters, value_when_empty),
+      tissue: tissueFilter,
       host: this.selectionToParamsOrNone(this.state.selectedHostIndices, value_when_empty),
       search: this.state.searchParams,
       ids: this.state.sampleIdsParams,
