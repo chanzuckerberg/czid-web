@@ -804,24 +804,19 @@ class Samples extends React.Component {
     var that = this;
     $('.checkAll').click(function(e) {
       var checked = e.currentTarget.checked;
+      console.log(checked);
       $('.checkbox:enabled').prop('checked', checked);
       var checkedCount = $("input:checkbox:checked").length
       that.setState({
-        allChecked: checked,
-        checkedBoxes: checkedCount
+        allChecked: checked
       });
+      that.fetchAllSelectedIds(checked);
     });
   }
 
   checkTheRightBoxes() {
-    if (this.state.allChecked) {
-      $('.checkbox').each((id, element) => {
-        element.checked = true;
-      })
-      return;
-    }
     var that = this;
-    $('.checkbox').each((id, element) => {
+    $('.checkbox:enabled').each((id, element) => {
       let sample_id = element.getAttribute('data-sample-id');
       const sampleList = that.state.selectedSampleIds;
       if (!sample_id) {
@@ -833,30 +828,28 @@ class Samples extends React.Component {
         element.checked = false;
       }
     });
-
   }
 
   fetchAllSelectedIds(checked) {
     var that = this;
+    let sampleList = that.state.selectedSampleIds;
     $('.checkbox').each((id, element) => {
-      let sample_id = element.getAttribute('data-sample-id')
-      let sampleList = that.state.selectedSampleIds;
+      let sample_id = parseInt(element.getAttribute('data-sample-id'))
       if (checked) {
         if (sampleList.indexOf(sample_id) === -1) {
           sampleList.push(+sample_id);
         }
       } else {
-        sampleList = []
+        if (sampleList.indexOf(sample_id) >= 0) {
+          sampleList.splice(sampleList.indexOf(sample_id), 1);
+        }
       }
-    that.setState({ selectedSampleIds: sampleList })
     });
+    that.setState({ selectedSampleIds: sampleList })
   }
 
   compareSamples() {
     let params;
-    if(this.state.allChecked) {
-      this.fetchAllSelectedIds(this.state.allChecked);
-    }
     if(this.state.selectedSampleIds.length) {
       location.href = `/samples/heatmap?sample_ids=${this.state.selectedSampleIds}`
     }
@@ -884,7 +877,7 @@ class Samples extends React.Component {
     // current array of options
     const sampleList = this.state.selectedSampleIds
 
-    let sample_id = e.target.getAttribute('data-sample-id')
+    let sample_id = parseInt(e.target.getAttribute('data-sample-id'))
     let index
     // check if the check box is checked or unchecked
 
