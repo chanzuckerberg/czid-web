@@ -830,7 +830,7 @@ class Samples extends React.Component {
   fetchAllSelectedIds(checked) {
     var that = this;
     let sampleList = that.state.selectedSampleIds;
-    $('.checkbox').each((id, element) => {
+    $('.checkbox:enabled').each((id, element) => {
       let sample_id = parseInt(element.getAttribute('data-sample-id'))
       if (checked) {
         if (sampleList.indexOf(sample_id) === -1) {
@@ -1169,7 +1169,7 @@ class Samples extends React.Component {
           <p className="subheading col no-padding s12">
           { this.state.allSamples.length === 0 ? 'No sample found'
             : ( this.state.allSamples.length === 1 ? '1 sample found'
-              : `Showing ${this.state.allSamples.length} out of ${this.state.totalNumber} total samples`)
+              : `Showing ${this.state.allSamples.length} out of ${this.state.totalNumber} total samples. ${this.state.selectedSampleIds.length} samples selected.`)
           }
         </p>
         </div>
@@ -1426,12 +1426,14 @@ class Samples extends React.Component {
   }
 
   handleProjectSelection(id, listType) {
+    $(".checkAll").prop('checked', false);
     this.setState({
       selectedProjectId: id,
       projectType: listType,
       filterParams: '',
       searchParams:'',
       checkInUpdate: false,
+      allChecked: false,
       selectedTissueFilters: [],
       selectedHostIndices: [],
       tissueTypes: [],
