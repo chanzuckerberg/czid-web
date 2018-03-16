@@ -3,7 +3,6 @@ class Project < ApplicationRecord
   has_many :samples
   has_many :favorite_projects
   has_many :favorited_by, through: :favorite_projects, source: :user
-  attr_accessor :is_empty
   validates :name, presence: true, uniqueness: true
   include ReportHelper
 

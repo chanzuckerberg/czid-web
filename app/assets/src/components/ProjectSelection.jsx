@@ -17,6 +17,7 @@ import Samples from './Samples';
     this.toggleDisplayFavProjects = this.toggleDisplayFavProjects.bind(this);
     this.toggleFavorite = this.toggleFavorite.bind(this);
     this.handleProjectClick = this.handleProjectClick.bind(this);
+    this.deleteProject = this.deleteProject.bind(this);
 
     this.state = {
       formattedProjectList: [],
@@ -69,7 +70,7 @@ import Samples from './Samples';
   deleteProject(e) {
     let projectId = e.target.getAttribute('project-id');
     axios
-      .destroy(`/projects/${projectId}`, {
+      .delete(`/projects/${projectId}`, {
         authenticity_token: this.csrf
       })
       .then((res) => {
