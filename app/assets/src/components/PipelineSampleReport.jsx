@@ -1010,7 +1010,7 @@ class PipelineSampleReport extends React.Component {
                         <Dropdown.Menu>
                           {
                             this.all_backgrounds.length ?
-                              this.all_backgrounds.slice(0, -1).map((background, i) => {
+                              this.all_backgrounds.map((background, i) => {
                                 return (
                                   <Dropdown.Item
                                     text={background.name}
