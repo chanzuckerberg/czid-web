@@ -175,6 +175,9 @@ a {
 .sub-header .sub-title {
   color: #333333;
   font-size: $font-size-h3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sub-header .sub-title a:hover{
