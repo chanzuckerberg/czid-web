@@ -816,10 +816,11 @@ class Samples extends React.Component {
   fetchAllSelectedIds(checked) {
     var that = this;
     $('.checkbox').each((id, element) => {
+      sample_id = element.getAttribute('data-sample-id')
       let sampleList = that.state.selectedSampleIds;
       if (checked) {
-        if (sampleList.indexOf(id) === -1) {
-          sampleList.push(+id);
+        if (sampleList.indexOf(sample_id) === -1) {
+          sampleList.push(+sample_id);
         }
       } else {
         sampleList = []
