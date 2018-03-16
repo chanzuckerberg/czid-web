@@ -13,7 +13,6 @@ class HomeController < ApplicationController
       p["can_delete"] = p_r.can_delete?(current_user) ? 1 : 0
       @projects << p
     end
-    logger.warn @projects
     @editable_project_ids = current_power.updatable_projects.pluck(:id)
     @host_genomes = HostGenome.all.reject { |hg| hg.name.downcase.include?("__test__") }
     render 'home'

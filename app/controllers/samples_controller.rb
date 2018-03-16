@@ -393,7 +393,8 @@ class SamplesController < ApplicationController
       else
         format.html { render :new }
         format.json do
-          render json: @sample.errors.full_messages + @project.errors.full_messages,
+          render json: { sample_errors: @sample.errors.full_messages,
+                         project_errors: @project.errors.full_messages },
                  status: :unprocessable_entity
         end
       end
