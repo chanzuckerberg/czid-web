@@ -270,27 +270,38 @@ import Nanobar from 'nanobar';
                .slice(0,8)
                .map((project, i) => {
                 return (
-                    <div className="all project-item"
-                         onClick={this.handleProjectClick}
-                         data-id={project.id}  key={i}>
-                      <span className='project-label'
-                        data-id={project.id}>
-                        {project.name}
-                      </span>
-                      {this.addFavIconClass(project)}
+                    <div
+                      className="all project-item"
+                      onClick={this.handleProjectClick}
+                      data-id={project.id}  key={i}>
+                      <div className="row label-row">
+                        <span className='project-label no-padding col s10'
+                          data-id={project.id}>
+                          {project.name}
+                        </span>
+                        <span className="icon-container no-padding col s2">
+                          {this.addFavIconClass(project)}
+                        </span>
+                      </div>
                     </div>
                 )
             }) :
             this.state.formattedProjectList.sort(sortLogic).filter((project) => !project.favorited).map((project, i) => {
             return (
-              <div className="all project-item"
-                   onClick={this.handleProjectClick}
-                   data-id={project.id} key={i}>
-                <span className='project-label'
-                  data-id={project.id}>
-                  {project.name}
-                </span>
-                {this.addFavIconClass(project)}
+              <div
+                className="all project-item"
+                onClick={this.handleProjectClick}
+                data-id={project.id}  key={i}>
+                <div className="row label-row">
+                  <span
+                    className='project-label no-padding col s10'
+                    data-id={project.id}>
+                    {project.name}
+                  </span>
+                  <span className="icon-container no-padding col s2">
+                    {this.addFavIconClass(project)}
+                  </span>
+                </div>
               </div>
             )
           })}

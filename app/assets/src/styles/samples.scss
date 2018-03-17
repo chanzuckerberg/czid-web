@@ -913,8 +913,14 @@ input[type="button"] {
               }
             }
           }
+          .row.label-row {
+            margin-bottom: 0;
+          }
           .project-label {
             cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
           }
         }
       }
