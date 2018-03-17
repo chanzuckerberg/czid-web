@@ -532,6 +532,9 @@ $break-large: 1070px;
           .check {
             display: inline-block
           }
+          [type=checkbox].filled-in:disabled:not(:checked)+label:after {
+            background-color: #CCC;
+          }
         }
         .sample-name-info {
           display: inline-block;
