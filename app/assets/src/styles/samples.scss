@@ -843,9 +843,7 @@ input[type="button"] {
   .sidebar {
     background-color: #333333;
     border-right: 1px solid #eaeaea;
-    .sticky-inner-wrapper {
-      background: #333333;
-    }
+    width: 15.3em!important;
     .title {
       color: $gray3;
       font-weight: 600;
@@ -933,7 +931,8 @@ input[type="button"] {
     background: #fff;
     -webkit-transform: unset !important;
     transform: unset !important;
-    margin-left: 260px !important;
+    margin-left: 15.3em !important;
+    width: 86.666667% !important;
     .content-wrapper {
       .divider {
         height: 3px;
