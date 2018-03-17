@@ -41,6 +41,9 @@ $break-large: 1070px;
 .tab-screen {
   background: #f8f9f9;
   margin-top: 5px;
+  &#details {
+    min-height: 100vh;
+  }
 }
 
 .tab-screen-content {
