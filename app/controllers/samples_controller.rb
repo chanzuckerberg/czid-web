@@ -413,10 +413,16 @@ class SamplesController < ApplicationController
   # DELETE /samples/1
   # DELETE /samples/1.json
   def destroy
-    @sample.destroy
+    deletable = @sample.status == Sample::UPLOAD_FAILED_STATUS
+    @sample.destroy if deletable
     respond_to do |format|
-      format.html { redirect_to samples_url, notice: 'Sample was successfully destroyed.' }
-      format.json { head :no_content }
+      if deletable
+        format.html { redirect_to projects_url, notice: 'Project was successfully destroyed.' }
+        format.json { head :no_content }
+      else
+        format.html { render :edit }
+        format.json { render json: { message: 'Cannot delete this project' }, status: :unprocessable_entity }
+      end
     end
   end
 
