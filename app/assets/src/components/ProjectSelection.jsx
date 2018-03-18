@@ -266,7 +266,8 @@ import Nanobar from 'nanobar';
              <div className='title'>None</div> :
                this.state.showLess ? this.state.formattedProjectList
                .sort(sortLogic)
-               .slice(0,7)
+               .slice(0,8)
+               .filter((project) => !project.favorited)
                .map((project, i) => {
                 return (
                     <div className="all project-item"
@@ -280,7 +281,7 @@ import Nanobar from 'nanobar';
                     </div>
                 )
             }) :
-            this.state.formattedProjectList.sort(sortLogic).map((project, i) => {
+            this.state.formattedProjectList.sort(sortLogic).filter((project) => !project.favorited).map((project, i) => {
             return (
               <div className="all project-item"
                    onClick={this.handleProjectClick}
