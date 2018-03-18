@@ -75,10 +75,6 @@ class Header extends React.Component {
               </p>
             </div>
             <br/>
-            <p>The project you specify (<span className="code-to-edit">Your Project Name</span>) must already exist on IDseq: you can create it using the
-              <br />
-              <span className="code">+ New project</span> button on the sample upload page.
-            </p>
             <p>4. You can also upload samples in bulk by specifying a folder as follows:</p>
             <div className="code center-code">
               <p>
