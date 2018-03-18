@@ -937,6 +937,20 @@ class Samples extends React.Component {
     });
   }
 
+  deleteProject(e) {
+    let projectId = this.state.selectedProjectId;
+    this.nanobar.go(30);
+    axios
+      .delete(`/projects/${projectId}`, {
+        data: { authenticity_token: this.csrf }
+      })
+      .then((res) => {
+        this.nanobar.go(100);
+        this.setState({ selectedProjectId: null });
+      }).catch((err) => {
+    })
+  }
+
   renderTable(samples) {
     let project_id = this.state.selectedProjectId ? this.state.selectedProjectId : 'all'
     let search_field_width = 'col s3 no-padding'
@@ -990,6 +1004,16 @@ class Samples extends React.Component {
         <div className='white'>
           <a onClick={this.compareSamples} className="compare center">
             <span>Compare</span>
+          </a>
+        </div>
+      </div>
+    )
+
+    let delete_project_button = (
+      <div className='download-table'>
+        <div className='white'>
+          <a onClick={this.deleteProject} className="compare center">
+            <span>Delete project</span>
           </a>
         </div>
       </div>
@@ -1177,6 +1201,7 @@ class Samples extends React.Component {
             { this.state.selectedProjectId ? project_menu : null }
             { table_download_dropdown }
             { this.state.selectedSampleIds.length > 0  ? compare_button : null }
+            { this.state.selectedProjectId && this.state.allSamples.length == 0 ? delete_project_button : null }
         </div>
       </div>
     );
