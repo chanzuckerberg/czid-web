@@ -16,7 +16,7 @@ before_install:
 install:
   - gem install brakeman
 script:
-  - docker-compose run webtest "./node_modules/.bin/eslint --no-eslintrc -c .eslint-light app/assets/src/components/* --ext .js"
+  - docker-compose run webtest "./node_modules/.bin/eslint app/assets/src --ext .js,.jsx --no-eslintrc -c .eslint-light"
   - docker-compose run webtest "rails test"
   - echo "quit" | docker-compose run webtest "rails dbconsole"
   - docker-compose run webtest "rubocop -R --config .rubocop_todo.yml"
