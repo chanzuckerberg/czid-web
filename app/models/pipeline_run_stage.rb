@@ -310,6 +310,16 @@ class PipelineRunStage < ApplicationRecord
       mysqlimport --replace --local --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --columns=taxid,hit_type,first_byte,last_byte,pipeline_run_id --fields-terminated-by=',' idseq_#{Rails.env} taxon_byteranges;
     `
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_byteranges_path}")
+    statuses_in_project = PipelineRun.connection.select_all("
+      SELECT
+        pipeline_runs.id,
+        pipeline_runs.job_status
+      FROM pipeline_runs
+      LEFT OUTER JOIN samples ON
+        pipeline_runs.sample_id = samples.id
+      WHERE
+        samples.project_id = #{pr.sample.project_id.to_i}
+    ")
   end
 
   def host_filtering_outputs
