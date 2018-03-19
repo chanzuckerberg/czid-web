@@ -18,6 +18,7 @@
   ],
   "extends": ["standard", "standard-react", "airbnb", "eslint:recommended", "plugin:react/recommended"],
   "rules": {
+    "jsx-a11y/label-has-for": 0,
     "no-compare-neg-zero": 2,
     "no-cond-assign": 2,
     "no-constant-condition": 2,
@@ -47,6 +48,39 @@
     "no-dupe-class-members": 2,
     "no-new-symbol": 2,
     "no-this-before-super": 2,
+    "react/no-multi-comp": 0,
+    "react/prop-types": 0,
+    "react/sort-comp": [2, {
+			order: [
+				'static-methods',
+				'lifecycle',
+				'everything-else',
+				'render'
+			],
+			groups: {
+				lifecycle: [
+					'displayName',
+					'propTypes',
+					'contextTypes',
+					'childContextTypes',
+					'mixins',
+					'statics',
+					'defaultProps',
+					'constructor',
+					'getDefaultProps',
+					'getInitialState',
+					'state',
+					'getChildContext',
+					'componentWillMount',
+					'componentDidMount',
+					'componentWillReceiveProps',
+					'shouldComponentUpdate',
+					'componentWillUpdate',
+					'componentDidUpdate',
+					'componentWillUnmount'
+				]
+			}
+		}],
     "require-yield": 2,
     "curly": [
       "error",
