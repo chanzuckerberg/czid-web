@@ -17,6 +17,11 @@ public_sample:
   name: sample4
   project: public_project
 
+deletable_sample:
+  name: sample5
+  project: one
+  status: "upload_failed"
+
 joe_sample:
   name: sample Joe
   project: joe_project
