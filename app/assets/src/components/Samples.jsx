@@ -55,6 +55,7 @@ class Samples extends React.Component {
     this.startReportGeneration = this.startReportGeneration.bind(this);
     this.checkReportDownload = this.checkReportDownload.bind(this);
     this.displayReportProgress = this.displayReportProgress.bind(this);
+    this.deleteProject = this.deleteProject.bind(this);
 
     this.state = {
       invite_status: null,
@@ -938,15 +939,18 @@ class Samples extends React.Component {
   }
 
   deleteProject(e) {
+    console.log(this.state.selectedProjectId);
     let projectId = this.state.selectedProjectId;
     this.nanobar.go(30);
+    console.log(`/projects/${projectId}`)
     axios
-      .delete(`/projects/${projectId}`, {
+      .delete(`/projects/${projectId}.json`, {
         data: { authenticity_token: this.csrf }
       })
       .then((res) => {
         this.nanobar.go(100);
-        this.setState({ selectedProjectId: null });
+        location.href = "/"
+        // this.setState({ selectedProjectId: null });
       }).catch((err) => {
     })
   }
