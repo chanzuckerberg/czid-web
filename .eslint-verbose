@@ -50,6 +50,7 @@
     "no-this-before-super": 2,
     "react/forbid-prop-types": 0,
     "react/no-multi-comp": 0,
+    "react/require-default-props": 0,
     "react/sort-comp": [2, {
 			order: [
 				'static-methods',

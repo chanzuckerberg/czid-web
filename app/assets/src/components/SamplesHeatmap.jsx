@@ -85,7 +85,7 @@ class SampleHeatmapTooltip extends React.Component {
 SampleHeatmapTooltip.propTypes = {
   taxon: PropTypes.shape({
     name: PropTypes.string,
-  }).isRequired,
+  }),
   sample: PropTypes.shape({
     name: PropTypes.string,
   }).isRequired,
