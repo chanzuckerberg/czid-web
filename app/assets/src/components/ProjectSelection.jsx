@@ -266,8 +266,8 @@ import Nanobar from 'nanobar';
              <div className='title'>None</div> :
                this.state.showLess ? this.state.formattedProjectList
                .sort(sortLogic)
-               .slice(0,8)
                .filter((project) => !project.favorited)
+               .slice(0,8)
                .map((project, i) => {
                 return (
                     <div className="all project-item"
