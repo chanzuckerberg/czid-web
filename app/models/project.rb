@@ -28,6 +28,13 @@ class Project < ApplicationRecord
     return path unless path != File.expand_path(path)
   end
 
+  def can_delete?(user)
+    current_power = Power.new(user)
+    return false unless current_power.updatable_projects.include?(self)
+    non_empty_sample_count = current_power.project_samples(self).reject { |s| s.status == Sample::STATUS_CREATED }.count
+    non_empty_sample_count.zero?
+  end
+
   def samples
     # Disable samples function. have to go through power
     nil

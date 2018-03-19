@@ -6,7 +6,13 @@ class HomeController < ApplicationController
 
   def index
     @favorite_projects = current_user.favorites
-    @projects = current_power.projects
+    project_records = current_power.projects
+    @projects = []
+    project_records.each do |p_r|
+      p = p_r.as_json
+      p["can_delete"] = p_r.can_delete?(current_user) ? 1 : 0
+      @projects << p
+    end
     @editable_project_ids = current_power.updatable_projects.pluck(:id)
     @host_genomes = HostGenome.all.reject { |hg| hg.name.downcase.include?("__test__") }
     render 'home'

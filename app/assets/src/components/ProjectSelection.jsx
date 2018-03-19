@@ -23,6 +23,8 @@ import Nanobar from 'nanobar';
     this.toggleDisplayFavProjects = this.toggleDisplayFavProjects.bind(this);
     this.toggleFavorite = this.toggleFavorite.bind(this);
     this.handleProjectClick = this.handleProjectClick.bind(this);
+    this.deleteProject = this.deleteProject.bind(this);
+    this.renderDeleteProject = this.renderDeleteProject.bind(this);
 
     this.state = {
       formattedProjectList: [],
@@ -71,6 +73,42 @@ import Nanobar from 'nanobar';
       }).catch((err) => {
     })
   }
+
+  cleanProjectState(projectId, listKeys) {
+    var newState = {}
+    listKeys.forEach((key, i) => {
+      let project_list = Object.assign([], this.state[key])
+      let project_id_list = project_list.map(p => p.id)
+      let index = project_id_list.indexOf(+projectId)
+      project_list.splice(index, 1)
+      newState[key] = project_list;
+    })
+    return newState;
+  }
+
+  deleteProject(e) {
+    e.stopPropagation();
+    let projectId = e.target.getAttribute('project-id');
+    this.nanobar.go(30);
+    axios
+      .delete(`/projects/${projectId}`, {
+        data: { authenticity_token: this.csrf }
+      })
+      .then((res) => {
+        let newState = this.cleanProjectState(projectId, ["formattedProjectList", "formattedFavProjectList"])
+        this.nanobar.go(100);
+        this.setState(newState)
+      }).catch((err) => {
+    })
+  }
+
+  renderDeleteProject(project) {
+    return (
+      project.can_delete ?
+        <span><i className="fa fa-close" project-id={project.id}
+                 onClick={this.deleteProject}/> </span>
+        : null
+  )}
 
   reformatProjectList(favorites, allProjects) {
     let favProjects = [];
@@ -221,6 +259,7 @@ import Nanobar from 'nanobar';
                     <div className="project-item fav-item"
                          onClick={this.handleProjectClick} data-type='favorite'
                          data-id={project.id} key={i}>
+                    { this.renderDeleteProject(project, "formattedFavProjectList") }
                     <span className='project-label'
                           data-type='favorite'
                           data-id={project.id}>
@@ -237,6 +276,7 @@ import Nanobar from 'nanobar';
                     <div className="project-item fav-item"
                          onClick={this.handleProjectClick} data-type='favorite'
                          data-id={project.id} key={i}>
+                { this.renderDeleteProject(project, "formattedFavProjectList") }
                 <span className='project-label'
                       data-type='favorite'
                       data-id={project.id}>
@@ -272,6 +312,7 @@ import Nanobar from 'nanobar';
                     <div className="all project-item"
                          onClick={this.handleProjectClick}
                          data-id={project.id}  key={i}>
+                      { this.renderDeleteProject(project, "formattedProjectList") }
                       <span className='project-label'
                         data-id={project.id}>
                         {project.name}
@@ -285,6 +326,7 @@ import Nanobar from 'nanobar';
               <div className="all project-item"
                    onClick={this.handleProjectClick}
                    data-id={project.id} key={i}>
+                { this.renderDeleteProject(project, "formattedProjectList") }
                 <span className='project-label'
                   data-id={project.id}>
                   {project.name}
