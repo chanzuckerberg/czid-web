@@ -165,7 +165,7 @@ https://github.com/kislyuk/aegea
 You can run ESLint for JSX/React linting checks. eslint-light is used for basic checks in Travis. eslint-verbose will show lots of details, and you can customize your own eslint config file.
 
 - Light: `./node_modules/.bin/eslint app/assets/src --ext .js,.jsx --no-eslintrc -c .eslint-light`
-- Verbose: `./node_modules/.bin/eslint app/assets/src --ext .js,.jsx --no-eslintrc -c .eslint-light`
+- Verbose: `./node_modules/.bin/eslint app/assets/src --ext .js,.jsx --no-eslintrc -c .eslint-verbose`
 - Auto-fix dry run: `./node_modules/.bin/eslint app/assets/src --ext .js,.jsx --fix-dry-run --no-eslintrc -c .eslint-verbose`
 - Auto-fix: `./node_modules/.bin/eslint app/assets/src --ext .js,.jsx --no-eslintrc -c .eslint-verbose --fix`
 
