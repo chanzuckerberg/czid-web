@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import clusterfck from 'clusterfck';
 import axios from 'axios';
 import d3, {event as currentEvent} from 'd3';
@@ -81,34 +82,21 @@ class SampleHeatmapTooltip extends React.Component {
   }
 }
 
+SampleHeatmapTooltip.propTypes = {
+  taxon: PropTypes.shape({
+    name: PropTypes.string,
+  }).isRequired,
+  sample: PropTypes.shape({
+    name: PropTypes.string,
+  }).isRequired,
+};
+
 class D3Heatmap extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {}
-    this.colors = this.props.colors || [
-      '#FFFFFF',
-      '#F9F1F4',
-      '#F3E4EA',
-      '#EDD6E0',
-      '#E7C9D6',
-      '#E2BBCC',
-      '#DCAEC2',
-      '#D6A1B8',
-      '#D093AE',
-      '#CA86A4',
-      '#C57899',
-      '#BF6B8F',
-      '#B95D85',
-      '#B3507B',
-      '#AD4371',
-      '#A83567',
-      '#A2285D',
-      '#9C1A53',
-      '#960D49',
-      '#91003F',
-    ];
-
+    this.colors = this.props.colors;
     this.initializeData(this.props);
   }
 
@@ -518,6 +506,38 @@ class D3Heatmap extends React.Component {
     )
   }
 }
+
+D3Heatmap.propTypes = {
+  colors: PropTypes.array,
+  getTooltip: PropTypes.func.isRequired,
+  onCellClick: PropTypes.func.isRequired,
+  onRemoveRow: PropTypes.func.isRequired,
+};
+
+D3Heatmap.defaultProps = {
+  colors:  [
+    '#FFFFFF',
+    '#F9F1F4',
+    '#F3E4EA',
+    '#EDD6E0',
+    '#E7C9D6',
+    '#E2BBCC',
+    '#DCAEC2',
+    '#D6A1B8',
+    '#D093AE',
+    '#CA86A4',
+    '#C57899',
+    '#BF6B8F',
+    '#B95D85',
+    '#B3507B',
+    '#AD4371',
+    '#A83567',
+    '#A2285D',
+    '#9C1A53',
+    '#960D49',
+    '#91003F',
+  ],
+};
 
 class SamplesHeatmap extends React.Component {
   constructor(props) {
