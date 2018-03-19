@@ -158,3 +158,15 @@ Note that this requires the proper ssh config to access the deployed versions of
 ## Dependencies
 
 https://github.com/kislyuk/aegea
+
+
+## ESLint
+
+You can run ESLint for JSX/React linting checks. eslint-light is used for basic checks in Travis. eslint-verbose will show lots of details, and you can customize your own eslint config file.
+
+- Light: `./node_modules/.bin/eslint app/assets/src/components/* --ext .js --no-eslintrc -c .eslint-light`
+- Verbose: `./node_modules/.bin/eslint app/assets/src/components/* --ext .js --no-eslintrc -c .eslint-light`
+- Auto-fix dry run: `./node_modules/.bin/eslint app/assets/src/components/* --ext .js --fix-dry-run --no-eslintrc -c .eslint-verbose`
+- Auto-fix: `./node_modules/.bin/eslint app/assets/src/components/* --ext .js --no-eslintrc -c .eslint-verbose --fix`
+
+- Prettier is another code formatting tool: https://github.com/prettier/prettier
