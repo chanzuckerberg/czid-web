@@ -546,8 +546,7 @@ class D3Heatmap extends React.Component {
     return (
       <div className="D3Heatmap">
         {this.renderTooltip()}
-        <div ref={(container) => { this.container = container; }} >
-        </div>
+        <div ref={(container) => { this.container = container; }}  />
       </div>
     )
   }
@@ -905,7 +904,7 @@ class SamplesHeatmap extends React.Component {
   }
 
   renderLoading () {
-    return (<p className="loading-indicator text-center"><i className="fa fa-spinner fa-pulse fa-fw"/> Loading...</p>);
+    return (<p className="loading-indicator text-center"><i className="fa fa-spinner fa-pulse fa-fw" /> Loading...</p>);
   }
 
   onCellClick (d) {
@@ -1175,15 +1174,15 @@ class SamplesHeatmap extends React.Component {
   render () {
     return (
       <div id="project-visualization">
-				<div className="heatmap-header">
-					<Popup
-						trigger={<Button className="right" primary onClick={this.onShareClick.bind(this)}>Share</Button>}
-						content='A shareable URL has been copied to your clipboard!'
-						on='click'
-						hideOnScroll
-					/>
-				 	<h2>Comparing {this.state.data ? this.state.data.length : ''} samples</h2>
-				</div>
+        <div className="heatmap-header">
+          <Popup
+            trigger={<Button className="right" primary onClick={this.onShareClick.bind(this)}>Share</Button>}
+            content='A shareable URL has been copied to your clipboard!'
+            on='click'
+            hideOnScroll
+          />
+          <h2>Comparing {this.state.data ? this.state.data.length : ''} samples</h2>
+        </div>
         {this.renderVisualization()}
       </div>
     );
@@ -1254,8 +1253,7 @@ class D3HeatmapLegend extends React.Component {
 
   render () {
     return (
-      <div className="heatmap-legend" ref={(container) => { this.container = container; }} >
-      </div>
+      <div className="heatmap-legend" ref={(container) => { this.container = container; }}  />
     );
   }
 }
