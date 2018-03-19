@@ -417,11 +417,11 @@ class SamplesController < ApplicationController
     @sample.destroy if deletable
     respond_to do |format|
       if deletable
-        format.html { redirect_to projects_url, notice: 'Project was successfully destroyed.' }
+        format.html { redirect_to samples_url, notice: 'Sample was successfully destroyed.' }
         format.json { head :no_content }
       else
         format.html { render :edit }
-        format.json { render json: { message: 'Cannot delete this project' }, status: :unprocessable_entity }
+        format.json { render json: { message: 'Cannot delete this sample' }, status: :unprocessable_entity }
       end
     end
   end
