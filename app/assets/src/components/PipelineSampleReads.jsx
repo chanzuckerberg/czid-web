@@ -56,6 +56,17 @@ class PipelineSampleReads extends React.Component {
     });
   }
 
+  deleteSample(e) {
+    axios
+      .delete(`/samples/${this.sampleInfo.id}`, {
+        data: { authenticity_token: this.csrf }
+      })
+      .then((res) => {
+        location.href=`/?project_id=${this.projectInfo.id}`
+      }).catch((err) => {
+    })
+  }
+
   render_metadata_dropdown(label, field) {
     let dropdown_options = this.DROPDOWN_OPTIONS[field];
     let display_value = this.sampleInfo[field] ? this.sampleInfo[field] : '-';
@@ -488,6 +499,14 @@ class PipelineSampleReads extends React.Component {
         </div>
       </div>) : null;
 
+    let delete_sample_button = (
+      <div className="report-action-buttons">
+        <a onClick={this.deleteSample} className="right">
+          <span>Delete sample</span>
+        </a>
+      </div>
+    )
+
     return (
       <div>
         <SubHeader>
@@ -503,6 +522,7 @@ class PipelineSampleReads extends React.Component {
                 </a>
                 > { sample_dropdown }
               </div>
+              { delete_sample_button }
               <div className="col no-padding s3 right-align">
                 <div className="report-action-buttons">
                   <a className="right" href={this.getDownloadLink()}>
