@@ -4,7 +4,7 @@ require 'tempfile'
 require 'aws-sdk'
 
 class Sample < ApplicationRecord
-  STATUS_CREATED  = 'created'.freeze
+  STATUS_CREATED = 'created'.freeze
   STATUS_UPLOAD_FAILED = 'upload_failed'.freeze
   STATUS_UPLOADED = 'uploaded'.freeze
   STATUS_RERUN    = 'need_rerun'.freeze
