@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "start": "yarn install && webpack --watch",
-    "build-img": "webpack",
+    "start": "yarn install && webpack --config webpack.config.dev.js --watch",
+    "build-img": "webpack --config webpack.config.prod.js",
     "lint": "./node_modules/.bin/eslint . ./**/*.js"
   },
   "devDependencies": {
@@ -29,13 +29,15 @@
     "style-loader": "^0.20.2",
     "uglifyjs-webpack-plugin": "^1.1.6",
     "url-loader": "^1.0.1",
-    "webpack": "^3.10.0"
+    "webpack": "^3.10.0",
+    "webpack-merge": "^4.1.2"
   },
   "dependencies": {
     "axios": "^0.17.1",
     "clusterfck": "git+https://github.com/chanzuckerberg/clusterfck.git#master",
     "copy-to-clipboard": "^3.0.8",
     "d3": "^3.5.17",
+    "diff-so-fancy": "^1.2.0",
     "font-awesome": "^4.7.0",
     "jquery": "^3.2.1",
     "js-cookie": "^2.2.0",

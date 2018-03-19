@@ -1,5 +1,7 @@
 const path = require("path");
+const webpack = require('webpack');
 const extractTextPlugin = require('extract-text-webpack-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 const extractPlugin = new extractTextPlugin({
   filename: 'dist/bundle.min.css'
@@ -58,7 +60,17 @@ const config = {
       }
     }]
   },
-  plugins: [ extractPlugin ]
+  plugins: [
+    extractPlugin,
+    new UglifyJsPlugin({
+      uglifyOptions: {
+        mangle: false,
+      }
+    }),
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify('production')
+    }),
+  ]
 }
 
 module.exports = config;
