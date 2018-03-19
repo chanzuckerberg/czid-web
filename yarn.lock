@@ -1570,10 +1570,6 @@ detect-libc@^1.0.2:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/detect-libc/-/detect-libc-1.0.3.tgz#fa137c4bd698edf55cd5cd02ac559f91a4c4ba9b"
 
-diff-so-fancy@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/diff-so-fancy/-/diff-so-fancy-1.2.0.tgz#dfcca33b82dbf446965acc6fee97291fe69d8a56"
-
 diffie-hellman@^5.0.0:
   version "5.0.2"
   resolved "https://registry.yarnpkg.com/diffie-hellman/-/diffie-hellman-5.0.2.tgz#b5835739270cfe26acf632099fded2a07f209e5e"

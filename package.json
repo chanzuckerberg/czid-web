@@ -37,7 +37,6 @@
     "clusterfck": "git+https://github.com/chanzuckerberg/clusterfck.git#master",
     "copy-to-clipboard": "^3.0.8",
     "d3": "^3.5.17",
-    "diff-so-fancy": "^1.2.0",
     "font-awesome": "^4.7.0",
     "jquery": "^3.2.1",
     "js-cookie": "^2.2.0",
