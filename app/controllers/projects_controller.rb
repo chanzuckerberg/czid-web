@@ -163,7 +163,7 @@ class ProjectsController < ApplicationController
   # DELETE /projects/1
   # DELETE /projects/1.json
   def destroy
-    deletable = @project.samples.count.zero?
+    deletable = @project.samples.to_a.empty?
     @project.destroy if deletable
     respond_to do |format|
       if deletable
