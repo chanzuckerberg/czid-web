@@ -927,8 +927,7 @@ class Samples extends React.Component {
     let sampleList = this.state.selectedSampleIds;
     const checked = e.target.checked;
     const allSamples = this.state.allSamples;
-    for (let idx in allSamples) {
-      let sample = allSamples[idx];
+    for (let sample of allSamples) {
       if (sample.run_info.report_ready != 1) {
         continue;
       }
@@ -1106,7 +1105,6 @@ class Samples extends React.Component {
             id="checkAll"
             className="filled-in checkAll"
             checked = {this.state.allChecked}
-            onChange = {(e) => {}}
             onClick={this.fetchAllSelectedIds}
             />
           <label htmlFor="checkAll"></label>
