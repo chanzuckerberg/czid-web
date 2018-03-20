@@ -1544,46 +1544,6 @@ class Samples extends React.Component {
     );
   }
 
-  componentDidMount() {
-    $(() => {
-      const win = $(window);
-      const samplesHeader = $(".sample-table-container");
-      const siteHeaderHeight = $(".site-header").height();
-      const projectWrapper = $(".project-wrapper");
-      let prevScrollTop = 0;
-      let marginTop = 0;
-      win.scroll(() => {
-        const scrollTop = win.scrollTop();
-        const scrollDirection =
-          scrollTop >= prevScrollTop ? "downward" : "upward";
-        if (scrollTop > samplesHeader.offset().top) {
-          samplesHeader.addClass("shadow");
-        } else {
-          samplesHeader.removeClass("shadow");
-        }
-        if (scrollDirection === "downward") {
-          const scrollDiff = siteHeaderHeight - scrollTop;
-          marginTop = scrollDiff > 0 ? scrollDiff : 0;
-        } else {
-          const scrollDiff = siteHeaderHeight - scrollTop;
-          marginTop =
-            scrollDiff < 0 ? 0 : Math.abs(scrollTop - siteHeaderHeight);
-        }
-        projectWrapper.css({ marginTop });
-        prevScrollTop = scrollTop;
-      });
-      $(".filter").hide();
-    });
-    this.closeMetaDataDropdown();
-    this.initializeSelectAll();
-    this.displayDownloadDropdown();
-    this.initializeTooltip();
-    this.fetchProjectDetails(this.state.selectedProjectId, false);
-    this.scrollDown();
-    this.displayPipelineStatusFilter();
-    this.initializeColumnSelect();
-  }
-
   componentDidUpdate(prevProps, prevState) {
     const prevStatus = prevState.filterParams;
     const currentStatus = this.state.filterParams;
