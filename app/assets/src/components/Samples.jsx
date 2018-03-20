@@ -1130,8 +1130,7 @@ class Samples extends React.Component {
               { this.state.project && this.canEditProject(this.state.project.id) ? (
                 this.state.project_users.length ?
                 <span>
-                  <i className="tiny material-icons">people</i>
-                    {this.state.project_users.length}
+                  <i className="tiny material-icons">people</i> {this.state.project_users.length}
                     { (this.state.project_users.length > 1) ? ' members' : ' member'}
                 </span>
                 : <span>
