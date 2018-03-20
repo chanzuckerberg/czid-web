@@ -525,71 +525,17 @@ class Samples extends React.Component {
       });
 
       return (
-        <a className="col s12 no-padding sample-feed" key={i}>
-          <div>
-            <div className='samples-card white'>
-              <div className='flex-container'>
-                <ul className='flex-items'>
-                  <li className='check-box-container'>
-                    { this.state.displaySelectSamples ? <div><input type="checkbox" id={i} onClick = { this.selectSample } key= {`sample_${dbSample.id}`} data-sample-id ={dbSample.id}
-                      className="filled-in checkbox" checked={ this.state.selectedSampleIds.indexOf(dbSample.id) >= 0 }
-                      disabled={sample.run_info.report_ready != 1}
-                      /> <label htmlFor={i}>{sample_name_info}</label></div> : sample_name_info }
-                  </li>
-                  {this.state.columnsShown.map((column, pos) => {
-                    let column_data = "";
-                    if (column === "pipeline_status") {
-                      column_data = (
-                        <li
-                          key={pos}
-                          onClick={this.viewSample.bind(this, dbSample.id)}
-                        >
-                          <div className="card-label top-label">
-                            {rowWithChunkStatus}
-                          </div>
-                          <div className="card-label center-label">
-                            {runInfo.total_runtime ? (
-                              <span className="time">
-                                <i
-                                  className="fa fa-clock-o"
-                                  aria-hidden="true"
-                                />
-                                <span className="duration-label">
-                                  {this.formatRunTime(runInfo.total_runtime)}
-                                </span>
-                              </span>
-                            ) : null}
-                          </div>
-                        </li>
-                      );
-                    } else if (column === "nonhost_reads") {
-                      column_data = (
-                        <li key={pos}>
-                          <div className="card-label center center-label data-label">
-                            {data_values[column]}{" "}
-                            {data_values["nonhost_reads_percent"]}
-                          </div>
-                        </li>
-                      );
-                    } else {
-                      column_data = (
-                        <li
-                          key={pos}
-                          onClick={this.viewSample.bind(this, dbSample.id)}
-                        >
-                          <div className="card-label center center-label data-label">
-                            {data_values[column]}
-                          </div>
-                        </li>
-                      );
-                    }
-                    return column_data;
-                  })}
-                </ul>
-              </div>
-            </div>
-          </div>
-        </a>
+        <PipelineOutputCards
+          i={i}
+          key={i}
+          dbSample={dbSample}
+          report_ready={sample.run_info.report_ready}
+          sample_name_info={sample_name_info}
+          rowWithChunkStatus={rowWithChunkStatus}
+          total_runtime={runInfo.total_runtime}
+          data_values={data_values}
+          parent={this}
+        />
       );
     });
   }
@@ -886,7 +832,7 @@ class Samples extends React.Component {
     this.setState({
       allChecked: checked,
       selectedSampleIds: sampleList
-    })
+    });
   }
 
   compareSamples() {
@@ -917,7 +863,7 @@ class Samples extends React.Component {
     // current array of options
     const sampleList = this.state.selectedSampleIds;
 
-    let sample_id = parseInt(e.target.getAttribute('data-sample-id'))
+    let sample_id = parseInt(e.target.getAttribute("data-sample-id"));
 
     if (e.target.checked) {
       // add the numerical value of the checkbox to options array
@@ -926,7 +872,7 @@ class Samples extends React.Component {
       }
     } else {
       // or remove the value from the unchecked checkbox from the array
-      let index = sampleList.indexOf(+sample_id)
+      let index = sampleList.indexOf(+sample_id);
       if (index >= 0) {
         sampleList.splice(index, 1);
       }
@@ -935,7 +881,7 @@ class Samples extends React.Component {
     this.setState({
       allChecked: false,
       selectedSampleIds: sampleList
-     })
+    });
   }
 
   applyExcluded(e, type, state_var) {
@@ -1038,13 +984,14 @@ class Samples extends React.Component {
 
     let check_all = (
       <div className="check-all">
-          <input type="checkbox"
-            id="checkAll"
-            className="filled-in checkAll"
-            checked = {this.state.allChecked}
-            onClick={this.fetchAllSelectedIds}
-            />
-          <label htmlFor="checkAll"></label>
+        <input
+          type="checkbox"
+          id="checkAll"
+          className="filled-in checkAll"
+          checked={this.state.allChecked}
+          onClick={this.fetchAllSelectedIds}
+        />
+        <label htmlFor="checkAll" />
       </div>
     );
 
@@ -1073,91 +1020,11 @@ class Samples extends React.Component {
       "Tissue: "
     );
 
-    const metaDataFilter = (
-      <div className="col s2 wrapper">
-        <div
-          className={
-            this.state.displayDropdown ? "metadata metadata-active" : "metadata"
-          }
-          onClick={this.displayMetaDataDropdown}
-        >
-          <div className="metadata-dropdown">Filter</div>
-          <i
-            className={
-              this.state.displayDropdown ? "fa fa-angle-up" : "fa fa-angle-down"
-            }
-          />
-        </div>
-        {this.state.displayDropdown ? (
-          <div className="row metadata-options">
-            <div className="col s6">
-              <h6>Host</h6>
-              {this.state.hostGenomes.length == 0 ? (
-                <div className="options-wrapper">
-                  <label>No host genome data present</label>
-                </div>
-              ) : (
-                this.state.hostGenomes.map((host, i) => {
-                  let indices = this.state.selectedHostIndices;
-                  let res = (
-                    <div key={i} className="options-wrapper">
-                      <input
-                        name="host"
-                        type="checkbox"
-                        data-id={host.id}
-                        checked={indices.indexOf(host.id) < 0 ? "" : "checked"}
-                        value={indices.indexOf(i) != -1}
-                        onChange={this.selectHostFilter}
-                        id={host.id}
-                        className="filled-in human"
-                      />
-                      <label htmlFor={host.id}>{host.name}</label>
-                    </div>
-                  );
-                  return res;
-                })
-              )}
-            </div>
-            <div className="col s6">
-              <h6>Tissue</h6>
-              {this.state.tissueTypes.length == 0 ? (
-                <div className="options-wrapper">
-                  <label>No tissue data present</label>
-                </div>
-              ) : (
-                this.state.tissueTypes.map((tissue, i) => {
-                  let res = (
-                    <div key={i} className="options-wrapper">
-                      <input
-                        name="tissue"
-                        type="checkbox"
-                        id={tissue}
-                        className="filled-in"
-                        data-status={tissue}
-                        checked={
-                          this.state.selectedTissueFilters.indexOf(tissue) < 0
-                            ? ""
-                            : "checked"
-                        }
-                        onChange={this.selectTissueFilter}
-                      />
-                      <label htmlFor={tissue}>{tissue}</label>
-                    </div>
-                  );
-                  return res;
-                })
-              )}
-            </div>
-          </div>
-        ) : null}
-      </div>
-    );
-
     const search_box = (
       <div className="row search-box">
         {this.state.displaySelectSamples ? check_all : null}
         {search_field}
-        {metaDataFilter}
+        {<MetaDataFilter state={this.state} parent={this} />}
       </div>
     );
 
@@ -1290,7 +1157,9 @@ class Samples extends React.Component {
     );
 
     let allSamplesLen = this.state.allSamples.length;
-    const samplesSelectionStr = this.state.selectedSampleIds.length ? `${this.state.selectedSampleIds.length} samples selected.` :  "";
+    const samplesSelectionStr = this.state.selectedSampleIds.length
+      ? `${this.state.selectedSampleIds.length} samples selected.`
+      : "";
 
     const projInfo = (
       <div className="row download-section">
@@ -1315,8 +1184,7 @@ class Samples extends React.Component {
                 ? "1 sample found"
                 : `Showing ${allSamplesLen} out of ${
                     this.state.totalNumber
-                  } total samples. ${samplesSelectionStr}`
-            }
+                  } total samples. ${samplesSelectionStr}`}
           </p>
         </div>
         <div className="col s6 download-section-btns">
@@ -1463,30 +1331,32 @@ class Samples extends React.Component {
   componentDidMount() {
     $(() => {
       const win = $(window);
-      const samplesHeader = $('.sample-table-container');
-      const siteHeaderHeight = $('.site-header').height();
-      const projectWrapper = $('.project-wrapper');
+      const samplesHeader = $(".sample-table-container");
+      const siteHeaderHeight = $(".site-header").height();
+      const projectWrapper = $(".project-wrapper");
       let prevScrollTop = 0;
       let marginTop = 0;
       win.scroll(() => {
         const scrollTop = win.scrollTop();
-        const scrollDirection = (scrollTop >= prevScrollTop) ? 'downward' : 'upward';
+        const scrollDirection =
+          scrollTop >= prevScrollTop ? "downward" : "upward";
         if (scrollTop > samplesHeader.offset().top) {
-          samplesHeader.addClass('shadow');
+          samplesHeader.addClass("shadow");
         } else {
-          samplesHeader.removeClass('shadow');
+          samplesHeader.removeClass("shadow");
         }
-        if (scrollDirection === 'downward') {
+        if (scrollDirection === "downward") {
           const scrollDiff = siteHeaderHeight - scrollTop;
-          marginTop = (scrollDiff > 0) ? scrollDiff : 0;
+          marginTop = scrollDiff > 0 ? scrollDiff : 0;
         } else {
           const scrollDiff = siteHeaderHeight - scrollTop;
-          marginTop = (scrollDiff < 0) ? 0 : Math.abs(scrollTop - siteHeaderHeight);
+          marginTop =
+            scrollDiff < 0 ? 0 : Math.abs(scrollTop - siteHeaderHeight);
         }
         projectWrapper.css({ marginTop });
         prevScrollTop = scrollTop;
       });
-      $('.filter').hide();
+      $(".filter").hide();
     });
     this.closeMetaDataDropdown();
     this.displayDownloadDropdown();
@@ -1563,22 +1433,25 @@ class Samples extends React.Component {
   }
 
   handleProjectSelection(id, listType) {
-    this.setState({
-      selectedProjectId: id,
-      projectType: listType,
-      filterParams: "",
-      searchParams: "",
-      checkInUpdate: false,
-      allChecked: false,
-      selectedTissueFilters: [],
-      selectedHostIndices: [],
-      tissueTypes: [],
-      hostGenomes: [],
-      sampleIdsParams: []
-    }, () => {
-      this.setUrlLocation();
-      this.fetchProjectDetails(id);
-    });
+    this.setState(
+      {
+        selectedProjectId: id,
+        projectType: listType,
+        filterParams: "",
+        searchParams: "",
+        checkInUpdate: false,
+        allChecked: false,
+        selectedTissueFilters: [],
+        selectedHostIndices: [],
+        tissueTypes: [],
+        hostGenomes: [],
+        sampleIdsParams: []
+      },
+      () => {
+        this.setUrlLocation();
+        this.fetchProjectDetails(id);
+      }
+    );
   }
 
   closeMetaDataDropdown() {
@@ -1868,6 +1741,179 @@ function PipelineOutputDataValues({
     notes:
       dbSample && dbSample.sample_notes ? dbSample.sample_notes : BLANK_TEXT
   };
+}
+
+function PipelineOutputCards({
+  i,
+  dbSample,
+  report_ready,
+  sample_name_info,
+  rowWithChunkStatus,
+  total_runtime,
+  data_values,
+  parent
+}) {
+  return (
+    <a className="col s12 no-padding sample-feed" key={i}>
+      <div>
+        <div className="samples-card white">
+          <div className="flex-container">
+            <ul className="flex-items">
+              <li className="check-box-container">
+                {parent.state.displaySelectSamples ? (
+                  <div>
+                    <input
+                      type="checkbox"
+                      id={i}
+                      onClick={parent.selectSample}
+                      key={`sample_${dbSample.id}`}
+                      data-sample-id={dbSample.id}
+                      className="filled-in checkbox"
+                      checked={
+                        parent.state.selectedSampleIds.indexOf(dbSample.id) >= 0
+                      }
+                      disabled={report_ready != 1}
+                    />{" "}
+                    <label htmlFor={i}>{sample_name_info}</label>
+                  </div>
+                ) : (
+                  sample_name_info
+                )}
+              </li>
+              {parent.state.columnsShown.map((column, pos) => {
+                let column_data = "";
+                if (column === "pipeline_status") {
+                  column_data = (
+                    <li
+                      key={pos}
+                      onClick={parent.viewSample.bind(parent, dbSample.id)}
+                    >
+                      <div className="card-label top-label">
+                        {rowWithChunkStatus}
+                      </div>
+                      <div className="card-label center-label">
+                        {total_runtime ? (
+                          <span className="time">
+                            <i className="fa fa-clock-o" aria-hidden="true" />
+                            <span className="duration-label">
+                              {parent.formatRunTime(total_runtime)}
+                            </span>
+                          </span>
+                        ) : null}
+                      </div>
+                    </li>
+                  );
+                } else if (column === "nonhost_reads") {
+                  column_data = (
+                    <li key={pos}>
+                      <div className="card-label center center-label data-label">
+                        {data_values[column]}{" "}
+                        {data_values["nonhost_reads_percent"]}
+                      </div>
+                    </li>
+                  );
+                } else {
+                  column_data = (
+                    <li
+                      key={pos}
+                      onClick={parent.viewSample.bind(parent, dbSample.id)}
+                    >
+                      <div className="card-label center center-label data-label">
+                        {data_values[column]}
+                      </div>
+                    </li>
+                  );
+                }
+                return column_data;
+              })}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </a>
+  );
+}
+
+function MetaDataFilter({ state, parent }) {
+  return (
+    <div className="col s2 wrapper">
+      <div
+        className={
+          state.displayDropdown ? "metadata metadata-active" : "metadata"
+        }
+        onClick={parent.displayMetaDataDropdown}
+      >
+        <div className="metadata-dropdown">Filter</div>
+        <i
+          className={
+            state.displayDropdown ? "fa fa-angle-up" : "fa fa-angle-down"
+          }
+        />
+      </div>
+      {state.displayDropdown ? (
+        <div className="row metadata-options">
+          <div className="col s6">
+            <h6>Host</h6>
+            {state.hostGenomes.length == 0 ? (
+              <div className="options-wrapper">
+                <label>No host genome data present</label>
+              </div>
+            ) : (
+              state.hostGenomes.map((host, i) => {
+                let indices = state.selectedHostIndices;
+                let res = (
+                  <div key={i} className="options-wrapper">
+                    <input
+                      name="host"
+                      type="checkbox"
+                      data-id={host.id}
+                      checked={indices.indexOf(host.id) < 0 ? "" : "checked"}
+                      value={indices.indexOf(i) != -1}
+                      onChange={parent.selectHostFilter}
+                      id={host.id}
+                      className="filled-in human"
+                    />
+                    <label htmlFor={host.id}>{host.name}</label>
+                  </div>
+                );
+                return res;
+              })
+            )}
+          </div>
+          <div className="col s6">
+            <h6>Tissue</h6>
+            {state.tissueTypes.length == 0 ? (
+              <div className="options-wrapper">
+                <label>No tissue data present</label>
+              </div>
+            ) : (
+              state.tissueTypes.map((tissue, i) => {
+                let res = (
+                  <div key={i} className="options-wrapper">
+                    <input
+                      name="tissue"
+                      type="checkbox"
+                      id={tissue}
+                      className="filled-in"
+                      data-status={tissue}
+                      checked={
+                        state.selectedTissueFilters.indexOf(tissue) < 0
+                          ? ""
+                          : "checked"
+                      }
+                      onChange={parent.selectTissueFilter}
+                    />
+                    <label htmlFor={tissue}>{tissue}</label>
+                  </div>
+                );
+                return res;
+              })
+            )}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 export default Samples;
