@@ -8,7 +8,7 @@ class ObjectHelper {
           return false;
       }
     }
-    for(var key in b) {
+    for(key in b) {
       if(!(key in a) || a[key] !== b[key]) {
           return false;
       }

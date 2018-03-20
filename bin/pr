@@ -25,7 +25,7 @@ chdir APP_ROOT do
   system!(DOCKER + 'rake rubocop:auto_correct')
   system!('git diff-index --quiet HEAD', 'commit changes before re-running')
   # ESLint sanity check with a reduced rule set. Doesn't need to run in Docker.
-  system!('./node_modules/.bin/eslint app/assets/src --ext .js,.jsx --no-eslintrc -c .eslint-light')
+  system!('./node_modules/.bin/eslint app/assets/src --ext .js,.jsx')
   system!(DOCKER + 'rake test')
   # The --force is needed for updating a branch;  without it, we end up
   # accumulating meaningless trivial "this is a pull request" commits

@@ -886,12 +886,6 @@ class PipelineSampleReport extends React.Component {
     $('.table-arrow').toggleClass('hidden');
   }
 
-  // Download report in csv
-  downloadReport(id) {
-    _satellite.track('downloadreport')
-    location.href = `/reports/${id}/csv`
-  }
-
   handleSearch(e) {
     this.setState({
       searchKey: e.target.value,
