@@ -591,7 +591,7 @@ class Samples extends React.Component {
             <div className="samples-card white">
               <div className="flex-container">
                 <ul className="flex-items">
-                  <li className="check-box-container">
+                  <li className="check-box-container" key={i}>
                     {this.state.displaySelectSamples ? (
                       <div>
                         <input
@@ -1071,15 +1071,19 @@ class Samples extends React.Component {
       let id = id_field ? entry[id_field] : entry;
       let name = name_field ? entry[name_field] : entry;
       if (this.state[state_selected_options].indexOf(id) >= 0) {
-        return LabelTagMarkup({
-          state_all_options,
-          i,
-          name,
-          prefix,
-          id,
-          id_type,
-          state_selected_options
-        });
+        return (
+          <LabelTagMarkup
+            state_all_options={state_all_options}
+            key={i}
+            i={i}
+            name={name}
+            prefix={prefix}
+            id={id}
+            id_type={id_type}
+            state_selected_options={state_selected_options}
+            parent={this}
+          />
+        );
       } else {
         return null;
       }
@@ -1358,8 +1362,9 @@ class Samples extends React.Component {
             {proj && this.canEditProject(proj.id) ? (
               proj_users_count ? (
                 <span>
-                  <i className="tiny material-icons">people</i> {this.state.project_users.length}
-                    { (this.state.project_users.length > 1) ? ' members' : ' member'}
+                  <i className="tiny material-icons">people</i>{" "}
+                  {this.state.project_users.length}
+                  {this.state.project_users.length > 1 ? " members" : " member"}
                 </span>
               ) : (
                 <span>No member</span>
@@ -1475,6 +1480,7 @@ class Samples extends React.Component {
                 return (
                   <ColumnDropdown
                     pos={pos}
+                    key={pos}
                     colMap={colMap}
                     column_name={column_name}
                     filterStatus={filterStatus}
@@ -1491,31 +1497,16 @@ class Samples extends React.Component {
     );
 
     return (
-      <div className="row content-wrapper">
-        <div className="project-info col s12">
-          {projInfo} {addUser}
-        </div>
-        <div className="divider" />
-        <div className="sample-container no-padding col s12">
-          {search_box}
-          <div className="filter-tags-list">
-            {host_filter_tag_list} {tissue_filter_tag_list}
-          </div>
-          <div className="sample-table-container row">
-            {tableHead}
-            {!samples.length && this.state.displayEmpty
-              ? this.renderEmptyTable()
-              : this.renderPipelineOutput(samples)}
-          </div>
-        </div>
-        {!this.state.pageEnd && this.state.allSamples.length > 14 ? (
-          <div className="scroll">
-            <i className="fa fa-spinner fa-spin fa-3x" />
-          </div>
-        ) : (
-          ""
-        )}
-      </div>
+      <FilterListMarkup
+        projInfo={projInfo}
+        addUser={addUser}
+        search_box={search_box}
+        host_filter_tag_list={host_filter_tag_list}
+        tissue_filter_tag_list={tissue_filter_tag_list}
+        tableHead={tableHead}
+        samples={samples}
+        parent={this}
+      />
     );
   }
 
@@ -1737,14 +1728,15 @@ class Samples extends React.Component {
 }
 
 function LabelTagMarkup({
-                          state_all_options,
-                          i,
-                          name,
-                          prefix,
-                          id,
-                          id_type,
-                          state_selected_options
-                        }) {
+  state_all_options,
+  i,
+  name,
+  prefix,
+  id,
+  id_type,
+  state_selected_options,
+  parent
+}) {
   return (
     <Label
       className="label-tags"
@@ -1756,17 +1748,21 @@ function LabelTagMarkup({
         name="close"
         data-exclude={id}
         onClick={e => {
-          this.applyExcluded(e, id_type, state_selected_options);
+          parent.applyExcluded(e, id_type, state_selected_options);
         }}
       />
     </Label>
   );
 }
 
-
 function FilterItemMarkup({ status, filterSelect, classes, pos, texts }) {
   return (
-    <li className="filter-item" data-status={status} onClick={filterSelect}>
+    <li
+      className="filter-item"
+      key={pos}
+      data-status={status}
+      onClick={filterSelect}
+    >
       <a data-status={status} className={"filter-item " + classes[pos]}>
         {texts[pos]}
       </a>
@@ -1776,14 +1772,14 @@ function FilterItemMarkup({ status, filterSelect, classes, pos, texts }) {
 }
 
 function ColumnDropdown({
-                          pos,
-                          colMap,
-                          column_name,
-                          filterStatus,
-                          allColumns,
-                          columnsShown,
-                          parent
-                        }) {
+  pos,
+  colMap,
+  column_name,
+  filterStatus,
+  allColumns,
+  columnsShown,
+  parent
+}) {
   return (
     <li key={`shown-${pos}`}>
       {
@@ -1820,7 +1816,7 @@ function ColumnDropdown({
               key={`all-${i}`}
               className={`disabled column_name ${
                 column_name === name ? "current" : ""
-                }`}
+              }`}
             >
               {colMap[name].display_name}
               {column_name === name ? (
@@ -1839,6 +1835,45 @@ function ColumnDropdown({
         })}
       </ul>
     </li>
+  );
+}
+
+function FilterListMarkup({
+  projInfo,
+  addUser,
+  search_box,
+  host_filter_tag_list,
+  tissue_filter_tag_list,
+  tableHead,
+  samples,
+  parent
+}) {
+  return (
+    <div className="row content-wrapper">
+      <div className="project-info col s12">
+        {projInfo} {addUser}
+      </div>
+      <div className="divider" />
+      <div className="sample-container no-padding col s12">
+        {search_box}
+        <div className="filter-tags-list">
+          {host_filter_tag_list} {tissue_filter_tag_list}
+        </div>
+        <div className="sample-table-container row">
+          {tableHead}
+          {!samples.length && parent.state.displayEmpty
+            ? parent.renderEmptyTable()
+            : parent.renderPipelineOutput(samples)}
+        </div>
+      </div>
+      {!parent.state.pageEnd && parent.state.allSamples.length > 14 ? (
+        <div className="scroll">
+          <i className="fa fa-spinner fa-spin fa-3x" />
+        </div>
+      ) : (
+        ""
+      )}
+    </div>
   );
 }
 
