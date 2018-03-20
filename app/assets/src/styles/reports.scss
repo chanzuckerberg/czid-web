@@ -296,9 +296,11 @@ margin-bottom: 0px;
     text-align: right;
     font-weight: normal;
     color:  #999999;
+    font-size: $font-size-small;
     &.active {
       font-weight: bolder;
       color: #333333;
+      font-size: $font-size-base;
     }
   }
   .blank {
@@ -321,6 +323,8 @@ margin-bottom: 0px;
   .genus-name {
     display: inline-block;
     margin-right: 5px;
+    font-size: $font-size-base;
+    font-weight: $font-weight-semibold;
   }
   .fa {
     margin-left: 2px;
@@ -418,7 +422,7 @@ margin-bottom: 0px;
 .report-table {
 
   th{
-    padding: 8px 6px;
+    padding: 1px 6px;
   }
 
   td{
