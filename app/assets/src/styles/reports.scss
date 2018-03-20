@@ -527,6 +527,10 @@ margin-bottom: 0px;
   font-size: 10pt !important;
 }
 
+.ui.dropdown.filter-btn {
+  margin-right: 30px !important;
+}
+
 .reports-section {
   padding: 0 !important;
   .reports-count {
@@ -611,7 +615,7 @@ margin-bottom: 0px;
           display: inline-block;
           width: 250px;
           font-size: $font-size-large;
-          margin-right: 20px;
+          margin-right: 15px;
           &:hover {
             color: #2e363d;
             background: #fbfbfb;
