@@ -518,50 +518,12 @@ class Samples extends React.Component {
         <SampleNameInfo parent={this} dbSample={dbSample} uploader={uploader} />
       );
       let stats = derivedOutput.summary_stats;
-      const data_values = {
-        total_reads: !derivedOutput.pipeline_run
-          ? BLANK_TEXT
-          : numberWithCommas(derivedOutput.pipeline_run.total_reads),
-        nonhost_reads:
-          !stats || !stats.remaining_reads
-            ? BLANK_TEXT
-            : numberWithCommas(stats.remaining_reads),
-        nonhost_reads_percent:
-          !stats || !stats.percent_remaining ? (
-            ""
-          ) : (
-            <span className="percent">
-              {" "}
-              {`(${stats.percent_remaining.toFixed(2)}%)`}{" "}
-            </span>
-          ),
-        quality_control:
-          !stats || !stats.qc_percent
-            ? BLANK_TEXT
-            : `${stats.qc_percent.toFixed(2)}%`,
-        compression_ratio:
-          !stats || !stats.compression_ratio
-            ? BLANK_TEXT
-            : stats.compression_ratio.toFixed(2),
-        tissue_type:
-          dbSample && dbSample.sample_tissue
-            ? dbSample.sample_tissue
-            : BLANK_TEXT,
-        nucleotide_type:
-          dbSample && dbSample.sample_template
-            ? dbSample.sample_template
-            : BLANK_TEXT,
-        location:
-          dbSample && dbSample.sample_location
-            ? dbSample.sample_location
-            : BLANK_TEXT,
-        host_genome:
-          derivedOutput && derivedOutput.host_genome_name
-            ? derivedOutput.host_genome_name
-            : BLANK_TEXT,
-        notes:
-          dbSample && dbSample.sample_notes ? dbSample.sample_notes : BLANK_TEXT
-      };
+      const data_values = PipelineOutputDataValues({
+        derivedOutput,
+        BLANK_TEXT,
+        stats,
+        dbSample
+      });
 
       return (
         <a className="col s12 no-padding sample-feed" key={i}>
@@ -1900,6 +1862,56 @@ function SampleNameInfo({ parent, dbSample, uploader }) {
       </div>
     </span>
   );
+}
+
+function PipelineOutputDataValues({
+  derivedOutput,
+  BLANK_TEXT,
+  stats,
+  dbSample
+}) {
+  return {
+    total_reads: !derivedOutput.pipeline_run
+      ? BLANK_TEXT
+      : numberWithCommas(derivedOutput.pipeline_run.total_reads),
+    nonhost_reads:
+      !stats || !stats.remaining_reads
+        ? BLANK_TEXT
+        : numberWithCommas(stats.remaining_reads),
+    nonhost_reads_percent:
+      !stats || !stats.percent_remaining ? (
+        ""
+      ) : (
+        <span className="percent">
+          {" "}
+          {`(${stats.percent_remaining.toFixed(2)}%)`}{" "}
+        </span>
+      ),
+    quality_control:
+      !stats || !stats.qc_percent
+        ? BLANK_TEXT
+        : `${stats.qc_percent.toFixed(2)}%`,
+    compression_ratio:
+      !stats || !stats.compression_ratio
+        ? BLANK_TEXT
+        : stats.compression_ratio.toFixed(2),
+    tissue_type:
+      dbSample && dbSample.sample_tissue ? dbSample.sample_tissue : BLANK_TEXT,
+    nucleotide_type:
+      dbSample && dbSample.sample_template
+        ? dbSample.sample_template
+        : BLANK_TEXT,
+    location:
+      dbSample && dbSample.sample_location
+        ? dbSample.sample_location
+        : BLANK_TEXT,
+    host_genome:
+      derivedOutput && derivedOutput.host_genome_name
+        ? derivedOutput.host_genome_name
+        : BLANK_TEXT,
+    notes:
+      dbSample && dbSample.sample_notes ? dbSample.sample_notes : BLANK_TEXT
+  };
 }
 
 export default Samples;
