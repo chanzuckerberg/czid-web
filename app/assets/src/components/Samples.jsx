@@ -922,37 +922,6 @@ class Samples extends React.Component {
     return !this.state.columnsShown.includes(column);
   }
 
-<<<<<<< HEAD
-  initializeSelectAll() {
-    // select all checkboxes
-    var that = this;
-    $(".checkAll").click(function(e) {
-      var checked = e.currentTarget.checked;
-      $(".checkbox:enabled").prop("checked", checked);
-      that.setState({
-        allChecked: checked
-      });
-      that.fetchAllSelectedIds(checked);
-    });
-  }
-
-  checkTheRightBoxes() {
-    var that = this;
-    $(".checkbox:enabled").each((id, element) => {
-      let sample_id = element.getAttribute("data-sample-id");
-      const sampleList = that.state.selectedSampleIds;
-      if (!sample_id) {
-        return;
-      }
-      let i = parseInt(sample_id);
-      if (sampleList.indexOf(i) >= 0) {
-        element.checked = true;
-      } else {
-        element.checked = false;
-      }
-    });
-  }
-
   fetchAllSelectedIds(e) {
     let sampleList = this.state.selectedSampleIds;
     const checked = e.target.checked;
