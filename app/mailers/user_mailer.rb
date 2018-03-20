@@ -10,11 +10,13 @@ class UserMailer < ApplicationMailer
   end
 
   def project_complete_email(email_arguments)
-    begin 
-      @user_email = User.find(email_arguments[:user_id]).email
-      @project_name = Project.find(email_arguments[:project_id]).name
-      @number_samples = Sample.where(project_id: email_arguments[:project_id]).count
-      mail(to: @user_email, subject: email_arguments[:email_subject])
+    begin
+      @project_name = email_arguments[:project_name]
+      @project_id = email_arguments[:project_id]
+      @number_samples = email_arguments[:number_samples]
+      email_arguments[:user_emails].each do |user_email|
+        mail(to: user_email, subject: "Project #{@project_name} has finished processing")
+      end
     rescue
     end
   end
