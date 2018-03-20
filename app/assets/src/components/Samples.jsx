@@ -881,7 +881,8 @@ class Samples extends React.Component {
   viewSample(id, e) {
     e.preventDefault();
     // _satellite.track('viewsample')
-    location.href = `/samples/${id}`;
+
+    window.open(`/samples/${id}`);
   }
 
   renderEmptyTable() {
