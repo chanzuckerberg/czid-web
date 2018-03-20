@@ -704,22 +704,23 @@ margin-bottom: 0px;
   &:hover {
     .link-tag {
       visibility: visible;
+      color: #3867fa;
     }
   }
   .link-tag {
     visibility: hidden;
     padding: 10px;
-    color: #84d4fa;
+    color: #3867fa;
     font-size: $font-size-base;
     cursor: text;
     .fa-download {
       margin-left:12px;
     }
     .cloud {
-      color: #84d4fa;
+      color: #3867fa;
       font-size: $font-size-base;
       &:hover {
-        color: #414367
+        color: #414367;
       }
     }
   }
