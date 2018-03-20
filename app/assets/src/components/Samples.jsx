@@ -23,7 +23,7 @@ class Samples extends React.Component {
     this.allProjects = props.projects || [];
     this.pageSize = props.pageSize || 30;
 
-    this.checkTheRightBoxes = this.checkTheRightBoxes.bind(this);
+    this.fetchAllSelectedIds = this.fetchAllSelectedIds.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
     this.columnSorting = this.columnSorting.bind(this);
     this.handleSearchChange = this.handleSearchChange.bind(this);
@@ -73,7 +73,6 @@ class Samples extends React.Component {
       pageEnd: false,
       hostFilterChange: false,
       tissueFilterChange: false,
-      checkedBoxes: 0,
       allChecked: false,
       selectedSampleIds: [],
       displayDropdown: false,
@@ -528,29 +527,14 @@ class Samples extends React.Component {
       return (
         <a className="col s12 no-padding sample-feed" key={i}>
           <div>
-            <div className="samples-card white">
-              <div className="flex-container">
-                <ul className="flex-items">
-                  <li className="check-box-container" key={i}>
-                    {this.state.displaySelectSamples ? (
-                      <div>
-                        <input
-                          type="checkbox"
-                          data-sample-id={dbSample.id}
-                          id={i}
-                          onClick={this.selectSample}
-                          className="filled-in checkbox"
-                          value={
-                            this.state.selectedSampleIds.indexOf(dbSample.id) !=
-                            -1
-                          }
-                          disabled={status != "COMPLETE"}
-                        />{" "}
-                        <label htmlFor={i}>{sample_name_info}</label>
-                      </div>
-                    ) : (
-                      sample_name_info
-                    )}
+            <div className='samples-card white'>
+              <div className='flex-container'>
+                <ul className='flex-items'>
+                  <li className='check-box-container'>
+                    { this.state.displaySelectSamples ? <div><input type="checkbox" id={i} onClick = { this.selectSample } key= {`sample_${dbSample.id}`} data-sample-id ={dbSample.id}
+                      className="filled-in checkbox" checked={ this.state.selectedSampleIds.indexOf(dbSample.id) >= 0 }
+                      disabled={sample.run_info.report_ready != 1}
+                      /> <label htmlFor={i}>{sample_name_info}</label></div> : sample_name_info }
                   </li>
                   {this.state.columnsShown.map((column, pos) => {
                     let column_data = "";
@@ -836,8 +820,9 @@ class Samples extends React.Component {
 
   viewSample(id, e) {
     e.preventDefault();
-    $(".checkAll, .checkbox").prop("checked", false);
-    location.href = `/samples/${id}`;
+    // _satellite.track('viewsample')
+
+    window.open(`/samples/${id}`);
   }
 
   renderEmptyTable() {
@@ -878,53 +863,30 @@ class Samples extends React.Component {
     return !this.state.columnsShown.includes(column);
   }
 
-  initializeSelectAll() {
-    // select all checkboxes
-    var that = this;
-    $(".checkAll").click(function(e) {
-      var checked = e.currentTarget.checked;
-      $(".checkbox:enabled").prop("checked", checked);
-      that.setState({
-        allChecked: checked
-      });
-      that.fetchAllSelectedIds(checked);
-    });
-  }
-
-  checkTheRightBoxes() {
-    var that = this;
-    $(".checkbox:enabled").each((id, element) => {
-      let sample_id = element.getAttribute("data-sample-id");
-      const sampleList = that.state.selectedSampleIds;
-      if (!sample_id) {
-        return;
+  fetchAllSelectedIds(e) {
+    let sampleList = this.state.selectedSampleIds;
+    const checked = e.target.checked;
+    const allSamples = this.state.allSamples;
+    for (let sample of allSamples) {
+      if (sample.run_info.report_ready != 1) {
+        continue;
       }
-      let i = parseInt(sample_id);
-      if (sampleList.indexOf(i) >= 0) {
-        element.checked = true;
-      } else {
-        element.checked = false;
-      }
-    });
-  }
-
-  fetchAllSelectedIds(checked) {
-    var that = this;
-    let sampleList = that.state.selectedSampleIds;
-    $(".checkbox:enabled").each((id, element) => {
-      let sample_id = parseInt(element.getAttribute("data-sample-id"));
-      let indx = sampleList.indexOf(sample_id);
+      let sample_id = sample.db_sample.id;
       if (checked) {
-        if (indx === -1) {
-          sampleList.push(+sample_id);
+        if (sampleList.indexOf(sample_id) === -1) {
+          sampleList.push(sample_id);
         }
       } else {
-        if (indx >= 0) {
-          sampleList.splice(indx, 1);
+        let index = sampleList.indexOf(sample_id);
+        if (index >= 0) {
+          sampleList.splice(index, 1);
         }
       }
-    });
-    that.setState({ selectedSampleIds: sampleList });
+    }
+    this.setState({
+      allChecked: checked,
+      selectedSampleIds: sampleList
+    })
   }
 
   compareSamples() {
@@ -952,32 +914,28 @@ class Samples extends React.Component {
   }
 
   selectSample(e) {
-    e.stopPropagation();
-    $(".checkAll").prop("checked", false);
-    this.setState({
-      allChecked: false
-    });
     // current array of options
     const sampleList = this.state.selectedSampleIds;
 
-    let sample_id = parseInt(e.target.getAttribute("data-sample-id"));
-    let index;
-    // check if the check box is checked or unchecked
+    let sample_id = parseInt(e.target.getAttribute('data-sample-id'))
 
     if (e.target.checked) {
       // add the numerical value of the checkbox to options array
-      sampleList.push(+sample_id);
+      if (sampleList.indexOf(sample_id) < 0) {
+        sampleList.push(+sample_id);
+      }
     } else {
       // or remove the value from the unchecked checkbox from the array
-      index = sampleList.indexOf(+sample_id);
-      sampleList.splice(index, 1);
+      let index = sampleList.indexOf(+sample_id)
+      if (index >= 0) {
+        sampleList.splice(index, 1);
+      }
     }
-    var checkedCount = $("input:checkbox:checked").length;
     // update the state with the new array of options
     this.setState({
-      selectedSampleIds: sampleList,
-      checkedBoxes: checkedCount
-    });
+      allChecked: false,
+      selectedSampleIds: sampleList
+     })
   }
 
   applyExcluded(e, type, state_var) {
@@ -1080,8 +1038,13 @@ class Samples extends React.Component {
 
     let check_all = (
       <div className="check-all">
-        <input type="checkbox" id="checkAll" className="filled-in checkAll" />
-        <label htmlFor="checkAll" />
+          <input type="checkbox"
+            id="checkAll"
+            className="filled-in checkAll"
+            checked = {this.state.allChecked}
+            onClick={this.fetchAllSelectedIds}
+            />
+          <label htmlFor="checkAll"></label>
       </div>
     );
 
@@ -1327,6 +1290,8 @@ class Samples extends React.Component {
     );
 
     let allSamplesLen = this.state.allSamples.length;
+    const samplesSelectionStr = this.state.selectedSampleIds.length ? `${this.state.selectedSampleIds.length} samples selected.` :  "";
+
     const projInfo = (
       <div className="row download-section">
         <div className="col s6 wrapper">
@@ -1350,9 +1315,8 @@ class Samples extends React.Component {
                 ? "1 sample found"
                 : `Showing ${allSamplesLen} out of ${
                     this.state.totalNumber
-                  } total samples. ${
-                    this.state.selectedSampleIds.length
-                  } samples selected.`}
+                  } total samples. ${samplesSelectionStr}`
+            }
           </p>
         </div>
         <div className="col s6 download-section-btns">
@@ -1450,46 +1414,6 @@ class Samples extends React.Component {
     );
   }
 
-  componentDidMount() {
-    $(() => {
-      const win = $(window);
-      const samplesHeader = $(".sample-table-container");
-      const siteHeaderHeight = $(".site-header").height();
-      const projectWrapper = $(".project-wrapper");
-      let prevScrollTop = 0;
-      let marginTop = 0;
-      win.scroll(() => {
-        const scrollTop = win.scrollTop();
-        const scrollDirection =
-          scrollTop >= prevScrollTop ? "downward" : "upward";
-        if (scrollTop > samplesHeader.offset().top) {
-          samplesHeader.addClass("shadow");
-        } else {
-          samplesHeader.removeClass("shadow");
-        }
-        if (scrollDirection === "downward") {
-          const scrollDiff = siteHeaderHeight - scrollTop;
-          marginTop = scrollDiff > 0 ? scrollDiff : 0;
-        } else {
-          const scrollDiff = siteHeaderHeight - scrollTop;
-          marginTop =
-            scrollDiff < 0 ? 0 : Math.abs(scrollTop - siteHeaderHeight);
-        }
-        projectWrapper.css({ marginTop });
-        prevScrollTop = scrollTop;
-      });
-      $(".filter").hide();
-    });
-    this.closeMetaDataDropdown();
-    this.initializeSelectAll();
-    this.displayDownloadDropdown();
-    this.initializeTooltip();
-    this.fetchProjectDetails(this.state.selectedProjectId, false);
-    this.scrollDown();
-    this.displayPipelineStatusFilter();
-    this.initializeColumnSelect();
-  }
-
   componentDidUpdate(prevProps, prevState) {
     const prevStatus = prevState.filterParams;
     const currentStatus = this.state.filterParams;
@@ -1534,7 +1458,43 @@ class Samples extends React.Component {
     } else {
       this.state.checkInUpdate = true;
     }
-    this.checkTheRightBoxes();
+  }
+
+  componentDidMount() {
+    $(() => {
+      const win = $(window);
+      const samplesHeader = $('.sample-table-container');
+      const siteHeaderHeight = $('.site-header').height();
+      const projectWrapper = $('.project-wrapper');
+      let prevScrollTop = 0;
+      let marginTop = 0;
+      win.scroll(() => {
+        const scrollTop = win.scrollTop();
+        const scrollDirection = (scrollTop >= prevScrollTop) ? 'downward' : 'upward';
+        if (scrollTop > samplesHeader.offset().top) {
+          samplesHeader.addClass('shadow');
+        } else {
+          samplesHeader.removeClass('shadow');
+        }
+        if (scrollDirection === 'downward') {
+          const scrollDiff = siteHeaderHeight - scrollTop;
+          marginTop = (scrollDiff > 0) ? scrollDiff : 0;
+        } else {
+          const scrollDiff = siteHeaderHeight - scrollTop;
+          marginTop = (scrollDiff < 0) ? 0 : Math.abs(scrollTop - siteHeaderHeight);
+        }
+        projectWrapper.css({ marginTop });
+        prevScrollTop = scrollTop;
+      });
+      $('.filter').hide();
+    });
+    this.closeMetaDataDropdown();
+    this.displayDownloadDropdown();
+    this.initializeTooltip();
+    this.fetchProjectDetails(this.state.selectedProjectId, false);
+    this.scrollDown();
+    this.displayPipelineStatusFilter();
+    this.initializeColumnSelect();
   }
 
   initializeColumnSelect() {
@@ -1603,26 +1563,22 @@ class Samples extends React.Component {
   }
 
   handleProjectSelection(id, listType) {
-    $(".checkAll").prop("checked", false);
-    this.setState(
-      {
-        selectedProjectId: id,
-        projectType: listType,
-        filterParams: "",
-        searchParams: "",
-        checkInUpdate: false,
-        allChecked: false,
-        selectedTissueFilters: [],
-        selectedHostIndices: [],
-        tissueTypes: [],
-        hostGenomes: [],
-        sampleIdsParams: []
-      },
-      () => {
-        this.setUrlLocation();
-        this.fetchProjectDetails(id);
-      }
-    );
+    this.setState({
+      selectedProjectId: id,
+      projectType: listType,
+      filterParams: "",
+      searchParams: "",
+      checkInUpdate: false,
+      allChecked: false,
+      selectedTissueFilters: [],
+      selectedHostIndices: [],
+      tissueTypes: [],
+      hostGenomes: [],
+      sampleIdsParams: []
+    }, () => {
+      this.setUrlLocation();
+      this.fetchProjectDetails(id);
+    });
   }
 
   closeMetaDataDropdown() {
