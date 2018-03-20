@@ -158,3 +158,14 @@ Note that this requires the proper ssh config to access the deployed versions of
 ## Dependencies
 
 https://github.com/kislyuk/aegea
+
+
+## ESLint
+
+You can run ESLint for JSX linting checks. Uses our shared .eslintrc settings.
+
+- Manual: `./node_modules/.bin/eslint app/assets/src --ext .js,.jsx`
+- Auto-fix dry run: `./node_modules/.bin/eslint app/assets/src --ext .js,.jsx --fix-dry-run`
+- Auto-fix: `./node_modules/.bin/eslint app/assets/src --ext .js,.jsx`
+
+- Prettier is another code formatting tool: https://github.com/prettier/prettier
