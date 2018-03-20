@@ -1811,7 +1811,18 @@ function ColumnDropdown({
           </a>
         </li>
         {allColumns.map((name, i) => {
-          return <ColumnEntries columnsShown={columnsShown} name={name} key={i} i={i} column_name={column_name} colMap={colMap} pos={pos} parent={parent} />;
+          return (
+            <ColumnEntries
+              columnsShown={columnsShown}
+              name={name}
+              key={i}
+              i={i}
+              column_name={column_name}
+              colMap={colMap}
+              pos={pos}
+              parent={parent}
+            />
+          );
         })}
       </ul>
     </li>
@@ -1858,19 +1869,23 @@ function FilterListMarkup({
 }
 
 function ColumnEntries({
-  columnsShown, name, i, column_name, colMap, pos, parent
-                       }) {
+  columnsShown,
+  name,
+  i,
+  column_name,
+  colMap,
+  pos,
+  parent
+}) {
   return columnsShown.includes(name) ? (
     <li
       key={`all-${i}`}
       className={`disabled column_name ${
         column_name === name ? "current" : ""
-        }`}
+      }`}
     >
       {colMap[name].display_name}
-      {column_name === name ? (
-        <i className="fa fa-check right" />
-      ) : null}
+      {column_name === name ? <i className="fa fa-check right" /> : null}
     </li>
   ) : (
     <li
