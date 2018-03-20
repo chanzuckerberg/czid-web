@@ -107,7 +107,7 @@ class PipelineSampleReport extends React.Component {
       pagesRendered: 0,
       sort_by: this.default_sort_by,
       excluded_categories: (cached_cats) ? JSON.parse(cached_cats) : [],
-      exclude_phage: (cached_exclude_phage) ? (cached_exclude_phage == 'true') : false
+      exclude_phage: (cached_exclude_phage) ? (cached_exclude_phage == 'true') : false,
       name_type: cached_name_type ? cached_name_type : 'Scientific Name',
       search_taxon_id: 0,
       rendering: false,
@@ -969,7 +969,7 @@ class PipelineSampleReport extends React.Component {
       );
     });
     const phage_filter_tag = (
-      <span className="filter-tag" key='category_tag_phage'}>
+      <span className="filter-tag" key='category_tag_phage'>
         <span className='filter-tag-name'> phage </span>
         <span className='filter-tag-x' data-exclude-category='phage' onClick= {this.applyExcludePhage}  >X</span>
       </span>
