@@ -514,75 +514,15 @@ class Samples extends React.Component {
       );
 
       const sample_name_info = (
-        <span
-          onClick={e => this.viewSample(dbSample.id, e)}
-          className="sample-name-info"
-        >
-          <div className="card-label top-label">
-            <span className="upload-date">
-              Uploaded{" "}
-              {moment(dbSample.created_at)
-                .startOf("second")
-                .fromNow()}
-            </span>
-          </div>
-          <div className="card-label center-label sample-name">
-            {dbSample.name}
-          </div>
-          <div className="card-label author bottom-label author">
-            {!uploader || uploader === "" ? (
-              ""
-            ) : (
-              <span>Uploaded by: {uploader}</span>
-            )}
-          </div>
-        </span>
+        <SampleNameInfo parent={this} dbSample={dbSample} uploader={uploader} />
       );
       let stats = derivedOutput.summary_stats;
-      const data_values = {
-        total_reads: !derivedOutput.pipeline_run
-          ? BLANK_TEXT
-          : numberWithCommas(derivedOutput.pipeline_run.total_reads),
-        nonhost_reads:
-          !stats || !stats.remaining_reads
-            ? BLANK_TEXT
-            : numberWithCommas(stats.remaining_reads),
-        nonhost_reads_percent:
-          !stats || !stats.percent_remaining ? (
-            ""
-          ) : (
-            <span className="percent">
-              {" "}
-              {`(${stats.percent_remaining.toFixed(2)}%)`}{" "}
-            </span>
-          ),
-        quality_control:
-          !stats || !stats.qc_percent
-            ? BLANK_TEXT
-            : `${stats.qc_percent.toFixed(2)}%`,
-        compression_ratio:
-          !stats || !stats.compression_ratio
-            ? BLANK_TEXT
-            : stats.compression_ratio.toFixed(2),
-        tissue_type:
-          dbSample && dbSample.sample_tissue
-            ? dbSample.sample_tissue
-            : BLANK_TEXT,
-        nucleotide_type:
-          dbSample && dbSample.sample_template
-            ? dbSample.sample_template
-            : BLANK_TEXT,
-        location:
-          dbSample && dbSample.sample_location
-            ? dbSample.sample_location
-            : BLANK_TEXT,
-        host_genome:
-          derivedOutput && derivedOutput.host_genome_name
-            ? derivedOutput.host_genome_name
-            : BLANK_TEXT,
-        notes:
-          dbSample && dbSample.sample_notes ? dbSample.sample_notes : BLANK_TEXT
-      };
+      const data_values = PipelineOutputDataValues({
+        derivedOutput,
+        BLANK_TEXT,
+        stats,
+        dbSample
+      });
 
       return (
         <a className="col s12 no-padding sample-feed" key={i}>
@@ -1030,20 +970,17 @@ class Samples extends React.Component {
       let name = name_field ? entry[name_field] : entry;
       if (this.state[state_selected_options].indexOf(id) >= 0) {
         return (
-          <Label
-            className="label-tags"
-            size="tiny"
-            key={`${state_all_options}_tag_${i}`}
-          >
-            {`${prefix}${name}`}
-            <Icon
-              name="close"
-              data-exclude={id}
-              onClick={e => {
-                this.applyExcluded(e, id_type, state_selected_options);
-              }}
-            />
-          </Label>
+          <LabelTagMarkup
+            state_all_options={state_all_options}
+            key={i}
+            i={i}
+            name={name}
+            prefix={prefix}
+            id={id}
+            id_type={id_type}
+            state_selected_options={state_selected_options}
+            parent={this}
+          />
         );
       } else {
         return null;
@@ -1328,8 +1265,9 @@ class Samples extends React.Component {
             {proj && this.canEditProject(proj.id) ? (
               proj_users_count ? (
                 <span>
-                  <i className="tiny material-icons">people</i> {this.state.project_users.length}
-                    { (this.state.project_users.length > 1) ? ' members' : ' member'}
+                  <i className="tiny material-icons">people</i>{" "}
+                  {this.state.project_users.length}
+                  {this.state.project_users.length > 1 ? " members" : " member"}
                 </span>
               ) : (
                 <span>No member</span>
@@ -1403,19 +1341,13 @@ class Samples extends React.Component {
         </li>
 
         {statuses.map((status, pos) => {
-          return (
-            <li
-              key = {`status_${pos}`}
-              className="filter-item"
-              data-status={status}
-              onClick={filterSelect}
-            >
-              <a data-status={status} className={"filter-item " + classes[pos]}>
-                {texts[pos]}
-              </a>
-              <i data-status={status} className="filter fa fa-check hidden" />
-            </li>
-          );
+          return FilterItemMarkup({
+            status,
+            filterSelect,
+            classes,
+            pos,
+            texts
+          });
         })}
         <li className="divider" />
       </div>
@@ -1450,64 +1382,16 @@ class Samples extends React.Component {
 
               {this.state.columnsShown.map((column_name, pos) => {
                 return (
-                  <li key={`shown-${pos}`}>
-                    {
-                      <Popup
-                        trigger={
-                          <div
-                            className="card-label column-title center-label sample-name center menu-dropdown"
-                            data-activates={`column-dropdown-${pos}`}
-                          >
-                            {colMap[column_name].display_name}{" "}
-                            <i className="fa fa-caret-down" />
-                          </div>
-                        }
-                        size="mini"
-                        className={
-                          !colMap[column_name].tooltip ? "hidden-popup" : ""
-                        }
-                        content={colMap[column_name].tooltip}
-                        hideOnScroll
-                        inverted
-                      />
-                    }
-                    <ul
-                      className="dropdown-content column-dropdown"
-                      id={`column-dropdown-${pos}`}
-                    >
-                      {column_name === "pipeline_status" ? (
-                        <div>{filterStatus}</div>
-                      ) : null}
-                      <li>
-                        <a className="title">
-                          <b>Switch column</b>
-                        </a>
-                      </li>
-                      {this.state.allColumns.map((name, i) => {
-                        return this.state.columnsShown.includes(name) ? (
-                          <li
-                            key={`all-${i}`}
-                            className={`disabled column_name ${
-                              column_name === name ? "current" : ""
-                            }`}
-                          >
-                            {colMap[name].display_name}
-                            {column_name === name ? (
-                              <i className="fa fa-check right" />
-                            ) : null}
-                          </li>
-                        ) : (
-                          <li
-                            key={`all-${i}`}
-                            className="selectable column_name"
-                            onClick={() => this.switchColumn(name, pos)}
-                          >
-                            {colMap[name].display_name}
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </li>
+                  <ColumnDropdown
+                    pos={pos}
+                    key={pos}
+                    colMap={colMap}
+                    column_name={column_name}
+                    filterStatus={filterStatus}
+                    allColumns={this.state.allColumns}
+                    columnsShown={this.state.columnsShown}
+                    parent={this}
+                  />
                 );
               })}
             </ul>
@@ -1517,31 +1401,16 @@ class Samples extends React.Component {
     );
 
     return (
-      <div className="row content-wrapper">
-        <div className="project-info col s12">
-          {projInfo} {addUser}
-        </div>
-        <div className="divider" />
-        <div className="sample-container no-padding col s12">
-          {search_box}
-          <div className="filter-tags-list">
-            {host_filter_tag_list} {tissue_filter_tag_list}
-          </div>
-          <div className="sample-table-container row">
-            {tableHead}
-            {!samples.length && this.state.displayEmpty
-              ? this.renderEmptyTable()
-              : this.renderPipelineOutput(samples)}
-          </div>
-        </div>
-        {!this.state.pageEnd && this.state.allSamples.length > 14 ? (
-          <div className="scroll">
-            <i className="fa fa-spinner fa-spin fa-3x" />
-          </div>
-        ) : (
-          ""
-        )}
-      </div>
+      <FilterListMarkup
+        projInfo={projInfo}
+        addUser={addUser}
+        search_box={search_box}
+        host_filter_tag_list={host_filter_tag_list}
+        tissue_filter_tag_list={tissue_filter_tag_list}
+        tableHead={tableHead}
+        samples={samples}
+        parent={this}
+      />
     );
   }
 
@@ -1752,6 +1621,253 @@ class Samples extends React.Component {
       </div>
     );
   }
+}
+
+function LabelTagMarkup({
+  state_all_options,
+  i,
+  name,
+  prefix,
+  id,
+  id_type,
+  state_selected_options,
+  parent
+}) {
+  return (
+    <Label
+      className="label-tags"
+      size="tiny"
+      key={`${state_all_options}_tag_${i}`}
+    >
+      {`${prefix}${name}`}
+      <Icon
+        name="close"
+        data-exclude={id}
+        onClick={e => {
+          parent.applyExcluded(e, id_type, state_selected_options);
+        }}
+      />
+    </Label>
+  );
+}
+
+function FilterItemMarkup({ status, filterSelect, classes, pos, texts }) {
+  return (
+    <li
+      className="filter-item"
+      key={pos}
+      data-status={status}
+      onClick={filterSelect}
+    >
+      <a data-status={status} className={"filter-item " + classes[pos]}>
+        {texts[pos]}
+      </a>
+      <i data-status={status} className="filter fa fa-check hidden" />
+    </li>
+  );
+}
+
+function ColumnDropdown({
+  pos,
+  colMap,
+  column_name,
+  filterStatus,
+  allColumns,
+  columnsShown,
+  parent
+}) {
+  return (
+    <li key={`shown-${pos}`}>
+      {
+        <Popup
+          trigger={
+            <div
+              className="card-label column-title center-label sample-name center menu-dropdown"
+              data-activates={`column-dropdown-${pos}`}
+            >
+              {colMap[column_name].display_name}{" "}
+              <i className="fa fa-caret-down" />
+            </div>
+          }
+          size="mini"
+          className={!colMap[column_name].tooltip ? "hidden-popup" : ""}
+          content={colMap[column_name].tooltip}
+          hideOnScroll
+          inverted
+        />
+      }
+      <ul
+        className="dropdown-content column-dropdown"
+        id={`column-dropdown-${pos}`}
+      >
+        {column_name === "pipeline_status" ? <div>{filterStatus}</div> : null}
+        <li>
+          <a className="title">
+            <b>Switch column</b>
+          </a>
+        </li>
+        {allColumns.map((name, i) => {
+          return (
+            <ColumnEntries
+              columnsShown={columnsShown}
+              name={name}
+              key={i}
+              i={i}
+              column_name={column_name}
+              colMap={colMap}
+              pos={pos}
+              parent={parent}
+            />
+          );
+        })}
+      </ul>
+    </li>
+  );
+}
+
+function FilterListMarkup({
+  projInfo,
+  addUser,
+  search_box,
+  host_filter_tag_list,
+  tissue_filter_tag_list,
+  tableHead,
+  samples,
+  parent
+}) {
+  return (
+    <div className="row content-wrapper">
+      <div className="project-info col s12">
+        {projInfo} {addUser}
+      </div>
+      <div className="divider" />
+      <div className="sample-container no-padding col s12">
+        {search_box}
+        <div className="filter-tags-list">
+          {host_filter_tag_list} {tissue_filter_tag_list}
+        </div>
+        <div className="sample-table-container row">
+          {tableHead}
+          {!samples.length && parent.state.displayEmpty
+            ? parent.renderEmptyTable()
+            : parent.renderPipelineOutput(samples)}
+        </div>
+      </div>
+      {!parent.state.pageEnd && parent.state.allSamples.length > 14 ? (
+        <div className="scroll">
+          <i className="fa fa-spinner fa-spin fa-3x" />
+        </div>
+      ) : (
+        ""
+      )}
+    </div>
+  );
+}
+
+function ColumnEntries({
+  columnsShown,
+  name,
+  i,
+  column_name,
+  colMap,
+  pos,
+  parent
+}) {
+  return columnsShown.includes(name) ? (
+    <li
+      key={`all-${i}`}
+      className={`disabled column_name ${
+        column_name === name ? "current" : ""
+      }`}
+    >
+      {colMap[name].display_name}
+      {column_name === name ? <i className="fa fa-check right" /> : null}
+    </li>
+  ) : (
+    <li
+      key={`all-${i}`}
+      className="selectable column_name"
+      onClick={() => parent.switchColumn(name, pos)}
+    >
+      {colMap[name].display_name}
+    </li>
+  );
+}
+
+function SampleNameInfo({ parent, dbSample, uploader }) {
+  return (
+    <span
+      onClick={e => parent.viewSample(dbSample.id, e)}
+      className="sample-name-info"
+    >
+      <div className="card-label top-label">
+        <span className="upload-date">
+          Uploaded{" "}
+          {moment(dbSample.created_at)
+            .startOf("second")
+            .fromNow()}
+        </span>
+      </div>
+      <div className="card-label center-label sample-name">{dbSample.name}</div>
+      <div className="card-label author bottom-label author">
+        {!uploader || uploader === "" ? (
+          ""
+        ) : (
+          <span>Uploaded by: {uploader}</span>
+        )}
+      </div>
+    </span>
+  );
+}
+
+function PipelineOutputDataValues({
+  derivedOutput,
+  BLANK_TEXT,
+  stats,
+  dbSample
+}) {
+  return {
+    total_reads: !derivedOutput.pipeline_run
+      ? BLANK_TEXT
+      : numberWithCommas(derivedOutput.pipeline_run.total_reads),
+    nonhost_reads:
+      !stats || !stats.remaining_reads
+        ? BLANK_TEXT
+        : numberWithCommas(stats.remaining_reads),
+    nonhost_reads_percent:
+      !stats || !stats.percent_remaining ? (
+        ""
+      ) : (
+        <span className="percent">
+          {" "}
+          {`(${stats.percent_remaining.toFixed(2)}%)`}{" "}
+        </span>
+      ),
+    quality_control:
+      !stats || !stats.qc_percent
+        ? BLANK_TEXT
+        : `${stats.qc_percent.toFixed(2)}%`,
+    compression_ratio:
+      !stats || !stats.compression_ratio
+        ? BLANK_TEXT
+        : stats.compression_ratio.toFixed(2),
+    tissue_type:
+      dbSample && dbSample.sample_tissue ? dbSample.sample_tissue : BLANK_TEXT,
+    nucleotide_type:
+      dbSample && dbSample.sample_template
+        ? dbSample.sample_template
+        : BLANK_TEXT,
+    location:
+      dbSample && dbSample.sample_location
+        ? dbSample.sample_location
+        : BLANK_TEXT,
+    host_genome:
+      derivedOutput && derivedOutput.host_genome_name
+        ? derivedOutput.host_genome_name
+        : BLANK_TEXT,
+    notes:
+      dbSample && dbSample.sample_notes ? dbSample.sample_notes : BLANK_TEXT
+  };
 }
 
 export default Samples;
