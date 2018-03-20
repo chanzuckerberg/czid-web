@@ -253,6 +253,8 @@ class PipelineSampleReport extends React.Component {
         const taxon = this.state.taxonomy_details[i];
         if (taxon.genus_taxid == taxon.tax_id) {
           if (matched_taxons.length > 0) {
+            // Update species count on page after a search
+            genus_taxon.species_count = matched_taxons.length;
             selected_taxons.push(genus_taxon);
             selected_taxons = selected_taxons.concat(matched_taxons);
           }
@@ -297,7 +299,20 @@ class PipelineSampleReport extends React.Component {
         }
       }
     } else {
-      selected_taxons = thresholded_taxons;
+      // Called for All search
+      let included = thresholded_taxons;
+      for (let i = 0; i < included.length; i++) {
+        if (included[i].genus_taxid == included[i].tax_id) {
+          // Resets the count of species in the view.
+          // Find a genus entry and count the number of species entries after it.
+          let count = 0;
+          for (let j = i + 1; j < included.length && included[j].genus_taxid != included[j].tax_id; j++) {
+            count++;
+          }
+          included[i].species_count = count;
+        }
+      }
+      selected_taxons = included;
     }
 
     let searchKey = this.state.searchKey
@@ -305,7 +320,6 @@ class PipelineSampleReport extends React.Component {
       searchKey = ""
     }
 
-    // console.log(excludedCategories)
     this.setState({
       loading: false,
       excluded_categories: excludedCategories,
