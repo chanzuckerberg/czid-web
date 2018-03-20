@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180309193548) do
+ActiveRecord::Schema.define(version: 20180320212140) do
 
   create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "archive_of"
@@ -297,6 +297,7 @@ ActiveRecord::Schema.define(version: 20180309193548) do
     t.string "species_common_name"
     t.datetime "started_at", default: "2000-01-01 00:00:00", null: false
     t.datetime "ended_at", default: "3000-01-01 00:00:00", null: false
+    t.integer "is_phage", limit: 1
     t.index ["class_taxid"], name: "index_taxon_lineages_on_class_taxid"
     t.index ["family_taxid"], name: "index_taxon_lineages_on_family_taxid"
     t.index ["genus_taxid"], name: "index_taxon_lineages_on_genus_taxid"
