@@ -131,6 +131,7 @@ class PipelineSampleReport extends React.Component {
     this.collapseTable = this.collapseTable.bind(this);
     this.downloadFastaUrl = this.downloadFastaUrl.bind(this);
     this.gotoAlignmentVizLink = this.gotoAlignmentVizLink.bind(this);
+    this.applyExcludePhage = this.applyExcludePhage.bind(this);
 
     this.handleThresholdEnter = this.handleThresholdEnter.bind(this);
     this.renderMore = this.renderMore.bind(this)
@@ -501,7 +502,7 @@ class PipelineSampleReport extends React.Component {
       searchKey: ''
     }, () => {
       Cookies.set('exclude_phage', new_exclude_phage.toString());
-      this.applySearchFilter(0, excluded_categories, undefined, new_exclude_phage);
+      this.applySearchFilter(0, this.state.excluded_categories, undefined, new_exclude_phage);
       this.flash();
     });
   }
@@ -969,9 +970,10 @@ class PipelineSampleReport extends React.Component {
       );
     });
     const phage_filter_tag = (
+      this.state.exclude_phage ? null :
       <span className="filter-tag" key='category_tag_phage'>
         <span className='filter-tag-name'> phage </span>
-        <span className='filter-tag-x' data-exclude-category='phage' onClick= {this.applyExcludePhage}  >X</span>
+        <span className='filter-tag-x' onClick= {this.applyExcludePhage}  >X</span>
       </span>
     )
 
@@ -1055,7 +1057,7 @@ class PipelineSampleReport extends React.Component {
                       <li className='categories-dropdown top-filter ui dropdown filter-btn' >
                         <div className="categories-filters-activate">
                           <span className='filter-label'>Categories</span>
-                          <span className='filter-label-count'>{(this.all_categories.length-this.state.excluded_categories.length-this.state.exclude_phage)} </span>
+                          <span className='filter-label-count'>{(this.all_categories.length-this.state.excluded_categories.length+!this.state.exclude_phage)} </span>
                           <i className='fa fa-angle-down right down-box'></i>
                         </div>
                         <div className='categories-filters-modal'>
@@ -1082,8 +1084,8 @@ class PipelineSampleReport extends React.Component {
                                 value='phage'
                                 onChange={(e) => {}}
                                 onClick={(e) =>{this.applyExcludePhage(e);}}
-                                checked={this.state.exclude_phage}/>
-                                <label htmlFor='phage'>phage</label>
+                                checked={!this.state.exclude_phage}/>
+                                <label htmlFor='phage'>Phage</label>
                               </li>
                             </ul>
                             { this.all_categories.length < 1 ? <p>None found</p> : null }
