@@ -1406,6 +1406,7 @@ class Samples extends React.Component {
         {statuses.map((status, pos) => {
           return (
             <li
+              key = {`status_${pos}`}
               className="filter-item"
               data-status={status}
               onClick={filterSelect}
