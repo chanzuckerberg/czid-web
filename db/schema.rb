@@ -249,6 +249,7 @@ ActiveRecord::Schema.define(version: 20180320212140) do
     t.float "family_total_concordant", limit: 24
     t.bigint "pipeline_run_id"
     t.string "common_name"
+    t.integer "is_phage", limit: 1
     t.index ["pipeline_output_id", "tax_id", "count_type"], name: "new_index_taxon_counts", unique: true
     t.index ["pipeline_output_id", "tax_level", "count_type", "tax_id"], name: "index_taxon_counts", unique: true
     t.index ["pipeline_output_id"], name: "index_taxon_counts_on_pipeline_output_id"
@@ -297,7 +298,6 @@ ActiveRecord::Schema.define(version: 20180320212140) do
     t.string "species_common_name"
     t.datetime "started_at", default: "2000-01-01 00:00:00", null: false
     t.datetime "ended_at", default: "3000-01-01 00:00:00", null: false
-    t.integer "is_phage", limit: 1
     t.index ["class_taxid"], name: "index_taxon_lineages_on_class_taxid"
     t.index ["family_taxid"], name: "index_taxon_lineages_on_family_taxid"
     t.index ["genus_taxid"], name: "index_taxon_lineages_on_genus_taxid"
