@@ -36,7 +36,7 @@ module ReportHelper
   # We do not allow underscores in metric names, sorry!
   METRICS = %w[r rpm zscore percentidentity alignmentlength neglogevalue percentconcordant aggregatescore maxzscore].freeze
   COUNT_TYPES = %w[NT NR].freeze
-  PROPERTIES_OF_TAXID = %w[tax_id name common_name tax_level genus_taxid superkingdom_taxid category_name].freeze # note: no underscore in sortable column names
+  PROPERTIES_OF_TAXID = %w[tax_id name common_name tax_level genus_taxid superkingdom_taxid category_name is_phage].freeze # note: no underscore in sortable column names
   UNUSED_IN_UI_FIELDS = ['superkingdom_taxid', :sort_key].freeze
 
   # This query takes 1.4 seconds and the results are static, so we hardcoded it
@@ -205,6 +205,7 @@ module ReportHelper
         taxon_counts.name                AS  name,
         taxon_counts.common_name                AS  common_name,
         taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
+        taxon_counts.is_phage            AS  is_phage,
         taxon_counts.count               AS  r,
         (count / #{adjusted_total_reads}
           * 1000000.0)                   AS  rpm,
@@ -251,6 +252,7 @@ module ReportHelper
         taxon_counts.genus_taxid         AS  genus_taxid,
         taxon_counts.name                AS  name,
         taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
+        taxon_counts.is_phage            AS  is_phage,
         taxon_counts.count               AS  r,
         taxon_summaries.stdev            AS stdev,
         taxon_summaries.mean             AS mean,
@@ -311,6 +313,7 @@ module ReportHelper
         taxon_counts.genus_taxid         AS  genus_taxid,
         taxon_counts.name                AS  name,
         taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
+        taxon_counts.is_phage            AS  is_phage,
         taxon_counts.count               AS  r,
         taxon_summaries.stdev            AS stdev,
         taxon_summaries.mean             AS mean,
@@ -510,6 +513,7 @@ module ReportHelper
     #       name,
     #       common_name,
     #       category_name,
+    #       is_phage,
     #       NR => {
     #         count_type,
     #         r,
