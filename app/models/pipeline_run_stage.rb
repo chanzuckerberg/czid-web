@@ -1,4 +1,4 @@
-	class PipelineRunStage < ApplicationRecord
+class PipelineRunStage < ApplicationRecord
   include ApplicationHelper
   include PipelineOutputsHelper
   belongs_to :pipeline_run
