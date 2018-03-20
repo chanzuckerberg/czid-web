@@ -591,7 +591,7 @@ class Samples extends React.Component {
               <div className='flex-container'>
                 <ul className='flex-items'>
                   <li className='check-box-container'>
-                    { this.state.displaySelectSamplees ? <div><input type="checkbox" id={i} onClick = { this.selectSample } data-sample-id ={dbSample.id}
+                    { this.state.displaySelectSamples ? <div><input type="checkbox" id={i} onClick = { this.selectSample } key= {`sample_${dbSample.id}`} data-sample-id ={dbSample.id}
                       className="filled-in checkbox" checked={ this.state.selectedSampleIds.indexOf(dbSample.id) >= 0 }
                       disabled={sample.run_info.report_ready != 1}
                       /> <label htmlFor={i}>{sample_name_info}</label></div> : sample_name_info }
@@ -937,8 +937,9 @@ class Samples extends React.Component {
           sampleList.push(sample_id);
         }
       } else {
-        if (indx >= 0) {
-          sampleList.splice(indx, 1);
+        let index = sampleList.indexOf(sample_id);
+        if (index >= 0) {
+          sampleList.splice(index, 1);
         }
       }
     }
@@ -1697,7 +1698,7 @@ class Samples extends React.Component {
       selectedProjectId: id,
       projectType: listType,
       filterParams: "",
-      searchParams: "',
+      searchParams: "",
       checkInUpdate: false,
       allChecked: false,
       selectedTissueFilters: [],
