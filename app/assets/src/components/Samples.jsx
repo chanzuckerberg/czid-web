@@ -997,11 +997,6 @@ class Samples extends React.Component {
      })
   }
 
-  downloadTable(id) {
-    _satellite.track('downloadtable');
-    location.href = `/projects/${id}/csv`;
-  }
-
   applyExcluded(e, type, state_var) {
     let id = e.target.getAttribute("data-exclude");
     if (type === "int") {
