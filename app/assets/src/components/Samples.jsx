@@ -1071,22 +1071,15 @@ class Samples extends React.Component {
       let id = id_field ? entry[id_field] : entry;
       let name = name_field ? entry[name_field] : entry;
       if (this.state[state_selected_options].indexOf(id) >= 0) {
-        return (
-          <Label
-            className="label-tags"
-            size="tiny"
-            key={`${state_all_options}_tag_${i}`}
-          >
-            {`${prefix}${name}`}
-            <Icon
-              name="close"
-              data-exclude={id}
-              onClick={e => {
-                this.applyExcluded(e, id_type, state_selected_options);
-              }}
-            />
-          </Label>
-        );
+        return LabelTagMarkup({
+          state_all_options,
+          i,
+          name,
+          prefix,
+          id,
+          id_type,
+          state_selected_options
+        });
       } else {
         return null;
       }
@@ -1439,18 +1432,13 @@ class Samples extends React.Component {
         </li>
 
         {statuses.map((status, pos) => {
-          return (
-            <li
-              className="filter-item"
-              data-status={status}
-              onClick={filterSelect}
-            >
-              <a data-status={status} className={"filter-item " + classes[pos]}>
-                {texts[pos]}
-              </a>
-              <i data-status={status} className="filter fa fa-check hidden" />
-            </li>
-          );
+          return FilterItemMarkup({
+            status,
+            filterSelect,
+            classes,
+            pos,
+            texts
+          });
         })}
         <li className="divider" />
       </div>
@@ -1485,64 +1473,15 @@ class Samples extends React.Component {
 
               {this.state.columnsShown.map((column_name, pos) => {
                 return (
-                  <li key={`shown-${pos}`}>
-                    {
-                      <Popup
-                        trigger={
-                          <div
-                            className="card-label column-title center-label sample-name center menu-dropdown"
-                            data-activates={`column-dropdown-${pos}`}
-                          >
-                            {colMap[column_name].display_name}{" "}
-                            <i className="fa fa-caret-down" />
-                          </div>
-                        }
-                        size="mini"
-                        className={
-                          !colMap[column_name].tooltip ? "hidden-popup" : ""
-                        }
-                        content={colMap[column_name].tooltip}
-                        hideOnScroll
-                        inverted
-                      />
-                    }
-                    <ul
-                      className="dropdown-content column-dropdown"
-                      id={`column-dropdown-${pos}`}
-                    >
-                      {column_name === "pipeline_status" ? (
-                        <div>{filterStatus}</div>
-                      ) : null}
-                      <li>
-                        <a className="title">
-                          <b>Switch column</b>
-                        </a>
-                      </li>
-                      {this.state.allColumns.map((name, i) => {
-                        return this.state.columnsShown.includes(name) ? (
-                          <li
-                            key={`all-${i}`}
-                            className={`disabled column_name ${
-                              column_name === name ? "current" : ""
-                            }`}
-                          >
-                            {colMap[name].display_name}
-                            {column_name === name ? (
-                              <i className="fa fa-check right" />
-                            ) : null}
-                          </li>
-                        ) : (
-                          <li
-                            key={`all-${i}`}
-                            className="selectable column_name"
-                            onClick={() => this.switchColumn(name, pos)}
-                          >
-                            {colMap[name].display_name}
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </li>
+                  <ColumnDropdown
+                    pos={pos}
+                    colMap={colMap}
+                    column_name={column_name}
+                    filterStatus={filterStatus}
+                    allColumns={this.state.allColumns}
+                    columnsShown={this.state.columnsShown}
+                    parent={this}
+                  />
                 );
               })}
             </ul>
@@ -1795,6 +1734,112 @@ class Samples extends React.Component {
       </div>
     );
   }
+}
+
+function LabelTagMarkup({
+                          state_all_options,
+                          i,
+                          name,
+                          prefix,
+                          id,
+                          id_type,
+                          state_selected_options
+                        }) {
+  return (
+    <Label
+      className="label-tags"
+      size="tiny"
+      key={`${state_all_options}_tag_${i}`}
+    >
+      {`${prefix}${name}`}
+      <Icon
+        name="close"
+        data-exclude={id}
+        onClick={e => {
+          this.applyExcluded(e, id_type, state_selected_options);
+        }}
+      />
+    </Label>
+  );
+}
+
+
+function FilterItemMarkup({ status, filterSelect, classes, pos, texts }) {
+  return (
+    <li className="filter-item" data-status={status} onClick={filterSelect}>
+      <a data-status={status} className={"filter-item " + classes[pos]}>
+        {texts[pos]}
+      </a>
+      <i data-status={status} className="filter fa fa-check hidden" />
+    </li>
+  );
+}
+
+function ColumnDropdown({
+                          pos,
+                          colMap,
+                          column_name,
+                          filterStatus,
+                          allColumns,
+                          columnsShown,
+                          parent
+                        }) {
+  return (
+    <li key={`shown-${pos}`}>
+      {
+        <Popup
+          trigger={
+            <div
+              className="card-label column-title center-label sample-name center menu-dropdown"
+              data-activates={`column-dropdown-${pos}`}
+            >
+              {colMap[column_name].display_name}{" "}
+              <i className="fa fa-caret-down" />
+            </div>
+          }
+          size="mini"
+          className={!colMap[column_name].tooltip ? "hidden-popup" : ""}
+          content={colMap[column_name].tooltip}
+          hideOnScroll
+          inverted
+        />
+      }
+      <ul
+        className="dropdown-content column-dropdown"
+        id={`column-dropdown-${pos}`}
+      >
+        {column_name === "pipeline_status" ? <div>{filterStatus}</div> : null}
+        <li>
+          <a className="title">
+            <b>Switch column</b>
+          </a>
+        </li>
+        {allColumns.map((name, i) => {
+          return columnsShown.includes(name) ? (
+            <li
+              key={`all-${i}`}
+              className={`disabled column_name ${
+                column_name === name ? "current" : ""
+                }`}
+            >
+              {colMap[name].display_name}
+              {column_name === name ? (
+                <i className="fa fa-check right" />
+              ) : null}
+            </li>
+          ) : (
+            <li
+              key={`all-${i}`}
+              className="selectable column_name"
+              onClick={() => parent.switchColumn(name, pos)}
+            >
+              {colMap[name].display_name}
+            </li>
+          );
+        })}
+      </ul>
+    </li>
+  );
 }
 
 export default Samples;
