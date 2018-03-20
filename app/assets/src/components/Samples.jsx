@@ -515,29 +515,7 @@ class Samples extends React.Component {
       );
 
       const sample_name_info = (
-        <span
-          onClick={e => this.viewSample(dbSample.id, e)}
-          className="sample-name-info"
-        >
-          <div className="card-label top-label">
-            <span className="upload-date">
-              Uploaded{" "}
-              {moment(dbSample.created_at)
-                .startOf("second")
-                .fromNow()}
-            </span>
-          </div>
-          <div className="card-label center-label sample-name">
-            {dbSample.name}
-          </div>
-          <div className="card-label author bottom-label author">
-            {!uploader || uploader === "" ? (
-              ""
-            ) : (
-              <span>Uploaded by: {uploader}</span>
-            )}
-          </div>
-        </span>
+        <SampleNameInfo parent={this} dbSample={dbSample} uploader={uploader} />
       );
       let stats = derivedOutput.summary_stats;
       const data_values = {
@@ -1895,6 +1873,32 @@ function ColumnEntries({
     >
       {colMap[name].display_name}
     </li>
+  );
+}
+
+function SampleNameInfo({ parent, dbSample, uploader }) {
+  return (
+    <span
+      onClick={e => parent.viewSample(dbSample.id, e)}
+      className="sample-name-info"
+    >
+      <div className="card-label top-label">
+        <span className="upload-date">
+          Uploaded{" "}
+          {moment(dbSample.created_at)
+            .startOf("second")
+            .fromNow()}
+        </span>
+      </div>
+      <div className="card-label center-label sample-name">{dbSample.name}</div>
+      <div className="card-label author bottom-label author">
+        {!uploader || uploader === "" ? (
+          ""
+        ) : (
+          <span>Uploaded by: {uploader}</span>
+        )}
+      </div>
+    </span>
   );
 }
 
