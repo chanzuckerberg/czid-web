@@ -802,7 +802,6 @@ class Samples extends React.Component {
     var that = this;
     $('.checkAll').click(function(e) {
       var checked = e.currentTarget.checked;
-      console.log(checked);
       $('.checkbox:enabled').prop('checked', checked);
       var checkedCount = $("input:checkbox:checked").length
       that.setState({
@@ -939,10 +938,8 @@ class Samples extends React.Component {
   }
 
   deleteProject(e) {
-    console.log(this.state.selectedProjectId);
     let projectId = this.state.selectedProjectId;
     this.nanobar.go(30);
-    console.log(`/projects/${projectId}`)
     axios
       .delete(`/projects/${projectId}.json`, {
         data: { authenticity_token: this.csrf }
