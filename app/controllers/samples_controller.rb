@@ -86,7 +86,7 @@ class SamplesController < ApplicationController
 
   # GET /samples/bulk_new
   def bulk_new
-    @projects = current_power.projects.sort_by { |e| e.name.downcase }
+    @projects = current_power.projects.sort_by { |e| e.name }
     @host_genomes = HostGenome.all
   end
 
@@ -346,7 +346,7 @@ class SamplesController < ApplicationController
   # GET /samples/new
   def new
     @sample = nil
-    @projects = current_power.updatable_projects.sort_by { |e| e.name.downcase }
+    @projects = current_power.updatable_projects.sort_by { |e| e.name }
     @host_genomes = host_genomes_list ? host_genomes_list : nil
   end
 
@@ -354,7 +354,7 @@ class SamplesController < ApplicationController
   def edit
     @project_info = @sample.project ? @sample.project : nil
     @host_genomes = host_genomes_list ? host_genomes_list : nil
-    @projects = current_power.updatable_projects.sort_by { |e| e.name.downcase }
+    @projects = current_power.updatable_projects.sort_by { |e| e.name }
     @input_files = @sample.input_files
   end
 
