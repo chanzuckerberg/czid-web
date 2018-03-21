@@ -1028,7 +1028,6 @@ class Samples extends React.Component {
       </div>
     )
 
-    const tissue_filter_tag_list = this.generateTagList("tissueTypes", "selectedTissueFilters", "Tissue: ")
     const host_filter_tag_list = this.generateTagList(
       "hostGenomes",
       "selectedHostIndices",
