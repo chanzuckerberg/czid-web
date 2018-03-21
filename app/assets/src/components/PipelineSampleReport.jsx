@@ -972,7 +972,7 @@ class PipelineSampleReport extends React.Component {
     const phage_filter_tag = (
       this.state.exclude_phage ? null :
       <span className="filter-tag" key='category_tag_phage'>
-        <span className='filter-tag-name'> phage </span>
+        <span className='filter-tag-name'> Phage </span>
         <span className='filter-tag-x' onClick= {this.applyExcludePhage}  >X</span>
       </span>
     )
@@ -1083,7 +1083,6 @@ class PipelineSampleReport extends React.Component {
                                 className="filled-in cat-filter"
                                 id='phage'
                                 value='phage'
-                                onChange={(e) => {}}
                                 onClick={(e) =>{this.applyExcludePhage(e);}}
                                 checked={!this.state.exclude_phage}/>
                                 <label htmlFor='phage'>Phage (part of Viruses)</label>
