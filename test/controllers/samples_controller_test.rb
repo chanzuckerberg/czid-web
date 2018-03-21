@@ -4,6 +4,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   setup do
     @background = backgrounds(:real_background)
     @sample = samples(:one)
+    @deletable_sample = samples(:deletable_sample)
     @project = projects(:one)
     @user = users(:one)
     @user.authentication_token = 'sdfsdfsdff'
@@ -173,7 +174,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   test 'should destroy sample' do
     post user_session_path, params: @user_params
     assert_difference('Sample.count', -1) do
-      delete sample_url(@sample)
+      delete sample_url(@deletable_sample)
     end
     assert_redirected_to samples_url
   end
