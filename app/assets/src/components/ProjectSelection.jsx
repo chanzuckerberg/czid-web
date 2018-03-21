@@ -218,15 +218,23 @@ import Nanobar from 'nanobar';
                 .slice(0,4)
                 .map((project, i) => {
                   return (
-                    <div className="project-item fav-item"
-                         onClick={this.handleProjectClick} data-type='favorite'
-                         data-id={project.id} key={i}>
-                    <span className='project-label'
-                          data-type='favorite'
-                          data-id={project.id}>
-                      {project.name}
-                    </span>
-                      {this.addFavIconClass(project)}
+                    <div
+                      className="project-item fav-item"
+                      onClick={this.handleProjectClick}
+                      data-type='favorite'
+                      data-id={project.id}
+                      key={i}>
+                      <div className="row label-row">
+                        <span
+                          className='project-label no-padding col s10'
+                          data-id={project.id}
+                          data-type='favorite'>
+                          {project.name}
+                        </span>
+                        <span className="icon-container no-padding col s2">
+                          {this.addFavIconClass(project)}
+                        </span>
+                      </div>
                     </div>
                   )
                 }):
@@ -234,15 +242,23 @@ import Nanobar from 'nanobar';
                 .sort(sortLogic)
                 .map((project, i) => {
                   return (
-                    <div className="project-item fav-item"
-                         onClick={this.handleProjectClick} data-type='favorite'
-                         data-id={project.id} key={i}>
-                <span className='project-label'
+                    <div
+                      className="project-item fav-item"
+                      onClick={this.handleProjectClick}
                       data-type='favorite'
-                      data-id={project.id}>
-                  {project.name}
-                </span>
-                      { this.addFavIconClass(project) }
+                      data-id={project.id}
+                      key={i}>
+                      <div className="row label-row">
+                        <span
+                          className='project-label no-padding col s10'
+                          data-id={project.id}
+                          data-type='favorite'>
+                          {project.name}
+                        </span>
+                        <span className="icon-container no-padding col s2">
+                          {this.addFavIconClass(project)}
+                        </span>
+                      </div>
                     </div>
                   )
                 })
