@@ -47,13 +47,18 @@ class PipelineSampleReads extends React.Component {
                               sample_template: this.NUCLEOTIDE_TYPES };
     this.DROPDOWN_METADATA_FIELDS = Object.keys(this.DROPDOWN_OPTIONS);
     this.handleDropdownChange = this.handleDropdownChange.bind(this);
-
+    this.deleteSample = this.deleteSample.bind(this);
   }
 
-  componentDidMount() {
-    $('.dropdown-button').dropdown({
-      belowOrigin: true
-    });
+  deleteSample() {
+    axios
+      .delete(`/samples/${this.sampleInfo.id}.json`, {
+        data: { authenticity_token: this.csrf }
+      })
+      .then((res) => {
+        location.href=`/?project_id=${this.projectInfo.id}`
+      }).catch((err) => {
+    })
   }
 
   render_metadata_dropdown(label, field) {
@@ -178,6 +183,10 @@ class PipelineSampleReads extends React.Component {
   }
 
   componentDidMount() {
+    $('.dropdown-button').dropdown({
+      belowOrigin: true
+    });
+
     $('ul.tabs').tabs();
     this.listenNoteChanges();
     this.initializeSelectTag();
@@ -488,6 +497,12 @@ class PipelineSampleReads extends React.Component {
         </div>
       </div>) : null;
 
+    let delete_sample_button = (
+      <Button onClick={this.deleteSample}>
+        Delete sample
+      </Button>  
+    )
+
     return (
       <div>
         <SubHeader>
@@ -502,6 +517,7 @@ class PipelineSampleReads extends React.Component {
                   {this.projectInfo.name + ' '}
                 </a>
                 > { sample_dropdown }
+              { this.sampleInfo.status == "created" ? delete_sample_button : null }
               </div>
               <div className="col no-padding s3 right-align">
                 <div className="report-action-buttons">

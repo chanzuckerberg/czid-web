@@ -1,7 +1,8 @@
 //  d3.scaleGenericlog
+import d3 from 'd3';
+
 export default function genericLog() {
   return (function d3_scale_genericLog(logScale) {
-    const _this = this;
     let scales = [];
     let domainParts = [];
     let eps = 0.1;
@@ -12,8 +13,9 @@ export default function genericLog() {
     let rangePointingForward, domainPointingForward;
 
     const abs = function(arg) {
-      if (arg instanceof Array)
+      if (arg instanceof Array) {
         return arg.map(d => Math.abs(d));
+      }
       return Math.abs(arg);
     };
 
@@ -60,15 +62,15 @@ export default function genericLog() {
         logScale.domain([eps, maxDomain]).range([0, rangeLength]);
         const minRangePoint = delta;//logScale(eps * 2);
         if (domain[0] != 0 && abs(domain[0]) > eps)
-          firstRangePoint = logScale(abs(domain[0]));
+          {firstRangePoint = logScale(abs(domain[0]));}
         if (domain[domain.length - 1] != 0  && abs(domain.length - 1) > eps)
-          secondRangePoint = logScale(abs(domain[domain.length - 1]));
+          {secondRangePoint = logScale(abs(domain[domain.length - 1]));}
 
         if (abs(domain[0]) > eps)
-          firstEps = minRangePoint;
+          {firstEps = minRangePoint;}
 
         if (abs(domain[domain.length - 1]) > eps)
-          secondEps = minRangePoint;
+          {secondEps = minRangePoint;}
 
         rangeLength = rangeLength - firstEps - secondEps;
         if (secondRangePoint != 0) rangePointKoef = abs((firstRangePoint) / (secondRangePoint));
@@ -134,7 +136,7 @@ export default function genericLog() {
             _addSubdomain(start, eps);
             start = eps;
           } else {
-            console.warn("Something wrong while build subdomains: " + start + " " + end);
+            //console.warn("Something wrong while build subdomains: " + start + " " + end);
             start = end;
           }
         }
@@ -221,7 +223,7 @@ export default function genericLog() {
 
     scale.eps = function(arg) {
       if (!arguments.length)
-        return eps;
+        {return eps;}
       eps = arg;
       scale.domain(domain);
       return scale;
@@ -229,7 +231,7 @@ export default function genericLog() {
 
     scale.delta = function(arg) {
       if (!arguments.length)
-        return delta;
+        {return delta;}
       delta = arg;
       scale.range(range);
       return scale;
@@ -237,7 +239,7 @@ export default function genericLog() {
 
     scale.domain = function(arg) {
       if (!arguments.length)
-        return domain;
+        {return domain;}
 
       // this is an internal array, it will be modified. the input _arg should stay intact
       switch (arg.length) {
@@ -268,7 +270,7 @@ export default function genericLog() {
 
     scale.range = function(arg, force) {
       if (!arguments.length)
-        return interpolator ? interpolator.range() : range;
+        {return interpolator ? interpolator.range() : range;}
 
       switch (arg.length) {
         // reset input to the default range
@@ -318,7 +320,7 @@ export default function genericLog() {
       return currScale.scale.invert(arg) * currScale.sign;
     };
 
-    scale.ticks = function(arg) {
+    scale.ticks = function() {
       let partTicks;
       const ticks = [];
       for (let i = 0; i < scales.length; i++) {

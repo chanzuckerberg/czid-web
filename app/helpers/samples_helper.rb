@@ -224,6 +224,7 @@ module SamplesHelper
     else
       pipeline_run_entry[:job_status_description] = 'WAITING'
       pipeline_run_entry[:finalized] = 0
+      pipeline_run_entry[:report_ready] = 0
     end
     pipeline_run_entry
   end

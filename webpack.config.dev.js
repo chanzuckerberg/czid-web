@@ -58,7 +58,9 @@ const config = {
       }
     }]
   },
-  plugins: [ extractPlugin ]
+  plugins: [
+    extractPlugin,
+  ]
 }
 
 module.exports = config;
