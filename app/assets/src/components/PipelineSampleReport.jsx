@@ -202,13 +202,13 @@ class PipelineSampleReport extends React.Component {
       // the genus_map never changes, so we move it out from the react state, to reduce perfomance cost
       this.genus_map = genus_map;
       this.setState({
-          rows_passing_filters: res.data.taxonomy_details[0],
-          rows_total: res.data.taxonomy_details[1],
-          taxonomy_details: res.data.taxonomy_details[2]
-        },
-        () => {
-          this.applyThresholdFilters(this.state.taxonomy_details, false);
-        });
+        rows_passing_filters: res.data.taxonomy_details[0],
+        rows_total: res.data.taxonomy_details[1],
+        taxonomy_details: res.data.taxonomy_details[2]
+      },
+      () => {
+        this.applyThresholdFilters(this.state.taxonomy_details, false);
+      });
     });
   }
 
@@ -339,9 +339,9 @@ class PipelineSampleReport extends React.Component {
     if (selected_taxons.length > currentPage * this.max_rows_to_render) {
       let next_page = selected_taxons.slice(currentPage * rowsPerPage, rowsPerPage * (currentPage +1))
       this.setState((prevState) => ({
-          selected_taxons_top: [...prevState.selected_taxons_top, ...next_page],
-          pagesRendered: (currentPage + 1),
-        })
+        selected_taxons_top: [...prevState.selected_taxons_top, ...next_page],
+        pagesRendered: (currentPage + 1),
+      })
       )
     }
   }
@@ -537,7 +537,7 @@ class PipelineSampleReport extends React.Component {
     if (threshold.hasOwnProperty('label')
       && threshold.hasOwnProperty('operator')
       && threshold.hasOwnProperty('value')) {
-      return ((threshold.label.length > 0)
+        return ((threshold.label.length > 0)
         && (threshold.operator.length > 0)
         && (threshold.value != '' && !isNaN(threshold.value)));
     }
@@ -604,31 +604,31 @@ class PipelineSampleReport extends React.Component {
       return false;
     }
 
-    for (let i = 0; i < rules.length; i += 1) {
-      let rule = rules[i];
-      if (this.isThresholdValid(rule)) {
-        let { label, operator, value } = rule;
-        let threshold = parseFloat(value);
-        const [fieldType, fieldTitle] = label.split('_');
-        const taxonValue = (taxon[fieldType] || {})[fieldTitle];
-        switch (operator) {
-          case '>=':
-            if (taxonValue < threshold) {
-              return false;
-            }
+	for (let i = 0; i < rules.length; i += 1) {
+	  let rule = rules[i];
+	  if (this.isThresholdValid(rule)) {
+		let { label, operator, value } = rule;
+		let threshold = parseFloat(value);
+		const [fieldType, fieldTitle] = label.split('_');
+		const taxonValue = (taxon[fieldType] || {})[fieldTitle];
+		switch (operator) {
+		  case '>=':
+			if (taxonValue < threshold) {
+			  return false;
+			}
             break;
-          case '<=':
-            if (taxonValue > threshold) {
-              return false;
-            }
+		  case '<=':
+			if (taxonValue > threshold) {
+			  return false;
+			}
             break;
-          default: // '>='
-            if (taxonValue < threshold) {
-              return false;
-            }
-        }
-      }
-    }
+		  default: // '>='
+			if (taxonValue < threshold) {
+			  return false;
+			}
+		}
+	  }
+	}
     return true;
   }
 
@@ -693,12 +693,12 @@ class PipelineSampleReport extends React.Component {
         /> : null }
         {
           this.canSeeAlignViz && taxInfo.tax_id > 0 && taxInfo.NT.r > 0 ?  <i
-            data-tax-level={tax_level_str}
-            data-tax-id={taxInfo.tax_id}
-            onClick={this.gotoAlignmentVizLink}
-            className="fa fa-bars fa-1"
-            aria-hidden="true"
-          /> : null }
+          data-tax-level={tax_level_str}
+          data-tax-id={taxInfo.tax_id}
+          onClick={this.gotoAlignmentVizLink}
+          className="fa fa-bars fa-1"
+          aria-hidden="true"
+        /> : null }
       </span>
     );
   }
@@ -726,8 +726,8 @@ class PipelineSampleReport extends React.Component {
     let tax_scientific_name = tax_info['name']
     let tax_common_name = tax_info['common_name']
     let tax_name = this.state.name_type.toLowerCase() == 'common name' ?
-      !tax_common_name || tax_common_name.trim() == "" ? <span className="count-info">{tax_scientific_name}</span> : <span>{StringHelper.capitalizeFirstLetter(tax_common_name)}</span>
-      : <span>{tax_scientific_name}</span>
+                     !tax_common_name || tax_common_name.trim() == "" ? <span className="count-info">{tax_scientific_name}</span> : <span>{StringHelper.capitalizeFirstLetter(tax_common_name)}</span>
+                     : <span>{tax_scientific_name}</span>
     let foo = <i>{tax_name}</i>;
 
     if (tax_info.tax_id > 0) {
@@ -743,7 +743,7 @@ class PipelineSampleReport extends React.Component {
         <div className="species-name">{foo}
           { this.displayTags(tax_info, report_details) }
         </div>
-      </div>);
+             </div>);
     } else {
       // emphasize genus, soften category and species count
       const category_name = tax_info.tax_id == -200 ? '' : tax_info.category_name;
@@ -758,11 +758,11 @@ class PipelineSampleReport extends React.Component {
           <i className={`fa fa-angle-right ${tax_info.tax_id}`} onClick={this.expandGenus} />
         </span>
       </span>);
-      foo = (<div className="hover-wrapper">
+       foo = (<div className="hover-wrapper">
         <div className="genus-name"> {plus_or_minus} {foo}</div>
         <i className="count-info">({tax_info.species_count} {this.category_to_adjective(category_name)} species)</i>
         { this.displayTags(tax_info, report_details) }
-      </div>);
+             </div>);
     }
     return foo;
   }
@@ -859,7 +859,7 @@ class PipelineSampleReport extends React.Component {
     const taxId = attr[2];
     const taxIdIdx = this.expandedGenera.indexOf(taxId)
     if (taxIdIdx >= 0) {
-      this.expandedGenera.splice(taxIdIdx, 1)
+       this.expandedGenera.splice(taxIdIdx, 1)
     }
     $(`.report-row-species.${taxId}`).addClass('hidden');
     $(`.report-arrow.${taxId}`).toggleClass('hidden');
@@ -915,10 +915,10 @@ class PipelineSampleReport extends React.Component {
     const filter_stats = `${this.state.rows_passing_filters} rows passing filters, out of ${this.state.rows_total} total rows.`;
     let subsampled_reads = this.report_details ? this.report_details.subsampled_reads : null
     let subsampling_stats = subsampled_reads && subsampled_reads < this.report_details.pipeline_info.remaining_reads ?
-      'Randomly subsampled to ' + subsampled_reads
-      + ' out of ' + this.report_details.pipeline_info.remaining_reads
-      + ' non-host reads.'
-      : '';
+                              'Randomly subsampled to ' + subsampled_reads
+                              + ' out of ' + this.report_details.pipeline_info.remaining_reads
+                              + ' non-host reads.'
+                              : '';
     const disable_filter = this.anyFilterSet() ? (<span className="disable" onClick={e => this.resetAllFilters()}><b> Disable all filters</b></span>) : null;
     const filter_row_stats = this.state.loading ? null : (
       <div id="filter-message" className="filter-message">
@@ -934,7 +934,7 @@ class PipelineSampleReport extends React.Component {
         <span className='filter-tag-name'>{this.thresholdLabel2Name[threshold['label']]} { threshold['operator'] } {threshold['value'] }</span>
         <span className='filter-tag-x' onClick= {() => {this.removeThresholdFilter(i);}} >X</span>
         </span>
-      ) : null;
+        ) : null;
     });
 
     const categories_filter_tag_list = this.displayedCategories(this.state.excluded_categories).map((category, i) => {
@@ -957,7 +957,7 @@ class PipelineSampleReport extends React.Component {
                   <div className='report-top-filters'>
                     <ul className='filter-lists'>
                       <li className='search-box genus-autocomplete-container'>
-                        <ReactAutocomplete
+                         <ReactAutocomplete
                           inputProps={{ placeholder: 'Search' }}
                           items={this.state.search_keys_in_sample}
                           shouldItemRender={(item, value) => (item[0] == 'All') || (value.length > 2 && item[0].toLowerCase().indexOf(value.toLowerCase()) > -1)}
@@ -1014,7 +1014,7 @@ class PipelineSampleReport extends React.Component {
                                   />
                                 );
                               })
-                              :
+                            :
                               <Dropdown.Item
                                 text="No background models to display"
                               />
@@ -1031,20 +1031,20 @@ class PipelineSampleReport extends React.Component {
                         <div className='categories-filters-modal'>
                           <div className="categories">
                             <ul>
-                              { this.all_categories.map((category, i) => {
-                                return (
-                                  <li key={i}>
-                                    <input type="checkbox"
-                                           className="filled-in cat-filter"
-                                           id={category.name}
-                                           value={category.name}
-                                           onChange={(e) => {}}
-                                           onClick={(e) =>{this.applyExcludedCategories(e);}}
-                                           checked={this.state.excluded_categories.indexOf(category.name) < 0}/>
-                                    <label htmlFor={ category.name }>{ category.name }</label>
-                                  </li>
-                                )
-                              })}
+                            { this.all_categories.map((category, i) => {
+                              return (
+                                <li key={i}>
+                                  <input type="checkbox"
+                                  className="filled-in cat-filter"
+                                  id={category.name}
+                                  value={category.name}
+                                  onChange={(e) => {}}
+                                  onClick={(e) =>{this.applyExcludedCategories(e);}}
+                                  checked={this.state.excluded_categories.indexOf(category.name) < 0}/>
+                                  <label htmlFor={ category.name }>{ category.name }</label>
+                                </li>
+                              )
+                            })}
                             </ul>
                             { this.all_categories.length < 1 ? <p>None found</p> : null }
                           </div>
@@ -1137,49 +1137,49 @@ class PipelineSampleReport extends React.Component {
                 <div className="reports-main">
                   <table id="report-table" className="bordered report-table">
                     <thead>
-                    <tr>
-                      <th>
+                      <tr>
+                        <th>
                           <span className={`table-arrow ${right_arrow_initial_visibility}`}>
                             <i className="fa fa-angle-right" onClick={this.expandTable} />
                           </span>
-                        <span className="table-arrow hidden">
+                          <span className="table-arrow hidden">
                             <i className="fa fa-angle-down" onClick={this.collapseTable} />
                           </span>
                         Taxonomy
-                      </th>
-                      {this.render_column_header('Score', `NT_aggregatescore`, 'Aggregate score: ( |genus.NT.Z| * species.NT.Z * species.NT.rPM ) + ( |genus.NR.Z| * species.NR.Z * species.NR.rPM )') }
-                      {this.render_column_header('Z', `${this.state.countType}_zscore`, `Z-score relative to background model for alignments to NCBI NT/NR`) }
-                      {this.render_column_header('rPM', `${this.state.countType}_rpm`, `Number of reads aligning to the taxon in the NCBI NT/NR database per million total input reads`)}
-                      {this.render_column_header('r', `${this.state.countType}_r`, `Number of reads aligning to the taxon in the NCBI NT/NR database`)}
-                      {this.render_column_header('%id', `${this.state.countType}_percentidentity`, `Average percent-identity of alignments to NCBI NT/NR`)}
-                      {this.render_column_header('log(1/E)', `${this.state.countType}_neglogevalue`, `Average log-10-transformed expect value for alignments to NCBI NT/NR`)}
-                      {this.render_column_header('%conc', `${this.state.countType}_percentconcordant`, `Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NT/NR)`)}
-                      <th>
-                        <Tipsy content='Switch count type' placement="top">
-                          <div className='sort-controls center left'>
-                            <div className={this.state.countType === "NT" ? 'active column-switcher' : 'column-switcher'} onClick={() => {this.setState({countType: 'NT'}); }}>NT</div>
-                            <div className={this.state.countType === "NR" ? 'active column-switcher' : 'column-switcher'} onClick={() => {this.setState({countType: 'NR'}); }}>NR</div>
-                          </div>
-                        </Tipsy>
-                      </th>
-                    </tr>
+                        </th>
+                        {this.render_column_header('Score', `NT_aggregatescore`, 'Aggregate score: ( |genus.NT.Z| * species.NT.Z * species.NT.rPM ) + ( |genus.NR.Z| * species.NR.Z * species.NR.rPM )') }
+                        {this.render_column_header('Z', `${this.state.countType}_zscore`, `Z-score relative to background model for alignments to NCBI NT/NR`) }
+                        {this.render_column_header('rPM', `${this.state.countType}_rpm`, `Number of reads aligning to the taxon in the NCBI NT/NR database per million total input reads`)}
+                        {this.render_column_header('r', `${this.state.countType}_r`, `Number of reads aligning to the taxon in the NCBI NT/NR database`)}
+                        {this.render_column_header('%id', `${this.state.countType}_percentidentity`, `Average percent-identity of alignments to NCBI NT/NR`)}
+                        {this.render_column_header('log(1/E)', `${this.state.countType}_neglogevalue`, `Average log-10-transformed expect value for alignments to NCBI NT/NR`)}
+                        {this.render_column_header('%conc', `${this.state.countType}_percentconcordant`, `Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NT/NR)`)}
+                        <th>
+                          <Tipsy content='Switch count type' placement="top">
+                            <div className='sort-controls center left'>
+                              <div className={this.state.countType === "NT" ? 'active column-switcher' : 'column-switcher'} onClick={() => {this.setState({countType: 'NT'}); }}>NT</div>
+                              <div className={this.state.countType === "NR" ? 'active column-switcher' : 'column-switcher'} onClick={() => {this.setState({countType: 'NR'}); }}>NR</div>
+                            </div>
+                          </Tipsy>
+                        </th>
+                      </tr>
                     </thead>
                     <tbody>
-                    { this.state.selected_taxons_top.map((tax_info, i) => (
-                      <tr key={tax_info.tax_id} className={this.row_class(tax_info)}>
-                        <td>
-                          { this.render_name(tax_info, this.report_details) }
-                        </td>
-                        { this.render_number(tax_info.NT.aggregatescore, null, 0, true) }
-                        { this.render_number(tax_info.NT.zscore, tax_info.NR.zscore, 1) }
-                        { this.render_number(tax_info.NT.rpm, tax_info.NR.rpm, 1) }
-                        { this.render_number(tax_info.NT.r, tax_info.NR.r, 0) }
-                        { this.render_number(tax_info.NT.percentidentity, tax_info.NR.percentidentity, 1) }
-                        { this.render_number(tax_info.NT.neglogevalue, tax_info.NR.neglogevalue, 0) }
-                        { this.render_number(tax_info.NT.percentconcordant, tax_info.NR.percentconcordant, 1) }
-                        <td>&nbsp;</td>
-                      </tr>
-                    ))}
+                      { this.state.selected_taxons_top.map((tax_info, i) => (
+                        <tr key={tax_info.tax_id} className={this.row_class(tax_info)}>
+                          <td>
+                            { this.render_name(tax_info, this.report_details) }
+                          </td>
+                          { this.render_number(tax_info.NT.aggregatescore, null, 0, true) }
+                          { this.render_number(tax_info.NT.zscore, tax_info.NR.zscore, 1) }
+                          { this.render_number(tax_info.NT.rpm, tax_info.NR.rpm, 1) }
+                          { this.render_number(tax_info.NT.r, tax_info.NR.r, 0) }
+                          { this.render_number(tax_info.NT.percentidentity, tax_info.NR.percentidentity, 1) }
+                          { this.render_number(tax_info.NT.neglogevalue, tax_info.NR.neglogevalue, 0) }
+                          { this.render_number(tax_info.NT.percentconcordant, tax_info.NR.percentconcordant, 1) }
+                          <td>&nbsp;</td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 </div>
