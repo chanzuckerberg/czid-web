@@ -58,7 +58,7 @@ class PipelineSampleReads extends React.Component {
 
   deleteSample() {
     axios
-      .delete(`/samples/${this.sampleInfo.id}`, {
+      .delete(`/samples/${this.sampleInfo.id}.json`, {
         data: { authenticity_token: this.csrf }
       })
       .then((res) => {
