@@ -50,12 +50,6 @@ class PipelineSampleReads extends React.Component {
     this.deleteSample = this.deleteSample.bind(this);
   }
 
-  componentDidMount() {
-    $('.dropdown-button').dropdown({
-      belowOrigin: true
-    });
-  }
-
   deleteSample() {
     axios
       .delete(`/samples/${this.sampleInfo.id}.json`, {
@@ -189,6 +183,10 @@ class PipelineSampleReads extends React.Component {
   }
 
   componentDidMount() {
+    $('.dropdown-button').dropdown({
+      belowOrigin: true
+    });
+
     $('ul.tabs').tabs();
     this.listenNoteChanges();
     this.initializeSelectTag();

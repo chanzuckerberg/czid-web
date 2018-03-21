@@ -30,6 +30,8 @@ const react_component = (componentName, props, target) => {
       React.createElement(matchedComponent, props, null),
       document.getElementById(target)
     );
+  } else {
+    console.log("Couldn't find component for", componentName, foundComponents);
   }
 };
 
