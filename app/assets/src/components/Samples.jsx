@@ -939,15 +939,12 @@ class Samples extends React.Component {
 
   deleteProject(e) {
     let projectId = this.state.selectedProjectId;
-    this.nanobar.go(30);
     axios
       .delete(`/projects/${projectId}.json`, {
         data: { authenticity_token: this.csrf }
       })
       .then((res) => {
-        this.nanobar.go(100);
         location.href = "/"
-        // this.setState({ selectedProjectId: null });
       }).catch((err) => {
     })
   }
