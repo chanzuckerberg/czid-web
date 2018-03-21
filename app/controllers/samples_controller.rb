@@ -366,7 +366,7 @@ class SamplesController < ApplicationController
       project_name = params.delete(:project_name)
       project = Project.find_by(name: project_name)
       unless project
-        Project.create(name: project_name)
+        project = Project.create(name: project_name)
         project.users << current_user if current_user
       end
     end
