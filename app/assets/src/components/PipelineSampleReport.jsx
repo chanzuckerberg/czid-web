@@ -253,8 +253,6 @@ class PipelineSampleReport extends React.Component {
         const taxon = this.state.taxonomy_details[i];
         if (taxon.genus_taxid == taxon.tax_id) {
           if (matched_taxons.length > 0) {
-            // Update species count on page after a search
-            genus_taxon.species_count = matched_taxons.length;
             selected_taxons.push(genus_taxon);
             selected_taxons = selected_taxons.concat(matched_taxons);
           }
@@ -299,26 +297,15 @@ class PipelineSampleReport extends React.Component {
         }
       }
     } else {
-      // Called for All search
-      let included = thresholded_taxons;
-      for (let i = 0; i < included.length; i++) {
-        if (included[i].genus_taxid == included[i].tax_id) {
-          // Resets the count of species in the view.
-          // Find a genus entry and count the number of species entries after it.
-          let count = 0;
-          for (let j = i + 1; j < included.length && included[j].genus_taxid != included[j].tax_id; j++) {
-            count++;
-          }
-          included[i].species_count = count;
-        }
-      }
-      selected_taxons = included;
+      selected_taxons = thresholded_taxons;
     }
 
     let searchKey = this.state.searchKey
     if (searchTaxonId <= 0) {
       searchKey = ""
     }
+
+    selected_taxons = this.updateSpeciesCount(selected_taxons);
 
     this.setState({
       loading: false,
@@ -332,6 +319,21 @@ class PipelineSampleReport extends React.Component {
       pagesRendered: 1,
       rows_passing_filters: selected_taxons.length
     });
+  }
+
+  updateSpeciesCount(res) {
+    for (let i = 0; i < res.length; i++) {
+      let isGenus = (res[i].genus_taxid == res[i].tax_id);
+      if (isGenus) {
+        // Find a genus entry and count the number of species entries after it.
+        let count = 0;
+        for (let j = i + 1; j < res.length && res[j].genus_taxid != res[j].tax_id; j++) {
+          count++;
+        }
+        res[i].species_count = count;
+      }
+    }
+    return res;
   }
 
   //Load more samples on scroll
