@@ -413,7 +413,7 @@ class SamplesController < ApplicationController
   # DELETE /samples/1
   # DELETE /samples/1.json
   def destroy
-    deletable = @sample.status == Sample::STATUS_UPLOAD_FAILED
+    deletable = @sample.status == Sample::STATUS_CREATED
     @sample.destroy if deletable
     respond_to do |format|
       if deletable

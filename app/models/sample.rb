@@ -5,7 +5,6 @@ require 'aws-sdk'
 
 class Sample < ApplicationRecord
   STATUS_CREATED = 'created'.freeze
-  STATUS_UPLOAD_FAILED = 'upload_failed'.freeze
   STATUS_UPLOADED = 'uploaded'.freeze
   STATUS_RERUN    = 'need_rerun'.freeze
   STATUS_RETRY_PR = 'retry_pr'.freeze # retry existing pipeline run
@@ -179,8 +178,6 @@ class Sample < ApplicationRecord
       stderr_array << stderr unless status.exitstatus.zero?
     end
     unless stderr_array.empty?
-      self.status = STATUS_UPLOAD_FAILED
-      save
       Airbrake.notify("Failed to upload sample #{id} with error #{stderr_array[0]}")
       raise stderr_array[0]
     end
@@ -300,8 +297,6 @@ class Sample < ApplicationRecord
         end
       end
     rescue
-      self.status = STATUS_UPLOAD_FAILED
-      save
       Airbrake.notify("Failed to concatenate input parts for sample #{id}")
     end
   end

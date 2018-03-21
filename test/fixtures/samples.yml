@@ -20,7 +20,7 @@ public_sample:
 deletable_sample:
   name: sample5
   project: one
-  status: "upload_failed"
+  status: "created"
 
 joe_sample:
   name: sample Joe

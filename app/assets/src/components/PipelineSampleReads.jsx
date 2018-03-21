@@ -522,7 +522,7 @@ class PipelineSampleReads extends React.Component {
                 </a>
                 > { sample_dropdown }
               </div>
-              { this.sampleInfo.status == "upload_failed" ? delete_sample_button : null }
+              { this.sampleInfo.status == "created" ? delete_sample_button : null }
               <div className="col no-padding s3 right-align">
                 <div className="report-action-buttons">
                   <a className="right" href={this.getDownloadLink()}>
