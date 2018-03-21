@@ -266,15 +266,15 @@ class PipelineRun < ApplicationRecord
 
   def update_is_phage
     TaxonCount.connection.execute("
-      UPDATE taxon_counts, taxon_lineages
+      UPDATE taxon_counts
+      INNER JOIN taxon_lineages ON taxon_counts.tax_id = taxon_lineages.taxid
       SET taxon_counts.is_phage = IF(taxon_lineages.family_name IN ('Myoviridae', 'Siphoviridae', 'Podoviridae', 'Lipothrixviridae',
                                                                     'Rudiviridae', 'Ampullaviridae', 'Bicaudaviridae', 'Clavaviridae',
                                                                     'Corticoviridae', 'Cystoviridae', 'Fuselloviridae', 'Globuloviridae',
                                                                     'Guttaviridae', 'Inoviridae', 'Leviviridae', 'Microviridae', 'Plasmaviridae', 'Tectiviridae'),
                                      1, 0)
       WHERE taxon_counts.pipeline_run_id=#{id} AND
-            (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at) AND
-            taxon_lineages.taxid = taxon_counts.tax_id
+            (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at)
     ")
   end
 
