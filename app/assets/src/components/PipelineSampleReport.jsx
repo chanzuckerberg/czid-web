@@ -1077,6 +1077,7 @@ class PipelineSampleReport extends React.Component {
                                 </li>
                               )
                             })}
+                              <br /><div className="divider" /><br />
                               <li key='phage'>
                                 <input type="checkbox"
                                 className="filled-in cat-filter"
@@ -1085,7 +1086,7 @@ class PipelineSampleReport extends React.Component {
                                 onChange={(e) => {}}
                                 onClick={(e) =>{this.applyExcludePhage(e);}}
                                 checked={!this.state.exclude_phage}/>
-                                <label htmlFor='phage'>Phage</label>
+                                <label htmlFor='phage'>Phage (part of Viruses)</label>
                               </li>
                             </ul>
                             { this.all_categories.length < 1 ? <p>None found</p> : null }
