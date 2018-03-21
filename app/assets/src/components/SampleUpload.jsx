@@ -4,6 +4,7 @@ import axios from 'axios';
 import $ from 'jquery';
 import Tipsy from 'react-tipsy';
 import IconComponent from './IconComponent';
+import ObjectHelper from '../helpers/ObjectHelper';
 
 class SampleUpload extends React.Component {
   constructor(props, context) {
@@ -33,6 +34,7 @@ class SampleUpload extends React.Component {
     const adminGenomes = this.hostGenomes.filter((g) => {
       return g.name.toLowerCase().indexOf('test') >= 0;
     });
+    console.log('Fuck', JSON.stringify(this.props.projects));
     this.selected = {
       name: this.sample.name || '',
       hostGenome: this.sample ? this.sample.host_genome_name : selectedHostGenomeName,
@@ -532,8 +534,7 @@ class SampleUpload extends React.Component {
                 <div className="input-field col s6 project-list">
                    <select ref="projectSelect" className="" onChange={ this.handleProjectChange } value={this.state.selectedProject} id="sample">
                     <option disabled defaultValue>{this.state.selectedProject}</option>
-                   { this.state.allProjects.length ?
-                      this.state.allProjects.map((project, i) => {
+                   { this.state.allProjects.length ? ObjectHelper.sortByKey(this.state.allProjects, 'name').map((project, i) => {
                         return <option ref= "project" key={i} id={project.id} >{project.name}</option>
                       }) : <option>No projects to display</option>
                     }
@@ -633,7 +634,7 @@ class SampleUpload extends React.Component {
                         <select ref="projectSelect" disabled={(this.state.disableProjectSelect ? 'disabled' : '')} className="projectSelect" id="sample" onChange={ this.handleProjectChange } value={this.state.selectedProject}>
                           <option disabled defaultValue>{this.state.selectedProject}</option>
                           { this.state.allProjects.length ?
-                            this.state.allProjects.map((project, i) => {
+                             ObjectHelper.sortByKey(this.state.allProjects, 'name').map((project, i) => {
                               return <option ref= "project" key={i} id={project.id} >{project.name}</option>
                             }) : <option>No projects to display</option>
                           }
