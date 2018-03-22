@@ -300,4 +300,23 @@ class PipelineRun < ApplicationRecord
     unidentified_fasta = get_s3_file(sample.unidentified_fasta_s3_path)
     unidentified_fasta.lines.select { |line| line.start_with? '>' }.count if unidentified_fasta
   end
+
+  def project_id
+    sample.project_id
+  end
+
+  def notify?
+    incomplete_runs = PipelineRun.where("id in (select max(id) from pipeline_runs group by sample_id) and sample_id in (select id from samples where project_id = #{project_id.to_i})").where("status != ?", PipelineRun::STATUS_CHECKED)
+    incomplete_runs.count > 0
+  end
+
+  def notify_users
+    project = Project.find(project_id)
+    samples = Sample.where(project_id: project_id)
+    email_arguments = { user_emails: project.users.map(&:email),
+                        project_name: project.name,
+                        project_id: project_id,
+                        number_samples: samples.count }
+    project_complete_email(email_arguments)
+  end
 end

@@ -313,34 +313,6 @@ class PipelineRunStage < ApplicationRecord
     notify_users if notify?
   end
 
-  def project_id
-    pipeline_run.sample.project_id
-  end
-
-  def notify?
-    statuses_in_project = PipelineRun.connection.select_all("
-      SELECT
-        pipeline_runs.job_status
-      FROM pipeline_runs
-      LEFT OUTER JOIN samples ON
-        pipeline_runs.sample_id = samples.id
-      WHERE
-        samples.project_id = #{project_id.to_i}
-    ")
-    statuses_in_project.all? { |s| s == PipelineRun::STATUS_CHECKED }
-  end
-
-  def notify_users
-    # to do: reduce number of SQL queries
-    project = Project.find(project_id)
-    samples = Sample.where(project_id: project_id)
-    email_arguments = { user_emails: project.users.map(&:email),
-                        project_name: project.name,
-                        project_id: project_id,
-                        number_samples: samples.count }
-    project_complete_email(email_arguments)
-  end
-
   def host_filtering_outputs
     stats_json_s3_path = "#{pipeline_run.sample_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
     unmapped_fasta_s3_path = "#{pipeline_run.sample_output_s3_path}/unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.merged.fasta"
