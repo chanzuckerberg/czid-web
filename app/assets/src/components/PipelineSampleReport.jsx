@@ -483,13 +483,17 @@ class PipelineSampleReport extends React.Component {
     } else {
       excluded_categories.push(e.target.value);
     }
+    // Also update subcategory
+    let new_exclude_phage = (excluded_categories.indexOf('Viruses') != -1)
     this.setState({
       excluded_categories: excluded_categories,
+      exclude_phage: new_exclude_phage,
       searchId: 0,
       searchKey: ''
     }, () => {
       Cookies.set('excluded_categories', JSON.stringify(excluded_categories));
-      this.applySearchFilter(0, excluded_categories);
+      Cookies.set('exclude_phage', new_exclude_phage.toString());
+      this.applySearchFilter(0, excluded_categories, undefined, new_exclude_phage);
       this.flash();
     });
   }
