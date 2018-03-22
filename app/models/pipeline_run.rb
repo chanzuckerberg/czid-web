@@ -315,6 +315,6 @@ class PipelineRun < ApplicationRecord
                         project_name: project.name,
                         project_id: project_id,
                         number_samples: samples.count }
-    UserMailer.project_complete_email(email_arguments)
+    UserMailer.project_complete_email(email_arguments).deliver_now
   end
 end
