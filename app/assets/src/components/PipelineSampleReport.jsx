@@ -305,7 +305,8 @@ class PipelineSampleReport extends React.Component {
       searchKey = ""
     }
 
-    // console.log(excludedCategories)
+    selected_taxons = this.updateSpeciesCount(selected_taxons);
+
     this.setState({
       loading: false,
       excluded_categories: excludedCategories,
@@ -318,6 +319,21 @@ class PipelineSampleReport extends React.Component {
       pagesRendered: 1,
       rows_passing_filters: selected_taxons.length
     });
+  }
+
+  updateSpeciesCount(res) {
+    for (let i = 0; i < res.length; i++) {
+      let isGenus = (res[i].genus_taxid == res[i].tax_id);
+      if (isGenus) {
+        // Find a genus entry and count the number of species entries after it.
+        let count = 0;
+        for (let j = i + 1; j < res.length && res[j].genus_taxid != res[j].tax_id; j++) {
+          count++;
+        }
+        res[i].species_count = count;
+      }
+    }
+    return res;
   }
 
   //Load more samples on scroll
