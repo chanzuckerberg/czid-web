@@ -460,6 +460,12 @@ $break-large: 1070px;
 }
 
 .sample-container {
+  [type=checkbox].filled-in:not(:checked)+label:after,
+  [type=checkbox].filled-in+label:after {
+    height: 15px!important;
+    width: 15px!important;
+  }
+
   .metadata {
     position: relative;
     border-radius: 40px;
@@ -531,6 +537,9 @@ $break-large: 1070px;
         .check-box-container {
           .check {
             display: inline-block
+          }
+          [type=checkbox].filled-in:disabled:not(:checked)+label:after {
+            background-color: #CCC;
           }
         }
         .sample-name-info {
@@ -843,9 +852,7 @@ input[type="button"] {
   .sidebar {
     background-color: #333333;
     border-right: 1px solid #eaeaea;
-    .sticky-inner-wrapper {
-      background: #333333;
-    }
+    width: 15.3em!important;
     .title {
       color: $gray3;
       font-weight: 600;
@@ -933,7 +940,8 @@ input[type="button"] {
     background: #fff;
     -webkit-transform: unset !important;
     transform: unset !important;
-    margin-left: 260px !important;
+    margin-left: 15.3em !important;
+    width: 86.666667% !important;
     .content-wrapper {
       .divider {
         height: 3px;
@@ -1056,6 +1064,23 @@ input[type="button"] {
   margin-top: 4px;
 }
 
+.add-user-modal {
+  width: 35% !important;
+  box-shadow: 1px 1px 7px 2px #fff;
+  color: #353535;
+  border-radius: 0px;
+  margin: 0 auto !important;
+  top: 30% !important;
+}
+
+.ui.dimmer {
+  background-color: rgba(0,0,0,.50);
+}
+
+#add_user_to_project {
+  height: 15px !important;
+}
+
 .project-popup {
   width: 30%;
   box-shadow: 1px 1px 7px 2px #fff;
@@ -1073,7 +1098,7 @@ input[type="button"] {
     font-weight: $font-weight-bold;
     margin-bottom: 10px;
   }
-  .project_modal_visiblity {
+  .project_modal_visibility {
     i.material-icons {
       font-size: $font-size-base;
       position: relative;
@@ -1112,6 +1137,7 @@ input[type="button"] {
       background: #e9ecef;
       padding: 10px;
       font-size: 12px;
+      right: 8px;
       border-top-right-radius: 2px;
       border-bottom-right-radius: 2px;
       border: 1px solid #ced4da;
@@ -1163,11 +1189,6 @@ input[type="button"] {
   }
 }
 
-[type=checkbox].filled-in {
-    height: 20px !important;
-    width: 20px !important;
-}
-
 [type=checkbox].filled-in:not(:checked)+label:after {
     top: 4px;
     background-color: transparent;
@@ -1177,7 +1198,7 @@ input[type="button"] {
 
 [type=checkbox].filled-in:checked+label:after {
     top: 4px;
-    border: 10px solid #188fd8;
+    border: 1px solid #188fd8;
     background-color: #188fd8;
     &.check-all {
       padding: 10px 21px 8px 16px;
@@ -1186,6 +1207,8 @@ input[type="button"] {
 
 [type=checkbox].filled-in:checked+label:before {
     top: 4px;
+    height: 10px;
+    left: 0;
 }
 
 .dropdown-content li>a, .dropdown-content li>span {

@@ -4,7 +4,7 @@ require 'tempfile'
 require 'aws-sdk'
 
 class Sample < ApplicationRecord
-  STATUS_CREATED  = 'created'.freeze
+  STATUS_CREATED = 'created'.freeze
   STATUS_UPLOADED = 'uploaded'.freeze
   STATUS_RERUN    = 'need_rerun'.freeze
   STATUS_RETRY_PR = 'retry_pr'.freeze # retry existing pipeline run
@@ -278,22 +278,26 @@ class Sample < ApplicationRecord
 
   def concatenate_input_parts
     return unless status == STATUS_UPLOADED
-    input_files.each do |f|
-      next unless f.source_type == 'local'
-      parts = f.parts.split(", ")
-      next unless parts.length > 1
-      source_parts = []
-      local_path = "#{LOCAL_INPUT_PART_PATH}/#{id}/#{f.id}"
-      parts.each_with_index do |part, index|
-        source_part = File.join("s3://#{SAMPLES_BUCKET_NAME}", File.dirname(f.file_path), File.basename(part))
-        source_parts << source_part
-        `aws s3 cp #{source_part} #{local_path}/#{index}`
+    begin
+      input_files.each do |f|
+        next unless f.source_type == 'local'
+        parts = f.parts.split(", ")
+        next unless parts.length > 1
+        source_parts = []
+        local_path = "#{LOCAL_INPUT_PART_PATH}/#{id}/#{f.id}"
+        parts.each_with_index do |part, index|
+          source_part = File.join("s3://#{SAMPLES_BUCKET_NAME}", File.dirname(f.file_path), File.basename(part))
+          source_parts << source_part
+          `aws s3 cp #{source_part} #{local_path}/#{index}`
+        end
+        `cd #{local_path}; cat * > complete_file; aws s3 cp complete_file s3://#{SAMPLES_BUCKET_NAME}/#{f.file_path}`
+        `rm -rf #{local_path}`
+        source_parts.each do |source_part|
+          `aws s3 rm #{source_part}`
+        end
       end
-      `cd #{local_path}; cat * > complete_file; aws s3 cp complete_file s3://#{SAMPLES_BUCKET_NAME}/#{f.file_path}`
-      `rm -rf #{local_path}`
-      source_parts.each do |source_part|
-        `aws s3 rm #{source_part}`
-      end
+    rescue
+      Airbrake.notify("Failed to concatenate input parts for sample #{id}")
     end
   end
 
