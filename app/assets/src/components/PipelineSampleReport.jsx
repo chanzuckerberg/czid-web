@@ -30,64 +30,10 @@ class PipelineSampleReport extends React.Component {
       "highest_",
       ""
     );
-    this.sort_params = {};
     const cached_cats = Cookies.get("excluded_categories");
     const cached_name_type = Cookies.get("name_type");
     const savedThresholdFilters = this.getSavedThresholdFilters();
-    this.allThresholds = [
-      {
-        name: "Score",
-        value: "NT_aggregatescore"
-      },
-      {
-        name: "NT Z Score",
-        value: "NT_zscore"
-      },
-      {
-        name: "NT rPM",
-        value: "NT_rpm"
-      },
-      {
-        name: "NT r (total reads)",
-        value: "NT_r"
-      },
-      {
-        name: "NT %id",
-        value: "NT_percentidentity"
-      },
-      {
-        name: "NT log(1/e)",
-        value: "NT_neglogevalue"
-      },
-      {
-        name: "NT %conc",
-        value: "NT_percentconcordant"
-      },
-      {
-        name: "NR Z Score",
-        value: "NR_zscore"
-      },
-      {
-        name: "NR r (total reads)",
-        value: "NR_r"
-      },
-      {
-        name: "NR rPM",
-        value: "NR_rpm"
-      },
-      {
-        name: "NR %id",
-        value: "NR_percentidentity"
-      },
-      {
-        name: "R log(1/e)",
-        value: "NR_neglogevalue"
-      },
-      {
-        name: "NR %conc",
-        value: "NR_percentconcordant"
-      }
-    ];
+    this.allThresholds = ThresholdMap();
     this.genus_map = {};
 
     this.thresholdLabel2Name = {};
@@ -147,7 +93,6 @@ class PipelineSampleReport extends React.Component {
     this.collapseTable = this.collapseTable.bind(this);
     this.downloadFastaUrl = this.downloadFastaUrl.bind(this);
     this.gotoAlignmentVizLink = this.gotoAlignmentVizLink.bind(this);
-
     this.handleThresholdEnter = this.handleThresholdEnter.bind(this);
     this.renderMore = this.renderMore.bind(this);
     this.initializeTooltip();
@@ -895,34 +840,7 @@ class PipelineSampleReport extends React.Component {
       // emphasize genus, soften category and species count
       const category_name =
         tax_info.tax_id == -200 ? "" : tax_info.category_name;
-      const fake_or_real =
-        tax_info.genus_taxid < 0 ? "fake-genus" : "real-genus";
-      const right_arrow_initial_visibility = "";
-      const down_arrow_initial_visibility = "hidden";
-      const plus_or_minus = (
-        <span>
-          <span
-            className={`report-arrow-down report-arrow ${
-              tax_info.tax_id
-            } ${fake_or_real} ${down_arrow_initial_visibility}`}
-          >
-            <i
-              className={`fa fa-angle-down ${tax_info.tax_id}`}
-              onClick={this.collapseGenus}
-            />
-          </span>
-          <span
-            className={`report-arrow-right report-arrow ${
-              tax_info.tax_id
-            } ${fake_or_real} ${right_arrow_initial_visibility}`}
-          >
-            <i
-              className={`fa fa-angle-right ${tax_info.tax_id}`}
-              onClick={this.expandGenus}
-            />
-          </span>
-        </span>
-      );
+      const plus_or_minus = <CollapseExpand tax_info={tax_info} parent={this} />;
       foo = (
         <div className="hover-wrapper">
           <div className="genus-name">
@@ -1580,9 +1498,94 @@ class PipelineSampleReport extends React.Component {
         </div>
       </div>
     );
-    const t1 = Date.now();
     return result;
   }
+}
+
+function ThresholdMap() {
+  return [
+    {
+      name: "Score",
+      value: "NT_aggregatescore"
+    },
+    {
+      name: "NT Z Score",
+      value: "NT_zscore"
+    },
+    {
+      name: "NT rPM",
+      value: "NT_rpm"
+    },
+    {
+      name: "NT r (total reads)",
+      value: "NT_r"
+    },
+    {
+      name: "NT %id",
+      value: "NT_percentidentity"
+    },
+    {
+      name: "NT log(1/e)",
+      value: "NT_neglogevalue"
+    },
+    {
+      name: "NT %conc",
+      value: "NT_percentconcordant"
+    },
+    {
+      name: "NR Z Score",
+      value: "NR_zscore"
+    },
+    {
+      name: "NR r (total reads)",
+      value: "NR_r"
+    },
+    {
+      name: "NR rPM",
+      value: "NR_rpm"
+    },
+    {
+      name: "NR %id",
+      value: "NR_percentidentity"
+    },
+    {
+      name: "R log(1/e)",
+      value: "NR_neglogevalue"
+    },
+    {
+      name: "NR %conc",
+      value: "NR_percentconcordant"
+    }
+  ];
+}
+
+function CollapseExpand({tax_info, parent}) {
+  const fake_or_real =
+    tax_info.genus_taxid < 0 ? "fake-genus" : "real-genus";
+  return (
+    <span>
+          <span
+            className={`report-arrow-down report-arrow ${
+              tax_info.tax_id
+              } ${fake_or_real} ${"hidden"}`}
+          >
+            <i
+              className={`fa fa-angle-down ${tax_info.tax_id}`}
+              onClick={parent.collapseGenus}
+            />
+          </span>
+          <span
+            className={`report-arrow-right report-arrow ${
+              tax_info.tax_id
+              } ${fake_or_real} ${""}`}
+          >
+            <i
+              className={`fa fa-angle-right ${tax_info.tax_id}`}
+              onClick={parent.expandGenus}
+            />
+          </span>
+        </span>
+  );
 }
 
 export default PipelineSampleReport;
