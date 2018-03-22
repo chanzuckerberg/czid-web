@@ -301,9 +301,7 @@ class PipelineRun < ApplicationRecord
     unidentified_fasta.lines.select { |line| line.start_with? '>' }.count if unidentified_fasta
   end
 
-  def project_id
-    sample.project_id
-  end
+  delegate :project_id, to: :sample
 
   def notify?
     incomplete_runs = PipelineRun.where("id in (select max(id) from pipeline_runs group by sample_id) and sample_id in (select id from samples where project_id = #{project_id.to_i})").where("status != ?", PipelineRun::STATUS_CHECKED)
