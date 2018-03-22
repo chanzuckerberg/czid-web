@@ -1,10 +1,19 @@
-import React from "react";
+import React, { Component } from "react";
 import axios from "axios";
 import ReactDOM from "react-dom";
 import moment from "moment";
 import $ from "jquery";
 import Materialize from "materialize-css";
-import { Sidebar, Popup, Dropdown, Label, Icon } from "semantic-ui-react";
+import {
+  Sidebar,
+  Popup,
+  Dropdown,
+  Label,
+  Icon,
+  Modal,
+  Button,
+  Form
+} from "semantic-ui-react";
 import Nanobar from "nanobar";
 import SortHelper from "./SortHelper";
 import numberWithCommas from "../helpers/strings";
@@ -41,7 +50,6 @@ class Samples extends React.Component {
     this.fetchProjectUsers = this.fetchProjectUsers.bind(this);
     this.updateProjectUserState = this.updateProjectUserState.bind(this);
     this.updateUserDisplay = this.updateUserDisplay.bind(this);
-    this.resetForm = this.resetForm.bind(this);
     this.selectSample = this.selectSample.bind(this);
     this.compareSamples = this.compareSamples.bind(this);
     this.clearAllFilters = this.clearAllFilters.bind(this);
@@ -333,15 +341,6 @@ class Samples extends React.Component {
   updateProjectUserState(email_array) {
     this.setState({ project_users: email_array });
   }
-
-  resetForm() {
-    $("#add_user_to_project").val("");
-    this.setState({
-      project_add_email_validation: null,
-      invite_status: null
-    });
-  }
-
   fetchProjectUsers(id) {
     if (!id || !this.canEditProject(id)) {
       this.updateProjectUserState([]);
@@ -357,7 +356,7 @@ class Samples extends React.Component {
     }
   }
 
-  toggleProjectVisbility(projId, publicAccess) {
+  toggleProjectVisibility(projId, publicAccess) {
     if (projId) {
       axios
         .put(`/projects/${projId}.json`, {
@@ -397,35 +396,31 @@ class Samples extends React.Component {
     }
   }
 
-  handleAddUser(e, waitForEnter) {
-    if (waitForEnter && e.keyCode !== 13) {
-      return;
-    } else {
-      let email_to_add = this.refs.add_user.value;
-      let project_id = this.state.selectedProjectId;
-      const isValidEmail = StringHelper.validateEmail(email_to_add);
-      if (isValidEmail) {
-        this.setState({
-          project_add_email_validation: null,
-          invite_status: "sending"
-        });
-        axios
-          .put(`/projects/${project_id}/add_user`, {
-            user_email_to_add: email_to_add,
-            authenticity_token: this.csrf
-          })
-          .then(() => {
-            this.updateUserDisplay(email_to_add);
-            this.setState({
-              invite_status: "sent"
-            });
+  handleAddUser(email_to_add) {
+    let project_id = this.state.selectedProjectId;
+    const isValidEmail = StringHelper.validateEmail(email_to_add);
+    if (isValidEmail) {
+      this.setState({
+        project_add_email_validation: null,
+        invite_status: "sending"
+      });
+      axios
+        .put(`/projects/${project_id}/add_user`, {
+          user_email_to_add: email_to_add,
+          authenticity_token: this.csrf
+        })
+        .then(() => {
+          this.updateUserDisplay(email_to_add);
+          this.setState({
+            invite_status: "sent"
           });
-      } else {
-        this.setState({
-          project_add_email_validation: "Invalid email address, try again?"
         });
-      }
+    } else {
+      this.setState({
+        project_add_email_validation: "Invalid email address, try again?"
+      });
     }
+    // }
   }
 
   handleSearchChange(e) {
@@ -939,47 +934,12 @@ class Samples extends React.Component {
     let project_id = this.state.selectedProjectId
       ? this.state.selectedProjectId
       : "all";
-    let search_field_width = "col s3 no-padding";
     let search_field = (
-      <div className={search_field_width + " search-field"}>
-        <div className="row">
-          <i className="fa search-icon left fa-search" />
-          <input
-            id="search"
-            value={this.state.searchParams}
-            onChange={this.handleSearchChange}
-            onKeyDown={this.handleSearch}
-            className="search col s12"
-            placeholder="Search"
-          />
-        </div>
-      </div>
+      <TableSearchField searchParams={this.state.searchParams} parent={this} />
     );
 
     let table_download_dropdown = (
-      <div className="download-wrapper">
-        <Dropdown
-          button
-          className="icon link download-btn"
-          labeled
-          icon={{ className: "cloud download alternate" }}
-          text="Download"
-        >
-          <Dropdown.Menu>
-            <Dropdown.Item href={`/projects/${project_id}/csv`}>
-              Download Table
-            </Dropdown.Item>
-            {project_id === "all" ? null : (
-              <Dropdown.Item
-                onClick={this.startReportGeneration}
-                className="download-reports"
-              >
-                Download Reports
-              </Dropdown.Item>
-            )}
-          </Dropdown.Menu>
-        </Dropdown>
-      </div>
+      <TableDownloadDropdown project_id={project_id} parent={this} />
     );
 
     let check_all = (
@@ -1028,132 +988,16 @@ class Samples extends React.Component {
       </div>
     );
 
-    let addUser = (
-      <div id="modal1" className="modal project-popup">
-        <div className="modal-content">
-          <div className="project_modal_header">
-            Project Members and Access Control
-          </div>
-          <div className="project_modal_title">
-            {this.state.project ? this.state.project.name : null}
-          </div>
-          <div className="project_modal_visiblity">
-            {this.state.project ? (
-              this.state.project.public_access ? (
-                <span>
-                  <i className="tiny material-icons">lock_open</i>
-                  <span className="label">Public Project</span>
-                </span>
-              ) : (
-                <span>
-                  <i className="tiny material-icons">lock</i>
-                  <span className="label">Private Project</span>
-                  <a
-                    href="#"
-                    onClick={() =>
-                      this.toggleProjectVisbility(this.state.project.id, 1)
-                    }
-                  >
-                    Make project public
-                  </a>
-                </span>
-              )
-            ) : null}
-          </div>
-
-          <div className="add_member row">
-            <input
-              ref="add_user"
-              id="add_user_to_project"
-              type="email"
-              placeholder="Add project members by email"
-              onKeyDown={e => this.handleAddUser(e, true)}
-              className="validate col s12 browser-default"
-            />
-            <span className="add_member_action" onClick={this.handleAddUser}>
-              Add member
-            </span>
-            <div className="error-message">
-              {this.state.project_add_email_validation}
-            </div>
-            {this.state.invite_status === "sending" ? (
-              <div className="status-message">
-                <i className="fa fa-circle-o-notch fa-spin fa-fw" />
-                Hang tight, sending invitation...
-              </div>
-            ) : null}
-            {this.state.invite_status === "sent" ? (
-              <div className="status-message status teal-text text-darken-2">
-                <i className="fa fa-smile-o fa-fw" />
-                Yay! User has been added
-              </div>
-            ) : null}
-          </div>
-
-          <div className="members_list">
-            <div className="list_title">
-              <i className="tiny material-icons">person_add</i> Project Members
-            </div>
-            <ul>
-              {this.state.project_users.length > 0 ? (
-                this.state.project_users.map(email => {
-                  return <li key={email}>{email}</li>;
-                })
-              ) : (
-                <li key="None">None</li>
-              )}
-            </ul>
-          </div>
-          <button className="modal-close">Close</button>
-        </div>
-      </div>
-    );
+    let addUserModal = <AddUserModal parent={this} state={this.state} />;
 
     let proj_users_count = this.state.project_users.length;
     let proj = this.state.project;
     const project_menu = (
-      <div className="right col s12">
-        <ul className="project-menu">
-          <li>
-            {proj ? (
-              proj.public_access ? (
-                <span>
-                  <i className="tiny material-icons">lock_open</i> Public
-                  project
-                </span>
-              ) : (
-                <span>
-                  <i className="tiny material-icons">lock</i> Private project
-                </span>
-              )
-            ) : null}
-          </li>
-          <li>
-            {proj && this.canEditProject(proj.id) ? (
-              proj_users_count ? (
-                <span>
-                  <i className="tiny material-icons">people</i>{" "}
-                  {this.state.project_users.length}
-                  {this.state.project_users.length > 1 ? " members" : " member"}
-                </span>
-              ) : (
-                <span>No member</span>
-              )
-            ) : null}
-          </li>
-          <li className="add-member">
-            {proj && this.canEditProject(proj.id) ? (
-              <a
-                className="modal-trigger"
-                href="#modal1"
-                onClick={this.resetForm}
-              >
-                Add user
-              </a>
-            ) : null}
-          </li>
-        </ul>
-      </div>
+      <ProjectHeaderMenu
+        proj={proj}
+        proj_users_count={proj_users_count}
+        parent={this}
+      />
     );
 
     let allSamplesLen = this.state.allSamples.length;
@@ -1271,7 +1115,6 @@ class Samples extends React.Component {
     return (
       <FilterListMarkup
         projInfo={projInfo}
-        addUser={addUser}
         search_box={search_box}
         host_filter_tag_list={host_filter_tag_list}
         tissue_filter_tag_list={tissue_filter_tag_list}
@@ -1600,7 +1443,6 @@ function ColumnDropdown({
 
 function FilterListMarkup({
   projInfo,
-  addUser,
   search_box,
   host_filter_tag_list,
   tissue_filter_tag_list,
@@ -1610,9 +1452,7 @@ function FilterListMarkup({
 }) {
   return (
     <div className="row content-wrapper">
-      <div className="project-info col s12">
-        {projInfo} {addUser}
-      </div>
+      <div className="project-info col s12">{projInfo}</div>
       <div className="divider" />
       <div className="sample-container no-padding col s12">
         {search_box}
@@ -1912,6 +1752,214 @@ function MetaDataFilter({ state, parent }) {
           </div>
         </div>
       ) : null}
+    </div>
+  );
+}
+
+function TableSearchField({ searchParams, parent }) {
+  let search_field_width = "col s3 no-padding";
+  return (
+    <div className={search_field_width + " search-field"}>
+      <div className="row">
+        <i className="fa search-icon left fa-search" />
+        <input
+          id="search"
+          value={searchParams}
+          onChange={parent.handleSearchChange}
+          onKeyDown={parent.handleSearch}
+          className="search col s12"
+          placeholder="Search"
+        />
+      </div>
+    </div>
+  );
+}
+
+function TableDownloadDropdown({ project_id, parent }) {
+  return (
+    <div className="download-wrapper">
+      <Dropdown
+        button
+        className="icon link download-btn"
+        labeled
+        icon={{ className: "cloud download alternate" }}
+        text="Download"
+      >
+        <Dropdown.Menu>
+          <Dropdown.Item href={`/projects/${project_id}/csv`}>
+            Download Table
+          </Dropdown.Item>
+          {project_id === "all" ? null : (
+            <Dropdown.Item
+              onClick={parent.startReportGeneration}
+              className="download-reports"
+            >
+              Download Reports
+            </Dropdown.Item>
+          )}
+        </Dropdown.Menu>
+      </Dropdown>
+    </div>
+  );
+}
+
+class AddUserModal extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { modalOpen: false, email: "" };
+    this.handleOpen = this.handleOpen.bind(this);
+    this.handleClose = this.handleClose.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+  handleOpen() {
+    this.setState({ modalOpen: true });
+  }
+  handleClose() {
+    this.setState({ modalOpen: false });
+  }
+  handleChange(e, { name, value }) {
+    this.setState({ email: value });
+  }
+  handleSubmit() {
+    this.props.parent.handleAddUser(this.state.email);
+  }
+
+  render() {
+    return (
+      <Modal
+        trigger={<a onClick={this.handleOpen}>Add User</a>}
+        open={this.state.modalOpen}
+        onClose={this.handleClose}
+        className="modal project-popup add-user-modal"
+      >
+        <Modal.Header className="project_modal_header">
+          Project Members and Access Control
+        </Modal.Header>
+        <Modal.Content className="modal-content">
+          <div className="project_modal_title">
+            {this.props.state.project ? this.props.state.project.name : null}
+          </div>
+          <div className="project_modal_visibility">
+            {this.props.state.project ? (
+              this.props.state.project.public_access ? (
+                <span>
+                  <i className="tiny material-icons">lock_open</i>
+                  <span className="label">Public Project</span>
+                </span>
+              ) : (
+                <span>
+                  <i className="tiny material-icons">lock</i>
+                  <span className="label">Private Project</span>
+                  <a
+                    href="#"
+                    onClick={() =>
+                      parent.toggleProjectVisibility(
+                        this.props.state.project.id,
+                        1
+                      )
+                    }
+                  >
+                    Make project public
+                  </a>
+                </span>
+              )
+            ) : null}
+          </div>
+
+          <div className="add_member row">
+            <Form onSubmit={this.handleSubmit}>
+              <Form.Field>
+                <Form.Input
+                  placeholder="Add project members by email"
+                  className="validate col s12 browser-default"
+                  id="add_user_to_project"
+                  type="email"
+                  onChange={this.handleChange}
+                />
+              </Form.Field>
+              <Button className="add_member_action" type="submit">
+                Add member
+              </Button>
+            </Form>
+            <div className="error-message">
+              {this.props.state.project_add_email_validation}
+            </div>
+            {this.props.state.invite_status === "sending" ? (
+              <div className="status-message">
+                <i className="fa fa-circle-o-notch fa-spin fa-fw" />
+                Hang tight, sending invitation...
+              </div>
+            ) : null}
+            {this.props.state.invite_status === "sent" ? (
+              <div className="status-message status teal-text text-darken-2">
+                <i className="fa fa-smile-o fa-fw" />
+                Yay! User has been added
+              </div>
+            ) : null}
+          </div>
+
+          <div className="members_list">
+            <div className="list_title">
+              <i className="tiny material-icons">person_add</i> Project Members
+            </div>
+            <ul>
+              {this.props.state.project_users.length > 0 ? (
+                this.props.state.project_users.map(email => {
+                  return <li key={email}>{email}</li>;
+                })
+              ) : (
+                <li key="None">None</li>
+              )}
+            </ul>
+          </div>
+        </Modal.Content>
+        <Modal.Actions>
+          <button className="modal-close" onClick={this.handleClose}>
+            Close
+          </button>
+        </Modal.Actions>
+      </Modal>
+    );
+  }
+}
+
+function ProjectHeaderMenu({ proj, proj_users_count, parent }) {
+  return (
+    <div className="right col s12">
+      <ul className="project-menu">
+        <li>
+          {proj ? (
+            proj.public_access ? (
+              <span>
+                <i className="tiny material-icons">lock_open</i> Public project
+              </span>
+            ) : (
+              <span>
+                <i className="tiny material-icons">lock</i> Private project
+              </span>
+            )
+          ) : null}
+        </li>
+        <li>
+          {proj && parent.canEditProject(proj.id) ? (
+            proj_users_count ? (
+              <span>
+                <i className="tiny material-icons">people</i>{" "}
+                {parent.state.project_users.length}
+                {parent.state.project_users.length > 1 ? " members" : " member"}
+              </span>
+            ) : (
+              <span>No member</span>
+            )
+          ) : null}
+        </li>
+        <li className="add-member">
+          {proj && parent.canEditProject(proj.id) ? (
+            <AddUserModal parent={parent} state={parent.state} />
+          ) : null}
+        </li>
+      </ul>
     </div>
   );
 }
