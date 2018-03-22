@@ -841,14 +841,14 @@ class PipelineSampleReport extends React.Component {
       // emphasize genus, soften category and species count
       const category_name =
         tax_info.tax_id == -200 ? "" : tax_info.category_name;
-      const plus_or_minus = (
+      const collapseExpand = (
         <CollapseExpand tax_info={tax_info} parent={this} />
       );
       foo = (
         <div className="hover-wrapper">
           <div className="genus-name">
             {" "}
-            {plus_or_minus} {foo}
+            {collapseExpand} {foo}
           </div>
           <i className="count-info">
             ({tax_info.species_count}{" "}
