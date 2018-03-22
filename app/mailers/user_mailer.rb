@@ -13,7 +13,7 @@ class UserMailer < ApplicationMailer
     @project_id = email_arguments[:project_id]
     @number_samples = email_arguments[:number_samples]
     email_arguments[:user_emails].each do |user_email|
-      mail(to: user_email, subject: "Project #{@project_name} has finished processing")
+      mail(to: user_email, subject: "Project '#{@project_name}' has finished processing")
     end
   rescue
     Airbrake.notify("project_complete_email(#{email_arguments}) failed")
