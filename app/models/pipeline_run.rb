@@ -304,7 +304,7 @@ class PipelineRun < ApplicationRecord
   delegate :project_id, to: :sample
 
   def notify?
-    incomplete_runs = PipelineRun.where("id in (select max(id) from pipeline_runs group by sample_id) and sample_id in (select id from samples where project_id = #{project_id.to_i})").where("status != ?", PipelineRun::STATUS_CHECKED)
+    incomplete_runs = PipelineRun.where("id in (select max(id) from pipeline_runs group by sample_id) and sample_id in (select id from samples where project_id = #{project_id.to_i})").where("job_status != ?", PipelineRun::STATUS_CHECKED)
     incomplete_runs.count > 0
   end
 
