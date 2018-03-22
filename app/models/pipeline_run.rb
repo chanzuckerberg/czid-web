@@ -251,12 +251,14 @@ class PipelineRun < ApplicationRecord
     TaxonCount.connection.execute("
       UPDATE taxon_counts
       SET taxon_counts.genus_taxid = #{TaxonLineage::MISSING_GENUS_ID},
+          taxon_counts.family_taxid = #{TaxonLineage::MISSING_FAMILY_ID},
           taxon_counts.superkingdom_taxid = #{TaxonLineage::MISSING_SUPERKINGDOM_ID}
       WHERE taxon_counts.pipeline_run_id=#{id}
     ")
     TaxonCount.connection.execute("
       UPDATE taxon_counts, taxon_lineages
       SET taxon_counts.genus_taxid = taxon_lineages.genus_taxid,
+          taxon_counts.family_taxid = taxon_lineages.family_taxid,
           taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
       WHERE taxon_counts.pipeline_run_id=#{id} AND
             (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at) AND
@@ -265,17 +267,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def update_is_phage
-    TaxonCount.connection.execute("
-      UPDATE taxon_counts
-      INNER JOIN taxon_lineages ON taxon_counts.tax_id = taxon_lineages.taxid
-      SET taxon_counts.is_phage = IF(taxon_lineages.family_name IN ('Myoviridae', 'Siphoviridae', 'Podoviridae', 'Lipothrixviridae',
-                                                                    'Rudiviridae', 'Ampullaviridae', 'Bicaudaviridae', 'Clavaviridae',
-                                                                    'Corticoviridae', 'Cystoviridae', 'Fuselloviridae', 'Globuloviridae',
-                                                                    'Guttaviridae', 'Inoviridae', 'Leviviridae', 'Microviridae', 'Plasmaviridae', 'Tectiviridae'),
-                                     1, 0)
-      WHERE taxon_counts.pipeline_run_id=#{id} AND
-            (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at)
-    ")
+    TaxonCount.where(pipeline_run_id: id).where(family_taxid: TaxonLineage::PHAGE_PHYLA_TAXIDS).update_all(is_phage: 1)
   end
 
   def subsampled_reads
