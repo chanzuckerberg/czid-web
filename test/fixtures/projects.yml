@@ -6,6 +6,9 @@ one:
 two:
   name: Project 2
 
+deletable_project:
+  name: Empty project
+
 public_project:
   name: Public Project
   public_access: 1
