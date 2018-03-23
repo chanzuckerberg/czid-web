@@ -21,7 +21,7 @@ service = "idseq-#{env}-web"
 resp = ecs_client.describe_services(cluster: env, services: [service])
 service = resp.services.first
 
-task = ecs_client.list_tasks(cluster: env, service_name: "idseq-web-#{env}").task_arns.first
+task = ecs_client.list_tasks(cluster: env, service_name: "idseq-#{env}-web").task_arns.first
 
 tasks = ecs_client.describe_tasks(cluster: env, tasks: [task])
 instances = ecs_client.describe_container_instances(cluster: env,
