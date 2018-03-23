@@ -29,9 +29,10 @@ class PipelineSampleReport extends React.Component {
     this.default_sort_by = this.report_page_params.sort_by.replace('highest_', '');
     this.sort_params = {};
     const cached_cats = Cookies.get('excluded_categories');
-    const cached_exclude_phage = Cookies.get('exclude_phage');
+    const cached_exclude_subcats = Cookies.get('exclude_subcats');
     const cached_name_type = Cookies.get('name_type');
     const savedThresholdFilters = this.getSavedThresholdFilters();
+    this.category_child_parent = { Phage: 'Viruses' };
     this.allThresholds = [
       {
         name: 'Score',
@@ -107,7 +108,7 @@ class PipelineSampleReport extends React.Component {
       pagesRendered: 0,
       sort_by: this.default_sort_by,
       excluded_categories: (cached_cats) ? JSON.parse(cached_cats) : [],
-      exclude_phage: (cached_exclude_phage) ? (cached_exclude_phage == 'true') : false,
+      exclude_subcats: (cached_exclude_subcats) ? JSON.parse(cached_exclude_subcats) : [],
       name_type: cached_name_type ? cached_name_type : 'Scientific Name',
       search_taxon_id: 0,
       rendering: false,
@@ -131,7 +132,6 @@ class PipelineSampleReport extends React.Component {
     this.collapseTable = this.collapseTable.bind(this);
     this.downloadFastaUrl = this.downloadFastaUrl.bind(this);
     this.gotoAlignmentVizLink = this.gotoAlignmentVizLink.bind(this);
-    this.applyExcludePhage = this.applyExcludePhage.bind(this);
 
     this.handleThresholdEnter = this.handleThresholdEnter.bind(this);
     this.renderMore = this.renderMore.bind(this)
@@ -219,7 +219,7 @@ class PipelineSampleReport extends React.Component {
   anyFilterSet() {
     if (this.state.search_taxon_id > 0
       || this.state.excluded_categories.length > 0
-      || this.state.exclude_phage
+      || this.state.exclude_subcats.length > 0
       || (this.state.activeThresholds.length > 0 && this.isThresholdValid(this.state.activeThresholds[0]))) {
       return true;
     }
@@ -230,7 +230,7 @@ class PipelineSampleReport extends React.Component {
     this.setState({
       activeThresholds: [Object.assign({}, this.defaultThreshold)],
       excluded_categories: [],
-      exclude_phage: false,
+      exclude_subcats: [],
       searchId: 0,
       searchKey: '',
       search_taxon_id: 0,
@@ -242,12 +242,12 @@ class PipelineSampleReport extends React.Component {
     }, () => {
       this.saveThresholdFilters();
       Cookies.set('excluded_categories', '[]');
-      Cookies.set('exclude_phage', 'false');
+      Cookies.set('exclude_subcats', '[]');
       this.flash();
     });
   }
 
-  applySearchFilter(searchTaxonId, excludedCategories, input_taxons, excludePhage=false) {
+  applySearchFilter(searchTaxonId, excludedCategories, input_taxons, excludeSubcats=[]) {
     let selected_taxons = [];
     const thresholded_taxons = input_taxons || this.state.thresholded_taxons;
     const active_thresholds = this.state.activeThresholds
@@ -305,9 +305,12 @@ class PipelineSampleReport extends React.Component {
     } else {
       selected_taxons = thresholded_taxons;
     }
-    if (excludePhage && searchTaxonId <= 0) { 
+    if (searchTaxonId <= 0) {
       // only apply phage filter if user is not doing a search
-      selected_taxons = selected_taxons.filter((x) => { return x.is_phage == 0 })
+      for (let i = 0; i < excludeSubcats.length; i++) {
+        let column = `is_${excludeSubcats[i].toLowerCase()}`
+        selected_taxons = selected_taxons.filter((x) => { return x[column] == 0 })
+      }
     }
 
     let searchKey = this.state.searchKey
@@ -318,7 +321,7 @@ class PipelineSampleReport extends React.Component {
     // console.log(excludedCategories)
     this.setState({
       loading: false,
-      exclude_phage: excludePhage,
+      exclude_subcats: excludeSubcats,
       excluded_categories: excludedCategories,
       search_taxon_id: searchTaxonId,
       activeThresholds: active_thresholds,
@@ -470,6 +473,18 @@ class PipelineSampleReport extends React.Component {
     return displayed_categories;
   }
 
+  displayedSubcats(excludeSubcats) {
+    let displayed_subcats = [];
+    let all_subcats = Object.keys(this.category_child_parent);
+    for (let i = 0; i < all_subcats.length; i++) {
+      let subcat = all_subcats[i];
+      if (excludeSubcats.indexOf(subcat) == -1) {
+        displayed_subcats.push(subcat);
+      }
+    }
+    return displayed_subcats;
+  }
+
   applyExcludedCategories(e) {
     let excluded_categories = this.state.excluded_categories;
     const category = e.target.getAttribute('data-exclude-category')
@@ -483,30 +498,52 @@ class PipelineSampleReport extends React.Component {
     } else {
       excluded_categories.push(e.target.value);
     }
-    // Also update subcategory
-    let new_exclude_phage = (excluded_categories.indexOf('Viruses') != -1)
+    // Also update subcategory to match category
+    let new_exclude_subcats = this.state.exclude_subcats;
+    console.log(new_exclude_subcats);
+    let subcats = Object.keys(this.category_child_parent);
+    for (let i = 0; i < subcats.length; i++) {
+      let subcat = subcats[i];
+      let parent = this.category_child_parent[subcat]
+      let i_excluded_categories = excluded_categories.indexOf(parent)
+      let i_exclude_subcats = new_exclude_subcats.indexOf(subcat)
+      if (i_excluded_categories != -1 && i_exclude_subcats == -1) {
+        new_exclude_subcats.push(subcat)
+      } else if (i_excluded_categories == -1 && i_exclude_subcats != -1) {
+        new_exclude_subcats.splice(i_exclude_subcats, 1)
+      }
+    }
+    console.log(new_exclude_subcats)
     this.setState({
       excluded_categories: excluded_categories,
-      exclude_phage: new_exclude_phage,
+      exclude_subcats: new_exclude_subcats,
       searchId: 0,
       searchKey: ''
     }, () => {
       Cookies.set('excluded_categories', JSON.stringify(excluded_categories));
-      Cookies.set('exclude_phage', new_exclude_phage.toString());
-      this.applySearchFilter(0, excluded_categories, undefined, new_exclude_phage);
+      Cookies.set('exclude_subcats', JSON.stringify(new_exclude_subcats));
+      this.applySearchFilter(0, excluded_categories, undefined, new_exclude_subcats);
       this.flash();
     });
   }
 
-  applyExcludePhage() {
-    let new_exclude_phage = !this.state.exclude_phage
+  applyExcludeSubcats(e) {
+    let new_exclude_subcats = this.state.exclude_subcats;
+    let x_tag_subcat = e.target.getAttribute('data-exclude-subcat')
+    let subcat = (x_tag_subcat && x_tag_subcat.length > 0) ? x_tag_subcat : e.target.value
+    let i_subcat = new_exclude_subcats.indexOf(subcat)
+    if (i_subcat == -1) {
+      new_exclude_subcats.push(subcat)
+    } else {
+      new_exclude_subcats.splice(i_subcat, 1)
+    }
     this.setState({
-      exclude_phage: new_exclude_phage,
+      exclude_subcats: new_exclude_subcats,
       searchId: 0,
       searchKey: ''
     }, () => {
-      Cookies.set('exclude_phage', new_exclude_phage.toString());
-      this.applySearchFilter(0, this.state.excluded_categories, undefined, new_exclude_phage);
+      Cookies.set('exclude_subcats', JSON.stringify(new_exclude_subcats));
+      this.applySearchFilter(0, this.state.excluded_categories, undefined, new_exclude_subcats);
       this.flash();
     });
   }
@@ -620,7 +657,7 @@ class PipelineSampleReport extends React.Component {
       thresholded_taxons.push(genus_taxon);
     }
 
-    this.applySearchFilter(0, this.state.excluded_categories, thresholded_taxons, this.state.exclude_phage);
+    this.applySearchFilter(0, this.state.excluded_categories, thresholded_taxons, this.state.exclude_subcats);
 
     if (play_animation) {
       this.flash();
@@ -925,7 +962,7 @@ class PipelineSampleReport extends React.Component {
     this.setState({
       searchId,
       excluded_categories: [],
-      exclude_phage: false,
+      exclude_subcats: [],
       searchKey: item[0],
       activeThresholds: []
     }, () => {
@@ -973,13 +1010,14 @@ class PipelineSampleReport extends React.Component {
         </span>
       );
     });
-    const phage_filter_tag = (
-      this.state.exclude_phage ? null :
-      <span className="filter-tag" key='category_tag_phage'>
-        <span className='filter-tag-name'> Phage </span>
-        <span className='filter-tag-x' onClick= {this.applyExcludePhage}  >X</span>
-      </span>
-    )
+    const subcats_filter_tag_list = this.displayedSubcats(this.state.exclude_subcats).map((subcat, i) => {
+      return (
+        <span className="filter-tag" key={`subcat_tag_${i}`}>
+        <span className='filter-tag-name'> {subcat} </span>
+        <span className='filter-tag-x' data-exclude-subcat={subcat} onClick= { (e) => { this.applyExcludeSubcats(e);} }  >X</span>
+        </span>
+      );
+    });
 
     const right_arrow_initial_visibility = '';
     const result = (
@@ -1061,7 +1099,10 @@ class PipelineSampleReport extends React.Component {
                       <li className='categories-dropdown top-filter ui dropdown filter-btn' >
                         <div className="categories-filters-activate">
                           <span className='filter-label'>Categories</span>
-                          <span className='filter-label-count'>{(this.all_categories.length-this.state.excluded_categories.length+!this.state.exclude_phage)} </span>
+                          <span className='filter-label-count'>
+                            { (this.all_categories.length - this.state.excluded_categories.length
+                               + Object.keys(this.category_child_parent).length - this.state.exclude_subcats.length) }
+                          </span>
                           <i className='fa fa-angle-down right down-box'></i>
                         </div>
                         <div className='categories-filters-modal'>
@@ -1081,18 +1122,25 @@ class PipelineSampleReport extends React.Component {
                                 </li>
                               )
                             })}
+
                               <br /><div className="divider" /><br />
-                              <li key='phage'>
-                                <input type="checkbox"
-                                className="filled-in cat-filter"
-                                id='phage'
-                                value='phage'
-                                onClick={(e) =>{this.applyExcludePhage(e);}}
-                                checked={!this.state.exclude_phage}/>
-                                <label htmlFor='phage'>Phage (part of Viruses)</label>
-                              </li>
+
+                            { Object.keys(this.category_child_parent).map((subcat, i) => {
+                              return (
+                                <li key={`subcat_check_${i}`}>
+                                  <input type="checkbox"
+                                  className="filled-in cat-filter"
+                                  id={subcat}
+                                  value={subcat}
+                                  onChange={(e) => {}}
+                                  onClick={(e) =>{this.applyExcludeSubcats(e);}}
+                                  checked={this.state.exclude_subcats.indexOf(subcat) == -1}/>
+                                  <label htmlFor={subcat}>{subcat} (part of {this.category_child_parent[subcat]})</label>
+                                </li>
+                              )
+                            })}
                             </ul>
-                            { this.all_categories.length < 1 ? <p>None found</p> : null }
+                            { this.all_categories.length + Object.keys(this.category_child_parent).length < 1 ? <p>None found</p> : null }
                           </div>
                         </div>
                       </li>
@@ -1175,7 +1223,7 @@ class PipelineSampleReport extends React.Component {
                     </ul>
                   </div>
                   <div className="filter-tags-list">
-                    { advanced_filter_tag_list } { categories_filter_tag_list } { phage_filter_tag }
+                    { advanced_filter_tag_list } { categories_filter_tag_list } { subcats_filter_tag_list }
                   </div>
                   {/* { filter_row_stats } */}
                 </div>
