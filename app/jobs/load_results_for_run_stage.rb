@@ -18,7 +18,7 @@ class LoadResultForRunStage
       prs.run_load_db
       # Send email when last sample in project completes successfully
       pr = prs.pipeline_run
-      prs_count = pipeline_run.pipeline_run_stages.count
+      prs_count = pr.pipeline_run_stages.count
       pr.notify_users if prs.step_number == prs_count && pr.notify?
     end
   end
