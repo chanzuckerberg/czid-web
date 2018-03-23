@@ -14,6 +14,12 @@ class LoadResultForRunStage
   def self.perform(pipeline_run_stage_id)
     @logger.info("load pipeline run stage #{pipeline_run_stage_id} into database")
     prs = PipelineRunStage.find(pipeline_run_stage_id)
-    prs.run_load_db unless prs.completed?
+    unless prs.completed?
+      prs.run_load_db
+      # Send email when last sample in project completes successfully
+      pr = prs.pipeline_run
+      prs_count = pipeline_run.pipeline_run_stages.count
+      pr.notify_users if prs.step_number == prs_count && pr.notify?
+    end
   end
 end
