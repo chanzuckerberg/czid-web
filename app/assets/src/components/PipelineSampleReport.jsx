@@ -306,7 +306,7 @@ class PipelineSampleReport extends React.Component {
       selected_taxons = thresholded_taxons;
     }
     if (searchTaxonId <= 0) {
-      // only apply phage filter if user is not doing a search
+      // only apply subcategory filter if user is not doing a search
       for (let i = 0; i < excludeSubcats.length; i++) {
         let column = `is_${excludeSubcats[i].toLowerCase()}`
         selected_taxons = selected_taxons.filter((x) => { return x[column] == 0 })
@@ -500,7 +500,6 @@ class PipelineSampleReport extends React.Component {
     }
     // Also update subcategory to match category
     let new_exclude_subcats = this.state.exclude_subcats;
-    console.log(new_exclude_subcats);
     let subcats = Object.keys(this.category_child_parent);
     for (let i = 0; i < subcats.length; i++) {
       let subcat = subcats[i];
@@ -513,7 +512,6 @@ class PipelineSampleReport extends React.Component {
         new_exclude_subcats.splice(i_exclude_subcats, 1)
       }
     }
-    console.log(new_exclude_subcats)
     this.setState({
       excluded_categories: excluded_categories,
       exclude_subcats: new_exclude_subcats,
