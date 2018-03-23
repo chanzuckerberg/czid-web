@@ -56,6 +56,12 @@ margin-bottom: 0px;
 
 }
 
+.reports-divider {
+  background-color: #f8f8f8;
+  height: 8px !important;
+  border-top: 1px solid #fff !important;
+  margin-top: -0.4rem !important;
+}
 #details table tr td{
   padding: 2px;
 }
@@ -798,7 +804,9 @@ margin-bottom: 0px;
     padding-right: 20px;
   }
 }
-
+.s3.download-area {
+  margin-top: 25px;
+}
 .categories-filters-modal {
   display: none;
   position: absolute;
