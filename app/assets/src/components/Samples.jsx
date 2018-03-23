@@ -1532,22 +1532,11 @@ function PipelineOutputCards({
 
 function MetadataFilter({ state, parent }) {
   return (
-    <div className="col s2 wrapper">
-      <div
-        className={
-          state.displayDropdown ? "metadata metadata-active" : "metadata"
-        }
-        onClick={parent.displayMetadataDropdown}
-      >
-        <div className="metadata-dropdown">Filter</div>
-        <i
-          className={
-            state.displayDropdown ? "fa fa-angle-up" : "fa fa-angle-down"
-          }
-        />
-      </div>
-      <MetadataFilterDropdowns state={state} parent={parent} />
-    </div>
+    <Dropdown text="Filter" className="col s2 wrapper all-filter-btn">
+      <Dropdown.Menu>
+        <MetadataFilterDropdowns state={state} parent={parent} />
+      </Dropdown.Menu>
+    </Dropdown>
   );
 }
 
@@ -1928,72 +1917,68 @@ function SampleDetailedColumns({
 }
 
 function MetadataFilterDropdowns({ state, parent }) {
-  if (state.displayDropdown) {
-    return (
-      <div className="row metadata-options">
-        <div className="col s6">
-          <h6>Host</h6>
-          {state.hostGenomes.length == 0 ? (
-            <div className="options-wrapper">
-              <label>No host genome data present</label>
-            </div>
-          ) : (
-            state.hostGenomes.map((host, i) => {
-              let indices = state.selectedHostIndices;
-              let res = (
-                <div key={i} className="options-wrapper">
-                  <input
-                    name="host"
-                    type="checkbox"
-                    data-id={host.id}
-                    checked={indices.indexOf(host.id) < 0 ? "" : "checked"}
-                    value={indices.indexOf(i) != -1}
-                    onChange={parent.selectHostFilter}
-                    id={host.id}
-                    className="filled-in human"
-                  />
-                  <label htmlFor={host.id}>{host.name}</label>
-                </div>
-              );
-              return res;
-            })
-          )}
-        </div>
-        <div className="col s6">
-          <h6>Tissue</h6>
-          {state.tissueTypes.length == 0 ? (
-            <div className="options-wrapper">
-              <label>No tissue data present</label>
-            </div>
-          ) : (
-            state.tissueTypes.map((tissue, i) => {
-              let res = (
-                <div key={i} className="options-wrapper">
-                  <input
-                    name="tissue"
-                    type="checkbox"
-                    id={tissue}
-                    className="filled-in"
-                    data-status={tissue}
-                    checked={
-                      state.selectedTissueFilters.indexOf(tissue) < 0
-                        ? ""
-                        : "checked"
-                    }
-                    onChange={parent.selectTissueFilter}
-                  />
-                  <label htmlFor={tissue}>{tissue}</label>
-                </div>
-              );
-              return res;
-            })
-          )}
-        </div>
+  return (
+    <div className="row metadata-options">
+      <div className="col s6">
+        <h6>Host</h6>
+        {state.hostGenomes.length == 0 ? (
+          <div className="options-wrapper">
+            <label>No host genome data present</label>
+          </div>
+        ) : (
+          state.hostGenomes.map((host, i) => {
+            let indices = state.selectedHostIndices;
+            let res = (
+              <div key={i} className="options-wrapper">
+                <input
+                  name="host"
+                  type="checkbox"
+                  data-id={host.id}
+                  checked={indices.indexOf(host.id) < 0 ? "" : "checked"}
+                  value={indices.indexOf(i) != -1}
+                  onChange={parent.selectHostFilter}
+                  id={host.id}
+                  className="filled-in human"
+                />
+                <label htmlFor={host.id}>{host.name}</label>
+              </div>
+            );
+            return res;
+          })
+        )}
       </div>
-    );
-  } else {
-    return null;
-  }
+      <div className="col s6">
+        <h6>Tissue</h6>
+        {state.tissueTypes.length == 0 ? (
+          <div className="options-wrapper">
+            <label>No tissue data present</label>
+          </div>
+        ) : (
+          state.tissueTypes.map((tissue, i) => {
+            let res = (
+              <div key={i} className="options-wrapper">
+                <input
+                  name="tissue"
+                  type="checkbox"
+                  id={tissue}
+                  className="filled-in"
+                  data-status={tissue}
+                  checked={
+                    state.selectedTissueFilters.indexOf(tissue) < 0
+                      ? ""
+                      : "checked"
+                  }
+                  onChange={parent.selectTissueFilter}
+                />
+                <label htmlFor={tissue}>{tissue}</label>
+              </div>
+            );
+            return res;
+          })
+        )}
+      </div>
+    </div>
+  );
 }
 
 function AddUserModalMemberArea({ state, parent }) {
