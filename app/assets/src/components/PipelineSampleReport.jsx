@@ -4,7 +4,7 @@ import Cookies from 'js-cookie';
 import $ from 'jquery';
 import Tipsy from 'react-tipsy';
 import ReactAutocomplete from 'react-autocomplete';
-import { Dropdown } from 'semantic-ui-react'
+import { Dropdown, Label, Icon } from 'semantic-ui-react'
 import numberWithCommas from '../helpers/strings';
 import StringHelper from '../helpers/StringHelper';
 import Nanobar from 'nanobar';
@@ -1002,18 +1002,18 @@ class PipelineSampleReport extends React.Component {
 
     const categories_filter_tag_list = this.displayedCategories(this.state.excluded_categories).map((category, i) => {
       return (
-        <span className="filter-tag" key={`category_tag_${i}`}>
-        <span className='filter-tag-name'> {category} </span>
-        <span className='filter-tag-x' data-exclude-category={category} onClick= { (e) => { this.applyExcludedCategories(e);} }  >X</span>
-        </span>
+        <Label className="label-tags" size="tiny" key={`category_tag_${i}`}>
+          {category}
+          <Icon name='close' data-exclude-category={category} onClick= { (e) => { this.applyExcludedCategories(e);} }/>
+        </Label>
       );
     });
     const subcats_filter_tag_list = this.displayedSubcats(this.state.exclude_subcats).map((subcat, i) => {
       return (
-        <span className="filter-tag" key={`subcat_tag_${i}`}>
-        <span className='filter-tag-name'> {subcat} </span>
-        <span className='filter-tag-x' data-exclude-subcat={subcat} onClick= { (e) => { this.applyExcludeSubcats(e);} }  >X</span>
-        </span>
+        <Label className="label-tags" size="tiny" key={`subcat_tag_${i}`}>
+          {subcat}
+          <Icon name='close' data-exclude-subcat={subcat} onClick= { (e) => { this.applyExcludeSubcats(e);} }/>
+        </Label>
       );
     });
 
