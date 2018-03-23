@@ -1083,10 +1083,7 @@ class Samples extends React.Component {
         });
       }
 
-      if (
-        !this.state.displayDropdown &&
-        (this.state.hostFilterChange || this.state.tissueFilterChange)
-      ) {
+      if (this.state.hostFilterChange || this.state.tissueFilterChange) {
         this.setUrlLocation("none");
         this.fetchResults();
         this.state.hostFilterChange = false;
