@@ -34,7 +34,6 @@ class SampleUpload extends React.Component {
     const adminGenomes = this.hostGenomes.filter((g) => {
       return g.name.toLowerCase().indexOf('test') >= 0;
     });
-    console.log('Fuck', JSON.stringify(this.props.projects));
     this.selected = {
       name: this.sample.name || '',
       hostGenome: this.sample ? this.sample.host_genome_name : selectedHostGenomeName,
