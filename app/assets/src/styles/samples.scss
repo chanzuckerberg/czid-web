@@ -454,6 +454,17 @@ $break-large: 1070px;
   }
 }
 
+.all-filter-btn {
+  height: 43px;
+  width: 150px !important;
+  .text {
+    margin-top: 7px;
+  }
+  .dropdown.icon {
+    margin-top: -3px !important;
+  }
+}
+
 .sample-container {
   [type=checkbox].filled-in:not(:checked)+label:after,
   [type=checkbox].filled-in+label:after {
@@ -750,7 +761,7 @@ $break-large: 1070px;
     }
     .search {
       border-radius: 40px;
-      border: solid 1px #cccccc;
+      border: solid 1px #e4e4e4;
       padding-left: 32px;
       position: relative;
       top: -1.2em;
