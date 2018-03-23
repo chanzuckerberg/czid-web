@@ -454,6 +454,17 @@ $break-large: 1070px;
   }
 }
 
+.all-filter-btn {
+  height: 43px;
+  width: 150px !important;
+  .text {
+    margin-top: 7px;
+  }
+  .dropdown.icon {
+    margin-top: -3px !important;
+  }
+}
+
 .sample-container {
   [type=checkbox].filled-in:not(:checked)+label:after,
   [type=checkbox].filled-in+label:after {
@@ -711,8 +722,7 @@ $break-large: 1070px;
         z-index: 100;
         border-radius: 3px;
         box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-        height: 300px;
-        overflow: scroll;
+        height: auto !important;
         .col.s6 {
           .options-wrapper {
             label {
@@ -751,7 +761,7 @@ $break-large: 1070px;
     }
     .search {
       border-radius: 40px;
-      border: solid 1px #cccccc;
+      border: solid 1px #e4e4e4;
       padding-left: 32px;
       position: relative;
       top: -1.2em;
@@ -908,8 +918,14 @@ input[type="button"] {
               }
             }
           }
+          .row.label-row {
+            margin-bottom: 0;
+          }
           .project-label {
             cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
           }
         }
       }
