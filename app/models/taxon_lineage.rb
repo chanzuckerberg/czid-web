@@ -27,8 +27,8 @@ class TaxonLineage < ApplicationRecord
   #                      'Guttaviridae', 'Inoviridae', 'Leviviridae', 'Microviridae',
   #                      'Plasmaviridae', 'Tectiviridae']
   # PHAGE_PHYLA_TAXIDS = TaxonLineage.where(family_name: PHAGE_PHYLA_NAMES).map(&:family_taxid).compact.uniq.sort
-  PHAGE_PHYLA_TAXIDS = [10472, 10474, 10477, 10656, 10659, 10662, 10699, 10744, 10841, 10860,
-                        10877, 11989, 157897, 292638, 324686, 423358, 573053, 1232737]
+  PHAGE_PHYLA_TAXIDS = [10_472, 10_474, 10_477, 10_656, 10_659, 10_662, 10_699, 10_744, 10_841, 10_860,
+                        10_877, 11_989, 157_897, 292_638, 324_686, 423_358, 573_053, 1_232_737].freeze
 
   def self.get_genus_info(genus_tax_id)
     r = find_by(genus_taxid: genus_tax_id)
