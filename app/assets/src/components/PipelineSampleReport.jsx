@@ -1229,13 +1229,13 @@ class PipelineSampleReport extends React.Component {
                           <Dropdown.Item
                             text="Scientific Name"
                             onClick={() =>
-                              this.handleNameTypeChange("Scientific name")
+                              this.handleNameTypeChange("Scientific Name")
                             }
                           />
                           <Dropdown.Item
                             text="Common Name"
                             onClick={() =>
-                              this.handleNameTypeChange("Common name")
+                              this.handleNameTypeChange("Common Name")
                             }
                           />
                         </Dropdown.Menu>
