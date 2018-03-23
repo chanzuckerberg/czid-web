@@ -267,12 +267,12 @@ class PipelineRun < ApplicationRecord
   end
 
   def update_is_phage
-    phage_phyla = TaxonLineage::PHAGE_PHYLA_TAXIDS.join(",")
+    phage_families = TaxonLineage::PHAGE_FAMILIES_TAXIDS.join(",")
     TaxonCount.connection.execute("
       UPDATE taxon_counts
       SET is_phage = 1
       WHERE pipeline_run_id=#{id} AND
-            family_taxid IN (#{phage_phyla})
+            family_taxid IN (#{phage_families})
     ")
   end
 
