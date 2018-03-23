@@ -590,7 +590,7 @@ class PipelineSampleReads extends React.Component {
                           {this.render_metadata_dropdown("Nucleotide type", "sample_template")}
                           <div className='row detail-row no-padding'>
                             <div className='col s5 label'>
-                              Patient ID
+                              Unique ID
                             </div>
                             <div className='col s7 '>
                               <div className="details-value label sample-notes">
