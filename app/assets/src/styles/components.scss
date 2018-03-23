@@ -24,7 +24,7 @@
   .text {
     display: block;
     white-space: nowrap;
-    overflow: hidden;
+    overflow: hidden; // Do we need this? it's affecting all dropdowns
     font-size: 8pt;
   }
   .icon {
@@ -44,5 +44,17 @@
     padding: 0.2em 0.4em;
     font-weight: normal;
     font-size: inherit;
+  }
+}
+.semantic-input {
+  input {
+    height: inherit !important;
+    font-size: inherit !important;
+    width: inherit !important;
+    &:focus {
+      border-color: #85b7d9;
+      box-shadow: none !important;
+      border-bottom: 1px solid #85b7d9 !important;
+    }
   }
 }

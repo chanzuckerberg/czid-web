@@ -57,6 +57,9 @@
           .row {
             &.input-row {
               margin-top: -10px;
+              .new-button-col {
+                padding: 0 0 0 10px !important;
+              }
               .browser-default {
                 width: 100%;
                 padding: 10px;
@@ -130,6 +133,9 @@
               background: #D6EEF5;
               border-color: #D6EEF5;
               color: #68C2D9;
+              border-radius: 0;
+              &.new-proj {
+              }
               i {
                 color: #5ABCD6;
               }
@@ -200,6 +206,15 @@
               }
             }
             .project-list {
+              .ui.dropdown {
+                .text {
+                  overflow: visible;
+                }
+              }
+              .ui.disabled.dropdown {
+                background: #EEF1F2;
+                border: #CAD0DA;
+              }
               .select-wrapper {
                 height: 50px;
                 width: 98%;
@@ -301,6 +316,23 @@
           color: #1B232A;
         }
       }
+    }
+  }
+}
+.new-project-input {
+  .semantic-input {
+    &.right {
+      float: none !important;
+    }
+  }
+  .ui.label {
+    background: #eef1f2;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: normal;
+    &:hover {
+      background: #c3dde5;
+      color: #4c9db1;
     }
   }
 }
