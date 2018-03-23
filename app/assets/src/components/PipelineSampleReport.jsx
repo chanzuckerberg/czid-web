@@ -30,64 +30,10 @@ class PipelineSampleReport extends React.Component {
       "highest_",
       ""
     );
-    this.sort_params = {};
     const cached_cats = Cookies.get("excluded_categories");
     const cached_name_type = Cookies.get("name_type");
     const savedThresholdFilters = this.getSavedThresholdFilters();
-    this.allThresholds = [
-      {
-        name: "Score",
-        value: "NT_aggregatescore"
-      },
-      {
-        name: "NT Z Score",
-        value: "NT_zscore"
-      },
-      {
-        name: "NT rPM",
-        value: "NT_rpm"
-      },
-      {
-        name: "NT r (total reads)",
-        value: "NT_r"
-      },
-      {
-        name: "NT %id",
-        value: "NT_percentidentity"
-      },
-      {
-        name: "NT log(1/e)",
-        value: "NT_neglogevalue"
-      },
-      {
-        name: "NT %conc",
-        value: "NT_percentconcordant"
-      },
-      {
-        name: "NR Z Score",
-        value: "NR_zscore"
-      },
-      {
-        name: "NR r (total reads)",
-        value: "NR_r"
-      },
-      {
-        name: "NR rPM",
-        value: "NR_rpm"
-      },
-      {
-        name: "NR %id",
-        value: "NR_percentidentity"
-      },
-      {
-        name: "R log(1/e)",
-        value: "NR_neglogevalue"
-      },
-      {
-        name: "NR %conc",
-        value: "NR_percentconcordant"
-      }
-    ];
+    this.allThresholds = ThresholdMap();
     this.genus_map = {};
 
     this.thresholdLabel2Name = {};
@@ -147,7 +93,6 @@ class PipelineSampleReport extends React.Component {
     this.collapseTable = this.collapseTable.bind(this);
     this.downloadFastaUrl = this.downloadFastaUrl.bind(this);
     this.gotoAlignmentVizLink = this.gotoAlignmentVizLink.bind(this);
-
     this.handleThresholdEnter = this.handleThresholdEnter.bind(this);
     this.renderMore = this.renderMore.bind(this);
     this.initializeTooltip();
@@ -417,13 +362,14 @@ class PipelineSampleReport extends React.Component {
   }
 
   flash() {
-    $(".filter-message").removeClass("flash");
+    let sel = $(".filter-message");
+    sel.removeClass("flash");
     const el = document.getElementById("filter-message");
     if (el) {
       el.offsetHeight;
       /* trigger reflow */
     }
-    $(".filter-message").addClass("flash");
+    sel.addClass("flash");
   }
 
   initializeTooltip() {
@@ -895,39 +841,14 @@ class PipelineSampleReport extends React.Component {
       // emphasize genus, soften category and species count
       const category_name =
         tax_info.tax_id == -200 ? "" : tax_info.category_name;
-      const fake_or_real =
-        tax_info.genus_taxid < 0 ? "fake-genus" : "real-genus";
-      const right_arrow_initial_visibility = "";
-      const down_arrow_initial_visibility = "hidden";
-      const plus_or_minus = (
-        <span>
-          <span
-            className={`report-arrow-down report-arrow ${
-              tax_info.tax_id
-            } ${fake_or_real} ${down_arrow_initial_visibility}`}
-          >
-            <i
-              className={`fa fa-angle-down ${tax_info.tax_id}`}
-              onClick={this.collapseGenus}
-            />
-          </span>
-          <span
-            className={`report-arrow-right report-arrow ${
-              tax_info.tax_id
-            } ${fake_or_real} ${right_arrow_initial_visibility}`}
-          >
-            <i
-              className={`fa fa-angle-right ${tax_info.tax_id}`}
-              onClick={this.expandGenus}
-            />
-          </span>
-        </span>
+      const collapseExpand = (
+        <CollapseExpand tax_info={tax_info} parent={this} />
       );
       foo = (
         <div className="hover-wrapper">
           <div className="genus-name">
             {" "}
-            {plus_or_minus} {foo}
+            {collapseExpand} {foo}
           </div>
           <i className="count-info">
             ({tax_info.species_count}{" "}
@@ -1102,10 +1023,6 @@ class PipelineSampleReport extends React.Component {
   }
 
   render() {
-    const parts = this.report_page_params.sort_by.split("_");
-    const sort_column = `${parts[1]}_${parts[2]}`;
-    const t0 = Date.now();
-
     const filter_stats = `${
       this.state.rows_passing_filters
     } rows passing filters, out of ${this.state.rows_total} total rows.`;
@@ -1135,24 +1052,9 @@ class PipelineSampleReport extends React.Component {
     );
 
     const advanced_filter_tag_list = this.state.activeThresholds.map(
-      (threshold, i) => {
-        return this.isThresholdValid(threshold) ? (
-          <span className="filter-tag" key={`advanced_filter_tag_${i}`}>
-            <span className="filter-tag-name">
-              {this.thresholdLabel2Name[threshold["label"]]}{" "}
-              {threshold["operator"]} {threshold["value"]}
-            </span>
-            <span
-              className="filter-tag-x"
-              onClick={() => {
-                this.removeThresholdFilter(i);
-              }}
-            >
-              X
-            </span>
-          </span>
-        ) : null;
-      }
+      (threshold, i) => (
+        <AdvancedFilterTagList threshold={threshold} key={i} i={i} parent={this} />
+      )
     );
 
     const categories_filter_tag_list = this.displayedCategories(
@@ -1173,416 +1075,514 @@ class PipelineSampleReport extends React.Component {
         </span>
       );
     });
-    const right_arrow_initial_visibility = "";
-    const result = (
-      <div>
-        <div id="reports" className="reports-screen tab-screen col s12">
-          <div className="tab-screen-content">
-            <div className="row reports-container">
-              <div className="col s12 reports-section">
-                <div className="reports-count">
-                  {filter_row_stats}
-                  <div className="report-top-filters">
-                    <ul className="filter-lists">
-                      <li className="search-box genus-autocomplete-container">
-                        <ReactAutocomplete
-                          inputProps={{ placeholder: "Search" }}
-                          items={this.state.search_keys_in_sample}
-                          shouldItemRender={(item, value) =>
-                            item[0] == "All" ||
-                            (value.length > 2 &&
-                              item[0]
-                                .toLowerCase()
-                                .indexOf(value.toLowerCase()) > -1)
-                          }
-                          getItemValue={item => item[0]}
-                          renderItem={(item, highlighted) => (
-                            <div
-                              key={item[1]}
-                              style={{
-                                backgroundColor: highlighted
-                                  ? "#eee"
-                                  : "transparent"
-                              }}
-                            >
-                              {item[0]}
-                            </div>
-                          )}
-                          value={this.state.searchKey}
-                          onChange={e => this.handleSearch(e)}
-                          onSelect={(value, item) =>
-                            this.searchSelectedTaxon(value, item)
-                          }
-                        />
-                        <i className="fa fa-search" />
-                      </li>
+    return (
+      <RenderMarkup
+        filter_row_stats={filter_row_stats}
+        advanced_filter_tag_list={advanced_filter_tag_list}
+        categories_filter_tag_list={categories_filter_tag_list}
+        parent={this}
+      />
+    );
+  }
+}
 
-                      <Dropdown
-                        text={
-                          this.state.name_type
-                            ? this.state.name_type
-                            : "Select name type"
-                        }
-                        className="filter-btn"
-                      >
-                        <Dropdown.Menu>
-                          <Dropdown.Item
-                            text="Scientific Name"
-                            onClick={() =>
-                              this.handleNameTypeChange("Scientific Name")
-                            }
-                          />
-                          <Dropdown.Item
-                            text="Common Name"
-                            onClick={() =>
-                              this.handleNameTypeChange("Common Name")
-                            }
-                          />
-                        </Dropdown.Menu>
-                      </Dropdown>
+function ThresholdMap() {
+  return [
+    {
+      name: "Score",
+      value: "NT_aggregatescore"
+    },
+    {
+      name: "NT Z Score",
+      value: "NT_zscore"
+    },
+    {
+      name: "NT rPM",
+      value: "NT_rpm"
+    },
+    {
+      name: "NT r (total reads)",
+      value: "NT_r"
+    },
+    {
+      name: "NT %id",
+      value: "NT_percentidentity"
+    },
+    {
+      name: "NT log(1/e)",
+      value: "NT_neglogevalue"
+    },
+    {
+      name: "NT %conc",
+      value: "NT_percentconcordant"
+    },
+    {
+      name: "NR Z Score",
+      value: "NR_zscore"
+    },
+    {
+      name: "NR r (total reads)",
+      value: "NR_r"
+    },
+    {
+      name: "NR rPM",
+      value: "NR_rpm"
+    },
+    {
+      name: "NR %id",
+      value: "NR_percentidentity"
+    },
+    {
+      name: "R log(1/e)",
+      value: "NR_neglogevalue"
+    },
+    {
+      name: "NR %conc",
+      value: "NR_percentconcordant"
+    }
+  ];
+}
 
-                      <Dropdown
-                        text={
-                          this.state.backgroundName
-                            ? this.state.backgroundName
-                            : "Background model"
-                        }
-                        className={"filter-btn"}
-                      >
-                        <Dropdown.Menu>
-                          {this.all_backgrounds.length ? (
-                            this.all_backgrounds.map((background, i) => {
-                              return (
-                                <Dropdown.Item
-                                  text={background.name}
-                                  ref="background"
-                                  key={i}
-                                  onClick={() =>
-                                    this.handleBackgroundModelChange(
-                                      background.name,
-                                      background.id
-                                    )
-                                  }
-                                />
-                              );
-                            })
-                          ) : (
-                            <Dropdown.Item text="No background models to display" />
-                          )}
-                        </Dropdown.Menu>
-                      </Dropdown>
+function CollapseExpand({ tax_info, parent }) {
+  const fake_or_real = tax_info.genus_taxid < 0 ? "fake-genus" : "real-genus";
+  return (
+    <span>
+      <span
+        className={`report-arrow-down report-arrow ${
+          tax_info.tax_id
+        } ${fake_or_real} ${"hidden"}`}
+      >
+        <i
+          className={`fa fa-angle-down ${tax_info.tax_id}`}
+          onClick={parent.collapseGenus}
+        />
+      </span>
+      <span
+        className={`report-arrow-right report-arrow ${
+          tax_info.tax_id
+        } ${fake_or_real} ${""}`}
+      >
+        <i
+          className={`fa fa-angle-right ${tax_info.tax_id}`}
+          onClick={parent.expandGenus}
+        />
+      </span>
+    </span>
+  );
+}
 
-                      <li className="categories-dropdown top-filter ui dropdown filter-btn">
-                        <div className="categories-filters-activate">
-                          <span className="filter-label">Categories</span>
-                          <span className="filter-label-count">
-                            {this.all_categories.length -
-                              this.state.excluded_categories.length}{" "}
-                          </span>
-                          <i className="fa fa-angle-down right down-box" />
-                        </div>
-                        <div className="categories-filters-modal">
-                          <div className="categories">
-                            <ul>
-                              {this.all_categories.map((category, i) => {
-                                return (
-                                  <li key={i}>
-                                    <input
-                                      type="checkbox"
-                                      className="filled-in cat-filter"
-                                      id={category.name}
-                                      value={category.name}
-                                      onChange={e => {}}
-                                      onClick={e => {
-                                        this.applyExcludedCategories(e);
-                                      }}
-                                      checked={
-                                        this.state.excluded_categories.indexOf(
-                                          category.name
-                                        ) < 0
-                                      }
-                                    />
-                                    <label htmlFor={category.name}>
-                                      {category.name}
-                                    </label>
-                                  </li>
-                                );
-                              })}
-                            </ul>
-                            {this.all_categories.length < 1 ? (
-                              <p>None found</p>
-                            ) : null}
-                          </div>
-                        </div>
-                      </li>
+function AdvancedFilterTagList({ threshold, i, parent }) {
+  if (parent.isThresholdValid(threshold)) {
+    return (
+      <span className="filter-tag" key={`advanced_filter_tag_${i}`}>
+        <span className="filter-tag-name">
+          {parent.thresholdLabel2Name[threshold["label"]]}{" "}
+          {threshold["operator"]} {threshold["value"]}
+        </span>
+        <span
+          className="filter-tag-x"
+          onClick={() => {
+            parent.removeThresholdFilter(i);
+          }}
+        >
+          X
+        </span>
+      </span>
+    );
+  } else {
+    return null;
+  }
+}
 
-                      <li className="advanced-filter-top top-filter ui dropdown filter-btn">
-                        <div
-                          className="advanced-filters-activate"
-                          onClick={e => {
-                            this.saveThresholdFilters(false);
-                          }}
-                        >
-                          <span className="filter-label">Advanced Filters</span>
-                          <span className="filter-label-count">
-                            {this.validThresholdCount(
-                              this.state.activeThresholds
-                            )}{" "}
-                          </span>
-                          <i className="fa fa-angle-down right down-box" />
-                        </div>
-                        <div className="advanced-filters-modal round-me">
-                          <div className="filter-inputs">
-                            {this.state.activeThresholds.map(
-                              (activeThreshold, index) => {
-                                return (
-                                  <div key={index} className="row">
-                                    <div className=" col s5">
-                                      <select
-                                        value={activeThreshold.label}
-                                        onChange={e =>
-                                          this.setThresholdProperty(
-                                            index,
-                                            "label",
-                                            e.target.value
-                                          )
-                                        }
-                                        className="browser-default inner-menus"
-                                      >
-                                        {this.allThresholds.map(
-                                          thresholdObject => {
-                                            return (
-                                              <option
-                                                key={thresholdObject.value}
-                                                value={thresholdObject.value}
-                                              >
-                                                {thresholdObject.name}
-                                              </option>
-                                            );
-                                          }
-                                        )}
-                                      </select>
-                                    </div>
-                                    <div className="col s3">
-                                      <select
-                                        value={activeThreshold.operator}
-                                        onChange={e =>
-                                          this.setThresholdProperty(
-                                            index,
-                                            "operator",
-                                            e.target.value
-                                          )
-                                        }
-                                        className="browser-default inner-menus"
-                                      >
-                                        <option value=">=">>=</option>
-                                        <option value="<=">&lt;=</option>
-                                      </select>
-                                    </div>
-                                    <div className="col s3">
-                                      <input
-                                        className="browser-default metric-thresholds inner-menus"
-                                        onChange={e =>
-                                          this.setThresholdProperty(
-                                            index,
-                                            "value",
-                                            e.target.value
-                                          )
-                                        }
-                                        onKeyDown={e =>
-                                          this.handleThresholdEnter(e, index)
-                                        }
-                                        name="group2"
-                                        value={activeThreshold.value}
-                                        id={activeThreshold.label}
-                                        type="number"
-                                      />
-                                    </div>
-                                    <div
-                                      className="col s1"
-                                      onClick={() =>
-                                        this.removeThresholdFilter(index)
-                                      }
-                                    >
-                                      <i
-                                        className="fa fa-close "
-                                        data-ng={index}
-                                      />
-                                    </div>
-                                  </div>
-                                );
-                              }
-                            )}
-                          </div>
-                          <div
-                            className="add-threshold-filter inner-menus"
-                            onClick={() => this.appendThresholdFilter()}
-                          >
-                            <i className="fa fa-plus-circle" /> Add threshold
-                          </div>
-                          <br />
-                          <div className="">
-                            <button
-                              className="inner-menus save-btn"
-                              onClick={() => this.saveThresholdFilters()}
-                            >
-                              Save
-                            </button>
-                          </div>
-                        </div>
-                      </li>
-                    </ul>
+function DetailCells({ parent }) {
+  return parent.state.selected_taxons_top.map((tax_info, i) => (
+    <tr key={tax_info.tax_id} className={parent.row_class(tax_info)}>
+      <td>{parent.render_name(tax_info, parent.report_details)}</td>
+      {parent.render_number(tax_info.NT.aggregatescore, null, 0, true)}
+      {parent.render_number(tax_info.NT.zscore, tax_info.NR.zscore, 1)}
+      {parent.render_number(tax_info.NT.rpm, tax_info.NR.rpm, 1)}
+      {parent.render_number(tax_info.NT.r, tax_info.NR.r, 0)}
+      {parent.render_number(
+        tax_info.NT.percentidentity,
+        tax_info.NR.percentidentity,
+        1
+      )}
+      {parent.render_number(
+        tax_info.NT.neglogevalue,
+        tax_info.NR.neglogevalue,
+        0
+      )}
+      {parent.render_number(
+        tax_info.NT.percentconcordant,
+        tax_info.NR.percentconcordant,
+        1
+      )}
+      <td>&nbsp;</td>
+    </tr>
+  ));
+}
+
+function ReportTableHeader({ parent }) {
+  return (
+    <div className="reports-main">
+      <table id="report-table" className="bordered report-table">
+        <thead>
+          <tr>
+            <th>
+              <span className={`table-arrow ""`}>
+                <i className="fa fa-angle-right" onClick={parent.expandTable} />
+              </span>
+              <span className="table-arrow hidden">
+                <i
+                  className="fa fa-angle-down"
+                  onClick={parent.collapseTable}
+                />
+              </span>
+              Taxonomy
+            </th>
+            {parent.render_column_header(
+              "Score",
+              `NT_aggregatescore`,
+              "Aggregate score: ( |genus.NT.Z| * species.NT.Z * species.NT.rPM ) + ( |genus.NR.Z| * species.NR.Z * species.NR.rPM )"
+            )}
+            {parent.render_column_header(
+              "Z",
+              `${parent.state.countType}_zscore`,
+              `Z-score relative to background model for alignments to NCBI NT/NR`
+            )}
+            {parent.render_column_header(
+              "rPM",
+              `${parent.state.countType}_rpm`,
+              `Number of reads aligning to the taxon in the NCBI NT/NR database per million total input reads`
+            )}
+            {parent.render_column_header(
+              "r",
+              `${parent.state.countType}_r`,
+              `Number of reads aligning to the taxon in the NCBI NT/NR database`
+            )}
+            {parent.render_column_header(
+              "%id",
+              `${parent.state.countType}_percentidentity`,
+              `Average percent-identity of alignments to NCBI NT/NR`
+            )}
+            {parent.render_column_header(
+              "log(1/E)",
+              `${parent.state.countType}_neglogevalue`,
+              `Average log-10-transformed expect value for alignments to NCBI NT/NR`
+            )}
+            {parent.render_column_header(
+              "%conc",
+              `${parent.state.countType}_percentconcordant`,
+              `Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NT/NR)`
+            )}
+            <th>
+              <Tipsy content="Switch count type" placement="top">
+                <div className="sort-controls center left">
+                  <div
+                    className={
+                      parent.state.countType === "NT"
+                        ? "active column-switcher"
+                        : "column-switcher"
+                    }
+                    onClick={() => {
+                      parent.setState({ countType: "NT" });
+                    }}
+                  >
+                    NT
                   </div>
-                  <div className="filter-tags-list">
-                    {advanced_filter_tag_list} {categories_filter_tag_list}
+                  <div
+                    className={
+                      parent.state.countType === "NR"
+                        ? "active column-switcher"
+                        : "column-switcher"
+                    }
+                    onClick={() => {
+                      parent.setState({ countType: "NR" });
+                    }}
+                  >
+                    NR
                   </div>
-                  {/* { filter_row_stats } */}
                 </div>
+              </Tipsy>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <DetailCells parent={parent} />
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
-                <div className="reports-main">
-                  <table id="report-table" className="bordered report-table">
-                    <thead>
-                      <tr>
-                        <th>
-                          <span
-                            className={`table-arrow ${right_arrow_initial_visibility}`}
-                          >
-                            <i
-                              className="fa fa-angle-right"
-                              onClick={this.expandTable}
-                            />
-                          </span>
-                          <span className="table-arrow hidden">
-                            <i
-                              className="fa fa-angle-down"
-                              onClick={this.collapseTable}
-                            />
-                          </span>
-                          Taxonomy
-                        </th>
-                        {this.render_column_header(
-                          "Score",
-                          `NT_aggregatescore`,
-                          "Aggregate score: ( |genus.NT.Z| * species.NT.Z * species.NT.rPM ) + ( |genus.NR.Z| * species.NR.Z * species.NR.rPM )"
-                        )}
-                        {this.render_column_header(
-                          "Z",
-                          `${this.state.countType}_zscore`,
-                          `Z-score relative to background model for alignments to NCBI NT/NR`
-                        )}
-                        {this.render_column_header(
-                          "rPM",
-                          `${this.state.countType}_rpm`,
-                          `Number of reads aligning to the taxon in the NCBI NT/NR database per million total input reads`
-                        )}
-                        {this.render_column_header(
-                          "r",
-                          `${this.state.countType}_r`,
-                          `Number of reads aligning to the taxon in the NCBI NT/NR database`
-                        )}
-                        {this.render_column_header(
-                          "%id",
-                          `${this.state.countType}_percentidentity`,
-                          `Average percent-identity of alignments to NCBI NT/NR`
-                        )}
-                        {this.render_column_header(
-                          "log(1/E)",
-                          `${this.state.countType}_neglogevalue`,
-                          `Average log-10-transformed expect value for alignments to NCBI NT/NR`
-                        )}
-                        {this.render_column_header(
-                          "%conc",
-                          `${this.state.countType}_percentconcordant`,
-                          `Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NT/NR)`
-                        )}
-                        <th>
-                          <Tipsy content="Switch count type" placement="top">
-                            <div className="sort-controls center left">
-                              <div
-                                className={
-                                  this.state.countType === "NT"
-                                    ? "active column-switcher"
-                                    : "column-switcher"
-                                }
-                                onClick={() => {
-                                  this.setState({ countType: "NT" });
-                                }}
-                              >
-                                NT
-                              </div>
-                              <div
-                                className={
-                                  this.state.countType === "NR"
-                                    ? "active column-switcher"
-                                    : "column-switcher"
-                                }
-                                onClick={() => {
-                                  this.setState({ countType: "NR" });
-                                }}
-                              >
-                                NR
-                              </div>
-                            </div>
-                          </Tipsy>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {this.state.selected_taxons_top.map((tax_info, i) => (
-                        <tr
-                          key={tax_info.tax_id}
-                          className={this.row_class(tax_info)}
-                        >
-                          <td>
-                            {this.render_name(tax_info, this.report_details)}
-                          </td>
-                          {this.render_number(
-                            tax_info.NT.aggregatescore,
-                            null,
-                            0,
-                            true
-                          )}
-                          {this.render_number(
-                            tax_info.NT.zscore,
-                            tax_info.NR.zscore,
-                            1
-                          )}
-                          {this.render_number(
-                            tax_info.NT.rpm,
-                            tax_info.NR.rpm,
-                            1
-                          )}
-                          {this.render_number(tax_info.NT.r, tax_info.NR.r, 0)}
-                          {this.render_number(
-                            tax_info.NT.percentidentity,
-                            tax_info.NR.percentidentity,
-                            1
-                          )}
-                          {this.render_number(
-                            tax_info.NT.neglogevalue,
-                            tax_info.NR.neglogevalue,
-                            0
-                          )}
-                          {this.render_number(
-                            tax_info.NT.percentconcordant,
-                            tax_info.NR.percentconcordant,
-                            1
-                          )}
-                          <td>&nbsp;</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+function AdvancedFilters({ parent }) {
+  return (
+    <li className="advanced-filter-top top-filter ui dropdown filter-btn">
+      <div
+        className="advanced-filters-activate"
+        onClick={() => {
+          parent.saveThresholdFilters(false);
+        }}
+      >
+        <span className="filter-label">Advanced Filters</span>
+        <span className="filter-label-count">
+          {parent.validThresholdCount(parent.state.activeThresholds)}{" "}
+        </span>
+        <i className="fa fa-angle-down right down-box" />
+      </div>
+      <div className="advanced-filters-modal round-me">
+        <div className="filter-inputs">
+          {parent.state.activeThresholds.map((activeThreshold, index) => {
+            return (
+              <ActiveThresholdRows
+                activeThreshold={activeThreshold}
+                key={index}
+                index={index}
+                parent={parent}
+              />
+            );
+          })}
+        </div>
+        <div
+          className="add-threshold-filter inner-menus"
+          onClick={() => parent.appendThresholdFilter()}
+        >
+          <i className="fa fa-plus-circle" /> Add threshold
+        </div>
+        <br />
+        <div className="">
+          <button
+            className="inner-menus save-btn"
+            onClick={() => parent.saveThresholdFilters()}
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </li>
+  );
+}
+
+function CategoryFilter({ parent }) {
+  return (
+    <li className="categories-dropdown top-filter ui dropdown filter-btn">
+      <div className="categories-filters-activate">
+        <span className="filter-label">Categories</span>
+        <span className="filter-label-count">
+          {parent.all_categories.length -
+            parent.state.excluded_categories.length}{" "}
+        </span>
+        <i className="fa fa-angle-down right down-box" />
+      </div>
+      <div className="categories-filters-modal">
+        <div className="categories">
+          <ul>
+            {parent.all_categories.map((category, i) => {
+              return (
+                <li key={i}>
+                  <input
+                    type="checkbox"
+                    className="filled-in cat-filter"
+                    id={category.name}
+                    value={category.name}
+                    onChange={e => {}}
+                    onClick={e => {
+                      parent.applyExcludedCategories(e);
+                    }}
+                    checked={
+                      parent.state.excluded_categories.indexOf(category.name) <
+                      0
+                    }
+                  />
+                  <label htmlFor={category.name}>{category.name}</label>
+                </li>
+              );
+            })}
+          </ul>
+          {parent.all_categories.length < 1 ? <p>None found</p> : null}
+        </div>
+      </div>
+    </li>
+  );
+}
+
+function ReportSearchBox({ parent }) {
+  return (
+    <li className="search-box genus-autocomplete-container">
+      <ReactAutocomplete
+        inputProps={{ placeholder: "Search" }}
+        items={parent.state.search_keys_in_sample}
+        shouldItemRender={(item, value) =>
+          item[0] == "All" ||
+          (value.length > 2 &&
+            item[0].toLowerCase().indexOf(value.toLowerCase()) > -1)
+        }
+        getItemValue={item => item[0]}
+        renderItem={(item, highlighted) => (
+          <div
+            key={item[1]}
+            style={{
+              backgroundColor: highlighted ? "#eee" : "transparent"
+            }}
+          >
+            {item[0]}
+          </div>
+        )}
+        value={parent.state.searchKey}
+        onChange={e => parent.handleSearch(e)}
+        onSelect={(value, item) => parent.searchSelectedTaxon(value, item)}
+      />
+      <i className="fa fa-search" />
+    </li>
+  );
+}
+
+function NameTypeFilter({ parent }) {
+  return (
+    <Dropdown
+      text={
+        parent.state.name_type ? parent.state.name_type : "Select name type"
+      }
+      className="filter-btn"
+    >
+      <Dropdown.Menu>
+        <Dropdown.Item
+          text="Scientific Name"
+          onClick={() => parent.handleNameTypeChange("Scientific name")}
+        />
+        <Dropdown.Item
+          text="Common Name"
+          onClick={() => parent.handleNameTypeChange("Common name")}
+        />
+      </Dropdown.Menu>
+    </Dropdown>
+  );
+}
+
+function BackgroundModelFilter({ parent }) {
+  return (
+    <Dropdown
+      text={
+        parent.state.backgroundName
+          ? parent.state.backgroundName
+          : "Background model"
+      }
+      className={"filter-btn"}
+    >
+      <Dropdown.Menu>
+        {parent.all_backgrounds.length ? (
+          parent.all_backgrounds.map((background, i) => {
+            return (
+              <Dropdown.Item
+                text={background.name}
+                key={i}
+                onClick={() =>
+                  parent.handleBackgroundModelChange(
+                    background.name,
+                    background.id
+                  )
+                }
+              />
+            );
+          })
+        ) : (
+          <Dropdown.Item text="No background models to display" />
+        )}
+      </Dropdown.Menu>
+    </Dropdown>
+  );
+}
+
+function RenderMarkup({
+  filter_row_stats,
+  advanced_filter_tag_list,
+  categories_filter_tag_list,
+  parent
+}) {
+  return (
+    <div>
+      <div id="reports" className="reports-screen tab-screen col s12">
+        <div className="tab-screen-content">
+          <div className="row reports-container">
+            <div className="col s12 reports-section">
+              <div className="reports-count">
+                {filter_row_stats}
+                <div className="report-top-filters">
+                  <ul className="filter-lists">
+                    <ReportSearchBox parent={parent} />
+                    <NameTypeFilter parent={parent} />
+                    <BackgroundModelFilter parent={parent} />
+                    <CategoryFilter parent={parent} />
+                    <AdvancedFilters parent={parent} />
+                  </ul>
                 </div>
+                <div className="filter-tags-list">
+                  {advanced_filter_tag_list} {categories_filter_tag_list}
+                </div>
+                {filter_row_stats}
               </div>
+              <ReportTableHeader parent={parent} />
             </div>
           </div>
         </div>
       </div>
-    );
-    const t1 = Date.now();
-    return result;
-  }
+    </div>
+  );
+}
+
+function ActiveThresholdRows({ activeThreshold, index, parent }) {
+  return (
+    <div key={index} className="row">
+      <div className=" col s5">
+        <select
+          value={activeThreshold.label}
+          onChange={e =>
+            parent.setThresholdProperty(index, "label", e.target.value)
+          }
+          className="browser-default inner-menus"
+        >
+          {parent.allThresholds.map(thresholdObject => {
+            return (
+              <option key={thresholdObject.value} value={thresholdObject.value}>
+                {thresholdObject.name}
+              </option>
+            );
+          })}
+        </select>
+      </div>
+      <div className="col s3">
+        <select
+          value={activeThreshold.operator}
+          onChange={e =>
+            parent.setThresholdProperty(index, "operator", e.target.value)
+          }
+          className="browser-default inner-menus"
+        >
+          <option value=">=">>=</option>
+          <option value="<=">&lt;=</option>
+        </select>
+      </div>
+      <div className="col s3">
+        <input
+          className="browser-default metric-thresholds inner-menus"
+          onChange={e =>
+            parent.setThresholdProperty(index, "value", e.target.value)
+          }
+          onKeyDown={e => parent.handleThresholdEnter(e, index)}
+          name="group2"
+          value={activeThreshold.value}
+          id={activeThreshold.label}
+          type="number"
+        />
+      </div>
+      <div
+        className="col s1"
+        onClick={() => parent.removeThresholdFilter(index)}
+      >
+        <i className="fa fa-close " data-ng={index} />
+      </div>
+    </div>
+  );
 }
 
 export default PipelineSampleReport;
