@@ -32,6 +32,7 @@
         color: #333E48;
         font-weight: $font-weight-bold;
         letter-spacing: 0.28px;
+        margin-bottom: 5px;
       }
       .upload-info {
         color: #677986;
@@ -134,8 +135,6 @@
               border-color: #D6EEF5;
               color: #68C2D9;
               border-radius: 0;
-              &.new-proj {
-              }
               i {
                 color: #5ABCD6;
               }

@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import axios from 'axios';
 import $ from 'jquery';
 import Tipsy from 'react-tipsy';
+import {Dropdown, Input, Button} from 'semantic-ui-react';
 import SampleUpload from './SampleUpload';
 import ObjectHelper from '../helpers/ObjectHelper';
 
@@ -171,20 +172,23 @@ class BulkUploadImport extends React.Component {
   }
 
   handleProjectSubmit(e) {
-    if(e && e.preventDefault) {
-      e.preventDefault();
-    }
-    this.clearError();
-    if(!this.isProjectInvalid()) {
-      this.addProject()
-    }
+    if (this.refs.new_project.inputRef.value.trim().length) {
+      $('.new-project-button').click();
+      if(e && e.preventDefault) {
+        e.preventDefault();
+      }
+      this.clearError();
+      if(!this.isProjectInvalid()) {
+        this.addProject()
+      }
+    };
   }
 
   addProject() {
     var that = this;
     axios.post('/projects.json', {
       project: {
-        name: this.refs.new_project.value,
+        name: this.refs.new_project.inputRef.value,
         public_access: this.state.public_checked ? 1 : 0
       },
       authenticity_token: this.csrf
@@ -199,7 +203,7 @@ class BulkUploadImport extends React.Component {
         success: true,
         successMessage: 'Project added successfully'
       }, () => {
-        this.refs.new_project.value = '';
+        this.refs.new_project.inputRef.value = '';
         that.initializeSelectTag();
       });
     })
@@ -212,7 +216,7 @@ class BulkUploadImport extends React.Component {
   }
 
   isProjectInvalid() {
-    if (this.refs.new_project.value === '' && this.state.project === 'Select a project') {
+    if (this.refs.new_project.inputRef.value === '' && this.state.project === 'Select a project') {
       this.setState({
         invalid: true,
         errorMessage: 'Please enter valid project name'
@@ -333,13 +337,9 @@ class BulkUploadImport extends React.Component {
     return false;
   }
 
-  handleProjectChange(e) {
-    let projectId
-    if (e.target.selectedIndex > 0) {
-      projectId = this.state.allProjects[e.target.selectedIndex - 1].id;
-    }
+  handleProjectChange(projectName, projectId) {
     this.setState({
-      project: e.target.value.trim(),
+      project: projectName.trim(),
       projectId: projectId
     })
     this.clearError();
@@ -554,56 +554,83 @@ class BulkUploadImport extends React.Component {
                   </div>
                   <div className='row input-row'>
                     <Tipsy content='Name of experiment or project' position='top'>
-                      <div className='col project-list no-padding s8' data-delay="50">
-                          <select
-                            ref="projectSelect"
-                            disabled={(this.state.disableProjectSelect ? 'disabled' : '')} className="projectSelect" id="sample" onChange={ this.handleProjectChange } value={this.state.project}>
-                              <option disabled defaultValue>{this.state.project}</option>
-                                { this.state.allProjects.length ?
-                                 ObjectHelper.sortByKey(this.state.allProjects, 'name').map((project, i) => {
-                                  return <option ref= "project" key={i} id={project.id} >{project.name}</option>
-                                }) : <option>No projects to display</option>
-                            }
-                          </select>
-                          {
-                            (this.state.errors.project) ?
-                              <div className='field-error'>
-                                {this.state.errors.project}
-                              </div> : null
+                      <div className='col project-list no-padding s9'>
+                        <Dropdown
+                          ref="projectSelect"
+                          disabled={this.state.disableProjectSelect}
+                          fluid
+                          selection
+                          text={this.state.project}
+                          options={ObjectHelper.sortByKey(this.state.allProjects, 'name').map((project, i) => {
+                            return {
+                              key: i,
+                              text: project.name,
+                              value: i,
+                              id: project.id
+                            };
+                          })}
+                          noResultsMessage="No projects to display"
+                          onChange={(e, {options, value}) => this.handleProjectChange(options[value].text, options[value].id)
                           }
+                        />
+                        {
+                          (this.state.errors.project) ?
+                            <div className='field-error'>
+                              {this.state.errors.project}
+                            </div> : null
+                        }
                       </div>
                     </Tipsy>
-                    <div className='col no-padding s4'>
+                    <div className='col new-button-col s3'>
                       <Tipsy content='Add a new desired experiment or project name'
                         placement='right'>
-                        <button
-                          type='button' onClick={this.toggleNewProjectInput}
-                          className='new-project-button new-button skyblue-button'
-                          data-delay="50">
-                          <i className='fa fa-plus'/>
-                          <span>
-                            New project
-                          </span>
-                        </button>
+                        <Button
+                          className="skyblue-button new-proj fluid"
+                          onClick={this.toggleNewProjectInput}
+                          type="button"
+                          content="New project"
+                          icon="add"
+                          labelPosition="left" />
                       </Tipsy>
                     </div>
+                  </div>
+                  <div className="row input-row">
                     <div className='col no-padding s12 new-project-input hidden'>
-                      <input type='text' ref='new_project' onFocus={ this.clearError } className='browser-default' placeholder='Input new project name' />
-                      <span className="input-icon hidden"
-                        onClick={(e) => { if (this.refs.new_project.value.trim().length) {this.handleProjectSubmit()};
-                          $('.new-project-button').click();}}>
-                          Create project
-                      </span>
+                      <Input
+                        type="text"
+                        className="fluid semantic-input"
+                        ref="new_project"
+
+                        type="text"
+                        placeholder="Input new project name"
+                        label={{
+                          basic: true,
+                          content: <span onClick={() => this.handleProjectSubmit() }>
+                            Create project
+                          </span>
+                          }
+                        }
+                        labelPosition="right"
+                      />
                       {
                         (this.state.errors.new_project) ?
                           <div className='field-error'>
                             {this.state.errors.new_project}
-                          </div> : null
+                        </div> : null
                       }
                     </div>
-                    <div className='col no-padding 12 new-project-input public_access hidden'>
-                      <input ref="public_checked" type="checkbox" name="switch" id="public_checked" className="col s8 filled-in" onChange={ this.toggleCheckBox }
-                             value={ this.state.public_checked } />
+                  </div>
+                  <div className='row input-row'>
+                    <div
+                      className='col no-padding 12 new-project-input public_access hidden'>
+                      <input
+                        ref="public_checked"
+                        type="checkbox"
+                        name="switch"
+                        id="public_checked"
+                        className="col s8 filled-in"
+                        onChange={ this.toggleCheckBox }
+                        value={ this.state.public_checked } />
                       <label htmlFor="public_checked" className="checkbox">Make project public</label>
                     </div>
                   </div>
