@@ -21,14 +21,14 @@ class TaxonLineage < ApplicationRecord
 
   # We label as 'phage' all of the prokaryotic (bacterial and archaeal) virus families
   # listed here: https://en.wikipedia.org/wiki/Bacteriophage
-  # PHAGE_PHYLA_NAMES = ['Myoviridae', 'Siphoviridae', 'Podoviridae', 'Lipothrixviridae',
-  #                      'Rudiviridae', 'Ampullaviridae', 'Bicaudaviridae', 'Clavaviridae',
-  #                      'Corticoviridae', 'Cystoviridae', 'Fuselloviridae', 'Globuloviridae',
-  #                      'Guttaviridae', 'Inoviridae', 'Leviviridae', 'Microviridae',
-  #                      'Plasmaviridae', 'Tectiviridae']
-  # PHAGE_PHYLA_TAXIDS = TaxonLineage.where(family_name: PHAGE_PHYLA_NAMES).map(&:family_taxid).compact.uniq.sort
-  PHAGE_PHYLA_TAXIDS = [10_472, 10_474, 10_477, 10_656, 10_659, 10_662, 10_699, 10_744, 10_841, 10_860,
-                        10_877, 11_989, 157_897, 292_638, 324_686, 423_358, 573_053, 1_232_737].freeze
+  # PHAGE_FAMILIES_NAMES = ['Myoviridae', 'Siphoviridae', 'Podoviridae', 'Lipothrixviridae',
+  #                         'Rudiviridae', 'Ampullaviridae', 'Bicaudaviridae', 'Clavaviridae',
+  #                         'Corticoviridae', 'Cystoviridae', 'Fuselloviridae', 'Globuloviridae',
+  #                         'Guttaviridae', 'Inoviridae', 'Leviviridae', 'Microviridae',
+  #                         'Plasmaviridae', 'Tectiviridae']
+  # PHAGE_FAMILIES_TAXIDS = TaxonLineage.where(family_name: PHAGE_PHYLA_NAMES).map(&:family_taxid).compact.uniq.sort
+  PHAGE_FAMILIES_TAXIDS = [10_472, 10_474, 10_477, 10_656, 10_659, 10_662, 10_699, 10_744, 10_841, 10_860,
+                           10_877, 11_989, 157_897, 292_638, 324_686, 423_358, 573_053, 1_232_737].freeze
 
   def self.get_genus_info(genus_tax_id)
     r = find_by(genus_taxid: genus_tax_id)
