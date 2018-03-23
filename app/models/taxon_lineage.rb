@@ -7,7 +7,7 @@ class TaxonLineage < ApplicationRecord
   MISSING_FAMILY_ID = -300
   MISSING_ORDER_ID = -400
   MISSING_CLASS_ID = -500
-  MISSING_PHYLLUM_ID = -600
+  MISSING_PHYLUM_ID = -600
   MISSING_SUPERKINGDOM_ID = -700
   MISSING_LINEAGE_ID = {
     species: MISSING_SPECIES_ID,
@@ -15,7 +15,7 @@ class TaxonLineage < ApplicationRecord
     family: MISSING_FAMILY_ID,
     order: MISSING_ORDER_ID,
     class: MISSING_CLASS_ID,
-    phyllum: MISSING_PHYLLUM_ID,
+    phylum: MISSING_PHYLUM_ID,
     superkingdom: MISSING_SUPERKINGDOM_ID
   }.freeze
 
