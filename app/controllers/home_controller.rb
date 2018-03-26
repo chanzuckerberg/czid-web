@@ -18,9 +18,9 @@ class HomeController < ApplicationController
     dir == 'newest' ? samples.order(id: :desc) : samples.order(id: :asc)
   end
 
-  def feedback()
+  def feedback
     render json: {
-      status: 'ok',
+      status: 'ok'
     }
   end
 end
