@@ -86,7 +86,11 @@
 			stroke: rgb(82,131,211);
 		}
 	}
-
+  .colLabel {
+    &:hover {
+      cursor: pointer;
+    }
+  }
   svg {
     display: block;
     margin: 0 auto;
