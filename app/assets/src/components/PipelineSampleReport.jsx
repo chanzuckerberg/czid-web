@@ -819,7 +819,7 @@ class PipelineSampleReport extends React.Component {
     if (tax_info.tax_id > 0) {
       if (report_details.taxon_fasta_flag) {
         foo = (
-          <span className="link">
+          <span>
             <a>{tax_name}</a>
           </span>
         );
@@ -1040,7 +1040,7 @@ class PipelineSampleReport extends React.Component {
         : "";
     const disable_filter = this.anyFilterSet() ? (
       <span className="disable" onClick={e => this.resetAllFilters()}>
-        <b> Disable all filters</b>
+       Clear All
       </span>
     ) : null;
     const filter_row_stats = this.state.loading ? null : (
@@ -1328,7 +1328,7 @@ function AdvancedFilters({ parent }) {
         <span className="filter-label-count">
           {parent.validThresholdCount(parent.state.activeThresholds)}{" "}
         </span>
-        <i className="fa fa-angle-down right down-box" />
+        <i className="fa fa-caret-down right down-box" />
       </div>
       <div className="advanced-filters-modal round-me">
         <div className="filter-inputs">
@@ -1372,7 +1372,7 @@ function CategoryFilter({ parent }) {
           {parent.all_categories.length -
             parent.state.excluded_categories.length}{" "}
         </span>
-        <i className="fa fa-angle-down right down-box" />
+        <i className="fa fa-caret-down right down-box" />
       </div>
       <div className="categories-filters-modal">
         <div className="categories">
@@ -1506,7 +1506,6 @@ function RenderMarkup({
           <div className="row reports-container">
             <div className="col s12 reports-section">
               <div className="reports-count">
-                {filter_row_stats}
                 <div className="report-top-filters">
                   <ul className="filter-lists">
                     <ReportSearchBox parent={parent} />
