@@ -32,6 +32,10 @@
       position: absolute !important;
       top: 8px;
       right: 10px;
+      &:before {
+        font-family: FontAwesome;
+        content: "\f107";
+      }
     }
   }
 
