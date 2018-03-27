@@ -186,8 +186,14 @@ a {
   text-overflow: ellipsis;
 }
 
-.sub-header .sub-title a:hover{
-  color: #09c;
+.sub-header {
+  .sub-title {
+    a {
+      &:hover {
+        color: #3867fa !important;
+      }
+    }
+  }
 }
 
 #sample-list{
