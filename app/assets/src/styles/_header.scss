@@ -186,8 +186,14 @@ a {
   text-overflow: ellipsis;
 }
 
-.sub-header .sub-title a:hover{
-  color: #09c !important;
+.sub-header {
+  .sub-title {
+    a {
+      &:hover {
+        color: #3867fa !important;
+      }
+    }
+  }
 }
 
 #sample-list{
@@ -198,18 +204,25 @@ a {
 .sample-select-dropdown {
   padding: 8px;
   display: inline-block;
+  border: 1px solid transparent;
+  &:hover, &.active {
+    color: #3867fa;
+    cursor: pointer;
+    i {
+      visibility: visible;
+    }
+  }
   i {
     visibility: hidden;
     font-size: .7em;
     font-weight: normal;
     margin: .1em;
   }
-  border: 1px solid transparent;
-  &:hover, &.active {
-    color: #5ABCD6;
-    cursor: pointer;
-    i {
-      visibility: visible;
+  li {
+    a {
+      &:hover {
+        color: #3867fa !important;
+      }
     }
   }
 }

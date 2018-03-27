@@ -183,7 +183,7 @@ class PipelineSampleReads extends React.Component {
   }
 
   componentDidMount() {
-    $('.dropdown-button').dropdown({
+    $('.sample-select-dropdown').dropdown({
       belowOrigin: true
     });
 
