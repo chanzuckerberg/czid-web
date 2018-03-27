@@ -1,35 +1,36 @@
 @import "variables";
-
-.header {
-  margin: 25px 75px;
-  .title {
-  font-size: $font-size-h3;
-  color: #03a9f4;
-  .path {
-    margin: 20px;
-    color: #000;
-    font-weight: $font-weight-thin
+.results {
+  .header {
+    margin: 25px 75px;
+    .title {
+    font-size: $font-size-h3;
+    color: #03a9f4;
+    .path {
+      margin: 20px;
+      color: #000;
+      font-weight: $font-weight-thin
+      }
+      .back {
+        cursor: pointer;
+        &:hover {
+          text-decoration: underline
+        }
+      }
     }
-    .back {
+    th {
+      color: $headings-color;
+    }
+    tr {
       cursor: pointer;
-      &:hover {
-        text-decoration: underline
+      td {
+        color: $body-color;
+        &:hover {
+          color: #5abcd6;
+        }
       }
     }
-  }
-  th {
-    color: $headings-color;
-  }
-  tr {
-    cursor: pointer;
-    td {
-      color: $body-color;
-      &:hover {
-        color: #5abcd6;
-      }
+    i.fa-file {
+      margin-right: 15px;
     }
   }
-  i.fa-file {
-    margin-right: 15px;
-  }
-}  
+}

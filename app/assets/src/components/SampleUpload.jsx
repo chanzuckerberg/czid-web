@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import axios from 'axios';
 import $ from 'jquery';
 import Tipsy from 'react-tipsy';
+import {Input, Dropdown, Button, Icon} from 'semantic-ui-react';
 import IconComponent from './IconComponent';
 import ObjectHelper from '../helpers/ObjectHelper';
 
@@ -52,6 +53,8 @@ class SampleUpload extends React.Component {
     this.secondInput = this.selected.inputFiles.length && this.selected.inputFiles[1] ? (this.selected.inputFiles[1].source === null ? '' : this.selected.inputFiles[1].source) : '';
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
     this.openCliModal = this.openCliModal.bind(this);
+    // caching dom ref to reduce dom operation
+    this.newProjectButton = null;
     this.state = {
       submitting: false,
       allProjects: this.projects || [],
@@ -83,6 +86,7 @@ class SampleUpload extends React.Component {
   componentDidMount() {
     $('body').addClass('background-cover');
     $('.tooltipped').tooltip({ delay: 50 });
+    this.newProjectButton = $('.new-project-button');
     this.initializeSelectTag();
     $(ReactDOM.findDOMNode(this.refs.projectSelect)).on('change',this.handleProjectChange);
     $(ReactDOM.findDOMNode(this.refs.hostSelect)).on('change',this.handleHostChange);
@@ -157,7 +161,7 @@ class SampleUpload extends React.Component {
     var that = this;
     axios.post('/projects.json', {
       project: {
-        name: this.refs.new_project.value,
+        name: this.refs.new_project.inputRef.value,
         public_access: this.state.public_checked ? 1 : 0
       },
       authenticity_token: this.csrf
@@ -172,7 +176,7 @@ class SampleUpload extends React.Component {
         success: true,
         successMessage: 'Project added successfully'
       }, () => {
-        this.refs.new_project.value = '';
+        this.refs.new_project.inputRef.value = '';
         that.initializeSelectTag();
       });
     })
@@ -185,7 +189,7 @@ class SampleUpload extends React.Component {
   }
 
   isProjectInvalid() {
-    if (this.refs.new_project.value === '' && this.state.selectedProject === 'Select a project') {
+    if (this.refs.new_project.inputRef.value === '' && this.state.selectedProject === 'Select a project') {
       this.setState({
         invalid: true,
         errorMessage: 'Please enter valid project name'
@@ -386,15 +390,12 @@ class SampleUpload extends React.Component {
     return errorLength;
   }
 
-  handleProjectChange(e) {
-    if(e.target.value.trim().toLowerCase() !== 'select a project') {
-      const selectedIndex = e.target.selectedIndex - 1; // because the first item is Select a project
-      this.setState({
-        selectedProject: e.target.value.trim(),
-        selectedPId: this.state.allProjects[selectedIndex].id,
-        errors: Object.assign({}, this.state.errors, {selectedProject: null})
-      });
-    }
+  handleProjectChange(selectedProject, selectedPId) {
+    this.setState({
+      selectedProject: selectedProject.trim(),
+      selectedPId: selectedPId,
+      errors: Object.assign({}, this.state.errors, {selectedProject: null})
+    });
     this.clearError();
   }
 
@@ -440,6 +441,15 @@ class SampleUpload extends React.Component {
     });
   }
 
+  handleCreateProject() {
+    if (this.refs.new_project.inputRef.value.trim().length) {
+      this.handleProjectSubmit();
+    };
+    if (this.newProjectButton) {
+      this.newProjectButton.click();
+    }
+  }
+
   displayError(failedStatus, serverError, formattedError) {
     if (failedStatus) {
       return (serverError instanceof Array) ? serverError.map((error, i) => {
@@ -454,7 +464,9 @@ class SampleUpload extends React.Component {
     this.clearError();
     $('.new-project-input').slideToggle();
     $('.new-project-input  .input-icon').slideToggle();
-    $('.new-project-button').toggleClass('active');
+    if (this.newProjectButton) {
+      this.newProjectButton.toggleClass('active');
+    }
     this.setState({
       disableProjectSelect: !this.state.disableProjectSelect
     }, () => {
@@ -629,15 +641,25 @@ class SampleUpload extends React.Component {
                   </div>
                   <div className='row input-row'>
                     <Tipsy content='Name of experiment or project' placement='top'>
-                      <div className='col project-list no-padding s8'>
-                        <select ref="projectSelect" disabled={(this.state.disableProjectSelect ? 'disabled' : '')} className="projectSelect" id="sample" onChange={ this.handleProjectChange } value={this.state.selectedProject}>
-                          <option disabled defaultValue>{this.state.selectedProject}</option>
-                          { this.state.allProjects.length ?
-                             ObjectHelper.sortByKey(this.state.allProjects, 'name').map((project, i) => {
-                              return <option ref= "project" key={i} id={project.id} >{project.name}</option>
-                            }) : <option>No projects to display</option>
+                      <div className='col project-list no-padding s9'>
+                        <Dropdown
+                          ref="projectSelect"
+                          disabled={this.state.disableProjectSelect}
+                          fluid
+                          selection
+                          text={this.state.selectedProject}
+                          options={ObjectHelper.sortByKey(this.state.allProjects, 'name').map((project, i) => {
+                            return {
+                              key: i,
+                              text: project.name,
+                              value: i,
+                              id: project.id
+                            };
+                          })}
+                          noResultsMessage="No projects to display"
+                          onChange={(e, {options, value}) => this.handleProjectChange(options[value].text, options[value].id)
                           }
-                        </select>
+                        />
                         {
                           (this.state.errors.selectedProject) ?
                             <div className='field-error'>
@@ -646,21 +668,37 @@ class SampleUpload extends React.Component {
                         }
                       </div>
                     </Tipsy>
-                    <div className='col no-padding s4'>
+                    <div className='col new-button-col s3'>
                       <Tipsy content='Add a new desired experiment or project name'
                         placement='right'>
-                        <button type='button' onClick={this.toggleNewProjectInput} className='new-project-button new-button skyblue-button'>
-                          <i className='fa fa-plus'/><span>New project</span>
-                        </button>
+                        <Button
+                          className="skyblue-button new-proj fluid"
+                          onClick={this.toggleNewProjectInput}
+                          type="button"
+                          content="New project"
+                          icon="add"
+                          labelPosition="left" />
                       </Tipsy>
                     </div>
+                  </div>
+                  <div className="row input-row">
                     <div className='col no-padding s12 new-project-input hidden'>
-                      <input type='text' ref='new_project' onFocus={ this.clearError } className='browser-default new_project_input' placeholder='Input new project name' />
-                        <span className="input-icon hidden"
-                          onClick={(e) => { if (this.refs.new_project.value.trim().length) {this.handleProjectSubmit()};
-                            $('.new-project-button').click();}}>
+                      <Input
+                        type="text"
+                        className="fluid semantic-input"
+                        ref="new_project"
+                        onFocus={ this.clearError }
+                        type="text"
+                        placeholder="Input new project name"
+                        label={{
+                          basic: true,
+                          content: <span onClick={() => this.handleCreateProject() }>
                             Create project
-                        </span>
+                          </span>
+                          }
+                        }
+                        labelPosition="right"
+                      />
                       {
                         (this.state.errors.new_project) ?
                           <div className='field-error'>
@@ -668,10 +706,15 @@ class SampleUpload extends React.Component {
                           </div> : null
                       }
                     </div>
+                  </div>
+                  <div className="row input-row">
                     <div className='col no-padding s12 new-project-input public_access hidden'>
-                      <input ref="public_checked" type="checkbox" name="switch" id="public_checked" className="col s8 filled-in" onChange={ this.toggleCheckBox }
-                             value={ this.state.public_checked } />
-                      <label htmlFor="public_checked" className="checkbox">Make project public</label>
+                      <input
+                        ref="public_checked"
+                        type="checkbox"
+                        name="switch" id="public_checked" className="col s8 filled-in" onChange={ this.toggleCheckBox }
+                          value={ this.state.public_checked } />
+                        <label htmlFor="public_checked" className="checkbox">Make project public</label>
                     </div>
                   </div>
                 </div>
