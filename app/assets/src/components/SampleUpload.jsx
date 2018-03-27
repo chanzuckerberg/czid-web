@@ -53,6 +53,8 @@ class SampleUpload extends React.Component {
     this.secondInput = this.selected.inputFiles.length && this.selected.inputFiles[1] ? (this.selected.inputFiles[1].source === null ? '' : this.selected.inputFiles[1].source) : '';
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
     this.openCliModal = this.openCliModal.bind(this);
+    // caching dom ref to reduce dom operation
+    this.newProjectButton = null;
     this.state = {
       submitting: false,
       allProjects: this.projects || [],
@@ -84,6 +86,7 @@ class SampleUpload extends React.Component {
   componentDidMount() {
     $('body').addClass('background-cover');
     $('.tooltipped').tooltip({ delay: 50 });
+    this.newProjectButton = $('.new-project-button');
     this.initializeSelectTag();
     $(ReactDOM.findDOMNode(this.refs.projectSelect)).on('change',this.handleProjectChange);
     $(ReactDOM.findDOMNode(this.refs.hostSelect)).on('change',this.handleHostChange);
@@ -442,7 +445,9 @@ class SampleUpload extends React.Component {
     if (this.refs.new_project.inputRef.value.trim().length) {
       this.handleProjectSubmit();
     };
-    $('.new-project-button').click();
+    if (this.newProjectButton) {
+      this.newProjectButton.click();
+    }
   }
 
   displayError(failedStatus, serverError, formattedError) {
@@ -459,7 +464,9 @@ class SampleUpload extends React.Component {
     this.clearError();
     $('.new-project-input').slideToggle();
     $('.new-project-input  .input-icon').slideToggle();
-    $('.new-project-button').toggleClass('active');
+    if (this.newProjectButton) {
+      this.newProjectButton.toggleClass('active');
+    }
     this.setState({
       disableProjectSelect: !this.state.disableProjectSelect
     }, () => {

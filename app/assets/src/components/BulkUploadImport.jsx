@@ -31,6 +31,7 @@ class BulkUploadImport extends React.Component {
     this.userDetails = props.loggedin_user;
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
     this.openCliModal = this.openCliModal.bind(this);
+    this.newProjectButton = null;
     this.state = {
       submitting: false,
       allProjects: props.projects || [],
@@ -64,6 +65,7 @@ class BulkUploadImport extends React.Component {
   componentDidMount() {
     $('body').addClass('background-cover');
     this.initializeSelectTag();
+    this.newProjectButton = $('.new-project-button');
     $(ReactDOM.findDOMNode(this.refs.projectSelect)).on('change',this.handleProjectChange);
     $(ReactDOM.findDOMNode(this.refs.hostSelect)).on('change',this.handleHostChange);
     this.initializeSelectTag();
@@ -73,7 +75,9 @@ class BulkUploadImport extends React.Component {
   toggleNewProjectInput(e) {
     $('.new-project-input').slideToggle();
     $('.new-project-input  .input-icon').slideToggle();
-    $('.new-project-button').toggleClass('active');
+    if (this.newProjectButton) {
+      this.newProjectButton.toggleClass('active');
+    }
     this.setState({
       disableProjectSelect: !this.state.disableProjectSelect
     }, () => {
@@ -173,7 +177,9 @@ class BulkUploadImport extends React.Component {
 
   handleProjectSubmit(e) {
     if (this.refs.new_project.inputRef.value.trim().length) {
-      $('.new-project-button').click();
+      if (this.newProjectButton) {
+        this.newProjectButton.click();
+      }
       if(e && e.preventDefault) {
         e.preventDefault();
       }
