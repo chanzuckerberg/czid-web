@@ -4,7 +4,7 @@ import moment from 'moment';
 import $ from 'jquery';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { Button, Icon } from 'semantic-ui-react'
+import { Button, Icon, Divider } from 'semantic-ui-react'
 import numberWithCommas from '../helpers/strings';
 import SubHeader from './SubHeader';
 import PipelineSampleReport from './PipelineSampleReport';
@@ -47,7 +47,18 @@ class PipelineSampleReads extends React.Component {
                               sample_template: this.NUCLEOTIDE_TYPES };
     this.DROPDOWN_METADATA_FIELDS = Object.keys(this.DROPDOWN_OPTIONS);
     this.handleDropdownChange = this.handleDropdownChange.bind(this);
+    this.deleteSample = this.deleteSample.bind(this);
+  }
 
+  deleteSample() {
+    axios
+      .delete(`/samples/${this.sampleInfo.id}.json`, {
+        data: { authenticity_token: this.csrf }
+      })
+      .then((res) => {
+        location.href=`/?project_id=${this.projectInfo.id}`
+      }).catch((err) => {
+    })
   }
 
   render_metadata_dropdown(label, field) {
@@ -172,7 +183,7 @@ class PipelineSampleReads extends React.Component {
   }
 
   componentDidMount() {
-    $('.dropdown-button').dropdown({
+    $('.sample-select-dropdown').dropdown({
       belowOrigin: true
     });
 
@@ -462,6 +473,10 @@ class PipelineSampleReads extends React.Component {
       version_display = version_display + ', NR ' + this.pipelineRun.version.nr
     }
 
+    let run_date_display = !this.pipelineRun ? '' :
+                             !this.pipelineRun.created_at ? '' :
+                               '(run on ' + Date(Date.parse(this.pipelineRun.created_at))  + ')'
+
     let retriable = this.pipelineRunRetriable ? (
       <div className="row">
         <div className="col s12">
@@ -486,12 +501,18 @@ class PipelineSampleReads extends React.Component {
         </div>
       </div>) : null;
 
+    let delete_sample_button = (
+      <Button onClick={this.deleteSample}>
+        Delete sample
+      </Button>  
+    )
+
     return (
       <div>
         <SubHeader>
           <div className="sub-header">
             <div className="title">
-              PIPELINE {version_display}
+              PIPELINE {version_display} {run_date_display}
             </div>
             <div className="row">
               <div className="sub-title col s9">
@@ -500,6 +521,7 @@ class PipelineSampleReads extends React.Component {
                   {this.projectInfo.name + ' '}
                 </a>
                 > { sample_dropdown }
+              { this.sampleInfo.status == "created" ? delete_sample_button : null }
               </div>
               <div className="col no-padding s3 right-align">
                 <div className="report-action-buttons">
@@ -527,6 +549,7 @@ class PipelineSampleReads extends React.Component {
             </div>
           </div>
         </SubHeader>
+        <Divider className="reports-divider" />
         <div id="details" className="tab-screen col s12">
           <div className='center'>
             <span className='note-action-feedback note-saved-success'>
@@ -572,7 +595,7 @@ class PipelineSampleReads extends React.Component {
                           {this.render_metadata_dropdown("Nucleotide type", "sample_template")}
                           <div className='row detail-row no-padding'>
                             <div className='col s5 label'>
-                              Patient ID
+                              Unique ID
                             </div>
                             <div className='col s7 '>
                               <div className="details-value label sample-notes">

@@ -365,10 +365,10 @@ class SamplesController < ApplicationController
     if params[:project_name]
       project_name = params.delete(:project_name)
       project = Project.find_by(name: project_name)
-    end
-    if params[:host_genome_name]
-      host_genome_name = params.delete(:host_genome_name)
-      host_genome = HostGenome.find_by(name: host_genome_name)
+      unless project
+        project = Project.create(name: project_name)
+        project.users << current_user if current_user
+      end
     end
     if project && !current_power.updatable_project?(project)
       respond_to do |format|
@@ -376,6 +376,10 @@ class SamplesController < ApplicationController
         format.html { render json: { status: "User not authorized to update project #{project.name}" }, status: :unprocessable_entity }
       end
       return
+    end
+    if params[:host_genome_name]
+      host_genome_name = params.delete(:host_genome_name)
+      host_genome = HostGenome.find_by(name: host_genome_name)
     end
 
     params[:input_files_attributes] = params[:input_files_attributes].reject { |f| f["source"] == '' }
@@ -391,7 +395,11 @@ class SamplesController < ApplicationController
         format.json { render :show, status: :created, location: @sample }
       else
         format.html { render :new }
-        format.json { render json: @sample.errors.full_messages, status: :unprocessable_entity }
+        format.json do
+          render json: { sample_errors: @sample.errors.full_messages,
+                         project_errors: project ? project.errors.full_messages : nil },
+                 status: :unprocessable_entity
+        end
       end
     end
   end
@@ -413,10 +421,16 @@ class SamplesController < ApplicationController
   # DELETE /samples/1
   # DELETE /samples/1.json
   def destroy
-    @sample.destroy
+    deletable = @sample.pipeline_runs.empty?
+    @sample.destroy if deletable
     respond_to do |format|
-      format.html { redirect_to samples_url, notice: 'Sample was successfully destroyed.' }
-      format.json { head :no_content }
+      if deletable
+        format.html { redirect_to samples_url, notice: 'Sample was successfully destroyed.' }
+        format.json { head :no_content }
+      else
+        format.html { render :edit }
+        format.json { render json: { message: 'Cannot delete this sample' }, status: :unprocessable_entity }
+      end
     end
   end
 

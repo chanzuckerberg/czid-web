@@ -4,6 +4,7 @@ import axios from 'axios';
 import $ from 'jquery';
 import Tipsy from 'react-tipsy';
 import SampleUpload from './SampleUpload';
+import ObjectHelper from '../helpers/ObjectHelper';
 
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
@@ -468,7 +469,7 @@ class BulkUploadImport extends React.Component {
                             </div>
                               <ul id={`project-dropdown${i}`} className='dropdown-content'>
                                 { this.state.allProjects.length ?
-                                this.state.allProjects.map((project, j) => {
+                                 ObjectHelper.sortByKey(this.state.allProjects, 'name').map((project, j) => {
                                   return <li onClick={ (e) => {
                                     this.handleProjectChangeForSample(i, j, e)
                                   }} ref= "project" key={j} value={project.id}>{project.name}</li>
@@ -559,7 +560,7 @@ class BulkUploadImport extends React.Component {
                             disabled={(this.state.disableProjectSelect ? 'disabled' : '')} className="projectSelect" id="sample" onChange={ this.handleProjectChange } value={this.state.project}>
                               <option disabled defaultValue>{this.state.project}</option>
                                 { this.state.allProjects.length ?
-                                this.state.allProjects.map((project, i) => {
+                                 ObjectHelper.sortByKey(this.state.allProjects, 'name').map((project, i) => {
                                   return <option ref= "project" key={i} id={project.id} >{project.name}</option>
                                 }) : <option>No projects to display</option>
                             }

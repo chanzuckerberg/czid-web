@@ -4,7 +4,7 @@ require 'tempfile'
 require 'aws-sdk'
 
 class Sample < ApplicationRecord
-  STATUS_CREATED  = 'created'.freeze
+  STATUS_CREATED = 'created'.freeze
   STATUS_UPLOADED = 'uploaded'.freeze
   STATUS_RERUN    = 'need_rerun'.freeze
   STATUS_RETRY_PR = 'retry_pr'.freeze # retry existing pipeline run
@@ -36,7 +36,7 @@ class Sample < ApplicationRecord
   # These zombies keep coming back, so we now expressly fail submissions to them.
   DEPRECATED_QUEUES = %w[idseq_alpha_stg1 aegea_batch_ondemand idseq_production_high_pri_stg1].freeze
 
-  METADATA_FIELDS = [:sample_host, # this has been repurposed to be patient ID (nothing to do with host genome)
+  METADATA_FIELDS = [:sample_host, # this has been repurposed to be 'Unique ID' (e.g. in human case, patient ID -- nothing to do with host genome)
                      :sample_location, :sample_date, :sample_tissue,
                      :sample_template, # this refers to nucleotide type (RNA or DNA)
                      :sample_library, :sample_sequencer, :sample_notes].freeze
@@ -64,7 +64,7 @@ class Sample < ApplicationRecord
   attr_writer :bulk_mode
 
   def sample_path
-    File.join('samples', project.id.to_s, id.to_s)
+    File.join('samples', project_id.to_s, id.to_s)
   end
 
   validates_associated :input_files
@@ -204,8 +204,7 @@ class Sample < ApplicationRecord
 
   def sample_alignment_output_s3_path
     pr = pipeline_runs.first
-    prs = pr.pipeline_run_stages.first
-    return prs.alignment_output_s3_path
+    return pr.alignment_output_s3_path
   rescue
     return sample_output_s3_path
   end
@@ -278,22 +277,26 @@ class Sample < ApplicationRecord
 
   def concatenate_input_parts
     return unless status == STATUS_UPLOADED
-    input_files.each do |f|
-      next unless f.source_type == 'local'
-      parts = f.parts.split(", ")
-      next unless parts.length > 1
-      source_parts = []
-      local_path = "#{LOCAL_INPUT_PART_PATH}/#{id}/#{f.id}"
-      parts.each_with_index do |part, index|
-        source_part = File.join("s3://#{SAMPLES_BUCKET_NAME}", File.dirname(f.file_path), File.basename(part))
-        source_parts << source_part
-        `aws s3 cp #{source_part} #{local_path}/#{index}`
+    begin
+      input_files.each do |f|
+        next unless f.source_type == 'local'
+        parts = f.parts.split(", ")
+        next unless parts.length > 1
+        source_parts = []
+        local_path = "#{LOCAL_INPUT_PART_PATH}/#{id}/#{f.id}"
+        parts.each_with_index do |part, index|
+          source_part = File.join("s3://#{SAMPLES_BUCKET_NAME}", File.dirname(f.file_path), File.basename(part))
+          source_parts << source_part
+          `aws s3 cp #{source_part} #{local_path}/#{index}`
+        end
+        `cd #{local_path}; cat * > complete_file; aws s3 cp complete_file s3://#{SAMPLES_BUCKET_NAME}/#{f.file_path}`
+        `rm -rf #{local_path}`
+        source_parts.each do |source_part|
+          `aws s3 rm #{source_part}`
+        end
       end
-      `cd #{local_path}; cat * > complete_file; aws s3 cp complete_file s3://#{SAMPLES_BUCKET_NAME}/#{f.file_path}`
-      `rm -rf #{local_path}`
-      source_parts.each do |source_part|
-        `aws s3 rm #{source_part}`
-      end
+    rescue
+      Airbrake.notify("Failed to concatenate input parts for sample #{id}")
     end
   end
 

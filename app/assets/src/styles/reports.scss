@@ -56,6 +56,12 @@ margin-bottom: 0px;
 
 }
 
+.reports-divider {
+  background-color: #f8f8f8;
+  height: 8px !important;
+  border-top: 1px solid #fff !important;
+  margin-top: -0.4rem !important;
+}
 #details table tr td{
   padding: 2px;
 }
@@ -293,7 +299,7 @@ margin-bottom: 0px;
   // min-width: 1000px;
   font-size: $font-size-small;
   .count-type {
-    text-align: right;
+    text-align: center;
     font-weight: normal;
     color:  #999999;
     font-size: $font-size-small;
@@ -310,10 +316,6 @@ margin-bottom: 0px;
   }
 }
 
-.report-table .link:hover {
-  color: #0099cc;
-  cursor: text;
-}
 
 .report-table .count-info {
   color: #A0A0A0;
@@ -387,7 +389,6 @@ margin-bottom: 0px;
 }
 
 .report-table .sort-controls {
-  width: 75px;
   min-width: 50px;
   white-space: nowrap;
   overflow: hidden;
@@ -533,6 +534,10 @@ margin-bottom: 0px;
 
 .reports-section {
   padding: 0 !important;
+  .filter-message {
+    color: #999999;
+    font-size: 12px;
+  }
   .reports-count {
     // box-shadow: 1px 2px 5px 0 #eaeaea;
     .download-report {
@@ -562,8 +567,9 @@ margin-bottom: 0px;
     .disable {
       cursor: pointer;
       color: #414367;
+      font-weight: $font-weight-semibold;
       &:hover {
-        color: #84d4fa;
+        color: #3867fa;
       }
     }
     div.text {
@@ -593,7 +599,6 @@ margin-bottom: 0px;
           margin-right: 15px;
           &:hover {
             color: #2e363d;
-            background: #fbfbfb;
             cursor: pointer;
           }
           &.top-filter-dropdown, &.top-filter {
@@ -612,20 +617,21 @@ margin-bottom: 0px;
               width: 24px;
               height: 24px;
               border-radius: 14px;
-              background-color: #f8f8f8;
-              font-family: OpenSans;
-              font-size: 12px;
+              background-color: #f7f7f7;
+              font-size: 12px !important;
               font-weight: 600;
-              font-style: normal;
-              font-stretch: normal;
-              line-height: normal;
               letter-spacing: 1.4px;
-              text-align: left;
+              text-align: center;
               color: #3867fa;
-              vertical-align: top;
+              border: 1px solid transparent;
+              display: inline-block;
+              position: relative;
+              top: -7px;
             }
             .down-box {
               position: initial !important;
+              margin: 3px;
+              font-size: 13px;
             }
             &.download-report-button {
               padding: 8px;
@@ -725,6 +731,7 @@ margin-bottom: 0px;
     &:hover {
       background-color: #3867fa !important;
       color: #fff;
+      border: 1px solid #3867fa;
     }
   }
   .ui.dropdown .text { // The text in the button
@@ -740,7 +747,6 @@ margin-bottom: 0px;
   background: #fff;
   box-shadow: 1px 2px 2px 2px #c8c8c8;
   margin-left: -16px;
-  margin-top: 8px;
   padding: 10px;
   cursor: auto;
   border-radius: 10px;
@@ -760,6 +766,11 @@ margin-bottom: 0px;
   .round-me {
     border-radius: 10px;
   }
+  input {
+    &.inner-menus {
+      border: 1px solid #cccccc;
+    }
+  }
   .inner-menus {
     font-family: Open Sans, Helvetica, Arial, sans-serif;
     border-radius: 20px;
@@ -773,14 +784,15 @@ margin-bottom: 0px;
     padding-right: 20px;
   }
 }
-
+.s3.download-area {
+  margin-top: 25px;
+}
 .categories-filters-modal {
   display: none;
   position: absolute;
   background: #fff;
   box-shadow: 1px 3px 3px 2px #c8c8c8;
   margin-left: -16px;
-  margin-top: 8px;
   padding: 10px;
   cursor: auto;
   .metric-thresholds {

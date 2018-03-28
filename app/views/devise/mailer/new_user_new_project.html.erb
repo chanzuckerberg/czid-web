@@ -1,2 +1,2 @@
-<p><%= @sharing_user_email %> has added you to the project '<%= @shared_project_name %>' on IDseq!</p>
+<p><%= @sharing_user_email %> has added you to the project '<%= link_to @shared_project_name, "/?project_id=#{@shared_project_id}" %>' on IDseq!</p>
 <p><%= link_to 'Activate your account', edit_password_url(@user, reset_password_token: @token) %></p>

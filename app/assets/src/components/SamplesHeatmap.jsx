@@ -163,7 +163,7 @@ class D3Heatmap extends React.Component {
       }
     }
     this.margin ={
-      top: longest_col_label * Math.cos(25 * (Math.PI / 180)) + 10,
+      top: longest_col_label * Math.cos(25 * (Math.PI / 180)) + 15,
       left: Math.max(Math.ceil(Math.sqrt(this.row_number)) * 10, 40),
       bottom: 80,
       right: longest_row_label + 20
@@ -482,6 +482,9 @@ class D3Heatmap extends React.Component {
       .attr("class",  function (d,i) { return "colLabel mono c"+i;} )
       .on("mouseover", function() {d3.select(this).classed("text-hover",true);})
       .on("mouseout" , function() {d3.select(this).classed("text-hover",false);})
+      .on("click", (d, i) => {
+        this.props.onColumnLabelClick(d, i);
+      });
   }
 
 
@@ -511,6 +514,7 @@ D3Heatmap.propTypes = {
   colors: PropTypes.array,
   getTooltip: PropTypes.func.isRequired,
   onCellClick: PropTypes.func.isRequired,
+  onColumnLabelClick: PropTypes.func.isRequired,
   onRemoveRow: PropTypes.func.isRequired,
 };
 
@@ -599,6 +603,7 @@ class SamplesHeatmap extends React.Component {
       'onCellClick',
       'onRemoveRow',
       'onShareClick',
+      'sampleLabelClicked',
       'taxonLevelChanged',
       'updateDataScale',
       'updateDataType',
@@ -911,6 +916,11 @@ class SamplesHeatmap extends React.Component {
     return (<p className="loading-indicator text-center"><i className="fa fa-spinner fa-pulse fa-fw" /> Loading...</p>);
   }
 
+  sampleLabelClicked (d, i) {
+    let sample = this.clustered_samples.flat[i];
+    window.location.href = "/samples/" + sample.sample_id;
+  }
+
   onCellClick (d) {
     let sample = this.clustered_samples.flat[d.col];
     window.location.href = "/samples/" + sample.sample_id;
@@ -949,6 +959,7 @@ class SamplesHeatmap extends React.Component {
         getCellValue={this.dataGetters[this.state.dataType]}
         getTooltip={this._getTooltip}
         onCellClick={this._onCellClick}
+        onColumnLabelClick={this._sampleLabelClicked}
         onRemoveRow={this._onRemoveRow}
         scale={this.scales[this.state.dataScaleIdx][1]}
         colors={this.colors}
