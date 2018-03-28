@@ -1,48 +1,64 @@
-.ui.button.primary {
-  padding: 7px 30px;
-  border-radius: 40px;
-  border: 1px solid #3867fa;
-  cursor: pointer;
-  display: block;
-  background: #3867fa !important;
-  color: #ffffff !important;
-  &:hover {
-    background: #ffffff !important;
-    color: #3867fa !important;
-  }
-}
-
-.ui.dropdown {
-  border: 1px solid rgb(228,228,228);
-  padding: 5px 1.75em 5px 1em;
-  border-radius: 999999px;
-
-  .menu {
-    margin-top: 2px;
-    width: 100%;
-  }
-  .text {
+#id-seq {
+  .ui.button.primary {
+    padding: 7px 30px;
+    border-radius: 40px;
+    border: 1px solid #3867fa;
+    cursor: pointer;
     display: block;
-    white-space: nowrap;
-    overflow: hidden;
-    font-size: 8pt;
+    background: #3867fa !important;
+    color: #ffffff !important;
+    &:hover {
+      background: #ffffff !important;
+      color: #3867fa !important;
+    }
   }
-  .icon {
-    position: absolute !important;
-    top: 8px;
-    right: 10px;
-  }
-}
 
-.ui.dropdown.labeled-filter-dropdown {
-  input[type=checkbox] {
-    opacity: 1;
-    position: static;
-    margin-right: 0.5em;
+  .ui.dropdown {
+    border: 1px solid rgb(228,228,228);
+    padding: 5px 1.75em 5px 1em;
+    border-radius: 999999px;
+
+    .menu {
+      margin-top: 2px;
+      width: 100%;
+    }
+    .text {
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      font-size: 8pt;
+    }
+    .dropdown.icon {
+      position: absolute !important;
+      top: 8px;
+      right: 10px;
+      &:before {
+        font-family: FontAwesome;
+        content: "\f107";
+      }
+    }
   }
-  .label {
-    padding: 0.2em 0.4em;
-    font-weight: normal;
-    font-size: inherit;
+
+  .ui.dropdown.labeled-filter-dropdown {
+    input[type=checkbox] {
+      opacity: 1;
+      position: static;
+      margin-right: 0.5em;
+    }
+    .label {
+      float: right;
+      padding: 0;
+      margin: -1px 0 0 0;
+      font-size: 11px;
+      text-align: center;
+      width: 20px;
+      height: 20px;
+      line-height: 20px;
+      border-radius: 10px;
+      background-color: #f8f8f8;
+      color: #3867fa;
+      font-weight: normal;
+      font-size: inherit;
+    }
   }
 }

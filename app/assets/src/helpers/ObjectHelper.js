@@ -16,6 +16,12 @@ class ObjectHelper {
 
     return true;
   }
+  static sortByKey(arr, key) {
+    return arr.sort((a,b)  => {
+      const aVal = a[key].toLowerCase(), bVal = b[key].toLowerCase();
+      return (aVal > bVal) ? 1 : ((bVal > aVal) ? -1 : 0);
+    });
+  }
 }
 
 export default ObjectHelper;

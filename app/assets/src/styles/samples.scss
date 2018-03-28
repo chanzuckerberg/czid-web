@@ -38,11 +38,6 @@ $break-large: 1070px;
   }
 }
 
-.tab-screen {
-  background: #f8f9f9;
-  margin-top: 5px;
-}
-
 .tab-screen-content {
   .content-title{
     color: #313E49;
@@ -459,6 +454,17 @@ $break-large: 1070px;
   }
 }
 
+.all-filter-btn {
+  height: 43px;
+  width: 150px !important;
+  .text {
+    margin-top: 7px;
+  }
+  .dropdown.icon {
+    margin-top: -3px !important;
+  }
+}
+
 .sample-container {
   [type=checkbox].filled-in:not(:checked)+label:after,
   [type=checkbox].filled-in+label:after {
@@ -716,8 +722,7 @@ $break-large: 1070px;
         z-index: 100;
         border-radius: 3px;
         box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-        height: 300px;
-        overflow: scroll;
+        height: auto !important;
         .col.s6 {
           .options-wrapper {
             label {
@@ -756,7 +761,7 @@ $break-large: 1070px;
     }
     .search {
       border-radius: 40px;
-      border: solid 1px #cccccc;
+      border: solid 1px #e4e4e4;
       padding-left: 32px;
       position: relative;
       top: -1.2em;
@@ -913,8 +918,14 @@ input[type="button"] {
               }
             }
           }
+          .row.label-row {
+            margin-bottom: 0;
+          }
           .project-label {
             cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
           }
         }
       }
@@ -1064,6 +1075,23 @@ input[type="button"] {
   margin-top: 4px;
 }
 
+.add-user-modal {
+  width: 35% !important;
+  box-shadow: 1px 1px 7px 2px #fff;
+  color: #353535;
+  border-radius: 0px;
+  margin: 0 auto !important;
+  top: 30% !important;
+}
+
+.ui.dimmer {
+  background-color: rgba(0,0,0,.50);
+}
+
+#add_user_to_project {
+  height: 15px !important;
+}
+
 .project-popup {
   width: 30%;
   box-shadow: 1px 1px 7px 2px #fff;
@@ -1081,7 +1109,7 @@ input[type="button"] {
     font-weight: $font-weight-bold;
     margin-bottom: 10px;
   }
-  .project_modal_visiblity {
+  .project_modal_visibility {
     i.material-icons {
       font-size: $font-size-base;
       position: relative;
@@ -1120,6 +1148,7 @@ input[type="button"] {
       background: #e9ecef;
       padding: 10px;
       font-size: 12px;
+      right: 8px;
       border-top-right-radius: 2px;
       border-bottom-right-radius: 2px;
       border: 1px solid #ced4da;

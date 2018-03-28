@@ -36,7 +36,7 @@ class LabeledFilterDropdown extends React.Component {
 
   renderText () {
     return (
-      <span><b>{this.props.label}</b> <Label color='blue'>{this.props.value.length}</Label></span>
+      <span><b>{this.props.label}</b> <Label>{this.props.value.length}</Label></span>
     );
   }
 

@@ -19,9 +19,13 @@ class CheckPipelineRuns
 
   def self.update_jobs(silent)
     PipelineRun.in_progress.each do |pr|
-      break if @shutdown_requested
-      @logger.info("  Checking pipeline run #{pr.id} for sample #{pr.sample_id}") unless silent
-      pr.update_job_status
+      begin
+        break if @shutdown_requested
+        @logger.info("  Checking pipeline run #{pr.id} for sample #{pr.sample_id}") unless silent
+        pr.update_job_status
+      rescue
+        Airbrake.notify("Failed to update pipeline run #{pr.id}")
+      end
     end
   end
 

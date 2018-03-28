@@ -4,7 +4,7 @@ import moment from 'moment';
 import $ from 'jquery';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { Button, Icon } from 'semantic-ui-react'
+import { Button, Icon, Divider } from 'semantic-ui-react'
 import numberWithCommas from '../helpers/strings';
 import SubHeader from './SubHeader';
 import PipelineSampleReport from './PipelineSampleReport';
@@ -183,7 +183,7 @@ class PipelineSampleReads extends React.Component {
   }
 
   componentDidMount() {
-    $('.dropdown-button').dropdown({
+    $('.sample-select-dropdown').dropdown({
       belowOrigin: true
     });
 
@@ -545,6 +545,7 @@ class PipelineSampleReads extends React.Component {
             </div>
           </div>
         </SubHeader>
+        <Divider className="reports-divider" />
         <div id="details" className="tab-screen col s12">
           <div className='center'>
             <span className='note-action-feedback note-saved-success'>
@@ -590,7 +591,7 @@ class PipelineSampleReads extends React.Component {
                           {this.render_metadata_dropdown("Nucleotide type", "sample_template")}
                           <div className='row detail-row no-padding'>
                             <div className='col s5 label'>
-                              Patient ID
+                              Unique ID
                             </div>
                             <div className='col s7 '>
                               <div className="details-value label sample-notes">

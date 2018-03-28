@@ -56,6 +56,12 @@ margin-bottom: 0px;
 
 }
 
+.reports-divider {
+  background-color: #f8f8f8;
+  height: 8px !important;
+  border-top: 1px solid #fff !important;
+  margin-top: -0.4rem !important;
+}
 #details table tr td{
   padding: 2px;
 }
@@ -310,10 +316,6 @@ margin-bottom: 0px;
   }
 }
 
-.report-table .link:hover {
-  color: #0099cc;
-  cursor: text;
-}
 
 .report-table .count-info {
   color: #A0A0A0;
@@ -533,6 +535,10 @@ margin-bottom: 0px;
 
 .reports-section {
   padding: 0 !important;
+  .filter-message {
+    color: #999999;
+    font-size: 12px;
+  }
   .reports-count {
     // box-shadow: 1px 2px 5px 0 #eaeaea;
     .download-report {
@@ -562,8 +568,9 @@ margin-bottom: 0px;
     .disable {
       cursor: pointer;
       color: #414367;
+      font-weight: $font-weight-semibold;
       &:hover {
-        color: #84d4fa;
+        color: #3867fa;
       }
     }
     div.text {
@@ -650,7 +657,9 @@ margin-bottom: 0px;
               vertical-align: top;
             }
             .down-box {
-              position: initial !important;
+              font-size: .75714286em;
+              top: 3px;
+              position: relative !important;
             }
             &.download-report-button {
               padding: 8px;
@@ -750,6 +759,7 @@ margin-bottom: 0px;
     &:hover {
       background-color: #3867fa !important;
       color: #fff;
+      border: 1px solid #3867fa;
     }
   }
   .ui.dropdown .text { // The text in the button
@@ -798,7 +808,9 @@ margin-bottom: 0px;
     padding-right: 20px;
   }
 }
-
+.s3.download-area {
+  margin-top: 25px;
+}
 .categories-filters-modal {
   display: none;
   position: absolute;

@@ -36,7 +36,7 @@ class Sample < ApplicationRecord
   # These zombies keep coming back, so we now expressly fail submissions to them.
   DEPRECATED_QUEUES = %w[idseq_alpha_stg1 aegea_batch_ondemand idseq_production_high_pri_stg1].freeze
 
-  METADATA_FIELDS = [:sample_host, # this has been repurposed to be patient ID (nothing to do with host genome)
+  METADATA_FIELDS = [:sample_host, # this has been repurposed to be 'Unique ID' (e.g. in human case, patient ID -- nothing to do with host genome)
                      :sample_location, :sample_date, :sample_tissue,
                      :sample_template, # this refers to nucleotide type (RNA or DNA)
                      :sample_library, :sample_sequencer, :sample_notes].freeze
@@ -204,8 +204,7 @@ class Sample < ApplicationRecord
 
   def sample_alignment_output_s3_path
     pr = pipeline_runs.first
-    prs = pr.pipeline_run_stages.first
-    return prs.alignment_output_s3_path
+    return pr.alignment_output_s3_path
   rescue
     return sample_output_s3_path
   end

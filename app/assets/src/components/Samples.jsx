@@ -1,10 +1,19 @@
-import React from "react";
+import React, { Component } from "react";
 import axios from "axios";
 import ReactDOM from "react-dom";
 import moment from "moment";
 import $ from "jquery";
 import Materialize from "materialize-css";
-import { Sidebar, Popup, Dropdown, Label, Icon } from "semantic-ui-react";
+import {
+  Sidebar,
+  Popup,
+  Dropdown,
+  Label,
+  Icon,
+  Modal,
+  Button,
+  Form
+} from "semantic-ui-react";
 import Nanobar from "nanobar";
 import SortHelper from "./SortHelper";
 import numberWithCommas from "../helpers/strings";
@@ -41,13 +50,12 @@ class Samples extends React.Component {
     this.fetchProjectUsers = this.fetchProjectUsers.bind(this);
     this.updateProjectUserState = this.updateProjectUserState.bind(this);
     this.updateUserDisplay = this.updateUserDisplay.bind(this);
-    this.resetForm = this.resetForm.bind(this);
     this.selectSample = this.selectSample.bind(this);
     this.compareSamples = this.compareSamples.bind(this);
     this.clearAllFilters = this.clearAllFilters.bind(this);
     this.selectTissueFilter = this.selectTissueFilter.bind(this);
     this.selectHostFilter = this.selectHostFilter.bind(this);
-    this.displayMetaDataDropdown = this.displayMetaDataDropdown.bind(this);
+    this.displayMetadataDropdown = this.displayMetadataDropdown.bind(this);
     this.handleColumnSelectChange = this.handleColumnSelectChange.bind(this);
     this.columnHidden = this.columnHidden.bind(this);
     this.startReportGeneration = this.startReportGeneration.bind(this);
@@ -334,15 +342,6 @@ class Samples extends React.Component {
   updateProjectUserState(email_array) {
     this.setState({ project_users: email_array });
   }
-
-  resetForm() {
-    $("#add_user_to_project").val("");
-    this.setState({
-      project_add_email_validation: null,
-      invite_status: null
-    });
-  }
-
   fetchProjectUsers(id) {
     if (!id || !this.canEditProject(id)) {
       this.updateProjectUserState([]);
@@ -358,7 +357,7 @@ class Samples extends React.Component {
     }
   }
 
-  toggleProjectVisbility(projId, publicAccess) {
+  toggleProjectVisibility(projId, publicAccess) {
     if (projId) {
       axios
         .put(`/projects/${projId}.json`, {
@@ -384,7 +383,7 @@ class Samples extends React.Component {
     }
   }
 
-  displayMetaDataDropdown() {
+  displayMetadataDropdown() {
     this.setState({
       displayDropdown: !this.state.displayDropdown
     });
@@ -398,34 +397,29 @@ class Samples extends React.Component {
     }
   }
 
-  handleAddUser(e, waitForEnter) {
-    if (waitForEnter && e.keyCode !== 13) {
-      return;
-    } else {
-      let email_to_add = this.refs.add_user.value;
-      let project_id = this.state.selectedProjectId;
-      const isValidEmail = StringHelper.validateEmail(email_to_add);
-      if (isValidEmail) {
-        this.setState({
-          project_add_email_validation: null,
-          invite_status: "sending"
-        });
-        axios
-          .put(`/projects/${project_id}/add_user`, {
-            user_email_to_add: email_to_add,
-            authenticity_token: this.csrf
-          })
-          .then(() => {
-            this.updateUserDisplay(email_to_add);
-            this.setState({
-              invite_status: "sent"
-            });
+  handleAddUser(email_to_add) {
+    let project_id = this.state.selectedProjectId;
+    const isValidEmail = StringHelper.validateEmail(email_to_add);
+    if (isValidEmail) {
+      this.setState({
+        project_add_email_validation: null,
+        invite_status: "sending"
+      });
+      axios
+        .put(`/projects/${project_id}/add_user`, {
+          user_email_to_add: email_to_add,
+          authenticity_token: this.csrf
+        })
+        .then(() => {
+          this.updateUserDisplay(email_to_add);
+          this.setState({
+            invite_status: "sent"
           });
-      } else {
-        this.setState({
-          project_add_email_validation: "Invalid email address, try again?"
         });
-      }
+    } else {
+      this.setState({
+        project_add_email_validation: "Invalid email address, try again?"
+      });
     }
   }
 
@@ -507,7 +501,7 @@ class Samples extends React.Component {
         : this.applyClass(descrip);
       let status = !descrip ? this.getChunkedStage(runInfo) : descrip;
 
-      const rowWithChunkStatus = (
+      const stageStatus = (
         <div className={`${statusClass} status`}>
           {this.appendStatusIcon(status)}
           <span>{status}</span>
@@ -532,7 +526,7 @@ class Samples extends React.Component {
           dbSample={dbSample}
           report_ready={sample.run_info.report_ready}
           sample_name_info={sample_name_info}
-          rowWithChunkStatus={rowWithChunkStatus}
+          stageStatus={stageStatus}
           total_runtime={runInfo.total_runtime}
           data_values={data_values}
           parent={this}
@@ -952,47 +946,12 @@ class Samples extends React.Component {
     let project_id = this.state.selectedProjectId
       ? this.state.selectedProjectId
       : "all";
-    let search_field_width = "col s3 no-padding";
     let search_field = (
-      <div className={search_field_width + " search-field"}>
-        <div className="row">
-          <i className="fa search-icon left fa-search" />
-          <input
-            id="search"
-            value={this.state.searchParams}
-            onChange={this.handleSearchChange}
-            onKeyDown={this.handleSearch}
-            className="search col s12"
-            placeholder="Search"
-          />
-        </div>
-      </div>
+      <TableSearchField searchParams={this.state.searchParams} parent={this} />
     );
 
     let table_download_dropdown = (
-      <div className="download-wrapper">
-        <Dropdown
-          button
-          className="icon link download-btn"
-          labeled
-          icon={{ className: "cloud download alternate" }}
-          text="Download"
-        >
-          <Dropdown.Menu>
-            <Dropdown.Item href={`/projects/${project_id}/csv`}>
-              Download Table
-            </Dropdown.Item>
-            {project_id === "all" ? null : (
-              <Dropdown.Item
-                onClick={this.startReportGeneration}
-                className="download-reports"
-              >
-                Download Reports
-              </Dropdown.Item>
-            )}
-          </Dropdown.Menu>
-        </Dropdown>
-      </div>
+      <TableDownloadDropdown project_id={project_id} parent={this} />
     );
 
     let check_all = (
@@ -1047,255 +1006,64 @@ class Samples extends React.Component {
       <div className="row search-box">
         {this.state.displaySelectSamples ? check_all : null}
         {search_field}
-        {<MetaDataFilter state={this.state} parent={this} />}
-      </div>
-    );
-
-    let addUser = (
-      <div id="modal1" className="modal project-popup">
-        <div className="modal-content">
-          <div className="project_modal_header">
-            Project Members and Access Control
-          </div>
-          <div className="project_modal_title">
-            {this.state.project ? this.state.project.name : null}
-          </div>
-          <div className="project_modal_visiblity">
-            {this.state.project ? (
-              this.state.project.public_access ? (
-                <span>
-                  <i className="tiny material-icons">lock_open</i>
-                  <span className="label">Public Project</span>
-                </span>
-              ) : (
-                <span>
-                  <i className="tiny material-icons">lock</i>
-                  <span className="label">Private Project</span>
-                  <a
-                    href="#"
-                    onClick={() =>
-                      this.toggleProjectVisbility(this.state.project.id, 1)
-                    }
-                  >
-                    Make project public
-                  </a>
-                </span>
-              )
-            ) : null}
-          </div>
-
-          <div className="add_member row">
-            <input
-              ref="add_user"
-              id="add_user_to_project"
-              type="email"
-              placeholder="Add project members by email"
-              onKeyDown={e => this.handleAddUser(e, true)}
-              className="validate col s12 browser-default"
-            />
-            <span className="add_member_action" onClick={this.handleAddUser}>
-              Add member
-            </span>
-            <div className="error-message">
-              {this.state.project_add_email_validation}
-            </div>
-            {this.state.invite_status === "sending" ? (
-              <div className="status-message">
-                <i className="fa fa-circle-o-notch fa-spin fa-fw" />
-                Hang tight, sending invitation...
-              </div>
-            ) : null}
-            {this.state.invite_status === "sent" ? (
-              <div className="status-message status teal-text text-darken-2">
-                <i className="fa fa-smile-o fa-fw" />
-                Yay! User has been added
-              </div>
-            ) : null}
-          </div>
-
-          <div className="members_list">
-            <div className="list_title">
-              <i className="tiny material-icons">person_add</i> Project Members
-            </div>
-            <ul>
-              {this.state.project_users.length > 0 ? (
-                this.state.project_users.map(email => {
-                  return <li key={email}>{email}</li>;
-                })
-              ) : (
-                <li key="None">None</li>
-              )}
-            </ul>
-          </div>
-          <button className="modal-close">Close</button>
-        </div>
+        {<MetadataFilter state={this.state} parent={this} />}
       </div>
     );
 
     let proj_users_count = this.state.project_users.length;
     let proj = this.state.project;
     const project_menu = (
-      <div className="right col s12">
-        <ul className="project-menu">
-          <li>
-            {proj ? (
-              proj.public_access ? (
-                <span>
-                  <i className="tiny material-icons">lock_open</i> Public
-                  project
-                </span>
-              ) : (
-                <span>
-                  <i className="tiny material-icons">lock</i> Private project
-                </span>
-              )
-            ) : null}
-          </li>
-          <li>
-            {proj && this.canEditProject(proj.id) ? (
-              proj_users_count ? (
-                <span>
-                  <i className="tiny material-icons">people</i>{" "}
-                  {this.state.project_users.length}
-                  {this.state.project_users.length > 1 ? " members" : " member"}
-                </span>
-              ) : (
-                <span>No member</span>
-              )
-            ) : null}
-          </li>
-          <li className="add-member">
-            {proj && this.canEditProject(proj.id) ? (
-              <a
-                className="modal-trigger"
-                href="#modal1"
-                onClick={this.resetForm}
-              >
-                Add user
-              </a>
-            ) : null}
-          </li>
-        </ul>
-      </div>
+      <ProjectHeaderMenu
+        proj={proj}
+        proj_users_count={proj_users_count}
+        parent={this}
+      />
     );
 
-    let allSamplesLen = this.state.allSamples.length;
-    const samplesSelectionStr = this.state.selectedSampleIds.length
+    let samplesCount = this.state.allSamples.length;
+    const selectedStr = this.state.selectedSampleIds.length
       ? `${this.state.selectedSampleIds.length} samples selected.`
       : "";
 
     const projInfo = (
-      <div className="row download-section">
-        <div className="col s6 wrapper">
-          <div
-            className={
-              !proj ? "proj-title heading all-proj" : "heading proj-title"
-            }
-          >
-            {!proj ? (
-              <div className="">All Samples</div>
-            ) : (
-              <div>
-                <span className="">{proj.name}</span>
-              </div>
-            )}
-          </div>
-          <p className="subheading col no-padding s12">
-            {allSamplesLen === 0
-              ? "No sample found"
-              : allSamplesLen === 1
-                ? "1 sample found"
-                : `Showing ${allSamplesLen} out of ${
-                    this.state.totalNumber
-                  } total samples. ${samplesSelectionStr}`}
-          </p>
-        </div>
-        <div className="col s6 download-section-btns">
-          {this.state.selectedProjectId ? project_menu : null}
-          {table_download_dropdown}
-          {this.state.selectedSampleIds.length > 0 ? compare_button : null}
-          { this.state.selectedProjectId && this.state.allSamples.length == 0 ? delete_project_button : null }
-        </div>
-      </div>
+      <ProjectInfoHeading
+        proj={proj}
+        samplesCount={samplesCount}
+        selectedStr={selectedStr}
+        project_menu={project_menu}
+        table_download_dropdown={table_download_dropdown}
+        compare_button={compare_button}
+        state={this.state}
+      />
     );
 
     let filterSelect = this.handleStatusFilterSelect;
-    let statuses = ["WAITING", "UPLOADING", "CHECKED", "FAILED", "ALL"];
-    let texts = ["Waiting", "In Progress", "Complete", "Failed", "All"];
-    let classes = ["waiting", "uploading", "complete", "failed", "all"];
+    let all_caps = ["WAITING", "UPLOADING", "CHECKED", "FAILED", "ALL"];
+    let uppercase = ["Waiting", "In Progress", "Complete", "Failed", "All"];
+    let lowercase = ["waiting", "uploading", "complete", "failed", "all"];
 
     const filterStatus = (
-      <div className="dropdown-status-filtering">
-        <li>
-          <a className="title">
-            <b>Filter status</b>
-          </a>
-        </li>
-
-        {statuses.map((status, pos) => {
-          return FilterItemMarkup({
-            status,
-            filterSelect,
-            classes,
-            pos,
-            texts
-          });
-        })}
-        <li className="divider" />
-      </div>
+      <JobStatusFilters
+        all_caps={all_caps}
+        filterSelect={filterSelect}
+        lowercase={lowercase}
+        uppercase={uppercase}
+      />
     );
 
-    let sort = this.state.sort_by;
-    let colMap = this.COLUMN_DISPLAY_MAP;
     const tableHead = (
-      <div className="col s12 sample-feed-head no-padding samples-table-head">
-        <div className="samples-card white">
-          <div className="flex-container">
-            <ul className="flex-items">
-              <li className="sample-name-info">
-                <div className="card-label column-title center-label sample-name">
-                  <div className="sort-able" onClick={this.sortSamples}>
-                    <span>Name</span>
-                    <i
-                      className={`fa ${
-                        sort === "name,desc"
-                          ? "fa fa-sort-alpha-desc"
-                          : "fa fa-sort-alpha-asc"
-                      }
-                  ${
-                    sort === "name,desc" || sort === "name,asc"
-                      ? "active"
-                      : "hidden"
-                  }`}
-                    />
-                  </div>
-                </div>
-              </li>
-
-              {this.state.columnsShown.map((column_name, pos) => {
-                return (
-                  <ColumnDropdown
-                    pos={pos}
-                    key={pos}
-                    colMap={colMap}
-                    column_name={column_name}
-                    filterStatus={filterStatus}
-                    allColumns={this.state.allColumns}
-                    columnsShown={this.state.columnsShown}
-                    parent={this}
-                  />
-                );
-              })}
-            </ul>
-          </div>
-        </div>
-      </div>
+      <TableColumnHeaders
+        sort={this.state.sort_by}
+        colMap={this.COLUMN_DISPLAY_MAP}
+        filterStatus={filterStatus}
+        state={this.state}
+        parent={this}
+      />
     );
 
     return (
       <FilterListMarkup
         projInfo={projInfo}
-        addUser={addUser}
         search_box={search_box}
         host_filter_tag_list={host_filter_tag_list}
         tissue_filter_tag_list={tissue_filter_tag_list}
@@ -1338,10 +1106,7 @@ class Samples extends React.Component {
         });
       }
 
-      if (
-        !this.state.displayDropdown &&
-        (this.state.hostFilterChange || this.state.tissueFilterChange)
-      ) {
+      if (this.state.hostFilterChange || this.state.tissueFilterChange) {
         this.setUrlLocation("none");
         this.fetchResults();
         this.state.hostFilterChange = false;
@@ -1382,7 +1147,7 @@ class Samples extends React.Component {
       });
       $(".filter").hide();
     });
-    this.closeMetaDataDropdown();
+    this.closeMetadataDropdown();
     this.displayDownloadDropdown();
     this.initializeTooltip();
     this.fetchProjectDetails(this.state.selectedProjectId, false);
@@ -1478,7 +1243,7 @@ class Samples extends React.Component {
     );
   }
 
-  closeMetaDataDropdown() {
+  closeMetadataDropdown() {
     let that = this;
     $(document).on("click", function(event) {
       if ($(event.target).has(".wrapper").length) {
@@ -1548,7 +1313,7 @@ function LabelTagMarkup({
   );
 }
 
-function FilterItemMarkup({ status, filterSelect, classes, pos, texts }) {
+function FilterItemMarkup({ status, filterSelect, lowercase, pos, uppercase }) {
   return (
     <li
       className="filter-item"
@@ -1556,8 +1321,8 @@ function FilterItemMarkup({ status, filterSelect, classes, pos, texts }) {
       data-status={status}
       onClick={filterSelect}
     >
-      <a data-status={status} className={"filter-item " + classes[pos]}>
-        {texts[pos]}
+      <a data-status={status} className={"filter-item " + lowercase[pos]}>
+        {uppercase[pos]}
       </a>
       <i data-status={status} className="filter fa fa-check hidden" />
     </li>
@@ -1575,24 +1340,7 @@ function ColumnDropdown({
 }) {
   return (
     <li key={`shown-${pos}`}>
-      {
-        <Popup
-          trigger={
-            <div
-              className="card-label column-title center-label sample-name center menu-dropdown"
-              data-activates={`column-dropdown-${pos}`}
-            >
-              {colMap[column_name].display_name}{" "}
-              <i className="fa fa-caret-down" />
-            </div>
-          }
-          size="mini"
-          className={!colMap[column_name].tooltip ? "hidden-popup" : ""}
-          content={colMap[column_name].tooltip}
-          hideOnScroll
-          inverted
-        />
-      }
+      <ColumnPopups pos={pos} colMap={colMap} column_name={column_name} />
       <ul
         className="dropdown-content column-dropdown"
         id={`column-dropdown-${pos}`}
@@ -1624,7 +1372,6 @@ function ColumnDropdown({
 
 function FilterListMarkup({
   projInfo,
-  addUser,
   search_box,
   host_filter_tag_list,
   tissue_filter_tag_list,
@@ -1634,9 +1381,7 @@ function FilterListMarkup({
 }) {
   return (
     <div className="row content-wrapper">
-      <div className="project-info col s12">
-        {projInfo} {addUser}
-      </div>
+      <div className="project-info col s12">{projInfo}</div>
       <div className="divider" />
       <div className="sample-container no-padding col s12">
         {search_box}
@@ -1772,7 +1517,7 @@ function PipelineOutputCards({
   dbSample,
   report_ready,
   sample_name_info,
-  rowWithChunkStatus,
+  stageStatus,
   total_runtime,
   data_values,
   parent
@@ -1783,73 +1528,20 @@ function PipelineOutputCards({
         <div className="samples-card white">
           <div className="flex-container">
             <ul className="flex-items">
-              <li className="check-box-container">
-                {parent.state.displaySelectSamples ? (
-                  <div>
-                    <input
-                      type="checkbox"
-                      id={i}
-                      onClick={parent.selectSample}
-                      key={`sample_${dbSample.id}`}
-                      data-sample-id={dbSample.id}
-                      className="filled-in checkbox"
-                      checked={
-                        parent.state.selectedSampleIds.indexOf(dbSample.id) >= 0
-                      }
-                      disabled={report_ready != 1}
-                    />{" "}
-                    <label htmlFor={i}>{sample_name_info}</label>
-                  </div>
-                ) : (
-                  sample_name_info
-                )}
-              </li>
-              {parent.state.columnsShown.map((column, pos) => {
-                let column_data = "";
-                if (column === "pipeline_status") {
-                  column_data = (
-                    <li
-                      key={pos}
-                      onClick={parent.viewSample.bind(parent, dbSample.id)}
-                    >
-                      <div className="card-label top-label">
-                        {rowWithChunkStatus}
-                      </div>
-                      <div className="card-label center-label">
-                        {total_runtime ? (
-                          <span className="time">
-                            <i className="fa fa-clock-o" aria-hidden="true" />
-                            <span className="duration-label">
-                              {parent.formatRunTime(total_runtime)}
-                            </span>
-                          </span>
-                        ) : null}
-                      </div>
-                    </li>
-                  );
-                } else if (column === "nonhost_reads") {
-                  column_data = (
-                    <li key={pos}>
-                      <div className="card-label center center-label data-label">
-                        {data_values[column]}{" "}
-                        {data_values["nonhost_reads_percent"]}
-                      </div>
-                    </li>
-                  );
-                } else {
-                  column_data = (
-                    <li
-                      key={pos}
-                      onClick={parent.viewSample.bind(parent, dbSample.id)}
-                    >
-                      <div className="card-label center center-label data-label">
-                        {data_values[column]}
-                      </div>
-                    </li>
-                  );
-                }
-                return column_data;
-              })}
+              <SampleCardCheckboxes
+                dbSample={dbSample}
+                report_ready={report_ready}
+                sample_name_info={sample_name_info}
+                i={i}
+                parent={parent}
+              />
+              <SampleDetailedColumns
+                dbSample={dbSample}
+                stageStatus={stageStatus}
+                total_runtime={total_runtime}
+                data_values={data_values}
+                parent={parent}
+              />
             </ul>
           </div>
         </div>
@@ -1858,84 +1550,506 @@ function PipelineOutputCards({
   );
 }
 
-function MetaDataFilter({ state, parent }) {
+function MetadataFilter({ state, parent }) {
   return (
-    <div className="col s2 wrapper">
-      <div
-        className={
-          state.displayDropdown ? "metadata metadata-active" : "metadata"
-        }
-        onClick={parent.displayMetaDataDropdown}
-      >
-        <div className="metadata-dropdown">Filter</div>
-        <i
-          className={
-            state.displayDropdown ? "fa fa-angle-up" : "fa fa-angle-down"
-          }
+    <Dropdown text="Filter" className="col s2 wrapper all-filter-btn">
+      <Dropdown.Menu>
+        <MetadataFilterDropdowns state={state} parent={parent} />
+      </Dropdown.Menu>
+    </Dropdown>
+  );
+}
+
+function TableSearchField({ searchParams, parent }) {
+  let search_field_width = "col s3 no-padding";
+  return (
+    <div className={search_field_width + " search-field"}>
+      <div className="row">
+        <i className="fa search-icon left fa-search" />
+        <input
+          id="search"
+          value={searchParams}
+          onChange={parent.handleSearchChange}
+          onKeyDown={parent.handleSearch}
+          className="search col s12"
+          placeholder="Search"
         />
       </div>
-      {state.displayDropdown ? (
-        <div className="row metadata-options">
-          <div className="col s6">
-            <h6>Host</h6>
-            {state.hostGenomes.length == 0 ? (
-              <div className="options-wrapper">
-                <label>No host genome data present</label>
-              </div>
-            ) : (
-              state.hostGenomes.map((host, i) => {
-                let indices = state.selectedHostIndices;
-                let res = (
-                  <div key={i} className="options-wrapper">
-                    <input
-                      name="host"
-                      type="checkbox"
-                      data-id={host.id}
-                      checked={indices.indexOf(host.id) < 0 ? "" : "checked"}
-                      value={indices.indexOf(i) != -1}
-                      onChange={parent.selectHostFilter}
-                      id={host.id}
-                      className="filled-in human"
-                    />
-                    <label htmlFor={host.id}>{host.name}</label>
-                  </div>
-                );
-                return res;
-              })
-            )}
+    </div>
+  );
+}
+
+function TableDownloadDropdown({ project_id, parent }) {
+  return (
+    <div className="download-wrapper">
+      <Dropdown
+        button
+        className="icon link download-btn"
+        labeled
+        icon={{ className: "cloud download alternate" }}
+        text="Download"
+      >
+        <Dropdown.Menu>
+          <Dropdown.Item href={`/projects/${project_id}/csv`}>
+            Download Table
+          </Dropdown.Item>
+          {project_id === "all" ? null : (
+            <Dropdown.Item
+              onClick={parent.startReportGeneration}
+              className="download-reports"
+            >
+              Download Reports
+            </Dropdown.Item>
+          )}
+        </Dropdown.Menu>
+      </Dropdown>
+    </div>
+  );
+}
+
+class AddUserModal extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { modalOpen: false, email: "" };
+    this.handleOpen = this.handleOpen.bind(this);
+    this.handleClose = this.handleClose.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+  handleOpen() {
+    this.setState({ modalOpen: true, email: "" });
+    this.props.parent.setState({
+      invite_status: "",
+      project_add_email_validation: ""
+    });
+  }
+  handleClose() {
+    this.setState({ modalOpen: false, email: "" });
+  }
+  handleChange(e, { name, value }) {
+    this.setState({ email: value });
+  }
+  handleSubmit() {
+    this.props.parent.handleAddUser(this.state.email);
+  }
+
+  render() {
+    return (
+      <Modal
+        trigger={<a onClick={this.handleOpen}>Add User</a>}
+        open={this.state.modalOpen}
+        onClose={this.handleClose}
+        className="modal project-popup add-user-modal"
+      >
+        <Modal.Header className="project_modal_header">
+          Project Members and Access Control
+        </Modal.Header>
+        <Modal.Content className="modal-content">
+          <div className="project_modal_title">
+            {this.props.state.project ? this.props.state.project.name : null}
           </div>
-          <div className="col s6">
-            <h6>Tissue</h6>
-            {state.tissueTypes.length == 0 ? (
-              <div className="options-wrapper">
-                <label>No tissue data present</label>
-              </div>
-            ) : (
-              state.tissueTypes.map((tissue, i) => {
-                let res = (
-                  <div key={i} className="options-wrapper">
-                    <input
-                      name="tissue"
-                      type="checkbox"
-                      id={tissue}
-                      className="filled-in"
-                      data-status={tissue}
-                      checked={
-                        state.selectedTissueFilters.indexOf(tissue) < 0
-                          ? ""
-                          : "checked"
-                      }
-                      onChange={parent.selectTissueFilter}
-                    />
-                    <label htmlFor={tissue}>{tissue}</label>
-                  </div>
-                );
-                return res;
-              })
-            )}
+          <div className="project_modal_visibility">
+            {this.props.state.project ? (
+              this.props.state.project.public_access ? (
+                <span>
+                  <i className="tiny material-icons">lock_open</i>
+                  <span className="label">Public Project</span>
+                </span>
+              ) : (
+                <span>
+                  <i className="tiny material-icons">lock</i>
+                  <span className="label">Private Project</span>
+                  <a
+                    href="#"
+                    onClick={() =>
+                      this.props.parent.toggleProjectVisibility(
+                        this.props.state.project.id,
+                        1
+                      )
+                    }
+                  >
+                    Make project public
+                  </a>
+                </span>
+              )
+            ) : null}
           </div>
+          <AddUserModalMemberArea state={this.props.state} parent={this} />
+        </Modal.Content>
+        <Modal.Actions>
+          <button className="modal-close" onClick={this.handleClose}>
+            Close
+          </button>
+        </Modal.Actions>
+      </Modal>
+    );
+  }
+}
+
+function ProjectHeaderMenu({ proj, proj_users_count, parent }) {
+  return (
+    <div className="right col s12">
+      <ul className="project-menu">
+        <li>
+          {proj ? (
+            proj.public_access ? (
+              <span>
+                <i className="tiny material-icons">lock_open</i> Public project
+              </span>
+            ) : (
+              <span>
+                <i className="tiny material-icons">lock</i> Private project
+              </span>
+            )
+          ) : null}
+        </li>
+        <li>
+          {proj && parent.canEditProject(proj.id) ? (
+            proj_users_count ? (
+              <span>
+                <i className="tiny material-icons">people</i>{" "}
+                {parent.state.project_users.length}
+                {parent.state.project_users.length > 1 ? " members" : " member"}
+              </span>
+            ) : (
+              <span>No member</span>
+            )
+          ) : null}
+        </li>
+        <li className="add-member">
+          {proj && parent.canEditProject(proj.id) ? (
+            <AddUserModal parent={parent} state={parent.state} />
+          ) : null}
+        </li>
+      </ul>
+    </div>
+  );
+}
+
+function ProjectInfoHeading({
+  proj,
+  samplesCount,
+  selectedStr,
+  project_menu,
+  table_download_dropdown,
+  compare_button,
+  state
+}) {
+  return (
+    <div className="row download-section">
+      <div className="col s6 wrapper">
+        <div
+          className={
+            !proj ? "proj-title heading all-proj" : "heading proj-title"
+          }
+        >
+          {!proj ? (
+            <div className="">All Samples</div>
+          ) : (
+            <div>
+              <span className="">{proj.name}</span>
+            </div>
+          )}
         </div>
-      ) : null}
+        <p className="subheading col no-padding s12">
+          {samplesCount === 0
+            ? "No sample found"
+            : samplesCount === 1
+              ? "1 sample found"
+              : `Showing ${samplesCount} out of ${
+                  state.totalNumber
+                } total samples. ${selectedStr}`}
+        </p>
+      </div>
+      <div className="col s6 download-section-btns">
+        {state.selectedProjectId ? project_menu : null}
+        {table_download_dropdown}
+        {state.selectedSampleIds.length > 0 ? compare_button : null}
+        {this.state.selectedProjectId && this.state.allSamples.length == 0 ? delete_project_button : null}
+      </div>
+    </div>
+  );
+}
+
+function TableColumnHeaders({ sort, colMap, filterStatus, state, parent }) {
+  return (
+    <div className="col s12 sample-feed-head no-padding samples-table-head">
+      <div className="samples-card white">
+        <div className="flex-container">
+          <ul className="flex-items">
+            <li className="sample-name-info">
+              <div className="card-label column-title center-label sample-name">
+                <div className="sort-able" onClick={parent.sortSamples}>
+                  <span>Name</span>
+                  <i
+                    className={`fa ${
+                      sort === "name,desc"
+                        ? "fa fa-sort-alpha-desc"
+                        : "fa fa-sort-alpha-asc"
+                    }
+                  ${
+                    sort === "name,desc" || sort === "name,asc"
+                      ? "active"
+                      : "hidden"
+                  }`}
+                  />
+                </div>
+              </div>
+            </li>
+
+            {state.columnsShown.map((column_name, pos) => {
+              return (
+                <ColumnDropdown
+                  pos={pos}
+                  key={pos}
+                  colMap={colMap}
+                  column_name={column_name}
+                  filterStatus={filterStatus}
+                  allColumns={state.allColumns}
+                  columnsShown={state.columnsShown}
+                  parent={parent}
+                />
+              );
+            })}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function JobStatusFilters({ all_caps, filterSelect, lowercase, uppercase }) {
+  return (
+    <div className="dropdown-status-filtering">
+      <li>
+        <a className="title">
+          <b>Filter status</b>
+        </a>
+      </li>
+
+      {all_caps.map((status, pos) => {
+        return FilterItemMarkup({
+          status,
+          filterSelect,
+          lowercase,
+          pos,
+          uppercase
+        });
+      })}
+      <li className="divider" />
+    </div>
+  );
+}
+
+function ColumnPopups({ pos, colMap, column_name }) {
+  return (
+    <Popup
+      trigger={
+        <div
+          className="card-label column-title center-label sample-name center menu-dropdown"
+          data-activates={`column-dropdown-${pos}`}
+        >
+          {colMap[column_name].display_name} <i className="fa fa-caret-down" />
+        </div>
+      }
+      size="mini"
+      className={!colMap[column_name].tooltip ? "hidden-popup" : ""}
+      content={colMap[column_name].tooltip}
+      hideOnScroll
+      inverted
+    />
+  );
+}
+
+function SampleCardCheckboxes({
+  dbSample,
+  report_ready,
+  sample_name_info,
+  i,
+  parent
+}) {
+  return (
+    <li className="check-box-container">
+      {parent.state.displaySelectSamples ? (
+        <div>
+          <input
+            type="checkbox"
+            id={i}
+            onClick={parent.selectSample}
+            key={`sample_${dbSample.id}`}
+            data-sample-id={dbSample.id}
+            className="filled-in checkbox"
+            checked={parent.state.selectedSampleIds.indexOf(dbSample.id) >= 0}
+            disabled={report_ready != 1}
+          />{" "}
+          <label htmlFor={i}>{sample_name_info}</label>
+        </div>
+      ) : (
+        sample_name_info
+      )}
+    </li>
+  );
+}
+
+function SampleDetailedColumns({
+  dbSample,
+  stageStatus,
+  total_runtime,
+  data_values,
+  parent
+}) {
+  return parent.state.columnsShown.map((column, pos) => {
+    let column_data = "";
+    if (column === "pipeline_status") {
+      column_data = (
+        <li key={pos} onClick={parent.viewSample.bind(parent, dbSample.id)}>
+          <div className="card-label top-label">{stageStatus}</div>
+          <div className="card-label center-label">
+            {total_runtime ? (
+              <span className="time">
+                <i className="fa fa-clock-o" aria-hidden="true" />
+                <span className="duration-label">
+                  {parent.formatRunTime(total_runtime)}
+                </span>
+              </span>
+            ) : null}
+          </div>
+        </li>
+      );
+    } else if (column === "nonhost_reads") {
+      column_data = (
+        <li key={pos}>
+          <div className="card-label center center-label data-label">
+            {data_values[column]} {data_values["nonhost_reads_percent"]}
+          </div>
+        </li>
+      );
+    } else {
+      column_data = (
+        <li key={pos} onClick={parent.viewSample.bind(parent, dbSample.id)}>
+          <div className="card-label center center-label data-label">
+            {data_values[column]}
+          </div>
+        </li>
+      );
+    }
+    return column_data;
+  });
+}
+
+function MetadataFilterDropdowns({ state, parent }) {
+  return (
+    <div className="row metadata-options">
+      <div className="col s6">
+        <h6>Host</h6>
+        {state.hostGenomes.length == 0 ? (
+          <div className="options-wrapper">
+            <label>No host genome data present</label>
+          </div>
+        ) : (
+          state.hostGenomes.map((host, i) => {
+            let indices = state.selectedHostIndices;
+            let res = (
+              <div key={i} className="options-wrapper">
+                <input
+                  name="host"
+                  type="checkbox"
+                  data-id={host.id}
+                  checked={indices.indexOf(host.id) < 0 ? "" : "checked"}
+                  value={indices.indexOf(i) != -1}
+                  onChange={parent.selectHostFilter}
+                  id={host.id}
+                  className="filled-in human"
+                />
+                <label htmlFor={host.id}>{host.name}</label>
+              </div>
+            );
+            return res;
+          })
+        )}
+      </div>
+      <div className="col s6">
+        <h6>Tissue</h6>
+        {state.tissueTypes.length == 0 ? (
+          <div className="options-wrapper">
+            <label>No tissue data present</label>
+          </div>
+        ) : (
+          state.tissueTypes.map((tissue, i) => {
+            let res = (
+              <div key={i} className="options-wrapper">
+                <input
+                  name="tissue"
+                  type="checkbox"
+                  id={tissue}
+                  className="filled-in"
+                  data-status={tissue}
+                  checked={
+                    state.selectedTissueFilters.indexOf(tissue) < 0
+                      ? ""
+                      : "checked"
+                  }
+                  onChange={parent.selectTissueFilter}
+                />
+                <label htmlFor={tissue}>{tissue}</label>
+              </div>
+            );
+            return res;
+          })
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AddUserModalMemberArea({ state, parent }) {
+  return (
+    <div>
+      <div className="add_member row">
+        <Form onSubmit={parent.handleSubmit}>
+          <Form.Field>
+            <Form.Input
+              placeholder="Add project members by email"
+              className="validate col s12 browser-default"
+              id="add_user_to_project"
+              type="email"
+              onChange={parent.handleChange}
+            />
+          </Form.Field>
+          <Button className="add_member_action" type="submit">
+            Add member
+          </Button>
+        </Form>
+        <div className="error-message">
+          {state.project_add_email_validation}
+        </div>
+        {state.invite_status === "sending" ? (
+          <div className="status-message">
+            <i className="fa fa-circle-o-notch fa-spin fa-fw" />
+            Hang tight, sending invitation...
+          </div>
+        ) : null}
+        {state.invite_status === "sent" ? (
+          <div className="status-message status teal-text text-darken-2">
+            <i className="fa fa-smile-o fa-fw" />
+            Yay! User has been added
+          </div>
+        ) : null}
+      </div>
+      <div className="members_list">
+        <div className="list_title">
+          <i className="tiny material-icons">person_add</i> Project Members
+        </div>
+        <ul>
+          {state.project_users.length > 0 ? (
+            state.project_users.map(email => {
+              return <li key={email}>{email}</li>;
+            })
+          ) : (
+            <li key="None">None</li>
+          )}
+        </ul>
+      </div>
     </div>
   );
 }
