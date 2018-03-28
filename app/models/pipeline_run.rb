@@ -19,6 +19,7 @@ class PipelineRun < ApplicationRecord
   OUTPUT_JSON_NAME = 'idseq_web_sample.json'.freeze
   STATS_JSON_NAME = 'stats.json'.freeze
   VERSION_JSON_NAME = 'versions.json'.freeze
+  ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
   TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined.json'.freeze
   LOCAL_JSON_PATH = '/app/tmp/results_json'.freeze
   STATUS_CHECKED = 'CHECKED'.freeze
