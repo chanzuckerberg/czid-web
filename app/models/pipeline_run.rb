@@ -11,9 +11,11 @@ class PipelineRun < ApplicationRecord
   has_many :taxon_counts, dependent: :destroy
   has_many :job_stats, dependent: :destroy
   has_many :taxon_byteranges, dependent: :destroy
+  has_many :ercc_counts, dependent: :destroy
   accepts_nested_attributes_for :taxon_counts
   accepts_nested_attributes_for :job_stats
   accepts_nested_attributes_for :taxon_byteranges
+  accepts_nested_attributes_for :ercc_counts
 
   DEFAULT_SUBSAMPLING = 1_000_000 # number of reads to subsample to, after host filtering
   OUTPUT_JSON_NAME = 'idseq_web_sample.json'.freeze
