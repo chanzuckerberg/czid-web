@@ -64,7 +64,7 @@ class Sample < ApplicationRecord
   attr_writer :bulk_mode
 
   def sample_path
-    File.join('samples', project.id.to_s, id.to_s)
+    File.join('samples', project_id.to_s, id.to_s)
   end
 
   validates_associated :input_files

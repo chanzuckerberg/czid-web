@@ -3,6 +3,7 @@ require 'test_helper'
 class ProjectsControllerTest < ActionDispatch::IntegrationTest
   setup do
     @project = projects(:one)
+    @deletable_project = projects(:deletable_project)
     @user = users(:one)
     @user_params = { 'user[email]' => @user.email, 'user[password]' => 'password' }
   end
@@ -49,7 +50,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
   test 'should destroy project' do
     post user_session_path, params: @user_params
     assert_difference('Project.count', -1) do
-      delete project_url(@project)
+      delete project_url(@deletable_project)
     end
 
     assert_redirected_to projects_url
