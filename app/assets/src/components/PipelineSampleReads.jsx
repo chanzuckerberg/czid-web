@@ -300,9 +300,10 @@ class PipelineSampleReads extends React.Component {
         </p>
       </div>;
 
-    let run_date_display = !this.summary_stats.last_processed_at ? BLANK_TEXT :
+    let date_available = (this.summary_stats && this.summary_stats.last_processed_at)
+    let run_date_display = !date_available ? BLANK_TEXT :
                              moment(this.summary_stats.last_processed_at).startOf('second').fromNow()
-    let run_date_display_augmented = !this.summary_stats.last_processed_at ? '' :
+    let run_date_display_augmented = !date_available ? '' :
                                        "| data processed " + run_date_display
 
     if(this.reportPresent) {
