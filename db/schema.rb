@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180320212140) do
+ActiveRecord::Schema.define(version: 20180328234905) do
 
   create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "archive_of"
@@ -45,6 +45,16 @@ ActiveRecord::Schema.define(version: 20180320212140) do
     t.bigint "sample_id", null: false
     t.index ["background_id"], name: "index_backgrounds_samples_on_background_id"
     t.index ["sample_id"], name: "index_backgrounds_samples_on_sample_id"
+  end
+
+  create_table "ercc_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "pipeline_run_id"
+    t.integer "name"
+    t.integer "count"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_ercc_counts_on_name"
+    t.index ["pipeline_run_id"], name: "index_ercc_counts_on_pipeline_run_id"
   end
 
   create_table "favorite_projects", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|

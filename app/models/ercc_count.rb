@@ -1,0 +1,2 @@
+class ErccCount < ApplicationRecord
+end
