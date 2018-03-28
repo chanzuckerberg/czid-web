@@ -252,16 +252,28 @@ class PipelineRun < ApplicationRecord
     TaxonCount.connection.execute("
       UPDATE taxon_counts
       SET taxon_counts.genus_taxid = #{TaxonLineage::MISSING_GENUS_ID},
+          taxon_counts.family_taxid = #{TaxonLineage::MISSING_FAMILY_ID},
           taxon_counts.superkingdom_taxid = #{TaxonLineage::MISSING_SUPERKINGDOM_ID}
       WHERE taxon_counts.pipeline_run_id=#{id}
     ")
     TaxonCount.connection.execute("
       UPDATE taxon_counts, taxon_lineages
       SET taxon_counts.genus_taxid = taxon_lineages.genus_taxid,
+          taxon_counts.family_taxid = taxon_lineages.family_taxid,
           taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
       WHERE taxon_counts.pipeline_run_id=#{id} AND
             (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at) AND
             taxon_lineages.taxid = taxon_counts.tax_id
+    ")
+  end
+
+  def update_is_phage
+    phage_families = TaxonLineage::PHAGE_FAMILIES_TAXIDS.join(",")
+    TaxonCount.connection.execute("
+      UPDATE taxon_counts
+      SET is_phage = 1
+      WHERE pipeline_run_id=#{id} AND
+            family_taxid IN (#{phage_families})
     ")
   end
 

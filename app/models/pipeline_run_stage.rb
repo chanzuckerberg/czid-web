@@ -294,6 +294,8 @@ class PipelineRunStage < ApplicationRecord
     pr.update_names
     # denormalize genus_taxid and superkingdom_taxid into taxon_counts
     pr.update_genera
+    # label taxa as phage or non-phage
+    pr.update_is_phage
 
     # rm the json
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_json_path} #{downloaded_stats_path}")

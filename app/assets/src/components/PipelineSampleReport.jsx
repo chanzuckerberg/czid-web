@@ -4,7 +4,7 @@ import Cookies from "js-cookie";
 import $ from "jquery";
 import Tipsy from "react-tipsy";
 import ReactAutocomplete from "react-autocomplete";
-import { Dropdown } from "semantic-ui-react";
+import { Dropdown, Label, Icon } from "semantic-ui-react";
 import numberWithCommas from "../helpers/strings";
 import StringHelper from "../helpers/StringHelper";
 import Nanobar from "nanobar";
@@ -31,8 +31,10 @@ class PipelineSampleReport extends React.Component {
       ""
     );
     const cached_cats = Cookies.get("excluded_categories");
+    const cached_exclude_subcats = Cookies.get('exclude_subcats');
     const cached_name_type = Cookies.get("name_type");
     const savedThresholdFilters = this.getSavedThresholdFilters();
+    this.category_child_parent = { Phage: 'Viruses' };
     this.allThresholds = ThresholdMap();
     this.genus_map = {};
 
@@ -70,6 +72,7 @@ class PipelineSampleReport extends React.Component {
       pagesRendered: 0,
       sort_by: this.default_sort_by,
       excluded_categories: cached_cats ? JSON.parse(cached_cats) : [],
+      exclude_subcats: (cached_exclude_subcats) ? JSON.parse(cached_exclude_subcats) : [],
       name_type: cached_name_type ? cached_name_type : "Scientific Name",
       search_taxon_id: 0,
       rendering: false,
@@ -196,6 +199,7 @@ class PipelineSampleReport extends React.Component {
     if (
       this.state.search_taxon_id > 0 ||
       this.state.excluded_categories.length > 0 ||
+      this.state.exclude_subcats.length > 0 ||
       (this.state.activeThresholds.length > 0 &&
         this.isThresholdValid(this.state.activeThresholds[0]))
     ) {
@@ -209,6 +213,7 @@ class PipelineSampleReport extends React.Component {
       {
         activeThresholds: [Object.assign({}, this.defaultThreshold)],
         excluded_categories: [],
+        exclude_subcats: [],
         searchId: 0,
         searchKey: "",
         search_taxon_id: 0,
@@ -224,12 +229,13 @@ class PipelineSampleReport extends React.Component {
       () => {
         this.saveThresholdFilters();
         Cookies.set("excluded_categories", "[]");
+        Cookies.set('exclude_subcats', '[]');
         this.flash();
       }
     );
   }
 
-  applySearchFilter(searchTaxonId, excludedCategories, input_taxons) {
+  applySearchFilter(searchTaxonId, excludedCategories, input_taxons, excludeSubcats=[]) {
     let selected_taxons = [];
     const thresholded_taxons = input_taxons || this.state.thresholded_taxons;
     const active_thresholds = this.state.activeThresholds;
@@ -290,6 +296,13 @@ class PipelineSampleReport extends React.Component {
     } else {
       selected_taxons = thresholded_taxons;
     }
+    if (searchTaxonId <= 0) {
+      // only apply subcategory filter if user is not doing a search
+      for (let i = 0; i < excludeSubcats.length; i++) {
+        let column = `is_${excludeSubcats[i].toLowerCase()}`
+        selected_taxons = selected_taxons.filter((x) => { return x[column] == 0 })
+      }
+    }
 
     let searchKey = this.state.searchKey;
     if (searchTaxonId <= 0) {
@@ -301,6 +314,7 @@ class PipelineSampleReport extends React.Component {
     this.setState({
       loading: false,
       excluded_categories: excludedCategories,
+      exclude_subcats: excludeSubcats,
       search_taxon_id: searchTaxonId,
       activeThresholds: active_thresholds,
       searchKey,
@@ -476,6 +490,17 @@ class PipelineSampleReport extends React.Component {
     return displayed_categories;
   }
 
+  displayedSubcats(excludeSubcats) {
+    let displayed_subcats = [];
+    let all_subcats = Object.keys(this.category_child_parent);
+    for (let subcat of all_subcats) {
+      if (excludeSubcats.indexOf(subcat) == -1) {
+        displayed_subcats.push(subcat);
+      }
+    }
+    return displayed_subcats;
+  }
+
   applyExcludedCategories(e) {
     let excluded_categories = this.state.excluded_categories;
     const category = e.target.getAttribute("data-exclude-category");
@@ -490,18 +515,60 @@ class PipelineSampleReport extends React.Component {
     } else {
       excluded_categories.push(e.target.value);
     }
+    // Also update subcategory to match category
+    let new_exclude_subcats = this.state.exclude_subcats;
+    let subcats = Object.keys(this.category_child_parent);
+    for (let i = 0; i < subcats.length; i++) {
+      let subcat = subcats[i];
+      let parent = this.category_child_parent[subcat]
+      let parent_excluded = (excluded_categories.indexOf(parent) >= 0);
+      if (parent_excluded) {
+        //subcat should be excluded
+        if (new_exclude_subcats.indexOf(subcat) < 0) {
+          new_exclude_subcats.push(subcat);
+        }
+      } else {
+        let idx = new_exclude_subcats.indexOf(subcat);
+        if (idx >= 0) {
+          new_exclude_subcats.splice(idx, 1);
+        }
+      }
+    }
     this.setState(
       {
         excluded_categories: excluded_categories,
+        exclude_subcats: new_exclude_subcats,
         searchId: 0,
         searchKey: ""
       },
       () => {
         Cookies.set("excluded_categories", JSON.stringify(excluded_categories));
-        this.applySearchFilter(0, excluded_categories);
+        Cookies.set('exclude_subcats', JSON.stringify(new_exclude_subcats));
+        this.applySearchFilter(0, excluded_categories, undefined, new_exclude_subcats);
         this.flash();
       }
     );
+  }
+
+  applyExcludeSubcats(e) {
+    let new_exclude_subcats = this.state.exclude_subcats;
+    let x_tag_subcat = e.target.getAttribute('data-exclude-subcat')
+    let subcat = (x_tag_subcat && x_tag_subcat.length > 0) ? x_tag_subcat : e.target.value
+    let i_subcat = new_exclude_subcats.indexOf(subcat)
+    if (i_subcat == -1) {
+      new_exclude_subcats.push(subcat)
+    } else {
+      new_exclude_subcats.splice(i_subcat, 1)
+    }
+    this.setState({
+      exclude_subcats: new_exclude_subcats,
+      searchId: 0,
+      searchKey: ''
+    }, () => {
+      Cookies.set('exclude_subcats', JSON.stringify(new_exclude_subcats));
+      this.applySearchFilter(0, this.state.excluded_categories, undefined, new_exclude_subcats);
+      this.flash();
+    });
   }
 
   sortResults() {
@@ -635,11 +702,7 @@ class PipelineSampleReport extends React.Component {
       thresholded_taxons.push(genus_taxon);
     }
 
-    this.applySearchFilter(
-      0,
-      this.state.excluded_categories,
-      thresholded_taxons
-    );
+    this.applySearchFilter(0, this.state.excluded_categories, thresholded_taxons, this.state.exclude_subcats);
 
     if (play_animation) {
       this.flash();
@@ -1013,6 +1076,7 @@ class PipelineSampleReport extends React.Component {
       {
         searchId,
         excluded_categories: [],
+        exclude_subcats: [],
         searchKey: item[0],
         activeThresholds: []
       },
@@ -1061,25 +1125,28 @@ class PipelineSampleReport extends React.Component {
       this.state.excluded_categories
     ).map((category, i) => {
       return (
-        <span className="filter-tag" key={`category_tag_${i}`}>
-          <span className="filter-tag-name"> {category} </span>
-          <span
-            className="filter-tag-x"
-            data-exclude-category={category}
-            onClick={e => {
-              this.applyExcludedCategories(e);
-            }}
-          >
-            X
-          </span>
-        </span>
+        <Label className="label-tags" size="tiny" key={`category_tag_${i}`}>
+          {category}
+          <Icon name='close' data-exclude-category={category} onClick= { (e) => { this.applyExcludedCategories(e);} }/>
+        </Label>
       );
     });
+
+    const subcats_filter_tag_list = this.displayedSubcats(this.state.exclude_subcats).map((subcat, i) => {
+      return (
+        <Label className="label-tags" size="tiny" key={`subcat_tag_${i}`}>
+          {subcat}
+          <Icon name='close' data-exclude-subcat={subcat} onClick= { (e) => { this.applyExcludeSubcats(e);} }/>
+        </Label>
+      );
+    });
+
     return (
       <RenderMarkup
         filter_row_stats={filter_row_stats}
         advanced_filter_tag_list={advanced_filter_tag_list}
         categories_filter_tag_list={categories_filter_tag_list}
+        subcats_filter_tag_list={subcats_filter_tag_list}
         parent={this}
       />
     );
@@ -1369,8 +1436,10 @@ function CategoryFilter({ parent }) {
       <div className="categories-filters-activate">
         <span className="filter-label">Categories</span>
         <span className="filter-label-count">
-          {parent.all_categories.length -
-            parent.state.excluded_categories.length}{" "}
+          {parent.all_categories.length
+            - parent.state.excluded_categories.length
+            + Object.keys(parent.category_child_parent).length
+            - parent.state.exclude_subcats.length}{" "}
         </span>
         <i className="fa fa-angle-down right down-box" />
       </div>
@@ -1398,8 +1467,25 @@ function CategoryFilter({ parent }) {
                 </li>
               );
             })}
+
+            <br /><div className="divider" /><br />
+
+            { Object.keys(parent.category_child_parent).map((subcat, i) => {
+                return (
+                  <li key={`subcat_check_${i}`}>
+                    <input type="checkbox"
+                      className="filled-in cat-filter"
+                      id={subcat}
+                      value={subcat}
+                      onChange={(e) => {}}
+                      onClick={(e) =>{parent.applyExcludeSubcats(e);}}
+                      checked={parent.state.exclude_subcats.indexOf(subcat) == -1}/>
+                      <label htmlFor={subcat}>{subcat} (part of {parent.category_child_parent[subcat]})</label>
+                  </li>
+                )
+            })}
           </ul>
-          {parent.all_categories.length < 1 ? <p>None found</p> : null}
+          {parent.all_categories.length + Object.keys(parent.category_child_parent).length < 1 ? <p>None found</p> : null}
         </div>
       </div>
     </li>
@@ -1497,6 +1583,7 @@ function RenderMarkup({
   filter_row_stats,
   advanced_filter_tag_list,
   categories_filter_tag_list,
+  subcats_filter_tag_list,
   parent
 }) {
   return (
@@ -1516,7 +1603,7 @@ function RenderMarkup({
                   </ul>
                 </div>
                 <div className="filter-tags-list">
-                  {advanced_filter_tag_list} {categories_filter_tag_list}
+                  {advanced_filter_tag_list} {categories_filter_tag_list} {subcats_filter_tag_list}
                 </div>
                 {filter_row_stats}
               </div>

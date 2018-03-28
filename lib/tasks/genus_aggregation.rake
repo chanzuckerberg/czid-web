@@ -11,6 +11,7 @@ task genus_aggregation: :environment do
       pr.generate_aggregate_counts('genus')
       pr.update_names
       pr.update_genera
+      pr.update_is_phage
     end
   end
 end
