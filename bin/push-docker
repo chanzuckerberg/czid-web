@@ -13,23 +13,39 @@ echo $TAG
 echo '--'
 
 # Retry up to 5 times total if failed Docker login
-status=1
+run=1
 count=1
-until [ ${status} -eq 0 ] || [ $count -gt 5 ]; do
+while [ $run -eq 1 ] ; do
     echo "Trying Docker login..."
     docker login -u $DOCKER_USER -p $DOCKER_PASS
-    status=$?
+    if [ $? -eq 0 ]; then  # Success
+        run=0
+        break
+    fi
+    if [ $count -ge 5 ]; then
+        run=0
+        echo "Error: Exceeded retries with Docker."
+        exit 1
+    fi
     count=$((count+1))
     sleep 15
 done
 
 # Retry up to 5 times total if failed Docker push
-status=1
+run=1
 count=1
-until [ ${status} -eq 0 ] || [ $count -gt 5 ]; do
+while [ $run -eq 1 ] ; do
     echo "Trying Docker push..."
     docker push $REPO
-    status=$?
+    if [ $? -eq 0 ]; then  # Success
+        run=0
+        break
+    fi
+    if [ $count -ge 5 ]; then
+        run=0
+        echo "Error: Exceeded retries with Docker."
+        exit 1
+    fi
     count=$((count+1))
     sleep 15
 done
