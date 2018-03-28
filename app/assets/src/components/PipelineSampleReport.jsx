@@ -1317,7 +1317,7 @@ function ReportTableHeader({ parent }) {
 
 function AdvancedFilters({ parent }) {
   return (
-    <li className="advanced-filter-top top-filter ui dropdown filter-btn">
+    <li className="advanced-filter-top top-filter ui dropdown custom-dropdown filter-btn">
       <div
         className="advanced-filters-activate"
         onClick={() => {
@@ -1328,7 +1328,7 @@ function AdvancedFilters({ parent }) {
         <span className="filter-label-count">
           {parent.validThresholdCount(parent.state.activeThresholds)}{" "}
         </span>
-        <i className="fa fa-caret-down right down-box" />
+        <i className="fa fa-angle-down right down-box" />
       </div>
       <div className="advanced-filters-modal round-me">
         <div className="filter-inputs">
@@ -1365,14 +1365,14 @@ function AdvancedFilters({ parent }) {
 
 function CategoryFilter({ parent }) {
   return (
-    <li className="categories-dropdown top-filter ui dropdown filter-btn">
+    <li className="categories-dropdown top-filter ui dropdown custom-dropdown filter-btn">
       <div className="categories-filters-activate">
         <span className="filter-label">Categories</span>
         <span className="filter-label-count">
           {parent.all_categories.length -
             parent.state.excluded_categories.length}{" "}
         </span>
-        <i className="fa fa-caret-down right down-box" />
+        <i className="fa fa-angle-down right down-box" />
       </div>
       <div className="categories-filters-modal">
         <div className="categories">

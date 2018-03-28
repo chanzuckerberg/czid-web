@@ -655,7 +655,8 @@ margin-bottom: 0px;
             }
             .down-box {
               position: initial !important;
-              margin: 0;
+              margin: 3px;
+              font-size: 13px;
             }
             &.download-report-button {
               padding: 8px;
@@ -771,7 +772,6 @@ margin-bottom: 0px;
   background: #fff;
   box-shadow: 1px 2px 2px 2px #c8c8c8;
   margin-left: -16px;
-  margin-top: 8px;
   padding: 10px;
   cursor: auto;
   border-radius: 10px;
@@ -813,7 +813,6 @@ margin-bottom: 0px;
   background: #fff;
   box-shadow: 1px 3px 3px 2px #c8c8c8;
   margin-left: -16px;
-  margin-top: 8px;
   padding: 10px;
   cursor: auto;
   .metric-thresholds {
