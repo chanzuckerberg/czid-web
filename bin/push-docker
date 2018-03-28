@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 export REPO=chanzuckerberg/idseq-web
 
@@ -13,4 +12,16 @@ echo $REPO
 echo $TAG
 echo '--'
 docker login -u $DOCKER_USER -p $DOCKER_PASS
-docker push $REPO
+if [ ! $? -eq 0 ]; then
+    exit
+fi
+
+status=1
+count=1
+# Retry up to 5 times total if failed Docker push
+until [ ${status} -eq 0 ] || [ $count -gt 5 ]; do
+    docker push $REPO
+    status=$?
+    count=$((count+1))
+    sleep 15
+done
