@@ -1033,6 +1033,7 @@ class Samples extends React.Component {
         project_menu={project_menu}
         table_download_dropdown={table_download_dropdown}
         compare_button={compare_button}
+        delete_project_button={delete_project_button}
         state={this.state}
       />
     );
@@ -1733,6 +1734,7 @@ function ProjectInfoHeading({
   project_menu,
   table_download_dropdown,
   compare_button,
+  delete_project_button,
   state
 }) {
   return (
