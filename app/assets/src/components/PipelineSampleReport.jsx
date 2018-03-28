@@ -476,8 +476,7 @@ class PipelineSampleReport extends React.Component {
   displayedSubcats(excludeSubcats) {
     let displayed_subcats = [];
     let all_subcats = Object.keys(this.category_child_parent);
-    for (let i = 0; i < all_subcats.length; i++) {
-      let subcat = all_subcats[i];
+    for (let subcat of all_subcats) {
       if (excludeSubcats.indexOf(subcat) == -1) {
         displayed_subcats.push(subcat);
       }
@@ -504,7 +503,6 @@ class PipelineSampleReport extends React.Component {
     for (let i = 0; i < subcats.length; i++) {
       let subcat = subcats[i];
       let parent = this.category_child_parent[subcat]
-      console.log("using rewritten logic2")
       let parent_excluded = (excluded_categories.indexOf(parent) >= 0);
       if (parent_excluded) {
         //subcat should be excluded
