@@ -1765,7 +1765,7 @@ function ProjectInfoHeading({
         {state.selectedProjectId ? project_menu : null}
         {table_download_dropdown}
         {state.selectedSampleIds.length > 0 ? compare_button : null}
-        {this.state.selectedProjectId && this.state.allSamples.length == 0 ? delete_project_button : null}
+        {state.selectedProjectId && state.allSamples.length == 0 ? delete_project_button : null}
       </div>
     </div>
   );
