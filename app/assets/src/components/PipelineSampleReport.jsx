@@ -1470,7 +1470,7 @@ function CategoryFilter({ parent }) {
 
             <br /><div className="divider" /><br />
 
-            { Object.keys(this.category_child_parent).map((subcat, i) => {
+            { Object.keys(parent.category_child_parent).map((subcat, i) => {
                 return (
                   <li key={`subcat_check_${i}`}>
                     <input type="checkbox"
@@ -1478,9 +1478,9 @@ function CategoryFilter({ parent }) {
                       id={subcat}
                       value={subcat}
                       onChange={(e) => {}}
-                      onClick={(e) =>{this.applyExcludeSubcats(e);}}
-                      checked={this.state.exclude_subcats.indexOf(subcat) == -1}/>
-                      <label htmlFor={subcat}>{subcat} (part of {this.category_child_parent[subcat]})</label>
+                      onClick={(e) =>{parent.applyExcludeSubcats(e);}}
+                      checked={parent.state.exclude_subcats.indexOf(subcat) == -1}/>
+                      <label htmlFor={subcat}>{subcat} (part of {parent.category_child_parent[subcat]})</label>
                   </li>
                 )
             })}
