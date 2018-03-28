@@ -265,10 +265,16 @@ class PipelineSampleReport extends React.Component {
         selected_taxons = selected_taxons.concat(matched_taxons);
       }
     } else if (excludedCategories.length > 0) {
+      let displayed_subcat_indicator_columns = this.displayedSubcats(excludeSubcats).map((subcat) => {
+        return `is_${subcat.toLowerCase()}`
+      })
       for (var i = 0; i < thresholded_taxons.length; i++) {
         let taxon = thresholded_taxons[i];
         if (excludedCategories.indexOf(taxon.category_name) < 0) {
           // not in the excluded categories
+          selected_taxons.push(taxon);
+        } else if (displayed_subcat_indicator_columns.some((column) => { return taxon[column] == 1; })) {
+          // even if category is excluded, include checked subcategories
           selected_taxons.push(taxon);
         } else if (
           taxon.category_name == "Uncategorized" &&
