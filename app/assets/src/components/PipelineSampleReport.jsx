@@ -903,7 +903,7 @@ class PipelineSampleReport extends React.Component {
   render_sort_arrow(column, desired_sort_direction, arrow_direction) {
     let className = `${this.isSortedActive(
       column
-    )} fa fa-chevron-${arrow_direction}`;
+    )} fa fa-angle-${arrow_direction}`;
     return (
       <i
         onClick={this.applySort.bind(this, column)}
@@ -1550,6 +1550,10 @@ function ActiveThresholdRows({ activeThreshold, index, parent }) {
         </select>
       </div>
       <div className="col s3">
+        {/* <Dropdown
+          selection
+          options={[{text: '>=', value: '>=', key: 'operator1'},
+          {text: '<=', value: '<=', key: 'operator2'} ]}/> */}
         <select
           value={activeThreshold.operator}
           onChange={e =>
@@ -1578,7 +1582,7 @@ function ActiveThresholdRows({ activeThreshold, index, parent }) {
         className="col s1"
         onClick={() => parent.removeThresholdFilter(index)}
       >
-        <i className="fa fa-close " data-ng={index} />
+        <i className="fa fa-trash remove-filter" data-ng={index} />
       </div>
     </div>
   );
