@@ -17,7 +17,9 @@
     border: 1px solid rgb(228,228,228);
     padding: 5px 1.75em 5px 1em;
     border-radius: 999999px;
-
+    &.custom-dropdown {
+      padding: 5px 10px;
+    }
     .menu {
       margin-top: 2px;
       width: 100%;
