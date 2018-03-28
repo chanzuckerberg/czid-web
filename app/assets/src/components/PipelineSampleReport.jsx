@@ -504,12 +504,18 @@ class PipelineSampleReport extends React.Component {
     for (let i = 0; i < subcats.length; i++) {
       let subcat = subcats[i];
       let parent = this.category_child_parent[subcat]
-      let i_excluded_categories = excluded_categories.indexOf(parent)
-      let i_exclude_subcats = new_exclude_subcats.indexOf(subcat)
-      if (i_excluded_categories != -1 && i_exclude_subcats == -1) {
-        new_exclude_subcats.push(subcat)
-      } else if (i_excluded_categories == -1 && i_exclude_subcats != -1) {
-        new_exclude_subcats.splice(i_exclude_subcats, 1)
+      console.log("using rewritten logic2")
+      let parent_excluded = (excluded_categories.indexOf(parent) >= 0);
+      if (parent_excluded) {
+        //subcat should be excluded
+        if (new_exclude_subcats.indexOf(subcat) < 0) {
+          new_exclude_subcats.push(subcat);
+        }
+      } else {
+        let idx = new_exclude_subcats.indexOf(subcat);
+        if (idx >= 0) {
+          new_exclude_subcats.splice(idx, 1);
+        }
       }
     }
     this.setState({
