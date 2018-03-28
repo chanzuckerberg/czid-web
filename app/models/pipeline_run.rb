@@ -38,7 +38,8 @@ class PipelineRun < ApplicationRecord
   end
 
   def check_box_label
-    "#{sample.project.name} : #{sample.name} (#{id})"
+    project_name = sample.project ? sample.project.name : 'Unknown Project'
+    "#{project_name} : #{sample.name} (#{id})"
   end
 
   def archive_s3_path

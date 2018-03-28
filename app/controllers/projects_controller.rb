@@ -163,10 +163,16 @@ class ProjectsController < ApplicationController
   # DELETE /projects/1
   # DELETE /projects/1.json
   def destroy
-    @project.destroy
+    deletable = Sample.where(project_id: @project.id).empty?
+    @project.destroy if deletable
     respond_to do |format|
-      format.html { redirect_to projects_url, notice: 'Project was successfully destroyed.' }
-      format.json { head :no_content }
+      if deletable
+        format.html { redirect_to projects_url, notice: 'Project was successfully destroyed.' }
+        format.json { head :no_content }
+      else
+        format.html { render :edit }
+        format.json { render json: { message: 'Cannot delete this project' }, status: :unprocessable_entity }
+      end
     end
   end
 

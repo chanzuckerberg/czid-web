@@ -64,7 +64,7 @@ class Sample < ApplicationRecord
   attr_writer :bulk_mode
 
   def sample_path
-    File.join('samples', project.id.to_s, id.to_s)
+    File.join('samples', project_id.to_s, id.to_s)
   end
 
   validates_associated :input_files
@@ -204,8 +204,7 @@ class Sample < ApplicationRecord
 
   def sample_alignment_output_s3_path
     pr = pipeline_runs.first
-    prs = pr.pipeline_run_stages.first
-    return prs.alignment_output_s3_path
+    return pr.alignment_output_s3_path
   rescue
     return sample_output_s3_path
   end

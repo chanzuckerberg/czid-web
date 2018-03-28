@@ -61,6 +61,7 @@ class Samples extends React.Component {
     this.startReportGeneration = this.startReportGeneration.bind(this);
     this.checkReportDownload = this.checkReportDownload.bind(this);
     this.displayReportProgress = this.displayReportProgress.bind(this);
+    this.deleteProject = this.deleteProject.bind(this);
 
     this.state = {
       invite_status: null,
@@ -929,6 +930,18 @@ class Samples extends React.Component {
     return result;
   }
 
+  deleteProject(e) {
+    let projectId = this.state.selectedProjectId;
+    axios
+      .delete(`/projects/${projectId}.json`, {
+        data: { authenticity_token: this.csrf }
+      })
+      .then((res) => {
+        location.href = "/"
+      }).catch((err) => {
+    })
+  }
+
   renderTable(samples) {
     let project_id = this.state.selectedProjectId
       ? this.state.selectedProjectId
@@ -963,6 +976,16 @@ class Samples extends React.Component {
         </div>
       </div>
     );
+
+    let delete_project_button = (
+      <div className='download-table'>
+        <div className='white'>
+          <a onClick={this.deleteProject} className="compare center">
+            <span>Delete project</span>
+          </a>
+        </div>
+      </div>
+    )
 
     const host_filter_tag_list = this.generateTagList(
       "hostGenomes",
@@ -1010,6 +1033,7 @@ class Samples extends React.Component {
         project_menu={project_menu}
         table_download_dropdown={table_download_dropdown}
         compare_button={compare_button}
+        delete_project_button={delete_project_button}
         state={this.state}
       />
     );
@@ -1710,6 +1734,7 @@ function ProjectInfoHeading({
   project_menu,
   table_download_dropdown,
   compare_button,
+  delete_project_button,
   state
 }) {
   return (
@@ -1742,6 +1767,7 @@ function ProjectInfoHeading({
         {state.selectedProjectId ? project_menu : null}
         {table_download_dropdown}
         {state.selectedSampleIds.length > 0 ? compare_button : null}
+        {state.selectedProjectId && state.allSamples.length == 0 ? delete_project_button : null}
       </div>
     </div>
   );

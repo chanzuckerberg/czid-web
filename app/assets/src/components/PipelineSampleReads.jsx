@@ -183,7 +183,7 @@ class PipelineSampleReads extends React.Component {
   }
 
   componentDidMount() {
-    $('.dropdown-button').dropdown({
+    $('.sample-select-dropdown').dropdown({
       belowOrigin: true
     });
 
@@ -473,6 +473,10 @@ class PipelineSampleReads extends React.Component {
       version_display = version_display + ', NR ' + this.pipelineRun.version.nr
     }
 
+    let run_date_display = !this.pipelineRun ? '' :
+                             !this.pipelineRun.created_at ? '' :
+                               '(run on ' + Date(Date.parse(this.pipelineRun.created_at))  + ')'
+
     let retriable = this.pipelineRunRetriable ? (
       <div className="row">
         <div className="col s12">
@@ -508,7 +512,7 @@ class PipelineSampleReads extends React.Component {
         <SubHeader>
           <div className="sub-header">
             <div className="title">
-              PIPELINE {version_display}
+              PIPELINE {version_display} {run_date_display}
             </div>
             <div className="row">
               <div className="sub-title col s9">
