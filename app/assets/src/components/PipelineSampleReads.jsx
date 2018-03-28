@@ -302,6 +302,8 @@ class PipelineSampleReads extends React.Component {
 
     let run_date_display = !this.summary_stats.last_processed_at ? BLANK_TEXT :
                              moment(this.summary_stats.last_processed_at).startOf('second').fromNow()
+    let run_date_display_augmented = !this.summary_stats.last_processed_at ? '' :
+                                       "| data processed " + run_date_display
 
     if(this.reportPresent) {
       d_report = <PipelineSampleReport
@@ -510,7 +512,7 @@ class PipelineSampleReads extends React.Component {
         <SubHeader>
           <div className="sub-header">
             <div className="title">
-              PIPELINE {version_display} | data processed {run_date_display}
+              PIPELINE {version_display} {run_date_display_augmented}
             </div>
             <div className="row">
               <div className="sub-title col s9">
