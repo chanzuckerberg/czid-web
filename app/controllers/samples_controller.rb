@@ -292,7 +292,6 @@ class SamplesController < ApplicationController
   end
 
   def show_taxid_fasta
-    logger.warn(params[:hit_type])
     if params[:hit_type] == "NT_or_NR"
       nt_array = get_taxid_fasta(@sample, params[:taxid], params[:tax_level].to_i, 'NT').split(">")
       nr_array = get_taxid_fasta(@sample, params[:taxid], params[:tax_level].to_i, 'NR').split(">")
