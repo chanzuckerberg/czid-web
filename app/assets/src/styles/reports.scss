@@ -795,6 +795,11 @@ margin-bottom: 0px;
   .round-me {
     border-radius: 10px;
   }
+  input {
+    &.inner-menus {
+      border: 1px solid #cccccc;
+    }
+  }
   .inner-menus {
     font-family: Open Sans, Helvetica, Arial, sans-serif;
     border-radius: 20px;
