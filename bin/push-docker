@@ -11,15 +11,21 @@ echo $COMMIT
 echo $REPO
 echo $TAG
 echo '--'
-echo "Trying Docker login..."
-docker login -u $DOCKER_USER -p $DOCKER_PASS
-if [ ! $? -eq 0 ]; then
-    exit
-fi
 
+# Retry up to 5 times total if failed Docker login
 status=1
 count=1
+until [ ${status} -eq 0 ] || [ $count -gt 5 ]; do
+    echo "Trying Docker login..."
+    docker login -u $DOCKER_USER -p $DOCKER_PASS
+    status=$?
+    count=$((count+1))
+    sleep 15
+done
+
 # Retry up to 5 times total if failed Docker push
+status=1
+count=1
 until [ ${status} -eq 0 ] || [ $count -gt 5 ]; do
     echo "Trying Docker push..."
     docker push $REPO
