@@ -185,7 +185,7 @@ module ReportHelper
       subsampled_reads: pipeline_run.subsampled_reads,
       sample_info: pipeline_run.sample,
       default_background: Background.find(pipeline_run.sample.default_background_id),
-      taxon_fasta_flag: pipeline_run.job_status == STATUS_CHECKED # all stages succeeded
+      taxon_fasta_flag: pipeline_run.job_status == PipelineRun::STATUS_CHECKED # all stages succeeded
     }
   end
 
