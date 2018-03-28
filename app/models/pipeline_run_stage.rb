@@ -242,6 +242,7 @@ class PipelineRunStage < ApplicationRecord
     stats_array = stats_array.select { |entry| entry.key?("task") }
     # TODO(yf): remove the following line
     pr.job_stats_attributes = stats_array
+    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_stats_path}")
 
     # Load version
     version_s3_path = "#{pr.sample_output_s3_path}/#{PipelineRun::VERSION_JSON_NAME}"
@@ -249,10 +250,17 @@ class PipelineRunStage < ApplicationRecord
 
     # Load ERCC counts
     ercc_s3_path = "#{pr.sample_output_s3_path}/#{PipelineRun::ERCC_OUTPUT_NAME}"
-    ercc_counts = `aws s3 cp #{ercc_s3_path} - | grep 'ERCC' | cut -f1,2`
-
-    # rm the json
-    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_stats_path}")
+    _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", ercc_s3_path)
+    return unless status.exitstatus.zero?
+    ercc_lines = `aws s3 cp #{ercc_s3_path} - | grep 'ERCC' | cut -f1,2`
+    ercc_counts_array = []
+    ercc_lines.split( /\r?\n/ ).each do |line|
+      fields = line.split("\t")
+      name = fields[0]
+      count = fields[1]
+      ercc_counts_array << { name: name, count: count }
+    end
+    pr.ercc_counts_attributes = ercc_counts_array
   end
 
   def db_load_alignment
