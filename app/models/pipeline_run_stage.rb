@@ -250,6 +250,8 @@ class PipelineRunStage < ApplicationRecord
 
     # Load ERCC counts
     pr.load_ercc_counts
+
+    pr.save
   end
 
   def db_load_alignment
