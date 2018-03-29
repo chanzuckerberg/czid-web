@@ -20,9 +20,13 @@
 			font-size: 10px;
 	}
 
-	.dot {
-			stroke: #293b47;
-			fill: #7A99AC
+	.point {
+			stroke: #000;
+      stroke-width: 1px;
+			fill: #fff;
+      &:hover {
+        fill: #3867fa;
+      }
 	}
 }
 

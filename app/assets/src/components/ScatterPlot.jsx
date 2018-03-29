@@ -1,5 +1,6 @@
 import React from 'react';
 import d3, {event as currentEvent} from 'd3';
+import symlog from './symlog';
 
 class ScatterPlot extends React.Component {
   componentDidMount() {
@@ -19,15 +20,26 @@ class ScatterPlot extends React.Component {
       bottom: 30,
     };
 
+    this.scale = symlog;
+    this.xKey = props.xKey || 0;
+    this.yKey = props.yKey || 1;
+
     this.width = props.width || 960;
     this.height = props.height || 500;
-    let xMinMax = d3.extent(this.data, function(d) { return d[0]; });
-    let yMinMax = d3.extent(this.data, function(d) { return d[1]; });
-    this.xScale = d3.scale.linear().range([0, this.width])
-                    .domain([xMinMax[0] - 1, xMinMax[1] + 1]);
 
-    this.yScale = d3.scale.linear().range([this.height, 0])
-                    .domain([yMinMax[0] - 1, yMinMax[1] + 1]);
+    this.xMinMax = d3.extent(this.data, (d) => { return d[this.xKey]; });
+    this.xMinMax = [this.xMinMax[0] - 1, this.xMinMax[1] + 1];
+
+    this.yMinMax = d3.extent(this.data, (d) => { return d[this.yKey]; });
+    this.yMinMax = [this.yMinMax[0] - 1, this.yMinMax[1] + 1];
+
+    this.xScale = this.scale()
+                  .domain(this.xMinMax)
+                  .range([0, this.width]);
+
+    this.yScale = this.scale()
+                  .domain(this.yMinMax)
+                  .range([this.height, 0]);
 
     this.svg = d3.select(this.container).append("svg")
         .attr("width", this.width + this.margin.left + this.margin.right)
@@ -41,6 +53,7 @@ class ScatterPlot extends React.Component {
   renderXAxis () {
 		var xAxis = d3.svg.axis()
         .scale(this.xScale)
+        .ticks(1, ".2f")
         .orient("bottom");
 
 		this.svg.append("g")
@@ -58,6 +71,7 @@ class ScatterPlot extends React.Component {
   renderYAxis () {
 		var yAxis = d3.svg.axis()
         .scale(this.yScale)
+        .ticks(10, ",.2f")
         .orient("left");
 
 		this.svg.append("g")
@@ -79,17 +93,18 @@ class ScatterPlot extends React.Component {
 			.data(this.data)
 			.enter().append("circle")
 			.attr("class", "point")
-			.attr("r", 2)
+			.attr("r", 4)
 			.attr("cx", (d) => {
-				return this.xScale(d[0]);
+				return this.xScale(d[this.xKey]);
 			})
 			.attr("cy", (d) => {
-				return this.yScale(d[1]);
+				return this.yScale(d[this.yKey]);
 			});
   }
 
   renderFitLine () {
     let leastSquares = this.leastSquares();
+    console.log(leastSquares);
     let slope = leastSquares[0];
     let intercept = leastSquares[1];
     let rSquare = leastSquares[2];
@@ -97,16 +112,16 @@ class ScatterPlot extends React.Component {
         .append("g")
         .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")")
         .append("line")
-        .attr("x1", this.xScale(0))
+        .attr("x1", this.xScale(this.xMinMax[0]))
         .attr("y1", this.yScale(intercept))
-        .attr("x2", this.xScale(9))
-        .attr("y2", this.yScale(9*slope + intercept))
+        .attr("x2", this.xScale(this.xMinMax[1]))
+        .attr("y2", this.yScale(this.xMinMax[1] * slope + intercept))
         .classed("trendline", true);
   }
 
   leastSquares () {
-	 	let xSeries = this.data.map(function(d) { return d[0] });
-    let ySeries = this.data.map(function(d) { return d[1] });
+	 	let xSeries = this.data.map((d) => { return Math.log(d[this.xKey]) });
+    let ySeries = this.data.map((d) => { return Math.log(d[this.yKey]) });
 
     let reduceSumFunc = function(prev, cur) { return prev + cur; };
 
