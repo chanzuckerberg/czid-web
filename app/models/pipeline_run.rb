@@ -323,7 +323,7 @@ class PipelineRun < ApplicationRecord
     return unless status.exitstatus.zero?
     ercc_lines = `aws s3 cp #{ercc_s3_path} - | grep 'ERCC' | cut -f1,2`
     ercc_counts_array = []
-    ercc_lines.split( /\r?\n/ ).each do |line|
+    ercc_lines.split(/\r?\n/).each do |line|
       fields = line.split("\t")
       name = fields[0]
       count = fields[1]
