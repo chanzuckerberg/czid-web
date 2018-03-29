@@ -326,7 +326,7 @@ class PipelineRun < ApplicationRecord
     ercc_lines.split(/\r?\n/).each do |line|
       fields = line.split("\t")
       name = fields[0]
-      count = fields[1]
+      count = fields[1].to_i
       ercc_counts_array << { name: name, count: count }
     end
     self.ercc_counts_attributes = ercc_counts_array
