@@ -1,3 +1,31 @@
+.scatterplot {
+	margin-left: 250px;
+  .trendline {
+    stroke: #3867fa;
+    stroke-width: 2;
+    fill: none;
+  }
+	.axis path,
+	.axis line {
+			fill: none;
+			stroke: black;
+			shape-rendering: crispEdges;
+	}
+
+	.axis text {
+			font-size: 10px;
+	}
+
+	.text-label {
+			font-size: 10px;
+	}
+
+	.dot {
+			stroke: #293b47;
+			fill: #7A99AC
+	}
+}
+
 .mono {
   font-size: 8pt;
   fill: #aaa;
