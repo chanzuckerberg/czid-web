@@ -1247,20 +1247,11 @@ function CollapseExpand({ tax_info, parent }) {
 function AdvancedFilterTagList({ threshold, i, parent }) {
   if (parent.isThresholdValid(threshold)) {
     return (
-      <span className="filter-tag" key={`advanced_filter_tag_${i}`}>
-        <span className="filter-tag-name">
+      <Label className="label-tags" size="tiny" key={`advanced_filter_tag_${i}`}>
           {parent.thresholdLabel2Name[threshold["label"]]}{" "}
           {threshold["operator"]} {threshold["value"]}
-        </span>
-        <span
-          className="filter-tag-x"
-          onClick={() => {
-            parent.removeThresholdFilter(i);
-          }}
-        >
-          X
-        </span>
-      </span>
+          <Icon name='close' onClick= { () => {  parent.removeThresholdFilter(i); } }/>
+      </Label>
     );
   } else {
     return null;

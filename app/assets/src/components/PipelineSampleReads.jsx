@@ -299,6 +299,13 @@ class PipelineSampleReads extends React.Component {
           <i className='fa fa-spinner fa-spin fa-3x'></i>
         </p>
       </div>;
+
+    let date_available = (this.summary_stats && this.summary_stats.last_processed_at)
+    let run_date_display = !date_available ? BLANK_TEXT :
+                             moment(this.summary_stats.last_processed_at).startOf('second').fromNow()
+    let run_date_display_augmented = !date_available ? '' :
+                                       "| data processed " + run_date_display
+
     if(this.reportPresent) {
       d_report = <PipelineSampleReport
         sample_id = {this.sampleId}
@@ -404,9 +411,7 @@ class PipelineSampleReads extends React.Component {
                   Date processed
                 </div>
                 <div className={`details-value col s6 no-padding ${!this.summary_stats.last_processed_at ? BLANK_TEXT : ''}`}>
-                  {!this.summary_stats.last_processed_at ? BLANK_TEXT :
-                    moment(this.summary_stats.last_processed_at).startOf('second').fromNow()
-                  }
+                  {run_date_display}
                 </div>
               </div>
             </div>
@@ -473,10 +478,6 @@ class PipelineSampleReads extends React.Component {
       version_display = version_display + ', NR ' + this.pipelineRun.version.nr
     }
 
-    let run_date_display = !this.pipelineRun ? '' :
-                             !this.pipelineRun.created_at ? '' :
-                               '(run on ' + Date(Date.parse(this.pipelineRun.created_at))  + ')'
-
     let retriable = this.pipelineRunRetriable ? (
       <div className="row">
         <div className="col s12">
@@ -512,7 +513,7 @@ class PipelineSampleReads extends React.Component {
         <SubHeader>
           <div className="sub-header">
             <div className="title">
-              PIPELINE {version_display} {run_date_display}
+              PIPELINE {version_display} {run_date_display_augmented}
             </div>
             <div className="row">
               <div className="sub-title col s9">

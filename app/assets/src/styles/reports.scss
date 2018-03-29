@@ -299,7 +299,7 @@ margin-bottom: 0px;
   // min-width: 1000px;
   font-size: $font-size-small;
   .count-type {
-    text-align: center;
+    text-align: right;
     font-weight: normal;
     color:  #999999;
     font-size: $font-size-small;
@@ -393,7 +393,7 @@ margin-bottom: 0px;
   white-space: nowrap;
   overflow: hidden;
   font-weight: $font-weight-semibold;
-  text-align: center;
+  text-align: right;
   .table-head-label {
     cursor: pointer;
     &.active {
