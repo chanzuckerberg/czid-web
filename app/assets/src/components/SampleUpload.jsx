@@ -445,9 +445,7 @@ class SampleUpload extends React.Component {
     if (this.refs.new_project.inputRef.value.trim().length) {
       this.handleProjectSubmit();
     };
-    if (this.newProjectButton) {
-      this.newProjectButton.click();
-    }
+    this.toggleNewProjectInput();
   }
 
   displayError(failedStatus, serverError, formattedError) {
@@ -460,7 +458,7 @@ class SampleUpload extends React.Component {
     }
   }
 
-  toggleNewProjectInput(e) {
+  toggleNewProjectInput() {
     this.clearError();
     $('.new-project-input').slideToggle();
     $('.new-project-input  .input-icon').slideToggle();
