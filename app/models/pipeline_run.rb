@@ -330,6 +330,6 @@ class PipelineRun < ApplicationRecord
       ercc_counts_array << { name: name, count: count }
     end
     self.ercc_counts_attributes = ercc_counts_array
-    self.total_ercc_reads = ercc_counts.map(&:count).sum
+    self.total_ercc_reads = ercc_counts_array.map { |entry| entry[:count] }.sum
   end
 end
