@@ -316,4 +316,19 @@ class PipelineRun < ApplicationRecord
     unidentified_fasta = get_s3_file(sample.unidentified_fasta_s3_path)
     unidentified_fasta.lines.select { |line| line.start_with? '>' }.count if unidentified_fasta
   end
+
+  def load_ercc_counts
+    ercc_s3_path = "#{sample_output_s3_path}/#{ERCC_OUTPUT_NAME}"
+    _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", ercc_s3_path)
+    return unless status.exitstatus.zero?
+    ercc_lines = `aws s3 cp #{ercc_s3_path} - | grep 'ERCC' | cut -f1,2`
+    ercc_counts_array = []
+    ercc_lines.split( /\r?\n/ ).each do |line|
+      fields = line.split("\t")
+      name = fields[0]
+      count = fields[1]
+      ercc_counts_array << { name: name, count: count }
+    end
+    self.ercc_counts_attributes = ercc_counts_array
+  end
 end

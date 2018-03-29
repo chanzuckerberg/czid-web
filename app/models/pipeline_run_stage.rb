@@ -249,18 +249,7 @@ class PipelineRunStage < ApplicationRecord
     pr.version = `aws s3 cp #{version_s3_path} -`
 
     # Load ERCC counts
-    ercc_s3_path = "#{pr.sample_output_s3_path}/#{PipelineRun::ERCC_OUTPUT_NAME}"
-    _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", ercc_s3_path)
-    return unless status.exitstatus.zero?
-    ercc_lines = `aws s3 cp #{ercc_s3_path} - | grep 'ERCC' | cut -f1,2`
-    ercc_counts_array = []
-    ercc_lines.split( /\r?\n/ ).each do |line|
-      fields = line.split("\t")
-      name = fields[0]
-      count = fields[1]
-      ercc_counts_array << { name: name, count: count }
-    end
-    pr.ercc_counts_attributes = ercc_counts_array
+    pr.load_ercc_counts
   end
 
   def db_load_alignment
