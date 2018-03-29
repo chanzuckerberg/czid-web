@@ -137,6 +137,7 @@ class PipelineRun < ApplicationRecord
     if all_stages_succeeded
       self.finalized = 1
       self.job_status = STATUS_CHECKED
+      notify_users if notify?
     else
       if prs.failed?
         self.finalized = 1
