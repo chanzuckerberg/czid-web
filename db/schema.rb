@@ -53,8 +53,7 @@ ActiveRecord::Schema.define(version: 20180329221958) do
     t.integer "count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["name"], name: "index_ercc_counts_on_name", unique: true
-    t.index ["pipeline_run_id"], name: "index_ercc_counts_on_pipeline_run_id"
+    t.index ["pipeline_run_id", "name"], name: "index_ercc_counts_on_pipeline_run_id_and_name", unique: true
   end
 
   create_table "favorite_projects", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
