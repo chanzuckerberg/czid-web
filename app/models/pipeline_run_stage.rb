@@ -234,20 +234,24 @@ class PipelineRunStage < ApplicationRecord
   def db_load_host_filtering
     pr = pipeline_run
 
+    # Load job statistics
     stats_json_s3_path = "#{pr.sample_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
     downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, pr.local_json_path)
     stats_array = JSON.parse(File.read(downloaded_stats_path))
     pr.total_reads = (stats_array[0] || {})['total_reads'] || 0
     stats_array = stats_array.select { |entry| entry.key?("task") }
+    # TODO(yf): remove the following line
+    pr.job_stats_attributes = stats_array
+    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_stats_path}")
 
+    # Load version
     version_s3_path = "#{pr.sample_output_s3_path}/#{PipelineRun::VERSION_JSON_NAME}"
     pr.version = `aws s3 cp #{version_s3_path} -`
 
-    # TODO(yf): remove the following line
-    pr.job_stats_attributes = stats_array
+    # Load ERCC counts
+    pr.load_ercc_counts
 
-    # rm the json
-    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_stats_path}")
+    pr.save
   end
 
   def db_load_alignment
