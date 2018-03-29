@@ -195,8 +195,7 @@ module ReportHelper
 
   def fetch_taxon_counts(pipeline_run_id, background_id)
     pipeline_run = PipelineRun.find(pipeline_run_id)
-    total_ercc_reads = pipeline_run.ercc_counts.map(&:count).sum # will be zero if no ercc_counts
-    adjusted_total_reads = (pipeline_run.total_reads - total_ercc_reads) * pipeline_run.subsample_fraction
+    adjusted_total_reads = (pipeline_run.total_reads - pipeline_run.total_ercc_reads) * pipeline_run.subsample_fraction
     TaxonCount.connection.select_all("
       SELECT
         taxon_counts.tax_id              AS  tax_id,
