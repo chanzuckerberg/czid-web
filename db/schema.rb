@@ -48,8 +48,8 @@ ActiveRecord::Schema.define(version: 20180329174615) do
   end
 
   create_table "ercc_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.integer "pipeline_run_id"
-    t.integer "name"
+    t.bigint "pipeline_run_id"
+    t.string "name"
     t.integer "count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
