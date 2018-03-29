@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180329174615) do
+ActiveRecord::Schema.define(version: 20180329221958) do
 
   create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "archive_of"
@@ -53,7 +53,7 @@ ActiveRecord::Schema.define(version: 20180329174615) do
     t.integer "count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["name"], name: "index_ercc_counts_on_name"
+    t.index ["name"], name: "index_ercc_counts_on_name", unique: true
     t.index ["pipeline_run_id"], name: "index_ercc_counts_on_pipeline_run_id"
   end
 
