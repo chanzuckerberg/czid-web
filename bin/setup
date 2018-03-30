@@ -33,7 +33,7 @@ chdir APP_ROOT do
   system!('docker -v || brew cask install docker')
   puts "\n== Preparing database =="
   system! 'docker-compose build'
-  system! 'yarn install && ./node_modules/.bin/webpack'
+  system! 'yarn install && ./node_modules/.bin/webpack --config webpack.config.dev.js'
   system! 'docker-compose up -d db'
   sleep(10)
   system! 'docker-compose run web rake db:drop db:create db:migrate db:seed'
