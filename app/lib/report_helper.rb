@@ -287,7 +287,7 @@ module ReportHelper
         pr = PipelineRun.find(pipeline_run_id)
         result_hash[pipeline_run_id] = { "pr" => pr, "taxon_counts" => [] }
       end
-      row["rpm"] = row["r"] / (pr.total_reads * pr.subsample_fraction) * 1_000_000.0
+      row["rpm"] = row["r"] / ((pr.total_reads - pr.total_ercc_reads.to_i) * pr.subsample_fraction) * 1_000_000.0
       row["zscore"] = row["stdev"].nil? ? ZSCORE_WHEN_ABSENT_FROM_BACKGROUND : ((row["rpm"] - row["mean"]) / row["stdev"])
       row["zscore"] = ZSCORE_MAX if row["zscore"] > ZSCORE_MAX && row["zscore"] != ZSCORE_WHEN_ABSENT_FROM_BACKGROUND
       row["zcore"] = ZSCORE_MIN if row["zscore"] < ZSCORE_MIN
@@ -347,7 +347,7 @@ module ReportHelper
         pr = PipelineRun.find(pipeline_run_id)
         result_hash[pipeline_run_id] = { "pr" => pr, "taxon_counts" => [] }
       end
-      row["rpm"] = row["r"] / (pr.total_reads * pr.subsample_fraction) * 1_000_000.0
+      row["rpm"] = row["r"] / ((pr.total_reads - pr.total_ercc_reads.to_i) * pr.subsample_fraction) * 1_000_000.0
       row["zscore"] = row["stdev"].nil? ? ZSCORE_WHEN_ABSENT_FROM_BACKGROUND : ((row["rpm"] - row["mean"]) / row["stdev"])
       row["zscore"] = ZSCORE_MAX if row["zscore"] > ZSCORE_MAX && row["zscore"] != ZSCORE_WHEN_ABSENT_FROM_BACKGROUND
       row["zcore"] = ZSCORE_MIN if row["zscore"] < ZSCORE_MIN
