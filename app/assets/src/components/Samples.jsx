@@ -223,9 +223,11 @@ class Samples extends React.Component {
   selectHostFilter(e) {
     // current array of options
     const hostList = this.state.selectedHostIndices.slice(0);
+
+    let target_id = parseInt(e.target.getAttribute("data-host-id"));
+
     let index;
     // check if the check box is checked or unchecked
-    let target_id = e.target.id.slice(5); // Remove 'host-' from front.
     if (e.target.checked) {
       // add the numerical value of the checkbox to options array
       hostList.push(+target_id);
@@ -1952,20 +1954,21 @@ function MetadataFilterDropdowns({ parent }) {
         ) : (
           parent.state.hostGenomes.map((host, i) => {
             let indices = parent.state.selectedHostIndices;
-            let label_i = `host-${host.id}`;
+            let host_label = `host-${host.id}`;
             let res = (
               <div key={"host-"+i} className="options-wrapper">
                 <input
                   name="host"
                   type="checkbox"
-                  data-id={"host-"+host.id}
+                  data-id={host_label}
+                  data-host-id={host.id}
                   checked={indices.indexOf(host.id) < 0 ? "" : "checked"}
                   value={indices.indexOf(i) != -1}
                   onChange={parent.selectHostFilter}
-                  id={"host-"+host.id}
+                  id={host_label}
                   className="filled-in human"
                 />
-                <label htmlFor={label_i}>{host.name}</label>
+                <label htmlFor={host_label}>{host.name}</label>
               </div>
             );
             return res;
