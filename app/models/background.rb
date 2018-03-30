@@ -17,7 +17,19 @@ class Background < ApplicationRecord
   end
 
   def summarize
-    results = TaxonCount.connection.select_all("SELECT tax_id, count_type, tax_level, sum((1.0*1e6*count)/total_reads) as sum_rpm, sum((1.0*1e6*count*1e6*count)/(total_reads*total_reads)) as sum_rpm2 FROM `taxon_counts` INNER JOIN `pipeline_runs` ON `pipeline_runs`.`id` = `taxon_counts`.`pipeline_run_id` WHERE (pipeline_run_id in (select pipeline_run_id from backgrounds_pipeline_runs where background_id = #{id}))  GROUP BY tax_id, count_type, tax_level").to_hash
+    results = TaxonCount.connection.select_all("
+      SELECT
+        tax_id,
+        count_type,
+        tax_level,
+        sum((1.0*1e6*count)/(total_reads-ISNULL(total_ercc_reads,0))) AS sum_rpm,
+        sum((1.0*1e6*count*1e6*count)/((total_reads-ISNULL(total_ercc_reads,0))*(total_reads-ISNULL(total_ercc_reads,0)))) AS sum_rpm2
+      FROM `taxon_counts`
+      INNER JOIN `pipeline_runs` ON
+        `pipeline_runs`.`id` = `taxon_counts`.`pipeline_run_id`
+      WHERE (pipeline_run_id in (select pipeline_run_id from backgrounds_pipeline_runs where background_id = #{id}))
+      GROUP BY tax_id, count_type, tax_level
+    ").to_hash
     n = pipeline_runs.count
     date = DateTime.now.in_time_zone
     results.each do |h|
