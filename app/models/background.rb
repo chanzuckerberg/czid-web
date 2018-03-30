@@ -22,7 +22,7 @@ class Background < ApplicationRecord
         tax_id,
         count_type,
         tax_level,
-        @adjusted_total_reads := (total_reads - IFNULL(total_ercc_reads, 0)) * fraction_subsampled,
+        @adjusted_total_reads := (total_reads - IFNULL(total_ercc_reads, 0)) * IFNULL(fraction_subsampled, 1.0),
         sum((1.0*1e6*count)/@adjusted_total_reads) AS sum_rpm,
         sum((1.0*1e6*count*1e6*count)/(@adjusted_total_reads*@adjusted_total_reads)) AS sum_rpm2
       FROM `taxon_counts`
