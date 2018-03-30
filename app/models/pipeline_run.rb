@@ -139,19 +139,20 @@ class PipelineRun < ApplicationRecord
       self.job_status = STATUS_CHECKED
       save
       notify_users if notify?
-      return
-    if prs.failed?
-      self.finalized = 1
-      Airbrake.notify("Sample #{sample.id} failed #{prs.name}")
-    elsif !prs.started?
-      prs.run_job
     else
-      # still running
-      prs.update_job_status
+      if prs.failed?
+        self.finalized = 1
+        Airbrake.notify("Sample #{sample.id} failed #{prs.name}")
+      elsif !prs.started?
+        prs.run_job
+      else
+        # still running
+        prs.update_job_status
+      end
+      self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
+      self.job_status += "|#{STATUS_READY}" if report_ready?
+      save
     end
-    self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
-    self.job_status += "|#{STATUS_READY}" if report_ready?
-    save
   end
 
   def local_json_path
