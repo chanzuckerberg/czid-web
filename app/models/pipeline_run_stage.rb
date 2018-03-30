@@ -272,6 +272,7 @@ class PipelineRunStage < ApplicationRecord
     pr.total_reads = pipeline_output_dict['total_reads']
     pr.remaining_reads = pipeline_output_dict['remaining_reads']
     pr.unmapped_reads = pr.count_unmapped_reads
+    pr.fraction_subsampled = pr.subsample_fraction
 
     stats_array = JSON.parse(File.read(downloaded_stats_path))
     stats_array = stats_array.select { |entry| entry.key?("task") }
