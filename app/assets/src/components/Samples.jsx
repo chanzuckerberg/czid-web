@@ -223,14 +223,17 @@ class Samples extends React.Component {
   selectHostFilter(e) {
     // current array of options
     const hostList = this.state.selectedHostIndices.slice(0);
+
+    let target_id = parseInt(e.target.getAttribute("data-host-id"));
+
     let index;
     // check if the check box is checked or unchecked
     if (e.target.checked) {
       // add the numerical value of the checkbox to options array
-      hostList.push(+e.target.id);
+      hostList.push(+target_id);
     } else {
       // or remove the value from the unchecked checkbox from the array
-      index = hostList.indexOf(+e.target.id);
+      index = hostList.indexOf(+target_id);
       hostList.splice(index, 1);
     }
     // update the state with the new array of options
@@ -1006,7 +1009,7 @@ class Samples extends React.Component {
       <div className="row search-box">
         {this.state.displaySelectSamples ? check_all : null}
         {search_field}
-        {<MetadataFilter state={this.state} parent={this} />}
+        {<MetadataFilter parent={this} />}
       </div>
     );
 
@@ -1551,11 +1554,11 @@ function PipelineOutputCards({
   );
 }
 
-function MetadataFilter({ state, parent }) {
+function MetadataFilter({ parent }) {
   return (
     <Dropdown text="Filter" className="col s2 wrapper all-filter-btn">
       <Dropdown.Menu>
-        <MetadataFilterDropdowns state={state} parent={parent} />
+        <MetadataFilterDropdowns parent={parent} />
       </Dropdown.Menu>
     </Dropdown>
   );
@@ -1939,31 +1942,33 @@ function SampleDetailedColumns({
   });
 }
 
-function MetadataFilterDropdowns({ state, parent }) {
+function MetadataFilterDropdowns({ parent }) {
   return (
     <div className="row metadata-options">
       <div className="col s6">
         <h6>Host</h6>
-        {state.hostGenomes.length == 0 ? (
+        {parent.state.hostGenomes.length == 0 ? (
           <div className="options-wrapper">
             <label>No host genome data present</label>
           </div>
         ) : (
-          state.hostGenomes.map((host, i) => {
-            let indices = state.selectedHostIndices;
+          parent.state.hostGenomes.map((host, i) => {
+            let indices = parent.state.selectedHostIndices;
+            let host_label = `host-${host.id}`;
             let res = (
-              <div key={i} className="options-wrapper">
+              <div key={"host-"+i} className="options-wrapper">
                 <input
                   name="host"
                   type="checkbox"
-                  data-id={host.id}
+                  data-id={host_label}
+                  data-host-id={host.id}
                   checked={indices.indexOf(host.id) < 0 ? "" : "checked"}
                   value={indices.indexOf(i) != -1}
                   onChange={parent.selectHostFilter}
-                  id={host.id}
+                  id={host_label}
                   className="filled-in human"
                 />
-                <label htmlFor={host.id}>{host.name}</label>
+                <label htmlFor={host_label}>{host.name}</label>
               </div>
             );
             return res;
@@ -1972,12 +1977,12 @@ function MetadataFilterDropdowns({ state, parent }) {
       </div>
       <div className="col s6">
         <h6>Tissue</h6>
-        {state.tissueTypes.length == 0 ? (
+        {parent.state.tissueTypes.length == 0 ? (
           <div className="options-wrapper">
             <label>No tissue data present</label>
           </div>
         ) : (
-          state.tissueTypes.map((tissue, i) => {
+          parent.state.tissueTypes.map((tissue, i) => {
             let res = (
               <div key={i} className="options-wrapper">
                 <input
@@ -1987,7 +1992,7 @@ function MetadataFilterDropdowns({ state, parent }) {
                   className="filled-in"
                   data-status={tissue}
                   checked={
-                    state.selectedTissueFilters.indexOf(tissue) < 0
+                    parent.state.selectedTissueFilters.indexOf(tissue) < 0
                       ? ""
                       : "checked"
                   }
