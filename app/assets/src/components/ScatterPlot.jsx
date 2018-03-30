@@ -20,7 +20,7 @@ class ScatterPlot extends React.Component {
       bottom: 30,
     };
 
-    this.scale = symlog;
+    this.scale = d3.scale.linear;
     this.xKey = props.xKey || 0;
     this.yKey = props.yKey || 1;
 
@@ -53,7 +53,7 @@ class ScatterPlot extends React.Component {
   renderXAxis () {
 		var xAxis = d3.svg.axis()
         .scale(this.xScale)
-        .ticks(1, ".2f")
+        .ticks(10, ".2f")
         .orient("bottom");
 
 		this.svg.append("g")
@@ -104,7 +104,6 @@ class ScatterPlot extends React.Component {
 
   renderFitLine () {
     let leastSquares = this.leastSquares();
-    console.log(leastSquares);
     let slope = leastSquares[0];
     let intercept = leastSquares[1];
     let rSquare = leastSquares[2];
@@ -120,8 +119,8 @@ class ScatterPlot extends React.Component {
   }
 
   leastSquares () {
-	 	let xSeries = this.data.map((d) => { return Math.log(d[this.xKey]) });
-    let ySeries = this.data.map((d) => { return Math.log(d[this.yKey]) });
+	 	let xSeries = this.data.map((d) => { return d[this.xKey] });
+    let ySeries = this.data.map((d) => { return d[this.yKey] });
 
     let reduceSumFunc = function(prev, cur) { return prev + cur; };
 
