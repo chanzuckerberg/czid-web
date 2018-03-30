@@ -313,8 +313,9 @@ class PipelineRun < ApplicationRecord
   end
 
   def count_unmapped_reads
-    unidentified_fasta = get_s3_file(sample.unidentified_fasta_s3_path)
-    unidentified_fasta.lines.select { |line| line.start_with? '>' }.count if unidentified_fasta
+    _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", sample.unidentified_fasta_s3_path)
+    return unless status.exitstatus.zero?
+    `aws s3 cp #{sample.unidentified_fasta_s3_path} - | grep '^>' | wc -l`.to_i
   end
 
   def load_ercc_counts
