@@ -358,6 +358,19 @@ class PipelineSampleReads extends React.Component {
                   { numberWithCommas(this.pipelineRun.total_reads) }
                 </div>
               </div>
+             <div className='row detail-row'>
+                <div className='col s6 no-padding'>
+                  ERCC reads
+                </div>
+                <div className={`details-value col s6 no-padding`}>
+                  { !this.pipelineRun.total_ercc_reads ? BLANK_TEXT :
+                    numberWithCommas(this.pipelineRun.total_ercc_reads)
+                  }
+                  { !this.pipelineRun.total_ercc_reads ? BLANK_TEXT :
+                    ` (${(100.0 * this.pipelineRun.total_ercc_reads / this.pipelineRun.total_reads).toFixed(2)}%)`
+                  }
+                </div>
+              </div>
               <div className='row detail-row'>
                 <div className='col s6 no-padding'>
                   Non-host reads
