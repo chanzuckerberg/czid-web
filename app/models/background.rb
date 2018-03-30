@@ -22,8 +22,9 @@ class Background < ApplicationRecord
         tax_id,
         count_type,
         tax_level,
-        sum((1.0*1e6*count)/(total_reads-IFNULL(total_ercc_reads,0))) AS sum_rpm,
-        sum((1.0*1e6*count*1e6*count)/((total_reads-IFNULL(total_ercc_reads,0))*(total_reads-IFNULL(total_ercc_reads,0)))) AS sum_rpm2
+        @adjusted_total_reads := (total_reads - IFNULL(total_ercc_reads, 0)) * IFNULL(fraction_subsampled, 1.0),
+        sum((1.0*1e6*count)/@adjusted_total_reads) AS sum_rpm,
+        sum((1.0*1e6*count*1e6*count)/(@adjusted_total_reads*@adjusted_total_reads)) AS sum_rpm2
       FROM `taxon_counts`
       INNER JOIN `pipeline_runs` ON
         `pipeline_runs`.`id` = `taxon_counts`.`pipeline_run_id`
