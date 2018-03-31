@@ -366,7 +366,7 @@ class PipelineSampleReads extends React.Component {
                   { !this.pipelineRun.total_ercc_reads ? BLANK_TEXT :
                     numberWithCommas(this.pipelineRun.total_ercc_reads)
                   }
-                  { !this.pipelineRun.total_ercc_reads ? BLANK_TEXT :
+                  { !this.pipelineRun.total_ercc_reads ? '' :
                     ` (${(100.0 * this.pipelineRun.total_ercc_reads / this.pipelineRun.total_reads).toFixed(2)}%)`
                   }
                 </div>
