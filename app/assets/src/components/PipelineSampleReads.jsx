@@ -363,7 +363,7 @@ class PipelineSampleReads extends React.Component {
                   ERCC reads
                 </div>
                 <div className={`details-value col s6 no-padding`}>
-                  { !this.pipelineRun.total_ercc_reads ? BLANK_TEXT :
+                  { !this.pipelineRun.total_ercc_reads ? 0 :
                     numberWithCommas(this.pipelineRun.total_ercc_reads)
                   }
                   { !this.pipelineRun.total_ercc_reads ? '' :
