@@ -1,15 +1,8 @@
 # Jos to initiate database download
 require 'logger'
-require 'resque/plugins/lock'
 class LoadResultForRunStage
-  extend Resque::Plugins::Lock
   @queue = :q03_pipeline_run
   @logger = Logger.new(STDOUT)
-  @git_version = ENV['GIT_VERSION'] || ""
-
-  def self.lock(pipeline_run_stage_id)
-    "LoadResultsFromS3-#{pipeline_run_stage_id}-#{@git_version}"
-  end
 
   def self.perform(pipeline_run_stage_id)
     @logger.info("load pipeline run stage #{pipeline_run_stage_id} into database")
