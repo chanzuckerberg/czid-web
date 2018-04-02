@@ -140,6 +140,8 @@ class PipelineRun < ApplicationRecord
     if all_stages_succeeded
       self.finalized = 1
       self.job_status = STATUS_CHECKED
+      save
+      notify_users if notify?
     else
       if prs.failed?
         self.finalized = 1
@@ -152,8 +154,8 @@ class PipelineRun < ApplicationRecord
       end
       self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
       self.job_status += "|#{STATUS_READY}" if report_ready?
+      save
     end
-    save
   end
 
   def local_json_path
@@ -332,5 +334,26 @@ class PipelineRun < ApplicationRecord
     end
     self.ercc_counts_attributes = ercc_counts_array
     self.total_ercc_reads = ercc_counts_array.map { |entry| entry[:count] }.sum
+  end
+
+  delegate :project_id, to: :sample
+
+  def notify?
+    incomplete_runs = PipelineRun.where("id in (select max(id) from pipeline_runs group by sample_id) and sample_id in (select id from samples where project_id = #{project_id.to_i})").where("job_status != ?", PipelineRun::STATUS_CHECKED)
+    incomplete_runs.count.zero?
+  end
+
+  def notify_users
+    project = Project.find(project_id)
+    number_samples = Sample.where(project_id: project_id).count
+    project_name = project.name
+    user_emails = project.users.map(&:email)
+    user_emails.each do |user_email|
+      email_arguments = { user_email: user_email,
+                          project_name: project_name,
+                          project_id: project_id,
+                          number_samples: number_samples }
+      UserMailer.project_complete_email(email_arguments).deliver_now
+    end
   end
 end
