@@ -17,7 +17,7 @@ class TaxonLineage < ApplicationRecord
     order: MISSING_ORDER_ID,
     class: MISSING_CLASS_ID,
     phylum: MISSING_PHYLUM_ID,
-    kingdom: MISSING_KINGDOM_ID
+    kingdom: MISSING_KINGDOM_ID,
     superkingdom: MISSING_SUPERKINGDOM_ID
   }.freeze
 
