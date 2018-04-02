@@ -14,7 +14,9 @@ class ERCCScatterPlot extends React.Component {
         expected: Math.log10(row.expected),
       });
     }
-    return (<ScatterPlot data={data} xKey="expected" yKey="actual" width={720} xLabel="log10 spike in concetrations" yLabel="log10 read-pairs per gene" />)
+    if (data.length) {
+      return (<ScatterPlot data={data} xKey="expected" yKey="actual" width={720} xLabel="log10 spike in concetrations" yLabel="log10 read-pairs per gene" />)
+    }
   };
 }
 
