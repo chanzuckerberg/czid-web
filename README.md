@@ -141,6 +141,11 @@ Note that this requires the proper ssh config to access the deployed versions of
 1. Let RAILS know it's okay to use alpha data locally.
 `docker-compose run web bin/rails db:environment:set RAILS_ENV=development`
 
+## Update Lineage Table locally
+
+1. `docker-compose run web "REFERENCE_S3_FOLDER=s3://czbiohub-infectious-disease/references rake update_lineage_db"`
+1. `docker-compose run web "rake load_blacklist['config/taxon_blacklist.txt']"`
+
 
 ## Deployment
 
