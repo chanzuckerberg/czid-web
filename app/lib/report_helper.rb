@@ -36,7 +36,7 @@ module ReportHelper
   # We do not allow underscores in metric names, sorry!
   METRICS = %w[r rpm zscore percentidentity alignmentlength neglogevalue percentconcordant aggregatescore maxzscore].freeze
   COUNT_TYPES = %w[NT NR].freeze
-  PROPERTIES_OF_TAXID = %w[tax_id name common_name tax_level genus_taxid superkingdom_taxid category_name].freeze # note: no underscore in sortable column names
+  PROPERTIES_OF_TAXID = %w[tax_id name common_name tax_level genus_taxid superkingdom_taxid category_name is_phage].freeze # note: no underscore in sortable column names
   UNUSED_IN_UI_FIELDS = ['superkingdom_taxid', :sort_key].freeze
 
   # This query takes 1.4 seconds and the results are static, so we hardcoded it
@@ -185,7 +185,7 @@ module ReportHelper
       subsampled_reads: pipeline_run.subsampled_reads,
       sample_info: pipeline_run.sample,
       default_background: Background.find(pipeline_run.sample.default_background_id),
-      taxon_fasta_flag: pipeline_run.finalized?
+      taxon_fasta_flag: pipeline_run.job_status == PipelineRun::STATUS_CHECKED # all stages succeeded
     }
   end
 
@@ -195,7 +195,7 @@ module ReportHelper
 
   def fetch_taxon_counts(pipeline_run_id, background_id)
     pipeline_run = PipelineRun.find(pipeline_run_id)
-    adjusted_total_reads = pipeline_run.total_reads * pipeline_run.subsample_fraction
+    adjusted_total_reads = (pipeline_run.total_reads - pipeline_run.total_ercc_reads.to_i) * pipeline_run.subsample_fraction
     TaxonCount.connection.select_all("
       SELECT
         taxon_counts.tax_id              AS  tax_id,
@@ -205,6 +205,7 @@ module ReportHelper
         taxon_counts.name                AS  name,
         taxon_counts.common_name                AS  common_name,
         taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
+        taxon_counts.is_phage            AS  is_phage,
         taxon_counts.count               AS  r,
         (count / #{adjusted_total_reads}
           * 1000000.0)                   AS  rpm,
@@ -251,6 +252,7 @@ module ReportHelper
         taxon_counts.genus_taxid         AS  genus_taxid,
         taxon_counts.name                AS  name,
         taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
+        taxon_counts.is_phage            AS  is_phage,
         taxon_counts.count               AS  r,
         taxon_summaries.stdev            AS stdev,
         taxon_summaries.mean             AS mean,
@@ -285,7 +287,7 @@ module ReportHelper
         pr = PipelineRun.find(pipeline_run_id)
         result_hash[pipeline_run_id] = { "pr" => pr, "taxon_counts" => [] }
       end
-      row["rpm"] = row["r"] / (pr.total_reads * pr.subsample_fraction) * 1_000_000.0
+      row["rpm"] = row["r"] / ((pr.total_reads - pr.total_ercc_reads.to_i) * pr.subsample_fraction) * 1_000_000.0
       row["zscore"] = row["stdev"].nil? ? ZSCORE_WHEN_ABSENT_FROM_BACKGROUND : ((row["rpm"] - row["mean"]) / row["stdev"])
       row["zscore"] = ZSCORE_MAX if row["zscore"] > ZSCORE_MAX && row["zscore"] != ZSCORE_WHEN_ABSENT_FROM_BACKGROUND
       row["zcore"] = ZSCORE_MIN if row["zscore"] < ZSCORE_MIN
@@ -311,6 +313,7 @@ module ReportHelper
         taxon_counts.genus_taxid         AS  genus_taxid,
         taxon_counts.name                AS  name,
         taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
+        taxon_counts.is_phage            AS  is_phage,
         taxon_counts.count               AS  r,
         taxon_summaries.stdev            AS stdev,
         taxon_summaries.mean             AS mean,
@@ -344,7 +347,7 @@ module ReportHelper
         pr = PipelineRun.find(pipeline_run_id)
         result_hash[pipeline_run_id] = { "pr" => pr, "taxon_counts" => [] }
       end
-      row["rpm"] = row["r"] / (pr.total_reads * pr.subsample_fraction) * 1_000_000.0
+      row["rpm"] = row["r"] / ((pr.total_reads - pr.total_ercc_reads.to_i) * pr.subsample_fraction) * 1_000_000.0
       row["zscore"] = row["stdev"].nil? ? ZSCORE_WHEN_ABSENT_FROM_BACKGROUND : ((row["rpm"] - row["mean"]) / row["stdev"])
       row["zscore"] = ZSCORE_MAX if row["zscore"] > ZSCORE_MAX && row["zscore"] != ZSCORE_WHEN_ABSENT_FROM_BACKGROUND
       row["zcore"] = ZSCORE_MIN if row["zscore"] < ZSCORE_MIN
@@ -510,6 +513,7 @@ module ReportHelper
     #       name,
     #       common_name,
     #       category_name,
+    #       is_phage,
     #       NR => {
     #         count_type,
     #         r,

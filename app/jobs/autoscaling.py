@@ -282,10 +282,10 @@ def autoscaling_update(my_num_jobs, my_environment="development"):
         else:
             print "Deferring scaling decision to stay under the rate limit for 'aws batch list-jobs'."
     elif 1 <= num_real_jobs <= 6:
-        set_desired_capacity(gsnap_asg, at_least(6), can_scale)
-        set_desired_capacity(rapsearch2_asg, at_least(12), can_scale)
+        set_desired_capacity(gsnap_asg, at_least(8), can_scale)
+        set_desired_capacity(rapsearch2_asg, at_least(8), can_scale)
     else:
-        set_desired_capacity(gsnap_asg, at_least(12), can_scale)
+        set_desired_capacity(gsnap_asg, at_least(24), can_scale)
         set_desired_capacity(rapsearch2_asg, at_least(24), can_scale)
 
 

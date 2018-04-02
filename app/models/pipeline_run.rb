@@ -11,14 +11,17 @@ class PipelineRun < ApplicationRecord
   has_many :taxon_counts, dependent: :destroy
   has_many :job_stats, dependent: :destroy
   has_many :taxon_byteranges, dependent: :destroy
+  has_many :ercc_counts, dependent: :destroy
   accepts_nested_attributes_for :taxon_counts
   accepts_nested_attributes_for :job_stats
   accepts_nested_attributes_for :taxon_byteranges
+  accepts_nested_attributes_for :ercc_counts
 
   DEFAULT_SUBSAMPLING = 1_000_000 # number of reads to subsample to, after host filtering
   OUTPUT_JSON_NAME = 'idseq_web_sample.json'.freeze
   STATS_JSON_NAME = 'stats.json'.freeze
   VERSION_JSON_NAME = 'versions.json'.freeze
+  ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
   TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined.json'.freeze
   LOCAL_JSON_PATH = '/app/tmp/results_json'.freeze
   STATUS_CHECKED = 'CHECKED'.freeze
@@ -254,16 +257,28 @@ class PipelineRun < ApplicationRecord
     TaxonCount.connection.execute("
       UPDATE taxon_counts
       SET taxon_counts.genus_taxid = #{TaxonLineage::MISSING_GENUS_ID},
+          taxon_counts.family_taxid = #{TaxonLineage::MISSING_FAMILY_ID},
           taxon_counts.superkingdom_taxid = #{TaxonLineage::MISSING_SUPERKINGDOM_ID}
       WHERE taxon_counts.pipeline_run_id=#{id}
     ")
     TaxonCount.connection.execute("
       UPDATE taxon_counts, taxon_lineages
       SET taxon_counts.genus_taxid = taxon_lineages.genus_taxid,
+          taxon_counts.family_taxid = taxon_lineages.family_taxid,
           taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
       WHERE taxon_counts.pipeline_run_id=#{id} AND
             (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at) AND
             taxon_lineages.taxid = taxon_counts.tax_id
+    ")
+  end
+
+  def update_is_phage
+    phage_families = TaxonLineage::PHAGE_FAMILIES_TAXIDS.join(",")
+    TaxonCount.connection.execute("
+      UPDATE taxon_counts
+      SET is_phage = 1
+      WHERE pipeline_run_id=#{id} AND
+            family_taxid IN (#{phage_families})
     ")
   end
 
@@ -300,8 +315,25 @@ class PipelineRun < ApplicationRecord
   end
 
   def count_unmapped_reads
-    unidentified_fasta = get_s3_file(sample.unidentified_fasta_s3_path)
-    unidentified_fasta.lines.select { |line| line.start_with? '>' }.count if unidentified_fasta
+    _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", sample.unidentified_fasta_s3_path)
+    return unless status.exitstatus.zero?
+    `aws s3 cp #{sample.unidentified_fasta_s3_path} - | grep '^>' | wc -l`.to_i
+  end
+
+  def load_ercc_counts
+    ercc_s3_path = "#{sample_output_s3_path}/#{ERCC_OUTPUT_NAME}"
+    _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", ercc_s3_path)
+    return unless status.exitstatus.zero?
+    ercc_lines = `aws s3 cp #{ercc_s3_path} - | grep 'ERCC' | cut -f1,2`
+    ercc_counts_array = []
+    ercc_lines.split(/\r?\n/).each do |line|
+      fields = line.split("\t")
+      name = fields[0]
+      count = fields[1].to_i
+      ercc_counts_array << { name: name, count: count }
+    end
+    self.ercc_counts_attributes = ercc_counts_array
+    self.total_ercc_reads = ercc_counts_array.map { |entry| entry[:count] }.sum
   end
 
   delegate :project_id, to: :sample
