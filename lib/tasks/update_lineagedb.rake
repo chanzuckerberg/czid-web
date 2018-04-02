@@ -7,9 +7,9 @@ task update_lineage_db: :environment do
 
   reference_s3_path = ENV['REFERENCE_S3_FOLDER'].gsub(%r{([/]*$)}, '') # trim any trailing '/'
   local_taxonomy_path = "/app/tmp/taxonomy"
-  name_column_array = %w[superkingdom_name superkingdom_common_name phylum_name phylum_common_name class_name class_common_name
+  name_column_array = %w[superkingdom_name superkingdom_common_name kingdom_name kingdom_common_name phylum_name phylum_common_name class_name class_common_name
                          order_name order_common_name family_name family_common_name genus_name genus_common_name species_name species_common_name]
-  column_names = "taxid,superkingdom_taxid,phylum_taxid,class_taxid,order_taxid,family_taxid,genus_taxid,species_taxid," +
+  column_names = "taxid,superkingdom_taxid,kingdom_taxid,phylum_taxid,class_taxid,order_taxid,family_taxid,genus_taxid,species_taxid," +
                  name_column_array.join(",")
   host = Rails.env == 'development' ? 'db' : '$RDS_ADDRESS'
   taxid_lineages_file = 'taxid-lineages.csv'
@@ -44,12 +44,12 @@ task update_lineage_db: :environment do
    aws s3 cp #{reference_s3_path}/#{taxid_lineages_file}.gz - | gunzip | tail -n +2 > taxid-lineages.csv
    aws s3 cp #{reference_s3_path}/#{names_file}.gz - | gunzip | tail -n +2 > names.csv
    # names.csv has columns: tax_id,name_txt,name_txt_common
-   # taxid-lineages.csv has columns: tax_id,superkingdom,phylum,class,order,family,genus,species
+   # taxid-lineages.csv has columns: tax_id,superkingdom,kingdom,phylum,class,order,family,genus,species
    # Now perform series of joins to produce the format in column_names.
-   file1_ncol=8
-   file1_output_cols=1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8
+   file1_ncol=9
+   file1_output_cols=1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9
    sort -k1 -t, names.csv > names_sorted.csv
-   for i in 2 3 4 5 6 7 8; do
+   for i in 2 3 4 5 6 7 8 9; do
      sort -k$i -t, taxid-lineages.csv > taxid-lineages_sorted.csv;
      join -t, -1 $i -2 1 -a 1 -o${file1_output_cols},2.2,2.3 taxid-lineages_sorted.csv names_sorted.csv > taxid-lineages.csv;
      file1_output_cols=${file1_output_cols},1.$((${file1_ncol}+1)),1.$((${file1_ncol}+2));
