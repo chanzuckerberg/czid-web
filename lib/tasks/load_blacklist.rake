@@ -13,7 +13,5 @@ task :load_blacklist, [:blacklist_file] => :environment do |_t, args|
   # update the pipeline runs
   pipeline_runs = PipelineRun.where("id in (select max(id) from pipeline_runs where job_status = 'CHECKED' and sample_id in (select id from samples) group by sample_id)")
   pipeline_runs = pipeline_runs.order(id: :desc)
-  pipeline_runs.each do |pr|
-    pr.update_genera
-  end
+  pipeline_runs.each(&:update_genera)
 end

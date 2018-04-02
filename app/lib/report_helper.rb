@@ -623,8 +623,8 @@ module ReportHelper
   end
 
   def negative(vec_10d)
-    vec_10d.map {|x| x ||= 0.0; -x}
-    #vec_10d.map(&:-@)
+    vec_10d.map { |x| -(x || 0.0) }
+    # vec_10d.map(&:-@)
   end
 
   def sort_key(tax_2d, tax_info, sort_by)
