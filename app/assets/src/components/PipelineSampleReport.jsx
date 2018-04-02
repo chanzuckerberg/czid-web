@@ -80,6 +80,7 @@ class PipelineSampleReport extends React.Component {
       activeThresholds: this.defaultThresholdValues,
       countType: "NT"
     };
+    this.showConcordance = false;
     this.expandAll = false;
     this.expandedGenera = [];
     this.applySearchFilter = this.applySearchFilter.bind(this);
@@ -930,7 +931,7 @@ class PipelineSampleReport extends React.Component {
     return foo;
   }
 
-  render_number(ntCount, nrCount, num_decimals, isAggregate = false) {
+  render_number(ntCount, nrCount, num_decimals, isAggregate = false, visible_flag = true) {
     let ntCountStr = numberWithCommas(Number(ntCount).toFixed(num_decimals));
     let nrCountStr =
       nrCount !== null
@@ -950,7 +951,7 @@ class PipelineSampleReport extends React.Component {
         {nrCountStr}
       </div>
     ) : null;
-    return (
+    return ( !visible_flag ? null :
       <td className="report-number">
         {ntCountLabel}
         {nrCountLabel}
@@ -982,8 +983,8 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
-  render_column_header(visible_metric, column_name, tooltip_message) {
-    return (
+  render_column_header(visible_metric, column_name, tooltip_message, visible_flag=true) {
+    return ( !visible_flag ? null :
       <th>
         <Tipsy content={tooltip_message} placement="top">
           <div
@@ -1185,10 +1186,10 @@ function ThresholdMap() {
       name: "NT log(1/e)",
       value: "NT_neglogevalue"
     },
-    {
-      name: "NT %conc",
-      value: "NT_percentconcordant"
-    },
+    //{
+    //  name: "NT %conc",
+    //  value: "NT_percentconcordant"
+    //},
     {
       name: "NR Z Score",
       value: "NR_zscore"
@@ -1208,11 +1209,11 @@ function ThresholdMap() {
     {
       name: "R log(1/e)",
       value: "NR_neglogevalue"
-    },
-    {
-      name: "NR %conc",
-      value: "NR_percentconcordant"
-    }
+    }//,
+    //{
+    //  name: "NR %conc",
+    //  value: "NR_percentconcordant"
+    //}
   ];
 }
 
@@ -1279,7 +1280,8 @@ function DetailCells({ parent }) {
       {parent.render_number(
         tax_info.NT.percentconcordant,
         tax_info.NR.percentconcordant,
-        1
+        1,
+        this.showConcordance
       )}
       <td>&nbsp;</td>
     </tr>
@@ -1337,7 +1339,8 @@ function ReportTableHeader({ parent }) {
             {parent.render_column_header(
               "%conc",
               `${parent.state.countType}_percentconcordant`,
-              `Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NT/NR)`
+              `Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NT/NR)`,
+              this.showConcordance
             )}
             <th>
               <Tipsy content="Switch count type" placement="top">
