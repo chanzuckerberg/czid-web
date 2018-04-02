@@ -177,7 +177,7 @@ class SamplesController < ApplicationController
         @all_categories = all_categories
         @report_details = report_details(@pipeline_run)
         @report_page_params = clean_params(params, @all_categories)
-        @ercc_comparison = @pipeline_run.compare_ercc_counts()
+        @ercc_comparison = @pipeline_run.compare_ercc_counts
       end
 
       if @pipeline_run.failed?

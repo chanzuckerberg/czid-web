@@ -292,8 +292,19 @@ class PipelineSampleReads extends React.Component {
   }
 
   renderERCC () {
+    if (!this.props.ercc_comparison) {
+      return;
+    }
+
     return (
-      <ERCCScatterPlot />
+      <div className="row">
+        <div className="col s12">
+          <div className="content-title">
+            ERCC Spike In Counts
+          </div>
+          <ERCCScatterPlot ercc_comparison={this.props.ercc_comparison} />
+        </div>
+      </div>
     );
   }
 
@@ -652,9 +663,9 @@ class PipelineSampleReads extends React.Component {
                       PIPELINE OUTPUT
                     </div>
                     { pipeline_run }
-                    { this.renderERCC() }
                   </div>
                 </div>
+                { this.renderERCC() }
                 { retriable }
 
               </div>

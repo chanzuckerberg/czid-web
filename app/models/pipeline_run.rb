@@ -358,19 +358,19 @@ class PipelineRun < ApplicationRecord
   end
 
   def compare_ercc_counts
-    return nil if self.ercc_counts.empty?
-    ercc_counts_by_name =  Hash[self.ercc_counts.map{ |a| [a.name, a] }]
+    return nil if ercc_counts.empty?
+    ercc_counts_by_name = Hash[ercc_counts.map { |a| [a.name, a] }]
 
     ret = []
-    EccCount::BASELINE.each do |baseline|
-      actual = ercc_counts_by_name[baseline['name']]
+    ErccCount::BASELINE.each do |baseline|
+      actual = ercc_counts_by_name[baseline[:ercc_id]]
       actual_count = actual && actual.count || 0
       ret << {
-        name: baseline['name'],
+        name: baseline[:ercc_id],
         actual: actual_count,
         expected: baseline[:concentration_in_mix_1_attomolesul]
       }
     end
-    return ret
+    ret
   end
 end

@@ -15,15 +15,17 @@ class ScatterPlot extends React.Component {
     this.data = props.data;
     this.margin = {
       top: 10,
-      left: 30,
+      left: 40,
       right: 10,
-      bottom: 30,
+      bottom: 40,
     };
 
     this.scale = d3.scale.linear;
     this.xKey = props.xKey || 0;
     this.yKey = props.yKey || 1;
 
+    this.xLabel = props.xLabel || "X-Value";
+    this.yLabel = props.yLabel || "Y-Value";
     this.width = props.width || 960;
     this.height = props.height || 500;
 
@@ -68,7 +70,7 @@ class ScatterPlot extends React.Component {
         .attr("x", this.width)
         .attr("y", -6)
         .style("text-anchor", "end")
-        .text("X-Value");
+        .text(this.xLabel);
   }
 
   renderYAxis () {
@@ -85,7 +87,7 @@ class ScatterPlot extends React.Component {
         .attr("class", "label")
         .attr("x", 6)
         .attr("y", 6)
-        .text("y-Value");
+        .text(this.yLabel);
   }
 
   renderPoints () {
@@ -96,7 +98,9 @@ class ScatterPlot extends React.Component {
 			.data(this.data)
 			.enter().append("circle")
 			.attr("class", "point")
-			.attr("r", 4)
+			.attr("r", 2)
+      .attr("data-x", (d) => { return d[this.xKey] })
+      .attr("data-y", (d) => { return d[this.yKey] })
 			.attr("cx", (d) => {
 				return this.xScale(d[this.xKey]);
 			})
