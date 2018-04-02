@@ -932,6 +932,7 @@ class PipelineSampleReport extends React.Component {
   }
 
   render_number(ntCount, nrCount, num_decimals, isAggregate = false, visible_flag = true) {
+    if (!visible_flag) { return null; }
     let ntCountStr = numberWithCommas(Number(ntCount).toFixed(num_decimals));
     let nrCountStr =
       nrCount !== null
@@ -951,7 +952,7 @@ class PipelineSampleReport extends React.Component {
         {nrCountStr}
       </div>
     ) : null;
-    return ( !visible_flag ? null :
+    return (
       <td className="report-number">
         {ntCountLabel}
         {nrCountLabel}
@@ -1281,6 +1282,7 @@ function DetailCells({ parent }) {
         tax_info.NT.percentconcordant,
         tax_info.NR.percentconcordant,
         1,
+        undefined,
         parent.showConcordance
       )}
       <td>&nbsp;</td>
