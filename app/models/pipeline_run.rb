@@ -356,4 +356,8 @@ class PipelineRun < ApplicationRecord
       UserMailer.project_complete_email(email_arguments).deliver_now
     end
   end
+
+  def compare_ercc_counts
+    # FILL THIS OUT
+  end
 end

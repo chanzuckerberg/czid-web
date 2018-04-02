@@ -7,6 +7,7 @@ import Cookies from 'js-cookie';
 import { Button, Icon, Divider } from 'semantic-ui-react'
 import numberWithCommas from '../helpers/strings';
 import SubHeader from './SubHeader';
+import ERCCScatterPlot from './ERCCScatterPlot';
 import PipelineSampleReport from './PipelineSampleReport';
 
 class PipelineSampleReads extends React.Component {
@@ -290,6 +291,12 @@ class PipelineSampleReads extends React.Component {
     });
   }
 
+  renderERCC () {
+    return (
+      <ERCCScatterPlot />
+    );
+  }
+
   render() {
     let d_report = null;
     let waitingSpinner =
@@ -518,7 +525,7 @@ class PipelineSampleReads extends React.Component {
     let delete_sample_button = (
       <Button onClick={this.deleteSample}>
         Delete sample
-      </Button>  
+      </Button>
     )
 
     return (
@@ -645,6 +652,7 @@ class PipelineSampleReads extends React.Component {
                       PIPELINE OUTPUT
                     </div>
                     { pipeline_run }
+                    { this.renderERCC() }
                   </div>
                 </div>
                 { retriable }

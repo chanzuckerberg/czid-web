@@ -27,6 +27,9 @@ class ScatterPlot extends React.Component {
     this.width = props.width || 960;
     this.height = props.height || 500;
 
+    this.width -= (this.margin.left + this.margin.right);
+    this.height -= (this.margin.top + this.margin.bottom);
+
     this.xMinMax = d3.extent(this.data, (d) => { return d[this.xKey]; });
     this.xMinMax = [this.xMinMax[0] - 1, this.xMinMax[1] + 1];
 
