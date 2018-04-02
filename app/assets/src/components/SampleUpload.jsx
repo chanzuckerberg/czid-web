@@ -464,8 +464,11 @@ class SampleUpload extends React.Component {
       case 'human':
         return IconComponent.human(color);
         break;
-      case 'no host subtraction':
-        return IconComponent.bacteria(color);
+      case 'tick':
+        return IconComponent.tick(color);
+        break;
+      case 'ercc only':
+        return IconComponent.ercc(color);
         break;
       default:
         return false;

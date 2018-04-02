@@ -231,6 +231,7 @@ module ReportHelper
         taxon_counts.tax_id     = taxon_summaries.tax_id
       WHERE
         pipeline_run_id = #{pipeline_run_id.to_i} AND
+        taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID} AND
         taxon_counts.count_type IN ('NT', 'NR')
     ").to_hash
   end
@@ -272,6 +273,7 @@ module ReportHelper
         taxon_counts.tax_id     = taxon_summaries.tax_id
       WHERE
         pipeline_run_id in (#{pipeline_run_ids.join(',')}) AND
+        taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID} AND
         taxon_counts.count >= #{MINIMUM_READ_THRESHOLD} AND
         taxon_counts.count_type IN ('NT', 'NR')
         #{tax_level_str}
@@ -333,6 +335,7 @@ module ReportHelper
         taxon_counts.tax_id     = taxon_summaries.tax_id
       WHERE
         pipeline_run_id in (#{pipeline_run_ids.join(',')}) AND
+        taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID} AND
         taxon_counts.count_type IN ('NT', 'NR') AND
         (taxon_counts.tax_id IN (#{taxon_ids.join(',')})
          OR taxon_counts.genus_taxid IN (#{taxon_ids.join(',')}))").to_hash
@@ -620,8 +623,8 @@ module ReportHelper
   end
 
   def negative(vec_10d)
-    # vec_10d.map {|x| -x}
-    vec_10d.map(&:-@)
+    vec_10d.map {|x| x ||= 0.0; -x}
+    #vec_10d.map(&:-@)
   end
 
   def sort_key(tax_2d, tax_info, sort_by)
