@@ -1281,7 +1281,7 @@ function DetailCells({ parent }) {
         tax_info.NT.percentconcordant,
         tax_info.NR.percentconcordant,
         1,
-        this.showConcordance
+        parent.showConcordance
       )}
       <td>&nbsp;</td>
     </tr>
@@ -1340,7 +1340,7 @@ function ReportTableHeader({ parent }) {
               "%conc",
               `${parent.state.countType}_percentconcordant`,
               `Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NT/NR)`,
-              this.showConcordance
+              parent.showConcordance
             )}
             <th>
               <Tipsy content="Switch count type" placement="top">
