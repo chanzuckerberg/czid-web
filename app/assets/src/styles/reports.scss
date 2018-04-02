@@ -401,10 +401,11 @@ margin-bottom: 0px;
     }
   }
   i {
-    font-size: $font-size-small;
-    width: 7.9px;
-    height: 4.7px;
+    font-size: $font-size-h4;
     cursor: pointer;
+    position: relative;
+    left: 4px;
+    top: 2px;
     &:hover, &.active {
       color: $id-blue;
     }
@@ -511,8 +512,12 @@ margin-bottom: 0px;
       width: inherit;
       height: 20px !important;
       outline: none;
+      font-family: OpenSans;
       &::placeholder, &::-webkit-input-placeholder, &:-moz-placeholder, &::placeholder {
         color: #BAC7CF
+      }
+      &:focus {
+        box-shadow: none;
       }
     }
   }
@@ -749,7 +754,8 @@ margin-bottom: 0px;
   margin-left: -16px;
   padding: 10px;
   cursor: auto;
-  border-radius: 10px;
+  border-radius: 3px;
+  z-index: 100;
   span.filter-label {
     font-size: 1em !important;
   }
@@ -782,6 +788,14 @@ margin-bottom: 0px;
     color: white;
     padding-left: 20px;
     padding-right: 20px;
+    border: 1px solid transparent;
+  }
+  .remove-filter {
+    color: #9a9b9a;
+    margin: 3px;
+    &:hover {
+      color: $red4;
+    }
   }
 }
 .s3.download-area {
@@ -794,7 +808,15 @@ margin-bottom: 0px;
   box-shadow: 1px 3px 3px 2px #c8c8c8;
   margin-left: -16px;
   padding: 10px;
+  width: inherit;
   cursor: auto;
+  border-radius: 3px;
+  z-index: 100;
+  li {
+    label {
+      width: 100%;
+    }
+  }
   .metric-thresholds {
     width: 100%;
   }

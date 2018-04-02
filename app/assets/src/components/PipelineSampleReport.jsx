@@ -972,7 +972,7 @@ class PipelineSampleReport extends React.Component {
   render_sort_arrow(column, desired_sort_direction, arrow_direction) {
     let className = `${this.isSortedActive(
       column
-    )} fa fa-chevron-${arrow_direction}`;
+    )} fa fa-angle-${arrow_direction}`;
     return (
       <i
         onClick={this.applySort.bind(this, column)}
@@ -1633,19 +1633,23 @@ function ActiveThresholdRows({ activeThreshold, index, parent }) {
           })}
         </select>
       </div>
-      <div className="col s3">
-        <select
-          value={activeThreshold.operator}
-          onChange={e =>
-            parent.setThresholdProperty(index, "operator", e.target.value)
-          }
-          className="browser-default inner-menus"
-        >
-          <option value=">=">>=</option>
-          <option value="<=">&lt;=</option>
-        </select>
+      <div className="col center-align s3">
+        <Dropdown
+        text=">="
+        className="">
+        <Dropdown.Menu>
+            <Dropdown.Item
+              text=">="
+              onClick={() => parent.setThresholdProperty(index, "operator", ">=")}
+            />
+            <Dropdown.Item
+              text="<="
+              onClick={() => parent.setThresholdProperty(index, "operator", "<=")}
+            />
+          </Dropdown.Menu>
+        </Dropdown>
       </div>
-      <div className="col s3">
+      <div className="col center-align s3">
         <input
           className="browser-default metric-thresholds inner-menus"
           onChange={e =>
@@ -1662,7 +1666,7 @@ function ActiveThresholdRows({ activeThreshold, index, parent }) {
         className="col s1"
         onClick={() => parent.removeThresholdFilter(index)}
       >
-        <i className="fa fa-close " data-ng={index} />
+        <i className="fa fa-trash remove-filter" data-ng={index} />
       </div>
     </div>
   );
