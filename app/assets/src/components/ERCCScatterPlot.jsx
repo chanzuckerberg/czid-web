@@ -14,6 +14,7 @@ class ERCCScatterPlot extends React.Component {
         expected: Math.log10(row.expected),
       });
     }
+
     if (!data.length) {
       return null;
     }
