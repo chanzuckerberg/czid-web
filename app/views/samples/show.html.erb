@@ -20,6 +20,7 @@
       rerun_path: '<%= retry_pipeline_sample_path %>',
       can_edit: <%= @can_edit %>,
       can_see_align_viz: <%= !!@align_viz %>,
+      ercc_comparison: JSON.parse('<%= raw escape_json(@ercc_comparison) %>'),
       all_backgrounds: JSON.parse('<%= raw escape_json(@background_models) %>')
     }, 'PipelineSampleReads_page');
   <% end %>

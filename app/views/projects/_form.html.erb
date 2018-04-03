@@ -22,10 +22,12 @@
     <%= form.collection_check_boxes :user_ids, User.all, :id, :name %>
   </div>
 
-  <div class="field checkbox-list">
-    <%= form.label :samples %>
-    <%= form.collection_check_boxes :sample_ids, Sample.all, :id, :name %>
-  </div>
+  <% if false %>
+    <div class="field checkbox-list">
+      <%= form.label :samples %>
+      <%= form.collection_check_boxes :sample_ids, Sample.all, :id, :name %>
+    </div>
+  <% end %>
 
   <div class="actions">
     <%= form.submit %>

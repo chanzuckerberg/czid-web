@@ -9,7 +9,7 @@ class Background < ApplicationRecord
   TAXON_SUMMARY_CHUNK_SIZE = 100
 
   def self.eligible_pipeline_runs
-    PipelineRun.where("id in (select max(id) from pipeline_runs where job_status = 'CHECKED' and sample_id in (select id from samples) group by sample_id)").order(:sample_id)
+    PipelineRun.top_completed_runs.order(:sample_id)
   end
 
   def validate_size
@@ -37,8 +37,8 @@ class Background < ApplicationRecord
       h[:background_id] = id
       h[:created_at] = date
       h[:updated_at] = date
-      h[:mean] = h["sum_rpm"] / n.to_f
-      h[:stdev] = compute_stdev(h["sum_rpm"], h["sum_rpm2"], n)
+      h[:mean] = (h["sum_rpm"] || 0.0) / n.to_f
+      h[:stdev] = compute_stdev(h["sum_rpm"] || 0.0, h["sum_rpm2"] || 0.0, n)
     end
     results
   end
