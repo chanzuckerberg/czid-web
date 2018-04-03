@@ -47,8 +47,6 @@ task update_lineage_db: :environment do
    # Sort in view of using "comm" command
    sort old_taxon_lineages.csv > old_taxon_lineages_sorted.csv
    sort taxid-lineages.csv > new_taxon_lineages_sorted.csv
-   # Replace "NULL" by "" in old_taxon_lineages_sorted.csv to match new_taxon_lineages_sorted.csv
-   sed -e 's/NULL//g' -i old_taxon_lineages_sorted.csv
    # Find deleted lines and added lines
    comm -23 old_taxon_lineages_sorted.csv new_taxon_lineages_sorted.csv > records_to_retire.csv
    comm -13 old_taxon_lineages_sorted.csv new_taxon_lineages_sorted.csv > records_to_insert.csv
