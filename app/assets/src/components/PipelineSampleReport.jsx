@@ -1161,8 +1161,8 @@ class PipelineSampleReport extends React.Component {
   }
 }
 
-function ThresholdMap() {
-  return [
+function ThresholdMap(show_concordance) {
+  let result = [
     {
       name: "Score",
       value: "NT_aggregatescore"
@@ -1187,10 +1187,6 @@ function ThresholdMap() {
       name: "NT log(1/e)",
       value: "NT_neglogevalue"
     },
-    //{
-    //  name: "NT %conc",
-    //  value: "NT_percentconcordant"
-    //},
     {
       name: "NR Z Score",
       value: "NR_zscore"
@@ -1210,12 +1206,21 @@ function ThresholdMap() {
     {
       name: "R log(1/e)",
       value: "NR_neglogevalue"
-    }//,
-    //{
-    //  name: "NR %conc",
-    //  value: "NR_percentconcordant"
-    //}
+    }
   ];
+  if (show_concordance) {
+    result = result.concat([
+      {
+        name: "NT %conc",
+        value: "NT_percentconcordant"
+      },
+      {
+        name: "NR %conc",
+        value: "NR_percentconcordant"
+      }
+    ]);
+  }
+  return result;
 }
 
 function CollapseExpand({ tax_info, parent }) {
