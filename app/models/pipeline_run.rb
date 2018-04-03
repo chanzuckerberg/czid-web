@@ -58,6 +58,11 @@ class PipelineRun < ApplicationRecord
     in_progress.where("job_status NOT LIKE '3.%' AND job_status NOT LIKE '4.%'")
   end
 
+  def self.top_completed_runs
+    where("id in (select max(id) from pipeline_runs where job_status = 'CHECKED' and
+                  sample_id in (select id from samples) group by sample_id)")
+  end
+
   def finalized?
     finalized == 1
   end
