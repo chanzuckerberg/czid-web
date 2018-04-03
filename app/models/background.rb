@@ -37,8 +37,8 @@ class Background < ApplicationRecord
       h[:background_id] = id
       h[:created_at] = date
       h[:updated_at] = date
-      h[:mean] = h["sum_rpm"] / n.to_f
-      h[:stdev] = compute_stdev(h["sum_rpm"], h["sum_rpm2"], n)
+      h[:mean] = (h["sum_rpm"] || 0.0) / n.to_f
+      h[:stdev] = compute_stdev(h["sum_rpm"] || 0.0, h["sum_rpm2"] || 0.0, n)
     end
     results
   end
