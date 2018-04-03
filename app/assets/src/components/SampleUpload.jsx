@@ -18,7 +18,6 @@ class SampleUpload extends React.Component {
     this.handleNameChange = this.handleNameChange.bind(this);
     this.handleProjectChange = this.handleProjectChange.bind(this);
     this.handleHostChange = this.handleHostChange.bind(this);
-    this.handleQueueChange = this.handleQueueChange.bind(this);
     this.handleMemoryChange = this.handleMemoryChange.bind(this);
     this.handleBranchChange = this.handleBranchChange.bind(this);
     this.handleResultChange = this.handleResultChange.bind(this);
@@ -61,19 +60,17 @@ class SampleUpload extends React.Component {
       success: false,
       successMessage: '',
       serverErrors: [],
-      selectedName: this.selected.name || '',
       selectedHostGenome: this.selected.hostGenome || '',
       selectedHostGenomeId: this.selected.hostGenomeId || null,
       selectedProject: this.selected.project || '',
       selectedPId: this.selected.projectId || null,
       selectedResultPath: this.selected.resultPath || '',
-      selectedJobQueue: this.selected.jobQueue || '',
       selectedMemory: this.selected.memory || '',
       selectedBranch: this.selected.branch || '',
       id: this.selected.id,
       errors: {},
       adminGenomes,
-      sampleName: '',
+      sampleName: this.selected.name || '',
       disableProjectSelect: false,
       omit_subsampling_checked: false,
       public_checked: false
@@ -209,7 +206,6 @@ class SampleUpload extends React.Component {
         input_files_attributes: [{source_type: 's3', source: this.refs.first_file_source.value.trim() },
         {source_type: 's3', source: this.refs.second_file_source.value.trim() }],
         s3_preload_result_path: (this.userDetails.admin) ? this.refs.s3_preload_result_path.value.trim() : '',
-        job_queue: this.state.selectedJobQueue,
         sample_memory: this.state.selectedMemory,
         pipeline_branch: this.state.selectedBranch,
         host_genome_id: this.state.selectedHostGenomeId,
@@ -246,12 +242,12 @@ class SampleUpload extends React.Component {
     })
     axios.put(`/samples/${this.state.id}.json`, {
       sample: {
-        name: this.state.selectedName,
+        name: this.state.sampleName,
         project: this.state.selectedProject,
         project_id: this.state.selectedPId,
         s3_preload_result_path: this.state.selectedResultPath,
-        job_queue: this.state.selectedJobQueue,
         sample_memory: this.state.selectedMemory,
+        pipeline_branch: this.state.selectedBranch,
         host_genome_id: this.state.selectedHostGenomeId
       },
       authenticity_token: this.csrf
@@ -283,13 +279,13 @@ class SampleUpload extends React.Component {
   }
 
   isUpdateFormInvalid() {
-    if (this.state.selectedName === '' && this.state.selectedProject === 'Select a Project' && this.state.selectedHostGenome === '') {
+    if (this.state.sampleName === '' && this.state.selectedProject === 'Select a Project' && this.state.selectedHostGenome === '') {
       this.setState({
         invalid: true,
         errorMessage: 'Please fill in name, host genome and select a project'
       });
       return true;
-    } else if (this.state.selectedName === '') {
+    } else if (this.state.sampleName === '') {
         this.setState({
           invalid: true,
           errorMessage: 'Please fill in Sample name'
@@ -407,13 +403,6 @@ class SampleUpload extends React.Component {
     this.clearError();
   }
 
-  handleQueueChange(e) {
-    this.setState({
-      selectedJobQueue: e.target.value.trim()
-    });
-    this.clearError();
-  }
-
   handleMemoryChange(e) {
     this.setState({
       selectedMemory: e.target.value.trim()
@@ -430,7 +419,7 @@ class SampleUpload extends React.Component {
 
   handleNameChange(e) {
     this.setState({
-      selectedName: e.target.value.trim(),
+      sampleName: e.target.value.trim(),
     });
   }
 
@@ -475,8 +464,11 @@ class SampleUpload extends React.Component {
       case 'human':
         return IconComponent.human(color);
         break;
-      case 'no host subtraction':
-        return IconComponent.bacteria(color);
+      case 'tick':
+        return IconComponent.tick(color);
+        break;
+      case 'ercc only':
+        return IconComponent.ercc(color);
         break;
       default:
         return false;
@@ -501,94 +493,12 @@ class SampleUpload extends React.Component {
     }
   }
 
-  renderUpdateForm() {
-    return (
-      <div className="form-wrapper">
-        <form ref="form" onSubmit={ this.handleUpdate } >
-          <div className="row title">
-            <p className="col s6 signup">Sample Update</p>
-          </div>
-          {this.state.success ? <div className="success-info" >
-            <i className="fa fa-success"></i>
-              <span>{this.state.successMessage}</span>
-            </div> : null }
-          <div className={this.state.invalid ? 'error-info' : ''} >{ this.displayError(this.state.invalid, this.state.serverErrors, this.state.errorMessage) }</div>
-          <div className="row content-wrapper">
-            <div className="row field-row">
-              <div className="col s6 input-field name">
-                <input ref= "name" type="text" className="" onFocus={ this.clearError } onChange= { this.handleNameChange } value= { this.state.selectedName }  />
-              </div>
-              <div className="col s6 input-field genome-list">
-                  <select ref="hostSelect" name="host" className="" id="host" onChange={ this.handleHostChange } value={this.state.selectedHostGenome}>
-                      { this.state.hostGenomes.length ?
-                          this.state.hostGenomes.map((host, i) => {
-                            return <option ref= "host" key={i} id={host.id} >{host.name}</option>
-                          }) : <option>No host genomes to display</option>
-                        }
-                  </select>
-                  <label>Host genomes</label>
-                </div>
-            </div>
-              <div className="row field-row">
-                <div className="input-field col s6 project-list">
-                   <select ref="projectSelect" className="" onChange={ this.handleProjectChange } value={this.state.selectedProject} id="sample">
-                    <option disabled defaultValue>{this.state.selectedProject}</option>
-                   { this.state.allProjects.length ? ObjectHelper.sortByKey(this.state.allProjects, 'name').map((project, i) => {
-                        return <option ref= "project" key={i} id={project.id} >{project.name}</option>
-                      }) : <option>No projects to display</option>
-                    }
-                  </select>
-                  <label>Project list</label>
-              </div>
-                <div className="input-field col s6">
-                    <div className="row">
-                      <input className="col s11 project-input" ref= "new_project" type="text" onFocus={ this.clearError } placeholder="Add a project if desired project is not on the list" />
-                      <input className="col s1 add-icon" value="&#xf067;" type="button" onClick={ this.handleProjectSubmit } />
-                    </div>
-                    <label htmlFor="new_project">Project</label>
-                </div>
-              </div>
-              <div className="field-row input-field align">
-                <i className="sample fa fa-link" aria-hidden="true"></i>
-                <input ref= "first_file_source" type="text" className="no-edit" onFocus={ this.clearError } placeholder="Required" value={ this.firstInput } readOnly/>
-                <label htmlFor="sample_first_file_source">Read 1 s3 path</label>
-              </div>
-              <div className="field-row input-field align" >
-                <i className="sample fa fa-link" aria-hidden="true"></i>
-                <input ref= "second_file_source" type="text" className="no-edit" onFocus={ this.clearError } placeholder="Required" value={ this.secondInput } readOnly/>
-                <label htmlFor="sample_second_file_source">Read 2 s3 path</label>
-              </div>
-              <div className="row field-row">
-                <div className={ this.userDetails.admin ? "col s4 input-field" : "col s12 input-field"}>
-                  <i className="sample fa fa-folder" aria-hidden="true"></i>
-                  <input ref= "s3_preload_result_path" type="text" className="no-edit" onChange={ this.handleResultChange }  onFocus={ this.clearError } readOnly placeholder="Optional" value={ this.state.selectedResultPath }/>
-                  <label htmlFor="sample_s3_preload_result_path">Preload results path (s3 only)</label>
-                </div>
-                { this.userDetails.admin ? <div className="col s4 input-field">
-                  <i className="sample fa fa-file" aria-hidden="true"></i>
-                  <input ref= "job_queue" type="text" className="" onFocus={ this.clearError } placeholder="Optional" value={this.state.selectedJobQueue} onChange={ this.handleQueueChange } />
-                  <label htmlFor="sample_job_queue">Job queue</label>
-                </div> : null }
-                { this.userDetails.admin ? <div className="col s4 input-field">
-                  <i className="sample fa fa-file" aria-hidden="true"></i>
-                  <input ref= "memory" type="text" className="" value={this.state.selectedMemory} onFocus={ this.clearError } placeholder="Optional" onChange={ this.handleMemoryChange } />
-                  <label htmlFor="sample_memory">Sample memory (in mbs)</label>
-                </div> : null }
-            </div>
-        </div>
-        <input className="hidden" type="submit"/>
-        { this.state.submitting ? <div className="center login-wrapper disabled"> <i className='fa fa-spinner fa-spin fa-lg'></i> </div> :
-          <div onClick={ this.handleUpdate } className="center login-wrapper">Submit</div> }
-      </form>
-    </div>
-    )
-  }
-
   openCliModal() {
     $('#cli_modal').modal('open');
   }
 
-  renderSampleForm() {
+  renderSampleForm(updateExistingSample = false) {
+    updateExistingSample = updateExistingSample ? true : false;
     return (
       <div id='samplesUploader' className='row'>
         <div className='col s6 offset-s3 upload-form-container'>
@@ -619,7 +529,7 @@ class SampleUpload extends React.Component {
                   { this.displayError(this.state.invalid, this.state.serverErrors, this.state.errorMessage) }
                 </div> : null
             }
-            <form ref="form" onSubmit={ this.handleUpload }>
+            <form ref="form" onSubmit={ updateExistingSample ? this.handleUpdate : this.handleUpload }>
               <div className='fields'>
                 <div className='field'>
                   <div className='row'>
@@ -758,7 +668,7 @@ class SampleUpload extends React.Component {
                   </div>
                   <div className='row input-row'>
                     <div className='col no-padding s12'>
-                      <input type='text' ref='first_file_source' onKeyUp={this.updateSampleName} onBlur={ this.clearError } className='browser-default' placeholder='aws/path-to-sample' />
+                      <input type='text' ref='first_file_source' onKeyUp={this.updateSampleName} onBlur={ this.clearError } className='browser-default' placeholder='aws/path-to-sample' defaultValue={this.firstInput} disabled={updateExistingSample} />
                       {
                         (this.state.errors.first_file_source) ?
                           <div className='field-error'>
@@ -786,7 +696,7 @@ class SampleUpload extends React.Component {
                   </div>
                   <div className='row input-row'>
                     <div className='col no-padding s12'>
-                      <input ref='second_file_source' onFocus={ this.clearError } type='text' className='browser-default' placeholder='aws/path-to-sample' />
+                      <input ref='second_file_source' onFocus={ this.clearError } type='text' className='browser-default' placeholder='aws/path-to-sample' defaultValue={this.secondInput} disabled={updateExistingSample} />
                       {
                         (this.state.errors.second_file_source) ?
                           <div className='field-error'>
@@ -809,7 +719,7 @@ class SampleUpload extends React.Component {
                   <div className='row input-row'>
                     <div className='col no-padding s12'>
                       <input type='text' ref='sample_name' className='browser-default'
-                      onChange={(e) => this.updateSampleName(null, e.target.value)} placeholder='sample name' />
+                      onChange={(e) => this.updateSampleName(null, e.target.value)} value={this.state.sampleName} placeholder='sample name' />
                       {
                         (this.state.errors.sampleName) ?
                           <div className='field-error'>
@@ -858,35 +768,11 @@ class SampleUpload extends React.Component {
                         </div>
                         <div className='row input-row'>
                           <div className='col no-padding s12'>
-                            <input type='text' ref='s3_preload_result_path' className='browser-default' placeholder='aws/path-of-results' />
+                            <input type='text' ref='s3_preload_result_path' className='browser-default' placeholder='aws/path-of-results' disabled = {updateExistingSample} defaultValue={this.selected.resultPath} />
                             {
                               (this.state.errors.s3_preload_result_path) ?
                                 <div className='field-error'>
                                   {this.state.errors.s3_preload_result_path}
-                                </div> : null
-                            }
-                          </div>
-                        </div>
-                      </div>
-                      <div className='field'>
-                        <div className='row'>
-                          <div className='col no-padding s12'>
-                            <div className='field-title'>
-                              <div className='read-count-label' htmlFor="sample_job_queue">
-                                Job queue
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className='row input-row'>
-                          <div className='col no-padding s12'>
-                            <input id='sample_job_queue' ref= "job_queue" type='text' className='browser-default'
-                                   placeholder='idseq_himem' value={this.state.selectedJobQueue}
-                                   onChange={ this.handleQueueChange } />
-                            {
-                              (this.state.errors.job_queue) ?
-                                <div className='field-error'>
-                                  {this.state.errors.job_queue}
                                 </div> : null
                             }
                           </div>
@@ -940,8 +826,8 @@ class SampleUpload extends React.Component {
                         <button type='button' disabled className='new-button blue-button upload-samples-button'>
                           <i className='fa fa-spinner fa-spin fa-lg'/>
                         </button> :
-                        <button type='submit' onClick={ this.handleUpload } className='new-button blue-button upload-samples-button'>
-                          Upload sample
+                        <button type='submit' onClick={ updateExistingSample ? this.handleUpdate : this.handleUpload } className='new-button blue-button upload-samples-button'>
+                        { updateExistingSample ? 'Update' : 'Upload' } sample
                         </button>
                       }
                       <button type='button' onClick={() => window.history.back()} className='new-button skyblue-button'>
@@ -955,12 +841,12 @@ class SampleUpload extends React.Component {
           </div>
         </div>
       </div>
-    )
+    );
   }
   render() {
     return (
       <div>
-        { this.props.selectedSample ? this.renderUpdateForm() : this.renderSampleForm() }
+        { this.renderSampleForm(this.props.selectedSample) }
       </div>
     )
   }

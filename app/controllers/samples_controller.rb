@@ -164,7 +164,7 @@ class SamplesController < ApplicationController
 
     @align_viz = false
     align_summary_file = @pipeline_run ? "#{@pipeline_run.alignment_viz_output_s3_path}.summary" : nil
-    @align_viz = true if params[:align_viz] && align_summary_file && get_s3_file(align_summary_file)
+    @align_viz = true if align_summary_file && get_s3_file(align_summary_file)
 
     if @pipeline_run && (((@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?) || @pipeline_run.report_ready?)
       background_id = params[:background_id] || @sample.default_background_id
@@ -177,6 +177,7 @@ class SamplesController < ApplicationController
         @all_categories = all_categories
         @report_details = report_details(@pipeline_run)
         @report_page_params = clean_params(params, @all_categories)
+        @ercc_comparison = @pipeline_run.compare_ercc_counts
       end
 
       if @pipeline_run.failed?

@@ -97,6 +97,7 @@ class PipelineRunStage < ApplicationRecord
       update(db_load_status: 1, job_status: STATUS_LOADED)
     rescue
       update(job_status: STATUS_FAILED)
+      Airbrake.notify("Pipeline Run #{pipeline_run.id} failed #{name} db load")
       raise
     ensure
       terminate_job

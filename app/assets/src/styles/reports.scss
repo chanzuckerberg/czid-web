@@ -794,6 +794,7 @@ margin-bottom: 0px;
   box-shadow: 1px 3px 3px 2px #c8c8c8;
   margin-left: -16px;
   padding: 10px;
+  left: 20px;
   cursor: auto;
   .metric-thresholds {
     width: 100%;
@@ -804,5 +805,9 @@ margin-bottom: 0px;
     width: 175px;
     text-align: center;
     cursor: pointer;
+  }
+  [type=checkbox].filled-in:checked+label:after {
+    width: 18px;
+    height: 18px;
   }
 }

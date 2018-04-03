@@ -58,6 +58,11 @@ class PipelineRun < ApplicationRecord
     in_progress.where("job_status NOT LIKE '3.%' AND job_status NOT LIKE '4.%'")
   end
 
+  def self.top_completed_runs
+    where("id in (select max(id) from pipeline_runs where job_status = 'CHECKED' and
+                  sample_id in (select id from samples) group by sample_id)")
+  end
+
   def finalized?
     finalized == 1
   end
@@ -346,5 +351,22 @@ class PipelineRun < ApplicationRecord
                           number_samples: number_samples }
       UserMailer.project_complete_email(email_arguments).deliver_now
     end
+  end
+
+  def compare_ercc_counts
+    return nil if ercc_counts.empty?
+    ercc_counts_by_name = Hash[ercc_counts.map { |a| [a.name, a] }]
+
+    ret = []
+    ErccCount::BASELINE.each do |baseline|
+      actual = ercc_counts_by_name[baseline[:ercc_id]]
+      actual_count = actual && actual.count || 0
+      ret << {
+        name: baseline[:ercc_id],
+        actual: actual_count,
+        expected: baseline[:concentration_in_mix_1_attomolesul]
+      }
+    end
+    ret
   end
 end
