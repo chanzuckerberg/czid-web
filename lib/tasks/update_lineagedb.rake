@@ -11,6 +11,7 @@ task update_lineage_db: :environment do
                          order_name order_common_name family_name family_common_name genus_name genus_common_name species_name species_common_name]
   column_names = "taxid,superkingdom_taxid,kingdom_taxid,phylum_taxid,class_taxid,order_taxid,family_taxid,genus_taxid,species_taxid," +
                  name_column_array.join(",")
+  n_columns = column_names.split(",").count
   host = Rails.env == 'development' ? 'db' : '$RDS_ADDRESS'
   taxid_lineages_file = 'taxid-lineages.csv'
   names_file = 'names.csv'
@@ -22,8 +23,8 @@ task update_lineage_db: :environment do
 
    ## Get old lineage file
    mysql -h #{host} -u $DB_USERNAME --password=$DB_PASSWORD -e "SELECT #{column_names},started_at FROM idseq_#{Rails.env}.taxon_lineages WHERE ended_at = (SELECT MAX(ended_at) FROM idseq_#{Rails.env}.taxon_lineages);" | tr "\t" "," | tail -n +2 > old_taxon_lineages_with_started_at.csv
-   cut -d, -f1-22 old_taxon_lineages_with_started_at.csv > old_taxon_lineages.csv
-   cut -d, -f1,23 old_taxon_lineages_with_started_at.csv > taxid_to_started_at.csv
+   cut -d, -f1-#{n_columns} old_taxon_lineages_with_started_at.csv > old_taxon_lineages.csv
+   cut -d, -f1,#{n_columns+1} old_taxon_lineages_with_started_at.csv > taxid_to_started_at.csv
 
    ## Get new lineage file
    # Download new references, extract and remove header line
