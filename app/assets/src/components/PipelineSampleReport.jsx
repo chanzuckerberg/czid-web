@@ -35,7 +35,8 @@ class PipelineSampleReport extends React.Component {
     const cached_name_type = Cookies.get("name_type");
     const savedThresholdFilters = this.getSavedThresholdFilters();
     this.category_child_parent = { Phage: 'Viruses' };
-    this.allThresholds = ThresholdMap();
+    this.showConcordance = false;
+    this.allThresholds = ThresholdMap(this.showConcordance);
     this.genus_map = {};
 
     this.thresholdLabel2Name = {};
@@ -80,7 +81,6 @@ class PipelineSampleReport extends React.Component {
       activeThresholds: this.defaultThresholdValues,
       countType: "NT"
     };
-    this.showConcordance = false;
     this.expandAll = false;
     this.expandedGenera = [];
     this.applySearchFilter = this.applySearchFilter.bind(this);
