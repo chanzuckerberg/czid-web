@@ -15,20 +15,6 @@ task update_lineage_db: :environment do
   taxid_lineages_file = 'taxid-lineages.csv'
   names_file = 'names.csv'
   current_date = Time.now.utc
-
-  ## Convert NULL to empty string in all name columns for consistency
-  ## using query:
-  #   UPDATE taxon_lineages
-  #   SET
-  #     superkingdom_name = IFNULL(superkingdom_name, ''),
-  #     superkingdom_common_name = IFNULL(superkingdom_common_name, ''),
-  #     ...
-  #     species_name = IFNULL(species_name, ''),
-  #     species_common_name = IFNULL(species_common_name, '')
-  replacements = name_column_array.map { |column| "#{column} = IFNULL(#{column}, '')" }
-  query = "UPDATE taxon_lineages SET " + replacements.join(", ")
-  ActiveRecord::Base.connection.execute(query)
-
   `
    ## Set work directory
    mkdir -p #{local_taxonomy_path};
@@ -85,17 +71,4 @@ task update_lineage_db: :environment do
    rm -rf #{local_taxonomy_path};
   `
   raise "lineage database update failed" unless $CHILD_STATUS.success?
-
-  ## Convert empty strings back to NULL
-  ## using query:
-  #   UPDATE taxon_lineages
-  #   SET
-  #     superkingdom_name = NULLIF(superkingdom_name, ''),
-  #     superkingdom_common_name = NULLIF(superkingdom_common_name, ''),
-  #     ...
-  #     species_name = NULLIF(species_name, ''),
-  #     species_common_name = NULLIF(species_common_name, '')
-  replacements = name_column_array.map { |column| "#{column} = NULLIF(#{column}, '')" }
-  query = "UPDATE taxon_lineages SET " + replacements.join(", ")
-  ActiveRecord::Base.connection.execute(query)
 end
