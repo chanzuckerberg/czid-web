@@ -44,7 +44,7 @@ module ReportHelper
   # +-------+---------------+
   # | taxid | name          |
   # +-------+---------------+
-  # |  -800 | Uncategorized |
+  # |  -700 | Uncategorized |
   # |     2 | Bacteria      |
   # |  2157 | Archaea       |
   # |  2759 | Eukaryota     |
