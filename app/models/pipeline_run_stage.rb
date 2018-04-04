@@ -255,10 +255,13 @@ class PipelineRunStage < ApplicationRecord
     pr.save
   end
 
+  def output_json_name
+    pipeline_run.pipeline_branch == 'charles/hit-calling' ? PipelineRun::MULTIHIT_OUTPUT_JSON_NAME : PipelineRun::OUTPUT_JSON_NAME
+  end
+
   def db_load_alignment
     pr = pipeline_run
-
-    output_json_s3_path = "#{pipeline_run.alignment_output_s3_path}/#{PipelineRun::OUTPUT_JSON_NAME}"
+    output_json_s3_path = "#{pipeline_run.alignment_output_s3_path}/#{output_json_name}"
     stats_json_s3_path = "#{pipeline_run.alignment_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
 
     # Get the file
@@ -330,7 +333,7 @@ class PipelineRunStage < ApplicationRecord
 
   def alignment_outputs
     stats_json_s3_path = "#{pipeline_run.alignment_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
-    output_json_s3_path = "#{pipeline_run.alignment_output_s3_path}/#{PipelineRun::OUTPUT_JSON_NAME}"
+    output_json_s3_path = "#{pipeline_run.alignment_output_s3_path}/#{output_json_name}"
     [stats_json_s3_path, output_json_s3_path]
   end
 
