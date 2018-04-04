@@ -281,12 +281,17 @@ module ReportHelper
 
     # calculating rpm and zscore, organizing the results by pipeline_run_id
     result_hash = {}
+
+    pipeline_run_ids = sql_results.map { |x| x['pipeline_run_id'] }
+    pipeline_runs = PipelineRun.where(id: pipeline_run_ids).includes([:sample])
+    pipeline_runs_by_id = Hash[pipeline_runs.map { |x| [x.id, x] }]
+
     sql_results.each do |row|
       pipeline_run_id = row["pipeline_run_id"]
       if result_hash[pipeline_run_id]
         pr = result_hash[pipeline_run_id]["pr"]
       else
-        pr = PipelineRun.find(pipeline_run_id)
+        pr = pipeline_runs_by_id[pipeline_run_id]
         result_hash[pipeline_run_id] = { "pr" => pr, "taxon_counts" => [] }
       end
       row["rpm"] = row["r"] / ((pr.total_reads - pr.total_ercc_reads.to_i) * pr.subsample_fraction) * 1_000_000.0
@@ -342,12 +347,17 @@ module ReportHelper
 
     # calculating rpm and zscore, organizing the results by pipeline_run_id
     result_hash = {}
+
+    pipeline_run_ids = sql_results.map { |x| x['pipeline_run_id'] }
+    pipeline_runs = PipelineRun.where(id: pipeline_run_ids)
+    pipeline_runs_by_id = Hash[pipeline_runs.map { |x| [x.id, x] }]
+
     sql_results.each do |row|
       pipeline_run_id = row["pipeline_run_id"]
       if result_hash[pipeline_run_id]
         pr = result_hash[pipeline_run_id]["pr"]
       else
-        pr = PipelineRun.find(pipeline_run_id)
+        pr = pipeline_runs_by_id[pipeline_run_id]
         result_hash[pipeline_run_id] = { "pr" => pr, "taxon_counts" => [] }
       end
       row["rpm"] = row["r"] / ((pr.total_reads - pr.total_ercc_reads.to_i) * pr.subsample_fraction) * 1_000_000.0
