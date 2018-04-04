@@ -281,13 +281,23 @@ class PipelineRunStage < ApplicationRecord
     version_s3_path = "#{pipeline_run.alignment_output_s3_path}/#{PipelineRun::VERSION_JSON_NAME}"
     pr.version = `aws s3 cp #{version_s3_path} -`
 
+    # only keep counts at certain taxonomic levels
+    taxon_counts_attributes_filtered = []
+    acceptable_tax_levels = [TaxonCount::TAX_LEVEL_SPECIES]
+    acceptable_tax_levels << TaxonCount::TAX_LEVEL_GENUS if pr.pipeline_branch == 'charles/hit-calling'
+    pipeline_output_dict['taxon_counts_attributes'].each do |tcnt|
+      if acceptable_tax_levels.include?(tcnt['tax_level'].to_i)
+        taxon_counts_attributes_filtered << tcnt
+      end
+    end
+
     pr.job_stats.delete_all
     pr.job_stats_attributes = stats_array
     pr.taxon_counts_attributes = taxon_counts_attributes_filtered
     pr.updated_at = Time.now.utc
     pr.save
     # aggregate the data at genus level
-    pr.generate_aggregate_counts('genus')
+    pr.generate_aggregate_counts('genus') unless pr.pipeline_branch == 'charles/hit-calling'
     # merge more accurate name information from lineages table
     pr.update_names
     # denormalize genus_taxid and superkingdom_taxid into taxon_counts
