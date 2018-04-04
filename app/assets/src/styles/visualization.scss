@@ -224,3 +224,32 @@
     }
   }
 }
+
+.d3-tree {
+  text {
+    font-size: 8pt;
+  }
+  .link {
+    fill: none;
+    stroke: #dcdde0;
+    stroke-width: 1px;
+  }
+  circle {
+    stroke: #3867fa;
+    stroke-width: 1px;
+    fill: #fff;
+    &:hover {
+      fill: #3867fa;
+      cursor: pointer;
+    }
+  }
+  .collapsed circle {
+    fill: rgba(56, 103, 250, 0.33);
+  }
+}
+
+#PipelineSampleReads_page {
+  .d3-tree {
+    border: 1px solid #eee;
+  }
+}

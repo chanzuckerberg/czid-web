@@ -4,7 +4,7 @@ import Cookies from "js-cookie";
 import $ from "jquery";
 import Tipsy from "react-tipsy";
 import ReactAutocomplete from "react-autocomplete";
-import { Dropdown, Label, Icon } from "semantic-ui-react";
+import { Dropdown, Label, Menu, Icon } from "semantic-ui-react";
 import numberWithCommas from "../helpers/strings";
 import StringHelper from "../helpers/StringHelper";
 import Nanobar from "nanobar";
@@ -1586,41 +1586,69 @@ function BackgroundModelFilter({ parent }) {
   );
 }
 
-function RenderMarkup({
-  filter_row_stats,
-  advanced_filter_tag_list,
-  categories_filter_tag_list,
-  subcats_filter_tag_list,
-  parent
-}) {
-  return (
-    <div>
-      <div id="reports" className="reports-screen tab-screen col s12">
-        <div className="tab-screen-content">
-          <div className="row reports-container">
-            <div className="col s12 reports-section">
-              <div className="reports-count">
-                <div className="report-top-filters">
-                  <ul className="filter-lists">
-                    <ReportSearchBox parent={parent} />
-                    <NameTypeFilter parent={parent} />
-                    <BackgroundModelFilter parent={parent} />
-                    <CategoryFilter parent={parent} />
-                    <AdvancedFilters parent={parent} />
-                  </ul>
+class RenderMarkup extends React.Component {
+  constructor (props) {
+    super(props);
+    this.state = {
+      view: 'table',
+    };
+    this._onViewClicked = this.onViewClicked.bind(this);
+  }
+
+  onViewClicked (e, f) {
+    this.setState({ view: f.name });
+  }
+  renderMenu () {
+    return (
+      <Menu icon floated="right">
+        <Menu.Item name="table" active={this.state.view == 'table'} onClick={this._onViewClicked}>
+          <Icon name="table"/>
+        </Menu.Item>
+        <Menu.Item name="chart" active={this.state.view == 'chart'} onClick={this._onViewClicked}>
+          <Icon name="chart line" />
+        </Menu.Item>
+      </Menu>
+    );
+  }
+  render () {
+    const {
+      filter_row_stats,
+      advanced_filter_tag_list,
+      categories_filter_tag_list,
+      subcats_filter_tag_list,
+      parent
+    } = this.props;
+    return (
+      <div>
+        <div id="reports" className="reports-screen tab-screen col s12">
+          <div className="tab-screen-content">
+            <div className="row reports-container">
+              <div className="col s12 reports-section">
+                <div className="reports-count">
+                  <div className="report-top-filters">
+                    <ul className="filter-lists">
+                      <ReportSearchBox parent={parent} />
+                      <NameTypeFilter parent={parent} />
+                      <BackgroundModelFilter parent={parent} />
+                      <CategoryFilter parent={parent} />
+                      <AdvancedFilters parent={parent} />
+                    </ul>
+                  </div>
+                  {this.renderMenu()}
+                  <div className="filter-tags-list">
+                    {advanced_filter_tag_list} {categories_filter_tag_list} {subcats_filter_tag_list}
+                  </div>
+                  {filter_row_stats}
                 </div>
-                <div className="filter-tags-list">
-                  {advanced_filter_tag_list} {categories_filter_tag_list} {subcats_filter_tag_list}
-                </div>
-                {filter_row_stats}
+                {this.state.view == "table" && <ReportTableHeader parent={parent} />}
+                {parent.state.selected_taxons.length && this.state.view == "chart" && <PipelineSampleTree taxons={parent.state.selected_taxons} />}
               </div>
-              <ReportTableHeader parent={parent} />
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  }
 }
 
 function ActiveThresholdRows({ activeThreshold, index, parent }) {
@@ -1678,4 +1706,162 @@ function ActiveThresholdRows({ activeThreshold, index, parent }) {
   );
 }
 
+class PipelineSampleTree extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+  makeTree () {
+		function make_node(name, level) {
+			return {
+				name: name,
+				level: level,
+				children: [],
+			}
+		}
+
+		let rows = this.props.taxons;
+		let nodes_by_name = {};
+
+		let root = {
+			name: '',
+			children: [],
+		};
+
+		let tree = root;
+
+		let order = [
+			"species",
+			"genus",
+			"family",
+			"order",
+			"class",
+			"phylum",
+			"superkingdom",
+		].reverse();
+
+		for (let i=0; i < rows.length; i += 1) {
+			tree = root;
+			let row = rows[i];
+			for (let j = 0; j < order.length; j+= 1) {
+				if (!row.lineage) {
+					break;
+				}
+				let level = order[j];
+				let name = row.lineage[level + "_name"];
+				if (!name) {
+					continue;
+				}
+
+				if(!nodes_by_name[name]) {
+					let node = make_node(name, level);
+					tree.children.push(node);
+					nodes_by_name[name] = node;
+				}
+
+				tree = nodes_by_name[name];
+			}
+		}
+    return root;
+  }
+  render () {
+    let tree = this.makeTree();
+    return (<TreeStructure tree={tree} leaf_count={this.props.taxons.length} />);
+  }
+}
+
+class TreeStructure extends React.Component {
+
+  componentDidMount () {
+    this.renderD3(this.props);
+  }
+
+  componentWillReceiveProps (nextProps) {
+    d3.select(this.container).select("svg").remove();
+    this.renderD3(nextProps);
+  }
+
+  renderD3 (props) {
+    let width = 1000,
+        height = 14 * props.leaf_count;
+    let margin = {
+      top: 20,
+      right: 200,
+      left: 40,
+      bottom: 20,
+    };
+    this.svg = d3.select(this.container).append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom);
+
+    let vis = this.svg.append("g")
+      //.attr("transform", "translate(" + (margin.left + width/2) + "," + (margin.top + height/2) + ")")
+
+    let tree = d3.layout.tree().size([height, width]);
+    let nodes = tree.nodes(props.tree);
+    let links = tree.links(nodes);
+
+    /*
+    let diagonal = (d) => {
+      return "M" + d.source.y + "," + d.source.x + "V" + d.target.x + "H" + d.target.y;
+    }
+    */
+
+    let diagonal = d3.svg.diagonal()
+    .projection(function(d) { return [d.y, d.x]; });
+
+    //diagonal = d3.svg.diagonal.radial()
+    //  .projection(function(d) { return [d.y, d.x / 180 * Math.PI]; });
+
+    vis.selectAll("path.link")
+      .data(links)
+      .enter().append("path")
+      .attr("class", "link")
+      .attr("d", diagonal);
+
+    var node = vis.selectAll("g.node")
+				.data(nodes)
+	  		.enter().append("g")
+				.attr("class", (d) => {
+          let cls = "node";
+          if(d._children) {
+            cls += " collapsed";
+          }
+          return cls;
+        })
+				.attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; })
+        //.attr("transform", function(d){ return "rotate(" + (d.x - 90) + ")translate(" + d.y + ")"; })
+        .on("click", (d) => {
+          let t = d.children;
+          d.children = d._children;
+          d._children = t;
+
+          d3.select(this.container).select("svg").remove();
+          this.renderD3(this.props);
+        });
+
+		node.append("circle")
+			.attr("r", 4.5)
+
+  	node.append("text")
+      .attr("dy", 3)
+      .attr("x", function(d) { return d.children || d._children ? -8 : 8; })
+      .style("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+      //.attr("dy", ".31em")
+      //.attr("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
+      //.attr("transform", function(d) { return d.x < 180 ? "translate(8)" : "rotate(180)translate(-8)"; })
+      .text(function(d) {
+        return d.name;
+			});
+  }
+
+  render () {
+    return (
+      <div
+        className="d3-tree"
+        ref={(container) => { this.container = container; }}
+      >
+      </div>
+    );
+  }
+};
 export default PipelineSampleReport;
