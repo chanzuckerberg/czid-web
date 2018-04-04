@@ -298,7 +298,7 @@ class PipelineRun < ApplicationRecord
 
   def subsample_fraction
     # fraction of non-host ("remaining") reads that actually went through non-host alignment
-    (1.0 * subsampled_reads) / remaining_reads
+    @cached_subsample_fraction ||= (1.0 * subsampled_reads) / remaining_reads
   end
 
   def subsample_suffix
