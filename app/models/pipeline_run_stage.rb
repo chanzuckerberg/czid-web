@@ -281,14 +281,6 @@ class PipelineRunStage < ApplicationRecord
     version_s3_path = "#{pipeline_run.alignment_output_s3_path}/#{PipelineRun::VERSION_JSON_NAME}"
     pr.version = `aws s3 cp #{version_s3_path} -`
 
-    # only keep species level counts
-    taxon_counts_attributes_filtered = []
-    pipeline_output_dict['taxon_counts_attributes'].each do |tcnt|
-      if tcnt['tax_level'].to_i == TaxonCount::TAX_LEVEL_SPECIES
-        taxon_counts_attributes_filtered << tcnt
-      end
-    end
-
     pr.job_stats.delete_all
     pr.job_stats_attributes = stats_array
     pr.taxon_counts_attributes = taxon_counts_attributes_filtered
