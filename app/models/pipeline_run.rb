@@ -18,11 +18,8 @@ class PipelineRun < ApplicationRecord
   accepts_nested_attributes_for :ercc_counts
 
   DEFAULT_SUBSAMPLING = 1_000_000 # number of reads to subsample to, after host filtering
-  OUTPUT_JSON_NAME = if pr.pipeline_branch == 'charles/hit-calling'
-                       'multihit_idseq_web_sample.json'
-                     else
-                       'idseq_web_sample.json'
-                     end
+  OUTPUT_JSON_NAME = 'idseq_web_sample.json'.freeze
+  MULTIHIT_OUTPUT_JSON_NAME = 'multihit_idseq_web_sample.json'.freeze
   STATS_JSON_NAME = 'stats.json'.freeze
   VERSION_JSON_NAME = 'versions.json'.freeze
   ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
