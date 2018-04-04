@@ -1765,7 +1765,7 @@ class PipelineSampleTree extends React.Component {
   }
   render () {
     let tree = this.makeTree();
-    return (<TreeStructure tree={tree} leaf_count={this.props.taxons.length} />);
+    return (<TreeStructure tree={tree} />);
   }
 }
 
@@ -1781,8 +1781,18 @@ class TreeStructure extends React.Component {
   }
 
   renderD3 (props) {
+    let leaf_count = 0;
+    let to_visit = [props.tree];
+    while(to_visit.length) {
+      let node = to_visit.pop();
+      if (!(node.children && node.children.length)) {
+        leaf_count += 1;
+      } else {
+        to_visit = to_visit.concat(node.children);
+      }
+    }
     let width = 1000,
-        height = 14 * props.leaf_count;
+        height = 14 * leaf_count;
     let margin = {
       top: 20,
       right: 200,
