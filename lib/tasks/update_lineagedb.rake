@@ -24,7 +24,7 @@ task update_lineage_db: :environment do
    ## Get old lineage file
    mysql -h #{host} -u $DB_USERNAME --password=$DB_PASSWORD -e "SELECT #{column_names},started_at FROM idseq_#{Rails.env}.taxon_lineages WHERE ended_at = (SELECT MAX(ended_at) FROM idseq_#{Rails.env}.taxon_lineages);" | tr "\t" "," | tail -n +2 > old_taxon_lineages_with_started_at.csv
    cut -d, -f1-#{n_columns} old_taxon_lineages_with_started_at.csv > old_taxon_lineages.csv
-   cut -d, -f1,#{n_columns+1} old_taxon_lineages_with_started_at.csv > taxid_to_started_at.csv
+   cut -d, -f1,#{n_columns + 1} old_taxon_lineages_with_started_at.csv > taxid_to_started_at.csv
 
    ## Get new lineage file
    # Download new references, extract and remove header line
