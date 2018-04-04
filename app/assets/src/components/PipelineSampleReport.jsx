@@ -1803,9 +1803,29 @@ class TreeStructure extends React.Component {
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom);
 
-    let vis = this.svg.append("g")
-      //.attr("transform", "translate(" + (margin.left + width/2) + "," + (margin.top + height/2) + ")")
+    let rect = this.svg.append("rect")
+      .attr("fill", "none")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .style("pointer-events", "all");
 
+    let vis = this.svg.append("g");
+
+      //.attr("transform", "translate(" + (margin.left + width/2) + "," + (margin.top + height/2) + ")")
+    let drag = d3.behavior.drag()
+        .origin(function(d) { return d; })
+        .on("drag", function () {
+            d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
+        });
+
+    let zoom = d3.behavior.zoom()
+        .scaleExtent([0.1, 1])
+        .on("zoom", (z) => {
+          vis.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+        });
+
+    rect.call(zoom);
+    rect.call(drag);
     let tree = d3.layout.tree().size([height, width]);
     let nodes = tree.nodes(props.tree);
     let links = tree.links(nodes);
