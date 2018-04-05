@@ -340,7 +340,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def load_ercc_counts
-    ercc_s3_path = "#{sample_output_s3_path}/#{ERCC_OUTPUT_NAME}"
+    ercc_s3_path = "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
     _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", ercc_s3_path)
     return unless status.exitstatus.zero?
     ercc_lines = `aws s3 cp #{ercc_s3_path} - | grep 'ERCC' | cut -f1,2`

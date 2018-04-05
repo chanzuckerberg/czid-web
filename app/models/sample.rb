@@ -138,7 +138,7 @@ class Sample < ApplicationRecord
   def results_folder_files
     pr = pipeline_runs.first
     return list_outputs(sample_output_s3_path) unless pr
-    stage1_files = list_outputs(pr.sample_output_s3_path)
+    stage1_files = list_outputs(pr.host_filter_output_s3_path)
     stage2_files = list_outputs(pr.alignment_output_s3_path, 2)
     stage1_files + stage2_files
   end

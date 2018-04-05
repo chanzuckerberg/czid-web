@@ -216,10 +216,11 @@ class PipelineRunStage < ApplicationRecord
   def alignment_command
     sample = pipeline_run.sample
     file_type = sample.input_files.first.file_type
-    batch_command_env_variables = "FASTQ_BUCKET=#{sample.sample_input_s3_path} INPUT_BUCKET=#{sample.sample_output_s3_path} " \
+    batch_command_env_variables = "FASTQ_BUCKET=#{sample.sample_input_s3_path} INPUT_BUCKET=#{pipeline_run.host_filter_output_s3_path} " \
       "OUTPUT_BUCKET=#{pipeline_run.alignment_output_s3_path} FILE_TYPE=#{file_type} ENVIRONMENT=#{Rails.env} DB_SAMPLE_ID=#{sample.id} " \
       "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} SKIP_DEUTERO_FILTER=#{sample.skip_deutero_filter_flag}"
     batch_command_env_variables += "SUBSAMPLE=#{pipeline_run.subsample} " if pipeline_run.subsample
+    batch_command_env_varibkes += "HOST_FILTER_PIPELINE_VERSION=#{pipeline_run.pipeline_version} " if pipeline_run.pipeline_version
     batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline non_host_alignment"
     aegea_batch_submit_command(batch_command)
   end
@@ -234,9 +235,10 @@ class PipelineRunStage < ApplicationRecord
 
   def db_load_host_filtering
     pr = pipeline_run
+    pr.pipeline_version = pr.fetch_pipeline_version
 
     # Load job statistics
-    stats_json_s3_path = "#{pr.sample_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
+    stats_json_s3_path = "#{pr.host_filter_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
     downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, pr.local_json_path)
     stats_array = JSON.parse(File.read(downloaded_stats_path))
     pr.total_reads = (stats_array[0] || {})['total_reads'] || 0
@@ -246,12 +248,11 @@ class PipelineRunStage < ApplicationRecord
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_stats_path}")
 
     # Load version
-    version_s3_path = "#{pr.sample_output_s3_path}/#{PipelineRun::VERSION_JSON_NAME}"
+    version_s3_path = "#{pr.host_filter_output_s3_path}/#{PipelineRun::VERSION_JSON_NAME}"
     pr.version = `aws s3 cp #{version_s3_path} -`
 
     # Load ERCC counts
     pr.load_ercc_counts
-
     pr.save
   end
 
@@ -321,8 +322,8 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def host_filtering_outputs
-    stats_json_s3_path = "#{pipeline_run.sample_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
-    unmapped_fasta_s3_path = "#{pipeline_run.sample_output_s3_path}/unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.merged.fasta"
+    stats_json_s3_path = "#{pipeline_run.host_filter_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
+    unmapped_fasta_s3_path = "#{pipeline_run.host_filter_output_s3_path}/unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.merged.fasta"
     [stats_json_s3_path, unmapped_fasta_s3_path]
   end
 
