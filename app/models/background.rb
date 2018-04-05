@@ -67,4 +67,16 @@ class Background < ApplicationRecord
   def compute_stdev(sum, sum2, n)
     Math.sqrt((sum2 - sum**2 / n.to_f) / (n - 1))
   end
+
+  def self.viewable(user)
+    if user.admin?
+      all
+    else
+      where("project_id in (select project_id from projects_users where user_id=?)
+             or
+             project_id is ?",
+            user.id,
+            nil)
+    end
+  end
 end

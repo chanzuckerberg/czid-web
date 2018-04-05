@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180330173525) do
+ActiveRecord::Schema.define(version: 20180405175934) do
 
   create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "archive_of"
@@ -24,6 +24,7 @@ ActiveRecord::Schema.define(version: 20180330173525) do
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "project_id"
     t.index ["name"], name: "index_backgrounds_on_name", unique: true
   end
 
@@ -285,31 +286,34 @@ ActiveRecord::Schema.define(version: 20180330173525) do
 
   create_table "taxon_lineages", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.integer "taxid", null: false
-    t.integer "superkingdom_taxid"
-    t.integer "phylum_taxid"
-    t.integer "class_taxid"
-    t.integer "order_taxid"
-    t.integer "family_taxid"
-    t.integer "genus_taxid"
-    t.integer "species_taxid"
+    t.integer "superkingdom_taxid", default: -700, null: false
+    t.integer "phylum_taxid", default: -600, null: false
+    t.integer "class_taxid", default: -500, null: false
+    t.integer "order_taxid", default: -400, null: false
+    t.integer "family_taxid", default: -300, null: false
+    t.integer "genus_taxid", default: -200, null: false
+    t.integer "species_taxid", default: -100, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "superkingdom_name"
-    t.string "phylum_name"
-    t.string "class_name"
-    t.string "order_name"
-    t.string "family_name"
-    t.string "genus_name"
-    t.string "species_name"
-    t.string "superkingdom_common_name"
-    t.string "phylum_common_name"
-    t.string "class_common_name"
-    t.string "order_common_name"
-    t.string "family_common_name"
-    t.string "genus_common_name"
-    t.string "species_common_name"
+    t.string "superkingdom_name", default: "", null: false
+    t.string "phylum_name", default: "", null: false
+    t.string "class_name", default: "", null: false
+    t.string "order_name", default: "", null: false
+    t.string "family_name", default: "", null: false
+    t.string "genus_name", default: "", null: false
+    t.string "species_name", default: "", null: false
+    t.string "superkingdom_common_name", default: "", null: false
+    t.string "phylum_common_name", default: "", null: false
+    t.string "class_common_name", default: "", null: false
+    t.string "order_common_name", default: "", null: false
+    t.string "family_common_name", default: "", null: false
+    t.string "genus_common_name", default: "", null: false
+    t.string "species_common_name", default: "", null: false
     t.datetime "started_at", default: "2000-01-01 00:00:00", null: false
     t.datetime "ended_at", default: "3000-01-01 00:00:00", null: false
+    t.integer "kingdom_taxid", default: -650, null: false
+    t.string "kingdom_name", default: "", null: false
+    t.string "kingdom_common_name", default: "", null: false
     t.index ["class_taxid"], name: "index_taxon_lineages_on_class_taxid"
     t.index ["family_taxid"], name: "index_taxon_lineages_on_family_taxid"
     t.index ["genus_taxid"], name: "index_taxon_lineages_on_genus_taxid"
