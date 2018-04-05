@@ -1604,8 +1604,8 @@ class RenderMarkup extends React.Component {
         <Menu.Item name="table" active={this.state.view == 'table'} onClick={this._onViewClicked}>
           <Icon name="table"/>
         </Menu.Item>
-        <Menu.Item name="chart" active={this.state.view == 'chart'} onClick={this._onViewClicked}>
-          <Icon name="chart line" />
+        <Menu.Item name="tree" active={this.state.view == 'tree'} onClick={this._onViewClicked}>
+          <Icon name="tree" />
         </Menu.Item>
       </Menu>
     );
@@ -1641,7 +1641,7 @@ class RenderMarkup extends React.Component {
                   {filter_row_stats}
                 </div>
                 {this.state.view == "table" && <ReportTableHeader parent={parent} />}
-                {parent.state.selected_taxons.length && this.state.view == "chart" && <PipelineSampleTree taxons={parent.state.selected_taxons} />}
+                {parent.state.selected_taxons.length && this.state.view == "tree" && <PipelineSampleTree taxons={parent.state.selected_taxons} />}
               </div>
             </div>
           </div>
@@ -1716,6 +1716,7 @@ class PipelineSampleTree extends React.Component {
 				name: name,
 				level: level,
 				children: [],
+        weight: 0,
 			}
 		}
 
@@ -1725,6 +1726,7 @@ class PipelineSampleTree extends React.Component {
 		let root = {
 			name: '',
 			children: [],
+      weight: 0,
 		};
 
 		let tree = root;
@@ -1757,9 +1759,10 @@ class PipelineSampleTree extends React.Component {
 					tree.children.push(node);
 					nodes_by_name[name] = node;
 				}
-
+        tree.weight += row.NT.aggregatescore;
 				tree = nodes_by_name[name];
 			}
+      tree.weight += row.NT.aggregatescore;
 		}
     return root;
   }
@@ -1781,6 +1784,7 @@ class TreeStructure extends React.Component {
   }
 
   renderD3 (props) {
+    console.log("CREATING TREE");
     let leaf_count = 0;
     let to_visit = [props.tree];
     while(to_visit.length) {
@@ -1792,7 +1796,8 @@ class TreeStructure extends React.Component {
       }
     }
     let width = 1000,
-        height = 14 * leaf_count;
+        height = 25 * leaf_count;
+
     let margin = {
       top: 20,
       right: 200,
@@ -1802,15 +1807,15 @@ class TreeStructure extends React.Component {
     this.svg = d3.select(this.container).append("svg")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom);
-
+    /*
     let rect = this.svg.append("rect")
       .attr("fill", "none")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
       .style("pointer-events", "all");
-
-    let vis = this.svg.append("g");
-
+    */
+    let vis = this.svg.append("g")
+                      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
       //.attr("transform", "translate(" + (margin.left + width/2) + "," + (margin.top + height/2) + ")")
     let drag = d3.behavior.drag()
         .origin(function(d) { return d; })
@@ -1824,8 +1829,16 @@ class TreeStructure extends React.Component {
           vis.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
         });
 
-    rect.call(zoom);
-    rect.call(drag);
+    //rect.call(zoom);
+    //rect.call(drag);
+    let circleScale = d3.scale.linear()
+              .domain([0, props.tree.weight])
+              .range([3, 20]);
+
+    let linkScale = d3.scale.linear()
+              .domain([0, props.tree.weight])
+              .range([1, 20]);
+
     let tree = d3.layout.tree().size([height, width]);
     let nodes = tree.nodes(props.tree);
     let links = tree.links(nodes);
@@ -1846,7 +1859,10 @@ class TreeStructure extends React.Component {
       .data(links)
       .enter().append("path")
       .attr("class", "link")
-      .attr("d", diagonal);
+      .attr("d", diagonal)
+      .attr("stroke-width", (d) => {
+        return linkScale(d.target.weight);
+      });
 
     var node = vis.selectAll("g.node")
 				.data(nodes)
@@ -1870,11 +1886,11 @@ class TreeStructure extends React.Component {
         });
 
 		node.append("circle")
-			.attr("r", 4.5)
+			.attr("r", function (d) { return circleScale(d.weight); });
 
   	node.append("text")
       .attr("dy", 3)
-      .attr("x", function(d) { return d.children || d._children ? -8 : 8; })
+      .attr("x", function(d) { return d.children || d._children ? -1 * circleScale(d.weight) - 5 : circleScale(d.weight) + 5; })
       .style("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
       //.attr("dy", ".31em")
       //.attr("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })

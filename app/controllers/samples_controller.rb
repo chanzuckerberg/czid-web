@@ -249,10 +249,10 @@ class SamplesController < ApplicationController
 
     @report_info = external_report_info(pipeline_run_id, background_id, params)
     tax_ids = @report_info[:taxonomy_details][2].map {|x| x['tax_id']}
-    lineages = TaxonLineage.where(taxid: tax_ids)
+    lineages = TaxonCount.connection.select_all(TaxonLineage.where(taxid: tax_ids)).to_hash
     lineage_by_taxid = {}
     lineages.each do |x|
-      lineage_by_taxid[x.taxid] = x
+      lineage_by_taxid[x['taxid']] = x
     end
     @report_info[:taxonomy_details][2].each do |tax|
       tax['lineage'] = lineage_by_taxid[tax['tax_id']]

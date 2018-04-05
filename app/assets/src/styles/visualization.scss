@@ -231,12 +231,12 @@
   }
   .link {
     fill: none;
-    stroke: #dcdde0;
-    stroke-width: 1px;
+    stroke: rgb(78, 173, 73);
+    opacity: 0.5;
   }
   circle {
     stroke: #3867fa;
-    stroke-width: 1px;
+    stroke-width: 1.5px;
     fill: #fff;
     &:hover {
       fill: #3867fa;
@@ -244,7 +244,7 @@
     }
   }
   .collapsed circle {
-    fill: rgba(56, 103, 250, 0.33);
+    fill: rgb(192, 206, 250);
   }
 }
 
