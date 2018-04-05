@@ -53,6 +53,22 @@ class Project < ApplicationRecord
     `rm -rf #{user_csv_dir}`
   end
 
+  def project_background_name
+    "All '#{name}' samples"
+  end
+
+  def create_or_update_project_background
+    project_sample_ids = Sample.where(project_id: id)
+    project_pipeline_runs = Background.eligible_pipeline_runs.where(sample_id: project_sample_ids)
+    project_background = Background.find_by(name: project_background_name)
+    unless project_background
+      project_background = Background.new
+      project_background.name = project_background_name
+    end
+    project_background.pipeline_runs = project_pipeline_runs
+    project_background.save
+  end
+
   def self.editable(user)
     if user.admin?
       all
