@@ -61,11 +61,12 @@ class Project < ApplicationRecord
     project_sample_ids = Sample.where(project_id: id)
     project_pipeline_runs = Background.eligible_pipeline_runs.where(sample_id: project_sample_ids)
     return if project_pipeline_runs.count < 2
-    project_background = Background.find_by(name: project_background_name)
+    project_background = Background.find_by(project_id: id)
     unless project_background
       project_background = Background.new
-      project_background.name = project_background_name
+      project_background.project_id = id
     end
+    project_background.name = project_background_name
     project_background.pipeline_runs = project_pipeline_runs
     project_background.save
   end
