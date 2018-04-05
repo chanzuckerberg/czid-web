@@ -60,6 +60,7 @@ class Project < ApplicationRecord
   def create_or_update_project_background
     project_sample_ids = Sample.where(project_id: id)
     project_pipeline_runs = Background.eligible_pipeline_runs.where(sample_id: project_sample_ids)
+    return if project_pipeline_runs.count < 2
     project_background = Background.find_by(name: project_background_name)
     unless project_background
       project_background = Background.new
