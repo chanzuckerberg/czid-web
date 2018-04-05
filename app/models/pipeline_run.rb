@@ -302,7 +302,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def subsample_suffix
-    subsample? ? "/subsample_#{subsample}" : ""
+    subsample? ? "/subsample_#{subsample}" : "subsample_all"
   end
 
   delegate :sample_output_s3_path, to: :sample
@@ -315,8 +315,22 @@ class PipelineRun < ApplicationRecord
     "#{sample.sample_postprocess_s3_path}/align_viz"
   end
 
+  def host_filter_output_s3_path
+    pipeline_ver_str = ""
+    pipeline_ver_str = "/#{pipeline_version}/" if pipeline_version
+    "#{sample.sample_output_s3_path}#{pipeline_ver_str}"
+  end
+
+  def fetch_pipeline_version
+    `aws s3 cp #{sample.sample_output_s3_path}/pipeline_version.txt -`.strip
+  rescue
+    return nil
+  end
+
   def alignment_output_s3_path
-    "#{sample.sample_output_s3_path}#{subsample_suffix}"
+    pipeline_ver_str = ""
+    pipeline_ver_str = "#{pipeline_version}/" if pipeline_version
+    "#{sample.sample_output_s3_path}/#{pipeline_ver_str}#{subsample_suffix}"
   end
 
   def count_unmapped_reads
