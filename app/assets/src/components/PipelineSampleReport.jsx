@@ -4,8 +4,9 @@ import Cookies from "js-cookie";
 import $ from "jquery";
 import Tipsy from "react-tipsy";
 import ReactAutocomplete from "react-autocomplete";
-import { Dropdown, Label, Menu, Icon } from "semantic-ui-react";
+import { Dropdown, Label, Menu, Icon, Popup } from "semantic-ui-react";
 import numberWithCommas from "../helpers/strings";
+import LabeledDropdown from './LabeledDropdown';
 import StringHelper from "../helpers/StringHelper";
 import TaxonTooltip from './TaxonTooltip';
 import Nanobar from "nanobar";
@@ -1603,12 +1604,25 @@ class RenderMarkup extends React.Component {
   renderMenu () {
     return (
       <Menu icon floated="right">
-        <Menu.Item name="table" active={this.state.view == 'table'} onClick={this._onViewClicked}>
-          <Icon name="table"/>
-        </Menu.Item>
-        <Menu.Item name="tree" active={this.state.view == 'tree'} onClick={this._onViewClicked}>
-          <Icon name="tree" />
-        </Menu.Item>
+        <Popup
+          trigger={
+            <Menu.Item name="table" active={this.state.view == 'table'} onClick={this._onViewClicked}>
+              <Icon name="table"/>
+            </Menu.Item>
+          }
+          content='Table View'
+          inverted
+         />
+
+        <Popup
+          trigger={
+            <Menu.Item name="tree" active={this.state.view == 'tree'} onClick={this._onViewClicked}>
+              <Icon name="fork" />
+            </Menu.Item>
+          }
+          content='Phylogenetic Tree View'
+          inverted
+        />
       </Menu>
     );
   }
@@ -1643,7 +1657,7 @@ class RenderMarkup extends React.Component {
                   {filter_row_stats}
                 </div>
                 {this.state.view == "table" && <ReportTableHeader parent={parent} />}
-                {parent.state.selected_taxons.length && this.state.view == "tree" && <PipelineSampleTree taxons={parent.state.selected_taxons} sample={parent.report_details.sample_info}/>}
+                {parent.state.selected_taxons.length && this.state.view == "tree" && <PipelineSampleTree taxons={parent.state.selected_taxons} sample={parent.report_details.sample_info} nameType={parent.state.name_type} />}
               </div>
             </div>
           </div>
@@ -1712,6 +1726,11 @@ class PipelineSampleTree extends React.PureComponent {
   constructor(props) {
     super(props);
     this._getTooltip = this.getTooltip.bind(this);
+    this.dataTypes = ["NT.aggregatescore", "NT.r", "NT.rpm"];
+    this.state = {
+      dataType: this.dataTypes[0],
+    };
+    this._updateDataType = this.updateDataType.bind(this);
   }
   makeTree () {
 		function make_node(name, level) {
@@ -1744,6 +1763,10 @@ class PipelineSampleTree extends React.PureComponent {
 			"superkingdom",
 		].reverse();
 
+    let getValue = (row) => {
+      let parts = this.state.dataType.split(".");
+      return row[parts[0]][parts[1]];
+    };
 		for (let i=0; i < rows.length; i += 1) {
 			tree = root;
 			let row = rows[i];
@@ -1751,8 +1774,17 @@ class PipelineSampleTree extends React.PureComponent {
 				if (!row.lineage) {
 					break;
 				}
-				let level = order[j];
-				let name = row.lineage[level + "_name"];
+				let level = order[j],
+            name;
+
+        if (this.props.nameType == "Common name") {
+          name = row.lineage[level + "_common_name"];
+        }
+
+        if (!name) {
+				  name = row.lineage[level + "_name"];
+        }
+
 				if (!name) {
 					continue;
 				}
@@ -1762,10 +1794,10 @@ class PipelineSampleTree extends React.PureComponent {
 					tree.children.push(node);
 					nodes_by_name[name] = node;
 				}
-        tree.weight += row.NT.r;
+        tree.weight += getValue(row);
 				tree = nodes_by_name[name];
 			}
-      tree.weight += row.NT.r;
+      tree.weight += getValue(row);
 		}
     return root;
   }
@@ -1776,27 +1808,57 @@ class PipelineSampleTree extends React.PureComponent {
     return <div>{node.weight}</div>
     //return <TaxonTooltip taxon={node} sample={this.props.sample} />
   }
+
+  updateDataType (e, d) {
+    this.setState({dataType: d.value});
+  }
+
+  renderWeightDataTypeChooser () {
+    let options = [];
+    for (let dataType of this.dataTypes) {
+      options.push({
+        value: dataType,
+        text: dataType,
+      });
+    }
+
+    return (
+      <LabeledDropdown
+        options={options}
+        onChange={this._updateDataType}
+        value={this.state.dataType}
+        label="Data Type:"
+      />
+    );
+
+  }
   render () {
     let tree = this.makeTree();
-    return (<TreeStructure tree={tree} getTooltip={this._getTooltip} />);
+    return (
+      <div>
+        {this.renderWeightDataTypeChooser()}
+        <TreeStructure tree={tree} getTooltip={this._getTooltip} />
+      </div>
+    );
   }
 }
 
-class TreeStructure extends React.Component {
+class TreeStructure extends React.PureComponent {
   constructor (props) {
     super(props);
     this.state = {};
     this.autoCollapsed = false;
     this.i = 0;
+    this.duration = 0;
+  }
+  componentWillReceiveProps (nextProps) {
+    this.duration = 0;
+    this.autoCollapsed = false;
+    this.update(nextProps, nextProps.tree);
   }
   componentDidMount () {
     this.create();
     this.update(this.props, this.props.tree);
-  }
-
-  componentWillReceiveProps (nextProps) {
-    this.autoCollapsed = false;
-    this.update(nextProps, nextProps.tree);
   }
   create () {
     this.svg = d3.select(this.container).append("svg")
@@ -1804,10 +1866,9 @@ class TreeStructure extends React.Component {
     this.nodeContainer = this.svg.append("g");
   }
   update (props, source) {
-    let duration = 750;
     let circleScale = d3.scale.linear()
               .domain([0, props.tree.weight])
-              .range([3, 20]);
+              .range([3, 15]);
 
     let linkScale = d3.scale.linear()
               .domain([0, props.tree.weight])
@@ -1815,9 +1876,12 @@ class TreeStructure extends React.Component {
 
     let leaf_count = 0;
     let to_visit = [props.tree];
+    let min_weight = 999999999;
+
     while(to_visit.length) {
       let node = to_visit.pop();
-      if (!this.autoCollapsed && circleScale(node.weight) < 15 && node.children && node.children.length) {
+      min_weight = Math.min(min_weight, node.weight);
+      if (!this.autoCollapsed && circleScale(node.weight) < 10 && node.children && node.children.length) {
         node._children = node.children;
         node.children = null;
       }
@@ -1828,9 +1892,12 @@ class TreeStructure extends React.Component {
       }
     }
 
+    circleScale.domain([min_weight, props.tree.weight]);
+    linkScale.domain([min_weight, props.tree.weight]);
+
 		this.autoCollapsed = true;
     let width = 1000,
-        height = 25 * leaf_count;
+        height = Math.max(300, 35 * leaf_count);
 
     let margin = {
       top: 20,
@@ -1844,9 +1911,9 @@ class TreeStructure extends React.Component {
 
     this.svg
 				.transition()
-				.duration(duration)
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom);
+				.duration(this.duration)
+        .attr("width", Math.max(this.svg.attr("width"), width + margin.left + margin.right))
+        .attr("height", Math.max(this.svg.attr("height"), height + margin.top + margin.bottom));
 
     this.pathContainer.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
     this.nodeContainer.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -1875,7 +1942,7 @@ class TreeStructure extends React.Component {
       });
 
     let pathsExit = paths.exit().transition()
-        .duration(duration)
+        .duration(this.duration)
         .attr("d", function(d) {
           let o = {x: source.x, y: source.y};
             return diagonal({source: o, target: o});
@@ -1883,7 +1950,7 @@ class TreeStructure extends React.Component {
           .remove();
 
 		let pathsUpdate = paths.transition()
-      .duration(duration)
+      .duration(this.duration)
       .attr("d", (d) => {
       	var source = {x: d.source.x - linkScale(this.calculateLinkSourcePosition(d)), y: d.source.y};
       	var target = {x: d.target.x, y: d.target.y};
@@ -1935,7 +2002,7 @@ class TreeStructure extends React.Component {
       .style("fill-opacity", 1e-6);
 
     let nodeExit = node.exit().transition()
-        .duration(duration)
+        .duration(this.duration)
         .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
         .remove();
 
@@ -1946,7 +2013,7 @@ class TreeStructure extends React.Component {
       .style("fill-opacity", 1e-6);
 
     let nodeUpdate = node.transition()
-        .duration(duration)
+        .duration(this.duration)
         .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; })
 				.attr("class", (d) => {
           let cls = "node";
@@ -1966,6 +2033,7 @@ class TreeStructure extends React.Component {
     	d.x0 = d.x;
     	d.y0 = d.y;
   	});
+    this.duration = 750;
   }
 
 	calculateLinkSourcePosition (link) {
