@@ -7,7 +7,9 @@ import ReactAutocomplete from "react-autocomplete";
 import { Dropdown, Label, Menu, Icon } from "semantic-ui-react";
 import numberWithCommas from "../helpers/strings";
 import StringHelper from "../helpers/StringHelper";
+import TaxonTooltip from './TaxonTooltip';
 import Nanobar from "nanobar";
+import d3, {event as currentEvent} from 'd3';
 
 class PipelineSampleReport extends React.Component {
   constructor(props) {
@@ -1641,7 +1643,7 @@ class RenderMarkup extends React.Component {
                   {filter_row_stats}
                 </div>
                 {this.state.view == "table" && <ReportTableHeader parent={parent} />}
-                {parent.state.selected_taxons.length && this.state.view == "tree" && <PipelineSampleTree taxons={parent.state.selected_taxons} />}
+                {parent.state.selected_taxons.length && this.state.view == "tree" && <PipelineSampleTree taxons={parent.state.selected_taxons} sample={parent.report_details.sample_info}/>}
               </div>
             </div>
           </div>
@@ -1706,9 +1708,10 @@ function ActiveThresholdRows({ activeThreshold, index, parent }) {
   );
 }
 
-class PipelineSampleTree extends React.Component {
+class PipelineSampleTree extends React.PureComponent {
   constructor(props) {
     super(props);
+    this._getTooltip = this.getTooltip.bind(this);
   }
   makeTree () {
 		function make_node(name, level) {
@@ -1759,42 +1762,73 @@ class PipelineSampleTree extends React.Component {
 					tree.children.push(node);
 					nodes_by_name[name] = node;
 				}
-        tree.weight += row.NT.aggregatescore;
+        tree.weight += row.NT.r;
 				tree = nodes_by_name[name];
 			}
-      tree.weight += row.NT.aggregatescore;
+      tree.weight += row.NT.r;
 		}
     return root;
   }
+  getTooltip (node) {
+    if (!node) {
+      return null;
+    }
+    return <div>{node.weight}</div>
+    //return <TaxonTooltip taxon={node} sample={this.props.sample} />
+  }
   render () {
     let tree = this.makeTree();
-    return (<TreeStructure tree={tree} />);
+    return (<TreeStructure tree={tree} getTooltip={this._getTooltip} />);
   }
 }
 
 class TreeStructure extends React.Component {
-
+  constructor (props) {
+    super(props);
+    this.state = {};
+    this.autoCollapsed = false;
+    this.i = 0;
+  }
   componentDidMount () {
-    this.renderD3(this.props);
+    this.create();
+    this.update(this.props, this.props.tree);
   }
 
   componentWillReceiveProps (nextProps) {
-    d3.select(this.container).select("svg").remove();
-    this.renderD3(nextProps);
+    this.autoCollapsed = false;
+    this.update(nextProps, nextProps.tree);
   }
+  create () {
+    this.svg = d3.select(this.container).append("svg")
+    this.pathContainer = this.svg.append("g");
+    this.nodeContainer = this.svg.append("g");
+  }
+  update (props, source) {
+    let duration = 750;
+    let circleScale = d3.scale.linear()
+              .domain([0, props.tree.weight])
+              .range([3, 20]);
 
-  renderD3 (props) {
-    console.log("CREATING TREE");
+    let linkScale = d3.scale.linear()
+              .domain([0, props.tree.weight])
+              .range([1, 20]);
+
     let leaf_count = 0;
     let to_visit = [props.tree];
     while(to_visit.length) {
       let node = to_visit.pop();
+      if (!this.autoCollapsed && circleScale(node.weight) < 15 && node.children && node.children.length) {
+        node._children = node.children;
+        node.children = null;
+      }
       if (!(node.children && node.children.length)) {
         leaf_count += 1;
       } else {
         to_visit = to_visit.concat(node.children);
       }
     }
+
+		this.autoCollapsed = true;
     let width = 1000,
         height = 25 * leaf_count;
 
@@ -1804,69 +1838,63 @@ class TreeStructure extends React.Component {
       left: 40,
       bottom: 20,
     };
-    this.svg = d3.select(this.container).append("svg")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom);
-    /*
-    let rect = this.svg.append("rect")
-      .attr("fill", "none")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-      .style("pointer-events", "all");
-    */
-    let vis = this.svg.append("g")
-                      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-      //.attr("transform", "translate(" + (margin.left + width/2) + "," + (margin.top + height/2) + ")")
-    let drag = d3.behavior.drag()
-        .origin(function(d) { return d; })
-        .on("drag", function () {
-            d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
-        });
 
-    let zoom = d3.behavior.zoom()
-        .scaleExtent([0.1, 1])
-        .on("zoom", (z) => {
-          vis.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-        });
+		props.tree.x0 = height / 2;
+  	props.tree.y0 = 0;
 
-    //rect.call(zoom);
-    //rect.call(drag);
-    let circleScale = d3.scale.linear()
-              .domain([0, props.tree.weight])
-              .range([3, 20]);
+    this.svg
+				.transition()
+				.duration(duration)
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom);
 
-    let linkScale = d3.scale.linear()
-              .domain([0, props.tree.weight])
-              .range([1, 20]);
+    this.pathContainer.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    this.nodeContainer.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     let tree = d3.layout.tree().size([height, width]);
     let nodes = tree.nodes(props.tree);
     let links = tree.links(nodes);
 
-    /*
-    let diagonal = (d) => {
-      return "M" + d.source.y + "," + d.source.x + "V" + d.target.x + "H" + d.target.y;
-    }
-    */
-
     let diagonal = d3.svg.diagonal()
     .projection(function(d) { return [d.y, d.x]; });
 
-    //diagonal = d3.svg.diagonal.radial()
-    //  .projection(function(d) { return [d.y, d.x / 180 * Math.PI]; });
+    var node = this.nodeContainer.selectAll("g.node")
+				.data(nodes, (d) => { return d.id || (d.id = ++this.i); });
 
-    vis.selectAll("path.link")
-      .data(links)
-      .enter().append("path")
+		let paths = this.pathContainer.selectAll("path.link")
+			.data(links, function(d) { return d.target.id; });
+
+    let pathsEnter = paths.enter().append("path")
       .attr("class", "link")
-      .attr("d", diagonal)
+      .attr("d", function(d) {
+        var o = {x: source.x0, y: source.y0};
+        return diagonal({source: o, target: o});
+      })
       .attr("stroke-width", (d) => {
         return linkScale(d.target.weight);
       });
 
-    var node = vis.selectAll("g.node")
-				.data(nodes)
-	  		.enter().append("g")
+    let pathsExit = paths.exit().transition()
+        .duration(duration)
+        .attr("d", function(d) {
+          let o = {x: source.x, y: source.y};
+            return diagonal({source: o, target: o});
+          })
+          .remove();
+
+		let pathsUpdate = paths.transition()
+      .duration(duration)
+      .attr("d", (d) => {
+      	var source = {x: d.source.x - linkScale(this.calculateLinkSourcePosition(d)), y: d.source.y};
+      	var target = {x: d.target.x, y: d.target.y};
+      	return diagonal({source: source, target: target});
+      })
+      .attr("stroke-width", function(d){
+      	return linkScale(d.target.weight);
+      });
+
+
+	  let nodeEnter = node.enter().append("g")
 				.attr("class", (d) => {
           let cls = "node";
           if(d._children) {
@@ -1874,38 +1902,107 @@ class TreeStructure extends React.Component {
           }
           return cls;
         })
-				.attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; })
-        //.attr("transform", function(d){ return "rotate(" + (d.x - 90) + ")translate(" + d.y + ")"; })
+				.attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
         .on("click", (d) => {
           let t = d.children;
           d.children = d._children;
           d._children = t;
+          this.update(this.props, d);
+        })
+        .on("mouseover", (d) => {
+          this.setState({hoverNode: d});
 
-          d3.select(this.container).select("svg").remove();
-          this.renderD3(this.props);
+          d3.select(this.tooltip)
+           .style("left", (currentEvent.pageX+10) + "px")
+           .style("top", (currentEvent.pageY-10) + "px")
+          d3.select(this.tooltip).classed("hidden", false);
+        })
+        .on("mouseout", (d) => {
+          d3.select(this.tooltip).classed("hidden", true);
         });
 
-		node.append("circle")
-			.attr("r", function (d) { return circleScale(d.weight); });
 
-  	node.append("text")
+		nodeEnter.append("circle")
+      .attr("r", 1e-6)
+
+  	nodeEnter.append("text")
       .attr("dy", 3)
       .attr("x", function(d) { return d.children || d._children ? -1 * circleScale(d.weight) - 5 : circleScale(d.weight) + 5; })
       .style("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
-      //.attr("dy", ".31em")
-      //.attr("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
-      //.attr("transform", function(d) { return d.x < 180 ? "translate(8)" : "rotate(180)translate(-8)"; })
       .text(function(d) {
         return d.name;
-			});
+			})
+      .style("fill-opacity", 1e-6);
+
+    let nodeExit = node.exit().transition()
+        .duration(duration)
+        .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
+        .remove();
+
+  	nodeExit.select("circle")
+      .attr("r", 1e-6);
+
+	  nodeExit.select("text")
+      .style("fill-opacity", 1e-6);
+
+    let nodeUpdate = node.transition()
+        .duration(duration)
+        .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; })
+				.attr("class", (d) => {
+          let cls = "node";
+          if(d._children) {
+            cls += " collapsed";
+          }
+          return cls;
+        });
+
+	  nodeUpdate.select("circle")
+      .attr("r", function(d){ return circleScale(d.weight);})
+
+	  nodeUpdate.select("text")
+      .style("fill-opacity", 1);
+
+		nodes.forEach(function(d) {
+    	d.x0 = d.x;
+    	d.y0 = d.y;
+  	});
+  }
+
+	calculateLinkSourcePosition (link) {
+		let targetID = link.target.id;
+		let childrenNumber = link.source.children.length;
+		let widthAbove = 0;
+		for (var i = 0; i < childrenNumber; i++)
+		{
+			if (link.source.children[i].id == targetID)
+			{
+				// we are done
+				widthAbove = widthAbove + link.source.children[i].weight/2;
+				break;
+			}else {
+				// keep adding
+				widthAbove = widthAbove + link.source.children[i].weight
+			}
+		}
+		return link.source.weight/2 - widthAbove;
+	}
+
+  renderTooltip () {
+    if (this.state.hoverNode === undefined) {
+      return;
+    }
+
+    return (
+      <div className="d3-tree-tooltip hidden" ref={(tooltip) => { this.tooltip = tooltip; }} >
+        {this.props.getTooltip(this.state.hoverNode)}
+      </div>)
   }
 
   render () {
     return (
-      <div
-        className="d3-tree"
-        ref={(container) => { this.container = container; }}
-      >
+      <div className="d3-tree">
+        {this.renderTooltip()}
+        <div ref={(container) => { this.container = container; }} />
       </div>
     );
   }
