@@ -49,8 +49,8 @@ gem 'will_paginate'
 # Use AWS-SDK to make AWS requests with byte range
 gem 'aws-sdk'
 # Redirect
-gem 'rack-host-redirect'
 gem 'activesupport'
+gem 'rack-host-redirect'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
