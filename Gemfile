@@ -49,6 +49,7 @@ gem 'will_paginate'
 # Use AWS-SDK to make AWS requests with byte range
 gem 'aws-sdk'
 # Redirect
+gem 'activesupport'
 gem 'rack-host-redirect'
 
 group :development, :test do
