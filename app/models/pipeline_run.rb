@@ -334,7 +334,9 @@ class PipelineRun < ApplicationRecord
   end
 
   def fetch_pipeline_version
-    `aws s3 cp #{sample.sample_output_s3_path}/pipeline_version.txt -`.strip.sub(/\.\d+$/, '')
+    whole_version = `aws s3 cp #{sample.sample_output_s3_path}/pipeline_version.txt -`.strip
+    whole_version =~ /(^\d+\.\d+).*/
+    return $1
   rescue
     return nil
   end
