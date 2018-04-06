@@ -21,6 +21,11 @@ $break-large: 1070px;
 
   &.tabs-transparent {
     background: transparent;
+    .tab-item {
+      letter-spacing: 1.4px;
+      font-weight: 300px !important;
+      text-transform: uppercase;
+    }
   }
 
   .indicator {
@@ -458,7 +463,7 @@ $break-large: 1070px;
   height: 43px;
   width: 150px !important;
   .text {
-    margin-top: 7px;
+    margin-top: 5px;
   }
   .dropdown.icon {
     margin-top: -3px !important;
@@ -629,7 +634,7 @@ $break-large: 1070px;
     &:hover {
       cursor: pointer;
       .sample-name{
-        color: #188fd8 !important;
+        color: $id-blue !important;
       }
     }
   }
@@ -977,6 +982,18 @@ input[type="button"] {
       .download-wrapper {
         float: right;
         padding-top: 20px;
+        .dropdown {
+          &:hover {
+            background-color: #3867fa !important;
+            color: #fff;
+            border: 1px solid #3867fa;
+          }
+        }
+        .link.download-btn {
+          .text {
+            padding: 5px !important;
+          }
+        }
         .download-btn {
           padding: 9px;
         }
