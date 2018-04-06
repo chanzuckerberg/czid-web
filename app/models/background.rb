@@ -72,11 +72,7 @@ class Background < ApplicationRecord
     if user.admin?
       all
     else
-      where("project_id in (select project_id from projects_users where user_id=?)
-             or
-             project_id is ?",
-            user.id,
-            nil)
+      where(project_id: Project.viewable(user).pluck(:id) + [nil])
     end
   end
 end
