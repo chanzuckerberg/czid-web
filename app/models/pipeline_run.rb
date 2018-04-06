@@ -308,17 +308,29 @@ class PipelineRun < ApplicationRecord
   delegate :sample_output_s3_path, to: :sample
 
   def postprocess_output_s3_path
-    sample.sample_postprocess_s3_path
+    pipeline_ver_str = ""
+    pipeline_ver_str = "/#{pipeline_version}" if pipeline_version
+    "#{sample.sample_postprocess_s3_path}#{pipeline_ver_str}"
   end
 
   def alignment_viz_output_s3_path
-    "#{sample.sample_postprocess_s3_path}/align_viz"
+    "#{postprocess_output_s3_path}/align_viz"
   end
 
   def host_filter_output_s3_path
     pipeline_ver_str = ""
-    pipeline_ver_str = "/#{pipeline_version}/" if pipeline_version
+    pipeline_ver_str = "/#{pipeline_version}" if pipeline_version
     "#{sample.sample_output_s3_path}#{pipeline_ver_str}"
+  end
+
+  def s3_paths_for_taxon_byteranges
+    # by tax_level and hit_type
+    { TaxonCount::TAX_LEVEL_SPECIES => { 'NT' => "#{postprocess_output_s3_path}/#{Sample::SORTED_TAXID_ANNOTATED_FASTA}",
+                                         'NR' => "#{postprocess_output_s3_path}/#{Sample::SORTED_TAXID_ANNOTATED_FASTA_NR}" },
+      TaxonCount::TAX_LEVEL_GENUS => { 'NT' => "#{postprocess_output_s3_path}/#{Sample::SORTED_TAXID_ANNOTATED_FASTA_GENUS_NT}",
+                                       'NR' => "#{postprocess_output_s3_path}/#{Sample::SORTED_TAXID_ANNOTATED_FASTA_GENUS_NR}" },
+      TaxonCount::TAX_LEVEL_FAMILY => { 'NT' => "#{postprocess_output_s3_path}/#{Sample::SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NT}",
+                                        'NR' => "#{postprocess_output_s3_path}/#{Sample::SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR}" } }
   end
 
   def fetch_pipeline_version

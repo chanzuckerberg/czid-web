@@ -218,15 +218,6 @@ class Sample < ApplicationRecord
     "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/postprocess#{subsample_suffix}"
   end
 
-  def s3_paths_for_taxon_byteranges
-    # by tax_level and hit_type
-    { TaxonCount::TAX_LEVEL_SPECIES => { 'NT' => "#{sample_postprocess_s3_path}/#{SORTED_TAXID_ANNOTATED_FASTA}",
-                                         'NR' => "#{sample_postprocess_s3_path}/#{SORTED_TAXID_ANNOTATED_FASTA_NR}" },
-      TaxonCount::TAX_LEVEL_GENUS => { 'NT' => "#{sample_postprocess_s3_path}/#{SORTED_TAXID_ANNOTATED_FASTA_GENUS_NT}",
-                                       'NR' => "#{sample_postprocess_s3_path}/#{SORTED_TAXID_ANNOTATED_FASTA_GENUS_NR}" },
-      TaxonCount::TAX_LEVEL_FAMILY => { 'NT' => "#{sample_postprocess_s3_path}/#{SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NT}",
-                                        'NR' => "#{sample_postprocess_s3_path}/#{SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR}" } }
-  end
 
   def annotated_fasta_s3_path
     "#{sample_alignment_output_s3_path}/#{HIT_FASTA_BASENAME}"
@@ -236,21 +227,6 @@ class Sample < ApplicationRecord
     "#{sample_alignment_output_s3_path}/#{UNIDENTIFIED_FASTA_BASENAME}"
   end
 
-  def sample_annotated_fasta_url
-    "https://s3.console.aws.amazon.com/s3/object/#{SAMPLES_BUCKET_NAME}/#{sample_path}/results/#{HIT_FASTA_BASENAME}"
-  end
-
-  def sample_unidentified_fasta_url
-    "https://s3.console.aws.amazon.com/s3/object/#{SAMPLES_BUCKET_NAME}/#{sample_path}/results/#{UNIDENTIFIED_FASTA_BASENAME}"
-  end
-
-  def sample_output_folder_url
-    "https://s3.console.aws.amazon.com/s3/buckets/#{SAMPLES_BUCKET_NAME}/#{sample_path}/results/"
-  end
-
-  def sample_input_folder_url
-    "https://s3.console.aws.amazon.com/s3/buckets/#{SAMPLES_BUCKET_NAME}/#{sample_path}/fastqs/"
-  end
 
   def host_genome_name
     host_genome.name if host_genome
@@ -261,8 +237,7 @@ class Sample < ApplicationRecord
   end
 
   def as_json(_options = {})
-    super(methods: [:sample_input_folder_url, :sample_output_folder_url, :sample_annotated_fasta_url, :input_files,
-                    :sample_unidentified_fasta_url, :host_genome_name])
+    super(methods: [:input_files, :host_genome_name])
   end
 
   def check_host_genome
