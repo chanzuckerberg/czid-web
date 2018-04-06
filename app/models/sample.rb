@@ -218,7 +218,6 @@ class Sample < ApplicationRecord
     "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/postprocess#{subsample_suffix}"
   end
 
-
   def annotated_fasta_s3_path
     "#{sample_alignment_output_s3_path}/#{HIT_FASTA_BASENAME}"
   end
@@ -226,7 +225,6 @@ class Sample < ApplicationRecord
   def unidentified_fasta_s3_path
     "#{sample_alignment_output_s3_path}/#{UNIDENTIFIED_FASTA_BASENAME}"
   end
-
 
   def host_genome_name
     host_genome.name if host_genome
