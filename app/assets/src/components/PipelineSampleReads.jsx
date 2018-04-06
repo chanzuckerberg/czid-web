@@ -337,7 +337,7 @@ class PipelineSampleReads extends React.Component {
       />;
     } else if(this.pipelineInProgress()) {
       d_report =
-        <div className="center-align text-grey text-lighten-2 no-report">
+        <div className="center-align text-grey text-lighten-2 no-report sample-wait-top">
           {waitingSpinner}
         </div>;
     } else {
@@ -534,7 +534,7 @@ class PipelineSampleReads extends React.Component {
       </div>) : null;
 
     let delete_sample_button = (
-      <Button onClick={this.deleteSample}>
+      <Button onClick={this.deleteSample} className="delete-button">
         Delete sample
       </Button>
     )
