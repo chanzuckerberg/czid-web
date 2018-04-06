@@ -161,6 +161,10 @@ a {
 .sub-header-component {
   min-height: 120px;
   padding-top: 20px;
+  .delete-button {
+    margin-left: 50px;
+    vertical-align: middle;
+  }
   .container {
     width: 90%;
   }
