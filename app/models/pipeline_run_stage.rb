@@ -322,6 +322,9 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def host_filtering_outputs
+    pr = pipeline_run
+    pr.pipeline_version = pr.fetch_pipeline_version
+
     stats_json_s3_path = "#{pipeline_run.host_filter_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
     unmapped_fasta_s3_path = "#{pipeline_run.host_filter_output_s3_path}/unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.merged.fasta"
     [stats_json_s3_path, unmapped_fasta_s3_path]
