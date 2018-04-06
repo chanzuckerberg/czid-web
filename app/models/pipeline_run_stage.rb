@@ -201,7 +201,7 @@ class PipelineRunStage < ApplicationRecord
     file_type = sample.input_files.first.file_type
     batch_command_env_variables = "INPUT_BUCKET=#{sample.sample_input_s3_path} OUTPUT_BUCKET=#{sample.sample_output_s3_path} " \
       "FILE_TYPE=#{file_type} DB_SAMPLE_ID=#{sample.id} " \
-      "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} PIPELINE_VERSION=`idseq_pipeline --version` "
+      "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} PIPELINE_VERSION=\\`idseq_pipeline --version\\` "
     if sample.s3_star_index_path.present?
       batch_command_env_variables += " STAR_GENOME=#{sample.s3_star_index_path} "
     end
@@ -218,7 +218,7 @@ class PipelineRunStage < ApplicationRecord
     file_type = sample.input_files.first.file_type
     batch_command_env_variables = "FASTQ_BUCKET=#{sample.sample_input_s3_path} INPUT_BUCKET=#{pipeline_run.host_filter_output_s3_path} " \
       "OUTPUT_BUCKET=#{pipeline_run.alignment_output_s3_path} FILE_TYPE=#{file_type} ENVIRONMENT=#{Rails.env} DB_SAMPLE_ID=#{sample.id} " \
-      "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} SKIP_DEUTERO_FILTER=#{sample.skip_deutero_filter_flag} PIPELINE_VERSION=`idseq_pipeline --version` "
+      "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} SKIP_DEUTERO_FILTER=#{sample.skip_deutero_filter_flag} PIPELINE_VERSION=\\`idseq_pipeline --version\\` "
     batch_command_env_variables += "SUBSAMPLE=#{pipeline_run.subsample} " if pipeline_run.subsample
     batch_command_env_variables += "HOST_FILTER_PIPELINE_VERSION=#{pipeline_run.pipeline_version} " if pipeline_run.pipeline_version
     batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline non_host_alignment"
@@ -228,7 +228,7 @@ class PipelineRunStage < ApplicationRecord
   def postprocess_command
     batch_command_env_variables = "INPUT_BUCKET=#{pipeline_run.alignment_output_s3_path} " \
       "OUTPUT_BUCKET=#{pipeline_run.postprocess_output_s3_path} " \
-      "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} PIPELINE_VERSION=`idseq_pipeline --version` "
+      "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} PIPELINE_VERSION=\\`idseq_pipeline --version\\` "
     batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline postprocess"
     aegea_batch_submit_command(batch_command, Sample::HOST_FILTERING_MEMORY_IN_MB) # HACK: it just needs more vCPUs
   end
