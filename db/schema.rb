@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180402214120) do
+ActiveRecord::Schema.define(version: 20180406004121) do
 
   create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "archive_of"
@@ -252,8 +252,8 @@ ActiveRecord::Schema.define(version: 20180402214120) do
     t.float "percent_identity", limit: 24
     t.float "alignment_length", limit: 24
     t.float "e_value", limit: 24
-    t.integer "genus_taxid"
-    t.integer "superkingdom_taxid"
+    t.integer "genus_taxid", default: -200, null: false
+    t.integer "superkingdom_taxid", default: -700, null: false
     t.float "percent_concordant", limit: 24
     t.float "species_total_concordant", limit: 24
     t.float "genus_total_concordant", limit: 24
