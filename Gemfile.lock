@@ -862,6 +862,7 @@ PLATFORMS
 
 DEPENDENCIES
   active_record_query_trace
+  activesupport
   airbrake (~> 7.0)
   airbrake-ruby
   aws-sdk
