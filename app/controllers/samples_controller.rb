@@ -214,7 +214,7 @@ class SamplesController < ApplicationController
     taxon_ids = params[:taxon_ids].to_s.split(",").map(&:to_i) || []
     sort_by = params[:sort_by] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
     only_species = params[:species] == "1"
-    samples = current_power.samples.where(id: sample_ids)
+    samples = current_power.samples.where(id: sample_ids).includes([:pipeline_runs])
     if samples.first
       first_sample = samples.first
       default_background_id = first_sample.host_genome && first_sample.host_genome.default_background ? first_sample.host_genome.default_background.id : nil

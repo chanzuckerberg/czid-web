@@ -41,7 +41,7 @@ class ResultsFolder extends React.Component {
             </thead>
             <tbody>
             { this.fileList.map((file, i) => {
-              return <tr onClick={this.download.bind(this, file.url)} key={i}><td><i className="fa fa-file" />{file['display_name']}</td></tr>
+              return <tr onClick={this.download.bind(this, file.url)} key={i}><td><i className="fa fa-file" />{file['display_name']}<span className="size-tag"> -- {file['size']}</span></td></tr>
             })}
             </tbody>
           </table> : 'No files to show' }

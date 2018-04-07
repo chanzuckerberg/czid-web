@@ -67,4 +67,5 @@ Rails.application.configure do
     api_key: ENV['MAIL_GUN_API_KEY'],
     domain: 'mg.idseq.net'
   }
+  ActiveRecordQueryTrace.enabled = true
 end

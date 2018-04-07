@@ -7,28 +7,15 @@ task update_lineage_db: :environment do
 
   reference_s3_path = ENV['REFERENCE_S3_FOLDER'].gsub(%r{([/]*$)}, '') # trim any trailing '/'
   local_taxonomy_path = "/app/tmp/taxonomy"
-  name_column_array = %w[superkingdom_name superkingdom_common_name phylum_name phylum_common_name class_name class_common_name
+  name_column_array = %w[superkingdom_name superkingdom_common_name kingdom_name kingdom_common_name phylum_name phylum_common_name class_name class_common_name
                          order_name order_common_name family_name family_common_name genus_name genus_common_name species_name species_common_name]
-  column_names = "taxid,superkingdom_taxid,phylum_taxid,class_taxid,order_taxid,family_taxid,genus_taxid,species_taxid," +
+  column_names = "taxid,superkingdom_taxid,kingdom_taxid,phylum_taxid,class_taxid,order_taxid,family_taxid,genus_taxid,species_taxid," +
                  name_column_array.join(",")
+  n_columns = column_names.split(",").count
   host = Rails.env == 'development' ? 'db' : '$RDS_ADDRESS'
   taxid_lineages_file = 'taxid-lineages.csv'
   names_file = 'names.csv'
   current_date = Time.now.utc
-
-  ## Convert NULL to empty string in all name columns for consistency
-  ## using query:
-  #   UPDATE taxon_lineages
-  #   SET
-  #     superkingdom_name = IFNULL(superkingdom_name, ''),
-  #     superkingdom_common_name = IFNULL(superkingdom_common_name, ''),
-  #     ...
-  #     species_name = IFNULL(species_name, ''),
-  #     species_common_name = IFNULL(species_common_name, '')
-  replacements = name_column_array.map { |column| "#{column} = IFNULL(#{column}, '')" }
-  query = "UPDATE taxon_lineages SET " + replacements.join(", ")
-  ActiveRecord::Base.connection.execute(query)
-
   `
    ## Set work directory
    mkdir -p #{local_taxonomy_path};
@@ -36,20 +23,20 @@ task update_lineage_db: :environment do
 
    ## Get old lineage file
    mysql -h #{host} -u $DB_USERNAME --password=$DB_PASSWORD -e "SELECT #{column_names},started_at FROM idseq_#{Rails.env}.taxon_lineages WHERE ended_at = (SELECT MAX(ended_at) FROM idseq_#{Rails.env}.taxon_lineages);" | tr "\t" "," | tail -n +2 > old_taxon_lineages_with_started_at.csv
-   cut -d, -f1-22 old_taxon_lineages_with_started_at.csv > old_taxon_lineages.csv
-   cut -d, -f1,23 old_taxon_lineages_with_started_at.csv > taxid_to_started_at.csv
+   cut -d, -f1-#{n_columns} old_taxon_lineages_with_started_at.csv > old_taxon_lineages.csv
+   cut -d, -f1,#{n_columns + 1} old_taxon_lineages_with_started_at.csv > taxid_to_started_at.csv
 
    ## Get new lineage file
    # Download new references, extract and remove header line
    aws s3 cp #{reference_s3_path}/#{taxid_lineages_file}.gz - | gunzip | tail -n +2 > taxid-lineages.csv
    aws s3 cp #{reference_s3_path}/#{names_file}.gz - | gunzip | tail -n +2 > names.csv
    # names.csv has columns: tax_id,name_txt,name_txt_common
-   # taxid-lineages.csv has columns: tax_id,superkingdom,phylum,class,order,family,genus,species
+   # taxid-lineages.csv has columns: tax_id,superkingdom,kingdom,phylum,class,order,family,genus,species
    # Now perform series of joins to produce the format in column_names.
-   file1_ncol=8
-   file1_output_cols=1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8
+   file1_ncol=9
+   file1_output_cols=1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9
    sort -k1 -t, names.csv > names_sorted.csv
-   for i in 2 3 4 5 6 7 8; do
+   for i in 2 3 4 5 6 7 8 9; do
      sort -k$i -t, taxid-lineages.csv > taxid-lineages_sorted.csv;
      join -t, -1 $i -2 1 -a 1 -o${file1_output_cols},2.2,2.3 taxid-lineages_sorted.csv names_sorted.csv > taxid-lineages.csv;
      file1_output_cols=${file1_output_cols},1.$((${file1_ncol}+1)),1.$((${file1_ncol}+2));
@@ -60,8 +47,6 @@ task update_lineage_db: :environment do
    # Sort in view of using "comm" command
    sort old_taxon_lineages.csv > old_taxon_lineages_sorted.csv
    sort taxid-lineages.csv > new_taxon_lineages_sorted.csv
-   # Replace "NULL" by "" in old_taxon_lineages_sorted.csv to match new_taxon_lineages_sorted.csv
-   sed -e 's/NULL//g' -i old_taxon_lineages_sorted.csv
    # Find deleted lines and added lines
    comm -23 old_taxon_lineages_sorted.csv new_taxon_lineages_sorted.csv > records_to_retire.csv
    comm -13 old_taxon_lineages_sorted.csv new_taxon_lineages_sorted.csv > records_to_insert.csv
@@ -85,17 +70,4 @@ task update_lineage_db: :environment do
    rm -rf #{local_taxonomy_path};
   `
   raise "lineage database update failed" unless $CHILD_STATUS.success?
-
-  ## Convert empty strings back to NULL
-  ## using query:
-  #   UPDATE taxon_lineages
-  #   SET
-  #     superkingdom_name = NULLIF(superkingdom_name, ''),
-  #     superkingdom_common_name = NULLIF(superkingdom_common_name, ''),
-  #     ...
-  #     species_name = NULLIF(species_name, ''),
-  #     species_common_name = NULLIF(species_common_name, '')
-  replacements = name_column_array.map { |column| "#{column} = NULLIF(#{column}, '')" }
-  query = "UPDATE taxon_lineages SET " + replacements.join(", ")
-  ActiveRecord::Base.connection.execute(query)
 end
