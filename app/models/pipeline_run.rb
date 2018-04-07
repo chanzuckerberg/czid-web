@@ -309,8 +309,8 @@ class PipelineRun < ApplicationRecord
 
   def postprocess_output_s3_path
     pipeline_ver_str = ""
-    pipeline_ver_str = "/#{pipeline_version}" if pipeline_version
-    "#{sample.sample_postprocess_s3_path}#{pipeline_ver_str}"
+    pipeline_ver_str = "#{pipeline_version}/" if pipeline_version
+    "#{sample.sample_postprocess_s3_path}/#{pipeline_ver_str}#{subsample_suffix}"
   end
 
   def alignment_viz_output_s3_path

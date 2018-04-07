@@ -215,7 +215,7 @@ class Sample < ApplicationRecord
   end
 
   def sample_postprocess_s3_path
-    "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/postprocess#{subsample_suffix}"
+    "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/postprocess"
   end
 
   def annotated_fasta_s3_path
