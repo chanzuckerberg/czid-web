@@ -132,7 +132,14 @@ class Sample < ApplicationRecord
     file_list = S3_CLIENT.list_objects(bucket: SAMPLES_BUCKET_NAME,
                                        prefix: "#{prefix}/",
                                        delimiter: "/")
-    file_list.contents.map { |f| { key: f.key, display_name: end_path(f.key, display_prefix), url: Sample.get_signed_url(f.key) } }
+    file_list.contents.map do |f|
+      {
+        key: f.key,
+        display_name: end_path(f.key, display_prefix),
+        url: Sample.get_signed_url(f.key),
+        size: ActiveSupport::NumberHelper.number_to_human_size(f.size)
+      }
+    end
   end
 
   def results_folder_files

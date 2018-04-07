@@ -114,12 +114,15 @@ class ScatterPlot extends React.Component {
     let slope = leastSquares[0];
     let intercept = leastSquares[1];
     let rSquare = leastSquares[2];
+
+    let x1 = Math.max((this.yMinMax[0] - intercept) / slope, this.xMinMax[0]);
+
 		this.svg
         .append("g")
         .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")")
         .append("line")
-        .attr("x1", this.xScale(this.xMinMax[0]))
-        .attr("y1", this.yScale(intercept))
+        .attr("x1", this.xScale(x1))
+        .attr("y1", this.yScale(x1 * slope +intercept))
         .attr("x2", this.xScale(this.xMinMax[1]))
         .attr("y2", this.yScale(this.xMinMax[1] * slope + intercept))
         .classed("trendline", true);

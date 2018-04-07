@@ -702,8 +702,8 @@ margin-bottom: 0px;
     color: #3867fa;
     font-size: $font-size-base;
     cursor: text;
-    .fa-download {
-      margin-left:12px;
+    .fa {
+      margin-left: 7px;
     }
     .cloud {
       color: #3867fa;
@@ -711,6 +711,9 @@ margin-bottom: 0px;
       &:hover {
         color: #414367;
       }
+    }
+    .fa-bars {
+      font-size: 15px;
     }
   }
 }
