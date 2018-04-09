@@ -207,4 +207,22 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     get sample_url(@expired_sample)
     assert_response :success
   end
+
+  # backgrounds
+
+  test 'joe can view joe_sample with public background' do
+    @public_background = backgrounds(:public_background)
+    @joe_sample = samples(:joe_sample)
+    get "/samples/#{@joe_sample.id}?background_id=#{@public_background.id}"
+    assert_response :success
+  end
+
+  test 'joe can view joe_sample with background for public_project' do
+  end
+
+  test 'joe can view joe_sample with background for joe_project' do
+  end
+
+  test 'joe cannot view joe_sample with background for project one' do
+  end
 end

@@ -11,3 +11,7 @@ two:
 real_background:
   name: "NID human CSF"
   pipeline_runs: [three, four]
+
+public_background:
+  name: "public background"
+  pipeline_runs: [three, four]
