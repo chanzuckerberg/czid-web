@@ -302,7 +302,8 @@ class PipelineRun < ApplicationRecord
   end
 
   def subsample_suffix
-    subsample? ? "subsample_#{subsample}" : (pipeline_version ? "subsample_all" : "")
+    all_suffix = pipeline_version ? "subsample_all" : ""
+    subsample? ? "subsample_#{subsample}" : all_suffix
   end
 
   delegate :sample_output_s3_path, to: :sample
