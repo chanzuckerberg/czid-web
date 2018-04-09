@@ -476,7 +476,7 @@ class SamplesController < ApplicationController
   def set_background_id(sample)
     background_id = params[:background_id] || sample.default_background_id
     viewable_background_ids = current_power.backgrounds.pluck(:id)
-    if viewable_background_ids.include?(background_id)
+    if viewable_background_ids.include?(background_id.to_i)
       return background_id
     else
       raise "Not allowed to view background"
