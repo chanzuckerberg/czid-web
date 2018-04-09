@@ -32,7 +32,7 @@ gem 'puma', '~> 3.7'
 # Use Redis adapter to run Action Cable in production
 # gem 'redis', '~> 3.0'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 5.1.4'
+gem 'rails', '~> 5.1.5'
 gem 'rake'
 # Worker/Scheduler management
 gem 'resque', '>= 1.27.4'
@@ -49,6 +49,7 @@ gem 'will_paginate'
 # Use AWS-SDK to make AWS requests with byte range
 gem 'aws-sdk'
 # Redirect
+gem 'activesupport'
 gem 'rack-host-redirect'
 
 group :development, :test do
@@ -64,6 +65,7 @@ group :development, :test do
 end
 
 group :development do
+  gem 'active_record_query_trace'
   gem 'listen', '>= 3.0.5', '< 3.2'
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
