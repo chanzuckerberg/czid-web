@@ -1618,6 +1618,7 @@ class RenderMarkup extends React.Component {
           trigger={
             <Menu.Item name="tree" active={this.state.view == 'tree'} onClick={this._onViewClicked}>
               <Icon name="fork" />
+              <Label color='purple' floating>beta</Label>
             </Menu.Item>
           }
           content='Phylogenetic Tree View'
@@ -1733,22 +1734,24 @@ class PipelineSampleTree extends React.PureComponent {
     this._updateDataType = this.updateDataType.bind(this);
   }
   makeTree () {
-		function make_node(name, level) {
+		function make_node(id, name, level) {
 			return {
 				name: name,
 				level: level,
 				children: [],
         weight: 0,
+        id: id,
 			}
 		}
 
 		let rows = this.props.taxons;
-		let nodes_by_name = {};
+		let nodes_by_id = {};
 
 		let root = {
 			name: '',
 			children: [],
       weight: 0,
+      id: -12345,
 		};
 
 		let tree = root;
@@ -1760,21 +1763,34 @@ class PipelineSampleTree extends React.PureComponent {
 			"order",
 			"class",
 			"phylum",
+      "kingdom",
 			"superkingdom",
 		].reverse();
 
     let getValue = (row) => {
       let parts = this.state.dataType.split(".");
-      return row[parts[0]][parts[1]];
+      return parseFloat(row[parts[0]][parts[1]]);
     };
-		for (let i=0; i < rows.length; i += 1) {
-			tree = root;
-			let row = rows[i];
-			for (let j = 0; j < order.length; j+= 1) {
-				if (!row.lineage) {
-					break;
-				}
-				let level = order[j],
+
+		for (let row of rows) {
+		  if (row.tax_level != 1) {
+        continue;
+      }
+
+      tree = root;
+
+      if (!row.lineage) {
+        row.lineage = {
+          genus_taxid: -9,
+          genus_name: "Uncategorized",
+          species_taxid: row.tax_id,
+          species_name: row.name,
+        };
+      }
+      for (let j = 0; j < order.length; j+= 1) {
+
+        let level = order[j],
+            taxon_id = row.lineage[level + "_taxid"],
             name;
 
         if (this.props.nameType == "Common name") {
@@ -1782,31 +1798,35 @@ class PipelineSampleTree extends React.PureComponent {
         }
 
         if (!name) {
-				  name = row.lineage[level + "_name"];
+          name = row.lineage[level + "_name"];
         }
 
-				if (!name) {
-					continue;
-				}
+        if (!name) {
+          continue;
+        }
 
-				if(!nodes_by_name[name]) {
-					let node = make_node(name, level);
-					tree.children.push(node);
-					nodes_by_name[name] = node;
-				}
+        if(!nodes_by_id[taxon_id]) {
+          let node = make_node(taxon_id, name, level);
+          tree.children.push(node);
+          nodes_by_id[taxon_id] = node;
+        }
+
+        nodes_by_id[taxon_id].name = nodes_by_id[taxon_id].name || name;
+
         tree.weight += getValue(row);
-				tree = nodes_by_name[name];
-			}
+        tree = nodes_by_id[taxon_id];
+      }
+
       tree.weight += getValue(row);
-		}
+    }
     return root;
   }
+
   getTooltip (node) {
     if (!node) {
       return null;
     }
-    return <div>{node.weight}</div>
-    //return <TaxonTooltip taxon={node} sample={this.props.sample} />
+    return <div>{this.state.dataType}: {numberWithCommas(Math.round(node.weight))}</div>
   }
 
   updateDataType (e, d) {
@@ -1872,7 +1892,7 @@ class TreeStructure extends React.PureComponent {
 
     let linkScale = d3.scale.linear()
               .domain([0, props.tree.weight])
-              .range([1, 20]);
+              .range([1, 15]);
 
     let leaf_count = 0;
     let to_visit = [props.tree];
@@ -1881,7 +1901,7 @@ class TreeStructure extends React.PureComponent {
     while(to_visit.length) {
       let node = to_visit.pop();
       min_weight = Math.min(min_weight, node.weight);
-      if (!this.autoCollapsed && circleScale(node.weight) < 10 && node.children && node.children.length) {
+      if (!this.autoCollapsed && circleScale(node.weight) < 5 && node.children && node.children.length) {
         node._children = node.children;
         node.children = null;
       }
