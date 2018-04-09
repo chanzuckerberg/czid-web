@@ -8,5 +8,8 @@ class ActiveSupport::TestCase
   # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
   fixtures :all
 
-  # Add more helper methods to be used by all tests here...
+  def access_sample_with_background(background, sample)
+    get "/samples/#{sample.id}?background_id=#{background.id}"
+    assert_response :success
+  end
 end
