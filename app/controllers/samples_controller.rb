@@ -217,7 +217,7 @@ class SamplesController < ApplicationController
       if taxon_ids.empty?
         render json: {}
       else
-        @sample_taxons_dict = samples_taxons_details(samples, taxon_ids, @background_id)
+        @sample_taxons_dict = samples_taxons_details(samples, taxon_ids, background_id)
         render json: @sample_taxons_dict
       end
     else
@@ -474,9 +474,13 @@ class SamplesController < ApplicationController
   private
 
   def set_background_id(sample)
-    @background_id = params[:background_id] || sample.default_background_id
+    background_id = params[:background_id] || sample.default_background_id
     viewable_background_ids = current_power.backgrounds.pluck(:id)
-    raise "Not allowed to view background" unless viewable_background_ids.include?(@background_id)
+    if viewable_background_ids.include?(background_id)
+      return background_id
+    else
+      raise "Not allowed to view background"
+    end
   end
 
   def set_sample
