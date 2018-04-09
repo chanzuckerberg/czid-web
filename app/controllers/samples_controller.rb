@@ -171,7 +171,7 @@ class SamplesController < ApplicationController
       # Here background_id is only used to decide whether a report can be shown.
       # No report/background-specific data is actually being shown.
       # Background selection is used in report_info action, which fetches the actual report data.
-      if background_id
+      if background_id && viewable_background_ids.include?(background_id)
         @report_present = 1
         @report_ts = @pipeline_run.updated_at.to_i
         @all_categories = all_categories
@@ -198,6 +198,9 @@ class SamplesController < ApplicationController
       first_sample = samples.first
       default_background_id = first_sample.host_genome && first_sample.host_genome.default_background ? first_sample.host_genome.default_background.id : nil
       background_id = params[:background_id] || default_background_id || Background.first
+      unless viewable_background_ids.include?(background_id)
+        render json: {}
+      end
       @top_taxons = top_taxons_details(samples, background_id, num_results, sort_by, only_species)
       render json: @top_taxons
     else
@@ -219,6 +222,9 @@ class SamplesController < ApplicationController
       first_sample = samples.first
       default_background_id = first_sample.host_genome && first_sample.host_genome.default_background ? first_sample.host_genome.default_background.id : nil
       background_id = params[:background_id] || default_background_id || Background.first.id
+      unless viewable_background_ids.include?(background_id)
+        render json: {}
+      end
       if taxon_ids.empty?
         taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, only_species).pluck("tax_id")
       end
@@ -247,8 +253,10 @@ class SamplesController < ApplicationController
       pipeline_run_id = @pipeline_run.id
     end
 
-    @report_info = external_report_info(pipeline_run_id, background_id, params)
-    render json: @report_info
+    if viewable_background_ids.include?(background_id)
+      @report_info = external_report_info(pipeline_run_id, background_id, params)
+      render json: @report_info
+    end
   end
 
   def search_list
@@ -480,6 +488,10 @@ class SamplesController < ApplicationController
   # Use callbacks to share common setup or constraints between actions.
 
   private
+
+  def viewable_background_ids
+    current_power.backgrounds.pluck(:id)
+  end
 
   def set_sample
     @sample = samples_scope.find(params[:id])
