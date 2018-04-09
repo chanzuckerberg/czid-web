@@ -15,3 +15,18 @@ real_background:
 public_background:
   name: "public background"
   pipeline_runs: [three, four]
+
+background_for_public_project:
+  name: "All 'Public Project' samples"
+  pipeline_runs: [three, four]
+  project: public_project
+
+background_for_joe_project:
+  name: "All 'Project 3' samples"
+  pipeline_runs: [three, four]
+  project: joe_project
+
+background_for_project_one:
+  name: "All 'Project 1' samples"
+  pipeline_runs: [three, four]
+  project: one
