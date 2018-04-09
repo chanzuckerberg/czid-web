@@ -190,7 +190,7 @@ class SamplesController < ApplicationController
     only_species = params[:species] == "1"
     if samples.first
       first_sample = samples.first
-      background_id = set_background_id(first_sample)
+      background_id = check_background_id(first_sample)
       @top_taxons = top_taxons_details(samples, background_id, num_results, sort_by, only_species)
       render json: @top_taxons
     else
@@ -210,7 +210,7 @@ class SamplesController < ApplicationController
     samples = current_power.samples.where(id: sample_ids)
     if samples.first
       first_sample = samples.first
-      background_id = set_background_id(first_sample)
+      background_id = check_background_id(first_sample)
       if taxon_ids.empty?
         taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, only_species).pluck("tax_id")
       end
@@ -235,7 +235,7 @@ class SamplesController < ApplicationController
     ## TODO(yf): clean the following up.
     ####################################################
     if @pipeline_run && (((@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?) || @pipeline_run.report_ready?)
-      background_id = set_background_id(@sample)
+      background_id = check_background_id(@sample)
       pipeline_run_id = @pipeline_run.id
     end
 
@@ -473,7 +473,7 @@ class SamplesController < ApplicationController
 
   private
 
-  def set_background_id(sample)
+  def check_background_id(sample)
     background_id = params[:background_id] || sample.default_background_id
     viewable_background_ids = current_power.backgrounds.pluck(:id)
     if viewable_background_ids.include?(background_id.to_i)
