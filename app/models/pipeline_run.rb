@@ -146,9 +146,9 @@ class PipelineRun < ApplicationRecord
       self.finalized = 1
       self.job_status = STATUS_CHECKED
       save
-      if project_complete?
+      if sample.project.complete?
         notify_users
-        sample.project.create_or_update_project_background
+        sample.project.create_or_update_project_background if sample.project.background_flag == 1
       end
     else
       if prs.failed?
@@ -345,11 +345,6 @@ class PipelineRun < ApplicationRecord
   end
 
   delegate :project_id, to: :sample
-
-  def project_complete?
-    incomplete_runs = PipelineRun.where("id in (select max(id) from pipeline_runs group by sample_id) and sample_id in (select id from samples where project_id = #{project_id.to_i})").where("job_status != ?", PipelineRun::STATUS_CHECKED)
-    incomplete_runs.count.zero?
-  end
 
   def notify_users
     project = Project.find(project_id)
