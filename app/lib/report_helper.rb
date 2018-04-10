@@ -574,10 +574,16 @@ module ReportHelper
         tax_info['name'] = "All taxa without #{level_str} classification"
         if tax_id == TaxonLineage::BLACKLIST_GENUS_ID
           tax_info['name'] = "All artificial constructs"
-        elsif tax_id < TaxonLineage::INVALID_CALL_BASE_ID
-          tax_info['name'] = "All #{level_str} non-specific reads"
         elsif !(TaxonLineage::MISSING_LINEAGE_ID.values.include? tax_id) && tax_id != TaxonLineage::MISSING_SPECIES_ID_ALT
           tax_info['name'] += " #{tax_id}"
+        elsif tax_id < TaxonLineage::INVALID_CALL_BASE_ID
+          parent_taxid = if tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
+                           tax_info['genus_taxid']
+                         elsif tax_info['tax_level'] == TaxonCount::TAX_LEVEL_GENUS
+                           tax_info['family_taxid']
+                         end
+          parent_name = taxon_counts_2d.each[parent_taxid]['name']
+          tax_info['name'] = "Non-#{level_str}-specific #{parent_name} reads"
         end
       elsif !tax_info['name']
         missing_names.add(tax_id)
