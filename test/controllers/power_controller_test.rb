@@ -211,18 +211,23 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
   # backgrounds
 
   test 'joe can view joe_sample with public background' do
-    access_sample_with_background(backgrounds(:public_background), samples(:joe_sample), :success)
+    access_sample_with_background(backgrounds(:public_background), samples(:joe_sample))
+    assert_response :success
   end
 
   test 'joe can view joe_sample with background for public_project' do
-    access_sample_with_background(backgrounds(:background_for_public_project), samples(:joe_sample), :success)
+    access_sample_with_background(backgrounds(:background_for_public_project), samples(:joe_sample))
+    assert_response :success
   end
 
   test 'joe can view joe_sample with background for joe_project' do
-    access_sample_with_background(backgrounds(:background_for_joe_project), samples(:joe_sample), :success)
+    access_sample_with_background(backgrounds(:background_for_joe_project), samples(:joe_sample))
+    assert_response :success
   end
 
   test 'joe cannot view joe_sample with background for project one' do
-    access_sample_with_background(backgrounds(:background_for_project_one), samples(:joe_sample), :error)
+    assert_raise do
+      access_sample_with_background(backgrounds(:background_for_project_one), samples(:joe_sample))
+    end
   end
 end

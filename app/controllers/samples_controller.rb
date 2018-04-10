@@ -166,8 +166,8 @@ class SamplesController < ApplicationController
     align_summary_file = @pipeline_run ? "#{@pipeline_run.alignment_viz_output_s3_path}.summary" : nil
     @align_viz = true if align_summary_file && get_s3_file(align_summary_file)
 
+    background_id = check_background_id(@sample)
     if @pipeline_run && (((@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?) || @pipeline_run.report_ready?)
-      background_id = check_background_id(@sample)
       if background_id
         @report_present = 1
         @report_ts = @pipeline_run.updated_at.to_i
