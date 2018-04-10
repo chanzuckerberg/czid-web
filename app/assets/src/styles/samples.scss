@@ -444,7 +444,7 @@ $break-large: 1070px;
 
     &.add-member {
       cursor: pointer;
-      color: #4A90E2
+      color: #3867fa;
     }
     i {
       &.material-icons {
@@ -947,7 +947,7 @@ input[type="button"] {
       font-size: $font-size-small;
       cursor: pointer;
       padding: 0 20px;
-      color: #4ba4c2;
+      color: #326bff;
       margin-top: 20px;
 
     }
@@ -1129,9 +1129,9 @@ input[type="button"] {
     }
     a {
       margin-left: 5px;
-      color: #66aed6 !important;
+      color: #3867fa !important;
       &:hover{
-        color: #548fb0 !important;
+        color: #2c4fc1 !important;
       }
     }
   }
@@ -1197,8 +1197,8 @@ input[type="button"] {
     }
   }
   .modal-close {
-    border: 1px solid #b6d8eb;
-    background: #288ec5;
+    border: 1px solid #5784eb;
+    background: #3867fa;
     color: #ecf5f9;
     padding: 5px;
     border-radius: 4px;
