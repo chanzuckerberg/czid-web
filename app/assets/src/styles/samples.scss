@@ -444,7 +444,7 @@ $break-large: 1070px;
 
     &.add-member {
       cursor: pointer;
-      color: #4A90E2
+      color: #3867fa;
     }
     i {
       &.material-icons {
@@ -947,7 +947,7 @@ input[type="button"] {
       font-size: $font-size-small;
       cursor: pointer;
       padding: 0 20px;
-      color: #4ba4c2;
+      color: #326bff;
       margin-top: 20px;
 
     }
@@ -1009,11 +1009,13 @@ input[type="button"] {
         .ui.dropdown .text { // The text in the button
           font-size: 1.2em;
           padding: 0.05em;
+          margin-top: 0.3em;
         }
         .download-btn { // The whole button
           color: #3867fa;
           background-color: transparent;
           padding-left: 5em;
+          min-height: 35px !important;
         }
         .download-reports {
           color: #3867fa;
@@ -1127,9 +1129,9 @@ input[type="button"] {
     }
     a {
       margin-left: 5px;
-      color: #66aed6 !important;
+      color: #3867fa !important;
       &:hover{
-        color: #548fb0 !important;
+        color: #2c4fc1 !important;
       }
     }
   }
@@ -1195,8 +1197,8 @@ input[type="button"] {
     }
   }
   .modal-close {
-    border: 1px solid #b6d8eb;
-    background: #288ec5;
+    border: 1px solid #5784eb;
+    background: #3867fa;
     color: #ecf5f9;
     padding: 5px;
     border-radius: 4px;
@@ -1237,4 +1239,10 @@ input[type="button"] {
 
 .ui.popup.hidden-popup {
   display: none !important;
+}
+
+#report-tree {
+  .filters {
+    margin-bottom: -4em;
+  }
 }

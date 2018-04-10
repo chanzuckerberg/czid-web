@@ -145,7 +145,7 @@ class Sample < ApplicationRecord
   def results_folder_files
     pr = pipeline_runs.first
     return list_outputs(sample_output_s3_path) unless pr
-    stage1_files = list_outputs(pr.sample_output_s3_path)
+    stage1_files = list_outputs(pr.host_filter_output_s3_path)
     stage2_files = list_outputs(pr.alignment_output_s3_path, 2)
     stage1_files + stage2_files
   end
@@ -222,17 +222,7 @@ class Sample < ApplicationRecord
   end
 
   def sample_postprocess_s3_path
-    "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/postprocess#{subsample_suffix}"
-  end
-
-  def s3_paths_for_taxon_byteranges
-    # by tax_level and hit_type
-    { TaxonCount::TAX_LEVEL_SPECIES => { 'NT' => "#{sample_postprocess_s3_path}/#{SORTED_TAXID_ANNOTATED_FASTA}",
-                                         'NR' => "#{sample_postprocess_s3_path}/#{SORTED_TAXID_ANNOTATED_FASTA_NR}" },
-      TaxonCount::TAX_LEVEL_GENUS => { 'NT' => "#{sample_postprocess_s3_path}/#{SORTED_TAXID_ANNOTATED_FASTA_GENUS_NT}",
-                                       'NR' => "#{sample_postprocess_s3_path}/#{SORTED_TAXID_ANNOTATED_FASTA_GENUS_NR}" },
-      TaxonCount::TAX_LEVEL_FAMILY => { 'NT' => "#{sample_postprocess_s3_path}/#{SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NT}",
-                                        'NR' => "#{sample_postprocess_s3_path}/#{SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR}" } }
+    "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/postprocess"
   end
 
   def annotated_fasta_s3_path
@@ -243,33 +233,16 @@ class Sample < ApplicationRecord
     "#{sample_alignment_output_s3_path}/#{UNIDENTIFIED_FASTA_BASENAME}"
   end
 
-  def sample_annotated_fasta_url
-    "https://s3.console.aws.amazon.com/s3/object/#{SAMPLES_BUCKET_NAME}/#{sample_path}/results/#{HIT_FASTA_BASENAME}"
-  end
-
-  def sample_unidentified_fasta_url
-    "https://s3.console.aws.amazon.com/s3/object/#{SAMPLES_BUCKET_NAME}/#{sample_path}/results/#{UNIDENTIFIED_FASTA_BASENAME}"
-  end
-
-  def sample_output_folder_url
-    "https://s3.console.aws.amazon.com/s3/buckets/#{SAMPLES_BUCKET_NAME}/#{sample_path}/results/"
-  end
-
-  def sample_input_folder_url
-    "https://s3.console.aws.amazon.com/s3/buckets/#{SAMPLES_BUCKET_NAME}/#{sample_path}/fastqs/"
-  end
-
   def host_genome_name
     host_genome.name if host_genome
   end
 
   def default_background_id
-    host_genome && host_genome.default_background ? host_genome.default_background.id : Background.first.id
+    host_genome && host_genome.default_background ? host_genome.default_background.id : Background.find_by(project_id: nil).id
   end
 
   def as_json(_options = {})
-    super(methods: [:sample_input_folder_url, :sample_output_folder_url, :sample_annotated_fasta_url, :input_files,
-                    :sample_unidentified_fasta_url, :host_genome_name])
+    super(methods: [:input_files, :host_genome_name])
   end
 
   def check_host_genome
@@ -384,6 +357,8 @@ class Sample < ApplicationRecord
     # but was made an integer type in case we want to allow users to enter the desired number
     # of reads to susbample to in the future
     pr.pipeline_branch = pipeline_branch.blank? ? "master" : pipeline_branch
+    pr.pipeline_commit = `git ls-remote https://github.com/chanzuckerberg/idseq-pipeline.git | grep refs/heads/#{pr.pipeline_branch}`.split[0]
+
     pr.save
 
     archive_old_pipeline_runs

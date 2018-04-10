@@ -4,10 +4,13 @@ import Cookies from "js-cookie";
 import $ from "jquery";
 import Tipsy from "react-tipsy";
 import ReactAutocomplete from "react-autocomplete";
-import { Dropdown, Label, Icon } from "semantic-ui-react";
+import { Dropdown, Label, Menu, Icon, Popup } from "semantic-ui-react";
 import numberWithCommas from "../helpers/strings";
+import LabeledDropdown from './LabeledDropdown';
 import StringHelper from "../helpers/StringHelper";
+import TaxonTooltip from './TaxonTooltip';
 import Nanobar from "nanobar";
+import d3, {event as currentEvent} from 'd3';
 
 class PipelineSampleReport extends React.Component {
   constructor(props) {
@@ -1586,41 +1589,82 @@ function BackgroundModelFilter({ parent }) {
   );
 }
 
-function RenderMarkup({
-  filter_row_stats,
-  advanced_filter_tag_list,
-  categories_filter_tag_list,
-  subcats_filter_tag_list,
-  parent
-}) {
-  return (
-    <div>
-      <div id="reports" className="reports-screen tab-screen col s12">
-        <div className="tab-screen-content">
-          <div className="row reports-container">
-            <div className="col s12 reports-section">
-              <div className="reports-count">
-                <div className="report-top-filters">
-                  <ul className="filter-lists">
-                    <ReportSearchBox parent={parent} />
-                    <NameTypeFilter parent={parent} />
-                    <BackgroundModelFilter parent={parent} />
-                    <CategoryFilter parent={parent} />
-                    <AdvancedFilters parent={parent} />
-                  </ul>
+class RenderMarkup extends React.Component {
+  constructor (props) {
+    super(props);
+    this.state = {
+      view: 'table',
+    };
+    this._onViewClicked = this.onViewClicked.bind(this);
+  }
+
+  onViewClicked (e, f) {
+    this.setState({ view: f.name });
+  }
+  renderMenu () {
+    return (
+      <Menu icon floated="right">
+        <Popup
+          trigger={
+            <Menu.Item name="table" active={this.state.view == 'table'} onClick={this._onViewClicked}>
+              <Icon name="table"/>
+            </Menu.Item>
+          }
+          content='Table View'
+          inverted
+         />
+
+        <Popup
+          trigger={
+            <Menu.Item name="tree" active={this.state.view == 'tree'} onClick={this._onViewClicked}>
+              <Icon name="fork" />
+            </Menu.Item>
+          }
+          content={<div>Phylogenetic Tree View <Label color='purple' size='mini' floating>beta</Label></div>}
+          inverted
+        />
+      </Menu>
+    );
+  }
+  render () {
+    const {
+      filter_row_stats,
+      advanced_filter_tag_list,
+      categories_filter_tag_list,
+      subcats_filter_tag_list,
+      parent
+    } = this.props;
+    return (
+      <div>
+        <div id="reports" className="reports-screen tab-screen col s12">
+          <div className="tab-screen-content">
+            <div className="row reports-container">
+              <div className="col s12 reports-section">
+                <div className="reports-count">
+                  <div className="report-top-filters">
+                    <ul className="filter-lists">
+                      <ReportSearchBox parent={parent} />
+                      <NameTypeFilter parent={parent} />
+                      <BackgroundModelFilter parent={parent} />
+                      <CategoryFilter parent={parent} />
+                      <AdvancedFilters parent={parent} />
+                    </ul>
+                  </div>
+                  {this.renderMenu()}
+                  <div className="filter-tags-list">
+                    {advanced_filter_tag_list} {categories_filter_tag_list} {subcats_filter_tag_list}
+                  </div>
+                  {filter_row_stats}
                 </div>
-                <div className="filter-tags-list">
-                  {advanced_filter_tag_list} {categories_filter_tag_list} {subcats_filter_tag_list}
-                </div>
-                {filter_row_stats}
+                {this.state.view == "table" && <ReportTableHeader parent={parent} />}
+                {parent.state.selected_taxons.length && this.state.view == "tree" && <PipelineSampleTree taxons={parent.state.selected_taxons} sample={parent.report_details.sample_info} nameType={parent.state.name_type} />}
               </div>
-              <ReportTableHeader parent={parent} />
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  }
 }
 
 function ActiveThresholdRows({ activeThreshold, index, parent }) {
@@ -1678,4 +1722,382 @@ function ActiveThresholdRows({ activeThreshold, index, parent }) {
   );
 }
 
+class PipelineSampleTree extends React.PureComponent {
+  constructor(props) {
+    super(props);
+    this._getTooltip = this.getTooltip.bind(this);
+    this.dataTypes = ["NT.r", "NT.aggregatescore", "NT.rpm"];
+    this.state = {
+      dataType: this.dataTypes[0],
+    };
+    this._updateDataType = this.updateDataType.bind(this);
+  }
+
+  makeTree () {
+		function make_node(id, name, level) {
+			return {
+				name: name,
+				level: level,
+				children: [],
+        weight: 0,
+        id: id,
+			}
+		}
+
+		let rows = this.props.taxons;
+		let nodes_by_id = {};
+
+		let root = {
+			name: '',
+			children: [],
+      weight: 0,
+      id: -12345,
+		};
+
+		let tree = root;
+
+		let order = [
+			"species",
+			"genus",
+			"family",
+			"order",
+			"class",
+			"phylum",
+      "kingdom",
+			"superkingdom",
+		].reverse();
+
+    let getValue = (row) => {
+      let parts = this.state.dataType.split(".");
+      return parseFloat(row[parts[0]][parts[1]]);
+    };
+
+		for (let row of rows) {
+		  if (row.tax_level != 1) {
+        continue;
+      }
+
+      tree = root;
+
+      if (!row.lineage) {
+        row.lineage = {
+          genus_taxid: -9,
+          genus_name: "Uncategorized",
+          species_taxid: row.tax_id,
+          species_name: row.name,
+        };
+      }
+      for (let j = 0; j < order.length; j+= 1) {
+
+        let level = order[j],
+            taxon_id = row.lineage[level + "_taxid"],
+            name;
+
+        if (this.props.nameType == "Common name") {
+          name = row.lineage[level + "_common_name"];
+        }
+
+        if (!name) {
+          name = row.lineage[level + "_name"];
+        }
+
+        if (!name) {
+          continue;
+        }
+
+        if(!nodes_by_id[taxon_id]) {
+          let node = make_node(taxon_id, name, level);
+          tree.children.push(node);
+          nodes_by_id[taxon_id] = node;
+        }
+
+        nodes_by_id[taxon_id].name = nodes_by_id[taxon_id].name || name;
+
+        tree.weight += getValue(row);
+        tree = nodes_by_id[taxon_id];
+      }
+
+      tree.weight += getValue(row);
+    }
+    return root;
+  }
+
+  getTooltip (node) {
+    if (!node) {
+      return null;
+    }
+    return (
+      <div>
+        <div className="name">{node.name}</div>
+        <div className="data">{this.state.dataType}: {numberWithCommas(Math.round(node.weight))}</div>
+      </div>
+    );
+  }
+
+  updateDataType (e, d) {
+    this.setState({dataType: d.value});
+  }
+
+  renderWeightDataTypeChooser () {
+    let options = [];
+    for (let dataType of this.dataTypes) {
+      options.push({
+        value: dataType,
+        text: dataType,
+      });
+    }
+
+    return (
+      <LabeledDropdown
+        options={options}
+        onChange={this._updateDataType}
+        value={this.state.dataType}
+        label="Data Type:"
+      />
+    );
+
+  }
+  render () {
+    let tree = this.makeTree();
+    return (
+      <div>
+        {this.renderWeightDataTypeChooser()}
+        <TreeStructure tree={tree} getTooltip={this._getTooltip} />
+      </div>
+    );
+  }
+}
+
+class TreeStructure extends React.PureComponent {
+  constructor (props) {
+    super(props);
+    this.state = {};
+    this.autoCollapsed = false;
+    this.i = 0;
+    this.duration = 0;
+  }
+  componentWillReceiveProps (nextProps) {
+    this.duration = 0;
+    this.autoCollapsed = false;
+    this.update(nextProps, nextProps.tree);
+  }
+  componentDidMount () {
+    this.create();
+    this.update(this.props, this.props.tree);
+  }
+  create () {
+    this.svg = d3.select(this.container).append("svg")
+    this.pathContainer = this.svg.append("g");
+    this.nodeContainer = this.svg.append("g");
+  }
+  update (props, source) {
+    let leaf_count = 0;
+    let to_visit = [props.tree];
+    let min_weight = 999999999;
+    let collapseScale = d3.scale.linear()
+                        .domain([0, props.tree.weight])
+                        .range([0, 10]);
+
+    while(to_visit.length) {
+      let node = to_visit.pop();
+      min_weight = Math.min(min_weight, node.weight);
+      if (!this.autoCollapsed && collapseScale(node.weight) < 2 && node.children && node.children.length) {
+        node._children = node.children;
+        node.children = null;
+      }
+      if (!(node.children && node.children.length)) {
+        leaf_count += 1;
+      } else {
+        to_visit = to_visit.concat(node.children);
+      }
+    }
+    let circleScale = d3.scale.linear()
+              .domain([min_weight, props.tree.weight])
+              .range([4, 15]);
+
+    let linkScale = d3.scale.linear()
+              .domain([min_weight, props.tree.weight])
+              .range([1, 15]);
+
+
+		this.autoCollapsed = true;
+    let width = 1000,
+        height = Math.max(300, 25 * leaf_count);
+
+    let margin = {
+      top: 20,
+      right: 200,
+      left: 40,
+      bottom: 20,
+    };
+
+		props.tree.x0 = height / 2;
+  	props.tree.y0 = 0;
+
+    this.svg
+				.transition()
+				.duration(this.duration)
+        .attr("width", Math.max(this.svg.attr("width"), width + margin.left + margin.right))
+        .attr("height", Math.max(this.svg.attr("height"), height + margin.top + margin.bottom));
+
+    this.pathContainer.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    this.nodeContainer.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    let tree = d3.layout.tree().size([height, width]);
+    let nodes = tree.nodes(props.tree);
+    let links = tree.links(nodes);
+
+    let diagonal = d3.svg.diagonal()
+    .projection(function(d) { return [d.y, d.x]; });
+
+    var node = this.nodeContainer.selectAll("g.node")
+				.data(nodes, (d) => { return d.id || (d.id = ++this.i); });
+
+		let paths = this.pathContainer.selectAll("path.link")
+			.data(links, function(d) { return d.target.id; });
+
+    let pathsEnter = paths.enter().append("path")
+      .attr("class", "link")
+      .attr("d", function(d) {
+        var o = {x: source.x0, y: source.y0};
+        return diagonal({source: o, target: o});
+      })
+      .attr("stroke-width", (d) => {
+        return linkScale(d.target.weight);
+      });
+
+    let pathsExit = paths.exit().transition()
+        .duration(this.duration)
+        .attr("d", function(d) {
+          let o = {x: source.x, y: source.y};
+            return diagonal({source: o, target: o});
+          })
+          .remove();
+
+		let pathsUpdate = paths.transition()
+      .duration(this.duration)
+      .attr("d", (d) => {
+      	var source = {x: d.source.x - linkScale(this.calculateLinkSourcePosition(d)), y: d.source.y};
+      	var target = {x: d.target.x, y: d.target.y};
+      	return diagonal({source: source, target: target});
+      })
+      .attr("stroke-width", function(d){
+      	return linkScale(d.target.weight);
+      });
+
+
+	  let nodeEnter = node.enter().append("g")
+				.attr("class", (d) => {
+          let cls = "node";
+          if(d._children) {
+            cls += " collapsed";
+          }
+          return cls;
+        })
+				.attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
+        .on("click", (d) => {
+          let t = d.children;
+          d.children = d._children;
+          d._children = t;
+          this.update(this.props, d);
+        })
+        .on("mouseover", (d) => {
+          this.setState({hoverNode: d});
+
+          d3.select(this.tooltip)
+           .style("left", (currentEvent.pageX+10) + "px")
+           .style("top", (currentEvent.pageY-10) + "px")
+          d3.select(this.tooltip).classed("hidden", false);
+        })
+        .on("mouseout", (d) => {
+          d3.select(this.tooltip).classed("hidden", true);
+        });
+
+
+		nodeEnter.append("circle")
+      .attr("r", 1e-6)
+
+  	nodeEnter.append("text")
+      .attr("dy", 3)
+      .attr("x", function(d) { return d.children || d._children ? -1 * circleScale(d.weight) - 5 : circleScale(d.weight) + 5; })
+      .style("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+      .text(function(d) {
+        return d.name;
+			})
+      .style("fill-opacity", 1e-6);
+
+    let nodeExit = node.exit().transition()
+        .duration(this.duration)
+        .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
+        .remove();
+
+  	nodeExit.select("circle")
+      .attr("r", 1e-6);
+
+	  nodeExit.select("text")
+      .style("fill-opacity", 1e-6);
+
+    let nodeUpdate = node.transition()
+        .duration(this.duration)
+        .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; })
+				.attr("class", (d) => {
+          let cls = "node";
+          if(d._children) {
+            cls += " collapsed";
+          }
+          return cls;
+        });
+
+	  nodeUpdate.select("circle")
+      .attr("r", function(d){ return circleScale(d.weight);})
+
+	  nodeUpdate.select("text")
+      .style("fill-opacity", 1);
+
+		nodes.forEach(function(d) {
+    	d.x0 = d.x;
+    	d.y0 = d.y;
+  	});
+    this.duration = 750;
+  }
+
+	calculateLinkSourcePosition (link) {
+		let targetID = link.target.id;
+		let childrenNumber = link.source.children.length;
+		let widthAbove = 0;
+		for (var i = 0; i < childrenNumber; i++)
+		{
+			if (link.source.children[i].id == targetID)
+			{
+				// we are done
+				widthAbove = widthAbove + link.source.children[i].weight/2;
+				break;
+			}else {
+				// keep adding
+				widthAbove = widthAbove + link.source.children[i].weight
+			}
+		}
+		return link.source.weight/2 - widthAbove;
+	}
+
+  renderTooltip () {
+    if (this.state.hoverNode === undefined) {
+      return;
+    }
+
+    return (
+      <div className="d3-tree-tooltip hidden" ref={(tooltip) => { this.tooltip = tooltip; }} >
+        {this.props.getTooltip(this.state.hoverNode)}
+      </div>)
+  }
+
+  render () {
+    return (
+      <div className="d3-tree">
+        {this.renderTooltip()}
+        <div ref={(container) => { this.container = container; }} />
+      </div>
+    );
+  }
+};
 export default PipelineSampleReport;

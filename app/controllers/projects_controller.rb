@@ -43,6 +43,7 @@ class ProjectsController < ApplicationController
           id: @project.id,
           name: @project.name,
           public_access: @project.public_access.to_i,
+          background_flag: @project.background_flag.to_i,
           created_at: @project.created_at
         }
       end
@@ -149,6 +150,7 @@ class ProjectsController < ApplicationController
   # PATCH/PUT /projects/1
   # PATCH/PUT /projects/1.json
   def update
+    update_project_background
     respond_to do |format|
       if @project.update(project_params)
         format.html { redirect_to @project, notice: 'Project was successfully updated.' }
@@ -217,7 +219,16 @@ class ProjectsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def project_params
-    params.require(:project).permit(:name, :public_access, user_ids: [])
+    params.require(:project).permit(:name, :public_access, :background_flag, user_ids: [])
+  end
+
+  def update_project_background
+    return unless project_params[:background_flag]
+    if project_params[:background_flag].zero? && @project.background
+      @project.background.destroy
+    elsif project_params[:background_flag] == 1 && @project.complete?
+      @project.create_or_update_project_background
+    end
   end
 
   def project_reports_progress_message

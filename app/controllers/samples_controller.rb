@@ -157,7 +157,7 @@ class SamplesController < ApplicationController
     @project_info = @sample.project ? @sample.project : nil
     @project_sample_ids_names = @sample.project ? Hash[current_power.project_samples(@sample.project).map { |s| [s.id, s.name] }] : nil
     @host_genome = @sample.host_genome ? @sample.host_genome : nil
-    @background_models = Background.all
+    @background_models = current_power.backgrounds
     @can_edit = current_power.updatable_sample?(@sample)
     @git_version = ENV['GIT_VERSION'] || ""
     @git_version = Time.current.to_i if @git_version.blank?
@@ -166,11 +166,8 @@ class SamplesController < ApplicationController
     align_summary_file = @pipeline_run ? "#{@pipeline_run.alignment_viz_output_s3_path}.summary" : nil
     @align_viz = true if align_summary_file && get_s3_file(align_summary_file)
 
+    background_id = check_background_id(@sample)
     if @pipeline_run && (((@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?) || @pipeline_run.report_ready?)
-      background_id = params[:background_id] || @sample.default_background_id
-      # Here background_id is only used to decide whether a report can be shown.
-      # No report/background-specific data is actually being shown.
-      # Background selection is used in report_info action, which fetches the actual report data.
       if background_id
         @report_present = 1
         @report_ts = @pipeline_run.updated_at.to_i
@@ -196,8 +193,7 @@ class SamplesController < ApplicationController
     only_species = params[:species] == "1"
     if samples.first
       first_sample = samples.first
-      default_background_id = first_sample.host_genome && first_sample.host_genome.default_background ? first_sample.host_genome.default_background.id : nil
-      background_id = params[:background_id] || default_background_id || Background.first
+      background_id = check_background_id(first_sample)
       @top_taxons = top_taxons_details(samples, background_id, num_results, sort_by, only_species)
       render json: @top_taxons
     else
@@ -217,8 +213,7 @@ class SamplesController < ApplicationController
     samples = current_power.samples.where(id: sample_ids).includes([:pipeline_runs])
     if samples.first
       first_sample = samples.first
-      default_background_id = first_sample.host_genome && first_sample.host_genome.default_background ? first_sample.host_genome.default_background.id : nil
-      background_id = params[:background_id] || default_background_id || Background.first.id
+      background_id = check_background_id(first_sample)
       if taxon_ids.empty?
         taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, only_species).pluck("tax_id")
       end
@@ -243,11 +238,20 @@ class SamplesController < ApplicationController
     ## TODO(yf): clean the following up.
     ####################################################
     if @pipeline_run && (((@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?) || @pipeline_run.report_ready?)
-      background_id = params[:background_id] || @sample.default_background_id
+      background_id = check_background_id(@sample)
       pipeline_run_id = @pipeline_run.id
     end
 
     @report_info = external_report_info(pipeline_run_id, background_id, params)
+    tax_ids = @report_info[:taxonomy_details][2].map { |x| x['tax_id'] }
+    lineages = TaxonCount.connection.select_all(TaxonLineage.where(taxid: tax_ids)).to_hash
+    lineage_by_taxid = {}
+    lineages.each do |x|
+      lineage_by_taxid[x['taxid']] = x
+    end
+    @report_info[:taxonomy_details][2].each do |tax|
+      tax['lineage'] = lineage_by_taxid[tax['tax_id']]
+    end
     render json: @report_info
   end
 
@@ -480,6 +484,16 @@ class SamplesController < ApplicationController
   # Use callbacks to share common setup or constraints between actions.
 
   private
+
+  def check_background_id(sample)
+    background_id = params[:background_id] || sample.default_background_id
+    viewable_background_ids = current_power.backgrounds.pluck(:id)
+    if viewable_background_ids.include?(background_id.to_i)
+      return background_id
+    else
+      raise "Not allowed to view background"
+    end
+  end
 
   def set_sample
     @sample = samples_scope.find(params[:id])

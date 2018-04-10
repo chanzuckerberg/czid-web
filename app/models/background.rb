@@ -2,6 +2,7 @@ class Background < ApplicationRecord
   has_and_belongs_to_many :samples, through: :pipeline_runs
   has_and_belongs_to_many :pipeline_runs
   has_many :taxon_summaries, dependent: :destroy
+  belongs_to :project, optional: true
   validate :validate_size
   after_save :store_summary
 
@@ -66,5 +67,13 @@ class Background < ApplicationRecord
 
   def compute_stdev(sum, sum2, n)
     Math.sqrt((sum2 - sum**2 / n.to_f) / (n - 1))
+  end
+
+  def self.viewable(user)
+    if user.admin?
+      all
+    else
+      where(project_id: Project.viewable(user).pluck(:id) + [nil])
+    end
   end
 end
