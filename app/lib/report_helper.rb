@@ -574,6 +574,8 @@ module ReportHelper
         tax_info['name'] = "All taxa without #{level_str} classification"
         if tax_id == TaxonLineage::BLACKLIST_GENUS_ID
           tax_info['name'] = "All artificial constructs"
+        elsif tax_id < TaxonLineage::INVALID_CALL_BASE_ID
+          tax_info['name'] = "All #{level_str} non-specific reads"
         elsif !(TaxonLineage::MISSING_LINEAGE_ID.values.include? tax_id) && tax_id != TaxonLineage::MISSING_SPECIES_ID_ALT
           tax_info['name'] += " #{tax_id}"
         end
