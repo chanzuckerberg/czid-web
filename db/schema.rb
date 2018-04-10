@@ -10,9 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-
-ActiveRecord::Schema.define(version: 20180406004121) do
-
+ActiveRecord::Schema.define(version: 20180410004023) do
 
   create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "archive_of"
@@ -26,6 +24,7 @@ ActiveRecord::Schema.define(version: 20180406004121) do
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "project_id"
     t.index ["name"], name: "index_backgrounds_on_name", unique: true
   end
 
@@ -49,7 +48,7 @@ ActiveRecord::Schema.define(version: 20180406004121) do
     t.index ["sample_id"], name: "index_backgrounds_samples_on_sample_id"
   end
 
-  create_table "ercc_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
+  create_table "ercc_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "pipeline_run_id"
     t.string "name"
     t.integer "count"
@@ -174,6 +173,7 @@ ActiveRecord::Schema.define(version: 20180406004121) do
     t.datetime "updated_at", null: false
     t.integer "public_access", limit: 1
     t.integer "days_to_keep_sample_private", default: 365, null: false
+    t.integer "background_flag", limit: 1, default: 1
     t.index ["name"], name: "index_projects_on_name", unique: true
   end
 

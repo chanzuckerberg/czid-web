@@ -5,6 +5,10 @@ class Power
     @user = user
   end
 
+  power :backgrounds do
+    Background.viewable(@user)
+  end
+
   power :projects do
     Project.viewable(@user)
   end
