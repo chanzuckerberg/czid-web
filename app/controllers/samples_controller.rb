@@ -167,12 +167,15 @@ class SamplesController < ApplicationController
     @align_viz = true if align_summary_file && get_s3_file(align_summary_file)
 
     if @pipeline_run && (((@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?) || @pipeline_run.report_ready?)
-      @report_present = 1
-      @report_ts = @pipeline_run.updated_at.to_i
-      @all_categories = all_categories
-      @report_details = report_details(@pipeline_run)
-      @report_page_params = clean_params(params, @all_categories)
-      @ercc_comparison = @pipeline_run.compare_ercc_counts
+      background_id = check_background_id(@sample)
+      if background_id
+        @report_present = 1
+        @report_ts = @pipeline_run.updated_at.to_i
+        @all_categories = all_categories
+        @report_details = report_details(@pipeline_run)
+        @report_page_params = clean_params(params, @all_categories)
+        @ercc_comparison = @pipeline_run.compare_ercc_counts
+      end
 
       if @pipeline_run.failed?
         @pipeline_run_retriable = true
