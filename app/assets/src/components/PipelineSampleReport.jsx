@@ -1849,6 +1849,7 @@ class PipelineSampleTree extends React.PureComponent {
 
     return (
       <LabeledDropdown
+        className={"data-type-chooser"}
         options={options}
         onChange={this._updateDataType}
         value={this.state.dataType}
@@ -1860,7 +1861,7 @@ class PipelineSampleTree extends React.PureComponent {
   render () {
     let tree = this.makeTree();
     return (
-      <div>
+      <div className="pipeline-tree">
         {this.renderWeightDataTypeChooser()}
         <TreeStructure tree={tree} getTooltip={this._getTooltip} />
       </div>
