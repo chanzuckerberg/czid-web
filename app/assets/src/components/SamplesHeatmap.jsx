@@ -14,82 +14,7 @@ import ObjectHelper from '../helpers/ObjectHelper';
 import ReactNouislider from './ReactNouislider';
 import LabeledDropdown from './LabeledDropdown';
 import LabeledFilterDropdown from './LabeledFilterDropdown';
-
-class SampleHeatmapTooltip extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
-  renderTaxons () {
-    let taxon = this.props.taxon;
-    if (!taxon) {
-      return
-    }
-
-    let valueMap = [
-        ['Agg Score', 'NT.aggregatescore'],
-        null,
-        ['NT RPM', 'NT.rpm'],
-        ['NR RPM', 'NR.rpm'],
-        ['NT R', 'NT.r'],
-        ['NR R', 'NR.r'],
-        ['NT Z', 'NT.zscore'],
-        ['NR Z', 'NR.zscore'],
-        ['NT Max Z', 'NT.maxzscore'],
-        ['NR Max Z', 'NR.maxzscore'],
-    ]
-    let ret = [
-      <li className="col s12" key="taxon-name">
-        <label>Taxon:</label>{taxon.name}
-      </li>
-    ];
-    valueMap.forEach(function (pair) {
-      if (!pair) {
-        ret.push(<li key="blank" className="col s6">&nbsp;</li>);
-        return;
-      }
-
-      let key = pair[0],
-          value = pair[1];
-
-      let parts = value.split("."),
-            base = taxon;
-
-      for (var part of parts) {
-        base = base[part];
-      }
-      ret.push(
-        <li className="col s6" key={"taxon-" + value + "-value"}>
-          <label>{key}:</label>
-          {base.toFixed(1)}
-        </li>
-      );
-    });
-    return ret;
-  }
-  render () {
-    let sample = this.props.sample;
-    return (
-      <div className="heatmap-tooltips">
-        <ul className="row">
-          <li className="col s12">
-            <label>Sample:</label>{sample.name}
-          </li>
-          {this.renderTaxons()}
-        </ul>
-      </div>
-    )
-  }
-}
-
-SampleHeatmapTooltip.propTypes = {
-  taxon: PropTypes.shape({
-    name: PropTypes.string,
-  }),
-  sample: PropTypes.shape({
-    name: PropTypes.string,
-  }).isRequired,
-};
+import TaxonTooltip from './TaxonTooltip';
 
 class D3Heatmap extends React.Component {
   constructor(props) {
@@ -907,7 +832,7 @@ class SamplesHeatmap extends React.Component {
     }
 
     return (
-      <SampleHeatmapTooltip sample={sample} taxon={taxon} />
+      <TaxonTooltip sample={sample} taxon={taxon} />
     )
 
   }

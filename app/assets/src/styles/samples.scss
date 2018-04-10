@@ -1240,3 +1240,9 @@ input[type="button"] {
 .ui.popup.hidden-popup {
   display: none !important;
 }
+
+#report-tree {
+  .filters {
+    margin-bottom: -4em;
+  }
+}

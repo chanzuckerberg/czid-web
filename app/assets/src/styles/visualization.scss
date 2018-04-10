@@ -224,3 +224,49 @@
     }
   }
 }
+
+.d3-tree {
+  text {
+    font-size: 8pt;
+  }
+  .link {
+    fill: none;
+    stroke: rgb(78, 173, 73);
+    opacity: 0.5;
+  }
+  circle {
+    stroke: #3867fa;
+    stroke-width: 1.5px;
+    fill: #fff;
+    &:hover {
+      fill: #3867fa;
+      cursor: pointer;
+    }
+  }
+  .collapsed circle {
+    fill: rgb(192, 206, 250);
+  }
+
+  .d3-tree-tooltip {
+    position: absolute;
+    min-width: 200px;
+    height: auto;
+    padding: 10px;
+    background-color: rgba(255,255,255, 0.95);
+    border-radius: 5px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    pointer-events: none;
+    font-size: 8pt;
+
+    .name {
+      font-size: 9pt;
+    }
+  }
+}
+
+#PipelineSampleReads_page {
+  .d3-tree {
+    border: 1px solid #eee;
+    margin: 1em 0;
+  }
+}
