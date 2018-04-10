@@ -1626,6 +1626,13 @@ class RenderMarkup extends React.Component {
       </Menu>
     );
   }
+  renderTree () {
+    let parent = this.props.parent;
+    if (!(parent.state.selected_taxons.length && this.state.view == "tree")){
+      return;
+    }
+    return <PipelineSampleTree taxons={parent.state.selected_taxons} sample={parent.report_details.sample_info} nameType={parent.state.name_type} />
+  }
   render () {
     const {
       filter_row_stats,
@@ -1657,7 +1664,7 @@ class RenderMarkup extends React.Component {
                   {filter_row_stats}
                 </div>
                 {this.state.view == "table" && <ReportTableHeader parent={parent} />}
-                {parent.state.selected_taxons.length && this.state.view == "tree" && <PipelineSampleTree taxons={parent.state.selected_taxons} sample={parent.report_details.sample_info} nameType={parent.state.name_type} />}
+                {this.renderTree()}
               </div>
             </div>
           </div>
