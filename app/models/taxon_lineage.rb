@@ -1,6 +1,6 @@
 # The TaxonLineage model gives the taxids forming the taxonomic lineage of any given species-level taxid.
 class TaxonLineage < ApplicationRecord
-  INVALID_CALL_BASE_ID = -1e9
+  INVALID_CALL_BASE_ID = -1e8 # dun't run into -2e9 limit
   MISSING_SPECIES_ID = -100
   MISSING_SPECIES_ID_ALT = -1
   MISSING_GENUS_ID = -200
