@@ -293,21 +293,50 @@ class PipelineRun < ApplicationRecord
   end
 
   def subsample_suffix
-    subsample? ? "/subsample_#{subsample}" : ""
+    all_suffix = pipeline_version ? "subsample_all" : ""
+    subsample? ? "subsample_#{subsample}" : all_suffix
   end
 
   delegate :sample_output_s3_path, to: :sample
 
   def postprocess_output_s3_path
-    sample.sample_postprocess_s3_path
+    pipeline_ver_str = ""
+    pipeline_ver_str = "#{pipeline_version}/" if pipeline_version
+    "#{sample.sample_postprocess_s3_path}/#{pipeline_ver_str}#{subsample_suffix}"
   end
 
   def alignment_viz_output_s3_path
-    "#{sample.sample_postprocess_s3_path}/align_viz"
+    "#{postprocess_output_s3_path}/align_viz"
+  end
+
+  def host_filter_output_s3_path
+    pipeline_ver_str = ""
+    pipeline_ver_str = "/#{pipeline_version}" if pipeline_version
+    "#{sample.sample_output_s3_path}#{pipeline_ver_str}"
+  end
+
+  def s3_paths_for_taxon_byteranges
+    # by tax_level and hit_type
+    { TaxonCount::TAX_LEVEL_SPECIES => { 'NT' => "#{postprocess_output_s3_path}/#{Sample::SORTED_TAXID_ANNOTATED_FASTA}",
+                                         'NR' => "#{postprocess_output_s3_path}/#{Sample::SORTED_TAXID_ANNOTATED_FASTA_NR}" },
+      TaxonCount::TAX_LEVEL_GENUS => { 'NT' => "#{postprocess_output_s3_path}/#{Sample::SORTED_TAXID_ANNOTATED_FASTA_GENUS_NT}",
+                                       'NR' => "#{postprocess_output_s3_path}/#{Sample::SORTED_TAXID_ANNOTATED_FASTA_GENUS_NR}" },
+      TaxonCount::TAX_LEVEL_FAMILY => { 'NT' => "#{postprocess_output_s3_path}/#{Sample::SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NT}",
+                                        'NR' => "#{postprocess_output_s3_path}/#{Sample::SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR}" } }
+  end
+
+  def fetch_pipeline_version
+    whole_version = `aws s3 cp #{sample.sample_output_s3_path}/pipeline_version.txt -`.strip
+    whole_version =~ /(^\d+\.\d+).*/
+    return Regexp.last_match(1)
+  rescue
+    return nil
   end
 
   def alignment_output_s3_path
-    "#{sample.sample_output_s3_path}#{subsample_suffix}"
+    pipeline_ver_str = ""
+    pipeline_ver_str = "#{pipeline_version}/" if pipeline_version
+    "#{sample.sample_output_s3_path}/#{pipeline_ver_str}#{subsample_suffix}"
   end
 
   def count_unmapped_reads
@@ -317,7 +346,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def load_ercc_counts
-    ercc_s3_path = "#{sample_output_s3_path}/#{ERCC_OUTPUT_NAME}"
+    ercc_s3_path = "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
     _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", ercc_s3_path)
     return unless status.exitstatus.zero?
     ercc_lines = `aws s3 cp #{ercc_s3_path} - | grep 'ERCC' | cut -f1,2`
