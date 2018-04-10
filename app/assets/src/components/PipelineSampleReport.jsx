@@ -1618,10 +1618,9 @@ class RenderMarkup extends React.Component {
           trigger={
             <Menu.Item name="tree" active={this.state.view == 'tree'} onClick={this._onViewClicked}>
               <Icon name="fork" />
-              <Label color='purple' floating>beta</Label>
             </Menu.Item>
           }
-          content='Phylogenetic Tree View'
+          content={<div>Phylogenetic Tree View <Label color='purple' size='mini' floating>beta</Label></div>}
           inverted
         />
       </Menu>
@@ -1727,12 +1726,13 @@ class PipelineSampleTree extends React.PureComponent {
   constructor(props) {
     super(props);
     this._getTooltip = this.getTooltip.bind(this);
-    this.dataTypes = ["NT.aggregatescore", "NT.r", "NT.rpm"];
+    this.dataTypes = ["NT.r", "NT.aggregatescore", "NT.rpm"];
     this.state = {
       dataType: this.dataTypes[0],
     };
     this._updateDataType = this.updateDataType.bind(this);
   }
+
   makeTree () {
 		function make_node(id, name, level) {
 			return {
@@ -1826,7 +1826,12 @@ class PipelineSampleTree extends React.PureComponent {
     if (!node) {
       return null;
     }
-    return <div>{this.state.dataType}: {numberWithCommas(Math.round(node.weight))}</div>
+    return (
+      <div>
+        <div className="name">{node.name}</div>
+        <div className="data">{this.state.dataType}: {numberWithCommas(Math.round(node.weight))}</div>
+      </div>
+    );
   }
 
   updateDataType (e, d) {
@@ -1886,22 +1891,17 @@ class TreeStructure extends React.PureComponent {
     this.nodeContainer = this.svg.append("g");
   }
   update (props, source) {
-    let circleScale = d3.scale.linear()
-              .domain([0, props.tree.weight])
-              .range([3, 15]);
-
-    let linkScale = d3.scale.linear()
-              .domain([0, props.tree.weight])
-              .range([1, 15]);
-
     let leaf_count = 0;
     let to_visit = [props.tree];
     let min_weight = 999999999;
+    let collapseScale = d3.scale.linear()
+                        .domain([0, props.tree.weight])
+                        .range([0, 10]);
 
     while(to_visit.length) {
       let node = to_visit.pop();
       min_weight = Math.min(min_weight, node.weight);
-      if (!this.autoCollapsed && circleScale(node.weight) < 5 && node.children && node.children.length) {
+      if (!this.autoCollapsed && collapseScale(node.weight) < 2 && node.children && node.children.length) {
         node._children = node.children;
         node.children = null;
       }
@@ -1911,13 +1911,18 @@ class TreeStructure extends React.PureComponent {
         to_visit = to_visit.concat(node.children);
       }
     }
+    let circleScale = d3.scale.linear()
+              .domain([min_weight, props.tree.weight])
+              .range([4, 15]);
 
-    circleScale.domain([min_weight, props.tree.weight]);
-    linkScale.domain([min_weight, props.tree.weight]);
+    let linkScale = d3.scale.linear()
+              .domain([min_weight, props.tree.weight])
+              .range([1, 15]);
+
 
 		this.autoCollapsed = true;
     let width = 1000,
-        height = Math.max(300, 35 * leaf_count);
+        height = Math.max(300, 25 * leaf_count);
 
     let margin = {
       top: 20,
