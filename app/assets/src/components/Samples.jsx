@@ -62,7 +62,7 @@ class Samples extends React.Component {
     this.checkReportDownload = this.checkReportDownload.bind(this);
     this.displayReportProgress = this.displayReportProgress.bind(this);
     this.deleteProject = this.deleteProject.bind(this);
-
+    this.toggleBackgroundFlag = this.toggleBackgroundFlag.bind(this);
     this.state = {
       invite_status: null,
       project: null,
@@ -384,6 +384,24 @@ class Samples extends React.Component {
           );
         });
     }
+  }
+
+  toggleBackgroundFlag() {
+    let project_id = this.state.project.id;
+    let current_flag = this.state.project.background_flag;
+    let new_flag = current_flag ? 0 : 1;
+    axios
+      .put(`/projects/${project_id}.json`, {
+        background_flag: new_flag,
+        authenticity_token: this.csrf
+      })
+      .then(() => {
+        this.setState({
+          project: Object.assign(this.state.project, {
+            background_flag: new_flag
+          })
+        });
+      })
   }
 
   displayMetadataDropdown() {
@@ -1679,6 +1697,14 @@ class AddUserModal extends React.Component {
             ) : null}
           </div>
           <AddUserModalMemberArea state={this.props.state} parent={this} />
+          <input
+            type="checkbox"
+            id="background_flag"
+            onChange={this.props.parent.toggleBackgroundFlag}
+            className="filled-in checkbox"
+            checked={this.props.state.project.background_flag}
+          />
+          <label htmlFor="background_flag">Expose project-specific background</label>
         </Modal.Content>
         <Modal.Actions>
           <button className="modal-close" onClick={this.handleClose}>

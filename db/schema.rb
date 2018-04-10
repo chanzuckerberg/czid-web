@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180405175934) do
+ActiveRecord::Schema.define(version: 20180410004023) do
 
   create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "archive_of"
@@ -172,6 +172,7 @@ ActiveRecord::Schema.define(version: 20180405175934) do
     t.datetime "updated_at", null: false
     t.integer "public_access", limit: 1
     t.integer "days_to_keep_sample_private", default: 365, null: false
+    t.integer "background_flag", limit: 1
     t.index ["name"], name: "index_projects_on_name", unique: true
   end
 

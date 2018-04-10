@@ -43,6 +43,7 @@ class ProjectsController < ApplicationController
           id: @project.id,
           name: @project.name,
           public_access: @project.public_access.to_i,
+          background_flag: @project.background_flag.to_i,
           created_at: @project.created_at
         }
       end
@@ -217,7 +218,7 @@ class ProjectsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def project_params
-    params.require(:project).permit(:name, :public_access, user_ids: [])
+    params.require(:project).permit(:name, :public_access, :background_flag, user_ids: [])
   end
 
   def project_reports_progress_message
