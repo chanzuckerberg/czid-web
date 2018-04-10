@@ -8,6 +8,7 @@ class TaxonLineage < ApplicationRecord
   MISSING_ORDER_ID = -400
   MISSING_CLASS_ID = -500
   MISSING_PHYLUM_ID = -600
+  MISSING_KINGDOM_ID = -650
   MISSING_SUPERKINGDOM_ID = -700
   MISSING_LINEAGE_ID = {
     species: MISSING_SPECIES_ID,
@@ -16,6 +17,7 @@ class TaxonLineage < ApplicationRecord
     order: MISSING_ORDER_ID,
     class: MISSING_CLASS_ID,
     phylum: MISSING_PHYLUM_ID,
+    kingdom: MISSING_KINGDOM_ID,
     superkingdom: MISSING_SUPERKINGDOM_ID
   }.freeze
 
@@ -29,13 +31,6 @@ class TaxonLineage < ApplicationRecord
   # PHAGE_FAMILIES_TAXIDS = TaxonLineage.where(family_name: PHAGE_PHYLA_NAMES).map(&:family_taxid).compact.uniq.sort
   PHAGE_FAMILIES_TAXIDS = [10_472, 10_474, 10_477, 10_656, 10_659, 10_662, 10_699, 10_744, 10_841, 10_860,
                            10_877, 11_989, 157_897, 292_638, 324_686, 423_358, 573_053, 1_232_737].freeze
-
-  # HACK: Implement fungus filter by listing current fungus phyla. Eventually we should have 'kingdom' as a column
-  # in taxon_lineages, so that the fungus classification is accurate gets updated with every update of NCBI taxonomy.
-  # For fungus phyla, see: https://myhits.isb-sib.ch/cgi-bin/view_cla_entry?name=taxid:4751. Filtering these is
-  # currently the best we can do. As there are some fungi not classified into a phylum, this implementation
-  # of the fungus filter is not totally accurate.
-  FUNGUS_PHYLA_TAXIDS = [1_264_859, 6029, 4761, 451_455, 1_031_332, 451_459, 214_504].freeze
 
   def self.get_genus_info(genus_tax_id)
     r = find_by(genus_taxid: genus_tax_id)
