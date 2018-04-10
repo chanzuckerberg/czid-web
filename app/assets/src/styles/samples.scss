@@ -1009,11 +1009,13 @@ input[type="button"] {
         .ui.dropdown .text { // The text in the button
           font-size: 1.2em;
           padding: 0.05em;
+          margin-top: 0.3em;
         }
         .download-btn { // The whole button
           color: #3867fa;
           background-color: transparent;
           padding-left: 5em;
+          min-height: 35px !important;
         }
         .download-reports {
           color: #3867fa;
