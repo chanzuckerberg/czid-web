@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180410004023) do
+ActiveRecord::Schema.define(version: 20180405175934) do
 
   create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "archive_of"
@@ -35,7 +35,7 @@ ActiveRecord::Schema.define(version: 20180410004023) do
     t.index ["pipeline_output_id"], name: "index_backgrounds_pipeline_outputs_on_pipeline_output_id"
   end
 
-  create_table "backgrounds_pipeline_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "backgrounds_pipeline_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.bigint "background_id"
     t.bigint "pipeline_run_id"
     t.index ["background_id", "pipeline_run_id"], name: "index_bg_pr_id", unique: true
@@ -48,7 +48,7 @@ ActiveRecord::Schema.define(version: 20180410004023) do
     t.index ["sample_id"], name: "index_backgrounds_samples_on_sample_id"
   end
 
-  create_table "ercc_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
+  create_table "ercc_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "pipeline_run_id"
     t.string "name"
     t.integer "count"
@@ -161,19 +161,17 @@ ActiveRecord::Schema.define(version: 20180410004023) do
     t.integer "ready_step"
     t.integer "total_ercc_reads"
     t.float "fraction_subsampled", limit: 24
-    t.string "pipeline_version"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
     t.index ["pipeline_output_id"], name: "index_pipeline_runs_on_pipeline_output_id", unique: true
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
   end
 
   create_table "projects", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name", collation: "utf8_general_ci"
+    t.string "name", collation: "latin1_swedish_ci"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "public_access", limit: 1
     t.integer "days_to_keep_sample_private", default: 365, null: false
-    t.integer "background_flag", limit: 1
     t.index ["name"], name: "index_projects_on_name", unique: true
   end
 
@@ -185,7 +183,7 @@ ActiveRecord::Schema.define(version: 20180410004023) do
   end
 
   create_table "samples", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name", collation: "utf8_general_ci"
+    t.string "name", collation: "latin1_swedish_ci"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "project_id"
@@ -250,13 +248,13 @@ ActiveRecord::Schema.define(version: 20180410004023) do
     t.integer "count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "name", collation: "utf8_general_ci"
+    t.string "name", collation: "latin1_swedish_ci"
     t.string "count_type"
     t.float "percent_identity", limit: 24
     t.float "alignment_length", limit: 24
     t.float "e_value", limit: 24
-    t.integer "genus_taxid", default: -200, null: false
-    t.integer "superkingdom_taxid", default: -700, null: false
+    t.integer "genus_taxid"
+    t.integer "superkingdom_taxid"
     t.float "percent_concordant", limit: 24
     t.float "species_total_concordant", limit: 24
     t.float "genus_total_concordant", limit: 24
@@ -288,34 +286,31 @@ ActiveRecord::Schema.define(version: 20180410004023) do
 
   create_table "taxon_lineages", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.integer "taxid", null: false
-    t.integer "superkingdom_taxid", default: -700, null: false
-    t.integer "phylum_taxid", default: -600, null: false
-    t.integer "class_taxid", default: -500, null: false
-    t.integer "order_taxid", default: -400, null: false
-    t.integer "family_taxid", default: -300, null: false
-    t.integer "genus_taxid", default: -200, null: false
-    t.integer "species_taxid", default: -100, null: false
+    t.integer "superkingdom_taxid"
+    t.integer "phylum_taxid"
+    t.integer "class_taxid"
+    t.integer "order_taxid"
+    t.integer "family_taxid"
+    t.integer "genus_taxid"
+    t.integer "species_taxid"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "superkingdom_name", default: "", null: false
-    t.string "phylum_name", default: "", null: false
-    t.string "class_name", default: "", null: false
-    t.string "order_name", default: "", null: false
-    t.string "family_name", default: "", null: false
-    t.string "genus_name", default: "", null: false
-    t.string "species_name", default: "", null: false
-    t.string "superkingdom_common_name", default: "", null: false
-    t.string "phylum_common_name", default: "", null: false
-    t.string "class_common_name", default: "", null: false
-    t.string "order_common_name", default: "", null: false
-    t.string "family_common_name", default: "", null: false
-    t.string "genus_common_name", default: "", null: false
-    t.string "species_common_name", default: "", null: false
+    t.string "superkingdom_name"
+    t.string "phylum_name"
+    t.string "class_name"
+    t.string "order_name"
+    t.string "family_name"
+    t.string "genus_name"
+    t.string "species_name"
+    t.string "superkingdom_common_name"
+    t.string "phylum_common_name"
+    t.string "class_common_name"
+    t.string "order_common_name"
+    t.string "family_common_name"
+    t.string "genus_common_name"
+    t.string "species_common_name"
     t.datetime "started_at", default: "2000-01-01 00:00:00", null: false
     t.datetime "ended_at", default: "3000-01-01 00:00:00", null: false
-    t.integer "kingdom_taxid", default: -650, null: false
-    t.string "kingdom_name", default: "", null: false
-    t.string "kingdom_common_name", default: "", null: false
     t.index ["class_taxid"], name: "index_taxon_lineages_on_class_taxid"
     t.index ["family_taxid"], name: "index_taxon_lineages_on_family_taxid"
     t.index ["genus_taxid"], name: "index_taxon_lineages_on_genus_taxid"
@@ -351,20 +346,20 @@ ActiveRecord::Schema.define(version: 20180410004023) do
   end
 
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "email", default: "", null: false, collation: "utf8_general_ci"
-    t.string "name", collation: "utf8_general_ci"
+    t.string "email", default: "", null: false, collation: "latin1_swedish_ci"
+    t.string "name", collation: "latin1_swedish_ci"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "encrypted_password", default: "", null: false, collation: "utf8_general_ci"
-    t.string "reset_password_token", collation: "utf8_general_ci"
+    t.string "encrypted_password", default: "", null: false, collation: "latin1_swedish_ci"
+    t.string "reset_password_token", collation: "latin1_swedish_ci"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
     t.integer "sign_in_count", default: 0, null: false
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
-    t.string "current_sign_in_ip", collation: "utf8_general_ci"
-    t.string "last_sign_in_ip", collation: "utf8_general_ci"
-    t.string "authentication_token", limit: 30, collation: "utf8_general_ci"
+    t.string "current_sign_in_ip", collation: "latin1_swedish_ci"
+    t.string "last_sign_in_ip", collation: "latin1_swedish_ci"
+    t.string "authentication_token", limit: 30, collation: "latin1_swedish_ci"
     t.integer "role"
     t.index ["authentication_token"], name: "index_users_on_authentication_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
