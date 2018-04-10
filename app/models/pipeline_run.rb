@@ -101,6 +101,8 @@ class PipelineRun < ApplicationRecord
       output_func: 'postprocess_outputs'
     )
     self.pipeline_run_stages = run_stages
+    # we consider the job successful after stage 2 completes, even if subsequent stages fail
+    # this is the only meaning of "ready_step"
     self.ready_step = 2
   end
 
