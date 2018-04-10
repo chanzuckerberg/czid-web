@@ -27,8 +27,10 @@
     .text {
       display: block;
       white-space: nowrap;
-      overflow: hidden;
       font-size: 8pt;
+    }
+    > .text {
+      overflow: hidden;
     }
     .dropdown.icon {
       position: absolute !important;
