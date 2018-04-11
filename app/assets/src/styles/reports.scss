@@ -790,7 +790,11 @@ input[type="number"] {
   }
 }
 .s3.download-area {
+  padding-left: 5rem;
   margin-top: 25px;
+}
+.download-title {
+  margin-bottom: 1rem;
 }
 .categories-filters-modal {
   display: none;

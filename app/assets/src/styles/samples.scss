@@ -53,12 +53,13 @@ $break-large: 1070px;
   border: 1px solid #d9dee5;
   padding: 8px;
   margin: 7px 0;
-  min-width: 100%;
+  min-width: 11rem;
   letter-spacing: 0.43px;
   display: inline-block;
   cursor: pointer;
-  border-radius: 3px;
+  border-radius: 20px;
   font-size: 11px;
+  font-family: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;
   &:hover {
     color: #232333 !important;
     border-color: #bfc3c9;
@@ -83,7 +84,8 @@ $break-large: 1070px;
   }
   i {
     font-size: 15px;
-    margin-right: 4px;
+    margin-left: 4px;
+    margin-right: 10px;
     position: relative;
     top: 1px;
   }

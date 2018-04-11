@@ -522,21 +522,21 @@ class PipelineSampleReads extends React.Component {
             href={`/samples/${this.sampleInfo.id}/nonhost_fasta`}
           >
             <i className="fa fa-cloud-download" />
-            Download Non-Host Reads
+            Non-Host Reads
           </a>
           <a
             className="custom-button"
             href={`/samples/${this.sampleInfo.id}/unidentified_fasta`}
           >
             <i className="fa fa-cloud-download" />
-            Download Unmapped Reads
+            Unmapped Reads
           </a>
           <a
             className="custom-button"
             href={`/samples/${this.sampleInfo.id}/results_folder`}
           >
             <i className="fa fa-folder-open" />
-            Navigate to Results Folder
+            Results Folder
           </a>
         </div>
       );
@@ -774,13 +774,13 @@ class PipelineSampleReads extends React.Component {
               </div>
 
               <div className="col s3 download-area">
-                <div className="download-title">Downloads Reads</div>
+                <div className="download-title">Download Reads</div>
                 <a
                   className="custom-button"
                   href={`/samples/${this.sampleInfo.id}/fastqs_folder`}
                 >
                   <i className="fa fa-folder-open" />
-                  Go To Source Data
+                  Source Data
                 </a>
                 {download_section}
               </div>
