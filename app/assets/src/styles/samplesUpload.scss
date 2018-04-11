@@ -46,7 +46,7 @@
           font-weight: $font-weight-semibold;
         }
         a:hover {
-          color: #5abcd6 !important;
+          color: #3867fa !important;
         }
       }
       .bulkSumbitForm {
@@ -131,7 +131,7 @@
               border-color: #d6eef5;
               color: #68c2d9;
               i {
-                color: #5abcd6;
+                color: #3867fa;
               }
               &.new-project-button {
                 width: 92%;
@@ -156,8 +156,8 @@
               }
             }
             .blue-button {
-              background: #5abcd6;
-              border-color: #5abcd6;
+              background: #3867fa;
+              border-color: #3867fa;
               color: #ffffff;
             }
             .upload-samples-button {
@@ -186,7 +186,7 @@
                   background: #d6eef5;
                   border-color: #4ba4c1;
                   .genome-label {
-                    color: #5abcd6;
+                    color: #3867fa;
                   }
                 }
                 .img-container {
