@@ -1602,9 +1602,12 @@ function TableSearchField({ searchParams, parent }) {
 }
 
 function TableDownloadDropdown({ project_id, parent }) {
-  let renderText = (<span>
-        {"Download"}<Icon name='angle down' />
-      </span>);
+  let renderText = (
+    <span>
+      {"Download"}
+      <Icon name="angle down" />
+    </span>
+  );
   return (
     <div className="download-wrapper">
       <Dropdown

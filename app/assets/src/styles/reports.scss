@@ -748,13 +748,13 @@ input[type="number"] {
   display: none;
   position: absolute;
   background: #fff;
-  box-shadow: 0 2px 3px 0 rgba(34,36,38,.15);
+  box-shadow: 0 2px 3px 0 rgba(34, 36, 38, 0.15);
   margin-left: -16px;
   padding: 10px;
   cursor: auto;
-  border-radius: .5rem;
+  border-radius: 0.5rem;
   z-index: 1;
-  border: 1px solid rgba(34,36,38,.15);
+  border: 1px solid rgba(34, 36, 38, 0.15);
   span.filter-label {
     font-size: 1em !important;
   }
@@ -777,7 +777,7 @@ input[type="number"] {
     }
   }
   .inner-menus {
-    font-family: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    font-family: "Lato", "Helvetica Neue", Arial, Helvetica, sans-serif;
     border-radius: 20px;
     font-size: 10pt;
     height: 30px;
@@ -800,9 +800,9 @@ input[type="number"] {
   display: none;
   position: absolute;
   background: #fff;
-  box-shadow: 0 2px 3px 0 rgba(34,36,38,.15);
-  border: 1px solid rgba(34,36,38,.15);
-  border-radius: .28571429rem;
+  box-shadow: 0 2px 3px 0 rgba(34, 36, 38, 0.15);
+  border: 1px solid rgba(34, 36, 38, 0.15);
+  border-radius: 0.28571429rem;
   background: #fff;
   margin-left: -16px;
   padding: 10px;
@@ -823,8 +823,8 @@ input[type="number"] {
     height: 18px;
   }
   label {
-    font-family: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    font-family: "Open Sans", "Helvetica Neue", Arial, Helvetica, sans-serif;
     font-size: 1rem;
-    color: rgba(0,0,0,.87);
+    color: rgba(0, 0, 0, 0.87);
   }
 }

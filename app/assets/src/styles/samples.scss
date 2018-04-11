@@ -59,7 +59,7 @@ $break-large: 1070px;
   cursor: pointer;
   border-radius: 20px;
   font-size: 11px;
-  font-family: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  font-family: "Lato", "Helvetica Neue", Arial, Helvetica, sans-serif;
   &:hover {
     color: #232333 !important;
     border-color: #bfc3c9;
@@ -516,6 +516,12 @@ $break-large: 1070px;
     }
   }
 
+  .sample-feed {
+    :hover {
+      background: #f8f9fe !important;
+    }
+  }
+
   .sample-feed,
   .sample-feed-head {
     border-bottom: 2px solid #edf1f2;
@@ -544,6 +550,11 @@ $break-large: 1070px;
         flex-wrap: nowrap;
         justify-content: space-between;
         .check-box-container {
+          [type="checkbox"].filled-in:not(:checked) + label:after,
+          [type="checkbox"].filled-in:checked + label:after,
+          [type="checkbox"].filled-in:checked + label:before {
+            top: 37px;
+          }
           .check {
             display: inline-block;
           }
@@ -724,8 +735,8 @@ $break-large: 1070px;
         background-color: #fff;
         z-index: 100;
         border-radius: 5px;
-        box-shadow: 0 2px 3px 0 rgba(34,36,38,.15);
-        border: 1px solid rgba(34,36,38,.15);
+        box-shadow: 0 2px 3px 0 rgba(34, 36, 38, 0.15);
+        border: 1px solid rgba(34, 36, 38, 0.15);
         height: auto !important;
         .col.s6 {
           .options-wrapper {
@@ -989,7 +1000,8 @@ input[type="button"] {
       .download-wrapper {
         float: right;
         padding-top: 20px;
-        .ui.labeled.icon.button > .icon { // Actual icon in the button
+        .ui.labeled.icon.button > .icon {
+          // Actual icon in the button
           background-color: transparent;
           font-size: 1.3em;
           margin-left: 0.4em !important;
