@@ -1,17 +1,19 @@
-import PropTypes from 'prop-types';
-import React from 'react';
-import nouislider from 'nouislider';
+import PropTypes from "prop-types";
+import React from "react";
+import nouislider from "nouislider";
 
 class ReactNouislider extends React.Component {
   componentDidMount() {
-    if (this.props.disabled) this.sliderContainer.setAttribute('disabled', true);
-    else this.sliderContainer.removeAttribute('disabled');
+    if (this.props.disabled)
+      this.sliderContainer.setAttribute("disabled", true);
+    else this.sliderContainer.removeAttribute("disabled");
     this.createSlider();
   }
 
   componentDidUpdate() {
-    if (this.props.disabled) this.sliderContainer.setAttribute('disabled', true);
-    else this.sliderContainer.removeAttribute('disabled');
+    if (this.props.disabled)
+      this.sliderContainer.setAttribute("disabled", true);
+    else this.sliderContainer.removeAttribute("disabled");
     this.slider.destroy();
     this.createSlider();
   }
@@ -21,30 +23,33 @@ class ReactNouislider extends React.Component {
   }
 
   createSlider() {
-    var slider = (this.slider = nouislider.create(this.sliderContainer, this.props));
+    var slider = (this.slider = nouislider.create(
+      this.sliderContainer,
+      this.props
+    ));
 
     if (this.props.onUpdate) {
-      slider.on('update', this.props.onUpdate);
+      slider.on("update", this.props.onUpdate);
     }
 
     if (this.props.onChange) {
-      slider.on('change', this.props.onChange);
+      slider.on("change", this.props.onChange);
     }
 
     if (this.props.onSlide) {
-      slider.on('slide', this.props.onSlide);
+      slider.on("slide", this.props.onSlide);
     }
 
     if (this.props.onStart) {
-      slider.on('start', this.props.onStart);
+      slider.on("start", this.props.onStart);
     }
 
     if (this.props.onEnd) {
-      slider.on('end', this.props.onEnd);
+      slider.on("end", this.props.onEnd);
     }
 
     if (this.props.onSet) {
-      slider.on('set', this.props.onSet);
+      slider.on("set", this.props.onSet);
     }
   }
 
@@ -65,11 +70,14 @@ ReactNouislider.propTypes = {
   // http://refreshless.com/nouislider/behaviour-option/
   behaviour: PropTypes.string,
   // http://refreshless.com/nouislider/slider-options/#section-Connect
-  connect: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.bool), PropTypes.bool]),
+  connect: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.bool),
+    PropTypes.bool
+  ]),
   // http://refreshless.com/nouislider/slider-options/#section-cssPrefix
   cssPrefix: PropTypes.string,
   // http://refreshless.com/nouislider/slider-options/#section-orientation
-  direction: PropTypes.oneOf(['ltr', 'rtl']),
+  direction: PropTypes.oneOf(["ltr", "rtl"]),
   // http://refreshless.com/nouislider/more/#section-disable
   disabled: PropTypes.bool,
   // http://refreshless.com/nouislider/slider-options/#section-limit
@@ -89,7 +97,7 @@ ReactNouislider.propTypes = {
   // http://refreshless.com/nouislider/events-callbacks/#section-update
   onUpdate: PropTypes.func,
   // http://refreshless.com/nouislider/slider-options/#section-orientation
-  orientation: PropTypes.oneOf(['horizontal', 'vertical']),
+  orientation: PropTypes.oneOf(["horizontal", "vertical"]),
   // http://refreshless.com/nouislider/pips/
   pips: PropTypes.object,
   // http://refreshless.com/nouislider/slider-values/#section-range

@@ -1,10 +1,10 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import axios from 'axios';
-import $ from 'jquery';
-import Tipsy from 'react-tipsy';
-import IconComponent from './IconComponent';
-import ObjectHelper from '../helpers/ObjectHelper';
+import React from "react";
+import ReactDOM from "react-dom";
+import axios from "axios";
+import $ from "jquery";
+import Tipsy from "react-tipsy";
+import IconComponent from "./IconComponent";
+import ObjectHelper from "../helpers/ObjectHelper";
 
 class SampleUpload extends React.Component {
   constructor(props, context) {
@@ -23,32 +23,53 @@ class SampleUpload extends React.Component {
     this.handleResultChange = this.handleResultChange.bind(this);
     this.toggleNewProjectInput = this.toggleNewProjectInput.bind(this);
     this.projects = props.projects || [];
-    this.project = props.projectInfo || '';
+    this.project = props.projectInfo || "";
     this.hostGenomes = props.host_genomes || [];
-    this.sample = props.selectedSample || '';
+    this.sample = props.selectedSample || "";
     this.userDetails = props.loggedin_user;
     this.updateSampleName = this.updateSampleName.bind(this);
-    const selectedHostGenomeName = (this.hostGenomes[0] && this.hostGenomes[0].name) ? this.hostGenomes[0].name : '';
-    const selectedHostGenomeId = (this.hostGenomes[0] && this.hostGenomes[0].id) ? this.hostGenomes[0].id : '';
-    const adminGenomes = this.hostGenomes.filter((g) => {
-      return g.name.toLowerCase().indexOf('test') >= 0;
+    const selectedHostGenomeName =
+      this.hostGenomes[0] && this.hostGenomes[0].name
+        ? this.hostGenomes[0].name
+        : "";
+    const selectedHostGenomeId =
+      this.hostGenomes[0] && this.hostGenomes[0].id
+        ? this.hostGenomes[0].id
+        : "";
+    const adminGenomes = this.hostGenomes.filter(g => {
+      return g.name.toLowerCase().indexOf("test") >= 0;
     });
     this.selected = {
-      name: this.sample.name || '',
-      hostGenome: this.sample ? this.sample.host_genome_name : selectedHostGenomeName,
-      hostGenomeId: this.sample ? this.sample.host_genome_id : selectedHostGenomeId,
-      project: this.project ? this.project.name : 'Select a project',
+      name: this.sample.name || "",
+      hostGenome: this.sample
+        ? this.sample.host_genome_name
+        : selectedHostGenomeName,
+      hostGenomeId: this.sample
+        ? this.sample.host_genome_id
+        : selectedHostGenomeId,
+      project: this.project ? this.project.name : "Select a project",
       projectId: this.project ? this.project.id : null,
-      resultPath: this.sample ? this.sample.s3_preload_result_path : '',
-      jobQueue: this.sample ? this.sample.job_queue : '',
-      memory: this.sample ? this.sample.sample_memory : '',
-      branch: this.sample ? this.sample.pipeline_branch : '',
-      id: this.sample.id || '',
-      inputFiles: props.inputFiles && props.inputFiles.length ? props.inputFiles : [],
+      resultPath: this.sample ? this.sample.s3_preload_result_path : "",
+      jobQueue: this.sample ? this.sample.job_queue : "",
+      memory: this.sample ? this.sample.sample_memory : "",
+      branch: this.sample ? this.sample.pipeline_branch : "",
+      id: this.sample.id || "",
+      inputFiles:
+        props.inputFiles && props.inputFiles.length ? props.inputFiles : [],
       status: this.sample.status
     };
-    this.firstInput = this.selected.inputFiles.length && this.selected.inputFiles[0] ? (this.selected.inputFiles[0].source === null ? '' : this.selected.inputFiles[0].source) : '';
-    this.secondInput = this.selected.inputFiles.length && this.selected.inputFiles[1] ? (this.selected.inputFiles[1].source === null ? '' : this.selected.inputFiles[1].source) : '';
+    this.firstInput =
+      this.selected.inputFiles.length && this.selected.inputFiles[0]
+        ? this.selected.inputFiles[0].source === null
+          ? ""
+          : this.selected.inputFiles[0].source
+        : "";
+    this.secondInput =
+      this.selected.inputFiles.length && this.selected.inputFiles[1]
+        ? this.selected.inputFiles[1].source === null
+          ? ""
+          : this.selected.inputFiles[1].source
+        : "";
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
     this.openCliModal = this.openCliModal.bind(this);
     this.state = {
@@ -56,21 +77,21 @@ class SampleUpload extends React.Component {
       allProjects: this.projects || [],
       hostGenomes: this.hostGenomes || [],
       invalid: false,
-      errorMessage: '',
+      errorMessage: "",
       success: false,
-      successMessage: '',
+      successMessage: "",
       serverErrors: [],
-      selectedHostGenome: this.selected.hostGenome || '',
+      selectedHostGenome: this.selected.hostGenome || "",
       selectedHostGenomeId: this.selected.hostGenomeId || null,
-      selectedProject: this.selected.project || '',
+      selectedProject: this.selected.project || "",
       selectedPId: this.selected.projectId || null,
-      selectedResultPath: this.selected.resultPath || '',
-      selectedMemory: this.selected.memory || '',
-      selectedBranch: this.selected.branch || '',
+      selectedResultPath: this.selected.resultPath || "",
+      selectedMemory: this.selected.memory || "",
+      selectedBranch: this.selected.branch || "",
       id: this.selected.id,
       errors: {},
       adminGenomes,
-      sampleName: this.selected.name || '',
+      sampleName: this.selected.name || "",
       disableProjectSelect: false,
       omit_subsampling_checked: false,
       public_checked: false
@@ -78,31 +99,37 @@ class SampleUpload extends React.Component {
   }
 
   componentDidMount() {
-    $('body').addClass('background-cover');
-    $('.tooltipped').tooltip({ delay: 50 });
+    $("body").addClass("background-cover");
+    $(".tooltipped").tooltip({ delay: 50 });
     this.initializeSelectTag();
-    $(ReactDOM.findDOMNode(this.refs.projectSelect)).on('change',this.handleProjectChange);
-    $(ReactDOM.findDOMNode(this.refs.hostSelect)).on('change',this.handleHostChange);
+    $(ReactDOM.findDOMNode(this.refs.projectSelect)).on(
+      "change",
+      this.handleProjectChange
+    );
+    $(ReactDOM.findDOMNode(this.refs.hostSelect)).on(
+      "change",
+      this.handleHostChange
+    );
     this.initializeTooltip();
   }
-    initializeTooltip() {
-      // only updating the tooltip offset when the component is loaded
-      $(() => {
-        const tooltipIdentifier = $("[rel='tooltip']");
-        tooltipIdentifier.tooltip({
-          delay: 0,
-          html: true,
-          placement: 'top',
-          offset: '0px 50px'
-        });
+  initializeTooltip() {
+    // only updating the tooltip offset when the component is loaded
+    $(() => {
+      const tooltipIdentifier = $("[rel='tooltip']");
+      tooltipIdentifier.tooltip({
+        delay: 0,
+        html: true,
+        placement: "top",
+        offset: "0px 50px"
       });
-    }
+    });
+  }
 
   handleUpload(e) {
     e.preventDefault();
     this.clearError();
-    if(!this.isFormInvalid()) {
-      this.createSample()
+    if (!this.isFormInvalid()) {
+      this.createSample();
     }
   }
 
@@ -110,13 +137,13 @@ class SampleUpload extends React.Component {
     e.preventDefault();
     e.target.disabled = true;
     this.clearError();
-    if(!this.isUpdateFormInvalid()) {
-      this.updateSample()
+    if (!this.isUpdateFormInvalid()) {
+      this.updateSample();
     }
   }
 
   initializeSelectTag() {
-    $('select').material_select();
+    $("select").material_select();
   }
 
   clearError() {
@@ -124,20 +151,20 @@ class SampleUpload extends React.Component {
       invalid: false,
       success: false,
       errors: {}
-     })
+    });
   }
 
   gotoPage(path) {
-    location.href = `${path}`
+    location.href = `${path}`;
   }
 
   toggleCheckBox(e) {
     this.setState({
-      [e.target.id]: e.target.value == "true" ? false : true,
+      [e.target.id]: e.target.value == "true" ? false : true
       /* Note: "[e.target.id]" indicates a "computed property name".
          This allows us to use toggleCheckBox(event) to set different state variables
          depending on the id attached to the event. */
-    })
+    });
   }
 
   handleProjectSubmit(e) {
@@ -145,48 +172,55 @@ class SampleUpload extends React.Component {
       e.preventDefault();
     }
     this.clearError();
-    if(!this.isProjectInvalid()) {
-      this.addProject()
+    if (!this.isProjectInvalid()) {
+      this.addProject();
     }
   }
 
   addProject() {
     var that = this;
-    axios.post('/projects.json', {
-      project: {
-        name: this.refs.new_project.value,
-        public_access: this.state.public_checked ? 1 : 0
-      },
-      authenticity_token: this.csrf
-    })
-    .then((response) => {
-      var newProjectList = that.state.allProjects.slice();
-      newProjectList.push(response.data);
-      that.setState({
-        allProjects: newProjectList,
-        selectedProject: response.data.name,
-        selectedPId: response.data.id,
-        success: true,
-        successMessage: 'Project added successfully'
-      }, () => {
-        this.refs.new_project.value = '';
-        that.initializeSelectTag();
-      });
-    })
-    .catch((error) => {
-      that.setState({
-        invalid: true,
-        errors: { 'selectedProject': 'Project already exists or is invalid' },
+    axios
+      .post("/projects.json", {
+        project: {
+          name: this.refs.new_project.value,
+          public_access: this.state.public_checked ? 1 : 0
+        },
+        authenticity_token: this.csrf
       })
-    });
+      .then(response => {
+        var newProjectList = that.state.allProjects.slice();
+        newProjectList.push(response.data);
+        that.setState(
+          {
+            allProjects: newProjectList,
+            selectedProject: response.data.name,
+            selectedPId: response.data.id,
+            success: true,
+            successMessage: "Project added successfully"
+          },
+          () => {
+            this.refs.new_project.value = "";
+            that.initializeSelectTag();
+          }
+        );
+      })
+      .catch(error => {
+        that.setState({
+          invalid: true,
+          errors: { selectedProject: "Project already exists or is invalid" }
+        });
+      });
   }
 
   isProjectInvalid() {
-    if (this.refs.new_project.value === '' && this.state.selectedProject === 'Select a project') {
+    if (
+      this.refs.new_project.value === "" &&
+      this.state.selectedProject === "Select a project"
+    ) {
       this.setState({
         invalid: true,
-        errorMessage: 'Please enter valid project name'
-      })
+        errorMessage: "Please enter valid project name"
+      });
       return true;
     } else {
       return false;
@@ -194,123 +228,137 @@ class SampleUpload extends React.Component {
   }
 
   createSample() {
-    _satellite.track('uploadsample');
+    _satellite.track("uploadsample");
     this.setState({
       submitting: true
     });
-    axios.post('/samples.json', {
-      sample: {
-        name: this.state.sampleName,
-        project_name: this.state.selectedProject.trim(),
-        project_id: this.state.selectedPId,
-        input_files_attributes: [{source_type: 's3', source: this.refs.first_file_source.value.trim() },
-        {source_type: 's3', source: this.refs.second_file_source.value.trim() }],
-        s3_preload_result_path: (this.userDetails.admin) ? this.refs.s3_preload_result_path.value.trim() : '',
-        sample_memory: this.state.selectedMemory,
-        pipeline_branch: this.state.selectedBranch,
-        host_genome_id: this.state.selectedHostGenomeId,
-        subsample: this.state.omit_subsampling_checked ? 0 : 1,
-        status: 'created'
-      },
-      authenticity_token: this.csrf
-    })
-    .then((response) => {
-      this.setState({
-        success: true,
-        submitting: false,
-        successMessage: 'Sample created successfully'
+    axios
+      .post("/samples.json", {
+        sample: {
+          name: this.state.sampleName,
+          project_name: this.state.selectedProject.trim(),
+          project_id: this.state.selectedPId,
+          input_files_attributes: [
+            {
+              source_type: "s3",
+              source: this.refs.first_file_source.value.trim()
+            },
+            {
+              source_type: "s3",
+              source: this.refs.second_file_source.value.trim()
+            }
+          ],
+          s3_preload_result_path: this.userDetails.admin
+            ? this.refs.s3_preload_result_path.value.trim()
+            : "",
+          sample_memory: this.state.selectedMemory,
+          pipeline_branch: this.state.selectedBranch,
+          host_genome_id: this.state.selectedHostGenomeId,
+          subsample: this.state.omit_subsampling_checked ? 0 : 1,
+          status: "created"
+        },
+        authenticity_token: this.csrf
+      })
+      .then(response => {
+        this.setState({
+          success: true,
+          submitting: false,
+          successMessage: "Sample created successfully"
+        });
+        setTimeout(() => {
+          this.gotoPage(`/samples/${response.data.id}`);
+        }, 2000);
+      })
+      .catch(error => {
+        this.setState({
+          invalid: true,
+          submitting: false,
+          serverErrors: error.response.data,
+          errorMessage: "Something went wrong"
+        });
       });
-      setTimeout(() => {
-        this.gotoPage(`/samples/${response.data.id}`);
-      }, 2000);
-    })
-    .catch((error) => {
-      this.setState({
-        invalid: true,
-        submitting: false,
-        serverErrors: error.response.data,
-        errorMessage: 'Something went wrong'
-      });
-    });
   }
-
 
   updateSample() {
     var that = this;
     that.setState({
       submitting: true
-    })
-    axios.put(`/samples/${this.state.id}.json`, {
-      sample: {
-        name: this.state.sampleName,
-        project: this.state.selectedProject,
-        project_id: this.state.selectedPId,
-        s3_preload_result_path: this.state.selectedResultPath,
-        sample_memory: this.state.selectedMemory,
-        pipeline_branch: this.state.selectedBranch,
-        host_genome_id: this.state.selectedHostGenomeId
-      },
-      authenticity_token: this.csrf
-    })
-    .then((response) => {
-      that.setState({
-        success: true,
-        submitting: false,
-        successMessage: 'Sample updated successfully'
-      });
-      setTimeout(() => {
-        that.gotoPage(`/samples/${that.state.id}`);
-      }, 2000);
-    })
-    .catch((error) => {
-     that.setState({
-      submitting: false,
-      invalid: true,
-      serverErrors: error.response.data,
-      errorMessage: 'Failed to upload sample'
-     });
     });
+    axios
+      .put(`/samples/${this.state.id}.json`, {
+        sample: {
+          name: this.state.sampleName,
+          project: this.state.selectedProject,
+          project_id: this.state.selectedPId,
+          s3_preload_result_path: this.state.selectedResultPath,
+          sample_memory: this.state.selectedMemory,
+          pipeline_branch: this.state.selectedBranch,
+          host_genome_id: this.state.selectedHostGenomeId
+        },
+        authenticity_token: this.csrf
+      })
+      .then(response => {
+        that.setState({
+          success: true,
+          submitting: false,
+          successMessage: "Sample updated successfully"
+        });
+        setTimeout(() => {
+          that.gotoPage(`/samples/${that.state.id}`);
+        }, 2000);
+      })
+      .catch(error => {
+        that.setState({
+          submitting: false,
+          invalid: true,
+          serverErrors: error.response.data,
+          errorMessage: "Failed to upload sample"
+        });
+      });
   }
 
   filePathValid(str) {
     const regexPrefix = /s3:\/\//;
-    const regexSuffix = /(\.fastq|\.fq|\.fastq.gz|\.fq.gz|\.fasta|\.fa|\.fasta.gz\.fa.gz)/igm;
-    return (str.match(regexPrefix) && str.match(regexSuffix));
+    const regexSuffix = /(\.fastq|\.fq|\.fastq.gz|\.fq.gz|\.fasta|\.fa|\.fasta.gz\.fa.gz)/gim;
+    return str.match(regexPrefix) && str.match(regexSuffix);
   }
 
   isUpdateFormInvalid() {
-    if (this.state.sampleName === '' && this.state.selectedProject === 'Select a Project' && this.state.selectedHostGenome === '') {
+    if (
+      this.state.sampleName === "" &&
+      this.state.selectedProject === "Select a Project" &&
+      this.state.selectedHostGenome === ""
+    ) {
       this.setState({
         invalid: true,
-        errorMessage: 'Please fill in name, host genome and select a project'
+        errorMessage: "Please fill in name, host genome and select a project"
       });
       return true;
-    } else if (this.state.sampleName === '') {
-        this.setState({
-          invalid: true,
-          errorMessage: 'Please fill in Sample name'
-        });
-        return true;
-    } else if (this.state.selectedProject === 'Select a Project') {
-        this.setState({
-          invalid: true,
-          errorMessage: 'Please select a project'
-        });
-        return true;
-    } else if (this.state.selectedHostGenome === '') {
+    } else if (this.state.sampleName === "") {
       this.setState({
         invalid: true,
-        errorMessage: 'Please select a host genome'
+        errorMessage: "Please fill in Sample name"
       });
       return true;
-    }
-    else {
+    } else if (this.state.selectedProject === "Select a Project") {
+      this.setState({
+        invalid: true,
+        errorMessage: "Please select a project"
+      });
+      return true;
+    } else if (this.state.selectedHostGenome === "") {
+      this.setState({
+        invalid: true,
+        errorMessage: "Please select a host genome"
+      });
+      return true;
+    } else {
       return false;
     }
   }
   baseName(str) {
-    let base = new String(str).substring(str.lastIndexOf('/') + 1);
-    if(base.lastIndexOf(".") != -1) {
+    let base = new String(str).substring(str.lastIndexOf("/") + 1);
+    if (base.lastIndexOf(".") != -1) {
       base = base.substring(0, base.lastIndexOf("."));
     }
     return base;
@@ -318,62 +366,65 @@ class SampleUpload extends React.Component {
   isFormInvalid() {
     const errors = {};
 
-    if(this.state.sampleName) {
-      if(this.state.sampleName.toLowerCase() === '') {
-        errors.sampleName = 'Please enter a sample name';
+    if (this.state.sampleName) {
+      if (this.state.sampleName.toLowerCase() === "") {
+        errors.sampleName = "Please enter a sample name";
       }
     } else {
-      errors.sampleName = 'Please enter a sample name';
+      errors.sampleName = "Please enter a sample name";
     }
 
-    if(this.state.selectedProject) {
-      if(this.state.selectedProject.toLowerCase() === 'select a project') {
-        errors.selectedProject = 'Please select a project';
+    if (this.state.selectedProject) {
+      if (this.state.selectedProject.toLowerCase() === "select a project") {
+        errors.selectedProject = "Please select a project";
       }
     } else {
-      errors.selectedProject = 'Please select a project';
+      errors.selectedProject = "Please select a project";
     }
 
-    if(this.state.selectedHostGenome) {
-      if (this.state.selectedHostGenome === '') {
-        errors.selectedHostGenome = 'Please select a host genome';
+    if (this.state.selectedHostGenome) {
+      if (this.state.selectedHostGenome === "") {
+        errors.selectedHostGenome = "Please select a host genome";
       }
     } else {
-      errors.selectedHostGenome = 'Please select a host genome';
+      errors.selectedHostGenome = "Please select a host genome";
     }
 
     if (this.refs.first_file_source) {
       const firstFileSourceValue = this.refs.first_file_source.value.trim();
-      if(!this.filePathValid(firstFileSourceValue)) {
-        errors.first_file_source = 'Error: invalid file path';
+      if (!this.filePathValid(firstFileSourceValue)) {
+        errors.first_file_source = "Error: invalid file path";
       }
     } else {
-      errors.first_file_source = 'Error: invalid file path';
+      errors.first_file_source = "Error: invalid file path";
     }
 
     if (this.refs.second_file_source) {
       const secondFileSourceValue = this.refs.second_file_source.value.trim();
-      if(secondFileSourceValue !== '' && !this.filePathValid(secondFileSourceValue)) {
-        errors.second_file_source = 'Error: invalid file path';
+      if (
+        secondFileSourceValue !== "" &&
+        !this.filePathValid(secondFileSourceValue)
+      ) {
+        errors.second_file_source = "Error: invalid file path";
       }
     }
 
-    if(this.userDetails.admin ) {
+    if (this.userDetails.admin) {
       // running validations for admin inputs
-      if(this.refs.s3_preload_result_path) {
+      if (this.refs.s3_preload_result_path) {
         const preloadPath = this.refs.s3_preload_result_path.value.trim();
-        if(preloadPath !== '' && preloadPath.indexOf('s3://') < 0) {
-          errors.s3_preload_result_path = 'Error: invalid file path';
+        if (preloadPath !== "" && preloadPath.indexOf("s3://") < 0) {
+          errors.s3_preload_result_path = "Error: invalid file path";
         }
       }
-      if(this.state.selectedMemory !== '') {
+      if (this.state.selectedMemory !== "") {
         const memorySize = parseInt(this.state.selectedMemory, 10);
-        if(isNaN(memorySize) || memorySize < 1) {
-          errors.memory = 'Memory size is not valid';
+        if (isNaN(memorySize) || memorySize < 1) {
+          errors.memory = "Memory size is not valid";
         }
       }
     }
-    const errorLength  = Object.keys(errors).length;
+    const errorLength = Object.keys(errors).length;
     if (errorLength) {
       this.setState({ invalid: true, errors });
     } else {
@@ -383,17 +434,16 @@ class SampleUpload extends React.Component {
   }
 
   handleProjectChange(e) {
-    if(e.target.value.trim().toLowerCase() !== 'select a project') {
+    if (e.target.value.trim().toLowerCase() !== "select a project") {
       const selectedIndex = e.target.selectedIndex - 1; // because the first item is Select a project
       this.setState({
         selectedProject: e.target.value.trim(),
         selectedPId: this.state.allProjects[selectedIndex].id,
-        errors: Object.assign({}, this.state.errors, {selectedProject: null})
+        errors: Object.assign({}, this.state.errors, { selectedProject: null })
       });
     }
     this.clearError();
   }
-
 
   handleHostChange(hostId, hostName) {
     this.setState({
@@ -419,7 +469,7 @@ class SampleUpload extends React.Component {
 
   handleNameChange(e) {
     this.setState({
-      sampleName: e.target.value.trim(),
+      sampleName: e.target.value.trim()
     });
   }
 
@@ -431,43 +481,50 @@ class SampleUpload extends React.Component {
 
   displayError(failedStatus, serverError, formattedError) {
     if (failedStatus) {
-      return (serverError instanceof Array) ? serverError.map((error, i) => {
-        return <p key={i}>{error}</p>
-      }) : <p>{formattedError}</p>
+      return serverError instanceof Array ? (
+        serverError.map((error, i) => {
+          return <p key={i}>{error}</p>;
+        })
+      ) : (
+        <p>{formattedError}</p>
+      );
     } else {
-      return null
+      return null;
     }
   }
 
   toggleNewProjectInput(e) {
     this.clearError();
-    $('.new-project-input').slideToggle();
-    $('.new-project-input  .input-icon').slideToggle();
-    $('.new-project-button').toggleClass('active');
-    this.setState({
-      disableProjectSelect: !this.state.disableProjectSelect
-    }, () => {
-      this.initializeSelectTag();
-    });
+    $(".new-project-input").slideToggle();
+    $(".new-project-input  .input-icon").slideToggle();
+    $(".new-project-button").toggleClass("active");
+    this.setState(
+      {
+        disableProjectSelect: !this.state.disableProjectSelect
+      },
+      () => {
+        this.initializeSelectTag();
+      }
+    );
   }
 
-  static resolveGenomeIcon (genomeName, color) {
-    let imgPath = '/assets/generic_genome.png';
-    if (typeof genomeName === 'undefined') {
+  static resolveGenomeIcon(genomeName, color) {
+    let imgPath = "/assets/generic_genome.png";
+    if (typeof genomeName === "undefined") {
       return false;
     }
     genomeName = genomeName.toLowerCase();
     switch (genomeName) {
-      case 'mosquito':
+      case "mosquito":
         return IconComponent.mosquito(color);
         break;
-      case 'human':
+      case "human":
         return IconComponent.human(color);
         break;
-      case 'tick':
+      case "tick":
         return IconComponent.tick(color);
         break;
-      case 'ercc only':
+      case "ercc only":
         return IconComponent.ercc(color);
         break;
       default:
@@ -476,361 +533,528 @@ class SampleUpload extends React.Component {
   }
 
   updateSampleName(e, sampleField) {
-    if(e) {
+    if (e) {
       let value = e.target.value.trim();
-      if((value.length && value.indexOf('/'))) {
-        if(!this.refs.sample_name.value.trim().length) {
+      if (value.length && value.indexOf("/")) {
+        if (!this.refs.sample_name.value.trim().length) {
           let base = this.baseName(value);
-          let fastqLabel = /.fastq*$|.fq*$|.fasta*$|.fa*$|.gz*$/igm;
-          let readLabel = /_R1.*$|_R2.*$/ig;
-          base = base.replace(fastqLabel, '').replace(readLabel, '');
+          let fastqLabel = /.fastq*$|.fq*$|.fasta*$|.fa*$|.gz*$/gim;
+          let readLabel = /_R1.*$|_R2.*$/gi;
+          base = base.replace(fastqLabel, "").replace(readLabel, "");
           this.refs.sample_name.value = base;
           this.setState({ sampleName: base });
         }
       }
-    } else if(sampleField) {
+    } else if (sampleField) {
       this.setState({ sampleName: sampleField });
     }
   }
 
   openCliModal() {
-    $('#cli_modal').modal('open');
+    $("#cli_modal").modal("open");
   }
 
   renderSampleForm(updateExistingSample = false) {
     updateExistingSample = updateExistingSample ? true : false;
     return (
-      <div id='samplesUploader' className='row'>
-        <div className='col s6 offset-s3 upload-form-container'>
-          <div className='content'>
+      <div id="samplesUploader" className="row">
+        <div className="col s6 offset-s3 upload-form-container">
+          <div className="content">
             <div>
-              <div className='form-title'>
-                Single Upload
-              </div>
-              <div className='upload-info'>
-                Upload a single sample to be processed through the IDseq pipeline.
+              <div className="form-title">Single Upload</div>
+              <div className="upload-info">
+                Upload a single sample to be processed through the IDseq
+                pipeline.
               </div>
             </div>
             <div>
-              <p className='upload-question'>
-                Want to upload multiple samples at once? <a href='/samples/bulk_new'>Click here.</a>
-                <br></br>Rather use our command-line interface?
-                { <a onClick={ this.openCliModal } href="#!"> Instructions here.</a> }
+              <p className="upload-question">
+                Want to upload multiple samples at once?{" "}
+                <a href="/samples/bulk_new">Click here.</a>
+                <br />Rather use our command-line interface?
+                {
+                  <a onClick={this.openCliModal} href="#!">
+                    {" "}
+                    Instructions here.
+                  </a>
+                }
               </p>
             </div>
-            { this.state.success ?
-              <div className="form-feedback success-message" >
-                <i className="fa fa-check-circle-o"/> <span>{this.state.successMessage}</span>
-              </div> : null
-            }
-            {
-              this.state.invalid ?
-                <div className='form-feedback error-message'>
-                  { this.displayError(this.state.invalid, this.state.serverErrors, this.state.errorMessage) }
-                </div> : null
-            }
-            <form ref="form" onSubmit={ updateExistingSample ? this.handleUpdate : this.handleUpload }>
-              <div className='fields'>
-                <div className='field'>
-                  <div className='row'>
-                    <div className='col field-title no-padding s12'>
+            {this.state.success ? (
+              <div className="form-feedback success-message">
+                <i className="fa fa-check-circle-o" />{" "}
+                <span>{this.state.successMessage}</span>
+              </div>
+            ) : null}
+            {this.state.invalid ? (
+              <div className="form-feedback error-message">
+                {this.displayError(
+                  this.state.invalid,
+                  this.state.serverErrors,
+                  this.state.errorMessage
+                )}
+              </div>
+            ) : null}
+            <form
+              ref="form"
+              onSubmit={
+                updateExistingSample ? this.handleUpdate : this.handleUpload
+              }
+            >
+              <div className="fields">
+                <div className="field">
+                  <div className="row">
+                    <div className="col field-title no-padding s12">
                       Project
                     </div>
                   </div>
-                  <div className='row input-row'>
-                    <Tipsy content='Name of experiment or project' placement='top'>
-                      <div className='col project-list no-padding s8'>
-                        <select ref="projectSelect" disabled={(this.state.disableProjectSelect ? 'disabled' : '')} className="projectSelect" id="sample" onChange={ this.handleProjectChange } value={this.state.selectedProject}>
-                          <option disabled defaultValue>{this.state.selectedProject}</option>
-                          { this.state.allProjects.length ?
-                             ObjectHelper.sortByKey(this.state.allProjects, 'name').map((project, i) => {
-                              return <option ref= "project" key={i} id={project.id} >{project.name}</option>
-                            }) : <option>No projects to display</option>
+                  <div className="row input-row">
+                    <Tipsy
+                      content="Name of experiment or project"
+                      placement="top"
+                    >
+                      <div className="col project-list no-padding s8">
+                        <select
+                          ref="projectSelect"
+                          disabled={
+                            this.state.disableProjectSelect ? "disabled" : ""
                           }
+                          className="projectSelect"
+                          id="sample"
+                          onChange={this.handleProjectChange}
+                          value={this.state.selectedProject}
+                        >
+                          <option disabled defaultValue>
+                            {this.state.selectedProject}
+                          </option>
+                          {this.state.allProjects.length ? (
+                            ObjectHelper.sortByKey(
+                              this.state.allProjects,
+                              "name"
+                            ).map((project, i) => {
+                              return (
+                                <option ref="project" key={i} id={project.id}>
+                                  {project.name}
+                                </option>
+                              );
+                            })
+                          ) : (
+                            <option>No projects to display</option>
+                          )}
                         </select>
-                        {
-                          (this.state.errors.selectedProject) ?
-                            <div className='field-error'>
-                              {this.state.errors.selectedProject}
-                            </div> : null
-                        }
+                        {this.state.errors.selectedProject ? (
+                          <div className="field-error">
+                            {this.state.errors.selectedProject}
+                          </div>
+                        ) : null}
                       </div>
                     </Tipsy>
-                    <div className='col no-padding s4'>
-                      <Tipsy content='Add a new desired experiment or project name'
-                        placement='right'>
-                        <button type='button' onClick={this.toggleNewProjectInput} className='new-project-button new-button skyblue-button'>
-                          <i className='fa fa-plus'/><span>New project</span>
+                    <div className="col no-padding s4">
+                      <Tipsy
+                        content="Add a new desired experiment or project name"
+                        placement="right"
+                      >
+                        <button
+                          type="button"
+                          onClick={this.toggleNewProjectInput}
+                          className="new-project-button new-button skyblue-button"
+                        >
+                          <i className="fa fa-plus" />
+                          <span>New project</span>
                         </button>
                       </Tipsy>
                     </div>
-                    <div className='col no-padding s12 new-project-input hidden'>
-                      <input type='text' ref='new_project' onFocus={ this.clearError } className='browser-default new_project_input' placeholder='Input new project name' />
-                        <span className="input-icon hidden"
-                          onClick={(e) => { if (this.refs.new_project.value.trim().length) {this.handleProjectSubmit()};
-                            $('.new-project-button').click();}}>
-                            Create project
-                        </span>
-                      {
-                        (this.state.errors.new_project) ?
-                          <div className='field-error'>
-                            {this.state.errors.new_project}
-                          </div> : null
-                      }
+                    <div className="col no-padding s12 new-project-input hidden">
+                      <input
+                        type="text"
+                        ref="new_project"
+                        onFocus={this.clearError}
+                        className="browser-default new_project_input"
+                        placeholder="Input new project name"
+                      />
+                      <span
+                        className="input-icon hidden"
+                        onClick={e => {
+                          if (this.refs.new_project.value.trim().length) {
+                            this.handleProjectSubmit();
+                          }
+                          $(".new-project-button").click();
+                        }}
+                      >
+                        Create project
+                      </span>
+                      {this.state.errors.new_project ? (
+                        <div className="field-error">
+                          {this.state.errors.new_project}
+                        </div>
+                      ) : null}
                     </div>
-                    <div className='col no-padding s12 new-project-input public_access hidden'>
-                      <input ref="public_checked" type="checkbox" name="switch" id="public_checked" className="col s8 filled-in" onChange={ this.toggleCheckBox }
-                             value={ this.state.public_checked } />
-                      <label htmlFor="public_checked" className="checkbox">Make project public</label>
+                    <div className="col no-padding s12 new-project-input public_access hidden">
+                      <input
+                        ref="public_checked"
+                        type="checkbox"
+                        name="switch"
+                        id="public_checked"
+                        className="col s8 filled-in"
+                        onChange={this.toggleCheckBox}
+                        value={this.state.public_checked}
+                      />
+                      <label htmlFor="public_checked" className="checkbox">
+                        Make project public
+                      </label>
                     </div>
                   </div>
                 </div>
 
-                <div className='field'>
-                  <div className='row'>
-                    <Tipsy content='This will be subtracted by the pipeline'
-                      placement='top'>
-                      <div className='col field-title no-padding s5'
-                        data-delay="50">
+                <div className="field">
+                  <div className="row">
+                    <Tipsy
+                      content="This will be subtracted by the pipeline"
+                      placement="top"
+                    >
+                      <div
+                        className="col field-title no-padding s5"
+                        data-delay="50"
+                      >
                         Select host genome
                       </div>
                     </Tipsy>
-                    {
-                      (this.userDetails.admin) ?
-                        <div className='col s7 right-align no-padding right admin-genomes'>
-                          {
-                            this.state.adminGenomes.map((g) => {
-                              return (
-                                <div key={g.id}
-                                     className={`${this.state.selectedHostGenome ===  g.name ? 'active' : ''} genome-label`}
-                                     id={g.name} onClick={() => this.handleHostChange(g.id, g.name)}>
-                                  { g.name }
-                                  </div>
-                              );
-                            })
-                          }
-                        </div> : null
-                    }
-                    </div>
-                  <div className='row input-row'>
-                    <div className='col center no-padding s12'>
-                      <ul className='host-selector'>
-                        {
-                          this.state.hostGenomes.map((g) => {
-                            return (
-                              SampleUpload.resolveGenomeIcon(g.name) ?
-                              <li
-                                  key={g.id} className={ `${this.state.selectedHostGenome ===  g.name ? 'active' : ''} `}
-                                  id={g.name} onClick={() => this.handleHostChange(g.id, g.name)}>
-                                  {
-                                    this.state.selectedHostGenome ===  g.name ?
-                                    <div className='img-container' dangerouslySetInnerHTML={{ __html: SampleUpload.resolveGenomeIcon(g.name, '#59bcd6') }} />
-                                    :
-                                    <div className='img-container' dangerouslySetInnerHTML={{ __html: SampleUpload.resolveGenomeIcon(g.name, '#95A1Ab') }} />
-                                  }
-                                <div className='genome-label'>
-                                  { g.name }
-                                </div>
-                              </li> : null
-                            );
-                          })
-                        }
-                        { this.state.hostGenomes.length ? '' :
+                    {this.userDetails.admin ? (
+                      <div className="col s7 right-align no-padding right admin-genomes">
+                        {this.state.adminGenomes.map(g => {
+                          return (
+                            <div
+                              key={g.id}
+                              className={`${
+                                this.state.selectedHostGenome === g.name
+                                  ? "active"
+                                  : ""
+                              } genome-label`}
+                              id={g.name}
+                              onClick={() =>
+                                this.handleHostChange(g.id, g.name)
+                              }
+                            >
+                              {g.name}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : null}
+                  </div>
+                  <div className="row input-row">
+                    <div className="col center no-padding s12">
+                      <ul className="host-selector">
+                        {this.state.hostGenomes.map(g => {
+                          return SampleUpload.resolveGenomeIcon(g.name) ? (
+                            <li
+                              key={g.id}
+                              className={`${
+                                this.state.selectedHostGenome === g.name
+                                  ? "active"
+                                  : ""
+                              } `}
+                              id={g.name}
+                              onClick={() =>
+                                this.handleHostChange(g.id, g.name)
+                              }
+                            >
+                              {this.state.selectedHostGenome === g.name ? (
+                                <div
+                                  className="img-container"
+                                  dangerouslySetInnerHTML={{
+                                    __html: SampleUpload.resolveGenomeIcon(
+                                      g.name,
+                                      "#59bcd6"
+                                    )
+                                  }}
+                                />
+                              ) : (
+                                <div
+                                  className="img-container"
+                                  dangerouslySetInnerHTML={{
+                                    __html: SampleUpload.resolveGenomeIcon(
+                                      g.name,
+                                      "#95A1Ab"
+                                    )
+                                  }}
+                                />
+                              )}
+                              <div className="genome-label">{g.name}</div>
+                            </li>
+                          ) : null;
+                        })}
+                        {this.state.hostGenomes.length ? (
+                          ""
+                        ) : (
                           <div>
                             <small>No host genome found!</small>
                           </div>
-                        }
+                        )}
                       </ul>
-                      {
-                        (this.state.errors.selectedHostGenome) ?
-                          <div className='field-error'>
-                            {this.state.errors.selectedHostGenome}
-                          </div> : null
-                      }
+                      {this.state.errors.selectedHostGenome ? (
+                        <div className="field-error">
+                          {this.state.errors.selectedHostGenome}
+                        </div>
+                      ) : null}
                     </div>
                   </div>
                 </div>
-                <div className='field'>
-                  <div className='row'>
-                    <div className='col no-padding s12'>
-                      <div className='field-title'>
-                        <div className='read-count-label'>
-                          Read 1
+                <div className="field">
+                  <div className="row">
+                    <div className="col no-padding s12">
+                      <div className="field-title">
+                        <div className="read-count-label">Read 1</div>
+                        <div className="validation-info">
+                          Accepted formats: fastq (fq), fastq.gz (fq.gz), fasta
+                          (fa), fasta.gz (fa.gz)
                         </div>
-                        <div className='validation-info'>
-                          Accepted formats: fastq (fq), fastq.gz (fq.gz), fasta (fa), fasta.gz (fa.gz)
-                        </div>
-                        <div className='example-link'>
-                          Example: s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz
+                        <div className="example-link">
+                          Example:
+                          s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div className='row input-row'>
-                    <div className='col no-padding s12'>
-                      <input type='text' ref='first_file_source' onKeyUp={this.updateSampleName} onBlur={ this.clearError } className='browser-default' placeholder='aws/path-to-sample' defaultValue={this.firstInput} disabled={updateExistingSample} />
-                      {
-                        (this.state.errors.first_file_source) ?
-                          <div className='field-error'>
-                            {this.state.errors.first_file_source}
-                          </div> : null
-                      }
+                  <div className="row input-row">
+                    <div className="col no-padding s12">
+                      <input
+                        type="text"
+                        ref="first_file_source"
+                        onKeyUp={this.updateSampleName}
+                        onBlur={this.clearError}
+                        className="browser-default"
+                        placeholder="aws/path-to-sample"
+                        defaultValue={this.firstInput}
+                        disabled={updateExistingSample}
+                      />
+                      {this.state.errors.first_file_source ? (
+                        <div className="field-error">
+                          {this.state.errors.first_file_source}
+                        </div>
+                      ) : null}
                     </div>
                   </div>
                 </div>
-                <div className='field'>
-                  <div className='row'>
-                    <div className='col no-padding s12'>
-                      <div className='field-title'>
-                        <div className='read-count-label'>
+                <div className="field">
+                  <div className="row">
+                    <div className="col no-padding s12">
+                      <div className="field-title">
+                        <div className="read-count-label">
                           Read 2 (optional)
                         </div>
-                        <div className='validation-info'>
-                          Accepted formats: fastq (fq), fastq.gz (fq.gz), fasta (fa), fasta.gz (fa.gz)
+                        <div className="validation-info">
+                          Accepted formats: fastq (fq), fastq.gz (fq.gz), fasta
+                          (fa), fasta.gz (fa.gz)
                         </div>
-                        <div className='example-link'>
-                          Example: s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R2_001.fastq.gz
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className='row input-row'>
-                    <div className='col no-padding s12'>
-                      <input ref='second_file_source' onFocus={ this.clearError } type='text' className='browser-default' placeholder='aws/path-to-sample' defaultValue={this.secondInput} disabled={updateExistingSample} />
-                      {
-                        (this.state.errors.second_file_source) ?
-                          <div className='field-error'>
-                            {this.state.errors.second_file_source}
-                          </div> : null
-                      }
-                    </div>
-                  </div>
-                </div>
-                <div className='field'>
-                  <div className='row'>
-                    <div className='col no-padding s12'>
-                      <div className='field-title'>
-                        <div className='read-count-label'>
-                          Sample name
+                        <div className="example-link">
+                          Example:
+                          s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R2_001.fastq.gz
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div className='row input-row'>
-                    <div className='col no-padding s12'>
-                      <input type='text' ref='sample_name' className='browser-default'
-                      onChange={(e) => this.updateSampleName(null, e.target.value)} value={this.state.sampleName} placeholder='sample name' />
-                      {
-                        (this.state.errors.sampleName) ?
-                          <div className='field-error'>
-                            {this.state.errors.sampleName}
-                          </div> : null
-                      }
+                  <div className="row input-row">
+                    <div className="col no-padding s12">
+                      <input
+                        ref="second_file_source"
+                        onFocus={this.clearError}
+                        type="text"
+                        className="browser-default"
+                        placeholder="aws/path-to-sample"
+                        defaultValue={this.secondInput}
+                        disabled={updateExistingSample}
+                      />
+                      {this.state.errors.second_file_source ? (
+                        <div className="field-error">
+                          {this.state.errors.second_file_source}
+                        </div>
+                      ) : null}
                     </div>
                   </div>
                 </div>
-                <div className='field'>
-                  <div className='row'>
-                    <div className='col no-padding s12'>
-                      <div className='field-title'>
-                        <div className='read-count-label'>
-                          Subsampling
-                        </div>
+                <div className="field">
+                  <div className="row">
+                    <div className="col no-padding s12">
+                      <div className="field-title">
+                        <div className="read-count-label">Sample name</div>
                       </div>
                     </div>
                   </div>
-                  <div className='row input-row'>
-                    <div className='col no-padding s12'>
-                      <input ref="omit_subsampling_checked" type="checkbox" name="switch" id="omit_subsampling_checked" className="filled-in" onChange={ this.toggleCheckBox } value={ this.state.omit_subsampling_checked } />
-                      <label htmlFor="omit_subsampling_checked" className="checkbox">Skip subsampling (not recommended: slow mode)</label>
+                  <div className="row input-row">
+                    <div className="col no-padding s12">
+                      <input
+                        type="text"
+                        ref="sample_name"
+                        className="browser-default"
+                        onChange={e =>
+                          this.updateSampleName(null, e.target.value)
+                        }
+                        value={this.state.sampleName}
+                        placeholder="sample name"
+                      />
+                      {this.state.errors.sampleName ? (
+                        <div className="field-error">
+                          {this.state.errors.sampleName}
+                        </div>
+                      ) : null}
                     </div>
                   </div>
                 </div>
-                {
-                  this.userDetails.admin ?
-                    <div>
-                      <div className='admin-fields divider'/>
-                      <div className='admin-input-title'>
-                        Admin options
+                <div className="field">
+                  <div className="row">
+                    <div className="col no-padding s12">
+                      <div className="field-title">
+                        <div className="read-count-label">Subsampling</div>
                       </div>
-                      <div className='field'>
-                        <div className='row'>
-                          <div className='col no-padding s12'>
-                            <div className='field-title'>
-                              <div className='read-count-label'>
-                                Preload results path (s3)
-                              </div>
-                              <div className='example-link'>
-                                Example: s3://yunfang-workdir/id-rr004/RR004_water_2_S23/
-                              </div>
+                    </div>
+                  </div>
+                  <div className="row input-row">
+                    <div className="col no-padding s12">
+                      <input
+                        ref="omit_subsampling_checked"
+                        type="checkbox"
+                        name="switch"
+                        id="omit_subsampling_checked"
+                        className="filled-in"
+                        onChange={this.toggleCheckBox}
+                        value={this.state.omit_subsampling_checked}
+                      />
+                      <label
+                        htmlFor="omit_subsampling_checked"
+                        className="checkbox"
+                      >
+                        Skip subsampling (not recommended: slow mode)
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                {this.userDetails.admin ? (
+                  <div>
+                    <div className="admin-fields divider" />
+                    <div className="admin-input-title">Admin options</div>
+                    <div className="field">
+                      <div className="row">
+                        <div className="col no-padding s12">
+                          <div className="field-title">
+                            <div className="read-count-label">
+                              Preload results path (s3)
+                            </div>
+                            <div className="example-link">
+                              Example:
+                              s3://yunfang-workdir/id-rr004/RR004_water_2_S23/
                             </div>
                           </div>
                         </div>
-                        <div className='row input-row'>
-                          <div className='col no-padding s12'>
-                            <input type='text' ref='s3_preload_result_path' className='browser-default' placeholder='aws/path-of-results' disabled = {updateExistingSample} defaultValue={this.selected.resultPath} />
-                            {
-                              (this.state.errors.s3_preload_result_path) ?
-                                <div className='field-error'>
-                                  {this.state.errors.s3_preload_result_path}
-                                </div> : null
-                            }
-                          </div>
+                      </div>
+                      <div className="row input-row">
+                        <div className="col no-padding s12">
+                          <input
+                            type="text"
+                            ref="s3_preload_result_path"
+                            className="browser-default"
+                            placeholder="aws/path-of-results"
+                            disabled={updateExistingSample}
+                            defaultValue={this.selected.resultPath}
+                          />
+                          {this.state.errors.s3_preload_result_path ? (
+                            <div className="field-error">
+                              {this.state.errors.s3_preload_result_path}
+                            </div>
+                          ) : null}
                         </div>
                       </div>
-                      <div className='field'>
-                        <div className='row'>
-                          <div className='col no-padding s12'>
-                            <div className='field-title'>
-                              <div htmlFor="sample_memory" className='read-count-label'>
-                                Sample memory (in MB)
-                              </div>
+                    </div>
+                    <div className="field">
+                      <div className="row">
+                        <div className="col no-padding s12">
+                          <div className="field-title">
+                            <div
+                              htmlFor="sample_memory"
+                              className="read-count-label"
+                            >
+                              Sample memory (in MB)
                             </div>
                           </div>
                         </div>
-                        <div className='row input-row'>
-                          <div className='col no-padding s12'>
-                            <input id='sample_memory' type='text' className='browser-default' ref= "memory" value={this.state.selectedMemory} placeholder='240000' onChange={ this.handleMemoryChange } />
-                            {
-                              (this.state.errors.memory) ?
-                                <div className='field-error'>
-                                  {this.state.errors.memory}
-                                </div> : null
-                            }
-                          </div>
+                      </div>
+                      <div className="row input-row">
+                        <div className="col no-padding s12">
+                          <input
+                            id="sample_memory"
+                            type="text"
+                            className="browser-default"
+                            ref="memory"
+                            value={this.state.selectedMemory}
+                            placeholder="240000"
+                            onChange={this.handleMemoryChange}
+                          />
+                          {this.state.errors.memory ? (
+                            <div className="field-error">
+                              {this.state.errors.memory}
+                            </div>
+                          ) : null}
                         </div>
                       </div>
-                      <div className='field'>
-                        <div className='row'>
-                          <div className='col no-padding s12'>
-                            <div className='field-title'>
-                              <div htmlFor="pipeline_branch" className='read-count-label'>
-                                Branch of idseq-pipeline to be used for processing
-                              </div>
+                    </div>
+                    <div className="field">
+                      <div className="row">
+                        <div className="col no-padding s12">
+                          <div className="field-title">
+                            <div
+                              htmlFor="pipeline_branch"
+                              className="read-count-label"
+                            >
+                              Branch of idseq-pipeline to be used for processing
                             </div>
                           </div>
                         </div>
-                        <div className='row input-row'>
-                          <div className='col no-padding s12'>
-                            <input id='pipeline_branch' type='text' className='browser-default' ref="pipeline_branch" value={this.state.selectedBranch} placeholder='master' onChange={ this.handleBranchChange } />
-                          </div>
+                      </div>
+                      <div className="row input-row">
+                        <div className="col no-padding s12">
+                          <input
+                            id="pipeline_branch"
+                            type="text"
+                            className="browser-default"
+                            ref="pipeline_branch"
+                            value={this.state.selectedBranch}
+                            placeholder="master"
+                            onChange={this.handleBranchChange}
+                          />
                         </div>
                       </div>
-                    </div> :
-                    null
-                }
-                <div className='field'>
-                  <div className='row'>
-                    <div className='col no-padding s12'>
-                      { (this.state.submitting) ?
-                        <button type='button' disabled className='new-button blue-button upload-samples-button'>
-                          <i className='fa fa-spinner fa-spin fa-lg'/>
-                        </button> :
-                        <button type='submit' onClick={ updateExistingSample ? this.handleUpdate : this.handleUpload } className='new-button blue-button upload-samples-button'>
-                        { updateExistingSample ? 'Update' : 'Upload' } sample
+                    </div>
+                  </div>
+                ) : null}
+                <div className="field">
+                  <div className="row">
+                    <div className="col no-padding s12">
+                      {this.state.submitting ? (
+                        <button
+                          type="button"
+                          disabled
+                          className="new-button blue-button upload-samples-button"
+                        >
+                          <i className="fa fa-spinner fa-spin fa-lg" />
                         </button>
-                      }
-                      <button type='button' onClick={() => window.history.back()} className='new-button skyblue-button'>
+                      ) : (
+                        <button
+                          type="submit"
+                          onClick={
+                            updateExistingSample
+                              ? this.handleUpdate
+                              : this.handleUpload
+                          }
+                          className="new-button blue-button upload-samples-button"
+                        >
+                          {updateExistingSample ? "Update" : "Upload"} sample
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => window.history.back()}
+                        className="new-button skyblue-button"
+                      >
                         Cancel
                       </button>
                     </div>
@@ -844,11 +1068,7 @@ class SampleUpload extends React.Component {
     );
   }
   render() {
-    return (
-      <div>
-        { this.renderSampleForm(this.props.selectedSample) }
-      </div>
-    )
+    return <div>{this.renderSampleForm(this.props.selectedSample)}</div>;
   }
 }
 export default SampleUpload;

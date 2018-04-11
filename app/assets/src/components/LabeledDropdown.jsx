@@ -1,5 +1,5 @@
-import React from 'react';
-import { Dropdown } from 'semantic-ui-react'
+import React from "react";
+import { Dropdown } from "semantic-ui-react";
 
 class LabeledDropdown extends React.Component {
   constructor(props) {
@@ -7,11 +7,11 @@ class LabeledDropdown extends React.Component {
     this.passedOnChange = this.props.onChange;
   }
 
-  onChange (e, d) {
+  onChange(e, d) {
     this.passedOnChange && this.passedOnChange(e, d);
   }
 
-  renderText () {
+  renderText() {
     let label;
     for (let opt of this.props.options) {
       if (opt.value == this.props.value) {
@@ -20,12 +20,18 @@ class LabeledDropdown extends React.Component {
       }
     }
     return (
-      <span><b>{this.props.label}</b> {label}</span>
+      <span>
+        <b>{this.props.label}</b> {label}
+      </span>
     );
   }
-  render () {
+  render() {
     return (
-      <Dropdown {...this.props} onChange={this.onChange.bind(this)} text={this.renderText()} />
+      <Dropdown
+        {...this.props}
+        onChange={this.onChange.bind(this)}
+        text={this.renderText()}
+      />
     );
   }
 }

@@ -1,7 +1,7 @@
 /**
  * @class SortHelper
  * @desc a helper class to handle sorting on tables
-*/
+ */
 class SortHelper {
   /**
     @method currentSort
@@ -9,7 +9,7 @@ class SortHelper {
     @return {Object} an object literal
   */
   static currentSort() {
-    const sortBy = SortHelper.getFilter('sort_by');
+    const sortBy = SortHelper.getFilter("sort_by");
     let currentSort = {};
     if (sortBy) {
       currentSort = {
@@ -27,7 +27,7 @@ class SortHelper {
   */
   static getFilter(name) {
     const url = window.location.href;
-    name = name.replace(/[\[\]]/g, '\\$&');
+    name = name.replace(/[\[\]]/g, "\\$&");
     const regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`);
     const results = regex.exec(url);
     if (!results) {
@@ -36,7 +36,7 @@ class SortHelper {
     if (!results[2]) {
       return null;
     }
-    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
   }
 
   /**
@@ -46,7 +46,7 @@ class SortHelper {
   */
   static applySort(sortQuery) {
     const currentUrl = window.location.href;
-    const url = SortHelper.deleteUrlParam(currentUrl, 'sort_by');
+    const url = SortHelper.deleteUrlParam(currentUrl, "sort_by");
     if (SortHelper.hasQuery(url)) {
       window.location = `${url}&${sortQuery}`;
     } else {
@@ -60,9 +60,9 @@ class SortHelper {
    * @param {String} parameter
    * @desc this delete a query parameter from a url
    * @return {String} the modified url
-  */
+   */
   static deleteUrlParam(url, parameter) {
-    const queryString = url.split('?');
+    const queryString = url.split("?");
     if (queryString.length >= 2) {
       const prefix = `${encodeURIComponent(parameter)}=`;
       const pars = queryString[1].split(/[&;]/g);
@@ -72,7 +72,7 @@ class SortHelper {
           pars.splice(i, 1);
         }
       }
-      url = `${queryString[0]}${pars.length > 0 ? `?${pars.join('&')}` : ''}`;
+      url = `${queryString[0]}${pars.length > 0 ? `?${pars.join("&")}` : ""}`;
     }
     return url;
   }
@@ -82,9 +82,9 @@ class SortHelper {
    * @param {String} url
    * @desc check if the url contain any get query
    * @return {Boolean} true if the urls has any query modifier
-  */
+   */
   static hasQuery(url) {
-    return (url.split('?').length >= 2);
+    return url.split("?").length >= 2;
   }
 }
 export default SortHelper;
