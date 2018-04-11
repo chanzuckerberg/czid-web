@@ -578,7 +578,7 @@ module ReportHelper
                          elsif tax_info['tax_level'] == TaxonCount::TAX_LEVEL_GENUS
                            tax_info['family_taxid']
                          end
-          parent_name = taxon_counts_2d.each[parent_taxid]['name']
+          parent_name = taxon_counts_2d[parent_taxid]['name']
           tax_info['name'] = "Non-#{level_str}-specific #{parent_name} reads"
         elsif tax_id == TaxonLineage::BLACKLIST_GENUS_ID
           tax_info['name'] = "All artificial constructs"
