@@ -260,6 +260,12 @@ class PipelineRunStage < ApplicationRecord
     pipeline_run.pipeline_branch == 'charles/hit-calling' ? PipelineRun::MULTIHIT_OUTPUT_JSON_NAME : PipelineRun::OUTPUT_JSON_NAME
   end
 
+  def invalid_genus_call?(tcnt)
+    tcnt['genus_taxid'].to_i < TaxonLineage::INVALID_CALL_BASE_ID
+  rescue
+    false
+  end
+
   def db_load_alignment
     pr = pipeline_run
 
@@ -291,7 +297,7 @@ class PipelineRunStage < ApplicationRecord
     acceptable_tax_levels = [TaxonCount::TAX_LEVEL_SPECIES]
     acceptable_tax_levels << TaxonCount::TAX_LEVEL_GENUS if pr.pipeline_branch == 'charles/hit-calling'
     pipeline_output_dict['taxon_counts_attributes'].each do |tcnt|
-      if acceptable_tax_levels.include?(tcnt['tax_level'].to_i)
+      if acceptable_tax_levels.include?(tcnt['tax_level'].to_i) && !invalid_genus_call?(tcnt)
         taxon_counts_attributes_filtered << tcnt
       end
     end

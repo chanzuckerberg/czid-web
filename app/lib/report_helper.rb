@@ -572,13 +572,9 @@ module ReportHelper
         # TODO: Can we keep the accession numbers to show in these cases?
         level_str = tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES ? 'species' : 'genus'
         tax_info['name'] = "All taxa without #{level_str} classification"
-        if tax_id < TaxonLineage::INVALID_CALL_BASE_ID
-          parent_taxid = if tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
-                           tax_info['genus_taxid']
-                         elsif tax_info['tax_level'] == TaxonCount::TAX_LEVEL_GENUS
-                           tax_info['family_taxid']
-                         end
-          parent_name = taxon_counts_2d[parent_taxid]['name']
+        if tax_id < TaxonLineage::INVALID_CALL_BASE_ID && tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
+          parent_taxid = tax_info['genus_taxid']
+          parent_name = taxon_counts_2d[parent_taxid]#['name']
           tax_info['name'] = "Non-#{level_str}-specific #{parent_name} reads"
         elsif tax_id == TaxonLineage::BLACKLIST_GENUS_ID
           tax_info['name'] = "All artificial constructs"
