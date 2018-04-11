@@ -29,7 +29,7 @@ $break-large: 1460px;
       color: #b8b8b8;
       cursor: pointer;
       &:hover {
-        color: #5ABCD6
+        color: #5abcd6;
       }
     }
   }
@@ -44,7 +44,7 @@ $break-large: 1460px;
       color: #4a91cc;
       cursor: pointer;
       &:hover {
-        color: #5ABCD6
+        color: #5abcd6;
       }
     }
   }
@@ -72,7 +72,7 @@ $break-large: 1460px;
       color: #414367;
       cursor: pointer;
       &:hover {
-        color:#039be5
+        color: #039be5;
       }
     }
   }
@@ -80,12 +80,12 @@ $break-large: 1460px;
     width: 80%;
     background: rgba(208, 2, 27, 0.07);
     border-radius: 5px;
-    color: #D0021B;
+    color: #d0021b;
     margin: 0 auto;
     padding: 10px 5px;
     border: 1px solid rgba(160, 11, 64, 0.16);
     font-size: 12px;
-    transition: .2s width ease-out;
+    transition: 0.2s width ease-out;
     text-align: center;
     @media screen and (max-width: $break-large) {
       width: 70%;
@@ -100,7 +100,7 @@ $break-large: 1460px;
     padding: 10px 5px;
     border: 1px solid rgba(160, 11, 64, 0.16);
     font-size: 12px;
-    transition: .2s width ease-out;
+    transition: 0.2s width ease-out;
     text-align: center;
   }
 }

@@ -1,47 +1,49 @@
-@import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400,400i,600,600i,700,700i,800');
+@import url("https://fonts.googleapis.com/css?family=Open+Sans:300,400,400i,600,600i,700,700i,800");
 
 $grid-size: 10px !default;
-$body-color: #212B36;
+$body-color: #212b36;
 $subdued-color: #637381;
 //== Typography
 //## Font, line-height, and color for body text, headings, and more.
-$font-family-sans-serif:  'Open Sans', Helvetica, Arial, sans-serif !default;
-$font-family-serif:       Georgia, "Times New Roman", Times, serif !default;
+$font-family-sans-serif: "Open Sans", Helvetica, Arial, sans-serif !default;
+$font-family-serif: Georgia, "Times New Roman", Times, serif !default;
 
 //** Default monospace fonts for `<code>`, `<kbd>`, and `<pre>`.
-$font-family-monospace:   Menlo, Monaco, Consolas, "Courier New", monospace !default;
-$font-family-default:     $font-family-sans-serif !default;
+$font-family-monospace: Menlo, Monaco, Consolas, "Courier New", monospace !default;
+$font-family-default: $font-family-sans-serif !default;
 
-$font-size-base:          14px !default;
-$font-size-large:         ceil(($font-size-base * 1.25)) !default; // ~18px
-$font-size-small:         ceil(($font-size-base * 0.85)) !default; // ~12px
+$font-size-base: 14px !default;
+$font-size-large: ceil(($font-size-base * 1.25)) !default; // ~18px
+$font-size-small: ceil(($font-size-base * 0.85)) !default; // ~12px
 
-$font-size-h1:            floor(($font-size-base * 3)) !default; // ~42px
-$font-size-h2:            floor(($font-size-base * 2.5)) !default; // ~28px
-$font-size-h3:            ceil(($font-size-base * 1.85)) !default; // ~26px
-$font-size-h4:            ceil(($font-size-base * 1.4)) !default; // ~20px
-$font-size-h5:            ceil(($font-size-base * 1.4)) !default; // ~16px
-$font-size-h6:            ceil(($font-size-base * 0.85)) !default; // ~12px
-$font-size-body:          $font-size-base !default; // ~14px
-$font-size-caption:       $font-size-h6 !default; // ~12px
+$font-size-h1: floor(($font-size-base * 3)) !default; // ~42px
+$font-size-h2: floor(($font-size-base * 2.5)) !default; // ~28px
+$font-size-h3: ceil(($font-size-base * 1.85)) !default; // ~26px
+$font-size-h4: ceil(($font-size-base * 1.4)) !default; // ~20px
+$font-size-h5: ceil(($font-size-base * 1.4)) !default; // ~16px
+$font-size-h6: ceil(($font-size-base * 0.85)) !default; // ~12px
+$font-size-body: $font-size-base !default; // ~14px
+$font-size-caption: $font-size-h6 !default; // ~12px
 
 //Font Weights
-$font-weight-thin:        300;
-$font-weight-regular:     400;
-$font-weight-semibold:    600;
-$font-weight-bold:        700;
-$font-weight-heavy:       800;
+$font-weight-thin: 300;
+$font-weight-regular: 400;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+$font-weight-heavy: 800;
 
 //** Unit-less `line-height` for use in components like buttons.
-$line-height-base:        1.428571429 !default; // 20/14
+$line-height-base: 1.428571429 !default; // 20/14
 //** Computed "line-height" (`font-size` * `line-height`) for use with `margin`, `padding`, etc.
-$line-height-computed:    floor(($font-size-base * $line-height-base)) !default; // ~20px
+$line-height-computed: floor(
+  ($font-size-base * $line-height-base)
+) !default; // ~20px
 
 //** By default, this inherits from the `<body>`.
-$headings-font-family:    inherit !default;
-$headings-font-weight:    600 !default;
-$headings-line-height:    1.1 !default;
-$headings-color:          $body-color !default;
+$headings-font-family: inherit !default;
+$headings-font-weight: 600 !default;
+$headings-line-height: 1.1 !default;
+$headings-color: $body-color !default;
 
 // a little bit extra to ensure the height comes out to just over 18px (and browser rounds to 18px)
 $id-line-height: ($grid-size * 1.8) / $font-size-base + 0.0001 !default;
@@ -52,10 +54,24 @@ $icons20-family: "Icons20" !default;
 
 $id-icon-size-standard: 16px !default;
 $id-icon-size-large: 20px !default;
-h1, h2, h3, h4, h5, h6,
-.h1, .h2, .h3, .h4, .h5, .h6,
-.display-xlarge, .display-large, .display-medium, .display-small,
-.heading, .subheading{
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6,
+.display-xlarge,
+.display-large,
+.display-medium,
+.display-small,
+.heading,
+.subheading {
   font-family: $headings-font-family;
   font-family: $font-family-sans-serif;
   font-weight: $headings-font-weight;
@@ -70,9 +86,15 @@ h1, h2, h3, h4, h5, h6,
   }
 }
 
-h1, .h1, .display-xlarge,
-h2, .h2, .display-large,
-h3, .h3, .display-medium {
+h1,
+.h1,
+.display-xlarge,
+h2,
+.h2,
+.display-large,
+h3,
+.h3,
+.display-medium {
   margin-top: $line-height-computed;
   margin-bottom: ($line-height-computed / 2);
   font-family: $font-family-sans-serif;
@@ -83,9 +105,15 @@ h3, .h3, .display-medium {
     font-size: 65%;
   }
 }
-h4, .h4, .display-small,
-h5, .h5, .heading,
-h6, .h6, .subheading {
+h4,
+.h4,
+.display-small,
+h5,
+.h5,
+.heading,
+h6,
+.h6,
+.subheading {
   margin-top: ($line-height-computed / 2);
   margin-bottom: ($line-height-computed / 2);
 
@@ -95,42 +123,56 @@ h6, .h6, .subheading {
   }
 }
 
-h1, .h1, .display-xlarge {
-  font-size:    $font-size-h1;
-  font-weight:  $font-weight-semibold;
+h1,
+.h1,
+.display-xlarge {
+  font-size: $font-size-h1;
+  font-weight: $font-weight-semibold;
 }
-h2, .h2, .display-large {
-  font-size:    $font-size-h2;
-  font-weight:  $font-weight-semibold;
+h2,
+.h2,
+.display-large {
+  font-size: $font-size-h2;
+  font-weight: $font-weight-semibold;
 }
-h3, .h3, .display-medium {
-  font-size:    $font-size-h3;
-  font-weight:  $font-weight-regular;
+h3,
+.h3,
+.display-medium {
+  font-size: $font-size-h3;
+  font-weight: $font-weight-regular;
 }
-h4, .h4, .display-small {
-  font-size:    $font-size-h4;
-  font-weight:  $font-weight-regular;
+h4,
+.h4,
+.display-small {
+  font-size: $font-size-h4;
+  font-weight: $font-weight-regular;
 }
-h5, .h5 , .heading {
-  font-size:    $font-size-h5;
-  font-weight:  $font-weight-semibold;
+h5,
+.h5,
+.heading {
+  font-size: $font-size-h5;
+  font-weight: $font-weight-semibold;
 }
-h6, .h6 , .subheading{
-  font-size:      $font-size-h6;
-  font-weight:    $font-weight-semibold;
+h6,
+.h6,
+.subheading {
+  font-size: $font-size-h6;
+  font-weight: $font-weight-semibold;
   text-transform: uppercase;
 }
 
 // Body text
 // -------------------------
 
-p, .p, .body-text {
+p,
+.p,
+.body-text {
   margin: 0 0 ($line-height-computed / 2);
   font-size: $font-size-body;
   color: $body-color;
   font-family: $font-family-sans-serif;
 
-  .subdued{
+  .subdued {
     color: $subdued-color;
   }
 }
@@ -138,7 +180,7 @@ p, .p, .body-text {
   font-size: $font-size-caption;
   font-family: $font-family-sans-serif;
 
-  .subdued{
+  .subdued {
     color: $subdued-color;
   }
 }
@@ -151,16 +193,32 @@ small,
 }
 
 // Alignment
-.text-left           { text-align: left; }
-.text-right          { text-align: right; }
-.text-center         { text-align: center; }
-.text-justify        { text-align: justify; }
-.text-nowrap         { white-space: nowrap; }
+.text-left {
+  text-align: left;
+}
+.text-right {
+  text-align: right;
+}
+.text-center {
+  text-align: center;
+}
+.text-justify {
+  text-align: justify;
+}
+.text-nowrap {
+  white-space: nowrap;
+}
 
 // Transformation
-.text-lowercase      { text-transform: lowercase; }
-.text-uppercase      { text-transform: uppercase; }
-.text-capitalize     { text-transform: capitalize; }
+.text-lowercase {
+  text-transform: lowercase;
+}
+.text-uppercase {
+  text-transform: uppercase;
+}
+.text-capitalize {
+  text-transform: capitalize;
+}
 
 //Contextual colors
 .text-muted {
