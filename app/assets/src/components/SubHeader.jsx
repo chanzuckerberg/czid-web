@@ -1,14 +1,12 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React from "react";
+import PropTypes from "prop-types";
 
-const SubHeader = (props) => {
+const SubHeader = props => {
   const { children } = props;
   return (
     <div className="sub-header-component">
       <div className="container">
-        <div className="content">
-          { children }
-        </div>
+        <div className="content">{children}</div>
       </div>
     </div>
   );
