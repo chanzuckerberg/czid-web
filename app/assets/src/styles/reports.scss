@@ -728,13 +728,11 @@ margin-bottom: 0px;
     color: #3867fa;
     background-color: #fff;
     padding-left: 5em !important;
-    border: 1px solid #e4e4e4;
-    //padding: 5px 1em;
+    border: 1px solid #3867fa;
     border-radius: 999999px;
     &:hover {
-      background-color: #3867fa !important;
+      background-color: #3867fa;
       color: #fff;
-      border: 1px solid #3867fa;
     }
   }
   .ui.dropdown .text { // The text in the button
