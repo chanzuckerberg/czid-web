@@ -980,12 +980,13 @@ input[type="button"] {
   .project-info {
     padding-left: 20px;
     .download-section {
+      .angle.down.icon {
+        margin-left: 0.5rem;
+        margin-right: -0.3rem;
+      }
       .download-wrapper {
         float: right;
         padding-top: 20px;
-        .download-btn {
-          padding: 9px;
-        }
         .ui.labeled.icon.button>.icon { // Actual icon in the button
           background-color: transparent;
           font-size: 1.3em;
@@ -1015,7 +1016,7 @@ input[type="button"] {
         .download-btn { // The whole button
           color: #3867fa;
           background-color: transparent;
-          padding-left: 5em;
+          padding: 9px 9px 9px 5em;
           min-height: 35px !important;
           border: 1px solid #3867fa !important;
         }
