@@ -1,13 +1,13 @@
-import React from 'react';
-import Samples from './Samples';
+import React from "react";
+import Samples from "./Samples";
 
 class Home extends React.Component {
   render() {
     return (
       <div>
-        <Samples {...this.props}/>
+        <Samples {...this.props} />
       </div>
-    )
+    );
   }
 }
 

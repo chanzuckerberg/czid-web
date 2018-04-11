@@ -1,20 +1,20 @@
-import React from 'react';
-import axios from 'axios';
-import $ from 'jquery';
-import Samples from './Samples';
-import Nanobar from 'nanobar';
+import React from "react";
+import axios from "axios";
+import $ from "jquery";
+import Samples from "./Samples";
+import Nanobar from "nanobar";
 
 /**
  @class ProjectSelection
  @desc Creates react component to handle filtering in the page
  */
 
- class ProjectSelection extends React.Component {
+class ProjectSelection extends React.Component {
   constructor(props) {
     super(props);
     this.nanobar = new Nanobar({
-      id: 'prog-bar',
-      class: 'prog-bar'
+      id: "prog-bar",
+      class: "prog-bar"
     });
     this.csrf = props.csrf;
     this.favoriteProjects = props.favoriteProjects;
@@ -30,7 +30,7 @@ import Nanobar from 'nanobar';
       favIds: [],
       showLess: true,
       showLessFavorites: true,
-      selectedProjectId: this.fetchParams('project_id') || null,
+      selectedProjectId: this.fetchParams("project_id") || null
     };
   }
 
@@ -43,39 +43,50 @@ import Nanobar from 'nanobar';
 
   fetchParams(param) {
     let urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(param)
+    return urlParams.get(param);
   }
 
   toggleDisplayProjects() {
-    this.setState((prevState) => ({ showLess: !prevState.showLess }))
+    this.setState(prevState => ({ showLess: !prevState.showLess }));
   }
 
-
   toggleDisplayFavProjects() {
-    this.setState((prevState) => ({ showLessFavorites: !prevState.showLessFavorites }))
+    this.setState(prevState => ({
+      showLessFavorites: !prevState.showLessFavorites
+    }));
   }
 
   toggleFavorite(e) {
     e.stopPropagation();
-    let favStatus = e.target.getAttribute('data-fav');
-    let projectId = e.target.getAttribute('data-id');
-    favStatus == 'true' ?  _satellite.track('unfavorite') : _satellite.track('favorite');
+    let favStatus = e.target.getAttribute("data-fav");
+    let projectId = e.target.getAttribute("data-id");
+    favStatus == "true"
+      ? _satellite.track("unfavorite")
+      : _satellite.track("favorite");
     this.nanobar.go(30);
     axios
-      .put(`/projects/${projectId}/${favStatus == 'true' ? 'remove_favorite' : 'add_favorite' }?`, {
-        authenticity_token: this.csrf
-      })
-      .then((res) => {
+      .put(
+        `/projects/${projectId}/${
+          favStatus == "true" ? "remove_favorite" : "add_favorite"
+        }?`,
+        {
+          authenticity_token: this.csrf
+        }
+      )
+      .then(res => {
         this.nanobar.go(100);
-        this.checkIfProjecExistInFavorites(projectId, this.state.formattedProjectList);
-      }).catch((err) => {
-    })
+        this.checkIfProjecExistInFavorites(
+          projectId,
+          this.state.formattedProjectList
+        );
+      })
+      .catch(err => {});
   }
 
   reformatProjectList(favorites, allProjects) {
     let favProjects = [];
     let favIds = [];
-    if(favorites.length) {
+    if (favorites.length) {
       favIds = favorites.map(e => e.id);
     }
     let formattedList = allProjects.map(e => {
@@ -105,7 +116,7 @@ import Nanobar from 'nanobar';
   updateProjectsState(id, projects) {
     let updatedList = projects.map(project => {
       if (project.id == id) {
-        project.favorited = !project.favorited
+        project.favorited = !project.favorited;
       }
 
       return project;
@@ -127,11 +138,14 @@ import Nanobar from 'nanobar';
     this.updateProjectsState(id, projects);
   }
 
-
   // remove Projects from favorites list
   removeProjectFromFavorites(id) {
-    let updatedFavouriteProjects = this.state.formattedFavProjectList.filter(project => project.id != id);
-    let removedFavouriteProject = this.state.formattedFavProjectList.filter(project => project.id == id);
+    let updatedFavouriteProjects = this.state.formattedFavProjectList.filter(
+      project => project.id != id
+    );
+    let removedFavouriteProject = this.state.formattedFavProjectList.filter(
+      project => project.id == id
+    );
 
     let favIds = this.state.favIds;
     let projectIdIndex = favIds.indexOf(removedFavouriteProject[0].id);
@@ -150,15 +164,17 @@ import Nanobar from 'nanobar';
     let updatedProject = projects.filter(project => project.id == id);
 
     this.setState({
-        formattedFavProjectList: [...this.state.formattedFavProjectList, ...updatedProject],
-        favIds: [...this.state.favIds, updatedProject[0].id]
+      formattedFavProjectList: [
+        ...this.state.formattedFavProjectList,
+        ...updatedProject
+      ],
+      favIds: [...this.state.favIds, updatedProject[0].id]
     });
   }
 
-
   handleProjectClick(e) {
-    let id = e.target.getAttribute('data-id');
-    let listType = e.target.getAttribute('data-type') || null;
+    let id = e.target.getAttribute("data-id");
+    let listType = e.target.getAttribute("data-type") || null;
     this.props.selectProject(id, listType);
     this.highlightSelectedProject(id, listType);
   }
@@ -166,29 +182,34 @@ import Nanobar from 'nanobar';
   highlightSelectedProject(id, type) {
     this.removeHighlight();
     const isFavoriteSelected =
-    this.fetchParams('type') === 'favorite' || type === 'favorite';
+      this.fetchParams("type") === "favorite" || type === "favorite";
     if (id && isFavoriteSelected) {
-      $(`.fav-item.project-item[data-id="${id}"]`).addClass('highlight');
-    } else if (id){
-      $(`.all.project-item[data-id="${id}"]`).addClass('highlight');
+      $(`.fav-item.project-item[data-id="${id}"]`).addClass("highlight");
+    } else if (id) {
+      $(`.all.project-item[data-id="${id}"]`).addClass("highlight");
     } else {
-      $(`.all-samples.project-item`).addClass('highlight');
+      $(`.all-samples.project-item`).addClass("highlight");
     }
   }
 
   removeHighlight() {
-    $('.project-item').removeClass('highlight')
+    $(".project-item").removeClass("highlight");
   }
 
   addFavIconClass(project) {
     return (
-      <i data-status="favorite"
+      <i
+        data-status="favorite"
         data-fav={project.favorited}
         data-id={project.id}
         onClick={this.toggleFavorite}
-        className={!project.favorited ?
-          "favorite fa fa-star-o right hidden" : "favorite fa fa-star right hidden"}></i>
-    )
+        className={
+          !project.favorited
+            ? "favorite fa fa-star-o right hidden"
+            : "favorite fa fa-star right hidden"
+        }
+      />
+    );
   }
 
   renderProjectSection() {
@@ -206,153 +227,170 @@ import Nanobar from 'nanobar';
     };
 
     const favProjLen = this.state.formattedFavProjectList.length;
-    var fav_section = (<div></div>)
+    var fav_section = <div />;
     if (favProjLen) {
-      fav_section = (<div className="row fav-row">
-        <div className="title fav-title">Favorite Projects</div>
-        <div className="fav-projects-wrapper  projects-wrapper">
-          {
-            this.state.showLessFavorites ?
-              this.state.formattedFavProjectList
-                .sort(sortLogic)
-                .slice(0,4)
-                .map((project, i) => {
-                  return (
-                    <div
-                      className="project-item fav-item"
-                      onClick={this.handleProjectClick}
-                      data-type='favorite'
-                      data-id={project.id}
-                      key={i}>
-                      <div className="row label-row">
-                        <span
-                          className='project-label no-padding col s10'
-                          data-id={project.id}
-                          data-type='favorite'>
-                          {project.name}
-                        </span>
-                        <span className="icon-container no-padding col s2">
-                          {this.addFavIconClass(project)}
-                        </span>
+      fav_section = (
+        <div className="row fav-row">
+          <div className="title fav-title">Favorite Projects</div>
+          <div className="fav-projects-wrapper  projects-wrapper">
+            {this.state.showLessFavorites
+              ? this.state.formattedFavProjectList
+                  .sort(sortLogic)
+                  .slice(0, 4)
+                  .map((project, i) => {
+                    return (
+                      <div
+                        className="project-item fav-item"
+                        onClick={this.handleProjectClick}
+                        data-type="favorite"
+                        data-id={project.id}
+                        key={i}
+                      >
+                        <div className="row label-row">
+                          <span
+                            className="project-label no-padding col s10"
+                            data-id={project.id}
+                            data-type="favorite"
+                          >
+                            {project.name}
+                          </span>
+                          <span className="icon-container no-padding col s2">
+                            {this.addFavIconClass(project)}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  )
-                }):
-              this.state.formattedFavProjectList
-                .sort(sortLogic)
-                .map((project, i) => {
-                  return (
-                    <div
-                      className="project-item fav-item"
-                      onClick={this.handleProjectClick}
-                      data-type='favorite'
-                      data-id={project.id}
-                      key={i}>
-                      <div className="row label-row">
-                        <span
-                          className='project-label no-padding col s10'
-                          data-id={project.id}
-                          data-type='favorite'>
-                          {project.name}
-                        </span>
-                        <span className="icon-container no-padding col s2">
-                          {this.addFavIconClass(project)}
-                        </span>
+                    );
+                  })
+              : this.state.formattedFavProjectList
+                  .sort(sortLogic)
+                  .map((project, i) => {
+                    return (
+                      <div
+                        className="project-item fav-item"
+                        onClick={this.handleProjectClick}
+                        data-type="favorite"
+                        data-id={project.id}
+                        key={i}
+                      >
+                        <div className="row label-row">
+                          <span
+                            className="project-label no-padding col s10"
+                            data-id={project.id}
+                            data-type="favorite"
+                          >
+                            {project.name}
+                          </span>
+                          <span className="icon-container no-padding col s2">
+                            {this.addFavIconClass(project)}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  )
-                })
-          }
-          { (this.state.formattedFavProjectList.length > 4)
-            ? <div className="more"
-                   onClick={this.toggleDisplayFavProjects}>
-              {this.state.showLessFavorites ? 'Show More...' : 'Show Less...'}
-            </div>
-            : null
-          }
+                    );
+                  })}
+            {this.state.formattedFavProjectList.length > 4 ? (
+              <div className="more" onClick={this.toggleDisplayFavProjects}>
+                {this.state.showLessFavorites ? "Show More..." : "Show Less..."}
+              </div>
+            ) : null}
+          </div>
         </div>
-      </div>);
+      );
     }
 
     const all_projects_section = (
       <div className="projects">
-        <div data-title="allprojects" className="title">All Projects</div>
+        <div data-title="allprojects" className="title">
+          All Projects
+        </div>
         <div className="projects-wrapper">
-          { !this.state.formattedProjectList.length ?
-             <div className='title'>None</div> :
-               this.state.showLess ? this.state.formattedProjectList
-               .sort(sortLogic)
-               .filter((project) => !project.favorited)
-               .slice(0,8)
-               .map((project, i) => {
+          {!this.state.formattedProjectList.length ? (
+            <div className="title">None</div>
+          ) : this.state.showLess ? (
+            this.state.formattedProjectList
+              .sort(sortLogic)
+              .filter(project => !project.favorited)
+              .slice(0, 8)
+              .map((project, i) => {
                 return (
-                    <div
-                      className="all project-item"
-                      onClick={this.handleProjectClick}
-                      data-id={project.id}  key={i}>
-                      <div className="row label-row">
-                        <span className='project-label no-padding col s10'
-                          data-id={project.id}>
-                          {project.name}
-                        </span>
-                        <span className="icon-container no-padding col s2">
-                          {this.addFavIconClass(project)}
-                        </span>
-                      </div>
+                  <div
+                    className="all project-item"
+                    onClick={this.handleProjectClick}
+                    data-id={project.id}
+                    key={i}
+                  >
+                    <div className="row label-row">
+                      <span
+                        className="project-label no-padding col s10"
+                        data-id={project.id}
+                      >
+                        {project.name}
+                      </span>
+                      <span className="icon-container no-padding col s2">
+                        {this.addFavIconClass(project)}
+                      </span>
                     </div>
-                )
-            }) :
-            this.state.formattedProjectList.sort(sortLogic).filter((project) => !project.favorited).map((project, i) => {
-            return (
-              <div
-                className="all project-item"
-                onClick={this.handleProjectClick}
-                data-id={project.id}  key={i}>
-                <div className="row label-row">
-                  <span
-                    className='project-label no-padding col s10'
-                    data-id={project.id}>
-                    {project.name}
-                  </span>
-                  <span className="icon-container no-padding col s2">
-                    {this.addFavIconClass(project)}
-                  </span>
-                </div>
-              </div>
-            )
-          })}
-          { this.state.formattedProjectList.length > 7 ? <div className="more" onClick={this.toggleDisplayProjects}>{this.state.showLess ? 'Show More...' : 'Show Less...'}</div> : ''}
+                  </div>
+                );
+              })
+          ) : (
+            this.state.formattedProjectList
+              .sort(sortLogic)
+              .filter(project => !project.favorited)
+              .map((project, i) => {
+                return (
+                  <div
+                    className="all project-item"
+                    onClick={this.handleProjectClick}
+                    data-id={project.id}
+                    key={i}
+                  >
+                    <div className="row label-row">
+                      <span
+                        className="project-label no-padding col s10"
+                        data-id={project.id}
+                      >
+                        {project.name}
+                      </span>
+                      <span className="icon-container no-padding col s2">
+                        {this.addFavIconClass(project)}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })
+          )}
+          {this.state.formattedProjectList.length > 7 ? (
+            <div className="more" onClick={this.toggleDisplayProjects}>
+              {this.state.showLess ? "Show More..." : "Show Less..."}
+            </div>
+          ) : (
+            ""
+          )}
         </div>
       </div>
-    )
+    );
     return (
       <div className="project-wrapper">
         <div className="row">
-          <div className='col no-padding s12'>
+          <div className="col no-padding s12">
             <div className="projects-wrapper">
-              <div className="all-samples project-item"
-                   onClick={this.handleProjectClick} >
-                <span className='project-label'>
-                  All Samples
-                </span>
+              <div
+                className="all-samples project-item"
+                onClick={this.handleProjectClick}
+              >
+                <span className="project-label">All Samples</span>
               </div>
             </div>
-
           </div>
-          { fav_section }
-          { all_projects_section }
+          {fav_section}
+          {all_projects_section}
         </div>
       </div>
-    )
+    );
   }
-
 
   render() {
-    return (
-      <div>
-        { this.renderProjectSection() }
-      </div>
-    )
+    return <div>{this.renderProjectSection()}</div>;
   }
- }
- export default ProjectSelection;
+}
+export default ProjectSelection;

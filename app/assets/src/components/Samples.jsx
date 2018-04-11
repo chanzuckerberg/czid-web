@@ -401,7 +401,7 @@ class Samples extends React.Component {
             background_flag: new_flag
           })
         });
-      })
+      });
   }
 
   displayMetadataDropdown() {
@@ -957,10 +957,10 @@ class Samples extends React.Component {
       .delete(`/projects/${projectId}.json`, {
         data: { authenticity_token: this.csrf }
       })
-      .then((res) => {
-        location.href = "/"
-      }).catch((err) => {
-    })
+      .then(res => {
+        location.href = "/";
+      })
+      .catch(err => {});
   }
 
   renderTable(samples) {
@@ -999,14 +999,14 @@ class Samples extends React.Component {
     );
 
     let delete_project_button = (
-      <div className='download-table'>
-        <div className='white'>
+      <div className="download-table">
+        <div className="white">
           <a onClick={this.deleteProject} className="compare center">
             <span>Delete project</span>
           </a>
         </div>
       </div>
-    )
+    );
 
     const host_filter_tag_list = this.generateTagList(
       "hostGenomes",
@@ -1704,7 +1704,9 @@ class AddUserModal extends React.Component {
             className="filled-in checkbox"
             checked={this.props.state.project.background_flag}
           />
-          <label htmlFor="background_flag">Expose project-specific background</label>
+          <label htmlFor="background_flag">
+            Expose project-specific background
+          </label>
         </Modal.Content>
         <Modal.Actions>
           <button className="modal-close" onClick={this.handleClose}>
@@ -1796,7 +1798,9 @@ function ProjectInfoHeading({
         {state.selectedProjectId ? project_menu : null}
         {table_download_dropdown}
         {state.selectedSampleIds.length > 0 ? compare_button : null}
-        {state.selectedProjectId && state.allSamples.length == 0 ? delete_project_button : null}
+        {state.selectedProjectId && state.allSamples.length == 0
+          ? delete_project_button
+          : null}
       </div>
     </div>
   );
@@ -1982,7 +1986,7 @@ function MetadataFilterDropdowns({ parent }) {
             let indices = parent.state.selectedHostIndices;
             let host_label = `host-${host.id}`;
             let res = (
-              <div key={"host-"+i} className="options-wrapper">
+              <div key={"host-" + i} className="options-wrapper">
                 <input
                   name="host"
                   type="checkbox"

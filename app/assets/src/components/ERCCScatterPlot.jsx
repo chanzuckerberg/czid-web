@@ -1,8 +1,8 @@
-import React from 'react';
-import ScatterPlot from './ScatterPlot';
+import React from "react";
+import ScatterPlot from "./ScatterPlot";
 
 class ERCCScatterPlot extends React.Component {
-  render () {
+  render() {
     let data = [];
     for (let row of this.props.ercc_comparison) {
       if (row.actual == 0) {
@@ -11,7 +11,7 @@ class ERCCScatterPlot extends React.Component {
       data.push({
         name: row.name,
         actual: Math.log10(row.actual),
-        expected: Math.log10(row.expected),
+        expected: Math.log10(row.expected)
       });
     }
 
@@ -19,8 +19,17 @@ class ERCCScatterPlot extends React.Component {
       return null;
     }
 
-    return (<ScatterPlot data={data} xKey="expected" yKey="actual" width={720} xLabel="log10 spike in concetrations" yLabel="log10 read-pairs per gene" />)
-  };
+    return (
+      <ScatterPlot
+        data={data}
+        xKey="expected"
+        yKey="actual"
+        width={720}
+        xLabel="log10 spike in concetrations"
+        yLabel="log10 read-pairs per gene"
+      />
+    );
+  }
 }
 
 export default ERCCScatterPlot;
