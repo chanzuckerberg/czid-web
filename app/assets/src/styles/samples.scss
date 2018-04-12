@@ -53,12 +53,13 @@ $break-large: 1070px;
   border: 1px solid #d9dee5;
   padding: 8px;
   margin: 7px 0;
-  min-width: 100%;
+  min-width: 11rem;
   letter-spacing: 0.43px;
   display: inline-block;
   cursor: pointer;
-  border-radius: 3px;
+  border-radius: 20px;
   font-size: 11px;
+  font-family: "Lato", "Helvetica Neue", Arial, Helvetica, sans-serif;
   &:hover {
     color: #232333 !important;
     border-color: #bfc3c9;
@@ -83,7 +84,8 @@ $break-large: 1070px;
   }
   i {
     font-size: 15px;
-    margin-right: 4px;
+    margin-left: 4px;
+    margin-right: 10px;
     position: relative;
     top: 1px;
   }
@@ -126,9 +128,9 @@ $break-large: 1070px;
     padding: 8px;
     &:hover,
     &.active {
-      border: 1px solid #5abcd6;
-      background: #d6eef5;
-      color: #5abcd6;
+      border: 1px solid #3867fa;
+      background: #b7e0f5;
+      color: #3867fa;
       i {
         display: inline-block;
       }
@@ -410,7 +412,7 @@ $break-large: 1070px;
       }
     }
     .add {
-      color: #5abcd6;
+      color: #3867fa;
     }
   }
   .title {
@@ -514,6 +516,12 @@ $break-large: 1070px;
     }
   }
 
+  .sample-feed {
+    :hover {
+      background: #f8f9fe !important;
+    }
+  }
+
   .sample-feed,
   .sample-feed-head {
     border-bottom: 2px solid #edf1f2;
@@ -542,6 +550,11 @@ $break-large: 1070px;
         flex-wrap: nowrap;
         justify-content: space-between;
         .check-box-container {
+          [type="checkbox"].filled-in:not(:checked) + label:after,
+          [type="checkbox"].filled-in:checked + label:after,
+          [type="checkbox"].filled-in:checked + label:before {
+            top: 37px;
+          }
           .check {
             display: inline-block;
           }
@@ -719,10 +732,11 @@ $break-large: 1070px;
         padding: 15px;
         width: 500px !important;
         position: absolute;
-        background-color: #f9f9f9;
+        background-color: #fff;
         z-index: 100;
-        border-radius: 3px;
-        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+        border-radius: 5px;
+        box-shadow: 0 2px 3px 0 rgba(34, 36, 38, 0.15);
+        border: 1px solid rgba(34, 36, 38, 0.15);
         height: auto !important;
         .col.s6 {
           .options-wrapper {
@@ -979,12 +993,13 @@ input[type="button"] {
   .project-info {
     padding-left: 20px;
     .download-section {
+      .angle.down.icon {
+        margin-left: 0.5rem;
+        margin-right: -0.3rem;
+      }
       .download-wrapper {
         float: right;
         padding-top: 20px;
-        .download-btn {
-          padding: 9px;
-        }
         .ui.labeled.icon.button > .icon {
           // Actual icon in the button
           background-color: transparent;
@@ -1017,8 +1032,9 @@ input[type="button"] {
           // The whole button
           color: #3867fa;
           background-color: transparent;
-          padding-left: 5em;
+          padding: 9px 9px 9px 5em;
           min-height: 35px !important;
+          border: 1px solid #3867fa !important;
         }
         .download-reports {
           color: #3867fa;

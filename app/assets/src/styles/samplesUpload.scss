@@ -27,11 +27,20 @@
       .error-message {
         color: #d0021b;
       }
+      .upload-page-button {
+        margin-left: 2rem;
+        top: 1rem;
+        i.icon.plus:before {
+          margin-right: 1rem;
+          padding-right: 5rem;
+        }
+      }
       .form-title {
         font-size: $font-size-h3;
         color: #333e48;
         font-weight: $font-weight-bold;
         letter-spacing: 0.28px;
+        padding-bottom: 1rem;
       }
       .upload-info {
         color: #677986;
@@ -46,10 +55,10 @@
           font-weight: $font-weight-semibold;
         }
         a:hover {
-          color: #5abcd6 !important;
+          color: #3867fa !important;
         }
       }
-      .bulkSumbitForm {
+      .bulkSubmitForm {
         margin-top: 50px;
       }
       .fields {
@@ -131,7 +140,7 @@
               border-color: #d6eef5;
               color: #68c2d9;
               i {
-                color: #5abcd6;
+                color: #3867fa;
               }
               &.new-project-button {
                 width: 92%;
@@ -156,8 +165,8 @@
               }
             }
             .blue-button {
-              background: #5abcd6;
-              border-color: #5abcd6;
+              background: #3867fa;
+              border-color: #3867fa;
               color: #ffffff;
             }
             .upload-samples-button {
@@ -186,7 +195,7 @@
                   background: #d6eef5;
                   border-color: #4ba4c1;
                   .genome-label {
-                    color: #5abcd6;
+                    color: #3867fa;
                   }
                 }
                 .img-container {
@@ -212,6 +221,7 @@
               .select-dropdown {
                 padding-left: 2px;
                 border: 1px solid #cad0da;
+                border-radius: 20px;
               }
               .caret {
                 color: #bac8cf;
