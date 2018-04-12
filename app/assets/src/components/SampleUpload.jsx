@@ -3,7 +3,6 @@ import ReactDOM from "react-dom";
 import axios from "axios";
 import $ from "jquery";
 import Tipsy from "react-tipsy";
-import { Button, Icon } from 'semantic-ui-react'
 import IconComponent from "./IconComponent";
 import ObjectHelper from "../helpers/ObjectHelper";
 
@@ -281,7 +280,7 @@ class SampleUpload extends React.Component {
   }
 
   updateSample() {
-    var that = this;
+    let that = this;
     that.setState({
       submitting: true
     });
@@ -510,7 +509,6 @@ class SampleUpload extends React.Component {
   }
 
   static resolveGenomeIcon(genomeName, color) {
-    let imgPath = "/assets/generic_genome.png";
     if (typeof genomeName === "undefined") {
       return false;
     }
@@ -518,16 +516,12 @@ class SampleUpload extends React.Component {
     switch (genomeName) {
       case "mosquito":
         return IconComponent.mosquito(color);
-        break;
       case "human":
         return IconComponent.human(color);
-        break;
       case "tick":
         return IconComponent.tick(color);
-        break;
       case "ercc only":
         return IconComponent.ercc(color);
-        break;
       default:
         return false;
     }
@@ -556,7 +550,6 @@ class SampleUpload extends React.Component {
   }
 
   renderSampleForm(updateExistingSample = false) {
-    updateExistingSample = updateExistingSample ? true : false;
     return (
       <div id="samplesUploader" className="row">
         <div className="col s6 offset-s3 upload-form-container">
@@ -603,7 +596,7 @@ class SampleUpload extends React.Component {
               }
             >
               <div className="fields">
-                <div className="field">
+                <div className="field proj-field">
                   <div className="row">
                     <div className="col field-title no-padding s12">
                       Project
@@ -658,7 +651,7 @@ class SampleUpload extends React.Component {
                         <button
                           type="button"
                           onClick={this.toggleNewProjectInput}
-                          className="new-project-button new-button skyblue-button"
+                          className="new-project-button new-button secondary-button"
                         >
                           <i className="fa fa-plus" />
                           <span>New Project</span>
@@ -707,7 +700,7 @@ class SampleUpload extends React.Component {
                   </div>
                 </div>
 
-                <div className="field">
+                <div className="field field-host">
                   <div className="row">
                     <Tipsy
                       content="This will be subtracted by the pipeline"
@@ -766,7 +759,7 @@ class SampleUpload extends React.Component {
                                   dangerouslySetInnerHTML={{
                                     __html: SampleUpload.resolveGenomeIcon(
                                       g.name,
-                                      "#59bcd6"
+                                      "#f2f6ee"
                                     )
                                   }}
                                 />
@@ -1054,7 +1047,7 @@ class SampleUpload extends React.Component {
                       <button
                         type="button"
                         onClick={() => window.history.back()}
-                        className="new-button skyblue-button"
+                        className="new-button secondary-button"
                       >
                         Cancel
                       </button>

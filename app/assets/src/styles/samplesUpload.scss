@@ -8,9 +8,8 @@
     margin-top: 50px;
     background: #ffffff;
     min-height: 400px;
-    border-radius: 3px;
+    border-radius: 20px;
     .content {
-      // border: 1px solid;
       margin: 25px;
       .form-feedback {
         font-size: $font-size-base;
@@ -62,6 +61,9 @@
         margin-top: 50px;
       }
       .fields {
+        .field-host {
+          padding-top: 1.5rem;
+        }
         .field {
           .row {
             &.input-row {
@@ -71,6 +73,7 @@
                 padding: 10px;
                 border: 1px solid #cad0da;
                 background: #fff;
+                border-radius: 10px;
                 &.new_project_input {
                   padding-right: 45px;
                 }
@@ -86,12 +89,14 @@
               }
               .input-icon {
                 position: absolute;
-                margin-left: -107px;
+                margin-left: -108px;
                 margin-top: 1px;
                 font-size: 13px;
                 background: #eef1f2;
                 padding: 10.4px;
+                height: 36px;
                 text-align: center;
+                border-radius: 10px;
                 &:hover {
                   cursor: pointer;
                   background: #c3dde5;
@@ -101,6 +106,10 @@
               .public_access {
                 margin-top: 5px;
               }
+            }
+
+            .proj-field {
+              padding-bottom: 1.5rem;
             }
 
             .field-title {
@@ -124,9 +133,9 @@
             }
             .new-button {
               padding: 10px;
-              border-radius: 2px;
               border: 1px solid;
               min-width: 120px;
+              border-radius: 25px;
               i {
                 margin-right: 5px;
               }
@@ -135,10 +144,10 @@
                 border-color: #cccccc;
               }
             }
-            .skyblue-button {
-              background: #d6eef5;
-              border-color: #d6eef5;
-              color: #68c2d9;
+            .secondary-button {
+              background: #cccccc;
+              border-color: #cccccc;
+              color: #ffffff;
               i {
                 color: #3867fa;
               }
@@ -146,20 +155,21 @@
                 width: 92%;
                 float: right;
                 font-size: $font-size-base;
-                height: 48px;
+                height: 45px;
                 background: #e9ecf1;
                 border-color: #e9ecf1;
+                border-radius: 25px;
                 color: #586a78;
                 i {
                   color: #586a78;
                 }
                 &:hover,
                 &.active {
-                  background: #c3dde4;
-                  border-color: #c3dde4;
-                  color: #4d9db1;
+                  background: #aec9e2;
+                  border-color: #aec9e2;
+                  color: #f2f6ee;
                   i {
-                    color: #4d9db1;
+                    color: #f2f6ee;
                   }
                 }
               }
@@ -173,8 +183,9 @@
               margin-right: 10px;
             }
             .host-selector {
-              margin-top: 0;
+              padding-top: 0.8rem;
               li {
+                border-radius: 2rem;
                 display: inline-block;
                 margin-right: 10px;
                 border: 1px solid transparent;
@@ -192,17 +203,16 @@
                 }
                 &.active,
                 &:hover {
-                  background: #d6eef5;
-                  border-color: #4ba4c1;
+                  background: #aec9e2;
+                  border-color: #305df9;
                   .genome-label {
-                    color: #3867fa;
+                    color: #f2f6ee;
                   }
                 }
                 .img-container {
                   text-align: center;
-                  background-repeat: no-repeat;
                   background-size: contain;
-                  background-position: center;
+                  background: no-repeat center;
                   padding: 10px;
                   svg {
                     width: 65px;
@@ -235,7 +245,6 @@
             }
             .admin-genomes {
               .genome-label {
-                // float: right;
                 font-size: $font-size-small;
                 color: #313e49;
                 display: inline-block;

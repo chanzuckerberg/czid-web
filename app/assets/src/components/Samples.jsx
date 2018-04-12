@@ -991,9 +991,16 @@ class Samples extends React.Component {
     let compare_button = (
       <div className="download-table">
         <div className="white">
-          <a onClick={this.compareSamples} className="compare center">
-            <span>Compare</span>
-          </a>
+          {
+            this.state.selectedSampleIds.length > 0 ?
+              (<a onClick={this.compareSamples} className="compare center">
+                <span>Compare</span>
+              </a>)
+              :
+              (<a className="compare center btn-disabled">
+                <span>Compare</span>
+              </a>)
+          }
         </div>
       </div>
     );
@@ -1803,7 +1810,7 @@ function ProjectInfoHeading({
       <div className="col s6 download-section-btns">
         {state.selectedProjectId ? project_menu : null}
         {table_download_dropdown}
-        {state.selectedSampleIds.length > 0 ? compare_button : null}
+        {compare_button}
         {state.selectedProjectId && state.allSamples.length == 0
           ? delete_project_button
           : null}
