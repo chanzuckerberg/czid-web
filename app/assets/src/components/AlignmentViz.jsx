@@ -16,6 +16,17 @@ class AccessionViz extends React.Component {
 }
 
 class AlignmentViz extends React.Component {
+  constructor(props) {
+    super(props);
+    this.sampleId = props.sampleId
+    this.alignmentQuery = props.alignmentQuery
+    this.alignmentData = []
+  }
+
+  componentWillMount() {
+    this.fetchAlignmentData();
+  }
+
   render() {
     return (
       <div>

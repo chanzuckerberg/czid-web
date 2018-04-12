@@ -324,7 +324,12 @@ class SamplesController < ApplicationController
       format.json {
         flattened_data = {}
         parse_tree(flattened_data, @taxid, alignment_data, true)
-        render json: flattened_data
+        output_array = []
+        flattened_data.each { |k, v|
+          v["accession"] = k
+          output_array << v
+        }
+        render json: output_array.sort { |a,b| b['reads_count'] <=> a['reads_count'] }
       }
       format.html { @title = @parsed_alignment_results['title'] }
     end
