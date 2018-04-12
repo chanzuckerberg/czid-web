@@ -133,6 +133,14 @@ module PipelineOutputsHelper
   def parse_tree(results, key, current_dict, raw = false)
     if current_dict["reads"]
       if raw # no further parsing
+        # sort the coverage
+        if current_dict["coverage_summary"] && current_dict["coverage_summary"]["coverage"]
+          coverage = current_dict["coverage_summary"]["coverage"].sort_by { |k, v| k.split("-")[0].to_i }
+          current_dict["coverage_summary"]["coverage"] = coverage
+        end
+        # sort the reads
+        reads = current_dict["reads"].sort { |a,b| a['metrics'][6] <=> b['metrics'][6] }
+        current_dict["reads"] = reads
         results[key] = current_dict
       else
         results[key] = parse_accession(current_dict)
