@@ -655,14 +655,14 @@ class SampleUpload extends React.Component {
                         content="Add a new desired experiment or project name"
                         placement="right"
                       >
-                        <Button
-                          icon
+                        <button
+                          type="button"
                           onClick={this.toggleNewProjectInput}
-                          className="upload-page-button"
+                          className="new-project-button new-button skyblue-button"
                         >
-                          <Icon name='plus' />
-                          New Project
-                        </Button>
+                          <i className="fa fa-plus" />
+                          <span>New Project</span>
+                        </button>
                       </Tipsy>
                     </div>
                     <div className="col no-padding s12 new-project-input hidden">
