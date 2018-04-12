@@ -454,7 +454,7 @@ class BulkUploadImport extends React.Component {
                 Select which files you want to run through the pipeline.
               </div>
               <form
-                className="bulkSumbitForm"
+                className="bulkSubmitForm"
                 ref="form"
                 onSubmit={this.handleUploadSubmit}
               >
@@ -619,7 +619,7 @@ class BulkUploadImport extends React.Component {
                             onClick={this.handleUploadSubmit}
                             className="new-button blue-button upload-samples-button"
                           >
-                            Run samples
+                            Run Samples
                           </button>
                         )}
                         <button
@@ -942,7 +942,7 @@ class BulkUploadImport extends React.Component {
                           onClick={this.handleImportSubmit}
                           className="new-button blue-button upload-samples-button"
                         >
-                          Upload samples
+                          Upload Samples
                         </button>
                       )}
                       <button

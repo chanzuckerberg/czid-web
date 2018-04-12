@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import axios from "axios";
 import $ from "jquery";
 import Tipsy from "react-tipsy";
+import { Button, Icon } from 'semantic-ui-react'
 import IconComponent from "./IconComponent";
 import ObjectHelper from "../helpers/ObjectHelper";
 
@@ -654,14 +655,14 @@ class SampleUpload extends React.Component {
                         content="Add a new desired experiment or project name"
                         placement="right"
                       >
-                        <button
-                          type="button"
+                        <Button
+                          icon
                           onClick={this.toggleNewProjectInput}
-                          className="new-project-button new-button skyblue-button"
+                          className="upload-page-button"
                         >
-                          <i className="fa fa-plus" />
-                          <span>New project</span>
-                        </button>
+                          <Icon name='plus' />
+                          New Project
+                        </Button>
                       </Tipsy>
                     </div>
                     <div className="col no-padding s12 new-project-input hidden">
@@ -1047,7 +1048,7 @@ class SampleUpload extends React.Component {
                           }
                           className="new-button blue-button upload-samples-button"
                         >
-                          {updateExistingSample ? "Update" : "Upload"} sample
+                          {updateExistingSample ? "Update" : "Upload"} Sample
                         </button>
                       )}
                       <button

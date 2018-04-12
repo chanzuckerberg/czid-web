@@ -27,11 +27,20 @@
       .error-message {
         color: #d0021b;
       }
+      .upload-page-button {
+        margin-left: 2rem;
+        top: 1rem;
+        i.icon.plus:before {
+          margin-right: 1rem;
+          padding-right: 5rem;
+        }
+      }
       .form-title {
         font-size: $font-size-h3;
         color: #333e48;
         font-weight: $font-weight-bold;
         letter-spacing: 0.28px;
+        padding-bottom: 1rem;
       }
       .upload-info {
         color: #677986;
@@ -49,7 +58,7 @@
           color: #3867fa !important;
         }
       }
-      .bulkSumbitForm {
+      .bulkSubmitForm {
         margin-top: 50px;
       }
       .fields {
@@ -212,6 +221,7 @@
               .select-dropdown {
                 padding-left: 2px;
                 border: 1px solid #cad0da;
+                border-radius: 20px;
               }
               .caret {
                 color: #bac8cf;
