@@ -321,7 +321,11 @@ class SamplesController < ApplicationController
     @parsed_alignment_results = parse_alignment_results(@taxid, @tax_level, alignment_data)
 
     respond_to do |format|
-      format.json { render json: @parsed_alignment_results }
+      format.json {
+        flattened_data = {}
+        parse_tree(flattened_data, @taxid, alignment_data, true)
+        render json: flattened_data
+      }
       format.html { @title = @parsed_alignment_results['title'] }
     end
   end

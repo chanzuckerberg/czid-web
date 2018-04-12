@@ -129,12 +129,17 @@ module PipelineOutputsHelper
     [quality_string, mis_matches]
   end
 
-  def parse_tree(results, key, current_dict)
+
+  def parse_tree(results, key, current_dict, raw = false)
     if current_dict["reads"]
-      results[key] = parse_accession(current_dict)
+      if raw # no further parsing
+        results[key] = current_dict
+      else
+        results[key] = parse_accession(current_dict)
+      end
     else
       current_dict.each do |key2, val|
-        parse_tree(results, key2, val)
+        parse_tree(results, key2, val, raw)
       end
     end
   end
