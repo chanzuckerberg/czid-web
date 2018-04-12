@@ -22,23 +22,32 @@
         }
       }
       .success-message {
-        color: #61A615;
+        color: #61a615;
       }
       .error-message {
-        color: #D0021B;
+        color: #d0021b;
+      }
+      .upload-page-button {
+        margin-left: 2rem;
+        top: 1rem;
+        i.icon.plus:before {
+          margin-right: 1rem;
+          padding-right: 5rem;
+        }
       }
       .form-title {
         font-size: $font-size-h3;
-        color: #333E48;
+        color: #333e48;
         font-weight: $font-weight-bold;
         letter-spacing: 0.28px;
+        padding-bottom: 1rem;
       }
       .upload-info {
         color: #677986;
         font-size: $font-size-base;
       }
       .upload-question {
-        color: #313E49;
+        color: #313e49;
         font-size: $font-size-small;
         margin-top: 20px;
         margin-bottom: 25px;
@@ -46,10 +55,10 @@
           font-weight: $font-weight-semibold;
         }
         a:hover {
-          color: #5ABCD6 !important;
+          color: #3867fa !important;
         }
       }
-      .bulkSumbitForm {
+      .bulkSubmitForm {
         margin-top: 50px;
       }
       .fields {
@@ -60,7 +69,7 @@
               .browser-default {
                 width: 100%;
                 padding: 10px;
-                border: 1px solid #CAD0DA;
+                border: 1px solid #cad0da;
                 background: #fff;
                 &.new_project_input {
                   padding-right: 45px;
@@ -72,8 +81,8 @@
                 color: #677986;
               }
               [disabled] {
-                background: #EEF1F2;
-                border: #CAD0DA;
+                background: #eef1f2;
+                border: #cad0da;
               }
               .input-icon {
                 position: absolute;
@@ -110,7 +119,7 @@
               padding: 0;
             }
             .example-link {
-              color: #3D8CAD !important;
+              color: #3d8cad !important;
               font-size: $font-size-small;
             }
             .new-button {
@@ -127,24 +136,25 @@
               }
             }
             .skyblue-button {
-              background: #D6EEF5;
-              border-color: #D6EEF5;
-              color: #68C2D9;
+              background: #d6eef5;
+              border-color: #d6eef5;
+              color: #68c2d9;
               i {
-                color: #5ABCD6;
+                color: #3867fa;
               }
               &.new-project-button {
                 width: 92%;
                 float: right;
                 font-size: $font-size-base;
-                height:48px;
-                background:#e9ecf1;
+                height: 48px;
+                background: #e9ecf1;
                 border-color: #e9ecf1;
-                color: #586A78;
+                color: #586a78;
                 i {
-                  color: #586A78;
+                  color: #586a78;
                 }
-                &:hover, &.active {
+                &:hover,
+                &.active {
                   background: #c3dde4;
                   border-color: #c3dde4;
                   color: #4d9db1;
@@ -155,9 +165,9 @@
               }
             }
             .blue-button {
-              background: #5ABCD6;
-              border-color: #5ABCD6;
-              color: #FFFFFF;
+              background: #3867fa;
+              border-color: #3867fa;
+              color: #ffffff;
             }
             .upload-samples-button {
               margin-right: 10px;
@@ -172,19 +182,20 @@
                 min-height: 120px;
                 min-width: 120px;
                 margin-bottom: 10px;
-                background: #E8EFF1;
+                background: #e8eff1;
                 cursor: pointer;
                 .genome-label {
-                  color: #95A1AB;
+                  color: #95a1ab;
                   text-align: center;
                   font-size: $font-size-small;
                   margin-top: 5px;
                 }
-                &.active, &:hover {
-                  background: #D6EEF5;
-                  border-color: #4BA4C1;
+                &.active,
+                &:hover {
+                  background: #d6eef5;
+                  border-color: #4ba4c1;
                   .genome-label {
-                    color: #5ABCD6;
+                    color: #3867fa;
                   }
                 }
                 .img-container {
@@ -209,11 +220,11 @@
               }
               .select-dropdown {
                 padding-left: 2px;
-                border: 1px solid #CAD0DA;
+                border: 1px solid #cad0da;
+                border-radius: 20px;
               }
               .caret {
                 color: #bac8cf;
-
               }
               li {
                 span {
@@ -226,13 +237,14 @@
               .genome-label {
                 // float: right;
                 font-size: $font-size-small;
-                color: #313E49;
+                color: #313e49;
                 display: inline-block;
-                border-right: 1px solid #313E49;
+                border-right: 1px solid #313e49;
                 padding-right: 5px;
                 margin-left: 5px;
                 cursor: pointer;
-                &:hover, &.active {
+                &:hover,
+                &.active {
                   color: #3a71a0;
                 }
               }
@@ -246,10 +258,12 @@
         .custom-select-dropdown {
           border: 1px solid transparent;
           padding: 8px;
-          &:hover, &.active {
-            box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
-            }
-          &.genome-select{
+          &:hover,
+          &.active {
+            box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+              0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+          }
+          &.genome-select {
             width: inherit;
             min-width: 75px;
             div {
@@ -263,9 +277,9 @@
             }
           }
           i {
-              color: #BAC7CF;
-              font-weight: $font-weight-semibold;
-            }
+            color: #bac7cf;
+            font-weight: $font-weight-semibold;
+          }
           svg {
             width: 35px;
           }
@@ -276,7 +290,7 @@
           }
           li {
             min-height: inherit;
-            padding: 10px
+            padding: 10px;
           }
         }
         .admin-fields {
@@ -289,16 +303,16 @@
           font-size: $font-size-base;
         }
         [type="checkbox"].filled-in:checked + label:after {
-          border: 2px solid #2786C1;
-          background-color: #2786C1;
+          border: 2px solid #2786c1;
+          background-color: #2786c1;
         }
 
-        [type="checkbox"].filled-in +  label:after {
+        [type="checkbox"].filled-in + label:after {
           border: 2px solid #c7c7c7;
           background-color: #fff;
         }
         label {
-          color: #1B232A;
+          color: #1b232a;
         }
       }
     }

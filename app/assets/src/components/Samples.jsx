@@ -1602,6 +1602,12 @@ function TableSearchField({ searchParams, parent }) {
 }
 
 function TableDownloadDropdown({ project_id, parent }) {
+  let renderText = (
+    <span>
+      {"Download"}
+      <Icon name="angle down" />
+    </span>
+  );
   return (
     <div className="download-wrapper">
       <Dropdown
@@ -1609,7 +1615,7 @@ function TableDownloadDropdown({ project_id, parent }) {
         className="icon link download-btn"
         labeled
         icon={{ className: "cloud download alternate" }}
-        text="Download"
+        text={renderText}
       >
         <Dropdown.Menu>
           <Dropdown.Item href={`/projects/${project_id}/csv`}>

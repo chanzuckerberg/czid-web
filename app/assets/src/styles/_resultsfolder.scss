@@ -3,17 +3,17 @@
 .header {
   margin: 25px 75px;
   .title {
-  font-size: $font-size-h3;
-  color: #03a9f4;
-  .path {
-    margin: 20px;
-    color: #000;
-    font-weight: $font-weight-thin
+    font-size: $font-size-h3;
+    color: #03a9f4;
+    .path {
+      margin: 20px;
+      color: #000;
+      font-weight: $font-weight-thin;
     }
     .back {
       cursor: pointer;
       &:hover {
-        text-decoration: underline
+        text-decoration: underline;
       }
     }
   }
@@ -25,7 +25,7 @@
     td {
       color: $body-color;
       &:hover {
-        color: #5abcd6;
+        color: #3867fa;
       }
     }
   }
@@ -33,6 +33,6 @@
     margin-right: 15px;
   }
   .size-tag {
-    color: #D3D3D3;
+    color: #d3d3d3;
   }
-}  
+}
