@@ -991,16 +991,15 @@ class Samples extends React.Component {
     let compare_button = (
       <div className="download-table">
         <div className="white">
-          {
-            this.state.selectedSampleIds.length > 0 ?
-              (<a onClick={this.compareSamples} className="compare center">
-                <span>Compare</span>
-              </a>)
-              :
-              (<a className="compare center btn-disabled">
-                <span>Compare</span>
-              </a>)
-          }
+          {this.state.selectedSampleIds.length > 0 ? (
+            <a onClick={this.compareSamples} className="compare center">
+              <span>Compare</span>
+            </a>
+          ) : (
+            <a className="compare center btn-disabled">
+              <span>Compare</span>
+            </a>
+          )}
         </div>
       </div>
     );

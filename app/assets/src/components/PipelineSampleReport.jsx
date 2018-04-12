@@ -1611,8 +1611,8 @@ function ReportSearchBox({ parent }) {
             style={{
               backgroundColor: highlighted ? "#eee" : "transparent",
               fontFamily: "'Helvetica Neue', Arial, Helvetica, sans-serif",
-              fontSize: '1rem',
-              overflow: 'hidden',
+              fontSize: "1rem",
+              overflow: "hidden"
             }}
           >
             {item[0]}
