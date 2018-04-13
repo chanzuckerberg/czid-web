@@ -6,13 +6,6 @@ import Tipsy from "react-tipsy";
 import SampleUpload from "./SampleUpload";
 import ObjectHelper from "../helpers/ObjectHelper";
 
-BulkUploadImport.propTypes = {
-  host_genomes: PropTypes.array,
-  csrf: PropTypes.string,
-  loggedin_user: PropTypes.object,
-  projects: PropTypes.array
-};
-
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
     super(props, context);
@@ -976,5 +969,12 @@ class BulkUploadImport extends React.Component {
     );
   }
 }
+
+BulkUploadImport.propTypes = {
+  host_genomes: PropTypes.array,
+  csrf: PropTypes.string,
+  loggedin_user: PropTypes.object,
+  projects: PropTypes.array
+};
 
 export default BulkUploadImport;
