@@ -14,7 +14,7 @@ class SamplesController < ApplicationController
   ##########################################
   skip_before_action :verify_authenticity_token, only: [:create, :update]
 
-  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder, :show_taxid_alignment].freeze
+  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder, :show_taxid_alignment, :show_taxid_alignment_viz].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :samples_taxons, :top_taxons, :heatmap].freeze
@@ -322,16 +322,35 @@ class SamplesController < ApplicationController
 
     respond_to do |format|
       format.json {
+        render json: alignment_data
+      }
+      format.html { @title = @parsed_alignment_results['title'] }
+    end
+  end
+
+  def show_taxid_alignment_viz
+    @taxon_info = params[:taxon_info].split(".")[0]
+    pr = @sample.pipeline_runs.first
+
+    @taxid = @taxon_info.split("_")[2].to_i
+    @tax_level = @taxon_info.split("_")[1]
+    @taxon_name = taxon_name(@taxid, @tax_level)
+
+    respond_to do |format|
+      format.json {
+        s3_file_path = "#{pr.alignment_viz_output_s3_path}/#{@taxon_info.tr('_','.')}.align_viz.json"
+        alignment_data = JSON.parse(get_s3_file(s3_file_path) || "{}")
         flattened_data = {}
         parse_tree(flattened_data, @taxid, alignment_data, true)
         output_array = []
         flattened_data.each { |k, v|
           v["accession"] = k
+          v["reads_count"] = v["reads"].size
           output_array << v
         }
         render json: output_array.sort { |a,b| b['reads_count'] <=> a['reads_count'] }
       }
-      format.html { @title = @parsed_alignment_results['title'] }
+      format.html { }
     end
   end
 

@@ -139,7 +139,7 @@ module PipelineOutputsHelper
           current_dict["coverage_summary"]["coverage"] = coverage
         end
         # sort the reads
-        reads = current_dict["reads"].sort { |a,b| a['metrics'][6] <=> b['metrics'][6] }
+        reads = current_dict["reads"].sort { |a,b| (a[2][6]).to_i <=> (b[2][6]).to_i }
         current_dict["reads"] = reads
         results[key] = current_dict
       else
@@ -152,13 +152,18 @@ module PipelineOutputsHelper
     end
   end
 
-  def parse_alignment_results(taxid, tax_level, alignment_data)
+  def taxon_name(taxid, tax_level)
     taxon = TaxonLineage.find_by(taxid: taxid)
+    taxon["#{tax_level}_name"] if taxon
+  end
+
+  def parse_alignment_results(taxid, tax_level, alignment_data)
     results = {}
     parse_tree(results, taxid, alignment_data)
     accession_ids = results.keys.sort_by { |k| -results[k]['reads_count'] }
 
-    title = taxon["#{tax_level}_name"].to_s + "(#{tax_level}) Alignment (#{results.size} unique accessions)"
+    name = taxon_name(taxid, tax_level)
+    title = name.to_s + "(#{tax_level}) Alignment (#{results.size} unique accessions)"
     { "title" => title, "details" => results, "accessions" => accession_ids }
   end
 
