@@ -6,9 +6,11 @@ import Tipsy from "react-tipsy";
 import ReactAutocomplete from "react-autocomplete";
 import { Dropdown, Label, Menu, Icon, Popup } from "semantic-ui-react";
 import numberWithCommas from "../helpers/strings";
-import LabeledDropdown from "./LabeledDropdown";
+import LabeledDropdown from './LabeledDropdown';
+import AdvancedThresholdFilterDropdown from './AdvancedThresholdFilter';
 import StringHelper from "../helpers/StringHelper";
-import TaxonTooltip from "./TaxonTooltip";
+import TaxonTooltip from './TaxonTooltip';
+import ThresholdMap from "./ThresholdMap";
 import Nanobar from "nanobar";
 import d3, { event as currentEvent } from "d3";
 
@@ -36,8 +38,8 @@ class PipelineSampleReport extends React.Component {
     const cached_cats = Cookies.get("excluded_categories");
     const cached_exclude_subcats = Cookies.get("exclude_subcats");
     const cached_name_type = Cookies.get("name_type");
-    const savedThresholdFilters = this.getSavedThresholdFilters();
-    this.category_child_parent = { Phage: "Viruses" };
+    const savedThresholdFilters = ThresholdMap.getSavedThresholdFilters();
+    this.category_child_parent = { Phage: 'Viruses' };
     this.showConcordance = false;
     this.allThresholds = ThresholdMap(this.showConcordance);
     this.genus_map = {};
@@ -207,7 +209,7 @@ class PipelineSampleReport extends React.Component {
       this.state.excluded_categories.length > 0 ||
       this.state.exclude_subcats.length > 0 ||
       (this.state.activeThresholds.length > 0 &&
-        this.isThresholdValid(this.state.activeThresholds[0]))
+        ThresholdMap.isThresholdValid(this.state.activeThresholds[0]))
     ) {
       return true;
     }
@@ -665,48 +667,22 @@ class PipelineSampleReport extends React.Component {
   validThresholdCount(thresholds) {
     let cnt = 0;
     for (let i = 0; i < thresholds.length; i += 1) {
-      if (this.isThresholdValid(thresholds[i])) {
+      if (ThresholdMap.isThresholdValid(thresholds[i])) {
         cnt += 1;
       }
     }
     return cnt;
   }
 
-  isThresholdValid(threshold) {
-    if (
-      threshold.hasOwnProperty("label") &&
-      threshold.hasOwnProperty("operator") &&
-      threshold.hasOwnProperty("value")
-    ) {
-      return (
-        threshold.label.length > 0 &&
-        threshold.operator.length > 0 &&
-        (threshold.value != "" && !isNaN(threshold.value))
-      );
-    }
-    return false;
-  }
-
   saveThresholdFilters(closeWindow = true) {
     this.applyThresholdFilters(this.state.taxonomy_details, true);
-    // prevent saving threshold with invalid values
-    const activeThresholds = this.state.activeThresholds.filter(threshold => {
-      return this.isThresholdValid(threshold);
-    });
-    window.localStorage.setItem(
-      "activeThresholds",
-      JSON.stringify(activeThresholds)
-    );
+
+    ThresholdMap.saveThresholdFilters(this.state.activeThresholds);
+
     if (closeWindow) {
       $(".advanced-filters-modal").slideUp(300);
     }
   }
-
-  getSavedThresholdFilters() {
-    const activeThresholds = window.localStorage.getItem("activeThresholds");
-    return activeThresholds ? JSON.parse(activeThresholds) : [];
-  }
-
   applyThresholdFilters(candidate_taxons, play_animation = true) {
     let thresholded_taxons = [];
     let genus_taxon = {};
@@ -719,7 +695,7 @@ class PipelineSampleReport extends React.Component {
           thresholded_taxons.push(genus_taxon);
           thresholded_taxons = thresholded_taxons.concat(matched_taxons);
         } else if (
-          this.taxonPassThresholdFilter(
+          ThresholdMap.taxonPassThresholdFilter(
             genus_taxon,
             this.state.activeThresholds
           )
@@ -730,7 +706,7 @@ class PipelineSampleReport extends React.Component {
         matched_taxons = [];
       } else {
         // species
-        if (this.taxonPassThresholdFilter(taxon, this.state.activeThresholds)) {
+        if (ThresholdMap.taxonPassThresholdFilter(taxon, this.state.activeThresholds)) {
           matched_taxons.push(taxon);
         }
       }
@@ -740,7 +716,7 @@ class PipelineSampleReport extends React.Component {
       thresholded_taxons.push(genus_taxon);
       thresholded_taxons = thresholded_taxons.concat(matched_taxons);
     } else if (
-      this.taxonPassThresholdFilter(genus_taxon, this.state.activeThresholds)
+      ThresholdMap.taxonPassThresholdFilter(genus_taxon, this.state.activeThresholds)
     ) {
       thresholded_taxons.push(genus_taxon);
     }
@@ -756,41 +732,6 @@ class PipelineSampleReport extends React.Component {
       this.flash();
     }
   }
-
-  taxonPassThresholdFilter(taxon, rules) {
-    if (Object.keys(taxon).length <= 0) {
-      return false;
-    }
-
-    for (let i = 0; i < rules.length; i += 1) {
-      let rule = rules[i];
-      if (this.isThresholdValid(rule)) {
-        let { label, operator, value } = rule;
-        let threshold = parseFloat(value);
-        const [fieldType, fieldTitle] = label.split("_");
-        const taxonValue = (taxon[fieldType] || {})[fieldTitle];
-        switch (operator) {
-          case ">=":
-            if (taxonValue < threshold) {
-              return false;
-            }
-            break;
-          case "<=":
-            if (taxonValue > threshold) {
-              return false;
-            }
-            break;
-          default:
-            // '>='
-            if (taxonValue < threshold) {
-              return false;
-            }
-        }
-      }
-    }
-    return true;
-  }
-
   handleThresholdEnter(event) {
     if (event.keyCode === 13) {
       this.applyThresholdFilters(this.state.taxonomy_details, true);
@@ -1234,68 +1175,6 @@ class PipelineSampleReport extends React.Component {
   }
 }
 
-function ThresholdMap(show_concordance) {
-  let result = [
-    {
-      name: "Score",
-      value: "NT_aggregatescore"
-    },
-    {
-      name: "NT Z Score",
-      value: "NT_zscore"
-    },
-    {
-      name: "NT rPM",
-      value: "NT_rpm"
-    },
-    {
-      name: "NT r (total reads)",
-      value: "NT_r"
-    },
-    {
-      name: "NT %id",
-      value: "NT_percentidentity"
-    },
-    {
-      name: "NT log(1/e)",
-      value: "NT_neglogevalue"
-    },
-    {
-      name: "NR Z Score",
-      value: "NR_zscore"
-    },
-    {
-      name: "NR r (total reads)",
-      value: "NR_r"
-    },
-    {
-      name: "NR rPM",
-      value: "NR_rpm"
-    },
-    {
-      name: "NR %id",
-      value: "NR_percentidentity"
-    },
-    {
-      name: "R log(1/e)",
-      value: "NR_neglogevalue"
-    }
-  ];
-  if (show_concordance) {
-    result = result.concat([
-      {
-        name: "NT %conc",
-        value: "NT_percentconcordant"
-      },
-      {
-        name: "NR %conc",
-        value: "NR_percentconcordant"
-      }
-    ]);
-  }
-  return result;
-}
-
 function CollapseExpand({ tax_info, parent }) {
   const fake_or_real = tax_info.genus_taxid < 0 ? "fake-genus" : "real-genus";
   return (
@@ -1325,7 +1204,7 @@ function CollapseExpand({ tax_info, parent }) {
 }
 
 function AdvancedFilterTagList({ threshold, i, parent }) {
-  if (parent.isThresholdValid(threshold)) {
+  if (ThresholdMap.isThresholdValid(threshold)) {
     return (
       <Label
         className="label-tags"
@@ -1470,55 +1349,6 @@ function ReportTableHeader({ parent }) {
     </div>
   );
 }
-
-function AdvancedFilters({ parent }) {
-  return (
-    <li className="advanced-filter-top top-filter ui dropdown custom-dropdown filter-btn">
-      <div
-        className="advanced-filters-activate"
-        onClick={() => {
-          parent.saveThresholdFilters(false);
-        }}
-      >
-        <span className="filter-label">Advanced Filters</span>
-        <span className="filter-label-count">
-          {parent.validThresholdCount(parent.state.activeThresholds)}{" "}
-        </span>
-        <i className="fa fa-angle-down right down-box" />
-      </div>
-      <div className="advanced-filters-modal round-me">
-        <div className="filter-inputs">
-          {parent.state.activeThresholds.map((activeThreshold, index) => {
-            return (
-              <ActiveThresholdRows
-                activeThreshold={activeThreshold}
-                key={index}
-                index={index}
-                parent={parent}
-              />
-            );
-          })}
-        </div>
-        <div
-          className="add-threshold-filter inner-menus"
-          onClick={() => parent.appendThresholdFilter()}
-        >
-          <i className="fa fa-plus-circle" /> Add threshold
-        </div>
-        <br />
-        <div className="">
-          <button
-            className="inner-menus save-btn"
-            onClick={() => parent.saveThresholdFilters()}
-          >
-            Save
-          </button>
-        </div>
-      </div>
-    </li>
-  );
-}
-
 function CategoryFilter({ parent }) {
   return (
     <li className="categories-dropdown top-filter ui dropdown custom-dropdown filter-btn">
@@ -1766,7 +1596,17 @@ class RenderMarkup extends React.Component {
                       <NameTypeFilter parent={parent} />
                       <BackgroundModelFilter parent={parent} />
                       <CategoryFilter parent={parent} />
-                      <AdvancedFilters parent={parent} />
+                      <AdvancedThresholdFilterDropdown
+                        labels={parent.allThresholds}
+                        operators={[">=", "<="]}
+                        filters={parent.state.activeThresholds}
+                        onChange={(filters)=> {
+                          parent.setState({activeThresholds: filters});
+                        }}
+                        onApply={() => {
+                          parent.saveThresholdFilters(false);
+                        }}
+                      />
                     </ul>
                   </div>
                   {this.renderMenu()}
@@ -1787,61 +1627,6 @@ class RenderMarkup extends React.Component {
       </div>
     );
   }
-}
-
-function ActiveThresholdRows({ activeThreshold, index, parent }) {
-  return (
-    <div key={index} className="row">
-      <div className=" col s5">
-        <select
-          value={activeThreshold.label}
-          onChange={e =>
-            parent.setThresholdProperty(index, "label", e.target.value)
-          }
-          className="browser-default inner-menus"
-        >
-          {parent.allThresholds.map(thresholdObject => {
-            return (
-              <option key={thresholdObject.value} value={thresholdObject.value}>
-                {thresholdObject.name}
-              </option>
-            );
-          })}
-        </select>
-      </div>
-      <div className="col s3">
-        <select
-          value={activeThreshold.operator}
-          onChange={e =>
-            parent.setThresholdProperty(index, "operator", e.target.value)
-          }
-          className="browser-default inner-menus"
-        >
-          <option value=">=">>=</option>
-          <option value="<=">&lt;=</option>
-        </select>
-      </div>
-      <div className="col s3">
-        <input
-          className="browser-default metric-thresholds inner-menus"
-          onChange={e =>
-            parent.setThresholdProperty(index, "value", e.target.value)
-          }
-          onKeyDown={e => parent.handleThresholdEnter(e, index)}
-          name="group2"
-          value={activeThreshold.value}
-          id={activeThreshold.label}
-          type="number"
-        />
-      </div>
-      <div
-        className="col s1"
-        onClick={() => parent.removeThresholdFilter(index)}
-      >
-        <i className="fa fa-close " data-ng={index} />
-      </div>
-    </div>
-  );
 }
 
 class PipelineSampleTree extends React.PureComponent {
