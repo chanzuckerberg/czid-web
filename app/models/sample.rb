@@ -356,7 +356,7 @@ class Sample < ApplicationRecord
     # The subsample field of "sample" is currently used as a simple flag (UI checkbox),
     # but was made an integer type in case we want to allow users to enter the desired number
     # of reads to susbample to in the future
-    pr.pipeline_branch = pipeline_branch.blank? ? "master" : pipeline_branch
+    pr.pipeline_branch = pipeline_branch.blank? ? "charles/hit-calling" : pipeline_branch
     pr.pipeline_commit = `git ls-remote https://github.com/chanzuckerberg/idseq-pipeline.git | grep refs/heads/#{pr.pipeline_branch}`.split[0]
 
     pr.save
