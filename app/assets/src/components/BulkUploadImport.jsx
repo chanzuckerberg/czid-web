@@ -32,6 +32,8 @@ class BulkUploadImport extends React.Component {
     this.userDetails = props.loggedin_user;
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
     this.openCliModal = this.openCliModal.bind(this);
+    this.setBulkPathRef = this.setBulkPathRef.bind(this);
+    this.setNewProjectRef = this.setNewProjectRef(this);
     this.bulkPathRef = null;
     this.newProjectRef = null;
     this.state = {
@@ -66,7 +68,6 @@ class BulkUploadImport extends React.Component {
 
   componentDidMount() {
     $("body").addClass("background-cover");
-    this.initializeSelectTag();
     this.initializeSelectTag();
     this.initializeSelectAll();
   }
@@ -501,12 +502,9 @@ class BulkUploadImport extends React.Component {
                               id={i}
                               className="filled-in sample-box"
                               value={
-                                this.state.selectedSampleIndices.indexOf(i) <
-                                0 ? (
-                                  0
-                                ) : (
-                                  1
-                                )
+                                this.state.selectedSampleIndices.indexOf(i) < 0
+                                  ? 0
+                                  : 1
                               }
                               onChange={this.selectSample}
                             />
@@ -812,12 +810,13 @@ class BulkUploadImport extends React.Component {
                             return (
                               <div
                                 key={g.id}
-                                className={`${this.state.hostName === g.name
-                                  ? "active"
-                                  : ""} genome-label`}
+                                className={`${
+                                  this.state.hostName === g.name ? "active" : ""
+                                } genome-label`}
                                 id={g.name}
                                 onClick={() =>
-                                  this.handleHostChange(g.id, g.name)}
+                                  this.handleHostChange(g.id, g.name)
+                                }
                               >
                                 {g.name}
                               </div>
@@ -834,12 +833,13 @@ class BulkUploadImport extends React.Component {
                           return SampleUpload.resolveGenomeIcon(g.name) ? (
                             <li
                               key={g.id}
-                              className={`${this.state.hostName === g.name
-                                ? "active"
-                                : ""} `}
+                              className={`${
+                                this.state.hostName === g.name ? "active" : ""
+                              } `}
                               id={g.name}
                               onClick={() =>
-                                this.handleHostChange(g.id, g.name)}
+                                this.handleHostChange(g.id, g.name)
+                              }
                             >
                               {this.state.hostName === g.name ? (
                                 <div
