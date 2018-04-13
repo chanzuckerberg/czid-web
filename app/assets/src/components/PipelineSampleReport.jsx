@@ -677,7 +677,7 @@ class PipelineSampleReport extends React.Component {
   saveThresholdFilters(closeWindow = true) {
     this.applyThresholdFilters(this.state.taxonomy_details, true);
 
-    ThresholdMap.saveThresholdFilters(this.state.activeFilters);
+    ThresholdMap.saveThresholdFilters(this.state.activeThresholds);
 
     if (closeWindow) {
       $(".advanced-filters-modal").slideUp(300);

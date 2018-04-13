@@ -210,8 +210,9 @@ class AdvancedThresholdFilterDropdown extends React.Component {
       <Popup
         trigger={<Dropdown fluid={this.props.fluid} className="active-threshold-filter-dropdown" text={<span>Advanced Filters <Label>{this.props.filters.length}</Label></span>} open={false}/>}
         on='click'
-        position='bottom left'
+        position='bottom right'
         hideOnScroll={true}
+        keepInViewPort={false}
       >
         <AdvancedThresholdFilter {...this.props} filters={this.props.filters} onChange={this.onThresholdsChanged.bind(this)}/>
       </Popup>
