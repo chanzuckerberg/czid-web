@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from 'prop-types';
 import { Button, Dropdown, Icon, Input, Label, Popup } from "semantic-ui-react";
+import ThresholdMap from "./ThresholdMap";
 
 class AdvancedThresholdFilterRow extends React.Component {
   constructor (props) {
@@ -206,9 +207,22 @@ class AdvancedThresholdFilterDropdown extends React.Component {
     this.props.onChange(filters);
   }
   render () {
+    let validFilters = [];
+    for (let filter of this.props.filters) {
+      if (ThresholdMap.isThresholdValid(filter)) {
+        validFilters.push(filter);
+      }
+    }
     return (
       <Popup
-        trigger={<Dropdown fluid={this.props.fluid} className="active-threshold-filter-dropdown" text={<span>Advanced Filters <Label>{this.props.filters.length}</Label></span>} open={false}/>}
+        trigger={
+          <Dropdown
+            fluid={this.props.fluid}
+            className="active-threshold-filter-dropdown"
+            text={<span>Advanced Filters <Label>{validFilters.length}</Label></span>}
+            open={false}
+          />
+        }
         on='click'
         position='bottom right'
         hideOnScroll={true}
