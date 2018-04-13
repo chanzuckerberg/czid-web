@@ -1,10 +1,17 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import PropTypes from "prop-types";
 import axios from "axios";
 import $ from "jquery";
 import Tipsy from "react-tipsy";
 import SampleUpload from "./SampleUpload";
 import ObjectHelper from "../helpers/ObjectHelper";
+
+BulkUploadImport.propTypes = {
+  host_genomes: PropTypes.array,
+  csrf: PropTypes.string,
+  loggedin_user: PropTypes.object,
+  projects: PropTypes.array
+};
 
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
@@ -32,6 +39,8 @@ class BulkUploadImport extends React.Component {
     this.userDetails = props.loggedin_user;
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
     this.openCliModal = this.openCliModal.bind(this);
+    this.bulkPathRef = null;
+    this.newProjectRef = null;
     this.state = {
       submitting: false,
       allProjects: props.projects || [],
@@ -65,14 +74,6 @@ class BulkUploadImport extends React.Component {
   componentDidMount() {
     $("body").addClass("background-cover");
     this.initializeSelectTag();
-    $(ReactDOM.findDOMNode(this.refs.projectSelect)).on(
-      "change",
-      this.handleProjectChange
-    );
-    $(ReactDOM.findDOMNode(this.refs.hostSelect)).on(
-      "change",
-      this.handleHostChange
-    );
     this.initializeSelectTag();
     this.initializeSelectAll();
   }
@@ -89,6 +90,14 @@ class BulkUploadImport extends React.Component {
         this.initializeSelectTag();
       }
     );
+  }
+
+  setBulkPathRef(ref) {
+    this.bulkPathRef = ref;
+  }
+
+  setNewProjectRef(ref) {
+    this.newProjectRef = ref;
   }
 
   selectSample(e) {
@@ -203,7 +212,7 @@ class BulkUploadImport extends React.Component {
     axios
       .post("/projects.json", {
         project: {
-          name: this.refs.new_project.value,
+          name: this.newProjectRef.value,
           public_access: this.state.public_checked ? 1 : 0
         },
         authenticity_token: this.csrf
@@ -220,7 +229,7 @@ class BulkUploadImport extends React.Component {
             successMessage: "Project added successfully"
           },
           () => {
-            this.refs.new_project.value = "";
+            this.newProjectRef.value = "";
             that.initializeSelectTag();
           }
         );
@@ -235,7 +244,7 @@ class BulkUploadImport extends React.Component {
 
   isProjectInvalid() {
     if (
-      this.refs.new_project.value === "" &&
+      this.newProjectRef.value === "" &&
       this.state.project === "Select a project"
     ) {
       this.setState({
@@ -335,10 +344,10 @@ class BulkUploadImport extends React.Component {
     } else {
       errors.project = "Please select a project";
     }
-    if (this.refs.bulk_path) {
-      if (this.refs.bulk_path.value === "") {
+    if (this.bulkPathRef) {
+      if (this.bulkPathRef.value === "") {
         errors.bulk_path = "Please fill in the S3 bulk path";
-      } else if (!this.filePathValid(this.refs.bulk_path.value)) {
+      } else if (!this.filePathValid(this.bulkPathRef.value)) {
         errors.bulk_path = "S3 bulk path is invalid";
       }
     } else {
@@ -383,7 +392,7 @@ class BulkUploadImport extends React.Component {
       .html(
         `${selectedSampleElement.text()} <i class='fa fa-caret-down right' />`
       );
-    // updating the label for slected project
+    // updating the label for selected project
     const samples = this.state.samples;
     samples[samplesId].project_id = this.state.allProjects[projectId].id;
     this.setState({
@@ -454,8 +463,7 @@ class BulkUploadImport extends React.Component {
                 Select which files you want to run through the pipeline.
               </div>
               <form
-                className="bulkSubmitForm"
-                ref="form"
+                className="bulkSumbitForm"
                 onSubmit={this.handleUploadSubmit}
               >
                 {this.state.success ? (
@@ -496,14 +504,16 @@ class BulkUploadImport extends React.Component {
                         <div className="row field-row sample-row" key={i}>
                           <p className="col s5 sample-names no-padding">
                             <input
-                              ref="samples_list"
                               type="checkbox"
                               id={i}
                               className="filled-in sample-box"
                               value={
-                                this.state.selectedSampleIndices.indexOf(i) < 0
-                                  ? 0
-                                  : 1
+                                this.state.selectedSampleIndices.indexOf(i) <
+                                0 ? (
+                                  0
+                                ) : (
+                                  1
+                                )
                               }
                               onChange={this.selectSample}
                             />
@@ -542,7 +552,6 @@ class BulkUploadImport extends React.Component {
                                       onClick={e => {
                                         this.handleHostChangeForSample(i, j, e);
                                       }}
-                                      ref="genome"
                                       key={j}
                                       value={host_genome.id}
                                     >
@@ -584,7 +593,6 @@ class BulkUploadImport extends React.Component {
                                           e
                                         );
                                       }}
-                                      ref="project"
                                       key={j}
                                       value={project.id}
                                     >
@@ -681,7 +689,7 @@ class BulkUploadImport extends React.Component {
                 {this.state.errorMessage}
               </div>
             ) : null}
-            <form ref="form" onSubmit={this.handleUpload}>
+            <form onSubmit={this.handleUpload}>
               <div className="fields">
                 <div className="field">
                   <div className="row">
@@ -699,7 +707,6 @@ class BulkUploadImport extends React.Component {
                         data-delay="50"
                       >
                         <select
-                          ref="projectSelect"
                           disabled={
                             this.state.disableProjectSelect ? "disabled" : ""
                           }
@@ -717,7 +724,7 @@ class BulkUploadImport extends React.Component {
                               "name"
                             ).map((project, i) => {
                               return (
-                                <option ref="project" key={i} id={project.id}>
+                                <option key={i} id={project.id}>
                                   {project.name}
                                 </option>
                               );
@@ -752,7 +759,7 @@ class BulkUploadImport extends React.Component {
                     <div className="col no-padding s12 new-project-input hidden">
                       <input
                         type="text"
-                        ref="new_project"
+                        ref={this.setNewProjectRef}
                         onFocus={this.clearError}
                         className="browser-default"
                         placeholder="Input new project name"
@@ -760,7 +767,7 @@ class BulkUploadImport extends React.Component {
                       <span
                         className="input-icon hidden"
                         onClick={e => {
-                          if (this.refs.new_project.value.trim().length) {
+                          if (this.newProjectRef.value.trim().length) {
                             this.handleProjectSubmit();
                           }
                           $(".new-project-button").click();
@@ -776,7 +783,6 @@ class BulkUploadImport extends React.Component {
                     </div>
                     <div className="col no-padding 12 new-project-input public_access hidden">
                       <input
-                        ref="public_checked"
                         type="checkbox"
                         name="switch"
                         id="public_checked"
@@ -813,13 +819,12 @@ class BulkUploadImport extends React.Component {
                             return (
                               <div
                                 key={g.id}
-                                className={`${
-                                  this.state.hostName === g.name ? "active" : ""
-                                } genome-label`}
+                                className={`${this.state.hostName === g.name
+                                  ? "active"
+                                  : ""} genome-label`}
                                 id={g.name}
                                 onClick={() =>
-                                  this.handleHostChange(g.id, g.name)
-                                }
+                                  this.handleHostChange(g.id, g.name)}
                               >
                                 {g.name}
                               </div>
@@ -836,13 +841,12 @@ class BulkUploadImport extends React.Component {
                           return SampleUpload.resolveGenomeIcon(g.name) ? (
                             <li
                               key={g.id}
-                              className={`${
-                                this.state.hostName === g.name ? "active" : ""
-                              } `}
+                              className={`${this.state.hostName === g.name
+                                ? "active"
+                                : ""} `}
                               id={g.name}
                               onClick={() =>
-                                this.handleHostChange(g.id, g.name)
-                              }
+                                this.handleHostChange(g.id, g.name)}
                             >
                               {this.state.hostName === g.name ? (
                                 <div
@@ -896,8 +900,8 @@ class BulkUploadImport extends React.Component {
                             extensions to be considered:<br />
                             fastq.gz / fq.gz / fastq / fq / fasta.gz / fa.gz /
                             fasta / fa.<br />
-                            Paired files must be labeled "_R1" or "_R2" at the
-                            end of the basename.
+                            Paired files must be labeled &quot;_R1&quot; or
+                            &quot;_R2&quot; at the end of the basename.
                           </i>
                         </div>
                         <div className="example-link">
@@ -913,7 +917,7 @@ class BulkUploadImport extends React.Component {
                         onChange={this.handleBulkPathChange}
                         onFocus={this.clearError}
                         type="text"
-                        ref="bulk_path"
+                        ref={this.setBulkPathRef}
                         className="browser-default"
                         placeholder="s3://aws/path-to-sample-folder"
                       />
