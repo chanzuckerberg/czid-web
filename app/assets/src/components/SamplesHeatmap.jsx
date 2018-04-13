@@ -756,7 +756,6 @@ class SamplesHeatmap extends React.Component {
     if (ThresholdMap.taxonPassThresholdFilter(data, this.state.appliedThresholds)) {
       return value;
     }
-    return null;
   }
 
   makeDataGetter(dataType) {
