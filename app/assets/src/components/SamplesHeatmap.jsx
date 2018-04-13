@@ -1,22 +1,25 @@
-import React from "react";
-import PropTypes from "prop-types";
-import clusterfck from "clusterfck";
-import axios from "axios";
-import d3, { event as currentEvent } from "d3";
-import NumAbbreviate from "number-abbreviate";
-import { Button, Popup } from "semantic-ui-react";
-import copy from "copy-to-clipboard";
-import textWidth from "text-width";
-import { StickyContainer, Sticky } from "react-sticky";
+import React from 'react';
+import PropTypes from 'prop-types';
+import clusterfck from 'clusterfck';
+import axios from 'axios';
+import d3, {event as currentEvent} from 'd3';
+import NumAbbreviate from 'number-abbreviate';
+import { Button, Popup } from 'semantic-ui-react'
+import copy from 'copy-to-clipboard';
+import textWidth from 'text-width';
+import { StickyContainer, Sticky } from 'react-sticky';
 
-import symlog from "./symlog";
-import ObjectHelper from "../helpers/ObjectHelper";
-import ReactNouislider from "./ReactNouislider";
-import LabeledDropdown from "./LabeledDropdown";
-import LabeledFilterDropdown from "./LabeledFilterDropdown";
-import TaxonTooltip from "./TaxonTooltip";
+import symlog from './symlog';
+import AdvancedThresholdFilterDropdown from './AdvancedThresholdFilter';
+import ObjectHelper from '../helpers/ObjectHelper';
+import ErrorBoundary from './ErrorBoundary';
+import ReactNouislider from './ReactNouislider';
+import LabeledDropdown from './LabeledDropdown';
+import LabeledFilterDropdown from './LabeledFilterDropdown';
+import TaxonTooltip from './TaxonTooltip';
+import ThresholdMap from "./ThresholdMap";
 
-class D3Heatmap extends React.Component {
+class D3Heatmap extends React.PureComponent {
   constructor(props) {
     super(props);
 
@@ -655,27 +658,26 @@ class SamplesHeatmap extends React.Component {
       species: urlParams.species || "0",
       dataType: urlParams.dataType || "NT.aggregatescore",
       dataScaleIdx: urlParams.dataScaleIdx || 0,
-      minDataThreshold: urlParams.minDataThreshold || -99999999999,
-      maxDataThreshold: urlParams.maxDataThreshold || 99999999999,
       sample_ids: urlParams.sample_ids || [],
       taxon_ids: urlParams.taxon_ids || [],
-      categories: urlParams.categories
+      categories: urlParams.categories,
+      activeThresholds: urlParams.appliedThresholds || ThresholdMap.getSavedThresholdFilters(),
+      appliedThresholds: urlParams.appliedThresholds || ThresholdMap.getSavedThresholdFilters(),
     };
     this.updateUrlParams();
-
+    this.thresholdLabels = new ThresholdMap(false);
     let to_bind = [
-      "getRowLabel",
-      "getColumnLabel",
-      "getTooltip",
-      "onCategoryChanged",
-      "onCellClick",
-      "onRemoveRow",
-      "onShareClick",
-      "sampleLabelClicked",
-      "taxonLevelChanged",
-      "updateDataScale",
-      "updateDataType",
-      "updateDataThreshold"
+      'getRowLabel',
+      'getColumnLabel',
+      'getTooltip',
+      'onCategoryChanged',
+      'onCellClick',
+      'onRemoveRow',
+      'onShareClick',
+      'sampleLabelClicked',
+      'taxonLevelChanged',
+      'updateDataScale',
+      'updateDataType',
     ];
     for (let fname of to_bind) {
       this["_" + fname] = this[fname].bind(this);
@@ -704,30 +706,11 @@ class SamplesHeatmap extends React.Component {
     };
     sp.set("species", newParams["species"] || this.state.species);
     sp.set("dataType", newParams["dataType"] || this.state.dataType);
-    sp.set(
-      "dataScaleIdx",
-      newParams["dataScaleIdx"] || this.state.dataScaleIdx
-    );
-    sp.set(
-      "minDataThreshold",
-      newParams["minDataThreshold"] || this.state.minDataThreshold
-    );
-    sp.set(
-      "maxDataThreshold",
-      newParams["maxDataThreshold"] || this.state.maxDataThreshold
-    );
-    sp.set(
-      "sample_ids",
-      lst_to_comma(newParams["sample_ids"]) || this.state.sample_ids
-    );
-    sp.set(
-      "taxon_ids",
-      lst_to_comma(newParams["taxon_ids"]) || this.state.taxon_ids
-    );
-    sp.set(
-      "categories",
-      lst_to_comma(newParams["categories"]) || this.state.categories
-    );
+    sp.set("dataScaleIdx", newParams["dataScaleIdx"] || this.state.dataScaleIdx);
+    sp.set("sample_ids", lst_to_comma(newParams["sample_ids"]) || this.state.sample_ids);
+    sp.set("taxon_ids", lst_to_comma(newParams["taxon_ids"]) || this.state.taxon_ids);
+    sp.set("categories", lst_to_comma(newParams["categories"]) || this.state.categories);
+    sp.set("appliedThresholds", JSON.stringify(newParams["appliedThresholds"] || this.state.appliedThresholds));
     window.history.replaceState(null, null, url.toString());
   }
 
@@ -738,26 +721,29 @@ class SamplesHeatmap extends React.Component {
       return x == null ? null : parseFloat(x);
     };
 
-    let lon = function(x) {
-      return x == null
-        ? null
-        : x.split(",").map(function(j) {
-            return parseInt(j, 10);
-          });
-    };
-    let ton = function(x) {
-      return x == null ? null : x.split(",");
-    };
+    let lon = function (x) {
+      return (x == null) ? null : x.split(",").map(function(j) { return parseInt(j, 10); });
+    }
+    let ton = function (x) {
+      return (x == null) ? null : x.split(",");
+    }
+
+    let json_or_null = function (x) {
+      try {
+        return JSON.parse(x);
+      } catch (error) {
+        return null;
+      }
+    }
     return {
       species: sp.get("species"),
       dataType: sp.get("dataType"),
       dataScaleIdx: ion(sp.get("dataScaleIdx")),
-      minDataThreshold: ion(sp.get("minDataThreshold")),
-      maxDataThreshold: ion(sp.get("maxDataThreshold")),
       sample_ids: lon(sp.get("sample_ids")),
       taxon_ids: lon(sp.get("taxon_ids")),
-      categories: ton(sp.get("categories"))
-    };
+      categories: ton(sp.get("categories")),
+      appliedThresholds: json_or_null(sp.get('appliedThresholds')),
+    }
   }
 
   getDataProperty(data, property) {
@@ -767,12 +753,10 @@ class SamplesHeatmap extends React.Component {
 
   getThresholdedDataProperty(data, property) {
     let value = this.getDataProperty(data, property);
-    if (
-      value >= this.state.minDataThreshold &&
-      value <= this.state.maxDataThreshold
-    ) {
+    if (ThresholdMap.taxonPassThresholdFilter(data, this.state.appliedThresholds)) {
       return value;
     }
+    return null;
   }
 
   makeDataGetter(dataType) {
@@ -1045,30 +1029,30 @@ class SamplesHeatmap extends React.Component {
       return;
     }
     return (
-      <D3Heatmap
-        colTree={this.clustered_samples.tree}
-        rowTree={this.clustered_taxons.tree}
-        rows={this.filteredTaxonsNames.length}
-        columns={this.state.data.length}
-        getRowLabel={this._getRowLabel}
-        getColumnLabel={this._getColumnLabel}
-        getCellValue={this.dataGetters[this.state.dataType]}
-        getTooltip={this._getTooltip}
-        onCellClick={this._onCellClick}
-        onColumnLabelClick={this._sampleLabelClicked}
-        onRemoveRow={this._onRemoveRow}
-        scale={this.scales[this.state.dataScaleIdx][1]}
-        colors={this.colors}
-      />
-    );
+			<ErrorBoundary>
+				<D3Heatmap
+					colTree={this.clustered_samples.tree}
+					rowTree={this.clustered_taxons.tree}
+					rows={this.filteredTaxonsNames.length}
+					columns={this.state.data.length}
+					getRowLabel={this._getRowLabel}
+					getColumnLabel={this._getColumnLabel}
+					getCellValue={this.dataGetters[this.state.dataType]}
+					getTooltip={this._getTooltip}
+					onCellClick={this._onCellClick}
+					onColumnLabelClick={this._sampleLabelClicked}
+					onRemoveRow={this._onRemoveRow}
+					scale={this.scales[this.state.dataScaleIdx][1]}
+					colors={this.colors}
+				/>
+			</ErrorBoundary>
+    )
   }
 
   updateDataType(e, d) {
     let newDataType = d.value;
     this.setState({
       dataType: newDataType,
-      minDataThreshold: -99999999999,
-      maxDataThreshold: 99999999999
     });
   }
 
@@ -1096,30 +1080,26 @@ class SamplesHeatmap extends React.Component {
     );
   }
 
-  updateDataThreshold(e) {
-    this.setState({
-      minDataThreshold: parseFloat(e[0]),
-      maxDataThreshold: parseFloat(e[1])
-    });
-  }
-
-  renderThresholdSlider() {
+  renderThresholdSlider () {
     if (!this.state.data) {
       return;
     }
     return (
-      <div className="range-field">
-        <div className="slider-container">
-          <ReactNouislider
-            range={{ min: this.minMax.min, max: this.minMax.max + 1 }}
-            start={[this.state.minDataThreshold, this.state.maxDataThreshold]}
-            connect={[false, true, false]}
-            onChange={this._updateDataThreshold}
-            tooltips
-          />
-        </div>
-      </div>
-    );
+      <AdvancedThresholdFilterDropdown
+        labels={this.thresholdLabels}
+        operators={[">=", "<="]}
+        filters={this.state.activeThresholds}
+        onChange={(filters)=> {
+          this.setState({activeThresholds: filters});
+        }}
+        onApply={(t) => {
+					let newThresholds = [].concat(t);
+          this.setState({appliedThresholds:  newThresholds});
+					ThresholdMap.saveThresholdFilters(newThresholds);
+        }}
+        fluid
+      />
+    )
   }
 
   taxonLevelChanged(e, d) {
