@@ -129,17 +129,16 @@ module PipelineOutputsHelper
     [quality_string, mis_matches]
   end
 
-
   def parse_tree(results, key, current_dict, raw = false)
     if current_dict["reads"]
       if raw # no further parsing
         # sort the coverage
         if current_dict["coverage_summary"] && current_dict["coverage_summary"]["coverage"]
-          coverage = current_dict["coverage_summary"]["coverage"].sort_by { |k, v| k.split("-")[0].to_i }
+          coverage = current_dict["coverage_summary"]["coverage"].sort_by { |k, _v| k.split("-")[0].to_i }
           current_dict["coverage_summary"]["coverage"] = coverage
         end
         # sort the reads
-        reads = current_dict["reads"].sort { |a,b| (a[2][6]).to_i <=> (b[2][6]).to_i }
+        reads = current_dict["reads"].sort { |a, b| (a[2][6]).to_i <=> (b[2][6]).to_i }
         current_dict["reads"] = reads
         results[key] = current_dict
       else

@@ -321,9 +321,9 @@ class SamplesController < ApplicationController
     @parsed_alignment_results = parse_alignment_results(@taxid, @tax_level, alignment_data)
 
     respond_to do |format|
-      format.json {
+      format.json do
         render json: alignment_data
-      }
+      end
       format.html { @title = @parsed_alignment_results['title'] }
     end
   end
@@ -337,20 +337,20 @@ class SamplesController < ApplicationController
     @taxon_name = taxon_name(@taxid, @tax_level)
 
     respond_to do |format|
-      format.json {
-        s3_file_path = "#{pr.alignment_viz_output_s3_path}/#{@taxon_info.tr('_','.')}.align_viz.json"
+      format.json do
+        s3_file_path = "#{pr.alignment_viz_output_s3_path}/#{@taxon_info.tr('_', '.')}.align_viz.json"
         alignment_data = JSON.parse(get_s3_file(s3_file_path) || "{}")
         flattened_data = {}
         parse_tree(flattened_data, @taxid, alignment_data, true)
         output_array = []
-        flattened_data.each { |k, v|
+        flattened_data.each do |k, v|
           v["accession"] = k
           v["reads_count"] = v["reads"].size
           output_array << v
-        }
-        render json: output_array.sort { |a,b| b['reads_count'] <=> a['reads_count'] }
-      }
-      format.html { }
+        end
+        render json: output_array.sort { |a, b| b['reads_count'] <=> a['reads_count'] }
+      end
+      format.html {}
     end
   end
 
