@@ -102,6 +102,27 @@ class PipelineSampleReads extends React.Component {
     );
   }
 
+  render_metadata_textfield_wide(label, field) {
+    return (
+      <div className="col s12">
+        <div className="details-title note">{label}</div>
+        <div className="sample-notes note">
+          <pre
+            className="details-value"
+            suppressContentEditableWarning={true}
+            contentEditable={this.can_edit}
+            id={field}
+          >
+            {this.sampleInfo[field] &&
+               this.sampleInfo[field].trim() !== ""
+                 ? this.sampleInfo[field]
+                 : this.TYPE_PROMPT}
+          </pre>
+        </div>
+      </div>
+    )
+  }
+
   render_metadata_textfield(label, field) {
     let display_value =
       this.sampleInfo[field] && this.sampleInfo[field].trim() !== ""
@@ -709,8 +730,7 @@ class PipelineSampleReads extends React.Component {
                           </div>
                           {this.render_metadata_textfield(
                             "Location",
-                            "sample_location",
-                            0
+                            "sample_location"
                           )}
                         </div>
                         <div className="col s6">
@@ -722,42 +742,15 @@ class PipelineSampleReads extends React.Component {
                             "Nucleotide type",
                             "sample_template"
                           )}
-                          <div className="row detail-row no-padding">
-                            <div className="col s5 label">Unique ID</div>
-                            <div className="col s7 ">
-                              <div className="details-value label sample-notes">
-                                <pre
-                                  suppressContentEditableWarning={true}
-                                  contentEditable={this.can_edit}
-                                  id="sample_host"
-                                >
-                                  {this.sampleInfo["sample_host"] &&
-                                  this.sampleInfo["sample_host"].trim() !== ""
-                                    ? this.sampleInfo["sample_host"]
-                                    : this.TYPE_PROMPT}
-                                </pre>
-                              </div>
-                            </div>
-                          </div>
+                          {this.render_metadata_textfield(
+                            "Unique ID",
+                            "sample_host"
+                          )}
                         </div>
                       </div>
                       <div className="row">
-                        <div className="col s12">
-                          <div className="details-title note">Notes</div>
-                          <div className="sample-notes note">
-                            <pre
-                              className="details-value"
-                              suppressContentEditableWarning={true}
-                              contentEditable={this.can_edit}
-                              id="sample_notes"
-                            >
-                              {this.sampleInfo["sample_notes"] &&
-                              this.sampleInfo["sample_notes"].trim() !== ""
-                                ? this.sampleInfo["sample_notes"]
-                                : this.TYPE_PROMPT}
-                            </pre>
-                          </div>
-                        </div>
+                        {this.render_metadata_textfield_wide("Notes", "sample_notes")}
+                        {this.render_metadata_textfield_wide("Name", "name")}                      
                       </div>
                     </div>
                   </div>
