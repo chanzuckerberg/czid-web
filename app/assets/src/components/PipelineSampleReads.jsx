@@ -749,8 +749,8 @@ class PipelineSampleReads extends React.Component {
                         </div>
                       </div>
                       <div className="row">
-                        {this.render_metadata_textfield_wide("Notes", "sample_notes")}
-                        {this.render_metadata_textfield_wide("Name", "name")}                      
+                        {this.render_metadata_textfield_wide("Name", "name")}
+                        {this.render_metadata_textfield_wide("Notes", "sample_notes")}                      
                       </div>
                     </div>
                   </div>
