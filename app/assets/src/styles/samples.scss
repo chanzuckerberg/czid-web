@@ -1036,15 +1036,15 @@ input[type="button"] {
         .ui.dropdown .text {
           // The text in the button
           font-size: 1.2em;
-          padding: 0.05em;
           margin-top: 0.3em;
+          padding: 3px 0.05em 0.05em;
         }
         .download-btn {
           // The whole button
           color: #3867fa;
           background-color: transparent;
           padding: 9px 9px 9px 5em;
-          min-height: 35px !important;
+          min-height: 39px !important;
           border: 1px solid #3867fa !important;
         }
         .download-reports {
@@ -1079,6 +1079,7 @@ input[type="button"] {
           display: block;
           background: #3867fa;
           color: #ffffff;
+          font-size: 13.333px;
           &:not(.btn-disabled) {
             color: #ffffff !important;
           }
@@ -1091,13 +1092,8 @@ input[type="button"] {
             margin-left: -7px;
           }
           .compare-svg {
-            margin-bottom: -9px;
-          }
-          &:not(.btn-disabled).compare-svg {
-            color: #b4b4b5 !important;
-          }
-          &:not(.btn-disabled):hover.compare-svg {
-            color: #b4b4b5 !important;
+            margin-bottom: -7px;
+            fill: currentColor;
           }
         }
         .download-progress {
