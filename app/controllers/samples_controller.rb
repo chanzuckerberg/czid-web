@@ -282,7 +282,8 @@ class SamplesController < ApplicationController
   rescue
     render json: {
       status: 'failed',
-      message: 'Unable to update sample'
+      message: 'Unable to update sample',
+      errors: @sample.errors.full_messages
     }
   end
 

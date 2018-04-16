@@ -343,7 +343,7 @@ class PipelineSampleReads extends React.Component {
                 .slideUp(200);
             } else {
               $(".note-save-failed")
-                .html(`<i class='fa fa-frown-o'></i> ${response.data.message}`)
+                .html(`<i class='fa fa-frown-o'></i> ${response.data.message} ${response.data.errors}`)
                 .css("display", "inline-block")
                 .delay(1000)
                 .slideUp(200);
