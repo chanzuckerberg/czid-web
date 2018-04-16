@@ -1689,7 +1689,11 @@ class PipelineSampleTree extends React.PureComponent {
 
       tree = root;
 
-      if (!row.lineage) {
+      let has_categorization = order.filter(function (level) {
+        return row.lineage && row.lineage[level + "_taxid"] >= 0
+      }).length > 1;
+
+      if (!row.lineage || !has_categorization) {
         row.lineage = {
           genus_taxid: -9,
           genus_name: "Uncategorized",
