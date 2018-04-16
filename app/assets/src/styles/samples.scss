@@ -340,8 +340,8 @@ $break-large: 1070px;
       }
     }
     .align {
-      margin: 0px 9px;
-      padding: 0px 0 10px 0px;
+      margin: 0 9px;
+      padding: 0 0 10px 0;
     }
     input.path {
       margin: 0;
@@ -742,6 +742,7 @@ $break-large: 1070px;
           .options-wrapper {
             label {
               margin: 10px 0;
+              color: #000000;
             }
           }
         }
@@ -811,7 +812,7 @@ $break-large: 1070px;
 }
 
 input[type="button"] {
-  font-family: FontAwesome;
+  font-family: FontAwesome, sans-serif;
   font-size: 14px;
 }
 
@@ -1068,7 +1069,7 @@ input[type="button"] {
           display: block;
           background: #3867fa;
           color: #ffffff !important;
-          &:hover {
+          &:not(.btn-disabled):hover {
             background: #ffffff;
             color: #3867fa !important;
           }
@@ -1076,13 +1077,12 @@ input[type="button"] {
         .download-progress {
           cursor: pointer;
           padding: 13px;
-          border: 1px solid transparent;
           font-size: 12px;
           color: #fff;
           text-align: center;
           display: none;
           background-color: #26a69a;
-          border-color: #26a69a;
+          border: 1px solid #26a69a;
           text-overflow: ellipsis;
           overflow: hidden;
           white-space: nowrap;
@@ -1090,6 +1090,13 @@ input[type="button"] {
       }
     }
   }
+}
+
+.btn-disabled {
+  border: 1px solid #bbc6c8 !important;
+  background: #bbc6c8 !important;
+  color: #acb2b3 !important;
+  cursor: default;
 }
 
 .fa-star {

@@ -159,7 +159,7 @@ class PipelineSampleReport extends React.Component {
       )
       .then(res => {
         const search_list = res.data.search_list;
-        search_list.splice(0, 0, ["All", 0]);
+        search_list.splice(0, 0, ["Show All", 0]);
         this.setState({
           lineage_map: res.data.lineage_map,
           search_keys_in_sample: search_list
@@ -1430,7 +1430,7 @@ function ReportSearchBox({ parent }) {
         inputProps={{ placeholder: "Search" }}
         items={parent.state.search_keys_in_sample}
         shouldItemRender={(item, value) =>
-          item[0] == "All" ||
+          item[0] == "Show All" ||
           (value.length > 2 &&
             item[0].toLowerCase().indexOf(value.toLowerCase()) > -1)
         }
@@ -1439,7 +1439,10 @@ function ReportSearchBox({ parent }) {
           <div
             key={item[1]}
             style={{
-              backgroundColor: highlighted ? "#eee" : "transparent"
+              backgroundColor: highlighted ? "#eee" : "transparent",
+              fontFamily: "'Helvetica Neue', Arial, Helvetica, sans-serif",
+              fontSize: "1rem",
+              overflow: "hidden"
             }}
           >
             {item[0]}
