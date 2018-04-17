@@ -675,8 +675,8 @@ input[type="number"] {
           min-height: inherit;
           padding: 10px;
           [type="checkbox"].filled-in:checked + label:after {
-            border: 2px solid #2786c1;
-            background-color: #2786c1;
+            border: 2px solid #305df9;
+            background-color: #305df9;
           }
 
           [type="checkbox"].filled-in + label:after {
@@ -807,7 +807,6 @@ input[type="number"] {
   box-shadow: 0 2px 3px 0 rgba(34, 36, 38, 0.15);
   border: 1px solid rgba(34, 36, 38, 0.15);
   border-radius: 0.28571429rem;
-  background: #fff;
   margin-left: -16px;
   padding: 10px;
   left: 20px;
@@ -826,9 +825,19 @@ input[type="number"] {
     width: 18px;
     height: 18px;
   }
+  [type=checkbox].filled-in:checked+label:before {
+    top: 6px;
+    left: 1px;
+  }
   label {
     font-family: "Open Sans", "Helvetica Neue", Arial, Helvetica, sans-serif;
     font-size: 1rem;
     color: rgba(0, 0, 0, 0.87);
   }
+}
+
+[type="checkbox"].filled-in + label:before,
+[type="checkbox"].filled-in + label:after {
+  -webkit-transition: none;
+  transition: none;
 }
