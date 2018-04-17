@@ -177,15 +177,19 @@ module ReportHelper
     data
   end
 
-  def report_details(pipeline_run)
+  def report_details(pipeline_run, user_id)
     # Provides some auxiliary information on pipeline_run, including default background for sample.
     # No report-specific scores though.
+    sample = pipeline_run.sample
+    taxon_confirmations = TaxonConfirmation.where(sample_id: sample.id, user_id: user_id)
     {
       pipeline_info: pipeline_run,
       subsampled_reads: pipeline_run.subsampled_reads,
-      sample_info: pipeline_run.sample,
+      sample_info: sample,
       default_background: Background.find(pipeline_run.sample.default_background_id),
       taxon_fasta_flag: pipeline_run.job_status == PipelineRun::STATUS_CHECKED # all stages succeeded
+      confirmed_taxids: taxon_confirmations.where(type: "confirmed").pluck(:taxid),
+      watched_taxids: taxon_confirmations.where(type: "watched").pluck(:taxid)
     }
   end
 

@@ -999,8 +999,13 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
-  row_class(tax_info) {
-    // add to color indication to class name here, based on whether tax_info.tax_id is in confirmed_taxids/watched_taxids
+  row_class(tax_info, confirmed_taxids, watched_taxids) {
+    let taxon_status = confirmed_taxids.indexOf(tax_info.tax_id) >= 0 ?
+                         "confirmed"
+                         : watched_taxids.indexOf(tax_info.tax_id) >= 0 ?
+                           "watched"
+                           : ""
+    // add color indication to class name here, based on whether tax_info.tax_id is in confirmed_taxids/watched_taxids
     if (tax_info.tax_level == 2) {
       if (tax_info.tax_id < 0) {
         return `report-row-genus ${tax_info.genus_taxid} fake-genus`;
@@ -1229,7 +1234,7 @@ function AdvancedFilterTagList({ threshold, i, parent }) {
 
 function DetailCells({ parent }) {
   return parent.state.selected_taxons_top.map((tax_info, i) => (
-    <tr key={tax_info.tax_id} className={parent.row_class(tax_info)}>
+    <tr key={tax_info.tax_id} className={parent.row_class(tax_info, parent.report_details.confirmed_taxids, parent.report_details.watched_taxids)}>
       <td>{parent.render_name(tax_info, parent.report_details)}</td>
       {parent.render_number(tax_info.NT.aggregatescore, null, 0, true)}
       {parent.render_number(tax_info.NT.zscore, tax_info.NR.zscore, 1)}
