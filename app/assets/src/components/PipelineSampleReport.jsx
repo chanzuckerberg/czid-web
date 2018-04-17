@@ -1000,6 +1000,7 @@ class PipelineSampleReport extends React.Component {
   }
 
   row_class(tax_info) {
+    // add to color indication to class name here, based on whether tax_info.tax_id is in confirmed_taxids/watched_taxids
     if (tax_info.tax_level == 2) {
       if (tax_info.tax_id < 0) {
         return `report-row-genus ${tax_info.genus_taxid} fake-genus`;
