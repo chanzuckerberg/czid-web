@@ -339,6 +339,26 @@ class PipelineRun < ApplicationRecord
     return nil
   end
 
+  def major_minor(version)
+    # given "1.5" return [1, 5]
+    version.split('.').map(&:to_i)
+  end
+
+  def after(v0, v1)
+    # Return "true" when v0 >= v1
+    return true unless v1
+    return false unless v0
+    v0_major, v0_minor = major_minor(v0)
+    v1_major, v1_minor = major_minor(v1)
+    return true if v0_major > v1_major
+    return false if v0_major < v1_major
+    v0_minor >= v1_minor
+  end
+
+  def multihit?
+    after(pipeline_version || fetch_pipeline_version, "1.5")
+  end
+
   def alignment_output_s3_path
     pipeline_ver_str = ""
     pipeline_ver_str = "#{pipeline_version}/" if pipeline_version
