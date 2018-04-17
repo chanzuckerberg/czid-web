@@ -850,6 +850,13 @@ class PipelineSampleReport extends React.Component {
             aria-hidden="true"
           />
         ) : null}
+      </span>
+    );
+  }
+
+  displayHighlightTags(taxInfo) {
+    return (
+      <span className="link-tag">
         <i
           data-tax-id={taxInfo.tax_id}
           data-confirmation-strength="watched"
@@ -867,6 +874,7 @@ class PipelineSampleReport extends React.Component {
       </span>
     );
   }
+
 
   category_to_adjective(category) {
     const category_lowercase = category.toLowerCase();
@@ -1290,7 +1298,7 @@ function DetailCells({ parent }) {
         undefined,
         parent.showConcordance
       )}
-      <td>&nbsp;</td>
+      <td>{parent.displayHighlightTags(tax_info)}</td>
     </tr>
   ));
 }
