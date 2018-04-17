@@ -109,6 +109,7 @@ class PipelineSampleReport extends React.Component {
     this.handleThresholdEnter = this.handleThresholdEnter.bind(this);
     this.renderMore = this.renderMore.bind(this);
     this.initializeTooltip();
+    this.toggleHighlightTaxon = this.toggleHighlightTaxon.bind(this);
   }
 
   componentWillUpdate(nextProps, nextState) {
