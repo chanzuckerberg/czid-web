@@ -281,6 +281,10 @@ class SamplesController < ApplicationController
         status: "success",
         message: "Saved successfully"
       }
+    else
+      render json: {
+        status: "ignored"
+      }
     end
   rescue
     error_messages = @sample ? @sample.errors.full_messages : []
