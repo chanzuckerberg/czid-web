@@ -480,11 +480,17 @@ class SamplesController < ApplicationController
     remove_taxon_confirmation
     taxon_confirmation_params = { sample_id: @sample.id, user_id: current_user.id, taxid: params[:taxid], strength: params[:strength], method: params[:method] }
     TaxonConfirmation.create(taxon_confirmation_params)
+    taxon_confirmations = TaxonConfirmation.where(sample_id: @sample.id, user_id: current_user.id)
+    render json: { watched_taxids: taxon_confirmations.where(strength: "watched").pluck(:taxid),
+                   confirmed_taxids: taxon_confirmations.where(strength: "confirmed").pluck(:taxid) }
   end
 
   def remove_taxon_confirmation
     taxon_confirmation = TaxonConfirmation.where(sample_id: @sample.id, user_id: current_user.id, strength: params[:strength], taxid: params[:taxid])
     taxon_confirmation.destroy
+    taxon_confirmations = TaxonConfirmation.where(sample_id:  @sample.id, user_id: current_user.id)
+    render json: { watched_taxids: taxon_confirmations.where(strength: "watched").pluck(:taxid),
+                   confirmed_taxids: taxon_confirmations.where(strength: "confirmed").pluck(:taxid) }
   end
 
   # Use callbacks to share common setup or constraints between actions.

@@ -86,7 +86,9 @@ class PipelineSampleReport extends React.Component {
       rendering: false,
       loading: true,
       activeThresholds: this.defaultThresholdValues,
-      countType: "NT"
+      countType: "NT",
+      watched_taxids: props.report_details.watched_taxids,
+      confirmed_taxids: props.report_details.confirmed_taxids,
     };
     this.expandAll = false;
     this.expandedGenera = [];
@@ -800,6 +802,21 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
+  toggleWatchTaxon(e) {
+    let taxid = e.target.getAttribute("data-tax-id");
+    let watched_taxids = this.state.watched_taxids;
+    let action = watched_taxids.indexOf(taxid) >= 0 ? "remove_taxon_confirmation" : "add_taxon_confirmation"
+    axios
+      .post("/samples/${this.sample_id}/${action}", {
+        taxid: taxid,
+        strength: "confirmed",
+        authenticity_token: this.csrf
+      })
+      .then(res => {
+        this.setState({ watched_taxids: res.data.watched_taxids})
+      })
+  }
+
   displayTags(taxInfo, reportDetails) {
     const tax_level_str = taxInfo.tax_level == 1 ? "species" : "genus";
     return (
@@ -830,6 +847,18 @@ class PipelineSampleReport extends React.Component {
             aria-hidden="true"
           />
         ) : null}
+        <i
+          data-tax-id={taxInfo.tax_id}
+          onClick={this.toggleWatchTaxon}
+          className="fa fa-eye"
+          aria-hidden="true"
+        />
+        <i
+          data-tax-id={taxInfo.tax_id}
+          onClick={this.toggleConfirmTaxon}
+          className="fa fa-check"
+          aria-hidden="true"
+        />
       </span>
     );
   }
@@ -1233,7 +1262,7 @@ function AdvancedFilterTagList({ threshold, i, parent }) {
 
 function DetailCells({ parent }) {
   return parent.state.selected_taxons_top.map((tax_info, i) => (
-    <tr key={tax_info.tax_id} className={parent.row_class(tax_info, parent.report_details.confirmed_taxids, parent.report_details.watched_taxids)}>
+    <tr key={tax_info.tax_id} className={parent.row_class(tax_info, parent.state.confirmed_taxids, parent.state.watched_taxids)}>
       <td>{parent.render_name(tax_info, parent.report_details)}</td>
       {parent.render_number(tax_info.NT.aggregatescore, null, 0, true)}
       {parent.render_number(tax_info.NT.zscore, tax_info.NR.zscore, 1)}
