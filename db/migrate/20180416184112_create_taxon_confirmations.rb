@@ -4,10 +4,10 @@ class CreateTaxonConfirmations < ActiveRecord::Migration[5.1]
       t.integer :taxid
       t.integer :sample_id
       t.integer :user_id
-      t.string :type # "watched" or "confirmed"
+      t.string :strength # "watched" or "confirmed"
       t.string :method # e.g. "qPCR"
 
-      t.index [:sample_id, :user_id, :type]
+      t.index [:sample_id, :user_id, :strength]
       t.timestamps
     end
   end

@@ -478,12 +478,12 @@ class SamplesController < ApplicationController
 
   def add_taxon_confirmation
     remove_taxon_confirmation
-    taxon_confirmation_params = { sample_id: @sample.id, user_id: current_user.id, taxid: params[:taxid], type: params[:type], method: params[:method] }
+    taxon_confirmation_params = { sample_id: @sample.id, user_id: current_user.id, taxid: params[:taxid], strength: params[:strength], method: params[:method] }
     TaxonConfirmation.create(taxon_confirmation_params)
   end
 
   def remove_taxon_confirmation
-    taxon_confirmation = TaxonConfirmation.where(sample_id: @sample.id, user_id: current_user.id, type: params[:type], taxid: params[:taxid])
+    taxon_confirmation = TaxonConfirmation.where(sample_id: @sample.id, user_id: current_user.id, strength: params[:strength], taxid: params[:taxid])
     taxon_confirmation.destroy
   end
 
