@@ -113,14 +113,13 @@ class PipelineSampleReads extends React.Component {
             contentEditable={this.can_edit}
             id={field}
           >
-            {this.sampleInfo[field] &&
-               this.sampleInfo[field].trim() !== ""
-                 ? this.sampleInfo[field]
-                 : this.TYPE_PROMPT}
+            {this.sampleInfo[field] && this.sampleInfo[field].trim() !== ""
+              ? this.sampleInfo[field]
+              : this.TYPE_PROMPT}
           </pre>
         </div>
       </div>
-    )
+    );
   }
 
   render_metadata_textfield(label, field) {
@@ -343,7 +342,11 @@ class PipelineSampleReads extends React.Component {
                 .slideUp(200);
             } else {
               $(".note-save-failed")
-                .html(`<i class='fa fa-frown-o'></i> ${response.data.message} ${response.data.errors}`)
+                .html(
+                  `<i class='fa fa-frown-o'></i> ${response.data.message} ${
+                    response.data.errors
+                  }`
+                )
                 .css("display", "inline-block")
                 .delay(1000)
                 .slideUp(200);
@@ -667,7 +670,7 @@ class PipelineSampleReads extends React.Component {
                       className="icon link download-btn"
                     >
                       <Icon className="cloud download alternate" />
-                      Download
+                      <span>Download</span>
                     </Button>
                   </a>
                 </div>
@@ -750,7 +753,10 @@ class PipelineSampleReads extends React.Component {
                       </div>
                       <div className="row">
                         {this.render_metadata_textfield_wide("Name", "name")}
-                        {this.render_metadata_textfield_wide("Notes", "sample_notes")}                      
+                        {this.render_metadata_textfield_wide(
+                          "Notes",
+                          "sample_notes"
+                        )}
                       </div>
                     </div>
                   </div>

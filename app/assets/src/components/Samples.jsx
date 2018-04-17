@@ -15,10 +15,12 @@ import {
   Form
 } from "semantic-ui-react";
 import Nanobar from "nanobar";
+import colors from "../styles/themes"
 import SortHelper from "./SortHelper";
 import numberWithCommas from "../helpers/strings";
 import ProjectSelection from "./ProjectSelection";
 import StringHelper from "../helpers/StringHelper";
+import IconComponent from "./IconComponent";
 
 class Samples extends React.Component {
   constructor(props, context) {
@@ -988,16 +990,28 @@ class Samples extends React.Component {
       </div>
     );
 
+    const compare_button_inner = (
+      <span>
+        <span
+          className="img-container compare-container"
+          dangerouslySetInnerHTML={{
+            __html: IconComponent.compare(colors.disabledGray)
+          }}
+        />
+        <span>Compare</span>
+      </span>
+    );
+
     let compare_button = (
-      <div className="download-table">
+      <div className="compare-area">
         <div className="white">
           {this.state.selectedSampleIds.length > 0 ? (
             <a onClick={this.compareSamples} className="compare center">
-              <span>Compare</span>
+              {compare_button_inner}
             </a>
           ) : (
             <a className="compare center btn-disabled">
-              <span>Compare</span>
+              {compare_button_inner}
             </a>
           )}
         </div>
@@ -1005,7 +1019,7 @@ class Samples extends React.Component {
     );
 
     let delete_project_button = (
-      <div className="download-table">
+      <div className="compare-area">
         <div className="white">
           <a onClick={this.deleteProject} className="compare center">
             <span>Delete project</span>
@@ -1478,8 +1492,10 @@ function SampleNameInfo({ parent, dbSample, uploader }) {
             .fromNow()}
         </span>
       </div>
-      <div className="card-label center-label sample-name">{dbSample.name}</div>
-      <div className="card-label author bottom-label author">
+      <div className="card-label center-label sample-name bold-label">
+        {dbSample.name}
+      </div>
+      <div className="card-label author bottom-label">
         {!uploader || uploader === "" ? (
           ""
         ) : (
@@ -1510,7 +1526,7 @@ function PipelineOutputDataValues({
       ) : (
         <span className="percent">
           {" "}
-          {`(${stats.percent_remaining.toFixed(2)}%)`}{" "}
+          {`${stats.percent_remaining.toFixed(2)}%`}{" "}
         </span>
       ),
     quality_control:
@@ -1824,7 +1840,7 @@ function TableColumnHeaders({ sort, colMap, filterStatus, state, parent }) {
       <div className="samples-card white">
         <div className="flex-container">
           <ul className="flex-items">
-            <li className="sample-name-info">
+            <li>
               <div className="card-label column-title center-label sample-name">
                 <div className="sort-able" onClick={parent.sortSamples}>
                   <span>Name</span>
@@ -1966,15 +1982,18 @@ function SampleDetailedColumns({
     } else if (column === "nonhost_reads") {
       column_data = (
         <li key={pos}>
+          <div className="card-label center center-label data-label bold-label">
+            {data_values[column]}
+          </div>
           <div className="card-label center center-label data-label">
-            {data_values[column]} {data_values["nonhost_reads_percent"]}
+            {data_values["nonhost_reads_percent"]}
           </div>
         </li>
       );
     } else {
       column_data = (
         <li key={pos} onClick={parent.viewSample.bind(parent, dbSample.id)}>
-          <div className="card-label center center-label data-label">
+          <div className="card-label center center-label data-label bold-label">
             {data_values[column]}
           </div>
         </li>
