@@ -404,6 +404,7 @@ class PipelineSampleReads extends React.Component {
       d_report = (
         <PipelineSampleReport
           sample_id={this.sampleId}
+          csrf={this.csrf}
           report_ts={this.reportTime}
           git_version={this.gitVersion}
           all_categories={this.allCategories}

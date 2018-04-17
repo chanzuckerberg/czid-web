@@ -25,6 +25,7 @@ class PipelineSampleReport extends React.Component {
     this.sample_id = props.sample_id;
     this.gitVersion = props.git_version;
     this.canSeeAlignViz = props.can_see_align_viz;
+    this.csrf = props.csrf;
 
     this.all_categories = props.all_categories;
     this.report_details = props.report_details;
