@@ -255,6 +255,10 @@ class SamplesController < ApplicationController
       tax['lineage'] = lineage_by_taxid[tax['tax_id']]
     end
 
+    taxon_confirmations = TaxonConfirmation.where(sample_id: @sample.id, user_id: current_user.id)
+    @report_info[:confirmed_taxids] = taxon_confirmations.where(type: "confirmed").pluck(:taxid)
+    @report_info[:watched_taxids] = taxon_confirmations.where(type: "watched").pluck(:taxid)
+
     render json: JSON.dump(@report_info)
   end
 

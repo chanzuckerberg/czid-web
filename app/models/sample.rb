@@ -49,7 +49,6 @@ class Sample < ApplicationRecord
   has_many :pipeline_runs, -> { order(created_at: :desc) }, dependent: :destroy
   has_and_belongs_to_many :backgrounds, through: :pipeline_runs
   has_many :input_files, dependent: :destroy
-  has_many :taxon_confirmations
   accepts_nested_attributes_for :input_files
   validate :input_files_checks
   after_create :initiate_input_file_upload

@@ -8,7 +8,6 @@ class User < ApplicationRecord
   has_many :samples
   has_many :favorite_projects
   has_many :favorites, through: :favorite_projects, source: :project
-  has_many :taxon_confirmations
   attr_accessor :email_arguments
   ROLE_ADMIN = 1
   DEMO_USER_EMAILS = ['idseq.guest@chanzuckerberg.com'].freeze
