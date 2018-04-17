@@ -14,7 +14,7 @@ class SamplesController < ApplicationController
   ##########################################
   skip_before_action :verify_authenticity_token, only: [:create, :update]
 
-  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder, :show_taxid_alignment].freeze
+  READ_ACTIONS = [:show, :add_taxon_confirmation, :remove_taxon_confirmation, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder, :show_taxid_alignment].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :samples_taxons, :top_taxons, :heatmap].freeze
@@ -479,6 +479,17 @@ class SamplesController < ApplicationController
   end
 
   def pipeline_runs
+  end
+
+  def add_taxon_confirmation
+    remove_taxon_confirmation
+    taxon_confirmation_params = { sample_id: @sample.id, user_id: current_user.id, taxon_lineage_id: TaxonLineage.find_by(taxid: params[:taxid]).id, type: params[:type], method: params[:method] }
+    TaxonConfirmation.create(taxon_confirmation_params)
+  end
+
+  def remove_taxon_confirmation
+    taxon_confirmation = TaxonConfirmation.where(sample_id: @sample.id, user_id: current_user.id, type: params[:type], taxon_lineage_id: TaxonLineage.find_by(taxid: params[:taxid]).id)
+    taxon_confirmation.destroy
   end
 
   # Use callbacks to share common setup or constraints between actions.
