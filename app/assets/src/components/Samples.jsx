@@ -19,7 +19,7 @@ import SortHelper from "./SortHelper";
 import numberWithCommas from "../helpers/strings";
 import ProjectSelection from "./ProjectSelection";
 import StringHelper from "../helpers/StringHelper";
-import IconComponent from './IconComponent';¬
+import IconComponent from './IconComponent';
 
 class Samples extends React.Component {
   constructor(props, context) {
