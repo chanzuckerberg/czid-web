@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180410183807) do
+ActiveRecord::Schema.define(version: 20180416184112) do
 
   create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "archive_of"
@@ -242,6 +242,17 @@ ActiveRecord::Schema.define(version: 20180410183807) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["taxid"], name: "index_taxon_child_parents_on_taxid", unique: true
+  end
+
+  create_table "taxon_confirmations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "taxid"
+    t.integer "sample_id"
+    t.integer "user_id"
+    t.string "strength"
+    t.string "method"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["sample_id", "user_id", "strength"], name: "index_taxon_confirmations_on_sample_id_and_user_id_and_strength"
   end
 
   create_table "taxon_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
