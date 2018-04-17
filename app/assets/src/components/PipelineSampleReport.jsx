@@ -807,10 +807,8 @@ class PipelineSampleReport extends React.Component {
   toggleHighlightTaxon(e) {
     let taxid = e.target.getAttribute("data-tax-id");
     let strength = e.target.getAttribute("data-confirmation-strength");
-    let watched_taxids = this.state.watched_taxids;
-    console.log(watched_taxids)
-    console.log(taxid)
-    let action = watched_taxids.indexOf(parseInt(taxid)) >= 0 ? "remove_taxon_confirmation" : "add_taxon_confirmation"
+    let current_taxids = this.state[strength + "_taxids"];
+    let action = current_taxids.indexOf(parseInt(taxid)) >= 0 ? "remove_taxon_confirmation" : "add_taxon_confirmation"
     axios
       .post(`/samples/${this.sample_id}/${action}`, {
         taxid: taxid,
@@ -818,7 +816,7 @@ class PipelineSampleReport extends React.Component {
         authenticity_token: this.csrf
       })
       .then(res => {
-        this.setState({ watched_taxids: res.data.watched_taxids})
+        this.setState({ watched_taxids: res.data.watched_taxids, confirmed_taxids: res.data.confirmed_taxids })
       })
   }
 
