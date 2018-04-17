@@ -1041,6 +1041,8 @@ input[type="button"] {
         }
         .download-btn {
           // The whole button
+          width: 162px;
+          height: 38px;
           color: #3867fa;
           background-color: transparent;
           padding: 9px 9px 9px 5em;
@@ -1064,34 +1066,40 @@ input[type="button"] {
       }
 
       padding-top: 15px;
-      .download-table {
+      .compare-area {
         float: right;
         padding-right: 10px;
-        float: right;
         .white {
           padding-top: 20px;
         }
         .compare {
-          padding: 7px 30px;
+          padding: 5px 30px;
           border-radius: 40px;
           border: 1px solid #3867fa;
           cursor: pointer;
           display: block;
-          background: #3867fa;
+          background: #ffffff;
           color: #ffffff;
           font-size: 13.333px;
+          font-family: "Lato", "Helvetica Neue", Arial, Helvetica, sans-serif;
+          font-weight: 700;
+          width: 162px;
+          height: 38px;
           &:not(.btn-disabled) {
-            color: #ffffff !important;
+            // Active
+            color: #3867fa !important;
           }
           &:not(.btn-disabled):hover {
-            background: #ffffff;
-            color: #3867fa !important;
+            // Active and hover
+            background: #3867fa;
+            color: #ffffff !important;
           }
           .compare-container {
             margin-right: 15px;
             margin-left: -7px;
           }
           .compare-svg {
+            margin-top: 1px;
             margin-bottom: -7px;
             fill: currentColor;
           }
@@ -1298,4 +1306,3 @@ input[type="button"] {
 #PipelineSampleReads_page .active-threshold-filter-dropdown {
   width: 200px;
 }
-

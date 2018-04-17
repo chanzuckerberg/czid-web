@@ -19,7 +19,7 @@ import SortHelper from "./SortHelper";
 import numberWithCommas from "../helpers/strings";
 import ProjectSelection from "./ProjectSelection";
 import StringHelper from "../helpers/StringHelper";
-import IconComponent from './IconComponent';
+import IconComponent from "./IconComponent";
 
 class Samples extends React.Component {
   constructor(props, context) {
@@ -989,32 +989,28 @@ class Samples extends React.Component {
       </div>
     );
 
+    let compare_button_inner = (
+      <span>
+        <span
+          className="img-container compare-container"
+          dangerouslySetInnerHTML={{
+            __html: IconComponent.compare("#c5c5c5")
+          }}
+        />
+        <span>{"Compare"}</span>
+      </span>
+    );
+
     let compare_button = (
-      <div className="download-table">
+      <div className="compare-area">
         <div className="white">
           {this.state.selectedSampleIds.length > 0 ? (
             <a onClick={this.compareSamples} className="compare center">
-              <span>
-                <span
-                  className="img-container compare-container"
-                  dangerouslySetInnerHTML={{
-                    __html: IconComponent.compare("#c5c5c5")
-                  }}
-                />
-                {"Compare"}
-              </span>
+              {compare_button_inner}
             </a>
           ) : (
             <a className="compare center btn-disabled">
-              <span>
-                <span
-                  className="img-container compare-container"
-                  dangerouslySetInnerHTML={{
-                    __html: IconComponent.compare("#c5c5c5")
-                  }}
-                />
-                {"Compare"}
-              </span>
+              {compare_button_inner}
             </a>
           )}
         </div>
@@ -1022,7 +1018,7 @@ class Samples extends React.Component {
     );
 
     let delete_project_button = (
-      <div className="download-table">
+      <div className="compare-area">
         <div className="white">
           <a onClick={this.deleteProject} className="compare center">
             <span>Delete project</span>
@@ -1495,7 +1491,9 @@ function SampleNameInfo({ parent, dbSample, uploader }) {
             .fromNow()}
         </span>
       </div>
-      <div className="card-label center-label sample-name bold-label">{dbSample.name}</div>
+      <div className="card-label center-label sample-name bold-label">
+        {dbSample.name}
+      </div>
       <div className="card-label author bottom-label">
         {!uploader || uploader === "" ? (
           ""
