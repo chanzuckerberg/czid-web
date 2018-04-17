@@ -477,9 +477,8 @@ class SamplesController < ApplicationController
   end
 
   def add_taxon_confirmation
-    remove_taxon_confirmation
     taxon_confirmation_params = { sample_id: @sample.id, user_id: current_user.id, taxid: params[:taxid], strength: params[:strength], method: params[:method] }
-    TaxonConfirmation.create(taxon_confirmation_params)
+    TaxonConfirmation.find_or_create_by(taxon_confirmation_params)
     taxon_confirmations = TaxonConfirmation.where(sample_id: @sample.id, user_id: current_user.id)
     render json: { watched_taxids: taxon_confirmations.where(strength: "watched").pluck(:taxid),
                    confirmed_taxids: taxon_confirmations.where(strength: "confirmed").pluck(:taxid) }
