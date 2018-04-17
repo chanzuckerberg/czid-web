@@ -256,10 +256,20 @@ class PipelineRunStage < ApplicationRecord
     pr.save
   end
 
+  def output_json_name
+    pipeline_run.pipeline_branch == 'charles/hit-calling' ? PipelineRun::MULTIHIT_OUTPUT_JSON_NAME : PipelineRun::OUTPUT_JSON_NAME
+  end
+
+  def invalid_genus_call?(tcnt)
+    tcnt['genus_taxid'].to_i < TaxonLineage::INVALID_CALL_BASE_ID
+  rescue
+    false
+  end
+
   def db_load_alignment
     pr = pipeline_run
 
-    output_json_s3_path = "#{pipeline_run.alignment_output_s3_path}/#{PipelineRun::OUTPUT_JSON_NAME}"
+    output_json_s3_path = "#{pipeline_run.alignment_output_s3_path}/#{output_json_name}"
     stats_json_s3_path = "#{pipeline_run.alignment_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
 
     # Get the file
@@ -282,10 +292,12 @@ class PipelineRunStage < ApplicationRecord
     version_s3_path = "#{pipeline_run.alignment_output_s3_path}/#{PipelineRun::VERSION_JSON_NAME}"
     pr.version = `aws s3 cp #{version_s3_path} -`
 
-    # only keep species level counts
+    # only keep counts at certain taxonomic levels
     taxon_counts_attributes_filtered = []
+    acceptable_tax_levels = [TaxonCount::TAX_LEVEL_SPECIES]
+    acceptable_tax_levels << TaxonCount::TAX_LEVEL_GENUS if pr.pipeline_branch == 'charles/hit-calling'
     pipeline_output_dict['taxon_counts_attributes'].each do |tcnt|
-      if tcnt['tax_level'].to_i == TaxonCount::TAX_LEVEL_SPECIES
+      if acceptable_tax_levels.include?(tcnt['tax_level'].to_i) && !invalid_genus_call?(tcnt)
         taxon_counts_attributes_filtered << tcnt
       end
     end
@@ -296,7 +308,7 @@ class PipelineRunStage < ApplicationRecord
     pr.updated_at = Time.now.utc
     pr.save
     # aggregate the data at genus level
-    pr.generate_aggregate_counts('genus')
+    pr.generate_aggregate_counts('genus') unless pr.pipeline_branch == 'charles/hit-calling'
     # merge more accurate name information from lineages table
     pr.update_names
     # denormalize genus_taxid and superkingdom_taxid into taxon_counts
@@ -332,7 +344,7 @@ class PipelineRunStage < ApplicationRecord
 
   def alignment_outputs
     stats_json_s3_path = "#{pipeline_run.alignment_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
-    output_json_s3_path = "#{pipeline_run.alignment_output_s3_path}/#{PipelineRun::OUTPUT_JSON_NAME}"
+    output_json_s3_path = "#{pipeline_run.alignment_output_s3_path}/#{output_json_name}"
     [stats_json_s3_path, output_json_s3_path]
   end
 
