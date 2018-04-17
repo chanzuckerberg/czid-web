@@ -7,7 +7,6 @@ import 'react-tipsy/dist/react-tipsy.css';
 import 'font-awesome/scss/font-awesome.scss';
 import 'semantic-ui-css/semantic.min.css';
 import './loader.scss';
-import './styles/materialize-override.scss';
 
 const context = require.context('./components', true, /\.(js|jsx)$/);
 const foundComponents = {};
