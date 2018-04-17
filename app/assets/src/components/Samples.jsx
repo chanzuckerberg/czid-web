@@ -15,6 +15,7 @@ import {
   Form
 } from "semantic-ui-react";
 import Nanobar from "nanobar";
+import colors from "../styles/themes"
 import SortHelper from "./SortHelper";
 import numberWithCommas from "../helpers/strings";
 import ProjectSelection from "./ProjectSelection";
@@ -989,15 +990,15 @@ class Samples extends React.Component {
       </div>
     );
 
-    let compare_button_inner = (
+    const compare_button_inner = (
       <span>
         <span
           className="img-container compare-container"
           dangerouslySetInnerHTML={{
-            __html: IconComponent.compare("#c5c5c5")
+            __html: IconComponent.compare(colors.disabledGray)
           }}
         />
-        <span>{"Compare"}</span>
+        <span>Compare</span>
       </span>
     );
 
