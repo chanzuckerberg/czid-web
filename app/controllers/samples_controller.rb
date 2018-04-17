@@ -49,7 +49,7 @@ class SamplesController < ApplicationController
     sort = params[:sort_by]
     samples_query = JSON.parse(params[:ids]) if params[:ids].present?
 
-    results = current_power.samples.includes(:pipeline_runs)
+    results = current_power.samples.includes([:user, :input_files], pipeline_runs: [:job_stats, :pipeline_run_stages])
 
     results = results.where(id: samples_query) if samples_query.present?
 
@@ -243,16 +243,19 @@ class SamplesController < ApplicationController
     end
 
     @report_info = external_report_info(pipeline_run_id, background_id, params)
+
     tax_ids = @report_info[:taxonomy_details][2].map { |x| x['tax_id'] }
     lineages = TaxonCount.connection.select_all(TaxonLineage.where(taxid: tax_ids)).to_hash
     lineage_by_taxid = {}
     lineages.each do |x|
       lineage_by_taxid[x['taxid']] = x
     end
+
     @report_info[:taxonomy_details][2].each do |tax|
       tax['lineage'] = lineage_by_taxid[tax['tax_id']]
     end
-    render json: @report_info
+
+    render json: JSON.dump(@report_info)
   end
 
   def search_list
@@ -271,29 +274,21 @@ class SamplesController < ApplicationController
     field = params[:field].to_sym
     value = params[:value]
     metadata = { field => value }
-    metadata.select! { |k, _v| Sample::METADATA_FIELDS.include?(k) }
-    if @sample
-      unless @sample[field].blank? && value.strip.blank?
-        @sample.update_attributes!(metadata)
-        respond_to do |format|
-          format.json do
-            render json: {
-              status: "success",
-              message: "Saved successfully"
-            }
-          end
-        end
-      end
-    else
-      respond_to do |format|
-        format.json do
-          render json: {
-            status: 'failed',
-            message: 'Unable to save sample, sample not found'
-          }
-        end
-      end
+    metadata.select! { |k, _v| (Sample::METADATA_FIELDS + [:name]).include?(k) }
+    unless @sample[field].blank? && value.strip.blank?
+      @sample.update_attributes!(metadata)
+      render json: {
+        status: "success",
+        message: "Saved successfully"
+      }
     end
+  rescue
+    error_messages = @sample ? @sample.errors.full_messages : []
+    render json: {
+      status: 'failed',
+      message: 'Unable to update sample',
+      errors: error_messages
+    }
   end
 
   def show_taxid_fasta
