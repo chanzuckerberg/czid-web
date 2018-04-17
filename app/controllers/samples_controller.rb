@@ -485,8 +485,8 @@ class SamplesController < ApplicationController
   end
 
   def remove_taxon_confirmation
-    taxon_confirmation = TaxonConfirmation.where(sample_id: @sample.id, user_id: current_user.id, strength: params[:strength], taxid: params[:taxid])
-    taxon_confirmation.destroy
+    taxon_confirmation = TaxonConfirmation.find_by(sample_id: @sample.id, user_id: current_user.id, strength: params[:strength], taxid: params[:taxid])
+    taxon_confirmation.destroy if taxon_confirmation
     taxon_confirmations = TaxonConfirmation.where(sample_id:  @sample.id, user_id: current_user.id)
     render json: { watched_taxids: taxon_confirmations.where(strength: "watched").pluck(:taxid),
                    confirmed_taxids: taxon_confirmations.where(strength: "confirmed").pluck(:taxid) }
