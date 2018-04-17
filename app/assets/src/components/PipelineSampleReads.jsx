@@ -109,7 +109,7 @@ class PipelineSampleReads extends React.Component {
         <div className="sample-notes note">
           <pre
             className="details-value"
-            suppressContentEditableWarning={true}
+            suppressContentEditableWarning
             contentEditable={this.can_edit}
             id={field}
           >
@@ -133,7 +133,7 @@ class PipelineSampleReads extends React.Component {
         <div className="col s6 no-padding">
           <div className="details-value sample-notes">
             <pre
-              suppressContentEditableWarning={true}
+              suppressContentEditableWarning
               contentEditable={this.can_edit}
               id={field}
             >
@@ -340,7 +340,7 @@ class PipelineSampleReads extends React.Component {
                 .css("display", "inline-block")
                 .delay(1000)
                 .slideUp(200);
-            } else {
+            } else if (response.data.status === "failed") {
               $(".note-save-failed")
                 .html(
                   `<i class='fa fa-frown-o'></i> ${response.data.message} ${

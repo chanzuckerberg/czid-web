@@ -275,7 +275,11 @@ class SamplesController < ApplicationController
     value = params[:value]
     metadata = { field => value }
     metadata.select! { |k, _v| (Sample::METADATA_FIELDS + [:name]).include?(k) }
-    unless @sample[field].blank? && value.strip.blank?
+    if @sample[field].blank? && value.strip.blank?
+      render json: {
+        status: "ignored"
+      }
+    else
       @sample.update_attributes!(metadata)
       render json: {
         status: "success",
