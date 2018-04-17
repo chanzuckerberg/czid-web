@@ -809,7 +809,7 @@ class PipelineSampleReport extends React.Component {
     let watched_taxids = this.state.watched_taxids;
     let action = watched_taxids.indexOf(taxid) >= 0 ? "remove_taxon_confirmation" : "add_taxon_confirmation"
     axios
-      .post("/samples/${this.sample_id}/${action}", {
+      .post(`/samples/${this.sample_id}/${action}`, {
         taxid: taxid,
         strength: strength,
         authenticity_token: this.csrf
