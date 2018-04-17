@@ -1005,12 +1005,11 @@ class PipelineSampleReport extends React.Component {
                          : watched_taxids.indexOf(tax_info.tax_id) >= 0 ?
                            "watched"
                            : ""
-    // add color indication to class name here, based on whether tax_info.tax_id is in confirmed_taxids/watched_taxids
     if (tax_info.tax_level == 2) {
       if (tax_info.tax_id < 0) {
-        return `report-row-genus ${tax_info.genus_taxid} fake-genus`;
+        return `report-row-genus ${tax_info.genus_taxid} fake-genus ${taxon_status}`;
       }
-      return `report-row-genus ${tax_info.genus_taxid} real-genus`;
+      return `report-row-genus ${tax_info.genus_taxid} real-genus ${taxon_status}`;
     }
     let initial_visibility = "hidden";
     if (
@@ -1022,11 +1021,11 @@ class PipelineSampleReport extends React.Component {
     if (tax_info.genus_taxid < 0) {
       return `report-row-species ${
         tax_info.genus_taxid
-      } fake-genus ${initial_visibility}`;
+      } fake-genus ${initial_visibility} ${taxon_status}`;
     }
     return `report-row-species ${
       tax_info.genus_taxid
-    } real-genus ${initial_visibility}`;
+    } real-genus ${initial_visibility} ${taxon_status}`;
   }
 
   expandGenus(e) {
