@@ -12,7 +12,8 @@ import {
   Icon,
   Modal,
   Button,
-  Form
+  Form,
+  Checkbox,
 } from "semantic-ui-react";
 import Nanobar from "nanobar";
 import SortHelper from "./SortHelper";
@@ -20,7 +21,6 @@ import numberWithCommas from "../helpers/strings";
 import ProjectSelection from "./ProjectSelection";
 import StringHelper from "../helpers/StringHelper";
 import IconComponent from './IconComponent';
-import SampleUpload from './SampleUpload';
 
 class Samples extends React.Component {
   constructor(props, context) {
@@ -987,6 +987,8 @@ class Samples extends React.Component {
           onClick={this.fetchAllSelectedIds}
         />
         <label htmlFor="checkAll" />
+
+        <Checkbox />
       </div>
     );
 
