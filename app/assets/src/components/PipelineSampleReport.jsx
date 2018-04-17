@@ -808,7 +808,9 @@ class PipelineSampleReport extends React.Component {
     let taxid = e.target.getAttribute("data-tax-id");
     let strength = e.target.getAttribute("data-confirmation-strength");
     let watched_taxids = this.state.watched_taxids;
-    let action = watched_taxids.indexOf(taxid) >= 0 ? "remove_taxon_confirmation" : "add_taxon_confirmation"
+    console.log(watched_taxids)
+    console.log(taxid)
+    let action = watched_taxids.indexOf(parseInt(taxid)) >= 0 ? "remove_taxon_confirmation" : "add_taxon_confirmation"
     axios
       .post(`/samples/${this.sample_id}/${action}`, {
         taxid: taxid,
