@@ -13,7 +13,13 @@
       "jsx": true
     }
   },
-  "extends": ["standard", "eslint:recommended"],
+  "extends": [
+    "standard", 
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "prettier",
+    "prettier/react"
+  ],
   "rules": {
     "no-unused-vars": 1,
     "standard/object-curly-even-spacing": 1,

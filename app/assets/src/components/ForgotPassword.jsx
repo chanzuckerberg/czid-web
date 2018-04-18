@@ -2,8 +2,8 @@ import React from "react";
 import PropTypes from "prop-types";
 
 const ForgotPassword = props => {
-  const { endpoint, errors, csrf, emailLabel } = props; // Turn off danger rule // Turn off danger rule
-  /* eslint react/no-danger: 0 */ /* eslint jsx-a11y/label-has-for: 0 */ return (
+  const { endpoint, errors, csrf, emailLabel } = props;
+  return (
     <div className="login-form forgot-password">
       <div className="row">
         <form action={endpoint} method="POST" className="new_user">
