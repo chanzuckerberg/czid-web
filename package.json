@@ -2,9 +2,16 @@
   "scripts": {
     "start": "yarn install && webpack --config webpack.config.dev.js --watch",
     "build-img": "webpack --config webpack.config.prod.js",
-    "lint": "./node_modules/.bin/eslint . ./**/*.js"
+    "lint": "./node_modules/.bin/eslint . ./**/*.js",
+    "precommit": "lint-staged"
   },
-  "devDependencies": {
+  "lint-staged": {
+    "*.{js,jsx,json,css,scss}": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+"devDependencies": {
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-preset-env": "^1.6.1",
