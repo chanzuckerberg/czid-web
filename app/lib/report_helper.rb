@@ -179,8 +179,10 @@ module ReportHelper
 
   def taxon_confirmation_map(sample_id)
     taxon_confirmations = TaxonConfirmation.where(sample_id: sample_id)
+    confirmed = taxon_confirmations.where(strength: "confirmed")
     { watched_taxids: taxon_confirmations.where(strength: "watched").pluck(:taxid).uniq,
-      confirmed_taxids: taxon_confirmations.where(strength: "confirmed").pluck(:taxid).uniq }
+      confirmed_taxids: confirmed.pluck(:taxid).uniq,
+      confirmed_names: confirmed.pluck(:name).uniq }
   end
 
   def report_details(pipeline_run)
@@ -195,7 +197,8 @@ module ReportHelper
       default_background: Background.find(pipeline_run.sample.default_background_id),
       taxon_fasta_flag: pipeline_run.job_status == PipelineRun::STATUS_CHECKED, # all stages succeeded
       confirmed_taxids: taxon_confirmation_hash[:confirmed_taxids],
-      watched_taxids: taxon_confirmation_hash[:watched_taxids]
+      watched_taxids: taxon_confirmation_hash[:watched_taxids],
+      confirmed_names: taxon_confirmation_hash[:confirmed_names]
     }
   end
 
