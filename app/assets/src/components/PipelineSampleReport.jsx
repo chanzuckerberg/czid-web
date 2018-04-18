@@ -89,7 +89,7 @@ class PipelineSampleReport extends React.Component {
       activeThresholds: this.defaultThresholdValues,
       countType: "NT",
       watched_taxids: props.report_details.watched_taxids,
-      confirmed_taxids: props.report_details.confirmed_taxids,
+      confirmed_taxids: props.report_details.confirmed_taxids
     };
     this.expandAll = false;
     this.expandedGenera = [];
