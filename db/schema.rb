@@ -251,7 +251,7 @@ ActiveRecord::Schema.define(version: 20180416184112) do
     t.string "strength"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["sample_id", "user_id", "strength"], name: "index_taxon_confirmations_on_sample_id_and_user_id_and_strength"
+    t.index ["sample_id", "strength", "taxid"], name: "index_taxon_confirmations_on_sample_id_and_strength_and_taxid"
   end
 
   create_table "taxon_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
