@@ -23,6 +23,9 @@ class ObjectHelper {
       return aVal > bVal ? 1 : bVal > aVal ? -1 : 0;
     });
   }
+  static deepCopy(obj) {
+    return JSON.parse(JSON.stringify(obj));
+  }
 }
 
 export default ObjectHelper;

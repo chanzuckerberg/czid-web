@@ -661,7 +661,7 @@ class SamplesHeatmap extends React.Component {
       sample_ids: urlParams.sample_ids || [],
       taxon_ids: urlParams.taxon_ids || [],
       categories: urlParams.categories,
-      activeThresholds: urlParams.appliedThresholds || ThresholdMap.getSavedThresholdFilters(),
+      activeThresholds: ObjectHelper.deepCopy(urlParams.appliedThresholds || ThresholdMap.getSavedThresholdFilters()),
       appliedThresholds: urlParams.appliedThresholds || ThresholdMap.getSavedThresholdFilters(),
     };
     this.updateUrlParams();
@@ -751,18 +751,11 @@ class SamplesHeatmap extends React.Component {
     return data[keys[0]][keys[1]];
   }
 
-  getThresholdedDataProperty(data, property) {
-    let value = this.getDataProperty(data, property);
-    if (ThresholdMap.taxonPassThresholdFilter(data, this.state.appliedThresholds)) {
-      return value;
-    }
-  }
-
   makeDataGetter(dataType) {
     return function(row, col) {
       let taxon = this.getTaxonFor(row, col);
       if (taxon) {
-        return this.getThresholdedDataProperty(taxon, dataType);
+        return this.getDataProperty(taxon, dataType);
       }
     };
   }
@@ -795,7 +788,7 @@ class SamplesHeatmap extends React.Component {
   }
 
   getMinMax(taxon_names) {
-    let data = this.state.data;
+    let data = this.filteredData;
     let dataType = this.state.dataType;
     let taxon_lists = [];
     taxon_names = new Set(taxon_names);
@@ -816,11 +809,11 @@ class SamplesHeatmap extends React.Component {
       return this.getDataProperty(d, dataType);
     });
     let thresholdMin = d3.min(taxons, d => {
-      return this.getThresholdedDataProperty(d, dataType);
+      return this.getDataProperty(d, dataType);
     });
 
     let thresholdMax = d3.max(taxons, d => {
-      return this.getThresholdedDataProperty(d, dataType);
+      return this.getDataProperty(d, dataType);
     });
 
     return {
@@ -839,7 +832,7 @@ class SamplesHeatmap extends React.Component {
         let value = null;
         for (let taxon of sample.taxons) {
           if (taxon.name == taxon_name) {
-            value = this.getThresholdedDataProperty(taxon, dataType);
+            value = this.getDataProperty(taxon, dataType);
             break;
           }
         }
@@ -912,7 +905,7 @@ class SamplesHeatmap extends React.Component {
         let value = null;
         for (let sample_taxon of sample.taxons) {
           if (sample_taxon.name == taxon) {
-            value = this.getThresholdedDataProperty(sample_taxon, dataType);
+            value = this.getDataProperty(sample_taxon, dataType);
             break;
           }
         }
@@ -927,6 +920,9 @@ class SamplesHeatmap extends React.Component {
       vectors.push(vector);
     }
     let cluster = clusterfck.hcluster(vectors);
+    if (!cluster) {
+      return {};
+    }
     let clustered_taxons = [];
     let to_visit = [cluster];
     while (to_visit.length > 0) {
@@ -1024,7 +1020,7 @@ class SamplesHeatmap extends React.Component {
   }
 
   renderHeatmap() {
-    if (!this.state.data) {
+    if (!this.filteredData || !this.filteredData.length) {
       return;
     }
     return (
@@ -1033,7 +1029,7 @@ class SamplesHeatmap extends React.Component {
 					colTree={this.clustered_samples.tree}
 					rowTree={this.clustered_taxons.tree}
 					rows={this.filteredTaxonsNames.length}
-					columns={this.state.data.length}
+					columns={this.filteredData.length}
 					getRowLabel={this._getRowLabel}
 					getColumnLabel={this._getColumnLabel}
 					getCellValue={this.dataGetters[this.state.dataType]}
@@ -1231,28 +1227,45 @@ class SamplesHeatmap extends React.Component {
       let id = this.state.taxons.name_to_id[name];
       let category = this.state.taxons.id_to_category[id];
       if (categories.has(category)) {
-        filtered_names.push(name);
+        let has_value = false;
+        for(let sample of this.filteredData) {
+          for(let taxon of sample.taxons) {
+            if(taxon.tax_id == id) {
+              has_value = true;
+              break
+            }
+          }
+          if (has_value) {
+            break;
+          }
+        }
+        if (has_value) {
+          filtered_names.push(name);
+        }
       }
     }
     return filtered_names;
   }
 
-  renderVisualization() {
-    if (this.state.data) {
-      this.filteredTaxonsNames = this.filterTaxons();
-      this.clustered_samples = this.clusterSamples(
-        this.state.data,
-        this.state.dataType,
-        this.filteredTaxonsNames
-      );
-      this.clustered_taxons = this.clusterTaxons(
-        this.state.data,
-        this.state.dataType,
-        this.filteredTaxonsNames
-      );
-      this.minMax = this.getMinMax(this.filteredTaxonsNames);
+  filterData () {
+    let filteredData = [];
+    for(let sample of this.state.data) {
+      let newSample = ObjectHelper.deepCopy(sample);
+      let newTaxons = [];
+      for(let taxon of sample.taxons) {
+        if (ThresholdMap.taxonPassThresholdFilter(taxon, this.state.appliedThresholds)) {
+          newTaxons.push(taxon);
+        }
+      }
+      if (newTaxons.length) {
+        newSample.taxons = newTaxons;
+        filteredData.push(newSample);
+      }
     }
+    return filteredData;
+  }
 
+  renderVisualization() {
     return (
       <StickyContainer>
         <Sticky>{this.renderSubMenu.bind(this)}</Sticky>
@@ -1265,6 +1278,23 @@ class SamplesHeatmap extends React.Component {
   }
 
   render() {
+    this.filteredData = this.state.data && this.filterData();
+    if (this.filteredData && this.filteredData.length) {
+      this.filteredTaxonsNames = this.filterTaxons();
+      this.clustered_samples = this.clusterSamples(
+        this.filteredData,
+        this.state.dataType,
+        this.filteredTaxonsNames
+      );
+      this.clustered_taxons = this.clusterTaxons(
+        this.filteredData,
+        this.state.dataType,
+        this.filteredTaxonsNames
+      );
+      this.minMax = this.getMinMax(this.filteredTaxonsNames);
+    }
+
+
     return (
       <div id="project-visualization">
         <div className="heatmap-header">
