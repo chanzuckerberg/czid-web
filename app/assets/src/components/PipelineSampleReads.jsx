@@ -102,7 +102,7 @@ class PipelineSampleReads extends React.Component {
     );
   }
 
-  render_metadata_textfield_wide(label, field) {
+  render_metadata_textfield_wide(label, hash, field, blank_value, editable) {
     return (
       <div className="col s12">
         <div className="details-title note">{label}</div>
@@ -110,12 +110,12 @@ class PipelineSampleReads extends React.Component {
           <pre
             className="details-value"
             suppressContentEditableWarning
-            contentEditable={this.can_edit}
+            contentEditable={editable}
             id={field}
           >
             {this.sampleInfo[field] && this.sampleInfo[field].trim() !== ""
               ? this.sampleInfo[field]
-              : this.TYPE_PROMPT}
+              : blank_value}
           </pre>
         </div>
       </div>
@@ -754,10 +754,26 @@ class PipelineSampleReads extends React.Component {
                         </div>
                       </div>
                       <div className="row">
-                        {this.render_metadata_textfield_wide("Name", "name")}
+                        {this.render_metadata_textfield_wide(
+                          "Name",
+                          this.sampleInfo,
+                          "name",
+                          this.TYPE_PROMPT,
+                          this.can_edit
+                        )}
+                        {this.render_metadata_textfield_wide(
+                          "Confirmed hits",
+                          this.reportDetails,
+                          "confirmed_names",
+                          "None",
+                          false
+                        )}
                         {this.render_metadata_textfield_wide(
                           "Notes",
-                          "sample_notes"
+                          this.sampleInfo,
+                          "sample_notes",
+                          this.TYPE_PROMPT,
+                          this.can_edit
                         )}
                       </div>
                     </div>

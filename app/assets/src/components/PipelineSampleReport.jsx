@@ -879,7 +879,7 @@ class PipelineSampleReport extends React.Component {
           <span className="link-tag">
             <i
               data-tax-id={taxInfo.tax_id}
-              data-tax-name={tax_info.name}
+              data-tax-name={taxInfo.name}
               data-confirmation-strength="watched"
               onClick={this.toggleHighlightTaxon}
               className="fa fa-eye"
@@ -887,7 +887,7 @@ class PipelineSampleReport extends React.Component {
             />
             <i
               data-tax-id={taxInfo.tax_id}
-              data-tax-name={tax_info.name}
+              data-tax-name={taxInfo.name}
               data-confirmation-strength="confirmed"
               onClick={this.toggleHighlightTaxon}
               className="fa fa-check"
