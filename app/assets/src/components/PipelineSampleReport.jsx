@@ -856,6 +856,7 @@ class PipelineSampleReport extends React.Component {
 
   displayHighlightTags(taxInfo) {
     return (
+     <div className="hover-wrapper">
       <span className="link-tag">
         <i
           data-tax-id={taxInfo.tax_id}
@@ -872,6 +873,7 @@ class PipelineSampleReport extends React.Component {
           aria-hidden="true"
         />
       </span>
+     </div>
     );
   }
 
