@@ -19,7 +19,7 @@ import LabeledFilterDropdown from './LabeledFilterDropdown';
 import TaxonTooltip from './TaxonTooltip';
 import ThresholdMap from "./ThresholdMap";
 
-class D3Heatmap extends React.PureComponent {
+class D3Heatmap extends React.Component {
   constructor(props) {
     super(props);
 
@@ -33,7 +33,7 @@ class D3Heatmap extends React.PureComponent {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (ObjectHelper.shallowEquals(nextProps, this.props)) {
+    if(ObjectHelper.shallowEquals(nextProps, this.props)) {
       return;
     }
     d3.select(".D3Heatmap svg").remove();
@@ -775,15 +775,15 @@ class SamplesHeatmap extends React.Component {
       .get(url)
       .then(response => {
         let taxons = this.extractTaxons(response.data);
+
+        this.recluster = true;
         this.setState({
           taxon_ids: taxons.ids,
           data: response.data,
           taxons: taxons,
-          categories: this.state.categories || taxons.categories
+          categories: this.state.categories || taxons.categories,
+          loading: false
         });
-      })
-      .then(() => {
-        this.setState({ loading: false });
       });
   }
 
@@ -1013,6 +1013,7 @@ class SamplesHeatmap extends React.Component {
 
     delete taxons.name_to_id[rowLabel];
     delete taxons.id_to_name[id];
+    this.recluster = true;
     this.setState({
       taxon_ids: taxons.ids,
       taxons: taxons
@@ -1046,6 +1047,7 @@ class SamplesHeatmap extends React.Component {
 
   updateDataType(e, d) {
     let newDataType = d.value;
+    this.recluster = true;
     this.setState({
       dataType: newDataType,
     });
@@ -1089,6 +1091,7 @@ class SamplesHeatmap extends React.Component {
         }}
         onApply={(t) => {
 					let newThresholds = [].concat(t);
+          this.recluster = true;
           this.setState({appliedThresholds:  newThresholds});
 					ThresholdMap.saveThresholdFilters(newThresholds);
         }}
@@ -1131,6 +1134,7 @@ class SamplesHeatmap extends React.Component {
   }
 
   updateDataScale(e, d) {
+    this.recluster = true;
     this.setState({ dataScaleIdx: d.value });
   }
 
@@ -1177,6 +1181,7 @@ class SamplesHeatmap extends React.Component {
 
   onCategoryChanged(e, value) {
     let newValue = value.length ? value : this.state.categories;
+    this.recluster = true;
     this.setState({
       categories: newValue
     });
@@ -1257,10 +1262,8 @@ class SamplesHeatmap extends React.Component {
           newTaxons.push(taxon);
         }
       }
-      if (newTaxons.length) {
-        newSample.taxons = newTaxons;
-        filteredData.push(newSample);
-      }
+      newSample.taxons = newTaxons;
+      filteredData.push(newSample);
     }
     return filteredData;
   }
@@ -1277,7 +1280,7 @@ class SamplesHeatmap extends React.Component {
     );
   }
 
-  render() {
+  clusterData () {
     this.filteredData = this.state.data && this.filterData();
     if (this.filteredData && this.filteredData.length) {
       this.filteredTaxonsNames = this.filterTaxons();
@@ -1293,8 +1296,13 @@ class SamplesHeatmap extends React.Component {
       );
       this.minMax = this.getMinMax(this.filteredTaxonsNames);
     }
+  }
 
-
+  render() {
+    if (this.recluster) {
+      this.clusterData();
+      this.recluster = false;
+    }
     return (
       <div id="project-visualization">
         <div className="heatmap-header">
