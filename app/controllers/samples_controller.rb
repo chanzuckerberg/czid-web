@@ -496,9 +496,7 @@ class SamplesController < ApplicationController
   end
 
   def respond_taxon_confirmations
-    taxon_confirmations = TaxonConfirmation.where(sample_id: @sample.id)
-    render json: { watched_taxids: taxon_confirmations.where(strength: "watched").pluck(:taxid).uniq,
-                   confirmed_taxids: taxon_confirmations.where(strength: "confirmed").pluck(:taxid).uniq }
+    render json: taxon_confirmation_map(@sample.id)
   end
 
   def check_background_id(sample)
