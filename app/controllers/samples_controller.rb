@@ -482,7 +482,7 @@ class SamplesController < ApplicationController
   end
 
   def remove_taxon_confirmation
-    TaxonConfirmation.where(taxon_confirmation_params[:sample_id, :taxid, :strength]).destroy_all
+    TaxonConfirmation.where(taxon_confirmation_params([:sample_id, :taxid, :strength])).destroy_all
     respond_taxon_confirmations
   end
 
