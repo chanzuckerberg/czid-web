@@ -25,6 +25,8 @@ class PipelineSampleReport extends React.Component {
     this.sample_id = props.sample_id;
     this.gitVersion = props.git_version;
     this.canSeeAlignViz = props.can_see_align_viz;
+    this.can_edit = props.can_edit;
+    this.csrf = props.csrf;
 
     this.all_categories = props.all_categories;
     this.report_details = props.report_details;
@@ -86,7 +88,9 @@ class PipelineSampleReport extends React.Component {
       rendering: false,
       loading: true,
       activeThresholds: this.defaultThresholdValues,
-      countType: "NT"
+      countType: "NT",
+      watched_taxids: props.report_details.watched_taxids,
+      confirmed_taxids: props.report_details.confirmed_taxids
     };
     this.expandAll = false;
     this.expandedGenera = [];
@@ -107,6 +111,8 @@ class PipelineSampleReport extends React.Component {
     this.handleThresholdEnter = this.handleThresholdEnter.bind(this);
     this.renderMore = this.renderMore.bind(this);
     this.initializeTooltip();
+    this.toggleHighlightTaxon = this.toggleHighlightTaxon.bind(this);
+    this.displayHighlightTags = this.displayHighlightTags.bind(this);
   }
 
   componentWillUpdate(nextProps, nextState) {
@@ -800,6 +806,22 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
+  toggleHighlightTaxon(e) {
+    let taxid = e.target.getAttribute("data-tax-id");
+    let strength = e.target.getAttribute("data-confirmation-strength");
+    let current_taxids = this.state[strength + "_taxids"];
+    let action = current_taxids.indexOf(parseInt(taxid)) >= 0 ? "remove_taxon_confirmation" : "add_taxon_confirmation"
+    axios
+      .post(`/samples/${this.sample_id}/${action}`, {
+        taxid: taxid,
+        strength: strength,
+        authenticity_token: this.csrf
+      })
+      .then(res => {
+        this.setState({ watched_taxids: res.data.watched_taxids, confirmed_taxids: res.data.confirmed_taxids })
+      })
+  }
+
   displayTags(taxInfo, reportDetails) {
     const tax_level_str = taxInfo.tax_level == 1 ? "species" : "genus";
     return (
@@ -833,6 +855,32 @@ class PipelineSampleReport extends React.Component {
       </span>
     );
   }
+
+  displayHighlightTags(taxInfo) {
+    return (
+     <div className="hover-wrapper">
+       {this.can_edit ? (
+         <span className="link-tag">
+           <i
+             data-tax-id={taxInfo.tax_id}
+             data-confirmation-strength="watched"
+             onClick={this.toggleHighlightTaxon}
+             className="fa fa-eye"
+             aria-hidden="true"
+           />
+           <i
+             data-tax-id={taxInfo.tax_id}
+             data-confirmation-strength="confirmed"
+             onClick={this.toggleHighlightTaxon}
+             className="fa fa-check"
+             aria-hidden="true"
+           />
+         </span>
+       ) : null}
+     </div>
+    );
+  }
+
 
   category_to_adjective(category) {
     const category_lowercase = category.toLowerCase();
@@ -999,12 +1047,17 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
-  row_class(tax_info) {
+  row_class(tax_info, confirmed_taxids, watched_taxids) {
+    let taxon_status = confirmed_taxids.indexOf(tax_info.tax_id) >= 0 ?
+                         "confirmed"
+                         : watched_taxids.indexOf(tax_info.tax_id) >= 0 ?
+                           "watched"
+                           : ""
     if (tax_info.tax_level == 2) {
       if (tax_info.tax_id < 0) {
-        return `report-row-genus ${tax_info.genus_taxid} fake-genus`;
+        return `report-row-genus ${tax_info.genus_taxid} fake-genus ${taxon_status}`;
       }
-      return `report-row-genus ${tax_info.genus_taxid} real-genus`;
+      return `report-row-genus ${tax_info.genus_taxid} real-genus ${taxon_status}`;
     }
     let initial_visibility = "hidden";
     if (
@@ -1016,11 +1069,11 @@ class PipelineSampleReport extends React.Component {
     if (tax_info.genus_taxid < 0) {
       return `report-row-species ${
         tax_info.genus_taxid
-      } fake-genus ${initial_visibility}`;
+      } fake-genus ${initial_visibility} ${taxon_status}`;
     }
     return `report-row-species ${
       tax_info.genus_taxid
-    } real-genus ${initial_visibility}`;
+    } real-genus ${initial_visibility} ${taxon_status}`;
   }
 
   expandGenus(e) {
@@ -1228,7 +1281,7 @@ function AdvancedFilterTagList({ threshold, i, parent }) {
 
 function DetailCells({ parent }) {
   return parent.state.selected_taxons_top.map((tax_info, i) => (
-    <tr key={tax_info.tax_id} className={parent.row_class(tax_info)}>
+    <tr key={tax_info.tax_id} className={parent.row_class(tax_info, parent.state.confirmed_taxids, parent.state.watched_taxids)}>
       <td>{parent.render_name(tax_info, parent.report_details)}</td>
       {parent.render_number(tax_info.NT.aggregatescore, null, 0, true)}
       {parent.render_number(tax_info.NT.zscore, tax_info.NR.zscore, 1)}
@@ -1251,7 +1304,7 @@ function DetailCells({ parent }) {
         undefined,
         parent.showConcordance
       )}
-      <td>&nbsp;</td>
+      <td>{parent.displayHighlightTags(tax_info)}</td>
     </tr>
   ));
 }

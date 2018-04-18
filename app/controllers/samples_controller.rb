@@ -15,7 +15,7 @@ class SamplesController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:create, :update]
 
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder, :show_taxid_alignment].freeze
-  EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata].freeze
+  EDIT_ACTIONS = [:edit, :add_taxon_confirmation, :remove_taxon_confirmation, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :samples_taxons, :top_taxons, :heatmap].freeze
 
@@ -480,9 +480,28 @@ class SamplesController < ApplicationController
   def pipeline_runs
   end
 
+  def add_taxon_confirmation
+    TaxonConfirmation.create(taxon_confirmation_params) unless TaxonConfirmation.find_by(taxon_confirmation_params([:sample_id, :taxid, :strength]))
+    respond_taxon_confirmations
+  end
+
+  def remove_taxon_confirmation
+    TaxonConfirmation.where(taxon_confirmation_params([:sample_id, :taxid, :strength])).destroy_all
+    respond_taxon_confirmations
+  end
+
   # Use callbacks to share common setup or constraints between actions.
 
   private
+
+  def taxon_confirmation_params(keys = nil)
+    h = { sample_id: @sample.id, user_id: current_user.id, taxid: params[:taxid], strength: params[:strength] }
+    keys ? h.select { |k, _v| k && keys.include?(k) } : h
+  end
+
+  def respond_taxon_confirmations
+    render json: taxon_confirmation_map(@sample.id)
+  end
 
   def check_background_id(sample)
     background_id = params[:background_id] || sample.default_background_id

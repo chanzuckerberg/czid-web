@@ -23,6 +23,8 @@ Rails.application.routes.draw do
     get :fastqs_folder, on: :member
     post :bulk_upload, on: :collection
     post :save_metadata, on: :member
+    post :add_taxon_confirmation, on: :member
+    post :remove_taxon_confirmation, on: :member
     get :samples_taxons, on: :collection
     get :top_taxons, on: :collection
     get :heatmap, on: :collection

@@ -407,6 +407,7 @@ class PipelineSampleReads extends React.Component {
       d_report = (
         <PipelineSampleReport
           sample_id={this.sampleId}
+          csrf={this.csrf}
           report_ts={this.reportTime}
           git_version={this.gitVersion}
           all_categories={this.allCategories}
@@ -414,6 +415,7 @@ class PipelineSampleReads extends React.Component {
           report_details={this.reportDetails}
           report_page_params={this.reportPageParams}
           can_see_align_viz={this.canSeeAlignViz}
+          can_edit={this.can_edit}
         />
       );
     } else if (this.pipelineInProgress()) {

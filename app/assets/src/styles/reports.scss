@@ -260,6 +260,14 @@ input[type="number"] {
   background: #f7f7f7;
 }
 
+.confirmed {
+  color: #3CB371;
+}
+
+.watched {
+  color: #F4A460;
+}
+
 .reports-screen {
   background: #ffffff !important;
 }
@@ -714,6 +722,12 @@ input[type="number"] {
       }
     }
     .fa-bars {
+      font-size: 15px;
+    }
+    .fa-eye {
+      font-size: 15px;
+    }
+    .fa-check {
       font-size: 15px;
     }
   }
