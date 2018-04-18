@@ -1021,7 +1021,7 @@ class SamplesHeatmap extends React.Component {
   }
 
   renderHeatmap() {
-    if (!this.filteredData || !this.filteredData.length) {
+    if (this.state.loading || !this.filteredData || !this.filteredData.length) {
       return;
     }
     return (
