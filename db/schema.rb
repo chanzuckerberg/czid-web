@@ -249,7 +249,6 @@ ActiveRecord::Schema.define(version: 20180416184112) do
     t.integer "sample_id"
     t.integer "user_id"
     t.string "strength"
-    t.string "method"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["sample_id", "user_id", "strength"], name: "index_taxon_confirmations_on_sample_id_and_user_id_and_strength"
