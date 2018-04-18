@@ -3,7 +3,11 @@
     "start": "yarn install && webpack --config webpack.config.dev.js --watch",
     "build-img": "webpack --config webpack.config.prod.js",
     "lint": "./node_modules/.bin/eslint . ./**/*.js",
-    "precommit": "lint-staged"
+    "precommit": "lint-staged",
+    "test": "jest"
+  },
+  "jest": {
+    "setupTestFrameworkScriptFile": "./enzyme_config.js"
   },
   "lint-staged": {
     "*.{js,jsx,json,css,scss}": ["prettier --write", "git add"]
@@ -15,6 +19,8 @@
     "babel-preset-react": "^6.24.1",
     "coveralls": "^3.0.0",
     "css-loader": "^0.28.10",
+    "enzyme": "^3.3.0",
+    "enzyme-adapter-react-16": "^1.1.1",
     "eslint": "^4.15.0",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-config-standard": "^11.0.0",
@@ -29,6 +35,7 @@
     "file-loader": "^1.1.11",
     "husky": "^0.14.3",
     "import-glob-loader": "^1.1.0",
+    "jest": "^22.4.3",
     "lint-staged": "^7.0.4",
     "node-sass": "^4.7.2",
     "sass-loader": "^6.0.6",
@@ -52,6 +59,7 @@
     "nanobar": "^0.4.2",
     "nouislider": "^11.0.3",
     "number-abbreviate": "^2.0.0",
+    "prettier": "^1.12.1",
     "prop-types": "^15.6.0",
     "react": "^16.2.0",
     "react-autocomplete": "^1.7.2",
