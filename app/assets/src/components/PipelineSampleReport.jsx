@@ -25,6 +25,7 @@ class PipelineSampleReport extends React.Component {
     this.sample_id = props.sample_id;
     this.gitVersion = props.git_version;
     this.canSeeAlignViz = props.can_see_align_viz;
+    this.can_edit = props.can_edit;
     this.csrf = props.csrf;
 
     this.all_categories = props.all_categories;
@@ -111,6 +112,7 @@ class PipelineSampleReport extends React.Component {
     this.renderMore = this.renderMore.bind(this);
     this.initializeTooltip();
     this.toggleHighlightTaxon = this.toggleHighlightTaxon.bind(this);
+    this.displayHighlightTags = this.displayHighlightTags.bind(this);
   }
 
   componentWillUpdate(nextProps, nextState) {
@@ -857,22 +859,24 @@ class PipelineSampleReport extends React.Component {
   displayHighlightTags(taxInfo) {
     return (
      <div className="hover-wrapper">
-      <span className="link-tag">
-        <i
-          data-tax-id={taxInfo.tax_id}
-          data-confirmation-strength="watched"
-          onClick={this.toggleHighlightTaxon}
-          className="fa fa-eye"
-          aria-hidden="true"
-        />
-        <i
-          data-tax-id={taxInfo.tax_id}
-          data-confirmation-strength="confirmed"
-          onClick={this.toggleHighlightTaxon}
-          className="fa fa-check"
-          aria-hidden="true"
-        />
-      </span>
+       {this.can_edit ? (
+         <span className="link-tag">
+           <i
+             data-tax-id={taxInfo.tax_id}
+             data-confirmation-strength="watched"
+             onClick={this.toggleHighlightTaxon}
+             className="fa fa-eye"
+             aria-hidden="true"
+           />
+           <i
+             data-tax-id={taxInfo.tax_id}
+             data-confirmation-strength="confirmed"
+             onClick={this.toggleHighlightTaxon}
+             className="fa fa-check"
+             aria-hidden="true"
+           />
+         </span>
+       ) : null}
      </div>
     );
   }

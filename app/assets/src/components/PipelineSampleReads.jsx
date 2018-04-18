@@ -412,6 +412,7 @@ class PipelineSampleReads extends React.Component {
           report_details={this.reportDetails}
           report_page_params={this.reportPageParams}
           can_see_align_viz={this.canSeeAlignViz}
+          can_edit={this.can_edit}
         />
       );
     } else if (this.pipelineInProgress()) {
