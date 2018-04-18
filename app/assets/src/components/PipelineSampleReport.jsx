@@ -6,10 +6,10 @@ import Tipsy from "react-tipsy";
 import ReactAutocomplete from "react-autocomplete";
 import { Dropdown, Label, Menu, Icon, Popup } from "semantic-ui-react";
 import numberWithCommas from "../helpers/strings";
-import LabeledDropdown from './LabeledDropdown';
-import AdvancedThresholdFilterDropdown from './AdvancedThresholdFilter';
+import LabeledDropdown from "./LabeledDropdown";
+import AdvancedThresholdFilterDropdown from "./AdvancedThresholdFilter";
 import StringHelper from "../helpers/StringHelper";
-import TaxonTooltip from './TaxonTooltip';
+import TaxonTooltip from "./TaxonTooltip";
 import ThresholdMap from "./ThresholdMap";
 import Nanobar from "nanobar";
 import d3, { event as currentEvent } from "d3";
@@ -41,7 +41,7 @@ class PipelineSampleReport extends React.Component {
     const cached_exclude_subcats = Cookies.get("exclude_subcats");
     const cached_name_type = Cookies.get("name_type");
     const savedThresholdFilters = ThresholdMap.getSavedThresholdFilters();
-    this.category_child_parent = { Phage: 'Viruses' };
+    this.category_child_parent = { Phage: "Viruses" };
     this.showConcordance = false;
     this.allThresholds = ThresholdMap(this.showConcordance);
     this.genus_map = {};
@@ -712,7 +712,12 @@ class PipelineSampleReport extends React.Component {
         matched_taxons = [];
       } else {
         // species
-        if (ThresholdMap.taxonPassThresholdFilter(taxon, this.state.activeThresholds)) {
+        if (
+          ThresholdMap.taxonPassThresholdFilter(
+            taxon,
+            this.state.activeThresholds
+          )
+        ) {
           matched_taxons.push(taxon);
         }
       }
@@ -722,7 +727,10 @@ class PipelineSampleReport extends React.Component {
       thresholded_taxons.push(genus_taxon);
       thresholded_taxons = thresholded_taxons.concat(matched_taxons);
     } else if (
-      ThresholdMap.taxonPassThresholdFilter(genus_taxon, this.state.activeThresholds)
+      ThresholdMap.taxonPassThresholdFilter(
+        genus_taxon,
+        this.state.activeThresholds
+      )
     ) {
       thresholded_taxons.push(genus_taxon);
     }
@@ -808,18 +816,26 @@ class PipelineSampleReport extends React.Component {
 
   toggleHighlightTaxon(e) {
     let taxid = e.target.getAttribute("data-tax-id");
+    let name = e.target.getAttribute("data-tax-name");
     let strength = e.target.getAttribute("data-confirmation-strength");
     let current_taxids = this.state[strength + "_taxids"];
-    let action = current_taxids.indexOf(parseInt(taxid)) >= 0 ? "remove_taxon_confirmation" : "add_taxon_confirmation"
+    let action =
+      current_taxids.indexOf(parseInt(taxid)) >= 0
+        ? "remove_taxon_confirmation"
+        : "add_taxon_confirmation";
     axios
       .post(`/samples/${this.sample_id}/${action}`, {
         taxid: taxid,
+        name: name,
         strength: strength,
         authenticity_token: this.csrf
       })
       .then(res => {
-        this.setState({ watched_taxids: res.data.watched_taxids, confirmed_taxids: res.data.confirmed_taxids })
-      })
+        this.setState({
+          watched_taxids: res.data.watched_taxids,
+          confirmed_taxids: res.data.confirmed_taxids
+        });
+      });
   }
 
   displayTags(taxInfo, reportDetails) {
@@ -858,29 +874,30 @@ class PipelineSampleReport extends React.Component {
 
   displayHighlightTags(taxInfo) {
     return (
-     <div className="hover-wrapper">
-       {this.can_edit ? (
-         <span className="link-tag">
-           <i
-             data-tax-id={taxInfo.tax_id}
-             data-confirmation-strength="watched"
-             onClick={this.toggleHighlightTaxon}
-             className="fa fa-eye"
-             aria-hidden="true"
-           />
-           <i
-             data-tax-id={taxInfo.tax_id}
-             data-confirmation-strength="confirmed"
-             onClick={this.toggleHighlightTaxon}
-             className="fa fa-check"
-             aria-hidden="true"
-           />
-         </span>
-       ) : null}
-     </div>
+      <div className="hover-wrapper">
+        {this.can_edit ? (
+          <span className="link-tag">
+            <i
+              data-tax-id={taxInfo.tax_id}
+              data-tax-name={tax_info.name}
+              data-confirmation-strength="watched"
+              onClick={this.toggleHighlightTaxon}
+              className="fa fa-eye"
+              aria-hidden="true"
+            />
+            <i
+              data-tax-id={taxInfo.tax_id}
+              data-tax-name={tax_info.name}
+              data-confirmation-strength="confirmed"
+              onClick={this.toggleHighlightTaxon}
+              className="fa fa-check"
+              aria-hidden="true"
+            />
+          </span>
+        ) : null}
+      </div>
     );
   }
-
 
   category_to_adjective(category) {
     const category_lowercase = category.toLowerCase();
@@ -1048,16 +1065,21 @@ class PipelineSampleReport extends React.Component {
   }
 
   row_class(tax_info, confirmed_taxids, watched_taxids) {
-    let taxon_status = confirmed_taxids.indexOf(tax_info.tax_id) >= 0 ?
-                         "confirmed"
-                         : watched_taxids.indexOf(tax_info.tax_id) >= 0 ?
-                           "watched"
-                           : ""
+    let taxon_status =
+      confirmed_taxids.indexOf(tax_info.tax_id) >= 0
+        ? "confirmed"
+        : watched_taxids.indexOf(tax_info.tax_id) >= 0
+          ? "watched"
+          : "";
     if (tax_info.tax_level == 2) {
       if (tax_info.tax_id < 0) {
-        return `report-row-genus ${tax_info.genus_taxid} fake-genus ${taxon_status}`;
+        return `report-row-genus ${
+          tax_info.genus_taxid
+        } fake-genus ${taxon_status}`;
       }
-      return `report-row-genus ${tax_info.genus_taxid} real-genus ${taxon_status}`;
+      return `report-row-genus ${
+        tax_info.genus_taxid
+      } real-genus ${taxon_status}`;
     }
     let initial_visibility = "hidden";
     if (
@@ -1281,7 +1303,14 @@ function AdvancedFilterTagList({ threshold, i, parent }) {
 
 function DetailCells({ parent }) {
   return parent.state.selected_taxons_top.map((tax_info, i) => (
-    <tr key={tax_info.tax_id} className={parent.row_class(tax_info, parent.state.confirmed_taxids, parent.state.watched_taxids)}>
+    <tr
+      key={tax_info.tax_id}
+      className={parent.row_class(
+        tax_info,
+        parent.state.confirmed_taxids,
+        parent.state.watched_taxids
+      )}
+    >
       <td>{parent.render_name(tax_info, parent.report_details)}</td>
       {parent.render_number(tax_info.NT.aggregatescore, null, 0, true)}
       {parent.render_number(tax_info.NT.zscore, tax_info.NR.zscore, 1)}
@@ -1656,8 +1685,8 @@ class RenderMarkup extends React.Component {
                         labels={parent.allThresholds}
                         operators={[">=", "<="]}
                         filters={parent.state.activeThresholds}
-                        onChange={(filters)=> {
-                          parent.setState({activeThresholds: filters});
+                        onChange={filters => {
+                          parent.setState({ activeThresholds: filters });
                         }}
                         onApply={() => {
                           parent.saveThresholdFilters(false);
@@ -1742,9 +1771,10 @@ class PipelineSampleTree extends React.PureComponent {
 
       tree = root;
 
-      let has_categorization = order.filter(function (level) {
-        return row.lineage && row.lineage[level + "_taxid"] >= 0
-      }).length > 1;
+      let has_categorization =
+        order.filter(function(level) {
+          return row.lineage && row.lineage[level + "_taxid"] >= 0;
+        }).length > 1;
 
       if (!row.lineage || !has_categorization) {
         row.lineage = {

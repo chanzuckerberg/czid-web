@@ -495,7 +495,7 @@ class SamplesController < ApplicationController
   private
 
   def taxon_confirmation_params(keys = nil)
-    h = { sample_id: @sample.id, user_id: current_user.id, taxid: params[:taxid], strength: params[:strength] }
+    h = { sample_id: @sample.id, user_id: current_user.id, taxid: params[:taxid], name: params[:name], strength: params[:strength] }
     keys ? h.select { |k, _v| k && keys.include?(k) } : h
   end
 
