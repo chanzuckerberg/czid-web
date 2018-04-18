@@ -1272,7 +1272,7 @@ input[type="button"] {
   z-index: 0;
 }
 
-[type=checkbox].filled-in:checked + label:after {
+[type="checkbox"].filled-in:checked + label:after {
   top: 4px;
   border: 1px solid #305df9;
   background-color: #305df9;
