@@ -172,7 +172,7 @@ class SamplesController < ApplicationController
         @report_present = 1
         @report_ts = @pipeline_run.updated_at.to_i
         @all_categories = all_categories
-        @report_details = report_details(@pipeline_run, current_user.id)
+        @report_details = report_details(@pipeline_run)
         @report_page_params = clean_params(params, @all_categories)
         @ercc_comparison = @pipeline_run.compare_ercc_counts
       end
