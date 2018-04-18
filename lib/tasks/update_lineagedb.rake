@@ -2,7 +2,7 @@ require 'open3'
 require 'csv'
 require 'English'
 task update_lineage_db: :environment do
-  ### Usage: REFERENCE_S3_FOLDER=s3://czbiohub-infectious-disease/references rake update_lineage_db
+  ### Usage: REFERENCE_S3_FOLDER=s3://idseq-database/taxonomy/2018-02-15-utc-1518652800-unixtime__2018-02-15-utc-1518652800-unixtime rake update_lineage_db
   ### REFERENCE_S3_FOLDER needs to contain names.csv.gz and taxid-lineages.csv.gz
 
   reference_s3_path = ENV['REFERENCE_S3_FOLDER'].gsub(%r{([/]*$)}, '') # trim any trailing '/'
