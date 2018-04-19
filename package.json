@@ -10,7 +10,10 @@
     "setupTestFrameworkScriptFile": "./enzyme_config.js"
   },
   "lint-staged": {
-    "*.{js,jsx,json,css,scss}": ["prettier --write", "git add"]
+    "*.{js,jsx,json,css,scss}": [
+      "prettier --write",
+      "git add"
+    ]
   },
   "devDependencies": {
     "babel-core": "^6.26.0",

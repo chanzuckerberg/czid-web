@@ -41,6 +41,9 @@ class PipelineSampleReads extends React.Component {
     this.state = {
       rerunStatus: "failed",
       rerunStatusMessage: "Sample run failed",
+      watched_taxids: props.reportDetails.watched_taxids,
+      confirmed_taxids: props.reportDetails.confirmed_taxids,
+      confirmed_names: props.reportDetails.confirmed_names,
       sample_name: props.sampleInfo.name
     };
     this.TYPE_PROMPT = this.can_edit ? "Type here..." : "-";
@@ -52,6 +55,7 @@ class PipelineSampleReads extends React.Component {
     this.DROPDOWN_METADATA_FIELDS = Object.keys(this.DROPDOWN_OPTIONS);
     this.handleDropdownChange = this.handleDropdownChange.bind(this);
     this.deleteSample = this.deleteSample.bind(this);
+    this.toggleHighlightTaxon = this.toggleHighlightTaxon.bind(this);
   }
 
   deleteSample() {
@@ -63,6 +67,31 @@ class PipelineSampleReads extends React.Component {
         location.href = `/?project_id=${this.projectInfo.id}`;
       })
       .catch(err => {});
+  }
+
+  toggleHighlightTaxon(e) {
+    let taxid = e.target.getAttribute("data-tax-id");
+    let name = e.target.getAttribute("data-tax-name");
+    let strength = e.target.getAttribute("data-confirmation-strength");
+    let current_taxids = this.state[strength + "_taxids"];
+    let action =
+      current_taxids.indexOf(parseInt(taxid)) >= 0
+        ? "remove_taxon_confirmation"
+        : "add_taxon_confirmation";
+    axios
+      .post(`/samples/${this.sampleId}/${action}`, {
+        taxid: taxid,
+        name: name,
+        strength: strength,
+        authenticity_token: this.csrf
+      })
+      .then(res => {
+        this.setState({
+          watched_taxids: res.data.watched_taxids,
+          confirmed_taxids: res.data.confirmed_taxids,
+          confirmed_names: res.data.confirmed_names
+        });
+      });
   }
 
   render_metadata_dropdown(label, field) {
@@ -103,7 +132,9 @@ class PipelineSampleReads extends React.Component {
     );
   }
 
-  render_metadata_textfield_wide(label, field) {
+  render_metadata_textfield_wide(label, hash, field, blank_value, editable) {
+    let value =
+      hash[field] instanceof Array ? hash[field].join("; ") : hash[field];
     return (
       <div className="col s12">
         <div className="details-title note">{label}</div>
@@ -111,12 +142,10 @@ class PipelineSampleReads extends React.Component {
           <pre
             className="details-value"
             suppressContentEditableWarning
-            contentEditable={this.can_edit}
+            contentEditable={editable}
             id={field}
           >
-            {this.sampleInfo[field] && this.sampleInfo[field].trim() !== ""
-              ? this.sampleInfo[field]
-              : this.TYPE_PROMPT}
+            {value && value.trim() !== "" ? value : blank_value}
           </pre>
         </div>
       </div>
@@ -421,6 +450,9 @@ class PipelineSampleReads extends React.Component {
           report_page_params={this.reportPageParams}
           can_see_align_viz={this.canSeeAlignViz}
           can_edit={this.can_edit}
+          confirmed_taxids={this.state.confirmed_taxids}
+          watched_taxids={this.state.watched_taxids}
+          toggleHighlightTaxon={this.toggleHighlightTaxon}
         />
       );
     } else if (this.pipelineInProgress()) {
@@ -761,10 +793,26 @@ class PipelineSampleReads extends React.Component {
                         </div>
                       </div>
                       <div className="row">
-                        {this.render_metadata_textfield_wide("Name", "name")}
+                        {this.render_metadata_textfield_wide(
+                          "Name",
+                          this.sampleInfo,
+                          "name",
+                          this.TYPE_PROMPT,
+                          this.can_edit
+                        )}
+                        {this.render_metadata_textfield_wide(
+                          "Confirmed hits",
+                          this.state,
+                          "confirmed_names",
+                          "None",
+                          false
+                        )}
                         {this.render_metadata_textfield_wide(
                           "Notes",
-                          "sample_notes"
+                          this.sampleInfo,
+                          "sample_notes",
+                          this.TYPE_PROMPT,
+                          this.can_edit
                         )}
                       </div>
                     </div>
