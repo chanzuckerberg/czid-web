@@ -88,9 +88,7 @@ class PipelineSampleReport extends React.Component {
       rendering: false,
       loading: true,
       activeThresholds: this.defaultThresholdValues,
-      countType: "NT",
-      watched_taxids: props.report_details.watched_taxids,
-      confirmed_taxids: props.report_details.confirmed_taxids
+      countType: "NT"
     };
     this.expandAll = false;
     this.expandedGenera = [];
@@ -111,7 +109,6 @@ class PipelineSampleReport extends React.Component {
     this.handleThresholdEnter = this.handleThresholdEnter.bind(this);
     this.renderMore = this.renderMore.bind(this);
     this.initializeTooltip();
-    this.toggleHighlightTaxon = this.toggleHighlightTaxon.bind(this);
     this.displayHighlightTags = this.displayHighlightTags.bind(this);
   }
 
@@ -814,30 +811,6 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
-  toggleHighlightTaxon(e) {
-    let taxid = e.target.getAttribute("data-tax-id");
-    let name = e.target.getAttribute("data-tax-name");
-    let strength = e.target.getAttribute("data-confirmation-strength");
-    let current_taxids = this.state[strength + "_taxids"];
-    let action =
-      current_taxids.indexOf(parseInt(taxid)) >= 0
-        ? "remove_taxon_confirmation"
-        : "add_taxon_confirmation";
-    axios
-      .post(`/samples/${this.sample_id}/${action}`, {
-        taxid: taxid,
-        name: name,
-        strength: strength,
-        authenticity_token: this.csrf
-      })
-      .then(res => {
-        this.setState({
-          watched_taxids: res.data.watched_taxids,
-          confirmed_taxids: res.data.confirmed_taxids
-        });
-      });
-  }
-
   displayTags(taxInfo, reportDetails) {
     const tax_level_str = taxInfo.tax_level == 1 ? "species" : "genus";
     return (
@@ -881,7 +854,7 @@ class PipelineSampleReport extends React.Component {
               data-tax-id={taxInfo.tax_id}
               data-tax-name={taxInfo.name}
               data-confirmation-strength="watched"
-              onClick={this.toggleHighlightTaxon}
+              onClick={this.props.toggleHighlightTaxon}
               className="fa fa-eye"
               aria-hidden="true"
             />
@@ -889,7 +862,7 @@ class PipelineSampleReport extends React.Component {
               data-tax-id={taxInfo.tax_id}
               data-tax-name={taxInfo.name}
               data-confirmation-strength="confirmed"
-              onClick={this.toggleHighlightTaxon}
+              onClick={this.props.toggleHighlightTaxon}
               className="fa fa-check"
               aria-hidden="true"
             />
@@ -1307,8 +1280,8 @@ function DetailCells({ parent }) {
       key={tax_info.tax_id}
       className={parent.row_class(
         tax_info,
-        parent.state.confirmed_taxids,
-        parent.state.watched_taxids
+        parent.props.confirmed_taxids,
+        parent.props.watched_taxids
       )}
     >
       <td>{parent.render_name(tax_info, parent.report_details)}</td>

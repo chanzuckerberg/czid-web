@@ -6,7 +6,10 @@
     "precommit": "lint-staged"
   },
   "lint-staged": {
-    "*.{js,jsx,json,css,scss}": ["prettier --write", "git add"]
+    "*.{js,jsx,json,css,scss}": [
+      "prettier --write",
+      "git add"
+    ]
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
@@ -52,6 +55,7 @@
     "nanobar": "^0.4.2",
     "nouislider": "^11.0.3",
     "number-abbreviate": "^2.0.0",
+    "prettier": "^1.12.1",
     "prop-types": "^15.6.0",
     "react": "^16.2.0",
     "react-autocomplete": "^1.7.2",
