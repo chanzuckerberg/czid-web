@@ -172,7 +172,7 @@ class SamplesController < ApplicationController
         @report_present = 1
         @report_ts = @pipeline_run.updated_at.to_i
         @all_categories = all_categories
-        @report_details = report_details(@pipeline_run)
+        @report_details = report_details(@pipeline_run, current_user.id)
         @report_page_params = clean_params(params, @all_categories)
         @ercc_comparison = @pipeline_run.compare_ercc_counts
       end
@@ -481,12 +481,14 @@ class SamplesController < ApplicationController
   end
 
   def add_taxon_confirmation
-    TaxonConfirmation.create(taxon_confirmation_params) unless TaxonConfirmation.find_by(taxon_confirmation_params([:sample_id, :taxid, :strength]))
+    keys = taxon_confirmation_unique_on(params)
+    TaxonConfirmation.create(taxon_confirmation_params) unless TaxonConfirmation.find_by(taxon_confirmation_params(keys))
     respond_taxon_confirmations
   end
 
   def remove_taxon_confirmation
-    TaxonConfirmation.where(taxon_confirmation_params([:sample_id, :taxid, :strength])).destroy_all
+    keys = taxon_confirmation_unique_on(params)
+    TaxonConfirmation.where(taxon_confirmation_params(keys)).destroy_all
     respond_taxon_confirmations
   end
 
@@ -494,13 +496,17 @@ class SamplesController < ApplicationController
 
   private
 
+  def taxon_confirmation_unique_on(params)
+    (params[:strength] == TaxonConfirmation::WATCHED) ? [:sample_id, :taxid, :strength, :user_id] : [:sample_id, :taxid, :strength]
+  end
+
   def taxon_confirmation_params(keys = nil)
     h = { sample_id: @sample.id, user_id: current_user.id, taxid: params[:taxid], name: params[:name], strength: params[:strength] }
     keys ? h.select { |k, _v| k && keys.include?(k) } : h
   end
 
   def respond_taxon_confirmations
-    render json: taxon_confirmation_map(@sample.id)
+    render json: taxon_confirmation_map(@sample.id, current_user.id)
   end
 
   def check_background_id(sample)

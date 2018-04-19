@@ -177,19 +177,20 @@ module ReportHelper
     data
   end
 
-  def taxon_confirmation_map(sample_id)
+  def taxon_confirmation_map(sample_id, user_id)
     taxon_confirmations = TaxonConfirmation.where(sample_id: sample_id)
-    confirmed = taxon_confirmations.where(strength: "confirmed")
-    { watched_taxids: taxon_confirmations.where(strength: "watched").pluck(:taxid).uniq,
+    confirmed = taxon_confirmations.where(strength: TaxonConfirmation::CONFIRMED)
+    watched = taxon_confirmations.where(strength: TaxonConfirmation::WATCHED, user_id: user_id)
+    { watched_taxids: watched.pluck(:taxid).uniq,
       confirmed_taxids: confirmed.pluck(:taxid).uniq,
       confirmed_names: confirmed.pluck(:name).uniq }
   end
 
-  def report_details(pipeline_run)
+  def report_details(pipeline_run, user_id)
     # Provides some auxiliary information on pipeline_run, including default background for sample.
     # No report-specific scores though.
     sample = pipeline_run.sample
-    taxon_confirmation_hash = taxon_confirmation_map(sample.id)
+    taxon_confirmation_hash = taxon_confirmation_map(sample.id, user_id)
     {
       pipeline_info: pipeline_run,
       subsampled_reads: pipeline_run.subsampled_reads,
