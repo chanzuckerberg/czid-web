@@ -497,7 +497,7 @@ class SamplesController < ApplicationController
   private
 
   def taxon_confirmation_unique_on(params)
-    (params[:strength] == TaxonConfirmation::WATCHED) ? [:sample_id, :taxid, :strength, :user_id] : [:sample_id, :taxid, :strength]
+    params[:strength] == TaxonConfirmation::WATCHED ? [:sample_id, :taxid, :strength, :user_id] : [:sample_id, :taxid, :strength]
   end
 
   def taxon_confirmation_params(keys = nil)
