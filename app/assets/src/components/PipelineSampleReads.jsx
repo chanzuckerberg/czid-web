@@ -44,6 +44,7 @@ class PipelineSampleReads extends React.Component {
       watched_taxids: props.reportDetails.watched_taxids,
       confirmed_taxids: props.reportDetails.confirmed_taxids,
       confirmed_names: props.reportDetails.confirmed_names
+      sample_name: props.sampleInfo.name
     };
     this.TYPE_PROMPT = this.can_edit ? "Type here..." : "-";
     this.NUCLEOTIDE_TYPES = ["-", "DNA", "RNA"];
@@ -371,6 +372,10 @@ class PipelineSampleReads extends React.Component {
                 .css("display", "inline-block")
                 .delay(1000)
                 .slideUp(200);
+              if (field === "name") {
+                // update the name displayed in the header in real-time
+                this.setState({ sample_name: newText });
+              }
             } else if (response.data.status === "failed") {
               $(".note-save-failed")
                 .html(
@@ -614,7 +619,7 @@ class PipelineSampleReads extends React.Component {
           className="dropdown-button sample-select-dropdown"
           data-activates="sample-list"
         >
-          <span className="sample-name-label">{this.sampleInfo.name}</span>
+          <span className="sample-name-label">{this.state.sample_name}</span>
           <i className="fa fa-chevron-down right" />
 
           <ul
@@ -622,20 +627,22 @@ class PipelineSampleReads extends React.Component {
             className="dropdown-content sample-dropdown-content"
           >
             {Object.keys(this.sample_map).map((sample_id, i) => {
-              return (
-                <li key={i}>
-                  <a href={`/samples/${sample_id}`}>
-                    {this.sample_map[sample_id]}
-                  </a>
-                </li>
-              );
+              if (parseInt(sample_id) !== parseInt(this.sampleId)) {
+                return (
+                  <li key={i}>
+                    <a href={`/samples/${sample_id}`}>
+                      {this.sample_map[sample_id]}
+                    </a>
+                  </li>
+                );
+              }
             })}
           </ul>
         </div>
       );
     } else {
       sample_dropdown = (
-        <span className="sample-name-label">{this.sampleInfo.name}</span>
+        <span className="sample-name-label">{this.state.sample_name}</span>
       );
     }
 
