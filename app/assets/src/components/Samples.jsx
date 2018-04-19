@@ -15,7 +15,7 @@ import {
   Form
 } from "semantic-ui-react";
 import Nanobar from "nanobar";
-import colors from "../styles/themes"
+import colors from "../styles/themes";
 import SortHelper from "./SortHelper";
 import numberWithCommas from "../helpers/strings";
 import ProjectSelection from "./ProjectSelection";
@@ -128,7 +128,8 @@ class Samples extends React.Component {
         "pipeline_status",
         "notes",
         "nucleotide_type",
-        "tissue_type"
+        "tissue_type",
+        "sample_library"
       ]
     };
 
@@ -174,6 +175,10 @@ class Samples extends React.Component {
       },
       notes: {
         display_name: "Notes",
+        type: "metadata"
+      },
+      sample_library: {
+        display_name: "Library prep",
         type: "metadata"
       }
     };
@@ -1552,7 +1557,15 @@ function PipelineOutputDataValues({
         ? derivedOutput.host_genome_name
         : BLANK_TEXT,
     notes:
-      dbSample && dbSample.sample_notes ? dbSample.sample_notes : BLANK_TEXT
+      dbSample && dbSample.sample_notes ? dbSample.sample_notes : BLANK_TEXT,
+    sample_library:
+      dbSample && dbSample.sample_library
+        ? dbSample.sample_library
+        : BLANK_TEXT,
+    sample_sequencer:
+      dbSample && dbSample.sample_sequencer
+        ? dbSample.sample_sequencer
+        : BLANK_TEXT
   };
 }
 
