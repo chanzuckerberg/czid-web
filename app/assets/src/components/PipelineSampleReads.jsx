@@ -43,7 +43,7 @@ class PipelineSampleReads extends React.Component {
       rerunStatusMessage: "Sample run failed",
       watched_taxids: props.reportDetails.watched_taxids,
       confirmed_taxids: props.reportDetails.confirmed_taxids,
-      confirmed_names: props.reportDetails.confirmed_names
+      confirmed_names: props.reportDetails.confirmed_names,
       sample_name: props.sampleInfo.name
     };
     this.TYPE_PROMPT = this.can_edit ? "Type here..." : "-";
@@ -94,7 +94,6 @@ class PipelineSampleReads extends React.Component {
       });
   }
 
-
   render_metadata_dropdown(label, field) {
     let dropdown_options = this.DROPDOWN_OPTIONS[field];
     let display_value = this.sampleInfo[field] ? this.sampleInfo[field] : "-";
@@ -134,7 +133,8 @@ class PipelineSampleReads extends React.Component {
   }
 
   render_metadata_textfield_wide(label, hash, field, blank_value, editable) {
-    let value = (hash[field] instanceof Array) ? hash[field].join("; ") : hash[field]
+    let value =
+      hash[field] instanceof Array ? hash[field].join("; ") : hash[field];
     return (
       <div className="col s12">
         <div className="details-title note">{label}</div>
@@ -145,9 +145,7 @@ class PipelineSampleReads extends React.Component {
             contentEditable={editable}
             id={field}
           >
-            {value && value.trim() !== ""
-              ? value
-              : blank_value}
+            {value && value.trim() !== "" ? value : blank_value}
           </pre>
         </div>
       </div>
