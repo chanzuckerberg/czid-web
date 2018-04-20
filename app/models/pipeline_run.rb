@@ -315,6 +315,10 @@ class PipelineRun < ApplicationRecord
     "#{postprocess_output_s3_path}/align_viz"
   end
 
+  def assembly_output_s3_path(taxid)
+    "#{postprocess_output_s3_path}/assembly/#{taxid}"
+  end
+
   def host_filter_output_s3_path
     pipeline_ver_str = ""
     pipeline_ver_str = "/#{pipeline_version}" if pipeline_version
