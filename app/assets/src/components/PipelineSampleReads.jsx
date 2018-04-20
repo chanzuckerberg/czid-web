@@ -104,15 +104,15 @@ class PipelineSampleReads extends React.Component {
     let dropdown_options = this.DROPDOWN_OPTIONS[field];
     let display_value = this.sampleInfo[field] ? this.sampleInfo[field] : "-";
     return (
-      <div className="row detail-row no-padding">
-        <div className="col s5 label">{label}</div>
-        <div className="col s7 no-padding">
+      <div className="row detail-row">
+        <div className="col s6 label">{label}</div>
+        <div className="col s6">
           <div className="sample-notes">
             <div
               className="details-value custom-select-dropdown select-dropdown"
               data-activates={field}
             >
-              <div className="hack">{display_value}</div>
+              <div className="details-text">{display_value}</div>
               <i className="fa fa-chevron-down right" />
             </div>
             {this.can_edit ? (
@@ -142,9 +142,9 @@ class PipelineSampleReads extends React.Component {
     let value =
       hash[field] instanceof Array ? hash[field].join("; ") : hash[field];
     return (
-      <div className="col s12">
+      <div className="details-container col s12">
         <div className="details-title note">{label}</div>
-        <div className="sample-notes note">
+        <div className="sample-notes note edit-wide">
           <pre
             className="details-value"
             suppressContentEditableWarning
@@ -165,17 +165,25 @@ class PipelineSampleReads extends React.Component {
         : this.TYPE_PROMPT;
     return (
       <div className="row detail-row">
-        <div className="col s6 no-padding">{label}</div>
-        <div className="col s6 no-padding">
-          <div className="details-value sample-notes">
-            <pre
-              suppressContentEditableWarning
-              contentEditable={this.can_edit}
-              id={field}
-            >
-              {display_value}
-            </pre>
-          </div>
+        <div className="col s6 label">{label}</div>
+        <div className="col s6">
+          {this.can_edit ? (
+            <div className="details-value sample-notes edit">
+              <pre
+                suppressContentEditableWarning
+                contentEditable="true"
+                id={field}
+              >
+                {display_value}
+              </pre>
+            </div>
+          ) : (
+            <div className="details-value sample-notes">
+              <pre suppressContentEditableWarning id={field}>
+                {display_value}
+              </pre>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -185,17 +193,25 @@ class PipelineSampleReads extends React.Component {
     let display_value = this.sampleInfo[field] || this.TYPE_PROMPT;
     return (
       <div className="row detail-row">
-        <div className="col s6 no-padding">{label}</div>
-        <div className="col s6 no-padding">
-          <div className="details-value sample-notes">
-            <pre
-              suppressContentEditableWarning
-              contentEditable={this.can_edit}
-              id={field}
-            >
-              {display_value}
-            </pre>
-          </div>
+        <div className="col s6 label">{label}</div>
+        <div className="col s6">
+          {this.can_edit ? (
+            <div className="details-value sample-notes edit">
+              <pre
+                suppressContentEditableWarning
+                contentEditable="true"
+                id={field}
+              >
+                {display_value}
+              </pre>
+            </div>
+          ) : (
+            <div className="details-value sample-notes">
+              <pre suppressContentEditableWarning id={field}>
+                {display_value}
+              </pre>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -327,7 +343,7 @@ class PipelineSampleReads extends React.Component {
       .trim();
     if (prevValue !== value) {
       parent.prev().html(
-        `<div class='hack'>
+        `<div class='details-text'>
         ${value}
        </div>
        <i class="fa fa-chevron-down right"/>`
@@ -516,14 +532,14 @@ class PipelineSampleReads extends React.Component {
           <div className="row">
             <div className="col s6">
               <div className="row detail-row">
-                <div className="col s6 no-padding">Total reads</div>
-                <div className="details-value col s6 no-padding">
+                <div className="col s6 label">Total reads</div>
+                <div className="details-value col s6 plain">
                   {numberWithCommas(this.pipelineRun.total_reads)}
                 </div>
               </div>
               <div className="row detail-row">
-                <div className="col s6 no-padding">ERCC reads</div>
-                <div className={`details-value col s6 no-padding`}>
+                <div className="col s6 label">ERCC reads</div>
+                <div className="details-value col s6 plain">
                   {!this.pipelineRun.total_ercc_reads
                     ? 0
                     : numberWithCommas(this.pipelineRun.total_ercc_reads)}
@@ -537,9 +553,9 @@ class PipelineSampleReads extends React.Component {
                 </div>
               </div>
               <div className="row detail-row">
-                <div className="col s6 no-padding">Non-host reads</div>
+                <div className="col s6 label">Non-host reads</div>
                 <div
-                  className={`details-value col s6 no-padding ${
+                  className={`details-value col s6 plain ${
                     !this.summary_stats.remaining_reads ? BLANK_TEXT : ""
                   }`}
                 >
@@ -552,9 +568,9 @@ class PipelineSampleReads extends React.Component {
                 </div>
               </div>
               <div className="row detail-row">
-                <div className="col s6 no-padding">Unmapped reads</div>
+                <div className="col s6 label">Unmapped reads</div>
                 <div
-                  className={`details-value col s6 no-padding ${
+                  className={`details-value col s6 plain ${
                     !this.summary_stats.unmapped_reads ? BLANK_TEXT : ""
                   }`}
                 >
@@ -566,9 +582,9 @@ class PipelineSampleReads extends React.Component {
             </div>
             <div className="col s6">
               <div className="row detail-row">
-                <div className="col s6 no-padding">Passed quality control</div>
+                <div className="col s6 label">Passed quality control</div>
                 <div
-                  className={`details-value col s6 no-padding ${
+                  className={`details-value col s6 plain ${
                     !this.summary_stats.qc_percent ? BLANK_TEXT : ""
                   }`}
                 >
@@ -578,9 +594,9 @@ class PipelineSampleReads extends React.Component {
                 </div>
               </div>
               <div className="row detail-row">
-                <div className="col s6 no-padding">Compression ratio</div>
+                <div className="col s6 label">Compression ratio</div>
                 <div
-                  className={`details-value col s6 no-padding ${
+                  className={`details-value col s6 plain ${
                     !this.summary_stats.compression_ratio ? BLANK_TEXT : ""
                   }`}
                 >
@@ -590,9 +606,9 @@ class PipelineSampleReads extends React.Component {
                 </div>
               </div>
               <div className="row detail-row">
-                <div className="col s6 no-padding">Date processed</div>
+                <div className="col s6 label">Date processed</div>
                 <div
-                  className={`details-value col s6 no-padding ${
+                  className={`details-value col s6 plain ${
                     !this.summary_stats.last_processed_at ? BLANK_TEXT : ""
                   }`}
                 >
@@ -779,9 +795,9 @@ class PipelineSampleReads extends React.Component {
                       <div className="row">
                         <div className="col s6">
                           <div className="row detail-row">
-                            <div className="col s6 no-padding">Host</div>
+                            <div className="col s6 label">Host</div>
                             <div
-                              className={`details-value col s6 no-padding
+                              className={`details-value col s6 plain
                             ${!this.host_genome ? BLANK_TEXT : ""}`}
                             >
                               {!this.host_genome
@@ -791,8 +807,8 @@ class PipelineSampleReads extends React.Component {
                           </div>
 
                           <div className="row detail-row">
-                            <div className="col s6 no-padding">Upload date</div>
-                            <div className="details-value col s6 no-padding">
+                            <div className="col s6 label">Upload date</div>
+                            <div className="details-value col s6 plain">
                               {moment(this.sampleInfo.created_at)
                                 .startOf("second")
                                 .fromNow()}
@@ -802,8 +818,6 @@ class PipelineSampleReads extends React.Component {
                             "Location",
                             "sample_location"
                           )}
-                        </div>
-                        <div className="col s6">
                           {this.render_metadata_dropdown(
                             "Tissue type",
                             "sample_tissue"
@@ -817,16 +831,18 @@ class PipelineSampleReads extends React.Component {
                             "sample_host"
                           )}
                           {this.render_metadata_textfield(
+                            "Sample collection date",
+                            "sample_date"
+                          )}
+                        </div>
+                        <div className="col s6">
+                          {this.render_metadata_textfield(
                             "Library prep",
                             "sample_library"
                           )}
                           {this.render_metadata_textfield(
                             "Sequencer",
                             "sample_sequencer"
-                          )}
-                          {this.render_metadata_textfield(
-                            "Sample collection date",
-                            "sample_date"
                           )}
                           {this.render_metadata_numfield(
                             "RNA/DNA input (ng)",
