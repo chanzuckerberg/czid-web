@@ -41,8 +41,7 @@ module SamplesHelper
                         sample_batch: db_sample ? db_sample[:sample_batch] : '',
                         sample_diagnosis: db_sample ? db_sample[:sample_diagnosis] : '',
                         sample_organism: db_sample ? db_sample[:sample_organism] : '',
-                        sample_detection: db_sample ? db_sample[:sample_detection] : '',
-        }
+                        sample_detection: db_sample ? db_sample[:sample_detection] : '' }
         stage_statuses = data_values.values_at(:host_filtering_status, :nonhost_alignment_status, :postprocessing_status)
         if stage_statuses.any? { |status| status == "FAILED" }
           data_values[:overall_job_status] = "FAILED"
