@@ -200,7 +200,7 @@ module ReportHelper
       confirmed_taxids: taxon_confirmation_hash[:confirmed_taxids],
       watched_taxids: taxon_confirmation_hash[:watched_taxids],
       confirmed_names: taxon_confirmation_hash[:confirmed_names]
-      assembled_taxids: pipeline_run.assembled_taxids
+      assembled_taxids: JSON.parse(pipeline_run.assembled_taxids)
     }
   end
 
