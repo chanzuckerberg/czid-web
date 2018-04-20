@@ -41,9 +41,15 @@ class PipelineSampleReads extends React.Component {
     this.state = {
       rerunStatus: "failed",
       rerunStatusMessage: "Sample run failed",
-      watched_taxids: props.reportDetails.watched_taxids,
-      confirmed_taxids: props.reportDetails.confirmed_taxids,
-      confirmed_names: props.reportDetails.confirmed_names,
+      watched_taxids: props.reportDetails
+        ? props.reportDetails.watched_taxids
+        : [],
+      confirmed_taxids: props.reportDetails
+        ? props.reportDetails.confirmed_taxids
+        : [],
+      confirmed_names: props.reportDetails
+        ? props.reportDetails.confirmed_names
+        : [],
       sample_name: props.sampleInfo.name
     };
     this.TYPE_PROMPT = this.can_edit ? "Type here..." : "-";
