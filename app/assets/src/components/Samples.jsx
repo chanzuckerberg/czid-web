@@ -552,7 +552,7 @@ class Samples extends React.Component {
   }
 
   renderPipelineOutput(samples) {
-    let BLANK_TEXT = <span className="blank">NA</span>;
+    let BLANK_TEXT = <span className="blank">—</span>;
     return samples.map((sample, i) => {
       let dbSample = sample.db_sample;
       let derivedOutput = sample.derived_sample_output;
