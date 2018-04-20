@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180418215805) do
+ActiveRecord::Schema.define(version: 20180420224803) do
 
   create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "archive_of"
@@ -163,6 +163,7 @@ ActiveRecord::Schema.define(version: 20180418215805) do
     t.float "fraction_subsampled", limit: 24
     t.string "pipeline_version"
     t.string "pipeline_commit"
+    t.text "assembled_taxids"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
     t.index ["pipeline_output_id"], name: "index_pipeline_runs_on_pipeline_output_id", unique: true
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
