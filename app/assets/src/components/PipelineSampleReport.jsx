@@ -811,6 +811,11 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
+  downloadAssemblyLink(e) {
+    const taxId = e.target.getAttribute("data-tax-id");
+    location.href = `/samples/${this.sample_id}/assembly/${taxId}`;
+  }
+
   displayTags(taxInfo, reportDetails) {
     const tax_level_str = taxInfo.tax_level == 1 ? "species" : "genus";
     return (
@@ -838,6 +843,14 @@ class PipelineSampleReport extends React.Component {
             data-tax-id={taxInfo.tax_id}
             onClick={this.gotoAlignmentVizLink}
             className="fa fa-bars fa-1"
+            aria-hidden="true"
+          />
+        ) : null}
+        {reportDetails.assembled_taxids.indexOf(taxInfo.tax_id) >= 0 ? (
+          <i
+            data-tax-id={taxInfo.tax_id}
+            onClick={this.downloadAssemblyLink}
+            className="fa fa-compress-alt"
             aria-hidden="true"
           />
         ) : null}
