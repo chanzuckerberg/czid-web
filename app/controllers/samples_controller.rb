@@ -298,7 +298,7 @@ class SamplesController < ApplicationController
   def assembly
     pipeline_run = sample.pipeline_runs.first
     assembly_fasta = pipeline_run.assembly_output_s3_path(params[:taxid])
-    send_data get_s3_file(assembly_fasta), filename: @sample.name + '_' + clean_taxid_name(@sample, params[:taxid]) + '-assembled-scaffolds.fasta'
+    send_data get_s3_file(assembly_fasta), filename: @sample.name + '_' + clean_taxid_name(pipeline_run, params[:taxid]) + '-assembled-scaffolds.fasta'
   end
 
   def show_taxid_fasta
@@ -311,7 +311,7 @@ class SamplesController < ApplicationController
       @taxid_fasta = get_taxid_fasta(@sample, params[:taxid], params[:tax_level].to_i, params[:hit_type])
     end
     pipeline_run = @sample.pipeline_runs.first
-    send_data @taxid_fasta, filename: @sample.name + '_' + clean_taxid_name(@sample, params[:taxid]) + '-hits.fasta'
+    send_data @taxid_fasta, filename: @sample.name + '_' + clean_taxid_name(pipeline_run, params[:taxid]) + '-hits.fasta'
   end
 
   def show_taxid_alignment
@@ -500,9 +500,8 @@ class SamplesController < ApplicationController
 
   private
 
-  def clean_taxid_name(sample, taxid)
-    pipeline_run = sample.pipeline_runs.first
-    name = pipeline_run.taxon_counts.find_by(tax_id: taxid).name
+  def clean_taxid_name(pipeline_run, taxid)
+    taxid_name = pipeline_run.taxon_counts.find_by(tax_id: taxid).name
     taxid_name ? taxid_name.downcase.gsub(/\W/, "-") : ''
   end
 
