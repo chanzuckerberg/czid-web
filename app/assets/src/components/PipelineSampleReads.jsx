@@ -181,6 +181,26 @@ class PipelineSampleReads extends React.Component {
     );
   }
 
+  render_metadata_numfield(label, field) {
+    let display_value = this.sampleInfo[field] || this.TYPE_PROMPT;
+    return (
+      <div className="row detail-row">
+        <div className="col s6 no-padding">{label}</div>
+        <div className="col s6 no-padding">
+          <div className="details-value sample-notes">
+            <pre
+              suppressContentEditableWarning
+              contentEditable={this.can_edit}
+              id={field}
+            >
+              {display_value}
+            </pre>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   gotoReport() {
     $("ul.tabs").tabs("select_tab", "reports");
     PipelineSampleReads.setTab("pipeline_display", "reports");
@@ -796,6 +816,34 @@ class PipelineSampleReads extends React.Component {
                             "Unique ID",
                             "sample_host"
                           )}
+                          {this.render_metadata_textfield(
+                            "Library prep",
+                            "sample_library"
+                          )}
+                          {this.render_metadata_textfield(
+                            "Sequencer",
+                            "sample_sequencer"
+                          )}
+                          {this.render_metadata_textfield(
+                            "Sample collection date",
+                            "sample_date"
+                          )}
+                          {this.render_metadata_numfield(
+                            "RNA/DNA input (ng)",
+                            "sample_input_ng"
+                          )}
+                          {this.render_metadata_numfield(
+                            "Batch",
+                            "sample_batch"
+                          )}
+                          {this.render_metadata_textfield(
+                            "Organism",
+                            "sample_organism"
+                          )}
+                          {this.render_metadata_textfield(
+                            "Detection method",
+                            "sample_detection"
+                          )}
                         </div>
                       </div>
                       <div className="row">
@@ -819,6 +867,10 @@ class PipelineSampleReads extends React.Component {
                           "sample_notes",
                           this.TYPE_PROMPT,
                           this.can_edit
+                        )}
+                        {this.render_metadata_textfield_wide(
+                          "Diagnosis",
+                          "sample_diagnosis"
                         )}
                       </div>
                     </div>

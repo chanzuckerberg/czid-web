@@ -545,6 +545,7 @@ class SamplesController < ApplicationController
                                    :sample_memory, :sample_location, :sample_date, :sample_tissue,
                                    :sample_template, :sample_library, :sample_sequencer,
                                    :sample_notes, :job_queue, :search, :subsample, :pipeline_branch,
+                                   :sample_input_ng, :sample_batch, :sample_diagnosis, :sample_organism, :sample_detection,
                                    input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts])
   end
 

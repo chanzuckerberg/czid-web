@@ -129,7 +129,14 @@ class Samples extends React.Component {
         "notes",
         "nucleotide_type",
         "tissue_type",
-        "sample_library"
+        "sample_library",
+        "sample_sequencer",
+        "sample_date",
+        "sample_input_ng",
+        "sample_batch",
+        "sample_diagnosis",
+        "sample_organism",
+        "sample_detection"
       ]
     };
 
@@ -179,6 +186,34 @@ class Samples extends React.Component {
       },
       sample_library: {
         display_name: "Library prep",
+        type: "metadata"
+      },
+      sample_sequencer: {
+        display_name: "Sequencer",
+        type: "metadata"
+      },
+      sample_date: {
+        display_name: "Collection date",
+        type: "metadata"
+      },
+      sample_input_ng: {
+        display_name: "RNA/DNA input (ng)",
+        type: "metadata"
+      },
+      sample_batch: {
+        display_name: "Batch",
+        type: "metadata"
+      },
+      sample_diagnosis: {
+        display_name: "Diagnosis",
+        type: "metadata"
+      },
+      sample_organism: {
+        display_name: "Organism",
+        type: "metadata"
+      },
+      sample_detection: {
+        display_name: "Detection method",
         type: "metadata"
       }
     };
@@ -1517,7 +1552,7 @@ function PipelineOutputDataValues({
   stats,
   dbSample
 }) {
-  return {
+  let res = {
     total_reads: !derivedOutput.pipeline_run
       ? BLANK_TEXT
       : numberWithCommas(derivedOutput.pipeline_run.total_reads),
@@ -1557,16 +1592,33 @@ function PipelineOutputDataValues({
         ? derivedOutput.host_genome_name
         : BLANK_TEXT,
     notes:
-      dbSample && dbSample.sample_notes ? dbSample.sample_notes : BLANK_TEXT,
-    sample_library:
-      dbSample && dbSample.sample_library
-        ? dbSample.sample_library
-        : BLANK_TEXT,
-    sample_sequencer:
-      dbSample && dbSample.sample_sequencer
-        ? dbSample.sample_sequencer
-        : BLANK_TEXT
+      dbSample && dbSample.sample_notes ? dbSample.sample_notes : BLANK_TEXT
   };
+
+  // Add more fields or blank_text values
+  let fields = [
+    "sample_library",
+    "sample_sequencer",
+    "sample_date",
+    "sample_input_ng",
+    "sample_batch",
+    "sample_diagnosis",
+    "sample_organism",
+    "sample_detection"
+  ];
+  fields.forEach(function(field) {
+    AddValOrBlank(res, dbSample, field);
+  });
+  return res;
+}
+
+function AddValOrBlank(all, sample, key) {
+  let BLANK_TEXT = <span className="blank">NA</span>;
+  if (sample && sample[key]) {
+    all[key] = sample[key];
+  } else {
+    all[key] = BLANK_TEXT;
+  }
 }
 
 function PipelineOutputCards({

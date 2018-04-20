@@ -39,7 +39,7 @@ class Sample < ApplicationRecord
   METADATA_FIELDS = [:sample_host, # this has been repurposed to be 'Unique ID' (e.g. in human case, patient ID -- nothing to do with host genome)
                      :sample_location, :sample_date, :sample_tissue,
                      :sample_template, # this refers to nucleotide type (RNA or DNA)
-                     :sample_library, :sample_sequencer, :sample_notes].freeze
+                     :sample_library, :sample_sequencer, :sample_notes, :sample_input_ng, :sample_batch, :sample_diagnosis, :sample_organism, :sample_detection].freeze
 
   attr_accessor :bulk_mode
 
