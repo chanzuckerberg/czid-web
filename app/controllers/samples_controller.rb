@@ -272,7 +272,7 @@ class SamplesController < ApplicationController
     @pipeline_run = @sample.pipeline_runs.first
     if @pipeline_run
       @search_list = fetch_lineage_info(@pipeline_run.id)
-      render json: @search_list
+      render json: JSON.dump(@search_list)
     else
       render json: { lineage_map: {}, search_list: [] }
     end
