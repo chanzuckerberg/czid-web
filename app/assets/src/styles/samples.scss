@@ -13,6 +13,12 @@
 }
 $break-large: 1070px;
 
+.column_name {
+  .fa-check.right {
+    margin-top: 5px;
+  }
+}
+
 .tabs {
   display: block !important;
   .tab {
