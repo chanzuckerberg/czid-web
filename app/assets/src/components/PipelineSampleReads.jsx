@@ -144,7 +144,7 @@ class PipelineSampleReads extends React.Component {
     return (
       <div className="details-container col s12">
         <div className="details-title note">{label}</div>
-        <div className="sample-notes note edit-wide">
+        <div className={"sample-notes note " + (editable ? "edit-wide" : "")}>
           <pre
             className="details-value"
             suppressContentEditableWarning
@@ -167,23 +167,19 @@ class PipelineSampleReads extends React.Component {
       <div className="row detail-row">
         <div className="col s6 label">{label}</div>
         <div className="col s6">
-          {this.can_edit ? (
-            <div className="details-value sample-notes edit">
-              <pre
-                suppressContentEditableWarning
-                contentEditable="true"
-                id={field}
-              >
-                {display_value}
-              </pre>
-            </div>
-          ) : (
-            <div className="details-value sample-notes">
-              <pre suppressContentEditableWarning id={field}>
-                {display_value}
-              </pre>
-            </div>
-          )}
+          <div
+            className={
+              "details-value sample-notes " + (this.can_edit ? "edit" : "")
+            }
+          >
+            <pre
+              suppressContentEditableWarning
+              contentEditable="true"
+              id={field}
+            >
+              {display_value}
+            </pre>
+          </div>
         </div>
       </div>
     );
@@ -195,23 +191,19 @@ class PipelineSampleReads extends React.Component {
       <div className="row detail-row">
         <div className="col s6 label">{label}</div>
         <div className="col s6">
-          {this.can_edit ? (
-            <div className="details-value sample-notes edit">
-              <pre
-                suppressContentEditableWarning
-                contentEditable="true"
-                id={field}
-              >
-                {display_value}
-              </pre>
-            </div>
-          ) : (
-            <div className="details-value sample-notes">
-              <pre suppressContentEditableWarning id={field}>
-                {display_value}
-              </pre>
-            </div>
-          )}
+          <div
+            className={
+              "details-value sample-notes " + (this.can_edit ? "edit" : "")
+            }
+          >
+            <pre
+              suppressContentEditableWarning
+              contentEditable="true"
+              id={field}
+            >
+              {display_value}
+            </pre>
+          </div>
         </div>
       </div>
     );
@@ -885,8 +877,11 @@ class PipelineSampleReads extends React.Component {
                           this.can_edit
                         )}
                         {this.render_metadata_textfield_wide(
-                          "Diagnosis",
-                          "sample_diagnosis"
+                          "Diagnoses",
+                          this.sampleInfo,
+                          "sample_diagnosis",
+                          this.TYPE_PROMPT,
+                          this.can_edit
                         )}
                       </div>
                     </div>

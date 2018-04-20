@@ -105,6 +105,7 @@ $break-large: 1070px;
 .edit-wide {
   background: #f6faff;
   border: 1px solid #d0d4d9;
+  border-radius: 5px;
   margin-top: 10px;
   &:hover {
     background: #ebeff4;
@@ -176,12 +177,8 @@ $break-large: 1070px;
   pre {
     font-weight: 600;
     margin-left: 5px;
-    border: 1px solid transparent;
     padding: 15px 5px;
     cursor: text;
-    &:hover {
-      border-color: #cad0da;
-    }
   }
 }
 .data-divider {
