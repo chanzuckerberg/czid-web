@@ -52,7 +52,7 @@ class PipelineSampleReads extends React.Component {
         : [],
       sample_name: props.sampleInfo.name
     };
-    this.TYPE_PROMPT = this.can_edit ? "Type here..." : "-";
+    this.TYPE_PROMPT = "-";
     this.NUCLEOTIDE_TYPES = ["-", "DNA", "RNA"];
     this.DROPDOWN_OPTIONS = {
       sample_tissue: PipelineSampleReads.fetchTissueTypes(),
