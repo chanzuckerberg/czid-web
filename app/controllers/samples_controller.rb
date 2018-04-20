@@ -207,7 +207,15 @@ class SamplesController < ApplicationController
   def samples_taxons
     sample_ids = params[:sample_ids].to_s.split(",").map(&:to_i) || []
     num_results = params[:n] ? params[:n].to_i : 20
-    taxon_ids = params[:taxon_ids].to_s.split(",").map(&:to_i) || []
+    taxon_ids = params[:taxon_ids].to_s.split(",").map do |x|
+      begin
+        Integer(x)
+      rescue ArgumentError
+        nil
+      end
+    end
+    taxon_ids = taxon_ids.compact
+
     sort_by = params[:sort_by] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
     only_species = params[:species] == "1"
     samples = current_power.samples.where(id: sample_ids).includes([:pipeline_runs])
