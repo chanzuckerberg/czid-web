@@ -1,22 +1,22 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import clusterfck from 'clusterfck';
-import axios from 'axios';
-import d3, {event as currentEvent} from 'd3';
-import NumAbbreviate from 'number-abbreviate';
-import { Button, Popup } from 'semantic-ui-react'
-import copy from 'copy-to-clipboard';
-import textWidth from 'text-width';
-import { StickyContainer, Sticky } from 'react-sticky';
+import React from "react";
+import PropTypes from "prop-types";
+import clusterfck from "clusterfck";
+import axios from "axios";
+import d3, { event as currentEvent } from "d3";
+import NumAbbreviate from "number-abbreviate";
+import { Button, Popup } from "semantic-ui-react";
+import copy from "copy-to-clipboard";
+import textWidth from "text-width";
+import { StickyContainer, Sticky } from "react-sticky";
 
-import symlog from './symlog';
-import AdvancedThresholdFilterDropdown from './AdvancedThresholdFilter';
-import ObjectHelper from '../helpers/ObjectHelper';
-import ErrorBoundary from './ErrorBoundary';
-import ReactNouislider from './ReactNouislider';
-import LabeledDropdown from './LabeledDropdown';
-import LabeledFilterDropdown from './LabeledFilterDropdown';
-import TaxonTooltip from './TaxonTooltip';
+import symlog from "./symlog";
+import AdvancedThresholdFilterDropdown from "./AdvancedThresholdFilter";
+import ObjectHelper from "../helpers/ObjectHelper";
+import ErrorBoundary from "./ErrorBoundary";
+import ReactNouislider from "./ReactNouislider";
+import LabeledDropdown from "./LabeledDropdown";
+import LabeledFilterDropdown from "./LabeledFilterDropdown";
+import TaxonTooltip from "./TaxonTooltip";
 import ThresholdMap from "./ThresholdMap";
 
 class D3Heatmap extends React.Component {
@@ -33,7 +33,7 @@ class D3Heatmap extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if(ObjectHelper.shallowEquals(nextProps, this.props)) {
+    if (ObjectHelper.shallowEquals(nextProps, this.props)) {
       return;
     }
     d3.select(".D3Heatmap svg").remove();
@@ -661,23 +661,26 @@ class SamplesHeatmap extends React.Component {
       sample_ids: urlParams.sample_ids || [],
       taxon_ids: urlParams.taxon_ids || [],
       categories: urlParams.categories,
-      activeThresholds: ObjectHelper.deepCopy(urlParams.appliedThresholds || ThresholdMap.getSavedThresholdFilters()),
-      appliedThresholds: urlParams.appliedThresholds || ThresholdMap.getSavedThresholdFilters(),
+      activeThresholds: ObjectHelper.deepCopy(
+        urlParams.appliedThresholds || ThresholdMap.getSavedThresholdFilters()
+      ),
+      appliedThresholds:
+        urlParams.appliedThresholds || ThresholdMap.getSavedThresholdFilters()
     };
     this.updateUrlParams();
     this.thresholdLabels = new ThresholdMap(false);
     let to_bind = [
-      'getRowLabel',
-      'getColumnLabel',
-      'getTooltip',
-      'onCategoryChanged',
-      'onCellClick',
-      'onRemoveRow',
-      'onShareClick',
-      'sampleLabelClicked',
-      'taxonLevelChanged',
-      'updateDataScale',
-      'updateDataType',
+      "getRowLabel",
+      "getColumnLabel",
+      "getTooltip",
+      "onCategoryChanged",
+      "onCellClick",
+      "onRemoveRow",
+      "onShareClick",
+      "sampleLabelClicked",
+      "taxonLevelChanged",
+      "updateDataScale",
+      "updateDataType"
     ];
     for (let fname of to_bind) {
       this["_" + fname] = this[fname].bind(this);
@@ -706,11 +709,28 @@ class SamplesHeatmap extends React.Component {
     };
     sp.set("species", newParams["species"] || this.state.species);
     sp.set("dataType", newParams["dataType"] || this.state.dataType);
-    sp.set("dataScaleIdx", newParams["dataScaleIdx"] || this.state.dataScaleIdx);
-    sp.set("sample_ids", lst_to_comma(newParams["sample_ids"]) || this.state.sample_ids);
-    sp.set("taxon_ids", lst_to_comma(newParams["taxon_ids"]) || this.state.taxon_ids);
-    sp.set("categories", lst_to_comma(newParams["categories"]) || this.state.categories);
-    sp.set("appliedThresholds", JSON.stringify(newParams["appliedThresholds"] || this.state.appliedThresholds));
+    sp.set(
+      "dataScaleIdx",
+      newParams["dataScaleIdx"] || this.state.dataScaleIdx
+    );
+    sp.set(
+      "sample_ids",
+      lst_to_comma(newParams["sample_ids"]) || this.state.sample_ids
+    );
+    sp.set(
+      "taxon_ids",
+      lst_to_comma(newParams["taxon_ids"]) || this.state.taxon_ids
+    );
+    sp.set(
+      "categories",
+      lst_to_comma(newParams["categories"]) || this.state.categories
+    );
+    sp.set(
+      "appliedThresholds",
+      JSON.stringify(
+        newParams["appliedThresholds"] || this.state.appliedThresholds
+      )
+    );
     window.history.replaceState(null, null, url.toString());
   }
 
@@ -721,20 +741,24 @@ class SamplesHeatmap extends React.Component {
       return x == null ? null : parseFloat(x);
     };
 
-    let lon = function (x) {
-      return (x == null) ? null : x.split(",").map(function(j) { return parseInt(j, 10); });
-    }
-    let ton = function (x) {
-      return (x == null) ? null : x.split(",");
-    }
+    let lon = function(x) {
+      return x == null
+        ? null
+        : x.split(",").map(function(j) {
+            return parseInt(j, 10);
+          });
+    };
+    let ton = function(x) {
+      return x == null ? null : x.split(",");
+    };
 
-    let json_or_null = function (x) {
+    let json_or_null = function(x) {
       try {
         return JSON.parse(x);
       } catch (error) {
         return null;
       }
-    }
+    };
     return {
       species: sp.get("species"),
       dataType: sp.get("dataType"),
@@ -742,8 +766,8 @@ class SamplesHeatmap extends React.Component {
       sample_ids: lon(sp.get("sample_ids")),
       taxon_ids: lon(sp.get("taxon_ids")),
       categories: ton(sp.get("categories")),
-      appliedThresholds: json_or_null(sp.get('appliedThresholds')),
-    }
+      appliedThresholds: json_or_null(sp.get("appliedThresholds"))
+    };
   }
 
   getDataProperty(data, property) {
@@ -771,20 +795,18 @@ class SamplesHeatmap extends React.Component {
     if (species == "1") {
       url += "&species=1";
     }
-    this.request = axios
-      .get(url)
-      .then(response => {
-        let taxons = this.extractTaxons(response.data);
+    this.request = axios.get(url).then(response => {
+      let taxons = this.extractTaxons(response.data);
 
-        this.recluster = true;
-        this.setState({
-          taxon_ids: taxons.ids,
-          data: response.data,
-          taxons: taxons,
-          categories: this.state.categories || taxons.categories,
-          loading: false
-        });
+      this.recluster = true;
+      this.setState({
+        taxon_ids: taxons.ids,
+        data: response.data,
+        taxons: taxons,
+        categories: this.state.categories || taxons.categories,
+        loading: false
       });
+    });
   }
 
   getMinMax(taxon_names) {
@@ -1025,31 +1047,31 @@ class SamplesHeatmap extends React.Component {
       return;
     }
     return (
-			<ErrorBoundary>
-				<D3Heatmap
-					colTree={this.clustered_samples.tree}
-					rowTree={this.clustered_taxons.tree}
-					rows={this.filteredTaxonsNames.length}
-					columns={this.filteredData.length}
-					getRowLabel={this._getRowLabel}
-					getColumnLabel={this._getColumnLabel}
-					getCellValue={this.dataGetters[this.state.dataType]}
-					getTooltip={this._getTooltip}
-					onCellClick={this._onCellClick}
-					onColumnLabelClick={this._sampleLabelClicked}
-					onRemoveRow={this._onRemoveRow}
-					scale={this.scales[this.state.dataScaleIdx][1]}
-					colors={this.colors}
-				/>
-			</ErrorBoundary>
-    )
+      <ErrorBoundary>
+        <D3Heatmap
+          colTree={this.clustered_samples.tree}
+          rowTree={this.clustered_taxons.tree}
+          rows={this.filteredTaxonsNames.length}
+          columns={this.filteredData.length}
+          getRowLabel={this._getRowLabel}
+          getColumnLabel={this._getColumnLabel}
+          getCellValue={this.dataGetters[this.state.dataType]}
+          getTooltip={this._getTooltip}
+          onCellClick={this._onCellClick}
+          onColumnLabelClick={this._sampleLabelClicked}
+          onRemoveRow={this._onRemoveRow}
+          scale={this.scales[this.state.dataScaleIdx][1]}
+          colors={this.colors}
+        />
+      </ErrorBoundary>
+    );
   }
 
   updateDataType(e, d) {
     let newDataType = d.value;
     this.recluster = true;
     this.setState({
-      dataType: newDataType,
+      dataType: newDataType
     });
   }
 
@@ -1077,7 +1099,7 @@ class SamplesHeatmap extends React.Component {
     );
   }
 
-  renderThresholdSlider () {
+  renderThresholdSlider() {
     if (!this.state.data) {
       return;
     }
@@ -1086,18 +1108,18 @@ class SamplesHeatmap extends React.Component {
         labels={this.thresholdLabels}
         operators={[">=", "<="]}
         filters={this.state.activeThresholds}
-        onChange={(filters)=> {
-          this.setState({activeThresholds: filters});
+        onChange={filters => {
+          this.setState({ activeThresholds: filters });
         }}
-        onApply={(t) => {
-					let newThresholds = [].concat(t);
+        onApply={t => {
+          let newThresholds = [].concat(t);
           this.recluster = true;
-          this.setState({appliedThresholds:  newThresholds});
-					ThresholdMap.saveThresholdFilters(newThresholds);
+          this.setState({ appliedThresholds: newThresholds });
+          ThresholdMap.saveThresholdFilters(newThresholds);
         }}
         fluid
       />
-    )
+    );
   }
 
   taxonLevelChanged(e, d) {
@@ -1163,7 +1185,7 @@ class SamplesHeatmap extends React.Component {
     );
   }
   renderLegend() {
-    if (!this.state.data) {
+    if (!this.state.data || !this.minMax) {
       return;
     }
     return (
@@ -1233,11 +1255,11 @@ class SamplesHeatmap extends React.Component {
       let category = this.state.taxons.id_to_category[id];
       if (categories.has(category)) {
         let has_value = false;
-        for(let sample of this.filteredData) {
-          for(let taxon of sample.taxons) {
-            if(taxon.tax_id == id) {
+        for (let sample of this.filteredData) {
+          for (let taxon of sample.taxons) {
+            if (taxon.tax_id == id) {
               has_value = true;
-              break
+              break;
             }
           }
           if (has_value) {
@@ -1252,13 +1274,18 @@ class SamplesHeatmap extends React.Component {
     return filtered_names;
   }
 
-  filterData () {
+  filterData() {
     let filteredData = [];
-    for(let sample of this.state.data) {
+    for (let sample of this.state.data) {
       let newSample = ObjectHelper.deepCopy(sample);
       let newTaxons = [];
-      for(let taxon of sample.taxons) {
-        if (ThresholdMap.taxonPassThresholdFilter(taxon, this.state.appliedThresholds)) {
+      for (let taxon of sample.taxons) {
+        if (
+          ThresholdMap.taxonPassThresholdFilter(
+            taxon,
+            this.state.appliedThresholds
+          )
+        ) {
           newTaxons.push(taxon);
         }
       }
@@ -1280,7 +1307,7 @@ class SamplesHeatmap extends React.Component {
     );
   }
 
-  clusterData () {
+  clusterData() {
     this.filteredData = this.state.data && this.filterData();
     if (this.filteredData && this.filteredData.length) {
       this.filteredTaxonsNames = this.filterTaxons();
