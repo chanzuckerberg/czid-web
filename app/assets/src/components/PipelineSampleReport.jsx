@@ -106,6 +106,7 @@ class PipelineSampleReport extends React.Component {
     this.collapseTable = this.collapseTable.bind(this);
     this.downloadFastaUrl = this.downloadFastaUrl.bind(this);
     this.gotoAlignmentVizLink = this.gotoAlignmentVizLink.bind(this);
+    this.downloadAssemblyLink = this.downloadAssemblyLink.bind(this);
     this.handleThresholdEnter = this.handleThresholdEnter.bind(this);
     this.renderMore = this.renderMore.bind(this);
     this.initializeTooltip();
@@ -850,7 +851,7 @@ class PipelineSampleReport extends React.Component {
           <i
             data-tax-id={taxInfo.tax_id}
             onClick={this.downloadAssemblyLink}
-            className="fa fa-compress-alt"
+            className="fa fa-gg"
             aria-hidden="true"
           />
         ) : null}

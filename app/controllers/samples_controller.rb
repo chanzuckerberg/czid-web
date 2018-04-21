@@ -296,7 +296,7 @@ class SamplesController < ApplicationController
   end
 
   def assembly
-    pipeline_run = sample.pipeline_runs.first
+    pipeline_run = @sample.pipeline_runs.first
     assembly_fasta = pipeline_run.assembly_output_s3_path(params[:taxid])
     send_data get_s3_file(assembly_fasta), filename: @sample.name + '_' + clean_taxid_name(pipeline_run, params[:taxid]) + '-assembled-scaffolds.fasta'
   end
