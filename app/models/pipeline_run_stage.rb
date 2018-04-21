@@ -328,7 +328,7 @@ class PipelineRunStage < ApplicationRecord
       mysqlimport --replace --local --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --columns=taxid,hit_type,first_byte,last_byte,pipeline_run_id --fields-terminated-by=',' idseq_#{Rails.env} taxon_byteranges;
     `
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_byteranges_path}")
-    pr.assembled_taxids = `aws s3 ls ${pr.assembly_output_s3_path} | awk '{print $4}'`.split("\n")
+    pr.assembled_taxids = `aws s3 ls #{pr.assembly_output_s3_path} | awk '{print $4}'`.split("\n")
     pr.save
   end
 
