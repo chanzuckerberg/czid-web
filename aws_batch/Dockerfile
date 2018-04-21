@@ -72,7 +72,6 @@ RUN apt-get install -y bsdtar
 WORKDIR /tmp
 RUN wget http://cab.spbu.ru/files/release3.10.1/SPAdes-3.10.1-Linux.tar.gz
 RUN tar -xzf SPAdes-3.10.1-Linux.tar.gz
-WORKDIR /tmp/SPAdes-3.10.1-Linux/bin
 RUN cp SPAdes-3.10.1-Linux/bin/* /usr/local/bin/
 RUN cp -r SPAdes-3.10.1-Linux/share/* /usr/local/share/
 
