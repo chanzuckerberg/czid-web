@@ -174,7 +174,7 @@ class PipelineSampleReads extends React.Component {
           >
             <pre
               suppressContentEditableWarning
-              contentEditable="true"
+              contentEditable={this.can_edit}
               id={field}
             >
               {display_value}
@@ -198,7 +198,7 @@ class PipelineSampleReads extends React.Component {
           >
             <pre
               suppressContentEditableWarning
-              contentEditable="true"
+              contentEditable={this.can_edit}
               id={field}
             >
               {display_value}
