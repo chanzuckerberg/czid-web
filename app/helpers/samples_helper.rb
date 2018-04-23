@@ -37,7 +37,7 @@ module SamplesHelper
                         sample_library: db_sample ? db_sample[:sample_library] : '',
                         sample_sequencer: db_sample ? db_sample[:sample_sequencer] : '',
                         sample_date: db_sample ? db_sample[:sample_date] : '',
-                        sample_input_ng: db_sample ? db_sample[:sample_input_ng] : '',
+                        sample_input_pg: db_sample ? db_sample[:sample_input_pg] : '',
                         sample_batch: db_sample ? db_sample[:sample_batch] : '',
                         sample_diagnosis: db_sample ? db_sample[:sample_diagnosis] : '',
                         sample_organism: db_sample ? db_sample[:sample_organism] : '',

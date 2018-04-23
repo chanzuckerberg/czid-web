@@ -132,7 +132,7 @@ class Samples extends React.Component {
         "sample_library",
         "sample_sequencer",
         "sample_date",
-        "sample_input_ng",
+        "sample_input_pg",
         "sample_batch",
         "sample_diagnosis",
         "sample_organism",
@@ -196,8 +196,8 @@ class Samples extends React.Component {
         display_name: "Collection date",
         type: "metadata"
       },
-      sample_input_ng: {
-        display_name: "RNA/DNA input (ng)",
+      sample_input_pg: {
+        display_name: "RNA/DNA input (pg)",
         type: "metadata"
       },
       sample_batch: {
@@ -1600,7 +1600,7 @@ function PipelineOutputDataValues({
     "sample_library",
     "sample_sequencer",
     "sample_date",
-    "sample_input_ng",
+    "sample_input_pg",
     "sample_batch",
     "sample_diagnosis",
     "sample_organism",

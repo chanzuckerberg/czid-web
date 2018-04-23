@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180419230428) do
+ActiveRecord::Schema.define(version: 20180423230428) do
 
   create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "archive_of"
@@ -208,7 +208,7 @@ ActiveRecord::Schema.define(version: 20180419230428) do
     t.bigint "user_id"
     t.integer "subsample"
     t.string "pipeline_branch"
-    t.float "sample_input_ng", limit: 24
+    t.float "sample_input_pg", limit: 24
     t.integer "sample_batch"
     t.text "sample_diagnosis"
     t.string "sample_organism"

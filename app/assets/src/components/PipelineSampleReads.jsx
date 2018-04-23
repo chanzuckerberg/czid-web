@@ -839,8 +839,8 @@ class PipelineSampleReads extends React.Component {
                             "sample_sequencer"
                           )}
                           {this.render_metadata_numfield(
-                            "RNA/DNA input (ng)",
-                            "sample_input_ng"
+                            "RNA/DNA input (pg)",
+                            "sample_input_pg"
                           )}
                           {this.render_metadata_numfield(
                             "Batch",
