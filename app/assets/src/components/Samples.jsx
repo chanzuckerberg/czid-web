@@ -205,11 +205,11 @@ class Samples extends React.Component {
         type: "metadata"
       },
       sample_diagnosis: {
-        display_name: "Diagnosis",
+        display_name: "Clinical diagnosis",
         type: "metadata"
       },
       sample_organism: {
-        display_name: "Organism",
+        display_name: "Known organisms",
         type: "metadata"
       },
       sample_detection: {

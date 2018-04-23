@@ -845,7 +845,7 @@ class PipelineSampleReads extends React.Component {
                             "sample_batch"
                           )}
                           {this.render_metadata_textfield(
-                            "Organism",
+                            "Known organisms",
                             "sample_organism"
                           )}
                           {this.render_metadata_textfield(
@@ -863,7 +863,7 @@ class PipelineSampleReads extends React.Component {
                           this.can_edit
                         )}
                         {this.render_metadata_textfield_wide(
-                          "Confirmed hits",
+                          "Confirmed hits in report",
                           this.state,
                           "confirmed_names",
                           "None",
@@ -877,7 +877,7 @@ class PipelineSampleReads extends React.Component {
                           this.can_edit
                         )}
                         {this.render_metadata_textfield_wide(
-                          "Diagnoses",
+                          "Clinical diagnosis",
                           this.sampleInfo,
                           "sample_diagnosis",
                           this.TYPE_PROMPT,

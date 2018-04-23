@@ -57,6 +57,9 @@ class Sample < ApplicationRecord
   before_save :check_host_genome, :concatenate_input_parts, :check_status
   after_save :set_presigned_url_for_local_upload
 
+  # Error on trying to save string values to float
+  validates_numericality_of :sample_input_ng, :sample_batch
+
   # getter
   attr_reader :bulk_mode
 
