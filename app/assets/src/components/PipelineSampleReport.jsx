@@ -1691,7 +1691,7 @@ class PipelineSampleTree extends React.PureComponent {
   constructor(props) {
     super(props);
     this._getTooltip = this.getTooltip.bind(this);
-    this.dataTypes = ["NT.r", "NT.aggregatescore", "NT.rpm"];
+    this.dataTypes = ["NT.r", "NT.aggregatescore", "NT.rpm", "NR.r", "NR.rpm"];
     this.state = {
       dataType: this.dataTypes[0]
     };
