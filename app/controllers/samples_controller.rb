@@ -15,7 +15,7 @@ class SamplesController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:create, :update]
 
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder, :show_taxid_alignment, :show_taxid_alignment_viz].freeze
-  EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata].freeze
+  EDIT_ACTIONS = [:edit, :add_taxon_confirmation, :remove_taxon_confirmation, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :samples_taxons, :top_taxons, :heatmap].freeze
 
@@ -49,7 +49,7 @@ class SamplesController < ApplicationController
     sort = params[:sort_by]
     samples_query = JSON.parse(params[:ids]) if params[:ids].present?
 
-    results = current_power.samples.includes(:pipeline_runs)
+    results = current_power.samples
 
     results = results.where(id: samples_query) if samples_query.present?
 
@@ -68,7 +68,7 @@ class SamplesController < ApplicationController
     results = filter_by_tissue_type(results, tissue_type_query) if tissue_type_query.present?
     results = filter_by_host(results, host_query) if host_query.present?
 
-    @samples = sort_by(results, sort).paginate(page: params[:page], per_page: params[:per_page] || PAGE_SIZE)
+    @samples = sort_by(results, sort).paginate(page: params[:page], per_page: params[:per_page] || PAGE_SIZE).includes([:user, :input_files], pipeline_runs: [:job_stats, :pipeline_run_stages])
     @samples_count = results.size
     @all_samples = format_samples(@samples)
 
@@ -172,7 +172,7 @@ class SamplesController < ApplicationController
         @report_present = 1
         @report_ts = @pipeline_run.updated_at.to_i
         @all_categories = all_categories
-        @report_details = report_details(@pipeline_run)
+        @report_details = report_details(@pipeline_run, current_user.id)
         @report_page_params = clean_params(params, @all_categories)
         @ercc_comparison = @pipeline_run.compare_ercc_counts
       end
@@ -207,7 +207,15 @@ class SamplesController < ApplicationController
   def samples_taxons
     sample_ids = params[:sample_ids].to_s.split(",").map(&:to_i) || []
     num_results = params[:n] ? params[:n].to_i : 20
-    taxon_ids = params[:taxon_ids].to_s.split(",").map(&:to_i) || []
+    taxon_ids = params[:taxon_ids].to_s.split(",").map do |x|
+      begin
+        Integer(x)
+      rescue ArgumentError
+        nil
+      end
+    end
+    taxon_ids = taxon_ids.compact
+
     sort_by = params[:sort_by] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
     only_species = params[:species] == "1"
     samples = current_power.samples.where(id: sample_ids).includes([:pipeline_runs])
@@ -243,16 +251,19 @@ class SamplesController < ApplicationController
     end
 
     @report_info = external_report_info(pipeline_run_id, background_id, params)
+
     tax_ids = @report_info[:taxonomy_details][2].map { |x| x['tax_id'] }
     lineages = TaxonCount.connection.select_all(TaxonLineage.where(taxid: tax_ids)).to_hash
     lineage_by_taxid = {}
     lineages.each do |x|
       lineage_by_taxid[x['taxid']] = x
     end
+
     @report_info[:taxonomy_details][2].each do |tax|
       tax['lineage'] = lineage_by_taxid[tax['tax_id']]
     end
-    render json: @report_info
+
+    render json: JSON.dump(@report_info)
   end
 
   def search_list
@@ -261,7 +272,7 @@ class SamplesController < ApplicationController
     @pipeline_run = @sample.pipeline_runs.first
     if @pipeline_run
       @search_list = fetch_lineage_info(@pipeline_run.id)
-      render json: @search_list
+      render json: JSON.dump(@search_list)
     else
       render json: { lineage_map: {}, search_list: [] }
     end
@@ -271,29 +282,25 @@ class SamplesController < ApplicationController
     field = params[:field].to_sym
     value = params[:value]
     metadata = { field => value }
-    metadata.select! { |k, _v| Sample::METADATA_FIELDS.include?(k) }
-    if @sample
-      unless @sample[field].blank? && value.strip.blank?
-        @sample.update_attributes!(metadata)
-        respond_to do |format|
-          format.json do
-            render json: {
-              status: "success",
-              message: "Saved successfully"
-            }
-          end
-        end
-      end
+    metadata.select! { |k, _v| (Sample::METADATA_FIELDS + [:name]).include?(k) }
+    if @sample[field].blank? && value.strip.blank?
+      render json: {
+        status: "ignored"
+      }
     else
-      respond_to do |format|
-        format.json do
-          render json: {
-            status: 'failed',
-            message: 'Unable to save sample, sample not found'
-          }
-        end
-      end
+      @sample.update_attributes!(metadata)
+      render json: {
+        status: "success",
+        message: "Saved successfully"
+      }
     end
+  rescue
+    error_messages = @sample ? @sample.errors.full_messages : []
+    render json: {
+      status: 'failed',
+      message: 'Unable to update sample',
+      errors: error_messages
+    }
   end
 
   def show_taxid_fasta
@@ -509,9 +516,34 @@ class SamplesController < ApplicationController
   def pipeline_runs
   end
 
+  def add_taxon_confirmation
+    keys = taxon_confirmation_unique_on(params)
+    TaxonConfirmation.create(taxon_confirmation_params) unless TaxonConfirmation.find_by(taxon_confirmation_params(keys))
+    respond_taxon_confirmations
+  end
+
+  def remove_taxon_confirmation
+    keys = taxon_confirmation_unique_on(params)
+    TaxonConfirmation.where(taxon_confirmation_params(keys)).destroy_all
+    respond_taxon_confirmations
+  end
+
   # Use callbacks to share common setup or constraints between actions.
 
   private
+
+  def taxon_confirmation_unique_on(params)
+    params[:strength] == TaxonConfirmation::WATCHED ? [:sample_id, :taxid, :strength, :user_id] : [:sample_id, :taxid, :strength]
+  end
+
+  def taxon_confirmation_params(keys = nil)
+    h = { sample_id: @sample.id, user_id: current_user.id, taxid: params[:taxid], name: params[:name], strength: params[:strength] }
+    keys ? h.select { |k, _v| k && keys.include?(k) } : h
+  end
+
+  def respond_taxon_confirmations
+    render json: taxon_confirmation_map(@sample.id, current_user.id)
+  end
 
   def check_background_id(sample)
     background_id = params[:background_id] || sample.default_background_id

@@ -1,20 +1,27 @@
 #id-seq {
-  .ui.button.primary {
+  .ui.button {
     padding: 7px 30px;
     border-radius: 40px;
-    border: 1px solid #3867fa;
     cursor: pointer;
-    display: block;
-    background: #3867fa !important;
-    color: #ffffff !important;
-    &:hover {
+    display: inline-block;
+    &.primary {
+      border: 1px solid #3867fa;
+      background: #3867fa !important;
+      color: #ffffff !important;
+      &:hover {
+        background: #ffffff !important;
+        color: #3867fa !important;
+      }
+    }
+    &.secondary {
+      border: 1px solid #3867fa;
       background: #ffffff !important;
       color: #3867fa !important;
     }
   }
 
   .ui.dropdown {
-    border: 1px solid rgb(228,228,228);
+    border: 1px solid rgb(228, 228, 228);
     padding: 5px 1.75em 5px 1em;
     border-radius: 999999px;
     &.custom-dropdown {
@@ -33,6 +40,7 @@
       overflow: hidden;
     }
     .dropdown.icon {
+      pointer-events: none;
       position: absolute !important;
       top: 8px;
       right: 10px;
@@ -40,14 +48,6 @@
         font-family: FontAwesome;
         content: "\f107";
       }
-    }
-  }
-
-  .ui.dropdown.labeled-filter-dropdown {
-    input[type=checkbox] {
-      opacity: 1;
-      position: static;
-      margin-right: 0.5em;
     }
     .label {
       float: right;
@@ -63,6 +63,44 @@
       color: #3867fa;
       font-weight: normal;
       font-size: inherit;
+    }
+  }
+
+  .ui.dropdown.labeled-filter-dropdown {
+    input[type=checkbox] {
+      opacity: 1;
+      position: static;
+      margin-right: 0.5em;
+    }
+    
+  }
+  .advanced-threshold-filter {
+    width: 400px;
+    input[type=text] {
+      height: 1em;
+      border: 1px solid rgba(34,36,38,.15) !important;
+      box-shadow: none;
+      font-size: 9pt;
+    }
+    .remove-button {
+      margin-top: 5px;
+      font-size: 9pt;
+      &:hover {
+        cursor: pointer;
+      }
+    }
+    .rows {
+      margin-bottom: 1em;
+    }
+    .actions {
+      border-top: 1px solid #eee;
+      padding-top: 1em;
+    }
+    .advanced-threshold-filter-row {
+      margin-bottom: 0.5em;
+    }
+    .row:last-child {
+      margin-bottom: 0;
     }
   }
 }

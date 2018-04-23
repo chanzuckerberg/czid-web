@@ -177,15 +177,29 @@ module ReportHelper
     data
   end
 
-  def report_details(pipeline_run)
+  def taxon_confirmation_map(sample_id, user_id)
+    taxon_confirmations = TaxonConfirmation.where(sample_id: sample_id)
+    confirmed = taxon_confirmations.where(strength: TaxonConfirmation::CONFIRMED)
+    watched = taxon_confirmations.where(strength: TaxonConfirmation::WATCHED, user_id: user_id)
+    { watched_taxids: watched.pluck(:taxid).uniq,
+      confirmed_taxids: confirmed.pluck(:taxid).uniq,
+      confirmed_names: confirmed.pluck(:name).uniq }
+  end
+
+  def report_details(pipeline_run, user_id)
     # Provides some auxiliary information on pipeline_run, including default background for sample.
     # No report-specific scores though.
+    sample = pipeline_run.sample
+    taxon_confirmation_hash = taxon_confirmation_map(sample.id, user_id)
     {
       pipeline_info: pipeline_run,
       subsampled_reads: pipeline_run.subsampled_reads,
-      sample_info: pipeline_run.sample,
+      sample_info: sample,
       default_background: Background.find(pipeline_run.sample.default_background_id),
-      taxon_fasta_flag: pipeline_run.job_status == PipelineRun::STATUS_CHECKED # all stages succeeded
+      taxon_fasta_flag: pipeline_run.job_status == PipelineRun::STATUS_CHECKED, # all stages succeeded
+      confirmed_taxids: taxon_confirmation_hash[:confirmed_taxids],
+      watched_taxids: taxon_confirmation_hash[:watched_taxids],
+      confirmed_names: taxon_confirmation_hash[:confirmed_names]
     }
   end
 
@@ -454,17 +468,19 @@ module ReportHelper
   end
 
   def fetch_lineage_info(pipeline_run_id)
-    lineage_records = TaxonLineage.where(
+    lineage_records = TaxonLineage.connection.select_all(TaxonLineage.where(
       "taxid in (select tax_id from taxon_counts
                  where pipeline_run_id = #{pipeline_run_id}
                    and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES})"
-    )
+    ).to_sql).to_a
     result_map = {}
     search_key_list = Set.new
     sort_map = {}
+
+    n2la = TaxonCount::NAME_2_LEVEL.to_a
     lineage_records.each do |lr|
       key_array = []
-      TaxonCount::NAME_2_LEVEL.each do |category, level|
+      n2la.each do |category, level|
         tax_name = lr["#{category}_name"]
         tax_id = lr["#{category}_taxid"]
         next unless tax_name && tax_name.strip.present?
@@ -475,8 +491,9 @@ module ReportHelper
         key_array << search_id
         search_key_list.add([display_name, search_id])
       end
-      result_map[lr.taxid] = key_array
+      result_map[lr['taxid']] = key_array
     end
+
     search_key_list = search_key_list.sort_by { |u| sort_map[u[1]] }
     { lineage_map: result_map, search_list: search_key_list }
   end
@@ -572,7 +589,11 @@ module ReportHelper
         # TODO: Can we keep the accession numbers to show in these cases?
         level_str = tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES ? 'species' : 'genus'
         tax_info['name'] = "All taxa without #{level_str} classification"
-        if tax_id == TaxonLineage::BLACKLIST_GENUS_ID
+        if tax_id < TaxonLineage::INVALID_CALL_BASE_ID && tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
+          parent_taxid = tax_info['genus_taxid']
+          parent_name = taxon_counts_2d[parent_taxid]['name']
+          tax_info['name'] = "Non-#{level_str}-specific #{parent_name} reads"
+        elsif tax_id == TaxonLineage::BLACKLIST_GENUS_ID
           tax_info['name'] = "All artificial constructs"
         elsif !(TaxonLineage::MISSING_LINEAGE_ID.values.include? tax_id) && tax_id != TaxonLineage::MISSING_SPECIES_ID_ALT
           tax_info['name'] += " #{tax_id}"

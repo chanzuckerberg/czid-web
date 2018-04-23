@@ -454,7 +454,7 @@ class BulkUploadImport extends React.Component {
                 Select which files you want to run through the pipeline.
               </div>
               <form
-                className="bulkSumbitForm"
+                className="bulkSubmitForm"
                 ref="form"
                 onSubmit={this.handleUploadSubmit}
               >
@@ -619,13 +619,13 @@ class BulkUploadImport extends React.Component {
                             onClick={this.handleUploadSubmit}
                             className="new-button blue-button upload-samples-button"
                           >
-                            Run samples
+                            Run Samples
                           </button>
                         )}
                         <button
                           type="button"
                           onClick={() => window.history.back()}
-                          className="new-button skyblue-button"
+                          className="new-button secondary-button"
                         >
                           Cancel
                         </button>
@@ -741,7 +741,7 @@ class BulkUploadImport extends React.Component {
                         <button
                           type="button"
                           onClick={this.toggleNewProjectInput}
-                          className="new-project-button new-button skyblue-button"
+                          className="new-project-button new-button secondary-button"
                           data-delay="50"
                         >
                           <i className="fa fa-plus" />
@@ -790,7 +790,7 @@ class BulkUploadImport extends React.Component {
                     </div>
                   </div>
                 </div>
-                <div className="field">
+                <div className="field field-host">
                   <div className="row">
                     <Tipsy
                       content="This will be subtracted by the pipeline"
@@ -850,7 +850,7 @@ class BulkUploadImport extends React.Component {
                                   dangerouslySetInnerHTML={{
                                     __html: SampleUpload.resolveGenomeIcon(
                                       g.name,
-                                      "#59bcd6"
+                                      "#f2f6ee"
                                     )
                                   }}
                                 />
@@ -942,13 +942,13 @@ class BulkUploadImport extends React.Component {
                           onClick={this.handleImportSubmit}
                           className="new-button blue-button upload-samples-button"
                         >
-                          Upload samples
+                          Upload Samples
                         </button>
                       )}
                       <button
                         type="button"
                         onClick={() => window.history.back()}
-                        className="new-button skyblue-button"
+                        className="new-button secondary-button"
                       >
                         Cancel
                       </button>

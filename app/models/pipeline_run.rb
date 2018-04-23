@@ -19,6 +19,7 @@ class PipelineRun < ApplicationRecord
 
   DEFAULT_SUBSAMPLING = 1_000_000 # number of reads to subsample to, after host filtering
   OUTPUT_JSON_NAME = 'idseq_web_sample.json'.freeze
+  MULTIHIT_OUTPUT_JSON_NAME = 'multihit_idseq_web_sample.json'.freeze
   STATS_JSON_NAME = 'stats.json'.freeze
   VERSION_JSON_NAME = 'versions.json'.freeze
   ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
@@ -336,6 +337,26 @@ class PipelineRun < ApplicationRecord
     return Regexp.last_match(1)
   rescue
     return nil
+  end
+
+  def major_minor(version)
+    # given "1.5" return [1, 5]
+    version.split('.').map(&:to_i)
+  end
+
+  def after(v0, v1)
+    # Return "true" when v0 >= v1
+    return true unless v1
+    return false unless v0
+    v0_major, v0_minor = major_minor(v0)
+    v1_major, v1_minor = major_minor(v1)
+    return true if v0_major > v1_major
+    return false if v0_major < v1_major
+    v0_minor >= v1_minor
+  end
+
+  def multihit?
+    after(pipeline_version || fetch_pipeline_version, "1.5")
   end
 
   def alignment_output_s3_path

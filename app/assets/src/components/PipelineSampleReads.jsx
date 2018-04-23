@@ -40,7 +40,17 @@ class PipelineSampleReads extends React.Component {
     this.canSeeAlignViz = props.can_see_align_viz;
     this.state = {
       rerunStatus: "failed",
-      rerunStatusMessage: "Sample run failed"
+      rerunStatusMessage: "Sample run failed",
+      watched_taxids: props.reportDetails
+        ? props.reportDetails.watched_taxids
+        : [],
+      confirmed_taxids: props.reportDetails
+        ? props.reportDetails.confirmed_taxids
+        : [],
+      confirmed_names: props.reportDetails
+        ? props.reportDetails.confirmed_names
+        : [],
+      sample_name: props.sampleInfo.name
     };
     this.TYPE_PROMPT = this.can_edit ? "Type here..." : "-";
     this.NUCLEOTIDE_TYPES = ["-", "DNA", "RNA"];
@@ -51,6 +61,7 @@ class PipelineSampleReads extends React.Component {
     this.DROPDOWN_METADATA_FIELDS = Object.keys(this.DROPDOWN_OPTIONS);
     this.handleDropdownChange = this.handleDropdownChange.bind(this);
     this.deleteSample = this.deleteSample.bind(this);
+    this.toggleHighlightTaxon = this.toggleHighlightTaxon.bind(this);
   }
 
   deleteSample() {
@@ -62,6 +73,31 @@ class PipelineSampleReads extends React.Component {
         location.href = `/?project_id=${this.projectInfo.id}`;
       })
       .catch(err => {});
+  }
+
+  toggleHighlightTaxon(e) {
+    let taxid = e.target.getAttribute("data-tax-id");
+    let name = e.target.getAttribute("data-tax-name");
+    let strength = e.target.getAttribute("data-confirmation-strength");
+    let current_taxids = this.state[strength + "_taxids"];
+    let action =
+      current_taxids.indexOf(parseInt(taxid)) >= 0
+        ? "remove_taxon_confirmation"
+        : "add_taxon_confirmation";
+    axios
+      .post(`/samples/${this.sampleId}/${action}`, {
+        taxid: taxid,
+        name: name,
+        strength: strength,
+        authenticity_token: this.csrf
+      })
+      .then(res => {
+        this.setState({
+          watched_taxids: res.data.watched_taxids,
+          confirmed_taxids: res.data.confirmed_taxids,
+          confirmed_names: res.data.confirmed_names
+        });
+      });
   }
 
   render_metadata_dropdown(label, field) {
@@ -102,6 +138,26 @@ class PipelineSampleReads extends React.Component {
     );
   }
 
+  render_metadata_textfield_wide(label, hash, field, blank_value, editable) {
+    let value =
+      hash[field] instanceof Array ? hash[field].join("; ") : hash[field];
+    return (
+      <div className="col s12">
+        <div className="details-title note">{label}</div>
+        <div className="sample-notes note">
+          <pre
+            className="details-value"
+            suppressContentEditableWarning
+            contentEditable={editable}
+            id={field}
+          >
+            {value && value.trim() !== "" ? value : blank_value}
+          </pre>
+        </div>
+      </div>
+    );
+  }
+
   render_metadata_textfield(label, field) {
     let display_value =
       this.sampleInfo[field] && this.sampleInfo[field].trim() !== ""
@@ -113,7 +169,7 @@ class PipelineSampleReads extends React.Component {
         <div className="col s6 no-padding">
           <div className="details-value sample-notes">
             <pre
-              suppressContentEditableWarning={true}
+              suppressContentEditableWarning
               contentEditable={this.can_edit}
               id={field}
             >
@@ -320,9 +376,17 @@ class PipelineSampleReads extends React.Component {
                 .css("display", "inline-block")
                 .delay(1000)
                 .slideUp(200);
-            } else {
+              if (field === "name") {
+                // update the name displayed in the header in real-time
+                this.setState({ sample_name: newText });
+              }
+            } else if (response.data.status === "failed") {
               $(".note-save-failed")
-                .html(`<i class='fa fa-frown-o'></i> ${response.data.message}`)
+                .html(
+                  `<i class='fa fa-frown-o'></i> ${response.data.message} ${
+                    response.data.errors
+                  }`
+                )
                 .css("display", "inline-block")
                 .delay(1000)
                 .slideUp(200);
@@ -383,6 +447,7 @@ class PipelineSampleReads extends React.Component {
       d_report = (
         <PipelineSampleReport
           sample_id={this.sampleId}
+          csrf={this.csrf}
           report_ts={this.reportTime}
           git_version={this.gitVersion}
           all_categories={this.allCategories}
@@ -390,6 +455,10 @@ class PipelineSampleReads extends React.Component {
           report_details={this.reportDetails}
           report_page_params={this.reportPageParams}
           can_see_align_viz={this.canSeeAlignViz}
+          can_edit={this.can_edit}
+          confirmed_taxids={this.state.confirmed_taxids}
+          watched_taxids={this.state.watched_taxids}
+          toggleHighlightTaxon={this.toggleHighlightTaxon}
         />
       );
     } else if (this.pipelineInProgress()) {
@@ -522,21 +591,21 @@ class PipelineSampleReads extends React.Component {
             href={`/samples/${this.sampleInfo.id}/nonhost_fasta`}
           >
             <i className="fa fa-cloud-download" />
-            Download Non-Host Reads
+            Non-Host Reads
           </a>
           <a
             className="custom-button"
             href={`/samples/${this.sampleInfo.id}/unidentified_fasta`}
           >
             <i className="fa fa-cloud-download" />
-            Download Unmapped Reads
+            Unmapped Reads
           </a>
           <a
             className="custom-button"
             href={`/samples/${this.sampleInfo.id}/results_folder`}
           >
             <i className="fa fa-folder-open" />
-            Navigate to Results Folder
+            Results Folder
           </a>
         </div>
       );
@@ -554,7 +623,7 @@ class PipelineSampleReads extends React.Component {
           className="dropdown-button sample-select-dropdown"
           data-activates="sample-list"
         >
-          <span className="sample-name-label">{this.sampleInfo.name}</span>
+          <span className="sample-name-label">{this.state.sample_name}</span>
           <i className="fa fa-chevron-down right" />
 
           <ul
@@ -562,20 +631,22 @@ class PipelineSampleReads extends React.Component {
             className="dropdown-content sample-dropdown-content"
           >
             {Object.keys(this.sample_map).map((sample_id, i) => {
-              return (
-                <li key={i}>
-                  <a href={`/samples/${sample_id}`}>
-                    {this.sample_map[sample_id]}
-                  </a>
-                </li>
-              );
+              if (parseInt(sample_id) !== parseInt(this.sampleId)) {
+                return (
+                  <li key={i}>
+                    <a href={`/samples/${sample_id}`}>
+                      {this.sample_map[sample_id]}
+                    </a>
+                  </li>
+                );
+              }
             })}
           </ul>
         </div>
       );
     } else {
       sample_dropdown = (
-        <span className="sample-name-label">{this.sampleInfo.name}</span>
+        <span className="sample-name-label">{this.state.sample_name}</span>
       );
     }
 
@@ -646,7 +717,7 @@ class PipelineSampleReads extends React.Component {
                       className="icon link download-btn"
                     >
                       <Icon className="cloud download alternate" />
-                      Download
+                      <span>Download</span>
                     </Button>
                   </a>
                 </div>
@@ -709,8 +780,7 @@ class PipelineSampleReads extends React.Component {
                           </div>
                           {this.render_metadata_textfield(
                             "Location",
-                            "sample_location",
-                            0
+                            "sample_location"
                           )}
                         </div>
                         <div className="col s6">
@@ -722,42 +792,34 @@ class PipelineSampleReads extends React.Component {
                             "Nucleotide type",
                             "sample_template"
                           )}
-                          <div className="row detail-row no-padding">
-                            <div className="col s5 label">Unique ID</div>
-                            <div className="col s7 ">
-                              <div className="details-value label sample-notes">
-                                <pre
-                                  suppressContentEditableWarning={true}
-                                  contentEditable={this.can_edit}
-                                  id="sample_host"
-                                >
-                                  {this.sampleInfo["sample_host"] &&
-                                  this.sampleInfo["sample_host"].trim() !== ""
-                                    ? this.sampleInfo["sample_host"]
-                                    : this.TYPE_PROMPT}
-                                </pre>
-                              </div>
-                            </div>
-                          </div>
+                          {this.render_metadata_textfield(
+                            "Unique ID",
+                            "sample_host"
+                          )}
                         </div>
                       </div>
                       <div className="row">
-                        <div className="col s12">
-                          <div className="details-title note">Notes</div>
-                          <div className="sample-notes note">
-                            <pre
-                              className="details-value"
-                              suppressContentEditableWarning={true}
-                              contentEditable={this.can_edit}
-                              id="sample_notes"
-                            >
-                              {this.sampleInfo["sample_notes"] &&
-                              this.sampleInfo["sample_notes"].trim() !== ""
-                                ? this.sampleInfo["sample_notes"]
-                                : this.TYPE_PROMPT}
-                            </pre>
-                          </div>
-                        </div>
+                        {this.render_metadata_textfield_wide(
+                          "Name",
+                          this.sampleInfo,
+                          "name",
+                          this.TYPE_PROMPT,
+                          this.can_edit
+                        )}
+                        {this.render_metadata_textfield_wide(
+                          "Confirmed hits",
+                          this.state,
+                          "confirmed_names",
+                          "None",
+                          false
+                        )}
+                        {this.render_metadata_textfield_wide(
+                          "Notes",
+                          this.sampleInfo,
+                          "sample_notes",
+                          this.TYPE_PROMPT,
+                          this.can_edit
+                        )}
                       </div>
                     </div>
                   </div>
@@ -774,13 +836,13 @@ class PipelineSampleReads extends React.Component {
               </div>
 
               <div className="col s3 download-area">
-                <div className="download-title">Downloads Reads</div>
+                <div className="download-title">Download Reads</div>
                 <a
                   className="custom-button"
                   href={`/samples/${this.sampleInfo.id}/fastqs_folder`}
                 >
                   <i className="fa fa-folder-open" />
-                  Go To Source Data
+                  Source Data
                 </a>
                 {download_section}
               </div>
