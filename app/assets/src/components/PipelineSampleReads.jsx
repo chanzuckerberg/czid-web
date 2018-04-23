@@ -363,7 +363,7 @@ class PipelineSampleReads extends React.Component {
               .slideUp(200);
           }
         })
-        .catch(error => {
+        .catch(() => {
           $(".note-save-failed")
             .html(`<i class='fa fa-frown-o'></i> Something went wrong!`)
             .css("display", "inline-block")
@@ -418,9 +418,11 @@ class PipelineSampleReads extends React.Component {
                 .css("display", "inline-block")
                 .delay(1000)
                 .slideUp(200);
+              // Reset back to the old text
+              e.target.innerText = currentText;
             }
           })
-          .catch(error => {
+          .catch(() => {
             $(".note-save-failed")
               .html(`<i class='fa fa-frown-o'></i> Something went wrong!`)
               .css("display", "inline-block")
