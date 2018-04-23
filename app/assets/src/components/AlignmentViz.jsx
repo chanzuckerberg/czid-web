@@ -3,15 +3,15 @@ import React from "react";
 
 class ReadViz extends React.Component {
   constructor(props) {
-    super(props);
+    super();
     this.parsedAlignment = this.parseAlignment(props);
   }
 
   parseAlignment(readInfo) {
-    let readPart = parseInt(readInfo.name.split("/")[1])
-    let reversed = 0
-    let seq_len = readInfo.sequence.length
+    const readPart = parseInt(readInfo.name.split("/")[1])
+    const seqLen = readInfo.sequence.length
     let sequence = readInfo.sequence
+    let reversed = 0
 
 
     readInfo.metrics[0] = parseFloat(readInfo.metrics[0])
@@ -29,13 +29,13 @@ class ReadViz extends React.Component {
     if ((reversed == 1 && readPart == 1) || (reversed == 0 && readPart == 2)) {
       let m4 = readInfo.metrics[4]
       let m5 = readInfo.metrics[5]
-      readInfo.metrics[4] = seq_len - m5 + 1
-      readInfo.metrics[5] = seq_len - m4 + 1
+      readInfo.metrics[4] = seqLen - m5 + 1
+      readInfo.metrics[5] = seqLen - m4 + 1
     }
 
     let aligned_portion = sequence.slice(readInfo.metrics[4] - 1, readInfo.metrics[5])
     let left_portion = (readInfo.metrics[4] - 2) >= 0 ? sequence.slice(0, readInfo.metrics[4] - 1) : ""
-    let right_portion = readInfo.metrics[5] < seq_len ? sequence.slice(readInfo.metrics[5]) : ""
+    let right_portion = readInfo.metrics[5] < seqLen ? sequence.slice(readInfo.metrics[5]) : ""
 
     if (readInfo.refInfo[0].length > left_portion.length) {
       // trim refInfo[0]
@@ -122,7 +122,7 @@ class ReadViz extends React.Component {
   }
 
   render() {
-    const nopadding = {padding: '0px'}
+    const nopadding = {padding: '0'}
     return (
       <div style={{border: '1px solid'}}>
         Read Name: {this.props.name} <br/>
@@ -252,7 +252,6 @@ class AlignmentViz extends React.Component {
           alignmentData: res.data
         });
       })
-      .catch(() => {});
   }
 
   render() {
