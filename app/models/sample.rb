@@ -58,7 +58,7 @@ class Sample < ApplicationRecord
   after_save :set_presigned_url_for_local_upload
 
   # Error on trying to save string values to float
-  validates :sample_input_ng, :sample_batch, :numericality => true, :allow_nil => true
+  validates :sample_input_ng, :sample_batch, numericality: true, allow_nil: true
 
   # getter
   attr_reader :bulk_mode
