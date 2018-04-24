@@ -9,6 +9,7 @@ class Sample < ApplicationRecord
   STATUS_RERUN    = 'need_rerun'.freeze
   STATUS_RETRY_PR = 'retry_pr'.freeze # retry existing pipeline run
   STATUS_CHECKED = 'checked'.freeze # status regarding pipeline kickoff is checked
+  MULTIHIT_FASTA_BASENAME = 'accessions.rapsearch2.gsnapl.fasta'.freeze
   HIT_FASTA_BASENAME = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.fasta'.freeze
   UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fasta'.freeze
   SORTED_TAXID_ANNOTATED_FASTA = 'taxid_annot_sorted_nt.fasta'.freeze
@@ -229,7 +230,8 @@ class Sample < ApplicationRecord
   end
 
   def annotated_fasta_s3_path
-    "#{sample_alignment_output_s3_path}/#{HIT_FASTA_BASENAME}"
+    pr = pipeline_runs.first
+    pr.multihit? ? "#{sample_alignment_output_s3_path}/#{MULTIHIT_FASTA_BASENAME}" : "#{sample_alignment_output_s3_path}/#{HIT_FASTA_BASENAME}"
   end
 
   def unidentified_fasta_s3_path
