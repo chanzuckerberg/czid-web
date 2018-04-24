@@ -8,6 +8,7 @@ class AccessionViz extends React.Component {
     this.allReads = props.reads;
     this.readsPerPage = props.readsPerPage;
     this.coverageSummary = props.coverage_summary || {};
+    this.renderMoreReads = this.renderMoreReads.bind(this);
     this.state = {
       reads: this.allReads.slice(0, this.readsPerPage),
       rendering: false
@@ -20,6 +21,17 @@ class AccessionViz extends React.Component {
 
   componentDidUpdate(prevProps, prevState) {
     this.state.rendering = false;
+  }
+  renderMoreReads() {
+    const numReads = this.state.reads.length;
+    let nextPageReads = this.allReads.slice(
+      numReads,
+      numReads + this.readsPerPage
+    );
+    console.log([numReads, numReads + this.readsPerPage]);
+    this.setState(prevState => ({
+      reads: [...prevState.reads, ...nextPageReads]
+    }));
   }
 
   render_coverage_table(coverageTable) {
@@ -42,19 +54,6 @@ class AccessionViz extends React.Component {
             </tr>
           </tbody>
         </table>
-        <h5>Reads</h5>
-        {this.state.reads.map(function(read, i) {
-          return (
-            <ReadViz
-              key={`read_${i}`}
-              name={read[0]}
-              sequence={read[1]}
-              metrics={read[2]}
-              refInfo={read[3]}
-            />
-          );
-        })}
-        <div> </div>
       </div>
     );
   }
@@ -90,18 +89,42 @@ class AccessionViz extends React.Component {
     const coverage_summary = this.coverageSummary.total_read_length
       ? this.render_coverage_summary(this.coverageSummary)
       : null;
+    const render_more_link =
+      this.state.reads.length < this.allReads.length &&
+      !this.state.rendering ? (
+        <div style={{ textAlign: "right" }}>
+          <a onClick={this.renderMoreReads} style={{ cursor: "pointer" }}>
+            View more reads
+          </a>
+        </div>
+      ) : null;
     return (
-      <div style={{ overflow: "scroll" }}>
+      <div>
         <h3>
           {" "}
           {this.props.accession} : {this.props.name}{" "}
         </h3>
         <b> Reference Sequence:</b> {this.props.ref_seq} <br />
         <b> Reference Sequence Length: </b> {this.props.ref_seq_len},{" "}
-        <a href={this.props.ref_link}>NCBI URL</a>,{" "}
-        <b> {this.props.reads_count} </b> aligned reads <br />
+        <b>
+          <a href={this.props.ref_link}>NCBI URL</a>
+        </b>, <b> {this.props.reads_count} </b> aligned reads <br />
         {coverage_summary}
         {coverage_table}
+        <h5>Reads</h5>
+        {this.state.reads.map(function(read, i) {
+          return (
+            <ReadViz
+              key={`read_${i}`}
+              name={read[0]}
+              sequence={read[1]}
+              metrics={read[2]}
+              refInfo={read[3]}
+            />
+          );
+        })}
+        {render_more_link}
+        <hr />
       </div>
     );
   }
