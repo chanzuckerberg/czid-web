@@ -9,6 +9,7 @@ class Sample < ApplicationRecord
   STATUS_RERUN    = 'need_rerun'.freeze
   STATUS_RETRY_PR = 'retry_pr'.freeze # retry existing pipeline run
   STATUS_CHECKED = 'checked'.freeze # status regarding pipeline kickoff is checked
+  MULTIHIT_FASTA_BASENAME = 'accessions.rapsearch2.gsnapl.fasta'.freeze
   HIT_FASTA_BASENAME = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.fasta'.freeze
   UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fasta'.freeze
   SORTED_TAXID_ANNOTATED_FASTA = 'taxid_annot_sorted_nt.fasta'.freeze
@@ -39,7 +40,7 @@ class Sample < ApplicationRecord
   METADATA_FIELDS = [:sample_host, # this has been repurposed to be 'Unique ID' (e.g. in human case, patient ID -- nothing to do with host genome)
                      :sample_location, :sample_date, :sample_tissue,
                      :sample_template, # this refers to nucleotide type (RNA or DNA)
-                     :sample_library, :sample_sequencer, :sample_notes].freeze
+                     :sample_library, :sample_sequencer, :sample_notes, :sample_input_pg, :sample_batch, :sample_diagnosis, :sample_organism, :sample_detection].freeze
 
   attr_accessor :bulk_mode
 
@@ -56,6 +57,9 @@ class Sample < ApplicationRecord
 
   before_save :check_host_genome, :concatenate_input_parts, :check_status
   after_save :set_presigned_url_for_local_upload
+
+  # Error on trying to save string values to float
+  validates :sample_input_pg, :sample_batch, numericality: true, allow_nil: true
 
   # getter
   attr_reader :bulk_mode
@@ -226,7 +230,8 @@ class Sample < ApplicationRecord
   end
 
   def annotated_fasta_s3_path
-    "#{sample_alignment_output_s3_path}/#{HIT_FASTA_BASENAME}"
+    pr = pipeline_runs.first
+    pr.multihit? ? "#{sample_alignment_output_s3_path}/#{MULTIHIT_FASTA_BASENAME}" : "#{sample_alignment_output_s3_path}/#{HIT_FASTA_BASENAME}"
   end
 
   def unidentified_fasta_s3_path

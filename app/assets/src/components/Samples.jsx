@@ -15,7 +15,7 @@ import {
   Form
 } from "semantic-ui-react";
 import Nanobar from "nanobar";
-import colors from "../styles/themes"
+import colors from "../styles/themes";
 import SortHelper from "./SortHelper";
 import numberWithCommas from "../helpers/strings";
 import ProjectSelection from "./ProjectSelection";
@@ -128,7 +128,15 @@ class Samples extends React.Component {
         "pipeline_status",
         "notes",
         "nucleotide_type",
-        "tissue_type"
+        "tissue_type",
+        "sample_library",
+        "sample_sequencer",
+        "sample_date",
+        "sample_input_pg",
+        "sample_batch",
+        "sample_diagnosis",
+        "sample_organism",
+        "sample_detection"
       ]
     };
 
@@ -174,6 +182,38 @@ class Samples extends React.Component {
       },
       notes: {
         display_name: "Notes",
+        type: "metadata"
+      },
+      sample_library: {
+        display_name: "Library prep",
+        type: "metadata"
+      },
+      sample_sequencer: {
+        display_name: "Sequencer",
+        type: "metadata"
+      },
+      sample_date: {
+        display_name: "Collection date",
+        type: "metadata"
+      },
+      sample_input_pg: {
+        display_name: "RNA/DNA input (pg)",
+        type: "metadata"
+      },
+      sample_batch: {
+        display_name: "Batch",
+        type: "metadata"
+      },
+      sample_diagnosis: {
+        display_name: "Clinical diagnosis",
+        type: "metadata"
+      },
+      sample_organism: {
+        display_name: "Known organisms",
+        type: "metadata"
+      },
+      sample_detection: {
+        display_name: "Detection method",
         type: "metadata"
       }
     };
@@ -512,7 +552,7 @@ class Samples extends React.Component {
   }
 
   renderPipelineOutput(samples) {
-    let BLANK_TEXT = <span className="blank">NA</span>;
+    let BLANK_TEXT = <span className="blank">—</span>;
     return samples.map((sample, i) => {
       let dbSample = sample.db_sample;
       let derivedOutput = sample.derived_sample_output;
@@ -1512,7 +1552,7 @@ function PipelineOutputDataValues({
   stats,
   dbSample
 }) {
-  return {
+  let res = {
     total_reads: !derivedOutput.pipeline_run
       ? BLANK_TEXT
       : numberWithCommas(derivedOutput.pipeline_run.total_reads),
@@ -1554,6 +1594,31 @@ function PipelineOutputDataValues({
     notes:
       dbSample && dbSample.sample_notes ? dbSample.sample_notes : BLANK_TEXT
   };
+
+  // Add more fields or blank_text values
+  let fields = [
+    "sample_library",
+    "sample_sequencer",
+    "sample_date",
+    "sample_input_pg",
+    "sample_batch",
+    "sample_diagnosis",
+    "sample_organism",
+    "sample_detection"
+  ];
+  fields.forEach(function(field) {
+    AddValOrBlank(res, dbSample, field);
+  });
+  return res;
+}
+
+function AddValOrBlank(all, sample, key) {
+  let BLANK_TEXT = <span className="blank">NA</span>;
+  if (sample && sample[key]) {
+    all[key] = sample[key];
+  } else {
+    all[key] = BLANK_TEXT;
+  }
 }
 
 function PipelineOutputCards({
