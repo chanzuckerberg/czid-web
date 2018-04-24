@@ -308,7 +308,8 @@ class PipelineRun < ApplicationRecord
   def postprocess_output_s3_path
     pipeline_ver_str = ""
     pipeline_ver_str = "#{pipeline_version}/" if pipeline_version
-    "#{sample.sample_postprocess_s3_path}/#{pipeline_ver_str}#{subsample_suffix}"
+    result = "#{sample.sample_postprocess_s3_path}/#{pipeline_ver_str}#{subsample_suffix}"
+    result.chomp("/")
   end
 
   def alignment_viz_output_s3_path
@@ -366,7 +367,8 @@ class PipelineRun < ApplicationRecord
   def alignment_output_s3_path
     pipeline_ver_str = ""
     pipeline_ver_str = "#{pipeline_version}/" if pipeline_version
-    "#{sample.sample_output_s3_path}/#{pipeline_ver_str}#{subsample_suffix}"
+    result = "#{sample.sample_output_s3_path}/#{pipeline_ver_str}#{subsample_suffix}"
+    result.chomp("/")
   end
 
   def count_unmapped_reads

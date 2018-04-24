@@ -14,7 +14,7 @@ class SamplesController < ApplicationController
   ##########################################
   skip_before_action :verify_authenticity_token, only: [:create, :update]
 
-  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder, :show_taxid_alignment].freeze
+  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder, :show_taxid_alignment, :show_taxid_alignment_viz].freeze
   EDIT_ACTIONS = [:edit, :add_taxon_confirmation, :remove_taxon_confirmation, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :samples_taxons, :top_taxons, :heatmap].freeze
@@ -207,7 +207,15 @@ class SamplesController < ApplicationController
   def samples_taxons
     sample_ids = params[:sample_ids].to_s.split(",").map(&:to_i) || []
     num_results = params[:n] ? params[:n].to_i : 20
-    taxon_ids = params[:taxon_ids].to_s.split(",").map(&:to_i) || []
+    taxon_ids = params[:taxon_ids].to_s.split(",").map do |x|
+      begin
+        Integer(x)
+      rescue ArgumentError
+        nil
+      end
+    end
+    taxon_ids = taxon_ids.compact
+
     sort_by = params[:sort_by] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
     only_species = params[:species] == "1"
     samples = current_power.samples.where(id: sample_ids).includes([:pipeline_runs])
@@ -264,7 +272,7 @@ class SamplesController < ApplicationController
     @pipeline_run = @sample.pipeline_runs.first
     if @pipeline_run
       @search_list = fetch_lineage_info(@pipeline_run.id)
-      render json: @search_list
+      render json: JSON.dump(@search_list)
     else
       render json: { lineage_map: {}, search_list: [] }
     end
@@ -324,8 +332,36 @@ class SamplesController < ApplicationController
     @parsed_alignment_results = parse_alignment_results(@taxid, @tax_level, alignment_data)
 
     respond_to do |format|
-      format.json { render json: @parsed_alignment_results }
+      format.json do
+        render json: alignment_data
+      end
       format.html { @title = @parsed_alignment_results['title'] }
+    end
+  end
+
+  def show_taxid_alignment_viz
+    @taxon_info = params[:taxon_info].split(".")[0]
+    pr = @sample.pipeline_runs.first
+
+    @taxid = @taxon_info.split("_")[2].to_i
+    @tax_level = @taxon_info.split("_")[1]
+    @taxon_name = taxon_name(@taxid, @tax_level)
+
+    respond_to do |format|
+      format.json do
+        s3_file_path = "#{pr.alignment_viz_output_s3_path}/#{@taxon_info.tr('_', '.')}.align_viz.json"
+        alignment_data = JSON.parse(get_s3_file(s3_file_path) || "{}")
+        flattened_data = {}
+        parse_tree(flattened_data, @taxid, alignment_data, true)
+        output_array = []
+        flattened_data.each do |k, v|
+          v["accession"] = k
+          v["reads_count"] = v["reads"].size
+          output_array << v
+        end
+        render json: output_array.sort { |a, b| b['reads_count'] <=> a['reads_count'] }
+      end
+      format.html {}
     end
   end
 
@@ -546,6 +582,7 @@ class SamplesController < ApplicationController
                                    :sample_memory, :sample_location, :sample_date, :sample_tissue,
                                    :sample_template, :sample_library, :sample_sequencer,
                                    :sample_notes, :job_queue, :search, :subsample, :pipeline_branch,
+                                   :sample_input_pg, :sample_batch, :sample_diagnosis, :sample_organism, :sample_detection,
                                    input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts])
   end
 

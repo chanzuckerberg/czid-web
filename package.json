@@ -10,10 +10,7 @@
     "setupTestFrameworkScriptFile": "./enzyme_config.js"
   },
   "lint-staged": {
-    "*.{js,jsx,json,css,scss}": [
-      "prettier --write",
-      "git add"
-    ]
+    "*.{js,jsx,json,css,scss}": ["prettier --write", "git add"]
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
@@ -72,6 +69,7 @@
     "react-tooltip": "^3.4.0",
     "semantic-ui-css": "^2.3.0",
     "semantic-ui-react": "^0.78.3",
-    "text-width": "^1.2.0"
+    "text-width": "^1.2.0",
+    "url-search-params-polyfill": "^3.0.0"
   }
 }

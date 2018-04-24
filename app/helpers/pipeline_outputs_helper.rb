@@ -129,23 +129,40 @@ module PipelineOutputsHelper
     [quality_string, mis_matches]
   end
 
-  def parse_tree(results, key, current_dict)
+  def parse_tree(results, key, current_dict, raw = false)
     if current_dict["reads"]
-      results[key] = parse_accession(current_dict)
+      if raw # no further parsing
+        # sort the coverage
+        if current_dict["coverage_summary"] && current_dict["coverage_summary"]["coverage"]
+          coverage = current_dict["coverage_summary"]["coverage"].sort_by { |k, _v| k.split("-")[0].to_i }
+          current_dict["coverage_summary"]["coverage"] = coverage
+        end
+        # sort the reads
+        reads = current_dict["reads"].sort { |a, b| (a[2][6]).to_i <=> (b[2][6]).to_i }
+        current_dict["reads"] = reads
+        results[key] = current_dict
+      else
+        results[key] = parse_accession(current_dict)
+      end
     else
       current_dict.each do |key2, val|
-        parse_tree(results, key2, val)
+        parse_tree(results, key2, val, raw)
       end
     end
   end
 
-  def parse_alignment_results(taxid, tax_level, alignment_data)
+  def taxon_name(taxid, tax_level)
     taxon = TaxonLineage.find_by(taxid: taxid)
+    taxon["#{tax_level}_name"] if taxon
+  end
+
+  def parse_alignment_results(taxid, tax_level, alignment_data)
     results = {}
     parse_tree(results, taxid, alignment_data)
     accession_ids = results.keys.sort_by { |k| -results[k]['reads_count'] }
 
-    title = taxon["#{tax_level}_name"].to_s + "(#{tax_level}) Alignment (#{results.size} unique accessions)"
+    name = taxon_name(taxid, tax_level)
+    title = name.to_s + "(#{tax_level}) Alignment (#{results.size} unique accessions)"
     { "title" => title, "details" => results, "accessions" => accession_ids }
   end
 

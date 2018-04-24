@@ -209,6 +209,11 @@ ActiveRecord::Schema.define(version: 20180420224803) do
     t.bigint "user_id"
     t.integer "subsample"
     t.string "pipeline_branch"
+    t.float "sample_input_pg", limit: 24
+    t.integer "sample_batch"
+    t.text "sample_diagnosis"
+    t.string "sample_organism"
+    t.string "sample_detection"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
     t.index ["user_id"], name: "index_samples_on_user_id"
   end

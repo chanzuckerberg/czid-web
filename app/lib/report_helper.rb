@@ -469,17 +469,19 @@ module ReportHelper
   end
 
   def fetch_lineage_info(pipeline_run_id)
-    lineage_records = TaxonLineage.where(
+    lineage_records = TaxonLineage.connection.select_all(TaxonLineage.where(
       "taxid in (select tax_id from taxon_counts
                  where pipeline_run_id = #{pipeline_run_id}
                    and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES})"
-    )
+    ).to_sql).to_a
     result_map = {}
     search_key_list = Set.new
     sort_map = {}
+
+    n2la = TaxonCount::NAME_2_LEVEL.to_a
     lineage_records.each do |lr|
       key_array = []
-      TaxonCount::NAME_2_LEVEL.each do |category, level|
+      n2la.each do |category, level|
         tax_name = lr["#{category}_name"]
         tax_id = lr["#{category}_taxid"]
         next unless tax_name && tax_name.strip.present?
@@ -490,8 +492,9 @@ module ReportHelper
         key_array << search_id
         search_key_list.add([display_name, search_id])
       end
-      result_map[lr.taxid] = key_array
+      result_map[lr['taxid']] = key_array
     end
+
     search_key_list = search_key_list.sort_by { |u| sort_map[u[1]] }
     { lineage_map: result_map, search_list: search_key_list }
   end

@@ -32,6 +32,7 @@ Rails.application.routes.draw do
   get 'samples/:id/fasta/:tax_level/:taxid/:hit_type', to: 'samples#show_taxid_fasta'
   get 'samples/:id/assembly/:taxid', to: 'samples#assembly'
   get 'samples/:id/alignment/:taxon_info', to: 'samples#show_taxid_alignment'
+  get 'samples/:id/alignment_viz/:taxon_info', to: 'samples#show_taxid_alignment_viz'
   get 'select', to: 'home#index'
   post '/feedback', to: 'home#feedback'
 
