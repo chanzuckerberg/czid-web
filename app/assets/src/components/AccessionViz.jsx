@@ -28,7 +28,6 @@ class AccessionViz extends React.Component {
       numReads,
       numReads + this.readsPerPage
     );
-    console.log([numReads, numReads + this.readsPerPage]);
     this.setState(prevState => ({
       reads: [...prevState.reads, ...nextPageReads]
     }));
