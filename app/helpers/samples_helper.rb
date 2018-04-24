@@ -33,7 +33,15 @@ module SamplesHelper
                         nonhost_alignment_status: run_info ? run_info['GSNAPL/RAPSEARCH alignment'] : '',
                         postprocessing_status: run_info ? run_info['Post Processing'] : '',
                         uploader: sample_info[:uploader] ? sample_info[:uploader][:name] : '',
-                        runtime_seconds: run_info ? run_info[:total_runtime] : '' }
+                        runtime_seconds: run_info ? run_info[:total_runtime] : '',
+                        sample_library: db_sample ? db_sample[:sample_library] : '',
+                        sample_sequencer: db_sample ? db_sample[:sample_sequencer] : '',
+                        sample_date: db_sample ? db_sample[:sample_date] : '',
+                        sample_input_pg: db_sample ? db_sample[:sample_input_pg] : '',
+                        sample_batch: db_sample ? db_sample[:sample_batch] : '',
+                        sample_diagnosis: db_sample ? db_sample[:sample_diagnosis] : '',
+                        sample_organism: db_sample ? db_sample[:sample_organism] : '',
+                        sample_detection: db_sample ? db_sample[:sample_detection] : '' }
         stage_statuses = data_values.values_at(:host_filtering_status, :nonhost_alignment_status, :postprocessing_status)
         if stage_statuses.any? { |status| status == "FAILED" }
           data_values[:overall_job_status] = "FAILED"
