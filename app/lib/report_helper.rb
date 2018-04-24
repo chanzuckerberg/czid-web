@@ -396,8 +396,7 @@ module ReportHelper
       count_species_per_genus!(tax_2d)
       rows = []
       tax_2d.each { |_tax_id, tax_info| rows << tax_info }
-      compute_species_aggregate_scores!(rows, tax_2d)
-      compute_genera_aggregate_scores!(rows, tax_2d)
+      compute_aggregate_scores_v2!(rows)
 
       filtered_rows = []
       rows.each do |row|
@@ -429,8 +428,7 @@ module ReportHelper
       tax_2d.each do |_tax_id, tax_info|
         rows << tax_info
       end
-      compute_species_aggregate_scores!(rows, tax_2d)
-      compute_genera_aggregate_scores!(rows, tax_2d)
+      compute_aggregate_scores_v2!(rows)
       rows = rows.select { |row| row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD }
 
       rows.sort_by! { |tax_info| ((tax_info[count_type] || {})[metric] || 0.0) * -1.0 }
@@ -734,6 +732,28 @@ module ReportHelper
     aggregate
   end
 
+  def aggregate_score_v2(taxon_info)
+    aggregate = 0.0
+    COUNT_TYPES.each do |count_type|
+      aggregate += (
+        taxon_info[count_type]['zscore'] *
+        taxon_info[count_type]['rpm']
+      )
+    end
+    aggregate
+  end
+
+  def compute_aggregate_scores_v2!(rows)
+    rows.each do |taxon_info|
+      taxon_info['NT']['maxzscore'] = [taxon_info['NT']['zscore'], taxon_info['NR']['zscore']].max
+      taxon_info['NR']['maxzscore'] = taxon_info['NT']['maxzscore']
+      score = aggregate_score_v2(taxon_info)
+      taxon_info['NT']['aggregatescore'] = score.to_f
+      taxon_info['NR']['aggregatescore'] = score.to_f
+    end
+  end
+
+
   def compute_genera_aggregate_scores!(rows, tax_2d)
     rows.each do |species_info|
       next unless species_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
@@ -751,7 +771,7 @@ module ReportHelper
   def compute_species_aggregate_scores!(rows, tax_2d)
     rows.each do |species_info|
       species_info['NT']['maxzscore'] = [species_info['NT']['zscore'], species_info['NR']['zscore']].max
-      species_info['NR']['maxzscore'] = [species_info['NR']['zscore'], species_info['NR']['zscore']].max
+      species_info['NR']['maxzscore'] = species_info['NT']['maxzscore']
       next unless species_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
       genus_id = species_info['genus_taxid']
       genus_info = tax_2d[genus_id]
@@ -759,7 +779,6 @@ module ReportHelper
       species_info['NT']['aggregatescore'] = species_score.to_f
       species_info['NR']['aggregatescore'] = species_score.to_f
     end
-    tax_2d
   end
 
   def wall_clock_ms
@@ -811,7 +830,6 @@ module ReportHelper
 
     # Compute all species aggregate scores.  These are used in filtering.
     compute_species_aggregate_scores!(rows, tax_2d)
-
     # Compute all genus aggregate scores.  These are used only in sorting.
     compute_genera_aggregate_scores!(rows, tax_2d)
 
