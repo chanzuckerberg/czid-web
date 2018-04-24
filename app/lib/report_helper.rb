@@ -753,7 +753,6 @@ module ReportHelper
     end
   end
 
-
   def compute_genera_aggregate_scores!(rows, tax_2d)
     rows.each do |species_info|
       next unless species_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
