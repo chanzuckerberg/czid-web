@@ -9,8 +9,17 @@ class AccessionViz extends React.Component {
     this.readsPerPage = props.readsPerPage;
     this.coverageSummary = props.coverage_summary || {};
     this.state = {
-      reads: this.allReads.slice(0, this.readsPerPage)
+      reads: this.allReads.slice(0, this.readsPerPage),
+      rendering: false
     };
+  }
+
+  componentWillUpdate(nextProps, nextState) {
+    this.state.rendering = true;
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    this.state.rendering = false;
   }
 
   render_coverage_table(coverageTable) {
@@ -45,6 +54,7 @@ class AccessionViz extends React.Component {
             />
           );
         })}
+        <div> </div>
       </div>
     );
   }
