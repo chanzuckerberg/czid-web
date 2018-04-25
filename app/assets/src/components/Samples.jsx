@@ -527,6 +527,9 @@ class Samples extends React.Component {
       case "ALIGNMENT":
         klass = "uploading fa fa-repeat";
         break;
+      case "ASSEMBLY":
+        klass = "uploading fa fa-repeat";
+        break;
       case "FAILED":
         klass = "failed fa fa-times";
         break;
@@ -761,10 +764,19 @@ class Samples extends React.Component {
 
   getChunkedStage(runInfo) {
     let postProcess = runInfo["Post Processing"];
+    let assembly = runInfo["De-Novo Assembly"];
     let hostFiltering = runInfo["Host Filtering"];
     let alignment = runInfo["GSNAPL/RAPSEARCH alignment"];
     if (alignment === "FAILED" || hostFiltering === "FAILED") {
       return "FAILED";
+    } else if (assembly) {
+      if (assembly === "LOADED") {
+        return "COMPLETE";
+      } else if (assembly === "FAILED") {
+        return "COMPLETE*";
+      } else {
+        return "ASSEMBLY";
+      }
     } else if (postProcess) {
       if (postProcess === "LOADED") {
         return "COMPLETE";
