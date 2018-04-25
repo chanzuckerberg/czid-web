@@ -750,10 +750,13 @@ class Samples extends React.Component {
   }
 
   applyChunkStatusClass(runInfo) {
+    let assembly = runInfo["De-Novo Assembly"];
     let postProcess = runInfo["Post Processing"];
     let hostFiltering = runInfo["Host Filtering"];
     let alignment = runInfo["GSNAPL/RAPSEARCH alignment"];
-    if (postProcess) {
+    if (assembly) {
+      return assembly === "LOADED" ? "complete" : "uploading";
+    } else if (postProcess) {
       return postProcess === "LOADED" ? "complete" : "uploading";
     } else if (alignment) {
       return alignment === "FAILED" ? "failed" : "uploading";
