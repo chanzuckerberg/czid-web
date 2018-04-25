@@ -142,7 +142,7 @@ class PipelineRunStage < ApplicationRecord
     end
     # The job appears to be in progress.  Check to make sure it hasn't been killed in AWS.   But not too frequently.
     return unless due_for_aegea_check?
-    db_load_assembly # update the list of taxids that have been assembled by polling S3
+    db_load_assembly # update the list of taxids that have already been assembled by polling S3
     stdout, stderr, status = Open3.capture3("aegea", "batch", "describe", job_id.to_s)
     unless status.exitstatus.zero?
       Airbrake.notify("Error for update job status for pipeline run #{id} with error #{stderr}")
