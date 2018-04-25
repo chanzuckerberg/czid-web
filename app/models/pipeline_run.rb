@@ -247,7 +247,7 @@ class PipelineRun < ApplicationRecord
   def update_names
     # The names from the taxon_lineages table are preferred, but, not always
     # available;  this code merges them into taxon_counts.name.
-    %w[species genus].each do |level|
+    %w[species genus family].each do |level|
       level_id = TaxonCount::NAME_2_LEVEL[level]
       TaxonCount.connection.execute("
         UPDATE taxon_counts, taxon_lineages
@@ -271,6 +271,16 @@ class PipelineRun < ApplicationRecord
       WHERE taxon_counts.pipeline_run_id=#{id} AND
             (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at) AND
             taxon_lineages.taxid = taxon_counts.tax_id
+    ")
+  end
+
+  def update_superkingdoms
+    TaxonCount.connection.execute("
+      UPDATE taxon_counts, taxon_lineages
+      SET taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
+      WHERE taxon_counts.pipeline_run_id=#{id} AND
+            (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at) AND
+            taxon_lineages.taxid = taxon_counts.family_taxid
     ")
   end
 
