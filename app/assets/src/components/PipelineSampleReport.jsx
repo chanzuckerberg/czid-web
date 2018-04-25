@@ -807,7 +807,7 @@ class PipelineSampleReport extends React.Component {
     const taxId = e.target.getAttribute("data-tax-id");
     const taxLevel = e.target.getAttribute("data-tax-level");
     window.open(
-      `/samples/${this.sample_id}/alignment/nt_${taxLevel}_${taxId}`,
+      `/samples/${this.sample_id}/alignment_viz/nt_${taxLevel}_${taxId}`,
       "_blank"
     );
   }

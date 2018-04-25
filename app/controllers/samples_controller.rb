@@ -186,7 +186,7 @@ class SamplesController < ApplicationController
   def top_taxons
     sample_ids = params[:sample_ids].split(",").map(&:to_i) || []
 
-    num_results = params[:n] ? params[:n].to_i : 20
+    num_results = params[:n] ? params[:n].to_i : 30
     sort_by = params[:sort_by] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
 
     samples = current_power.samples.where(id: sample_ids)
@@ -206,7 +206,7 @@ class SamplesController < ApplicationController
 
   def samples_taxons
     sample_ids = params[:sample_ids].to_s.split(",").map(&:to_i) || []
-    num_results = params[:n] ? params[:n].to_i : 20
+    num_results = params[:n] ? params[:n].to_i : 30
     taxon_ids = params[:taxon_ids].to_s.split(",").map do |x|
       begin
         Integer(x)
@@ -323,6 +323,7 @@ class SamplesController < ApplicationController
   end
 
   def show_taxid_alignment
+    # TODO(yf): DEPRECATED. Remove by 5/24/2018
     @taxon_info = params[:taxon_info].tr("_", ".")
     pr = @sample.pipeline_runs.first
     s3_file_path = "#{pr.alignment_viz_output_s3_path}/#{@taxon_info}.align_viz.json"
