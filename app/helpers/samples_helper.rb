@@ -60,7 +60,7 @@ module SamplesHelper
   def populate_metadata_bulk(csv_s3_path)
     # Load the CSV data
     csv_data = get_s3_file(csv_s3_path)
-    csv_data.delete!("\uFEFF")  # Remove BOM if present (file likely comes from Excel)
+    csv_data.delete!("\uFEFF") # Remove BOM if present (file likely comes from Excel)
     CSV.parse(csv_data, headers: true) do |row|
       # Find the right project and sample
       row_details = row.to_h
@@ -70,7 +70,7 @@ module SamplesHelper
       next unless sampl
 
       # Format the new details. Append to existing notes.
-      new_details = Hash.new
+      new_details = {}
       new_details['sample_notes'] = sampl.sample_notes || ''
       row_details.each do |key, value|
         if !key || !value || key == 'sample_name' || key == 'project_name'
@@ -78,8 +78,8 @@ module SamplesHelper
         end
         if Sample::METADATA_FIELDS.include?(key.to_sym)
           new_details[key] = value
-        else  # Otherwise throw in notes
-          new_details['sample_notes'] << "\n- %s: %s" % [key, value]
+        else # Otherwise throw in notes
+          new_details['sample_notes'] << format("\n- %s: %s", key, value)
         end
       end
       new_details['sample_notes'].strip!
