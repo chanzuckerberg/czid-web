@@ -230,6 +230,14 @@ class PipelineRunStage < ApplicationRecord
     aegea_batch_submit_command(batch_command, Sample::HOST_FILTERING_MEMORY_IN_MB) # HACK: it just needs more vCPUs
   end
 
+  def assembly_command
+    batch_command_env_variables = "ALIGNMENT_BUCKET=#{pipeline_run.alignment_output_s3_path} " \
+      "POSTPROCESS_BUCKET=#{pipeline_run.postprocess_output_s3_path} " \
+      "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} "
+    batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline assembly"
+    aegea_batch_submit_command(batch_command, Sample::HOST_FILTERING_MEMORY_IN_MB) # HACK: it just needs more vCPUs
+  end
+
   def db_load_host_filtering
     pr = pipeline_run
     pr.pipeline_version = pr.fetch_pipeline_version
@@ -328,6 +336,10 @@ class PipelineRunStage < ApplicationRecord
       mysqlimport --replace --local --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --columns=taxid,hit_type,first_byte,last_byte,pipeline_run_id --fields-terminated-by=',' idseq_#{Rails.env} taxon_byteranges;
     `
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_byteranges_path}")
+  end
+
+  def db_load_assembly
+    pr = pipeline_run
     pr.assembled_taxids = `aws s3 ls #{pr.assembly_output_s3_path} | awk '{print $4}'`.split("\n").map(&:to_i)
     pr.save
   end
@@ -344,5 +356,9 @@ class PipelineRunStage < ApplicationRecord
 
   def postprocess_outputs
     "#{pipeline_run.postprocess_output_s3_path}/#{PipelineRun::TAXID_BYTERANGE_JSON_NAME}"
+  end
+
+  def assembly_outputs
+    "#{pipeline_run.assembly_output_s3_path}/#{PipelineRun::ASSEMBLY_STATUSFILE}"
   end
 end
