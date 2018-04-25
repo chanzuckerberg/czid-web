@@ -58,7 +58,7 @@ module SamplesHelper
 
   # Load bulk metadata from a CSV file
   def populate_metadata_bulk(csv_s3_path)
-    # Load the CSV data
+    # Load the CSV data. CSV should have columns "sample_name", "project_name", and any desired columns from Sample::METADATA_FIELDS.
     csv_data = get_s3_file(csv_s3_path)
     csv_data.delete!("\uFEFF") # Remove BOM if present (file likely comes from Excel)
     CSV.parse(csv_data, headers: true) do |row|
