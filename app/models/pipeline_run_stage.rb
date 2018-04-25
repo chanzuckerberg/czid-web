@@ -360,6 +360,6 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def assembly_outputs
-    "#{pipeline_run.assembly_output_s3_path}/#{PipelineRun::ASSEMBLY_STATUSFILE}"
+    "#{pipeline_run.assembly_output_s3_path}-#{PipelineRun::ASSEMBLY_STATUSFILE}"
   end
 end
