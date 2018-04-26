@@ -58,11 +58,26 @@ class ProjectsController < ApplicationController
     else
       project = current_power.projects.find(params[:id])
       samples = current_power.project_samples(project)
-      project_name = "project-#{project.name.downcase.split(' ').join('_')}"
+      project_name = cleaned_project_name(project)
     end
     formatted_samples = format_samples(samples)
     project_csv = generate_sample_list_csv(formatted_samples)
     send_data project_csv, filename: project_name + '_sample-table.csv'
+  end
+
+  def host_gene_counts
+    project = current_power.projects.find(params[:id])
+    samples = current_power.project_samples(project)
+    output_dir = "/app/tmp/host-gene-counts/#{project.id}/#{current_user.id}"
+    work_dir = "#{output_dir}/workdir"
+    output_name = cleaned_project_name(project) + '_host-gene-counts.tar.gz'
+    output_file = "#{output_dir}/#{output_name}"
+    samples.each do |sample|
+      sample_name = "#{sample.name.downcase.gsub(/\W/, '-')}_#{sample.id}"
+      `aws s3 cp #{sample.sample_alignment_output_s3_path}/reads_per_gene.star.tab #{work_dir}/#{sample_name}`
+    end
+    `cd #{work_dir}; tar cvzf #{output_file} .`
+    send_file output_file
   end
 
   def update_project_visibility
@@ -234,5 +249,9 @@ class ProjectsController < ApplicationController
 
   def project_reports_progress_message
     "In progress (project #{@project.name})"
+  end
+
+  def cleaned_project_name(project)
+    "project-#{project.name.downcase.split(' ').join('_')}"
   end
 end

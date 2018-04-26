@@ -1718,6 +1718,9 @@ function TableDownloadDropdown({ project_id, parent }) {
               Download Reports
             </Dropdown.Item>
           )}
+          <Dropdown.Item href={`/projects/${project_id}/host_gene_counts`}>
+            Download Host Gene Counts
+          </Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown>
     </div>
