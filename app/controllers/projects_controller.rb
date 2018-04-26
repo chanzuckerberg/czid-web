@@ -44,7 +44,8 @@ class ProjectsController < ApplicationController
           name: @project.name,
           public_access: @project.public_access.to_i,
           background_flag: @project.background_flag.to_i,
-          created_at: @project.created_at
+          created_at: @project.created_at,
+          total_sample_count: @samples.count
         }
       end
     end
