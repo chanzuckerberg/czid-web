@@ -130,11 +130,6 @@ class Login extends React.Component {
                 </span>
               </p>
             </div>
-            <div className="mail">
-              Or login with the following demo account:
-              <p> Email: idseq.guest@chanzuckerberg.com </p>
-              <p> Password: idseqisawesome</p>
-            </div>
             {this.state.success ? (
               <div className="success-info">
                 <i className="fa fa-success" />
@@ -202,4 +197,5 @@ class Login extends React.Component {
     return <div>{this.renderLogin()}</div>;
   }
 }
+
 export default Login;
