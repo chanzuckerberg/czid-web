@@ -72,10 +72,7 @@ class ProjectSelection extends React.Component {
       )
       .then(() => {
         this.nanobar.go(100);
-        this.checkIfProjectExistInFavorites(
-          projectId,
-          this.state.formattedProjectList
-        );
+        this.projectInFavorites(projectId, this.state.formattedProjectList);
       })
       .catch(err => {});
   }
@@ -126,7 +123,7 @@ class ProjectSelection extends React.Component {
 
   // check existence of projects in favorites projects list
   // if true then remove else add
-  checkIfProjectExistInFavorites(id, projects) {
+  projectInFavorites(id, projects) {
     if (this.state.favIds.includes(parseInt(id))) {
       this.removeProjectFromFavorites(id);
     } else {
