@@ -332,6 +332,7 @@ class Samples extends React.Component {
           location.href = `/projects/${
             this.state.project_id_download_in_progress
           }/send_project_reports_csv`;
+          this.nanobar.go(100);
           this.setState({
             project_id_download_in_progress: null
           });
