@@ -1891,12 +1891,12 @@ class TreeStructure extends React.PureComponent {
     let circleScale = d3.scale
       .linear()
       .domain([min_weight, props.tree.weight])
-      .range([4, 15]);
+      .range([2, 20]);
 
     let linkScale = d3.scale
       .linear()
       .domain([min_weight, props.tree.weight])
-      .range([1, 15]);
+      .range([1, 20]);
 
     this.autoCollapsed = true;
     let width = 1000,
