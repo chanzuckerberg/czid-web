@@ -11,7 +11,7 @@ class ProjectsController < ApplicationController
   #
   ##########################################
 
-  READ_ACTIONS = [:show, :add_favorite, :remove_favorite, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv, :visuals].freeze
+  READ_ACTIONS = [:show, :add_favorite, :remove_favorite, :host_gene_counts, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv, :visuals].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_emails, :update_project_visibility].freeze
   OTHER_ACTIONS = [:create, :new, :index, :send_project_csv].freeze
 
@@ -70,13 +70,16 @@ class ProjectsController < ApplicationController
     samples = current_power.project_samples(project)
     output_dir = "/app/tmp/host-gene-counts/#{project.id}/#{current_user.id}"
     work_dir = "#{output_dir}/workdir"
+    `mkdir -p #{work_dir}`
     output_name = cleaned_project_name(project) + '_host-gene-counts.tar.gz'
     output_file = "#{output_dir}/#{output_name}"
     samples.each do |sample|
       sample_name = "#{sample.name.downcase.gsub(/\W/, '-')}_#{sample.id}"
-      `aws s3 cp #{sample.sample_alignment_output_s3_path}/reads_per_gene.star.tab #{work_dir}/#{sample_name}`
+      `aws s3 cp #{sample.sample_host_filter_output_s3_path}/reads_per_gene.star.tab #{work_dir}/#{sample_name}`
     end
+    logger.warn `ls #{work_dir}/`
     `cd #{work_dir}; tar cvzf #{output_file} .`
+    `rm -rf #{work_dir}`
     send_file output_file
   end
 
