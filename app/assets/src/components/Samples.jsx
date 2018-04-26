@@ -1116,6 +1116,7 @@ class Samples extends React.Component {
         compare_button={compare_button}
         delete_project_button={delete_project_button}
         state={this.state}
+        canEditProject={this.canEditProject}
       />
     );
 
@@ -1859,7 +1860,8 @@ function ProjectInfoHeading({
   table_download_dropdown,
   compare_button,
   delete_project_button,
-  state
+  state,
+  canEditProject
 }) {
   return (
     <div className="row download-section">
@@ -1891,7 +1893,10 @@ function ProjectInfoHeading({
         {state.selectedProjectId ? project_menu : null}
         {table_download_dropdown}
         {compare_button}
-        {state.selectedProjectId && state.allSamples.length == 0
+        {state.selectedProjectId &&
+        canEditProject(state.selectedProjectId) &&
+        state.project &&
+        state.project.total_sample_count == 0
           ? delete_project_button
           : null}
       </div>
