@@ -39,6 +39,28 @@ class Project < ApplicationRecord
     nil
   end
 
+  def cleaned_project_name
+    "project-#{name.downcase.split(' ').join('_')}"
+  end
+
+  def host_gene_counts_from_params(params)
+    user_id = params["user_id"]
+    current_power = Power.new(User.find(user_id))
+    samples = current_power.project_samples(self)
+    output_dir = "/app/tmp/host-gene-counts/#{project.id}/#{current_user.id}"
+    work_dir = "#{output_dir}/workdir"
+    `rm -rf #{output_dir}; mkdir -p #{work_dir}`
+    output_name = cleaned_project_name + '_host-gene-counts.tar.gz'
+    output_file = "#{output_dir}/#{output_name}"
+    samples.each do |sample|
+      sample_name = "#{sample.name.downcase.gsub(/\W/, '-')}_#{sample.id}"
+      `aws s3 cp #{sample.sample_host_filter_output_s3_path}/reads_per_gene.star.tab #{work_dir}/#{sample_name}`
+    end
+    `cd #{work_dir}; tar cvzf #{output_file} .`
+    `aws s3 cp #{output_file} #{report_tar_s3(user_id)}`
+    `rm -rf #{work_dir}`
+  end
+
   def bulk_report_csvs_from_params(params)
     user_id = params["user_id"]
     current_power = Power.new(User.find(user_id))

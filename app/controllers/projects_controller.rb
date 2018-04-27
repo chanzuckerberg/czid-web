@@ -65,24 +65,6 @@ class ProjectsController < ApplicationController
     send_data project_csv, filename: project_name + '_sample-table.csv'
   end
 
-  def host_gene_counts
-    project = current_power.projects.find(params[:id])
-    samples = current_power.project_samples(project)
-    output_dir = "/app/tmp/host-gene-counts/#{project.id}/#{current_user.id}"
-    work_dir = "#{output_dir}/workdir"
-    `mkdir -p #{work_dir}`
-    output_name = cleaned_project_name(project) + '_host-gene-counts.tar.gz'
-    output_file = "#{output_dir}/#{output_name}"
-    samples.each do |sample|
-      sample_name = "#{sample.name.downcase.gsub(/\W/, '-')}_#{sample.id}"
-      `aws s3 cp #{sample.sample_host_filter_output_s3_path}/reads_per_gene.star.tab #{work_dir}/#{sample_name}`
-    end
-    logger.warn `ls #{work_dir}/`
-    `cd #{work_dir}; tar cvzf #{output_file} .`
-    `rm -rf #{work_dir}`
-    send_file output_file
-  end
-
   def update_project_visibility
     errors = []
     public_access = params[:public_access] ? params[:public_access].to_i : nil
@@ -126,6 +108,48 @@ class ProjectsController < ApplicationController
     user_id = current_user.id
     output_file = @project.report_tar(user_id)
     `aws s3 cp #{@project.report_tar_s3(user_id)} #{output_file}`
+    send_file output_file
+  end
+
+  def make_host_gene_counts
+    user_id = current_user.id
+    `aws s3 rm #{@project.host_gene_counts_tar_s3(user_id)}`
+    params["user_id"] = user_id
+    Resque.enqueue(HostGeneCounts, params)
+    render json: { status_display: project_reports_progress_message }
+  end
+
+  def host_gene_counts_status
+    final_complete = `aws s3 ls #{@project.host_gene_counts_tar_s3(current_user.id)} | wc -l`.to_i == 1
+    if final_complete
+      render json: { status_display: "complete" }
+      return
+    end
+    render json: { status_display: project_reports_progress_message }
+  end
+
+  def send_host_gene_counts
+    user_id = current_user.id
+    output_file = @project.host_gene_counts(user_id)
+    `aws s3 cp #{@project.host_gene_counts_tar_s3(user_id)} #{output_file}`
+    send_file output_file
+  end
+
+  def host_gene_counts
+    project = current_power.projects.find(params[:id])
+    samples = current_power.project_samples(project)
+    output_dir = "/app/tmp/host-gene-counts/#{project.id}/#{current_user.id}"
+    work_dir = "#{output_dir}/workdir"
+    `mkdir -p #{work_dir}`
+    output_name = cleaned_project_name(project) + '_host-gene-counts.tar.gz'
+    output_file = "#{output_dir}/#{output_name}"
+    samples.each do |sample|
+      sample_name = "#{sample.name.downcase.gsub(/\W/, '-')}_#{sample.id}"
+      `aws s3 cp #{sample.sample_host_filter_output_s3_path}/reads_per_gene.star.tab #{work_dir}/#{sample_name}`
+    end
+    logger.warn `ls #{work_dir}/`
+    `cd #{work_dir}; tar cvzf #{output_file} .`
+    `rm -rf #{work_dir}`
     send_file output_file
   end
 

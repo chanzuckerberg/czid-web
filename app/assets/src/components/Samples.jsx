@@ -1725,7 +1725,12 @@ function TableDownloadDropdown({ project_id, parent }) {
             </Dropdown.Item>
           )}
           {project_id === "all" || !parent.canEditProject(project_id) ? null : (
-            <Dropdown.Item href={`/projects/${project_id}/host_gene_counts`}>
+            <Dropdown.Item
+              data-make-action="make_host_gene_counts"
+              data-status-action="host_gene_counts_status"
+              data-retrieve-action="send_host_gene_counts"
+              onClick={parent.startReportGeneration}
+            >
               Host Gene Counts
             </Dropdown.Item>
           )}
