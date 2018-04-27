@@ -58,7 +58,7 @@ class ProjectsController < ApplicationController
     else
       project = current_power.projects.find(params[:id])
       samples = current_power.project_samples(project)
-      project_name = cleaned_project_name(project)
+      project_name = project.cleaned_project_name
     end
     formatted_samples = format_samples(samples)
     project_csv = generate_sample_list_csv(formatted_samples)
@@ -130,7 +130,7 @@ class ProjectsController < ApplicationController
 
   def send_host_gene_counts
     user_id = current_user.id
-    output_file = @project.host_gene_counts(user_id)
+    output_file = @project.host_gene_counts_tar(user_id)
     `aws s3 cp #{@project.host_gene_counts_tar_s3(user_id)} #{output_file}`
     send_file output_file
   end
@@ -276,9 +276,5 @@ class ProjectsController < ApplicationController
 
   def project_reports_progress_message
     "In progress (project #{@project.name})"
-  end
-
-  def cleaned_project_name(project)
-    "project-#{project.name.downcase.split(' ').join('_')}"
   end
 end
