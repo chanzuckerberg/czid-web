@@ -69,6 +69,8 @@ class Project < ApplicationRecord
     output_file = host_gene_counts_tar(user_id)
     samples.each do |sample|
       sample_name = "#{sample.name.downcase.gsub(/\W/, '-')}_#{sample.id}"
+      _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", "#{sample.sample_host_filter_output_s3_path}/reads_per_gene.star.tab")
+      next unless status.exitstatus.zero?
       `aws s3 cp #{sample.sample_host_filter_output_s3_path}/reads_per_gene.star.tab #{work_dir}/#{sample_name}`
     end
     `cd #{work_dir}; tar cvzf #{output_file} .`
