@@ -13,7 +13,8 @@ class AlignmentViz extends React.Component {
     this.readsPerPage = props.readsPerPage || 20;
     this.fetchAlignmentData = this.fetchAlignmentData.bind(this);
     this.state = {
-      alignmentData: []
+      alignmentData: [],
+      loading: true
     };
   }
 
@@ -28,13 +29,21 @@ class AlignmentViz extends React.Component {
       )
       .then(res => {
         this.setState({
-          alignmentData: res.data
+          alignmentData: res.data,
+          loading: false
         });
       });
   }
 
   render() {
-    return (
+    return this.state.loading ? (
+      <div>
+        {" "}
+        <h2>
+          Loading alignment data for {this.taxName} ({this.taxLevel}) ...{" "}
+        </h2>
+      </div>
+    ) : (
       <div>
         <h2>
           {" "}
