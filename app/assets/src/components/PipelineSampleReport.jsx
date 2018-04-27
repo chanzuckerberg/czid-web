@@ -9,7 +9,6 @@ import numberWithCommas from "../helpers/strings";
 import LabeledDropdown from "./LabeledDropdown";
 import AdvancedThresholdFilterDropdown from "./AdvancedThresholdFilter";
 import StringHelper from "../helpers/StringHelper";
-import TaxonTooltip from "./TaxonTooltip";
 import ThresholdMap from "./ThresholdMap";
 import Nanobar from "nanobar";
 import d3, { event as currentEvent } from "d3";
@@ -812,59 +811,80 @@ class PipelineSampleReport extends React.Component {
   }
 
   displayTags(taxInfo, reportDetails) {
-    const tax_level_str = taxInfo.tax_level == 1 ? "species" : "genus";
+    let tax_level_str = "";
+    let ncbiDot, fastaDot, alignmentVizDot;
+    if (taxInfo.tax_level == 1) tax_level_str = "species";
+    else tax_level_str = "genus";
+    if (taxInfo.tax_id > 0)
+      ncbiDot = (
+        <i
+          data-tax-id={taxInfo.tax_id}
+          onClick={this.gotoNCBI}
+          className="fa fa-link cloud"
+          aria-hidden="true"
+        />
+      );
+    if (reportDetails.taxon_fasta_flag)
+      fastaDot = (
+        <i
+          data-tax-level={taxInfo.tax_level}
+          data-tax-id={taxInfo.tax_id}
+          onClick={this.downloadFastaUrl}
+          className="fa fa-download cloud"
+          aria-hidden="true"
+        />
+      );
+    if (this.canSeeAlignViz && taxInfo.tax_id > 0 && taxInfo.NT.r > 0)
+      alignmentVizDot = (
+        <i
+          data-tax-level={tax_level_str}
+          data-tax-id={taxInfo.tax_id}
+          onClick={this.gotoAlignmentVizLink}
+          className="fa fa-bars"
+          aria-hidden="true"
+        />
+      );
     return (
       <span className="link-tag">
-        {taxInfo.tax_id > 0 ? (
-          <i
-            data-tax-id={taxInfo.tax_id}
-            onClick={this.gotoNCBI}
-            className="fa fa-link cloud"
-            aria-hidden="true"
-          />
-        ) : null}
-        {reportDetails.taxon_fasta_flag ? (
-          <i
-            data-tax-level={taxInfo.tax_level}
-            data-tax-id={taxInfo.tax_id}
-            onClick={this.downloadFastaUrl}
-            className="fa fa-download cloud"
-            aria-hidden="true"
-          />
-        ) : null}
-        {this.canSeeAlignViz && taxInfo.tax_id > 0 && taxInfo.NT.r > 0 ? (
-          <i
-            data-tax-level={tax_level_str}
-            data-tax-id={taxInfo.tax_id}
-            onClick={this.gotoAlignmentVizLink}
-            className="fa fa-bars fa-1"
-            aria-hidden="true"
-          />
-        ) : null}
+        <BasicPopup trigger={ncbiDot} content={"NCBI Taxonomy Browser"} />
+        <BasicPopup trigger={fastaDot} content={"FASTA Download"} />
+        <BasicPopup
+          trigger={alignmentVizDot}
+          content={"Alignment Visualization"}
+        />
       </span>
     );
   }
 
   displayHighlightTags(taxInfo) {
+    const watchDot = (
+      <i
+        data-tax-id={taxInfo.tax_id}
+        data-tax-name={taxInfo.name}
+        data-confirmation-strength="watched"
+        onClick={this.props.toggleHighlightTaxon}
+        className="fa fa-eye"
+        aria-hidden="true"
+      />
+    );
+    const confirmedHitDot = (
+      <i
+        data-tax-id={taxInfo.tax_id}
+        data-tax-name={taxInfo.name}
+        data-confirmation-strength="confirmed"
+        onClick={this.props.toggleHighlightTaxon}
+        className="fa fa-check"
+        aria-hidden="true"
+      />
+    );
     return (
       <div className="hover-wrapper">
         {this.can_edit ? (
           <span className="link-tag">
-            <i
-              data-tax-id={taxInfo.tax_id}
-              data-tax-name={taxInfo.name}
-              data-confirmation-strength="watched"
-              onClick={this.props.toggleHighlightTaxon}
-              className="fa fa-eye"
-              aria-hidden="true"
-            />
-            <i
-              data-tax-id={taxInfo.tax_id}
-              data-tax-name={taxInfo.name}
-              data-confirmation-strength="confirmed"
-              onClick={this.props.toggleHighlightTaxon}
-              className="fa fa-check"
-              aria-hidden="true"
+            <BasicPopup trigger={watchDot} content={"Mark as Watching"} />
+            <BasicPopup
+              trigger={confirmedHitDot}
+              content={"Mark as Confirmed Hit"}
             />
           </span>
         ) : null}
@@ -872,7 +892,7 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
-  category_to_adjective(category) {
+  static category_to_adjective(category) {
     const category_lowercase = category.toLowerCase();
     switch (category_lowercase) {
       case "bacteria":
@@ -894,16 +914,19 @@ class PipelineSampleReport extends React.Component {
   render_name(tax_info, report_details) {
     let tax_scientific_name = tax_info["name"];
     let tax_common_name = tax_info["common_name"];
-    let tax_name =
-      this.state.name_type.toLowerCase() == "common name" ? (
-        !tax_common_name || tax_common_name.trim() == "" ? (
-          <span className="count-info">{tax_scientific_name}</span>
-        ) : (
+    let tax_name;
+
+    if (this.state.name_type.toLowerCase() == "common name") {
+      if (!tax_common_name || tax_common_name.trim() == "")
+        tax_name = <span className="count-info">{tax_scientific_name}</span>;
+      else
+        tax_name = (
           <span>{StringHelper.capitalizeFirstLetter(tax_common_name)}</span>
-        )
-      ) : (
-        <span>{tax_scientific_name}</span>
-      );
+        );
+    } else {
+      tax_name = <span>{tax_scientific_name}</span>;
+    }
+
     let foo = <i>{tax_name}</i>;
 
     if (tax_info.tax_id > 0) {
@@ -942,7 +965,7 @@ class PipelineSampleReport extends React.Component {
           </div>
           <i className="count-info">
             ({tax_info.species_count}{" "}
-            {this.category_to_adjective(category_name)} species)
+            {PipelineSampleReport.category_to_adjective(category_name)} species)
           </i>
           {this.displayTags(tax_info, report_details)}
         </div>
@@ -1038,12 +1061,13 @@ class PipelineSampleReport extends React.Component {
   }
 
   row_class(tax_info, confirmed_taxids, watched_taxids) {
-    let taxon_status =
-      confirmed_taxids.indexOf(tax_info.tax_id) >= 0
-        ? "confirmed"
-        : watched_taxids.indexOf(tax_info.tax_id) >= 0
-          ? "watched"
-          : "";
+    let taxon_status;
+    if (confirmed_taxids.indexOf(tax_info.tax_id) >= 0)
+      taxon_status = "confirmed";
+    else if (watched_taxids.indexOf(tax_info.tax_id) >= 0)
+      taxon_status = "watched";
+    else taxon_status = "";
+
     if (tax_info.tax_level == 2) {
       if (tax_info.tax_id < 0) {
         return `report-row-genus ${
@@ -1565,6 +1589,12 @@ function BackgroundModelFilter({ parent }) {
         )}
       </Dropdown.Menu>
     </Dropdown>
+  );
+}
+
+function BasicPopup({ trigger, content }) {
+  return (
+    <Popup trigger={trigger} content={content} on="hover" basic inverted />
   );
 }
 

@@ -4,7 +4,7 @@ import moment from "moment";
 import $ from "jquery";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { Button, Icon, Divider } from "semantic-ui-react";
+import { Button, Icon, Divider, Popup } from "semantic-ui-react";
 import numberWithCommas from "../helpers/strings";
 import SubHeader from "./SubHeader";
 import ERCCScatterPlot from "./ERCCScatterPlot";
@@ -158,14 +158,17 @@ class PipelineSampleReads extends React.Component {
     );
   }
 
-  render_metadata_textfield(label, field) {
+  render_metadata_textfield(label, field, popupContent) {
     let display_value =
       this.sampleInfo[field] && this.sampleInfo[field].trim() !== ""
         ? this.sampleInfo[field]
         : this.TYPE_PROMPT;
+    let labelElem = <div className="col s6 label">{label}</div>;
+    if (popupContent)
+      labelElem = <BasicPopup trigger={labelElem} content={popupContent} />;
     return (
       <div className="row detail-row">
-        <div className="col s6 label">{label}</div>
+        {labelElem}
         <div className="col s6">
           <div
             className={
@@ -843,12 +846,13 @@ class PipelineSampleReads extends React.Component {
                             "sample_input_pg"
                           )}
                           {this.render_metadata_numfield(
-                            "Batch",
+                            "Batch (#)",
                             "sample_batch"
                           )}
                           {this.render_metadata_textfield(
                             "Known organisms",
-                            "sample_organism"
+                            "sample_organism",
+                            "Known hits that may or may not have been in this report"
                           )}
                           {this.render_metadata_textfield(
                             "Detection method",
@@ -865,7 +869,7 @@ class PipelineSampleReads extends React.Component {
                           this.can_edit
                         )}
                         {this.render_metadata_textfield_wide(
-                          "Confirmed hits in report",
+                          "Manually confirmed hits (from Report tab)",
                           this.state,
                           "confirmed_names",
                           "None",
@@ -924,4 +928,11 @@ class PipelineSampleReads extends React.Component {
     );
   }
 }
+
+function BasicPopup({ trigger, content }) {
+  return (
+    <Popup trigger={trigger} content={content} on="hover" basic inverted />
+  );
+}
+
 export default PipelineSampleReads;
