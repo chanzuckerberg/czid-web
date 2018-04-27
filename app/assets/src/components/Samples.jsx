@@ -293,7 +293,7 @@ class Samples extends React.Component {
     return this.editableProjects.indexOf(parseInt(projectId)) > -1;
   }
 
-  displayReportProgress(res) {
+  displayReportProgress(res, status_action, retrieve_action) {
     $(".download-progress")
       .html(
         `<i className="fa fa-circle-o-notch fa-spin fa-fw"></i> ${
@@ -302,42 +302,45 @@ class Samples extends React.Component {
       )
       .css("display", "block");
     setTimeout(() => {
-      this.checkReportDownload();
+      this.checkReportDownload(status_action, retrieve_action);
     }, 2000);
   }
 
-  startReportGeneration() {
+  startReportGeneration(e) {
+    let make_action = e.target.getAttribute("data-make-action");
+    let status_action = e.target.getAttribute("data-status-action");
+    let retrieve_action = e.target.getAttribute("data-retrieve-action");
     this.nanobar.go(30);
     axios
-      .get(`/projects/${this.state.selectedProjectId}/make_project_reports_csv`)
+      .get(`/projects/${this.state.selectedProjectId}/${make_action}`)
       .then(res => {
         this.setState({
           project_id_download_in_progress: this.state.selectedProjectId
         });
-        this.displayReportProgress(res);
+        this.displayReportProgress(res, status_action, retrieve_action);
       })
       .catch(() => {});
   }
 
-  checkReportDownload() {
+  checkReportDownload(status_action, retrieve_action) {
     axios
       .get(
         `/projects/${
           this.state.project_id_download_in_progress
-        }/project_reports_csv_status`
+        }/${status_action}`
       )
       .then(res => {
         let download_status = res.data.status_display;
         if (download_status === "complete") {
           location.href = `/projects/${
             this.state.project_id_download_in_progress
-          }/send_project_reports_csv`;
+          }/${retrieve_action}`;
           this.nanobar.go(100);
           this.setState({
             project_id_download_in_progress: null
           });
         } else {
-          this.displayReportProgress(res);
+          this.displayReportProgress(res, status_action, retrieve_action);
         }
       })
       .catch(() => {
@@ -347,7 +350,7 @@ class Samples extends React.Component {
           },
           () => {
             Materialize.toast(
-              `Failed to download report for '${this.state.project.name}'`,
+              `Failed to download file for '${this.state.project.name}'`,
               3000,
               "rounded"
             );
@@ -1708,19 +1711,22 @@ function TableDownloadDropdown({ project_id, parent }) {
       >
         <Dropdown.Menu>
           <Dropdown.Item href={`/projects/${project_id}/csv`}>
-            Download Table
+            Sample Table
           </Dropdown.Item>
           {project_id === "all" ? null : (
             <Dropdown.Item
+              data-make-action="make_project_reports_csv"
+              data-status-action="project_reports_csv_status"
+              data-retrieve-action="send_project_reports_csv"
               onClick={parent.startReportGeneration}
               className="download-reports"
             >
-              Download Reports
+              Reports
             </Dropdown.Item>
           )}
           {project_id === "all" || !parent.canEditProject(project_id) ? null : (
             <Dropdown.Item href={`/projects/${project_id}/host_gene_counts`}>
-              Download Host Gene Counts
+              Host Gene Counts
             </Dropdown.Item>
           )}
         </Dropdown.Menu>
