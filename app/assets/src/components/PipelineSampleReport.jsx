@@ -881,10 +881,10 @@ class PipelineSampleReport extends React.Component {
       <div className="hover-wrapper">
         {this.can_edit ? (
           <span className="link-tag">
-            <BasicPopup trigger={watchDot} content={"Mark as Watching"} />
+            <BasicPopup trigger={watchDot} content={"Toggle Watching"} />
             <BasicPopup
               trigger={confirmedHitDot}
-              content={"Mark as Confirmed Hit"}
+              content={"Toggle Confirmed Hit"}
             />
           </span>
         ) : null}

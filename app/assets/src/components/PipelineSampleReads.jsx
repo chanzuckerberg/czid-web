@@ -69,7 +69,7 @@ class PipelineSampleReads extends React.Component {
       .delete(`/samples/${this.sampleInfo.id}.json`, {
         data: { authenticity_token: this.csrf }
       })
-      .then(res => {
+      .then(() => {
         location.href = `/?project_id=${this.projectInfo.id}`;
       })
       .catch(err => {});
@@ -139,8 +139,8 @@ class PipelineSampleReads extends React.Component {
   }
 
   render_metadata_textfield_wide(label, hash, field, blank_value, editable) {
-    let value =
-      hash[field] instanceof Array ? hash[field].join("; ") : hash[field];
+    let value = hash[field];
+    if (hash[field] instanceof Array) value = hash[field].join("; ");
     return (
       <div className="details-container col s12">
         <div className="details-title note">{label}</div>
@@ -159,10 +159,9 @@ class PipelineSampleReads extends React.Component {
   }
 
   render_metadata_textfield(label, field, popupContent) {
-    let display_value =
-      this.sampleInfo[field] && this.sampleInfo[field].trim() !== ""
-        ? this.sampleInfo[field]
-        : this.TYPE_PROMPT;
+    let display_value = this.TYPE_PROMPT;
+    if (this.sampleInfo[field] && this.sampleInfo[field].trim() !== "")
+      display_value = this.sampleInfo[field];
     let labelElem = <div className="col s6 label">{label}</div>;
     if (popupContent)
       labelElem = <BasicPopup trigger={labelElem} content={popupContent} />;
@@ -445,7 +444,7 @@ class PipelineSampleReads extends React.Component {
     }
 
     return (
-      <div className="row">
+      <div className="row last-row">
         <div className="col s12">
           <div className="content-title">ERCC Spike In Counts</div>
           <ERCCScatterPlot ercc_comparison={this.props.ercc_comparison} />
@@ -835,11 +834,13 @@ class PipelineSampleReads extends React.Component {
                         <div className="col s6">
                           {this.render_metadata_textfield(
                             "Library prep",
-                            "sample_library"
+                            "sample_library",
+                            "Type of library preparation protocol (e.g. Nextera)"
                           )}
                           {this.render_metadata_textfield(
                             "Sequencer",
-                            "sample_sequencer"
+                            "sample_sequencer",
+                            "e.g. Illumina NovaSeq"
                           )}
                           {this.render_metadata_numfield(
                             "RNA/DNA input (pg)",
@@ -856,7 +857,8 @@ class PipelineSampleReads extends React.Component {
                           )}
                           {this.render_metadata_textfield(
                             "Detection method",
-                            "sample_detection"
+                            "sample_detection",
+                            "Method for detecting known organisms"
                           )}
                         </div>
                       </div>
