@@ -36,9 +36,6 @@ class ProjectSelection extends React.Component {
 
   componentDidMount() {
     this.reformatProjectList(this.favoriteProjects, this.allProjects);
-    $(() => {
-      this.highlightSelectedProject(this.state.selectedProjectId);
-    });
   }
 
   fetchParams(param) {
@@ -73,12 +70,9 @@ class ProjectSelection extends React.Component {
           authenticity_token: this.csrf
         }
       )
-      .then(res => {
+      .then(() => {
         this.nanobar.go(100);
-        this.checkIfProjecExistInFavorites(
-          projectId,
-          this.state.formattedProjectList
-        );
+        this.projectInFavorites(projectId, this.state.formattedProjectList);
       })
       .catch(err => {});
   }
@@ -129,7 +123,7 @@ class ProjectSelection extends React.Component {
 
   // check existence of projects in favorites projects list
   // if true then remove else add
-  checkIfProjecExistInFavorites(id, projects) {
+  projectInFavorites(id, projects) {
     if (this.state.favIds.includes(parseInt(id))) {
       this.removeProjectFromFavorites(id);
     } else {
@@ -176,40 +170,7 @@ class ProjectSelection extends React.Component {
     let id = e.target.getAttribute("data-id");
     let listType = e.target.getAttribute("data-type") || null;
     this.props.selectProject(id, listType);
-    this.highlightSelectedProject(id, listType);
-  }
-
-  highlightSelectedProject(id, type) {
-    this.removeHighlight();
-    const isFavoriteSelected =
-      this.fetchParams("type") === "favorite" || type === "favorite";
-    if (id && isFavoriteSelected) {
-      $(`.fav-item.project-item[data-id="${id}"]`).addClass("highlight");
-    } else if (id) {
-      $(`.all.project-item[data-id="${id}"]`).addClass("highlight");
-    } else {
-      $(`.all-samples.project-item`).addClass("highlight");
-    }
-  }
-
-  removeHighlight() {
-    $(".project-item").removeClass("highlight");
-  }
-
-  addFavIconClass(project) {
-    return (
-      <i
-        data-status="favorite"
-        data-fav={project.favorited}
-        data-id={project.id}
-        onClick={this.toggleFavorite}
-        className={
-          !project.favorited
-            ? "favorite fa fa-star-o right hidden"
-            : "favorite fa fa-star right hidden"
-        }
-      />
-    );
+    this.state.selectedProjectId = id;
   }
 
   renderProjectSection() {
@@ -226,67 +187,25 @@ class ProjectSelection extends React.Component {
       return 0;
     };
 
-    const favProjLen = this.state.formattedFavProjectList.length;
+    let favProjects = this.state.formattedFavProjectList.sort(sortLogic);
+    if (this.state.showLessFavorites) favProjects = favProjects.slice(0, 4);
+
     var fav_section = <div />;
-    if (favProjLen) {
+    if (favProjects.length) {
       fav_section = (
         <div className="row fav-row">
           <div className="title fav-title">Favorite Projects</div>
-          <div className="fav-projects-wrapper  projects-wrapper">
-            {this.state.showLessFavorites
-              ? this.state.formattedFavProjectList
-                  .sort(sortLogic)
-                  .slice(0, 4)
-                  .map((project, i) => {
-                    return (
-                      <div
-                        className="project-item fav-item"
-                        onClick={this.handleProjectClick}
-                        data-type="favorite"
-                        data-id={project.id}
-                        key={i}
-                      >
-                        <div className="row label-row">
-                          <span
-                            className="project-label no-padding col s10"
-                            data-id={project.id}
-                            data-type="favorite"
-                          >
-                            {project.name}
-                          </span>
-                          <span className="icon-container no-padding col s2">
-                            {this.addFavIconClass(project)}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })
-              : this.state.formattedFavProjectList
-                  .sort(sortLogic)
-                  .map((project, i) => {
-                    return (
-                      <div
-                        className="project-item fav-item"
-                        onClick={this.handleProjectClick}
-                        data-type="favorite"
-                        data-id={project.id}
-                        key={i}
-                      >
-                        <div className="row label-row">
-                          <span
-                            className="project-label no-padding col s10"
-                            data-id={project.id}
-                            data-type="favorite"
-                          >
-                            {project.name}
-                          </span>
-                          <span className="icon-container no-padding col s2">
-                            {this.addFavIconClass(project)}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
+          <div className="fav-projects-wrapper projects-wrapper">
+            {favProjects.map((project, i) => {
+              return (
+                <ProjectInSelector
+                  parent={this}
+                  project={project}
+                  i={i}
+                  favorite={true}
+                />
+              );
+            })}
             {this.state.formattedFavProjectList.length > 4 ? (
               <div className="more" onClick={this.toggleDisplayFavProjects}>
                 {this.state.showLessFavorites ? "Show More..." : "Show Less..."}
@@ -297,69 +216,69 @@ class ProjectSelection extends React.Component {
       );
     }
 
+    function ProjectInSelector({ parent, project, i, favorite }) {
+      return (
+        <div
+          className={
+            "project-item " +
+            (parent.state.selectedProjectId == project.id ? "highlight" : "")
+          }
+          onClick={parent.handleProjectClick}
+          data-id={project.id}
+          data-type={favorite ? "favorite" : ""}
+          key={i}
+        >
+          <div className="row label-row">
+            <span
+              className="project-label no-padding col s10"
+              data-id={project.id}
+            >
+              {project.name}
+            </span>
+            <span className="icon-container no-padding col s2">
+              <i
+                data-status="favorite"
+                data-fav={project.favorited}
+                data-id={project.id}
+                onClick={parent.toggleFavorite}
+                className={
+                  "favorite fa fa-star" +
+                  (!project.favorited ? "-o" : "") +
+                  " right hidden"
+                }
+              />
+            </span>
+          </div>
+        </div>
+      );
+    }
+
+    let ProjectList = this.state.formattedProjectList
+      .sort(sortLogic)
+      .filter(project => !project.favorited);
+    if (this.state.showLess) ProjectList = ProjectList.slice(0, 8);
+
     const all_projects_section = (
       <div className="projects">
         <div data-title="allprojects" className="title">
           All Projects
         </div>
         <div className="projects-wrapper">
-          {!this.state.formattedProjectList.length ? (
+          {!ProjectList.length ? (
             <div className="title">None</div>
-          ) : this.state.showLess ? (
-            this.state.formattedProjectList
-              .sort(sortLogic)
-              .filter(project => !project.favorited)
-              .slice(0, 8)
-              .map((project, i) => {
-                return (
-                  <div
-                    className="all project-item"
-                    onClick={this.handleProjectClick}
-                    data-id={project.id}
-                    key={i}
-                  >
-                    <div className="row label-row">
-                      <span
-                        className="project-label no-padding col s10"
-                        data-id={project.id}
-                      >
-                        {project.name}
-                      </span>
-                      <span className="icon-container no-padding col s2">
-                        {this.addFavIconClass(project)}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })
           ) : (
-            this.state.formattedProjectList
-              .sort(sortLogic)
-              .filter(project => !project.favorited)
-              .map((project, i) => {
-                return (
-                  <div
-                    className="all project-item"
-                    onClick={this.handleProjectClick}
-                    data-id={project.id}
-                    key={i}
-                  >
-                    <div className="row label-row">
-                      <span
-                        className="project-label no-padding col s10"
-                        data-id={project.id}
-                      >
-                        {project.name}
-                      </span>
-                      <span className="icon-container no-padding col s2">
-                        {this.addFavIconClass(project)}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })
+            ProjectList.map((project, i) => {
+              return (
+                <ProjectInSelector
+                  parent={this}
+                  project={project}
+                  i={i}
+                  favorite={false}
+                />
+              );
+            })
           )}
-          {this.state.formattedProjectList.length > 7 ? (
+          {ProjectList.length > 7 ? (
             <div className="more" onClick={this.toggleDisplayProjects}>
               {this.state.showLess ? "Show More..." : "Show Less..."}
             </div>

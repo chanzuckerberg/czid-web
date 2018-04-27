@@ -57,19 +57,34 @@ module SamplesHelper
     end
   end
 
+  # Load bulk metadata from a CSV file
   def populate_metadata_bulk(csv_s3_path)
-    # CSV should have columns "sample_name", "project_name", and any desired columns from Sample::METADATA_FIELDS
-    csv = get_s3_file(csv_s3_path)
-    csv.delete!("\uFEFF") # remove BOM if present (file likely comes from Excel)
-    project_name_to_id = Hash[Project.all.map { |p| [p.name, p.id] }]
-    all_project_id_sample_name = Sample.all.map { |s| [s.project_id, s.name] }
-    CSV.parse(csv, headers: true) do |row|
-      h = row.to_h
-      project_id = project_name_to_id[h['project_name']]
-      next unless all_project_id_sample_name.include?([project_id, h['sample_name']])
-      sample = Sample.find_by(name: h['sample_name'], project_id: project_id)
-      metadata = h.select { |k, _v| k && Sample::METADATA_FIELDS.include?(k.to_sym) }
-      sample.update_attributes!(metadata)
+    # Load the CSV data. CSV should have columns "sample_name", "project_name", and any desired columns from Sample::METADATA_FIELDS.
+    csv_data = get_s3_file(csv_s3_path)
+    csv_data.delete!("\uFEFF") # Remove BOM if present (file likely comes from Excel)
+    CSV.parse(csv_data, headers: true) do |row|
+      # Find the right project and sample
+      row_details = row.to_h
+      proj = Project.find_by(name: row_details['project_name'])
+      next unless proj
+      sampl = Sample.find_by(project_id: proj, name: row_details['sample_name'])
+      next unless sampl
+
+      # Format the new details. Append to existing notes.
+      new_details = {}
+      new_details['sample_notes'] = sampl.sample_notes || ''
+      row_details.each do |key, value|
+        if !key || !value || key == 'sample_name' || key == 'project_name'
+          next
+        end
+        if Sample::METADATA_FIELDS.include?(key.to_sym)
+          new_details[key] = value
+        else # Otherwise throw in notes
+          new_details['sample_notes'] << format("\n- %s: %s", key, value)
+        end
+      end
+      new_details['sample_notes'].strip!
+      sampl.update_attributes!(new_details)
     end
   end
 

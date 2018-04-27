@@ -266,8 +266,9 @@ class PipelineRunStage < ApplicationRecord
     pipeline_run.multihit? ? PipelineRun::MULTIHIT_OUTPUT_JSON_NAME : PipelineRun::OUTPUT_JSON_NAME
   end
 
-  def invalid_genus_call?(tcnt)
-    tcnt['genus_taxid'].to_i < TaxonLineage::INVALID_CALL_BASE_ID
+  def invalid_family_call?(tcnt)
+    # TODO:  Better family support.
+    tcnt['family_taxid'].to_i < TaxonLineage::INVALID_CALL_BASE_ID
   rescue
     false
   end
@@ -302,8 +303,10 @@ class PipelineRunStage < ApplicationRecord
     taxon_counts_attributes_filtered = []
     acceptable_tax_levels = [TaxonCount::TAX_LEVEL_SPECIES]
     acceptable_tax_levels << TaxonCount::TAX_LEVEL_GENUS if pr.multihit?
+    acceptable_tax_levels << TaxonCount::TAX_LEVEL_FAMILY if pr.multihit?
     pipeline_output_dict['taxon_counts_attributes'].each do |tcnt|
-      if acceptable_tax_levels.include?(tcnt['tax_level'].to_i) && !invalid_genus_call?(tcnt)
+      # TODO:  Better family support.
+      if acceptable_tax_levels.include?(tcnt['tax_level'].to_i) && !invalid_family_call?(tcnt)
         taxon_counts_attributes_filtered << tcnt
       end
     end
@@ -317,8 +320,12 @@ class PipelineRunStage < ApplicationRecord
     pr.generate_aggregate_counts('genus') unless pr.multihit?
     # merge more accurate name information from lineages table
     pr.update_names
-    # denormalize genus_taxid and superkingdom_taxid into taxon_counts
-    pr.update_genera
+    # denormalize superkingdom_taxid into taxon_counts
+    if pr.multihit?
+      pr.update_superkingdoms
+    else
+      pr.update_genera
+    end
     # label taxa as phage or non-phage
     pr.update_is_phage
 
