@@ -240,7 +240,6 @@ class PipelineSampleReport extends React.Component {
         this.saveThresholdFilters();
         Cookies.set("excluded_categories", "[]");
         Cookies.set("exclude_subcats", "[]");
-        this.flash();
       }
     );
   }
@@ -583,7 +582,6 @@ class PipelineSampleReport extends React.Component {
           undefined,
           new_exclude_subcats
         );
-        this.flash();
       }
     );
   }
@@ -613,7 +611,6 @@ class PipelineSampleReport extends React.Component {
           undefined,
           new_exclude_subcats
         );
-        this.flash();
       }
     );
   }
@@ -739,7 +736,6 @@ class PipelineSampleReport extends React.Component {
     );
 
     if (play_animation) {
-      this.flash();
     }
   }
   handleThresholdEnter(event) {
