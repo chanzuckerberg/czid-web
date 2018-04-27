@@ -39,6 +39,9 @@ Rails.application.routes.draw do
     get :make_project_reports_csv, on: :member
     get :project_reports_csv_status, on: :member
     get :send_project_reports_csv, on: :member
+    get :make_host_gene_counts, on: :member
+    get :host_gene_counts_status, on: :member
+    get :send_host_gene_counts, on: :member
     get :all_emails, on: :member
     put :add_favorite, on: :member
     put :remove_favorite, on: :member
@@ -46,7 +49,6 @@ Rails.application.routes.draw do
     put :add_user, on: :member
   end
   get 'projects/:id/csv', to: 'projects#send_project_csv'
-  get 'projects/:id/host_gene_counts', to: 'projects#host_gene_counts'
 
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
