@@ -1389,36 +1389,6 @@ function ReportTableHeader({ parent }) {
               `Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NT/NR)`,
               parent.showConcordance
             )}
-            <th>
-              <Tipsy content="Switch count type" placement="top">
-                <div className="sort-controls center left">
-                  <div
-                    className={
-                      parent.state.countType === "NT"
-                        ? "active column-switcher"
-                        : "column-switcher"
-                    }
-                    onClick={() => {
-                      parent.setState({ countType: "NT" });
-                    }}
-                  >
-                    NT
-                  </div>
-                  <div
-                    className={
-                      parent.state.countType === "NR"
-                        ? "active column-switcher"
-                        : "column-switcher"
-                    }
-                    onClick={() => {
-                      parent.setState({ countType: "NR" });
-                    }}
-                  >
-                    NR
-                  </div>
-                </div>
-              </Tipsy>
-            </th>
           </tr>
         </thead>
         <tbody>
@@ -1665,6 +1635,42 @@ class RenderMarkup extends React.Component {
       />
     );
   }
+  renderNtNrSwitch() {
+    let parent = this.props.parent;
+    let classStr = "column-switcher";
+    return (
+      <Tipsy content="Switch count type" placement="top">
+        <div className="sort-controls center right floated ntnr-switch">
+          <Menu>
+            <Menu.Item>
+              <div
+                className={
+                  classStr + (parent.state.countType === "NT" ? " active" : "")
+                }
+                onClick={() => {
+                  parent.setState({ countType: "NT" });
+                }}
+              >
+                NT
+              </div>
+            </Menu.Item>
+            <Menu.Item>
+              <div
+                className={
+                  classStr + (parent.state.countType === "NR" ? " active" : "")
+                }
+                onClick={() => {
+                  parent.setState({ countType: "NR" });
+                }}
+              >
+                NR
+              </div>
+            </Menu.Item>
+          </Menu>
+        </div>
+      </Tipsy>
+    );
+  }
   render() {
     const {
       filter_row_stats,
@@ -1700,6 +1706,7 @@ class RenderMarkup extends React.Component {
                     </ul>
                   </div>
                   {this.renderMenu()}
+                  {this.renderNtNrSwitch()}
                   <div className="filter-tags-list">
                     {advanced_filter_tag_list} {categories_filter_tag_list}{" "}
                     {subcats_filter_tag_list}

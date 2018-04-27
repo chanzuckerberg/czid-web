@@ -550,6 +550,9 @@ input[type="number"] {
     font-size: 12px;
   }
   .reports-count {
+    .ui.menu {
+      height: 42px;
+    }
     .download-report {
       background: #edf8ff;
       color: rgb(3, 169, 244) !important;
@@ -872,4 +875,11 @@ label {
 
 [type="checkbox"] + label {
   line-height: 27px;
+}
+
+.ntnr-switch {
+  margin-right: 1.5rem;
+  .active {
+    font-weight: bolder;
+  }
 }
