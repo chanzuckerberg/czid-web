@@ -210,14 +210,17 @@ module ReportHelper
   def fetch_taxon_counts(pipeline_run_id, background_id)
     pipeline_run = PipelineRun.find(pipeline_run_id)
     adjusted_total_reads = (pipeline_run.total_reads - pipeline_run.total_ercc_reads.to_i) * pipeline_run.subsample_fraction
+    # NOTE:  If you add more columns to be fetched here, you really should add them to PROPERTIES_OF_TAXID above
+    # otherwise they will not survive cleaning.
     TaxonCount.connection.select_all("
       SELECT
         taxon_counts.tax_id              AS  tax_id,
         taxon_counts.count_type          AS  count_type,
         taxon_counts.tax_level           AS  tax_level,
         taxon_counts.genus_taxid         AS  genus_taxid,
+        taxon_counts.family_taxid        AS  family_taxid,
         taxon_counts.name                AS  name,
-        taxon_counts.common_name                AS  common_name,
+        taxon_counts.common_name         AS  common_name,
         taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
         taxon_counts.is_phage            AS  is_phage,
         taxon_counts.count               AS  r,
@@ -265,6 +268,7 @@ module ReportHelper
         taxon_counts.count_type          AS  count_type,
         taxon_counts.tax_level           AS  tax_level,
         taxon_counts.genus_taxid         AS  genus_taxid,
+        taxon_counts.family_taxid        AS  family_taxid,
         taxon_counts.name                AS  name,
         taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
         taxon_counts.is_phage            AS  is_phage,
@@ -332,6 +336,7 @@ module ReportHelper
         taxon_counts.count_type          AS  count_type,
         taxon_counts.tax_level           AS  tax_level,
         taxon_counts.genus_taxid         AS  genus_taxid,
+        taxon_counts.family_taxid        AS  family_taxid,
         taxon_counts.name                AS  name,
         taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
         taxon_counts.is_phage            AS  is_phage,
@@ -522,7 +527,7 @@ module ReportHelper
     # in the code lest that bug recurs.  A warning will be logged.
     #
     fake_genus_info = tax_info.clone
-    fake_genus_info['name'] = "#{tax_info['name']} fake genus"
+    fake_genus_info['name'] = "Ad hoc bucket for #{tax_info['name'].downcase}"
     fake_genus_id = FAKE_GENUS_BASE - tax_info['tax_id']
     fake_genus_info['tax_id'] = fake_genus_id
     fake_genus_info['genus_taxid'] = fake_genus_id
@@ -537,6 +542,7 @@ module ReportHelper
     #       tax_id,
     #       tax_level,
     #       genus_taxid,
+    #       family_taxid,
     #       species_count,
     #       name,
     #       common_name,
@@ -569,8 +575,19 @@ module ReportHelper
       if tax_info['tax_level'] == TaxonCount::TAX_LEVEL_GENUS
         tax_info['genus_taxid'] = tax_id
       end
+      if tax_info['tax_level'] == TaxonCount::TAX_LEVEL_FAMILY
+        tax_info['family_taxid'] = tax_id
+      end
     end
     taxon_counts_2d
+  end
+
+  def level_name(tax_level)
+    level_str = "rank_#{tax_level}"
+    level_str = 'species' if tax_level == TaxonCount::TAX_LEVEL_SPECIES
+    level_str = 'genus' if tax_level == TaxonCount::TAX_LEVEL_GENUS
+    level_str = 'family' if tax_level == TaxonCount::TAX_LEVEL_FAMILY
+    level_str
   end
 
   def validate_names!(taxon_counts_2d)
@@ -581,16 +598,24 @@ module ReportHelper
       category[c['taxid']] = c['name']
     end
     missing_names = Set.new
+    missing_parents = {}
     taxon_counts_2d.each do |tax_id, tax_info|
+      level_str = level_name(tax_info['tax_level'])
       if tax_id < 0
         # Usually -1 means accession number did not resolve to species.
         # TODO: Can we keep the accession numbers to show in these cases?
-        level_str = tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES ? 'species' : 'genus'
         tax_info['name'] = "All taxa without #{level_str} classification"
-        if tax_id < TaxonLineage::INVALID_CALL_BASE_ID && tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
-          parent_taxid = tax_info['genus_taxid']
-          parent_name = taxon_counts_2d[parent_taxid]['name']
-          tax_info['name'] = "Non-#{level_str}-specific #{parent_name} reads"
+        if tax_id < TaxonLineage::INVALID_CALL_BASE_ID && (tax_info['tax_level'] == TaxonCount::TAX_LEVEL_GENUS || tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES)
+          parent_taxid = -(tax_id % TaxonLineage::INVALID_CALL_BASE_ID)
+          if taxon_counts_2d[parent_taxid]
+            parent_name = taxon_counts_2d[parent_taxid]['name']
+            parent_level = level_name(taxon_counts_2d[parent_taxid]['tax_level'])
+          else
+            missing_parents[parent_taxid] = tax_id
+            parent_name = "taxon #{parent_taxid}"
+            parent_level = ""
+          end
+          tax_info['name'] = "Non-#{level_str}-specific reads in #{parent_level} #{parent_name}"
         elsif tax_id == TaxonLineage::BLACKLIST_GENUS_ID
           tax_info['name'] = "All artificial constructs"
         elsif !(TaxonLineage::MISSING_LINEAGE_ID.values.include? tax_id) && tax_id != TaxonLineage::MISSING_SPECIES_ID_ALT
@@ -598,12 +623,13 @@ module ReportHelper
         end
       elsif !tax_info['name']
         missing_names.add(tax_id)
-        tax_info['name'] = "Unnamed taxon #{tax_id}"
+        tax_info['name'] = "Unnamed #{level_str} taxon #{tax_id}"
       end
       category_id = tax_info.delete('superkingdom_taxid')
       tax_info['category_name'] = category[category_id] || 'Uncategorized'
     end
     logger.warn "Missing names for taxon ids #{missing_names.to_a}" unless missing_names.empty?
+    logger.warn "Missing parent for child:  #{missing_parents}" unless missing_parents.empty?
     taxon_counts_2d
   end
 
@@ -641,11 +667,16 @@ module ReportHelper
     taxon_counts_2d
   end
 
+  def remove_family_level_counts!(taxon_counts_2d)
+    taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] != TaxonCount::TAX_LEVEL_FAMILY }
+  end
+
   def cleanup_all!(taxon_counts_2d)
     # t0 = Time.now
     cleanup_genus_ids!(taxon_counts_2d)
     validate_names!(taxon_counts_2d)
     cleanup_missing_genus_counts!(taxon_counts_2d)
+    remove_family_level_counts!(taxon_counts_2d) # TODO: Support these
     # t1 = Time.now
     # logger.info "Data cleanup took #{t1 - t0} seconds."
     taxon_counts_2d
