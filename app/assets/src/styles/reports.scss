@@ -261,11 +261,11 @@ input[type="number"] {
 }
 
 .confirmed {
-  color: #3CB371;
+  color: #3cb371;
 }
 
 .watched {
-  color: #F4A460;
+  color: #f4a460;
 }
 
 .reports-screen {
@@ -839,7 +839,7 @@ input[type="number"] {
     width: 18px;
     height: 18px;
   }
-  [type=checkbox].filled-in:checked+label:before {
+  [type="checkbox"].filled-in:checked + label:before {
     top: 6px;
     left: 1px;
   }
@@ -854,4 +854,22 @@ input[type="number"] {
 [type="checkbox"].filled-in + label:after {
   -webkit-transition: none;
   transition: none;
+}
+
+.category-filter-dropdown {
+  width: 200px;
+}
+
+.category-filter-menu {
+  margin: 1rem;
+}
+
+label {
+  font-family: "Open Sans", "Helvetica Neue", Arial, Helvetica, sans-serif;
+  font-size: 1rem;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+[type="checkbox"] + label {
+  line-height: 27px;
 }

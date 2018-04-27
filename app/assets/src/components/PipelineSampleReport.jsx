@@ -952,8 +952,8 @@ class PipelineSampleReport extends React.Component {
       );
     } else {
       // emphasize genus, soften category and species count
-      const category_name =
-        tax_info.tax_id == -200 ? "" : tax_info.category_name;
+      let category_name = "";
+      if (tax_info.tax_id != -200) category_name = tax_info.category_name;
       const collapseExpand = (
         <CollapseExpand tax_info={tax_info} parent={this} />
       );
@@ -1429,20 +1429,22 @@ function ReportTableHeader({ parent }) {
   );
 }
 function CategoryFilter({ parent }) {
+  let count =
+    parent.all_categories.length -
+    parent.state.excluded_categories.length +
+    Object.keys(parent.category_child_parent).length -
+    parent.state.exclude_subcats.length;
   return (
-    <li className="categories-dropdown top-filter ui dropdown custom-dropdown filter-btn">
-      <div className="categories-filters-activate">
-        <span className="filter-label">Categories</span>
-        <span className="filter-label-count">
-          {parent.all_categories.length -
-            parent.state.excluded_categories.length +
-            Object.keys(parent.category_child_parent).length -
-            parent.state.exclude_subcats.length}{" "}
+    <Dropdown
+      className="filter-btn category-filter-dropdown"
+      text={
+        <span>
+          Categories <Label>{count}</Label>
         </span>
-        <i className="fa fa-angle-down right down-box" />
-      </div>
-      <div className="categories-filters-modal">
-        <div className="categories">
+      }
+    >
+      <Dropdown.Menu>
+        <div className="category-filter-menu">
           <ul>
             {parent.all_categories.map((category, i) => {
               return (
@@ -1497,8 +1499,8 @@ function CategoryFilter({ parent }) {
             <p>None found</p>
           ) : null}
         </div>
-      </div>
-    </li>
+      </Dropdown.Menu>
+    </Dropdown>
   );
 }
 
