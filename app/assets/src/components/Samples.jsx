@@ -1730,6 +1730,7 @@ function TableDownloadDropdown({ project_id, parent }) {
               data-status-action="host_gene_counts_status"
               data-retrieve-action="send_host_gene_counts"
               onClick={parent.startReportGeneration}
+              className="download-reports"
             >
               Host Gene Counts
             </Dropdown.Item>

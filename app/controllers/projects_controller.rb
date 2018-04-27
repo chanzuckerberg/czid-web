@@ -11,7 +11,7 @@ class ProjectsController < ApplicationController
   #
   ##########################################
 
-  READ_ACTIONS = [:show, :add_favorite, :remove_favorite, :host_gene_counts, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv, :visuals].freeze
+  READ_ACTIONS = [:show, :add_favorite, :remove_favorite, :make_host_gene_counts, :host_gene_counts_status, :send_host_gene_counts, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv, :visuals].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_emails, :update_project_visibility].freeze
   OTHER_ACTIONS = [:create, :new, :index, :send_project_csv].freeze
 
