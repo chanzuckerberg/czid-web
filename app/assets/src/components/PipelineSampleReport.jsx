@@ -734,9 +734,6 @@ class PipelineSampleReport extends React.Component {
       thresholded_taxons,
       this.state.exclude_subcats
     );
-
-    if (play_animation) {
-    }
   }
   handleThresholdEnter(event) {
     if (event.keyCode === 13) {
