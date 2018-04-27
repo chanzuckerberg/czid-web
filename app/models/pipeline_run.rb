@@ -105,13 +105,15 @@ class PipelineRun < ApplicationRecord
     )
 
     # De-Novo Assembly
-    run_stages << PipelineRunStage.new(
-      step_number: 4,
-      name: 'De-Novo Assembly',
-      job_command_func: 'assembly_command',
-      load_db_command_func: 'db_load_assembly',
-      output_func: 'assembly_outputs'
-    )
+    if assembly?
+      run_stages << PipelineRunStage.new(
+        step_number: 4,
+        name: 'De-Novo Assembly',
+        job_command_func: 'assembly_command',
+        load_db_command_func: 'db_load_assembly',
+        output_func: 'assembly_outputs'
+      )
+    end
 
     self.pipeline_run_stages = run_stages
     # we consider the job successful after stage 2 completes, even if subsequent stages fail
@@ -384,6 +386,10 @@ class PipelineRun < ApplicationRecord
 
   def multihit?
     after(pipeline_version || fetch_pipeline_version, "1.5")
+  end
+
+  def assembly?
+    after(pipeline_version || fetch_pipeline_version, "1.8")
   end
 
   def alignment_output_s3_path
