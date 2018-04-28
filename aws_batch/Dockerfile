@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND noninteractive
 MAINTAINER Yun-Fang Juan yunfang@chanzuckerberg.com
 
 # Add packages, update image, and clear cache
-RUN apt-get update && apt-get install -y build-essential curl wget python-pip python-dev python-scipy python-redis gdebi-core zip unzip g++ zlib1g-dev gcc pkg-config apt-utils
+RUN apt-get update && apt-get install -y build-essential curl wget python-pip python-dev python-scipy python-redis gdebi-core zip unzip g++ zlib1g-dev gcc pkg-config apt-utils make perl
 
 RUN pip install --upgrade pip
 RUN pip install htseq==0.6.1p1
@@ -25,6 +25,17 @@ RUN unzip bowtie2-2.3.2-source.zip
 WORKDIR /tmp/bowtie2-2.3.2
 RUN make NO_TBB=1 # we may want tbb (for "superior thread scaling") later, so will need to find a way to compile without "NO_TBB=1"
 RUN mv -t /usr/local/bin/ bowtie2 bowtie2-align-l bowtie2-align-s bowtie2-build bowtie2-build-l bowtie2-build-s bowtie2-inspect bowtie2-inspect-l bowtie2-inspect-s
+
+WORKDIR /tmp
+# Compile and install gmap/gsnap
+RUN wget http://research-pub.gene.com/gmap/src/gmap-gsnap-2018-03-25.tar.gz
+RUN mkdir gmap-gsnap && tar xf gmap-gsnap-2018-03-25.tar.gz -C gmap-gsnap --strip-components 1
+WORKDIR /tmp/gmap-gsnap
+RUN ./configure --prefix=/usr/local
+RUN make && make check && make install
+RUN rm -rf /tmp/gmap-gsnap /tmp/gmap-gsnap-2018-03-25.tar.gz
+RUN gsnapl --version
+
 
 WORKDIR /tmp
 # install samtools
