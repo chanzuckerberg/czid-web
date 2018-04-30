@@ -27,7 +27,7 @@ class PipelineSampleReport extends React.Component {
     this.canSeeAlignViz = props.can_see_align_viz;
     this.can_edit = props.can_edit;
     this.csrf = props.csrf;
-
+    this.taxon_row_refs = {};
     this.all_categories = props.all_categories;
     this.report_details = props.report_details;
     this.report_page_params = props.report_page_params;
@@ -101,7 +101,7 @@ class PipelineSampleReport extends React.Component {
     this.setSortParams = this.setSortParams.bind(this);
     this.flash = this.flash.bind(this);
     this.collapseGenus = this.collapseGenus.bind(this);
-    this.expandGenus = this.expandGenus.bind(this);
+    this.expandGenusClick = this.expandGenusClick.bind(this);
     this.expandTable = this.expandTable.bind(this);
     this.collapseTable = this.collapseTable.bind(this);
     this.downloadFastaUrl = this.downloadFastaUrl.bind(this);
@@ -391,6 +391,44 @@ class PipelineSampleReport extends React.Component {
         return false;
       }
     });
+  }
+
+  scrollToTaxon(taxon_id) {
+    // Find the taxon
+    let taxon;
+    for (let ttaxon of this.state.selected_taxons) {
+      if (ttaxon.tax_id == taxon_id) {
+        taxon = ttaxon;
+        break;
+      }
+    }
+
+    if (!taxon) {
+      return;
+    }
+    // Make sure the taxon is rendered
+    if (this.state.selected_taxons_top.indexOf(taxon) == -1) {
+      this.renderMore();
+      this.setState({}, () => {
+        this.scrollToTaxon(taxon_id);
+      });
+    }
+
+    // set view to table and scoll into view
+    this.setState(
+      {
+        view: "table",
+        highlight_taxon: taxon.tax_id
+      },
+      () => {
+        if (taxon.tax_level == 1) {
+          this.expandGenus(taxon.genus_taxid);
+        }
+        this.taxon_row_refs[taxon.tax_id].scrollIntoView({
+          block: "center"
+        });
+      }
+    );
   }
 
   renderMore() {
@@ -1038,6 +1076,8 @@ class PipelineSampleReport extends React.Component {
   }
 
   row_class(tax_info, confirmed_taxids, watched_taxids) {
+    let highlighted =
+      this.state.highlight_taxon == tax_info.tax_id ? "highlighted" : "";
     let taxon_status =
       confirmed_taxids.indexOf(tax_info.tax_id) >= 0
         ? "confirmed"
@@ -1048,11 +1088,11 @@ class PipelineSampleReport extends React.Component {
       if (tax_info.tax_id < 0) {
         return `report-row-genus ${
           tax_info.genus_taxid
-        } fake-genus ${taxon_status}`;
+        } fake-genus ${taxon_status} ${highlighted}`;
       }
       return `report-row-genus ${
         tax_info.genus_taxid
-      } real-genus ${taxon_status}`;
+      } real-genus ${taxon_status} ${highlighted}`;
     }
     let initial_visibility = "hidden";
     if (
@@ -1064,17 +1104,21 @@ class PipelineSampleReport extends React.Component {
     if (tax_info.genus_taxid < 0) {
       return `report-row-species ${
         tax_info.genus_taxid
-      } fake-genus ${initial_visibility} ${taxon_status}`;
+      } fake-genus ${initial_visibility} ${taxon_status} ${highlighted}`;
     }
     return `report-row-species ${
       tax_info.genus_taxid
-    } real-genus ${initial_visibility} ${taxon_status}`;
+    } real-genus ${initial_visibility} ${taxon_status} ${highlighted}`;
   }
 
-  expandGenus(e) {
+  expandGenusClick(e) {
     const className = e.target.attributes.class.nodeValue;
     const attr = className.split(" ");
     const taxId = attr[2];
+    this.expandGenus(taxId);
+  }
+
+  expandGenus(taxId) {
     const taxIdIdx = this.expandedGenera.indexOf(taxId);
     if (taxIdIdx < 0) {
       this.expandedGenera.push(taxId);
@@ -1217,6 +1261,7 @@ class PipelineSampleReport extends React.Component {
         advanced_filter_tag_list={advanced_filter_tag_list}
         categories_filter_tag_list={categories_filter_tag_list}
         subcats_filter_tag_list={subcats_filter_tag_list}
+        view={this.state.view}
         parent={this}
       />
     );
@@ -1244,7 +1289,7 @@ function CollapseExpand({ tax_info, parent }) {
       >
         <i
           className={`fa fa-angle-right ${tax_info.tax_id}`}
-          onClick={parent.expandGenus}
+          onClick={parent.expandGenusClick}
         />
       </span>
     </span>
@@ -1278,6 +1323,10 @@ function DetailCells({ parent }) {
   return parent.state.selected_taxons_top.map((tax_info, i) => (
     <tr
       key={tax_info.tax_id}
+      id={`taxon-${tax_info.tax_id}`}
+      ref={elm => {
+        parent.taxon_row_refs[tax_info.tax_id] = elm;
+      }}
       className={parent.row_class(
         tax_info,
         parent.props.confirmed_taxids,
@@ -1572,9 +1621,20 @@ class RenderMarkup extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      view: "table"
+      view: this.props.view || "table"
     };
     this._onViewClicked = this.onViewClicked.bind(this);
+    this._nodeTextClicked = this.nodeTextClicked.bind(this);
+  }
+
+  componentWillReceiveProps(newProps) {
+    if (newProps.view && this.state.view != newProps.view) {
+      this.setState({ view: newProps.view });
+    }
+  }
+
+  nodeTextClicked(d) {
+    this.props.parent.scrollToTaxon(d.id);
   }
 
   onViewClicked(e, f) {
@@ -1630,6 +1690,7 @@ class RenderMarkup extends React.Component {
         taxons={parent.state.selected_taxons}
         sample={parent.report_details.sample_info}
         nameType={parent.state.name_type}
+        onNodeTextClicked={this._nodeTextClicked}
       />
     );
   }
@@ -1696,6 +1757,7 @@ class PipelineSampleTree extends React.PureComponent {
       dataType: this.dataTypes[0]
     };
     this._updateDataType = this.updateDataType.bind(this);
+    this._nodeTextClicked = this.nodeTextClicked.bind(this);
   }
 
   makeTree() {
@@ -1809,6 +1871,10 @@ class PipelineSampleTree extends React.PureComponent {
     this.setState({ dataType: d.value });
   }
 
+  nodeTextClicked(d) {
+    this.props.onNodeTextClicked && this.props.onNodeTextClicked(d);
+  }
+
   renderWeightDataTypeChooser() {
     let options = [];
     for (let dataType of this.dataTypes) {
@@ -1833,7 +1899,11 @@ class PipelineSampleTree extends React.PureComponent {
     return (
       <div className="pipeline-tree">
         {this.renderWeightDataTypeChooser()}
-        <TreeStructure tree={tree} getTooltip={this._getTooltip} />
+        <TreeStructure
+          tree={tree}
+          getTooltip={this._getTooltip}
+          onNodeTextClicked={this._nodeTextClicked}
+        />
       </div>
     );
   }
@@ -2001,12 +2071,6 @@ class TreeStructure extends React.PureComponent {
       .attr("transform", function(d) {
         return "translate(" + source.y0 + "," + source.x0 + ")";
       })
-      .on("click", d => {
-        let t = d.children;
-        d.children = d._children;
-        d._children = t;
-        this.update(this.props, d);
-      })
       .on("mouseover", d => {
         this.setState({ hoverNode: d });
 
@@ -2020,7 +2084,15 @@ class TreeStructure extends React.PureComponent {
         d3.select(this.tooltip).classed("hidden", true);
       });
 
-    nodeEnter.append("circle").attr("r", 1e-6);
+    nodeEnter
+      .append("circle")
+      .attr("r", 1e-6)
+      .on("click", d => {
+        let t = d.children;
+        d.children = d._children;
+        d._children = t;
+        this.update(this.props, d);
+      });
 
     nodeEnter
       .append("text")
@@ -2035,6 +2107,9 @@ class TreeStructure extends React.PureComponent {
       })
       .text(function(d) {
         return d.name;
+      })
+      .on("click", (d, e) => {
+        this.props.onNodeTextClicked && this.props.onNodeTextClicked(d);
       })
       .style("fill-opacity", 1e-6);
 
