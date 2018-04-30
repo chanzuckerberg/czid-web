@@ -1643,7 +1643,7 @@ class RenderMarkup extends React.Component {
           }}
         >
           <div className={classStr + (active === vals[i] ? " active" : "")}>
-            NT
+            {vals[i]}
           </div>
         </Menu.Item>
       );
