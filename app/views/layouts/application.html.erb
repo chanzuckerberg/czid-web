@@ -12,7 +12,7 @@
     <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
 		 <link rel="icon"
 				 type="image/png"
-				 href="/logo-<%= Rails.env %>.png">
+         href="<%= image_url("logo-#{Rails.env}.png") %>"
   </head>
 
   <body id="id-seq">
