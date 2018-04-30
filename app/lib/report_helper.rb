@@ -25,7 +25,7 @@ module ReportHelper
   DECIMALS = 1
 
   DEFAULT_SORT_PARAM = 'highest_nt_aggregatescore'.freeze
-  DEFAULT_TAXON_SORT_PARAM = 'highest_nt_maxzscore'.freeze
+  DEFAULT_TAXON_SORT_PARAM = 'highest_nt_aggregatescore'.freeze
   DEFAULT_PARAMS = { sort_by: DEFAULT_SORT_PARAM }.freeze
 
   IGNORED_PARAMS = [:controller, :action, :id].freeze
@@ -397,8 +397,7 @@ module ReportHelper
       pr = res["pr"]
       taxon_counts = res["taxon_counts"]
       sample_id = pr.sample_id
-      tax_2d = cleanup_all!(convert_2d(taxon_counts))
-      count_species_per_genus!(tax_2d)
+      tax_2d = convert_2d(taxon_counts)
       rows = []
       tax_2d.each { |_tax_id, tax_info| rows << tax_info }
       compute_aggregate_scores_v2!(rows)
@@ -427,8 +426,7 @@ module ReportHelper
       pr = res["pr"]
       taxon_counts = res["taxon_counts"]
       sample_id = pr.sample_id
-      tax_2d = cleanup_all!(convert_2d(taxon_counts))
-      count_species_per_genus!(tax_2d)
+      tax_2d = convert_2d(taxon_counts)
       rows = []
       tax_2d.each do |_tax_id, tax_info|
         rows << tax_info
