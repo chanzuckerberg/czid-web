@@ -301,8 +301,8 @@ input[type="number"] {
 }
 
 .report-table {
-  // min-width: 1000px;
   font-size: $font-size-small;
+  margin-bottom: 7rem;
   .count-type {
     text-align: right;
     font-weight: normal;
@@ -550,9 +550,6 @@ input[type="number"] {
     font-size: 12px;
   }
   .reports-count {
-    .ui.menu {
-      height: 42px;
-    }
     .download-report {
       background: #edf8ff;
       color: rgb(3, 169, 244) !important;
@@ -879,6 +876,9 @@ label {
 
 .ntnr-switch {
   margin-right: 1.5rem;
+  .ui.menu {
+    height: 42px;
+  }
   .active {
     font-weight: bolder;
   }

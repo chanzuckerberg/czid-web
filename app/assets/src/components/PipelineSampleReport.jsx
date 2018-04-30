@@ -1631,35 +1631,27 @@ class RenderMarkup extends React.Component {
   renderNtNrSwitch() {
     let parent = this.props.parent;
     let classStr = "column-switcher";
+    let vals = ["NT", "NR"];
+    let menuItems = [];
+    let active = parent.state.countType;
+    for (let i = 0; i < vals.length; i++) {
+      menuItems.push(
+        <Menu.Item
+          active={active === vals[i]}
+          onClick={() => {
+            parent.setState({ countType: vals[i] });
+          }}
+        >
+          <div className={classStr + (active === vals[i] ? " active" : "")}>
+            NT
+          </div>
+        </Menu.Item>
+      );
+    }
     return (
       <Tipsy content="Switch count type" placement="top">
         <div className="sort-controls center right floated ntnr-switch">
-          <Menu>
-            <Menu.Item>
-              <div
-                className={
-                  classStr + (parent.state.countType === "NT" ? " active" : "")
-                }
-                onClick={() => {
-                  parent.setState({ countType: "NT" });
-                }}
-              >
-                NT
-              </div>
-            </Menu.Item>
-            <Menu.Item>
-              <div
-                className={
-                  classStr + (parent.state.countType === "NR" ? " active" : "")
-                }
-                onClick={() => {
-                  parent.setState({ countType: "NR" });
-                }}
-              >
-                NR
-              </div>
-            </Menu.Item>
-          </Menu>
+          <Menu>{menuItems}</Menu>
         </div>
       </Tipsy>
     );
