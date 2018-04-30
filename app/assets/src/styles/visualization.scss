@@ -230,7 +230,10 @@
 .d3-tree {
   text {
     font-size: 8pt;
-    cursor: pointer;
+    &:hover {
+      cursor: pointer;
+      fill: #3867fa;
+    }
   }
   .link {
     fill: none;
