@@ -191,7 +191,7 @@ ActiveRecord::Schema.define(version: 20180430224826) do
     t.datetime "updated_at", null: false
     t.bigint "project_id"
     t.string "status"
-    t.string "sample_id"
+    t.string "sample_unique_id"
     t.string "sample_location"
     t.string "sample_date"
     t.string "sample_tissue"
