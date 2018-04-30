@@ -1034,21 +1034,23 @@ class PipelineSampleReport extends React.Component {
     tooltip_message,
     visible_flag = true
   ) {
-    return !visible_flag ? null : (
+    let element = (
+      <div
+        className="sort-controls"
+        onClick={this.applySort.bind(this, column_name)}
+      >
+        <span
+          className={`${this.isSortedActive(column_name)} table-head-label`}
+        >
+          {visible_metric}
+        </span>
+        {this.render_sort_arrow(column_name, "highest", "up")}
+      </div>
+    );
+    if (!visible_flag) return null;
+    return (
       <th>
-        <Tipsy content={tooltip_message} placement="top">
-          <div
-            className="sort-controls"
-            onClick={this.applySort.bind(this, column_name)}
-          >
-            <span
-              className={`${this.isSortedActive(column_name)} table-head-label`}
-            >
-              {visible_metric}
-            </span>
-            {this.render_sort_arrow(column_name, "highest", "up")}
-          </div>
-        </Tipsy>
+        <BasicPopup trigger={element} content={tooltip_message} />
       </th>
     );
   }
@@ -1648,13 +1650,12 @@ class RenderMarkup extends React.Component {
         </Menu.Item>
       );
     }
-    return (
-      <Tipsy content="Switch count type" placement="top">
-        <div className="sort-controls center right floated ntnr-switch">
-          <Menu>{menuItems}</Menu>
-        </div>
-      </Tipsy>
+    let elem = (
+      <div className="sort-controls center right floated ntnr-switch">
+        <Menu>{menuItems}</Menu>
+      </div>
     );
+    return <BasicPopup content="Switch count type" trigger={elem} />;
   }
   render() {
     const {
