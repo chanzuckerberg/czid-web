@@ -261,11 +261,11 @@ input[type="number"] {
 }
 
 .confirmed {
-  color: #3CB371;
+  color: #3cb371;
 }
 
 .watched {
-  color: #F4A460;
+  color: #f4a460;
 }
 
 .reports-screen {
@@ -325,12 +325,25 @@ input[type="number"] {
   color: #a0a0a0;
 }
 
+@keyframes highlight-animation {
+  from {
+    background-color: rgb(232, 242, 230);
+  }
+  to {
+    background-color: white;
+  }
+}
+
 .report-table {
   .genus-name {
     display: inline-block;
     margin-right: 5px;
     font-size: $font-size-base;
     font-weight: $font-weight-semibold;
+  }
+  .highlighted {
+    animation-name: highlight-animation;
+    animation-duration: 2s;
   }
   .fa {
     margin-left: 2px;
@@ -839,7 +852,7 @@ input[type="number"] {
     width: 18px;
     height: 18px;
   }
-  [type=checkbox].filled-in:checked+label:before {
+  [type="checkbox"].filled-in:checked + label:before {
     top: 6px;
     left: 1px;
   }
