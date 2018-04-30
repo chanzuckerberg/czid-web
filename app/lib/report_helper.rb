@@ -397,7 +397,7 @@ module ReportHelper
       pr = res["pr"]
       taxon_counts = res["taxon_counts"]
       sample_id = pr.sample_id
-      tax_2d = convert_2d(taxon_counts)
+      tax_2d = validate_names!(convert_2d(taxon_counts))
       rows = []
       tax_2d.each { |_tax_id, tax_info| rows << tax_info }
       compute_aggregate_scores_v2!(rows)
