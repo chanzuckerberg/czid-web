@@ -931,10 +931,17 @@ class PipelineSampleReads extends React.Component {
   }
 }
 
-function BasicPopup({ trigger, content }) {
+export const BasicPopup = ({ trigger, content }) => {
   return (
-    <Popup trigger={trigger} content={content} on="hover" basic inverted />
+    <Popup
+      trigger={trigger}
+      content={content}
+      on="hover"
+      basic
+      inverted
+      size="tiny"
+    />
   );
-}
+};
 
 export default PipelineSampleReads;

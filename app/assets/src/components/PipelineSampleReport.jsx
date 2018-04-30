@@ -1559,12 +1559,6 @@ function BackgroundModelFilter({ parent }) {
   );
 }
 
-function BasicPopup({ trigger, content }) {
-  return (
-    <Popup trigger={trigger} content={content} on="hover" basic inverted />
-  );
-}
-
 class RenderMarkup extends React.Component {
   constructor(props) {
     super(props);
