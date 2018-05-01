@@ -4,11 +4,12 @@ import moment from "moment";
 import $ from "jquery";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { Button, Icon, Divider } from "semantic-ui-react";
+import { Button, Icon, Divider, Popup } from "semantic-ui-react";
 import numberWithCommas from "../helpers/strings";
 import SubHeader from "./SubHeader";
 import ERCCScatterPlot from "./ERCCScatterPlot";
 import PipelineSampleReport from "./PipelineSampleReport";
+import BasicPopup from "./BasicPopup";
 
 class PipelineSampleReads extends React.Component {
   constructor(props) {
@@ -69,7 +70,7 @@ class PipelineSampleReads extends React.Component {
       .delete(`/samples/${this.sampleInfo.id}.json`, {
         data: { authenticity_token: this.csrf }
       })
-      .then(res => {
+      .then(() => {
         location.href = `/?project_id=${this.projectInfo.id}`;
       })
       .catch(err => {});
@@ -139,8 +140,8 @@ class PipelineSampleReads extends React.Component {
   }
 
   render_metadata_textfield_wide(label, hash, field, blank_value, editable) {
-    let value =
-      hash[field] instanceof Array ? hash[field].join("; ") : hash[field];
+    let value = hash[field];
+    if (hash[field] instanceof Array) value = hash[field].join("; ");
     return (
       <div className="details-container col s12">
         <div className="details-title note">{label}</div>
@@ -158,14 +159,16 @@ class PipelineSampleReads extends React.Component {
     );
   }
 
-  render_metadata_textfield(label, field) {
-    let display_value =
-      this.sampleInfo[field] && this.sampleInfo[field].trim() !== ""
-        ? this.sampleInfo[field]
-        : this.TYPE_PROMPT;
+  render_metadata_textfield(label, field, popupContent) {
+    let display_value = this.TYPE_PROMPT;
+    if (this.sampleInfo[field] && this.sampleInfo[field].trim() !== "")
+      display_value = this.sampleInfo[field];
+    let labelElem = <div className="col s6 label">{label}</div>;
+    if (popupContent)
+      labelElem = <BasicPopup trigger={labelElem} content={popupContent} />;
     return (
       <div className="row detail-row">
-        <div className="col s6 label">{label}</div>
+        {labelElem}
         <div className="col s6">
           <div
             className={
@@ -442,7 +445,7 @@ class PipelineSampleReads extends React.Component {
     }
 
     return (
-      <div className="row">
+      <div className="row last-row">
         <div className="col s12">
           <div className="content-title">ERCC Spike In Counts</div>
           <ERCCScatterPlot ercc_comparison={this.props.ercc_comparison} />
@@ -832,27 +835,31 @@ class PipelineSampleReads extends React.Component {
                         <div className="col s6">
                           {this.render_metadata_textfield(
                             "Library prep",
-                            "sample_library"
+                            "sample_library",
+                            "Type of library preparation protocol (e.g. Nextera)"
                           )}
                           {this.render_metadata_textfield(
                             "Sequencer",
-                            "sample_sequencer"
+                            "sample_sequencer",
+                            "e.g. Illumina NovaSeq"
                           )}
                           {this.render_metadata_numfield(
                             "RNA/DNA input (pg)",
                             "sample_input_pg"
                           )}
                           {this.render_metadata_numfield(
-                            "Batch",
+                            "Batch (#)",
                             "sample_batch"
                           )}
                           {this.render_metadata_textfield(
                             "Known organisms",
-                            "sample_organism"
+                            "sample_organism",
+                            "Known hits that may or may not have been in this report"
                           )}
                           {this.render_metadata_textfield(
                             "Detection method",
-                            "sample_detection"
+                            "sample_detection",
+                            "Method for detecting known organisms"
                           )}
                         </div>
                       </div>
@@ -865,7 +872,7 @@ class PipelineSampleReads extends React.Component {
                           this.can_edit
                         )}
                         {this.render_metadata_textfield_wide(
-                          "Confirmed hits in report",
+                          "Manually confirmed hits (from Report tab)",
                           this.state,
                           "confirmed_names",
                           "None",
@@ -924,4 +931,5 @@ class PipelineSampleReads extends React.Component {
     );
   }
 }
+
 export default PipelineSampleReads;

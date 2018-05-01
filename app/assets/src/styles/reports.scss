@@ -301,8 +301,8 @@ input[type="number"] {
 }
 
 .report-table {
-  // min-width: 1000px;
   font-size: $font-size-small;
+  margin-bottom: 7rem;
   .count-type {
     text-align: right;
     font-weight: normal;
@@ -720,7 +720,7 @@ input[type="number"] {
   }
   .link-tag {
     visibility: hidden;
-    padding: 10px;
+    padding-left: 10px;
     color: #3867fa;
     font-size: $font-size-base;
     cursor: text;
@@ -867,4 +867,32 @@ input[type="number"] {
 [type="checkbox"].filled-in + label:after {
   -webkit-transition: none;
   transition: none;
+}
+
+.category-filter-dropdown {
+  width: 200px;
+}
+
+.category-filter-menu {
+  margin: 1rem;
+}
+
+label {
+  font-family: "Open Sans", "Helvetica Neue", Arial, Helvetica, sans-serif;
+  font-size: 1rem;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+[type="checkbox"] + label {
+  line-height: 27px;
+}
+
+.ntnr-switch {
+  margin-right: 1.5rem;
+  .ui.menu {
+    height: 43px;
+  }
+  .active {
+    font-weight: bolder;
+  }
 }

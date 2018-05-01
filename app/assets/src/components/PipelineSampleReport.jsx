@@ -9,10 +9,10 @@ import numberWithCommas from "../helpers/strings";
 import LabeledDropdown from "./LabeledDropdown";
 import AdvancedThresholdFilterDropdown from "./AdvancedThresholdFilter";
 import StringHelper from "../helpers/StringHelper";
-import TaxonTooltip from "./TaxonTooltip";
 import ThresholdMap from "./ThresholdMap";
 import Nanobar from "nanobar";
 import d3, { event as currentEvent } from "d3";
+import BasicPopup from "./BasicPopup";
 
 class PipelineSampleReport extends React.Component {
   constructor(props) {
@@ -241,7 +241,6 @@ class PipelineSampleReport extends React.Component {
         this.saveThresholdFilters();
         Cookies.set("excluded_categories", "[]");
         Cookies.set("exclude_subcats", "[]");
-        this.flash();
       }
     );
   }
@@ -622,7 +621,6 @@ class PipelineSampleReport extends React.Component {
           undefined,
           new_exclude_subcats
         );
-        this.flash();
       }
     );
   }
@@ -652,7 +650,6 @@ class PipelineSampleReport extends React.Component {
           undefined,
           new_exclude_subcats
         );
-        this.flash();
       }
     );
   }
@@ -776,10 +773,6 @@ class PipelineSampleReport extends React.Component {
       thresholded_taxons,
       this.state.exclude_subcats
     );
-
-    if (play_animation) {
-      this.flash();
-    }
   }
   handleThresholdEnter(event) {
     if (event.keyCode === 13) {
@@ -850,59 +843,80 @@ class PipelineSampleReport extends React.Component {
   }
 
   displayTags(taxInfo, reportDetails) {
-    const tax_level_str = taxInfo.tax_level == 1 ? "species" : "genus";
+    let tax_level_str = "";
+    let ncbiDot, fastaDot, alignmentVizDot;
+    if (taxInfo.tax_level == 1) tax_level_str = "species";
+    else tax_level_str = "genus";
+    if (taxInfo.tax_id > 0)
+      ncbiDot = (
+        <i
+          data-tax-id={taxInfo.tax_id}
+          onClick={this.gotoNCBI}
+          className="fa fa-link cloud"
+          aria-hidden="true"
+        />
+      );
+    if (reportDetails.taxon_fasta_flag)
+      fastaDot = (
+        <i
+          data-tax-level={taxInfo.tax_level}
+          data-tax-id={taxInfo.tax_id}
+          onClick={this.downloadFastaUrl}
+          className="fa fa-download cloud"
+          aria-hidden="true"
+        />
+      );
+    if (this.canSeeAlignViz && taxInfo.tax_id > 0 && taxInfo.NT.r > 0)
+      alignmentVizDot = (
+        <i
+          data-tax-level={tax_level_str}
+          data-tax-id={taxInfo.tax_id}
+          onClick={this.gotoAlignmentVizLink}
+          className="fa fa-bars"
+          aria-hidden="true"
+        />
+      );
     return (
       <span className="link-tag">
-        {taxInfo.tax_id > 0 ? (
-          <i
-            data-tax-id={taxInfo.tax_id}
-            onClick={this.gotoNCBI}
-            className="fa fa-link cloud"
-            aria-hidden="true"
-          />
-        ) : null}
-        {reportDetails.taxon_fasta_flag ? (
-          <i
-            data-tax-level={taxInfo.tax_level}
-            data-tax-id={taxInfo.tax_id}
-            onClick={this.downloadFastaUrl}
-            className="fa fa-download cloud"
-            aria-hidden="true"
-          />
-        ) : null}
-        {this.canSeeAlignViz && taxInfo.tax_id > 0 && taxInfo.NT.r > 0 ? (
-          <i
-            data-tax-level={tax_level_str}
-            data-tax-id={taxInfo.tax_id}
-            onClick={this.gotoAlignmentVizLink}
-            className="fa fa-bars fa-1"
-            aria-hidden="true"
-          />
-        ) : null}
+        <BasicPopup trigger={ncbiDot} content={"NCBI Taxonomy Browser"} />
+        <BasicPopup trigger={fastaDot} content={"FASTA Download"} />
+        <BasicPopup
+          trigger={alignmentVizDot}
+          content={"Alignment Visualization"}
+        />
       </span>
     );
   }
 
   displayHighlightTags(taxInfo) {
+    const watchDot = (
+      <i
+        data-tax-id={taxInfo.tax_id}
+        data-tax-name={taxInfo.name}
+        data-confirmation-strength="watched"
+        onClick={this.props.toggleHighlightTaxon}
+        className="fa fa-eye"
+        aria-hidden="true"
+      />
+    );
+    const confirmedHitDot = (
+      <i
+        data-tax-id={taxInfo.tax_id}
+        data-tax-name={taxInfo.name}
+        data-confirmation-strength="confirmed"
+        onClick={this.props.toggleHighlightTaxon}
+        className="fa fa-check"
+        aria-hidden="true"
+      />
+    );
     return (
       <div className="hover-wrapper">
         {this.can_edit ? (
           <span className="link-tag">
-            <i
-              data-tax-id={taxInfo.tax_id}
-              data-tax-name={taxInfo.name}
-              data-confirmation-strength="watched"
-              onClick={this.props.toggleHighlightTaxon}
-              className="fa fa-eye"
-              aria-hidden="true"
-            />
-            <i
-              data-tax-id={taxInfo.tax_id}
-              data-tax-name={taxInfo.name}
-              data-confirmation-strength="confirmed"
-              onClick={this.props.toggleHighlightTaxon}
-              className="fa fa-check"
-              aria-hidden="true"
+            <BasicPopup trigger={watchDot} content={"Toggle Watching"} />
+            <BasicPopup
+              trigger={confirmedHitDot}
+              content={"Toggle Confirmed Hit"}
             />
           </span>
         ) : null}
@@ -910,7 +924,7 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
-  category_to_adjective(category) {
+  static category_to_adjective(category) {
     const category_lowercase = category.toLowerCase();
     switch (category_lowercase) {
       case "bacteria":
@@ -932,16 +946,19 @@ class PipelineSampleReport extends React.Component {
   render_name(tax_info, report_details) {
     let tax_scientific_name = tax_info["name"];
     let tax_common_name = tax_info["common_name"];
-    let tax_name =
-      this.state.name_type.toLowerCase() == "common name" ? (
-        !tax_common_name || tax_common_name.trim() == "" ? (
-          <span className="count-info">{tax_scientific_name}</span>
-        ) : (
+    let tax_name;
+
+    if (this.state.name_type.toLowerCase() == "common name") {
+      if (!tax_common_name || tax_common_name.trim() == "")
+        tax_name = <span className="count-info">{tax_scientific_name}</span>;
+      else
+        tax_name = (
           <span>{StringHelper.capitalizeFirstLetter(tax_common_name)}</span>
-        )
-      ) : (
-        <span>{tax_scientific_name}</span>
-      );
+        );
+    } else {
+      tax_name = <span>{tax_scientific_name}</span>;
+    }
+
     let foo = <i>{tax_name}</i>;
 
     if (tax_info.tax_id > 0) {
@@ -967,8 +984,8 @@ class PipelineSampleReport extends React.Component {
       );
     } else {
       // emphasize genus, soften category and species count
-      const category_name =
-        tax_info.tax_id == -200 ? "" : tax_info.category_name;
+      let category_name = "";
+      if (tax_info.tax_id != -200) category_name = tax_info.category_name;
       const collapseExpand = (
         <CollapseExpand tax_info={tax_info} parent={this} />
       );
@@ -980,7 +997,7 @@ class PipelineSampleReport extends React.Component {
           </div>
           <i className="count-info">
             ({tax_info.species_count}{" "}
-            {this.category_to_adjective(category_name)} species)
+            {PipelineSampleReport.category_to_adjective(category_name)} species)
           </i>
           {this.displayTags(tax_info, report_details)}
         </div>
@@ -1056,21 +1073,23 @@ class PipelineSampleReport extends React.Component {
     tooltip_message,
     visible_flag = true
   ) {
-    return !visible_flag ? null : (
+    let element = (
+      <div
+        className="sort-controls"
+        onClick={this.applySort.bind(this, column_name)}
+      >
+        <span
+          className={`${this.isSortedActive(column_name)} table-head-label`}
+        >
+          {visible_metric}
+        </span>
+        {this.render_sort_arrow(column_name, "highest", "up")}
+      </div>
+    );
+    if (!visible_flag) return null;
+    return (
       <th>
-        <Tipsy content={tooltip_message} placement="top">
-          <div
-            className="sort-controls"
-            onClick={this.applySort.bind(this, column_name)}
-          >
-            <span
-              className={`${this.isSortedActive(column_name)} table-head-label`}
-            >
-              {visible_metric}
-            </span>
-            {this.render_sort_arrow(column_name, "highest", "up")}
-          </div>
-        </Tipsy>
+        <BasicPopup trigger={element} content={tooltip_message} />
       </th>
     );
   }
@@ -1078,12 +1097,11 @@ class PipelineSampleReport extends React.Component {
   row_class(tax_info, confirmed_taxids, watched_taxids) {
     let highlighted =
       this.state.highlight_taxon == tax_info.tax_id ? "highlighted" : "";
-    let taxon_status =
-      confirmed_taxids.indexOf(tax_info.tax_id) >= 0
-        ? "confirmed"
-        : watched_taxids.indexOf(tax_info.tax_id) >= 0
-          ? "watched"
-          : "";
+    let taxon_status = "";
+    if (confirmed_taxids.indexOf(tax_info.tax_id) >= 0)
+      taxon_status = "confirmed";
+    else if (watched_taxids.indexOf(tax_info.tax_id) >= 0)
+      taxon_status = "watched";
     if (tax_info.tax_level == 2) {
       if (tax_info.tax_id < 0) {
         return `report-row-genus ${
@@ -1414,36 +1432,6 @@ function ReportTableHeader({ parent }) {
               `Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NT/NR)`,
               parent.showConcordance
             )}
-            <th>
-              <Tipsy content="Switch count type" placement="top">
-                <div className="sort-controls center left">
-                  <div
-                    className={
-                      parent.state.countType === "NT"
-                        ? "active column-switcher"
-                        : "column-switcher"
-                    }
-                    onClick={() => {
-                      parent.setState({ countType: "NT" });
-                    }}
-                  >
-                    NT
-                  </div>
-                  <div
-                    className={
-                      parent.state.countType === "NR"
-                        ? "active column-switcher"
-                        : "column-switcher"
-                    }
-                    onClick={() => {
-                      parent.setState({ countType: "NR" });
-                    }}
-                  >
-                    NR
-                  </div>
-                </div>
-              </Tipsy>
-            </th>
           </tr>
         </thead>
         <tbody>
@@ -1454,20 +1442,22 @@ function ReportTableHeader({ parent }) {
   );
 }
 function CategoryFilter({ parent }) {
+  let count =
+    parent.all_categories.length -
+    parent.state.excluded_categories.length +
+    Object.keys(parent.category_child_parent).length -
+    parent.state.exclude_subcats.length;
   return (
-    <li className="categories-dropdown top-filter ui dropdown custom-dropdown filter-btn">
-      <div className="categories-filters-activate">
-        <span className="filter-label">Categories</span>
-        <span className="filter-label-count">
-          {parent.all_categories.length -
-            parent.state.excluded_categories.length +
-            Object.keys(parent.category_child_parent).length -
-            parent.state.exclude_subcats.length}{" "}
+    <Dropdown
+      className="filter-btn category-filter-dropdown"
+      text={
+        <span>
+          Categories <Label>{count}</Label>
         </span>
-        <i className="fa fa-angle-down right down-box" />
-      </div>
-      <div className="categories-filters-modal">
-        <div className="categories">
+      }
+    >
+      <Dropdown.Menu>
+        <div className="category-filter-menu">
           <ul>
             {parent.all_categories.map((category, i) => {
               return (
@@ -1522,8 +1512,8 @@ function CategoryFilter({ parent }) {
             <p>None found</p>
           ) : null}
         </div>
-      </div>
-    </li>
+      </Dropdown.Menu>
+    </Dropdown>
   );
 }
 
@@ -1694,6 +1684,33 @@ class RenderMarkup extends React.Component {
       />
     );
   }
+  renderNtNrSwitch() {
+    let parent = this.props.parent;
+    let classStr = "column-switcher";
+    let vals = ["NT", "NR"];
+    let menuItems = [];
+    let active = parent.state.countType;
+    for (let i = 0; i < vals.length; i++) {
+      menuItems.push(
+        <Menu.Item
+          active={active === vals[i]}
+          onClick={() => {
+            parent.setState({ countType: vals[i] });
+          }}
+        >
+          <div className={classStr + (active === vals[i] ? " active" : "")}>
+            {vals[i]}
+          </div>
+        </Menu.Item>
+      );
+    }
+    let elem = (
+      <div className="sort-controls center right floated ntnr-switch">
+        <Menu>{menuItems}</Menu>
+      </div>
+    );
+    return <BasicPopup content="Switch count type" trigger={elem} />;
+  }
   render() {
     const {
       filter_row_stats,
@@ -1729,6 +1746,7 @@ class RenderMarkup extends React.Component {
                     </ul>
                   </div>
                   {this.renderMenu()}
+                  {this.renderNtNrSwitch()}
                   <div className="filter-tags-list">
                     {advanced_filter_tag_list} {categories_filter_tag_list}{" "}
                     {subcats_filter_tag_list}

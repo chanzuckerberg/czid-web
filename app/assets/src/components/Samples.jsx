@@ -1614,7 +1614,7 @@ function PipelineOutputDataValues({
 }
 
 function AddValOrBlank(all, sample, key) {
-  let BLANK_TEXT = <span className="blank">NA</span>;
+  let BLANK_TEXT = <span className="blank">—</span>;
   if (sample && sample[key]) {
     all[key] = sample[key];
   } else {
