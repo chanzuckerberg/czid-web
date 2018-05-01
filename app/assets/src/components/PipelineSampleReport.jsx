@@ -1432,6 +1432,36 @@ function ReportTableHeader({ parent }) {
               `Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NT/NR)`,
               parent.showConcordance
             )}
+            <th>
+              <Tipsy content="Switch count type" placement="top">
+                <div className="sort-controls center left">
+                  <div
+                    className={
+                      parent.state.countType === "NT"
+                        ? "active column-switcher"
+                        : "column-switcher"
+                    }
+                    onClick={() => {
+                      parent.setState({ countType: "NT" });
+                    }}
+                  >
+                    NT
+                  </div>
+                  <div
+                    className={
+                      parent.state.countType === "NR"
+                        ? "active column-switcher"
+                        : "column-switcher"
+                    }
+                    onClick={() => {
+                      parent.setState({ countType: "NR" });
+                    }}
+                  >
+                    NR
+                  </div>
+                </div>
+              </Tipsy>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -1684,33 +1714,7 @@ class RenderMarkup extends React.Component {
       />
     );
   }
-  renderNtNrSwitch() {
-    let parent = this.props.parent;
-    let classStr = "column-switcher";
-    let vals = ["NT", "NR"];
-    let menuItems = [];
-    let active = parent.state.countType;
-    for (let i = 0; i < vals.length; i++) {
-      menuItems.push(
-        <Menu.Item
-          active={active === vals[i]}
-          onClick={() => {
-            parent.setState({ countType: vals[i] });
-          }}
-        >
-          <div className={classStr + (active === vals[i] ? " active" : "")}>
-            {vals[i]}
-          </div>
-        </Menu.Item>
-      );
-    }
-    let elem = (
-      <div className="sort-controls center right floated ntnr-switch">
-        <Menu>{menuItems}</Menu>
-      </div>
-    );
-    return <BasicPopup content="Switch count type" trigger={elem} />;
-  }
+
   render() {
     const {
       filter_row_stats,
@@ -1746,7 +1750,6 @@ class RenderMarkup extends React.Component {
                     </ul>
                   </div>
                   {this.renderMenu()}
-                  {this.renderNtNrSwitch()}
                   <div className="filter-tags-list">
                     {advanced_filter_tag_list} {categories_filter_tag_list}{" "}
                     {subcats_filter_tag_list}
