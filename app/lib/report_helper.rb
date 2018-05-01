@@ -665,7 +665,7 @@ module ReportHelper
     taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] != TaxonCount::TAX_LEVEL_FAMILY }
   end
 
-def remove_genus_level_counts!(taxon_counts_2d)
+  def remove_genus_level_counts!(taxon_counts_2d)
     taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] != TaxonCount::TAX_LEVEL_GENUS }
   end
 
