@@ -817,7 +817,7 @@ class PipelineSampleReads extends React.Component {
                           )}
                           {this.render_metadata_textfield(
                             "Unique ID",
-                            "sample_host"
+                            "sample_unique_id"
                           )}
                           {this.render_metadata_textfield(
                             "Sample collection date",
