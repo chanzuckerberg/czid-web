@@ -17,7 +17,7 @@ class SamplesController < ApplicationController
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder, :show_taxid_alignment, :show_taxid_alignment_viz].freeze
   EDIT_ACTIONS = [:edit, :add_taxon_confirmation, :remove_taxon_confirmation, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata].freeze
 
-  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :samples_taxons, :top_taxons, :heatmap].freeze
+  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :samples_taxons, :top_taxons, :heatmap, :download_heatmap].freeze
 
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload]
   acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload], fallback: :devise
@@ -205,35 +205,33 @@ class SamplesController < ApplicationController
   end
 
   def samples_taxons
-    sample_ids = params[:sample_ids].to_s.split(",").map(&:to_i) || []
-    num_results = params[:n] ? params[:n].to_i : 30
-    taxon_ids = params[:taxon_ids].to_s.split(",").map do |x|
-      begin
-        Integer(x)
-      rescue ArgumentError
-        nil
-      end
-    end
-    taxon_ids = taxon_ids.compact
+    @sample_taxons_dict = sample_taxons_dict(params)
+    render json: @sample_taxons_dict
+  end
 
-    sort_by = params[:sort_by] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
-    only_species = params[:species] == "1"
-    samples = current_power.samples.where(id: sample_ids).includes([:pipeline_runs])
-    if samples.first
-      first_sample = samples.first
-      background_id = check_background_id(first_sample)
-      if taxon_ids.empty?
-        taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, only_species).pluck("tax_id")
+  def download_heatmap
+    @sample_taxons_dict = sample_taxons_dict(params)
+    attribute_names = %w[sample_name tax_id taxon_name aggregatescore
+                         NT_r NT_rpm NT_zscore NR_r NR_rpm NR_zscore]
+    output_csv = CSV.generate(headers: true) do |csv|
+      csv << attribute_names
+      @sample_taxons_dict.each do |sample_record|
+        sample_record[:taxons].each do |taxon_record|
+          data_values = { sample_name: sample_record[:name],
+                          tax_id: taxon_record["tax_id"],
+                          taxon_name: taxon_record["name"],
+                          aggregatescore: taxon_record["NT"]["aggregatescore"],
+                          NT_r: taxon_record["NT"]["r"],
+                          NT_rpm: taxon_record["NT"]["rpm"],
+                          NT_zscore: taxon_record["NT"]["zscore"],
+                          NR_r: taxon_record["NR"]["r"],
+                          NR_rpm: taxon_record["NR"]["rpm"],
+                          NR_zscore: taxon_record["NR"]["zscore"] }
+          csv << data_values.values_at(*attribute_names.map(&:to_sym))
+        end
       end
-      if taxon_ids.empty?
-        render json: {}
-      else
-        @sample_taxons_dict = samples_taxons_details(samples, taxon_ids, background_id)
-        render json: @sample_taxons_dict
-      end
-    else
-      render json: {}
     end
+    send_data output_csv, filename: 'heatmap.csv'
   end
 
   def report_info
@@ -532,6 +530,37 @@ class SamplesController < ApplicationController
   # Use callbacks to share common setup or constraints between actions.
 
   private
+
+  def sample_taxons_dict(params)
+    sample_ids = params[:sample_ids].to_s.split(",").map(&:to_i) || []
+    num_results = params[:n] ? params[:n].to_i : 30
+    taxon_ids = params[:taxon_ids].to_s.split(",").map do |x|
+      begin
+        Integer(x)
+      rescue ArgumentError
+        nil
+      end
+    end
+    taxon_ids = taxon_ids.compact
+
+    sort_by = params[:sort_by] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
+    only_species = params[:species] == "1"
+    samples = current_power.samples.where(id: sample_ids).includes([:pipeline_runs])
+    if samples.first
+      first_sample = samples.first
+      background_id = check_background_id(first_sample)
+      if taxon_ids.empty?
+        taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, only_species).pluck("tax_id")
+      end
+      if taxon_ids.empty?
+        return {}
+      else
+        return samples_taxons_details(samples, taxon_ids, background_id)
+      end
+    else
+      return {}
+    end
+  end
 
   def taxon_confirmation_unique_on(params)
     params[:strength] == TaxonConfirmation::WATCHED ? [:sample_id, :taxid, :strength, :user_id] : [:sample_id, :taxid, :strength]

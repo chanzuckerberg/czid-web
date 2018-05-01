@@ -780,7 +780,7 @@ class SamplesHeatmap extends React.Component {
     const sample_ids = this.state.sample_ids;
     const data_type = this.state.dataType;
 
-    let url = new URL("/download", window.origin);
+    let url = new URL("/samples/download_heatmap", window.origin);
     let sp = url.searchParams;
     sp.set("sample_ids", sample_ids);
     sp.set("taxon_ids", taxon_ids);
