@@ -505,14 +505,6 @@ class PipelineSampleReads extends React.Component {
               ? waitingSpinner
               : this.state.rerunStatusMessage}
           </h6>
-          <p>
-            {this.state.rerunStatus === "failed" && this.can_edit ? (
-              <a onClick={this.rerunPipeline} className="custom-button small">
-                <i className="fa fa-repeat left" />
-                RERUN PIPELINE
-              </a>
-            ) : null}
-          </p>
         </div>
       );
     }
