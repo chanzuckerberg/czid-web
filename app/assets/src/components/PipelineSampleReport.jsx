@@ -12,6 +12,7 @@ import StringHelper from "../helpers/StringHelper";
 import ThresholdMap from "./ThresholdMap";
 import Nanobar from "nanobar";
 import d3, { event as currentEvent } from "d3";
+import BasicPopup from "./BasicPopup";
 
 class PipelineSampleReport extends React.Component {
   constructor(props) {

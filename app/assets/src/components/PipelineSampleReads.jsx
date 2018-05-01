@@ -9,6 +9,7 @@ import numberWithCommas from "../helpers/strings";
 import SubHeader from "./SubHeader";
 import ERCCScatterPlot from "./ERCCScatterPlot";
 import PipelineSampleReport from "./PipelineSampleReport";
+import BasicPopup from "./BasicPopup";
 
 class PipelineSampleReads extends React.Component {
   constructor(props) {
@@ -930,18 +931,5 @@ class PipelineSampleReads extends React.Component {
     );
   }
 }
-
-export const BasicPopup = ({ trigger, content }) => {
-  return (
-    <Popup
-      trigger={trigger}
-      content={content}
-      on="hover"
-      basic
-      inverted
-      size="tiny"
-    />
-  );
-};
 
 export default PipelineSampleReads;
