@@ -421,8 +421,9 @@ module ReportHelper
       taxon_counts = res["taxon_counts"]
       sample_id = pr.sample_id
       tax_2d = validate_names!(convert_2d(taxon_counts))
-      rows = []
       remove_genus_level_counts!(tax_2d) if only_species
+      
+      rows = []
       tax_2d.each do |_tax_id, tax_info|
         rows << tax_info
       end
