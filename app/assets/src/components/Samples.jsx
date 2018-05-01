@@ -30,6 +30,7 @@ class Samples extends React.Component {
       class: "prog-bar"
     });
     this.csrf = props.csrf;
+    this.admin = props.admin;
     this.favoriteProjects = props.favorites || [];
     this.allProjects = props.projects || [];
     this.pageSize = props.pageSize || 30;
@@ -1724,7 +1725,7 @@ function TableDownloadDropdown({ project_id, parent }) {
               Reports
             </Dropdown.Item>
           )}
-          {project_id === "all" || !parent.canEditProject(project_id) ? null : (
+          {project_id === "all" || parent.admin != 1 ? null : (
             <Dropdown.Item
               data-make-action="make_host_gene_counts"
               data-status-action="host_gene_counts_status"
