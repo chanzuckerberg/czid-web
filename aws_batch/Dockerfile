@@ -27,17 +27,6 @@ RUN make NO_TBB=1 # we may want tbb (for "superior thread scaling") later, so wi
 RUN mv -t /usr/local/bin/ bowtie2 bowtie2-align-l bowtie2-align-s bowtie2-build bowtie2-build-l bowtie2-build-s bowtie2-inspect bowtie2-inspect-l bowtie2-inspect-s
 
 WORKDIR /tmp
-# Compile and install gmap/gsnap
-RUN wget http://research-pub.gene.com/gmap/src/gmap-gsnap-2018-03-25.tar.gz
-RUN mkdir gmap-gsnap && tar xf gmap-gsnap-2018-03-25.tar.gz -C gmap-gsnap --strip-components 1
-WORKDIR /tmp/gmap-gsnap
-RUN ./configure --prefix=/usr/local
-RUN make && make check && make install
-RUN rm -rf /tmp/gmap-gsnap /tmp/gmap-gsnap-2018-03-25.tar.gz
-RUN gsnapl --version
-
-
-WORKDIR /tmp
 # install samtools
 RUN apt-get install -y libncurses-dev libbz2-dev
 RUN wget https://github.com/samtools/samtools/releases/download/1.5/samtools-1.5.tar.bz2
@@ -85,6 +74,16 @@ RUN wget http://cab.spbu.ru/files/release3.10.1/SPAdes-3.10.1-Linux.tar.gz
 RUN tar -xzf SPAdes-3.10.1-Linux.tar.gz
 RUN cp SPAdes-3.10.1-Linux/bin/* /usr/local/bin/
 RUN cp -r SPAdes-3.10.1-Linux/share/* /usr/local/share/
+
+WORKDIR /tmp
+# Compile and install gmap/gsnap
+RUN wget http://research-pub.gene.com/gmap/src/gmap-gsnap-2017-11-15.tar.gz
+RUN mkdir gmap-gsnap && tar xf gmap-gsnap-2017-11-15.tar.gz -C gmap-gsnap --strip-components 1
+WORKDIR /tmp/gmap-gsnap
+RUN ./configure --prefix=/usr/local
+RUN make && make check && make install
+RUN rm -rf /tmp/gmap-gsnap /tmp/gmap-gsnap-2017-11-15.tar.gz
+RUN gsnapl --version
 
 # Cleanup
 RUN rm -rf /tmp/*
