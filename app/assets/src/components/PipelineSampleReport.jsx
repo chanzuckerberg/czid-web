@@ -1685,6 +1685,8 @@ class RenderMarkup extends React.Component {
     );
   }
   renderNtNrSwitch() {
+    if (this.state.view != "table") return null;
+
     let parent = this.props.parent;
     let classStr = "column-switcher";
     let vals = ["NT", "NR"];
