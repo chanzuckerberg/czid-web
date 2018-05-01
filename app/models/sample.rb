@@ -25,11 +25,11 @@ class Sample < ApplicationRecord
 
   # TODO: Make all these params configurable without code change
   DEFAULT_STORAGE_IN_GB = 500
-  DEFAULT_MEMORY_IN_MB = 30_000
+  DEFAULT_MEMORY_IN_MB = 59_000 # sorry, hacky
   HOST_FILTERING_MEMORY_IN_MB = 60_000
 
   DEFAULT_QUEUE = 'idseq'.freeze
-  DEFAULT_VCPUS = 4
+  DEFAULT_VCPUS = 8
 
   DEFAULT_QUEUE_HIMEM = 'idseq_himem'.freeze
   DEFAULT_VCPUS_HIMEM = 32
