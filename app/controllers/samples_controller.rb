@@ -211,6 +211,7 @@ class SamplesController < ApplicationController
 
   def download_heatmap
     @sample_taxons_dict = sample_taxons_dict(params)
+    output_csv = generate_heatmap_csv(@sample_taxons_dict)
     attribute_names = %w[sample_name tax_id taxon_name aggregatescore
                          NT_r NT_rpm NT_zscore NR_r NR_rpm NR_zscore]
     output_csv = CSV.generate(headers: true) do |csv|
@@ -546,20 +547,12 @@ class SamplesController < ApplicationController
     sort_by = params[:sort_by] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
     only_species = params[:species] == "1"
     samples = current_power.samples.where(id: sample_ids).includes([:pipeline_runs])
-    if samples.first
-      first_sample = samples.first
-      background_id = check_background_id(first_sample)
-      if taxon_ids.empty?
-        taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, only_species).pluck("tax_id")
-      end
-      if taxon_ids.empty?
-        return {}
-      else
-        return samples_taxons_details(samples, taxon_ids, background_id)
-      end
-    else
-      return {}
-    end
+    return {} unless samples.first
+    first_sample = samples.first
+    background_id = check_background_id(first_sample)
+    taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, only_species).pluck("tax_id") if taxon_ids.empty?
+    return {} if taxon_ids.empty?
+    samples_taxons_details(samples, taxon_ids, background_id)
   end
 
   def taxon_confirmation_unique_on(params)
