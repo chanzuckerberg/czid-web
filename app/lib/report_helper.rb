@@ -253,14 +253,9 @@ module ReportHelper
     ").to_hash
   end
 
-  def fetch_top_taxons(samples, background_id, only_species)
+  def fetch_top_taxons(samples, background_id)
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
 
-    tax_level_str = if only_species
-                      " AND taxon_counts.tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}"
-                    else
-                      " AND taxon_counts.tax_level = #{TaxonCount::TAX_LEVEL_GENUS}"
-                    end
     sql_results = TaxonCount.connection.select_all("
       SELECT
         taxon_counts.pipeline_run_id     AS  pipeline_run_id,
@@ -294,7 +289,6 @@ module ReportHelper
         taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID} AND
         taxon_counts.count >= #{MINIMUM_READ_THRESHOLD} AND
         taxon_counts.count_type IN ('NT', 'NR')
-        #{tax_level_str}
        ").to_hash
 
     # calculating rpm and zscore, organizing the results by pipeline_run_id
@@ -417,7 +411,7 @@ module ReportHelper
   end
 
   def top_taxons_details(samples, background_id, num_results, sort_by_key, only_species)
-    results_by_pr = fetch_top_taxons(samples, background_id, only_species)
+    results_by_pr = fetch_top_taxons(samples, background_id)
     sort_by = decode_sort_by(sort_by_key)
     count_type = sort_by[:count_type]
     metric = sort_by[:metric]
@@ -426,11 +420,12 @@ module ReportHelper
       pr = res["pr"]
       taxon_counts = res["taxon_counts"]
       sample_id = pr.sample_id
-      tax_2d = convert_2d(taxon_counts)
+      tax_2d = validate_names!(convert_2d(taxon_counts))
       rows = []
       tax_2d.each do |_tax_id, tax_info|
         rows << tax_info
       end
+
       compute_aggregate_scores_v2!(rows)
       rows = rows.select { |row| row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD }
 
