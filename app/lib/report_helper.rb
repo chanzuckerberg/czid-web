@@ -422,6 +422,7 @@ module ReportHelper
       sample_id = pr.sample_id
       tax_2d = validate_names!(convert_2d(taxon_counts))
       rows = []
+      remove_genus_level_counts!(tax_2d) if only_species
       tax_2d.each do |_tax_id, tax_info|
         rows << tax_info
       end
@@ -662,6 +663,10 @@ module ReportHelper
 
   def remove_family_level_counts!(taxon_counts_2d)
     taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] != TaxonCount::TAX_LEVEL_FAMILY }
+  end
+
+def remove_genus_level_counts!(taxon_counts_2d)
+    taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] != TaxonCount::TAX_LEVEL_GENUS }
   end
 
   def cleanup_all!(taxon_counts_2d)
