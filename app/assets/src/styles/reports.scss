@@ -325,12 +325,25 @@ input[type="number"] {
   color: #a0a0a0;
 }
 
+@keyframes highlight-animation {
+  from {
+    background-color: rgb(232, 242, 230);
+  }
+  to {
+    background-color: white;
+  }
+}
+
 .report-table {
   .genus-name {
     display: inline-block;
     margin-right: 5px;
     font-size: $font-size-base;
     font-weight: $font-weight-semibold;
+  }
+  .highlighted {
+    animation-name: highlight-animation;
+    animation-duration: 2s;
   }
   .fa {
     margin-left: 2px;

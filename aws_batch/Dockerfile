@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND noninteractive
 MAINTAINER Yun-Fang Juan yunfang@chanzuckerberg.com
 
 # Add packages, update image, and clear cache
-RUN apt-get update && apt-get install -y build-essential curl wget python-pip python-dev python-scipy python-redis gdebi-core zip unzip g++ zlib1g-dev gcc pkg-config apt-utils
+RUN apt-get update && apt-get install -y build-essential curl wget python-pip python-dev python-scipy python-redis gdebi-core zip unzip g++ zlib1g-dev gcc pkg-config apt-utils make perl
 
 RUN pip install --upgrade pip
 RUN pip install htseq==0.6.1p1
@@ -25,6 +25,17 @@ RUN unzip bowtie2-2.3.2-source.zip
 WORKDIR /tmp/bowtie2-2.3.2
 RUN make NO_TBB=1 # we may want tbb (for "superior thread scaling") later, so will need to find a way to compile without "NO_TBB=1"
 RUN mv -t /usr/local/bin/ bowtie2 bowtie2-align-l bowtie2-align-s bowtie2-build bowtie2-build-l bowtie2-build-s bowtie2-inspect bowtie2-inspect-l bowtie2-inspect-s
+
+WORKDIR /tmp
+# Compile and install gmap/gsnap
+RUN wget http://research-pub.gene.com/gmap/src/gmap-gsnap-2018-03-25.tar.gz
+RUN mkdir gmap-gsnap && tar xf gmap-gsnap-2018-03-25.tar.gz -C gmap-gsnap --strip-components 1
+WORKDIR /tmp/gmap-gsnap
+RUN ./configure --prefix=/usr/local
+RUN make && make check && make install
+RUN rm -rf /tmp/gmap-gsnap /tmp/gmap-gsnap-2018-03-25.tar.gz
+RUN gsnapl --version
+
 
 WORKDIR /tmp
 # install samtools
@@ -67,6 +78,13 @@ RUN pip3 install awscli-cwlogs==1.4.0 keymaker==0.2.1 boto3==1.4.3 awscli==1.11.
 #RUN echo iptables-persistent iptables-persistent/autosave_v4 boolean true | debconf-set-selections
 RUN apt-get install -y iptables-persistent debian-goodies bridge-utils pixz cryptsetup-bin mdadm btrfs-tools libffi-dev libssl-dev libxml2-dev libxslt1-dev libyaml-dev libcurl4-openssl-dev libjemalloc-dev libzip-dev libsnappy-dev liblz4-dev libgmp-dev libmpfr-dev libhts-dev libsqlite3-dev libncurses5-dev htop pydf jq httpie python-dev python-cffi python-pip python-setuptools python-wheel python-virtualenv python-requests python-yaml python3-dev python3-cffi python3-pip python3-setuptools python3-wheel python3-requests python3-yaml nfs-common unzip build-essential cmake libtool autoconf ruby sysstat dstat numactl gdebi-core sqlite3 stunnel moreutils curl wget git aria2 sift
 RUN apt-get install -y bsdtar
+
+# For de-novo assembly
+WORKDIR /tmp
+RUN wget http://cab.spbu.ru/files/release3.10.1/SPAdes-3.10.1-Linux.tar.gz
+RUN tar -xzf SPAdes-3.10.1-Linux.tar.gz
+RUN cp SPAdes-3.10.1-Linux/bin/* /usr/local/bin/
+RUN cp -r SPAdes-3.10.1-Linux/share/* /usr/local/share/
 
 # Cleanup
 RUN rm -rf /tmp/*
