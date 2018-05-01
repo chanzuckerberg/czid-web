@@ -212,26 +212,6 @@ class SamplesController < ApplicationController
   def download_heatmap
     @sample_taxons_dict = sample_taxons_dict(params)
     output_csv = generate_heatmap_csv(@sample_taxons_dict)
-    attribute_names = %w[sample_name tax_id taxon_name aggregatescore
-                         NT_r NT_rpm NT_zscore NR_r NR_rpm NR_zscore]
-    output_csv = CSV.generate(headers: true) do |csv|
-      csv << attribute_names
-      @sample_taxons_dict.each do |sample_record|
-        sample_record[:taxons].each do |taxon_record|
-          data_values = { sample_name: sample_record[:name],
-                          tax_id: taxon_record["tax_id"],
-                          taxon_name: taxon_record["name"],
-                          aggregatescore: taxon_record["NT"]["aggregatescore"],
-                          NT_r: taxon_record["NT"]["r"],
-                          NT_rpm: taxon_record["NT"]["rpm"],
-                          NT_zscore: taxon_record["NT"]["zscore"],
-                          NR_r: taxon_record["NR"]["r"],
-                          NR_rpm: taxon_record["NR"]["rpm"],
-                          NR_zscore: taxon_record["NR"]["zscore"] }
-          csv << data_values.values_at(*attribute_names.map(&:to_sym))
-        end
-      end
-    end
     send_data output_csv, filename: 'heatmap.csv'
   end
 
