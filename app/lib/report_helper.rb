@@ -602,7 +602,7 @@ module ReportHelper
       if tax_id < 0
         # Usually -1 means accession number did not resolve to species.
         # TODO: Can we keep the accession numbers to show in these cases?
-        tax_info['name'] = "All taxa without #{level_str} classification"
+        tax_info['name'] = "All taxa with neither family nor genus classification"
         if tax_id < TaxonLineage::INVALID_CALL_BASE_ID && (tax_info['tax_level'] == TaxonCount::TAX_LEVEL_GENUS || tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES)
           parent_taxid = -(tax_id % TaxonLineage::INVALID_CALL_BASE_ID)
           if taxon_counts_2d[parent_taxid]
