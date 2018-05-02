@@ -220,6 +220,13 @@ class Sample < ApplicationRecord
     return sample_output_s3_path
   end
 
+  def sample_host_filter_output_s3_path
+    pr = pipeline_runs.first
+    return pr.host_filter_output_s3_path
+  rescue
+    return sample_output_s3_path
+  end
+
   def subsample_suffix
     pr = pipeline_runs.first
     pr.subsample_suffix

@@ -11,7 +11,7 @@ class ProjectsController < ApplicationController
   #
   ##########################################
 
-  READ_ACTIONS = [:show, :add_favorite, :remove_favorite, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv, :visuals].freeze
+  READ_ACTIONS = [:show, :add_favorite, :remove_favorite, :make_host_gene_counts, :host_gene_counts_status, :send_host_gene_counts, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv, :visuals].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_emails, :update_project_visibility].freeze
   OTHER_ACTIONS = [:create, :new, :index, :send_project_csv].freeze
 
@@ -58,7 +58,7 @@ class ProjectsController < ApplicationController
     else
       project = current_power.projects.find(params[:id])
       samples = current_power.project_samples(project)
-      project_name = "project-#{project.name.downcase.split(' ').join('_')}"
+      project_name = project.cleaned_project_name
     end
     formatted_samples = format_samples(samples)
     project_csv = generate_sample_list_csv(formatted_samples)
@@ -108,6 +108,30 @@ class ProjectsController < ApplicationController
     user_id = current_user.id
     output_file = @project.report_tar(user_id)
     `aws s3 cp #{@project.report_tar_s3(user_id)} #{output_file}`
+    send_file output_file
+  end
+
+  def make_host_gene_counts
+    user_id = current_user.id
+    `aws s3 rm #{@project.host_gene_counts_tar_s3(user_id)}`
+    params["user_id"] = user_id
+    Resque.enqueue(HostGeneCounts, params)
+    render json: { status_display: project_reports_progress_message }
+  end
+
+  def host_gene_counts_status
+    final_complete = `aws s3 ls #{@project.host_gene_counts_tar_s3(current_user.id)} | wc -l`.to_i == 1
+    if final_complete
+      render json: { status_display: "complete" }
+      return
+    end
+    render json: { status_display: project_reports_progress_message }
+  end
+
+  def send_host_gene_counts
+    user_id = current_user.id
+    output_file = @project.host_gene_counts_tar(user_id)
+    `aws s3 cp #{@project.host_gene_counts_tar_s3(user_id)} #{output_file}`
     send_file output_file
   end
 
