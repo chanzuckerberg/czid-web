@@ -896,3 +896,32 @@ label {
     font-weight: bolder;
   }
 }
+.pipeline-tree {
+  .sample-tree-tooltip {
+    min-width: 230px;
+
+    font-size: 9pt;
+    .row {
+      margin-bottom: 0;
+      .value {
+        text-align: right;
+      }
+      &.active {
+        font-weight: 600;
+      }
+    }
+    .title {
+      text-transform: uppercase;
+      font-size: 8pt;
+      color: #888;
+      border-bottom: 1px solid #eee;
+      margin-bottom: 0.5em;
+    }
+    .name {
+      margin-bottom: 1em;
+    }
+    ul {
+      margin: 0;
+    }
+  }
+}
