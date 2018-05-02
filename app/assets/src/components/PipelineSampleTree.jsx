@@ -16,7 +16,7 @@ class PipelineSampleTree extends React.PureComponent {
   }
 
   makeTree() {
-    function make_node(id, name, level) {
+    let make_node = function(id, name, level) {
       let data = {};
       for (let dataType of this.dataTypes) {
         data[dataType] = 0;
@@ -29,7 +29,7 @@ class PipelineSampleTree extends React.PureComponent {
         weight: 0,
         id: id
       };
-    }
+    };
     make_node = make_node.bind(this);
 
     let rows = this.props.taxons;
