@@ -866,7 +866,7 @@ class PipelineSampleReport extends React.Component {
           aria-hidden="true"
         />
       );
-    if (this.canSeeAlignViz && taxInfo.tax_id > 0 && taxInfo.NT.r > 0)
+    if (this.canSeeAlignViz && (taxInfo.tax_id > 0 || taxInfo.tax_id < -100000000) && taxInfo.NT.r > 0)
       alignmentVizDot = (
         <i
           data-tax-level={tax_level_str}
