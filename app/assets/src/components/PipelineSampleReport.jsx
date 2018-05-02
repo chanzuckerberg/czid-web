@@ -1168,9 +1168,9 @@ class PipelineSampleReport extends React.Component {
     // expand all real genera
     this.expandAll = true;
     this.expandedGenera = [];
-    $(".report-row-species.real-genus").removeClass("hidden");
-    $(".report-arrow-down.real-genus").removeClass("hidden");
-    $(".report-arrow-right.real-genus").addClass("hidden");
+    $(".report-row-species").removeClass("hidden");
+    $(".report-arrow-down").removeClass("hidden");
+    $(".report-arrow-right").addClass("hidden");
     $(".table-arrow").toggleClass("hidden");
   }
 
