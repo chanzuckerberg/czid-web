@@ -855,7 +855,7 @@ class PipelineSampleReport extends React.Component {
     let ncbiDot, fastaDot, alignmentVizDot;
     if (taxInfo.tax_level == 1) tax_level_str = "species";
     else tax_level_str = "genus";
-    if (taxInfo.tax_id != -200)
+    if (taxInfo.tax_id != -200 && taxInfo.tax_id != -100)
       ncbiDot = (
         <i
           data-tax-id={taxInfo.tax_id}
