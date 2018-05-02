@@ -8,7 +8,7 @@ class ReadViz extends React.Component {
   }
 
   parseAlignment(readInfo) {
-    const readPart = parseInt(readInfo.name.split("/")[1]);
+    const readPart = parseInt(readInfo.name.split("/")[1]) || 1;
     const seqLen = readInfo.sequence.length;
     let sequence = readInfo.sequence;
     let reversed = 0;
