@@ -4,7 +4,7 @@ import clusterfck from "clusterfck";
 import axios from "axios";
 import d3, { event as currentEvent } from "d3";
 import NumAbbreviate from "number-abbreviate";
-import { Button, Popup } from "semantic-ui-react";
+import { Button, Icon, Popup } from "semantic-ui-react";
 import copy from "copy-to-clipboard";
 import textWidth from "text-width";
 import { StickyContainer, Sticky } from "react-sticky";
@@ -770,6 +770,24 @@ class SamplesHeatmap extends React.Component {
     };
   }
 
+  downloadCurrentViewDataURL() {
+    if (!this.state.data) {
+      return;
+    }
+    const taxon_ids = this.filteredTaxonsNames.map(taxon_name => {
+      return this.state.taxons.name_to_id[taxon_name];
+    });
+    const sample_ids = this.state.sample_ids;
+    const data_type = this.state.dataType;
+
+    let url = new URL("/samples/download_heatmap", window.origin);
+    let sp = url.searchParams;
+    sp.set("sample_ids", sample_ids);
+    sp.set("taxon_ids", taxon_ids);
+    sp.set("data_type", data_type);
+    return url.toString();
+  }
+
   getDataProperty(data, property) {
     let keys = this.dataAccessorKeys[property];
     return data[keys[0]][keys[1]];
@@ -1343,6 +1361,14 @@ class SamplesHeatmap extends React.Component {
             on="click"
             hideOnScroll
           />
+          <Button
+            className="right"
+            secondary
+            href={this.downloadCurrentViewDataURL()}
+          >
+            <Icon className="cloud download alternate" />
+            Download
+          </Button>
           <h2>
             Comparing {this.state.data ? this.state.data.length : ""} samples
           </h2>
