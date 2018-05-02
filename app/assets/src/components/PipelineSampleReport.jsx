@@ -823,7 +823,12 @@ class PipelineSampleReport extends React.Component {
   // path to NCBI
   gotoNCBI(e) {
     const taxId = e.target.getAttribute("data-tax-id");
-    const ncbiLink = `https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${taxId}`;
+    let num = parseInt(taxId);
+    if (num < 0) {
+      num = -num % 1e8;
+    }
+    num = num.toString();
+    const ncbiLink = `https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${num}`;
     window.open(ncbiLink, "_blank");
   }
 
@@ -850,7 +855,7 @@ class PipelineSampleReport extends React.Component {
     let ncbiDot, fastaDot, alignmentVizDot;
     if (taxInfo.tax_level == 1) tax_level_str = "species";
     else tax_level_str = "genus";
-    if (taxInfo.tax_id > 0)
+    if (taxInfo.tax_id != -200)
       ncbiDot = (
         <i
           data-tax-id={taxInfo.tax_id}
