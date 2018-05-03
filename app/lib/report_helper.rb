@@ -298,7 +298,11 @@ module ReportHelper
     pipeline_runs = PipelineRun.where(id: pipeline_run_ids.uniq).includes([:sample])
     pipeline_runs_by_id = Hash[pipeline_runs.map { |x| [x.id, x] }]
 
+    parent_ids = Set.new()
+
     sql_results.each do |row|
+      parent_ids.add(row["genus_taxid"])
+      parent_ids.add(row["family_taxid"])
       pipeline_run_id = row["pipeline_run_id"]
       if result_hash[pipeline_run_id]
         pr = result_hash[pipeline_run_id]["pr"]
@@ -312,11 +316,55 @@ module ReportHelper
       row["zcore"] = ZSCORE_MIN if row["zscore"] < ZSCORE_MIN
       result_hash[pipeline_run_id]["taxon_counts"] << row
     end
-    result_hash
+    [result_hash, parent_ids]
   end
 
-  def fetch_samples_taxons_counts(samples, taxon_ids, background_id)
+  def fetch_parent_ids(taxon_ids, samples)
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
+
+    res = []
+    sql_results = TaxonCount.connection.select_all("
+      SELECT DISTINCT
+        taxon_counts.genus_taxid         AS  genus_taxid,
+        taxon_counts.family_taxid        AS  family_taxid
+      FROM taxon_counts
+      WHERE
+        pipeline_run_id in (#{pipeline_run_ids.join(',')}) AND
+        taxon_counts.tax_id in (#{taxon_ids.join(',')})
+       ").to_hash
+
+    sql_results.each { |k, v|
+      k.each { |k, v|
+        res << k
+      }
+      puts "KEY"
+      puts k
+      puts "VALUE"
+      puts v
+
+    }
+    puts "RESULTS: "
+    puts sql_results
+    puts res
+    return res
+  end
+
+  def fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
+    pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
+    puts "NIL CHECKS"
+    puts pipeline_run_ids
+    puts taxon_ids
+    puts "PARENT ID SET:"
+    puts parent_ids
+    puts parent_ids.size
+    puts background_id
+    if !taxon_ids || taxon_ids.empty?
+      puts "taxon_ids ARE EMPTY"
+    end
+    if parent_ids.nil? || !parent_ids || parent_ids.empty?
+      puts "PARENT IDS ARE EMPTY"
+    end
+    parent_ids = parent_ids.to_a
 
     # Note: subsample_fraction is of type 'float' so adjusted_total_reads is too
     # Note: stdev is never 0
@@ -356,6 +404,7 @@ module ReportHelper
         taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID} AND
         taxon_counts.count_type IN ('NT', 'NR') AND
         (taxon_counts.tax_id IN (#{taxon_ids.join(',')})
+         OR taxon_counts.tax_id in (#{parent_ids.join(',')})
          OR taxon_counts.genus_taxid IN (#{taxon_ids.join(',')}))").to_hash
 
     # calculating rpm and zscore, organizing the results by pipeline_run_id
@@ -383,15 +432,19 @@ module ReportHelper
     result_hash
   end
 
-  def samples_taxons_details(samples, taxon_ids, background_id)
+  def samples_taxons_details(samples, taxon_ids, parent_ids, background_id, only_species)
     samples_by_id = Hash[samples.map { |s| [s.id, s] }]
-    results_by_pr = fetch_samples_taxons_counts(samples, taxon_ids, background_id)
+    results_by_pr = fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
     results = []
     results_by_pr.each do |_pr_id, res|
       pr = res["pr"]
       taxon_counts = res["taxon_counts"]
       sample_id = pr.sample_id
       tax_2d = validate_names!(convert_2d(taxon_counts))
+      remove_family_level_counts!(tax_2d)
+      if only_species
+        remove_genus_level_counts!(tax_2d)
+      end
       rows = []
       tax_2d.each { |_tax_id, tax_info| rows << tax_info }
       compute_aggregate_scores_v2!(rows)
@@ -411,7 +464,7 @@ module ReportHelper
   end
 
   def top_taxons_details(samples, background_id, num_results, sort_by_key, only_species)
-    results_by_pr = fetch_top_taxons(samples, background_id)
+    results_by_pr, parent_ids = fetch_top_taxons(samples, background_id)
     sort_by = decode_sort_by(sort_by_key)
     count_type = sort_by[:count_type]
     metric = sort_by[:metric]
@@ -419,6 +472,9 @@ module ReportHelper
     results_by_pr.each do |_pr_id, res|
       pr = res["pr"]
       taxon_counts = res["taxon_counts"]
+
+
+
       sample_id = pr.sample_id
       tax_2d = convert_2d(taxon_counts)
       cleanup_genus_ids!(tax_2d)
@@ -456,7 +512,7 @@ module ReportHelper
       end
     end
 
-    candidate_taxons.values.sort_by { |taxon| -1.0 * taxon["max_aggregate_score"].to_f }
+    [candidate_taxons.values.sort_by { |taxon| -1.0 * taxon["max_aggregate_score"].to_f }, parent_ids]
   end
 
   def zero_metrics(count_type)
@@ -672,6 +728,10 @@ module ReportHelper
 
   def remove_family_level_counts!(taxon_counts_2d)
     taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] != TaxonCount::TAX_LEVEL_FAMILY }
+  end
+
+  def remove_genus_level_counts!(taxon_counts_2d)
+    taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] != TaxonCount::TAX_LEVEL_GENUS }
   end
 
   def cleanup_all!(taxon_counts_2d)
