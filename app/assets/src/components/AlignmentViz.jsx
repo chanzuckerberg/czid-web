@@ -47,10 +47,8 @@ class AlignmentViz extends React.Component {
       <div>
         <h2>
           {" "}
-          {this.taxName} ({this.taxLevel}) Alignment ({
-            this.state.alignmentData.length
-          }{" "}
-          unique accessions)
+          {this.taxName ? this.taxName + " (" + this.taxLevel + ")" : ""}{" "}
+          Alignment ({this.state.alignmentData.length} unique accessions)
         </h2>
         <div style={{ margin: "15px" }}>
           {this.state.alignmentData.map(function(item, i) {

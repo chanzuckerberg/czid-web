@@ -47,6 +47,8 @@ class PipelineSampleReport extends React.Component {
     this.allThresholds = ThresholdMap(this.showConcordance);
     this.genus_map = {};
 
+    this.INVALID_CALL_BASE_TAXID = -1e8;
+
     this.thresholdLabel2Name = {};
     for (let i = 0; i < this.allThresholds.length; i += 1) {
       const threshold = this.allThresholds[i];
@@ -867,7 +869,11 @@ class PipelineSampleReport extends React.Component {
           aria-hidden="true"
         />
       );
-    if (this.canSeeAlignViz && taxInfo.tax_id > 0 && taxInfo.NT.r > 0)
+    if (
+      this.canSeeAlignViz &&
+      (taxInfo.tax_id > 0 || taxInfo.tax_id < this.INVALID_CALL_BASE_TAXID) &&
+      taxInfo.NT.r > 0
+    )
       alignmentVizDot = (
         <i
           data-tax-level={tax_level_str}
