@@ -824,8 +824,8 @@ class PipelineSampleReport extends React.Component {
   gotoNCBI(e) {
     const taxId = e.target.getAttribute("data-tax-id");
     let num = parseInt(taxId);
-    if (num < 0) {
-      num = -num % 1e8;
+    if (num < -1e8) {
+      num = -num % -1e8;
     }
     num = num.toString();
     const ncbiLink = `https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${num}`;
@@ -855,7 +855,10 @@ class PipelineSampleReport extends React.Component {
     let ncbiDot, fastaDot, alignmentVizDot;
     if (taxInfo.tax_level == 1) tax_level_str = "species";
     else tax_level_str = "genus";
-    if (taxInfo.tax_id != -200 && taxInfo.tax_id != -100)
+
+    let valid_tax_id =
+      taxInfo.tax_id < this.INVALID_CALL_BASE_TAXID || taxInfo.tax_id > 0;
+    if (valid_tax_id)
       ncbiDot = (
         <i
           data-tax-id={taxInfo.tax_id}
@@ -874,11 +877,7 @@ class PipelineSampleReport extends React.Component {
           aria-hidden="true"
         />
       );
-    if (
-      this.canSeeAlignViz &&
-      (taxInfo.tax_id > 0 || taxInfo.tax_id < this.INVALID_CALL_BASE_TAXID) &&
-      taxInfo.NT.r > 0
-    )
+    if (this.canSeeAlignViz && valid_tax_id && taxInfo.NT.r > 0)
       alignmentVizDot = (
         <i
           data-tax-level={tax_level_str}
