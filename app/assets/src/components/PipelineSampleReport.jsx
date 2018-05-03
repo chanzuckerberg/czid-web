@@ -823,7 +823,12 @@ class PipelineSampleReport extends React.Component {
   // path to NCBI
   gotoNCBI(e) {
     const taxId = e.target.getAttribute("data-tax-id");
-    const ncbiLink = `https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${taxId}`;
+    let num = parseInt(taxId);
+    if (num < -1e8) {
+      num = -num % -1e8;
+    }
+    num = num.toString();
+    const ncbiLink = `https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${num}`;
     window.open(ncbiLink, "_blank");
   }
 
@@ -850,7 +855,10 @@ class PipelineSampleReport extends React.Component {
     let ncbiDot, fastaDot, alignmentVizDot;
     if (taxInfo.tax_level == 1) tax_level_str = "species";
     else tax_level_str = "genus";
-    if (taxInfo.tax_id > 0)
+
+    let valid_tax_id =
+      taxInfo.tax_id < this.INVALID_CALL_BASE_TAXID || taxInfo.tax_id > 0;
+    if (valid_tax_id)
       ncbiDot = (
         <i
           data-tax-id={taxInfo.tax_id}
@@ -869,11 +877,7 @@ class PipelineSampleReport extends React.Component {
           aria-hidden="true"
         />
       );
-    if (
-      this.canSeeAlignViz &&
-      (taxInfo.tax_id > 0 || taxInfo.tax_id < this.INVALID_CALL_BASE_TAXID) &&
-      taxInfo.NT.r > 0
-    )
+    if (this.canSeeAlignViz && valid_tax_id && taxInfo.NT.r > 0)
       alignmentVizDot = (
         <i
           data-tax-level={tax_level_str}
@@ -1168,9 +1172,9 @@ class PipelineSampleReport extends React.Component {
     // expand all real genera
     this.expandAll = true;
     this.expandedGenera = [];
-    $(".report-row-species.real-genus").removeClass("hidden");
-    $(".report-arrow-down.real-genus").removeClass("hidden");
-    $(".report-arrow-right.real-genus").addClass("hidden");
+    $(".report-row-species").removeClass("hidden");
+    $(".report-arrow-down").removeClass("hidden");
+    $(".report-arrow-right").addClass("hidden");
     $(".table-arrow").toggleClass("hidden");
   }
 
