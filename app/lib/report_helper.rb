@@ -253,14 +253,9 @@ module ReportHelper
     ").to_hash
   end
 
-  def fetch_top_taxons(samples, background_id, only_species)
+  def fetch_top_taxons(samples, background_id)
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
 
-    tax_level_str = if only_species
-                      " AND taxon_counts.tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}"
-                    else
-                      " AND taxon_counts.tax_level = #{TaxonCount::TAX_LEVEL_GENUS}"
-                    end
     sql_results = TaxonCount.connection.select_all("
       SELECT
         taxon_counts.pipeline_run_id     AS  pipeline_run_id,
@@ -294,7 +289,6 @@ module ReportHelper
         taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID} AND
         taxon_counts.count >= #{MINIMUM_READ_THRESHOLD} AND
         taxon_counts.count_type IN ('NT', 'NR')
-
        ").to_hash
 
     # calculating rpm and zscore, organizing the results by pipeline_run_id
@@ -417,7 +411,7 @@ module ReportHelper
   end
 
   def top_taxons_details(samples, background_id, num_results, sort_by_key, only_species)
-    results_by_pr = fetch_top_taxons(samples, background_id, only_species)
+    results_by_pr = fetch_top_taxons(samples, background_id)
     sort_by = decode_sort_by(sort_by_key)
     count_type = sort_by[:count_type]
     metric = sort_by[:metric]
@@ -427,20 +421,15 @@ module ReportHelper
       taxon_counts = res["taxon_counts"]
       sample_id = pr.sample_id
       tax_2d = convert_2d(taxon_counts)
+      cleanup_genus_ids!(tax_2d)
+      validate_names!(tax_2d)
+      cleanup_missing_genus_counts!(tax_2d)
+
       if only_species
-        puts "ONLY SPECIES"
-        puts "TAX LEVEL SPECIES: " + TaxonCount::TAX_LEVEL_SPECIES.to_s
-        tax_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] = TaxonCount::TAX_LEVEL_SPECIES }
+        tax_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES }
       else
-        puts "NOT ONLY SPECIES"
-        puts "TAX LEVEL GENUS: " + TaxonCount::TAX_LEVEL_GENUS.to_s
-        puts "BEFORE"
-        puts tax_2d
-        tax_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] = TaxonCount::TAX_LEVEL_GENUS }
-        puts "AFTER"
-        puts tax_2d
+        tax_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] == TaxonCount::TAX_LEVEL_GENUS }
       end
-      tax_2d = validate_names!(tax_2d)
 
       rows = []
       tax_2d.each do |_tax_id, tax_info|
