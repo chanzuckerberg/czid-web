@@ -525,7 +525,7 @@ class SamplesController < ApplicationController
     taxon_ids = taxon_ids.compact
 
     sort_by = params[:sort_by] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
-    species_selected = params[:species] == "1"  # Otherwise genus selected
+    species_selected = params[:species] == "1" # Otherwise genus selected
     samples = current_power.samples.where(id: sample_ids).includes([:pipeline_runs])
     return {} unless samples.first
 

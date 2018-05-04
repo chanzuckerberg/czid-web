@@ -417,9 +417,9 @@ module ReportHelper
       sample_id = pr.sample_id
       tax_2d = validate_names!(convert_2d(taxon_counts))
 
-      if species_selected  # Species selected
+      if species_selected # Species selected
         only_species_level_counts!(tax_2d)
-      else  # Genus selected
+      else # Genus selected
         only_genus_level_counts!(tax_2d)
       end
       rows = []
@@ -455,9 +455,9 @@ module ReportHelper
       validate_names!(tax_2d)
       cleanup_missing_genus_counts!(tax_2d)
 
-      if species_selected  # Species selected
+      if species_selected # Species selected
         only_species_level_counts!(tax_2d)
-      else  # Genus selected
+      else # Genus selected
         only_genus_level_counts!(tax_2d)
       end
 
