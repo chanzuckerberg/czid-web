@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND noninteractive
 MAINTAINER Yun-Fang Juan yunfang@chanzuckerberg.com
 
 # Add packages, update image, and clear cache
-RUN apt-get update && apt-get install -y build-essential curl wget python-pip python-dev python-scipy python-redis gdebi-core zip unzip g++ zlib1g-dev gcc pkg-config apt-utils make perl
+RUN apt-get update && apt-get install -y build-essential curl wget python-pip python-dev python-scipy python-redis gdebi-core zip unzip g++ zlib1g-dev gcc pkg-config apt-utils make perl cmake libbz2-dev
 
 RUN pip install --upgrade pip
 RUN pip install htseq==0.6.1p1
@@ -23,7 +23,7 @@ RUN rm -rf STAR-2.5.3a
 RUN wget https://sourceforge.net/projects/bowtie-bio/files/bowtie2/2.3.2/bowtie2-2.3.2-source.zip
 RUN unzip bowtie2-2.3.2-source.zip
 WORKDIR /tmp/bowtie2-2.3.2
-RUN make NO_TBB=1 # we may want tbb (for "superior thread scaling") later, so will need to find a way to compile without "NO_TBB=1"
+RUN make -j 16 NO_TBB=1 # we may want tbb (for "superior thread scaling") later, so will need to find a way to compile without "NO_TBB=1"
 RUN mv -t /usr/local/bin/ bowtie2 bowtie2-align-l bowtie2-align-s bowtie2-build bowtie2-build-l bowtie2-build-s bowtie2-inspect bowtie2-inspect-l bowtie2-inspect-s
 
 WORKDIR /tmp
@@ -33,7 +33,7 @@ RUN wget https://github.com/samtools/samtools/releases/download/1.5/samtools-1.5
 RUN tar -jxf samtools-1.5.tar.bz2
 WORKDIR /tmp/samtools-1.5
 RUN ./configure --disable-lzma
-RUN make
+RUN make -j 16
 RUN mv samtools /usr/local/bin/
 
 WORKDIR /tmp
@@ -41,7 +41,7 @@ WORKDIR /tmp
 RUN wget http://derisilab.ucsf.edu/software/price/PriceSource140408.tar.gz
 RUN tar -xzf PriceSource140408.tar.gz
 WORKDIR /tmp/PriceSource140408
-RUN make
+RUN make -j 16
 RUN mv PriceSeqFilter /usr/local/bin/
 
 WORKDIR /tmp
@@ -49,9 +49,9 @@ WORKDIR /tmp
 RUN wget https://github.com/weizhongli/cdhit/archive/V4.6.8.zip
 RUN unzip V4.6.8.zip
 WORKDIR /tmp/cdhit-4.6.8
-RUN make
+RUN make -j 16
 WORKDIR /tmp/cdhit-4.6.8/cd-hit-auxtools
-RUN make
+RUN make -j 16
 RUN mv cd-hit-dup /usr/local/bin/
 
 WORKDIR /tmp
@@ -69,11 +69,14 @@ RUN apt-get install -y iptables-persistent debian-goodies bridge-utils pixz cryp
 RUN apt-get install -y bsdtar
 
 # For de-novo assembly
-WORKDIR /tmp
-RUN wget http://cab.spbu.ru/files/release3.10.1/SPAdes-3.10.1-Linux.tar.gz
-RUN tar -xzf SPAdes-3.10.1-Linux.tar.gz
-RUN cp SPAdes-3.10.1-Linux/bin/* /usr/local/bin/
-RUN cp -r SPAdes-3.10.1-Linux/share/* /usr/local/share/
+WORKDIR /tmp/spades_build
+RUN git clone https://github.com/ablab/spades.git
+WORKDIR /tmp/spades_build/spades
+RUN git checkout spades_3.11.0
+WORKDIR /tmp/spades_build/spades/assembler
+RUN PREFIX=/usr/local ./spades_compile.sh
+RUN /usr/local/bin/spades.py --test
+
 
 WORKDIR /tmp
 # Compile and install gmap/gsnap
@@ -81,7 +84,7 @@ RUN wget http://research-pub.gene.com/gmap/src/gmap-gsnap-2017-11-15.tar.gz
 RUN mkdir gmap-gsnap && tar xf gmap-gsnap-2017-11-15.tar.gz -C gmap-gsnap --strip-components 1
 WORKDIR /tmp/gmap-gsnap
 RUN ./configure --prefix=/usr/local
-RUN make && make check && make install
+RUN make -j 16 && make check && make install
 RUN rm -rf /tmp/gmap-gsnap /tmp/gmap-gsnap-2017-11-15.tar.gz
 RUN gsnapl --version
 
