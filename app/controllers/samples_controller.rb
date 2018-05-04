@@ -190,11 +190,11 @@ class SamplesController < ApplicationController
     sort_by = params[:sort_by] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
 
     samples = current_power.samples.where(id: sample_ids)
-    only_species = params[:species] == "1"
+    species_selected = params[:species] == "1"
     if samples.first
       first_sample = samples.first
       background_id = check_background_id(first_sample)
-      @top_taxons = top_taxons_details(samples, background_id, num_results, sort_by, only_species)
+      @top_taxons = top_taxons_details(samples, background_id, num_results, sort_by, species_selected)
       render json: @top_taxons
     else
       render json: {}
@@ -525,14 +525,16 @@ class SamplesController < ApplicationController
     taxon_ids = taxon_ids.compact
 
     sort_by = params[:sort_by] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
-    only_species = params[:species] == "1"
+    species_selected = params[:species] == "1" # Otherwise genus selected
     samples = current_power.samples.where(id: sample_ids).includes([:pipeline_runs])
     return {} unless samples.first
+
     first_sample = samples.first
     background_id = check_background_id(first_sample)
-    taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, only_species).pluck("tax_id") if taxon_ids.empty?
+    taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected).pluck("tax_id") if taxon_ids.empty?
+
     return {} if taxon_ids.empty?
-    samples_taxons_details(samples, taxon_ids, background_id)
+    samples_taxons_details(samples, taxon_ids, background_id, species_selected)
   end
 
   def taxon_confirmation_unique_on(params)
