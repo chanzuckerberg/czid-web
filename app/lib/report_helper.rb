@@ -339,7 +339,6 @@ module ReportHelper
   def fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
     parent_ids = parent_ids.to_a
-    # parent_ids = Set.new
 
     # Note: subsample_fraction is of type 'float' so adjusted_total_reads is too
     # Note: stdev is never 0
@@ -407,7 +406,7 @@ module ReportHelper
     result_hash
   end
 
-  def samples_taxons_details(samples, taxon_ids, background_id, only_species)
+  def samples_taxons_details(samples, taxon_ids, background_id, species_selected)
     samples_by_id = Hash[samples.map { |s| [s.id, s] }]
     parent_ids = fetch_parent_ids(taxon_ids, samples)
     results_by_pr = fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
@@ -417,9 +416,11 @@ module ReportHelper
       taxon_counts = res["taxon_counts"]
       sample_id = pr.sample_id
       tax_2d = validate_names!(convert_2d(taxon_counts))
-      remove_family_level_counts!(tax_2d)
-      if only_species
-        remove_genus_level_counts!(tax_2d)
+
+      if species_selected  # Species selected
+        only_species_level_counts!(tax_2d)
+      else  # Genus selected
+        only_genus_level_counts!(tax_2d)
       end
       rows = []
       tax_2d.each { |_tax_id, tax_info| rows << tax_info }
@@ -439,7 +440,7 @@ module ReportHelper
     results
   end
 
-  def top_taxons_details(samples, background_id, num_results, sort_by_key, only_species)
+  def top_taxons_details(samples, background_id, num_results, sort_by_key, species_selected)
     results_by_pr = fetch_top_taxons(samples, background_id)
     sort_by = decode_sort_by(sort_by_key)
     count_type = sort_by[:count_type]
@@ -454,10 +455,10 @@ module ReportHelper
       validate_names!(tax_2d)
       cleanup_missing_genus_counts!(tax_2d)
 
-      if only_species
-        tax_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES }
-      else
-        tax_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] == TaxonCount::TAX_LEVEL_GENUS }
+      if species_selected  # Species selected
+        only_species_level_counts!(tax_2d)
+      else  # Genus selected
+        only_genus_level_counts!(tax_2d)
       end
 
       rows = []
@@ -705,6 +706,14 @@ module ReportHelper
 
   def remove_genus_level_counts!(taxon_counts_2d)
     taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] != TaxonCount::TAX_LEVEL_GENUS }
+  end
+
+  def only_species_level_counts!(taxon_counts_2d)
+    taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES }
+  end
+
+  def only_genus_level_counts!(taxon_counts_2d)
+    taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] == TaxonCount::TAX_LEVEL_GENUS }
   end
 
   def cleanup_all!(taxon_counts_2d)
