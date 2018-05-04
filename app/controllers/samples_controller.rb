@@ -527,30 +527,19 @@ class SamplesController < ApplicationController
     sort_by = params[:sort_by] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
     only_species = params[:species] == "1"
     samples = current_power.samples.where(id: sample_ids).includes([:pipeline_runs])
-    if samples.first
-      first_sample = samples.first
-      background_id = check_background_id(first_sample)
-      if taxon_ids.empty?
-        puts "Taxon ids is empty"
-        taxon_rows, parent_ids = top_taxons_details(samples, background_id, num_results, sort_by, only_species)
-        taxon_ids = taxon_rows.pluck("tax_id")
-        puts "TAXON ROWS"
-        puts taxon_rows
-        # parent_ids = Set.new(taxon_rows.pluck("genus_taxid")) | Set.new(taxon_rows.pluck("family_taxid"))
-      else
-        parent_ids = fetch_parent_ids(taxon_ids, samples)
-      end
-      puts "PARENT IDS: "
-      puts parent_ids
-      if taxon_ids.empty?
-        return {}
-      else
-        @sample_taxons_dict = samples_taxons_details(samples, taxon_ids, parent_ids, background_id, only_species)
-      end
+    return {} unless samples.first
+
+    first_sample = samples.first
+    background_id = check_background_id(first_sample)
+    if taxon_ids.empty?
+      taxon_rows, parent_ids = top_taxons_details(samples, background_id, num_results, sort_by, only_species)
+      taxon_ids = taxon_rows.pluck("tax_id")
     else
-      return {}
+      parent_ids = fetch_parent_ids(taxon_ids, samples)
     end
-    return @sample_taxons_dict
+
+    return {} if taxon_ids.empty?
+    return samples_taxons_details(samples, taxon_ids, parent_ids, background_id, only_species)
   end
 
   def taxon_confirmation_unique_on(params)

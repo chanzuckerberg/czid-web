@@ -299,10 +299,8 @@ module ReportHelper
     pipeline_runs_by_id = Hash[pipeline_runs.map { |x| [x.id, x] }]
 
     parent_ids = Set.new()
-
     sql_results.each do |row|
-      parent_ids.add(row["genus_taxid"])
-      parent_ids.add(row["family_taxid"])
+      parent_ids.merge([row["genus_taxid"], row["family_taxid"]])
       pipeline_run_id = row["pipeline_run_id"]
       if result_hash[pipeline_run_id]
         pr = result_hash[pipeline_run_id]["pr"]
@@ -316,12 +314,11 @@ module ReportHelper
       row["zcore"] = ZSCORE_MIN if row["zscore"] < ZSCORE_MIN
       result_hash[pipeline_run_id]["taxon_counts"] << row
     end
-    [result_hash, parent_ids]
+    return [result_hash, parent_ids]
   end
 
   def fetch_parent_ids(taxon_ids, samples)
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
-
     res = []
     sql_results = TaxonCount.connection.select_all("
       SELECT DISTINCT
@@ -333,37 +330,16 @@ module ReportHelper
         taxon_counts.tax_id in (#{taxon_ids.join(',')})
        ").to_hash
 
-    sql_results.each { |k, v|
-      k.each { |k, v|
-        res << k
+    sql_results.each { |k, _|  # Unfolding the hash
+      k.each { |id, _|
+        res << id
       }
-      puts "KEY"
-      puts k
-      puts "VALUE"
-      puts v
-
     }
-    puts "RESULTS: "
-    puts sql_results
-    puts res
     return res
   end
 
   def fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
-    puts "NIL CHECKS"
-    puts pipeline_run_ids
-    puts taxon_ids
-    puts "PARENT ID SET:"
-    puts parent_ids
-    puts parent_ids.size
-    puts background_id
-    if !taxon_ids || taxon_ids.empty?
-      puts "taxon_ids ARE EMPTY"
-    end
-    if parent_ids.nil? || !parent_ids || parent_ids.empty?
-      puts "PARENT IDS ARE EMPTY"
-    end
     parent_ids = parent_ids.to_a
 
     # Note: subsample_fraction is of type 'float' so adjusted_total_reads is too
@@ -472,9 +448,6 @@ module ReportHelper
     results_by_pr.each do |_pr_id, res|
       pr = res["pr"]
       taxon_counts = res["taxon_counts"]
-
-
-
       sample_id = pr.sample_id
       tax_2d = convert_2d(taxon_counts)
       cleanup_genus_ids!(tax_2d)
