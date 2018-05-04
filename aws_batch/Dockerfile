@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND noninteractive
 MAINTAINER Yun-Fang Juan yunfang@chanzuckerberg.com
 
 # Add packages, update image, and clear cache
-RUN apt-get update && apt-get install -y build-essential curl wget python-pip python-dev python-scipy python-redis gdebi-core zip unzip g++ zlib1g-dev gcc pkg-config apt-utils make perl
+RUN apt-get update && apt-get install -y build-essential curl wget python-pip python-dev python-scipy python-redis gdebi-core zip unzip g++ zlib1g-dev gcc pkg-config apt-utils make perl cmake libbz2-dev
 
 RUN pip install --upgrade pip
 RUN pip install htseq==0.6.1p1
@@ -69,11 +69,13 @@ RUN apt-get install -y iptables-persistent debian-goodies bridge-utils pixz cryp
 RUN apt-get install -y bsdtar
 
 # For de-novo assembly
-WORKDIR /tmp
-RUN wget http://cab.spbu.ru/files/release3.10.1/SPAdes-3.10.1-Linux.tar.gz
-RUN tar -xzf SPAdes-3.10.1-Linux.tar.gz
-RUN cp SPAdes-3.10.1-Linux/bin/* /usr/local/bin/
-RUN cp -r SPAdes-3.10.1-Linux/share/* /usr/local/share/
+WORKDIR /tmp/spades_build
+RUN git clone git@github.com:ablab/spades.git
+RUN git checkout spades_3.11.0
+RUN cd spades/assembler
+RUN PREFIX=/usr/local ./spades_compile.sh
+RUN /usr/local/bin/spades.py --test
+
 
 WORKDIR /tmp
 # Compile and install gmap/gsnap
