@@ -70,10 +70,10 @@ RUN apt-get install -y bsdtar
 
 # For de-novo assembly
 WORKDIR /tmp/spades_build
-RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
-RUN git clone git@github.com:ablab/spades.git
+RUN git clone https://github.com/ablab/spades.git
+WORKDIR /tmp/spades_build/spades
 RUN git checkout spades_3.11.0
-RUN cd spades/assembler
+WORKDIR /tmp/spades_build/spades/assembler
 RUN PREFIX=/usr/local ./spades_compile.sh
 RUN /usr/local/bin/spades.py --test
 
