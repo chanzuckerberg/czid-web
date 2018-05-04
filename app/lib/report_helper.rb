@@ -298,7 +298,7 @@ module ReportHelper
     pipeline_runs = PipelineRun.where(id: pipeline_run_ids.uniq).includes([:sample])
     pipeline_runs_by_id = Hash[pipeline_runs.map { |x| [x.id, x] }]
 
-    parent_ids = Set.new()
+    parent_ids = Set.new
     sql_results.each do |row|
       parent_ids.merge([row["genus_taxid"], row["family_taxid"]])
       pipeline_run_id = row["pipeline_run_id"]
@@ -314,7 +314,7 @@ module ReportHelper
       row["zcore"] = ZSCORE_MIN if row["zscore"] < ZSCORE_MIN
       result_hash[pipeline_run_id]["taxon_counts"] << row
     end
-    return [result_hash, parent_ids]
+    [result_hash, parent_ids]
   end
 
   def fetch_parent_ids(taxon_ids, samples)
@@ -330,12 +330,12 @@ module ReportHelper
         taxon_counts.tax_id in (#{taxon_ids.join(',')})
        ").to_hash
 
-    sql_results.each { |k, _|  # Unfolding the hash
-      k.each { |id, _|
+    sql_results.each do |k, _| # Unfolding the hash
+      k.each do |id, _|
         res << id
-      }
-    }
-    return res
+      end
+    end
+    res
   end
 
   def fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)

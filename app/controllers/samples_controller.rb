@@ -539,7 +539,7 @@ class SamplesController < ApplicationController
     end
 
     return {} if taxon_ids.empty?
-    return samples_taxons_details(samples, taxon_ids, parent_ids, background_id, only_species)
+    samples_taxons_details(samples, taxon_ids, parent_ids, background_id, only_species)
   end
 
   def taxon_confirmation_unique_on(params)
