@@ -298,9 +298,7 @@ module ReportHelper
     pipeline_runs = PipelineRun.where(id: pipeline_run_ids.uniq).includes([:sample])
     pipeline_runs_by_id = Hash[pipeline_runs.map { |x| [x.id, x] }]
 
-    parent_ids = Set.new
     sql_results.each do |row|
-      parent_ids.merge([row["genus_taxid"], row["family_taxid"]])
       pipeline_run_id = row["pipeline_run_id"]
       if result_hash[pipeline_run_id]
         pr = result_hash[pipeline_run_id]["pr"]
@@ -314,7 +312,7 @@ module ReportHelper
       row["zcore"] = ZSCORE_MIN if row["zscore"] < ZSCORE_MIN
       result_hash[pipeline_run_id]["taxon_counts"] << row
     end
-    [result_hash, parent_ids]
+    result_hash
   end
 
   def fetch_parent_ids(taxon_ids, samples)
@@ -341,6 +339,7 @@ module ReportHelper
   def fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
     parent_ids = parent_ids.to_a
+    # parent_ids = Set.new
 
     # Note: subsample_fraction is of type 'float' so adjusted_total_reads is too
     # Note: stdev is never 0
@@ -408,8 +407,9 @@ module ReportHelper
     result_hash
   end
 
-  def samples_taxons_details(samples, taxon_ids, parent_ids, background_id, only_species)
+  def samples_taxons_details(samples, taxon_ids, background_id, only_species)
     samples_by_id = Hash[samples.map { |s| [s.id, s] }]
+    parent_ids = fetch_parent_ids(taxon_ids, samples)
     results_by_pr = fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
     results = []
     results_by_pr.each do |_pr_id, res|
@@ -440,7 +440,7 @@ module ReportHelper
   end
 
   def top_taxons_details(samples, background_id, num_results, sort_by_key, only_species)
-    results_by_pr, parent_ids = fetch_top_taxons(samples, background_id)
+    results_by_pr = fetch_top_taxons(samples, background_id)
     sort_by = decode_sort_by(sort_by_key)
     count_type = sort_by[:count_type]
     metric = sort_by[:metric]
@@ -485,7 +485,7 @@ module ReportHelper
       end
     end
 
-    [candidate_taxons.values.sort_by { |taxon| -1.0 * taxon["max_aggregate_score"].to_f }, parent_ids]
+    candidate_taxons.values.sort_by { |taxon| -1.0 * taxon["max_aggregate_score"].to_f }
   end
 
   def zero_metrics(count_type)

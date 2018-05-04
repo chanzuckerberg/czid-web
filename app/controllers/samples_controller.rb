@@ -531,15 +531,10 @@ class SamplesController < ApplicationController
 
     first_sample = samples.first
     background_id = check_background_id(first_sample)
-    if taxon_ids.empty?
-      taxon_rows, parent_ids = top_taxons_details(samples, background_id, num_results, sort_by, only_species)
-      taxon_ids = taxon_rows.pluck("tax_id")
-    else
-      parent_ids = fetch_parent_ids(taxon_ids, samples)
-    end
+    taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, only_species).pluck("tax_id") if taxon_ids.empty?
 
     return {} if taxon_ids.empty?
-    samples_taxons_details(samples, taxon_ids, parent_ids, background_id, only_species)
+    samples_taxons_details(samples, taxon_ids, background_id, only_species)
   end
 
   def taxon_confirmation_unique_on(params)
