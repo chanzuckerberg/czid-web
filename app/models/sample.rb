@@ -18,6 +18,7 @@ class Sample < ApplicationRecord
   SORTED_TAXID_ANNOTATED_FASTA_GENUS_NR = 'taxid_annot_sorted_genus_nr.fasta'.freeze
   SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NT = 'taxid_annot_sorted_family_nt.fasta'.freeze
   SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR = 'taxid_annot_sorted_family_nr.fasta'.freeze
+  TOTAL_READS_JSON = "total_reads.json".freeze
 
   LOG_BASENAME = 'log.txt'.freeze
 
@@ -194,10 +195,22 @@ class Sample < ApplicationRecord
   def initiate_s3_cp
     return unless status == STATUS_CREATED
     stderr_array = []
+    total_reads_json_path = nil
     input_files.each do |input_file|
       fastq = input_file.source
+      total_reads_json_path = File.join(File.dirname(fastq.to_s), TOTAL_READS_JSON)
       _stdout, stderr, status = Open3.capture3("aws", "s3", "cp", fastq.to_s, "#{sample_input_s3_path}/#{input_file.name}")
       stderr_array << stderr unless status.exitstatus.zero?
+    end
+    if total_reads_json_path.present?
+      # For samples where we are only given fastas post host filtering, we need to input the total reads (before host filtering) from this file.
+      _stdout, _stderr, status = Open3.capture3("aws", "s3", "cp", total_reads_json_path, "#{sample_input_s3_path}/#{TOTAL_READS_JSON}")
+      # We don't have a good way to know if this file should be present or not, so we just try to upload it
+      # and if it fails, we try one more time;  if that fails too, it's okay, the file is optional.
+      unless status.exitstatus.zero?
+        sleep(1.0)
+        _stdout, _stderr, _status = Open3.capture3("aws", "s3", "cp", total_reads_json_path, "#{sample_input_s3_path}/#{TOTAL_READS_JSON}")
+      end
     end
     if s3_preload_result_path.present? && s3_preload_result_path[0..4] == 's3://'
       _stdout, stderr, status = Open3.capture3("aws", "s3", "cp", s3_preload_result_path.to_s, sample_output_s3_path.to_s, "--recursive")
