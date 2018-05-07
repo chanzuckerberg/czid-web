@@ -37,7 +37,7 @@
                 <td> <%= "#{pipeline_run.id} - #{run_stage.name}" %>
                 <td> <%= run_stage.job_status %>
                 <td> <%= run_stage.job_id %>
-                <td> <%= link_to 'Logs', run_stage.log_url %>
+                <td> <%= link_to 'Logs', run_stage.log_url, target: :_blank %>
                 <td><%= pipeline_run.remaining_reads %> &nbsp;</td>
                 <td><%= run_stage.created_at %></td>
                </tr>
@@ -47,7 +47,7 @@
             <td> <%= pipeline_run.id %>
             <td> <%= pipeline_run.job_status %>
             <td> <%= pipeline_run.job_id %>
-            <td> <%= link_to 'Logs', pipeline_run.log_url %>
+            <td> <%= link_to 'Logs', pipeline_run.log_url, target: :_blank %>
             <td><%= pipeline_run.remaining_reads %> &nbsp;</td>
             <td><%= pipeline_run.created_at %></td>
            </tr>

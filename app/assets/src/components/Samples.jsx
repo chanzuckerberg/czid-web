@@ -900,9 +900,9 @@ class Samples extends React.Component {
 
   compareSamples() {
     if (this.state.selectedSampleIds.length) {
-      location.href = `/samples/heatmap?sample_ids=${
-        this.state.selectedSampleIds
-      }`;
+      window.open(
+        `/samples/heatmap?sample_ids=${this.state.selectedSampleIds}`
+      );
     }
   }
 

@@ -540,7 +540,7 @@ class SampleUpload extends React.Component {
           this.setState({ sampleName: base });
         }
       }
-    } else if (sampleField) {
+    } else {
       this.setState({ sampleName: sampleField });
     }
   }
