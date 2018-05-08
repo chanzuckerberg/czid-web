@@ -141,7 +141,7 @@ class PipelineSampleReads extends React.Component {
                         this.handleDropdownChange(field, i, e);
                       }}
                       ref={field}
-                      key={i}
+                      key={`version_${i}`}
                     >
                       {option_value}
                     </li>
