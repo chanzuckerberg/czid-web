@@ -45,8 +45,8 @@
               <%= pipeline_run.job_status %>
               &nbsp;
               <% if pipeline_run.completed? %>
-                <%= button_to 'rerun from top', kickoff_pipeline_sample_path(sample), method: :put %>
-                <%= button_to "rerun failed stage", retry_pipeline_sample_path(sample), method: :put %>
+                <%= button_to 'rerun from top', kickoff_pipeline_sample_path(sample), method: :put, form: {target: '_blank'} %>
+                <%= button_to "rerun failed stage", retry_pipeline_sample_path(sample), method: :put, form: {target: '_blank'} %>
               <% end %>
             <% end %>
           </td>

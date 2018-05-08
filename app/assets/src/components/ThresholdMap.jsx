@@ -60,7 +60,7 @@ function ThresholdMap(show_concordance) {
   return result;
 }
 
-ThresholdMap.isThresholdValid = function (threshold) {
+ThresholdMap.isThresholdValid = function(threshold) {
   if (
     threshold.hasOwnProperty("label") &&
     threshold.hasOwnProperty("operator") &&
@@ -73,13 +73,14 @@ ThresholdMap.isThresholdValid = function (threshold) {
     );
   }
   return false;
-}
-ThresholdMap.getSavedThresholdFilters = function () {
+};
+
+ThresholdMap.getSavedThresholdFilters = function() {
   const activeThresholds = window.localStorage.getItem("activeThresholds");
   return activeThresholds ? JSON.parse(activeThresholds) : [];
-}
+};
 
-ThresholdMap.saveThresholdFilters = function (thresholds) {
+ThresholdMap.saveThresholdFilters = function(thresholds) {
   const activeThresholds = thresholds.filter(threshold => {
     return ThresholdMap.isThresholdValid(threshold);
   });
@@ -87,9 +88,9 @@ ThresholdMap.saveThresholdFilters = function (thresholds) {
     "activeThresholds",
     JSON.stringify(activeThresholds)
   );
-}
+};
 
-ThresholdMap.taxonPassThresholdFilter = function (taxon, rules) {
+ThresholdMap.taxonPassThresholdFilter = function(taxon, rules) {
   if (Object.keys(taxon).length <= 0) {
     return false;
   }
@@ -121,9 +122,6 @@ ThresholdMap.taxonPassThresholdFilter = function (taxon, rules) {
     }
   }
   return true;
-}
+};
 
-
-
-
-export default ThresholdMap
+export default ThresholdMap;
