@@ -396,13 +396,7 @@ module ReportHelper
       pr = res["pr"]
       taxon_counts = res["taxon_counts"]
       sample_id = pr.sample_id
-      tax_2d = validate_names!(convert_2d(taxon_counts))
-
-      if species_selected # Species selected
-        only_species_level_counts!(tax_2d)
-      else # Genus selected
-        only_genus_level_counts!(tax_2d)
-      end
+      tax_2d = taxon_counts_cleanup(taxon_counts, species_selected)
       rows = []
       tax_2d.each { |_tax_id, tax_info| rows << tax_info }
       compute_aggregate_scores_v2!(rows)
@@ -431,16 +425,15 @@ module ReportHelper
       pr = res["pr"]
       taxon_counts = res["taxon_counts"]
       sample_id = pr.sample_id
-      tax_2d = convert_2d(taxon_counts)
-      cleanup_genus_ids!(tax_2d)
-      validate_names!(tax_2d)
-      cleanup_missing_genus_counts!(tax_2d)
+
+      tax_2d = validate_names!(convert_2d(taxon_counts))
 
       if species_selected # Species selected
         only_species_level_counts!(tax_2d)
       else # Genus selected
         only_genus_level_counts!(tax_2d)
       end
+      # tax_2d = taxon_counts_cleanup(taxon_counts, species_selected)
 
       rows = []
       tax_2d.each do |_tax_id, tax_info|
@@ -697,15 +690,19 @@ module ReportHelper
     taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] == TaxonCount::TAX_LEVEL_GENUS }
   end
 
-  def cleanup_all!(taxon_counts_2d)
-    # t0 = Time.now
-    cleanup_genus_ids!(taxon_counts_2d)
-    validate_names!(taxon_counts_2d)
-    cleanup_missing_genus_counts!(taxon_counts_2d)
-    remove_family_level_counts!(taxon_counts_2d) # TODO: Support these
-    # t1 = Time.now
-    # logger.info "Data cleanup took #{t1 - t0} seconds."
-    taxon_counts_2d
+  def taxon_counts_cleanup(taxon_counts, species_selected)
+    tax_2d = convert_2d(taxon_counts)
+    cleanup_genus_ids!(tax_2d)
+    validate_names!(tax_2d)
+    cleanup_missing_genus_counts!(tax_2d)
+
+    if species_selected # Species selected
+      only_species_level_counts!(tax_2d)
+    else # Genus selected
+      only_genus_level_counts!(tax_2d)
+    end
+
+    tax_2d
   end
 
   def negative(vec_10d)
@@ -866,6 +863,11 @@ module ReportHelper
     # Fetch and clean data.
     t0 = wall_clock_ms
     tax_2d = cleanup_all!(convert_2d(fetch_taxon_counts(pipeline_run_id, background_id)))
+    #
+    # taxon_counts = fetch_taxon_counts(pipeline_run_id, background_id)
+    #
+    # species_selected = params[:species] == "1" # Otherwise genus selected
+    # tax_2d = taxon_counts_cleanup(taxon_counts, species_selected)
     t1 = wall_clock_ms
 
     # These counts are shown in the UI on each genus line.
