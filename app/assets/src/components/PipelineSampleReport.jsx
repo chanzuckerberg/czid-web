@@ -31,13 +31,9 @@ class PipelineSampleReport extends React.Component {
     this.taxon_row_refs = {};
     this.all_categories = props.all_categories;
     this.report_details = props.report_details;
-    this.report_page_params = props.report_page_params;
     this.all_backgrounds = props.all_backgrounds;
     this.max_rows_to_render = props.max_rows || 1500;
-    this.default_sort_by = this.report_page_params.sort_by.replace(
-      "highest_",
-      ""
-    );
+    this.default_sort_by = "nt_aggregatescore";
     const cached_cats = Cookies.get("excluded_categories");
     const cached_exclude_subcats = Cookies.get("exclude_subcats");
     const cached_name_type = Cookies.get("name_type");
@@ -783,23 +779,6 @@ class PipelineSampleReport extends React.Component {
     }
   }
 
-  // only for background model
-  refreshPage(overrides) {
-    this.nanobar.go(100);
-    const new_params = Object.assign(
-      {},
-      this.props.report_page_params,
-      overrides
-    );
-    window.location =
-      location.protocol +
-      "//" +
-      location.host +
-      location.pathname +
-      "?" +
-      $.param(new_params);
-  }
-
   handleBackgroundModelChange(backgroundName, backgroundParams) {
     this.setState(
       {
@@ -809,7 +788,7 @@ class PipelineSampleReport extends React.Component {
       () => {
         Cookies.set("background_name", backgroundName);
         Cookies.set("background_id", backgroundParams);
-        this.refreshPage({ background_id: backgroundParams });
+        this.props.refreshPage({ background_id: backgroundParams });
       }
     );
   }

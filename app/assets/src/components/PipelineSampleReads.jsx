@@ -27,12 +27,13 @@ class PipelineSampleReads extends React.Component {
     this.reportTime = props.reportTime;
     this.allCategories = props.allCategories;
     this.reportDetails = props.reportDetails;
-    this.reportPageParams = props.reportPageParams;
     this.pipelineRunRetriable = props.pipelineRunRetriable;
+    this.pipelineVersions = props.pipeline_versions;
 
     this.jobStatistics = props.jobStatistics;
     this.summary_stats = props.summary_stats;
     this.gotoReport = this.gotoReport.bind(this);
+    this.refreshPage = this.refreshPage.bind(this);
     this.sampleId = this.sampleInfo.id;
     this.host_genome = props.host_genome;
     this.pipelineStatus = props.sample_status;
@@ -63,6 +64,21 @@ class PipelineSampleReads extends React.Component {
     this.handleDropdownChange = this.handleDropdownChange.bind(this);
     this.deleteSample = this.deleteSample.bind(this);
     this.toggleHighlightTaxon = this.toggleHighlightTaxon.bind(this);
+  }
+
+  refreshPage(overrides) {
+    const new_params = Object.assign(
+      {},
+      this.props.reportPageParams,
+      overrides
+    );
+    window.location =
+      location.protocol +
+      "//" +
+      location.host +
+      location.pathname +
+      "?" +
+      $.param(new_params);
   }
 
   deleteSample() {
@@ -125,7 +141,7 @@ class PipelineSampleReads extends React.Component {
                         this.handleDropdownChange(field, i, e);
                       }}
                       ref={field}
-                      key={i}
+                      key={`version_${i}`}
                     >
                       {option_value}
                     </li>
@@ -475,6 +491,27 @@ class PipelineSampleReads extends React.Component {
     let run_date_display_augmented = !date_available
       ? ""
       : "| data processed " + run_date_display;
+    let pipeline_versions =
+      this.pipelineVersions.length > 1 ? (
+        <span>
+          {" "}
+          | switch to
+          {this.pipelineVersions.map((version, i) => {
+            const phash = { pipeline_version: version };
+            return version != this.props.reportPageParams.pipeline_version ? (
+              <a
+                key={i}
+                onClick={e => {
+                  this.refreshPage(phash);
+                }}
+              >
+                {" "}
+                {version}{" "}
+              </a>
+            ) : null;
+          }, this)}
+        </span>
+      ) : null;
 
     if (this.reportPresent) {
       d_report = (
@@ -486,12 +523,12 @@ class PipelineSampleReads extends React.Component {
           all_categories={this.allCategories}
           all_backgrounds={this.allBackgrounds}
           report_details={this.reportDetails}
-          report_page_params={this.reportPageParams}
           can_see_align_viz={this.canSeeAlignViz}
           can_edit={this.can_edit}
           confirmed_taxids={this.state.confirmed_taxids}
           watched_taxids={this.state.watched_taxids}
           toggleHighlightTaxon={this.toggleHighlightTaxon}
+          refreshPage={this.refreshPage}
         />
       );
     } else if (this.pipelineInProgress()) {
@@ -721,7 +758,8 @@ class PipelineSampleReads extends React.Component {
         <SubHeader>
           <div className="sub-header">
             <div className="title">
-              PIPELINE {version_display} {run_date_display_augmented}
+              PIPELINE {version_display} {run_date_display_augmented}{" "}
+              {pipeline_versions}
             </div>
             <div className="row">
               <div className="sub-title col s9">

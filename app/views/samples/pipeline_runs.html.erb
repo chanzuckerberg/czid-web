@@ -25,6 +25,7 @@
           <th> Job Id </th>
           <th> Job Log </th>
           <th>Remaining reads</th>
+          <th>Pipeline Version</th>
           <th>Job Started</th>
         </tr>
       </thead>
@@ -34,21 +35,24 @@
             <% prs = pipeline_run.pipeline_run_stages %>
             <% prs.each do |run_stage| %>
               <tr>
-                <td> <%= "#{pipeline_run.id} - #{run_stage.name}" %>
-                <td> <%= run_stage.job_status %>
-                <td> <%= run_stage.job_id %>
-                <td> <%= link_to 'Logs', run_stage.log_url, target: :_blank %>
+
+                <td> <%= "#{pipeline_run.id} - #{run_stage.name}" %> </td>
+                <td> <%= run_stage.job_status %></td>
+                <td> <%= run_stage.job_id %></td>
+                <td> <%= link_to 'Logs', run_stage.log_url, target: :_blank  %></td>
                 <td><%= pipeline_run.remaining_reads %> &nbsp;</td>
+                <td><%= pipeline_run.pipeline_version %> &nbsp;</td>
                 <td><%= run_stage.created_at %></td>
                </tr>
             <% end %>
           <% else %>
           <tr>
-            <td> <%= pipeline_run.id %>
-            <td> <%= pipeline_run.job_status %>
-            <td> <%= pipeline_run.job_id %>
-            <td> <%= link_to 'Logs', pipeline_run.log_url, target: :_blank %>
+            <td> <%= pipeline_run.id %> </td>
+            <td> <%= pipeline_run.job_status %></td>
+            <td> <%= pipeline_run.job_id %></td>
+            <td> <%= link_to 'Logs', pipeline_run.log_url, target: :_blank %></td>
             <td><%= pipeline_run.remaining_reads %> &nbsp;</td>
+            <td><%= pipeline_run.pipeline_version %> &nbsp;</td>
             <td><%= pipeline_run.created_at %></td>
            </tr>
           <% end %>
