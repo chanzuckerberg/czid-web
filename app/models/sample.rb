@@ -25,11 +25,11 @@ class Sample < ApplicationRecord
 
   # TODO: Make all these params configurable without code change
   DEFAULT_STORAGE_IN_GB = 500
-  DEFAULT_MEMORY_IN_MB = 30_000
+  DEFAULT_MEMORY_IN_MB = 59_000 # sorry, hacky
   HOST_FILTERING_MEMORY_IN_MB = 60_000
 
   DEFAULT_QUEUE = 'idseq'.freeze
-  DEFAULT_VCPUS = 4
+  DEFAULT_VCPUS = 8
 
   DEFAULT_QUEUE_HIMEM = 'idseq_himem'.freeze
   DEFAULT_VCPUS_HIMEM = 32
@@ -37,7 +37,7 @@ class Sample < ApplicationRecord
   # These zombies keep coming back, so we now expressly fail submissions to them.
   DEPRECATED_QUEUES = %w[idseq_alpha_stg1 aegea_batch_ondemand idseq_production_high_pri_stg1].freeze
 
-  METADATA_FIELDS = [:sample_host, # this has been repurposed to be 'Unique ID' (e.g. in human case, patient ID -- nothing to do with host genome)
+  METADATA_FIELDS = [:sample_unique_id, # 'Unique ID' (e.g. in human case, patient ID)
                      :sample_location, :sample_date, :sample_tissue,
                      :sample_template, # this refers to nucleotide type (RNA or DNA)
                      :sample_library, :sample_sequencer, :sample_notes, :sample_input_pg, :sample_batch, :sample_diagnosis, :sample_organism, :sample_detection].freeze
@@ -69,6 +69,21 @@ class Sample < ApplicationRecord
 
   def sample_path
     File.join('samples', project_id.to_s, id.to_s)
+  end
+
+  def pipeline_versions
+    pipeline_runs.pluck(:pipeline_version).uniq.map do |prv|
+      prv.nil? ? PipelineRun::PIPELINE_VERSION_WHEN_NULL : prv
+    end
+  end
+
+  def pipeline_run_by_version(pipeline_version)
+    # Right now we don't filter for successful pipeline runs. we should do that at some point.
+    if pipeline_version == PipelineRun::PIPELINE_VERSION_WHEN_NULL
+      pipeline_runs.find_by(pipeline_version: nil)
+    else
+      pipeline_runs.find_by(pipeline_version: pipeline_version)
+    end
   end
 
   validates_associated :input_files
@@ -107,7 +122,7 @@ class Sample < ApplicationRecord
         OR samples.sample_tissue LIKE :search
         OR samples.sample_location LIKE :search
         OR samples.sample_notes LIKE :search
-        OR samples.sample_host', search: "%#{search}%")
+        OR samples.sample_unique_id', search: "%#{search}%")
     else
       scoped
     end
@@ -216,6 +231,13 @@ class Sample < ApplicationRecord
   def sample_alignment_output_s3_path
     pr = pipeline_runs.first
     return pr.alignment_output_s3_path
+  rescue
+    return sample_output_s3_path
+  end
+
+  def sample_host_filter_output_s3_path
+    pr = pipeline_runs.first
+    return pr.host_filter_output_s3_path
   rescue
     return sample_output_s3_path
   end

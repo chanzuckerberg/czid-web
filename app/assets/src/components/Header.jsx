@@ -172,7 +172,7 @@ class Header extends React.Component {
               {cli_modal /* Able to be called later */}
               <Dropdown
                 text={this.userDetails.email}
-                className="right hide-on-med-and-down profile-header-dropdown"
+                className="right profile-header-dropdown"
               >
                 <Dropdown.Menu>
                   {this.userSignedIn &&

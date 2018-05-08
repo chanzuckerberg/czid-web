@@ -301,8 +301,8 @@ input[type="number"] {
 }
 
 .report-table {
-  // min-width: 1000px;
   font-size: $font-size-small;
+  margin-bottom: 7rem;
   .count-type {
     text-align: right;
     font-weight: normal;
@@ -325,12 +325,25 @@ input[type="number"] {
   color: #a0a0a0;
 }
 
+@keyframes highlight-animation {
+  from {
+    background-color: rgb(232, 242, 230);
+  }
+  to {
+    background-color: white;
+  }
+}
+
 .report-table {
   .genus-name {
     display: inline-block;
     margin-right: 5px;
     font-size: $font-size-base;
     font-weight: $font-weight-semibold;
+  }
+  .highlighted {
+    animation-name: highlight-animation;
+    animation-duration: 2s;
   }
   .fa {
     margin-left: 2px;
@@ -707,7 +720,7 @@ input[type="number"] {
   }
   .link-tag {
     visibility: hidden;
-    padding: 10px;
+    padding-left: 10px;
     color: #3867fa;
     font-size: $font-size-base;
     cursor: text;
@@ -857,4 +870,61 @@ input[type="number"] {
 [type="checkbox"].filled-in + label:after {
   -webkit-transition: none;
   transition: none;
+}
+
+.category-filter-dropdown {
+  width: 200px;
+}
+
+.category-filter-menu {
+  margin: 1rem;
+}
+
+label {
+  font-family: "Open Sans", "Helvetica Neue", Arial, Helvetica, sans-serif;
+  font-size: 1rem;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+[type="checkbox"] + label {
+  line-height: 27px;
+}
+
+.ntnr-switch {
+  margin-right: 1.5rem;
+  .ui.menu {
+    height: 42px;
+  }
+  .active {
+    font-weight: bolder;
+  }
+}
+.pipeline-tree {
+  .sample-tree-tooltip {
+    min-width: 230px;
+
+    font-size: 9pt;
+    .row {
+      margin-bottom: 0;
+      .value {
+        text-align: right;
+      }
+      &.active {
+        font-weight: 600;
+      }
+    }
+    .title {
+      text-transform: uppercase;
+      font-size: 8pt;
+      color: #888;
+      border-bottom: 1px solid #eee;
+      margin-bottom: 0.5em;
+    }
+    .name {
+      margin-bottom: 1em;
+    }
+    ul {
+      margin: 0;
+    }
+  }
 }
