@@ -28,6 +28,7 @@ Rails.application.routes.draw do
     get :samples_taxons, on: :collection
     get :top_taxons, on: :collection
     get :heatmap, on: :collection
+    get :download_heatmap, on: :collection
   end
   get 'samples/:id/fasta/:tax_level/:taxid/:hit_type', to: 'samples#show_taxid_fasta'
   get 'samples/:id/assembly/:taxid', to: 'samples#assembly'
@@ -40,6 +41,9 @@ Rails.application.routes.draw do
     get :make_project_reports_csv, on: :member
     get :project_reports_csv_status, on: :member
     get :send_project_reports_csv, on: :member
+    get :make_host_gene_counts, on: :member
+    get :host_gene_counts_status, on: :member
+    get :send_host_gene_counts, on: :member
     get :all_emails, on: :member
     put :add_favorite, on: :member
     put :remove_favorite, on: :member

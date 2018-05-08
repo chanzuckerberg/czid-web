@@ -17,7 +17,7 @@ class SamplesController < ApplicationController
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder, :show_taxid_alignment, :show_taxid_alignment_viz].freeze
   EDIT_ACTIONS = [:edit, :add_taxon_confirmation, :remove_taxon_confirmation, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata].freeze
 
-  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :samples_taxons, :top_taxons, :heatmap].freeze
+  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :samples_taxons, :top_taxons, :heatmap, :download_heatmap].freeze
 
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload]
   acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload], fallback: :devise
@@ -149,7 +149,9 @@ class SamplesController < ApplicationController
   # GET /samples/1.json
 
   def show
-    @pipeline_run = @sample.pipeline_runs.first
+    @pipeline_run = select_pipeline_run(@sample)
+    @pipeline_version = @pipeline_run.pipeline_version || PipelineRun::PIPELINE_VERSION_WHEN_NULL if @pipeline_run
+
     @pipeline_run_display = curate_pipeline_run_display(@pipeline_run)
     @sample_status = @pipeline_run ? @pipeline_run.job_status : nil
     @job_stats = @pipeline_run ? @pipeline_run.job_stats : nil
@@ -167,13 +169,13 @@ class SamplesController < ApplicationController
     @align_viz = true if align_summary_file && get_s3_file(align_summary_file)
 
     background_id = check_background_id(@sample)
+    @report_page_params = { pipeline_version: @pipeline_version, background_id: background_id } if background_id
     if @pipeline_run && (((@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?) || @pipeline_run.report_ready?)
       if background_id
         @report_present = 1
         @report_ts = @pipeline_run.updated_at.to_i
         @all_categories = all_categories
         @report_details = report_details(@pipeline_run, current_user.id)
-        @report_page_params = clean_params(params, @all_categories)
         @ercc_comparison = @pipeline_run.compare_ercc_counts
       end
 
@@ -190,11 +192,11 @@ class SamplesController < ApplicationController
     sort_by = params[:sort_by] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
 
     samples = current_power.samples.where(id: sample_ids)
-    only_species = params[:species] == "1"
+    species_selected = params[:species] == "1"
     if samples.first
       first_sample = samples.first
       background_id = check_background_id(first_sample)
-      @top_taxons = top_taxons_details(samples, background_id, num_results, sort_by, only_species)
+      @top_taxons = top_taxons_details(samples, background_id, num_results, sort_by, species_selected)
       render json: @top_taxons
     else
       render json: {}
@@ -205,41 +207,19 @@ class SamplesController < ApplicationController
   end
 
   def samples_taxons
-    sample_ids = params[:sample_ids].to_s.split(",").map(&:to_i) || []
-    num_results = params[:n] ? params[:n].to_i : 30
-    taxon_ids = params[:taxon_ids].to_s.split(",").map do |x|
-      begin
-        Integer(x)
-      rescue ArgumentError
-        nil
-      end
-    end
-    taxon_ids = taxon_ids.compact
+    @sample_taxons_dict = sample_taxons_dict(params)
+    render json: @sample_taxons_dict
+  end
 
-    sort_by = params[:sort_by] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
-    only_species = params[:species] == "1"
-    samples = current_power.samples.where(id: sample_ids).includes([:pipeline_runs])
-    if samples.first
-      first_sample = samples.first
-      background_id = check_background_id(first_sample)
-      if taxon_ids.empty?
-        taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, only_species).pluck("tax_id")
-      end
-      if taxon_ids.empty?
-        render json: {}
-      else
-        @sample_taxons_dict = samples_taxons_details(samples, taxon_ids, background_id)
-        render json: @sample_taxons_dict
-      end
-    else
-      render json: {}
-    end
+  def download_heatmap
+    @sample_taxons_dict = sample_taxons_dict(params)
+    output_csv = generate_heatmap_csv(@sample_taxons_dict)
+    send_data output_csv, filename: 'heatmap.csv'
   end
 
   def report_info
     expires_in 30.days
-
-    @pipeline_run = @sample.pipeline_runs.first
+    @pipeline_run = select_pipeline_run(@sample)
 
     ##################################################
     ## Duct tape for changing background id dynamically
@@ -269,7 +249,7 @@ class SamplesController < ApplicationController
   def search_list
     expires_in 30.days
 
-    @pipeline_run = @sample.pipeline_runs.first
+    @pipeline_run = select_pipeline_run(@sample)
     if @pipeline_run
       @search_list = fetch_lineage_info(@pipeline_run.id)
       render json: JSON.dump(@search_list)
@@ -542,6 +522,31 @@ class SamplesController < ApplicationController
     taxid_name ? taxid_name.downcase.gsub(/\W/, "-") : ''
   end
 
+  def sample_taxons_dict(params)
+    sample_ids = params[:sample_ids].to_s.split(",").map(&:to_i) || []
+    num_results = params[:n] ? params[:n].to_i : 30
+    taxon_ids = params[:taxon_ids].to_s.split(",").map do |x|
+      begin
+        Integer(x)
+      rescue ArgumentError
+        nil
+      end
+    end
+    taxon_ids = taxon_ids.compact
+
+    sort_by = params[:sort_by] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
+    species_selected = params[:species] == "1" # Otherwise genus selected
+    samples = current_power.samples.where(id: sample_ids).includes([:pipeline_runs])
+    return {} unless samples.first
+
+    first_sample = samples.first
+    background_id = check_background_id(first_sample)
+    taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected).pluck("tax_id") if taxon_ids.empty?
+
+    return {} if taxon_ids.empty?
+    samples_taxons_details(samples, taxon_ids, background_id, species_selected)
+  end
+
   def taxon_confirmation_unique_on(params)
     params[:strength] == TaxonConfirmation::WATCHED ? [:sample_id, :taxid, :strength, :user_id] : [:sample_id, :taxid, :strength]
   end
@@ -562,6 +567,14 @@ class SamplesController < ApplicationController
       return background_id
     else
       raise "Not allowed to view background"
+    end
+  end
+
+  def select_pipeline_run(sample)
+    if params[:pipeline_version].blank?
+      sample.pipeline_runs.first
+    else
+      sample.pipeline_run_by_version(params[:pipeline_version])
     end
   end
 

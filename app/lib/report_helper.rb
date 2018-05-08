@@ -25,7 +25,7 @@ module ReportHelper
   DECIMALS = 1
 
   DEFAULT_SORT_PARAM = 'highest_nt_aggregatescore'.freeze
-  DEFAULT_TAXON_SORT_PARAM = 'highest_nt_maxzscore'.freeze
+  DEFAULT_TAXON_SORT_PARAM = 'highest_nt_aggregatescore'.freeze
   DEFAULT_PARAMS = { sort_by: DEFAULT_SORT_PARAM }.freeze
 
   IGNORED_PARAMS = [:controller, :action, :id].freeze
@@ -149,29 +149,8 @@ module ReportHelper
     !validated_str.empty? ? validated_str : nil
   end
 
-  def clean_params(raw, all_cats)
-    clean = {}
-    raw_hash = {}
-    raw.each do |name, value|
-      raw_hash[name] = value
-    end
-    raw = raw_hash
-    DEFAULT_PARAMS.each do |name, default_value|
-      raw_name = name.to_s
-      clean[name] = valid_arg_value(name, raw[raw_name], all_cats) || default_value
-      raw.delete(raw_name)
-    end
-    IGNORED_PARAMS.each do |name|
-      raw_name = name.to_s
-      raw.delete(raw_name)
-    end
-    logger.warn "Ignoring #{raw.length} report params: #{raw}." unless raw.empty?
-    clean
-  end
-
   def external_report_info(pipeline_run_id, background_id, params)
     return {} if pipeline_run_id.nil? || background_id.nil?
-    params = clean_params(params, ALL_CATEGORIES)
     data = {}
     data[:taxonomy_details] = taxonomy_details(pipeline_run_id, background_id, params)
     data
@@ -255,14 +234,9 @@ module ReportHelper
     ").to_hash
   end
 
-  def fetch_top_taxons(samples, background_id, only_species)
+  def fetch_top_taxons(samples, background_id)
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
 
-    tax_level_str = if only_species
-                      " AND taxon_counts.tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}"
-                    else
-                      " AND taxon_counts.tax_level = #{TaxonCount::TAX_LEVEL_GENUS}"
-                    end
     sql_results = TaxonCount.connection.select_all("
       SELECT
         taxon_counts.pipeline_run_id     AS  pipeline_run_id,
@@ -296,7 +270,6 @@ module ReportHelper
         taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID} AND
         taxon_counts.count >= #{MINIMUM_READ_THRESHOLD} AND
         taxon_counts.count_type IN ('NT', 'NR')
-        #{tax_level_str}
        ").to_hash
 
     # calculating rpm and zscore, organizing the results by pipeline_run_id
@@ -323,8 +296,30 @@ module ReportHelper
     result_hash
   end
 
-  def fetch_samples_taxons_counts(samples, taxon_ids, background_id)
+  def fetch_parent_ids(taxon_ids, samples)
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
+    res = []
+    sql_results = TaxonCount.connection.select_all("
+      SELECT DISTINCT
+        taxon_counts.genus_taxid         AS  genus_taxid,
+        taxon_counts.family_taxid        AS  family_taxid
+      FROM taxon_counts
+      WHERE
+        pipeline_run_id in (#{pipeline_run_ids.join(',')}) AND
+        taxon_counts.tax_id in (#{taxon_ids.join(',')})
+       ").to_hash
+
+    sql_results.each do |k, _| # Unfolding the hash
+      k.each do |id, _|
+        res << id
+      end
+    end
+    res
+  end
+
+  def fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
+    pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
+    parent_ids = parent_ids.to_a
 
     # Note: subsample_fraction is of type 'float' so adjusted_total_reads is too
     # Note: stdev is never 0
@@ -364,6 +359,7 @@ module ReportHelper
         taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID} AND
         taxon_counts.count_type IN ('NT', 'NR') AND
         (taxon_counts.tax_id IN (#{taxon_ids.join(',')})
+         OR taxon_counts.tax_id in (#{parent_ids.join(',')})
          OR taxon_counts.genus_taxid IN (#{taxon_ids.join(',')}))").to_hash
 
     # calculating rpm and zscore, organizing the results by pipeline_run_id
@@ -391,16 +387,22 @@ module ReportHelper
     result_hash
   end
 
-  def samples_taxons_details(samples, taxon_ids, background_id)
+  def samples_taxons_details(samples, taxon_ids, background_id, species_selected)
     samples_by_id = Hash[samples.map { |s| [s.id, s] }]
-    results_by_pr = fetch_samples_taxons_counts(samples, taxon_ids, background_id)
+    parent_ids = fetch_parent_ids(taxon_ids, samples)
+    results_by_pr = fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
     results = []
     results_by_pr.each do |_pr_id, res|
       pr = res["pr"]
       taxon_counts = res["taxon_counts"]
       sample_id = pr.sample_id
-      tax_2d = cleanup_all!(convert_2d(taxon_counts))
-      count_species_per_genus!(tax_2d)
+      tax_2d = validate_names!(convert_2d(taxon_counts))
+
+      if species_selected # Species selected
+        only_species_level_counts!(tax_2d)
+      else # Genus selected
+        only_genus_level_counts!(tax_2d)
+      end
       rows = []
       tax_2d.each { |_tax_id, tax_info| rows << tax_info }
       compute_aggregate_scores_v2!(rows)
@@ -419,8 +421,8 @@ module ReportHelper
     results
   end
 
-  def top_taxons_details(samples, background_id, num_results, sort_by_key, only_species)
-    results_by_pr = fetch_top_taxons(samples, background_id, only_species)
+  def top_taxons_details(samples, background_id, num_results, sort_by_key, species_selected)
+    results_by_pr = fetch_top_taxons(samples, background_id)
     sort_by = decode_sort_by(sort_by_key)
     count_type = sort_by[:count_type]
     metric = sort_by[:metric]
@@ -429,12 +431,22 @@ module ReportHelper
       pr = res["pr"]
       taxon_counts = res["taxon_counts"]
       sample_id = pr.sample_id
-      tax_2d = cleanup_all!(convert_2d(taxon_counts))
-      count_species_per_genus!(tax_2d)
+      tax_2d = convert_2d(taxon_counts)
+      cleanup_genus_ids!(tax_2d)
+      validate_names!(tax_2d)
+      cleanup_missing_genus_counts!(tax_2d)
+
+      if species_selected # Species selected
+        only_species_level_counts!(tax_2d)
+      else # Genus selected
+        only_genus_level_counts!(tax_2d)
+      end
+
       rows = []
       tax_2d.each do |_tax_id, tax_info|
         rows << tax_info
       end
+
       compute_aggregate_scores_v2!(rows)
       rows = rows.select { |row| row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD }
 
@@ -606,7 +618,7 @@ module ReportHelper
       if tax_id < 0
         # Usually -1 means accession number did not resolve to species.
         # TODO: Can we keep the accession numbers to show in these cases?
-        tax_info['name'] = "All taxa without #{level_str} classification"
+        tax_info['name'] = "All taxa with neither family nor genus classification"
         if tax_id < TaxonLineage::INVALID_CALL_BASE_ID && (tax_info['tax_level'] == TaxonCount::TAX_LEVEL_GENUS || tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES)
           parent_taxid = -(tax_id % TaxonLineage::INVALID_CALL_BASE_ID)
           if taxon_counts_2d[parent_taxid]
@@ -671,6 +683,18 @@ module ReportHelper
 
   def remove_family_level_counts!(taxon_counts_2d)
     taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] != TaxonCount::TAX_LEVEL_FAMILY }
+  end
+
+  def remove_genus_level_counts!(taxon_counts_2d)
+    taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] != TaxonCount::TAX_LEVEL_GENUS }
+  end
+
+  def only_species_level_counts!(taxon_counts_2d)
+    taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES }
+  end
+
+  def only_genus_level_counts!(taxon_counts_2d)
+    taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] == TaxonCount::TAX_LEVEL_GENUS }
   end
 
   def cleanup_all!(taxon_counts_2d)
@@ -873,7 +897,7 @@ module ReportHelper
     rows_passing_filters = rows.length
 
     # Compute sort key and sort.
-    sort_by = decode_sort_by(params[:sort_by])
+    sort_by = decode_sort_by(params[:sort_by] || DEFAULT_SORT_PARAM)
     rows.each do |tax_info|
       tax_info[:sort_key] = sort_key(tax_2d, tax_info, sort_by)
     end
@@ -927,8 +951,31 @@ module ReportHelper
     background_id = params[:background_id] || sample.default_background_id
     pipeline_run = sample.pipeline_runs.first
     pipeline_run_id = pipeline_run ? pipeline_run.id : nil
-    return "" if pipeline_run_id.nil? || pipeline_run.total_reads.nil?
+    return "" if pipeline_run_id.nil? || pipeline_run.total_reads.nil? || pipeline_run.remaining_reads.nil?
     tax_details = taxonomy_details(pipeline_run_id, background_id, params)
     generate_report_csv(tax_details)
+  end
+
+  def generate_heatmap_csv(sample_taxa_hash)
+    attribute_names = %w[sample_name tax_id taxon_name aggregatescore
+                         NT_r NT_rpm NT_zscore NR_r NR_rpm NR_zscore]
+    CSV.generate(headers: true) do |csv|
+      csv << attribute_names
+      sample_taxa_hash.each do |sample_record|
+        sample_record[:taxons].each do |taxon_record|
+          data_values = { sample_name: sample_record[:name],
+                          tax_id: taxon_record["tax_id"],
+                          taxon_name: taxon_record["name"],
+                          aggregatescore: taxon_record["NT"]["aggregatescore"],
+                          NT_r: taxon_record["NT"]["r"],
+                          NT_rpm: taxon_record["NT"]["rpm"],
+                          NT_zscore: taxon_record["NT"]["zscore"],
+                          NR_r: taxon_record["NR"]["r"],
+                          NR_rpm: taxon_record["NR"]["rpm"],
+                          NR_zscore: taxon_record["NR"]["zscore"] }
+          csv << data_values.values_at(*attribute_names.map(&:to_sym))
+        end
+      end
+    end
   end
 end

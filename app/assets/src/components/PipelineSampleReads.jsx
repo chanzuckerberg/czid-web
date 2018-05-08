@@ -4,11 +4,12 @@ import moment from "moment";
 import $ from "jquery";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { Button, Icon, Divider } from "semantic-ui-react";
+import { Button, Icon, Divider, Popup } from "semantic-ui-react";
 import numberWithCommas from "../helpers/strings";
 import SubHeader from "./SubHeader";
 import ERCCScatterPlot from "./ERCCScatterPlot";
 import PipelineSampleReport from "./PipelineSampleReport";
+import BasicPopup from "./BasicPopup";
 
 class PipelineSampleReads extends React.Component {
   constructor(props) {
@@ -26,12 +27,13 @@ class PipelineSampleReads extends React.Component {
     this.reportTime = props.reportTime;
     this.allCategories = props.allCategories;
     this.reportDetails = props.reportDetails;
-    this.reportPageParams = props.reportPageParams;
     this.pipelineRunRetriable = props.pipelineRunRetriable;
+    this.pipelineVersions = props.pipeline_versions;
 
     this.jobStatistics = props.jobStatistics;
     this.summary_stats = props.summary_stats;
     this.gotoReport = this.gotoReport.bind(this);
+    this.refreshPage = this.refreshPage.bind(this);
     this.sampleId = this.sampleInfo.id;
     this.host_genome = props.host_genome;
     this.pipelineStatus = props.sample_status;
@@ -64,12 +66,27 @@ class PipelineSampleReads extends React.Component {
     this.toggleHighlightTaxon = this.toggleHighlightTaxon.bind(this);
   }
 
+  refreshPage(overrides) {
+    const new_params = Object.assign(
+      {},
+      this.props.reportPageParams,
+      overrides
+    );
+    window.location =
+      location.protocol +
+      "//" +
+      location.host +
+      location.pathname +
+      "?" +
+      $.param(new_params);
+  }
+
   deleteSample() {
     axios
       .delete(`/samples/${this.sampleInfo.id}.json`, {
         data: { authenticity_token: this.csrf }
       })
-      .then(res => {
+      .then(() => {
         location.href = `/?project_id=${this.projectInfo.id}`;
       })
       .catch(err => {});
@@ -124,7 +141,7 @@ class PipelineSampleReads extends React.Component {
                         this.handleDropdownChange(field, i, e);
                       }}
                       ref={field}
-                      key={i}
+                      key={`version_${i}`}
                     >
                       {option_value}
                     </li>
@@ -139,8 +156,8 @@ class PipelineSampleReads extends React.Component {
   }
 
   render_metadata_textfield_wide(label, hash, field, blank_value, editable) {
-    let value =
-      hash[field] instanceof Array ? hash[field].join("; ") : hash[field];
+    let value = hash[field];
+    if (hash[field] instanceof Array) value = hash[field].join("; ");
     return (
       <div className="details-container col s12">
         <div className="details-title note">{label}</div>
@@ -158,14 +175,16 @@ class PipelineSampleReads extends React.Component {
     );
   }
 
-  render_metadata_textfield(label, field) {
-    let display_value =
-      this.sampleInfo[field] && this.sampleInfo[field].trim() !== ""
-        ? this.sampleInfo[field]
-        : this.TYPE_PROMPT;
+  render_metadata_textfield(label, field, popupContent) {
+    let display_value = this.TYPE_PROMPT;
+    if (this.sampleInfo[field] && this.sampleInfo[field].trim() !== "")
+      display_value = this.sampleInfo[field];
+    let labelElem = <div className="col s6 label">{label}</div>;
+    if (popupContent)
+      labelElem = <BasicPopup trigger={labelElem} content={popupContent} />;
     return (
       <div className="row detail-row">
-        <div className="col s6 label">{label}</div>
+        {labelElem}
         <div className="col s6">
           <div
             className={
@@ -442,7 +461,7 @@ class PipelineSampleReads extends React.Component {
     }
 
     return (
-      <div className="row">
+      <div className="row last-row">
         <div className="col s12">
           <div className="content-title">ERCC Spike In Counts</div>
           <ERCCScatterPlot ercc_comparison={this.props.ercc_comparison} />
@@ -472,6 +491,27 @@ class PipelineSampleReads extends React.Component {
     let run_date_display_augmented = !date_available
       ? ""
       : "| data processed " + run_date_display;
+    let pipeline_versions =
+      this.pipelineVersions.length > 1 ? (
+        <span>
+          {" "}
+          | switch to
+          {this.pipelineVersions.map((version, i) => {
+            const phash = { pipeline_version: version };
+            return version != this.props.reportPageParams.pipeline_version ? (
+              <a
+                key={i}
+                onClick={e => {
+                  this.refreshPage(phash);
+                }}
+              >
+                {" "}
+                {version}{" "}
+              </a>
+            ) : null;
+          }, this)}
+        </span>
+      ) : null;
 
     if (this.reportPresent) {
       d_report = (
@@ -483,12 +523,12 @@ class PipelineSampleReads extends React.Component {
           all_categories={this.allCategories}
           all_backgrounds={this.allBackgrounds}
           report_details={this.reportDetails}
-          report_page_params={this.reportPageParams}
           can_see_align_viz={this.canSeeAlignViz}
           can_edit={this.can_edit}
           confirmed_taxids={this.state.confirmed_taxids}
           watched_taxids={this.state.watched_taxids}
           toggleHighlightTaxon={this.toggleHighlightTaxon}
+          refreshPage={this.refreshPage}
         />
       );
     } else if (this.pipelineInProgress()) {
@@ -505,14 +545,6 @@ class PipelineSampleReads extends React.Component {
               ? waitingSpinner
               : this.state.rerunStatusMessage}
           </h6>
-          <p>
-            {this.state.rerunStatus === "failed" && this.can_edit ? (
-              <a onClick={this.rerunPipeline} className="custom-button small">
-                <i className="fa fa-repeat left" />
-                RERUN PIPELINE
-              </a>
-            ) : null}
-          </p>
         </div>
       );
     }
@@ -726,7 +758,8 @@ class PipelineSampleReads extends React.Component {
         <SubHeader>
           <div className="sub-header">
             <div className="title">
-              PIPELINE {version_display} {run_date_display_augmented}
+              PIPELINE {version_display} {run_date_display_augmented}{" "}
+              {pipeline_versions}
             </div>
             <div className="row">
               <div className="sub-title col s9">
@@ -822,7 +855,7 @@ class PipelineSampleReads extends React.Component {
                           )}
                           {this.render_metadata_textfield(
                             "Unique ID",
-                            "sample_host"
+                            "sample_unique_id"
                           )}
                           {this.render_metadata_textfield(
                             "Sample collection date",
@@ -832,27 +865,31 @@ class PipelineSampleReads extends React.Component {
                         <div className="col s6">
                           {this.render_metadata_textfield(
                             "Library prep",
-                            "sample_library"
+                            "sample_library",
+                            "Type of library preparation protocol (e.g. Nextera)"
                           )}
                           {this.render_metadata_textfield(
                             "Sequencer",
-                            "sample_sequencer"
+                            "sample_sequencer",
+                            "e.g. Illumina NovaSeq"
                           )}
                           {this.render_metadata_numfield(
                             "RNA/DNA input (pg)",
                             "sample_input_pg"
                           )}
                           {this.render_metadata_numfield(
-                            "Batch",
+                            "Batch (#)",
                             "sample_batch"
                           )}
                           {this.render_metadata_textfield(
                             "Known organisms",
-                            "sample_organism"
+                            "sample_organism",
+                            "Known hits that may or may not have been in this report"
                           )}
                           {this.render_metadata_textfield(
                             "Detection method",
-                            "sample_detection"
+                            "sample_detection",
+                            "Method for detecting known organisms"
                           )}
                         </div>
                       </div>
@@ -865,7 +902,7 @@ class PipelineSampleReads extends React.Component {
                           this.can_edit
                         )}
                         {this.render_metadata_textfield_wide(
-                          "Confirmed hits in report",
+                          "Manually confirmed hits (from Report tab)",
                           this.state,
                           "confirmed_names",
                           "None",
@@ -924,4 +961,5 @@ class PipelineSampleReads extends React.Component {
     );
   }
 }
+
 export default PipelineSampleReads;

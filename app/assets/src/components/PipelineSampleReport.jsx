@@ -9,10 +9,11 @@ import numberWithCommas from "../helpers/strings";
 import LabeledDropdown from "./LabeledDropdown";
 import AdvancedThresholdFilterDropdown from "./AdvancedThresholdFilter";
 import StringHelper from "../helpers/StringHelper";
-import TaxonTooltip from "./TaxonTooltip";
 import ThresholdMap from "./ThresholdMap";
+import PipelineSampleTree from "./PipelineSampleTree";
 import Nanobar from "nanobar";
 import d3, { event as currentEvent } from "d3";
+import BasicPopup from "./BasicPopup";
 
 class PipelineSampleReport extends React.Component {
   constructor(props) {
@@ -27,16 +28,12 @@ class PipelineSampleReport extends React.Component {
     this.canSeeAlignViz = props.can_see_align_viz;
     this.can_edit = props.can_edit;
     this.csrf = props.csrf;
-
+    this.taxon_row_refs = {};
     this.all_categories = props.all_categories;
     this.report_details = props.report_details;
-    this.report_page_params = props.report_page_params;
     this.all_backgrounds = props.all_backgrounds;
     this.max_rows_to_render = props.max_rows || 1500;
-    this.default_sort_by = this.report_page_params.sort_by.replace(
-      "highest_",
-      ""
-    );
+    this.default_sort_by = "nt_aggregatescore";
     const cached_cats = Cookies.get("excluded_categories");
     const cached_exclude_subcats = Cookies.get("exclude_subcats");
     const cached_name_type = Cookies.get("name_type");
@@ -45,6 +42,8 @@ class PipelineSampleReport extends React.Component {
     this.showConcordance = false;
     this.allThresholds = ThresholdMap(this.showConcordance);
     this.genus_map = {};
+
+    this.INVALID_CALL_BASE_TAXID = -1e8;
 
     this.thresholdLabel2Name = {};
     for (let i = 0; i < this.allThresholds.length; i += 1) {
@@ -101,7 +100,7 @@ class PipelineSampleReport extends React.Component {
     this.setSortParams = this.setSortParams.bind(this);
     this.flash = this.flash.bind(this);
     this.collapseGenus = this.collapseGenus.bind(this);
-    this.expandGenus = this.expandGenus.bind(this);
+    this.expandGenusClick = this.expandGenusClick.bind(this);
     this.expandTable = this.expandTable.bind(this);
     this.collapseTable = this.collapseTable.bind(this);
     this.downloadFastaUrl = this.downloadFastaUrl.bind(this);
@@ -242,7 +241,6 @@ class PipelineSampleReport extends React.Component {
         this.saveThresholdFilters();
         Cookies.set("excluded_categories", "[]");
         Cookies.set("exclude_subcats", "[]");
-        this.flash();
       }
     );
   }
@@ -392,6 +390,44 @@ class PipelineSampleReport extends React.Component {
         return false;
       }
     });
+  }
+
+  scrollToTaxon(taxon_id) {
+    // Find the taxon
+    let taxon;
+    for (let ttaxon of this.state.selected_taxons) {
+      if (ttaxon.tax_id == taxon_id) {
+        taxon = ttaxon;
+        break;
+      }
+    }
+
+    if (!taxon) {
+      return;
+    }
+    // Make sure the taxon is rendered
+    if (this.state.selected_taxons_top.indexOf(taxon) == -1) {
+      this.renderMore();
+      this.setState({}, () => {
+        this.scrollToTaxon(taxon_id);
+      });
+    }
+
+    // set view to table and scoll into view
+    this.setState(
+      {
+        view: "table",
+        highlight_taxon: taxon.tax_id
+      },
+      () => {
+        if (taxon.tax_level == 1) {
+          this.expandGenus(taxon.genus_taxid);
+        }
+        this.taxon_row_refs[taxon.tax_id].scrollIntoView({
+          block: "center"
+        });
+      }
+    );
   }
 
   renderMore() {
@@ -585,7 +621,6 @@ class PipelineSampleReport extends React.Component {
           undefined,
           new_exclude_subcats
         );
-        this.flash();
       }
     );
   }
@@ -615,7 +650,6 @@ class PipelineSampleReport extends React.Component {
           undefined,
           new_exclude_subcats
         );
-        this.flash();
       }
     );
   }
@@ -739,32 +773,11 @@ class PipelineSampleReport extends React.Component {
       thresholded_taxons,
       this.state.exclude_subcats
     );
-
-    if (play_animation) {
-      this.flash();
-    }
   }
   handleThresholdEnter(event) {
     if (event.keyCode === 13) {
       this.applyThresholdFilters(this.state.taxonomy_details, true);
     }
-  }
-
-  // only for background model
-  refreshPage(overrides) {
-    this.nanobar.go(100);
-    const new_params = Object.assign(
-      {},
-      this.props.report_page_params,
-      overrides
-    );
-    window.location =
-      location.protocol +
-      "//" +
-      location.host +
-      location.pathname +
-      "?" +
-      $.param(new_params);
   }
 
   handleBackgroundModelChange(backgroundName, backgroundParams) {
@@ -776,7 +789,7 @@ class PipelineSampleReport extends React.Component {
       () => {
         Cookies.set("background_name", backgroundName);
         Cookies.set("background_id", backgroundParams);
-        this.refreshPage({ background_id: backgroundParams });
+        this.props.refreshPage({ background_id: backgroundParams });
       }
     );
   }
@@ -790,7 +803,12 @@ class PipelineSampleReport extends React.Component {
   // path to NCBI
   gotoNCBI(e) {
     const taxId = e.target.getAttribute("data-tax-id");
-    const ncbiLink = `https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${taxId}`;
+    let num = parseInt(taxId);
+    if (num < -1e8) {
+      num = -num % -1e8;
+    }
+    num = num.toString();
+    const ncbiLink = `https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${num}`;
     window.open(ncbiLink, "_blank");
   }
 
@@ -818,67 +836,93 @@ class PipelineSampleReport extends React.Component {
   }
 
   displayTags(taxInfo, reportDetails) {
-    const tax_level_str = taxInfo.tax_level == 1 ? "species" : "genus";
+    let tax_level_str = "";
+    let ncbiDot, fastaDot, alignmentVizDot, assemblyDot;
+    if (taxInfo.tax_level == 1) tax_level_str = "species";
+    else tax_level_str = "genus";
+
+    let valid_tax_id =
+      taxInfo.tax_id < this.INVALID_CALL_BASE_TAXID || taxInfo.tax_id > 0;
+    if (valid_tax_id)
+      ncbiDot = (
+        <i
+          data-tax-id={taxInfo.tax_id}
+          onClick={this.gotoNCBI}
+          className="fa fa-link cloud"
+          aria-hidden="true"
+        />
+      );
+    if (reportDetails.taxon_fasta_flag)
+      fastaDot = (
+        <i
+          data-tax-level={taxInfo.tax_level}
+          data-tax-id={taxInfo.tax_id}
+          onClick={this.downloadFastaUrl}
+          className="fa fa-download cloud"
+          aria-hidden="true"
+        />
+      );
+    if (this.canSeeAlignViz && valid_tax_id && taxInfo.NT.r > 0)
+      alignmentVizDot = (
+        <i
+          data-tax-level={tax_level_str}
+          data-tax-id={taxInfo.tax_id}
+          onClick={this.gotoAlignmentVizLink}
+          className="fa fa-bars"
+          aria-hidden="true"
+        />
+      );
+    if (reportDetails.assembled_taxids.indexOf(taxInfo.tax_id) >= 0)
+      assemblyDot = (
+        <i
+          data-tax-id={taxInfo.tax_id}
+          onClick={this.downloadAssemblyLink}
+          className="fa fa-gg"
+          aria-hidden="true"
+        />
+      );
     return (
       <span className="link-tag">
-        {taxInfo.tax_id > 0 ? (
-          <i
-            data-tax-id={taxInfo.tax_id}
-            onClick={this.gotoNCBI}
-            className="fa fa-link cloud"
-            aria-hidden="true"
-          />
-        ) : null}
-        {reportDetails.taxon_fasta_flag ? (
-          <i
-            data-tax-level={taxInfo.tax_level}
-            data-tax-id={taxInfo.tax_id}
-            onClick={this.downloadFastaUrl}
-            className="fa fa-download cloud"
-            aria-hidden="true"
-          />
-        ) : null}
-        {this.canSeeAlignViz && taxInfo.tax_id > 0 && taxInfo.NT.r > 0 ? (
-          <i
-            data-tax-level={tax_level_str}
-            data-tax-id={taxInfo.tax_id}
-            onClick={this.gotoAlignmentVizLink}
-            className="fa fa-bars fa-1"
-            aria-hidden="true"
-          />
-        ) : null}
-        {reportDetails.assembled_taxids.indexOf(taxInfo.tax_id) >= 0 ? (
-          <i
-            data-tax-id={taxInfo.tax_id}
-            onClick={this.downloadAssemblyLink}
-            className="fa fa-gg"
-            aria-hidden="true"
-          />
-        ) : null}
+        <BasicPopup trigger={ncbiDot} content={"NCBI Taxonomy Browser"} />
+        <BasicPopup trigger={fastaDot} content={"FASTA Download"} />
+        <BasicPopup
+          trigger={alignmentVizDot}
+          content={"Alignment Visualization"}
+        />
+        <BasicPopup trigger={assemblyDot} content={"Assembly Download"} />
       </span>
     );
   }
 
   displayHighlightTags(taxInfo) {
+    const watchDot = (
+      <i
+        data-tax-id={taxInfo.tax_id}
+        data-tax-name={taxInfo.name}
+        data-confirmation-strength="watched"
+        onClick={this.props.toggleHighlightTaxon}
+        className="fa fa-eye"
+        aria-hidden="true"
+      />
+    );
+    const confirmedHitDot = (
+      <i
+        data-tax-id={taxInfo.tax_id}
+        data-tax-name={taxInfo.name}
+        data-confirmation-strength="confirmed"
+        onClick={this.props.toggleHighlightTaxon}
+        className="fa fa-check"
+        aria-hidden="true"
+      />
+    );
     return (
       <div className="hover-wrapper">
         {this.can_edit ? (
           <span className="link-tag">
-            <i
-              data-tax-id={taxInfo.tax_id}
-              data-tax-name={taxInfo.name}
-              data-confirmation-strength="watched"
-              onClick={this.props.toggleHighlightTaxon}
-              className="fa fa-eye"
-              aria-hidden="true"
-            />
-            <i
-              data-tax-id={taxInfo.tax_id}
-              data-tax-name={taxInfo.name}
-              data-confirmation-strength="confirmed"
-              onClick={this.props.toggleHighlightTaxon}
-              className="fa fa-check"
-              aria-hidden="true"
+            <BasicPopup trigger={watchDot} content={"Toggle Watching"} />
+            <BasicPopup
+              trigger={confirmedHitDot}
+              content={"Toggle Confirmed Hit"}
             />
           </span>
         ) : null}
@@ -886,7 +930,7 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
-  category_to_adjective(category) {
+  static category_to_adjective(category) {
     const category_lowercase = category.toLowerCase();
     switch (category_lowercase) {
       case "bacteria":
@@ -908,16 +952,19 @@ class PipelineSampleReport extends React.Component {
   render_name(tax_info, report_details) {
     let tax_scientific_name = tax_info["name"];
     let tax_common_name = tax_info["common_name"];
-    let tax_name =
-      this.state.name_type.toLowerCase() == "common name" ? (
-        !tax_common_name || tax_common_name.trim() == "" ? (
-          <span className="count-info">{tax_scientific_name}</span>
-        ) : (
+    let tax_name;
+
+    if (this.state.name_type.toLowerCase() == "common name") {
+      if (!tax_common_name || tax_common_name.trim() == "")
+        tax_name = <span className="count-info">{tax_scientific_name}</span>;
+      else
+        tax_name = (
           <span>{StringHelper.capitalizeFirstLetter(tax_common_name)}</span>
-        )
-      ) : (
-        <span>{tax_scientific_name}</span>
-      );
+        );
+    } else {
+      tax_name = <span>{tax_scientific_name}</span>;
+    }
+
     let foo = <i>{tax_name}</i>;
 
     if (tax_info.tax_id > 0) {
@@ -943,8 +990,8 @@ class PipelineSampleReport extends React.Component {
       );
     } else {
       // emphasize genus, soften category and species count
-      const category_name =
-        tax_info.tax_id == -200 ? "" : tax_info.category_name;
+      let category_name = "";
+      if (tax_info.tax_id != -200) category_name = tax_info.category_name;
       const collapseExpand = (
         <CollapseExpand tax_info={tax_info} parent={this} />
       );
@@ -956,7 +1003,7 @@ class PipelineSampleReport extends React.Component {
           </div>
           <i className="count-info">
             ({tax_info.species_count}{" "}
-            {this.category_to_adjective(category_name)} species)
+            {PipelineSampleReport.category_to_adjective(category_name)} species)
           </i>
           {this.displayTags(tax_info, report_details)}
         </div>
@@ -1032,41 +1079,44 @@ class PipelineSampleReport extends React.Component {
     tooltip_message,
     visible_flag = true
   ) {
-    return !visible_flag ? null : (
+    let element = (
+      <div
+        className="sort-controls"
+        onClick={this.applySort.bind(this, column_name)}
+      >
+        <span
+          className={`${this.isSortedActive(column_name)} table-head-label`}
+        >
+          {visible_metric}
+        </span>
+        {this.render_sort_arrow(column_name, "highest", "up")}
+      </div>
+    );
+    if (!visible_flag) return null;
+    return (
       <th>
-        <Tipsy content={tooltip_message} placement="top">
-          <div
-            className="sort-controls"
-            onClick={this.applySort.bind(this, column_name)}
-          >
-            <span
-              className={`${this.isSortedActive(column_name)} table-head-label`}
-            >
-              {visible_metric}
-            </span>
-            {this.render_sort_arrow(column_name, "highest", "up")}
-          </div>
-        </Tipsy>
+        <BasicPopup trigger={element} content={tooltip_message} />
       </th>
     );
   }
 
   row_class(tax_info, confirmed_taxids, watched_taxids) {
-    let taxon_status =
-      confirmed_taxids.indexOf(tax_info.tax_id) >= 0
-        ? "confirmed"
-        : watched_taxids.indexOf(tax_info.tax_id) >= 0
-          ? "watched"
-          : "";
+    let highlighted =
+      this.state.highlight_taxon == tax_info.tax_id ? "highlighted" : "";
+    let taxon_status = "";
+    if (confirmed_taxids.indexOf(tax_info.tax_id) >= 0)
+      taxon_status = "confirmed";
+    else if (watched_taxids.indexOf(tax_info.tax_id) >= 0)
+      taxon_status = "watched";
     if (tax_info.tax_level == 2) {
       if (tax_info.tax_id < 0) {
         return `report-row-genus ${
           tax_info.genus_taxid
-        } fake-genus ${taxon_status}`;
+        } fake-genus ${taxon_status} ${highlighted}`;
       }
       return `report-row-genus ${
         tax_info.genus_taxid
-      } real-genus ${taxon_status}`;
+      } real-genus ${taxon_status} ${highlighted}`;
     }
     let initial_visibility = "hidden";
     if (
@@ -1078,17 +1128,21 @@ class PipelineSampleReport extends React.Component {
     if (tax_info.genus_taxid < 0) {
       return `report-row-species ${
         tax_info.genus_taxid
-      } fake-genus ${initial_visibility} ${taxon_status}`;
+      } fake-genus ${initial_visibility} ${taxon_status} ${highlighted}`;
     }
     return `report-row-species ${
       tax_info.genus_taxid
-    } real-genus ${initial_visibility} ${taxon_status}`;
+    } real-genus ${initial_visibility} ${taxon_status} ${highlighted}`;
   }
 
-  expandGenus(e) {
+  expandGenusClick(e) {
     const className = e.target.attributes.class.nodeValue;
     const attr = className.split(" ");
     const taxId = attr[2];
+    this.expandGenus(taxId);
+  }
+
+  expandGenus(taxId) {
     const taxIdIdx = this.expandedGenera.indexOf(taxId);
     if (taxIdIdx < 0) {
       this.expandedGenera.push(taxId);
@@ -1113,9 +1167,9 @@ class PipelineSampleReport extends React.Component {
     // expand all real genera
     this.expandAll = true;
     this.expandedGenera = [];
-    $(".report-row-species.real-genus").removeClass("hidden");
-    $(".report-arrow-down.real-genus").removeClass("hidden");
-    $(".report-arrow-right.real-genus").addClass("hidden");
+    $(".report-row-species").removeClass("hidden");
+    $(".report-arrow-down").removeClass("hidden");
+    $(".report-arrow-right").addClass("hidden");
     $(".table-arrow").toggleClass("hidden");
   }
 
@@ -1231,6 +1285,7 @@ class PipelineSampleReport extends React.Component {
         advanced_filter_tag_list={advanced_filter_tag_list}
         categories_filter_tag_list={categories_filter_tag_list}
         subcats_filter_tag_list={subcats_filter_tag_list}
+        view={this.state.view}
         parent={this}
       />
     );
@@ -1258,7 +1313,7 @@ function CollapseExpand({ tax_info, parent }) {
       >
         <i
           className={`fa fa-angle-right ${tax_info.tax_id}`}
-          onClick={parent.expandGenus}
+          onClick={parent.expandGenusClick}
         />
       </span>
     </span>
@@ -1292,6 +1347,10 @@ function DetailCells({ parent }) {
   return parent.state.selected_taxons_top.map((tax_info, i) => (
     <tr
       key={tax_info.tax_id}
+      id={`taxon-${tax_info.tax_id}`}
+      ref={elm => {
+        parent.taxon_row_refs[tax_info.tax_id] = elm;
+      }}
       className={parent.row_class(
         tax_info,
         parent.props.confirmed_taxids,
@@ -1419,20 +1478,22 @@ function ReportTableHeader({ parent }) {
   );
 }
 function CategoryFilter({ parent }) {
+  let count =
+    parent.all_categories.length -
+    parent.state.excluded_categories.length +
+    Object.keys(parent.category_child_parent).length -
+    parent.state.exclude_subcats.length;
   return (
-    <li className="categories-dropdown top-filter ui dropdown custom-dropdown filter-btn">
-      <div className="categories-filters-activate">
-        <span className="filter-label">Categories</span>
-        <span className="filter-label-count">
-          {parent.all_categories.length -
-            parent.state.excluded_categories.length +
-            Object.keys(parent.category_child_parent).length -
-            parent.state.exclude_subcats.length}{" "}
+    <Dropdown
+      className="filter-btn category-filter-dropdown"
+      text={
+        <span>
+          Categories <Label>{count}</Label>
         </span>
-        <i className="fa fa-angle-down right down-box" />
-      </div>
-      <div className="categories-filters-modal">
-        <div className="categories">
+      }
+    >
+      <Dropdown.Menu>
+        <div className="category-filter-menu">
           <ul>
             {parent.all_categories.map((category, i) => {
               return (
@@ -1487,8 +1548,8 @@ function CategoryFilter({ parent }) {
             <p>None found</p>
           ) : null}
         </div>
-      </div>
-    </li>
+      </Dropdown.Menu>
+    </Dropdown>
   );
 }
 
@@ -1586,9 +1647,20 @@ class RenderMarkup extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      view: "table"
+      view: this.props.view || "table"
     };
     this._onViewClicked = this.onViewClicked.bind(this);
+    this._nodeTextClicked = this.nodeTextClicked.bind(this);
+  }
+
+  componentWillReceiveProps(newProps) {
+    if (newProps.view && this.state.view != newProps.view) {
+      this.setState({ view: newProps.view });
+    }
+  }
+
+  nodeTextClicked(d) {
+    this.props.parent.scrollToTaxon(d.id);
   }
 
   onViewClicked(e, f) {
@@ -1644,9 +1716,11 @@ class RenderMarkup extends React.Component {
         taxons={parent.state.selected_taxons}
         sample={parent.report_details.sample_info}
         nameType={parent.state.name_type}
+        onNodeTextClicked={this._nodeTextClicked}
       />
     );
   }
+
   render() {
     const {
       filter_row_stats,
@@ -1701,442 +1775,4 @@ class RenderMarkup extends React.Component {
   }
 }
 
-class PipelineSampleTree extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    this._getTooltip = this.getTooltip.bind(this);
-    this.dataTypes = ["NT.r", "NT.aggregatescore", "NT.rpm", "NR.r", "NR.rpm"];
-    this.state = {
-      dataType: this.dataTypes[0]
-    };
-    this._updateDataType = this.updateDataType.bind(this);
-  }
-
-  makeTree() {
-    function make_node(id, name, level) {
-      return {
-        name: name,
-        level: level,
-        children: [],
-        weight: 0,
-        id: id
-      };
-    }
-
-    let rows = this.props.taxons;
-    let nodes_by_id = {};
-
-    let root = {
-      name: "",
-      children: [],
-      weight: 0,
-      id: -12345
-    };
-
-    let tree = root;
-
-    let order = [
-      "species",
-      "genus",
-      "family",
-      "order",
-      "class",
-      "phylum",
-      "kingdom",
-      "superkingdom"
-    ].reverse();
-
-    let getValue = row => {
-      let parts = this.state.dataType.split(".");
-      return parseFloat(row[parts[0]][parts[1]]);
-    };
-
-    for (let row of rows) {
-      if (row.tax_level != 1) {
-        continue;
-      }
-
-      tree = root;
-
-      let has_categorization =
-        order.filter(function(level) {
-          return row.lineage && row.lineage[level + "_taxid"] >= 0;
-        }).length > 1;
-
-      if (!row.lineage || !has_categorization) {
-        row.lineage = {
-          genus_taxid: -9,
-          genus_name: "Uncategorized",
-          species_taxid: row.tax_id,
-          species_name: row.name
-        };
-      }
-      for (let j = 0; j < order.length; j += 1) {
-        let level = order[j],
-          taxon_id = row.lineage[level + "_taxid"],
-          name;
-
-        if (this.props.nameType == "Common name") {
-          name = row.lineage[level + "_common_name"];
-        }
-
-        if (!name) {
-          name = row.lineage[level + "_name"];
-        }
-
-        if (!name) {
-          continue;
-        }
-
-        if (!nodes_by_id[taxon_id]) {
-          let node = make_node(taxon_id, name, level);
-          tree.children.push(node);
-          nodes_by_id[taxon_id] = node;
-        }
-
-        nodes_by_id[taxon_id].name = nodes_by_id[taxon_id].name || name;
-
-        tree.weight += getValue(row);
-        tree = nodes_by_id[taxon_id];
-      }
-
-      tree.weight += getValue(row);
-    }
-    return root;
-  }
-
-  getTooltip(node) {
-    if (!node) {
-      return null;
-    }
-    return (
-      <div>
-        <div className="name">{node.name}</div>
-        <div className="data">
-          {this.state.dataType}: {numberWithCommas(Math.round(node.weight))}
-        </div>
-      </div>
-    );
-  }
-
-  updateDataType(e, d) {
-    this.setState({ dataType: d.value });
-  }
-
-  renderWeightDataTypeChooser() {
-    let options = [];
-    for (let dataType of this.dataTypes) {
-      options.push({
-        value: dataType,
-        text: dataType
-      });
-    }
-
-    return (
-      <LabeledDropdown
-        className={"data-type-chooser"}
-        options={options}
-        onChange={this._updateDataType}
-        value={this.state.dataType}
-        label="Data Type:"
-      />
-    );
-  }
-  render() {
-    let tree = this.makeTree();
-    return (
-      <div className="pipeline-tree">
-        {this.renderWeightDataTypeChooser()}
-        <TreeStructure tree={tree} getTooltip={this._getTooltip} />
-      </div>
-    );
-  }
-}
-
-class TreeStructure extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = {};
-    this.autoCollapsed = false;
-    this.i = 0;
-    this.duration = 0;
-  }
-  componentWillReceiveProps(nextProps) {
-    this.duration = 0;
-    this.autoCollapsed = false;
-    this.update(nextProps, nextProps.tree);
-  }
-  componentDidMount() {
-    this.create();
-    this.update(this.props, this.props.tree);
-  }
-  create() {
-    this.svg = d3.select(this.container).append("svg");
-    this.pathContainer = this.svg.append("g");
-    this.nodeContainer = this.svg.append("g");
-  }
-  update(props, source) {
-    let leaf_count = 0;
-    let to_visit = [props.tree];
-    let min_weight = 999999999;
-    let collapseScale = d3.scale
-      .linear()
-      .domain([0, props.tree.weight])
-      .range([0, 10]);
-
-    while (to_visit.length) {
-      let node = to_visit.pop();
-      min_weight = Math.min(min_weight, node.weight);
-      if (
-        !this.autoCollapsed &&
-        collapseScale(node.weight) < 2 &&
-        node.children &&
-        node.children.length
-      ) {
-        node._children = node.children;
-        node.children = null;
-      }
-      if (!(node.children && node.children.length)) {
-        leaf_count += 1;
-      } else {
-        to_visit = to_visit.concat(node.children);
-      }
-    }
-    let circleScale = d3.scale
-      .linear()
-      .domain([min_weight, props.tree.weight])
-      .range([2, 20]);
-
-    let linkScale = d3.scale
-      .linear()
-      .domain([min_weight, props.tree.weight])
-      .range([1, 20]);
-
-    this.autoCollapsed = true;
-    let width = 1000,
-      height = Math.max(300, 25 * leaf_count);
-
-    let margin = {
-      top: 20,
-      right: 200,
-      left: 40,
-      bottom: 20
-    };
-
-    props.tree.x0 = height / 2;
-    props.tree.y0 = 0;
-
-    this.svg
-      .transition()
-      .duration(this.duration)
-      .attr(
-        "width",
-        Math.max(this.svg.attr("width"), width + margin.left + margin.right)
-      )
-      .attr(
-        "height",
-        Math.max(this.svg.attr("height"), height + margin.top + margin.bottom)
-      );
-
-    this.pathContainer.attr(
-      "transform",
-      "translate(" + margin.left + "," + margin.top + ")"
-    );
-    this.nodeContainer.attr(
-      "transform",
-      "translate(" + margin.left + "," + margin.top + ")"
-    );
-
-    let tree = d3.layout.tree().size([height, width]);
-    let nodes = tree.nodes(props.tree);
-    let links = tree.links(nodes);
-
-    let diagonal = d3.svg.diagonal().projection(function(d) {
-      return [d.y, d.x];
-    });
-
-    var node = this.nodeContainer.selectAll("g.node").data(nodes, d => {
-      return d.id || (d.id = ++this.i);
-    });
-
-    let paths = this.pathContainer
-      .selectAll("path.link")
-      .data(links, function(d) {
-        return d.target.id;
-      });
-
-    let pathsEnter = paths
-      .enter()
-      .append("path")
-      .attr("class", "link")
-      .attr("d", function(d) {
-        var o = { x: source.x0, y: source.y0 };
-        return diagonal({ source: o, target: o });
-      })
-      .attr("stroke-width", d => {
-        return linkScale(d.target.weight);
-      });
-
-    let pathsExit = paths
-      .exit()
-      .transition()
-      .duration(this.duration)
-      .attr("d", function(d) {
-        let o = { x: source.x, y: source.y };
-        return diagonal({ source: o, target: o });
-      })
-      .remove();
-
-    let pathsUpdate = paths
-      .transition()
-      .duration(this.duration)
-      .attr("d", d => {
-        var source = {
-          x: d.source.x - linkScale(this.calculateLinkSourcePosition(d)),
-          y: d.source.y
-        };
-        var target = { x: d.target.x, y: d.target.y };
-        return diagonal({ source: source, target: target });
-      })
-      .attr("stroke-width", function(d) {
-        return linkScale(d.target.weight);
-      });
-
-    let nodeEnter = node
-      .enter()
-      .append("g")
-      .attr("class", d => {
-        let cls = "node";
-        if (d._children) {
-          cls += " collapsed";
-        }
-        return cls;
-      })
-      .attr("transform", function(d) {
-        return "translate(" + source.y0 + "," + source.x0 + ")";
-      })
-      .on("click", d => {
-        let t = d.children;
-        d.children = d._children;
-        d._children = t;
-        this.update(this.props, d);
-      })
-      .on("mouseover", d => {
-        this.setState({ hoverNode: d });
-
-        d3
-          .select(this.tooltip)
-          .style("left", currentEvent.pageX + 10 + "px")
-          .style("top", currentEvent.pageY - 10 + "px");
-        d3.select(this.tooltip).classed("hidden", false);
-      })
-      .on("mouseout", d => {
-        d3.select(this.tooltip).classed("hidden", true);
-      });
-
-    nodeEnter.append("circle").attr("r", 1e-6);
-
-    nodeEnter
-      .append("text")
-      .attr("dy", 3)
-      .attr("x", function(d) {
-        return d.children || d._children
-          ? -1 * circleScale(d.weight) - 5
-          : circleScale(d.weight) + 5;
-      })
-      .style("text-anchor", function(d) {
-        return d.children || d._children ? "end" : "start";
-      })
-      .text(function(d) {
-        return d.name;
-      })
-      .style("fill-opacity", 1e-6);
-
-    let nodeExit = node
-      .exit()
-      .transition()
-      .duration(this.duration)
-      .attr("transform", function(d) {
-        return "translate(" + source.y + "," + source.x + ")";
-      })
-      .remove();
-
-    nodeExit.select("circle").attr("r", 1e-6);
-
-    nodeExit.select("text").style("fill-opacity", 1e-6);
-
-    let nodeUpdate = node
-      .transition()
-      .duration(this.duration)
-      .attr("transform", function(d) {
-        return "translate(" + d.y + "," + d.x + ")";
-      })
-      .attr("class", d => {
-        let cls = "node";
-        if (d._children) {
-          cls += " collapsed";
-        }
-        return cls;
-      });
-
-    nodeUpdate.select("circle").attr("r", function(d) {
-      return circleScale(d.weight);
-    });
-
-    nodeUpdate.select("text").style("fill-opacity", 1);
-
-    nodes.forEach(function(d) {
-      d.x0 = d.x;
-      d.y0 = d.y;
-    });
-    this.duration = 750;
-  }
-
-  calculateLinkSourcePosition(link) {
-    let targetID = link.target.id;
-    let childrenNumber = link.source.children.length;
-    let widthAbove = 0;
-    for (var i = 0; i < childrenNumber; i++) {
-      if (link.source.children[i].id == targetID) {
-        // we are done
-        widthAbove = widthAbove + link.source.children[i].weight / 2;
-        break;
-      } else {
-        // keep adding
-        widthAbove = widthAbove + link.source.children[i].weight;
-      }
-    }
-    return link.source.weight / 2 - widthAbove;
-  }
-
-  renderTooltip() {
-    if (this.state.hoverNode === undefined) {
-      return;
-    }
-
-    return (
-      <div
-        className="d3-tree-tooltip hidden"
-        ref={tooltip => {
-          this.tooltip = tooltip;
-        }}
-      >
-        {this.props.getTooltip(this.state.hoverNode)}
-      </div>
-    );
-  }
-
-  render() {
-    return (
-      <div className="d3-tree">
-        {this.renderTooltip()}
-        <div
-          ref={container => {
-            this.container = container;
-          }}
-        />
-      </div>
-    );
-  }
-}
 export default PipelineSampleReport;
