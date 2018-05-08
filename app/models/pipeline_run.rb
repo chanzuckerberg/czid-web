@@ -34,6 +34,7 @@ class PipelineRun < ApplicationRecord
   STATUS_LOADED = 'LOADED'.freeze
   STATUS_READY = 'READY'.freeze
   POSTPROCESS_STATUS_LOADED = 'LOADED'.freeze
+  PIPELINE_VERSION_WHEN_NULL = '1.0'
 
   before_create :create_run_stages
 

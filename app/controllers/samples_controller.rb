@@ -149,7 +149,14 @@ class SamplesController < ApplicationController
   # GET /samples/1.json
 
   def show
-    @pipeline_run = @sample.pipeline_runs.first
+    if params[:pipeline_version].blank?
+      @pipeline_run = @sample.pipeline_runs.first
+    else
+      @pipeline_run = @sample.pipeline_run_by_version(params[:pipeline_version])
+    end
+
+    @pipeline_version = @pipeline_run.pipeline_version || PipelineRun::PIPELINE_VERSION_WHEN_NULL if @pipeline_run
+
     @pipeline_run_display = curate_pipeline_run_display(@pipeline_run)
     @sample_status = @pipeline_run ? @pipeline_run.job_status : nil
     @job_stats = @pipeline_run ? @pipeline_run.job_stats : nil
@@ -167,13 +174,13 @@ class SamplesController < ApplicationController
     @align_viz = true if align_summary_file && get_s3_file(align_summary_file)
 
     background_id = check_background_id(@sample)
+    @report_page_params = { pipeline_version: @pipeline_version, background_id: background_id } if background_id
     if @pipeline_run && (((@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?) || @pipeline_run.report_ready?)
       if background_id
         @report_present = 1
         @report_ts = @pipeline_run.updated_at.to_i
         @all_categories = all_categories
         @report_details = report_details(@pipeline_run, current_user.id)
-        @report_page_params = clean_params(params, @all_categories)
         @ercc_comparison = @pipeline_run.compare_ercc_counts
       end
 
@@ -218,7 +225,11 @@ class SamplesController < ApplicationController
   def report_info
     expires_in 30.days
 
-    @pipeline_run = @sample.pipeline_runs.first
+    if params[:pipeline_version].blank?
+      @pipeline_run = @sample.pipeline_runs.first
+    else
+      @pipeline_run = @sample.pipeline_run_by_version(params[:pipeline_version])
+    end
 
     ##################################################
     ## Duct tape for changing background id dynamically
@@ -248,7 +259,12 @@ class SamplesController < ApplicationController
   def search_list
     expires_in 30.days
 
-    @pipeline_run = @sample.pipeline_runs.first
+    if params[:pipeline_version].blank?
+      @pipeline_run = @sample.pipeline_runs.first
+    else
+      @pipeline_run = @sample.pipeline_run_by_version(params[:pipeline_version])
+    end
+
     if @pipeline_run
       @search_list = fetch_lineage_info(@pipeline_run.id)
       render json: JSON.dump(@search_list)

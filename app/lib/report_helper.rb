@@ -149,29 +149,8 @@ module ReportHelper
     !validated_str.empty? ? validated_str : nil
   end
 
-  def clean_params(raw, all_cats)
-    clean = {}
-    raw_hash = {}
-    raw.each do |name, value|
-      raw_hash[name] = value
-    end
-    raw = raw_hash
-    DEFAULT_PARAMS.each do |name, default_value|
-      raw_name = name.to_s
-      clean[name] = valid_arg_value(name, raw[raw_name], all_cats) || default_value
-      raw.delete(raw_name)
-    end
-    IGNORED_PARAMS.each do |name|
-      raw_name = name.to_s
-      raw.delete(raw_name)
-    end
-    logger.warn "Ignoring #{raw.length} report params: #{raw}." unless raw.empty?
-    clean
-  end
-
   def external_report_info(pipeline_run_id, background_id, params)
     return {} if pipeline_run_id.nil? || background_id.nil?
-    params = clean_params(params, ALL_CATEGORIES)
     data = {}
     data[:taxonomy_details] = taxonomy_details(pipeline_run_id, background_id, params)
     data
@@ -916,7 +895,7 @@ module ReportHelper
     rows_passing_filters = rows.length
 
     # Compute sort key and sort.
-    sort_by = decode_sort_by(params[:sort_by])
+    sort_by = decode_sort_by(params[:sort_by] || DEFAULT_SORT_PARAM)
     rows.each do |tax_info|
       tax_info[:sort_key] = sort_key(tax_2d, tax_info, sort_by)
     end

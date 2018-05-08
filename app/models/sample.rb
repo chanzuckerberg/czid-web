@@ -71,6 +71,22 @@ class Sample < ApplicationRecord
     File.join('samples', project_id.to_s, id.to_s)
   end
 
+
+  def pipeline_versions
+    prs = pipeline_runs.pluck(:pipeline_version).uniq.map {
+      |prv| prv.nil? ? PipelineRun::PIPELINE_VERSION_WHEN_NULL : prv
+    }
+  end
+
+  def pipeline_run_by_version(pipeline_version)
+    # Right now we don't filter for successful pipeline runs. we should do that at some point.
+    if pipeline_version == PipelineRun::PIPELINE_VERSION_WHEN_NULL
+      pipeline_runs.where(pipeline_version: nil).first
+    else
+      pipeline_runs.where(pipeline_version: pipeline_version).first
+    end
+  end
+
   validates_associated :input_files
 
   def input_files_checks
