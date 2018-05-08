@@ -35,6 +35,7 @@ class PipelineRun < ApplicationRecord
   STATUS_READY = 'READY'.freeze
   POSTPROCESS_STATUS_LOADED = 'LOADED'.freeze
   INPUT_TRUNCATED_FILE = 'input_truncated.txt'.freeze
+  PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
 
   before_create :create_run_stages
 

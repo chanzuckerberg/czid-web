@@ -1,53 +1,53 @@
 import React from "react";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 import { Button, Dropdown, Icon, Input, Label, Popup } from "semantic-ui-react";
 import ThresholdMap from "./ThresholdMap";
 
 class AdvancedThresholdFilterRow extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
     this._labelChanged = this.labelChanged.bind(this);
     this._operatorChanged = this.operatorChanged.bind(this);
     this._valueChanged = this.valueChanged.bind(this);
   }
 
-  changed (data) {
+  changed(data) {
     this.props.onChange(data);
   }
 
-  labelChanged (e, data) {
+  labelChanged(e, data) {
     this.changed({
       label: data.value,
       operator: this.props.filter.operator,
-      value: this.props.filter.value,
+      value: this.props.filter.value
     });
   }
 
-  operatorChanged (e, data) {
+  operatorChanged(e, data) {
     this.changed({
       label: this.props.filter.label,
       operator: data.value,
-      value: this.props.filter.value,
+      value: this.props.filter.value
     });
   }
 
-  valueChanged (e, data) {
+  valueChanged(e, data) {
     let newValue = data.value;
-    if(newValue != "" && newValue!="-" && isNaN(parseFloat(newValue))) {
+    if (newValue != "" && newValue != "-" && isNaN(parseFloat(newValue))) {
       newValue = this.props.filter.value;
     }
     this.changed({
       label: this.props.filter.label,
       operator: this.props.filter.operator,
-      value: newValue,
+      value: newValue
     });
   }
 
-  renderLabelSelect () {
-    let opts = this.props.labels.map((label) => {
+  renderLabelSelect() {
+    let opts = this.props.labels.map(label => {
       return {
         text: label.name,
-        value: label.value,
+        value: label.value
       };
     });
 
@@ -61,11 +61,11 @@ class AdvancedThresholdFilterRow extends React.Component {
     );
   }
 
-  renderOperatorSelect () {
-    let opts = this.props.operators.map((label) => {
+  renderOperatorSelect() {
+    let opts = this.props.operators.map(label => {
       return {
         text: label,
-        value: label,
+        value: label
       };
     });
 
@@ -79,19 +79,27 @@ class AdvancedThresholdFilterRow extends React.Component {
     );
   }
 
-  renderValue () {
+  renderValue() {
     return (
-      <Input fluid value={this.props.filter.value} onChange={this._valueChanged} />
+      <Input
+        fluid
+        value={this.props.filter.value}
+        onChange={this._valueChanged}
+      />
     );
   }
 
-  renderRemove () {
+  renderRemove() {
     return (
-      <Icon name='remove'onClick={this.props.onRemove} className="remove-button" />
+      <Icon
+        name="remove"
+        onClick={this.props.onRemove}
+        className="remove-button"
+      />
     );
   }
 
-  render () {
+  render() {
     return (
       <div className="advanced-threshold-filter-row">
         <div className="row">
@@ -103,12 +111,10 @@ class AdvancedThresholdFilterRow extends React.Component {
       </div>
     );
   }
-};
-
-
+}
 
 class AdvancedThresholdFilter extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     let filters = this.props.filters;
@@ -118,39 +124,39 @@ class AdvancedThresholdFilter extends React.Component {
     }
 
     this.state = {
-      filters: filters,
+      filters: filters
     };
     this._addRow = this.addRow.bind(this);
     this._applyClicked = this.applyClicked.bind(this);
   }
 
-  applyClicked () {
+  applyClicked() {
     this.props.onApply(this.state.filters);
   }
 
-  makeRow () {
+  makeRow() {
     return {
       label: this.props.labels[0].value,
       operator: this.props.operators[0],
-      value: '',
+      value: ""
     };
   }
 
-  addRow () {
+  addRow() {
     this.state.filters.push(this.makeRow());
-    this.setState({filters: this.state.filters});
+    this.setState({ filters: this.state.filters });
     this.props.onChange(this.state.filters);
   }
 
-  rowChanged (data, i) {
+  rowChanged(data, i) {
     this.state.filters[i] = data;
-    this.setState({filters: this.state.filters});
+    this.setState({ filters: this.state.filters });
     this.props.onChange(this.state.filters);
   }
 
-  removeRow (i) {
+  removeRow(i) {
     this.state.filters.splice(i, 1);
-    this.setState({filters: this.state.filters});
+    this.setState({ filters: this.state.filters });
     this.props.onChange(this.state.filters);
   }
 
@@ -161,7 +167,7 @@ class AdvancedThresholdFilter extends React.Component {
           labels={this.props.labels}
           operators={this.props.operators}
           filter={filter}
-          onChange={(data) => {
+          onChange={data => {
             this.rowChanged(data, i);
           }}
           onRemove={() => {
@@ -172,12 +178,10 @@ class AdvancedThresholdFilter extends React.Component {
       );
     });
   }
-  render () {
+  render() {
     return (
       <div className="advanced-threshold-filter">
-        <div className="rows">
-          {this.renderFilterRows()}
-        </div>
+        <div className="rows">{this.renderFilterRows()}</div>
         <div className="row">
           <div className="actions col s12">
             <Button secondary onClick={this._addRow}>
@@ -191,22 +195,22 @@ class AdvancedThresholdFilter extends React.Component {
       </div>
     );
   }
-};
+}
 
 AdvancedThresholdFilter.propTypes = {
   labels: PropTypes.array.isRequired,
   operators: PropTypes.array.isRequired,
-  filters: PropTypes.array,
+  filters: PropTypes.array
 };
 
 class AdvancedThresholdFilterDropdown extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
   }
-  onThresholdsChanged (filters) {
+  onThresholdsChanged(filters) {
     this.props.onChange(filters);
   }
-  render () {
+  render() {
     let validFilters = [];
     for (let filter of this.props.filters) {
       if (ThresholdMap.isThresholdValid(filter)) {
@@ -219,16 +223,24 @@ class AdvancedThresholdFilterDropdown extends React.Component {
           <Dropdown
             fluid={this.props.fluid}
             className="active-threshold-filter-dropdown"
-            text={<span>Advanced Filters <Label>{validFilters.length}</Label></span>}
+            text={
+              <span>
+                Advanced Filters <Label>{validFilters.length}</Label>
+              </span>
+            }
             open={false}
           />
         }
-        on='click'
-        position='bottom right'
+        on="click"
+        position="bottom right"
         hideOnScroll={true}
         keepInViewPort={false}
       >
-        <AdvancedThresholdFilter {...this.props} filters={this.props.filters} onChange={this.onThresholdsChanged.bind(this)}/>
+        <AdvancedThresholdFilter
+          {...this.props}
+          filters={this.props.filters}
+          onChange={this.onThresholdsChanged.bind(this)}
+        />
       </Popup>
     );
   }
@@ -238,7 +250,7 @@ AdvancedThresholdFilterDropdown.propTypes = {
   operators: PropTypes.array.isRequired,
   filters: PropTypes.array,
   onChange: PropTypes.func,
-  onApply: PropTypes.func,
+  onApply: PropTypes.func
 };
 
 export default AdvancedThresholdFilterDropdown;
