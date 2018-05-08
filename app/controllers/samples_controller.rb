@@ -149,11 +149,11 @@ class SamplesController < ApplicationController
   # GET /samples/1.json
 
   def show
-    if params[:pipeline_version].blank?
-      @pipeline_run = @sample.pipeline_runs.first
-    else
-      @pipeline_run = @sample.pipeline_run_by_version(params[:pipeline_version])
-    end
+    @pipeline_run = if params[:pipeline_version].blank?
+                      @sample.pipeline_runs.first
+                    else
+                      @sample.pipeline_run_by_version(params[:pipeline_version])
+                    end
 
     @pipeline_version = @pipeline_run.pipeline_version || PipelineRun::PIPELINE_VERSION_WHEN_NULL if @pipeline_run
 
@@ -225,11 +225,11 @@ class SamplesController < ApplicationController
   def report_info
     expires_in 30.days
 
-    if params[:pipeline_version].blank?
-      @pipeline_run = @sample.pipeline_runs.first
-    else
-      @pipeline_run = @sample.pipeline_run_by_version(params[:pipeline_version])
-    end
+    @pipeline_run = if params[:pipeline_version].blank?
+                      @sample.pipeline_runs.first
+                    else
+                      @sample.pipeline_run_by_version(params[:pipeline_version])
+                    end
 
     ##################################################
     ## Duct tape for changing background id dynamically
@@ -259,11 +259,11 @@ class SamplesController < ApplicationController
   def search_list
     expires_in 30.days
 
-    if params[:pipeline_version].blank?
-      @pipeline_run = @sample.pipeline_runs.first
-    else
-      @pipeline_run = @sample.pipeline_run_by_version(params[:pipeline_version])
-    end
+    @pipeline_run = if params[:pipeline_version].blank?
+                      @sample.pipeline_runs.first
+                    else
+                      @sample.pipeline_run_by_version(params[:pipeline_version])
+                    end
 
     if @pipeline_run
       @search_list = fetch_lineage_info(@pipeline_run.id)
