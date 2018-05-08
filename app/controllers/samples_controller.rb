@@ -233,7 +233,14 @@ class SamplesController < ApplicationController
 
     @report_info = external_report_info(pipeline_run_id, background_id, params)
 
-    tax_ids = @report_info[:taxonomy_details][2].map { |x| x['tax_id'] }
+    tax_ids = @report_info[:taxonomy_details][2].map { |x|
+      t = x['tax_id']
+      if t > -1e8
+        t
+      else
+        -(t % -1e8)
+      end
+    }
     lineages = TaxonCount.connection.select_all(TaxonLineage.where(taxid: tax_ids)).to_hash
     lineage_by_taxid = {}
     lineages.each do |x|
@@ -241,7 +248,9 @@ class SamplesController < ApplicationController
     end
 
     @report_info[:taxonomy_details][2].each do |tax|
-      tax['lineage'] = lineage_by_taxid[tax['tax_id']]
+      tid = tax['tax_id']
+      tid = -(tid % -1e8).to_i if tid < -1e8
+      tax['lineage'] = lineage_by_taxid[tid]
     end
 
     render json: JSON.dump(@report_info)
