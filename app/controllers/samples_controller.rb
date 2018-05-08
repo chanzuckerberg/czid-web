@@ -538,6 +538,7 @@ class SamplesController < ApplicationController
   private
 
   def clean_taxid_name(pipeline_run, taxid)
+    return 'all' if taxid == 'all'
     taxid_name = pipeline_run.taxon_counts.find_by(tax_id: taxid).name
     taxid_name ? taxid_name.downcase.gsub(/\W/, "-") : ''
   end

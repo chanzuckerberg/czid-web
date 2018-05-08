@@ -625,6 +625,13 @@ class PipelineSampleReads extends React.Component {
           </a>
           <a
             className="custom-button"
+            href={`/samples/${this.sampleInfo.id}/all`}
+          >
+            <i className="fa fa-cloud-download" />
+            Non-Host Assemblies
+          </a>
+          <a
+            className="custom-button"
             href={`/samples/${this.sampleInfo.id}/unidentified_fasta`}
           >
             <i className="fa fa-cloud-download" />

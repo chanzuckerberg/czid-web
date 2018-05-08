@@ -348,6 +348,7 @@ class PipelineRunStage < ApplicationRecord
 
   def db_load_assembly
     pr = pipeline_run
+    return unless pr.assembly?
     pr.assembled_taxids = `aws s3 ls #{pr.assembly_output_s3_path}/ | awk '{print $4}'`.split("\n").map(&:to_i)
     pr.save
   end
