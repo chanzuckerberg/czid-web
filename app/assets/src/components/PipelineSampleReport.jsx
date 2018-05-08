@@ -1216,7 +1216,9 @@ class PipelineSampleReport extends React.Component {
     } rows passing filters, out of ${this.state.rows_total} total rows.`;
     let truncation_stats =
       this.report_details && this.report_details.pipeline_info.truncated
-        ? "Overly large input was truncated."
+        ? "Overly large input was truncated to " +
+          this.report_details.pipeline_info.truncated +
+          " reads."
         : "";
     let subsampled_reads = this.report_details
       ? this.report_details.subsampled_reads
