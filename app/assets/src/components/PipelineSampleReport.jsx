@@ -872,7 +872,7 @@ class PipelineSampleReport extends React.Component {
           aria-hidden="true"
         />
       );
-    if (reportDetails.assembled_taxids.indexOf(taxInfo.tax_id) >= 0)
+    if (reportDetails.assembled_taxids.indexOf(taxInfo.tax_id.toString()) >= 0)
       assemblyDot = (
         <i
           data-tax-id={taxInfo.tax_id}

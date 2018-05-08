@@ -550,7 +550,6 @@ class PipelineSampleReads extends React.Component {
     }
 
     let pipeline_run = null;
-    let download_section = null;
     const BLANK_TEXT = "unknown";
     if (this.pipelineRun && this.pipelineRun.total_reads) {
       pipeline_run = (
@@ -645,7 +644,32 @@ class PipelineSampleReads extends React.Component {
           </div>
         </div>
       );
+    } else {
+      pipeline_run = (
+        <div className="center">
+          There is no pipeline output for this sample
+        </div>
+      );
+    }
 
+    let assembly_download = null;
+    if (
+      this.reportDetails &&
+      this.reportDetails.assembled_taxids.indexOf("all") >= 0
+    ) {
+      assembly_download = (
+        <a
+          className="custom-button"
+          href={`/samples/${this.sampleInfo.id}/all`}
+        >
+          <i className="fa fa-cloud-download" />
+          Non-Host Assemblies
+        </a>
+      );
+    }
+
+    let download_section = null;
+    if (this.pipelineRun && this.pipelineRun.total_reads) {
       download_section = (
         <div>
           <a
@@ -654,13 +678,6 @@ class PipelineSampleReads extends React.Component {
           >
             <i className="fa fa-cloud-download" />
             Non-Host Reads
-          </a>
-          <a
-            className="custom-button"
-            href={`/samples/${this.sampleInfo.id}/all`}
-          >
-            <i className="fa fa-cloud-download" />
-            Non-Host Assemblies
           </a>
           <a
             className="custom-button"
@@ -676,15 +693,11 @@ class PipelineSampleReads extends React.Component {
             <i className="fa fa-folder-open" />
             Results Folder
           </a>
-        </div>
-      );
-    } else {
-      pipeline_run = (
-        <div className="center">
-          There is no pipeline output for this sample
+          {assembly_download}
         </div>
       );
     }
+
     let sample_dropdown = "";
     if (this.sample_map && Object.keys(this.sample_map).length > 1) {
       sample_dropdown = (

@@ -340,8 +340,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def assembly_output_s3_path(taxid = nil)
-    key = taxid == 'all' ? "assembly-all" : "assembly/#{taxid}"
-    "#{postprocess_output_s3_path}/#{key}".chomp("/")
+    "#{postprocess_output_s3_path}/assembly/#{taxid}".chomp("/")
   end
 
   def host_filter_output_s3_path
