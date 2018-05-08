@@ -44,7 +44,7 @@ module SamplesHelper
                         sample_organism: db_sample ? db_sample[:sample_organism] : '',
                         sample_detection: db_sample ? db_sample[:sample_detection] : '' }
         stages_to_display = [:host_filtering_status, :nonhost_alignment_status, :postprocessing_status]
-        stages_to_display << :assembly_status if run_info && run_info[:with_assembly] == 1
+        stages_to_display << :assembly_status if run_info && run_info[:with_assembly]
         stage_statuses = data_values.values_at(*stages_to_display)
         if stage_statuses.any? { |status| status == "FAILED" }
           data_values[:overall_job_status] = "FAILED"
