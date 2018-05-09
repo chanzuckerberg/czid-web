@@ -388,7 +388,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def assembly?
-    after(pipeline_version || fetch_pipeline_version, "1.8")
+    after(pipeline_version || fetch_pipeline_version, "1.11")
   end
 
   def alignment_output_s3_path
