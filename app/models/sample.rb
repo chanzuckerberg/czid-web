@@ -90,7 +90,7 @@ class Sample < ApplicationRecord
           end
 
     prs.each { |pr| return pr unless pr.taxon_counts.empty? }
-    nil
+    prs.first
   end
 
   validates_associated :input_files
