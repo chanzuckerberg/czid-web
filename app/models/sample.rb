@@ -383,7 +383,7 @@ class Sample < ApplicationRecord
       next unless pr_local_file_name
       json_dict = JSON.parse(File.read(pr_local_file_name))
       json_dict = json_dict["pipeline_output"] if json_dict["pipeline_output"]
-      taxon_counts = json_dict["taxon_counts"].map do |txn|
+      taxon_counts = (json_dict["taxon_counts"] || {}).map do |txn|
         txn.slice("tax_id", "tax_level", "count", "created_at", "name", "count_type", "percent_identity", "alignment_length", "e_value", "genus_taxid", "superkingdom_taxid", "percent_concordant", "species_total_concordant", "genus_total_concordant", "family_total_concordant", "common_name", "family_taxid", "is_phage")
       end
       taxon_byteranges = (json_dict["taxon_byteranges"] || {}).map do |txn|
