@@ -598,7 +598,8 @@ module ReportHelper
     # suitable names for missing and blacklisted genera and species.
     category = {}
     ALL_CATEGORIES.each do |c|
-      category[c['taxid']] = c['name']
+      tid = convert_neg_taxid(c['taxid'])
+      category[tid] = c['name']
     end
     missing_names = Set.new
     missing_parents = {}
@@ -628,7 +629,9 @@ module ReportHelper
         missing_names.add(tax_id)
         tax_info['name'] = "Unnamed #{level_str} taxon #{tax_id}"
       end
+      # Category_id isn't being set successfully
       category_id = tax_info.delete('superkingdom_taxid')
+      category_id = convert_neg_taxid(category_id)
       tax_info['category_name'] = category[category_id] || 'Uncategorized'
     end
     logger.warn "Missing names for taxon ids #{missing_names.to_a}" unless missing_names.empty?
