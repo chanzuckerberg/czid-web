@@ -188,7 +188,7 @@ module ReportHelper
     ALL_CATEGORIES
   end
 
-  def fetch_taxon_counts(pipeline_run_id, background_id)
+  def fetch_taxon_counts(pipeline_run_id, background_id, parent_ids)
     pipeline_run = PipelineRun.find(pipeline_run_id)
     adjusted_total_reads = (pipeline_run.total_reads - pipeline_run.total_ercc_reads.to_i) * pipeline_run.subsample_fraction
     # NOTE:  If you add more columns to be fetched here, you really should add them to PROPERTIES_OF_TAXID above
@@ -230,8 +230,10 @@ module ReportHelper
       WHERE
         pipeline_run_id = #{pipeline_run_id.to_i} AND
         taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID} AND
-        taxon_counts.count_type IN ('NT', 'NR')
+        taxon_counts.count_type IN ('NT', 'NR') OR
+        taxon_counts.tax_id in (#{parent_ids.join(',')})
     ").to_hash
+    # Fetch genus_taxid and family_taxid entries to provide lineage
   end
 
   def fetch_top_taxons(samples, background_id)
@@ -298,7 +300,6 @@ module ReportHelper
 
   def fetch_parent_ids(taxon_ids, samples)
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
-    res = []
     sql_results = TaxonCount.connection.select_all("
       SELECT DISTINCT
         taxon_counts.genus_taxid         AS  genus_taxid,
@@ -308,13 +309,19 @@ module ReportHelper
         pipeline_run_id in (#{pipeline_run_ids.join(',')}) AND
         taxon_counts.tax_id in (#{taxon_ids.join(',')})
        ").to_hash
+    values_in_hash_keys(sql_results)
+  end
 
-    sql_results.each do |k, _| # Unfolding the hash
-      k.each do |id, _|
-        res << id
-      end
-    end
-    res
+  def fetch_parent_ids_by_pr(pipeline_run_id)
+    sql_results = TaxonCount.connection.select_all("
+      SELECT DISTINCT
+        taxon_counts.genus_taxid         AS  genus_taxid,
+        taxon_counts.family_taxid        AS  family_taxid
+      FROM taxon_counts
+      WHERE
+        pipeline_run_id = (#{pipeline_run_id})
+       ").to_hash
+    values_in_hash_keys(sql_results)
   end
 
   def fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
@@ -593,7 +600,7 @@ module ReportHelper
     level_str
   end
 
-  def validate_names!(taxon_counts_2d)
+  def validate_names!(tax_2d)
     # This converts superkingdom_id to category_name and makes up
     # suitable names for missing and blacklisted genera and species.
     category = {}
@@ -603,20 +610,22 @@ module ReportHelper
     end
     missing_names = Set.new
     missing_parents = {}
-    taxon_counts_2d.each do |tax_id, tax_info|
+
+    tax_2d.each do |tax_id, tax_info|
       level_str = level_name(tax_info['tax_level'])
       if tax_id < 0
         # Usually -1 means accession number did not resolve to species.
         # TODO: Can we keep the accession numbers to show in these cases?
         tax_info['name'] = "All taxa with neither family nor genus classification"
-        if tax_id < TaxonLineage::INVALID_CALL_BASE_ID && (tax_info['tax_level'] == TaxonCount::TAX_LEVEL_GENUS || tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES)
-          parent_taxid = convert_neg_taxid(tax_id)
-          if taxon_counts_2d[parent_taxid]
-            parent_name = taxon_counts_2d[parent_taxid]['name']
-            parent_level = level_name(taxon_counts_2d[parent_taxid]['tax_level'])
+
+        if tax_id < TaxonLineage::INVALID_CALL_BASE_ID && species_or_genus(tax_info['tax_level'])
+          parent_id = convert_neg_taxid(tax_id)
+          if tax_2d[parent_id]
+            parent_name = tax_2d[parent_id]['name']
+            parent_level = level_name(tax_2d[parent_id]['tax_level'])
           else
-            missing_parents[parent_taxid] = tax_id
-            parent_name = "taxon #{parent_taxid}"
+            missing_parents[parent_id] = tax_id
+            parent_name = "taxon #{parent_id}"
             parent_level = ""
           end
           tax_info['name'] = "Non-#{level_str}-specific reads in #{parent_level} #{parent_name}"
@@ -629,14 +638,14 @@ module ReportHelper
         missing_names.add(tax_id)
         tax_info['name'] = "Unnamed #{level_str} taxon #{tax_id}"
       end
-      # Category_id isn't being set successfully
       category_id = tax_info.delete('superkingdom_taxid')
       category_id = convert_neg_taxid(category_id)
       tax_info['category_name'] = category[category_id] || 'Uncategorized'
     end
+
     logger.warn "Missing names for taxon ids #{missing_names.to_a}" unless missing_names.empty?
     logger.warn "Missing parent for child:  #{missing_parents}" unless missing_parents.empty?
-    taxon_counts_2d
+    tax_2d
   end
 
   def cleanup_missing_genus_counts!(taxon_counts_2d)
@@ -835,6 +844,10 @@ module ReportHelper
     tax_id
   end
 
+  def species_or_genus(tid)
+    tid == TaxonCount::TAX_LEVEL_SPECIES || tid == TaxonCount::TAX_LEVEL_GENUS
+  end
+
   # DEPRECATED
   # TODO(yf): remove the following.
   def apply_filters!(rows, tax_2d, all_genera, params)
@@ -858,7 +871,8 @@ module ReportHelper
   def taxonomy_details(pipeline_run_id, background_id, params)
     # Fetch and clean data.
     t0 = wall_clock_ms
-    taxon_counts = fetch_taxon_counts(pipeline_run_id, background_id)
+    parent_ids = fetch_parent_ids_by_pr(pipeline_run_id)
+    taxon_counts = fetch_taxon_counts(pipeline_run_id, background_id, parent_ids)
     tax_2d = taxon_counts_cleanup(taxon_counts)
     remove_family_level_counts!(tax_2d)
     t1 = wall_clock_ms
@@ -920,6 +934,17 @@ module ReportHelper
     #                            :e => 3 },
     #                    :f => 4 }
     # into    {[:a, :b, :c] => 1, [:a, :b, :d] => 2, [:a, :e] => 3, [:f] => 4}
+  end
+
+  def values_in_hash_keys(input)
+    # Results from some SQL queries
+    res = []
+    input.each do |k, _|
+      k.each do |_, id|
+        res << id
+      end
+    end
+    res
   end
 
   def species_or_genus!(tax_2d, species_selected)
