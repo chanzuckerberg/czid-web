@@ -236,7 +236,8 @@ class PipelineRunStage < ApplicationRecord
       "POSTPROCESS_S3_PATH=#{pipeline_run.postprocess_output_s3_path} " \
       "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} "
     batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline assembly"
-    aegea_batch_submit_command(batch_command, Sample::HOST_FILTERING_MEMORY_IN_MB) # HACK: it just needs more vCPUs
+    "aegea batch submit --command=\"#{batch_command}\" " \
+      " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --ecr-image idseq --memory #{60_000} --queue idseq_assembly --vcpus 32 --job-role idseq-pipeline "
   end
 
   def db_load_host_filtering
