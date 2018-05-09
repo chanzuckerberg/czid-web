@@ -34,6 +34,7 @@ class PipelineRun < ApplicationRecord
   STATUS_LOADED = 'LOADED'.freeze
   STATUS_READY = 'READY'.freeze
   POSTPROCESS_STATUS_LOADED = 'LOADED'.freeze
+  PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
 
   before_create :create_run_stages
 
@@ -140,6 +141,10 @@ class PipelineRun < ApplicationRecord
 
   def report_ready?
     job_status == STATUS_CHECKED || (ready_step && active_stage && active_stage.step_number > ready_step)
+  end
+
+  def succeeded?
+    job_status == STATUS_CHECKED
   end
 
   def update_job_status
@@ -280,7 +285,7 @@ class PipelineRun < ApplicationRecord
       SET taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
       WHERE taxon_counts.pipeline_run_id=#{id} AND
             (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at) AND
-            taxon_lineages.taxid = taxon_counts.family_taxid
+            taxon_lineages.taxid = taxon_counts.tax_id
     ")
   end
 

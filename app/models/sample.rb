@@ -18,6 +18,7 @@ class Sample < ApplicationRecord
   SORTED_TAXID_ANNOTATED_FASTA_GENUS_NR = 'taxid_annot_sorted_genus_nr.fasta'.freeze
   SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NT = 'taxid_annot_sorted_family_nt.fasta'.freeze
   SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR = 'taxid_annot_sorted_family_nr.fasta'.freeze
+  TOTAL_READS_JSON = "total_reads.json".freeze
 
   LOG_BASENAME = 'log.txt'.freeze
 
@@ -69,6 +70,21 @@ class Sample < ApplicationRecord
 
   def sample_path
     File.join('samples', project_id.to_s, id.to_s)
+  end
+
+  def pipeline_versions
+    pipeline_runs.pluck(:pipeline_version).uniq.map do |prv|
+      prv.nil? ? PipelineRun::PIPELINE_VERSION_WHEN_NULL : prv
+    end
+  end
+
+  def pipeline_run_by_version(pipeline_version)
+    # Right now we don't filter for successful pipeline runs. we should do that at some point.
+    if pipeline_version == PipelineRun::PIPELINE_VERSION_WHEN_NULL
+      pipeline_runs.find_by(pipeline_version: nil)
+    else
+      pipeline_runs.find_by(pipeline_version: pipeline_version)
+    end
   end
 
   validates_associated :input_files
@@ -179,10 +195,22 @@ class Sample < ApplicationRecord
   def initiate_s3_cp
     return unless status == STATUS_CREATED
     stderr_array = []
+    total_reads_json_path = nil
     input_files.each do |input_file|
       fastq = input_file.source
+      total_reads_json_path = File.join(File.dirname(fastq.to_s), TOTAL_READS_JSON)
       _stdout, stderr, status = Open3.capture3("aws", "s3", "cp", fastq.to_s, "#{sample_input_s3_path}/#{input_file.name}")
       stderr_array << stderr unless status.exitstatus.zero?
+    end
+    if total_reads_json_path.present?
+      # For samples where we are only given fastas post host filtering, we need to input the total reads (before host filtering) from this file.
+      _stdout, _stderr, status = Open3.capture3("aws", "s3", "cp", total_reads_json_path, "#{sample_input_s3_path}/#{TOTAL_READS_JSON}")
+      # We don't have a good way to know if this file should be present or not, so we just try to upload it
+      # and if it fails, we try one more time;  if that fails too, it's okay, the file is optional.
+      unless status.exitstatus.zero?
+        sleep(1.0)
+        _stdout, _stderr, _status = Open3.capture3("aws", "s3", "cp", total_reads_json_path, "#{sample_input_s3_path}/#{TOTAL_READS_JSON}")
+      end
     end
     if s3_preload_result_path.present? && s3_preload_result_path[0..4] == 's3://'
       _stdout, stderr, status = Open3.capture3("aws", "s3", "cp", s3_preload_result_path.to_s, sample_output_s3_path.to_s, "--recursive")
@@ -358,6 +386,29 @@ class Sample < ApplicationRecord
     end
   end
 
+  def reload_old_pipeline_runs
+    old_pipeline_runs = pipeline_runs.order('id desc').offset(1)
+    old_pipeline_runs.each do |pr|
+      next unless pr.succeeded?
+      next unless pr.taxon_counts.empty?
+      pr_s3_file_name = "#{pr.archive_s3_path}/pipeline_run_#{pr.id}.json"
+      pr_local_file_name = PipelineRun.download_file(pr_s3_file_name, pr.local_json_path)
+      next unless pr_local_file_name
+      json_dict = JSON.parse(File.read(pr_local_file_name))
+      json_dict = json_dict["pipeline_output"] if json_dict["pipeline_output"]
+      taxon_counts = (json_dict["taxon_counts"] || {}).map do |txn|
+        txn.slice("tax_id", "tax_level", "count", "created_at", "name", "count_type", "percent_identity", "alignment_length", "e_value", "genus_taxid", "superkingdom_taxid", "percent_concordant", "species_total_concordant", "genus_total_concordant", "family_total_concordant", "common_name", "family_taxid", "is_phage")
+      end
+      taxon_byteranges = (json_dict["taxon_byteranges"] || {}).map do |txn|
+        txn.slice("taxid", "first_byte", "last_byte", "created_at", "hit_type", "tax_level")
+      end
+
+      pr.taxon_counts_attributes = taxon_counts unless taxon_counts.empty?
+      pr.taxon_byteranges_attributes = taxon_byteranges unless taxon_byteranges.empty?
+      pr.save
+    end
+  end
+
   def kickoff_pipeline
     # only kickoff pipeline when no active pipeline_run running
     return unless pipeline_runs.in_progress.empty?
@@ -372,7 +423,5 @@ class Sample < ApplicationRecord
     pr.pipeline_commit = `git ls-remote https://github.com/chanzuckerberg/idseq-pipeline.git | grep refs/heads/#{pr.pipeline_branch}`.split[0]
 
     pr.save
-
-    archive_old_pipeline_runs
   end
 end
