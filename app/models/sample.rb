@@ -75,7 +75,7 @@ class Sample < ApplicationRecord
   def pipeline_versions
     prvs = []
     pipeline_runs.each do |pr|
-      next if pr.taxon_counts.empty?
+      next if pr.completed? && pr.taxon_counts.empty?
       prvs << (pr.pipeline_version.nil? ? PipelineRun::PIPELINE_VERSION_WHEN_NULL : pr.pipeline_version)
     end
     prvs
