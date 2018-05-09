@@ -143,6 +143,10 @@ class PipelineRun < ApplicationRecord
     job_status == STATUS_CHECKED || (ready_step && active_stage && active_stage.step_number > ready_step)
   end
 
+  def succeeded?
+    job_status == STATUS_CHECKED
+  end
+
   def update_job_status
     prs = active_stage
     all_stages_succeeded = prs.nil?
