@@ -759,7 +759,7 @@ class Samples extends React.Component {
     let postProcess = runInfo["Post Processing"];
     let hostFiltering = runInfo["Host Filtering"];
     let alignment = runInfo["GSNAPL/RAPSEARCH alignment"];
-    if (assembly) {
+    if (assembly && runInfo["with_assembly"]) {
       return assembly === "LOADED" ? "complete" : "uploading";
     } else if (postProcess) {
       return postProcess === "LOADED" ? "complete" : "uploading";
@@ -777,7 +777,7 @@ class Samples extends React.Component {
     let alignment = runInfo["GSNAPL/RAPSEARCH alignment"];
     if (alignment === "FAILED" || hostFiltering === "FAILED") {
       return "FAILED";
-    } else if (assembly) {
+    } else if (assembly && runInfo["with_assembly"]) {
       if (assembly === "LOADED") {
         return "COMPLETE";
       } else if (assembly === "FAILED") {

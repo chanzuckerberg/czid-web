@@ -44,7 +44,7 @@ module SamplesHelper
                         sample_organism: db_sample ? db_sample[:sample_organism] : '',
                         sample_detection: db_sample ? db_sample[:sample_detection] : '' }
         stages_to_display = [:host_filtering_status, :nonhost_alignment_status, :postprocessing_status]
-        stages_to_display << :assembly_status if run_info && run_info[:with_assembly]
+        stages_to_display << :assembly_status if run_info && run_info[:with_assembly] == 1
         stage_statuses = data_values.values_at(*stages_to_display)
         if stage_statuses.any? { |status| status == "FAILED" }
           data_values[:overall_job_status] = "FAILED"
@@ -231,7 +231,7 @@ module SamplesHelper
           pipeline_run_entry[rs.name] = rs.job_status
         end
         pipeline_run_entry[:total_runtime] = get_total_runtime(pipeline_run)
-        pipeline_run_entry[:with_assembly] = pipeline_run.assembly?
+        pipeline_run_entry[:with_assembly] = pipeline_run.assembly? ? 1 : 0
       else
         # old data
         pipeline_run_status = pipeline_run.job_status
