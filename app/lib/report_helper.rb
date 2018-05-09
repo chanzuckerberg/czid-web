@@ -609,7 +609,7 @@ module ReportHelper
         # TODO: Can we keep the accession numbers to show in these cases?
         tax_info['name'] = "All taxa with neither family nor genus classification"
         if tax_id < TaxonLineage::INVALID_CALL_BASE_ID && (tax_info['tax_level'] == TaxonCount::TAX_LEVEL_GENUS || tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES)
-          parent_taxid = -(tax_id % TaxonLineage::INVALID_CALL_BASE_ID)
+          parent_taxid = convert_neg_taxid(tax_id)
           if taxon_counts_2d[parent_taxid]
             parent_name = taxon_counts_2d[parent_taxid]['name']
             parent_level = level_name(taxon_counts_2d[parent_taxid]['tax_level'])
@@ -822,6 +822,14 @@ module ReportHelper
   def wall_clock_ms
     # used for rudimentary perf analysis
     Time.now.to_f
+  end
+
+  def convert_neg_taxid(tax_id)
+    thres = TaxonLineage::INVALID_CALL_BASE_ID
+    if tax_id < thres
+      tax_id = -(tax_id % thres).to_i
+    end
+    tax_id
   end
 
   # DEPRECATED
