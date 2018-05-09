@@ -233,9 +233,7 @@ class SamplesController < ApplicationController
 
     @report_info = external_report_info(pipeline_run_id, background_id, params)
 
-    tax_ids = @report_info[:taxonomy_details][2].map do |x|
-      convert_neg_taxid(x['tax_id'])
-    end
+    tax_ids = @report_info[:taxonomy_details][2].map { |x| x['tax_id'] }
 
     lineages = TaxonCount.connection.select_all(TaxonLineage.where(taxid: tax_ids)).to_hash
     lineage_by_taxid = {}
@@ -244,8 +242,8 @@ class SamplesController < ApplicationController
     end
 
     @report_info[:taxonomy_details][2].each do |tax|
-      tid = convert_neg_taxid(tax['tax_id'])
-      tax['lineage'] = lineage_by_taxid[tid]
+      tax['lineage'] = lineage_by_taxid[tax['tax_id']]
+      # Replace with a function that combine the speices/etc/etc with the higher order ranks
     end
 
     render json: JSON.dump(@report_info)

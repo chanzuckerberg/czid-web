@@ -188,7 +188,7 @@ module ReportHelper
     ALL_CATEGORIES
   end
 
-  def fetch_taxon_counts(pipeline_run_id, background_id, parent_ids)
+  def fetch_taxon_counts(pipeline_run_id, background_id)
     pipeline_run = PipelineRun.find(pipeline_run_id)
     adjusted_total_reads = (pipeline_run.total_reads - pipeline_run.total_ercc_reads.to_i) * pipeline_run.subsample_fraction
     # NOTE:  If you add more columns to be fetched here, you really should add them to PROPERTIES_OF_TAXID above
@@ -230,10 +230,8 @@ module ReportHelper
       WHERE
         pipeline_run_id = #{pipeline_run_id.to_i} AND
         taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID} AND
-        taxon_counts.count_type IN ('NT', 'NR') OR
-        taxon_counts.tax_id in (#{parent_ids.join(',')})
+        taxon_counts.count_type IN ('NT', 'NR')
     ").to_hash
-    # Fetch genus_taxid and family_taxid entries to provide lineage
   end
 
   def fetch_top_taxons(samples, background_id)
@@ -605,8 +603,7 @@ module ReportHelper
     # suitable names for missing and blacklisted genera and species.
     category = {}
     ALL_CATEGORIES.each do |c|
-      tid = convert_neg_taxid(c['taxid'])
-      category[tid] = c['name']
+      category[c['taxid']] = c['name']
     end
     missing_names = Set.new
     missing_parents = {}
@@ -621,6 +618,7 @@ module ReportHelper
         if tax_id < TaxonLineage::INVALID_CALL_BASE_ID && species_or_genus(tax_info['tax_level'])
           parent_id = convert_neg_taxid(tax_id)
           if tax_2d[parent_id]
+            # tax_info["superkingdom_taxid"] = tax_2d[parent_id]["superkingdom_taxid"]
             parent_name = tax_2d[parent_id]['name']
             parent_level = level_name(tax_2d[parent_id]['tax_level'])
           else
@@ -628,7 +626,7 @@ module ReportHelper
             parent_name = "taxon #{parent_id}"
             parent_level = ""
           end
-          tax_info['name'] = "Non-#{level_str}-specific reads in #{parent_level} #{parent_name}"
+          tax_info['name'] = "Non-#{level_str}-specific foobar5 reads in #{parent_level} #{parent_name}"
         elsif tax_id == TaxonLineage::BLACKLIST_GENUS_ID
           tax_info['name'] = "All artificial constructs"
         elsif !(TaxonLineage::MISSING_LINEAGE_ID.values.include? tax_id) && tax_id != TaxonLineage::MISSING_SPECIES_ID_ALT
@@ -639,7 +637,6 @@ module ReportHelper
         tax_info['name'] = "Unnamed #{level_str} taxon #{tax_id}"
       end
       category_id = tax_info.delete('superkingdom_taxid')
-      category_id = convert_neg_taxid(category_id)
       tax_info['category_name'] = category[category_id] || 'Uncategorized'
     end
 
@@ -872,7 +869,7 @@ module ReportHelper
     # Fetch and clean data.
     t0 = wall_clock_ms
     parent_ids = fetch_parent_ids_by_pr(pipeline_run_id)
-    taxon_counts = fetch_taxon_counts(pipeline_run_id, background_id, parent_ids)
+    taxon_counts = fetch_taxon_counts(pipeline_run_id, background_id)
     tax_2d = taxon_counts_cleanup(taxon_counts)
     remove_family_level_counts!(tax_2d)
     t1 = wall_clock_ms
