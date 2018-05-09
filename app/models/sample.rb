@@ -78,7 +78,7 @@ class Sample < ApplicationRecord
       next if pr.completed? && pr.taxon_counts.empty?
       prvs << (pr.pipeline_version.nil? ? PipelineRun::PIPELINE_VERSION_WHEN_NULL : pr.pipeline_version)
     end
-    prvs
+    prvs.uniq
   end
 
   def pipeline_run_by_version(pipeline_version)
