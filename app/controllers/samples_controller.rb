@@ -233,12 +233,13 @@ class SamplesController < ApplicationController
 
     @report_info = external_report_info(pipeline_run_id, background_id, params)
 
+    thres = TaxonLineage::INVALID_CALL_BASE_ID
     tax_ids = @report_info[:taxonomy_details][2].map do |x|
       t = x['tax_id']
-      if t > -1e8
+      if t > thres
         t
       else
-        -(t % -1e8)
+        -(t % thres).to_i
       end
     end
     lineages = TaxonCount.connection.select_all(TaxonLineage.where(taxid: tax_ids)).to_hash
@@ -249,7 +250,7 @@ class SamplesController < ApplicationController
 
     @report_info[:taxonomy_details][2].each do |tax|
       tid = tax['tax_id']
-      tid = -(tid % -1e8).to_i if tid < -1e8
+      tid = -(tid % thres).to_i if tid < thres
       tax['lineage'] = lineage_by_taxid[tid]
     end
 
