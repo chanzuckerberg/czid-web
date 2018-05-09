@@ -237,7 +237,7 @@ class PipelineRunStage < ApplicationRecord
       "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} "
     batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline assembly"
     "aegea batch submit --command=\"#{batch_command}\" " \
-      " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --ecr-image idseq --memory #{60_000} --queue idseq_assembly --vcpus 32 --job-role idseq-pipeline "
+      " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --ecr-image idseq --memory 60_000 --queue idseq_assembly --vcpus 32 --job-role idseq-pipeline "
   end
 
   def db_load_host_filtering
