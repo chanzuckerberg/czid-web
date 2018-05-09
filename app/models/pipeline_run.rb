@@ -38,8 +38,8 @@ class PipelineRun < ApplicationRecord
 
   before_create :create_run_stages
 
-  def as_json(_options = {})
-    super(except: [:command, :command_stdout, :command_error, :job_description])
+  def as_json(options = {})
+    super(options.merge(except: [:command, :command_stdout, :command_error, :job_description]))
   end
 
   def check_box_label
