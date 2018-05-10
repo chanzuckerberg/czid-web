@@ -42,7 +42,8 @@ class BackgroundsController < ApplicationController
   # PATCH/PUT /backgrounds/1
   # PATCH/PUT /backgrounds/1.json
   def update
-    if background_params[:pipeline_run_ids].map { |p| p.to_i }.sort == @background.pipeline_runs.pluck(:id).sort
+    puts background_params
+    if background_params[:pipeline_run_ids].map { |p| p.to_i }.select {|p| p > 0} .sort == @background.pipeline_runs.pluck(:id).sort
       @background.name = background_params[:name]
     else
       @background = Background.new(background_params)
