@@ -163,6 +163,7 @@ ActiveRecord::Schema.define(version: 20180508003522) do
     t.float "fraction_subsampled", limit: 24
     t.string "pipeline_version"
     t.string "pipeline_commit"
+    t.text "assembled_taxids"
     t.bigint "truncated"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
     t.index ["pipeline_output_id"], name: "index_pipeline_runs_on_pipeline_output_id", unique: true
@@ -250,7 +251,7 @@ ActiveRecord::Schema.define(version: 20180508003522) do
     t.index ["taxid"], name: "index_taxon_child_parents_on_taxid", unique: true
   end
 
-  create_table "taxon_confirmations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "taxon_confirmations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.integer "taxid"
     t.integer "sample_id"
     t.integer "user_id"

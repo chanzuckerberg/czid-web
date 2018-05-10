@@ -105,6 +105,7 @@ class PipelineSampleReport extends React.Component {
     this.collapseTable = this.collapseTable.bind(this);
     this.downloadFastaUrl = this.downloadFastaUrl.bind(this);
     this.gotoAlignmentVizLink = this.gotoAlignmentVizLink.bind(this);
+    this.downloadAssemblyLink = this.downloadAssemblyLink.bind(this);
     this.handleThresholdEnter = this.handleThresholdEnter.bind(this);
     this.renderMore = this.renderMore.bind(this);
     this.initializeTooltip();
@@ -829,9 +830,14 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
+  downloadAssemblyLink(e) {
+    const taxId = e.target.getAttribute("data-tax-id");
+    location.href = `/samples/${this.sample_id}/assembly/${taxId}`;
+  }
+
   displayTags(taxInfo, reportDetails) {
     let tax_level_str = "";
-    let ncbiDot, fastaDot, alignmentVizDot;
+    let ncbiDot, fastaDot, alignmentVizDot, assemblyDot;
     if (taxInfo.tax_level == 1) tax_level_str = "species";
     else tax_level_str = "genus";
 
@@ -866,6 +872,15 @@ class PipelineSampleReport extends React.Component {
           aria-hidden="true"
         />
       );
+    if (reportDetails.assembled_taxids.indexOf(taxInfo.tax_id.toString()) >= 0)
+      assemblyDot = (
+        <i
+          data-tax-id={taxInfo.tax_id}
+          onClick={this.downloadAssemblyLink}
+          className="fa fa-gg"
+          aria-hidden="true"
+        />
+      );
     return (
       <span className="link-tag">
         <BasicPopup trigger={ncbiDot} content={"NCBI Taxonomy Browser"} />
@@ -874,6 +889,7 @@ class PipelineSampleReport extends React.Component {
           trigger={alignmentVizDot}
           content={"Alignment Visualization"}
         />
+        <BasicPopup trigger={assemblyDot} content={"Assembly Download"} />
       </span>
     );
   }

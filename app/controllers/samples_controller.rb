@@ -14,7 +14,7 @@ class SamplesController < ApplicationController
   ##########################################
   skip_before_action :verify_authenticity_token, only: [:create, :update]
 
-  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder, :show_taxid_alignment, :show_taxid_alignment_viz].freeze
+  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder, :show_taxid_alignment, :show_taxid_alignment_viz].freeze
   EDIT_ACTIONS = [:edit, :add_taxon_confirmation, :remove_taxon_confirmation, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :samples_taxons, :top_taxons, :heatmap, :download_heatmap].freeze
@@ -284,6 +284,12 @@ class SamplesController < ApplicationController
     }
   end
 
+  def assembly
+    pipeline_run = @sample.pipeline_runs.first
+    assembly_fasta = pipeline_run.assembly_output_s3_path(params[:taxid])
+    send_data get_s3_file(assembly_fasta), filename: @sample.name + '_' + clean_taxid_name(pipeline_run, params[:taxid]) + '-assembled-scaffolds.fasta'
+  end
+
   def show_taxid_fasta
     if params[:hit_type] == "NT_or_NR"
       nt_array = get_taxid_fasta(@sample, params[:taxid], params[:tax_level].to_i, 'NT').split(">")
@@ -294,9 +300,7 @@ class SamplesController < ApplicationController
       @taxid_fasta = get_taxid_fasta(@sample, params[:taxid], params[:tax_level].to_i, params[:hit_type])
     end
     pipeline_run = @sample.pipeline_runs.first
-    taxid_name = pipeline_run.taxon_counts.find_by(tax_id: params[:taxid], tax_level: params[:tax_level]).name
-    taxid_name_clean = taxid_name ? taxid_name.downcase.gsub(/\W/, "-") : ''
-    send_data @taxid_fasta, filename: @sample.name + '_' + taxid_name_clean + '-hits.fasta'
+    send_data @taxid_fasta, filename: @sample.name + '_' + clean_taxid_name(pipeline_run, params[:taxid]) + '-hits.fasta'
   end
 
   def show_taxid_alignment
@@ -513,6 +517,13 @@ class SamplesController < ApplicationController
   # Use callbacks to share common setup or constraints between actions.
 
   private
+
+  def clean_taxid_name(pipeline_run, taxid)
+    return 'all' if taxid == 'all'
+    taxid_name = pipeline_run.taxon_counts.find_by(tax_id: taxid).name
+    return "taxon-#{taxid}" unless taxid_name
+    taxid_name.downcase.gsub(/\W/, "-")
+  end
 
   def sample_taxons_dict(params)
     sample_ids = params[:sample_ids].to_s.split(",").map(&:to_i) || []

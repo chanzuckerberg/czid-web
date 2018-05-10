@@ -142,6 +142,7 @@ class PipelineRunStage < ApplicationRecord
     end
     # The job appears to be in progress.  Check to make sure it hasn't been killed in AWS.   But not too frequently.
     return unless due_for_aegea_check?
+    db_load_assembly(false) # update the list of taxids that have already been assembled by polling S3
     stdout, stderr, status = Open3.capture3("aegea", "batch", "describe", job_id.to_s)
     unless status.exitstatus.zero?
       Airbrake.notify("Error for update job status for pipeline run #{id} with error #{stderr}")
@@ -228,6 +229,15 @@ class PipelineRunStage < ApplicationRecord
       "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} "
     batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline postprocess"
     aegea_batch_submit_command(batch_command, Sample::HOST_FILTERING_MEMORY_IN_MB) # HACK: it just needs more vCPUs
+  end
+
+  def assembly_command
+    batch_command_env_variables = "ALIGNMENT_S3_PATH=#{pipeline_run.alignment_output_s3_path} " \
+      "POSTPROCESS_S3_PATH=#{pipeline_run.postprocess_output_s3_path} " \
+      "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} "
+    batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline assembly"
+    "aegea batch submit --command=\"#{batch_command}\" " \
+      " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --ecr-image idseq --memory 60000 --queue idseq_assembly --vcpus 32 --job-role idseq-pipeline "
   end
 
   def db_load_host_filtering
@@ -342,6 +352,13 @@ class PipelineRunStage < ApplicationRecord
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_byteranges_path}")
   end
 
+  def db_load_assembly(save_pipeline_run = true)
+    pr = pipeline_run
+    return unless pr.assembly?
+    pr.assembled_taxids = `aws s3 ls #{pr.assembly_output_s3_path}/ | awk '{print $4}'`.split("\n")
+    pr.save if save_pipeline_run
+  end
+
   def host_filtering_outputs
     pr = pipeline_run
     pr.pipeline_version = pr.fetch_pipeline_version
@@ -354,5 +371,9 @@ class PipelineRunStage < ApplicationRecord
 
   def postprocess_outputs
     "#{pipeline_run.postprocess_output_s3_path}/#{PipelineRun::TAXID_BYTERANGE_JSON_NAME}"
+  end
+
+  def assembly_outputs
+    "#{pipeline_run.assembly_output_s3_path}-#{PipelineRun::ASSEMBLY_STATUSFILE}"
   end
 end
