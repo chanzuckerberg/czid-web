@@ -50,6 +50,7 @@ class BackgroundsController < ApplicationController
 
     respond_to do |format|
       if @background.save
+        @background.set_versions
         format.html { redirect_to @background, notice: 'Background was successfully updated.' }
         format.json { render :show, status: :ok, location: @background }
       else
