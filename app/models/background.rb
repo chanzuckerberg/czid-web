@@ -44,6 +44,15 @@ class Background < ApplicationRecord
     results
   end
 
+  def pipeline_run_ids
+    updated_pipeline_run_ids = []
+    pipeline_runs.each do |pr|
+      pr_new = pr.sample.pipeline_runs.where(job_status: PipelineRun::STATUS_CHECKED).first
+      updated_pipeline_run_ids << pr_new.id
+    end
+    updated_pipeline_run_ids
+  end
+
   def set_versions
     self.time_version = Time.now.to_i
     self.pipeline_version = self.pipeline_runs.map { |pr| pr.pipeline_version.to_f }.max.to_s
