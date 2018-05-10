@@ -310,18 +310,6 @@ module ReportHelper
     values_in_hash_keys(sql_results)
   end
 
-  def fetch_parent_ids_by_pr(pipeline_run_id)
-    sql_results = TaxonCount.connection.select_all("
-      SELECT DISTINCT
-        taxon_counts.genus_taxid         AS  genus_taxid,
-        taxon_counts.family_taxid        AS  family_taxid
-      FROM taxon_counts
-      WHERE
-        pipeline_run_id = (#{pipeline_run_id})
-       ").to_hash
-    values_in_hash_keys(sql_results)
-  end
-
   def fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
     parent_ids = parent_ids.to_a
@@ -626,7 +614,7 @@ module ReportHelper
             parent_name = "taxon #{parent_id}"
             parent_level = ""
           end
-          tax_info['name'] = "Non-#{level_str}-specific foobar7 reads in #{parent_level} #{parent_name}"
+          tax_info['name'] = "Non-#{level_str}-specific reads in #{parent_level} #{parent_name}"
         elsif tax_id == TaxonLineage::BLACKLIST_GENUS_ID
           tax_info['name'] = "All artificial constructs"
         elsif !(TaxonLineage::MISSING_LINEAGE_ID.values.include? tax_id) && tax_id != TaxonLineage::MISSING_SPECIES_ID_ALT
@@ -868,7 +856,6 @@ module ReportHelper
   def taxonomy_details(pipeline_run_id, background_id, params)
     # Fetch and clean data.
     t0 = wall_clock_ms
-    parent_ids = fetch_parent_ids_by_pr(pipeline_run_id)
     taxon_counts = fetch_taxon_counts(pipeline_run_id, background_id)
     tax_2d = taxon_counts_cleanup(taxon_counts)
     remove_family_level_counts!(tax_2d)
