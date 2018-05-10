@@ -652,51 +652,38 @@ class PipelineSampleReads extends React.Component {
       );
     }
 
-    let assembly_download = null;
-    if (
+    let stage2_complete = this.pipelineRun && this.pipelineRun.remaining_reads;
+    let nonhost_assembly_complete =
       this.reportDetails &&
-      this.reportDetails.assembled_taxids.indexOf("all") >= 0
-    ) {
-      assembly_download = (
-        <a
-          className="custom-button"
-          href={`/samples/${this.sampleInfo.id}/assembly/all`}
-        >
-          <i className="fa fa-cloud-download" />
-          Non-Host Assemblies
-        </a>
-      );
-    }
-
-    let download_section = null;
-    if (this.pipelineRun && this.pipelineRun.total_reads) {
-      download_section = (
-        <div>
-          <a
-            className="custom-button"
-            href={`/samples/${this.sampleInfo.id}/nonhost_fasta`}
-          >
-            <i className="fa fa-cloud-download" />
-            Non-Host Reads
-          </a>
-          <a
-            className="custom-button"
-            href={`/samples/${this.sampleInfo.id}/unidentified_fasta`}
-          >
-            <i className="fa fa-cloud-download" />
-            Unmapped Reads
-          </a>
-          <a
-            className="custom-button"
-            href={`/samples/${this.sampleInfo.id}/results_folder`}
-          >
-            <i className="fa fa-folder-open" />
-            Results Folder
-          </a>
-          {assembly_download}
-        </div>
-      );
-    }
+      this.reportDetails.assembled_taxids.indexOf("all") >= 0;
+    let download_section = (
+      <div>
+        <ResultButton
+          url={`/samples/${this.sampleInfo.id}/nonhost_fasta`}
+          icon="fa-cloud-download"
+          label="Non-Host Reads"
+          visible={stage2_complete}
+        />
+        <ResultButton
+          url={`/samples/${this.sampleInfo.id}/unidentified_fasta`}
+          icon="fa-cloud-download"
+          label="Unmapped Reads"
+          visible={stage2_complete}
+        />
+        <ResultButton
+          url={`/samples/${this.sampleInfo.id}/results_folder`}
+          icon="fa-folder-open"
+          label="Results Folder"
+          visible={stage2_complete}
+        />
+        <ResultButton
+          url={`/samples/${this.sampleInfo.id}/assembly/all`}
+          icon="fa-cloud-download"
+          label="Non-Host Assemblies"
+          visible={nonhost_assembly_complete}
+        />
+      </div>
+    );
 
     let sample_dropdown = "";
     if (this.sample_map && Object.keys(this.sample_map).length > 1) {
@@ -980,6 +967,15 @@ class PipelineSampleReads extends React.Component {
       </div>
     );
   }
+}
+
+function ResultButton({ url, icon, label, visible }) {
+  return visible ? (
+    <a className="custom-button" href={url}>
+      <i className={`fa ${icon}`} />
+      {label}
+    </a>
+  ) : null;
 }
 
 export default PipelineSampleReads;
