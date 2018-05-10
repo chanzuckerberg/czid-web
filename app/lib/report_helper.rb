@@ -864,19 +864,25 @@ module ReportHelper
     # These counts are shown in the UI on each genus line.
     count_species_per_genus!(tax_2d)
 
-    # Pull out all genera names in sample (before filters are applied).
-    # Add tax_info into output rows.
-    all_genera = Set.new
-    rows = []
-    tax_2d.each do |_tax_id, tax_info|
-      tax_name = tax_info['name']
-      tax_level = tax_info['tax_level']
-      all_genera.add(tax_name) if tax_level == TaxonCount::TAX_LEVEL_GENUS
-      rows << tax_info
+    # Generate lineage info.
+    unfiltered_ids = []
+    tax_2d.each do |tid, _|
+      unfiltered_ids << tid
+    end
+    lineages = TaxonCount.connection.select_all(TaxonLineage.where(taxid: unfiltered_ids)).to_hash
+    lineage_by_taxid = {}
+    lineages.each do |x|
+      lineage_by_taxid[x['taxid']] = x
     end
 
     # Remove family level rows because the reports only display species/genus
     remove_family_level_counts!(tax_2d)
+
+    # Add tax_info into output rows.
+    rows = []
+    tax_2d.each do |_tax_id, tax_info|
+      rows << tax_info
+    end
 
     # Compute all species aggregate scores.  These are used in filtering.
     compute_species_aggregate_scores!(rows, tax_2d)
@@ -906,7 +912,7 @@ module ReportHelper
     t5 = wall_clock_ms
     logger.info "Data processing took #{t5 - t1} seconds (#{t5 - t0} with I/O)."
 
-    [rows_passing_filters, rows_total, rows]
+    [rows_passing_filters, rows_total, rows, lineage_by_taxid]
   end
 
   def lineage_details(pipeline_run_id, background_id)
@@ -976,6 +982,7 @@ module ReportHelper
     pipeline_run_id = pipeline_run ? pipeline_run.id : nil
     return "" if pipeline_run_id.nil? || pipeline_run.total_reads.nil? || pipeline_run.remaining_reads.nil?
     tax_details = taxonomy_details(pipeline_run_id, background_id, params)
+    tax_details.pop  # Remove unused lineage field
     generate_report_csv(tax_details)
   end
 
