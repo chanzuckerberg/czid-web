@@ -36,7 +36,7 @@ module ReportHelper
   # We do not allow underscores in metric names, sorry!
   METRICS = %w[r rpm zscore percentidentity alignmentlength neglogevalue percentconcordant aggregatescore maxzscore].freeze
   COUNT_TYPES = %w[NT NR].freeze
-  PROPERTIES_OF_TAXID = %w[tax_id name common_name tax_level genus_taxid superkingdom_taxid category_name is_phage].freeze # note: no underscore in sortable column names
+  PROPERTIES_OF_TAXID = %w[tax_id name common_name tax_level genus_taxid family_taxid superkingdom_taxid category_name is_phage].freeze # note: no underscore in sortable column names
   UNUSED_IN_UI_FIELDS = ['superkingdom_taxid', :sort_key].freeze
 
   # This query takes 1.4 seconds and the results are static, so we hardcoded it
@@ -153,7 +153,6 @@ module ReportHelper
     return {} if pipeline_run_id.nil? || background_id.nil?
     data = {}
     data[:taxonomy_details] = taxonomy_details(pipeline_run_id, background_id, params)
-    data[:lineage_details] = lineage_details(pipeline_run_id, background_id)
     data
   end
 
@@ -605,8 +604,7 @@ module ReportHelper
         tax_info['name'] = "All taxa with neither family nor genus classification"
 
         if tax_id < TaxonLineage::INVALID_CALL_BASE_ID && species_or_genus(tax_info['tax_level'])
-          # parent_id = convert_neg_taxid(tax_id)
-          parent_id = -(tax_id % TaxonLineage::INVALID_CALL_BASE_ID)
+          parent_id = convert_neg_taxid(tax_id)
           if tax_2d[parent_id]
             tax_info["superkingdom_taxid"] = tax_2d[parent_id]["superkingdom_taxid"]
             parent_name = tax_2d[parent_id]['name']
@@ -673,10 +671,6 @@ module ReportHelper
     taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] != TaxonCount::TAX_LEVEL_FAMILY }
   end
 
-  def remove_order_level_counts!(taxon_counts_2d)
-    taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] != TaxonCount::TAX_LEVEL_ORDER }
-  end
-
   def only_species_level_counts!(taxon_counts_2d)
     taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES }
   end
@@ -686,10 +680,8 @@ module ReportHelper
   end
 
   def taxon_counts_cleanup(taxon_counts)
+    # convert_2d also does some filtering.
     tax_2d = convert_2d(taxon_counts)
-    tax_2d.each do |_tax_id, tax_info|
-      puts "FAMILY BEFORE CLEANUP: " + tax_info['family_taxid'].to_s
-    end
     cleanup_genus_ids!(tax_2d)
     validate_names!(tax_2d)
     cleanup_missing_genus_counts!(tax_2d)
@@ -866,7 +858,6 @@ module ReportHelper
     # Fetch and clean data.
     t0 = wall_clock_ms
     taxon_counts = fetch_taxon_counts(pipeline_run_id, background_id)
-    # Print statements to see if there's family_taxid
     tax_2d = taxon_counts_cleanup(taxon_counts)
     t1 = wall_clock_ms
 
@@ -874,21 +865,18 @@ module ReportHelper
     count_species_per_genus!(tax_2d)
 
     # Pull out all genera names in sample (before filters are applied).
+    # Add tax_info into output rows.
     all_genera = Set.new
+    rows = []
     tax_2d.each do |_tax_id, tax_info|
       tax_name = tax_info['name']
       tax_level = tax_info['tax_level']
       all_genera.add(tax_name) if tax_level == TaxonCount::TAX_LEVEL_GENUS
-    end
-
-    rows = []
-    tax_2d.each do |_tax_id, tax_info|
       rows << tax_info
-      puts "FAMILY: " + tax_info['family_taxid'].to_s
     end
 
-    # Remove family level counts because the reports don't display them
-    # remove_family_level_counts!(tax_2d)
+    # Remove family level rows because the reports only display species/genus
+    remove_family_level_counts!(tax_2d)
 
     # Compute all species aggregate scores.  These are used in filtering.
     compute_species_aggregate_scores!(rows, tax_2d)

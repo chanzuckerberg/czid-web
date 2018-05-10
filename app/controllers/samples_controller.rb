@@ -234,9 +234,6 @@ class SamplesController < ApplicationController
     @report_info = external_report_info(pipeline_run_id, background_id, params)
 
     tax_ids = @report_info[:taxonomy_details][2].map { |x| x['tax_id'] }
-    lineage_ids = @report_info[:lineage_details].map { |x| x['tax_id'] }
-    # puts "LINEAGE IDS"
-    # puts lineage_ids
 
     lineages = TaxonCount.connection.select_all(TaxonLineage.where(taxid: tax_ids)).to_hash
     lineage_by_taxid = {}
@@ -244,26 +241,17 @@ class SamplesController < ApplicationController
       lineage_by_taxid[x['taxid']] = x
     end
 
-    puts "Deets: " + @report_info[:taxonomy_details][2].first.to_s
-    puts "Lineage: " + lineage_by_taxid[9].to_s
-
+    # Fix visible genus/family 'Uncategorized' bug on tree view by checking
+    # species/genus/family taxids and using the first positive lineage info.
     @report_info[:taxonomy_details][2].each do |tax|
       target_id = tax['tax_id']
-      # if target_id < 0 && tax['genus_taxid'] < 0
-      #   puts "PROBLEM"
-      #   puts tax
-      # end
-      #
       if target_id < 0
         if tax['genus_taxid'] > 0
           target_id = tax['genus_taxid']
-        elsif tax['family_taxid']
-          puts "PRESENT"
+        elsif tax['family_taxid'] > 0
+          target_id = tax['family_taxid']
         end
       end
-      # elsif target_id < 0 && tax['family_taxid'] && tax['family_taxid'] > 0
-      #   target_id = tax['family_taxid']
-      # end
       tax['lineage'] = lineage_by_taxid[target_id]
     end
 
