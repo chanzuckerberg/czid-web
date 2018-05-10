@@ -4,7 +4,7 @@ class Background < ApplicationRecord
   has_many :taxon_summaries, dependent: :destroy
   belongs_to :project, optional: true
   validate :validate_size
-  after_save :store_summary
+  after_create :store_summary
 
   DEFAULT_BACKGROUND_MODEL_NAME = "default".freeze
   TAXON_SUMMARY_CHUNK_SIZE = 100
@@ -44,11 +44,14 @@ class Background < ApplicationRecord
     results
   end
 
+  def set_versions
+    self.time_version = Time.now.to_i
+    self.pipeline_version = self.pipeline_runs.map { |pr| pr.pipeline_version.to_f }.max.to_s
+    self.save
+  end
+
   def store_summary
     ActiveRecord::Base.transaction do
-      ActiveRecord::Base.connection.execute <<-SQL
-      DELETE FROM taxon_summaries WHERE background_id = #{id}
-      SQL
       data = summarize.map { |h| h.slice('tax_id', 'count_type', 'tax_level', :background_id, :created_at, :updated_at, :mean, :stdev) }
       data_chunks = data.in_groups_of(TAXON_SUMMARY_CHUNK_SIZE, false)
       data_chunks.each do |chunk|
