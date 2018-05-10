@@ -258,6 +258,11 @@ class PipelineRunStage < ApplicationRecord
     version_s3_path = "#{pr.host_filter_output_s3_path}/#{PipelineRun::VERSION_JSON_NAME}"
     pr.version = `aws s3 cp #{version_s3_path} -`
 
+    # Check if input was truncated
+    truncation_file = "#{pr.host_filter_output_s3_path}/#{PipelineRun::INPUT_TRUNCATED_FILE}"
+    _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", truncation_file)
+    pr.truncated = `aws s3 cp #{truncation_file} -`.split("\n")[0].to_i if status.exitstatus.zero?
+
     # Load ERCC counts
     pr.load_ercc_counts
     pr.save

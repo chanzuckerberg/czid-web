@@ -35,12 +35,13 @@ class PipelineRun < ApplicationRecord
   STATUS_LOADED = 'LOADED'.freeze
   STATUS_READY = 'READY'.freeze
   POSTPROCESS_STATUS_LOADED = 'LOADED'.freeze
+  INPUT_TRUNCATED_FILE = 'input_truncated.txt'.freeze
   PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
 
   before_create :create_run_stages
 
-  def as_json(_options = {})
-    super(except: [:command, :command_stdout, :command_error, :job_description])
+  def as_json(options = {})
+    super(options.merge(except: [:command, :command_stdout, :command_error, :job_description]))
   end
 
   def check_box_label
@@ -153,6 +154,10 @@ class PipelineRun < ApplicationRecord
 
   def report_ready?
     job_status == STATUS_CHECKED || (ready_step && active_stage && active_stage.step_number > ready_step)
+  end
+
+  def succeeded?
+    job_status == STATUS_CHECKED
   end
 
   def update_job_status
