@@ -241,10 +241,18 @@ class SamplesController < ApplicationController
       lineage_by_taxid[x['taxid']] = x
     end
 
+    puts lineage_by_taxid
+
     @report_info[:taxonomy_details][2].each do |tax|
       tax['lineage'] = lineage_by_taxid[tax['tax_id']]
-      # Replace with a function that combine the speices/etc/etc with the higher order ranks
+      if tax['lineage'].nil?
+        puts "TAX: " + tax.to_s
+        puts "TAX ID: " + tax['tax_id'].to_s
+        puts "LINEAGE: " + tax['lineage'].to_s
+      end
+      # Replace with a function that combine the species/etc/etc with the higher order ranks
       # From the taxon lineage table
+      # Table has an ID column and everything beyond it
     end
 
     render json: JSON.dump(@report_info)

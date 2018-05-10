@@ -390,7 +390,7 @@ module ReportHelper
       taxon_counts = res["taxon_counts"]
       sample_id = pr.sample_id
       tax_2d = taxon_counts_cleanup(taxon_counts)
-      species_or_genus!(tax_2d, species_selected)
+      only_species_or_genus_counts!(tax_2d, species_selected)
 
       rows = []
       tax_2d.each { |_tax_id, tax_info| rows << tax_info }
@@ -422,7 +422,7 @@ module ReportHelper
       sample_id = pr.sample_id
 
       tax_2d = taxon_counts_cleanup(taxon_counts)
-      species_or_genus!(tax_2d, species_selected)
+      only_species_or_genus_counts!(tax_2d, species_selected)
 
       rows = []
       tax_2d.each do |_tax_id, tax_info|
@@ -931,7 +931,7 @@ module ReportHelper
     res
   end
 
-  def species_or_genus!(tax_2d, species_selected)
+  def only_species_or_genus_counts!(tax_2d, species_selected)
     if species_selected # Species selected
       only_species_level_counts!(tax_2d)
     else # Genus selected
