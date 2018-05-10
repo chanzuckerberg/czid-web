@@ -73,18 +73,24 @@ class Sample < ApplicationRecord
   end
 
   def pipeline_versions
-    pipeline_runs.pluck(:pipeline_version).uniq.map do |prv|
-      prv.nil? ? PipelineRun::PIPELINE_VERSION_WHEN_NULL : prv
+    prvs = []
+    pipeline_runs.each do |pr|
+      next if pr.completed? && pr.taxon_counts.empty?
+      prvs << (pr.pipeline_version.nil? ? PipelineRun::PIPELINE_VERSION_WHEN_NULL : pr.pipeline_version)
     end
+    prvs.uniq
   end
 
   def pipeline_run_by_version(pipeline_version)
     # Right now we don't filter for successful pipeline runs. we should do that at some point.
-    if pipeline_version == PipelineRun::PIPELINE_VERSION_WHEN_NULL
-      pipeline_runs.find_by(pipeline_version: nil)
-    else
-      pipeline_runs.find_by(pipeline_version: pipeline_version)
-    end
+    prs = if pipeline_version == PipelineRun::PIPELINE_VERSION_WHEN_NULL
+            pipeline_runs.where(pipeline_version: nil)
+          else
+            pipeline_runs.where(pipeline_version: pipeline_version)
+          end
+
+    prs.each { |pr| return pr unless pr.taxon_counts.empty? }
+    prs.first
   end
 
   validates_associated :input_files

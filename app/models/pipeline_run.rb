@@ -24,6 +24,7 @@ class PipelineRun < ApplicationRecord
   VERSION_JSON_NAME = 'versions.json'.freeze
   ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
   TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined.json'.freeze
+  ASSEMBLY_STATUSFILE = 'job-complete'.freeze
   LOCAL_JSON_PATH = '/app/tmp/results_json'.freeze
   STATUS_CHECKED = 'CHECKED'.freeze
   STATUS_SUCCESS = 'SUCCEEDED'.freeze
@@ -34,12 +35,13 @@ class PipelineRun < ApplicationRecord
   STATUS_LOADED = 'LOADED'.freeze
   STATUS_READY = 'READY'.freeze
   POSTPROCESS_STATUS_LOADED = 'LOADED'.freeze
+  INPUT_TRUNCATED_FILE = 'input_truncated.txt'.freeze
   PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
 
   before_create :create_run_stages
 
-  def as_json(_options = {})
-    super(except: [:command, :command_stdout, :command_error, :job_description])
+  def as_json(options = {})
+    super(options.merge(except: [:command, :command_stdout, :command_error, :job_description]))
   end
 
   def check_box_label
@@ -94,7 +96,8 @@ class PipelineRun < ApplicationRecord
       load_db_command_func: 'db_load_alignment',
       output_func: 'alignment_outputs'
     )
-    # Post Processing
+
+    # Taxon Fastas and Alignment Visualization
     run_stages << PipelineRunStage.new(
       step_number: 3,
       name: 'Post Processing',
@@ -102,6 +105,16 @@ class PipelineRun < ApplicationRecord
       load_db_command_func: 'db_load_postprocess',
       output_func: 'postprocess_outputs'
     )
+
+    # De-Novo Assembly
+    run_stages << PipelineRunStage.new(
+      step_number: 4,
+      name: 'De-Novo Assembly',
+      job_command_func: 'assembly_command',
+      load_db_command_func: 'db_load_assembly',
+      output_func: 'assembly_outputs'
+    )
+
     self.pipeline_run_stages = run_stages
     # we consider the job successful after stage 2 completes, even if subsequent stages fail
     # this is the only meaning of "ready_step"
@@ -331,6 +344,10 @@ class PipelineRun < ApplicationRecord
     "#{postprocess_output_s3_path}/align_viz"
   end
 
+  def assembly_output_s3_path(taxid = nil)
+    "#{postprocess_output_s3_path}/assembly/#{taxid}".chomp("/")
+  end
+
   def host_filter_output_s3_path
     pipeline_ver_str = ""
     pipeline_ver_str = "/#{pipeline_version}" if pipeline_version
@@ -373,6 +390,10 @@ class PipelineRun < ApplicationRecord
 
   def multihit?
     after(pipeline_version || fetch_pipeline_version, "1.5")
+  end
+
+  def assembly?
+    after(pipeline_version || fetch_pipeline_version, "1.11")
   end
 
   def alignment_output_s3_path
