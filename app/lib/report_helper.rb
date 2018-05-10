@@ -153,6 +153,7 @@ module ReportHelper
     return {} if pipeline_run_id.nil? || background_id.nil?
     data = {}
     data[:taxonomy_details] = taxonomy_details(pipeline_run_id, background_id, params)
+    data[:lineage_details] = lineage_details(pipeline_run_id, background_id)
     data
   end
 
@@ -604,7 +605,8 @@ module ReportHelper
         tax_info['name'] = "All taxa with neither family nor genus classification"
 
         if tax_id < TaxonLineage::INVALID_CALL_BASE_ID && species_or_genus(tax_info['tax_level'])
-          parent_id = convert_neg_taxid(tax_id)
+          # parent_id = convert_neg_taxid(tax_id)
+          parent_id = -(tax_id % TaxonLineage::INVALID_CALL_BASE_ID)
           if tax_2d[parent_id]
             tax_info["superkingdom_taxid"] = tax_2d[parent_id]["superkingdom_taxid"]
             parent_name = tax_2d[parent_id]['name']
@@ -671,6 +673,10 @@ module ReportHelper
     taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] != TaxonCount::TAX_LEVEL_FAMILY }
   end
 
+  def remove_order_level_counts!(taxon_counts_2d)
+    taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] != TaxonCount::TAX_LEVEL_ORDER }
+  end
+
   def only_species_level_counts!(taxon_counts_2d)
     taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES }
   end
@@ -681,6 +687,9 @@ module ReportHelper
 
   def taxon_counts_cleanup(taxon_counts)
     tax_2d = convert_2d(taxon_counts)
+    tax_2d.each do |_tax_id, tax_info|
+      puts "FAMILY BEFORE CLEANUP: " + tax_info['family_taxid'].to_s
+    end
     cleanup_genus_ids!(tax_2d)
     validate_names!(tax_2d)
     cleanup_missing_genus_counts!(tax_2d)
@@ -857,8 +866,8 @@ module ReportHelper
     # Fetch and clean data.
     t0 = wall_clock_ms
     taxon_counts = fetch_taxon_counts(pipeline_run_id, background_id)
+    # Print statements to see if there's family_taxid
     tax_2d = taxon_counts_cleanup(taxon_counts)
-    remove_family_level_counts!(tax_2d)
     t1 = wall_clock_ms
 
     # These counts are shown in the UI on each genus line.
@@ -875,14 +884,17 @@ module ReportHelper
     rows = []
     tax_2d.each do |_tax_id, tax_info|
       rows << tax_info
+      puts "FAMILY: " + tax_info['family_taxid'].to_s
     end
+
+    # Remove family level counts because the reports don't display them
+    # remove_family_level_counts!(tax_2d)
 
     # Compute all species aggregate scores.  These are used in filtering.
     compute_species_aggregate_scores!(rows, tax_2d)
     # Compute all genus aggregate scores.  These are used only in sorting.
     compute_genera_aggregate_scores!(rows, tax_2d)
 
-    #
     # Total number of rows for view level, before application of filters.
     rows_total = tax_2d.length
 
@@ -907,6 +919,16 @@ module ReportHelper
     logger.info "Data processing took #{t5 - t1} seconds (#{t5 - t0} with I/O)."
 
     [rows_passing_filters, rows_total, rows]
+  end
+
+  def lineage_details(pipeline_run_id, background_id)
+    taxon_counts = fetch_taxon_counts(pipeline_run_id, background_id)
+    tax_2d = taxon_counts_cleanup(taxon_counts)
+    rows = []
+    tax_2d.each do |_tax_id, tax_info|
+      rows << tax_info
+    end
+    rows
   end
 
   def flat_hash(h, f = [], g = {})

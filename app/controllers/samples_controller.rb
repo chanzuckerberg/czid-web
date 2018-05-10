@@ -234,6 +234,9 @@ class SamplesController < ApplicationController
     @report_info = external_report_info(pipeline_run_id, background_id, params)
 
     tax_ids = @report_info[:taxonomy_details][2].map { |x| x['tax_id'] }
+    lineage_ids = @report_info[:lineage_details].map { |x| x['tax_id'] }
+    # puts "LINEAGE IDS"
+    # puts lineage_ids
 
     lineages = TaxonCount.connection.select_all(TaxonLineage.where(taxid: tax_ids)).to_hash
     lineage_by_taxid = {}
@@ -241,18 +244,27 @@ class SamplesController < ApplicationController
       lineage_by_taxid[x['taxid']] = x
     end
 
-    puts lineage_by_taxid
+    puts "Deets: " + @report_info[:taxonomy_details][2].first.to_s
+    puts "Lineage: " + lineage_by_taxid[9].to_s
 
     @report_info[:taxonomy_details][2].each do |tax|
-      tax['lineage'] = lineage_by_taxid[tax['tax_id']]
-      if tax['lineage'].nil?
-        puts "TAX: " + tax.to_s
-        puts "TAX ID: " + tax['tax_id'].to_s
-        puts "LINEAGE: " + tax['lineage'].to_s
+      target_id = tax['tax_id']
+      # if target_id < 0 && tax['genus_taxid'] < 0
+      #   puts "PROBLEM"
+      #   puts tax
+      # end
+      #
+      if target_id < 0
+        if tax['genus_taxid'] > 0
+          target_id = tax['genus_taxid']
+        elsif tax['family_taxid']
+          puts "PRESENT"
+        end
       end
-      # Replace with a function that combine the species/etc/etc with the higher order ranks
-      # From the taxon lineage table
-      # Table has an ID column and everything beyond it
+      # elsif target_id < 0 && tax['family_taxid'] && tax['family_taxid'] > 0
+      #   target_id = tax['family_taxid']
+      # end
+      tax['lineage'] = lineage_by_taxid[target_id]
     end
 
     render json: JSON.dump(@report_info)
