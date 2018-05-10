@@ -244,6 +244,7 @@ class SamplesController < ApplicationController
     @report_info[:taxonomy_details][2].each do |tax|
       tax['lineage'] = lineage_by_taxid[tax['tax_id']]
       # Replace with a function that combine the speices/etc/etc with the higher order ranks
+      # From the taxon lineage table
     end
 
     render json: JSON.dump(@report_info)

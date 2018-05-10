@@ -618,7 +618,7 @@ module ReportHelper
         if tax_id < TaxonLineage::INVALID_CALL_BASE_ID && species_or_genus(tax_info['tax_level'])
           parent_id = convert_neg_taxid(tax_id)
           if tax_2d[parent_id]
-            # tax_info["superkingdom_taxid"] = tax_2d[parent_id]["superkingdom_taxid"]
+            tax_info["superkingdom_taxid"] = tax_2d[parent_id]["superkingdom_taxid"]
             parent_name = tax_2d[parent_id]['name']
             parent_level = level_name(tax_2d[parent_id]['tax_level'])
           else
@@ -626,7 +626,7 @@ module ReportHelper
             parent_name = "taxon #{parent_id}"
             parent_level = ""
           end
-          tax_info['name'] = "Non-#{level_str}-specific foobar5 reads in #{parent_level} #{parent_name}"
+          tax_info['name'] = "Non-#{level_str}-specific foobar7 reads in #{parent_level} #{parent_name}"
         elsif tax_id == TaxonLineage::BLACKLIST_GENUS_ID
           tax_info['name'] = "All artificial constructs"
         elsif !(TaxonLineage::MISSING_LINEAGE_ID.values.include? tax_id) && tax_id != TaxonLineage::MISSING_SPECIES_ID_ALT
