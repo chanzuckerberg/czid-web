@@ -13,11 +13,11 @@ task make_background: :environment do
   query = "(#{query}) AND project_id = #{project_id}" if project_id
   samples = Sample.where(query)
 
-  completed_samples = samples.select {|s| eligible_pipeline_runs.map(&:sample_id).include?(s.id)}
+  completed_samples = samples.select { |s| eligible_pipeline_runs.map(&:sample_id).include?(s.id) }
   failed_samples = samples - completed_samples
 
   def display(sample_array)
-    sample_array.map {|s| "Name: #{s.name}, id: #{s.id}, project_id: #{s.project_id}"}.join("\n")
+    sample_array.map { |s| "Name: #{s.name}, id: #{s.id}, project_id: #{s.project_id}" }.join("\n")
   end
 
   unless failed_samples.empty?
