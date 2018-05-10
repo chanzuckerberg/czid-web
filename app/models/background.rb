@@ -48,7 +48,7 @@ class Background < ApplicationRecord
     updated_pipeline_run_ids = []
     pipeline_runs.each do |pr|
       pr_new = pr.sample.pipeline_runs.find_by(job_status: PipelineRun::STATUS_CHECKED)
-      updated_pipeline_run_ids << pr_new.id
+      updated_pipeline_run_ids << pr_new.id if pr_new
     end
     updated_pipeline_run_ids
   end
