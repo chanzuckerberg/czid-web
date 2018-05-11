@@ -4,7 +4,7 @@
 
 project = Project.create!(name: "Awesome Project")
 background = Background.new(name: "fake background")
-HostGenome.create!(name: "human", default_background_id: 1)
+HostGenome.create!(name: "human", default_background_name: "fake background")
 
 (1..5).each do |i|
   sample = Sample.new(name: "Sample #{i}", project: project,

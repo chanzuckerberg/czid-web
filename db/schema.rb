@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180508003522) do
+ActiveRecord::Schema.define(version: 20180511190826) do
 
   create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "archive_of"
@@ -26,8 +26,7 @@ ActiveRecord::Schema.define(version: 20180508003522) do
     t.datetime "updated_at", null: false
     t.bigint "project_id"
     t.string "pipeline_version"
-    t.bigint "time_version"
-    t.index ["name", "pipeline_version", "time_version"], name: "index_backgrounds_on_name_and_pipeline_version_and_time_version", unique: true
+    t.index ["name", "pipeline_version", "created_at"], name: "index_backgrounds_on_name_and_pipeline_version_and_created_at", unique: true
   end
 
   create_table "backgrounds_pipeline_outputs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -70,11 +69,11 @@ ActiveRecord::Schema.define(version: 20180508003522) do
     t.string "name", null: false
     t.text "s3_star_index_path"
     t.text "s3_bowtie2_index_path"
-    t.bigint "default_background_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "sample_memory"
     t.integer "skip_deutero_filter"
+    t.string "default_background_name"
   end
 
   create_table "input_files", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|

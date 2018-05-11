@@ -4,10 +4,26 @@ class Background < ApplicationRecord
   has_many :taxon_summaries, dependent: :destroy
   belongs_to :project, optional: true
   validate :validate_size
+  before_save :set_version
   after_create :store_summary
+
+  default_scope { order(id: :desc) }
 
   DEFAULT_BACKGROUND_MODEL_NAME = "default".freeze
   TAXON_SUMMARY_CHUNK_SIZE = 100
+
+  def current?
+    id == Background.find_by(name: name).id
+  end
+
+  def self.current_backgrounds
+    # backgrounds that are of the latest version of the same name
+    where("id in (
+        select id from backgrounds inner join (
+          select name, max(created_at) as c from backgrounds group by name
+        ) as bg2 on backgrounds.name = bg2.name and backgrounds.created_at = bg2.c
+    )")
+  end
 
   def self.eligible_pipeline_runs
     PipelineRun.top_completed_runs.order(:sample_id)
@@ -15,6 +31,22 @@ class Background < ApplicationRecord
 
   def validate_size
     errors.add(:base, "Need to select at least 2 pipeline runs.") if pipeline_runs.size < 2
+  end
+
+  def new_params(params)
+    # Deciding what to do when user intends to update a background model
+    background = self
+    name_changed = params[:name] && name != params[:name]
+    pipeline_runs_changed = params[:pipeline_run_ids] && (params[:pipeline_run_ids].map(&:to_i).select{ |p| p > 0 }.sort != pipeline_runs.pluck(:id).sort)
+    if pipeline_runs_changed
+      # create a new bacgkround model when list of pipeline_runs changed
+      background = Background.new(params)
+      background.project_id = project_id
+    elsif name_changed # but pipeline runs not changed
+      # update the names who have the same name
+      Background.where(name: name).each { |bg| bg.update(name: params[:name]) }
+      background.name = params[:name]
+    end
   end
 
   def summarize
@@ -45,6 +77,7 @@ class Background < ApplicationRecord
   end
 
   def pipeline_run_ids
+    # get the list of successful and most recent pipeline_runs that belong to the same samples
     updated_pipeline_run_ids = []
     pipeline_runs.each do |pr|
       pr_new = pr.sample.pipeline_runs.find_by(job_status: PipelineRun::STATUS_CHECKED)
@@ -53,10 +86,8 @@ class Background < ApplicationRecord
     updated_pipeline_run_ids
   end
 
-  def set_versions
-    self.time_version = Time.now.to_i
+  def set_version
     self.pipeline_version = pipeline_runs.map { |pr| pr.pipeline_version.to_f }.max.to_s
-    save
   end
 
   def store_summary
