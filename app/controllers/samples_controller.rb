@@ -526,19 +526,28 @@ class SamplesController < ApplicationController
     # Used for the tree view and sets appropriate lineage info at each node.
 
     @report_info[:taxonomy_details][2].each do |tax|
-      missing_vals = { species_taxid: TaxonLineage::MISSING_SPECIES_ID, genus_taxid: TaxonLineage::MISSING_GENUS_ID, family_taxid: TaxonLineage::MISSING_FAMILY_ID }
+      missing_vals = {
+          species_taxid: TaxonLineage::MISSING_SPECIES_ID,
+          genus_taxid: TaxonLineage::MISSING_GENUS_ID,
+          family_taxid: TaxonLineage::MISSING_FAMILY_ID,
+          order_taxid: TaxonLineage::MISSING_ORDER_ID,
+          class_taxid: TaxonLineage::MISSING_CLASS_ID,
+          phylum_taxid: TaxonLineage::MISSING_PHYLUM_ID,
+          kingdom_taxid: TaxonLineage::MISSING_KINGDOM_ID,
+          superkingdom_taxid: TaxonLineage::MISSING_SUPERKINGDOM_ID
+      }
       lineage_id = most_specific_positive_id(tax)
 
       if lineage_id
         tax['lineage'] = lineage_by_taxid[lineage_id] || missing_vals
       else
         tax['lineage'] = missing_vals
-        next
       end
 
       tax['lineage']['taxid'] = tax['tax_id']
       tax['lineage']['species_taxid'] = tax['species_taxid']
       tax['lineage']['genus_taxid'] = tax['genus_taxid']
+      tax['lineage']['family_taxid'] = tax['family_taxid']
 
       name = level_name(tax['tax_level']) + "_name"
       tax['lineage'][name] = tax['name']
@@ -546,7 +555,7 @@ class SamplesController < ApplicationController
   end
 
   def most_specific_positive_id(tax)
-    targets = [tax['tax_id'], tax['species_taxid'], tax['genus_taxid'], tax['family_taxid']]
+    targets = [tax['species_taxid'], tax['genus_taxid'], tax['family_taxid']]
     targets.each do |tentative_id|
       return tentative_id if tentative_id && tentative_id > 0
     end
