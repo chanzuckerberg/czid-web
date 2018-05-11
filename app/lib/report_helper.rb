@@ -867,11 +867,6 @@ module ReportHelper
     tax_2d.each do |tid, _|
       unfiltered_ids << tid
     end
-    lineages = TaxonCount.connection.select_all(TaxonLineage.where(taxid: unfiltered_ids)).to_hash
-    lineage_by_taxid = {}
-    lineages.each do |x|
-      lineage_by_taxid[x['taxid']] = x
-    end
 
     # Remove family level rows because the reports only display species/genus
     remove_family_level_counts!(tax_2d)
@@ -911,16 +906,6 @@ module ReportHelper
     logger.info "Data processing took #{t5 - t1} seconds (#{t5 - t0} with I/O)."
 
     [rows_passing_filters, rows_total, rows]
-  end
-
-  def lineage_details(pipeline_run_id, background_id)
-    taxon_counts = fetch_taxon_counts(pipeline_run_id, background_id)
-    tax_2d = taxon_counts_cleanup(taxon_counts)
-    rows = []
-    tax_2d.each do |_tax_id, tax_info|
-      rows << tax_info
-    end
-    rows
   end
 
   def flat_hash(h, f = [], g = {})
