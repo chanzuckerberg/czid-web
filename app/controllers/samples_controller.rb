@@ -530,7 +530,7 @@ class SamplesController < ApplicationController
       lineage_id = most_specific_positive_id(tax)
 
       if lineage_id
-        tax['lineage'] = lineage_by_taxid[lineage_id] || {}
+        tax['lineage'] = lineage_by_taxid[lineage_id] || missing_vals
       else
         tax['lineage'] = missing_vals
         next
