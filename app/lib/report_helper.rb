@@ -298,7 +298,7 @@ module ReportHelper
 
   def fetch_parent_ids(taxon_ids, samples)
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
-    sql_results = TaxonCount.connection.select_all("
+    TaxonCount.connection.select_all("
       SELECT DISTINCT
         taxon_counts.genus_taxid         AS  genus_taxid,
         taxon_counts.family_taxid        AS  family_taxid
@@ -306,8 +306,7 @@ module ReportHelper
       WHERE
         pipeline_run_id in (#{pipeline_run_ids.join(',')}) AND
         taxon_counts.tax_id in (#{taxon_ids.join(',')})
-       ").to_hash
-    values_in_hash_keys(sql_results)
+    ").to_a
   end
 
   def fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
@@ -606,7 +605,6 @@ module ReportHelper
         if tax_id < TaxonLineage::INVALID_CALL_BASE_ID && species_or_genus(tax_info['tax_level'])
           parent_id = convert_neg_taxid(tax_id)
           if tax_2d[parent_id]
-            tax_info["superkingdom_taxid"] = tax_2d[parent_id]["superkingdom_taxid"]
             parent_name = tax_2d[parent_id]['name']
             parent_level = level_name(tax_2d[parent_id]['tax_level'])
           else
@@ -934,17 +932,6 @@ module ReportHelper
     #                            :e => 3 },
     #                    :f => 4 }
     # into    {[:a, :b, :c] => 1, [:a, :b, :d] => 2, [:a, :e] => 3, [:f] => 4}
-  end
-
-  def values_in_hash_keys(input)
-    # Results from some SQL queries
-    res = []
-    input.each do |k, _|
-      k.each do |_, id|
-        res << id
-      end
-    end
-    res
   end
 
   def only_species_or_genus_counts!(tax_2d, species_selected)
