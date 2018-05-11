@@ -233,18 +233,8 @@ class SamplesController < ApplicationController
 
     @report_info = external_report_info(pipeline_run_id, background_id, params)
 
-    # Get list of tax_ids to look up in TaxonLineage and TaxonCount rows. Include family_taxids.
-    tax_ids = @report_info[:taxonomy_details][2].map { |x| x['tax_id'] }
-    tax_ids |= @report_info[:taxonomy_details][2].map { |x| x['family_taxid'] }
-
-    # TODO: Should definitely be simplified with taxonomy/lineage refactoring.
-    lineage_by_taxid = {}
-    TaxonLineage.where(taxid: tax_ids).as_json.each { |x|
-      lineage_by_taxid[x['taxid']] = x
-    }
-
     # Fill lineage details into report info
-    fill_lineage_details(lineage_by_taxid)
+    fill_lineage_details
 
     render json: JSON.dump(@report_info)
   end
@@ -520,32 +510,47 @@ class SamplesController < ApplicationController
 
   private
 
-  def fill_lineage_details(lineage_by_taxid)
+  def fill_lineage_details
+    # Get list of tax_ids to look up in TaxonLineage and TaxonCount rows. Include family_taxids.
+    tax_ids = @report_info[:taxonomy_details][2].map { |x| x['tax_id'] }
+    tax_ids |= @report_info[:taxonomy_details][2].map { |x| x['family_taxid'] }
+
+    # TODO: Should definitely be simplified with taxonomy/lineage refactoring.
+    lineage_by_taxid = {}
+    TaxonLineage.where(taxid: tax_ids).each do |x|
+      lineage_by_taxid[x.taxid] = x.as_json
+    end
+
     # Set lineage info from the first positive tax_id of the species, genus, or family levels.
     # Preserve names of the negative 'non-specific' nodes.
     # Used for the tree view and sets appropriate lineage info at each node.
+
     @report_info[:taxonomy_details][2].each do |tax|
-      if tax['tax_id'] > 0
-        tax['lineage'] = lineage_by_taxid[tax['tax_id']]
-      elsif tax['tax_id'] < 0 && tax['tax_level'] == 1 && tax['genus_taxid'] > 0
-        # NOTE: start_tax_lineage fills missing info from TaxonLineage with an empty hash.
-        tax['lineage'] = lineage_by_taxid[tax['genus_taxid']] || {}
-        tax['lineage']['taxid'] = tax['tax_id']
-        tax['lineage']['species_taxid'] = tax['species_taxid']
-        tax['lineage']['species_name'] = tax['name']
-      elsif tax['tax_id'] < 0 && tax['tax_level'] == 1 && tax['genus_taxid'] < 0 && tax['family_taxid'] > 0
-        tax['lineage'] = lineage_by_taxid[tax['family_taxid']] || {}
-        tax['lineage']['taxid'] = tax['tax_id']
-        tax['lineage']['species_taxid'] = tax['species_taxid']
-        tax['lineage']['species_name'] = tax['name']
-        tax['lineage']['genus_taxid'] = tax['genus_taxid']
-      elsif tax['tax_id'] < 0 && tax['tax_level'] == 2 && tax['family_taxid'] > 0
-        tax['lineage'] = lineage_by_taxid[tax['family_taxid']] || {}
-        tax['lineage']['taxid'] = tax['tax_id']
-        tax['lineage']['genus_taxid'] = tax['genus_taxid']
-        tax['lineage']['genus_name'] = tax['name']
+      missing_vals = { species_taxid: TaxonLineage::MISSING_SPECIES_ID, genus_taxid: TaxonLineage::MISSING_GENUS_ID, family_taxid: TaxonLineage::MISSING_FAMILY_ID }
+      lineage_id = most_specific_positive_id(tax)
+
+      if lineage_id
+        tax['lineage'] = lineage_by_taxid[lineage_id] || {}
+      else
+        tax['lineage'] = missing_vals
+        next
       end
+
+      tax['lineage']['taxid'] = tax['tax_id']
+      tax['lineage']['species_taxid'] = tax['species_taxid']
+      tax['lineage']['genus_taxid'] = tax['genus_taxid']
+
+      name = level_name(tax['tax_level']) + "_name"
+      tax['lineage'][name] = tax['name']
     end
+  end
+
+  def most_specific_positive_id(tax)
+    targets = [tax['tax_id'], tax['species_taxid'], tax['genus_taxid'], tax['family_taxid']]
+    targets.each do |tentative_id|
+      return tentative_id if tentative_id && tentative_id > 0
+    end
+    nil
   end
 
   def clean_taxid_name(pipeline_run, taxid)
