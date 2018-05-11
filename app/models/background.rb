@@ -37,16 +37,17 @@ class Background < ApplicationRecord
     # Deciding what to do when user intends to update a background model
     background = self
     name_changed = params[:name] && name != params[:name]
-    pipeline_runs_changed = params[:pipeline_run_ids] && (params[:pipeline_run_ids].map(&:to_i).select{ |p| p > 0 }.sort != pipeline_runs.pluck(:id).sort)
+    pipeline_runs_changed = params[:pipeline_run_ids] && params[:pipeline_run_ids].map(&:to_i).select { |p| p > 0 }.sort != pipeline_runs.pluck(:id).sort
     if pipeline_runs_changed
       # create a new bacgkround model when list of pipeline_runs changed
       background = Background.new(params)
       background.project_id = project_id
     elsif name_changed # but pipeline runs not changed
       # update the names who have the same name
-      Background.where(name: name).each { |bg| bg.update(name: params[:name]) }
+      Background.where(name: name).find_each { |bg| bg.update(name: params[:name]) }
       background.name = params[:name]
     end
+    background
   end
 
   def summarize
