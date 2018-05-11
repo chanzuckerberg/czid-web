@@ -912,7 +912,7 @@ module ReportHelper
     t5 = wall_clock_ms
     logger.info "Data processing took #{t5 - t1} seconds (#{t5 - t0} with I/O)."
 
-    [rows_passing_filters, rows_total, rows, lineage_by_taxid]
+    [rows_passing_filters, rows_total, rows]
   end
 
   def lineage_details(pipeline_run_id, background_id)
@@ -982,7 +982,6 @@ module ReportHelper
     pipeline_run_id = pipeline_run ? pipeline_run.id : nil
     return "" if pipeline_run_id.nil? || pipeline_run.total_reads.nil? || pipeline_run.remaining_reads.nil?
     tax_details = taxonomy_details(pipeline_run_id, background_id, params)
-    tax_details.pop  # Remove unused lineage field
     generate_report_csv(tax_details)
   end
 

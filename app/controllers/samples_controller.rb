@@ -233,6 +233,7 @@ class SamplesController < ApplicationController
 
     @report_info = external_report_info(pipeline_run_id, background_id, params)
 
+    # Get list of tax_ids to look up in TaxonLineage and TaxonCount rows. Include family_taxids.
     tax_ids = @report_info[:taxonomy_details][2].map { |x| x['tax_id'] }
     tax_ids = tax_ids | @report_info[:taxonomy_details][2].map { |x| x['family_taxid'] }
     lineages = TaxonCount.connection.select_all(TaxonLineage.where(taxid: tax_ids)).to_hash
@@ -241,11 +242,13 @@ class SamplesController < ApplicationController
       lineage_by_taxid[x['taxid']] = x
     end
 
+    # Set lineage info from the first positive tax_id of the species, genus, or family levels.
+    # Preserve names of the negative 'non-specific' nodes.
     @report_info[:taxonomy_details][2].each do |tax|
       if tax['tax_id'] > 0
         tax['lineage'] = lineage_by_taxid[tax['tax_id']]
       elsif tax['tax_id'] < 0 && tax['tax_level'] == 1 && tax['genus_taxid'] > 0
-        # OPERATIONAL FIX for missing info from TaxonLineage. Set to empty hash.
+        # NOTE: start_tax_lineage fills missing info from TaxonLineage with an empty hash.
         tax['lineage'] = lineage_by_taxid[tax['genus_taxid']] || {}
         tax['lineage']['taxid'] = tax['tax_id']
         tax['lineage']['species_taxid'] = tax['species_taxid']
