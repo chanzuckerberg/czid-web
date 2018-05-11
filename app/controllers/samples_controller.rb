@@ -245,29 +245,19 @@ class SamplesController < ApplicationController
       if tax['tax_id'] > 0
         tax['lineage'] = lineage_by_taxid[tax['tax_id']]
       elsif tax['tax_id'] < 0 && tax['tax_level'] == 1 && tax['genus_taxid'] > 0
-        tax['lineage'] = lineage_by_taxid[tax['genus_taxid']]
-        # OPERATIONAL FIX for missing info from TaxonLineage.
-        # TODO: decide on display name for cases of missing records.
-        if tax['lineage'].nil?
-          next
-        end
+        # OPERATIONAL FIX for missing info from TaxonLineage. Set to empty hash.
+        tax['lineage'] = lineage_by_taxid[tax['genus_taxid']] || {}
         tax['lineage']['taxid'] = tax['tax_id']
         tax['lineage']['species_taxid'] = tax['species_taxid']
         tax['lineage']['species_name'] = tax['name']
       elsif tax['tax_id'] < 0 && tax['tax_level'] == 1 && tax['genus_taxid'] < 0 && tax['family_taxid'] > 0
-        tax['lineage'] = lineage_by_taxid[tax['family_taxid']]
-        if tax['lineage'].nil?
-          next
-        end
+        tax['lineage'] = lineage_by_taxid[tax['family_taxid']] || {}
         tax['lineage']['taxid'] = tax['tax_id']
         tax['lineage']['species_taxid'] = tax['species_taxid']
         tax['lineage']['species_name'] = tax['name']
         tax['lineage']['genus_taxid'] = tax['genus_taxid']
       elsif tax['tax_id'] < 0 && tax['tax_level'] == 2 && tax['family_taxid'] > 0
-        tax['lineage'] = lineage_by_taxid[tax['family_taxid']]
-        if tax['lineage'].nil?
-          next
-        end
+        tax['lineage'] = lineage_by_taxid[tax['family_taxid']] || {}
         tax['lineage']['taxid'] = tax['tax_id']
         tax['lineage']['genus_taxid'] = tax['genus_taxid']
         tax['lineage']['genus_name'] = tax['name']
