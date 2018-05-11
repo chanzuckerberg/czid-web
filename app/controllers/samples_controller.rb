@@ -232,23 +232,35 @@ class SamplesController < ApplicationController
     end
 
     @report_info = external_report_info(pipeline_run_id, background_id, params)
-    tax_details = @report_info[:taxonomy_details][2]
 
-    # Filtered rows
-    lineage_by_taxid = @report_info[:taxonomy_details][3]
+    tax_ids = @report_info[:taxonomy_details][2].map { |x| x['tax_id'] }
+    tax_ids = tax_ids | @report_info[:taxonomy_details][2].map { |x| x['family_taxid'] }
+    lineages = TaxonCount.connection.select_all(TaxonLineage.where(taxid: tax_ids)).to_hash
+    lineage_by_taxid = {}
+    lineages.each do |x|
+      lineage_by_taxid[x['taxid']] = x
+    end
 
-    # Fix visible genus/family 'Uncategorized' bug on tree view by checking
-    # species/genus/family taxids and using the first positive lineage info.
-    tax_details.each do |tax|
-      target_id = tax['tax_id']
-      if target_id < 0
-        if tax['genus_taxid'] > 0
-          target_id = tax['genus_taxid']
-        elsif tax['family_taxid'] > 0
-          target_id = tax['family_taxid']
-        end
+    @report_info[:taxonomy_details][2].each do |tax|
+      if tax['tax_id'] > 0
+        tax['lineage'] = lineage_by_taxid[tax['tax_id']]
+      elsif tax['tax_id'] < 0 && tax['tax_level'] == 1 && tax['genus_taxid'] > 0
+        tax['lineage'] = lineage_by_taxid[tax['genus_taxid']]
+        tax['lineage']['taxid'] = tax['tax_id']
+        tax['lineage']['species_taxid'] = tax['species_taxid']
+        tax['lineage']['species_name'] = tax['name']
+      elsif tax['tax_id'] < 0 && tax['tax_level'] == 1 && tax['genus_taxid'] < 0 && tax['family_taxid'] > 0
+        tax['lineage'] = lineage_by_taxid[tax['family_taxid']]
+        tax['lineage']['taxid'] = tax['tax_id']
+        tax['lineage']['species_taxid'] = tax['species_taxid']
+        tax['lineage']['species_name'] = tax['name']
+        tax['lineage']['genus_taxid'] = tax['genus_taxid']
+      elsif tax['tax_id'] < 0 && tax['tax_level'] == 2 && tax['family_taxid'] > 0
+        tax['lineage'] = lineage_by_taxid[tax['family_taxid']]
+        tax['lineage']['taxid'] = tax['tax_id']
+        tax['lineage']['genus_taxid'] = tax['genus_taxid']
+        tax['lineage']['genus_name'] = tax['name']
       end
-      tax['lineage'] = lineage_by_taxid[target_id]
     end
 
     render json: JSON.dump(@report_info)
