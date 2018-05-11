@@ -108,7 +108,6 @@ class Project < ApplicationRecord
     return if project_pipeline_runs.count < 2
     project_background = Background.find_by(project_id: id)
     unless project_background
-      # Create a new background if list of pipeline runs change
       project_background = Background.new
       project_background.project_id = id
     end
