@@ -527,22 +527,22 @@ class SamplesController < ApplicationController
 
     @report_info[:taxonomy_details][2].each do |tax|
       missing_vals = {
-          species_taxid: TaxonLineage::MISSING_SPECIES_ID,
-          genus_taxid: TaxonLineage::MISSING_GENUS_ID,
-          family_taxid: TaxonLineage::MISSING_FAMILY_ID,
-          order_taxid: TaxonLineage::MISSING_ORDER_ID,
-          class_taxid: TaxonLineage::MISSING_CLASS_ID,
-          phylum_taxid: TaxonLineage::MISSING_PHYLUM_ID,
-          kingdom_taxid: TaxonLineage::MISSING_KINGDOM_ID,
-          superkingdom_taxid: TaxonLineage::MISSING_SUPERKINGDOM_ID
+        species_taxid: TaxonLineage::MISSING_SPECIES_ID,
+        genus_taxid: TaxonLineage::MISSING_GENUS_ID,
+        family_taxid: TaxonLineage::MISSING_FAMILY_ID,
+        order_taxid: TaxonLineage::MISSING_ORDER_ID,
+        class_taxid: TaxonLineage::MISSING_CLASS_ID,
+        phylum_taxid: TaxonLineage::MISSING_PHYLUM_ID,
+        kingdom_taxid: TaxonLineage::MISSING_KINGDOM_ID,
+        superkingdom_taxid: TaxonLineage::MISSING_SUPERKINGDOM_ID
       }
       lineage_id = most_specific_positive_id(tax)
 
-      if lineage_id
-        tax['lineage'] = lineage_by_taxid[lineage_id] || missing_vals
-      else
-        tax['lineage'] = missing_vals
-      end
+      tax['lineage'] = if lineage_id
+                         lineage_by_taxid[lineage_id] || missing_vals
+                       else
+                         missing_vals
+                       end
 
       tax['lineage']['taxid'] = tax['tax_id']
       tax['lineage']['species_taxid'] = tax['species_taxid']
