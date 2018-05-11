@@ -237,16 +237,11 @@ class SamplesController < ApplicationController
     tax_ids = @report_info[:taxonomy_details][2].map { |x| x['tax_id'] }
     tax_ids |= @report_info[:taxonomy_details][2].map { |x| x['family_taxid'] }
 
-    # Get lineage records from the TaxonLineage table and get more info from TaxonCount rows.
-    # This is because taxon counts contains transformed results such as -10000543 to indicate
-    # non-specific hits.
     # TODO: Should definitely be simplified with taxonomy/lineage refactoring.
-    lineage_records = TaxonLineage.where(taxid: tax_ids)
-    lineages = TaxonCount.connection.select_all(lineage_records).to_hash
     lineage_by_taxid = {}
-    lineages.each do |x|
+    TaxonLineage.where(taxid: tax_ids).as_json.each { |x|
       lineage_by_taxid[x['taxid']] = x
-    end
+    }
 
     # Fill lineage details into report info
     fill_lineage_details(lineage_by_taxid)
