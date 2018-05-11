@@ -865,7 +865,7 @@ module ReportHelper
     # Generate lineage info.
     unfiltered_ids = []
     tax_2d.each do |tid, _|
-      unfiltered_ids << tid
+      unfiltered_ids << tid if tid > 0
     end
 
     # Remove family level rows because the reports only display species/genus

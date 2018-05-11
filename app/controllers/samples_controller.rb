@@ -236,7 +236,13 @@ class SamplesController < ApplicationController
     # Get list of tax_ids to look up in TaxonLineage and TaxonCount rows. Include family_taxids.
     tax_ids = @report_info[:taxonomy_details][2].map { |x| x['tax_id'] }
     tax_ids |= @report_info[:taxonomy_details][2].map { |x| x['family_taxid'] }
-    lineages = TaxonCount.connection.select_all(TaxonLineage.where(taxid: tax_ids)).to_hash
+
+    # Get lineage records from the TaxonLineage table and get more info from TaxonCount rows.
+    # This is because taxon counts contains transformed results such as -10000543 to indicate
+    # non-specific hits.
+    # TODO: Should definitely be simplified with taxonomy/lineage refactoring.
+    lineage_records = TaxonLineage.where(taxid: tax_ids)
+    lineages = TaxonCount.connection.select_all(lineage_records).to_hash
     lineage_by_taxid = {}
     lineages.each do |x|
       lineage_by_taxid[x['taxid']] = x
