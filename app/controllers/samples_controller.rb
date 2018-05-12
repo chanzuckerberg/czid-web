@@ -401,6 +401,7 @@ class SamplesController < ApplicationController
     end
 
     params[:input_files_attributes] = params[:input_files_attributes].reject { |f| f["source"] == '' }
+    params[:input_files_attributes] = params[:input_files_attributes].reject { |f| f["source"].include?(SAMPLES_BUCKET_NAME) } unless current_user && current_user.role == 1
     @sample = Sample.new(params)
     @sample.project = project if project
     @sample.input_files.each { |f| f.name ||= File.basename(f.source) }
