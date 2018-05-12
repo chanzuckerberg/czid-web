@@ -298,8 +298,7 @@ module ReportHelper
 
   def fetch_parent_ids(taxon_ids, samples)
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
-    res = []
-    sql_results = TaxonCount.connection.select_all("
+    TaxonCount.connection.select_all("
       SELECT DISTINCT
         taxon_counts.genus_taxid         AS  genus_taxid,
         taxon_counts.family_taxid        AS  family_taxid
@@ -307,8 +306,7 @@ module ReportHelper
       WHERE
         pipeline_run_id in (#{pipeline_run_ids.join(',')}) AND
         taxon_counts.tax_id in (#{taxon_ids.join(',')})
-    ")
-    sql_results.to_hash.map(&:values).flatten
+    ").to_hash.map(&:values).flatten
   end
 
   def fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
