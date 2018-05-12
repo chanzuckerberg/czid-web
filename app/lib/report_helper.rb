@@ -307,14 +307,8 @@ module ReportHelper
       WHERE
         pipeline_run_id in (#{pipeline_run_ids.join(',')}) AND
         taxon_counts.tax_id in (#{taxon_ids.join(',')})
-       ").to_hash
-
-    sql_results.each do |k, _| # Unfolding the hash
-      k.each do |id, _|
-        res << id
-      end
-    end
-    res
+    ")
+    sql_results.to_hash.map(&:values).flatten
   end
 
   def fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
