@@ -536,26 +536,17 @@ class SamplesController < ApplicationController
       superkingdom_taxid: TaxonLineage::MISSING_SUPERKINGDOM_ID
     }
 
-    puts "foobar1"
-
     @report_info[:taxonomy_details][2].each do |tax|
+      # Grab the appropriate lineage info by the first positive tax level
       tax['lineage'] = missing_vals
       lineage_id = most_specific_positive_id(tax)
       lin = lineage_by_taxid[lineage_id] if lineage_id
       tax['lineage'] = lin if lin
       tax['lineage']['taxid'] = tax['tax_id']
 
+      # Set the name
       name = level_name(tax['tax_level']) + "_name"
       tax['lineage'][name] = tax['name']
-
-      if tax['tax_id'] < 0
-        if tax['tax_level'] == 1
-          tax['lineage']['species_taxid'] = tax['species_taxid']
-        end
-        if tax['family_taxid'] > 0
-          tax['lineage']['genus_taxid'] = tax['genus_taxid']
-        end
-      end
     end
   end
 
