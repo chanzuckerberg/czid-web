@@ -525,37 +525,40 @@ class SamplesController < ApplicationController
     # Preserve names of the negative 'non-specific' nodes.
     # Used for the tree view and sets appropriate lineage info at each node.
 
+    missing_vals = {
+      species_taxid: TaxonLineage::MISSING_SPECIES_ID,
+      genus_taxid: TaxonLineage::MISSING_GENUS_ID,
+      family_taxid: TaxonLineage::MISSING_FAMILY_ID,
+      order_taxid: TaxonLineage::MISSING_ORDER_ID,
+      class_taxid: TaxonLineage::MISSING_CLASS_ID,
+      phylum_taxid: TaxonLineage::MISSING_PHYLUM_ID,
+      kingdom_taxid: TaxonLineage::MISSING_KINGDOM_ID,
+      superkingdom_taxid: TaxonLineage::MISSING_SUPERKINGDOM_ID
+    }
+
     @report_info[:taxonomy_details][2].each do |tax|
-      missing_vals = {
-        species_taxid: TaxonLineage::MISSING_SPECIES_ID,
-        genus_taxid: TaxonLineage::MISSING_GENUS_ID,
-        family_taxid: TaxonLineage::MISSING_FAMILY_ID,
-        order_taxid: TaxonLineage::MISSING_ORDER_ID,
-        class_taxid: TaxonLineage::MISSING_CLASS_ID,
-        phylum_taxid: TaxonLineage::MISSING_PHYLUM_ID,
-        kingdom_taxid: TaxonLineage::MISSING_KINGDOM_ID,
-        superkingdom_taxid: TaxonLineage::MISSING_SUPERKINGDOM_ID
-      }
+      tax['lineage'] = missing_vals
       lineage_id = most_specific_positive_id(tax)
-
-      tax['lineage'] = if lineage_id
-                         lineage_by_taxid[lineage_id] || missing_vals
-                       else
-                         missing_vals
-                       end
-
+      lin = lineage_by_taxid[lineage_id] if lineage_id
+      tax['lineage'] = lin if lin
       tax['lineage']['taxid'] = tax['tax_id']
-      tax['lineage']['species_taxid'] = tax['species_taxid']
-      tax['lineage']['genus_taxid'] = tax['genus_taxid']
-      tax['lineage']['family_taxid'] = tax['family_taxid']
 
       name = level_name(tax['tax_level']) + "_name"
       tax['lineage'][name] = tax['name']
+
+      if tax['tax_id'] < 0
+        if tax['tax_level'] == 1
+          tax['lineage']['species_taxid'] = tax['species_taxid']
+        end
+        if tax['family_taxid'] > 0
+          tax['lineage']['genus_taxid'] = tax['genus_taxid']
+        end
+      end
     end
   end
 
   def most_specific_positive_id(tax)
-    targets = [tax['species_taxid'], tax['genus_taxid'], tax['family_taxid']]
+    targets = [tax['tax_id'], tax['species_taxid'], tax['genus_taxid'], tax['family_taxid']]
     targets.each do |tentative_id|
       return tentative_id if tentative_id && tentative_id > 0
     end
