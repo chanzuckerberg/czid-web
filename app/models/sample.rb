@@ -30,7 +30,7 @@ class Sample < ApplicationRecord
   HOST_FILTERING_MEMORY_IN_MB = 240_000
 
   DEFAULT_QUEUE = 'idseq'.freeze
-  DEFAULT_VCPUS = 8
+  DEFAULT_VCPUS = 16
 
   DEFAULT_QUEUE_HIMEM = 'idseq_himem'.freeze
   DEFAULT_VCPUS_HIMEM = 32
