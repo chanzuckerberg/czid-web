@@ -567,11 +567,11 @@ module ReportHelper
     # We might rewrite the query to be super sure of this
     taxon_counts_2d.each do |tax_id, tax_info|
       # Fill in missing info since the pipeline doesn't yet emit these.
-      if tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
-        tax_info['species_taxid'] = tax_id
-      else
-        tax_info['species_taxid'] = TaxonLineage::MISSING_SPECIES_ID
-      end
+      tax_info['species_taxid'] = if tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
+                                    tax_id
+                                  else
+                                    TaxonLineage::MISSING_SPECIES_ID
+                                  end
 
       if tax_info['tax_level'] == TaxonCount::TAX_LEVEL_GENUS
         tax_info['genus_taxid'] = tax_id

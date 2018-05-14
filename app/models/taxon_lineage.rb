@@ -46,7 +46,7 @@ class TaxonLineage < ApplicationRecord
 
     # TODO: Should definitely be simplified with taxonomy/lineage refactoring.
     lineage_by_taxid = {}
-    TaxonLineage.where(taxid: tax_ids).each do |x|
+    TaxonLineage.where(taxid: tax_ids).find_each do |x|
       lineage_by_taxid[x.taxid] = x.as_json
     end
 
@@ -55,26 +55,26 @@ class TaxonLineage < ApplicationRecord
     # Used for the tree view and sets appropriate lineage info at each node.
 
     missing_vals = {
-        species_taxid: TaxonLineage::MISSING_SPECIES_ID,
-        genus_taxid: TaxonLineage::MISSING_GENUS_ID,
-        family_taxid: TaxonLineage::MISSING_FAMILY_ID,
-        order_taxid: TaxonLineage::MISSING_ORDER_ID,
-        class_taxid: TaxonLineage::MISSING_CLASS_ID,
-        phylum_taxid: TaxonLineage::MISSING_PHYLUM_ID,
-        kingdom_taxid: TaxonLineage::MISSING_KINGDOM_ID,
-        superkingdom_taxid: TaxonLineage::MISSING_SUPERKINGDOM_ID
+      species_taxid: TaxonLineage::MISSING_SPECIES_ID,
+      genus_taxid: TaxonLineage::MISSING_GENUS_ID,
+      family_taxid: TaxonLineage::MISSING_FAMILY_ID,
+      order_taxid: TaxonLineage::MISSING_ORDER_ID,
+      class_taxid: TaxonLineage::MISSING_CLASS_ID,
+      phylum_taxid: TaxonLineage::MISSING_PHYLUM_ID,
+      kingdom_taxid: TaxonLineage::MISSING_KINGDOM_ID,
+      superkingdom_taxid: TaxonLineage::MISSING_SUPERKINGDOM_ID
     }
 
     tax_map.each do |tax|
       # Grab the appropriate lineage info by the first positive tax level
       tax['lineage'] = missing_vals
-      lineage_id = self.most_specific_positive_id(tax)
+      lineage_id = most_specific_positive_id(tax)
       lin = lineage_by_taxid[lineage_id] if lineage_id
       tax['lineage'] = lin if lin
       tax['lineage']['taxid'] = tax['tax_id']
 
       # Set the name
-      name = self.level_name(tax['tax_level']) + "_name"
+      name = level_name(tax['tax_level']) + "_name"
       tax['lineage'][name] = tax['name']
     end
 
