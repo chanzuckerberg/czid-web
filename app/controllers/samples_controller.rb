@@ -536,6 +536,8 @@ class SamplesController < ApplicationController
       superkingdom_taxid: TaxonLineage::MISSING_SUPERKINGDOM_ID
     }
 
+    puts "foobar1"
+
     @report_info[:taxonomy_details][2].each do |tax|
       tax['lineage'] = missing_vals
       lineage_id = most_specific_positive_id(tax)
@@ -558,7 +560,7 @@ class SamplesController < ApplicationController
   end
 
   def most_specific_positive_id(tax)
-    targets = [tax['tax_id'], tax['species_taxid'], tax['genus_taxid'], tax['family_taxid']]
+    targets = [tax['species_taxid'], tax['genus_taxid'], tax['family_taxid']]
     targets.each do |tentative_id|
       return tentative_id if tentative_id && tentative_id > 0
     end

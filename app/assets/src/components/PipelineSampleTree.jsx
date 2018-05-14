@@ -64,7 +64,11 @@ class PipelineSampleTree extends React.PureComponent {
 
       let has_categorization =
         order.filter(function(level) {
-          return row.lineage && row.lineage[level + "_taxid"] >= 0;
+          return (
+            row.lineage &&
+            (row.lineage[level + "_taxid"] >= 0 ||
+              row.lineage[level + "_taxid"] < -1e8)
+          );
         }).length > 1;
 
       if (!row.lineage || !has_categorization) {
