@@ -72,6 +72,9 @@ class TaxonLineage < ApplicationRecord
       lin = lineage_by_taxid[lineage_id] if lineage_id
       tax['lineage'] = lin if lin
       tax['lineage']['taxid'] = tax['tax_id']
+      tax['lineage']['species_taxid'] = tax['species_taxid']
+      tax['lineage']['genus_taxid'] = tax['genus_taxid']
+      tax['lineage']['family_taxid'] = tax['family_taxid']
 
       # Set the name
       name = level_name(tax['tax_level']) + "_name"
