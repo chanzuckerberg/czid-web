@@ -297,16 +297,12 @@ module ReportHelper
   end
 
   def fetch_parent_ids(taxon_ids, samples)
-    pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
-    TaxonCount.connection.select_all("
-      SELECT DISTINCT
-        taxon_counts.genus_taxid         AS  genus_taxid,
-        taxon_counts.family_taxid        AS  family_taxid
-      FROM taxon_counts
-      WHERE
-        pipeline_run_id in (#{pipeline_run_ids.join(',')}) AND
-        taxon_counts.tax_id in (#{taxon_ids.join(',')})
-    ").to_hash.map(&:values).flatten
+    # Get parent (genus,family) ids for the taxon_ids based on the samples
+    pipeline_run_ids = PipelineRun.where(sample_id: samples.pluck(:id)).pluck(:id)
+    TaxonCount.select("distinct genus_taxid, family_taxid")
+               .where(pipeline_run_id: pipeline_run_ids)
+               .where(tax_id: taxon_ids)
+               .map { |u| u.attributes.values.compact }.flatten
   end
 
   def fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
@@ -410,6 +406,7 @@ module ReportHelper
   end
 
   def top_taxons_details(samples, background_id, num_results, sort_by_key, species_selected)
+    # return top taxons
     results_by_pr = fetch_top_taxons(samples, background_id)
     sort_by = decode_sort_by(sort_by_key)
     count_type = sort_by[:count_type]
