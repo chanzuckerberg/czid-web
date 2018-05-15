@@ -403,6 +403,8 @@ class PipelineRun < ApplicationRecord
 
   def assembly?
     after(pipeline_version || fetch_pipeline_version, "1000.1000")
+    # Very big version number so we don't accidentally start going into assembly mode.
+    # Once we decide to deploy the assembly pipeline, change "1000.1000" to the relevant version number of idseq-pipeline.
   end
 
   def alignment_output_s3_path
