@@ -29,6 +29,6 @@ class User < ApplicationRecord
   end
 
   def can_upload(s3_path)
-    admin? || !s3_path.include?(SAMPLES_BUCKET_NAME)
+    !s3_path.include?(SAMPLES_BUCKET_NAME) || admin?
   end
 end
