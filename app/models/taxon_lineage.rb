@@ -59,10 +59,13 @@ class TaxonLineage < ApplicationRecord
 
     tax_map.each do |tax|
       # Grab the appropriate lineage info by the first positive tax level
-      tax['lineage'] = missing_vals
       lineage_id = most_specific_positive_id(tax)
-      lin = lineage_by_taxid[lineage_id] if lineage_id
-      tax['lineage'] = lin if lin
+      tax['lineage'] = if lineage_id
+                         lineage_by_taxid[lineage_id] || missing_vals.dup
+                       else
+                         missing_vals.dup
+                       end
+
       tax['lineage']['taxid'] = tax['tax_id']
       tax['lineage']['species_taxid'] = tax['species_taxid']
       tax['lineage']['genus_taxid'] = tax['genus_taxid']
