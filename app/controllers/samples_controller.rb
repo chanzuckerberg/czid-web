@@ -400,7 +400,7 @@ class SamplesController < ApplicationController
       host_genome = HostGenome.find_by(name: host_genome_name)
     end
 
-    params[:input_files_attributes].reject! { |f| f["source"] == '' || !current_user.can_upload(f["source"]) }
+    params[:input_files_attributes].select! { |f| f["source"] != '' && current_user.can_upload(f["source"]) }
     @sample = Sample.new(params)
     @sample.project = project if project
     @sample.input_files.each { |f| f.name ||= File.basename(f.source) }
