@@ -27,4 +27,9 @@ class User < ApplicationRecord
   def demo_user?
     DEMO_USER_EMAILS.include?(email)
   end
+
+  def can_upload(s3_path)
+    user_bucket = s3_path.split("/")[2] # get "bucket" from "s3://bucket/path/to/file"
+    user_bucket != SAMPLES_BUCKET_NAME || admin?
+  end
 end
