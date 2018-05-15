@@ -30,8 +30,6 @@ class User < ApplicationRecord
 
   def can_upload(s3_path)
     user_bucket = s3_path.split("/")[2] # get "bucket" from "s3://bucket/path/to/file"
-    all_envs = %w[production alpha development]
-    forbidden_buckets = all_envs.map { |env| SAMPLES_BUCKET_NAME.gsub(Regexp.union(*all_envs), env) }
-    !forbidden_buckets.include?(user_bucket) || admin?
+    user_bucket != SAMPLES_BUCKET_NAME || admin?
   end
 end
