@@ -318,7 +318,12 @@ class PipelineSampleReads extends React.Component {
     const csv_background_id_param = param_background_id
       ? `?background_id=${param_background_id}`
       : defaultBackground;
-    return `/samples/${this.sampleId}/report_csv${csv_background_id_param}`;
+    const pipeline_version_param = this.pipelineRun.pipeline_version
+      ? `&pipeline_version=${this.pipelineRun.pipeline_version}`
+      : "";
+    return `/samples/${
+      this.sampleId
+    }/report_csv${csv_background_id_param}${pipeline_version_param}`;
   }
 
   componentDidMount() {
