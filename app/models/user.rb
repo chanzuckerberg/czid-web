@@ -29,8 +29,9 @@ class User < ApplicationRecord
   end
 
   def can_upload(s3_path)
-    bucket = s3_path.split("/")[2] # get "bucket" from "s3://bucket/path/to/file"
-    samples_bucket_base = SAMPLES_BUCKET_NAME.gsub(Regexp.union('production', 'alpha', 'development'), '') # Hack: remove env so guard applies to all envs
-    !bucket.include?(samples_bucket_base) || admin?
+    user_bucket = s3_path.split("/")[2] # get "bucket" from "s3://bucket/path/to/file"
+    all_envs = ['production', 'alpha', 'development']
+    forbidden_buckets = all_envs.map { |env| SAMPLES_BUCKET_NAME.gsub(Regexp.union(*all_envs), env) }
+    !forbidden_buckets.include?(user_bucket) || admin?
   end
 end
