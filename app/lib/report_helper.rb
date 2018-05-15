@@ -36,7 +36,8 @@ module ReportHelper
   # We do not allow underscores in metric names, sorry!
   METRICS = %w[r rpm zscore percentidentity alignmentlength neglogevalue percentconcordant aggregatescore maxzscore].freeze
   COUNT_TYPES = %w[NT NR].freeze
-  PROPERTIES_OF_TAXID = %w[tax_id name common_name tax_level genus_taxid family_taxid superkingdom_taxid category_name is_phage].freeze # note: no underscore in sortable column names
+  # Note: no underscore in sortable column names. Add to here to protect from data cleaning.
+  PROPERTIES_OF_TAXID = %w[tax_id name common_name tax_level species_taxid genus_taxid family_taxid superkingdom_taxid category_name is_phage].freeze
   UNUSED_IN_UI_FIELDS = ['superkingdom_taxid', :sort_key].freeze
 
   # This query takes 1.4 seconds and the results are static, so we hardcoded it
@@ -198,6 +199,7 @@ module ReportHelper
         taxon_counts.tax_id              AS  tax_id,
         taxon_counts.count_type          AS  count_type,
         taxon_counts.tax_level           AS  tax_level,
+
         taxon_counts.genus_taxid         AS  genus_taxid,
         taxon_counts.family_taxid        AS  family_taxid,
         taxon_counts.name                AS  name,
@@ -564,6 +566,13 @@ module ReportHelper
   def cleanup_genus_ids!(taxon_counts_2d)
     # We might rewrite the query to be super sure of this
     taxon_counts_2d.each do |tax_id, tax_info|
+      # Fill in missing info since the pipeline doesn't yet emit these.
+      tax_info['species_taxid'] = if tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
+                                    tax_id
+                                  else
+                                    TaxonLineage::MISSING_SPECIES_ID
+                                  end
+
       if tax_info['tax_level'] == TaxonCount::TAX_LEVEL_GENUS
         tax_info['genus_taxid'] = tax_id
       end
@@ -572,14 +581,6 @@ module ReportHelper
       end
     end
     taxon_counts_2d
-  end
-
-  def level_name(tax_level)
-    level_str = "rank_#{tax_level}"
-    level_str = 'species' if tax_level == TaxonCount::TAX_LEVEL_SPECIES
-    level_str = 'genus' if tax_level == TaxonCount::TAX_LEVEL_GENUS
-    level_str = 'family' if tax_level == TaxonCount::TAX_LEVEL_FAMILY
-    level_str
   end
 
   def validate_names!(tax_2d)
@@ -593,7 +594,7 @@ module ReportHelper
     missing_parents = {}
 
     tax_2d.each do |tax_id, tax_info|
-      level_str = level_name(tax_info['tax_level'])
+      level_str = TaxonLineage.level_name(tax_info['tax_level'])
       if tax_id < 0
         # Usually -1 means accession number did not resolve to species.
         # TODO: Can we keep the accession numbers to show in these cases?
@@ -603,7 +604,7 @@ module ReportHelper
           parent_id = convert_neg_taxid(tax_id)
           if tax_2d[parent_id]
             parent_name = tax_2d[parent_id]['name']
-            parent_level = level_name(tax_2d[parent_id]['tax_level'])
+            parent_level = TaxonLineage.level_name(tax_2d[parent_id]['tax_level'])
           else
             missing_parents[parent_id] = tax_id
             parent_name = "taxon #{parent_id}"
