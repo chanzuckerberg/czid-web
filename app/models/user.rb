@@ -27,4 +27,8 @@ class User < ApplicationRecord
   def demo_user?
     DEMO_USER_EMAILS.include?(email)
   end
+
+  def can_upload(s3_path)
+    admin? || !s3_path.include?(SAMPLES_BUCKET_NAME)
+  end
 end
