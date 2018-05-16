@@ -196,9 +196,6 @@ class PipelineSampleReport extends React.Component {
           this.applyThresholdFilters(this.state.taxonomy_details, false);
         }
       );
-
-      // Tag on ?pipeline_version and ?background_id if not in the URL
-      // history.pushState(null, null, "?pipeline_version=3");
     });
   }
 

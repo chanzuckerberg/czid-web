@@ -65,6 +65,7 @@ class PipelineSampleReads extends React.Component {
     this.handleDropdownChange = this.handleDropdownChange.bind(this);
     this.deleteSample = this.deleteSample.bind(this);
     this.toggleHighlightTaxon = this.toggleHighlightTaxon.bind(this);
+    this._fillUrlParams = this.fillUrlParams.bind(this);
   }
 
   generateGsnapFilterStatus(jobStats) {
@@ -255,6 +256,7 @@ class PipelineSampleReads extends React.Component {
     }
     return true;
   }
+
   rerunPipeline() {
     this.setState({
       rerunStatus: "waiting",
@@ -364,7 +366,24 @@ class PipelineSampleReads extends React.Component {
       );
     }
 
-    history.pushState(null, null, "?${test}pipeline_version=3");
+    this._fillUrlParams();
+  }
+
+  // Fill in desired URL parameters so user's can copy and paste URLs.
+  // Ex: Add ?pipeline_version=1.7&background_id=4 to /samples/545
+  // This way links can still be to '/samples/545' in the rest of the app
+  // but the URL will be filled in without triggering another page reload.
+  fillUrlParams() {
+    let params = {};
+    const stringer = require("querystring");
+
+    let given = this.props.reportPageParams;
+    if (given) {
+      params["pipeline_version"] = given.pipeline_version;
+      params["background_id"] = given.background_id;
+      // Modify the URL in place without triggering a page reload.
+      history.pushState(null, null, `?${stringer.stringify(params)}`);
+    }
   }
 
   initializeSelectTag() {
