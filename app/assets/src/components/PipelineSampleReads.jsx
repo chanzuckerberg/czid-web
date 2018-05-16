@@ -363,6 +363,8 @@ class PipelineSampleReads extends React.Component {
         this.handleDropdownChange
       );
     }
+
+    history.pushState(null, null, "?${test}pipeline_version=3");
   }
 
   initializeSelectTag() {

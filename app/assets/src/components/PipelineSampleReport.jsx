@@ -175,13 +175,6 @@ class PipelineSampleReport extends React.Component {
     let params = `?${window.location.search.replace("?", "")}&report_ts=${
       this.report_ts
     }&version=${this.gitVersion}`;
-    const cached_background_id = Cookies.get("background_id");
-    if (cached_background_id) {
-      params =
-        params.indexOf("background_id=") < 0
-          ? `${params}&background_id=${cached_background_id}`
-          : params;
-    }
     axios.get(`/samples/${this.sample_id}/report_info${params}`).then(res => {
       this.nanobar.go(100);
       const genus_map = {};
@@ -191,7 +184,7 @@ class PipelineSampleReport extends React.Component {
           genus_map[taxon.genus_taxid] = taxon;
         }
       }
-      // the genus_map never changes, so we move it out from the react state, to reduce perfomance cost
+      // the genus_map never changes, so we move it out from the react state, to reduce performance cost
       this.genus_map = genus_map;
       this.setState(
         {
@@ -203,6 +196,9 @@ class PipelineSampleReport extends React.Component {
           this.applyThresholdFilters(this.state.taxonomy_details, false);
         }
       );
+
+      // Tag on ?pipeline_version and ?background_id if not in the URL
+      // history.pushState(null, null, "?pipeline_version=3");
     });
   }
 
@@ -788,7 +784,6 @@ class PipelineSampleReport extends React.Component {
       },
       () => {
         Cookies.set("background_name", backgroundName);
-        Cookies.set("background_id", backgroundParams);
         this.props.refreshPage({ background_id: backgroundParams });
       }
     );
