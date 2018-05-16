@@ -310,20 +310,25 @@ class PipelineSampleReads extends React.Component {
   }
 
   getDownloadLink() {
-    const param_background_id = this.fetchParams("background_id");
-    const cookie_background_id = Cookies.get("background_id");
-    const defaultBackground = cookie_background_id
-      ? `?background_id=${cookie_background_id}`
-      : "";
-    const csv_background_id_param = param_background_id
-      ? `?background_id=${param_background_id}`
-      : defaultBackground;
-    const pipeline_version_param = this.pipelineRun.pipeline_version
-      ? `&pipeline_version=${this.pipelineRun.pipeline_version}`
-      : "";
-    return `/samples/${
-      this.sampleId
-    }/report_csv${csv_background_id_param}${pipeline_version_param}`;
+    const givenBackgroundId = this.fetchParams("background_id");
+    const cookieBackgroundId = Cookies.get("background_id");
+
+    let resParams = {};
+    let csvBackgroundId;
+    const stringer = require("querystring");
+
+    // Set the right CSV background ID.
+    if (cookieBackgroundId) csvBackgroundId = cookieBackgroundId;
+    if (givenBackgroundId) csvBackgroundId = givenBackgroundId;
+    if (csvBackgroundId) resParams["background_id"] = csvBackgroundId;
+
+    // Set the right pipeline version.
+    let v = this.pipelineRun.pipeline_version;
+    if (v) resParams["pipeline_version"] = v;
+
+    let res = `/samples/${this.sampleId}/report_csv`;
+    res += `?${stringer.stringify(resParams)}`;
+    return res;
   }
 
   componentDidMount() {
