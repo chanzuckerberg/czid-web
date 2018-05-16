@@ -4,7 +4,7 @@ import moment from "moment";
 import $ from "jquery";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { Button, Icon, Divider, Popup } from "semantic-ui-react";
+import { Button, Icon, Divider, Popup, Dropdown } from "semantic-ui-react";
 import numberWithCommas from "../helpers/strings";
 import SubHeader from "./SubHeader";
 import ERCCScatterPlot from "./ERCCScatterPlot";
@@ -483,35 +483,57 @@ class PipelineSampleReads extends React.Component {
 
     let date_available =
       this.summary_stats && this.summary_stats.last_processed_at;
-    let run_date_display = !date_available
-      ? BLANK_TEXT
-      : moment(this.summary_stats.last_processed_at)
+    let run_date_blurb = "";
+    if (date_available) {
+      run_date_blurb =
+        "processed " +
+        moment(this.summary_stats.last_processed_at)
           .startOf("second")
           .fromNow();
-    let run_date_display_augmented = !date_available
-      ? ""
-      : "| data processed " + run_date_display;
-    let pipeline_versions =
-      this.pipelineVersions.length > 1 ? (
+    }
+
+    // Ex: 'processed 5 days ago' text or dropdown menu with version selector.
+    let pipeline_version_blurb;
+    if (this.pipelineVersions.length > 1) {
+      // Show a little dropdown menu for version selection.
+      let cur_version = this.pipelineRun.pipeline_version;
+      let other_versions = this.pipelineVersions.filter(v => v !== cur_version);
+      pipeline_version_blurb = (
         <span>
-          {" "}
-          | switch to
-          {this.pipelineVersions.map((version, i) => {
-            const phash = { pipeline_version: version };
-            return version != this.props.reportPageParams.pipeline_version ? (
-              <a
-                key={i}
-                onClick={e => {
-                  this.refreshPage(phash);
-                }}
-              >
-                {" "}
-                {version}{" "}
-              </a>
-            ) : null;
-          }, this)}
+          {"| "}
+          <Dropdown text={run_date_blurb} className="version-dropdown">
+            <Dropdown.Menu>
+              {other_versions.map(version => {
+                const phash = { pipeline_version: version };
+                return (
+                  <Dropdown.Item
+                    onClick={() => {
+                      this.refreshPage(phash);
+                    }}
+                  >
+                    {"Pipeline v" + version}
+                  </Dropdown.Item>
+                );
+              })}
+            </Dropdown.Menu>
+          </Dropdown>
         </span>
-      ) : null;
+      );
+      pipeline_version_blurb = (
+        <BasicPopup
+          trigger={pipeline_version_blurb}
+          content={"Select Report Version"}
+          position={"right"}
+        />
+      );
+    } else {
+      // Old blurb without version selector.
+      pipeline_version_blurb = (
+        <span>
+          {"| "} {run_date_blurb}
+        </span>
+      );
+    }
 
     if (this.reportPresent) {
       d_report = (
@@ -637,7 +659,7 @@ class PipelineSampleReads extends React.Component {
                     !this.summary_stats.last_processed_at ? BLANK_TEXT : ""
                   }`}
                 >
-                  {run_date_display}
+                  {run_date_blurb}
                 </div>
               </div>
             </div>
@@ -719,17 +741,18 @@ class PipelineSampleReads extends React.Component {
       );
     }
 
-    let version_display = !this.pipelineRun
-      ? ""
-      : !this.pipelineRun.version
-        ? ""
-        : !this.pipelineRun.version.pipeline
-          ? ""
-          : "v" + this.pipelineRun.version.pipeline;
-    if (version_display != "" && this.pipelineRun.version.nt) {
+    let version_display = "";
+    if (
+      this.pipelineRun &&
+      this.pipelineRun.version &&
+      this.pipelineRun.version.pipeline
+    ) {
+      version_display = "v" + this.pipelineRun.version.pipeline;
+    }
+    if (version_display !== "" && this.pipelineRun.version.nt) {
       version_display = version_display + ", NT " + this.pipelineRun.version.nt;
     }
-    if (version_display != "" && this.pipelineRun.version.nr) {
+    if (version_display !== "" && this.pipelineRun.version.nr) {
       version_display = version_display + ", NR " + this.pipelineRun.version.nr;
     }
 
@@ -765,8 +788,7 @@ class PipelineSampleReads extends React.Component {
         <SubHeader>
           <div className="sub-header">
             <div className="title">
-              PIPELINE {version_display} {run_date_display_augmented}{" "}
-              {pipeline_versions}
+              PIPELINE {version_display} {pipeline_version_blurb}
             </div>
             <div className="row">
               <div className="sub-title col s9">

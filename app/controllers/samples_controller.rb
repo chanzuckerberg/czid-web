@@ -151,7 +151,7 @@ class SamplesController < ApplicationController
   def show
     @pipeline_run = select_pipeline_run(@sample)
     @pipeline_version = @pipeline_run.pipeline_version || PipelineRun::PIPELINE_VERSION_WHEN_NULL if @pipeline_run
-    @pipeline_versions = params[:venabled] ? @sample.pipeline_versions : []
+    @pipeline_versions = @sample.pipeline_versions
 
     @pipeline_run_display = curate_pipeline_run_display(@pipeline_run)
     @sample_status = @pipeline_run ? @pipeline_run.job_status : nil
