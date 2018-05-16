@@ -323,7 +323,7 @@ class PipelineSampleReads extends React.Component {
     if (csvBackgroundId) resParams["background_id"] = csvBackgroundId;
 
     // Set the right pipeline version.
-    let v = this.pipelineRun.pipeline_version;
+    let v = this.pipelineRun && this.pipelineRun.pipeline_version;
     if (v) resParams["pipeline_version"] = v;
 
     let res = `/samples/${this.sampleId}/report_csv`;
