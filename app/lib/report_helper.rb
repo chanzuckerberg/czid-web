@@ -948,7 +948,7 @@ module ReportHelper
     params[:is_csv] = 1
     params[:sort_by] = "highest_nt_aggregatescore"
     background_id = params[:background_id] || sample.default_background_id
-    pipeline_run = sample.pipeline_runs.first
+    pipeline_run = select_pipeline_run(sample)
     pipeline_run_id = pipeline_run ? pipeline_run.id : nil
     return "" if pipeline_run_id.nil? || pipeline_run.total_reads.nil? || pipeline_run.remaining_reads.nil?
     tax_details = taxonomy_details(pipeline_run_id, background_id, params)
