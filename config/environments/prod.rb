@@ -11,7 +11,7 @@ Rails.application.configure do
   config.eager_load = true
 
   # Full error reports are disabled and caching is turned on.
-  config.consider_all_requests_local       = true
+  config.consider_all_requests_local       = false
   config.action_controller.perform_caching = true
 
   # Attempt to read encrypted secrets from `config/secrets.yml.enc`.
@@ -59,6 +59,8 @@ Rails.application.configure do
   # Prepend all log lines with the following tags.
   config.log_tags = [:request_id]
 
+  config.serve_static_assets = true
+
   # Use a different cache store in production.
   # config.cache_store = :mem_cache_store
 
@@ -66,20 +68,20 @@ Rails.application.configure do
   # config.active_job.queue_adapter     = :resque
   # config.active_job.queue_name_prefix = "idseq-#{Rails.env}"
   config.action_mailer.perform_caching = false
+  config.action_mailer.default_url_options = { host: 'idseq.net' }
 
-  # Ignore bad email addresses and do not raise email delivery errors.
-  # Set this to true and configure the email server for immediate delivery to raise delivery errors.
-  # config.action_mailer.raise_delivery_errors = false
-  config.action_mailer.default_url_options = { host: 'alpha.idseq.net' }
-
-  config.action_controller.asset_host = 'alpha.idseq.net'
-  config.middleware.use Rack::HostRedirect, 'www.alpha.idseq.net' => 'alpha.idseq.net'
+  config.action_controller.asset_host = 'idseq.net'
+  config.middleware.use Rack::HostRedirect, 'www.idseq.net' => 'idseq.net'
 
   config.action_mailer.delivery_method = :mailgun
   config.action_mailer.mailgun_settings = {
     api_key: ENV['MAIL_GUN_API_KEY'],
     domain: 'mg.idseq.net'
   }
+
+  # Ignore bad email addresses and do not raise email delivery errors.
+  # Set this to true and configure the email server for immediate delivery to raise delivery errors.
+  # config.action_mailer.raise_delivery_errors = false
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).

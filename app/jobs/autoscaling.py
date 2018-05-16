@@ -11,7 +11,7 @@ from functools import wraps
 
 
 # As opposed to "development", where different containers belong to different developers.
-MULTICONTAINER_ENVIRONMENTS = ["production", "alpha"]
+MULTICONTAINER_ENVIRONMENTS = ["production", "alpha", "staging", "prod"]
 
 
 # If you are running into problems with this autoscaler, just delete this tag from
