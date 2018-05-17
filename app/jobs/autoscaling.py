@@ -236,8 +236,8 @@ def autoscaling_update(my_num_jobs, my_environment="development"):
         my_environment += "_" + hashlib.sha224(hostname).hexdigest()[:10]
     asg_json = aws_command("aws autoscaling describe-auto-scaling-groups")
     asg_list = json.loads(asg_json).get('AutoScalingGroups', [])
-    gsnap_asg = find_asg(asg_list, "gsnapl-asg-production")
-    rapsearch2_asg = find_asg(asg_list, "rapsearch2-asg-production")
+    gsnap_asg = find_asg(asg_list, "gsnapl-asg-prod")
+    rapsearch2_asg = find_asg(asg_list, "rapsearch2-asg-prod")
     if DEBUG:
         print json.dumps(gsnap_asg, indent=2)
         print json.dumps(rapsearch2_asg, indent=2)
