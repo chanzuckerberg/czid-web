@@ -326,17 +326,13 @@ class PipelineSampleReads extends React.Component {
   }
 
   getDownloadLink() {
+    // Should have background_id in all cases now.
     const givenBackgroundId = this.fetchParams("background_id");
-    const cookieBackgroundId = Cookies.get("background_id");
-
     let resParams = {};
-    let csvBackgroundId;
     const stringer = require("querystring");
 
     // Set the right CSV background ID.
-    if (cookieBackgroundId) csvBackgroundId = cookieBackgroundId;
-    if (givenBackgroundId) csvBackgroundId = givenBackgroundId;
-    if (csvBackgroundId) resParams["background_id"] = csvBackgroundId;
+    if (givenBackgroundId) resParams["background_id"] = givenBackgroundId;
 
     // Set the right pipeline version.
     let v = this.pipelineRun && this.pipelineRun.pipeline_version;
@@ -378,7 +374,8 @@ class PipelineSampleReads extends React.Component {
     const stringer = require("querystring");
 
     let given = this.props.reportPageParams;
-    if (given) {
+    if (given && given.pipeline_version && given.background_id) {
+      // Supposed to have both fields anyway.
       params["pipeline_version"] = given.pipeline_version;
       params["background_id"] = given.background_id;
       // Modify the URL in place without triggering a page reload.
