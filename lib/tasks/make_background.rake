@@ -14,6 +14,9 @@ task make_background: :environment do
   samples = Sample.where(query)
 
   completed_samples = samples.select { |s| eligible_pipeline_runs.map(&:sample_id).include?(s.id) }
+
+  puts "REALLY BAD STUFF"
+
   failed_samples = samples - completed_samples
 
   def display(sample_array)
