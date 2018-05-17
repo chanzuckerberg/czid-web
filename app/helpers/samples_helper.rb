@@ -90,6 +90,36 @@ module SamplesHelper
     end
   end
 
+  def should_say_something(csv_s3_path)
+    # Load the CSV data. CSV should have columns "sample_name", "project_name", and any desired columns from Sample::METADATA_FIELDS.
+    csv_data = get_s3_file(csv_s3_path)
+    csv_data.delete!("\uFEFF") # Remove BOM if present (file likely comes from Excel)
+    CSV.parse(csv_data, headers: true) do |row|
+      # Find the right project and sample
+      row_details = row.to_h
+      proj = Project.find_by(name: row_details['project_name'])
+      next unless proj
+      sampl = Sample.find_by(project_id: proj, name: row_details['sample_name'])
+      next unless sampl
+
+      # Format the new details. Append to existing notes.
+      new_details = {}
+      new_details['sample_notes'] = sampl.sample_notes || ''
+      row_details.each do |key, value|
+        if !key || !value || key == 'sample_name' || key == 'project_name'
+          next
+        end
+        if Sample::METADATA_FIELDS.include?(key.to_sym)
+          new_details[key] = value
+        else # Otherwise throw in notes
+          new_details['sample_notes'] << format("\n- %s: %s", key, value)
+        end
+      end
+      new_details['sample_notes'].strip!
+      sampl.update_attributes!(new_details)
+    end
+  end
+
   def host_genomes_list
     HostGenome.all.map { |h| h.slice('name', 'id') }
   end
