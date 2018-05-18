@@ -2,6 +2,8 @@ class SamplesController < ApplicationController
   include ReportHelper
   include SamplesHelper
   include PipelineOutputsHelper
+  include ::ActionController
+  include ::ActionController::Cookies
 
   ########################################
   # Note to developers:
@@ -149,6 +151,8 @@ class SamplesController < ApplicationController
   # GET /samples/1.json
 
   def show
+    puts "COOKIE STUFF: " + session["pipeline_version"].to_s
+    puts "foobar 1:38pm"
     @pipeline_run = select_pipeline_run(@sample)
     @pipeline_version = @pipeline_run.pipeline_version || PipelineRun::PIPELINE_VERSION_WHEN_NULL if @pipeline_run
     @pipeline_versions = @sample.pipeline_versions

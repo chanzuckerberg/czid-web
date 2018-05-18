@@ -373,6 +373,29 @@ class PipelineSampleReads extends React.Component {
     let params = {};
     const stringer = require("querystring");
 
+    // Skip if a background ID is explicitly specified in the URL.
+    if (this.fetchParams("background_id")) {
+      return;
+    }
+
+    // If a background name is set in Cookies, get its ID from allBackgrounds.
+    // This is necessary because soon we may show different backgrounds
+    // 'versions' as the same name to the users.
+    if (Cookies.get("background_name")) {
+      // Select the background with the matching name.
+      let match = this.allBackgrounds.filter(
+        b => b["name"] === Cookies.get("background_name")
+      );
+      if (match && match[0] && match[0]["id"]) {
+        match = match[0]["id"];
+        params["background_id"] = match;
+        if (this.props.reportPageParams) {
+          this.props.reportPageParams.background_id = match;
+        }
+      }
+    }
+
+    // Set pipeline_version and background_id from reportPageParams.
     let given = this.props.reportPageParams;
     if (given && given.pipeline_version && given.background_id) {
       // Supposed to have both fields anyway.
