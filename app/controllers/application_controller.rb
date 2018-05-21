@@ -1,6 +1,7 @@
 class ApplicationController < ActionController::Base
   before_action :authenticate_user!
   protect_from_forgery with: :exception
+  before_action :check_rack_mini_profiler
 
   include Consul::Controller
 
@@ -23,6 +24,12 @@ class ApplicationController < ActionController::Base
   def no_demo_user
     login_required
     redirect_to root_path if current_user.demo_user?
+  end
+
+  def check_rack_mini_profiler
+    if current_user && current_user.admin?
+      Rack::MiniProfiler.authorize_request
+    end
   end
 
   protected

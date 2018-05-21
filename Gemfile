@@ -52,6 +52,12 @@ gem 'aws-sdk'
 gem 'activesupport'
 gem 'rack-host-redirect'
 
+# Performance profiling in all envs
+gem 'flamegraph'
+gem 'memory_profiler'
+gem 'rack-mini-profiler'
+gem 'stackprof'
+
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'bundler-audit'
