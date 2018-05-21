@@ -271,8 +271,7 @@ module SamplesHelper
     output_data
   end
 
-  def format_samples(samples)
-    sample_ids = samples.map(&:id)
+  def make_job_stats_hash(sample_ids)
     pipeline_run_ids = PipelineRun.top_completed_runs.where(sample_id: sample_ids)
     all_job_stats = JobStat.where(pipeline_run_id: pipeline_run_ids).as_json
     job_stats_by_pipeline_run_id = {}
@@ -280,6 +279,12 @@ module SamplesHelper
       job_stats_by_pipeline_run_id[entry['pipeline_run_id']] ||= {}
       job_stats_by_pipeline_run_id[entry['pipeline_run_id']][entry['task']] = entry
     end
+    job_stats_by_pipeline_run_id
+  end
+
+  def format_samples(samples)
+    sample_ids = samples.map(&:id)
+    job_stats_by_pipeline_run_id = make_job_stats_hash(sample_ids)
 
     formatted_samples = []
     samples.each_with_index do |sample|
