@@ -373,8 +373,10 @@ class PipelineSampleReads extends React.Component {
   fillUrlParams() {
     // Skip if report is not present or a background ID and pipeline version
     // are explicitly specified in the URL.
+    let reportPageParams = this.props.reportPageParams;
     if (
       !this.reportPresent ||
+      !reportPageParams ||
       (this.fetchParams("pipeline_version") &&
         this.fetchParams("background_id"))
     ) {
@@ -384,7 +386,6 @@ class PipelineSampleReads extends React.Component {
     // Setup
     let params = new URLSearchParams(window.href);
     const stringer = require("querystring");
-    let reportPageParams = this.props.reportPageParams;
 
     // If a background name is set in Cookies, get its ID from allBackgrounds.
     // This is necessary because soon we may show different backgrounds IDs
@@ -411,16 +412,10 @@ class PipelineSampleReads extends React.Component {
     }
 
     // Set pipeline_version and background_id from reportPageParams.
-    if (
-      reportPageParams &&
-      reportPageParams.pipeline_version &&
-      reportPageParams.background_id
-    ) {
-      params["pipeline_version"] = reportPageParams.pipeline_version;
-      params["background_id"] = reportPageParams.background_id;
-      // Modify the URL in place without triggering a page reload.
-      history.replaceState(null, null, `?${stringer.stringify(params)}`);
-    }
+    params["pipeline_version"] = reportPageParams.pipeline_version;
+    params["background_id"] = reportPageParams.background_id;
+    // Modify the URL in place without triggering a page reload.
+    history.replaceState(null, null, `?${stringer.stringify(params)}`);
   }
 
   initializeSelectTag() {
