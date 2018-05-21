@@ -1,2 +1,2 @@
-Rack::MiniProfiler.config.storage = Rack::MiniProfiler::MemoryStore
-Rack::MiniProfiler.config.enabled = false
+# Rack::MiniProfiler.config.storage = Rack::MiniProfiler::MemoryStore
+Rack::MiniProfiler.config.enabled = true
