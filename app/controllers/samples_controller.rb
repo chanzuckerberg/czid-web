@@ -49,11 +49,13 @@ class SamplesController < ApplicationController
     sort = params[:sort_by]
     samples_query = JSON.parse(params[:ids]) if params[:ids].present?
 
-    results = current_power.samples
+    results = if project_id.present?
+                current_power.project_samples(Project.find(project_id))
+              else
+                current_power.samples
+              end
 
     results = results.where(id: samples_query) if samples_query.present?
-
-    results = results.where(project_id: project_id) if project_id.present?
 
     # Get tissue types and host genomes that are present in the sample list
     # TODO(yf) : the following tissue_types, host_genomes have performance
@@ -156,7 +158,7 @@ class SamplesController < ApplicationController
     @pipeline_run_display = curate_pipeline_run_display(@pipeline_run)
     @sample_status = @pipeline_run ? @pipeline_run.job_status : nil
     @job_stats = @pipeline_run ? @pipeline_run.job_stats : nil
-    @summary_stats = @job_stats ? get_summary_stats(@job_stats) : nil
+    @summary_stats = @job_stats ? get_summary_stats(@job_stats, @pipeline_run) : nil
     @project_info = @sample.project ? @sample.project : nil
     @project_sample_ids_names = @sample.project ? Hash[current_power.project_samples(@sample.project).map { |s| [s.id, s.name] }] : nil
     @host_genome = @sample.host_genome ? @sample.host_genome : nil

@@ -94,20 +94,19 @@ module SamplesHelper
     HostGenome.all.map { |h| h.slice('name', 'id') }
   end
 
-  def get_summary_stats(jobstats)
-    pr = jobstats[0].pipeline_run unless jobstats[0].nil?
+  def get_summary_stats(jobstats, pipeline_run)
+    pr = pipeline_run
     unmapped_reads = pr.nil? ? nil : pr.unmapped_reads
     last_processed_at = pr.nil? ? nil : pr.created_at
-    { remaining_reads: get_remaining_reads(jobstats),
+    { remaining_reads: get_remaining_reads(pr),
       compression_ratio: compute_compression_ratio(jobstats),
       qc_percent: compute_qc_value(jobstats),
-      percent_remaining: compute_percentage_reads(jobstats),
+      percent_remaining: compute_percentage_reads(pr),
       unmapped_reads: unmapped_reads,
       last_processed_at: last_processed_at }
   end
 
-  def get_remaining_reads(jobstats)
-    pr = jobstats[0].pipeline_run unless jobstats[0].nil?
+  def get_remaining_reads(pr)
     pr.remaining_reads unless pr.nil?
   end
 
@@ -121,8 +120,7 @@ module SamplesHelper
     (100.0 * priceseqfilter_stats.reads_after) / priceseqfilter_stats.reads_before unless priceseqfilter_stats.nil?
   end
 
-  def compute_percentage_reads(jobstats)
-    pr = jobstats[0].pipeline_run unless jobstats[0].nil?
+  def compute_percentage_reads(pr)
     (100.0 * pr.remaining_reads) / pr.total_reads unless pr.nil? || pr.remaining_reads.nil? || pr.total_reads.nil?
   end
 
@@ -200,10 +198,10 @@ module SamplesHelper
     samples
   end
 
-  def get_total_runtime(pipeline_run)
+  def get_total_runtime(pipeline_run, pipeline_run_stages)
     if pipeline_run.finalized?
       # total processing time (without time spent waiting), for performance evaluation
-      pipeline_run.pipeline_run_stages.map { |rs| pipeline_run.ready_step && rs.step_number > pipeline_run.ready_step ? 0 : (rs.updated_at - rs.created_at) }.sum
+      pipeline_run_stages.map { |rs| pipeline_run.ready_step && rs.step_number > pipeline_run.ready_step ? 0 : (rs.updated_at - rs.created_at) }.sum
     else
       # time since pipeline kickoff (including time spent waiting), for run diagnostics
       (Time.current - pipeline_run.created_at)
@@ -230,7 +228,7 @@ module SamplesHelper
         run_stages.each do |rs|
           pipeline_run_entry[rs.name] = rs.job_status
         end
-        pipeline_run_entry[:total_runtime] = get_total_runtime(pipeline_run)
+        pipeline_run_entry[:total_runtime] = get_total_runtime(pipeline_run, run_stages)
         pipeline_run_entry[:with_assembly] = pipeline_run.assembly? ? 1 : 0
       else
         # old data
@@ -262,13 +260,12 @@ module SamplesHelper
     user
   end
 
-  def sample_derived_data(sample)
+  def sample_derived_data(sample, pipeline_run)
     output_data = {}
-    pipeline_run = sample.pipeline_runs.first
     job_stats = pipeline_run ? pipeline_run.job_stats : nil
-    summary_stats = job_stats ? get_summary_stats(job_stats) : nil
+    summary_stats = job_stats ? get_summary_stats(job_stats, pipeline_run) : nil
     output_data[:pipeline_run] = pipeline_run
-    output_data[:host_genome_name] = sample.host_genome ? sample.host_genome.name : nil
+    output_data[:host_genome_name] = sample.host_genome_name
     output_data[:job_stats] = job_stats
     output_data[:summary_stats] = summary_stats
 
@@ -280,8 +277,9 @@ module SamplesHelper
     samples.each_with_index do |sample|
       job_info = {}
       job_info[:db_sample] = sample
-      job_info[:derived_sample_output] = sample_derived_data(sample)
-      job_info[:run_info] = pipeline_run_info(sample.pipeline_runs.first)
+      pipeline_run = sample.pipeline_runs.first
+      job_info[:derived_sample_output] = sample_derived_data(sample, pipeline_run)
+      job_info[:run_info] = pipeline_run_info(pipeline_run)
       job_info[:uploader] = sample_uploader(sample)
       formatted_samples.push(job_info)
     end
