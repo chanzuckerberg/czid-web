@@ -53,9 +53,9 @@ gem 'activesupport'
 gem 'rack-host-redirect'
 
 # Performance profiling in all envs
-gem 'rack-mini-profiler'
-gem 'memory_profiler'
 gem 'flamegraph'
+gem 'memory_profiler'
+gem 'rack-mini-profiler'
 gem 'stackprof'
 
 group :development, :test do
