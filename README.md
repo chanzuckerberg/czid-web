@@ -174,3 +174,8 @@ You can run ESLint for JSX linting checks. Uses our shared .eslintrc settings.
 - Auto-fix: `./node_modules/.bin/eslint app/assets/src --ext .js,.jsx`
 
 - Prettier is another code formatting tool: https://github.com/prettier/prettier
+
+## Profiler
+
+- Disabled by default. Add param `?pp=enable` to enable or `?pp=disable` to disable for your session.
+- Also flamegraphs and memory profiling: https://github.com/MiniProfiler/rack-mini-profiler
