@@ -61,12 +61,11 @@ class PipelineSampleReport extends React.Component {
       ? savedThresholdFilters
       : [Object.assign({}, this.defaultThreshold)]; // all taxons will pass this default filter
 
+    this._backgroundNameFromId = this.backgroundNameFromId.bind(this);
+
     // we should only keep dynamic data in the state
     this.state = {
       taxonomy_details: [],
-      backgroundName:
-        Cookies.get("background_name") ||
-        this.report_details.default_background.name,
       searchId: 0,
       searchKey: "",
       search_keys_in_sample: [],
@@ -89,6 +88,11 @@ class PipelineSampleReport extends React.Component {
       activeThresholds: this.defaultThresholdValues,
       countType: "NT"
     };
+
+    // Set background name.
+    let bg_id = this.props.reportPageParams.background_id;
+    this.state.backgroundName = this._backgroundNameFromId(bg_id);
+
     this.expandAll = false;
     this.expandedGenera = [];
     this.applySearchFilter = this.applySearchFilter.bind(this);
@@ -714,6 +718,7 @@ class PipelineSampleReport extends React.Component {
       $(".advanced-filters-modal").slideUp(300);
     }
   }
+
   applyThresholdFilters(candidate_taxons, play_animation = true) {
     let thresholded_taxons = [];
     let genus_taxon = {};
@@ -767,6 +772,7 @@ class PipelineSampleReport extends React.Component {
       this.state.exclude_subcats
     );
   }
+
   handleThresholdEnter(event) {
     if (event.keyCode === 13) {
       this.applyThresholdFilters(this.state.taxonomy_details, true);
@@ -1195,6 +1201,15 @@ class PipelineSampleReport extends React.Component {
         this.applySearchFilter(searchId, []);
       }
     );
+  }
+
+  backgroundNameFromId(id) {
+    // Get the background with the matching id.
+    let match = this.all_backgrounds.filter(b => b["id"] === parseInt(id));
+    // Get the name from the background.
+    if (match && match[0] && match[0]["name"]) {
+      return match[0]["name"];
+    }
   }
 
   render() {

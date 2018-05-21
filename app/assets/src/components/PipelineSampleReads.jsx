@@ -326,12 +326,12 @@ class PipelineSampleReads extends React.Component {
   }
 
   getDownloadLink() {
-    // Should have background_id in all cases now.
-    const givenBackgroundId = this.fetchParams("background_id");
     let resParams = {};
     const stringer = require("querystring");
 
     // Set the right CSV background ID.
+    // Should have background_id param in all cases now.
+    const givenBackgroundId = this.fetchParams("background_id");
     if (givenBackgroundId) resParams["background_id"] = givenBackgroundId;
 
     // Set the right pipeline version.
@@ -370,39 +370,53 @@ class PipelineSampleReads extends React.Component {
   // This way links can still be to '/samples/545' in the rest of the app
   // but the URL will be filled in without triggering another page reload.
   fillUrlParams() {
-    let params = {};
-    const stringer = require("querystring");
-
-    // Skip if a background ID is explicitly specified in the URL.
-    if (this.fetchParams("background_id")) {
+    // Skip if report is not present or a background ID and pipeline version
+    // are explicitly specified in the URL.
+    if (
+      !this.reportPresent ||
+      (this.fetchParams("pipeline_version") &&
+        this.fetchParams("background_id"))
+    ) {
       return;
     }
 
+    let params = new URLSearchParams(window.href);
+    const stringer = require("querystring");
+    let reportPageParams = this.props.reportPageParams;
+
     // If a background name is set in Cookies, get its ID from allBackgrounds.
-    // This is necessary because soon we may show different backgrounds
-    // 'versions' as the same name to the users.
-    if (Cookies.get("background_name")) {
-      // Select the background with the matching name.
-      let match = this.allBackgrounds.filter(
-        b => b["name"] === Cookies.get("background_name")
-      );
-      if (match && match[0] && match[0]["id"]) {
-        match = match[0]["id"];
-        params["background_id"] = match;
-        if (this.props.reportPageParams) {
-          this.props.reportPageParams.background_id = match;
+    // This is necessary because soon we may show different backgrounds IDs
+    // as the same name to the users.
+    // If the ID is different from the loaded ID, trigger a page reload.
+    // No way to do it without the page reload without reading the cookie in
+    // Rails because Rails passes down the report information.
+    if (!this.fetchParams("background_name")) {
+      let loaded_id = reportPageParams.background_id;
+      if (Cookies.get("background_name")) {
+        // Select the background with the matching name.
+        let match = this.allBackgrounds.filter(
+          b => b["name"] === Cookies.get("background_name")
+        );
+        if (match && match[0] && match[0]["id"]) {
+          let cookie_id = match[0]["id"];
+          if (loaded_id !== cookie_id) {
+            this.refreshPage({ background_id: cookie_id });
+          }
         }
       }
+      params["background_id"] = loaded_id;
     }
 
     // Set pipeline_version and background_id from reportPageParams.
-    let given = this.props.reportPageParams;
-    if (given && given.pipeline_version && given.background_id) {
-      // Supposed to have both fields anyway.
-      params["pipeline_version"] = given.pipeline_version;
-      params["background_id"] = given.background_id;
+    if (
+      reportPageParams &&
+      reportPageParams.pipeline_version &&
+      reportPageParams.background_id
+    ) {
+      params["pipeline_version"] = reportPageParams.pipeline_version;
+      params["background_id"] = reportPageParams.background_id;
       // Modify the URL in place without triggering a page reload.
-      history.pushState(null, null, `?${stringer.stringify(params)}`);
+      history.replaceState(null, null, `?${stringer.stringify(params)}`);
     }
   }
 
@@ -617,6 +631,8 @@ class PipelineSampleReads extends React.Component {
           toggleHighlightTaxon={this.toggleHighlightTaxon}
           refreshPage={this.refreshPage}
           gsnapFilterStatus={this.gsnapFilterStatus}
+          // Needs to be passed down to set the background dropdown properly.
+          reportPageParams={this.props.reportPageParams}
         />
       );
     } else if (this.pipelineInProgress()) {
