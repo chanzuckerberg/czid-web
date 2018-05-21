@@ -392,20 +392,20 @@ class PipelineSampleReads extends React.Component {
     // If the ID is different from the loaded ID, trigger a page reload.
     // No way to do it without the page reload and without reading the cookie
     // in Rails because Rails passes down the report information to the JS.
-    if (!this.fetchParams("background_name")) {
-      let loaded_id = reportPageParams.background_id;
-      // Use the background name in the cookies if present.
-      if (Cookies.get("background_name")) {
-        // Select the background with the matching name.
-        let match = this.allBackgrounds.filter(
-          b => b["name"] === Cookies.get("background_name")
-        );
-        if (match && match[0] && match[0]["id"]) {
-          let cookie_id = match[0]["id"];
-          if (loaded_id !== cookie_id) {
-            // Refresh the page using this background id.
-            this.refreshPage({ background_id: cookie_id });
-          }
+    if (
+      !this.fetchParams("background_name") &&
+      Cookies.get("background_name")
+    ) {
+      // Select the background with the matching name.
+      let match = this.allBackgrounds.filter(
+        b => b["name"] === Cookies.get("background_name")
+      );
+      if (match && match[0] && match[0]["id"]) {
+        let cookie_id = match[0]["id"];
+        let loaded_id = reportPageParams.background_id;
+        if (loaded_id !== cookie_id) {
+          // Refresh the page using this background id.
+          this.refreshPage({ background_id: cookie_id });
         }
       }
     }
