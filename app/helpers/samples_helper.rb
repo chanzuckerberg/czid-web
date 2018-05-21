@@ -94,35 +94,33 @@ module SamplesHelper
     HostGenome.all.map { |h| h.slice('name', 'id') }
   end
 
-  def get_summary_stats(jobstats)
-    pr = jobstats[0].pipeline_run unless jobstats[0].nil?
+  def get_summary_stats(job_stats_hash, pipeline_run)
+    pr = pipeline_run
     unmapped_reads = pr.nil? ? nil : pr.unmapped_reads
     last_processed_at = pr.nil? ? nil : pr.created_at
-    { remaining_reads: get_remaining_reads(jobstats),
-      compression_ratio: compute_compression_ratio(jobstats),
-      qc_percent: compute_qc_value(jobstats),
-      percent_remaining: compute_percentage_reads(jobstats),
+    { remaining_reads: get_remaining_reads(pr),
+      compression_ratio: compute_compression_ratio(job_stats_hash),
+      qc_percent: compute_qc_value(job_stats_hash),
+      percent_remaining: compute_percentage_reads(pr),
       unmapped_reads: unmapped_reads,
       last_processed_at: last_processed_at }
   end
 
-  def get_remaining_reads(jobstats)
-    pr = jobstats[0].pipeline_run unless jobstats[0].nil?
+  def get_remaining_reads(pr)
     pr.remaining_reads unless pr.nil?
   end
 
-  def compute_compression_ratio(jobstats)
-    cdhitdup_stats = jobstats.find_by(task: 'run_cdhitdup')
-    (1.0 * cdhitdup_stats.reads_before) / cdhitdup_stats.reads_after unless cdhitdup_stats.nil?
+  def compute_compression_ratio(job_stats_hash)
+    cdhitdup_stats = job_stats_hash['run_cdhitdup']
+    (1.0 * cdhitdup_stats['reads_before']) / cdhitdup_stats['reads_after'] unless cdhitdup_stats.nil?
   end
 
-  def compute_qc_value(jobstats)
-    priceseqfilter_stats = jobstats.find_by(task: 'run_priceseqfilter')
-    (100.0 * priceseqfilter_stats.reads_after) / priceseqfilter_stats.reads_before unless priceseqfilter_stats.nil?
+  def compute_qc_value(job_stats_hash)
+    priceseqfilter_stats = job_stats_hash['run_priceseqfilter']
+    (100.0 * priceseqfilter_stats['reads_after']) / priceseqfilter_stats['reads_before'] unless priceseqfilter_stats.nil?
   end
 
-  def compute_percentage_reads(jobstats)
-    pr = jobstats[0].pipeline_run unless jobstats[0].nil?
+  def compute_percentage_reads(pr)
     (100.0 * pr.remaining_reads) / pr.total_reads unless pr.nil? || pr.remaining_reads.nil? || pr.total_reads.nil?
   end
 
@@ -262,25 +260,33 @@ module SamplesHelper
     user
   end
 
-  def sample_derived_data(sample)
+  def sample_derived_data(sample, job_stats_hash)
     output_data = {}
     pipeline_run = sample.pipeline_runs.first
-    job_stats = pipeline_run ? pipeline_run.job_stats : nil
-    summary_stats = job_stats ? get_summary_stats(job_stats) : nil
+    summary_stats = job_stats_hash ? get_summary_stats(job_stats_hash, pipeline_run) : nil
     output_data[:pipeline_run] = pipeline_run
     output_data[:host_genome_name] = sample.host_genome ? sample.host_genome.name : nil
-    output_data[:job_stats] = job_stats
     output_data[:summary_stats] = summary_stats
 
     output_data
   end
 
   def format_samples(samples)
+    sample_ids = samples.map(&:id)
+    pipeline_run_ids = PipelineRun.top_completed_runs.where(sample_id: sample_ids)
+    all_job_stats = JobStat.where(pipeline_run_id: pipeline_run_ids).as_json
+    job_stats_by_pipeline_run_id = {}
+    all_job_stats.each do |entry|
+      job_stats_by_pipeline_run_id[entry['pipeline_run_id']] ||= {}
+      job_stats_by_pipeline_run_id[entry['pipeline_run_id']][entry['task']] = entry
+    end
+
     formatted_samples = []
     samples.each_with_index do |sample|
       job_info = {}
       job_info[:db_sample] = sample
-      job_info[:derived_sample_output] = sample_derived_data(sample)
+      job_stats_hash = sample.pipeline_runs.first ? job_stats_by_pipeline_run_id[sample.pipeline_runs.first.id] : {}
+      job_info[:derived_sample_output] = sample_derived_data(sample, job_stats_hash)
       job_info[:run_info] = pipeline_run_info(sample.pipeline_runs.first)
       job_info[:uploader] = sample_uploader(sample)
       formatted_samples.push(job_info)
