@@ -33,11 +33,8 @@ class CheckPipelineRuns
     # Force refresh well before autoscaling.EXPIRATION_PERIOD_MINUTES.
     # Production does it more often because it needs to pick up updates from
     # all other environments and adjust the autoscaling groups.
-    if %w[production prod].include? Rails.env
-      60
-    else
-      600
-    end
+    Rails.env == "prod" ? 60 : 600
+
   end
 
   def self.autoscaling_update(autoscaling_state, t_now)

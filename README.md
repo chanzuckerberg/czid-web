@@ -130,7 +130,7 @@ Sometimes you may be prompted to run a migration or configuration command like `
 
 ## DB backup/restore within and across environments
 
-Note that this requires the proper ssh config to access the deployed versions of the site. (Run chanzuckerberg/shared-infra/tools/ssh_config, then `sed -i.bak '/bastion-staging.idseq.net/d' ~/.ssh/known_hosts` and `sed -i.bak '/bastion-production.idseq.net/d' ~/.ssh/known_hosts`, then get the pem keys from a teammate, then `ssh-add <pem key>`.)
+Note that this requires the proper ssh config to access the deployed versions of the site. (Run chanzuckerberg/shared-infra/tools/ssh_config, then `sed -i.bak '/bastion-staging.idseq.net/d' ~/.ssh/known_hosts` and `sed -i.bak '/bastion-prod.idseq.net/d' ~/.ssh/known_hosts`, then get the pem keys from a teammate, then `ssh-add <pem key>`.)
 
 1. Backup your local `development` DB into a local file:
 `docker-compose exec web mysqldump -h db -u root idseq_development | gzip -c > idseq_development.sql.gz`
