@@ -321,8 +321,8 @@ class PipelineSampleReads extends React.Component {
   }
 
   fetchParams(param) {
-    let urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(param);
+    let url = new URL(window.location);
+    return url.searchParams.get(param);
   }
 
   getDownloadLink() {
@@ -368,7 +368,8 @@ class PipelineSampleReads extends React.Component {
   // Fill in desired URL parameters so user's can copy and paste URLs.
   // Ex: Add ?pipeline_version=1.7&background_id=4 to /samples/545
   // This way links can still be to '/samples/545' in the rest of the app
-  // but the URL will be filled in without triggering another page reload.
+  // but the URL will be filled in without triggering another page reload
+  // usually.
   fillUrlParams() {
     // Skip if report is not present or a background ID and pipeline version
     // are explicitly specified in the URL.
@@ -380,6 +381,7 @@ class PipelineSampleReads extends React.Component {
       return;
     }
 
+    // Setup
     let params = new URLSearchParams(window.href);
     const stringer = require("querystring");
     let reportPageParams = this.props.reportPageParams;
@@ -388,10 +390,11 @@ class PipelineSampleReads extends React.Component {
     // This is necessary because soon we may show different backgrounds IDs
     // as the same name to the users.
     // If the ID is different from the loaded ID, trigger a page reload.
-    // No way to do it without the page reload without reading the cookie in
-    // Rails because Rails passes down the report information.
+    // No way to do it without the page reload and without reading the cookie
+    // in Rails because Rails passes down the report information to the JS.
     if (!this.fetchParams("background_name")) {
       let loaded_id = reportPageParams.background_id;
+      // Use the background name in the cookies if present.
       if (Cookies.get("background_name")) {
         // Select the background with the matching name.
         let match = this.allBackgrounds.filter(
@@ -400,11 +403,11 @@ class PipelineSampleReads extends React.Component {
         if (match && match[0] && match[0]["id"]) {
           let cookie_id = match[0]["id"];
           if (loaded_id !== cookie_id) {
+            // Refresh the page using this background id.
             this.refreshPage({ background_id: cookie_id });
           }
         }
       }
-      params["background_id"] = loaded_id;
     }
 
     // Set pipeline_version and background_id from reportPageParams.
