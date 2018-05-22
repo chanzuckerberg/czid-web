@@ -68,16 +68,16 @@ class PipelineSampleReads extends React.Component {
   }
 
   generateGsnapFilterStatus(jobStats) {
-    if (this.host_genome && this.host_genome.name === "Human") {
+    if (!this.host_genome || this.host_genome.name != "Human") {
       // only relevant for Human  as of 5/21/2018
-      for (let stat of jobStats) {
-        if (stat["task"] === "run_gsnap_filter") {
-          return null;
-        }
-      }
-      return "gsnap filter on human/chimp genome was not run.";
+      return null;
     }
-    return null;
+    for (let stat of jobStats) {
+      if (stat["task"] === "run_gsnap_filter") {
+        return null;
+      }
+    }
+    return "gsnap filter on human/chimp genome was not run.";
   }
 
   refreshPage(overrides) {
