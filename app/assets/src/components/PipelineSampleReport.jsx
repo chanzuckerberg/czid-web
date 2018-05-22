@@ -57,15 +57,17 @@ class PipelineSampleReport extends React.Component {
       value: ""
     };
 
+    // all taxons will pass this default filter
     this.defaultThresholdValues = savedThresholdFilters.length
       ? savedThresholdFilters
-      : [Object.assign({}, this.defaultThreshold)]; // all taxons will pass this default filter
-
-    this.backgroundNameFromId = this.backgroundNameFromId.bind(this);
+      : [Object.assign({}, this.defaultThreshold)];
 
     // we should only keep dynamic data in the state
+    // Starting state is default values which are to be set later.
     this.state = {
       taxonomy_details: [],
+      backgroundId: 1,
+      backgroundName: "",
       searchId: 0,
       searchKey: "",
       search_keys_in_sample: [],
@@ -89,10 +91,6 @@ class PipelineSampleReport extends React.Component {
       countType: "NT"
     };
 
-    // Set background name.
-    let bg_id = this.props.reportPageParams.background_id;
-    this.state.backgroundName = this.backgroundNameFromId(bg_id);
-
     this.expandAll = false;
     this.expandedGenera = [];
     this.applySearchFilter = this.applySearchFilter.bind(this);
@@ -114,6 +112,7 @@ class PipelineSampleReport extends React.Component {
     this.renderMore = this.renderMore.bind(this);
     this.initializeTooltip();
     this.displayHighlightTags = this.displayHighlightTags.bind(this);
+    this.fillUrlParams = this.fillUrlParams.bind(this);
   }
 
   componentWillUpdate(nextProps, nextState) {
@@ -125,7 +124,9 @@ class PipelineSampleReport extends React.Component {
   }
 
   componentWillMount() {
+    // Fill in URL parameters for usability and specifying data to fetch.
     this.fillUrlParams();
+    // Fetch the actual report data via axios calls to fill in the page.
     this.fetchReportData();
     this.fetchSearchList();
   }
@@ -175,6 +176,8 @@ class PipelineSampleReport extends React.Component {
       });
   }
 
+  // fetchReportData loads the actual report information with another call to
+  // the API endpoint.
   fetchReportData() {
     this.nanobar.go(30);
     let params = `?${window.location.search.replace("?", "")}&report_ts=${
@@ -189,13 +192,16 @@ class PipelineSampleReport extends React.Component {
           genus_map[taxon.genus_taxid] = taxon;
         }
       }
-      // the genus_map never changes, so we move it out from the react state, to reduce performance cost
+      // The genus_map never changes, so we move it out from the react state,
+      // to reduce performance cost.
       this.genus_map = genus_map;
       this.setState(
         {
           rows_passing_filters: res.data.taxonomy_details[0],
           rows_total: res.data.taxonomy_details[1],
-          taxonomy_details: res.data.taxonomy_details[2]
+          taxonomy_details: res.data.taxonomy_details[2],
+          backgroundId: res.data.background_info.id,
+          backgroundName: res.data.background_info.name
         },
         () => {
           this.applyThresholdFilters(this.state.taxonomy_details, false);
@@ -1204,27 +1210,20 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
-  backgroundNameFromId(id) {
-    // Get the background with the matching id.
-    let match = this.all_backgrounds.filter(b => b["id"] === parseInt(id));
-    // Get the name from the background.
-    if (match && match[0] && match[0]["name"]) {
-      return match[0]["name"];
-    }
-  }
-
   // Fill in desired URL parameters so user's can copy and paste URLs.
   // Ex: Add ?pipeline_version=1.7&background_id=4 to /samples/545
   // This way links can still be to '/samples/545' in the rest of the app
-  // but the URL will be filled in without triggering another page reload
-  // usually.
+  // but the URL will be filled in without triggering another page reload.
+  //
+  // Order of precedence for background_id is:
+  // (1) URL parameter specified
+  // (2) saved background name in frontend cookie
+  // (3) the default background
   fillUrlParams() {
     // Skip if report is not present or a background ID and pipeline version
     // are explicitly specified in the URL.
-    let reportPageParams = this.props.reportPageParams;
     if (
-      !this.reportPresent ||
-      !reportPageParams ||
+      !this.props.reportPageParams ||
       (this.fetchParams("pipeline_version") &&
         this.fetchParams("background_id"))
     ) {
@@ -1238,32 +1237,26 @@ class PipelineSampleReport extends React.Component {
     // If a background name is set in Cookies, get its ID from allBackgrounds.
     // This is necessary because soon we may show different backgrounds IDs
     // as the same name to the users.
-    // If the ID is different from the loaded ID, trigger a page reload.
-    // No way to do it without the page reload and without reading the cookie
-    // in Rails because Rails passes down the report information to the JS.
-    if (
-      !this.fetchParams("background_name") &&
-      Cookies.get("background_name")
-    ) {
+    if (!this.fetchParams("background_id") && Cookies.get("background_name")) {
       // Select the background with the matching name.
-      let match = this.allBackgrounds.filter(
+      let match = this.all_backgrounds.filter(
         b => b["name"] === Cookies.get("background_name")
       );
       if (match && match[0] && match[0]["id"]) {
-        let cookie_id = match[0]["id"];
-        let loaded_id = reportPageParams.background_id;
-        if (loaded_id !== cookie_id) {
-          // Refresh the page using this background id.
-          this.refreshPage({ background_id: cookie_id });
-        }
+        this.props.reportPageParams.background_id = match[0]["id"];
       }
     }
 
     // Set pipeline_version and background_id from reportPageParams.
-    params["pipeline_version"] = reportPageParams.pipeline_version;
-    params["background_id"] = reportPageParams.background_id;
+    params["pipeline_version"] = this.props.reportPageParams.pipeline_version;
+    params["background_id"] = this.props.reportPageParams.background_id;
     // Modify the URL in place without triggering a page reload.
     history.replaceState(null, null, `?${stringer.stringify(params)}`);
+  }
+
+  fetchParams(param) {
+    let url = new URL(window.location);
+    return url.searchParams.get(param);
   }
 
   render() {

@@ -65,7 +65,6 @@ class PipelineSampleReads extends React.Component {
     this.handleDropdownChange = this.handleDropdownChange.bind(this);
     this.deleteSample = this.deleteSample.bind(this);
     this.toggleHighlightTaxon = this.toggleHighlightTaxon.bind(this);
-    this.fillUrlParams = this.fillUrlParams.bind(this);
   }
 
   generateGsnapFilterStatus(jobStats) {
