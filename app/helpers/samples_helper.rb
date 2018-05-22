@@ -292,14 +292,24 @@ module SamplesHelper
     PipelineRun.where(id: pipeline_run_ids).where("job_status = '#{PipelineRun::STATUS_CHECKED}' or id in (select pipeline_run_id from pipeline_run_stages where pipeline_run_stages.step_number = pipeline_runs.ready_step and pipeline_run_stages.job_status = '#{PipelineRun::STATUS_LOADED}')").pluck(:id)
   end
 
+  def top_pipeline_runs_multiget(sample_ids)
+    top_pipeline_runs = PipelineRun.where("id in (select max(id) from pipeline_runs where
+                  sample_id in (#{sample_ids.join(',')}) group by sample_id)")
+    top_pipeline_run_by_sample_id = {}
+    top_pipeline_runs.each do |pr|
+      top_pipeline_run_by_sample_id[pr.sample_id] = pr
+    end
+    top_pipeline_run_by_sample_id
+  end
+
   def format_samples(samples)
     formatted_samples = []
     return formatted_samples if samples.empty?
 
     # Do major SQL queries
     sample_ids = samples.map(&:id)
-    pipeline_run_ids = PipelineRun.where("id in (select max(id) from pipeline_runs where
-                  sample_id in (#{sample_ids.join(',')}) group by sample_id)").pluck(:id)
+    top_pipeline_run_by_sample_id = top_pipeline_runs_multiget(sample_ids)
+    pipeline_run_ids = top_pipeline_run_by_sample_id.values.map(&:id)
     job_stats_by_pipeline_run_id = job_stats_multiget(pipeline_run_ids)
     report_ready_pipeline_run_ids = report_ready_multiget(pipeline_run_ids)
 
@@ -307,9 +317,10 @@ module SamplesHelper
     samples.each_with_index do |sample|
       job_info = {}
       job_info[:db_sample] = sample
-      job_stats_hash = sample.pipeline_runs.first ? job_stats_by_pipeline_run_id[sample.pipeline_runs.first.id] : {}
+      top_pipeline_run = top_pipeline_run_by_sample_id[sample.id]
+      job_stats_hash = top_pipeline_run ? job_stats_by_pipeline_run_id[top_pipeline_run.id] : {}
       job_info[:derived_sample_output] = sample_derived_data(sample, job_stats_hash)
-      job_info[:run_info] = pipeline_run_info(sample.pipeline_runs.first, report_ready_pipeline_run_ids)
+      job_info[:run_info] = pipeline_run_info(top_pipeline_run, report_ready_pipeline_run_ids)
       job_info[:uploader] = sample_uploader(sample)
       formatted_samples.push(job_info)
     end
