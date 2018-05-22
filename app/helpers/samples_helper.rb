@@ -198,10 +198,10 @@ module SamplesHelper
     samples
   end
 
-  def get_total_runtime(pipeline_run)
+  def get_total_runtime(pipeline_run, run_stages)
     if pipeline_run.finalized?
       # total processing time (without time spent waiting), for performance evaluation
-      pipeline_run.pipeline_run_stages.map { |rs| pipeline_run.ready_step && rs.step_number > pipeline_run.ready_step ? 0 : (rs.updated_at - rs.created_at) }.sum
+      run_stages.map { |rs| pipeline_run.ready_step && rs.step_number > pipeline_run.ready_step ? 0 : (rs.updated_at - rs.created_at) }.sum
     else
       # time since pipeline kickoff (including time spent waiting), for run diagnostics
       (Time.current - pipeline_run.created_at)
@@ -219,16 +219,16 @@ module SamplesHelper
     samples.where(host_genome_id: query)
   end
 
-  def pipeline_run_info(pipeline_run, report_ready_pipeline_run_ids)
+  def pipeline_run_info(pipeline_run, report_ready_pipeline_run_ids, pipeline_run_stages_by_pipeline_run_id)
     pipeline_run_entry = {}
     if pipeline_run
       pipeline_run_entry[:job_status_description] = 'WAITING' if pipeline_run.job_status.nil?
-      if pipeline_run.pipeline_run_stages.present?
-        run_stages = pipeline_run.pipeline_run_stages
+      run_stages = pipeline_run_stages_by_pipeline_run_id[pipeline_run.id]
+      if run_stages.present?
         run_stages.each do |rs|
           pipeline_run_entry[rs.name] = rs.job_status
         end
-        pipeline_run_entry[:total_runtime] = get_total_runtime(pipeline_run)
+        pipeline_run_entry[:total_runtime] = get_total_runtime(pipeline_run, run_stages)
         pipeline_run_entry[:with_assembly] = pipeline_run.assembly? ? 1 : 0
       else
         # old data
@@ -302,6 +302,16 @@ module SamplesHelper
     top_pipeline_run_by_sample_id
   end
 
+  def pipeline_run_stages_multiget(pipeline_run_ids)
+    all_stages = PipelineRunStage.where(pipeline_run_id: pipeline_run_ids)
+    stages_by_pipeline_run_id = {}
+    all_stages.each do |prs|
+      stages_by_pipeline_run_id[prs.pipeline_run_id] ||= []
+      stages_by_pipeline_run_id[prs.pipeline_run_id] << prs
+    end
+    stages_by_pipeline_run_id
+  end
+
   def format_samples(samples)
     formatted_samples = []
     return formatted_samples if samples.empty?
@@ -312,6 +322,7 @@ module SamplesHelper
     pipeline_run_ids = top_pipeline_run_by_sample_id.values.map(&:id)
     job_stats_by_pipeline_run_id = job_stats_multiget(pipeline_run_ids)
     report_ready_pipeline_run_ids = report_ready_multiget(pipeline_run_ids)
+    pipeline_run_stages_by_pipeline_run_id = pipeline_run_stages_multiget(pipeline_run_ids)
 
     # Massage data into the right format
     samples.each_with_index do |sample|
@@ -320,7 +331,7 @@ module SamplesHelper
       top_pipeline_run = top_pipeline_run_by_sample_id[sample.id]
       job_stats_hash = top_pipeline_run ? job_stats_by_pipeline_run_id[top_pipeline_run.id] : {}
       job_info[:derived_sample_output] = sample_derived_data(sample, job_stats_hash)
-      job_info[:run_info] = pipeline_run_info(top_pipeline_run, report_ready_pipeline_run_ids)
+      job_info[:run_info] = pipeline_run_info(top_pipeline_run, report_ready_pipeline_run_ids, pipeline_run_stages_by_pipeline_run_id)
       job_info[:uploader] = sample_uploader(sample)
       formatted_samples.push(job_info)
     end
