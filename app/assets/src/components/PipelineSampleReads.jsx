@@ -40,6 +40,7 @@ class PipelineSampleReads extends React.Component {
     this.pipelineRun = props.pipelineRun;
     this.rerunPipeline = this.rerunPipeline.bind(this);
     this.canSeeAlignViz = props.can_see_align_viz;
+    this.gsnapFilterRun = this.checkGsnapFilterRunStatus(this.jobStatistics);
     this.state = {
       rerunStatus: "failed",
       rerunStatusMessage: "Sample run failed",
@@ -64,6 +65,15 @@ class PipelineSampleReads extends React.Component {
     this.handleDropdownChange = this.handleDropdownChange.bind(this);
     this.deleteSample = this.deleteSample.bind(this);
     this.toggleHighlightTaxon = this.toggleHighlightTaxon.bind(this);
+  }
+
+  checkGsnapFilterRunStatus(jobStats) {
+    for (let stat of jobStats) {
+      if (stat["task"] === "run_gsnap_filter") {
+        return true;
+      }
+    }
+    return false;
   }
 
   refreshPage(overrides) {
@@ -561,6 +571,7 @@ class PipelineSampleReads extends React.Component {
           watched_taxids={this.state.watched_taxids}
           toggleHighlightTaxon={this.toggleHighlightTaxon}
           refreshPage={this.refreshPage}
+          gsnapFilterRun={this.gsnapFilterRun}
         />
       );
     } else if (this.pipelineInProgress()) {

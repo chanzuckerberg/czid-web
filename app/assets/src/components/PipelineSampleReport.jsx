@@ -1215,6 +1215,9 @@ class PipelineSampleReport extends React.Component {
           this.report_details.pipeline_info.truncated +
           " reads."
         : "";
+    const gsnap_filter_status = this.props.gsnapFilterRun
+      ? null
+      : "gsnap filter on host genome is not run.";
     let subsampled_reads = this.report_details
       ? this.report_details.subsampled_reads
       : null;
@@ -1235,7 +1238,8 @@ class PipelineSampleReport extends React.Component {
     const filter_row_stats = this.state.loading ? null : (
       <div id="filter-message" className="filter-message">
         <span className="count">
-          {filter_stats} {truncation_stats} {subsampling_stats} {disable_filter}
+          {filter_stats} {truncation_stats} {subsampling_stats}{" "}
+          {gsnap_filter_status} {disable_filter}
         </span>
       </div>
     );
