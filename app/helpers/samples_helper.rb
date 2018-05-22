@@ -287,6 +287,9 @@ module SamplesHelper
   end
 
   def format_samples(samples)
+    formatted_samples = []
+    return formatted_samples if samples.empty?
+
     # Do major SQL queries
     sample_ids = samples.map(&:id)
     pipeline_run_ids = PipelineRun.where("id in (select max(id) from pipeline_runs where
@@ -295,7 +298,6 @@ module SamplesHelper
     report_ready_pipeline_run_ids = check_report_ready(pipeline_run_ids)
 
     # Massage data into the right format
-    formatted_samples = []
     samples.each_with_index do |sample|
       job_info = {}
       job_info[:db_sample] = sample

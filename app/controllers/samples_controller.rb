@@ -155,7 +155,8 @@ class SamplesController < ApplicationController
 
     @pipeline_run_display = curate_pipeline_run_display(@pipeline_run)
     @sample_status = @pipeline_run ? @pipeline_run.job_status : nil
-    job_stats_hash = make_job_stats_hash([@pipeline_run.id])[@pipeline_run.id]
+    pipeline_run_id = @pipeline_run ? @pipeline_run.id : nil
+    job_stats_hash = make_job_stats_hash([pipeline_run_id])[pipeline_run_id]
     @summary_stats = job_stats_hash.present? ? get_summary_stats(job_stats_hash, @pipeline_run) : nil
     @project_info = @sample.project ? @sample.project : nil
     @project_sample_ids_names = @sample.project ? Hash[current_power.project_samples(@sample.project).map { |s| [s.id, s.name] }] : nil
