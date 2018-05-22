@@ -157,7 +157,7 @@ module ReportHelper
     # Pass the background info so it can be set in the frontend directly
     # for whatever was loaded.
     # Find the background name from the id. Safely returns nil if not found.
-    bg = current_power.backgrounds.find_by_id(background_id.to_i)
+    bg = current_power.backgrounds.find_by(id: background_id.to_i)
     if bg
       data[:background_info] = {}
       data[:background_info][:name] = bg.name
