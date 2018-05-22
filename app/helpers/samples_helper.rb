@@ -219,7 +219,7 @@ module SamplesHelper
     samples.where(host_genome_id: query)
   end
 
-  def pipeline_run_info(pipeline_run)
+  def pipeline_run_info(pipeline_run, report_ready_pipeline_run_ids)
     pipeline_run_entry = {}
     if pipeline_run
       pipeline_run_entry[:job_status_description] = 'WAITING' if pipeline_run.job_status.nil?
@@ -245,7 +245,7 @@ module SamplesHelper
           end
       end
       pipeline_run_entry[:finalized] = pipeline_run.finalized
-      pipeline_run_entry[:report_ready] = pipeline_run.report_ready? ? 1 : 0
+      pipeline_run_entry[:report_ready] = report_ready_pipeline_run_ids.include?(pipeline_run.id)
     else
       pipeline_run_entry[:job_status_description] = 'WAITING'
       pipeline_run_entry[:finalized] = 0
@@ -263,7 +263,7 @@ module SamplesHelper
   def sample_derived_data(sample, job_stats_hash)
     output_data = {}
     pipeline_run = sample.pipeline_runs.first
-    summary_stats = job_stats_hash ? get_summary_stats(job_stats_hash, pipeline_run) : nil
+    summary_stats = job_stats_hash.present? ? get_summary_stats(job_stats_hash, pipeline_run) : nil
     output_data[:pipeline_run] = pipeline_run
     output_data[:host_genome_name] = sample.host_genome ? sample.host_genome.name : nil
     output_data[:summary_stats] = summary_stats
@@ -271,8 +271,7 @@ module SamplesHelper
     output_data
   end
 
-  def make_job_stats_hash(sample_ids)
-    pipeline_run_ids = PipelineRun.top_completed_runs.where(sample_id: sample_ids)
+  def make_job_stats_hash(pipeline_run_ids)
     all_job_stats = JobStat.where(pipeline_run_id: pipeline_run_ids).as_json
     job_stats_by_pipeline_run_id = {}
     all_job_stats.each do |entry|
@@ -282,17 +281,38 @@ module SamplesHelper
     job_stats_by_pipeline_run_id
   end
 
-  def format_samples(samples)
-    sample_ids = samples.map(&:id)
-    job_stats_by_pipeline_run_id = make_job_stats_hash(sample_ids)
+  def check_report_ready(pipeline_run_ids)
+    # get ids of pipeline_runs for which "report_ready?" is true
+    PipelineRun.connection.select_all("
+      SELECT DISTINCT
+        pipeline_runs.id
+      FROM pipeline_runs LEFT OUTER JOIN pipeline_run_stages
+      ON pipeline_runs.id = pipeline_run_stages.pipeline_run_id
+      WHERE
+        pipeline_runs.id IN (#{pipeline_run_ids.join(',')}) AND
+        (
+          pipeline_runs.job_status = '#{PipelineRun::STATUS_CHECKED}' OR
+          (pipeline_run_stages.job_status = '#{PipelineRun::STATUS_LOADED}' AND pipeline_run_stages.step_number = pipeline_runs.ready_step)
+        )
+    ").to_hash.map(&:values).flatten
+  end
 
+  def format_samples(samples)
+    # Do major SQL queries
+    sample_ids = samples.map(&:id)
+    pipeline_run_ids = PipelineRun.where("id in (select max(id) from pipeline_runs where
+                  sample_id in (#{sample_ids.join(',')}) group by sample_id)").pluck(:id)
+    job_stats_by_pipeline_run_id = make_job_stats_hash(pipeline_run_ids)
+    report_ready_pipeline_run_ids = check_report_ready(pipeline_run_ids)
+
+    # Massage data into the right format
     formatted_samples = []
     samples.each_with_index do |sample|
       job_info = {}
       job_info[:db_sample] = sample
       job_stats_hash = sample.pipeline_runs.first ? job_stats_by_pipeline_run_id[sample.pipeline_runs.first.id] : {}
       job_info[:derived_sample_output] = sample_derived_data(sample, job_stats_hash)
-      job_info[:run_info] = pipeline_run_info(sample.pipeline_runs.first)
+      job_info[:run_info] = pipeline_run_info(sample.pipeline_runs.first, report_ready_pipeline_run_ids)
       job_info[:uploader] = sample_uploader(sample)
       formatted_samples.push(job_info)
     end
