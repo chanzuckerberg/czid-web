@@ -107,13 +107,13 @@ class PipelineRun < ApplicationRecord
     )
 
     # De-Novo Assembly
-    run_stages << PipelineRunStage.new(
-      step_number: 4,
-      name: 'De-Novo Assembly',
-      job_command_func: 'assembly_command',
-      load_db_command_func: 'db_load_assembly',
-      output_func: 'assembly_outputs'
-    )
+    #run_stages << PipelineRunStage.new(
+    #  step_number: 4,
+    #  name: 'De-Novo Assembly',
+    #  job_command_func: 'assembly_command',
+    #  load_db_command_func: 'db_load_assembly',
+    #  output_func: 'assembly_outputs'
+    #)
 
     self.pipeline_run_stages = run_stages
     # we consider the job successful after stage 2 completes, even if subsequent stages fail
