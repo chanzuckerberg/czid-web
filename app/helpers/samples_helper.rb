@@ -271,7 +271,8 @@ module SamplesHelper
     output_data
   end
 
-  def job_stats_db_multiget(pipeline_run_ids)
+  def job_stats_multiget(pipeline_run_ids)
+    # get job_stats from db
     all_job_stats = JobStat.where(pipeline_run_id: pipeline_run_ids)
     job_stats_by_pipeline_run_id = {}
     all_job_stats.each do |entry|
@@ -281,12 +282,13 @@ module SamplesHelper
     job_stats_by_pipeline_run_id
   end
 
-  def job_stats_db_get(pipeline_run_id)
-    job_stats_db_multiget([pipeline_run_id])[pipeline_run_id]
+  def job_stats_get(pipeline_run_id)
+    # get job_stats from db
+    job_stats_multiget([pipeline_run_id])[pipeline_run_id]
   end
 
-  def report_ready_db_multiget(pipeline_run_ids)
-    # get ids of pipeline_runs for which "report_ready?" is true
+  def report_ready_multiget(pipeline_run_ids)
+    # query db to get ids of pipeline_runs for which "report_ready?" is true
     PipelineRun.where(id: pipeline_run_ids).where("job_status = '#{PipelineRun::STATUS_CHECKED}' or id in (select pipeline_run_id from pipeline_run_stages where pipeline_run_stages.step_number = pipeline_runs.ready_step and pipeline_run_stages.job_status = '#{PipelineRun::STATUS_LOADED}')").pluck(:id)
   end
 
@@ -298,8 +300,8 @@ module SamplesHelper
     sample_ids = samples.map(&:id)
     pipeline_run_ids = PipelineRun.where("id in (select max(id) from pipeline_runs where
                   sample_id in (#{sample_ids.join(',')}) group by sample_id)").pluck(:id)
-    job_stats_by_pipeline_run_id = job_stats_db_multiget(pipeline_run_ids)
-    report_ready_pipeline_run_ids = report_ready_db_multiget(pipeline_run_ids)
+    job_stats_by_pipeline_run_id = job_stats_multiget(pipeline_run_ids)
+    report_ready_pipeline_run_ids = report_ready_multiget(pipeline_run_ids)
 
     # Massage data into the right format
     samples.each_with_index do |sample|
