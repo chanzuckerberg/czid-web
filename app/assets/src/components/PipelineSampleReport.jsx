@@ -1239,7 +1239,8 @@ class PipelineSampleReport extends React.Component {
     // This is necessary because soon we may show different backgrounds IDs
     // as the same name to the users.
     if (!this.fetchParams("background_id") && Cookies.get("background_name")) {
-      this.getBackgroundIdByName(Cookies.get("background_name"));
+      const bg_id = this.getBackgroundIdByName(Cookies.get("background_name"));
+      if (bg_id) this.props.reportPageParams.background_id = bg_id;
     }
 
     // Set pipeline_version and background_id from reportPageParams.
@@ -1258,7 +1259,7 @@ class PipelineSampleReport extends React.Component {
   getBackgroundIdByName(name) {
     let match = this.all_backgrounds.filter(b => b["name"] === name);
     if (match && match[0] && match[0]["id"]) {
-      this.props.reportPageParams.background_id = match[0]["id"];
+      return match[0]["id"];
     }
   }
 
