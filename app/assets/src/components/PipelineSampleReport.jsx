@@ -1235,7 +1235,8 @@ class PipelineSampleReport extends React.Component {
     const filter_row_stats = this.state.loading ? null : (
       <div id="filter-message" className="filter-message">
         <span className="count">
-          {filter_stats} {truncation_stats} {subsampling_stats} {disable_filter}
+          {filter_stats} {truncation_stats} {subsampling_stats}{" "}
+          {this.props.gsnapFilterStatus} {disable_filter}
         </span>
       </div>
     );
