@@ -57,16 +57,17 @@ class PipelineSampleReport extends React.Component {
       value: ""
     };
 
+    // all taxons will pass this default filter
     this.defaultThresholdValues = savedThresholdFilters.length
       ? savedThresholdFilters
-      : [Object.assign({}, this.defaultThreshold)]; // all taxons will pass this default filter
+      : [Object.assign({}, this.defaultThreshold)];
 
     // we should only keep dynamic data in the state
+    // Starting state is default values which are to be set later.
     this.state = {
       taxonomy_details: [],
-      backgroundName:
-        Cookies.get("background_name") ||
-        this.report_details.default_background.name,
+      backgroundId: 0,
+      backgroundName: "",
       searchId: 0,
       searchKey: "",
       search_keys_in_sample: [],
@@ -89,6 +90,7 @@ class PipelineSampleReport extends React.Component {
       activeThresholds: this.defaultThresholdValues,
       countType: "NT"
     };
+
     this.expandAll = false;
     this.expandedGenera = [];
     this.applySearchFilter = this.applySearchFilter.bind(this);
@@ -110,6 +112,8 @@ class PipelineSampleReport extends React.Component {
     this.renderMore = this.renderMore.bind(this);
     this.initializeTooltip();
     this.displayHighlightTags = this.displayHighlightTags.bind(this);
+    this.fillUrlParams = this.fillUrlParams.bind(this);
+    this.getBackgroundIdByName = this.getBackgroundIdByName.bind(this);
   }
 
   componentWillUpdate(nextProps, nextState) {
@@ -121,6 +125,9 @@ class PipelineSampleReport extends React.Component {
   }
 
   componentWillMount() {
+    // Fill in URL parameters for usability and specifying data to fetch.
+    this.fillUrlParams();
+    // Fetch the actual report data via axios calls to fill in the page.
     this.fetchReportData();
     this.fetchSearchList();
   }
@@ -170,18 +177,13 @@ class PipelineSampleReport extends React.Component {
       });
   }
 
+  // fetchReportData loads the actual report information with another call to
+  // the API endpoint.
   fetchReportData() {
     this.nanobar.go(30);
     let params = `?${window.location.search.replace("?", "")}&report_ts=${
       this.report_ts
     }&version=${this.gitVersion}`;
-    const cached_background_id = Cookies.get("background_id");
-    if (cached_background_id) {
-      params =
-        params.indexOf("background_id=") < 0
-          ? `${params}&background_id=${cached_background_id}`
-          : params;
-    }
     axios.get(`/samples/${this.sample_id}/report_info${params}`).then(res => {
       this.nanobar.go(100);
       const genus_map = {};
@@ -191,13 +193,16 @@ class PipelineSampleReport extends React.Component {
           genus_map[taxon.genus_taxid] = taxon;
         }
       }
-      // the genus_map never changes, so we move it out from the react state, to reduce perfomance cost
+      // The genus_map never changes, so we move it out from the react state,
+      // to reduce performance cost.
       this.genus_map = genus_map;
       this.setState(
         {
           rows_passing_filters: res.data.taxonomy_details[0],
           rows_total: res.data.taxonomy_details[1],
-          taxonomy_details: res.data.taxonomy_details[2]
+          taxonomy_details: res.data.taxonomy_details[2],
+          backgroundId: res.data.background_info.id,
+          backgroundName: res.data.background_info.name
         },
         () => {
           this.applyThresholdFilters(this.state.taxonomy_details, false);
@@ -721,6 +726,7 @@ class PipelineSampleReport extends React.Component {
       $(".advanced-filters-modal").slideUp(300);
     }
   }
+
   applyThresholdFilters(candidate_taxons, play_animation = true) {
     let thresholded_taxons = [];
     let genus_taxon = {};
@@ -774,6 +780,7 @@ class PipelineSampleReport extends React.Component {
       this.state.exclude_subcats
     );
   }
+
   handleThresholdEnter(event) {
     if (event.keyCode === 13) {
       this.applyThresholdFilters(this.state.taxonomy_details, true);
@@ -788,7 +795,6 @@ class PipelineSampleReport extends React.Component {
       },
       () => {
         Cookies.set("background_name", backgroundName);
-        Cookies.set("background_id", backgroundParams);
         this.props.refreshPage({ background_id: backgroundParams });
       }
     );
@@ -1203,6 +1209,58 @@ class PipelineSampleReport extends React.Component {
         this.applySearchFilter(searchId, []);
       }
     );
+  }
+
+  // Fill in desired URL parameters so user's can copy and paste URLs.
+  // Ex: Add ?pipeline_version=1.7&background_id=4 to /samples/545
+  // This way links can still be to '/samples/545' in the rest of the app
+  // but the URL will be filled in without triggering another page reload.
+  //
+  // Order of precedence for background_id is:
+  // (1) URL parameter specified
+  // (2) saved background name in frontend cookie
+  // (3) the default background
+  fillUrlParams() {
+    // Skip if report is not present or a background ID and pipeline version
+    // are explicitly specified in the URL.
+    if (
+      !this.props.reportPageParams ||
+      (this.fetchParams("pipeline_version") &&
+        this.fetchParams("background_id"))
+    ) {
+      return;
+    }
+
+    // Setup
+    let params = new URLSearchParams(window.href);
+    const stringer = require("querystring");
+
+    // If a background name is set in Cookies, get its ID from allBackgrounds.
+    // This is necessary because soon we may show different backgrounds IDs
+    // as the same name to the users.
+    if (!this.fetchParams("background_id") && Cookies.get("background_name")) {
+      const bg_id = this.getBackgroundIdByName(Cookies.get("background_name"));
+      if (bg_id) this.props.reportPageParams.background_id = bg_id;
+    }
+
+    // Set pipeline_version and background_id from reportPageParams.
+    params["pipeline_version"] = this.props.reportPageParams.pipeline_version;
+    params["background_id"] = this.props.reportPageParams.background_id;
+    // Modify the URL in place without triggering a page reload.
+    history.replaceState(null, null, `?${stringer.stringify(params)}`);
+  }
+
+  fetchParams(param) {
+    let url = new URL(window.location);
+    return url.searchParams.get(param);
+  }
+
+  // Select the background with the matching name.
+  getBackgroundIdByName(name) {
+    let match = this.all_backgrounds.filter(b => b["name"] === name);
+    if (match && match[0] && match[0]["id"]) {
+      return match[0]["id"];
+    }
   }
 
   render() {
