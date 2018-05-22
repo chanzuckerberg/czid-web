@@ -65,6 +65,7 @@ class PipelineSampleReads extends React.Component {
     this.handleDropdownChange = this.handleDropdownChange.bind(this);
     this.deleteSample = this.deleteSample.bind(this);
     this.toggleHighlightTaxon = this.toggleHighlightTaxon.bind(this);
+    this.downloadCSV = this.downloadCSV.bind(this);
   }
 
   generateGsnapFilterStatus(jobStats) {
@@ -255,6 +256,7 @@ class PipelineSampleReads extends React.Component {
     }
     return true;
   }
+
   rerunPipeline() {
     this.setState({
       rerunStatus: "waiting",
@@ -319,22 +321,18 @@ class PipelineSampleReads extends React.Component {
   }
 
   fetchParams(param) {
-    let urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(param);
+    let url = new URL(window.location);
+    return url.searchParams.get(param);
   }
 
-  getDownloadLink() {
-    const givenBackgroundId = this.fetchParams("background_id");
-    const cookieBackgroundId = Cookies.get("background_id");
-
+  downloadCSV() {
     let resParams = {};
-    let csvBackgroundId;
     const stringer = require("querystring");
 
     // Set the right CSV background ID.
-    if (cookieBackgroundId) csvBackgroundId = cookieBackgroundId;
-    if (givenBackgroundId) csvBackgroundId = givenBackgroundId;
-    if (csvBackgroundId) resParams["background_id"] = csvBackgroundId;
+    // Should have background_id param in all cases now.
+    const givenBackgroundId = this.fetchParams("background_id");
+    if (givenBackgroundId) resParams["background_id"] = givenBackgroundId;
 
     // Set the right pipeline version.
     let v = this.pipelineRun && this.pipelineRun.pipeline_version;
@@ -342,7 +340,7 @@ class PipelineSampleReads extends React.Component {
 
     let res = `/samples/${this.sampleId}/report_csv`;
     res += `?${stringer.stringify(resParams)}`;
-    return res;
+    location.href = res;
   }
 
   componentDidMount() {
@@ -576,6 +574,8 @@ class PipelineSampleReads extends React.Component {
           toggleHighlightTaxon={this.toggleHighlightTaxon}
           refreshPage={this.refreshPage}
           gsnapFilterStatus={this.gsnapFilterStatus}
+          // Needs to be passed down to set the background dropdown properly.
+          reportPageParams={this.props.reportPageParams}
         />
       );
     } else if (this.pipelineInProgress()) {
@@ -808,6 +808,24 @@ class PipelineSampleReads extends React.Component {
       </Button>
     );
 
+    let report_buttons;
+    if (this.reportPresent)
+      report_buttons = (
+        <div className="col no-padding s3 right-align">
+          <div className="report-action-buttons">
+            <Button
+              icon
+              labelPosition="left"
+              className="icon link download-btn"
+              onClick={this.downloadCSV}
+            >
+              <Icon className="cloud download alternate" />
+              <span>Download</span>
+            </Button>
+          </div>
+        </div>
+      );
+
     return (
       <div>
         <SubHeader>
@@ -825,20 +843,7 @@ class PipelineSampleReads extends React.Component {
                   ? delete_sample_button
                   : null}
               </div>
-              <div className="col no-padding s3 right-align">
-                <div className="report-action-buttons">
-                  <a className="right" href={this.getDownloadLink()}>
-                    <Button
-                      icon
-                      labelPosition="left"
-                      className="icon link download-btn"
-                    >
-                      <Icon className="cloud download alternate" />
-                      <span>Download</span>
-                    </Button>
-                  </a>
-                </div>
-              </div>
+              {report_buttons}
             </div>
 
             <div className="sub-header-navigation">
