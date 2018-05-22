@@ -42,20 +42,10 @@ class BackgroundsController < ApplicationController
   # PATCH/PUT /backgrounds/1
   # PATCH/PUT /backgrounds/1.json
   def update
-    current_data = @background.to_json(include: [{ pipeline_runs: { only: [:id, :sample_id] } }])
-    current_data_full_string = @background.to_json(include: [{ pipeline_runs: { only: [:id, :sample_id] } },
-                                                             :taxon_summaries])
-    background_changed = assign_attributes_and_has_changed?(background_params)
-    if background_changed
-      s3_archive_successful, s3_backup_path = archive_background_to_s3(current_data_full_string)
-      db_archive_successful = archive_background_to_db(current_data, s3_backup_path)
-      update_successful = db_archive_successful && s3_archive_successful ? @background.save : false # this triggers recomputation of @background's taxon_summaries if archiving was successful
-    else
-      update_successful = true
-      @background.save # recompute
-    end
+    @background = @background.new_params(background_params)
+
     respond_to do |format|
-      if update_successful
+      if @background.save
         format.html { redirect_to @background, notice: 'Background was successfully updated.' }
         format.json { render :show, status: :ok, location: @background }
       else

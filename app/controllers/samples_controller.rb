@@ -160,7 +160,7 @@ class SamplesController < ApplicationController
     @project_info = @sample.project ? @sample.project : nil
     @project_sample_ids_names = @sample.project ? Hash[current_power.project_samples(@sample.project).map { |s| [s.id, s.name] }] : nil
     @host_genome = @sample.host_genome ? @sample.host_genome : nil
-    @background_models = current_power.backgrounds
+    @background_models = current_power.backgrounds.current_backgrounds
     @can_edit = current_power.updatable_sample?(@sample)
     @git_version = ENV['GIT_VERSION'] || ""
     @git_version = Time.current.to_i if @git_version.blank?

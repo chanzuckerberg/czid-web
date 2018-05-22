@@ -28,7 +28,7 @@
   </div>
   <div class="field radiobutton-list">
     <%= form.label :default_background %>
-    <%= form.collection_radio_buttons :default_background_id, Background.all, :id, :name %>
+    <%= form.collection_radio_buttons :default_background_name, Background.current_backgrounds, :name, :name %>
   </div>
 
   <div class="actions">

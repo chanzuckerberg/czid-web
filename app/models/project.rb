@@ -111,8 +111,10 @@ class Project < ApplicationRecord
       project_background = Background.new
       project_background.project_id = id
     end
-    project_background.name = project_background_name
-    project_background.pipeline_runs = project_pipeline_runs
+    project_background = project_background.new_params(
+      name: project_background_name,
+      pipeline_run_ids: project_pipeline_runs.pluck(:id)
+    )
     project_background.save
   end
 

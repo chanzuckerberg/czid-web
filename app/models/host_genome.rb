@@ -4,6 +4,6 @@ class HostGenome < ApplicationRecord
   NO_HOST_NAME = 'No host subtraction'.freeze
 
   def default_background
-    Background.find(default_background_id) if default_background_id
+    Background.find_by(name: default_background_name) if default_background_name
   end
 end
