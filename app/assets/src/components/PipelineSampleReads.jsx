@@ -40,6 +40,7 @@ class PipelineSampleReads extends React.Component {
     this.pipelineRun = props.pipelineRun;
     this.rerunPipeline = this.rerunPipeline.bind(this);
     this.canSeeAlignViz = props.can_see_align_viz;
+    this.gsnapFilterStatus = this.generateGsnapFilterStatus(this.jobStatistics);
     this.state = {
       rerunStatus: "failed",
       rerunStatusMessage: "Sample run failed",
@@ -64,6 +65,19 @@ class PipelineSampleReads extends React.Component {
     this.handleDropdownChange = this.handleDropdownChange.bind(this);
     this.deleteSample = this.deleteSample.bind(this);
     this.toggleHighlightTaxon = this.toggleHighlightTaxon.bind(this);
+  }
+
+  generateGsnapFilterStatus(jobStats) {
+    if (!this.host_genome || this.host_genome.name != "Human") {
+      // only relevant for Human  as of 5/21/2018
+      return null;
+    }
+    for (let stat of jobStats) {
+      if (stat["task"] === "run_gsnap_filter") {
+        return null;
+      }
+    }
+    return "gsnap filter on human/chimp genome was not run.";
   }
 
   refreshPage(overrides) {
@@ -561,6 +575,7 @@ class PipelineSampleReads extends React.Component {
           watched_taxids={this.state.watched_taxids}
           toggleHighlightTaxon={this.toggleHighlightTaxon}
           refreshPage={this.refreshPage}
+          gsnapFilterStatus={this.gsnapFilterStatus}
         />
       );
     } else if (this.pipelineInProgress()) {
