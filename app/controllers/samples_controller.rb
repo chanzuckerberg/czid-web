@@ -68,7 +68,7 @@ class SamplesController < ApplicationController
     results = filter_by_tissue_type(results, tissue_type_query) if tissue_type_query.present?
     results = filter_by_host(results, host_query) if host_query.present?
 
-    @samples = sort_by(results, sort).paginate(page: params[:page], per_page: params[:per_page] || PAGE_SIZE).includes([:user, :input_files], pipeline_runs: [:job_stats, :pipeline_run_stages])
+    @samples = sort_by(results, sort).paginate(page: params[:page], per_page: params[:per_page] || PAGE_SIZE).includes([:user, :host_genome, :pipeline_runs, :input_files])
     @samples_count = results.size
     @all_samples = format_samples(@samples)
 
@@ -155,8 +155,9 @@ class SamplesController < ApplicationController
 
     @pipeline_run_display = curate_pipeline_run_display(@pipeline_run)
     @sample_status = @pipeline_run ? @pipeline_run.job_status : nil
-    @job_stats = @pipeline_run ? @pipeline_run.job_stats : nil
-    @summary_stats = @job_stats ? get_summary_stats(@job_stats) : nil
+    pipeline_run_id = @pipeline_run ? @pipeline_run.id : nil
+    job_stats_hash = job_stats_get(pipeline_run_id)
+    @summary_stats = job_stats_hash.present? ? get_summary_stats(job_stats_hash, @pipeline_run) : nil
     @project_info = @sample.project ? @sample.project : nil
     @project_sample_ids_names = @sample.project ? Hash[current_power.project_samples(@sample.project).map { |s| [s.id, s.name] }] : nil
     @host_genome = @sample.host_genome ? @sample.host_genome : nil

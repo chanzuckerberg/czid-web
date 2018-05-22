@@ -94,35 +94,33 @@ module SamplesHelper
     HostGenome.all.map { |h| h.slice('name', 'id') }
   end
 
-  def get_summary_stats(jobstats)
-    pr = jobstats[0].pipeline_run unless jobstats[0].nil?
+  def get_summary_stats(job_stats_hash, pipeline_run)
+    pr = pipeline_run
     unmapped_reads = pr.nil? ? nil : pr.unmapped_reads
     last_processed_at = pr.nil? ? nil : pr.created_at
-    { remaining_reads: get_remaining_reads(jobstats),
-      compression_ratio: compute_compression_ratio(jobstats),
-      qc_percent: compute_qc_value(jobstats),
-      percent_remaining: compute_percentage_reads(jobstats),
+    { remaining_reads: get_remaining_reads(pr),
+      compression_ratio: compute_compression_ratio(job_stats_hash),
+      qc_percent: compute_qc_value(job_stats_hash),
+      percent_remaining: compute_percentage_reads(pr),
       unmapped_reads: unmapped_reads,
       last_processed_at: last_processed_at }
   end
 
-  def get_remaining_reads(jobstats)
-    pr = jobstats[0].pipeline_run unless jobstats[0].nil?
+  def get_remaining_reads(pr)
     pr.remaining_reads unless pr.nil?
   end
 
-  def compute_compression_ratio(jobstats)
-    cdhitdup_stats = jobstats.find_by(task: 'run_cdhitdup')
-    (1.0 * cdhitdup_stats.reads_before) / cdhitdup_stats.reads_after unless cdhitdup_stats.nil?
+  def compute_compression_ratio(job_stats_hash)
+    cdhitdup_stats = job_stats_hash['run_cdhitdup']
+    (1.0 * cdhitdup_stats['reads_before']) / cdhitdup_stats['reads_after'] unless cdhitdup_stats.nil?
   end
 
-  def compute_qc_value(jobstats)
-    priceseqfilter_stats = jobstats.find_by(task: 'run_priceseqfilter')
-    (100.0 * priceseqfilter_stats.reads_after) / priceseqfilter_stats.reads_before unless priceseqfilter_stats.nil?
+  def compute_qc_value(job_stats_hash)
+    priceseqfilter_stats = job_stats_hash['run_priceseqfilter']
+    (100.0 * priceseqfilter_stats['reads_after']) / priceseqfilter_stats['reads_before'] unless priceseqfilter_stats.nil?
   end
 
-  def compute_percentage_reads(jobstats)
-    pr = jobstats[0].pipeline_run unless jobstats[0].nil?
+  def compute_percentage_reads(pr)
     (100.0 * pr.remaining_reads) / pr.total_reads unless pr.nil? || pr.remaining_reads.nil? || pr.total_reads.nil?
   end
 
@@ -200,10 +198,10 @@ module SamplesHelper
     samples
   end
 
-  def get_total_runtime(pipeline_run)
+  def get_total_runtime(pipeline_run, run_stages)
     if pipeline_run.finalized?
       # total processing time (without time spent waiting), for performance evaluation
-      pipeline_run.pipeline_run_stages.map { |rs| pipeline_run.ready_step && rs.step_number > pipeline_run.ready_step ? 0 : (rs.updated_at - rs.created_at) }.sum
+      run_stages.map { |rs| pipeline_run.ready_step && rs.step_number > pipeline_run.ready_step ? 0 : (rs.updated_at - rs.created_at) }.sum
     else
       # time since pipeline kickoff (including time spent waiting), for run diagnostics
       (Time.current - pipeline_run.created_at)
@@ -221,16 +219,16 @@ module SamplesHelper
     samples.where(host_genome_id: query)
   end
 
-  def pipeline_run_info(pipeline_run)
+  def pipeline_run_info(pipeline_run, report_ready_pipeline_run_ids, pipeline_run_stages_by_pipeline_run_id)
     pipeline_run_entry = {}
     if pipeline_run
       pipeline_run_entry[:job_status_description] = 'WAITING' if pipeline_run.job_status.nil?
-      if pipeline_run.pipeline_run_stages.present?
-        run_stages = pipeline_run.pipeline_run_stages
+      run_stages = pipeline_run_stages_by_pipeline_run_id[pipeline_run.id]
+      if run_stages.present?
         run_stages.each do |rs|
           pipeline_run_entry[rs.name] = rs.job_status
         end
-        pipeline_run_entry[:total_runtime] = get_total_runtime(pipeline_run)
+        pipeline_run_entry[:total_runtime] = get_total_runtime(pipeline_run, run_stages)
         pipeline_run_entry[:with_assembly] = pipeline_run.assembly? ? 1 : 0
       else
         # old data
@@ -247,7 +245,7 @@ module SamplesHelper
           end
       end
       pipeline_run_entry[:finalized] = pipeline_run.finalized
-      pipeline_run_entry[:report_ready] = pipeline_run.report_ready? ? 1 : 0
+      pipeline_run_entry[:report_ready] = report_ready_pipeline_run_ids.include?(pipeline_run.id)
     else
       pipeline_run_entry[:job_status_description] = 'WAITING'
       pipeline_run_entry[:finalized] = 0
@@ -262,26 +260,78 @@ module SamplesHelper
     user
   end
 
-  def sample_derived_data(sample)
+  def sample_derived_data(sample, job_stats_hash)
     output_data = {}
     pipeline_run = sample.pipeline_runs.first
-    job_stats = pipeline_run ? pipeline_run.job_stats : nil
-    summary_stats = job_stats ? get_summary_stats(job_stats) : nil
+    summary_stats = job_stats_hash.present? ? get_summary_stats(job_stats_hash, pipeline_run) : nil
     output_data[:pipeline_run] = pipeline_run
     output_data[:host_genome_name] = sample.host_genome ? sample.host_genome.name : nil
-    output_data[:job_stats] = job_stats
     output_data[:summary_stats] = summary_stats
 
     output_data
   end
 
+  def job_stats_multiget(pipeline_run_ids)
+    # get job_stats from db
+    all_job_stats = JobStat.where(pipeline_run_id: pipeline_run_ids)
+    job_stats_by_pipeline_run_id = {}
+    all_job_stats.each do |entry|
+      job_stats_by_pipeline_run_id[entry.pipeline_run_id] ||= {}
+      job_stats_by_pipeline_run_id[entry.pipeline_run_id][entry.task] = entry
+    end
+    job_stats_by_pipeline_run_id
+  end
+
+  def job_stats_get(pipeline_run_id)
+    # get job_stats from db
+    job_stats_multiget([pipeline_run_id])[pipeline_run_id]
+  end
+
+  def report_ready_multiget(pipeline_run_ids)
+    # query db to get ids of pipeline_runs for which "report_ready?" is true
+    PipelineRun.where(id: pipeline_run_ids).where("job_status = '#{PipelineRun::STATUS_CHECKED}' or id in (select pipeline_run_id from pipeline_run_stages where pipeline_run_stages.step_number = pipeline_runs.ready_step and pipeline_run_stages.job_status = '#{PipelineRun::STATUS_LOADED}')").pluck(:id)
+  end
+
+  def top_pipeline_runs_multiget(sample_ids)
+    top_pipeline_runs = PipelineRun.where("id in (select max(id) from pipeline_runs where
+                  sample_id in (#{sample_ids.join(',')}) group by sample_id)")
+    top_pipeline_run_by_sample_id = {}
+    top_pipeline_runs.each do |pr|
+      top_pipeline_run_by_sample_id[pr.sample_id] = pr
+    end
+    top_pipeline_run_by_sample_id
+  end
+
+  def pipeline_run_stages_multiget(pipeline_run_ids)
+    all_stages = PipelineRunStage.where(pipeline_run_id: pipeline_run_ids)
+    stages_by_pipeline_run_id = {}
+    all_stages.each do |prs|
+      stages_by_pipeline_run_id[prs.pipeline_run_id] ||= []
+      stages_by_pipeline_run_id[prs.pipeline_run_id] << prs
+    end
+    stages_by_pipeline_run_id
+  end
+
   def format_samples(samples)
     formatted_samples = []
+    return formatted_samples if samples.empty?
+
+    # Do major SQL queries
+    sample_ids = samples.map(&:id)
+    top_pipeline_run_by_sample_id = top_pipeline_runs_multiget(sample_ids)
+    pipeline_run_ids = top_pipeline_run_by_sample_id.values.map(&:id)
+    job_stats_by_pipeline_run_id = job_stats_multiget(pipeline_run_ids)
+    report_ready_pipeline_run_ids = report_ready_multiget(pipeline_run_ids)
+    pipeline_run_stages_by_pipeline_run_id = pipeline_run_stages_multiget(pipeline_run_ids)
+
+    # Massage data into the right format
     samples.each_with_index do |sample|
       job_info = {}
       job_info[:db_sample] = sample
-      job_info[:derived_sample_output] = sample_derived_data(sample)
-      job_info[:run_info] = pipeline_run_info(sample.pipeline_runs.first)
+      top_pipeline_run = top_pipeline_run_by_sample_id[sample.id]
+      job_stats_hash = top_pipeline_run ? job_stats_by_pipeline_run_id[top_pipeline_run.id] : {}
+      job_info[:derived_sample_output] = sample_derived_data(sample, job_stats_hash)
+      job_info[:run_info] = pipeline_run_info(top_pipeline_run, report_ready_pipeline_run_ids, pipeline_run_stages_by_pipeline_run_id)
       job_info[:uploader] = sample_uploader(sample)
       formatted_samples.push(job_info)
     end
