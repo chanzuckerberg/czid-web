@@ -361,61 +361,6 @@ class PipelineSampleReads extends React.Component {
         this.handleDropdownChange
       );
     }
-
-    this.fillUrlParams();
-  }
-
-  // Fill in desired URL parameters so user's can copy and paste URLs.
-  // Ex: Add ?pipeline_version=1.7&background_id=4 to /samples/545
-  // This way links can still be to '/samples/545' in the rest of the app
-  // but the URL will be filled in without triggering another page reload
-  // usually.
-  fillUrlParams() {
-    // Skip if report is not present or a background ID and pipeline version
-    // are explicitly specified in the URL.
-    let reportPageParams = this.props.reportPageParams;
-    if (
-      !this.reportPresent ||
-      !reportPageParams ||
-      (this.fetchParams("pipeline_version") &&
-        this.fetchParams("background_id"))
-    ) {
-      return;
-    }
-
-    // Setup
-    let params = new URLSearchParams(window.href);
-    const stringer = require("querystring");
-
-    // If a background name is set in Cookies, get its ID from allBackgrounds.
-    // This is necessary because soon we may show different backgrounds IDs
-    // as the same name to the users.
-    // If the ID is different from the loaded ID, trigger a page reload.
-    // No way to do it without the page reload and without reading the cookie
-    // in Rails because Rails passes down the report information to the JS.
-    if (
-      !this.fetchParams("background_name") &&
-      Cookies.get("background_name")
-    ) {
-      // Select the background with the matching name.
-      let match = this.allBackgrounds.filter(
-        b => b["name"] === Cookies.get("background_name")
-      );
-      if (match && match[0] && match[0]["id"]) {
-        let cookie_id = match[0]["id"];
-        let loaded_id = reportPageParams.background_id;
-        if (loaded_id !== cookie_id) {
-          // Refresh the page using this background id.
-          this.refreshPage({ background_id: cookie_id });
-        }
-      }
-    }
-
-    // Set pipeline_version and background_id from reportPageParams.
-    params["pipeline_version"] = reportPageParams.pipeline_version;
-    params["background_id"] = reportPageParams.background_id;
-    // Modify the URL in place without triggering a page reload.
-    history.replaceState(null, null, `?${stringer.stringify(params)}`);
   }
 
   initializeSelectTag() {
