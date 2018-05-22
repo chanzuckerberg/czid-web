@@ -69,8 +69,8 @@ class PipelineSampleReads extends React.Component {
   }
 
   generateGsnapFilterStatus(jobStats) {
-    if (!this.host_genome || this.host_genome.name != "Human") {
-      // only relevant for Human  as of 5/21/2018
+    if (!jobStats || !this.host_genome || this.host_genome.name != "Human") {
+      // only relevant for Human as of 5/21/2018
       return null;
     }
     for (let stat of jobStats) {
