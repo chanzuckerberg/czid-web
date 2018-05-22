@@ -156,12 +156,13 @@ module ReportHelper
 
     # Pass the background info so it can be set in the frontend directly
     # for whatever was loaded.
-    data[:background_info] = {}
-    data[:background_info][:id] = background_id
-    # Find the background name from the id
-    bg = current_power.backgrounds.find(background_id.to_i)
-    bg = bg[0] if bg
-    data[:background_info][:name] = bg.name if bg
+    # Find the background name from the id. Safely returns nil if not found.
+    bg = current_power.backgrounds.find_by_id(background_id.to_i)
+    if bg
+      data[:background_info] = {}
+      data[:background_info][:name] = bg.name
+      data[:background_info][:id] = bg.id
+    end
 
     data[:taxonomy_details] = taxonomy_details(pipeline_run_id, background_id, params)
     data
