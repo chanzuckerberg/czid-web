@@ -68,7 +68,7 @@ class SamplesController < ApplicationController
     results = filter_by_tissue_type(results, tissue_type_query) if tissue_type_query.present?
     results = filter_by_host(results, host_query) if host_query.present?
 
-    @samples = sort_by(results, sort).paginate(page: params[:page], per_page: params[:per_page] || PAGE_SIZE).includes([:user, :host_genome, :input_files, :pipeline_runs])
+    @samples = sort_by(results, sort).paginate(page: params[:page], per_page: params[:per_page] || PAGE_SIZE).includes([:user, :host_genome, :pipeline_runs])
     @samples_count = results.size
     @all_samples = format_samples(@samples)
 
