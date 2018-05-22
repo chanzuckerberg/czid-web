@@ -153,16 +153,17 @@ module ReportHelper
   def external_report_info(pipeline_run_id, background_id, params)
     return {} if pipeline_run_id.nil? || background_id.nil?
     data = {}
-    data[:taxonomy_details] = taxonomy_details(pipeline_run_id, background_id, params)
 
     # Pass the background info so it can be set in the frontend directly
     # for whatever was loaded.
     data[:background_info] = {}
     data[:background_info][:id] = background_id
     # Find the background name from the id
-    bg = current_power.backgrounds.select { |b| b.id == background_id.to_i }
+    bg = current_power.backgrounds.find(background_id.to_i)
     bg = bg[0] if bg
     data[:background_info][:name] = bg.name if bg
+
+    data[:taxonomy_details] = taxonomy_details(pipeline_run_id, background_id, params)
     data
   end
 

@@ -66,7 +66,7 @@ class PipelineSampleReport extends React.Component {
     // Starting state is default values which are to be set later.
     this.state = {
       taxonomy_details: [],
-      backgroundId: 1,
+      backgroundId: 0,
       backgroundName: "",
       searchId: 0,
       searchKey: "",
@@ -113,6 +113,7 @@ class PipelineSampleReport extends React.Component {
     this.initializeTooltip();
     this.displayHighlightTags = this.displayHighlightTags.bind(this);
     this.fillUrlParams = this.fillUrlParams.bind(this);
+    this.getBackgroundIdByName = this.getBackgroundIdByName.bind(this);
   }
 
   componentWillUpdate(nextProps, nextState) {
@@ -1238,13 +1239,7 @@ class PipelineSampleReport extends React.Component {
     // This is necessary because soon we may show different backgrounds IDs
     // as the same name to the users.
     if (!this.fetchParams("background_id") && Cookies.get("background_name")) {
-      // Select the background with the matching name.
-      let match = this.all_backgrounds.filter(
-        b => b["name"] === Cookies.get("background_name")
-      );
-      if (match && match[0] && match[0]["id"]) {
-        this.props.reportPageParams.background_id = match[0]["id"];
-      }
+      this.getBackgroundIdByName(Cookies.get("background_name"));
     }
 
     // Set pipeline_version and background_id from reportPageParams.
@@ -1257,6 +1252,14 @@ class PipelineSampleReport extends React.Component {
   fetchParams(param) {
     let url = new URL(window.location);
     return url.searchParams.get(param);
+  }
+
+  // Select the background with the matching name.
+  getBackgroundIdByName(name) {
+    let match = this.all_backgrounds.filter(b => b["name"] === name);
+    if (match && match[0] && match[0]["id"]) {
+      this.props.reportPageParams.background_id = match[0]["id"];
+    }
   }
 
   render() {
