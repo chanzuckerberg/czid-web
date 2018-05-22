@@ -65,6 +65,7 @@ class PipelineSampleReads extends React.Component {
     this.handleDropdownChange = this.handleDropdownChange.bind(this);
     this.deleteSample = this.deleteSample.bind(this);
     this.toggleHighlightTaxon = this.toggleHighlightTaxon.bind(this);
+    this.downloadCSV = this.downloadCSV.bind(this);
   }
 
   generateGsnapFilterStatus(jobStats) {
@@ -324,7 +325,7 @@ class PipelineSampleReads extends React.Component {
     return url.searchParams.get(param);
   }
 
-  getDownloadLink() {
+  downloadCSV() {
     let resParams = {};
     const stringer = require("querystring");
 
@@ -339,7 +340,7 @@ class PipelineSampleReads extends React.Component {
 
     let res = `/samples/${this.sampleId}/report_csv`;
     res += `?${stringer.stringify(resParams)}`;
-    return res;
+    location.href = res;
   }
 
   componentDidMount() {
@@ -807,6 +808,24 @@ class PipelineSampleReads extends React.Component {
       </Button>
     );
 
+    let report_buttons;
+    if (this.reportPresent)
+      report_buttons = (
+        <div className="col no-padding s3 right-align">
+          <div className="report-action-buttons">
+            <Button
+              icon
+              labelPosition="left"
+              className="icon link download-btn"
+              onClick={this.downloadCSV}
+            >
+              <Icon className="cloud download alternate" />
+              <span>Download</span>
+            </Button>
+          </div>
+        </div>
+      );
+
     return (
       <div>
         <SubHeader>
@@ -824,20 +843,7 @@ class PipelineSampleReads extends React.Component {
                   ? delete_sample_button
                   : null}
               </div>
-              <div className="col no-padding s3 right-align">
-                <div className="report-action-buttons">
-                  <a className="right" href={this.getDownloadLink()}>
-                    <Button
-                      icon
-                      labelPosition="left"
-                      className="icon link download-btn"
-                    >
-                      <Icon className="cloud download alternate" />
-                      <span>Download</span>
-                    </Button>
-                  </a>
-                </div>
-              </div>
+              {report_buttons}
             </div>
 
             <div className="sub-header-navigation">
