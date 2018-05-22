@@ -65,7 +65,7 @@ class PipelineSampleReads extends React.Component {
     this.handleDropdownChange = this.handleDropdownChange.bind(this);
     this.deleteSample = this.deleteSample.bind(this);
     this.toggleHighlightTaxon = this.toggleHighlightTaxon.bind(this);
-    this._fillUrlParams = this.fillUrlParams.bind(this);
+    this.fillUrlParams = this.fillUrlParams.bind(this);
   }
 
   generateGsnapFilterStatus(jobStats) {
@@ -362,7 +362,7 @@ class PipelineSampleReads extends React.Component {
       );
     }
 
-    this._fillUrlParams();
+    this.fillUrlParams();
   }
 
   // Fill in desired URL parameters so user's can copy and paste URLs.

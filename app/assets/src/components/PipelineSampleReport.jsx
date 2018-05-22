@@ -61,7 +61,7 @@ class PipelineSampleReport extends React.Component {
       ? savedThresholdFilters
       : [Object.assign({}, this.defaultThreshold)]; // all taxons will pass this default filter
 
-    this._backgroundNameFromId = this.backgroundNameFromId.bind(this);
+    this.backgroundNameFromId = this.backgroundNameFromId.bind(this);
 
     // we should only keep dynamic data in the state
     this.state = {
@@ -91,7 +91,7 @@ class PipelineSampleReport extends React.Component {
 
     // Set background name.
     let bg_id = this.props.reportPageParams.background_id;
-    this.state.backgroundName = this._backgroundNameFromId(bg_id);
+    this.state.backgroundName = this.backgroundNameFromId(bg_id);
 
     this.expandAll = false;
     this.expandedGenera = [];
