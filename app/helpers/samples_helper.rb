@@ -272,29 +272,18 @@ module SamplesHelper
   end
 
   def make_job_stats_hash(pipeline_run_ids)
-    all_job_stats = JobStat.where(pipeline_run_id: pipeline_run_ids).as_json
+    all_job_stats = JobStat.where(pipeline_run_id: pipeline_run_ids)
     job_stats_by_pipeline_run_id = {}
     all_job_stats.each do |entry|
-      job_stats_by_pipeline_run_id[entry['pipeline_run_id']] ||= {}
-      job_stats_by_pipeline_run_id[entry['pipeline_run_id']][entry['task']] = entry
+      job_stats_by_pipeline_run_id[entry.pipeline_run_id] ||= {}
+      job_stats_by_pipeline_run_id[entry.pipeline_run_id][entry.task] = entry
     end
     job_stats_by_pipeline_run_id
   end
 
   def check_report_ready(pipeline_run_ids)
     # get ids of pipeline_runs for which "report_ready?" is true
-    PipelineRun.connection.select_all("
-      SELECT DISTINCT
-        pipeline_runs.id
-      FROM pipeline_runs LEFT OUTER JOIN pipeline_run_stages
-      ON pipeline_runs.id = pipeline_run_stages.pipeline_run_id
-      WHERE
-        pipeline_runs.id IN (#{pipeline_run_ids.join(',')}) AND
-        (
-          pipeline_runs.job_status = '#{PipelineRun::STATUS_CHECKED}' OR
-          (pipeline_run_stages.job_status = '#{PipelineRun::STATUS_LOADED}' AND pipeline_run_stages.step_number = pipeline_runs.ready_step)
-        )
-    ").to_hash.map(&:values).flatten
+    PipelineRun.where(id: pipeline_run_ids).where("job_status = '#{PipelineRun::STATUS_CHECKED}' or id in (select pipeline_run_id from pipeline_run_stages where pipeline_run_stages.step_number = pipeline_runs.ready_step and pipeline_run_stages.job_status = '#{PipelineRun::STATUS_LOADED}')").pluck(:id)
   end
 
   def format_samples(samples)
