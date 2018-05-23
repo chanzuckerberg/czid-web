@@ -811,7 +811,7 @@ class PipelineSampleReads extends React.Component {
     let report_buttons;
     if (this.reportPresent)
       report_buttons = (
-        <div className="col no-padding s3 right-align">
+        <div className="col no-padding s2 right-align">
           <div className="report-action-buttons">
             <Button
               icon
@@ -834,7 +834,7 @@ class PipelineSampleReads extends React.Component {
               PIPELINE {version_display} {pipeline_version_blurb}
             </div>
             <div className="row">
-              <div className="sub-title col s9">
+              <div className="sub-title col s10">
                 <a href={`/?project_id=${this.projectInfo.id}`}>
                   {this.projectInfo.name + " "}
                 </a>
