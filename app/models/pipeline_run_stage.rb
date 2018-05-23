@@ -128,7 +128,7 @@ class PipelineRunStage < ApplicationRecord
     end
 
     # Load light-weight results that can be populated incrementally (e.g. growing list of taxids that have assembly)
-    # db_load_assembly(false) # update the list of taxids that have already been assembled by polling S3
+    # db_load_assembly # update the list of taxids that have already been assembled by polling S3
 
     # Load monolithic result files
     if output_ready?
