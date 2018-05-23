@@ -160,10 +160,9 @@ class PipelineRun < ApplicationRecord
     job_status == STATUS_CHECKED
   end
 
-  def update_job_status
+  def monitor_results
     prs = active_stage
-    all_stages_succeeded = prs.nil?
-    if all_stages_succeeded
+    if prs.nil?
       self.finalized = 1
       self.job_status = STATUS_CHECKED
       save
@@ -172,19 +171,25 @@ class PipelineRun < ApplicationRecord
         sample.project.create_or_update_project_background if sample.project.background_flag == 1
       end
     else
-      if prs.failed?
-        self.finalized = 1
-        Airbrake.notify("Sample #{sample.id} failed #{prs.name}")
-      elsif !prs.started?
-        prs.run_job
-      else
-        # still running
-        prs.update_job_status
-      end
-      self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
-      self.job_status += "|#{STATUS_READY}" if report_ready?
-      save
+      prs.monitor_results
     end
+  end
+
+  def update_job_status
+    prs = active_stage
+    return if prs.nil?
+    if prs.failed?
+      self.finalized = 1
+      Airbrake.notify("Sample #{sample.id} failed #{prs.name}")
+    elsif !prs.started?
+      prs.run_job
+    else
+      # still running
+      prs.update_job_status
+    end
+    self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
+    self.job_status += "|#{STATUS_READY}" if report_ready?
+    save
   end
 
   def local_json_path

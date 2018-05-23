@@ -96,8 +96,6 @@ class PipelineRunStage < ApplicationRecord
       update(job_status: STATUS_FAILED)
       Airbrake.notify("Pipeline Run #{pipeline_run.id} failed #{name} db load")
       raise
-    ensure
-      terminate_job
     end
   end
 
@@ -122,27 +120,36 @@ class PipelineRunStage < ApplicationRecord
     rand < 0.1
   end
 
-  def update_job_status
-    if !id || !started? || succeeded? || failed?
-      # This is called only from PipelineRun.update_status and only when the guard above is false.
-      Airbrake.notify("Invalid precondition for PipelineRunStage.update_job_status #{id} #{job_id} #{job_status}.")
-      return
-    end
+  def monitor_results
+    # Verify that LoadResultForRunStage has not been enqueued already
     if checked?
-      # This can happen due to overly-eager frequent calls from pipeline_monitor through PipelineRun.update_job_status.
       Rails.logger.info "Job #{id} #{job_id} checked and waiting to load results."
       return
     end
+
+    # Load light-weight results that can be populated incrementally (e.g. growing list of taxids that have assembly)
+    # db_load_assembly(false) # update the list of taxids that have already been assembled by polling S3
+
+    # Load monolithic result files
     if output_ready?
       self.job_status = STATUS_CHECKED
-      # save before enqueue, to prevent minor race
-      save
+      save # before enqueue, to prevent minor race
       Resque.enqueue(LoadResultForRunStage, id)
+      return
+    end
+  end
+
+  def update_job_status
+    if !id || !started?
+      Airbrake.notify("Invalid precondition for PipelineRunStage.update_job_status #{id} #{job_id} #{job_status}.")
+      return
+    end
+    if completed?
+      terminate_job
       return
     end
     # The job appears to be in progress.  Check to make sure it hasn't been killed in AWS.   But not too frequently.
     return unless due_for_aegea_check?
-    # db_load_assembly(false) # update the list of taxids that have already been assembled by polling S3
     stdout, stderr, status = Open3.capture3("aegea", "batch", "describe", job_id.to_s)
     unless status.exitstatus.zero?
       Airbrake.notify("Error for update job status for pipeline run #{id} with error #{stderr}")
