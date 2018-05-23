@@ -31,7 +31,7 @@ class CheckPipelineRuns
 
   def self.forced_update_interval
     # Force refresh well before autoscaling.EXPIRATION_PERIOD_MINUTES.
-    # Production does it more often because it needs to pick up updates from
+    # prod does it more often because it needs to pick up updates from
     # all other environments and adjust the autoscaling groups.
     Rails.env == "prod" ? 60 : 600
 
