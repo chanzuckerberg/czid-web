@@ -34,7 +34,6 @@ class CheckPipelineRuns
     # prod does it more often because it needs to pick up updates from
     # all other environments and adjust the autoscaling groups.
     Rails.env == "prod" ? 60 : 600
-
   end
 
   def self.autoscaling_update(autoscaling_state, t_now)
