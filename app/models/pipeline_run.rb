@@ -38,6 +38,12 @@ class PipelineRun < ApplicationRecord
   INPUT_TRUNCATED_FILE = 'input_truncated.txt'.freeze
   PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
 
+  # constants for result monitor status checking
+  LOADING_QUEUED = 'LOADING_QUEUED'.freeze
+  HOST_FILTER_LOADED = 'HOST_FILTER_LOADED'.freeze
+  ALIGNMENT_LOADED = 'ALIGNMENT_LOADED'.freeze
+  POSTPROCESS_LOADED = 'POSTPROCESS_LOADED'.freeze
+
   before_create :create_run_stages
 
   def as_json(options = {})
@@ -187,18 +193,99 @@ class PipelineRun < ApplicationRecord
     pr.save
   end
 
+  def output_json_name
+    multihit? ? MULTIHIT_OUTPUT_JSON_NAME : OUTPUT_JSON_NAME
+  end
+
+  def invalid_family_call?(tcnt)
+    # TODO:  Better family support.
+    tcnt['family_taxid'].to_i < TaxonLineage::INVALID_CALL_BASE_ID
+  rescue
+    false
+  end
+
+  def db_load_alignment
+    output_json_s3_path = "#{alignment_output_s3_path}/#{output_json_name}"
+    stats_json_s3_path = "#{alignment_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
+
+    # Get the file
+    downloaded_json_path = PipelineRun.download_file(output_json_s3_path, local_json_path)
+    downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, local_json_path)
+    return unless downloaded_json_path && downloaded_stats_path
+    json_dict = JSON.parse(File.read(downloaded_json_path))
+
+    pipeline_output_dict = json_dict['pipeline_output']
+    pipeline_output_dict.slice!('remaining_reads', 'total_reads', 'taxon_counts_attributes')
+
+    self.total_reads = pipeline_output_dict['total_reads']
+    self.remaining_reads = pipeline_output_dict['remaining_reads']
+    self.unmapped_reads = count_unmapped_reads
+    self.fraction_subsampled = subsample_fraction
+
+    stats_array = JSON.parse(File.read(downloaded_stats_path))
+    stats_array = stats_array.select { |entry| entry.key?("task") }
+
+    version_s3_path = "#{alignment_output_s3_path}/#{VERSION_JSON_NAME}"
+    self.version = `aws s3 cp #{version_s3_path} -`
+
+    # only keep counts at certain taxonomic levels
+    taxon_counts_attributes_filtered = []
+    acceptable_tax_levels = [TaxonCount::TAX_LEVEL_SPECIES]
+    acceptable_tax_levels << TaxonCount::TAX_LEVEL_GENUS if multihit?
+    acceptable_tax_levels << TaxonCount::TAX_LEVEL_FAMILY if multihit?
+    pipeline_output_dict['taxon_counts_attributes'].each do |tcnt|
+      # TODO:  Better family support.
+      if acceptable_tax_levels.include?(tcnt['tax_level'].to_i) && !invalid_family_call?(tcnt)
+        taxon_counts_attributes_filtered << tcnt
+      end
+    end
+
+    job_stats.delete_all
+    self.job_stats_attributes = stats_array
+    self.taxon_counts_attributes = taxon_counts_attributes_filtered
+    self.updated_at = Time.now.utc
+    save
+    # aggregate the data at genus level
+    generate_aggregate_counts('genus') unless pr.multihit?
+    # merge more accurate name information from lineages table
+    update_names
+    # denormalize superkingdom_taxid into taxon_counts
+    if multihit?
+      update_superkingdoms
+    else
+      update_genera
+    end
+    # label taxa as phage or non-phage
+    update_is_phage
+
+    # rm the json
+    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_json_path} #{downloaded_stats_path}")
+  end
+
+  def db_load_postprocess
+    byteranges_json_s3_path = "#{postprocess_output_s3_path}/#{TAXID_BYTERANGE_JSON_NAME}"
+    downloaded_byteranges_path = PipelineRun.download_file(byteranges_json_s3_path, local_json_path)
+    taxon_byteranges_csv_file = "#{local_json_path}/taxon_byteranges"
+    hash_array_json2csv(downloaded_byteranges_path, taxon_byteranges_csv_file, %w[taxid hit_type first_byte last_byte])
+    ` cd #{local_json_path};
+      sed -e 's/$/,#{id}/' -i taxon_byteranges;
+      mysqlimport --replace --local --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --columns=taxid,hit_type,first_byte,last_byte,pipeline_run_id --fields-terminated-by=',' idseq_#{Rails.env} taxon_byteranges;
+    `
+    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_byteranges_path}")
+  end
+
   def monitor_results
     if host_filter_output_ready? && ![LOADING_QUEUED, HOST_FILTER_LOADED].include?(job_status)
       update(job_status: LOADING_QUEUED)
-      Resque.enqueue(LoadResult, id, "db_load_host_filter")
+      Resque.enqueue(ResultMonitorLoad, id, "db_load_host_filter")
     end
     if alignment_output_ready? && ![LOADING_QUEUED, ALIGNMENT_LOADED].include?(job_status)
       update(job_status: LOADING_QUEUED)
-      Resque.enqueue(LoadResult, id, "db_load_alignment")
+      Resque.enqueue(ResultMonitorLoad, id, "db_load_alignment")
     end
     if postprocess_output_ready? && ![LOADING_QUEUED, POSTPROCESS_LOADED].include?(job_status)
       update(job_status: LOADING_QUEUED)
-      Resque.enqueue(LoadResult, id, "db_load_postprocess")
+      Resque.enqueue(ResultMonitorLoad, id, "db_load_postprocess")
     end
     if job_status == POSTPROCESS_LOADED # last output has been loaded
       self.finalized = 1 # this ensures in_progress will be false and monitor_results won't be run again on this pipeline run
