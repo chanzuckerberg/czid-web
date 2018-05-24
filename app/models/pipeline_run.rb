@@ -161,17 +161,26 @@ class PipelineRun < ApplicationRecord
   end
 
   def monitor_results
-    prs = active_stage
-    if prs.nil?
-      self.finalized = 1
+    if host_filter_output_ready? && ![LOADING_QUEUED, HOST_FILTER_LOADED].include?(job_status)
+      update(job_status: LOADING_QUEUED)
+      Resque.enqueue(LoadResult, id, "db_load_host_filter")
+    end
+    if alignment_output_ready? && ![LOADING_QUEUED, ALIGNMENT_LOADED].include?(job_status)
+      update(job_status: LOADING_QUEUED)
+      Resque.enqueue(LoadResult, id, "db_load_alignment")
+    end
+    if postprocess_output_ready? && ![LOADING_QUEUED, POSTPROCESS_LOADED].include?(job_status)
+      update(job_status: LOADING_QUEUED)
+      Resque.enqueue(LoadResult, id, "db_load_postprocess")
+    end
+    if job_status == POSTPROCESS_LOADED # last output has been loaded
+      self.finalized = 1 # this ensures in_progress will be false and monitor_results won't be run again on this pipeline run
       self.job_status = STATUS_CHECKED
       save
-      if sample.project.complete?
+      if sample.project.complete? # the entire project has just completed
         notify_users
         sample.project.create_or_update_project_background if sample.project.background_flag == 1
       end
-    else
-      prs.monitor_results
     end
   end
 
