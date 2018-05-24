@@ -13,7 +13,7 @@ class ResultMonitorLoad
       pr.update(job_status: loaded_status)
     rescue
       pr.update(job_status: PipelineRun::STATUS_FAILED)
-      Airbrake.notify("Pipeline Run #{pipeline_run.id} failed #{load_db_command_func}")
+      Airbrake.notify("Pipeline Run #{pr.id} failed #{load_db_command_func}")
       raise
     end
   end
