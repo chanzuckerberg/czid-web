@@ -1,5 +1,0 @@
-monitor_pipeline_results:
-  cron: "*/5 * * * *"
-  class: MonitorPipelineResults
-  args:
-  description: check for pipeline results every 5m
