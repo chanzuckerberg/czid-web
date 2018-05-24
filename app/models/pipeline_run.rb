@@ -274,17 +274,29 @@ class PipelineRun < ApplicationRecord
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_byteranges_path}")
   end
 
+  def output_ready?(db_load_command)
+    case db_load_command
+    when "db_load_host_filter"
+      "#{host_filter_output_s3_path}/#{STATS_JSON_NAME}"
+    when "db_load_alignment"
+      "#{alignment_output_s3_path}/#{STATS_JSON_NAME}"
+    when "db_load_postprocess"
+      "#{postprocess_output_s3_path}/#{TAXID_BYTERANGE_JSON_NAME}"
+    end
+  end
+
   def monitor_results
-    return if complete?
-    if host_filter_output_ready? && ![LOADING_QUEUED, HOST_FILTER_LOADED].include?(job_status)
+    return if completed?
+    update(pipeline_version: fetch_pipeline_version) unless pipeline_version
+    if output_ready?("db_load_host_filter") && ![LOADING_QUEUED, HOST_FILTER_LOADED].include?(job_status)
       update(job_status: LOADING_QUEUED)
       Resque.enqueue(ResultMonitorLoad, id, "db_load_host_filter", HOST_FILTER_LOADED)
     end
-    if alignment_output_ready? && ![LOADING_QUEUED, ALIGNMENT_LOADED].include?(job_status)
+    if output_ready?("db_load_alignment") && ![LOADING_QUEUED, ALIGNMENT_LOADED].include?(job_status)
       update(job_status: LOADING_QUEUED)
       Resque.enqueue(ResultMonitorLoad, id, "db_load_alignment", ALIGNMENT_LOADED)
     end
-    if postprocess_output_ready? && ![LOADING_QUEUED, POSTPROCESS_LOADED].include?(job_status)
+    if output_ready?("db_load_postprocess") && ![LOADING_QUEUED, POSTPROCESS_LOADED].include?(job_status)
       update(job_status: LOADING_QUEUED)
       Resque.enqueue(ResultMonitorLoad, id, "db_load_postprocess", POSTPROCESS_LOADED)
     end
