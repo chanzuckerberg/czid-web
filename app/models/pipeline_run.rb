@@ -275,17 +275,18 @@ class PipelineRun < ApplicationRecord
   end
 
   def monitor_results
+    return if complete?
     if host_filter_output_ready? && ![LOADING_QUEUED, HOST_FILTER_LOADED].include?(job_status)
       update(job_status: LOADING_QUEUED)
-      Resque.enqueue(ResultMonitorLoad, id, "db_load_host_filter")
+      Resque.enqueue(ResultMonitorLoad, id, "db_load_host_filter", HOST_FILTER_LOADED)
     end
     if alignment_output_ready? && ![LOADING_QUEUED, ALIGNMENT_LOADED].include?(job_status)
       update(job_status: LOADING_QUEUED)
-      Resque.enqueue(ResultMonitorLoad, id, "db_load_alignment")
+      Resque.enqueue(ResultMonitorLoad, id, "db_load_alignment", ALIGNMENT_LOADED)
     end
     if postprocess_output_ready? && ![LOADING_QUEUED, POSTPROCESS_LOADED].include?(job_status)
       update(job_status: LOADING_QUEUED)
-      Resque.enqueue(ResultMonitorLoad, id, "db_load_postprocess")
+      Resque.enqueue(ResultMonitorLoad, id, "db_load_postprocess", POSTPROCESS_LOADED)
     end
     if job_status == POSTPROCESS_LOADED # last output has been loaded
       self.finalized = 1 # this ensures in_progress will be false and monitor_results won't be run again on this pipeline run

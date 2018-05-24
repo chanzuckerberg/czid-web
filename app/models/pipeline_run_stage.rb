@@ -86,19 +86,6 @@ class PipelineRunStage < ApplicationRecord
     save
   end
 
-  def run_load_db
-    return unless output_ready?
-    return if completed?
-    begin
-      send(load_db_command_func)
-      update(db_load_status: 1, job_status: STATUS_LOADED)
-    rescue
-      update(job_status: STATUS_FAILED)
-      Airbrake.notify("Pipeline Run #{pipeline_run.id} failed #{name} db load")
-      raise
-    end
-  end
-
   def instance_terminated?(job_hash)
     job_hash['status'] == STATUS_FAILED &&
       job_hash['statusReason'].start_with?("Host EC2 (instance") &&
