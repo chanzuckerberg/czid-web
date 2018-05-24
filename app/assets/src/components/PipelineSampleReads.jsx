@@ -706,6 +706,12 @@ class PipelineSampleReads extends React.Component {
     let download_section = (
       <div>
         <ResultButton
+          url={`/samples/${this.sampleInfo.id}/fastqs_folder`}
+          icon="fa-folder-open"
+          label="Source Data"
+          visible={true}
+        />
+        <ResultButton
           url={`/samples/${this.sampleInfo.id}/nonhost_fasta`}
           icon="fa-cloud-download"
           label="Non-Host Reads"
@@ -721,7 +727,7 @@ class PipelineSampleReads extends React.Component {
           url={`/samples/${this.sampleInfo.id}/results_folder`}
           icon="fa-folder-open"
           label="Results Folder"
-          visible={stage2_complete}
+          visible={true}
         />
         <ResultButton
           url={`/samples/${this.sampleInfo.id}/assembly/all`}
@@ -998,13 +1004,6 @@ class PipelineSampleReads extends React.Component {
 
               <div className="col s3 download-area">
                 <div className="download-title">Download Reads</div>
-                <a
-                  className="custom-button"
-                  href={`/samples/${this.sampleInfo.id}/fastqs_folder`}
-                >
-                  <i className="fa fa-folder-open" />
-                  Source Data
-                </a>
                 {download_section}
               </div>
             </div>
