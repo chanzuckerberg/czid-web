@@ -9,7 +9,6 @@ class ResultMonitorLoad
     pr = PipelineRun.find(pipeline_run_id)
     begin
       pr.send(load_db_command_func) unless pr.completed?
-      send(load_db_command_func)
       pr.update(job_status: loaded_status)
     rescue
       pr.update(job_status: PipelineRun::STATUS_FAILED)
