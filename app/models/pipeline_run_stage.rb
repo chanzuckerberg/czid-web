@@ -53,8 +53,8 @@ class PipelineRunStage < ApplicationRecord
     job_status == STATUS_FAILED
   end
 
-  def succeeded? # The whole thing completed successfully
-    db_load_status == 1
+  def succeeded?
+    pipeline_run.output_ready?(load_db_command_func)
   end
 
   def completed?
@@ -100,25 +100,6 @@ class PipelineRunStage < ApplicationRecord
 
   def due_for_aegea_check?
     rand < 0.1
-  end
-
-  def monitor_results
-    # Verify that LoadResultForRunStage has not been enqueued already
-    if checked?
-      Rails.logger.info "Job #{id} #{job_id} checked and waiting to load results."
-      return
-    end
-
-    # Load light-weight results that can be populated incrementally (e.g. growing list of taxids that have assembly)
-    # db_load_assembly # update the list of taxids that have already been assembled by polling S3
-
-    # Load monolithic result files
-    if output_ready?
-      self.job_status = STATUS_CHECKED
-      save # before enqueue, to prevent minor race
-      Resque.enqueue(LoadResultForRunStage, id)
-      return
-    end
   end
 
   def update_job_status
