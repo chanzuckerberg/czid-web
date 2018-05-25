@@ -302,20 +302,10 @@ class PipelineRun < ApplicationRecord
   end
 
   def monitor_results
-    return if results_completed?
-    update(pipeline_version: fetch_pipeline_version) if pipeline_version.blank?
-    if output_ready?("db_load_host_filtering") && ![LOADING_QUEUED, HOST_FILTER_LOADED].include?(result_status)
-      update(result_status: LOADING_QUEUED)
-      Resque.enqueue(ResultMonitorLoad, id, "db_load_host_filtering", HOST_FILTER_LOADED)
-    end
-    if output_ready?("db_load_alignment") && ![LOADING_QUEUED, ALIGNMENT_LOADED].include?(result_status)
-      update(result_status: LOADING_QUEUED)
-      Resque.enqueue(ResultMonitorLoad, id, "db_load_alignment", ALIGNMENT_LOADED)
-    end
-    if output_ready?("db_load_postprocess") && ![LOADING_QUEUED, POSTPROCESS_LOADED].include?(result_status)
-      update(result_status: LOADING_QUEUED)
-      Resque.enqueue(ResultMonitorLoad, id, "db_load_postprocess", POSTPROCESS_LOADED)
-    end
+    # Do not do anything if results are already complete or a loading job is already queued:
+    return if results_completed? || result_status == LOADING_QUEUED
+
+    # When last output has just been loaded, indicate sample completion via result_status:
     if result_status == POSTPROCESS_LOADED # last output has been loaded
       self.results_finalized = 1 # this ensures in_progress will be false and monitor_results won't be run again on this pipeline run
       self.result_status = STATUS_CHECKED
@@ -324,6 +314,24 @@ class PipelineRun < ApplicationRecord
         notify_users
         sample.project.create_or_update_project_background if sample.project.background_flag == 1
       end
+      return
+    end
+
+    # Otherwise go through pipeline result files and load if available.
+
+    # First, get pipeline_version, which will determine S3 locations of output files:
+    update(pipeline_version: fetch_pipeline_version) if pipeline_version.blank?
+
+    # Then traverse outputs in reverse order of generation, to make sure nothing is loaded twice:
+    if output_ready?("db_load_postprocess") && ![LOADING_QUEUED, POSTPROCESS_LOADED].include?(result_status)
+      update(result_status: LOADING_QUEUED)
+      Resque.enqueue(ResultMonitorLoad, id, "db_load_postprocess", POSTPROCESS_LOADED)
+    elsif output_ready?("db_load_alignment") && ![LOADING_QUEUED, ALIGNMENT_LOADED].include?(result_status)
+      update(result_status: LOADING_QUEUED)
+      Resque.enqueue(ResultMonitorLoad, id, "db_load_alignment", ALIGNMENT_LOADED)
+    elsif output_ready?("db_load_host_filtering") && ![LOADING_QUEUED, HOST_FILTER_LOADED].include?(result_status)
+      update(result_status: LOADING_QUEUED)
+      Resque.enqueue(ResultMonitorLoad, id, "db_load_host_filtering", HOST_FILTER_LOADED)
     end
   end
 
