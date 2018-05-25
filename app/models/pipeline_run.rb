@@ -272,7 +272,7 @@ class PipelineRun < ApplicationRecord
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_byteranges_path}")
   end
 
-  def output_ready?(db_load_command)
+  def s3_output_for(db_load_command)
     case db_load_command
     when "db_load_host_filtering"
       "#{host_filter_output_s3_path}/#{STATS_JSON_NAME}"
@@ -281,6 +281,10 @@ class PipelineRun < ApplicationRecord
     when "db_load_postprocess"
       "#{postprocess_output_s3_path}/#{TAXID_BYTERANGE_JSON_NAME}"
     end
+  end
+
+  def output_ready?(db_load_command)
+    file_generated_since_run(s3_output_for(db_load_command))
   end
 
   def monitor_results
