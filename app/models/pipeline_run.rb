@@ -167,8 +167,6 @@ class PipelineRun < ApplicationRecord
   end
 
   def db_load_host_filter
-    self.pipeline_version = fetch_pipeline_version
-
     # Load job statistics
     stats_json_s3_path = "#{host_filter_output_s3_path}/#{STATS_JSON_NAME}"
     downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, local_json_path)
@@ -287,7 +285,7 @@ class PipelineRun < ApplicationRecord
 
   def monitor_results
     return if completed?
-    update(pipeline_version: fetch_pipeline_version) unless pipeline_version
+    update(pipeline_version: fetch_pipeline_version) if pipeline_version.blank?
     if output_ready?("db_load_host_filter") && ![LOADING_QUEUED, HOST_FILTER_LOADED].include?(job_status)
       update(job_status: LOADING_QUEUED)
       Resque.enqueue(ResultMonitorLoad, id, "db_load_host_filter", HOST_FILTER_LOADED)
