@@ -185,10 +185,10 @@ class PipelineRun < ApplicationRecord
     truncation_file = "#{host_filter_output_s3_path}/#{INPUT_TRUNCATED_FILE}"
     _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", truncation_file)
     self.truncated = `aws s3 cp #{truncation_file} -`.split("\n")[0].to_i if status.exitstatus.zero?
+    save
 
     # Load ERCC counts
     load_ercc_counts
-    save
   end
 
   def output_json_name
@@ -571,8 +571,8 @@ class PipelineRun < ApplicationRecord
       count = fields[1].to_i
       ercc_counts_array << { name: name, count: count }
     end
-    self.ercc_counts_attributes = ercc_counts_array
-    self.total_ercc_reads = ercc_counts_array.map { |entry| entry[:count] }.sum
+    update(ercc_counts_attributes: ercc_counts_array)
+    update(total_ercc_reads: ercc_counts_array.map { |entry| entry[:count] }.sum)
   end
 
   delegate :project_id, to: :sample
