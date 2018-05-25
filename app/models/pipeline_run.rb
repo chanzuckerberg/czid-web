@@ -171,10 +171,10 @@ class PipelineRun < ApplicationRecord
     stats_json_s3_path = "#{host_filter_output_s3_path}/#{STATS_JSON_NAME}"
     downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, local_json_path)
     stats_array = JSON.parse(File.read(downloaded_stats_path))
-    self.total_reads = (stats_array[0] || {})['total_reads'] || 0
+    update(total_reads: (stats_array[0] || {})['total_reads'] || 0)
     stats_array = stats_array.select { |entry| entry.key?("task") }
     # TODO(yf): remove the following line
-    self.job_stats_attributes = stats_array
+    update(job_stats_attributes: stats_array)
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_stats_path}")
 
     # Load version
@@ -204,7 +204,7 @@ class PipelineRun < ApplicationRecord
 
   def db_load_alignment
     output_json_s3_path = "#{alignment_output_s3_path}/#{output_json_name}"
-    stats_json_s3_path = "#{alignment_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
+    stats_json_s3_path = "#{alignment_output_s3_path}/#{STATS_JSON_NAME}"
 
     # Get the file
     downloaded_json_path = PipelineRun.download_file(output_json_s3_path, local_json_path)
@@ -224,7 +224,7 @@ class PipelineRun < ApplicationRecord
     stats_array = stats_array.select { |entry| entry.key?("task") }
 
     version_s3_path = "#{alignment_output_s3_path}/#{VERSION_JSON_NAME}"
-    self.version = `aws s3 cp #{version_s3_path} -`
+    update(version: `aws s3 cp #{version_s3_path} -`)
 
     # only keep counts at certain taxonomic levels
     taxon_counts_attributes_filtered = []
@@ -238,13 +238,13 @@ class PipelineRun < ApplicationRecord
       end
     end
 
-    job_stats.delete_all
-    self.job_stats_attributes = stats_array
-    self.taxon_counts_attributes = taxon_counts_attributes_filtered
-    self.updated_at = Time.now.utc
-    save
+    job_stats.destroy_all
+    update(job_stats_attributes: stats_array)
+    update(taxon_counts_attributes: taxon_counts_attributes_filtered)
+    update(updated_at: Time.now.utc)
+
     # aggregate the data at genus level
-    generate_aggregate_counts('genus') unless pr.multihit?
+    generate_aggregate_counts('genus') unless multihit?
     # merge more accurate name information from lineages table
     update_names
     # denormalize superkingdom_taxid into taxon_counts
