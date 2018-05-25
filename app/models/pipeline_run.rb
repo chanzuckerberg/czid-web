@@ -166,7 +166,7 @@ class PipelineRun < ApplicationRecord
     job_status == STATUS_CHECKED
   end
 
-  def db_load_host_filtering
+  def db_load_host_filter
     self.pipeline_version = fetch_pipeline_version
 
     # Load job statistics
@@ -190,7 +190,7 @@ class PipelineRun < ApplicationRecord
 
     # Load ERCC counts
     load_ercc_counts
-    pr.save
+    save
   end
 
   def output_json_name

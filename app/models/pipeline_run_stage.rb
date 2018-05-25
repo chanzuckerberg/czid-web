@@ -65,11 +65,6 @@ class PipelineRunStage < ApplicationRecord
     job_status == STATUS_CHECKED
   end
 
-  def output_ready?
-    s3_output_file = send(output_func)
-    file_generated_since_run(s3_output_file)
-  end
-
   def run_job
     # Check output for the run and decide if we should run this stage
     return if started? && !failed? # job has been started successfully
@@ -163,17 +158,6 @@ class PipelineRunStage < ApplicationRecord
       return
     end
     run_job # this saves
-  end
-
-  def file_generated_since_run(s3_path)
-    stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", s3_path.to_s)
-    return false unless status.exitstatus.zero?
-    begin
-      s3_file_time = DateTime.strptime(stdout[0..18], "%Y-%m-%d %H:%M:%S")
-      return (s3_file_time > created_at)
-    rescue
-      return nil
-    end
   end
 
   def terminate_job
