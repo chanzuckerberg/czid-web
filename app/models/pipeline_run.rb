@@ -166,7 +166,7 @@ class PipelineRun < ApplicationRecord
     job_status == STATUS_CHECKED
   end
 
-  def db_load_host_filter
+  def db_load_host_filtering
     # Load job statistics
     stats_json_s3_path = "#{host_filter_output_s3_path}/#{STATS_JSON_NAME}"
     downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, local_json_path)
@@ -274,7 +274,7 @@ class PipelineRun < ApplicationRecord
 
   def output_ready?(db_load_command)
     case db_load_command
-    when "db_load_host_filter"
+    when "db_load_host_filtering"
       "#{host_filter_output_s3_path}/#{STATS_JSON_NAME}"
     when "db_load_alignment"
       "#{alignment_output_s3_path}/#{STATS_JSON_NAME}"
@@ -286,21 +286,21 @@ class PipelineRun < ApplicationRecord
   def monitor_results
     return if completed?
     update(pipeline_version: fetch_pipeline_version) if pipeline_version.blank?
-    if output_ready?("db_load_host_filter") && ![LOADING_QUEUED, HOST_FILTER_LOADED].include?(job_status)
-      update(job_status: LOADING_QUEUED)
-      Resque.enqueue(ResultMonitorLoad, id, "db_load_host_filter", HOST_FILTER_LOADED)
+    if output_ready?("db_load_host_filtering") && ![LOADING_QUEUED, HOST_FILTER_LOADED].include?(result_status)
+      update(result_status: LOADING_QUEUED)
+      Resque.enqueue(ResultMonitorLoad, id, "db_load_host_filtering", HOST_FILTER_LOADED)
     end
-    if output_ready?("db_load_alignment") && ![LOADING_QUEUED, ALIGNMENT_LOADED].include?(job_status)
-      update(job_status: LOADING_QUEUED)
+    if output_ready?("db_load_alignment") && ![LOADING_QUEUED, ALIGNMENT_LOADED].include?(result_status)
+      update(result_status: LOADING_QUEUED)
       Resque.enqueue(ResultMonitorLoad, id, "db_load_alignment", ALIGNMENT_LOADED)
     end
-    if output_ready?("db_load_postprocess") && ![LOADING_QUEUED, POSTPROCESS_LOADED].include?(job_status)
-      update(job_status: LOADING_QUEUED)
+    if output_ready?("db_load_postprocess") && ![LOADING_QUEUED, POSTPROCESS_LOADED].include?(result_status)
+      update(result_status: LOADING_QUEUED)
       Resque.enqueue(ResultMonitorLoad, id, "db_load_postprocess", POSTPROCESS_LOADED)
     end
     if job_status == POSTPROCESS_LOADED # last output has been loaded
       self.finalized = 1 # this ensures in_progress will be false and monitor_results won't be run again on this pipeline run
-      self.job_status = STATUS_CHECKED
+      self.result_status = STATUS_CHECKED
       save
       if sample.project.complete? # the entire project has just completed
         notify_users

@@ -9,9 +9,9 @@ class ResultMonitorLoad
     pr = PipelineRun.find(pipeline_run_id)
     begin
       pr.send(load_db_command_func) unless pr.completed?
-      pr.update(job_status: loaded_status)
+      pr.update(result_status: loaded_status)
     rescue
-      pr.update(job_status: PipelineRun::STATUS_FAILED)
+      pr.update(result_status: PipelineRun::STATUS_FAILED)
       Airbrake.notify("Pipeline Run #{pr.id} failed #{load_db_command_func}")
       raise
     end
