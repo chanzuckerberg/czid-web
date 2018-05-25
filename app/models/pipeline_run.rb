@@ -77,6 +77,10 @@ class PipelineRun < ApplicationRecord
     finalized == 1
   end
 
+  def results_finalized?
+    results_finalized == 1
+  end
+
   def failed?
     /FAILED/ =~ job_status
   end
@@ -131,6 +135,10 @@ class PipelineRun < ApplicationRecord
     return true if finalized?
     # Old version before run stages
     return true if pipeline_run_stages.blank? && (job_status == STATUS_FAILED || job_status == STATUS_CHECKED)
+  end
+
+  def results_completed?
+    return true if results_finalized?
   end
 
   def log_url
@@ -294,7 +302,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def monitor_results
-    return if completed?
+    return if results_completed?
     update(pipeline_version: fetch_pipeline_version) if pipeline_version.blank?
     if output_ready?("db_load_host_filtering") && ![LOADING_QUEUED, HOST_FILTER_LOADED].include?(result_status)
       update(result_status: LOADING_QUEUED)
@@ -308,11 +316,11 @@ class PipelineRun < ApplicationRecord
       update(result_status: LOADING_QUEUED)
       Resque.enqueue(ResultMonitorLoad, id, "db_load_postprocess", POSTPROCESS_LOADED)
     end
-    if job_status == POSTPROCESS_LOADED # last output has been loaded
-      self.finalized = 1 # this ensures in_progress will be false and monitor_results won't be run again on this pipeline run
+    if result_status == POSTPROCESS_LOADED # last output has been loaded
+      self.results_finalized = 1 # this ensures in_progress will be false and monitor_results won't be run again on this pipeline run
       self.result_status = STATUS_CHECKED
       save
-      if sample.project.complete? # the entire project has just completed
+      if sample.project.results_complete? # the entire project has just completed
         notify_users
         sample.project.create_or_update_project_background if sample.project.background_flag == 1
       end
