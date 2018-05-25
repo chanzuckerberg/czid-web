@@ -202,26 +202,30 @@ class PipelineRun < ApplicationRecord
     false
   end
 
-  def db_load_alignment
-    output_json_s3_path = "#{alignment_output_s3_path}/#{output_json_name}"
+  def load_job_stats
     stats_json_s3_path = "#{alignment_output_s3_path}/#{STATS_JSON_NAME}"
-
-    # Get the file
-    downloaded_json_path = PipelineRun.download_file(output_json_s3_path, local_json_path)
     downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, local_json_path)
-    return unless downloaded_json_path && downloaded_stats_path
-    json_dict = JSON.parse(File.read(downloaded_json_path))
+    return unless downloaded_stats_path
+    stats_array = JSON.parse(File.read(downloaded_stats_path))
+    stats_array = stats_array.select { |entry| entry.key?("task") }
+    job_stats.destroy_all
+    update(job_stats_attributes: stats_array)
+    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_stats_path}")
+  end
 
+  def load_taxon_counts
+    output_json_s3_path = "#{alignment_output_s3_path}/#{output_json_name}"
+    downloaded_json_path = PipelineRun.download_file(output_json_s3_path, local_json_path)
+    return unless downloaded_json_path
+
+    json_dict = JSON.parse(File.read(downloaded_json_path))
     pipeline_output_dict = json_dict['pipeline_output']
     pipeline_output_dict.slice!('remaining_reads', 'total_reads', 'taxon_counts_attributes')
-
     self.total_reads = pipeline_output_dict['total_reads']
     self.remaining_reads = pipeline_output_dict['remaining_reads']
     self.unmapped_reads = count_unmapped_reads
     self.fraction_subsampled = subsample_fraction
-
-    stats_array = JSON.parse(File.read(downloaded_stats_path))
-    stats_array = stats_array.select { |entry| entry.key?("task") }
+    save
 
     version_s3_path = "#{alignment_output_s3_path}/#{VERSION_JSON_NAME}"
     update(version: `aws s3 cp #{version_s3_path} -`)
@@ -237,11 +241,8 @@ class PipelineRun < ApplicationRecord
         taxon_counts_attributes_filtered << tcnt
       end
     end
-
-    job_stats.destroy_all
-    update(job_stats_attributes: stats_array)
     update(taxon_counts_attributes: taxon_counts_attributes_filtered)
-    update(updated_at: Time.now.utc)
+    update(updated_at: Time.now.utc) # for TaxonLineage date range comparison
 
     # aggregate the data at genus level
     generate_aggregate_counts('genus') unless multihit?
@@ -257,7 +258,12 @@ class PipelineRun < ApplicationRecord
     update_is_phage
 
     # rm the json
-    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_json_path} #{downloaded_stats_path}")
+    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_json_path}")
+  end
+
+  def db_load_alignment
+    load_job_stats
+    load_taxon_counts
   end
 
   def db_load_postprocess
