@@ -12,6 +12,16 @@ class PipelineRunStage < ApplicationRecord
   STATUS_LOADED = 'LOADED'.freeze
   STATUS_ERROR = 'ERROR'.freeze
 
+  # Stage names
+  HOST_FILTERING_STAGE_NAME = 'Host Filtering'.freeze
+  ALIGNMENT_STAGE_NAME = 'GSNAPL/RAPSEARCH alignment'.freeze
+  POSTPROCESS_STAGE_NAME = 'Post Processing'.freeze
+
+  # Pipeline output files indicating stage completion
+  HOST_FILTERING_COMPLETE_FILE = 'host_filtering__complete'.freeze
+  ALIGNMENT_COMPLETE_FILE = 'alignment__complete'.freeze
+  POSTPROCESS_COMPLETE_FILE = 'postprocess__complete'.freeze
+
   # Max number of times we resubmit a job when it gets killed by EC2.
   MAX_RETRIES = 5
 
@@ -53,8 +63,20 @@ class PipelineRunStage < ApplicationRecord
     job_status == STATUS_FAILED
   end
 
+  def last_output_in_stage
+    # Status file uploaded at the end of a run stage in idseq-pipeline
+    case name
+    when HOST_FILTERING_STAGE_NAME
+      "#{host_filter_output_s3_path}/#{HOST_FILTERING_COMPLETE_FILE}"
+    when ALIGNMENT_STAGE_NAME
+      "#{alignment_output_s3_path}/#{ALIGNMENT_COMPLETE_FILE}"
+    when POSTPROCESS_STAGE_NAME
+      "#{alignment_output_s3_path}/#{POSTPROCESS_COMPLETE_FILE}"
+    end
+  end
+
   def succeeded?
-    pipeline_run.output_ready?(load_db_command_func)
+    pipeline_run.file_generated_since_run(last_output_in_stage)
   end
 
   def completed?

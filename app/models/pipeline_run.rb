@@ -91,7 +91,7 @@ class PipelineRun < ApplicationRecord
     unless sample.host_genome && sample.host_genome.name == HostGenome::NO_HOST_NAME
       run_stages << PipelineRunStage.new(
         step_number: 1,
-        name: 'Host Filtering',
+        name: PipelineRunStage::HOST_FILTERING_STAGE_NAME,
         job_command_func: 'host_filtering_command',
         load_db_command_func: 'db_load_host_filtering',
         output_func: 'host_filtering_outputs'
@@ -101,7 +101,7 @@ class PipelineRun < ApplicationRecord
     # Alignment and Merging
     run_stages << PipelineRunStage.new(
       step_number: 2,
-      name: 'GSNAPL/RAPSEARCH alignment',
+      name: PipelineRunStage::ALIGNMENT_STAGE_NAME,
       job_command_func: 'alignment_command',
       load_db_command_func: 'db_load_alignment',
       output_func: 'alignment_outputs'
@@ -110,23 +110,14 @@ class PipelineRun < ApplicationRecord
     # Taxon Fastas and Alignment Visualization
     run_stages << PipelineRunStage.new(
       step_number: 3,
-      name: 'Post Processing',
+      name: PipelineRunStage::POSTPROCESS_STAGE_NAME,
       job_command_func: 'postprocess_command',
       load_db_command_func: 'db_load_postprocess',
       output_func: 'postprocess_outputs'
     )
 
-    # De-Novo Assembly
-    # run_stages << PipelineRunStage.new(
-    #  step_number: 4,
-    #  name: 'De-Novo Assembly',
-    #  job_command_func: 'assembly_command',
-    #  load_db_command_func: 'db_load_assembly',
-    #  output_func: 'assembly_outputs'
-    # )
-
     self.pipeline_run_stages = run_stages
-    # we consider the job successful after stage 2 completes, even if subsequent stages fail
+    # we consider the main report to become ready after stage 2 completes, even if subsequent stages fail
     # this is the only meaning of "ready_step"
     self.ready_step = 2
   end
@@ -175,17 +166,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def db_load_host_filtering
-    # Load job statistics
-    stats_json_s3_path = "#{host_filter_output_s3_path}/#{STATS_JSON_NAME}"
-    downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, local_json_path)
-    stats_array = JSON.parse(File.read(downloaded_stats_path))
-    update(total_reads: (stats_array[0] || {})['total_reads'] || 0)
-    stats_array = stats_array.select { |entry| entry.key?("task") }
-    # TODO(yf): remove the following line
-    update(job_stats_attributes: stats_array)
-    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_stats_path}")
-
-    # Load version
+    # Load version info applicable to host filtering
     version_s3_path = "#{host_filter_output_s3_path}/#{VERSION_JSON_NAME}"
     self.version = `aws s3 cp #{version_s3_path} -`
 
@@ -210,11 +191,11 @@ class PipelineRun < ApplicationRecord
     false
   end
 
-  def load_job_stats
-    stats_json_s3_path = "#{alignment_output_s3_path}/#{STATS_JSON_NAME}"
+  def load_job_stats(stats_json_s3_path)
     downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, local_json_path)
     return unless downloaded_stats_path
     stats_array = JSON.parse(File.read(downloaded_stats_path))
+    update(total_reads: (stats_array[0] || {})['total_reads'] || 0)
     stats_array = stats_array.select { |entry| entry.key?("task") }
     job_stats.destroy_all
     update(job_stats_attributes: stats_array)
@@ -270,7 +251,6 @@ class PipelineRun < ApplicationRecord
   end
 
   def db_load_alignment
-    load_job_stats
     load_taxon_counts
   end
 
@@ -291,7 +271,7 @@ class PipelineRun < ApplicationRecord
     when "db_load_host_filtering"
       "#{host_filter_output_s3_path}/#{STATS_JSON_NAME}"
     when "db_load_alignment"
-      "#{alignment_output_s3_path}/#{STATS_JSON_NAME}"
+      "#{alignment_output_s3_path}/#{output_json_name}"
     when "db_load_postprocess"
       "#{postprocess_output_s3_path}/#{TAXID_BYTERANGE_JSON_NAME}"
     end
@@ -322,7 +302,19 @@ class PipelineRun < ApplicationRecord
     # First, get pipeline_version, which will determine S3 locations of output files:
     update(pipeline_version: fetch_pipeline_version) if pipeline_version.blank?
 
-    # Then traverse outputs in reverse order of generation, to make sure nothing is loaded twice:
+    # Then update the job stats, which the pipeline can modify incrementally:
+    # [TODO: make it a single file rather than using stage-specific.
+    #  Until then, we need to make sure we check both stats files,
+    #  in reverse order of generation, to avoid loading twice]
+    host_filtering_job_stats_s3 = "#{host_filter_output_s3_path}/#{STATS_JSON_NAME}"
+    alignment_job_stats_s3 = "#{alignment_output_s3_path}/#{STATS_JSON_NAME}"
+    if file_generated_since_jobstats?(alignment_job_stats_s3)
+      load_job_stats(alignment_job_stats_s3)
+    elsif file_generated_since_jobstats?(host_filtering_job_stats_s3)
+      load_job_stats(host_filtering_job_stats_s3)
+    end
+
+    # Finally, traverse outputs -- in reverse order of generation, to make sure nothing is loaded twice:
     if output_ready?("db_load_postprocess") && ![LOADING_QUEUED, POSTPROCESS_LOADED].include?(result_status)
       update(result_status: LOADING_QUEUED)
       Resque.enqueue(ResultMonitorLoad, id, "db_load_postprocess", POSTPROCESS_LOADED)
@@ -370,6 +362,22 @@ class PipelineRun < ApplicationRecord
     begin
       s3_file_time = DateTime.strptime(stdout[0..18], "%Y-%m-%d %H:%M:%S")
       return (s3_file_time && created_at && s3_file_time > created_at)
+    rescue
+      return nil
+    end
+  end
+
+  def file_generated_since_jobstats?(s3_path)
+    # If there is no file, return false
+    stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", s3_path.to_s)
+    return false unless status.exitstatus.zero?
+    # If there is a file and there are no existing job_stats yet, return true
+    existing_jobstats = job_stats
+    return true if existing_jobstats.empty?
+    # If there is a file and there are job_stats, check if the file supersedes the job_stats:
+    begin
+      s3_file_time = DateTime.strptime(stdout[0..18], "%Y-%m-%d %H:%M:%S")
+      return (s3_file_time && existing_jobstats.created_at && s3_file_time > existing_jobstats.created_at)
     rescue
       return nil
     end
