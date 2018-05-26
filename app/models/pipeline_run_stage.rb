@@ -67,11 +67,11 @@ class PipelineRunStage < ApplicationRecord
     # Status file uploaded at the end of a run stage in idseq-pipeline
     case name
     when HOST_FILTERING_STAGE_NAME
-      "#{host_filter_output_s3_path}/#{HOST_FILTERING_COMPLETE_FILE}"
+      "#{pipeline_run.host_filter_output_s3_path}/#{HOST_FILTERING_COMPLETE_FILE}"
     when ALIGNMENT_STAGE_NAME
-      "#{alignment_output_s3_path}/#{ALIGNMENT_COMPLETE_FILE}"
+      "#{pipeline_run.alignment_output_s3_path}/#{ALIGNMENT_COMPLETE_FILE}"
     when POSTPROCESS_STAGE_NAME
-      "#{postprocess_output_s3_path}/#{POSTPROCESS_COMPLETE_FILE}"
+      "#{pipeline_run.postprocess_output_s3_path}/#{POSTPROCESS_COMPLETE_FILE}"
     end
   end
 
