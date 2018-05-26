@@ -71,7 +71,7 @@ class PipelineRunStage < ApplicationRecord
     when ALIGNMENT_STAGE_NAME
       "#{alignment_output_s3_path}/#{ALIGNMENT_COMPLETE_FILE}"
     when POSTPROCESS_STAGE_NAME
-      "#{alignment_output_s3_path}/#{POSTPROCESS_COMPLETE_FILE}"
+      "#{postprocess_output_s3_path}/#{POSTPROCESS_COMPLETE_FILE}"
     end
   end
 
