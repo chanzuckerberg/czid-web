@@ -303,9 +303,7 @@ class PipelineRun < ApplicationRecord
     update(pipeline_version: fetch_pipeline_version) if pipeline_version.blank?
 
     # Then update the job stats, which the pipeline can modify incrementally:
-    # [TODO: make it a single file rather than using stage-specific.
-    #  Until then, we need to make sure we check both stats files,
-    #  in reverse order of generation, to avoid loading twice]
+    # [TODO: make it a single file rather than using stage-specific.]
     host_filtering_job_stats_s3 = "#{host_filter_output_s3_path}/#{STATS_JSON_NAME}"
     alignment_job_stats_s3 = "#{alignment_output_s3_path}/#{STATS_JSON_NAME}"
     if file_generated_since_jobstats?(alignment_job_stats_s3)
@@ -314,16 +312,21 @@ class PipelineRun < ApplicationRecord
       load_job_stats(host_filtering_job_stats_s3)
     end
 
-    # Finally, traverse outputs -- in reverse order of generation, to make sure nothing is loaded twice:
+    # Finally, load any new outputs that have become available:
+    # [TODO: find a more elegant way to avoid re-loading previous stages' results.
+    #  Right now, this is accomplished by enumerating all possible values of result_status
+    #  that arise later than the stage under consideration.]
+    if output_ready?("db_load_host_filtering") && ![LOADING_QUEUED, HOST_FILTER_LOADED, ALIGNMENT_LOADED, POSTPROCESS_LOADED].include?(result_status)
+      update(result_status: LOADING_QUEUED)
+      Resque.enqueue(ResultMonitorLoad, id, "db_load_host_filtering", HOST_FILTER_LOADED)
+    end
+    if output_ready?("db_load_alignment") && ![LOADING_QUEUED, ALIGNMENT_LOADED, POSTPROCESS_LOADED].include?(result_status)
+      update(result_status: LOADING_QUEUED)
+      Resque.enqueue(ResultMonitorLoad, id, "db_load_alignment", ALIGNMENT_LOADED)
+    end
     if output_ready?("db_load_postprocess") && ![LOADING_QUEUED, POSTPROCESS_LOADED].include?(result_status)
       update(result_status: LOADING_QUEUED)
       Resque.enqueue(ResultMonitorLoad, id, "db_load_postprocess", POSTPROCESS_LOADED)
-    elsif output_ready?("db_load_alignment") && ![LOADING_QUEUED, ALIGNMENT_LOADED].include?(result_status)
-      update(result_status: LOADING_QUEUED)
-      Resque.enqueue(ResultMonitorLoad, id, "db_load_alignment", ALIGNMENT_LOADED)
-    elsif output_ready?("db_load_host_filtering") && ![LOADING_QUEUED, HOST_FILTER_LOADED].include?(result_status)
-      update(result_status: LOADING_QUEUED)
-      Resque.enqueue(ResultMonitorLoad, id, "db_load_host_filtering", HOST_FILTER_LOADED)
     end
   end
 
