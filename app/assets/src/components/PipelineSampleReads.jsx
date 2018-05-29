@@ -598,7 +598,11 @@ class PipelineSampleReads extends React.Component {
 
     let pipeline_run = null;
     const BLANK_TEXT = "unknown";
-    if (this.pipelineRun && this.pipelineRun.total_reads) {
+    if (
+      this.pipelineRun &&
+      this.pipelineRun.total_reads &&
+      this.summary_stats
+    ) {
       pipeline_run = (
         <div className="data">
           <div className="row">
