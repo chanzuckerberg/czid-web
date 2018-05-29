@@ -33,16 +33,11 @@ class PipelineRun < ApplicationRecord
   STATUS_RUNNABLE = 'RUNNABLE'.freeze
   STATUS_ERROR = 'ERROR'.freeze # when aegea batch describe failed
   STATUS_LOADED = 'LOADED'.freeze
+  STATUS_LOADING = 'LOADING'.freeze
   STATUS_READY = 'READY'.freeze
   POSTPROCESS_STATUS_LOADED = 'LOADED'.freeze
   INPUT_TRUNCATED_FILE = 'input_truncated.txt'.freeze
   PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
-
-  # constants for result monitor status checking
-  LOADING_QUEUED = 'LOADING_QUEUED'.freeze
-  HOST_FILTER_LOADED = 'HOST_FILTER_LOADED'.freeze
-  ALIGNMENT_LOADED = 'ALIGNMENT_LOADED'.freeze
-  POSTPROCESS_LOADED = 'POSTPROCESS_LOADED'.freeze
 
   before_create :create_run_stages
 
@@ -281,14 +276,30 @@ class PipelineRun < ApplicationRecord
     file_generated_since_run(s3_output_for(db_load_command))
   end
 
-  def monitor_results
-    # Do not do anything if results are already complete or a loading job is already queued:
-    return if results_completed? || result_status == LOADING_QUEUED
+  def update_result_status(field, value)
+    status_hash = result_status ? JSON.parse(result_status) : {}
+    status_hash[field] = value
+    update(result_status: status_hash.to_json)
+  end
 
-    # When last output has just been loaded, indicate sample completion via result_status:
-    if result_status == POSTPROCESS_LOADED # last output has been loaded
+  def result_status_for(field)
+    status_hash = result_status ? JSON.parse(result_status) : {}
+    status_hash[field]
+  end
+
+  def check_and_enqueue(db_load_command_name)
+    if output_ready?(db_load_command_name) && ![STATUS_LOADED, STATUS_LOADING].include?(result_status_for(db_load_command_name))
+      update_result_status(db_load_command_name, STATUS_LOADING)
+      Resque.enqueue(ResultMonitorLoad, id, db_load_command_name)
+    end
+  end
+
+  def monitor_results
+    return if results_completed?
+
+    # When last output has just been loaded, indicate sample completion via results_finalized:
+    if result_status_for("db_load_postprocess") == STATUS_LOADED # last output has been loaded
       self.results_finalized = 1 # this ensures in_progress will be false and monitor_results won't be run again on this pipeline run
-      self.result_status = STATUS_CHECKED
       save
       if sample.project.results_complete? # the entire project has just completed
         notify_users
@@ -313,21 +324,9 @@ class PipelineRun < ApplicationRecord
     end
 
     # Finally, load any new outputs that have become available:
-    # [TODO: find a more elegant way to avoid re-loading previous stages' results.
-    #  Right now, this is accomplished by enumerating all possible values of result_status
-    #  that arise later than the stage under consideration.]
-    if output_ready?("db_load_host_filtering") && ![LOADING_QUEUED, HOST_FILTER_LOADED, ALIGNMENT_LOADED, POSTPROCESS_LOADED].include?(result_status)
-      update(result_status: LOADING_QUEUED)
-      Resque.enqueue(ResultMonitorLoad, id, "db_load_host_filtering", HOST_FILTER_LOADED)
-    end
-    if output_ready?("db_load_alignment") && ![LOADING_QUEUED, ALIGNMENT_LOADED, POSTPROCESS_LOADED].include?(result_status)
-      update(result_status: LOADING_QUEUED)
-      Resque.enqueue(ResultMonitorLoad, id, "db_load_alignment", ALIGNMENT_LOADED)
-    end
-    if output_ready?("db_load_postprocess") && ![LOADING_QUEUED, POSTPROCESS_LOADED].include?(result_status)
-      update(result_status: LOADING_QUEUED)
-      Resque.enqueue(ResultMonitorLoad, id, "db_load_postprocess", POSTPROCESS_LOADED)
-    end
+    check_and_enqueue("db_load_host_filtering")
+    check_and_enqueue("db_load_alignment")
+    check_and_enqueue("db_load_postprocess")
   end
 
   def update_job_status
