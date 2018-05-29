@@ -64,15 +64,7 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def last_output_in_stage
-    # Status file uploaded at the end of a run stage in idseq-pipeline
-    case name
-    when HOST_FILTERING_STAGE_NAME
-      "#{pipeline_run.host_filter_output_s3_path}/#{HOST_FILTERING_COMPLETE_FILE}"
-    when ALIGNMENT_STAGE_NAME
-      "#{pipeline_run.alignment_output_s3_path}/#{ALIGNMENT_COMPLETE_FILE}"
-    when POSTPROCESS_STAGE_NAME
-      "#{pipeline_run.postprocess_output_s3_path}/#{POSTPROCESS_COMPLETE_FILE}"
-    end
+    "#{job_id}.done"
   end
 
   def succeeded?
