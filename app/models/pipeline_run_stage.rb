@@ -17,11 +17,6 @@ class PipelineRunStage < ApplicationRecord
   ALIGNMENT_STAGE_NAME = 'GSNAPL/RAPSEARCH alignment'.freeze
   POSTPROCESS_STAGE_NAME = 'Post Processing'.freeze
 
-  # Pipeline output files indicating stage completion
-  HOST_FILTERING_COMPLETE_FILE = 'host_filtering__complete'.freeze
-  ALIGNMENT_COMPLETE_FILE = 'alignment__complete'.freeze
-  POSTPROCESS_COMPLETE_FILE = 'postprocess__complete'.freeze
-
   # Max number of times we resubmit a job when it gets killed by EC2.
   MAX_RETRIES = 5
 
