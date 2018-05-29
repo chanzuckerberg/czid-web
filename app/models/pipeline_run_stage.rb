@@ -11,6 +11,7 @@ class PipelineRunStage < ApplicationRecord
   STATUS_CHECKED = 'CHECKED'.freeze
   STATUS_LOADED = 'LOADED'.freeze
   STATUS_ERROR = 'ERROR'.freeze
+  STATUS_SUCCEEDED = 'SUCCEEDED'.freeze
 
   # Stage names
   HOST_FILTERING_STAGE_NAME = 'Host Filtering'.freeze
@@ -116,7 +117,12 @@ class PipelineRunStage < ApplicationRecord
       Airbrake.notify("Invalid precondition for PipelineRunStage.update_job_status #{id} #{job_id} #{job_status}.")
       return
     end
-    if completed?
+    if failed?
+      terminate_job
+      return
+    end
+    if succeeded?
+      update(job_status: STATUS_SUCCEEDED)
       terminate_job
       return
     end
