@@ -958,7 +958,7 @@ module ReportHelper
     params[:is_csv] = 1
     params[:sort_by] = "highest_nt_aggregatescore"
     background_id = params[:background_id] || sample.default_background_id
-    pipeline_run = select_pipeline_run(sample)
+    pipeline_run = select_pipeline_run(sample, params)
     pipeline_run_id = pipeline_run ? pipeline_run.id : nil
     return "" if pipeline_run_id.nil? || pipeline_run.total_reads.nil? || pipeline_run.remaining_reads.nil?
     tax_details = taxonomy_details(pipeline_run_id, background_id, params)
@@ -985,6 +985,14 @@ module ReportHelper
           csv << data_values.values_at(*attribute_names.map(&:to_sym))
         end
       end
+    end
+  end
+
+  def select_pipeline_run(sample, params)
+    if params[:pipeline_version].blank?
+      sample.pipeline_runs.first
+    else
+      sample.pipeline_run_by_version(params[:pipeline_version])
     end
   end
 end
