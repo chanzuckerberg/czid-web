@@ -22,7 +22,8 @@ puts "deploying #{image} to #{env}"
 
 RAILS_SERVICE = "idseq-#{env}-web".freeze
 RESQUE_WORKER_SERVICE = "idseq-#{env}-resque".freeze
-RESQUE_SCHEDULER_SERVICE = "idseq-#{env}-resque-scheduler".freeze
+RESQUE_PIPELINE_MONITOR_SERVICE = "idseq-#{env}-resque-pipeline-monitor".freeze
+RESQUE_RESULT_MONITOR_SERVICE = "idseq-#{env}-resque-result-monitor".freeze
 REPO = 'chanzuckerberg/idseq-web'.freeze
 REGION = 'us-west-2'.freeze
 LOG_GROUP = "ecs-logs-#{env}".freeze
@@ -165,7 +166,8 @@ notify_slack(env, image, "start")
 begin
   deploy(client, env, RAILS_SERVICE, REPO, image, true)
   deploy(client, env, RESQUE_WORKER_SERVICE, REPO, image, false)
-  deploy(client, env, RESQUE_SCHEDULER_SERVICE, REPO, image, false)
+  deploy(client, env, RESQUE_PIPELINE_MONITOR_SERVICE, REPO, image, false)
+  deploy(client, env, RESQUE_RESULT_MONITOR_SERVICE, REPO, image, false)
   notify_slack(env, image, "end")
 rescue => e
   notify_slack(env, image, "failure")
