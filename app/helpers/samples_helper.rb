@@ -222,12 +222,8 @@ module SamplesHelper
   def pipeline_run_info(pipeline_run, report_ready_pipeline_run_ids, pipeline_run_stages_by_pipeline_run_id)
     pipeline_run_entry = {}
     if pipeline_run
-      pipeline_run_entry[:result_status_description] = 'WAITING' if pipeline_run.job_status.nil?
       run_stages = pipeline_run_stages_by_pipeline_run_id[pipeline_run.id]
       if run_stages.present?
-        run_stages.each do |rs|
-          pipeline_run_entry[rs.name] = rs.job_status
-        end
         pipeline_run_entry[:total_runtime] = get_total_runtime(pipeline_run, run_stages)
         pipeline_run_entry[:with_assembly] = pipeline_run.assembly? ? 1 : 0
         pipeline_run_entry[:result_status_description] = if pipeline_run.result_status
@@ -238,17 +234,7 @@ module SamplesHelper
                                                          end
       else
         # data processed before pipeline_run_stages were instated
-        pipeline_run_status = pipeline_run.job_status
-        pipeline_run_entry[:result_status_description] =
-          if %w[CHECKED SUCCEEDED].include?(pipeline_run_status)
-            'COMPLETE'
-          elsif %w[FAILED ERROR].include?(pipeline_run_status)
-            'FAILED'
-          elsif %w[RUNNING LOADED].include?(pipeline_run_status)
-            'IN PROGRESS'
-          elsif pipeline_run_status == 'RUNNABLE'
-            'WAITING'
-          end
+        pipeline_run_entry[:result_status_description] = pipeline_run.status_display_pre_run_stages
       end
       pipeline_run_entry[:finalized] = pipeline_run.finalized
       pipeline_run_entry[:report_ready] = report_ready_pipeline_run_ids.include?(pipeline_run.id)

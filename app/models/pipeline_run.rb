@@ -337,6 +337,19 @@ class PipelineRun < ApplicationRecord
     "HOST FILTERING"
   end
 
+  def status_display_pre_run_stages
+    pipeline_run_status = pipeline_run.job_status
+    if %w[CHECKED SUCCEEDED].include?(pipeline_run_status)
+      'COMPLETE'
+    elsif %w[FAILED ERROR].include?(pipeline_run_status)
+      'FAILED'
+    elsif %w[RUNNING LOADED].include?(pipeline_run_status)
+      'IN PROGRESS'
+    else
+      'WAITING'
+    end
+  end
+
   def check_and_enqueue(db_load_command_name)
     # TODO: handle case where resque crashes and needs to be restarted. What happens to runs that were queued to load results?
     if output_ready?(db_load_command_name) && ![STATUS_LOADED, STATUS_LOADING].include?(result_status_for(db_load_command_name))
