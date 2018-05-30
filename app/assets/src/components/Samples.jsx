@@ -514,40 +514,36 @@ class Samples extends React.Component {
     this.setState({ columnsShown });
   }
 
-  statusClass(status) {
+  statusDisplay(status) {
+    let statusClass;
+    let statusIcon;
     switch (status) {
       case "WAITING":
-        return "waiting";
-      case "FAILED":
-        return "failed";
-      case "COMPLETE":
-        return "complete";
-      case "COMPLETE*":
-        return "complete";
-      default:
-        return "uploading";
-    }
-  }
-
-  statusIcon(status) {
-    let klass = "";
-    switch (status) {
-      case "WAITING":
-        klass = "waiting fa fa-arrow-up";
+        statusClass = "waiting";
+        statusIcon = "fa fa-arrow-up";
         break;
       case "FAILED":
-        klass = "failed fa fa-times";
+        statusClass = "failed";
+        statusIcon = "fa fa-times";
         break;
       case "COMPLETE":
-        klass = "complete fa fa-check";
+        statusClass = "complete";
+        statusIcon = "fa fa-check";
         break;
       case "COMPLETE*":
-        klass = "complete fa fa-check";
+        statusClass = "complete";
+        statusIcon = "fa fa-check";
         break;
       default:
-        klass = "uploading fa fa-repeat";
+        statusClass = "uploading";
+        statusIcon = "fa fa-repeat";
     }
-    return <i className={klass} aria-hidden="true" />;
+    return (
+      <div className={`${statusClass} status`}>
+        <i className={`${statusClass} ${statusIcon}`} aria-hidden="true" />
+        <span>{status}</span>
+      </div>
+    );
   }
 
   formatRunTime(runtime) {
@@ -571,12 +567,7 @@ class Samples extends React.Component {
       let uploader = sample.uploader.name;
       let status = runInfo.result_status_description;
 
-      const stageStatus = (
-        <div className={`${this.statusClass(status)} status`}>
-          {this.statusIcon(status)}
-          <span>{status}</span>
-        </div>
-      );
+      const stageStatus = this.statusDisplay(status);
 
       const sample_name_info = (
         <SampleNameInfo parent={this} dbSample={dbSample} uploader={uploader} />
