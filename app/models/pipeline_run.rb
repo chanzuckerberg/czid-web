@@ -141,15 +141,10 @@ class PipelineRun < ApplicationRecord
   end
 
   def active_stage
-    # returns the active stage AND makes sure job_status for all previous stages is up-to-date
     pipeline_run_stages.order(:step_number).each do |prs|
-      if prs.succeeded?
-        prs.update(job_status: PipelineRunStage::STATUS_SUCCEEDED) unless prs.job_status == PipelineRunStage::STATUS_SUCCEEDED
-      else
-        return prs
-      end
+      return prs unless prs.succeeded?
     end
-    # All stages have succeded
+    # If all stages have succeded:
     nil
   end
 

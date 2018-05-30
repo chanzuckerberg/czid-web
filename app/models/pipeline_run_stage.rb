@@ -73,7 +73,12 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def succeeded?
-    pipeline_run.file_generated_since_run(last_output_in_stage)
+    # Return whether stage succeeded AND record the result in the database if it is not there already
+    answer = pipeline_run.file_generated_since_run(last_output_in_stage)
+    if answer && job_status != STATUS_SUCCEEDED
+      update(job_status: STATUS_SUCCEEDED)
+    end
+    answer
   end
 
   def completed?
