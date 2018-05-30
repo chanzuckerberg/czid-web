@@ -306,8 +306,8 @@ class PipelineRun < ApplicationRecord
     return "FAILED" if h["db_load_alignment"] == STATUS_FAILED
     return "FAILED" if h["db_load_host_filtering"] == STATUS_FAILED
     return "COMPLETE*" if h["db_load_postprocess"] == STATUS_FAILED && h["db_load_alignment"] == STATUS_LOADED
-    return "COMPLETE*" if job_status == STATUS_FAILED && h["db_load_alignment"] == STATUS_LOADED
-    return "FAILED" if job_status == STATUS_FAILED
+    return "COMPLETE*" if job_status.include?(STATUS_FAILED) && h["db_load_alignment"] == STATUS_LOADED
+    return "FAILED" if job_status.include?(STATUS_FAILED)
 
     # Non-failure cases
     return "COMPLETE" if h["db_load_postprocess"] == STATUS_LOADED
