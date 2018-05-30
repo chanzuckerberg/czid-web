@@ -309,12 +309,9 @@ class PipelineRun < ApplicationRecord
     elsif [h["db_load_alignment"], h["db_load_host_filtering"]].include?(STATUS_FAILED)
       # host-filtering or non-host alignment failed
       "FAILED"
-    elsif h["db_load_alignment"] == STATUS_LOADED && (h["db_load_postprocess"] == STATUS_FAILED || job_status.include?(STATUS_FAILED))
-      # report is ready but postprocessing results or the overall job failed
+    elsif h["db_load_alignment"] == STATUS_LOADED && h["db_load_postprocess"] == STATUS_FAILED
+      # report is ready but postprocessing failed
       "COMPLETE*"
-    elsif job_status.include?(STATUS_FAILED)
-      # job failed and report is NOT ready
-      "FAILED"
     elsif h["db_load_postprocess"] == STATUS_LOADED
       # postprocessing succeeded
       "COMPLETE"
