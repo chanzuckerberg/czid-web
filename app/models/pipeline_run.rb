@@ -39,7 +39,7 @@ class PipelineRun < ApplicationRecord
   INPUT_TRUNCATED_FILE = 'input_truncated.txt'.freeze
   PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
 
-  before_create :create_run_stages
+  before_create :initialize_result_status, :create_run_stages
 
   def as_json(options = {})
     super(options.merge(except: [:command, :command_stdout, :command_error, :job_description]))
@@ -78,6 +78,13 @@ class PipelineRun < ApplicationRecord
 
   def failed?
     /FAILED/ =~ job_status
+  end
+
+  def initialize_result_status
+    # We explicitly set a value for result_status so that we can unambiguously
+    # identify pipeline_runs that predate result_status by the fact
+    # that their result_status is nil.
+    self.result_status = {}.to_json
   end
 
   def create_run_stages
@@ -306,6 +313,22 @@ class PipelineRun < ApplicationRecord
     return "COMPLETE" if h["db_load_postprocess"] == STATUS_LOADED
     return "POST PROCESSING" if h["db_load_alignment"] == STATUS_LOADED
     return "ALIGNMENT" if h["db_load_host_filtering"] == STATUS_LOADED
+    "HOST FILTERING"
+  end
+
+  def status_display_pre_result_monitor(run_stages)
+    return "WAITING" if run_stages.pluck(:job_status).compact.empty?
+
+    # Failure cases
+    return "FAILED" if run_stages[1].job_status == STATUS_FAILED
+    return "FAILED" if run_stages[0].job_status == STATUS_FAILED
+    return "COMPLETE*" if run_stages[2].job_status == STATUS_FAILED && run_stages[1].job_status == STATUS_LOADED
+    return "COMPLETE*" if run_stages[3] && run_stages[3].job_status == STATUS_FAILED && run_stages[1].job_status == STATUS_LOADED
+
+    # Non-failure cases
+    return "COMPLETE" if run_stages[2].job_status == STATUS_LOADED
+    return "POST PROCESSING" if run_stages[1].job_status == STATUS_LOADED
+    return "ALIGNMENT" if run_stages[0].job_status == STATUS_LOADED
     "HOST FILTERING"
   end
 

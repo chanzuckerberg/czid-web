@@ -164,7 +164,7 @@ ActiveRecord::Schema.define(version: 20_180_525_171_027) do
     t.string "pipeline_commit"
     t.text "assembled_taxids"
     t.bigint "truncated"
-    t.string "result_status"
+    t.text "result_status"
     t.integer "results_finalized", default: 0, null: false
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
     t.index ["pipeline_output_id"], name: "index_pipeline_runs_on_pipeline_output_id", unique: true

@@ -230,9 +230,14 @@ module SamplesHelper
         end
         pipeline_run_entry[:total_runtime] = get_total_runtime(pipeline_run, run_stages)
         pipeline_run_entry[:with_assembly] = pipeline_run.assembly? ? 1 : 0
-        pipeline_run_entry[:result_status_description] = pipeline_run.status_display
+        pipeline_run_entry[:result_status_description] = if pipeline_run.result_status
+                                                           pipeline_run.status_display
+                                                         else
+                                                           # data processed before result monitor was instated
+                                                           pipeline_run.status_display_pre_result_monitor(run_stages)
+                                                         end
       else
-        # old data
+        # data processed before pipeline_run_stages were instated
         pipeline_run_status = pipeline_run.job_status
         pipeline_run_entry[:result_status_description] =
           if %w[CHECKED SUCCEEDED].include?(pipeline_run_status)
