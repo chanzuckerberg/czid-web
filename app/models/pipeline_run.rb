@@ -338,12 +338,11 @@ class PipelineRun < ApplicationRecord
   end
 
   def status_display_pre_run_stages
-    pipeline_run_status = pipeline_run.job_status
-    if %w[CHECKED SUCCEEDED].include?(pipeline_run_status)
+    if %w[CHECKED SUCCEEDED].include?(job_status)
       'COMPLETE'
-    elsif %w[FAILED ERROR].include?(pipeline_run_status)
+    elsif %w[FAILED ERROR].include?(job_status)
       'FAILED'
-    elsif %w[RUNNING LOADED].include?(pipeline_run_status)
+    elsif %w[RUNNING LOADED].include?(job_status)
       'IN PROGRESS'
     else
       'WAITING'
