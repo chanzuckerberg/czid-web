@@ -522,6 +522,8 @@ class Samples extends React.Component {
         return "failed";
       case "COMPLETE":
         return "complete";
+      case "COMPLETE*":
+        return "complete";
       default:
         return "uploading";
     }
@@ -537,6 +539,9 @@ class Samples extends React.Component {
         klass = "failed fa fa-times";
         break;
       case "COMPLETE":
+        klass = "complete fa fa-check";
+        break;
+      case "COMPLETE*":
         klass = "complete fa fa-check";
         break;
       default:
