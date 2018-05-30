@@ -11,12 +11,12 @@ from functools import wraps
 
 
 # As opposed to "development", where different containers belong to different developers.
-MULTICONTAINER_ENVIRONMENTS = ["production", "alpha", "staging", "prod"]
+MULTICONTAINER_ENVIRONMENTS = ["staging", "prod"]
 
 
 # If you are running into problems with this autoscaler, just delete this tag from
 # any affected autoscaling group, and it will be left alone.  The value is a list
-# of environments permitted to trigger scaling, usually just "production".
+# of environments permitted to trigger scaling, usually just "prod".
 SCALING_PERMISSION_TAG = "IDSeqEnvsThatCanScale"
 
 

@@ -30,7 +30,7 @@ After you deploy the code, you will have to log into the rails console into the 
 ```
 idseq-web yf$ bin/shell <cluster> "rails c"
 Running via Spring preloader in process 2608
-Loading alpha environment (Rails 5.1.4)
+Loading staging environment (Rails 5.1.4)
 irb(main):001:0> User.create(email: 'your@email.com', password: 'yourpass', password_confirmation: 'yourpass', authentication_token: 'your_auth_token')
 ```
 
@@ -118,7 +118,7 @@ You can now run a non-interactive command on a cloud web container like so
 ## Interactive shells
 
 1. `docker-compose exec web bash` for a shell in your local `development` env.
-1. `bin/shell alpha bash` for a shell in the cloud `alpha` env.
+1. `bin/shell staging bash` for a shell in the cloud `staging` env.
 
 Useful commands inside an interactive shell:
 
@@ -130,15 +130,15 @@ Sometimes you may be prompted to run a migration or configuration command like `
 
 ## DB backup/restore within and across environments
 
-Note that this requires the proper ssh config to access the deployed versions of the site. (Run chanzuckerberg/shared-infra/tools/ssh_config, then `sed -i.bak '/bastion-alpha.idseq.net/d' ~/.ssh/known_hosts` and `sed -i.bak '/bastion-production.idseq.net/d' ~/.ssh/known_hosts`, then get the pem keys from a teammate, then `ssh-add <pem key>`.)
+Note that this requires the proper ssh config to access the deployed versions of the site. (Run chanzuckerberg/shared-infra/tools/ssh_config, then `sed -i.bak '/bastion-staging.idseq.net/d' ~/.ssh/known_hosts` and `sed -i.bak '/bastion-prod.idseq.net/d' ~/.ssh/known_hosts`, then get the pem keys from a teammate, then `ssh-add <pem key>`.)
 
 1. Backup your local `development` DB into a local file:
 `docker-compose exec web mysqldump -h db -u root idseq_development | gzip -c > idseq_development.sql.gz`
-1. Backup cloud `alpha` DB into a local file:
-`bin/clam alpha 'mysqldump -h $RDS_ADDRESS -u $DB_USERNAME --password=$DB_PASSWORD idseq_alpha | gzip -c' > idseq_alpha.sql.gz`
+1. Backup cloud `staging` DB into a local file:
+`bin/clam staging 'mysqldump -h $RDS_ADDRESS -u $DB_USERNAME --password=$DB_PASSWORD idseq_staging | gzip -c' > idseq_staging.sql.gz`
 1. Overwrite your local `development` DB with data from given backup file:
-`docker-compose run web "gzip -dc idseq_alpha.sql.gz | mysql -h db -u root --database idseq_development"`
-1. Let RAILS know it's okay to use alpha data locally.
+`docker-compose run web "gzip -dc idseq_staging.sql.gz | mysql -h db -u root --database idseq_development"`
+1. Let RAILS know it's okay to use staging data locally.
 `docker-compose run web bin/rails db:environment:set RAILS_ENV=development`
 
 ## Update Lineage Table locally
