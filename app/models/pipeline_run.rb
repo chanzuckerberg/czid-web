@@ -157,7 +157,9 @@ class PipelineRun < ApplicationRecord
   end
 
   def report_ready?
-    results_finalized == 1 || result_status_for(REPORT_READY_LOADER)
+    clause_for_old_runs = (job_status == STATUS_CHECKED || (ready_step && pipeline_run_stages.find_by(step_number: ready_step) && pipeline_run_stages.find_by(step_number: ready_step).job_status == STATUS_LOADED))
+    # TODO: migrate old runs so we don't need to deal with them separately in the code
+    results_finalized == 1 || result_status_for(REPORT_READY_LOADER) || clause_for_old_runs
   end
 
   def succeeded?
@@ -295,23 +297,22 @@ class PipelineRun < ApplicationRecord
     result_status ? JSON.parse(result_status) : {}
   end
 
-  def status_display
+  def status_display(h = result_status_hash)
     # Status display for the frontend.
     # This function would be simpler if we used active_stage (job monitor),
     # but we want to use result_status instead (result monitor)
     # so that it becomes easy to expose availability of specific results
     # with more granularity later if we desire.
-    h = result_status_hash
-    if h.empty?
+    if h.empty? || h.values.compact.empty?
       # No status has been set yet
       "WAITING"
     elsif [h["db_load_alignment"], h["db_load_host_filtering"]].include?(STATUS_FAILED)
       # host-filtering or non-host alignment failed
       "FAILED"
-    elsif h["db_load_alignment"] == STATUS_LOADED && [h["db_load_postprocess"], job_status].include?(STATUS_FAILED)
+    elsif h["db_load_alignment"] == STATUS_LOADED && (h["db_load_postprocess"] == STATUS_FAILED || job_status.include?(STATUS_FAILED))
       # report is ready but postprocessing results or the overall job failed
       "COMPLETE*"
-    elsif job_status == STATUS_FAILED
+    elsif job_status.include?(STATUS_FAILED)
       # job failed and report is NOT ready
       "FAILED"
     elsif h["db_load_postprocess"] == STATUS_LOADED
@@ -330,28 +331,11 @@ class PipelineRun < ApplicationRecord
   end
 
   def status_display_pre_result_monitor(run_stages)
-    if run_stages.pluck(:job_status).compact.empty?
-      # no stage has had its job_status set yet
-      "WAITING"
-    elsif [run_stages[0].job_status, run_stages[1].job_status].include?(STATUS_FAILED)
-      # host-filtering or non-host alignment failed
-      "FAILED"
-    elsif run_stages[1].job_status == STATUS_LOADED && run_stages[2].job_status == STATUS_FAILED
-      # report is ready but postprocessing failed
-      "COMPLETE*"
-    elsif run_stages[2].job_status == STATUS_LOADED
-      # postprocessing succeeded
-      "COMPLETE"
-    elsif run_stages[1].job_status == STATUS_LOADED
-      # alignment succeeded, postprocessing in progress
-      "POST PROCESSING"
-    elsif run_stages[0].job_status == STATUS_LOADED
-      # host-filtering succeeded, alignment in progress
-      "ALIGNMENT"
-    else
-      # host-filtering in progress
-      "HOST FILTERING"
+    status_by_loader = {}
+    run_stages.each do |rs|
+      status_by_loader[rs.load_db_command_func] = rs.job_status
     end
+    status_display(status_by_loader)
   end
 
   def status_display_pre_run_stages
