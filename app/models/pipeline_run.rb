@@ -130,10 +130,6 @@ class PipelineRun < ApplicationRecord
     return true if pipeline_run_stages.blank? && (job_status == STATUS_FAILED || job_status == STATUS_CHECKED)
   end
 
-  def results_completed?
-    return true if results_finalized?
-  end
-
   def log_url
     return nil unless job_log_id
     "https://us-west-2.console.aws.amazon.com/cloudwatch/home?region=us-west-2" \
@@ -353,7 +349,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def monitor_results
-    return if results_completed?
+    return if results_finalized?
 
     # When last output has just been loaded, indicate sample completion via results_finalized:
     if result_status_for("db_load_postprocess") == STATUS_LOADED # last output has been loaded
