@@ -141,8 +141,13 @@ class PipelineRun < ApplicationRecord
   end
 
   def active_stage
+    # returns the active stage AND makes sure job_status for all previous stages is up-to-date
     pipeline_run_stages.order(:step_number).each do |prs|
-      return prs unless prs.succeeded?
+      if prs.succeeded?
+        prs.update(job_status: PipelineRunStage::STATUS_SUCCEEDED) unless prs.job_status == PipelineRunStage::STATUS_SUCCEEDED
+      else
+        return prs
+      end
     end
     # All stages have succeded
     nil
@@ -333,6 +338,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def check_and_enqueue(db_load_command_name)
+    # TODO: handle case where resque crashes and needs to be restarted. What happens to runs that were queued to load results?
     if output_ready?(db_load_command_name) && ![STATUS_LOADED, STATUS_LOADING].include?(result_status_for(db_load_command_name))
       update_result_status(db_load_command_name, STATUS_LOADING)
       Resque.enqueue(ResultMonitorLoad, id, db_load_command_name)
@@ -381,7 +387,7 @@ class PipelineRun < ApplicationRecord
       self.job_status = STATUS_FAILED
       self.finalized = 1
       Airbrake.notify("Sample #{sample.id} failed #{prs.name}")
-    elsif !prs.started?
+    elsif !prs.started? # we're moving on to a new stage
       prs.run_job
     else
       # still running
