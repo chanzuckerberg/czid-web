@@ -13,6 +13,10 @@ class PipelineRunStage < ApplicationRecord
   STATUS_ERROR = 'ERROR'.freeze
   STATUS_SUCCEEDED = 'SUCCEEDED'.freeze
 
+  # Status file parameters for integration with pipeline
+  JOB_SUCCEEDED = "succeeded".freeze
+  JOB_FAILED = "failed".freeze
+
   # Stage names
   HOST_FILTERING_STAGE_NAME = 'Host Filtering'.freeze
   ALIGNMENT_STAGE_NAME = 'GSNAPL/RAPSEARCH alignment'.freeze
@@ -55,12 +59,8 @@ class PipelineRunStage < ApplicationRecord
     job_command.present?
   end
 
-  def failed?
-    job_status == STATUS_FAILED
-  end
-
-  def last_output_in_stage
-    basename = "#{job_id}.done"
+  def stage_status_file(status)
+    basename = "#{job_id}.#{status}"
     s3_folder = case name
                 when HOST_FILTERING_STAGE_NAME
                   pipeline_run.host_filter_output_s3_path
@@ -72,13 +72,22 @@ class PipelineRunStage < ApplicationRecord
     "#{s3_folder}/#{basename}"
   end
 
-  def succeeded?
-    # Return whether stage succeeded AND record the result in the database if it is not there already
-    answer = pipeline_run.file_generated_since_run(last_output_in_stage)
-    if answer && job_status != STATUS_SUCCEEDED
-      update(job_status: STATUS_SUCCEEDED)
+  def assess_and_update(status_file_suffix, job_status_value)
+    # Return whether stage exited exited with status_file_suffix
+    # AND, if so, record the corresponding job_status_value in the database if it is not there already
+    answer = pipeline_run.file_generated_since_run(stage_status_file(status_file_suffix))
+    if answer && job_status != job_status_value
+      update(job_status: job_status_value)
     end
     answer
+  end
+
+  def succeeded?
+    assess_and_update(JOB_SUCCEEDED, STATUS_SUCCEEDED)
+  end
+
+  def failed?
+    assess_and_update(JOB_FAILED, STATUS_FAILED)
   end
 
   def completed?
