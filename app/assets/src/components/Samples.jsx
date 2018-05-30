@@ -514,26 +514,24 @@ class Samples extends React.Component {
     this.setState({ columnsShown });
   }
 
-  appendStatusIcon(status) {
+  statusClass(status) {
+    switch (status) {
+      case "WAITING":
+        return "waiting";
+      case "FAILED":
+        return "failed";
+      case "COMPLETE":
+        return "complete";
+      default:
+        return "uploading";
+    }
+  }
+
+  statusIcon(status) {
     let klass = "";
     switch (status) {
       case "WAITING":
         klass = "waiting fa fa-arrow-up";
-        break;
-      case "INPROGRESS":
-        klass = "uploading fa fa-repeat";
-        break;
-      case "POST PROCESSING":
-        klass = "uploading fa fa-repeat";
-        break;
-      case "HOST FILTERING":
-        klass = "uploading fa fa-repeat";
-        break;
-      case "ALIGNMENT":
-        klass = "uploading fa fa-repeat";
-        break;
-      case "ASSEMBLY":
-        klass = "uploading fa fa-repeat";
         break;
       case "FAILED":
         klass = "failed fa fa-times";
@@ -542,7 +540,7 @@ class Samples extends React.Component {
         klass = "complete fa fa-check";
         break;
       default:
-        klass = "waiting fa fa-arrow-up";
+        klass = "uploading fa fa-repeat";
     }
     return <i className={klass} aria-hidden="true" />;
   }
@@ -566,15 +564,11 @@ class Samples extends React.Component {
       let derivedOutput = sample.derived_sample_output;
       let runInfo = sample.run_info;
       let uploader = sample.uploader.name;
-      let descrip = runInfo.job_status_description;
-      let statusClass = !descrip
-        ? this.applyChunkStatusClass(runInfo)
-        : this.applyClass(descrip);
-      let status = !descrip ? this.getChunkedStage(runInfo) : descrip;
+      let status = runInfo.result_status_description;
 
       const stageStatus = (
-        <div className={`${statusClass} status`}>
-          {this.appendStatusIcon(status)}
+        <div className={`${this.statusClass(status)} status`}>
+          {this.statusIcon(status)}
           <span>{status}</span>
         </div>
       );
@@ -740,66 +734,6 @@ class Samples extends React.Component {
           cb();
         }
       });
-  }
-
-  applyClass(status) {
-    if (status === "COMPLETE") {
-      return "complete";
-    } else if (status === "WAITING") {
-      return "waiting";
-    } else if (status === "INPROGRESS") {
-      return "uploading";
-    } else if (status === "FAILED") {
-      return "failed";
-    }
-  }
-
-  applyChunkStatusClass(runInfo) {
-    let assembly = runInfo["De-Novo Assembly"];
-    let postProcess = runInfo["Post Processing"];
-    let hostFiltering = runInfo["Host Filtering"];
-    let alignment = runInfo["GSNAPL/RAPSEARCH alignment"];
-    if (assembly && runInfo["with_assembly"]) {
-      return assembly === "LOADED" ? "complete" : "uploading";
-    } else if (postProcess) {
-      return postProcess === "LOADED" ? "complete" : "uploading";
-    } else if (alignment) {
-      return alignment === "FAILED" ? "failed" : "uploading";
-    } else if (hostFiltering) {
-      return hostFiltering === "FAILED" ? "failed" : "uploading";
-    }
-  }
-
-  getChunkedStage(runInfo) {
-    let postProcess = runInfo["Post Processing"];
-    let assembly = runInfo["De-Novo Assembly"];
-    let hostFiltering = runInfo["Host Filtering"];
-    let alignment = runInfo["GSNAPL/RAPSEARCH alignment"];
-    if (alignment === "FAILED" || hostFiltering === "FAILED") {
-      return "FAILED";
-    } else if (assembly && runInfo["with_assembly"]) {
-      if (assembly === "LOADED") {
-        return "COMPLETE";
-      } else if (assembly === "FAILED") {
-        return "COMPLETE*";
-      } else {
-        return "ASSEMBLY";
-      }
-    } else if (postProcess) {
-      if (postProcess === "LOADED") {
-        return "COMPLETE";
-      } else if (postProcess === "FAILED") {
-        return "COMPLETE*";
-      } else {
-        return "POST PROCESSING";
-      }
-    } else if (alignment) {
-      return "ALIGNMENT";
-    } else if (hostFiltering) {
-      return "HOST FILTERING";
-    } else {
-      return "WAITING";
-    }
   }
 
   //handle search when query is passed

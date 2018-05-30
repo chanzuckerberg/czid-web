@@ -277,14 +277,36 @@ class PipelineRun < ApplicationRecord
   end
 
   def update_result_status(field, value)
-    status_hash = result_status ? JSON.parse(result_status) : {}
+    status_hash = result_status_hash
     status_hash[field] = value
     update(result_status: status_hash.to_json)
   end
 
   def result_status_for(field)
-    status_hash = result_status ? JSON.parse(result_status) : {}
+    status_hash = result_status_hash
     status_hash[field]
+  end
+
+  def result_status_hash
+    result_status ? JSON.parse(result_status) : {}
+  end
+
+  def status_display
+    h = result_status_hash
+    return "WAITING" if h.empty?
+
+    # Failure cases
+    return "FAILED" if h["db_load_alignment"] == STATUS_FAILED
+    return "FAILED" if h["db_load_host_filtering"] == STATUS_FAILED
+    return "COMPLETE*" if h["db_load_postprocess"] == STATUS_FAILED && h["db_load_alignment"] == STATUS_LOADED
+    return "COMPLETE*" if job_status == STATUS_FAILED && h["db_load_alignment"] == STATUS_LOADED
+    return "FAILED" if job_status == STATUS_FAILED
+
+    # Non-failure cases
+    return "COMPLETE" if h["db_load_postprocess"] == STATUS_LOADED
+    return "POST PROCESSING" if h["db_load_alignment"] == STATUS_LOADED
+    return "ALIGNMENT" if h["db_load_host_filtering"] == STATUS_LOADED
+    "HOST FILTERING"
   end
 
   def check_and_enqueue(db_load_command_name)
@@ -333,6 +355,7 @@ class PipelineRun < ApplicationRecord
     prs = active_stage
     return if prs.nil?
     if prs.failed?
+      self.job_status = STATUS_FAILED
       self.finalized = 1
       Airbrake.notify("Sample #{sample.id} failed #{prs.name}")
     elsif !prs.started?

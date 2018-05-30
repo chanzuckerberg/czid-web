@@ -28,7 +28,7 @@ module SamplesHelper
                         location: db_sample ? db_sample[:sample_location] : '',
                         host_genome: derived_output ? derived_output[:host_genome_name] : '',
                         notes: db_sample ? db_sample[:sample_notes] : '',
-                        overall_job_status: run_info ? run_info[:job_status_description] : '',
+                        overall_job_status: run_info ? run_info[:result_status_description] : '',
                         host_filtering_status: run_info ? run_info['Host Filtering'] : '',
                         nonhost_alignment_status: run_info ? run_info['GSNAPL/RAPSEARCH alignment'] : '',
                         postprocessing_status: run_info ? run_info['Post Processing'] : '',
@@ -222,7 +222,7 @@ module SamplesHelper
   def pipeline_run_info(pipeline_run, report_ready_pipeline_run_ids, pipeline_run_stages_by_pipeline_run_id)
     pipeline_run_entry = {}
     if pipeline_run
-      pipeline_run_entry[:job_status_description] = 'WAITING' if pipeline_run.job_status.nil?
+      pipeline_run_entry[:result_status_description] = 'WAITING' if pipeline_run.job_status.nil?
       run_stages = pipeline_run_stages_by_pipeline_run_id[pipeline_run.id]
       if run_stages.present?
         run_stages.each do |rs|
@@ -230,10 +230,11 @@ module SamplesHelper
         end
         pipeline_run_entry[:total_runtime] = get_total_runtime(pipeline_run, run_stages)
         pipeline_run_entry[:with_assembly] = pipeline_run.assembly? ? 1 : 0
+        pipeline_run_entry[:result_status_description] = pipeline_run.status_display
       else
         # old data
         pipeline_run_status = pipeline_run.job_status
-        pipeline_run_entry[:job_status_description] =
+        pipeline_run_entry[:result_status_description] =
           if %w[CHECKED SUCCEEDED].include?(pipeline_run_status)
             'COMPLETE'
           elsif %w[FAILED ERROR].include?(pipeline_run_status)
@@ -241,13 +242,13 @@ module SamplesHelper
           elsif %w[RUNNING LOADED].include?(pipeline_run_status)
             'IN PROGRESS'
           elsif pipeline_run_status == 'RUNNABLE'
-            'INITIALIZING'
+            'WAITING'
           end
       end
       pipeline_run_entry[:finalized] = pipeline_run.finalized
       pipeline_run_entry[:report_ready] = report_ready_pipeline_run_ids.include?(pipeline_run.id)
     else
-      pipeline_run_entry[:job_status_description] = 'WAITING'
+      pipeline_run_entry[:result_status_description] = 'WAITING'
       pipeline_run_entry[:finalized] = 0
       pipeline_run_entry[:report_ready] = 0
     end
