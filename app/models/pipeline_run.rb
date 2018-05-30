@@ -38,6 +38,7 @@ class PipelineRun < ApplicationRecord
   POSTPROCESS_STATUS_LOADED = 'LOADED'.freeze
   INPUT_TRUNCATED_FILE = 'input_truncated.txt'.freeze
   PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
+  REPORT_READY_LOADER = "db_load_alignment".freeze
 
   before_create :initialize_result_status, :create_run_stages
 
@@ -156,7 +157,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def report_ready?
-    results_finalized == 1 || (ready_step && active_stage && active_stage.step_number > ready_step)
+    results_finalized == 1 || result_status_for(REPORT_READY_LOADER)
   end
 
   def succeeded?
