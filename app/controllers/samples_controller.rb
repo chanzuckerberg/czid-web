@@ -122,7 +122,7 @@ class SamplesController < ApplicationController
       sample = Sample.new(sample_attributes)
       next unless editable_project_ids.include?(sample.project_id)
       sample.bulk_mode = true
-      sample.user = @user if @user
+      sample.user = current_user
       if sample.save
         @samples << sample
       else
@@ -406,7 +406,7 @@ class SamplesController < ApplicationController
     @sample = Sample.new(params)
     @sample.project = project if project
     @sample.input_files.each { |f| f.name ||= File.basename(f.source) }
-    @sample.user = current_user if current_user
+    @sample.user = current_user
     @sample.host_genome ||= (host_genome || HostGenome.first)
 
     respond_to do |format|
