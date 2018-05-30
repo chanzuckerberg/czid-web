@@ -348,7 +348,7 @@ class PipelineRun < ApplicationRecord
     # TODO: handle case where resque crashes and needs to be restarted. What happens to runs that were queued to load results?
     if output_ready?(db_load_command_name) && ![STATUS_LOADED, STATUS_LOADING].include?(result_status_for(db_load_command_name))
       update_result_status(db_load_command_name, STATUS_LOADING)
-      Resque.enqueue(ResultMonitorLoad, id, db_load_command_name)
+      Resque.enqueue(ResultMonitorLoader, id, db_load_command_name)
     end
   end
 

@@ -1,6 +1,6 @@
 # Load a result from S3 into the db
 require 'logger'
-class ResultMonitorLoad
+class ResultMonitorLoader
   @queue = :q03_pipeline_run
   @logger = Logger.new(STDOUT)
 
