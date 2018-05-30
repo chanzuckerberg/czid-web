@@ -281,7 +281,8 @@ module SamplesHelper
 
   def report_ready_multiget(pipeline_run_ids)
     # query db to get ids of pipeline_runs for which "report_ready?" is true
-    PipelineRun.where(id: pipeline_run_ids).where("job_status = '#{PipelineRun::STATUS_CHECKED}' or id in (select pipeline_run_id from pipeline_run_stages where pipeline_run_stages.step_number = pipeline_runs.ready_step and pipeline_run_stages.job_status = '#{PipelineRun::STATUS_LOADED}')").pluck(:id)
+    # TODO: remove pipeline_run_stages from the equation?
+    PipelineRun.where(id: pipeline_run_ids).where("results_finalized = 1 or id in (select pipeline_run_id from pipeline_run_stages where pipeline_run_stages.step_number = pipeline_runs.ready_step and pipeline_run_stages.job_status = '#{PipelineRunStage::STATUS_SUCCEEDED}')").pluck(:id)
   end
 
   def top_pipeline_runs_multiget(sample_ids)

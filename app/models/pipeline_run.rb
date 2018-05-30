@@ -165,7 +165,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def report_ready?
-    job_status == STATUS_CHECKED || (ready_step && active_stage && active_stage.step_number > ready_step)
+    results_finalized == 1 || (ready_step && active_stage && active_stage.step_number > ready_step)
   end
 
   def succeeded?
