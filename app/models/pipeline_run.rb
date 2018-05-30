@@ -313,19 +313,28 @@ class PipelineRun < ApplicationRecord
   end
 
   def status_display_pre_result_monitor(run_stages)
-    return "WAITING" if run_stages.pluck(:job_status).compact.empty?
-
-    # Failure cases
-    return "FAILED" if run_stages[1].job_status == STATUS_FAILED
-    return "FAILED" if run_stages[0].job_status == STATUS_FAILED
-    return "COMPLETE*" if run_stages[2].job_status == STATUS_FAILED && run_stages[1].job_status == STATUS_LOADED
-    return "COMPLETE*" if run_stages[3] && run_stages[3].job_status == STATUS_FAILED && run_stages[1].job_status == STATUS_LOADED
-
-    # Non-failure cases
-    return "COMPLETE" if run_stages[2].job_status == STATUS_LOADED
-    return "POST PROCESSING" if run_stages[1].job_status == STATUS_LOADED
-    return "ALIGNMENT" if run_stages[0].job_status == STATUS_LOADED
-    "HOST FILTERING"
+    if run_stages.pluck(:job_status).compact.empty?
+      # No stage has had its job_status set yet
+      "WAITING"
+    elsif [run_stages[0].job_status, run_stages[1].job_status].include?(STATUS_FAILED)
+      # host-filtering or non-host alignment failed
+      "FAILED"
+    elsif run_stages[1].job_status == STATUS_LOADED && run_stages[2].job_status == STATUS_FAILED
+      # report is ready but postprocessing failed
+      "COMPLETE*"
+    elsif run_stages[2].job_status == STATUS_LOADED
+      # postprocessing succeeded
+      "COMPLETE"
+    elsif run_stages[1].job_status == STATUS_LOADED
+      # alignment succeeded, postprocessing in progress
+      "POST PROCESSING"
+    elsif run_stages[0].job_status == STATUS_LOADED
+      # host-filtering succeeded, alignment in progress
+      "ALIGNMENT"
+    else
+      # host-filtering in progress
+      "HOST FILTERING"
+    end
   end
 
   def status_display_pre_run_stages
