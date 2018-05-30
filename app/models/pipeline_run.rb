@@ -295,26 +295,42 @@ class PipelineRun < ApplicationRecord
   end
 
   def status_display
+    # Status display for the frontend.
+    # This function would be simpler if we used active_stage (job monitor),
+    # but we want to use result_status instead (result monitor)
+    # so that it becomes easy to expose availability of specific results
+    # with more granularity later if we desire.
     h = result_status_hash
-    return "WAITING" if h.empty?
-
-    # Failure cases
-    return "FAILED" if h["db_load_alignment"] == STATUS_FAILED
-    return "FAILED" if h["db_load_host_filtering"] == STATUS_FAILED
-    return "COMPLETE*" if h["db_load_postprocess"] == STATUS_FAILED && h["db_load_alignment"] == STATUS_LOADED
-    return "COMPLETE*" if job_status.include?(STATUS_FAILED) && h["db_load_alignment"] == STATUS_LOADED
-    return "FAILED" if job_status.include?(STATUS_FAILED)
-
-    # Non-failure cases
-    return "COMPLETE" if h["db_load_postprocess"] == STATUS_LOADED
-    return "POST PROCESSING" if h["db_load_alignment"] == STATUS_LOADED
-    return "ALIGNMENT" if h["db_load_host_filtering"] == STATUS_LOADED
-    "HOST FILTERING"
+    if h.empty?
+      # No status has been set yet
+      "WAITING"
+    elsif [h["db_load_alignment"], h["db_load_host_filtering"]].include?(STATUS_FAILED)
+      # host-filtering or non-host alignment failed
+      "FAILED"
+    elsif h["db_load_alignment"] == STATUS_LOADED && [h["db_load_postprocess"], job_status].include?(STATUS_FAILED)
+      # report is ready but postprocessing results or the overall job failed
+      "COMPLETE*"
+    elsif job_status == STATUS_FAILED
+      # job failed and report is NOT ready
+      "FAILED"
+    elsif h["db_load_postprocess"] == STATUS_LOADED
+      # postprocessing succeeded
+      "COMPLETE"
+    elsif h["db_load_alignment"] == STATUS_LOADED
+      # alignment succeeded, postprocessing in progress
+      "POST PROCESSING"
+    elsif h["db_load_host_filtering"] == STATUS_LOADED
+      # host-filtering succeeded, alignment in progress
+      "ALIGNMENT"
+    else
+      # host-filtering in progress
+      "HOST FILTERING"
+    end
   end
 
   def status_display_pre_result_monitor(run_stages)
     if run_stages.pluck(:job_status).compact.empty?
-      # No stage has had its job_status set yet
+      # no stage has had its job_status set yet
       "WAITING"
     elsif [run_stages[0].job_status, run_stages[1].job_status].include?(STATUS_FAILED)
       # host-filtering or non-host alignment failed
