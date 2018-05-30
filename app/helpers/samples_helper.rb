@@ -6,7 +6,6 @@ module SamplesHelper
 
   def generate_sample_list_csv(formatted_samples)
     attributes = %w[sample_name uploader upload_date runtime_seconds overall_job_status
-                    host_filtering_status nonhost_alignment_status postprocessing_status
                     total_reads nonhost_reads nonhost_reads_percent
                     quality_control compression_ratio tissue_type nucleotide_type
                     location host_genome notes]
@@ -29,10 +28,6 @@ module SamplesHelper
                         host_genome: derived_output ? derived_output[:host_genome_name] : '',
                         notes: db_sample ? db_sample[:sample_notes] : '',
                         overall_job_status: run_info ? run_info[:result_status_description] : '',
-                        host_filtering_status: run_info ? run_info['Host Filtering'] : '',
-                        nonhost_alignment_status: run_info ? run_info['GSNAPL/RAPSEARCH alignment'] : '',
-                        postprocessing_status: run_info ? run_info['Post Processing'] : '',
-                        assembly_status: run_info ? run_info['De-Novo Assembly'] : '',
                         uploader: sample_info[:uploader] ? sample_info[:uploader][:name] : '',
                         runtime_seconds: run_info ? run_info[:total_runtime] : '',
                         sample_library: db_sample ? db_sample[:sample_library] : '',
@@ -43,16 +38,6 @@ module SamplesHelper
                         sample_diagnosis: db_sample ? db_sample[:sample_diagnosis] : '',
                         sample_organism: db_sample ? db_sample[:sample_organism] : '',
                         sample_detection: db_sample ? db_sample[:sample_detection] : '' }
-        stages_to_display = [:host_filtering_status, :nonhost_alignment_status, :postprocessing_status]
-        stages_to_display << :assembly_status if run_info && run_info[:with_assembly] == 1
-        stage_statuses = data_values.values_at(*stages_to_display)
-        if stage_statuses.any? { |status| status == "FAILED" }
-          data_values[:overall_job_status] = "FAILED"
-        elsif stage_statuses.any? { |status| status == "RUNNING" }
-          data_values[:overall_job_status] = "RUNNING"
-        elsif stage_statuses.all? { |status| status == "LOADED" }
-          data_values[:overall_job_status] = "COMPLETE"
-        end
         attributes_as_symbols = attributes.map(&:to_sym)
         csv << data_values.values_at(*attributes_as_symbols)
       end
