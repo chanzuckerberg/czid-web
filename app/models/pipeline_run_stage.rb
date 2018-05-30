@@ -140,12 +140,7 @@ class PipelineRunStage < ApplicationRecord
       Airbrake.notify("Invalid precondition for PipelineRunStage.update_job_status #{id} #{job_id} #{job_status}.")
       return
     end
-    if failed?
-      terminate_job
-      return
-    end
-    if succeeded?
-      update(job_status: STATUS_SUCCEEDED)
+    if failed? || succeeded?
       terminate_job
       return
     end
