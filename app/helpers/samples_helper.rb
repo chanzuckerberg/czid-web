@@ -269,7 +269,7 @@ module SamplesHelper
     report_ready_result_status = "\"#{PipelineRun::REPORT_READY_LOADER}\":\"#{PipelineRun::STATUS_LOADED}\""
     report_ready_clause = "results_finalized = 1 or result_status like '%#{report_ready_result_status}%'"
 
-    clause_for_old_results = "job_status like '%|READY%'"
+    clause_for_old_results = "job_status = '#{PipelineRun::STATUS_CHECKED}' or job_status like '%|READY%'"
     # TODO: migrate old runs so we don't need to deal with them separately in the code
 
     PipelineRun.where(id: pipeline_run_ids).where("#{report_ready_clause} or #{clause_for_old_results}").pluck(:id)
