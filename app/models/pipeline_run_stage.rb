@@ -60,7 +60,16 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def last_output_in_stage
-    "#{job_id}.done"
+    basename = "#{job_id}.done"
+    s3_folder = case name
+                when HOST_FILTERING_STAGE_NAME
+                  pipeline_run.host_filter_output_s3_path
+                when ALIGNMENT_STAGE_NAME
+                  pipeline_run.alignment_output_s3_path
+                when POSTPROCESS_STAGE_NAME
+                  pipeline_run.postprocess_output_s3_path
+                end
+    "#{s3_folder}/#{basename}"
   end
 
   def succeeded?
