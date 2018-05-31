@@ -14,8 +14,8 @@ class PipelineRunStage < ApplicationRecord
   STATUS_SUCCEEDED = 'SUCCEEDED'.freeze
 
   # Status file parameters for integration with pipeline
-  JOB_SUCCEEDED = "succeeded".freeze
-  JOB_FAILED = "failed".freeze
+  JOB_SUCCEEDED_FILE_SUFFIX = "succeeded".freeze
+  JOB_FAILED_FILE_SUFFIX = "failed".freeze
 
   # Stage names
   HOST_FILTERING_STAGE_NAME = 'Host Filtering'.freeze
@@ -83,11 +83,11 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def succeeded?
-    assess_and_update(JOB_SUCCEEDED, STATUS_SUCCEEDED)
+    assess_and_update(JOB_SUCCEEDED_FILE_SUFFIX, STATUS_SUCCEEDED)
   end
 
   def failed?
-    assess_and_update(JOB_FAILED, STATUS_FAILED)
+    assess_and_update(JOB_FAILED_FILE_SUFFIX, STATUS_FAILED)
   end
 
   def completed?
