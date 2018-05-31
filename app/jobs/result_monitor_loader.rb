@@ -4,16 +4,16 @@ class ResultMonitorLoader
   @queue = :q03_pipeline_run
   @logger = Logger.new(STDOUT)
 
-  def self.perform(pipeline_run_id, load_db_command_func)
-    @logger.info("#{load_db_command_func} for pipeline run #{pipeline_run_id}")
+  def self.perform(pipeline_run_id, output)
+    @logger.info("Loading #{output} for pipeline run #{pipeline_run_id}")
     pr = PipelineRun.find(pipeline_run_id)
     return if pr.completed?
     begin
-      pr.send(load_db_command_func)
-      pr.update_result_status(load_db_command_func, PipelineRun::STATUS_LOADED)
+      pr.send(PipelineRun::LOADERS_BY_OUTPUT[output])
+      pr.update_result_status(output, PipelineRun::STATUS_LOADED)
     rescue
-      pr.update_result_status(load_db_command_func, PipelineRun::STATUS_FAILED)
-      Airbrake.notify("Pipeline Run #{pr.id} failed #{load_db_command_func}")
+      pr.update_result_status(output, PipelineRun::STATUS_FAILED)
+      Airbrake.notify("Pipeline Run #{pr.id} failed loading #{output}")
       raise
     end
   end

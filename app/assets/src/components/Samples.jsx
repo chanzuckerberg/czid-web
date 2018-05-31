@@ -1071,16 +1071,14 @@ class Samples extends React.Component {
     );
 
     let filterSelect = this.handleStatusFilterSelect;
-    let all_caps = ["WAITING", "UPLOADING", "CHECKED", "FAILED", "ALL"];
-    let uppercase = ["Waiting", "In Progress", "Complete", "Failed", "All"];
-    let lowercase = ["waiting", "uploading", "complete", "failed", "all"];
+    let status_filter_options = ["In Progress", "Complete", "Failed", "All"];
+    let status_filter_css_classes = ["uploading", "complete", "failed", "all"];
 
     const filterStatus = (
       <JobStatusFilters
-        all_caps={all_caps}
+        status_filter_options={status_filter_options}
         filterSelect={filterSelect}
-        lowercase={lowercase}
-        uppercase={uppercase}
+        status_filter_css_classes={status_filter_css_classes}
       />
     );
 
@@ -1346,7 +1344,7 @@ function LabelTagMarkup({
   );
 }
 
-function FilterItemMarkup({ status, filterSelect, lowercase, pos, uppercase }) {
+function FilterItemMarkup({ status, filterSelect, status_filter_css_classes, pos }) {
   return (
     <li
       className="filter-item"
@@ -1354,8 +1352,8 @@ function FilterItemMarkup({ status, filterSelect, lowercase, pos, uppercase }) {
       data-status={status}
       onClick={filterSelect}
     >
-      <a data-status={status} className={"filter-item " + lowercase[pos]}>
-        {uppercase[pos]}
+      <a data-status={status} className={"filter-item " + status_filter_css_classes[pos]}>
+        {status}
       </a>
       <i data-status={status} className="filter fa fa-check hidden" />
     </li>
@@ -1915,7 +1913,7 @@ function TableColumnHeaders({ sort, colMap, filterStatus, state, parent }) {
   );
 }
 
-function JobStatusFilters({ all_caps, filterSelect, lowercase, uppercase }) {
+function JobStatusFilters({ status_filter_options, filterSelect, status_filter_css_classes }) {
   return (
     <div className="dropdown-status-filtering">
       <li>
@@ -1924,13 +1922,12 @@ function JobStatusFilters({ all_caps, filterSelect, lowercase, uppercase }) {
         </a>
       </li>
 
-      {all_caps.map((status, pos) => {
+      {status_filter_options.map((status, pos) => {
         return FilterItemMarkup({
           status,
           filterSelect,
-          lowercase,
-          pos,
-          uppercase
+          status_filter_css_classes,
+          pos
         });
       })}
       <li className="divider" />

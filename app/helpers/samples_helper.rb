@@ -109,7 +109,7 @@ module SamplesHelper
     (100.0 * pr.remaining_reads) / pr.total_reads unless pr.nil? || pr.remaining_reads.nil? || pr.total_reads.nil?
   end
 
-  def sample_status_display(sample)
+  def sample_status_display_for_hidden_page(sample)
     if sample.status == Sample::STATUS_CREATED
       'uploading'
     elsif sample.status == Sample::STATUS_CHECKED
@@ -168,19 +168,22 @@ module SamplesHelper
     sample_list
   end
 
-  def filter_samples(samples, query)
-    samples = if query == 'WAITING'
-                samples.joins("LEFT OUTER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id) or pipeline_runs.id  IS NULL ").where("samples.status = ?  or pipeline_runs.job_status is NULL", 'created')
-              elsif query == 'FAILED'
-                samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status like '%FAILED'")
-              elsif query == 'UPLOADING'
-                samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status NOT IN (?) and pipeline_runs.finalized != 1", %w[CHECKED FAILED])
-              elsif query == 'CHECKED'
-                samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("(pipeline_runs.job_status IN (?) or pipeline_runs.job_status like '%READY') and pipeline_runs.finalized = 1", query)
-              else
-                samples
-              end
-    samples
+  def filter_by_status(samples, query)
+    top_pipeline_run_clause = "pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)"
+    if query == 'In Progress'
+      join_clause = "LEFT OUTER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id"
+      samples.joins(join_clause).where("#{top_pipeline_run_clause} or pipeline_runs.id is NULL").where("samples.status = ? or pipeline_runs.job_status is NULL or (pipeline_runs.job_status NOT IN (?) and pipeline_runs.finalized != 1)", Sample::STATUS_CREATED, [PipelineRun::STATUS_CHECKED, PipelineRun::STATUS_FAILED])
+    else
+      join_clause = "INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id"
+      samples_pipeline_runs = samples.joins(join_clause).where(status: Sample::STATUS_CHECKED).where(top_pipeline_run_clause)
+      if query == 'Failed'
+        samples_pipeline_runs.where("pipeline_runs.job_status like '%FAILED'")
+      elsif query == 'Complete'
+        samples_pipeline_runs.where("(pipeline_runs.job_status = ? or pipeline_runs.job_status like '%READY') and pipeline_runs.finalized = 1", PipelineRun::STATUS_CHECKED)
+      else # query == 'All' or something unexpected
+        samples
+      end
+    end
   end
 
   def get_total_runtime(pipeline_run, run_stages)
@@ -215,10 +218,12 @@ module SamplesHelper
                                                            pipeline_run.status_display
                                                          else
                                                            # data processed before result monitor was instated
+                                                           # TODO: migrate old runs and delete this code
                                                            pipeline_run.status_display_pre_result_monitor(run_stages)
                                                          end
       else
         # data processed before pipeline_run_stages were instated
+        # TODO: migrate old runs and delete this code
         pipeline_run_entry[:result_status_description] = pipeline_run.status_display_pre_run_stages
       end
       pipeline_run_entry[:finalized] = pipeline_run.finalized
@@ -266,7 +271,7 @@ module SamplesHelper
 
   def report_ready_multiget(pipeline_run_ids)
     # query db to get ids of pipeline_runs for which the report is ready
-    report_ready_result_status = "\"#{PipelineRun::REPORT_READY_LOADER}\":\"#{PipelineRun::STATUS_LOADED}\""
+    report_ready_result_status = "\"#{PipelineRun::REPORT_READY_OUTPUT}\":\"#{PipelineRun::STATUS_LOADED}\""
     report_ready_clause = "results_finalized = 1 or result_status like '%#{report_ready_result_status}%'"
 
     clause_for_old_results = "job_status = '#{PipelineRun::STATUS_CHECKED}' or job_status like '%|READY%'"
