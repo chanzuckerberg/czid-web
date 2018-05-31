@@ -11,6 +11,16 @@ class PipelineRunStage < ApplicationRecord
   STATUS_CHECKED = 'CHECKED'.freeze
   STATUS_LOADED = 'LOADED'.freeze
   STATUS_ERROR = 'ERROR'.freeze
+  STATUS_SUCCEEDED = 'SUCCEEDED'.freeze
+
+  # Status file parameters for integration with pipeline
+  JOB_SUCCEEDED_FILE_SUFFIX = "succeeded".freeze
+  JOB_FAILED_FILE_SUFFIX = "failed".freeze
+
+  # Stage names
+  HOST_FILTERING_STAGE_NAME = 'Host Filtering'.freeze
+  ALIGNMENT_STAGE_NAME = 'GSNAPL/RAPSEARCH alignment'.freeze
+  POSTPROCESS_STAGE_NAME = 'Post Processing'.freeze
 
   # Max number of times we resubmit a job when it gets killed by EC2.
   MAX_RETRIES = 5
@@ -49,12 +59,35 @@ class PipelineRunStage < ApplicationRecord
     job_command.present?
   end
 
-  def failed?
-    job_status == STATUS_FAILED
+  def stage_status_file(status)
+    basename = "#{job_id}.#{status}"
+    s3_folder = case name
+                when HOST_FILTERING_STAGE_NAME
+                  pipeline_run.host_filter_output_s3_path
+                when ALIGNMENT_STAGE_NAME
+                  pipeline_run.alignment_output_s3_path
+                when POSTPROCESS_STAGE_NAME
+                  pipeline_run.postprocess_output_s3_path
+                end
+    "#{s3_folder}/#{basename}"
   end
 
-  def succeeded? # The whole thing completed successfully
-    db_load_status == 1
+  def assess_and_update(status_file_suffix, job_status_value)
+    # Return whether stage exited exited with status_file_suffix
+    # AND, if so, record the corresponding job_status_value in the database if it is not there already
+    answer = pipeline_run.file_generated_since_run(stage_status_file(status_file_suffix))
+    if answer && job_status != job_status_value
+      update(job_status: job_status_value)
+    end
+    answer
+  end
+
+  def succeeded?
+    assess_and_update(JOB_SUCCEEDED_FILE_SUFFIX, STATUS_SUCCEEDED)
+  end
+
+  def failed?
+    assess_and_update(JOB_FAILED_FILE_SUFFIX, STATUS_FAILED)
   end
 
   def completed?
@@ -63,11 +96,6 @@ class PipelineRunStage < ApplicationRecord
 
   def checked?
     job_status == STATUS_CHECKED
-  end
-
-  def output_ready?
-    s3_output_file = send(output_func)
-    file_generated_since_run(s3_output_file)
   end
 
   def run_job
@@ -84,21 +112,6 @@ class PipelineRunStage < ApplicationRecord
     end
     self.created_at = Time.now.utc
     save
-  end
-
-  def run_load_db
-    return unless output_ready?
-    return if completed?
-    begin
-      send(load_db_command_func)
-      update(db_load_status: 1, job_status: STATUS_LOADED)
-    rescue
-      update(job_status: STATUS_FAILED)
-      Airbrake.notify("Pipeline Run #{pipeline_run.id} failed #{name} db load")
-      raise
-    ensure
-      terminate_job
-    end
   end
 
   def instance_terminated?(job_hash)
@@ -123,26 +136,16 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def update_job_status
-    if !id || !started? || succeeded? || failed?
-      # This is called only from PipelineRun.update_status and only when the guard above is false.
+    if !id || !started?
       Airbrake.notify("Invalid precondition for PipelineRunStage.update_job_status #{id} #{job_id} #{job_status}.")
       return
     end
-    if checked?
-      # This can happen due to overly-eager frequent calls from pipeline_monitor through PipelineRun.update_job_status.
-      Rails.logger.info "Job #{id} #{job_id} checked and waiting to load results."
-      return
-    end
-    if output_ready?
-      self.job_status = STATUS_CHECKED
-      # save before enqueue, to prevent minor race
-      save
-      Resque.enqueue(LoadResultForRunStage, id)
+    if failed? || succeeded?
+      terminate_job
       return
     end
     # The job appears to be in progress.  Check to make sure it hasn't been killed in AWS.   But not too frequently.
     return unless due_for_aegea_check?
-    # db_load_assembly(false) # update the list of taxids that have already been assembled by polling S3
     stdout, stderr, status = Open3.capture3("aegea", "batch", "describe", job_id.to_s)
     unless status.exitstatus.zero?
       Airbrake.notify("Error for update job status for pipeline run #{id} with error #{stderr}")
@@ -169,17 +172,6 @@ class PipelineRunStage < ApplicationRecord
       return
     end
     run_job # this saves
-  end
-
-  def file_generated_since_run(s3_path)
-    stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", s3_path.to_s)
-    return false unless status.exitstatus.zero?
-    begin
-      s3_file_time = DateTime.strptime(stdout[0..18], "%Y-%m-%d %H:%M:%S")
-      return (s3_file_time > created_at)
-    rescue
-      return nil
-    end
   end
 
   def terminate_job
@@ -238,142 +230,5 @@ class PipelineRunStage < ApplicationRecord
     batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline assembly"
     "aegea batch submit --command=\"#{batch_command}\" " \
       " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --ecr-image idseq --memory 60000 --queue idseq_assembly --vcpus 32 --job-role idseq-pipeline "
-  end
-
-  def db_load_host_filtering
-    pr = pipeline_run
-    pr.pipeline_version = pr.fetch_pipeline_version
-
-    # Load job statistics
-    stats_json_s3_path = "#{pr.host_filter_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
-    downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, pr.local_json_path)
-    stats_array = JSON.parse(File.read(downloaded_stats_path))
-    pr.total_reads = (stats_array[0] || {})['total_reads'] || 0
-    stats_array = stats_array.select { |entry| entry.key?("task") }
-    # TODO(yf): remove the following line
-    pr.job_stats_attributes = stats_array
-    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_stats_path}")
-
-    # Load version
-    version_s3_path = "#{pr.host_filter_output_s3_path}/#{PipelineRun::VERSION_JSON_NAME}"
-    pr.version = `aws s3 cp #{version_s3_path} -`
-
-    # Check if input was truncated
-    truncation_file = "#{pr.host_filter_output_s3_path}/#{PipelineRun::INPUT_TRUNCATED_FILE}"
-    _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", truncation_file)
-    pr.truncated = `aws s3 cp #{truncation_file} -`.split("\n")[0].to_i if status.exitstatus.zero?
-
-    # Load ERCC counts
-    pr.load_ercc_counts
-    pr.save
-  end
-
-  def output_json_name
-    pipeline_run.multihit? ? PipelineRun::MULTIHIT_OUTPUT_JSON_NAME : PipelineRun::OUTPUT_JSON_NAME
-  end
-
-  def invalid_family_call?(tcnt)
-    # TODO:  Better family support.
-    tcnt['family_taxid'].to_i < TaxonLineage::INVALID_CALL_BASE_ID
-  rescue
-    false
-  end
-
-  def db_load_alignment
-    pr = pipeline_run
-
-    output_json_s3_path = "#{pipeline_run.alignment_output_s3_path}/#{output_json_name}"
-    stats_json_s3_path = "#{pipeline_run.alignment_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
-
-    # Get the file
-    downloaded_json_path = PipelineRun.download_file(output_json_s3_path, pr.local_json_path)
-    downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, pr.local_json_path)
-    return unless downloaded_json_path && downloaded_stats_path
-    json_dict = JSON.parse(File.read(downloaded_json_path))
-
-    pipeline_output_dict = json_dict['pipeline_output']
-    pipeline_output_dict.slice!('remaining_reads', 'total_reads', 'taxon_counts_attributes')
-
-    pr.total_reads = pipeline_output_dict['total_reads']
-    pr.remaining_reads = pipeline_output_dict['remaining_reads']
-    pr.unmapped_reads = pr.count_unmapped_reads
-    pr.fraction_subsampled = pr.subsample_fraction
-
-    stats_array = JSON.parse(File.read(downloaded_stats_path))
-    stats_array = stats_array.select { |entry| entry.key?("task") }
-
-    version_s3_path = "#{pipeline_run.alignment_output_s3_path}/#{PipelineRun::VERSION_JSON_NAME}"
-    pr.version = `aws s3 cp #{version_s3_path} -`
-
-    # only keep counts at certain taxonomic levels
-    taxon_counts_attributes_filtered = []
-    acceptable_tax_levels = [TaxonCount::TAX_LEVEL_SPECIES]
-    acceptable_tax_levels << TaxonCount::TAX_LEVEL_GENUS if pr.multihit?
-    acceptable_tax_levels << TaxonCount::TAX_LEVEL_FAMILY if pr.multihit?
-    pipeline_output_dict['taxon_counts_attributes'].each do |tcnt|
-      # TODO:  Better family support.
-      if acceptable_tax_levels.include?(tcnt['tax_level'].to_i) && !invalid_family_call?(tcnt)
-        taxon_counts_attributes_filtered << tcnt
-      end
-    end
-
-    pr.job_stats.delete_all
-    pr.job_stats_attributes = stats_array
-    pr.taxon_counts_attributes = taxon_counts_attributes_filtered
-    pr.updated_at = Time.now.utc
-    pr.save
-    # aggregate the data at genus level
-    pr.generate_aggregate_counts('genus') unless pr.multihit?
-    # merge more accurate name information from lineages table
-    pr.update_names
-    # denormalize superkingdom_taxid into taxon_counts
-    if pr.multihit?
-      pr.update_superkingdoms
-    else
-      pr.update_genera
-    end
-    # label taxa as phage or non-phage
-    pr.update_is_phage
-
-    # rm the json
-    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_json_path} #{downloaded_stats_path}")
-  end
-
-  def db_load_postprocess
-    pr = pipeline_run
-    byteranges_json_s3_path = "#{pipeline_run.postprocess_output_s3_path}/#{PipelineRun::TAXID_BYTERANGE_JSON_NAME}"
-    downloaded_byteranges_path = PipelineRun.download_file(byteranges_json_s3_path, pr.local_json_path)
-    taxon_byteranges_csv_file = "#{pr.local_json_path}/taxon_byteranges"
-    hash_array_json2csv(downloaded_byteranges_path, taxon_byteranges_csv_file, %w[taxid hit_type first_byte last_byte])
-    ` cd #{pr.local_json_path};
-      sed -e 's/$/,#{pr.id}/' -i taxon_byteranges;
-      mysqlimport --replace --local --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --columns=taxid,hit_type,first_byte,last_byte,pipeline_run_id --fields-terminated-by=',' idseq_#{Rails.env} taxon_byteranges;
-    `
-    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_byteranges_path}")
-  end
-
-  def db_load_assembly(save_pipeline_run = true)
-    pr = pipeline_run
-    return unless pr.assembly?
-    pr.assembled_taxids = `aws s3 ls #{pr.assembly_output_s3_path}/ | awk '{print $4}'`.split("\n")
-    pr.save if save_pipeline_run
-  end
-
-  def host_filtering_outputs
-    pr = pipeline_run
-    pr.pipeline_version = pr.fetch_pipeline_version
-    "#{pipeline_run.host_filter_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
-  end
-
-  def alignment_outputs
-    "#{pipeline_run.alignment_output_s3_path}/#{PipelineRun::STATS_JSON_NAME}"
-  end
-
-  def postprocess_outputs
-    "#{pipeline_run.postprocess_output_s3_path}/#{PipelineRun::TAXID_BYTERANGE_JSON_NAME}"
-  end
-
-  def assembly_outputs
-    "#{pipeline_run.assembly_output_s3_path}-#{PipelineRun::ASSEMBLY_STATUSFILE}"
   end
 end

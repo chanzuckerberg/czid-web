@@ -182,13 +182,12 @@ module ReportHelper
     # No report-specific scores though.
     sample = pipeline_run.sample
     taxon_confirmation_hash = taxon_confirmation_map(sample.id, user_id)
-    postprocess_stage = pipeline_run.pipeline_run_stages.find_by(name: "Post Processing")
     {
       pipeline_info: pipeline_run,
       subsampled_reads: pipeline_run.subsampled_reads,
       sample_info: sample,
       default_background: Background.find(pipeline_run.sample.default_background_id),
-      taxon_fasta_flag: postprocess_stage && postprocess_stage.db_load_status == 1,
+      taxon_fasta_flag: !pipeline_run.taxon_byteranges.empty?,
       confirmed_taxids: taxon_confirmation_hash[:confirmed_taxids],
       watched_taxids: taxon_confirmation_hash[:watched_taxids],
       confirmed_names: taxon_confirmation_hash[:confirmed_names],
