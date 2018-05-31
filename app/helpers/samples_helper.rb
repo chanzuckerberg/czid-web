@@ -6,7 +6,6 @@ module SamplesHelper
 
   def generate_sample_list_csv(formatted_samples)
     attributes = %w[sample_name uploader upload_date runtime_seconds overall_job_status
-                    host_filtering_status nonhost_alignment_status postprocessing_status
                     total_reads nonhost_reads nonhost_reads_percent
                     quality_control compression_ratio tissue_type nucleotide_type
                     location host_genome notes]
@@ -28,11 +27,7 @@ module SamplesHelper
                         location: db_sample ? db_sample[:sample_location] : '',
                         host_genome: derived_output ? derived_output[:host_genome_name] : '',
                         notes: db_sample ? db_sample[:sample_notes] : '',
-                        overall_job_status: run_info ? run_info[:job_status_description] : '',
-                        host_filtering_status: run_info ? run_info['Host Filtering'] : '',
-                        nonhost_alignment_status: run_info ? run_info['GSNAPL/RAPSEARCH alignment'] : '',
-                        postprocessing_status: run_info ? run_info['Post Processing'] : '',
-                        assembly_status: run_info ? run_info['De-Novo Assembly'] : '',
+                        overall_job_status: run_info ? run_info[:result_status_description] : '',
                         uploader: sample_info[:uploader] ? sample_info[:uploader][:name] : '',
                         runtime_seconds: run_info ? run_info[:total_runtime] : '',
                         sample_library: db_sample ? db_sample[:sample_library] : '',
@@ -43,16 +38,6 @@ module SamplesHelper
                         sample_diagnosis: db_sample ? db_sample[:sample_diagnosis] : '',
                         sample_organism: db_sample ? db_sample[:sample_organism] : '',
                         sample_detection: db_sample ? db_sample[:sample_detection] : '' }
-        stages_to_display = [:host_filtering_status, :nonhost_alignment_status, :postprocessing_status]
-        stages_to_display << :assembly_status if run_info && run_info[:with_assembly] == 1
-        stage_statuses = data_values.values_at(*stages_to_display)
-        if stage_statuses.any? { |status| status == "FAILED" }
-          data_values[:overall_job_status] = "FAILED"
-        elsif stage_statuses.any? { |status| status == "RUNNING" }
-          data_values[:overall_job_status] = "RUNNING"
-        elsif stage_statuses.all? { |status| status == "LOADED" }
-          data_values[:overall_job_status] = "COMPLETE"
-        end
         attributes_as_symbols = attributes.map(&:to_sym)
         csv << data_values.values_at(*attributes_as_symbols)
       end
@@ -222,32 +207,24 @@ module SamplesHelper
   def pipeline_run_info(pipeline_run, report_ready_pipeline_run_ids, pipeline_run_stages_by_pipeline_run_id)
     pipeline_run_entry = {}
     if pipeline_run
-      pipeline_run_entry[:job_status_description] = 'WAITING' if pipeline_run.job_status.nil?
       run_stages = pipeline_run_stages_by_pipeline_run_id[pipeline_run.id]
       if run_stages.present?
-        run_stages.each do |rs|
-          pipeline_run_entry[rs.name] = rs.job_status
-        end
         pipeline_run_entry[:total_runtime] = get_total_runtime(pipeline_run, run_stages)
         pipeline_run_entry[:with_assembly] = pipeline_run.assembly? ? 1 : 0
+        pipeline_run_entry[:result_status_description] = if pipeline_run.result_status
+                                                           pipeline_run.status_display
+                                                         else
+                                                           # data processed before result monitor was instated
+                                                           pipeline_run.status_display_pre_result_monitor(run_stages)
+                                                         end
       else
-        # old data
-        pipeline_run_status = pipeline_run.job_status
-        pipeline_run_entry[:job_status_description] =
-          if %w[CHECKED SUCCEEDED].include?(pipeline_run_status)
-            'COMPLETE'
-          elsif %w[FAILED ERROR].include?(pipeline_run_status)
-            'FAILED'
-          elsif %w[RUNNING LOADED].include?(pipeline_run_status)
-            'IN PROGRESS'
-          elsif pipeline_run_status == 'RUNNABLE'
-            'INITIALIZING'
-          end
+        # data processed before pipeline_run_stages were instated
+        pipeline_run_entry[:result_status_description] = pipeline_run.status_display_pre_run_stages
       end
       pipeline_run_entry[:finalized] = pipeline_run.finalized
       pipeline_run_entry[:report_ready] = report_ready_pipeline_run_ids.include?(pipeline_run.id)
     else
-      pipeline_run_entry[:job_status_description] = 'WAITING'
+      pipeline_run_entry[:result_status_description] = 'WAITING'
       pipeline_run_entry[:finalized] = 0
       pipeline_run_entry[:report_ready] = 0
     end
@@ -288,8 +265,14 @@ module SamplesHelper
   end
 
   def report_ready_multiget(pipeline_run_ids)
-    # query db to get ids of pipeline_runs for which "report_ready?" is true
-    PipelineRun.where(id: pipeline_run_ids).where("job_status = '#{PipelineRun::STATUS_CHECKED}' or id in (select pipeline_run_id from pipeline_run_stages where pipeline_run_stages.step_number = pipeline_runs.ready_step and pipeline_run_stages.job_status = '#{PipelineRun::STATUS_LOADED}')").pluck(:id)
+    # query db to get ids of pipeline_runs for which the report is ready
+    report_ready_result_status = "\"#{PipelineRun::REPORT_READY_LOADER}\":\"#{PipelineRun::STATUS_LOADED}\""
+    report_ready_clause = "results_finalized = 1 or result_status like '%#{report_ready_result_status}%'"
+
+    clause_for_old_results = "job_status = '#{PipelineRun::STATUS_CHECKED}' or job_status like '%|READY%'"
+    # TODO: migrate old runs so we don't need to deal with them separately in the code
+
+    PipelineRun.where(id: pipeline_run_ids).where("#{report_ready_clause} or #{clause_for_old_results}").pluck(:id)
   end
 
   def top_pipeline_runs_multiget(sample_ids)

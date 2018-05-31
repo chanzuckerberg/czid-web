@@ -33,12 +33,14 @@ class PipelineRun < ApplicationRecord
   STATUS_RUNNABLE = 'RUNNABLE'.freeze
   STATUS_ERROR = 'ERROR'.freeze # when aegea batch describe failed
   STATUS_LOADED = 'LOADED'.freeze
+  STATUS_LOADING = 'LOADING'.freeze
   STATUS_READY = 'READY'.freeze
   POSTPROCESS_STATUS_LOADED = 'LOADED'.freeze
   INPUT_TRUNCATED_FILE = 'input_truncated.txt'.freeze
   PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
+  REPORT_READY_LOADER = "db_load_alignment".freeze
 
-  before_create :create_run_stages
+  before_create :initialize_result_status, :create_run_stages
 
   def as_json(options = {})
     super(options.merge(except: [:command, :command_stdout, :command_error, :job_description]))
@@ -71,8 +73,19 @@ class PipelineRun < ApplicationRecord
     finalized == 1
   end
 
+  def results_finalized?
+    results_finalized == 1
+  end
+
   def failed?
     /FAILED/ =~ job_status
+  end
+
+  def initialize_result_status
+    # We explicitly set a value for result_status so that we can unambiguously
+    # identify pipeline_runs that predate result_status by the fact
+    # that their result_status is nil.
+    self.result_status = {}.to_json
   end
 
   def create_run_stages
@@ -81,7 +94,7 @@ class PipelineRun < ApplicationRecord
     unless sample.host_genome && sample.host_genome.name == HostGenome::NO_HOST_NAME
       run_stages << PipelineRunStage.new(
         step_number: 1,
-        name: 'Host Filtering',
+        name: PipelineRunStage::HOST_FILTERING_STAGE_NAME,
         job_command_func: 'host_filtering_command',
         load_db_command_func: 'db_load_host_filtering',
         output_func: 'host_filtering_outputs'
@@ -91,7 +104,7 @@ class PipelineRun < ApplicationRecord
     # Alignment and Merging
     run_stages << PipelineRunStage.new(
       step_number: 2,
-      name: 'GSNAPL/RAPSEARCH alignment',
+      name: PipelineRunStage::ALIGNMENT_STAGE_NAME,
       job_command_func: 'alignment_command',
       load_db_command_func: 'db_load_alignment',
       output_func: 'alignment_outputs'
@@ -100,23 +113,14 @@ class PipelineRun < ApplicationRecord
     # Taxon Fastas and Alignment Visualization
     run_stages << PipelineRunStage.new(
       step_number: 3,
-      name: 'Post Processing',
+      name: PipelineRunStage::POSTPROCESS_STAGE_NAME,
       job_command_func: 'postprocess_command',
       load_db_command_func: 'db_load_postprocess',
       output_func: 'postprocess_outputs'
     )
 
-    # De-Novo Assembly
-    # run_stages << PipelineRunStage.new(
-    #  step_number: 4,
-    #  name: 'De-Novo Assembly',
-    #  job_command_func: 'assembly_command',
-    #  load_db_command_func: 'db_load_assembly',
-    #  output_func: 'assembly_outputs'
-    # )
-
     self.pipeline_run_stages = run_stages
-    # we consider the job successful after stage 2 completes, even if subsequent stages fail
+    # we consider the main report to become ready after stage 2 completes, even if subsequent stages fail
     # this is the only meaning of "ready_step"
     self.ready_step = 2
   end
@@ -137,7 +141,7 @@ class PipelineRun < ApplicationRecord
     pipeline_run_stages.order(:step_number).each do |prs|
       return prs unless prs.succeeded?
     end
-    # All stages have succeded
+    # If all stages have succeded:
     nil
   end
 
@@ -153,38 +157,255 @@ class PipelineRun < ApplicationRecord
   end
 
   def report_ready?
-    job_status == STATUS_CHECKED || (ready_step && active_stage && active_stage.step_number > ready_step)
+    clause_for_old_runs = (job_status == STATUS_CHECKED || (ready_step && pipeline_run_stages.find_by(step_number: ready_step) && pipeline_run_stages.find_by(step_number: ready_step).job_status == STATUS_LOADED))
+    # TODO: migrate old runs so we don't need to deal with them separately in the code
+    results_finalized == 1 || result_status_for(REPORT_READY_LOADER) || clause_for_old_runs
   end
 
   def succeeded?
     job_status == STATUS_CHECKED
   end
 
-  def update_job_status
-    prs = active_stage
-    all_stages_succeeded = prs.nil?
-    if all_stages_succeeded
-      self.finalized = 1
-      self.job_status = STATUS_CHECKED
+  def db_load_host_filtering
+    # Load version info applicable to host filtering
+    version_s3_path = "#{host_filter_output_s3_path}/#{VERSION_JSON_NAME}"
+    self.version = `aws s3 cp #{version_s3_path} -`
+
+    # Check if input was truncated
+    truncation_file = "#{host_filter_output_s3_path}/#{INPUT_TRUNCATED_FILE}"
+    _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", truncation_file)
+    self.truncated = `aws s3 cp #{truncation_file} -`.split("\n")[0].to_i if status.exitstatus.zero?
+    save
+
+    # Load ERCC counts
+    load_ercc_counts
+  end
+
+  def output_json_name
+    multihit? ? MULTIHIT_OUTPUT_JSON_NAME : OUTPUT_JSON_NAME
+  end
+
+  def invalid_family_call?(tcnt)
+    # TODO:  Better family support.
+    tcnt['family_taxid'].to_i < TaxonLineage::INVALID_CALL_BASE_ID
+  rescue
+    false
+  end
+
+  def load_job_stats(stats_json_s3_path)
+    downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, local_json_path)
+    return unless downloaded_stats_path
+    stats_array = JSON.parse(File.read(downloaded_stats_path))
+    update(total_reads: (stats_array[0] || {})['total_reads'] || 0)
+    stats_array = stats_array.select { |entry| entry.key?("task") }
+    job_stats.destroy_all
+    update(job_stats_attributes: stats_array)
+    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_stats_path}")
+  end
+
+  def load_taxon_counts
+    output_json_s3_path = "#{alignment_output_s3_path}/#{output_json_name}"
+    downloaded_json_path = PipelineRun.download_file(output_json_s3_path, local_json_path)
+    return unless downloaded_json_path
+
+    json_dict = JSON.parse(File.read(downloaded_json_path))
+    pipeline_output_dict = json_dict['pipeline_output']
+    pipeline_output_dict.slice!('remaining_reads', 'total_reads', 'taxon_counts_attributes')
+    self.total_reads = pipeline_output_dict['total_reads']
+    self.remaining_reads = pipeline_output_dict['remaining_reads']
+    self.unmapped_reads = count_unmapped_reads
+    self.fraction_subsampled = subsample_fraction
+    save
+
+    version_s3_path = "#{alignment_output_s3_path}/#{VERSION_JSON_NAME}"
+    update(version: `aws s3 cp #{version_s3_path} -`)
+
+    # only keep counts at certain taxonomic levels
+    taxon_counts_attributes_filtered = []
+    acceptable_tax_levels = [TaxonCount::TAX_LEVEL_SPECIES]
+    acceptable_tax_levels << TaxonCount::TAX_LEVEL_GENUS if multihit?
+    acceptable_tax_levels << TaxonCount::TAX_LEVEL_FAMILY if multihit?
+    pipeline_output_dict['taxon_counts_attributes'].each do |tcnt|
+      # TODO:  Better family support.
+      if acceptable_tax_levels.include?(tcnt['tax_level'].to_i) && !invalid_family_call?(tcnt)
+        taxon_counts_attributes_filtered << tcnt
+      end
+    end
+    update(taxon_counts_attributes: taxon_counts_attributes_filtered)
+    update(updated_at: Time.now.utc) # for TaxonLineage date range comparison
+
+    # aggregate the data at genus level
+    generate_aggregate_counts('genus') unless multihit?
+    # merge more accurate name information from lineages table
+    update_names
+    # denormalize superkingdom_taxid into taxon_counts
+    if multihit?
+      update_superkingdoms
+    else
+      update_genera
+    end
+    # label taxa as phage or non-phage
+    update_is_phage
+
+    # rm the json
+    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_json_path}")
+  end
+
+  def db_load_alignment
+    load_taxon_counts
+  end
+
+  def db_load_postprocess
+    byteranges_json_s3_path = "#{postprocess_output_s3_path}/#{TAXID_BYTERANGE_JSON_NAME}"
+    downloaded_byteranges_path = PipelineRun.download_file(byteranges_json_s3_path, local_json_path)
+    taxon_byteranges_csv_file = "#{local_json_path}/taxon_byteranges"
+    hash_array_json2csv(downloaded_byteranges_path, taxon_byteranges_csv_file, %w[taxid hit_type first_byte last_byte])
+    ` cd #{local_json_path};
+      sed -e 's/$/,#{id}/' -i taxon_byteranges;
+      mysqlimport --replace --local --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --columns=taxid,hit_type,first_byte,last_byte,pipeline_run_id --fields-terminated-by=',' idseq_#{Rails.env} taxon_byteranges;
+    `
+    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_byteranges_path}")
+  end
+
+  def s3_output_for(db_load_command)
+    case db_load_command
+    when "db_load_host_filtering"
+      "#{host_filter_output_s3_path}/#{STATS_JSON_NAME}"
+    when "db_load_alignment"
+      "#{alignment_output_s3_path}/#{output_json_name}"
+    when "db_load_postprocess"
+      "#{postprocess_output_s3_path}/#{TAXID_BYTERANGE_JSON_NAME}"
+    end
+  end
+
+  def output_ready?(db_load_command)
+    file_generated_since_run(s3_output_for(db_load_command))
+  end
+
+  def update_result_status(field, value)
+    status_hash = result_status_hash
+    status_hash[field] = value
+    update(result_status: status_hash.to_json)
+  end
+
+  def result_status_for(field)
+    status_hash = result_status_hash
+    status_hash[field]
+  end
+
+  def result_status_hash
+    result_status ? JSON.parse(result_status) : {}
+  end
+
+  def status_display(h = result_status_hash)
+    # Status display for the frontend.
+    # This function would be simpler if we used active_stage (job monitor),
+    # but we want to use result_status instead (result monitor)
+    # so that it becomes easy to expose availability of specific results
+    # with more granularity later if we desire.
+    if h.empty? || h.values.compact.empty?
+      # No status has been set yet
+      "WAITING"
+    elsif [h["db_load_alignment"], h["db_load_host_filtering"]].include?(STATUS_FAILED)
+      # host-filtering or non-host alignment failed
+      "FAILED"
+    elsif h["db_load_alignment"] == STATUS_LOADED && h["db_load_postprocess"] == STATUS_FAILED
+      # report is ready but postprocessing failed
+      "COMPLETE*"
+    elsif h["db_load_postprocess"] == STATUS_LOADED
+      # postprocessing succeeded
+      "COMPLETE"
+    elsif h["db_load_alignment"] == STATUS_LOADED
+      # alignment succeeded, postprocessing in progress
+      "POST PROCESSING"
+    elsif h["db_load_host_filtering"] == STATUS_LOADED
+      # host-filtering succeeded, alignment in progress
+      "ALIGNMENT"
+    else
+      # host-filtering in progress
+      "HOST FILTERING"
+    end
+  end
+
+  def status_display_pre_result_monitor(run_stages)
+    status_by_loader = {}
+    run_stages.each do |rs|
+      status_by_loader[rs.load_db_command_func] = rs.job_status
+    end
+    status_display(status_by_loader)
+  end
+
+  def status_display_pre_run_stages
+    if %w[CHECKED SUCCEEDED].include?(job_status)
+      'COMPLETE'
+    elsif %w[FAILED ERROR].include?(job_status)
+      'FAILED'
+    elsif %w[RUNNING LOADED].include?(job_status)
+      'IN PROGRESS'
+    else
+      'WAITING'
+    end
+  end
+
+  def check_and_enqueue(db_load_command_name)
+    # TODO: handle case where resque crashes and needs to be restarted. What happens to runs that were queued to load results?
+    if output_ready?(db_load_command_name) && ![STATUS_LOADED, STATUS_LOADING].include?(result_status_for(db_load_command_name))
+      update_result_status(db_load_command_name, STATUS_LOADING)
+      Resque.enqueue(ResultMonitorLoader, id, db_load_command_name)
+    end
+  end
+
+  def monitor_results
+    return if results_finalized?
+
+    # When last output has just been loaded, indicate sample completion via results_finalized:
+    if result_status_for("db_load_postprocess") == STATUS_LOADED # last output has been loaded
+      self.results_finalized = 1 # this ensures in_progress will be false and monitor_results won't be run again on this pipeline run
       save
-      if sample.project.complete?
+      if sample.project.results_complete? # the entire project has just completed
         notify_users
         sample.project.create_or_update_project_background if sample.project.background_flag == 1
       end
-    else
-      if prs.failed?
-        self.finalized = 1
-        Airbrake.notify("Sample #{sample.id} failed #{prs.name}")
-      elsif !prs.started?
-        prs.run_job
-      else
-        # still running
-        prs.update_job_status
-      end
-      self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
-      self.job_status += "|#{STATUS_READY}" if report_ready?
-      save
+      return
     end
+
+    # Otherwise go through pipeline result files and load if available.
+
+    # First, get pipeline_version, which will determine S3 locations of output files:
+    update(pipeline_version: fetch_pipeline_version) if pipeline_version.blank?
+
+    # Then update the job stats, which the pipeline can modify incrementally:
+    # [TODO: make it a single file rather than using stage-specific.]
+    host_filtering_job_stats_s3 = "#{host_filter_output_s3_path}/#{STATS_JSON_NAME}"
+    alignment_job_stats_s3 = "#{alignment_output_s3_path}/#{STATS_JSON_NAME}"
+    if file_generated_since_jobstats?(alignment_job_stats_s3)
+      load_job_stats(alignment_job_stats_s3)
+    elsif file_generated_since_jobstats?(host_filtering_job_stats_s3)
+      load_job_stats(host_filtering_job_stats_s3)
+    end
+
+    # Finally, load any new outputs that have become available:
+    check_and_enqueue("db_load_host_filtering")
+    check_and_enqueue("db_load_alignment")
+    check_and_enqueue("db_load_postprocess")
+  end
+
+  def update_job_status
+    prs = active_stage
+    return if prs.nil?
+    if prs.failed?
+      self.job_status = STATUS_FAILED
+      self.finalized = 1
+      Airbrake.notify("Sample #{sample.id} failed #{prs.name}")
+    elsif !prs.started? # we're moving on to a new stage
+      prs.run_job
+    else
+      # still running
+      prs.update_job_status
+    end
+    self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
+    self.job_status += "|#{STATUS_READY}" if report_ready?
+    save
   end
 
   def local_json_path
@@ -205,6 +426,22 @@ class PipelineRun < ApplicationRecord
     begin
       s3_file_time = DateTime.strptime(stdout[0..18], "%Y-%m-%d %H:%M:%S")
       return (s3_file_time && created_at && s3_file_time > created_at)
+    rescue
+      return nil
+    end
+  end
+
+  def file_generated_since_jobstats?(s3_path)
+    # If there is no file, return false
+    stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", s3_path.to_s)
+    return false unless status.exitstatus.zero?
+    # If there is a file and there are no existing job_stats yet, return true
+    existing_jobstats = job_stats
+    return true if existing_jobstats.empty?
+    # If there is a file and there are job_stats, check if the file supersedes the job_stats:
+    begin
+      s3_file_time = DateTime.strptime(stdout[0..18], "%Y-%m-%d %H:%M:%S")
+      return (s3_file_time && existing_jobstats.created_at && s3_file_time > existing_jobstats.created_at)
     rescue
       return nil
     end
@@ -432,8 +669,8 @@ class PipelineRun < ApplicationRecord
       count = fields[1].to_i
       ercc_counts_array << { name: name, count: count }
     end
-    self.ercc_counts_attributes = ercc_counts_array
-    self.total_ercc_reads = ercc_counts_array.map { |entry| entry[:count] }.sum
+    update(ercc_counts_attributes: ercc_counts_array)
+    update(total_ercc_reads: ercc_counts_array.map { |entry| entry[:count] }.sum)
   end
 
   delegate :project_id, to: :sample
