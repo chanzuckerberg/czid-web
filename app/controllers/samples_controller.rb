@@ -172,7 +172,7 @@ class SamplesController < ApplicationController
 
     background_id = check_background_id(@sample)
     @report_page_params = { pipeline_version: @pipeline_version, background_id: background_id } if background_id
-    if @pipeline_run && (((@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?) || @pipeline_run.report_ready?)
+    if @pipeline_run && (((@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.results_finalized?) && !@pipeline_run.failed?) || @pipeline_run.report_ready?)
       if background_id
         @report_present = 1
         @report_ts = @pipeline_run.updated_at.to_i
