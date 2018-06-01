@@ -312,10 +312,7 @@ class PipelineRun < ApplicationRecord
     # but we want to use result_status instead (result monitor)
     # so that it becomes easy to expose availability of specific results
     # with more granularity later if we desire.
-    if h.empty? || h.values.compact.empty?
-      # No status has been set yet
-      "WAITING"
-    elsif [h["taxon_counts"], h["ercc_counts"]].include?(STATUS_FAILED)
+    if [h["taxon_counts"], h["ercc_counts"]].include?(STATUS_FAILED)
       # host-filtering or non-host alignment failed
       "FAILED"
     elsif h["taxon_counts"] == STATUS_LOADED && h["taxon_byteranges"] == STATUS_FAILED
@@ -424,7 +421,8 @@ class PipelineRun < ApplicationRecord
 
   def update_job_status
     prs = active_stage
-    if prs.nil? # all stages succeeded
+    if prs.nil?
+      # all stages succeeded
       self.finalized = 1
       self.job_status = STATUS_CHECKED
       save
@@ -435,7 +433,8 @@ class PipelineRun < ApplicationRecord
       self.job_status = STATUS_FAILED
       self.finalized = 1
       Airbrake.notify("Sample #{sample.id} failed #{prs.name}")
-    elsif !prs.started? # we're moving on to a new stage
+    elsif !prs.started?
+      # we're moving on to a new stage
       prs.run_job
     else
       # still running

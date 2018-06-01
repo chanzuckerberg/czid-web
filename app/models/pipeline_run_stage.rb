@@ -72,22 +72,19 @@ class PipelineRunStage < ApplicationRecord
     "#{s3_folder}/#{basename}"
   end
 
-  def assess_and_update(status_file_suffix, job_status_value)
-    # Return whether stage exited exited with status_file_suffix
-    # AND, if so, record the corresponding job_status_value in the database if it is not there already
-    answer = pipeline_run.file_generated_since_run(stage_status_file(status_file_suffix))
-    if answer && job_status != job_status_value
+  def check_status_file_and_update(status_file_suffix, job_status_value)
+    status_file_present = pipeline_run.file_generated_since_run(stage_status_file(status_file_suffix))
+    if status_file_present && job_status != job_status_value
       update(job_status: job_status_value)
     end
-    answer
   end
 
   def succeeded?
-    assess_and_update(JOB_SUCCEEDED_FILE_SUFFIX, STATUS_SUCCEEDED)
+    job_status == STATUS_SUCCEEDED
   end
 
   def failed?
-    assess_and_update(JOB_FAILED_FILE_SUFFIX, STATUS_FAILED)
+    job_status == STATUS_FAILED
   end
 
   def completed?
@@ -140,6 +137,8 @@ class PipelineRunStage < ApplicationRecord
       Airbrake.notify("Invalid precondition for PipelineRunStage.update_job_status #{id} #{job_id} #{job_status}.")
       return
     end
+    check_status_file_and_update(JOB_SUCCEEDED_FILE_SUFFIX, STATUS_SUCCEEDED)
+    check_status_file_and_update(JOB_FAILED_FILE_SUFFIX, STATUS_FAILED)
     if failed? || succeeded?
       terminate_job
       return
