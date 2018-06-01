@@ -635,8 +635,8 @@ module ReportHelper
       tax_info['category_name'] = category[category_id] || 'Uncategorized'
     end
 
-    logger.warn "Missing names for taxon ids #{missing_names.to_a}" unless missing_names.empty?
-    logger.warn "Missing parent for child:  #{missing_parents}" unless missing_parents.empty?
+    Rails.logger.warn "Missing names for taxon ids #{missing_names.to_a}" unless missing_names.empty?
+    Rails.logger.warn "Missing parent for child:  #{missing_parents}" unless missing_parents.empty?
     tax_2d
   end
 
@@ -655,7 +655,7 @@ module ReportHelper
         fake_genera << fake_genus!(tax_info)
       end
     end
-    logger.warn "Missing taxon_counts for genus ids #{missing_genera.to_a} corresponding to taxon ids #{taxids_with_missing_genera.to_a}." unless missing_genera.empty?
+    Rails.logger.warn "Missing taxon_counts for genus ids #{missing_genera.to_a} corresponding to taxon ids #{taxids_with_missing_genera.to_a}." unless missing_genera.empty?
     fake_genera.each do |fake_genus_info|
       taxon_counts_2d[fake_genus_info['genus_taxid']] = fake_genus_info
     end
@@ -912,7 +912,7 @@ module ReportHelper
     end
 
     t5 = wall_clock_ms
-    logger.info "Data processing took #{t5 - t1} seconds (#{t5 - t0} with I/O)."
+    Rails.logger.info "Data processing took #{t5 - t1} seconds (#{t5 - t0} with I/O)."
 
     [rows_passing_filters, rows_total, rows]
   end
