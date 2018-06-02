@@ -24,6 +24,7 @@ gem 'jbuilder', '~> 2.5'
 # Logger
 gem 'logger'
 gem 'multipart-post'
+gem 'silencer'
 # Use mysql as the database for Active Record
 gem 'mysql2'
 gem 'prometheus-client', '0.7.1'

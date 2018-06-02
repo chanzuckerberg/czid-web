@@ -1,17 +1,10 @@
 # Jos to check the status of pipeline runs
-require 'logger'
 require 'English'
 
 class CheckPipelineRuns
-  @logger = Logger.new(STDOUT)
-
   @sleep_quantum = 5.0
 
   @shutdown_requested = false
-
-  class << self
-    attr_reader :logger
-  end
 
   class << self
     attr_accessor :shutdown_requested
@@ -21,7 +14,7 @@ class CheckPipelineRuns
     PipelineRun.in_progress.each do |pr|
       begin
         break if @shutdown_requested
-        @logger.info("  Checking pipeline run #{pr.id} for sample #{pr.sample_id}") unless silent
+        Rails.logger.info("  Checking pipeline run #{pr.id} for sample #{pr.sample_id}") unless silent
         pr.update_job_status
       rescue
         Airbrake.notify("Failed to update pipeline run #{pr.id}")
@@ -50,22 +43,22 @@ class CheckPipelineRuns
     new_job_count = runs.count
     return autoscaling_state if new_job_count == last_job_count && ((t_now - t_last) < forced_update_interval)
     if last_job_count.nil?
-      @logger.info("Autoscaling update to #{new_job_count}.")
+      Rails.logger.info("Autoscaling update to #{new_job_count}.")
     elsif last_job_count == new_job_count
-      @logger.info("Forced autoscaling update at #{new_job_count} after #{t_now - t_last} seconds.")
+      Rails.logger.info("Forced autoscaling update at #{new_job_count} after #{t_now - t_last} seconds.")
     else
-      @logger.info("Autoscaling update from #{last_job_count} to #{new_job_count}.")
+      Rails.logger.info("Autoscaling update from #{last_job_count} to #{new_job_count}.")
     end
     autoscaling_state[:t_last] = t_now
     autoscaling_state[:job_count] = new_job_count
     c_stdout, c_stderr, c_status = Open3.capture3("app/jobs/autoscaling.py update #{new_job_count} #{Rails.env}")
-    @logger.info(c_stdout)
-    @logger.error(c_stderr) unless c_status.success? && c_stderr.blank?
+    Rails.logger.info(c_stdout)
+    Rails.logger.error(c_stderr) unless c_status.success? && c_stderr.blank?
     autoscaling_state
   end
 
   def self.run(duration, min_refresh_interval)
-    @logger.info("Checking the active pipeline runs every #{min_refresh_interval} seconds over the next #{duration / 60} minutes.")
+    Rails.logger.info("Checking the active pipeline runs every #{min_refresh_interval} seconds over the next #{duration / 60} minutes.")
     t_now = Time.now.to_f # unixtime
     # Will try to return as soon as duration seconds have elapsed, but not any sooner.
     t_end = t_now + duration
@@ -93,7 +86,7 @@ class CheckPipelineRuns
       sleep [t_end - t_now, @sleep_quantum].min
       t_now = Time.now.to_f
     end
-    @logger.info("Exited loop after #{iter_count} iterations.")
+    Rails.logger.info("Exited loop after #{iter_count} iterations.")
   end
 end
 
@@ -113,7 +106,7 @@ task "pipeline_monitor", [:duration] => :environment do |_t, args|
   else
     # infinite duration
     # HACK
-    CheckPipelineRuns.logger.info("HACK: Sleeping 30 seconds on daemon startup for prior incarnations to drain.")
+    Rails.logger.info("HACK: Sleeping 30 seconds on daemon startup for prior incarnations to drain.")
     sleep 30
     until CheckPipelineRuns.shutdown_requested
       system("rake pipeline_monitor[finite_duration]")

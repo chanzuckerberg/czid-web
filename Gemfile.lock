@@ -798,6 +798,7 @@ GEM
     selenium-webdriver (3.8.0)
       childprocess (~> 0.5)
       rubyzip (~> 1.0)
+    silencer (1.0.1)
     simple_token_authentication (1.15.1)
       actionmailer (>= 3.2.6, < 6)
       actionpack (>= 3.2.6, < 6)
@@ -904,6 +905,7 @@ DEPENDENCIES
   rspec-rails (>= 3.7.2)
   rubocop (= 0.49.1)
   selenium-webdriver
+  silencer
   simple_token_authentication (~> 1.15, >= 1.15.1)
   spring
   spring-watcher-listen (~> 2.0.0)
