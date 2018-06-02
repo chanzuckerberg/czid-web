@@ -118,9 +118,6 @@ class PipelineRun < ApplicationRecord
     )
 
     self.pipeline_run_stages = run_stages
-    # we consider the main report to become ready after stage 2 completes, even if subsequent stages fail
-    # this is the only meaning of "ready_step"
-    self.ready_step = 2
   end
 
   def completed?
@@ -155,9 +152,9 @@ class PipelineRun < ApplicationRecord
   end
 
   def report_ready?
-    clause_for_old_runs = (job_status == STATUS_CHECKED || (ready_step && pipeline_run_stages.find_by(step_number: ready_step) && pipeline_run_stages.find_by(step_number: ready_step).job_status == STATUS_LOADED))
+    clause_for_old_runs = result_status.nil? && (job_status == STATUS_CHECKED || (ready_step && pipeline_run_stages.find_by(step_number: ready_step) && pipeline_run_stages.find_by(step_number: ready_step).job_status == STATUS_LOADED))
     # TODO: migrate old runs so we don't need to deal with them separately in the code
-    results_finalized == 1 || result_status_for(REPORT_READY_OUTPUT) == PipelineRun::STATUS_LOADED || clause_for_old_runs
+    results_finalized == 1 || result_status_for(REPORT_READY_OUTPUT) == STATUS_LOADED || clause_for_old_runs
   end
 
   def succeeded?
@@ -306,43 +303,22 @@ class PipelineRun < ApplicationRecord
     result_status ? JSON.parse(result_status) : {}
   end
 
-  def status_display(h = result_status_hash)
-    # Status display for the frontend.
-    # This function would be simpler if we used active_stage (job monitor),
-    # but we want to use result_status instead (result monitor)
-    # so that it becomes easy to expose availability of specific results
-    # with more granularity later if we desire.
-    if [h["taxon_counts"], h["ercc_counts"]].include?(STATUS_FAILED)
-      # host-filtering or non-host alignment failed
+  def status_display
+    if job_status.end_with?(STATUS_FAILED)
       "FAILED"
-    elsif h["taxon_counts"] == STATUS_LOADED && h["taxon_byteranges"] == STATUS_FAILED
-      # report is ready but postprocessing failed
+    elsif job_status.end_with?("#{STATUS_FAILED}|#{STATUS_READY}")
       "COMPLETE*"
-    elsif h["taxon_byteranges"] == STATUS_LOADED
-      # postprocessing succeeded
+    elsif job_status == STATUS_CHECKED
       "COMPLETE"
-    elsif h["taxon_counts"] == STATUS_LOADED
-      # alignment succeeded, postprocessing in progress
+    elsif job_status.include?(PipelineRunStage::POSTPROCESS_STAGE_NAME)
       "POST PROCESSING"
-    elsif h["ercc_counts"] == STATUS_LOADED
-      # host-filtering succeeded, alignment in progress
+    elsif job_status.include?(PipelineRunStage::ALIGNMENT_STAGE_NAME)
       "ALIGNMENT"
-    else
-      # host-filtering in progress
+    elsif job_status.include?(PipelineRunStage::HOST_FILTERING_STAGE_NAME)
       "HOST FILTERING"
+    else
+      "WAITING"
     end
-  end
-
-  def status_display_pre_result_monitor(run_stages)
-    # TODO: remove the need for this function by migrating old runs
-    status_by_loader = {}
-    old_loaders_by_output = { "db_load_host_filtering" => "ercc_counts",
-                              "db_load_alignment" => "taxon_counts",
-                              "db_load_postprocess" => "taxon_byteranges" }
-    run_stages.each do |rs|
-      status_by_loader[old_loaders_by_output[rs.load_db_command_func]] = rs.job_status
-    end
-    status_display(status_by_loader)
   end
 
   def status_display_pre_run_stages

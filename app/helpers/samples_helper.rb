@@ -214,13 +214,7 @@ module SamplesHelper
       if run_stages.present?
         pipeline_run_entry[:total_runtime] = get_total_runtime(pipeline_run, run_stages)
         pipeline_run_entry[:with_assembly] = pipeline_run.assembly? ? 1 : 0
-        pipeline_run_entry[:result_status_description] = if pipeline_run.result_status
-                                                           pipeline_run.status_display
-                                                         else
-                                                           # data processed before result monitor was instated
-                                                           # TODO: migrate old runs and delete this code
-                                                           pipeline_run.status_display_pre_result_monitor(run_stages)
-                                                         end
+        pipeline_run_entry[:result_status_description] = pipeline_run.status_display
       else
         # data processed before pipeline_run_stages were instated
         # TODO: migrate old runs and delete this code
