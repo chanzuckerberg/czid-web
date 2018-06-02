@@ -377,8 +377,16 @@ class PipelineRun < ApplicationRecord
   def monitor_results
     return if results_finalized?
 
-    # Get pipeline_version, which determines S3 locations of output files:
-    update(pipeline_version: fetch_pipeline_version) if pipeline_version.blank?
+    # Get pipeline_version, which determines S3 locations of output files.
+    # If pipeline version is not present, we cannot load results yet.
+    # [ We use "file_generated_since_run(pipeline_version_file)" because "pipeline_version_file"
+    #   is not in the versioned result folder, so it gets overwritten with each new run.
+    #   TODO: change that, so that we can get rid of "file_generated_since_run".
+    # ]
+    if pipeline_version.blank? && file_generated_since_run(pipeline_version_file)
+      update(pipeline_version: fetch_pipeline_version)
+    end
+    return if pipeline_version.blank?
 
     # Load any new outputs that have become available:
     outputs = target_outputs
@@ -623,8 +631,12 @@ class PipelineRun < ApplicationRecord
                                         'NR' => "#{postprocess_output_s3_path}/#{Sample::SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR}" } }
   end
 
+  def pipeline_version_file
+    "#{sample.sample_output_s3_path}/pipeline_version.txt"
+  end
+
   def fetch_pipeline_version
-    whole_version = `aws s3 cp #{sample.sample_output_s3_path}/pipeline_version.txt -`.strip
+    whole_version = `aws s3 cp #{pipeline_version_file} -`.strip
     whole_version =~ /(^\d+\.\d+).*/
     return Regexp.last_match(1)
   rescue
