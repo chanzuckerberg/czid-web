@@ -101,6 +101,11 @@ task "pipeline_monitor", [:duration] => :environment do |_t, args|
   # make sure the system is not overwhelmed under any cirmustances
   wait_before_respawn = 5
   additional_wait_after_failure = 25
+
+  # don't show all the SQL debug info in the logs, and throttle data sent to Honeycomb
+  Rails.logger.level = [1, Rails.logger.level].max
+  HoneycombRails.config.sample_rate = 120
+
   if args[:duration] == "finite_duration"
     CheckPipelineRuns.run(respawn_interval - wait_before_respawn, 60.0 / checks_per_minute)
   else
