@@ -304,6 +304,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def status_display
+    return "WAITING" unless job_status
     if job_status.end_with?(STATUS_FAILED)
       "FAILED"
     elsif job_status.end_with?("#{STATUS_FAILED}|#{STATUS_READY}")
