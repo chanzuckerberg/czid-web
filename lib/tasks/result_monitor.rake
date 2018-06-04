@@ -1,17 +1,10 @@
 # Check for pipeline results and load them if available
-require 'logger'
 require 'English'
 
 class MonitorPipelineResults
-  @logger = Logger.new(STDOUT)
-
   @sleep_quantum = 5.0
 
   @shutdown_requested = false
-
-  class << self
-    attr_reader :logger
-  end
 
   class << self
     attr_accessor :shutdown_requested
@@ -21,7 +14,7 @@ class MonitorPipelineResults
     PipelineRun.in_progress.each do |pr|
       begin
         break if @shutdown_requested
-        @logger.info("Monitoring results: pipeline run #{pr.id}, sample #{pr.sample_id}") unless silent
+        Rails.logger.info("Monitoring results: pipeline run #{pr.id}, sample #{pr.sample_id}") unless silent
         pr.monitor_results
       rescue
         Airbrake.notify("Failed monitor results for pipeline run #{pr.id}")
@@ -34,7 +27,7 @@ class MonitorPipelineResults
   end
 
   def self.run(duration, min_refresh_interval)
-    @logger.info("Monitoring results for the active pipeline runs every #{min_refresh_interval} seconds over the next #{duration / 60} minutes.")
+    Rails.logger.info("Monitoring results for the active pipeline runs every #{min_refresh_interval} seconds over the next #{duration / 60} minutes.")
     t_now = Time.now.to_f # unixtime
     # Will try to return as soon as duration seconds have elapsed, but not any sooner.
     t_end = t_now + duration
@@ -60,7 +53,7 @@ class MonitorPipelineResults
       sleep [t_end - t_now, @sleep_quantum].min
       t_now = Time.now.to_f
     end
-    @logger.info("Exited result_monitor loop after #{iter_count} iterations.")
+    Rails.logger.info("Exited result_monitor loop after #{iter_count} iterations.")
   end
 end
 
@@ -75,12 +68,17 @@ task "result_monitor", [:duration] => :environment do |_t, args|
   # make sure the system is not overwhelmed under any cirmustances
   wait_before_respawn = 5
   additional_wait_after_failure = 25
+
+  # don't show all the SQL debug info in the logs, and throttle data sent to Honeycomb
+  Rails.logger.level = [1, Rails.logger.level].max
+  HoneycombRails.config.sample_rate = 120
+
   if args[:duration] == "finite_duration"
     MonitorPipelineResults.run(respawn_interval - wait_before_respawn, 60.0 / checks_per_minute)
   else
     # infinite duration
     # HACK
-    MonitorPipelineResults.logger.info("HACK: Sleeping 30 seconds on daemon startup for prior incarnations to drain.")
+    Rails.logger.info("HACK: Sleeping 30 seconds on daemon startup for prior incarnations to drain.")
     sleep 30
     until MonitorPipelineResults.shutdown_requested
       system("rake result_monitor[finite_duration]")
