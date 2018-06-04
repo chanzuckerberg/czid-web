@@ -266,7 +266,7 @@ module SamplesHelper
   def report_ready_multiget(pipeline_run_ids)
     # query db to get ids of pipeline_runs for which the report is ready
     report_ready_result_status = "\"#{PipelineRun::REPORT_READY_OUTPUT}\":\"#{PipelineRun::STATUS_LOADED}\""
-    report_ready_clause = "results_finalized = 1 or result_status like '%#{report_ready_result_status}%'"
+    report_ready_clause = "result_status like '%#{report_ready_result_status}%'"
 
     clause_for_old_results = "job_status = '#{PipelineRun::STATUS_CHECKED}' or job_status like '%|READY%'"
     # TODO: migrate old runs so we don't need to deal with them separately in the code

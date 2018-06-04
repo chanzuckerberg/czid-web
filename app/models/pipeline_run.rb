@@ -159,7 +159,7 @@ class PipelineRun < ApplicationRecord
   def report_ready?
     clause_for_old_runs = result_status.nil? && (job_status == STATUS_CHECKED || (ready_step && pipeline_run_stages.find_by(step_number: ready_step) && pipeline_run_stages.find_by(step_number: ready_step).job_status == STATUS_LOADED))
     # TODO: migrate old runs so we don't need to deal with them separately in the code
-    results_finalized == 1 || result_status_for(REPORT_READY_OUTPUT) == STATUS_LOADED || clause_for_old_runs
+    result_status_for(REPORT_READY_OUTPUT) == STATUS_LOADED || clause_for_old_runs
   end
 
   def succeeded?
