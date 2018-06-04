@@ -9,6 +9,7 @@ class ResultMonitorLoader
     pr = PipelineRun.find(pipeline_run_id)
     return if pr.completed?
     begin
+      pr.update_result_status(output, PipelineRun::STATUS_LOADING)
       pr.send(PipelineRun::LOADERS_BY_OUTPUT[output])
       pr.update_result_status(output, PipelineRun::STATUS_LOADED)
     rescue

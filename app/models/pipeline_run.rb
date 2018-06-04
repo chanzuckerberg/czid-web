@@ -34,6 +34,7 @@ class PipelineRun < ApplicationRecord
   STATUS_ERROR = 'ERROR'.freeze # when aegea batch describe failed
   STATUS_LOADED = 'LOADED'.freeze
   STATUS_LOADING = 'LOADING'.freeze
+  STATUS_LOADING_QUEUED = 'LOADING_QUEUED'.freeze
   STATUS_READY = 'READY'.freeze
   POSTPROCESS_STATUS_LOADED = 'LOADED'.freeze
   INPUT_TRUNCATED_FILE = 'input_truncated.txt'.freeze
@@ -335,10 +336,16 @@ class PipelineRun < ApplicationRecord
     end
   end
 
+  def need_to_load?(output)
+    current_status = result_status_for(output)
+    no_loading_job_yet = ![STATUS_LOADED, STATUS_LOADING, STATUS_LOADING_QUEUED, STATUS_FAILED].include?(current_status)
+    loading_job_got_lost = (current_status == STATUS_LOADING_QUEUED && updated_at > 2.hours.ago)
+    no_loading_job_yet || loading_job_got_lost
+  end
+
   def check_and_enqueue(output)
-    # TODO: handle case where resque crashes and needs to be restarted. What happens to runs that were queued to load results?
-    if output_ready?(output) && ![STATUS_LOADED, STATUS_LOADING].include?(result_status_for(output))
-      update_result_status(output, STATUS_LOADING)
+    if output_ready?(output) && need_to_load?(output)
+      update_result_status(output, STATUS_LOADING_QUEUED)
       Resque.enqueue(ResultMonitorLoader, id, output)
     end
   end
