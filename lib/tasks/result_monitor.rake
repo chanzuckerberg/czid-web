@@ -11,7 +11,7 @@ class MonitorPipelineResults
   end
 
   def self.update_jobs(silent)
-    PipelineRun.in_progress.each do |pr|
+    PipelineRun.results_in_progress.each do |pr|
       begin
         break if @shutdown_requested
         Rails.logger.info("Monitoring results: pipeline run #{pr.id}, sample #{pr.sample_id}") unless silent
