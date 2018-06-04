@@ -115,6 +115,9 @@ services:
       - redis
     environment:
       - SAMPLES_BUCKET_NAME=idseq-samples-development
+      - IDSEQ_HONEYCOMB_DB_DATA_SET
+      - IDSEQ_HONEYCOMB_DATA_SET
+      - IDSEQ_HONEYCOMB_WRITE_KEY
       - CI
       - CONTINUOUS_INTEGRATION
       - RACK_ENV
@@ -191,6 +194,9 @@ services:
       - redis
     environment:
       - SAMPLES_BUCKET_NAME=idseq-samples-development
+      - IDSEQ_HONEYCOMB_DB_DATA_SET
+      - IDSEQ_HONEYCOMB_DATA_SET
+      - IDSEQ_HONEYCOMB_WRITE_KEY
       - CI
       - CONTINUOUS_INTEGRATION
       - RACK_ENV
