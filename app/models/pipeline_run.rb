@@ -33,6 +33,7 @@ class PipelineRun < ApplicationRecord
   STATUS_RUNNABLE = 'RUNNABLE'.freeze
   STATUS_ERROR = 'ERROR'.freeze # when aegea batch describe failed
   STATUS_LOADED = 'LOADED'.freeze
+  STATUS_EMPTY = 'EMPTY'.freeze
   STATUS_LOADING = 'LOADING'.freeze
   STATUS_LOADING_QUEUED = 'LOADING_QUEUED'.freeze
   STATUS_READY = 'READY'.freeze
@@ -94,7 +95,11 @@ class PipelineRun < ApplicationRecord
     # We explicitly set a value for result_status so that we can unambiguously
     # identify pipeline_runs that predate result_status by the fact
     # that their result_status is nil.
-    self.result_status = {}.to_json
+    h = {}
+    target_outputs.each do |o|
+      h[o] = STATUS_EMPTY
+    end
+    self.result_status = h.to_json
   end
 
   def create_run_stages
@@ -308,23 +313,44 @@ class PipelineRun < ApplicationRecord
     result_status ? JSON.parse(result_status) : {}
   end
 
-  def status_display
-    return "WAITING" unless job_status
-    if job_status.end_with?(STATUS_FAILED)
-      "FAILED"
-    elsif job_status.end_with?("#{STATUS_FAILED}|#{STATUS_READY}")
-      "COMPLETE*"
-    elsif job_status == STATUS_CHECKED
-      "COMPLETE"
-    elsif job_status.include?(PipelineRunStage::POSTPROCESS_STAGE_NAME)
-      "POST PROCESSING"
-    elsif job_status.include?(PipelineRunStage::ALIGNMENT_STAGE_NAME)
-      "ALIGNMENT"
-    elsif job_status.include?(PipelineRunStage::HOST_FILTERING_STAGE_NAME)
-      "HOST FILTERING"
+  def status_display(h = result_status_hash, results_finalized_var = results_finalized)
+    # Status display for the frontend.
+    # This function would be simpler if we used active_stage (job monitor),
+    # but we want to use result_status instead (result monitor)
+    # so that it becomes easy to expose availability of specific results
+    # with more granularity later if we desire.
+    if results_finalized_var == 1
+      if h["taxon_byteranges"] == STATUS_LOADED
+        "COMPLETE"
+      elsif h["taxon_counts"] == STATUS_LOADED
+        "COMPLETE*"
+      else
+        "FAILED"
+      end
     else
-      "WAITING"
+      if h["taxon_counts"] == STATUS_LOADED
+        # alignment succeeded, postprocessing in progress
+        "POST PROCESSING"
+      elsif h["ercc_counts"] == STATUS_LOADED
+        # host-filtering succeeded, alignment in progress
+        "ALIGNMENT"
+      else
+        # host-filtering in progress
+        "HOST FILTERING"
+      end
     end
+  end
+
+  def status_display_pre_result_monitor(run_stages)
+    # TODO: remove the need for this function by migrating old runs
+    status_by_loader = {}
+    old_loaders_by_output = { "db_load_host_filtering" => "ercc_counts",
+                              "db_load_alignment" => "taxon_counts",
+                              "db_load_postprocess" => "taxon_byteranges" }
+    run_stages.each do |rs|
+      status_by_loader[old_loaders_by_output[rs.load_db_command_func]] = rs.job_status
+    end
+    status_display(status_by_loader, finalized)
   end
 
   def status_display_pre_run_stages
