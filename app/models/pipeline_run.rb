@@ -327,17 +327,15 @@ class PipelineRun < ApplicationRecord
       else
         "FAILED"
       end
+    elsif h["taxon_counts"] == STATUS_LOADED
+      # alignment succeeded, postprocessing in progress
+      "POST PROCESSING"
+    elsif h["ercc_counts"] == STATUS_LOADED
+      # host-filtering succeeded, alignment in progress
+      "ALIGNMENT"
     else
-      if h["taxon_counts"] == STATUS_LOADED
-        # alignment succeeded, postprocessing in progress
-        "POST PROCESSING"
-      elsif h["ercc_counts"] == STATUS_LOADED
-        # host-filtering succeeded, alignment in progress
-        "ALIGNMENT"
-      else
-        # host-filtering in progress
-        "HOST FILTERING"
-      end
+      # host-filtering in progress
+      "HOST FILTERING"
     end
   end
 
