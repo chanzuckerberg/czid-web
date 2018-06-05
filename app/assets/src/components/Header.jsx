@@ -178,12 +178,12 @@ class Header extends React.Component {
                   {this.userSignedIn &&
                     this.demoUser !== 1 && [
                       <Dropdown.Item
-                        text="New sample"
+                        text="New Sample"
                         key="1"
                         onClick={this.gotoPage.bind(this, "/samples/new")}
                       />,
                       <Dropdown.Item
-                        text="New sample (command line)"
+                        text="New Sample (command line)"
                         key="2"
                         onClick={this.openCliModal}
                       />
@@ -191,18 +191,30 @@ class Header extends React.Component {
                   {this.userDetails &&
                     this.userDetails.admin && (
                       <Dropdown.Item
-                        text="Create user"
+                        text="Create User"
                         onClick={this.gotoPage.bind(this, "/users/new")}
                       />
                     )}
-                  {
-                    <Dropdown.Item
-                      text="Report feedback"
-                      onClick={this.sendMail}
-                    />
-                  }
-                  {<Dropdown.Divider />}
-                  {<Dropdown.Item text="Logout" onClick={this.signOut} />}
+                  <Dropdown.Item
+                    text="Report Feedback"
+                    onClick={this.sendMail}
+                  />
+                  <Dropdown.Item
+                    text="Terms of Service"
+                    onClick={this.gotoPage.bind(
+                      this,
+                      "https://s3-us-west-2.amazonaws.com/idseq-database/Terms.pdf"
+                    )}
+                  />
+                  <Dropdown.Item
+                    text="Privacy Policy"
+                    onClick={this.gotoPage.bind(
+                      this,
+                      "https://s3-us-west-2.amazonaws.com/idseq-database/Privacy.pdf"
+                    )}
+                  />
+                  <Dropdown.Divider />
+                  <Dropdown.Item text="Logout" onClick={this.signOut} />
                 </Dropdown.Menu>
               </Dropdown>
             </div>
