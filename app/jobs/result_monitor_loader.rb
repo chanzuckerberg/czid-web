@@ -7,6 +7,7 @@ class ResultMonitorLoader
   def self.perform(pipeline_run_id, output)
     @logger.info("Loading #{output} for pipeline run #{pipeline_run_id}")
     pr = PipelineRun.find(pipeline_run_id)
+    return unless pr.result_status_for(output) == PipelineRun::STATUS_LOADING_QUEUED
     begin
       pr.update_result_status(output, PipelineRun::STATUS_LOADING)
       pr.send(PipelineRun::LOADERS_BY_OUTPUT[output])
