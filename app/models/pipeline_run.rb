@@ -367,7 +367,7 @@ class PipelineRun < ApplicationRecord
   def need_to_load?(output)
     current_status = result_status_for(output)
     no_loading_job_yet = ![STATUS_LOADED, STATUS_LOADING, STATUS_LOADING_QUEUED, STATUS_FAILED].include?(current_status)
-    loading_job_got_lost = (current_status == STATUS_LOADING_QUEUED && updated_at > 2.hours.ago)
+    loading_job_got_lost = (current_status == STATUS_LOADING_QUEUED && updated_at > 24.hours.ago)
     no_loading_job_yet || loading_job_got_lost
   end
 
