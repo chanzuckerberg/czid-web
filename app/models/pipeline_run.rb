@@ -415,7 +415,7 @@ class PipelineRun < ApplicationRecord
 
     # If pipeline monitor has marked a run as finalized,
     # we should do no more than 1 additional check for outputs,
-    # so we should  also mark results as finalized:
+    # so we should also mark results as finalized:
     update(results_finalized: 1) if finalized == 1
 
     # Get pipeline_version, which determines S3 locations of output files.
