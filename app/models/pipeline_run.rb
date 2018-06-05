@@ -430,7 +430,7 @@ class PipelineRun < ApplicationRecord
     return if pipeline_version.blank?
 
     # Load any new outputs that have become available:
-    outputs = target_outputs
+    outputs = result_status_hash.keys
     outputs.each do |o|
       check_and_enqueue(o)
     end
