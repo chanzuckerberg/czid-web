@@ -5,6 +5,7 @@ import $ from "jquery";
 import Tipsy from "react-tipsy";
 import IconComponent from "./IconComponent";
 import ObjectHelper from "../helpers/ObjectHelper";
+import { Checkbox } from "semantic-ui-react";
 
 class SampleUpload extends React.Component {
   constructor(props, context) {
@@ -94,7 +95,8 @@ class SampleUpload extends React.Component {
       sampleName: this.selected.name || "",
       disableProjectSelect: false,
       omit_subsampling_checked: false,
-      public_checked: false
+      public_checked: false,
+      consentChecked: false
     };
   }
 
@@ -550,8 +552,64 @@ class SampleUpload extends React.Component {
   }
 
   renderSampleForm(updateExistingSample = false) {
-    let terms_blurb =
-      "I agree that the data I am uploading to IDseq has been lawfully collected and that I have all necessary consent and authorization to upload it for the purposes outlined in IDseq's ";
+    let terms_blurb = (
+      <div className="consent-blurb">
+        <input
+          type="checkbox"
+          id="consentChecked"
+          className="filled-in"
+          onChange={this.toggleCheckBox}
+          value={this.state.consentChecked}
+        />
+        <label htmlFor="consentChecked" className="checkbox">
+          <span>
+            I agree that the data I am uploading to IDseq has been lawfully
+            collected and that I have all necessary consent and authorization to
+            upload it for the purposes outlined in IDseq's&nbsp;
+          </span>
+          <a
+            href="https://s3-us-west-2.amazonaws.com/idseq-database/Terms.pdf"
+            target="_blank"
+            className="terms"
+          >
+            Terms of Use.
+          </a>
+        </label>
+      </div>
+    );
+    let submit_button;
+    if (this.state.submitting) {
+      submit_button = (
+        <button
+          type="button"
+          disabled
+          className="new-button blue-button upload-samples-button"
+        >
+          <i className="fa fa-spinner fa-spin fa-lg" />
+        </button>
+      );
+    } else if (this.state.consentChecked) {
+      submit_button = (
+        <button
+          type="submit"
+          onClick={updateExistingSample ? this.handleUpdate : this.handleUpload}
+          className="new-button blue-button upload-samples-button"
+        >
+          {updateExistingSample ? "Update" : "Upload"} Sample
+        </button>
+      );
+    } else {
+      submit_button = (
+        <button
+          type="submit"
+          disabled
+          className="new-button blue-button upload-samples-button"
+        >
+          {updateExistingSample ? "Update" : "Upload"} Sample
+        </button>
+      );
+    }
+
     return (
       <div id="samplesUploader" className="row">
         <div className="col s6 offset-s3 upload-form-container">
@@ -1023,33 +1081,10 @@ class SampleUpload extends React.Component {
                   </div>
                 ) : null}
                 <div className="field">
-                  <div>
-                    <span>{terms_blurb}</span>
-                    <a href="https://www.w3schools.com">Terms of Use</a>
-                  </div>
+                  {terms_blurb}
                   <div className="row">
                     <div className="col no-padding s12">
-                      {this.state.submitting ? (
-                        <button
-                          type="button"
-                          disabled
-                          className="new-button blue-button upload-samples-button"
-                        >
-                          <i className="fa fa-spinner fa-spin fa-lg" />
-                        </button>
-                      ) : (
-                        <button
-                          type="submit"
-                          onClick={
-                            updateExistingSample
-                              ? this.handleUpdate
-                              : this.handleUpload
-                          }
-                          className="new-button blue-button upload-samples-button"
-                        >
-                          {updateExistingSample ? "Update" : "Upload"} Sample
-                        </button>
-                      )}
+                      {submit_button}
                       <button
                         type="button"
                         onClick={() => window.history.back()}

@@ -36,6 +36,10 @@ class Header extends React.Component {
     location.href = `${path}`;
   }
 
+  openNewTab(path) {
+    window.open(path);
+  }
+
   signOut() {
     axios(`${this.props.signoutEndpoint}.json`, {
       method: "DELETE",
@@ -201,17 +205,19 @@ class Header extends React.Component {
                   />
                   <Dropdown.Item
                     text="Terms of Use"
-                    onClick={this.gotoPage.bind(
-                      this,
-                      "https://s3-us-west-2.amazonaws.com/idseq-database/Terms.pdf"
-                    )}
+                    onClick={() =>
+                      this.openNewTab(
+                        "https://s3-us-west-2.amazonaws.com/idseq-database/Terms.pdf"
+                      )
+                    }
                   />
                   <Dropdown.Item
                     text="Privacy Policy"
-                    onClick={this.gotoPage.bind(
-                      this,
-                      "https://s3-us-west-2.amazonaws.com/idseq-database/Privacy.pdf"
-                    )}
+                    onClick={() =>
+                      this.openNewTab(
+                        "https://s3-us-west-2.amazonaws.com/idseq-database/Privacy.pdf"
+                      )
+                    }
                   />
                   <Dropdown.Divider />
                   <Dropdown.Item text="Logout" onClick={this.signOut} />

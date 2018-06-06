@@ -57,6 +57,17 @@
           color: #3867fa !important;
         }
       }
+      .consent-blurb {
+        margin-bottom: 1.5rem;
+        label.checkbox {
+          span {
+            cursor: default;
+          }
+        }
+      }
+      .terms {
+        color: $primary-button !important;
+      }
       .bulkSubmitForm {
         margin-top: 50px;
       }
@@ -181,6 +192,12 @@
             }
             .upload-samples-button {
               margin-right: 10px;
+            }
+            .upload-samples-button-disabled {
+              border: 1px solid #e7e7e7 !important;
+              background: #e7e7e7 !important;
+              color: #b4b4b5 !important;
+              cursor: default !important;
             }
             .host-selector {
               padding-top: 0.8rem;
