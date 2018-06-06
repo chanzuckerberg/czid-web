@@ -36,6 +36,7 @@ Rails.application.routes.draw do
   get 'samples/:id/alignment_viz/:taxon_info', to: 'samples#show_taxid_alignment_viz'
   get 'select', to: 'home#index'
   post '/feedback', to: 'home#feedback'
+  get 'terms' => redirect("https://s3-us-west-2.amazonaws.com/idseq-database/Terms.pdf")
 
   resources :projects do
     get :make_project_reports_csv, on: :member
