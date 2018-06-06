@@ -320,7 +320,7 @@ class PipelineRun < ApplicationRecord
     # so that it becomes easy to expose availability of specific results
     # with more granularity later if we desire.
     if results_finalized_var == 1
-      if h["taxon_byteranges"] == STATUS_LOADED
+      if [h["taxon_byteranges"], h["taxon_counts"]].all? { |s| s == STATUS_LOADED }
         "COMPLETE"
       elsif h["taxon_counts"] == STATUS_LOADED
         "COMPLETE*"
