@@ -57,6 +57,17 @@
           color: #3867fa !important;
         }
       }
+      .consent-blurb {
+        margin-bottom: 1.5rem;
+        label.checkbox {
+          span {
+            cursor: default;
+          }
+        }
+      }
+      .terms-link {
+        color: $primary-button !important;
+      }
       .bulkSubmitForm {
         margin-top: 50px;
       }
