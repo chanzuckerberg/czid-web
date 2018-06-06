@@ -9,7 +9,6 @@ class PipelineRunStage < ApplicationRecord
   STATUS_STARTED = 'STARTED'.freeze
   STATUS_FAILED  = 'FAILED'.freeze
   STATUS_CHECKED = 'CHECKED'.freeze
-  STATUS_LOADED = 'LOADED'.freeze
   STATUS_ERROR = 'ERROR'.freeze
   STATUS_SUCCEEDED = 'SUCCEEDED'.freeze
 

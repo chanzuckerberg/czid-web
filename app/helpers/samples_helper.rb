@@ -219,6 +219,7 @@ module SamplesHelper
                                                          else
                                                            # data processed before result monitor was instated
                                                            # TODO: migrate old runs and delete this code
+                                                           # (chanzuckerberg/idseq-web/issues/1336)
                                                            pipeline_run.status_display_pre_result_monitor(run_stages)
                                                          end
       else

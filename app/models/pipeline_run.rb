@@ -26,20 +26,50 @@ class PipelineRun < ApplicationRecord
   TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined.json'.freeze
   ASSEMBLY_STATUSFILE = 'job-complete'.freeze
   LOCAL_JSON_PATH = '/app/tmp/results_json'.freeze
+  INPUT_TRUNCATED_FILE = 'input_truncated.txt'.freeze
+  PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
+
+  # The PIPELINE MONITOR is responsible for keeping status of AWS Batch jobs
+  # and for submitting jobs that need to be run next.
+  # It accomplishes this using the following:
+  #    function "update_job_status"
+  #    columns "job_status", "finalized"
+  #    records "pipeline_run_stages".
+  # The progression for a pipeline_run_stage's job_status is as follows:
+  # STARTED -> RUNNABLE -> RUNNING -> SUCCEEDED / FAILED (via aegea batch or status files).
+  # Once a stage has finished, the next stage is kicked off.
+  # A pipeline_run's job_status indicates the most recent stage the run was at,
+  # as well as that stage's status. At the end of a successful run, the pipeline_run's
+  # job_status is set to CHECKED. If a late stage failed (e.g. postprocessing), but the
+  # main report is ready, these facts are indicated in the job_status using the suffix
+  # "FAILED|READY". The column "finalized", if set to 1, indicates that the pipeline monitor
+  # no longer needs to check on or update the pipeline_run's job_status.
+
   STATUS_CHECKED = 'CHECKED'.freeze
-  STATUS_SUCCESS = 'SUCCEEDED'.freeze
   STATUS_FAILED = 'FAILED'.freeze
   STATUS_RUNNING = 'RUNNING'.freeze
   STATUS_RUNNABLE = 'RUNNABLE'.freeze
-  STATUS_ERROR = 'ERROR'.freeze # when aegea batch describe failed
+  STATUS_READY = 'READY'.freeze
+
+  # The RESULT MONITOR is responsible for keeping status of available outputs
+  # and for loading those outputs in from S3.
+  # It accomplishes this using the following:
+  #    function "monitor_results"
+  #    columns "result_status", "results_finalized".
+  # The result status is a JSON string where keys are outputs and values are status,
+  # e.g.  "{\"ercc_counts\":\"LOADED\",\"taxon_counts\":\"LOADING\",\"taxon_byteranges\":\"EMPTY\"}".
+  # The progression for an output's status is as follows:
+  # EMPTY -> LOADING_QUEUED -> LOADING -> LOADED / FAILED.
+  # When all results have been loaded, or the PIPELINE MONITOR indicates no new outputs will be 
+  # forthcoming (due to either success or failure), results_finalized is set to 1 in order
+  # to indicate to the RESULT MONITOR that it can stop attending to the pipeline_run.
+  # In the case of failure, we determine whether the main report is nevertheless ready
+  # by checking whether REPORT_READY_OUTPUT has been loaded.
+
   STATUS_LOADED = 'LOADED'.freeze
   STATUS_EMPTY = 'EMPTY'.freeze
   STATUS_LOADING = 'LOADING'.freeze
   STATUS_LOADING_QUEUED = 'LOADING_QUEUED'.freeze
-  STATUS_READY = 'READY'.freeze
-  POSTPROCESS_STATUS_LOADED = 'LOADED'.freeze
-  INPUT_TRUNCATED_FILE = 'input_truncated.txt'.freeze
-  PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
 
   LOADERS_BY_OUTPUT = { "ercc_counts" => "db_load_ercc_counts",
                         "taxon_counts" => "db_load_taxon_counts",
@@ -420,7 +450,10 @@ class PipelineRun < ApplicationRecord
 
     # If pipeline monitor has marked a run as finalized,
     # we should do no more than 1 additional check for outputs,
-    # so we should also mark results as finalized:
+    # so we should also mark results as finalized.
+    # TODO: move this to an S3 interface to give us the option
+    # of running pipeline_monitor in a new environment that
+    # result_monitor does not have access to.
     update(results_finalized: 1) if finalized == 1
 
     # Get pipeline_version, which determines S3 locations of output files.
