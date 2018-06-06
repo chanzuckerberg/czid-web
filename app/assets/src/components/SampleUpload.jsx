@@ -5,7 +5,6 @@ import $ from "jquery";
 import Tipsy from "react-tipsy";
 import IconComponent from "./IconComponent";
 import ObjectHelper from "../helpers/ObjectHelper";
-import { Checkbox } from "semantic-ui-react";
 
 class SampleUpload extends React.Component {
   constructor(props, context) {
@@ -94,8 +93,8 @@ class SampleUpload extends React.Component {
       adminGenomes,
       sampleName: this.selected.name || "",
       disableProjectSelect: false,
-      omit_subsampling_checked: false,
-      public_checked: false,
+      omitSubsamplingChecked: false,
+      publicChecked: false,
       consentChecked: false
     };
   }
@@ -185,7 +184,7 @@ class SampleUpload extends React.Component {
       .post("/projects.json", {
         project: {
           name: this.refs.new_project.value,
-          public_access: this.state.public_checked ? 1 : 0
+          public_access: this.state.publicChecked ? 1 : 0
         },
         authenticity_token: this.csrf
       })
@@ -256,7 +255,7 @@ class SampleUpload extends React.Component {
           sample_memory: this.state.selectedMemory,
           pipeline_branch: this.state.selectedBranch,
           host_genome_id: this.state.selectedHostGenomeId,
-          subsample: this.state.omit_subsampling_checked ? 0 : 1,
+          subsample: this.state.omitSubsamplingChecked ? 0 : 1,
           status: "created"
         },
         authenticity_token: this.csrf
@@ -552,7 +551,7 @@ class SampleUpload extends React.Component {
   }
 
   renderSampleForm(updateExistingSample = false) {
-    let terms_blurb = (
+    let termsBlurb = (
       <div className="consent-blurb">
         <input
           type="checkbox"
@@ -570,16 +569,16 @@ class SampleUpload extends React.Component {
           <a
             href="https://s3-us-west-2.amazonaws.com/idseq-database/Terms.pdf"
             target="_blank"
-            className="terms"
+            className="terms-link"
           >
             Terms of Use.
           </a>
         </label>
       </div>
     );
-    let submit_button;
+    let submitButton;
     if (this.state.submitting) {
-      submit_button = (
+      submitButton = (
         <button
           type="button"
           disabled
@@ -589,7 +588,7 @@ class SampleUpload extends React.Component {
         </button>
       );
     } else if (this.state.consentChecked) {
-      submit_button = (
+      submitButton = (
         <button
           type="submit"
           onClick={updateExistingSample ? this.handleUpdate : this.handleUpload}
@@ -599,7 +598,7 @@ class SampleUpload extends React.Component {
         </button>
       );
     } else {
-      submit_button = (
+      submitButton = (
         <button
           type="submit"
           disabled
@@ -751,7 +750,7 @@ class SampleUpload extends React.Component {
                         id="public_checked"
                         className="col s8 filled-in"
                         onChange={this.toggleCheckBox}
-                        value={this.state.public_checked}
+                        value={this.state.publicChecked}
                       />
                       <label htmlFor="public_checked" className="checkbox">
                         Make project public
@@ -972,7 +971,7 @@ class SampleUpload extends React.Component {
                         id="omit_subsampling_checked"
                         className="filled-in"
                         onChange={this.toggleCheckBox}
-                        value={this.state.omit_subsampling_checked}
+                        value={this.state.omitSubsamplingChecked}
                       />
                       <label
                         htmlFor="omit_subsampling_checked"
@@ -1081,10 +1080,10 @@ class SampleUpload extends React.Component {
                   </div>
                 ) : null}
                 <div className="field">
-                  {terms_blurb}
+                  {termsBlurb}
                   <div className="row">
                     <div className="col no-padding s12">
-                      {submit_button}
+                      {submitButton}
                       <button
                         type="button"
                         onClick={() => window.history.back()}
