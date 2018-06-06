@@ -818,15 +818,15 @@ class BulkUploadImport extends React.Component {
                     </div>
                     <div className="col no-padding 12 new-project-input public_access hidden">
                       <input
-                        ref="public_checked"
+                        ref="publicChecked"
                         type="checkbox"
                         name="switch"
-                        id="public_checked"
+                        id="publicChecked"
                         className="col s8 filled-in"
                         onChange={this.toggleCheckBox}
                         value={this.state.publicChecked}
                       />
-                      <label htmlFor="public_checked" className="checkbox">
+                      <label htmlFor="publicChecked" className="checkbox">
                         Make project public
                       </label>
                     </div>
