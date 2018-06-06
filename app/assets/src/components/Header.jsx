@@ -183,7 +183,7 @@ class Header extends React.Component {
                         onClick={this.gotoPage.bind(this, "/samples/new")}
                       />,
                       <Dropdown.Item
-                        text="New Sample (command line)"
+                        text="New Sample (Command Line)"
                         key="2"
                         onClick={this.openCliModal}
                       />
@@ -200,7 +200,7 @@ class Header extends React.Component {
                     onClick={this.sendMail}
                   />
                   <Dropdown.Item
-                    text="Terms of Service"
+                    text="Terms of Use"
                     onClick={this.gotoPage.bind(
                       this,
                       "https://s3-us-west-2.amazonaws.com/idseq-database/Terms.pdf"

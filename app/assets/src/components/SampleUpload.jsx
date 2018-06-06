@@ -550,6 +550,8 @@ class SampleUpload extends React.Component {
   }
 
   renderSampleForm(updateExistingSample = false) {
+    let terms_blurb =
+      "I agree that the data I am uploading to IDseq has been lawfully collected and that I have all necessary consent and authorization to upload it for the purposes outlined in IDseq's ";
     return (
       <div id="samplesUploader" className="row">
         <div className="col s6 offset-s3 upload-form-container">
@@ -1021,6 +1023,10 @@ class SampleUpload extends React.Component {
                   </div>
                 ) : null}
                 <div className="field">
+                  <div>
+                    <span>{terms_blurb}</span>
+                    <a href="https://www.w3schools.com">Terms of Use</a>
+                  </div>
                   <div className="row">
                     <div className="col no-padding s12">
                       {this.state.submitting ? (
