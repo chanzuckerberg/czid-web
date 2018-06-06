@@ -647,7 +647,7 @@ class BulkUploadImport extends React.Component {
   }
 
   renderBulkUploadImportForm() {
-    let termsBlurb = (
+    const termsBlurb = (
       <div className="consent-blurb">
         <input
           type="checkbox"
@@ -665,6 +665,7 @@ class BulkUploadImport extends React.Component {
           <a
             href="https://s3-us-west-2.amazonaws.com/idseq-database/Terms.pdf"
             target="_blank"
+            rel="noopener noreferrer"
             className="terms-link"
           >
             Terms of Use.
@@ -672,38 +673,20 @@ class BulkUploadImport extends React.Component {
         </label>
       </div>
     );
-    let submitButton;
-    if (this.state.submitting) {
-      submitButton = (
-        <button
-          type="button"
-          disabled
-          className="new-button blue-button upload-samples-button"
-        >
+    const submitButton = (
+      <button
+        type="submit"
+        disabled={!this.state.consentChecked || this.state.submitting}
+        className="new-button blue-button upload-samples-button"
+        onClick={this.handleImportSubmit}
+      >
+        {this.state.submitting ? (
           <i className="fa fa-spinner fa-spin fa-lg" />
-        </button>
-      );
-    } else if (this.state.consentChecked) {
-      submitButton = (
-        <button
-          type="submit"
-          onClick={this.handleImportSubmit}
-          className="new-button blue-button upload-samples-button"
-        >
-          Upload Samples
-        </button>
-      );
-    } else {
-      submitButton = (
-        <button
-          type="submit"
-          disabled
-          className="new-button blue-button upload-samples-button"
-        >
-          Upload Samples
-        </button>
-      );
-    }
+        ) : (
+          "Upload Samples"
+        )}
+      </button>
+    );
 
     return (
       <div id="samplesUploader" className="row">

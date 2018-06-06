@@ -144,6 +144,7 @@ class Header extends React.Component {
               <a
                 href="https://github.com/chanzuckerberg/idseq-web/blob/master/README.md"
                 target="_blank"
+                rel="noopener noreferrer"
               >
                 GitHub repository
               </a>.

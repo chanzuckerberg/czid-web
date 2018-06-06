@@ -551,7 +551,7 @@ class SampleUpload extends React.Component {
   }
 
   renderSampleForm(updateExistingSample = false) {
-    let termsBlurb = (
+    const termsBlurb = (
       <div className="consent-blurb">
         <input
           type="checkbox"
@@ -569,6 +569,7 @@ class SampleUpload extends React.Component {
           <a
             href="https://s3-us-west-2.amazonaws.com/idseq-database/Terms.pdf"
             target="_blank"
+            rel="noopener noreferrer"
             className="terms-link"
           >
             Terms of Use.
@@ -576,38 +577,20 @@ class SampleUpload extends React.Component {
         </label>
       </div>
     );
-    let submitButton;
-    if (this.state.submitting) {
-      submitButton = (
-        <button
-          type="button"
-          disabled
-          className="new-button blue-button upload-samples-button"
-        >
+    const submitButton = (
+      <button
+        type="submit"
+        disabled={!this.state.consentChecked || this.state.submitting}
+        className="new-button blue-button upload-samples-button"
+        onClick={updateExistingSample ? this.handleUpdate : this.handleUpload}
+      >
+        {this.state.submitting ? (
           <i className="fa fa-spinner fa-spin fa-lg" />
-        </button>
-      );
-    } else if (this.state.consentChecked) {
-      submitButton = (
-        <button
-          type="submit"
-          onClick={updateExistingSample ? this.handleUpdate : this.handleUpload}
-          className="new-button blue-button upload-samples-button"
-        >
-          {updateExistingSample ? "Update" : "Upload"} Sample
-        </button>
-      );
-    } else {
-      submitButton = (
-        <button
-          type="submit"
-          disabled
-          className="new-button blue-button upload-samples-button"
-        >
-          {updateExistingSample ? "Update" : "Upload"} Sample
-        </button>
-      );
-    }
+        ) : (
+          (updateExistingSample ? "Update" : "Upload") + " Sample"
+        )}
+      </button>
+    );
 
     return (
       <div id="samplesUploader" className="row">
