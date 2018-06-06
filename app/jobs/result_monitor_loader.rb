@@ -1,13 +1,15 @@
 # Load a result from S3 into the db
-require 'logger'
 class ResultMonitorLoader
   @queue = :q03_pipeline_run
-  @logger = Logger.new(STDOUT)
 
   def self.perform(pipeline_run_id, output)
-    @logger.info("Loading #{output} for pipeline run #{pipeline_run_id}")
+    Rails.logger.info("Loading #{output} for pipeline run #{pipeline_run_id}")
     pr = PipelineRun.find(pipeline_run_id)
-    return unless pr.result_status_for(output) == PipelineRun::STATUS_LOADING_QUEUED
+    if pr.result_status_for(output) != PipelineRun::STATUS_LOADING_QUEUED
+      Rails.logger.warn("Aborting #{output} loading for pipeline run #{pipeline_run_id} " \
+                        "because status was not #{PipelineRun::STATUS_LOADING_QUEUED}")
+      return
+    end
     begin
       pr.update_result_status(output, PipelineRun::STATUS_LOADING)
       pr.send(PipelineRun::LOADERS_BY_OUTPUT[output])

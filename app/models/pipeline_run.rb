@@ -60,7 +60,7 @@ class PipelineRun < ApplicationRecord
   # e.g.  "{\"ercc_counts\":\"LOADED\",\"taxon_counts\":\"LOADING\",\"taxon_byteranges\":\"EMPTY\"}".
   # The progression for an output's status is as follows:
   # EMPTY -> LOADING_QUEUED -> LOADING -> LOADED / FAILED.
-  # When all results have been loaded, or the PIPELINE MONITOR indicates no new outputs will be 
+  # When all results have been loaded, or the PIPELINE MONITOR indicates no new outputs will be
   # forthcoming (due to either success or failure), results_finalized is set to 1 in order
   # to indicate to the RESULT MONITOR that it can stop attending to the pipeline_run.
   # In the case of failure, we determine whether the main report is nevertheless ready
