@@ -251,8 +251,13 @@ class PipelineRun < ApplicationRecord
         taxon_counts_attributes_filtered << tcnt
       end
     end
+    # Set created_at and updated_at
+    current_time = Time.now.utc # to match TaxonLineage date range comparison
+    taxon_counts_attributes_filtered.each do |tcnt|
+      tcnt["created_at"] = current_time
+      tcnt["updated_at"] = current_time
+    end
     update(taxon_counts_attributes: taxon_counts_attributes_filtered)
-    update(updated_at: Time.now.utc) # for TaxonLineage date range comparison
 
     # aggregate the data at genus level
     generate_aggregate_counts('genus') unless multihit?
