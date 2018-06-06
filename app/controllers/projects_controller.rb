@@ -221,7 +221,7 @@ class ProjectsController < ApplicationController
 
   # Use callbacks to share common setup or constraints between actions.
   def create_new_user_random_password(email)
-    user_params_with_password = { email: email }
+    user_params_with_password = { email: email, name: email }
     random_password = SecureRandom.hex(10)
     user_params_with_password[:password] = random_password
     user_params_with_password[:password_confirmation] = random_password
