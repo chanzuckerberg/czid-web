@@ -275,7 +275,8 @@ class SampleUpload extends React.Component {
           invalid: true,
           submitting: false,
           serverErrors: error.response.data,
-          errorMessage: "Something went wrong"
+          errorMessage:
+            "Something went wrong. Try checking if sample name already exists in project?"
         });
       });
   }
@@ -616,21 +617,6 @@ class SampleUpload extends React.Component {
                 }
               </p>
             </div>
-            {this.state.success ? (
-              <div className="form-feedback success-message">
-                <i className="fa fa-check-circle-o" />{" "}
-                <span>{this.state.successMessage}</span>
-              </div>
-            ) : null}
-            {this.state.invalid ? (
-              <div className="form-feedback error-message">
-                {this.displayError(
-                  this.state.invalid,
-                  this.state.serverErrors,
-                  this.state.errorMessage
-                )}
-              </div>
-            ) : null}
             <form
               ref="form"
               onSubmit={
@@ -1066,6 +1052,21 @@ class SampleUpload extends React.Component {
                   {termsBlurb}
                   <div className="row">
                     <div className="col no-padding s12">
+                      {this.state.success ? (
+                        <div className="form-feedback success-message">
+                          <i className="fa fa-check-circle-o" />{" "}
+                          <span>{this.state.successMessage}</span>
+                        </div>
+                      ) : null}
+                      {this.state.invalid ? (
+                        <div className="form-feedback error-message">
+                          {this.displayError(
+                            this.state.invalid,
+                            this.state.serverErrors,
+                            this.state.errorMessage
+                          )}
+                        </div>
+                      ) : null}
                       {submitButton}
                       <button
                         type="button"
