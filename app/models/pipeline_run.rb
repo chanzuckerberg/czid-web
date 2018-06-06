@@ -67,7 +67,7 @@ class PipelineRun < ApplicationRecord
   # by checking whether REPORT_READY_OUTPUT has been loaded.
 
   STATUS_LOADED = 'LOADED'.freeze
-  STATUS_EMPTY = 'EMPTY'.freeze
+  STATUS_UNKNOWN = 'UNKNOWN'.freeze
   STATUS_LOADING = 'LOADING'.freeze
   STATUS_LOADING_QUEUED = 'LOADING_QUEUED'.freeze
 
@@ -126,8 +126,12 @@ class PipelineRun < ApplicationRecord
     # identify pipeline_runs that predate result_status by the fact
     # that their result_status is nil.
     h = {}
-    target_outputs.each do |o|
-      h[o] = STATUS_EMPTY
+    # First, determine which outputs need to be considered:
+    outputs = %w[taxon_counts taxon_byteranges]
+    outputs = ["ercc_counts"] + outputs unless skip_host_filtering?
+    # Then initialize each output's status:
+    outputs.each do |o|
+      h[o] = STATUS_UNKNOWN
     end
     self.result_status = h.to_json
   end
@@ -202,7 +206,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def db_load_ercc_counts
-    # TODO: break this function up into 3 different target_outputs / loader commands
+    # TODO: break this function up into 3 different target outputs / loader commands
     #       rather than combining several outputs in 1 function
 
     # Load version info applicable to host filtering
@@ -333,10 +337,19 @@ class PipelineRun < ApplicationRecord
     file_generated_since_run(s3_file_for(output))
   end
 
-  def update_result_status(field, value)
-    status_hash = result_status_hash
-    status_hash[field] = value
-    update(result_status: status_hash.to_json)
+  def update_result_status(field, from_value, to_value)
+    PipelineRun.transaction do
+      status_hash = result_status_hash
+      # Check if from_value is satisfied
+      initial_value = status_hash[field]
+      if initial_value != from_value
+        raise "update_result_status failed: expected initial value #{from_value} for #{field}, " \
+              "was #{initial_value}"
+      end
+      # Perform update
+      status_hash[field] = to_value
+      update(result_status: status_hash.to_json)
+    end
   end
 
   def result_status_for(field)
@@ -399,24 +412,28 @@ class PipelineRun < ApplicationRecord
     end
   end
 
-  def need_to_load?(output)
-    current_status = result_status_for(output)
-    no_loading_job_yet = ![STATUS_LOADED, STATUS_LOADING, STATUS_LOADING_QUEUED, STATUS_FAILED].include?(current_status)
-    loading_job_got_lost = (current_status == STATUS_LOADING_QUEUED && updated_at > 24.hours.ago)
-    no_loading_job_yet || loading_job_got_lost
-  end
-
   def check_and_enqueue(output)
-    if output_ready?(output) && need_to_load?(output)
-      update_result_status(output, STATUS_LOADING_QUEUED)
+    # If the pipeline monitor tells us that no jobs are running anymore,
+    # yet outputs are not available, we need to draw the conclusion that
+    # those outputs should be marked as failed. Otherwise we will never
+    # stop checking for them.
+    # [ TODO: move the check on "finalized" (column managed by pipeline_monitor)
+    #   to an S3 interface in order to give us the option of running pipeline_monitor
+    #   in a new environment that result_monitor does not have access to.
+    # ]
+    if finalized && !output_ready?(output)
+      update_result_status(output, STATUS_UNKNOWN, STATUS_FAILED)
+      return
+    end
+    # Otherwise, if the output is ready and has not yet been loaded or enqueued
+    # for loading, enqueue a loader job.
+    if output_ready?(output) && result_status_for(output) == STATUS_UNKNOWN
+      update_result_status(output, STATUS_UNKNOWN, STATUS_LOADING_QUEUED)
       Resque.enqueue(ResultMonitorLoader, id, output)
     end
   end
 
-  def mark_as_complete
-    # Ensure monitor_results won't run again on this pipeline_run:
-    update(results_finalized: 1)
-
+  def handle_success
     # Check if this was the last run in a project and act accordingly:
     if sample.project.results_complete?
       notify_users
@@ -439,22 +456,12 @@ class PipelineRun < ApplicationRecord
     sample.host_genome && sample.host_genome.name == HostGenome::NO_HOST_NAME
   end
 
-  def target_outputs
-    outputs = %w[taxon_counts taxon_byteranges]
-    outputs = ["ercc_counts"] + outputs unless skip_host_filtering?
-    outputs
+  def terminal_result_status?
+    result_status_hash.values.all? { |s| [STATUS_LOADED, STATUS_FAILED].include?(s) }
   end
 
   def monitor_results
     return if results_finalized?
-
-    # If pipeline monitor has marked a run as finalized,
-    # we should do no more than 1 additional check for outputs,
-    # so we should also mark results as finalized.
-    # TODO: move this to an S3 interface to give us the option
-    # of running pipeline_monitor in a new environment that
-    # result_monitor does not have access to.
-    update(results_finalized: 1) if finalized == 1
 
     # Get pipeline_version, which determines S3 locations of output files.
     # If pipeline version is not present, we cannot load results yet.
@@ -477,8 +484,12 @@ class PipelineRun < ApplicationRecord
     load_stats_file
 
     # Check if run is complete:
+    if terminal_result_status?
+      update(results_finalized: 1) # ensures monitor_results won't run again on this pipeline_run
+    end
+
     if outputs.all? { |o| result_status_for(o) == STATUS_LOADED }
-      mark_as_complete
+      handle_success
     end
   end
 
