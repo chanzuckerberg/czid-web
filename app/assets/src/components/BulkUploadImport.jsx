@@ -53,7 +53,8 @@ class BulkUploadImport extends React.Component {
       disableProjectSelect: false,
       errors: {},
       serverErrors: null,
-      public_checked: false
+      publicChecked: false,
+      consentChecked: false
     };
   }
   componentDidUpdate() {
@@ -204,7 +205,7 @@ class BulkUploadImport extends React.Component {
       .post("/projects.json", {
         project: {
           name: this.refs.new_project.value,
-          public_access: this.state.public_checked ? 1 : 0
+          public_access: this.state.publicChecked ? 1 : 0
         },
         authenticity_token: this.csrf
       })
@@ -646,6 +647,47 @@ class BulkUploadImport extends React.Component {
   }
 
   renderBulkUploadImportForm() {
+    const termsBlurb = (
+      <div className="consent-blurb">
+        <input
+          type="checkbox"
+          id="consentChecked"
+          className="filled-in"
+          onChange={this.toggleCheckBox}
+          value={this.state.consentChecked}
+        />
+        <label htmlFor="consentChecked" className="checkbox">
+          <span>
+            I agree that the data I am uploading to IDseq has been lawfully
+            collected and that I have all necessary consent and authorization to
+            upload it for the purposes outlined in IDseq's&nbsp;
+          </span>
+          <a
+            href="https://s3-us-west-2.amazonaws.com/idseq-database/Terms.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="terms-link"
+          >
+            Terms of Use.
+          </a>
+        </label>
+      </div>
+    );
+    const submitButton = (
+      <button
+        type="submit"
+        disabled={!this.state.consentChecked || this.state.submitting}
+        className="new-button blue-button upload-samples-button"
+        onClick={this.handleImportSubmit}
+      >
+        {this.state.submitting ? (
+          <i className="fa fa-spinner fa-spin fa-lg" />
+        ) : (
+          "Upload Samples"
+        )}
+      </button>
+    );
+
     return (
       <div id="samplesUploader" className="row">
         <div className="col s6 offset-s3 upload-form-container">
@@ -776,15 +818,15 @@ class BulkUploadImport extends React.Component {
                     </div>
                     <div className="col no-padding 12 new-project-input public_access hidden">
                       <input
-                        ref="public_checked"
+                        ref="publicChecked"
                         type="checkbox"
                         name="switch"
-                        id="public_checked"
+                        id="publicChecked"
                         className="col s8 filled-in"
                         onChange={this.toggleCheckBox}
-                        value={this.state.public_checked}
+                        value={this.state.publicChecked}
                       />
-                      <label htmlFor="public_checked" className="checkbox">
+                      <label htmlFor="publicChecked" className="checkbox">
                         Make project public
                       </label>
                     </div>
@@ -925,26 +967,11 @@ class BulkUploadImport extends React.Component {
                     </div>
                   </div>
                 </div>
+                {termsBlurb}
                 <div className="field">
                   <div className="row">
                     <div className="col no-padding s12">
-                      {this.state.submitting ? (
-                        <button
-                          type="button"
-                          disabled
-                          className="new-button blue-button upload-samples-button"
-                        >
-                          <i className="fa fa-spinner fa-spin fa-lg" />
-                        </button>
-                      ) : (
-                        <button
-                          type="submit"
-                          onClick={this.handleImportSubmit}
-                          className="new-button blue-button upload-samples-button"
-                        >
-                          Upload Samples
-                        </button>
-                      )}
+                      {submitButton}
                       <button
                         type="button"
                         onClick={() => window.history.back()}

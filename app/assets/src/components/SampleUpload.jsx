@@ -93,8 +93,9 @@ class SampleUpload extends React.Component {
       adminGenomes,
       sampleName: this.selected.name || "",
       disableProjectSelect: false,
-      omit_subsampling_checked: false,
-      public_checked: false
+      omitSubsamplingChecked: false,
+      publicChecked: false,
+      consentChecked: false
     };
   }
 
@@ -183,7 +184,7 @@ class SampleUpload extends React.Component {
       .post("/projects.json", {
         project: {
           name: this.refs.new_project.value,
-          public_access: this.state.public_checked ? 1 : 0
+          public_access: this.state.publicChecked ? 1 : 0
         },
         authenticity_token: this.csrf
       })
@@ -254,7 +255,7 @@ class SampleUpload extends React.Component {
           sample_memory: this.state.selectedMemory,
           pipeline_branch: this.state.selectedBranch,
           host_genome_id: this.state.selectedHostGenomeId,
-          subsample: this.state.omit_subsampling_checked ? 0 : 1,
+          subsample: this.state.omitSubsamplingChecked ? 0 : 1,
           status: "created"
         },
         authenticity_token: this.csrf
@@ -274,7 +275,8 @@ class SampleUpload extends React.Component {
           invalid: true,
           submitting: false,
           serverErrors: error.response.data,
-          errorMessage: "Something went wrong"
+          errorMessage:
+            "Something went wrong. Try checking if sample name already exists in project?"
         });
       });
   }
@@ -550,6 +552,47 @@ class SampleUpload extends React.Component {
   }
 
   renderSampleForm(updateExistingSample = false) {
+    const termsBlurb = (
+      <div className="consent-blurb">
+        <input
+          type="checkbox"
+          id="consentChecked"
+          className="filled-in"
+          onChange={this.toggleCheckBox}
+          value={this.state.consentChecked}
+        />
+        <label htmlFor="consentChecked" className="checkbox">
+          <span>
+            I agree that the data I am uploading to IDseq has been lawfully
+            collected and that I have all necessary consent and authorization to
+            upload it for the purposes outlined in IDseq's&nbsp;
+          </span>
+          <a
+            href="https://s3-us-west-2.amazonaws.com/idseq-database/Terms.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="terms-link"
+          >
+            Terms of Use.
+          </a>
+        </label>
+      </div>
+    );
+    const submitButton = (
+      <button
+        type="submit"
+        disabled={!this.state.consentChecked || this.state.submitting}
+        className="new-button blue-button upload-samples-button"
+        onClick={updateExistingSample ? this.handleUpdate : this.handleUpload}
+      >
+        {this.state.submitting ? (
+          <i className="fa fa-spinner fa-spin fa-lg" />
+        ) : (
+          (updateExistingSample ? "Update" : "Upload") + " Sample"
+        )}
+      </button>
+    );
+
     return (
       <div id="samplesUploader" className="row">
         <div className="col s6 offset-s3 upload-form-container">
@@ -574,21 +617,6 @@ class SampleUpload extends React.Component {
                 }
               </p>
             </div>
-            {this.state.success ? (
-              <div className="form-feedback success-message">
-                <i className="fa fa-check-circle-o" />{" "}
-                <span>{this.state.successMessage}</span>
-              </div>
-            ) : null}
-            {this.state.invalid ? (
-              <div className="form-feedback error-message">
-                {this.displayError(
-                  this.state.invalid,
-                  this.state.serverErrors,
-                  this.state.errorMessage
-                )}
-              </div>
-            ) : null}
             <form
               ref="form"
               onSubmit={
@@ -691,7 +719,7 @@ class SampleUpload extends React.Component {
                         id="public_checked"
                         className="col s8 filled-in"
                         onChange={this.toggleCheckBox}
-                        value={this.state.public_checked}
+                        value={this.state.publicChecked}
                       />
                       <label htmlFor="public_checked" className="checkbox">
                         Make project public
@@ -912,7 +940,7 @@ class SampleUpload extends React.Component {
                         id="omit_subsampling_checked"
                         className="filled-in"
                         onChange={this.toggleCheckBox}
-                        value={this.state.omit_subsampling_checked}
+                        value={this.state.omitSubsamplingChecked}
                       />
                       <label
                         htmlFor="omit_subsampling_checked"
@@ -1021,29 +1049,25 @@ class SampleUpload extends React.Component {
                   </div>
                 ) : null}
                 <div className="field">
+                  {termsBlurb}
                   <div className="row">
                     <div className="col no-padding s12">
-                      {this.state.submitting ? (
-                        <button
-                          type="button"
-                          disabled
-                          className="new-button blue-button upload-samples-button"
-                        >
-                          <i className="fa fa-spinner fa-spin fa-lg" />
-                        </button>
-                      ) : (
-                        <button
-                          type="submit"
-                          onClick={
-                            updateExistingSample
-                              ? this.handleUpdate
-                              : this.handleUpload
-                          }
-                          className="new-button blue-button upload-samples-button"
-                        >
-                          {updateExistingSample ? "Update" : "Upload"} Sample
-                        </button>
-                      )}
+                      {this.state.success ? (
+                        <div className="form-feedback success-message">
+                          <i className="fa fa-check-circle-o" />{" "}
+                          <span>{this.state.successMessage}</span>
+                        </div>
+                      ) : null}
+                      {this.state.invalid ? (
+                        <div className="form-feedback error-message">
+                          {this.displayError(
+                            this.state.invalid,
+                            this.state.serverErrors,
+                            this.state.errorMessage
+                          )}
+                        </div>
+                      ) : null}
+                      {submitButton}
                       <button
                         type="button"
                         onClick={() => window.history.back()}
