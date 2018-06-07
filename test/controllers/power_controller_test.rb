@@ -83,7 +83,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
                      name: "RR004_water_2_S23_R2_001.fastq.gz",
                      source_type: "local" }]
     assert_no_difference('Sample.count') do
-      post "#{samples_url}.json", params: { sample: { name: 'joe new sample', project_name: @public_project.name, input_files_attributes: input_files } }
+      post "#{samples_url}.json", params: { sample: { name: 'joe new sample', project_name: @public_project.name, input_files_attributes: input_files }, client: "web" }
     end
     assert_response 422
   end
@@ -135,7 +135,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
                      name: "RR004_water_2_S23_R2_001.fastq.gz",
                      source_type: "local" }]
     assert_no_difference('Sample.count') do
-      post "#{samples_url}.json", params: { sample: { name: 'joe new sample', project_name: @project.name, input_files_attributes: input_files } }
+      post "#{samples_url}.json", params: { sample: { name: 'joe new sample', project_name: @project.name, input_files_attributes: input_files }, client: "web" }
     end
     assert_response 422
   end
@@ -181,7 +181,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
                      name: "RR004_water_2_S23_R2_001.fastq.gz",
                      source_type: "local" }]
     assert_no_difference('Sample.count') do
-      post "#{samples_url}.json", params: { sample: { name: 'joe new sample', project_name: @project.name, input_files_attributes: input_files } }
+      post "#{samples_url}.json", params: { sample: { name: 'joe new sample', project_name: @project.name, input_files_attributes: input_files }, client: "web" }
     end
     assert_response 422
   end
