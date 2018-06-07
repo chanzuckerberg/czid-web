@@ -8,6 +8,7 @@ class PipelineRun < ApplicationRecord
   accepts_nested_attributes_for :pipeline_run_stages
   has_and_belongs_to_many :backgrounds
 
+  has_many :output_states
   has_many :taxon_counts, dependent: :destroy
   has_many :job_stats, dependent: :destroy
   has_many :taxon_byteranges, dependent: :destroy
@@ -61,10 +62,12 @@ class PipelineRun < ApplicationRecord
   # The progression for an output's status is as follows:
   # EMPTY -> LOADING_QUEUED -> LOADING -> LOADED / FAILED.
   # When all results have been loaded, or the PIPELINE MONITOR indicates no new outputs will be
-  # forthcoming (due to either success or failure), results_finalized is set to 1 in order
-  # to indicate to the RESULT MONITOR that it can stop attending to the pipeline_run.
+  # forthcoming (due to either success or failure), results_finalized is set to FINALIZED_SUCCESS
+  # or FINALIZED_FAIL in order to indicate to the RESULT MONITOR that it can stop attending to the pipeline_run.
   # In the case of failure, we determine whether the main report is nevertheless ready
   # by checking whether REPORT_READY_OUTPUT has been loaded.
+  # Note we don't put a default on results_finalized in the schema, so that we can
+  # recognize old runs by results_finalized being nil.
 
   STATUS_LOADED = 'LOADED'.freeze
   STATUS_UNKNOWN = 'UNKNOWN'.freeze
@@ -76,7 +79,15 @@ class PipelineRun < ApplicationRecord
                         "taxon_byteranges" => "db_load_byteranges" }.freeze
   REPORT_READY_OUTPUT = "taxon_counts".freeze
 
-  before_create :initialize_result_status, :create_run_stages
+  # Values for results_finalized are as follows.
+  # Note we don't put a default on results_finalized in the schema, so that we can
+  # recognize old runs by results_finalized being nil.
+
+  IN_PROGRESS = 0
+  FINALIZED_SUCCESS = 10
+  FINALIZED_FAIL = 20
+
+  before_create :create_output_states, :create_run_stages
 
   def as_json(options = {})
     super(options.merge(except: [:command, :command_stdout, :command_error, :job_description]))
@@ -97,7 +108,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def self.results_in_progress
-    where(results_finalized: 0)
+    where(results_finalized: IN_PROGRESS)
   end
 
   def self.in_progress_at_stage_1_or_2
@@ -114,26 +125,30 @@ class PipelineRun < ApplicationRecord
   end
 
   def results_finalized?
-    results_finalized == 1
+    [FINALIZED_SUCCESS, FINALIZED_FAIL].include?(results_finalized)
   end
 
   def failed?
     /FAILED/ =~ job_status
   end
 
-  def initialize_result_status
-    # We explicitly set a value for result_status so that we can unambiguously
-    # identify pipeline_runs that predate result_status by the fact
-    # that their result_status is nil.
-    h = {}
-    # First, determine which outputs need to be considered:
-    outputs = %w[taxon_counts taxon_byteranges]
-    outputs = ["ercc_counts"] + outputs unless skip_host_filtering?
-    # Then initialize each output's status:
-    outputs.each do |o|
-      h[o] = STATUS_UNKNOWN
+  def create_output_states
+    # First, determine which outputs we need:
+    target_outputs = %w[taxon_counts taxon_byteranges]
+    target_outputs = ["ercc_counts"] + target_outputs unless skip_host_filtering?
+
+    # Then, generate output_states
+    output_state_entries = []
+    target_outputs.each do |output|
+      output_state_entries << OutputState.new(
+        output: output,
+        state: STATUS_UNKNOWN
+      )
     end
-    self.result_status = h.to_json
+    self.output_states = output_state_entries
+
+    # Also initialize results_finalized here.
+    self.results_finalized = IN_PROGRESS
   end
 
   def create_run_stages
@@ -196,9 +211,9 @@ class PipelineRun < ApplicationRecord
   end
 
   def report_ready?
-    clause_for_old_runs = result_status.nil? && (job_status == STATUS_CHECKED || (ready_step && pipeline_run_stages.find_by(step_number: ready_step) && pipeline_run_stages.find_by(step_number: ready_step).job_status == STATUS_LOADED))
+    clause_for_old_runs = results_finalized.nil? && (job_status == STATUS_CHECKED || (ready_step && pipeline_run_stages.find_by(step_number: ready_step) && pipeline_run_stages.find_by(step_number: ready_step).job_status == STATUS_LOADED))
     # TODO: migrate old runs so we don't need to deal with them separately in the code
-    result_status_for(REPORT_READY_OUTPUT) == STATUS_LOADED || clause_for_old_runs
+    output_states.find_by(output: REPORT_READY_OUTPUT).state == STATUS_LOADED || clause_for_old_runs
   end
 
   def succeeded?
@@ -337,37 +352,21 @@ class PipelineRun < ApplicationRecord
     file_generated_since_run(s3_file_for(output))
   end
 
-  def update_result_status(field, from_value, to_value)
-    PipelineRun.transaction do
-      status_hash = result_status_hash
-      # Check if from_value is satisfied
-      initial_value = status_hash[field]
-      if initial_value != from_value
-        raise "update_result_status failed: expected initial value #{from_value} for #{field}, " \
-              "was #{initial_value}"
-      end
-      # Perform update
-      status_hash[field] = to_value
-      update(result_status: status_hash.to_json)
+  def output_state_hash
+    h = {}
+    output_states.each do |o|
+      h[o.output] = o.state
     end
+    h
   end
 
-  def result_status_for(field)
-    status_hash = result_status_hash
-    status_hash[field]
-  end
-
-  def result_status_hash
-    result_status ? JSON.parse(result_status) : {}
-  end
-
-  def status_display(h = result_status_hash, results_finalized_var = results_finalized)
+  def status_display(h = output_state_hash, results_finalized_var = results_finalized)
     # Status display for the frontend.
     # This function would be simpler if we used active_stage (job monitor),
     # but we want to use result_status instead (result monitor)
     # so that it becomes easy to expose availability of specific results
     # with more granularity later if we desire.
-    if results_finalized_var == 1
+    if [1, FINALIZED_SUCCESS, FINALIZED_FAIL].include?(results_finalized_var) # 1 is for status_display_pre_result_monitor
       if [h["taxon_byteranges"], h["taxon_counts"]].all? { |s| s == STATUS_LOADED }
         "COMPLETE"
       elsif h["taxon_counts"] == STATUS_LOADED
@@ -389,14 +388,14 @@ class PipelineRun < ApplicationRecord
 
   def status_display_pre_result_monitor(run_stages)
     # TODO: remove the need for this function by migrating old runs
-    status_by_loader = {}
+    state_by_output = {}
     old_loaders_by_output = { "db_load_host_filtering" => "ercc_counts",
                               "db_load_alignment" => "taxon_counts",
                               "db_load_postprocess" => "taxon_byteranges" }
     run_stages.each do |rs|
-      status_by_loader[old_loaders_by_output[rs.load_db_command_func]] = rs.job_status
+      state_by_output[old_loaders_by_output[rs.load_db_command_func]] = rs.job_status
     end
-    status_display(status_by_loader, finalized)
+    status_display(state_by_output, finalized)
   end
 
   def status_display_pre_run_stages
@@ -412,7 +411,7 @@ class PipelineRun < ApplicationRecord
     end
   end
 
-  def check_and_enqueue(output)
+  def check_and_enqueue(output_state)
     # If the pipeline monitor tells us that no jobs are running anymore,
     # yet outputs are not available, we need to draw the conclusion that
     # those outputs should be marked as failed. Otherwise we will never
@@ -421,14 +420,16 @@ class PipelineRun < ApplicationRecord
     #   to an S3 interface in order to give us the option of running pipeline_monitor
     #   in a new environment that result_monitor does not have access to.
     # ]
+    output = output_state.output
+    state = output_state.state
     if finalized && !output_ready?(output)
-      update_result_status(output, STATUS_UNKNOWN, STATUS_FAILED)
+      output_state.update(state: STATUS_FAILED)
       return
     end
     # Otherwise, if the output is ready and has not yet been loaded or enqueued
     # for loading, enqueue a loader job.
-    if output_ready?(output) && result_status_for(output) == STATUS_UNKNOWN
-      update_result_status(output, STATUS_UNKNOWN, STATUS_LOADING_QUEUED)
+    if output_ready?(output) && state == STATUS_UNKNOWN
+      output_state.update(state: STATUS_LOADING_QUEUED)
       Resque.enqueue(ResultMonitorLoader, id, output)
     end
   end
@@ -456,8 +457,8 @@ class PipelineRun < ApplicationRecord
     sample.host_genome && sample.host_genome.name == HostGenome::NO_HOST_NAME
   end
 
-  def terminal_result_status?
-    result_status_hash.values.all? { |s| [STATUS_LOADED, STATUS_FAILED].include?(s) }
+  def all_output_states_terminal?
+    output_states.pluck(:state).all? { |s| [STATUS_LOADED, STATUS_FAILED].include?(s) }
   end
 
   def monitor_results
@@ -475,8 +476,7 @@ class PipelineRun < ApplicationRecord
     return if pipeline_version.blank?
 
     # Load any new outputs that have become available:
-    outputs = result_status_hash.keys
-    outputs.each do |o|
+    output_states.each do |o|
       check_and_enqueue(o)
     end
 
@@ -484,12 +484,11 @@ class PipelineRun < ApplicationRecord
     load_stats_file
 
     # Check if run is complete:
-    if terminal_result_status?
-      update(results_finalized: 1) # ensures monitor_results won't run again on this pipeline_run
-    end
-
-    if outputs.all? { |o| result_status_for(o) == STATUS_LOADED }
+    if output_states.pluck(:state).all? { |s| s == STATUS_LOADED }
+      update(results_finalized: FINALIZED_SUCCESS)
       handle_success
+    elsif all_output_states_terminal?
+      update(results_finalized: FINALIZED_FAIL)
     end
   end
 

@@ -272,13 +272,13 @@ module SamplesHelper
 
   def report_ready_multiget(pipeline_run_ids)
     # query db to get ids of pipeline_runs for which the report is ready
-    report_ready_result_status = "\"#{PipelineRun::REPORT_READY_OUTPUT}\":\"#{PipelineRun::STATUS_LOADED}\""
-    report_ready_clause = "result_status like '%#{report_ready_result_status}%'"
+    join_clause = "LEFT OUTER JOIN output_states ON output_states.pipeline_run_id = pipeline_runs.id AND output_states.output = '#{PipelineRun::REPORT_READY_OUTPUT}'"
+    report_ready_clause = "output_states.state = '#{PipelineRun::STATUS_LOADED}'"
 
     clause_for_old_results = "job_status = '#{PipelineRun::STATUS_CHECKED}' or job_status like '%|READY%'"
     # TODO: migrate old runs so we don't need to deal with them separately in the code
 
-    PipelineRun.where(id: pipeline_run_ids).where("#{report_ready_clause} or #{clause_for_old_results}").pluck(:id)
+    PipelineRun.where(id: pipeline_run_ids).joins(join_clause).where("#{report_ready_clause} or #{clause_for_old_results}").pluck(:id)
   end
 
   def top_pipeline_runs_multiget(sample_ids)

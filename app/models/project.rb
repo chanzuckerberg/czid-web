@@ -8,7 +8,7 @@ class Project < ApplicationRecord
   include ReportHelper
 
   def results_complete?
-    incomplete_runs = PipelineRun.where("id in (select max(id) from pipeline_runs group by sample_id) and sample_id in (select id from samples where project_id = #{id.to_i})").where("result_status != ?", PipelineRun::STATUS_CHECKED)
+    incomplete_runs = PipelineRun.where("id in (select max(id) from pipeline_runs group by sample_id) and sample_id in (select id from samples where project_id = #{id.to_i})").where("results_finalized != ? and job_status != ?", PipelineRun::FINALIZED_SUCCESS, PipelineRun::STATUS_CHECKED)
     incomplete_runs.count.zero?
   end
 
