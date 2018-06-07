@@ -56,11 +56,10 @@ class PipelineRun < ApplicationRecord
   # and for loading those outputs in from S3.
   # It accomplishes this using the following:
   #    function "monitor_results"
-  #    columns "result_status", "results_finalized".
-  # The result status is a JSON string where keys are outputs and values are status,
-  # e.g.  "{\"ercc_counts\":\"LOADED\",\"taxon_counts\":\"LOADING\",\"taxon_byteranges\":\"EMPTY\"}".
-  # The progression for an output's status is as follows:
-  # EMPTY -> LOADING_QUEUED -> LOADING -> LOADED / FAILED.
+  #    column "results_finalized"
+  #    records "output_states"
+  # The output_states indicate the state of each target output, the progression being as follows:
+  # UNKNOWN -> LOADING_QUEUED -> LOADING -> LOADED / FAILED (see also state machine below).
   # When all results have been loaded, or the PIPELINE MONITOR indicates no new outputs will be
   # forthcoming (due to either success or failure), results_finalized is set to FINALIZED_SUCCESS
   # or FINALIZED_FAIL in order to indicate to the RESULT MONITOR that it can stop attending to the pipeline_run.
@@ -395,10 +394,6 @@ class PipelineRun < ApplicationRecord
 
   def status_display(h = output_state_hash, results_finalized_var = results_finalized)
     # Status display for the frontend.
-    # This function would be simpler if we used active_stage (job monitor),
-    # but we want to use result_status instead (result monitor)
-    # so that it becomes easy to expose availability of specific results
-    # with more granularity later if we desire.
     if [1, FINALIZED_SUCCESS, FINALIZED_FAIL].include?(results_finalized_var) # 1 is for status_display_pre_result_monitor
       if [h["taxon_byteranges"], h["taxon_counts"]].all? { |s| s == STATUS_LOADED }
         "COMPLETE"
