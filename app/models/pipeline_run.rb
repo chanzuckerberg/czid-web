@@ -386,6 +386,10 @@ class PipelineRun < ApplicationRecord
     end
   end
 
+  def pre_result_monitor?
+    results_finalized.nil?
+  end
+
   def status_display_pre_result_monitor(run_stages)
     # TODO: remove the need for this function by migrating old runs
     state_by_output = {}
