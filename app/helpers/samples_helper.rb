@@ -207,7 +207,7 @@ module SamplesHelper
     samples.where(host_genome_id: query)
   end
 
-  def pipeline_run_info(pipeline_run, report_ready_pipeline_run_ids, pipeline_run_stages_by_pipeline_run_id)
+  def pipeline_run_info(pipeline_run, report_ready_pipeline_run_ids, pipeline_run_stages_by_pipeline_run_id, output_states_by_pipeline_run_id)
     pipeline_run_entry = {}
     if pipeline_run
       run_stages = pipeline_run_stages_by_pipeline_run_id[pipeline_run.id]
@@ -219,7 +219,7 @@ module SamplesHelper
                                                            # (chanzuckerberg/idseq-web/issues/1336)
                                                            pipeline_run.status_display_pre_result_monitor(run_stages)
                                                          else
-                                                           pipeline_run.status_display
+                                                           pipeline_run.status_display(output_states_by_pipeline_run_id)
                                                          end
       else
         # data processed before pipeline_run_stages were instated
@@ -290,14 +290,14 @@ module SamplesHelper
     top_pipeline_run_by_sample_id
   end
 
-  def pipeline_run_stages_multiget(pipeline_run_ids)
-    all_stages = PipelineRunStage.where(pipeline_run_id: pipeline_run_ids)
-    stages_by_pipeline_run_id = {}
-    all_stages.each do |prs|
-      stages_by_pipeline_run_id[prs.pipeline_run_id] ||= []
-      stages_by_pipeline_run_id[prs.pipeline_run_id] << prs
+  def dependent_records_multiget(table, parent_id_column_sym, parent_ids)
+    all_records = table.where(parent_id_column_sym => parent_ids)
+    records_by_parent_id = {}
+    all_records.each do |r|
+      records_by_parent_id[r[parent_id_column_sym]] ||= []
+      records_by_parent_id[r[parent_id_column_sym]] << r
     end
-    stages_by_pipeline_run_id
+    records_by_parent_id
   end
 
   def format_samples(samples)
@@ -310,7 +310,8 @@ module SamplesHelper
     pipeline_run_ids = top_pipeline_run_by_sample_id.values.map(&:id)
     job_stats_by_pipeline_run_id = job_stats_multiget(pipeline_run_ids)
     report_ready_pipeline_run_ids = report_ready_multiget(pipeline_run_ids)
-    pipeline_run_stages_by_pipeline_run_id = pipeline_run_stages_multiget(pipeline_run_ids)
+    pipeline_run_stages_by_pipeline_run_id = dependent_records_multiget(PipelineRunStage, :pipeline_run_id, pipeline_run_ids)
+    output_states_by_pipeline_run_id = dependent_records_multiget(OutputState, :pipeline_run_id, pipeline_run_ids)
 
     # Massage data into the right format
     samples.each_with_index do |sample|
@@ -319,7 +320,8 @@ module SamplesHelper
       top_pipeline_run = top_pipeline_run_by_sample_id[sample.id]
       job_stats_hash = top_pipeline_run ? job_stats_by_pipeline_run_id[top_pipeline_run.id] : {}
       job_info[:derived_sample_output] = sample_derived_data(sample, job_stats_hash)
-      job_info[:run_info] = pipeline_run_info(top_pipeline_run, report_ready_pipeline_run_ids, pipeline_run_stages_by_pipeline_run_id)
+      job_info[:run_info] = pipeline_run_info(top_pipeline_run, report_ready_pipeline_run_ids,
+                                              pipeline_run_stages_by_pipeline_run_id, output_states_by_pipeline_run_id)
       job_info[:uploader] = sample_uploader(sample)
       formatted_samples.push(job_info)
     end

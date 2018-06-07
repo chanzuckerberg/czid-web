@@ -384,16 +384,21 @@ class PipelineRun < ApplicationRecord
     file_generated_since_run(s3_file_for(output))
   end
 
-  def output_state_hash
+  def output_state_hash(output_states_by_pipeline_run_id)
     h = {}
-    output_states.each do |o|
+    output_states_by_pipeline_run_id[id].each do |o|
       h[o.output] = o.state
     end
     h
   end
 
-  def status_display(h = output_state_hash, results_finalized_var = results_finalized)
+  def status_display(output_states_by_pipeline_run_id)
+    status_display_helper(output_state_hash(output_states_by_pipeline_run_id), results_finalized)
+  end
+
+  def status_display_helper(states_by_output_hash, results_finalized_var)
     # Status display for the frontend.
+    h = states_by_output_hash
     if [1, FINALIZED_SUCCESS, FINALIZED_FAIL].include?(results_finalized_var) # 1 is for status_display_pre_result_monitor
       if [h["taxon_byteranges"], h["taxon_counts"]].all? { |s| s == STATUS_LOADED }
         "COMPLETE"
@@ -427,7 +432,7 @@ class PipelineRun < ApplicationRecord
     run_stages.each do |rs|
       state_by_output[old_loaders_by_output[rs.load_db_command_func]] = rs.job_status
     end
-    status_display(state_by_output, finalized)
+    status_display_helper(state_by_output, finalized)
   end
 
   def status_display_pre_run_stages
