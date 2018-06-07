@@ -87,6 +87,39 @@ class PipelineRun < ApplicationRecord
   FINALIZED_SUCCESS = 10
   FINALIZED_FAIL = 20
 
+  # State machine for RESULT MONITOR:
+  #
+  #  +-----------+ !output_ready
+  #  |           | && !pipeline_finalized
+  #  |           | (RM)
+  #  |     +-----+------+
+  #  +-----> POLLING    +------------------------------+
+  #        +-----+------+                              |
+  #              |                                     |
+  #              | output_ready?                       |
+  #              | (RM)                                |
+  #              |                                     |
+  #        +-----v------+                              |    !output_ready?
+  #        | QUEUED FOR |                              |    && pipeline_finalized
+  #        | LOADING    |                              |    (RM)
+  #        +-----+------+                              |
+  #              |                                     |
+  #              | (Resque)                            |
+  #              |                                     |
+  #        +-----v------+         !success?            |
+  #        | LOADING    +------------+                 |
+  #        +-----+------+            |                 |
+  #              |                   |(Resque          |
+  #              | success?          |  Worker)        |
+  #              | (Resque worker)   |                 |
+  #        +-----v------+            |            +----v---+
+  #        | COMPLETED  |            +------------> FAILED |
+  #        +------------+                         +--------+
+  #
+  #
+  # (RM) transition executed by the Result Monitor
+  # (Resque Worker) transition executed by the Resque Worker
+
   before_create :create_output_states, :create_run_stages
 
   def as_json(options = {})
@@ -211,7 +244,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def report_ready?
-    clause_for_old_runs = results_finalized.nil? && (job_status == STATUS_CHECKED || (ready_step && pipeline_run_stages.find_by(step_number: ready_step) && pipeline_run_stages.find_by(step_number: ready_step).job_status == STATUS_LOADED))
+    clause_for_old_runs = pre_result_monitor? && (job_status == STATUS_CHECKED || (ready_step && pipeline_run_stages.find_by(step_number: ready_step) && pipeline_run_stages.find_by(step_number: ready_step).job_status == STATUS_LOADED))
     # TODO: migrate old runs so we don't need to deal with them separately in the code
     output_states.find_by(output: REPORT_READY_OUTPUT).state == STATUS_LOADED || clause_for_old_runs
   end
@@ -426,7 +459,7 @@ class PipelineRun < ApplicationRecord
     # ]
     output = output_state.output
     state = output_state.state
-    if finalized && !output_ready?(output)
+    if finalized? && !output_ready?(output)
       output_state.update(state: STATUS_FAILED)
       return
     end
