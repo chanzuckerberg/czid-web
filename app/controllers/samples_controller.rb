@@ -381,6 +381,27 @@ class SamplesController < ApplicationController
   # POST /samples
   # POST /samples.json
   def create
+    # Single sample upload path
+    # Check if the client is up-to-date. "web" is always valid whereas the
+    # CLI client should provide a version string to-be-checked against the
+    # minimum version here. Bulk upload from CLI goes to this method.
+    valid_client = false
+    if client_params && client_params[:client]
+      client = client_params[:client]
+      min_version = '0.3.2'
+      if client == "web" || Gem::Version.new(client) >= Gem::Version.new(min_version)
+        valid_client = true
+      end
+    end
+    unless valid_client
+      respond_to do |format|
+        msg = "Outdated command line client. Please run `pip install --upgrade git+https://github.com/chanzuckerberg/idseq-cli.git `"
+        format.json { render json: { status: msg }, status: :upgrade_required }
+        format.html { render json: { status: msg }, status: :upgrade_required }
+      end
+      return
+    end
+
     params = sample_params
     if params[:project_name]
       project_name = params.delete(:project_name)
@@ -587,6 +608,10 @@ class SamplesController < ApplicationController
                                    :sample_notes, :job_queue, :search, :subsample, :pipeline_branch,
                                    :sample_input_pg, :sample_batch, :sample_diagnosis, :sample_organism, :sample_detection,
                                    input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts])
+  end
+
+  def client_params
+    params.permit(:client)
   end
 
   def sort_by(samples, dir = nil)

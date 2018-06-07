@@ -258,7 +258,8 @@ class SampleUpload extends React.Component {
           subsample: this.state.omitSubsamplingChecked ? 0 : 1,
           status: "created"
         },
-        authenticity_token: this.csrf
+        authenticity_token: this.csrf,
+        client: "web"
       })
       .then(response => {
         this.setState({
