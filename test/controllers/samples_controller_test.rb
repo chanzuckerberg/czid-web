@@ -34,7 +34,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
                      name: "RR004_water_2_S23_R2_001.fastq.gz",
                      source_type: "local" }]
     assert_difference('Sample.count') do
-      post samples_url, params: { sample: { name: 'new sample', project_name: @project.name, input_files_attributes: input_files } }, headers: req_headers
+      post samples_url, params: { sample: { name: 'new sample', project_name: @project.name, client: "web", input_files_attributes: input_files } }, headers: req_headers
     end
     assert_redirected_to sample_url(Sample.last)
   end
@@ -47,7 +47,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
                      name: "RR004_water_2_S23_R2_001.fastq.gz",
                      source_type: "local" }]
     assert_difference('Sample.count', 0) do
-      post samples_url, params: { sample: { name: 'new sample', project_name: @project.name, input_files_attributes: input_files } }
+      post samples_url, params: { sample: { name: 'new sample', project_name: @project.name, client: "web", input_files_attributes: input_files } }
     end
     assert_redirected_to new_user_session_url
   end
@@ -88,7 +88,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
                      name: "RR004_water_2_S23_R2_001.fastq.gz",
                      source_type: "local" }]
     assert_difference('Sample.count') do
-      post samples_url, params: { sample: { name: 'new sample', project_name: @project.name, input_files_attributes: input_files } }
+      post samples_url, params: { sample: { name: 'new sample', project_name: @project.name, client: "web", input_files_attributes: input_files } }
     end
     assert_redirected_to sample_url(Sample.last)
   end
