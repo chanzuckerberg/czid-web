@@ -388,7 +388,7 @@ class SamplesController < ApplicationController
     # CLI client should provide a version string to-be-checked against the
     # minimum version here. Bulk upload from CLI goes to this method.
     client = params.delete(:client)
-    min_version = Gem::Version.new('0.3.2')
+    min_version = Gem::Version.new('0.3.0')
     unless client && (client == "web" || Gem::Version.new(client) >= min_version)
       render json: {
         message: "Outdated command line client. Please run `pip install --upgrade git+https://github.com/chanzuckerberg/idseq-cli.git `",
