@@ -191,4 +191,27 @@ module PipelineOutputsHelper
       return nil
     end
   end
+
+  def status_display_helper(states_by_output_hash, results_finalized_var)
+    # Status display for the frontend.
+    h = states_by_output_hash
+    if [1, PipelineRun::FINALIZED_SUCCESS, PipelineRun::FINALIZED_FAIL].include?(results_finalized_var) # 1 is for status_display_pre_result_monitor
+      if [h["taxon_byteranges"], h["taxon_counts"]].all? { |s| s == PipelineRun::STATUS_LOADED }
+        "COMPLETE"
+      elsif h["taxon_counts"] == PipelineRun::STATUS_LOADED
+        "COMPLETE*"
+      else
+        "FAILED"
+      end
+    elsif h["taxon_counts"] == PipelineRun::STATUS_LOADED
+      # alignment succeeded, postprocessing in progress
+      "POST PROCESSING"
+    elsif h["ercc_counts"] == PipelineRun::STATUS_LOADED
+      # host-filtering succeeded, alignment in progress
+      "ALIGNMENT"
+    else
+      # host-filtering in progress
+      "HOST FILTERING"
+    end
+  end
 end

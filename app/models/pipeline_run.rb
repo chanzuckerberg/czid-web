@@ -241,9 +241,12 @@ class PipelineRun < ApplicationRecord
   end
 
   def report_ready?
-    clause_for_old_runs = pre_result_monitor? && (job_status == STATUS_CHECKED || (ready_step && pipeline_run_stages.find_by(step_number: ready_step) && pipeline_run_stages.find_by(step_number: ready_step).job_status == STATUS_LOADED))
-    # TODO: migrate old runs so we don't need to deal with them separately in the code
-    output_states.find_by(output: REPORT_READY_OUTPUT).state == STATUS_LOADED || clause_for_old_runs
+    if pre_result_monitor?
+      # TODO: migrate old runs so we don't need to deal with them separately in the code
+      job_status == STATUS_CHECKED || (ready_step && pipeline_run_stages.find_by(step_number: ready_step) && pipeline_run_stages.find_by(step_number: ready_step).job_status == STATUS_LOADED)
+    else
+      output_states.find_by(output: REPORT_READY_OUTPUT).state == STATUS_LOADED
+    end
   end
 
   def succeeded?
