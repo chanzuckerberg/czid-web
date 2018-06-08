@@ -32,7 +32,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
                      name: "RR004_water_2_S23_R2_001.fastq.gz",
                      source_type: "local" }]
     assert_difference('Sample.count') do
-      post "#{samples_url}.json", params: { sample: { name: 'joe new sample', project_name: @joe_project.name, input_files_attributes: input_files, client: "web" } }
+      post "#{samples_url}.json", params: { sample: { name: 'joe new sample', project_name: @joe_project.name, client: "web", input_files_attributes: input_files } }
     end
     assert_response :success
   end
