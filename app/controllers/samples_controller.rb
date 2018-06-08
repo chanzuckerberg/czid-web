@@ -387,7 +387,7 @@ class SamplesController < ApplicationController
     # Check if the client is up-to-date. "web" is always valid whereas the
     # CLI client should provide a version string to-be-checked against the
     # minimum version here. Bulk upload from CLI goes to this method.
-    client = params[:client]
+    client = params.delete(:client)
     min_version = Gem::Version.new('0.3.2')
     unless client && (client == "web" || Gem::Version.new(client) >= min_version)
       render json: {
