@@ -236,6 +236,29 @@ module SamplesHelper
     pipeline_run_entry
   end
 
+  def status_display_helper(states_by_output_hash, results_finalized_var)
+    # Status display for the frontend.
+    h = states_by_output_hash
+    if [1, FINALIZED_SUCCESS, FINALIZED_FAIL].include?(results_finalized_var) # 1 is for status_display_pre_result_monitor
+      if [h["taxon_byteranges"], h["taxon_counts"]].all? { |s| s == STATUS_LOADED }
+        "COMPLETE"
+      elsif h["taxon_counts"] == STATUS_LOADED
+        "COMPLETE*"
+      else
+        "FAILED"
+      end
+    elsif h["taxon_counts"] == STATUS_LOADED
+      # alignment succeeded, postprocessing in progress
+      "POST PROCESSING"
+    elsif h["ercc_counts"] == STATUS_LOADED
+      # host-filtering succeeded, alignment in progress
+      "ALIGNMENT"
+    else
+      # host-filtering in progress
+      "HOST FILTERING"
+    end
+  end
+
   def sample_uploader(sample)
     user = {}
     user[:name] = (sample.user.name if sample.user)
