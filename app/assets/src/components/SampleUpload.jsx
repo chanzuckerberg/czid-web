@@ -256,10 +256,10 @@ class SampleUpload extends React.Component {
           pipeline_branch: this.state.selectedBranch,
           host_genome_id: this.state.selectedHostGenomeId,
           subsample: this.state.omitSubsamplingChecked ? 0 : 1,
-          status: "created"
+          status: "created",
+          client: "web"
         },
-        authenticity_token: this.csrf,
-        client: "web"
+        authenticity_token: this.csrf
       })
       .then(response => {
         this.setState({

@@ -382,27 +382,21 @@ class SamplesController < ApplicationController
   # POST /samples.json
   def create
     # Single sample upload path
+    params = sample_params
+
     # Check if the client is up-to-date. "web" is always valid whereas the
     # CLI client should provide a version string to-be-checked against the
     # minimum version here. Bulk upload from CLI goes to this method.
-    valid_client = false
-    if client_params && client_params[:client]
-      client = client_params[:client]
-      min_version = '0.3.2'
-      if client == "web" || Gem::Version.new(client) >= Gem::Version.new(min_version)
-        valid_client = true
-      end
-    end
-    unless valid_client
-      respond_to do |format|
-        msg = "Outdated command line client. Please run `pip install --upgrade git+https://github.com/chanzuckerberg/idseq-cli.git `"
-        format.json { render json: { status: msg }, status: :upgrade_required }
-        format.html { render json: { status: msg }, status: :upgrade_required }
-      end
+    client = params[:client]
+    min_version = Gem::Version.new('0.3.2')
+    unless client && (client == "web" || Gem::Version.new(client) >= min_version)
+      render json: {
+        message: "Outdated command line client. Please run `pip install --upgrade git+https://github.com/chanzuckerberg/idseq-cli.git `",
+        status: :upgrade_required
+      }
       return
     end
 
-    params = sample_params
     if params[:project_name]
       project_name = params.delete(:project_name)
       project = Project.find_by(name: project_name)
@@ -606,12 +600,8 @@ class SamplesController < ApplicationController
                                    :sample_memory, :sample_location, :sample_date, :sample_tissue,
                                    :sample_template, :sample_library, :sample_sequencer,
                                    :sample_notes, :job_queue, :search, :subsample, :pipeline_branch,
-                                   :sample_input_pg, :sample_batch, :sample_diagnosis, :sample_organism, :sample_detection,
+                                   :sample_input_pg, :sample_batch, :sample_diagnosis, :sample_organism, :sample_detection, :client,
                                    input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts])
-  end
-
-  def client_params
-    params.permit(:client)
   end
 
   def sort_by(samples, dir = nil)
