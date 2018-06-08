@@ -161,7 +161,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def failed?
-    /FAILED/ =~ job_status
+    /FAILED/ =~ job_status || results_finalized == FINALIZED_FAIL
   end
 
   def create_output_states
@@ -187,10 +187,10 @@ class PipelineRun < ApplicationRecord
 
     # Host Filtering
     run_stages << PipelineRunStage.new(
-        step_number: 1,
-        name: PipelineRunStage::HOST_FILTERING_STAGE_NAME,
-        job_command_func: 'host_filtering_command'
-      )
+      step_number: 1,
+      name: PipelineRunStage::HOST_FILTERING_STAGE_NAME,
+      job_command_func: 'host_filtering_command'
+    )
 
     # Alignment and Merging
     run_stages << PipelineRunStage.new(
@@ -434,15 +434,12 @@ class PipelineRun < ApplicationRecord
     # ]
     output = output_state.output
     state = output_state.state
-    if finalized? && !output_ready?(output)
-      output_state.update(state: STATUS_FAILED)
-      return
-    end
-    # Otherwise, if the output is ready and has not yet been loaded or enqueued
-    # for loading, enqueue a loader job.
-    if output_ready?(output) && state == STATUS_UNKNOWN
+    return unless state == STATUS_UNKNOWN
+    if output_ready?(output)
       output_state.update(state: STATUS_LOADING_QUEUED)
       Resque.enqueue(ResultMonitorLoader, id, output)
+    elsif finalized?
+      output_state.update(state: STATUS_FAILED)
     end
   end
 
@@ -469,6 +466,10 @@ class PipelineRun < ApplicationRecord
     output_states.pluck(:state).all? { |s| [STATUS_LOADED, STATUS_FAILED].include?(s) }
   end
 
+  def all_output_states_loaded?
+    output_states.pluck(:state).all? { |s| s == STATUS_LOADED }
+  end
+
   def monitor_results
     return if results_finalized?
 
@@ -492,11 +493,13 @@ class PipelineRun < ApplicationRecord
     load_stats_file
 
     # Check if run is complete:
-    if output_states.pluck(:state).all? { |s| s == STATUS_LOADED }
-      update(results_finalized: FINALIZED_SUCCESS)
-      handle_success
-    elsif all_output_states_terminal?
-      update(results_finalized: FINALIZED_FAIL)
+    if all_output_states_terminal?
+      if all_output_states_loaded?
+        update(results_finalized: FINALIZED_SUCCESS)
+        handle_success
+      else
+        update(results_finalized: FINALIZED_FAIL)
+      end
     end
   end
 
@@ -506,23 +509,21 @@ class PipelineRun < ApplicationRecord
       # all stages succeeded
       self.finalized = 1
       self.job_status = STATUS_CHECKED
-      save
-      return
-    end
-
-    if prs.failed?
-      self.job_status = STATUS_FAILED
-      self.finalized = 1
-      Airbrake.notify("Sample #{sample.id} failed #{prs.name}")
-    elsif !prs.started?
-      # we're moving on to a new stage
-      prs.run_job
     else
-      # still running
-      prs.update_job_status
+      if prs.failed?
+        self.job_status = STATUS_FAILED
+        self.finalized = 1
+        Airbrake.notify("Sample #{sample.id} failed #{prs.name}")
+      elsif !prs.started?
+        # we're moving on to a new stage
+        prs.run_job
+      else
+        # still running
+        prs.update_job_status
+      end
+      self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
+      self.job_status += "|#{STATUS_READY}" if report_ready?
     end
-    self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
-    self.job_status += "|#{STATUS_READY}" if report_ready?
     save
   end
 
