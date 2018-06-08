@@ -166,8 +166,7 @@ class PipelineRun < ApplicationRecord
 
   def create_output_states
     # First, determine which outputs we need:
-    target_outputs = %w[taxon_counts taxon_byteranges]
-    target_outputs = ["ercc_counts"] + target_outputs unless skip_host_filtering?
+    target_outputs = %w[ercc_counts taxon_counts taxon_byteranges]
 
     # Then, generate output_states
     output_state_entries = []
@@ -184,15 +183,14 @@ class PipelineRun < ApplicationRecord
   end
 
   def create_run_stages
-    # Host Filtering
     run_stages = []
-    unless sample.host_genome && sample.host_genome.name == HostGenome::NO_HOST_NAME
-      run_stages << PipelineRunStage.new(
+
+    # Host Filtering
+    run_stages << PipelineRunStage.new(
         step_number: 1,
         name: PipelineRunStage::HOST_FILTERING_STAGE_NAME,
         job_command_func: 'host_filtering_command'
       )
-    end
 
     # Alignment and Merging
     run_stages << PipelineRunStage.new(
@@ -488,10 +486,6 @@ class PipelineRun < ApplicationRecord
     elsif file_generated_since_jobstats?(host_filtering_job_stats_s3)
       load_job_stats(host_filtering_job_stats_s3)
     end
-  end
-
-  def skip_host_filtering?
-    sample.host_genome && sample.host_genome.name == HostGenome::NO_HOST_NAME
   end
 
   def all_output_states_terminal?
