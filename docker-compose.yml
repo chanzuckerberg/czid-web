@@ -146,7 +146,45 @@ services:
       - TRAVIS_TAG
       - TRAVIS
     command: bundle exec "QUEUE=* COUNT=5 rake resque:workers"
-  resque_schedule:
+  resque_result_monitor:
+    build: .
+    volumes:
+      - .:/app
+      - ~/.aws:/root/.aws:ro
+    depends_on:
+      - db
+      - redis
+    environment:
+      - SAMPLES_BUCKET_NAME=idseq-samples-development
+      - CI
+      - CONTINUOUS_INTEGRATION
+      - RACK_ENV
+      - RAILS_ENV
+      - TRAVIS_ALLOW_FAILURE
+      - TRAVIS_BRANCH
+      - TRAVIS_BUILD_DIR
+      - TRAVIS_BUILD_ID
+      - TRAVIS_BUILD_NUMBER
+      - TRAVIS_COMMIT
+      - TRAVIS_COMMIT_MESSAGE
+      - TRAVIS_COMMIT_RANGE
+      - TRAVIS_EVENT_TYPE
+      - TRAVIS_FILTERED
+      - TRAVIS_JOB_ID
+      - TRAVIS_JOB_NUMBER
+      - TRAVIS_LANGUAGE
+      - TRAVIS_OS_NAME
+      - TRAVIS_PRE_CHEF_BOOTSTRAP_TIME
+      - TRAVIS_PULL_REQUEST_BRANCH
+      - TRAVIS_PULL_REQUEST
+      - TRAVIS_PULL_REQUEST_SHA
+      - TRAVIS_PULL_REQUEST_SLUG
+      - TRAVIS_REPO_SLUG
+      - TRAVIS_SECURE_ENV_VARS
+      - TRAVIS_TAG
+      - TRAVIS
+    command: bundle exec "rake result_monitor"
+  resque_pipeline_monitor:
     build: .
     volumes:
       - .:/app

@@ -7,8 +7,9 @@ class Project < ApplicationRecord
   validates :name, presence: true, uniqueness: true
   include ReportHelper
 
-  def complete?
-    incomplete_runs = PipelineRun.where("id in (select max(id) from pipeline_runs group by sample_id) and sample_id in (select id from samples where project_id = #{id.to_i})").where("job_status != ?", PipelineRun::STATUS_CHECKED)
+  def results_complete?
+    incomplete_runs = PipelineRun.where("id in (select max(id) from pipeline_runs group by sample_id) and sample_id in (select id from samples where project_id = #{id.to_i})").where("results_finalized != ? and job_status != ?", PipelineRun::FINALIZED_SUCCESS, PipelineRun::STATUS_CHECKED)
+    # Check for job_status is only for old runs. TODO: migrate old runs so check on job_status can be removed.
     incomplete_runs.count.zero?
   end
 

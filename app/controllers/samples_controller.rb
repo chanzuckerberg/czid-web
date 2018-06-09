@@ -64,7 +64,7 @@ class SamplesController < ApplicationController
     @host_genomes = HostGenome.find(host_genome_ids)
 
     results = results.search(name_search_query) if name_search_query.present?
-    results = filter_samples(results, filter_query) if filter_query.present?
+    results = filter_by_status(results, filter_query) if filter_query.present?
     results = filter_by_tissue_type(results, tissue_type_query) if tissue_type_query.present?
     results = filter_by_host(results, host_query) if host_query.present?
 
@@ -172,7 +172,7 @@ class SamplesController < ApplicationController
 
     background_id = check_background_id(@sample)
     @report_page_params = { pipeline_version: @pipeline_version, background_id: background_id } if background_id
-    if @pipeline_run && (((@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?) || @pipeline_run.report_ready?)
+    if @pipeline_run && (((@pipeline_run.remaining_reads.to_i > 0 || @pipeline_run.results_finalized?) && !@pipeline_run.failed?) || @pipeline_run.report_ready?)
       if background_id
         @report_present = 1
         @report_ts = @pipeline_run.updated_at.to_i

@@ -251,7 +251,7 @@ class ProjectsController < ApplicationController
     return unless project_params[:background_flag]
     if project_params[:background_flag].zero? && @project.background
       @project.background.destroy
-    elsif project_params[:background_flag] == 1 && @project.complete?
+    elsif project_params[:background_flag] == 1 && @project.results_complete?
       @project.create_or_update_project_background
     end
   end

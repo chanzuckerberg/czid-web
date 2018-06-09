@@ -6,7 +6,6 @@ module SamplesHelper
 
   def generate_sample_list_csv(formatted_samples)
     attributes = %w[sample_name uploader upload_date runtime_seconds overall_job_status
-                    host_filtering_status nonhost_alignment_status postprocessing_status
                     total_reads nonhost_reads nonhost_reads_percent
                     quality_control compression_ratio tissue_type nucleotide_type
                     location host_genome notes]
@@ -28,11 +27,7 @@ module SamplesHelper
                         location: db_sample ? db_sample[:sample_location] : '',
                         host_genome: derived_output ? derived_output[:host_genome_name] : '',
                         notes: db_sample ? db_sample[:sample_notes] : '',
-                        overall_job_status: run_info ? run_info[:job_status_description] : '',
-                        host_filtering_status: run_info ? run_info['Host Filtering'] : '',
-                        nonhost_alignment_status: run_info ? run_info['GSNAPL/RAPSEARCH alignment'] : '',
-                        postprocessing_status: run_info ? run_info['Post Processing'] : '',
-                        assembly_status: run_info ? run_info['De-Novo Assembly'] : '',
+                        overall_job_status: run_info ? run_info[:result_status_description] : '',
                         uploader: sample_info[:uploader] ? sample_info[:uploader][:name] : '',
                         runtime_seconds: run_info ? run_info[:total_runtime] : '',
                         sample_library: db_sample ? db_sample[:sample_library] : '',
@@ -43,16 +38,6 @@ module SamplesHelper
                         sample_diagnosis: db_sample ? db_sample[:sample_diagnosis] : '',
                         sample_organism: db_sample ? db_sample[:sample_organism] : '',
                         sample_detection: db_sample ? db_sample[:sample_detection] : '' }
-        stages_to_display = [:host_filtering_status, :nonhost_alignment_status, :postprocessing_status]
-        stages_to_display << :assembly_status if run_info && run_info[:with_assembly] == 1
-        stage_statuses = data_values.values_at(*stages_to_display)
-        if stage_statuses.any? { |status| status == "FAILED" }
-          data_values[:overall_job_status] = "FAILED"
-        elsif stage_statuses.any? { |status| status == "RUNNING" }
-          data_values[:overall_job_status] = "RUNNING"
-        elsif stage_statuses.all? { |status| status == "LOADED" }
-          data_values[:overall_job_status] = "COMPLETE"
-        end
         attributes_as_symbols = attributes.map(&:to_sym)
         csv << data_values.values_at(*attributes_as_symbols)
       end
@@ -124,7 +109,7 @@ module SamplesHelper
     (100.0 * pr.remaining_reads) / pr.total_reads unless pr.nil? || pr.remaining_reads.nil? || pr.total_reads.nil?
   end
 
-  def sample_status_display(sample)
+  def sample_status_display_for_hidden_page(sample)
     if sample.status == Sample::STATUS_CREATED
       'uploading'
     elsif sample.status == Sample::STATUS_CHECKED
@@ -183,19 +168,22 @@ module SamplesHelper
     sample_list
   end
 
-  def filter_samples(samples, query)
-    samples = if query == 'WAITING'
-                samples.joins("LEFT OUTER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id) or pipeline_runs.id  IS NULL ").where("samples.status = ?  or pipeline_runs.job_status is NULL", 'created')
-              elsif query == 'FAILED'
-                samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status like '%FAILED'")
-              elsif query == 'UPLOADING'
-                samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("pipeline_runs.job_status NOT IN (?) and pipeline_runs.finalized != 1", %w[CHECKED FAILED])
-              elsif query == 'CHECKED'
-                samples.joins("INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id").where(status: 'checked').where("pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)").where("(pipeline_runs.job_status IN (?) or pipeline_runs.job_status like '%READY') and pipeline_runs.finalized = 1", query)
-              else
-                samples
-              end
-    samples
+  def filter_by_status(samples, query)
+    top_pipeline_run_clause = "pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)"
+    if query == 'In Progress'
+      join_clause = "LEFT OUTER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id"
+      samples.joins(join_clause).where("#{top_pipeline_run_clause} or pipeline_runs.id is NULL").where("samples.status = ? or pipeline_runs.job_status is NULL or (pipeline_runs.job_status NOT IN (?) and pipeline_runs.finalized != 1)", Sample::STATUS_CREATED, [PipelineRun::STATUS_CHECKED, PipelineRun::STATUS_FAILED])
+    else
+      join_clause = "INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id"
+      samples_pipeline_runs = samples.joins(join_clause).where(status: Sample::STATUS_CHECKED).where(top_pipeline_run_clause)
+      if query == 'Failed'
+        samples_pipeline_runs.where("pipeline_runs.job_status like '%FAILED'")
+      elsif query == 'Complete'
+        samples_pipeline_runs.where("(pipeline_runs.job_status = ? or pipeline_runs.job_status like '%READY') and pipeline_runs.finalized = 1", PipelineRun::STATUS_CHECKED)
+      else # query == 'All' or something unexpected
+        samples
+      end
+    end
   end
 
   def get_total_runtime(pipeline_run, run_stages)
@@ -219,35 +207,29 @@ module SamplesHelper
     samples.where(host_genome_id: query)
   end
 
-  def pipeline_run_info(pipeline_run, report_ready_pipeline_run_ids, pipeline_run_stages_by_pipeline_run_id)
+  def pipeline_run_info(pipeline_run, report_ready_pipeline_run_ids, pipeline_run_stages_by_pipeline_run_id, output_states_by_pipeline_run_id)
     pipeline_run_entry = {}
     if pipeline_run
-      pipeline_run_entry[:job_status_description] = 'WAITING' if pipeline_run.job_status.nil?
       run_stages = pipeline_run_stages_by_pipeline_run_id[pipeline_run.id]
       if run_stages.present?
-        run_stages.each do |rs|
-          pipeline_run_entry[rs.name] = rs.job_status
-        end
         pipeline_run_entry[:total_runtime] = get_total_runtime(pipeline_run, run_stages)
         pipeline_run_entry[:with_assembly] = pipeline_run.assembly? ? 1 : 0
+        pipeline_run_entry[:result_status_description] = if pipeline_run.pre_result_monitor?
+                                                           # TODO: migrate old runs and delete this code
+                                                           # (chanzuckerberg/idseq-web/issues/1336)
+                                                           pipeline_run.status_display_pre_result_monitor(run_stages)
+                                                         else
+                                                           pipeline_run.status_display(output_states_by_pipeline_run_id)
+                                                         end
       else
-        # old data
-        pipeline_run_status = pipeline_run.job_status
-        pipeline_run_entry[:job_status_description] =
-          if %w[CHECKED SUCCEEDED].include?(pipeline_run_status)
-            'COMPLETE'
-          elsif %w[FAILED ERROR].include?(pipeline_run_status)
-            'FAILED'
-          elsif %w[RUNNING LOADED].include?(pipeline_run_status)
-            'IN PROGRESS'
-          elsif pipeline_run_status == 'RUNNABLE'
-            'INITIALIZING'
-          end
+        # data processed before pipeline_run_stages were instated
+        # TODO: migrate old runs and delete this code
+        pipeline_run_entry[:result_status_description] = pipeline_run.status_display_pre_run_stages
       end
       pipeline_run_entry[:finalized] = pipeline_run.finalized
       pipeline_run_entry[:report_ready] = report_ready_pipeline_run_ids.include?(pipeline_run.id)
     else
-      pipeline_run_entry[:job_status_description] = 'WAITING'
+      pipeline_run_entry[:result_status_description] = 'WAITING'
       pipeline_run_entry[:finalized] = 0
       pipeline_run_entry[:report_ready] = 0
     end
@@ -288,8 +270,14 @@ module SamplesHelper
   end
 
   def report_ready_multiget(pipeline_run_ids)
-    # query db to get ids of pipeline_runs for which "report_ready?" is true
-    PipelineRun.where(id: pipeline_run_ids).where("job_status = '#{PipelineRun::STATUS_CHECKED}' or id in (select pipeline_run_id from pipeline_run_stages where pipeline_run_stages.step_number = pipeline_runs.ready_step and pipeline_run_stages.job_status = '#{PipelineRun::STATUS_LOADED}')").pluck(:id)
+    # query db to get ids of pipeline_runs for which the report is ready
+    join_clause = "LEFT OUTER JOIN output_states ON output_states.pipeline_run_id = pipeline_runs.id AND output_states.output = '#{PipelineRun::REPORT_READY_OUTPUT}'"
+    report_ready_clause = "output_states.state = '#{PipelineRun::STATUS_LOADED}'"
+
+    clause_for_old_results = "job_status = '#{PipelineRun::STATUS_CHECKED}' or job_status like '%|READY%'"
+    # TODO: migrate old runs so we don't need to deal with them separately in the code
+
+    PipelineRun.where(id: pipeline_run_ids).joins(join_clause).where("#{report_ready_clause} or #{clause_for_old_results}").pluck(:id)
   end
 
   def top_pipeline_runs_multiget(sample_ids)
@@ -302,14 +290,14 @@ module SamplesHelper
     top_pipeline_run_by_sample_id
   end
 
-  def pipeline_run_stages_multiget(pipeline_run_ids)
-    all_stages = PipelineRunStage.where(pipeline_run_id: pipeline_run_ids)
-    stages_by_pipeline_run_id = {}
-    all_stages.each do |prs|
-      stages_by_pipeline_run_id[prs.pipeline_run_id] ||= []
-      stages_by_pipeline_run_id[prs.pipeline_run_id] << prs
+  def dependent_records_multiget(table, parent_id_column_sym, parent_ids)
+    all_records = table.where(parent_id_column_sym => parent_ids)
+    records_by_parent_id = {}
+    all_records.each do |r|
+      records_by_parent_id[r[parent_id_column_sym]] ||= []
+      records_by_parent_id[r[parent_id_column_sym]] << r
     end
-    stages_by_pipeline_run_id
+    records_by_parent_id
   end
 
   def format_samples(samples)
@@ -322,7 +310,8 @@ module SamplesHelper
     pipeline_run_ids = top_pipeline_run_by_sample_id.values.map(&:id)
     job_stats_by_pipeline_run_id = job_stats_multiget(pipeline_run_ids)
     report_ready_pipeline_run_ids = report_ready_multiget(pipeline_run_ids)
-    pipeline_run_stages_by_pipeline_run_id = pipeline_run_stages_multiget(pipeline_run_ids)
+    pipeline_run_stages_by_pipeline_run_id = dependent_records_multiget(PipelineRunStage, :pipeline_run_id, pipeline_run_ids)
+    output_states_by_pipeline_run_id = dependent_records_multiget(OutputState, :pipeline_run_id, pipeline_run_ids)
 
     # Massage data into the right format
     samples.each_with_index do |sample|
@@ -331,7 +320,8 @@ module SamplesHelper
       top_pipeline_run = top_pipeline_run_by_sample_id[sample.id]
       job_stats_hash = top_pipeline_run ? job_stats_by_pipeline_run_id[top_pipeline_run.id] : {}
       job_info[:derived_sample_output] = sample_derived_data(sample, job_stats_hash)
-      job_info[:run_info] = pipeline_run_info(top_pipeline_run, report_ready_pipeline_run_ids, pipeline_run_stages_by_pipeline_run_id)
+      job_info[:run_info] = pipeline_run_info(top_pipeline_run, report_ready_pipeline_run_ids,
+                                              pipeline_run_stages_by_pipeline_run_id, output_states_by_pipeline_run_id)
       job_info[:uploader] = sample_uploader(sample)
       formatted_samples.push(job_info)
     end

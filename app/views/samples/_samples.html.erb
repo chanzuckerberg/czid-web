@@ -25,7 +25,7 @@
 
     <tbody>
       <% samples.each do |sample| %>
-        <tr class=<%= sample_status_display(sample)%>>
+        <tr class=<%= sample_status_display_for_hidden_page(sample)%>>
           <td><%= sample.name %></td>
           <td><%= sample.id %></td>
           <td class='small'><%= sample.user.email if sample.user %></td>

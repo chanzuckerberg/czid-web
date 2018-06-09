@@ -514,37 +514,36 @@ class Samples extends React.Component {
     this.setState({ columnsShown });
   }
 
-  appendStatusIcon(status) {
-    let klass = "";
+  statusDisplay(status) {
+    let statusClass;
+    let statusIcon;
     switch (status) {
       case "WAITING":
-        klass = "waiting fa fa-arrow-up";
-        break;
-      case "INPROGRESS":
-        klass = "uploading fa fa-repeat";
-        break;
-      case "POST PROCESSING":
-        klass = "uploading fa fa-repeat";
-        break;
-      case "HOST FILTERING":
-        klass = "uploading fa fa-repeat";
-        break;
-      case "ALIGNMENT":
-        klass = "uploading fa fa-repeat";
-        break;
-      case "ASSEMBLY":
-        klass = "uploading fa fa-repeat";
+        statusClass = "waiting";
+        statusIcon = "fa fa-arrow-up";
         break;
       case "FAILED":
-        klass = "failed fa fa-times";
+        statusClass = "failed";
+        statusIcon = "fa fa-times";
         break;
       case "COMPLETE":
-        klass = "complete fa fa-check";
+        statusClass = "complete";
+        statusIcon = "fa fa-check";
+        break;
+      case "COMPLETE*":
+        statusClass = "complete";
+        statusIcon = "fa fa-check";
         break;
       default:
-        klass = "waiting fa fa-arrow-up";
+        statusClass = "uploading";
+        statusIcon = "fa fa-repeat";
     }
-    return <i className={klass} aria-hidden="true" />;
+    return (
+      <div className={`${statusClass} status`}>
+        <i className={`${statusClass} ${statusIcon}`} aria-hidden="true" />
+        <span>{status}</span>
+      </div>
+    );
   }
 
   formatRunTime(runtime) {
@@ -566,18 +565,9 @@ class Samples extends React.Component {
       let derivedOutput = sample.derived_sample_output;
       let runInfo = sample.run_info;
       let uploader = sample.uploader.name;
-      let descrip = runInfo.job_status_description;
-      let statusClass = !descrip
-        ? this.applyChunkStatusClass(runInfo)
-        : this.applyClass(descrip);
-      let status = !descrip ? this.getChunkedStage(runInfo) : descrip;
+      let status = runInfo.result_status_description;
 
-      const stageStatus = (
-        <div className={`${statusClass} status`}>
-          {this.appendStatusIcon(status)}
-          <span>{status}</span>
-        </div>
-      );
+      const stageStatus = this.statusDisplay(status);
 
       const sample_name_info = (
         <SampleNameInfo parent={this} dbSample={dbSample} uploader={uploader} />
@@ -740,66 +730,6 @@ class Samples extends React.Component {
           cb();
         }
       });
-  }
-
-  applyClass(status) {
-    if (status === "COMPLETE") {
-      return "complete";
-    } else if (status === "WAITING") {
-      return "waiting";
-    } else if (status === "INPROGRESS") {
-      return "uploading";
-    } else if (status === "FAILED") {
-      return "failed";
-    }
-  }
-
-  applyChunkStatusClass(runInfo) {
-    let assembly = runInfo["De-Novo Assembly"];
-    let postProcess = runInfo["Post Processing"];
-    let hostFiltering = runInfo["Host Filtering"];
-    let alignment = runInfo["GSNAPL/RAPSEARCH alignment"];
-    if (assembly && runInfo["with_assembly"]) {
-      return assembly === "LOADED" ? "complete" : "uploading";
-    } else if (postProcess) {
-      return postProcess === "LOADED" ? "complete" : "uploading";
-    } else if (alignment) {
-      return alignment === "FAILED" ? "failed" : "uploading";
-    } else if (hostFiltering) {
-      return hostFiltering === "FAILED" ? "failed" : "uploading";
-    }
-  }
-
-  getChunkedStage(runInfo) {
-    let postProcess = runInfo["Post Processing"];
-    let assembly = runInfo["De-Novo Assembly"];
-    let hostFiltering = runInfo["Host Filtering"];
-    let alignment = runInfo["GSNAPL/RAPSEARCH alignment"];
-    if (alignment === "FAILED" || hostFiltering === "FAILED") {
-      return "FAILED";
-    } else if (assembly && runInfo["with_assembly"]) {
-      if (assembly === "LOADED") {
-        return "COMPLETE";
-      } else if (assembly === "FAILED") {
-        return "COMPLETE*";
-      } else {
-        return "ASSEMBLY";
-      }
-    } else if (postProcess) {
-      if (postProcess === "LOADED") {
-        return "COMPLETE";
-      } else if (postProcess === "FAILED") {
-        return "COMPLETE*";
-      } else {
-        return "POST PROCESSING";
-      }
-    } else if (alignment) {
-      return "ALIGNMENT";
-    } else if (hostFiltering) {
-      return "HOST FILTERING";
-    } else {
-      return "WAITING";
-    }
   }
 
   //handle search when query is passed
@@ -1141,16 +1071,14 @@ class Samples extends React.Component {
     );
 
     let filterSelect = this.handleStatusFilterSelect;
-    let all_caps = ["WAITING", "UPLOADING", "CHECKED", "FAILED", "ALL"];
-    let uppercase = ["Waiting", "In Progress", "Complete", "Failed", "All"];
-    let lowercase = ["waiting", "uploading", "complete", "failed", "all"];
+    let status_filter_options = ["In Progress", "Complete", "Failed", "All"];
+    let status_filter_css_classes = ["uploading", "complete", "failed", "all"];
 
     const filterStatus = (
       <JobStatusFilters
-        all_caps={all_caps}
+        status_filter_options={status_filter_options}
         filterSelect={filterSelect}
-        lowercase={lowercase}
-        uppercase={uppercase}
+        status_filter_css_classes={status_filter_css_classes}
       />
     );
 
@@ -1416,7 +1344,7 @@ function LabelTagMarkup({
   );
 }
 
-function FilterItemMarkup({ status, filterSelect, lowercase, pos, uppercase }) {
+function FilterItemMarkup({ status, filterSelect, status_filter_css_classes, pos }) {
   return (
     <li
       className="filter-item"
@@ -1424,8 +1352,8 @@ function FilterItemMarkup({ status, filterSelect, lowercase, pos, uppercase }) {
       data-status={status}
       onClick={filterSelect}
     >
-      <a data-status={status} className={"filter-item " + lowercase[pos]}>
-        {uppercase[pos]}
+      <a data-status={status} className={"filter-item " + status_filter_css_classes[pos]}>
+        {status}
       </a>
       <i data-status={status} className="filter fa fa-check hidden" />
     </li>
@@ -1985,7 +1913,7 @@ function TableColumnHeaders({ sort, colMap, filterStatus, state, parent }) {
   );
 }
 
-function JobStatusFilters({ all_caps, filterSelect, lowercase, uppercase }) {
+function JobStatusFilters({ status_filter_options, filterSelect, status_filter_css_classes }) {
   return (
     <div className="dropdown-status-filtering">
       <li>
@@ -1994,13 +1922,12 @@ function JobStatusFilters({ all_caps, filterSelect, lowercase, uppercase }) {
         </a>
       </li>
 
-      {all_caps.map((status, pos) => {
+      {status_filter_options.map((status, pos) => {
         return FilterItemMarkup({
           status,
           filterSelect,
-          lowercase,
-          pos,
-          uppercase
+          status_filter_css_classes,
+          pos
         });
       })}
       <li className="divider" />
