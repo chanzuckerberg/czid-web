@@ -17,7 +17,7 @@ gem 'coffee-rails', '~> 4.2', '>= 4.2.2'
 gem 'consul', '>= 0.13.1'
 gem 'devise', '4.3.0'
 gem "health_check", ">= 2.7.0"
-gem 'honeycomb-rails', '0.7.1'
+gem 'honeycomb-rails', '0.4.1'
 gem 'mailgun_rails', '>= 0.9.0'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.5'
