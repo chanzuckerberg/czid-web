@@ -10,7 +10,10 @@
     "setupTestFrameworkScriptFile": "./enzyme_config.js"
   },
   "lint-staged": {
-    "*.{js,jsx,json,css,scss}": ["prettier --write", "git add"],
+    "*.{js,jsx,json,css,scss}": [
+      "prettier --write",
+      "git add"
+    ],
     "*.rb": [
       "rubocop -R --auto-correct --config .rubocop_todo.yml --display-cop-names --display-style-guide",
       "git add"
@@ -40,7 +43,7 @@
     "husky": "^0.14.3",
     "import-glob-loader": "^1.1.0",
     "jest": "^22.4.3",
-    "lint-staged": "^7.0.4",
+    "lint-staged": "^7.2.0",
     "node-sass": "^4.7.2",
     "sass-loader": "^6.0.6",
     "style-loader": "^0.20.2",
