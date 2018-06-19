@@ -116,6 +116,8 @@ services:
       - db
       - redis
     environment:
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
       - SAMPLES_BUCKET_NAME=idseq-samples-development
       - IDSEQ_HONEYCOMB_DB_DATA_SET
       - IDSEQ_HONEYCOMB_DATA_SET
@@ -157,6 +159,8 @@ services:
       - db
       - redis
     environment:
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
       - SAMPLES_BUCKET_NAME=idseq-samples-development
       - CI
       - CONTINUOUS_INTEGRATION
@@ -195,6 +199,8 @@ services:
       - db
       - redis
     environment:
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
       - SAMPLES_BUCKET_NAME=idseq-samples-development
       - IDSEQ_HONEYCOMB_DB_DATA_SET
       - IDSEQ_HONEYCOMB_DATA_SET
