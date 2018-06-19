@@ -66,7 +66,11 @@ class Background < ApplicationRecord
   end
 
   def compute_stdev(sum, sum2, n)
-    Math.sqrt((sum2 - sum**2 / n.to_f) / (n - 1))
+    x = (sum2 - sum**2 / n.to_f) / (n - 1)
+    # In theory, x can mathematically be proven to be non-negative.
+    # But in practice, rounding errors can make it slightly negative when it should be 0.
+    x = [0, x].max
+    Math.sqrt(x)
   end
 
   def self.viewable(user)

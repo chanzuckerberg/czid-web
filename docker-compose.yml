@@ -71,6 +71,8 @@ services:
       - db
       - redis
     environment:
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
       - SAMPLES_BUCKET_NAME=idseq-samples-development
       - IDSEQ_AIRBRAKE_PROJECT_ID
       - IDSEQ_AIRBRAKE_PROJECT_KEY
