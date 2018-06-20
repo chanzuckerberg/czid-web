@@ -19,19 +19,16 @@ class PipelineRun < ApplicationRecord
   accepts_nested_attributes_for :ercc_counts
 
   DEFAULT_SUBSAMPLING = 1_000_000 # number of fragments to subsample to, after host filtering
-  ASSEMBLY_STATUSFILE = 'job-complete'.freeze
-  LOCAL_JSON_PATH = '/app/tmp/results_json'.freeze
-  PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
-
-  # Output file names
-  OUTPUT_JSON_NAME = 'idseq_web_sample.json'.freeze # old
+  OUTPUT_JSON_NAME = 'idseq_web_sample.json'.freeze
   MULTIHIT_OUTPUT_JSON_NAME = 'multihit_idseq_web_sample.json'.freeze
   STATS_JSON_NAME = 'stats.json'.freeze
   VERSION_JSON_NAME = 'versions.json'.freeze
   ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
   TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined.json'.freeze
+  ASSEMBLY_STATUSFILE = 'job-complete'.freeze
+  LOCAL_JSON_PATH = '/app/tmp/results_json'.freeze
   INPUT_TRUNCATED_FILE = 'input_truncated.txt'.freeze
-  REMAINING_READS_OUTPUT_NAME = 
+  PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
 
   # The PIPELINE MONITOR is responsible for keeping status of AWS Batch jobs
   # and for submitting jobs that need to be run next.
@@ -375,10 +372,6 @@ class PipelineRun < ApplicationRecord
 
   def s3_file_for(output)
     case output
-    when "total_reads"
-      "#{host_filter_output_s3_path}/#{TOTAL_READS_OUTPUT_NAME}"
-    when "remaining_reads"
-      "#{host_filter_output_s3_path}/#{REMAINING_READS_OUTPUT_NAME}"
     when "ercc_counts"
       "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
     when "taxon_counts"
