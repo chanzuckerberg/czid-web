@@ -73,8 +73,8 @@ class PipelineRun < ApplicationRecord
   STATUS_LOADING = 'LOADING'.freeze
   STATUS_LOADING_QUEUED = 'LOADING_QUEUED'.freeze
 
-  LOADERS_BY_OUTPUT = { "total_reads" => db_load_total_reads",
-                        "remaining_reads" => db_load_remaining_reads",
+  LOADERS_BY_OUTPUT = { "total_reads" => "db_load_total_reads",
+                        "remaining_reads" => "db_load_remaining_reads",
                         "ercc_counts" => "db_load_ercc_counts",
                         "taxon_counts" => "db_load_taxon_counts",
                         "taxon_byteranges" => "db_load_byteranges" }.freeze
