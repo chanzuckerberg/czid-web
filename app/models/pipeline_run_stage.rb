@@ -195,7 +195,7 @@ class PipelineRunStage < ApplicationRecord
       if step["class"] == "PipelineStepRunStar" && sample.s3_star_index_path.present?
         step["additional_files"]["star_genome"] = sample.s3_star_index_path
       elsif step["class"] == "PipelineStepRunBowtie2" && sample.s3_bowtie2_index_path.present?
-        step["additional_files"]["bowtie2_genome"] = sample.s3_star_index_path
+        step["additional_files"]["bowtie2_genome"] = sample.s3_bowtie2_index_path
       elsif step["class"] == "PipelineStepRunSubsample" && pipeline_run.subsample
         step["additional_attributes"]["max_fragments"] = pipeline_run.subsample
       end
