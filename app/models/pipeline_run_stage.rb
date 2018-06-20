@@ -27,11 +27,11 @@ class PipelineRunStage < ApplicationRecord
   def install_pipeline
     "pip install --upgrade git+git://github.com/chanzuckerberg/s3mi.git; " \
     "cd /mnt; " \
-    "git clone https://github.com/chanzuckerberg/idseq-pipeline.git; " \
-    "cd idseq-pipeline; " \
+    "git clone https://github.com/chanzuckerberg/idseq-dag.git; " \
+    "cd idseq-dag; " \
     "git checkout #{pipeline_run.pipeline_commit}; " \
     "echo #{pipeline_run.pipeline_commit} > #{COMMIT_SHA_FILE_ON_WORKER}; " \
-    "pip install -e .[test]"
+    "pip install -e . --upgrade"
   end
 
   def aegea_batch_submit_command(base_command, memory = Sample::DEFAULT_MEMORY_IN_MB)
@@ -185,18 +185,32 @@ class PipelineRunStage < ApplicationRecord
   ########### STAGE SPECIFIC FUNCTIONS BELOW ############
 
   def host_filtering_command
+    # Generate DAG from template
     sample = pipeline_run.sample
-    file_type = sample.input_files.first.file_type
-    batch_command_env_variables = "INPUT_BUCKET=#{sample.sample_input_s3_path} OUTPUT_BUCKET=#{sample.sample_output_s3_path} " \
-      "FILE_TYPE=#{file_type} DB_SAMPLE_ID=#{sample.id} " \
-      "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} "
-    if sample.s3_star_index_path.present?
-      batch_command_env_variables += " STAR_GENOME=#{sample.s3_star_index_path} "
+    dag = JSON.parse('app/lib/host_filter_dag.json')
+    dag["given_targets"]["fastqs"]["s3_dir"] = sample.sample_input_s3_path
+    dag["given_targets"]["fastqs"]["max_fragments"] = sample.sample_input_s3_path
+    dag["output_dir_s3"] = sample.sample_output_s3_path
+    dag["steps"].each do |step|
+      if step["class"] == "PipelineStepRunStar" && sample.s3_star_index_path.present?
+        step["additional_files"]["star_genome"] = sample.s3_star_index_path
+      elsif step["class"] == "PipelineStepRunBowtie2" && sample.s3_bowtie2_index_path.present?
+        step["additional_files"]["bowtie2_genome"] = sample.s3_star_index_path
+      elsif step["class"] == "PipelineStepRunSubsample" && pipeline_run.subsample
+        step["additional_attributes"]["max_fragments"] = pipeline_run.subsample
+      end
     end
-    if sample.s3_bowtie2_index_path.present?
-      batch_command_env_variables += " BOWTIE2_GENOME=#{sample.s3_bowtie2_index_path} "
-    end
-    batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline host_filtering"
+
+    # Upload DAG to S3
+    dag_s3 = "#{sample.sample_output_s3_path}/host_filter_dag.json"
+    `echo '#{dag.to_s}' | aws s3 cp - #{dag_s3}"`
+
+    # Generate job command
+    dag_path_on_worker = "/mnt/host_filter_dag.json"
+    download_dag = "aws s3 cp #{dag_s3} #{dag_path_on_worker}"
+    batch_command = [install_pipeline, download_dag, "idseq_dag #{dag_path_on_worker}"].join("; ")
+
+    # Dispatch job
     memory = sample.sample_memory.present? ? sample.sample_memory : Sample::DEFAULT_MEMORY_IN_MB
     aegea_batch_submit_command(batch_command, memory)
   end
