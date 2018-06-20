@@ -182,6 +182,23 @@ class PipelineRun < ApplicationRecord
     self.results_finalized = IN_PROGRESS
   end
 
+  def make_host_filter_dag
+    dag = JSON.parse('app/lib/host_filter_dag.json')
+    dag["given_targets"]["fastqs"]["s3_dir"] = sample.sample_input_s3_path
+    dag["given_targets"]["fastqs"]["max_fragments"] = sample.sample_input_s3_path
+    dag["output_dir_s3"] = sample.sample_output_s3_path
+    dag["steps"].each do |step|
+      if step["class"] == "PipelineStepRunStar" && sample.s3_star_index_path.present?
+        step["additional_files"]["star_genome"] = sample.s3_star_index_path
+      elsif step["class"] == "PipelineStepRunBowtie2" && sample.s3_bowtie2_index_path.present?
+        step["additional_files"]["bowtie2_genome"] = sample.s3_bowtie2_index_path
+      elsif step["class"] == "PipelineStepRunSubsample" && subsample
+        step["additional_attributes"]["max_fragments"] = subsample
+      end
+    end
+    dag
+  end
+
   def create_run_stages
     run_stages = []
 
@@ -191,6 +208,7 @@ class PipelineRun < ApplicationRecord
       name: PipelineRunStage::HOST_FILTERING_STAGE_NAME,
       job_command_func: 'host_filtering_command'
     )
+    self.host_filter_dag = make_host_filter_dag
 
     # Alignment and Merging
     run_stages << PipelineRunStage.new(
@@ -312,9 +330,7 @@ class PipelineRun < ApplicationRecord
 
     json_dict = JSON.parse(File.read(downloaded_json_path))
     pipeline_output_dict = json_dict['pipeline_output']
-    pipeline_output_dict.slice!('remaining_reads', 'total_reads', 'taxon_counts_attributes')
-    self.total_reads = pipeline_output_dict['total_reads']
-    self.remaining_reads = pipeline_output_dict['remaining_reads']
+    pipeline_output_dict.slice!('taxon_counts_attributes')
     self.unmapped_reads = count_unmapped_reads
     self.fraction_subsampled = subsample_fraction
     save
@@ -372,6 +388,10 @@ class PipelineRun < ApplicationRecord
 
   def s3_file_for(output)
     case output
+    when "total_reads"
+      "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
+    when "remaining_reads"
+      "#{host_filter_output_s3_path}/"#{
     when "ercc_counts"
       "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
     when "taxon_counts"

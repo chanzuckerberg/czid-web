@@ -185,23 +185,8 @@ class PipelineRunStage < ApplicationRecord
   ########### STAGE SPECIFIC FUNCTIONS BELOW ############
 
   def host_filtering_command
-    # Generate DAG from template
-    sample = pipeline_run.sample
-    dag = JSON.parse('app/lib/host_filter_dag.json')
-    dag["given_targets"]["fastqs"]["s3_dir"] = sample.sample_input_s3_path
-    dag["given_targets"]["fastqs"]["max_fragments"] = sample.sample_input_s3_path
-    dag["output_dir_s3"] = sample.sample_output_s3_path
-    dag["steps"].each do |step|
-      if step["class"] == "PipelineStepRunStar" && sample.s3_star_index_path.present?
-        step["additional_files"]["star_genome"] = sample.s3_star_index_path
-      elsif step["class"] == "PipelineStepRunBowtie2" && sample.s3_bowtie2_index_path.present?
-        step["additional_files"]["bowtie2_genome"] = sample.s3_bowtie2_index_path
-      elsif step["class"] == "PipelineStepRunSubsample" && pipeline_run.subsample
-        step["additional_attributes"]["max_fragments"] = pipeline_run.subsample
-      end
-    end
-
     # Upload DAG to S3
+    dag = JSON.parse(pipeline_run.host_filter_dag)
     dag_s3 = "#{sample.sample_output_s3_path}/host_filter_dag.json"
     `echo '#{dag.to_json}' | aws s3 cp - #{dag_s3}`
 
