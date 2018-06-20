@@ -203,7 +203,7 @@ class PipelineRunStage < ApplicationRecord
 
     # Upload DAG to S3
     dag_s3 = "#{sample.sample_output_s3_path}/host_filter_dag.json"
-    `echo '#{dag.to_s}' | aws s3 cp - #{dag_s3}"`
+    `echo '#{dag.to_s}' | aws s3 cp - #{dag_s3}`
 
     # Generate job command
     dag_path_on_worker = "/mnt/host_filter_dag.json"
