@@ -73,7 +73,9 @@ class PipelineRun < ApplicationRecord
   STATUS_LOADING = 'LOADING'.freeze
   STATUS_LOADING_QUEUED = 'LOADING_QUEUED'.freeze
 
-  LOADERS_BY_OUTPUT = { "ercc_counts" => "db_load_ercc_counts",
+  LOADERS_BY_OUTPUT = { "total_reads" => db_load_total_reads",
+                        "remaining_reads" => db_load_remaining_reads",
+                        "ercc_counts" => "db_load_ercc_counts",
                         "taxon_counts" => "db_load_taxon_counts",
                         "taxon_byteranges" => "db_load_byteranges" }.freeze
   REPORT_READY_OUTPUT = "taxon_counts".freeze
@@ -183,11 +185,18 @@ class PipelineRun < ApplicationRecord
   end
 
   def make_host_filter_dag
+    # Load template:
     dag = JSON.parse('app/lib/host_filter_dag.json')
+
+    # Populate input and output paths:
     dag["given_targets"]["fastqs"]["s3_dir"] = sample.sample_input_s3_path
     dag["given_targets"]["fastqs"]["max_fragments"] = sample.sample_input_s3_path
     dag["output_dir_s3"] = sample.sample_output_s3_path
+
+    # Edit individual steps:
+    new_dag_steps = []
     dag["steps"].each do |step|
+      # Populate steps with sample-specific parameters
       if step["class"] == "PipelineStepRunStar" && sample.s3_star_index_path.present?
         step["additional_files"]["star_genome"] = sample.s3_star_index_path
       elsif step["class"] == "PipelineStepRunBowtie2" && sample.s3_bowtie2_index_path.present?
@@ -195,7 +204,14 @@ class PipelineRun < ApplicationRecord
       elsif step["class"] == "PipelineStepRunSubsample" && subsample
         step["additional_attributes"]["max_fragments"] = subsample
       end
+      # Delete gsnap_filter step if host is not human
+      unless step["class"] == "PipelineStepRunGsnapFilter" && sample.host_genome && sample.host_genome.name != 'Human'
+        new_dag_steps << step
+      end
     end
+    # Save the newly edited steps
+    dag["steps"] = new_dag_steps
+
     dag
   end
 
@@ -271,19 +287,22 @@ class PipelineRun < ApplicationRecord
     job_status == STATUS_CHECKED
   end
 
-  def db_load_ercc_counts
-    # TODO: break this function up into 3 different target outputs / loader commands
-    #       rather than combining several outputs in 1 function
+  def db_load_total_reads
+    count_json = JSON.parse(`aws s3 cp #{s3_file_for("total_reads")} -`)
+    self.total_reads = count_json[dag_input_target].to_i
+    self.truncated = count_json["truncated"].to_i
+    save
+  end
 
+  def db_load_remaining_reads
+    count_json = JSON.parse(`aws s3 cp #{s3_file_for("remaining_reads")} -`)
+    update(remaining_reads: count_json[dag_last_host_filter_target].to_i)
+  end
+
+  def db_load_ercc_counts
     # Load version info applicable to host filtering
     version_s3_path = "#{host_filter_output_s3_path}/#{VERSION_JSON_NAME}"
     self.version = `aws s3 cp #{version_s3_path} -`
-
-    # Check if input was truncated
-    truncation_file = "#{host_filter_output_s3_path}/#{INPUT_TRUNCATED_FILE}"
-    _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", truncation_file)
-    self.truncated = `aws s3 cp #{truncation_file} -`.split("\n")[0].to_i if status.exitstatus.zero?
-    save
 
     # Load ERCC counts
     ercc_s3_path = "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
@@ -386,12 +405,22 @@ class PipelineRun < ApplicationRecord
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_byteranges_path}")
   end
 
+  def dag_input_target
+    dag = JSON.parse(host_filter_dag)
+    dag["given_targets"].keys[0]
+  end
+
+  def dag_last_host_filter_target
+    dag = JSON.parse(host_filter_dag)
+    dag["steps"][-1]["out"]
+  end
+
   def s3_file_for(output)
     case output
     when "total_reads"
-      "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
+      "#{host_filter_output_s3_path}/#{dag_input_target}.count"
     when "remaining_reads"
-      "#{host_filter_output_s3_path}/"#{
+      "#{host_filter_output_s3_path}/#{dag_last_host_filter_target}.count"
     when "ercc_counts"
       "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
     when "taxon_counts"
