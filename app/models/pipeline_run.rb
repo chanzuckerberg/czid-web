@@ -186,7 +186,7 @@ class PipelineRun < ApplicationRecord
 
   def make_host_filter_dag
     # Load template:
-    dag = JSON.parse('app/lib/host_filter_dag.json')
+    dag = JSON.parse(`cat app/lib/host_filter_dag.json`)
 
     # Populate input and output paths:
     dag["given_targets"]["fastqs"]["s3_dir"] = sample.sample_input_s3_path
