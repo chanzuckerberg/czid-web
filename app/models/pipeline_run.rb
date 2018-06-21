@@ -21,7 +21,6 @@ class PipelineRun < ApplicationRecord
   DEFAULT_SUBSAMPLING = 1_000_000 # number of fragments to subsample to, after host filtering
   OUTPUT_JSON_NAME = 'idseq_web_sample.json'.freeze
   MULTIHIT_OUTPUT_JSON_NAME = 'multihit_idseq_web_sample.json'.freeze
-  STATS_JSON_NAME = 'stats.json'.freeze
   VERSION_JSON_NAME = 'versions.json'.freeze
   ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
   TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined.json'.freeze
@@ -75,9 +74,14 @@ class PipelineRun < ApplicationRecord
 
   LOADERS_BY_OUTPUT = { "total_reads" => "db_load_total_reads",
                         "remaining_reads" => "db_load_remaining_reads",
+                        "reads_before_priceseqfilter" => "db_load_reads_before_priceseqfilter",
+                        "reads_after_priceseqfilter" => "db_load_reads_after_priceseqfilter",
+                        "reads_after_cdhitdup" => "db_load_reads_after_cdhitdup",
                         "ercc_counts" => "db_load_ercc_counts",
                         "taxon_counts" => "db_load_taxon_counts",
                         "taxon_byteranges" => "db_load_byteranges" }.freeze
+  # Note: reads_before_priceseqfilter, reads_after_priceseqfilter, reads_after_cdhitdup
+  #       are the only "job_stats" we actually need for web display.
   REPORT_READY_OUTPUT = "taxon_counts".freeze
 
   # Values for results_finalized are as follows.
@@ -168,7 +172,9 @@ class PipelineRun < ApplicationRecord
 
   def create_output_states
     # First, determine which outputs we need:
-    target_outputs = %w[ercc_counts taxon_counts taxon_byteranges]
+    target_outputs = %w[total_reads remaining_reads reads_before_priceseqfilter
+                        reads_after_priceseqfilter reads_after_cdhitdup
+                        ercc_counts taxon_counts taxon_byteranges]
 
     # Then, generate output_states
     output_state_entries = []
@@ -299,6 +305,35 @@ class PipelineRun < ApplicationRecord
     update(remaining_reads: count_json[dag_last_host_filter_target].to_i)
   end
 
+  def db_load_reads_before_priceseqfilter
+    count_json = JSON.parse(`aws s3 cp #{s3_file_for("reads_before_priceseqfilter")} -`)
+    n_reads = count_json[dag_target_before_priceseqfilter].to_i
+    jobstat = JobStat.find_or_initialize_by(pipeline_run_id: id, task: "run_priceseqfilter")
+    jobstat.reads_before = n_reads
+    jobstat.save
+  end
+
+  def db_load_reads_after_priceseqfilter
+    count_json = JSON.parse(`aws s3 cp #{s3_file_for("reads_after_priceseqfilter")} -`)
+    n_reads = count_json["priceseq_out"].to_i
+
+    jobstat = JobStat.find_or_initialize_by(pipeline_run_id: id, task: "run_priceseqfilter")
+    jobstat.reads_after = n_reads
+    jobstat.save
+
+    jobstat = JobStat.find_or_initialize_by(pipeline_run_id: id, task: "run_cdhitdup")
+    jobstat.reads_before = n_reads
+    jobstat.save
+  end
+
+  def db_load_reads_after_cdhitdup
+    count_json = JSON.parse(`aws s3 cp #{s3_file_for("reads_after_cdhitdup")} -`)
+    n_reads = count_json["cdhitdup_out"].to_i
+    jobstat = JobStat.find_or_initialize_by(pipeline_run_id: id, task: "run_cdhitdup")
+    jobstat.reads_after = n_reads
+    jobstat.save
+  end
+
   def db_load_ercc_counts
     # Load version info applicable to host filtering
     version_s3_path = "#{host_filter_output_s3_path}/#{VERSION_JSON_NAME}"
@@ -329,17 +364,6 @@ class PipelineRun < ApplicationRecord
     tcnt['family_taxid'].to_i < TaxonLineage::INVALID_CALL_BASE_ID
   rescue
     false
-  end
-
-  def load_job_stats(stats_json_s3_path)
-    downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, local_json_path)
-    return unless downloaded_stats_path
-    stats_array = JSON.parse(File.read(downloaded_stats_path))
-    update(total_reads: (stats_array[0] || {})['total_reads'] || 0)
-    stats_array = stats_array.select { |entry| entry.key?("task") }
-    job_stats.destroy_all
-    update(job_stats_attributes: stats_array)
-    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_stats_path}")
   end
 
   def db_load_taxon_counts
@@ -415,12 +439,22 @@ class PipelineRun < ApplicationRecord
     dag["steps"][-1]["out"]
   end
 
+  def dag_target_before_priceseqfilter
+    "star_out"
+  end
+
   def s3_file_for(output)
     case output
     when "total_reads"
       "#{host_filter_output_s3_path}/#{dag_input_target}.count"
     when "remaining_reads"
       "#{host_filter_output_s3_path}/#{dag_last_host_filter_target}.count"
+    when "reads_before_priceseqfilter"
+      "#{host_filter_output_s3_path}/#{dag_target_before_priceseqfilter}"
+    when "reads_after_priceseqfilter"
+      "#{host_filter_output_s3_path}/priceseq_out.count"
+    when "reads_after_cdhitdup"
+      "#{host_filter_output_s3_path}/cdhitdup_out.count"
     when "ercc_counts"
       "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
     when "taxon_counts"
@@ -503,17 +537,6 @@ class PipelineRun < ApplicationRecord
     end
   end
 
-  def load_stats_file
-    # TODO: make it a single file rather than using stage-specific.
-    host_filtering_job_stats_s3 = "#{host_filter_output_s3_path}/#{STATS_JSON_NAME}"
-    alignment_job_stats_s3 = "#{alignment_output_s3_path}/#{STATS_JSON_NAME}"
-    if file_generated_since_jobstats?(alignment_job_stats_s3)
-      load_job_stats(alignment_job_stats_s3)
-    elsif file_generated_since_jobstats?(host_filtering_job_stats_s3)
-      load_job_stats(host_filtering_job_stats_s3)
-    end
-  end
-
   def all_output_states_terminal?
     output_states.pluck(:state).all? { |s| [STATUS_LOADED, STATUS_FAILED].include?(s) }
   end
@@ -540,9 +563,6 @@ class PipelineRun < ApplicationRecord
     output_states.each do |o|
       check_and_enqueue(o)
     end
-
-    # Update job stats:
-    load_stats_file
 
     # Check if run is complete:
     if all_output_states_terminal?
@@ -597,22 +617,6 @@ class PipelineRun < ApplicationRecord
     begin
       s3_file_time = DateTime.strptime(stdout[0..18], "%Y-%m-%d %H:%M:%S")
       return (s3_file_time && created_at && s3_file_time > created_at)
-    rescue
-      return nil
-    end
-  end
-
-  def file_generated_since_jobstats?(s3_path)
-    # If there is no file, return false
-    stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", s3_path.to_s)
-    return false unless status.exitstatus.zero?
-    # If there is a file and there are no existing job_stats yet, return true
-    existing_jobstats = job_stats
-    return true if existing_jobstats.empty?
-    # If there is a file and there are job_stats, check if the file supersedes the job_stats:
-    begin
-      s3_file_time = DateTime.strptime(stdout[0..18], "%Y-%m-%d %H:%M:%S")
-      return (s3_file_time && existing_jobstats.created_at && s3_file_time > existing_jobstats.created_at)
     rescue
       return nil
     end
