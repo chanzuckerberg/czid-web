@@ -141,7 +141,7 @@ class PipelineRunStage < ApplicationRecord
     if failed? || succeeded?
       unless job_log_id
         # set log id if not set
-        _job_status, self.job_log_id, _job_hash, self.job_description = job_info(job_id, id)
+        _job_status, self.job_log_id, _job_hash, self.job_description = PipelineRunStage.job_info(job_id, id)
         save
       end
       terminate_job
@@ -149,7 +149,7 @@ class PipelineRunStage < ApplicationRecord
     end
     # The job appears to be in progress.  Check to make sure it hasn't been killed in AWS.   But not too frequently.
     return unless due_for_aegea_check?
-    self.job_status, self.job_log_id, job_hash, self.job_description = job_info(job_id, id)
+    self.job_status, self.job_log_id, job_hash, self.job_description = PipelineRunStage.job_info(job_id, id)
     if [STATUS_ERROR, STATUS_FAILED].include?(job_status)
       save
       return
