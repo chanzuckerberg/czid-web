@@ -139,24 +139,20 @@ class PipelineRunStage < ApplicationRecord
     check_status_file_and_update(JOB_SUCCEEDED_FILE_SUFFIX, STATUS_SUCCEEDED)
     check_status_file_and_update(JOB_FAILED_FILE_SUFFIX, STATUS_FAILED)
     if failed? || succeeded?
+      unless job_log_id
+        # set log id if not set
+        _job_status, self.job_log_id, _job_hash, self.job_description = PipelineRunStage.job_info(job_id, id)
+        save
+      end
       terminate_job
       return
     end
     # The job appears to be in progress.  Check to make sure it hasn't been killed in AWS.   But not too frequently.
     return unless due_for_aegea_check?
-    stdout, stderr, status = Open3.capture3("aegea", "batch", "describe", job_id.to_s)
-    unless status.exitstatus.zero?
-      Airbrake.notify("Error for update job status for pipeline run #{id} with error #{stderr}")
-      self.job_status = STATUS_ERROR # transient error, job is still "in progress"
-      self.job_status = STATUS_FAILED if stderr =~ /IndexError/ # job no longer exists
+    self.job_status, self.job_log_id, job_hash, self.job_description = PipelineRunStage.job_info(job_id, id)
+    if [STATUS_ERROR, STATUS_FAILED].include?(job_status)
       save
       return
-    end
-    self.job_description = stdout
-    job_hash = JSON.parse(job_description)
-    self.job_status = job_hash['status']
-    if job_hash['container'] && job_hash['container']['logStreamName']
-      self.job_log_id = job_hash['container']['logStreamName']
     end
     unless instance_terminated?(job_hash)
       save
@@ -170,6 +166,26 @@ class PipelineRunStage < ApplicationRecord
       return
     end
     run_job # this saves
+  end
+
+  def self.job_info(job_id, run_id)
+    job_status = nil
+    job_log_id = nil
+    job_hash = nil
+    stdout, stderr, status = Open3.capture3("aegea", "batch", "describe", job_id.to_s)
+    if status.exitstatus.zero?
+      job_description = stdout
+      job_hash = JSON.parse(job_description)
+      job_status = job_hash['status']
+      if job_hash['container'] && job_hash['container']['logStreamName']
+        job_log_id = job_hash['container']['logStreamName']
+      end
+    else
+      Airbrake.notify("Error for update job status for pipeline run #{run_id} with error #{stderr}")
+      job_status = STATUS_ERROR # transient error, job is still "in progress"
+      job_status = STATUS_FAILED if stderr =~ /IndexError/ # job no longer exists
+    end
+    [job_status, job_log_id, job_hash, stdout]
   end
 
   def terminate_job
