@@ -1,8 +1,8 @@
 {
   "output_dir_s3":
-    "s3://idseq-samples-prod/samples/%{project_id}/%{sample_id}/results",
+    "s3://idseq-samples-prod/samples/<%= @project_id %>/<%= @sample_id %>/results",
   "targets": {
-    "fastqs": ["%{fas", "RR004_water_2_S23_R2_001.fastq.gz"],
+    "fastqs": ["<%= @attribute_dict[:fastq1] %>", "<%= @attribute_dict[:fastq2] %>"],
     "star_out": ["unmapped1.fq", "unmapped2.fq"],
     "priceseq_out": ["priceseq1.fa", "priceseq2.fa"],
     "cdhitdup_out": ["dedup1.fa", "dedup2.fa"],
@@ -27,10 +27,9 @@
       "class": "PipelineStepRunStar",
       "module": "idseq_dag.steps.run_star",
       "additional_files": {
-        "star_genome":
-          "s3://idseq-database/host_filter/human/2018-02-15-utc-1518652800-unixtime__2018-02-15-utc-1518652800-unixtime/STAR_genome.tar"
+        "star_genome": "<%= @attribute_dict[:star_genome] %>"
       },
-      "additional_attributes": { "truncate_fragments_to": 75000000 }
+      "additional_attributes": { "truncate_fragments_to": <%= @attribute_dict[:max_fragments] %> }
     },
     {
       "in": ["star_out"],
@@ -62,8 +61,7 @@
       "class": "PipelineStepRunBowtie2",
       "module": "idseq_dag.steps.run_bowtie2",
       "additional_files": {
-        "bowtie2_genome":
-          "s3://idseq-database/host_filter/human/2018-02-15-utc-1518652800-unixtime__2018-02-15-utc-1518652800-unixtime/bowtie2_genome.tar"
+        "bowtie2_genome": "<%= @attribute_dict[:bowtie2_genome] %>"
       },
       "additional_attributes": { "output_sam_file": "bowtie2.sam" }
     },
@@ -73,25 +71,27 @@
       "class": "PipelineStepRunSubsample",
       "module": "idseq_dag.steps.run_subsample",
       "additional_files": {},
-      "additional_attributes": { "max_fragments": 1000000 }
-    },
+      "additional_attributes": { "max_fragments": <%= @attribute_dict[:max_subsample_frag] %> }
+    }
+    <% if @host_genome == "human" %>
+    ,
     {
       "in": ["subsampled_out"],
       "out": "gsnap_filter_out",
       "class": "PipelineStepRunGsnapFilter",
       "module": "idseq_dag.steps.run_gsnap_filter",
       "additional_files": {
-        "gsnap_genome":
-          "s3://idseq-database/host_filter/human/2018-02-15-utc-1518652800-unixtime__2018-02-15-utc-1518652800-unixtime/hg38_pantro5_k16.tar"
+        "gsnap_genome": "<%= @attribute_dict[:gsnap_genome] %>"
       },
       "additional_attributes": { "output_sam_file": "gsnap_filter.sam" }
     }
+    <% end %>
   ],
   "given_targets": {
     "fastqs": {
-      "s3_dir": "s3://idseq-samples-prod/samples/71/4542/fastqs",
+      "s3_dir": "s3://idseq-samples-prod/samples/<%= @project_id %>/<%= @sample_id %>/fastqs",
       "count_reads": 1,
-      "max_fragments": 75000000
+      "max_fragments": <%= @attribute_dict[:max_fragments] %>
     }
   }
 }
