@@ -199,21 +199,10 @@ class PipelineRunStage < ApplicationRecord
   end
 
   ########### STAGE SPECIFIC FUNCTIONS BELOW ############
-
-  def host_filtering_command
-    # Upload DAG to S3
+  def prepare_dag(dag_name, attribute_dict)
     sample = pipeline_run.sample
-    dag_s3 = "#{sample.sample_output_s3_path}/host_filter_dag.json"
-    attribute_dict = {
-      fastq1: sample.input_files[0].name,
-      star_genome: sample.s3_star_index_path,
-      bowtie2_genome: sample.s3_bowtie2_index_path,
-      max_fragments: PipelineRun::MAX_INPUT_FRAGMENTS,
-      max_subsample_frag: pipeline_run.subsample
-    }
-    attribute_dict[:fastq2] = sample.input_files[1].name if sample.input_files[1]
-
-    dag = DagGenerator.new('app/lib/dags/host_filter.json.erb',
+    dag_s3 = "#{sample.sample_output_s3_path}/#{dag_name}.json"
+    dag = DagGenerator.new("app/lib/dags/#{dag_name}.json.erb",
                            sample.project_id,
                            sample.id,
                            sample.host_genome_name.downcase,
@@ -223,11 +212,27 @@ class PipelineRunStage < ApplicationRecord
     `echo '#{dag_json}' | aws s3 cp - #{dag_s3}`
 
     # Generate job command
-    dag_path_on_worker = "/mnt/host_filter_dag.json"
+    dag_path_on_worker = "/mnt/#{dag_name}.json"
     download_dag = "aws s3 cp #{dag_s3} #{dag_path_on_worker}"
+    execute_dag = "idseq_dag #{dag_path_on_worker}"
+    [download_dag, execute_dag].join(";")
+  end
+
+  def host_filtering_command
+    # Upload DAG to S3
+    sample = pipeline_run.sample
+    attribute_dict = {
+      fastq1: sample.input_files[0].name,
+      star_genome: sample.s3_star_index_path,
+      bowtie2_genome: sample.s3_bowtie2_index_path,
+      max_fragments: PipelineRun::MAX_INPUT_FRAGMENTS,
+      max_subsample_frag: pipeline_run.subsample
+    }
+    attribute_dict[:fastq2] = sample.input_files[1].name if sample.input_files[1]
+    dag_commands = prepare_dag("host_filter", attribute_dict)
+
     upload_version = "idseq_dag --version | cut -f2 -d ' ' | aws s3 cp  - #{pipeline_run.pipeline_version_file} "
-    batch_command = [install_pipeline, upload_version,
-                     download_dag, "idseq_dag #{dag_path_on_worker}"].join("; ")
+    batch_command = [install_pipeline, upload_version, dag_commands].join("; ")
 
     # Dispatch job
     memory = sample.sample_memory.present? ? sample.sample_memory : Sample::DEFAULT_MEMORY_IN_MB
@@ -237,52 +242,24 @@ class PipelineRunStage < ApplicationRecord
   def alignment_command
     # Upload DAG to S3
     sample = pipeline_run.sample
-    dag_s3 = "#{sample.sample_output_s3_path}/non_host_alignment.json"
     attribute_dict = {
       input_file_count: sample.input_files.count,
       skip_dedeuterostome_filter: sample.skip_deutero_filter_flag,
       pipeline_version: pipeline_run.pipeline_version || pipeline_run.fetch_pipeline_run_version
     }
-
-    dag = DagGenerator.new('app/lib/dags/non_host_alignment.json.erb',
-                           sample.project_id,
-                           sample.id,
-                           sample.host_genome_name.downcase,
-                           attribute_dict)
-    self.dag_json = dag.render
-
-    `echo '#{dag_json}' | aws s3 cp - #{dag_s3}`
-
-    # Generate job command
-    dag_path_on_worker = "/mnt/non_host_alignment.json"
-    download_dag = "aws s3 cp #{dag_s3} #{dag_path_on_worker}"
-    batch_command = [install_pipeline, download_dag, "idseq_dag #{dag_path_on_worker}"].join("; ")
-
+    dag_commands = prepare_dag("non_host_alignment", attribute_dict)
+    batch_command = [install_pipeline, dag_commands].join("; ")
     # Run it
     aegea_batch_submit_command(batch_command)
   end
 
   def postprocess_command
     # Upload DAG to S3
-    sample = pipeline_run.sample
-    dag_s3 = "#{sample.sample_output_s3_path}/postprocess.json"
     attribute_dict = {
       pipeline_version: pipeline_run.pipeline_version || pipeline_run.fetch_pipeline_run_version
     }
-    dag = DagGenerator.new('app/lib/dags/postprocess.json.erb',
-                           sample.project_id,
-                           sample.id,
-                           sample.host_genome_name.downcase,
-                           attribute_dict)
-    self.dag_json = dag.render
-
-    `echo '#{dag_json}' | aws s3 cp - #{dag_s3}`
-
-    # Generate job command
-    dag_path_on_worker = "/mnt/postprocess.json"
-    download_dag = "aws s3 cp #{dag_s3} #{dag_path_on_worker}"
-    batch_command = [install_pipeline, download_dag, "idseq_dag #{dag_path_on_worker}"].join("; ")
-
+    dag_commands = prepare_dag("post_process", attribute_dict)
+    batch_command = [install_pipeline, dag_commands].join("; ")
     # Run it
     aegea_batch_submit_command(batch_command)
   end
