@@ -168,29 +168,6 @@ class PipelineRunStage < ApplicationRecord
     run_job # this saves
   end
 
-  def load_counts_files # or basically generate the stats.json file
-    # So actually should split this into:
-    # (1) A function that will write the compiled stats.json file
-    # (2) Modifications to the loader functions
-
-    res_folder = host_filter_output_s3_path # TODO: Change to the actual output path
-    stdout, _stderr, status = Open3.capture3("aws s3 ls #{res_folder}/ | grep count")
-    # Non zero exit would mean no count files found
-    return false unless status.exitstatus.zero?
-
-    all_counts = []
-    stdout.split("\n").each do |line|
-      fname = line.split(" ")[3] # Last col in line
-
-      raw = `aws s3 cp #{res_folder}/#{fname} -`
-      contents = JSON.parse(raw)
-      contents = { task: contents.first[0], reads_before: contents.first[1] }
-
-      # Ex: [{:task=>"fastqs", :reads_before=>379162}, {:task=>"gsnap_filter_out", :reads_before=>158}]
-      all_counts << contents
-    end
-  end
-
   def self.job_info(job_id, run_id)
     job_status = nil
     job_log_id = nil

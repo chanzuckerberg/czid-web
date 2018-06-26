@@ -548,6 +548,34 @@ class PipelineRun < ApplicationRecord
     save
   end
 
+  def compile_stats_file
+    res_folder = host_filter_output_s3_path # TODO: Or whatever is the new results name
+    stdout, _stderr, status = Open3.capture3("aws s3 ls #{res_folder}/ | grep count")
+    return false unless status.exitstatus.zero?
+
+    # Compile all counts
+    # Ex: [{:task=>"fastqs", :reads_before=>379162}, {:task=>"gsnap_filter_out", :reads_before=>158}]
+    all_counts = []
+    stdout.split("\n").each do |line|
+      fname = line.split(" ")[3] # Last col in line
+      raw = `aws s3 cp #{res_folder}/#{fname} -`
+      contents = JSON.parse(raw)
+      contents = { task: contents.first[0], reads_before: contents.first[1] }
+      all_counts << contents
+    end
+
+    # Write JSON to a file
+    tmp = Tempfile.new
+    tmp.write(all_counts.to_json)
+    tmp.close
+
+    # Copy to S3
+    _stdout, stderr, status = Open3.capture3("aws s3 cp #{tmp.path} #{host_filter_output_s3_path}/#{STATS_JSON_NAME}")
+    if status.exitstatus && !status.exitstatus.zero?
+      Rails.logger.warn("Failed to write compiled stats file: #{stderr}")
+    end
+  end
+
   def local_json_path
     "#{LOCAL_JSON_PATH}/#{id}"
   end
