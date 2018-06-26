@@ -753,6 +753,20 @@ class PipelineRun < ApplicationRecord
     ")
   end
 
+  def subsampled_reads
+    # number of non-host reads that actually went through non-host alignment
+    res = remaining_reads
+    if subsample
+      res = subsample * sample.input_files.count
+      if remaining_reads < res
+        res = remaining_reads
+      end
+    end
+    res
+    # 'subsample' is number of reads, respectively read pairs, to sample after host filtering
+    # 'remaining_reads' is number of individual reads remaining after host filtering
+  end
+
   def subsample_suffix
     all_suffix = pipeline_version ? "subsample_all" : ""
     subsample? ? "subsample_#{subsample}" : all_suffix
