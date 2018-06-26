@@ -583,7 +583,7 @@ class PipelineRun < ApplicationRecord
 
     # Copy to S3. Overwrite if exists.
     _stdout, stderr, status = Open3.capture3("aws s3 cp #{tmp.path} #{res_folder}/#{STATS_JSON_NAME}")
-    if status.exitstatus && !status.exitstatus.zero?
+    unless status.exitstatus.zero?
       Rails.logger.warn("Failed to write compiled stats file: #{stderr}")
     end
   end
