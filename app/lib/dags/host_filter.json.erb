@@ -2,24 +2,40 @@
   "output_dir_s3":
     "s3://idseq-samples-prod/samples/<%= @project_id %>/<%= @sample_id %>/results",
   "targets": {
-    "fastqs": ["<%= @attribute_dict[:fastq1] %>", "<%= @attribute_dict[:fastq2] %>"],
-    "star_out": ["unmapped1.fq", "unmapped2.fq"],
-    "priceseq_out": ["priceseq1.fa", "priceseq2.fa"],
-    "cdhitdup_out": ["dedup1.fa", "dedup2.fa"],
-    "lzw_out": ["lzw1.fa", "lzw2.fa"],
-    "bowtie2_out": ["bowtie2_1.fa", "bowtie2_2.fa", "bowtie2_merged.fa"],
-    "subsampled_out": [
-      "subsampled_1.fa",
-      "subsampled_2.fa",
-      "subsampled_merged.fa"
-    ],
-    "gsnap_filter_out": [
-      "gsnap_filter_1.fa",
-      "gsnap_filter_2.fa",
-      "gsnap_filter_merged.fa"
-    ]
+    <% if @attribute_dict[:fastq2] %>
+      "fastqs": ["<%= @attribute_dict[:fastq1] %>", "<%= @attribute_dict[:fastq2] %>"],
+      "star_out": ["unmapped1.fq", "unmapped2.fq"],
+      "priceseq_out": ["priceseq1.fa", "priceseq2.fa"],
+      "cdhitdup_out": ["dedup1.fa", "dedup2.fa"],
+      "lzw_out": ["lzw1.fa", "lzw2.fa"],
+      "bowtie2_out": ["bowtie2_1.fa", "bowtie2_2.fa", "bowtie2_merged.fa"],
+      "subsampled_out": [
+        "subsampled_1.fa",
+        "subsampled_2.fa",
+        "subsampled_merged.fa"
+      ]
+      <% if @host_genome == "human" %>
+        ,
+        "gsnap_filter_out": [
+          "gsnap_filter_1.fa",
+          "gsnap_filter_2.fa",
+          "gsnap_filter_merged.fa"
+        ]
+      <% end %>
+    <% else %>
+      "fastqs": ["<%= @attribute_dict[:fastq1] %>"],
+      "star_out": ["unmapped1.fq"],
+      "priceseq_out": ["priceseq1.fa"],
+      "cdhitdup_out": ["dedup1.fa"],
+      "lzw_out": ["lzw1.fa"],
+      "bowtie2_out": ["bowtie2_1.fa"],
+      "subsampled_out": [ "subsampled_1.fa"]
+      <% if @host_genome == "human" %>
+        ,
+        "gsnap_filter_out": [ "gsnap_filter_1.fa"]
+      <% end %>
+    <% end %>
   },
-
   "steps": [
     {
       "in": ["fastqs"],
