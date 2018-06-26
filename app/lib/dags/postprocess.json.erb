@@ -1,5 +1,5 @@
 {
-  "output_dir_s3": "s3://idseq-samples-prod/samples//<%= @project_id %>/<%= @sample_id %>/results",
+  "output_dir_s3": "s3://idseq-samples-prod/samples/<%= @project_id %>/<%= @sample_id %>/postprocess",
   "targets": {
     "taxid_fasta_in": [
       "annotated_merged.fa",
@@ -58,7 +58,8 @@
   ],
   "given_targets": {
     "taxid_fasta_in": {
-      "s3_dir": "s3://idseq-samples-prod/test_samples/1/results/<%= @attribute_dict[:pipeline_version] %>"
+      "s3_dir": "s3://idseq-samples-prod/samples/<%= @project_id %>/<%= @sample_id %>/results/<%= @attribute_dict[:pipeline_version] %>"
+
     }
   }
 }

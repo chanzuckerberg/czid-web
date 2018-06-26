@@ -183,37 +183,6 @@ class PipelineRun < ApplicationRecord
     self.results_finalized = IN_PROGRESS
   end
 
-  def make_host_filter_dag
-    # Load template:
-    dag = JSON.parse(`cat app/lib/host_filter_dag.json`)
-
-    # Populate input and output paths:
-    dag["given_targets"]["fastqs"]["s3_dir"] = sample.sample_input_s3_path
-    dag["given_targets"]["fastqs"]["max_fragments"] = sample.sample_input_s3_path
-    dag["output_dir_s3"] = sample.sample_output_s3_path
-
-    # Edit individual steps:
-    new_dag_steps = []
-    dag["steps"].each do |step|
-      # Populate steps with sample-specific parameters
-      if step["class"] == "PipelineStepRunStar" && sample.s3_star_index_path.present?
-        step["additional_files"]["star_genome"] = sample.s3_star_index_path
-      elsif step["class"] == "PipelineStepRunBowtie2" && sample.s3_bowtie2_index_path.present?
-        step["additional_files"]["bowtie2_genome"] = sample.s3_bowtie2_index_path
-      elsif step["class"] == "PipelineStepRunSubsample" && subsample
-        step["additional_attributes"]["max_fragments"] = subsample
-      end
-      # Delete gsnap_filter step if host is not human
-      unless step["class"] == "PipelineStepRunGsnapFilter" && sample.host_genome && sample.host_genome.name != 'Human'
-        new_dag_steps << step
-      end
-    end
-    # Save the newly edited steps
-    dag["steps"] = new_dag_steps
-
-    dag
-  end
-
   def create_run_stages
     run_stages = []
 
@@ -223,7 +192,6 @@ class PipelineRun < ApplicationRecord
       name: PipelineRunStage::HOST_FILTERING_STAGE_NAME,
       job_command_func: 'host_filtering_command'
     )
-    self.host_filter_dag = make_host_filter_dag
 
     # Alignment and Merging
     run_stages << PipelineRunStage.new(
@@ -286,51 +254,11 @@ class PipelineRun < ApplicationRecord
     job_status == STATUS_CHECKED
   end
 
-  def db_load_total_reads
-    count_json = JSON.parse(`aws s3 cp #{s3_file_for("total_reads")} -`)
-    self.total_reads = count_json[dag_input_target].to_i
-    self.truncated = count_json["truncated"].to_i
-    save
-  end
-
-  def db_load_remaining_reads
-    count_json = JSON.parse(`aws s3 cp #{s3_file_for("remaining_reads")} -`)
-    update(remaining_reads: count_json[dag_last_host_filter_target].to_i)
-  end
-
-  def db_load_reads_before_priceseqfilter
-    count_json = JSON.parse(`aws s3 cp #{s3_file_for("reads_before_priceseqfilter")} -`)
-    n_reads = count_json[dag_target_before_priceseqfilter].to_i
-    jobstat = JobStat.find_or_initialize_by(pipeline_run_id: id, task: "run_priceseqfilter")
-    jobstat.reads_before = n_reads
-    jobstat.save
-  end
-
-  def db_load_reads_after_priceseqfilter
-    count_json = JSON.parse(`aws s3 cp #{s3_file_for("reads_after_priceseqfilter")} -`)
-    n_reads = count_json["priceseq_out"].to_i
-
-    jobstat = JobStat.find_or_initialize_by(pipeline_run_id: id, task: "run_priceseqfilter")
-    jobstat.reads_after = n_reads
-    jobstat.save
-
-    jobstat = JobStat.find_or_initialize_by(pipeline_run_id: id, task: "run_cdhitdup")
-    jobstat.reads_before = n_reads
-    jobstat.save
-  end
-
-  def db_load_reads_after_cdhitdup
-    count_json = JSON.parse(`aws s3 cp #{s3_file_for("reads_after_cdhitdup")} -`)
-    n_reads = count_json["cdhitdup_out"].to_i
-    jobstat = JobStat.find_or_initialize_by(pipeline_run_id: id, task: "run_cdhitdup")
-    jobstat.reads_after = n_reads
-    jobstat.save
-  end
-
   def db_load_ercc_counts
+    # TODO: remove the following. deprecated.
     # Load version info applicable to host filtering
-    version_s3_path = "#{host_filter_output_s3_path}/#{VERSION_JSON_NAME}"
-    self.version = `aws s3 cp #{version_s3_path} -`
+    # version_s3_path = "#{host_filter_output_s3_path}/#{VERSION_JSON_NAME}"
+    # self.version = `aws s3 cp #{version_s3_path} -`
 
     # Load ERCC counts
     ercc_s3_path = "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
@@ -371,8 +299,9 @@ class PipelineRun < ApplicationRecord
     self.fraction_subsampled = subsample_fraction
     save
 
-    version_s3_path = "#{alignment_output_s3_path}/#{VERSION_JSON_NAME}"
-    update(version: `aws s3 cp #{version_s3_path} -`)
+    # TODO: remove the following. deprecated.
+    # version_s3_path = "#{alignment_output_s3_path}/#{VERSION_JSON_NAME}"
+    # update(version: `aws s3 cp #{version_s3_path} -`)
 
     # only keep counts at certain taxonomic levels
     taxon_counts_attributes_filtered = []
@@ -422,32 +351,8 @@ class PipelineRun < ApplicationRecord
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_byteranges_path}")
   end
 
-  def dag_input_target
-    dag = JSON.parse(host_filter_dag)
-    dag["given_targets"].keys[0]
-  end
-
-  def dag_last_host_filter_target
-    dag = JSON.parse(host_filter_dag)
-    dag["steps"][-1]["out"]
-  end
-
-  def dag_target_before_priceseqfilter
-    "star_out"
-  end
-
   def s3_file_for(output)
     case output
-    when "total_reads"
-      "#{host_filter_output_s3_path}/#{dag_input_target}.count"
-    when "remaining_reads"
-      "#{host_filter_output_s3_path}/#{dag_last_host_filter_target}.count"
-    when "reads_before_priceseqfilter"
-      "#{host_filter_output_s3_path}/#{dag_target_before_priceseqfilter}"
-    when "reads_after_priceseqfilter"
-      "#{host_filter_output_s3_path}/priceseq_out.count"
-    when "reads_after_cdhitdup"
-      "#{host_filter_output_s3_path}/cdhitdup_out.count"
     when "ercc_counts"
       "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
     when "taxon_counts"
@@ -458,7 +363,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def output_ready?(output)
-    file_generated_since_run(s3_file_for(output))
+    file_generated(s3_file_for(output))
   end
 
   def output_state_hash(output_states_by_pipeline_run_id)
@@ -613,6 +518,11 @@ class PipelineRun < ApplicationRecord
     rescue
       return nil
     end
+  end
+
+  def file_generated(s3_path)
+    _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", s3_path.to_s)
+    status.exitstatus.zero?
   end
 
   def generate_aggregate_counts(tax_level_name)
