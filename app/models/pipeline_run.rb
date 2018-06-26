@@ -314,6 +314,13 @@ class PipelineRun < ApplicationRecord
       update(remaining_reads: rem)
     end
 
+    # Load subsample fraction
+    sub = stats_array.detect { |entry| entry.key?("fraction_subsampled") }
+    if sub
+      sub = sub["fraction_subsampled"]
+      update(fraction_subsampled: sub)
+    end
+
     # Load task name and read pairs
     stats_array = stats_array.select { |entry| entry.key?("task") }
     job_stats.destroy_all
@@ -333,7 +340,6 @@ class PipelineRun < ApplicationRecord
     self.total_reads = pipeline_output_dict['total_reads']
     self.remaining_reads = pipeline_output_dict['remaining_reads']
     self.unmapped_reads = count_unmapped_reads
-    self.fraction_subsampled = subsample_fraction
     save
 
     version_s3_path = "#{alignment_output_s3_path}/#{VERSION_JSON_NAME}"
@@ -576,6 +582,13 @@ class PipelineRun < ApplicationRecord
       all_counts << { remaining_reads: rem[:reads_after] }
     end
 
+    # Load subsample fraction
+    sub_before = all_counts.detect { |entry| entry.value?("bowtie2_out") }
+    sub_after = all_counts.detect { |entry| entry.value?("subsampled_out") }
+    if sub_before && sub_after
+      all_counts << { fraction_subsampled: (1.0 * sub_after[:reads_after]) / sub_before[:reads_after] }
+    end
+
     # Write JSON to a file
     tmp = Tempfile.new
     tmp.write(all_counts.to_json)
@@ -736,20 +749,6 @@ class PipelineRun < ApplicationRecord
       WHERE pipeline_run_id=#{id} AND
             family_taxid IN (#{phage_families})
     ")
-  end
-
-  def subsampled_reads
-    # number of non-host reads that actually went through non-host alignment
-    return remaining_reads unless subsample
-    result = subsample * sample.input_files.count
-    remaining_reads < result ? remaining_reads : result
-    # 'subsample' is number of reads, respectively read pairs, to sample after host filtering
-    # 'remaining_reads'a is number of individual reads remaining after host filtering
-  end
-
-  def subsample_fraction
-    # fraction of non-host ("remaining") reads that actually went through non-host alignment
-    @cached_subsample_fraction ||= (1.0 * subsampled_reads) / remaining_reads
   end
 
   def subsample_suffix

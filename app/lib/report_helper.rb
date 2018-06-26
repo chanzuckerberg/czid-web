@@ -201,7 +201,7 @@ module ReportHelper
 
   def fetch_taxon_counts(pipeline_run_id, background_id)
     pipeline_run = PipelineRun.find(pipeline_run_id)
-    adjusted_total_reads = (pipeline_run.total_reads - pipeline_run.total_ercc_reads.to_i) * pipeline_run.subsample_fraction
+    adjusted_total_reads = (pipeline_run.total_reads - pipeline_run.total_ercc_reads.to_i) * pipeline_run.fraction_subsampled
     # NOTE:  If you add more columns to be fetched here, you really should add them to PROPERTIES_OF_TAXID above
     # otherwise they will not survive cleaning.
     TaxonCount.connection.select_all("
@@ -299,7 +299,7 @@ module ReportHelper
         pr = pipeline_runs_by_id[pipeline_run_id]
         result_hash[pipeline_run_id] = { "pr" => pr, "taxon_counts" => [] }
       end
-      row["rpm"] = row["r"] / ((pr.total_reads - pr.total_ercc_reads.to_i) * pr.subsample_fraction) * 1_000_000.0
+      row["rpm"] = row["r"] / ((pr.total_reads - pr.total_ercc_reads.to_i) * pr.fraction_subsampled) * 1_000_000.0
       row["zscore"] = row["stdev"].nil? ? ZSCORE_WHEN_ABSENT_FROM_BACKGROUND : ((row["rpm"] - row["mean"]) / row["stdev"])
       row["zscore"] = ZSCORE_MAX if row["zscore"] > ZSCORE_MAX && row["zscore"] != ZSCORE_WHEN_ABSENT_FROM_BACKGROUND
       row["zcore"] = ZSCORE_MIN if row["zscore"] < ZSCORE_MIN
@@ -321,7 +321,7 @@ module ReportHelper
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
     parent_ids = parent_ids.to_a
 
-    # Note: subsample_fraction is of type 'float' so adjusted_total_reads is too
+    # Note: fraction_subsampled is of type 'float' so adjusted_total_reads is too
     # Note: stdev is never 0
     # Note: connection.select_all is TWICE faster than TaxonCount.select
     # (I/O latency goes from 2 seconds -> 0.8 seconds)
@@ -377,7 +377,7 @@ module ReportHelper
         pr = pipeline_runs_by_id[pipeline_run_id]
         result_hash[pipeline_run_id] = { "pr" => pr, "taxon_counts" => [] }
       end
-      row["rpm"] = row["r"] / ((pr.total_reads - pr.total_ercc_reads.to_i) * pr.subsample_fraction) * 1_000_000.0
+      row["rpm"] = row["r"] / ((pr.total_reads - pr.total_ercc_reads.to_i) * pr.fraction_subsampled) * 1_000_000.0
       row["zscore"] = row["stdev"].nil? ? ZSCORE_WHEN_ABSENT_FROM_BACKGROUND : ((row["rpm"] - row["mean"]) / row["stdev"])
       row["zscore"] = ZSCORE_MAX if row["zscore"] > ZSCORE_MAX && row["zscore"] != ZSCORE_WHEN_ABSENT_FROM_BACKGROUND
       row["zcore"] = ZSCORE_MIN if row["zscore"] < ZSCORE_MIN
