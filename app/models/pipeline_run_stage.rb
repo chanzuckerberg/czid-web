@@ -30,7 +30,6 @@ class PipelineRunStage < ApplicationRecord
     "git clone https://github.com/chanzuckerberg/idseq-dag.git; " \
     "cd idseq-dag; " \
     "git checkout #{pipeline_run.pipeline_commit}; " \
-    "echo #{pipeline_run.pipeline_commit} > #{COMMIT_SHA_FILE_ON_WORKER}; " \
     "pip3 install -e . --upgrade"
   end
 

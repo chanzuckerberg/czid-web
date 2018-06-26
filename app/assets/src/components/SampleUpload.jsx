@@ -924,15 +924,6 @@ class SampleUpload extends React.Component {
                     </div>
                   </div>
                 </div>
-                <div className="field">
-                  <div className="row">
-                    <div className="col no-padding s12">
-                      <div className="field-title">
-                        <div className="read-count-label">Subsampling</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
                 {this.userDetails.admin ? (
                   <div>
                     <div className="admin-fields divider" />
