@@ -767,6 +767,15 @@ class PipelineRun < ApplicationRecord
     # 'remaining_reads' is number of individual reads remaining after host filtering
   end
 
+  def subsample_fraction
+    # fraction of non-host ("remaining") reads that actually went through non-host alignment
+    if fraction_subsampled
+      fraction_subsampled
+    else
+      @cached_subsample_fraction ||= (1.0 * subsampled_reads) / remaining_reads
+    end
+  end
+
   def subsample_suffix
     all_suffix = pipeline_version ? "subsample_all" : ""
     subsample? ? "subsample_#{subsample}" : all_suffix
