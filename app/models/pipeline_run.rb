@@ -298,7 +298,7 @@ class PipelineRun < ApplicationRecord
     downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, local_json_path)
     return unless downloaded_stats_path
     stats_array = JSON.parse(File.read(downloaded_stats_path))
-    # Ex: [{"total_reads": 1122}, {"reads_after": 832, "task": "run_star", "reads_before": 1122}... {"remaining_reads": 474}]
+    # Ex: [{"total_reads": 1122}, {"task": "star_out", "reads_after": 832}... {"remaining_reads": 474}]
 
     # Load total reads
     total = stats_array.detect { |entry| entry.key?("total_reads") }
@@ -547,15 +547,19 @@ class PipelineRun < ApplicationRecord
   def compile_stats_file
     res_folder = output_s3_path_with_version
     stdout, _stderr, status = Open3.capture3("aws s3 ls #{res_folder}/ | grep count")
-    return false unless status.exitstatus.zero?
+    unless status.exitstatus.zero?
+      Rails.logger.info("No .count files found: #{stderr}")
+      return
+    end
 
     # Compile all counts
-    # Ex: [{:task=>"fastqs", :reads_before=>379162}, {:task=>"gsnap_filter_out", :reads_before=>158}]
+    # Ex: [{"total_reads": 1122}, {"task": "run_star", "reads_after": 832}... {"remaining_reads": 474}]
     all_counts = []
     stdout.split("\n").each do |line|
       fname = line.split(" ")[3] # Last col in line
       raw = `aws s3 cp #{res_folder}/#{fname} -`
       contents = JSON.parse(raw)
+      # Ex: {"gsnap_filter_out": 194}
       contents = { task: contents.first[0], reads_after: contents.first[1] }
       all_counts << contents
     end
@@ -563,13 +567,13 @@ class PipelineRun < ApplicationRecord
     # Load total reads
     total = all_counts.detect { |entry| entry.value?("fastqs") }
     if total
-      all_counts << { total_reads: total }
+      all_counts << { total_reads: total[:reads_after] }
     end
 
     # Load remaining reads
     rem = all_counts.detect { |entry| entry.value?("gsnap_filter_out") }
     if rem
-      all_counts << { remaining_reads: rem }
+      all_counts << { remaining_reads: rem[:reads_after] }
     end
 
     # Write JSON to a file
@@ -578,7 +582,7 @@ class PipelineRun < ApplicationRecord
     tmp.close
 
     # Copy to S3. Overwrite if exists.
-    _stdout, stderr, status = Open3.capture3("aws s3 cp #{tmp.path} #{host_filter_output_s3_path}/#{STATS_JSON_NAME}")
+    _stdout, stderr, status = Open3.capture3("aws s3 cp #{tmp.path} #{res_folder}/#{STATS_JSON_NAME}")
     if status.exitstatus && !status.exitstatus.zero?
       Rails.logger.warn("Failed to write compiled stats file: #{stderr}")
     end
