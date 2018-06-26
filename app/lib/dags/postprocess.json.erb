@@ -1,12 +1,12 @@
 {
-  "output_dir_s3": "s3://idseq-samples-prod/test_samples/1/results",
+  "output_dir_s3": "s3://idseq-samples-prod/samples//<%= @project_id %>/<%= @sample_id %>/results",
   "targets": {
     "taxid_fasta_in": [
-      "accessions.rapsearch2.gsnapl.fasta",
-      "dedup.multihit.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.m8",
-      "summary.multihit.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.tab",
-      "summary.multihit.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.tab"
+      "annotated_merged.fa",
+      "gsnap.hitsummary.tab",
+      "rapsearch2.hitsummary.tab"
     ],
+    "gsnap_m8": ["gsnap.deduped.m8"],
     "taxid_fasta_out": ["taxid_annot.fasta"],
     "taxid_locator_out": [
       "taxid_annot_sorted_nt.fasta",
@@ -32,8 +32,7 @@
       "class": "PipelineStepGenerateTaxidFasta",
       "module": "idseq_dag.steps.generate_taxid_fasta",
       "additional_files": {
-        "lineage_db":
-          "s3://idseq-database/taxonomy/2018-02-15-utc-1518652800-unixtime__2018-02-15-utc-1518652800-unixtime/taxid-lineages.db"
+        "lineage_db": "<%= @attribute_dict[:lineage_db] %>"
       },
       "additional_attributes": {}
     },
@@ -46,20 +45,20 @@
       "additional_attributes": {}
     },
     {
-      "in": ["taxid_fasta_in", "taxid_locator_out"],
+      "in": ["gsnap_m8", "taxid_locator_out"],
       "out": "alignment_viz_out",
       "class": "PipelineStepGenerateAlignmentViz",
       "module": "idseq_dag.steps.generate_alignment_viz",
       "additional_files": {
-        "nt_db": "s3://idseq-database/20170824/blast_db/nt",
-        "nt_loc_db": "s3://idseq-database/20170824/blast_db/nt_loc.db"
+        "nt_db": "<%= @attribute_dict[:nt_db] %>",
+        "nt_loc_db": "<%= @attribute_dict[:nt_loc_db] %>"
       },
       "additional_attributes": {}
     }
   ],
   "given_targets": {
     "taxid_fasta_in": {
-      "s3_dir": "s3://idseq-samples-prod/test_samples/1/results"
+      "s3_dir": "s3://idseq-samples-prod/test_samples/1/results/<%= @attribute_dict[:pipeline_version] %>"
     }
   }
 }
