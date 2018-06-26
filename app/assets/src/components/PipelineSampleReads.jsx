@@ -74,7 +74,7 @@ class PipelineSampleReads extends React.Component {
       return null;
     }
     for (let stat of jobStats) {
-      if (stat["task"] === "run_gsnap_filter") {
+      if (stat["task"] === "gsnap_filter_out") {
         return null;
       }
     }

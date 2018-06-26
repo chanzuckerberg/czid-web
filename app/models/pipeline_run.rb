@@ -301,21 +301,21 @@ class PipelineRun < ApplicationRecord
     # Ex: [{"total_reads": 1122}, {"reads_after": 832, "task": "run_star", "reads_before": 1122}... {"remaining_reads": 474}]
 
     # Load total reads
-    total = stats_array.detect { |pair| pair.key?("total_reads") }
+    total = stats_array.detect { |entry| entry.key?("total_reads") }
     if total
       total = total["total_reads"]
       update(total_reads: total)
     end
 
     # Load remaining reads
-    rem = stats_array.detect { |pair| pair.key?("remaining_reads") }
+    rem = stats_array.detect { |entry| entry.key?("remaining_reads") }
     if rem
       rem = rem["remaining_reads"]
       update(remaining_reads: rem)
     end
 
     # Load task name and read pairs
-    stats_array = stats_array.select { |pair| pair.key?("task") }
+    stats_array = stats_array.select { |entry| entry.key?("task") }
     job_stats.destroy_all
     # New JobStat objects will be created. Missing attributes will stay nil.
     update(job_stats_attributes: stats_array)
@@ -472,7 +472,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def load_stats_file
-    stats_s3 = "#{host_filter_output_s3_path}/#{STATS_JSON_NAME}"
+    stats_s3 = "#{output_s3_path_with_version}/#{STATS_JSON_NAME}"
     if file_generated_since_jobstats?(stats_s3)
       load_job_stats(stats_s3)
     end
@@ -545,7 +545,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def compile_stats_file
-    res_folder = host_filter_output_s3_path # TODO: Or whatever is the new results name
+    res_folder = output_s3_path_with_version
     stdout, _stderr, status = Open3.capture3("aws s3 ls #{res_folder}/ | grep count")
     return false unless status.exitstatus.zero?
 
@@ -556,8 +556,20 @@ class PipelineRun < ApplicationRecord
       fname = line.split(" ")[3] # Last col in line
       raw = `aws s3 cp #{res_folder}/#{fname} -`
       contents = JSON.parse(raw)
-      contents = { task: contents.first[0], reads_before: contents.first[1] }
+      contents = { task: contents.first[0], reads_after: contents.first[1] }
       all_counts << contents
+    end
+
+    # Load total reads
+    total = all_counts.detect { |entry| entry.value?("fastqs") }
+    if total
+      all_counts << { total_reads: total }
+    end
+
+    # Load remaining reads
+    rem = all_counts.detect { |entry| entry.value?("gsnap_filter_out") }
+    if rem
+      all_counts << { remaining_reads: rem }
     end
 
     # Write JSON to a file
@@ -759,9 +771,15 @@ class PipelineRun < ApplicationRecord
   end
 
   def host_filter_output_s3_path
-    pipeline_ver_str = ""
-    pipeline_ver_str = "/#{pipeline_version}" if pipeline_version
-    "#{sample.sample_output_s3_path}#{pipeline_ver_str}"
+    output_s3_path_with_version
+  end
+
+  def output_s3_path_with_version
+    if pipeline_version
+      "#{sample.sample_output_s3_path}/#{pipeline_version}"
+    else
+      sample.sample_output_s3_path
+    end
   end
 
   def s3_paths_for_taxon_byteranges

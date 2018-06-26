@@ -96,13 +96,15 @@ module SamplesHelper
   end
 
   def compute_compression_ratio(job_stats_hash)
-    cdhitdup_stats = job_stats_hash['run_cdhitdup']
-    (1.0 * cdhitdup_stats['reads_before']) / cdhitdup_stats['reads_after'] unless cdhitdup_stats.nil?
+    cdhitdup_stats = job_stats_hash['cdhitdup_out']
+    priceseq_stats = job_stats_hash['priceseq_out']
+    (1.0 * priceseq_stats['reads_after']) / cdhitdup_stats['reads_after'] unless cdhitdup_stats.nil?
   end
 
   def compute_qc_value(job_stats_hash)
-    priceseqfilter_stats = job_stats_hash['run_priceseqfilter']
-    (100.0 * priceseqfilter_stats['reads_after']) / priceseqfilter_stats['reads_before'] unless priceseqfilter_stats.nil?
+    star_stats = job_stats_hash['star_out']
+    priceseqfilter_stats = job_stats_hash['priceseq_out']
+    (100.0 * priceseqfilter_stats['reads_after']) / star_stats['reads_after'] unless priceseqfilter_stats.nil?
   end
 
   def compute_percentage_reads(pr)
