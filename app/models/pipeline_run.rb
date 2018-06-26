@@ -19,9 +19,10 @@ class PipelineRun < ApplicationRecord
   accepts_nested_attributes_for :ercc_counts
 
   DEFAULT_SUBSAMPLING = 1_000_000 # number of fragments to subsample to, after host filtering
-  OUTPUT_JSON_NAME = 'idseq_web_sample.json'.freeze
-  MULTIHIT_OUTPUT_JSON_NAME = 'multihit_idseq_web_sample.json'.freeze
+  OUTPUT_JSON_NAME = 'taxon_counts.json'.freeze
   VERSION_JSON_NAME = 'versions.json'.freeze
+  PIPELINE_VERSION_FILE = "pipeline_version.txt".freeze
+  JOB_STATS_FILE = "stats.json".freeze
   ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
   TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined.json'.freeze
   ASSEMBLY_STATUSFILE = 'job-complete'.freeze
@@ -72,12 +73,7 @@ class PipelineRun < ApplicationRecord
   STATUS_LOADING = 'LOADING'.freeze
   STATUS_LOADING_QUEUED = 'LOADING_QUEUED'.freeze
 
-  LOADERS_BY_OUTPUT = { "total_reads" => "db_load_total_reads",
-                        "remaining_reads" => "db_load_remaining_reads",
-                        "reads_before_priceseqfilter" => "db_load_reads_before_priceseqfilter",
-                        "reads_after_priceseqfilter" => "db_load_reads_after_priceseqfilter",
-                        "reads_after_cdhitdup" => "db_load_reads_after_cdhitdup",
-                        "ercc_counts" => "db_load_ercc_counts",
+  LOADERS_BY_OUTPUT = { "ercc_counts" => "db_load_ercc_counts",
                         "taxon_counts" => "db_load_taxon_counts",
                         "taxon_byteranges" => "db_load_byteranges" }.freeze
   # Note: reads_before_priceseqfilter, reads_after_priceseqfilter, reads_after_cdhitdup
@@ -172,9 +168,7 @@ class PipelineRun < ApplicationRecord
 
   def create_output_states
     # First, determine which outputs we need:
-    target_outputs = %w[total_reads remaining_reads reads_before_priceseqfilter
-                        reads_after_priceseqfilter reads_after_cdhitdup
-                        ercc_counts taxon_counts taxon_byteranges]
+    target_outputs = %w[ercc_counts taxon_counts taxon_byteranges]
 
     # Then, generate output_states
     output_state_entries = []
@@ -356,7 +350,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def taxon_counts_json_name
-    multihit? ? MULTIHIT_OUTPUT_JSON_NAME : OUTPUT_JSON_NAME
+    OUTPUT_JSON_NAME
   end
 
   def invalid_family_call?(tcnt)
@@ -786,7 +780,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def pipeline_version_file
-    "#{sample.sample_output_s3_path}/pipeline_version.txt"
+    "#{sample.sample_output_s3_path}/#{PIPELINE_VERSION_FILE}"
   end
 
   def fetch_pipeline_version
