@@ -932,25 +932,6 @@ class SampleUpload extends React.Component {
                       </div>
                     </div>
                   </div>
-                  <div className="row input-row">
-                    <div className="col no-padding s12">
-                      <input
-                        ref="omit_subsampling_checked"
-                        type="checkbox"
-                        name="switch"
-                        id="omit_subsampling_checked"
-                        className="filled-in"
-                        onChange={this.toggleCheckBox}
-                        value={this.state.omitSubsamplingChecked}
-                      />
-                      <label
-                        htmlFor="omit_subsampling_checked"
-                        className="checkbox"
-                      >
-                        Skip subsampling (not recommended: slow mode)
-                      </label>
-                    </div>
-                  </div>
                 </div>
                 {this.userDetails.admin ? (
                   <div>
