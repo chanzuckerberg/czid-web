@@ -169,6 +169,10 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def load_counts_files # or basically generate the stats.json file
+    # So actually should split this into:
+    # (1) A function that will write the compiled stats.json file
+    # (2) Modifications to the loader functions
+
     res_folder = host_filter_output_s3_path # TODO: Change to the actual output path
     stdout, _stderr, status = Open3.capture3("aws s3 ls #{res_folder}/ | grep count")
     # Non zero exit would mean no count files found

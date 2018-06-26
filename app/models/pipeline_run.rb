@@ -298,9 +298,27 @@ class PipelineRun < ApplicationRecord
     downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, local_json_path)
     return unless downloaded_stats_path
     stats_array = JSON.parse(File.read(downloaded_stats_path))
-    update(total_reads: (stats_array[0] || {})['total_reads'] || 0)
-    stats_array = stats_array.select { |entry| entry.key?("task") }
+    # Ex: [{"total_reads": 1122}, {"reads_after": 832, "task": "run_star", "reads_before": 1122}... {"remaining_reads": 474}]
+
+    # Load total reads
+    total = stats_array.select { |pair| pair.key?("total_reads") }
+    total = if !total.empty?
+              total[0]["total_reads"]
+            else
+              0
+            end
+    update(total_reads: total)
+
+    # Load remaining reads
+    rem = stats_array.select { |pair| pair.key?("remaining_reads") }
+    unless rem.empty?
+      rem = rem[0]["remaining_reads"]
+      update(remaining_reads: rem)
+    end
+
+    stats_array = stats_array.select { |pair| pair.key?("task") }
     job_stats.destroy_all
+    # Missing attributes will stay nil
     update(job_stats_attributes: stats_array)
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_stats_path}")
   end
