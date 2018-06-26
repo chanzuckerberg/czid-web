@@ -45,7 +45,8 @@
       "additional_files": {
         "star_genome": "<%= @attribute_dict[:star_genome] %>"
       },
-      "additional_attributes": { "truncate_fragments_to": <%= @attribute_dict[:max_fragments] %> }
+      "additional_attributes": { "truncate_fragments_to": <%= @attribute_dict[:max_fragments] %>
+                                ,"output_gene_file": "reads_per_gene.star.tab" }
     },
     {
       "in": ["star_out"],

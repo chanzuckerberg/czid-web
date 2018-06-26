@@ -22,12 +22,11 @@ class PipelineRun < ApplicationRecord
   OUTPUT_JSON_NAME = 'taxon_counts.json'.freeze
   VERSION_JSON_NAME = 'versions.json'.freeze
   PIPELINE_VERSION_FILE = "pipeline_version.txt".freeze
-  JOB_STATS_FILE = "stats.json".freeze
+  STATS_JSON_NAME = "stats.json".freeze
   ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
   TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined.json'.freeze
   ASSEMBLY_STATUSFILE = 'job-complete'.freeze
   LOCAL_JSON_PATH = '/app/tmp/results_json'.freeze
-  INPUT_TRUNCATED_FILE = 'input_truncated.txt'.freeze
   PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
 
   # The PIPELINE MONITOR is responsible for keeping status of AWS Batch jobs
