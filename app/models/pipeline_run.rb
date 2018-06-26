@@ -576,17 +576,19 @@ class PipelineRun < ApplicationRecord
       all_counts << { total_reads: total[:reads_after] }
     end
 
-    # Load remaining reads
-    rem = all_counts.detect { |entry| entry.value?("gsnap_filter_out") }
-    if rem
-      all_counts << { remaining_reads: rem[:reads_after] }
-    end
-
     # Load subsample fraction
     sub_before = all_counts.detect { |entry| entry.value?("bowtie2_out") }
     sub_after = all_counts.detect { |entry| entry.value?("subsampled_out") }
+    frac = -1
     if sub_before && sub_after
-      all_counts << { fraction_subsampled: (1.0 * sub_after[:reads_after]) / sub_before[:reads_after] }
+      frac = (1.0 * sub_after[:reads_after]) / sub_before[:reads_after]
+      all_counts << { fraction_subsampled: frac }
+    end
+
+    # Load remaining reads
+    rem = all_counts.detect { |entry| entry.value?("gsnap_filter_out") }
+    if rem && frac != -1
+      all_counts << { remaining_reads: rem[:reads_after] * (1 / frac) }
     end
 
     # Write JSON to a file
