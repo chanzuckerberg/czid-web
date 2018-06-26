@@ -301,24 +301,23 @@ class PipelineRun < ApplicationRecord
     # Ex: [{"total_reads": 1122}, {"reads_after": 832, "task": "run_star", "reads_before": 1122}... {"remaining_reads": 474}]
 
     # Load total reads
-    total = stats_array.select { |pair| pair.key?("total_reads") }
-    total = if !total.empty?
-              total[0]["total_reads"]
-            else
-              0
-            end
-    update(total_reads: total)
+    total = stats_array.detect { |pair| pair.key?("total_reads") }
+    if total
+      total = total["total_reads"]
+      update(total_reads: total)
+    end
 
     # Load remaining reads
-    rem = stats_array.select { |pair| pair.key?("remaining_reads") }
-    unless rem.empty?
-      rem = rem[0]["remaining_reads"]
+    rem = stats_array.detect { |pair| pair.key?("remaining_reads") }
+    if rem
+      rem = rem["remaining_reads"]
       update(remaining_reads: rem)
     end
 
+    # Load task name and read pairs
     stats_array = stats_array.select { |pair| pair.key?("task") }
     job_stats.destroy_all
-    # Missing attributes will stay nil
+    # New JobStat objects will be created. Missing attributes will stay nil.
     update(job_stats_attributes: stats_array)
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_stats_path}")
   end
@@ -473,13 +472,9 @@ class PipelineRun < ApplicationRecord
   end
 
   def load_stats_file
-    # TODO: make it a single file rather than using stage-specific.
-    host_filtering_job_stats_s3 = "#{host_filter_output_s3_path}/#{STATS_JSON_NAME}"
-    alignment_job_stats_s3 = "#{alignment_output_s3_path}/#{STATS_JSON_NAME}"
-    if file_generated_since_jobstats?(alignment_job_stats_s3)
-      load_job_stats(alignment_job_stats_s3)
-    elsif file_generated_since_jobstats?(host_filtering_job_stats_s3)
-      load_job_stats(host_filtering_job_stats_s3)
+    stats_s3 = "#{host_filter_output_s3_path}/#{STATS_JSON_NAME}"
+    if file_generated_since_jobstats?(stats_s3)
+      load_job_stats(stats_s3)
     end
   end
 
@@ -545,6 +540,7 @@ class PipelineRun < ApplicationRecord
       self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
       self.job_status += "|#{STATUS_READY}" if report_ready?
     end
+    compile_stats_file
     save
   end
 
@@ -569,7 +565,7 @@ class PipelineRun < ApplicationRecord
     tmp.write(all_counts.to_json)
     tmp.close
 
-    # Copy to S3
+    # Copy to S3. Overwrite if exists.
     _stdout, stderr, status = Open3.capture3("aws s3 cp #{tmp.path} #{host_filter_output_s3_path}/#{STATS_JSON_NAME}")
     if status.exitstatus && !status.exitstatus.zero?
       Rails.logger.warn("Failed to write compiled stats file: #{stderr}")
