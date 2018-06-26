@@ -587,9 +587,12 @@ class PipelineRun < ApplicationRecord
     end
 
     # Load remaining reads
+    # This is an approximation multiplied by the subsampled ratio so that it
+    # can be compared to total reads for the user. Number of reads after host
+    # filtering step vs. total reads as if subsampling had never occurred.
     rem = all_counts.detect { |entry| entry.value?("gsnap_filter_out") }
     if rem && frac != -1
-      all_counts << { remaining_reads: rem[:reads_after] * (1 / frac) }
+      all_counts << { remaining_reads: (rem[:reads_after] * (1 / frac)).to_i }
     end
 
     # Write JSON to a file
@@ -758,9 +761,10 @@ class PipelineRun < ApplicationRecord
     # number of non-host reads that actually went through non-host alignment
     res = remaining_reads
     if subsample
-      res = subsample * sample.input_files.count
-      if remaining_reads < res
-        res = remaining_reads
+      # Ex: max of 1,000,000 or 2,000,000 reads
+      max_reads = subsample * sample.input_files.count
+      if remaining_reads > max_reads
+        res = max_reads
       end
     end
     res
@@ -770,7 +774,7 @@ class PipelineRun < ApplicationRecord
 
   def subsample_fraction
     # fraction of non-host ("remaining") reads that actually went through non-host alignment
-    if fraction_subsampled
+    if fraction_subsampled # If this was set in the db, use this value
       fraction_subsampled
     else
       @cached_subsample_fraction ||= (1.0 * subsampled_reads) / remaining_reads
