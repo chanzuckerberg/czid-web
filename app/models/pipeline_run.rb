@@ -340,6 +340,7 @@ class PipelineRun < ApplicationRecord
     self.total_reads = pipeline_output_dict['total_reads']
     self.remaining_reads = pipeline_output_dict['remaining_reads']
     self.unmapped_reads = count_unmapped_reads
+    self.fraction_subsampled = subsample_fraction
     save
 
     version_s3_path = "#{alignment_output_s3_path}/#{VERSION_JSON_NAME}"
