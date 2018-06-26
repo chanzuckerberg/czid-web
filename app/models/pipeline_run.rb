@@ -19,8 +19,9 @@ class PipelineRun < ApplicationRecord
   accepts_nested_attributes_for :ercc_counts
 
   DEFAULT_SUBSAMPLING = 1_000_000 # number of fragments to subsample to, after host filtering
+  MAX_INPUT_FRAGMENTS = 75_000_000 # max fragments going into the pipeline
   OUTPUT_JSON_NAME = 'taxon_counts.json'.freeze
-  VERSION_JSON_NAME = 'versions.json'.freeze
+  # VERSION_JSON_NAME = 'versions.json'.freeze # TODO: remove this line
   PIPELINE_VERSION_FILE = "pipeline_version.txt".freeze
   STATS_JSON_NAME = "stats.json".freeze
   ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
@@ -471,6 +472,16 @@ class PipelineRun < ApplicationRecord
         update(results_finalized: FINALIZED_FAIL)
       end
     end
+  end
+
+  def load_job_stats(stats_json_s3_path)
+    downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, local_json_path)
+    return unless downloaded_stats_path
+    stats_array = JSON.parse(File.read(downloaded_stats_path))
+    stats_array = stats_array.select { |entry| entry.key?("task") }
+    job_stats.destroy_all
+    update(job_stats_attributes: stats_array)
+    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_stats_path}")
   end
 
   def update_job_status
