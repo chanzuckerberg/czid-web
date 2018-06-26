@@ -651,6 +651,10 @@ class PipelineRun < ApplicationRecord
   end
 
   def subsample_suffix
+    if pipeline_version && pipeline_version.to_f >= 2.0
+      # New dag pipeline. no subsample folder
+      return nil
+    end
     all_suffix = pipeline_version ? "subsample_all" : ""
     subsample? ? "subsample_#{subsample}" : all_suffix
   end
