@@ -297,10 +297,6 @@ class PipelineRun < ApplicationRecord
     pipeline_output_dict = json_dict['pipeline_output']
     pipeline_output_dict.slice!('taxon_counts_attributes')
 
-    self.unmapped_reads = count_unmapped_reads
-    self.fraction_subsampled = subsample_fraction
-    save
-
     # TODO: remove the following. deprecated.
     # version_s3_path = "#{alignment_output_s3_path}/#{VERSION_JSON_NAME}"
     # update(version: `aws s3 cp #{version_s3_path} -`)
@@ -586,6 +582,12 @@ class PipelineRun < ApplicationRecord
       self.adjusted_remaining_reads = adjusted_remaining_reads
     end
 
+    # Load unidentified reads
+    unidentified = all_counts.detect { |entry| entry.value?("unidentified_fasta") }
+    if unidentified
+      self.unmapped_reads = unidentified[:reads_after]
+    end
+
     # Write JSON to a file
     tmp = Tempfile.new
     tmp.write(all_counts.to_json)
@@ -853,12 +855,6 @@ class PipelineRun < ApplicationRecord
     pipeline_ver_str = "#{pipeline_version}/" if pipeline_version
     result = "#{sample.sample_output_s3_path}/#{pipeline_ver_str}#{subsample_suffix}"
     result.chomp("/")
-  end
-
-  def count_unmapped_reads
-    _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", sample.unidentified_fasta_s3_path)
-    return unless status.exitstatus.zero?
-    `aws s3 cp #{sample.unidentified_fasta_s3_path} - | grep '^>' | wc -l`.to_i
   end
 
   def load_ercc_counts
