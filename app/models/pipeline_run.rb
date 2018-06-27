@@ -472,6 +472,9 @@ class PipelineRun < ApplicationRecord
       check_and_enqueue(o)
     end
 
+    # Update job stats:
+    load_stats_file
+
     # Check if run is complete:
     if all_output_states_terminal?
       if all_output_states_loaded?

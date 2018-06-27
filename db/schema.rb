@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_180_626_200_352) do
+ActiveRecord::Schema.define(version: 20_180_627_164_147) do
   create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "archive_of"
     t.text "data"
@@ -162,7 +162,7 @@ ActiveRecord::Schema.define(version: 20_180_626_200_352) do
     t.string "postprocess_status"
     t.integer "finalized", default: 0, null: false
     t.bigint "total_reads"
-    t.bigint "remaining_reads"
+    t.bigint "adjusted_remaining_reads"
     t.bigint "unmapped_reads"
     t.text "version"
     t.integer "subsample"
