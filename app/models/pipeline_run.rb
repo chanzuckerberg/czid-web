@@ -298,9 +298,33 @@ class PipelineRun < ApplicationRecord
     downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, local_json_path)
     return unless downloaded_stats_path
     stats_array = JSON.parse(File.read(downloaded_stats_path))
-    update(total_reads: (stats_array[0] || {})['total_reads'] || 0)
+    # Ex: [{"total_reads": 1122}, {"task": "star_out", "reads_after": 832}... {"adjusted_remaining_reads": 474}]
+
+    # Load total reads
+    total = stats_array.detect { |entry| entry.key?("total_reads") }
+    if total
+      total = total["total_reads"]
+      update(total_reads: total)
+    end
+
+    # Load remaining reads
+    rem = stats_array.detect { |entry| entry.key?("adjusted_remaining_reads") }
+    if rem
+      rem = rem["adjusted_remaining_reads"]
+      update(adjusted_remaining_reads: rem)
+    end
+
+    # Load subsample fraction
+    sub = stats_array.detect { |entry| entry.key?("fraction_subsampled") }
+    if sub
+      sub = sub["fraction_subsampled"]
+      update(fraction_subsampled: sub)
+    end
+
+    # Load task name and read pairs
     stats_array = stats_array.select { |entry| entry.key?("task") }
     job_stats.destroy_all
+    # New JobStat objects will be created. Missing attributes will stay nil.
     update(job_stats_attributes: stats_array)
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_stats_path}")
   end
@@ -314,7 +338,7 @@ class PipelineRun < ApplicationRecord
     pipeline_output_dict = json_dict['pipeline_output']
     pipeline_output_dict.slice!('remaining_reads', 'total_reads', 'taxon_counts_attributes')
     self.total_reads = pipeline_output_dict['total_reads']
-    self.remaining_reads = pipeline_output_dict['remaining_reads']
+    self.adjusted_remaining_reads = pipeline_output_dict['adjusted_remaining_reads']
     self.unmapped_reads = count_unmapped_reads
     self.fraction_subsampled = subsample_fraction
     save
@@ -455,13 +479,10 @@ class PipelineRun < ApplicationRecord
   end
 
   def load_stats_file
-    # TODO: make it a single file rather than using stage-specific.
-    host_filtering_job_stats_s3 = "#{host_filter_output_s3_path}/#{STATS_JSON_NAME}"
-    alignment_job_stats_s3 = "#{alignment_output_s3_path}/#{STATS_JSON_NAME}"
-    if file_generated_since_jobstats?(alignment_job_stats_s3)
-      load_job_stats(alignment_job_stats_s3)
-    elsif file_generated_since_jobstats?(host_filtering_job_stats_s3)
-      load_job_stats(host_filtering_job_stats_s3)
+    stats_s3 = "#{output_s3_path_with_version}/#{STATS_JSON_NAME}"
+    # TODO: Remove the datetime check?
+    if file_generated_since_jobstats?(stats_s3)
+      load_job_stats(stats_s3)
     end
   end
 
@@ -527,7 +548,64 @@ class PipelineRun < ApplicationRecord
       self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
       self.job_status += "|#{STATUS_READY}" if report_ready?
     end
+    compile_stats_file
     save
+  end
+
+  def compile_stats_file
+    res_folder = output_s3_path_with_version
+    stdout, _stderr, status = Open3.capture3("aws s3 ls #{res_folder}/ | grep count")
+    unless status.exitstatus.zero?
+      Rails.logger.info("No .count files found: #{stderr}")
+      return
+    end
+
+    # Compile all counts
+    # Ex: [{"total_reads": 1122}, {"task": "star_out", "reads_after": 832}... {"adjusted_remaining_reads": 474}]
+    all_counts = []
+    stdout.split("\n").each do |line|
+      fname = line.split(" ")[3] # Last col in line
+      raw = `aws s3 cp #{res_folder}/#{fname} -`
+      contents = JSON.parse(raw)
+      # Ex: {"gsnap_filter_out": 194}
+      contents = { task: contents.first[0], reads_after: contents.first[1] }
+      all_counts << contents
+    end
+
+    # Load total reads
+    total = all_counts.detect { |entry| entry.value?("fastqs") }
+    if total
+      all_counts << { total_reads: total[:reads_after] }
+    end
+
+    # Load subsample fraction
+    sub_before = all_counts.detect { |entry| entry.value?("bowtie2_out") }
+    sub_after = all_counts.detect { |entry| entry.value?("subsampled_out") }
+    frac = -1
+    if sub_before && sub_after
+      frac = (1.0 * sub_after[:reads_after]) / sub_before[:reads_after]
+      all_counts << { fraction_subsampled: frac }
+    end
+
+    # Load remaining reads
+    # This is an approximation multiplied by the subsampled ratio so that it
+    # can be compared to total reads for the user. Number of reads after host
+    # filtering step vs. total reads as if subsampling had never occurred.
+    rem = all_counts.detect { |entry| entry.value?("gsnap_filter_out") }
+    if rem && frac != -1
+      all_counts << { adjusted_remaining_reads: (rem[:reads_after] * (1 / frac)).to_i }
+    end
+
+    # Write JSON to a file
+    tmp = Tempfile.new
+    tmp.write(all_counts.to_json)
+    tmp.close
+
+    # Copy to S3. Overwrite if exists.
+    _stdout, stderr, status = Open3.capture3("aws s3 cp #{tmp.path} #{res_folder}/#{STATS_JSON_NAME}")
+    unless status.exitstatus.zero?
+      Rails.logger.warn("Failed to write compiled stats file: #{stderr}")
+    end
   end
 
   def local_json_path
@@ -682,16 +760,27 @@ class PipelineRun < ApplicationRecord
 
   def subsampled_reads
     # number of non-host reads that actually went through non-host alignment
-    return remaining_reads unless subsample
-    result = subsample * sample.input_files.count
-    remaining_reads < result ? remaining_reads : result
+    res = adjusted_remaining_reads
+    if subsample
+      # Ex: max of 1,000,000 or 2,000,000 reads
+      max_reads = subsample * sample.input_files.count
+      if adjusted_remaining_reads > max_reads
+        res = max_reads
+      end
+    end
+    res
     # 'subsample' is number of reads, respectively read pairs, to sample after host filtering
-    # 'remaining_reads'a is number of individual reads remaining after host filtering
+    # 'adjusted_remaining_reads' is number of individual reads remaining after subsampling
+    # and host filtering, artificially multiplied to be at the original scale of total reads.
   end
 
   def subsample_fraction
     # fraction of non-host ("remaining") reads that actually went through non-host alignment
-    @cached_subsample_fraction ||= (1.0 * subsampled_reads) / remaining_reads
+    if fraction_subsampled
+      fraction_subsampled
+    else # These should actually be the same value
+      @cached_subsample_fraction ||= (1.0 * subsampled_reads) / adjusted_remaining_reads
+    end
   end
 
   def subsample_suffix
@@ -717,9 +806,15 @@ class PipelineRun < ApplicationRecord
   end
 
   def host_filter_output_s3_path
-    pipeline_ver_str = ""
-    pipeline_ver_str = "/#{pipeline_version}" if pipeline_version
-    "#{sample.sample_output_s3_path}#{pipeline_ver_str}"
+    output_s3_path_with_version
+  end
+
+  def output_s3_path_with_version
+    if pipeline_version
+      "#{sample.sample_output_s3_path}/#{pipeline_version}"
+    else
+      sample.sample_output_s3_path
+    end
   end
 
   def s3_paths_for_taxon_byteranges
