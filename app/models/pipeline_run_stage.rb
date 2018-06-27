@@ -49,7 +49,7 @@ class PipelineRunStage < ApplicationRecord
         queue = pipeline_run.sample.job_queue
       end
     end
-    command += " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --ecr-image idseq --memory #{memory} --queue #{queue} --vcpus #{vcpus} --job-role idseq-pipeline "
+    command += " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --ecr-image idseq_dag --memory #{memory} --queue #{queue} --vcpus #{vcpus} --job-role idseq-pipeline "
     command
   end
 
@@ -59,15 +59,7 @@ class PipelineRunStage < ApplicationRecord
 
   def stage_status_file(status)
     basename = "#{job_id}.#{status}"
-    s3_folder = case name
-                when HOST_FILTERING_STAGE_NAME
-                  pipeline_run.host_filter_output_s3_path
-                when ALIGNMENT_STAGE_NAME
-                  pipeline_run.alignment_output_s3_path
-                when POSTPROCESS_STAGE_NAME
-                  pipeline_run.postprocess_output_s3_path
-                end
-    "#{s3_folder}/#{basename}"
+    "#{sample.sample_output_s3_path}/#{basename}"
   end
 
   def check_status_file_and_update(status_file_suffix, job_status_value)
@@ -215,7 +207,8 @@ class PipelineRunStage < ApplicationRecord
     dag_path_on_worker = "/mnt/#{dag_name}.json"
     download_dag = "aws s3 cp #{dag_s3} #{dag_path_on_worker}"
     execute_dag = "idseq_dag #{key_s3_params} #{dag_path_on_worker}"
-    [download_dag, execute_dag].join(";")
+    copy_done_file = "echo done | aws s3 cp - #{sample.sample_output_s3_path}/\\$AWS_BATCH_JOB_ID.#{JOB_SUCCEEDED_FILE_SUFFIX}"
+    [download_dag, execute_dag, copy_done_file].join(";")
   end
 
   def host_filtering_command
@@ -259,7 +252,7 @@ class PipelineRunStage < ApplicationRecord
     attribute_dict = {
       pipeline_version: pipeline_run.pipeline_version || pipeline_run.fetch_pipeline_run_version
     }
-    dag_commands = prepare_dag("post_process", attribute_dict)
+    dag_commands = prepare_dag("postprocess", attribute_dict)
     batch_command = [install_pipeline, dag_commands].join("; ")
     # Run it
     aegea_batch_submit_command(batch_command)
