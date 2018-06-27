@@ -1344,7 +1344,12 @@ function LabelTagMarkup({
   );
 }
 
-function FilterItemMarkup({ status, filterSelect, status_filter_css_classes, pos }) {
+function FilterItemMarkup({
+  status,
+  filterSelect,
+  status_filter_css_classes,
+  pos
+}) {
   return (
     <li
       className="filter-item"
@@ -1352,7 +1357,10 @@ function FilterItemMarkup({ status, filterSelect, status_filter_css_classes, pos
       data-status={status}
       onClick={filterSelect}
     >
-      <a data-status={status} className={"filter-item " + status_filter_css_classes[pos]}>
+      <a
+        data-status={status}
+        className={"filter-item " + status_filter_css_classes[pos]}
+      >
         {status}
       </a>
       <i data-status={status} className="filter fa fa-check hidden" />
@@ -1506,9 +1514,9 @@ function PipelineOutputDataValues({
       ? BLANK_TEXT
       : numberWithCommas(derivedOutput.pipeline_run.total_reads),
     nonhost_reads:
-      !stats || !stats.remaining_reads
+      !stats || !stats.adjusted_remaining_reads
         ? BLANK_TEXT
-        : numberWithCommas(stats.remaining_reads),
+        : numberWithCommas(stats.adjusted_remaining_reads),
     nonhost_reads_percent:
       !stats || !stats.percent_remaining ? (
         ""
@@ -1913,7 +1921,11 @@ function TableColumnHeaders({ sort, colMap, filterStatus, state, parent }) {
   );
 }
 
-function JobStatusFilters({ status_filter_options, filterSelect, status_filter_css_classes }) {
+function JobStatusFilters({
+  status_filter_options,
+  filterSelect,
+  status_filter_css_classes
+}) {
   return (
     <div className="dropdown-status-filtering">
       <li>

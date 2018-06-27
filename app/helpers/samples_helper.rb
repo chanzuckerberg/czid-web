@@ -18,7 +18,7 @@ module SamplesHelper
         data_values = { sample_name: db_sample ? db_sample[:name] : '',
                         upload_date: db_sample ? db_sample[:created_at] : '',
                         total_reads: derived_output[:pipeline_run] ? derived_output[:pipeline_run][:total_reads] : '',
-                        nonhost_reads: derived_output[:summary_stats] ? derived_output[:summary_stats][:remaining_reads] : '',
+                        nonhost_reads: derived_output[:summary_stats] ? derived_output[:summary_stats][:adjusted_remaining_reads] : '',
                         nonhost_reads_percent: derived_output[:summary_stats] && derived_output[:summary_stats][:percent_remaining] ? derived_output[:summary_stats][:percent_remaining].round(3) : '',
                         quality_control: derived_output[:summary_stats] && derived_output[:summary_stats][:qc_percent] ? derived_output[:summary_stats][:qc_percent].round(3) : '',
                         compression_ratio: derived_output[:summary_stats] && derived_output[:summary_stats][:compression_ratio] ? derived_output[:summary_stats][:compression_ratio].round(2) : '',
@@ -83,7 +83,7 @@ module SamplesHelper
     pr = pipeline_run
     unmapped_reads = pr.nil? ? nil : pr.unmapped_reads
     last_processed_at = pr.nil? ? nil : pr.created_at
-    { remaining_reads: get_remaining_reads(pr),
+    { adjusted_remaining_reads: get_adjusted_remaining_reads(pr),
       compression_ratio: compute_compression_ratio(job_stats_hash),
       qc_percent: compute_qc_value(job_stats_hash),
       percent_remaining: compute_percentage_reads(pr),
@@ -91,22 +91,24 @@ module SamplesHelper
       last_processed_at: last_processed_at }
   end
 
-  def get_remaining_reads(pr)
-    pr.remaining_reads unless pr.nil?
+  def get_adjusted_remaining_reads(pr)
+    pr.adjusted_remaining_reads unless pr.nil?
   end
 
   def compute_compression_ratio(job_stats_hash)
-    cdhitdup_stats = job_stats_hash['run_cdhitdup']
-    (1.0 * cdhitdup_stats['reads_before']) / cdhitdup_stats['reads_after'] unless cdhitdup_stats.nil?
+    cdhitdup_stats = job_stats_hash['cdhitdup_out']
+    priceseq_stats = job_stats_hash['priceseq_out']
+    (1.0 * priceseq_stats['reads_after']) / cdhitdup_stats['reads_after'] unless cdhitdup_stats.nil?
   end
 
   def compute_qc_value(job_stats_hash)
-    priceseqfilter_stats = job_stats_hash['run_priceseqfilter']
-    (100.0 * priceseqfilter_stats['reads_after']) / priceseqfilter_stats['reads_before'] unless priceseqfilter_stats.nil?
+    star_stats = job_stats_hash['star_out']
+    priceseqfilter_stats = job_stats_hash['priceseq_out']
+    (100.0 * priceseqfilter_stats['reads_after']) / star_stats['reads_after'] unless priceseqfilter_stats.nil?
   end
 
   def compute_percentage_reads(pr)
-    (100.0 * pr.remaining_reads) / pr.total_reads unless pr.nil? || pr.remaining_reads.nil? || pr.total_reads.nil?
+    (100.0 * pr.adjusted_remaining_reads) / pr.total_reads unless pr.nil? || pr.adjusted_remaining_reads.nil? || pr.total_reads.nil?
   end
 
   def sample_status_display_for_hidden_page(sample)
