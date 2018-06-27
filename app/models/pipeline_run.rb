@@ -472,6 +472,9 @@ class PipelineRun < ApplicationRecord
       check_and_enqueue(o)
     end
 
+    # Update job stats:
+    load_stats_file
+
     # Check if run is complete:
     if all_output_states_terminal?
       if all_output_states_loaded?
@@ -536,7 +539,7 @@ class PipelineRun < ApplicationRecord
 
   def compile_stats_file
     res_folder = output_s3_path_with_version
-    stdout, _stderr, status = Open3.capture3("aws s3 ls #{res_folder}/ | grep count")
+    stdout, _stderr, status = Open3.capture3("aws s3 ls #{res_folder}/ | grep count$")
     unless status.exitstatus.zero?
       Rails.logger.info("No .count files found: #{stderr}")
       return
@@ -550,8 +553,9 @@ class PipelineRun < ApplicationRecord
       raw = `aws s3 cp #{res_folder}/#{fname} -`
       contents = JSON.parse(raw)
       # Ex: {"gsnap_filter_out": 194}
-      contents = { task: contents.first[0], reads_after: contents.first[1] }
-      all_counts << contents
+      contents.each do |key, count|
+        all_counts << { task: key, reads_after: count }
+      end
     end
 
     # Load total reads
