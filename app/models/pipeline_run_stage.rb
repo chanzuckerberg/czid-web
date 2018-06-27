@@ -59,7 +59,7 @@ class PipelineRunStage < ApplicationRecord
 
   def stage_status_file(status)
     basename = "#{job_id}.#{status}"
-    "#{sample.sample_output_s3_path}/#{basename}"
+    "#{pipeline_run.sample.sample_output_s3_path}/#{basename}"
   end
 
   def check_status_file_and_update(status_file_suffix, job_status_value)
