@@ -770,15 +770,14 @@ class PipelineRun < ApplicationRecord
     res
     # 'subsample' is number of reads, respectively read pairs, to sample after host filtering
     # 'remaining_reads' is number of individual reads remaining after host filtering
+    #
+    # Note that now that subsampling runs before gsnap filter, remaining_reads after gsnap
+    # filter are artificially multiplied to be at the original scale of total reads.
   end
 
   def subsample_fraction
     # fraction of non-host ("remaining") reads that actually went through non-host alignment
-    if fraction_subsampled # If this was set in the db, use this value
-      fraction_subsampled
-    else
-      @cached_subsample_fraction ||= (1.0 * subsampled_reads) / remaining_reads
-    end
+    fraction_subsampled || 1.0
   end
 
   def subsample_suffix
