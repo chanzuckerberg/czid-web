@@ -474,6 +474,17 @@ class PipelineRun < ApplicationRecord
     end
   end
 
+  def load_stats_file
+    # TODO: make it a single file rather than using stage-specific.
+    host_filtering_job_stats_s3 = "#{host_filter_output_s3_path}/#{STATS_JSON_NAME}"
+    alignment_job_stats_s3 = "#{alignment_output_s3_path}/#{STATS_JSON_NAME}"
+    if file_generated_since_jobstats?(alignment_job_stats_s3)
+      load_job_stats(alignment_job_stats_s3)
+    elsif file_generated_since_jobstats?(host_filtering_job_stats_s3)
+      load_job_stats(host_filtering_job_stats_s3)
+    end
+  end
+
   def load_job_stats(stats_json_s3_path)
     downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, local_json_path)
     return unless downloaded_stats_path
