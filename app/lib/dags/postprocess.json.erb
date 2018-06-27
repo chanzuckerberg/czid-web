@@ -58,8 +58,11 @@
   ],
   "given_targets": {
     "taxid_fasta_in": {
-      "s3_dir": "s3://idseq-samples-prod/samples/<%= @project_id %>/<%= @sample_id %>/results/<%= @attribute_dict[:pipeline_version] %>"
+      "s3_dir": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/results/<%= @attribute_dict[:pipeline_version] %>"
 
+    },
+    "gsnap_m8": {
+      "s3_dir": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/results/<%= @attribute_dict[:pipeline_version] %>"
     }
   }
 }

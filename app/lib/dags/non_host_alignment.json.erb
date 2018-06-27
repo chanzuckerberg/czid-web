@@ -1,5 +1,5 @@
 {
-  "output_dir_s3": "s3://idseq-samples-prod/samples/<%= @project_id %>/<%= @sample_id %>/results",
+  "output_dir_s3": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/results",
   "targets": {
     "host_filter_out": [
       <% if @host_genome == "human" %>
@@ -91,7 +91,7 @@
   ],
   "given_targets": {
     "host_filter_out": {
-      "s3_dir": "s3://idseq-samples-prod/samples/<%= @project_id %>/<%= @sample_id %>/results/<%= @attribute_dict[:pipeline_version] %>"
+      "s3_dir": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/results/<%= @attribute_dict[:pipeline_version] %>"
     }
   }
 }

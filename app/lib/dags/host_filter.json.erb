@@ -1,6 +1,6 @@
 {
   "output_dir_s3":
-    "s3://idseq-samples-prod/samples/<%= @project_id %>/<%= @sample_id %>/results",
+    "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/results",
   "targets": {
     <% if @attribute_dict[:fastq2] %>
       "fastqs": ["<%= @attribute_dict[:fastq1] %>", "<%= @attribute_dict[:fastq2] %>"],
@@ -106,7 +106,7 @@
   ],
   "given_targets": {
     "fastqs": {
-      "s3_dir": "s3://idseq-samples-prod/samples/<%= @project_id %>/<%= @sample_id %>/fastqs",
+      "s3_dir": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/fastqs",
       "count_reads": 1,
       "max_fragments": <%= @attribute_dict[:max_fragments] %>
     }

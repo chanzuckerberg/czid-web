@@ -198,9 +198,10 @@ class PipelineRunStage < ApplicationRecord
   end
 
   ########### STAGE SPECIFIC FUNCTIONS BELOW ############
-  def prepare_dag(dag_name, attribute_dict)
+  def prepare_dag(dag_name, attribute_dict, key_s3_params = nil)
     sample = pipeline_run.sample
     dag_s3 = "#{sample.sample_output_s3_path}/#{dag_name}.json"
+    attribute_dict[:bucket] = Sample::SAMPLES_BUCKET_NAME
     dag = DagGenerator.new("app/lib/dags/#{dag_name}.json.erb",
                            sample.project_id,
                            sample.id,
@@ -213,7 +214,7 @@ class PipelineRunStage < ApplicationRecord
     # Generate job command
     dag_path_on_worker = "/mnt/#{dag_name}.json"
     download_dag = "aws s3 cp #{dag_s3} #{dag_path_on_worker}"
-    execute_dag = "idseq_dag #{dag_path_on_worker}"
+    execute_dag = "idseq_dag #{key_s3_params} #{dag_path_on_worker}"
     [download_dag, execute_dag].join(";")
   end
 
@@ -246,7 +247,8 @@ class PipelineRunStage < ApplicationRecord
       skip_dedeuterostome_filter: sample.skip_deutero_filter_flag,
       pipeline_version: pipeline_run.pipeline_version || pipeline_run.fetch_pipeline_run_version
     }
-    dag_commands = prepare_dag("non_host_alignment", attribute_dict)
+    key_s3_params = "--key-path-s3 s3://idseq-secrets/idseq-prod.pem"
+    dag_commands = prepare_dag("non_host_alignment", attribute_dict, key_s3_params)
     batch_command = [install_pipeline, dag_commands].join("; ")
     # Run it
     aegea_batch_submit_command(batch_command)
@@ -270,6 +272,6 @@ class PipelineRunStage < ApplicationRecord
       "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} "
     batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline assembly"
     "aegea batch submit --command=\"#{batch_command}\" " \
-      " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --ecr-image idseq --memory 60000 --queue idseq_assembly --vcpus 32 --job-role idseq-pipeline "
+      " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --ecr-image idseq_dag --memory 60000 --queue idseq_assembly --vcpus 32 --job-role idseq-pipeline "
   end
 end
