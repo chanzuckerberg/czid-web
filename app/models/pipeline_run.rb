@@ -298,7 +298,7 @@ class PipelineRun < ApplicationRecord
     downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, local_json_path)
     return unless downloaded_stats_path
     stats_array = JSON.parse(File.read(downloaded_stats_path))
-    # Ex: [{"total_reads": 1122}, {"task": "star_out", "reads_after": 832}... {"remaining_reads": 474}]
+    # Ex: [{"total_reads": 1122}, {"task": "star_out", "reads_after": 832}... {"adjusted_remaining_reads": 474}]
 
     # Load total reads
     total = stats_array.detect { |entry| entry.key?("total_reads") }
@@ -308,10 +308,10 @@ class PipelineRun < ApplicationRecord
     end
 
     # Load remaining reads
-    rem = stats_array.detect { |entry| entry.key?("remaining_reads") }
+    rem = stats_array.detect { |entry| entry.key?("adjusted_remaining_reads") }
     if rem
-      rem = rem["remaining_reads"]
-      update(remaining_reads: rem)
+      rem = rem["adjusted_remaining_reads"]
+      update(adjusted_remaining_reads: rem)
     end
 
     # Load subsample fraction
@@ -338,7 +338,7 @@ class PipelineRun < ApplicationRecord
     pipeline_output_dict = json_dict['pipeline_output']
     pipeline_output_dict.slice!('remaining_reads', 'total_reads', 'taxon_counts_attributes')
     self.total_reads = pipeline_output_dict['total_reads']
-    self.remaining_reads = pipeline_output_dict['remaining_reads']
+    self.adjusted_remaining_reads = pipeline_output_dict['adjusted_remaining_reads']
     self.unmapped_reads = count_unmapped_reads
     self.fraction_subsampled = subsample_fraction
     save
@@ -480,6 +480,7 @@ class PipelineRun < ApplicationRecord
 
   def load_stats_file
     stats_s3 = "#{output_s3_path_with_version}/#{STATS_JSON_NAME}"
+    # TODO: Remove the datetime check?
     if file_generated_since_jobstats?(stats_s3)
       load_job_stats(stats_s3)
     end
@@ -560,7 +561,7 @@ class PipelineRun < ApplicationRecord
     end
 
     # Compile all counts
-    # Ex: [{"total_reads": 1122}, {"task": "run_star", "reads_after": 832}... {"remaining_reads": 474}]
+    # Ex: [{"total_reads": 1122}, {"task": "star_out", "reads_after": 832}... {"adjusted_remaining_reads": 474}]
     all_counts = []
     stdout.split("\n").each do |line|
       fname = line.split(" ")[3] # Last col in line
@@ -592,7 +593,7 @@ class PipelineRun < ApplicationRecord
     # filtering step vs. total reads as if subsampling had never occurred.
     rem = all_counts.detect { |entry| entry.value?("gsnap_filter_out") }
     if rem && frac != -1
-      all_counts << { remaining_reads: (rem[:reads_after] * (1 / frac)).to_i }
+      all_counts << { adjusted_remaining_reads: (rem[:reads_after] * (1 / frac)).to_i }
     end
 
     # Write JSON to a file
@@ -759,20 +760,18 @@ class PipelineRun < ApplicationRecord
 
   def subsampled_reads
     # number of non-host reads that actually went through non-host alignment
-    res = remaining_reads
+    res = adjusted_remaining_reads
     if subsample
       # Ex: max of 1,000,000 or 2,000,000 reads
       max_reads = subsample * sample.input_files.count
-      if remaining_reads > max_reads
+      if adjusted_remaining_reads > max_reads
         res = max_reads
       end
     end
     res
     # 'subsample' is number of reads, respectively read pairs, to sample after host filtering
-    # 'remaining_reads' is number of individual reads remaining after host filtering
-    #
-    # Note that now that subsampling runs before gsnap filter, remaining_reads after gsnap
-    # filter are artificially multiplied to be at the original scale of total reads.
+    # 'adjusted_remaining_reads' is number of individual reads remaining after subsampling
+    # and host filtering, artificially multiplied to be at the original scale of total reads.
   end
 
   def subsample_fraction
@@ -780,7 +779,7 @@ class PipelineRun < ApplicationRecord
     if fraction_subsampled
       fraction_subsampled
     else # These should actually be the same value
-      @cached_subsample_fraction ||= (1.0 * subsampled_reads) / remaining_reads
+      @cached_subsample_fraction ||= (1.0 * subsampled_reads) / adjusted_remaining_reads
     end
   end
 

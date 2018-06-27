@@ -321,7 +321,7 @@ module ReportHelper
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
     parent_ids = parent_ids.to_a
 
-    # Note: fraction_subsampled is of type 'float' so adjusted_total_reads is too
+    # Note: subsample_fraction is of type 'float' so adjusted_total_reads is too
     # Note: stdev is never 0
     # Note: connection.select_all is TWICE faster than TaxonCount.select
     # (I/O latency goes from 2 seconds -> 0.8 seconds)
@@ -960,7 +960,7 @@ module ReportHelper
     background_id = params[:background_id] || sample.default_background_id
     pipeline_run = select_pipeline_run(sample, params)
     pipeline_run_id = pipeline_run ? pipeline_run.id : nil
-    return "" if pipeline_run_id.nil? || pipeline_run.total_reads.nil? || pipeline_run.remaining_reads.nil?
+    return "" if pipeline_run_id.nil? || pipeline_run.total_reads.nil? || pipeline_run.adjusted_remaining_reads.nil?
     tax_details = taxonomy_details(pipeline_run_id, background_id, params)
     generate_report_csv(tax_details)
   end

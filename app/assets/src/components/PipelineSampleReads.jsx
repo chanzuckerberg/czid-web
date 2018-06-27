@@ -632,12 +632,16 @@ class PipelineSampleReads extends React.Component {
                 <div className="col s6 label">Non-host reads</div>
                 <div
                   className={`details-value col s6 plain ${
-                    !this.summary_stats.remaining_reads ? BLANK_TEXT : ""
+                    !this.summary_stats.adjusted_remaining_reads
+                      ? BLANK_TEXT
+                      : ""
                   }`}
                 >
-                  {!this.summary_stats.remaining_reads
+                  {!this.summary_stats.adjusted_remaining_reads
                     ? BLANK_TEXT
-                    : numberWithCommas(this.summary_stats.remaining_reads)}
+                    : numberWithCommas(
+                        this.summary_stats.adjusted_remaining_reads
+                      )}
                   {!this.summary_stats.percent_remaining
                     ? ""
                     : ` (${this.summary_stats.percent_remaining.toFixed(2)}%)`}
@@ -703,7 +707,8 @@ class PipelineSampleReads extends React.Component {
       );
     }
 
-    let stage2_complete = this.pipelineRun && this.pipelineRun.remaining_reads;
+    let stage2_complete =
+      this.pipelineRun && this.pipelineRun.adjusted_remaining_reads;
     let nonhost_assembly_complete =
       this.reportDetails &&
       this.reportDetails.assembled_taxids.indexOf("all") >= 0;
