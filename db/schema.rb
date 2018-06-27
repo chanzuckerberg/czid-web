@@ -34,7 +34,7 @@ ActiveRecord::Schema.define(version: 20_180_627_164_147) do
     t.index ["pipeline_output_id"], name: "index_backgrounds_pipeline_outputs_on_pipeline_output_id"
   end
 
-  create_table "backgrounds_pipeline_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
+  create_table "backgrounds_pipeline_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "background_id"
     t.bigint "pipeline_run_id"
     t.index %w[background_id pipeline_run_id], name: "index_bg_pr_id", unique: true
@@ -47,7 +47,7 @@ ActiveRecord::Schema.define(version: 20_180_627_164_147) do
     t.index ["sample_id"], name: "index_backgrounds_samples_on_sample_id"
   end
 
-  create_table "ercc_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
+  create_table "ercc_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "pipeline_run_id"
     t.string "name"
     t.integer "count"
@@ -99,7 +99,7 @@ ActiveRecord::Schema.define(version: 20_180_627_164_147) do
     t.index ["task"], name: "index_job_stats_on_task"
   end
 
-  create_table "output_states", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
+  create_table "output_states", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "output"
     t.string "state"
     t.bigint "pipeline_run_id"
@@ -174,7 +174,6 @@ ActiveRecord::Schema.define(version: 20_180_627_164_147) do
     t.string "pipeline_commit"
     t.text "assembled_taxids"
     t.bigint "truncated"
-    t.text "result_status"
     t.integer "results_finalized"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
     t.index ["pipeline_output_id"], name: "index_pipeline_runs_on_pipeline_output_id", unique: true
@@ -182,7 +181,7 @@ ActiveRecord::Schema.define(version: 20_180_627_164_147) do
   end
 
   create_table "projects", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name", collation: "latin1_swedish_ci"
+    t.string "name", collation: "utf8_general_ci"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "public_access", limit: 1
@@ -199,7 +198,7 @@ ActiveRecord::Schema.define(version: 20_180_627_164_147) do
   end
 
   create_table "samples", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name", collation: "latin1_swedish_ci"
+    t.string "name", collation: "utf8_general_ci"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "project_id"
@@ -262,7 +261,7 @@ ActiveRecord::Schema.define(version: 20_180_627_164_147) do
     t.index ["taxid"], name: "index_taxon_child_parents_on_taxid", unique: true
   end
 
-  create_table "taxon_confirmations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
+  create_table "taxon_confirmations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.integer "taxid"
     t.integer "sample_id"
     t.integer "user_id"
@@ -280,7 +279,7 @@ ActiveRecord::Schema.define(version: 20_180_627_164_147) do
     t.integer "count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "name", collation: "latin1_swedish_ci"
+    t.string "name", collation: "utf8_general_ci"
     t.string "count_type"
     t.float "percent_identity", limit: 24
     t.float "alignment_length", limit: 24
@@ -381,20 +380,20 @@ ActiveRecord::Schema.define(version: 20_180_627_164_147) do
   end
 
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "email", default: "", null: false, collation: "latin1_swedish_ci"
-    t.string "name", collation: "latin1_swedish_ci"
+    t.string "email", default: "", null: false, collation: "utf8_general_ci"
+    t.string "name", collation: "utf8_general_ci"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "encrypted_password", default: "", null: false, collation: "latin1_swedish_ci"
-    t.string "reset_password_token", collation: "latin1_swedish_ci"
+    t.string "encrypted_password", default: "", null: false, collation: "utf8_general_ci"
+    t.string "reset_password_token", collation: "utf8_general_ci"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
     t.integer "sign_in_count", default: 0, null: false
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
-    t.string "current_sign_in_ip", collation: "latin1_swedish_ci"
-    t.string "last_sign_in_ip", collation: "latin1_swedish_ci"
-    t.string "authentication_token", limit: 30, collation: "latin1_swedish_ci"
+    t.string "current_sign_in_ip", collation: "utf8_general_ci"
+    t.string "last_sign_in_ip", collation: "utf8_general_ci"
+    t.string "authentication_token", limit: 30, collation: "utf8_general_ci"
     t.integer "role"
     t.index ["authentication_token"], name: "index_users_on_authentication_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
