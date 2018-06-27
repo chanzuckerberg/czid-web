@@ -562,6 +562,7 @@ class PipelineRun < ApplicationRecord
     total = all_counts.detect { |entry| entry.value?("fastqs") }
     if total
       all_counts << { total_reads: total[:reads_after] }
+      self.total_reads = total[:reads_after]
     end
 
     # Load subsample fraction
@@ -571,6 +572,7 @@ class PipelineRun < ApplicationRecord
     if sub_before && sub_after
       frac = (1.0 * sub_after[:reads_after]) / sub_before[:reads_after]
       all_counts << { fraction_subsampled: frac }
+      self.fraction_subsampled = frac
     end
 
     # Load remaining reads
@@ -579,7 +581,9 @@ class PipelineRun < ApplicationRecord
     # filtering step vs. total reads as if subsampling had never occurred.
     rem = all_counts.detect { |entry| entry.value?("gsnap_filter_out") }
     if rem && frac != -1
-      all_counts << { adjusted_remaining_reads: (rem[:reads_after] * (1 / frac)).to_i }
+      adjusted_remaining_reads = (rem[:reads_after] * (1 / frac)).to_i
+      all_counts << { adjusted_remaining_reads: adjusted_remaining_reads }
+      self.adjusted_remaining_reads = adjusted_remaining_reads
     end
 
     # Write JSON to a file
