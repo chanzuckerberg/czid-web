@@ -561,6 +561,12 @@ class PipelineRun < ApplicationRecord
       self.total_reads = total[:reads_after]
     end
 
+    # Load truncation
+    truncation = all_counts.detect { |entry| entry.value?("truncated") }
+    if truncation
+      self.truncated = truncation[:reads_after]
+    end
+
     # Load subsample fraction
     sub_before = all_counts.detect { |entry| entry.value?("bowtie2_out") }
     sub_after = all_counts.detect { |entry| entry.value?("subsampled_out") }
