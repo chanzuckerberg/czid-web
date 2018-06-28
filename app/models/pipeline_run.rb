@@ -586,6 +586,12 @@ class PipelineRun < ApplicationRecord
       adjusted_remaining_reads = (rem[:reads_after] * (1 / frac)).to_i
       all_counts << { adjusted_remaining_reads: adjusted_remaining_reads }
       self.adjusted_remaining_reads = adjusted_remaining_reads
+    else
+      # gsnap filter is not done. use bowtie output as remaining reads
+      bowtie = all_counts.detect { |entry| entry.value?("bowtie2_out") }
+      if bowtie
+        self.adjusted_remaining_reads = bowtie[:reads_after]
+      end
     end
 
     # Load unidentified reads
