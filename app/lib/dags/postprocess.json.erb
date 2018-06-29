@@ -1,5 +1,5 @@
 {
-  "output_dir_s3": "s3://idseq-samples-prod/samples/<%= @project_id %>/<%= @sample_id %>/postprocess",
+  "output_dir_s3": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/postprocess",
   "targets": {
     "taxid_fasta_in": [
       "annotated_merged.fa",
