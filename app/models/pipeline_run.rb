@@ -487,8 +487,8 @@ class PipelineRun < ApplicationRecord
     stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", s3_path.to_s)
     return false unless status.exitstatus.zero?
     # If there is a file and there are no existing job_stats yet, return true
-    existing_jobstats = job_stats
-    return true if existing_jobstats.empty?
+    existing_jobstats = job_stats.first
+    return true unless existing_jobstats
     # If there is a file and there are job_stats, check if the file supersedes the job_stats:
     begin
       s3_file_time = DateTime.strptime(stdout[0..18], "%Y-%m-%d %H:%M:%S")
