@@ -13,7 +13,7 @@ end
 
 chdir APP_ROOT do
   system('brew help 1>/dev/null') || abort('install homebrew from directions at https://brew.sh/')
-  system('open -a Docker 1>/dev/null') || abort('install docker from directions at https://docs.docker.com/docker-for-mac/install/')
+#  system('open -a Docker 1>/dev/null') || abort('install docker from directions at https://docs.docker.com/docker-for-mac/install/')
   puts '== Updating homebrew Formulae =='
   system!('brew update')
   dependencies = ['mysql', 'hub', 'bash-completion', 'node', 'yarn']
