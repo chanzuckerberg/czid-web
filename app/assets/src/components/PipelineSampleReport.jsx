@@ -1255,7 +1255,7 @@ class PipelineSampleReport extends React.Component {
     return url.searchParams.get(param);
   }
 
-  // Select the background with the matching name.
+  // Select the background ID with the matching name.
   getBackgroundIdByName(name) {
     let match = this.all_backgrounds.filter(b => b["name"] === name);
     if (match && match[0] && match[0]["id"]) {

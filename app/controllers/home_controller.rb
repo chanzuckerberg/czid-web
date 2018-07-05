@@ -10,6 +10,7 @@ class HomeController < ApplicationController
     @editable_project_ids = current_power.updatable_projects.pluck(:id)
     @host_genomes = HostGenome.all.reject { |hg| hg.name.downcase.include?("__test__") }
     @user_is_admin = current_user.role == 1 ? 1 : 0
+    @background_models = current_power.backgrounds
     render 'home'
   end
 
