@@ -7,7 +7,8 @@
       editableProjects: <%= @editable_project_ids %>,
       favorites: JSON.parse('<%= raw escape_json(@favorite_projects) %>'),
       projects: JSON.parse('<%= raw escape_json(@projects)%>'),
-      hostGenomes: JSON.parse('<%= raw escape_json(@host_genomes)%>')
+      hostGenomes: JSON.parse('<%= raw escape_json(@host_genomes)%>'),
+      allBackgrounds: JSON.parse('<%= raw escape_json(@background_models) %>')
     }, 'samples_page');
   <% end %>
 </div>
