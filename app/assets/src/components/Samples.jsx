@@ -1531,9 +1531,9 @@ function PipelineOutputDataValues({
       ? BLANK_TEXT
       : numberWithCommas(derivedOutput.pipeline_run.total_reads),
     nonhost_reads:
-      !stats || !stats.remaining_reads
+      !stats || !stats.adjusted_remaining_reads
         ? BLANK_TEXT
-        : numberWithCommas(stats.remaining_reads),
+        : numberWithCommas(stats.adjusted_remaining_reads),
     nonhost_reads_percent:
       !stats || !stats.percent_remaining ? (
         ""

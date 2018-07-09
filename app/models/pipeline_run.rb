@@ -18,16 +18,16 @@ class PipelineRun < ApplicationRecord
   accepts_nested_attributes_for :taxon_byteranges
   accepts_nested_attributes_for :ercc_counts
 
-  DEFAULT_SUBSAMPLING = 1_000_000 # number of reads to subsample to, after host filtering
-  OUTPUT_JSON_NAME = 'idseq_web_sample.json'.freeze
-  MULTIHIT_OUTPUT_JSON_NAME = 'multihit_idseq_web_sample.json'.freeze
-  STATS_JSON_NAME = 'stats.json'.freeze
-  VERSION_JSON_NAME = 'versions.json'.freeze
+  DEFAULT_SUBSAMPLING = 1_000_000 # number of fragments to subsample to, after host filtering
+  MAX_INPUT_FRAGMENTS = 75_000_000 # max fragments going into the pipeline
+  OUTPUT_JSON_NAME = 'taxon_counts.json'.freeze
+  # VERSION_JSON_NAME = 'versions.json'.freeze # TODO: remove this line
+  PIPELINE_VERSION_FILE = "pipeline_version.txt".freeze
+  STATS_JSON_NAME = "stats.json".freeze
   ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
   TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined.json'.freeze
   ASSEMBLY_STATUSFILE = 'job-complete'.freeze
   LOCAL_JSON_PATH = '/app/tmp/results_json'.freeze
-  INPUT_TRUNCATED_FILE = 'input_truncated.txt'.freeze
   PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
 
   # The PIPELINE MONITOR is responsible for keeping status of AWS Batch jobs
@@ -76,6 +76,8 @@ class PipelineRun < ApplicationRecord
   LOADERS_BY_OUTPUT = { "ercc_counts" => "db_load_ercc_counts",
                         "taxon_counts" => "db_load_taxon_counts",
                         "taxon_byteranges" => "db_load_byteranges" }.freeze
+  # Note: reads_before_priceseqfilter, reads_after_priceseqfilter, reads_after_cdhitdup
+  #       are the only "job_stats" we actually need for web display.
   REPORT_READY_OUTPUT = "taxon_counts".freeze
 
   # Values for results_finalized are as follows.
@@ -254,18 +256,10 @@ class PipelineRun < ApplicationRecord
   end
 
   def db_load_ercc_counts
-    # TODO: break this function up into 3 different target outputs / loader commands
-    #       rather than combining several outputs in 1 function
-
+    # TODO: remove the following. deprecated.
     # Load version info applicable to host filtering
-    version_s3_path = "#{host_filter_output_s3_path}/#{VERSION_JSON_NAME}"
-    self.version = `aws s3 cp #{version_s3_path} -`
-
-    # Check if input was truncated
-    truncation_file = "#{host_filter_output_s3_path}/#{INPUT_TRUNCATED_FILE}"
-    _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", truncation_file)
-    self.truncated = `aws s3 cp #{truncation_file} -`.split("\n")[0].to_i if status.exitstatus.zero?
-    save
+    # version_s3_path = "#{host_filter_output_s3_path}/#{VERSION_JSON_NAME}"
+    # self.version = `aws s3 cp #{version_s3_path} -`
 
     # Load ERCC counts
     ercc_s3_path = "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
@@ -284,7 +278,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def taxon_counts_json_name
-    multihit? ? MULTIHIT_OUTPUT_JSON_NAME : OUTPUT_JSON_NAME
+    OUTPUT_JSON_NAME
   end
 
   def invalid_family_call?(tcnt)
@@ -294,17 +288,6 @@ class PipelineRun < ApplicationRecord
     false
   end
 
-  def load_job_stats(stats_json_s3_path)
-    downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, local_json_path)
-    return unless downloaded_stats_path
-    stats_array = JSON.parse(File.read(downloaded_stats_path))
-    update(total_reads: (stats_array[0] || {})['total_reads'] || 0)
-    stats_array = stats_array.select { |entry| entry.key?("task") }
-    job_stats.destroy_all
-    update(job_stats_attributes: stats_array)
-    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_stats_path}")
-  end
-
   def db_load_taxon_counts
     output_json_s3_path = "#{alignment_output_s3_path}/#{taxon_counts_json_name}"
     downloaded_json_path = PipelineRun.download_file(output_json_s3_path, local_json_path)
@@ -312,15 +295,11 @@ class PipelineRun < ApplicationRecord
 
     json_dict = JSON.parse(File.read(downloaded_json_path))
     pipeline_output_dict = json_dict['pipeline_output']
-    pipeline_output_dict.slice!('remaining_reads', 'total_reads', 'taxon_counts_attributes')
-    self.total_reads = pipeline_output_dict['total_reads']
-    self.remaining_reads = pipeline_output_dict['remaining_reads']
-    self.unmapped_reads = count_unmapped_reads
-    self.fraction_subsampled = subsample_fraction
-    save
+    pipeline_output_dict.slice!('taxon_counts_attributes')
 
-    version_s3_path = "#{alignment_output_s3_path}/#{VERSION_JSON_NAME}"
-    update(version: `aws s3 cp #{version_s3_path} -`)
+    # TODO: remove the following. deprecated.
+    # version_s3_path = "#{alignment_output_s3_path}/#{VERSION_JSON_NAME}"
+    # update(version: `aws s3 cp #{version_s3_path} -`)
 
     # only keep counts at certain taxonomic levels
     taxon_counts_attributes_filtered = []
@@ -382,7 +361,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def output_ready?(output)
-    file_generated_since_run(s3_file_for(output))
+    file_generated(s3_file_for(output))
   end
 
   def output_state_hash(output_states_by_pipeline_run_id)
@@ -455,13 +434,10 @@ class PipelineRun < ApplicationRecord
   end
 
   def load_stats_file
-    # TODO: make it a single file rather than using stage-specific.
-    host_filtering_job_stats_s3 = "#{host_filter_output_s3_path}/#{STATS_JSON_NAME}"
-    alignment_job_stats_s3 = "#{alignment_output_s3_path}/#{STATS_JSON_NAME}"
-    if file_generated_since_jobstats?(alignment_job_stats_s3)
-      load_job_stats(alignment_job_stats_s3)
-    elsif file_generated_since_jobstats?(host_filtering_job_stats_s3)
-      load_job_stats(host_filtering_job_stats_s3)
+    stats_s3 = "#{output_s3_path_with_version}/#{STATS_JSON_NAME}"
+    # TODO: Remove the datetime check?
+    if file_generated_since_jobstats?(stats_s3)
+      load_job_stats(stats_s3)
     end
   end
 
@@ -506,6 +482,32 @@ class PipelineRun < ApplicationRecord
     end
   end
 
+  def file_generated_since_jobstats?(s3_path)
+    # If there is no file, return false
+    stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", s3_path.to_s)
+    return false unless status.exitstatus.zero?
+    # If there is a file and there are no existing job_stats yet, return true
+    existing_jobstats = job_stats.first
+    return true unless existing_jobstats
+    # If there is a file and there are job_stats, check if the file supersedes the job_stats:
+    begin
+      s3_file_time = DateTime.strptime(stdout[0..18], "%Y-%m-%d %H:%M:%S")
+      return (s3_file_time && existing_jobstats.created_at && s3_file_time > existing_jobstats.created_at)
+    rescue
+      return nil
+    end
+  end
+
+  def load_job_stats(stats_json_s3_path)
+    downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, local_json_path)
+    return unless downloaded_stats_path
+    stats_array = JSON.parse(File.read(downloaded_stats_path))
+    stats_array = stats_array.select { |entry| entry.key?("task") }
+    job_stats.destroy_all
+    update(job_stats_attributes: stats_array)
+    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_stats_path}")
+  end
+
   def update_job_status
     prs = active_stage
     if prs.nil?
@@ -527,7 +529,87 @@ class PipelineRun < ApplicationRecord
       self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
       self.job_status += "|#{STATUS_READY}" if report_ready?
     end
+    compile_stats_file
     save
+  end
+
+  def compile_stats_file
+    res_folder = output_s3_path_with_version
+    stdout, stderr, status = Open3.capture3("aws s3 ls #{res_folder}/ | grep count$")
+    unless status.exitstatus.zero?
+      Rails.logger.info("No .count files found: #{stderr}")
+      return
+    end
+
+    # Compile all counts
+    # Ex: [{"total_reads": 1122}, {"task": "star_out", "reads_after": 832}... {"adjusted_remaining_reads": 474}]
+    all_counts = []
+    stdout.split("\n").each do |line|
+      fname = line.split(" ")[3] # Last col in line
+      raw = `aws s3 cp #{res_folder}/#{fname} -`
+      contents = JSON.parse(raw)
+      # Ex: {"gsnap_filter_out": 194}
+      contents.each do |key, count|
+        all_counts << { task: key, reads_after: count }
+      end
+    end
+
+    # Load total reads
+    total = all_counts.detect { |entry| entry.value?("fastqs") }
+    if total
+      all_counts << { total_reads: total[:reads_after] }
+      self.total_reads = total[:reads_after]
+    end
+
+    # Load truncation
+    truncation = all_counts.detect { |entry| entry.value?("truncated") }
+    if truncation
+      self.truncated = truncation[:reads_after]
+    end
+
+    # Load subsample fraction
+    sub_before = all_counts.detect { |entry| entry.value?("bowtie2_out") }
+    sub_after = all_counts.detect { |entry| entry.value?("subsampled_out") }
+    frac = -1
+    if sub_before && sub_after
+      frac = (1.0 * sub_after[:reads_after]) / sub_before[:reads_after]
+      all_counts << { fraction_subsampled: frac }
+      self.fraction_subsampled = frac
+    end
+
+    # Load remaining reads
+    # This is an approximation multiplied by the subsampled ratio so that it
+    # can be compared to total reads for the user. Number of reads after host
+    # filtering step vs. total reads as if subsampling had never occurred.
+    rem = all_counts.detect { |entry| entry.value?("gsnap_filter_out") }
+    if rem && frac != -1
+      adjusted_remaining_reads = (rem[:reads_after] * (1 / frac)).to_i
+      all_counts << { adjusted_remaining_reads: adjusted_remaining_reads }
+      self.adjusted_remaining_reads = adjusted_remaining_reads
+    else
+      # gsnap filter is not done. use bowtie output as remaining reads
+      bowtie = all_counts.detect { |entry| entry.value?("bowtie2_out") }
+      if bowtie
+        self.adjusted_remaining_reads = bowtie[:reads_after]
+      end
+    end
+
+    # Load unidentified reads
+    unidentified = all_counts.detect { |entry| entry.value?("unidentified_fasta") }
+    if unidentified
+      self.unmapped_reads = unidentified[:reads_after]
+    end
+
+    # Write JSON to a file
+    tmp = Tempfile.new
+    tmp.write(all_counts.to_json)
+    tmp.close
+
+    # Copy to S3. Overwrite if exists.
+    _stdout, stderr, status = Open3.capture3("aws s3 cp #{tmp.path} #{res_folder}/#{STATS_JSON_NAME}")
+    unless status.exitstatus.zero?
+      Rails.logger.warn("Failed to write compiled stats file: #{stderr}")
+    end
   end
 
   def local_json_path
@@ -553,20 +635,9 @@ class PipelineRun < ApplicationRecord
     end
   end
 
-  def file_generated_since_jobstats?(s3_path)
-    # If there is no file, return false
-    stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", s3_path.to_s)
-    return false unless status.exitstatus.zero?
-    # If there is a file and there are no existing job_stats yet, return true
-    existing_jobstats = job_stats
-    return true if existing_jobstats.empty?
-    # If there is a file and there are job_stats, check if the file supersedes the job_stats:
-    begin
-      s3_file_time = DateTime.strptime(stdout[0..18], "%Y-%m-%d %H:%M:%S")
-      return (s3_file_time && existing_jobstats.created_at && s3_file_time > existing_jobstats.created_at)
-    rescue
-      return nil
-    end
+  def file_generated(s3_path)
+    _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", s3_path.to_s)
+    status.exitstatus.zero?
   end
 
   def generate_aggregate_counts(tax_level_name)
@@ -682,19 +753,34 @@ class PipelineRun < ApplicationRecord
 
   def subsampled_reads
     # number of non-host reads that actually went through non-host alignment
-    return remaining_reads unless subsample
-    result = subsample * sample.input_files.count
-    remaining_reads < result ? remaining_reads : result
+    res = adjusted_remaining_reads
+    if subsample
+      # Ex: max of 1,000,000 or 2,000,000 reads
+      max_reads = subsample * sample.input_files.count
+      if adjusted_remaining_reads > max_reads
+        res = max_reads
+      end
+    end
+    res
     # 'subsample' is number of reads, respectively read pairs, to sample after host filtering
-    # 'remaining_reads'a is number of individual reads remaining after host filtering
+    # 'adjusted_remaining_reads' is number of individual reads remaining after subsampling
+    # and host filtering, artificially multiplied to be at the original scale of total reads.
   end
 
   def subsample_fraction
     # fraction of non-host ("remaining") reads that actually went through non-host alignment
-    @cached_subsample_fraction ||= (1.0 * subsampled_reads) / remaining_reads
+    if fraction_subsampled
+      fraction_subsampled
+    else # These should actually be the same value
+      @cached_subsample_fraction ||= (1.0 * subsampled_reads) / adjusted_remaining_reads
+    end
   end
 
   def subsample_suffix
+    if pipeline_version && pipeline_version.to_f >= 2.0
+      # New dag pipeline. no subsample folder
+      return nil
+    end
     all_suffix = pipeline_version ? "subsample_all" : ""
     subsample? ? "subsample_#{subsample}" : all_suffix
   end
@@ -717,9 +803,15 @@ class PipelineRun < ApplicationRecord
   end
 
   def host_filter_output_s3_path
-    pipeline_ver_str = ""
-    pipeline_ver_str = "/#{pipeline_version}" if pipeline_version
-    "#{sample.sample_output_s3_path}#{pipeline_ver_str}"
+    output_s3_path_with_version
+  end
+
+  def output_s3_path_with_version
+    if pipeline_version
+      "#{sample.sample_output_s3_path}/#{pipeline_version}"
+    else
+      sample.sample_output_s3_path
+    end
   end
 
   def s3_paths_for_taxon_byteranges
@@ -733,7 +825,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def pipeline_version_file
-    "#{sample.sample_output_s3_path}/pipeline_version.txt"
+    "#{sample.sample_output_s3_path}/#{PIPELINE_VERSION_FILE}"
   end
 
   def fetch_pipeline_version
@@ -775,12 +867,6 @@ class PipelineRun < ApplicationRecord
     pipeline_ver_str = "#{pipeline_version}/" if pipeline_version
     result = "#{sample.sample_output_s3_path}/#{pipeline_ver_str}#{subsample_suffix}"
     result.chomp("/")
-  end
-
-  def count_unmapped_reads
-    _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", sample.unidentified_fasta_s3_path)
-    return unless status.exitstatus.zero?
-    `aws s3 cp #{sample.unidentified_fasta_s3_path} - | grep '^>' | wc -l`.to_i
   end
 
   def load_ercc_counts
