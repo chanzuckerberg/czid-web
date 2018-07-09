@@ -11,6 +11,8 @@ class Sample < ApplicationRecord
   STATUS_CHECKED = 'checked'.freeze # status regarding pipeline kickoff is checked
   MULTIHIT_FASTA_BASENAME = 'accessions.rapsearch2.gsnapl.fasta'.freeze
   HIT_FASTA_BASENAME = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.fasta'.freeze
+  DAG_ANNOTATED_FASTA_BASENAME = 'annotated_merged.fa'.freeze
+  DAG_UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fa'.freeze
   UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fasta'.freeze
   SORTED_TAXID_ANNOTATED_FASTA = 'taxid_annot_sorted_nt.fasta'.freeze
   SORTED_TAXID_ANNOTATED_FASTA_NR = 'taxid_annot_sorted_nr.fasta'.freeze
@@ -278,10 +280,14 @@ class Sample < ApplicationRecord
 
   def annotated_fasta_s3_path
     pr = pipeline_runs.first
+    return "#{pr.output_s3_path_with_version}/#{DAG_ANNOTATED_FASTA_BASENAME}" if pr.pipeline_version && pr.pipeline_version.to_f >= 2.0
+
     pr.multihit? ? "#{sample_alignment_output_s3_path}/#{MULTIHIT_FASTA_BASENAME}" : "#{sample_alignment_output_s3_path}/#{HIT_FASTA_BASENAME}"
   end
 
   def unidentified_fasta_s3_path
+    pr = pipeline_runs.first
+    return "#{pr.output_s3_path_with_version}/#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if pr.pipeline_version && pr.pipeline_version.to_f >= 2.0
     "#{sample_alignment_output_s3_path}/#{UNIDENTIFIED_FASTA_BASENAME}"
   end
 
