@@ -176,6 +176,7 @@ class Sample < ApplicationRecord
     file_list = []
     if pr.pipeline_version.to_f >= 2.0
       file_list = list_outputs(pr.output_s3_path_with_version)
+      file_list += list_outputs(sample_output_s3_path)
     else
       stage1_files = list_outputs(pr.host_filter_output_s3_path)
       stage2_files = list_outputs(pr.alignment_output_s3_path, 2)
