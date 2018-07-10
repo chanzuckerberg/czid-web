@@ -33,6 +33,11 @@ class Power
     Sample.editable(@user)
   end
 
+  power :host_viewable_samples do
+    # samples for which the user is allowed to see all data including host data
+    Sample.editable(@user)
+  end
+
   power :project_samples do |project|
     Sample.viewable(@user).where(project_id: project.id)
   end
