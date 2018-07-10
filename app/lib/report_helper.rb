@@ -664,7 +664,7 @@ module ReportHelper
       tax_info['category_name'] = category[category_id] || 'Uncategorized'
     end
 
-    Rails.logger.warn "Missing names for taxon ids #{missing_names.to_a}" unoggeress missing_names.empty?
+    Rails.logger.warn "Missing names for taxon ids #{missing_names.to_a}" unless missing_names.empty?
     Rails.logger.warn "Missing parent for child:  #{missing_parents}" unless missing_parents.empty?
     tax_2d
   end
