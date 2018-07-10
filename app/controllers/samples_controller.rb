@@ -241,8 +241,7 @@ class SamplesController < ApplicationController
           {:name => "R log(1/e)", :value => "NR_neglogevalue"}
         ],
         :operators => [">=", "<="]
-      },
-      :sampleIds => params[:sample_ids].to_s.split(",").map(&:to_i) || []
+      }
     }
   end
 

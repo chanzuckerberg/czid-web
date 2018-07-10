@@ -2,6 +2,7 @@ import React from "react";
 import clusterfck from "clusterfck";
 import axios from "axios";
 import d3 from "d3";
+import queryString from "query-string";
 import { Button, Icon, Popup } from "semantic-ui-react";
 import copy from "copy-to-clipboard";
 import { StickyContainer, Sticky } from "react-sticky";
@@ -42,6 +43,9 @@ class SamplesHeatmap extends React.Component {
       "rgb(78, 173, 73)"
     ];
 
+    // URL params have precedence
+    this.urlParams = this.parseUrlParams();
+
     this.state = {
       availableOptions: {
         // Server side options
@@ -63,27 +67,22 @@ class SamplesHeatmap extends React.Component {
         }
       },
       selectedOptions: {
-        metric: this.props.metrics[0],
-        categories: this.props.categories,
-        background: this.props.backgrounds[0].value,
-        species: 1,
-        advancedFilters: [],
-        dataScaleIdx: 0,
-        taxonsPerSample: 30
+        metric: this.urlParams.metric || this.props.metrics[0],
+        categories: this.urlParams.categories || this.props.categories,
+        background:
+          this.urlParams.background || this.props.backgrounds[0].value,
+        species: parseInt(this.urlParams.species) || 1,
+        advancedFilters: this.urlParams.advancedFilters || [],
+        dataScaleIdx: parseInt(this.urlParams.dataScaleIdx) || 0,
+        taxonsPerSample: parseInt(this.urlParams.taxonsPerSample) || 30
       },
       data: null,
       taxons: {},
       loading: false,
-      sampleIds: this.props.sampleIds,
-      taxonIds: this.props.taxonIds || []
-      // appliedThresholds: [],
-
-      // activeThresholds: ObjectHelper.deepCopy(
-      //   urlParams.appliedThresholds || ThresholdMap.getSavedThresholdFilters()
-      // ),
-      // appliedThresholds:
-      //   urlParams.appliedThresholds || ThresholdMap.getSavedThresholdFilters()
+      sampleIds: this.urlParams.sampleIds || this.props.sampleIds,
+      taxonIds: this.urlParams.taxonIds || this.props.taxonIds || []
     };
+
     this.explicitApply = this.props.explicitApply || false;
     this.optionsChanged = false;
 
@@ -112,6 +111,7 @@ class SamplesHeatmap extends React.Component {
     this.onDataScaleChange = this.onDataScaleChange.bind(this);
     this.onMetricChange = this.onMetricChange.bind(this);
     this.onSampleLabelClick = this.onSampleLabelClick.bind(this);
+    this.onShareClick = this.onShareClick.bind(this);
     this.onTaxonLevelChange = this.onTaxonLevelChange.bind(this);
     this.onTaxonsPerSampleChange = this.onTaxonsPerSampleChange.bind(this);
     this.onTaxonsPerSampleEnd = this.onTaxonsPerSampleEnd.bind(this);
@@ -121,55 +121,31 @@ class SamplesHeatmap extends React.Component {
     this.fetchDataFromServer();
   }
 
-  // fetchParamsFromUrl() {
-  //   let sp = new URL(window.location).searchParams;
+  parseUrlParams() {
+    let urlParams = queryString.parse(location.search);
 
-  //   let ion = function(x) {
-  //     return x == null ? null : parseFloat(x);
-  //   };
-
-  //   let lon = function(x) {
-  //     return x == null
-  //       ? null
-  //       : x.split(",").map(function(j) {
-  //           return parseInt(j, 10);
-  //         });
-  //   };
-  //   let ton = function(x) {
-  //     return x == null ? null : x.split(",");
-  //   };
-
-  //   let json_or_null = function(x) {
-  //     try {
-  //       return JSON.parse(x);
-  //     } catch (error) {
-  //       return null;
-  //     }
-  //   };
-  //   return {
-  //     species: sp.get("species"),
-  //     dataType: sp.get("dataType"),
-  //     dataScaleIdx: ion(sp.get("dataScaleIdx")),
-  //     sample_ids: lon(sp.get("sample_ids")),
-  //     taxon_ids: lon(sp.get("taxon_ids")),
-  //     categories: ton(sp.get("categories")),
-  //     appliedThresholds: json_or_null(sp.get("appliedThresholds"))
-  //   };
-  // }
+    // consider the cases where variables can be passed as array string
+    if (typeof urlParams.sampleIds === "string") {
+      urlParams.sampleIds = urlParams.sampleIds.split(",");
+    }
+    if (typeof urlParams.taxonIds === "string") {
+      urlParams.taxonIds = urlParams.taxonIds.split(",");
+    }
+    if (typeof urlParams.categories === "string") {
+      urlParams.categories = urlParams.categories.split(",");
+    }
+    return urlParams;
+  }
 
   downloadCurrentViewDataURL() {
-    // TODO: adapt download heatmap;
-    //   const taxon_ids = this.filteredTaxonsNames.map(taxonName => {
-    //     return this.state.taxons.nameToId[taxonName];
-    //   });
-    //   const sample_ids = this.state.sample_ids;
-    //   const data_type = this.state.dataType;
-    //   let url = new URL("/samples/download_heatmap", window.origin);
-    //   let sp = url.searchParams;
-    //   sp.set("sample_ids", sample_ids);
-    //   sp.set("taxon_ids", taxon_ids);
-    //   sp.set("data_type", data_type);
-    //   return url.toString();
+    let params = this.getUrlParams();
+    let url = new URL("/samples/download_heatmap", window.origin);
+    let downloadableUrl = [
+      url.toString(),
+      "?",
+      queryString.stringify(params, { arrayFormat: "bracket" })
+    ].join("");
+    return downloadableUrl;
   }
 
   getDataProperty(data, property) {
@@ -462,7 +438,7 @@ class SamplesHeatmap extends React.Component {
         <Heatmap
           colTree={this.clusteredSamples.tree}
           rowTree={this.clusteredTaxons.tree}
-          rows={this.state.taxonNames.length}
+          rows={this.state.taxons.names.length}
           columns={this.state.data.length}
           getRowLabel={this.getRowLabel}
           getColumnLabel={this.getColumnLabel}
@@ -619,12 +595,27 @@ class SamplesHeatmap extends React.Component {
   updateHeatmap() {
     this.fetchDataFromServer();
     this.optionsChanged = false;
-    // this.fetchDataFromServer(null, this.state.selectedOptions.species, this.state.selectedOptions.categories);
+  }
+
+  getUrlParams() {
+    return Object.assign(
+      {
+        sampleIds: this.state.sampleIds,
+        taxonIds: this.state.taxonIds
+      },
+      this.state.selectedOptions
+    );
   }
 
   onShareClick() {
-    // TODO: adapt sharing link
-    //   copy(window.location);
+    let params = this.getUrlParams();
+    let url = new URL(location.pathname, window.origin);
+    let shareableUrl = [
+      url.toString(),
+      "?",
+      queryString.stringify(params, { arrayFormat: "bracket" })
+    ].join("");
+    copy(shareableUrl);
   }
 
   onCategoryChange(e, value) {
