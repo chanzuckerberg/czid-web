@@ -1,18 +1,18 @@
 def migrate_pre_run_stages(pr)
   target_outputs = %w[ercc_counts taxon_counts taxon_byteranges]
   if %w[CHECKED SUCCEEDED].include?(job_status)
+    pr.update(results_finalized: PipelineRun::FINALIZED_SUCCESS)
     target_outputs.each do |output|
       OutputState.create(pipeline_run_id: pr.id, output: output, state: PipelineRun::STATUS_LOADED)
     end
-    pr.update(results_finalized: PipelineRun::FINALIZED_SUCCESS)
   elsif %w[FAILED ERROR].include?(job_status)
-    target_outputs.each do |output|
     pr.create_output_states
     pr.update(results_finalized: PipelineRun::FINALIZED_FAIL)
   else
     pr.create_output_states
     pr.update(results_finalized: PipelineRun::IN_PROGRESS) # shouldn't be the case for any of those old runs
   end
+  pr.create_run_stages
 end
 
 def migrate_pre_result_monitor(pr)
@@ -25,7 +25,15 @@ def migrate_pre_result_monitor(pr)
                        output: old_loaders_by_output[rs.load_db_command_func],
                        state: rs.job_status)
   end
-  pr.update(results_finalized: pr.finalized)
+  if pr.all_output_states_terminal?
+    if pr.all_output_states_loaded?
+      pr.update(results_finalized: PipelineRun::FINALIZED_SUCCESS)
+    else
+      pr.update(results_finalized: PipelineRun::FINALIZED_FAIL)
+    end
+  else
+    pr.update(results_finalized: PipelineRun::IN_PROGRESS) # shouldn't be the case
+  end
 end
 
 task migrate_run_status: :environment do
@@ -40,4 +48,3 @@ task migrate_run_status: :environment do
     end
   end
 end
-

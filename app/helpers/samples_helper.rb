@@ -213,21 +213,9 @@ module SamplesHelper
     pipeline_run_entry = {}
     if pipeline_run
       run_stages = pipeline_run_stages_by_pipeline_run_id[pipeline_run.id]
-      if run_stages.present?
-        pipeline_run_entry[:total_runtime] = get_total_runtime(pipeline_run, run_stages)
-        pipeline_run_entry[:with_assembly] = pipeline_run.assembly? ? 1 : 0
-        pipeline_run_entry[:result_status_description] = if pipeline_run.pre_result_monitor?
-                                                           # TODO: migrate old runs and delete this code
-                                                           # (chanzuckerberg/idseq-web/issues/1336)
-                                                           pipeline_run.status_display_pre_result_monitor(run_stages)
-                                                         else
-                                                           pipeline_run.status_display(output_states_by_pipeline_run_id)
-                                                         end
-      else
-        # data processed before pipeline_run_stages were instated
-        # TODO: migrate old runs and delete this code
-        pipeline_run_entry[:result_status_description] = pipeline_run.status_display_pre_run_stages
-      end
+      pipeline_run_entry[:total_runtime] = get_total_runtime(pipeline_run, run_stages)
+      pipeline_run_entry[:with_assembly] = pipeline_run.assembly? ? 1 : 0
+      pipeline_run_entry[:result_status_description] = pipeline_run.status_display(output_states_by_pipeline_run_id)
       pipeline_run_entry[:finalized] = pipeline_run.finalized
       pipeline_run_entry[:report_ready] = report_ready_pipeline_run_ids.include?(pipeline_run.id)
     else
