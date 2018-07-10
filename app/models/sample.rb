@@ -211,10 +211,11 @@ class Sample < ApplicationRecord
     return unless status == STATUS_CREATED
     stderr_array = []
     total_reads_json_path = nil
+    max_lines = PipelineRun::MAX_INPUT_FRAGMENTS * 4
     input_files.each do |input_file|
       fastq = input_file.source
       total_reads_json_path = File.join(File.dirname(fastq.to_s), TOTAL_READS_JSON)
-      _stdout, stderr, status = Open3.capture3("aws", "s3", "cp", fastq.to_s, "#{sample_input_s3_path}/#{input_file.name}")
+      _stdout, stderr, status = Open3.capture3("aws s3 cp #{fastq} - |gzip -dc |head -#{max_lines} | gzip -c | aws s3 cp - #{sample_input_s3_path}/#{input_file.name}")
       stderr_array << stderr unless status.exitstatus.zero?
     end
     if total_reads_json_path.present?
