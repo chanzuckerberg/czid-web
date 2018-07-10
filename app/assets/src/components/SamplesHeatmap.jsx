@@ -1,617 +1,26 @@
 import React from "react";
-import PropTypes from "prop-types";
 import clusterfck from "clusterfck";
 import axios from "axios";
-import d3, { event as currentEvent } from "d3";
-import NumAbbreviate from "number-abbreviate";
+import d3 from "d3";
 import { Button, Icon, Popup } from "semantic-ui-react";
 import copy from "copy-to-clipboard";
-import textWidth from "text-width";
 import { StickyContainer, Sticky } from "react-sticky";
 
 import symlog from "./symlog";
-import AdvancedThresholdFilterDropdown from "./AdvancedThresholdFilter";
+import AdvancedThresholdFilterDropdown from "./modules/AdvancedThresholdFilter";
 import ObjectHelper from "../helpers/ObjectHelper";
 import ErrorBoundary from "./ErrorBoundary";
+import Heatmap from "./visualizations/Heatmap";
+import HeatmapLegend from "./visualizations/HeatmapLegend";
 import ReactNouislider from "./ReactNouislider";
-import LabeledDropdown from "./LabeledDropdown";
-import LabeledFilterDropdown from "./LabeledFilterDropdown";
+import ThresholdMap from "./utils/ThresholdMap";
+import LabeledDropdown from "./modules/LabeledDropdown";
+import LabeledFilterDropdown from "./modules/LabeledFilterDropdown";
 import TaxonTooltip from "./TaxonTooltip";
-import ThresholdMap from "./ThresholdMap";
-
-class D3Heatmap extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {};
-    this.colors = this.props.colors;
-    this.initializeData(this.props);
-  }
-
-  componentDidMount() {
-    this.renderD3();
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (ObjectHelper.shallowEquals(nextProps, this.props)) {
-      return;
-    }
-    d3.select(".D3Heatmap svg").remove();
-    this.initializeData(nextProps);
-    this.renderD3();
-  }
-
-  initializeData(props) {
-    this.row_number = props.rows;
-    this.col_number = props.columns;
-
-    this.rowLabel = [];
-    this.colLabel = [];
-
-    let longest_row_label = 0,
-      longest_col_label = 0;
-
-    // Figure out column and row labels
-    for (let i = 0; i < this.row_number; i += 1) {
-      let label = props.getRowLabel(i);
-      this.rowLabel.push(label);
-      let row_width = textWidth(label, {
-        size: "8pt"
-      });
-
-      longest_row_label = Math.max(longest_row_label, row_width);
-    }
-
-    for (let j = 0; j < this.col_number; j += 1) {
-      let label = props.getColumnLabel(j);
-      this.colLabel.push(label);
-      let col_width = textWidth(label, {
-        size: "8pt"
-      });
-      longest_col_label = Math.max(longest_col_label, col_width);
-    }
-
-    // Generate the grid data
-    this.data = [];
-    this.min = 999999999;
-    this.max = -999999999;
-
-    for (var i = 0; i < this.row_number; i += 1) {
-      for (var j = 0; j < this.col_number; j += 1) {
-        let value = props.getCellValue(i, j);
-        this.data.push({
-          row: i,
-          col: j,
-          value: value
-        });
-        if (value !== undefined) {
-          this.min = Math.min(this.min, value);
-          this.max = Math.max(this.max, value);
-        }
-      }
-    }
-    this.margin = {
-      top: longest_col_label * Math.cos(25 * (Math.PI / 180)) + 15,
-      left: Math.max(Math.ceil(Math.sqrt(this.row_number)) * 10, 40),
-      bottom: 80,
-      right: longest_row_label + 20
-    };
-    this.cellWidth = Math.max(900 / this.col_number, 20);
-    this.cellHeight = Math.max(400 / this.row_number, 15);
-
-    this.width =
-      this.cellWidth * this.col_number + this.margin.left + this.margin.right;
-    this.height =
-      this.cellHeight * this.row_number + this.margin.top + this.margin.bottom;
-
-    this.colTree = props.colTree;
-    this.rowTree = props.rowTree;
-    this.scale = props.scale;
-    this.legendElementWidth = this.margin.right / this.colors.length;
-  }
-
-  renderD3() {
-    this.svg = d3
-      .select(this.container)
-      .append("svg")
-      .attr("width", this.width)
-      .attr("height", this.height);
-
-    this.offsetCanvas = this.svg
-      .append("g")
-      .attr(
-        "transform",
-        "translate(" + this.margin.left + "," + this.margin.top + ")"
-      );
-
-    this.renderRowLabels();
-    this.renderColLabels();
-    this.renderHeatmap();
-    //this.renderLegend();
-    this.renderColDendrogram();
-    this.renderRowDendrogram();
-  }
-
-  renderHeatmap() {
-    let colorScale = this.scale()
-      .domain([this.min, this.max])
-      .range([0, this.colors.length - 1]);
-
-    let that = this;
-    this.offsetCanvas
-      .append("g")
-      .attr("class", "g3")
-      .selectAll(".cellg")
-      .data(this.data, function(d) {
-        return d.row + ":" + d.col;
-      })
-      .enter()
-      .append("rect")
-      .attr("x", function(d) {
-        return d.col * that.cellWidth;
-      })
-      .attr("y", function(d) {
-        return d.row * that.cellHeight;
-      })
-      .attr("class", function(d) {
-        return "cell cell-border cr" + d.row + " cc" + d.col;
-      })
-      .attr("width", this.cellWidth)
-      .attr("height", this.cellHeight)
-      .style("fill", function(d) {
-        if (d.value === undefined) {
-          return "rgb(238, 241, 244)";
-        }
-        let colorIndex = colorScale(d.value);
-        return that.colors[Math.round(colorIndex)];
-      })
-      .on("click", this.props.onCellClick)
-      .on("mouseover", function(d) {
-        //highlight text
-        d3.select(this).classed("cell-hover", true);
-        d3.selectAll(".rowLabel").classed("text-highlight", function(r, ri) {
-          return ri == d.row;
-        });
-        d3.selectAll(".colLabel").classed("text-highlight", function(c, ci) {
-          return ci == d.col;
-        });
-
-        d3
-          .select(that.tooltip)
-          .style("left", currentEvent.pageX + 10 + "px")
-          .style("top", currentEvent.pageY - 10 + "px");
-        d3.select(that.tooltip).classed("hidden", false);
-        that.setState({
-          hoverRow: d.row,
-          hoverColumn: d.col
-        });
-      })
-      .on("mouseout", function() {
-        d3.select(this).classed("cell-hover", false);
-        d3.selectAll(".rowLabel").classed("text-highlight", false);
-        d3.selectAll(".colLabel").classed("text-highlight", false);
-        d3.select(that.tooltip).classed("hidden", true);
-      });
-  }
-
-  renderColDendrogram() {
-    let width = this.cellWidth * this.col_number,
-      height = this.margin.bottom - 20;
-
-    let top_offset = this.margin.top + this.cellHeight * this.row_number + 10;
-    let container = this.renderDendrogram(
-      this.colTree,
-      width,
-      height,
-      "cc",
-      this.colLabel
-    );
-    container.attr(
-      "transform",
-      "rotate(90) translate(" +
-        top_offset +
-        ", -" +
-        (width + this.margin.left) +
-        ")"
-    );
-    container
-      .select("g")
-      .attr(
-        "transform",
-        "scale(-1, 1) translate(-" + (this.margin.bottom - 20) + ", 0)"
-      );
-  }
-
-  renderRowDendrogram() {
-    let height = this.margin.left - 20,
-      width = this.cellHeight * this.row_number;
-
-    let container = this.renderDendrogram(
-      this.rowTree,
-      width,
-      height,
-      "cr",
-      this.rowLabel
-    );
-    container.attr("transform", "translate(10, " + this.margin.top + ")");
-  }
-
-  renderDendrogram(tree, width, height, cssClass, labels) {
-    var cluster = d3.layout
-      .cluster()
-      .size([width, height])
-      .separation(function() {
-        return 1;
-      });
-
-    let diagonal = d => {
-      return (
-        "M" +
-        d.source.y +
-        "," +
-        d.source.x +
-        "V" +
-        d.target.x +
-        "H" +
-        d.target.y
-      );
-    };
-
-    //var diagonal = d3.svg.diagonal()
-    //		.projection(function(d) { return [d.y, d.x]; });
-
-    //set up the visualisation:
-    let visContainer = this.svg
-      .append("g")
-      .attr("width", width)
-      .attr("height", height);
-
-    let vis = visContainer.append("g");
-
-    cluster.children(function(d) {
-      let children = [];
-      if (d.left) {
-        children.push(d.left);
-      }
-      if (d.right) {
-        children.push(d.right);
-      }
-      return children;
-    });
-
-    var nodes = cluster.nodes(tree);
-
-    let i = 0;
-    for (let n of nodes) {
-      n.id = i;
-      i += 1;
-    }
-    vis
-      .selectAll("path.link." + cssClass + "-link")
-      .data(cluster.links(nodes))
-      .enter()
-      .append("path")
-      .attr("class", function(e) {
-        return (
-          "link " +
-          cssClass +
-          "-link " +
-          cssClass +
-          "-link-" +
-          e.source.id +
-          "-" +
-          e.target.id
-        );
-      })
-      .attr("d", diagonal);
-
-    vis
-      .selectAll("rect.hover-target." + cssClass + "-hover-target")
-      .data(cluster.links(nodes))
-      .enter()
-      .append("rect")
-      .attr("class", function(e) {
-        return (
-          "hover-target " +
-          cssClass +
-          "-hover-target " +
-          cssClass +
-          "-hover-" +
-          e.source.id +
-          "-" +
-          e.target.id
-        );
-      })
-      .attr("x", function(d) {
-        return Math.min(d.source.y, d.target.y);
-      })
-      .attr("y", function(d) {
-        return Math.min(d.source.x, d.target.x);
-      })
-      .attr("width", function(d) {
-        let targetY = Math.max(d.source.left.y, d.source.right.y);
-        return Math.abs(targetY - d.source.y);
-      })
-      .attr("height", function(d) {
-        return Math.abs(d.target.x - d.source.x);
-      })
-      .attr("fill", "rgba(0,0,0,0)")
-      .on("mouseover", d => {
-        d3.selectAll(".D3Heatmap").classed("highlighting", true);
-        let base = d.source.children.slice();
-        let to_visit = base;
-        while (to_visit.length > 0) {
-          let node = to_visit.pop();
-          if (node.left) {
-            to_visit.push(node.left);
-          }
-          if (node.right) {
-            to_visit.push(node.right);
-          }
-          let cls = "." + cssClass + "-link-" + node.parent.id + "-" + node.id;
-          d3.selectAll(cls).classed("link-hover", true);
-          i;
-
-          if (node.label) {
-            let idx = labels.indexOf(node.label);
-            let selector = "." + cssClass + idx;
-            d3.selectAll(selector).classed("highlight", true);
-          }
-        }
-      })
-      .on("mouseout", function() {
-        d3.selectAll(".D3Heatmap").classed("highlighting", false);
-        d3.selectAll("." + cssClass + "-link").classed("link-hover", false);
-        d3.selectAll(".D3Heatmap .highlight").classed("highlight", false);
-      });
-    /*
-		var node = vis.selectAll("g.node")
-				.data(nodes)
-			.enter().append("g")
-				.attr("class", "node")
-				.attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; })
-
-		node.append("circle")
-			.attr("r", 4.5);
-  	node.append("text")
-      .attr("dy", 3)
-      .attr("x", function(d) { return d.children ? -8 : 8; })
-      .style("text-anchor", function(d) { return d.children ? "end" : "start"; })
-      .text(function(d) {
-				if (d.sample) {
-					return d.sample.name;
-				}
-			});
-      */
-    return visContainer;
-  }
-
-  renderLegend() {
-    let that = this,
-      height = 20,
-      x_offset = this.cellWidth * this.col_number;
-
-    this.offsetCanvas
-      .selectAll(".legend-text-min")
-      .data([this.min])
-      .enter()
-      .append("text")
-      .attr("x", x_offset)
-      .attr("y", -33)
-      .attr("class", "mono")
-      .text(Math.round(this.min));
-
-    this.offsetCanvas
-      .selectAll(".legend-text-max")
-      .data([this.max])
-      .enter()
-      .append("text")
-      .attr("class", "mono")
-      .attr("x", function() {
-        return x_offset + that.legendElementWidth * that.colors.length;
-      })
-      .attr("y", -33)
-      .text(Math.round(this.max))
-      .style("text-anchor", "end");
-
-    var legend = this.offsetCanvas
-      .selectAll(".legend")
-      .data(this.colors)
-      .enter()
-      .append("g")
-      .attr("class", "legend");
-
-    legend
-      .append("rect")
-      .attr("x", function(d, i) {
-        return Math.floor(x_offset + that.legendElementWidth * i);
-      })
-      .attr("y", -10 - height)
-      .attr("width", Math.ceil(this.legendElementWidth))
-      .attr("height", height)
-      .style("fill", function(d, i) {
-        return that.colors[i];
-      });
-
-    this.offsetCanvas
-      .append("rect")
-      .attr("x", function(d, i) {
-        return x_offset + that.legendElementWidth * i;
-      })
-      .attr("stroke", "#aaa")
-      .attr("stroke-width", "0.25")
-      .style("fill", "none")
-      .attr("y", -10 - height)
-      .attr("width", that.legendElementWidth * that.colors.length)
-      .attr("height", height);
-  }
-
-  renderRowLabels() {
-    let that = this;
-    let rowLabels = this.offsetCanvas
-      .append("g")
-      .selectAll(".rowLabelg")
-      .data(this.rowLabel)
-      .enter();
-
-    let groups = rowLabels
-      .append("g")
-      .attr("class", "rowLabelg")
-      .attr(
-        "transform",
-        "translate(" + this.cellWidth * this.col_number + ", 0)"
-      )
-      .on("mouseover", function() {
-        d3.select(this).classed("text-hover", true);
-      })
-      .on("mouseout", function() {
-        d3.select(this).classed("text-hover", false);
-      });
-
-    groups
-      .append("rect")
-      .attr("y", function(d, i) {
-        return i * that.cellHeight;
-      })
-      .attr("width", this.margin.right)
-      .attr("height", this.cellHeight)
-      .style("fill", "#fff");
-
-    groups
-      .append("text")
-      .text(function(d) {
-        return d;
-      })
-      .attr("y", function(d, i) {
-        return i * that.cellHeight;
-      })
-      .attr("transform", "translate(8," + this.cellHeight / 1.5 + ")")
-      .attr("class", function(d, i) {
-        return "rowLabel mono r" + i;
-      });
-
-    groups
-      .append("text")
-      .attr("class", "removeLink mono")
-      .text("x")
-      .attr("y", function(d, i) {
-        return i * that.cellHeight;
-      })
-      .attr(
-        "transform",
-        "translate(" + this.margin.right + "," + this.cellHeight / 1.5 + ")"
-      )
-      .style("text-anchor", "end")
-      .on("click", d => {
-        this.props.onRemoveRow(d);
-      });
-  }
-
-  renderColLabels() {
-    let that = this;
-    this.offsetCanvas
-      .append("g")
-      .selectAll(".colLabelg")
-      .data(this.colLabel)
-      .enter()
-      .append("g")
-      .attr("transform", function(d, i) {
-        return "translate(" + that.cellWidth * i + ",-6)";
-      })
-      .append("text")
-      .text(function(d) {
-        return d;
-      })
-      .attr("x", 0)
-      .attr("y", 0)
-      .style("text-anchor", "left")
-      .attr(
-        "transform",
-        "translate(" + this.cellWidth / 2 + ",-6) rotate (-65)"
-      )
-      .attr("class", function(d, i) {
-        return "colLabel mono c" + i;
-      })
-      .on("mouseover", function() {
-        d3.select(this).classed("text-hover", true);
-      })
-      .on("mouseout", function() {
-        d3.select(this).classed("text-hover", false);
-      })
-      .on("click", (d, i) => {
-        this.props.onColumnLabelClick(d, i);
-      });
-  }
-
-  renderTooltip() {
-    if (this.state.hoverRow === undefined) {
-      return;
-    }
-
-    return (
-      <div
-        className="heatmap-tooltip hidden"
-        ref={tooltip => {
-          this.tooltip = tooltip;
-        }}
-      >
-        {this.props.getTooltip(this.state.hoverRow, this.state.hoverColumn)}
-      </div>
-    );
-  }
-
-  render() {
-    return (
-      <div className="D3Heatmap">
-        {this.renderTooltip()}
-        <div
-          ref={container => {
-            this.container = container;
-          }}
-        />
-      </div>
-    );
-  }
-}
-
-D3Heatmap.propTypes = {
-  colors: PropTypes.array,
-  getTooltip: PropTypes.func.isRequired,
-  onCellClick: PropTypes.func.isRequired,
-  onColumnLabelClick: PropTypes.func.isRequired,
-  onRemoveRow: PropTypes.func.isRequired
-};
-
-D3Heatmap.defaultProps = {
-  colors: [
-    "#FFFFFF",
-    "#F9F1F4",
-    "#F3E4EA",
-    "#EDD6E0",
-    "#E7C9D6",
-    "#E2BBCC",
-    "#DCAEC2",
-    "#D6A1B8",
-    "#D093AE",
-    "#CA86A4",
-    "#C57899",
-    "#BF6B8F",
-    "#B95D85",
-    "#B3507B",
-    "#AD4371",
-    "#A83567",
-    "#A2285D",
-    "#9C1A53",
-    "#960D49",
-    "#91003F"
-  ]
-};
 
 class SamplesHeatmap extends React.Component {
   constructor(props) {
     super(props);
-
-    this.scales = [["Symmetric Log", symlog], ["Linear", d3.scale.linear]];
 
     this.colors = [
       "rgb(255, 255, 255)",
@@ -633,159 +42,134 @@ class SamplesHeatmap extends React.Component {
       "rgb(78, 173, 73)"
     ];
 
-    this.dataTypes = [
-      "NT.aggregatescore",
-      "NT.rpm",
-      "NT.r",
-      "NT.zscore",
-      "NT.maxzscore",
-      "NR.rpm",
-      "NR.r",
-      "NR.zscore",
-      "NR.maxzscore"
-    ];
+    this.state = {
+      availableOptions: {
+        // Server side options
+        metrics: this.props.metrics,
+        categories: this.props.categories,
+        backgrounds: this.props.backgrounds,
+        taxonLevels: this.props.taxonLevels.map(function(
+          taxonLevelName,
+          index
+        ) {
+          return { text: taxonLevelName, value: index };
+        }),
+        advancedFilters: this.props.advancedFilters,
+        // Client side options
+        scales: [["Log", symlog], ["Lin", d3.scale.linear]],
+        taxonsPerSample: {
+          min: 0,
+          max: 100
+        }
+      },
+      selectedOptions: {
+        metric: this.props.metrics[0],
+        categories: this.props.categories,
+        background: this.props.backgrounds[0].value,
+        species: 1,
+        advancedFilters: [],
+        dataScaleIdx: 0,
+        taxonsPerSample: 30
+      },
+      data: null,
+      taxons: {},
+      loading: false,
+      sampleIds: this.props.sampleIds,
+      taxonIds: this.props.taxonIds || []
+      // appliedThresholds: [],
+
+      // activeThresholds: ObjectHelper.deepCopy(
+      //   urlParams.appliedThresholds || ThresholdMap.getSavedThresholdFilters()
+      // ),
+      // appliedThresholds:
+      //   urlParams.appliedThresholds || ThresholdMap.getSavedThresholdFilters()
+    };
+    this.explicitApply = this.props.explicitApply || false;
+    this.optionsChanged = false;
+
+    // Note: copies references of nested objects
+    this.appliedOptions = Object.assign({}, this.state.selectedOptions);
+
+    // this.updateUrlParams();
+    // this.thresholdLabels = new ThresholdMap(false);
     this.dataGetters = {};
     this.dataAccessorKeys = {};
-    for (var dataType of this.dataTypes) {
-      this.dataGetters[dataType] = this.makeDataGetter(dataType).bind(this);
-      this.dataAccessorKeys[dataType] = dataType.split(".");
+    for (var metric of this.state.availableOptions.metrics) {
+      this.dataGetters[metric] = this.makeDataGetter(metric);
+      this.dataAccessorKeys[metric] = metric.split(".");
     }
 
-    let urlParams = this.fetchParamsFromUrl();
-    this.state = {
-      loading: false,
-      data: undefined,
-      species: urlParams.species || "0",
-      dataType: urlParams.dataType || "NT.aggregatescore",
-      dataScaleIdx: urlParams.dataScaleIdx || 0,
-      sample_ids: urlParams.sample_ids || [],
-      taxon_ids: urlParams.taxon_ids || [],
-      categories: urlParams.categories,
-      activeThresholds: ObjectHelper.deepCopy(
-        urlParams.appliedThresholds || ThresholdMap.getSavedThresholdFilters()
-      ),
-      appliedThresholds:
-        urlParams.appliedThresholds || ThresholdMap.getSavedThresholdFilters()
-    };
-    this.updateUrlParams();
-    this.thresholdLabels = new ThresholdMap(false);
-    let to_bind = [
-      "getRowLabel",
-      "getColumnLabel",
-      "getTooltip",
-      "onCategoryChanged",
-      "onCellClick",
-      "onRemoveRow",
-      "onShareClick",
-      "sampleLabelClicked",
-      "taxonLevelChanged",
-      "updateDataScale",
-      "updateDataType"
-    ];
-    for (let fname of to_bind) {
-      this["_" + fname] = this[fname].bind(this);
-    }
+    this.getColumnLabel = this.getColumnLabel.bind(this);
+    this.getRowLabel = this.getRowLabel.bind(this);
+    this.getTaxonFor = this.getTaxonFor.bind(this);
+    this.getTooltip = this.getTooltip.bind(this);
+    this.onAdvancedFilterApply = this.onAdvancedFilterApply.bind(this);
+    this.onAdvancedFilterChange = this.onAdvancedFilterChange.bind(this);
+    this.onApplyClick = this.onApplyClick.bind(this);
+    this.onBackgroundChanged = this.onBackgroundChanged.bind(this);
+    this.onCategoryChange = this.onCategoryChange.bind(this);
+    this.onCellClick = this.onCellClick.bind(this);
+    this.onDataScaleChange = this.onDataScaleChange.bind(this);
+    this.onMetricChange = this.onMetricChange.bind(this);
+    this.onSampleLabelClick = this.onSampleLabelClick.bind(this);
+    this.onTaxonLevelChange = this.onTaxonLevelChange.bind(this);
+    this.onTaxonsPerSampleChange = this.onTaxonsPerSampleChange.bind(this);
+    this.onTaxonsPerSampleEnd = this.onTaxonsPerSampleEnd.bind(this);
   }
 
   componentDidMount() {
-    this.fetchDataFromServer(this.state.taxon_ids, this.state.species);
+    this.fetchDataFromServer();
   }
 
-  componentDidUpdate() {
-    this.updateUrlParams(this.state);
-  }
+  // fetchParamsFromUrl() {
+  //   let sp = new URL(window.location).searchParams;
 
-  updateUrlParams(newParams) {
-    newParams = {};
-    let url = new URL(window.location);
-    let sp = url.searchParams;
+  //   let ion = function(x) {
+  //     return x == null ? null : parseFloat(x);
+  //   };
 
-    let lst_to_comma = function(l) {
-      if (l == null) {
-        return null;
-      } else {
-        return l.join(",");
-      }
-    };
-    sp.set("species", newParams["species"] || this.state.species);
-    sp.set("dataType", newParams["dataType"] || this.state.dataType);
-    sp.set(
-      "dataScaleIdx",
-      newParams["dataScaleIdx"] || this.state.dataScaleIdx
-    );
-    sp.set(
-      "sample_ids",
-      lst_to_comma(newParams["sample_ids"]) || this.state.sample_ids
-    );
-    sp.set(
-      "taxon_ids",
-      lst_to_comma(newParams["taxon_ids"]) || this.state.taxon_ids
-    );
-    sp.set(
-      "categories",
-      lst_to_comma(newParams["categories"]) || this.state.categories
-    );
-    sp.set(
-      "appliedThresholds",
-      JSON.stringify(
-        newParams["appliedThresholds"] || this.state.appliedThresholds
-      )
-    );
-    window.history.replaceState(null, null, url.toString());
-  }
+  //   let lon = function(x) {
+  //     return x == null
+  //       ? null
+  //       : x.split(",").map(function(j) {
+  //           return parseInt(j, 10);
+  //         });
+  //   };
+  //   let ton = function(x) {
+  //     return x == null ? null : x.split(",");
+  //   };
 
-  fetchParamsFromUrl() {
-    let sp = new URL(window.location).searchParams;
-
-    let ion = function(x) {
-      return x == null ? null : parseFloat(x);
-    };
-
-    let lon = function(x) {
-      return x == null
-        ? null
-        : x.split(",").map(function(j) {
-            return parseInt(j, 10);
-          });
-    };
-    let ton = function(x) {
-      return x == null ? null : x.split(",");
-    };
-
-    let json_or_null = function(x) {
-      try {
-        return JSON.parse(x);
-      } catch (error) {
-        return null;
-      }
-    };
-    return {
-      species: sp.get("species"),
-      dataType: sp.get("dataType"),
-      dataScaleIdx: ion(sp.get("dataScaleIdx")),
-      sample_ids: lon(sp.get("sample_ids")),
-      taxon_ids: lon(sp.get("taxon_ids")),
-      categories: ton(sp.get("categories")),
-      appliedThresholds: json_or_null(sp.get("appliedThresholds"))
-    };
-  }
+  //   let json_or_null = function(x) {
+  //     try {
+  //       return JSON.parse(x);
+  //     } catch (error) {
+  //       return null;
+  //     }
+  //   };
+  //   return {
+  //     species: sp.get("species"),
+  //     dataType: sp.get("dataType"),
+  //     dataScaleIdx: ion(sp.get("dataScaleIdx")),
+  //     sample_ids: lon(sp.get("sample_ids")),
+  //     taxon_ids: lon(sp.get("taxon_ids")),
+  //     categories: ton(sp.get("categories")),
+  //     appliedThresholds: json_or_null(sp.get("appliedThresholds"))
+  //   };
+  // }
 
   downloadCurrentViewDataURL() {
-    if (!this.state.data) {
-      return;
-    }
-    const taxon_ids = this.filteredTaxonsNames.map(taxon_name => {
-      return this.state.taxons.name_to_id[taxon_name];
-    });
-    const sample_ids = this.state.sample_ids;
-    const data_type = this.state.dataType;
-
-    let url = new URL("/samples/download_heatmap", window.origin);
-    let sp = url.searchParams;
-    sp.set("sample_ids", sample_ids);
-    sp.set("taxon_ids", taxon_ids);
-    sp.set("data_type", data_type);
-    return url.toString();
+    // TODO: adapt download heatmap;
+    //   const taxon_ids = this.filteredTaxonsNames.map(taxonName => {
+    //     return this.state.taxons.nameToId[taxonName];
+    //   });
+    //   const sample_ids = this.state.sample_ids;
+    //   const data_type = this.state.dataType;
+    //   let url = new URL("/samples/download_heatmap", window.origin);
+    //   let sp = url.searchParams;
+    //   sp.set("sample_ids", sample_ids);
+    //   sp.set("taxon_ids", taxon_ids);
+    //   sp.set("data_type", data_type);
+    //   return url.toString();
   }
 
   getDataProperty(data, property) {
@@ -793,67 +177,77 @@ class SamplesHeatmap extends React.Component {
     return data[keys[0]][keys[1]];
   }
 
-  makeDataGetter(dataType) {
+  makeDataGetter(metric) {
     return function(row, col) {
       let taxon = this.getTaxonFor(row, col);
       if (taxon) {
-        return this.getDataProperty(taxon, dataType);
+        return this.getDataProperty(taxon, metric);
       }
-    };
+    }.bind(this);
   }
 
-  fetchDataFromServer(taxon_ids, species) {
+  metric2SortField(metric) {
+    // TODO: change into a json object - requires server changes
+    let fields = metric.split(".");
+    let countType = fields[0].toLowerCase();
+    let metricName = fields[1].toLowerCase();
+
+    return "highest_" + countType + "_" + metricName;
+  }
+
+  fetchDataFromServer() {
     this.setState({ loading: true });
 
-    let url =
-      "/samples/samples_taxons.json?sample_ids=" + this.state.sample_ids;
-    if (taxon_ids) {
-      url += "&taxon_ids=" + taxon_ids;
-    }
-    if (species == "1") {
-      url += "&species=1";
-    }
-    this.request = axios.get(url).then(response => {
-      let taxons = this.extractTaxons(response.data);
-
-      this.recluster = true;
-      this.setState({
-        taxon_ids: taxons.ids,
-        data: response.data,
-        taxons: taxons,
-        categories: this.state.categories || taxons.categories,
-        loading: false
+    axios
+      .get("/samples/samples_taxons.json", {
+        params: {
+          sampleIds: this.state.sampleIds,
+          taxonIds: this.state.taxonIds,
+          species: this.state.selectedOptions.species,
+          categories: this.state.selectedOptions.categories,
+          sortBy: this.metric2SortField(this.state.selectedOptions.metric),
+          advancedFilters: this.state.selectedOptions.advancedFilters,
+          taxonsPerSample: this.state.selectedOptions.taxonsPerSample
+        }
+      })
+      .then(response => {
+        let taxons = this.extractTaxons(response.data);
+        this.recluster = true;
+        this.setState({
+          data: response.data,
+          taxons: taxons,
+          loading: false
+        });
       });
-    });
   }
 
-  getMinMax(taxon_names) {
-    let data = this.filteredData;
-    let dataType = this.state.dataType;
-    let taxon_lists = [];
-    taxon_names = new Set(taxon_names);
+  getMinMax(taxonNames) {
+    let data = this.state.data;
+    let metric = this.state.selectedOptions.metric;
+    let taxonLists = [];
+    taxonNames = new Set(taxonNames);
     for (let sample of data) {
-      let sample_taxons = [];
+      let sampleTaxons = [];
       for (let taxon of sample.taxons) {
-        if (taxon_names.has(taxon.name)) {
-          taxon_lists.push(taxon);
+        if (taxonNames.has(taxon.name)) {
+          taxonLists.push(taxon);
         }
       }
-      taxon_lists.push(sample_taxons);
+      taxonLists.push(sampleTaxons);
     }
-    let taxons = [].concat.apply([], taxon_lists);
-    let min = d3.min(taxons, d => {
-      return this.getDataProperty(d, dataType);
+    let taxons = [].concat.apply([], taxonLists);
+    let min = d3.min(taxons, taxon => {
+      return this.getDataProperty(taxon, metric);
     });
-    let max = d3.max(taxons, d => {
-      return this.getDataProperty(d, dataType);
+    let max = d3.max(taxons, taxon => {
+      return this.getDataProperty(taxon, metric);
     });
-    let thresholdMin = d3.min(taxons, d => {
-      return this.getDataProperty(d, dataType);
+    let thresholdMin = d3.min(taxons, taxon => {
+      return this.getDataProperty(taxon, metric);
     });
 
-    let thresholdMax = d3.max(taxons, d => {
-      return this.getDataProperty(d, dataType);
+    let thresholdMax = d3.max(taxons, taxon => {
+      return this.getDataProperty(taxon, metric);
     });
 
     return {
@@ -864,15 +258,15 @@ class SamplesHeatmap extends React.Component {
     };
   }
 
-  clusterSamples(data, dataType, taxons) {
+  clusterSamples(data, metric, taxons) {
     let vectors = [];
     for (let sample of data) {
       let vector = [];
-      for (let taxon_name of taxons) {
+      for (let taxonName of taxons) {
         let value = null;
         for (let taxon of sample.taxons) {
-          if (taxon.name == taxon_name) {
-            value = this.getDataProperty(taxon, dataType);
+          if (taxon.name == taxonName) {
+            value = this.getDataProperty(taxon, metric);
             break;
           }
         }
@@ -884,33 +278,33 @@ class SamplesHeatmap extends React.Component {
 
     let cluster = clusterfck.hcluster(vectors);
 
-    let clustered_samples = [];
-    let to_visit = [cluster];
-    while (to_visit.length > 0) {
-      let node = to_visit.pop();
+    let clusteredSamples = [];
+    let toVisit = [cluster];
+    while (toVisit.length > 0) {
+      let node = toVisit.pop();
       if (node.right) {
-        to_visit.push(node.right);
+        toVisit.push(node.right);
       }
       if (node.left) {
-        to_visit.push(node.left);
+        toVisit.push(node.left);
       }
 
       if (node.value) {
         node.label = node.value.sample.name;
-        clustered_samples.push(node.value.sample);
+        clusteredSamples.push(node.value.sample);
       }
     }
 
     return {
       tree: cluster,
-      flat: clustered_samples.reverse()
+      flat: clusteredSamples.reverse()
     };
   }
 
   extractTaxons(data) {
-    let id_to_name = {},
-      id_to_category = {},
-      name_to_id = {},
+    let idToName = {},
+      idToCategory = {},
+      nameToId = {},
       ids = new Set(),
       categories = new Set();
 
@@ -918,103 +312,103 @@ class SamplesHeatmap extends React.Component {
       let sample = data[i];
       for (var j = 0; j < sample.taxons.length; j += 1) {
         let taxon = sample.taxons[j];
-        id_to_name[taxon.tax_id] = taxon.name;
-        id_to_category[taxon.tax_id] = taxon.category_name;
-        name_to_id[taxon.name] = taxon.tax_id;
+        idToName[taxon.tax_id] = taxon.name;
+        idToCategory[taxon.tax_id] = taxon.category_name;
+        nameToId[taxon.name] = taxon.tax_id;
         ids.add(taxon.tax_id);
         categories.add(taxon.category_name);
       }
     }
 
     return {
-      id_to_name: id_to_name,
-      id_to_category: id_to_category,
-      name_to_id: name_to_id,
+      idToName: idToName,
+      idToCategory: idToCategory,
+      nameToId: nameToId,
       ids: Array.from(ids),
-      names: Object.keys(name_to_id),
+      names: Object.keys(nameToId),
       categories: Array.from(categories).sort()
     };
   }
 
-  clusterTaxons(data, dataType, taxon_names) {
-    let taxon_scores = {};
-    for (let taxon of taxon_names) {
-      taxon_scores[taxon] = [];
+  clusterTaxons(data, dataType, taxonNames) {
+    let taxonScores = {};
+    for (let taxon of taxonNames) {
+      taxonScores[taxon] = [];
 
       for (let sample of data) {
         let value = null;
-        for (let sample_taxon of sample.taxons) {
-          if (sample_taxon.name == taxon) {
-            value = this.getDataProperty(sample_taxon, dataType);
+        for (let sampleTaxon of sample.taxons) {
+          if (sampleTaxon.name == taxon) {
+            value = this.getDataProperty(sampleTaxon, dataType);
             break;
           }
         }
-        taxon_scores[taxon].push(value);
+        taxonScores[taxon].push(value);
       }
     }
 
     let vectors = [];
-    for (let key of Object.keys(taxon_scores)) {
-      let vector = taxon_scores[key];
-      vector.taxon_name = key;
+    for (let key of Object.keys(taxonScores)) {
+      let vector = taxonScores[key];
+      vector.taxonName = key;
       vectors.push(vector);
     }
     let cluster = clusterfck.hcluster(vectors);
     if (!cluster) {
       return {};
     }
-    let clustered_taxons = [];
-    let to_visit = [cluster];
-    while (to_visit.length > 0) {
-      let node = to_visit.pop();
+    let clusteredTaxons = [];
+    let toVisit = [cluster];
+    while (toVisit.length > 0) {
+      let node = toVisit.pop();
       if (node.right) {
-        to_visit.push(node.right);
+        toVisit.push(node.right);
       }
       if (node.left) {
-        to_visit.push(node.left);
+        toVisit.push(node.left);
       }
 
       if (node.value) {
-        node.label = node.value.taxon_name;
-        clustered_taxons.push(node.value.taxon_name);
+        node.label = node.value.taxonName;
+        clusteredTaxons.push(node.value.taxonName);
       }
     }
 
     return {
       tree: cluster,
-      flat: clustered_taxons
+      flat: clusteredTaxons
     };
   }
 
-  getColumnLabel(column_index) {
-    return this.clustered_samples.flat[column_index].name;
+  getColumnLabel(columnIndex) {
+    return this.clusteredSamples.flat[columnIndex].name;
   }
 
-  getRowLabel(row_index) {
-    return this.clustered_taxons.flat[row_index];
+  getRowLabel(rowIndex) {
+    return this.clusteredTaxons.flat[rowIndex];
   }
 
-  getTaxonFor(row_index, column_index) {
-    let d = this.clustered_samples.flat[column_index];
-    let taxon_name = this.clustered_taxons.flat[row_index];
+  getTaxonFor(rowIndex, columnIndex) {
+    let d = this.clusteredSamples.flat[columnIndex];
+    let taxonName = this.clusteredTaxons.flat[rowIndex];
 
     for (let i = 0; i < d.taxons.length; i += 1) {
       let taxon = d.taxons[i];
-      if (taxon.name == taxon_name) {
+      if (taxon.name == taxonName) {
         return taxon;
       }
     }
     return undefined;
   }
 
-  getTooltip(row_index, column_index) {
-    let sample = this.clustered_samples.flat[column_index],
-      taxon_name = this.clustered_taxons.flat[row_index],
+  getTooltip(rowIndex, columnIndex) {
+    let sample = this.clusteredSamples.flat[columnIndex],
+      taxonName = this.clusteredTaxons.flat[rowIndex],
       taxon;
 
     for (let i = 0; i < sample.taxons.length; i += 1) {
       let ttaxon = sample.taxons[i];
-      if (ttaxon.name == taxon_name) {
+      if (ttaxon.name == taxonName) {
         taxon = ttaxon;
         break;
       }
@@ -1031,19 +425,19 @@ class SamplesHeatmap extends React.Component {
     );
   }
 
-  sampleLabelClicked(d, i) {
-    let sample = this.clustered_samples.flat[i];
+  onSampleLabelClick(d, i) {
+    let sample = this.clusteredSamples.flat[i];
     window.location.href = "/samples/" + sample.sample_id;
   }
 
   onCellClick(d) {
-    let sample = this.clustered_samples.flat[d.col];
+    let sample = this.clusteredSamples.flat[d.col];
     window.location.href = "/samples/" + sample.sample_id;
   }
 
   onRemoveRow(rowLabel) {
     let taxons = this.state.taxons;
-    let id = taxons.name_to_id[rowLabel];
+    let id = taxons.nameToId[rowLabel];
 
     let idx = taxons.names.indexOf(rowLabel);
     taxons.names.splice(idx, 1);
@@ -1051,229 +445,320 @@ class SamplesHeatmap extends React.Component {
     idx = taxons.ids.indexOf(id);
     taxons.ids.splice(idx, 1);
 
-    delete taxons.name_to_id[rowLabel];
-    delete taxons.id_to_name[id];
+    delete taxons.nameToId[rowLabel];
+    delete taxons.idToName[id];
     this.recluster = true;
     this.setState({
-      taxon_ids: taxons.ids,
       taxons: taxons
     });
   }
 
   renderHeatmap() {
-    if (this.state.loading || !this.filteredData || !this.filteredData.length) {
+    if (this.state.loading || !this.state.data || !this.state.data.length) {
       return;
     }
     return (
       <ErrorBoundary>
-        <D3Heatmap
-          colTree={this.clustered_samples.tree}
-          rowTree={this.clustered_taxons.tree}
-          rows={this.filteredTaxonsNames.length}
-          columns={this.filteredData.length}
-          getRowLabel={this._getRowLabel}
-          getColumnLabel={this._getColumnLabel}
-          getCellValue={this.dataGetters[this.state.dataType]}
-          getTooltip={this._getTooltip}
-          onCellClick={this._onCellClick}
-          onColumnLabelClick={this._sampleLabelClicked}
-          onRemoveRow={this._onRemoveRow}
-          scale={this.scales[this.state.dataScaleIdx][1]}
+        <Heatmap
+          colTree={this.clusteredSamples.tree}
+          rowTree={this.clusteredTaxons.tree}
+          rows={this.state.taxonNames.length}
+          columns={this.state.data.length}
+          getRowLabel={this.getRowLabel}
+          getColumnLabel={this.getColumnLabel}
+          getCellValue={this.dataGetters[this.state.selectedOptions.metric]}
+          getTooltip={this.getTooltip}
+          onCellClick={this.onCellClick}
+          onColumnLabelClick={this.onSampleLabelClick}
+          onRemoveRow={this.onRemoveRow}
+          scale={
+            this.state.availableOptions.scales[
+              this.state.selectedOptions.dataScaleIdx
+            ][1]
+          }
           colors={this.colors}
         />
       </ErrorBoundary>
     );
   }
 
-  updateDataType(e, d) {
-    let newDataType = d.value;
-    this.recluster = true;
+  onMetricChange(_, newMetric) {
+    // this.recluster = true;
     this.setState({
-      dataType: newDataType
+      selectedOptions: Object.assign({}, this.state.selectedOptions, {
+        metric: newMetric.value
+      })
     });
+    this.optionsChanged = true;
+    if (!this.explicitApply) {
+      this.updateHeatmap();
+    }
   }
 
-  renderTypePickers() {
-    if (!this.state.data) {
-      return;
-    }
-
-    let options = [];
-    for (let dataType of this.dataTypes) {
-      options.push({
-        value: dataType,
-        text: dataType
-      });
-    }
+  renderMetricPicker() {
+    let options = this.state.availableOptions.metrics.map(function(metric) {
+      return { text: metric, value: metric };
+    });
 
     return (
       <LabeledDropdown
         fluid
         options={options}
-        onChange={this._updateDataType}
-        value={this.state.dataType}
-        label="Data Type:"
+        onChange={this.onMetricChange}
+        value={this.state.selectedOptions.metric}
+        label="Metric:"
+        disabled={!this.state.data}
       />
     );
   }
 
-  renderThresholdSlider() {
-    if (!this.state.data) {
-      return;
+  onAdvancedFilterChange() {
+    this.optionsChanged = true;
+  }
+
+  onAdvancedFilterApply(filters) {
+    this.setState({
+      selectedOptions: Object.assign({}, this.state.selectedOptions, {
+        advancedFilters: filters
+      })
+    });
+    this.optionsChanged = true;
+    if (!this.explicitApply) {
+      this.updateHeatmap();
     }
+  }
+
+  renderAdvancedFilterPicker() {
     return (
       <AdvancedThresholdFilterDropdown
-        labels={this.thresholdLabels}
-        operators={[">=", "<="]}
-        filters={this.state.activeThresholds}
-        onChange={filters => {
-          this.setState({ activeThresholds: filters });
-        }}
-        onApply={t => {
-          let newThresholds = [].concat(t);
-          this.recluster = true;
-          this.setState({ appliedThresholds: newThresholds });
-          ThresholdMap.saveThresholdFilters(newThresholds);
-        }}
         fluid
+        labels={this.state.availableOptions.advancedFilters.filters}
+        operators={[">=", "<="]}
+        filters={this.state.selectedOptions.advancedFilters}
+        onChange={this.onAdvancedFilterChange}
+        onApply={this.onAdvancedFilterApply}
+        applyOnHide={true}
+        disabled={!this.state.data}
       />
     );
   }
 
-  taxonLevelChanged(e, d) {
-    if (this.state.species == d.value) {
+  onTaxonLevelChange(e, d) {
+    if (this.state.selectedOptions.species == d.value) {
       return;
     }
-    this.setState({ species: d.value, species_label: d.label, data: null });
-    this.fetchDataFromServer(null, d.value);
+
+    this.setState({
+      selectedOptions: Object.assign({}, this.state.selectedOptions, {
+        species: d.value
+      })
+    });
+    this.optionsChanged = true;
+    if (!this.explicitApply) {
+      this.updateHeatmap();
+    }
   }
 
   renderTaxonLevelPicker() {
-    if (!this.state.data) {
-      return;
-    }
-    let options = [
-      {
-        text: "Genus",
-        value: "0"
-      },
-      {
-        text: "Species",
-        value: "1"
-      }
-    ];
     return (
       <LabeledDropdown
         fluid
-        options={options}
-        onChange={this._taxonLevelChanged}
-        value={this.state.species}
+        options={this.state.availableOptions.taxonLevels}
+        value={this.state.selectedOptions.species}
+        onChange={this.onTaxonLevelChange}
         label="Taxon Level:"
+        disabled={!this.state.data}
       />
     );
   }
 
-  updateDataScale(e, d) {
-    this.recluster = true;
-    this.setState({ dataScaleIdx: d.value });
-  }
-
-  renderScalePicker() {
-    if (!this.state.data) {
-      return;
-    }
-
-    let options = [];
-
-    for (let i = 0; i < this.scales.length; i += 1) {
-      let scale = this.scales[i];
-      options.push({
-        value: i,
-        text: scale[0]
-      });
-    }
-    return (
-      <LabeledDropdown
-        fluid
-        value={this.state.dataScaleIdx}
-        onChange={this._updateDataScale}
-        options={options}
-        label="Data Scale:"
-      />
-    );
-  }
-  renderLegend() {
-    if (!this.state.data || !this.minMax) {
-      return;
-    }
-    return (
-      <D3HeatmapLegend
-        colors={this.colors}
-        min={this.minMax.thresholdMin}
-        max={this.minMax.thresholdMax}
-      />
-    );
-  }
-
-  onShareClick() {
-    copy(window.location);
-  }
-
-  onCategoryChanged(e, value) {
-    let newValue = value.length ? value : this.state.categories;
+  onDataScaleChange(_, d) {
     this.recluster = true;
     this.setState({
-      categories: newValue
+      selectedOptions: Object.assign({}, this.state.selectedOptions, {
+        dataScaleIdx: d.value
+      })
     });
   }
 
-  renderCategoryFilter() {
-    if (!this.state.data) {
-      return;
-    }
+  renderScalePicker() {
+    let options = this.state.availableOptions.scales.map(function(
+      scale,
+      index
+    ) {
+      return { text: scale[0], value: index };
+    });
 
-    let options = [];
-    for (let category of this.state.taxons.categories) {
-      options.push({
-        text: category,
-        value: category
-      });
+    return (
+      <LabeledDropdown
+        fluid
+        value={this.state.selectedOptions.dataScaleIdx}
+        onChange={this.onDataScaleChange}
+        options={options}
+        label="Scale:"
+        disabled={!this.state.data}
+      />
+    );
+  }
+
+  renderLegend() {
+    return (
+      <HeatmapLegend
+        colors={this.colors}
+        min={this.minMax ? this.minMax.thresholdMin : 0}
+        max={this.minMax ? this.minMax.thresholdMax : 1}
+        disabled={!this.state.data || !this.minMax}
+      />
+    );
+  }
+
+  onApplyClick() {
+    this.updateHeatmap();
+  }
+
+  updateHeatmap() {
+    this.fetchDataFromServer();
+    this.optionsChanged = false;
+    // this.fetchDataFromServer(null, this.state.selectedOptions.species, this.state.selectedOptions.categories);
+  }
+
+  onShareClick() {
+    // TODO: adapt sharing link
+    //   copy(window.location);
+  }
+
+  onCategoryChange(e, value) {
+    let newValue = value.length ? value : this.state.selectedOptions.categories;
+    // this.recluster = true;
+    this.setState({
+      selectedOptions: Object.assign({}, this.state.selectedOptions, {
+        categories: newValue
+      })
+    });
+    this.optionsChanged = true;
+    if (!this.explicitApply) {
+      this.updateHeatmap();
     }
+  }
+
+  renderCategoryFilter() {
+    let options = this.state.availableOptions.categories.map(function(
+      category
+    ) {
+      return { text: category, value: category };
+    });
 
     return (
       <LabeledFilterDropdown
         fluid
         options={options}
-        onChange={this._onCategoryChanged}
-        value={this.state.categories}
+        onChange={this.onCategoryChange}
+        value={this.state.selectedOptions.categories}
         label="Taxon Categories:"
+        disabled={!this.state.data}
       />
+    );
+  }
+
+  onBackgroundChanged(_, newBackground) {
+    this.setState({
+      selectedOptions: Object.assign({}, this.state.selectedOptions, {
+        background: newBackground.value
+      })
+    });
+    this.optionsChanged = true;
+    if (!this.explicitApply) {
+      this.updateHeatmap();
+    }
+  }
+
+  renderBackgroundPicker() {
+    let options = this.state.availableOptions.backgrounds.map(function(
+      background
+    ) {
+      return { text: background.name, value: background.value };
+    });
+
+    return (
+      <LabeledDropdown
+        fluid
+        options={options}
+        onChange={this.onBackgroundChanged}
+        value={this.state.selectedOptions.background}
+        label="Background:"
+        disabled={!this.state.data}
+      />
+    );
+  }
+
+  onTaxonsPerSampleChange(values, handle) {
+    let value = parseInt(values[handle]);
+    if (value != this.state.selectedOptions.taxonsPerSample) {
+      this.setState({
+        selectedOptions: Object.assign({}, this.state.selectedOptions, {
+          taxonsPerSample: parseInt(values[handle])
+        })
+      });
+      this.optionsChanged = true;
+    }
+  }
+
+  onTaxonsPerSampleEnd() {
+    if (!this.explicitApply) {
+      this.updateHeatmap();
+    }
+  }
+
+  renderTaxonsPerSampleSlider() {
+    let range = {
+      min: [this.state.availableOptions.taxonsPerSample.min],
+      max: [this.state.availableOptions.taxonsPerSample.max]
+    };
+    return (
+      <div>
+        <ReactNouislider
+          range={range}
+          start={[this.state.selectedOptions.taxonsPerSample]}
+          onUpdate={this.onTaxonsPerSampleChange}
+          onEnd={this.onTaxonsPerSampleEnd}
+          disabled={!this.state.data}
+        />
+        <span>
+          Taxons per Sample: {this.state.selectedOptions.taxonsPerSample}
+        </span>
+      </div>
     );
   }
 
   renderSubMenu(sticky) {
     return (
-      <div className="row sub-menu" style={sticky.style}>
-        <div className="col s2">{this.renderTaxonLevelPicker()}</div>
-        <div className="col s2">{this.renderCategoryFilter()}</div>
-        <div className="col s2">{this.renderScalePicker()}</div>
-        <div className="col s2">{this.renderTypePickers()}</div>
-        <div className="col s2">{this.renderThresholdSlider()}</div>
-        <div className="col s2">{this.renderLegend()}</div>
+      <div style={sticky.style}>
+        <div className="row sub-menu">
+          <div className="col s3">{this.renderTaxonLevelPicker()}</div>
+          <div className="col s3">{this.renderCategoryFilter()}</div>
+          <div className="col s3">{this.renderMetricPicker()}</div>
+          <div className="col s3">{this.renderBackgroundPicker()}</div>
+        </div>
+        <div className="row sub-menu">
+          <div className="col s3">{this.renderAdvancedFilterPicker()}</div>
+          <div className="col s3">{this.renderTaxonsPerSampleSlider()}</div>
+          <div className="col s3">{this.renderScalePicker()}</div>
+          <div className="col s3">{this.renderLegend()}</div>
+        </div>
       </div>
     );
   }
 
   filterTaxons() {
-    let filtered_names = [],
-      categories = new Set(this.state.categories);
+    let filteredNames = [],
+      categories = new Set(this.state.selectedOptions.categories);
 
     for (let name of this.state.taxons.names) {
-      let id = this.state.taxons.name_to_id[name];
-      let category = this.state.taxons.id_to_category[id];
+      let id = this.state.taxons.nameToId[name];
+      let category = this.state.taxons.idToCategory[id];
       if (categories.has(category)) {
         let has_value = false;
-        for (let sample of this.filteredData) {
+        for (let sample of this.state.data) {
           for (let taxon of sample.taxons) {
             if (taxon.tax_id == id) {
               has_value = true;
@@ -1285,32 +770,11 @@ class SamplesHeatmap extends React.Component {
           }
         }
         if (has_value) {
-          filtered_names.push(name);
+          filteredNames.push(name);
         }
       }
     }
-    return filtered_names;
-  }
-
-  filterData() {
-    let filteredData = [];
-    for (let sample of this.state.data) {
-      let newSample = ObjectHelper.deepCopy(sample);
-      let newTaxons = [];
-      for (let taxon of sample.taxons) {
-        if (
-          ThresholdMap.taxonPassThresholdFilter(
-            taxon,
-            this.state.appliedThresholds
-          )
-        ) {
-          newTaxons.push(taxon);
-        }
-      }
-      newSample.taxons = newTaxons;
-      filteredData.push(newSample);
-    }
-    return filteredData;
+    return filteredNames;
   }
 
   renderVisualization() {
@@ -1326,20 +790,18 @@ class SamplesHeatmap extends React.Component {
   }
 
   clusterData() {
-    this.filteredData = this.state.data && this.filterData();
-    if (this.filteredData && this.filteredData.length) {
-      this.filteredTaxonsNames = this.filterTaxons();
-      this.clustered_samples = this.clusterSamples(
-        this.filteredData,
-        this.state.dataType,
-        this.filteredTaxonsNames
+    if (this.state.data && this.state.data.length) {
+      this.clusteredSamples = this.clusterSamples(
+        this.state.data,
+        this.state.selectedOptions.metric,
+        this.state.taxons.names
       );
-      this.clustered_taxons = this.clusterTaxons(
-        this.filteredData,
-        this.state.dataType,
-        this.filteredTaxonsNames
+      this.clusteredTaxons = this.clusterTaxons(
+        this.state.data,
+        this.state.selectedOptions.metric,
+        this.state.taxons.names
       );
-      this.minMax = this.getMinMax(this.filteredTaxonsNames);
+      this.minMax = this.getMinMax(this.state.taxons.names);
     }
   }
 
@@ -1348,12 +810,13 @@ class SamplesHeatmap extends React.Component {
       this.clusterData();
       this.recluster = false;
     }
+
     return (
       <div id="project-visualization">
         <div className="heatmap-header">
           <Popup
             trigger={
-              <Button className="right" primary onClick={this._onShareClick}>
+              <Button className="right" primary onClick={this.onShareClick}>
                 Share
               </Button>
             }
@@ -1365,10 +828,21 @@ class SamplesHeatmap extends React.Component {
             className="right"
             secondary
             href={this.downloadCurrentViewDataURL()}
+            disabled={!this.state.data}
           >
             <Icon className="cloud download alternate" />
             Download
           </Button>
+          {this.explicitApply && (
+            <Button
+              className="right"
+              primary
+              onClick={this.onApplyClick.bind(this)}
+              disabled={!this.optionsChanged}
+            >
+              Apply
+            </Button>
+          )}
           <h2>
             Comparing {this.state.data ? this.state.data.length : ""} samples
           </h2>
@@ -1379,93 +853,4 @@ class SamplesHeatmap extends React.Component {
   }
 }
 
-class D3HeatmapLegend extends React.Component {
-  componentDidMount() {
-    this.renderD3(this.props);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (ObjectHelper.shallowEquals(nextProps, this.props)) {
-      return;
-    }
-    d3
-      .select(this.container)
-      .select("svg")
-      .remove();
-    this.renderD3(nextProps);
-  }
-
-  renderD3(props) {
-    this.svg = d3
-      .select(this.container)
-      .append("svg")
-      .attr("width", "100%")
-      .attr("height", "35");
-
-    let that = this,
-      height = 20,
-      legendElementWidth = 100 / props.colors.length;
-
-    this.svg
-      .selectAll(".legend-text-min")
-      .data([this.min])
-      .enter()
-      .append("text")
-      .attr("x", 0)
-      .attr("y", 35)
-      .attr("class", "mono")
-      .text(NumAbbreviate(Math.round(props.min)));
-
-    this.svg
-      .selectAll(".legend-text-max")
-      .data([props.max])
-      .enter()
-      .append("text")
-      .attr("class", "mono")
-      .attr("x", "100%")
-      .attr("y", 35)
-      .text(NumAbbreviate(Math.round(props.max)))
-      .style("text-anchor", "end");
-
-    var legend = this.svg
-      .selectAll(".legend")
-      .data(props.colors)
-      .enter()
-      .append("g")
-      .attr("class", "legend");
-
-    legend
-      .append("rect")
-      .attr("x", function(d, i) {
-        return Math.floor(legendElementWidth * i) + "%";
-      })
-      .attr("y", 0)
-      .attr("width", Math.ceil(legendElementWidth) + "%")
-      .attr("height", height)
-      .style("fill", function(d, i) {
-        return that.props.colors[i];
-      });
-
-    this.svg
-      .append("rect")
-      .attr("x", "0")
-      .attr("stroke", "#aaa")
-      .attr("stroke-width", "0.25")
-      .style("fill", "none")
-      .attr("y", 0)
-      .attr("width", "100%")
-      .attr("height", height);
-  }
-
-  render() {
-    return (
-      <div
-        className="heatmap-legend"
-        ref={container => {
-          this.container = container;
-        }}
-      />
-    );
-  }
-}
 export default SamplesHeatmap;

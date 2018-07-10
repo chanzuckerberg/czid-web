@@ -60,6 +60,7 @@ module ReportHelper
     { 'taxid' => 12_884, 'name' => "Viroids" },
     { 'taxid' => TaxonLineage::MISSING_SUPERKINGDOM_ID, 'name' => "Uncategorized" }
   ].freeze
+  CATEGORIES_TAXID_BY_NAME = ALL_CATEGORIES.map{|category| {category['name'] => category['taxid']}}.reduce(Hash.new, :merge)
 
   # use the metric's NT <=> NR dual as a tertiary sort key (so, for example,
   # when you sort by NT R, entries without NT R will be ordered amongst
@@ -135,7 +136,7 @@ module ReportHelper
       value = nil unless threshold_param?(name)
       value = number_or_nil(value)
     end
-    value
+    return value
   end
 
   def decode_excluded_categories(param_str)
@@ -165,7 +166,7 @@ module ReportHelper
     end
 
     data[:taxonomy_details] = taxonomy_details(pipeline_run_id, background_id, params)
-    data
+    return data
   end
 
   def taxon_confirmation_map(sample_id, user_id)
@@ -246,43 +247,51 @@ module ReportHelper
     ").to_hash
   end
 
-  def fetch_top_taxons(samples, background_id)
+  def fetch_top_taxons(samples, background_id, categories)
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
 
-    sql_results = TaxonCount.connection.select_all("
-      SELECT
-        taxon_counts.pipeline_run_id     AS  pipeline_run_id,
-        taxon_counts.tax_id              AS  tax_id,
-        taxon_counts.count_type          AS  count_type,
-        taxon_counts.tax_level           AS  tax_level,
-        taxon_counts.genus_taxid         AS  genus_taxid,
-        taxon_counts.family_taxid        AS  family_taxid,
-        taxon_counts.name                AS  name,
-        taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
-        taxon_counts.is_phage            AS  is_phage,
-        taxon_counts.count               AS  r,
-        taxon_summaries.stdev            AS stdev,
-        taxon_summaries.mean             AS mean,
-        taxon_counts.percent_identity    AS  percentidentity,
-        taxon_counts.alignment_length    AS  alignmentlength,
-        IF(
-          taxon_counts.e_value IS NOT NULL,
-          (0.0 - taxon_counts.e_value),
-          #{DEFAULT_SAMPLE_NEGLOGEVALUE}
-        )                                AS  neglogevalue,
-        taxon_counts.percent_concordant  AS  percentconcordant
-      FROM taxon_counts
-      LEFT OUTER JOIN taxon_summaries ON
-        #{background_id.to_i}   = taxon_summaries.background_id   AND
-        taxon_counts.count_type = taxon_summaries.count_type      AND
-        taxon_counts.tax_level  = taxon_summaries.tax_level       AND
-        taxon_counts.tax_id     = taxon_summaries.tax_id
-      WHERE
-        pipeline_run_id in (#{pipeline_run_ids.join(',')}) AND
-        taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID} AND
-        taxon_counts.count >= #{MINIMUM_READ_THRESHOLD} AND
-        taxon_counts.count_type IN ('NT', 'NR')
-       ").to_hash
+    categories_clause = if categories.empty? then 
+      "" 
+    else 
+      " AND taxon_counts.superkingdom_taxid IN (#{categories.map{|category| CATEGORIES_TAXID_BY_NAME[category]}.compact.join(',')})" 
+    end
+
+    query = "
+    SELECT
+      taxon_counts.pipeline_run_id     AS  pipeline_run_id,
+      taxon_counts.tax_id              AS  tax_id,
+      taxon_counts.count_type          AS  count_type,
+      taxon_counts.tax_level           AS  tax_level,
+      taxon_counts.genus_taxid         AS  genus_taxid,
+      taxon_counts.family_taxid        AS  family_taxid,
+      taxon_counts.name                AS  name,
+      taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
+      taxon_counts.is_phage            AS  is_phage,
+      taxon_counts.count               AS  r,
+      taxon_summaries.stdev            AS stdev,
+      taxon_summaries.mean             AS mean,
+      taxon_counts.percent_identity    AS  percentidentity,
+      taxon_counts.alignment_length    AS  alignmentlength,
+      IF(
+        taxon_counts.e_value IS NOT NULL,
+        (0.0 - taxon_counts.e_value),
+        #{DEFAULT_SAMPLE_NEGLOGEVALUE}
+      )                                AS  neglogevalue,
+      taxon_counts.percent_concordant  AS  percentconcordant
+    FROM taxon_counts
+    LEFT OUTER JOIN taxon_summaries ON
+      #{background_id.to_i}   = taxon_summaries.background_id   AND
+      taxon_counts.count_type = taxon_summaries.count_type      AND
+      taxon_counts.tax_level  = taxon_summaries.tax_level       AND
+      taxon_counts.tax_id     = taxon_summaries.tax_id
+    WHERE
+      pipeline_run_id in (#{pipeline_run_ids.join(',')}) 
+      AND taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID} 
+      AND taxon_counts.count >= #{MINIMUM_READ_THRESHOLD} 
+      AND taxon_counts.count_type IN ('NT', 'NR')
+      #{categories_clause}
+     "
+    sql_results = TaxonCount.connection.select_all(query).to_hash
 
     # calculating rpm and zscore, organizing the results by pipeline_run_id
     result_hash = {}
@@ -417,9 +426,28 @@ module ReportHelper
     results
   end
 
-  def top_taxons_details(samples, background_id, num_results, sort_by_key, species_selected)
+  def check_custom_filters(row, advanced_filters)
+    advanced_filters.each {|filter| 
+      count_type, metric = filter["label"].split("_")
+      begin
+        value = Float(filter["value"])
+      rescue
+      else
+        if filter["operator"] == ">="
+          if row[count_type][metric] < value
+            return false 
+          end
+        elsif row[count_type][metric] > value
+          return false
+        end  
+      end
+    }
+    return true
+  end
+
+  def top_taxons_details(samples, background_id, num_results, sort_by_key, species_selected, categories, advanced_filters={})
     # return top taxons
-    results_by_pr = fetch_top_taxons(samples, background_id)
+    results_by_pr = fetch_top_taxons(samples, background_id, categories)
     sort_by = decode_sort_by(sort_by_key)
     count_type = sort_by[:count_type]
     metric = sort_by[:metric]
@@ -438,7 +466,9 @@ module ReportHelper
       end
 
       compute_aggregate_scores_v2!(rows)
-      rows = rows.select { |row| row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD }
+      rows = rows.select { |row| 
+        row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD and check_custom_filters(row, advanced_filters)
+      }
 
       rows.sort_by! { |tax_info| ((tax_info[count_type] || {})[metric] || 0.0) * -1.0 }
       count = 1
@@ -634,7 +664,7 @@ module ReportHelper
       tax_info['category_name'] = category[category_id] || 'Uncategorized'
     end
 
-    Rails.logger.warn "Missing names for taxon ids #{missing_names.to_a}" unless missing_names.empty?
+    Rails.logger.warn "Missing names for taxon ids #{missing_names.to_a}" unoggeress missing_names.empty?
     Rails.logger.warn "Missing parent for child:  #{missing_parents}" unless missing_parents.empty?
     tax_2d
   end

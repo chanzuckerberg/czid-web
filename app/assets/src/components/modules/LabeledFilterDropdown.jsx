@@ -2,6 +2,12 @@ import React from "react";
 import { Dropdown, Label } from "semantic-ui-react";
 
 class LabeledFilterDropdown extends React.Component {
+  static get defaultProps() {
+    return {
+      value: []
+    };
+  }
+
   constructor(props) {
     super(props);
     this.passedOnChange = this.props.onChange;
@@ -57,7 +63,7 @@ class LabeledFilterDropdown extends React.Component {
         {...this.props}
         options={undefined}
         value={undefined}
-        text={this.renderText()}
+        trigger={this.renderText()}
       >
         <Dropdown.Menu>{this.renderMenuItems()}</Dropdown.Menu>
       </Dropdown>

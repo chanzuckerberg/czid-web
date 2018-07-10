@@ -71,16 +71,16 @@ class Header extends React.Component {
               <span className="code">aws help</span>, which should display usage
               instructions.
             </p>
-            <p>2. Install the IDseq CLI. Requires Python 2:</p>
             <p>
+              2. Install the IDseq CLI. Requires Python 2:
               <span className="code">
                 pip install git+https://github.com/chanzuckerberg/idseq-cli.git
                 --upgrade
               </span>
-              <p>
+              <span>
                 Or run with pip2 if regular pip is mapped to your python3
                 installation.
-              </p>
+              </span>
             </p>
             <p>3. Upload a sample using a command of the form:</p>
             <div className="code center-code">
