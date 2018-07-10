@@ -21,6 +21,7 @@ import numberWithCommas from "../helpers/strings";
 import ProjectSelection from "./ProjectSelection";
 import StringHelper from "../helpers/StringHelper";
 import IconComponent from "./IconComponent";
+import Cookies from "js-cookie";
 
 class Samples extends React.Component {
   constructor(props, context) {
@@ -66,6 +67,7 @@ class Samples extends React.Component {
     this.displayReportProgress = this.displayReportProgress.bind(this);
     this.deleteProject = this.deleteProject.bind(this);
     this.toggleBackgroundFlag = this.toggleBackgroundFlag.bind(this);
+    this.getBackgroundIdByName = this.getBackgroundIdByName.bind(this);
     this.state = {
       invite_status: null,
       project: null,
@@ -312,8 +314,15 @@ class Samples extends React.Component {
     let status_action = e.target.getAttribute("data-status-action");
     let retrieve_action = e.target.getAttribute("data-retrieve-action");
     this.nanobar.go(30);
+
+    let url = `/projects/${this.state.selectedProjectId}/${make_action}`;
+    const bg_name = Cookies.get("background_name");
+    if (bg_name) {
+      const bg_id = this.getBackgroundIdByName(bg_name);
+      if (bg_id) url += `?background_id=${bg_id}`;
+    }
     axios
-      .get(`/projects/${this.state.selectedProjectId}/${make_action}`)
+      .get(url)
       .then(res => {
         this.setState({
           project_id_download_in_progress: this.state.selectedProjectId
@@ -1287,6 +1296,14 @@ class Samples extends React.Component {
     });
   }
 
+  // Select the background ID with the matching name.
+  getBackgroundIdByName(name) {
+    let match = this.props.allBackgrounds.filter(b => b["name"] === name);
+    if (match && match[0] && match[0]["id"]) {
+      return match[0]["id"];
+    }
+  }
+
   render() {
     const project_section = (
       <ProjectSelection
@@ -1344,7 +1361,12 @@ function LabelTagMarkup({
   );
 }
 
-function FilterItemMarkup({ status, filterSelect, status_filter_css_classes, pos }) {
+function FilterItemMarkup({
+  status,
+  filterSelect,
+  status_filter_css_classes,
+  pos
+}) {
   return (
     <li
       className="filter-item"
@@ -1352,7 +1374,10 @@ function FilterItemMarkup({ status, filterSelect, status_filter_css_classes, pos
       data-status={status}
       onClick={filterSelect}
     >
-      <a data-status={status} className={"filter-item " + status_filter_css_classes[pos]}>
+      <a
+        data-status={status}
+        className={"filter-item " + status_filter_css_classes[pos]}
+      >
         {status}
       </a>
       <i data-status={status} className="filter fa fa-check hidden" />
@@ -1506,9 +1531,9 @@ function PipelineOutputDataValues({
       ? BLANK_TEXT
       : numberWithCommas(derivedOutput.pipeline_run.total_reads),
     nonhost_reads:
-      !stats || !stats.remaining_reads
+      !stats || !stats.adjusted_remaining_reads
         ? BLANK_TEXT
-        : numberWithCommas(stats.remaining_reads),
+        : numberWithCommas(stats.adjusted_remaining_reads),
     nonhost_reads_percent:
       !stats || !stats.percent_remaining ? (
         ""
@@ -1913,7 +1938,11 @@ function TableColumnHeaders({ sort, colMap, filterStatus, state, parent }) {
   );
 }
 
-function JobStatusFilters({ status_filter_options, filterSelect, status_filter_css_classes }) {
+function JobStatusFilters({
+  status_filter_options,
+  filterSelect,
+  status_filter_css_classes
+}) {
   return (
     <div className="dropdown-status-filtering">
       <li>

@@ -1255,7 +1255,7 @@ class PipelineSampleReport extends React.Component {
     return url.searchParams.get(param);
   }
 
-  // Select the background with the matching name.
+  // Select the background ID with the matching name.
   getBackgroundIdByName(name) {
     let match = this.all_backgrounds.filter(b => b["name"] === name);
     if (match && match[0] && match[0]["id"]) {
@@ -1278,11 +1278,12 @@ class PipelineSampleReport extends React.Component {
       : null;
     let subsampling_stats =
       subsampled_reads &&
-      subsampled_reads < this.report_details.pipeline_info.remaining_reads
+      subsampled_reads <
+        this.report_details.pipeline_info.adjusted_remaining_reads
         ? "Randomly subsampled to " +
           subsampled_reads +
           " out of " +
-          this.report_details.pipeline_info.remaining_reads +
+          this.report_details.pipeline_info.adjusted_remaining_reads +
           " non-host reads."
         : "";
     const disable_filter = this.anyFilterSet() ? (

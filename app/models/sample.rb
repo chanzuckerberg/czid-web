@@ -11,6 +11,8 @@ class Sample < ApplicationRecord
   STATUS_CHECKED = 'checked'.freeze # status regarding pipeline kickoff is checked
   MULTIHIT_FASTA_BASENAME = 'accessions.rapsearch2.gsnapl.fasta'.freeze
   HIT_FASTA_BASENAME = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.fasta'.freeze
+  DAG_ANNOTATED_FASTA_BASENAME = 'annotated_merged.fa'.freeze
+  DAG_UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fa'.freeze
   UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fasta'.freeze
   SORTED_TAXID_ANNOTATED_FASTA = 'taxid_annot_sorted_nt.fasta'.freeze
   SORTED_TAXID_ANNOTATED_FASTA_NR = 'taxid_annot_sorted_nr.fasta'.freeze
@@ -171,9 +173,16 @@ class Sample < ApplicationRecord
   def results_folder_files
     pr = pipeline_runs.first
     return list_outputs(sample_output_s3_path) unless pr
-    stage1_files = list_outputs(pr.host_filter_output_s3_path)
-    stage2_files = list_outputs(pr.alignment_output_s3_path, 2)
-    stage1_files + stage2_files
+    file_list = []
+    if pr.pipeline_version.to_f >= 2.0
+      file_list = list_outputs(pr.output_s3_path_with_version)
+      file_list += list_outputs(sample_output_s3_path)
+    else
+      stage1_files = list_outputs(pr.host_filter_output_s3_path)
+      stage2_files = list_outputs(pr.alignment_output_s3_path, 2)
+      file_list = stage1_files + stage2_files
+    end
+    file_list
   end
 
   def fastqs_folder_files
@@ -202,10 +211,11 @@ class Sample < ApplicationRecord
     return unless status == STATUS_CREATED
     stderr_array = []
     total_reads_json_path = nil
+    max_lines = PipelineRun::MAX_INPUT_FRAGMENTS * 4
     input_files.each do |input_file|
       fastq = input_file.source
       total_reads_json_path = File.join(File.dirname(fastq.to_s), TOTAL_READS_JSON)
-      _stdout, stderr, status = Open3.capture3("aws", "s3", "cp", fastq.to_s, "#{sample_input_s3_path}/#{input_file.name}")
+      _stdout, stderr, status = Open3.capture3("aws s3 cp #{fastq} - |gzip -dc |head -#{max_lines} | gzip -c | aws s3 cp - #{sample_input_s3_path}/#{input_file.name}")
       stderr_array << stderr unless status.exitstatus.zero?
     end
     if total_reads_json_path.present?
@@ -272,10 +282,14 @@ class Sample < ApplicationRecord
 
   def annotated_fasta_s3_path
     pr = pipeline_runs.first
+    return "#{pr.output_s3_path_with_version}/#{DAG_ANNOTATED_FASTA_BASENAME}" if pr.pipeline_version && pr.pipeline_version.to_f >= 2.0
+
     pr.multihit? ? "#{sample_alignment_output_s3_path}/#{MULTIHIT_FASTA_BASENAME}" : "#{sample_alignment_output_s3_path}/#{HIT_FASTA_BASENAME}"
   end
 
   def unidentified_fasta_s3_path
+    pr = pipeline_runs.first
+    return "#{pr.output_s3_path_with_version}/#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if pr.pipeline_version && pr.pipeline_version.to_f >= 2.0
     "#{sample_alignment_output_s3_path}/#{UNIDENTIFIED_FASTA_BASENAME}"
   end
 
@@ -421,12 +435,12 @@ class Sample < ApplicationRecord
 
     pr = PipelineRun.new
     pr.sample = self
-    pr.subsample = PipelineRun::DEFAULT_SUBSAMPLING if subsample != 0
+    pr.subsample = PipelineRun::DEFAULT_SUBSAMPLING # if subsample != 0 ALLWAYS SUBSAMPLE
     # The subsample field of "sample" is currently used as a simple flag (UI checkbox),
     # but was made an integer type in case we want to allow users to enter the desired number
     # of reads to susbample to in the future
     pr.pipeline_branch = pipeline_branch.blank? ? "master" : pipeline_branch
-    pr.pipeline_commit = `git ls-remote https://github.com/chanzuckerberg/idseq-pipeline.git | grep refs/heads/#{pr.pipeline_branch}`.split[0]
+    pr.pipeline_commit = `git ls-remote https://github.com/chanzuckerberg/idseq-dag.git | grep refs/heads/#{pr.pipeline_branch}`.split[0]
 
     pr.save
   end

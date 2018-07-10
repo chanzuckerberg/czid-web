@@ -5,13 +5,14 @@ module PipelineOutputsHelper
   def curate_pipeline_run_display(pipeline_run)
     return nil unless pipeline_run
     pipeline_run_display = pipeline_run.as_json.except("version")
-    pipeline_run_display["version"] = { pipeline: select_version_aspect(pipeline_run, "idseq-pipeline"),
+    pipeline_run_display["version"] = { pipeline: pipeline_run.pipeline_version,
                                         nt: select_version_aspect(pipeline_run, "nt_k16"),
                                         nr: select_version_aspect(pipeline_run, "nr_rapsearch") }
     pipeline_run_display
   end
 
   def select_version_aspect(pipeline_run, aspect)
+    # TODO: Remove. Deprecated function
     version_hashes = JSON.parse(pipeline_run.version)
     # example for version_hashes:
     #   [{"name"=>"job_id", "version"=>"023e1f7d-8f96-42cc-ab07-6c233254f113"},

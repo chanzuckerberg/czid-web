@@ -67,20 +67,33 @@ class Header extends React.Component {
           <div className="modal-content">
             <p>
               1. Install and configure the Amazon Web Services Command Line
-              Interface (AWS CLI). Verify it works by running{" "}
-              <span className="code">aws help</span>, which should display usage
-              instructions.
+              Interface (AWS CLI).
             </p>
             <p>
-              2. Install the IDseq CLI. Requires Python 2:
+              Verify it works by running <span className="code">aws help</span>,
+              which should display usage instructions.
+            </p>
+            <p>2. Install the IDseq CLI. Python 2 or Python 3 compatible:</p>
+            <p>
               <span className="code">
                 pip install git+https://github.com/chanzuckerberg/idseq-cli.git
                 --upgrade
               </span>
-              <span>
-                Or run with pip2 if regular pip is mapped to your python3
-                installation.
-              </span>
+              <p />
+              <p>
+                Tips: Or run with <span className="code">pip2</span> or{" "}
+                <span className="code">pip3</span> depending on your
+                configuration. Try <span className="code">sudo pip</span> if you
+                run into permissions errors.
+              </p>
+              <p>
+                Avoid copying commands into programs like TextEdit because it
+                may change "straight quotes" into
+              </p>
+              <p>
+                “smart quotes” (“ ‘ ’ ”) which will not be parsed correctly in
+                your terminal.
+              </p>
             </p>
             <p>3. Upload a sample using a command of the form:</p>
             <div className="code center-code">
