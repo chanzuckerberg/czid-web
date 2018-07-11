@@ -64,6 +64,13 @@
       font-weight: normal;
       font-size: inherit;
     }
+    span.title {
+      display: inline-block;
+      width: 100%;
+      white-space: nowrap;
+      overflow-x: hidden;
+      text-overflow: ellipsis;
+    }
   }
 
   .ui.dropdown.labeled-filter-dropdown {

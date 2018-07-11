@@ -1,14 +1,14 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Button, Dropdown, Icon, Input, Label, Popup } from "semantic-ui-react";
-import ThresholdMap from "./ThresholdMap";
+import ThresholdMap from "../utils/ThresholdMap";
 
 class AdvancedThresholdFilterRow extends React.Component {
   constructor(props) {
     super(props);
-    this._labelChanged = this.labelChanged.bind(this);
-    this._operatorChanged = this.operatorChanged.bind(this);
-    this._valueChanged = this.valueChanged.bind(this);
+    this.labelChanged = this.labelChanged.bind(this);
+    this.operatorChanged = this.operatorChanged.bind(this);
+    this.valueChanged = this.valueChanged.bind(this);
   }
 
   changed(data) {
@@ -54,7 +54,7 @@ class AdvancedThresholdFilterRow extends React.Component {
     return (
       <Dropdown
         fluid
-        onChange={this._labelChanged}
+        onChange={this.labelChanged}
         value={this.props.filter.label}
         options={opts}
       />
@@ -72,7 +72,7 @@ class AdvancedThresholdFilterRow extends React.Component {
     return (
       <Dropdown
         fluid
-        onChange={this._operatorChanged}
+        onChange={this.operatorChanged}
         value={this.props.filter.operator}
         options={opts}
       />
@@ -84,7 +84,7 @@ class AdvancedThresholdFilterRow extends React.Component {
       <Input
         fluid
         value={this.props.filter.value}
-        onChange={this._valueChanged}
+        onChange={this.valueChanged}
       />
     );
   }
@@ -126,8 +126,8 @@ class AdvancedThresholdFilter extends React.Component {
     this.state = {
       filters: filters
     };
-    this._addRow = this.addRow.bind(this);
-    this._applyClicked = this.applyClicked.bind(this);
+    this.addRow = this.addRow.bind(this);
+    this.applyClicked = this.applyClicked.bind(this);
   }
 
   applyClicked() {
@@ -184,10 +184,10 @@ class AdvancedThresholdFilter extends React.Component {
         <div className="rows">{this.renderFilterRows()}</div>
         <div className="row">
           <div className="actions col s12">
-            <Button secondary onClick={this._addRow}>
+            <Button secondary onClick={this.addRow}>
               Add threshold
             </Button>
-            <Button primary onClick={this._applyClicked}>
+            <Button primary onClick={this.applyClicked}>
               Apply
             </Button>
           </div>
@@ -206,10 +206,18 @@ AdvancedThresholdFilter.propTypes = {
 class AdvancedThresholdFilterDropdown extends React.Component {
   constructor(props) {
     super(props);
+    this.applyOnHide = this.props.applyOnHide;
   }
   onThresholdsChanged(filters) {
     this.props.onChange(filters);
   }
+
+  onClose() {
+    if (this.props.applyOnHide) {
+      this.refs.advancedThresholdFilter.applyClicked();
+    }
+  }
+
   render() {
     let validFilters = [];
     for (let filter of this.props.filters) {
@@ -223,20 +231,22 @@ class AdvancedThresholdFilterDropdown extends React.Component {
           <Dropdown
             fluid={this.props.fluid}
             className="active-threshold-filter-dropdown"
-            text={
+            trigger={
               <span>
                 Advanced Filters <Label>{validFilters.length}</Label>
               </span>
             }
             open={false}
+            disabled={this.props.disabled}
           />
         }
         on="click"
         position="bottom right"
         hideOnScroll={true}
-        keepInViewPort={false}
+        onClose={this.onClose.bind(this)}
       >
         <AdvancedThresholdFilter
+          ref="advancedThresholdFilter"
           {...this.props}
           filters={this.props.filters}
           onChange={this.onThresholdsChanged.bind(this)}
@@ -250,7 +260,8 @@ AdvancedThresholdFilterDropdown.propTypes = {
   operators: PropTypes.array.isRequired,
   filters: PropTypes.array,
   onChange: PropTypes.func,
-  onApply: PropTypes.func
+  onApply: PropTypes.func,
+  applyOnHide: PropTypes.bool
 };
 
 export default AdvancedThresholdFilterDropdown;

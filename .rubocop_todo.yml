@@ -51,17 +51,12 @@ AllCops:
     - bin/*
     - node_modules/**/*
 
-Metrics/MethodLength:
+ClassLength:
   Enabled: false
 
 Metrics/AbcSize:
   Enabled: false
-
-ModuleLength:
-  Enabled: false
-
-ClassLength:
-  Enabled: false
+  Max: 300
 
 Metrics/CyclomaticComplexity:
   Enabled: false
@@ -72,17 +67,20 @@ Metrics/PerceivedComplexity:
 Metrics/BlockLength:
   Enabled: false
 
-Rails/HasAndBelongsToMany:
-  Enabled: false
-
 Metrics/LineLength:
   Enabled: false
 
 Metrics/MethodLength:
   Enabled: false
 
-Metrics/AbcSize:
-  Max: 300
+Metrics/ParameterLists:
+  Max: 10
+
+ModuleLength:
+  Enabled: false
+
+Rails/HasAndBelongsToMany:
+  Enabled: false
 
 Rails/ReversibleMigration:
   Enabled: false
