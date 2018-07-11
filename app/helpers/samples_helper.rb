@@ -191,7 +191,7 @@ module SamplesHelper
   def get_total_runtime(pipeline_run, run_stages)
     if pipeline_run.finalized?
       # total processing time (without time spent waiting), for performance evaluation
-      run_stages.map { |rs| pipeline_run.ready_step && rs.step_number > pipeline_run.ready_step ? 0 : (rs.updated_at - rs.created_at) }.sum
+      (run_stages || []).map { |rs| pipeline_run.ready_step && rs.step_number > pipeline_run.ready_step ? 0 : (rs.updated_at - rs.created_at) }.sum
     else
       # time since pipeline kickoff (including time spent waiting), for run diagnostics
       (Time.current - pipeline_run.created_at)

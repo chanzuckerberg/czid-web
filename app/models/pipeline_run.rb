@@ -361,7 +361,8 @@ class PipelineRun < ApplicationRecord
 
   def output_state_hash(output_states_by_pipeline_run_id)
     h = {}
-    output_states_by_pipeline_run_id[id].each do |o|
+    run_output_states = output_states_by_pipeline_run_id[id] || []
+    run_output_states.each do |o|
       h[o.output] = o.state
     end
     h
