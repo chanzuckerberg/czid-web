@@ -8,7 +8,6 @@ import copy from "copy-to-clipboard";
 import { StickyContainer, Sticky } from "react-sticky";
 import symlog from "./symlog";
 import AdvancedThresholdFilterDropdown from "./modules/AdvancedThresholdFilter";
-import ObjectHelper from "../helpers/ObjectHelper";
 import ErrorBoundary from "./ErrorBoundary";
 import Heatmap from "./visualizations/Heatmap";
 import HeatmapLegend from "./visualizations/HeatmapLegend";
