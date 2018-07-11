@@ -208,9 +208,9 @@ class SamplesController < ApplicationController
 
   def heatmap
     @heatmap_data = {
-      taxonLevels => %w[Genus Species],
-      categories => ReportHelper::ALL_CATEGORIES.pluck('name'),
-      metrics => [
+      taxonLevels: %w[Genus Species],
+      categories: ReportHelper::ALL_CATEGORIES.pluck('name'),
+      metrics: [
         "NT.aggregatescore",
         "NT.rpm",
         "NT.r",
@@ -222,24 +222,24 @@ class SamplesController < ApplicationController
         "NR.zscore",
         "NR.maxzscore"
       ],
-      backgrounds => current_power.backgrounds.map do |background|
-        { name => background.name, value => background.id }
+      backgrounds: current_power.backgrounds.map do |background|
+        { name: background.name, value: background.id }
       end,
-      advancedFilters => {
-        filters => [
-          { name => "Aggregate Score", value => "NT_aggregatescore" },
-          { name => "NT Z Score", value => "NT_zscore" },
-          { name => "NT rPM", value => "NT_rpm" },
-          { name => "NT r (total reads)", value => "NT_r" },
-          { name => "NT %id", value => "NT_percentidentity" },
-          { name => "NT log(1/e)", value => "NT_neglogevalue" },
-          { name => "NR Z Score", value => "NR_zscore" },
-          { name => "NR r (total reads)", value => "NR_r" },
-          { name => "NR rPM", value => "NR_rpm" },
-          { name => "NR %id", value => "NR_percentidentity" },
-          { name => "R log(1/e)", value => "NR_neglogevalue" }
+      advancedFilters: {
+        filters: [
+          { name: "Aggregate Score", value: "NT_aggregatescore" },
+          { name: "NT Z Score", value: "NT_zscore" },
+          { name: "NT rPM", value: "NT_rpm" },
+          { name: "NT r (total reads)", value: "NT_r" },
+          { name: "NT %id", value: "NT_percentidentity" },
+          { name: "NT log(1/e)", value: "NT_neglogevalue" },
+          { name: "NR Z Score", value: "NR_zscore" },
+          { name: "NR r (total reads)", value: "NR_r" },
+          { name: "NR rPM", value: "NR_rpm" },
+          { name: "NR %id", value: "NR_percentidentity" },
+          { name: "R log(1/e)", value: "NR_neglogevalue" }
         ],
-        operators => [">=", "<="]
+        operators: [">=", "<="]
       }
     }
   end
