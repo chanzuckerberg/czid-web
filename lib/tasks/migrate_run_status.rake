@@ -25,18 +25,12 @@ def migrate_pre_result_monitor(pr)
                        output: old_loaders_by_output[rs.load_db_command_func],
                        state: rs.job_status)
   end
-  if pr.all_output_states_terminal?
-    if pr.all_output_states_loaded?
-      pr.update(results_finalized: PipelineRun::FINALIZED_SUCCESS)
-    else
-      pr.update(results_finalized: PipelineRun::FINALIZED_FAIL)
-    end
+  if pr.all_output_states_loaded?
+    pr.update(results_finalized: PipelineRun::FINALIZED_SUCCESS)
+  elsif pr.output_states.pluck(:state).any? { |s| s == PipelineRun::STATUS_FAILED }
+    pr.update(results_finalized: PipelineRun::FINALIZED_FAIL)
   else
-    if pr.job_status.include?("FAILED")
-      pr.update(results_finalized: PipelineRun::FINALIZED_FAIL)
-    else
-      pr.update(results_finalized: PipelineRun::IN_PROGRESS) # shouldn't be the case
-    end
+    pr.update(results_finalized: PipelineRun::IN_PROGRESS) # shouldn't be the case
   end
 end
 
