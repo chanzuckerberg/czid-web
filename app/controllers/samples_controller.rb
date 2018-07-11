@@ -40,7 +40,6 @@ class SamplesController < ApplicationController
   # GET /samples
   # GET /samples.json
   def index
-    
     @all_project = current_power.projects
     @page_size = PAGE_SIZE
     project_id = params[:project_id]
@@ -209,9 +208,9 @@ class SamplesController < ApplicationController
 
   def heatmap
     @heatmap_data = {
-      :taxonLevels => ['Genus', 'Species'],
-      :categories => ReportHelper::ALL_CATEGORIES.pluck('name'),
-      :metrics => [
+      taxonLevels => %w[Genus Species],
+      categories => ReportHelper::ALL_CATEGORIES.pluck('name'),
+      metrics => [
         "NT.aggregatescore",
         "NT.rpm",
         "NT.r",
@@ -223,24 +222,24 @@ class SamplesController < ApplicationController
         "NR.zscore",
         "NR.maxzscore"
       ],
-      :backgrounds => current_power.backgrounds.map{ |background|
-        {:name => background.name, :value => background.id}
-      },
-      :advancedFilters => {
-        :filters => [
-          {:name => "Aggregate Score", :value => "NT_aggregatescore"},
-          {:name => "NT Z Score", :value => "NT_zscore"},
-          {:name => "NT rPM", :value => "NT_rpm"},
-          {:name => "NT r (total reads)", :value => "NT_r"},
-          {:name => "NT %id", :value => "NT_percentidentity"},
-          {:name => "NT log(1/e)", :value => "NT_neglogevalue"},
-          {:name => "NR Z Score", :value => "NR_zscore"},
-          {:name => "NR r (total reads)", :value => "NR_r"},
-          {:name => "NR rPM", :value => "NR_rpm"},
-          {:name => "NR %id", :value => "NR_percentidentity"},
-          {:name => "R log(1/e)", :value => "NR_neglogevalue"}
+      backgrounds => current_power.backgrounds.map do |background|
+        { name => background.name, value => background.id }
+      end,
+      advancedFilters => {
+        filters => [
+          { name => "Aggregate Score", value => "NT_aggregatescore" },
+          { name => "NT Z Score", value => "NT_zscore" },
+          { name => "NT rPM", value => "NT_rpm" },
+          { name => "NT r (total reads)", value => "NT_r" },
+          { name => "NT %id", value => "NT_percentidentity" },
+          { name => "NT log(1/e)", value => "NT_neglogevalue" },
+          { name => "NR Z Score", value => "NR_zscore" },
+          { name => "NR r (total reads)", value => "NR_r" },
+          { name => "NR rPM", value => "NR_rpm" },
+          { name => "NR %id", value => "NR_percentidentity" },
+          { name => "R log(1/e)", value => "NR_neglogevalue" }
         ],
-        :operators => [">=", "<="]
+        operators => [">=", "<="]
       }
     }
   end
@@ -555,7 +554,8 @@ class SamplesController < ApplicationController
   end
 
   def remove_taxon_confirmation
-    keys = taxon_confirmation_unique_on(params)*    TaxonConfirmation.where(taxon_confirmation_params(keys)).destroy_all
+    keys = taxon_confirmation_unique_on(params)
+    TaxonConfirmation.where(taxon_confirmation_params(keys)).destroy_all
     respond_taxon_confirmations
   end
 
@@ -582,7 +582,7 @@ class SamplesController < ApplicationController
     end
     taxon_ids = taxon_ids.compact
     categories = params[:categories]
-    advanced_filters = (params[:advancedFilters] or {}).map{|filter| JSON.parse(filter)}
+    advanced_filters = (params[:advancedFilters] || {}).map { |filter| JSON.parse(filter) }
 
     # TODO: should fail if field is not well formatted and return proper error to client
     sort_by = params[:sortBy] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
@@ -595,8 +595,8 @@ class SamplesController < ApplicationController
     taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, advanced_filters).pluck("tax_id") if taxon_ids.empty?
 
     return {} if taxon_ids.empty?
-    
-    return samples_taxons_details(samples, taxon_ids, background_id, species_selected)
+
+    samples_taxons_details(samples, taxon_ids, background_id, species_selected)
   end
 
   def taxon_confirmation_unique_on(params)

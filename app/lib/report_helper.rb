@@ -60,7 +60,7 @@ module ReportHelper
     { 'taxid' => 12_884, 'name' => "Viroids" },
     { 'taxid' => TaxonLineage::MISSING_SUPERKINGDOM_ID, 'name' => "Uncategorized" }
   ].freeze
-  CATEGORIES_TAXID_BY_NAME = ALL_CATEGORIES.map{|category| {category['name'] => category['taxid']}}.reduce(Hash.new, :merge)
+  CATEGORIES_TAXID_BY_NAME = ALL_CATEGORIES.map { |category| { category['name'] => category['taxid'] } }.reduce({}, :merge)
 
   # use the metric's NT <=> NR dual as a tertiary sort key (so, for example,
   # when you sort by NT R, entries without NT R will be ordered amongst
@@ -136,7 +136,7 @@ module ReportHelper
       value = nil unless threshold_param?(name)
       value = number_or_nil(value)
     end
-    return value
+    value
   end
 
   def decode_excluded_categories(param_str)
@@ -166,7 +166,7 @@ module ReportHelper
     end
 
     data[:taxonomy_details] = taxonomy_details(pipeline_run_id, background_id, params)
-    return data
+    data
   end
 
   def taxon_confirmation_map(sample_id, user_id)
@@ -250,10 +250,9 @@ module ReportHelper
   def fetch_top_taxons(samples, background_id, categories)
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
 
-    categories_clause = if categories.empty? then 
-      "" 
-    else 
-      " AND taxon_counts.superkingdom_taxid IN (#{categories.map{|category| CATEGORIES_TAXID_BY_NAME[category]}.compact.join(',')})" 
+    categories_clause = ""
+    unless categories.empty?
+      " AND taxon_counts.superkingdom_taxid IN (#{categories.map { |category| CATEGORIES_TAXID_BY_NAME[category] }.compact.join(',')})"
     end
 
     query = "
@@ -285,9 +284,9 @@ module ReportHelper
       taxon_counts.tax_level  = taxon_summaries.tax_level       AND
       taxon_counts.tax_id     = taxon_summaries.tax_id
     WHERE
-      pipeline_run_id in (#{pipeline_run_ids.join(',')}) 
-      AND taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID} 
-      AND taxon_counts.count >= #{MINIMUM_READ_THRESHOLD} 
+      pipeline_run_id in (#{pipeline_run_ids.join(',')})
+      AND taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
+      AND taxon_counts.count >= #{MINIMUM_READ_THRESHOLD}
       AND taxon_counts.count_type IN ('NT', 'NR')
       #{categories_clause}
      "
@@ -427,25 +426,26 @@ module ReportHelper
   end
 
   def check_custom_filters(row, advanced_filters)
-    advanced_filters.each {|filter| 
+    advanced_filters.each do |filter|
       count_type, metric = filter["label"].split("_")
       begin
         value = Float(filter["value"])
       rescue
+        Rails.logger.warn "Bad advanced filter value."
       else
         if filter["operator"] == ">="
           if row[count_type][metric] < value
-            return false 
+            return false
           end
         elsif row[count_type][metric] > value
           return false
-        end  
+        end
       end
-    }
-    return true
+    end
+    true
   end
 
-  def top_taxons_details(samples, background_id, num_results, sort_by_key, species_selected, categories, advanced_filters={})
+  def top_taxons_details(samples, background_id, num_results, sort_by_key, species_selected, categories, advanced_filters = {})
     # return top taxons
     results_by_pr = fetch_top_taxons(samples, background_id, categories)
     sort_by = decode_sort_by(sort_by_key)
@@ -466,9 +466,9 @@ module ReportHelper
       end
 
       compute_aggregate_scores_v2!(rows)
-      rows = rows.select { |row| 
-        row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD and check_custom_filters(row, advanced_filters)
-      }
+      rows = rows.select do |row|
+        row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD && check_custom_filters(row, advanced_filters)
+      end
 
       rows.sort_by! { |tax_info| ((tax_info[count_type] || {})[metric] || 0.0) * -1.0 }
       count = 1

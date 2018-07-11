@@ -6,7 +6,6 @@ import queryString from "query-string";
 import { Button, Icon, Popup } from "semantic-ui-react";
 import copy from "copy-to-clipboard";
 import { StickyContainer, Sticky } from "react-sticky";
-
 import symlog from "./symlog";
 import AdvancedThresholdFilterDropdown from "./modules/AdvancedThresholdFilter";
 import ObjectHelper from "../helpers/ObjectHelper";
@@ -14,7 +13,6 @@ import ErrorBoundary from "./ErrorBoundary";
 import Heatmap from "./visualizations/Heatmap";
 import HeatmapLegend from "./visualizations/HeatmapLegend";
 import ReactNouislider from "./ReactNouislider";
-import ThresholdMap from "./utils/ThresholdMap";
 import LabeledDropdown from "./modules/LabeledDropdown";
 import LabeledFilterDropdown from "./modules/LabeledFilterDropdown";
 import TaxonTooltip from "./TaxonTooltip";
@@ -89,8 +87,6 @@ class SamplesHeatmap extends React.Component {
     // Note: copies references of nested objects
     this.appliedOptions = Object.assign({}, this.state.selectedOptions);
 
-    // this.updateUrlParams();
-    // this.thresholdLabels = new ThresholdMap(false);
     this.dataGetters = {};
     this.dataAccessorKeys = {};
     for (var metric of this.state.availableOptions.metrics) {
@@ -449,7 +445,7 @@ class SamplesHeatmap extends React.Component {
           onRemoveRow={this.onRemoveRow}
           scale={
             this.state.availableOptions.scales[
-              this.state.selectedOptions.dataScaleIdx
+              his.state.selectedOptions.dataScaleIdx
             ][1]
           }
           colors={this.colors}
