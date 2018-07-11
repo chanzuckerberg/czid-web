@@ -429,6 +429,7 @@ class SamplesHeatmap extends React.Component {
     if (this.state.loading || !this.state.data || !this.state.data.length) {
       return;
     }
+    let scaleIndex = this.state.selectedOptions.dataScaleIdx;
     return (
       <ErrorBoundary>
         <Heatmap
@@ -443,11 +444,7 @@ class SamplesHeatmap extends React.Component {
           onCellClick={this.onCellClick}
           onColumnLabelClick={this.onSampleLabelClick}
           onRemoveRow={this.onRemoveRow}
-          scale={
-            this.state.availableOptions.scales[
-              this.state.selectedOptions.dataScaleIdx
-            ][1]
-          }
+          scale={this.state.availableOptions.scales[scaleIndex][1]}
           colors={this.colors}
         />
       </ErrorBoundary>
