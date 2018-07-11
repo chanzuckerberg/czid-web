@@ -1061,6 +1061,7 @@ class Samples extends React.Component {
         table_download_dropdown={table_download_dropdown}
         compare_button={compare_button}
         delete_project_button={delete_project_button}
+        parent={this}
         state={this.state}
         canEditProject={this.canEditProject}
       />
@@ -1727,6 +1728,7 @@ class BackgroundModal extends React.Component {
   }
 
   render() {
+    console.log(this.props);
     return (
       <Modal
         trigger={
@@ -1891,6 +1893,7 @@ function ProjectInfoHeading({
   table_download_dropdown,
   compare_button,
   delete_project_button,
+  parent,
   state,
   canEditProject
 }) {
@@ -1924,7 +1927,7 @@ function ProjectInfoHeading({
         {state.selectedProjectId ? project_menu : null}
         {table_download_dropdown}
         {compare_button}
-        <BackgroundModal parent={this} />
+        <BackgroundModal parent={parent} />
         {state.selectedProjectId &&
         canEditProject(state.selectedProjectId) &&
         state.project &&
