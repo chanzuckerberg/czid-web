@@ -72,6 +72,7 @@ class PipelineRun < ApplicationRecord
   STATUS_UNKNOWN = 'UNKNOWN'.freeze
   STATUS_LOADING = 'LOADING'.freeze
   STATUS_LOADING_QUEUED = 'LOADING_QUEUED'.freeze
+  STATUS_LOADING_ERROR = 'LOADING_ERROR'.freeze
 
   LOADERS_BY_OUTPUT = { "ercc_counts" => "db_load_ercc_counts",
                         "taxon_counts" => "db_load_taxon_counts",
@@ -239,6 +240,8 @@ class PipelineRun < ApplicationRecord
     prs.db_load_status = 0
     prs.save
     self.finalized = 0
+    self.results_finalized = IN_PROGRESS
+    ouput_states.each { |o| o.update(state: STATUS_UNKNOWN) if o.state != STATUS_LOADED }
     save
   end
 
@@ -442,7 +445,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def all_output_states_terminal?
-    output_states.pluck(:state).all? { |s| [STATUS_LOADED, STATUS_FAILED].include?(s) }
+    output_states.pluck(:state).all? { |s| [STATUS_LOADED, STATUS_FAILED, STATUS_LOADING_ERROR].include?(s) }
   end
 
   def all_output_states_loaded?

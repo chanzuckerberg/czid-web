@@ -11,7 +11,7 @@ class ResultMonitorLoader
       pr.send(PipelineRun::LOADERS_BY_OUTPUT[output])
       output_state.update(state: PipelineRun::STATUS_LOADED)
     rescue
-      output_state.update(state: PipelineRun::STATUS_FAILED)
+      output_state.update(state: PipelineRun::STATUS_LOADING_ERROR)
       Airbrake.notify("Pipeline Run #{pr.id} failed loading #{output}")
       raise
     end
