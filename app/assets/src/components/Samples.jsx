@@ -56,6 +56,7 @@ class Samples extends React.Component {
     this.updateUserDisplay = this.updateUserDisplay.bind(this);
     this.selectSample = this.selectSample.bind(this);
     this.compareSamples = this.compareSamples.bind(this);
+    this.makeBackground = this.makeBackground.bind(this);
     this.clearAllFilters = this.clearAllFilters.bind(this);
     this.selectTissueFilter = this.selectTissueFilter.bind(this);
     this.selectHostFilter = this.selectHostFilter.bind(this);
@@ -860,6 +861,14 @@ class Samples extends React.Component {
     }
   }
 
+  makeBackground() {
+    if (this.state.selectedSampleIds.length) {
+      window.open(
+        `/samples/heatmap?sample_ids=${this.state.selectedSampleIds}`
+      );
+    }
+  }
+
   clearAllFilters() {
     this.setState(
       {
@@ -989,32 +998,12 @@ class Samples extends React.Component {
       </div>
     );
 
-    const compare_button_inner = (
-      <span>
-        <span
-          className="img-container compare-container"
-          dangerouslySetInnerHTML={{
-            __html: IconComponent.compare(colors.disabledGray)
-          }}
-        />
-        <span>Compare</span>
-      </span>
-    );
-
     let compare_button = (
-      <div className="compare-area">
-        <div className="white">
-          {this.state.selectedSampleIds.length > 0 ? (
-            <a onClick={this.compareSamples} className="compare center">
-              {compare_button_inner}
-            </a>
-          ) : (
-            <a className="compare center btn-disabled">
-              {compare_button_inner}
-            </a>
-          )}
-        </div>
-      </div>
+      <CohortButton
+        label="Compare"
+        action={this.compareSamples}
+        enabled={this.state.selectedSampleIds.length > 0}
+      />
     );
 
     let delete_project_button = (
@@ -1710,6 +1699,63 @@ function TableDownloadDropdown({ project_id, parent }) {
   );
 }
 
+class BackgroundModal extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { modalOpen: false, name: "", description: "" };
+    this.handleOpen = this.handleOpen.bind(this);
+    this.handleClose = this.handleClose.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+  handleOpen() {
+    this.setState({ modalOpen: true, name: "", description: "" });
+    this.props.parent.setState({
+      background_creation_status: ""
+    });
+  }
+  handleClose() {
+    this.setState({ modalOpen: false, name: "", description: "" });
+  }
+  handleChange(e, { name, value }) {
+    this.setState({ description: value });
+  }
+  handleSubmit() {
+    this.props.parent.handleCreateBackground(
+      this.state.name,
+      this.state.description,
+      this.props.parent.state.selectedSampleIds
+    );
+  }
+
+  render() {
+    return (
+      <Modal
+        trigger={
+          <CohortButton
+            label="Make Background"
+            action={this.handleOpen}
+            enabled={this.props.parent.state.selectedSampleIds.length > 0}
+          />
+        }
+        open={this.state.modalOpen}
+        onClose={this.handleClose}
+        className="modal project-popup add-user-modal"
+      >
+        <Modal.Header className="project_modal_header">
+          New Background
+        </Modal.Header>
+        <Modal.Content className="modal-content" />
+        <Modal.Actions>
+          <button className="modal-close" onClick={this.handleClose}>
+            Close
+          </button>
+        </Modal.Actions>
+      </Modal>
+    );
+  }
+}
+
 class AddUserModal extends React.Component {
   constructor(props) {
     super(props);
@@ -1880,6 +1926,7 @@ function ProjectInfoHeading({
         {state.selectedProjectId ? project_menu : null}
         {table_download_dropdown}
         {compare_button}
+        <BackgroundModal parent={this} />
         {state.selectedProjectId &&
         canEditProject(state.selectedProjectId) &&
         state.project &&
@@ -2177,6 +2224,33 @@ function AddUserModalMemberArea({ state, parent }) {
             <li key="None">None</li>
           )}
         </ul>
+      </div>
+    </div>
+  );
+}
+
+function CohortButton({ label, action, enabled }) {
+  let cohort_button_inner = (
+    <span>
+      <span
+        className="img-container compare-container"
+        dangerouslySetInnerHTML={{
+          __html: IconComponent.compare(colors.disabledGray)
+        }}
+      />
+      <span>{label}</span>
+    </span>
+  );
+  return (
+    <div className="compare-area">
+      <div className="white">
+        {enabled ? (
+          <a onClick={action} className="compare center">
+            {cohort_button_inner}
+          </a>
+        ) : (
+          <a className="compare center btn-disabled">{cohort_button_inner}</a>
+        )}
       </div>
     </div>
   );
