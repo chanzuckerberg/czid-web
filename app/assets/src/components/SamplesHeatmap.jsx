@@ -445,7 +445,7 @@ class SamplesHeatmap extends React.Component {
           onRemoveRow={this.onRemoveRow}
           scale={
             this.state.availableOptions.scales[
-              his.state.selectedOptions.dataScaleIdx
+              this.state.selectedOptions.dataScaleIdx
             ][1]
           }
           colors={this.colors}
