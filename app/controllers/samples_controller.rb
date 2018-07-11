@@ -35,6 +35,7 @@ class SamplesController < ApplicationController
   before_action :check_access
 
   PAGE_SIZE = 30
+  DEFAULT_MAX_NUM_TAXONS = 30
 
   # GET /samples
   # GET /samples.json
@@ -190,7 +191,7 @@ class SamplesController < ApplicationController
   def top_taxons
     sample_ids = params[:sample_ids].split(",").map(&:to_i) || []
 
-    num_results = params[:n] ? params[:n].to_i : 30
+    num_results = params[:n] ? params[:n].to_i : ReportHelper::MAX_NUM_TAXONS
     sort_by = params[:sort_by] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
 
     samples = current_power.samples.where(id: sample_ids)
@@ -206,6 +207,41 @@ class SamplesController < ApplicationController
   end
 
   def heatmap
+    @heatmap_data = {
+      taxonLevels: %w[Genus Species],
+      categories: ReportHelper::ALL_CATEGORIES.pluck('name'),
+      metrics: [
+        "NT.aggregatescore",
+        "NT.rpm",
+        "NT.r",
+        "NT.zscore",
+        "NT.maxzscore",
+        "NR.aggregatescore",
+        "NR.rpm",
+        "NR.r",
+        "NR.zscore",
+        "NR.maxzscore"
+      ],
+      backgrounds: current_power.backgrounds.map do |background|
+        { name: background.name, value: background.id }
+      end,
+      advancedFilters: {
+        filters: [
+          { name: "Aggregate Score", value: "NT_aggregatescore" },
+          { name: "NT Z Score", value: "NT_zscore" },
+          { name: "NT rPM", value: "NT_rpm" },
+          { name: "NT r (total reads)", value: "NT_r" },
+          { name: "NT %id", value: "NT_percentidentity" },
+          { name: "NT log(1/e)", value: "NT_neglogevalue" },
+          { name: "NR Z Score", value: "NR_zscore" },
+          { name: "NR r (total reads)", value: "NR_r" },
+          { name: "NR rPM", value: "NR_rpm" },
+          { name: "NR %id", value: "NR_percentidentity" },
+          { name: "R log(1/e)", value: "NR_neglogevalue" }
+        ],
+        operators: [">=", "<="]
+      }
+    }
   end
 
   def samples_taxons
@@ -358,7 +394,7 @@ class SamplesController < ApplicationController
   end
 
   def fastqs_folder
-    @file_list = @sample.fastqs_folder_files
+    @file_list = current_power.updatable_samples.include?(@sample) ? @sample.fastqs_folder_files : []
     @file_path = "#{@sample.sample_path}/fastqs/"
     render template: "samples/folder"
   end
@@ -535,9 +571,9 @@ class SamplesController < ApplicationController
   end
 
   def sample_taxons_dict(params)
-    sample_ids = params[:sample_ids].to_s.split(",").map(&:to_i) || []
-    num_results = params[:n] ? params[:n].to_i : 30
-    taxon_ids = params[:taxon_ids].to_s.split(",").map do |x|
+    sample_ids = (params[:sampleIds] || []).map(&:to_i)
+    num_results = params[:taxonsPerSample] ? params[:taxonsPerSample].to_i : DEFAULT_MAX_NUM_TAXONS
+    taxon_ids = (params[:taxonIds] || []).map do |x|
       begin
         Integer(x)
       rescue ArgumentError
@@ -545,17 +581,21 @@ class SamplesController < ApplicationController
       end
     end
     taxon_ids = taxon_ids.compact
+    categories = params[:categories]
+    advanced_filters = (params[:advancedFilters] || {}).map { |filter| JSON.parse(filter) }
 
-    sort_by = params[:sort_by] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
+    # TODO: should fail if field is not well formatted and return proper error to client
+    sort_by = params[:sortBy] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
     species_selected = params[:species] == "1" # Otherwise genus selected
     samples = current_power.samples.where(id: sample_ids).includes([:pipeline_runs])
-    return {} unless samples.first
+    return {} if samples.empty?
 
     first_sample = samples.first
-    background_id = check_background_id(first_sample)
-    taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected).pluck("tax_id") if taxon_ids.empty?
+    background_id = params[:background] ? params[:background].to_i : check_background_id(first_sample)
+    taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, advanced_filters).pluck("tax_id") if taxon_ids.empty?
 
     return {} if taxon_ids.empty?
+
     samples_taxons_details(samples, taxon_ids, background_id, species_selected)
   end
 

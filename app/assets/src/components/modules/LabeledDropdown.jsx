@@ -20,7 +20,7 @@ class LabeledDropdown extends React.Component {
       }
     }
     return (
-      <span>
+      <span className="title">
         <b>{this.props.label}</b> {label}
       </span>
     );
@@ -30,7 +30,7 @@ class LabeledDropdown extends React.Component {
       <Dropdown
         {...this.props}
         onChange={this.onChange.bind(this)}
-        text={this.renderText()}
+        trigger={this.renderText()}
       />
     );
   }
