@@ -1,11 +1,11 @@
 def migrate_pre_run_stages(pr)
   target_outputs = %w[ercc_counts taxon_counts taxon_byteranges]
-  if %w[CHECKED SUCCEEDED].include?(job_status)
+  if %w[CHECKED SUCCEEDED].include?(pr.job_status)
     pr.update(results_finalized: PipelineRun::FINALIZED_SUCCESS)
     target_outputs.each do |output|
       OutputState.create(pipeline_run_id: pr.id, output: output, state: PipelineRun::STATUS_LOADED)
     end
-  elsif %w[FAILED ERROR].include?(job_status)
+  elsif %w[FAILED ERROR].include?(pr.job_status)
     pr.create_output_states
     pr.update(results_finalized: PipelineRun::FINALIZED_FAIL)
   else
@@ -32,7 +32,11 @@ def migrate_pre_result_monitor(pr)
       pr.update(results_finalized: PipelineRun::FINALIZED_FAIL)
     end
   else
-    pr.update(results_finalized: PipelineRun::IN_PROGRESS) # shouldn't be the case
+    if pr.job_status.include?("FAILED")
+      pr.update(results_finalized: PipelineRun::FINALIZED_FAIL)
+    else
+      pr.update(results_finalized: PipelineRun::IN_PROGRESS) # shouldn't be the case
+    end
   end
 end
 
@@ -43,7 +47,7 @@ task migrate_run_status: :environment do
       migrate_pre_run_stages(pr)
       next
     end
-    if pipeline_run.pre_result_monitor?
+    if pr.pre_result_monitor?
       migrate_pre_result_monitor(pr)
     end
   end
