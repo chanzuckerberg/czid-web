@@ -35,7 +35,11 @@ contextKeys.forEach(key => {
       document.getElementById(target)
     );
   } else {
-    console.log("Couldn't find component for", componentName, foundComponents);
+    console.error(
+      "Couldn't find component for",
+      componentName,
+      foundComponents
+    );
   }
 };
 

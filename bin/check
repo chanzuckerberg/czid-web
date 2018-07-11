@@ -1,0 +1,23 @@
+#!/usr/bin/env ruby
+
+require 'pathname'
+require 'fileutils'
+require 'rubygems/version'
+require 'open3'
+include FileUtils
+
+APP_ROOT = Pathname.new File.expand_path('../../', __FILE__)
+
+def system!(cmd, err = nil)
+  system(cmd) || abort("\n== Command #{cmd} failed ==\n\n#{err}\n\n====")
+end
+
+DOCKER = 'docker-compose exec web '.freeze
+
+chdir APP_ROOT do
+  # make sure we're not on master
+  system!(DOCKER + 'rake rubocop:auto_correct')
+  # ESLint sanity check with a reduced rule set. Doesn't need to run in Docker.
+  system!('./node_modules/.bin/eslint app/assets/src --ext .js,.jsx')
+  system!(DOCKER + 'rake test')
+end

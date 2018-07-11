@@ -34,6 +34,9 @@ get-pip.py
 # Ignore Jetbrain Idea directory
 .idea/
 
+# Ignore VS Code
+.vscode/
+
 .byebug_history
 .editorconfig
 coverage

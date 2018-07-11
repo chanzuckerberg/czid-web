@@ -186,7 +186,6 @@ export default function genericLog() {
             _addSubdomain(start, eps);
             start = eps;
           } else {
-            //console.warn("Something wrong while build subdomains: " + start + " " + end);
             start = end;
           }
         }
