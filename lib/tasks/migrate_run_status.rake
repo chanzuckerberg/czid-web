@@ -37,7 +37,7 @@ end
 task migrate_run_status: :environment do
   pipeline_runs = PipelineRun.all
   pipeline_runs.each do |pr|
-    unless pr.pipeline_run_stages.present?
+    if pr.pipeline_run_stages.blank?
       migrate_pre_run_stages(pr)
       next
     end
