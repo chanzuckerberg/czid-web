@@ -53,7 +53,7 @@ Here's an example to render a react component from rails views.
 ```
 
 Calling the react_component method autoloads the component called `Demo` from the components directory, second parameters is the props you want passed to that component.
-And last but not least, the `div` id `demo_component`, was passed as a third parameter, to tell the function where to render the said component. In our case the current div
+And last but not least, the `div` with id `demo_component` was passed as a third parameter, to tell the function where to render the said component. In our case the current div.
 
 
 ## Testing

@@ -718,7 +718,7 @@ class PipelineSampleReads extends React.Component {
           url={`/samples/${this.sampleInfo.id}/fastqs_folder`}
           icon="fa-folder-open"
           label="Source Data"
-          visible={true}
+          visible={this.can_edit}
         />
         <ResultButton
           url={`/samples/${this.sampleInfo.id}/nonhost_fasta`}

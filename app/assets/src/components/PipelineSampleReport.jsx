@@ -6,10 +6,10 @@ import Tipsy from "react-tipsy";
 import ReactAutocomplete from "react-autocomplete";
 import { Dropdown, Label, Menu, Icon, Popup } from "semantic-ui-react";
 import numberWithCommas from "../helpers/strings";
-import LabeledDropdown from "./LabeledDropdown";
-import AdvancedThresholdFilterDropdown from "./AdvancedThresholdFilter";
+import LabeledDropdown from "./modules/LabeledDropdown";
+import AdvancedThresholdFilterDropdown from "./modules/AdvancedThresholdFilter";
 import StringHelper from "../helpers/StringHelper";
-import ThresholdMap from "./ThresholdMap";
+import ThresholdMap from "./utils/ThresholdMap";
 import PipelineSampleTree from "./PipelineSampleTree";
 import Nanobar from "nanobar";
 import d3, { event as currentEvent } from "d3";
@@ -40,7 +40,20 @@ class PipelineSampleReport extends React.Component {
     const savedThresholdFilters = ThresholdMap.getSavedThresholdFilters();
     this.category_child_parent = { Phage: "Viruses" };
     this.showConcordance = false;
-    this.allThresholds = ThresholdMap(this.showConcordance);
+    // TODO: move thresholds to server side
+    this.allThresholds = [
+      { name: "Score", value: "NT_aggregatescore" },
+      { name: "NT Z Score", value: "NT_zscore" },
+      { name: "NT rPM", value: "NT_rpm" },
+      { name: "NT r (total reads)", value: "NT_r" },
+      { name: "NT %id", value: "NT_percentidentity" },
+      { name: "NT log(1/e)", value: "NT_neglogevalue" },
+      { name: "NR Z Score", value: "NR_zscore" },
+      { name: "NR r (total reads)", value: "NR_r" },
+      { name: "NR rPM", value: "NR_rpm" },
+      { name: "NR %id", value: "NR_percentidentity" },
+      { name: "R log(1/e)", value: "NR_neglogevalue" }
+    ];
     this.genus_map = {};
 
     this.INVALID_CALL_BASE_TAXID = -1e8;
