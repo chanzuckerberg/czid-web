@@ -861,6 +861,7 @@ class Samples extends React.Component {
   }
 
   handleCreateBackground(name, description, sample_ids) {
+    console.log(name, description, sample_ids);
     var that = this;
     axios
       .post("/backgrounds.json", {
@@ -872,7 +873,9 @@ class Samples extends React.Component {
         authenticity_token: this.csrf
       })
       .then(response => {
-        that.setState({});
+        that.setState({
+          background_creation_status: response
+        });
       })
       .catch(error => {
         that.setState({
