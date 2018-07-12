@@ -5,11 +5,10 @@ def record_previous_state(pr)
   file.close
   # Copy file to S3
   pr_s3_file_name = "pipeline_run_#{pr.id}.json"
-  _stdout, _stderr, status = Open3.capture3("aws", "s3", "cp", file.path.to_s,
-                                            "#{pr.archive_s3_path}/pre_migrate_run_status/#{pr_s3_file_name}")
+  Open3.capture3("aws", "s3", "cp", file.path.to_s,
+                 "#{pr.archive_s3_path}/pre_migrate_run_status/#{pr_s3_file_name}")
   file.unlink
 end
-
 
 def migrate_pre_run_stages(pr)
   target_outputs = %w[ercc_counts taxon_counts taxon_byteranges]
