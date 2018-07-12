@@ -423,7 +423,8 @@ class PipelineRun < ApplicationRecord
     if output_ready?(output)
       output_state.update(state: STATUS_LOADING_QUEUED)
       Resque.enqueue(ResultMonitorLoader, id, output)
-    elsif finalized?
+    elsif finalized? && pipeline_run_stages.order(:step_number).last.updated_at < 1.minute.ago
+      # check if job is done more than a minute ago
       output_state.update(state: STATUS_FAILED)
     end
   end
