@@ -394,7 +394,7 @@ class SamplesController < ApplicationController
   end
 
   def fastqs_folder
-    @file_list = @sample.fastqs_folder_files
+    @file_list = current_power.updatable_samples.include?(@sample) ? @sample.fastqs_folder_files : []
     @file_path = "#{@sample.sample_path}/fastqs/"
     render template: "samples/folder"
   end
