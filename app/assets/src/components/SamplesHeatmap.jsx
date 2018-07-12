@@ -105,6 +105,7 @@ class SamplesHeatmap extends React.Component {
     this.onCellClick = this.onCellClick.bind(this);
     this.onDataScaleChange = this.onDataScaleChange.bind(this);
     this.onMetricChange = this.onMetricChange.bind(this);
+    this.onRemoveRow = this.onRemoveRow.bind(this);
     this.onSampleLabelClick = this.onSampleLabelClick.bind(this);
     this.onShareClick = this.onShareClick.bind(this);
     this.onTaxonLevelChange = this.onTaxonLevelChange.bind(this);
@@ -451,6 +452,7 @@ class SamplesHeatmap extends React.Component {
   }
 
   onMetricChange(_, newMetric) {
+    console.log("metric value changed", _, newMetric);
     // this.recluster = true;
     this.setState({
       selectedOptions: Object.assign({}, this.state.selectedOptions, {
