@@ -452,8 +452,6 @@ class SamplesHeatmap extends React.Component {
   }
 
   onMetricChange(_, newMetric) {
-    console.log("metric value changed", _, newMetric);
-    // this.recluster = true;
     this.setState({
       selectedOptions: Object.assign({}, this.state.selectedOptions, {
         metric: newMetric.value
