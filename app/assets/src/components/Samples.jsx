@@ -56,7 +56,7 @@ class Samples extends React.Component {
     this.updateUserDisplay = this.updateUserDisplay.bind(this);
     this.selectSample = this.selectSample.bind(this);
     this.compareSamples = this.compareSamples.bind(this);
-    this.makeBackground = this.makeBackground.bind(this);
+    this.handleCreateBackground = this.handleCreateBackground.bind(this);
     this.clearAllFilters = this.clearAllFilters.bind(this);
     this.selectTissueFilter = this.selectTissueFilter.bind(this);
     this.selectHostFilter = this.selectHostFilter.bind(this);
@@ -71,6 +71,7 @@ class Samples extends React.Component {
     this.getBackgroundIdByName = this.getBackgroundIdByName.bind(this);
     this.state = {
       invite_status: null,
+      background_creation_status: null,
       project: null,
       project_users: [],
       totalNumber: null,
@@ -859,12 +860,25 @@ class Samples extends React.Component {
     }
   }
 
-  makeBackground() {
-    if (this.state.selectedSampleIds.length) {
-      window.open(
-        `/samples/heatmap?sample_ids=${this.state.selectedSampleIds}`
-      );
-    }
+  handleCreateBackground(name, description, sample_ids) {
+    var that = this;
+    axios
+      .post("/backgrounds.json", {
+        project: {
+          name: name,
+          description: description,
+          sample_ids: sample_ids
+        },
+        authenticity_token: this.csrf
+      })
+      .then(response => {
+        that.setState({});
+      })
+      .catch(error => {
+        that.setState({
+          background_creation_status: "error"
+        });
+      });
   }
 
   clearAllFilters() {
@@ -1717,18 +1731,17 @@ class BackgroundModal extends React.Component {
     this.setState({ modalOpen: false, name: "", description: "" });
   }
   handleChange(e, { name, value }) {
-    this.setState({ description: value });
+    this.setState({ [e.target.id]: value });
   }
   handleSubmit() {
     this.props.parent.handleCreateBackground(
-      this.state.name,
-      this.state.description,
+      this.state.new_background_name,
+      this.state.new_background_description,
       this.props.parent.state.selectedSampleIds
     );
   }
 
   render() {
-    console.log(this.props);
     return (
       <Modal
         trigger={
@@ -1745,7 +1758,49 @@ class BackgroundModal extends React.Component {
         <Modal.Header className="project_modal_header">
           New Background
         </Modal.Header>
-        <Modal.Content className="modal-content" />
+        <Modal.Content className="modal-content">
+          <Form onSubmit={this.handleSubmit}>
+            <Form.Field>
+              <Form.Input
+                placeholder="Name"
+                className="col s12 browser-default"
+                id="new_background_name"
+                onChange={this.handleChange}
+              />
+            </Form.Field>
+            <Form.Field>
+              <Form.Input
+                placeholder="Description"
+                className="col s12 browser-default"
+                id="new_background_description"
+                onChange={this.handleChange}
+              />
+            </Form.Field>
+            <Form.Field>
+              <Form.Input
+                placeholder={`Sample IDs: ${this.props.parent.state.selectedSampleIds.join(
+                  ", "
+                )}`}
+                className="disabled col s12 browser-default"
+              />
+            </Form.Field>
+            <Button className="create_background_action" type="submit">
+              Create
+            </Button>
+          </Form>
+          {this.props.parent.state.background_creation_status === "success" ? (
+            <div className="status-message status teal-text text-darken-2">
+              <i className="fa fa-smile-o fa-fw" />
+              Background creation kicked off successfully. Background should
+              appear soon.
+            </div>
+          ) : this.props.parent.state.background_creation_status === "error" ? (
+            <div className="status-message">
+              <i className="fa fa-close fa-fw" />
+              Error. Try a different name.
+            </div>
+          ) : null}
+        </Modal.Content>
         <Modal.Actions>
           <button className="modal-close" onClick={this.handleClose}>
             Close
