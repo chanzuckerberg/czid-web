@@ -501,7 +501,7 @@ class SamplesHeatmap extends React.Component {
       <AdvancedThresholdFilterDropdown
         fluid
         labels={this.state.availableOptions.advancedFilters.filters}
-        operators={[">=", "<="]}
+        operators={this.state.availableOptions.advancedFilters.operators}
         filters={this.state.selectedOptions.advancedFilters}
         onChange={this.onAdvancedFilterChange}
         onApply={this.onAdvancedFilterApply}
