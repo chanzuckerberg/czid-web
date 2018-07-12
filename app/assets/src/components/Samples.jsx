@@ -71,7 +71,7 @@ class Samples extends React.Component {
     this.getBackgroundIdByName = this.getBackgroundIdByName.bind(this);
     this.state = {
       invite_status: null,
-      background_creation_status: null,
+      background_creation_response: {},
       project: null,
       project_users: [],
       totalNumber: null,
@@ -861,25 +861,22 @@ class Samples extends React.Component {
   }
 
   handleCreateBackground(name, description, sample_ids) {
-    console.log(name, description, sample_ids);
     var that = this;
     axios
-      .post("/backgrounds.json", {
-        project: {
-          name: name,
-          description: description,
-          sample_ids: sample_ids
-        },
+      .post("/backgrounds", {
+        name: name,
+        description: description,
+        sample_ids: sample_ids,
         authenticity_token: this.csrf
       })
       .then(response => {
         that.setState({
-          background_creation_status: response
+          background_creation_response: response.data
         });
       })
       .catch(error => {
         that.setState({
-          background_creation_status: "error"
+          background_creation_response: {}
         });
       });
   }
@@ -1727,7 +1724,7 @@ class BackgroundModal extends React.Component {
   handleOpen() {
     this.setState({ modalOpen: true, name: "", description: "" });
     this.props.parent.setState({
-      background_creation_status: ""
+      background_creation_response: {}
     });
   }
   handleClose() {
@@ -1791,16 +1788,17 @@ class BackgroundModal extends React.Component {
               Create
             </Button>
           </Form>
-          {this.props.parent.state.background_creation_status === "success" ? (
+          {this.props.parent.state.background_creation_response.status ===
+          "ok" ? (
             <div className="status-message status teal-text text-darken-2">
               <i className="fa fa-smile-o fa-fw" />
               Background creation kicked off successfully. Background should
               appear soon.
             </div>
-          ) : this.props.parent.state.background_creation_status === "error" ? (
+          ) : this.props.parent.state.background_creation_response.message ? (
             <div className="status-message">
               <i className="fa fa-close fa-fw" />
-              Error. Try a different name.
+              {this.props.parent.state.background_creation_response.message}
             </div>
           ) : null}
         </Modal.Content>

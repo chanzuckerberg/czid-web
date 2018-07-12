@@ -1,7 +1,7 @@
 class BackgroundsController < ApplicationController
   include BackgroundsHelper
   before_action :set_background, only: [:show, :edit, :update, :destroy]
-  before_action :admin_required
+  # before_action :admin_required
 
   # GET /backgrounds
   # GET /backgrounds.json
@@ -26,16 +26,22 @@ class BackgroundsController < ApplicationController
   # POST /backgrounds
   # POST /backgrounds.json
   def create
-    @background = Background.new(background_params)
+    Rails.logger.info("Initiate background creation: #{params}")
+    name = params[:name]
+    description = params[:description]
+    sample_ids = params[:sample_ids]
 
-    respond_to do |format|
-      if @background.save
-        format.html { redirect_to @background, notice: 'Background was successfully created.' }
-        format.json { render :show, status: :created, location: @background }
-      else
-        format.html { render :new }
-        format.json { render json: @background.errors, status: :unprocessable_entity }
-      end
+    if Background.find_by(name: name)
+      render json: {
+        status: :conflict,
+        message: "Name already taken; please try a different name."
+      }
+    else
+      pipeline_run_ids = Background.eligible_pipeline_runs.where(sample_id: sample_ids).pluck(:id)
+      Resque.enqueue(CreateBackground, name, description, pipeline_run_ids)
+      render json: {
+        status: :ok
+      }
     end
   end
 
