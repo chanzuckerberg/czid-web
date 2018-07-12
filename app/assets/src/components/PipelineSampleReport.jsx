@@ -40,7 +40,20 @@ class PipelineSampleReport extends React.Component {
     const savedThresholdFilters = ThresholdMap.getSavedThresholdFilters();
     this.category_child_parent = { Phage: "Viruses" };
     this.showConcordance = false;
-    this.allThresholds = ThresholdMap(this.showConcordance);
+    // TODO: move thresholds to server side
+    this.allThresholds = [
+      { name: "Score", value: "NT_aggregatescore" },
+      { name: "NT Z Score", value: "NT_zscore" },
+      { name: "NT rPM", value: "NT_rpm" },
+      { name: "NT r (total reads)", value: "NT_r" },
+      { name: "NT %id", value: "NT_percentidentity" },
+      { name: "NT log(1/e)", value: "NT_neglogevalue" },
+      { name: "NR Z Score", value: "NR_zscore" },
+      { name: "NR r (total reads)", value: "NR_r" },
+      { name: "NR rPM", value: "NR_rpm" },
+      { name: "NR %id", value: "NR_percentidentity" },
+      { name: "R log(1/e)", value: "NR_neglogevalue" }
+    ];
     this.genus_map = {};
 
     this.INVALID_CALL_BASE_TAXID = -1e8;

@@ -105,6 +105,7 @@ class SamplesHeatmap extends React.Component {
     this.onCellClick = this.onCellClick.bind(this);
     this.onDataScaleChange = this.onDataScaleChange.bind(this);
     this.onMetricChange = this.onMetricChange.bind(this);
+    this.onRemoveRow = this.onRemoveRow.bind(this);
     this.onSampleLabelClick = this.onSampleLabelClick.bind(this);
     this.onShareClick = this.onShareClick.bind(this);
     this.onTaxonLevelChange = this.onTaxonLevelChange.bind(this);
@@ -450,13 +451,14 @@ class SamplesHeatmap extends React.Component {
     );
   }
 
-  onMetricChange(_, newMetric) {
-    // this.recluster = true;
+  setSelectedOptionsState(state) {
     this.setState({
-      selectedOptions: Object.assign({}, this.state.selectedOptions, {
-        metric: newMetric.value
-      })
+      selectedOptions: Object.assign({}, this.state.selectedOptions, state)
     });
+  }
+
+  onMetricChange(_, newMetric) {
+    this.setSelectedOptionsState({ metric: newMetric });
     this.optionsChanged = true;
     if (!this.explicitApply) {
       this.updateHeatmap();
@@ -485,11 +487,7 @@ class SamplesHeatmap extends React.Component {
   }
 
   onAdvancedFilterApply(filters) {
-    this.setState({
-      selectedOptions: Object.assign({}, this.state.selectedOptions, {
-        advancedFilters: filters
-      })
-    });
+    this.setSelectedOptionsState({ advancedFilters: filters });
     this.optionsChanged = true;
     if (!this.explicitApply) {
       this.updateHeatmap();
@@ -501,7 +499,7 @@ class SamplesHeatmap extends React.Component {
       <AdvancedThresholdFilterDropdown
         fluid
         labels={this.state.availableOptions.advancedFilters.filters}
-        operators={[">=", "<="]}
+        operators={this.state.availableOptions.advancedFilters.operators}
         filters={this.state.selectedOptions.advancedFilters}
         onChange={this.onAdvancedFilterChange}
         onApply={this.onAdvancedFilterApply}
@@ -516,11 +514,7 @@ class SamplesHeatmap extends React.Component {
       return;
     }
 
-    this.setState({
-      selectedOptions: Object.assign({}, this.state.selectedOptions, {
-        species: d.value
-      })
-    });
+    this.setSelectedOptionsState({ species: d.value });
     this.optionsChanged = true;
     if (!this.explicitApply) {
       this.updateHeatmap();
@@ -542,11 +536,7 @@ class SamplesHeatmap extends React.Component {
 
   onDataScaleChange(_, d) {
     this.recluster = true;
-    this.setState({
-      selectedOptions: Object.assign({}, this.state.selectedOptions, {
-        dataScaleIdx: d.value
-      })
-    });
+    this.setSelectedOptionsState({ dataScaleIdx: d.value });
   }
 
   renderScalePicker() {
@@ -612,12 +602,7 @@ class SamplesHeatmap extends React.Component {
 
   onCategoryChange(e, value) {
     let newValue = value.length ? value : this.state.selectedOptions.categories;
-    // this.recluster = true;
-    this.setState({
-      selectedOptions: Object.assign({}, this.state.selectedOptions, {
-        categories: newValue
-      })
-    });
+    this.setSelectedOptionsState({ categories: newValue });
     this.optionsChanged = true;
     if (!this.explicitApply) {
       this.updateHeatmap();
@@ -644,11 +629,7 @@ class SamplesHeatmap extends React.Component {
   }
 
   onBackgroundChanged(_, newBackground) {
-    this.setState({
-      selectedOptions: Object.assign({}, this.state.selectedOptions, {
-        background: newBackground.value
-      })
-    });
+    this.setSelectedOptionsState({ background: newBackground.value });
     this.optionsChanged = true;
     if (!this.explicitApply) {
       this.updateHeatmap();
@@ -677,10 +658,8 @@ class SamplesHeatmap extends React.Component {
   onTaxonsPerSampleChange(values, handle) {
     let value = parseInt(values[handle]);
     if (value != this.state.selectedOptions.taxonsPerSample) {
-      this.setState({
-        selectedOptions: Object.assign({}, this.state.selectedOptions, {
-          taxonsPerSample: parseInt(values[handle])
-        })
+      this.setSelectedOptionsState({
+        taxonsPerSample: parseInt(values[handle])
       });
       this.optionsChanged = true;
     }

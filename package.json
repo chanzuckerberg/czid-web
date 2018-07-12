@@ -76,5 +76,8 @@
     "semantic-ui-react": "^0.78.3",
     "text-width": "^1.2.0",
     "url-search-params-polyfill": "^3.0.0"
+  },
+  "resolutions": {
+    "eslint-scope": "3.7.1"
   }
 }
