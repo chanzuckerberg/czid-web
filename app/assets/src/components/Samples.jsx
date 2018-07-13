@@ -1798,10 +1798,12 @@ class BackgroundModal extends React.Component {
               />
             </Form.Field>
             <div>
-              <p>Samples:</p>
-              {this.state.sample_names.map((name, index) => (
-                <p key={`background_sample_name_${index}`}>{name}</p>
-              ))}
+              Samples:
+              <ul>
+                {this.state.sample_names.map((name, index) => (
+                  <li key={`background_sample_name_${index}`}>{name}</li>
+                ))}
+              </ul>
             </div>
             <Button className="create_background_action" type="submit">
               Create
