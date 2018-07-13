@@ -25,6 +25,7 @@ ActiveRecord::Schema.define(version: 20_180_712_172_801) do
     t.datetime "updated_at", null: false
     t.bigint "project_id"
     t.text "description"
+    t.integer "public_access", limit: 1
     t.index ["name"], name: "index_backgrounds_on_name", unique: true
   end
 
