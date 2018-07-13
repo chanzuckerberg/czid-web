@@ -1813,8 +1813,8 @@ class BackgroundModal extends React.Component {
           "ok" ? (
             <div className="status-message status teal-text text-darken-2">
               <i className="fa fa-smile-o fa-fw" />
-              Background creation kicked off successfully. Background should
-              appear soon.
+              Background creation kicked off successfully. Background should be
+              available on the report page soon.
             </div>
           ) : this.props.parent.state.background_creation_response.message ? (
             <div className="status-message">
