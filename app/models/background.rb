@@ -74,10 +74,18 @@ class Background < ApplicationRecord
   end
 
   def self.viewable(user)
+    viewable_pipeline_run_ids = PipelineRun.where(sample_id: Sample.viewable(user).pluck(:id)).pluck(:id)
     if user.admin?
       all
     else
-      where(project_id: Project.viewable(user).pluck(:id) + [nil])
+      # backgrounds which are marked as public or for which none of the pipeline_run_ids are ABSENT from the viewable_pipeline_run_ids
+      where("public_access = 1
+             or
+             id in (select background_id from backgrounds_pipeline_runs
+                    where not exists(select null
+                                     from backgrounds_pipeline_runs
+                                     where backgrounds_pipeline_runs.pipeline_run_id not in (#{viewable_pipeline_run_ids.join(',')})))")
+
     end
   end
 end
