@@ -378,7 +378,7 @@ class SamplesController < ApplicationController
   end
 
   def show_sample_names
-    sample_ids = params[sample_ids].split(",").map(&:to_i)
+    sample_ids = params[:sample_ids].split(",").map(&:to_i)
     sample_names = current_power.samples.where(id: sample_ids).pluck(:name)
     render json: { sample_names: sample_names }
   end

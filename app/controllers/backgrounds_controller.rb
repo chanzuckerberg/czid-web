@@ -1,7 +1,11 @@
 class BackgroundsController < ApplicationController
   include BackgroundsHelper
+  before_action :login_required
   before_action :set_background, only: [:show, :edit, :update, :destroy]
-  # before_action :admin_required
+
+  before_action :admin_required, except: :create
+  before_action :authenticate_user!, only: :create
+  before_action :no_demo_user, only: :create
 
   # GET /backgrounds
   # GET /backgrounds.json
@@ -35,6 +39,11 @@ class BackgroundsController < ApplicationController
       render json: {
         status: :conflict,
         message: "Name already taken; please try a different name."
+      }
+    elsif sample_ids.any? { |sid| !current_power.samples.pluck(:id).include?(sid) }
+      render json: {
+        status: :unauthorized,
+        message: "You are not authorized to view all samples in the list."
       }
     else
       pipeline_run_ids = Background.eligible_pipeline_runs.where(sample_id: sample_ids).pluck(:id)
