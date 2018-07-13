@@ -1715,20 +1715,39 @@ function TableDownloadDropdown({ project_id, parent }) {
 class BackgroundModal extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { modalOpen: false, name: "", description: "" };
+    this.state = {
+      modalOpen: false,
+      name: "",
+      description: "",
+      sample_names: []
+    };
     this.handleOpen = this.handleOpen.bind(this);
     this.handleClose = this.handleClose.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.sample_ids = props.parent.state.selectedSampleIds;
   }
   handleOpen() {
-    this.setState({ modalOpen: true, name: "", description: "" });
+    axios.get(`/show_sample_names?sample_ids=${this.sample_ids}`).then(res => {
+      console.log("Hi: ", res);
+      this.setState({
+        modalOpen: true,
+        name: "",
+        description: "",
+        sample_names: res.data.sample_names
+      });
+    });
     this.props.parent.setState({
       background_creation_response: {}
     });
   }
   handleClose() {
-    this.setState({ modalOpen: false, name: "", description: "" });
+    this.setState({
+      modalOpen: false,
+      name: "",
+      description: "",
+      sample_names: []
+    });
   }
   handleChange(e, { name, value }) {
     this.setState({ [e.target.id]: value });
@@ -1762,6 +1781,7 @@ class BackgroundModal extends React.Component {
           <Form onSubmit={this.handleSubmit}>
             <Form.Field>
               <Form.Input
+                label="Name"
                 placeholder="Name"
                 className="col s12 browser-default"
                 id="new_background_name"
@@ -1770,20 +1790,19 @@ class BackgroundModal extends React.Component {
             </Form.Field>
             <Form.Field>
               <Form.Input
+                label="Description"
                 placeholder="Description"
                 className="col s12 browser-default"
                 id="new_background_description"
                 onChange={this.handleChange}
               />
             </Form.Field>
-            <Form.Field>
-              <Form.Input
-                placeholder={`Sample IDs: ${this.props.parent.state.selectedSampleIds.join(
-                  ", "
-                )}`}
-                className="disabled col s12 browser-default"
-              />
-            </Form.Field>
+            <div>
+              <p>Samples:</p>
+              {this.state.sample_names.map((name, index) => (
+                <p key={`background_sample_name_${index}`}>{name}</p>
+              ))}
+            </div>
             <Button className="create_background_action" type="submit">
               Create
             </Button>
