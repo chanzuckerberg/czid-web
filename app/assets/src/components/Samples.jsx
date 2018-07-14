@@ -1725,11 +1725,11 @@ class BackgroundModal extends React.Component {
     this.handleClose = this.handleClose.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.renderTextField = this.renderTextField.bind(this);
     this.sample_ids = props.parent.state.selectedSampleIds;
   }
   handleOpen() {
     axios.get(`/show_sample_names?sample_ids=${this.sample_ids}`).then(res => {
-      console.log("Hi: ", res);
       this.setState({
         modalOpen: true,
         name: "",
@@ -1759,15 +1759,30 @@ class BackgroundModal extends React.Component {
       this.props.parent.state.selectedSampleIds
     );
   }
+  renderTextField(label, id) {
+    return (
+      <Form.Field>
+        <Form.Input
+          label={label}
+          placeholder={label}
+          className="col s12 browser-default"
+          id={id}
+          onChange={this.handleChange}
+        />
+      </Form.Field>
+    );
+  }
 
   render() {
+    let background_creation_response = this.props.parent.state
+      .background_creation_response;
     return (
       <Modal
         trigger={
           <CohortButton
             label="Make Background"
             action={this.handleOpen}
-            enabled={this.props.parent.state.selectedSampleIds.length > 0}
+            enabled={this.sample_ids.length > 0}
           />
         }
         open={this.state.modalOpen}
@@ -1779,24 +1794,8 @@ class BackgroundModal extends React.Component {
         </Modal.Header>
         <Modal.Content className="modal-content">
           <Form onSubmit={this.handleSubmit}>
-            <Form.Field>
-              <Form.Input
-                label="Name"
-                placeholder="Name"
-                className="col s12 browser-default"
-                id="new_background_name"
-                onChange={this.handleChange}
-              />
-            </Form.Field>
-            <Form.Field>
-              <Form.Input
-                label="Description"
-                placeholder="Description"
-                className="col s12 browser-default"
-                id="new_background_description"
-                onChange={this.handleChange}
-              />
-            </Form.Field>
+            {this.renderTextField("Name", "new_background_name")}
+            {this.renderTextField("Description", "new_background_description")}
             <div>
               Samples:
               <ul>
@@ -1809,17 +1808,16 @@ class BackgroundModal extends React.Component {
               Create
             </Button>
           </Form>
-          {this.props.parent.state.background_creation_response.status ===
-          "ok" ? (
+          {background_creation_response.status === "ok" ? (
             <div className="status-message status teal-text text-darken-2">
               <i className="fa fa-smile-o fa-fw" />
               Background creation kicked off successfully. Background should be
               available on the report page soon.
             </div>
-          ) : this.props.parent.state.background_creation_response.message ? (
+          ) : background_creation_response.message ? (
             <div className="status-message">
               <i className="fa fa-close fa-fw" />
-              {this.props.parent.state.background_creation_response.message}
+              {background_creation_response.message}
             </div>
           ) : null}
         </Modal.Content>
