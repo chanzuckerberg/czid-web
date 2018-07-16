@@ -78,7 +78,9 @@ class Background < ApplicationRecord
     if user.admin?
       all
     else
-      # backgrounds which are marked as public or for which none of the pipeline_run_ids are ABSENT from the viewable_pipeline_run_ids
+      # Background is viewable by user if either
+      # (a) user is allowed to view all pipeline_runs that went into the background, or
+      # (b) background is marked as public (regardless of whether user is allowed to view individual pipeline_runs).
       where("public_access = 1
              or
              id not in (select background_id from backgrounds_pipeline_runs

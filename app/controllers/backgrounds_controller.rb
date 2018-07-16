@@ -35,15 +35,20 @@ class BackgroundsController < ApplicationController
     description = params[:description]
     sample_ids = params[:sample_ids]
 
-    if Background.find_by(name: name)
-      render json: {
-        status: :conflict,
-        message: "Name already taken; please try a different name."
-      }
-    elsif sample_ids.any? { |sid| !current_power.samples.pluck(:id).include?(sid) }
+    if sample_ids.any? { |sid| !current_power.samples.pluck(:id).include?(sid) }
       render json: {
         status: :unauthorized,
         message: "You are not authorized to view all samples in the list."
+      }
+    elsif sample_ids.length < 2
+      render json: {
+        status: :not_acceptable,
+        message: "Please select at least 2 samples."
+      }
+    elsif Background.find_by(name: name)
+      render json: {
+        status: :conflict,
+        message: "Name already taken; please try a different name."
       }
     else
       pipeline_run_ids = Background.eligible_pipeline_runs.where(sample_id: sample_ids).pluck(:id)

@@ -876,7 +876,7 @@ class Samples extends React.Component {
       })
       .catch(error => {
         that.setState({
-          background_creation_response: {}
+          background_creation_response: { message: "Something went wrong." }
         });
       });
   }
@@ -1013,7 +1013,7 @@ class Samples extends React.Component {
     let compare_button = (
       <CohortButton
         label="Compare"
-        action={this.compareSamples}
+        onClick={this.compareSamples}
         enabled={this.state.selectedSampleIds.length > 0}
       />
     );
@@ -1781,7 +1781,7 @@ class BackgroundModal extends React.Component {
         trigger={
           <CohortButton
             label="Make Background"
-            action={this.handleOpen}
+            onClick={this.handleOpen}
             enabled={this.sample_ids.length > 0}
           />
         }
@@ -2305,7 +2305,7 @@ function AddUserModalMemberArea({ state, parent }) {
   );
 }
 
-function CohortButton({ label, action, enabled }) {
+function CohortButton({ label, onClick, enabled }) {
   let cohort_button_inner = (
     <span>
       <span
@@ -2321,7 +2321,7 @@ function CohortButton({ label, action, enabled }) {
     <div className="compare-area">
       <div className="white">
         {enabled ? (
-          <a onClick={action} className="compare center">
+          <a onClick={onClick} className="compare center">
             {cohort_button_inner}
           </a>
         ) : (
