@@ -1789,6 +1789,7 @@ class BackgroundModal extends React.Component {
   render() {
     let background_creation_response = this.props.parent.state
       .background_creation_response;
+    console.log(background_creation_response.message);
     return (
       <Modal
         trigger={
@@ -1809,11 +1810,17 @@ class BackgroundModal extends React.Component {
           New Background
         </Modal.Header>
         <Modal.Content className="modal-content">
+          <div>
+            A background is a collection of samples whose microbial content is
+            considered "normal". After creation, a background can be selected on
+            a sample's report page to calculate z-scores indicating how
+            "unusual" each hit on the report is.
+          </div>
           <Form onSubmit={this.handleSubmit}>
             {this.renderTextField("Name", "new_background_name")}
             {this.renderTextField("Description", "new_background_description")}
             <div>
-              Samples:
+              <b>Selected samples:</b>
               <ul>
                 {this.state.sample_names.map((name, index) => (
                   <li key={`background_sample_name_${index}`}>{name}</li>

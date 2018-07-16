@@ -40,22 +40,19 @@ class BackgroundsController < ApplicationController
         status: :unauthorized,
         message: "You are not authorized to view all samples in the list."
       }
-    elsif sample_ids.length < 2
-      render json: {
-        status: :not_acceptable,
-        message: "Please select at least 2 samples."
-      }
-    elsif Background.find_by(name: name)
-      render json: {
-        status: :conflict,
-        message: "Name already taken; please try a different name."
-      }
     else
       pipeline_run_ids = Background.eligible_pipeline_runs.where(sample_id: sample_ids).pluck(:id)
-      Resque.enqueue(CreateBackground, name, description, pipeline_run_ids)
-      render json: {
-        status: :ok
-      }
+      @background = Background.new(name: name, description: description, pipeline_run_ids: pipeline_run_ids)
+      if @background.save
+        render json: {
+          status: :ok
+        }
+      else
+        render json: {
+          status: :not_acceptable,
+          message: @background.errors.full_messages
+        }
+      end
     end
   end
 

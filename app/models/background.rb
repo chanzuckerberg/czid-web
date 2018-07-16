@@ -4,7 +4,8 @@ class Background < ApplicationRecord
   has_many :taxon_summaries, dependent: :destroy
   belongs_to :project, optional: true
   validate :validate_size
-  after_save :store_summary
+  validates :name, uniqueness: true
+  after_save :submit_store_summary_job
 
   DEFAULT_BACKGROUND_MODEL_NAME = "default".freeze
   TAXON_SUMMARY_CHUNK_SIZE = 100
@@ -42,6 +43,10 @@ class Background < ApplicationRecord
       h[:stdev] = compute_stdev(h["sum_rpm"] || 0.0, h["sum_rpm2"] || 0.0, n)
     end
     results
+  end
+
+  def submit_store_summary_job
+    Resque.enqueue(ComputeBackground)
   end
 
   def store_summary
