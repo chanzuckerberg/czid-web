@@ -1010,11 +1010,24 @@ class Samples extends React.Component {
       </div>
     );
 
+    let compare_icon = (
+      <span
+        className="img-container compare-container"
+        dangerouslySetInnerHTML={{
+          __html: IconComponent.compare(colors.disabledGray)
+        }}
+      />
+    );
+
     let compare_button = (
-      <CohortButton
+      <ActiveInactiveButton
         label="Compare"
         onClick={this.compareSamples}
         enabled={this.state.selectedSampleIds.length > 0}
+        icon={compare_icon}
+        outerClass="compare-area"
+        enabledClass="compare center"
+        disabledClass="compare center btn-disabled"
       />
     );
 
@@ -1779,10 +1792,13 @@ class BackgroundModal extends React.Component {
     return (
       <Modal
         trigger={
-          <CohortButton
-            label="Make Background"
+          <ActiveInactiveButton
+            label="New Background"
             onClick={this.handleOpen}
-            enabled={this.sample_ids.length > 0}
+            enabled={this.sample_ids.length > 1}
+            outerClass="background-area"
+            enabledClass="background center"
+            disabledClass="background center btn-disabled"
           />
         }
         open={this.state.modalOpen}
@@ -2305,27 +2321,30 @@ function AddUserModalMemberArea({ state, parent }) {
   );
 }
 
-function CohortButton({ label, onClick, enabled }) {
+function ActiveInactiveButton({
+  label,
+  onClick,
+  enabled,
+  icon,
+  outerClass,
+  enabledClass,
+  disabledClass
+}) {
   let cohort_button_inner = (
     <span>
-      <span
-        className="img-container compare-container"
-        dangerouslySetInnerHTML={{
-          __html: IconComponent.compare(colors.disabledGray)
-        }}
-      />
+      {icon}
       <span>{label}</span>
     </span>
   );
   return (
-    <div className="compare-area">
+    <div className={outerClass}>
       <div className="white">
         {enabled ? (
-          <a onClick={onClick} className="compare center">
+          <a onClick={onClick} className={enabledClass}>
             {cohort_button_inner}
           </a>
         ) : (
-          <a className="compare center btn-disabled">{cohort_button_inner}</a>
+          <a className={disabledClass}>{cohort_button_inner}</a>
         )}
       </div>
     </div>

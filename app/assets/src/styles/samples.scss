@@ -1100,6 +1100,38 @@ input[type="button"] {
       }
 
       padding-top: 15px;
+
+      .background-area {
+        float: right;
+        padding-right: 10px;
+        .white {
+          padding-top: 20px;
+        }
+        .background {
+          padding: 10px;
+          border-radius: 40px;
+          border: 1px solid #3867fa;
+          cursor: pointer;
+          display: block;
+          background: #ffffff;
+          color: #ffffff;
+          font-size: 13.333px;
+          font-family: "Lato", "Helvetica Neue", Arial, Helvetica, sans-serif;
+          font-weight: 700;
+          width: 162px;
+          height: 39px;
+          &:not(.btn-disabled) {
+            // Active
+            color: #3867fa !important;
+          }
+          &:not(.btn-disabled):hover {
+            // Active and hover
+            background: #3867fa;
+            color: #ffffff !important;
+          }
+        }
+      }
+
       .compare-area {
         float: right;
         padding-right: 10px;
