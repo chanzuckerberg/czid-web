@@ -196,7 +196,7 @@ module PipelineOutputsHelper
   def status_display_helper(states_by_output_hash, results_finalized_var)
     # Status display for the frontend.
     h = states_by_output_hash
-    if [1, PipelineRun::FINALIZED_SUCCESS, PipelineRun::FINALIZED_FAIL].include?(results_finalized_var) # 1 is for status_display_pre_result_monitor
+    if [PipelineRun::FINALIZED_SUCCESS, PipelineRun::FINALIZED_FAIL].include?(results_finalized_var)
       if [h["taxon_byteranges"], h["taxon_counts"]].all? { |s| s == PipelineRun::STATUS_LOADED }
         "COMPLETE"
       elsif h["taxon_counts"] == PipelineRun::STATUS_LOADED

@@ -246,12 +246,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def report_ready?
-    if pre_result_monitor?
-      # TODO: migrate old runs so we don't need to deal with them separately in the code
-      job_status == STATUS_CHECKED || (ready_step && pipeline_run_stages.find_by(step_number: ready_step) && pipeline_run_stages.find_by(step_number: ready_step).job_status == STATUS_LOADED)
-    else
-      output_states.find_by(output: REPORT_READY_OUTPUT).state == STATUS_LOADED
-    end
+    output_states.find_by(output: REPORT_READY_OUTPUT).state == STATUS_LOADED
   end
 
   def succeeded?
@@ -369,7 +364,8 @@ class PipelineRun < ApplicationRecord
 
   def output_state_hash(output_states_by_pipeline_run_id)
     h = {}
-    output_states_by_pipeline_run_id[id].each do |o|
+    run_output_states = output_states_by_pipeline_run_id[id] || []
+    run_output_states.each do |o|
       h[o.output] = o.state
     end
     h
@@ -381,31 +377,6 @@ class PipelineRun < ApplicationRecord
 
   def pre_result_monitor?
     results_finalized.nil?
-  end
-
-  def status_display_pre_result_monitor(run_stages)
-    # TODO: remove the need for this function by migrating old runs
-    state_by_output = {}
-    old_loaders_by_output = { "db_load_host_filtering" => "ercc_counts",
-                              "db_load_alignment" => "taxon_counts",
-                              "db_load_postprocess" => "taxon_byteranges" }
-    run_stages.each do |rs|
-      state_by_output[old_loaders_by_output[rs.load_db_command_func]] = rs.job_status
-    end
-    status_display_helper(state_by_output, finalized)
-  end
-
-  def status_display_pre_run_stages
-    # TODO: remove the need for this function by migrating old runs
-    if %w[CHECKED SUCCEEDED].include?(job_status)
-      'COMPLETE'
-    elsif %w[FAILED ERROR].include?(job_status)
-      'FAILED'
-    elsif %w[RUNNING LOADED].include?(job_status)
-      'IN PROGRESS'
-    else
-      'WAITING'
-    end
   end
 
   def check_and_enqueue(output_state)
