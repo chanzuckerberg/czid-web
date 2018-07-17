@@ -34,7 +34,12 @@ class BackgroundsController < ApplicationController
     sample_ids = params[:sample_ids]
 
     non_viewable_sample_ids = sample_ids.to_set - current_power.samples.pluck(:id).to_set
-    if non_viewable_sample_ids.empty?
+    if !non_viewable_sample_ids.empty?
+      render json: {
+        status: :unauthorized,
+        message: "You are not authorized to view all samples in the list."
+      }
+    else
       pipeline_run_ids = Background.eligible_pipeline_runs.where(sample_id: sample_ids).pluck(:id)
       @background = Background.new(name: name, description: description, pipeline_run_ids: pipeline_run_ids)
       if @background.save
@@ -47,11 +52,6 @@ class BackgroundsController < ApplicationController
           message: @background.errors.full_messages
         }
       end
-    else
-      render json: {
-        status: :unauthorized,
-        message: "You are not authorized to view all samples in the list."
-      }
     end
   end
 
