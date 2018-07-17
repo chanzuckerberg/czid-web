@@ -30,3 +30,27 @@ six:
   name: RR004_water_2_S23-20180208
   project: one
   host_genome: two
+
+public_project_sampleA:
+  name: public_project_sampleA
+  project: public_project
+
+public_project_sampleB:
+  name: public_project_sampleB
+  project: public_project
+
+joe_project_sampleB:
+  name: joe_project_sampleB
+  project: joe_project
+
+joe_project_sampleA:
+  name: joe_project_sampleA
+  project: joe_project
+
+project_one_sampleA:
+  name: project_one_sampleA_run
+  project: one
+
+project_one_sampleB:
+  name: project_one_sampleB
+  project: one

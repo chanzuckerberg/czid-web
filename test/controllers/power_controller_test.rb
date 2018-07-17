@@ -49,7 +49,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     @joe_project = projects(:joe_project)
     get "/samples.json?project_id=#{@joe_project.id}"
     assert_response :success
-    assert JSON.parse(@response.body)["total_count"] == 1
+    assert JSON.parse(@response.body)["total_count"] == 3
   end
 
   test 'joe can see joe_sample' do
@@ -101,7 +101,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     @public_project = projects(:public_project)
     get "/samples.json?project_id=#{@public_project.id}"
     assert_response :success
-    assert JSON.parse(@response.body)["total_count"] == 1
+    assert JSON.parse(@response.body)["total_count"] == 3
   end
 
   test 'joe can see public_sample' do

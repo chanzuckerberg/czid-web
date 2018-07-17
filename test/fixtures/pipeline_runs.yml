@@ -33,3 +33,33 @@ six:
   total_reads: 1122
   adjusted_remaining_reads: 316
   subsample: 1000000
+public_project_sampleA_run:
+  sample: public_project_sampleA
+  job_id: 'public_project_sampleA_job'
+  total_reads: 1
+  adjusted_remaining_reads: 1
+public_project_sampleB_run:
+  sample: public_project_sampleB
+  job_id: 'public_project_sampleB_job'
+  total_reads: 1
+  adjusted_remaining_reads: 1
+joe_project_sampleA_run:
+  sample: joe_project_sampleA
+  job_id: 'joe_project_sampleA_job'
+  total_reads: 1
+  adjusted_remaining_reads: 1
+joe_project_sampleB_run:
+  sample: joe_project_sampleB
+  job_id: 'joe_project_sampleB_job'
+  total_reads: 1
+  adjusted_remaining_reads: 1
+project_one_sampleA_run:
+  sample: project_one_sampleA
+  job_id: 'project_one_sampleA_job'
+  total_reads: 1
+  adjusted_remaining_reads: 1
+project_one_sampleB_run:
+  sample: project_one_sampleB
+  job_id: 'project_one_sampleB_job'
+  total_reads: 1
+  adjusted_remaining_reads: 1
