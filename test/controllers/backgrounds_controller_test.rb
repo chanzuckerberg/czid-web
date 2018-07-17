@@ -13,10 +13,8 @@ class BackgroundsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should create background" do
-    assert_difference('Background.count') do
-      post backgrounds_url, params: { background: { name: 'new_name', sample_ids: [samples(:expired_sample).id, samples(:public_sample).id] } }
-    end
-    assert_redirected_to background_url(Background.last)
+    post backgrounds_url, params: { name: 'new_name', sample_ids: [samples(:expired_sample).id, samples(:public_sample).id] }
+    assert_response :success
   end
 
   test "should show background" do
