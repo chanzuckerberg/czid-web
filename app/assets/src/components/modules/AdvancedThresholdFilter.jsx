@@ -204,6 +204,12 @@ AdvancedThresholdFilter.propTypes = {
 };
 
 class AdvancedThresholdFilterDropdown extends React.Component {
+  static get defaultProps() {
+    return {
+      label: "Advanced Options:"
+    };
+  }
+
   constructor(props) {
     super(props);
     this.applyOnHide = this.props.applyOnHide;
@@ -233,7 +239,7 @@ class AdvancedThresholdFilterDropdown extends React.Component {
             className="active-threshold-filter-dropdown"
             trigger={
               <span>
-                Advanced Filters <Label>{validFilters.length}</Label>
+                <b>{this.props.label}</b> <Label>{validFilters.length}</Label>
               </span>
             }
             open={false}

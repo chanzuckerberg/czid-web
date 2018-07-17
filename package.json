@@ -66,6 +66,7 @@
     "prettier": "^1.12.1",
     "prop-types": "^15.6.0",
     "query-string": "^6.1.0",
+    "rc-slider": "^8.6.1",
     "react": "^16.2.0",
     "react-autocomplete": "^1.7.2",
     "react-dom": "^16.2.0",
@@ -76,5 +77,8 @@
     "semantic-ui-react": "^0.78.3",
     "text-width": "^1.2.0",
     "url-search-params-polyfill": "^3.0.0"
+  },
+  "resolutions": {
+    "eslint-scope": "3.7.1"
   }
 }
