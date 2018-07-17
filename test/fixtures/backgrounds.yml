@@ -15,6 +15,7 @@ real_background:
 public_background:
   name: "public background"
   pipeline_runs: [three, four]
+  public_access: 1
 
 background_for_public_project:
   name: "All 'Public Project' samples"

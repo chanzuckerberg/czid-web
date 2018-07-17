@@ -106,9 +106,4 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     delete background_url(@background)
     assert_redirected_to root_url
   end
-
-  test ' background -non admin shouldnt create ' do
-    post backgrounds_url, params: { background: { name: "dsfsdfd" } }
-    assert_redirected_to root_url
-  end
 end

@@ -30,7 +30,6 @@ class BackgroundsController < ApplicationController
   # POST /backgrounds
   # POST /backgrounds.json
   def create
-    Rails.logger.info("Initiate background creation: #{params}")
     name = params[:name]
     description = params[:description]
     sample_ids = params[:sample_ids]

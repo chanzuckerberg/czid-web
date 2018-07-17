@@ -12,26 +12,15 @@ class BackgroundsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "should get new" do
-    get new_background_url
-    assert_response :success
-  end
-
   test "should create background" do
     assert_difference('Background.count') do
-      post backgrounds_url, params: { background: { name: 'new_name', pipeline_run_ids: @background.pipeline_runs.map(&:id) } }
+      post backgrounds_url, params: { background: { name: 'new_name', sample_ids: @background.pipeline_runs.map { |s| s.sample.id } } }
     end
-
     assert_redirected_to background_url(Background.last)
   end
 
   test "should show background" do
     get background_url(@background)
-    assert_response :success
-  end
-
-  test "should get edit" do
-    get edit_background_url(@background)
     assert_response :success
   end
 

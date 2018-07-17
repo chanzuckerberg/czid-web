@@ -4,7 +4,7 @@ class Background < ApplicationRecord
   has_many :taxon_summaries, dependent: :destroy
   belongs_to :project, optional: true
   validate :validate_size
-  validates :name, uniqueness: true
+  validates :name, presence: true, uniqueness: true
   after_save :submit_store_summary_job
 
   DEFAULT_BACKGROUND_MODEL_NAME = "default".freeze
@@ -79,17 +79,19 @@ class Background < ApplicationRecord
   end
 
   def self.viewable(user)
-    viewable_pipeline_run_ids = PipelineRun.where(sample_id: Sample.viewable(user).pluck(:id)).pluck(:id)
     if user.admin?
       all
     else
       # Background is viewable by user if either
       # (a) user is allowed to view all pipeline_runs that went into the background, or
       # (b) background is marked as public (regardless of whether user is allowed to view individual pipeline_runs).
-      where("public_access = 1
-             or
-             id not in (select background_id from backgrounds_pipeline_runs
-                        where pipeline_run_id not in (#{viewable_pipeline_run_ids.join(',')}))")
+      condition = "public_access = 1"
+      viewable_pipeline_run_ids = PipelineRun.where(sample_id: Sample.viewable(user).pluck(:id)).pluck(:id)
+      unless viewable_pipeline_run_ids.empty?
+        condition += "or id not in (select background_id from backgrounds_pipeline_runs
+                                    where pipeline_run_id not in (#{viewable_pipeline_run_ids.join(',')}))"
+      end
+      where(condition)
     end
   end
 end
