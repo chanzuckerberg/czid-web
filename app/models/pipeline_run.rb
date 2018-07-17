@@ -288,7 +288,9 @@ class PipelineRun < ApplicationRecord
 
   def db_load_taxon_counts
     output_json_s3_path = "#{alignment_output_s3_path}/#{taxon_counts_json_name}"
-    downloaded_json_path = PipelineRun.download_file(output_json_s3_path, local_json_path)
+    downloaded_json_path = PipelineRun.download_file_with_retries(output_json_s3_path,
+                                                                  local_json_path, 3)
+    Airbrake.notify("PipelineRun #{id} failed taxon_counts download") unless downloaded_json_path
     return unless downloaded_json_path
 
     json_dict = JSON.parse(File.read(downloaded_json_path))
@@ -589,6 +591,16 @@ class PipelineRun < ApplicationRecord
 
   def local_json_path
     "#{LOCAL_JSON_PATH}/#{id}"
+  end
+
+  def self.download_file_with_retries(s3_path, destination_dir, max_tries)
+    round = 0
+    while round < max_tries
+      downloaded = PipelineRun.download_file(s3_path, destination_dir)
+      return downloaded if downloaded
+      round += 1
+      sleep(15)
+    end
   end
 
   def self.download_file(s3_path, destination_dir)
