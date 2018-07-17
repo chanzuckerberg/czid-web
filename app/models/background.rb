@@ -88,7 +88,7 @@ class Background < ApplicationRecord
       condition = "public_access = 1"
       viewable_pipeline_run_ids = PipelineRun.where(sample_id: Sample.viewable(user).pluck(:id)).pluck(:id)
       unless viewable_pipeline_run_ids.empty?
-        condition += "or id not in (select background_id from backgrounds_pipeline_runs
+        condition += " or id not in (select background_id from backgrounds_pipeline_runs
                                     where pipeline_run_id not in (#{viewable_pipeline_run_ids.join(',')}))"
       end
       where(condition)

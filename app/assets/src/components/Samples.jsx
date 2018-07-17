@@ -1840,7 +1840,7 @@ class BackgroundModal extends React.Component {
           ) : background_creation_response.message ? (
             <div className="status-message">
               <i className="fa fa-close fa-fw" />
-              {background_creation_response.message}
+              {background_creation_response.message.join("; ")}
             </div>
           ) : null}
         </Modal.Content>
@@ -2337,7 +2337,7 @@ function ActiveInactiveButton({
   enabledClass,
   disabledClass
 }) {
-  let cohort_button_inner = (
+  let button_inner = (
     <span>
       {icon}
       <span>{label}</span>
@@ -2348,10 +2348,10 @@ function ActiveInactiveButton({
       <div className="white">
         {enabled ? (
           <a onClick={onClick} className={enabledClass}>
-            {cohort_button_inner}
+            {button_inner}
           </a>
         ) : (
-          <a className={disabledClass}>{cohort_button_inner}</a>
+          <a className={disabledClass}>{button_inner}</a>
         )}
       </div>
     </div>
