@@ -31,9 +31,13 @@ def migrate_pre_result_monitor(pr)
                             "db_load_postprocess" => "taxon_byteranges" }
   run_stages = pr.pipeline_run_stages
   run_stages.each do |rs|
-    OutputState.create(pipeline_run_id: pr.id,
-                       output: old_loaders_by_output[rs.load_db_command_func],
-                       state: rs.job_status)
+    output_name = old_loaders_by_output[rs.load_db_command_func]
+    if output_name.present?
+      # don't include stages that are not represent in old_loaders_by_output (such as the old assembly stage)
+      OutputState.create(pipeline_run_id: pr.id,
+                         output: output_name,
+                         state: rs.job_status)
+    end
   end
   if pr.all_output_states_loaded?
     pr.update(results_finalized: PipelineRun::FINALIZED_SUCCESS)
