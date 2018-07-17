@@ -11,20 +11,18 @@ def record_previous_state(pr)
 end
 
 def migrate_pre_run_stages(pr)
-  target_outputs = %w[ercc_counts taxon_counts taxon_byteranges]
+  pr.create_run_stages
+  pr.create_output_states
   if %w[CHECKED SUCCEEDED].include?(pr.job_status)
+    pr.update(finalized: 1)
     pr.update(results_finalized: PipelineRun::FINALIZED_SUCCESS)
-    target_outputs.each do |output|
-      OutputState.create(pipeline_run_id: pr.id, output: output, state: PipelineRun::STATUS_LOADED)
-    end
+    pr.output_states.each { |s| s.update(state: PipelineRun::STATUS_LOADED) }
   elsif %w[FAILED ERROR].include?(pr.job_status)
-    pr.create_output_states
+    pr.update(finalized: 1)
     pr.update(results_finalized: PipelineRun::FINALIZED_FAIL)
   else
-    pr.create_output_states
     pr.update(results_finalized: PipelineRun::IN_PROGRESS) # shouldn't be the case for any of those old runs
   end
-  pr.create_run_stages
 end
 
 def migrate_pre_result_monitor(pr)
