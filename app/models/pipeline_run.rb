@@ -4,6 +4,7 @@ class PipelineRun < ApplicationRecord
   include ApplicationHelper
   include PipelineOutputsHelper
   belongs_to :sample
+  belongs_to :alignment_config
   has_many :pipeline_run_stages
   accepts_nested_attributes_for :pipeline_run_stages
   has_and_belongs_to_many :backgrounds
