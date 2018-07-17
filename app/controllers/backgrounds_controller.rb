@@ -1,11 +1,12 @@
 class BackgroundsController < ApplicationController
   include BackgroundsHelper
   before_action :login_required
-  before_action :set_background, only: [:show, :edit, :update, :destroy]
-
+  before_action :authenticate_user!
+  before_action :no_demo_user
+  
   before_action :admin_required, except: :create
-  before_action :authenticate_user!, only: :create
-  before_action :no_demo_user, only: :create
+
+  before_action :set_background, only: [:show, :edit, :update, :destroy]
 
   # GET /backgrounds
   # GET /backgrounds.json
