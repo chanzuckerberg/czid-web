@@ -25,20 +25,6 @@ ActiveRecord::Schema.define(version: 20_180_716_215_830) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "alignment_indices", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
-    t.string "name"
-    t.string "index_dir_suffix"
-    t.text "s3_nt_db_path"
-    t.text "s3_nt_loc_db_path"
-    t.text "s3_nr_db_path"
-    t.text "s3_nr_loc_db_path"
-    t.text "s3_lineage_path"
-    t.text "s3_accession2taxid_path"
-    t.text "s3_deuterostome_db_path"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
   create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "archive_of"
     t.text "data"
