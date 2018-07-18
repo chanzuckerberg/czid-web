@@ -1021,7 +1021,7 @@ class SampleUpload extends React.Component {
                             className="browser-default"
                             ref="alignment_config_name"
                             value={this.state.selectedAlignmentConfigName}
-                            placeholder="master"
+                            placeholder="2018-02-15"
                             onChange={this.handleAlignmentConfigNameChange}
                           />
                         </div>
