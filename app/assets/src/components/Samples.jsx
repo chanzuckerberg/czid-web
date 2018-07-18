@@ -36,7 +36,7 @@ class Samples extends React.Component {
     this.allProjects = props.projects || [];
     this.pageSize = props.pageSize || 30;
     this.sampleAttributeHelper = {};
-    this.sampleAttributeKeys = ["name", "project_id"];
+    this.sampleAttributesToStore = ["name", "project_id", "pipeline_run_id"];
 
     this.getSampleAttribute = this.getSampleAttribute.bind(this);
     this.fetchAllSelectedIds = this.fetchAllSelectedIds.bind(this);
@@ -248,10 +248,18 @@ class Samples extends React.Component {
     });
   }
 
-  getSampleAttribute(dbSample, key) {
+  getSampleAttribute(sample, key) {
+    let value;
+    console.log(sample);
     if (key === "name" || key === "project_id") {
-      return dbSample[key];
+      value = sample.db_sample[key];
+    } else if (key === "pipeline_run_id") {
+      let pipeline_run = sample.derived_sample_output.pipeline_run;
+      if (pipeline_run) {
+        value = pipeline_run.id;
+      }
     }
+    return value;
   }
 
   selectTissueFilter(e) {
@@ -604,7 +612,7 @@ class Samples extends React.Component {
         <PipelineOutputCards
           i={i}
           key={i}
-          dbSample={dbSample}
+          sample={sample}
           report_ready={sample.run_info.report_ready}
           sample_name_info={sample_name_info}
           stageStatus={stageStatus}
@@ -838,6 +846,7 @@ class Samples extends React.Component {
   }
 
   fetchAllSelectedIds(e) {
+    // Selects all samples and records the attributes in sampleAttributesToStore for each sample
     let sampleList = this.state.selectedSampleIds;
     const checked = e.target.checked;
     const allSamples = this.state.allSamples;
@@ -851,8 +860,8 @@ class Samples extends React.Component {
           sampleList.push(sample_id);
           // Also keep track of certain data for the sample that was just added
           let attributeHash = {};
-          for (let key of this.sampleAttributeKeys) {
-            attributeHash[key] = this.getSampleAttribute(sample.db_sample, key);
+          for (let key of this.sampleAttributesToStore) {
+            attributeHash[key] = this.getSampleAttribute(sample, key);
           }
           this.sampleAttributeHelper[sample_id] = attributeHash;
         }
@@ -860,6 +869,7 @@ class Samples extends React.Component {
         let index = sampleList.indexOf(sample_id);
         if (index >= 0) {
           sampleList.splice(index, 1);
+          delete this.sampleAttributeHelper[sample_id];
         }
       }
     }
@@ -913,8 +923,9 @@ class Samples extends React.Component {
   }
 
   selectSample(e) {
-    // current array of options
+    // Stores selected sample IDs and records the attributes in sampleAttributesToStore for each sample
     const sampleList = this.state.selectedSampleIds;
+    let attributeHash = {};
 
     let sample_id = parseInt(e.target.getAttribute("data-sample-id"));
 
@@ -923,8 +934,7 @@ class Samples extends React.Component {
       if (sampleList.indexOf(sample_id) < 0) {
         sampleList.push(+sample_id);
         // also keep track of certain data for the sample that was just added
-        let attributeHash = {};
-        for (let key of this.sampleAttributeKeys) {
+        for (let key of this.sampleAttributesToStore) {
           attributeHash[key] = e.target.getAttribute("data-sample-" + key);
         }
         this.sampleAttributeHelper[sample_id] = attributeHash;
@@ -934,6 +944,7 @@ class Samples extends React.Component {
       let index = sampleList.indexOf(+sample_id);
       if (index >= 0) {
         sampleList.splice(index, 1);
+        delete this.sampleAttributeHelper[sample_id];
       }
     }
     // update the state with the new array of options
@@ -1633,7 +1644,7 @@ function AddValOrBlank(all, sample, key) {
 
 function PipelineOutputCards({
   i,
-  dbSample,
+  sample,
   report_ready,
   sample_name_info,
   stageStatus,
@@ -1641,6 +1652,7 @@ function PipelineOutputCards({
   data_values,
   parent
 }) {
+  let dbSample = sample.db_sample;
   return (
     <a className="col s12 no-padding sample-feed" key={i}>
       <div>
@@ -1648,7 +1660,7 @@ function PipelineOutputCards({
           <div className="flex-container">
             <ul className="flex-items">
               <SampleCardCheckboxes
-                dbSample={dbSample}
+                sample={sample}
                 report_ready={report_ready}
                 sample_name_info={sample_name_info}
                 i={i}
@@ -1759,30 +1771,46 @@ class BackgroundModal extends React.Component {
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.renderTextField = this.renderTextField.bind(this);
-    this.getSampleNames = this.getSampleNames.bind(this);
+    this.renderSampleList = this.renderSampleList.bind(this);
     this.sample_ids = props.parent.state.selectedSampleIds;
-    this.sample_names = [];
     this.sampleAttributeHelper = props.parent.sampleAttributeHelper;
   }
-  getSampleNames(sampleIds) {
-    console.log(this.sampleAttributeHelper);
-    console.log("sample_ids: ", sampleIds);
-    var names = [];
-    for (let sample_id of sampleIds) {
-      console.log("this id: ", sample_id);
-      console.log(
-        "this record: ",
-        this.sampleAttributeHelper[sample_id.toString()]
-      );
+  renderSampleList() {
+    let sample_list = [];
+    for (let sample_id of this.sample_ids) {
       if (this.sampleAttributeHelper.hasOwnProperty(sample_id)) {
-        names.push(this.sampleAttributeHelper[sample_id].name);
+        let sample_attributes = this.sampleAttributeHelper[sample_id];
+        let sample_name = sample_attributes.name;
+        let sample_details =
+          " (project_id: " +
+          sample_attributes.project_id +
+          ", " +
+          " pipeline_run_id: " +
+          sample_attributes.pipeline_run_id +
+          ")";
+        let sample_display = this.props.parent.admin ? (
+          <span>
+            <b>{sample_name}</b>
+            {sample_details}
+          </span>
+        ) : (
+          <span>{sample_name}</span>
+        );
+        sample_list.push(sample_display);
       }
     }
-    console.log("names: ", names);
-    return names;
+    return (
+      <div>
+        <b>Selected samples:</b>
+        <ul>
+          {sample_list.map((text, index) => (
+            <li key={`background_sample_${index}`}>{text}</li>
+          ))}
+        </ul>
+      </div>
+    );
   }
   handleOpen() {
-    this.sample_names = this.getSampleNames(this.sample_ids);
     axios.get(`/show_sample_names?sample_ids=${this.sample_ids}`).then(res => {
       this.setState({
         modalOpen: true,
@@ -1833,7 +1861,7 @@ class BackgroundModal extends React.Component {
       <Modal
         trigger={
           <ActiveInactiveButton
-            label="New Background"
+            label="Create Collection"
             onClick={this.handleOpen}
             enabled={this.sample_ids.length > 1}
             outerClass="background-area"
@@ -1846,28 +1874,24 @@ class BackgroundModal extends React.Component {
         className="modal project-popup add-user-modal"
       >
         <Modal.Header className="project_modal_header">
-          New Background
+          Create a Collection
         </Modal.Header>
         <Modal.Content className="modal-content">
           <div>
-            A background is a collection of samples whose microbial content is
-            considered "normal". After creation, a background can be selected on
-            a sample's report page to calculate z-scores indicating how
-            "unusual" each hit on the report is.
+            A collection is a group of samples. You can use this collection as a
+            background model to be selected on a sample report page. It'll
+            update the calculated z-score to indicate how much the the sample
+            deviates from the norm for that collection.
           </div>
           <Form onSubmit={this.handleSubmit}>
             {this.renderTextField("Name", "new_background_name")}
             {this.renderTextField("Description", "new_background_description")}
-            <div>
-              <b>Selected samples:</b>
-              <ul>
-                {this.sample_names.map((name, index) => (
-                  <li key={`background_sample_name_${index}`}>{name}</li>
-                ))}
-              </ul>
-            </div>
+            {this.renderSampleList()}
             <Button className="create_background_action" type="submit">
               Create
+            </Button>
+            <Button className="modal-close" onClick={this.handleClose}>
+              Cancel
             </Button>
           </Form>
           {background_creation_response.status === "ok" ? (
@@ -1883,11 +1907,6 @@ class BackgroundModal extends React.Component {
             </div>
           ) : null}
         </Modal.Content>
-        <Modal.Actions>
-          <button className="modal-close" onClick={this.handleClose}>
-            Close
-          </button>
-        </Modal.Actions>
       </Modal>
     );
   }
@@ -2170,29 +2189,34 @@ function ColumnPopups({ pos, colMap, column_name }) {
 }
 
 function SampleCardCheckboxes({
-  dbSample,
+  sample,
   report_ready,
   sample_name_info,
   i,
   parent
 }) {
+  let sampleAttributeProps = {};
+  for (let key of parent.sampleAttributesToStore) {
+    sampleAttributeProps["data-sample-" + key] = parent.getSampleAttribute(
+      sample,
+      key
+    );
+  }
   return (
     <li className="check-box-container">
       {parent.state.displaySelectSamples ? (
         <div>
           <input
+            {...sampleAttributeProps}
             type="checkbox"
             id={i}
             onClick={parent.selectSample}
-            key={`sample_${dbSample.id}`}
-            data-sample-id={dbSample.id}
-            data-sample-name={parent.getSampleAttribute(dbSample, "name")}
-            data-sample-project_id={parent.getSampleAttribute(
-              dbSample,
-              "project_id"
-            )}
+            key={`sample_${sample.db_sample.id}`}
+            data-sample-id={sample.db_sample.id}
             className="filled-in checkbox"
-            checked={parent.state.selectedSampleIds.indexOf(dbSample.id) >= 0}
+            checked={
+              parent.state.selectedSampleIds.indexOf(sample.db_sample.id) >= 0
+            }
             disabled={report_ready != 1}
           />{" "}
           <label htmlFor={i}>{sample_name_info}</label>
