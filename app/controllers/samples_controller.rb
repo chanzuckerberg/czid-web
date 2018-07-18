@@ -87,8 +87,8 @@ class SamplesController < ApplicationController
 
   # GET /samples/bulk_new
   def bulk_new
-    @projects = current_power.projects
-    @host_genomes = HostGenome.all
+    @projects = current_power.updatable_projects
+    @host_genomes = host_genomes_list ? host_genomes_list : nil
   end
 
   def bulk_import
