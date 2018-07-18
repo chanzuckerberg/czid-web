@@ -240,6 +240,7 @@ class PipelineRunStage < ApplicationRecord
       input_file_count: sample.input_files.count,
       skip_dedeuterostome_filter: sample.skip_deutero_filter_flag,
       pipeline_version: pipeline_run.pipeline_version || pipeline_run.fetch_pipeline_run_version,
+      index_dir_suffix: alignment_config.index_dir_suffix,
       lineage_db: alignment_config.s3_lineage_path,
       accession2taxid_db: alignment_config.s3_accession2taxid_path,
       deuterostome_db: alignment_config.s3_deuterostome_db_path
