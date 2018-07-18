@@ -255,6 +255,7 @@ ActiveRecord::Schema.define(version: 20_180_716_215_830) do
     t.text "sample_diagnosis"
     t.string "sample_organism"
     t.string "sample_detection"
+    t.string "alignment_config_name"
     t.index %w[project_id name], name: "index_samples_name_project_id", unique: true
     t.index ["user_id"], name: "index_samples_on_user_id"
   end

@@ -39,13 +39,17 @@ class CreateAlignmentConfigs < ActiveRecord::Migration[5.1]
     ac2.save!
 
     add_column :pipeline_runs, :alignment_config_id, :bigint
+    add_column :samples, :alignment_config_name, :string
     # set the alignment_config_id to the one we are using prior to alignment config
     ActiveRecord::Base.connection.execute("UPDATE pipeline_runs
                                            SET alignment_config_id = #{ac1.id}")
+    ActiveRecord::Base.connection.execute("UPDATE samples
+                                           SET alignment_config_name = '#{ac1.name}'")
   end
 
   def down
     drop_table :alignment_configs
     remove_column :pipeline_runs, :alignment_config_id
+    remove_column :samples, :alignment_config_name
   end
 end
