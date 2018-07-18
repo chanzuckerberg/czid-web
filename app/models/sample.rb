@@ -442,6 +442,8 @@ class Sample < ApplicationRecord
     pr.pipeline_branch = pipeline_branch.blank? ? "master" : pipeline_branch
     pr.pipeline_commit = `git ls-remote https://github.com/chanzuckerberg/idseq-dag.git | grep refs/heads/#{pr.pipeline_branch}`.split[0]
 
+    pr.alignment_config = AlignmentConfig.find_by(name: alignment_config_name) if alignment_config_name
+    pr.alignment_config ||= AlignmentConfig.find_by(name: AlignmentConfig::DEFAULT_NAME)
     pr.save
   end
 end
