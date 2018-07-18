@@ -35,7 +35,10 @@ class Samples extends React.Component {
     this.favoriteProjects = props.favorites || [];
     this.allProjects = props.projects || [];
     this.pageSize = props.pageSize || 30;
+    this.sampleAttributeHelper = {};
+    this.sampleAttributeKeys = ["name", "project_id"];
 
+    this.getSampleAttribute = this.getSampleAttribute.bind(this);
     this.fetchAllSelectedIds = this.fetchAllSelectedIds.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
     this.columnSorting = this.columnSorting.bind(this);
@@ -243,6 +246,12 @@ class Samples extends React.Component {
         offset: "0px 50px"
       });
     });
+  }
+
+  getSampleAttribute(dbSample, key) {
+    if (key === "name" || key === "project_id") {
+      return dbSample[key];
+    }
   }
 
   selectTissueFilter(e) {
@@ -840,6 +849,12 @@ class Samples extends React.Component {
       if (checked) {
         if (sampleList.indexOf(sample_id) === -1) {
           sampleList.push(sample_id);
+          // Also keep track of certain data for the sample that was just added
+          let attributeHash = {};
+          for (let key of this.sampleAttributeKeys) {
+            attributeHash[key] = this.getSampleAttribute(sample.db_sample, key);
+          }
+          this.sampleAttributeHelper[sample_id] = attributeHash;
         }
       } else {
         let index = sampleList.indexOf(sample_id);
@@ -907,6 +922,12 @@ class Samples extends React.Component {
       // add the numerical value of the checkbox to options array
       if (sampleList.indexOf(sample_id) < 0) {
         sampleList.push(+sample_id);
+        // also keep track of certain data for the sample that was just added
+        let attributeHash = {};
+        for (let key of this.sampleAttributeKeys) {
+          attributeHash[key] = e.target.getAttribute("data-sample-" + key);
+        }
+        this.sampleAttributeHelper[sample_id] = attributeHash;
       }
     } else {
       // or remove the value from the unchecked checkbox from the array
@@ -1731,23 +1752,42 @@ class BackgroundModal extends React.Component {
     this.state = {
       modalOpen: false,
       name: "",
-      description: "",
-      sample_names: []
+      description: ""
     };
     this.handleOpen = this.handleOpen.bind(this);
     this.handleClose = this.handleClose.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.renderTextField = this.renderTextField.bind(this);
+    this.getSampleNames = this.getSampleNames.bind(this);
     this.sample_ids = props.parent.state.selectedSampleIds;
+    this.sample_names = [];
+    this.sampleAttributeHelper = props.parent.sampleAttributeHelper;
+  }
+  getSampleNames(sampleIds) {
+    console.log(this.sampleAttributeHelper);
+    console.log("sample_ids: ", sampleIds);
+    var names = [];
+    for (let sample_id of sampleIds) {
+      console.log("this id: ", sample_id);
+      console.log(
+        "this record: ",
+        this.sampleAttributeHelper[sample_id.toString()]
+      );
+      if (this.sampleAttributeHelper.hasOwnProperty(sample_id)) {
+        names.push(this.sampleAttributeHelper[sample_id].name);
+      }
+    }
+    console.log("names: ", names);
+    return names;
   }
   handleOpen() {
+    this.sample_names = this.getSampleNames(this.sample_ids);
     axios.get(`/show_sample_names?sample_ids=${this.sample_ids}`).then(res => {
       this.setState({
         modalOpen: true,
         name: "",
-        description: "",
-        sample_names: res.data.sample_names
+        description: ""
       });
     });
     this.props.parent.setState({
@@ -1755,11 +1795,11 @@ class BackgroundModal extends React.Component {
     });
   }
   handleClose() {
+    this.sample_names = [];
     this.setState({
       modalOpen: false,
       name: "",
-      description: "",
-      sample_names: []
+      description: ""
     });
   }
   handleChange(e, { name, value }) {
@@ -1789,7 +1829,6 @@ class BackgroundModal extends React.Component {
   render() {
     let background_creation_response = this.props.parent.state
       .background_creation_response;
-    console.log(background_creation_response.message);
     return (
       <Modal
         trigger={
@@ -1822,7 +1861,7 @@ class BackgroundModal extends React.Component {
             <div>
               <b>Selected samples:</b>
               <ul>
-                {this.state.sample_names.map((name, index) => (
+                {this.sample_names.map((name, index) => (
                   <li key={`background_sample_name_${index}`}>{name}</li>
                 ))}
               </ul>
@@ -2147,6 +2186,11 @@ function SampleCardCheckboxes({
             onClick={parent.selectSample}
             key={`sample_${dbSample.id}`}
             data-sample-id={dbSample.id}
+            data-sample-name={parent.getSampleAttribute(dbSample, "name")}
+            data-sample-project_id={parent.getSampleAttribute(
+              dbSample,
+              "project_id"
+            )}
             className="filled-in checkbox"
             checked={parent.state.selectedSampleIds.indexOf(dbSample.id) >= 0}
             disabled={report_ready != 1}
