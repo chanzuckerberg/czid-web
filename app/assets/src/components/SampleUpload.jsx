@@ -53,6 +53,7 @@ class SampleUpload extends React.Component {
       jobQueue: this.sample ? this.sample.job_queue : "",
       memory: this.sample ? this.sample.sample_memory : "",
       branch: this.sample ? this.sample.pipeline_branch : "",
+      alignmentConfigName: this.sample ? this.sample.alignment_config_name : "",
       id: this.sample.id || "",
       inputFiles:
         props.inputFiles && props.inputFiles.length ? props.inputFiles : [],
@@ -81,6 +82,7 @@ class SampleUpload extends React.Component {
       success: false,
       successMessage: "",
       serverErrors: [],
+      selectedAlignmentConfigName: this.selected.alignmentConfigName || null,
       selectedHostGenome: this.selected.hostGenome || "",
       selectedHostGenomeId: this.selected.hostGenomeId || null,
       selectedProject: this.selected.project || "",
@@ -256,6 +258,7 @@ class SampleUpload extends React.Component {
           pipeline_branch: this.state.selectedBranch,
           host_genome_id: this.state.selectedHostGenomeId,
           subsample: this.state.omitSubsamplingChecked ? 0 : 1,
+          alignment_config_name: this.state.selectedAlignmentConfigName,
           status: "created",
           client: "web"
         },
@@ -466,6 +469,13 @@ class SampleUpload extends React.Component {
   handleBranchChange(e) {
     this.setState({
       selectedBranch: e.target.value.trim()
+    });
+    this.clearError();
+  }
+
+  handleAlignmentConfigNameChange(e) {
+    this.setState({
+      selectedAlignmentConfigName: e.target.value.trim()
     });
     this.clearError();
   }
@@ -987,6 +997,33 @@ class SampleUpload extends React.Component {
                               {this.state.errors.memory}
                             </div>
                           ) : null}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="field">
+                      <div className="row">
+                        <div className="col no-padding s12">
+                          <div className="field-title">
+                            <div
+                              htmlFor="alignment_config_name"
+                              className="read-count-label"
+                            >
+                              Alignment Config Name. i.e. 2018-02-15
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="row input-row">
+                        <div className="col no-padding s12">
+                          <input
+                            id="alignment_config_name"
+                            type="text"
+                            className="browser-default"
+                            ref="alignment_config_name"
+                            value={this.state.selectedAlignmentConfigName}
+                            placeholder="master"
+                            onChange={this.handleAlignmentConfigNameChange}
+                          />
                         </div>
                       </div>
                     </div>
