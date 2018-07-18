@@ -215,7 +215,12 @@ class Sample < ApplicationRecord
     input_files.each do |input_file|
       fastq = input_file.source
       total_reads_json_path = File.join(File.dirname(fastq.to_s), TOTAL_READS_JSON)
-      _stdout, stderr, status = Open3.capture3("aws s3 cp #{fastq} - |gzip -dc |head -#{max_lines} | gzip -c | aws s3 cp - #{sample_input_s3_path}/#{input_file.name}")
+      command = if fastq =~ /\.gz/
+                  "aws s3 cp #{fastq} - |gzip -dc |head -#{max_lines} | gzip -c | aws s3 cp - #{sample_input_s3_path}/#{input_file.name}"
+                else
+                  "aws s3 cp #{fastq} #{sample_input_s3_path}/#{input_file.name}"
+                end
+      _stdout, stderr, status = Open3.capture3(command)
       stderr_array << stderr unless status.exitstatus.zero?
     end
     if total_reads_json_path.present?
