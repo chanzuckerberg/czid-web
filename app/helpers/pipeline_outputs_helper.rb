@@ -12,14 +12,6 @@ module PipelineOutputsHelper
     pipeline_run_display
   end
 
-  def select_version_aspect(pipeline_run, aspect)
-    # TODO: repurpose or remove. no longer needed
-    alignment_config = pipeline_run.alignment_config
-    alignment_config[aspect]
-  rescue
-    return nil
-  end
-
   def parse_accession(accession_details)
     results = accession_details
     reads = results.delete("reads")
