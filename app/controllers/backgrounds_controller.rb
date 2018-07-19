@@ -31,7 +31,7 @@ class BackgroundsController < ApplicationController
   def create
     name = params[:name]
     description = params[:description]
-    sample_ids = params[:sample_ids]
+    sample_ids = params[:sample_ids].map(&:to_i)
 
     non_viewable_sample_ids = sample_ids.to_set - current_power.samples.pluck(:id).to_set
     if !non_viewable_sample_ids.empty?

@@ -63,3 +63,15 @@ project_one_sampleB_run:
   job_id: 'project_one_sampleB_job'
   total_reads: 1
   adjusted_remaining_reads: 1
+expired_sample_run:
+  sample: expired_sample
+  job_id: 'expired_sample_job'
+  job_status: 'CHECKED'
+  total_reads: 1
+  adjusted_remaining_reads: 1
+public_sample_run:
+  sample: public_sample
+  job_id: 'public_sample_job'
+  job_status: 'CHECKED'
+  total_reads: 1
+  adjusted_remaining_reads: 1
