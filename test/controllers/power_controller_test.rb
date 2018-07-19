@@ -210,6 +210,12 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
 
   # backgrounds
 
+  test 'joe cannot create background from samples he cannot view' do
+    post backgrounds_url, params: { name: 'new_name', sample_ids: [samples(:project_one_sampleA).id, samples(:project_one_sampleB).id] }
+    resp = JSON.parse(@response.body)
+    assert_equal "unauthorized", resp['status']
+  end
+
   test 'joe can view joe_sample with public background' do
     access_sample_with_background(backgrounds(:public_background), samples(:joe_sample))
     assert_response :success

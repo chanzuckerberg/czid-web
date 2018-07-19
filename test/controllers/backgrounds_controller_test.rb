@@ -14,7 +14,8 @@ class BackgroundsControllerTest < ActionDispatch::IntegrationTest
 
   test "should create background" do
     post backgrounds_url, params: { name: 'new_name', sample_ids: [samples(:expired_sample).id, samples(:public_sample).id] }
-    assert_response :success
+    resp = JSON.parse(@response.body)
+    assert_equal "ok", resp['status']
   end
 
   test "should show background" do
