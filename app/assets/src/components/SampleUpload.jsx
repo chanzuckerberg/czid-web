@@ -21,6 +21,9 @@ class SampleUpload extends React.Component {
     this.handleMemoryChange = this.handleMemoryChange.bind(this);
     this.handleBranchChange = this.handleBranchChange.bind(this);
     this.handleResultChange = this.handleResultChange.bind(this);
+    this.handleAlignmentConfigNameChange = this.handleAlignmentConfigNameChange.bind(
+      this
+    );
     this.toggleNewProjectInput = this.toggleNewProjectInput.bind(this);
     this.projects = props.projects || [];
     this.project = props.projectInfo || "";
@@ -290,6 +293,7 @@ class SampleUpload extends React.Component {
     that.setState({
       submitting: true
     });
+
     axios
       .put(`/samples/${this.state.id}.json`, {
         sample: {
@@ -299,6 +303,7 @@ class SampleUpload extends React.Component {
           s3_preload_result_path: this.state.selectedResultPath,
           sample_memory: this.state.selectedMemory,
           pipeline_branch: this.state.selectedBranch,
+          alignment_config_name: this.state.selectedAlignmentConfigName,
           host_genome_id: this.state.selectedHostGenomeId
         },
         authenticity_token: this.csrf
