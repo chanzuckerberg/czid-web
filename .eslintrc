@@ -33,8 +33,11 @@
     "react/boolean-prop-naming": "warn",
     "standard/object-curly-even-spacing": "warn",
 
+    "react/no-deprecated": "warn",
+    "react/no-unescaped-entities": "warn",
     "react/no-find-dom-node": "warn",
     "react/no-direct-mutation-state": "warn",
+    "react/jsx-key": "warn",
     "react/no-string-refs": "warn",
     "react/prop-types": "warn",
   }
