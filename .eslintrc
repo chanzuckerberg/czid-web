@@ -22,13 +22,20 @@
     "react"
   ],
   "rules": {
-    "no-unused-vars": "warn",
-    "standard/object-curly-even-spacing": "warn",
+    "camelcase": "warn",
+    "no-console": "warn",
     "no-extra-semi": "warn",
     "no-mixed-spaces-and-tabs": "warn",
+    "no-undef": "warn",
+    "no-unused-vars": "warn",
     "no-unreachable": "warn",
-    "no-console": "warn",
     "no-useless-escape": "warn",
-    "no-undef": "warn"
+    "react/boolean-prop-naming": "warn",
+    "standard/object-curly-even-spacing": "warn",
+
+    "react/no-find-dom-node": "warn",
+    "react/no-direct-mutation-state": "warn",
+    "react/no-string-refs": "warn",
+    "react/prop-types": "warn",
   }
 }
