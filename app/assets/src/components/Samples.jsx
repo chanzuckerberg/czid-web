@@ -1812,12 +1812,10 @@ class BackgroundModal extends React.Component {
     );
   }
   handleOpen() {
-    axios.get(`/show_sample_names?sample_ids=${this.sample_ids}`).then(res => {
-      this.setState({
-        modalOpen: true,
-        name: "",
-        description: ""
-      });
+    this.setState({
+      modalOpen: true,
+      name: "",
+      description: ""
     });
     this.props.parent.setState({
       background_creation_response: {}

@@ -377,12 +377,6 @@ class SamplesController < ApplicationController
     end
   end
 
-  def show_sample_names
-    sample_ids = params[:sample_ids].split(",").map(&:to_i)
-    sample_names = current_power.samples.where(id: sample_ids).pluck(:name)
-    render json: { sample_names: sample_names }
-  end
-
   def nonhost_fasta
     @nonhost_fasta = get_s3_file(@sample.annotated_fasta_s3_path)
     send_data @nonhost_fasta, filename: @sample.name + '_nonhost.fasta'
