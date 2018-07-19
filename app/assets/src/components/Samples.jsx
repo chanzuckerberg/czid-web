@@ -12,7 +12,9 @@ import {
   Icon,
   Modal,
   Button,
-  Form
+  Form,
+  TextArea,
+  Input
 } from "semantic-ui-react";
 import Nanobar from "nanobar";
 import colors from "../styles/themes";
@@ -250,7 +252,6 @@ class Samples extends React.Component {
 
   getSampleAttribute(sample, key) {
     let value;
-    console.log(sample);
     if (key === "name" || key === "project_id") {
       value = sample.db_sample[key];
     } else if (key === "pipeline_run_id") {
@@ -1790,8 +1791,8 @@ class BackgroundModal extends React.Component {
           ")";
         let sample_display = this.props.parent.admin ? (
           <span>
-            <b>{sample_name}</b>
-            {sample_details}
+            {sample_name}
+            <span className="secondary-text">{sample_details}</span>
           </span>
         ) : (
           <span>{sample_name}</span>
@@ -1800,8 +1801,8 @@ class BackgroundModal extends React.Component {
       }
     }
     return (
-      <div>
-        <b>Selected samples:</b>
+      <div className="background-modal-contents">
+        <div className="label-text">Selected samples:</div>
         <ul>
           {sample_list.map((text, index) => (
             <li key={`background_sample_${index}`}>{text}</li>
@@ -1840,17 +1841,21 @@ class BackgroundModal extends React.Component {
       this.props.parent.state.selectedSampleIds
     );
   }
-  renderTextField(label, id) {
+  renderTextField(label, optional, id, rows) {
     return (
-      <Form.Field>
-        <Form.Input
-          label={label}
-          placeholder={label}
-          className="col s12 browser-default"
+      <div className="background-modal-contents">
+        <div className="label-text">
+          {label}
+          <span className="secondary-text">{optional ? " Optional" : ""}</span>
+        </div>
+        <Form.TextArea
+          autoHeight
+          className={`col s12 browser-default`}
+          rows={rows}
           id={id}
           onChange={this.handleChange}
         />
-      </Form.Field>
+      </div>
     );
   }
 
@@ -1884,15 +1889,22 @@ class BackgroundModal extends React.Component {
             deviates from the norm for that collection.
           </div>
           <Form onSubmit={this.handleSubmit}>
-            {this.renderTextField("Name", "new_background_name")}
-            {this.renderTextField("Description", "new_background_description")}
+            {this.renderTextField("Name", false, "new_background_name", 1)}
+            {this.renderTextField(
+              "Description",
+              true,
+              "new_background_description",
+              7
+            )}
             {this.renderSampleList()}
-            <Button className="create_background_action" type="submit">
-              Create
-            </Button>
-            <Button className="modal-close" onClick={this.handleClose}>
-              Cancel
-            </Button>
+            <div className="background-button-section">
+              <Button className="create-background" type="submit">
+                Create
+              </Button>
+              <Button className="cancel-background" onClick={this.handleClose}>
+                Cancel
+              </Button>
+            </div>
           </Form>
           {background_creation_response.status === "ok" ? (
             <div className="status-message status teal-text text-darken-2">

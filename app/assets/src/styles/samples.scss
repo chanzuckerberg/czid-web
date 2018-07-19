@@ -1,6 +1,53 @@
 @import "variables";
 /* TODO: refactor stylesheet into scss */
 
+.background-button-section {
+  padding-top: 30px;
+  font-size: 13.333px;
+  font-family: "Lato", "Helvetica Neue", Arial, Helvetica, sans-serif;
+  font-weight: 700;
+
+  .cancel-background {
+    border: 1px solid #3867fa !important;
+    background: #ffffff !important;
+    color: #3867fa !important;
+    cursor: pointer;
+    &:hover {
+      background: #3867fa !important;
+      color: #ffffff !important;
+    }
+  }
+
+  .create-background {
+    margin-right: 10px;
+    border: 1px solid #3867fa !important;
+    background: #3867fa !important;
+    color: #ffffff !important;
+    cursor: pointer;
+    &:hover {
+      background: #ffffff !important;
+      color: #3867fa !important;
+    }
+  }
+}
+
+.background-modal-contents {
+  .label-text {
+    padding-top: 25px;
+    padding-bottom: 10px;
+    font-size: 14px;
+    font-weight: bold;
+  }
+  .secondary-text {
+    font-size: 11px;
+    font-weight: normal;
+    color: #c0c0c0;
+  }
+  ul {
+    margin-top: 0;
+  }
+}
+
 .samples-table {
   td {
     cursor: pointer;
