@@ -221,7 +221,7 @@ class Sample < ApplicationRecord
       command = if fastq =~ /\.gz/
                   "aws s3 cp #{fastq} - |gzip -dc |head -#{max_lines} | gzip -c | aws s3 cp - #{sample_input_s3_path}/#{input_file.name}"
                 else
-                  "aws s3 cp #{fastq} #{sample_input_s3_path}/#{name}"
+                  "aws s3 cp #{fastq} #{sample_input_s3_path}/#{input_file.name}"
                 end
       _stdout, stderr, status = Open3.capture3(command)
       stderr_array << stderr unless status.exitstatus.zero?
