@@ -703,9 +703,9 @@ class Samples extends React.Component {
   }
 
   allTissueTypes(all_tissues) {
-    return all_tissues.length == 0 || all_tissues.indexOf("-") >= 0
+    return all_tissues.length == 0 || all_tissues.indexOf("Not set") >= 0
       ? all_tissues
-      : ["-", ...all_tissues];
+      : ["Not set", ...all_tissues];
   }
 
   //fetch results from filtering, search or switching projects
