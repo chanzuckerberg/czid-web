@@ -216,6 +216,18 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     assert_equal "unauthorized", resp['status']
   end
 
+  test 'joe can create background from public samples' do
+    post backgrounds_url, params: { name: 'new_name', sample_ids: [samples(:expired_sample).id, samples(:public_sample).id] }
+    resp = JSON.parse(@response.body)
+    assert_equal "ok", resp['status']
+  end
+
+  test 'joe can create background from samples in joe_project' do
+    post backgrounds_url, params: { name: 'new_name', sample_ids: [samples(:joe_project_sampleA).id, samples(:joe_project_sampleB).id] }
+    resp = JSON.parse(@response.body)
+    assert_equal "ok", resp['status']
+  end
+
   test 'joe can view joe_sample with public background' do
     access_sample_with_background(backgrounds(:public_background), samples(:joe_sample))
     assert_response :success
