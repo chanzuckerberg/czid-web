@@ -215,6 +215,9 @@ class Sample < ApplicationRecord
     input_files.each do |input_file|
       fastq = input_file.source
       total_reads_json_path = File.join(File.dirname(fastq.to_s), TOTAL_READS_JSON)
+
+      input_file.name = input_file.name.sub(".fq", ".fastq")
+
       command = if fastq =~ /\.gz/
                   "aws s3 cp #{fastq} - |gzip -dc |head -#{max_lines} | gzip -c | aws s3 cp - #{sample_input_s3_path}/#{input_file.name}"
                 else
