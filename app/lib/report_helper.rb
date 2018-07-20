@@ -252,7 +252,7 @@ module ReportHelper
 
     categories_clause = ""
     unless categories.empty?
-      " AND taxon_counts.superkingdom_taxid IN (#{categories.map { |category| CATEGORIES_TAXID_BY_NAME[category] }.compact.join(',')})"
+      categories_clause = " AND taxon_counts.superkingdom_taxid IN (#{categories.map { |category| CATEGORIES_TAXID_BY_NAME[category] }.compact.join(',')})"
     end
 
     query = "
