@@ -316,8 +316,8 @@ class PipelineRun < ApplicationRecord
           amr_counts_array << { sample_id: sample_id, gene: gene, allele: allele, coverage: coverage, depth: depth }
         end
       end
-      # AmrCount.create(amr_counts_array)
-      update(amr_counts_attributes: amr_counts_array)
+      AmrCount.create(amr_counts_array)
+      # update(amr_counts_attributes: amr_counts_array)
     end
   end
 
@@ -419,10 +419,15 @@ class PipelineRun < ApplicationRecord
     # TODO: remove the need for this function by migrating old runs
     Rails.logger.info("BEG: pre_result_monitor status status_display")
     state_by_output = {}
+    # old_loaders_by_output = { "db_load_host_filtering" => "ercc_counts",
+    #                           "db_load_alignment" => "taxon_counts",
+    #                           "db_load_postprocess" => "taxon_byteranges",
+    #                           "db_load_postprocess" => "amr_counts" }
     old_loaders_by_output = { "db_load_host_filtering" => ["ercc_counts"],
                               "db_load_alignment" => ["taxon_counts"],
                               "db_load_postprocess" => %w[taxon_byteranges amr_counts] }
     run_stages.each do |rs|
+      # state_by_output[old_loaders_by_output[rs.load_db_command_func]] = rs.job_status
       state_by_output[old_loaders_by_output[rs.load_db_command_func][0]] = rs.job_status
       if rs.load_db_command_func == "db_load_postprocess"
         state_by_output[old_loaders_by_output[rs.load_db_command_func][1]] = rs.job_status
