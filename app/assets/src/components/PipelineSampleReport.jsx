@@ -843,8 +843,11 @@ class PipelineSampleReport extends React.Component {
   gotoAlignmentVizLink(e) {
     const taxId = e.target.getAttribute("data-tax-id");
     const taxLevel = e.target.getAttribute("data-tax-level");
+    const pipeline_version = this.props.reportPageParams.pipeline_version;
     window.open(
-      `/samples/${this.sample_id}/alignment_viz/nt_${taxLevel}_${taxId}`,
+      `/samples/${
+        this.sample_id
+      }/alignment_viz/nt_${taxLevel}_${taxId}?pipeline_version=${pipeline_version}`,
       "_blank"
     );
   }
