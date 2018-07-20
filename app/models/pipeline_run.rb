@@ -1,5 +1,6 @@
 require 'open3'
 require 'json'
+
 class PipelineRun < ApplicationRecord
   include ApplicationHelper
   include PipelineOutputsHelper
@@ -26,9 +27,11 @@ class PipelineRun < ApplicationRecord
   PIPELINE_VERSION_FILE = "pipeline_version.txt".freeze
   STATS_JSON_NAME = "stats.json".freeze
   ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
+  AMR_OUTPUT_NAME = 'output__fullgenes__ARGannot_r2__results.txt'.freeze
   TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined.json'.freeze
   ASSEMBLY_STATUSFILE = 'job-complete'.freeze
   LOCAL_JSON_PATH = '/app/tmp/results_json'.freeze
+  LOCAL_TXT_PATH = '/app/tmp/results_txt'.freeze
   PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
 
   # The PIPELINE MONITOR is responsible for keeping status of AWS Batch jobs
@@ -77,7 +80,8 @@ class PipelineRun < ApplicationRecord
 
   LOADERS_BY_OUTPUT = { "ercc_counts" => "db_load_ercc_counts",
                         "taxon_counts" => "db_load_taxon_counts",
-                        "taxon_byteranges" => "db_load_byteranges" }.freeze
+                        "taxon_byteranges" => "db_load_byteranges",
+                        "amr_counts" => "db_load_amr_counts" }.freeze
   # Note: reads_before_priceseqfilter, reads_after_priceseqfilter, reads_after_cdhitdup
   #       are the only "job_stats" we actually need for web display.
   REPORT_READY_OUTPUT = "taxon_counts".freeze
@@ -170,7 +174,7 @@ class PipelineRun < ApplicationRecord
 
   def create_output_states
     # First, determine which outputs we need:
-    target_outputs = %w[ercc_counts taxon_counts taxon_byteranges]
+    target_outputs = %w[ercc_counts taxon_counts taxon_byteranges amr_counts]
 
     # Then, generate output_states
     output_state_entries = []
@@ -261,6 +265,7 @@ class PipelineRun < ApplicationRecord
     # self.version = `aws s3 cp #{version_s3_path} -`
 
     # Load ERCC counts
+    Rails.logger.info("IN ERCC COUNTS")
     ercc_s3_path = "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
     _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", ercc_s3_path)
     return unless status.exitstatus.zero?
@@ -285,6 +290,31 @@ class PipelineRun < ApplicationRecord
     tcnt['family_taxid'].to_i < TaxonLineage::INVALID_CALL_BASE_ID
   rescue
     false
+  end
+
+  def db_load_amr_counts
+    # amr_s3_path = "#{postprocess_output_s3_path}/#{AMR_OUTPUT_NAME}"
+    amr_test_s3_path = "s3://idseq-database/test/AMR/__fullgenes__ARGannot_r2__results.txt"
+    amr_downloaded_path = PipelineRun.download_file(amr_test_s3_path, local_txt_path)
+    # Check if full genes file is empty. if empty, don't update anything.
+    # Rails.logger.debug("AMR PATH:" + amr_downloaded_path)
+    # Rails.logger.debug("DEBUG STATEMENT")
+    unless File.zero?(amr_downloaded_path)
+      amr_counts_array = []
+      File.open(amr_downloaded_path) do |f|
+        f.each_line do |line|
+          fields = line.split("\t")
+          sample_id = fields[0]
+          gene = fields[2]
+          allele = fields[3]
+          coverage = fields[4]
+          depth = fields[5]
+          amr_counts_array << { sample_id: sample_id, gene: gene, allele: allele, coverage: coverage, depth: depth }
+        end
+      end
+      # AmrCount.create(amr_counts_array)
+      update(amr_counts_attributes: amr_counts_array)
+    end
   end
 
   def db_load_taxon_counts
@@ -358,6 +388,8 @@ class PipelineRun < ApplicationRecord
       "#{alignment_output_s3_path}/#{taxon_counts_json_name}"
     when "taxon_byteranges"
       "#{postprocess_output_s3_path}/#{TAXID_BYTERANGE_JSON_NAME}"
+    when "amr_counts"
+      "#{postprocess_output_s3_path}/#{AMR_OUTPUT_NAME}"
     end
   end
 
@@ -382,6 +414,7 @@ class PipelineRun < ApplicationRecord
     results_finalized.nil?
   end
 
+
   def check_and_enqueue(output_state)
     # If the pipeline monitor tells us that no jobs are running anymore,
     # yet outputs are not available, we need to draw the conclusion that
@@ -391,6 +424,7 @@ class PipelineRun < ApplicationRecord
     #   to an S3 interface in order to give us the option of running pipeline_monitor
     #   in a new environment that result_monitor does not have access to.
     # ]
+    Rails.logger.info("BEG check_and_enqueue")
     output = output_state.output
     state = output_state.state
     return unless state == STATUS_UNKNOWN
@@ -401,6 +435,7 @@ class PipelineRun < ApplicationRecord
       # check if job is done more than a minute ago
       output_state.update(state: STATUS_FAILED)
     end
+    Rails.logger.info("END check_and_enqueue")
   end
 
   def handle_success
@@ -428,6 +463,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def monitor_results
+    Rails.logger.info("BEG monitor_results")
     return if results_finalized?
 
     # Get pipeline_version, which determines S3 locations of output files.
@@ -458,6 +494,7 @@ class PipelineRun < ApplicationRecord
         update(results_finalized: FINALIZED_FAIL)
       end
     end
+    Rails.logger.info("END monitor_results")
   end
 
   def file_generated_since_jobstats?(s3_path)
@@ -477,6 +514,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def load_job_stats(stats_json_s3_path)
+    Rails.logger.info("BEG load_job_stats")
     downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, local_json_path)
     return unless downloaded_stats_path
     stats_array = JSON.parse(File.read(downloaded_stats_path))
@@ -484,10 +522,14 @@ class PipelineRun < ApplicationRecord
     job_stats.destroy_all
     update(job_stats_attributes: stats_array)
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_stats_path}")
+    Rails.logger.info("END load_job_stats")
   end
 
   def update_job_status
+    Rails.logger.info("IN update_job_status")
     prs = active_stage
+    Rails.logger.info("prs: ")
+    Rails.logger.info(prs)
     if prs.nil?
       # all stages succeeded
       self.finalized = 1
@@ -512,6 +554,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def compile_stats_file
+    Rails.logger.info("IN compile_stats_file")
     res_folder = output_s3_path_with_version
     stdout, stderr, status = Open3.capture3("aws s3 ls #{res_folder}/ | grep count$")
     unless status.exitstatus.zero?
@@ -590,6 +633,10 @@ class PipelineRun < ApplicationRecord
     end
   end
 
+  def local_txt_path
+    "#{LOCAL_TXT_PATH}/#{id}"
+  end
+
   def local_json_path
     "#{LOCAL_JSON_PATH}/#{id}"
   end
@@ -605,6 +652,8 @@ class PipelineRun < ApplicationRecord
   end
 
   def self.download_file(s3_path, destination_dir)
+    Rails.logger.info("DOWNLOADING FILE FROM S3")
+    Rails.logger.info(s3_path)
     command = "mkdir -p #{destination_dir};"
     command += "aws s3 cp #{s3_path} #{destination_dir}/;"
     _stdout, _stderr, status = Open3.capture3(command)
