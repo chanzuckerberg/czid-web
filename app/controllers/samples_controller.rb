@@ -353,7 +353,8 @@ class SamplesController < ApplicationController
 
   def show_taxid_alignment_viz
     @taxon_info = params[:taxon_info].split(".")[0]
-    pr = @sample.pipeline_runs.first
+
+    pr = select_pipeline_run(@sample, params)
 
     @taxid = @taxon_info.split("_")[2].to_i
     @tax_level = @taxon_info.split("_")[1]
