@@ -4,7 +4,7 @@
   "targets": {
     <% if @attribute_dict[:fastq2] %>
       "fastqs": ["<%= @attribute_dict[:fastq1] %>", "<%= @attribute_dict[:fastq2] %>"],
-      "star_out": ["unmapped1.fq", "unmapped2.fq"],
+      "star_out": ["unmapped1.<%= @attribute_dict[:file_type] %>", "unmapped2.<%= @attribute_dict[:file_type] %>"],
       "priceseq_out": ["priceseq1.fa", "priceseq2.fa"],
       "cdhitdup_out": ["dedup1.fa", "dedup2.fa"],
       "lzw_out": ["lzw1.fa", "lzw2.fa"],
@@ -24,7 +24,7 @@
       <% end %>
     <% else %>
       "fastqs": ["<%= @attribute_dict[:fastq1] %>"],
-      "star_out": ["unmapped1.fq"],
+      "star_out": ["unmapped1.<%= @attribute_dict[:file_type] %>"],
       "priceseq_out": ["priceseq1.fa"],
       "cdhitdup_out": ["dedup1.fa"],
       "lzw_out": ["lzw1.fa"],
@@ -54,7 +54,7 @@
       "class": "PipelineStepRunPriceSeq",
       "module": "idseq_dag.steps.run_priceseq",
       "additional_files": {},
-      "additional_attributes": {}
+      "additional_attributes": {"file_type": "<%= @attribute_dict[:file_type] %>"}
     },
     {
       "in": ["priceseq_out"],
