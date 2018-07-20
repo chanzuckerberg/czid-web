@@ -359,6 +359,7 @@ class SamplesController < ApplicationController
     @taxid = @taxon_info.split("_")[2].to_i
     @tax_level = @taxon_info.split("_")[1]
     @taxon_name = taxon_name(@taxid, @tax_level)
+    @pipeline_version = pr.pipeline_version if pr
 
     respond_to do |format|
       format.json do
