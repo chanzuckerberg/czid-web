@@ -49,7 +49,7 @@ class PipelineRunStage < ApplicationRecord
         queue = pipeline_run.sample.job_queue
       end
     end
-    command += " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --ecr-image idseq_dag --memory #{memory} --queue #{queue} --vcpus #{vcpus} --job-role idseq-pipeline "
+    command += " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --volume-type gp2 --ecr-image idseq_dag --memory #{memory} --queue #{queue} --vcpus #{vcpus} --job-role idseq-pipeline "
     command
   end
 
@@ -235,10 +235,15 @@ class PipelineRunStage < ApplicationRecord
   def alignment_command
     # Upload DAG to S3
     sample = pipeline_run.sample
+    alignment_config = pipeline_run.alignment_config
     attribute_dict = {
       input_file_count: sample.input_files.count,
       skip_dedeuterostome_filter: sample.skip_deutero_filter_flag,
-      pipeline_version: pipeline_run.pipeline_version || pipeline_run.fetch_pipeline_run_version
+      pipeline_version: pipeline_run.pipeline_version || pipeline_run.fetch_pipeline_run_version,
+      index_dir_suffix: alignment_config.index_dir_suffix,
+      lineage_db: alignment_config.s3_lineage_path,
+      accession2taxid_db: alignment_config.s3_accession2taxid_path,
+      deuterostome_db: alignment_config.s3_deuterostome_db_path
     }
     key_s3_params = "--key-path-s3 s3://idseq-secrets/idseq-prod.pem"
     dag_commands = prepare_dag("non_host_alignment", attribute_dict, key_s3_params)
@@ -249,8 +254,12 @@ class PipelineRunStage < ApplicationRecord
 
   def postprocess_command
     # Upload DAG to S3
+    alignment_config = pipeline_run.alignment_config
     attribute_dict = {
-      pipeline_version: pipeline_run.pipeline_version || pipeline_run.fetch_pipeline_run_version
+      pipeline_version: pipeline_run.pipeline_version || pipeline_run.fetch_pipeline_run_version,
+      lineage_db: alignment_config.s3_lineage_path,
+      nt_db: alignment_config.s3_nt_db_path,
+      nt_loc_db: alignment_config.s3_nt_loc_db_path
     }
     dag_commands = prepare_dag("postprocess", attribute_dict)
     batch_command = [install_pipeline, dag_commands].join("; ")

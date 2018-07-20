@@ -87,8 +87,8 @@ class SamplesController < ApplicationController
 
   # GET /samples/bulk_new
   def bulk_new
-    @projects = current_power.projects
-    @host_genomes = HostGenome.all
+    @projects = current_power.updatable_projects
+    @host_genomes = host_genomes_list ? host_genomes_list : nil
   end
 
   def bulk_import
@@ -636,7 +636,8 @@ class SamplesController < ApplicationController
 
   def sample_params
     params.require(:sample).permit(:name, :project_name, :project_id, :status, :s3_preload_result_path,
-                                   :s3_star_index_path, :s3_bowtie2_index_path, :host_genome_id, :host_genome_name,
+                                   :s3_star_index_path, :s3_bowtie2_index_path,
+                                   :host_genome_id, :host_genome_name, :alignment_config_name,
                                    :sample_memory, :sample_location, :sample_date, :sample_tissue,
                                    :sample_template, :sample_library, :sample_sequencer,
                                    :sample_notes, :job_queue, :search, :subsample, :pipeline_branch,

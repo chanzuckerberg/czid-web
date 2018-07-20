@@ -200,7 +200,7 @@ module SamplesHelper
 
   def filter_by_tissue_type(samples, query)
     return samples.where("false") if query == ["none"]
-    updated_query = query.map { |x| x == '-' ? nil : x }
+    updated_query = query.map { |x| x == 'Not set' ? nil : x }
     samples.where(sample_tissue: updated_query)
   end
 

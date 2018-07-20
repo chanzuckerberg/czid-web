@@ -8,24 +8,29 @@ one:
   job_id: 'dfdf'
   total_reads: 1
   adjusted_remaining_reads: 1
+  alignment_config: one
 two:
   job_id: 'sdfsf'
   total_reads: 1
   adjusted_remaining_reads: 1
+  alignment_config: one
 three:
   sample: one
   job_id: 'sdfsdfsdf'
   total_reads: 1
   adjusted_remaining_reads: 1
+  alignment_config: one
 four:
   sample: two
   job_id: 'four'
   total_reads: 1
   adjusted_remaining_reads: 1
+  alignment_config: one
 five:
   job_id: 'five'
   total_reads: 1
   adjusted_remaining_reads: 1
+  alignment_config: one
 six:
   sample: six
   job_status: "CHECKED"
@@ -33,3 +38,4 @@ six:
   total_reads: 1122
   adjusted_remaining_reads: 316
   subsample: 1000000
+  alignment_config: one

@@ -5,28 +5,11 @@ module PipelineOutputsHelper
   def curate_pipeline_run_display(pipeline_run)
     return nil unless pipeline_run
     pipeline_run_display = pipeline_run.as_json.except("version")
-    pipeline_run_display["version"] = { pipeline: pipeline_run.pipeline_version,
-                                        nt: select_version_aspect(pipeline_run, "nt_k16"),
-                                        nr: select_version_aspect(pipeline_run, "nr_rapsearch") }
+    pipeline_run_display["version"] = {
+      pipeline: pipeline_run.pipeline_version,
+      alignment_db: pipeline_run.alignment_config.name
+    }
     pipeline_run_display
-  end
-
-  def select_version_aspect(pipeline_run, aspect)
-    # TODO: Remove. Deprecated function
-    version_hashes = JSON.parse(pipeline_run.version)
-    # example for version_hashes:
-    #   [{"name"=>"job_id", "version"=>"023e1f7d-8f96-42cc-ab07-6c233254f113"},
-    #    {"name"=>"idseq-pipeline", "version"=>"1.0.9", "commit-sha"=>"d99a5e5c343a741cef7ea9ef888ead69f440c23d"},
-    #    {"name"=>"nt_k16", "source_file"=>"/blast/db/FASTA/nt.gz", "source_version"=>8, "generation_date"=>"2018-02-20T00:23:45.299465", "indexing_version"=>"1.0.0"},
-    #    {"name"=>"nr_rapsearch", "source_file"=>"/blast/db/FASTA/nr.gz", "source_version"=>12, "generation_date"=>"2018-02-20T00:23:45.299465", "indexing_version"=>"1.0.0"}]
-    aspect_hash = version_hashes.select { |item| item["name"] == aspect }[0]
-    if %w[nt_k16 nr_rapsearch].include?(aspect)
-      return DateTime.parse(aspect_hash["generation_date"]).utc.strftime("%m-%Y")
-    else
-      return aspect_hash["version"]
-    end
-  rescue
-    return nil
   end
 
   def parse_accession(accession_details)

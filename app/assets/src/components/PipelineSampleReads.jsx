@@ -56,7 +56,7 @@ class PipelineSampleReads extends React.Component {
       sample_name: props.sampleInfo.name
     };
     this.TYPE_PROMPT = "-";
-    this.NUCLEOTIDE_TYPES = ["-", "DNA", "RNA"];
+    this.NUCLEOTIDE_TYPES = ["Not set", "DNA", "RNA"];
     this.DROPDOWN_OPTIONS = {
       sample_tissue: PipelineSampleReads.fetchTissueTypes(),
       sample_template: this.NUCLEOTIDE_TYPES
@@ -302,7 +302,7 @@ class PipelineSampleReads extends React.Component {
 
   static fetchTissueTypes() {
     let tissue_types = [
-      "-",
+      "Not set",
       "Bronchoalveolar lavage",
       "Cerebrospinal fluid",
       "Nasopharyngeal swab",
@@ -789,11 +789,10 @@ class PipelineSampleReads extends React.Component {
     ) {
       version_display = "v" + this.pipelineRun.version.pipeline;
     }
-    if (version_display !== "" && this.pipelineRun.version.nt) {
-      version_display = version_display + ", NT " + this.pipelineRun.version.nt;
-    }
-    if (version_display !== "" && this.pipelineRun.version.nr) {
-      version_display = version_display + ", NR " + this.pipelineRun.version.nr;
+
+    if (version_display !== "" && this.pipelineRun.version.alignment_db) {
+      version_display =
+        version_display + ", NT/NR: " + this.pipelineRun.version.alignment_db;
     }
 
     let retriable = this.pipelineRunRetriable ? (

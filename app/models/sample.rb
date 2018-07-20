@@ -215,7 +215,15 @@ class Sample < ApplicationRecord
     input_files.each do |input_file|
       fastq = input_file.source
       total_reads_json_path = File.join(File.dirname(fastq.to_s), TOTAL_READS_JSON)
-      _stdout, stderr, status = Open3.capture3("aws s3 cp #{fastq} - |gzip -dc |head -#{max_lines} | gzip -c | aws s3 cp - #{sample_input_s3_path}/#{input_file.name}")
+
+      input_file.name = input_file.name.sub(".fq", ".fastq")
+
+      command = if fastq =~ /\.gz/
+                  "aws s3 cp #{fastq} - |gzip -dc |head -#{max_lines} | gzip -c | aws s3 cp - #{sample_input_s3_path}/#{input_file.name}"
+                else
+                  "aws s3 cp #{fastq} #{sample_input_s3_path}/#{input_file.name}"
+                end
+      _stdout, stderr, status = Open3.capture3(command)
       stderr_array << stderr unless status.exitstatus.zero?
     end
     if total_reads_json_path.present?
@@ -442,6 +450,8 @@ class Sample < ApplicationRecord
     pr.pipeline_branch = pipeline_branch.blank? ? "master" : pipeline_branch
     pr.pipeline_commit = `git ls-remote https://github.com/chanzuckerberg/idseq-dag.git | grep refs/heads/#{pr.pipeline_branch}`.split[0]
 
+    pr.alignment_config = AlignmentConfig.find_by(name: alignment_config_name) if alignment_config_name
+    pr.alignment_config ||= AlignmentConfig.find_by(name: AlignmentConfig::DEFAULT_NAME)
     pr.save
   end
 end
