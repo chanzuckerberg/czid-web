@@ -1,0 +1,2 @@
+class AmrCount < ApplicationRecord
+end
