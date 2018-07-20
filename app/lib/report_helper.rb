@@ -251,7 +251,7 @@ module ReportHelper
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
 
     categories_clause = ""
-    if categories and not categories.empty? then
+    if categories && !categories.empty?
       categories_clause = " AND taxon_counts.superkingdom_taxid IN (#{categories.map { |category| CATEGORIES_TAXID_BY_NAME[category] }.compact.join(',')})"
     end
 
