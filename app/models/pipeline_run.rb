@@ -15,10 +15,13 @@ class PipelineRun < ApplicationRecord
   has_many :job_stats, dependent: :destroy
   has_many :taxon_byteranges, dependent: :destroy
   has_many :ercc_counts, dependent: :destroy
+  has_many :amr_counts, dependent: :destroy
   accepts_nested_attributes_for :taxon_counts
   accepts_nested_attributes_for :job_stats
   accepts_nested_attributes_for :taxon_byteranges
   accepts_nested_attributes_for :ercc_counts
+  accepts_nested_attributes_for :amr_counts
+
 
   DEFAULT_SUBSAMPLING = 1_000_000 # number of fragments to subsample to, after host filtering
   MAX_INPUT_FRAGMENTS = 75_000_000 # max fragments going into the pipeline
@@ -312,8 +315,8 @@ class PipelineRun < ApplicationRecord
           amr_counts_array << { sample_id: sample_id, gene: gene, allele: allele, coverage: coverage, depth: depth }
         end
       end
-      # AmrCount.create(amr_counts_array)
-      update(amr_counts_attributes: amr_counts_array)
+      AmrCount.create(amr_counts_array)
+      # update(amr_counts_attributes: amr_counts_array)
     end
   end
 
