@@ -46,7 +46,7 @@ class Background < ApplicationRecord
   end
 
   def submit_store_summary_job
-    Resque.enqueue(ComputeBackground)
+    Resque.enqueue(ComputeBackground, id)
   end
 
   def store_summary
