@@ -38,10 +38,10 @@
       "class": "PipelineStepRunAlignmentRemotely",
       "module": "idseq_dag.steps.run_alignment_remotely",
       "additional_files": {
-        "lineage_db": "s3://idseq-database/taxonomy/2018-02-15-utc-1518652800-unixtime__2018-02-15-utc-1518652800-unixtime/taxid-lineages.db",
-        "accession2taxid_db": "s3://idseq-database/alignment_data/2018-02-15-utc-1518652800-unixtime__2018-02-15-utc-1518652800-unixtime/accession2taxid.db"
+        "lineage_db": "<%= @attribute_dict[:lineage_db] %>",
+        "accession2taxid_db": "<%= @attribute_dict[:accession2taxid_db] %>"
         <% if @attribute_dict[:skip_dedeuterostome_filter] == 0 %>
-          ,"deuterostome_db": "s3://idseq-database/taxonomy/2018-02-15-utc-1518652800-unixtime__2018-02-15-utc-1518652800-unixtime/deuterostome_taxids.txt"
+          ,"deuterostome_db": "<%= @attribute_dict[:deuterostome_db] %>"
         <% end %>
       },
       "additional_attributes": {
@@ -50,6 +50,9 @@
         "chunk_size": 15000,
         "max_concurrent": 3,
         "environment": "prod"
+        <% if @attribute_dict[:index_dir_suffix] %>
+          ,"index_dir_suffix": "<%= @attribute_dict[:index_dir_suffix] %>"
+        <% end %>
       }
     },
     {
@@ -58,10 +61,10 @@
       "class": "PipelineStepRunAlignmentRemotely",
       "module": "idseq_dag.steps.run_alignment_remotely",
       "additional_files": {
-        "lineage_db": "s3://idseq-database/taxonomy/2018-02-15-utc-1518652800-unixtime__2018-02-15-utc-1518652800-unixtime/taxid-lineages.db",
-        "accession2taxid_db": "s3://idseq-database/alignment_data/2018-02-15-utc-1518652800-unixtime__2018-02-15-utc-1518652800-unixtime/accession2taxid.db"
+        "lineage_db": "<%= @attribute_dict[:lineage_db] %>",
+        "accession2taxid_db": "<%= @attribute_dict[:accession2taxid_db] %>"
         <% if @attribute_dict[:skip_dedeuterostome_filter] == 0 %>
-          ,"deuterostome_db": "s3://idseq-database/taxonomy/2018-02-15-utc-1518652800-unixtime__2018-02-15-utc-1518652800-unixtime/deuterostome_taxids.txt"
+          ,"deuterostome_db": "<%= @attribute_dict[:deuterostome_db] %>"
         <% end %>
       },
       "additional_attributes": {
@@ -70,6 +73,9 @@
         "chunk_size": 10000,
         "max_concurrent": 6,
         "environment": "prod"
+        <% if @attribute_dict[:index_dir_suffix] %>
+          ,"index_dir_suffix": "<%= @attribute_dict[:index_dir_suffix] %>"
+        <% end %>
       }
     },
     {

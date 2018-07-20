@@ -789,11 +789,10 @@ class PipelineSampleReads extends React.Component {
     ) {
       version_display = "v" + this.pipelineRun.version.pipeline;
     }
-    if (version_display !== "" && this.pipelineRun.version.nt) {
-      version_display = version_display + ", NT " + this.pipelineRun.version.nt;
-    }
-    if (version_display !== "" && this.pipelineRun.version.nr) {
-      version_display = version_display + ", NR " + this.pipelineRun.version.nr;
+
+    if (version_display !== "" && this.pipelineRun.version.alignment_db) {
+      version_display =
+        version_display + ", NT/NR: " + this.pipelineRun.version.alignment_db;
     }
 
     let retriable = this.pipelineRunRetriable ? (

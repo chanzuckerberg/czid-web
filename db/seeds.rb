@@ -5,6 +5,7 @@
 project = Project.create!(name: "Awesome Project")
 background = Background.new(name: "fake background")
 HostGenome.create!(name: "human", default_background_id: 1)
+alignment_config = AlignmentConfig.create!(name: "test config")
 
 (1..5).each do |i|
   sample = Sample.new(name: "Sample #{i}", project: project,
@@ -14,7 +15,7 @@ HostGenome.create!(name: "human", default_background_id: 1)
   sample.input_files << InputFile.new(name: 'R2.fastq.gz', source_type: 'local', source: 'R2.fastq.gz')
   sample.save!
   taxon_counts = (1..50).map { |j| TaxonCount.new(tax_id: j, tax_level: [1, 2].sample, count: rand(1000), name: "Some Name", count_type: %w[NT NR].sample) }
-  pipeline_run = PipelineRun.create!(sample: sample, command: "xyz yzyz", total_reads: 1_000, adjusted_remaining_reads: 500, taxon_counts: taxon_counts)
+  pipeline_run = PipelineRun.create!(sample: sample, command: "xyz yzyz", total_reads: 1_000, adjusted_remaining_reads: 500, taxon_counts: taxon_counts, alignment_config: alignment_config)
   pipeline_run.save!
   background.pipeline_runs << pipeline_run
 end

@@ -32,7 +32,7 @@
       "class": "PipelineStepGenerateTaxidFasta",
       "module": "idseq_dag.steps.generate_taxid_fasta",
       "additional_files": {
-        "lineage_db": "s3://idseq-database/taxonomy/2018-02-15-utc-1518652800-unixtime__2018-02-15-utc-1518652800-unixtime/taxid-lineages.db"
+        "lineage_db":  "<%= @attribute_dict[:lineage_db] %>"
       },
       "additional_attributes": {}
     },
@@ -50,10 +50,10 @@
       "class": "PipelineStepGenerateAlignmentViz",
       "module": "idseq_dag.steps.generate_alignment_viz",
       "additional_files": {
-        "nt_loc_db": "s3://idseq-database/20170824/blast_db/nt_loc.db"
+        "nt_loc_db": "<%= @attribute_dict[:nt_loc_db] %>"
       },
       "additional_attributes": {
-        "nt_db": "s3://idseq-database/20170824/blast_db/nt"
+        "nt_db": "<%= @attribute_dict[:nt_db] %>"
       }
     }
   ],
