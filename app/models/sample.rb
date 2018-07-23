@@ -27,7 +27,7 @@ class Sample < ApplicationRecord
   LOCAL_INPUT_PART_PATH = '/app/tmp/input_parts'.freeze
 
   # TODO: Make all these params configurable without code change
-  DEFAULT_STORAGE_IN_GB = 1000
+  DEFAULT_STORAGE_IN_GB = 500
   DEFAULT_MEMORY_IN_MB = 120_000 # sorry, hacky
   HOST_FILTERING_MEMORY_IN_MB = 240_000
 
