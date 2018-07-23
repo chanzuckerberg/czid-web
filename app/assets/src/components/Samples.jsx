@@ -1907,8 +1907,7 @@ class BackgroundModal extends React.Component {
           {background_creation_response.status === "ok" ? (
             <div className="status-message status teal-text text-darken-2">
               <i className="fa fa-smile-o fa-fw" />
-              Background creation kicked off successfully. Background should be
-              available on the report page soon.
+              Collection is being created and will be visible on the report page once statistics have been computed.
             </div>
           ) : background_creation_response.message ? (
             <div className="status-message">
