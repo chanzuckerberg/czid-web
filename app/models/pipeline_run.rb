@@ -22,7 +22,6 @@ class PipelineRun < ApplicationRecord
   accepts_nested_attributes_for :ercc_counts
   accepts_nested_attributes_for :amr_counts
 
-
   DEFAULT_SUBSAMPLING = 1_000_000 # number of fragments to subsample to, after host filtering
   MAX_INPUT_FRAGMENTS = 75_000_000 # max fragments going into the pipeline
   OUTPUT_JSON_NAME = 'taxon_counts.json'.freeze
@@ -315,8 +314,10 @@ class PipelineRun < ApplicationRecord
           amr_counts_array << { sample_id: sample_id, gene: gene, allele: allele, coverage: coverage, depth: depth }
         end
       end
-      AmrCount.create(amr_counts_array)
-      # update(amr_counts_attributes: amr_counts_array)
+      # AmrCount.create(amr_counts_array)
+      update(amr_counts_attributes: amr_counts_array)
+      # update(AmrCount_attributes: amr_counts_array)
+      # update(amr_counts_attributes: )
     end
   end
 
