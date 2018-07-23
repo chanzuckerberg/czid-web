@@ -1,6 +1,53 @@
 @import "variables";
 /* TODO: refactor stylesheet into scss */
 
+.background-button-section {
+  padding-top: 30px;
+  font-size: 13.333px;
+  font-family: "Lato", "Helvetica Neue", Arial, Helvetica, sans-serif;
+  font-weight: 700;
+
+  .cancel-background {
+    border: 1px solid #3867fa !important;
+    background: #ffffff !important;
+    color: #3867fa !important;
+    cursor: pointer;
+    &:hover {
+      background: #3867fa !important;
+      color: #ffffff !important;
+    }
+  }
+
+  .create-background {
+    margin-right: 10px;
+    border: 1px solid #3867fa !important;
+    background: #3867fa !important;
+    color: #ffffff !important;
+    cursor: pointer;
+    &:hover {
+      background: #ffffff !important;
+      color: #3867fa !important;
+    }
+  }
+}
+
+.background-modal-contents {
+  .label-text {
+    padding-top: 25px;
+    padding-bottom: 10px;
+    font-size: 14px;
+    font-weight: bold;
+  }
+  .secondary-text {
+    font-size: 11px;
+    font-weight: normal;
+    color: #c0c0c0;
+  }
+  ul {
+    margin-top: 0;
+  }
+}
+
 .samples-table {
   td {
     cursor: pointer;
@@ -1100,6 +1147,38 @@ input[type="button"] {
       }
 
       padding-top: 15px;
+
+      .background-area {
+        float: right;
+        padding-right: 10px;
+        .white {
+          padding-top: 20px;
+        }
+        .background {
+          padding: 10px;
+          border-radius: 40px;
+          border: 1px solid #3867fa;
+          cursor: pointer;
+          display: block;
+          background: #ffffff;
+          color: #ffffff;
+          font-size: 13.333px;
+          font-family: "Lato", "Helvetica Neue", Arial, Helvetica, sans-serif;
+          font-weight: 700;
+          width: 162px;
+          height: 39px;
+          &:not(.btn-disabled) {
+            // Active
+            color: #3867fa !important;
+          }
+          &:not(.btn-disabled):hover {
+            // Active and hover
+            background: #3867fa;
+            color: #ffffff !important;
+          }
+        }
+      }
+
       .compare-area {
         float: right;
         padding-right: 10px;

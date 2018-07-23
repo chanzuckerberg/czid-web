@@ -4,7 +4,8 @@ class Background < ApplicationRecord
   has_many :taxon_summaries, dependent: :destroy
   belongs_to :project, optional: true
   validate :validate_size
-  after_save :store_summary
+  validates :name, presence: true, uniqueness: true
+  after_save :submit_store_summary_job
 
   DEFAULT_BACKGROUND_MODEL_NAME = "default".freeze
   TAXON_SUMMARY_CHUNK_SIZE = 100
@@ -44,6 +45,10 @@ class Background < ApplicationRecord
     results
   end
 
+  def submit_store_summary_job
+    Resque.enqueue(ComputeBackground, id)
+  end
+
   def store_summary
     ActiveRecord::Base.transaction do
       ActiveRecord::Base.connection.execute <<-SQL
@@ -63,6 +68,7 @@ class Background < ApplicationRecord
         SQL
       end
     end
+    update(ready: 1) # background will be displayed on report page
   end
 
   def compute_stdev(sum, sum2, n)
@@ -77,7 +83,19 @@ class Background < ApplicationRecord
     if user.admin?
       all
     else
-      where(project_id: Project.viewable(user).pluck(:id) + [nil])
+      # Background is viewable by user if either
+      # (A) user is allowed to view all pipeline_runs that went into the background, or
+      # (B) background is marked as public (regardless of whether user is allowed to view individual pipeline_runs).
+      condition_b = "public_access = 1"
+      viewable_pipeline_run_ids = PipelineRun.where(sample_id: Sample.viewable(user).pluck(:id)).pluck(:id)
+      condition_a = if viewable_pipeline_run_ids.empty?
+                      "false"
+                    else
+                      "id not in (select background_id from backgrounds_pipeline_runs
+                                  where pipeline_run_id not in (#{viewable_pipeline_run_ids.join(',')}))"
+                    end
+      condition = [condition_b, condition_a].join(" or ")
+      where(condition)
     end
   end
 end

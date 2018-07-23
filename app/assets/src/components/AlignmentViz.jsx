@@ -10,6 +10,7 @@ class AlignmentViz extends React.Component {
     this.taxId = props.taxId;
     this.taxLevel = props.taxLevel;
     this.taxName = props.taxName;
+    this.pipelineVersion = props.pipelineVersion;
     this.readsPerPage = props.readsPerPage || 20;
     this.fetchAlignmentData = this.fetchAlignmentData.bind(this);
     this.state = {
@@ -25,7 +26,9 @@ class AlignmentViz extends React.Component {
   fetchAlignmentData() {
     axios
       .get(
-        `/samples/${this.sampleId}/alignment_viz/${this.alignmentQuery}.json`
+        `/samples/${this.sampleId}/alignment_viz/${
+          this.alignmentQuery
+        }.json?pipeline_version=${this.pipelineVersion}`
       )
       .then(res => {
         this.setState({

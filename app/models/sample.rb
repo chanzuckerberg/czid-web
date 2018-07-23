@@ -310,7 +310,7 @@ class Sample < ApplicationRecord
   end
 
   def default_background_id
-    host_genome && host_genome.default_background ? host_genome.default_background.id : Background.find_by(project_id: nil).id
+    host_genome && host_genome.default_background ? host_genome.default_background.id : Background.find_by(public_access: 1).id
   end
 
   def as_json(_options = {})

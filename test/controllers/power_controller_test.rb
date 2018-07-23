@@ -49,7 +49,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     @joe_project = projects(:joe_project)
     get "/samples.json?project_id=#{@joe_project.id}"
     assert_response :success
-    assert JSON.parse(@response.body)["total_count"] == 1
+    assert JSON.parse(@response.body)["total_count"] == 3
   end
 
   test 'joe can see joe_sample' do
@@ -101,7 +101,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     @public_project = projects(:public_project)
     get "/samples.json?project_id=#{@public_project.id}"
     assert_response :success
-    assert JSON.parse(@response.body)["total_count"] == 1
+    assert JSON.parse(@response.body)["total_count"] == 3
   end
 
   test 'joe can see public_sample' do
@@ -209,6 +209,24 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
   end
 
   # backgrounds
+
+  test 'joe cannot create background from samples he cannot view' do
+    post backgrounds_url, params: { name: 'new_name', sample_ids: [samples(:project_one_sampleA).id, samples(:project_one_sampleB).id] }
+    resp = JSON.parse(@response.body)
+    assert_equal "unauthorized", resp['status']
+  end
+
+  test 'joe can create background from public samples' do
+    post backgrounds_url, params: { name: 'new_name', sample_ids: [samples(:expired_sample).id, samples(:public_sample).id] }
+    resp = JSON.parse(@response.body)
+    assert_equal "ok", resp['status']
+  end
+
+  test 'joe can create background from samples in joe_project' do
+    post backgrounds_url, params: { name: 'new_name', sample_ids: [samples(:joe_project_sampleA).id, samples(:joe_project_sampleB).id] }
+    resp = JSON.parse(@response.body)
+    assert_equal "ok", resp['status']
+  end
 
   test 'joe can view joe_sample with public background' do
     access_sample_with_background(backgrounds(:public_background), samples(:joe_sample))
