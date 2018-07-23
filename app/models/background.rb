@@ -68,6 +68,7 @@ class Background < ApplicationRecord
         SQL
       end
     end
+    update(ready: 1) # background will be displayed on report page
   end
 
   def compute_stdev(sum, sum2, n)
@@ -83,14 +84,17 @@ class Background < ApplicationRecord
       all
     else
       # Background is viewable by user if either
-      # (a) user is allowed to view all pipeline_runs that went into the background, or
-      # (b) background is marked as public (regardless of whether user is allowed to view individual pipeline_runs).
-      condition = "public_access = 1"
+      # (A) user is allowed to view all pipeline_runs that went into the background, or
+      # (B) background is marked as public (regardless of whether user is allowed to view individual pipeline_runs).
+      condition_b = "public_access = 1"
       viewable_pipeline_run_ids = PipelineRun.where(sample_id: Sample.viewable(user).pluck(:id)).pluck(:id)
-      unless viewable_pipeline_run_ids.empty?
-        condition += " or id not in (select background_id from backgrounds_pipeline_runs
-                                    where pipeline_run_id not in (#{viewable_pipeline_run_ids.join(',')}))"
-      end
+      condition_a = if viewable_pipeline_run_ids.empty?
+                      "false"
+                    else
+                      "id not in (select background_id from backgrounds_pipeline_runs
+                                  where pipeline_run_id not in (#{viewable_pipeline_run_ids.join(',')}))"
+                    end
+      condition = [condition_b, condition_a].join(" or ")
       where(condition)
     end
   end
