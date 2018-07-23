@@ -214,8 +214,10 @@ class PipelineRunStage < ApplicationRecord
   def host_filtering_command
     # Upload DAG to S3
     sample = pipeline_run.sample
+    file_type = sample.fasta_input? ? 'fasta' : 'fastq'
     attribute_dict = {
       fastq1: sample.input_files[0].name,
+      file_type: file_type,
       star_genome: sample.s3_star_index_path,
       bowtie2_genome: sample.s3_bowtie2_index_path,
       max_fragments: PipelineRun::MAX_INPUT_FRAGMENTS,

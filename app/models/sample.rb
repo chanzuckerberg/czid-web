@@ -83,6 +83,10 @@ class Sample < ApplicationRecord
     prvs.uniq
   end
 
+  def fasta_input?
+    ["fasta", "fa", "fasta.gz", "fa.gz"].include?(input_files[0].file_type)
+  end
+
   def pipeline_run_by_version(pipeline_version)
     # Right now we don't filter for successful pipeline runs. we should do that at some point.
     prs = if pipeline_version == PipelineRun::PIPELINE_VERSION_WHEN_NULL
