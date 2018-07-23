@@ -65,7 +65,7 @@ class SamplesHeatmap extends React.Component {
       },
       selectedOptions: {
         metric: this.urlParams.metric || this.props.metrics[0],
-        categories: this.urlParams.categories || this.props.categories,
+        categories: this.urlParams.categories || [],
         background:
           this.urlParams.background || this.props.backgrounds[0].value,
         species: parseInt(this.urlParams.species) || 1,
@@ -109,7 +109,6 @@ class SamplesHeatmap extends React.Component {
     this.onSampleLabelClick = this.onSampleLabelClick.bind(this);
     this.onShareClick = this.onShareClick.bind(this);
     this.onTaxonLevelChange = this.onTaxonLevelChange.bind(this);
-    this.onTaxonsPerSampleChange = this.onTaxonsPerSampleChange.bind(this);
     this.onTaxonsPerSampleEnd = this.onTaxonsPerSampleEnd.bind(this);
   }
 
@@ -451,10 +450,17 @@ class SamplesHeatmap extends React.Component {
     );
   }
 
-  setSelectedOptionsState(state) {
-    this.setState({
-      selectedOptions: Object.assign({}, this.state.selectedOptions, state)
-    });
+  setSelectedOptionsState(stateChanges, callback) {
+    this.setState(
+      {
+        selectedOptions: Object.assign(
+          {},
+          this.state.selectedOptions,
+          stateChanges
+        )
+      },
+      callback
+    );
   }
 
   onMetricChange(_, metric) {
@@ -463,10 +469,10 @@ class SamplesHeatmap extends React.Component {
     }
 
     this.optionsChanged = true;
-    this.setSelectedOptionsState({ metric: metric.value });
-    if (!this.explicitApply) {
-      this.updateHeatmap();
-    }
+    this.setSelectedOptionsState(
+      { metric: metric.value },
+      this.explicitApply ? undefined : this.updateHeatmap
+    );
   }
 
   renderMetricPicker() {
@@ -491,11 +497,11 @@ class SamplesHeatmap extends React.Component {
   }
 
   onAdvancedFilterApply(filters) {
-    this.setSelectedOptionsState({ advancedFilters: filters });
     this.optionsChanged = true;
-    if (!this.explicitApply) {
-      this.updateHeatmap();
-    }
+    this.setSelectedOptionsState(
+      { advancedFilters: filters },
+      this.explicitApply ? undefined : this.updateHeatmap
+    );
   }
 
   renderAdvancedFilterPicker() {
@@ -519,11 +525,11 @@ class SamplesHeatmap extends React.Component {
       return;
     }
 
-    this.setSelectedOptionsState({ species: taxonLevel.value });
     this.optionsChanged = true;
-    if (!this.explicitApply) {
-      this.updateHeatmap();
-    }
+    this.setSelectedOptionsState(
+      { species: taxonLevel.value },
+      this.explicitApply ? undefined : this.updateHeatmap
+    );
   }
 
   renderTaxonLevelPicker() {
@@ -609,16 +615,12 @@ class SamplesHeatmap extends React.Component {
     copy(shareableUrl);
   }
 
-  onCategoryChange(_, categories) {
-    if (!categories.length) {
-      return;
-    }
-
-    this.setSelectedOptionsState({ categories: categories });
+  onCategoryChange(_, newCategories) {
     this.optionsChanged = true;
-    if (!this.explicitApply) {
-      this.updateHeatmap();
-    }
+    this.setSelectedOptionsState(
+      { categories: newCategories },
+      this.explicitApply ? undefined : this.updateHeatmap
+    );
   }
 
   renderCategoryFilter() {
@@ -633,7 +635,7 @@ class SamplesHeatmap extends React.Component {
         fluid
         options={options}
         onChange={this.onCategoryChange}
-        value={this.state.selectedOptions.categories}
+        value={this.state.selectedOptions.categories.slice()}
         label="Taxon Categories:"
         disabled={!this.state.data}
       />
@@ -645,11 +647,11 @@ class SamplesHeatmap extends React.Component {
       return;
     }
 
-    this.setSelectedOptionsState({ background: background.value });
     this.optionsChanged = true;
-    if (!this.explicitApply) {
-      this.updateHeatmap();
-    }
+    this.setSelectedOptionsState(
+      { background: background.value },
+      this.explicitApply ? undefined : this.updateHeatmap
+    );
   }
 
   renderBackgroundPicker() {
@@ -671,19 +673,12 @@ class SamplesHeatmap extends React.Component {
     );
   }
 
-  onTaxonsPerSampleChange(value) {
-    if (value != this.state.selectedOptions.taxonsPerSample) {
-      this.setSelectedOptionsState({
-        taxonsPerSample: parseInt(value)
-      });
-      this.optionsChanged = true;
-    }
-  }
-
-  onTaxonsPerSampleEnd() {
-    if (!this.explicitApply) {
-      this.updateHeatmap();
-    }
+  onTaxonsPerSampleEnd(newValue) {
+    this.optionsChanged = true;
+    this.setSelectedOptionsState(
+      { taxonsPerSample: newValue },
+      this.explicitApply ? undefined : this.updateHeatmap
+    );
   }
 
   renderTaxonsPerSampleSlider() {
@@ -692,7 +687,7 @@ class SamplesHeatmap extends React.Component {
         label="Taxons per Sample:"
         min={this.state.availableOptions.taxonsPerSample.min}
         max={this.state.availableOptions.taxonsPerSample.max}
-        defaultValue={this.state.selectedOptions.taxonsPerSample}
+        value={this.state.selectedOptions.taxonsPerSample}
         onChange={this.onTaxonsPerSampleChange}
         onAfterChange={this.onTaxonsPerSampleEnd}
       />
