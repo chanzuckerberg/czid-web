@@ -844,7 +844,8 @@ class SampleUpload extends React.Component {
                       <div className="field-title">
                         <div className="read-count-label">Read 1</div>
                         <div className="validation-info">
-                          Accepted formats: fastq (fq), fastq.gz (fq.gz)
+                          Accepted formats: fastq (.fq), fastq.gz (.fq.gz),
+                          fasta (.fa), fasta.gz (.fa.gz)
                         </div>
                         <div className="example-link">
                           Example:
@@ -881,7 +882,8 @@ class SampleUpload extends React.Component {
                           Read 2 (optional)
                         </div>
                         <div className="validation-info">
-                          Accepted formats: fastq (fq), fastq.gz (fq.gz)
+                          Accepted formats: fastq (.fq), fastq.gz (.fq.gz),
+                          fasta (.fa), fasta.gz (.fa.gz)
                         </div>
                         <div className="example-link">
                           Example:
