@@ -39,3 +39,59 @@ six:
   adjusted_remaining_reads: 316
   subsample: 1000000
   alignment_config: one
+public_project_sampleA_run:
+  sample: public_project_sampleA
+  job_id: 'public_project_sampleA_job'
+  job_status: 'CHECKED'
+  total_reads: 1
+  adjusted_remaining_reads: 1
+  alignment_config: one
+public_project_sampleB_run:
+  sample: public_project_sampleB
+  job_id: 'public_project_sampleB_job'
+  job_status: 'CHECKED'
+  total_reads: 1
+  adjusted_remaining_reads: 1
+  alignment_config: one
+joe_project_sampleA_run:
+  sample: joe_project_sampleA
+  job_id: 'joe_project_sampleA_job'
+  job_status: 'CHECKED'
+  total_reads: 1
+  adjusted_remaining_reads: 1
+  alignment_config: one
+joe_project_sampleB_run:
+  sample: joe_project_sampleB
+  job_id: 'joe_project_sampleB_job'
+  job_status: 'CHECKED'
+  total_reads: 1
+  adjusted_remaining_reads: 1
+  alignment_config: one
+project_one_sampleA_run:
+  sample: project_one_sampleA
+  job_id: 'project_one_sampleA_job'
+  job_status: 'CHECKED'
+  total_reads: 1
+  adjusted_remaining_reads: 1
+  alignment_config: one
+project_one_sampleB_run:
+  sample: project_one_sampleB
+  job_id: 'project_one_sampleB_job'
+  job_status: 'CHECKED'
+  total_reads: 1
+  adjusted_remaining_reads: 1
+  alignment_config: one
+expired_sample_run:
+  sample: expired_sample
+  job_id: 'expired_sample_job'
+  job_status: 'CHECKED'
+  total_reads: 1
+  adjusted_remaining_reads: 1
+  alignment_config: one
+public_sample_run:
+  sample: public_sample
+  job_id: 'public_sample_job'
+  job_status: 'CHECKED'
+  total_reads: 1
+  adjusted_remaining_reads: 1
+  alignment_config: one

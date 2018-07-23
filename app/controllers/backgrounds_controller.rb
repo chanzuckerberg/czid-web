@@ -1,7 +1,10 @@
 class BackgroundsController < ApplicationController
   include BackgroundsHelper
+  before_action :login_required
+  before_action :authenticate_user!
+  before_action :no_demo_user
+  before_action :admin_required, except: :create
   before_action :set_background, only: [:show, :edit, :update, :destroy]
-  before_action :admin_required
 
   # GET /backgrounds
   # GET /backgrounds.json
@@ -26,15 +29,28 @@ class BackgroundsController < ApplicationController
   # POST /backgrounds
   # POST /backgrounds.json
   def create
-    @background = Background.new(background_params)
+    name = params[:name]
+    description = params[:description]
+    sample_ids = params[:sample_ids].map(&:to_i)
 
-    respond_to do |format|
+    non_viewable_sample_ids = sample_ids.to_set - current_power.samples.pluck(:id).to_set
+    if !non_viewable_sample_ids.empty?
+      render json: {
+        status: :unauthorized,
+        message: "You are not authorized to view all samples in the list."
+      }
+    else
+      pipeline_run_ids = Background.eligible_pipeline_runs.where(sample_id: sample_ids).pluck(:id)
+      @background = Background.new(name: name, description: description, pipeline_run_ids: pipeline_run_ids)
       if @background.save
-        format.html { redirect_to @background, notice: 'Background was successfully created.' }
-        format.json { render :show, status: :created, location: @background }
+        render json: {
+          status: :ok
+        }
       else
-        format.html { render :new }
-        format.json { render json: @background.errors, status: :unprocessable_entity }
+        render json: {
+          status: :not_acceptable,
+          message: @background.errors.full_messages
+        }
       end
     end
   end
