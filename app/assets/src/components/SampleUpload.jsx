@@ -5,6 +5,7 @@ import $ from "jquery";
 import Tipsy from "react-tipsy";
 import IconComponent from "./IconComponent";
 import ObjectHelper from "../helpers/ObjectHelper";
+import CliUserInstructionsModal from "./CliUserInstructionsModal";
 
 class SampleUpload extends React.Component {
   constructor(props, context) {
@@ -75,7 +76,6 @@ class SampleUpload extends React.Component {
           : this.selected.inputFiles[1].source
         : "";
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
-    this.openCliModal = this.openCliModal.bind(this);
     this.state = {
       submitting: false,
       allProjects: this.projects || [],
@@ -563,10 +563,6 @@ class SampleUpload extends React.Component {
     }
   }
 
-  openCliModal() {
-    $("#cli_modal").modal("open");
-  }
-
   renderSampleForm(updateExistingSample = false) {
     const termsBlurb = (
       <div className="consent-blurb">
@@ -625,12 +621,9 @@ class SampleUpload extends React.Component {
                 Want to upload multiple samples at once?{" "}
                 <a href="/samples/bulk_new">Click here.</a>
                 <br />Rather use our command-line interface?
-                {
-                  <a onClick={this.openCliModal} href="#!">
-                    {" "}
-                    Instructions here.
-                  </a>
-                }
+                <CliUserInstructionsModal
+                  trigger={<a href="#!"> Instructions here.</a>}
+                />
               </p>
             </div>
             <form

@@ -1251,11 +1251,11 @@ input[type="button"] {
   margin-top: 4px;
 }
 
-.add-user-modal {
+.generic-centered-modal {
   width: 35% !important;
   box-shadow: 1px 1px 7px 2px #fff;
   color: #353535;
-  border-radius: 0px;
+  border-radius: 0;
   margin: 0 auto !important;
   top: 30% !important;
 }
@@ -1347,6 +1347,10 @@ input[type="button"] {
       font-size: $font-size-small;
       margin-top: 5px;
       color: #6b6b6b;
+    }
+
+    .cli-modal {
+      max-width: 1rem;
     }
   }
   .members_list {

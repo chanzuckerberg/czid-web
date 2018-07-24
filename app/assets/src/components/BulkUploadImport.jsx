@@ -5,6 +5,7 @@ import $ from "jquery";
 import Tipsy from "react-tipsy";
 import SampleUpload from "./SampleUpload";
 import ObjectHelper from "../helpers/ObjectHelper";
+import CliUserInstructionsModal from "./CliUserInstructionsModal";
 
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
@@ -31,7 +32,6 @@ class BulkUploadImport extends React.Component {
     });
     this.userDetails = props.loggedin_user;
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
-    this.openCliModal = this.openCliModal.bind(this);
     this.state = {
       submitting: false,
       allProjects: props.projects || [],
@@ -642,10 +642,6 @@ class BulkUploadImport extends React.Component {
     );
   }
 
-  openCliModal() {
-    $("#cli_modal").modal("open");
-  }
-
   renderBulkUploadImportForm() {
     const termsBlurb = (
       <div className="consent-blurb">
@@ -704,12 +700,9 @@ class BulkUploadImport extends React.Component {
                 Only want to upload one sample?{" "}
                 <a href="/samples/new">Click here.</a>
                 <br />Rather use our command-line interface?
-                {
-                  <a onClick={this.openCliModal} href="#!">
-                    {" "}
-                    Instructions here.
-                  </a>
-                }
+                <CliUserInstructionsModal
+                  trigger={<a href="#!"> Instructions here.</a>}
+                />
               </p>
             </div>
             {this.state.success ? (

@@ -3,6 +3,7 @@ import $ from "jquery";
 import axios from "axios";
 import { Dropdown } from "semantic-ui-react";
 import SampleUpload from "./SampleUpload";
+import CliUserInstructionsModal from "./CliUserInstructionsModal";
 
 class Header extends React.Component {
   constructor(props, context) {
@@ -13,7 +14,6 @@ class Header extends React.Component {
     this.location = window.location.pathname;
     this.sendMail = this.sendMail.bind(this);
     this.signOut = this.signOut.bind(this);
-    this.openCliModal = this.openCliModal.bind(this);
     this.user_auth_token = props.user_auth_token;
     this.host_genome_names = props.host_genome_names;
     $(document).ready(() => {
@@ -54,124 +54,7 @@ class Header extends React.Component {
     window.location.href = link;
   }
 
-  openCliModal() {
-    $("#cli_modal").modal("open");
-  }
-
   render() {
-    const host_genome_names = this.host_genome_names;
-    let cli_modal;
-    if (this.userSignedIn && this.demoUser !== 1) {
-      cli_modal = (
-        <div id="cli_modal" className="modal project-popup">
-          <div className="modal-content">
-            <p>
-              1. Install and configure the Amazon Web Services Command Line
-              Interface (AWS CLI).
-            </p>
-            <p>
-              Verify it works by running <span className="code">aws help</span>,
-              which should display usage instructions.
-            </p>
-            <p>2. Install the IDseq CLI. Python 2 or Python 3 compatible:</p>
-            <div>
-              <span className="code">
-                pip install git+https://github.com/chanzuckerberg/idseq-cli.git
-                --upgrade
-              </span>
-              <p />
-              <p>
-                Tips: Or run with <span className="code">pip2</span> or{" "}
-                <span className="code">pip3</span> depending on your
-                configuration. Try <span className="code">sudo pip</span> if you
-                run into permissions errors.
-              </p>
-              <p>
-                Avoid copying commands into programs like TextEdit because it
-                may change "straight quotes" into
-              </p>
-              <p>
-                “smart quotes” (“ ‘ ’ ”) which will not be parsed correctly in
-                your terminal.
-              </p>
-            </div>
-            <p />
-            <p>3. Upload a sample using a command of the form:</p>
-            <div className="code center-code">
-              <p>
-                idseq -p '<span className="code-to-edit">
-                  Your Project Name
-                </span>' -s '<span className="code-to-edit">
-                  Your Sample Name
-                </span>' \
-                <br /> -u https://idseq.net -e{" "}
-                <span className="code-personal">
-                  {this.userDetails.email}
-                </span>{" "}
-                -t <span className="code-personal">{this.user_auth_token}</span>{" "}
-                \
-                <br /> --r1 <span className="code-to-edit">
-                  your_sample_R1
-                </span>.fastq.gz --r2{" "}
-                <span className="code-to-edit">your_sample_R2</span>.fastq.gz
-              </p>
-            </div>
-            <br />
-            <p>
-              4. You can also upload samples in bulk by specifying a folder as
-              follows:
-            </p>
-            <div className="code center-code">
-              <p>
-                idseq -p '<span className="code-to-edit">
-                  Your Project Name
-                </span>' \
-                <br /> -u https://idseq.net -e{" "}
-                <span className="code-personal">
-                  {this.userDetails.email}
-                </span>{" "}
-                -t <span className="code-personal">{this.user_auth_token}</span>{" "}
-                \
-                <br /> --bulk{" "}
-                <span className="code-to-edit">/path/to/your/folder</span>
-              </p>
-            </div>
-            <br />
-            <div className="divider" />
-            <br />
-            <p>
-              By default, the host genome to be subtracted out is "Human".<br />
-              You can change it by adding{" "}
-              <span className="code">
-                --host_genome_name{" "}
-                <span className="code-to-edit">'Your Chosen Host'</span>
-              </span>{" "}
-              to the command.<br />
-              Current possibilities for{" "}
-              <span className="code-to-edit">'Your Chosen Host'</span>:<br />
-              {host_genome_names
-                .map((hgn, i) => (
-                  <span className="code-personal" key={i}>
-                    '{hgn}'
-                  </span>
-                ))
-                .reduce((prev, curr) => [prev, " / ", curr])}.
-            </p>
-            <p className="upload-question">
-              For more information on the IDseq CLI, have a look at its{" "}
-              <a
-                href="https://github.com/chanzuckerberg/idseq-web/blob/master/README.md"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                GitHub repository
-              </a>.
-            </p>
-            <button className="modal-close">Done</button>
-          </div>
-        </div>
-      );
-    }
     return (
       <div className="header-row row">
         <div className="page-loading">
@@ -191,8 +74,6 @@ class Header extends React.Component {
                   </div>
                 </a>
               </div>
-
-              {cli_modal /* Able to be called later */}
               <Dropdown
                 text={this.userDetails.email}
                 className="right profile-header-dropdown"
@@ -205,10 +86,14 @@ class Header extends React.Component {
                         key="1"
                         onClick={this.gotoPage.bind(this, "/samples/new")}
                       />,
-                      <Dropdown.Item
-                        text="New Sample (Command Line)"
-                        key="2"
-                        onClick={this.openCliModal}
+                      <CliUserInstructionsModal
+                        key="cliInstructions"
+                        trigger={
+                          <Dropdown.Item
+                            text="New Sample (Command Line)"
+                            key="2"
+                          />
+                        }
                       />
                     ]}
                   {this.userDetails &&
