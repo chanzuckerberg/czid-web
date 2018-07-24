@@ -20,13 +20,19 @@ class CliUserInstructionsModal extends React.Component {
   }
 
   render() {
-    const singleUploadCmd = `idseq -e ${this.props.email} -t ${
-      this.props.authToken
-    } -p 'Your Project Name' -s 'Your Sample Name' --r1 your_sample_R1.fastq.gz --r2 your_sample_R2.fastq.gz --host-genome-name 'Human'`;
+    const singleUploadCmd =
+      "idseq -e " +
+      this.props.email +
+      " -t " +
+      this.props.authToken +
+      " -p 'Your Project Name' -s 'Your Sample Name' --r1 your_sample_R1.fastq.gz --r2 your_sample_R2.fastq.gz --host-genome-name 'Human'`";
 
-    const bulkUploadCmd = `idseq -e ${this.props.email} -t ${
-      this.props.authToken
-    } -p 'Your Project Name' --bulk . --host-genome-name 'Human'`;
+    const bulkUploadCmd =
+      "idseq -e " +
+      this.props.email +
+      " -t " +
+      this.props.authToken +
+      " -p 'Your Project Name' --bulk . --host-genome-name 'Human'";
 
     const modalContent = (
       <div>
