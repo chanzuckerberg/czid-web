@@ -412,7 +412,6 @@ class PipelineRun < ApplicationRecord
     results_finalized.nil?
   end
 
-
   def check_and_enqueue(output_state)
     # If the pipeline monitor tells us that no jobs are running anymore,
     # yet outputs are not available, we need to draw the conclusion that

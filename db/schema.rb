@@ -10,7 +10,6 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-<<<<<<< HEAD
 ActiveRecord::Schema.define(version: 20_180_716_215_830) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -24,7 +23,8 @@ ActiveRecord::Schema.define(version: 20_180_716_215_830) do
     t.text "s3_deuterostome_db_path"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-=======
+  end
+end
 ActiveRecord::Schema.define(version: 20_180_723_190_559) do
   create_table "amr_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "sample_id"
@@ -35,7 +35,6 @@ ActiveRecord::Schema.define(version: 20_180_723_190_559) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "pipeline_run_id"
->>>>>>> Updated to add pipeline_run_id column, works
   end
 
   create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|

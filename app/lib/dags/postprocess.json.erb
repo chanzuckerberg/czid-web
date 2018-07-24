@@ -69,6 +69,18 @@
         "min_cov": 0,
         "n_threads": 16
       }
+    },
+    
+    {
+      "in": ["fastqs"],
+      "out": "srst2_out",
+      "class": "PipelineStepRunSRST2",
+      "module": "idseq_dag.steps.run_srst2",
+      "additional_files": {"resist_gene_db": "s3://idseq-database/test/AMR/ARGannot_r2.fasta"},
+      "additional_attributes": {
+        "min_cov": 0,
+        "n_threads": 16
+      }
     }
   ],
   "given_targets": {
