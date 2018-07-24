@@ -6,6 +6,7 @@
       selectedSample: JSON.parse('<%= raw escape_json(@sample) %>'),
       host_genomes: JSON.parse('<%= raw escape_json(@host_genomes) %>'),
       loggedin_user: JSON.parse('<%= raw escape_json(current_user) %>'),
+      userAuthToken: '<%= current_user.authentication_token %>',
       projectInfo: JSON.parse('<%= raw escape_json(@project_info) %>'),
       inputFiles: JSON.parse('<%= raw escape_json(@input_files) %>')
     }, 'sample_upload_page');

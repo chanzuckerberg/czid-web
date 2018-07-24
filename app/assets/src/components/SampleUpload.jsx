@@ -623,6 +623,8 @@ class SampleUpload extends React.Component {
                 <br />Rather use our command-line interface?
                 <CliUserInstructionsModal
                   trigger={<a href="#!"> Instructions here.</a>}
+                  email={this.userDetails.email}
+                  authToken={this.props.userAuthToken}
                 />
               </p>
             </div>

@@ -1251,13 +1251,25 @@ input[type="button"] {
   margin-top: 4px;
 }
 
-.generic-centered-modal {
+.add-user-modal {
   width: 35% !important;
   box-shadow: 1px 1px 7px 2px #fff;
   color: #353535;
   border-radius: 0;
   margin: 0 auto !important;
   top: 30% !important;
+}
+
+.cli-modal {
+  margin: 0 auto !important;
+  top: 3%;
+  max-width: 75%;
+  max-height: 98%;
+}
+
+.cli-modal-content {
+  overflow-wrap: normal;
+  word-wrap: break-word;
 }
 
 .ui.dimmer {
@@ -1347,10 +1359,6 @@ input[type="button"] {
       font-size: $font-size-small;
       margin-top: 5px;
       color: #6b6b6b;
-    }
-
-    .cli-modal {
-      max-width: 1rem;
     }
   }
   .members_list {

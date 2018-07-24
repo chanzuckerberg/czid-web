@@ -14,7 +14,7 @@ class Header extends React.Component {
     this.location = window.location.pathname;
     this.sendMail = this.sendMail.bind(this);
     this.signOut = this.signOut.bind(this);
-    this.user_auth_token = props.user_auth_token;
+    this.userAuthToken = props.userAuthToken;
     this.host_genome_names = props.host_genome_names;
     $(document).ready(() => {
       $(".modal").modal();
@@ -94,6 +94,8 @@ class Header extends React.Component {
                             key="2"
                           />
                         }
+                        email={this.userDetails.email}
+                        authToken={this.userAuthToken}
                       />
                     ]}
                   {this.userDetails &&

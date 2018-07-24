@@ -1872,7 +1872,7 @@ class BackgroundModal extends React.Component {
         }
         open={this.state.modalOpen}
         onClose={this.handleClose}
-        className="modal project-popup generic-centered-modal"
+        className="modal project-popup add-user-modal"
       >
         <Modal.Header className="project_modal_header">
           Create a Collection
@@ -1952,7 +1952,7 @@ class AddUserModal extends React.Component {
         trigger={<a onClick={this.handleOpen}>Add User</a>}
         open={this.state.modalOpen}
         onClose={this.handleClose}
-        className="modal project-popup generic-centered-modal"
+        className="modal project-popup add-user-modal"
       >
         <Modal.Header className="project_modal_header">
           Project Members and Access Control

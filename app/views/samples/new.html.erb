@@ -5,7 +5,8 @@
       csrf: '<%= form_authenticity_token %>',
       sample: JSON.parse('<%= raw escape_json(@sample)%>'),
       host_genomes: JSON.parse('<%= raw escape_json(@host_genomes)%>'),
-      loggedin_user: JSON.parse('<%= raw escape_json(current_user)%>')
+      loggedin_user: JSON.parse('<%= raw escape_json(current_user)%>'),
+      userAuthToken: '<%= current_user.authentication_token %>',
     }, 'sample_upload_page');
   <% end %>
 </div>
