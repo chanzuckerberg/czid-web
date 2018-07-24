@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_180_716_215_830) do
+ActiveRecord::Schema.define(version: 20_180_724_192_236) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -23,6 +23,17 @@ ActiveRecord::Schema.define(version: 20_180_716_215_830) do
     t.text "s3_deuterostome_db_path"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "amr_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "sample_id"
+    t.string "gene"
+    t.string "allele"
+    t.float "coverage", limit: 24
+    t.float "depth", limit: 24
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "pipeline_run_id"
   end
 
   create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -125,6 +136,21 @@ ActiveRecord::Schema.define(version: 20_180_716_215_830) do
     t.index %w[pipeline_run_id output], name: "index_output_states_on_pipeline_run_id_and_output", unique: true
   end
 
+  create_table "phylo_trees", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "name"
+    t.text "description"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_phylo_trees_on_user_id"
+  end
+
+  create_table "phylo_trees_pipeline_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.bigint "phylo_tree_id"
+    t.bigint "pipeline_run_id"
+    t.index %w[phylo_tree_id pipeline_run_id], name: "index_pt_pr_id", unique: true
+  end
+
   create_table "pipeline_outputs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "sample_id", null: false
     t.bigint "total_reads", null: false
@@ -191,6 +217,7 @@ ActiveRecord::Schema.define(version: 20_180_716_215_830) do
     t.string "pipeline_commit"
     t.text "assembled_taxids"
     t.bigint "truncated"
+    t.text "result_status"
     t.integer "results_finalized"
     t.bigint "alignment_config_id"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
@@ -199,7 +226,7 @@ ActiveRecord::Schema.define(version: 20_180_716_215_830) do
   end
 
   create_table "projects", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name", collation: "utf8_general_ci"
+    t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "public_access", limit: 1
@@ -216,7 +243,7 @@ ActiveRecord::Schema.define(version: 20_180_716_215_830) do
   end
 
   create_table "samples", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name", collation: "utf8_general_ci"
+    t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "project_id"
@@ -298,7 +325,7 @@ ActiveRecord::Schema.define(version: 20_180_716_215_830) do
     t.integer "count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "name", collation: "utf8_general_ci"
+    t.string "name"
     t.string "count_type"
     t.float "percent_identity", limit: 24
     t.float "alignment_length", limit: 24
@@ -399,20 +426,20 @@ ActiveRecord::Schema.define(version: 20_180_716_215_830) do
   end
 
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "email", default: "", null: false, collation: "utf8_general_ci"
-    t.string "name", collation: "utf8_general_ci"
+    t.string "email"
+    t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "encrypted_password", default: "", null: false, collation: "utf8_general_ci"
-    t.string "reset_password_token", collation: "utf8_general_ci"
+    t.string "encrypted_password"
+    t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
     t.integer "sign_in_count", default: 0, null: false
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
-    t.string "current_sign_in_ip", collation: "utf8_general_ci"
-    t.string "last_sign_in_ip", collation: "utf8_general_ci"
-    t.string "authentication_token", limit: 30, collation: "utf8_general_ci"
+    t.string "current_sign_in_ip"
+    t.string "last_sign_in_ip"
+    t.string "authentication_token", limit: 30
     t.integer "role"
     t.index ["authentication_token"], name: "index_users_on_authentication_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
