@@ -24,6 +24,7 @@ class PipelineSampleReport extends React.Component {
     });
     this.report_ts = props.report_ts;
     this.sample_id = props.sample_id;
+    this.project_id = props.project_id;
     this.gitVersion = props.git_version;
     this.canSeeAlignViz = props.can_see_align_viz;
     this.can_edit = props.can_edit;
@@ -120,7 +121,7 @@ class PipelineSampleReport extends React.Component {
     this.collapseTable = this.collapseTable.bind(this);
     this.downloadFastaUrl = this.downloadFastaUrl.bind(this);
     this.gotoAlignmentVizLink = this.gotoAlignmentVizLink.bind(this);
-    this.downloadAssemblyLink = this.downloadAssemblyLink.bind(this);
+    this.gotoTreeLink = this.gotoTreeLink.bind(this);
     this.handleThresholdEnter = this.handleThresholdEnter.bind(this);
     this.renderMore = this.renderMore.bind(this);
     this.initializeTooltip();
@@ -852,14 +853,17 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
-  downloadAssemblyLink(e) {
+  gotoTreeLink(e) {
     const taxId = e.target.getAttribute("data-tax-id");
-    location.href = `/samples/${this.sample_id}/assembly/${taxId}`;
+    window.open(
+      `/trees?tax_id=${taxId}&project_id=${this.project_id}`,
+      "_blank"
+    );
   }
 
   displayTags(taxInfo, reportDetails) {
     let tax_level_str = "";
-    let ncbiDot, fastaDot, alignmentVizDot, assemblyDot;
+    let ncbiDot, fastaDot, alignmentVizDot, treeDot;
     if (taxInfo.tax_level == 1) tax_level_str = "species";
     else tax_level_str = "genus";
 
@@ -894,11 +898,11 @@ class PipelineSampleReport extends React.Component {
           aria-hidden="true"
         />
       );
-    if (reportDetails.assembled_taxids.indexOf(taxInfo.tax_id.toString()) >= 0)
-      assemblyDot = (
+    if (valid_tax_id)
+      treeDot = (
         <i
           data-tax-id={taxInfo.tax_id}
-          onClick={this.downloadAssemblyLink}
+          onClick={this.gotoTreeLink}
           className="fa fa-gg"
           aria-hidden="true"
         />
@@ -911,7 +915,7 @@ class PipelineSampleReport extends React.Component {
           trigger={alignmentVizDot}
           content={"Alignment Visualization"}
         />
-        <BasicPopup trigger={assemblyDot} content={"Assembly Download"} />
+        <BasicPopup trigger={treeDot} content={"Phylogenetic Analysis"} />
       </span>
     );
   }
