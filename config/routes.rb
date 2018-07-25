@@ -53,6 +53,7 @@ Rails.application.routes.draw do
     put :add_user, on: :member
   end
   get 'projects/:id/csv', to: 'projects#send_project_csv'
+  post 'projects/:id/create_tree', to: 'projects#create_tree'
 
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]

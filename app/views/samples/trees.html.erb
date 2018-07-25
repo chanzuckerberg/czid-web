@@ -1,9 +1,11 @@
 <div id="PhyloTree_page">
   <%= javascript_tag do %>
     react_component('PhyloTree', {
-    project: <%= @project %>,
-    samples: <%= @samples %>,
-    pipeline_runs: '<%= @pipeline_runs %>'
+    csrf: '<%= form_authenticity_token %>',
+    taxon: JSON.parse('<%= raw escape_json(@taxon) %>'),
+    project: JSON.parse('<%= raw escape_json(@project) %>'),
+    samples: JSON.parse('<%= raw escape_json(@samples) %>'),
+    pipeline_runs: JSON.parse('<%= raw escape_json(@pipeline_runs) %>')
     }, 'PhyloTree_page');
   <% end %>
 </div>

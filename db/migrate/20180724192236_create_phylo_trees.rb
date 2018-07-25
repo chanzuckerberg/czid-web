@@ -4,6 +4,7 @@ class CreatePhyloTrees < ActiveRecord::Migration[5.1]
       t.string :name
       t.text :description
       t.bigint :user_id
+      t.bigint :project_id
       t.timestamps
       t.index :user_id
     end

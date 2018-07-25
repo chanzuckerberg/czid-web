@@ -17,7 +17,7 @@ class SamplesController < ApplicationController
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder, :show_taxid_alignment, :show_taxid_alignment_viz].freeze
   EDIT_ACTIONS = [:edit, :add_taxon_confirmation, :remove_taxon_confirmation, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata].freeze
 
-  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :top_taxons, :heatmap, :download_heatmap].freeze
+  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :top_taxons, :heatmap, :download_heatmap, :trees].freeze
 
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload]
   acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload], fallback: :devise
@@ -562,15 +562,18 @@ class SamplesController < ApplicationController
   end
 
   def trees
-    taxid = params[:taxid].to_i
     project_id = params[:project_id].to_i
+    taxid = params[:taxid].to_i
+    taxon_name = params[:taxon_name]
 
     project_sample_ids = current_power.samples.where(project_id: project_id).pluck(:id)
     pipeline_run_ids_with_taxid = TaxonCount.where(tax_id: taxid).pluck(:pipeline_run_id)
 
     @pipeline_runs = PipelineRun.where(sample_id: project_sample_ids).where(id: pipeline_run_ids_with_taxid)
-    @samples = Sample.where(id: @pipeline_runs.pluck(:sample_id)
+    @samples = Sample.where(id: @pipeline_runs.pluck(:sample_id))
     @project = Project.find(project_id)
+    @tree = PhyloTree.find_by(project_id: project_id)
+    @taxon = { taxid: taxid, name: taxon_name }
   end
 
   # Use callbacks to share common setup or constraints between actions.

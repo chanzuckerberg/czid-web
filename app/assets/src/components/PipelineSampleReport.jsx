@@ -855,8 +855,9 @@ class PipelineSampleReport extends React.Component {
 
   gotoTreeLink(e) {
     const taxId = e.target.getAttribute("data-tax-id");
+    const taxName = e.target.getAttribute("data-tax-name");
     window.open(
-      `/samples/trees?taxid=${taxId}&project_id=${this.project_id}`,
+      `/samples/trees?taxid=${taxId}&project_id=${this.project_id}&taxon_name=${taxName}`,
       "_blank"
     );
   }
@@ -898,12 +899,13 @@ class PipelineSampleReport extends React.Component {
           aria-hidden="true"
         />
       );
-    if (valid_tax_id)
+    if (taxInfo.tax_id > 0)
       treeDot = (
         <i
           data-tax-id={taxInfo.tax_id}
+          data-tax-name={taxInfo.name}
           onClick={this.gotoTreeLink}
-          className="fa fa-gg"
+          className="fa fa-tree"
           aria-hidden="true"
         />
       );
