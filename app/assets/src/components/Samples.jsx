@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import axios from "axios";
 import ReactDOM from "react-dom";
 import moment from "moment";
@@ -12,9 +12,7 @@ import {
   Icon,
   Modal,
   Button,
-  Form,
-  TextArea,
-  Input
+  Form
 } from "semantic-ui-react";
 import Nanobar from "nanobar";
 import colors from "../styles/themes";
@@ -1907,7 +1905,8 @@ class BackgroundModal extends React.Component {
           {background_creation_response.status === "ok" ? (
             <div className="status-message status teal-text text-darken-2">
               <i className="fa fa-smile-o fa-fw" />
-              Collection is being created and will be visible on the report page once statistics have been computed.
+              Collection is being created and will be visible on the report page
+              once statistics have been computed.
             </div>
           ) : background_creation_response.message ? (
             <div className="status-message">

@@ -828,7 +828,7 @@ class PipelineSampleReport extends React.Component {
     }
     num = num.toString();
     const ncbiLink = `https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${num}`;
-    window.open(ncbiLink, "_blank");
+    window.open(ncbiLink, "_blank", "noopener", "hide_referrer");
   }
 
   // download Fasta
@@ -848,7 +848,9 @@ class PipelineSampleReport extends React.Component {
       `/samples/${
         this.sample_id
       }/alignment_viz/nt_${taxLevel}_${taxId}?pipeline_version=${pipeline_version}`,
-      "_blank"
+      "_blank",
+      "noopener",
+      "hide_referrer"
     );
   }
 
