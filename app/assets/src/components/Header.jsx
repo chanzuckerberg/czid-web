@@ -2,8 +2,6 @@ import React from "react";
 import $ from "jquery";
 import axios from "axios";
 import { Dropdown } from "semantic-ui-react";
-import SampleUpload from "./SampleUpload";
-import CliUserInstructionsModal from "./CliUserInstructionsModal";
 
 class Header extends React.Component {
   constructor(props, context) {
@@ -86,16 +84,12 @@ class Header extends React.Component {
                         key="1"
                         onClick={this.gotoPage.bind(this, "/samples/new")}
                       />,
-                      <CliUserInstructionsModal
-                        key="cliInstructions"
-                        trigger={
-                          <Dropdown.Item
-                            text="New Sample (Command Line)"
-                            key="2"
-                          />
+                      <Dropdown.Item
+                        text="New Sample (Command Line)"
+                        key="2"
+                        onClick={() =>
+                          this.openNewTab("/cli_user_instructions")
                         }
-                        email={this.userDetails.email}
-                        authToken={this.userAuthToken}
                       />
                     ]}
                   {this.userDetails &&

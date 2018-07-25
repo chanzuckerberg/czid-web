@@ -5,7 +5,6 @@ import $ from "jquery";
 import Tipsy from "react-tipsy";
 import SampleUpload from "./SampleUpload";
 import ObjectHelper from "../helpers/ObjectHelper";
-import CliUserInstructionsModal from "./CliUserInstructionsModal";
 
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
@@ -700,11 +699,14 @@ class BulkUploadImport extends React.Component {
                 Only want to upload one sample?{" "}
                 <a href="/samples/new">Click here.</a>
                 <br />Rather use our command-line interface?
-                <CliUserInstructionsModal
-                  trigger={<a href="#!"> Instructions here.</a>}
-                  email={this.userDetails.email}
-                  authToken={this.props.UserAuthToken}
-                />
+                <a
+                  href="/cli_user_instructions"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {" "}
+                  Instructions here.
+                </a>
               </p>
             </div>
             {this.state.success ? (

@@ -1,0 +1,8 @@
+<div id="cli_user_instructions">
+  <%= javascript_tag do %>
+    react_component('CliUserInstructions', {
+    authToken: '<%= current_user.authentication_token %>',
+    email: '<%= current_user.email %>'
+    }, 'cli_user_instructions');
+  <% end %>
+</div>

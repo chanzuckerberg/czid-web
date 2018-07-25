@@ -1,14 +1,11 @@
 @import "variables";
 
-.cli-modal {
-  margin: 0 auto !important;
-  top: 3%;
-  max-width: 75%;
-  max-height: 98%;
+.instruction-container {
+  margin: 5%;
 }
 
 .instruction-heading {
-  margin-top: 2rem;
+  margin-top: 2.2rem;
   font-weight: $font-weight-bold;
   font-size: 1.2rem;
 }

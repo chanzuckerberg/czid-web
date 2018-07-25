@@ -5,7 +5,6 @@ import $ from "jquery";
 import Tipsy from "react-tipsy";
 import IconComponent from "./IconComponent";
 import ObjectHelper from "../helpers/ObjectHelper";
-import CliUserInstructionsModal from "./CliUserInstructionsModal";
 
 class SampleUpload extends React.Component {
   constructor(props, context) {
@@ -621,11 +620,14 @@ class SampleUpload extends React.Component {
                 Want to upload multiple samples at once?{" "}
                 <a href="/samples/bulk_new">Click here.</a>
                 <br />Rather use our command-line interface?
-                <CliUserInstructionsModal
-                  trigger={<a href="#!"> Instructions here.</a>}
-                  email={this.userDetails.email}
-                  authToken={this.props.userAuthToken}
-                />
+                <a
+                  href="/cli_user_instructions"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {" "}
+                  Instructions here.
+                </a>
               </p>
             </div>
             <form

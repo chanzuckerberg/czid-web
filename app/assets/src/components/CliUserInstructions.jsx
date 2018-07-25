@@ -1,8 +1,8 @@
 import React from "react";
-import { Modal, Button, Form, TextArea } from "semantic-ui-react";
+import { Form, TextArea } from "semantic-ui-react";
 import PropTypes from "prop-types";
 
-class CliUserInstructionsModal extends React.Component {
+class CliUserInstructions extends React.Component {
   constructor(props) {
     super(props);
     this.state = { open: false };
@@ -20,35 +20,31 @@ class CliUserInstructionsModal extends React.Component {
   }
 
   render() {
-    const singleUploadCmd =
-      "idseq -e " +
-      this.props.email +
-      " -t " +
-      this.props.authToken +
-      " -p 'Your Project Name' -s 'Your Sample Name' --r1 your_sample_R1.fastq.gz --r2 your_sample_R2.fastq.gz --host-genome-name 'Human'`";
+    const singleUploadCmd = `idseq -e ${this.props.email} -t ${
+      this.props.authToken
+    } -p 'Your Project Name' -s 'Your Sample Name' --r1 your_sample_R1.fastq.gz --r2 your_sample_R2.fastq.gz --host-genome-name 'Human'`;
 
-    const bulkUploadCmd =
-      "idseq -e " +
-      this.props.email +
-      " -t " +
-      this.props.authToken +
-      " -p 'Your Project Name' --bulk . --host-genome-name 'Human'";
+    const bulkUploadCmd = `idseq -e ${this.props.email} -t ${
+      this.props.authToken
+    } -p 'Your Project Name' --bulk . --host-genome-name 'Human'`;
 
-    const modalContent = (
-      <div>
+    return (
+      <div className="instruction-container">
         <p className="instruction-heading">
           {
             "(1) Install and configure the Amazon Web Services Command Line Interface (AWS CLI): "
           }
         </p>
         <p>
-          {"Link: "}
-          <span className="code">
-            https://docs.aws.amazon.com/cli/latest/userguide/installing.html
-          </span>
-        </p>
-        <p>
-          Verify it works by running <span className="code">aws help</span>,
+          <a
+            href="https://docs.aws.amazon.com/cli/latest/userguide/installing.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="terms-link"
+          >
+            Installation instructions here
+          </a>
+          . Verify it works by running <span className="code">aws help</span>,
           which should display usage instructions. You do not need to set up AWS
           credentials.
         </p>
@@ -59,10 +55,12 @@ class CliUserInstructionsModal extends React.Component {
             --upgrade
           </span>
           <p className="instruction-medium-margin-top">
-            - Make sure you have Python 2 or 3 installed already.
+            - Tips: Make sure you have Python 2 or 3 installed already. Try
+            running <span className="code">pip --version</span> or{" "}
+            <span className="code">python --version</span>.
           </p>
           <p>
-            - Tips: Try running with <span className="code">pip2</span> or{" "}
+            - Try running with <span className="code">pip2</span> or{" "}
             <span className="code">pip3</span> depending on your configuration.
             Try <span className="code">sudo pip</span> if you run into
             permissions errors. You can use this same command in the future to
@@ -74,9 +72,10 @@ class CliUserInstructionsModal extends React.Component {
         <div className="code center-code">
           <p>
             idseq -e <span className="code-personal">{this.props.email}</span>{" "}
-            -t <span className="code-personal">{this.props.authToken}</span> \
-            <br />-p '<span className="code-to-edit">Your Project Name</span>'
-            -s '<span className="code-to-edit">Your Sample Name</span>' \
+            -t <span className="code-personal">{this.props.authToken}</span> -p
+            '<span className="code-to-edit">Your Project Name</span>' -s '<span className="code-to-edit">
+              Your Sample Name
+            </span>' \
             <br /> --r1 <span className="code-to-edit">
               your_sample_R1
             </span>.fastq.gz --r2{" "}
@@ -84,7 +83,7 @@ class CliUserInstructionsModal extends React.Component {
             --host-genome-name <span className="code-to-edit">'Human'</span>
           </p>
         </div>
-        <p className="instruction-medium-margin-top">
+        <div className="instruction-medium-margin-top">
           Edit the command in this text box and copy-and-paste:
           <Form className="instruction-medium-margin-top">
             <TextArea
@@ -93,16 +92,21 @@ class CliUserInstructionsModal extends React.Component {
               autoHeight
             />
           </Form>
-        </p>
+        </div>
         <p className="instruction-medium-margin-top">
           {
-            "- Supported file types are: .fastq/.fq/.fasta/.fa or .fastq.gz/.fq.gz/.fasta.gz/.fa.gz"
+            "- Supported file types: .fastq/.fq/.fasta/.fa or .fastq.gz/.fq.gz/.fasta.gz/.fa.gz"
           }
         </p>
         <p>
           {
-            "- Currently supported host genome values: 'Human', 'Mosquito', 'Tick', 'ERCC only'"
+            "- Supported host genome values: 'Human', 'Mosquito', 'Tick', 'ERCC only'"
           }
+        </p>
+        <p>
+          {"- Your authentication token for uploading is: "}
+          <span className="code-personal">{this.props.authToken}</span>
+          {"  Keep this private like a password!"}
         </p>
         <p>
           {
@@ -115,9 +119,18 @@ class CliUserInstructionsModal extends React.Component {
           }
         </p>
         <p>
-          {"- Your authentication token for uploading is: "}
-          <span className="code-personal">{this.props.authToken}</span>
-          {"  Keep this private like a password!"}
+          - New to using a command line? You will need to use{" "}
+          <span className="code">cd</span> and <span className="code">ls</span>{" "}
+          to navigate to the folder on your computer containing the source files
+          you want to upload.{" "}
+          <a
+            href="https://courses.cs.washington.edu/courses/cse140/13wi/shell-usage.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="terms-link"
+          >
+            Guide here
+          </a>.
         </p>
         <p className="instruction-heading">
           (Optional) Run the program in interactive mode:
@@ -141,7 +154,7 @@ class CliUserInstructionsModal extends React.Component {
             <span className="code-to-edit">'Human'</span>
           </p>
         </div>
-        <p className="instruction-medium-margin-top">
+        <div className="instruction-medium-margin-top">
           Edit the command in this text box and copy-and-paste:
           <Form className="instruction-medium-margin-top">
             <TextArea
@@ -150,7 +163,7 @@ class CliUserInstructionsModal extends React.Component {
               autoHeight
             />
           </Form>
-        </p>
+        </div>
         <p className="instruction-medium-margin-top">
           {
             "- The '.' refers to the current folder in your terminal. The program will try to auto-detect files in the folder."
@@ -168,30 +181,13 @@ class CliUserInstructionsModal extends React.Component {
         </p>
       </div>
     );
-    return (
-      <Modal
-        trigger={this.props.trigger}
-        onOpen={this.open}
-        onClose={this.close}
-        open={this.state.open}
-        className="cli-modal"
-      >
-        <Modal.Header>Command Line Upload Instructions</Modal.Header>
-        <Modal.Content>{modalContent}</Modal.Content>
-        <Modal.Actions>
-          <Button primary onClick={this.close}>
-            Close
-          </Button>
-        </Modal.Actions>
-      </Modal>
-    );
   }
 }
 
-CliUserInstructionsModal.propTypes = {
+CliUserInstructions.propTypes = {
   trigger: PropTypes.node,
   email: PropTypes.string,
   authToken: PropTypes.string
 };
 
-export default CliUserInstructionsModal;
+export default CliUserInstructions;
