@@ -29,6 +29,7 @@ Rails.application.routes.draw do
     get :top_taxons, on: :collection
     get :heatmap, on: :collection
     get :download_heatmap, on: :collection
+    get :trees, on: :collection
   end
   get 'samples/:id/fasta/:tax_level/:taxid/:hit_type', to: 'samples#show_taxid_fasta'
   get 'samples/:id/assembly/:taxid', to: 'samples#assembly'

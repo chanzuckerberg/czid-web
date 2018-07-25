@@ -1,0 +1,9 @@
+<div id="PhyloTree_page">
+  <%= javascript_tag do %>
+    react_component('PhyloTree', {
+    project: <%= @project %>,
+    samples: <%= @samples %>,
+    pipeline_runs: '<%= @pipeline_runs %>'
+    }, 'PhyloTree_page');
+  <% end %>
+</div>

@@ -856,7 +856,7 @@ class PipelineSampleReport extends React.Component {
   gotoTreeLink(e) {
     const taxId = e.target.getAttribute("data-tax-id");
     window.open(
-      `/trees?taxid=${taxId}&project_id=${this.project_id}`,
+      `/samples/trees?taxid=${taxId}&project_id=${this.project_id}`,
       "_blank"
     );
   }
