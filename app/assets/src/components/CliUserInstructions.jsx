@@ -3,22 +3,6 @@ import { Form, TextArea } from "semantic-ui-react";
 import PropTypes from "prop-types";
 
 class CliUserInstructions extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { open: false };
-    this.close = this.close.bind(this);
-    this.open = this.open.bind(this);
-  }
-
-  // These are needed since Modal.open = this.state.open
-  open() {
-    this.setState({ open: true });
-  }
-
-  close() {
-    this.setState({ open: false });
-  }
-
   render() {
     const singleUploadCmd = `idseq -e ${this.props.email} -t ${
       this.props.authToken
