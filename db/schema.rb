@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_180_724_192_236) do
+ActiveRecord::Schema.define(version: 20_180_724_235_332) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -23,17 +23,6 @@ ActiveRecord::Schema.define(version: 20_180_724_192_236) do
     t.text "s3_deuterostome_db_path"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-  end
-
-  create_table "amr_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "sample_id"
-    t.string "gene"
-    t.string "allele"
-    t.float "coverage", limit: 24
-    t.float "depth", limit: 24
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.bigint "pipeline_run_id"
   end
 
   create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -52,6 +41,7 @@ ActiveRecord::Schema.define(version: 20_180_724_192_236) do
     t.text "description"
     t.integer "public_access", limit: 1
     t.integer "ready", limit: 1, default: 0
+    t.bigint "user_id"
     t.index ["name"], name: "index_backgrounds_on_name", unique: true
   end
 
@@ -136,21 +126,6 @@ ActiveRecord::Schema.define(version: 20_180_724_192_236) do
     t.index %w[pipeline_run_id output], name: "index_output_states_on_pipeline_run_id_and_output", unique: true
   end
 
-  create_table "phylo_trees", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name"
-    t.text "description"
-    t.bigint "user_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["user_id"], name: "index_phylo_trees_on_user_id"
-  end
-
-  create_table "phylo_trees_pipeline_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.bigint "phylo_tree_id"
-    t.bigint "pipeline_run_id"
-    t.index %w[phylo_tree_id pipeline_run_id], name: "index_pt_pr_id", unique: true
-  end
-
   create_table "pipeline_outputs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "sample_id", null: false
     t.bigint "total_reads", null: false
@@ -217,7 +192,6 @@ ActiveRecord::Schema.define(version: 20_180_724_192_236) do
     t.string "pipeline_commit"
     t.text "assembled_taxids"
     t.bigint "truncated"
-    t.text "result_status"
     t.integer "results_finalized"
     t.bigint "alignment_config_id"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
