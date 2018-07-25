@@ -176,6 +176,7 @@ module PipelineOutputsHelper
     end
   end
 
+  # TODO: CHange this to reflect amr counts stage
   def status_display_helper(states_by_output_hash, results_finalized_var)
     # Status display for the frontend.
     h = states_by_output_hash

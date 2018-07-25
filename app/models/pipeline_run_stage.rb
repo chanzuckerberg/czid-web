@@ -49,8 +49,7 @@ class PipelineRunStage < ApplicationRecord
         queue = pipeline_run.sample.job_queue
       end
     end
-    command += " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --volume-type gp2 --ecr-image idseq_dag --memory #{memory} --queue #{queue} --vcpus #{vcpus} --job-role idseq-pipeline "
-    command
+    command += " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --volume-type gp2 --ecr-image idseq_dag_meera --memory #{memory} --queue #{queue} --vcpus #{vcpus} --job-role idseq-pipeline "
   end
 
   def started?
