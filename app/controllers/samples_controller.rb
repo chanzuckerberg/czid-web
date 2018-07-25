@@ -561,6 +561,16 @@ class SamplesController < ApplicationController
     respond_taxon_confirmations
   end
 
+  def trees
+    taxid = params[:taxid].to_i
+    project_id = params[:project_id].to_i
+
+    project_sample_ids = current_power.samples.where(project_id: project_id).pluck(:id)
+    pipeline_run_ids_with_taxid = TaxonCount.where(tax_id: taxid).pluck(:pipeline_run_id)
+    @pipeline_runs = PipelineRun.where(sample_id: project_sample_ids).where(id: pipeline_run_ids_with_taxid)
+    @samples = Sample.where(id: @pipeline_runs.pluck(:sample_id)
+  end
+
   # Use callbacks to share common setup or constraints between actions.
 
   private
