@@ -41,7 +41,7 @@ class BackgroundsController < ApplicationController
       }
     else
       pipeline_run_ids = Background.eligible_pipeline_runs.where(sample_id: sample_ids).pluck(:id)
-      @background = Background.new(name: name, description: description, pipeline_run_ids: pipeline_run_ids)
+      @background = Background.new(user_id: current_user.id, name: name, description: description, pipeline_run_ids: pipeline_run_ids)
       if @background.save
         render json: {
           status: :ok
