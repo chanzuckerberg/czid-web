@@ -127,7 +127,11 @@ class AdvancedThresholdFilter extends React.Component {
       filters: filters
     };
     this.addRow = this.addRow.bind(this);
-    this.onApply = this.props.onApply;
+    this.applyClicked = this.applyClicked.bind(this);
+  }
+
+  applyClicked() {
+    this.props.onApply(this.state.filters);
   }
 
   makeRow() {
@@ -183,7 +187,7 @@ class AdvancedThresholdFilter extends React.Component {
             <Button secondary onClick={this.addRow}>
               Add threshold
             </Button>
-            <Button primary onClick={this.onApply}>
+            <Button primary onClick={this.applyClicked}>
               Apply
             </Button>
           </div>
@@ -195,7 +199,6 @@ class AdvancedThresholdFilter extends React.Component {
 
 AdvancedThresholdFilter.propTypes = {
   labels: PropTypes.array.isRequired,
-  onApply: PropTypes.func,
   operators: PropTypes.array.isRequired,
   filters: PropTypes.array
 };
@@ -217,7 +220,7 @@ class AdvancedThresholdFilterDropdown extends React.Component {
 
   onClose() {
     if (this.props.applyOnHide) {
-      this.props.onApply();
+      this.refs.advancedThresholdFilter.applyClicked();
     }
   }
 
@@ -249,6 +252,7 @@ class AdvancedThresholdFilterDropdown extends React.Component {
         onClose={this.onClose.bind(this)}
       >
         <AdvancedThresholdFilter
+          ref="advancedThresholdFilter"
           {...this.props}
           filters={this.props.filters}
           onChange={this.onThresholdsChanged.bind(this)}
