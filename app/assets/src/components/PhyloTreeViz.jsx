@@ -8,12 +8,7 @@ class PhyloTreeViz extends React.Component {
   }
 
   render() {
-    return (
-      (this.phylo_tree === undefined || this.phylo_tree.length == 0) ? null
-        : (
-          <div>a tree here</div>
-        )
-    );
+    return this.phylo_tree ? <div>a tree here</div> : null;
   }
 }
 

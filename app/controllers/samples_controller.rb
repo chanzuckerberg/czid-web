@@ -569,13 +569,13 @@ class SamplesController < ApplicationController
     project_sample_ids = current_power.samples.where(project_id: project_id).pluck(:id)
     pipeline_run_ids_with_taxid = TaxonCount.where(tax_id: taxid).where(count_type: 'NT').pluck(:pipeline_run_id)
 
-    @pipeline_runs = PipelineRun.where(sample_id: project_sample_ids).where(id: pipeline_run_ids_with_taxid)
+    @pipeline_runs = PipelineRun.top_completed_runs.where(sample_id: project_sample_ids).where(id: pipeline_run_ids_with_taxid)
     @samples = Sample.where(id: @pipeline_runs.pluck(:sample_id))
     @project = Project.find(project_id)
     @phylo_tree = @project.phylo_trees.find_by(taxid: taxid)
 
     taxon_name = @pipeline_runs.first.taxon_counts.find_by(tax_id: taxid).name
-    @taxon = { taxid: taxid, name: taxon_name }
+    @taxon = { taxid: taxid, tax_level: tax_level, name: taxon_name }
   end
 
   # Use callbacks to share common setup or constraints between actions.

@@ -23,23 +23,32 @@ class PhyloTree extends React.Component {
     let pipeline_run_ids = this.pipeline_runs.map(pr => pr.id);
     var that = this;
     axios
-      .post(`/projects/${this.project.id}/create_tree?taxid=${this.taxon.taxid}&pipeline_run_ids=${pipeline_run_ids}`, {
-        authenticity_token: this.csrf
-      })
+      .post(
+        `/projects/${this.project.id}/create_tree?taxid=${
+          this.taxon.taxid
+        }&tax_level=${
+          this.taxon.tax_level
+        }&pipeline_run_ids=${pipeline_run_ids}`,
+        {
+          authenticity_token: this.csrf
+        }
+      )
       .then(res => {
-        that.setState({status: res.data.message})
-      })
-  };
+        that.setState({ status: res.data.message });
+      });
+  }
 
   render() {
     let title = (
       <h2>
-        Phylogenetic tree for <i>{this.taxon.name}</i> in project <i>{this.project.name}</i>
+        Phylogenetic tree for <i>{this.taxon.name}</i> in project{" "}
+        <i>{this.project.name}</i>
       </h2>
     );
-    let sample_list = this.samples.map(function(s, i) { return <p>{s.name}</p> });
-    console.log(this.phylo_tree)
-    let no_tree_yet = (this.phylo_tree === undefined || this.phylo_tree.length == 0);
+    let sample_list = this.samples.map(function(s, i) {
+      return <p>{s.name}</p>;
+    });
+    console.log(this.phylo_tree);
     let create_button = (
       <div>
         <Button primary onClick={this.createTree}>
@@ -53,9 +62,11 @@ class PhyloTree extends React.Component {
         {title}
         <h3>Relevant samples:</h3>
         {sample_list}
-        {no_tree_yet ? create_button : (
-           <PhyloTreeViz phylo_tree={this.phylo_tree} />
-         )}
+        {this.phylo_tree ? (
+          <PhyloTreeViz phylo_tree={this.phylo_tree} />
+        ) : (
+          create_button
+        )}
       </div>
     );
   }

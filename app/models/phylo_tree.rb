@@ -1,5 +1,5 @@
 class PhyloTree < ApplicationRecord
-  has_and_belongs_to_many :samples, through: :pipeline_runs
+  include PipelineOutputsHelper
   has_and_belongs_to_many :pipeline_runs
   belongs_to :user
   belongs_to :project
@@ -7,7 +7,7 @@ class PhyloTree < ApplicationRecord
   STATUS_INITIALIZED = 0
   STATUS_READY = 1
   STATUS_FAILED = 2
-  STATUS_INPROGRESS = 3
+  STATUS_IN_PROGRESS = 3
 
   def self.in_progress
     where(status: STATUS_IN_PROGRESS)
@@ -19,8 +19,8 @@ class PhyloTree < ApplicationRecord
     _stdout, _stderr, status = Open3.capture3("aws", "s3", "cp", output_s3, file.path.to_s)
     if status.exitstatus.zero?
       file.open
-      self.newick: file.read
-      self.status: STATUS_READY
+      self.newick = file.read
+      self.status = STATUS_READY
       save
     end
     file.close
@@ -36,14 +36,14 @@ class PhyloTree < ApplicationRecord
   def upload_taxon_fasta_inputs_and_return_names
     taxon_fasta_files = []
     pipeline_run_ids.each do |pr_id|
-      taxon_fasta_basename = "taxid_#{taxid}_pipeline_run_#{pri}.fasta"
+      taxon_fasta_basename = "taxid_#{taxid}_pipeline_run_#{pr_id}.fasta"
 
       # Make taxon fasta and upload into phylo_tree_output_s3_path
       fasta_data = get_taxid_fasta_from_pipeline_run(PipelineRun.find(pr_id), taxid, tax_level, 'NT')
       file = Tempfile.new
       file.write(fasta_data)
       file.close
-      _stdout, _stderr, status = Open3.capture3("aws", "s3", "cp", file.path.to_s, taxon_fasta_basename)
+      _stdout, _stderr, status = Open3.capture3("aws", "s3", "cp", file.path.to_s, "#{phylo_tree_output_s3_path}/#{taxon_fasta_basename}")
       file.unlink
       if status.exitstatus.zero?
         taxon_fasta_files << taxon_fasta_basename
