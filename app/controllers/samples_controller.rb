@@ -570,16 +570,16 @@ class SamplesController < ApplicationController
   end
 
   def fetch_run_log_summary(pipeline_run)
-    res = nil
-    pr_stages = pipeline_run.pipeline_run_stages
-    # Find the latest run stage that has a valid log in CloudWatch
-    pr_stages.reverse.each do |run_stage|
-      if run_stage.log_summary
-        res = run_stage.log_summary
-        break # Log summary was already fetched
+    # For this pipeline run, find the last run stage that generated a log in
+    # CloudWatch and fetch lines from the end of it.
+    summary = nil
+    pipeline_run.pipeline_run_stages.reverse.each do |stage|
+      if stage.log_summary
+        # Log summary was already fetched
+        summary = stage.log_summary
+        break
       end
-      # job_log_id = run_stage.job_log_id
-      job_log_id = "aegea_batch/default/9733cbf0-e120-4913-a977-0c59254b050a"
+      job_log_id = stage.job_log_id
       if job_log_id
         log_client = Aws::CloudWatchLogs::Client.new
         begin
@@ -589,17 +589,17 @@ class SamplesController < ApplicationController
             log_stream_name: job_log_id,
             limit: 50
           )
-          summary = resp.events.pluck(:message).join("\n")
-          res = summary
-          run_stage.update(log_summary: summary)
-          break # Just the latest run stage
+          msgs = resp.events.pluck(:message).join("\n")
+          summary = msgs
+          stage.update(log_summary: summary)
+          break # Just the latest
         rescue Aws::CloudWatchLogs::Errors::ResourceNotFoundException
           Rails.logger.info "No logs found for #{job_log_id}"
         end
       end
     end
 
-    res
+    summary
   end
 
   # Use callbacks to share common setup or constraints between actions.
