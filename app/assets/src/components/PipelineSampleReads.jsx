@@ -585,6 +585,17 @@ class PipelineSampleReads extends React.Component {
         </div>
       );
     } else {
+      let logBlock;
+      if (this.props.logSummary) {
+        logBlock = (
+          <div className="log-block">
+            {
+              "Rudimentary debugging information (from the end of the pipeline run logs):\n\n"
+            }
+            {this.props.logSummary}
+          </div>
+        );
+      }
       d_report = (
         <div className="center-align text-grey text-lighten-2 no-report">
           <h6 className={this.state.rerunStatus}>
@@ -592,6 +603,7 @@ class PipelineSampleReads extends React.Component {
               ? waitingSpinner
               : this.state.rerunStatusMessage}
           </h6>
+          {logBlock}
         </div>
       );
     }

@@ -160,6 +160,7 @@ ActiveRecord::Schema.define(version: 20_180_724_235_332) do
     t.string "name"
     t.text "failed_jobs"
     t.text "dag_json"
+    t.text "log_summary"
     t.index %w[pipeline_run_id step_number], name: "index_pipeline_run_stages_on_pipeline_run_id_and_step_number"
     t.index ["pipeline_run_id"], name: "index_pipeline_run_stages_on_pipeline_run_id"
   end

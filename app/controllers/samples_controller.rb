@@ -186,6 +186,10 @@ class SamplesController < ApplicationController
         @pipeline_run_retriable = true
       end
     end
+
+    if @pipeline_run && @pipeline_run.failed?
+      @log_summary = @pipeline_run.fetch_run_log_summary
+    end
   end
 
   def top_taxons

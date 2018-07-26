@@ -1442,3 +1442,11 @@ input[type="button"] {
     font-weight: 600;
   }
 }
+
+.log-block {
+  white-space: pre-line;
+  text-align: left;
+  margin: 3%;
+  font-family: monospace;
+  font-size: 0.9rem;
+}
