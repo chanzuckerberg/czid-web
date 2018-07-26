@@ -6,7 +6,6 @@ import Tipsy from "react-tipsy";
 import ReactAutocomplete from "react-autocomplete";
 import { Dropdown, Label, Menu, Icon, Popup } from "semantic-ui-react";
 import numberWithCommas from "../helpers/strings";
-import LabeledDropdown from "./modules/LabeledDropdown";
 import AdvancedThresholdFilterDropdown from "./modules/AdvancedThresholdFilter";
 import StringHelper from "../helpers/StringHelper";
 import ThresholdMap from "./utils/ThresholdMap";

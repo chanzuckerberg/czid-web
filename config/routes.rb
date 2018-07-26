@@ -1,6 +1,7 @@
 require 'resque/server'
 
 Rails.application.routes.draw do
+
   resources :backgrounds
   devise_for :users, controllers: {
     sessions: 'sessions',
@@ -55,6 +56,10 @@ Rails.application.routes.draw do
 
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
+
+  namespace :playground do
+    get :controls
+  end
 
   authenticate :user, ->(u) { u.admin? } do
     mount Resque::Server.new, at: "/resque"

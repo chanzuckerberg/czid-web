@@ -1,0 +1,64 @@
+@import "../themes/colors";
+
+// TODO: Redundant with other dropdowns - will refactor
+.ui.dropdown.multiple {
+  border: 1px solid $light-grey;
+  border-radius: 19px;
+  color: $black;
+  letter-spacing: 0.4px;
+  height: 38px;
+  line-height: 24px;
+  padding: 6px 16px;
+  position: relative;
+  width: 100%;
+
+  .label-title {
+    float: left;
+    font-weight: 600;
+    vertical-align: middle;
+    margin-right: 5px;
+  }
+
+  .ui.label {
+    line-height: 12px;
+    height: 24px;
+    border-radius: 12px;
+    background-color: $off-white;
+    color: $primary-light;
+    float: right;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 0 10px 0 0;
+  }
+
+  i.icon {
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    right: 10px;
+    top: 5px;
+    line-height: 24px;
+    pointer-events: none;
+    font-size: 20px;
+    &:before {
+      font-family: FontAwesome;
+      content: "\f107";
+    }
+  }
+
+  &.active {
+    border: 1px solid $primary-light;
+    border-radius: 19px;
+  }
+
+  &.disabled {
+    border: 1px solid $medium-grey;
+    color: $medium-grey;
+  }
+
+  input[type="checkbox"] {
+    opacity: 1;
+    position: static;
+    margin-right: 0.5em;
+  }
+}

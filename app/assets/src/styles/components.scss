@@ -1,112 +1,107 @@
-#id-seq {
-  .ui.button {
-    padding: 7px 30px;
-    border-radius: 40px;
-    cursor: pointer;
-    display: inline-block;
-    &.primary {
-      border: 1px solid #3867fa;
-      background: #3867fa !important;
-      color: #ffffff !important;
-      &:hover {
-        background: #ffffff !important;
-        color: #3867fa !important;
-      }
-    }
-    &.secondary {
-      border: 1px solid #3867fa;
+.ui.button {
+  padding: 7px 30px;
+  border-radius: 40px;
+  cursor: pointer;
+  display: inline-block;
+  &.primary {
+    border: 1px solid #3867fa;
+    background: #3867fa !important;
+    color: #ffffff !important;
+    &:hover {
       background: #ffffff !important;
       color: #3867fa !important;
     }
   }
+  &.secondary {
+    border: 1px solid #3867fa;
+    background: #ffffff !important;
+    color: #3867fa !important;
+  }
+}
 
-  .ui.dropdown {
-    border: 1px solid rgb(228, 228, 228);
-    padding: 5px 1.75em 5px 1em;
-    border-radius: 100px;
-    &.custom-dropdown {
-      padding: 5px 10px;
-    }
-    .menu {
-      margin-top: 2px;
-      width: 100%;
-    }
-    .text {
-      display: block;
-      white-space: nowrap;
-      font-size: 8pt;
-    }
-    > .text {
-      overflow: hidden;
-    }
-    .dropdown.icon {
-      pointer-events: none;
-      position: absolute !important;
-      top: 8px;
-      right: 10px;
-      &:before {
-        font-family: FontAwesome;
-        content: "\f107";
-      }
-    }
-    .label {
-      float: right;
-      padding: 0;
-      margin: -1px 0 0 0;
-      font-size: 11px;
-      text-align: center;
-      width: 20px;
-      height: 20px;
-      line-height: 20px;
-      border-radius: 10px;
-      background-color: #f8f8f8;
-      color: #3867fa;
-      font-weight: normal;
-      font-size: inherit;
-    }
-    span.title {
-      display: inline-block;
-      width: 100%;
-      white-space: nowrap;
-      overflow-x: hidden;
-      text-overflow: ellipsis;
+.ui.dropdown {
+  border: 1px solid rgb(228, 228, 228);
+  padding: 5px 1.75em 5px 1em;
+  border-radius: 100px;
+  &.custom-dropdown {
+    padding: 5px 10px;
+  }
+  .menu {
+    margin-top: 2px;
+    width: 100%;
+  }
+  .text {
+    display: block;
+    white-space: nowrap;
+    font-size: 8pt;
+  }
+  > .text {
+    overflow: hidden;
+  }
+  .dropdown.icon {
+    pointer-events: none;
+    position: absolute !important;
+    top: 8px;
+    right: 10px;
+    &:before {
+      font-family: FontAwesome;
+      content: "\f107";
     }
   }
+  .label {
+    float: right;
+    font-size: 11px;
+    text-align: center;
+    height: 20px;
+    line-height: 20px;
+    border-radius: 10px;
+    background-color: #f8f8f8;
+    color: #3867fa;
+    font-weight: normal;
+    font-size: inherit;
+  }
+  span.title {
+    display: inline-block;
+    width: 100%;
+    white-space: nowrap;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+  }
+}
 
-  .ui.dropdown.labeled-filter-dropdown {
-    input[type="checkbox"] {
-      opacity: 1;
-      position: static;
-      margin-right: 0.5em;
+.ui.dropdown.labeled-filter-dropdown {
+  input[type="checkbox"] {
+    opacity: 1;
+    position: static;
+    margin-right: 0.5em;
+  }
+}
+.advanced-threshold-filter {
+  width: 400px;
+  input[type="text"] {
+    height: 1em;
+    border: 1px solid rgba(34, 36, 38, 0.15) !important;
+    box-shadow: none;
+    font-size: 9pt;
+  }
+  .remove-button {
+    margin-top: 5px;
+    font-size: 9pt;
+    &:hover {
+      cursor: pointer;
     }
   }
-  .advanced-threshold-filter {
-    width: 400px;
-    input[type="text"] {
-      height: 1em;
-      border: 1px solid rgba(34, 36, 38, 0.15) !important;
-      box-shadow: none;
-      font-size: 9pt;
-    }
-    .remove-button {
-      margin-top: 5px;
-      font-size: 9pt;
-      &:hover {
-        cursor: pointer;
-      }
-    }
-    .rows {
-      margin-bottom: 1em;
-    }
-    .actions {
-      border-top: 1px solid #eee;
-      padding-top: 1em;
-    }
-    .advanced-threshold-filter-row {
-      margin-bottom: 0.5em;
-    }
-    .row:last-child {
-      margin-bottom: 0;
-    }
+  .rows {
+    margin-bottom: 1em;
+  }
+  .actions {
+    border-top: 1px solid #eee;
+    padding-top: 1em;
+  }
+  .advanced-threshold-filter-row {
+    margin-bottom: 0.5em;
+  }
+  .row:last-child {
+    margin-bottom: 0;
   }
 }

@@ -7,14 +7,15 @@ import { Button, Icon, Popup } from "semantic-ui-react";
 import copy from "copy-to-clipboard";
 import { StickyContainer, Sticky } from "react-sticky";
 import symlog from "./symlog";
-import AdvancedThresholdFilterDropdown from "./modules/AdvancedThresholdFilter";
+import Dropdown from "./controls/Dropdown";
 import ErrorBoundary from "./ErrorBoundary";
 import Heatmap from "./visualizations/Heatmap";
 import HeatmapLegend from "./visualizations/HeatmapLegend";
-import LabeledDropdown from "./modules/LabeledDropdown";
-import LabeledFilterDropdown from "./modules/LabeledFilterDropdown";
-import LabeledSlider from "./modules/LabeledSlider";
+import MultipleDropdown from "./controls/MultipleDropdown";
+import PrimaryButton from "./controls/PrimaryButton";
+import Slider from "./controls/Slider";
 import TaxonTooltip from "./TaxonTooltip";
+import ThresholdFilterDropdown from "./controls/ThresholdFilterDropdown";
 
 class SamplesHeatmap extends React.Component {
   constructor(props) {
@@ -55,7 +56,7 @@ class SamplesHeatmap extends React.Component {
         ) {
           return { text: taxonLevelName, value: index };
         }),
-        advancedFilters: this.props.advancedFilters,
+        thresholdFilters: this.props.thresholdFilters,
         // Client side options
         scales: [["Log", symlog], ["Lin", d3.scale.linear]],
         taxonsPerSample: {
@@ -69,7 +70,7 @@ class SamplesHeatmap extends React.Component {
         background:
           this.urlParams.background || this.props.backgrounds[0].value,
         species: parseInt(this.urlParams.species) || 1,
-        advancedFilters: this.urlParams.advancedFilters || [],
+        thresholdFilters: this.urlParams.thresholdFilters || [],
         dataScaleIdx: parseInt(this.urlParams.dataScaleIdx) || 0,
         taxonsPerSample: parseInt(this.urlParams.taxonsPerSample) || 30
       },
@@ -97,8 +98,6 @@ class SamplesHeatmap extends React.Component {
     this.getRowLabel = this.getRowLabel.bind(this);
     this.getTaxonFor = this.getTaxonFor.bind(this);
     this.getTooltip = this.getTooltip.bind(this);
-    this.onAdvancedFilterApply = this.onAdvancedFilterApply.bind(this);
-    this.onAdvancedFilterChange = this.onAdvancedFilterChange.bind(this);
     this.onApplyClick = this.onApplyClick.bind(this);
     this.onBackgroundChanged = this.onBackgroundChanged.bind(this);
     this.onCategoryChange = this.onCategoryChange.bind(this);
@@ -110,6 +109,7 @@ class SamplesHeatmap extends React.Component {
     this.onShareClick = this.onShareClick.bind(this);
     this.onTaxonLevelChange = this.onTaxonLevelChange.bind(this);
     this.onTaxonsPerSampleEnd = this.onTaxonsPerSampleEnd.bind(this);
+    this.onThresholdFilterApply = this.onThresholdFilterApply.bind(this);
   }
 
   componentDidMount() {
@@ -177,7 +177,7 @@ class SamplesHeatmap extends React.Component {
           species: this.state.selectedOptions.species,
           categories: this.state.selectedOptions.categories,
           sortBy: this.metricToSortField(this.state.selectedOptions.metric),
-          advancedFilters: this.state.selectedOptions.advancedFilters,
+          thresholdFilters: this.state.selectedOptions.thresholdFilters,
           taxonsPerSample: this.state.selectedOptions.taxonsPerSample
         }
       })
@@ -481,7 +481,7 @@ class SamplesHeatmap extends React.Component {
     });
 
     return (
-      <LabeledDropdown
+      <Dropdown
         fluid
         options={options}
         onChange={this.onMetricChange}
@@ -492,29 +492,20 @@ class SamplesHeatmap extends React.Component {
     );
   }
 
-  onAdvancedFilterChange() {
-    this.optionsChanged = true;
-  }
-
-  onAdvancedFilterApply(filters) {
+  onThresholdFilterApply(filters) {
     this.optionsChanged = true;
     this.setSelectedOptionsState(
-      { advancedFilters: filters },
+      { thresholdFilters: filters },
       this.explicitApply ? undefined : this.updateHeatmap
     );
   }
 
   renderAdvancedFilterPicker() {
     return (
-      <AdvancedThresholdFilterDropdown
-        fluid
-        label="Advanced Filters:"
-        labels={this.state.availableOptions.advancedFilters.filters}
-        operators={this.state.availableOptions.advancedFilters.operators}
-        filters={this.state.selectedOptions.advancedFilters}
-        onChange={this.onAdvancedFilterChange}
-        onApply={this.onAdvancedFilterApply}
-        applyOnHide={true}
+      <ThresholdFilterDropdown
+        options={this.state.availableOptions.thresholdFilters}
+        thresholds={this.state.selectedOptions.thresholdFilters}
+        onApply={this.onThresholdFilterApply}
         disabled={!this.state.data}
       />
     );
@@ -534,7 +525,7 @@ class SamplesHeatmap extends React.Component {
 
   renderTaxonLevelPicker() {
     return (
-      <LabeledDropdown
+      <Dropdown
         fluid
         options={this.state.availableOptions.taxonLevels}
         value={this.state.selectedOptions.species}
@@ -563,7 +554,7 @@ class SamplesHeatmap extends React.Component {
     });
 
     return (
-      <LabeledDropdown
+      <Dropdown
         fluid
         value={this.state.selectedOptions.dataScaleIdx}
         onChange={this.onDataScaleChange}
@@ -631,7 +622,7 @@ class SamplesHeatmap extends React.Component {
     });
 
     return (
-      <LabeledFilterDropdown
+      <MultipleDropdown
         fluid
         options={options}
         onChange={this.onCategoryChange}
@@ -662,7 +653,7 @@ class SamplesHeatmap extends React.Component {
     });
 
     return (
-      <LabeledDropdown
+      <Dropdown
         fluid
         options={options}
         onChange={this.onBackgroundChanged}
@@ -683,7 +674,7 @@ class SamplesHeatmap extends React.Component {
 
   renderTaxonsPerSampleSlider() {
     return (
-      <LabeledSlider
+      <Slider
         label="Taxons per Sample:"
         min={this.state.availableOptions.taxonsPerSample.min}
         max={this.state.availableOptions.taxonsPerSample.max}
@@ -779,11 +770,7 @@ class SamplesHeatmap extends React.Component {
       <div id="project-visualization">
         <div className="heatmap-header">
           <Popup
-            trigger={
-              <Button className="right" primary onClick={this.onShareClick}>
-                Share
-              </Button>
-            }
+            trigger={<PrimaryButton text="Share" onClick={this.onShareClick} />}
             content="A shareable URL has been copied to your clipboard!"
             on="click"
             hideOnScroll

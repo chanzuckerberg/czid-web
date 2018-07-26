@@ -1,17 +1,26 @@
 @charset 'utf-8';
+// legacy
 @import "styles/header";
+@import "styles/home";
+
 @import "styles/colors";
 @import "styles/forbidden";
 @import "styles/login";
-@import "styles/home";
 @import "styles/reports";
 @import "styles/samples";
 @import "styles/samplesUpload";
 @import "styles/users";
 @import "styles/resultsfolder";
 @import "styles/visualization";
-@import "styles/components";
+// @import "styles/components";
 @import "styles/typography";
 @import "styles/variables";
 @import "styles/edit_password";
 @import "styles/slider";
+
+// controls
+@import "styles/controls/dropdown";
+@import "styles/controls/multiple_dropdown";
+@import "styles/controls/primary_button";
+@import "styles/controls/secondary_button";
+@import "styles/controls/threshold_filter_dropdown";

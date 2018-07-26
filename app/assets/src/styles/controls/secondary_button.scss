@@ -1,0 +1,36 @@
+@import "../themes/colors";
+@import "../themes/typography";
+
+.ui.button {
+  border-radius: 19px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 400;
+  height: 38px;
+  letter-spacing: 0.4px;
+  min-width: 134px;
+  padding: 6px 16px;
+
+  &.secondary {
+    border: 1px solid $primary-light;
+    background-color: $white;
+    color: $primary-light;
+
+    &:hover {
+      background: $primary-light;
+      color: $white;
+    }
+
+    &:active {
+      border: 1px solid $primary-medium;
+      background-color: $primary-medium;
+      color: $white;
+    }
+
+    &:disabled {
+      border: 1px solid $medium-grey;
+      background-color: $white;
+      color: $medium-grey;
+    }
+  }
+}

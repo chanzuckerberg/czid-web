@@ -425,13 +425,13 @@ module ReportHelper
     results
   end
 
-  def check_custom_filters(row, advanced_filters)
-    advanced_filters.each do |filter|
-      count_type, metric = filter["label"].split("_")
+  def check_custom_filters(row, threshold_filters)
+    threshold_filters.each do |filter|
+      count_type, metric = filter["target"].split("_")
       begin
         value = Float(filter["value"])
       rescue
-        Rails.logger.warn "Bad advanced filter value."
+        Rails.logger.warn "Bad threshold filter value."
       else
         if filter["operator"] == ">="
           if row[count_type][metric] < value
@@ -445,7 +445,7 @@ module ReportHelper
     true
   end
 
-  def top_taxons_details(samples, background_id, num_results, sort_by_key, species_selected, categories, advanced_filters = {})
+  def top_taxons_details(samples, background_id, num_results, sort_by_key, species_selected, categories, threshold_filters = {})
     # return top taxons
     results_by_pr = fetch_top_taxons(samples, background_id, categories)
     sort_by = decode_sort_by(sort_by_key)
@@ -467,7 +467,7 @@ module ReportHelper
 
       compute_aggregate_scores_v2!(rows)
       rows = rows.select do |row|
-        row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD && check_custom_filters(row, advanced_filters)
+        row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD && check_custom_filters(row, threshold_filters)
       end
 
       rows.sort_by! { |tax_info| ((tax_info[count_type] || {})[metric] || 0.0) * -1.0 }
