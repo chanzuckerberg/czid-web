@@ -906,4 +906,38 @@ class PipelineRun < ApplicationRecord
     end
     ret
   end
+
+  def fetch_run_log_summary
+    # For this pipeline run, find the last run stage that generated a log in
+    # CloudWatch and fetch lines from the end of it.
+    summary = nil
+    pipeline_run_stages.reverse.each do |stage|
+      if stage.log_summary
+        # Log summary was already fetched
+        summary = stage.log_summary
+        break
+      end
+
+      job_log_id = stage.job_log_id
+      if job_log_id
+        log_client = Aws::CloudWatchLogs::Client.new
+        begin
+          # Fetch from the end of the CloudWatch logs
+          resp = log_client.get_log_events(
+            log_group_name: '/aws/batch/job',
+            log_stream_name: job_log_id,
+            limit: 50
+          )
+          msgs = resp.events.pluck(:message).join("\n")
+          summary = msgs
+          stage.update(log_summary: summary)
+          break # Just the latest
+        rescue Aws::CloudWatchLogs::Errors::ResourceNotFoundException
+          Rails.logger.info "No logs found for #{job_log_id}"
+        end
+      end
+    end
+
+    summary
+  end
 end
