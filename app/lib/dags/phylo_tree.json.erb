@@ -1,0 +1,30 @@
+{
+  "output_dir_s3": "<%= @attribute_dict[:phylo_tree_output_s3_path] %>",
+  "targets": {
+    "taxon_fasta_in": [
+      <% @attribute_dict[:taxon_fasta_files].each do |tff| %>
+        <% if tff == @attribute_dict[:taxon_fasta_files].last %>
+          "<%= tff %>"
+        <% else %>
+          "<%= tff %>,"
+        <% end %>
+      <% end %>
+    ],
+    "phylo_tree_out": ["phylo_tree.newick"]
+  },
+  "steps": [
+    {
+      "in": ["taxon_fasta_in"],
+      "out": "phylo_tree_out",
+      "class": "PipelineStepGeneratePhyloTree",
+      "module": "idseq_dag.steps.generate_phylo_tree",
+      "additional_files": {},
+      "additional_attributes": {}
+    }
+  ],
+  "given_targets": {
+    "taxon_fasta_in": {
+      "s3_dir": "<%= @attribute_dict[:phylo_tree_output_s3_path] %>"
+    }
+  }
+}

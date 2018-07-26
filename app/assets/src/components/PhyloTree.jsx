@@ -1,6 +1,7 @@
 import axios from "axios";
 import React from "react";
 import { Button } from "semantic-ui-react";
+import PhyloTreeViz from "./PhyloTreeViz";
 
 class PhyloTree extends React.Component {
   constructor(props) {
@@ -10,7 +11,7 @@ class PhyloTree extends React.Component {
     this.project = props.project;
     this.samples = props.samples;
     this.pipeline_runs = props.pipeline_runs;
-    this.tree = props.tree;
+    this.phylo_tree = props.phylo_tree;
     this.state = {
       status: null
     };
@@ -19,13 +20,13 @@ class PhyloTree extends React.Component {
   }
 
   createTree() {
+    let pipeline_run_ids = this.pipeline_runs.map(pr => pr.id);
     var that = this;
     axios
-      .post(`/projects/${this.project.id}/create_tree`, {
+      .post(`/projects/${this.project.id}/create_tree?taxid=${this.taxon.taxid}&pipeline_run_ids=${pipeline_run_ids}`, {
         authenticity_token: this.csrf
       })
       .then(res => {
-        console.log(res);
         that.setState({status: res.data.message})
       })
   };
@@ -37,7 +38,8 @@ class PhyloTree extends React.Component {
       </h2>
     );
     let sample_list = this.samples.map(function(s, i) { return <p>{s.name}</p> });
-    let no_tree_yet = (this.tree === undefined || this.tree.length == 0);
+    console.log(this.phylo_tree)
+    let no_tree_yet = (this.phylo_tree === undefined || this.phylo_tree.length == 0);
     let create_button = (
       <div>
         <Button primary onClick={this.createTree}>
@@ -52,7 +54,7 @@ class PhyloTree extends React.Component {
         <h3>Relevant samples:</h3>
         {sample_list}
         {no_tree_yet ? create_button : (
-           <PhyloTreeViz tree={this.tree} />
+           <PhyloTreeViz phylo_tree={this.phylo_tree} />
          )}
       </div>
     );

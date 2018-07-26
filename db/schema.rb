@@ -127,12 +127,19 @@ ActiveRecord::Schema.define(version: 20180724192236) do
   end
 
   create_table "phylo_trees", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string "name"
-    t.text "description"
+    t.integer "taxid"
+    t.integer "tax_level"
     t.bigint "user_id"
     t.bigint "project_id"
+    t.text "newick"
+    t.integer "status", default: 0
+    t.text "dag_json"
+    t.text "command_stdout"
+    t.text "command_stderr"
+    t.string "job_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["project_id", "taxid"], name: "index_phylo_trees_on_project_id_and_taxid"
     t.index ["user_id"], name: "index_phylo_trees_on_user_id"
   end
 

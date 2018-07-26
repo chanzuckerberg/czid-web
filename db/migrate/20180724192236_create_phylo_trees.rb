@@ -1,12 +1,19 @@
 class CreatePhyloTrees < ActiveRecord::Migration[5.1]
   def up
     create_table :phylo_trees do |t|
-      t.string :name
-      t.text :description
+      t.integer :taxid
+      t.integer :tax_level
       t.bigint :user_id
       t.bigint :project_id
+      t.text :newick
+      t.integer :status, default: 0
+      t.text :dag_json
+      t.text :command_stdout
+      t.text :command_stderr
+      t.string :job_id
       t.timestamps
       t.index :user_id
+      t.index [:project_id, :taxid]
     end
 
     create_table :phylo_trees_pipeline_runs do |t|

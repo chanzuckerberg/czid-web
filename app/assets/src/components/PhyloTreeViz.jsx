@@ -4,13 +4,15 @@ import React from "react";
 class PhyloTreeViz extends React.Component {
   constructor(props) {
     super();
-    this.tree = props.tree;
+    this.phylo_tree = props.phylo_tree;
   }
 
   render() {
     return (
-      (this.tree === undefined || this.tree.length == 0) ? null
-      : "tree would be here"
+      (this.phylo_tree === undefined || this.phylo_tree.length == 0) ? null
+        : (
+          <div>a tree here</div>
+        )
     );
   }
 }

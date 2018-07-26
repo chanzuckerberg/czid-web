@@ -855,16 +855,16 @@ class PipelineSampleReport extends React.Component {
 
   gotoTreeLink(e) {
     const taxId = e.target.getAttribute("data-tax-id");
-    const taxName = e.target.getAttribute("data-tax-name");
+    const taxLevel = e.target.getAttribute("data-tax-level");
     window.open(
-      `/samples/trees?taxid=${taxId}&project_id=${this.project_id}&taxon_name=${taxName}`,
+      `/samples/trees?taxid=${taxId}&tax_level=${taxLevel}&project_id=${this.project_id}`,
       "_blank"
     );
   }
 
   displayTags(taxInfo, reportDetails) {
     let tax_level_str = "";
-    let ncbiDot, fastaDot, alignmentVizDot, treeDot;
+    let ncbiDot, fastaDot, alignmentVizDot, phyloTreeDot;
     if (taxInfo.tax_level == 1) tax_level_str = "species";
     else tax_level_str = "genus";
 
@@ -900,10 +900,10 @@ class PipelineSampleReport extends React.Component {
         />
       );
     if (taxInfo.tax_id > 0)
-      treeDot = (
+      phyloTreeDot = (
         <i
           data-tax-id={taxInfo.tax_id}
-          data-tax-name={taxInfo.name}
+          data-tax-level={taxInfo.tax_level}
           onClick={this.gotoTreeLink}
           className="fa fa-tree"
           aria-hidden="true"
@@ -917,7 +917,7 @@ class PipelineSampleReport extends React.Component {
           trigger={alignmentVizDot}
           content={"Alignment Visualization"}
         />
-        <BasicPopup trigger={treeDot} content={"Phylogenetic Analysis"} />
+        <BasicPopup trigger={phyloTreeDot} content={"Phylogenetic Analysis"} />
       </span>
     );
   }

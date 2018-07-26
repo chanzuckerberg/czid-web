@@ -218,7 +218,15 @@ class ProjectsController < ApplicationController
   end
 
   def create_tree
-    render json: { message: "creating tree for project #{@project.name}" }
+    taxid = params[:taxid].to_i
+    if @project.phylo_trees.find_by(taxid: taxid).present?
+      render json: { message: "a tree run is already in progress for this project and taxon" }
+    else
+      pipeline_run_ids = params[:pipeline_run_ids].map(:to_i)
+      pt = PhyloTree.create(taxid: taxid, tax_level: tax_level, user_id: current_user.id, project_id: @project.id, pipeline_run_ids: pipeline_run_ids)
+      pt.kickoff
+      render json: { message: "creating the tree from pipeline_run_ids #{pipeline_run_ids}" }
+    end
   end
 
   private
