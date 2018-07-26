@@ -187,7 +187,7 @@ class SamplesController < ApplicationController
       end
     end
 
-    if @pipeline_run.failed?
+    if @pipeline_run && @pipeline_run.failed?
       @log_summary = fetch_run_log_summary(@pipeline_run)
     end
   end
