@@ -583,10 +583,11 @@ class SamplesController < ApplicationController
       if job_log_id
         log_client = Aws::CloudWatchLogs::Client.new
         begin
+          # Fetch from the end of the CloudWatch logs
           resp = log_client.get_log_events(
             log_group_name: '/aws/batch/job',
             log_stream_name: job_log_id,
-            limit: 100
+            limit: 50
           )
           summary = resp.events.pluck(:message).join("\n")
           res = summary
