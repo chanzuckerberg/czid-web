@@ -22,7 +22,8 @@
       can_see_align_viz: <%= !!@align_viz %>,
       pipeline_versions: <%= raw escape_json(@pipeline_versions) %>,
       ercc_comparison: JSON.parse('<%= raw escape_json(@ercc_comparison) %>'),
-      all_backgrounds: JSON.parse('<%= raw escape_json(@background_models) %>')
+      all_backgrounds: JSON.parse('<%= raw escape_json(@background_models) %>'),
+      logSummary: JSON.parse('<%= raw escape_json(@log_summary)%>'),
     }, 'PipelineSampleReads_page');
   <% end %>
 </div>

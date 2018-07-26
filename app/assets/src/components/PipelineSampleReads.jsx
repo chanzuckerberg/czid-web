@@ -592,6 +592,12 @@ class PipelineSampleReads extends React.Component {
               ? waitingSpinner
               : this.state.rerunStatusMessage}
           </h6>
+          <div className="log-block">
+            {
+              "Rudimentary debugging information (from the end of the pipeline run logs):\n"
+            }
+            {this.props.logSummary}
+          </div>
         </div>
       );
     }
