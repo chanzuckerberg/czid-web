@@ -857,7 +857,9 @@ class PipelineSampleReport extends React.Component {
     const taxId = e.target.getAttribute("data-tax-id");
     const taxLevel = e.target.getAttribute("data-tax-level");
     window.open(
-      `/samples/trees?taxid=${taxId}&tax_level=${taxLevel}&project_id=${this.project_id}`,
+      `/samples/trees?taxid=${taxId}&tax_level=${taxLevel}&project_id=${
+        this.project_id
+      }`,
       "_blank"
     );
   }
@@ -899,7 +901,8 @@ class PipelineSampleReport extends React.Component {
           aria-hidden="true"
         />
       );
-    if (taxInfo.tax_id > 0)
+    if (taxInfo.tax_id > 0 && taxInfo.tax_level == 1)
+      // right now, tree pipeline is only implemented for tax_level 1, but may change in future
       phyloTreeDot = (
         <i
           data-tax-id={taxInfo.tax_id}
