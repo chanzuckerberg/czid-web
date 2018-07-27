@@ -387,12 +387,12 @@ class PipelineRun < ApplicationRecord
     case output
     when "ercc_counts"
       "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
+    when "amr_counts"
+      "#{host_filter_output_s3_path}/#{AMR_OUTPUT_NAME}"
     when "taxon_counts"
       "#{alignment_output_s3_path}/#{taxon_counts_json_name}"
     when "taxon_byteranges"
       "#{postprocess_output_s3_path}/#{TAXID_BYTERANGE_JSON_NAME}"
-    when "amr_counts"
-      "#{postprocess_output_s3_path}/#{AMR_OUTPUT_NAME}"
     end
   end
 
