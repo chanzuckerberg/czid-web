@@ -27,6 +27,14 @@ class PhyloTree < ApplicationRecord
     file.unlink
   end
 
+  def monitor_job
+    # detect if batch job has failed so we can stop pulling for results
+    return unless rand < 0.1 # do time-consuming aegea checks everytime
+    job_status, self.job_log_id, _job_hash, self.job_description = PipelineRunStage.job_info(job_id, id)
+    self.status = STATUS_FAILED if job_status == PipelineRunStage::STATUS_FAILED
+    save
+  end
+
   def aegea_command(base_command)
     "aegea batch submit --command=\"#{base_command}\" " \
     " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --volume-type gp2 --ecr-image idseq_dag --memory #{Sample::DEFAULT_MEMORY_IN_MB}" \
@@ -59,7 +67,8 @@ class PhyloTree < ApplicationRecord
     taxon_fasta_files = upload_taxon_fasta_inputs_and_return_names
     attribute_dict = {
       phylo_tree_output_s3_path: phylo_tree_output_s3_path,
-      taxon_fasta_files: taxon_fasta_files
+      taxon_fasta_files: taxon_fasta_files,
+      taxid: taxid
     }
     dag_commands = prepare_dag("phylo_tree", attribute_dict)
 

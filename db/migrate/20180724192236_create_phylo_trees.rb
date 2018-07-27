@@ -11,6 +11,8 @@ class CreatePhyloTrees < ActiveRecord::Migration[5.1]
       t.text :command_stdout
       t.text :command_stderr
       t.string :job_id
+      t.string :job_log_id
+      t.text :job_description
       t.timestamps
       t.index :user_id
       t.index [:project_id, :taxid]
