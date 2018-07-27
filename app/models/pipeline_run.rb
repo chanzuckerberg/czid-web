@@ -290,21 +290,25 @@ class PipelineRun < ApplicationRecord
     update(total_ercc_reads: ercc_counts_array.map { |entry| entry[:count] }.sum)
   end
 
-  def db_load_amr_counts
+  def download_amr_results
     amr_s3_path = "#{host_filter_output_s3_path}/#{AMR_OUTPUT_NAME}"
-    amr_downloaded_path = PipelineRun.download_file(amr_s3_path, local_txt_path)
-    unless File.zero?(amr_downloaded_path)
+    amr_results = PipelineRun.download_file(amr_s3_path, local_txt_path)
+    amr_results
+  end
+
+  def db_load_amr_counts
+    amr_results = download_amr_results
+    unless File.zero?(amr_results)
       amr_counts_array = []
       # First line of output file has header titles, e.g. "Sample/Gene/Allele..." that are extraneous
       # that we drop
-      File.readlines(amr_downloaded_path).drop(1).each do |amr_result|
+      File.readlines(amr_results).drop(1).each do |amr_result|
         # Drop Sample ID and DB attributes from amr_result row as we don't need to display those
         amr_result_fields = amr_result.split("\t").drop(2)
-        gene = amr_result_fields[0]
-        allele = amr_result_fields[1]
-        coverage = amr_result_fields[2]
-        depth = amr_result_fields[3]
-        amr_counts_array << { gene: gene, allele: allele, coverage: coverage, depth: depth }
+        amr_counts_array << { gene: amr_result_fields[0],
+                              allele: amr_result_fields[1],
+                              coverage: amr_result_fields[2],
+                              depth:  amr_result_fields[3] }
       end
       update(amr_counts_attributes: amr_counts_array)
     end
