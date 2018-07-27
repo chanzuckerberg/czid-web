@@ -292,17 +292,18 @@ class PipelineRun < ApplicationRecord
 
   def db_load_amr_counts
     amr_s3_path = "#{host_filter_output_s3_path}/#{AMR_OUTPUT_NAME}"
-    # amr_test_s3_path = "s3://idseq-database/test/AMR/__fullgenes__ARGannot_r2__results.txt"
     amr_downloaded_path = PipelineRun.download_file(amr_s3_path, local_txt_path)
     unless File.zero?(amr_downloaded_path)
       amr_counts_array = []
-      File.readlines(amr_downloaded_path).drop(1).each do |line|
-        fields = line.split("\t")
-        Rails.logger.info(fields)
-        gene = fields[2]
-        allele = fields[3]
-        coverage = fields[4]
-        depth = fields[5]
+      # First line of output file has header titles, e.g. "Sample/Gene/Allele..." that are extraneous
+      # that we drop
+      File.readlines(amr_downloaded_path).drop(1).each do |amr_result|
+        # Drop Sample ID and DB attributes from amr_result row as we don't need to display those
+        amr_result_fields = amr_result.split("\t").drop(2)
+        gene = amr_result_fields[0]
+        allele = amr_result_fields[1]
+        coverage = amr_result_fields[2]
+        depth = amr_result_fields[3]
         amr_counts_array << { gene: gene, allele: allele, coverage: coverage, depth: depth }
       end
       update(amr_counts_attributes: amr_counts_array)
