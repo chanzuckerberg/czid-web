@@ -5,6 +5,7 @@
     <% if @attribute_dict[:fastq2] %>
       "fastqs": ["<%= @attribute_dict[:fastq1] %>", "<%= @attribute_dict[:fastq2] %>"],
       "star_out": ["unmapped1.<%= @attribute_dict[:file_type] %>", "unmapped2.<%= @attribute_dict[:file_type] %>"],
+      "srst2_out": ["output.log", "output__genes__ARGannot_r2__results.txt", "output__fullgenes__ARGannot_r2__results.txt"],
       "priceseq_out": ["priceseq1.fa", "priceseq2.fa"],
       "cdhitdup_out": ["dedup1.fa", "dedup2.fa"],
       "lzw_out": ["lzw1.fa", "lzw2.fa"],
@@ -25,6 +26,7 @@
     <% else %>
       "fastqs": ["<%= @attribute_dict[:fastq1] %>"],
       "star_out": ["unmapped1.<%= @attribute_dict[:file_type] %>"],
+      "srst2_out": ["output.log", "output__genes__ARGannot_r2__results.txt", "output__fullgenes__ARGannot_r2__results.txt"],
       "priceseq_out": ["priceseq1.fa"],
       "cdhitdup_out": ["dedup1.fa"],
       "lzw_out": ["lzw1.fa"],
@@ -47,6 +49,17 @@
       },
       "additional_attributes": { "truncate_fragments_to": <%= @attribute_dict[:max_fragments] %>
                                 ,"output_gene_file": "reads_per_gene.star.tab" }
+    },
+    {
+      "in": ["fastqs"],
+      "out": "srst2_out",
+      "class": "PipelineStepRunSRST2",
+      "module": "idseq_dag.steps.run_srst2",
+      "additional_files": {"resist_gene_db": "s3://idseq-database/test/AMR/ARGannot_r2.fasta"},
+      "additional_attributes": {
+        "min_cov": 0,
+        "n_threads": 16
+      }
     },
     {
       "in": ["star_out"],

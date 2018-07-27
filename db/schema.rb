@@ -25,6 +25,16 @@ ActiveRecord::Schema.define(version: 20_180_824_005_739) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "amr_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "gene"
+    t.string "allele"
+    t.float "coverage", limit: 24
+    t.float "depth", limit: 24
+    t.bigint "pipeline_run_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "archive_of"
     t.text "data"
@@ -221,6 +231,7 @@ ActiveRecord::Schema.define(version: 20_180_824_005_739) do
     t.string "pipeline_commit"
     t.text "assembled_taxids"
     t.bigint "truncated"
+    t.text "result_status"
     t.integer "results_finalized"
     t.bigint "alignment_config_id"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"

@@ -1,0 +1,45 @@
+<p>
+  <strong>Name:</strong>
+  <%= @sample.name %>
+</p>
+
+<p>
+  <strong>Project:</strong>
+  <%= link_to @sample.project.name, @sample.project %>
+</p>
+
+<p>
+  <strong>Date created:</strong>
+  <%= @sample.created_at %>
+</p>
+
+<p>
+  <strong>AMR results</strong>
+</p>
+
+<table class="table table-condensed">
+      <thead>
+        <tr>
+          <th> Pipeline Run ID </th>
+          <th> Gene </th>
+          <th> Allele </th>
+          <th> Coverage </th>
+          <th> Depth </th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @amr_counts.each do |amr_count| %>
+          <tr>
+            <td> <%= amr_count.pipeline_run_id %> </td>
+            <td> <%= amr_count.gene %></td>
+            <td> <%= amr_count.allele  %></td>
+            <td><%= amr_count.coverage %> &nbsp;</td>
+            <td><%= amr_count.depth %> &nbsp;</td>
+          </tr>
+        <% end %>
+      </tbody>
+</table>
+
+<p>
+<%= link_to 'See all samples', samples_path %> |
+</p>
