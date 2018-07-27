@@ -13,8 +13,22 @@ class PhyloTree < ApplicationRecord
     where(status: STATUS_IN_PROGRESS)
   end
 
+  def fetch_dag_version
+    # Needed to build full idseq-dag output path.
+    return dag_version if dag_version.present?
+    # If not present yet, need to fetch it.
+    # TEMP HACK:
+    # Assume version folder is the only folder in phylo_trees folder.
+    # Right now, assume each tree can only run once, so only 1 version ever.
+    stdout, _stderr, status = Open3.capture3("aws s3 ls #{phylo_tree_output_s3_path}/ | grep PRE | awk '{print $2}' | head -n1")
+    if status.exitstatus.zero?
+      update(dag_version: stdout.restrip.chomp("/"))
+    end
+    dag_version
+  end
+
   def monitor_results
-    output_s3 = "#{phylo_tree_output_s3_path}/phylo_tree.newick"
+    output_s3 = "#{phylo_tree_output_s3_path}/{fetch_dag_version}/phylo_tree.newick"
     file = Tempfile.new
     _stdout, _stderr, status = Open3.capture3("aws", "s3", "cp", output_s3, file.path.to_s)
     if status.exitstatus.zero?
@@ -76,6 +90,7 @@ class PhyloTree < ApplicationRecord
       "cd /mnt; " \
       "git clone https://github.com/chanzuckerberg/idseq-dag.git; " \
       "cd idseq-dag; " \
+      "git checkout charles/trees; " \
       "pip3 install -e . --upgrade"
 
     base_command = [install_pipeline, dag_commands].join("; ")

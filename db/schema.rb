@@ -132,6 +132,7 @@ ActiveRecord::Schema.define(version: 20_180_724_192_236) do
     t.bigint "project_id"
     t.text "newick"
     t.integer "status", default: 0
+    t.string "dag_version"
     t.text "dag_json"
     t.text "command_stdout"
     t.text "command_stderr"
