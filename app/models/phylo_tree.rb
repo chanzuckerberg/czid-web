@@ -22,13 +22,13 @@ class PhyloTree < ApplicationRecord
     # Right now, assume each tree can only run once, so only 1 version ever.
     stdout, _stderr, status = Open3.capture3("aws s3 ls #{phylo_tree_output_s3_path}/ | grep PRE | awk '{print $2}' | head -n1")
     if status.exitstatus.zero?
-      update(dag_version: stdout.restrip.chomp("/"))
+      update(dag_version: stdout.rstrip.chomp("/"))
     end
     dag_version
   end
 
   def monitor_results
-    output_s3 = "#{phylo_tree_output_s3_path}/{fetch_dag_version}/phylo_tree.newick"
+    output_s3 = "#{phylo_tree_output_s3_path}/#{fetch_dag_version}/phylo_tree.newick"
     file = Tempfile.new
     _stdout, _stderr, status = Open3.capture3("aws", "s3", "cp", output_s3, file.path.to_s)
     if status.exitstatus.zero?
@@ -41,9 +41,10 @@ class PhyloTree < ApplicationRecord
     file.unlink
   end
 
-  def monitor_job
-    # detect if batch job has failed so we can stop pulling for results
-    return unless rand < 0.1 # do time-consuming aegea checks everytime
+  def monitor_job(throttle = true)
+    # Detect if batch job has failed so we can stop polling for results.
+    # Also, populate job_log_id.
+    return if throttle && rand >= 0.1 # if throttling, do time-consuming aegea checks only 10% of the time
     job_status, self.job_log_id, _job_hash, self.job_description = PipelineRunStage.job_info(job_id, id)
     self.status = STATUS_FAILED if job_status == PipelineRunStage::STATUS_FAILED
     save
@@ -131,5 +132,6 @@ class PhyloTree < ApplicationRecord
       self.status = STATUS_FAILED
     end
     save
+    monitor_job(false) # want to populate job_log_id immediately
   end
 end

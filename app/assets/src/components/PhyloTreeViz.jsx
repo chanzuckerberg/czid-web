@@ -8,7 +8,26 @@ class PhyloTreeViz extends React.Component {
   }
 
   render() {
-    return this.phylo_tree ? <div>a tree here</div> : null;
+    let status_display, newick;
+    if (this.phylo_tree) {
+      switch (this.phylo_tree.status) {
+        case 1:
+          status_display = "TREE IS READY";
+          break;
+        case 2:
+          status_display = "TREE GENERATION FAILED";
+          break;
+        default:
+          status_display = "TREE GENERATION IN PROGRESS";
+      }
+      newick = this.phylo_tree.newick;
+    }
+    return (
+      <div>
+        <p>{status_display}</p>
+        <p>{newick}</p>
+      </div>
+    );
   }
 }
 
