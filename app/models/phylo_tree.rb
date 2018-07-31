@@ -52,7 +52,7 @@ class PhyloTree < ApplicationRecord
 
   def aegea_command(base_command)
     "aegea batch submit --command=\"#{base_command}\" " \
-    " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --volume-type gp2 --ecr-image idseq_dag --memory #{Sample::DEFAULT_MEMORY_IN_MB}" \
+    " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --volume-type gp2 --ecr-image idseq_phylo --memory #{Sample::DEFAULT_MEMORY_IN_MB}" \
     " --queue #{Sample::DEFAULT_QUEUE} --vcpus #{Sample::DEFAULT_VCPUS} --job-role idseq-pipeline"
   end
 
