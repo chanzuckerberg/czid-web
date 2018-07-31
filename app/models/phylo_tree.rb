@@ -59,10 +59,11 @@ class PhyloTree < ApplicationRecord
   def upload_taxon_fasta_inputs_and_return_names
     taxon_fasta_files = []
     pipeline_run_ids.each do |pr_id|
-      taxon_fasta_basename = "taxid_#{taxid}_pipeline_run_#{pr_id}.fasta"
+      pr = PipelineRun.find(pr_id)
+      taxon_fasta_basename = "#{pr.sample.name.downcase.gsub(/\W/, '-')}.fasta"
 
       # Make taxon fasta and upload into phylo_tree_output_s3_path
-      fasta_data = get_taxid_fasta_from_pipeline_run(PipelineRun.find(pr_id), taxid, tax_level, 'NT')
+      fasta_data = get_taxid_fasta_from_pipeline_run(pr, taxid, tax_level, 'NT')
       file = Tempfile.new
       file.write(fasta_data)
       file.close
