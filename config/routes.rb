@@ -29,7 +29,6 @@ Rails.application.routes.draw do
     get :top_taxons, on: :collection
     get :heatmap, on: :collection
     get :download_heatmap, on: :collection
-    get :trees, on: :collection
   end
   get 'samples/:id/fasta/:tax_level/:taxid/:hit_type', to: 'samples#show_taxid_fasta'
   get 'samples/:id/assembly/:taxid', to: 'samples#assembly'
@@ -53,7 +52,9 @@ Rails.application.routes.draw do
     put :add_user, on: :member
   end
   get 'projects/:id/csv', to: 'projects#send_project_csv'
-  post 'projects/:id/create_tree', to: 'projects#create_tree'
+
+  get 'trees/show', to: 'trees#show'
+  post 'trees/create', to: 'trees#create'
 
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]

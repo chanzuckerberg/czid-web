@@ -24,7 +24,7 @@ class PhyloTree extends React.Component {
     var that = this;
     axios
       .post(
-        `/projects/${this.project.id}/create_tree?taxid=${
+        `/trees/create?project_id=${this.project.id}&taxid=${
           this.taxon.taxid
         }&tax_level=${
           this.taxon.tax_level
@@ -34,7 +34,10 @@ class PhyloTree extends React.Component {
         }
       )
       .then(res => {
-        that.setState({ status: res.data.message });
+        that.setState({
+          status: res.data.status,
+          status_message: res.data.message
+        });
       });
   }
 
@@ -50,10 +53,12 @@ class PhyloTree extends React.Component {
     });
     let create_button = (
       <div>
-        <Button primary onClick={this.createTree}>
-          Create Tree
-        </Button>
-        <p>{this.state.status}</p>
+        {this.state.status === "ok" ? null : (
+          <Button primary onClick={this.createTree}>
+            Create Tree
+          </Button>
+        )}
+        <p>{this.state.status_message}</p>
       </div>
     );
     return (

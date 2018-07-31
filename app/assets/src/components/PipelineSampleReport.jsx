@@ -857,7 +857,7 @@ class PipelineSampleReport extends React.Component {
     const taxId = e.target.getAttribute("data-tax-id");
     const taxLevel = e.target.getAttribute("data-tax-level");
     window.open(
-      `/samples/trees?taxid=${taxId}&tax_level=${taxLevel}&project_id=${
+      `/trees/show?taxid=${taxId}&tax_level=${taxLevel}&project_id=${
         this.project_id
       }`,
       "_blank"
