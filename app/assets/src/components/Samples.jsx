@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import axios from "axios";
 import ReactDOM from "react-dom";
 import moment from "moment";
@@ -36,7 +36,10 @@ class Samples extends React.Component {
     this.favoriteProjects = props.favorites || [];
     this.allProjects = props.projects || [];
     this.pageSize = props.pageSize || 30;
+    this.sampleAttributeHelper = {};
+    this.sampleAttributesToStore = ["name", "project_id", "pipeline_run_id"];
 
+    this.getSampleAttribute = this.getSampleAttribute.bind(this);
     this.fetchAllSelectedIds = this.fetchAllSelectedIds.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
     this.columnSorting = this.columnSorting.bind(this);
@@ -57,6 +60,7 @@ class Samples extends React.Component {
     this.updateUserDisplay = this.updateUserDisplay.bind(this);
     this.selectSample = this.selectSample.bind(this);
     this.compareSamples = this.compareSamples.bind(this);
+    this.handleCreateBackground = this.handleCreateBackground.bind(this);
     this.clearAllFilters = this.clearAllFilters.bind(this);
     this.selectTissueFilter = this.selectTissueFilter.bind(this);
     this.selectHostFilter = this.selectHostFilter.bind(this);
@@ -71,6 +75,7 @@ class Samples extends React.Component {
     this.getBackgroundIdByName = this.getBackgroundIdByName.bind(this);
     this.state = {
       invite_status: null,
+      background_creation_response: {},
       project: null,
       project_users: [],
       totalNumber: null,
@@ -242,6 +247,19 @@ class Samples extends React.Component {
         offset: "0px 50px"
       });
     });
+  }
+
+  getSampleAttribute(sample, key) {
+    let value;
+    if (key === "name" || key === "project_id") {
+      value = sample.db_sample[key];
+    } else if (key === "pipeline_run_id") {
+      let pipeline_run = sample.derived_sample_output.pipeline_run;
+      if (pipeline_run) {
+        value = pipeline_run.id;
+      }
+    }
+    return value;
   }
 
   selectTissueFilter(e) {
@@ -594,7 +612,7 @@ class Samples extends React.Component {
         <PipelineOutputCards
           i={i}
           key={i}
-          dbSample={dbSample}
+          sample={sample}
           report_ready={sample.run_info.report_ready}
           sample_name_info={sample_name_info}
           stageStatus={stageStatus}
@@ -828,6 +846,7 @@ class Samples extends React.Component {
   }
 
   fetchAllSelectedIds(e) {
+    // Selects all samples and records the attributes in sampleAttributesToStore for each sample
     let sampleList = this.state.selectedSampleIds;
     const checked = e.target.checked;
     const allSamples = this.state.allSamples;
@@ -839,11 +858,18 @@ class Samples extends React.Component {
       if (checked) {
         if (sampleList.indexOf(sample_id) === -1) {
           sampleList.push(sample_id);
+          // Also keep track of certain data for the sample that was just added
+          let attributeHash = {};
+          for (let key of this.sampleAttributesToStore) {
+            attributeHash[key] = this.getSampleAttribute(sample, key);
+          }
+          this.sampleAttributeHelper[sample_id] = attributeHash;
         }
       } else {
         let index = sampleList.indexOf(sample_id);
         if (index >= 0) {
           sampleList.splice(index, 1);
+          delete this.sampleAttributeHelper[sample_id];
         }
       }
     }
@@ -857,6 +883,27 @@ class Samples extends React.Component {
     if (this.state.selectedSampleIds.length) {
       window.open(`/samples/heatmap?sampleIds=${this.state.selectedSampleIds}`);
     }
+  }
+
+  handleCreateBackground(name, description, sample_ids) {
+    var that = this;
+    axios
+      .post("/backgrounds", {
+        name: name,
+        description: description,
+        sample_ids: sample_ids,
+        authenticity_token: this.csrf
+      })
+      .then(response => {
+        that.setState({
+          background_creation_response: response.data
+        });
+      })
+      .catch(error => {
+        that.setState({
+          background_creation_response: { message: "Something went wrong." }
+        });
+      });
   }
 
   clearAllFilters() {
@@ -876,8 +923,9 @@ class Samples extends React.Component {
   }
 
   selectSample(e) {
-    // current array of options
+    // Stores selected sample IDs and records the attributes in sampleAttributesToStore for each sample
     const sampleList = this.state.selectedSampleIds;
+    let attributeHash = {};
 
     let sample_id = parseInt(e.target.getAttribute("data-sample-id"));
 
@@ -885,12 +933,18 @@ class Samples extends React.Component {
       // add the numerical value of the checkbox to options array
       if (sampleList.indexOf(sample_id) < 0) {
         sampleList.push(+sample_id);
+        // also keep track of certain data for the sample that was just added
+        for (let key of this.sampleAttributesToStore) {
+          attributeHash[key] = e.target.getAttribute("data-sample-" + key);
+        }
+        this.sampleAttributeHelper[sample_id] = attributeHash;
       }
     } else {
       // or remove the value from the unchecked checkbox from the array
       let index = sampleList.indexOf(+sample_id);
       if (index >= 0) {
         sampleList.splice(index, 1);
+        delete this.sampleAttributeHelper[sample_id];
       }
     }
     // update the state with the new array of options
@@ -1081,6 +1135,7 @@ class Samples extends React.Component {
         table_download_dropdown={table_download_dropdown}
         compare_button={compareButton}
         delete_project_button={delete_project_button}
+        parent={this}
         state={this.state}
         canEditProject={this.canEditProject}
       />
@@ -1604,7 +1659,7 @@ function AddValOrBlank(all, sample, key) {
 
 function PipelineOutputCards({
   i,
-  dbSample,
+  sample,
   report_ready,
   sample_name_info,
   stageStatus,
@@ -1612,6 +1667,7 @@ function PipelineOutputCards({
   data_values,
   parent
 }) {
+  let dbSample = sample.db_sample;
   return (
     <a className="col s12 no-padding sample-feed" key={i}>
       <div>
@@ -1619,7 +1675,7 @@ function PipelineOutputCards({
           <div className="flex-container">
             <ul className="flex-items">
               <SampleCardCheckboxes
-                dbSample={dbSample}
+                sample={sample}
                 report_ready={report_ready}
                 sample_name_info={sample_name_info}
                 i={i}
@@ -1715,6 +1771,169 @@ function TableDownloadDropdown({ project_id, parent }) {
       </Dropdown>
     </div>
   );
+}
+
+class BackgroundModal extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      modalOpen: false,
+      name: "",
+      description: ""
+    };
+    this.handleOpen = this.handleOpen.bind(this);
+    this.handleClose = this.handleClose.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.renderTextField = this.renderTextField.bind(this);
+    this.renderSampleList = this.renderSampleList.bind(this);
+    this.sample_ids = props.parent.state.selectedSampleIds;
+    this.sampleAttributeHelper = props.parent.sampleAttributeHelper;
+  }
+  renderSampleList() {
+    let sample_list = [];
+    for (let sample_id of this.sample_ids) {
+      if (this.sampleAttributeHelper.hasOwnProperty(sample_id)) {
+        let sample_attributes = this.sampleAttributeHelper[sample_id];
+        let sample_name = sample_attributes.name;
+        let sample_details =
+          " (project_id: " +
+          sample_attributes.project_id +
+          ", " +
+          " pipeline_run_id: " +
+          sample_attributes.pipeline_run_id +
+          ")";
+        let sample_display = this.props.parent.admin ? (
+          <span>
+            {sample_name}
+            <span className="secondary-text">{sample_details}</span>
+          </span>
+        ) : (
+          <span>{sample_name}</span>
+        );
+        sample_list.push(sample_display);
+      }
+    }
+    return (
+      <div className="background-modal-contents">
+        <div className="label-text">Selected samples:</div>
+        <ul>
+          {sample_list.map((text, index) => (
+            <li key={`background_sample_${index}`}>{text}</li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+  handleOpen() {
+    this.setState({
+      modalOpen: true,
+      name: "",
+      description: ""
+    });
+    this.props.parent.setState({
+      background_creation_response: {}
+    });
+  }
+  handleClose() {
+    this.sample_names = [];
+    this.setState({
+      modalOpen: false,
+      name: "",
+      description: ""
+    });
+  }
+  handleChange(e, { name, value }) {
+    this.setState({ [e.target.id]: value });
+  }
+  handleSubmit() {
+    this.props.parent.handleCreateBackground(
+      this.state.new_background_name,
+      this.state.new_background_description,
+      this.props.parent.state.selectedSampleIds
+    );
+  }
+  renderTextField(label, optional, id, rows) {
+    return (
+      <div className="background-modal-contents">
+        <div className="label-text">
+          {label}
+          <span className="secondary-text">{optional ? " Optional" : ""}</span>
+        </div>
+        <Form.TextArea
+          autoHeight
+          className={`col s12 browser-default`}
+          rows={rows}
+          id={id}
+          onChange={this.handleChange}
+        />
+      </div>
+    );
+  }
+
+  render() {
+    let background_creation_response = this.props.parent.state
+      .background_creation_response;
+    return (
+      <Modal
+        trigger={
+          <ActiveInactiveButton
+            label="Create Collection"
+            onClick={this.handleOpen}
+            enabled={this.sample_ids.length > 1}
+            outerClass="background-area"
+            enabledClass="background center"
+            disabledClass="background center btn-disabled"
+          />
+        }
+        open={this.state.modalOpen}
+        onClose={this.handleClose}
+        className="modal project-popup add-user-modal"
+      >
+        <Modal.Header className="project_modal_header">
+          Create a Collection
+        </Modal.Header>
+        <Modal.Content className="modal-content">
+          <div>
+            A collection is a group of samples. You can use this collection as a
+            background model to be selected on a sample report page. It'll
+            update the calculated z-score to indicate how much the the sample
+            deviates from the norm for that collection.
+          </div>
+          <Form onSubmit={this.handleSubmit}>
+            {this.renderTextField("Name", false, "new_background_name", 1)}
+            {this.renderTextField(
+              "Description",
+              true,
+              "new_background_description",
+              7
+            )}
+            {this.renderSampleList()}
+            <div className="background-button-section">
+              <Button className="create-background" type="submit">
+                Create
+              </Button>
+              <Button className="cancel-background" onClick={this.handleClose}>
+                Cancel
+              </Button>
+            </div>
+          </Form>
+          {background_creation_response.status === "ok" ? (
+            <div className="status-message status teal-text text-darken-2">
+              <i className="fa fa-smile-o fa-fw" />
+              Collection is being created and will be visible on the report page
+              once statistics have been computed.
+            </div>
+          ) : background_creation_response.message ? (
+            <div className="status-message">
+              <i className="fa fa-close fa-fw" />
+              {background_creation_response.message.join("; ")}
+            </div>
+          ) : null}
+        </Modal.Content>
+      </Modal>
+    );
+  }
 }
 
 class AddUserModal extends React.Component {
@@ -1854,6 +2073,7 @@ function ProjectInfoHeading({
   table_download_dropdown,
   compare_button,
   delete_project_button,
+  parent,
   state,
   canEditProject
 }) {
@@ -1887,6 +2107,7 @@ function ProjectInfoHeading({
         {state.selectedProjectId ? project_menu : null}
         {table_download_dropdown}
         {compare_button}
+        <BackgroundModal parent={parent} />
         {state.selectedProjectId &&
         canEditProject(state.selectedProjectId) &&
         state.project &&
@@ -1992,24 +2213,34 @@ function ColumnPopups({ pos, colMap, column_name }) {
 }
 
 function SampleCardCheckboxes({
-  dbSample,
+  sample,
   report_ready,
   sample_name_info,
   i,
   parent
 }) {
+  let sampleAttributeProps = {};
+  for (let key of parent.sampleAttributesToStore) {
+    sampleAttributeProps["data-sample-" + key] = parent.getSampleAttribute(
+      sample,
+      key
+    );
+  }
   return (
     <li className="check-box-container">
       {parent.state.displaySelectSamples ? (
         <div>
           <input
+            {...sampleAttributeProps}
             type="checkbox"
             id={i}
             onClick={parent.selectSample}
-            key={`sample_${dbSample.id}`}
-            data-sample-id={dbSample.id}
+            key={`sample_${sample.db_sample.id}`}
+            data-sample-id={sample.db_sample.id}
             className="filled-in checkbox"
-            checked={parent.state.selectedSampleIds.indexOf(dbSample.id) >= 0}
+            checked={
+              parent.state.selectedSampleIds.indexOf(sample.db_sample.id) >= 0
+            }
             disabled={report_ready != 1}
           />{" "}
           <label htmlFor={i}>{sample_name_info}</label>
@@ -2184,6 +2415,36 @@ function AddUserModalMemberArea({ state, parent }) {
             <li key="None">None</li>
           )}
         </ul>
+      </div>
+    </div>
+  );
+}
+
+function ActiveInactiveButton({
+  label,
+  onClick,
+  enabled,
+  icon,
+  outerClass,
+  enabledClass,
+  disabledClass
+}) {
+  let button_inner = (
+    <span>
+      {icon}
+      <span>{label}</span>
+    </span>
+  );
+  return (
+    <div className={outerClass}>
+      <div className="white">
+        {enabled ? (
+          <a onClick={onClick} className={enabledClass}>
+            {button_inner}
+          </a>
+        ) : (
+          <a className={disabledClass}>{button_inner}</a>
+        )}
       </div>
     </div>
   );

@@ -35,6 +35,7 @@ Rails.application.routes.draw do
   get 'samples/:id/assembly/:taxid', to: 'samples#assembly'
   get 'samples/:id/alignment/:taxon_info', to: 'samples#show_taxid_alignment'
   get 'samples/:id/alignment_viz/:taxon_info', to: 'samples#show_taxid_alignment_viz'
+  get 'cli_user_instructions', to: 'samples#cli_user_instructions'
   get 'select', to: 'home#index'
   post '/feedback', to: 'home#feedback'
   get 'terms' => redirect("https://s3-us-west-2.amazonaws.com/idseq-database/Terms.pdf")

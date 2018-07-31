@@ -27,7 +27,7 @@ class Sample < ApplicationRecord
   LOCAL_INPUT_PART_PATH = '/app/tmp/input_parts'.freeze
 
   # TODO: Make all these params configurable without code change
-  DEFAULT_STORAGE_IN_GB = 1000
+  DEFAULT_STORAGE_IN_GB = 500
   DEFAULT_MEMORY_IN_MB = 120_000 # sorry, hacky
   HOST_FILTERING_MEMORY_IN_MB = 240_000
 
@@ -81,6 +81,10 @@ class Sample < ApplicationRecord
       prvs << (pr.pipeline_version.nil? ? PipelineRun::PIPELINE_VERSION_WHEN_NULL : pr.pipeline_version)
     end
     prvs.uniq
+  end
+
+  def fasta_input?
+    ["fasta", "fa", "fasta.gz", "fa.gz"].include?(input_files[0].file_type)
   end
 
   def pipeline_run_by_version(pipeline_version)
@@ -306,7 +310,7 @@ class Sample < ApplicationRecord
   end
 
   def default_background_id
-    host_genome && host_genome.default_background ? host_genome.default_background.id : Background.find_by(project_id: nil).id
+    host_genome && host_genome.default_background ? host_genome.default_background.id : Background.find_by(public_access: 1).id
   end
 
   def as_json(_options = {})

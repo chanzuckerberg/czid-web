@@ -10,8 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180716215830) do
-
+ActiveRecord::Schema.define(version: 20_180_724_235_332) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -39,6 +38,10 @@ ActiveRecord::Schema.define(version: 20180716215830) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "project_id"
+    t.text "description"
+    t.integer "public_access", limit: 1
+    t.integer "ready", limit: 1, default: 0
+    t.bigint "user_id"
     t.index ["name"], name: "index_backgrounds_on_name", unique: true
   end
 
@@ -189,7 +192,6 @@ ActiveRecord::Schema.define(version: 20180716215830) do
     t.string "pipeline_commit"
     t.text "assembled_taxids"
     t.bigint "truncated"
-    t.text "result_status"
     t.integer "results_finalized"
     t.bigint "alignment_config_id"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"

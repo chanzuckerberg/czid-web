@@ -31,7 +31,6 @@ class BulkUploadImport extends React.Component {
     });
     this.userDetails = props.loggedin_user;
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
-    this.openCliModal = this.openCliModal.bind(this);
     this.state = {
       submitting: false,
       allProjects: props.projects || [],
@@ -642,10 +641,6 @@ class BulkUploadImport extends React.Component {
     );
   }
 
-  openCliModal() {
-    $("#cli_modal").modal("open");
-  }
-
   renderBulkUploadImportForm() {
     const termsBlurb = (
       <div className="consent-blurb">
@@ -704,12 +699,14 @@ class BulkUploadImport extends React.Component {
                 Only want to upload one sample?{" "}
                 <a href="/samples/new">Click here.</a>
                 <br />Rather use our command-line interface?
-                {
-                  <a onClick={this.openCliModal} href="#!">
-                    {" "}
-                    Instructions here.
-                  </a>
-                }
+                <a
+                  href="/cli_user_instructions"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {" "}
+                  Instructions here.
+                </a>
               </p>
             </div>
             {this.state.success ? (

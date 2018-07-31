@@ -117,7 +117,9 @@ class SamplesHeatmap extends React.Component {
   }
 
   parseUrlParams() {
-    let urlParams = queryString.parse(location.search);
+    let urlParams = queryString.parse(location.search, {
+      arrayFormat: "bracket"
+    });
 
     // consider the cases where variables can be passed as array string
     if (typeof urlParams.sampleIds === "string") {
