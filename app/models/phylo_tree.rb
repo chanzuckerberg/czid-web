@@ -60,7 +60,9 @@ class PhyloTree < ApplicationRecord
     taxon_fasta_files = []
     pipeline_run_ids.each do |pr_id|
       pr = PipelineRun.find(pr_id)
-      taxon_fasta_basename = "#{pr.sample.name.downcase.gsub(/\W/, '-')}.fasta"
+      taxon_name = pr.taxon_counts.find_by(tax_id: taxid).name.gsub(/\W/, '-')
+      sample_name = pr.sample.name.downcase.gsub(/\W/, '-')
+      taxon_fasta_basename = "#{sample_name}__#{taxon_name}.fasta"
 
       # Make taxon fasta and upload into phylo_tree_output_s3_path
       fasta_data = get_taxid_fasta_from_pipeline_run(pr, taxid, tax_level, 'NT')
