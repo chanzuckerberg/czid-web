@@ -17,7 +17,7 @@ class PhyloTreeViz extends React.Component {
     this.createTreeViz();
   }
   createTreeViz() {
-    if (this.phylo_tree) {
+    if (this.phylo_tree && this.phylo_tree.newick) {
       let newick = this.phylo_tree.newick;
       // below from http://bl.ocks.org/spond/f6b51aa6f34561f7006f
       let _ = require("lodash");
