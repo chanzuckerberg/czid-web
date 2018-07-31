@@ -22,6 +22,7 @@ import ProjectSelection from "./ProjectSelection";
 import StringHelper from "../helpers/StringHelper";
 import IconComponent from "./IconComponent";
 import Cookies from "js-cookie";
+import CompareButton from "./controls/CompareButton";
 
 class Samples extends React.Component {
   constructor(props, context) {
@@ -987,32 +988,40 @@ class Samples extends React.Component {
       </div>
     );
 
-    const compare_button_inner = (
-      <span>
-        <span
-          className="img-container compare-container"
-          dangerouslySetInnerHTML={{
-            __html: IconComponent.compare(colors.disabledGray)
-          }}
-        />
-        <span>Compare</span>
-      </span>
-    );
+    // const compare_button_inner = (
+    //   <span>
+    //     <span
+    //       className="img-container compare-container"
+    //       dangerouslySetInnerHTML={{
+    //         __html: IconComponent.compare(colors.disabledGray)
+    //       }}
+    //     />
+    //     <span>Compare</span>
+    //   </span>
+    // );
 
-    let compare_button = (
-      <div className="compare-area">
-        <div className="white">
-          {this.state.selectedSampleIds.length > 0 ? (
-            <a onClick={this.compareSamples} className="compare center">
-              {compare_button_inner}
-            </a>
-          ) : (
-            <a className="compare center btn-disabled">
-              {compare_button_inner}
-            </a>
-          )}
-        </div>
-      </div>
+    // let compareButton = (
+    //   <div className="compare-area">
+    //     <div className="white">
+    //       {this.state.selectedSampleIds.length > 0 ? (
+    //         <a onClick={this.compareSamples} className="compare center">
+    //           {compare_button_inner}
+    //         </a>
+    //       ) : (
+    //         <a className="compare center btn-disabled">
+    //           {compare_button_inner}
+    //         </a>
+    //       )}
+
+    //     </div>
+    //   </div>
+    // );
+
+    let compareButton = (
+      <CompareButton
+        disabled={this.state.selectedSampleIds > 1}
+        onClick={this.compareSamples}
+      />
     );
 
     let delete_project_button = (
@@ -1070,7 +1079,7 @@ class Samples extends React.Component {
         selectedStr={selectedStr}
         project_menu={project_menu}
         table_download_dropdown={table_download_dropdown}
-        compare_button={compare_button}
+        compare_button={compareButton}
         delete_project_button={delete_project_button}
         state={this.state}
         canEditProject={this.canEditProject}
@@ -1674,7 +1683,7 @@ function TableDownloadDropdown({ project_id, parent }) {
         className="icon link download-btn"
         labeled
         icon={{ className: "cloud download alternate" }}
-        text={renderText}
+        trigger={renderText}
       >
         <Dropdown.Menu>
           <Dropdown.Item href={`/projects/${project_id}/csv`}>
