@@ -48,7 +48,6 @@ class PhyloTree extends React.Component {
     let sample_list = this.samples.map(function(s, i) {
       return <p>{s.name}</p>;
     });
-    console.log(this.phylo_tree);
     let create_button = (
       <div>
         <Button primary onClick={this.createTree}>

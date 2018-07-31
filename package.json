@@ -63,6 +63,7 @@
     "nanobar": "^0.4.2",
     "nouislider": "^11.0.3",
     "number-abbreviate": "^2.0.0",
+    "phylotree": "^0.1.6",
     "prettier": "^1.12.1",
     "prop-types": "^15.6.0",
     "query-string": "^6.1.0",
