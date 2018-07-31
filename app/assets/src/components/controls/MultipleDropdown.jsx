@@ -61,7 +61,7 @@ class MultipleDropdown extends React.Component {
     return (
       <BaseDropdown
         floating
-        className="multiple"
+        className="idseq-ui multiple"
         {...this.props}
         options={undefined}
         value={undefined}

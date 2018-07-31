@@ -1,0 +1,32 @@
+.idseq-ui.ui.button.dropdown {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  width: auto;
+
+  &.disabled {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    width: auto;
+  }
+
+  &.focus {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    width: auto;
+  }
+
+  &.active {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    width: auto;
+  }
+
+  .idseq-ui.ui.button {
+    margin: 0;
+    padding: 6px 31px 6px 16px;
+  }
+}

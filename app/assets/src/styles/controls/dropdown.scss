@@ -1,7 +1,7 @@
 @import "../themes/colors";
 
-// TODO: Redundant with other dropdowns - will refactor
-.ui.dropdown.base {
+/* TODO: Redundant with other dropdowns - will refactor */
+.idseq-ui.ui.dropdown {
   border: 1px solid $light-grey;
   border-radius: 19px;
   color: $black;
@@ -29,9 +29,10 @@
     font-size: 12px;
     font-weight: 600;
     margin: 0 10px 0 0;
+    vertical-align: middle;
   }
 
-  i.icon {
+  i.dropdown.icon {
     margin: 0;
     padding: 0;
     position: absolute;
@@ -54,5 +55,6 @@
   &.disabled {
     border: 1px solid $medium-grey;
     color: $medium-grey;
+    opacity: 1 !important;
   }
 }

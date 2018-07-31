@@ -90,7 +90,7 @@ class ThresholdFilterDropdown extends React.Component {
 
   render() {
     const dropdownClasses =
-      "ui dropdown threshold" +
+      "idseq-ui ui dropdown threshold" +
       (this.state.popupIsOpen ? " active" : " ") +
       (this.props.disabled ? " disabled" : " ");
     return (
@@ -98,7 +98,7 @@ class ThresholdFilterDropdown extends React.Component {
         trigger={
           <div className={dropdownClasses}>
             <div className="label-title">{this.label}</div>
-            <i className="dropdown icon" />
+            <i className="dropdown handle icon" />
             <Label>{this.state.thresholds.length}</Label>
           </div>
         }
@@ -137,7 +137,7 @@ class ThresholdFilterDropdown extends React.Component {
           </div>
         }
         basic
-        className="threshold"
+        className="idseq-ui threshold"
         onOpen={this.handleOpen.bind(this)}
         onClose={this.handleClose.bind(this)}
         open={this.state.popupIsOpen}
@@ -182,7 +182,7 @@ const ThresholdFilter = ({
     <Grid.Row className="filter">
       <Grid.Column width={9}>
         <Dropdown
-          className="threshold"
+          className="idseq-ui threshold"
           placeholder="Metric"
           fluid
           floating
@@ -194,7 +194,7 @@ const ThresholdFilter = ({
       </Grid.Column>
       <Grid.Column>
         <Dropdown
-          className="threshold"
+          className="idseq-ui threshold"
           placeholder="Op."
           fluid
           floating

@@ -22,11 +22,14 @@ class Slider extends React.Component {
   }
 
   render() {
+    const sliderClasses = `idseq-ui slider ${
+      this.props.disabled ? "disabled" : " "
+    }`;
+
     return (
-      <div className="labeled-slider">
-        <span className="title">
-          <b>{this.props.label}</b> {this.state.value}
-        </span>
+      <div className={sliderClasses}>
+        <span className="label-title">{this.props.label}</span>
+        {this.state.value}
         <BaseSlider
           {...this.props}
           value={this.state.value}
@@ -38,6 +41,7 @@ class Slider extends React.Component {
 }
 
 Slider.propTypes = {
+  disabled: PropTypes.bool,
   label: PropTypes.string,
   onChange: PropTypes.func,
   value: PropTypes.number

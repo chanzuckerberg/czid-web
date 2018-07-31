@@ -1,0 +1,37 @@
+import { Button as BaseButton } from "semantic-ui-react";
+import PropTypes from "prop-types";
+import React from "react";
+
+const Button = ({ text, disabled, onClick, icon, primary, secondary }) => {
+  let content = text;
+  if (icon) {
+    content = (
+      <div className="icon-label">
+        {icon}
+        {text}
+      </div>
+    );
+  }
+  return (
+    <BaseButton
+      className="idseq-ui"
+      primary={primary}
+      secondary={secondary}
+      disabled={disabled}
+      onClick={onClick}
+    >
+      {content}
+    </BaseButton>
+  );
+};
+
+Button.propTypes = {
+  disabled: PropTypes.bool,
+  icon: PropTypes.element,
+  onClick: PropTypes.func,
+  text: PropTypes.string,
+  primary: PropTypes.bool,
+  secondary: PropTypes.bool
+};
+
+export default Button;

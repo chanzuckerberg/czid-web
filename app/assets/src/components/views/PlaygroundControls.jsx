@@ -1,5 +1,6 @@
-import { Grid } from "semantic-ui-react";
+import CompareButton from "../controls/CompareButton";
 import Dropdown from "../controls/Dropdown";
+import ButtonDropdown from "../controls/ButtonDropdown";
 import MultipleDropdown from "../controls/MultipleDropdown";
 import ThresholdFilterDropdown from "../controls/ThresholdFilterDropdown";
 import PrimaryButton from "../controls/PrimaryButton";
@@ -22,32 +23,16 @@ class PlaygroundControls extends React.Component {
     return (
       <div className="playground">
         <ComponentCard
-          title="Threshold Filter Dropdown"
-          width={350}
-          components={[
-            <ThresholdFilterDropdown
-              options={this.thresholdOptions}
-              onApply={vars => {
-                console.log("ThresholdFilterDropdown:Apply", vars);
-              }}
-            />,
-            <ThresholdFilterDropdown
-              options={this.thresholdOptions}
-              disabled
-              onApply={vars => {
-                console.log("ThresholdFilterDropdown:Apply", vars);
-              }}
-            />
-          ]}
-        />
-        <ComponentCard
-          title="Threshold Filter Dropdown"
+          title="Primary Button"
+          width={3}
           components={[
             <PrimaryButton
+              key={0}
               text="Submit"
               onClick={() => console.log("PrimaryButton:Click")}
             />,
             <PrimaryButton
+              key={1}
               text="Submit"
               disabled
               onClick={() => console.log("PrimaryButton:Click")}
@@ -56,12 +41,15 @@ class PlaygroundControls extends React.Component {
         />
         <ComponentCard
           title="Secondary Button"
+          width={3}
           components={[
             <SecondaryButton
+              key={0}
               text="Submit"
               onClick={() => console.log("SecondaryButton:Click")}
             />,
             <SecondaryButton
+              key={1}
               text="Submit"
               disabled
               onClick={() => console.log("SecondaryButton:Click")}
@@ -69,16 +57,77 @@ class PlaygroundControls extends React.Component {
           ]}
         />
         <ComponentCard
+          title="Icon Button"
+          width={3}
+          components={[
+            <CompareButton
+              key={0}
+              onClick={() => console.log("CompareButton:Click")}
+            />,
+            <CompareButton
+              key={1}
+              disabled
+              onClick={() =>
+                console.error("CompareButton:Click: should not show up!")
+              }
+            />
+          ]}
+        />
+        <ComponentCard
+          title="Button Dropdown"
+          width={4}
+          components={[
+            <ButtonDropdown
+              key={0}
+              fluid
+              options={this.dropdownOptions}
+              text="Download"
+              onChange={() => console.log("DropdownButton:Change")}
+            />,
+            <ButtonDropdown
+              key={1}
+              fluid
+              disabled
+              options={this.dropdownOptions}
+              text="Download"
+              onChange={() => console.log("DropdownButton:Change")}
+            />
+          ]}
+        />
+        <ComponentCard
+          title="Threshold Filter Dropdown"
+          width={5}
+          components={[
+            <ThresholdFilterDropdown
+              key={0}
+              options={this.thresholdOptions}
+              onApply={vars => {
+                console.log("ThresholdFilterDropdown:Apply", vars);
+              }}
+            />,
+            <ThresholdFilterDropdown
+              key={1}
+              options={this.thresholdOptions}
+              disabled
+              onApply={vars => {
+                console.log("ThresholdFilterDropdown:Apply", vars);
+              }}
+            />
+          ]}
+        />
+        <ComponentCard
           title="Dropdown"
-          width={200}
+          width={4}
           components={[
             <Dropdown
+              key={0}
               fluid
               options={this.dropdownOptions}
               label="Option: "
               onChange={() => console.log("Dropdown:Change")}
             />,
             <Dropdown
+              key={1}
               fluid
               disabled
               options={this.dropdownOptions}
@@ -89,15 +138,17 @@ class PlaygroundControls extends React.Component {
         />
         <ComponentCard
           title="Multiple Option Dropdown"
-          width={200}
+          width={4}
           components={[
             <MultipleDropdown
+              key={0}
               fluid
               options={this.dropdownOptions}
               label="Options: "
               onChange={() => console.log("MultipleDropdown:Change")}
             />,
             <MultipleDropdown
+              key={1}
               fluid
               disabled
               options={this.dropdownOptions}
@@ -108,9 +159,10 @@ class PlaygroundControls extends React.Component {
         />
         <ComponentCard
           title="Slider"
-          width={200}
+          width={4}
           components={[
             <Slider
+              key={0}
               options={this.dropdownOptions}
               label="Slider: "
               onChange={() => console.log("Slider:Change")}
@@ -120,11 +172,12 @@ class PlaygroundControls extends React.Component {
               value={20}
             />,
             <Slider
+              key={1}
               disabled
               options={this.dropdownOptions}
               label="Slider: "
               onChange={() => console.log("Slider:Change")}
-              onChange={() => console.log("Slider:onAfterChange")}
+              onAfterChange={() => console.log("Slider:onAfterChange")}
               min={0}
               max={100}
               value={20}
@@ -140,16 +193,11 @@ const ComponentCard = ({ title, components, width }) => {
   return (
     <div
       className="component-card"
-      style={{ width: width, padding: 10, float: "left" }}
+      style={{ gridColumn: `auto / span ${width}` }}
     >
-      <div
-        className="title"
-        style={{ padding: 10, textAlign: "center", whiteSpace: "nowrap" }}
-      >
-        {title}
-      </div>
+      <div className="title">{title}</div>
       {components.map((component, idx) => (
-        <div key={idx} className="component" style={{ padding: 10 }}>
+        <div key={idx} className="component">
           {component}
         </div>
       ))}

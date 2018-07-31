@@ -1,12 +1,17 @@
-import { Button } from "semantic-ui-react";
+import Button from "./Button";
 import PropTypes from "prop-types";
 import React from "react";
 
-const SecondaryButton = ({ text, disabled, onClick }) => {
+const SecondaryButton = ({ text, disabled, icon, onClick }) => {
   return (
-    <Button secondary disabled={disabled} onClick={onClick}>
-      {text}
-    </Button>
+    <Button
+      className="idseq-ui"
+      secondary
+      disabled={disabled}
+      onClick={onClick}
+      text={text}
+      icon={icon}
+    />
   );
 };
 

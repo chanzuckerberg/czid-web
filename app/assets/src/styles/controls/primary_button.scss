@@ -1,37 +1,44 @@
 @import "../themes/colors";
 @import "../themes/typography";
 
-.ui.button {
-  border-radius: 19px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 400;
-  height: 38px;
-  letter-spacing: 0.4px;
-  min-width: 134px;
-  padding: 6px 16px;
+.idseq-ui.button.primary {
+  border: 1px solid $primary-light;
+  background-color: $primary-light;
+  color: $white;
 
-  &.primary {
-    border: 1px solid $primary-light;
-    background-color: $primary-light;
+  .icon-label {
+    svg {
+      fill: $white;
+    }
+  }
+
+  &:hover {
+    border: 1px solid $primary-medium;
+    background: $primary-medium;
     color: $white;
+  }
 
-    &:hover {
-      border: 1px solid $primary-medium;
-      background: $primary-medium;
-      color: $white;
-    }
+  &:active {
+    border: 1px solid $primary-dark;
+    background-color: $primary-dark;
+    color: $white;
+  }
 
-    &:active {
-      border: 1px solid $primary-dark;
-      background-color: $primary-dark;
-      color: $white;
-    }
+  &:focus {
+    border: 1px solid $primary-dark;
+    background-color: $primary-dark;
+    color: $white;
+  }
 
-    &:disabled {
-      border: 1px solid $medium-grey;
-      background-color: $light-grey;
-      color: $medium-grey;
+  &:disabled {
+    border: 1px solid $medium-grey;
+    background-color: $light-grey;
+    color: $medium-grey;
+
+    .icon-label {
+      svg {
+        fill: $medium-grey;
+      }
     }
   }
 }

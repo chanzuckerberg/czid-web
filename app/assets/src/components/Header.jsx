@@ -26,7 +26,7 @@ class Header extends React.Component {
   }
 
   displayProfileMenu() {
-    $(".profile-dropdown").dropdown({
+    $(".profile-header-dropdown").dropdown({
       belowOrigin: true,
       stopPropagation: false
     });

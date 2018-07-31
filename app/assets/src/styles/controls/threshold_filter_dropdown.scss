@@ -8,7 +8,7 @@
 }
 
 // TODO: sync with design and move px -> em
-.ui.dropdown.threshold {
+.idseq-ui.ui.dropdown.threshold {
   border: 1px solid $light-grey;
   border-radius: 19px;
   color: $black;
@@ -60,11 +60,15 @@
   &.disabled {
     border: 1px solid $medium-grey;
     color: $medium-grey;
+
+    .ui.label {
+      color: $medium-grey;
+    }
   }
 }
 
 // TODO: Redundant
-.ui.selection.dropdown.threshold {
+.idseq-ui.ui.selection.dropdown.threshold {
   i.icon {
     margin: 0;
     padding: 0;
@@ -85,7 +89,7 @@
   }
 }
 
-.ui.popup.threshold {
+.idseq-ui.ui.popup.threshold {
   padding: 6px;
   border-radius: 4px;
 

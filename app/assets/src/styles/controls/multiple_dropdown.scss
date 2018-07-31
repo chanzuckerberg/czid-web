@@ -1,7 +1,7 @@
 @import "../themes/colors";
 
 // TODO: Redundant with other dropdowns - will refactor
-.ui.dropdown.multiple {
+.idseq-ui.dropdown.multiple {
   border: 1px solid $light-grey;
   border-radius: 19px;
   color: $black;
@@ -54,6 +54,10 @@
   &.disabled {
     border: 1px solid $medium-grey;
     color: $medium-grey;
+
+    .ui.label {
+      color: $medium-grey;
+    }
   }
 
   input[type="checkbox"] {
