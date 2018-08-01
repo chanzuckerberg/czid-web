@@ -128,6 +128,7 @@ ActiveRecord::Schema.define(version: 20_180_724_192_236) do
   create_table "phylo_trees", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "taxid"
     t.integer "tax_level"
+    t.string "tax_name"
     t.bigint "user_id"
     t.bigint "project_id"
     t.text "newick"

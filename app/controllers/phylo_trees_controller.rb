@@ -28,20 +28,21 @@ class PhyloTreesController < ApplicationController
     @samples = Sample.where(id: @pipeline_runs.pluck(:sample_id))
     @phylo_tree = @project.phylo_trees.find_by(taxid: taxid)
 
-    taxon_name = @pipeline_runs.first.taxon_counts.find_by(tax_id: taxid).name
+    taxon_name = @phylo_tree ? @phylo_tree.tax_name : @pipeline_runs.first.taxon_counts.find_by(tax_id: taxid).name
     @taxon = { taxid: taxid, tax_level: tax_level, name: taxon_name }
   end
 
   def create
     taxid = params[:taxid].to_i
     tax_level = params[:tax_level].to_i
+    tax_name = params[:tax_name]
     if @project.phylo_trees.find_by(taxid: taxid).present?
       render json: { message: "a tree run is already in progress for this project and taxon" }
     else
       pipeline_run_ids = params[:pipeline_run_ids].split(",").map(&:to_i)
-      pt = PhyloTree.create(taxid: taxid, tax_level: tax_level, user_id: current_user.id, project_id: @project.id, pipeline_run_ids: pipeline_run_ids)
+      pt = PhyloTree.create(taxid: taxid, tax_level: tax_level, tax_name: tax_name, user_id: current_user.id, project_id: @project.id, pipeline_run_ids: pipeline_run_ids)
       Resque.enqueue(KickoffPhyloTree, pt.id)
-      render json: { message: "creating the tree from pipeline_run_ids #{pipeline_run_ids}" }
+      render json: { message: "tree creation job submitted" }
     end
   end
 

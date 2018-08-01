@@ -12,7 +12,7 @@ class ProjectsController < ApplicationController
   ##########################################
 
   READ_ACTIONS = [:show, :add_favorite, :remove_favorite, :make_host_gene_counts, :host_gene_counts_status, :send_host_gene_counts, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv, :visuals].freeze
-  EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_emails, :update_project_visibility, :create_tree].freeze
+  EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_emails, :update_project_visibility].freeze
   OTHER_ACTIONS = [:create, :new, :index, :send_project_csv].freeze
 
   power :projects, map: { EDIT_ACTIONS => :updatable_projects }, as: :projects_scope
@@ -215,19 +215,6 @@ class ProjectsController < ApplicationController
       create_new_user_random_password(params[:user_email_to_add])
     end
     @project.user_ids |= [@user.id]
-  end
-
-  def create_tree
-    taxid = params[:taxid].to_i
-    tax_level = params[:tax_level].to_i
-    if @project.phylo_trees.find_by(taxid: taxid).present?
-      render json: { status: :conflict, message: "a tree run is already in progress for this project and taxon" }
-    else
-      pipeline_run_ids = params[:pipeline_run_ids].split(",").map(&:to_i)
-      pt = PhyloTree.create(taxid: taxid, tax_level: tax_level, user_id: current_user.id, project_id: @project.id, pipeline_run_ids: pipeline_run_ids)
-      Resque.enqueue(KickoffPhyloTree, pt.id)
-      render json: { status: :ok, message: "creating the tree from pipeline_run_ids #{pipeline_run_ids}" }
-    end
   end
 
   private

@@ -3,6 +3,7 @@ class CreatePhyloTrees < ActiveRecord::Migration[5.1]
     create_table :phylo_trees do |t|
       t.integer :taxid
       t.integer :tax_level
+      t.string :tax_name
       t.bigint :user_id
       t.bigint :project_id
       t.text :newick

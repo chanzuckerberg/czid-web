@@ -22,7 +22,7 @@ class PhyloTreeList extends React.Component {
                       tree.project_id
                     }&taxid=${tree.taxid}`}
                   >
-                    Taxid {tree.taxid}
+                    {tree.tax_name} (taxon ID: {tree.taxid})
                   </a>
                 </p>
               );

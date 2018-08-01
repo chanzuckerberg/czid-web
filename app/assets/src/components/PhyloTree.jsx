@@ -26,10 +26,10 @@ class PhyloTree extends React.Component {
       .post(
         `/phylo_trees/create?project_id=${this.project.id}&taxid=${
           this.taxon.taxid
-        }&tax_level=${
-          this.taxon.tax_level
         }&pipeline_run_ids=${pipeline_run_ids}`,
         {
+          tax_level: this.taxon.tax_level,
+          tax_name: this.taxon.name,
           authenticity_token: this.csrf
         }
       )
@@ -51,6 +51,7 @@ class PhyloTree extends React.Component {
     let sample_list = this.samples.map(function(s, i) {
       return <p>{s.name}</p>;
     });
+    console.log(this.state);
     let create_button = (
       <div>
         {this.state.status === "ok" ? null : (
