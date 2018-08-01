@@ -385,6 +385,14 @@ ActiveRecord::Schema.define(version: 20_180_724_235_332) do
     t.index ["taxid"], name: "index_taxon_names_on_taxid", unique: true
   end
 
+  create_table "taxon_scoring_models", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "name"
+    t.text "model_json"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_taxon_scoring_models_on_name", unique: true
+  end
+
   create_table "taxon_summaries", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "background_id"
     t.integer "tax_id"

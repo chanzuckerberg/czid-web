@@ -1,0 +1,2 @@
+class TaxonScoringModel < ApplicationRecord
+end
