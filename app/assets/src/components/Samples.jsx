@@ -74,6 +74,7 @@ class Samples extends React.Component {
     this.deleteProject = this.deleteProject.bind(this);
     this.toggleBackgroundFlag = this.toggleBackgroundFlag.bind(this);
     this.getBackgroundIdByName = this.getBackgroundIdByName.bind(this);
+    this.gotoTreeList = this.gotoTreeList.bind(this);
     this.state = {
       invite_status: null,
       background_creation_response: {},
@@ -905,6 +906,15 @@ class Samples extends React.Component {
           background_creation_response: { message: "Something went wrong." }
         });
       });
+  }
+
+  gotoTreeList(e) {
+    let tree_index_url = "/phylo_trees/index";
+    let project_id = parseInt(this.state.selectedProjectId);
+    if (project_id) {
+      tree_index_url += `?project_id=${project_id}`;
+    }
+    window.open(tree_index_url, "_blank");
   }
 
   clearAllFilters() {
@@ -1907,7 +1917,8 @@ class BackgroundModal extends React.Component {
           {background_creation_response.status === "ok" ? (
             <div className="status-message status teal-text text-darken-2">
               <i className="fa fa-smile-o fa-fw" />
-              Collection is being created and will be visible on the report page once statistics have been computed.
+              Collection is being created and will be visible on the report page
+              once statistics have been computed.
             </div>
           ) : background_creation_response.message ? (
             <div className="status-message">
@@ -2093,6 +2104,7 @@ function ProjectInfoHeading({
         {table_download_dropdown}
         {compare_button}
         <BackgroundModal parent={parent} />
+        <Button onClick={parent.gotoTreeList}>Phylogenetic Trees</Button>
         {state.selectedProjectId &&
         canEditProject(state.selectedProjectId) &&
         state.project &&

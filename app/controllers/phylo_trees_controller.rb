@@ -1,9 +1,21 @@
-class TreesController < ApplicationController
+class PhyloTreesController < ApplicationController
   before_action :authenticate_user!
   before_action :login_required
-  before_action :set_project
+  before_action :set_project, except: :index
+  before_action :assert_access, only: :index
   before_action :check_access
   before_action :no_demo_user, only: :create
+
+  def index
+    project_id = params[:project_id]
+    if project_id
+      @project = current_power.projects.find(project_id)
+      @phylo_trees = PhyloTree.where(project_id: project_id.to_i)
+    else
+      @project = []
+      @phylo_trees = PhyloTree.where(project_id: current_power.projects.pluck(:id))
+    end
+  end
 
   def show
     taxid = params[:taxid].to_i

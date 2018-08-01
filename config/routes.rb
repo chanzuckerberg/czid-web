@@ -53,8 +53,9 @@ Rails.application.routes.draw do
   end
   get 'projects/:id/csv', to: 'projects#send_project_csv'
 
-  get 'trees/show', to: 'trees#show'
-  post 'trees/create', to: 'trees#create'
+  get 'phylo_trees/index', to: 'phylo_trees#index'
+  get 'phylo_trees/show', to: 'phylo_trees#show'
+  post 'phylo_trees/create', to: 'phylo_trees#create'
 
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]

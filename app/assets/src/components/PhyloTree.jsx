@@ -24,7 +24,7 @@ class PhyloTree extends React.Component {
     var that = this;
     axios
       .post(
-        `/trees/create?project_id=${this.project.id}&taxid=${
+        `/phylo_trees/create?project_id=${this.project.id}&taxid=${
           this.taxon.taxid
         }&tax_level=${
           this.taxon.tax_level
