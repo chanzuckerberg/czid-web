@@ -13,7 +13,8 @@ class PhyloTree extends React.Component {
     this.pipeline_runs = props.pipeline_runs;
     this.phylo_tree = props.phylo_tree;
     this.state = {
-      status: null
+      show_create_button:
+        !this.phylo_tree || (this.phylo_tree && this.phylo_tree.status == 2)
     };
 
     this.createTree = this.createTree.bind(this);
@@ -35,7 +36,7 @@ class PhyloTree extends React.Component {
       )
       .then(res => {
         that.setState({
-          status: res.data.status,
+          show_create_button: !(res.data.status === "ok"),
           status_message: res.data.message
         });
       });
@@ -49,29 +50,24 @@ class PhyloTree extends React.Component {
       </h2>
     );
     let sample_list = this.samples.map(function(s, i) {
-      return <p>{s.name}</p>;
-    });
-    console.log(this.state);
-    let create_button = (
-      <div>
-        {this.state.status === "ok" ? null : (
-          <Button primary onClick={this.createTree}>
-            Create Tree
-          </Button>
-        )}
-        <p>{this.state.status_message}</p>
-      </div>
-    );
+      return (
+        <p>
+          {s.name} ({s.taxid_nt_reads} reads)
+        </p>
+      );
+    }, this);
     return (
       <div>
         {title}
         <h3>Relevant samples:</h3>
         {sample_list}
-        {this.phylo_tree ? (
-          <PhyloTreeViz phylo_tree={this.phylo_tree} />
-        ) : (
-          create_button
-        )}
+        {this.phylo_tree ? <PhyloTreeViz phylo_tree={this.phylo_tree} /> : null}
+        {this.state.show_create_button ? (
+          <Button primary onClick={this.createTree}>
+            Create Tree
+          </Button>
+        ) : null}
+        <p>{this.state.status_message}</p>
       </div>
     );
   }

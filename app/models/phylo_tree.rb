@@ -135,6 +135,5 @@ class PhyloTree < ApplicationRecord
       self.status = STATUS_FAILED
     end
     save
-    monitor_job(false) # want to populate job_log_id immediately
   end
 end

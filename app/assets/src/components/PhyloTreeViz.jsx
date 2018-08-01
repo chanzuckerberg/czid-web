@@ -47,10 +47,14 @@ class PhyloTreeViz extends React.Component {
           status_display = "TREE GENERATION IN PROGRESS";
       }
     }
+    let tree_svg =
+      this.phylo_tree && this.phylo_tree.newick ? (
+        <svg ref={node => (this.node = node)} />
+      ) : null;
     return (
       <div>
         <p>{status_display}</p>
-        <svg ref={node => (this.node = node)} />
+        {tree_svg}
       </div>
     );
   }
