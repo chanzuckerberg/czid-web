@@ -27,10 +27,13 @@ class PhyloTree < ApplicationRecord
     dag_version
   end
 
+  def newick_s3_path
+    "#{phylo_tree_output_s3_path}/#{fetch_dag_version}/phylo_tree.newick"
+  end
+
   def monitor_results
-    output_s3 = "#{phylo_tree_output_s3_path}/#{fetch_dag_version}/phylo_tree.newick"
     file = Tempfile.new
-    _stdout, _stderr, status = Open3.capture3("aws", "s3", "cp", output_s3, file.path.to_s)
+    _stdout, _stderr, status = Open3.capture3("aws", "s3", "cp", newick_s3_path, file.path.to_s)
     if status.exitstatus.zero?
       file.open
       self.newick = file.read
@@ -46,8 +49,11 @@ class PhyloTree < ApplicationRecord
     # Also, populate job_log_id.
     return if throttle && rand >= 0.1 # if throttling, do time-consuming aegea checks only 10% of the time
     job_status, self.job_log_id, _job_hash, self.job_description = PipelineRunStage.job_info(job_id, id)
-    self.status = STATUS_FAILED if job_status == PipelineRunStage::STATUS_FAILED
-    save
+    if job_status == PipelineRunStage::STATUS_FAILED ||
+       (job_status == "SUCCEEDED" && !Open3.capture3("aws", "s3", "ls", newick_s3_path)[2].exitstatus.zero?)
+      self.status = STATUS_FAILED
+      save
+    end
   end
 
   def aegea_command(base_command)
