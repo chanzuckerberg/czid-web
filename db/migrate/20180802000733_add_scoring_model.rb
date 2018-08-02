@@ -10,9 +10,9 @@ class AddScoringModel < ActiveRecord::Migration[5.1]
       "on": [
         {
           "op": "abs",
-          "on": { "op": "attr", "on": "genus.NT.Z" }
+          "on": { "op": "attr", "on": "genus.NT.zscore" }
         },
-        { "op": "attr", "on": "species.NT.Z" },
+        { "op": "attr", "on": "species.NT.zscore" },
         { "op": "attr", "on": "species.NT.rpm" }
       ]
     },
@@ -21,9 +21,9 @@ class AddScoringModel < ActiveRecord::Migration[5.1]
       "on": [
         {
           "op": "abs",
-          "on": { "op": "attr", "on": "genus.NR.Z" }
+          "on": { "op": "attr", "on": "genus.NR.zscore" }
         },
-        { "op": "attr", "on": "species.NR.Z" },
+        { "op": "attr", "on": "species.NR.zscore" },
         { "op": "attr", "on": "species.NR.rpm" }
       ]
     }
