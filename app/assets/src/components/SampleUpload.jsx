@@ -75,7 +75,6 @@ class SampleUpload extends React.Component {
           : this.selected.inputFiles[1].source
         : "";
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
-    this.openCliModal = this.openCliModal.bind(this);
     this.state = {
       submitting: false,
       allProjects: this.projects || [],
@@ -563,10 +562,6 @@ class SampleUpload extends React.Component {
     }
   }
 
-  openCliModal() {
-    $("#cli_modal").modal("open");
-  }
-
   renderSampleForm(updateExistingSample = false) {
     const termsBlurb = (
       <div className="consent-blurb">
@@ -625,12 +620,14 @@ class SampleUpload extends React.Component {
                 Want to upload multiple samples at once?{" "}
                 <a href="/samples/bulk_new">Click here.</a>
                 <br />Rather use our command-line interface?
-                {
-                  <a onClick={this.openCliModal} href="#!">
-                    {" "}
-                    Instructions here.
-                  </a>
-                }
+                <a
+                  href="/cli_user_instructions"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {" "}
+                  Instructions here.
+                </a>
               </p>
             </div>
             <form

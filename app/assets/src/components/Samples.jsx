@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import axios from "axios";
 import ReactDOM from "react-dom";
 import moment from "moment";
@@ -12,9 +12,7 @@ import {
   Icon,
   Modal,
   Button,
-  Form,
-  TextArea,
-  Input
+  Form
 } from "semantic-ui-react";
 import Nanobar from "nanobar";
 import colors from "../styles/themes";
