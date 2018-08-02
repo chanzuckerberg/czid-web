@@ -14,6 +14,7 @@ import BasicPopup from "./BasicPopup";
 class PipelineSampleReads extends React.Component {
   constructor(props) {
     super(props);
+    this.admin = props.admin;
     this.can_edit = props.can_edit;
     this.csrf = props.csrf;
     this.gitVersion = props.gitVersion;
@@ -562,6 +563,7 @@ class PipelineSampleReads extends React.Component {
         <PipelineSampleReport
           sample_id={this.sampleId}
           project_id={this.projectInfo.id}
+          admin={this.admin}
           csrf={this.csrf}
           report_ts={this.reportTime}
           git_version={this.gitVersion}

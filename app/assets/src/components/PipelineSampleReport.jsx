@@ -22,6 +22,7 @@ class PipelineSampleReport extends React.Component {
       id: "prog-bar",
       class: "prog-bar"
     });
+    this.admin = props.admin;
     this.report_ts = props.report_ts;
     this.sample_id = props.sample_id;
     this.project_id = props.project_id;
@@ -903,7 +904,10 @@ class PipelineSampleReport extends React.Component {
           aria-hidden="true"
         />
       );
-    if (taxInfo.tax_id > 0 && taxInfo.tax_level == 1 && taxInfo.NT.r > 0)
+    if (
+      this.admin == true &&
+      (taxInfo.tax_id > 0 && taxInfo.tax_level == 1 && taxInfo.NT.r > 0)
+    )
       // right now, tree pipeline is only implemented for tax_level 1, but may change in future
       phyloTreeDot = (
         <i

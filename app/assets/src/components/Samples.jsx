@@ -2102,14 +2102,16 @@ function ProjectInfoHeading({
         {table_download_dropdown}
         {compare_button}
         <BackgroundModal parent={parent} />
-        <ActiveInactiveButton
-          label="Phylogenetic Trees"
-          onClick={parent.gotoTreeList}
-          enabled={true}
-          outerClass="background-area"
-          enabledClass="background center"
-          disabledClass="background center btn-disabled"
-        />
+        {parent.admin == true ? (
+          <ActiveInactiveButton
+            label="Phylogenetic Trees"
+            onClick={parent.gotoTreeList}
+            enabled={true}
+            outerClass="background-area"
+            enabledClass="background center"
+            disabledClass="background center btn-disabled"
+          />
+        ) : null}
         {state.selectedProjectId &&
         canEditProject(state.selectedProjectId) &&
         state.project &&
