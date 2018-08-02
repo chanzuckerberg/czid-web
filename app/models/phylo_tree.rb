@@ -88,8 +88,8 @@ class PhyloTree < ApplicationRecord
   end
 
   def job_command(taxon_fasta_files)
-    alignment_config = AlignmentConfig.where(pipeline_run_id: pipeline_run_ids).last # TODO: revisit case where pipeline_runs have different alignment configs
-    align_viz_files = {}
+    alignment_config = pipeline_runs.last.alignment_config # TODO: revisit case where pipeline_runs have different alignment configs
+    align_viz_files = []
     PipelineRun.where(id: pipeline_run_ids).find_each do |pr|
       align_viz_files << { name: "align_viz_json_pipeline_run_#{pr.id}",
                            s3_file: pr.alignment_viz_json_s3("nt.species.#{taxid}") } # TODO: also support genus level (based on tax_level)

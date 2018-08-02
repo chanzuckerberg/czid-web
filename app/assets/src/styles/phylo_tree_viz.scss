@@ -1,5 +1,6 @@
 .dropdown-menu {
-  background-color: steelblue;
+  background-color: #d3d3d3;
+  cursor: pointer;
 }
 
 .tree-selection-brush .extent {
@@ -37,6 +38,7 @@
 
 .node {
   font: 10px sans-serif;
+  cursor: pointer;
 }
 
 .node-selected {
