@@ -87,12 +87,20 @@ class PhyloTree < ApplicationRecord
     taxon_fasta_files
   end
 
-  def job_command
-    taxon_fasta_files = upload_taxon_fasta_inputs_and_return_names
+  def job_command(taxon_fasta_files)
+    alignment_config = AlignmentConfig.where(pipeline_run_id: pipeline_run_ids).last # TODO: revisit case where pipeline_runs have different alignment configs
+    align_viz_files = {}
+    PipelineRun.where(id: pipeline_run_ids).find_each do |pr|
+      align_viz_files << { name: "align_viz_json_pipeline_run_#{pr.id}",
+                           s3_file: pr.alignment_viz_json_s3("nt.species.#{taxid}") } # TODO: also support genus level (based on tax_level)
+    end
     attribute_dict = {
       phylo_tree_output_s3_path: phylo_tree_output_s3_path,
       taxon_fasta_files: taxon_fasta_files,
-      taxid: taxid
+      taxid: taxid,
+      align_viz_files: align_viz_files,
+      nt_db: alignment_config.s3_nt_db_path,
+      nt_loc_db: alignment_config.s3_nt_loc_db_path
     }
     dag_commands = prepare_dag("phylo_tree", attribute_dict)
 
@@ -132,7 +140,8 @@ class PhyloTree < ApplicationRecord
 
   def kickoff
     return unless [STATUS_INITIALIZED, STATUS_FAILED].include?(status)
-    self.command_stdout, self.command_stderr, status = Open3.capture3(job_command)
+    taxon_fasta_files = upload_taxon_fasta_inputs_and_return_names
+    self.command_stdout, self.command_stderr, status = Open3.capture3(job_command(taxon_fasta_files))
     if status.exitstatus.zero?
       output = JSON.parse(command_stdout)
       self.job_id = output['jobId']

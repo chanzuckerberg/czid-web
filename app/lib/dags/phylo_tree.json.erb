@@ -3,11 +3,8 @@
   "targets": {
     "taxon_fasta_in": [
       <% @attribute_dict[:taxon_fasta_files].each do |tff| %>
-        <% if tff == @attribute_dict[:taxon_fasta_files].last %>
-          "<%= tff %>"
-        <% else %>
-          "<%= tff %>",
-        <% end %>
+        "<%= tff %>"
+        <%= (tff == @attribute_dict[:taxon_fasta_files].last) ? '' : ',' %>
       <% end %>
     ],
     "phylo_tree_out": ["phylo_tree.newick"]
@@ -18,8 +15,18 @@
       "out": "phylo_tree_out",
       "class": "PipelineStepGeneratePhyloTree",
       "module": "idseq_dag.steps.generate_phylo_tree",
-      "additional_files": {},
-      "additional_attributes": {"taxid": <%= @attribute_dict[:taxid] %>}
+      "additional_files": {
+        "nt_loc_db": "<%= @attribute_dict[:nt_loc_db] %>",
+
+        <% @attribute_dict[:align_viz_files].each do |avf| %>
+          "<%= avf[:name] %>": "<%= avf[:s3_file] %>"
+          <%= (avf == @attribute_dict[:align_viz_files].last) ? '' : ',' %>
+        <% end %>
+      },
+      "additional_attributes": {
+        "taxid": <%= @attribute_dict[:taxid] %>,
+        "nt_db": "<%= @attribute_dict[:nt_db] %>"
+      }
     }
   ],
   "given_targets": {

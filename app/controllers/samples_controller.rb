@@ -337,7 +337,7 @@ class SamplesController < ApplicationController
     # TODO(yf): DEPRECATED. Remove by 5/24/2018
     @taxon_info = params[:taxon_info].tr("_", ".")
     pr = @sample.pipeline_runs.first
-    s3_file_path = "#{pr.alignment_viz_output_s3_path}/#{@taxon_info}.align_viz.json"
+    s3_file_path = pr.alignment_viz_json_s3(@taxon_info)
     alignment_data = JSON.parse(get_s3_file(s3_file_path) || "{}")
     @taxid = @taxon_info.split(".")[2].to_i
     @tax_level = @taxon_info.split(".")[1]
@@ -363,7 +363,7 @@ class SamplesController < ApplicationController
 
     respond_to do |format|
       format.json do
-        s3_file_path = "#{pr.alignment_viz_output_s3_path}/#{@taxon_info.tr('_', '.')}.align_viz.json"
+        s3_file_path = pr.alignment_viz_json_s3(@taxon_info.tr('_', '.'))
         alignment_data = JSON.parse(get_s3_file(s3_file_path) || "{}")
         flattened_data = {}
         parse_tree(flattened_data, @taxid, alignment_data, true)

@@ -783,6 +783,11 @@ class PipelineRun < ApplicationRecord
     result.chomp("/")
   end
 
+  def alignment_viz_json_s3(taxon_info)
+    # taxon_info example: 'nt.species.573'
+    "#{alignment_viz_output_s3_path}/#{taxon_info}.align_viz.json"
+  end
+
   def alignment_viz_output_s3_path
     "#{postprocess_output_s3_path}/align_viz"
   end
