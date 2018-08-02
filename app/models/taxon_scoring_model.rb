@@ -37,6 +37,8 @@ class TaxonScoringModel < ApplicationRecord
   before_save :set_json
   after_find  :set_model
 
+  DEFAULT_MODEL_NAME = 'aggregate_score'.freeze
+
   def set_model
     self.model = JSON.parse(model_json)
   end

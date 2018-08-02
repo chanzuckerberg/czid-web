@@ -834,6 +834,7 @@ module ReportHelper
       species_score = species_info['NT']['aggregatescore']
       genus_score = genus_info['NT']['aggregatescore']
       unless genus_score && genus_score > species_score
+        # genus aggregate score is the max of the specifies scores
         genus_info['NT']['aggregatescore'] = species_score.to_f
         genus_info['NR']['aggregatescore'] = species_score.to_f
       end
@@ -841,13 +842,15 @@ module ReportHelper
   end
 
   def compute_species_aggregate_scores!(rows, tax_2d)
+    tsm = TaxonScoringModel.find_by(name: TaxonScoringModel::DEFAULT_MODEL_NAME)
     rows.each do |species_info|
       species_info['NT']['maxzscore'] = [species_info['NT']['zscore'], species_info['NR']['zscore']].max
       species_info['NR']['maxzscore'] = species_info['NT']['maxzscore']
       next unless species_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
       genus_id = species_info['genus_taxid']
       genus_info = tax_2d[genus_id]
-      species_score = aggregate_score(genus_info, species_info)
+      taxon_info = TaxonScoringModel.flatten_taxon("genus" => genus_info, "species" => species_info)
+      species_score = tsm.score(taxon_info)
       species_info['NT']['aggregatescore'] = species_score.to_f
       species_info['NR']['aggregatescore'] = species_score.to_f
     end
