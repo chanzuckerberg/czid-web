@@ -2102,7 +2102,7 @@ function ProjectInfoHeading({
         {table_download_dropdown}
         {compare_button}
         <BackgroundModal parent={parent} />
-        {parent.admin == true ? (
+        {parent.admin ? (
           <ActiveInactiveButton
             label="Phylogenetic Trees"
             onClick={parent.gotoTreeList}

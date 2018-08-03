@@ -905,7 +905,7 @@ class PipelineSampleReport extends React.Component {
         />
       );
     if (
-      this.admin == true &&
+      this.admin == 1 &&
       (taxInfo.tax_id > 0 && taxInfo.tax_level == 1 && taxInfo.NT.r > 0)
     )
       // right now, tree pipeline is only implemented for tax_level 1, but may change in future
