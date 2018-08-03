@@ -34,13 +34,21 @@
 class TaxonScoringModel < ApplicationRecord
   include Math
   attr_accessor :model
-  before_save :set_json
+  before_save :set_json, :validate_model
   after_find  :set_model
+
+  # Expand the following as needed
+  NUMERIC_FUNCTIONS = %w[abs abs2].freeze
+  MATH_FUNCTIONS = %w[log10 sqrt].freeze
 
   DEFAULT_MODEL_NAME = 'aggregate_score'.freeze
 
   def set_model
     self.model = JSON.parse(model_json)
+  end
+
+  def validate_model
+    self.model ||= JSON.parse(model_json) if model_json
   end
 
   def set_json
@@ -84,12 +92,13 @@ class TaxonScoringModel < ApplicationRecord
     else
       # atomic transformation function like abs, sqrt, log10
       result = score(taxon, score_func["on"])
-      begin
-        # eg. result.abs
+      if NUMERIC_FUNCTIONS.include?(op)
         return result.send(op)
-      rescue
-        # eg log10(result)
+      elsif MATH_FUNCTIONS.include?(op)
         return send(op, result)
+      else
+        Airbrake.notify("Unknonw operator for taxonscoring: #{op}")
+        return result
       end
     end
   end

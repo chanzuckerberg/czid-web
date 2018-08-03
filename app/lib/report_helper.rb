@@ -203,6 +203,8 @@ module ReportHelper
   def fetch_taxon_counts(pipeline_run_id, background_id)
     pipeline_run = PipelineRun.find(pipeline_run_id)
     adjusted_total_reads = (pipeline_run.total_reads - pipeline_run.total_ercc_reads.to_i) * pipeline_run.subsample_fraction
+    raw_non_host_reads = pipeline_run.adjusted_remaining_reads * pipeline_run.subsample_fraction
+
     # NOTE:  If you add more columns to be fetched here, you really should add them to PROPERTIES_OF_TAXID above
     # otherwise they will not survive cleaning.
     TaxonCount.connection.select_all("
@@ -220,6 +222,7 @@ module ReportHelper
         taxon_counts.count               AS  r,
         (count / #{adjusted_total_reads}
           * 1000000.0)                   AS  rpm,
+        (taxon_counts.count/#{raw_non_host_reads} * 100.0)  AS  r_pct,
         IF(
           stdev IS NOT NULL,
           GREATEST(#{ZSCORE_MIN}, LEAST(#{ZSCORE_MAX}, (((count / #{adjusted_total_reads} * 1000000.0) - mean) / stdev))),
