@@ -42,6 +42,12 @@ class TaxonScoringModel < ApplicationRecord
   MATH_FUNCTIONS = %w[log10 sqrt].freeze
 
   DEFAULT_MODEL_NAME = 'aggregate_score'.freeze
+  RESP_PATHOGEN_LIST = [470, 1_294_126, 1_035_095, 1_316_740, 285_217, 817, 447_095, 520, 95_486, 28_450, 83_558, 83_554, 546, 545,
+                        246_410, 199_306, 777, 1_160_107, 1_268_595, 548, 550, 562, 263, 859, 851, 725, 1_226_784, 480, 582,
+                        1_001_137, 1773, 2104, 1817, 747, 1_125_859, 584, 287, 1_031_333, 615, 1_001_744, 1_010_840, 1_000_570,
+                        1_095_731, 1_035_184, 1_004_953, 10_509, 11_135, 11_128, 11_120, 10_358, 10_359, 11_191, 694_448, 11_137,
+                        11_250, 11_320, 11_520, 11_552, 12_814, 12_129, 12_131, 435_275, 571, 573, 446, 11_264, 11_250].freeze
+  PATHO_MAP = { "is_respiratory_patho" => RESP_PATHOGEN_LIST }.freeze
 
   def set_model
     self.model = JSON.parse(model_json)
@@ -73,17 +79,31 @@ class TaxonScoringModel < ApplicationRecord
     result
   end
 
-  def score(taxon, score_func = model)
+  def self.pathogen_features(taxon_info)
+    species = taxon_info['species']
+    taxid = species['taxid']
+    genus_taxid = species['genus_taxid']
+    PATHO_MAP.each do |key, patho_list|
+      taxon_info[key] = patho_list.include?(taxid) || patho_list.include?(genus_taxid) ? 1 : 0
+    end
+  end
+
+  def score(taxon_info)
+    self.class.pathogen_features(taxon_info)
+    score_work(self.class.flatten_taxon(taxon_info))
+  end
+
+  def score_work(taxon, score_func = model)
     op = score_func["op"] # return 0.0 might not be the best solution but could avoid fatal error TODO(yf): revisit
     return 0.0 unless op
     case op
     when "+"
       result = 0.0
-      score_func["on"].each { |sf| result += score(taxon, sf) }
+      score_func["on"].each { |sf| result += score_work(taxon, sf) }
       return result
     when "*"
       result = 1.0
-      score_func["on"].each { |sf| result *= score(taxon, sf) }
+      score_func["on"].each { |sf| result *= score_work(taxon, sf) }
       return result
     when "const"
       return score_func["on"].to_f
@@ -91,7 +111,7 @@ class TaxonScoringModel < ApplicationRecord
       return taxon[score_func["on"]].to_f
     else
       # atomic transformation function like abs, sqrt, log10
-      result = score(taxon, score_func["on"])
+      result = score_work(taxon, score_func["on"])
       if NUMERIC_FUNCTIONS.include?(op)
         return result.send(op)
       elsif MATH_FUNCTIONS.include?(op)

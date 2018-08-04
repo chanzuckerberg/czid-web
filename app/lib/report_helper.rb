@@ -852,7 +852,7 @@ module ReportHelper
       next unless species_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
       genus_id = species_info['genus_taxid']
       genus_info = tax_2d[genus_id]
-      taxon_info = TaxonScoringModel.flatten_taxon("genus" => genus_info, "species" => species_info)
+      taxon_info = { "genus" => genus_info, "species" => species_info }
       species_score = tsm.score(taxon_info)
       species_info['NT']['aggregatescore'] = species_score.to_f
       species_info['NR']['aggregatescore'] = species_score.to_f
