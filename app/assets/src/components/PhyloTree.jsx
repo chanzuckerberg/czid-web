@@ -1,6 +1,6 @@
 import axios from "axios";
 import React from "react";
-import { Button } from "semantic-ui-react";
+import { Button, Checkbox } from "semantic-ui-react";
 import PhyloTreeViz from "./PhyloTreeViz";
 
 class PhyloTree extends React.Component {
@@ -52,7 +52,7 @@ class PhyloTree extends React.Component {
     let sample_list = this.samples.map(function(s, i) {
       return (
         <p>
-          {s.name} ({s.taxid_nt_reads} reads)
+          <Checkbox label="label" /> {s.name} ({s.taxid_nt_reads} reads)
         </p>
       );
     }, this);
