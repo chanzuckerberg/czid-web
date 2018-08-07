@@ -24,6 +24,9 @@ class PhyloTreesController < ApplicationController
     pipeline_run_ids_with_taxid = TaxonCount.where(tax_id: taxid).where(count_type: 'NT').pluck(:pipeline_run_id)
 
     @pipeline_runs = PipelineRun.top_completed_runs.where(sample_id: project_sample_ids).where(id: pipeline_run_ids_with_taxid)
+
+    # Retrieve information for displaying the tree's sample list.
+    # Expose it as an array of hashes containing (a) sample name, (b) number of reads matching the specified taxid in NT
     @samples = if @pipeline_runs.present?
                  Sample.connection.select_all("
                    select pipeline_run_ids_sample_names.name,
