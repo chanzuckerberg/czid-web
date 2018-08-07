@@ -19,7 +19,6 @@ class PhyloTreesController < ApplicationController
 
   def show
     taxid = params[:taxid].to_i
-    tax_level = params[:tax_level]
 
     project_sample_ids = current_power.project_samples(@project).pluck(:id)
     pipeline_run_ids_with_taxid = TaxonCount.where(tax_id: taxid).where(count_type: 'NT').pluck(:pipeline_run_id)
@@ -44,7 +43,15 @@ class PhyloTreesController < ApplicationController
 
     @phylo_tree = @project.phylo_trees.find_by(taxid: taxid)
 
-    taxon_name = @phylo_tree ? @phylo_tree.tax_name : @pipeline_runs.first.taxon_counts.find_by(tax_id: taxid).name
+    if @phylo_tree
+      taxon_name = @phylo_tree.tax_name
+      tax_level = @phylo_tree.tax_level
+    else
+      example_taxon_count = @pipeline_runs.first.taxon_counts.find_by(tax_id: taxid)
+      taxon_name = example_taxon_count.name
+      tax_level = example_taxon_count.tax_level
+    end
+
     @taxon = { taxid: taxid, tax_level: tax_level, name: taxon_name }
   end
 
