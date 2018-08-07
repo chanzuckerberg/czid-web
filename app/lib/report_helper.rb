@@ -22,7 +22,7 @@ module ReportHelper
   # the fake genus IDs start here:
   FAKE_GENUS_BASE = -1_900_000_000
 
-  DECIMALS = 1
+  DECIMALS = 7
 
   DEFAULT_SORT_PARAM = 'highest_nt_aggregatescore'.freeze
   DEFAULT_TAXON_SORT_PARAM = 'highest_nt_aggregatescore'.freeze
@@ -34,7 +34,7 @@ module ReportHelper
 
   SORT_DIRECTIONS = %w[highest lowest].freeze
   # We do not allow underscores in metric names, sorry!
-  METRICS = %w[r rpm zscore percentidentity alignmentlength neglogevalue percentconcordant aggregatescore maxzscore].freeze
+  METRICS = %w[r rpm zscore percentidentity alignmentlength neglogevalue percentconcordant aggregatescore maxzscore r_pct].freeze
   COUNT_TYPES = %w[NT NR].freeze
   # Note: no underscore in sortable column names. Add to here to protect from data cleaning.
   PROPERTIES_OF_TAXID = %w[tax_id name common_name tax_level species_taxid genus_taxid family_taxid superkingdom_taxid category_name is_phage].freeze
@@ -203,6 +203,8 @@ module ReportHelper
   def fetch_taxon_counts(pipeline_run_id, background_id)
     pipeline_run = PipelineRun.find(pipeline_run_id)
     adjusted_total_reads = (pipeline_run.total_reads - pipeline_run.total_ercc_reads.to_i) * pipeline_run.subsample_fraction
+    raw_non_host_reads = pipeline_run.adjusted_remaining_reads.to_f * pipeline_run.subsample_fraction
+
     # NOTE:  If you add more columns to be fetched here, you really should add them to PROPERTIES_OF_TAXID above
     # otherwise they will not survive cleaning.
     TaxonCount.connection.select_all("
@@ -220,6 +222,7 @@ module ReportHelper
         taxon_counts.count               AS  r,
         (count / #{adjusted_total_reads}
           * 1000000.0)                   AS  rpm,
+        (taxon_counts.count/#{raw_non_host_reads} * 100.0)  AS  r_pct,
         IF(
           stdev IS NOT NULL,
           GREATEST(#{ZSCORE_MIN}, LEAST(#{ZSCORE_MAX}, (((count / #{adjusted_total_reads} * 1000000.0) - mean) / stdev))),
@@ -834,20 +837,24 @@ module ReportHelper
       species_score = species_info['NT']['aggregatescore']
       genus_score = genus_info['NT']['aggregatescore']
       unless genus_score && genus_score > species_score
+        # genus aggregate score is the max of the specifies scores
         genus_info['NT']['aggregatescore'] = species_score.to_f
         genus_info['NR']['aggregatescore'] = species_score.to_f
       end
     end
   end
 
-  def compute_species_aggregate_scores!(rows, tax_2d)
+  def compute_species_aggregate_scores!(rows, tax_2d, scoring_model)
+    scoring_model ||= TaxonScoringModel::DEFAULT_MODEL_NAME
+    tsm = TaxonScoringModel.find_by(name: scoring_model)
     rows.each do |species_info|
       species_info['NT']['maxzscore'] = [species_info['NT']['zscore'], species_info['NR']['zscore']].max
       species_info['NR']['maxzscore'] = species_info['NT']['maxzscore']
       next unless species_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
       genus_id = species_info['genus_taxid']
       genus_info = tax_2d[genus_id]
-      species_score = aggregate_score(genus_info, species_info)
+      taxon_info = { "genus" => genus_info, "species" => species_info }
+      species_score = tsm.score(taxon_info)
       species_info['NT']['aggregatescore'] = species_score.to_f
       species_info['NR']['aggregatescore'] = species_score.to_f
     end
@@ -916,7 +923,7 @@ module ReportHelper
     end
 
     # Compute all species aggregate scores.  These are used in filtering.
-    compute_species_aggregate_scores!(rows, tax_2d)
+    compute_species_aggregate_scores!(rows, tax_2d, params[:scoring_model])
     # Compute all genus aggregate scores.  These are used only in sorting.
     compute_genera_aggregate_scores!(rows, tax_2d)
 

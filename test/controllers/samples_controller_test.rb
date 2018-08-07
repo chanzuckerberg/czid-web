@@ -110,26 +110,26 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     genus_result = json_response["taxonomy_details"][2].select { |entry| entry["tax_id"] == 570 }[0]
 
     assert_equal 209.0, species_result["NT"]["r"]
-    assert_equal "186274.5", species_result["NT"]["rpm"]
+    assert_equal "186274.509", species_result["NT"]["rpm"]
     assert_equal 99.0, species_result["NT"]["zscore"]
-    assert_equal 2_428_411_411.8, species_result["NT"]["aggregatescore"]
-    assert_equal 89.6, species_result["NT"]["neglogevalue"]
+    assert_equal 2_428_411_754.8, species_result["NT"]["aggregatescore"].round(1)
+    assert_equal 89.5641022, species_result["NT"]["neglogevalue"]
     assert_equal 69.0, species_result["NR"]["r"]
-    assert_equal "61497.3", species_result["NR"]["rpm"]
+    assert_equal "61497.326", species_result["NR"]["rpm"]
     assert_equal 99.0, species_result["NR"]["zscore"]
-    assert_equal 2_428_411_411.8, species_result["NR"]["aggregatescore"]
-    assert_equal 16.9, species_result["NR"]["neglogevalue"]
+    assert_equal 2_428_411_754.8, species_result["NR"]["aggregatescore"].round(1)
+    assert_equal 16.9101009, species_result["NR"]["neglogevalue"]
 
     assert_equal 217.0, genus_result["NT"]["r"]
-    assert_equal "193404.6", genus_result["NT"]["rpm"]
+    assert_equal "193404.634", genus_result["NT"]["rpm"]
     assert_equal 99.0, genus_result["NT"]["zscore"]
-    assert_equal 2_428_411_411.8, genus_result["NT"]["aggregatescore"]
-    assert_equal 89.6, genus_result["NT"]["neglogevalue"]
+    assert_equal 2_428_411_754.8, genus_result["NT"]["aggregatescore"].round(1)
+    assert_equal 89.5821991, genus_result["NT"]["neglogevalue"]
     assert_equal 87.0, genus_result["NR"]["r"]
-    assert_equal "77540.1", genus_result["NR"]["rpm"]
+    assert_equal "77540.106", genus_result["NR"]["rpm"]
     assert_equal 99.0, genus_result["NR"]["zscore"]
-    assert_equal 2_428_411_411.8, genus_result["NR"]["aggregatescore"]
-    assert_equal 17.0, genus_result["NR"]["neglogevalue"]
+    assert_equal 2_428_411_754.8, genus_result["NR"]["aggregatescore"].round(1)
+    assert_equal 16.9874001, genus_result["NR"]["neglogevalue"]
 
     # Test species taxid 1313, which has genus taxid 1301
     species_result = json_response["taxonomy_details"][2].select { |entry| entry["tax_id"] == 1313 }[0]
@@ -138,24 +138,24 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 0, species_result["NT"]["r"]
     assert_equal 0, species_result["NT"]["rpm"]
     assert_equal(-100, species_result["NT"]["zscore"])
-    assert_equal 12_727.05, species_result["NT"]["aggregatescore"]
+    assert_equal 12_583.63, species_result["NT"]["aggregatescore"].round(2)
     assert_equal 0.0, species_result["NT"]["neglogevalue"]
     assert_equal 2.0, species_result["NR"]["r"]
-    assert_equal "1782.5", species_result["NR"]["rpm"]
-    assert_equal 4.2, species_result["NR"]["zscore"]
-    assert_equal 12_727.05, species_result["NR"]["aggregatescore"]
-    assert_equal 9.3, species_result["NR"]["neglogevalue"]
+    assert_equal "1782.531", species_result["NR"]["rpm"]
+    assert_equal 4.2099668, species_result["NR"]["zscore"]
+    assert_equal 12_583.63, species_result["NR"]["aggregatescore"].round(2)
+    assert_equal 9.3000002, species_result["NR"]["neglogevalue"]
 
     assert_equal 4.0, genus_result["NT"]["r"]
-    assert_equal "3565.1", genus_result["NT"]["rpm"]
-    assert_equal 2.2, genus_result["NT"]["zscore"]
-    assert_equal 72_941.946, genus_result["NT"]["aggregatescore"]
-    assert_equal 81.5, genus_result["NT"]["neglogevalue"]
+    assert_equal "3565.062", genus_result["NT"]["rpm"]
+    assert_equal 2.2081236, genus_result["NT"]["zscore"]
+    assert_equal 73_603.777, genus_result["NT"]["aggregatescore"].round(3)
+    assert_equal 81.4779968, genus_result["NT"]["neglogevalue"]
     assert_equal 2.0, genus_result["NR"]["r"]
-    assert_equal "1782.5", genus_result["NR"]["rpm"]
-    assert_equal 1.7, genus_result["NR"]["zscore"]
-    assert_equal 72_941.946, genus_result["NR"]["aggregatescore"]
-    assert_equal 9.3, genus_result["NR"]["neglogevalue"]
+    assert_equal "1782.531", genus_result["NR"]["rpm"]
+    assert_equal 1.6768345, genus_result["NR"]["zscore"]
+    assert_equal 73_603.777, genus_result["NR"]["aggregatescore"].round(3)
+    assert_equal 9.3000002, genus_result["NR"]["neglogevalue"]
   end
 
   test 'should get edit' do
