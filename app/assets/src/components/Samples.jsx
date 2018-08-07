@@ -298,7 +298,7 @@ class Samples extends React.Component {
           "send_project_reports_csv"
         );
         break;
-      case "":
+      case "host_gene_counts":
         this.generateReport(
           "make_host_gene_counts",
           "host_gene_counts_status",
@@ -1005,7 +1005,7 @@ class Samples extends React.Component {
       if (this.admin != 1) {
         downloadOptions.push({
           text: "Host Gene Counts",
-          value: "host_gene)counts"
+          value: "host_gene_counts"
         });
       }
     }

@@ -17,14 +17,16 @@
 @import "styles/edit_password";
 @import "styles/cli_user_instructions";
 
-// controls
-@import "styles/controls/button_dropdown";
-@import "styles/controls/dropdown";
-@import "styles/controls/multiple_dropdown";
-@import "styles/controls/multiple_by_section_dropdown";
-@import "styles/controls/button";
-@import "styles/controls/primary_button";
-@import "styles/controls/secondary_button";
-@import "styles/controls/slider";
-@import "styles/controls/threshold_filter_dropdown";
-@import "styles/views/playground_controls.scss";
+// ui/controls
+@import "styles/ui/controls/dropdowns/button_dropdown";
+@import "styles/ui/controls/dropdowns/dropdown";
+@import "styles/ui/controls/dropdowns/multiple_dropdown";
+@import "styles/ui/controls/dropdowns/multiple_by_section_dropdown";
+@import "styles/ui/controls/dropdowns/threshold_filter_dropdown";
+@import "styles/ui/controls/buttons/button";
+@import "styles/ui/controls/buttons/primary_button";
+@import "styles/ui/controls/buttons/secondary_button";
+@import "styles/ui/controls/slider";
+
+// views
+@import "styles/views/playground_controls";
