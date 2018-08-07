@@ -22,7 +22,7 @@ module ReportHelper
   # the fake genus IDs start here:
   FAKE_GENUS_BASE = -1_900_000_000
 
-  DECIMALS = 1
+  DECIMALS = 7
 
   DEFAULT_SORT_PARAM = 'highest_nt_aggregatescore'.freeze
   DEFAULT_TAXON_SORT_PARAM = 'highest_nt_aggregatescore'.freeze
@@ -34,7 +34,7 @@ module ReportHelper
 
   SORT_DIRECTIONS = %w[highest lowest].freeze
   # We do not allow underscores in metric names, sorry!
-  METRICS = %w[r rpm zscore percentidentity alignmentlength neglogevalue percentconcordant aggregatescore maxzscore].freeze
+  METRICS = %w[r rpm zscore percentidentity alignmentlength neglogevalue percentconcordant aggregatescore maxzscore r_pct].freeze
   COUNT_TYPES = %w[NT NR].freeze
   # Note: no underscore in sortable column names. Add to here to protect from data cleaning.
   PROPERTIES_OF_TAXID = %w[tax_id name common_name tax_level species_taxid genus_taxid family_taxid superkingdom_taxid category_name is_phage].freeze
@@ -203,7 +203,7 @@ module ReportHelper
   def fetch_taxon_counts(pipeline_run_id, background_id)
     pipeline_run = PipelineRun.find(pipeline_run_id)
     adjusted_total_reads = (pipeline_run.total_reads - pipeline_run.total_ercc_reads.to_i) * pipeline_run.subsample_fraction
-    raw_non_host_reads = pipeline_run.adjusted_remaining_reads * pipeline_run.subsample_fraction
+    raw_non_host_reads = pipeline_run.adjusted_remaining_reads.to_f * pipeline_run.subsample_fraction
 
     # NOTE:  If you add more columns to be fetched here, you really should add them to PROPERTIES_OF_TAXID above
     # otherwise they will not survive cleaning.
