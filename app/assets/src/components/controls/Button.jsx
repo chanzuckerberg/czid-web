@@ -2,7 +2,15 @@ import { Button as BaseButton } from "semantic-ui-react";
 import PropTypes from "prop-types";
 import React from "react";
 
-const Button = ({ text, disabled, onClick, icon, primary, secondary }) => {
+const Button = ({
+  disabled,
+  onClick,
+  icon,
+  primary,
+  secondary,
+  text,
+  type
+}) => {
   let content = text;
   if (icon) {
     content = (
@@ -31,7 +39,8 @@ Button.propTypes = {
   onClick: PropTypes.func,
   text: PropTypes.string,
   primary: PropTypes.bool,
-  secondary: PropTypes.bool
+  secondary: PropTypes.bool,
+  type: PropTypes.string
 };
 
 export default Button;

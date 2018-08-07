@@ -1,4 +1,4 @@
-import { Dropdown, Icon } from "semantic-ui-react";
+import { Dropdown } from "semantic-ui-react";
 import PrimaryButton from "./PrimaryButton";
 import SecondaryButton from "./SecondaryButton";
 import PropTypes from "prop-types";

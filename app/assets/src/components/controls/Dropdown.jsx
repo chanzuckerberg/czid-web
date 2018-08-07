@@ -1,11 +1,11 @@
 import React from "react";
-import { Dropdown as SemanticDropdown } from "semantic-ui-react";
+import { Dropdown as BaseDropdown } from "semantic-ui-react";
 import PropTypes from "prop-types";
 
 class Dropdown extends React.Component {
   constructor(props) {
     super(props);
-    this.passedOnChange = this.props.onChange;
+    this.onChange = this.props.onChange;
     this.state = { value: this.props.value || this.props.options[0].value };
     this.labels = this.props.options.reduce((labelMap, option) => {
       labelMap[option.value.toString()] = option.text;
@@ -15,7 +15,7 @@ class Dropdown extends React.Component {
 
   onChange(e, d) {
     this.setState({ value: d.value });
-    this.passedOnChange && this.passedOnChange(e, d);
+    this.onChange(e, d);
   }
 
   renderText() {
@@ -29,7 +29,8 @@ class Dropdown extends React.Component {
 
   render() {
     return (
-      <SemanticDropdown
+      <BaseDropdown
+        disabled={this.props.disabled}
         fluid={this.props.fluid}
         options={this.props.options}
         value={this.state.value}
@@ -43,9 +44,11 @@ class Dropdown extends React.Component {
 }
 
 Dropdown.propTypes = {
+  disabled: PropTypes.bool,
   fluid: PropTypes.bool,
+  label: PropTypes.string,
   options: PropTypes.array,
-  onChange: PropTypes.func,
+  onChange: PropTypes.func.isRequired,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
 };
 

@@ -1,5 +1,6 @@
-import React from "react";
 import { Dropdown as BaseDropdown, Label } from "semantic-ui-react";
+import PropTypes from "prop-types";
+import React from "react";
 
 class MultipleDropdown extends React.Component {
   constructor(props) {
@@ -75,4 +76,11 @@ class MultipleDropdown extends React.Component {
     );
   }
 }
+
+MultipleDropdown.propTypes = {
+  label: PropTypes.string,
+  onChange: PropTypes.func.isRequired,
+  options: PropTypes.arrayOf(PropTypes.object)
+};
+
 export default MultipleDropdown;

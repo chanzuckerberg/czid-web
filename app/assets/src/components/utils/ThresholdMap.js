@@ -3,11 +3,7 @@ function ThresholdMap(options) {
 }
 
 ThresholdMap.isThresholdValid = function(threshold) {
-  if (
-    threshold.hasOwnProperty("metric") &&
-    threshold.hasOwnProperty("operator") &&
-    threshold.hasOwnProperty("value")
-  ) {
+  if (threshold.metric && threshold.operator && threshold.value) {
     return (
       threshold.metric.length > 0 &&
       threshold.operator.length > 0 &&

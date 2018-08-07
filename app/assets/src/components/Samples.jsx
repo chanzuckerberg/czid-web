@@ -4,16 +4,7 @@ import ReactDOM from "react-dom";
 import moment from "moment";
 import $ from "jquery";
 import Materialize from "materialize-css";
-import {
-  Sidebar,
-  Popup,
-  Dropdown,
-  Label,
-  Icon,
-  Modal,
-  Button,
-  Form
-} from "semantic-ui-react";
+import { Sidebar, Popup, Label, Icon, Modal, Form } from "semantic-ui-react";
 import Nanobar from "nanobar";
 import SortHelper from "./SortHelper";
 import numberWithCommas from "../helpers/strings";
@@ -23,6 +14,7 @@ import Cookies from "js-cookie";
 import CompareButton from "./controls/CompareButton";
 import DownloadButtonDropdown from "./controls/DownloadButtonDropdown";
 import PrimaryButton from "./controls/PrimaryButton";
+import SecondaryButton from "./controls/SecondaryButton";
 import MultipleDropdown from "./controls/MultipleDropdown";
 
 class Samples extends React.Component {
@@ -1009,11 +1001,12 @@ class Samples extends React.Component {
 
     const downloadOptions = [{ text: "Samples Table", value: "samples_table" }];
     if (project_id !== "all") {
-      downloadOptions.push([{ text: "Reports", value: "project_reports" }]);
+      downloadOptions.push({ text: "Reports", value: "project_reports" });
       if (this.admin != 1) {
-        downloadOptions.push([
-          { text: "Host Gene Counts", value: "host_gene)counts" }
-        ]);
+        downloadOptions.push({
+          text: "Host Gene Counts",
+          value: "host_gene)counts"
+        });
       }
     }
     let table_download_dropdown = (
@@ -1686,16 +1679,6 @@ function PipelineOutputCards({
   );
 }
 
-function MetadataFilter({ parent }) {
-  return (
-    <Dropdown text="Filter" className="col s2 wrapper all-filter-btn">
-      <Dropdown.Menu>
-        <MetadataFilterDropdowns parent={parent} />
-      </Dropdown.Menu>
-    </Dropdown>
-  );
-}
-
 function TableSearchField({ searchParams, parent }) {
   let search_field_width = "col s3 no-padding";
   return (
@@ -1851,12 +1834,10 @@ class BackgroundModal extends React.Component {
             )}
             {this.renderSampleList()}
             <div className="background-button-section">
-              <Button className="create-background" type="submit">
-                Create
-              </Button>
-              <Button className="cancel-background" onClick={this.handleClose}>
+              <PrimaryButton type="submit">Create</PrimaryButton>
+              <SecondaryButton onClick={this.handleClose}>
                 Cancel
-              </Button>
+              </SecondaryButton>
             </div>
           </Form>
           {background_creation_response.status === "ok" ? (
@@ -1957,9 +1938,7 @@ class AddUserModal extends React.Component {
           </label>
         </Modal.Content>
         <Modal.Actions>
-          <button className="modal-close" onClick={this.handleClose}>
-            Close
-          </button>
+          <PrimaryButton text="Close" onClick={this.handleClose} />
         </Modal.Actions>
       </Modal>
     );
@@ -2256,9 +2235,7 @@ function AddUserModalMemberArea({ state, parent }) {
               onChange={parent.handleChange}
             />
           </Form.Field>
-          <Button className="add_member_action" type="submit">
-            Add member
-          </Button>
+          <PrimaryButton type="submit" text="Add member" />
         </Form>
         <div className="error-message">
           {state.project_add_email_validation}

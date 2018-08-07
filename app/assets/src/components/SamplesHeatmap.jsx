@@ -3,7 +3,7 @@ import clusterfck from "clusterfck";
 import axios from "axios";
 import d3 from "d3";
 import queryString from "query-string";
-import { Button, Icon, Popup } from "semantic-ui-react";
+import { Popup } from "semantic-ui-react";
 import copy from "copy-to-clipboard";
 import { StickyContainer, Sticky } from "react-sticky";
 import symlog from "./symlog";
@@ -14,6 +14,7 @@ import Heatmap from "./visualizations/Heatmap";
 import HeatmapLegend from "./visualizations/HeatmapLegend";
 import MultipleDropdown from "./controls/MultipleDropdown";
 import PrimaryButton from "./controls/PrimaryButton";
+import PropTypes from "prop-types";
 import Slider from "./controls/Slider";
 import TaxonTooltip from "./TaxonTooltip";
 import ThresholdFilterDropdown from "./controls/ThresholdFilterDropdown";
@@ -707,34 +708,6 @@ class SamplesHeatmap extends React.Component {
     );
   }
 
-  filterTaxons() {
-    let filteredNames = [],
-      categories = new Set(this.state.selectedOptions.categories);
-
-    for (let name of this.state.taxons.names) {
-      let id = this.state.taxons.nameToId[name];
-      let category = this.state.taxons.idToCategory[id];
-      if (categories.has(category)) {
-        let has_value = false;
-        for (let sample of this.state.data) {
-          for (let taxon of sample.taxons) {
-            if (taxon.tax_id == id) {
-              has_value = true;
-              break;
-            }
-          }
-          if (has_value) {
-            break;
-          }
-        }
-        if (has_value) {
-          filteredNames.push(name);
-        }
-      }
-    }
-    return filteredNames;
-  }
-
   renderVisualization() {
     return (
       <StickyContainer>
@@ -800,5 +773,16 @@ class SamplesHeatmap extends React.Component {
     );
   }
 }
+
+SamplesHeatmap.propTypes = {
+  backgrounds: PropTypes.array,
+  categories: PropTypes.array,
+  explicitApply: PropTypes.bool,
+  metrics: PropTypes.array,
+  sampleIds: PropTypes.array,
+  taxonIds: PropTypes.array,
+  taxonLevels: PropTypes.array,
+  thresholdFilters: PropTypes.object
+};
 
 export default SamplesHeatmap;
