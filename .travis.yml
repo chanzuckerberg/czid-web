@@ -17,10 +17,10 @@ install:
   - gem install brakeman
 script:
   - docker-compose run webtest "./node_modules/.bin/eslint app/assets/src --ext .js,.jsx"
-  - docker-compose run webtest "rails test"
   - echo "quit" | docker-compose run webtest "rails dbconsole"
   - docker-compose run webtest "rubocop -R --config .rubocop_todo.yml"
   - docker-compose run webtest "rake db:drop db:create db:migrate db:seed"
+  - docker-compose run webtest "rails test"
   - brakeman --no-pager || true
 env:
   global:

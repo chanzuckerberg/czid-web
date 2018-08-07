@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_180_724_235_332) do
+ActiveRecord::Schema.define(version: 20_180_806_231_116) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -383,6 +383,16 @@ ActiveRecord::Schema.define(version: 20_180_724_235_332) do
     t.datetime "updated_at", null: false
     t.string "common_name"
     t.index ["taxid"], name: "index_taxon_names_on_taxid", unique: true
+  end
+
+  create_table "taxon_scoring_models", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "name"
+    t.text "model_json"
+    t.string "model_type"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_taxon_scoring_models_on_name", unique: true
   end
 
   create_table "taxon_summaries", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
