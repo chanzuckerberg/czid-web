@@ -37,7 +37,7 @@ class PhyloTree < ApplicationRecord
     if status.exitstatus.zero?
       file.open
       self.newick = file.read
-      self.status = STATUS_READY
+      self.status = newick.present? ? STATUS_READY : STATUSP_FAILED
       save
     end
     file.close
