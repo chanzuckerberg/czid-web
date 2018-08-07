@@ -1,13 +1,6 @@
 @import "../../../themes/colors";
 @import "../../../themes/typography";
 
-@mixin not-last-child($selector) {
-  & #{$selector}:not(:last-child) {
-    @content;
-  }
-}
-
-// TODO: sync with design and move px -> em
 .idseq-ui.ui.dropdown.threshold {
   border: 1px solid $light-grey;
   border-radius: 19px;
