@@ -844,8 +844,9 @@ module ReportHelper
     end
   end
 
-  def compute_species_aggregate_scores!(rows, tax_2d)
-    tsm = TaxonScoringModel.find_by(name: TaxonScoringModel::DEFAULT_MODEL_NAME)
+  def compute_species_aggregate_scores!(rows, tax_2d, scoring_model)
+    scoring_model ||= TaxonScoringModel::DEFAULT_MODEL_NAME
+    tsm = TaxonScoringModel.find_by(name: scoring_model)
     rows.each do |species_info|
       species_info['NT']['maxzscore'] = [species_info['NT']['zscore'], species_info['NR']['zscore']].max
       species_info['NR']['maxzscore'] = species_info['NT']['maxzscore']
@@ -922,7 +923,7 @@ module ReportHelper
     end
 
     # Compute all species aggregate scores.  These are used in filtering.
-    compute_species_aggregate_scores!(rows, tax_2d)
+    compute_species_aggregate_scores!(rows, tax_2d, params[:scoring_model])
     # Compute all genus aggregate scores.  These are used only in sorting.
     compute_genera_aggregate_scores!(rows, tax_2d)
 

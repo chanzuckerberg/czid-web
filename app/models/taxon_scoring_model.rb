@@ -41,12 +41,12 @@ class TaxonScoringModel < ApplicationRecord
   NUMERIC_FUNCTIONS = %w[abs abs2].freeze
   MATH_FUNCTIONS = %w[log10 sqrt].freeze
 
-  # DEFAULT_MODEL_NAME = 'aggregate_score'.freeze
+  DEFAULT_MODEL_NAME = 'aggregate_score'.freeze
+  # DEFAULT_MODEL_NAME = 'kat_m1'.freeze
   MODEL_TYPE_LINEAR = 'linear'.freeze # Default
   MODEL_TYPE_LOGISTIC = 'logistic'.freeze
   LOGISTIC_SCALING_FACTOR = 1000
 
-  DEFAULT_MODEL_NAME = 'kat_m1'.freeze
   RESP_PATHOGEN_LIST = [470, 1_294_126, 1_035_095, 1_316_740, 285_217, 817, 447_095, 520, 95_486, 28_450, 83_558, 83_554, 546, 545,
                         246_410, 199_306, 777, 1_160_107, 1_268_595, 548, 550, 562, 263, 859, 851, 725, 1_226_784, 480, 582,
                         1_001_137, 1773, 2104, 1817, 747, 1_125_859, 584, 287, 1_031_333, 615, 1_001_744, 1_010_840, 1_000_570,
