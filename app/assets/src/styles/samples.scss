@@ -851,7 +851,7 @@ $break-large: 1070px;
         position: relative;
         margin-left: 10px;
         font-size: 18px;
-        top: 0.7em;
+        top: 0.6em;
         color: $subdued-color;
       }
     }
@@ -863,17 +863,23 @@ $break-large: 1070px;
     }
     .search {
       border-radius: 40px;
-      border: solid 1px #e4e4e4;
+      border: solid 1px #cccccc;
       padding-left: 32px;
       position: relative;
       top: -1.2em;
+      height: 38px;
       &::placeholder {
-        color: #d0d9de;
+        color: #cccccc;
       }
       &:focus {
         border-bottom-color: $light-gray3;
         box-shadow: 0 1px 0 0 $light-gray3;
       }
+    }
+
+    .filter-container {
+      margin-right: 10px;
+      display: inline-block;
     }
   }
   input.search {
@@ -1177,6 +1183,12 @@ input[type="button"] {
             color: #ffffff !important;
           }
         }
+      }
+
+      .button-container {
+        float: right;
+        padding-right: 10px;
+        padding-top: 20px;
       }
 
       .compare-area {

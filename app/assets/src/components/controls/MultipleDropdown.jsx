@@ -12,7 +12,6 @@ class MultipleDropdown extends React.Component {
   }
 
   optionClicked(e, d) {
-    console.log(d.value);
     e.stopPropagation();
     let value = this.state.value.slice();
     let idx = value.indexOf(d["data-value"]);
@@ -22,7 +21,7 @@ class MultipleDropdown extends React.Component {
       value.push(d["data-value"]);
     }
     this.passedOnChange && this.passedOnChange(e, value);
-    this.setState({ value: value });
+    this.setState({ value });
   }
 
   renderMenuItems() {
@@ -50,9 +49,13 @@ class MultipleDropdown extends React.Component {
 
   renderText() {
     return (
-      <div>
-        <div className="label-title">{this.props.label}</div>
-        <Label>{this.state.value.length}</Label>
+      <div className="label-container">
+        <div className="label-container-title">{this.props.label}</div>
+        {this.state.value.length > 0 && (
+          <Label className="label-container-count">
+            {this.state.value.length}
+          </Label>
+        )}
       </div>
     );
   }

@@ -1,5 +1,5 @@
 import React from "react";
-import { Dropdown as BaseDropdown } from "semantic-ui-react";
+import { Dropdown as SemanticDropdown } from "semantic-ui-react";
 import PropTypes from "prop-types";
 
 class Dropdown extends React.Component {
@@ -26,10 +26,13 @@ class Dropdown extends React.Component {
       </div>
     );
   }
+
   render() {
     return (
-      <BaseDropdown
-        {...this.props}
+      <SemanticDropdown
+        fluid={this.props.fluid}
+        options={this.props.options}
+        value={this.state.value}
         floating
         className="idseq-ui"
         onChange={this.onChange.bind(this)}
@@ -40,9 +43,10 @@ class Dropdown extends React.Component {
 }
 
 Dropdown.propTypes = {
+  fluid: PropTypes.bool,
   options: PropTypes.array,
   onChange: PropTypes.func,
-  value: PropTypes.string
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
 };
 
 export default Dropdown;

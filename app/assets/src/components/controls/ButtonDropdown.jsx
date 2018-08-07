@@ -1,4 +1,5 @@
 import { Dropdown, Icon } from "semantic-ui-react";
+import PrimaryButton from "./PrimaryButton";
 import SecondaryButton from "./SecondaryButton";
 import PropTypes from "prop-types";
 import React from "react";
@@ -6,6 +7,40 @@ import React from "react";
 class ButtonDropdown extends React.Component {
   constructor(props) {
     super(props);
+
+    this.handleMouseDown = this.handleMouseDown.bind(this);
+  }
+
+  getButton() {
+    if (this.props.primary) {
+      return (
+        <PrimaryButton
+          text={this.props.text}
+          disabled={this.props.disabled}
+          icon={this.props.icon}
+        />
+      );
+    } else {
+      return (
+        <SecondaryButton
+          text={this.props.text}
+          disabled={this.props.disabled}
+          icon={this.props.icon}
+        />
+      );
+    }
+  }
+
+  handleMouseDown(event) {
+    const selectedText = event.target.textContent;
+    if (selectedText) {
+      const selectedOption = this.props.options.find(function(option) {
+        return option.text == selectedText;
+      });
+      if (selectedOption) {
+        this.props.onClick(selectedOption.value);
+      }
+    }
   }
 
   render() {
@@ -14,15 +49,9 @@ class ButtonDropdown extends React.Component {
         className="idseq-ui button"
         disabled={this.props.disabled}
         floating
-        onChange={this.props.onClick}
+        onMouseDown={this.handleMouseDown}
         options={this.props.options}
-        trigger={
-          <SecondaryButton
-            text={this.props.text}
-            disabled={this.props.disabled}
-            icon={<Icon size="large" className={"cloud download alternate"} />}
-          />
-        }
+        trigger={this.getButton()}
       />
     );
   }
@@ -30,8 +59,11 @@ class ButtonDropdown extends React.Component {
 
 ButtonDropdown.propTypes = {
   disabled: PropTypes.bool,
+  icon: PropTypes.element,
   onClick: PropTypes.func,
   options: PropTypes.array,
+  primary: PropTypes.bool,
+  secondary: PropTypes.bool,
   text: PropTypes.string
 };
 

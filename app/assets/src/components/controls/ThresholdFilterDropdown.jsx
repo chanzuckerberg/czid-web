@@ -1,14 +1,6 @@
-import {
-  Button,
-  Dropdown,
-  Grid,
-  Icon,
-  Input,
-  Label,
-  Popup
-} from "semantic-ui-react";
+import { Dropdown, Grid, Input, Label, Popup } from "semantic-ui-react";
 import PrimaryButton from "./PrimaryButton";
-import SecondaryButton from "./SecondaryButton";
+import RemoveIcon from "../icons/RemoveIcon";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -97,9 +89,15 @@ class ThresholdFilterDropdown extends React.Component {
       <Popup
         trigger={
           <div className={dropdownClasses}>
-            <div className="label-title">{this.label}</div>
+            <div className="label-container">
+              <div className="label-container-title">{this.label}</div>
+              {this.state.thresholds.length > 0 && (
+                <Label className="label-container-count">
+                  {this.state.thresholds.length}
+                </Label>
+              )}
+            </div>
             <i className="dropdown handle icon" />
-            <Label>{this.state.thresholds.length}</Label>
           </div>
         }
         content={
@@ -119,15 +117,20 @@ class ThresholdFilterDropdown extends React.Component {
                   }}
                 />
               ))}
-              <Grid.Row className="actions">
+              <Grid.Row className="threshold-actions">
+                <Grid.Column>
+                  <div
+                    className="add-threshold-link"
+                    onClick={this.handleAddThresholdItem.bind(this)}
+                  >
+                    + Add a threshold
+                  </div>
+                </Grid.Column>
+              </Grid.Row>
+              <Grid.Row className="threshold-buttons">
                 <Grid.Column>
                   <PrimaryButton
-                    text="Add Threshold"
-                    onClick={this.handleAddThresholdItem.bind(this)}
-                  />
-                </Grid.Column>
-                <Grid.Column>
-                  <SecondaryButton
+                    className="threshold-buttons-apply"
                     text="Apply"
                     onClick={this.handleApply.bind(this)}
                   />
@@ -182,7 +185,7 @@ const ThresholdFilter = ({
     <Grid.Row className="filter">
       <Grid.Column width={9}>
         <Dropdown
-          className="idseq-ui threshold"
+          className="idseq-ui threshold inner-dropdown"
           placeholder="Metric"
           fluid
           floating
@@ -194,7 +197,7 @@ const ThresholdFilter = ({
       </Grid.Column>
       <Grid.Column>
         <Dropdown
-          className="idseq-ui threshold"
+          className="idseq-ui threshold inner-dropdown"
           placeholder="Op."
           fluid
           floating
@@ -214,7 +217,9 @@ const ThresholdFilter = ({
         />
       </Grid.Column>
       <Grid.Column width={1}>
-        <Icon name="remove" onClick={onRemove} className="remove" />
+        <div onClick={onRemove}>
+          <RemoveIcon />
+        </div>
       </Grid.Column>
     </Grid.Row>
   );

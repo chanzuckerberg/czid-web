@@ -7,6 +7,7 @@ import { Button, Icon, Popup } from "semantic-ui-react";
 import copy from "copy-to-clipboard";
 import { StickyContainer, Sticky } from "react-sticky";
 import symlog from "./symlog";
+import DownloadButton from "./controls/DownloadButton";
 import Dropdown from "./controls/Dropdown";
 import ErrorBoundary from "./ErrorBoundary";
 import Heatmap from "./visualizations/Heatmap";
@@ -777,24 +778,18 @@ class SamplesHeatmap extends React.Component {
             on="click"
             hideOnScroll
           />
-          <Button
-            className="right"
-            secondary
-            href={this.downloadCurrentViewDataURL()}
+          <DownloadButton
+            onClick={() => {
+              location.href = this.downloadCurrentViewDataURL();
+            }}
             disabled={!this.state.data}
-          >
-            <Icon className="cloud download alternate" />
-            Download
-          </Button>
+          />
           {this.explicitApply && (
-            <Button
-              className="right"
-              primary
+            <PrimaryButton
+              text="Apply"
               onClick={this.onApplyClick.bind(this)}
               disabled={!this.optionsChanged}
-            >
-              Apply
-            </Button>
+            />
           )}
           <h2>
             Comparing {this.state.data ? this.state.data.length : ""} samples

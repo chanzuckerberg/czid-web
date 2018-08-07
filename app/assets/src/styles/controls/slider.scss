@@ -2,7 +2,13 @@
 @import "../themes/colors.scss";
 
 .idseq-ui.slider {
+  font-family: $font-family-default;
+  font-size: 13px;
+  font-weight: 400;
+  font-style: normal;
+  font-stretch: normal;
   height: 38px;
+  text-align: center;
 
   .label-title {
     font-weight: 600;

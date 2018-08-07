@@ -18,14 +18,36 @@
   padding: 6px 16px;
   position: relative;
   width: 100%;
+  font-family: $font-family-default;
+  font-size: 13px;
+  font-weight: 400;
+  font-style: normal;
+  font-stretch: normal;
 
-  .label-title {
+  .item {
+    font-family: $font-family-default;
+    font-size: 13px;
+    font-weight: 400;
+    font-style: normal;
+    font-stretch: normal;
+  }
+
+  &.inner-dropdown {
+    border-radius: 4px;
+  }
+
+  .label-container {
+    margin-right: 10px;
+  }
+
+  .label-container-title {
     float: left;
     font-weight: 600;
     vertical-align: middle;
+    margin-right: 10px;
   }
 
-  .ui.label {
+  .label-container-count.ui.label {
     line-height: 12px;
     height: 24px;
     border-radius: 12px;
@@ -34,7 +56,7 @@
     float: right;
     font-size: 12px;
     font-weight: 600;
-    margin: 0 10px 0 0;
+    margin: 0;
   }
 
   i.icon {
@@ -103,8 +125,8 @@
         margin: 0;
         padding: 0px;
 
-        &.actions {
-          border-top: 1px solid $lightest-grey;
+        &.threshold-buttons {
+          padding-top: 10px;
         }
 
         .column {
@@ -123,13 +145,13 @@
             }
           }
 
-          .icon.remove {
-            // position: relative;
-            // top: 10px;
+          .add-threshold-link {
+            text-align: left;
+            font-weight: 600;
           }
 
-          .button {
-            white-space: nowrap;
+          .threshold-buttons-apply {
+            text-align: left;
           }
         }
       }

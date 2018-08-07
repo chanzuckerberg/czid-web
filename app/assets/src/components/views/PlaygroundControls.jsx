@@ -1,4 +1,5 @@
 import CompareButton from "../controls/CompareButton";
+import DownloadButton from "../controls/DownloadButton";
 import Dropdown from "../controls/Dropdown";
 import ButtonDropdown from "../controls/ButtonDropdown";
 import MultipleDropdown from "../controls/MultipleDropdown";
@@ -13,10 +14,22 @@ class PlaygroundControls extends React.Component {
     super(props);
     this.thresholdOptions = this.props.thresholdFilters;
     this.dropdownOptions = [
-      { text: "option 1", value: "1" },
+      { text: "Option 1", value: "1" },
       { text: "option 2", value: "2" },
-      { text: "option 3", value: "3" }
+      { text: "Option 3", value: "3" }
     ];
+    this.dropdownOptionsBySection = {
+      Options: [
+        { text: "option 1", value: "1" },
+        { text: "option 2", value: "2" },
+        { text: "option 3", value: "3" }
+      ],
+      Abc: [
+        { text: "a", value: "val_a" },
+        { text: "b", value: "val_b" },
+        { text: "c", value: "val_c" }
+      ]
+    };
   }
 
   render() {
@@ -75,22 +88,45 @@ class PlaygroundControls extends React.Component {
         />
         <ComponentCard
           title="Button Dropdown"
-          width={4}
+          width={3}
           components={[
             <ButtonDropdown
+              primary
               key={0}
               fluid
               options={this.dropdownOptions}
               text="Download"
-              onChange={() => console.log("DropdownButton:Change")}
+              onClick={option => console.log("DropdownButton:Clicked", option)}
             />,
             <ButtonDropdown
+              primary
               key={1}
               fluid
               disabled
               options={this.dropdownOptions}
               text="Download"
-              onChange={() => console.log("DropdownButton:Change")}
+              onClick={option => console.log("DropdownButton:Change", option)}
+            />
+          ]}
+        />
+        <ComponentCard
+          title="Download Dropdown"
+          width={3}
+          components={[
+            <DownloadButton
+              key={0}
+              fluid
+              options={this.dropdownOptions}
+              text="Download"
+              onClick={option => console.log("DropdownButton:Clicked", option)}
+            />,
+            <DownloadButton
+              key={1}
+              fluid
+              disabled
+              options={this.dropdownOptions}
+              text="Download"
+              onClick={option => console.log("DropdownButton:Clicked", option)}
             />
           ]}
         />

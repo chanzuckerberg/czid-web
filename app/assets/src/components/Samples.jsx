@@ -15,14 +15,15 @@ import {
   Form
 } from "semantic-ui-react";
 import Nanobar from "nanobar";
-import colors from "../styles/themes";
 import SortHelper from "./SortHelper";
 import numberWithCommas from "../helpers/strings";
 import ProjectSelection from "./ProjectSelection";
 import StringHelper from "../helpers/StringHelper";
-import IconComponent from "./IconComponent";
 import Cookies from "js-cookie";
 import CompareButton from "./controls/CompareButton";
+import DownloadButtonDropdown from "./controls/DownloadButtonDropdown";
+import PrimaryButton from "./controls/PrimaryButton";
+import MultipleDropdown from "./controls/MultipleDropdown";
 
 class Samples extends React.Component {
   constructor(props, context) {
@@ -262,53 +263,14 @@ class Samples extends React.Component {
     return value;
   }
 
-  selectTissueFilter(e) {
-    const filterList = this.state.selectedTissueFilters.slice(0);
-
-    let filterIndex;
-    let selectedFilter = e.target.getAttribute("data-status");
-
-    if (e.target.checked) {
-      filterList.push(selectedFilter);
-    } else {
-      filterIndex = filterList.indexOf(selectedFilter);
-      filterList.splice(filterIndex, 1);
-    }
-    this.setState(
-      {
-        selectedTissueFilters: filterList
-      },
-      () => {
-        this.setUrlLocation("none");
-      }
+  selectTissueFilter(_, tissues) {
+    this.setState({ selectedTissueFilters: tissues }, () =>
+      this.setUrlLocation()
     );
   }
 
-  selectHostFilter(e) {
-    // current array of options
-    const hostList = this.state.selectedHostIndices.slice(0);
-
-    let target_id = parseInt(e.target.getAttribute("data-host-id"));
-
-    let index;
-    // check if the check box is checked or unchecked
-    if (e.target.checked) {
-      // add the numerical value of the checkbox to options array
-      hostList.push(+target_id);
-    } else {
-      // or remove the value from the unchecked checkbox from the array
-      index = hostList.indexOf(+target_id);
-      hostList.splice(index, 1);
-    }
-    // update the state with the new array of options
-    this.setState(
-      {
-        selectedHostIndices: hostList
-      },
-      () => {
-        this.setUrlLocation("none");
-      }
-    );
+  selectHostFilter(_, hosts) {
+    this.setState({ selectedHostIndices: hosts }, () => this.setUrlLocation());
   }
 
   canEditProject(projectId) {
@@ -328,13 +290,38 @@ class Samples extends React.Component {
     }, 2000);
   }
 
-  startReportGeneration(e) {
-    let make_action = e.target.getAttribute("data-make-action");
-    let status_action = e.target.getAttribute("data-status-action");
-    let retrieve_action = e.target.getAttribute("data-retrieve-action");
+  startReportGeneration(option) {
+    let project_id = this.state.selectedProjectId
+      ? this.state.selectedProjectId
+      : "all";
+
+    switch (option) {
+      case "samples_table":
+        location.href = `/projects/${project_id}/csv`;
+        break;
+      case "project_reports":
+        this.generateReport(
+          "make_project_reports_csv",
+          "project_reports_csv_status",
+          "send_project_reports_csv"
+        );
+        break;
+      case "":
+        this.generateReport(
+          "make_host_gene_counts",
+          "host_gene_counts_status",
+          "send_host_gene_counts"
+        );
+        break;
+      default:
+        break;
+    }
+  }
+
+  generateReport(makeAction, statusAction, retrieveAction) {
     this.nanobar.go(30);
 
-    let url = `/projects/${this.state.selectedProjectId}/${make_action}`;
+    let url = `/projects/${this.state.selectedProjectId}/${makeAction}`;
     const bg_name = Cookies.get("background_name");
     if (bg_name) {
       const bg_id = this.getBackgroundIdByName(bg_name);
@@ -346,7 +333,7 @@ class Samples extends React.Component {
         this.setState({
           project_id_download_in_progress: this.state.selectedProjectId
         });
-        this.displayReportProgress(res, status_action, retrieve_action);
+        this.displayReportProgress(res, statusAction, retrieveAction);
       })
       .catch(() => {});
   }
@@ -420,6 +407,7 @@ class Samples extends React.Component {
   updateProjectUserState(email_array) {
     this.setState({ project_users: email_array });
   }
+
   fetchProjectUsers(id) {
     if (!id || !this.canEditProject(id)) {
       this.updateProjectUserState([]);
@@ -685,17 +673,11 @@ class Samples extends React.Component {
     if (this.state.selectedTissueFilters.length) {
       let tissueParams = this.state.selectedTissueFilters.join(",");
       params += `&tissue=${tissueParams}`;
-    } else if (this.state.tissueTypes.length > 0) {
-      // initializing or all the tissue types are NA
-      params += "&tissue=none";
     }
 
     if (this.state.selectedHostIndices.length) {
       let hostParams = this.state.selectedHostIndices.join(",");
       params += `&host=${hostParams}`;
-    } else if (this.state.hostGenomes.length > 0) {
-      // initializing (before first results are selected)
-      params += "&host=none";
     }
 
     return params;
@@ -725,12 +707,12 @@ class Samples extends React.Component {
           tissueTypes: this.allTissueTypes(res.data.tissue_types),
           selectedTissueFilters:
             reset_filters || prevState.resetTissues
-              ? this.allTissueTypes(res.data.tissue_types)
+              ? []
               : prevState.selectedTissueFilters,
           hostGenomes: res.data.host_genomes,
           selectedHostIndices:
             reset_filters || prevState.resetHosts
-              ? res.data.host_genomes.map(h => h.id)
+              ? []
               : prevState.selectedHostIndices,
           displayEmpty: false,
           checkInUpdate: false, //don't trigger more update if it's from the fetchResults
@@ -967,7 +949,7 @@ class Samples extends React.Component {
         [`${state_var}`]: list
       };
       this.setState(new_state, () => {
-        this.setUrlLocation("none");
+        this.setUrlLocation();
         this.fetchResults();
       });
     }
@@ -1025,8 +1007,22 @@ class Samples extends React.Component {
       <TableSearchField searchParams={this.state.searchParams} parent={this} />
     );
 
+    const downloadOptions = [{ text: "Samples Table", value: "samples_table" }];
+    if (project_id !== "all") {
+      downloadOptions.push([{ text: "Reports", value: "project_reports" }]);
+      if (this.admin != 1) {
+        downloadOptions.push([
+          { text: "Host Gene Counts", value: "host_gene)counts" }
+        ]);
+      }
+    }
     let table_download_dropdown = (
-      <TableDownloadDropdown project_id={project_id} parent={this} />
+      <div className="button-container">
+        <DownloadButtonDropdown
+          options={downloadOptions}
+          onClick={this.startReportGeneration}
+        />
+      </div>
     );
 
     let check_all = (
@@ -1042,40 +1038,13 @@ class Samples extends React.Component {
       </div>
     );
 
-    // const compare_button_inner = (
-    //   <span>
-    //     <span
-    //       className="img-container compare-container"
-    //       dangerouslySetInnerHTML={{
-    //         __html: IconComponent.compare(colors.disabledGray)
-    //       }}
-    //     />
-    //     <span>Compare</span>
-    //   </span>
-    // );
-
-    // let compareButton = (
-    //   <div className="compare-area">
-    //     <div className="white">
-    //       {this.state.selectedSampleIds.length > 0 ? (
-    //         <a onClick={this.compareSamples} className="compare center">
-    //           {compare_button_inner}
-    //         </a>
-    //       ) : (
-    //         <a className="compare center btn-disabled">
-    //           {compare_button_inner}
-    //         </a>
-    //       )}
-
-    //     </div>
-    //   </div>
-    // );
-
     let compareButton = (
-      <CompareButton
-        disabled={this.state.selectedSampleIds > 1}
-        onClick={this.compareSamples}
-      />
+      <div className="button-container">
+        <CompareButton
+          disabled={this.state.selectedSampleIds.length < 1}
+          onClick={this.compareSamples}
+        />
+      </div>
     );
 
     let delete_project_button = (
@@ -1107,7 +1076,28 @@ class Samples extends React.Component {
       <div className="row search-box">
         {this.state.displaySelectSamples ? check_all : null}
         {search_field}
-        {<MetadataFilter parent={this} />}
+        <div className="filter-container">
+          <MultipleDropdown
+            label="Hosts: "
+            disabled={this.state.hostGenomes.length == 0}
+            options={this.state.hostGenomes.map(host => {
+              return { text: host.name, value: host.id };
+            })}
+            value={this.state.selectedHostIndices}
+            onChange={this.selectHostFilter}
+          />
+        </div>
+        <div className="filter-container">
+          <MultipleDropdown
+            label="Tissues: "
+            disabled={this.state.tissueTypes.length == 0}
+            options={this.state.tissueTypes.map(tissue => {
+              return { text: tissue, value: tissue };
+            })}
+            value={this.state.selectedTissueFilters}
+            onChange={this.selectTissueFilter}
+          />
+        </div>
       </div>
     );
 
@@ -1209,7 +1199,7 @@ class Samples extends React.Component {
       }
 
       if (this.state.hostFilterChange || this.state.tissueFilterChange) {
-        this.setUrlLocation("none");
+        this.setUrlLocation();
         this.fetchResults();
         this.state.hostFilterChange = false;
         this.state.tissueFilterChange = false;
@@ -1725,54 +1715,6 @@ function TableSearchField({ searchParams, parent }) {
   );
 }
 
-function TableDownloadDropdown({ project_id, parent }) {
-  let renderText = (
-    <span>
-      {"Download"}
-      <Icon name="angle down" />
-    </span>
-  );
-  return (
-    <div className="download-wrapper">
-      <Dropdown
-        button
-        className="icon link download-btn"
-        labeled
-        icon={{ className: "cloud download alternate" }}
-        trigger={renderText}
-      >
-        <Dropdown.Menu>
-          <Dropdown.Item href={`/projects/${project_id}/csv`}>
-            Sample Table
-          </Dropdown.Item>
-          {project_id === "all" ? null : (
-            <Dropdown.Item
-              data-make-action="make_project_reports_csv"
-              data-status-action="project_reports_csv_status"
-              data-retrieve-action="send_project_reports_csv"
-              onClick={parent.startReportGeneration}
-              className="download-reports"
-            >
-              Reports
-            </Dropdown.Item>
-          )}
-          {project_id === "all" || parent.admin != 1 ? null : (
-            <Dropdown.Item
-              data-make-action="make_host_gene_counts"
-              data-status-action="host_gene_counts_status"
-              data-retrieve-action="send_host_gene_counts"
-              onClick={parent.startReportGeneration}
-              className="download-reports"
-            >
-              Host Gene Counts
-            </Dropdown.Item>
-          )}
-        </Dropdown.Menu>
-      </Dropdown>
-    </div>
-  );
-}
-
 class BackgroundModal extends React.Component {
   constructor(props) {
     super(props);
@@ -1877,14 +1819,13 @@ class BackgroundModal extends React.Component {
     return (
       <Modal
         trigger={
-          <ActiveInactiveButton
-            label="Create Collection"
-            onClick={this.handleOpen}
-            enabled={this.sample_ids.length > 1}
-            outerClass="background-area"
-            enabledClass="background center"
-            disabledClass="background center btn-disabled"
-          />
+          <div className="button-container">
+            <PrimaryButton
+              text="Create Collection"
+              onClick={this.handleOpen}
+              disabled={!this.sample_ids.length}
+            />
+          </div>
         }
         open={this.state.modalOpen}
         onClose={this.handleClose}
@@ -2301,73 +2242,6 @@ function SampleDetailedColumns({
   });
 }
 
-function MetadataFilterDropdowns({ parent }) {
-  return (
-    <div className="row metadata-options">
-      <div className="col s6">
-        <h6>Host</h6>
-        {parent.state.hostGenomes.length == 0 ? (
-          <div className="options-wrapper">
-            <label>No host genome data present</label>
-          </div>
-        ) : (
-          parent.state.hostGenomes.map((host, i) => {
-            let indices = parent.state.selectedHostIndices;
-            let host_label = `host-${host.id}`;
-            let res = (
-              <div key={"host-" + i} className="options-wrapper">
-                <input
-                  name="host"
-                  type="checkbox"
-                  data-id={host_label}
-                  data-host-id={host.id}
-                  checked={indices.indexOf(host.id) < 0 ? "" : "checked"}
-                  value={indices.indexOf(i) != -1}
-                  onChange={parent.selectHostFilter}
-                  id={host_label}
-                  className="filled-in human"
-                />
-                <label htmlFor={host_label}>{host.name}</label>
-              </div>
-            );
-            return res;
-          })
-        )}
-      </div>
-      <div className="col s6">
-        <h6>Tissue</h6>
-        {parent.state.tissueTypes.length == 0 ? (
-          <div className="options-wrapper">
-            <label>No tissue data present</label>
-          </div>
-        ) : (
-          parent.state.tissueTypes.map((tissue, i) => {
-            let res = (
-              <div key={i} className="options-wrapper">
-                <input
-                  name="tissue"
-                  type="checkbox"
-                  id={tissue}
-                  className="filled-in"
-                  data-status={tissue}
-                  checked={
-                    parent.state.selectedTissueFilters.indexOf(tissue) < 0
-                      ? ""
-                      : "checked"
-                  }
-                  onChange={parent.selectTissueFilter}
-                />
-                <label htmlFor={tissue}>{tissue}</label>
-              </div>
-            );
-            return res;
-          })
-        )}
-      </div>
-    </div>
-  );
-}
-
 function AddUserModalMemberArea({ state, parent }) {
   return (
     <div>
@@ -2415,36 +2289,6 @@ function AddUserModalMemberArea({ state, parent }) {
             <li key="None">None</li>
           )}
         </ul>
-      </div>
-    </div>
-  );
-}
-
-function ActiveInactiveButton({
-  label,
-  onClick,
-  enabled,
-  icon,
-  outerClass,
-  enabledClass,
-  disabledClass
-}) {
-  let button_inner = (
-    <span>
-      {icon}
-      <span>{label}</span>
-    </span>
-  );
-  return (
-    <div className={outerClass}>
-      <div className="white">
-        {enabled ? (
-          <a onClick={onClick} className={enabledClass}>
-            {button_inner}
-          </a>
-        ) : (
-          <a className={disabledClass}>{button_inner}</a>
-        )}
       </div>
     </div>
   );

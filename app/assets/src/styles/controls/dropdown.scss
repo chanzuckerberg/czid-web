@@ -8,9 +8,21 @@
   letter-spacing: 0.4px;
   height: 38px;
   line-height: 24px;
-  padding: 6px 16px;
+  padding: 6px 26px 6px 16px;
   position: relative;
-  width: 100%;
+  font-family: $font-family-default;
+  font-size: 13px;
+  font-weight: 400;
+  font-style: normal;
+  font-stretch: normal;
+
+  .item {
+    font-family: $font-family-default;
+    font-size: 13px;
+    font-weight: 400;
+    font-style: normal;
+    font-stretch: normal;
+  }
 
   .label-title {
     float: left;

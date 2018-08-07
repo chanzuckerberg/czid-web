@@ -10,16 +10,32 @@
   line-height: 24px;
   padding: 6px 16px;
   position: relative;
-  width: 100%;
+  font-family: $font-family-default;
+  font-size: 13px;
+  font-weight: 400;
+  font-style: normal;
+  font-stretch: normal;
 
-  .label-title {
+  .item {
+    font-family: $font-family-default;
+    font-size: 13px;
+    font-weight: 400;
+    font-style: normal;
+    font-stretch: normal;
+  }
+
+  .label-container {
+    margin-right: 10px;
+  }
+
+  .label-container-title {
     float: left;
     font-weight: 600;
     vertical-align: middle;
-    margin-right: 5px;
+    margin-right: 10px;
   }
 
-  .ui.label {
+  .label-container-count.ui.label {
     line-height: 12px;
     height: 24px;
     border-radius: 12px;
@@ -28,7 +44,7 @@
     float: right;
     font-size: 12px;
     font-weight: 600;
-    margin: 0 10px 0 0;
+    margin: 0;
   }
 
   i.icon {
@@ -64,5 +80,30 @@
     opacity: 1;
     position: static;
     margin-right: 0.5em;
+
+    -webkit-appearance: none;
+    background-color: $white;
+    border: 1px solid $medium-grey;
+    border-radius: 2px;
+    padding: 8px;
+    display: inline-block;
+    position: relative;
+    top: 0.3em;
+
+    &:checked {
+      background-color: $primary-light;
+      border: 1px solid $primary-light;
+      color: $white;
+    }
+
+    &:checked:after {
+      content: "\2713";
+      font-size: 14px;
+      font-weight: 100;
+      position: absolute;
+      top: 0px;
+      left: 3px;
+      color: $white;
+    }
   }
 }

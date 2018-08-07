@@ -5,11 +5,4 @@ $font-family-sans-serif: "Open Sans", "Helvetica Neue", Arial, Helvetica,
 $font-family-serif: Georgia, "Times New Roman", Times, serif !default;
 $font-family-monospace: Menlo, Monaco, Consolas, "Courier New", monospace !default;
 $font-family-default: $font-family-sans-serif !default;
-
-* {
-  font-family: $font-family-default;
-  font-size: 13px;
-  font-weight: normal;
-  font-style: normal;
-  font-stretch: normal;
-}
+$font-size: 13px !default;

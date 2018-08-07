@@ -4,12 +4,12 @@ function ThresholdMap(options) {
 
 ThresholdMap.isThresholdValid = function(threshold) {
   if (
-    threshold.hasOwnProperty("label") &&
+    threshold.hasOwnProperty("metric") &&
     threshold.hasOwnProperty("operator") &&
     threshold.hasOwnProperty("value")
   ) {
     return (
-      threshold.label.length > 0 &&
+      threshold.metric.length > 0 &&
       threshold.operator.length > 0 &&
       (threshold.value != "" && !isNaN(threshold.value))
     );
@@ -40,9 +40,9 @@ ThresholdMap.taxonPassThresholdFilter = function(taxon, rules) {
   for (let i = 0; i < rules.length; i += 1) {
     let rule = rules[i];
     if (ThresholdMap.isThresholdValid(rule)) {
-      let { label, operator, value } = rule;
+      let { metric, operator, value } = rule;
       let threshold = parseFloat(value);
-      const [fieldType, fieldTitle] = label.split("_");
+      const [fieldType, fieldTitle] = metric.split("_");
       const taxonValue = (taxon[fieldType] || {})[fieldTitle];
       switch (operator) {
         case ">=":
@@ -56,10 +56,9 @@ ThresholdMap.taxonPassThresholdFilter = function(taxon, rules) {
           }
           break;
         default:
-          // '>='
-          if (taxonValue < threshold) {
-            return false;
-          }
+          // Invalid threshold: ignore - should never be here
+          // TODO: log to server once we have that ability
+          break;
       }
     }
   }
