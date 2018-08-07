@@ -2,7 +2,6 @@
 # Run with rake map_patho_list['patho_list.txt']
 
 task :load_scoring_models, [:models_json] => :environment do |_t, args|
-
   models = JSON.parse(File.read(args[:models_json]))
 
   models.each do |model|
