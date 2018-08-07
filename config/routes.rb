@@ -1,7 +1,6 @@
 require 'resque/server'
 
 Rails.application.routes.draw do
-
   resources :backgrounds
   devise_for :users, controllers: {
     sessions: 'sessions',
