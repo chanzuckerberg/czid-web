@@ -11,9 +11,9 @@ import ThresholdMap from "./utils/ThresholdMap";
 import PipelineSampleTree from "./PipelineSampleTree";
 import Nanobar from "nanobar";
 import BasicPopup from "./BasicPopup";
-import OurDropdown from "./controls/Dropdown";
-import MultipleDropdown from "./controls/MultipleDropdown";
-import ThresholdFilterDropdown from "./controls/ThresholdFilterDropdown";
+import OurDropdown from "./ui/controls/dropdowns/Dropdown";
+import MultipleDropdown from "./ui/controls/dropdowns/MultipleDropdown";
+import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
 
 class PipelineSampleReport extends React.Component {
   constructor(props) {

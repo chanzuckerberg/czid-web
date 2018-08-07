@@ -7,17 +7,17 @@ import { Popup } from "semantic-ui-react";
 import copy from "copy-to-clipboard";
 import { StickyContainer, Sticky } from "react-sticky";
 import symlog from "./symlog";
-import DownloadButton from "./controls/DownloadButton";
-import Dropdown from "./controls/Dropdown";
+import DownloadButton from "./ui/controls/buttons/DownloadButton";
+import Dropdown from "./ui/controls/dropdowns/Dropdown";
 import ErrorBoundary from "./ErrorBoundary";
 import Heatmap from "./visualizations/Heatmap";
 import HeatmapLegend from "./visualizations/HeatmapLegend";
-import MultipleDropdown from "./controls/MultipleDropdown";
-import PrimaryButton from "./controls/PrimaryButton";
+import MultipleDropdown from "./ui/controls/dropdowns/MultipleDropdown";
+import PrimaryButton from "./ui/controls/buttons/PrimaryButton";
 import PropTypes from "prop-types";
-import Slider from "./controls/Slider";
+import Slider from "./ui/controls/Slider";
 import TaxonTooltip from "./TaxonTooltip";
-import ThresholdFilterDropdown from "./controls/ThresholdFilterDropdown";
+import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
 
 class SamplesHeatmap extends React.Component {
   constructor(props) {

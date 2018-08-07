@@ -1,6 +1,6 @@
 import { Dropdown, Grid, Input, Label, Popup } from "semantic-ui-react";
-import PrimaryButton from "./PrimaryButton";
-import RemoveIcon from "../icons/RemoveIcon";
+import PrimaryButton from "../buttons/PrimaryButton";
+import RemoveIcon from "../../icons/RemoveIcon";
 import PropTypes from "prop-types";
 import React from "react";
 

@@ -1,26 +1,37 @@
 @import "../themes/colors";
 
 .playground {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
-  grid-gap: 10px;
-  margin: 10px;
+  .playground-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+    grid-gap: 10px;
+    margin: 10px;
 
-  .component-card {
-    border: 1px solid $lightest-grey;
-    padding: 10px;
-    float: left;
-
-    .component {
-      padding-top: 10px;
-      text-align: center;
-    }
-
-    .title {
-      border-bottom: 1px solid $lightest-grey;
+    .component-card {
+      border: 1px solid $lightest-grey;
       padding: 10px;
-      text-align: center;
-      white-space: nowrap;
+      float: left;
+
+      .component {
+        padding-top: 10px;
+        text-align: center;
+      }
+
+      .title {
+        border-bottom: 1px solid $lightest-grey;
+        padding: 10px;
+        text-align: center;
+        white-space: nowrap;
+      }
+    }
+  }
+
+  .playground-console {
+    padding: 10px;
+
+    .playground-console-label {
+      font-weight: 700;
+      margin-right: 20px;
     }
   }
 }

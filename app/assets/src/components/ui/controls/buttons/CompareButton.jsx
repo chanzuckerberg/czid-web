@@ -1,4 +1,4 @@
-import CompareIcon from "../icons/CompareIcon";
+import CompareIcon from "../../icons/CompareIcon";
 import PrimaryButton from "./PrimaryButton";
 import PropTypes from "prop-types";
 import React from "react";

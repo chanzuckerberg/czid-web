@@ -11,11 +11,11 @@ import numberWithCommas from "../helpers/strings";
 import ProjectSelection from "./ProjectSelection";
 import StringHelper from "../helpers/StringHelper";
 import Cookies from "js-cookie";
-import CompareButton from "./controls/CompareButton";
-import DownloadButtonDropdown from "./controls/DownloadButtonDropdown";
-import PrimaryButton from "./controls/PrimaryButton";
-import SecondaryButton from "./controls/SecondaryButton";
-import MultipleDropdown from "./controls/MultipleDropdown";
+import CompareButton from "./ui/controls/buttons/CompareButton";
+import DownloadButtonDropdown from "./ui/controls/dropdowns/DownloadButtonDropdown";
+import PrimaryButton from "./ui/controls/buttons/PrimaryButton";
+import SecondaryButton from "./ui/controls/buttons/SecondaryButton";
+import MultipleDropdown from "./ui/controls/dropdowns/MultipleDropdown";
 
 class Samples extends React.Component {
   constructor(props, context) {

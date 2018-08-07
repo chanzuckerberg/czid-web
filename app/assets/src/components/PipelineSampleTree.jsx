@@ -1,6 +1,6 @@
 import React from "react";
 import d3, { event as currentEvent } from "d3";
-import Dropdown from "./controls/Dropdown";
+import Dropdown from "./ui/controls/dropdowns/Dropdown";
 import numberWithCommas from "../helpers/strings";
 
 class PipelineSampleTree extends React.PureComponent {
