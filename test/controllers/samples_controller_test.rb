@@ -110,7 +110,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     genus_result = json_response["taxonomy_details"][2].select { |entry| entry["tax_id"] == 570 }[0]
 
     assert_equal 209.0, species_result["NT"]["r"]
-    assert_equal "186274.5", species_result["NT"]["rpm"]
+    assert_equal "186274.509", species_result["NT"]["rpm"]
     assert_equal 99.0, species_result["NT"]["zscore"]
     assert_equal 2_428_411_411.8, species_result["NT"]["aggregatescore"].round(1)
     assert_equal 89.6, species_result["NT"]["neglogevalue"]
