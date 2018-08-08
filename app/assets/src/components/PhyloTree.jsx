@@ -17,6 +17,7 @@ class PhyloTree extends React.Component {
         : [],
       show_create_button:
         !this.phylo_tree || (this.phylo_tree && this.phylo_tree.status == 2)
+      // there is no tree yet, or tree generation failed
     };
 
     this.createTree = this.createTree.bind(this);
@@ -43,24 +44,30 @@ class PhyloTree extends React.Component {
 
   createTree() {
     let pipeline_run_ids = this.state.selectedPipelineRunIds;
-    var that = this;
-    axios
-      .post(
-        `/phylo_trees/create?project_id=${this.project.id}&taxid=${
-          this.taxon.taxid
-        }&pipeline_run_ids=${pipeline_run_ids}`,
-        {
-          tax_level: this.taxon.tax_level,
-          tax_name: this.taxon.name,
-          authenticity_token: this.csrf
-        }
-      )
-      .then(res => {
-        that.setState({
-          show_create_button: !(res.data.status === "ok"),
-          status_message: res.data.message
-        });
+    if (pipeline_run_ids.length < 4) {
+      this.setState({
+        status_message: "ERROR: Need at least 4 samples to construct a tree"
       });
+    } else {
+      var that = this;
+      axios
+        .post(
+          `/phylo_trees/create?project_id=${this.project.id}&taxid=${
+            this.taxon.taxid
+          }&pipeline_run_ids=${pipeline_run_ids}`,
+          {
+            tax_level: this.taxon.tax_level,
+            tax_name: this.taxon.name,
+            authenticity_token: this.csrf
+          }
+        )
+        .then(res => {
+          that.setState({
+            show_create_button: !(res.data.status === "ok"),
+            status_message: res.data.message
+          });
+        });
+    }
   }
 
   render() {
@@ -70,7 +77,7 @@ class PhyloTree extends React.Component {
         <i>{this.project.name}</i>
       </h2>
     );
-    console.log(!!this.phylo_tree);
+    let tree_exists = !!this.phylo_tree;
     let sample_list = this.samples.map(function(s, i) {
       return (
         <div>
@@ -83,7 +90,7 @@ class PhyloTree extends React.Component {
             checked={
               this.state.selectedPipelineRunIds.indexOf(s.pipeline_run_id) >= 0
             }
-            disabled={!!this.phylo_tree}
+            disabled={tree_exists || s.taxid_nt_reads < 5}
           />
           <label htmlFor={s.pipeline_run_id}>
             {s.name} ({s.taxid_nt_reads} reads)
