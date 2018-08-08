@@ -151,4 +151,26 @@ class PhyloTree < ApplicationRecord
     end
     save
   end
+
+  def self.viewable(user)
+    if user.admin?
+      all
+    else
+      # user can see tree iff user can see all pipeline_runs
+      viewable_pipeline_run_ids = PipelineRun.where(sample_id: Sample.viewable(user).pluck(:id)).pluck(:id)
+      where("id not in (select phylo_tree_id
+                        from phylo_trees_pipeline_runs
+                        where pipeline_run_id not in #{viewable_pipeline_run_ids.join(',')})")
+    end
+  end
+
+  def self.editable(user)
+    if user.admin?
+      all
+    else
+      # user can edit tree iff user can see tree and user can edit project
+      editable_project_ids = Project.editable(user).pluck(:id)
+      viewable(user).where("project_id in (?)", editable_project_ids)
+    end
+  end
 end

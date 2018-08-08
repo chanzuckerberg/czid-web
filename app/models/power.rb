@@ -40,4 +40,16 @@ class Power
   power :updatable_project_samples do |project|
     Sample.editable(@user).where(project_id: project.id)
   end
+
+  power :phylo_trees do
+    PhyloTree.viewable(@user)
+  end
+
+  power :updatable_phylo_trees do
+    PhyloTree.editable(@user)
+  end
+
+  power destroyable_phylo_trees do
+    PhyloTree.editable(@user)
+  end
 end

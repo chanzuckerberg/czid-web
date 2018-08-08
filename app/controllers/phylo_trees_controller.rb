@@ -1,24 +1,47 @@
 class PhyloTreesController < ApplicationController
   before_action :authenticate_user!
-  before_action :login_required
-  before_action :set_project, except: :index
-  before_action :assert_access, only: :index
-  before_action :check_access
   before_action :no_demo_user, only: :create
 
+  ########################################
+  # Current logic for phylo_tree permissions:
+  # 1. index/show permissions are based on viewability of all the samples
+  #    that make up the tree.
+  # 2. create/edit permissions are based on
+  #    a. viewability of all the samles
+  #    b. the project the tree belongs to
+  #       (if 2 users belong to the same project, they are considered
+  #        collaborators and so they can both create/edit trees for the project).
+  # While project membership is used to confer create/edit permission,
+  # trees created for a project may in fact contain samples from outside
+  # the project. Such trees will be hidden from members of the project that do not
+  # have read access to all those samples.
+  ########################################
+
+  READ_ACTIONS = [:show].freeze
+  EDIT_ACTIONS = [:edit].freeze
+  OTHER_ACTIONS = [:create, :index].freeze
+
+  power :phylo_trees, map: { EDIT_ACTIONS => :updatable_phylo_trees }, as: :phylo_trees_scope
+
+  before_action :set_phylo_tree, only: READ_ACTIONS + EDIT_ACTIONS
+  before_action :assert_access, only: OTHER_ACTIONS
+  before_action :check_access
+
   def index
+    all_viewable_trees = current_power.phylo_trees
     project_id = params[:project_id]
     if project_id
       @project = current_power.projects.find(project_id)
-      @phylo_trees = PhyloTree.where(project_id: project_id.to_i)
+      @phylo_trees = all_viewable_trees.where(project_id: project_id.to_i)
     else
       @project = []
-      @phylo_trees = PhyloTree.where(project_id: current_power.projects.pluck(:id))
+      @phylo_trees = all_viewable_trees
     end
   end
 
   def show
     taxid = params[:taxid].to_i
+    @project = current_power.updatable_projects.find(params[:project_id])
 
     # Retrieve all pipeline runs in the specified project that contain the specified taxid.
     project_sample_ids = current_power.project_samples(@project).pluck(:id)
@@ -50,6 +73,7 @@ class PhyloTreesController < ApplicationController
 
     # Retrieve existing tree, if any.
     # Retrieve information about the taxon either from the existing tree or from a report.
+    @project = current_power.updatable_projects.find(params[:project_id])
     @phylo_tree = @project.phylo_trees.find_by(taxid: taxid).as_json(include: :pipeline_runs)
     if @phylo_tree
       taxon_name = @phylo_tree["tax_name"]
@@ -62,7 +86,11 @@ class PhyloTreesController < ApplicationController
     @taxon = { taxid: taxid, tax_level: tax_level, name: taxon_name }
   end
 
+  def edit
+  end
+
   def create
+    @project = current_power.updatable_projects.find(params[:project_id])
     taxid = params[:taxid].to_i
     tax_level = params[:tax_level].to_i
     tax_name = params[:tax_name]
@@ -85,8 +113,8 @@ class PhyloTreesController < ApplicationController
 
   private
 
-  def set_project
-    @project = current_power.updatable_projects.find(params[:project_id])
+  def set_phylo_tree
+    @phylo_tree = phylo_tree_scope.find(params[:id])
     assert_access
   end
 end
