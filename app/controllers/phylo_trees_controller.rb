@@ -26,10 +26,14 @@ class PhyloTreesController < ApplicationController
     @pipeline_runs = PipelineRun.top_completed_runs.where(sample_id: project_sample_ids).where(id: pipeline_run_ids_with_taxid)
 
     # Retrieve information for displaying the tree's sample list.
-    # Expose it as an array of hashes containing (a) sample name, (b) number of reads matching the specified taxid in NT
+    # Expose it as an array of hashes containing
+    # - sample name
+    # - pipeline run id to be used for the sample
+    # - number of reads matching the specified taxid in NT
     @samples = if @pipeline_runs.present?
                  Sample.connection.select_all("
                    select pipeline_run_ids_sample_names.name,
+                          pipeline_run_ids_sample_names.pipeline_run_id,
                           taxon_counts.count as taxid_nt_reads
                    from (select pipeline_runs.id as pipeline_run_id, samples.name
                          from pipeline_runs
@@ -46,10 +50,10 @@ class PhyloTreesController < ApplicationController
 
     # Retrieve existing tree, if any.
     # Retrieve information about the taxon either from the existing tree or from a report.
-    @phylo_tree = @project.phylo_trees.find_by(taxid: taxid)
+    @phylo_tree = @project.phylo_trees.find_by(taxid: taxid).as_json(include: :pipeline_runs)
     if @phylo_tree
-      taxon_name = @phylo_tree.tax_name
-      tax_level = @phylo_tree.tax_level
+      taxon_name = @phylo_tree["tax_name"]
+      tax_level = @phylo_tree["tax_level"]
     else
       example_taxon_count = @pipeline_runs.first.taxon_counts.find_by(tax_id: taxid)
       taxon_name = example_taxon_count.name

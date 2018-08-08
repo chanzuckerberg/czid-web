@@ -10,18 +10,39 @@ class PhyloTree extends React.Component {
     this.taxon = props.taxon;
     this.project = props.project;
     this.samples = props.samples;
-    this.pipeline_runs = props.pipeline_runs;
     this.phylo_tree = props.phylo_tree;
     this.state = {
+      selectedPipelineRunIds: this.phylo_tree
+        ? this.phylo_tree.pipeline_runs.map(pr => pr.id)
+        : [],
       show_create_button:
         !this.phylo_tree || (this.phylo_tree && this.phylo_tree.status == 2)
     };
 
     this.createTree = this.createTree.bind(this);
+    this.updatePipelineRunIdSelection = this.updatePipelineRunIdSelection.bind(
+      this
+    );
+  }
+
+  updatePipelineRunIdSelection(e) {
+    let PrId = e.target.getAttribute("data-pipeline-run-id");
+    let PrIdList = this.state.selectedPipelineRunIds;
+    let index = PrIdList.indexOf(+PrId);
+    if (e.target.checked) {
+      if (index < 0) {
+        PrIdList.push(+PrId);
+      }
+    } else {
+      if (index >= 0) {
+        PrIdList.splice(index, 1);
+      }
+    }
+    this.setState({ selectedPipelineRunIds: PrIdList });
   }
 
   createTree() {
-    let pipeline_run_ids = this.pipeline_runs.map(pr => pr.id);
+    let pipeline_run_ids = this.state.selectedPipelineRunIds;
     var that = this;
     axios
       .post(
@@ -49,11 +70,25 @@ class PhyloTree extends React.Component {
         <i>{this.project.name}</i>
       </h2>
     );
+    console.log(!!this.phylo_tree);
     let sample_list = this.samples.map(function(s, i) {
       return (
-        <p>
-          <Checkbox label="label" /> {s.name} ({s.taxid_nt_reads} reads)
-        </p>
+        <div>
+          <input
+            type="checkbox"
+            id={s.pipeline_run_id}
+            key={s.pipeline_run_id}
+            data-pipeline-run-id={s.pipeline_run_id}
+            onClick={this.updatePipelineRunIdSelection}
+            checked={
+              this.state.selectedPipelineRunIds.indexOf(s.pipeline_run_id) >= 0
+            }
+            disabled={!!this.phylo_tree}
+          />
+          <label htmlFor={s.pipeline_run_id}>
+            {s.name} ({s.taxid_nt_reads} reads)
+          </label>
+        </div>
       );
     }, this);
     return (
