@@ -16,12 +16,13 @@ class PipelineSampleTree extends React.PureComponent {
   }
 
   makeTree() {
-    let make_node = function(id, name, level) {
+    let make_node = function(id, name, scientific_name, level) {
       let data = {};
       for (let dataType of this.dataTypes) {
         data[dataType] = 0;
       }
       return {
+        scientific_name: scientific_name,
         name: name,
         level: level,
         children: [],
@@ -78,27 +79,28 @@ class PipelineSampleTree extends React.PureComponent {
       for (let j = 0; j < order.length; j += 1) {
         let level = order[j],
           taxon_id = row.lineage[level + "_taxid"],
-          name;
+          name,
+          scientific_name;
 
+        scientific_name = row.lineage[level + "_name"];
+        name = scientific_name;
         if (this.props.nameType == "Common name") {
           name = row.lineage[level + "_common_name"];
         }
 
-        if (!name) {
-          name = row.lineage[level + "_name"];
-        }
-
-        if (!name) {
+        if (!name && !scientific_name) {
           continue;
         }
 
         if (!nodes_by_id[taxon_id]) {
-          let node = make_node(taxon_id, name, level);
+          let node = make_node(taxon_id, name, scientific_name, level);
           tree.children.push(node);
           nodes_by_id[taxon_id] = node;
         }
 
         nodes_by_id[taxon_id].name = nodes_by_id[taxon_id].name || name;
+        nodes_by_id[taxon_id].scientific_name =
+          nodes_by_id[taxon_id].scientific_name || scientific_name;
         for (let dataType of this.dataTypes) {
           tree.data[dataType] += getValue(row, dataType);
         }
@@ -227,8 +229,9 @@ class TreeStructure extends React.PureComponent {
         node.children &&
         node.children.length
       ) {
+        const t = node._children;
         node._children = node.children;
-        node.children = null;
+        node.children = t;
       }
       if (!(node.children && node.children.length)) {
         leaf_count += 1;
@@ -366,7 +369,7 @@ class TreeStructure extends React.PureComponent {
       .append("circle")
       .attr("r", 1e-6)
       .on("click", d => {
-        let t = d.children;
+        const t = d.children;
         d.children = d._children;
         d._children = t;
         this.update(this.props, d);
@@ -384,7 +387,7 @@ class TreeStructure extends React.PureComponent {
         return d.children || d._children ? "end" : "start";
       })
       .text(function(d) {
-        return d.name;
+        return d.name || d.scientific_name;
       })
       .on("click", (d, e) => {
         this.props.onNodeTextClicked && this.props.onNodeTextClicked(d);
@@ -422,7 +425,14 @@ class TreeStructure extends React.PureComponent {
       return circleScale(d.weight);
     });
 
-    nodeUpdate.select("text").style("fill-opacity", 1);
+    nodeUpdate
+      .select("text")
+      .text(function(d) {
+        return d.name || d.scientific_name;
+      })
+      .style("fill-opacity", function(d) {
+        return d.name ? 1 : 0.5;
+      });
 
     nodes.forEach(function(d) {
       d.x0 = d.x;
