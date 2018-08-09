@@ -73,7 +73,8 @@ class PhyloTreesController < ApplicationController
   def show
     @project = current_power.projects.find(@phylo_tree.project_id)
     @samples = sample_details_json(PipelineRun.where(id: @phylo_tree.pipeline_run_ids), @phylo_tree.taxid)
-    @phylo_tree = @phylo_tree.as_json(include: :pipeline_runs)
+    @phylo_tree_augmented = @phylo_tree.as_json(include: :pipeline_runs)
+    @can_edit = current_power.updatable_phylo_tree?(@phylo_tree)
   end
 
   def retry

@@ -8,10 +8,11 @@ class PhyloTreeViz extends React.Component {
   constructor(props) {
     super();
     this.csrf = props.csrf;
+    this.can_edit = props.can_edit;
     this.phylo_tree = props.phylo_tree;
     this.createTreeViz = this.createTreeViz.bind(this);
     this.state = {
-      show_retry_button: this.phylo_tree.status == 2,
+      show_retry_button: this.can_edit && this.phylo_tree.status == 2,
       retry_message: ""
     };
     this.retryTree = this.retryTree.bind(this);

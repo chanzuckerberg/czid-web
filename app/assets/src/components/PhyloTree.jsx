@@ -9,6 +9,7 @@ class PhyloTree extends React.Component {
     this.csrf = props.csrf;
     this.project = props.project;
     this.samples = props.samples;
+    this.can_edit = props.can_edit;
     this.phylo_tree = props.phylo_tree;
     this.selectedPipelineRunIds = this.phylo_tree.pipeline_runs.map(
       pr => pr.id
@@ -48,7 +49,11 @@ class PhyloTree extends React.Component {
         <h3>Relevant samples:</h3>
         {tree_name}
         {sample_list}
-        <PhyloTreeViz csrf={this.csrf} phylo_tree={this.phylo_tree} />
+        <PhyloTreeViz
+          csrf={this.csrf}
+          can_edit={this.can_edit}
+          phylo_tree={this.phylo_tree}
+        />
       </div>
     );
   }
