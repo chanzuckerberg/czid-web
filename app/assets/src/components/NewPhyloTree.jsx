@@ -1,24 +1,20 @@
 import axios from "axios";
 import React from "react";
-import { Button, Checkbox, Input } from "semantic-ui-react";
-import PhyloTreeViz from "./PhyloTreeViz";
+import { Button, Input, Checkbox } from "semantic-ui-react";
 
-class PhyloTree extends React.Component {
+class NewPhyloTree extends React.Component {
   constructor(props) {
     super();
     this.csrf = props.csrf;
+    this.taxon = props.taxon;
     this.project = props.project;
     this.samples = props.samples;
-    this.phylo_tree = props.phylo_tree;
     this.state = {
-      selectedPipelineRunIds: this.phylo_tree
-        ? this.phylo_tree.pipeline_runs.map(pr => pr.id)
-        : [],
-      show_create_button:
-        !this.phylo_tree || (this.phylo_tree && this.phylo_tree.status == 2)
-      // there is no tree yet, or tree generation failed
+      selectedPipelineRunIds: []
     };
 
+    this.createTree = this.createTree.bind(this);
+    this.handleInputChange = this.handleInputChange.bind(this);
     this.updatePipelineRunIdSelection = this.updatePipelineRunIdSelection.bind(
       this
     );
@@ -44,14 +40,40 @@ class PhyloTree extends React.Component {
     this.setState({ [e.target.id]: value });
   }
 
+  createTree() {
+    let pipeline_run_ids = this.state.selectedPipelineRunIds;
+    if (pipeline_run_ids.length < 4) {
+      this.setState({
+        status_message: "ERROR: Need at least 4 samples to construct a tree"
+      });
+    } else {
+      var that = this;
+      axios
+        .post("/phylo_trees/create", {
+          name: this.state.treeName,
+          project_id: this.project.id,
+          taxid: this.taxon.taxid,
+          pipeline_run_ids: pipeline_run_ids,
+          tax_level: this.taxon.tax_level,
+          tax_name: this.taxon.name,
+          authenticity_token: this.csrf
+        })
+        .then(res => {
+          that.setState({
+            show_create_button: !(res.data.status === "ok"),
+            status_message: res.data.message
+          });
+        });
+    }
+  }
+
   render() {
     let title = (
       <h2>
-        Phylogenetic tree for <i>{this.phylo_tree.tax_name}</i> in project{" "}
+        Phylogenetic tree for <i>{this.taxon.name}</i> in project{" "}
         <i>{this.project.name}</i>
       </h2>
     );
-    let tree_exists = !!this.phylo_tree;
     let sample_list = this.samples.map(function(s, i) {
       return (
         <div>
@@ -64,7 +86,7 @@ class PhyloTree extends React.Component {
             checked={
               this.state.selectedPipelineRunIds.indexOf(s.pipeline_run_id) >= 0
             }
-            disabled={tree_exists || s.taxid_nt_reads < 5}
+            disabled={s.taxid_nt_reads < 5}
           />
           <label htmlFor={s.pipeline_run_id}>
             {s.name} ({s.taxid_nt_reads} reads)
@@ -77,7 +99,6 @@ class PhyloTree extends React.Component {
         id="treeName"
         placeholder="Name"
         onChange={this.handleInputChange}
-        disabled={tree_exists}
       />
     );
     return (
@@ -86,10 +107,13 @@ class PhyloTree extends React.Component {
         <h3>Relevant samples:</h3>
         {tree_name}
         {sample_list}
-        <PhyloTreeViz phylo_tree={this.phylo_tree} />
+        <Button primary onClick={this.createTree}>
+          Create Tree
+        </Button>
+        <p>{this.state.status_message}</p>
       </div>
     );
   }
 }
 
-export default PhyloTree;
+export default NewPhyloTree;

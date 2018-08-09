@@ -19,7 +19,7 @@ class PhyloTreesController < ApplicationController
 
   READ_ACTIONS = [:show].freeze
   EDIT_ACTIONS = [:retry].freeze
-  OTHER_ACTIONS = [:create, :index].freeze
+  OTHER_ACTIONS = [:new, :create, :index].freeze
 
   power :phylo_trees, map: { EDIT_ACTIONS => :updatable_phylo_trees }, as: :phylo_trees_scope
 
@@ -30,18 +30,23 @@ class PhyloTreesController < ApplicationController
   def index
     @project = []
     @phylo_trees = current_power.phylo_trees
+    @taxon = {}
 
     taxid = params[:taxid]
     project_id = params[:project_id]
 
     if project_id
       @project = current_power.projects.find(project_id)
-      @phylo_trees = @phylo_trees.where(project_id: project_id.to_i)
+      @phylo_trees = @phylo_trees.where(project_id: project_id)
     end
 
     if taxid
       @phylo_trees = @phylo_trees.where(taxid: taxid)
+      example_taxon_count = TaxonCount.where(tax_id: taxid).last
+      @taxon = { taxid: example_taxon_count.tax_id, name: example_taxon_count.name }
     end
+
+    @phylo_trees = @phylo_trees.as_json(include: :pipeline_runs)
   end
 
   def new
@@ -56,27 +61,7 @@ class PhyloTreesController < ApplicationController
     @pipeline_runs = PipelineRun.top_completed_runs.where(sample_id: project_sample_ids).where(id: pipeline_run_ids_with_taxid)
 
     # Retrieve information for displaying the tree's sample list.
-    # Expose it as an array of hashes containing
-    # - sample name
-    # - pipeline run id to be used for the sample
-    # - number of reads matching the specified taxid in NT
-    @samples = if @pipeline_runs.present?
-                 Sample.connection.select_all("
-                   select pipeline_run_ids_sample_names.name,
-                          pipeline_run_ids_sample_names.pipeline_run_id,
-                          taxon_counts.count as taxid_nt_reads
-                   from (select pipeline_runs.id as pipeline_run_id, samples.name
-                         from pipeline_runs
-                         inner join samples
-                         on pipeline_runs.sample_id = samples.id
-                         where pipeline_runs.id in (#{@pipeline_runs.pluck(:id).join(',')})) pipeline_run_ids_sample_names
-                   inner join taxon_counts
-                   on taxon_counts.pipeline_run_id = pipeline_run_ids_sample_names.pipeline_run_id
-                   where taxon_counts.tax_id = #{taxid} and taxon_counts.count_type = 'NT'
-                 ").to_hash
-               else
-                 []
-               end
+    @samples = sample_details_json(@pipeline_runs, taxid)
 
     # Retrieve information about the taxon
     example_taxon_count = @pipeline_runs.first.taxon_counts.find_by(tax_id: taxid)
@@ -86,6 +71,8 @@ class PhyloTreesController < ApplicationController
   end
 
   def show
+    @project = current_power.projects.find(@phylo_tree.project_id)
+    @samples = sample_details_json(PipelineRun.where(id: @phylo_tree.pipeline_run_ids), @phylo_tree.taxid)
     @phylo_tree = @phylo_tree.as_json(include: :pipeline_runs)
   end
 
@@ -106,7 +93,7 @@ class PhyloTreesController < ApplicationController
     tax_level = params[:tax_level].to_i
     tax_name = params[:tax_name]
 
-    pipeline_run_ids = params[:pipeline_run_ids].split(",").map(&:to_i)
+    pipeline_run_ids = params[:pipeline_run_ids].map(&:to_i)
     pt = PhyloTree.new(name: name, taxid: taxid, tax_level: tax_level, tax_name: tax_name, user_id: current_user.id, project_id: @project.id, pipeline_run_ids: pipeline_run_ids)
     if pt.save
       Resque.enqueue(KickoffPhyloTree, pt.id)
@@ -119,7 +106,29 @@ class PhyloTreesController < ApplicationController
   private
 
   def set_phylo_tree
-    @phylo_tree = phylo_tree_scope.find(params[:id])
+    @phylo_tree = phylo_trees_scope.find(params[:id])
     assert_access
+  end
+
+  def sample_details_json(pipeline_runs, taxid)
+    # Retrieve information for displaying the tree's sample list.
+    # Expose it as an array of hashes containing
+    # - sample name
+    # - pipeline run id to be used for the sample
+    # - number of reads matching the specified taxid in NT
+    return [] if pipeline_runs.blank?
+    Sample.connection.select_all("
+                   select pipeline_run_ids_sample_names.name,
+                          pipeline_run_ids_sample_names.pipeline_run_id,
+                          taxon_counts.count as taxid_nt_reads
+                   from (select pipeline_runs.id as pipeline_run_id, samples.name
+                         from pipeline_runs
+                         inner join samples
+                         on pipeline_runs.sample_id = samples.id
+                         where pipeline_runs.id in (#{pipeline_runs.pluck(:id).join(',')})) pipeline_run_ids_sample_names
+                   inner join taxon_counts
+                   on taxon_counts.pipeline_run_id = pipeline_run_ids_sample_names.pipeline_run_id
+                   where taxon_counts.tax_id = #{taxid} and taxon_counts.count_type = 'NT'
+    ").to_hash
   end
 end

@@ -49,7 +49,7 @@ class Power
     PhyloTree.editable(@user)
   end
 
-  power destroyable_phylo_trees do
+  power :destroyable_phylo_trees do
     PhyloTree.editable(@user)
   end
 end

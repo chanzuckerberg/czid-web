@@ -1,0 +1,11 @@
+<div id="NewPhyloTree_page">
+  <%= javascript_tag do %>
+    react_component('NewPhyloTree', {
+    csrf: '<%= form_authenticity_token %>',
+    taxon: JSON.parse('<%= raw escape_json(@taxon) %>'),
+    project: JSON.parse('<%= raw escape_json(@project) %>'),
+    samples: JSON.parse('<%= raw escape_json(@samples) %>')
+    }, 'NewPhyloTree_page');
+  <% end %>
+</div>
+\
