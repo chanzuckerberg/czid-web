@@ -259,21 +259,28 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     assert_equal "unauthorized", JSON.parse(@response.body)['status']
   end
 
-  # test 'joe can create phylo_tree to joe_project from public samples' do
-  #  post backgrounds_url, params: { name: 'new_name', sample_ids: [samples(:expired_sample).id, samples(:public_sample).id] }
-  #  resp = JSON.parse(@response.body)
-  #  assert_equal "ok", resp['status']
-  # end
+  test 'joe can create phylo_tree to joe_project from public samples' do
+    post "/phylo_trees/create", params: { name: 'new_phylo_tree', project_id: projects(:joe_project).id,
+                                          taxid: 1, pipeline_run_ids: [pipeline_runs(:public_project_sampleA_run).id,
+                                                                       pipeline_runs(:public_project_sampleB_run).id],
+                                          tax_level: 1, tax_name: 'some species' }
+    assert_equal "ok", JSON.parse(@response.body)['status']
+  end
 
-  # test 'joe can create phylo_tree to joe_project from samples in joe_project' do
-  #  post backgrounds_url, params: { name: 'new_name', sample_ids: [samples(:joe_project_sampleA).id, samples(:joe_project_sampleB).id] }
-  #  resp = JSON.parse(@response.body)
-  #  assert_equal "ok", resp['status']
-  # end
+  test 'joe can create phylo_tree to joe_project from samples in joe_project' do
+    post "/phylo_trees/create", params: { name: 'new_phylo_tree', project_id: projects(:joe_project).id,
+                                          taxid: 1, pipeline_run_ids: [pipeline_runs(:joe_project_sampleA_run).id,
+                                                                       pipeline_runs(:joe_project_sampleB_run).id],
+                                          tax_level: 1, tax_name: 'some species' }
+    assert_equal "ok", JSON.parse(@response.body)['status']
+  end
 
-  # test 'joe cannot create phylo_tree to public_project' do
-  #  post backgrounds_url, params: { name: 'new_name', sample_ids: [samples(:joe_project_sampleA).id, samples(:joe_project_sampleB).id] }
-  #  resp = JSON.parse(@response.body)
-  #  assert_equal "ok", resp['status']
-  # end
+  test 'joe cannot create phylo_tree to public_project' do
+    assert_raises(ActiveRecord::RecordNotFound) do
+      post "/phylo_trees/create", params: { name: 'new_phylo_tree', project_id: projects(:public_project).id,
+                                            taxid: 1, pipeline_run_ids: [pipeline_runs(:joe_project_sampleA_run).id,
+                                                                         pipeline_runs(:joe_project_sampleB_run).id],
+                                            tax_level: 1, tax_name: 'some species' }
+    end
+  end
 end
