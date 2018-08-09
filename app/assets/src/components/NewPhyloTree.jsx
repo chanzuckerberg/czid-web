@@ -9,8 +9,11 @@ class NewPhyloTree extends React.Component {
     this.taxon = props.taxon;
     this.project = props.project;
     this.samples = props.samples;
+    this.MIN_READS = 5;
     this.state = {
-      selectedPipelineRunIds: []
+      selectedPipelineRunIds: this.samples
+        .filter(s => s.taxid_nt_reads >= this.MIN_READS)
+        .map(s => s.pipeline_run_id)
     };
 
     this.createTree = this.createTree.bind(this);
@@ -86,7 +89,7 @@ class NewPhyloTree extends React.Component {
             checked={
               this.state.selectedPipelineRunIds.indexOf(s.pipeline_run_id) >= 0
             }
-            disabled={s.taxid_nt_reads < 5}
+            disabled={s.taxid_nt_reads < this.MIN_READS}
           />
           <label htmlFor={s.pipeline_run_id}>
             {s.name} ({s.taxid_nt_reads} reads)

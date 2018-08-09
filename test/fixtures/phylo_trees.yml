@@ -1,0 +1,7 @@
+one:
+  name: tree_one
+  project: one
+  taxid: 1
+  tax_level: 1
+  tax_name: 'some species'
+  pipeline_runs: [three, four]
