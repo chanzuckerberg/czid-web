@@ -1,4 +1,5 @@
 import { Button as BaseButton } from "semantic-ui-react";
+import { forbidExtraProps } from "airbnb-prop-types";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -33,7 +34,7 @@ const Button = ({
   );
 };
 
-Button.propTypes = {
+Button.propTypes = forbidExtraProps({
   disabled: PropTypes.bool,
   icon: PropTypes.element,
   onClick: PropTypes.func,
@@ -41,6 +42,6 @@ Button.propTypes = {
   primary: PropTypes.bool,
   secondary: PropTypes.bool,
   type: PropTypes.string
-};
+});
 
 export default Button;
