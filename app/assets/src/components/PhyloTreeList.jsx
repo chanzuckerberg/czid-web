@@ -2,13 +2,15 @@ import React from "react";
 class PhyloTreeList extends React.Component {
   constructor(props) {
     super();
+    this.taxon = props.taxon;
     this.project = props.project;
     this.phylo_trees = props.phylo_trees;
   }
   render() {
-    let title = this.project.name
-      ? 'Existing trees for project "' + this.project.name + '":'
-      : "Existing trees:";
+    let title = "Existing trees"
+    if (this.taxon.name) { title += " for " + this.taxon.name + " (taxon ID " + this.taxon.taxid + ")"}
+    if (this.project.name) { title += " in project " + this.project.name }
+    title += ":"
     return (
       <div>
         <h2>{title}</h2>
@@ -18,19 +20,22 @@ class PhyloTreeList extends React.Component {
               return (
                 <p key={`tree_${i}`}>
                   <a
-                    href={`/phylo_trees/show?project_id=${
-                      tree.project_id
-                    }&taxid=${tree.taxid}`}
+                    href={`/phylo_trees/${tree.id}`}
                   >
-                    {tree.tax_name} (taxon ID: {tree.taxid})
+                    {tree.name}
                   </a>
                 </p>
               );
             })}
         <p>
           <b>
-            You can create trees by clicking on the tree icon next to a taxon on
-            a sample's report page.
+            { this.project.id && this.taxon.taxid ?
+                <a href={`/phylo_trees/new?project_id=${this.project.id}&taxid=${this.taxon.taxid}`}>
+                  New tree
+                </a>
+                : "You can create new trees by clicking on the tree icon next to a taxon on
+                   a sample's report page."
+            }
           </b>
         </p>
       </div>

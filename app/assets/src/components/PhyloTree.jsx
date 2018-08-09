@@ -42,6 +42,10 @@ class PhyloTree extends React.Component {
     this.setState({ selectedPipelineRunIds: PrIdList });
   }
 
+  handleNameChange(e, { name, value }) {
+    this.setState({ [e.target.id]: value });
+  }
+
   createTree() {
     let pipeline_run_ids = this.state.selectedPipelineRunIds;
     if (pipeline_run_ids.length < 4) {
@@ -52,7 +56,7 @@ class PhyloTree extends React.Component {
       var that = this;
       axios
         .post(
-          `/phylo_trees/create?project_id=${this.project.id}&taxid=${
+          `/phylo_trees/create?name=${this.state.treeName}&project_id=${this.project.id}&taxid=${
             this.taxon.taxid
           }&pipeline_run_ids=${pipeline_run_ids}`,
           {
@@ -98,6 +102,15 @@ class PhyloTree extends React.Component {
         </div>
       );
     }, this);
+    let tree_name = (
+      <Form.TextArea
+        autoHeight
+        rows=1
+        id="treeName"
+        onChange={this.handleNameChange}
+        disabled={tree_exists}
+      />
+    );
     return (
       <div>
         {title}

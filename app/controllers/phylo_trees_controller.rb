@@ -18,7 +18,7 @@ class PhyloTreesController < ApplicationController
   ########################################
 
   READ_ACTIONS = [:show].freeze
-  EDIT_ACTIONS = [:edit].freeze
+  EDIT_ACTIONS = [:retry].freeze
   OTHER_ACTIONS = [:create, :index].freeze
 
   power :phylo_trees, map: { EDIT_ACTIONS => :updatable_phylo_trees }, as: :phylo_trees_scope
@@ -28,20 +28,27 @@ class PhyloTreesController < ApplicationController
   before_action :check_access
 
   def index
-    all_viewable_trees = current_power.phylo_trees
+    @project = []
+    @phylo_trees = current_power.phylo_trees
+
+    taxid = params[:taxid]
     project_id = params[:project_id]
+
     if project_id
       @project = current_power.projects.find(project_id)
-      @phylo_trees = all_viewable_trees.where(project_id: project_id.to_i)
-    else
-      @project = []
-      @phylo_trees = all_viewable_trees
+      @phylo_trees = @phylo_trees.where(project_id: project_id.to_i)
+    end
+
+    if taxid
+      @phylo_trees = @phylo_trees.where(taxid: taxid)
     end
   end
 
-  def show
+  def new
     taxid = params[:taxid].to_i
-    @project = current_power.updatable_projects.find(params[:project_id])
+    project_id = params[:project_id].to_i
+
+    @project = current_power.updatable_projects.find(project_id)
 
     # Retrieve all pipeline runs in the specified project that contain the specified taxid.
     project_sample_ids = current_power.project_samples(@project).pluck(:id)
@@ -71,43 +78,41 @@ class PhyloTreesController < ApplicationController
                  []
                end
 
-    # Retrieve existing tree, if any.
-    # Retrieve information about the taxon either from the existing tree or from a report.
-    @project = current_power.updatable_projects.find(params[:project_id])
-    @phylo_tree = @project.phylo_trees.find_by(taxid: taxid).as_json(include: :pipeline_runs)
-    if @phylo_tree
-      taxon_name = @phylo_tree["tax_name"]
-      tax_level = @phylo_tree["tax_level"]
-    else
-      example_taxon_count = @pipeline_runs.first.taxon_counts.find_by(tax_id: taxid)
-      taxon_name = example_taxon_count.name
-      tax_level = example_taxon_count.tax_level
-    end
+    # Retrieve information about the taxon
+    example_taxon_count = @pipeline_runs.first.taxon_counts.find_by(tax_id: taxid)
+    taxon_name = example_taxon_count.name
+    tax_level = example_taxon_count.tax_level
     @taxon = { taxid: taxid, tax_level: tax_level, name: taxon_name }
   end
 
-  def edit
+  def show
+    @phylo_tree = @phylo_tree.as_json(include: :pipeline_runs)
+  end
+
+  def retry
+    if @phylo_tree.status == PhyloTree::STATUS_FAILED
+      @phylo_tree.update(status: PhyloTree::STATUS_INITIALIZED)
+      Resque.enqueue(KickoffPhyloTree, @phylo_tree.id)
+      render json: { status: :ok, message: "retry submitted" }
+    else
+      render json: { status: :conflict, message: "a tree run is already in progress for this project and taxon" }
+    end
   end
 
   def create
     @project = current_power.updatable_projects.find(params[:project_id])
+    name = params[:name]
     taxid = params[:taxid].to_i
     tax_level = params[:tax_level].to_i
     tax_name = params[:tax_name]
-    existing_tree = @project.phylo_trees.find_by(taxid: taxid)
-    if existing_tree.present?
-      if existing_tree.status == PhyloTree::STATUS_FAILED
-        existing_tree.update(status: PhyloTree::STATUS_INITIALIZED)
-        Resque.enqueue(KickoffPhyloTree, existing_tree.id) # retry
-        render json: { status: :ok, message: "retry submitted" }
-      else
-        render json: { status: :conflict, message: "a tree run is already in progress for this project and taxon" }
-      end
-    else
-      pipeline_run_ids = params[:pipeline_run_ids].split(",").map(&:to_i)
-      pt = PhyloTree.create(taxid: taxid, tax_level: tax_level, tax_name: tax_name, user_id: current_user.id, project_id: @project.id, pipeline_run_ids: pipeline_run_ids)
+
+    pipeline_run_ids = params[:pipeline_run_ids].split(",").map(&:to_i)
+    pt = PhyloTree.new(name: name, taxid: taxid, tax_level: tax_level, tax_name: tax_name, user_id: current_user.id, project_id: @project.id, pipeline_run_ids: pipeline_run_ids)
+    if pt.save
       Resque.enqueue(KickoffPhyloTree, pt.id)
       render json: { status: :ok, message: "tree creation job submitted" }
+    else
+      render json: { status: :not_acceptable, message: pt.errors.full_messages }
     end
   end
 
