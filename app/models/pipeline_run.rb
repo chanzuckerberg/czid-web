@@ -911,4 +911,8 @@ class PipelineRun < ApplicationRecord
     end
     ret
   end
+
+  def self.viewable(user)
+    where(sample_id: Sample.viewable(user).pluck(:id))
+  end
 end

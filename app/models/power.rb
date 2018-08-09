@@ -52,4 +52,8 @@ class Power
   power :destroyable_phylo_trees do
     PhyloTree.editable(@user)
   end
+
+  power :pipeline_runs do
+    PipelineRun.viewable(@user)
+  end
 end

@@ -88,18 +88,27 @@ class PhyloTreesController < ApplicationController
 
   def create
     @project = current_power.updatable_projects.find(params[:project_id])
+    pipeline_run_ids = params[:pipeline_run_ids].map(&:to_i)
+
     name = params[:name]
     taxid = params[:taxid].to_i
     tax_level = params[:tax_level].to_i
     tax_name = params[:tax_name]
 
-    pipeline_run_ids = params[:pipeline_run_ids].map(&:to_i)
-    pt = PhyloTree.new(name: name, taxid: taxid, tax_level: tax_level, tax_name: tax_name, user_id: current_user.id, project_id: @project.id, pipeline_run_ids: pipeline_run_ids)
-    if pt.save
-      Resque.enqueue(KickoffPhyloTree, pt.id)
-      render json: { status: :ok, message: "tree creation job submitted" }
+    non_viewable_pipeline_run_ids = pipeline_run_ids.to_set - current_power.pipeline_runs.pluck(:id).to_set
+    if !non_viewable_pipeline_run_ids.empty?
+      render json: {
+        status: :unauthorized,
+        message: "You are not authorized to view all pipeline runs in the list."
+      }
     else
-      render json: { status: :not_acceptable, message: pt.errors.full_messages }
+      pt = PhyloTree.new(name: name, taxid: taxid, tax_level: tax_level, tax_name: tax_name, user_id: current_user.id, project_id: @project.id, pipeline_run_ids: pipeline_run_ids)
+      if pt.save
+        Resque.enqueue(KickoffPhyloTree, pt.id)
+        render json: { status: :ok, message: "tree creation job submitted" }
+      else
+        render json: { status: :not_acceptable, message: pt.errors.full_messages }
+      end
     end
   end
 
