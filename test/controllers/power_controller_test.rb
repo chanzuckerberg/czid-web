@@ -250,6 +250,26 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
   end
 
   # phylo_trees
+  test 'joe can see joe_phylo_tree' do
+    get "/phylo_trees/show?id=#{phylo_trees(:joe_phylo_tree).id}"
+    assert_response :success
+  end
+
+  test 'joe can see public_phylo_tree' do
+    get "/phylo_trees/show?id=#{phylo_trees(:public_phylo_tree).id}"
+    assert_response :success
+  end
+
+  test 'joe cannot retry public_phylo_tree' do
+    assert_raises(ActiveRecord::RecordNotFound) do
+      post "/phylo_trees/retry?id=#{phylo_trees(:public_phylo_tree).id}"
+    end
+  end
+
+  test 'joe can retry joe_failed_phylo_tree' do
+    post "/phylo_trees/retry?id=#{phylo_trees(:joe_failed_phylo_tree).id}"
+    assert_equal "ok", JSON.parse(@response.body)['status']
+  end
 
   test 'joe cannot create phylo_tree from pipeline_runs he cannot view' do
     entrypoint_taxon_count = taxon_counts(:three)

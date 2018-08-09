@@ -1,13 +1,20 @@
 import axios from "axios";
 import d3 from "d3";
+import { Button } from "semantic-ui-react";
 import phylotree from "phylotree";
 import React from "react";
 
 class PhyloTreeViz extends React.Component {
   constructor(props) {
     super();
+    this.csrf = props.csrf;
     this.phylo_tree = props.phylo_tree;
     this.createTreeViz = this.createTreeViz.bind(this);
+    this.state = {
+      show_retry_button: this.phylo_tree.status == 2,
+      retry_message: ""
+    };
+    this.retryTree = this.retryTree.bind(this);
   }
 
   componentDidMount() {
@@ -32,6 +39,20 @@ class PhyloTreeViz extends React.Component {
       // layout and render the tree
     }
   }
+  retryTree() {
+    var that = this;
+    axios
+      .post("/phylo_trees/retry", {
+        id: this.phylo_tree.id,
+        authenticity_token: this.csrf
+      })
+      .then(res => {
+        that.setState({
+          show_retry_button: !(res.data.status === "ok"),
+          retry_message: res.data.message
+        });
+      });
+  }
 
   render() {
     let status_display, newick, tree;
@@ -47,6 +68,11 @@ class PhyloTreeViz extends React.Component {
           status_display = "TREE GENERATION IN PROGRESS";
       }
     }
+    let retry_button = (
+      <Button primary onClick={this.retryTree}>
+        Retry
+      </Button>
+    );
     let tree_svg =
       this.phylo_tree && this.phylo_tree.newick ? (
         <svg ref={node => (this.node = node)} />
@@ -54,6 +80,8 @@ class PhyloTreeViz extends React.Component {
     return (
       <div>
         <p>{status_display}</p>
+        {this.state.show_retry_button ? retry_button : null}
+        {this.state.retry_message}
         {tree_svg}
       </div>
     );

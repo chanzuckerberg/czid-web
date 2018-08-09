@@ -10,38 +10,9 @@ class PhyloTree extends React.Component {
     this.project = props.project;
     this.samples = props.samples;
     this.phylo_tree = props.phylo_tree;
-    this.state = {
-      selectedPipelineRunIds: this.phylo_tree
-        ? this.phylo_tree.pipeline_runs.map(pr => pr.id)
-        : [],
-      show_create_button:
-        !this.phylo_tree || (this.phylo_tree && this.phylo_tree.status == 2)
-      // there is no tree yet, or tree generation failed
-    };
-
-    this.updatePipelineRunIdSelection = this.updatePipelineRunIdSelection.bind(
-      this
+    this.selectedPipelineRunIds = this.phylo_tree.pipeline_runs.map(
+      pr => pr.id
     );
-  }
-
-  updatePipelineRunIdSelection(e) {
-    let PrId = e.target.getAttribute("data-pipeline-run-id");
-    let PrIdList = this.state.selectedPipelineRunIds;
-    let index = PrIdList.indexOf(+PrId);
-    if (e.target.checked) {
-      if (index < 0) {
-        PrIdList.push(+PrId);
-      }
-    } else {
-      if (index >= 0) {
-        PrIdList.splice(index, 1);
-      }
-    }
-    this.setState({ selectedPipelineRunIds: PrIdList });
-  }
-
-  handleInputChange(e, { name, value }) {
-    this.setState({ [e.target.id]: value });
   }
 
   render() {
@@ -51,7 +22,6 @@ class PhyloTree extends React.Component {
         <i>{this.project.name}</i>
       </h2>
     );
-    let tree_exists = !!this.phylo_tree;
     let sample_list = this.samples.map(function(s, i) {
       return (
         <div>
@@ -60,11 +30,10 @@ class PhyloTree extends React.Component {
             id={s.pipeline_run_id}
             key={s.pipeline_run_id}
             data-pipeline-run-id={s.pipeline_run_id}
-            onClick={this.updatePipelineRunIdSelection}
             checked={
-              this.state.selectedPipelineRunIds.indexOf(s.pipeline_run_id) >= 0
+              this.selectedPipelineRunIds.indexOf(s.pipeline_run_id) >= 0
             }
-            disabled={tree_exists || s.taxid_nt_reads < 5}
+            disabled
           />
           <label htmlFor={s.pipeline_run_id}>
             {s.name} ({s.taxid_nt_reads} reads)
@@ -72,21 +41,14 @@ class PhyloTree extends React.Component {
         </div>
       );
     }, this);
-    let tree_name = (
-      <Input
-        id="treeName"
-        placeholder="Name"
-        onChange={this.handleInputChange}
-        disabled={tree_exists}
-      />
-    );
+    let tree_name = <Input id="treeName" placeholder="Name" disabled />;
     return (
       <div>
         {title}
         <h3>Relevant samples:</h3>
         {tree_name}
         {sample_list}
-        <PhyloTreeViz phylo_tree={this.phylo_tree} />
+        <PhyloTreeViz csrf={this.csrf} phylo_tree={this.phylo_tree} />
       </div>
     );
   }

@@ -5,3 +5,28 @@ one:
   tax_level: 1
   tax_name: 'some species'
   pipeline_runs: [three, four]
+
+joe_phylo_tree:
+  name: joe_phylo_tree
+  project: joe_project
+  taxid: 1
+  tax_level: 1
+  tax_name: 'some species'
+  pipeline_runs: [joe_project_sampleA_run, joe_project_sampleB_run]
+
+joe_failed_phylo_tree:
+  name: joe_failed_phylo_tree
+  project: joe_project
+  status: 2
+  taxid: 1
+  tax_level: 1
+  tax_name: 'some species'
+  pipeline_runs: [joe_project_sampleA_run, joe_project_sampleB_run]
+
+public_phylo_tree:
+  name: public_phylo_tree
+  project: public_project
+  taxid: 1
+  tax_level: 1
+  tax_name: 'some species'
+  pipeline_runs: [public_project_sampleA_run, public_project_sampleB_run]

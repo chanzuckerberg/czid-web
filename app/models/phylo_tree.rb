@@ -160,7 +160,7 @@ class PhyloTree < ApplicationRecord
       viewable_pipeline_run_ids = PipelineRun.viewable(user).pluck(:id)
       where("id not in (select phylo_tree_id
                         from phylo_trees_pipeline_runs
-                        where pipeline_run_id not in #{viewable_pipeline_run_ids.join(',')})")
+                        where pipeline_run_id not in (#{viewable_pipeline_run_ids.join(',')}))")
     end
   end
 
