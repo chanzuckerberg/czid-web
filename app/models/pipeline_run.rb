@@ -30,11 +30,14 @@ class PipelineRun < ApplicationRecord
   PIPELINE_VERSION_FILE = "pipeline_version.txt".freeze
   STATS_JSON_NAME = "stats.json".freeze
   ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
-  AMR_OUTPUT_NAME = 'output__fullgenes__ARGannot_r2__results.txt'.freeze
+  AMR_DRUG_SUMMARY_RESULTS = 'amr_summary_results.csv'.freeze
+  AMR_FULL_RESULTS_NAME = 'amr_processed_results.csv'.freeze
   TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined.json'.freeze
   ASSEMBLY_STATUSFILE = 'job-complete'.freeze
   LOCAL_JSON_PATH = '/app/tmp/results_json'.freeze
-  LOCAL_TXT_PATH = '/app/tmp/results_txt'.freeze
+  LOCAL_AMR_FULL_RESULTS_PATH = '/app/tmp/amr_full_results'.freeze
+  # Note -- not currently being used, but leaving here for reference
+  LOCAL_AMR_DRUG_SUMMARY_PATH = '/app/tmp/amr_drug_summary_txt'.freeze
   PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
 
   # The PIPELINE MONITOR is responsible for keeping status of AWS Batch jobs
@@ -217,6 +220,13 @@ class PipelineRun < ApplicationRecord
       job_command_func: 'postprocess_command'
     )
 
+    # Experimental Stage
+    run_stages << PipelineRunStage.new(
+      step_number: 4,
+      name: PipelineRunStage::EXPT_STAGE_NAME,
+      job_command_func: 'experimental_command'
+    )
+
     self.pipeline_run_stages = run_stages
   end
 
@@ -249,7 +259,7 @@ class PipelineRun < ApplicationRecord
     prs.save
     self.finalized = 0
     self.results_finalized = IN_PROGRESS
-    ouput_states.each { |o| o.update(state: STATUS_UNKNOWN) if o.state != STATUS_LOADED }
+    output_states.each { |o| o.update(state: STATUS_UNKNOWN) if o.state != STATUS_LOADED }
     save
   end
 
@@ -290,28 +300,47 @@ class PipelineRun < ApplicationRecord
     update(total_ercc_reads: ercc_counts_array.map { |entry| entry[:count] }.sum)
   end
 
-  def download_amr_results
-    amr_s3_path = "#{host_filter_output_s3_path}/#{AMR_OUTPUT_NAME}"
-    amr_results = PipelineRun.download_file(amr_s3_path, local_txt_path)
-    amr_results
-  end
-
   def db_load_amr_counts
-    amr_results = download_amr_results
+    # test files: "s3://idseq-database/test/AMR/amr_processed_results.csv", "s3://idseq-database/test/AMR/amr_summary_results.csv"
+    amr_results = PipelineRun.download_file(s3_file_for("amr_full_results"), local_amr_full_results_path)
     unless File.zero?(amr_results)
       amr_counts_array = []
       # First line of output file has header titles, e.g. "Sample/Gene/Allele..." that are extraneous
       # that we drop
-      File.readlines(amr_results).drop(1).each do |amr_result|
-        # Drop Sample ID and DB attributes from amr_result row as we don't need to display those
-        amr_result_fields = amr_result.split("\t").drop(2)
+      File.readlines(amr_lev1_results).drop(1).each do |amr_result|
+        amr_result_fields = amr_result.split(",").drop(2)
+        Rails.logger.info(amr_result_fields)
+        # TO DO: Can remove level, drug_gene_hits, drug_gene_coverage, drug_gene_depth as
+        # these are being summarized
         amr_counts_array << { gene: amr_result_fields[0],
                               allele: amr_result_fields[1],
                               coverage: amr_result_fields[2],
-                              depth:  amr_result_fields[3] }
+                              depth:  amr_result_fields[3],
+                              drug_family: amr_result_fields[12],
+                              drug_gene_hits: amr_result_fields[13],
+                              drug_gene_coverage: amr_result_fields[14],
+                              drug_gene_depth: amr_result_fields[15],
+                              level: 1 }
       end
       update(amr_counts_attributes: amr_counts_array)
     end
+    # TODO: remove this, for now is a helpful debug statement
+    Rails.logger.info(summarize_amr_drug_family_counts)
+  end
+
+  def summarize_amr_drug_family_counts
+    summary = AmrCount.connection.execute(
+      " SELECT
+          drug_family,
+          COUNT(drug_family),
+          SUM(coverage),
+          SUM(depth)
+        FROM  amr_counts
+        WHERE pipeline_run_id = #{id}
+        GROUP BY drug_family
+      "
+    ).as_json
+    summary
   end
 
   def taxon_counts_json_name
@@ -388,12 +417,13 @@ class PipelineRun < ApplicationRecord
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_byteranges_path}")
   end
 
+  # TODO: modify a lot for the amr_counts case
   def s3_file_for(output)
     case output
     when "ercc_counts"
       "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
-    when "amr_counts"
-      "#{host_filter_output_s3_path}/#{AMR_OUTPUT_NAME}"
+    when "amr_full_results"
+      "#{expt_output_s3_path}/#{AMR_FULL_RESULTS_NAME}"
     when "taxon_counts"
       "#{alignment_output_s3_path}/#{taxon_counts_json_name}"
     when "taxon_byteranges"
@@ -628,8 +658,12 @@ class PipelineRun < ApplicationRecord
     "#{LOCAL_JSON_PATH}/#{id}"
   end
 
-  def local_txt_path
-    "#{LOCAL_TXT_PATH}/#{id}"
+  def local_amr_full_results_path
+    "#{LOCAL_AMR_FULL_RESULTS_PATH}/#{id}"
+  end
+
+  def local_amr_drug_summary_path
+    "#{LOCAL_AMR_DRUG_SUMMARY_PATH}/#{id}"
   end
 
   def self.download_file_with_retries(s3_path, destination_dir, max_tries)
@@ -801,6 +835,13 @@ class PipelineRun < ApplicationRecord
   end
 
   delegate :sample_output_s3_path, to: :sample
+
+  def expt_output_s3_path
+    pipeline_ver_str = ""
+    pipeline_ver_str = "#{pipeline_version}/" if pipeline_version
+    result = "#{sample.sample_expt_s3_path}/#{pipeline_ver_str}#{subsample_suffix}"
+    result.chomp("/")
+  end
 
   def postprocess_output_s3_path
     pipeline_ver_str = ""

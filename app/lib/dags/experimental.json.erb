@@ -1,0 +1,32 @@
+{
+  "output_dir_s3":
+    "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/expt",
+  "targets": {
+    <% if @attribute_dict[:fastq2] %>
+      "fastqs": ["<%= @attribute_dict[:fastq1] %>", "<%= @attribute_dict[:fastq2] %>"],
+      "srst2_out": ["output.log", "output__genes__ARGannot_r2__results.txt", "output__fullgenes__ARGannot_r2__results.txt", "amr_processed_results.csv", "amr_summary_results.csv"]
+    <% else %>
+      "fastqs": ["<%= @attribute_dict[:fastq1] %>"],
+      "srst2_out": ["output.log", "output__genes__ARGannot_r2__results.txt", "output__fullgenes__ARGannot_r2__results.txt", "amr_processed_results.csv", "amr_summary_results.csv"]
+    <% end %>
+  },
+  "steps": [
+    {
+      "in": ["fastqs"],
+      "out": "srst2_out",
+      "class": "PipelineStepRunSRST2",
+      "module": "idseq_dag.steps.run_srst2",
+      "additional_files": {"resist_gene_db": "s3://idseq-database/test/AMR/ARGannot_r2.fasta"},
+      "additional_attributes": {
+        "min_cov": 0,
+        "n_threads": 16,
+        "file_type": "<%= @attribute_dict[:file_type] %>"
+      }
+    }
+  ],
+  "given_targets": {
+    "fastqs": {
+      "s3_dir": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/fastqs"
+    }
+  }
+}

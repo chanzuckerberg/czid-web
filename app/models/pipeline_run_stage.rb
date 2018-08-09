@@ -21,6 +21,7 @@ class PipelineRunStage < ApplicationRecord
   HOST_FILTERING_STAGE_NAME = 'Host Filtering'.freeze
   ALIGNMENT_STAGE_NAME = 'GSNAPL/RAPSEARCH alignment'.freeze
   POSTPROCESS_STAGE_NAME = 'Post Processing'.freeze
+  EXPT_STAGE_NAME = "Experimental".freeze
 
   # Max number of times we resubmit a job when it gets killed by EC2.
   MAX_RETRIES = 5
@@ -211,5 +212,34 @@ class PipelineRunStage < ApplicationRecord
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
     # Dispatch job with himem number of vCPUs and to the himem queue.
     aegea_batch_submit_command(batch_command, vcpus: Sample::DEFAULT_VCPUS_HIMEM, job_queue: Sample::DEFAULT_QUEUE_HIMEM)
+  end
+
+  def experimental_command
+    # Upload DAG to S3
+    sample = pipeline_run.sample
+    file_type = sample.fasta_input? ? 'fasta' : 'fastq'
+    attribute_dict = {
+      fastq1: sample.input_files[0].name,
+      file_type: file_type
+    }
+    attribute_dict[:fastq2] = sample.input_files[1].name if sample.input_files[1]
+    dag_commands = prepare_dag("experimental", attribute_dict)
+
+    upload_version = "idseq_dag --version | cut -f2 -d ' ' | aws s3 cp  - #{pipeline_run.pipeline_version_file} "
+    batch_command = [install_pipeline, upload_version, dag_commands].join("; ")
+
+    # Dispatch job
+    memory = sample.sample_memory.present? ? sample.sample_memory : Sample::DEFAULT_MEMORY_IN_MB
+    aegea_batch_submit_command(batch_command, memory)
+  end
+
+  def assembly_command
+    # TODO: Change the following to DAG
+    batch_command_env_variables = "ALIGNMENT_S3_PATH=#{pipeline_run.alignment_output_s3_path} " \
+      "POSTPROCESS_S3_PATH=#{pipeline_run.postprocess_output_s3_path} " \
+      "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} "
+    batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline assembly"
+    "aegea batch submit --command=\"#{batch_command}\" " \
+      " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --ecr-image idseq_dag --memory 60000 --queue idseq_assembly --vcpus 32 --job-role idseq-pipeline "
   end
 end

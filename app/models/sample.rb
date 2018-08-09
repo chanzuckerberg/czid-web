@@ -292,6 +292,10 @@ class Sample < ApplicationRecord
     "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/postprocess"
   end
 
+  def sample_expt_s3_path
+    "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/expt"
+  end
+
   def annotated_fasta_s3_path
     pr = pipeline_runs.first
     return "#{pr.output_s3_path_with_version}/#{DAG_ANNOTATED_FASTA_BASENAME}" if pr.pipeline_version && pr.pipeline_version.to_f >= 2.0
