@@ -1,17 +1,19 @@
 const path = require("path");
-const extractTextPlugin = require("extract-text-webpack-plugin");
-
-const extractPlugin = new extractTextPlugin({
-  filename: "dist/bundle.min.css"
-});
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 const config = {
+  plugins: [
+    new MiniCssExtractPlugin({
+      filename: "dist/bundle.min.css"
+    })
+  ],
+  mode: "development",
   entry: `${path.resolve(__dirname, "app/assets/src/")}/index.js`,
   output: {
     path: path.resolve(__dirname, "app/assets/"),
     filename: "dist/bundle.min.js"
   },
-  devtool: "cheap-module-eval-source-map",
+  devtool: "source-map",
   target: "web",
   resolve: {
     extensions: [".js", ".jsx"]
@@ -30,11 +32,24 @@ const config = {
       },
       {
         // sass / scss loader for webpack
-        test: /\.(sass|css|scss)$/,
-        loader: extractTextPlugin.extract({
-          fallback: "style-loader",
-          use: 'css-loader?{"minimize":true}!sass-loader'
-        })
+        test: /\.(sa|sc|c)ss$/,
+        use: [
+          MiniCssExtractPlugin.loader,
+          {
+            loader: "css-loader",
+            options: {
+              minimize: true,
+              sourceMap: true
+            }
+          },
+          {
+            loader: "sass-loader",
+            options: {
+              minimize: true,
+              sourceMap: true
+            }
+          }
+        ]
       },
       {
         test: /\.(png|eot|ttf|svg)$/,
@@ -61,8 +76,7 @@ const config = {
         }
       }
     ]
-  },
-  plugins: [extractPlugin]
+  }
 };
 
 module.exports = config;

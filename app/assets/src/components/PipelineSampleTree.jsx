@@ -1,6 +1,6 @@
 import React from "react";
 import d3, { event as currentEvent } from "d3";
-import LabeledDropdown from "./modules/LabeledDropdown";
+import Dropdown from "./ui/controls/dropdowns/Dropdown";
 import numberWithCommas from "../helpers/strings";
 
 class PipelineSampleTree extends React.PureComponent {
@@ -163,7 +163,7 @@ class PipelineSampleTree extends React.PureComponent {
     }
 
     return (
-      <LabeledDropdown
+      <Dropdown
         className={"data-type-chooser"}
         options={options}
         onChange={this._updateDataType}
