@@ -1834,10 +1834,8 @@ class BackgroundModal extends React.Component {
             )}
             {this.renderSampleList()}
             <div className="background-button-section">
-              <PrimaryButton type="submit">Create</PrimaryButton>
-              <SecondaryButton onClick={this.handleClose}>
-                Cancel
-              </SecondaryButton>
+              <PrimaryButton text="Create" type="submit" />
+              <SecondaryButton text="Cancel" onClick={this.handleClose} />
             </div>
           </Form>
           {background_creation_response.status === "ok" ? (
