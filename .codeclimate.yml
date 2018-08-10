@@ -2,9 +2,9 @@ version: "2"         # required to adjust maintainability checks
 checks:
   method-lines:
     config:
-      threshold: 50
+      threshold: 80
   similar-code:
     config:
-      threshold: 50
+      threshold: 60
 
         
