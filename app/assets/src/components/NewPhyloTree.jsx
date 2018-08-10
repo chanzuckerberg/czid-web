@@ -107,7 +107,6 @@ class NewPhyloTree extends React.Component {
     return (
       <div>
         {title}
-        <h3>Relevant samples:</h3>
         {tree_name}
         {sample_list}
         <Button primary onClick={this.createTree}>

@@ -46,8 +46,8 @@ class PhyloTree extends React.Component {
     return (
       <div>
         {title}
-        <h3>Relevant samples:</h3>
         {tree_name}
+        <h3>Relevant samples:</h3>
         {sample_list}
         <PhyloTreeViz
           csrf={this.csrf}
