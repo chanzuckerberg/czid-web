@@ -42,7 +42,9 @@ class PhyloTree extends React.Component {
         </div>
       );
     }, this);
-    let tree_name = <Input id="treeName" placeholder="Name" disabled />;
+    let tree_name = (
+      <Input id="treeName" value={this.phylo_tree.name} disabled />
+    );
     return (
       <div>
         {title}
