@@ -82,9 +82,6 @@ class ThresholdFilterDropdown extends React.Component {
   }
 
   render() {
-    const dropdownClasses = `idseq-ui ui dropdown threshold${
-      this.state.popupIsOpen ? " active" : " "
-    }${this.props.disabled ? " disabled" : " "}`;
     return (
       <Popup
         trigger={

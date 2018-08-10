@@ -3,3 +3,8 @@ checks:
   method-lines:
     config:
       threshold: 50
+  similar-code:
+    config:
+      threshold: 50
+
+        
