@@ -103,23 +103,15 @@ class PhyloTree < ApplicationRecord
     "s3://#{SAMPLES_BUCKET_NAME}/phylo_trees/#{id}"
   end
 
-  def prepare_dag(dag_name, attribute_dict, key_s3_params = nil)
+  def prepare_dag(dag_name, attribute_dict)
     dag_s3 = "#{phylo_tree_output_s3_path}/#{dag_name}.json"
-
     dag = DagGenerator.new("app/lib/dags/#{dag_name}.json.erb",
                            project_id,
                            nil,
                            nil,
                            attribute_dict)
     self.dag_json = dag.render
-
-    `echo '#{dag_json}' | aws s3 cp - #{dag_s3}`
-
-    # Generate job command
-    dag_path_on_worker = "/mnt/#{dag_name}.json"
-    download_dag = "aws s3 cp #{dag_s3} #{dag_path_on_worker}"
-    execute_dag = "idseq_dag #{key_s3_params} #{dag_path_on_worker}"
-    [download_dag, execute_dag].join(";")
+    PipelineRunStage.upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name)
   end
 
   def kickoff

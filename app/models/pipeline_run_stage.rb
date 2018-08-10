@@ -196,6 +196,17 @@ class PipelineRunStage < ApplicationRecord
   end
 
   ########### STAGE SPECIFIC FUNCTIONS BELOW ############
+  def self.upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name, key_s3_params = nil, copy_done_file = "")
+    # Upload dag json
+    `echo '#{dag_json}' | aws s3 cp - #{dag_s3}`
+
+    # Generate job command
+    dag_path_on_worker = "/mnt/#{dag_name}.json"
+    download_dag = "aws s3 cp #{dag_s3} #{dag_path_on_worker}"
+    execute_dag = "idseq_dag #{key_s3_params} #{dag_path_on_worker}"
+    [download_dag, execute_dag, copy_done_file].join(";")
+  end
+
   def prepare_dag(dag_name, attribute_dict, key_s3_params = nil)
     sample = pipeline_run.sample
     dag_s3 = "#{sample.sample_output_s3_path}/#{dag_name}.json"
@@ -206,15 +217,8 @@ class PipelineRunStage < ApplicationRecord
                            sample.host_genome_name.downcase,
                            attribute_dict)
     self.dag_json = dag.render
-
-    `echo '#{dag_json}' | aws s3 cp - #{dag_s3}`
-
-    # Generate job command
-    dag_path_on_worker = "/mnt/#{dag_name}.json"
-    download_dag = "aws s3 cp #{dag_s3} #{dag_path_on_worker}"
-    execute_dag = "idseq_dag #{key_s3_params} #{dag_path_on_worker}"
     copy_done_file = "echo done | aws s3 cp - #{sample.sample_output_s3_path}/\\$AWS_BATCH_JOB_ID.#{JOB_SUCCEEDED_FILE_SUFFIX}"
-    [download_dag, execute_dag, copy_done_file].join(";")
+    upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name, key_s3_params, copy_done_file)
   end
 
   def host_filtering_command
