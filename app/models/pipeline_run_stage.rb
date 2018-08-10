@@ -24,16 +24,22 @@ class PipelineRunStage < ApplicationRecord
   # Max number of times we resubmit a job when it gets killed by EC2.
   MAX_RETRIES = 5
 
-  def install_pipeline
+  def install_pipeline(commit_or_branch = pipeline_run.pipeline_commit)
     "pip install --upgrade git+git://github.com/chanzuckerberg/s3mi.git; " \
     "cd /mnt; " \
     "git clone https://github.com/chanzuckerberg/idseq-dag.git; " \
     "cd idseq-dag; " \
-    "git checkout #{pipeline_run.pipeline_commit}; " \
+    "git checkout #{commit_or_branch}; " \
     "pip3 install -e . --upgrade"
   end
 
-  def aegea_batch_submit_command(base_command, memory = Sample::DEFAULT_MEMORY_IN_MB)
+  def upload_version(s3_file = pipeline_run.pipeline_version_file)
+    "idseq_dag --version | cut -f2 -d ' ' | aws s3 cp  - #{s3_file}"
+  end
+
+  def aegea_batch_submit_command(base_command,
+                                 job_queue = pipeline_run.sample.job_queue,
+                                 memory = Sample::DEFAULT_MEMORY_IN_MB)
     command = "aegea batch submit --command=\"#{base_command}\" "
     if memory <= Sample::DEFAULT_MEMORY_IN_MB
       vcpus = Sample::DEFAULT_VCPUS
@@ -42,11 +48,11 @@ class PipelineRunStage < ApplicationRecord
       vcpus = Sample::DEFAULT_VCPUS_HIMEM
       queue = Sample::DEFAULT_QUEUE_HIMEM
     end
-    if pipeline_run.sample.job_queue.present?
-      if Sample::DEPRECATED_QUEUES.include? pipeline_run.sample.job_queue
-        Rails.logger.info "Overriding deprecated queue #{pipeline_run.sample.job_queue} with #{queue}"
+    if job_queue.present?
+      if Sample::DEPRECATED_QUEUES.include? job_queue
+        Rails.logger.info "Overriding deprecated queue #{job_queue} with #{queue}"
       else
-        queue = pipeline_run.sample.job_queue
+        queue = job_queue
       end
     end
     command += " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --volume-type gp2 --ecr-image idseq_dag --memory #{memory} --queue #{queue} --vcpus #{vcpus} --job-role idseq-pipeline "
@@ -226,7 +232,6 @@ class PipelineRunStage < ApplicationRecord
     attribute_dict[:fastq2] = sample.input_files[1].name if sample.input_files[1]
     dag_commands = prepare_dag("host_filter", attribute_dict)
 
-    upload_version = "idseq_dag --version | cut -f2 -d ' ' | aws s3 cp  - #{pipeline_run.pipeline_version_file} "
     batch_command = [install_pipeline, upload_version, dag_commands].join("; ")
 
     # Dispatch job

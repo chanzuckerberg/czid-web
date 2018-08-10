@@ -428,18 +428,19 @@ class PipelineRun < ApplicationRecord
     output_states.pluck(:state).all? { |s| s == STATUS_LOADED }
   end
 
+  def self.update_pipeline_version(record, version_column, s3_version_file)
+    if record[version_column].blank? && file_generated_since_run(s3_version_file)
+      record[version_column] = fetch_pipeline_version(s3_version_file)
+      record.save
+    end
+  end
+
   def monitor_results
     return if results_finalized?
 
     # Get pipeline_version, which determines S3 locations of output files.
     # If pipeline version is not present, we cannot load results yet.
-    # [ We use "file_generated_since_run(pipeline_version_file)" because "pipeline_version_file"
-    #   is not in the versioned result folder, so it gets overwritten with each new run.
-    #   TODO: change that, so that we can get rid of "file_generated_since_run".
-    # ]
-    if pipeline_version.blank? && file_generated_since_run(pipeline_version_file)
-      update(pipeline_version: fetch_pipeline_version)
-    end
+    update_pipeline_version(self, :pipeline_version, pipeline_version_file)
     return if pipeline_version.blank?
 
     # Load any new outputs that have become available:
@@ -822,8 +823,8 @@ class PipelineRun < ApplicationRecord
     "#{sample.sample_output_s3_path}/#{PIPELINE_VERSION_FILE}"
   end
 
-  def fetch_pipeline_version
-    whole_version = `aws s3 cp #{pipeline_version_file} -`.strip
+  def fetch_pipeline_version(s3_file = pipeline_version_file)
+    whole_version = `aws s3 cp #{s3_file} -`.strip
     whole_version =~ /(^\d+\.\d+).*/
     return Regexp.last_match(1)
   rescue

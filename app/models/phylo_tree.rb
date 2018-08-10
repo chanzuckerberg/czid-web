@@ -13,25 +13,20 @@ class PhyloTree < ApplicationRecord
     where(status: STATUS_IN_PROGRESS)
   end
 
-  def fetch_dag_version
-    # Needed to build full idseq-dag output path.
-    return dag_version if dag_version.present?
-    # If not present yet, need to fetch it.
-    # TEMP HACK:
-    # Assume version folder is the only folder in phylo_trees folder.
-    # Right now, assume each tree can only run once, so only 1 version ever.
-    stdout, _stderr, status = Open3.capture3("aws s3 ls #{phylo_tree_output_s3_path}/ | grep PRE | awk '{print $2}' | head -n1")
-    if status.exitstatus.zero?
-      update(dag_version: stdout.rstrip.chomp("/"))
-    end
-    dag_version
+  def newick_s3_path
+    "#{phylo_tree_output_s3_path}/#{dag_version}/phylo_tree.newick"
   end
 
-  def newick_s3_path
-    "#{phylo_tree_output_s3_path}/#{fetch_dag_version}/phylo_tree.newick"
+  def dag_version_file
+    "#{phylo_tree_output_s3_path}/#{PipelineRun::PIPELINE_VERSION_FILE}"
   end
 
   def monitor_results
+    # Retrieve dag version, which is needed to construct the output path:
+    PipelineRun.update_pipeline_version(self, :dag_version, dag_version_file)
+    return if dag_version.blank?
+
+    # Retrieve output:
     file = Tempfile.new
     _stdout, _stderr, status = Open3.capture3("aws", "s3", "cp", newick_s3_path, file.path.to_s)
     if status.exitstatus.zero?
@@ -54,12 +49,6 @@ class PhyloTree < ApplicationRecord
       self.status = STATUS_FAILED
       save
     end
-  end
-
-  def aegea_command(base_command)
-    "aegea batch submit --command=\"#{base_command}\" " \
-    " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --volume-type gp2 --ecr-image idseq_phylo --memory #{Sample::DEFAULT_MEMORY_IN_MB}" \
-    " --queue #{Sample::DEFAULT_QUEUE} --vcpus #{Sample::DEFAULT_VCPUS} --job-role idseq-pipeline"
   end
 
   def upload_taxon_fasta_inputs_and_return_names
@@ -104,15 +93,10 @@ class PhyloTree < ApplicationRecord
     }
     dag_commands = prepare_dag("phylo_tree", attribute_dict)
 
-    install_pipeline = "pip install --upgrade git+git://github.com/chanzuckerberg/s3mi.git; " \
-      "cd /mnt; " \
-      "git clone https://github.com/chanzuckerberg/idseq-dag.git; " \
-      "cd idseq-dag; " \
-      "git checkout charles/trees; " \
-      "pip3 install -e . --upgrade"
-
-    base_command = [install_pipeline, dag_commands].join("; ")
-    aegea_command(base_command)
+    base_command = [PipelineRunStage.install_pipeline("charles/trees"),
+                    PipelineRunStage.upload_version(dag_version_file),
+                    dag_commands].join("; ")
+    PipelineRunStage.aegea_batch_submit_command(base_command, nil)
   end
 
   def phylo_tree_output_s3_path
