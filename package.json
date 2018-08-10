@@ -53,6 +53,7 @@
   },
   "dependencies": {
     "axios": "^0.17.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "clusterfck": "git+https://github.com/chanzuckerberg/clusterfck.git#master",
     "copy-to-clipboard": "^3.0.8",
     "d3": "^3.5.17",

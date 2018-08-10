@@ -13,7 +13,7 @@ class Dropdown extends React.Component {
     }, {});
   }
 
-  onChange(e, d) {
+  handleOnChange(e, d) {
     this.setState({ value: d.value });
     this.onChange(e, d);
   }
@@ -22,7 +22,9 @@ class Dropdown extends React.Component {
     return (
       <div>
         <span className="label-title">{this.props.label}</span>
-        {this.state.value ? this.labels[this.state.value.toString()] : ""}
+        {this.state.value !== undefined &&
+          this.state.value !== null &&
+          this.labels[this.state.value.toString()]}
       </div>
     );
   }
@@ -36,7 +38,7 @@ class Dropdown extends React.Component {
         value={this.state.value}
         floating
         className="idseq-ui"
-        onChange={this.onChange.bind(this)}
+        onChange={this.handleOnChange.bind(this)}
         trigger={this.renderText()}
       />
     );

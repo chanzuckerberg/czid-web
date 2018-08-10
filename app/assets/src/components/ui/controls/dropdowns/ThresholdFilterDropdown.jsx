@@ -1,7 +1,8 @@
 import { Dropdown, Grid, Input, Label, Popup } from "semantic-ui-react";
+import { forbidExtraProps } from "airbnb-prop-types";
 import PrimaryButton from "../buttons/PrimaryButton";
-import RemoveIcon from "../../icons/RemoveIcon";
 import PropTypes from "prop-types";
+import RemoveIcon from "../../icons/RemoveIcon";
 import React from "react";
 
 class ThresholdFilterDropdown extends React.Component {
@@ -81,24 +82,18 @@ class ThresholdFilterDropdown extends React.Component {
   }
 
   render() {
-    const dropdownClasses =
-      "idseq-ui ui dropdown threshold" +
-      (this.state.popupIsOpen ? " active" : " ") +
-      (this.props.disabled ? " disabled" : " ");
+    const dropdownClasses = `idseq-ui ui dropdown threshold${
+      this.state.popupIsOpen ? " active" : " "
+    }${this.props.disabled ? " disabled" : " "}`;
     return (
       <Popup
         trigger={
-          <div className={dropdownClasses}>
-            <div className="label-container">
-              <div className="label-container-title">{this.label}</div>
-              {this.state.thresholds.length > 0 && (
-                <Label className="label-container-count">
-                  {this.state.thresholds.length}
-                </Label>
-              )}
-            </div>
-            <i className="dropdown handle icon" />
-          </div>
+          <ThresholdFilterDropdownLabel
+            popupIsOpen={this.state.popupIsOpen}
+            disabled={this.props.disabled}
+            label={this.label}
+            count={this.state.thresholds.length}
+          />
         }
         content={
           <div className="container">
@@ -130,7 +125,6 @@ class ThresholdFilterDropdown extends React.Component {
               <Grid.Row className="threshold-buttons">
                 <Grid.Column>
                   <PrimaryButton
-                    className="threshold-buttons-apply"
                     text="Apply"
                     onClick={this.handleApply.bind(this)}
                   />
@@ -151,13 +145,13 @@ class ThresholdFilterDropdown extends React.Component {
   }
 }
 
-ThresholdFilterDropdown.propTypes = {
+ThresholdFilterDropdown.propTypes = forbidExtraProps({
   disabled: PropTypes.bool,
   label: PropTypes.string,
   thresholds: PropTypes.array,
   onApply: PropTypes.func,
   options: PropTypes.object
-};
+});
 
 const ThresholdFilter = ({
   threshold,
@@ -225,12 +219,35 @@ const ThresholdFilter = ({
   );
 };
 
-ThresholdFilter.propTypes = {
+ThresholdFilter.propTypes = forbidExtraProps({
   metrics: PropTypes.array,
   onChange: PropTypes.func,
   onRemove: PropTypes.func,
   operators: PropTypes.array,
   threshold: PropTypes.object
+});
+
+const ThresholdFilterDropdownLabel = props => {
+  let { disabled, label, popupIsOpen, count, ...extraProps } = props;
+  const dropdownClasses = `idseq-ui ui dropdown threshold${
+    popupIsOpen ? " active" : " "
+  }${disabled ? " disabled" : " "}`;
+  return (
+    <div className={dropdownClasses} {...extraProps}>
+      <div className="label-container">
+        <div className="label-container-title">{label}</div>
+        {count > 0 && <Label className="label-container-count">{count}</Label>}
+      </div>
+      <i className="dropdown handle icon" />
+    </div>
+  );
 };
+
+ThresholdFilterDropdownLabel.propType = forbidExtraProps({
+  disabled: PropTypes.bool,
+  label: PropTypes.string,
+  popupIsOpen: PropTypes.bool,
+  count: PropTypes.number
+});
 
 export default ThresholdFilterDropdown;

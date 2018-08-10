@@ -15,22 +15,10 @@ class PlaygroundControls extends React.Component {
     super(props);
     this.thresholdOptions = this.props.thresholdFilters;
     this.dropdownOptions = [
-      { text: "Option 1", value: "1" },
-      { text: "option 2", value: "2" },
-      { text: "Option 3", value: "3" }
+      { text: "Option 1", value: 0 },
+      { text: "option 2", value: 1 },
+      { text: "Option 3", value: 2 }
     ];
-    this.dropdownOptionsBySection = {
-      Options: [
-        { text: "option 1", value: "1" },
-        { text: "option 2", value: "2" },
-        { text: "option 3", value: "3" }
-      ],
-      Abc: [
-        { text: "a", value: "val_a" },
-        { text: "b", value: "val_b" },
-        { text: "c", value: "val_c" }
-      ]
-    };
 
     this.state = {
       event: ""
@@ -185,7 +173,7 @@ class PlaygroundControls extends React.Component {
                 key={0}
                 fluid
                 options={this.dropdownOptions}
-                label="Option: "
+                label="Option:"
                 onChange={() => this.setState({ event: "Dropdown:Change" })}
               />,
               <Dropdown
@@ -193,7 +181,7 @@ class PlaygroundControls extends React.Component {
                 fluid
                 disabled
                 options={this.dropdownOptions}
-                label="Option: "
+                label="Option:"
                 onChange={() => this.setState({ event: "Dropdown:Change" })}
               />
             ]}
