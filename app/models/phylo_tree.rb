@@ -3,6 +3,7 @@ class PhyloTree < ApplicationRecord
   has_and_belongs_to_many :pipeline_runs
   belongs_to :user
   belongs_to :project
+  validates :name, presence: true, uniqueness: true
 
   STATUS_INITIALIZED = 0
   STATUS_READY = 1
