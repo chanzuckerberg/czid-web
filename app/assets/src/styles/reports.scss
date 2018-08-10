@@ -222,10 +222,6 @@ input[type="number"] {
           }
         }
       }
-
-      // .filter-label {
-      //   text-align: right;
-      // }
     }
   }
 
@@ -548,10 +544,6 @@ input[type="number"] {
   }
 }
 
-.ui.dropdown .text {
-  font-size: 10pt !important;
-}
-
 .ui.dropdown.filter-btn {
   margin-right: 30px !important;
 }
@@ -613,13 +605,13 @@ input[type="number"] {
     }
     .report-top-filters {
       .filter-lists {
-        margin-left: 15px;
-        & > li {
+        padding: 10px 15px;
+        width: 100%;
+        & > div.filter-lists-element > li {
           color: #444f5a;
           display: inline-block;
-          width: 250px;
+          width: 240px;
           font-size: $font-size-large;
-          margin-right: 15px;
           &:hover {
             color: #2e363d;
             cursor: pointer;
@@ -650,7 +642,6 @@ input[type="number"] {
               border: 1px solid transparent;
               display: inline-block;
               position: relative;
-              top: -7px;
             }
             .down-box {
               position: initial !important;
@@ -667,26 +658,23 @@ input[type="number"] {
           &.search-box {
             input {
               width: 100%;
-              border: 1px solid #dce0e7;
-              padding: 7px;
-              padding-right: 35px;
+              border: 1px solid #cccccc;
+              padding: 6px 35px 6px 10px;
               position: relative;
-              top: -5px;
               margin: 0;
-              height: 14px !important;
-              border-radius: 75px;
+              height: 24px !important;
+              border-radius: 19px;
             }
             i {
               color: #878787;
               position: relative;
-              left: 17px;
-              top: -4px;
+              left: 22px;
             }
           }
           i {
             &.fa {
               &.fa-angle-down {
-                top: 10px;
+                top: 0px;
                 position: relative;
               }
             }
@@ -703,6 +691,15 @@ input[type="number"] {
           [type="checkbox"].filled-in + label:after {
             border: 2px solid #c7c7c7;
             background-color: #fff;
+          }
+        }
+
+        .filter-lists-element {
+          display: inline-block;
+          vertical-align: top;
+
+          &:not(:last-child) {
+            margin-right: 10px;
           }
         }
       }

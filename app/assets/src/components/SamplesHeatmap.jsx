@@ -3,18 +3,21 @@ import clusterfck from "clusterfck";
 import axios from "axios";
 import d3 from "d3";
 import queryString from "query-string";
-import { Button, Icon, Popup } from "semantic-ui-react";
+import { Popup } from "semantic-ui-react";
 import copy from "copy-to-clipboard";
 import { StickyContainer, Sticky } from "react-sticky";
 import symlog from "./symlog";
-import AdvancedThresholdFilterDropdown from "./modules/AdvancedThresholdFilter";
+import DownloadButton from "./ui/controls/buttons/DownloadButton";
+import Dropdown from "./ui/controls/dropdowns/Dropdown";
 import ErrorBoundary from "./ErrorBoundary";
 import Heatmap from "./visualizations/Heatmap";
 import HeatmapLegend from "./visualizations/HeatmapLegend";
-import LabeledDropdown from "./modules/LabeledDropdown";
-import LabeledFilterDropdown from "./modules/LabeledFilterDropdown";
-import LabeledSlider from "./modules/LabeledSlider";
+import MultipleDropdown from "./ui/controls/dropdowns/MultipleDropdown";
+import PrimaryButton from "./ui/controls/buttons/PrimaryButton";
+import PropTypes from "prop-types";
+import Slider from "./ui/controls/Slider";
 import TaxonTooltip from "./TaxonTooltip";
+import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
 
 class SamplesHeatmap extends React.Component {
   constructor(props) {
@@ -55,7 +58,7 @@ class SamplesHeatmap extends React.Component {
         ) {
           return { text: taxonLevelName, value: index };
         }),
-        advancedFilters: this.props.advancedFilters,
+        thresholdFilters: this.props.thresholdFilters,
         // Client side options
         scales: [["Log", symlog], ["Lin", d3.scale.linear]],
         taxonsPerSample: {
@@ -69,7 +72,7 @@ class SamplesHeatmap extends React.Component {
         background:
           this.urlParams.background || this.props.backgrounds[0].value,
         species: parseInt(this.urlParams.species) || 1,
-        advancedFilters: this.urlParams.advancedFilters || [],
+        thresholdFilters: this.urlParams.thresholdFilters || [],
         dataScaleIdx: parseInt(this.urlParams.dataScaleIdx) || 0,
         taxonsPerSample: parseInt(this.urlParams.taxonsPerSample) || 30
       },
@@ -97,8 +100,6 @@ class SamplesHeatmap extends React.Component {
     this.getRowLabel = this.getRowLabel.bind(this);
     this.getTaxonFor = this.getTaxonFor.bind(this);
     this.getTooltip = this.getTooltip.bind(this);
-    this.onAdvancedFilterApply = this.onAdvancedFilterApply.bind(this);
-    this.onAdvancedFilterChange = this.onAdvancedFilterChange.bind(this);
     this.onApplyClick = this.onApplyClick.bind(this);
     this.onBackgroundChanged = this.onBackgroundChanged.bind(this);
     this.onCategoryChange = this.onCategoryChange.bind(this);
@@ -110,6 +111,7 @@ class SamplesHeatmap extends React.Component {
     this.onShareClick = this.onShareClick.bind(this);
     this.onTaxonLevelChange = this.onTaxonLevelChange.bind(this);
     this.onTaxonsPerSampleEnd = this.onTaxonsPerSampleEnd.bind(this);
+    this.onThresholdFilterApply = this.onThresholdFilterApply.bind(this);
   }
 
   componentDidMount() {
@@ -179,7 +181,7 @@ class SamplesHeatmap extends React.Component {
           species: this.state.selectedOptions.species,
           categories: this.state.selectedOptions.categories,
           sortBy: this.metricToSortField(this.state.selectedOptions.metric),
-          advancedFilters: this.state.selectedOptions.advancedFilters,
+          thresholdFilters: this.state.selectedOptions.thresholdFilters,
           taxonsPerSample: this.state.selectedOptions.taxonsPerSample
         }
       })
@@ -483,7 +485,7 @@ class SamplesHeatmap extends React.Component {
     });
 
     return (
-      <LabeledDropdown
+      <Dropdown
         fluid
         options={options}
         onChange={this.onMetricChange}
@@ -494,29 +496,20 @@ class SamplesHeatmap extends React.Component {
     );
   }
 
-  onAdvancedFilterChange() {
-    this.optionsChanged = true;
-  }
-
-  onAdvancedFilterApply(filters) {
+  onThresholdFilterApply(filters) {
     this.optionsChanged = true;
     this.setSelectedOptionsState(
-      { advancedFilters: filters },
+      { thresholdFilters: filters },
       this.explicitApply ? undefined : this.updateHeatmap
     );
   }
 
   renderAdvancedFilterPicker() {
     return (
-      <AdvancedThresholdFilterDropdown
-        fluid
-        label="Advanced Filters:"
-        labels={this.state.availableOptions.advancedFilters.filters}
-        operators={this.state.availableOptions.advancedFilters.operators}
-        filters={this.state.selectedOptions.advancedFilters}
-        onChange={this.onAdvancedFilterChange}
-        onApply={this.onAdvancedFilterApply}
-        applyOnHide={true}
+      <ThresholdFilterDropdown
+        options={this.state.availableOptions.thresholdFilters}
+        thresholds={this.state.selectedOptions.thresholdFilters}
+        onApply={this.onThresholdFilterApply}
         disabled={!this.state.data}
       />
     );
@@ -536,7 +529,7 @@ class SamplesHeatmap extends React.Component {
 
   renderTaxonLevelPicker() {
     return (
-      <LabeledDropdown
+      <Dropdown
         fluid
         options={this.state.availableOptions.taxonLevels}
         value={this.state.selectedOptions.species}
@@ -565,7 +558,7 @@ class SamplesHeatmap extends React.Component {
     });
 
     return (
-      <LabeledDropdown
+      <Dropdown
         fluid
         value={this.state.selectedOptions.dataScaleIdx}
         onChange={this.onDataScaleChange}
@@ -633,7 +626,7 @@ class SamplesHeatmap extends React.Component {
     });
 
     return (
-      <LabeledFilterDropdown
+      <MultipleDropdown
         fluid
         options={options}
         onChange={this.onCategoryChange}
@@ -664,7 +657,7 @@ class SamplesHeatmap extends React.Component {
     });
 
     return (
-      <LabeledDropdown
+      <Dropdown
         fluid
         options={options}
         onChange={this.onBackgroundChanged}
@@ -685,8 +678,8 @@ class SamplesHeatmap extends React.Component {
 
   renderTaxonsPerSampleSlider() {
     return (
-      <LabeledSlider
-        label="Taxons per Sample:"
+      <Slider
+        label="Taxons per Sample: "
         min={this.state.availableOptions.taxonsPerSample.min}
         max={this.state.availableOptions.taxonsPerSample.max}
         value={this.state.selectedOptions.taxonsPerSample}
@@ -713,34 +706,6 @@ class SamplesHeatmap extends React.Component {
         </div>
       </div>
     );
-  }
-
-  filterTaxons() {
-    let filteredNames = [],
-      categories = new Set(this.state.selectedOptions.categories);
-
-    for (let name of this.state.taxons.names) {
-      let id = this.state.taxons.nameToId[name];
-      let category = this.state.taxons.idToCategory[id];
-      if (categories.has(category)) {
-        let has_value = false;
-        for (let sample of this.state.data) {
-          for (let taxon of sample.taxons) {
-            if (taxon.tax_id == id) {
-              has_value = true;
-              break;
-            }
-          }
-          if (has_value) {
-            break;
-          }
-        }
-        if (has_value) {
-          filteredNames.push(name);
-        }
-      }
-    }
-    return filteredNames;
   }
 
   renderVisualization() {
@@ -781,33 +746,23 @@ class SamplesHeatmap extends React.Component {
       <div id="project-visualization">
         <div className="heatmap-header">
           <Popup
-            trigger={
-              <Button className="right" primary onClick={this.onShareClick}>
-                Share
-              </Button>
-            }
+            trigger={<PrimaryButton text="Share" onClick={this.onShareClick} />}
             content="A shareable URL has been copied to your clipboard!"
             on="click"
             hideOnScroll
           />
-          <Button
-            className="right"
-            secondary
-            href={this.downloadCurrentViewDataURL()}
+          <DownloadButton
+            onClick={() => {
+              location.href = this.downloadCurrentViewDataURL();
+            }}
             disabled={!this.state.data}
-          >
-            <Icon className="cloud download alternate" />
-            Download
-          </Button>
+          />
           {this.explicitApply && (
-            <Button
-              className="right"
-              primary
+            <PrimaryButton
+              text="Apply"
               onClick={this.onApplyClick.bind(this)}
               disabled={!this.optionsChanged}
-            >
-              Apply
-            </Button>
+            />
           )}
           <h2>
             Comparing {this.state.data ? this.state.data.length : ""} samples
@@ -818,5 +773,16 @@ class SamplesHeatmap extends React.Component {
     );
   }
 }
+
+SamplesHeatmap.propTypes = {
+  backgrounds: PropTypes.array,
+  categories: PropTypes.array,
+  explicitApply: PropTypes.bool,
+  metrics: PropTypes.array,
+  sampleIds: PropTypes.array,
+  taxonIds: PropTypes.array,
+  taxonLevels: PropTypes.array,
+  thresholdFilters: PropTypes.object
+};
 
 export default SamplesHeatmap;

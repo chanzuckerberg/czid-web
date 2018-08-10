@@ -1,0 +1,43 @@
+@import "../../../themes/colors";
+@import "../../../themes/typography";
+
+.idseq-ui.button.secondary {
+  border: 1px solid $primary-light;
+  background-color: $white;
+  color: $primary-light;
+
+  .icon-label {
+    svg {
+      fill: $primary-light;
+    }
+  }
+
+  &:hover {
+    background: $primary-light;
+    color: $white;
+  }
+
+  &:active {
+    border: 1px solid $primary-medium;
+    background-color: $primary-medium;
+    color: $white;
+  }
+
+  &:focus {
+    border: 1px solid $primary-medium;
+    background-color: $primary-medium;
+    color: $white;
+  }
+
+  &:disabled {
+    border: 1px solid $medium-grey;
+    background-color: $white;
+    color: $medium-grey;
+
+    .icon-label {
+      svg {
+        fill: $medium-grey;
+      }
+    }
+  }
+}

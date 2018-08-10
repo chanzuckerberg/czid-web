@@ -1,0 +1,49 @@
+@import "~rc-slider/assets/index.css";
+@import "../../themes/colors.scss";
+
+.idseq-ui.slider {
+  font-family: $font-family-default;
+  font-size: 13px;
+  font-weight: 400;
+  font-style: normal;
+  font-stretch: normal;
+  height: 38px;
+  text-align: center;
+
+  .label-title {
+    font-weight: 600;
+  }
+
+  &.disabled {
+    color: $medium-grey;
+  }
+
+  .rc-slider {
+    // margin: 0 16px;
+    background-color: transparent;
+
+    .rc-slider-rail {
+      background-color: $lightest-grey;
+    }
+
+    .rc-slider-track {
+      background-color: $primary-light;
+    }
+
+    .rc-slider-handle {
+      border: solid 4px $primary-light;
+    }
+
+    &.rc-slider-disabled {
+      color: $medium-grey;
+
+      .rc-slider-track {
+        background-color: $light-grey;
+      }
+
+      .rc-slider-handle {
+        border: solid 4px $light-grey;
+      }
+    }
+  }
+}
