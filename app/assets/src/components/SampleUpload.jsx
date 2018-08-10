@@ -537,6 +537,8 @@ class SampleUpload extends React.Component {
         return IconComponent.human(color);
       case "tick":
         return IconComponent.tick(color);
+      case "mouse":
+        return IconComponent.mouse(color);
       case "ercc only":
         return IconComponent.ercc(color);
       default:
