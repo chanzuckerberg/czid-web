@@ -55,7 +55,7 @@ class PipelineRunStage < ApplicationRecord
         queue = job_queue
       end
     end
-    command += " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --volume-type gp2 --ecr-image idseq_dag --memory #{memory} --queue #{queue} --vcpus #{vcpus} --job-role idseq-pipeline "
+    command += " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --volume-type gp2 --ecr-image idseq_phylo --memory #{memory} --queue #{queue} --vcpus #{vcpus} --job-role idseq-pipeline "
     command
   end
 
@@ -276,15 +276,5 @@ class PipelineRunStage < ApplicationRecord
     batch_command = [install_pipeline, dag_commands].join("; ")
     # Run it
     aegea_batch_submit_command(batch_command)
-  end
-
-  def assembly_command
-    # TODO: Change the following to DAG
-    batch_command_env_variables = "ALIGNMENT_S3_PATH=#{pipeline_run.alignment_output_s3_path} " \
-      "POSTPROCESS_S3_PATH=#{pipeline_run.postprocess_output_s3_path} " \
-      "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} "
-    batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline assembly"
-    "aegea batch submit --command=\"#{batch_command}\" " \
-      " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --ecr-image idseq_dag --memory 60000 --queue idseq_assembly --vcpus 32 --job-role idseq-pipeline "
   end
 end
