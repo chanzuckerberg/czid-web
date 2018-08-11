@@ -1,19 +1,24 @@
 import axios from "axios";
 import React from "react";
-import { Button, Input, Checkbox } from "semantic-ui-react";
+import { Input, Checkbox } from "semantic-ui-react";
 
-class NewPhyloTree extends React.Component {
+class PhyloTreeInputs extends React.Component {
   constructor(props) {
     super();
+    this.disabled = props.disabled;
+    this.phylo_tree = props.phylo_tree;
     this.csrf = props.csrf;
     this.taxon = props.taxon;
     this.project = props.project;
     this.samples = props.samples;
     this.MIN_READS = 5;
     this.state = {
-      selectedPipelineRunIds: this.samples
-        .filter(s => s.taxid_nt_reads >= this.MIN_READS)
-        .map(s => s.pipeline_run_id)
+      selectedPipelineRunIds:
+        this.disabled && this.phylo_tree
+          ? this.phylo_tree.pipeline_runs.map(pr => pr.id)
+          : this.samples
+              .filter(s => s.taxid_nt_reads >= this.MIN_READS)
+              .map(s => s.pipeline_run_id)
     };
 
     this.createTree = this.createTree.bind(this);
@@ -77,6 +82,7 @@ class NewPhyloTree extends React.Component {
         <i>{this.project.name}</i>
       </h2>
     );
+
     let sample_list = this.samples.map(function(s, i) {
       return (
         <div>
@@ -85,11 +91,15 @@ class NewPhyloTree extends React.Component {
             id={s.pipeline_run_id}
             key={s.pipeline_run_id}
             data-pipeline-run-id={s.pipeline_run_id}
-            onClick={this.updatePipelineRunIdSelection}
+            onClick={e => {
+              if (!this.disabled) {
+                this.updatePipelineRunIdSelection(e);
+              }
+            }}
             checked={
               this.state.selectedPipelineRunIds.indexOf(s.pipeline_run_id) >= 0
             }
-            disabled={s.taxid_nt_reads < this.MIN_READS}
+            disabled={this.disabled || s.taxid_nt_reads < this.MIN_READS}
           />
           <label htmlFor={s.pipeline_run_id}>
             {s.name} ({s.taxid_nt_reads} reads)
@@ -97,25 +107,38 @@ class NewPhyloTree extends React.Component {
         </div>
       );
     }, this);
+
     let tree_name = (
       <Input
         id="treeName"
         placeholder="Name"
-        onChange={this.handleInputChange}
+        disabled={this.disabled}
+        value={this.disabled ? this.phylo_tree.name : null}
+        onChange={e => {
+          if (!this.disabled) {
+            this.handleInputChange(e);
+          }
+        }}
       />
     );
-    return (
+
+    let create_button = this.disabled ? null : (
       <div>
-        {title}
-        {tree_name}
-        {sample_list}
         <Button primary onClick={this.createTree}>
           Create Tree
         </Button>
         <p>{this.state.status_message}</p>
       </div>
     );
+
+    return (
+      <div>
+        {title}
+        {tree_name}
+        {sample_list}
+        {create_button}
+      </div>
+    );
   }
 }
-
-export default NewPhyloTree;
+export default PhyloTreeInputs;

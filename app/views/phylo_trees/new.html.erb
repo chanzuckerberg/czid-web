@@ -1,7 +1,9 @@
 <div id="NewPhyloTree_page">
   <%= javascript_tag do %>
-    react_component('NewPhyloTree', {
+    react_component('PhyloTreeInputs', {
     csrf: '<%= form_authenticity_token %>',
+    disabled: 0;
+    this.phylo_tree: null;
     taxon: JSON.parse('<%= raw escape_json(@taxon) %>'),
     project: JSON.parse('<%= raw escape_json(@project) %>'),
     samples: JSON.parse('<%= raw escape_json(@samples) %>')
