@@ -52,31 +52,6 @@ class PhyloTree < ApplicationRecord
     end
   end
 
-  def upload_taxon_fasta_inputs_and_return_names
-    taxon_fasta_files = []
-    pipeline_run_ids.each do |pr_id|
-      pr = PipelineRun.find(pr_id)
-      taxon_name = pr.taxon_counts.find_by(tax_id: taxid).name.gsub(/\W/, '-')
-      sample_name = pr.sample.name.downcase.gsub(/\W/, '-')
-      taxon_fasta_basename = "#{sample_name}__#{taxon_name}.fasta"
-
-      # Make taxon fasta and upload into phylo_tree_output_s3_path
-      fasta_data = get_taxid_fasta_from_pipeline_run(pr, taxid, tax_level, 'NT')
-      file = Tempfile.new
-      file.write(fasta_data)
-      file.close
-      _stdout, _stderr, status = Open3.capture3("aws", "s3", "cp", file.path.to_s, "#{phylo_tree_output_s3_path}/#{taxon_fasta_basename}")
-      file.unlink
-      if status.exitstatus.zero?
-        taxon_fasta_files << taxon_fasta_basename
-      else
-        Airbrake.notify("Failed S3 upload of #{taxon_fasta_basename} for tree #{id}")
-      end
-    end
-
-    taxon_fasta_files
-  end
-
   def job_command
     # Get byte ranges for each pipeline run's taxon fasta.
     # We construct taxon_byteranges_hash to have the following format for integration with idseq-dag:
