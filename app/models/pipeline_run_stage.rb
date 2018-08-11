@@ -38,8 +38,9 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def self.aegea_batch_submit_command(base_command,
+                                      memory = Sample::DEFAULT_MEMORY_IN_MB,
                                       job_queue = pipeline_run.sample.job_queue,
-                                      memory = Sample::DEFAULT_MEMORY_IN_MB)
+                                      docker_image: "idseq_dag")
     command = "aegea batch submit --command=\"#{base_command}\" "
     if memory <= Sample::DEFAULT_MEMORY_IN_MB
       vcpus = Sample::DEFAULT_VCPUS
@@ -55,7 +56,7 @@ class PipelineRunStage < ApplicationRecord
         queue = job_queue
       end
     end
-    command += " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --volume-type gp2 --ecr-image idseq_dag --memory #{memory} --queue #{queue} --vcpus #{vcpus} --job-role idseq-pipeline "
+    command += " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --volume-type gp2 --ecr-image #{docker_image} --memory #{memory} --queue #{queue} --vcpus #{vcpus} --job-role idseq-pipeline "
     command
   end
 

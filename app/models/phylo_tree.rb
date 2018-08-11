@@ -92,7 +92,7 @@ class PhyloTree < ApplicationRecord
     base_command = [PipelineRunStage.install_pipeline("charles/trees"),
                     PipelineRunStage.upload_version(dag_version_file),
                     dag_commands].join("; ")
-    PipelineRunStage.aegea_batch_submit_command(base_command, nil)
+    PipelineRunStage.aegea_batch_submit_command(base_command, docker_image: "idseq_phylo") # TODO: push & use new idseq_dag image instead
   end
 
   def phylo_tree_output_s3_path
