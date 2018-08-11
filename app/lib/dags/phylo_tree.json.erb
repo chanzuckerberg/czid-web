@@ -1,12 +1,6 @@
 {
   "output_dir_s3": "<%= @attribute_dict[:phylo_tree_output_s3_path] %>",
   "targets": {
-    "taxon_fasta_in": [
-      <% @attribute_dict[:taxon_fasta_files].each do |tff| %>
-        "<%= tff %>"
-        <%= (tff == @attribute_dict[:taxon_fasta_files].last) ? '' : ',' %>
-      <% end %>
-    ],
     "phylo_tree_out": ["phylo_tree.newick"]
   },
   "steps": [
@@ -17,21 +11,15 @@
       "module": "idseq_dag.steps.generate_phylo_tree",
       "additional_files": {
         "nt_loc_db": "<%= @attribute_dict[:nt_loc_db] %>",
-
-        <% @attribute_dict[:align_viz_files].each do |avf| %>
-          "<%= avf[:name] %>": "<%= avf[:s3_file] %>"
-          <%= (avf == @attribute_dict[:align_viz_files].last) ? '' : ',' %>
-        <% end %>
+        "align_viz_files": "<%= raw escape_json(@attribute_dict[:align_viz_files]) %>"
       },
       "additional_attributes": {
         "taxid": <%= @attribute_dict[:taxid] %>,
-        "nt_db": "<%= @attribute_dict[:nt_db] %>"
+        "nt_db": "<%= @attribute_dict[:nt_db] %>",
+        "taxon_byteranges": "<%= raw escape_json(@attribute_dict[:taxon_byteranges_hash]) %>"
       }
     }
   ],
-  "given_targets": {
-    "taxon_fasta_in": {
-      "s3_dir": "<%= @attribute_dict[:phylo_tree_output_s3_path] %>"
-    }
+  "given_targets": {}
   }
 }
