@@ -2,7 +2,7 @@ import React from "react";
 import PhyloTreeViz from "./PhyloTreeViz";
 import PhyloTreeInputs from "./PhyloTreeInputs";
 
-class PhyloTree extends React.Component {
+class PhyloTreeView extends React.Component {
   constructor(props) {
     super();
     this.csrf = props.csrf;
@@ -32,4 +32,4 @@ class PhyloTree extends React.Component {
   }
 }
 
-export default PhyloTree;
+export default PhyloTreeView;
