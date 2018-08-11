@@ -21,12 +21,13 @@ class MultipleDropdown extends React.Component {
     } else {
       value.push(d["data-value"]);
     }
-    this.passedOnChange && this.passedOnChange(e, value);
     this.setState({ value });
+    this.passedOnChange && this.passedOnChange(e, value);
   }
 
   renderMenuItems() {
     let ret = [];
+    let checkedOptions = this.props.value || this.state.value;
     for (let option of this.props.options) {
       ret.push(
         <BaseDropdown.Item
@@ -37,7 +38,7 @@ class MultipleDropdown extends React.Component {
           <span className="text">
             <input
               type="checkbox"
-              checked={this.state.value.indexOf(option.value) > -1}
+              checked={checkedOptions.indexOf(option.value) > -1}
               readOnly
             />
             {option.text}
