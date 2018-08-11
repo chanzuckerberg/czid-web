@@ -1,5 +1,6 @@
 class PhyloTree < ApplicationRecord
   include PipelineOutputsHelper
+  include PipelineRunsHelper
   has_and_belongs_to_many :pipeline_runs
   belongs_to :user
   belongs_to :project
@@ -24,7 +25,7 @@ class PhyloTree < ApplicationRecord
 
   def monitor_results
     # Retrieve dag version, which is needed to construct the output path:
-    PipelineRun.update_pipeline_version(self, :dag_version, dag_version_file)
+    update_pipeline_version(self, :dag_version, dag_version_file)
     return if dag_version.blank?
 
     # Retrieve output:
@@ -66,7 +67,7 @@ class PhyloTree < ApplicationRecord
     samples = Sample.where(id: pipeline_runs.pluck(:sample_id))
     taxon_fasta_name_by_sample_id = {}
     samples.each do |s|
-      taxon_fasta_name_by_sample_id[s.id] = "#{s.name}__#{tax_name}.fasta".downcase.gsub(/\W/, '-')
+      taxon_fasta_name_by_sample_id[s.id] = "#{s.name}__#{tax_name}".downcase.gsub(/\W/, '-') + ".fasta"
     end
     # Get locations of align_viz files (needed for identifying NCBI accessions matched by the reads in the taxon fasta)
     align_viz_files = {}

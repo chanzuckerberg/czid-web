@@ -3,6 +3,7 @@ require 'json'
 class PipelineRun < ApplicationRecord
   include ApplicationHelper
   include PipelineOutputsHelper
+  include PipelineRunsHelper
   belongs_to :sample
   belongs_to :alignment_config
   has_many :pipeline_run_stages
@@ -428,13 +429,6 @@ class PipelineRun < ApplicationRecord
     output_states.pluck(:state).all? { |s| s == STATUS_LOADED }
   end
 
-  def self.update_pipeline_version(record, version_column, s3_version_file)
-    if record[version_column].blank? && file_generated_since_run(s3_version_file)
-      record[version_column] = fetch_pipeline_version(s3_version_file)
-      record.save
-    end
-  end
-
   def monitor_results
     return if results_finalized?
 
@@ -612,17 +606,6 @@ class PipelineRun < ApplicationRecord
     _stdout, _stderr, status = Open3.capture3(command)
     return nil unless status.exitstatus.zero?
     "#{destination_dir}/#{File.basename(s3_path)}"
-  end
-
-  def file_generated_since_run(s3_path)
-    stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", s3_path.to_s)
-    return false unless status.exitstatus.zero?
-    begin
-      s3_file_time = DateTime.strptime(stdout[0..18], "%Y-%m-%d %H:%M:%S")
-      return (s3_file_time && created_at && s3_file_time > created_at)
-    rescue
-      return nil
-    end
   end
 
   def file_generated(s3_path)
@@ -821,14 +804,6 @@ class PipelineRun < ApplicationRecord
 
   def pipeline_version_file
     "#{sample.sample_output_s3_path}/#{PIPELINE_VERSION_FILE}"
-  end
-
-  def fetch_pipeline_version(s3_file = pipeline_version_file)
-    whole_version = `aws s3 cp #{s3_file} -`.strip
-    whole_version =~ /(^\d+\.\d+).*/
-    return Regexp.last_match(1)
-  rescue
-    return nil
   end
 
   def major_minor(version)
