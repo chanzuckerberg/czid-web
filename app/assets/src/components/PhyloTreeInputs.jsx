@@ -34,8 +34,7 @@ class PhyloTreeInputs extends React.Component {
     );
   }
 
-  updatePipelineRunIdSelection(e) {
-    let PrId = e.target.getAttribute("data-pipeline-run-id");
+  updatePipelineRunIdSelection(e, PrId) {
     let PrIdList = this.state.selectedPipelineRunIds;
     let index = PrIdList.indexOf(+PrId);
     if (e.target.checked) {
@@ -96,8 +95,9 @@ class PhyloTreeInputs extends React.Component {
             type="checkbox"
             id={s.pipeline_run_id}
             key={s.pipeline_run_id}
-            data-pipeline-run-id={s.pipeline_run_id}
-            onChange={this.updatePipelineRunIdSelection}
+            onChange={e =>
+              this.updatePipelineRunIdSelection(e, s.pipeline_run_id)
+            }
             checked={
               this.state.selectedPipelineRunIds.indexOf(s.pipeline_run_id) >= 0
             }
