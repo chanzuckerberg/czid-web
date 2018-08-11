@@ -1,6 +1,6 @@
 import axios from "axios";
 import React from "react";
-import { Input, Checkbox } from "semantic-ui-react";
+import { Input, Checkbox, Button } from "semantic-ui-react";
 
 class PhyloTreeInputs extends React.Component {
   constructor(props) {
@@ -8,7 +8,13 @@ class PhyloTreeInputs extends React.Component {
     this.disabled = props.disabled;
     this.phylo_tree = props.phylo_tree;
     this.csrf = props.csrf;
-    this.taxon = props.taxon;
+    this.taxon = this.phylo_tree
+      ? {
+          name: this.phylo_tree.tax_name,
+          tax_level: this.phylo_tree.tax_level,
+          taxid: this.phylo_tree.taxid
+        }
+      : props.taxon;
     this.project = props.project;
     this.samples = props.samples;
     this.MIN_READS = 5;
@@ -91,11 +97,7 @@ class PhyloTreeInputs extends React.Component {
             id={s.pipeline_run_id}
             key={s.pipeline_run_id}
             data-pipeline-run-id={s.pipeline_run_id}
-            onClick={e => {
-              if (!this.disabled) {
-                this.updatePipelineRunIdSelection(e);
-              }
-            }}
+            onChange={this.updatePipelineRunIdSelection}
             checked={
               this.state.selectedPipelineRunIds.indexOf(s.pipeline_run_id) >= 0
             }
@@ -113,12 +115,8 @@ class PhyloTreeInputs extends React.Component {
         id="treeName"
         placeholder="Name"
         disabled={this.disabled}
-        value={this.disabled ? this.phylo_tree.name : null}
-        onChange={e => {
-          if (!this.disabled) {
-            this.handleInputChange(e);
-          }
-        }}
+        value={this.disabled ? this.phylo_tree.name : undefined}
+        onChange={this.handleInputChange}
       />
     );
 
