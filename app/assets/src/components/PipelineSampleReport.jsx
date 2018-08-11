@@ -856,10 +856,9 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
-  gotoTreeLink(e) {
-    const taxId = e.target.getAttribute("data-tax-id");
+  gotoTreeLink(taxid) {
     window.open(
-      `/phylo_trees/index?taxid=${taxId}&project_id=${this.project_id}`,
+      `/phylo_trees/index?taxid=${taxid}&project_id=${this.project_id}`,
       "_blank"
     );
   }
@@ -908,8 +907,7 @@ class PipelineSampleReport extends React.Component {
       // right now, tree pipeline is only implemented for tax_level 1, but may change in future
       phyloTreeDot = (
         <i
-          data-tax-id={taxInfo.tax_id}
-          onClick={this.gotoTreeLink}
+          onClick={() => this.gotoTreeLink(taxInfo.tax_id)}
           className="fa fa-tree"
           aria-hidden="true"
         />
