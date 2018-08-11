@@ -106,7 +106,7 @@ class PhyloTreesController < ApplicationController
       pt = PhyloTree.new(name: name, taxid: taxid, tax_level: tax_level, tax_name: tax_name, user_id: current_user.id, project_id: @project.id, pipeline_run_ids: pipeline_run_ids)
       if pt.save
         Resque.enqueue(KickoffPhyloTree, pt.id)
-        render json: { status: :ok, message: "tree creation job submitted" }
+        render json: { status: :ok, message: "tree creation job submitted", phylo_tree_id: pt.id }
       else
         render json: { status: :not_acceptable, message: pt.errors.full_messages }
       end

@@ -73,11 +73,20 @@ class PhyloTreeInputs extends React.Component {
         })
         .then(res => {
           let message = res.data.message;
-          that.setState({
-            show_create_button: !(res.data.status === "ok"),
-            status_message:
-              message instanceof Array ? message.join("; ") : message
-          });
+          that.setState(
+            {
+              show_create_button: !(res.data.status === "ok"),
+              status_message:
+                message instanceof Array ? message.join("; ") : message
+            },
+            () => {
+              if (res.data.phylo_tree_id) {
+                location.href = `/phylo_trees/show?id=${
+                  res.data.phylo_tree_id
+                }`;
+              }
+            }
+          );
         });
     }
   }
