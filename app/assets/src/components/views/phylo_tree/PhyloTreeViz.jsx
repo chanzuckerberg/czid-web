@@ -8,11 +8,10 @@ class PhyloTreeViz extends React.Component {
   constructor(props) {
     super();
     this.csrf = props.csrf;
-    this.can_edit = props.can_edit;
-    this.phylo_tree = props.phylo_tree;
+    this.phyloTree = props.phyloTree;
     this.createTreeViz = this.createTreeViz.bind(this);
     this.state = {
-      show_retry_button: this.can_edit && this.phylo_tree.status == 2,
+      show_retry_button: props.canEdit && this.phyloTree.status == 2,
       retry_message: ""
     };
     this.retryTree = this.retryTree.bind(this);
@@ -23,8 +22,8 @@ class PhyloTreeViz extends React.Component {
   }
 
   createTreeViz() {
-    if (this.phylo_tree && this.phylo_tree.newick) {
-      let newick = this.phylo_tree.newick;
+    if (this.phyloTree && this.phyloTree.newick) {
+      let newick = this.phyloTree.newick;
       // below from http://bl.ocks.org/spond/f6b51aa6f34561f7006f
       let _ = require("lodash");
       let tree = d3.layout
@@ -42,7 +41,7 @@ class PhyloTreeViz extends React.Component {
     var that = this;
     axios
       .post("/phylo_trees/retry", {
-        id: this.phylo_tree.id,
+        id: this.phyloTree.id,
         authenticity_token: this.csrf
       })
       .then(res => {
@@ -55,8 +54,8 @@ class PhyloTreeViz extends React.Component {
 
   render() {
     let status_display, newick, tree;
-    if (this.phylo_tree) {
-      switch (this.phylo_tree.status) {
+    if (this.phyloTree) {
+      switch (this.phyloTree.status) {
         case 1:
           status_display = "TREE IS READY";
           break;
@@ -73,7 +72,7 @@ class PhyloTreeViz extends React.Component {
       </Button>
     );
     let tree_svg =
-      this.phylo_tree && this.phylo_tree.newick ? (
+      this.phyloTree && this.phyloTree.newick ? (
         <svg ref={node => (this.node = node)} />
       ) : null;
     return (

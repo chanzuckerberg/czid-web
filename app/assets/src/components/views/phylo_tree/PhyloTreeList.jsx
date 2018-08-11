@@ -4,7 +4,7 @@ class PhyloTreeList extends React.Component {
     super();
     this.taxon = props.taxon;
     this.project = props.project;
-    this.phylo_trees = props.phylo_trees;
+    this.phyloTrees = props.phyloTrees;
   }
   render() {
     let title = "Existing trees";
@@ -19,9 +19,9 @@ class PhyloTreeList extends React.Component {
     return (
       <div>
         <h2>{title}</h2>
-        {this.phylo_trees.length === 0
+        {this.phyloTrees.length === 0
           ? "No trees yet."
-          : this.phylo_trees.map((tree, i) => {
+          : this.phyloTrees.map((tree, i) => {
               return (
                 <p key={`tree_${i}`}>
                   <a href={`/phylo_trees/show?id=${tree.id}`}>

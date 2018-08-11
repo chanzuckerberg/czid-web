@@ -8,8 +8,8 @@ class PhyloTreeView extends React.Component {
     this.csrf = props.csrf;
     this.project = props.project;
     this.samples = props.samples;
-    this.can_edit = props.can_edit;
-    this.phylo_tree = props.phylo_tree;
+    this.canEdit = props.canEdit;
+    this.phyloTree = props.phyloTree;
   }
 
   render() {
@@ -17,15 +17,15 @@ class PhyloTreeView extends React.Component {
       <div>
         <PhyloTreeInputs
           disabled
-          phylo_tree={this.phylo_tree}
+          phyloTree={this.phyloTree}
           csrf={this.csrf}
           project={this.project}
           samples={this.samples}
         />
         <PhyloTreeViz
           csrf={this.csrf}
-          can_edit={this.can_edit}
-          phylo_tree={this.phylo_tree}
+          canEdit={this.canEdit}
+          phyloTree={this.phyloTree}
         />
       </div>
     );

@@ -3,7 +3,7 @@
     react_component('PhyloTreeInputs', {
     csrf: '<%= form_authenticity_token %>',
     disabled: false,
-    phylo_tree: null,
+    phyloTree: null,
     taxon: JSON.parse('<%= raw escape_json(@taxon) %>'),
     project: JSON.parse('<%= raw escape_json(@project) %>'),
     samples: JSON.parse('<%= raw escape_json(@samples) %>')

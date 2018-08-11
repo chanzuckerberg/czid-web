@@ -5,8 +5,8 @@
     taxon: JSON.parse('<%= raw escape_json(@taxon) %>'),
     project: JSON.parse('<%= raw escape_json(@project) %>'),
     samples: JSON.parse('<%= raw escape_json(@samples) %>'),
-    can_edit: <%= @can_edit %>,
-    phylo_tree: JSON.parse('<%= raw escape_json(@phylo_tree_augmented) %>')
+    canEdit: <%= @can_edit %>,
+    phyloTree: JSON.parse('<%= raw escape_json(@phylo_tree_augmented) %>')
     }, 'PhyloTreeView_page');
   <% end %>
 </div>

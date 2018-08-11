@@ -25,7 +25,7 @@ class PipelineSampleReport extends React.Component {
     this.admin = props.admin;
     this.report_ts = props.report_ts;
     this.sample_id = props.sample_id;
-    this.project_id = props.project_id;
+    this.projectId = props.projectId;
     this.gitVersion = props.git_version;
     this.canSeeAlignViz = props.can_see_align_viz;
     this.can_edit = props.can_edit;
@@ -858,7 +858,7 @@ class PipelineSampleReport extends React.Component {
 
   gotoTreeLink(taxid) {
     window.open(
-      `/phylo_trees/index?taxid=${taxid}&project_id=${this.project_id}`,
+      `/phylo_trees/index?taxid=${taxid}&project_id=${this.projectId}`,
       "_blank"
     );
   }

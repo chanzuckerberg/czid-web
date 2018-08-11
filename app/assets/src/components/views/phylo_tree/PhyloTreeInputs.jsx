@@ -6,24 +6,24 @@ class PhyloTreeInputs extends React.Component {
   constructor(props) {
     super();
     this.disabled = props.disabled;
-    this.phylo_tree = props.phylo_tree;
+    this.phyloTree = props.phyloTree;
     this.csrf = props.csrf;
-    this.taxon = this.phylo_tree
+    this.taxon = this.phyloTree
       ? {
-          name: this.phylo_tree.tax_name,
-          tax_level: this.phylo_tree.tax_level,
-          taxid: this.phylo_tree.taxid
+          name: this.phyloTree.tax_name,
+          tax_level: this.phyloTree.tax_level,
+          taxid: this.phyloTree.taxid
         }
       : props.taxon;
     this.project = props.project;
     this.samples = props.samples;
-    this.MIN_READS = 5;
+    this.MinReads = 5;
     this.state = {
       selectedPipelineRunIds:
-        this.disabled && this.phylo_tree
-          ? this.phylo_tree.pipeline_runs.map(pr => pr.id)
+        this.disabled && this.phyloTree
+          ? this.phyloTree.pipeline_runs.map(pr => pr.id)
           : this.samples
-              .filter(s => s.taxid_nt_reads >= this.MIN_READS)
+              .filter(s => s.taxid_nt_reads >= this.MinReads)
               .map(s => s.pipeline_run_id)
     };
 
@@ -72,9 +72,11 @@ class PhyloTreeInputs extends React.Component {
           authenticity_token: this.csrf
         })
         .then(res => {
+          let message = res.data.message;
           that.setState({
             show_create_button: !(res.data.status === "ok"),
-            status_message: res.data.message
+            status_message:
+              message instanceof Array ? message.join("; ") : message
           });
         });
     }
@@ -101,7 +103,7 @@ class PhyloTreeInputs extends React.Component {
             checked={
               this.state.selectedPipelineRunIds.indexOf(s.pipeline_run_id) >= 0
             }
-            disabled={this.disabled || s.taxid_nt_reads < this.MIN_READS}
+            disabled={this.disabled || s.taxid_nt_reads < this.MinReads}
           />
           <label htmlFor={s.pipeline_run_id}>
             {s.name} ({s.taxid_nt_reads} reads)
@@ -115,7 +117,7 @@ class PhyloTreeInputs extends React.Component {
         id="treeName"
         placeholder="Name"
         disabled={this.disabled}
-        value={this.disabled ? this.phylo_tree.name : undefined}
+        value={this.disabled ? this.phyloTree.name : undefined}
         onChange={this.handleInputChange}
       />
     );
