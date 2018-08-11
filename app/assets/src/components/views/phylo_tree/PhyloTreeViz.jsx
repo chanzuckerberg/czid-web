@@ -45,10 +45,17 @@ class PhyloTreeViz extends React.Component {
         authenticity_token: this.csrf
       })
       .then(res => {
-        that.setState({
-          show_retry_button: !(res.data.status === "ok"),
-          retry_message: res.data.message
-        });
+        that.setState(
+          {
+            show_retry_button: !(res.data.status === "ok"),
+            retry_message: res.data.message
+          },
+          () => {
+            if (res.data.phylo_tree_id) {
+              location.href = `/phylo_trees/show?id=${res.data.phylo_tree_id}`;
+            }
+          }
+        );
       });
   }
 
