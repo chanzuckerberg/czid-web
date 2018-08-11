@@ -24,7 +24,7 @@ class PipelineRunStage < ApplicationRecord
   # Max number of times we resubmit a job when it gets killed by EC2.
   MAX_RETRIES = 5
 
-  def install_pipeline(commit_or_branch = pipeline_run.pipeline_commit)
+  def self.install_pipeline(commit_or_branch = pipeline_run.pipeline_commit)
     "pip install --upgrade git+git://github.com/chanzuckerberg/s3mi.git; " \
     "cd /mnt; " \
     "git clone https://github.com/chanzuckerberg/idseq-dag.git; " \
@@ -33,13 +33,13 @@ class PipelineRunStage < ApplicationRecord
     "pip3 install -e . --upgrade"
   end
 
-  def upload_version(s3_file = pipeline_run.pipeline_version_file)
+  def self.upload_version(s3_file = pipeline_run.pipeline_version_file)
     "idseq_dag --version | cut -f2 -d ' ' | aws s3 cp  - #{s3_file}"
   end
 
-  def aegea_batch_submit_command(base_command,
-                                 job_queue = pipeline_run.sample.job_queue,
-                                 memory = Sample::DEFAULT_MEMORY_IN_MB)
+  def self.aegea_batch_submit_command(base_command,
+                                      job_queue = pipeline_run.sample.job_queue,
+                                      memory = Sample::DEFAULT_MEMORY_IN_MB)
     command = "aegea batch submit --command=\"#{base_command}\" "
     if memory <= Sample::DEFAULT_MEMORY_IN_MB
       vcpus = Sample::DEFAULT_VCPUS

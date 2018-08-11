@@ -66,13 +66,13 @@ class PhyloTree < ApplicationRecord
     samples = Sample.where(id: pipeline_runs.pluck(:sample_id))
     taxon_fasta_name_by_sample_id = {}
     samples.each do |s|
-      taxon_fasta_name_by_sample_id[s.id] = "#{s.name}__#{tax_name}.fasta"
+      taxon_fasta_name_by_sample_id[s.id] = "#{s.name}__#{tax_name}.fasta".downcase.gsub(/\W/, '-')
     end
     # Get locations of align_viz files (needed for identifying NCBI accessions matched by the reads in the taxon fasta)
     align_viz_files = {}
     pipeline_runs.each do |pr|
       align_viz_files[pr.id] = pr.alignment_viz_json_s3("nt.species.#{taxid}") # TODO: also support genus level (based on tax_level)
-      taxon_byteranges_hash[pr.id] += [pr.s3_paths_for_taxon_byteranges[tax_level][hit_type],
+      taxon_byteranges_hash[pr.id] += [pr.s3_paths_for_taxon_byteranges[tax_level]['NT'],
                                        taxon_fasta_name_by_sample_id[pr.sample_id]]
     end
     # Get the alignment config specifying the location of the NCBI reference used in the pipeline run

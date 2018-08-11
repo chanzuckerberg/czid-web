@@ -11,12 +11,12 @@
       "module": "idseq_dag.steps.generate_phylo_tree",
       "additional_files": {
         "nt_loc_db": "<%= @attribute_dict[:nt_loc_db] %>",
-        "align_viz_files": "<%= raw escape_json(@attribute_dict[:align_viz_files]) %>"
+        "align_viz_files": <%= @attribute_dict[:align_viz_files].to_json %>
       },
       "additional_attributes": {
         "taxid": <%= @attribute_dict[:taxid] %>,
         "nt_db": "<%= @attribute_dict[:nt_db] %>",
-        "taxon_byteranges": "<%= raw escape_json(@attribute_dict[:taxon_byteranges_hash]) %>"
+        "taxon_byteranges": <%= @attribute_dict[:taxon_byteranges].to_json %>
       }
     }
   ],
