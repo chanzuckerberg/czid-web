@@ -112,8 +112,8 @@ class PhyloTree < ApplicationRecord
 
   def kickoff
     return unless [STATUS_INITIALIZED, STATUS_FAILED].include?(status)
-    self.command_stdout, self.command_stderr, status = Open3.capture3(job_command)
-    if status.exitstatus.zero?
+    self.command_stdout, self.command_stderr, command_status = Open3.capture3(job_command)
+    if command_status.exitstatus.zero?
       output = JSON.parse(command_stdout)
       self.job_id = output['jobId']
       self.status = STATUS_IN_PROGRESS
