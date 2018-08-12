@@ -1,6 +1,6 @@
 import axios from "axios";
 import React from "react";
-import { Input, Checkbox, Button } from "semantic-ui-react";
+import { Input, Checkbox, Button, Accordion, Menu } from "semantic-ui-react";
 
 class PhyloTreeInputs extends React.Component {
   constructor(props) {
@@ -19,19 +19,39 @@ class PhyloTreeInputs extends React.Component {
     this.samples = props.samples;
     this.MinReads = 5;
     this.state = {
+      active_projects: [],
       selectedPipelineRunIds:
         this.disabled && this.phyloTree
-          ? this.phyloTree.pipeline_runs.map(pr => pr.id)
-          : this.samples
-              .filter(s => s.taxid_nt_reads >= this.MinReads)
+          ? // if a tree is present, default to its pipeline runs:
+            this.phyloTree.pipeline_runs.map(pr => pr.id)
+          : // if no tree is present, default to those boxes that have enough reads and belong to the project
+            this.samples
+              .filter(
+                s =>
+                  s.taxid_nt_reads >= this.MinReads &&
+                  s.project_id == this.project.id
+              )
               .map(s => s.pipeline_run_id)
     };
 
     this.createTree = this.createTree.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
+    this.renderSampleCheckbox = this.renderSampleCheckbox.bind(this);
+    this.handleProjectClick = this.handleProjectClick.bind(this);
     this.updatePipelineRunIdSelection = this.updatePipelineRunIdSelection.bind(
       this
     );
+  }
+
+  handleProjectClick(project_name) {
+    let active_projects = this.state.active_projects;
+    let index = this.state.active_projects.indexOf(project_name);
+    if (index < 0) {
+      active_projects.push(project_name);
+    } else {
+      active_projects.splice(index, 1);
+    }
+    this.setState({ active_projects: active_projects });
   }
 
   updatePipelineRunIdSelection(e, PrId) {
@@ -51,6 +71,29 @@ class PhyloTreeInputs extends React.Component {
 
   handleInputChange(e, { name, value }) {
     this.setState({ [e.target.id]: value });
+  }
+
+  renderSampleCheckbox(sample) {
+    return (
+      <div>
+        <input
+          type="checkbox"
+          id={sample.pipeline_run_id}
+          key={sample.pipeline_run_id}
+          onChange={e =>
+            this.updatePipelineRunIdSelection(e, sample.pipeline_run_id)
+          }
+          checked={
+            this.state.selectedPipelineRunIds.indexOf(sample.pipeline_run_id) >=
+            0
+          }
+          disabled={this.disabled || sample.taxid_nt_reads < this.MinReads}
+        />
+        <label htmlFor={sample.pipeline_run_id}>
+          {sample.name} ({sample.taxid_nt_reads} reads)
+        </label>
+      </div>
+    );
   }
 
   createTree() {
@@ -99,27 +142,67 @@ class PhyloTreeInputs extends React.Component {
       </h2>
     );
 
-    let sample_list = this.samples.map(function(s, i) {
-      return (
+    // Generate sample list within the current project
+    let samples_in_project = this.samples.filter(
+      s => s.project_id == this.project.id
+    );
+    let sample_display_in_project = (
+      <div>
+        <br />
+        <b>Samples from this project:</b>
+        <br />
+        {samples_in_project.length === 0
+          ? "None."
+          : samples_in_project.map(this.renderSampleCheckbox, this)}
+      </div>
+    );
+
+    // Generate list of samples from other projects, organized by project
+    let samples_by_project_name = {};
+    for (let sample of this.samples) {
+      if (sample.project_id != this.project.id) {
+        samples_by_project_name[sample.project_name] = (
+          samples_by_project_name[sample.project_name] || []
+        ).concat([sample]);
+      }
+    }
+    let project_names = Object.keys(samples_by_project_name);
+
+    let sample_display_outside_project =
+      project_names.length === 0 ? null : (
         <div>
-          <input
-            type="checkbox"
-            id={s.pipeline_run_id}
-            key={s.pipeline_run_id}
-            onChange={e =>
-              this.updatePipelineRunIdSelection(e, s.pipeline_run_id)
-            }
-            checked={
-              this.state.selectedPipelineRunIds.indexOf(s.pipeline_run_id) >= 0
-            }
-            disabled={this.disabled || s.taxid_nt_reads < this.MinReads}
-          />
-          <label htmlFor={s.pipeline_run_id}>
-            {s.name} ({s.taxid_nt_reads} reads)
-          </label>
+          <br />
+          <b>
+            {this.disabled
+              ? "Samples from other projects:"
+              : `You may wish samples from other projects that contain ${
+                  this.taxon.name
+                }:`}
+          </b>
+          <Accordion as={Menu} vertical size="massive" exclusive={false}>
+            {Object.keys(samples_by_project_name).map(project_name => {
+              return (
+                <Menu.Item>
+                  <Accordion.Title
+                    content={project_name}
+                    onClick={() => this.handleProjectClick(project_name)}
+                  />
+                  <Accordion.Content
+                    active={
+                      this.disabled ||
+                      this.state.active_projects.indexOf(project_name) >= 0
+                    }
+                    content={samples_by_project_name[project_name].map(
+                      this.renderSampleCheckbox,
+                      this
+                    )}
+                  />
+                </Menu.Item>
+              );
+            })}
+          </Accordion>
         </div>
       );
-    }, this);
 
     let tree_name = (
       <Input
@@ -144,8 +227,9 @@ class PhyloTreeInputs extends React.Component {
       <div>
         {title}
         {tree_name}
-        {sample_list}
+        {sample_display_in_project}
         {create_button}
+        {sample_display_outside_project}
       </div>
     );
   }

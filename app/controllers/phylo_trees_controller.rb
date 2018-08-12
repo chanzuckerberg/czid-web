@@ -55,16 +55,16 @@ class PhyloTreesController < ApplicationController
 
     @project = current_power.updatable_projects.find(project_id)
 
-    # Retrieve all pipeline runs in the specified project that contain the specified taxid.
-    project_sample_ids = current_power.project_samples(@project).pluck(:id)
-    pipeline_run_ids_with_taxid = TaxonCount.where(tax_id: taxid).where(count_type: 'NT').pluck(:pipeline_run_id)
-    @pipeline_runs = PipelineRun.top_completed_runs.where(sample_id: project_sample_ids).where(id: pipeline_run_ids_with_taxid)
+    # Retrieve pipeline runs that contain the specified taxid.
+    eligible_pipeline_runs = current_power.pipeline_runs.top_completed_runs
+    all_pipeline_run_ids_with_taxid = TaxonCount.where(tax_id: taxid).where(count_type: 'NT').pluck(:pipeline_run_id)
+    eligible_pipeline_runs_with_taxid = eligible_pipeline_runs.where(id: all_pipeline_run_ids_with_taxid)
 
     # Retrieve information for displaying the tree's sample list.
-    @samples = sample_details_json(@pipeline_runs, taxid)
+    @samples = sample_details_json(eligible_pipeline_runs_with_taxid, taxid)
 
     # Retrieve information about the taxon
-    example_taxon_count = @pipeline_runs.first.taxon_counts.find_by(tax_id: taxid)
+    example_taxon_count = eligible_pipeline_runs_with_taxid.first.taxon_counts.find_by(tax_id: taxid)
     taxon_name = example_taxon_count.name
     tax_level = example_taxon_count.tax_level
     @taxon = { taxid: taxid, tax_level: tax_level, name: taxon_name }
@@ -124,20 +124,22 @@ class PhyloTreesController < ApplicationController
     # Retrieve information for displaying the tree's sample list.
     # Expose it as an array of hashes containing
     # - sample name
+    # - project id and name
     # - pipeline run id to be used for the sample
     # - number of reads matching the specified taxid in NT
     return [] if pipeline_runs.blank?
     Sample.connection.select_all("
-                   select pipeline_run_ids_sample_names.name,
-                          pipeline_run_ids_sample_names.pipeline_run_id,
+                   select pipeline_runs_samples_projects.name,
+                          pipeline_runs_samples_projects.project_id,
+                          pipeline_runs_samples_projects.project_name,
+                          pipeline_runs_samples_projects.pipeline_run_id,
                           taxon_counts.count as taxid_nt_reads
-                   from (select pipeline_runs.id as pipeline_run_id, samples.name
-                         from pipeline_runs
-                         inner join samples
-                         on pipeline_runs.sample_id = samples.id
-                         where pipeline_runs.id in (#{pipeline_runs.pluck(:id).join(',')})) pipeline_run_ids_sample_names
+                   from (select pipeline_runs.id as pipeline_run_id, samples.name, samples.project_id, projects.name as project_name
+                         from ((pipeline_runs inner join samples on pipeline_runs.sample_id = samples.id)
+                               inner join projects on samples.project_id = projects.id)
+                         where pipeline_runs.id in (#{pipeline_runs.pluck(:id).join(',')})) pipeline_runs_samples_projects
                    inner join taxon_counts
-                   on taxon_counts.pipeline_run_id = pipeline_run_ids_sample_names.pipeline_run_id
+                   on taxon_counts.pipeline_run_id = pipeline_runs_samples_projects.pipeline_run_id
                    where taxon_counts.tax_id = #{taxid} and taxon_counts.count_type = 'NT'
     ").to_hash
   end
