@@ -81,7 +81,7 @@ class PhyloTreesController < ApplicationController
     if @phylo_tree.status == PhyloTree::STATUS_FAILED
       @phylo_tree.update(status: PhyloTree::STATUS_INITIALIZED)
       Resque.enqueue(KickoffPhyloTree, @phylo_tree.id)
-      render json: { status: :ok, message: "retry submitted", phylo_tree_id: @phylo_tree.id }
+      render json: { status: :ok, message: "retry submitted" }
     else
       render json: { status: :conflict, message: "a tree run is already in progress for this project and taxon" }
     end

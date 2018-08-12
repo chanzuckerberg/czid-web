@@ -51,8 +51,8 @@ class PhyloTreeViz extends React.Component {
             retry_message: res.data.message
           },
           () => {
-            if (res.data.phylo_tree_id) {
-              location.href = `/phylo_trees/show?id=${res.data.phylo_tree_id}`;
+            if (res.data.status === "ok") {
+              location.href = `/phylo_trees/show?id=${this.phyloTree.id}`;
             }
           }
         );

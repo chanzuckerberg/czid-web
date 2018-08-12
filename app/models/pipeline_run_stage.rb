@@ -39,7 +39,7 @@ class PipelineRunStage < ApplicationRecord
 
   def self.aegea_batch_submit_command(base_command,
                                       memory = Sample::DEFAULT_MEMORY_IN_MB,
-                                      job_queue = pipeline_run.sample.job_queue,
+                                      job_queue: pipeline_run.sample.job_queue,
                                       docker_image: "idseq_dag")
     command = "aegea batch submit --command=\"#{base_command}\" "
     if memory <= Sample::DEFAULT_MEMORY_IN_MB
