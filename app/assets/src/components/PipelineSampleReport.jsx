@@ -34,12 +34,18 @@ class PipelineSampleReport extends React.Component {
     this.all_backgrounds = props.all_backgrounds;
     this.max_rows_to_render = props.max_rows || 1500;
     this.default_sort_by = "nt_aggregatescore";
+
+    const allCategorySet = new Set(
+      this.all_categories.map(categoryOption => {
+        return categoryOption.name;
+      })
+    );
     const cachedIncludedCategories = Cookies.get("includedCategories");
     const cachedIncludedSubcategories = Cookies.get("includedSubcategories");
+
     const cached_name_type = Cookies.get("name_type");
     const savedThresholdFilters = ThresholdMap.getSavedThresholdFilters();
-    this.category_child_parent = { Phage: "Viruses" };
-    this.category_parent_child = { Viruses: ["Phage"] };
+
     this.showConcordance = false;
     this.allThresholds = [
       { text: "Score", value: "NT_aggregatescore" },
@@ -54,6 +60,8 @@ class PipelineSampleReport extends React.Component {
       { text: "NR %id", value: "NR_percentidentity" },
       { text: "R log(1/e)", value: "NR_neglogevalue" }
     ];
+    this.category_child_parent = { Phage: "Viruses" };
+    this.category_parent_child = { Viruses: ["Phage"] };
     this.genus_map = {};
 
     this.INVALID_CALL_BASE_TAXID = -1e8;
@@ -95,10 +103,14 @@ class PipelineSampleReport extends React.Component {
       pagesRendered: 0,
       sort_by: this.default_sort_by,
       includedCategories: cachedIncludedCategories
-        ? JSON.parse(cachedIncludedCategories)
+        ? JSON.parse(cachedIncludedCategories).filter(category => {
+            return allCategorySet.has(category);
+          })
         : [],
       includedSubcategories: cachedIncludedSubcategories
-        ? JSON.parse(cachedIncludedSubcategories)
+        ? JSON.parse(cachedIncludedSubcategories).filter(category => {
+            return category in this.category_child_parent;
+          })
         : [],
       name_type: cached_name_type ? cached_name_type : "Scientific Name",
       search_taxon_id: 0,
@@ -138,15 +150,6 @@ class PipelineSampleReport extends React.Component {
 
     this.initializeTooltip();
   }
-
-  // // TODO: remove use of componentDidUpdate
-  // UNSAFE_componentWillUpdate(nextProps, nextState) {
-  //   this.state.rendering = true;
-  // }
-
-  // componentDidUpdate(prevProps, prevState) {
-  //   this.state.rendering = false;
-  // }
 
   componentWillMount() {
     // Fill in URL parameters for usability and specifying data to fetch.
@@ -583,14 +586,21 @@ class PipelineSampleReport extends React.Component {
     let includedSubcategories = newIncludedCategories.filter(category => {
       return category in this.category_child_parent;
     });
+
+    const allCategorySet = new Set(
+      this.all_categories.map(categoryOption => {
+        return categoryOption.name;
+      })
+    );
     let includedCategories = newIncludedCategories.filter(category => {
-      return !(category in this.category_child_parent);
+      return (
+        !(category in this.category_child_parent) &&
+        allCategorySet.has(category)
+      );
     });
 
-    let subcats = Object.keys(this.category_child_parent);
-    for (let i = 0; i < subcats.length; i++) {
-      let subcat = subcats[i];
-      let parent = this.category_child_parent[subcat];
+    Object.keys(this.category_child_parent).forEach(subcat => {
+      const parent = this.category_child_parent[subcat];
       if (
         includedCategories.includes(parent) &&
         !this.state.includedCategories.includes(parent)
@@ -599,11 +609,11 @@ class PipelineSampleReport extends React.Component {
           includedSubcategories.push(subcat);
         }
       }
-    }
+    });
 
     this.setState(
       {
-        newIncludedCategories,
+        includedCategories,
         includedSubcategories,
         searchId: 0,
         searchKey: ""
