@@ -7,7 +7,7 @@
       "srst2_out": ["output.log", "output__genes__ARGannot_r2__results.txt", "output__fullgenes__ARGannot_r2__results.txt", "amr_processed_results.csv", "amr_summary_results.csv"]
     <% else %>
       "fastqs": ["<%= @attribute_dict[:fastq1] %>"],
-      "srst2_out": ["output.log", "output__genes__ARGannot_r2__results.txt", "output__fullgenes__ARGannot_r2__results.txt", "amr_processed_results.csv", "amr_summary_results.csv"]
+      "srst2_out": ["output.log", "output__genes__ARGannot_r2__results.txt", "output__fullgenes__ARGannot_r2__results.txt", PipelineRun::AMR_FULL_RESULTS_NAME, PipelineRun:: AMR_DRUG_SUMMARY_RESULTS]
     <% end %>
   },
   "steps": [
