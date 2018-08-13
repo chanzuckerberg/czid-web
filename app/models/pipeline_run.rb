@@ -302,10 +302,7 @@ class PipelineRun < ApplicationRecord
 
   def db_load_amr_counts
     # test files: "s3://idseq-database/test/AMR/amr_processed_results.csv", "s3://idseq-database/test/AMR/amr_summary_results.csv"
-    Rails.logger.info(s3_file_for("amr_full_results"))
-    Rails.logger.info(local_amr_full_results_path)
     amr_results = PipelineRun.download_file(s3_file_for("amr_full_results"), local_amr_full_results_path)
-    Rails.logger.info(amr_results)
     unless File.zero?(amr_results)
       amr_counts_array = []
       # First line of output file has header titles, e.g. "Sample/Gene/Allele..." that are extraneous
@@ -463,13 +460,8 @@ class PipelineRun < ApplicationRecord
     #   to an S3 interface in order to give us the option of running pipeline_monitor
     #   in a new environment that result_monitor does not have access to.
     # ]
-    Rails.logger.info("in check and enqueue")
     output = output_state.output
     state = output_state.state
-    Rails.logger.info("state")
-    Rails.logger.info(state)
-    Rails.logger.info("output")
-    Rails.logger.info(output)
     return unless state == STATUS_UNKNOWN
     # TODO: How long does this wait for file to be generated for the output? looks like not long at all.
     # does it wait for a pipeline run stage to be finished ?
@@ -499,24 +491,11 @@ class PipelineRun < ApplicationRecord
     end
   end
 
-  # change these two functions to not have amr_counts accounted for
   def all_output_states_terminal?
-    # arr = output_states.pluck(:state)
-    # Rails.logger.info(arr)
-    # arr.pop
-    # Rails.logger.info("after deleting amr counts")
-    # Rails.logger.info(arr)
-    # arr.all? { |s| [STATUS_LOADED, STATUS_FAILED, STATUS_LOADING_ERROR].include?(s) }
     output_states.pluck(:state).all? { |s| [STATUS_LOADED, STATUS_FAILED, STATUS_LOADING_ERROR].include?(s) }
   end
 
   def all_output_states_loaded?
-    # arr = output_states.pluck(:state)
-    # Rails.logger.info(arr)
-    # arr.pop
-    # Rails.logger.info("after deleting amr counts")
-    # Rails.logger.info(arr)
-    # arr.all? { |s| s == STATUS_LOADED }
     output_states.pluck(:state).all? { |s| s == STATUS_LOADED }
   end
 
@@ -530,8 +509,6 @@ class PipelineRun < ApplicationRecord
 
     # Load any new outputs that have become available:
     output_states.each do |o|
-      Rails.logger.info("before checking and enqueue function")
-      Rails.logger.info(o)
       check_and_enqueue(o)
     end
 
