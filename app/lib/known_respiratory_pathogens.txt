@@ -1,0 +1,69 @@
+Acinetobacter baumannii	470
+Aspergillus flavus	1294126
+Aspergillus fumigatus	1035095
+Aspergillus niger	1316740
+Aspergillus terreus	285217
+Bacteroides fragilis	817
+Blastomyces dermatitidis	447095
+Bordetella pertussis	520
+Burkholderia cenocepacia	95486
+Burkholderia pseudomallei	28450
+Chlamydia pneumoniae	83558
+Chlamydia psittaci	83554
+Citrobacter freundii	546
+Citrobacter koseri	545
+Coccidioides immitis	246410
+Coccidioides posadasii	199306
+Coxiella burnetii	777
+Cryptococcus neoformans	1160107
+Cryptococcus gattii VGI	1268595
+Klebsiella aerogenes	548
+Enterobacter cloacae	550
+Escherichia coli	562
+Francisella tularensis	263
+Fusobacterium necrophorum	859
+Fusobacterium nucleatum	851
+Haemophilus influenzae	725
+Histoplasma capsulatum	1226784
+Moraxella catarrhalis	480
+Morganella morganii	582
+Mucor	1001137
+Mycobacterium tuberculosis	1773
+Mycoplasma pneumoniae	2104
+Nocardia	1817
+Pasteurella multocida	747
+Pneumocystis jirovecii	1125859
+Proteus mirabilis	584
+Pseudomonas aeruginosa	287
+Rhizomucor	1031333
+Serratia marcescens	615
+Streptococcus pneumoniae	1001744
+Streptococcus pyogenes	1010840
+Streptococcus anginosus	1000570
+Streptococcus intermedius	1095731
+Streptococcus constellatus	1035184
+Staphylococcus aureus	1004953
+Mastadenovirus	10509
+Alphacoronavirus	11135
+Betacoronavirus	11128
+Gammacoronavirus	11120
+Cytomegalovirus	10358
+Human betaherpesvirus 5	10359
+Respirovirus	11191
+unidentified human coronavirus	694448
+Human coronavirus 229E	11137
+Human parainfluenza	Nont Found
+Human orthopneumovirus	11250
+Influenza A virus	11320
+Influenza B virus	11520
+Influenza C virus	11552
+Parainfluenza virus	Nont Found
+Respiratory syncytial virus	12814
+Rhinovirus A	12129
+Rhinovirus B	12131
+Rhinovirus C	435275
+Klebsiella oxytoca	571
+Klebsiella pneumoniae	573
+Legionella pneumophila	446
+Metapneumovirus	11264
+Human orthopneumovirus	11250

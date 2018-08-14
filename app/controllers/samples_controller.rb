@@ -173,6 +173,7 @@ class SamplesController < ApplicationController
 
     background_id = check_background_id(@sample)
     @report_page_params = { pipeline_version: @pipeline_version, background_id: background_id } if background_id
+    @report_page_params[:scoring_model] = params[:scoring_model] if params[:scoring_model]
     if @pipeline_run && (((@pipeline_run.adjusted_remaining_reads.to_i > 0 || @pipeline_run.results_finalized?) && !@pipeline_run.failed?) || @pipeline_run.report_ready?)
       if background_id
         @report_present = 1
@@ -225,19 +226,19 @@ class SamplesController < ApplicationController
       backgrounds: current_power.backgrounds.map do |background|
         { name: background.name, value: background.id }
       end,
-      advancedFilters: {
-        filters: [
-          { name: "Aggregate Score", value: "NT_aggregatescore" },
-          { name: "NT Z Score", value: "NT_zscore" },
-          { name: "NT rPM", value: "NT_rpm" },
-          { name: "NT r (total reads)", value: "NT_r" },
-          { name: "NT %id", value: "NT_percentidentity" },
-          { name: "NT log(1/e)", value: "NT_neglogevalue" },
-          { name: "NR Z Score", value: "NR_zscore" },
-          { name: "NR r (total reads)", value: "NR_r" },
-          { name: "NR rPM", value: "NR_rpm" },
-          { name: "NR %id", value: "NR_percentidentity" },
-          { name: "R log(1/e)", value: "NR_neglogevalue" }
+      thresholdFilters: {
+        targets: [
+          { text: "Aggregate Score", value: "NT_aggregatescore" },
+          { text: "NT Z Score", value: "NT_zscore" },
+          { text: "NT rPM", value: "NT_rpm" },
+          { text: "NT r (total reads)", value: "NT_r" },
+          { text: "NT %id", value: "NT_percentidentity" },
+          { text: "NT log(1/e)", value: "NT_neglogevalue" },
+          { text: "NR Z Score", value: "NR_zscore" },
+          { text: "NR r (total reads)", value: "NR_r" },
+          { text: "NR rPM", value: "NR_rpm" },
+          { text: "NR %id", value: "NR_percentidentity" },
+          { text: "R log(1/e)", value: "NR_neglogevalue" }
         ],
         operators: [">=", "<="]
       }
@@ -588,7 +589,8 @@ class SamplesController < ApplicationController
     end
     taxon_ids = taxon_ids.compact
     categories = params[:categories]
-    advanced_filters = (params[:advancedFilters] || {}).map { |filter| JSON.parse(filter) }
+    threshold_filters = (params[:thresholdFilters] || {}).map { |filter| JSON.parse(filter) }
+    Rails.logger.debug("Categories: #{categories}")
 
     # TODO: should fail if field is not well formatted and return proper error to client
     sort_by = params[:sortBy] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
@@ -598,7 +600,7 @@ class SamplesController < ApplicationController
 
     first_sample = samples.first
     background_id = params[:background] ? params[:background].to_i : check_background_id(first_sample)
-    taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, advanced_filters).pluck("tax_id") if taxon_ids.empty?
+    taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, threshold_filters).pluck("tax_id") if taxon_ids.empty?
 
     return {} if taxon_ids.empty?
 

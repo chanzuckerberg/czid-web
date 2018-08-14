@@ -1,19 +1,32 @@
-@charset "utf-8";
+@charset 'utf-8';
+
+// legacy
 @import "styles/header";
+@import "styles/home";
 @import "styles/colors";
 @import "styles/forbidden";
 @import "styles/login";
-@import "styles/home";
 @import "styles/reports";
 @import "styles/samples";
 @import "styles/samplesUpload";
 @import "styles/users";
 @import "styles/resultsfolder";
 @import "styles/visualization";
-@import "styles/components";
 @import "styles/typography";
 @import "styles/variables";
 @import "styles/edit_password";
-@import "styles/slider";
 @import "styles/cli_user_instructions";
+
+// ui/controls
+@import "styles/ui/controls/dropdowns/button_dropdown";
+@import "styles/ui/controls/dropdowns/dropdown";
+@import "styles/ui/controls/dropdowns/multiple_dropdown";
+@import "styles/ui/controls/dropdowns/threshold_filter_dropdown";
+@import "styles/ui/controls/buttons/button";
+@import "styles/ui/controls/buttons/primary_button";
+@import "styles/ui/controls/buttons/secondary_button";
+@import "styles/ui/controls/slider";
+
+// views
+@import "styles/views/playground_controls";
 @import "styles/views/phylo_tree_viz";

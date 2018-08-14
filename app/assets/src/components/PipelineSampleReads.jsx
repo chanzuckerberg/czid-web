@@ -3,8 +3,8 @@ import ReactDOM from "react-dom";
 import moment from "moment";
 import $ from "jquery";
 import axios from "axios";
-import Cookies from "js-cookie";
-import { Button, Icon, Divider, Popup, Dropdown } from "semantic-ui-react";
+import { Button, Divider, Dropdown } from "semantic-ui-react";
+import DownloadButton from "./ui/controls/buttons/DownloadButton";
 import numberWithCommas from "../helpers/strings";
 import SubHeader from "./SubHeader";
 import ERCCScatterPlot from "./ERCCScatterPlot";
@@ -830,15 +830,7 @@ class PipelineSampleReads extends React.Component {
       report_buttons = (
         <div className="col no-padding s2 right-align">
           <div className="report-action-buttons">
-            <Button
-              icon
-              labelPosition="left"
-              className="icon link download-btn"
-              onClick={this.downloadCSV}
-            >
-              <Icon className="cloud download alternate" />
-              <span>Download</span>
-            </Button>
+            <DownloadButton onClick={this.downloadCSV} />
           </div>
         </div>
       );

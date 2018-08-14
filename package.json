@@ -17,6 +17,7 @@
     ]
   },
   "devDependencies": {
+    "airbnb-prop-types": "^2.10.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-preset-env": "^1.6.1",
@@ -46,11 +47,13 @@
     "style-loader": "^0.20.2",
     "uglifyjs-webpack-plugin": "^1.1.6",
     "url-loader": "^1.0.1",
-    "webpack": "^3.10.0",
+    "webpack": "^4.16.5",
+    "webpack-cli": "^3.1.0",
     "webpack-merge": "^4.1.2"
   },
   "dependencies": {
     "axios": "^0.17.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "clusterfck": "git+https://github.com/chanzuckerberg/clusterfck.git#master",
     "copy-to-clipboard": "^3.0.8",
     "d3": "^3.5.17",
@@ -59,6 +62,7 @@
     "js-cookie": "^2.2.0",
     "material-ui": "^1.0.0-beta.29",
     "materialize-css": "^0.100.2",
+    "mini-css-extract-plugin": "^0.4.1",
     "moment": "^2.20.1",
     "nanobar": "^0.4.2",
     "nouislider": "^11.0.3",
@@ -75,7 +79,7 @@
     "react-tipsy": "^0.6.2",
     "react-tooltip": "^3.4.0",
     "semantic-ui-css": "^2.3.0",
-    "semantic-ui-react": "^0.78.3",
+    "semantic-ui-react": "^0.82.1",
     "text-width": "^1.2.0",
     "url-search-params-polyfill": "^3.0.0"
   },

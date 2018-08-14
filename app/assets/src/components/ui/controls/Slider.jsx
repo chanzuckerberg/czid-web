@@ -1,8 +1,8 @@
 import PropTypes from "prop-types";
 import React from "react";
-import Slider from "rc-slider";
+import BaseSlider from "rc-slider";
 
-class LabeledSlider extends React.Component {
+class Slider extends React.Component {
   constructor(props) {
     super(props);
     this.onChangeParent = this.props.onChange;
@@ -22,12 +22,15 @@ class LabeledSlider extends React.Component {
   }
 
   render() {
+    const sliderClasses = `idseq-ui slider ${
+      this.props.disabled ? "disabled" : " "
+    }`;
+
     return (
-      <div className="labeled-slider">
-        <span className="title">
-          <b>{this.props.label}</b> {this.state.value}
-        </span>
-        <Slider
+      <div className={sliderClasses}>
+        <span className="label-title">{this.props.label}</span>
+        {this.state.value}
+        <BaseSlider
           {...this.props}
           value={this.state.value}
           onChange={this.onChange}
@@ -37,10 +40,11 @@ class LabeledSlider extends React.Component {
   }
 }
 
-LabeledSlider.propTypes = {
+Slider.propTypes = {
+  disabled: PropTypes.bool,
   label: PropTypes.string,
   onChange: PropTypes.func,
   value: PropTypes.number
 };
 
-export default LabeledSlider;
+export default Slider;

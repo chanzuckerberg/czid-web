@@ -1,0 +1,10 @@
+<div id="PlaygroundControls_page">
+</div>
+
+<%= javascript_tag do %>
+  react_component(
+    'PlaygroundControls', 
+    JSON.parse('<%= raw escape_json(@controls_data) %>'),
+    'PlaygroundControls_page'
+  );
+<% end %>
