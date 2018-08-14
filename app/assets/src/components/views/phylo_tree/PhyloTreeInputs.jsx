@@ -1,8 +1,10 @@
 import axios from "axios";
 import React from "react";
-import { Input, Checkbox, Button, Accordion, Menu } from "semantic-ui-react";
+import { Input, Checkbox, Accordion, Menu } from "semantic-ui-react";
+import PrimaryButton from "../../ui/controls/buttons/PrimaryButton";
 
 class PhyloTreeInputs extends React.Component {
+  // PhyloTreeInputs represents the inputs for the phylo_tree
   constructor(props) {
     super();
     this.disabled = props.disabled;
@@ -17,9 +19,9 @@ class PhyloTreeInputs extends React.Component {
       : props.taxon;
     this.project = props.project;
     this.samples = props.samples;
-    this.MinReads = 5;
+    this.minReads = 5;
     this.state = {
-      active_projects: [],
+      activeProjects: [],
       selectedPipelineRunIds:
         this.disabled && this.phyloTree
           ? // if a tree is present, default to its pipeline runs:
@@ -28,7 +30,7 @@ class PhyloTreeInputs extends React.Component {
             this.samples
               .filter(
                 s =>
-                  s.taxid_nt_reads >= this.MinReads &&
+                  s.taxid_nt_reads >= this.minReads &&
                   s.project_id == this.project.id
               )
               .map(s => s.pipeline_run_id)
@@ -44,14 +46,14 @@ class PhyloTreeInputs extends React.Component {
   }
 
   handleProjectClick(project_name) {
-    let active_projects = this.state.active_projects;
-    let index = this.state.active_projects.indexOf(project_name);
+    let activeProjects = this.state.activeProjects;
+    let index = this.state.activeProjects.indexOf(project_name);
     if (index < 0) {
-      active_projects.push(project_name);
+      activeProjects.push(project_name);
     } else {
-      active_projects.splice(index, 1);
+      activeProjects.splice(index, 1);
     }
-    this.setState({ active_projects: active_projects });
+    this.setState({ activeProjects: activeProjects });
   }
 
   updatePipelineRunIdSelection(e, PrId) {
@@ -87,7 +89,7 @@ class PhyloTreeInputs extends React.Component {
             this.state.selectedPipelineRunIds.indexOf(sample.pipeline_run_id) >=
             0
           }
-          disabled={this.disabled || sample.taxid_nt_reads < this.MinReads}
+          disabled={this.disabled || sample.taxid_nt_reads < this.minReads}
         />
         <label htmlFor={sample.pipeline_run_id}>
           {sample.name} ({sample.taxid_nt_reads} reads)
@@ -175,7 +177,7 @@ class PhyloTreeInputs extends React.Component {
           <b>
             {this.disabled
               ? "Samples from other projects:"
-              : `You may wish samples from other projects that contain ${
+              : `You may wish to include samples from other projects that contain ${
                   this.taxon.name
                 }:`}
           </b>
@@ -190,7 +192,7 @@ class PhyloTreeInputs extends React.Component {
                   <Accordion.Content
                     active={
                       this.disabled ||
-                      this.state.active_projects.indexOf(project_name) >= 0
+                      this.state.activeProjects.indexOf(project_name) >= 0
                     }
                     content={samples_by_project_name[project_name].map(
                       this.renderSampleCheckbox,
@@ -216,9 +218,7 @@ class PhyloTreeInputs extends React.Component {
 
     let create_button = this.disabled ? null : (
       <div>
-        <Button primary onClick={this.createTree}>
-          Create Tree
-        </Button>
+        <PrimaryButton text="Create Tree" onClick={this.createTree} />
         <p>{this.state.status_message}</p>
       </div>
     );

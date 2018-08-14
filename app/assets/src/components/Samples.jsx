@@ -887,7 +887,7 @@ class Samples extends React.Component {
     if (project_id) {
       tree_index_url += `?project_id=${project_id}`;
     }
-    window.open(tree_index_url, "_blank");
+    window.open(tree_index_url, "_blank noopener hide_referrer");
   }
 
   clearAllFilters() {
@@ -2037,14 +2037,7 @@ function ProjectInfoHeading({
         {compare_button}
         <BackgroundModal parent={parent} />
         {parent.admin ? (
-          <ActiveInactiveButton
-            label="Phylogenetic Trees"
-            onClick={parent.gotoTreeList}
-            enabled={true}
-            outerClass="background-area"
-            enabledClass="background center"
-            disabledClass="background center btn-disabled"
-          />
+          <i className="fa fa-tree fa-5x" onClick={parent.gotoTreeList} />
         ) : null}
         {state.selectedProjectId &&
         canEditProject(state.selectedProjectId) &&

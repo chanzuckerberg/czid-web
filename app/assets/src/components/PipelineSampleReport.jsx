@@ -133,7 +133,6 @@ class PipelineSampleReport extends React.Component {
     this.collapseTable = this.collapseTable.bind(this);
     this.gotoTreeLink = this.gotoTreeLink.bind(this);
     this.displayHighlightTags = this.displayHighlightTags.bind(this);
-    this.downloadAssemblyLink = this.downloadAssemblyLink.bind(this);
     this.downloadFastaUrl = this.downloadFastaUrl.bind(this);
     this.expandGenusClick = this.expandGenusClick.bind(this);
     this.expandTable = this.expandTable.bind(this);
@@ -789,7 +788,7 @@ class PipelineSampleReport extends React.Component {
   gotoTreeLink(taxid) {
     window.open(
       `/phylo_trees/index?taxid=${taxid}&project_id=${this.projectId}`,
-      "_blank"
+      "_blank noopener hide_referrer"
     );
   }
 

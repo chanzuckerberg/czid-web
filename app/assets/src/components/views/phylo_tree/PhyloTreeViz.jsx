@@ -1,8 +1,8 @@
 import axios from "axios";
 import d3 from "d3";
-import { Button } from "semantic-ui-react";
 import phylotree from "phylotree";
 import React from "react";
+import PrimaryButton from "../../ui/controls/buttons/PrimaryButton";
 
 class PhyloTreeViz extends React.Component {
   constructor(props) {
@@ -73,11 +73,7 @@ class PhyloTreeViz extends React.Component {
           status_display = "TREE GENERATION IN PROGRESS";
       }
     }
-    let retry_button = (
-      <Button primary onClick={this.retryTree}>
-        Retry
-      </Button>
-    );
+    let retry_button = <PrimaryButton text="Retry" onClick={this.retryTree} />;
     let tree_svg =
       this.phyloTree && this.phyloTree.newick ? (
         <svg ref={node => (this.node = node)} />
