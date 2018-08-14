@@ -4,7 +4,7 @@ module PipelineRunsHelper
   def aegea_batch_submit_command(base_command,
                                  memory = Sample::DEFAULT_MEMORY_IN_MB,
                                  job_queue: nil,
-                                 docker_image: "idseq_phylo")
+                                 docker_image: "idseq_dag")
     command = "aegea batch submit --command=\"#{base_command}\" "
     if memory <= Sample::DEFAULT_MEMORY_IN_MB
       vcpus = Sample::DEFAULT_VCPUS
