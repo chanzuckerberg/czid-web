@@ -838,6 +838,10 @@ class PipelineRun < ApplicationRecord
 
   delegate :sample_output_s3_path, to: :sample
 
+  # TODO: Refactor: "alignment_output_s3_path, postprocess_output_s3_path and
+  # now expt_output_s3_path all contain essentially the same code.
+  # So you could make a helper function to which you would pass
+  #  sample.sample_expt_s3_path as an argument" (Charles)
   def expt_output_s3_path
     pipeline_ver_str = ""
     pipeline_ver_str = "#{pipeline_version}/" if pipeline_version
