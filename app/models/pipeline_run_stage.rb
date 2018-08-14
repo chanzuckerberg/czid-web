@@ -35,7 +35,7 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def check_status_file_and_update(status_file_suffix, job_status_value)
-    status_file_present = pipeline_run.file_generated_since_run(stage_status_file(status_file_suffix))
+    status_file_present = file_generated_since_run(pipeline_run, stage_status_file(status_file_suffix))
     if status_file_present && job_status != job_status_value
       update(job_status: job_status_value)
     end
