@@ -45,7 +45,7 @@ class PhyloTree < ApplicationRecord
     # Detect if batch job has failed so we can stop polling for results.
     # Also, populate job_log_id.
     return if throttle && rand >= 0.1 # if throttling, do time-consuming aegea checks only 10% of the time
-    job_status, self.job_log_id, _job_hash, self.job_description = PipelineRunStage.job_info(job_id, id)
+    job_status, self.job_log_id, _job_hash, self.job_description = job_info(job_id, id)
     if job_status == PipelineRunStage::STATUS_FAILED ||
        (job_status == "SUCCEEDED" && !Open3.capture3("aws", "s3", "ls", newick_s3_path)[2].exitstatus.zero?)
       self.status = STATUS_FAILED
@@ -89,10 +89,10 @@ class PhyloTree < ApplicationRecord
     }
     dag_commands = prepare_dag("phylo_tree", attribute_dict)
     # Dispatch command
-    base_command = [PipelineRunStage.install_pipeline("charles/trees"),
-                    PipelineRunStage.upload_version(dag_version_file),
+    base_command = [install_pipeline("charles/trees"),
+                    upload_version(dag_version_file),
                     dag_commands].join("; ")
-    PipelineRunStage.aegea_batch_submit_command(base_command, job_queue: nil, docker_image: "idseq_phylo") # TODO: push & use new idseq_dag image instead
+    aegea_batch_submit_command(base_command, job_queue: nil, docker_image: "idseq_phylo") # TODO: push & use new idseq_dag image instead
   end
 
   def phylo_tree_output_s3_path
@@ -107,7 +107,7 @@ class PhyloTree < ApplicationRecord
                            nil,
                            attribute_dict)
     self.dag_json = dag.render
-    PipelineRunStage.upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name)
+    upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name)
   end
 
   def kickoff
