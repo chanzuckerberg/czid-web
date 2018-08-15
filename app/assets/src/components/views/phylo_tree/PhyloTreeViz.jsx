@@ -79,7 +79,7 @@ class PhyloTreeViz extends React.Component {
         <svg ref={node => (this.node = node)} />
       ) : null;
     return (
-      <div>
+      <div className="phylo-tree-view">
         <p>{status_display}</p>
         {this.state.show_retry_button ? retry_button : null}
         {this.state.retry_message}
