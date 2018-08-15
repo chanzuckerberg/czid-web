@@ -12,6 +12,7 @@ import ProjectSelection from "./ProjectSelection";
 import StringHelper from "../helpers/StringHelper";
 import Cookies from "js-cookie";
 import CompareButton from "./ui/controls/buttons/CompareButton";
+import PhylogenyButton from "./ui/controls/buttons/PhylogenyButton";
 import DownloadButtonDropdown from "./ui/controls/dropdowns/DownloadButtonDropdown";
 import PrimaryButton from "./ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "./ui/controls/buttons/SecondaryButton";
@@ -2007,7 +2008,7 @@ function ProjectInfoHeading({
 }) {
   return (
     <div className="row download-section">
-      <div className="col s6 wrapper">
+      <div className="col s5 wrapper">
         <div
           className={
             !proj ? "proj-title heading all-proj" : "heading proj-title"
@@ -2031,14 +2032,16 @@ function ProjectInfoHeading({
                 } total samples. ${selectedStr}`}
         </p>
       </div>
-      <div className="col s6 download-section-btns">
+      <div className="col s7 download-section-btns">
         {state.selectedProjectId ? project_menu : null}
         {table_download_dropdown}
+        {parent.admin ? (
+          <div className="button-container">
+            <PhylogenyButton onClick={parent.gotoTreeList} />
+          </div>
+        ) : null}
         {compare_button}
         <BackgroundModal parent={parent} />
-        {parent.admin ? (
-          <i className="fa fa-tree fa-5x" onClick={parent.gotoTreeList} />
-        ) : null}
         {state.selectedProjectId &&
         canEditProject(state.selectedProjectId) &&
         state.project &&
