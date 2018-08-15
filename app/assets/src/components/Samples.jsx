@@ -66,6 +66,7 @@ class Samples extends React.Component {
     this.deleteProject = this.deleteProject.bind(this);
     this.toggleBackgroundFlag = this.toggleBackgroundFlag.bind(this);
     this.getBackgroundIdByName = this.getBackgroundIdByName.bind(this);
+    this.gotoTreeList = this.gotoTreeList.bind(this);
     this.state = {
       invite_status: null,
       background_creation_response: {},
@@ -878,6 +879,15 @@ class Samples extends React.Component {
           background_creation_response: { message: "Something went wrong." }
         });
       });
+  }
+
+  gotoTreeList(e) {
+    let tree_index_url = "/phylo_trees/index";
+    let project_id = parseInt(this.state.selectedProjectId);
+    if (project_id) {
+      tree_index_url += `?project_id=${project_id}`;
+    }
+    window.open(tree_index_url, "_blank noopener hide_referrer");
   }
 
   clearAllFilters() {
@@ -2026,6 +2036,9 @@ function ProjectInfoHeading({
         {table_download_dropdown}
         {compare_button}
         <BackgroundModal parent={parent} />
+        {parent.admin ? (
+          <i className="fa fa-tree fa-5x" onClick={parent.gotoTreeList} />
+        ) : null}
         {state.selectedProjectId &&
         canEditProject(state.selectedProjectId) &&
         state.project &&

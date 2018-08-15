@@ -22,8 +22,10 @@ class PipelineSampleReport extends React.Component {
       id: "prog-bar",
       class: "prog-bar"
     });
+    this.admin = props.admin;
     this.report_ts = props.report_ts;
     this.sample_id = props.sample_id;
+    this.projectId = props.projectId;
     this.gitVersion = props.git_version;
     this.canSeeAlignViz = props.can_see_align_viz;
     this.can_edit = props.can_edit;
@@ -129,8 +131,8 @@ class PipelineSampleReport extends React.Component {
     this.applyThresholdFilters = this.applyThresholdFilters.bind(this);
     this.collapseGenus = this.collapseGenus.bind(this);
     this.collapseTable = this.collapseTable.bind(this);
+    this.gotoTreeLink = this.gotoTreeLink.bind(this);
     this.displayHighlightTags = this.displayHighlightTags.bind(this);
-    this.downloadAssemblyLink = this.downloadAssemblyLink.bind(this);
     this.downloadFastaUrl = this.downloadFastaUrl.bind(this);
     this.expandGenusClick = this.expandGenusClick.bind(this);
     this.expandTable = this.expandTable.bind(this);
@@ -788,14 +790,16 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
-  downloadAssemblyLink(e) {
-    const taxId = e.target.getAttribute("data-tax-id");
-    location.href = `/samples/${this.sample_id}/assembly/${taxId}`;
+  gotoTreeLink(taxid) {
+    window.open(
+      `/phylo_trees/index?taxid=${taxid}&project_id=${this.projectId}`,
+      "_blank noopener hide_referrer"
+    );
   }
 
   displayTags(taxInfo, reportDetails) {
     let tax_level_str = "";
-    let ncbiDot, fastaDot, alignmentVizDot, assemblyDot;
+    let ncbiDot, fastaDot, alignmentVizDot, phyloTreeDot;
     if (taxInfo.tax_level == 1) tax_level_str = "species";
     else tax_level_str = "genus";
 
@@ -830,12 +834,15 @@ class PipelineSampleReport extends React.Component {
           aria-hidden="true"
         />
       );
-    if (reportDetails.assembled_taxids.indexOf(taxInfo.tax_id.toString()) >= 0)
-      assemblyDot = (
+    if (
+      this.admin == 1 &&
+      (taxInfo.tax_id > 0 && taxInfo.tax_level == 1 && taxInfo.NT.r > 0)
+    )
+      // right now, tree pipeline is only implemented for tax_level 1, but may change in future
+      phyloTreeDot = (
         <i
-          data-tax-id={taxInfo.tax_id}
-          onClick={this.downloadAssemblyLink}
-          className="fa fa-gg"
+          onClick={() => this.gotoTreeLink(taxInfo.tax_id)}
+          className="fa fa-tree"
           aria-hidden="true"
         />
       );
@@ -847,7 +854,7 @@ class PipelineSampleReport extends React.Component {
           trigger={alignmentVizDot}
           content={"Alignment Visualization"}
         />
-        <BasicPopup trigger={assemblyDot} content={"Assembly Download"} />
+        <BasicPopup trigger={phyloTreeDot} content={"Phylogenetic Analysis"} />
       </span>
     );
   }
