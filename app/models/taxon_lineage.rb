@@ -55,7 +55,7 @@ class TaxonLineage < ApplicationRecord
     # now, we only select the valid entry based on started_at and ended_at.
     # The valid lineage entry has start and end dates that include the valid
     # taxon count entry date.
-    TaxonLineage.where(taxid: tax_ids).where("started_at < ? AND ended_at > ?", valid_date, valid_date).each do |x|
+    TaxonLineage.where(taxid: tax_ids).where("started_at < ? AND ended_at > ?", valid_date, valid_date).find_each do |x|
       lineage_by_taxid[x.taxid] = x.as_json
     end
 
