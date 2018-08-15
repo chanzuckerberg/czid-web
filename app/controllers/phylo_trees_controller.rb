@@ -57,12 +57,7 @@ class PhyloTreesController < ApplicationController
 
     # Retrieve pipeline runs that contain the specified taxid.
     eligible_pipeline_runs = current_power.pipeline_runs.top_completed_runs
-    ## We observed cases on staging where postprocessing was marked as loaded but taxon byteranges did not exist.
-    ## Here's a hack to determine which pipeline_runs are ACTUALLY eligible.
-    ## TODO: check how we can remove this line.
-    eligible_pipeline_runs = TaxonByterange.distinct.where(pipeline_run_id: eligible_pipeline_runs.pluck(:id)).pluck(:pipeline_run_id)
-    ##
-    all_pipeline_run_ids_with_taxid = TaxonCount.where(tax_id: taxid).where(count_type: 'NT').pluck(:pipeline_run_id)
+    all_pipeline_run_ids_with_taxid = TaxonByterange.where(taxid: taxid).where(hit_type: 'NT').pluck(:pipeline_run_id)
     eligible_pipeline_runs_with_taxid = eligible_pipeline_runs.where(id: all_pipeline_run_ids_with_taxid)
 
     # Retrieve information for displaying the tree's sample list.
@@ -70,8 +65,8 @@ class PhyloTreesController < ApplicationController
 
     # Retrieve information about the taxon
     example_taxon_count = eligible_pipeline_runs_with_taxid.first.taxon_counts.find_by(tax_id: taxid)
-    taxon_name = example_taxon_count.name
-    tax_level = example_taxon_count.tax_level
+    taxon_name = example_taxon_count ? example_taxon_count.name : nil
+    tax_level = example_taxon_count ? example_taxon_count.tax_level : nil
     @taxon = { taxid: taxid, tax_level: tax_level, name: taxon_name }
   end
 

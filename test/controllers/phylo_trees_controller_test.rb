@@ -13,7 +13,7 @@ class PhyloTreesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'should get new' do
-    taxid = 573
+    taxid = 1
     get "/phylo_trees/new?taxid=#{taxid}&project_id=#{@project.id}"
     assert_response :success
   end
