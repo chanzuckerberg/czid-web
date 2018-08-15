@@ -1,5 +1,5 @@
 import PrimaryButton from "./PrimaryButton";
-import BetaLabel from "../tooltips/BetaLabel";
+import BetaLabel from "../../labels/BetaLabel";
 import PropTypes from "prop-types";
 import React from "react";
 

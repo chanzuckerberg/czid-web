@@ -14,7 +14,7 @@ import BasicPopup from "./BasicPopup";
 import OurDropdown from "./ui/controls/dropdowns/Dropdown";
 import MultipleDropdown from "./ui/controls/dropdowns/MultipleDropdown";
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
-import BetaLabel from "./ui/controls/tooltips/BetaLabel";
+import BetaLabel from "./ui/labels/BetaLabel";
 
 class PipelineSampleReport extends React.Component {
   constructor(props) {
