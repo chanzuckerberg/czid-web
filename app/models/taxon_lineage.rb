@@ -39,14 +39,23 @@ class TaxonLineage < ApplicationRecord
     return { query: r.genus_name, tax_id: genus_tax_id } if r
   end
 
-  def self.fill_lineage_details(tax_map)
-    # Get list of tax_ids to look up in TaxonLineage and TaxonCount rows. Include family_taxids.
+  def self.fill_lineage_details(tax_map, pipeline_run_id)
+    # Get list of tax_ids to look up in TaxonLineage rows. Include family_taxids.
     tax_ids = tax_map.map { |x| x['tax_id'] }
     tax_ids |= tax_map.map { |x| x['family_taxid'] }
 
+    # Get created_at date for our TaxonCount entries. Same for all TaxonCounts
+    # in a PipelineRun.
+    valid_date = PipelineRun.find(pipeline_run_id).taxon_counts.last.created_at
+
     # TODO: Should definitely be simplified with taxonomy/lineage refactoring.
     lineage_by_taxid = {}
-    TaxonLineage.where(taxid: tax_ids).find_each do |x|
+
+    # Since there may be multiple TaxonLineage entries with the same taxid
+    # now, we only select the valid entry based on started_at and ended_at.
+    # The valid lineage entry has start and end dates that include the valid
+    # taxon count entry date.
+    TaxonLineage.where(taxid: tax_ids).where("started_at < ? AND ended_at > ?", valid_date, valid_date).find_each do |x|
       lineage_by_taxid[x.taxid] = x.as_json
     end
 
