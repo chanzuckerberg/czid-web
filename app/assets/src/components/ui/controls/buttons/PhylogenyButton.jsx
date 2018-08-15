@@ -1,10 +1,16 @@
 import PrimaryButton from "./PrimaryButton";
+import BetaLabel from "../tooltips/BetaLabel";
 import PropTypes from "prop-types";
 import React from "react";
 
 const PhylogenyButton = ({ disabled, onClick }) => {
   return (
-    <PrimaryButton text="Phylogenies" disabled={disabled} onClick={onClick} />
+    <PrimaryButton
+      text="Phylogenies"
+      label={<BetaLabel />}
+      disabled={disabled}
+      onClick={onClick}
+    />
   );
 };
 
