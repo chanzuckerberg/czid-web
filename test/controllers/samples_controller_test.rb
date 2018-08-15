@@ -117,7 +117,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 69.0, species_result["NR"]["r"]
     assert_equal "61497.326", species_result["NR"]["rpm"]
     assert_equal 9.0, species_result["NR"]["zscore"]
-    assert_equal 2_428_411_754.8, species_result["NR"]["aggregatescore"].round(1)
+    assert_equal 20_069_518.6, species_result["NR"]["aggregatescore"].round(1)
     assert_equal 16.9101009, species_result["NR"]["neglogevalue"]
 
     assert_equal 217.0, genus_result["NT"]["r"]
@@ -128,7 +128,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 87.0, genus_result["NR"]["r"]
     assert_equal "77540.106", genus_result["NR"]["rpm"]
     assert_equal 9.0, genus_result["NR"]["zscore"]
-    assert_equal 2_428_411_754.8, genus_result["NR"]["aggregatescore"].round(1)
+    assert_equal 20_069_518.6, genus_result["NR"]["aggregatescore"].round(1)
     assert_equal 16.9874001, genus_result["NR"]["neglogevalue"]
 
     # Test species taxid 1313, which has genus taxid 1301
