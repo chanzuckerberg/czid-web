@@ -1,9 +1,10 @@
-.phylo-tree-view {
-  .dropdown-menu {
-    background-color: #d3d3d3;
-    cursor: pointer;
-  }
+.dropdown-menu {
+  // TODO: make this a child of phylo-tree-view as well
+  background-color: #d3d3d3;
+  cursor: pointer;
+}
 
+.phylo-tree-view {
   .tree-selection-brush .extent {
     fill-opacity: 0.05;
     stroke: #fff;
