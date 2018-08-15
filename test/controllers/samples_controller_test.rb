@@ -112,7 +112,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 209.0, species_result["NT"]["r"]
     assert_equal "186274.509", species_result["NT"]["rpm"]
     assert_equal 9.0, species_result["NT"]["zscore"]
-    assert_equal 2_428_411_754.8, species_result["NT"]["aggregatescore"].round(1)
+    assert_equal 20_069_518.6, species_result["NT"]["aggregatescore"].round(1)
     assert_equal 89.5641022, species_result["NT"]["neglogevalue"]
     assert_equal 69.0, species_result["NR"]["r"]
     assert_equal "61497.326", species_result["NR"]["rpm"]
