@@ -20,6 +20,16 @@ class MonitorPipelineResults
         Airbrake.notify("Failed monitor results for pipeline run #{pr.id}")
       end
     end
+
+    PhyloTree.in_progress.each do |pt|
+      begin
+        break if @shutdown_requested
+        Rails.logger.info("Monitoring results for phylo_tree #{pt.id}") unless silent
+        pt.monitor_results
+      rescue
+        Airbrake.notify("Failed monitor results for phylo_tree #{pt.id}")
+      end
+    end
   end
 
   def self.forced_update_interval

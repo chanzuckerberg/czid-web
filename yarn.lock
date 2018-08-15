@@ -1219,6 +1219,10 @@ boom@5.x.x:
   dependencies:
     hoek "4.x.x"
 
+bootstrap@3.x:
+  version "3.3.7"
+  resolved "https://registry.yarnpkg.com/bootstrap/-/bootstrap-3.3.7.tgz#5a389394549f23330875a3b150656574f8a9eb71"
+
 brace-expansion@^1.1.7:
   version "1.1.11"
   resolved "https://registry.yarnpkg.com/brace-expansion/-/brace-expansion-1.1.11.tgz#3c7fcbf529d87226f3d2f52b966ff5271eb441dd"
@@ -2067,7 +2071,7 @@ cyclist@~0.2.2:
   version "0.2.2"
   resolved "https://registry.yarnpkg.com/cyclist/-/cyclist-0.2.2.tgz#1b33792e11e914a2fd6d6ed6447464444e5fa640"
 
-d3@^3.5.17:
+d3@3.x, d3@^3.5.17:
   version "3.5.17"
   resolved "https://registry.yarnpkg.com/d3/-/d3-3.5.17.tgz#bc46748004378b21a360c9fc7cf5231790762fb8"
 
@@ -3010,7 +3014,7 @@ follow-redirects@^1.2.5:
   dependencies:
     debug "^3.1.0"
 
-font-awesome@^4.7.0:
+font-awesome@4.x, font-awesome@^4.7.0:
   version "4.7.0"
   resolved "https://registry.yarnpkg.com/font-awesome/-/font-awesome-4.7.0.tgz#8fa8cf0411a1a31afd07b06d2902bb9fc815a133"
 
@@ -4324,6 +4328,10 @@ jest@^22.4.3:
   dependencies:
     import-local "^1.0.0"
     jest-cli "^22.4.3"
+
+jquery@1.x:
+  version "1.12.4"
+  resolved "https://registry.yarnpkg.com/jquery/-/jquery-1.12.4.tgz#01e1dfba290fe73deba77ceeacb0f9ba2fec9e0c"
 
 "jquery@^3.0.0 || ^2.1.4", jquery@^3.2.1:
   version "3.2.1"
@@ -5827,6 +5835,16 @@ performance-now@^0.2.0:
 performance-now@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/performance-now/-/performance-now-2.1.0.tgz#6309f4e0e5fa913ec1c69307ae364b4b377c9e7b"
+
+phylotree@^0.1.6:
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/phylotree/-/phylotree-0.1.6.tgz#0e6b1f246db5a1096f5338a67d3f17c6535a58db"
+  dependencies:
+    bootstrap "3.x"
+    d3 "3.x"
+    font-awesome "4.x"
+    jquery "1.x"
+    underscore "1.x"
 
 pify@^2.0.0:
   version "2.3.0"
@@ -7767,6 +7785,10 @@ uglifyjs-webpack-plugin@^1.2.4:
 uid-number@^0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/uid-number/-/uid-number-0.0.6.tgz#0ea10e8035e8eb5b8e4449f06da1c730663baa81"
+
+underscore@1.x:
+  version "1.9.1"
+  resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.9.1.tgz#06dce34a0e68a7babc29b365b8e74b8925203961"
 
 underscore@~1.4.4:
   version "1.4.4"
