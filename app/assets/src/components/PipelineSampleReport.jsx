@@ -737,10 +737,15 @@ class PipelineSampleReport extends React.Component {
       return option.text == data.value;
     });
     Cookies.set("background_name", backgroundName);
-    this.setState({
-      backgroundName,
-      backgroundId: data.value
-    });
+    this.setState(
+      {
+        backgroundName,
+        backgroundId: data.value
+      },
+      () => {
+        this.props.refreshPage({ background_id: data.value });
+      }
+    );
   }
 
   handleNameTypeChange(_, data) {
