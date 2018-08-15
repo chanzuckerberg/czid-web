@@ -14,6 +14,7 @@ import BasicPopup from "./BasicPopup";
 import OurDropdown from "./ui/controls/dropdowns/Dropdown";
 import MultipleDropdown from "./ui/controls/dropdowns/MultipleDropdown";
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
+import BetaLabel from "./ui/controls/tooltips/BetaLabel";
 
 class PipelineSampleReport extends React.Component {
   constructor(props) {
@@ -805,7 +806,7 @@ class PipelineSampleReport extends React.Component {
         <i
           data-tax-id={taxInfo.tax_id}
           onClick={this.gotoNCBI}
-          className="fa fa-link cloud"
+          className="fa fa-link action-dot"
           aria-hidden="true"
         />
       );
@@ -815,7 +816,7 @@ class PipelineSampleReport extends React.Component {
           data-tax-level={taxInfo.tax_level}
           data-tax-id={taxInfo.tax_id}
           onClick={this.downloadFastaUrl}
-          className="fa fa-download cloud"
+          className="fa fa-download action-dot"
           aria-hidden="true"
         />
       );
@@ -825,7 +826,7 @@ class PipelineSampleReport extends React.Component {
           data-tax-level={tax_level_str}
           data-tax-id={taxInfo.tax_id}
           onClick={this.gotoAlignmentVizLink}
-          className="fa fa-bars"
+          className="fa fa-bars action-dot"
           aria-hidden="true"
         />
       );
@@ -837,7 +838,7 @@ class PipelineSampleReport extends React.Component {
       phyloTreeDot = (
         <i
           onClick={() => this.gotoTreeLink(taxInfo.tax_id)}
-          className="fa fa-tree"
+          className="fa fa-code-fork action-dot"
           aria-hidden="true"
         />
       );
@@ -849,7 +850,14 @@ class PipelineSampleReport extends React.Component {
           trigger={alignmentVizDot}
           content={"Alignment Visualization"}
         />
-        <BasicPopup trigger={phyloTreeDot} content={"Phylogenetic Analysis"} />
+        <BasicPopup
+          trigger={phyloTreeDot}
+          content={
+            <div>
+              Phylogenetic Analysis <BetaLabel />
+            </div>
+          }
+        />
       </span>
     );
   }
@@ -861,7 +869,7 @@ class PipelineSampleReport extends React.Component {
         data-tax-name={taxInfo.name}
         data-confirmation-strength="watched"
         onClick={this.props.toggleHighlightTaxon}
-        className="fa fa-eye"
+        className="fa fa-eye action-dot"
         aria-hidden="true"
       />
     );
@@ -871,7 +879,7 @@ class PipelineSampleReport extends React.Component {
         data-tax-name={taxInfo.name}
         data-confirmation-strength="confirmed"
         onClick={this.props.toggleHighlightTaxon}
-        className="fa fa-check"
+        className="fa fa-check action-dot"
         aria-hidden="true"
       />
     );
@@ -1646,10 +1654,7 @@ class RenderMarkup extends React.Component {
           }
           content={
             <div>
-              Phylogenetic Tree View{" "}
-              <Label color="purple" size="mini" floating>
-                beta
-              </Label>
+              Taxonomic Tree View <BetaLabel />
             </div>
           }
           inverted
