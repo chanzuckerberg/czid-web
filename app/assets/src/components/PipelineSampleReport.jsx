@@ -88,11 +88,12 @@ class PipelineSampleReport extends React.Component {
       ? savedThresholdFilters
       : [Object.assign({}, this.defaultThreshold)];
 
+    let defaultBackgroundId = this.fetchParams("background_id");
     // we should only keep dynamic data in the state
     // Starting state is default values which are to be set later.
     this.state = {
       taxonomy_details: [],
-      backgroundId: 0,
+      backgroundId: defaultBackgroundId,
       backgroundName: "",
       searchId: 0,
       searchKey: "",
@@ -740,10 +741,15 @@ class PipelineSampleReport extends React.Component {
       return option.text == data.value;
     });
     Cookies.set("background_name", backgroundName);
-    this.setState({
-      backgroundName,
-      backgroundId: data.value
-    });
+    this.setState(
+      {
+        backgroundName,
+        backgroundId: data.value
+      },
+      () => {
+        this.props.refreshPage({ background_id: data.value });
+      }
+    );
   }
 
   handleNameTypeChange(_, data) {
