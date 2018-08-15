@@ -1429,7 +1429,7 @@ function ReportTableHeader({ parent }) {
             {parent.render_column_header(
               "Score",
               `NT_aggregatescore`,
-              "Aggregate score: ( |genus.NT.Z| * species.NT.Z * species.NT.rPM ) + ( |genus.NR.Z| * species.NR.Z * species.NR.rPM )"
+              "Aggregate score: ( |genus.NT.Z| * species.NT.rPM ) + ( |genus.NR.Z| * species.NR.rPM )"
             )}
             {parent.render_column_header(
               "Z",

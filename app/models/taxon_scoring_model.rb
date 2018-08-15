@@ -3,7 +3,7 @@
 # Currently the operators supported are addition (+), product (-) for nodes with multiple children and atomic transformation function for nodes with one children.
 # Here is an example of how the following scoring function can be translated to a json
 #
-# aggregate_score = |genus.NT.zscore|*species.NT.zscore*species.NT.rpm + |genus.NR.zscore|*species.NR.zscore*species.NR.rpm
+# aggregate_score = |genus.NT.zscore| * species.NT.rpm + |genus.NR.zscore| * species.NR.rpm
 # {
 #  "op" : "+",
 #  "on" : [
@@ -14,7 +14,6 @@
 #          "op": "abs",
 #          "on": { "op": "attr", "on": "genus.NT.zscore" }
 #        },
-#        { "op": "attr", "on": "species.NT.zscore" },
 #        { "op": "attr", "on": "species.NT.rpm" }
 #      ]
 #    },
@@ -25,7 +24,6 @@
 #          "op": "abs",
 #          "on": { "op": "attr", "on": "genus.NR.zscore" }
 #        },
-#        { "op": "attr", "on": "species.NR.zscore" },
 #        { "op": "attr", "on": "species.NR.rpm" }
 #      ]
 #    }

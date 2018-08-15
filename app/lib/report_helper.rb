@@ -4,10 +4,12 @@ require 'open3'
 module ReportHelper
   # Truncate report table past this number of rows.
   TAXON_CATEGORY_OFFSET = 100_000_000
-  ZSCORE_MIN = -99
-  ZSCORE_MAX =  99
-  ZSCORE_WHEN_ABSENT_FROM_SAMPLE = -100
-  ZSCORE_WHEN_ABSENT_FROM_BACKGROUND = 100
+  # Large values here add weight in the aggregate score to taxons that have
+  # just a few reads but are absent from the background for whatever reason.
+  ZSCORE_MIN = -9
+  ZSCORE_MAX =  9
+  ZSCORE_WHEN_ABSENT_FROM_SAMPLE = -10
+  ZSCORE_WHEN_ABSENT_FROM_BACKGROUND = 10
 
   DEFAULT_SAMPLE_NEGLOGEVALUE = 0.0
   DEFAULT_SAMPLE_PERCENTIDENTITY = 0.0
