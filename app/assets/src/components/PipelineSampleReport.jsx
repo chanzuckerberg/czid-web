@@ -269,7 +269,7 @@ class PipelineSampleReport extends React.Component {
         rows_passing_filters: this.state.taxonomy_details.length
       },
       () => {
-        this.saveThresholdFilters();
+        ThresholdMap.saveThresholdFilters([]);
         Cookies.set("includedCategories", "[]");
         Cookies.set("includedSubcategories", "[]");
       }
