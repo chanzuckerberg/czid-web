@@ -204,6 +204,15 @@ module ReportHelper
     JSON.parse(tsm.attributes_json)
   end
 
+  def taxon_sql_table_join_clause(background_id)
+    "FROM taxon_counts
+     LEFT OUTER JOIN taxon_summaries ON
+        #{background_id.to_i}   = taxon_summaries.background_id   AND
+        taxon_counts.count_type = taxon_summaries.count_type      AND
+        taxon_counts.tax_level  = taxon_summaries.tax_level       AND
+        taxon_counts.tax_id     = taxon_summaries.tax_id"
+  end
+
   def fetch_taxon_counts(pipeline_run_id, background_id, scoring_model)
     model_attr = fetch_scoring_model_attributes(scoring_model)
 
@@ -243,12 +252,7 @@ module ReportHelper
           #{DEFAULT_SAMPLE_NEGLOGEVALUE}
         )                                AS  neglogevalue,
         taxon_counts.percent_concordant  AS  percentconcordant
-      FROM taxon_counts
-      LEFT OUTER JOIN taxon_summaries ON
-        #{background_id.to_i}   = taxon_summaries.background_id   AND
-        taxon_counts.count_type = taxon_summaries.count_type      AND
-        taxon_counts.tax_level  = taxon_summaries.tax_level       AND
-        taxon_counts.tax_id     = taxon_summaries.tax_id
+      #{taxon_sql_table_join_clause(background_id)}
       WHERE
         pipeline_run_id = #{pipeline_run_id.to_i} AND
         taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID} AND
@@ -286,12 +290,7 @@ module ReportHelper
         #{DEFAULT_SAMPLE_NEGLOGEVALUE}
       )                                AS  neglogevalue,
       taxon_counts.percent_concordant  AS  percentconcordant
-    FROM taxon_counts
-    LEFT OUTER JOIN taxon_summaries ON
-      #{background_id.to_i}   = taxon_summaries.background_id   AND
-      taxon_counts.count_type = taxon_summaries.count_type      AND
-      taxon_counts.tax_level  = taxon_summaries.tax_level       AND
-      taxon_counts.tax_id     = taxon_summaries.tax_id
+    #{taxon_sql_table_join_clause(background_id)}
     WHERE
       pipeline_run_id in (#{pipeline_run_ids.join(',')})
       AND taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
