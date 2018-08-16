@@ -7,17 +7,18 @@ const Button = ({
   disabled,
   onClick,
   icon,
+  label,
   primary,
   secondary,
-  text,
-  type
+  text
 }) => {
   let content = text;
-  if (icon) {
+  if (icon || label) {
     content = (
       <div className="icon-label">
         {icon}
         {text}
+        {label}
       </div>
     );
   }
@@ -37,11 +38,11 @@ const Button = ({
 Button.propTypes = forbidExtraProps({
   disabled: PropTypes.bool,
   icon: PropTypes.element,
+  label: PropTypes.element,
   onClick: PropTypes.func,
   text: PropTypes.string,
   primary: PropTypes.bool,
-  secondary: PropTypes.bool,
-  type: PropTypes.string
+  secondary: PropTypes.bool
 });
 
 export default Button;
