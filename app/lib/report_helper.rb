@@ -205,11 +205,7 @@ module ReportHelper
   end
 
   def fetch_taxon_counts(pipeline_run_id, background_id, scoring_model)
-    # Use scoring model attributes
-    model_attributes = fetch_scoring_model_attributes(scoring_model)
-    zscore_min = model_attributes["zscore_min"]
-    zscore_max = model_attributes["zscore_max"]
-    zscore_when_absent_from_bg = model_attributes["zscore_when_absent_from_bg"]
+    model_attr = fetch_scoring_model_attributes(scoring_model)
 
     pipeline_run = PipelineRun.find(pipeline_run_id)
     adjusted_total_reads = (pipeline_run.total_reads - pipeline_run.total_ercc_reads.to_i) * pipeline_run.subsample_fraction
@@ -235,8 +231,8 @@ module ReportHelper
         (taxon_counts.count/#{raw_non_host_reads} * 100.0)  AS  r_pct,
         IF(
           stdev IS NOT NULL,
-          GREATEST(#{zscore_min}, LEAST(#{zscore_max}, (((count / #{adjusted_total_reads} * 1000000.0) - mean) / stdev))),
-          #{zscore_when_absent_from_bg}
+          GREATEST(#{model_attr['zscore_min']}, LEAST(#{model_attr['zscore_max']}, (((count / #{adjusted_total_reads} * 1000000.0) - mean) / stdev))),
+          #{model_attr['zscore_when_absent_from_bg']}
         )
                                          AS  zscore,
         taxon_counts.percent_identity    AS  percentidentity,
@@ -316,11 +312,7 @@ module ReportHelper
     pipeline_runs = PipelineRun.where(id: pipeline_run_ids.uniq).includes([:sample])
     pipeline_runs_by_id = Hash[pipeline_runs.map { |x| [x.id, x] }]
 
-    # Use scoring model attributes
-    model_attributes = fetch_scoring_model_attributes(scoring_model)
-    zscore_min = model_attributes["zscore_min"]
-    zscore_max = model_attributes["zscore_max"]
-    zscore_when_absent_from_bg = model_attributes["zscore_when_absent_from_bg"]
+    model_attr = fetch_scoring_model_attributes(scoring_model)
 
     sql_results.each do |row|
       pipeline_run_id = row["pipeline_run_id"]
@@ -331,9 +323,9 @@ module ReportHelper
         result_hash[pipeline_run_id] = { "pr" => pr, "taxon_counts" => [] }
       end
       row["rpm"] = row["r"] / ((pr.total_reads - pr.total_ercc_reads.to_i) * pr.subsample_fraction) * 1_000_000.0
-      row["zscore"] = row["stdev"].nil? ? zscore_when_absent_from_bg : ((row["rpm"] - row["mean"]) / row["stdev"])
-      row["zscore"] = zscore_max if row["zscore"] > zscore_max && row["zscore"] != zscore_when_absent_from_bg
-      row["zcore"] = zscore_min if row["zscore"] < zscore_min
+      row["zscore"] = row["stdev"].nil? ? model_attr["zscore_when_absent_from_bg"] : ((row["rpm"] - row["mean"]) / row["stdev"])
+      row["zscore"] = model_attr["zscore_max"] if row["zscore"] > model_attr["zscore_max"] && row["zscore"] != model_attr["zscore_when_absent_from_bg"]
+      row["zcore"] = model_attr["zscore_min"] if row["zscore"] < model_attr["zscore_min"]
       result_hash[pipeline_run_id]["taxon_counts"] << row
     end
     result_hash
