@@ -190,9 +190,10 @@ class SamplesController < ApplicationController
   end
 
   def top_taxons
+    # Only callable manually at samples/top_taxons and no longer actively used.
     sample_ids = params[:sample_ids].split(",").map(&:to_i) || []
 
-    num_results = params[:n] ? params[:n].to_i : ReportHelper::MAX_NUM_TAXONS
+    num_results = params[:n] ? params[:n].to_i : DEFAULT_MAX_NUM_TAXONS
     sort_by = params[:sort_by] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
 
     samples = current_power.samples.where(id: sample_ids)
@@ -200,8 +201,7 @@ class SamplesController < ApplicationController
     if samples.first
       first_sample = samples.first
       background_id = check_background_id(first_sample)
-      # TODO: This entire function #top_taxons can be removed because it isn't being called anywhere (?)
-      @top_taxons = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, nil, params[:scoring_model])
+      @top_taxons = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, params[:categories], params[:scoring_model])
       render json: @top_taxons
     else
       render json: {}
