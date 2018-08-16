@@ -200,7 +200,7 @@ class SamplesController < ApplicationController
     if samples.first
       first_sample = samples.first
       background_id = check_background_id(first_sample)
-      @top_taxons = top_taxons_details(samples, background_id, num_results, sort_by, species_selected)
+      @top_taxons = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, nil, params[:scoring_model])
       render json: @top_taxons
     else
       render json: {}
@@ -600,11 +600,11 @@ class SamplesController < ApplicationController
 
     first_sample = samples.first
     background_id = params[:background] ? params[:background].to_i : check_background_id(first_sample)
-    taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, threshold_filters).pluck("tax_id") if taxon_ids.empty?
+    taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, params[:scoring_model], threshold_filters).pluck("tax_id") if taxon_ids.empty?
 
     return {} if taxon_ids.empty?
 
-    samples_taxons_details(samples, taxon_ids, background_id, species_selected)
+    samples_taxons_details(samples, taxon_ids, background_id, species_selected, params[:scoring_model])
   end
 
   def taxon_confirmation_unique_on(params)

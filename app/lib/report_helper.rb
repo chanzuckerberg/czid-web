@@ -4,10 +4,7 @@ require 'open3'
 module ReportHelper
   # Truncate report table past this number of rows.
   TAXON_CATEGORY_OFFSET = 100_000_000
-  ZSCORE_MIN = -99
-  ZSCORE_MAX =  99
   ZSCORE_WHEN_ABSENT_FROM_SAMPLE = -100
-  ZSCORE_WHEN_ABSENT_FROM_BACKGROUND = 100
 
   DEFAULT_SAMPLE_NEGLOGEVALUE = 0.0
   DEFAULT_SAMPLE_PERCENTIDENTITY = 0.0
@@ -200,7 +197,20 @@ module ReportHelper
     ALL_CATEGORIES
   end
 
-  def fetch_taxon_counts(pipeline_run_id, background_id)
+  def fetch_scoring_model_attributes(scoring_model)
+    # Load scoring model attributes
+    scoring_model ||= TaxonScoringModel::DEFAULT_MODEL_NAME
+    tsm = TaxonScoringModel.find_by(name: scoring_model)
+    JSON.parse(tsm.attributes_json)
+  end
+
+  def fetch_taxon_counts(pipeline_run_id, background_id, scoring_model)
+    # Use scoring model attributes
+    model_attributes = fetch_scoring_model_attributes(scoring_model)
+    zscore_min = model_attributes["zscore_min"]
+    zscore_max = model_attributes["zscore_max"]
+    zscore_when_absent_from_bg = model_attributes["zscore_when_absent_from_bg"]
+
     pipeline_run = PipelineRun.find(pipeline_run_id)
     adjusted_total_reads = (pipeline_run.total_reads - pipeline_run.total_ercc_reads.to_i) * pipeline_run.subsample_fraction
     raw_non_host_reads = pipeline_run.adjusted_remaining_reads.to_f * pipeline_run.subsample_fraction
@@ -225,8 +235,8 @@ module ReportHelper
         (taxon_counts.count/#{raw_non_host_reads} * 100.0)  AS  r_pct,
         IF(
           stdev IS NOT NULL,
-          GREATEST(#{ZSCORE_MIN}, LEAST(#{ZSCORE_MAX}, (((count / #{adjusted_total_reads} * 1000000.0) - mean) / stdev))),
-          #{ZSCORE_WHEN_ABSENT_FROM_BACKGROUND}
+          GREATEST(#{zscore_min}, LEAST(#{zscore_max}, (((count / #{adjusted_total_reads} * 1000000.0) - mean) / stdev))),
+          #{zscore_when_absent_from_bg}
         )
                                          AS  zscore,
         taxon_counts.percent_identity    AS  percentidentity,
@@ -250,7 +260,7 @@ module ReportHelper
     ").to_hash
   end
 
-  def fetch_top_taxons(samples, background_id, categories)
+  def fetch_top_taxons(samples, background_id, categories, scoring_model)
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
 
     categories_clause = ""
@@ -302,6 +312,12 @@ module ReportHelper
     pipeline_runs = PipelineRun.where(id: pipeline_run_ids.uniq).includes([:sample])
     pipeline_runs_by_id = Hash[pipeline_runs.map { |x| [x.id, x] }]
 
+    # Use scoring model attributes
+    model_attributes = fetch_scoring_model_attributes(scoring_model)
+    zscore_min = model_attributes["zscore_min"]
+    zscore_max = model_attributes["zscore_max"]
+    zscore_when_absent_from_bg = model_attributes["zscore_when_absent_from_bg"]
+
     sql_results.each do |row|
       pipeline_run_id = row["pipeline_run_id"]
       if result_hash[pipeline_run_id]
@@ -311,9 +327,9 @@ module ReportHelper
         result_hash[pipeline_run_id] = { "pr" => pr, "taxon_counts" => [] }
       end
       row["rpm"] = row["r"] / ((pr.total_reads - pr.total_ercc_reads.to_i) * pr.subsample_fraction) * 1_000_000.0
-      row["zscore"] = row["stdev"].nil? ? ZSCORE_WHEN_ABSENT_FROM_BACKGROUND : ((row["rpm"] - row["mean"]) / row["stdev"])
-      row["zscore"] = ZSCORE_MAX if row["zscore"] > ZSCORE_MAX && row["zscore"] != ZSCORE_WHEN_ABSENT_FROM_BACKGROUND
-      row["zcore"] = ZSCORE_MIN if row["zscore"] < ZSCORE_MIN
+      row["zscore"] = row["stdev"].nil? ? zscore_when_absent_from_bg : ((row["rpm"] - row["mean"]) / row["stdev"])
+      row["zscore"] = zscore_max if row["zscore"] > zscore_max && row["zscore"] != zscore_when_absent_from_bg
+      row["zcore"] = zscore_min if row["zscore"] < zscore_min
       result_hash[pipeline_run_id]["taxon_counts"] << row
     end
     result_hash
@@ -328,7 +344,7 @@ module ReportHelper
               .map { |u| u.attributes.values.compact }.flatten
   end
 
-  def fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
+  def fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id, scoring_model)
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
     parent_ids = parent_ids.to_a
 
@@ -380,6 +396,12 @@ module ReportHelper
     pipeline_runs = PipelineRun.where(id: pipeline_run_ids.uniq).includes([:sample])
     pipeline_runs_by_id = Hash[pipeline_runs.map { |x| [x.id, x] }]
 
+    # Use scoring model attributes
+    model_attributes = fetch_scoring_model_attributes(scoring_model)
+    zscore_min = model_attributes["zscore_min"]
+    zscore_max = model_attributes["zscore_max"]
+    zscore_when_absent_from_bg = model_attributes["zscore_when_absent_from_bg"]
+
     sql_results.each do |row|
       pipeline_run_id = row["pipeline_run_id"]
       if result_hash[pipeline_run_id]
@@ -389,19 +411,19 @@ module ReportHelper
         result_hash[pipeline_run_id] = { "pr" => pr, "taxon_counts" => [] }
       end
       row["rpm"] = row["r"] / ((pr.total_reads - pr.total_ercc_reads.to_i) * pr.subsample_fraction) * 1_000_000.0
-      row["zscore"] = row["stdev"].nil? ? ZSCORE_WHEN_ABSENT_FROM_BACKGROUND : ((row["rpm"] - row["mean"]) / row["stdev"])
-      row["zscore"] = ZSCORE_MAX if row["zscore"] > ZSCORE_MAX && row["zscore"] != ZSCORE_WHEN_ABSENT_FROM_BACKGROUND
-      row["zcore"] = ZSCORE_MIN if row["zscore"] < ZSCORE_MIN
+      row["zscore"] = row["stdev"].nil? ? zscore_when_absent_from_bg : ((row["rpm"] - row["mean"]) / row["stdev"])
+      row["zscore"] = zscore_max if row["zscore"] > zscore_max && row["zscore"] != zscore_when_absent_from_bg
+      row["zcore"] = zscore_min if row["zscore"] < zscore_min
       result_hash[pipeline_run_id]["taxon_counts"] << row
     end
 
     result_hash
   end
 
-  def samples_taxons_details(samples, taxon_ids, background_id, species_selected)
+  def samples_taxons_details(samples, taxon_ids, background_id, species_selected, scoring_model)
     samples_by_id = Hash[samples.map { |s| [s.id, s] }]
     parent_ids = fetch_parent_ids(taxon_ids, samples)
-    results_by_pr = fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
+    results_by_pr = fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id, scoring_model)
     results = []
     results_by_pr.each do |_pr_id, res|
       pr = res["pr"]
@@ -448,9 +470,8 @@ module ReportHelper
     true
   end
 
-  def top_taxons_details(samples, background_id, num_results, sort_by_key, species_selected, categories, threshold_filters = {})
-    # return top taxons
-    results_by_pr = fetch_top_taxons(samples, background_id, categories)
+  def top_taxons_details(samples, background_id, num_results, sort_by_key, species_selected, categories, scoring_model, threshold_filters = {})
+    results_by_pr = fetch_top_taxons(samples, background_id, categories, scoring_model)
     sort_by = decode_sort_by(sort_by_key)
     count_type = sort_by[:count_type]
     metric = sort_by[:metric]
@@ -900,7 +921,7 @@ module ReportHelper
   def taxonomy_details(pipeline_run_id, background_id, params)
     # Fetch and clean data.
     t0 = wall_clock_ms
-    taxon_counts = fetch_taxon_counts(pipeline_run_id, background_id)
+    taxon_counts = fetch_taxon_counts(pipeline_run_id, background_id, params[:scoring_model])
     tax_2d = taxon_counts_cleanup(taxon_counts)
     t1 = wall_clock_ms
 
