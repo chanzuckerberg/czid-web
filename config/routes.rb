@@ -25,7 +25,7 @@ Rails.application.routes.draw do
     post :save_metadata, on: :member
     post :add_taxon_confirmation, on: :member
     post :remove_taxon_confirmation, on: :member
-    get :samples_taxons, on: :collection
+    get :heatmap_samples_taxons, on: :collection
     get :top_taxons, on: :collection
     get :heatmap, on: :collection
     get :download_heatmap, on: :collection

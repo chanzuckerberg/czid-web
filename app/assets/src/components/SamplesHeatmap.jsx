@@ -174,7 +174,7 @@ class SamplesHeatmap extends React.Component {
     this.setState({ loading: true });
 
     axios
-      .get("/samples/samples_taxons.json", {
+      .get("/samples/heatmap_samples_taxons.json", {
         params: {
           sampleIds: this.state.sampleIds,
           taxonIds: this.state.taxonIds,
