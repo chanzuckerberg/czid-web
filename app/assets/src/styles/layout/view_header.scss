@@ -1,0 +1,60 @@
+@import "../themes/colors";
+
+.view-header {
+  width: 100%;
+  margin: 20px 200px;
+  overflow: auto;
+
+  &__left {
+    float: left;
+    min-width: 20%;
+    max-width: 80%;
+
+    &__pre-title {
+      color: $medium-grey;
+      font-size: 12px;
+      height: 20px;
+      line-height: 20px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      vertical-align: middle;
+    }
+
+    &__title {
+      font-size: 26px;
+      font-weight: 400;
+      height: 40px;
+      line-height: 40px;
+      vertical-align: middle;
+    }
+
+    &__sub-title {
+      color: $dark-grey;
+      font-size: 12px;
+      height: 20px;
+      line-height: 20px;
+      margin-top: 10px;
+      vertical-align: middle;
+    }
+  }
+
+  &__right {
+    float: right;
+    height: 100px;
+    min-width: 20%;
+    max-width: 80%;
+    position: relative;
+    vertical-align: middle;
+
+    &__wrapper {
+      float: right;
+      position: relative;
+      top: 50%;
+      transform: translate(0, -50%);
+
+      &:not(:first-child) {
+        margin-right: 10px;
+      }
+    }
+  }
+}

@@ -1,4 +1,5 @@
 import React from "react";
+import Divider from "../../layout/Divider";
 import ViewHeader from "../../layout/ViewHeader";
 
 class PhyloTreeListView extends React.Component {
@@ -7,7 +8,12 @@ class PhyloTreeListView extends React.Component {
   }
 
   render() {
-    return <ViewHeader title="Phylogenetic Trees" />;
+    return (
+      <div>
+        <ViewHeader title="Phylogenetic Trees" />
+        <Divider />
+      </div>
+    );
   }
 }
 

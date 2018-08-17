@@ -2,24 +2,23 @@ import PropTypes from "prop-types";
 import React from "react";
 
 const ViewHeader = ({ title, preTitle, subTitle, children }) => {
-  const wrapComponent = (breacrumb, className) => {
-    return <span className={className}>{breacrumb}</span>;
-  };
-
-  if (Array.isArray(children)) {
+  if (children && !Array.isArray(children)) {
     children = [children];
   }
-
   return (
     <div className="view-header">
       <div className="view-header__left">
-        <div className="view-header__left__pretitle">{preTitle}</div>
+        <div className="view-header__left__pre-title">{preTitle}</div>
         <div className="view-header__left__title">{title}</div>
-        <div className="view-header__left__subtitle">{subTitle}</div>
+        <div className="view-header__left__sub-title">{subTitle}</div>
       </div>
       <div className="view-header__right">
-        {(children || []).map(child => {
-          return wrapComponent(child, "view-header__right__c-wrap");
+        {(children || []).map((child, idx) => {
+          return (
+            <span key={idx} className="view-header__right__wrapper">
+              {child}
+            </span>
+          );
         })}
       </div>
     </div>
