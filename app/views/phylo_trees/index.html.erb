@@ -1,9 +1,9 @@
-<div id="PhyloTreeList_page">
+<div id="PhyloTreeListView_page">
   <%= javascript_tag do %>
-    react_component('PhyloTreeList', {
+    react_component('PhyloTreeListView', {
       project: JSON.parse('<%= raw escape_json(@project) %>'),
       taxon: JSON.parse('<%= raw escape_json(@taxon) %>'),
       phyloTrees: JSON.parse('<%= raw escape_json(@phylo_trees) %>')
-    }, 'PhyloTreeList_page');
+    }, 'PhyloTreeListView_page');
   <% end %>
 </div>
