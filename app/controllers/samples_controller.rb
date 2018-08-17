@@ -175,20 +175,20 @@ class SamplesController < ApplicationController
     @report_page_params = { pipeline_version: @pipeline_version, background_id: background_id } if background_id
     @report_page_params[:scoring_model] = params[:scoring_model] if params[:scoring_model]
 
-    # Report is ready if the pipeline run has results finalized and did not
-    # fail, or if all its output states are loaded.
-    if @pipeline_run && ((@pipeline_run.results_finalized? && !@pipeline_run.failed?) || @pipeline_run.report_ready?)
-      if background_id
-        @report_present = 1
-        @report_ts = @pipeline_run.updated_at.to_i
-        @all_categories = all_categories
-        @report_details = report_details(@pipeline_run, current_user.id)
-        @ercc_comparison = @pipeline_run.compare_ercc_counts
-      end
+    # Report is ready if pipeline run has results finalized and did not fail
+    # (success), or if all its output states are loaded successfully.
+    if @pipeline_run &&
+       ((@pipeline_run.results_finalized? && !@pipeline_run.failed?) || @pipeline_run.report_ready?) &&
+       background_id
+      @report_present = 1
+      @report_ts = @pipeline_run.updated_at.to_i
+      @all_categories = all_categories
+      @report_details = report_details(@pipeline_run, current_user.id)
+      @ercc_comparison = @pipeline_run.compare_ercc_counts
+    end
 
-      if @pipeline_run.failed?
-        @pipeline_run_retriable = true
-      end
+    if @pipeline_run && @pipeline_run.results_finalized? && @pipeline_run.failed?
+      @pipeline_run_retriable = true
     end
   end
 
