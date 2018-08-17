@@ -135,7 +135,7 @@ class Sample < ApplicationRecord
         OR samples.sample_tissue LIKE :search
         OR samples.sample_location LIKE :search
         OR samples.sample_notes LIKE :search
-        OR samples.sample_unique_id', search: "%#{search}%")
+        OR samples.sample_unique_id LIKE :search', search: "%#{search}%")
     else
       scoped
     end
