@@ -13,6 +13,12 @@ class Dropdown extends React.Component {
     }, {});
   }
 
+  componentWillReceiveProps(newProps) {
+    if (newProps.value != this.props.value) {
+      this.setState({ value: newProps.value });
+    }
+  }
+
   handleOnChange(e, d) {
     this.setState({ value: d.value });
     this.onChange(e, d);
