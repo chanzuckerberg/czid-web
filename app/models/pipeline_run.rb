@@ -248,7 +248,7 @@ class PipelineRun < ApplicationRecord
     save
   end
 
-  def report_ready?
+  def all_outputs_ready?
     output_states.find_by(output: REPORT_READY_OUTPUT).state == STATUS_LOADED
   end
 
@@ -501,7 +501,7 @@ class PipelineRun < ApplicationRecord
         prs.update_job_status
       end
       self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
-      self.job_status += "|#{STATUS_READY}" if report_ready?
+      self.job_status += "|#{STATUS_READY}" if all_outputs_ready?
     end
     compile_stats_file
     save

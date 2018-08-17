@@ -177,9 +177,8 @@ class SamplesController < ApplicationController
 
     # Report is ready if pipeline run has results finalized and did not fail
     # (success), or if all its output states are loaded successfully.
-    if @pipeline_run &&
-       ((@pipeline_run.results_finalized? && !@pipeline_run.failed?) || @pipeline_run.report_ready?) &&
-       background_id
+    if @pipeline_run && background_id &&
+       ((@pipeline_run.results_finalized? && !@pipeline_run.failed?) || @pipeline_run.all_outputs_ready?)
       @report_present = 1
       @report_ts = @pipeline_run.updated_at.to_i
       @all_categories = all_categories
@@ -267,7 +266,7 @@ class SamplesController < ApplicationController
     ## Duct tape for changing background id dynamically
     ## TODO(yf): clean the following up.
     ####################################################
-    if @pipeline_run && (((@pipeline_run.adjusted_remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?) || @pipeline_run.report_ready?)
+    if @pipeline_run && (((@pipeline_run.adjusted_remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?) || @pipeline_run.all_outputs_ready?)
       background_id = check_background_id(@sample)
       pipeline_run_id = @pipeline_run.id
     end
