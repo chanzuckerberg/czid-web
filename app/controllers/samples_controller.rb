@@ -187,7 +187,7 @@ class SamplesController < ApplicationController
       @ercc_comparison = @pipeline_run.compare_ercc_counts
     end
 
-    if @pipeline_run && @pipeline_run.results_finalized? && @pipeline_run.failed?
+    if @pipeline_run.results_finalized? && @pipeline_run.failed?
       @pipeline_run_retriable = true
     end
   end
