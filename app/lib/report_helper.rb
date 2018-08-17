@@ -201,6 +201,9 @@ module ReportHelper
     # Load scoring model attributes
     scoring_model ||= TaxonScoringModel::DEFAULT_MODEL_NAME
     tsm = TaxonScoringModel.find_by(name: scoring_model)
+    if !tsm.attributes_json || tsm.attributes_json == ""
+      Airbrake.notify("No attributes json for TaxonScoringModel #{tsm.name}")
+    end
     JSON.parse(tsm.attributes_json)
   end
 
