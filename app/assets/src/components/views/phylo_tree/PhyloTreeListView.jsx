@@ -13,7 +13,7 @@ class PhyloTreeListView extends React.Component {
     this.phyloTreeMap = new Map(props.phyloTrees.map(tree => [tree.id, tree]));
 
     this.state = {
-      selectedPhyloTreeId: props.phyloTrees ? props.phyloTrees[1].id : null
+      selectedPhyloTreeId: props.phyloTrees ? props.phyloTrees[0].id : null
     };
 
     this.handleTreeChange = this.handleTreeChange.bind(this);
