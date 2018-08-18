@@ -6,7 +6,11 @@ class Dropdown extends React.Component {
   constructor(props) {
     super(props);
     this.onChange = this.props.onChange;
-    this.state = { value: this.props.value || this.props.options[0].value };
+    this.state = {
+      value:
+        this.props.value ||
+        (this.props.options.length ? this.props.options[0].value : null)
+    };
     this.labels = this.props.options.reduce((labelMap, option) => {
       labelMap[option.value.toString()] = option.text;
       return labelMap;
@@ -55,7 +59,7 @@ Dropdown.propTypes = {
   disabled: PropTypes.bool,
   fluid: PropTypes.bool,
   label: PropTypes.string,
-  options: PropTypes.array,
+  options: PropTypes.array.isRequired,
   onChange: PropTypes.func.isRequired,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
 };
