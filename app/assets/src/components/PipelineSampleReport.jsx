@@ -47,6 +47,7 @@ class PipelineSampleReport extends React.Component {
     const cachedIncludedSubcategories = Cookies.get("includedSubcategories");
 
     const cached_name_type = Cookies.get("name_type");
+    const cachedReadSpecificity = Cookies.get("readSpecificity");
     const savedThresholdFilters = ThresholdMap.getSavedThresholdFilters();
 
     this.showConcordance = false;
@@ -122,7 +123,7 @@ class PipelineSampleReport extends React.Component {
       loading: true,
       activeThresholds: this.defaultThresholdValues,
       countType: "NT",
-      readSpecificity: "All"
+      readSpecificity: cachedReadSpecificity ? cachedReadSpecificity : "All"
     };
 
     this.expandAll = false;
@@ -760,6 +761,7 @@ class PipelineSampleReport extends React.Component {
   }
 
   handleSpecificityChange(_, data) {
+    Cookies.set("readSpecificity", data.value);
     this.setState({ readSpecificity: data.value });
   }
 
