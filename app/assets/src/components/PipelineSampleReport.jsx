@@ -121,7 +121,8 @@ class PipelineSampleReport extends React.Component {
       rendering: false,
       loading: true,
       activeThresholds: this.defaultThresholdValues,
-      countType: "NT"
+      countType: "NT",
+      readSpecificity: "All"
     };
 
     this.expandAll = false;
@@ -143,6 +144,7 @@ class PipelineSampleReport extends React.Component {
     this.getBackgroundIdByName = this.getBackgroundIdByName.bind(this);
     this.gotoAlignmentVizLink = this.gotoAlignmentVizLink.bind(this);
     this.handleNameTypeChange = this.handleNameTypeChange.bind(this);
+    this.handleSpecificityChange = this.handleSpecificityChange.bind(this);
     this.handleBackgroundModelChange = this.handleBackgroundModelChange.bind(
       this
     );
@@ -757,6 +759,10 @@ class PipelineSampleReport extends React.Component {
     this.setState({ name_type: data.value });
   }
 
+  handleSpecificityChange(_, data) {
+    this.setState({ readSpecificity: data.value });
+  }
+
   // path to NCBI
   gotoNCBI(e) {
     const taxId = e.target.getAttribute("data-tax-id");
@@ -1082,16 +1088,22 @@ class PipelineSampleReport extends React.Component {
       taxon_status = "confirmed";
     else if (watched_taxids.indexOf(tax_info.tax_id) >= 0)
       taxon_status = "watched";
+
     if (tax_info.tax_level == 2) {
       if (tax_info.tax_id < 0) {
+        let visible = "hidden";
+        if (this.state.readSpecificity.toLowerCase() === "all") {
+          visible = "";
+        }
         return `report-row-genus ${
           tax_info.genus_taxid
-        } fake-genus ${taxon_status} ${highlighted}`;
+        } fake-genus ${visible} ${taxon_status} ${highlighted}`;
       }
       return `report-row-genus ${
         tax_info.genus_taxid
       } real-genus ${taxon_status} ${highlighted}`;
     }
+
     let initial_visibility = "hidden";
     if (
       (this.expandAll && tax_info.genus_taxid > 0) ||
@@ -1607,6 +1619,21 @@ function BackgroundModelFilter({ parent }) {
   );
 }
 
+function SpecificityFilter({ parent }) {
+  const specificityOptions = [
+    { text: "All", value: "All" },
+    { text: "Specific Only", value: "Specific Only" }
+  ];
+  return (
+    <OurDropdown
+      options={specificityOptions}
+      value={parent.state.readSpecificity}
+      label="Read Specificity: "
+      onChange={parent.handleSpecificityChange}
+    />
+  );
+}
+
 class RenderMarkup extends React.Component {
   constructor(props) {
     super(props);
@@ -1722,6 +1749,9 @@ class RenderMarkup extends React.Component {
                           thresholds={parent.state.activeThresholds}
                           onApply={parent.applyThresholdFilters}
                         />
+                      </div>
+                      <div className="filter-lists-element">
+                        <SpecificityFilter parent={parent} />
                       </div>
                     </div>
                   </div>
