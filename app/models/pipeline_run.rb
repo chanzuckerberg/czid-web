@@ -420,7 +420,6 @@ class PipelineRun < ApplicationRecord
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_byteranges_path}")
   end
 
-  # TODO: modify a lot for the amr_counts case
   def s3_file_for(output)
     case output
     when "ercc_counts"
@@ -467,8 +466,6 @@ class PipelineRun < ApplicationRecord
     output = output_state.output
     state = output_state.state
     return unless state == STATUS_UNKNOWN
-    # TODO: How long does this wait for file to be generated for the output? looks like not long at all.
-    # does it wait for a pipeline run stage to be finished ?
     if output_ready?(output)
       output_state.update(state: STATUS_LOADING_QUEUED)
       Resque.enqueue(ResultMonitorLoader, id, output)

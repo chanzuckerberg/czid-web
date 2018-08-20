@@ -152,8 +152,6 @@ class SamplesController < ApplicationController
   def show
     @sample = samples_scope.find(params[:id])
     @pipeline_run = select_pipeline_run(@sample, params)
-    Rails.logger.info("pipeline_run in show")
-    Rails.logger.info(@pipeline_run)
     @amr_counts = @pipeline_run ? @pipeline_run.amr_counts : nil
     @pipeline_version = @pipeline_run.pipeline_version || PipelineRun::PIPELINE_VERSION_WHEN_NULL if @pipeline_run
     @pipeline_versions = @sample.pipeline_versions
@@ -194,7 +192,6 @@ class SamplesController < ApplicationController
   end
 
   def show_amr_counts
-    @sample = samples_scope.find(params[:id])
     @amr_counts = @sample.pipeline_runs.first.amr_counts
     # TODO: Add this back in when modifying to use axios api.
     # render json: @amr_counts
