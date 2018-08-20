@@ -54,7 +54,6 @@ class ThresholdFilterDropdown extends React.Component {
   }
 
   validateItems() {
-    // let newThresholds = this.state.thresholds.filter(this.isThresholdValid);
     let newThresholds = this.state.thresholds.filter(this.isThresholdValid);
     this.setState({ thresholds: newThresholds });
     this.props.onApply(newThresholds);

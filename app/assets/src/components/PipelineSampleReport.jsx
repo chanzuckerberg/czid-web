@@ -270,7 +270,8 @@ class PipelineSampleReport extends React.Component {
           this.max_rows_to_render
         ),
         pagesRendered: 1,
-        rows_passing_filters: this.state.taxonomy_details.length
+        rows_passing_filters: this.state.taxonomy_details.length,
+        readSpecificity: "All"
       },
       () => {
         ThresholdMap.saveThresholdFilters([]);
@@ -323,7 +324,14 @@ class PipelineSampleReport extends React.Component {
       for (var i = 0; i < thresholded_taxons.length; i++) {
         let taxon = thresholded_taxons[i];
         if (includedCategories.indexOf(taxon.category_name) >= 0) {
-          // in the included categories
+          // In the included categories
+
+          // Skip if excluding non-specific rows
+          if (this.state.readSpecificity.toLowerCase() === "specific only") {
+            if (taxon.tax_level === 2 && taxon.tax_id < 0) {
+              continue;
+            }
+          }
           selected_taxons.push(taxon);
         } else if (
           displayed_subcat_indicator_columns.some(column => {
@@ -356,7 +364,16 @@ class PipelineSampleReport extends React.Component {
         }
       }
     } else {
-      selected_taxons = thresholded_taxons;
+      // Skip if excluding non-specific rows
+      if (this.state.readSpecificity.toLowerCase() === "specific only") {
+        for (let tax_info of thresholded_taxons) {
+          if (tax_info.tax_level !== 2 || tax_info.tax_id > 0) {
+            selected_taxons.push(tax_info);
+          }
+        }
+      } else {
+        selected_taxons = thresholded_taxons;
+      }
     }
 
     if (searchTaxonId <= 0) {
@@ -762,7 +779,14 @@ class PipelineSampleReport extends React.Component {
 
   handleSpecificityChange(_, data) {
     Cookies.set("readSpecificity", data.value);
-    this.setState({ readSpecificity: data.value });
+    this.setState({ readSpecificity: data.value }, () => {
+      this.applySearchFilter(
+        0,
+        this.state.includedCategories,
+        this.state.thresholded_taxons,
+        this.state.includedSubcategories
+      );
+    });
   }
 
   // path to NCBI
@@ -1093,13 +1117,9 @@ class PipelineSampleReport extends React.Component {
 
     if (tax_info.tax_level == 2) {
       if (tax_info.tax_id < 0) {
-        let visible = "hidden";
-        if (this.state.readSpecificity.toLowerCase() === "all") {
-          visible = "";
-        }
         return `report-row-genus ${
           tax_info.genus_taxid
-        } fake-genus ${visible} ${taxon_status} ${highlighted}`;
+        } fake-genus ${taxon_status} ${highlighted}`;
       }
       return `report-row-genus ${
         tax_info.genus_taxid
