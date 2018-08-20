@@ -46,7 +46,8 @@ class TaxonLineage < ApplicationRecord
 
     # Get created_at date for our TaxonCount entries. Same for all TaxonCounts
     # in a PipelineRun.
-    valid_date = PipelineRun.find(pipeline_run_id).taxon_counts.last.created_at
+    # TODO: Move the lineage selection mechanism into alignment_config.
+    valid_date = PipelineRun.find(pipeline_run_id).created_at
 
     # TODO: Should definitely be simplified with taxonomy/lineage refactoring.
     lineage_by_taxid = {}
@@ -55,7 +56,7 @@ class TaxonLineage < ApplicationRecord
     # now, we only select the valid entry based on started_at and ended_at.
     # The valid lineage entry has start and end dates that include the valid
     # taxon count entry date.
-    TaxonLineage.where(taxid: tax_ids).where("started_at < ? AND ended_at > ?", valid_date, valid_date).find_each do |x|
+    TaxonLineage.where(taxid: tax_ids).where("started_at < ? AND ended_at > ?", valid_date, valid_date).each do |x|
       lineage_by_taxid[x.taxid] = x.as_json
     end
 
