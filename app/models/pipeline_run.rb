@@ -302,9 +302,11 @@ class PipelineRun < ApplicationRecord
 
   def db_load_amr_counts
     # test files: "s3://idseq-database/test/AMR/amr_processed_results.csv", "s3://idseq-database/test/AMR/amr_summary_results.csv"
+    # amr_results = PipelineRun.download_file_with_retries("s3://idseq-database/test/AMR/amr_processed_results.csv", local_amr_full_results_path, 3)
     amr_results = PipelineRun.download_file_with_retries(s3_file_for("amr_full_results"), local_amr_full_results_path, 3)
     Airbrake.notify("PipelineRun #{id} failed amr_counts download") unless amr_results
     return unless amr_results
+
     unless File.zero?(amr_results)
       amr_counts_array = []
       # First line of output file has header titles, e.g. "Sample/Gene/Allele..." that are extraneous

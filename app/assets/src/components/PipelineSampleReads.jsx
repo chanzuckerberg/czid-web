@@ -15,11 +15,8 @@ import BasicPopup from "./BasicPopup";
 class PipelineSampleReads extends React.Component {
   constructor(props) {
     super(props);
-<<<<<<< HEAD
     this.admin = props.admin;
-=======
     this.amr = props.amr;
->>>>>>> View for AMR results
     this.can_edit = props.can_edit;
     this.csrf = props.csrf;
     this.gitVersion = props.gitVersion;

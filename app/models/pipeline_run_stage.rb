@@ -240,6 +240,6 @@ class PipelineRunStage < ApplicationRecord
       "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} "
     batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline assembly"
     "aegea batch submit --command=\"#{batch_command}\" " \
-      " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --ecr-image idseq_dag --memory 60000 --queue idseq_assembly --vcpus 32 --job-role idseq-pipeline "
+      " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --ecr-image idseq_dag_meera1 --memory 60000 --queue idseq_assembly --vcpus 32 --job-role idseq-pipeline "
   end
 end
