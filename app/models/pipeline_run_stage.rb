@@ -225,12 +225,12 @@ class PipelineRunStage < ApplicationRecord
     attribute_dict[:fastq2] = sample.input_files[1].name if sample.input_files[1]
     dag_commands = prepare_dag("experimental", attribute_dict)
 
-    upload_version = "idseq_dag --version | cut -f2 -d ' ' | aws s3 cp  - #{pipeline_run.pipeline_version_file} "
-    batch_command = [install_pipeline, upload_version, dag_commands].join("; ")
+    # upload_version = "idseq_dag --version | cut -f2 -d ' ' | aws s3 cp  - #{pipeline_run.pipeline_version_file} "
+    batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
 
     # Dispatch job
-    memory = sample.sample_memory.present? ? sample.sample_memory : Sample::DEFAULT_MEMORY_IN_MB
-    aegea_batch_submit_command(batch_command, memory)
+    # memory = sample.sample_memory.present? ? sample.sample_memory : Sample::DEFAULT_MEMORY_IN_MB
+    aegea_batch_submit_command(batch_command, job_queue: pipeline_run.sample.job_queue)
   end
 
   def assembly_command
