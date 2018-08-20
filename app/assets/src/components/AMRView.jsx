@@ -1,5 +1,4 @@
 import React from "react";
-import ReactDOM from "react-dom";
 import ReactTable from "react-table";
 import "react-table/react-table.css";
 import _ from "lodash";
@@ -7,10 +6,7 @@ import _ from "lodash";
 const columns = [
   {
     Header: "Antibiotic Class",
-    accessor: "drug_family",
-    PivotValue: ({ value }) => (
-      <span style={{ color: "darkblue" }}>{value}</span>
-    )
+    accessor: "drug_family"
   },
   {
     Header: "Gene",
@@ -45,7 +41,6 @@ class AMRView extends React.Component {
       this.state.data[key].gene_family = this.state.data[key].gene.slice(0, 5); // first four characters of gene family
     }
   }
-
   render() {
     const { data } = this.state;
     return (
