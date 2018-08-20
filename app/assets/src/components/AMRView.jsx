@@ -40,8 +40,8 @@ class AMRView extends React.Component {
   constructor(props) {
     super(props);
     this.state = { data: props.amr };
-    for (var z = 0; z < Object.keys(this.state.data).length; z++) {
-      var key = Object.keys(this.state.data)[z];
+    for (var i = 0; i < Object.keys(this.state.data).length; i++) {
+      var key = Object.keys(this.state.data)[i];
       this.state.data[key].gene_family = this.state.data[key].gene.slice(0, 5); // first four characters of gene family
     }
     console.log(this.state.data);
