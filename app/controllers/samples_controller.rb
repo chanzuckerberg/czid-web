@@ -496,8 +496,12 @@ class SamplesController < ApplicationController
   # DELETE /samples/1.json
   def destroy
     # Will also delete from job_stats, ercc_counts, backgrounds_pipeline_runs, pipeline_runs, input_files, and backgrounds_samples
+    # Current job_status values look like "1.Host Filtering-FAILED" or "2.GSNAPL/RAPSEARCH alignment-FAILED"
+    # Allow deletion if pipeline runs are empty or the latest run failed, and the sample belongs to you, or you're an admin.
+    deletable = ((@sample.pipeline_runs.empty? || @sample.pipeline_runs[0].job_status.include?("FAILED")) && @sample.user_id == current_user.id) || current_user.admin?
+    @sample.destroy if deletable
     respond_to do |format|
-      if @sample.destroy
+      if deletable
         format.html { redirect_to samples_url, notice: 'Sample was successfully destroyed.' }
         format.json { head :no_content }
       else
