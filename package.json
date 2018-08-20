@@ -73,6 +73,7 @@
     "query-string": "^6.1.0",
     "rc-slider": "^8.6.1",
     "react": "^16.2.0",
+    "react-table": "^6.8.6",
     "react-autocomplete": "^1.7.2",
     "react-dom": "^16.2.0",
     "react-sticky": "^6.0.1",
