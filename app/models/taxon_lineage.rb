@@ -46,9 +46,8 @@ class TaxonLineage < ApplicationRecord
 
     # Get created_at date for our TaxonCount entries. Same for all TaxonCounts
     # in a PipelineRun.
-    # TODO: change this to get the created_at date from the smaller pipeline_run table.
-    #       And/or move the lineage selection mechanism into alignment_config.
-    valid_date = TaxonCount.where(pipeline_run_id: pipeline_run_id).select(:created_at).last.created_at
+    # TODO: Move the lineage selection mechanism into alignment_config.
+    valid_date = PipelineRun.find(pipeline_run_id).created_at
 
     # TODO: Should definitely be simplified with taxonomy/lineage refactoring.
     lineage_by_taxid = {}
