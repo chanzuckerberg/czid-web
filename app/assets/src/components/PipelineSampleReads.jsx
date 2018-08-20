@@ -9,12 +9,17 @@ import numberWithCommas from "../helpers/strings";
 import SubHeader from "./SubHeader";
 import ERCCScatterPlot from "./ERCCScatterPlot";
 import PipelineSampleReport from "./PipelineSampleReport";
+import AMRView from "./AMRView";
 import BasicPopup from "./BasicPopup";
 
 class PipelineSampleReads extends React.Component {
   constructor(props) {
     super(props);
+<<<<<<< HEAD
     this.admin = props.admin;
+=======
+    this.amr = props.amr;
+>>>>>>> View for AMR results
     this.can_edit = props.can_edit;
     this.csrf = props.csrf;
     this.gitVersion = props.gitVersion;
@@ -482,7 +487,6 @@ class PipelineSampleReads extends React.Component {
     if (!this.props.ercc_comparison) {
       return;
     }
-
     return (
       <div className="row last-row">
         <div className="col s12">
@@ -867,12 +871,22 @@ class PipelineSampleReads extends React.Component {
                       Details
                     </a>
                   </li>
+                  <li className="tab">
+                    <a href="#amr" className="">
+                      Antimicrobial Resistance Report
+                    </a>
+                  </li>
                 </ul>
               </div>
             </div>
           </div>
         </SubHeader>
         <Divider className="reports-divider" />
+
+        <div id="amr" className="reports-screen container tab-screen col s12">
+          <AMRView amr={this.amr} />
+        </div>
+
         <div id="details" className="tab-screen col s12">
           <div className="center">
             <span className="note-action-feedback note-saved-success" />
