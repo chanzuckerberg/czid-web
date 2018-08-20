@@ -19,6 +19,7 @@ const columns = [
     aggregate: vals => _.size(vals)
   },
   {
+    // TODO: Make average for gene family level
     Header: "Coverage",
     accessor: "coverage",
     aggregate: vals => _.sum(vals),
@@ -36,9 +37,15 @@ class AMRView extends React.Component {
   constructor(props) {
     super(props);
     this.state = { data: props.amr };
-    for (var i = 0; i < Object.keys(this.state.data).length; i++) {
-      var key = Object.keys(this.state.data)[i];
-      this.state.data[key].gene_family = this.state.data[key].gene.slice(0, 5); // first four characters of gene family
+    if (this.state.data) {
+      // TODO: Use regex to parse out gene family, i.e. is [.]*_ -- everything until the underscore
+      for (var i = 0; i < Object.keys(this.state.data).length; i++) {
+        var key = Object.keys(this.state.data)[i];
+        this.state.data[key].gene_family = this.state.data[key].gene.slice(
+          0,
+          5
+        ); // first four characters of gene family
+      }
     }
   }
   render() {
