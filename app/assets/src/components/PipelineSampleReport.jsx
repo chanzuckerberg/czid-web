@@ -417,7 +417,9 @@ class PipelineSampleReport extends React.Component {
         let count = 0;
         for (
           let j = i + 1;
-          j < res.length && res[j].genus_taxid != res[j].tax_id;
+          j < res.length &&
+          res[j].genus_taxid != res[j].tax_id &&
+          res[j].genus_taxid === res[i].genus_taxid;
           j++
         ) {
           count++;
