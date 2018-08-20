@@ -387,6 +387,21 @@ class Sample < ApplicationRecord
     end
   end
 
+  def deletable?(user)
+    if user.admin?
+      return true
+    elsif user_id == user.id
+      # Sample belongs to the user
+      if pipeline_runs.empty? ||
+         (pipeline_runs[0].job_status.include?("Filtering-FAILED") || pipeline_runs[0].job_status.include?("alignment-FAILED"))
+        # Allow deletion if no pipeline runs, or host filtering or alignment failed.
+        # Current job_status values look like "1.Host Filtering-FAILED" or "2.GSNAPL/RAPSEARCH alignment-FAILED".
+        return true
+      end
+    end
+    false
+  end
+
   def self.public_samples
     joins("INNER JOIN projects ON samples.project_id = projects.id")
       .where("(projects.public_access = 1 or
