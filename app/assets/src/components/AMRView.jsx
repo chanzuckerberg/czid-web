@@ -36,7 +36,7 @@ const columns = [
 class AMRView extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { data: props.amr };
+    this.state = { data: props.amr ? props.amr : [] };
     if (this.state.data) {
       // TODO: Use regex to parse out gene family, i.e. is [.]*_ -- everything until the underscore
       for (var i = 0; i < Object.keys(this.state.data).length; i++) {
