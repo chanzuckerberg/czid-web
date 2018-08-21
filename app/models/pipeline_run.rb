@@ -252,6 +252,11 @@ class PipelineRun < ApplicationRecord
     output_states.find_by(output: REPORT_READY_OUTPUT).state == STATUS_LOADED
   end
 
+  def report_failed?
+    # If the report ready output was marked as STATUS_FAILED
+    output_states.find_by(output: REPORT_READY_OUTPUT).state == STATUS_FAILED
+  end
+
   def succeeded?
     job_status == STATUS_CHECKED
   end

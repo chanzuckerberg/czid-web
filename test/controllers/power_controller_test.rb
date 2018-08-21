@@ -45,7 +45,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     assert @joe_sample.sample_tissue == 'bone'
   end
 
-  test 'joe can see samples  in joe_project' do
+  test 'joe can see samples in joe_project' do
     @joe_project = projects(:joe_project)
     get "/samples.json?project_id=#{@joe_project.id}"
     assert_response :success
@@ -56,6 +56,19 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     @joe_sample = samples(:joe_sample)
     get sample_url(@joe_sample)
     assert_response :success
+  end
+
+  test 'joe can delete his own sample' do
+    @joe_sample = samples(:joe_sample)
+    delete sample_url(@joe_sample)
+    assert_response :success
+  end
+
+  test 'joe cannot delete public_sample' do
+    @public_sample = samples(:public_sample)
+    assert_raises(ActiveRecord::RecordNotFound) do
+      delete sample_url(@public_sample)
+    end
   end
 
   # public projects

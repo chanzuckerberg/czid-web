@@ -392,10 +392,8 @@ class Sample < ApplicationRecord
       return true
     elsif user_id == user.id
       # Sample belongs to the user
-      if pipeline_runs.empty? ||
-         (pipeline_runs[0].job_status.include?("Filtering-FAILED") || pipeline_runs[0].job_status.include?("alignment-FAILED"))
-        # Allow deletion if no pipeline runs, or host filtering or alignment failed.
-        # Current job_status values look like "1.Host Filtering-FAILED" or "2.GSNAPL/RAPSEARCH alignment-FAILED".
+      if pipeline_runs.empty? || pipeline_runs[0].report_failed?
+        # Allow deletion if no pipeline runs, or report ready output failed.
         return true
       end
     end

@@ -497,9 +497,10 @@ class SamplesController < ApplicationController
   def destroy
     # Will also delete from job_stats, ercc_counts, backgrounds_pipeline_runs, pipeline_runs, input_files, and backgrounds_samples
     deletable = @sample.deletable?(current_user)
-    @sample.destroy if deletable
+    success = false
+    success = @sample.destroy if deletable
     respond_to do |format|
-      if deletable
+      if deletable && success
         format.html { redirect_to samples_url, notice: 'Sample was successfully destroyed.' }
         format.json { head :no_content }
       else
