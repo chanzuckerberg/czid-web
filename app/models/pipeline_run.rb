@@ -82,7 +82,10 @@ class PipelineRun < ApplicationRecord
                         "taxon_byteranges" => "db_load_byteranges" }.freeze
   # Note: reads_before_priceseqfilter, reads_after_priceseqfilter, reads_after_cdhitdup
   #       are the only "job_stats" we actually need for web display.
-  REPORT_READY_OUTPUT = "taxon_counts".freeze
+  HOST_FILTERING_OUTPUT = "ercc_counts".freeze
+  ALIGNMENT_OUTPUT = "taxon_counts".freeze
+  POSTPROCESS_OUTPUT = "taxon_byteranges".freeze
+  REPORT_READY_OUTPUT = ALIGNMENT_OUTPUT
 
   # Values for results_finalized are as follows.
   # Note we don't put a default on results_finalized in the schema, so that we can
@@ -253,8 +256,12 @@ class PipelineRun < ApplicationRecord
   end
 
   def report_failed?
-    # If the report ready output was marked as STATUS_FAILED
-    output_states.find_by(output: REPORT_READY_OUTPUT).state == STATUS_FAILED
+    # The report failed if host filtering or alignment failed.
+    host_filtering_status = output_states.find_by(output: HOST_FILTERING_OUTPUT).state
+    alignment_status = output_states.find_by(output: ALIGNMENT_OUTPUT).state
+    if host_filtering_status == STATUS_FAILED || alignment_status == STATUS_FAILED
+      true
+    end
   end
 
   def succeeded?
