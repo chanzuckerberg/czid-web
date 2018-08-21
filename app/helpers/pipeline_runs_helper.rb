@@ -5,7 +5,7 @@ module PipelineRunsHelper
                                  memory: Sample::DEFAULT_MEMORY_IN_MB,
                                  vcpus: Sample::DEFAULT_VCPUS,
                                  job_queue: nil,
-                                 docker_image: "idseq_dag")
+                                 docker_image: "idseq_dag_meera1")
     command = "aegea batch submit --command=\"#{base_command}\" "
     if memory <= Sample::DEFAULT_MEMORY_IN_MB
       # Use default memory, vCPUs, and queue if below the default memory threshold.
