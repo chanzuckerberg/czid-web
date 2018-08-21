@@ -303,10 +303,10 @@ class PipelineRun < ApplicationRecord
   def db_load_amr_counts
     # test files: "s3://idseq-database/test/AMR/amr_processed_results.csv", "s3://idseq-database/test/AMR/amr_summary_results.csv"
     # amr_results = PipelineRun.download_file_with_retries("s3://idseq-database/test/AMR/amr_processed_results.csv", local_amr_full_results_path, 3)
-    amr_results = PipelineRun.download_file_with_retries(s3_file_for("amr_full_results"), local_amr_full_results_path, 3)
-    Airbrake.notify("PipelineRun #{id} failed amr_counts download") unless amr_results
-    return unless amr_results
-
+    # amr_results = PipelineRun.download_file_with_retries(s3_file_for("amr_full_results"), local_amr_full_results_path, 3)
+    # Airbrake.notify("PipelineRun #{id} failed amr_counts download") unless amr_results
+    # return unless amr_results
+    amr_results = PipelineRun.download_file(s3_file_for("amr_counts"), local_amr_full_results_path)
     unless File.zero?(amr_results)
       amr_counts_array = []
       # First line of output file has header titles, e.g. "Sample/Gene/Allele..." that are extraneous
@@ -320,7 +320,6 @@ class PipelineRun < ApplicationRecord
                               coverage: amr_result_fields[2],
                               depth:  amr_result_fields[3],
                               drug_family: amr_result_fields[12],
-                              drug_gene_hits: amr_result_fields[13],
                               drug_gene_coverage: amr_result_fields[14],
                               drug_gene_depth: amr_result_fields[15],
                               level: 1 }
@@ -424,7 +423,7 @@ class PipelineRun < ApplicationRecord
     case output
     when "ercc_counts"
       "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
-    when "amr_full_results"
+    when "amr_counts"
       "#{expt_output_s3_path}/#{AMR_FULL_RESULTS_NAME}"
     when "taxon_counts"
       "#{alignment_output_s3_path}/#{taxon_counts_json_name}"
