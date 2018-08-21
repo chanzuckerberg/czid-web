@@ -114,3 +114,6 @@ Style/Next:
   # `MinBodyLength` defines the number of lines of the a body of an if / unless
   # needs to have to trigger this cop
   MinBodyLength: 25
+
+Rails/FindEach:
+  Enabled: false
