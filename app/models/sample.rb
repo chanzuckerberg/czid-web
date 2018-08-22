@@ -393,7 +393,12 @@ class Sample < ApplicationRecord
     elsif user_id == user.id
       # Sample belongs to the user
       # Allow deletion if no pipeline runs, or report failed.
-      pipeline_runs.empty? || pipeline_runs[0].report_failed?
+      unless pipeline_runs.empty?
+        pipeline_runs.each do |prun|
+          return false unless prun.report_failed?
+        end
+      end
+      true
     end
   end
 

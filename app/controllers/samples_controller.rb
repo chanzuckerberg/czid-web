@@ -500,7 +500,7 @@ class SamplesController < ApplicationController
     success = false
     success = @sample.destroy if deletable
     respond_to do |format|
-      if deletable && success
+      if success
         format.html { redirect_to samples_url, notice: 'Sample was successfully destroyed.' }
         format.json { head :no_content }
       else
