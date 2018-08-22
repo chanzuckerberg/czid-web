@@ -58,16 +58,17 @@ class PhyloTreesController < ApplicationController
     # Retrieve pipeline runs that contain the specified taxid.
     eligible_pipeline_runs = current_power.pipeline_runs.top_completed_runs
     all_pipeline_run_ids_with_taxid = TaxonByterange.where(taxid: taxid).where(hit_type: 'NT').pluck(:pipeline_run_id)
-    eligible_pipeline_runs_with_taxid = eligible_pipeline_runs.where(id: all_pipeline_run_ids_with_taxid)
+    eligible_pipeline_run_ids_with_taxid = eligible_pipeline_runs.where(id: all_pipeline_run_ids_with_taxid).pluck(:id)
 
     # Retrieve information for displaying the tree's sample list.
-    @samples = sample_details_json(eligible_pipeline_runs_with_taxid, taxid)
+    @samples = sample_details_json(eligible_pipeline_run_ids_with_taxid, taxid)
 
     # Retrieve information about the taxon
-    example_taxon_count = eligible_pipeline_runs_with_taxid.first.taxon_counts.find_by(tax_id: taxid)
-    taxon_name = example_taxon_count ? example_taxon_count.name : nil
-    tax_level = example_taxon_count ? example_taxon_count.tax_level : nil
-    @taxon = { taxid: taxid, tax_level: tax_level, name: taxon_name }
+    taxon_lineage = TaxonLineage.where(taxid: taxid).last
+    @taxon = { taxid: taxid,
+               # Hardcode the species-level for now.
+               # TODO(charles): clean up when we actually implement genus-level support.
+               tax_level: TaxonCount::TAX_LEVEL_SPECIES, name: taxon_lineage.species_name }
   end
 
   def show
@@ -120,9 +121,8 @@ class PhyloTreesController < ApplicationController
     assert_access
   end
 
-  def sample_details_json(pipeline_runs, taxid)
-    return [] if pipeline_runs.blank?
-    pipeline_run_ids = pipeline_runs.pluck(:id)
+  def sample_details_json(pipeline_run_ids, taxid)
+    return [] if pipeline_run_ids.blank?
 
     # Retrieve information for displaying the tree's sample list.
     # Expose it as an array of hashes containing
@@ -151,7 +151,7 @@ class PhyloTreesController < ApplicationController
     # - number of reads matching the specified taxid in NT
     # Do not include the query on taxon_counts in the previous query above using a join,
     # because the taxon_counts table is large.
-    taxon_counts = TaxonCount.where(pipeline_run_id: pipeline_run_ids).where(tax_id: taxid).where(count_type: 'NT')
+    taxon_counts = TaxonCount.where(pipeline_run_id: pipeline_run_ids).where(tax_id: taxid).where(count_type: 'NT').order(:pipeline_run_id)
     read_counts_by_run_id = {}
     taxon_counts.each do |tc|
       read_counts_by_run_id[tc.pipeline_run_id] = tc.count
