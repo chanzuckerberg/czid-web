@@ -38,7 +38,7 @@ class AMRView extends React.Component {
     super(props);
     this.state = { data: props.amr ? props.amr : [] };
     if (this.state.data) {
-      // TODO: Use regex to parse out gene family, i.e. is [.]*_ -- everything until the underscore
+      // TODO: Talk with Chaz to determine how to improve gene family identification further.
       for (var i = 0; i < Object.keys(this.state.data).length; i++) {
         var key = Object.keys(this.state.data)[i];
         this.state.data[key].gene_family = this.state.data[key].gene.slice(
