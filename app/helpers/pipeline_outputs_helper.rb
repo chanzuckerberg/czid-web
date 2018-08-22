@@ -185,18 +185,18 @@ module PipelineOutputsHelper
     h = states_by_output_hash
     if [PipelineRun::FINALIZED_SUCCESS, PipelineRun::FINALIZED_FAIL].include?(results_finalized_var)
       # No steps are running anymore
-      if [h[PipelineRun::ALIGNMENT_OUTPUT], h[PipelineRun::POSTPROCESS_OUTPUT]].all? { |s| s == PipelineRun::STATUS_LOADED }
+      if [h["taxon_byteranges"], h["taxon_counts"]].all? { |s| s == PipelineRun::STATUS_LOADED }
         "COMPLETE"
-      elsif h[PipelineRun::ALIGNMENT_OUTPUT] == PipelineRun::STATUS_LOADED
+      elsif h["taxon_counts"] == PipelineRun::STATUS_LOADED
         # Alignment succeeded, postprocess failed
         "COMPLETE*"
       else
         "FAILED"
       end
-    elsif h[PipelineRun::ALIGNMENT_OUTPUT] == PipelineRun::STATUS_LOADED
+    elsif h["taxon_counts"] == PipelineRun::STATUS_LOADED
       # Alignment succeeded, postprocessing in progress
       "POST PROCESSING"
-    elsif h[PipelineRun::HOST_FILTERING_OUTPUT] == PipelineRun::STATUS_LOADED
+    elsif h["ercc_counts"] == PipelineRun::STATUS_LOADED
       # Host-filtering succeeded, alignment in progress
       "ALIGNMENT"
     else

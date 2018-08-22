@@ -389,15 +389,12 @@ class Sample < ApplicationRecord
 
   def deletable?(user)
     if user.admin?
-      return true
+      true
     elsif user_id == user.id
       # Sample belongs to the user
-      if pipeline_runs.empty? || pipeline_runs[0].report_failed?
-        # Allow deletion if no pipeline runs, or report failed.
-        return true
-      end
+      # Allow deletion if no pipeline runs, or report failed.
+      pipeline_runs.empty? || pipeline_runs[0].report_failed?
     end
-    false
   end
 
   def self.public_samples
