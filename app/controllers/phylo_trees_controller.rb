@@ -121,26 +121,45 @@ class PhyloTreesController < ApplicationController
   end
 
   def sample_details_json(pipeline_runs, taxid)
+    return [] if pipeline_runs.blank?
+    pipeline_run_ids = pipeline_runs.pluck(:id)
+
     # Retrieve information for displaying the tree's sample list.
     # Expose it as an array of hashes containing
     # - sample name
     # - project id and name
     # - pipeline run id to be used for the sample
-    # - number of reads matching the specified taxid in NT
-    return [] if pipeline_runs.blank?
-    Sample.connection.select_all("
-                   select pipeline_runs_samples_projects.name,
-                          pipeline_runs_samples_projects.project_id,
-                          pipeline_runs_samples_projects.project_name,
-                          pipeline_runs_samples_projects.pipeline_run_id,
-                          taxon_counts.count as taxid_nt_reads
-                   from (select pipeline_runs.id as pipeline_run_id, samples.name, samples.project_id, projects.name as project_name
-                         from ((pipeline_runs inner join samples on pipeline_runs.sample_id = samples.id)
-                               inner join projects on samples.project_id = projects.id)
-                         where pipeline_runs.id in (#{pipeline_runs.pluck(:id).join(',')})) pipeline_runs_samples_projects
-                   inner join taxon_counts
-                   on taxon_counts.pipeline_run_id = pipeline_runs_samples_projects.pipeline_run_id
-                   where taxon_counts.tax_id = #{taxid} and taxon_counts.count_type = 'NT'
+    samples_projects = Sample.connection.select_all("
+      select
+        pipeline_runs_samples_projects.name,
+        pipeline_runs_samples_projects.project_id,
+        pipeline_runs_samples_projects.project_name,
+        pipeline_runs_samples_projects.pipeline_run_id
+      from
+        (select
+           pipeline_runs.id as pipeline_run_id,
+           samples.name,
+           samples.project_id,
+           projects.name as project_name
+         from
+           ((pipeline_runs inner join samples on pipeline_runs.sample_id = samples.id)
+            inner join projects on samples.project_id = projects.id)
+         where pipeline_runs.id in (#{pipeline_run_ids.join(',')})) pipeline_runs_samples_projects
     ").to_hash
+
+    # Also add:
+    # - number of reads matching the specified taxid in NT
+    # Do not include the query on taxon_counts in the previous query above using a join,
+    # because the taxon_counts table is large.
+    taxon_counts = TaxonCount.where(pipeline_run_id: pipeline_run_ids).where(tax_id: taxid).where(count_type: 'NT')
+    read_counts_by_run_id = {}
+    taxon_counts.each do |tc|
+      read_counts_by_run_id[tc.pipeline_run_id] = tc.count
+    end
+    samples_projects.each do |sp|
+      sp["taxid_nt_reads"] = read_counts_by_run_id[sp["pipeline_run_id"]]
+    end
+
+    samples_projects
   end
 end
