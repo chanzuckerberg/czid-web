@@ -835,6 +835,22 @@ class PipelineSampleReads extends React.Component {
           </div>
         </div>
       );
+
+    let amr_tab =
+      this.admin == 1 ? (
+        <li className="tab">
+          <a href="#amr" className="">
+            Antimicrobial Resistance Report
+          </a>
+        </li>
+      ) : null;
+    let amr_table =
+      this.admin == 1 ? (
+        <div id="amr" className="reports-screen container tab-screen col s12">
+          <AMRView amr={this.amr} />
+        </div>
+      ) : null;
+
     return (
       <div>
         <SubHeader>
@@ -868,11 +884,7 @@ class PipelineSampleReads extends React.Component {
                       Details
                     </a>
                   </li>
-                  <li className="tab">
-                    <a href="#amr" className="">
-                      Antimicrobial Resistance Report
-                    </a>
-                  </li>
+                  {amr_tab}
                 </ul>
               </div>
             </div>
@@ -880,9 +892,7 @@ class PipelineSampleReads extends React.Component {
         </SubHeader>
         <Divider className="reports-divider" />
 
-        <div id="amr" className="reports-screen container tab-screen col s12">
-          <AMRView amr={this.amr} />
-        </div>
+        {amr_table}
 
         <div id="details" className="tab-screen col s12">
           <div className="center">
