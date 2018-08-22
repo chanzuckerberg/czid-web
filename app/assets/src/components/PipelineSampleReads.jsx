@@ -834,7 +834,6 @@ class PipelineSampleReads extends React.Component {
           </div>
         </div>
       );
-
     return (
       <div>
         <SubHeader>
@@ -848,8 +847,7 @@ class PipelineSampleReads extends React.Component {
                   {this.projectInfo.name + " "}
                 </a>
                 > {sample_dropdown}
-                {this.sampleInfo.status === "created" ||
-                this.state.rerunStatus === "failed"
+                {this.sampleInfo.status === "created" || !this.reportPresent
                   ? delete_sample_button
                   : null}
               </div>
