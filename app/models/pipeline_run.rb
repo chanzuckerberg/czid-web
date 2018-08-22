@@ -252,6 +252,13 @@ class PipelineRun < ApplicationRecord
     output_states.find_by(output: REPORT_READY_OUTPUT).state == STATUS_LOADED
   end
 
+  def report_failed?
+    # The report failed if host filtering or alignment failed.
+    host_filtering_status = output_states.find_by(output: "ercc_counts").state
+    alignment_status = output_states.find_by(output: "taxon_byteranges").state
+    host_filtering_status == STATUS_FAILED || alignment_status == STATUS_FAILED
+  end
+
   def succeeded?
     job_status == STATUS_CHECKED
   end

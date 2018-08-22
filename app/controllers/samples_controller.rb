@@ -495,15 +495,17 @@ class SamplesController < ApplicationController
   # DELETE /samples/1
   # DELETE /samples/1.json
   def destroy
-    deletable = @sample.pipeline_runs.empty?
-    @sample.destroy if deletable
+    # Will also delete from job_stats, ercc_counts, backgrounds_pipeline_runs, pipeline_runs, input_files, and backgrounds_samples
+    deletable = @sample.deletable?(current_user)
+    success = false
+    success = @sample.destroy if deletable
     respond_to do |format|
-      if deletable
+      if success
         format.html { redirect_to samples_url, notice: 'Sample was successfully destroyed.' }
         format.json { head :no_content }
       else
         format.html { render :edit }
-        format.json { render json: { message: 'Cannot delete this sample' }, status: :unprocessable_entity }
+        format.json { render json: { message: 'Cannot delete this sample. Something went wrong.' }, status: :unprocessable_entity }
       end
     end
   end
