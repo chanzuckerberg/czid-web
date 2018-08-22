@@ -19,7 +19,6 @@ const columns = [
     aggregate: vals => _.size(vals)
   },
   {
-    // TODO: Make average for gene family level
     Header: "Coverage",
     accessor: "coverage",
     aggregate: vals => _.round(_.mean(vals)),
