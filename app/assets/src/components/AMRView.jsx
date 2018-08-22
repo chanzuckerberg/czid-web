@@ -22,13 +22,13 @@ const columns = [
     // TODO: Make average for gene family level
     Header: "Coverage",
     accessor: "coverage",
-    aggregate: vals => _.sum(vals),
+    aggregate: vals => _.round(_.mean(vals)),
     filterMethod: (filter, row) => row[filter.id] >= filter.value
   },
   {
     Header: "Depth",
     accessor: "depth",
-    aggregate: vals => _.sum(vals),
+    aggregate: vals => _.round(_.sum(vals)),
     filterMethod: (filter, row) => row[filter.id] >= filter.value
   }
 ];
