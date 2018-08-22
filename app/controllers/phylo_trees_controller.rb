@@ -151,13 +151,9 @@ class PhyloTreesController < ApplicationController
     # - number of reads matching the specified taxid in NT
     # Do not include the query on taxon_counts in the previous query above using a join,
     # because the taxon_counts table is large.
-    taxon_counts = TaxonCount.where(pipeline_run_id: pipeline_run_ids).where(tax_id: taxid).where(count_type: 'NT').order(:pipeline_run_id)
-    read_counts_by_run_id = {}
-    taxon_counts.each do |tc|
-      read_counts_by_run_id[tc.pipeline_run_id] = tc.count
-    end
+    taxon_counts = TaxonCount.where(pipeline_run_id: pipeline_run_ids).where(tax_id: taxid).where(count_type: 'NT').index_by(&:pipeline_run_id)
     samples_projects.each do |sp|
-      sp["taxid_nt_reads"] = read_counts_by_run_id[sp["pipeline_run_id"]]
+      sp["taxid_nt_reads"] = taxon_counts[sp["pipeline_run_id"]].count
     end
 
     samples_projects
