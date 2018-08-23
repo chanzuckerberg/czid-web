@@ -35,11 +35,13 @@ class PhyloTreesController < ApplicationController
     taxid = params[:taxid]
     project_id = params[:project_id]
 
+    # Restrict to specified project
     if project_id
       @project = current_power.projects.find(project_id)
       @phylo_trees = @phylo_trees.where(project_id: project_id)
     end
 
+    # Restrict to specified taxid
     if taxid
       @phylo_trees = @phylo_trees.where(taxid: taxid)
       taxon_lineage = TaxonLineage.where(taxid: taxid).last
@@ -49,18 +51,17 @@ class PhyloTreesController < ApplicationController
                  name: taxon_lineage.species_name }
     end
 
-    trees_and_run_counts = ActiveRecord::Base.connection.select_all("
+    # Augment tree data with number of pipeline_runs
+    run_counts_by_tree_id = ActiveRecord::Base.connection.select_all("
       select phylo_tree_id, count(pipeline_run_id) as n_pipeline_runs
       from phylo_trees_pipeline_runs
+      group by phylo_tree_id
       order by phylo_tree_id
-    ").to_hash
-    pipeline_runs_by_tree_id = {}
-    trees_and_run_counts.each do |entry|
-      pipeline_runs_by_tree_id[entry["phylo_tree_id"]] = entry["n_pipeline_runs"]
-    end
+    ").index_by { |h| h["phylo_tree_id"] }
+
     @phylo_trees = @phylo_trees.as_json
     @phylo_trees.each do |pt|
-      @phylo_trees["n_pipeline_runs"] = pipeline_runs_by_tree_id[pt["id"]]
+      pt["n_pipeline_runs"] = run_counts_by_tree_id[pt["id"]]["n_pipeline_runs"]
     end
   end
 
@@ -88,7 +89,7 @@ class PhyloTreesController < ApplicationController
 
   def show
     @project = current_power.projects.find(@phylo_tree.project_id)
-    @samples = sample_details_json(PipelineRun.where(id: @phylo_tree.pipeline_run_ids), @phylo_tree.taxid)
+    @samples = sample_details_json(@phylo_tree.pipeline_run_ids, @phylo_tree.taxid)
     @phylo_tree_augmented = @phylo_tree.as_json(include: :pipeline_runs)
     @can_edit = current_power.updatable_phylo_tree?(@phylo_tree)
   end
