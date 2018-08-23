@@ -42,11 +42,26 @@ class PhyloTreesController < ApplicationController
 
     if taxid
       @phylo_trees = @phylo_trees.where(taxid: taxid)
-      example_taxon_count = TaxonCount.where(tax_id: taxid).last
-      @taxon = { taxid: example_taxon_count.tax_id, name: example_taxon_count.name }
+      taxon_lineage = TaxonLineage.where(taxid: taxid).last
+      @taxon = { taxid: taxid,
+                 # Hardcode the species-level for now.
+                 # TODO(charles): clean up when we actually implement genus-level support.
+                 name: taxon_lineage.species_name }
     end
 
-    @phylo_trees = @phylo_trees.as_json(include: :pipeline_runs)
+    trees_and_run_counts = ActiveRecord::Base.connection.select_all("
+      select phylo_tree_id, count(pipeline_run_id) as n_pipeline_runs
+      from phylo_trees_pipeline_runs
+      order by phylo_tree_id
+    ").to_hash
+    pipeline_runs_by_tree_id = {}
+    trees_and_run_counts.each do |entry|
+      pipeline_runs_by_tree_id[entry["phylo_tree_id"]] = entry["n_pipeline_runs"]
+    end
+    @phylo_trees = @phylo_trees.as_json
+    @phylo_trees.each do |pt|
+      @phylo_trees["n_pipeline_runs"] = pipeline_runs_by_tree_id[pt["id"]]
+    end
   end
 
   def new
