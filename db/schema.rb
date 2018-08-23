@@ -221,7 +221,6 @@ ActiveRecord::Schema.define(version: 20_180_822_214_204) do
     t.string "pipeline_commit"
     t.text "assembled_taxids"
     t.bigint "truncated"
-    t.text "result_status"
     t.integer "results_finalized"
     t.bigint "alignment_config_id"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
