@@ -52,16 +52,9 @@ class PhyloTreesController < ApplicationController
     end
 
     # Augment tree data with number of pipeline_runs
-    run_counts_by_tree_id = ActiveRecord::Base.connection.select_all("
-      select phylo_tree_id, count(pipeline_run_id) as n_pipeline_runs
-      from phylo_trees_pipeline_runs
-      group by phylo_tree_id
-      order by phylo_tree_id
-    ").index_by { |h| h["phylo_tree_id"] }
-
     @phylo_trees = @phylo_trees.as_json
     @phylo_trees.each do |pt|
-      pt["n_pipeline_runs"] = run_counts_by_tree_id[pt["id"]]["n_pipeline_runs"]
+      pt["n_pipeline_runs"] = PhyloTree.run_counts_by_tree_id[pt["id"]]["n_pipeline_runs"]
     end
   end
 
@@ -147,21 +140,16 @@ class PhyloTreesController < ApplicationController
     # - pipeline run id to be used for the sample
     samples_projects = Sample.connection.select_all("
       select
-        pipeline_runs_samples_projects.name,
-        pipeline_runs_samples_projects.project_id,
-        pipeline_runs_samples_projects.project_name,
-        pipeline_runs_samples_projects.pipeline_run_id
-      from
-        (select
-           pipeline_runs.id as pipeline_run_id,
-           samples.name,
-           samples.project_id,
-           projects.name as project_name
-         from
-           ((pipeline_runs inner join samples on pipeline_runs.sample_id = samples.id)
-            inner join projects on samples.project_id = projects.id)
-         where pipeline_runs.id in (#{pipeline_run_ids.join(',')})) pipeline_runs_samples_projects
-    ").to_hash
+        samples.name,
+        samples.project_id,
+        projects.name as project_name,
+        pipeline_runs.id as pipeline_run_id
+      from pipeline_runs, projects, samples
+      where
+        pipeline_runs.id in (#{pipeline_run_ids.join(',')}) and
+        pipeline_runs.sample_id = samples.id and
+        samples.project_id = projects.id
+    ").to_a
 
     # Also add:
     # - number of reads matching the specified taxid in NT
