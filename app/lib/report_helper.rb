@@ -4,10 +4,7 @@ require 'open3'
 module ReportHelper
   # Truncate report table past this number of rows.
   TAXON_CATEGORY_OFFSET = 100_000_000
-  ZSCORE_MIN = -99
-  ZSCORE_MAX =  99
   ZSCORE_WHEN_ABSENT_FROM_SAMPLE = -100
-  ZSCORE_WHEN_ABSENT_FROM_BACKGROUND = 100
 
   DEFAULT_SAMPLE_NEGLOGEVALUE = 0.0
   DEFAULT_SAMPLE_PERCENTIDENTITY = 0.0
@@ -200,107 +197,116 @@ module ReportHelper
     ALL_CATEGORIES
   end
 
-  def fetch_taxon_counts(pipeline_run_id, background_id)
+  def fetch_scoring_model_attributes(scoring_model)
+    # Load scoring model attributes
+    scoring_model ||= TaxonScoringModel::DEFAULT_MODEL_NAME
+    tsm = TaxonScoringModel.find_by(name: scoring_model)
+    if !tsm.attributes_json || tsm.attributes_json == ""
+      Airbrake.notify("No attributes json for TaxonScoringModel #{tsm.name}")
+    end
+    JSON.parse(tsm.attributes_json)
+  end
+
+  def taxon_sql_table_join_clause(background_id)
+    "FROM taxon_counts
+     LEFT OUTER JOIN taxon_summaries ON
+        #{background_id.to_i}   = taxon_summaries.background_id   AND
+        taxon_counts.count_type = taxon_summaries.count_type      AND
+        taxon_counts.tax_level  = taxon_summaries.tax_level       AND
+        taxon_counts.tax_id     = taxon_summaries.tax_id"
+  end
+
+  def taxon_sql_base_selectors
+    "taxon_counts.alignment_length    AS  alignmentlength,
+     taxon_counts.count               AS  r,
+     taxon_counts.count_type          AS  count_type,
+     taxon_counts.family_taxid        AS  family_taxid,
+     taxon_counts.genus_taxid         AS  genus_taxid,
+     taxon_counts.is_phage            AS  is_phage,
+     taxon_counts.name                AS  name,
+     taxon_counts.percent_concordant  AS  percentconcordant,
+     taxon_counts.percent_identity    AS  percentidentity,
+     taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
+     taxon_counts.tax_id              AS  tax_id,
+     taxon_counts.tax_level           AS  tax_level,
+     IF(
+       taxon_counts.e_value IS NOT NULL,
+       (0.0 - taxon_counts.e_value),
+       #{DEFAULT_SAMPLE_NEGLOGEVALUE}
+     )                                AS  neglogevalue,
+    "
+  end
+
+  def taxon_sql_genus_and_count
+    "AND taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
+     AND taxon_counts.count_type IN ('NT', 'NR')"
+  end
+
+  def fetch_taxon_counts(pipeline_run_id, background_id, scoring_model)
+    model_attr = fetch_scoring_model_attributes(scoring_model)
+
     pipeline_run = PipelineRun.find(pipeline_run_id)
     adjusted_total_reads = (pipeline_run.total_reads - pipeline_run.total_ercc_reads.to_i) * pipeline_run.subsample_fraction
     raw_non_host_reads = pipeline_run.adjusted_remaining_reads.to_f * pipeline_run.subsample_fraction
 
     # NOTE:  If you add more columns to be fetched here, you really should add them to PROPERTIES_OF_TAXID above
     # otherwise they will not survive cleaning.
-    TaxonCount.connection.select_all("
+    query = "
       SELECT
-        taxon_counts.tax_id              AS  tax_id,
-        taxon_counts.count_type          AS  count_type,
-        taxon_counts.tax_level           AS  tax_level,
-
-        taxon_counts.genus_taxid         AS  genus_taxid,
-        taxon_counts.family_taxid        AS  family_taxid,
-        taxon_counts.name                AS  name,
+        #{taxon_sql_base_selectors}
         taxon_counts.common_name         AS  common_name,
-        taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
-        taxon_counts.is_phage            AS  is_phage,
-        taxon_counts.count               AS  r,
         (count / #{adjusted_total_reads}
           * 1000000.0)                   AS  rpm,
         (taxon_counts.count/#{raw_non_host_reads} * 100.0)  AS  r_pct,
         IF(
           stdev IS NOT NULL,
-          GREATEST(#{ZSCORE_MIN}, LEAST(#{ZSCORE_MAX}, (((count / #{adjusted_total_reads} * 1000000.0) - mean) / stdev))),
-          #{ZSCORE_WHEN_ABSENT_FROM_BACKGROUND}
+          GREATEST(#{model_attr['zscore_min']}, LEAST(#{model_attr['zscore_max']}, (((count / #{adjusted_total_reads} * 1000000.0) - mean) / stdev))),
+          #{model_attr['zscore_when_absent_from_bg']}
         )
-                                         AS  zscore,
-        taxon_counts.percent_identity    AS  percentidentity,
-        taxon_counts.alignment_length    AS  alignmentlength,
-        IF(
-          taxon_counts.e_value IS NOT NULL,
-          (0.0 - taxon_counts.e_value),
-          #{DEFAULT_SAMPLE_NEGLOGEVALUE}
-        )                                AS  neglogevalue,
-        taxon_counts.percent_concordant  AS  percentconcordant
-      FROM taxon_counts
-      LEFT OUTER JOIN taxon_summaries ON
-        #{background_id.to_i}   = taxon_summaries.background_id   AND
-        taxon_counts.count_type = taxon_summaries.count_type      AND
-        taxon_counts.tax_level  = taxon_summaries.tax_level       AND
-        taxon_counts.tax_id     = taxon_summaries.tax_id
+                                         AS  zscore
+      #{taxon_sql_table_join_clause(background_id)}
       WHERE
-        pipeline_run_id = #{pipeline_run_id.to_i} AND
-        taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID} AND
-        taxon_counts.count_type IN ('NT', 'NR')
-    ").to_hash
+        pipeline_run_id = #{pipeline_run_id.to_i}
+        #{taxon_sql_genus_and_count}
+    "
+    TaxonCount.connection.select_all(query).to_hash
   end
 
-  def fetch_top_taxons(samples, background_id, categories)
+  def heatmap_taxons_count_sql(query_suffix, samples, background_id, scoring_model)
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
 
-    categories_clause = ""
-    if categories.present?
-      categories_clause = " AND taxon_counts.superkingdom_taxid IN (#{categories.map { |category| CATEGORIES_TAXID_BY_NAME[category] }.compact.join(',')})"
-    end
-
+    # Note: subsample_fraction is of type 'float' so adjusted_total_reads is too
+    # Note: stdev is never 0
+    # Note: connection.select_all is TWICE faster than TaxonCount.select
+    # (I/O latency goes from 2 seconds -> 0.8 seconds)
+    # Had to derive rpm and zscore for each sample
     query = "
     SELECT
+      #{taxon_sql_base_selectors}
       taxon_counts.pipeline_run_id     AS  pipeline_run_id,
-      taxon_counts.tax_id              AS  tax_id,
-      taxon_counts.count_type          AS  count_type,
-      taxon_counts.tax_level           AS  tax_level,
-      taxon_counts.genus_taxid         AS  genus_taxid,
-      taxon_counts.family_taxid        AS  family_taxid,
-      taxon_counts.name                AS  name,
-      taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
-      taxon_counts.is_phage            AS  is_phage,
-      taxon_counts.count               AS  r,
-      taxon_summaries.stdev            AS stdev,
-      taxon_summaries.mean             AS mean,
-      taxon_counts.percent_identity    AS  percentidentity,
-      taxon_counts.alignment_length    AS  alignmentlength,
-      IF(
-        taxon_counts.e_value IS NOT NULL,
-        (0.0 - taxon_counts.e_value),
-        #{DEFAULT_SAMPLE_NEGLOGEVALUE}
-      )                                AS  neglogevalue,
-      taxon_counts.percent_concordant  AS  percentconcordant
-    FROM taxon_counts
-    LEFT OUTER JOIN taxon_summaries ON
-      #{background_id.to_i}   = taxon_summaries.background_id   AND
-      taxon_counts.count_type = taxon_summaries.count_type      AND
-      taxon_counts.tax_level  = taxon_summaries.tax_level       AND
-      taxon_counts.tax_id     = taxon_summaries.tax_id
+      taxon_summaries.mean             AS  mean,
+      taxon_summaries.stdev            AS  stdev
+    #{taxon_sql_table_join_clause(background_id)}
     WHERE
       pipeline_run_id in (#{pipeline_run_ids.join(',')})
-      AND taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
       AND taxon_counts.count >= #{MINIMUM_READ_THRESHOLD}
-      AND taxon_counts.count_type IN ('NT', 'NR')
-      #{categories_clause}
-     "
+      #{taxon_sql_genus_and_count}
+    #{query_suffix}
+    "
     sql_results = TaxonCount.connection.select_all(query).to_hash
 
-    # calculating rpm and zscore, organizing the results by pipeline_run_id
+    calculate_and_add_rpm_zscore(sql_results, scoring_model)
+  end
+
+  def calculate_and_add_rpm_zscore(sql_results, scoring_model)
+    # Calculating rpm and zscore, organizing the results by pipeline_run_id
     result_hash = {}
 
     pipeline_run_ids = sql_results.map { |x| x['pipeline_run_id'] }
     pipeline_runs = PipelineRun.where(id: pipeline_run_ids.uniq).includes([:sample])
     pipeline_runs_by_id = Hash[pipeline_runs.map { |x| [x.id, x] }]
+
+    model_attr = fetch_scoring_model_attributes(scoring_model)
 
     sql_results.each do |row|
       pipeline_run_id = row["pipeline_run_id"]
@@ -311,9 +317,9 @@ module ReportHelper
         result_hash[pipeline_run_id] = { "pr" => pr, "taxon_counts" => [] }
       end
       row["rpm"] = row["r"] / ((pr.total_reads - pr.total_ercc_reads.to_i) * pr.subsample_fraction) * 1_000_000.0
-      row["zscore"] = row["stdev"].nil? ? ZSCORE_WHEN_ABSENT_FROM_BACKGROUND : ((row["rpm"] - row["mean"]) / row["stdev"])
-      row["zscore"] = ZSCORE_MAX if row["zscore"] > ZSCORE_MAX && row["zscore"] != ZSCORE_WHEN_ABSENT_FROM_BACKGROUND
-      row["zcore"] = ZSCORE_MIN if row["zscore"] < ZSCORE_MIN
+      row["zscore"] = row["stdev"].nil? ? model_attr["zscore_when_absent_from_bg"] : ((row["rpm"] - row["mean"]) / row["stdev"])
+      row["zscore"] = model_attr["zscore_max"] if row["zscore"] > model_attr["zscore_max"] && row["zscore"] != model_attr["zscore_when_absent_from_bg"]
+      row["zcore"] = model_attr["zscore_min"] if row["zscore"] < model_attr["zscore_min"]
       result_hash[pipeline_run_id]["taxon_counts"] << row
     end
     result_hash
@@ -328,91 +334,23 @@ module ReportHelper
               .map { |u| u.attributes.values.compact }.flatten
   end
 
-  def fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
-    pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
-    parent_ids = parent_ids.to_a
-
-    # Note: subsample_fraction is of type 'float' so adjusted_total_reads is too
-    # Note: stdev is never 0
-    # Note: connection.select_all is TWICE faster than TaxonCount.select
-    # (I/O latency goes from 2 seconds -> 0.8 seconds)
-    # Had to derive rpm and zscore for each sample
-    sql_results = TaxonCount.connection.select_all("
-      SELECT
-        taxon_counts.pipeline_run_id     AS  pipeline_run_id,
-        taxon_counts.tax_id              AS  tax_id,
-        taxon_counts.count_type          AS  count_type,
-        taxon_counts.tax_level           AS  tax_level,
-        taxon_counts.genus_taxid         AS  genus_taxid,
-        taxon_counts.family_taxid        AS  family_taxid,
-        taxon_counts.name                AS  name,
-        taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
-        taxon_counts.is_phage            AS  is_phage,
-        taxon_counts.count               AS  r,
-        taxon_summaries.stdev            AS stdev,
-        taxon_summaries.mean             AS mean,
-        taxon_counts.percent_identity    AS  percentidentity,
-        taxon_counts.alignment_length    AS  alignmentlength,
-        IF(
-          taxon_counts.e_value IS NOT NULL,
-          (0.0 - taxon_counts.e_value),
-          #{DEFAULT_SAMPLE_NEGLOGEVALUE}
-        )                                AS  neglogevalue,
-        taxon_counts.percent_concordant  AS  percentconcordant
-      FROM taxon_counts
-      LEFT OUTER JOIN taxon_summaries ON
-        #{background_id.to_i}   = taxon_summaries.background_id   AND
-        taxon_counts.count_type = taxon_summaries.count_type      AND
-        taxon_counts.tax_level  = taxon_summaries.tax_level       AND
-        taxon_counts.tax_id     = taxon_summaries.tax_id
-      WHERE
-        pipeline_run_id in (#{pipeline_run_ids.join(',')}) AND
-        taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID} AND
-        taxon_counts.count_type IN ('NT', 'NR') AND
-        (taxon_counts.tax_id IN (#{taxon_ids.join(',')})
-         OR taxon_counts.tax_id in (#{parent_ids.join(',')})
-         OR taxon_counts.genus_taxid IN (#{taxon_ids.join(',')}))").to_hash
-
-    # calculating rpm and zscore, organizing the results by pipeline_run_id
-    result_hash = {}
-
-    pipeline_run_ids = sql_results.map { |x| x['pipeline_run_id'] }
-    pipeline_runs = PipelineRun.where(id: pipeline_run_ids.uniq).includes([:sample])
-    pipeline_runs_by_id = Hash[pipeline_runs.map { |x| [x.id, x] }]
-
-    sql_results.each do |row|
-      pipeline_run_id = row["pipeline_run_id"]
-      if result_hash[pipeline_run_id]
-        pr = result_hash[pipeline_run_id]["pr"]
-      else
-        pr = pipeline_runs_by_id[pipeline_run_id]
-        result_hash[pipeline_run_id] = { "pr" => pr, "taxon_counts" => [] }
-      end
-      row["rpm"] = row["r"] / ((pr.total_reads - pr.total_ercc_reads.to_i) * pr.subsample_fraction) * 1_000_000.0
-      row["zscore"] = row["stdev"].nil? ? ZSCORE_WHEN_ABSENT_FROM_BACKGROUND : ((row["rpm"] - row["mean"]) / row["stdev"])
-      row["zscore"] = ZSCORE_MAX if row["zscore"] > ZSCORE_MAX && row["zscore"] != ZSCORE_WHEN_ABSENT_FROM_BACKGROUND
-      row["zcore"] = ZSCORE_MIN if row["zscore"] < ZSCORE_MIN
-      result_hash[pipeline_run_id]["taxon_counts"] << row
-    end
-
-    result_hash
-  end
-
-  def samples_taxons_details(samples, taxon_ids, background_id, species_selected)
+  def heatmap_samples_taxons_details(samples, taxon_ids, background_id, species_selected, scoring_model)
     samples_by_id = Hash[samples.map { |s| [s.id, s] }]
     parent_ids = fetch_parent_ids(taxon_ids, samples)
-    results_by_pr = fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
+    parent_ids = parent_ids.to_a
+
+    # Get results by pipeline run
+    inclusion_clause = "
+      AND (taxon_counts.tax_id IN (#{taxon_ids.join(',')})
+           OR taxon_counts.tax_id in (#{parent_ids.join(',')})
+           OR taxon_counts.genus_taxid IN (#{taxon_ids.join(',')}))
+    "
+    results_by_pr = heatmap_taxons_count_sql(inclusion_clause, samples, background_id, scoring_model)
     results = []
     results_by_pr.each do |_pr_id, res|
       pr = res["pr"]
-      taxon_counts = res["taxon_counts"]
       sample_id = pr.sample_id
-      tax_2d = taxon_counts_cleanup(taxon_counts)
-      only_species_or_genus_counts!(tax_2d, species_selected)
-
-      rows = []
-      tax_2d.each { |_tax_id, tax_info| rows << tax_info }
-      compute_aggregate_scores_v2!(rows)
+      rows = heatmap_clean_taxon_results_by_pr(res, species_selected)
 
       filtered_rows = []
       rows.each do |row|
@@ -448,27 +386,34 @@ module ReportHelper
     true
   end
 
-  def top_taxons_details(samples, background_id, num_results, sort_by_key, species_selected, categories, threshold_filters = {})
-    # return top taxons
-    results_by_pr = fetch_top_taxons(samples, background_id, categories)
+  def heatmap_clean_taxon_results_by_pr(res, species_selected)
+    taxon_counts = res["taxon_counts"]
+    tax_2d = taxon_counts_cleanup(taxon_counts)
+    only_species_or_genus_counts!(tax_2d, species_selected)
+    rows = []
+    tax_2d.each { |_tax_id, tax_info| rows << tax_info }
+    compute_aggregate_scores_v2!(rows)
+    rows
+  end
+
+  def heatmap_top_taxons_details(samples, background_id, num_results, sort_by_key, species_selected, categories, scoring_model, threshold_filters = {})
+    # Get results by pipeline run
+    categories_clause = ""
+    if categories.present?
+      categories_clause = " AND taxon_counts.superkingdom_taxid IN (#{categories.map { |category| CATEGORIES_TAXID_BY_NAME[category] }.compact.join(',')})"
+    end
+    results_by_pr = heatmap_taxons_count_sql(categories_clause, samples, background_id, scoring_model)
+
+    # Data cleaning and manipulation
     sort_by = decode_sort_by(sort_by_key)
     count_type = sort_by[:count_type]
     metric = sort_by[:metric]
     candidate_taxons = {}
     results_by_pr.each do |_pr_id, res|
       pr = res["pr"]
-      taxon_counts = res["taxon_counts"]
       sample_id = pr.sample_id
+      rows = heatmap_clean_taxon_results_by_pr(res, species_selected)
 
-      tax_2d = taxon_counts_cleanup(taxon_counts)
-      only_species_or_genus_counts!(tax_2d, species_selected)
-
-      rows = []
-      tax_2d.each do |_tax_id, tax_info|
-        rows << tax_info
-      end
-
-      compute_aggregate_scores_v2!(rows)
       rows = rows.select do |row|
         row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD && check_custom_filters(row, threshold_filters)
       end
@@ -900,7 +845,7 @@ module ReportHelper
   def taxonomy_details(pipeline_run_id, background_id, params)
     # Fetch and clean data.
     t0 = wall_clock_ms
-    taxon_counts = fetch_taxon_counts(pipeline_run_id, background_id)
+    taxon_counts = fetch_taxon_counts(pipeline_run_id, background_id, params[:scoring_model])
     tax_2d = taxon_counts_cleanup(taxon_counts)
     t1 = wall_clock_ms
 

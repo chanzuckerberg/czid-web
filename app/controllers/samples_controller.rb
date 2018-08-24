@@ -17,7 +17,7 @@ class SamplesController < ApplicationController
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder, :show_taxid_alignment, :show_taxid_alignment_viz].freeze
   EDIT_ACTIONS = [:edit, :add_taxon_confirmation, :remove_taxon_confirmation, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata].freeze
 
-  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :top_taxons, :heatmap, :download_heatmap, :cli_user_instructions].freeze
+  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :heatmap_samples_taxons, :top_taxons, :heatmap, :download_heatmap, :cli_user_instructions].freeze
 
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload]
   acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload], fallback: :devise
@@ -190,9 +190,10 @@ class SamplesController < ApplicationController
   end
 
   def top_taxons
+    # Only callable manually at samples/top_taxons and no longer actively used.
     sample_ids = params[:sample_ids].split(",").map(&:to_i) || []
 
-    num_results = params[:n] ? params[:n].to_i : ReportHelper::MAX_NUM_TAXONS
+    num_results = params[:n] ? params[:n].to_i : DEFAULT_MAX_NUM_TAXONS
     sort_by = params[:sort_by] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
 
     samples = current_power.samples.where(id: sample_ids)
@@ -200,7 +201,7 @@ class SamplesController < ApplicationController
     if samples.first
       first_sample = samples.first
       background_id = check_background_id(first_sample)
-      @top_taxons = top_taxons_details(samples, background_id, num_results, sort_by, species_selected)
+      @top_taxons = heatmap_top_taxons_details(samples, background_id, num_results, sort_by, species_selected, params[:categories], params[:scoring_model])
       render json: @top_taxons
     else
       render json: {}
@@ -245,13 +246,13 @@ class SamplesController < ApplicationController
     }
   end
 
-  def samples_taxons
-    @sample_taxons_dict = sample_taxons_dict(params)
+  def heatmap_samples_taxons
+    @sample_taxons_dict = heatmap_sample_taxons_dict(params)
     render json: @sample_taxons_dict
   end
 
   def download_heatmap
-    @sample_taxons_dict = sample_taxons_dict(params)
+    @sample_taxons_dict = heatmap_sample_taxons_dict(params)
     output_csv = generate_heatmap_csv(@sample_taxons_dict)
     send_data output_csv, filename: 'heatmap.csv'
   end
@@ -579,7 +580,7 @@ class SamplesController < ApplicationController
     taxid_name.downcase.gsub(/\W/, "-")
   end
 
-  def sample_taxons_dict(params)
+  def heatmap_sample_taxons_dict(params)
     sample_ids = (params[:sampleIds] || []).map(&:to_i)
     num_results = params[:taxonsPerSample] ? params[:taxonsPerSample].to_i : DEFAULT_MAX_NUM_TAXONS
     taxon_ids = (params[:taxonIds] || []).map do |x|
@@ -602,11 +603,11 @@ class SamplesController < ApplicationController
 
     first_sample = samples.first
     background_id = params[:background] ? params[:background].to_i : check_background_id(first_sample)
-    taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, threshold_filters).pluck("tax_id") if taxon_ids.empty?
+    taxon_ids = heatmap_top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, params[:scoring_model], threshold_filters).pluck("tax_id") if taxon_ids.empty?
 
     return {} if taxon_ids.empty?
 
-    samples_taxons_details(samples, taxon_ids, background_id, species_selected)
+    heatmap_samples_taxons_details(samples, taxon_ids, background_id, species_selected, params[:scoring_model])
   end
 
   def taxon_confirmation_unique_on(params)
