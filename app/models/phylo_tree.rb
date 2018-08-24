@@ -123,6 +123,15 @@ class PhyloTree < ApplicationRecord
     save
   end
 
+  def self.run_counts_by_tree_id
+    ActiveRecord::Base.connection.select_all("
+      select phylo_tree_id, count(pipeline_run_id) as n_pipeline_runs
+      from phylo_trees_pipeline_runs
+      group by phylo_tree_id
+      order by phylo_tree_id
+    ").index_by { |h| h["phylo_tree_id"] }
+  end
+
   def self.viewable(user)
     if user.admin?
       all

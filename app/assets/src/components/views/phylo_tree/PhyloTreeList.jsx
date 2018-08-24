@@ -25,7 +25,7 @@ class PhyloTreeList extends React.Component {
               return (
                 <p key={`tree_${i}`}>
                   <a href={`/phylo_trees/show?id=${tree.id}`}>
-                    {tree.name} ({tree.pipeline_runs.length} samples)
+                    {tree.name} ({tree.n_pipeline_runs} samples)
                   </a>
                 </p>
               );
