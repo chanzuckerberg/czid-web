@@ -175,7 +175,7 @@ class PipelineRunStage < ApplicationRecord
 
     # Dispatch job
     memory = sample.sample_memory.present? ? sample.sample_memory : Sample::DEFAULT_MEMORY_IN_MB
-    aegea_batch_submit_command(batch_command, memory, job_queue: pipeline_run.sample.job_queue)
+    aegea_batch_submit_command(batch_command, memory: memory, job_queue: pipeline_run.sample.job_queue)
   end
 
   def alignment_command
@@ -209,8 +209,7 @@ class PipelineRunStage < ApplicationRecord
     }
     dag_commands = prepare_dag("postprocess", attribute_dict)
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
-    # Run it
-    memory = sample.sample_memory.present? ? sample.sample_memory : Sample::DEFAULT_MEMORY_IN_MB
-    aegea_batch_submit_command(batch_command, memory, job_queue: pipeline_run.sample.job_queue)
+    # Dispatch job with himem number of vCPUs and to the himem queue.
+    aegea_batch_submit_command(batch_command, vcpus: Sample::DEFAULT_VCPUS_HIMEM, job_queue: Sample::DEFAULT_QUEUE_HIMEM)
   end
 end
