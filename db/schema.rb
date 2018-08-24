@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_180_822_214_204) do
+ActiveRecord::Schema.define(version: 20_180_824_005_739) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -403,6 +403,7 @@ ActiveRecord::Schema.define(version: 20_180_822_214_204) do
     t.index ["species_taxid"], name: "index_taxon_lineages_on_species_taxid"
     t.index ["superkingdom_taxid"], name: "index_taxon_lineages_on_superkingdom_taxid"
     t.index %w[taxid ended_at], name: "index_taxon_lineages_on_taxid_and_end", unique: true
+    t.index %w[taxid started_at ended_at], name: "index_taxon_lineages_on_taxid_and_started_at_and_ended_at"
     t.index %w[taxid started_at], name: "index_taxon_lineages_on_taxid_and_start", unique: true
   end
 
