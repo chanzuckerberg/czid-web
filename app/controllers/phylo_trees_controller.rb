@@ -77,7 +77,7 @@ class PhyloTreesController < ApplicationController
     @taxon = { taxid: taxid,
                # Hardcode the species-level for now.
                # TODO(charles): clean up when we actually implement genus-level support.
-               tax_level: TaxonCount::TAX_LEVEL_SPECIES, name: taxon_lineage.species_name }
+               name: taxon_lineage.species_name }
   end
 
   def show
@@ -103,8 +103,9 @@ class PhyloTreesController < ApplicationController
 
     name = params[:name]
     taxid = params[:taxid].to_i
-    tax_level = params[:tax_level].to_i
     tax_name = params[:tax_name]
+
+    ### Add method to detect tax_level here
 
     non_viewable_pipeline_run_ids = pipeline_run_ids.to_set - current_power.pipeline_runs.pluck(:id).to_set
     if !non_viewable_pipeline_run_ids.empty?
