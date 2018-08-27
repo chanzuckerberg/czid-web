@@ -6,29 +6,40 @@ import _ from "lodash";
 const columns = [
   {
     Header: "Antibiotic Class",
-    accessor: "drug_family"
+    accessor: "drug_family",
+    filterable: false
   },
   {
     Header: "Gene",
     accessor: "gene",
-    aggregate: vals => _.size(vals)
+    aggregate: vals => _.size(vals),
+    filterable: false
   },
   {
     Header: "Gene Family",
     accessor: "gene_family",
-    aggregate: vals => _.size(vals)
+    aggregate: vals => _.size(vals),
+    filterable: false
   },
   {
     Header: "Coverage",
     accessor: "coverage",
+    style: {
+      textAlign: "center"
+    },
     aggregate: vals => _.round(_.mean(vals)),
-    filterMethod: (filter, row) => row[filter.id] >= filter.value
+    filterMethod: (filter, row) => row[filter.id] >= filter.value,
+    Cell: props => parseFloat(props.value).toFixed(1)
   },
   {
     Header: "Depth",
     accessor: "depth",
     aggregate: vals => _.round(_.sum(vals)),
-    filterMethod: (filter, row) => row[filter.id] >= filter.value
+    style: {
+      textAlign: "center"
+    },
+    filterMethod: (filter, row) => row[filter.id] >= filter.value,
+    Cell: props => parseFloat(props.value).toFixed(1)
   }
 ];
 
@@ -53,6 +64,14 @@ class AMRView extends React.Component {
       <div>
         <ReactTable
           filterable
+          defaultFilterMethod={(filter, row, column) => {
+            const id = filter.pivotId || filter.id;
+            return row[id] !== undefined
+              ? String(row[id])
+                  .toLowerCase()
+                  .includes(filter.value.toLowerCase())
+              : true;
+          }}
           data={data}
           columns={columns}
           defaultPageSize={5}

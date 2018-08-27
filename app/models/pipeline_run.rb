@@ -301,11 +301,6 @@ class PipelineRun < ApplicationRecord
   end
 
   def db_load_amr_counts
-    # test files: "s3://idseq-database/test/AMR/amr_processed_results.csv", "s3://idseq-database/test/AMR/amr_summary_results.csv"
-    # amr_results = PipelineRun.download_file_with_retries("s3://idseq-database/test/AMR/amr_processed_results.csv", local_amr_full_results_path, 3)
-    # amr_results = PipelineRun.download_file_with_retries(s3_file_for("amr_full_results"), local_amr_full_results_path, 3)
-    # Airbrake.notify("PipelineRun #{id} failed amr_counts download") unless amr_results
-    # return unless amr_results
     amr_results = PipelineRun.download_file(s3_file_for("amr_counts"), local_amr_full_results_path)
     unless File.zero?(amr_results)
       amr_counts_array = []
@@ -313,23 +308,18 @@ class PipelineRun < ApplicationRecord
       # that we drop
       File.readlines(amr_results).drop(1).each do |amr_result|
         amr_result_fields = amr_result.split(",").drop(2)
-        # TO DO: Can remove level, drug_gene_hits, drug_gene_coverage, drug_gene_depth as
-        # these are being summarized
         amr_counts_array << { gene: amr_result_fields[0],
                               allele: amr_result_fields[1],
                               coverage: amr_result_fields[2],
                               depth:  amr_result_fields[3],
-                              drug_family: amr_result_fields[12],
-                              drug_gene_coverage: amr_result_fields[14],
-                              drug_gene_depth: amr_result_fields[15],
-                              level: 1 }
+                              drug_family: amr_result_fields[12] }
       end
       update(amr_counts_attributes: amr_counts_array)
     end
-    # TODO: remove this, for now is a helpful debug statement
-    Rails.logger.info(summarize_amr_drug_family_counts)
   end
 
+  # Can remove as aggregation is being done on the UI side,
+  # but leaving as useful function for possible future changes (e.g. if UI table)
   def summarize_amr_drug_family_counts
     summary = AmrCount.connection.execute(
       " SELECT

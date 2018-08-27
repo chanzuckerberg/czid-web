@@ -152,7 +152,13 @@ class SamplesController < ApplicationController
   def show
     @sample = samples_scope.find(params[:id])
     @pipeline_run = select_pipeline_run(@sample, params)
-    @amr_counts = @pipeline_run ? @pipeline_run.amr_counts : nil
+    @amr_counts = nil
+    if current_user.admin? && @pipeline_run
+      amr_state = @pipeline_run.output_states.find_by(output: "amr_counts")
+      if amr_state.present? && amr_state.state == PipelineRun::STATUS_LOADED
+        @amr_counts = @pipeline_run.amr_counts
+      end
+    end
     @pipeline_version = @pipeline_run.pipeline_version || PipelineRun::PIPELINE_VERSION_WHEN_NULL if @pipeline_run
     @pipeline_versions = @sample.pipeline_versions
 

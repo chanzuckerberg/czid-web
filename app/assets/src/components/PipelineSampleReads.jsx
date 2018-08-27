@@ -32,6 +32,7 @@ class PipelineSampleReads extends React.Component {
     this.reportDetails = props.reportDetails;
     this.pipelineRunRetriable = props.pipelineRunRetriable;
     this.pipelineVersions = props.pipeline_versions;
+    this.pipelineVersion = props.pipeline_version;
 
     this.jobStatistics = props.jobStatistics;
     this.summary_stats = props.summary_stats;
@@ -836,20 +837,19 @@ class PipelineSampleReads extends React.Component {
         </div>
       );
 
-    let amr_tab =
-      this.admin == 1 ? (
-        <li className="tab">
-          <a href="#amr" className="">
-            Antimicrobial Resistance Report
-          </a>
-        </li>
-      ) : null;
-    let amr_table =
-      this.admin == 1 ? (
-        <div id="amr" className="reports-screen container tab-screen col s12">
-          <AMRView amr={this.amr} />
-        </div>
-      ) : null;
+    let show_amr = this.amr != null;
+    let amr_tab = show_amr ? (
+      <li className="tab">
+        <a href="#amr" className="">
+          Antimicrobial Resistance Report
+        </a>
+      </li>
+    ) : null;
+    let amr_table = show_amr ? (
+      <div id="amr" className="reports-screen container tab-screen col s12">
+        <AMRView amr={this.amr} />
+      </div>
+    ) : null;
 
     return (
       <div>
