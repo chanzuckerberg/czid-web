@@ -226,10 +226,10 @@ class PipelineRunStage < ApplicationRecord
     dag_commands = prepare_dag("experimental", attribute_dict)
 
     # upload_version = "idseq_dag --version | cut -f2 -d ' ' | aws s3 cp  - #{pipeline_run.pipeline_version_file} "
-    batch_command = [install_pipeline("meera-add-amr"), dag_commands].join("; ")
+    batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
 
     # Dispatch job
     # memory = sample.sample_memory.present? ? sample.sample_memory : Sample::DEFAULT_MEMORY_IN_MB
-    aegea_batch_submit_command(batch_command, job_queue: pipeline_run.sample.job_queue, docker_image: "idseq_dag_meera1")
+    aegea_batch_submit_command(batch_command, job_queue: pipeline_run.sample.job_queue)
   end
 end
