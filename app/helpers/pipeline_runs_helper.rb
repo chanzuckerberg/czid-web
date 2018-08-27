@@ -2,12 +2,13 @@ require 'open3'
 
 module PipelineRunsHelper
   def aegea_batch_submit_command(base_command,
-                                 memory = Sample::DEFAULT_MEMORY_IN_MB,
+                                 memory: Sample::DEFAULT_MEMORY_IN_MB,
+                                 vcpus: Sample::DEFAULT_VCPUS,
                                  job_queue: nil,
                                  docker_image: "idseq_dag")
     command = "aegea batch submit --command=\"#{base_command}\" "
     if memory <= Sample::DEFAULT_MEMORY_IN_MB
-      vcpus = Sample::DEFAULT_VCPUS
+      # Use default memory, vCPUs, and queue if below the default memory threshold.
       queue = Sample::DEFAULT_QUEUE
     else
       vcpus = Sample::DEFAULT_VCPUS_HIMEM
