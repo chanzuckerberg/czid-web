@@ -292,6 +292,9 @@ class Sample < ApplicationRecord
     "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/postprocess"
   end
 
+  # This is for the "Experimental" pipeline run stage and path where results
+  # for this stage are outputted. Currently, Antimicrobial Resistance
+  # outputs are in this path.
   def sample_expt_s3_path
     "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/expt"
   end
