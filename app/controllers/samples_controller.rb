@@ -150,7 +150,6 @@ class SamplesController < ApplicationController
   # GET /samples/1.json
 
   def show
-    @sample = samples_scope.find(params[:id])
     @pipeline_run = select_pipeline_run(@sample, params)
     @amr_counts = nil
     if current_user.admin? && @pipeline_run
@@ -199,8 +198,6 @@ class SamplesController < ApplicationController
 
   def show_amr_counts
     @amr_counts = @sample.pipeline_runs.first.amr_counts
-    # TODO: Add this back in when modifying to use axios api.
-    # render json: @amr_counts
   end
 
   def top_taxons
