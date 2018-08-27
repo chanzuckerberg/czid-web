@@ -46,9 +46,7 @@ class PhyloTreesController < ApplicationController
       @phylo_trees = @phylo_trees.where(taxid: taxid)
       taxon_lineage = TaxonLineage.where(taxid: taxid).last
       @taxon = { taxid: taxid,
-                 # Hardcode the species-level for now.
-                 # TODO(charles): clean up when we actually implement genus-level support.
-                 name: taxon_lineage.species_name }
+                 name: taxon_lineage.name }
     end
 
     # Augment tree data with number of pipeline_runs
@@ -75,9 +73,7 @@ class PhyloTreesController < ApplicationController
     # Retrieve information about the taxon
     taxon_lineage = TaxonLineage.where(taxid: taxid).last
     @taxon = { taxid: taxid,
-               # Hardcode the species-level for now.
-               # TODO(charles): clean up when we actually implement genus-level support.
-               tax_level: TaxonCount::TAX_LEVEL_SPECIES, name: taxon_lineage.species_name }
+               name: taxon_lineage.name }
   end
 
   def show
@@ -103,8 +99,9 @@ class PhyloTreesController < ApplicationController
 
     name = params[:name]
     taxid = params[:taxid].to_i
-    tax_level = params[:tax_level].to_i
     tax_name = params[:tax_name]
+
+    tax_level = TaxonLineage.where(taxid: taxid).last.tax_level
 
     non_viewable_pipeline_run_ids = pipeline_run_ids.to_set - current_power.pipeline_runs.pluck(:id).to_set
     if !non_viewable_pipeline_run_ids.empty?
@@ -157,7 +154,7 @@ class PhyloTreesController < ApplicationController
     # because the taxon_counts table is large.
     taxon_counts = TaxonCount.where(pipeline_run_id: pipeline_run_ids).where(tax_id: taxid).where(count_type: 'NT').index_by(&:pipeline_run_id)
     samples_projects.each do |sp|
-      sp["taxid_nt_reads"] = taxon_counts[sp["pipeline_run_id"]].count
+      sp["taxid_nt_reads"] = (taxon_counts[sp["pipeline_run_id"]] || []).count # count is a column of taxon_counts indicating number of reads
     end
 
     samples_projects

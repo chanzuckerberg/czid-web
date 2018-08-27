@@ -288,7 +288,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     entrypoint_taxon_count = taxon_counts(:three)
     post "/phylo_trees/create", params: { name: 'new_phylo_tree', project_id: projects(:joe_project).id,
                                           taxid: entrypoint_taxon_count.tax_id, pipeline_run_ids: [pipeline_runs(:three).id, pipeline_runs(:four).id],
-                                          tax_level: entrypoint_taxon_count.tax_level, tax_name: entrypoint_taxon_count.name }
+                                          tax_name: entrypoint_taxon_count.name }
     assert_equal "unauthorized", JSON.parse(@response.body)['status']
   end
 
@@ -296,7 +296,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     post "/phylo_trees/create", params: { name: 'new_phylo_tree', project_id: projects(:joe_project).id,
                                           taxid: 1, pipeline_run_ids: [pipeline_runs(:public_project_sampleA_run).id,
                                                                        pipeline_runs(:public_project_sampleB_run).id],
-                                          tax_level: 1, tax_name: 'some species' }
+                                          tax_name: 'some species' }
     assert_equal "ok", JSON.parse(@response.body)['status']
   end
 
@@ -304,7 +304,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     post "/phylo_trees/create", params: { name: 'new_phylo_tree', project_id: projects(:joe_project).id,
                                           taxid: 1, pipeline_run_ids: [pipeline_runs(:joe_project_sampleA_run).id,
                                                                        pipeline_runs(:joe_project_sampleB_run).id],
-                                          tax_level: 1, tax_name: 'some species' }
+                                          tax_name: 'some species' }
     assert_equal "ok", JSON.parse(@response.body)['status']
   end
 
@@ -313,7 +313,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
       post "/phylo_trees/create", params: { name: 'new_phylo_tree', project_id: projects(:public_project).id,
                                             taxid: 1, pipeline_run_ids: [pipeline_runs(:joe_project_sampleA_run).id,
                                                                          pipeline_runs(:joe_project_sampleB_run).id],
-                                            tax_level: 1, tax_name: 'some species' }
+                                            tax_name: 'some species' }
     end
   end
 end

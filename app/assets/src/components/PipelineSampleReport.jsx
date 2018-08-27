@@ -870,11 +870,7 @@ class PipelineSampleReport extends React.Component {
           aria-hidden="true"
         />
       );
-    if (
-      this.admin == 1 &&
-      (taxInfo.tax_id > 0 && taxInfo.tax_level == 1 && taxInfo.NT.r > 0)
-    )
-      // right now, tree pipeline is only implemented for tax_level 1, but may change in future
+    if (this.admin == 1 && (taxInfo.tax_id > 0 && taxInfo.NT.r > 0))
       phyloTreeDot = (
         <i
           onClick={() => this.gotoTreeLink(taxInfo.tax_id)}
