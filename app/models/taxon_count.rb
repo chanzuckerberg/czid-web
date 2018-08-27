@@ -18,6 +18,7 @@ class TaxonCount < ApplicationRecord
                    'phylum' => TAX_LEVEL_PHYLUM,
                    'kingdom' => TAX_LEVEL_KINGDOM,
                    'superkingdom' => TAX_LEVEL_SUPERKINGDOM }.freeze
+  LEVEL_2_NAME = NAME_2_LEVEL.invert
   scope :type, ->(count_type) { where(count_type: count_type) }
   scope :level, ->(tax_level) { where(tax_level: tax_level) }
 end

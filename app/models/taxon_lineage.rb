@@ -23,8 +23,6 @@ class TaxonLineage < ApplicationRecord
     superkingdom: MISSING_SUPERKINGDOM_ID
   }.freeze
 
-  LEVEL_2_NAME = TaxonCount::NAME_2_LEVEL.invert
-
   # We label as 'phage' all of the prokaryotic (bacterial and archaeal) virus families
   # listed here: https://en.wikipedia.org/wiki/Bacteriophage
   # PHAGE_FAMILIES_NAMES = ['Myoviridae', 'Siphoviridae', 'Podoviridae', 'Lipothrixviridae',
@@ -37,15 +35,15 @@ class TaxonLineage < ApplicationRecord
                            10_877, 11_989, 157_897, 292_638, 324_686, 423_358, 573_053, 1_232_737].freeze
 
   def tax_level
-    LEVEL_2_NAME.keys.sort.each do |level_int|
-      level_str = LEVEL_2_NAME[level_int]
+    TaxonCount::LEVEL_2_NAME.keys.sort.each do |level_int|
+      level_str = TaxonCount::LEVEL_2_NAME[level_int]
       return level_int if self["#{level_str}_taxid"] > 0
     end
     nil
   end
 
   def name
-    level_str = LEVEL_2_NAME[tax_level]
+    level_str = TaxonCount::LEVEL_2_NAME[tax_level]
     self["#{level_str}_name"]
   end
 
