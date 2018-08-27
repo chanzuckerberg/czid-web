@@ -154,7 +154,7 @@ class PhyloTreesController < ApplicationController
     # because the taxon_counts table is large.
     taxon_counts = TaxonCount.where(pipeline_run_id: pipeline_run_ids).where(tax_id: taxid).where(count_type: 'NT').index_by(&:pipeline_run_id)
     samples_projects.each do |sp|
-      sp["taxid_nt_reads"] = taxon_counts[sp["pipeline_run_id"]].count
+      sp["taxid_nt_reads"] = (taxon_counts[sp["pipeline_run_id"]] || []).count # count is a column of taxon_counts indicating number of reads
     end
 
     samples_projects
