@@ -13,7 +13,6 @@ class PhyloTreeInputs extends React.Component {
     this.taxon = this.phyloTree
       ? {
           name: this.phyloTree.tax_name,
-          tax_level: this.phyloTree.tax_level,
           taxid: this.phyloTree.taxid
         }
       : props.taxon;
@@ -112,7 +111,6 @@ class PhyloTreeInputs extends React.Component {
           project_id: this.project.id,
           taxid: this.taxon.taxid,
           pipeline_run_ids: pipeline_run_ids,
-          tax_level: this.taxon.tax_level,
           tax_name: this.taxon.name,
           authenticity_token: this.csrf
         })
