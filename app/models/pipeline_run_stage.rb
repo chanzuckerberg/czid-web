@@ -232,14 +232,4 @@ class PipelineRunStage < ApplicationRecord
     # memory = sample.sample_memory.present? ? sample.sample_memory : Sample::DEFAULT_MEMORY_IN_MB
     aegea_batch_submit_command(batch_command, job_queue: pipeline_run.sample.job_queue, docker_image: "idseq_dag_meera1")
   end
-
-  def assembly_command
-    # TODO: Change the following to DAG
-    batch_command_env_variables = "ALIGNMENT_S3_PATH=#{pipeline_run.alignment_output_s3_path} " \
-      "POSTPROCESS_S3_PATH=#{pipeline_run.postprocess_output_s3_path} " \
-      "COMMIT_SHA_FILE=#{COMMIT_SHA_FILE_ON_WORKER} "
-    batch_command = install_pipeline + "; " + batch_command_env_variables + " idseq_pipeline assembly"
-    "aegea batch submit --command=\"#{batch_command}\" " \
-      " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --ecr-image idseq_dag_meera1 --memory 60000 --queue idseq_assembly --vcpus 32 --job-role idseq-pipeline "
-  end
 end
