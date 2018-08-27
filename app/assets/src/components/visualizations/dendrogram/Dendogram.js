@@ -209,11 +209,6 @@ export default class PhyloTree {
       .style("text-anchor", "middle")
       .text(this.formatBase10(multiplier, power));
 
-    // text
-    //     .append("tspan")
-    //     .attr("baseline-shift", "super")
-    //     .text(power === 0 ? "1" : "10");
-
     scale
       .select("path")
       .transition()
@@ -227,10 +222,6 @@ export default class PhyloTree {
       .attr("x", scaleSize);
 
     scale.select("text.scale-max").text(this.formatBase10(multiplier, power));
-
-    // scale
-    //     .select("text.scale-max > tspan")
-    //     .text(power);
   }
 
   update() {
@@ -239,24 +230,9 @@ export default class PhyloTree {
     }
 
     function curveEdge(d) {
-      return (
-        "M" +
-        d.y +
-        "," +
-        d.x +
-        "C" +
-        (d.parent.y + 100) +
-        "," +
-        d.x +
-        " " +
-        (d.parent.y + 100) +
-        "," +
-        d.parent.x +
-        " " +
-        d.parent.y +
-        "," +
+      return `M${d.y},${d.x}C${d.parent.y + 100},${d.x} ${d.parent.y + 100},${
         d.parent.x
-      );
+      } ${d.parent.y},${d.parent.x}`;
     }
 
     function rectEdge(d) {
