@@ -1,0 +1,29 @@
+dummy1:
+  taxid: 1
+  hit_type: 'NT'
+  pipeline_run: three
+
+dummy2:
+  taxid: 1
+  hit_type: 'NT'
+  pipeline_run: four
+
+dummy3:
+  taxid: 1
+  hit_type: 'NT'
+  pipeline_run: joe_project_sampleA_run
+
+dummy4:
+  taxid: 1
+  hit_type: 'NT'
+  pipeline_run: joe_project_sampleB_run
+
+dummy5:
+  taxid: 1
+  hit_type: 'NT'
+  pipeline_run: public_project_sampleA_run
+
+dummy6:
+  taxid: 1
+  hit_type: 'NT'
+  pipeline_run: public_project_sampleB_run

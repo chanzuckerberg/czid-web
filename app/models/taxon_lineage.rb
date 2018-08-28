@@ -34,19 +34,42 @@ class TaxonLineage < ApplicationRecord
   PHAGE_FAMILIES_TAXIDS = [10_472, 10_474, 10_477, 10_656, 10_659, 10_662, 10_699, 10_744, 10_841, 10_860,
                            10_877, 11_989, 157_897, 292_638, 324_686, 423_358, 573_053, 1_232_737].freeze
 
+  def tax_level
+    TaxonCount::LEVEL_2_NAME.keys.sort.each do |level_int|
+      level_str = TaxonCount::LEVEL_2_NAME[level_int]
+      return level_int if self["#{level_str}_taxid"] > 0
+    end
+    nil
+  end
+
+  def name
+    level_str = TaxonCount::LEVEL_2_NAME[tax_level]
+    self["#{level_str}_name"]
+  end
+
   def self.get_genus_info(genus_tax_id)
     r = find_by(genus_taxid: genus_tax_id)
     return { query: r.genus_name, tax_id: genus_tax_id } if r
   end
 
-  def self.fill_lineage_details(tax_map)
-    # Get list of tax_ids to look up in TaxonLineage and TaxonCount rows. Include family_taxids.
+  def self.fill_lineage_details(tax_map, pipeline_run_id)
+    # Get list of tax_ids to look up in TaxonLineage rows. Include family_taxids.
     tax_ids = tax_map.map { |x| x['tax_id'] }
     tax_ids |= tax_map.map { |x| x['family_taxid'] }
 
+    # Get created_at date for our TaxonCount entries. Same for all TaxonCounts
+    # in a PipelineRun.
+    # TODO: Move the lineage selection mechanism into alignment_config.
+    valid_date = PipelineRun.find(pipeline_run_id).created_at
+
     # TODO: Should definitely be simplified with taxonomy/lineage refactoring.
     lineage_by_taxid = {}
-    TaxonLineage.where(taxid: tax_ids).find_each do |x|
+
+    # Since there may be multiple TaxonLineage entries with the same taxid
+    # now, we only select the valid entry based on started_at and ended_at.
+    # The valid lineage entry has start and end dates that include the valid
+    # taxon count entry date.
+    TaxonLineage.where(taxid: tax_ids).where("started_at < ? AND ended_at > ?", valid_date, valid_date).each do |x|
       lineage_by_taxid[x.taxid] = x.as_json
     end
 

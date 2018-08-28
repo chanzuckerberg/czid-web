@@ -152,6 +152,10 @@ module PipelineOutputsHelper
 
   def get_taxid_fasta(sample, taxid, tax_level, hit_type)
     pipeline_run = sample.pipeline_runs.first
+    get_taxid_fasta_from_pipeline_run(pipeline_run, taxid, tax_level, hit_type)
+  end
+
+  def get_taxid_fasta_from_pipeline_run(pipeline_run, taxid, tax_level, hit_type)
     return '' unless pipeline_run
     uri = pipeline_run.s3_paths_for_taxon_byteranges[tax_level][hit_type]
     # e.g. "s3://czbiohub-idseq-samples-development/samples/8/74/postprocess/taxid_annot_sorted_genus_nt.fasta"
@@ -180,21 +184,23 @@ module PipelineOutputsHelper
     # Status display for the frontend.
     h = states_by_output_hash
     if [PipelineRun::FINALIZED_SUCCESS, PipelineRun::FINALIZED_FAIL].include?(results_finalized_var)
+      # No steps are running anymore
       if [h["taxon_byteranges"], h["taxon_counts"]].all? { |s| s == PipelineRun::STATUS_LOADED }
         "COMPLETE"
       elsif h["taxon_counts"] == PipelineRun::STATUS_LOADED
+        # Alignment succeeded, postprocess failed
         "COMPLETE*"
       else
         "FAILED"
       end
     elsif h["taxon_counts"] == PipelineRun::STATUS_LOADED
-      # alignment succeeded, postprocessing in progress
+      # Alignment succeeded, postprocessing in progress
       "POST PROCESSING"
     elsif h["ercc_counts"] == PipelineRun::STATUS_LOADED
-      # host-filtering succeeded, alignment in progress
+      # Host-filtering succeeded, alignment in progress
       "ALIGNMENT"
     else
-      # host-filtering in progress
+      # Host-filtering in progress
       "HOST FILTERING"
     end
   end

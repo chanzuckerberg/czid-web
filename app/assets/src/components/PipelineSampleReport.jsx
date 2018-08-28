@@ -14,6 +14,7 @@ import BasicPopup from "./BasicPopup";
 import OurDropdown from "./ui/controls/dropdowns/Dropdown";
 import MultipleDropdown from "./ui/controls/dropdowns/MultipleDropdown";
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
+import BetaLabel from "./ui/labels/BetaLabel";
 
 class PipelineSampleReport extends React.Component {
   constructor(props) {
@@ -22,8 +23,10 @@ class PipelineSampleReport extends React.Component {
       id: "prog-bar",
       class: "prog-bar"
     });
+    this.admin = props.admin;
     this.report_ts = props.report_ts;
     this.sample_id = props.sample_id;
+    this.projectId = props.projectId;
     this.gitVersion = props.git_version;
     this.canSeeAlignViz = props.can_see_align_viz;
     this.can_edit = props.can_edit;
@@ -44,6 +47,7 @@ class PipelineSampleReport extends React.Component {
     const cachedIncludedSubcategories = Cookies.get("includedSubcategories");
 
     const cached_name_type = Cookies.get("name_type");
+    const cachedReadSpecificity = Cookies.get("readSpecificity");
     const savedThresholdFilters = ThresholdMap.getSavedThresholdFilters();
 
     this.showConcordance = false;
@@ -85,11 +89,12 @@ class PipelineSampleReport extends React.Component {
       ? savedThresholdFilters
       : [Object.assign({}, this.defaultThreshold)];
 
+    let defaultBackgroundId = this.fetchParams("background_id");
     // we should only keep dynamic data in the state
     // Starting state is default values which are to be set later.
     this.state = {
       taxonomy_details: [],
-      backgroundId: 0,
+      backgroundId: defaultBackgroundId,
       backgroundName: "",
       searchId: 0,
       searchKey: "",
@@ -117,7 +122,8 @@ class PipelineSampleReport extends React.Component {
       rendering: false,
       loading: true,
       activeThresholds: this.defaultThresholdValues,
-      countType: "NT"
+      countType: "NT",
+      readSpecificity: cachedReadSpecificity ? cachedReadSpecificity : "All"
     };
 
     this.expandAll = false;
@@ -129,8 +135,8 @@ class PipelineSampleReport extends React.Component {
     this.applyThresholdFilters = this.applyThresholdFilters.bind(this);
     this.collapseGenus = this.collapseGenus.bind(this);
     this.collapseTable = this.collapseTable.bind(this);
+    this.gotoTreeLink = this.gotoTreeLink.bind(this);
     this.displayHighlightTags = this.displayHighlightTags.bind(this);
-    this.downloadAssemblyLink = this.downloadAssemblyLink.bind(this);
     this.downloadFastaUrl = this.downloadFastaUrl.bind(this);
     this.expandGenusClick = this.expandGenusClick.bind(this);
     this.expandTable = this.expandTable.bind(this);
@@ -139,6 +145,7 @@ class PipelineSampleReport extends React.Component {
     this.getBackgroundIdByName = this.getBackgroundIdByName.bind(this);
     this.gotoAlignmentVizLink = this.gotoAlignmentVizLink.bind(this);
     this.handleNameTypeChange = this.handleNameTypeChange.bind(this);
+    this.handleSpecificityChange = this.handleSpecificityChange.bind(this);
     this.handleBackgroundModelChange = this.handleBackgroundModelChange.bind(
       this
     );
@@ -263,10 +270,11 @@ class PipelineSampleReport extends React.Component {
           this.max_rows_to_render
         ),
         pagesRendered: 1,
-        rows_passing_filters: this.state.taxonomy_details.length
+        rows_passing_filters: this.state.taxonomy_details.length,
+        readSpecificity: "All"
       },
       () => {
-        this.saveThresholdFilters();
+        ThresholdMap.saveThresholdFilters([]);
         Cookies.set("includedCategories", "[]");
         Cookies.set("includedSubcategories", "[]");
       }
@@ -316,7 +324,14 @@ class PipelineSampleReport extends React.Component {
       for (var i = 0; i < thresholded_taxons.length; i++) {
         let taxon = thresholded_taxons[i];
         if (includedCategories.indexOf(taxon.category_name) >= 0) {
-          // in the included categories
+          // In the included categories
+
+          // Skip if excluding non-specific rows
+          if (this.state.readSpecificity.toLowerCase() === "specific only") {
+            if (taxon.tax_level === 2 && taxon.tax_id < 0) {
+              continue;
+            }
+          }
           selected_taxons.push(taxon);
         } else if (
           displayed_subcat_indicator_columns.some(column => {
@@ -349,7 +364,16 @@ class PipelineSampleReport extends React.Component {
         }
       }
     } else {
-      selected_taxons = thresholded_taxons;
+      // Skip if excluding non-specific rows
+      if (this.state.readSpecificity.toLowerCase() === "specific only") {
+        for (let tax_info of thresholded_taxons) {
+          if (tax_info.tax_level !== 2 || tax_info.tax_id > 0) {
+            selected_taxons.push(tax_info);
+          }
+        }
+      } else {
+        selected_taxons = thresholded_taxons;
+      }
     }
 
     if (searchTaxonId <= 0) {
@@ -393,7 +417,9 @@ class PipelineSampleReport extends React.Component {
         let count = 0;
         for (
           let j = i + 1;
-          j < res.length && res[j].genus_taxid != res[j].tax_id;
+          j < res.length &&
+          res[j].genus_taxid != res[j].tax_id &&
+          res[j].genus_taxid === res[i].genus_taxid;
           j++
         ) {
           count++;
@@ -737,15 +763,32 @@ class PipelineSampleReport extends React.Component {
       return option.text == data.value;
     });
     Cookies.set("background_name", backgroundName);
-    this.setState({
-      backgroundName,
-      backgroundId: data.value
-    });
+    this.setState(
+      {
+        backgroundName,
+        backgroundId: data.value
+      },
+      () => {
+        this.props.refreshPage({ background_id: data.value });
+      }
+    );
   }
 
   handleNameTypeChange(_, data) {
     Cookies.set("name_type", data.value);
     this.setState({ name_type: data.value });
+  }
+
+  handleSpecificityChange(_, data) {
+    Cookies.set("readSpecificity", data.value);
+    this.setState({ readSpecificity: data.value }, () => {
+      this.applySearchFilter(
+        0,
+        this.state.includedCategories,
+        this.state.thresholded_taxons,
+        this.state.includedSubcategories
+      );
+    });
   }
 
   // path to NCBI
@@ -783,14 +826,16 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
-  downloadAssemblyLink(e) {
-    const taxId = e.target.getAttribute("data-tax-id");
-    location.href = `/samples/${this.sample_id}/assembly/${taxId}`;
+  gotoTreeLink(taxid) {
+    window.open(
+      `/phylo_trees/index?taxid=${taxid}&project_id=${this.projectId}`,
+      "_blank noopener hide_referrer"
+    );
   }
 
   displayTags(taxInfo, reportDetails) {
     let tax_level_str = "";
-    let ncbiDot, fastaDot, alignmentVizDot, assemblyDot;
+    let ncbiDot, fastaDot, alignmentVizDot, phyloTreeDot;
     if (taxInfo.tax_level == 1) tax_level_str = "species";
     else tax_level_str = "genus";
 
@@ -801,7 +846,7 @@ class PipelineSampleReport extends React.Component {
         <i
           data-tax-id={taxInfo.tax_id}
           onClick={this.gotoNCBI}
-          className="fa fa-link cloud"
+          className="fa fa-link action-dot"
           aria-hidden="true"
         />
       );
@@ -811,7 +856,7 @@ class PipelineSampleReport extends React.Component {
           data-tax-level={taxInfo.tax_level}
           data-tax-id={taxInfo.tax_id}
           onClick={this.downloadFastaUrl}
-          className="fa fa-download cloud"
+          className="fa fa-download action-dot"
           aria-hidden="true"
         />
       );
@@ -821,16 +866,15 @@ class PipelineSampleReport extends React.Component {
           data-tax-level={tax_level_str}
           data-tax-id={taxInfo.tax_id}
           onClick={this.gotoAlignmentVizLink}
-          className="fa fa-bars"
+          className="fa fa-bars action-dot"
           aria-hidden="true"
         />
       );
-    if (reportDetails.assembled_taxids.indexOf(taxInfo.tax_id.toString()) >= 0)
-      assemblyDot = (
+    if (this.admin == 1 && (taxInfo.tax_id > 0 && taxInfo.NT.r > 0))
+      phyloTreeDot = (
         <i
-          data-tax-id={taxInfo.tax_id}
-          onClick={this.downloadAssemblyLink}
-          className="fa fa-gg"
+          onClick={() => this.gotoTreeLink(taxInfo.tax_id)}
+          className="fa fa-code-fork action-dot"
           aria-hidden="true"
         />
       );
@@ -842,7 +886,14 @@ class PipelineSampleReport extends React.Component {
           trigger={alignmentVizDot}
           content={"Alignment Visualization"}
         />
-        <BasicPopup trigger={assemblyDot} content={"Assembly Download"} />
+        <BasicPopup
+          trigger={phyloTreeDot}
+          content={
+            <div>
+              Phylogenetic Analysis <BetaLabel />
+            </div>
+          }
+        />
       </span>
     );
   }
@@ -854,7 +905,7 @@ class PipelineSampleReport extends React.Component {
         data-tax-name={taxInfo.name}
         data-confirmation-strength="watched"
         onClick={this.props.toggleHighlightTaxon}
-        className="fa fa-eye"
+        className="fa fa-eye action-dot"
         aria-hidden="true"
       />
     );
@@ -864,7 +915,7 @@ class PipelineSampleReport extends React.Component {
         data-tax-name={taxInfo.name}
         data-confirmation-strength="confirmed"
         onClick={this.props.toggleHighlightTaxon}
-        className="fa fa-check"
+        className="fa fa-check action-dot"
         aria-hidden="true"
       />
     );
@@ -1061,6 +1112,7 @@ class PipelineSampleReport extends React.Component {
       taxon_status = "confirmed";
     else if (watched_taxids.indexOf(tax_info.tax_id) >= 0)
       taxon_status = "watched";
+
     if (tax_info.tax_level == 2) {
       if (tax_info.tax_id < 0) {
         return `report-row-genus ${
@@ -1071,6 +1123,7 @@ class PipelineSampleReport extends React.Component {
         tax_info.genus_taxid
       } real-genus ${taxon_status} ${highlighted}`;
     }
+
     let initial_visibility = "hidden";
     if (
       (this.expandAll && tax_info.genus_taxid > 0) ||
@@ -1586,6 +1639,21 @@ function BackgroundModelFilter({ parent }) {
   );
 }
 
+function SpecificityFilter({ parent }) {
+  const specificityOptions = [
+    { text: "All", value: "All" },
+    { text: "Specific Only", value: "Specific Only" }
+  ];
+  return (
+    <OurDropdown
+      options={specificityOptions}
+      value={parent.state.readSpecificity}
+      label="Read Specificity: "
+      onChange={parent.handleSpecificityChange}
+    />
+  );
+}
+
 class RenderMarkup extends React.Component {
   constructor(props) {
     super(props);
@@ -1639,10 +1707,7 @@ class RenderMarkup extends React.Component {
           }
           content={
             <div>
-              Phylogenetic Tree View{" "}
-              <Label color="purple" size="mini" floating>
-                beta
-              </Label>
+              Taxonomic Tree View <BetaLabel />
             </div>
           }
           inverted
@@ -1704,6 +1769,9 @@ class RenderMarkup extends React.Component {
                           thresholds={parent.state.activeThresholds}
                           onApply={parent.applyThresholdFilters}
                         />
+                      </div>
+                      <div className="filter-lists-element">
+                        <SpecificityFilter parent={parent} />
                       </div>
                     </div>
                   </div>

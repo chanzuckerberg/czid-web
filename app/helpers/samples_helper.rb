@@ -5,21 +5,25 @@ module SamplesHelper
   include PipelineOutputsHelper
 
   def generate_sample_list_csv(formatted_samples)
-    attributes = %w[sample_name uploader upload_date runtime_seconds overall_job_status
-                    total_reads nonhost_reads nonhost_reads_percent
+    attributes = %w[sample_name uploader upload_date runtime_seconds overall_job_status num_input_files
+                    total_reads nonhost_reads nonhost_reads_percent ercc_reads subsampled_fraction
                     quality_control compression_ratio tissue_type nucleotide_type
-                    location host_genome notes]
+                    location host_genome notes sample_diagnosis]
     CSV.generate(headers: true) do |csv|
       csv << attributes
       formatted_samples.each do |sample_info|
         derived_output = sample_info[:derived_sample_output]
+        pipeline_run = derived_output[:pipeline_run]
         db_sample = sample_info[:db_sample]
         run_info = sample_info[:run_info]
         data_values = { sample_name: db_sample ? db_sample[:name] : '',
                         upload_date: db_sample ? db_sample[:created_at] : '',
-                        total_reads: derived_output[:pipeline_run] ? derived_output[:pipeline_run][:total_reads] : '',
-                        nonhost_reads: derived_output[:summary_stats] ? derived_output[:summary_stats][:adjusted_remaining_reads] : '',
+                        num_input_files: db_sample ? db_sample.input_files.count : '',
+                        total_reads: pipeline_run ? pipeline_run.total_reads : '',
+                        nonhost_reads: pipeline_run ? pipeline_run.adjusted_remaining_reads : '',
                         nonhost_reads_percent: derived_output[:summary_stats] && derived_output[:summary_stats][:percent_remaining] ? derived_output[:summary_stats][:percent_remaining].round(3) : '',
+                        ercc_reads: pipeline_run ? pipeline_run.total_ercc_reads : '',
+                        subsampled_fraction: pipeline_run ? pipeline_run.fraction_subsampled : '',
                         quality_control: derived_output[:summary_stats] && derived_output[:summary_stats][:qc_percent] ? derived_output[:summary_stats][:qc_percent].round(3) : '',
                         compression_ratio: derived_output[:summary_stats] && derived_output[:summary_stats][:compression_ratio] ? derived_output[:summary_stats][:compression_ratio].round(2) : '',
                         tissue_type: db_sample ? db_sample[:sample_tissue] : '',

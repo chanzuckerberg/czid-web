@@ -45,7 +45,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     assert @joe_sample.sample_tissue == 'bone'
   end
 
-  test 'joe can see samples  in joe_project' do
+  test 'joe can see samples in joe_project' do
     @joe_project = projects(:joe_project)
     get "/samples.json?project_id=#{@joe_project.id}"
     assert_response :success
@@ -56,6 +56,19 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     @joe_sample = samples(:joe_sample)
     get sample_url(@joe_sample)
     assert_response :success
+  end
+
+  test 'joe can delete his own sample' do
+    @joe_sample = samples(:joe_sample)
+    delete sample_url(@joe_sample)
+    assert_response :success
+  end
+
+  test 'joe cannot delete public_sample' do
+    @public_sample = samples(:public_sample)
+    assert_raises(ActiveRecord::RecordNotFound) do
+      delete sample_url(@public_sample)
+    end
   end
 
   # public projects
@@ -246,6 +259,61 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
   test 'joe cannot view joe_sample with background for project one' do
     assert_raise do
       access_sample_with_background(backgrounds(:background_for_project_one), samples(:joe_sample))
+    end
+  end
+
+  # phylo_trees
+  test 'joe can see joe_phylo_tree' do
+    get "/phylo_trees/show?id=#{phylo_trees(:joe_phylo_tree).id}"
+    assert_response :success
+  end
+
+  test 'joe can see public_phylo_tree' do
+    get "/phylo_trees/show?id=#{phylo_trees(:public_phylo_tree).id}"
+    assert_response :success
+  end
+
+  test 'joe cannot retry public_phylo_tree' do
+    assert_raises(ActiveRecord::RecordNotFound) do
+      post "/phylo_trees/retry?id=#{phylo_trees(:public_phylo_tree).id}"
+    end
+  end
+
+  test 'joe can retry joe_failed_phylo_tree' do
+    post "/phylo_trees/retry?id=#{phylo_trees(:joe_failed_phylo_tree).id}"
+    assert_equal "ok", JSON.parse(@response.body)['status']
+  end
+
+  test 'joe cannot create phylo_tree from pipeline_runs he cannot view' do
+    entrypoint_taxon_count = taxon_counts(:three)
+    post "/phylo_trees/create", params: { name: 'new_phylo_tree', project_id: projects(:joe_project).id,
+                                          taxid: entrypoint_taxon_count.tax_id, pipeline_run_ids: [pipeline_runs(:three).id, pipeline_runs(:four).id],
+                                          tax_name: entrypoint_taxon_count.name }
+    assert_equal "unauthorized", JSON.parse(@response.body)['status']
+  end
+
+  test 'joe can create phylo_tree to joe_project from public samples' do
+    post "/phylo_trees/create", params: { name: 'new_phylo_tree', project_id: projects(:joe_project).id,
+                                          taxid: 1, pipeline_run_ids: [pipeline_runs(:public_project_sampleA_run).id,
+                                                                       pipeline_runs(:public_project_sampleB_run).id],
+                                          tax_name: 'some species' }
+    assert_equal "ok", JSON.parse(@response.body)['status']
+  end
+
+  test 'joe can create phylo_tree to joe_project from samples in joe_project' do
+    post "/phylo_trees/create", params: { name: 'new_phylo_tree', project_id: projects(:joe_project).id,
+                                          taxid: 1, pipeline_run_ids: [pipeline_runs(:joe_project_sampleA_run).id,
+                                                                       pipeline_runs(:joe_project_sampleB_run).id],
+                                          tax_name: 'some species' }
+    assert_equal "ok", JSON.parse(@response.body)['status']
+  end
+
+  test 'joe cannot create phylo_tree to public_project' do
+    assert_raises(ActiveRecord::RecordNotFound) do
+      post "/phylo_trees/create", params: { name: 'new_phylo_tree', project_id: projects(:public_project).id,
+                                            taxid: 1, pipeline_run_ids: [pipeline_runs(:joe_project_sampleA_run).id,
+                                                                         pipeline_runs(:joe_project_sampleB_run).id],
+                                            tax_name: 'some species' }
     end
   end
 end

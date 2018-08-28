@@ -135,7 +135,7 @@ class Sample < ApplicationRecord
         OR samples.sample_tissue LIKE :search
         OR samples.sample_location LIKE :search
         OR samples.sample_notes LIKE :search
-        OR samples.sample_unique_id', search: "%#{search}%")
+        OR samples.sample_unique_id LIKE :search', search: "%#{search}%")
     else
       scoped
     end
@@ -384,6 +384,21 @@ class Sample < ApplicationRecord
     else
       project_ids = Project.editable(user).select("id").pluck(:id)
       where("project_id in (?)", project_ids)
+    end
+  end
+
+  def deletable?(user)
+    if user.admin?
+      true
+    elsif user_id == user.id
+      # Sample belongs to the user
+      # Allow deletion if no pipeline runs, or report failed.
+      unless pipeline_runs.empty?
+        pipeline_runs.each do |prun|
+          return false unless prun.report_failed?
+        end
+      end
+      true
     end
   end
 

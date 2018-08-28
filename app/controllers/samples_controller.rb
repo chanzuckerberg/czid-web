@@ -273,7 +273,7 @@ class SamplesController < ApplicationController
 
     # Fill lineage details into report info
     tax_map = @report_info[:taxonomy_details][2]
-    @report_info[:taxonomy_details][2] = TaxonLineage.fill_lineage_details(tax_map)
+    @report_info[:taxonomy_details][2] = TaxonLineage.fill_lineage_details(tax_map, pipeline_run_id)
 
     render json: JSON.dump(@report_info)
   end
@@ -338,7 +338,7 @@ class SamplesController < ApplicationController
     # TODO(yf): DEPRECATED. Remove by 5/24/2018
     @taxon_info = params[:taxon_info].tr("_", ".")
     pr = @sample.pipeline_runs.first
-    s3_file_path = "#{pr.alignment_viz_output_s3_path}/#{@taxon_info}.align_viz.json"
+    s3_file_path = pr.alignment_viz_json_s3(@taxon_info)
     alignment_data = JSON.parse(get_s3_file(s3_file_path) || "{}")
     @taxid = @taxon_info.split(".")[2].to_i
     @tax_level = @taxon_info.split(".")[1]
@@ -364,7 +364,7 @@ class SamplesController < ApplicationController
 
     respond_to do |format|
       format.json do
-        s3_file_path = "#{pr.alignment_viz_output_s3_path}/#{@taxon_info.tr('_', '.')}.align_viz.json"
+        s3_file_path = pr.alignment_viz_json_s3(@taxon_info.tr('_', '.'))
         alignment_data = JSON.parse(get_s3_file(s3_file_path) || "{}")
         flattened_data = {}
         parse_tree(flattened_data, @taxid, alignment_data, true)
@@ -495,15 +495,17 @@ class SamplesController < ApplicationController
   # DELETE /samples/1
   # DELETE /samples/1.json
   def destroy
-    deletable = @sample.pipeline_runs.empty?
-    @sample.destroy if deletable
+    # Will also delete from job_stats, ercc_counts, backgrounds_pipeline_runs, pipeline_runs, input_files, and backgrounds_samples
+    deletable = @sample.deletable?(current_user)
+    success = false
+    success = @sample.destroy if deletable
     respond_to do |format|
-      if deletable
+      if success
         format.html { redirect_to samples_url, notice: 'Sample was successfully destroyed.' }
         format.json { head :no_content }
       else
         format.html { render :edit }
-        format.json { render json: { message: 'Cannot delete this sample' }, status: :unprocessable_entity }
+        format.json { render json: { message: 'Cannot delete this sample. Something went wrong.' }, status: :unprocessable_entity }
       end
     end
   end

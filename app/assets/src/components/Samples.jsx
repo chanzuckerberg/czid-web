@@ -12,6 +12,7 @@ import ProjectSelection from "./ProjectSelection";
 import StringHelper from "../helpers/StringHelper";
 import Cookies from "js-cookie";
 import CompareButton from "./ui/controls/buttons/CompareButton";
+import PhylogenyButton from "./ui/controls/buttons/PhylogenyButton";
 import DownloadButtonDropdown from "./ui/controls/dropdowns/DownloadButtonDropdown";
 import PrimaryButton from "./ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "./ui/controls/buttons/SecondaryButton";
@@ -66,6 +67,7 @@ class Samples extends React.Component {
     this.deleteProject = this.deleteProject.bind(this);
     this.toggleBackgroundFlag = this.toggleBackgroundFlag.bind(this);
     this.getBackgroundIdByName = this.getBackgroundIdByName.bind(this);
+    this.gotoTreeList = this.gotoTreeList.bind(this);
     this.state = {
       invite_status: null,
       background_creation_response: {},
@@ -878,6 +880,15 @@ class Samples extends React.Component {
           background_creation_response: { message: "Something went wrong." }
         });
       });
+  }
+
+  gotoTreeList(e) {
+    let tree_index_url = "/phylo_trees/index";
+    let project_id = parseInt(this.state.selectedProjectId);
+    if (project_id) {
+      tree_index_url += `?project_id=${project_id}`;
+    }
+    window.open(tree_index_url, "_blank noopener hide_referrer");
   }
 
   clearAllFilters() {
@@ -1997,7 +2008,7 @@ function ProjectInfoHeading({
 }) {
   return (
     <div className="row download-section">
-      <div className="col s6 wrapper">
+      <div className="col s5 wrapper">
         <div
           className={
             !proj ? "proj-title heading all-proj" : "heading proj-title"
@@ -2021,9 +2032,14 @@ function ProjectInfoHeading({
                 } total samples. ${selectedStr}`}
         </p>
       </div>
-      <div className="col s6 download-section-btns">
+      <div className="col s7 download-section-btns">
         {state.selectedProjectId ? project_menu : null}
         {table_download_dropdown}
+        {parent.admin ? (
+          <div className="button-container">
+            <PhylogenyButton onClick={parent.gotoTreeList} />
+          </div>
+        ) : null}
         {compare_button}
         <BackgroundModal parent={parent} />
         {state.selectedProjectId &&

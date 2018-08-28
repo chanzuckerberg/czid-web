@@ -3,6 +3,7 @@ class Project < ApplicationRecord
   has_many :samples
   has_many :favorite_projects
   has_many :favorited_by, through: :favorite_projects, source: :user
+  has_many :phylo_trees, -> { order(created_at: :desc) }, dependent: :destroy
   has_one :background
   validates :name, presence: true, uniqueness: true
   include ReportHelper

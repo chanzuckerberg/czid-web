@@ -34,7 +34,7 @@ module ReportHelper
 
   SORT_DIRECTIONS = %w[highest lowest].freeze
   # We do not allow underscores in metric names, sorry!
-  METRICS = %w[r rpm zscore percentidentity alignmentlength neglogevalue percentconcordant aggregatescore maxzscore r_pct].freeze
+  METRICS = %w[r rpm zscore percentidentity alignmentlength neglogevalue percentconcordant aggregatescore maxzscore r_pct rpm_bg].freeze
   COUNT_TYPES = %w[NT NR].freeze
   # Note: no underscore in sortable column names. Add to here to protect from data cleaning.
   PROPERTIES_OF_TAXID = %w[tax_id name common_name tax_level species_taxid genus_taxid family_taxid superkingdom_taxid category_name is_phage].freeze
@@ -220,6 +220,7 @@ module ReportHelper
         taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
         taxon_counts.is_phage            AS  is_phage,
         taxon_counts.count               AS  r,
+        IF(taxon_summaries.mean IS NOT NULL, taxon_summaries.mean, 0.0) AS rpm_bg,
         (count / #{adjusted_total_reads}
           * 1000000.0)                   AS  rpm,
         (taxon_counts.count/#{raw_non_host_reads} * 100.0)  AS  r_pct,

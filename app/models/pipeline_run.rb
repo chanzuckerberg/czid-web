@@ -3,11 +3,13 @@ require 'json'
 class PipelineRun < ApplicationRecord
   include ApplicationHelper
   include PipelineOutputsHelper
+  include PipelineRunsHelper
   belongs_to :sample
   belongs_to :alignment_config
   has_many :pipeline_run_stages
   accepts_nested_attributes_for :pipeline_run_stages
   has_and_belongs_to_many :backgrounds
+  has_and_belongs_to_many :phylo_trees
 
   has_many :output_states
   has_many :taxon_counts, dependent: :destroy
@@ -250,6 +252,13 @@ class PipelineRun < ApplicationRecord
     output_states.find_by(output: REPORT_READY_OUTPUT).state == STATUS_LOADED
   end
 
+  def report_failed?
+    # The report failed if host filtering or alignment failed.
+    host_filtering_status = output_states.find_by(output: "ercc_counts").state
+    alignment_status = output_states.find_by(output: "taxon_byteranges").state
+    host_filtering_status == STATUS_FAILED || alignment_status == STATUS_FAILED
+  end
+
   def succeeded?
     job_status == STATUS_CHECKED
   end
@@ -432,13 +441,7 @@ class PipelineRun < ApplicationRecord
 
     # Get pipeline_version, which determines S3 locations of output files.
     # If pipeline version is not present, we cannot load results yet.
-    # [ We use "file_generated_since_run(pipeline_version_file)" because "pipeline_version_file"
-    #   is not in the versioned result folder, so it gets overwritten with each new run.
-    #   TODO: change that, so that we can get rid of "file_generated_since_run".
-    # ]
-    if pipeline_version.blank? && file_generated_since_run(pipeline_version_file)
-      update(pipeline_version: fetch_pipeline_version)
-    end
+    update_pipeline_version(self, :pipeline_version, pipeline_version_file)
     return if pipeline_version.blank?
 
     # Load any new outputs that have become available:
@@ -612,17 +615,6 @@ class PipelineRun < ApplicationRecord
     "#{destination_dir}/#{File.basename(s3_path)}"
   end
 
-  def file_generated_since_run(s3_path)
-    stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", s3_path.to_s)
-    return false unless status.exitstatus.zero?
-    begin
-      s3_file_time = DateTime.strptime(stdout[0..18], "%Y-%m-%d %H:%M:%S")
-      return (s3_file_time && created_at && s3_file_time > created_at)
-    rescue
-      return nil
-    end
-  end
-
   def file_generated(s3_path)
     _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", s3_path.to_s)
     status.exitstatus.zero?
@@ -782,6 +774,11 @@ class PipelineRun < ApplicationRecord
     result.chomp("/")
   end
 
+  def alignment_viz_json_s3(taxon_info)
+    # taxon_info example: 'nt.species.573'
+    "#{alignment_viz_output_s3_path}/#{taxon_info}.align_viz.json"
+  end
+
   def alignment_viz_output_s3_path
     "#{postprocess_output_s3_path}/align_viz"
   end
@@ -814,14 +811,6 @@ class PipelineRun < ApplicationRecord
 
   def pipeline_version_file
     "#{sample.sample_output_s3_path}/#{PIPELINE_VERSION_FILE}"
-  end
-
-  def fetch_pipeline_version
-    whole_version = `aws s3 cp #{pipeline_version_file} -`.strip
-    whole_version =~ /(^\d+\.\d+).*/
-    return Regexp.last_match(1)
-  rescue
-    return nil
   end
 
   def major_minor(version)
@@ -907,5 +896,9 @@ class PipelineRun < ApplicationRecord
       }
     end
     ret
+  end
+
+  def self.viewable(user)
+    where(sample_id: Sample.viewable(user).pluck(:id))
   end
 end
