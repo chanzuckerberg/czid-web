@@ -38,10 +38,10 @@ class NewickParser {
   parse() {
     let predecessors = [];
     let idx = this.newickString.indexOf("(");
-    let symbol = null;
     let currentNode = this.root;
+    let terminate = false;
     try {
-      while (idx < this.newickString.length && symbol !== ";") {
+      while (!terminate && idx < this.newickString.length) {
         const { token, symbol } = this.getNextTokenAndSymbol(idx);
         switch (symbol) {
           case "(": {
@@ -71,15 +71,15 @@ class NewickParser {
             }
             break;
           default:
-            throw new Error("Do not know what to do");
+            throw new Error(`Bad tree format - bad symbol: ${symbol}`);
         }
         idx += token.length + 1;
+        terminate = symbol === ";";
       }
     } catch (error) {
       // TODO: process error
       return null;
     }
-
     return this;
   }
 

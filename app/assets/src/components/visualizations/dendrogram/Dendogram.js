@@ -7,8 +7,8 @@ export default class PhyloTree {
   constructor(container, tree) {
     this.svg = null;
     this.container = container;
-    this.tree = tree;
-    this.root = hierarchy(this.tree.root);
+    this.tree = null;
+    this.root = null;
 
     // size
     this.width = 800;
@@ -16,11 +16,12 @@ export default class PhyloTree {
     this.innerLabelWidth = 60;
     this.outerLabelWidth = 150;
 
+    this._highlighted = new Set();
+
     // timeout to differentiate click from double click
     this._clickTimeout = null;
 
-    this._highlighted = new Set();
-
+    this.setTree(tree);
     this.initialize();
   }
 
@@ -39,7 +40,9 @@ export default class PhyloTree {
   }
 
   setTree(tree) {
-    this.svg.selectAll("*").remove();
+    if (this.svg) {
+      this.svg.selectAll("*").remove();
+    }
 
     if (this._clickTimeout) {
       this._clickTimeout.stop();
@@ -47,7 +50,7 @@ export default class PhyloTree {
     }
     this._highlighted.clear();
     this.tree = tree;
-    this.root = hierarchy(this.tree.root);
+    this.root = tree ? hierarchy(this.tree.root) : null;
   }
 
   computeDistanceToRoot(node, offset = 0) {
@@ -225,6 +228,10 @@ export default class PhyloTree {
   }
 
   update() {
+    if (!this.root) {
+      return;
+    }
+
     if (!this.svg) {
       this.initialize();
     }

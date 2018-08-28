@@ -47,14 +47,16 @@ class PhyloTreeListView extends React.Component {
         </div>
         <Divider />
         <div className="phylo-tree-list-view__narrow-container">
-          {this.phyloTreeMap.has(this.state.selectedPhyloTreeId) ? (
+          {this.phyloTreeMap.get(this.state.selectedPhyloTreeId).newick ? (
             <PhyloTreeVis
               newick={
                 this.phyloTreeMap.get(this.state.selectedPhyloTreeId).newick
               }
             />
           ) : (
-            "No tree selected"
+            <p className="phylo-tree-list-view__no-tree-banner">
+              Tree not available
+            </p>
           )}
         </div>
       </div>

@@ -6,6 +6,9 @@ export default class Tree {
   }
 
   static fromNewickString(newickString) {
+    if (!newickString) {
+      return null;
+    }
     let parser = new NewickParser(newickString);
     parser.parse();
     return new Tree(parser.root);

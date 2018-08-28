@@ -8,34 +8,31 @@ class PhyloTreeVis extends React.Component {
     super(props);
 
     this.state = {
-      newick: props.newick
+      newick: props.newick,
+      tree: Tree.fromNewickString(props.newick)
     };
 
-    this.tree = null;
     this.treeVis = null;
   }
 
   componentWillReceiveProps(newProps) {
-    if (newProps.newick != this.props.newick) {
-      this.setState({ newick: newProps.newick });
-      if (newProps.newick) {
-        this.tree = Tree.fromNewickString(newProps.newick);
-      }
+    if (newProps.newick !== this.props.newick) {
+      this.setState({
+        newick: newProps.newick,
+        tree: Tree.fromNewickString(newProps.newick)
+      });
     }
   }
 
   componentDidMount() {
-    if (this.tree) {
-      this.treeVis = new Dendogram(this.treeContainer, this.tree);
-      this.treeVis.update();
-    }
+    this.treeVis = new Dendogram(this.treeContainer);
+    this.treeVis.setTree(this.state.tree);
+    this.treeVis.update();
   }
 
   componentDidUpdate() {
-    if (this.tree) {
-      this.treeVis.setTree(this.tree);
-      this.treeVis.update();
-    }
+    this.treeVis.setTree(this.state.tree);
+    this.treeVis.update();
   }
 
   render() {
