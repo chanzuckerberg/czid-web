@@ -36,8 +36,6 @@ class PipelineRun < ApplicationRecord
   ASSEMBLY_STATUSFILE = 'job-complete'.freeze
   LOCAL_JSON_PATH = '/app/tmp/results_json'.freeze
   LOCAL_AMR_FULL_RESULTS_PATH = '/app/tmp/amr_full_results'.freeze
-  # Note -- not currently being used, but leaving here for reference
-  LOCAL_AMR_DRUG_SUMMARY_PATH = '/app/tmp/amr_drug_summary_txt'.freeze
   PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
 
   # The PIPELINE MONITOR is responsible for keeping status of AWS Batch jobs
@@ -316,23 +314,6 @@ class PipelineRun < ApplicationRecord
       end
       update(amr_counts_attributes: amr_counts_array)
     end
-  end
-
-  # Can remove as aggregation is being done on the UI side,
-  # but leaving as useful function for possible future changes (e.g. if UI table)
-  def summarize_amr_drug_family_counts
-    summary = AmrCount.connection.execute(
-      " SELECT
-          drug_family,
-          COUNT(drug_family),
-          SUM(coverage),
-          SUM(depth)
-        FROM  amr_counts
-        WHERE pipeline_run_id = #{id}
-        GROUP BY drug_family
-      "
-    ).as_json
-    summary
   end
 
   def taxon_counts_json_name

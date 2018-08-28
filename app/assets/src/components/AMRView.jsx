@@ -7,18 +7,27 @@ const columns = [
   {
     Header: "Antibiotic Class",
     accessor: "drug_family",
+    style: {
+      textAlign: "center"
+    },
     filterable: false
   },
   {
     Header: "Gene",
     accessor: "gene",
     aggregate: vals => _.size(vals),
+    style: {
+      textAlign: "center"
+    },
     filterable: false
   },
   {
     Header: "Gene Family",
     accessor: "gene_family",
     aggregate: vals => _.size(vals),
+    style: {
+      textAlign: "center"
+    },
     filterable: false
   },
   {
@@ -46,20 +55,16 @@ const columns = [
 class AMRView extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { data: props.amr ? props.amr : [] };
-    if (this.state.data) {
+    this.data = props.amr ? props.amr : (this.data = []);
+    if (this.data) {
       // TODO: Talk with Chaz to determine how to improve gene family identification further.
-      for (var i = 0; i < Object.keys(this.state.data).length; i++) {
-        var key = Object.keys(this.state.data)[i];
-        this.state.data[key].gene_family = this.state.data[key].gene.slice(
-          0,
-          5
-        ); // first four characters of gene family
+      for (var i = 0; i < Object.keys(this.data).length; i++) {
+        var key = Object.keys(this.data)[i];
+        this.data[key].gene_family = this.data[key].gene.slice(0, 5); // first four characters of gene family
       }
     }
   }
   render() {
-    const { data } = this.state;
     return (
       <div>
         <ReactTable
@@ -72,7 +77,7 @@ class AMRView extends React.Component {
                   .includes(filter.value.toLowerCase())
               : true;
           }}
-          data={data}
+          data={this.data}
           columns={columns}
           defaultPageSize={5}
           pivotBy={["drug_family", "gene_family"]}

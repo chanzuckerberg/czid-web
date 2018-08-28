@@ -1,7 +1,0 @@
-<div id="AMRView_page">
-  <%= javascript_tag do %>
-    react_component('AMRView', {
-    amr: JSON.parse('<%= raw escape_json(@amr_counts) %>')
-    }, 'AMRView_page');
-  <% end %>
-</div>

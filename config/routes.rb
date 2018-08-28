@@ -12,7 +12,6 @@ Rails.application.routes.draw do
     put :retry_pipeline, on: :member
     get :all, on: :collection
     get :pipeline_runs, on: :member
-    get :show_amr_counts, on: :member
     get :report_info, on: :member
     get :report_csv, on: :member
     get :search_list, on: :member

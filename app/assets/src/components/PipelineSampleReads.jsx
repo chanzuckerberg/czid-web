@@ -32,7 +32,6 @@ class PipelineSampleReads extends React.Component {
     this.reportDetails = props.reportDetails;
     this.pipelineRunRetriable = props.pipelineRunRetriable;
     this.pipelineVersions = props.pipeline_versions;
-    this.pipelineVersion = props.pipeline_version;
 
     this.jobStatistics = props.jobStatistics;
     this.summary_stats = props.summary_stats;
@@ -841,7 +840,7 @@ class PipelineSampleReads extends React.Component {
     let amr_tab = show_amr ? (
       <li className="tab">
         <a href="#amr" className="">
-          Antimicrobial Resistance Report
+          Antimicrobial Resistance
         </a>
       </li>
     ) : null;
