@@ -7,9 +7,6 @@ const columns = [
   {
     Header: "Antibiotic Class",
     accessor: "drug_family",
-    style: {
-      textAlign: "center"
-    },
     filterable: false
   },
   {
