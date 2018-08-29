@@ -299,34 +299,19 @@ class PipelineRun < ApplicationRecord
   end
 
   def db_load_amr_counts
-    amr_drug_mappings = {}
-    amr_drug_mappings["AGly"] = "aminoglycosides"
-    amr_drug_mappings["Bla"] = "beta-lactamases"
-    amr_drug_mappings["Fos"] = "fosfomycin"
-    amr_drug_mappings["Flq"] = "fluoroquinolones"
-    amr_drug_mappings["Gly"] = "glycopeptides"
-    amr_drug_mappings["MLS"] = "macrolide-lincosamide-streptogarmin"
-    amr_drug_mappings["Phe"] = "phenicols"
-    amr_drug_mappings["Rif"] = "rifampicin"
-    amr_drug_mappings["Sul"] = "sulfonamides"
-    amr_drug_mappings["Tet"] = "tetracyclines"
-    amr_drug_mappings["Tmt"] = "trimethoprim"
-    # amr_results = PipelineRun.download_file(s3_file_for("amr_counts"), local_amr_full_results_path)
-    amr_results = PipelineRun.download_file("s3://idseq-database/test/AMR/amr_processed_results.csv", local_amr_full_results_path)
+    amr_results = PipelineRun.download_file(s3_file_for("amr_counts"), local_amr_full_results_path)
+    # amr_results = PipelineRun.download_file("s3://idseq-database/test/AMR/amr_processed_results.csv", local_amr_full_results_path)
     unless File.zero?(amr_results)
       amr_counts_array = []
       # First line of output file has header titles, e.g. "Sample/Gene/Allele..." that are extraneous
       # that we drop
       File.readlines(amr_results).drop(1).each do |amr_result|
         amr_result_fields = amr_result.split(",").drop(2)
-        drug_family_key = amr_result_fields[12]
-        drug_expansion = amr_drug_mappings[drug_family_key]
-        formatted_drug_family = "#{drug_family_key} (#{drug_expansion})"
         amr_counts_array << { gene: amr_result_fields[0],
                               allele: amr_result_fields[1],
                               coverage: amr_result_fields[2],
                               depth:  amr_result_fields[3],
-                              drug_family: formatted_drug_family }
+                              drug_family: amr_result_fields[12] }
       end
       update(amr_counts_attributes: amr_counts_array)
     end

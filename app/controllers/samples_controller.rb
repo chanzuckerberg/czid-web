@@ -150,12 +150,30 @@ class SamplesController < ApplicationController
   # GET /samples/1.json
 
   def show
+    amr_drug_mappings = {}
+    amr_drug_mappings["AGly"] = "aminoglycosides"
+    amr_drug_mappings["Bla"] = "beta-lactamases"
+    amr_drug_mappings["Fos"] = "fosfomycin"
+    amr_drug_mappings["Flq"] = "fluoroquinolones"
+    amr_drug_mappings["Gly"] = "glycopeptides"
+    amr_drug_mappings["MLS"] = "macrolide-lincosamide-streptogarmin"
+    amr_drug_mappings["Phe"] = "phenicols"
+    amr_drug_mappings["Rif"] = "rifampicin"
+    amr_drug_mappings["Sul"] = "sulfonamides"
+    amr_drug_mappings["Tet"] = "tetracyclines"
+    amr_drug_mappings["Tmt"] = "trimethoprim"
     @pipeline_run = select_pipeline_run(@sample, params)
     @amr_counts = nil
     if current_user.admin? && @pipeline_run
       amr_state = @pipeline_run.output_states.find_by(output: "amr_counts")
       if amr_state.present? && amr_state.state == PipelineRun::STATUS_LOADED
         @amr_counts = @pipeline_run.amr_counts
+        @amr_counts.each do |amr_count|
+          drug_family_key = amr_count[:drug_family]
+          drug_expansion = amr_drug_mappings[drug_family_key]
+          formatted_drug_family = "#{drug_family_key} (#{drug_expansion})"
+          amr_count[:drug_family] = formatted_drug_family
+        end
       end
     end
     @pipeline_version = @pipeline_run.pipeline_version || PipelineRun::PIPELINE_VERSION_WHEN_NULL if @pipeline_run
