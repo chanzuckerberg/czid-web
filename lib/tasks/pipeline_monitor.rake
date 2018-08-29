@@ -17,7 +17,7 @@ class CheckPipelineRuns
         Rails.logger.info("  Checking pipeline run #{pr.id} for sample #{pr.sample_id}") unless silent
         pr.update_job_status
       rescue
-        Airbrake.notify("Failed to update pipeline run #{pr.id}")
+        LogHelper.log_err_and_airbrake("Failed to update pipeline run #{pr.id}")
       end
     end
 
@@ -27,7 +27,7 @@ class CheckPipelineRuns
         Rails.logger.info("Monitoring job for phylo_tree #{pt.id}") unless silent
         pt.monitor_job
       rescue
-        Airbrake.notify("Failed monitor job for phylo_tree #{pt.id}")
+        LogHelper.log_err_and_airbrake("Failed monitor job for phylo_tree #{pt.id}")
       end
     end
   end

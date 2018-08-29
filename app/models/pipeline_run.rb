@@ -331,7 +331,7 @@ class PipelineRun < ApplicationRecord
     output_json_s3_path = "#{alignment_output_s3_path}/#{taxon_counts_json_name}"
     downloaded_json_path = PipelineRun.download_file_with_retries(output_json_s3_path,
                                                                   local_json_path, 3)
-    Airbrake.notify("PipelineRun #{id} failed taxon_counts download") unless downloaded_json_path
+    LogHelper.log_err_and_airbrake("PipelineRun #{id} failed taxon_counts download") unless downloaded_json_path
     return unless downloaded_json_path
 
     json_dict = JSON.parse(File.read(downloaded_json_path))
@@ -532,7 +532,7 @@ class PipelineRun < ApplicationRecord
       if prs.failed?
         self.job_status = STATUS_FAILED
         self.finalized = 1
-        Airbrake.notify("Sample #{sample.id} failed #{prs.name}")
+        LogHelper.log_err_and_airbrake("SampleFailedEvent: Sample #{sample.id} failed #{prs.name}")
       elsif !prs.started?
         # we're moving on to a new stage
         prs.run_job
