@@ -129,7 +129,7 @@ ActiveRecord::Schema.define(version: 20_180_830_001_328) do
     t.index ["task"], name: "index_job_stats_on_task"
   end
 
-  create_table "output_states", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
+  create_table "output_states", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "output"
     t.string "state"
     t.bigint "pipeline_run_id"
@@ -430,14 +430,13 @@ ActiveRecord::Schema.define(version: 20_180_830_001_328) do
     t.index ["taxid"], name: "index_taxon_names_on_taxid", unique: true
   end
 
-  create_table "taxon_scoring_models", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "taxon_scoring_models", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "name"
     t.text "model_json"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "model_type"
     t.bigint "user_id"
-    t.text "attributes_json"
     t.index ["name"], name: "index_taxon_scoring_models_on_name", unique: true
   end
 
