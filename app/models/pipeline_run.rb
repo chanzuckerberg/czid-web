@@ -300,6 +300,7 @@ class PipelineRun < ApplicationRecord
 
   def db_load_amr_counts
     amr_results = PipelineRun.download_file(s3_file_for("amr_counts"), local_amr_full_results_path)
+    # amr_results = PipelineRun.download_file("s3://idseq-database/test/AMR/amr_processed_results.csv", local_amr_full_results_path)
     unless File.zero?(amr_results)
       amr_counts_array = []
       # First line of output file has header titles, e.g. "Sample/Gene/Allele..." that are extraneous
