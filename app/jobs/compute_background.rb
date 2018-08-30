@@ -3,6 +3,6 @@ class ComputeBackground
   def self.perform(background_id)
     Background.find(background_id).store_summary
   rescue
-    Airbrake.notify("Background computation failed for background_id #{background_id}")
+    LogUtil.log_err_and_notify("Background computation failed for background_id #{background_id}")
   end
 end

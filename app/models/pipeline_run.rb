@@ -331,7 +331,7 @@ class PipelineRun < ApplicationRecord
     output_json_s3_path = "#{alignment_output_s3_path}/#{taxon_counts_json_name}"
     downloaded_json_path = PipelineRun.download_file_with_retries(output_json_s3_path,
                                                                   local_json_path, 3)
-    Airbrake.notify("PipelineRun #{id} failed taxon_counts download") unless downloaded_json_path
+    LogUtil.log_err_and_airbrake("PipelineRun #{id} failed taxon_counts download") unless downloaded_json_path
     return unless downloaded_json_path
 
     json_dict = JSON.parse(File.read(downloaded_json_path))
@@ -532,19 +532,35 @@ class PipelineRun < ApplicationRecord
       if prs.failed?
         self.job_status = STATUS_FAILED
         self.finalized = 1
-        Airbrake.notify("Sample #{sample.id} failed #{prs.name}")
+        LogUtil.log_err_and_airbrake("SampleFailedEvent: Sample #{sample.id} failed #{prs.name}")
       elsif !prs.started?
         # we're moving on to a new stage
         prs.run_job
       else
         # still running
         prs.update_job_status
+        # Check for long-running pipeline run and log/alert if needed
+        check_and_log_long_run
       end
       self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
       self.job_status += "|#{STATUS_READY}" if report_ready?
     end
     compile_stats_file
     save
+  end
+
+  def check_and_log_long_run
+    # Check for long-running pipeline runs and log/alert if needed:
+    if alert_sent.zero?
+      run_time = Time.current - created_at
+      threshold = 5.hours
+      if run_time > threshold
+        duration_hrs = (run_time / 60 / 60).round(2)
+        msg = "LongRunningSampleEvent: Sample #{sample.id} has been running for #{duration_hrs} hours."
+        LogUtil.log_err_and_airbrake(msg)
+        update(alert_sent: 1)
+      end
+    end
   end
 
   def compile_stats_file

@@ -149,7 +149,7 @@ class Sample < ApplicationRecord
                                           expires_in: SAMPLE_DOWNLOAD_EXPIRATION).to_s
       end
     rescue StandardError => e
-      Airbrake.notify("AWS presign error: #{e.inspect}")
+      LogUtil.log_err_and_airbrake("AWS presign error: #{e.inspect}")
     end
     nil
   end
@@ -245,7 +245,7 @@ class Sample < ApplicationRecord
       stderr_array << stderr unless status.exitstatus.zero?
     end
     unless stderr_array.empty?
-      Airbrake.notify("Failed to upload sample #{id} with error #{stderr_array[0]}")
+      LogUtil.log_err_and_airbrake("Failed to upload sample #{id} with error #{stderr_array[0]}")
       raise stderr_array[0]
     end
 
@@ -355,7 +355,7 @@ class Sample < ApplicationRecord
         end
       end
     rescue
-      Airbrake.notify("Failed to concatenate input parts for sample #{id}")
+      LogUtil.log_err_and_airbrake("Failed to concatenate input parts for sample #{id}")
     end
   end
 

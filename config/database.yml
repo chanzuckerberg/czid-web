@@ -5,6 +5,8 @@ default: &default
   host: 127.0.0.1
   port: 3306
   database: idseq_<%= Rails.env %>
+  encoding: utf8
+  collation: utf8_unicode_ci
 
 development:
   <<: *default
