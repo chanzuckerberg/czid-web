@@ -12,7 +12,7 @@ const columns = [
   {
     Header: "Gene",
     accessor: "gene",
-    aggregate: vals => _.size(vals),
+    aggregate: vals => "",
     style: {
       textAlign: "center"
     },
@@ -21,7 +21,7 @@ const columns = [
   {
     Header: "Gene Family",
     accessor: "gene_family",
-    aggregate: vals => _.size(vals),
+    aggregate: vals => "",
     style: {
       textAlign: "center"
     },
@@ -66,14 +66,6 @@ class AMRView extends React.Component {
       <div>
         <ReactTable
           filterable
-          defaultFilterMethod={(filter, row, column) => {
-            const id = filter.pivotId || filter.id;
-            return row[id] !== undefined
-              ? String(row[id])
-                  .toLowerCase()
-                  .includes(filter.value.toLowerCase())
-              : true;
-          }}
           data={this.data}
           columns={columns}
           defaultPageSize={5}
