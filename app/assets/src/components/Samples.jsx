@@ -1013,7 +1013,7 @@ class Samples extends React.Component {
     const downloadOptions = [{ text: "Samples Table", value: "samples_table" }];
     if (project_id !== "all") {
       downloadOptions.push({ text: "Reports", value: "project_reports" });
-      if (this.admin != 1) {
+      if (this.admin === 1) {
         downloadOptions.push({
           text: "Host Gene Counts",
           value: "host_gene_counts"
