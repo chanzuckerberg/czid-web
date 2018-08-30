@@ -488,7 +488,7 @@ class PipelineRun < ApplicationRecord
     # Check for long-running pipeline runs and log/alert if needed:
     if alert_sent.zero?
       run_time = Time.current - created_at
-      threshold = 5.hours
+      threshold = 7.hours
       if run_time > threshold
         duration_hrs = (run_time / 60 / 60).round(2)
         msg = "LongRunningSampleEvent: Sample #{sample.id} has been running for #{duration_hrs} hours."
