@@ -25,7 +25,27 @@ class PhyloTreeListView extends React.Component {
     });
   }
 
+  getTreeStatus(tree) {
+    let statusMessage = "";
+    switch (tree) {
+      case 0:
+      case 3:
+        statusMessage = "Tree not yet completed!";
+        break;
+      case 2:
+        statusMessage = "Tree creation failed!";
+        break;
+      default:
+        // TODO: process error
+        statusMessage = "Tree unavailable!";
+        break;
+    }
+    return statusMessage;
+  }
+
   render() {
+    let currentTree = this.phyloTreeMap.get(this.state.selectedPhyloTreeId);
+
     return (
       <div className="phylo-tree-list-view">
         <div className="phylo-tree-list-view__narrow-container">
@@ -47,15 +67,11 @@ class PhyloTreeListView extends React.Component {
         </div>
         <Divider />
         <div className="phylo-tree-list-view__narrow-container">
-          {this.phyloTreeMap.get(this.state.selectedPhyloTreeId).newick ? (
-            <PhyloTreeVis
-              newick={
-                this.phyloTreeMap.get(this.state.selectedPhyloTreeId).newick
-              }
-            />
+          {currentTree.newick ? (
+            <PhyloTreeVis newick={currentTree.newick} />
           ) : (
             <p className="phylo-tree-list-view__no-tree-banner">
-              Tree not available
+              {this.getTreeStatus(currentTree.status)}
             </p>
           )}
         </div>
