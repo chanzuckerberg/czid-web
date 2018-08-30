@@ -97,7 +97,7 @@ class PipelineRunStage < ApplicationRecord
 
   def update_job_status
     if !id || !started?
-      Airbrake.notify("Invalid precondition for PipelineRunStage.update_job_status #{id} #{job_id} #{job_status}.")
+      LogUtil.log_err_and_airbrake("Invalid precondition for PipelineRunStage.update_job_status #{id} #{job_id} #{job_status}.")
       return
     end
     check_status_file_and_update(JOB_SUCCEEDED_FILE_SUFFIX, STATUS_SUCCEEDED)
@@ -125,7 +125,7 @@ class PipelineRunStage < ApplicationRecord
     # note failed attempt and retry
     add_failed_job
     unless count_failed_tries <= MAX_RETRIES
-      Airbrake.notify("Job #{job_id} for pipeline run #{id} was killed #{MAX_RETRIES} times.")
+      LogUtil.log_err_and_airbrake("Job #{job_id} for pipeline run #{id} was killed #{MAX_RETRIES} times.")
       save
       return
     end

@@ -13,7 +13,7 @@ class CustomDeviseMailer < Devise::Mailer
         @shared_project_name = Project.find(@email_arguments[:shared_project_id]).name
         @shared_project_id = @email_arguments[:shared_project_id]
       rescue
-        Airbrake.notify("reset_password_instructions with #{@email_arguments} failed")
+        LogUtil.log_err_and_airbrake("reset_password_instructions with #{@email_arguments} failed")
       end
     end
     super
