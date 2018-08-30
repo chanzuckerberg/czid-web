@@ -485,18 +485,6 @@ class PipelineRun < ApplicationRecord
     # Update job stats:
     load_stats_file
 
-    # Check for long-running pipeline runs and log/alert if needed:
-    if alert_sent.zero?
-      run_time = Time.current - created_at
-      threshold = 7.hours
-      if run_time > threshold
-        duration_hrs = (run_time / 60 / 60).round(2)
-        msg = "LongRunningSampleEvent: Sample #{sample.id} has been running for #{duration_hrs} hours."
-        LogUtil.log_err_and_airbrake(msg)
-        update(alert_sent: 1)
-      end
-    end
-
     # Check if run is complete:
     if all_output_states_terminal?
       if all_output_states_loaded?
@@ -551,12 +539,28 @@ class PipelineRun < ApplicationRecord
       else
         # still running
         prs.update_job_status
+        # Check for long-running pipeline run and log/alert if needed
+        check_and_log_long_run
       end
       self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
       self.job_status += "|#{STATUS_READY}" if report_ready?
     end
     compile_stats_file
     save
+  end
+
+  def check_and_log_long_run
+    # Check for long-running pipeline runs and log/alert if needed:
+    if alert_sent.zero?
+      run_time = Time.current - created_at
+      threshold = 5.hours
+      if run_time > threshold
+        duration_hrs = (run_time / 60 / 60).round(2)
+        msg = "LongRunningSampleEvent: Sample #{sample.id} has been running for #{duration_hrs} hours."
+        LogUtil.log_err_and_airbrake(msg)
+        update(alert_sent: 1)
+      end
+    end
   end
 
   def compile_stats_file
