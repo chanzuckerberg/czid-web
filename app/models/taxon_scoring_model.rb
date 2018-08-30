@@ -147,7 +147,7 @@ class TaxonScoringModel < ApplicationRecord
       else
         err_message = "Unknonw operator for taxonscoring: #{op}"
         raise err_message if validation_mode
-        LogHelper.log_err_and_airbrake(err_message)
+        LogUtil.log_err_and_airbrake(err_message)
         return result
       end
     end

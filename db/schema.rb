@@ -10,8 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-
-ActiveRecord::Schema.define(version: 20_180_824_005_739) do
+ActiveRecord::Schema.define(version: 20_180_830_001_328) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -130,7 +129,7 @@ ActiveRecord::Schema.define(version: 20_180_824_005_739) do
     t.index ["task"], name: "index_job_stats_on_task"
   end
 
-  create_table "output_states", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "output_states", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string "output"
     t.string "state"
     t.bigint "pipeline_run_id"
@@ -237,6 +236,7 @@ ActiveRecord::Schema.define(version: 20_180_824_005_739) do
     t.text "result_status"
     t.integer "results_finalized"
     t.bigint "alignment_config_id"
+    t.integer "alert_sent", default: 0
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
     t.index ["pipeline_output_id"], name: "index_pipeline_runs_on_pipeline_output_id", unique: true
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
@@ -430,13 +430,14 @@ ActiveRecord::Schema.define(version: 20_180_824_005_739) do
     t.index ["taxid"], name: "index_taxon_names_on_taxid", unique: true
   end
 
-  create_table "taxon_scoring_models", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "taxon_scoring_models", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.text "model_json"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "model_type"
     t.bigint "user_id"
+    t.text "attributes_json"
     t.index ["name"], name: "index_taxon_scoring_models_on_name", unique: true
   end
 
