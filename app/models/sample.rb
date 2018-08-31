@@ -149,7 +149,7 @@ class Sample < ApplicationRecord
                                           expires_in: SAMPLE_DOWNLOAD_EXPIRATION).to_s
       end
     rescue StandardError => e
-      Airbrake.notify("AWS presign error: #{e.inspect}")
+      LogUtil.log_err_and_airbrake("AWS presign error: #{e.inspect}")
     end
     nil
   end
@@ -245,7 +245,7 @@ class Sample < ApplicationRecord
       stderr_array << stderr unless status.exitstatus.zero?
     end
     unless stderr_array.empty?
-      Airbrake.notify("Failed to upload sample #{id} with error #{stderr_array[0]}")
+      LogUtil.log_err_and_airbrake("Failed to upload sample #{id} with error #{stderr_array[0]}")
       raise stderr_array[0]
     end
 
@@ -290,6 +290,13 @@ class Sample < ApplicationRecord
 
   def sample_postprocess_s3_path
     "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/postprocess"
+  end
+
+  # This is for the "Experimental" pipeline run stage and path where results
+  # for this stage are outputted. Currently, Antimicrobial Resistance
+  # outputs are in this path.
+  def sample_expt_s3_path
+    "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/expt"
   end
 
   def annotated_fasta_s3_path
@@ -348,7 +355,7 @@ class Sample < ApplicationRecord
         end
       end
     rescue
-      Airbrake.notify("Failed to concatenate input parts for sample #{id}")
+      LogUtil.log_err_and_airbrake("Failed to concatenate input parts for sample #{id}")
     end
   end
 

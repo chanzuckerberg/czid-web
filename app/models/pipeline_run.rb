@@ -16,10 +16,12 @@ class PipelineRun < ApplicationRecord
   has_many :job_stats, dependent: :destroy
   has_many :taxon_byteranges, dependent: :destroy
   has_many :ercc_counts, dependent: :destroy
+  has_many :amr_counts, dependent: :destroy
   accepts_nested_attributes_for :taxon_counts
   accepts_nested_attributes_for :job_stats
   accepts_nested_attributes_for :taxon_byteranges
   accepts_nested_attributes_for :ercc_counts
+  accepts_nested_attributes_for :amr_counts
 
   DEFAULT_SUBSAMPLING = 1_000_000 # number of fragments to subsample to, after host filtering
   MAX_INPUT_FRAGMENTS = 75_000_000 # max fragments going into the pipeline
@@ -28,9 +30,12 @@ class PipelineRun < ApplicationRecord
   PIPELINE_VERSION_FILE = "pipeline_version.txt".freeze
   STATS_JSON_NAME = "stats.json".freeze
   ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
+  AMR_DRUG_SUMMARY_RESULTS = 'amr_summary_results.csv'.freeze
+  AMR_FULL_RESULTS_NAME = 'amr_processed_results.csv'.freeze
   TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined.json'.freeze
   ASSEMBLY_STATUSFILE = 'job-complete'.freeze
   LOCAL_JSON_PATH = '/app/tmp/results_json'.freeze
+  LOCAL_AMR_FULL_RESULTS_PATH = '/app/tmp/amr_full_results'.freeze
   PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
 
   # The PIPELINE MONITOR is responsible for keeping status of AWS Batch jobs
@@ -79,7 +84,8 @@ class PipelineRun < ApplicationRecord
 
   LOADERS_BY_OUTPUT = { "ercc_counts" => "db_load_ercc_counts",
                         "taxon_counts" => "db_load_taxon_counts",
-                        "taxon_byteranges" => "db_load_byteranges" }.freeze
+                        "taxon_byteranges" => "db_load_byteranges",
+                        "amr_counts" => "db_load_amr_counts" }.freeze
   # Note: reads_before_priceseqfilter, reads_after_priceseqfilter, reads_after_cdhitdup
   #       are the only "job_stats" we actually need for web display.
   REPORT_READY_OUTPUT = "taxon_counts".freeze
@@ -172,7 +178,7 @@ class PipelineRun < ApplicationRecord
 
   def create_output_states
     # First, determine which outputs we need:
-    target_outputs = %w[ercc_counts taxon_counts taxon_byteranges]
+    target_outputs = %w[ercc_counts taxon_counts taxon_byteranges amr_counts]
 
     # Then, generate output_states
     output_state_entries = []
@@ -212,6 +218,13 @@ class PipelineRun < ApplicationRecord
       job_command_func: 'postprocess_command'
     )
 
+    # Experimental Stage
+    run_stages << PipelineRunStage.new(
+      step_number: 4,
+      name: PipelineRunStage::EXPT_STAGE_NAME,
+      job_command_func: 'experimental_command'
+    )
+
     self.pipeline_run_stages = run_stages
   end
 
@@ -244,7 +257,7 @@ class PipelineRun < ApplicationRecord
     prs.save
     self.finalized = 0
     self.results_finalized = IN_PROGRESS
-    ouput_states.each { |o| o.update(state: STATUS_UNKNOWN) if o.state != STATUS_LOADED }
+    output_states.each { |o| o.update(state: STATUS_UNKNOWN) if o.state != STATUS_LOADED }
     save
   end
 
@@ -285,6 +298,24 @@ class PipelineRun < ApplicationRecord
     update(total_ercc_reads: ercc_counts_array.map { |entry| entry[:count] }.sum)
   end
 
+  def db_load_amr_counts
+    amr_results = PipelineRun.download_file(s3_file_for("amr_counts"), local_amr_full_results_path)
+    unless File.zero?(amr_results)
+      amr_counts_array = []
+      # First line of output file has header titles, e.g. "Sample/Gene/Allele..." that are extraneous
+      # that we drop
+      File.readlines(amr_results).drop(1).each do |amr_result|
+        amr_result_fields = amr_result.split(",").drop(2)
+        amr_counts_array << { gene: amr_result_fields[0],
+                              allele: amr_result_fields[1],
+                              coverage: amr_result_fields[2],
+                              depth:  amr_result_fields[3],
+                              drug_family: amr_result_fields[12] }
+      end
+      update(amr_counts_attributes: amr_counts_array)
+    end
+  end
+
   def taxon_counts_json_name
     OUTPUT_JSON_NAME
   end
@@ -300,7 +331,7 @@ class PipelineRun < ApplicationRecord
     output_json_s3_path = "#{alignment_output_s3_path}/#{taxon_counts_json_name}"
     downloaded_json_path = PipelineRun.download_file_with_retries(output_json_s3_path,
                                                                   local_json_path, 3)
-    Airbrake.notify("PipelineRun #{id} failed taxon_counts download") unless downloaded_json_path
+    LogUtil.log_err_and_airbrake("PipelineRun #{id} failed taxon_counts download") unless downloaded_json_path
     return unless downloaded_json_path
 
     json_dict = JSON.parse(File.read(downloaded_json_path))
@@ -363,6 +394,8 @@ class PipelineRun < ApplicationRecord
     case output
     when "ercc_counts"
       "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
+    when "amr_counts"
+      "#{expt_output_s3_path}/#{AMR_FULL_RESULTS_NAME}"
     when "taxon_counts"
       "#{alignment_output_s3_path}/#{taxon_counts_json_name}"
     when "taxon_byteranges"
@@ -499,19 +532,35 @@ class PipelineRun < ApplicationRecord
       if prs.failed?
         self.job_status = STATUS_FAILED
         self.finalized = 1
-        Airbrake.notify("Sample #{sample.id} failed #{prs.name}")
+        LogUtil.log_err_and_airbrake("SampleFailedEvent: Sample #{sample.id} failed #{prs.name}")
       elsif !prs.started?
         # we're moving on to a new stage
         prs.run_job
       else
         # still running
         prs.update_job_status
+        # Check for long-running pipeline run and log/alert if needed
+        check_and_log_long_run
       end
       self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
       self.job_status += "|#{STATUS_READY}" if report_ready?
     end
     compile_stats_file
     save
+  end
+
+  def check_and_log_long_run
+    # Check for long-running pipeline runs and log/alert if needed:
+    if alert_sent.zero?
+      run_time = Time.current - created_at
+      threshold = 5.hours
+      if run_time > threshold
+        duration_hrs = (run_time / 60 / 60).round(2)
+        msg = "LongRunningSampleEvent: Sample #{sample.id} has been running for #{duration_hrs} hours."
+        LogUtil.log_err_and_airbrake(msg)
+        update(alert_sent: 1)
+      end
+    end
   end
 
   def compile_stats_file
@@ -595,6 +644,14 @@ class PipelineRun < ApplicationRecord
 
   def local_json_path
     "#{LOCAL_JSON_PATH}/#{id}"
+  end
+
+  def local_amr_full_results_path
+    "#{LOCAL_AMR_FULL_RESULTS_PATH}/#{id}"
+  end
+
+  def local_amr_drug_summary_path
+    "#{LOCAL_AMR_DRUG_SUMMARY_PATH}/#{id}"
   end
 
   def self.download_file_with_retries(s3_path, destination_dir, max_tries)
@@ -766,6 +823,17 @@ class PipelineRun < ApplicationRecord
   end
 
   delegate :sample_output_s3_path, to: :sample
+
+  # TODO: Refactor: "alignment_output_s3_path, postprocess_output_s3_path and
+  # now expt_output_s3_path all contain essentially the same code.
+  # So you could make a helper function to which you would pass
+  #  sample.sample_expt_s3_path as an argument" (Charles)
+  def expt_output_s3_path
+    pipeline_ver_str = ""
+    pipeline_ver_str = "#{pipeline_version}/" if pipeline_version
+    result = "#{sample.sample_expt_s3_path}/#{pipeline_ver_str}#{subsample_suffix}"
+    result.chomp("/")
+  end
 
   def postprocess_output_s3_path
     pipeline_ver_str = ""

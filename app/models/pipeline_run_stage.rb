@@ -21,6 +21,7 @@ class PipelineRunStage < ApplicationRecord
   HOST_FILTERING_STAGE_NAME = 'Host Filtering'.freeze
   ALIGNMENT_STAGE_NAME = 'GSNAPL/RAPSEARCH alignment'.freeze
   POSTPROCESS_STAGE_NAME = 'Post Processing'.freeze
+  EXPT_STAGE_NAME = "Experimental".freeze
 
   # Max number of times we resubmit a job when it gets killed by EC2.
   MAX_RETRIES = 5
@@ -96,7 +97,7 @@ class PipelineRunStage < ApplicationRecord
 
   def update_job_status
     if !id || !started?
-      Airbrake.notify("Invalid precondition for PipelineRunStage.update_job_status #{id} #{job_id} #{job_status}.")
+      LogUtil.log_err_and_airbrake("Invalid precondition for PipelineRunStage.update_job_status #{id} #{job_id} #{job_status}.")
       return
     end
     check_status_file_and_update(JOB_SUCCEEDED_FILE_SUFFIX, STATUS_SUCCEEDED)
@@ -124,7 +125,7 @@ class PipelineRunStage < ApplicationRecord
     # note failed attempt and retry
     add_failed_job
     unless count_failed_tries <= MAX_RETRIES
-      Airbrake.notify("Job #{job_id} for pipeline run #{id} was killed #{MAX_RETRIES} times.")
+      LogUtil.log_err_and_airbrake("Job #{job_id} for pipeline run #{id} was killed #{MAX_RETRIES} times.")
       save
       return
     end
@@ -211,5 +212,21 @@ class PipelineRunStage < ApplicationRecord
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
     # Dispatch job with himem number of vCPUs and to the himem queue.
     aegea_batch_submit_command(batch_command, vcpus: Sample::DEFAULT_VCPUS_HIMEM, job_queue: Sample::DEFAULT_QUEUE_HIMEM)
+  end
+
+  def experimental_command
+    # Upload DAG to S3
+    sample = pipeline_run.sample
+    file_type = sample.fasta_input? ? 'fasta' : 'fastq'
+    attribute_dict = {
+      fastq1: sample.input_files[0].name,
+      file_type: file_type
+    }
+    attribute_dict[:fastq2] = sample.input_files[1].name if sample.input_files[1]
+    dag_commands = prepare_dag("experimental", attribute_dict)
+    batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
+
+    # Dispatch job
+    aegea_batch_submit_command(batch_command, job_queue: pipeline_run.sample.job_queue)
   end
 end
