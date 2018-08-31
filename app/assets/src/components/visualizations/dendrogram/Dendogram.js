@@ -13,7 +13,7 @@ export default class PhyloTree {
     // size
     this.width = 800;
     this.height = 600;
-    this.innerLabelWidth = 60;
+    this.innerLabelWidth = 150;
     this.outerLabelWidth = 150;
 
     this._highlighted = new Set();
@@ -326,6 +326,18 @@ export default class PhyloTree {
       return d.data.highlight;
     });
 
+    node
+      .select("text")
+      .transition()
+      .duration(500)
+      .attr("x", function(d) {
+        return d.depth === 0
+          ? -(this.getBBox().width + 15)
+          : d.children
+            ? -8
+            : 15;
+      });
+
     let nodeEnter = node
       .enter()
       .append("g")
@@ -336,12 +348,10 @@ export default class PhyloTree {
         return `translate(${node.y},${node.x})`;
       })
       .on("click", node => {
-        if (!node.children || node.children.length === 0) {
-          this.clickHandler(
-            () => this.markAsHighlight(node),
-            () => this.rerootOriginalTree(node)
-          );
-        }
+        this.clickHandler(
+          () => this.markAsHighlight(node),
+          () => this.rerootOriginalTree(node)
+        );
       })
       .on("mouseover", node => {
         if (!node.children) {
@@ -385,9 +395,6 @@ export default class PhyloTree {
       })
       .attr("x", function(d) {
         return d.children ? -8 : 15;
-      })
-      .style("text-anchor", function(d) {
-        return d.children ? "end" : "start";
       })
       .text(function(d) {
         return d.children ? "" : d.data.name.split("__")[0];

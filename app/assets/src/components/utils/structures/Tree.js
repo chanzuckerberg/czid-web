@@ -21,34 +21,27 @@ export default class Tree {
 
   rerootTree(nodeId) {
     let ancestors = this.ancestors(this.root, nodeId);
-
-    while (ancestors.length > 2) {
+    while (ancestors.length > 1) {
       let nodeToMove = ancestors.pop();
-      // remove the next ancestor from children
+
+      // remove the next ancetor from children
       let previousAncestor = ancestors[ancestors.length - 1];
       this.detachFromParent(previousAncestor, nodeToMove);
 
       // set node's new distance
-      nodeToMove.distance = previousAncestor.distance;
+      [nodeToMove.distance, previousAncestor.distance] = [
+        previousAncestor.distance,
+        nodeToMove.distance
+      ];
+
       previousAncestor.children.push(nodeToMove);
     }
-
     this.root = ancestors.pop();
-    this.root.distance = 0;
-
-    let nodeToRoot = ancestors.pop();
-    this.root.children.forEach(node => {
-      node.distance += nodeToRoot.distance;
-    });
-    nodeToRoot.distance = 0;
   }
 
   ancestors(root, nodeId) {
-    if ((root.children || []).length === 0) {
-      if (root.id === nodeId) {
-        return [root];
-      }
-      return null;
+    if (root.id === nodeId) {
+      return [root];
     }
 
     for (let i = 0; i < root.children.length; i++) {
