@@ -1,0 +1,75 @@
+@import "../../themes/colors";
+
+.phylo-tree-vis {
+  svg {
+    padding: 20px;
+    width: 100%;
+  }
+
+  .node {
+    cursor: pointer;
+  }
+
+  .node circle {
+    fill: $light-grey;
+    opacity: 0.8;
+  }
+
+  .node.highlight circle {
+    fill: $primary-light;
+  }
+
+  .node text {
+    font-size: 14px;
+  }
+
+  .node.highlight text {
+    font-weight: 700;
+  }
+
+  .node-internal circle {
+    fill: #ccc;
+  }
+
+  .node-internal text {
+    text-shadow: 0 1px 0 #fff, 0 -1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff;
+  }
+
+  .link {
+    fill: none;
+    stroke: $light-grey;
+    stroke-width: 2px;
+  }
+
+  .link.highlight {
+    stroke: $primary-light;
+  }
+
+  form {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    position: absolute;
+    left: 10px;
+    top: 10px;
+  }
+
+  label {
+    display: block;
+  }
+
+  .scale {
+    .scale-line {
+      fill: none;
+      stroke: $light-grey;
+      stroke-width: 2px;
+    }
+  }
+}
+
+.dendogram__tooltip {
+  position: absolute;
+  padding: 10px;
+  font-size: 12px;
+  background-color: white;
+  border: 1px solid $medium-grey;
+  pointer-events: none;
+}
