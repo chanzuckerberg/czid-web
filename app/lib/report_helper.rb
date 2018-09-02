@@ -431,7 +431,7 @@ module ReportHelper
 
   def check_custom_filters(row, threshold_filters)
     threshold_filters.each do |filter|
-      count_type, metric = filter["target"].split("_")
+      count_type, metric = filter["metric"].split("_")
       begin
         value = Float(filter["value"])
       rescue
