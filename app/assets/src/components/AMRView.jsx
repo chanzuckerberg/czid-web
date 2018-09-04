@@ -7,24 +7,12 @@ const columns = [
   {
     Header: "Antibiotic Class",
     accessor: "drug_family",
-    style: {
-      textAlign: "center"
-    },
     filterable: false
   },
   {
     Header: "Gene",
     accessor: "gene",
-    aggregate: vals => _.size(vals),
-    style: {
-      textAlign: "center"
-    },
-    filterable: false
-  },
-  {
-    Header: "Gene Family",
-    accessor: "gene_family",
-    aggregate: vals => _.size(vals),
+    aggregate: vals => "",
     style: {
       textAlign: "center"
     },
@@ -80,7 +68,7 @@ class AMRView extends React.Component {
           data={this.data}
           columns={columns}
           defaultPageSize={5}
-          pivotBy={["drug_family", "gene_family"]}
+          pivotBy={["drug_family"]}
           defaultSorted={[
             {
               id: "coverage",
