@@ -57,9 +57,9 @@ class PhyloTree < ApplicationRecord
     # Get byte ranges for each pipeline run's taxon fasta.
     # We construct taxon_byteranges_hash to have the following format for integration with idseq-dag:
     # { pipeline_run_id_1: {
-          'NT': [first_byte, last_byte, source_s3_file, sample_id, align_viz_s3_file],
-          'NR': [first_byte, last_byte, source_s3_file, sample_id, align_viz_s3_file]
-        },
+    #     'NT': [first_byte, last_byte, source_s3_file, sample_id, align_viz_s3_file],
+    #     'NR': [first_byte, last_byte, source_s3_file, sample_id, align_viz_s3_file]
+    #   },
     #   pipeline_run_id_2: ... }
     taxon_byteranges = TaxonByterange.where(pipeline_run_id: pipeline_runs.pluck(:id)).where(taxid: taxid)
     taxon_byteranges_hash = {}
@@ -67,14 +67,14 @@ class PhyloTree < ApplicationRecord
       taxon_byteranges_hash[tbr.pipeline_run_id] ||= {}
       taxon_byteranges_hash[tbr.pipeline_run_id][tbr.hit_type] = [tbr.first_byte, tbr.last_byte]
     end
-    # Get sample_ids, fasta paths and alignment viz paths for each pipeline_run
+    # Get fasta paths and alignment viz paths for each pipeline_run
+    align_viz_files = {}
     pipeline_runs.each do |pr|
       level_name = TaxonCount::LEVEL_2_NAME[tax_level] # "species" or "genus"
+      align_viz_files[pr.id] = pr.alignment_viz_json_s3("nt.#{level_name}.#{taxid}") # align_viz only exists for NT
       entry = taxon_byteranges_hash[pr.id]
       entry.keys.each do |hit_type|
-        entry[hit_type] += [pr.s3_paths_for_taxon_byteranges[tax_level][hit_type],
-                            pr.sample_id,
-                            pr.alignment_viz_json_s3("nt.#{level_name}.#{taxid}")]
+        entry[hit_type] += [pr.s3_paths_for_taxon_byteranges[tax_level][hit_type]]
       end
     end
     # Get the alignment config specifying the location of the NCBI reference used in the pipeline run
@@ -84,6 +84,7 @@ class PhyloTree < ApplicationRecord
       phylo_tree_output_s3_path: phylo_tree_output_s3_path,
       taxid: taxid,
       taxon_byteranges: taxon_byteranges_hash,
+      align_viz_files: align_viz_files,
       nt_db: alignment_config.s3_nt_db_path,
       nt_loc_db: alignment_config.s3_nt_loc_db_path
     }
