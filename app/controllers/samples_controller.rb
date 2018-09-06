@@ -152,7 +152,7 @@ class SamplesController < ApplicationController
   def show
     @pipeline_run = select_pipeline_run(@sample, params)
     @amr_counts = nil
-    if current_user.admin? && @pipeline_run
+    if current_user.allowed_feature_list.include?("AMR") && @pipeline_run
       amr_state = @pipeline_run.output_states.find_by(output: "amr_counts")
       if amr_state.present? && amr_state.state == PipelineRun::STATUS_LOADED
         @amr_counts = @pipeline_run.amr_counts

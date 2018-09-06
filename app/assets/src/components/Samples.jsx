@@ -27,6 +27,7 @@ class Samples extends React.Component {
     });
     this.csrf = props.csrf;
     this.admin = props.admin;
+    this.allowedFeatures = props.allowedFeatures;
     this.favoriteProjects = props.favorites || [];
     this.allProjects = props.projects || [];
     this.pageSize = props.pageSize || 30;
@@ -2035,7 +2036,7 @@ function ProjectInfoHeading({
       <div className="col s7 download-section-btns">
         {state.selectedProjectId ? project_menu : null}
         {table_download_dropdown}
-        {parent.admin ? (
+        {parent.admin || parent.allowedFeatures.indexOf("phylo_trees") >= 0 ? (
           <div className="button-container">
             <PhylogenyButton onClick={parent.gotoTreeList} />
           </div>
