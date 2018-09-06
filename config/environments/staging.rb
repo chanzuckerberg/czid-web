@@ -100,10 +100,13 @@ Rails.application.configure do
   end
   config.colorize_logging = false
   config.lograge.ignore_actions = ["HealthCheck::HealthCheckController#index"]
-  ActiveRecord::Base.logger.level = 1
+  ActiveRecord::Base.logger.level = 1 if ActiveRecord::Base.logger
 
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
+
+  # Set the logging destination(s)
+  config.log_to = %w[stdout]
 end
 
 # Deployed logging configuration

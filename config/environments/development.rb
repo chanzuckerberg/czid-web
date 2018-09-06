@@ -73,8 +73,6 @@ Rails.application.configure do
   logger           = ActiveSupport::Logger.new(STDOUT)
   logger.formatter = config.log_formatter
   config.logger    = ActiveSupport::TaggedLogging.new(logger)
-
-  # Set the logging destination(s)
   config.log_to = %w[stdout file]
 end
 
