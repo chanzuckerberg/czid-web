@@ -68,7 +68,4 @@ Rails.application.configure do
     domain: 'mg.idseq.net'
   }
   ActiveRecordQueryTrace.enabled = true
-
-  # Set the logging destination(s)
-  config.log_to = %w[stdout file]
 end
