@@ -91,17 +91,29 @@ Rails.application.configure do
   config.active_support.deprecation = :notify
 
   # Use default logging formatter so that PID and timestamp are not suppressed.
-  config.log_formatter = ::Logger::Formatter.new
+  # config.log_formatter = ::Logger::Formatter.new
 
   # Use a different logger for distributed setups.
   # require 'syslog/logger'
   # config.logger = ActiveSupport::TaggedLogging.new(Syslog::Logger.new 'app-name')
 
-  if ENV['RAILS_LOG_TO_STDOUT'].present?
-    logger           = ActiveSupport::Logger.new(STDOUT)
-    logger.formatter = config.log_formatter
-    config.logger    = ActiveSupport::TaggedLogging.new(logger)
+  # if ENV['RAILS_LOG_TO_STDOUT'].present?
+  #   logger           = ActiveSupport::Logger.new(STDOUT)
+  #   logger.formatter = config.log_formatter
+  #   config.logger    = ActiveSupport::TaggedLogging.new(logger)
+  # end
+
+  # Recommended by Datadog: https://docs.datadoghq.com/logs/log_collection/ruby/
+  config.lograge.enabled = true
+  config.lograge.formatter = Lograge::Formatters::Json.new
+  config.lograge.logger = ActiveSupport::Logger.new(STDOUT)
+  config.lograge.custom_options = lambda do |event|
+    { time: event.time,
+      ddsource: ["ruby"],
+      params: event.payload[:params].reject { |k| %w[controller action].include? k } }
   end
+  config.colorize_logging = false
+  config.lograge.ignore_actions = ["HealthCheck::HealthCheckController#index"]
 
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
