@@ -24,7 +24,7 @@ gem 'jbuilder', '~> 2.5'
 # Logger
 gem 'logger'
 gem 'multipart-post'
-gem 'logging-rails', :require => 'logging/rails'
+gem 'logging-rails', require: 'logging/rails'
 gem 'lograge'
 gem 'lograge-sql'
 gem 'silencer'
