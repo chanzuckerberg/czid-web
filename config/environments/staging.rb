@@ -88,19 +88,51 @@ Rails.application.configure do
   # Send deprecation notices to registered listeners.
   config.active_support.deprecation = :notify
 
-  # Use default logging formatter so that PID and timestamp are not suppressed.
-  # config.log_formatter = ::Logger::Formatter.new
-
-  # Use a different logger for distributed setups.
-  # require 'syslog/logger'
-  # config.logger = ActiveSupport::TaggedLogging.new(Syslog::Logger.new 'app-name')
-
-  # if ENV['RAILS_LOG_TO_STDOUT'].present?
-  #   logger           = ActiveSupport::Logger.new(STDOUT)
-  #   logger.formatter = config.log_formatter
-  #   config.logger    = ActiveSupport::TaggedLogging.new(logger)
-  # end
+  # Deployed logging configuration
+  config.log_level = :info
+  config.lograge.enabled = true
+  config.lograge.formatter = Lograge::Formatters::Json.new
+  config.lograge.logger = ActiveSupport::Logger.new(STDOUT)
+  config.lograge.custom_options = lambda do |event|
+    { time: event.time,
+      ddsource: ["ruby"],
+      params: event.payload[:params].reject { |k| %w[controller action].include? k } }
+  end
+  config.colorize_logging = false
+  config.lograge.ignore_actions = ["HealthCheck::HealthCheckController#index"]
+  ActiveRecord::Base.logger.level = 1
 
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
+end
+
+# Deployed logging configuration
+Logging::Rails.configure do |config|
+  Logging.init %w[debug info warn error fatal]
+  Logging.format_as :json
+  layout = Logging.layouts.json
+
+  # Configure an appender that will write log events to STDOUT.
+  if config.log_to.include? 'stdout'
+    Logging.appenders.stdout('stdout',
+                             auto_flushing: true,
+                             layout: layout)
+  end
+
+  # Configure an appender that will write log events to a file. The file will
+  # be rolled on a daily basis, and the past 7 rolled files will be kept.
+  # Older files will be deleted. The default pattern layout is used when
+  # formatting log events into strings.
+  if config.log_to.include? 'file'
+    Logging.appenders.rolling_file('file',
+                                   filename: config.paths['log'].first,
+                                   keep: 7,
+                                   age: 'daily',
+                                   truncate: false,
+                                   auto_flushing: true,
+                                   layout: layout)
+  end
+
+  Logging.logger.root.level = :info
+  Logging.logger.root.appenders = config.log_to unless config.log_to.empty?
 end
