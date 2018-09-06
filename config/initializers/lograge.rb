@@ -1,9 +1,10 @@
 # Recommended by Datadog: https://docs.datadoghq.com/logs/log_collection/ruby/
 
 Rails.application.configure do
-  if true
+  if false
     # Present in deployed environments but leaves things more verbose for
     # local development.
+    config.log_level = :info
     config.lograge.enabled = true
     config.lograge.formatter = Lograge::Formatters::Json.new
     config.lograge.logger = ActiveSupport::Logger.new(STDOUT)
