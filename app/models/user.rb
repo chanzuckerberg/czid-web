@@ -26,6 +26,10 @@ class User < ApplicationRecord
     admin
   end
 
+  def allowed_feature_list
+    JSON.parse(allowed_features || "[]")
+  end
+
   def demo_user?
     DEMO_USER_EMAILS.include?(email)
   end
