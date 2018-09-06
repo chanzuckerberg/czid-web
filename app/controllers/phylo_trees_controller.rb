@@ -64,7 +64,7 @@ class PhyloTreesController < ApplicationController
 
     # Retrieve pipeline runs that contain the specified taxid.
     eligible_pipeline_runs = current_power.pipeline_runs.top_completed_runs
-    all_pipeline_run_ids_with_taxid = TaxonByterange.where(taxid: taxid).where(hit_type: 'NT').pluck(:pipeline_run_id)
+    all_pipeline_run_ids_with_taxid = TaxonByterange.where(taxid: taxid).pluck(:pipeline_run_id)
     eligible_pipeline_run_ids_with_taxid = eligible_pipeline_runs.where(id: all_pipeline_run_ids_with_taxid).pluck(:id)
 
     # Retrieve information for displaying the tree's sample list.
@@ -134,7 +134,7 @@ class PhyloTreesController < ApplicationController
     # Expose it as an array of hashes containing
     # - sample name
     # - project id and name
-    # - pipeline run id to be used for the sample
+    # - pipeline run id to be used for the sample.
     samples_projects = Sample.connection.select_all("
       select
         samples.name,
@@ -149,12 +149,16 @@ class PhyloTreesController < ApplicationController
     ").to_a
 
     # Also add:
-    # - number of reads matching the specified taxid in NT
+    # - number of reads matching the specified taxid.
     # Do not include the query on taxon_counts in the previous query above using a join,
     # because the taxon_counts table is large.
-    taxon_counts = TaxonCount.where(pipeline_run_id: pipeline_run_ids).where(tax_id: taxid).where(count_type: 'NT').index_by(&:pipeline_run_id)
+    taxon_counts = TaxonCount.where(pipeline_run_id: pipeline_run_ids).where(tax_id: taxid).index_by { |tc| "#{tc.pipeline_run_id},#{tc.count_type}" }
     samples_projects.each do |sp|
-      sp["taxid_nt_reads"] = (taxon_counts[sp["pipeline_run_id"]] || []).count # count is a column of taxon_counts indicating number of reads
+      sp["taxid_reads"] ||= {}
+      %w[NT NR].each do |count_type|
+        key = "#{sp['pipeline_run_id']},#{count_type}"
+        sp["taxid_reads"][count_type] = (taxon_counts[key] || []).count # count is a column of taxon_counts indicating number of reads
+      end
     end
 
     samples_projects

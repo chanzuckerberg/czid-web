@@ -870,7 +870,7 @@ class PipelineSampleReport extends React.Component {
           aria-hidden="true"
         />
       );
-    if (this.admin == 1 && (taxInfo.tax_id > 0 && taxInfo.NT.r > 0))
+    if (this.admin == 1 && taxInfo.tax_id > 0)
       phyloTreeDot = (
         <i
           onClick={() => this.gotoTreeLink(taxInfo.tax_id)}
