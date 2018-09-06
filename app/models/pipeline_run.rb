@@ -295,7 +295,8 @@ class PipelineRun < ApplicationRecord
       ercc_counts_array << { name: name, count: count }
     end
     update(ercc_counts_attributes: ercc_counts_array)
-    update(total_ercc_reads: ercc_counts_array.map { |entry| entry[:count] }.sum)
+    total_ercc_reads = ercc_counts_array.pluck(:count).sum * sample.input_files.count
+    update(total_ercc_reads: total_ercc_reads)
   end
 
   def db_load_amr_counts
@@ -912,25 +913,6 @@ class PipelineRun < ApplicationRecord
     pipeline_ver_str = "#{pipeline_version}/" if pipeline_version
     result = "#{sample.sample_output_s3_path}/#{pipeline_ver_str}#{subsample_suffix}"
     result.chomp("/")
-  end
-
-  def load_ercc_counts
-    ercc_s3_path = "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
-    _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", ercc_s3_path)
-    return unless status.exitstatus.zero?
-    ercc_lines = `aws s3 cp #{ercc_s3_path} - | grep 'ERCC' | cut -f1,2`
-    ercc_counts_array = []
-    total_ercc_counts = 0
-    ercc_lines.split(/\r?\n/).each do |line|
-      fields = line.split("\t")
-      name = fields[0]
-      count = fields[1].to_i
-      ercc_counts_array << { name: name, count: count }
-      total_ercc_counts += count
-    end
-    total_ercc_counts *= sample.input_files.count # x2 if paired
-    update(ercc_counts_attributes: ercc_counts_array)
-    update(total_ercc_reads: total_ercc_counts)
   end
 
   delegate :project_id, to: :sample
