@@ -3,7 +3,7 @@ Logging::Rails.configure do |config|
   Logging.init %w[debug info warn error fatal]
 
   # Objects will be converted to strings using the :inspect method.
-  Logging.format_as :inspect
+  Logging.format_as :json
 
   # The default layout used by the appenders.
   layout = Logging.layouts.pattern(pattern: '[%d] %-5l %c : %m\n')
