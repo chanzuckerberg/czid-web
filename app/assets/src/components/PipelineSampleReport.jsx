@@ -24,6 +24,10 @@ class PipelineSampleReport extends React.Component {
       class: "prog-bar"
     });
     this.admin = props.admin;
+    this.allowedFeatures = props.allowedFeatures;
+    this.allowPhyloTree =
+      props.can_edit &&
+      (this.admin == 1 || this.allowedFeatures.indexOf("phylo_trees") >= 0);
     this.report_ts = props.report_ts;
     this.sample_id = props.sample_id;
     this.projectId = props.projectId;
@@ -870,7 +874,7 @@ class PipelineSampleReport extends React.Component {
           aria-hidden="true"
         />
       );
-    if (this.admin == 1 && taxInfo.tax_id > 0)
+    if (this.allowPhyloTree && taxInfo.tax_id > 0)
       phyloTreeDot = (
         <i
           onClick={() => this.gotoTreeLink(taxInfo.tax_id)}

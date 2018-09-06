@@ -473,6 +473,7 @@ ActiveRecord::Schema.define(version: 20_180_830_001_328) do
     t.string "last_sign_in_ip", collation: "latin1_swedish_ci"
     t.string "authentication_token", limit: 30, collation: "latin1_swedish_ci"
     t.integer "role"
+    t.text "allowed_features"
     t.index ["authentication_token"], name: "index_users_on_authentication_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
