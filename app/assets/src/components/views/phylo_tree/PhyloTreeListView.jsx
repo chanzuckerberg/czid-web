@@ -13,7 +13,8 @@ class PhyloTreeListView extends React.Component {
     this.phyloTreeMap = new Map(props.phyloTrees.map(tree => [tree.id, tree]));
 
     this.state = {
-      selectedPhyloTreeId: props.phyloTrees ? props.phyloTrees[0].id : null
+      selectedPhyloTreeId:
+        props.phyloTrees && props.phyloTrees[0] ? props.phyloTrees[0].id : null
     };
 
     this.handleTreeChange = this.handleTreeChange.bind(this);
@@ -44,8 +45,15 @@ class PhyloTreeListView extends React.Component {
   }
 
   render() {
-    let currentTree = this.phyloTreeMap.get(this.state.selectedPhyloTreeId);
+    if (!this.state.selectedPhyloTreeId) {
+      // TEMP HACK for when there is no tree yet.
+      // Redirect from e.g. "/phylo_trees/index?taxid=1868215&project_id=91"
+      // to "/phylo_trees/new?taxid=1868215&project_id=91"
+      let currentUrl = window.location.href;
+      location.href = currentUrl.replace("index", "new");
+    }
 
+    let currentTree = this.phyloTreeMap.get(this.state.selectedPhyloTreeId);
     return (
       <div className="phylo-tree-list-view">
         <div className="phylo-tree-list-view__narrow-container">
