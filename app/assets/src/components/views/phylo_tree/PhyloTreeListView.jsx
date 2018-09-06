@@ -13,7 +13,8 @@ class PhyloTreeListView extends React.Component {
     this.phyloTreeMap = new Map(props.phyloTrees.map(tree => [tree.id, tree]));
 
     this.state = {
-      selectedPhyloTreeId: props.phyloTrees ? props.phyloTrees[0].id : null
+      selectedPhyloTreeId:
+        props.phyloTrees && props.phyloTrees[0] ? props.phyloTrees[0].id : null
     };
 
     this.handleTreeChange = this.handleTreeChange.bind(this);
@@ -44,8 +45,26 @@ class PhyloTreeListView extends React.Component {
   }
 
   render() {
-    let currentTree = this.phyloTreeMap.get(this.state.selectedPhyloTreeId);
+    if (!this.state.selectedPhyloTreeId) {
+      // TEMP HACK for when there is no tree yet.
+      // TODO: replace this entire block with a proper solution.
+      let currentUrl = window.location.href;
+      if (currentUrl.includes("taxid") && currentUrl.includes("project_id")) {
+        // Redirect from e.g. "/phylo_trees/index?taxid=1868215&project_id=91"
+        // to "/phylo_trees/new?taxid=1868215&project_id=91"
+        let currentUrl = window.location.href;
+        location.href = currentUrl.replace("index", "new");
+      } else {
+        // If no taxid/project is selected, just say there's no tree instead of a broken page
+        return (
+          <p className="phylo-tree-list-view__no-tree-banner">
+            No trees yet. You can create trees from the report page.
+          </p>
+        );
+      }
+    }
 
+    let currentTree = this.phyloTreeMap.get(this.state.selectedPhyloTreeId);
     return (
       <div className="phylo-tree-list-view">
         <div className="phylo-tree-list-view__narrow-container">
