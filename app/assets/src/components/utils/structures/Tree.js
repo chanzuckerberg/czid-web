@@ -24,7 +24,7 @@ export default class Tree {
     while (ancestors.length > 1) {
       let nodeToMove = ancestors.pop();
 
-      // remove the next ancetor from children
+      // remove the next ancestor from children
       let previousAncestor = ancestors[ancestors.length - 1];
       this.detachFromParent(previousAncestor, nodeToMove);
 
