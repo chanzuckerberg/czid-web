@@ -49,10 +49,12 @@ class PhyloTreesController < ApplicationController
                  name: taxon_lineage.name }
     end
 
-    # Augment tree data with number of pipeline_runs
+    # Augment tree data with sample attributes and number of pipeline_runs
     @phylo_trees = @phylo_trees.as_json
     @phylo_trees.each do |pt|
-      pt["n_pipeline_runs"] = PhyloTree.run_counts_by_tree_id[pt["id"]]["n_pipeline_runs"]
+      sample_details = PhyloTree.sample_details_by_tree_id[pt["id"]]
+      pt["sample_details_by_pipeline_run_id"] = sample_details
+      pt["n_pipeline_runs"] = sample_details.length
     end
   end
 
@@ -77,9 +79,11 @@ class PhyloTreesController < ApplicationController
   end
 
   def show
+    # DEPRECATED
     @project = current_power.projects.find(@phylo_tree.project_id)
     @samples = sample_details_json(@phylo_tree.pipeline_run_ids, @phylo_tree.taxid)
     @phylo_tree_augmented = @phylo_tree.as_json(include: :pipeline_runs)
+    # The preceding line is extremely slow. If use of the show actionn is restored, it should be rewritten.
     @can_edit = current_power.updatable_phylo_tree?(@phylo_tree)
   end
 

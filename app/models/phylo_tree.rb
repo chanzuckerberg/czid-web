@@ -124,13 +124,22 @@ class PhyloTree < ApplicationRecord
     save
   end
 
-  def self.run_counts_by_tree_id
-    ActiveRecord::Base.connection.select_all("
-      select phylo_tree_id, count(pipeline_run_id) as n_pipeline_runs
-      from phylo_trees_pipeline_runs
-      group by phylo_tree_id
+  def self.sample_details_by_tree_id
+    query_results = ActiveRecord::Base.connection.select_all("
+      select phylo_tree_id, pipeline_run_id, sample_id, samples.*
+      from phylo_trees_pipeline_runs, pipeline_runs, samples
+      where phylo_trees_pipeline_runs.pipeline_run_id = pipeline_runs.id and
+            pipeline_runs.sample_id = samples.id
       order by phylo_tree_id
-    ").index_by { |h| h["phylo_tree_id"] }
+    ").to_a
+    indexed_results = {}
+    query_results.each do |entry|
+      tree_id = entry["phylo_tree_id"]
+      pipeline_run_id = entry["pipeline_run_id"]
+      indexed_results[tree_id] ||= {}
+      indexed_results[tree_id][pipeline_run_id] = entry
+    end
+    indexed_results
   end
 
   def self.viewable(user)
