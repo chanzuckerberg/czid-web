@@ -54,7 +54,6 @@ class PhyloTreesController < ApplicationController
     @phylo_trees.each do |pt|
       sample_details = PhyloTree.sample_details_by_tree_id[pt["id"]]
       pt["sample_details_by_pipeline_run_id"] = sample_details
-      pt["n_pipeline_runs"] = sample_details.length
     end
   end
 
