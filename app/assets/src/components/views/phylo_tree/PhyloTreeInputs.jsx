@@ -30,13 +30,13 @@ class PhyloTreeInputs extends React.Component {
             this.samples
               .filter(
                 s =>
-                  this.passes_create_condition(s.taxid_reads) &&
+                  this.passesCreateCondition(s.taxid_reads) &&
                   s.project_id == this.project.id
               )
               .map(s => s.pipeline_run_id)
     };
 
-    this.passes_create_condition = this.passes_create_condition.bind(this);
+    this.passesCreateCondition = this.passesCreateCondition.bind(this);
     this.createTree = this.createTree.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.renderSampleCheckbox = this.renderSampleCheckbox.bind(this);
@@ -46,7 +46,7 @@ class PhyloTreeInputs extends React.Component {
     );
   }
 
-  passes_create_condition(taxid_reads) {
+  passesCreateCondition(taxid_reads) {
     let result = Math.max(taxid_reads.NT, taxid_reads.NR) >= MIN_READS;
     return result;
   }
@@ -96,7 +96,7 @@ class PhyloTreeInputs extends React.Component {
             0
           }
           disabled={
-            this.disabled || !this.passes_create_condition(sample.taxid_reads)
+            this.disabled || !this.passesCreateCondition(sample.taxid_reads)
           }
         />
         <label htmlFor={sample.pipeline_run_id}>
