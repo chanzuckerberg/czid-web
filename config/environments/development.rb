@@ -110,3 +110,15 @@ Logging::Rails.configure do |config|
   Logging.logger.root.level = :debug
   Logging.logger.root.appenders = config.log_to unless config.log_to.empty?
 end
+
+# Quiet the stack trace for invalid routes (e.g. random requests for /ws or robots.txt)
+class ActionDispatch::DebugExceptions
+  alias old_log_error log_error
+  def log_error(env, wrapper)
+    if wrapper.exception.is_a? ActionController::RoutingError
+      nil
+    else
+      old_log_error env, wrapper
+    end
+  end
+end
