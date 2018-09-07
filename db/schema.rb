@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_180_830_180_042) do
+ActiveRecord::Schema.define(version: 20_180_906_204_030) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -470,6 +470,7 @@ ActiveRecord::Schema.define(version: 20_180_830_180_042) do
     t.string "last_sign_in_ip", collation: "latin1_swedish_ci"
     t.string "authentication_token", limit: 30, collation: "latin1_swedish_ci"
     t.integer "role"
+    t.text "allowed_features"
     t.index ["authentication_token"], name: "index_users_on_authentication_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true

@@ -16,6 +16,7 @@ class PipelineSampleReads extends React.Component {
   constructor(props) {
     super(props);
     this.admin = props.admin;
+    this.allowedFeatures = props.allowedFeatures;
     this.amr = props.amr;
     this.can_edit = props.can_edit;
     this.csrf = props.csrf;
@@ -565,6 +566,7 @@ class PipelineSampleReads extends React.Component {
           sample_id={this.sampleId}
           projectId={this.projectInfo.id}
           admin={this.admin}
+          allowedFeatures={this.allowedFeatures}
           csrf={this.csrf}
           report_ts={this.reportTime}
           git_version={this.gitVersion}
