@@ -9,7 +9,7 @@ class PhyloTreeVis extends React.Component {
 
     this.state = {
       newick: props.newick,
-      tree: Tree.fromNewickString(props.newick)
+      tree: Tree.fromNewickString(props.newick, props.nodeData)
     };
 
     this.treeVis = null;
@@ -48,7 +48,8 @@ class PhyloTreeVis extends React.Component {
 }
 
 PhyloTreeVis.propType = {
-  newick: PropTypes.string
+  newick: PropTypes.string,
+  nodeData: PropTypes.object
 };
 
 export default PhyloTreeVis;
