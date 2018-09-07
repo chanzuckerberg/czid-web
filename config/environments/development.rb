@@ -67,36 +67,26 @@ Rails.application.configure do
     api_key: ENV['MAIL_GUN_API_KEY'],
     domain: 'mg.idseq.net'
   }
-  ActiveRecordQueryTrace.enabled = false
+  ActiveRecordQueryTrace.enabled = true
 
-  # Deployed logging configuration
-  config.log_level = :info
-  config.lograge.enabled = true
-  config.lograge.formatter = Lograge::Formatters::Json.new
-  config.lograge.logger = ActiveSupport::Logger.new(STDOUT)
-  config.lograge.custom_options = lambda do |event|
-    { time: event.time,
-      ddsource: ["ruby"],
-      params: event.payload[:params].reject { |k| %w[controller action].include? k } }
-  end
-  config.colorize_logging = false
-  config.lograge.ignore_actions = ["HealthCheck::HealthCheckController#index"]
-  ActiveRecord::Base.logger.level = 1 if ActiveRecord::Base.logger
-
-  # Do not dump schema after migrations.
-  config.active_record.dump_schema_after_migration = false
-
-  # Set the logging destination(s)
-  config.log_to = %w[stdout]
+  # Development logging configuration
+  logger           = ActiveSupport::Logger.new(STDOUT)
+  logger.formatter = config.log_formatter
+  config.logger    = ActiveSupport::TaggedLogging.new(logger)
+  config.log_to = %w[stdout file]
 end
 
-# Deployed logging configuration
+# Development logging configuration
 Logging::Rails.configure do |config|
   Logging.init %w[debug info warn error fatal]
-  Logging.format_as :json
-  layout = Logging.layouts.json
+  Logging.format_as :inspect
 
-  # Configure an appender that will write log events to STDOUT.
+  # The default layout used by the appenders.
+  layout = Logging.layouts.pattern(pattern: '[%d] %-5l %c : %m\n')
+
+  # Configure an appender that will write log events to STDOUT. A colorized
+  # pattern layout is used to format the log events into strings before
+  # writing.
   if config.log_to.include? 'stdout'
     Logging.appenders.stdout('stdout',
                              auto_flushing: true,
@@ -117,7 +107,7 @@ Logging::Rails.configure do |config|
                                    layout: layout)
   end
 
-  Logging.logger.root.level = :info
+  Logging.logger.root.level = :debug
   Logging.logger.root.appenders = config.log_to unless config.log_to.empty?
 end
 
