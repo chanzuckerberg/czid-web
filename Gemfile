@@ -23,10 +23,10 @@ gem 'mailgun_rails', '>= 0.9.0'
 gem 'jbuilder', '~> 2.5'
 # Logger
 gem 'logger'
-gem 'multipart-post'
 gem 'logging-rails', require: 'logging/rails'
 gem 'lograge'
 gem 'lograge-sql'
+gem 'multipart-post'
 gem 'silencer'
 # Use mysql as the database for Active Record
 gem 'mysql2'
