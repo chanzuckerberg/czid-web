@@ -169,8 +169,24 @@ export default class PhyloTree {
   }
 
   createScale(x, y, width, distance) {
-    function drawPath(x0, x1, y0, y1, y2) {
-      return `M${y0} ${x0} L${y0} ${x1} L${y2} ${x1} M${y1} ${x0} L${y1} ${x1} M${y2} ${x0} L${y2} ${x1}`;
+    function createTicks(yMin, yMax, stepSize, multiplier) {
+      let ticks = [{ id: 0, y: yMin, multiplier: 0 }];
+      for (let i = 0; i <= yMax / stepSize; i++) {
+        ticks.push({
+          id: i + 1,
+          y: yMin + i * stepSize,
+          multiplier: i % 2 ? undefined : i * multiplier / 2
+        });
+      }
+      return ticks;
+    }
+
+    function drawScale(xMax, yMin, yMax) {
+      return `M${yMin} ${xMax} L${yMax} ${xMax}`;
+    }
+
+    function drawTick(xMin, xMax, y) {
+      return `M${y} ${xMin} L${y} ${xMax}`;
     }
 
     const tickWidth = 10;
@@ -183,48 +199,65 @@ export default class PhyloTree {
     if (multiplier) {
       scaleSize *= multiplier;
     }
+    const tickElements = createTicks(0, width, scaleSize / 2, multiplier);
 
-    const scale = this.svg.selectAll(".scale").data(["scale"]);
+    let scale = this.svg.select(".scale");
 
-    const enterScale = scale
+    if (scale.empty()) {
+      scale = this.svg
+        .append("g")
+        .attr("transform", `translate(${y},${x})`)
+        .attr("class", "scale");
+
+      scale
+        .append("path")
+        .attr("class", "scale-line")
+        .attr("d", function() {
+          return drawScale(tickWidth, 0, width);
+        });
+    } else {
+      scale
+        .select("path")
+        .transition()
+        .duration(500)
+        .attr("d", function() {
+          return drawScale(tickWidth, 0, width);
+        });
+    }
+
+    let ticks = scale
+      .selectAll(".scale-tick")
+      .data(tickElements, tick => tick.id);
+
+    let enterTicks = ticks
       .enter()
       .append("g")
-      .attr("transform", `translate(${y},${x})`)
-      .attr("class", "scale");
+      .attr("class", "scale-tick")
+      .attr("transform", tick => `translate(${tick.y},0)`);
 
-    enterScale
-      .append("path")
-      .attr("class", "scale-line")
-      .attr("d", drawPath(0, tickWidth, 0, scaleSize / 2, scaleSize));
+    enterTicks.append("path").attr("d", drawTick(0, tickWidth, 0));
 
-    enterScale
+    enterTicks
       .append("text")
-      .attr("class", "scale-min")
       .attr("dy", -3)
       .style("text-anchor", "middle")
-      .text(0);
+      .text(
+        tick =>
+          tick.multiplier === undefined
+            ? ""
+            : this.formatBase10(tick.multiplier, power)
+      );
 
-    enterScale
-      .append("text")
-      .attr("class", "scale-max")
-      .attr("y", -3)
-      .attr("x", scaleSize)
-      .style("text-anchor", "middle")
-      .text(this.formatBase10(multiplier, power));
-
-    scale
-      .select("path")
+    ticks
       .transition()
       .duration(500)
-      .attr("d", drawPath(0, tickWidth, 0, scaleSize / 2, scaleSize));
+      .attr("transform", tick => `translate(${tick.y},0)`);
 
-    scale
-      .select("text.scale-max")
-      .transition()
-      .duration(500)
-      .attr("x", scaleSize);
-
-    scale.select("text.scale-max").text(this.formatBase10(multiplier, power));
+    ticks
+      .exit()
+      .transition(500)
+      .style("opacity", 0)
+      .remove();
   }
 
   update() {
@@ -267,7 +300,7 @@ export default class PhyloTree {
 
     let maxDistance = this.computeDistanceToRoot(this.root);
 
-    this.createScale(-30, 100, this.width - this.outerLabelWidth, maxDistance);
+    this.createScale(-30, 0, this.width - this.outerLabelWidth, maxDistance);
 
     this.updateHighlights();
 

@@ -1,11 +1,11 @@
 class NewickParser {
   constructor(newickString) {
-    this.newickString = newickString;
-    this.root = this.createNode();
-
     // Internal
     this._lastId = 0;
     this._symbols = new Set("(),;");
+
+    this.newickString = newickString;
+    this.root = this.createNode();
   }
 
   getUniqueId() {
