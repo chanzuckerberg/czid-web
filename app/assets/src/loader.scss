@@ -32,8 +32,10 @@
 @import "styles/ui/controls/buttons/secondary_button";
 @import "styles/ui/controls/slider";
 
+// ui/containers
+@import "styles/ui/containers/modal";
+
 // views
 @import "styles/views/playground_controls";
 @import "styles/views/phylo_tree/phylo_tree_list_view";
 @import "styles/views/phylo_tree/phylo_tree_vis";
-// @import "styles/views/phylo_tree/phylo_tree_viz";

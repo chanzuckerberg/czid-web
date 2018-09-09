@@ -15,6 +15,7 @@ import OurDropdown from "./ui/controls/dropdowns/Dropdown";
 import MultipleDropdown from "./ui/controls/dropdowns/MultipleDropdown";
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
 import BetaLabel from "./ui/labels/BetaLabel";
+import Modal from "./ui/containers/Modal";
 
 class PipelineSampleReport extends React.Component {
   constructor(props) {
@@ -876,11 +877,18 @@ class PipelineSampleReport extends React.Component {
       );
     if (this.allowPhyloTree && (taxInfo.tax_id > 0 && taxInfo.NT.r > 0))
       phyloTreeDot = (
-        <i
-          onClick={() => this.gotoTreeLink(taxInfo.tax_id)}
-          className="fa fa-code-fork action-dot"
-          aria-hidden="true"
-        />
+        <Modal
+          trigger={
+            <i className="fa fa-code-fork action-dot" aria-hidden="true" />
+          }
+        >
+          <div>Modal is working!!!</div>
+        </Modal>
+        // <i
+        //   onClick={() => this.gotoTreeLink(taxInfo.tax_id)}
+        //   className="fa fa-code-fork action-dot"
+        //   aria-hidden="true"
+        // />
       );
     return (
       <span className="link-tag">
