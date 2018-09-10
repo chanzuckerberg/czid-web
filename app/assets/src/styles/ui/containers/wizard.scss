@@ -1,0 +1,29 @@
+@import "../../themes/colors.scss";
+
+.wizard {
+  &__header {
+    display: block;
+    margin-bottom: 20px;
+    width: 100%;
+
+    &__title {
+      float: left;
+    }
+
+    &__page {
+      color: $medium-grey;
+      float: right;
+    }
+
+    &:after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+  }
+
+  &__nav {
+    margin-top: 20px;
+    align: center;
+  }
+}

@@ -28,12 +28,13 @@ class PhyloTreesController < ApplicationController
   before_action :check_access
 
   def index
+    Rails.logger.debug("Index - params: #{params}")
     @project = []
     @phylo_trees = current_power.phylo_trees
     @taxon = {}
 
-    taxid = params[:taxid]
-    project_id = params[:project_id]
+    taxid = params[:taxId]
+    project_id = params[:projectId]
 
     # Restrict to specified project
     if project_id
@@ -53,6 +54,17 @@ class PhyloTreesController < ApplicationController
     @phylo_trees = @phylo_trees.as_json
     @phylo_trees.each do |pt|
       pt["n_pipeline_runs"] = PhyloTree.run_counts_by_tree_id[pt["id"]]["n_pipeline_runs"]
+    end
+
+    respond_to do |format|
+      format.html
+      format.json do
+        render json: {
+          project: @project,
+          taxon: @taxon,
+          phyloTrees: @phyloTrees
+        }
+      end
     end
   end
 
