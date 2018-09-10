@@ -90,7 +90,7 @@ class PhyloTree < ApplicationRecord
     }
     dag_commands = prepare_dag("phylo_tree", attribute_dict)
     # Dispatch command
-    base_command = [install_pipeline("charles/nr-trees"),
+    base_command = [install_pipeline("master"),
                     upload_version(dag_version_file),
                     dag_commands].join("; ")
     aegea_batch_submit_command(base_command, job_queue: nil)
