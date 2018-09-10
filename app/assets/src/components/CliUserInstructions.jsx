@@ -12,7 +12,7 @@ class CliUserInstructions extends React.Component {
       this.props.authToken
     } -p 'Your Project Name' --bulk . --host-genome-name 'Human'`;
 
-    let genomesList = `'${this.props.hostGenomes.join("', '")}'`;
+    const genomesList = `'${this.props.hostGenomes.join("', '")}'`;
 
     return (
       <div className="instruction-container">
