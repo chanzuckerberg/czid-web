@@ -88,7 +88,8 @@ class PhyloTreesController < ApplicationController
 
   def retry
     if @phylo_tree.status == PhyloTree::STATUS_FAILED
-      @phylo_tree.update(status: PhyloTree::STATUS_INITIALIZED)
+      @phylo_tree.update(status: PhyloTree::STATUS_INITIALIZED,
+                         job_id: nil, job_log_id: nil, job_description: nil, command_stdout: nil, command_stderr: nil)
       Resque.enqueue(KickoffPhyloTree, @phylo_tree.id)
       render json: { status: :ok, message: "retry submitted" }
     else
