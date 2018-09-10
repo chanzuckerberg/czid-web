@@ -57,7 +57,8 @@
   }
 
   .scale {
-    .scale-line {
+    .scale-line,
+    .scale-tick path {
       fill: none;
       stroke: $light-grey;
       stroke-width: 2px;
