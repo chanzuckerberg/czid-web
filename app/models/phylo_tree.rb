@@ -136,8 +136,9 @@ class PhyloTree < ApplicationRecord
     query_results.each do |entry|
       tree_id = entry["phylo_tree_id"]
       pipeline_run_id = entry["pipeline_run_id"]
+      tree_node_name = pipeline_run_id.to_s
       indexed_results[tree_id] ||= {}
-      indexed_results[tree_id][pipeline_run_id] = entry
+      indexed_results[tree_id][tree_node_name] = entry
     end
     indexed_results
   end

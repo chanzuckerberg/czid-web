@@ -3,7 +3,7 @@ import React from "react";
 import { Input, Checkbox, Accordion, Menu } from "semantic-ui-react";
 import PrimaryButton from "../../ui/controls/buttons/PrimaryButton";
 
-const MIN_READS = 5; // TODO: come up with a more sensible number
+const MIN_READS = 100;
 
 class PhyloTreeInputs extends React.Component {
   // PhyloTreeInputs represents the inputs for the phylo_tree

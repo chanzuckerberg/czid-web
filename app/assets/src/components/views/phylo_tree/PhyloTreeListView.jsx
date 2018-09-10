@@ -87,7 +87,10 @@ class PhyloTreeListView extends React.Component {
         <Divider />
         <div className="phylo-tree-list-view__narrow-container">
           {currentTree.newick ? (
-            <PhyloTreeVis newick={currentTree.newick} />
+            <PhyloTreeVis
+              newick={currentTree.newick}
+              nodeData={currentTree.sampleDetailsByNodeName}
+            />
           ) : (
             <p className="phylo-tree-list-view__no-tree-banner">
               {this.getTreeStatus(currentTree.status)}

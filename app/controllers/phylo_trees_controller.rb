@@ -53,7 +53,7 @@ class PhyloTreesController < ApplicationController
     @phylo_trees = @phylo_trees.as_json
     @phylo_trees.each do |pt|
       sample_details = PhyloTree.sample_details_by_tree_id[pt["id"]]
-      pt["sample_details_by_pipeline_run_id"] = sample_details
+      pt["sampleDetailsByNodeName"] = sample_details
     end
   end
 
