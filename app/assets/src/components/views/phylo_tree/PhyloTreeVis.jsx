@@ -19,7 +19,7 @@ class PhyloTreeVis extends React.Component {
     if (newProps.newick !== this.props.newick) {
       this.setState({
         newick: newProps.newick,
-        tree: Tree.fromNewickString(newProps.newick)
+        tree: Tree.fromNewickString(newProps.newick, newProps.nodeData)
       });
     }
   }
