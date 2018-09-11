@@ -251,12 +251,16 @@ module ReportHelper
     ").to_hash
   end
 
-  def fetch_top_taxons(samples, background_id, categories)
+  def fetch_top_taxons(samples, background_id, categories, read_specificity = false)
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
 
     categories_clause = ""
     if categories.present?
       categories_clause = " AND taxon_counts.superkingdom_taxid IN (#{categories.map { |category| CATEGORIES_TAXID_BY_NAME[category] }.compact.join(',')})"
+    end
+    read_specificity_clause = ""
+    if read_specificity
+      read_specificity_clause = " AND taxon_counts.tax_id > 0"
     end
 
     query = "
@@ -293,6 +297,7 @@ module ReportHelper
       AND taxon_counts.count >= #{MINIMUM_READ_THRESHOLD}
       AND taxon_counts.count_type IN ('NT', 'NR')
       #{categories_clause}
+      #{read_specificity_clause}
      "
     sql_results = TaxonCount.connection.select_all(query).to_hash
 
@@ -449,9 +454,9 @@ module ReportHelper
     true
   end
 
-  def top_taxons_details(samples, background_id, num_results, sort_by_key, species_selected, categories, threshold_filters = {})
+  def top_taxons_details(samples, background_id, num_results, sort_by_key, species_selected, categories, threshold_filters = {}, read_specificity = false)
     # return top taxons
-    results_by_pr = fetch_top_taxons(samples, background_id, categories)
+    results_by_pr = fetch_top_taxons(samples, background_id, categories, read_specificity)
     sort_by = decode_sort_by(sort_by_key)
     count_type = sort_by[:count_type]
     metric = sort_by[:metric]
