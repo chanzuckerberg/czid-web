@@ -667,6 +667,7 @@ class PipelineSampleReport extends React.Component {
 
   removeCategory(categoryToRemove) {
     this.applyIncludedCategories(
+      this,
       this.state.includedCategories.filter(category => {
         return category != categoryToRemove;
       })
