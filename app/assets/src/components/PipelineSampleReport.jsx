@@ -333,7 +333,7 @@ class PipelineSampleReport extends React.Component {
 
           // Skip if excluding non-specific rows
           if (this.state.readSpecificity.toLowerCase() === "specific only") {
-            if (taxon.tax_level === 2 && taxon.tax_id < 0) {
+            if (taxon.tax_id < 0) {
               continue;
             }
           }
@@ -372,7 +372,7 @@ class PipelineSampleReport extends React.Component {
       // Skip if excluding non-specific rows
       if (this.state.readSpecificity.toLowerCase() === "specific only") {
         for (let tax_info of thresholded_taxons) {
-          if (tax_info.tax_level !== 2 || tax_info.tax_id > 0) {
+          if (tax_info.tax_id > 0) {
             selected_taxons.push(tax_info);
           }
         }
@@ -398,6 +398,9 @@ class PipelineSampleReport extends React.Component {
     }
 
     selected_taxons = this.updateSpeciesCount(selected_taxons);
+    if (this.state.readSpecificity.toLowerCase() === "specific only") {
+      selected_taxons = this.removeEmptyGenusRows(selected_taxons);
+    }
 
     this.setState({
       loading: false,
@@ -433,6 +436,10 @@ class PipelineSampleReport extends React.Component {
       }
     }
     return res;
+  }
+
+  removeEmptyGenusRows(rows) {
+    return rows.filter(r => r.tax_level === 1 || r.species_count > 0);
   }
 
   //Load more samples on scroll
