@@ -128,7 +128,7 @@ class PipelineSampleReport extends React.Component {
       loading: true,
       activeThresholds: this.defaultThresholdValues,
       countType: "NT",
-      readSpecificity: cachedReadSpecificity ? cachedReadSpecificity : "All"
+      readSpecificity: cachedReadSpecificity ? cachedReadSpecificity : 0
     };
 
     this.expandAll = false;
@@ -276,7 +276,7 @@ class PipelineSampleReport extends React.Component {
         ),
         pagesRendered: 1,
         rows_passing_filters: this.state.taxonomy_details.length,
-        readSpecificity: "All"
+        readSpecificity: 0
       },
       () => {
         ThresholdMap.saveThresholdFilters([]);
@@ -1661,8 +1661,8 @@ function BackgroundModelFilter({ parent }) {
 
 function SpecificityFilter({ parent }) {
   const specificityOptions = [
-    { text: "All", value: "All" },
-    { text: "Specific Only", value: "Specific Only" }
+    { text: "All", value: 0 },
+    { text: "Specific Only", value: 1 }
   ];
   return (
     <OurDropdown
