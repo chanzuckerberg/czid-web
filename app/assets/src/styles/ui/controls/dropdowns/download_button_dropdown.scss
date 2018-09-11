@@ -1,0 +1,9 @@
+@import "../../../themes/colors";
+
+.idseq-ui.ui.button.dropdown {
+  i.dropdown.icon {
+    &:before {
+      color: $primary-light;
+    }
+  }
+}
