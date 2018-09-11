@@ -39,6 +39,7 @@ class PhyloTreeInputs extends React.Component {
 
     this.createTree = this.createTree.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
+    this.renderTextInput = this.renderTextInput.bind(this);
     this.renderSampleCheckbox = this.renderSampleCheckbox.bind(this);
     this.handleProjectClick = this.handleProjectClick.bind(this);
     this.updatePipelineRunIdSelection = this.updatePipelineRunIdSelection.bind(
@@ -79,6 +80,22 @@ class PhyloTreeInputs extends React.Component {
 
   handleInputChange(e, { name, value }) {
     this.setState({ [e.target.id]: value });
+  }
+
+  renderTextInput(id, placeholder, valueFieldIfPresent) {
+    return (
+      <Input
+        id={id}
+        placeholder={placeholder}
+        disabled={this.disabled}
+        value={
+          this.disabled && this.phyloTree
+            ? this.phyloTree[valueFieldIfPresent]
+            : undefined
+        }
+        onChange={this.handleInputChange}
+      />
+    );
   }
 
   renderSampleCheckbox(sample) {
@@ -216,26 +233,11 @@ class PhyloTreeInputs extends React.Component {
         </div>
       );
 
-    let tree_name = (
-      <Input
-        id="treeName"
-        placeholder="Name"
-        disabled={this.disabled}
-        value={this.disabled ? this.phyloTree.name : undefined}
-        onChange={this.handleInputChange}
-      />
-    );
-
+    let tree_name = this.renderTextInput("treeName", "Name", "name");
     let dagBranchInput =
-      this.admin != 1 ? null : (
-        <Input
-          id="dagBranch"
-          placeholder="DAG branch"
-          disabled={this.disabled}
-          value={this.disabled ? this.phyloTree.dag_branch : undefined}
-          onChange={this.handleInputChange}
-        />
-      );
+      this.admin != 1
+        ? null
+        : this.renderTextInput("dagBranch", "DAG branch", "dag_branch");
 
     let create_button = this.disabled ? null : (
       <div>
