@@ -284,6 +284,7 @@ class PipelineSampleReport extends React.Component {
         ThresholdMap.saveThresholdFilters([]);
         Cookies.set("includedCategories", "[]");
         Cookies.set("includedSubcategories", "[]");
+        // need to reset the categories box too
       }
     );
   }
@@ -294,13 +295,17 @@ class PipelineSampleReport extends React.Component {
     input_taxons,
     includedSubcategories = []
   ) {
+    // Hierarchy of the search filters is:
+    //  1. Apply threshold filters (done outside of this function)
+    //  2. Apply text search, OR if no text search, apply category filters
+    //  3. Apply read specificity filters
+
     let selected_taxons = [];
     const thresholded_taxons = input_taxons || this.state.thresholded_taxons;
     const active_thresholds = this.state.activeThresholds;
     const specificOnly = this.state.readSpecificity === 1;
 
     if (searchTaxonId > 0) {
-      // ignore all the thresholds
       let genus_taxon = {};
       let matched_taxons = [];
       for (let i = 0; i < this.state.taxonomy_details.length; i++) {
@@ -324,7 +329,10 @@ class PipelineSampleReport extends React.Component {
         selected_taxons.push(genus_taxon);
         selected_taxons = selected_taxons.concat(matched_taxons);
       }
-    } else if (includedCategories.length > 0) {
+    } else if (
+      includedCategories.length > 0 ||
+      includedSubcategories.length > 0
+    ) {
       let displayed_subcat_indicator_columns = includedSubcategories.map(
         subcat => {
           return `is_${subcat.toLowerCase()}`;
@@ -333,7 +341,6 @@ class PipelineSampleReport extends React.Component {
 
       for (var i = 0; i < thresholded_taxons.length; i++) {
         let taxon = thresholded_taxons[i];
-
         if (includedCategories.indexOf(taxon.category_name) >= 0) {
           // In the included categories
           selected_taxons.push(taxon);
@@ -348,38 +355,10 @@ class PipelineSampleReport extends React.Component {
           taxon.category_name == "Uncategorized" &&
           parseInt(taxon.tax_id) == -200
         ) {
-          // the 'All taxa without genus classification' taxon
-          const uncat_taxon = taxon;
-          const filtered_children = [];
-          i++;
-          taxon = thresholded_taxons[i];
-          while (taxon && taxon.genus_taxid == -200) {
-            if (includedCategories.indexOf(taxon.category_name) >= 0) {
-              filtered_children.push(taxon);
-            }
-            i++;
-            taxon = thresholded_taxons[i];
-          }
-          if (filtered_children.length > 0) {
-            selected_taxons.push(uncat_taxon);
-            selected_taxons = selected_taxons.concat(filtered_children);
-          }
-          i--;
         }
       }
     } else {
       selected_taxons = thresholded_taxons;
-    }
-
-    if (searchTaxonId <= 0) {
-      // only apply subcategory filter if user is not doing a search
-      // TODO: this seems to make not sense!
-      for (let i = 0; i < includedSubcategories.length; i++) {
-        let column = `is_${includedSubcategories[i].toLowerCase()}`;
-        selected_taxons = selected_taxons.filter(x => {
-          return x[column] == 0;
-        });
-      }
     }
 
     let searchKey = this.state.searchKey;
