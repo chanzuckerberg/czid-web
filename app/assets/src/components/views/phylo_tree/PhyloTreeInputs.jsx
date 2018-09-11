@@ -12,6 +12,7 @@ class PhyloTreeInputs extends React.Component {
     this.disabled = props.disabled;
     this.phyloTree = props.phyloTree;
     this.csrf = props.csrf;
+    this.admin = props.admin;
     this.taxon = this.phyloTree
       ? {
           name: this.phyloTree.tax_name,
@@ -118,6 +119,7 @@ class PhyloTreeInputs extends React.Component {
       axios
         .post("/phylo_trees/create", {
           name: this.state.treeName,
+          dag_branch: this.state.dagBranch,
           project_id: this.project.id,
           taxid: this.taxon.taxid,
           pipeline_run_ids: pipeline_run_ids,
@@ -224,6 +226,17 @@ class PhyloTreeInputs extends React.Component {
       />
     );
 
+    let dagBranchInput =
+      this.admin != 1 ? null : (
+        <Input
+          id="dagBranch"
+          placeholder="DAG branch"
+          disabled={this.disabled}
+          value={this.disabled ? this.phyloTree.dag_branch : undefined}
+          onChange={this.handleInputChange}
+        />
+      );
+
     let create_button = this.disabled ? null : (
       <div>
         <PrimaryButton text="Create Tree" onClick={this.createTree} />
@@ -235,6 +248,7 @@ class PhyloTreeInputs extends React.Component {
       <div>
         {title}
         {tree_name}
+        {dagBranchInput}
         {sample_display_in_project}
         {create_button}
         {sample_display_outside_project}

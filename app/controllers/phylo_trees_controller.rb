@@ -104,6 +104,7 @@ class PhyloTreesController < ApplicationController
     name = params[:name]
     taxid = params[:taxid].to_i
     tax_name = params[:tax_name]
+    dag_branch = params[:dag_branch] || "master"
 
     tax_level = TaxonLineage.where(taxid: taxid).last.tax_level
 
@@ -114,7 +115,7 @@ class PhyloTreesController < ApplicationController
         message: "You are not authorized to view all pipeline runs in the list."
       }
     else
-      pt = PhyloTree.new(name: name, taxid: taxid, tax_level: tax_level, tax_name: tax_name, user_id: current_user.id, project_id: @project.id, pipeline_run_ids: pipeline_run_ids)
+      pt = PhyloTree.new(name: name, taxid: taxid, tax_level: tax_level, tax_name: tax_name, user_id: current_user.id, project_id: @project.id, pipeline_run_ids: pipeline_run_ids, dag_branch: dag_branch)
       if pt.save
         Resque.enqueue(KickoffPhyloTree, pt.id)
         render json: { status: :ok, message: "tree creation job submitted", phylo_tree_id: pt.id }
