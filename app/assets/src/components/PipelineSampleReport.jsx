@@ -295,6 +295,9 @@ class PipelineSampleReport extends React.Component {
     let selected_taxons = [];
     const thresholded_taxons = input_taxons || this.state.thresholded_taxons;
     const active_thresholds = this.state.activeThresholds;
+    const specificOnly =
+      this.state.readSpecificity.toLowerCase() === "specific only";
+
     if (searchTaxonId > 0) {
       // ignore all the thresholds
       let genus_taxon = {};
@@ -328,15 +331,14 @@ class PipelineSampleReport extends React.Component {
       );
       for (var i = 0; i < thresholded_taxons.length; i++) {
         let taxon = thresholded_taxons[i];
+
+        // Skip if excluding non-specific rows
+        if (specificOnly && taxon.tax_id < 0) {
+          continue;
+        }
+
         if (includedCategories.indexOf(taxon.category_name) >= 0) {
           // In the included categories
-
-          // Skip if excluding non-specific rows
-          if (this.state.readSpecificity.toLowerCase() === "specific only") {
-            if (taxon.tax_id < 0) {
-              continue;
-            }
-          }
           selected_taxons.push(taxon);
         } else if (
           displayed_subcat_indicator_columns.some(column => {
@@ -370,12 +372,8 @@ class PipelineSampleReport extends React.Component {
       }
     } else {
       // Skip if excluding non-specific rows
-      if (this.state.readSpecificity.toLowerCase() === "specific only") {
-        for (let tax_info of thresholded_taxons) {
-          if (tax_info.tax_id > 0) {
-            selected_taxons.push(tax_info);
-          }
-        }
+      if (specificOnly) {
+        selected_taxons = thresholded_taxons.filter(r => r.tax_id > 0);
       } else {
         selected_taxons = thresholded_taxons;
       }
@@ -398,7 +396,7 @@ class PipelineSampleReport extends React.Component {
     }
 
     selected_taxons = this.updateSpeciesCount(selected_taxons);
-    if (this.state.readSpecificity.toLowerCase() === "specific only") {
+    if (specificOnly) {
       selected_taxons = this.removeEmptyGenusRows(selected_taxons);
     }
 
@@ -439,6 +437,8 @@ class PipelineSampleReport extends React.Component {
   }
 
   removeEmptyGenusRows(rows) {
+    // Remove rows unless they have a species tax level or a species count
+    // under them of greater than 0.
     return rows.filter(r => r.tax_level === 1 || r.species_count > 0);
   }
 
