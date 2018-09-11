@@ -707,6 +707,14 @@ input[type="number"] {
   }
 }
 
+tr:hover {
+  .hover-wrapper {
+    .link-tag {
+      visibility: visible;
+    }
+  }
+}
+
 .hover-wrapper {
   cursor: text;
   &:hover {
