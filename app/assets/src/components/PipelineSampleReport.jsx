@@ -128,7 +128,9 @@ class PipelineSampleReport extends React.Component {
       loading: true,
       activeThresholds: this.defaultThresholdValues,
       countType: "NT",
-      readSpecificity: cachedReadSpecificity ? cachedReadSpecificity : 0
+      readSpecificity: cachedReadSpecificity
+        ? parseInt(cachedReadSpecificity)
+        : 0
     };
 
     this.expandAll = false;
@@ -295,8 +297,7 @@ class PipelineSampleReport extends React.Component {
     let selected_taxons = [];
     const thresholded_taxons = input_taxons || this.state.thresholded_taxons;
     const active_thresholds = this.state.activeThresholds;
-    const specificOnly =
-      this.state.readSpecificity.toLowerCase() === "specific only";
+    const specificOnly = this.state.readSpecificity === 1;
 
     if (searchTaxonId > 0) {
       // ignore all the thresholds
