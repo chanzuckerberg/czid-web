@@ -330,13 +330,9 @@ class PipelineSampleReport extends React.Component {
           return `is_${subcat.toLowerCase()}`;
         }
       );
+
       for (var i = 0; i < thresholded_taxons.length; i++) {
         let taxon = thresholded_taxons[i];
-
-        // Skip if excluding non-specific rows
-        if (specificOnly && taxon.tax_id < 0) {
-          continue;
-        }
 
         if (includedCategories.indexOf(taxon.category_name) >= 0) {
           // In the included categories
@@ -372,12 +368,7 @@ class PipelineSampleReport extends React.Component {
         }
       }
     } else {
-      // Skip if excluding non-specific rows
-      if (specificOnly) {
-        selected_taxons = thresholded_taxons.filter(r => r.tax_id > 0);
-      } else {
-        selected_taxons = thresholded_taxons;
-      }
+      selected_taxons = thresholded_taxons;
     }
 
     if (searchTaxonId <= 0) {
@@ -396,6 +387,9 @@ class PipelineSampleReport extends React.Component {
       searchKey = "";
     }
 
+    if (specificOnly) {
+      selected_taxons = this.filterNonSpecific(selected_taxons);
+    }
     selected_taxons = this.updateSpeciesCount(selected_taxons);
     if (specificOnly) {
       selected_taxons = this.removeEmptyGenusRows(selected_taxons);
@@ -435,6 +429,27 @@ class PipelineSampleReport extends React.Component {
       }
     }
     return res;
+  }
+
+  filterNonSpecific(rows) {
+    let filtered = [];
+    for (let i = 0; i < rows.length; i++) {
+      let cur = rows[i];
+      if (cur.tax_id < 0) {
+        // Leave it off if non-specific.
+        if (cur.tax_level === 2) {
+          // If it was a non-specific genus row, remove species rows under it.
+          let j = i + 1;
+          while (j < rows.length && rows[j].genus_taxid === cur.tax_id) {
+            j++;
+          }
+          i = j - 1; // -1 at the end because you increment j and i.
+        }
+      } else {
+        filtered.push(cur);
+      }
+    }
+    return filtered;
   }
 
   removeEmptyGenusRows(rows) {
