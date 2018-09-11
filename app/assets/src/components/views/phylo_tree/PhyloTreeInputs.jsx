@@ -3,6 +3,8 @@ import React from "react";
 import { Input, Checkbox, Accordion, Menu } from "semantic-ui-react";
 import PrimaryButton from "../../ui/controls/buttons/PrimaryButton";
 
+const MIN_READS = 100;
+
 class PhyloTreeInputs extends React.Component {
   // PhyloTreeInputs represents the inputs for the phylo_tree
   constructor(props) {
@@ -18,7 +20,6 @@ class PhyloTreeInputs extends React.Component {
       : props.taxon;
     this.project = props.project;
     this.samples = props.samples;
-    this.minReads = 5;
     this.state = {
       activeProjects: [],
       selectedPipelineRunIds:
@@ -29,7 +30,7 @@ class PhyloTreeInputs extends React.Component {
             this.samples
               .filter(
                 s =>
-                  s.taxid_nt_reads >= this.minReads &&
+                  PhyloTreeInputs.passesCreateCondition(s.taxid_reads) &&
                   s.project_id == this.project.id
               )
               .map(s => s.pipeline_run_id)
@@ -42,6 +43,11 @@ class PhyloTreeInputs extends React.Component {
     this.updatePipelineRunIdSelection = this.updatePipelineRunIdSelection.bind(
       this
     );
+  }
+
+  static passesCreateCondition(taxid_reads) {
+    let result = Math.max(taxid_reads.NT, taxid_reads.NR) >= MIN_READS;
+    return result;
   }
 
   handleProjectClick(project_name) {
@@ -88,10 +94,14 @@ class PhyloTreeInputs extends React.Component {
             this.state.selectedPipelineRunIds.indexOf(sample.pipeline_run_id) >=
             0
           }
-          disabled={this.disabled || sample.taxid_nt_reads < this.minReads}
+          disabled={
+            this.disabled ||
+            !PhyloTreeInputs.passesCreateCondition(sample.taxid_reads)
+          }
         />
         <label htmlFor={sample.pipeline_run_id}>
-          {sample.name} ({sample.taxid_nt_reads} reads)
+          {sample.name} ({sample.taxid_reads.NT} NT hits;{" "}
+          {sample.taxid_reads.NR} NR hits)
         </label>
       </div>
     );

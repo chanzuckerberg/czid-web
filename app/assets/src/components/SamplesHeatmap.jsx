@@ -18,33 +18,23 @@ import PropTypes from "prop-types";
 import Slider from "./ui/controls/Slider";
 import TaxonTooltip from "./TaxonTooltip";
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
+import { Colormap } from "./utils/colormaps/Colormap";
 
 class SamplesHeatmap extends React.Component {
   constructor(props) {
     super(props);
 
-    this.colors = [
-      "rgb(255, 255, 255)",
-      "rgb(243, 249, 243)",
-      "rgb(232, 244, 232)",
-      "rgb(221, 239, 220)",
-      "rgb(210, 234, 209)",
-      "rgb(199, 229, 197)",
-      "rgb(188, 224, 186)",
-      "rgb(177, 219, 175)",
-      "rgb(166, 214, 164)",
-      "rgb(155, 208, 152)",
-      "rgb(144, 203, 141)",
-      "rgb(133, 198, 129)",
-      "rgb(122, 193, 118)",
-      "rgb(111, 188, 106)",
-      "rgb(100, 183, 95)",
-      "rgb(89, 178, 84)",
-      "rgb(78, 173, 73)"
-    ];
+    this.colors = Colormap.getNScale("viridis", 10).reverse();
 
     // URL params have precedence
     this.urlParams = this.parseUrlParams();
+
+    this.availableOptions = {
+      specificityOptions: [
+        { text: "All", value: 0 },
+        { text: "Specific Only", value: 1 }
+      ]
+    };
 
     this.state = {
       availableOptions: {
@@ -74,7 +64,8 @@ class SamplesHeatmap extends React.Component {
         species: parseInt(this.urlParams.species) || 1,
         thresholdFilters: this.urlParams.thresholdFilters || [],
         dataScaleIdx: parseInt(this.urlParams.dataScaleIdx) || 0,
-        taxonsPerSample: parseInt(this.urlParams.taxonsPerSample) || 30
+        taxonsPerSample: parseInt(this.urlParams.taxonsPerSample) || 30,
+        readSpecificity: this.availableOptions.specificityOptions[1].value
       },
       data: null,
       taxons: {},
@@ -109,6 +100,7 @@ class SamplesHeatmap extends React.Component {
     this.onRemoveRow = this.onRemoveRow.bind(this);
     this.onSampleLabelClick = this.onSampleLabelClick.bind(this);
     this.onShareClick = this.onShareClick.bind(this);
+    this.onSpecificityChange = this.onSpecificityChange.bind(this);
     this.onTaxonLevelChange = this.onTaxonLevelChange.bind(this);
     this.onTaxonsPerSampleEnd = this.onTaxonsPerSampleEnd.bind(this);
     this.onThresholdFilterApply = this.onThresholdFilterApply.bind(this);
@@ -182,7 +174,8 @@ class SamplesHeatmap extends React.Component {
           categories: this.state.selectedOptions.categories,
           sortBy: this.metricToSortField(this.state.selectedOptions.metric),
           thresholdFilters: this.state.selectedOptions.thresholdFilters,
-          taxonsPerSample: this.state.selectedOptions.taxonsPerSample
+          taxonsPerSample: this.state.selectedOptions.taxonsPerSample,
+          readSpecificity: this.state.selectedOptions.readSpecificity
         }
       })
       .then(response => {
@@ -689,6 +682,26 @@ class SamplesHeatmap extends React.Component {
     );
   }
 
+  onSpecificityChange(_, specificity) {
+    this.optionsChanged = true;
+    this.setSelectedOptionsState(
+      { readSpecificity: specificity.value },
+      this.explicitApply ? undefined : this.updateHeatmap
+    );
+  }
+
+  renderSpecificityFilter() {
+    return (
+      <Dropdown
+        fluid
+        options={this.availableOptions.specificityOptions}
+        value={this.state.readSpecificity}
+        label="Read Specificity: "
+        onChange={this.onSpecificityChange}
+      />
+    );
+  }
+
   renderSubMenu(sticky) {
     return (
       <div style={sticky.style}>
@@ -700,9 +713,10 @@ class SamplesHeatmap extends React.Component {
         </div>
         <div className="row sub-menu">
           <div className="col s3">{this.renderAdvancedFilterPicker()}</div>
-          <div className="col s3">{this.renderTaxonsPerSampleSlider()}</div>
-          <div className="col s3">{this.renderScalePicker()}</div>
-          <div className="col s3">{this.renderLegend()}</div>
+          <div className="col s3">{this.renderSpecificityFilter()}</div>
+          <div className="col s2">{this.renderScalePicker()}</div>
+          <div className="col s2">{this.renderTaxonsPerSampleSlider()}</div>
+          <div className="col s2">{this.renderLegend()}</div>
         </div>
       </div>
     );

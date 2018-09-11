@@ -12,6 +12,8 @@ class CliUserInstructions extends React.Component {
       this.props.authToken
     } -p 'Your Project Name' --bulk . --host-genome-name 'Human'`;
 
+    const genomesList = `'${this.props.hostGenomes.join("', '")}'`;
+
     return (
       <div className="instruction-container">
         <p className="instruction-heading">
@@ -82,11 +84,7 @@ class CliUserInstructions extends React.Component {
             "- Supported file types: .fastq/.fq/.fasta/.fa or .fastq.gz/.fq.gz/.fasta.gz/.fa.gz"
           }
         </p>
-        <p>
-          {
-            "- Supported host genome values: 'Human', 'Mosquito', 'Tick', 'ERCC only'"
-          }
-        </p>
+        <p>{`- Supported host genome values: ${genomesList}`}</p>
         <p>
           {"- Your authentication token for uploading is: "}
           <span className="code-personal">{this.props.authToken}</span>
@@ -171,7 +169,8 @@ class CliUserInstructions extends React.Component {
 CliUserInstructions.propTypes = {
   trigger: PropTypes.node,
   email: PropTypes.string,
-  authToken: PropTypes.string
+  authToken: PropTypes.string,
+  hostGenomes: PropTypes.array
 };
 
 export default CliUserInstructions;

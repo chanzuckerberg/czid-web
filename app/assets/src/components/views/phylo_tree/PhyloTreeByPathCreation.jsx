@@ -30,7 +30,7 @@ class PhyloTreeByPathCreation extends React.Component {
         let phyloTrees = response.data.phyloTrees;
         if (
           !phyloTrees ||
-          typeof phyloTrees !== "array" ||
+          Array.isArray(phyloTrees) ||
           phyloTrees.length === 0
         ) {
           console.log("skipping");

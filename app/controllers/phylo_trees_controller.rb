@@ -50,10 +50,11 @@ class PhyloTreesController < ApplicationController
                  name: taxon_lineage.name }
     end
 
-    # Augment tree data with number of pipeline_runs
+    # Augment tree data with sample attributes and number of pipeline_runs
     @phylo_trees = @phylo_trees.as_json
     @phylo_trees.each do |pt|
-      pt["n_pipeline_runs"] = PhyloTree.run_counts_by_tree_id[pt["id"]]["n_pipeline_runs"]
+      sample_details = PhyloTree.sample_details_by_tree_id[pt["id"]]
+      pt["sampleDetailsByNodeName"] = sample_details
     end
 
     respond_to do |format|
@@ -76,7 +77,7 @@ class PhyloTreesController < ApplicationController
 
     # Retrieve pipeline runs that contain the specified taxid.
     eligible_pipeline_runs = current_power.pipeline_runs.top_completed_runs
-    all_pipeline_run_ids_with_taxid = TaxonByterange.where(taxid: taxid).where(hit_type: 'NT').pluck(:pipeline_run_id)
+    all_pipeline_run_ids_with_taxid = TaxonByterange.where(taxid: taxid).pluck(:pipeline_run_id)
     eligible_pipeline_run_ids_with_taxid = eligible_pipeline_runs.where(id: all_pipeline_run_ids_with_taxid).pluck(:id)
 
     # Retrieve information for displaying the tree's sample list.
@@ -89,15 +90,18 @@ class PhyloTreesController < ApplicationController
   end
 
   def show
+    # DEPRECATED
     @project = current_power.projects.find(@phylo_tree.project_id)
     @samples = sample_details_json(@phylo_tree.pipeline_run_ids, @phylo_tree.taxid)
     @phylo_tree_augmented = @phylo_tree.as_json(include: :pipeline_runs)
+    # The preceding line is extremely slow. If use of the show actionn is restored, it should be rewritten.
     @can_edit = current_power.updatable_phylo_tree?(@phylo_tree)
   end
 
   def retry
     if @phylo_tree.status == PhyloTree::STATUS_FAILED
-      @phylo_tree.update(status: PhyloTree::STATUS_INITIALIZED)
+      @phylo_tree.update(status: PhyloTree::STATUS_INITIALIZED,
+                         job_id: nil, job_log_id: nil, job_description: nil, command_stdout: nil, command_stderr: nil)
       Resque.enqueue(KickoffPhyloTree, @phylo_tree.id)
       render json: { status: :ok, message: "retry submitted" }
     else
@@ -146,7 +150,7 @@ class PhyloTreesController < ApplicationController
     # Expose it as an array of hashes containing
     # - sample name
     # - project id and name
-    # - pipeline run id to be used for the sample
+    # - pipeline run id to be used for the sample.
     samples_projects = Sample.connection.select_all("
       select
         samples.name,
@@ -161,12 +165,16 @@ class PhyloTreesController < ApplicationController
     ").to_a
 
     # Also add:
-    # - number of reads matching the specified taxid in NT
+    # - number of reads matching the specified taxid.
     # Do not include the query on taxon_counts in the previous query above using a join,
     # because the taxon_counts table is large.
-    taxon_counts = TaxonCount.where(pipeline_run_id: pipeline_run_ids).where(tax_id: taxid).where(count_type: 'NT').index_by(&:pipeline_run_id)
+    taxon_counts = TaxonCount.where(pipeline_run_id: pipeline_run_ids).where(tax_id: taxid).index_by { |tc| "#{tc.pipeline_run_id},#{tc.count_type}" }
     samples_projects.each do |sp|
-      sp["taxid_nt_reads"] = (taxon_counts[sp["pipeline_run_id"]] || []).count # count is a column of taxon_counts indicating number of reads
+      sp["taxid_reads"] ||= {}
+      %w[NT NR].each do |count_type|
+        key = "#{sp['pipeline_run_id']},#{count_type}"
+        sp["taxid_reads"][count_type] = (taxon_counts[key] || []).count # count is a column of taxon_counts indicating number of reads
+      end
     end
 
     samples_projects
