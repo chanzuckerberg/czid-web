@@ -15,6 +15,7 @@ import OurDropdown from "./ui/controls/dropdowns/Dropdown";
 import MultipleDropdown from "./ui/controls/dropdowns/MultipleDropdown";
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
 import BetaLabel from "./ui/labels/BetaLabel";
+import PhyloTreeInputs from "./views/phylo_tree/PhyloTreeInputs.jsx";
 
 class PipelineSampleReport extends React.Component {
   constructor(props) {
@@ -875,7 +876,14 @@ class PipelineSampleReport extends React.Component {
           aria-hidden="true"
         />
       );
-    if (this.allowPhyloTree && taxInfo.tax_id > 0)
+    if (
+      this.allowPhyloTree &&
+      taxInfo.tax_id > 0 &&
+      PhyloTreeInputs.passesCreateCondition({
+        NT: taxInfo.NT.r,
+        NR: taxInfo.NR.r
+      })
+    )
       phyloTreeDot = (
         <i
           onClick={() => this.gotoTreeLink(taxInfo.tax_id)}
