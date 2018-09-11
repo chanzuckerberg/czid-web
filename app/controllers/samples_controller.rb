@@ -601,7 +601,7 @@ class SamplesController < ApplicationController
     categories = params[:categories]
     threshold_filters = (params[:thresholdFilters] || {}).map { |filter| JSON.parse(filter) }
     read_specificity = params[:readSpecificity] ? params[:readSpecificity].to_i == 1 : false
-    
+
     # TODO: should fail if field is not well formatted and return proper error to client
     sort_by = params[:sortBy] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
     species_selected = params[:species] == "1" # Otherwise genus selected
