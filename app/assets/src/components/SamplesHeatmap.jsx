@@ -29,6 +29,13 @@ class SamplesHeatmap extends React.Component {
     // URL params have precedence
     this.urlParams = this.parseUrlParams();
 
+    this.availableOptions = {
+      specificityOptions: [
+        { text: "All", value: 0 },
+        { text: "Specific Only", value: 1 }
+      ]
+    };
+
     this.state = {
       availableOptions: {
         // Server side options
@@ -57,7 +64,8 @@ class SamplesHeatmap extends React.Component {
         species: parseInt(this.urlParams.species) || 1,
         thresholdFilters: this.urlParams.thresholdFilters || [],
         dataScaleIdx: parseInt(this.urlParams.dataScaleIdx) || 0,
-        taxonsPerSample: parseInt(this.urlParams.taxonsPerSample) || 30
+        taxonsPerSample: parseInt(this.urlParams.taxonsPerSample) || 30,
+        readSpecificity: this.availableOptions.specificityOptions[0].value
       },
       data: null,
       taxons: {},
@@ -92,6 +100,7 @@ class SamplesHeatmap extends React.Component {
     this.onRemoveRow = this.onRemoveRow.bind(this);
     this.onSampleLabelClick = this.onSampleLabelClick.bind(this);
     this.onShareClick = this.onShareClick.bind(this);
+    this.onSpecificityChange = this.onSpecificityChange.bind(this);
     this.onTaxonLevelChange = this.onTaxonLevelChange.bind(this);
     this.onTaxonsPerSampleEnd = this.onTaxonsPerSampleEnd.bind(this);
     this.onThresholdFilterApply = this.onThresholdFilterApply.bind(this);
@@ -165,7 +174,8 @@ class SamplesHeatmap extends React.Component {
           categories: this.state.selectedOptions.categories,
           sortBy: this.metricToSortField(this.state.selectedOptions.metric),
           thresholdFilters: this.state.selectedOptions.thresholdFilters,
-          taxonsPerSample: this.state.selectedOptions.taxonsPerSample
+          taxonsPerSample: this.state.selectedOptions.taxonsPerSample,
+          readSpecificity: this.state.selectedOptions.readSpecificity
         }
       })
       .then(response => {
@@ -672,6 +682,26 @@ class SamplesHeatmap extends React.Component {
     );
   }
 
+  onSpecificityChange(_, specificity) {
+    this.optionsChanged = true;
+    this.setSelectedOptionsState(
+      { readSpecificity: specificity.value },
+      this.explicitApply ? undefined : this.updateHeatmap
+    );
+  }
+
+  renderSpecificityFilter() {
+    return (
+      <Dropdown
+        fluid
+        options={this.availableOptions.specificityOptions}
+        value={this.state.readSpecificity}
+        label="Read Specificity: "
+        onChange={this.onSpecificityChange}
+      />
+    );
+  }
+
   renderSubMenu(sticky) {
     return (
       <div style={sticky.style}>
@@ -683,9 +713,10 @@ class SamplesHeatmap extends React.Component {
         </div>
         <div className="row sub-menu">
           <div className="col s3">{this.renderAdvancedFilterPicker()}</div>
-          <div className="col s3">{this.renderTaxonsPerSampleSlider()}</div>
-          <div className="col s3">{this.renderScalePicker()}</div>
-          <div className="col s3">{this.renderLegend()}</div>
+          <div className="col s3">{this.renderSpecificityFilter()}</div>
+          <div className="col s2">{this.renderScalePicker()}</div>
+          <div className="col s2">{this.renderTaxonsPerSampleSlider()}</div>
+          <div className="col s2">{this.renderLegend()}</div>
         </div>
       </div>
     );
