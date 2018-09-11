@@ -18,30 +18,13 @@ import PropTypes from "prop-types";
 import Slider from "./ui/controls/Slider";
 import TaxonTooltip from "./TaxonTooltip";
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
+import { Colormap } from "./utils/colormaps/Colormap";
 
 class SamplesHeatmap extends React.Component {
   constructor(props) {
     super(props);
 
-    this.colors = [
-      "rgb(255, 255, 255)",
-      "rgb(243, 249, 243)",
-      "rgb(232, 244, 232)",
-      "rgb(221, 239, 220)",
-      "rgb(210, 234, 209)",
-      "rgb(199, 229, 197)",
-      "rgb(188, 224, 186)",
-      "rgb(177, 219, 175)",
-      "rgb(166, 214, 164)",
-      "rgb(155, 208, 152)",
-      "rgb(144, 203, 141)",
-      "rgb(133, 198, 129)",
-      "rgb(122, 193, 118)",
-      "rgb(111, 188, 106)",
-      "rgb(100, 183, 95)",
-      "rgb(89, 178, 84)",
-      "rgb(78, 173, 73)"
-    ];
+    this.colors = Colormap.getNScale("viridis", 10).reverse();
 
     // URL params have precedence
     this.urlParams = this.parseUrlParams();

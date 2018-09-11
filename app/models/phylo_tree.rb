@@ -56,25 +56,26 @@ class PhyloTree < ApplicationRecord
   def job_command
     # Get byte ranges for each pipeline run's taxon fasta.
     # We construct taxon_byteranges_hash to have the following format for integration with idseq-dag:
-    # { pipeline_run_id_1: [first_byte, last_byte, source_s3_file, destination_name],
+    # { pipeline_run_id_1: {
+    #     'NT': [first_byte, last_byte, source_s3_file, sample_id, align_viz_s3_file],
+    #     'NR': [first_byte, last_byte, source_s3_file, sample_id, align_viz_s3_file]
+    #   },
     #   pipeline_run_id_2: ... }
-    taxon_byteranges = TaxonByterange.where(pipeline_run_id: pipeline_runs.pluck(:id)).where(taxid: taxid).where(hit_type: 'NT')
+    taxon_byteranges = TaxonByterange.where(pipeline_run_id: pipeline_runs.pluck(:id)).where(taxid: taxid)
     taxon_byteranges_hash = {}
     taxon_byteranges.each do |tbr|
-      taxon_byteranges_hash[tbr.pipeline_run_id] = [tbr.first_byte, tbr.last_byte]
+      taxon_byteranges_hash[tbr.pipeline_run_id] ||= {}
+      taxon_byteranges_hash[tbr.pipeline_run_id][tbr.hit_type] = [tbr.first_byte, tbr.last_byte]
     end
-    # Get sample names to construct a display name for the taxon fasta
-    samples = Sample.where(id: pipeline_runs.pluck(:sample_id))
-    taxon_fasta_name_by_sample_id = {}
-    samples.each do |s|
-      taxon_fasta_name_by_sample_id[s.id] = "#{s.name}__#{tax_name}".downcase.gsub(/\W/, '-') + ".fasta"
-    end
-    # Get locations of align_viz files (needed for identifying NCBI accessions matched by the reads in the taxon fasta)
+    # Get fasta paths and alignment viz paths for each pipeline_run
     align_viz_files = {}
     pipeline_runs.each do |pr|
-      align_viz_files[pr.id] = pr.alignment_viz_json_s3("nt.species.#{taxid}") # TODO: also support genus level (based on tax_level)
-      taxon_byteranges_hash[pr.id] += [pr.s3_paths_for_taxon_byteranges[tax_level]['NT'],
-                                       taxon_fasta_name_by_sample_id[pr.sample_id]]
+      level_name = TaxonCount::LEVEL_2_NAME[tax_level] # "species" or "genus"
+      align_viz_files[pr.id] = pr.alignment_viz_json_s3("nt.#{level_name}.#{taxid}") # align_viz only exists for NT
+      entry = taxon_byteranges_hash[pr.id]
+      entry.keys.each do |hit_type|
+        entry[hit_type] += [pr.s3_paths_for_taxon_byteranges[tax_level][hit_type]]
+      end
     end
     # Get the alignment config specifying the location of the NCBI reference used in the pipeline run
     alignment_config = pipeline_runs.last.alignment_config # TODO: revisit case where pipeline_runs have different alignment configs
@@ -123,13 +124,23 @@ class PhyloTree < ApplicationRecord
     save
   end
 
-  def self.run_counts_by_tree_id
-    ActiveRecord::Base.connection.select_all("
-      select phylo_tree_id, count(pipeline_run_id) as n_pipeline_runs
-      from phylo_trees_pipeline_runs
-      group by phylo_tree_id
+  def self.sample_details_by_tree_id
+    query_results = ActiveRecord::Base.connection.select_all("
+      select phylo_tree_id, pipeline_run_id, sample_id, samples.*
+      from phylo_trees_pipeline_runs, pipeline_runs, samples
+      where phylo_trees_pipeline_runs.pipeline_run_id = pipeline_runs.id and
+            pipeline_runs.sample_id = samples.id
       order by phylo_tree_id
-    ").index_by { |h| h["phylo_tree_id"] }
+    ").to_a
+    indexed_results = {}
+    query_results.each do |entry|
+      tree_id = entry["phylo_tree_id"]
+      pipeline_run_id = entry["pipeline_run_id"]
+      tree_node_name = pipeline_run_id.to_s
+      indexed_results[tree_id] ||= {}
+      indexed_results[tree_id][tree_node_name] = entry
+    end
+    indexed_results
   end
 
   def self.viewable(user)
