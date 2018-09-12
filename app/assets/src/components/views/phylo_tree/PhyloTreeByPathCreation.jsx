@@ -2,16 +2,28 @@ import PropTypes from "prop-types";
 import React from "react";
 import Wizard from "../../ui/containers/Wizard";
 import axios from "axios";
+import DataTable from "../../visualizations/table/DataTable";
+import Moment from "react-moment";
 
 class PhyloTreeByPathCreation extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
+      defaultPage: 0,
       skipListTrees: false,
       phyloTreesLoaded: false,
       phyloTrees: []
     };
+
+    this.phyloTreeHeaders = {
+      name: "Phylogenetic Tree",
+      user: "Creator",
+      last_update: "Last Updated",
+      view: "View"
+    };
+
+    this.taxonName = null;
   }
 
   componentDidMount() {
@@ -31,7 +43,7 @@ class PhyloTreeByPathCreation extends React.Component {
         let phyloTrees = response.data.phyloTrees;
         if (
           !phyloTrees ||
-          Array.isArray(phyloTrees) ||
+          !Array.isArray(phyloTrees) ||
           phyloTrees.length === 0
         ) {
           console.log("skipping");
@@ -41,8 +53,9 @@ class PhyloTreeByPathCreation extends React.Component {
           });
         } else {
           console.log("load the data");
+          this.taxonName = phyloTrees[0].tax_name;
           this.setState({
-            phyloTrees: response.data.phyloTrees,
+            phyloTrees: this.parsePhyloTreeData(response.data.phyloTrees),
             phyloTreesLoaded: true
           });
         }
@@ -52,24 +65,50 @@ class PhyloTreeByPathCreation extends React.Component {
       });
   }
 
+  parsePhyloTreeData(phyloTreeData) {
+    return phyloTreeData.map(row => ({
+      name: row.name,
+      user: row.user.name,
+      last_update: <Moment fromNow date={row.updated_at} />,
+      view: <a href={`/phylo_trees/index?taxId=${row.taxId}`}>View</a>
+    }));
+  }
+
+  setPage(defaultPage) {
+    this.setState({ defaultPage });
+  }
+
   getPages() {
+    console.log(this.state.phyloTrees, this.state.skipListTrees);
+
     let pages = [];
     if (!this.state.skipListTrees) {
       pages.push(
         <Wizard.Page
           key={0}
           className="page-one"
-          skipButtons={true}
+          skipDefaultButtons={true}
           title="Phylogenetic Trees"
         >
-          <div className="page-one__subtitle">
-            {(this.phyloTrees[0] || {}).tax_name}
+          <div className="page-one__subtitle">{this.taxonName}</div>
+          <div className="page-one__table">
+            <DataTable
+              headers={this.phyloTreeHeaders}
+              columns={["name", "user", "last_update", "view"]}
+              data={this.state.phyloTrees}
+            />
           </div>
-          <div className="page-one__table">{this.phyloTrees}</div>
-          <div className="page-one__link">+ Create new tree</div>
+          <div>
+            <Wizard.Action action="continue">
+              <p>+ Create new tree</p>
+            </Wizard.Action>
+          </div>
         </Wizard.Page>
       );
     }
+    // <div className="page-one__link" onClick={() => this.setPage(1)}>
+    //   + Create new tree
+    // </div>
     pages.push(
       <Wizard.Page key={1} title="Testing Page 1">
         <div>Page 1</div>
@@ -90,6 +129,7 @@ class PhyloTreeByPathCreation extends React.Component {
         <Wizard
           skipPageInfoNPages={this.state.skipListTrees ? 0 : 1}
           onComplete={this.props.onComplete}
+          defaultPage={this.state.defaultPage}
         >
           {this.getPages()}
         </Wizard>
