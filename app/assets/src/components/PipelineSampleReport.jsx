@@ -327,19 +327,10 @@ class PipelineSampleReport extends React.Component {
       includedCategories.length > 0 ||
       includedSubcategories.length > 0
     ) {
-      let displayed_subcat_indicator_columns = includedSubcategories.map(
-        subcat => {
-          return `is_${subcat.toLowerCase()}`;
-        }
-      );
-
       for (var i = 0; i < thresholded_taxons.length; i++) {
         let taxon = thresholded_taxons[i];
         if (
-          includedCategories.indexOf(taxon.category_name) >= 0 ||
-          displayed_subcat_indicator_columns.some(column => {
-            return taxon[column] == 1;
-          })
+          this.isTaxonIncluded(taxon, includedCategories, includedSubcategories)
         ) {
           // In the included categories or subcategories
           selected_taxons.push(taxon);
@@ -354,10 +345,11 @@ class PipelineSampleReport extends React.Component {
           taxon = thresholded_taxons[i];
           while (taxon && taxon.genus_taxid == -200) {
             if (
-              includedCategories.indexOf(taxon.category_name) >= 0 ||
-              displayed_subcat_indicator_columns.some(column => {
-                return taxon[column] == 1;
-              })
+              this.isTaxonIncluded(
+                taxon,
+                includedCategories,
+                includedSubcategories
+              )
             ) {
               filtered_children.push(taxon);
             }
@@ -422,6 +414,20 @@ class PipelineSampleReport extends React.Component {
       }
     }
     return res;
+  }
+
+  isTaxonIncluded(taxon, includedCategories, includedSubcategories) {
+    let displayed_subcat_indicator_columns = includedSubcategories.map(
+      subcat => {
+        return `is_${subcat.toLowerCase()}`;
+      }
+    );
+    return (
+      includedCategories.indexOf(taxon.category_name) >= 0 ||
+      displayed_subcat_indicator_columns.some(column => {
+        return taxon[column] == 1;
+      })
+    );
   }
 
   filterNonSpecific(rows) {
