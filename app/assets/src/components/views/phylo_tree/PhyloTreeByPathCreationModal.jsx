@@ -12,10 +12,17 @@ class PhyloTreeByPathCreationModal extends React.Component {
     };
 
     this.handleOpen = this.handleOpen.bind(this);
+    this.handleClose = this.handleClose.bind(this);
   }
 
   handleOpen() {
+    console.log("handling open");
     this.setState({ open: true });
+  }
+
+  handleClose() {
+    console.log("handling close");
+    this.setState({ open: false });
   }
 
   render() {
@@ -23,11 +30,13 @@ class PhyloTreeByPathCreationModal extends React.Component {
       <Modal
         trigger={<span onClick={this.handleOpen}>{this.props.trigger}</span>}
         open={this.state.open}
+        onClose={this.handleClose}
       >
         <PhyloTreeByPathCreation
           onComplete={() => {
             this.setState({ open: false });
           }}
+          {...this.props}
         />
       </Modal>
     );

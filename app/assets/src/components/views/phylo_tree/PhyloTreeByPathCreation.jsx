@@ -9,7 +9,8 @@ class PhyloTreeByPathCreation extends React.Component {
 
     this.state = {
       skipListTrees: false,
-      phyloTreesLoaded: false
+      phyloTreesLoaded: false,
+      phyloTrees: []
     };
   }
 
@@ -21,7 +22,7 @@ class PhyloTreeByPathCreation extends React.Component {
     axios
       .get("/phylo_trees/index.json", {
         params: {
-          taxId: this.props.taxId,
+          taxId: this.props.taxonId,
           projectId: this.props.projectId
         }
       })
@@ -41,6 +42,7 @@ class PhyloTreeByPathCreation extends React.Component {
         } else {
           console.log("load the data");
           this.setState({
+            phyloTrees: response.data.phyloTrees,
             phyloTreesLoaded: true
           });
         }
@@ -54,9 +56,17 @@ class PhyloTreeByPathCreation extends React.Component {
     let pages = [];
     if (!this.state.skipListTrees) {
       pages.push(
-        <Wizard.Page key={0} title="List Trees">
-          <div>Intro</div>
-          <div>Not counting</div>
+        <Wizard.Page
+          key={0}
+          className="page-one"
+          skipButtons={true}
+          title="Phylogenetic Trees"
+        >
+          <div className="page-one__subtitle">
+            {(this.phyloTrees[0] || {}).tax_name}
+          </div>
+          <div className="page-one__table">{this.phyloTrees}</div>
+          <div className="page-one__link">+ Create new tree</div>
         </Wizard.Page>
       );
     }

@@ -887,6 +887,7 @@ class PipelineSampleReport extends React.Component {
           trigger={
             <i className="fa fa-code-fork action-dot" aria-hidden="true" />
           }
+          taxonId={taxInfo.tax_id}
         />
         // <i
         //   onClick={() => this.gotoTreeLink(taxInfo.tax_id)}

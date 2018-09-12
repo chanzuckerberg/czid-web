@@ -50,8 +50,9 @@ class PhyloTreesController < ApplicationController
                  name: taxon_lineage.name }
     end
 
+    @phylo_trees = @phylo_trees.as_json(include: { user: { only: [ :id, :name ]}})
+
     # Augment tree data with sample attributes and number of pipeline_runs
-    @phylo_trees = @phylo_trees.as_json
     @phylo_trees.each do |pt|
       sample_details = PhyloTree.sample_details_by_tree_id[pt["id"]]
       pt["sampleDetailsByNodeName"] = sample_details
@@ -63,7 +64,7 @@ class PhyloTreesController < ApplicationController
         render json: {
           project: @project,
           taxon: @taxon,
-          phyloTrees: @phyloTrees
+          phyloTrees: @phylo_trees
         }
       end
     end

@@ -9,11 +9,7 @@ class Modal extends React.Component {
 
   render() {
     return (
-      <SemanticModal
-        className="idseq-ui"
-        open={this.props.open}
-        trigger={this.props.trigger}
-      >
+      <SemanticModal className="idseq-ui" {...this.props}>
         {this.props.title && (
           <SemanticModal.Header>{this.props.title}</SemanticModal.Header>
         )}
