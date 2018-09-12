@@ -129,7 +129,9 @@ class PipelineSampleReport extends React.Component {
       loading: true,
       activeThresholds: this.defaultThresholdValues,
       countType: "NT",
-      readSpecificity: cachedReadSpecificity ? cachedReadSpecificity : "All",
+      readSpecificity: cachedReadSpecificity
+        ? parseInt(cachedReadSpecificity)
+        : 0,
       phyloTreeModalOpen: true
     };
 
@@ -278,7 +280,7 @@ class PipelineSampleReport extends React.Component {
         ),
         pagesRendered: 1,
         rows_passing_filters: this.state.taxonomy_details.length,
-        readSpecificity: "All"
+        readSpecificity: 0
       },
       () => {
         ThresholdMap.saveThresholdFilters([]);
@@ -297,6 +299,8 @@ class PipelineSampleReport extends React.Component {
     let selected_taxons = [];
     const thresholded_taxons = input_taxons || this.state.thresholded_taxons;
     const active_thresholds = this.state.activeThresholds;
+    const specificOnly = this.state.readSpecificity === 1;
+
     if (searchTaxonId > 0) {
       // ignore all the thresholds
       let genus_taxon = {};
@@ -328,17 +332,12 @@ class PipelineSampleReport extends React.Component {
           return `is_${subcat.toLowerCase()}`;
         }
       );
+
       for (var i = 0; i < thresholded_taxons.length; i++) {
         let taxon = thresholded_taxons[i];
+
         if (includedCategories.indexOf(taxon.category_name) >= 0) {
           // In the included categories
-
-          // Skip if excluding non-specific rows
-          if (this.state.readSpecificity.toLowerCase() === "specific only") {
-            if (taxon.tax_level === 2 && taxon.tax_id < 0) {
-              continue;
-            }
-          }
           selected_taxons.push(taxon);
         } else if (
           displayed_subcat_indicator_columns.some(column => {
@@ -371,16 +370,7 @@ class PipelineSampleReport extends React.Component {
         }
       }
     } else {
-      // Skip if excluding non-specific rows
-      if (this.state.readSpecificity.toLowerCase() === "specific only") {
-        for (let tax_info of thresholded_taxons) {
-          if (tax_info.tax_level !== 2 || tax_info.tax_id > 0) {
-            selected_taxons.push(tax_info);
-          }
-        }
-      } else {
-        selected_taxons = thresholded_taxons;
-      }
+      selected_taxons = thresholded_taxons;
     }
 
     if (searchTaxonId <= 0) {
@@ -399,7 +389,13 @@ class PipelineSampleReport extends React.Component {
       searchKey = "";
     }
 
+    if (specificOnly) {
+      selected_taxons = this.filterNonSpecific(selected_taxons);
+    }
     selected_taxons = this.updateSpeciesCount(selected_taxons);
+    if (specificOnly) {
+      selected_taxons = this.removeEmptyGenusRows(selected_taxons);
+    }
 
     this.setState({
       loading: false,
@@ -435,6 +431,33 @@ class PipelineSampleReport extends React.Component {
       }
     }
     return res;
+  }
+
+  filterNonSpecific(rows) {
+    let filtered = [];
+    for (let i = 0; i < rows.length; i++) {
+      let cur = rows[i];
+      if (cur.tax_id < 0) {
+        // Leave it off if non-specific.
+        if (cur.tax_level === 2) {
+          // If it was a non-specific genus row, remove species rows under it.
+          let j = i + 1;
+          while (j < rows.length && rows[j].genus_taxid === cur.tax_id) {
+            j++;
+          }
+          i = j - 1; // -1 at the end because you increment j and i.
+        }
+      } else {
+        filtered.push(cur);
+      }
+    }
+    return filtered;
+  }
+
+  removeEmptyGenusRows(rows) {
+    // Remove rows unless they have a species tax level or a species count
+    // under them of greater than 0.
+    return rows.filter(r => r.tax_level === 1 || r.species_count > 0);
   }
 
   //Load more samples on scroll
@@ -669,6 +692,7 @@ class PipelineSampleReport extends React.Component {
 
   removeCategory(categoryToRemove) {
     this.applyIncludedCategories(
+      this,
       this.state.includedCategories.filter(category => {
         return category != categoryToRemove;
       })
@@ -1658,8 +1682,8 @@ function BackgroundModelFilter({ parent }) {
 
 function SpecificityFilter({ parent }) {
   const specificityOptions = [
-    { text: "All", value: "All" },
-    { text: "Specific Only", value: "Specific Only" }
+    { text: "All", value: 0 },
+    { text: "Specific Only", value: 1 }
   ];
   return (
     <OurDropdown
