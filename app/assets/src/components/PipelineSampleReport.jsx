@@ -300,7 +300,6 @@ class PipelineSampleReport extends React.Component {
     const specificOnly = this.state.readSpecificity === 1;
 
     if (searchTaxonId > 0) {
-      // ignore all the thresholds
       let genus_taxon = {};
       let matched_taxons = [];
       for (let i = 0; i < this.state.taxonomy_details.length; i++) {
@@ -324,25 +323,16 @@ class PipelineSampleReport extends React.Component {
         selected_taxons.push(genus_taxon);
         selected_taxons = selected_taxons.concat(matched_taxons);
       }
-    } else if (includedCategories.length > 0) {
-      let displayed_subcat_indicator_columns = includedSubcategories.map(
-        subcat => {
-          return `is_${subcat.toLowerCase()}`;
-        }
-      );
-
+    } else if (
+      includedCategories.length > 0 ||
+      includedSubcategories.length > 0
+    ) {
       for (var i = 0; i < thresholded_taxons.length; i++) {
         let taxon = thresholded_taxons[i];
-
-        if (includedCategories.indexOf(taxon.category_name) >= 0) {
-          // In the included categories
-          selected_taxons.push(taxon);
-        } else if (
-          displayed_subcat_indicator_columns.some(column => {
-            return taxon[column] == 1;
-          })
+        if (
+          this.isTaxonIncluded(taxon, includedCategories, includedSubcategories)
         ) {
-          // even if category is not included, include checked subcategories
+          // In the included categories or subcategories
           selected_taxons.push(taxon);
         } else if (
           taxon.category_name == "Uncategorized" &&
@@ -354,7 +344,13 @@ class PipelineSampleReport extends React.Component {
           i++;
           taxon = thresholded_taxons[i];
           while (taxon && taxon.genus_taxid == -200) {
-            if (includedCategories.indexOf(taxon.category_name) >= 0) {
+            if (
+              this.isTaxonIncluded(
+                taxon,
+                includedCategories,
+                includedSubcategories
+              )
+            ) {
               filtered_children.push(taxon);
             }
             i++;
@@ -369,17 +365,6 @@ class PipelineSampleReport extends React.Component {
       }
     } else {
       selected_taxons = thresholded_taxons;
-    }
-
-    if (searchTaxonId <= 0) {
-      // only apply subcategory filter if user is not doing a search
-      // TODO: this seems to make not sense!
-      for (let i = 0; i < includedSubcategories.length; i++) {
-        let column = `is_${includedSubcategories[i].toLowerCase()}`;
-        selected_taxons = selected_taxons.filter(x => {
-          return x[column] == 0;
-        });
-      }
     }
 
     let searchKey = this.state.searchKey;
@@ -429,6 +414,20 @@ class PipelineSampleReport extends React.Component {
       }
     }
     return res;
+  }
+
+  isTaxonIncluded(taxon, includedCategories, includedSubcategories) {
+    let displayed_subcat_indicator_columns = includedSubcategories.map(
+      subcat => {
+        return `is_${subcat.toLowerCase()}`;
+      }
+    );
+    return (
+      includedCategories.indexOf(taxon.category_name) >= 0 ||
+      displayed_subcat_indicator_columns.some(column => {
+        return taxon[column] == 1;
+      })
+    );
   }
 
   filterNonSpecific(rows) {
@@ -689,39 +688,18 @@ class PipelineSampleReport extends React.Component {
   }
 
   removeCategory(categoryToRemove) {
-    this.applyIncludedCategories(
-      this,
-      this.state.includedCategories.filter(category => {
+    let newIncludedCategories = this.state.includedCategories.filter(
+      category => {
         return category != categoryToRemove;
+      }
+    );
+    newIncludedCategories = newIncludedCategories.concat(
+      this.state.includedSubcategories.filter(subcategory => {
+        return subcategory != categoryToRemove;
       })
     );
-  }
 
-  removeSubcategory(subcategoryToRemove) {
-    const newIncludedSubcategories = this.state.includedSubcategories.filter(
-      subcategory => {
-        return subcategory != subcategoryToRemove;
-      }
-    );
-    this.setState(
-      {
-        includedSubcategories: newIncludedSubcategories,
-        searchId: 0,
-        searchKey: ""
-      },
-      () => {
-        Cookies.set(
-          "includeSubcategories",
-          JSON.stringify(newIncludedSubcategories)
-        );
-        this.applySearchFilter(
-          0,
-          this.state.includedCategories,
-          undefined,
-          newIncludedSubcategories
-        );
-      }
-    );
+    this.applyIncludedCategories(this, newIncludedCategories);
   }
 
   sortResults() {
@@ -1372,7 +1350,7 @@ class PipelineSampleReport extends React.Component {
             <Icon
               name="close"
               onClick={e => {
-                this.removeSubcategory(subcat);
+                this.removeCategory(subcat);
               }}
             />
           </Label>
