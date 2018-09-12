@@ -760,6 +760,25 @@ class PipelineRun < ApplicationRecord
     ")
   end
 
+  def update_kingdoms
+    TaxonCount.connection.execute("
+      UPDATE taxon_counts, taxon_lineages
+      SET taxon_counts.kingdom_taxid = taxon_lineages.kingdom_taxid
+      WHERE taxon_counts.pipeline_run_id=#{id}
+            AND (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at)
+            AND taxon_counts.tax_id > #{TaxonLineage::INVALID_CALL_BASE_ID}
+            AND taxon_lineages.taxid = taxon_counts.tax_id
+    ")
+    TaxonCount.connection.execute("
+      UPDATE taxon_counts, taxon_lineages
+      SET taxon_counts.kingdom_taxid = taxon_lineages.kingdom_taxid
+      WHERE taxon_counts.pipeline_run_id=#{id}
+            AND (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at)
+            AND taxon_counts.tax_id < #{TaxonLineage::INVALID_CALL_BASE_ID}
+            AND taxon_lineages.taxid = MOD(ABS(taxon_counts.tax_id), ABS(#{TaxonLineage::INVALID_CALL_BASE_ID}))
+    ")
+  end
+
   def update_superkingdoms
     TaxonCount.connection.execute("
       UPDATE taxon_counts, taxon_lineages
