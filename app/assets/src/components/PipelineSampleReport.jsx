@@ -284,7 +284,6 @@ class PipelineSampleReport extends React.Component {
         ThresholdMap.saveThresholdFilters([]);
         Cookies.set("includedCategories", "[]");
         Cookies.set("includedSubcategories", "[]");
-        // need to reset the categories box too
       }
     );
   }
@@ -295,11 +294,6 @@ class PipelineSampleReport extends React.Component {
     input_taxons,
     includedSubcategories = []
   ) {
-    // Hierarchy of the search filters is:
-    //  1. Apply threshold filters (done outside of this function)
-    //  2. Apply text search, OR if no text search, apply category filters
-    //  3. Apply read specificity filters
-
     let selected_taxons = [];
     const thresholded_taxons = input_taxons || this.state.thresholded_taxons;
     const active_thresholds = this.state.activeThresholds;
@@ -341,20 +335,40 @@ class PipelineSampleReport extends React.Component {
 
       for (var i = 0; i < thresholded_taxons.length; i++) {
         let taxon = thresholded_taxons[i];
-        if (includedCategories.indexOf(taxon.category_name) >= 0) {
-          // In the included categories
-          selected_taxons.push(taxon);
-        } else if (
+        if (
+          includedCategories.indexOf(taxon.category_name) >= 0 ||
           displayed_subcat_indicator_columns.some(column => {
             return taxon[column] == 1;
           })
         ) {
-          // even if category is not included, include checked subcategories
+          // In the included categories or subcategories
           selected_taxons.push(taxon);
         } else if (
           taxon.category_name == "Uncategorized" &&
           parseInt(taxon.tax_id) == -200
         ) {
+          // the 'All taxa without genus classification' taxon
+          const uncat_taxon = taxon;
+          const filtered_children = [];
+          i++;
+          taxon = thresholded_taxons[i];
+          while (taxon && taxon.genus_taxid == -200) {
+            if (
+              includedCategories.indexOf(taxon.category_name) >= 0 ||
+              displayed_subcat_indicator_columns.some(column => {
+                return taxon[column] == 1;
+              })
+            ) {
+              filtered_children.push(taxon);
+            }
+            i++;
+            taxon = thresholded_taxons[i];
+          }
+          if (filtered_children.length > 0) {
+            selected_taxons.push(uncat_taxon);
+            selected_taxons = selected_taxons.concat(filtered_children);
+          }
+          i--;
         }
       }
     } else {
@@ -668,39 +682,18 @@ class PipelineSampleReport extends React.Component {
   }
 
   removeCategory(categoryToRemove) {
-    this.applyIncludedCategories(
-      this,
-      this.state.includedCategories.filter(category => {
+    let newIncludedCategories = this.state.includedCategories.filter(
+      category => {
         return category != categoryToRemove;
+      }
+    );
+    newIncludedCategories = newIncludedCategories.concat(
+      this.state.includedSubcategories.filter(subcategory => {
+        return subcategory != categoryToRemove;
       })
     );
-  }
 
-  removeSubcategory(subcategoryToRemove) {
-    const newIncludedSubcategories = this.state.includedSubcategories.filter(
-      subcategory => {
-        return subcategory != subcategoryToRemove;
-      }
-    );
-    this.setState(
-      {
-        includedSubcategories: newIncludedSubcategories,
-        searchId: 0,
-        searchKey: ""
-      },
-      () => {
-        Cookies.set(
-          "includeSubcategories",
-          JSON.stringify(newIncludedSubcategories)
-        );
-        this.applySearchFilter(
-          0,
-          this.state.includedCategories,
-          undefined,
-          newIncludedSubcategories
-        );
-      }
-    );
+    this.applyIncludedCategories(this, newIncludedCategories);
   }
 
   sortResults() {
@@ -1351,7 +1344,7 @@ class PipelineSampleReport extends React.Component {
             <Icon
               name="close"
               onClick={e => {
-                this.removeSubcategory(subcat);
+                this.removeCategory(subcat);
               }}
             />
           </Label>
