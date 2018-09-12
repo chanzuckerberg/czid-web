@@ -2,7 +2,7 @@ class AddSampleMetadata < ActiveRecord::Migration[5.1]
   def change
     create_table :metadata do |t|
       t.string :key, null: false
-      t.integer :type, null: false, default: 0 # 0 for string, 1 for number, 2 for lists (as string)
+      t.tinyint :data_type, null: false, default: 0 # 0 for string, 1 for number, 2 for lists (as string)
       t.string :text_raw_value
       t.string :text_validated_value
       t.float :number_raw_value

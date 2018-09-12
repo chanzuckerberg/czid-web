@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_180_911_202_026) do
+ActiveRecord::Schema.define(version: 20_180_912_200_855) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -127,6 +127,19 @@ ActiveRecord::Schema.define(version: 20_180_911_202_026) do
     t.index ["pipeline_output_id"], name: "index_job_stats_on_pipeline_output_id"
     t.index ["pipeline_run_id"], name: "index_job_stats_on_pipeline_run_id"
     t.index ["task"], name: "index_job_stats_on_task"
+  end
+
+  create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "key", null: false
+    t.integer "data_type", default: 0, null: false
+    t.string "text_raw_value"
+    t.string "text_validated_value"
+    t.float "number_raw_value", limit: 24
+    t.float "number_validated_value", limit: 24
+    t.bigint "sample_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["sample_id"], name: "index_metadata_on_sample_id"
   end
 
   create_table "output_states", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
