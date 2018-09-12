@@ -368,6 +368,7 @@ class PipelineRun < ApplicationRecord
     update_names
     # denormalize superkingdom_taxid into taxon_counts
     if multihit?
+      update_kingdoms
       update_superkingdoms
     else
       update_genera
@@ -753,10 +754,30 @@ class PipelineRun < ApplicationRecord
       UPDATE taxon_counts, taxon_lineages
       SET taxon_counts.genus_taxid = taxon_lineages.genus_taxid,
           taxon_counts.family_taxid = taxon_lineages.family_taxid,
+          taxon_counts.kingdom_taxid = taxon_lineages.kingdom_taxid,
           taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
       WHERE taxon_counts.pipeline_run_id=#{id} AND
             (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at) AND
             taxon_lineages.taxid = taxon_counts.tax_id
+    ")
+  end
+
+  def update_kingdoms
+    TaxonCount.connection.execute("
+      UPDATE taxon_counts, taxon_lineages
+      SET taxon_counts.kingdom_taxid = taxon_lineages.kingdom_taxid
+      WHERE taxon_counts.pipeline_run_id=#{id}
+            AND (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at)
+            AND taxon_counts.tax_id > #{TaxonLineage::INVALID_CALL_BASE_ID}
+            AND taxon_lineages.taxid = taxon_counts.tax_id
+    ")
+    TaxonCount.connection.execute("
+      UPDATE taxon_counts, taxon_lineages
+      SET taxon_counts.kingdom_taxid = taxon_lineages.kingdom_taxid
+      WHERE taxon_counts.pipeline_run_id=#{id}
+            AND (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at)
+            AND taxon_counts.tax_id < #{TaxonLineage::INVALID_CALL_BASE_ID}
+            AND taxon_lineages.taxid = MOD(ABS(taxon_counts.tax_id), ABS(#{TaxonLineage::INVALID_CALL_BASE_ID}))
     ")
   end
 
