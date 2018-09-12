@@ -19,8 +19,8 @@ class Metadatum < ApplicationRecord
   def self.add_to_sample(sample, key, raw_value)
     key = key.to_sym
 
-    # Raise RuntimeError if the raw_value is invalid. Caller can handle and
-    # provide feedback.
+    # validate raises RuntimeError if invalid. Caller can handle and provide
+    # feedback.
     validated_value = validate(key, raw_value)
 
     # Create the entry
