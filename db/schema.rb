@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_180_912_200_855) do
+ActiveRecord::Schema.define(version: 20_180_913_180_552) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -131,12 +131,12 @@ ActiveRecord::Schema.define(version: 20_180_912_200_855) do
 
   create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "key", null: false
-    t.integer "data_type", default: 0, null: false
+    t.integer "data_type", limit: 1, null: false
     t.string "text_raw_value"
     t.string "text_validated_value"
     t.float "number_raw_value", limit: 24
     t.float "number_validated_value", limit: 24
-    t.bigint "sample_id"
+    t.integer "sample_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["sample_id"], name: "index_metadata_on_sample_id"

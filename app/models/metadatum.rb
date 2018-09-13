@@ -1,6 +1,7 @@
 class Metadatum < ApplicationRecord
   # ActiveRecord related
   belongs_to :sample
+  # When using an ActiveRecord enum, the type returned from reading records is String.
   enum data_type: [:string, :number]
   validates :text_validated_value, length: { maximum: 250 }
   validates :number_raw_value, :number_validated_value, numericality: true, allow_nil: true
@@ -53,19 +54,21 @@ class Metadatum < ApplicationRecord
   # Custom validator called on save or update. Writes to the *_validated_value column.
   def set_validated_values
     # Check if the key is valid
-    errors.add(:key, "not a supported metadatum") unless KEY_TO_TYPE.key?(key)
+    unless key && KEY_TO_TYPE.key?(key.to_sym)
+      errors.add(:key, "#{key} is not a supported metadatum")
+    end
 
-    if data_type == NUMBER_TYPE
+    if data_type == "number"
       # Set number types. ActiveRecord validated.
       self.number_validated_value = number_raw_value
-    elsif data_type == STRING_TYPE
+    elsif data_type == "string"
       check_and_set_string_type
     end
-    save
   end
 
   # Called by set_validated_values custom validator
   def check_and_set_string_type
+    key = self.key.to_sym
     if KEY_TO_STRING_OPTIONS.key?(key)
       # If there are explicit string options, match the value to one of them.
       matched = false
@@ -80,7 +83,7 @@ class Metadatum < ApplicationRecord
         end
       end
       unless matched
-        errors.add(:text_raw_value, "did not match options #{options.join(', ')}")
+        errors.add(:text_raw_value, "#{text_raw_value} did not match options #{options.join(', ')}")
       end
     else
       self.text_validated_value = text_raw_value
@@ -105,7 +108,7 @@ class Metadatum < ApplicationRecord
     m.save!
   end
 
-  def self.str_to_basic_chars(res)
+  def str_to_basic_chars(res)
     res.downcase.gsub(/[^0-9A-Za-z]/, '')
   end
 end
