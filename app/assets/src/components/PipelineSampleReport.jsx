@@ -137,8 +137,7 @@ class PipelineSampleReport extends React.Component {
     this.expandedGenera = [];
 
     this.anyFilterSet = this.anyFilterSet.bind(this);
-    this.applyIncludedCategories = this.applyIncludedCategories.bind(this);
-    this.applySearchFilter = this.applySearchFilter.bind(this);
+    this.applyFilters = this.applyFilters.bind(this);
     this.applyThresholdFilters = this.applyThresholdFilters.bind(this);
     this.collapseGenus = this.collapseGenus.bind(this);
     this.collapseTable = this.collapseTable.bind(this);
@@ -151,18 +150,26 @@ class PipelineSampleReport extends React.Component {
     this.flash = this.flash.bind(this);
     this.getBackgroundIdByName = this.getBackgroundIdByName.bind(this);
     this.gotoAlignmentVizLink = this.gotoAlignmentVizLink.bind(this);
-    this.handleNameTypeChange = this.handleNameTypeChange.bind(this);
-    this.handleSpecificityChange = this.handleSpecificityChange.bind(this);
+
+    // control handlers
     this.handleBackgroundModelChange = this.handleBackgroundModelChange.bind(
       this
     );
-    this.removeCategory = this.removeCategory.bind(this);
-    this.removeThresholdFilter = this.removeThresholdFilter.bind(this);
-    this.renderMore = this.renderMore.bind(this);
-    this.resetAllFilters = this.resetAllFilters.bind(this);
-    this.saveAndApplyThresholdFilters = this.saveAndApplyThresholdFilters.bind(
+    this.handleIncludedCategoriesChange = this.handleIncludedCategoriesChange.bind(
       this
     );
+    this.handleNameTypeChange = this.handleNameTypeChange.bind(this);
+    this.handleRemoveCategory = this.handleRemoveCategory.bind(this);
+    this.handleRemoveThresholdFilter = this.handleRemoveThresholdFilter.bind(
+      this
+    );
+    this.handleSpecificityChange = this.handleSpecificityChange.bind(this);
+    this.handleThresholdFiltersChange = this.handleThresholdFiltersChange.bind(
+      this
+    );
+
+    this.renderMore = this.renderMore.bind(this);
+    this.resetAllFilters = this.resetAllFilters.bind(this);
     this.setSortParams = this.setSortParams.bind(this);
     this.sortCompareFunction = this.sortCompareFunction.bind(this);
     this.sortResults = this.sortResults.bind(this);
@@ -250,7 +257,7 @@ class PipelineSampleReport extends React.Component {
           backgroundName: res.data.background_info.name
         },
         () => {
-          this.applyThresholdFilters(this.state.activeThresholds);
+          this.applyThresholdFilters();
         }
       );
     });
@@ -293,7 +300,7 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
-  applySearchFilter() {
+  applyFilters() {
     let searchTaxonId = this.state.search_taxon_id;
     let input_taxons = this.state.thresholded_taxons;
     let includedCategories = this.state.includedCategories;
@@ -628,7 +635,7 @@ class PipelineSampleReport extends React.Component {
     };
   }
 
-  applyIncludedCategories(_, newIncludedCategories) {
+  handleIncludedCategoriesChange(_, newIncludedCategories) {
     // Also update subcategory to match category
     let includedSubcategories = newIncludedCategories.filter(category => {
       return category in this.category_child_parent;
@@ -669,12 +676,12 @@ class PipelineSampleReport extends React.Component {
           "includedSubcategories",
           JSON.stringify(includedSubcategories)
         );
-        this.applySearchFilter();
+        this.applyFilters();
       }
     );
   }
 
-  removeCategory(categoryToRemove) {
+  handleRemoveCategory(categoryToRemove) {
     let newIncludedCategories = this.state.includedCategories.filter(
       category => {
         return category != categoryToRemove;
@@ -686,7 +693,7 @@ class PipelineSampleReport extends React.Component {
       })
     );
 
-    this.applyIncludedCategories(this, newIncludedCategories);
+    this.handleIncludedCategoriesChange(this, newIncludedCategories);
   }
 
   sortResults() {
@@ -706,26 +713,22 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
-  saveAndApplyThresholdFilters(activeThresholds) {
+  handleThresholdFiltersChange(activeThresholds) {
     ThresholdMap.saveThresholdFilters(activeThresholds);
-    this.applyThresholdFilters(activeThresholds);
+    this.setState({ activeThresholds }, () => {
+      this.applyThresholdFilters();
+    });
   }
 
-  removeThresholdFilter(pos) {
+  handleRemoveThresholdFilter(pos) {
     const activeThresholds = Object.assign([], this.state.activeThresholds);
     activeThresholds.splice(pos, 1);
-    this.setState(
-      {
-        activeThresholds
-      },
-      () => {
-        this.saveAndApplyThresholdFilters(activeThresholds);
-      }
-    );
+    this.handleThresholdFiltersChange(activeThresholds);
   }
 
-  applyThresholdFilters(activeThresholds) {
+  applyThresholdFilters() {
     const candidate_taxons = this.state.taxonomy_details;
+    const activeThresholds = this.state.activeThresholds;
     let thresholded_taxons = [];
     let genus_taxon = {};
     let matched_taxons = [];
@@ -761,7 +764,7 @@ class PipelineSampleReport extends React.Component {
     }
 
     this.setState({ activeThresholds, thresholded_taxons }, () => {
-      this.applySearchFilter();
+      this.applyFilters();
     });
   }
 
@@ -789,7 +792,7 @@ class PipelineSampleReport extends React.Component {
   handleSpecificityChange(_, data) {
     Cookies.set("readSpecificity", data.value);
     this.setState({ readSpecificity: data.value }, () => {
-      this.applySearchFilter();
+      this.applyFilters();
     });
   }
 
@@ -1212,7 +1215,7 @@ class PipelineSampleReport extends React.Component {
         search_taxon_id: searchId
       },
       () => {
-        this.applySearchFilter();
+        this.applyFilters();
       }
     );
   }
@@ -1326,7 +1329,7 @@ class PipelineSampleReport extends React.Component {
             <Icon
               name="close"
               onClick={e => {
-                this.removeCategory(category);
+                this.handleRemoveCategory(category);
               }}
             />
           </Label>
@@ -1342,7 +1345,7 @@ class PipelineSampleReport extends React.Component {
             <Icon
               name="close"
               onClick={e => {
-                this.removeCategory(subcat);
+                this.handleRemoveCategory(subcat);
               }}
             />
           </Label>
@@ -1404,7 +1407,7 @@ function AdvancedFilterTagList({ threshold, i, parent }) {
         <Icon
           name="close"
           onClick={() => {
-            parent.removeThresholdFilter(i);
+            parent.handleRemoveThresholdFilter(i);
           }}
         />
       </Label>
@@ -1569,7 +1572,7 @@ function CategoryFilter({ parent }) {
         parent.state.includedSubcategories
       )}
       label="Categories: "
-      onChange={parent.applyIncludedCategories}
+      onChange={parent.handleIncludedCategoriesChange}
     />
   );
 }
@@ -1773,7 +1776,7 @@ class RenderMarkup extends React.Component {
                             operators: [">=", "<="]
                           }}
                           thresholds={parent.state.activeThresholds}
-                          onApply={parent.saveAndApplyThresholdFilters}
+                          onApply={parent.handleThresholdFiltersChange}
                         />
                       </div>
                       <div className="filter-lists-element">
