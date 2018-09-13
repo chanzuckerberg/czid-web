@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_180_911_202_026) do
+ActiveRecord::Schema.define(version: 20_180_913_225_013) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -157,6 +157,7 @@ ActiveRecord::Schema.define(version: 20_180_911_202_026) do
     t.datetime "updated_at", null: false
     t.string "name"
     t.string "dag_branch"
+    t.integer "snps_ready", limit: 1, default: 0
     t.index ["name"], name: "index_phylo_trees_on_name", unique: true
     t.index %w[project_id taxid], name: "index_phylo_trees_on_project_id_and_taxid"
     t.index ["user_id"], name: "index_phylo_trees_on_user_id"

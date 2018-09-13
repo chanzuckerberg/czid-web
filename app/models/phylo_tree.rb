@@ -33,15 +33,20 @@ class PhyloTree < ApplicationRecord
 
     # Retrieve output:
     file = Tempfile.new
-    _stdout, _stderr, status = Open3.capture3("aws", "s3", "cp", s3_outputs["newick"], file.path.to_s)
-    if status.exitstatus.zero?
+    _cmd_stdout, _cmd_stderr, cmd_status = Open3.capture3("aws", "s3", "cp", s3_outputs["newick"], file.path.to_s)
+    if cmd_status.exitstatus.zero?
       file.open
       self.newick = file.read
       self.status = newick.present? ? STATUS_READY : STATUS_FAILED
-      save
     end
     file.close
     file.unlink
+
+    # Determine if SNP annotation is present:
+    _cmd_stdout, _cmd_stderr, cmd_status = Open3.capture3("aws", "s3", "ls", s3_outputs["SNP_annotations"])
+    self.snps_ready = 1 if cmd_status.exitstatus.zero?
+
+    save
   end
 
   def monitor_job(throttle = true)
