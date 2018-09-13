@@ -366,10 +366,9 @@ class PipelineRun < ApplicationRecord
     generate_aggregate_counts('genus') unless multihit?
     # merge more accurate name information from lineages table
     update_names
-    # denormalize superkingdom_taxid into taxon_counts
+    # denormalize superkingdom_taxid and kingdom_taxid into taxon_counts
     if multihit?
-      update_kingdoms
-      update_superkingdoms
+      update_lineage_higher_ranks
     else
       update_genera
     end
@@ -762,29 +761,15 @@ class PipelineRun < ApplicationRecord
     ")
   end
 
-  def update_kingdoms
-    TaxonCount.connection.execute("
-      UPDATE taxon_counts, taxon_lineages
-      SET taxon_counts.kingdom_taxid = taxon_lineages.kingdom_taxid
-      WHERE taxon_counts.pipeline_run_id=#{id}
-            AND (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at)
-            AND taxon_counts.tax_id > #{TaxonLineage::INVALID_CALL_BASE_ID}
-            AND taxon_lineages.taxid = taxon_counts.tax_id
-    ")
-    TaxonCount.connection.execute("
-      UPDATE taxon_counts, taxon_lineages
-      SET taxon_counts.kingdom_taxid = taxon_lineages.kingdom_taxid
-      WHERE taxon_counts.pipeline_run_id=#{id}
-            AND (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at)
-            AND taxon_counts.tax_id < #{TaxonLineage::INVALID_CALL_BASE_ID}
-            AND taxon_lineages.taxid = MOD(ABS(taxon_counts.tax_id), ABS(#{TaxonLineage::INVALID_CALL_BASE_ID}))
-    ")
+  def update_lineage_higher_ranks()
+    update_lineage_level("kingdom")
+    update_lineage_level("superkingdom")
   end
 
-  def update_superkingdoms
+  def update_lineage_rank(rank)
     TaxonCount.connection.execute("
       UPDATE taxon_counts, taxon_lineages
-      SET taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
+      SET taxon_counts.#{rank}_taxid = taxon_lineages.#{rank}_taxid
       WHERE taxon_counts.pipeline_run_id=#{id}
             AND (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at)
             AND taxon_counts.tax_id > #{TaxonLineage::INVALID_CALL_BASE_ID}
@@ -792,7 +777,7 @@ class PipelineRun < ApplicationRecord
     ")
     TaxonCount.connection.execute("
       UPDATE taxon_counts, taxon_lineages
-      SET taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
+      SET taxon_counts.#{rank}_taxid = taxon_lineages.#{rank}_taxid
       WHERE taxon_counts.pipeline_run_id=#{id}
             AND (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at)
             AND taxon_counts.tax_id < #{TaxonLineage::INVALID_CALL_BASE_ID}
