@@ -293,7 +293,8 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
-  applySearchFilter(searchTaxonId = this.state.search_taxon_id) {
+  applySearchFilter() {
+    let searchTaxonId = this.state.search_taxon_id;
     let input_taxons = this.state.thresholded_taxons;
     let includedCategories = this.state.includedCategories;
     let includedSubcategories = this.state.includedSubcategories;
@@ -1211,7 +1212,7 @@ class PipelineSampleReport extends React.Component {
         search_taxon_id: searchId
       },
       () => {
-        this.applySearchFilter(searchId);
+        this.applySearchFilter();
       }
     );
   }
