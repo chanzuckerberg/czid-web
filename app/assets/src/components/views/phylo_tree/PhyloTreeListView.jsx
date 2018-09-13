@@ -5,7 +5,7 @@ import FilterRow from "../../layout/FilterRow";
 import PhyloTreeVis from "./PhyloTreeVis";
 import PropTypes from "prop-types";
 import ViewHeader from "../../layout/ViewHeader";
-import DownloadButton from "../../ui/controls/buttons/DownloadButton";
+import DownloadButtonDropdown from "../../ui/controls/dropdowns/DownloadButtonDropdown";
 
 class PhyloTreeListView extends React.Component {
   constructor(props) {
@@ -70,8 +70,8 @@ class PhyloTreeListView extends React.Component {
       <div className="phylo-tree-list-view">
         <div className="phylo-tree-list-view__narrow-container">
           <ViewHeader title="Phylogenetic Trees">
-            <DownloadButton
-              what="SNPs"
+            <DownloadButtonDropdown
+              options={[{ text: "SNPs", value: "SNPs" }]}
               onClick={() => {
                 location.href = `/phylo_trees/${currentTree.id}/download_snps`;
               }}

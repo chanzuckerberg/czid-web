@@ -86,7 +86,7 @@ class PhyloTree < ApplicationRecord
       reference_taxids = [taxid]
     end
     # Retrieve superkigdom name for idseq-dag
-    superkingdom_name = TaxonLineage.where(taxid: 573).last.superkingdom_name
+    superkingdom_name = TaxonLineage.where(taxid: taxid).last.superkingdom_name
     # Get fasta paths and alignment viz paths for each pipeline_run
     align_viz_files = {}
     pipeline_runs.each do |pr|
