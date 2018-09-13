@@ -53,12 +53,6 @@ class ThresholdFilterDropdown extends React.Component {
     });
   }
 
-  validateItems() {
-    let newThresholds = this.state.thresholds.filter(this.isThresholdValid);
-    this.setState({ thresholds: newThresholds });
-    this.props.onApply(newThresholds);
-  }
-
   handleAddThresholdItem(event) {
     this.addNewItem();
     event.stopPropagation();
@@ -70,7 +64,9 @@ class ThresholdFilterDropdown extends React.Component {
 
   handleClose() {
     this.setState({ popupIsOpen: false });
-    this.validateItems();
+    let newThresholds = this.state.thresholds.filter(this.isThresholdValid);
+    this.setState({ thresholds: newThresholds });
+    this.props.onApply(newThresholds);
   }
 
   handleOpen() {
@@ -138,6 +134,13 @@ class ThresholdFilterDropdown extends React.Component {
         on="click"
       />
     );
+  }
+
+  componentWillReceiveProps(nextProps) {
+    let newThresholds = nextProps.thresholds.filter(this.isThresholdValid);
+    if (newThresholds !== this.state.thresholds) {
+      this.setState({ thresholds: newThresholds });
+    }
   }
 }
 

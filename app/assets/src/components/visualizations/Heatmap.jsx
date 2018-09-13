@@ -349,25 +349,6 @@ export default class Heatmap extends React.Component {
         d3.selectAll("." + cssClass + "-link").classed("link-hover", false);
         d3.selectAll(".heatmap .highlight").classed("highlight", false);
       });
-    /*
-            var node = vis.selectAll("g.node")
-                    .data(nodes)
-                .enter().append("g")
-                    .attr("class", "node")
-                    .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; })
-
-            node.append("circle")
-                .attr("r", 4.5);
-        node.append("text")
-        .attr("dy", 3)
-        .attr("x", function(d) { return d.children ? -8 : 8; })
-        .style("text-anchor", function(d) { return d.children ? "end" : "start"; })
-        .text(function(d) {
-                    if (d.sample) {
-                        return d.sample.name;
-                    }
-                });
-        */
     return visContainer;
   }
 
