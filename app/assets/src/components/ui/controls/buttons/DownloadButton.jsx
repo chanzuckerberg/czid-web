@@ -3,14 +3,10 @@ import PropTypes from "prop-types";
 import SecondaryButton from "./SecondaryButton";
 import React from "react";
 
-const DownloadButton = ({ what, disabled, onClick }) => {
-  let text = "Download";
-  if (what) {
-    text += ` ${what}`;
-  }
+const DownloadButton = ({ disabled, onClick }) => {
   return (
     <SecondaryButton
-      text={text}
+      text="Download"
       disabled={disabled}
       onClick={onClick}
       icon={<Icon size="large" className={"cloud download alternate"} />}
@@ -19,7 +15,6 @@ const DownloadButton = ({ what, disabled, onClick }) => {
 };
 
 DownloadButton.propTypes = {
-  what: PropTypes.string,
   disabled: PropTypes.bool,
   onClick: PropTypes.func
 };
