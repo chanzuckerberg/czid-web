@@ -1,14 +1,14 @@
 class Metadatum < ApplicationRecord
   # ActiveRecord related
   belongs_to :sample
+  STRING_TYPE = 0
+  NUMBER_TYPE = 1
   # When using an ActiveRecord enum, the type returned from reading records is String.
-  enum data_type: [:string, :number]
+  enum data_type: { string: STRING_TYPE, number: NUMBER_TYPE }
   validates :text_validated_value, length: { maximum: 250 }
   validates :number_raw_value, :number_validated_value, numericality: true, allow_nil: true
   validate :set_validated_values
 
-  STRING_TYPE = 0
-  NUMBER_TYPE = 1
   # Key to the metadatum type. Supporting strings and numbers currently.
   KEY_TO_TYPE = {
     unique_id: STRING_TYPE,
