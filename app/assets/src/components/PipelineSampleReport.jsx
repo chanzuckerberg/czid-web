@@ -297,6 +297,9 @@ class PipelineSampleReport extends React.Component {
   }
 
   applyFilters(recomputeThresholdedTaxons = false) {
+    //
+    // Threshold filters
+    //
     if (recomputeThresholdedTaxons) {
       this.computeThresholdedTaxons();
     }
@@ -309,6 +312,9 @@ class PipelineSampleReport extends React.Component {
     let selected_taxons = [];
     const specificOnly = this.state.readSpecificity === 1;
 
+    //
+    // Search filters
+    //
     if (searchTaxonId > 0) {
       let genus_taxon = {};
       let matched_taxons = [];
@@ -338,11 +344,37 @@ class PipelineSampleReport extends React.Component {
       input_taxons = new_input_taxons;
     }
 
+    //
+    // Category filters
+    //
     if (includedCategories.length > 0 || includedSubcategories.length > 0) {
+      // prepare some variables used by isTaxonIncluded
+      const excludedSubcategories = [];
+      Object.keys(this.category_child_parent).forEach(subcat => {
+        const parent = this.category_child_parent[subcat];
+        if (
+          includedCategories.includes(parent) &&
+          includedSubcategories.indexOf(subcat) < 0
+        ) {
+          excludedSubcategories.push(subcat);
+        }
+      });
+      const includedSubcategoryColumns = includedSubcategories.map(subcat => {
+        return `is_${subcat.toLowerCase()}`;
+      });
+      const excludedSubcategoryColumns = excludedSubcategories.map(subcat => {
+        return `is_${subcat.toLowerCase()}`;
+      });
+
       for (var i = 0; i < input_taxons.length; i++) {
         let taxon = input_taxons[i];
         if (
-          this.isTaxonIncluded(taxon, includedCategories, includedSubcategories)
+          this.isTaxonIncluded(
+            taxon,
+            includedCategories,
+            includedSubcategoryColumns,
+            excludedSubcategoryColumns
+          )
         ) {
           // In the included categories or subcategories
           selected_taxons.push(taxon);
@@ -360,7 +392,8 @@ class PipelineSampleReport extends React.Component {
               this.isTaxonIncluded(
                 taxon,
                 includedCategories,
-                includedSubcategories
+                includedSubcategoryColumns,
+                excludedSubcategoryColumns
               )
             ) {
               filtered_children.push(taxon);
@@ -379,6 +412,9 @@ class PipelineSampleReport extends React.Component {
       selected_taxons = input_taxons;
     }
 
+    //
+    // Non-specific reads filter
+    //
     if (specificOnly) {
       selected_taxons = this.filterNonSpecific(selected_taxons);
     }
@@ -417,15 +453,20 @@ class PipelineSampleReport extends React.Component {
     return res;
   }
 
-  isTaxonIncluded(taxon, includedCategories, includedSubcategories) {
-    let displayed_subcat_indicator_columns = includedSubcategories.map(
-      subcat => {
-        return `is_${subcat.toLowerCase()}`;
-      }
-    );
+  isTaxonIncluded(
+    taxon,
+    includedCategories,
+    includedSubcategoryColumns,
+    excludedSubcategoryColumns
+  ) {
+    // returns if taxon is in either the included categories / subcategories AND
+    // the taxon is not in an excluded subcategory
     return (
-      includedCategories.indexOf(taxon.category_name) >= 0 ||
-      displayed_subcat_indicator_columns.some(column => {
+      (includedCategories.indexOf(taxon.category_name) >= 0 ||
+        includedSubcategoryColumns.some(column => {
+          return taxon[column] == 1;
+        })) &&
+      !excludedSubcategoryColumns.some(column => {
         return taxon[column] == 1;
       })
     );
@@ -636,7 +677,7 @@ class PipelineSampleReport extends React.Component {
   }
 
   handleIncludedCategoriesChange(_, newIncludedCategories) {
-    // Also update subcategory to match category
+    // filter out categories from subcategory list
     let includedSubcategories = newIncludedCategories.filter(category => {
       return category in this.category_child_parent;
     });
@@ -646,6 +687,8 @@ class PipelineSampleReport extends React.Component {
         return categoryOption.name;
       })
     );
+
+    // filter out subcategories from the category list
     let includedCategories = newIncludedCategories.filter(category => {
       return (
         !(category in this.category_child_parent) &&
@@ -653,6 +696,7 @@ class PipelineSampleReport extends React.Component {
       );
     });
 
+    // add all subcategories of a category if the parent category is being added
     Object.keys(this.category_child_parent).forEach(subcat => {
       const parent = this.category_child_parent[subcat];
       if (
