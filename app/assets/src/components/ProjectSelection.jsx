@@ -1,7 +1,5 @@
 import React from "react";
 import axios from "axios";
-import $ from "jquery";
-import Samples from "./Samples";
 import Nanobar from "nanobar";
 
 /**
@@ -57,9 +55,6 @@ class ProjectSelection extends React.Component {
     e.stopPropagation();
     let favStatus = e.target.getAttribute("data-fav");
     let projectId = e.target.getAttribute("data-id");
-    favStatus == "true"
-      ? _satellite.track("unfavorite")
-      : _satellite.track("favorite");
     this.nanobar.go(30);
     axios
       .put(

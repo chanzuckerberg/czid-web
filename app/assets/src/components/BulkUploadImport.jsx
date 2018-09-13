@@ -655,7 +655,7 @@ class BulkUploadImport extends React.Component {
           <span>
             I agree that the data I am uploading to IDseq has been lawfully
             collected and that I have all necessary consent and authorization to
-            upload it for the purposes outlined in IDseq's&nbsp;
+            upload it for the purposes outlined in {"IDseq's "}
           </span>
           <a
             href="https://s3-us-west-2.amazonaws.com/idseq-database/Terms.pdf"
@@ -935,8 +935,8 @@ class BulkUploadImport extends React.Component {
                             extensions to be considered:<br />
                             fastq.gz / fq.gz / fastq / fq / fasta.gz / fa.gz /
                             fasta / fa.<br />
-                            Paired files must be labeled "_R1" or "_R2" at the
-                            end of the basename.
+                            Paired files must be labeled {'"_R1" or "_R2"'} at
+                            the end of the basename.
                           </i>
                         </div>
                         <div className="example-link">
