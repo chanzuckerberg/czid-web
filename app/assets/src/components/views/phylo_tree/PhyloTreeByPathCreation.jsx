@@ -16,7 +16,11 @@ class PhyloTreeByPathCreation extends React.Component {
       phyloTreesLoaded: false,
       phyloTrees: [],
       projectSamples: [],
-      otherSamples: []
+      otherSamples: [],
+      selectedSamples: {
+        project: [],
+        other: []
+      }
     };
 
     this.phyloTreeHeaders = {
@@ -222,7 +226,7 @@ class PhyloTreeByPathCreation extends React.Component {
     pages.push(
       <Wizard.Page
         key="page_1"
-        title="CreatePhylogeneticTree"
+        title="Create phylogenetic tree and choose samples to include:"
         onLoad={this.loadNewTreeContext}
       >
         <div className="page-two__subtitle">{this.taxonName}</div>
@@ -240,9 +244,43 @@ class PhyloTreeByPathCreation extends React.Component {
           />
         </div>
       </Wizard.Page>,
-      <Wizard.Page key="page_2" title="Testing Page 2">
-        <div>Page 2</div>
-        <div>Contents</div>
+      <Wizard.Page
+        key="page_2"
+        title={`Would you like to additional samples from IDSeq that contain ${
+          this.taxonName
+        }`}
+      >
+        <div className="page-three__searchbar">
+          <div className="page-three__searchbar_container">
+            <Input placeholder="Name of the Tree" />
+          </div>
+          <div className="page-three__searchbar_container">
+            {this.state.selectedSamples.project.length} Project Samples
+          </div>
+          <div className="page-three__searchbar_container">
+            {this.state.selectedSamples.other.length} IDSeq Samples
+          </div>
+          <div className="page-three__searchbar_container">
+            {this.state.selectedSamples.project.length +
+              this.state.selectedSamples.other.length}{" "}
+            Total Samples
+          </div>
+        </div>
+        <div>
+          <DataTable
+            headers={this.otherSamplesHeaders}
+            columns={[
+              "name",
+              "project",
+              "host",
+              "tissue",
+              "location",
+              "date",
+              "reads"
+            ]}
+            data={this.state.otherSamples}
+          />
+        </div>
       </Wizard.Page>
     );
     return pages;
@@ -267,6 +305,9 @@ class PhyloTreeByPathCreation extends React.Component {
           skipPageInfoNPages={this.state.skipListTrees ? 0 : 1}
           onComplete={this.props.onComplete}
           defaultPage={this.state.defaultPage}
+          labels={{
+            finish: "Create Table"
+          }}
         >
           {this.getPages()}
         </Wizard>

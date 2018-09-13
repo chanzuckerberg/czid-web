@@ -21,6 +21,15 @@ class Wizard extends React.Component {
     this.handleBackClick = this.handleBackClick.bind(this);
     this.handleContinueClick = this.handleContinueClick.bind(this);
     this.handleFinishClick = this.handleFinishClick.bind(this);
+
+    this.labels = Object.assign(
+      {
+        back: "Back",
+        continue: "Continue",
+        finish: "Finish"
+      },
+      this.props.labels
+    );
   }
 
   static getDerivedStateFromProps(newProps, prevState) {
@@ -83,18 +92,21 @@ class Wizard extends React.Component {
           {!currentPage.props.skipDefaultButtons && (
             <div className="wizard__nav">
               <PrimaryButton
-                text="Back"
+                text={this.props.labels.back}
                 disabled={this.state.currentPage <= 0}
                 onClick={this.handleBackClick}
               />
               {this.state.currentPage < this.props.children.length - 1 && (
                 <PrimaryButton
-                  text="Continue"
+                  text={this.props.labels.continue}
                   onClick={this.handleContinueClick}
                 />
               )}
               {this.state.currentPage == this.props.children.length - 1 && (
-                <PrimaryButton text="Finish" onClick={this.handleFinishClick} />
+                <PrimaryButton
+                  text={this.props.labels.finish}
+                  onClick={this.handleFinishClick}
+                />
               )}
             </div>
           )}
@@ -109,16 +121,13 @@ class Page extends React.Component {
     super(props);
     this.state = {};
     console.log("Wizard.Page::constructor");
+  }
 
+  componentDidMount() {
     if (this.props.onLoad) {
       console.log("Wizard.Page::constructor onLoad");
       this.props.onLoad();
     }
-  }
-
-  static getDerivedStateFromProps(props, state) {
-    console.log("Wizard.Page::getDerivedStateFromProps", props, state);
-    return null;
   }
 
   render() {
@@ -126,12 +135,6 @@ class Page extends React.Component {
     return React.Children.toArray(this.props.children);
   }
 }
-
-// const Page = ({ children, onLoad }) => {
-//   if (onLoad) { onLoad(); }
-//   console.log("Wizard.Page::rendering page", children);
-//   return children;
-// };
 
 Wizard.Page = Page;
 
