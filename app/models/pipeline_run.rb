@@ -762,14 +762,11 @@ class PipelineRun < ApplicationRecord
   end
 
   def update_lineage_higher_ranks
-    update_lineage_level("kingdom")
-    update_lineage_level("superkingdom")
-  end
-
-  def update_lineage_rank(rank)
     TaxonCount.connection.execute("
       UPDATE taxon_counts, taxon_lineages
-      SET taxon_counts.#{rank}_taxid = taxon_lineages.#{rank}_taxid
+      SET 
+        taxon_counts.kingdom_taxid = taxon_lineages.kingdom_taxid,
+        taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
       WHERE taxon_counts.pipeline_run_id=#{id}
             AND (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at)
             AND taxon_counts.tax_id > #{TaxonLineage::INVALID_CALL_BASE_ID}
@@ -777,7 +774,9 @@ class PipelineRun < ApplicationRecord
     ")
     TaxonCount.connection.execute("
       UPDATE taxon_counts, taxon_lineages
-      SET taxon_counts.#{rank}_taxid = taxon_lineages.#{rank}_taxid
+      SET 
+        taxon_counts.kingdom_taxid = taxon_lineages.kingdom_taxid,
+        taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
       WHERE taxon_counts.pipeline_run_id=#{id}
             AND (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at)
             AND taxon_counts.tax_id < #{TaxonLineage::INVALID_CALL_BASE_ID}
