@@ -366,9 +366,9 @@ class PipelineRun < ApplicationRecord
     generate_aggregate_counts('genus') unless multihit?
     # merge more accurate name information from lineages table
     update_names
-    # denormalize superkingdom_taxid into taxon_counts
+    # denormalize superkingdom_taxid and kingdom_taxid into taxon_counts
     if multihit?
-      update_superkingdoms
+      update_lineage_higher_ranks
     else
       update_genera
     end
@@ -753,6 +753,7 @@ class PipelineRun < ApplicationRecord
       UPDATE taxon_counts, taxon_lineages
       SET taxon_counts.genus_taxid = taxon_lineages.genus_taxid,
           taxon_counts.family_taxid = taxon_lineages.family_taxid,
+          taxon_counts.kingdom_taxid = taxon_lineages.kingdom_taxid,
           taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
       WHERE taxon_counts.pipeline_run_id=#{id} AND
             (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at) AND
@@ -760,10 +761,12 @@ class PipelineRun < ApplicationRecord
     ")
   end
 
-  def update_superkingdoms
+  def update_lineage_higher_ranks
     TaxonCount.connection.execute("
       UPDATE taxon_counts, taxon_lineages
-      SET taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
+      SET 
+        taxon_counts.kingdom_taxid = taxon_lineages.kingdom_taxid,
+        taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
       WHERE taxon_counts.pipeline_run_id=#{id}
             AND (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at)
             AND taxon_counts.tax_id > #{TaxonLineage::INVALID_CALL_BASE_ID}
@@ -771,7 +774,9 @@ class PipelineRun < ApplicationRecord
     ")
     TaxonCount.connection.execute("
       UPDATE taxon_counts, taxon_lineages
-      SET taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
+      SET 
+        taxon_counts.kingdom_taxid = taxon_lineages.kingdom_taxid,
+        taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
       WHERE taxon_counts.pipeline_run_id=#{id}
             AND (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at)
             AND taxon_counts.tax_id < #{TaxonLineage::INVALID_CALL_BASE_ID}
