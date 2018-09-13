@@ -17,7 +17,7 @@ class PhyloTreesController < ApplicationController
   # have read access to all those samples.
   ########################################
 
-  READ_ACTIONS = [:show].freeze
+  READ_ACTIONS = [:show, :download_snps].freeze
   EDIT_ACTIONS = [:retry].freeze
   OTHER_ACTIONS = [:new, :create, :index].freeze
 
@@ -95,6 +95,12 @@ class PhyloTreesController < ApplicationController
     else
       render json: { status: :conflict, message: "a tree run is already in progress for this project and taxon" }
     end
+  end
+
+  def download_snps
+    snp_file = Tempfile.new
+    Open3.capture3("aws", "s3", "cp", @phylo_tree.s3_outputs["SNP_annotations"], snp_file.path)
+    send_file snp_file.path, filename: "#{@phylo_tree.name.downcase.gsub(/\W/, '-')}__SNP-annotations.txt"
   end
 
   def create

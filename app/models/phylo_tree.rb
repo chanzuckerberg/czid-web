@@ -15,8 +15,11 @@ class PhyloTree < ApplicationRecord
     where(status: STATUS_IN_PROGRESS)
   end
 
-  def newick_s3_path
-    "#{phylo_tree_output_s3_path}/#{dag_version}/phylo_tree.newick"
+  def s3_outputs
+    {
+      "newick" => "#{versioned_output_s3_path}/phylo_tree.newick",
+      "SNP_annotations" => "#{versioned_output_s3_path}/SNP_annotations.txt"
+    }
   end
 
   def dag_version_file
@@ -30,7 +33,7 @@ class PhyloTree < ApplicationRecord
 
     # Retrieve output:
     file = Tempfile.new
-    _stdout, _stderr, status = Open3.capture3("aws", "s3", "cp", newick_s3_path, file.path.to_s)
+    _stdout, _stderr, status = Open3.capture3("aws", "s3", "cp", s3_outputs["newick"], file.path.to_s)
     if status.exitstatus.zero?
       file.open
       self.newick = file.read
@@ -61,12 +64,29 @@ class PhyloTree < ApplicationRecord
     #     'NR': [first_byte, last_byte, source_s3_file, sample_id, align_viz_s3_file]
     #   },
     #   pipeline_run_id_2: ... }
-    taxon_byteranges = TaxonByterange.where(pipeline_run_id: pipeline_runs.pluck(:id)).where(taxid: taxid)
+    pipeline_run_ids = pipeline_runs.pluck(:id)
+    taxon_byteranges = TaxonByterange.where(pipeline_run_id: pipeline_run_ids).where(taxid: taxid)
     taxon_byteranges_hash = {}
     taxon_byteranges.each do |tbr|
       taxon_byteranges_hash[tbr.pipeline_run_id] ||= {}
       taxon_byteranges_hash[tbr.pipeline_run_id][tbr.hit_type] = [tbr.first_byte, tbr.last_byte]
     end
+    # If the tree is for genus level or higher, get the top species underneath (these species will have genbank records pulled in idseq-dag)
+    if tax_level > TaxonCount::TAX_LEVEL_SPECIES
+      level_str = (TaxonCount::LEVEL_2_NAME[tax_level]).to_s
+      taxid_column = "#{level_str}_taxid"
+      species_counts = TaxonCount.where(pipeline_run_id: pipeline_run_ids).where("#{taxid_column} = ?", taxid).where(tax_level: TaxonCount::TAX_LEVEL_SPECIES)
+      species_counts = species_counts.order('pipeline_run_id, count DESC')
+      top_taxid_by_run_id = {}
+      species_counts.each do |sc|
+        top_taxid_by_run_id[sc.pipeline_run_id] ||= sc.tax_id
+      end
+      reference_taxids = top_taxid_by_run_id.values
+    else
+      reference_taxids = [taxid]
+    end
+    # Retrieve superkigdom name for idseq-dag
+    superkingdom_name = TaxonLineage.where(taxid: 573).last.superkingdom_name
     # Get fasta paths and alignment viz paths for each pipeline_run
     align_viz_files = {}
     pipeline_runs.each do |pr|
@@ -83,6 +103,8 @@ class PhyloTree < ApplicationRecord
     attribute_dict = {
       phylo_tree_output_s3_path: phylo_tree_output_s3_path,
       taxid: taxid,
+      reference_taxids: reference_taxids,
+      superkingdom_name: superkingdom_name,
       taxon_byteranges: taxon_byteranges_hash,
       align_viz_files: align_viz_files,
       nt_db: alignment_config.s3_nt_db_path,
@@ -98,6 +120,10 @@ class PhyloTree < ApplicationRecord
 
   def phylo_tree_output_s3_path
     "s3://#{SAMPLES_BUCKET_NAME}/phylo_trees/#{id}"
+  end
+
+  def versioned_output_s3_path
+    "#{phylo_tree_output_s3_path}/#{dag_version}"
   end
 
   def prepare_dag(dag_name, attribute_dict)
