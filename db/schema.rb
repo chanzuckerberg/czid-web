@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_180_911_202_026) do
+ActiveRecord::Schema.define(version: 20_180_913_180_552) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -25,7 +25,7 @@ ActiveRecord::Schema.define(version: 20_180_911_202_026) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "amr_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
+  create_table "amr_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "gene"
     t.string "allele"
     t.float "coverage", limit: 24
@@ -129,6 +129,19 @@ ActiveRecord::Schema.define(version: 20_180_911_202_026) do
     t.index ["task"], name: "index_job_stats_on_task"
   end
 
+  create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "key", null: false
+    t.integer "data_type", limit: 1, null: false
+    t.string "text_raw_value"
+    t.string "text_validated_value"
+    t.float "number_raw_value", limit: 24
+    t.float "number_validated_value", limit: 24
+    t.integer "sample_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["sample_id"], name: "index_metadata_on_sample_id"
+  end
+
   create_table "output_states", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string "output"
     t.string "state"
@@ -138,7 +151,7 @@ ActiveRecord::Schema.define(version: 20_180_911_202_026) do
     t.index %w[pipeline_run_id output], name: "index_output_states_on_pipeline_run_id_and_output", unique: true
   end
 
-  create_table "phylo_trees", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
+  create_table "phylo_trees", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.integer "taxid"
     t.integer "tax_level"
     t.string "tax_name"
@@ -162,7 +175,7 @@ ActiveRecord::Schema.define(version: 20_180_911_202_026) do
     t.index ["user_id"], name: "index_phylo_trees_on_user_id"
   end
 
-  create_table "phylo_trees_pipeline_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
+  create_table "phylo_trees_pipeline_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "phylo_tree_id"
     t.bigint "pipeline_run_id"
     t.index %w[phylo_tree_id pipeline_run_id], name: "index_pt_pr_id", unique: true
@@ -431,7 +444,7 @@ ActiveRecord::Schema.define(version: 20_180_911_202_026) do
     t.index ["taxid"], name: "index_taxon_names_on_taxid", unique: true
   end
 
-  create_table "taxon_scoring_models", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
+  create_table "taxon_scoring_models", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.text "model_json"
     t.datetime "created_at", null: false
