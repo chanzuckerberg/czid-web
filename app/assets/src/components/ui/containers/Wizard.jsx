@@ -15,7 +15,6 @@ class Wizard extends React.Component {
       currentPage: 0
     };
 
-    this.pages = this.props.children;
     this.showPageInfo = this.props.showPageInfo || true;
     this.skipPageInfoNPages = this.props.skipPageInfoNPages || 0;
 
@@ -24,10 +23,12 @@ class Wizard extends React.Component {
     this.handleFinishClick = this.handleFinishClick.bind(this);
   }
 
-  componentWillReceiveProps(newProps) {
-    console.log("will receive", this.props.defaultPage, newProps.defaultPage);
-    if (this.props.defaultPage != newProps.defaultPage) {
-      this.setState({ currentPage: newProps.defaultPage });
+  static getDerivedStateFromProps(newProps, prevState) {
+    if (newProps.defaultPage !== prevState.lastDefaultPage) {
+      return {
+        lastDefaultPage: newProps.defaultPage,
+        currentPage: newProps.defaultPage
+      };
     }
   }
 
@@ -38,7 +39,7 @@ class Wizard extends React.Component {
   }
 
   handleContinueClick() {
-    if (this.state.currentPage < this.pages.length - 1) {
+    if (this.state.currentPage < this.props.children.length - 1) {
       this.setState({ currentPage: this.state.currentPage + 1 });
     }
   }
@@ -49,7 +50,7 @@ class Wizard extends React.Component {
   }
 
   render() {
-    const currentPage = this.pages[this.state.currentPage];
+    const currentPage = this.props.children[this.state.currentPage];
 
     const wizardActions = {
       continue: this.handleContinueClick,
@@ -57,7 +58,7 @@ class Wizard extends React.Component {
       finish: this.handleFinishClick
     };
 
-    console.log(this.pages, currentPage);
+    console.log("Wizard::render rendering", this.props.children, currentPage);
     return (
       <WizardContext.Provider
         value={{ currentPage: this.state.currentPage, actions: wizardActions }}
@@ -72,7 +73,8 @@ class Wizard extends React.Component {
                 {this.state.currentPage >= this.skipPageInfoNPages
                   ? `${this.state.currentPage -
                       this.skipPageInfoNPages +
-                      1} / ${this.pages.length - this.skipPageInfoNPages}`
+                      1} / ${this.props.children.length -
+                      this.skipPageInfoNPages}`
                   : "\u00A0"}
               </div>
             )}
@@ -85,13 +87,13 @@ class Wizard extends React.Component {
                 disabled={this.state.currentPage <= 0}
                 onClick={this.handleBackClick}
               />
-              {this.state.currentPage < this.pages.length - 1 && (
+              {this.state.currentPage < this.props.children.length - 1 && (
                 <PrimaryButton
                   text="Continue"
                   onClick={this.handleContinueClick}
                 />
               )}
-              {this.state.currentPage == this.pages.length - 1 && (
+              {this.state.currentPage == this.props.children.length - 1 && (
                 <PrimaryButton text="Finish" onClick={this.handleFinishClick} />
               )}
             </div>
@@ -102,52 +104,76 @@ class Wizard extends React.Component {
   }
 }
 
-const Page = ({ children }) => {
-  return children;
-};
+class Page extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {};
+    console.log("Wizard.Page::constructor");
+
+    if (this.props.onLoad) {
+      console.log("Wizard.Page::constructor onLoad");
+      this.props.onLoad();
+    }
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    console.log("Wizard.Page::getDerivedStateFromProps", props, state);
+    return null;
+  }
+
+  render() {
+    console.log("Wizard.Page::render children", this.props.children);
+    return React.Children.toArray(this.props.children);
+  }
+}
+
+// const Page = ({ children, onLoad }) => {
+//   if (onLoad) { onLoad(); }
+//   console.log("Wizard.Page::rendering page", children);
+//   return children;
+// };
 
 Wizard.Page = Page;
 
-const Action = ({ action, children }) => {
-  // const actions = {
-  //   'continue': currentPage => currentPage + 1
-  // }
+const Action = ({ action, onAfterAction, children }) => {
+  const handleOnClick = wizardAction => {
+    wizardAction();
 
-  console.log(action, children);
-  // return (
-  //   <div>
-  //     {children}
-  //   </div>
-  // );
+    if (onAfterAction) {
+      onAfterAction();
+    }
+  };
 
   return (
     <WizardContext.Consumer>
-      {({ currentPage, actions }) => {
-        console.log(currentPage, actions);
-        return <div onClick={actions["continue"]}>{children}</div>;
+      {({ actions }) => {
+        return (
+          <div onClick={() => handleOnClick(actions[action])}>{children}</div>
+        );
       }}
     </WizardContext.Consumer>
   );
 };
 
 Action.propTypes = {
-  action: PropTypes.oneOf(["continue"]),
-  children: PropTypes.element.isRequired
+  action: PropTypes.oneOf(["back", "continue", "finish"]),
+  children: PropTypes.element.isRequired,
+  onAfterAction: PropTypes.func
 };
 
 Wizard.Action = Action;
 
 Wizard.propTypes = {
-  children: PropTypes.oneOfType([
-    PropTypes.shape({
-      type: Wizard.Page
-    }),
-    PropTypes.arrayOf(
-      PropTypes.shape({
-        type: Wizard.Page
-      })
-    )
-  ]).isRequired
+  // children: PropTypes.oneOfType([
+  //   PropTypes.shape({
+  //     type: Wizard.Page
+  //   }),
+  //   PropTypes.arrayOf(
+  //     PropTypes.shape({
+  //       type: Wizard.Page
+  //     })
+  //   )
+  // ]).isRequired
 };
 
 export default Wizard;

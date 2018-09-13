@@ -7,10 +7,24 @@ class DataTable extends React.Component {
   // - async fetcher function
   constructor(props) {
     super(props);
+
+    this.state = {
+      data: this.props.data
+    };
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    console.log("DataTable::getDerivedStateFromProps", props, state);
+    if (props.data !== state.data) {
+      return {
+        data: props.data
+      };
+    }
+    return null;
   }
 
   render() {
-    console.log("props", this.props);
+    console.log("DataTable::getDerivedStateFromProps", this.props);
     return (
       <table>
         <thead>
@@ -21,7 +35,7 @@ class DataTable extends React.Component {
           </tr>
         </thead>
         <tbody>
-          {this.props.data.map((row, row_idx) => (
+          {this.state.data.map((row, row_idx) => (
             <tr key={row_idx}>
               {this.props.columns.map((column, col_idx) => (
                 <td key={col_idx}>{row[column]}</td>

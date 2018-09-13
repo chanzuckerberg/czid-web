@@ -71,8 +71,8 @@ class PhyloTreesController < ApplicationController
   end
 
   def new
-    taxid = params[:taxid].to_i
-    project_id = params[:project_id].to_i
+    taxid = params[:taxId].to_i
+    project_id = params[:projectId].to_i
 
     @project = current_power.updatable_projects.find(project_id)
 
@@ -88,6 +88,18 @@ class PhyloTreesController < ApplicationController
     taxon_lineage = TaxonLineage.where(taxid: taxid).last
     @taxon = { taxid: taxid,
                name: taxon_lineage.name }
+
+    respond_to do |format|
+      format.html
+        format.json do
+          render json: {
+            project: @project,
+            taxon: @taxon,
+            samples: @samples,
+            csrf: form_authenticity_token
+          }
+        end
+      end
   end
 
   def show

@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
 import React from "react";
+import Input from "../../ui/controls/Input";
 import Wizard from "../../ui/containers/Wizard";
 import axios from "axios";
 import DataTable from "../../visualizations/table/DataTable";
@@ -13,7 +14,9 @@ class PhyloTreeByPathCreation extends React.Component {
       defaultPage: 0,
       skipListTrees: false,
       phyloTreesLoaded: false,
-      phyloTrees: []
+      phyloTrees: [],
+      projectSamples: [],
+      otherSamples: []
     };
 
     this.phyloTreeHeaders = {
@@ -23,7 +26,38 @@ class PhyloTreeByPathCreation extends React.Component {
       view: "View"
     };
 
+    this.projectSamplesHeaders = {
+      name: "Name",
+      host: "Host",
+      tissue: "Tissue",
+      location: "Location",
+      date: "Date",
+      reads: "Read Count"
+    };
+
+    this.otherSamplesHeaders = {
+      name: "Name",
+      project: "Project",
+      host: "Host",
+      tissue: "Tissue",
+      location: "Location",
+      date: "Date",
+      reads: "Read Count (NT | NR)"
+    };
+
     this.taxonName = null;
+
+    this.loadNewTreeContext = this.loadNewTreeContext.bind(this);
+    this.handleNewTreeContextResponse = this.handleNewTreeContextResponse.bind(
+      this
+    );
+
+    console.log(
+      "PhyloTreeByPathCreation::constructor",
+      this.props,
+      this.props.taxonId,
+      this.props.projectId
+    );
   }
 
   componentDidMount() {
@@ -38,31 +72,79 @@ class PhyloTreeByPathCreation extends React.Component {
           projectId: this.props.projectId
         }
       })
-      .then(response => {
-        console.log("load phylo trees", response.data);
-        let phyloTrees = response.data.phyloTrees;
-        if (
-          !phyloTrees ||
-          !Array.isArray(phyloTrees) ||
-          phyloTrees.length === 0
-        ) {
-          console.log("skipping");
-          this.setState({
-            skipListTrees: true,
-            phyloTreesLoaded: true
-          });
-        } else {
-          console.log("load the data");
-          this.taxonName = phyloTrees[0].tax_name;
-          this.setState({
-            phyloTrees: this.parsePhyloTreeData(response.data.phyloTrees),
-            phyloTreesLoaded: true
-          });
+      .then(response => this.handlePhyloTreeResponse(response))
+      .catch(error => {
+        console.log("Error loading existing phylo trees: ", error);
+      });
+  }
+
+  loadNewTreeContext() {
+    console.log(this.props);
+    axios
+      .get("/phylo_trees/new.json", {
+        params: {
+          taxId: this.props.taxonId,
+          projectId: this.props.projectId
         }
       })
+      .then(response => this.handleNewTreeContextResponse(response))
       .catch(error => {
-        console.log("error phylo trees", error);
+        console.log("Error loading new phylo tree context: ", error);
       });
+  }
+
+  handlePhyloTreeResponse(response) {
+    console.log(
+      "PhyloTreeByPathCreation::handlePhyloTreeResponse - data",
+      response.data
+    );
+    let phyloTrees = response.data.phyloTrees;
+    if (!phyloTrees || !Array.isArray(phyloTrees) || phyloTrees.length === 0) {
+      console.log(
+        "PhyloTreeByPathCreation::handlePhyloTreeResponse - skipping"
+      );
+      this.setState({
+        skipListTrees: true,
+        phyloTreesLoaded: true
+      });
+    } else {
+      console.log(
+        "PhyloTreeByPathCreation::handlePhyloTreeResponse - load the data"
+      );
+      this.taxonName = phyloTrees[0].tax_name;
+      this.setState({
+        phyloTrees: this.parsePhyloTreeData(response.data.phyloTrees),
+        phyloTreesLoaded: true
+      });
+    }
+  }
+
+  handleNewTreeContextResponse(response) {
+    console.log(
+      "PhyloTreeByPathCreation::handleNewTreeContextResponse - new tree context",
+      response.data
+    );
+    let samplesData = response.data.samples;
+    if (
+      !samplesData ||
+      !Array.isArray(samplesData) ||
+      samplesData.length === 0
+    ) {
+      console.error("Process error on samples data");
+    } else {
+      console.log(
+        "PhyloTreeByPathCreation::handleNewTreeContextResponse - settng state"
+      );
+      let parsedTables = this.parseProjectSamplesData(samplesData);
+      console.log(
+        "PhyloTreeByPathCreation::handleNewTreeContextResponse - parsedTables",
+        parsedTables
+      );
+      this.setState({
+        projectSamples: parsedTables.projectSamples,
+        otherSamples: parsedTables.otherSamples
+      });
+    }
   }
 
   parsePhyloTreeData(phyloTreeData) {
@@ -74,18 +156,45 @@ class PhyloTreeByPathCreation extends React.Component {
     }));
   }
 
+  parseProjectSamplesData(samples) {
+    let projectSamples = [];
+    let otherSamples = [];
+    for (let i = 0; i < samples.length; i++) {
+      const row = samples[i];
+      let entry = {
+        name: row.name,
+        host: "-",
+        tissue: "-",
+        location: "-",
+        date: "-",
+        reads: `${(row.taxid_reads || {}).NT} | ${(row.taxid_reads || {}).NR}`
+      };
+      if (row.project_id === this.props.projectId) {
+        projectSamples.push(entry);
+      } else {
+        entry.project = row.project_name;
+        otherSamples.push(entry);
+      }
+    }
+    return { projectSamples, otherSamples };
+  }
+
   setPage(defaultPage) {
     this.setState({ defaultPage });
   }
 
   getPages() {
-    console.log(this.state.phyloTrees, this.state.skipListTrees);
+    console.log(
+      "PhyloTreeByPathCreation::getPages",
+      this.state.phyloTrees,
+      this.state.skipListTrees
+    );
 
     let pages = [];
     if (!this.state.skipListTrees) {
       pages.push(
         <Wizard.Page
-          key={0}
+          key="page_0"
           className="page-one"
           skipDefaultButtons={true}
           title="Phylogenetic Trees"
@@ -106,15 +215,32 @@ class PhyloTreeByPathCreation extends React.Component {
         </Wizard.Page>
       );
     }
-    // <div className="page-one__link" onClick={() => this.setPage(1)}>
-    //   + Create new tree
-    // </div>
+    console.log(
+      "PhyloTreeByPathCreation::getPages - pushing with ",
+      this.state.projectSamples
+    );
     pages.push(
-      <Wizard.Page key={1} title="Testing Page 1">
-        <div>Page 1</div>
-        <div>Contents</div>
+      <Wizard.Page
+        key="page_1"
+        title="CreatePhylogeneticTree"
+        onLoad={this.loadNewTreeContext}
+      >
+        <div className="page-two__subtitle">{this.taxonName}</div>
+        <div className="page-two__form">
+          <div>
+            <div>Name</div>
+            <Input placeholder="Name of the Tree" />
+          </div>
+        </div>
+        <div className="page-two__table">
+          <DataTable
+            headers={this.projectSamplesHeaders}
+            columns={["name", "host", "tissue", "location", "date", "reads"]}
+            data={this.state.projectSamples}
+          />
+        </div>
       </Wizard.Page>,
-      <Wizard.Page key={2} title="Testing Page 2">
+      <Wizard.Page key="page_2" title="Testing Page 2">
         <div>Page 2</div>
         <div>Contents</div>
       </Wizard.Page>
@@ -124,7 +250,18 @@ class PhyloTreeByPathCreation extends React.Component {
 
   render() {
     if (this.state.phyloTreesLoaded) {
-      console.log("phylo trees loaded", this.state);
+      console.log(
+        "PhyloTreeByPathCreation::render - phylo trees",
+        this.state.phyloTrees
+      );
+      console.log(
+        "PhyloTreeByPathCreation::render - project samples",
+        this.state.projectSamples
+      );
+      console.log(
+        "PhyloTreeByPathCreation::render - other samples",
+        this.state.otherSamples
+      );
       return (
         <Wizard
           skipPageInfoNPages={this.state.skipListTrees ? 0 : 1}
@@ -135,7 +272,7 @@ class PhyloTreeByPathCreation extends React.Component {
         </Wizard>
       );
     } else {
-      console.log("phylo trees not loaded");
+      console.log("PhyloTreeByPathCreation::render - phylo trees not loaded");
       return <div>Loading Phylo Trees...</div>;
     }
   }
