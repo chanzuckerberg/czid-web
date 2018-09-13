@@ -761,7 +761,7 @@ class PipelineRun < ApplicationRecord
     ")
   end
 
-  def update_lineage_higher_ranks()
+  def update_lineage_higher_ranks
     update_lineage_level("kingdom")
     update_lineage_level("superkingdom")
   end
