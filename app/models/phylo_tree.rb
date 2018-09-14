@@ -18,7 +18,7 @@ class PhyloTree < ApplicationRecord
   def s3_outputs
     {
       "newick" => "#{versioned_output_s3_path}/phylo_tree.newick",
-      "SNP_annotations" => "#{versioned_output_s3_path}/SNP_annotations.txt"
+      "SNP_annotations" => "#{versioned_output_s3_path}/ksnp3_outputs/SNPs_all_annotated"
     }
   end
 
