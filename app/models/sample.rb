@@ -54,6 +54,8 @@ class Sample < ApplicationRecord
   has_and_belongs_to_many :backgrounds, through: :pipeline_runs
   has_many :input_files, dependent: :destroy
   accepts_nested_attributes_for :input_files
+  has_many :metadata
+
   validate :input_files_checks
   after_create :initiate_input_file_upload
   validates :name, uniqueness: { scope: :project_id }

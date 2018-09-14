@@ -59,14 +59,16 @@ class CliUserInstructions extends React.Component {
           <p>
             idseq -e <span className="code-personal">{this.props.email}</span>{" "}
             -t <span className="code-personal">{this.props.authToken}</span> -p
-            '<span className="code-to-edit">Your Project Name</span>' -s '<span className="code-to-edit">
-              Your Sample Name
-            </span>' \
+            {"'"}
+            <span className="code-to-edit">Your Project Name</span>
+            {"' -s '"}
+            <span className="code-to-edit">Your Sample Name</span>
+            {"'"} \
             <br /> --r1 <span className="code-to-edit">
               your_sample_R1
             </span>.fastq.gz --r2{" "}
             <span className="code-to-edit">your_sample_R2</span>.fastq.gz
-            --host-genome-name <span className="code-to-edit">'Human'</span>
+            --host-genome-name <span className="code-to-edit">{"'Human'"}</span>
           </p>
         </div>
         <div className="instruction-medium-margin-top">
@@ -128,12 +130,14 @@ class CliUserInstructions extends React.Component {
           <p>
             idseq -e <span className="code-personal">{this.props.email}</span>{" "}
             -t <span className="code-personal">{this.props.authToken}</span> -p
-            '<span className="code-to-edit">Your Project Name</span>' \
+            {"'"}
+            <span className="code-to-edit">Your Project Name</span>
+            {"'"} \
             <br /> --bulk{" "}
             <span className="code-to-edit">
               /path/to/your/folder{" "}
             </span>--host-genome-name{" "}
-            <span className="code-to-edit">'Human'</span>
+            <span className="code-to-edit">{"'Human'"}</span>
           </p>
         </div>
         <div className="instruction-medium-margin-top">

@@ -16,8 +16,9 @@ class CheckPipelineRuns
         break if @shutdown_requested
         Rails.logger.info("  Checking pipeline run #{pr.id} for sample #{pr.sample_id}") unless silent
         pr.update_job_status
-      rescue
+      rescue => exception
         LogUtil.log_err_and_airbrake("Failed to update pipeline run #{pr.id}")
+        LogUtil.log_backtrace(exception)
       end
     end
 
@@ -26,8 +27,9 @@ class CheckPipelineRuns
         break if @shutdown_requested
         Rails.logger.info("Monitoring job for phylo_tree #{pt.id}") unless silent
         pt.monitor_job
-      rescue
+      rescue => exception
         LogUtil.log_err_and_airbrake("Failed monitor job for phylo_tree #{pt.id}")
+        LogUtil.log_backtrace(exception)
       end
     end
   end
