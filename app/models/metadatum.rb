@@ -1,3 +1,5 @@
+require 'csv'
+
 class Metadatum < ApplicationRecord
   include PipelineOutputsHelper
 
@@ -78,7 +80,7 @@ class Metadatum < ApplicationRecord
       matched = false
       options = KEY_TO_STRING_OPTIONS[key]
       options.each do |opt|
-        if str_to_basic_chars(text_raw_value) == str_to_basic_chars(opt)
+        if Metadatum.str_to_basic_chars(text_raw_value) == Metadatum.str_to_basic_chars(opt)
           # Ex: Match 'neb ultra-iifs dna' to 'NEB Ultra II FS DNA'
           # Ex: Match '30-day mortality' to "30 Day Mortality"
           self.text_validated_value = opt
@@ -94,113 +96,96 @@ class Metadatum < ApplicationRecord
     end
   end
 
-  # Add a new Metadatum entry to the sample
-  def self.add_to_sample(sample, key, raw_value)
-    key = key.to_sym
-
-    # Create the entry
-    m = Metadatum.new
-    m.key = key
-    m.data_type = KEY_TO_TYPE[key]
-    if KEY_TO_TYPE[key] == STRING_TYPE
-      m.text_raw_value = raw_value
-    elsif KEY_TO_TYPE[key] == NUMBER_TYPE
-      m.number_raw_value = raw_value
+  # Set value based on data type
+  def edit_value(val)
+    d_type = data_type
+    if d_type == "string"
+      self.text_raw_value = val
+    elsif d_type == "number"
+      self.number_raw_value = val
     end
-    # *_validated_value field is set in the set_validated_values validator.
-    m.sample = sample
-    m.save!
+    # Note: *_validated_value field is set in the set_validated_values
+    # validator.
   end
 
-  def update_with_type(key, raw_value)
-    data_type = KEY_TO_TYPE[key.to_sym]
-    if data_type == STRING_TYPE
-      self.text_raw_value = raw_value
-    elsif data_type == NUMBER_TYPE
-      self.number_raw_value = raw_value
-    end
-    save!
-  end
-
-  def self.add_or_update_on_sample(sample, key, raw_value)
-    existing = sample.metadata.find_by(key.to_s)
-    if existing
-      data_type = KEY_TO_TYPE[key.to_sym]
-      if data_type == STRING_TYPE
-        existing.text_raw_value = raw_value
-      elsif data_type == NUMBER_TYPE
-        existing.number_raw_value = raw_value
-      end
-      existing.save!
-    end
-  end
-
-  def str_to_basic_chars(res)
+  def self.str_to_basic_chars(res)
     res.downcase.gsub(/[^0-9A-Za-z]/, '')
   end
 
+  # Load bulk metadata from a CSV file from S3
   def self.load_csv_from_s3(path)
-    # Return all the errors at the end to present consolidated feedback.
     errors = []
-
     csv_data = get_s3_file(path)
     # Remove BOM if present (file likely comes from Excel)
-    csv_data.delete!("\uFEFF")
+    csv_data = csv_data.delete("\uFEFF")
+    csv_data = CSV.parse(csv_data, headers: true)
 
-    CSV.parse(csv_data, headers: true).each_with_index do |row, index|
-      errors += load_csv_single_sample_row(row, index)
+    # Load CSV file row-by-row
+    csv_data.each_with_index do |row, index|
+      begin
+        errors += load_csv_single_sample_row(row, index)
+      rescue => err
+        # Catch other errors
+        errors << err.message
+      end
+    end
+
+    # Handle errors
+    unless errors.empty?
+      msg = errors.join(". ")
+      Rails.logger.error(msg)
+      return errors
     end
   end
 
+  # Load metadata from a single CSV row corresponding to one sample
   def self.load_csv_single_sample_row(row, index)
+    # Setup
     errors = []
     row = row.to_h
-    done_keys = []
-
-    # Get project name
-    proj_name = row['study_id'] || row['project_name']
-    unless proj_name
-      errors << "No project name found in row #{index + 1}"
-      return errors
-    end
-    proj = Project.find_by(name: proj_name)
-    unless proj
-      errors << "No project found named #{proj_name}"
-      return errors
-    end
-    done_keys += %w[study_id project_name]
-
-    # Get sample name
-    sample_name = row['sample_name']
-    unless sample_name
-      errors << "No sample name found in row #{index + 1}"
-      return errors
-    end
-    sample = Sample.find_by(project_id: proj, name: sample_name)
-    unless sample
-      errors << "No sample found named #{sample_name} in #{proj_name}"
-      return errors
-    end
-    done_keys << 'sample_name'
+    proj = load_csv_project(row, index)
+    sample = load_csv_sample(row, index, proj)
 
     # Add or update Metadata items
+    done_keys = %w[study_id project_name sample_name]
     row.each do |key, value|
       if !key || !value || done_keys.include?(key)
         next
       end
+      begin
+        sample.metadatum_add_or_update(key, value)
+      rescue => err
+        # Consolidate all the metadatum errors
+        errors << "#{sample.name}: #{key}: #{value}: #{err.message}"
+      end
     end
 
-    row.each do |key, value|
-      if !key || !value || key == 'sample_name' || key == 'project_name'
-        next
-      end
-      if Sample::METADATA_FIELDS.include?(key.to_sym)
-        new_details[key] = value
-      else # Otherwise throw in notes
-        new_details['sample_notes'] << format("\n- %s: %s", key, value)
-      end
+    errors
+  end
+
+  # Get the project for the CSV row
+  def self.load_csv_project(row, index)
+    proj_name = row['study_id'] || row['project_name']
+    unless proj_name
+      raise ArgumentError("No project name found in row #{index + 1}")
     end
-    new_details['sample_notes'].strip!
-    sampl.update_attributes!(new_details)
+    proj = Project.find_by(name: proj_name)
+    unless proj
+      raise ArgumentError("No project found named #{proj_name}")
+    end
+    proj
+  end
+
+  # Get the sample for the CSV row
+  def self.load_csv_sample(row, index, proj)
+    sample_name = row['sample_name']
+    unless sample_name
+      raise ArgumentError("No sample name found in row #{index + 1}")
+    end
+    sample = Sample.find_by(project: proj, name: sample_name)
+    unless sample
+      raise ArgumentError("No sample found named #{sample_name} in #{proj.name}")
+    end
+    sample
   end
 end

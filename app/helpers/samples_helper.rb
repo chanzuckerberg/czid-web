@@ -49,6 +49,7 @@ module SamplesHelper
   end
 
   # Load bulk metadata from a CSV file
+  # TODO: Succeeded by Metadatum#load_csv_from_s3 for new Metadatum objects.
   def populate_metadata_bulk(csv_s3_path)
     # Load the CSV data. CSV should have columns "sample_name", "project_name", and any desired columns from Sample::METADATA_FIELDS.
     csv_data = get_s3_file(csv_s3_path)
