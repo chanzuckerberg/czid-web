@@ -7,6 +7,8 @@ class Metadatum < ApplicationRecord
   NUMBER_TYPE = 1
   # When using an ActiveRecord enum, the type returned from reading records is String.
   enum data_type: { string: STRING_TYPE, number: NUMBER_TYPE }
+
+  # Validations
   validates :text_validated_value, length: { maximum: 250 }
   validates :number_raw_value, :number_validated_value, numericality: true, allow_nil: true
   validate :set_validated_values
@@ -110,8 +112,27 @@ class Metadatum < ApplicationRecord
     m.save!
   end
 
-  def self.add_or_update_on_sample(sample, key, _raw_value)
-    sample.metadata.find_by(key.to_s)
+  def update_with_type(key, raw_value)
+    data_type = KEY_TO_TYPE[key.to_sym]
+    if data_type == STRING_TYPE
+      self.text_raw_value = raw_value
+    elsif data_type == NUMBER_TYPE
+      self.number_raw_value = raw_value
+    end
+    save!
+  end
+
+  def self.add_or_update_on_sample(sample, key, raw_value)
+    existing = sample.metadata.find_by(key.to_s)
+    if existing
+      data_type = KEY_TO_TYPE[key.to_sym]
+      if data_type == STRING_TYPE
+        existing.text_raw_value = raw_value
+      elsif data_type == NUMBER_TYPE
+        existing.number_raw_value = raw_value
+      end
+      existing.save!
+    end
   end
 
   def str_to_basic_chars(res)
@@ -134,6 +155,7 @@ class Metadatum < ApplicationRecord
   def self.load_csv_single_sample_row(row, index)
     errors = []
     row = row.to_h
+    done_keys = []
 
     # Get project name
     proj_name = row['study_id'] || row['project_name']
@@ -146,6 +168,7 @@ class Metadatum < ApplicationRecord
       errors << "No project found named #{proj_name}"
       return errors
     end
+    done_keys += %w[study_id project_name]
 
     # Get sample name
     sample_name = row['sample_name']
@@ -158,16 +181,15 @@ class Metadatum < ApplicationRecord
       errors << "No sample found named #{sample_name} in #{proj_name}"
       return errors
     end
+    done_keys << 'sample_name'
 
     # Add or update Metadata items
     row.each do |key, value|
-      if !key || !value || key == 'sample_name' || key == 'project_name'
+      if !key || !value || done_keys.include?(key)
         next
       end
     end
 
-    new_details = {}
-    new_details['sample_notes'] = sampl.sample_notes || ''
     row.each do |key, value|
       if !key || !value || key == 'sample_name' || key == 'project_name'
         next
