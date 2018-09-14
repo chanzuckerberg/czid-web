@@ -233,7 +233,6 @@ class SampleUpload extends React.Component {
   }
 
   createSample() {
-    _satellite.track("uploadsample");
     this.setState({
       submitting: true
     });
@@ -578,7 +577,7 @@ class SampleUpload extends React.Component {
           <span>
             I agree that the data I am uploading to IDseq has been lawfully
             collected and that I have all necessary consent and authorization to
-            upload it for the purposes outlined in IDseq's&nbsp;
+            upload it for the purposes outlined in {"IDseq's "}
           </span>
           <a
             href="https://s3-us-west-2.amazonaws.com/idseq-database/Terms.pdf"

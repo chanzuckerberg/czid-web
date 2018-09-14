@@ -26,7 +26,7 @@ class ResultsFolder extends React.Component {
             <span className="back" onClick={this.gotoPath.bind(this, "/")}>
               {this.filePath[0]}
             </span>
-            <span className="path">></span>
+            <span className="path">{">"}</span>
             <span
               className="back"
               onClick={this.gotoPath.bind(

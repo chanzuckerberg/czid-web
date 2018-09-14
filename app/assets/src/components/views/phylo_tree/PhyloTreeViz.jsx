@@ -1,6 +1,5 @@
 import axios from "axios";
 import d3 from "d3";
-import phylotree from "phylotree";
 import React from "react";
 import PrimaryButton from "../../ui/controls/buttons/PrimaryButton";
 
@@ -25,7 +24,6 @@ class PhyloTreeViz extends React.Component {
     if (this.phyloTree && this.phyloTree.newick) {
       let newick = this.phyloTree.newick;
       // below from http://bl.ocks.org/spond/f6b51aa6f34561f7006f
-      let _ = require("lodash");
       let tree = d3.layout
         .phylotree()
         // create a tree layout object
@@ -60,7 +58,7 @@ class PhyloTreeViz extends React.Component {
   }
 
   render() {
-    let status_display, newick, tree;
+    let status_display;
     if (this.phyloTree) {
       switch (this.phyloTree.status) {
         case 1:
