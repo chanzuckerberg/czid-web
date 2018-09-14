@@ -30,6 +30,7 @@ class Wizard extends React.Component {
       },
       this.props.labels
     );
+    console.log("Wizard::constructor - labels", this.props.labels, this.labels);
   }
 
   static getDerivedStateFromProps(newProps, prevState) {
@@ -39,6 +40,7 @@ class Wizard extends React.Component {
         currentPage: newProps.defaultPage
       };
     }
+    return null;
   }
 
   handleBackClick() {
@@ -88,23 +90,23 @@ class Wizard extends React.Component {
               </div>
             )}
           </div>
-          <div className="wizard__page">{currentPage}</div>
+          {currentPage}
           {!currentPage.props.skipDefaultButtons && (
             <div className="wizard__nav">
               <PrimaryButton
-                text={this.props.labels.back}
+                text={this.labels.back}
                 disabled={this.state.currentPage <= 0}
                 onClick={this.handleBackClick}
               />
               {this.state.currentPage < this.props.children.length - 1 && (
                 <PrimaryButton
-                  text={this.props.labels.continue}
+                  text={this.labels.continue}
                   onClick={this.handleContinueClick}
                 />
               )}
               {this.state.currentPage == this.props.children.length - 1 && (
                 <PrimaryButton
-                  text={this.props.labels.finish}
+                  text={this.labels.finish}
                   onClick={this.handleFinishClick}
                 />
               )}
@@ -132,7 +134,15 @@ class Page extends React.Component {
 
   render() {
     console.log("Wizard.Page::render children", this.props.children);
-    return React.Children.toArray(this.props.children);
+    return (
+      <div
+        className={`wizard__page${
+          this.props.small ? " wizard__page--small" : ""
+        }`}
+      >
+        {React.Children.toArray(this.props.children)}
+      </div>
+    );
   }
 }
 
@@ -151,7 +161,12 @@ const Action = ({ action, onAfterAction, children }) => {
     <WizardContext.Consumer>
       {({ actions }) => {
         return (
-          <div onClick={() => handleOnClick(actions[action])}>{children}</div>
+          <div
+            className={`wizard__action wizard__action--${action}`}
+            onClick={() => handleOnClick(actions[action])}
+          >
+            {children}
+          </div>
         );
       }}
     </WizardContext.Consumer>
@@ -160,7 +175,7 @@ const Action = ({ action, onAfterAction, children }) => {
 
 Action.propTypes = {
   action: PropTypes.oneOf(["back", "continue", "finish"]),
-  children: PropTypes.element.isRequired,
+  children: PropTypes.node.isRequired,
   onAfterAction: PropTypes.func
 };
 

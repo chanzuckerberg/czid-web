@@ -1,0 +1,53 @@
+@import "../../themes/colors";
+
+.data-table {
+  max-height: 300px;
+
+  thead {
+    // remove scrollbar width
+    display: table;
+    width: calc(100% - 10px);
+    border-bottom: 2px solid $lightest-grey;
+  }
+
+  thead tr,
+  tbody tr {
+    table-layout: fixed;
+    display: table;
+    width: 100%;
+  }
+
+  tbody {
+    display: block;
+    max-height: 280px;
+    overflow-y: scroll;
+
+    td {
+      border-bottom: 1px solid $lightest-grey;
+      word-wrap: break-word;
+    }
+
+    &::-webkit-scrollbar-track {
+      display: none;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: $medium-grey;
+    }
+  }
+
+  &__header {
+    color: $medium-grey;
+    font-weight: 700;
+
+    &.column-reserved-selectable {
+      width: 30px;
+    }
+  }
+
+  &__data {
+    &.column-reserved-selectable {
+      width: 30px;
+    }
+  }
+}

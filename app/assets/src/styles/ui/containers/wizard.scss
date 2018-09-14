@@ -1,13 +1,27 @@
 @import "../../themes/colors.scss";
 
 .wizard {
+  font-size: 12px;
+
+  // TODO: overrides home.scss, remove after refactoring
+  table thead {
+    th,
+    td {
+      font-size: 12px;
+    }
+  }
+
   &__header {
     display: block;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     width: 100%;
 
     &__title {
       float: left;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 40px;
+      vertical-align: middle;
     }
 
     &__page {

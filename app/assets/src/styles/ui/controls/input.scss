@@ -1,0 +1,16 @@
+@import "../../themes/colors";
+
+.idseq-ui.input {
+  input {
+    height: 40px;
+    border-radius: 2px;
+    box-sizing: border-box;
+
+    &:focus {
+      border: 1px solid $primary-light;
+      -webkit-box-shadow: none;
+      -moz-box-shadow: none;
+      box-shadow: none;
+    }
+  }
+}

@@ -187,6 +187,10 @@ class PhyloTreeByPathCreation extends React.Component {
     this.setState({ defaultPage });
   }
 
+  handleChangedProjectSamples(selectedProjectSamples) {}
+
+  handleChangedOtherSamples(selectedOtherSamples) {}
+
   getPages() {
     console.log(
       "PhyloTreeByPathCreation::getPages",
@@ -198,23 +202,22 @@ class PhyloTreeByPathCreation extends React.Component {
     if (!this.state.skipListTrees) {
       pages.push(
         <Wizard.Page
-          key="page_0"
-          className="page-one"
+          key="page_1"
+          className="wizard__page-1"
           skipDefaultButtons={true}
           title="Phylogenetic Trees"
+          small
         >
-          <div className="page-one__subtitle">{this.taxonName}</div>
-          <div className="page-one__table">
+          <div className="wizard__page-1__subtitle">{this.taxonName}</div>
+          <div className="wizard__page-1__table">
             <DataTable
               headers={this.phyloTreeHeaders}
               columns={["name", "user", "last_update", "view"]}
               data={this.state.phyloTrees}
             />
           </div>
-          <div>
-            <Wizard.Action action="continue">
-              <p>+ Create new tree</p>
-            </Wizard.Action>
+          <div className="wizard__page-1__action">
+            <Wizard.Action action="continue">+ Create new tree</Wizard.Action>
           </div>
         </Wizard.Page>
       );
@@ -225,48 +228,47 @@ class PhyloTreeByPathCreation extends React.Component {
     );
     pages.push(
       <Wizard.Page
-        key="page_1"
-        title="Create phylogenetic tree and choose samples to include:"
+        key="wizard__page_2"
+        title="Create phylogenetic tree and samples from project"
         onLoad={this.loadNewTreeContext}
       >
-        <div className="page-two__subtitle">{this.taxonName}</div>
-        <div className="page-two__form">
-          <div>
-            <div>Name</div>
-            <Input placeholder="Name of the Tree" />
-          </div>
+        <div className="wizard__page-2__subtitle">{this.taxonName}</div>
+        <div className="wizard__page-2__form">
+          <div className="wizard__page-2__form__label">Name</div>
+          <Input placeholder="Name of the Tree" />
         </div>
-        <div className="page-two__table">
+        <div className="wizard__page-2__table">
           <DataTable
             headers={this.projectSamplesHeaders}
             columns={["name", "host", "tissue", "location", "date", "reads"]}
             data={this.state.projectSamples}
+            onSelectedRowsChanged={this.handleChangedProjectSamples}
           />
         </div>
       </Wizard.Page>,
       <Wizard.Page
-        key="page_2"
+        key="wizard__page_3"
         title={`Would you like to additional samples from IDSeq that contain ${
           this.taxonName
         }`}
       >
-        <div className="page-three__searchbar">
-          <div className="page-three__searchbar_container">
+        <div className="wizard__page-3__searchbar">
+          <div className="wizard__page-3__searchbar_container">
             <Input placeholder="Name of the Tree" />
           </div>
-          <div className="page-three__searchbar_container">
+          <div className="wizard__page-three__searchbar_container">
             {this.state.selectedSamples.project.length} Project Samples
           </div>
-          <div className="page-three__searchbar_container">
+          <div className="wizard__page-3__searchbar_container">
             {this.state.selectedSamples.other.length} IDSeq Samples
           </div>
-          <div className="page-three__searchbar_container">
+          <div className="wizard__page-3__searchbar_container">
             {this.state.selectedSamples.project.length +
               this.state.selectedSamples.other.length}{" "}
             Total Samples
           </div>
         </div>
-        <div>
+        <div className="wizard__page-3__table">
           <DataTable
             headers={this.otherSamplesHeaders}
             columns={[

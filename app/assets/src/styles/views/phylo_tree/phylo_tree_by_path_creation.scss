@@ -1,0 +1,76 @@
+@import "../../themes/colors";
+
+.wizard {
+  &__page-1,
+  &__page-2,
+  &__page-3 {
+    &__subtitle {
+      height: 30px;
+      font-weight: 700;
+      color: $dark-grey;
+      text-transform: capitalize;
+    }
+  }
+
+  &__page-1 {
+    &__action {
+      color: $primary-light;
+      font-weight: 700;
+    }
+
+    &__table {
+      max-height: 300px;
+      margin-bottom: 20px;
+    }
+  }
+
+  &__page-2 {
+    &__form {
+      height: 50px;
+      display: flex;
+      align-items: center;
+
+      &__label {
+        font-weight: 700;
+        float: left;
+        margin-right: 20px;
+      }
+
+      input {
+        float: left;
+      }
+
+      &:after {
+        content: "";
+        display: table;
+        clear: both;
+      }
+    }
+
+    &__table {
+      height: 500px;
+      margin-bottom: 20px;
+    }
+  }
+
+  &__page-3 {
+    &__table {
+      height: 300px;
+      margin-bottom: 20px;
+    }
+  }
+
+  // custom style for data tables
+  .data-table {
+    &__data {
+      &.column-name {
+        font-weight: 700;
+      }
+
+      &.column-view {
+        color: $primary-light;
+        font-weight: 700;
+      }
+    }
+  }
+}
