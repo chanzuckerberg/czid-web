@@ -71,7 +71,7 @@ class PhyloTreeListView extends React.Component {
         <div className="phylo-tree-list-view__narrow-container">
           <ViewHeader title="Phylogenetic Trees">
             <DownloadButtonDropdown
-              options={[{ text: "SNPs", value: "SNPs" }]}
+              options={[{ text: "SNP annotations", value: "SNP_annotations" }]}
               onClick={() => {
                 location.href = `/phylo_trees/${currentTree.id}/download_snps`;
               }}

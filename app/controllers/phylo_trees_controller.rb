@@ -103,6 +103,7 @@ class PhyloTreesController < ApplicationController
     cmd_status = Open3.capture3("aws", "s3", "cp", s3_file, snp_file.path)[2]
     unless cmd_status.success?
       snp_file.write("Not yet available.")
+      snp_file.close
       LogUtil.log_err_and_airbrake("downloading #{s3_file} failed")
     end
     send_file snp_file.path, filename: "#{@phylo_tree.name.downcase.gsub(/\W/, '-')}__SNP-annotations.txt"
