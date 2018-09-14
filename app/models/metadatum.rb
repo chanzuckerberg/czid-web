@@ -1,4 +1,6 @@
 class Metadatum < ApplicationRecord
+  include PipelineOutputsHelper
+
   # ActiveRecord related
   belongs_to :sample
   STRING_TYPE = 0
@@ -108,7 +110,75 @@ class Metadatum < ApplicationRecord
     m.save!
   end
 
+  def self.add_or_update_on_sample(sample, key, _raw_value)
+    sample.metadata.find_by(key.to_s)
+  end
+
   def str_to_basic_chars(res)
     res.downcase.gsub(/[^0-9A-Za-z]/, '')
+  end
+
+  def self.load_csv_from_s3(path)
+    # Return all the errors at the end to present consolidated feedback.
+    errors = []
+
+    csv_data = get_s3_file(path)
+    # Remove BOM if present (file likely comes from Excel)
+    csv_data.delete!("\uFEFF")
+
+    CSV.parse(csv_data, headers: true).each_with_index do |row, index|
+      errors += load_csv_single_sample_row(row, index)
+    end
+  end
+
+  def self.load_csv_single_sample_row(row, index)
+    errors = []
+    row = row.to_h
+
+    # Get project name
+    proj_name = row['study_id'] || row['project_name']
+    unless proj_name
+      errors << "No project name found in row #{index + 1}"
+      return errors
+    end
+    proj = Project.find_by(name: proj_name)
+    unless proj
+      errors << "No project found named #{proj_name}"
+      return errors
+    end
+
+    # Get sample name
+    sample_name = row['sample_name']
+    unless sample_name
+      errors << "No sample name found in row #{index + 1}"
+      return errors
+    end
+    sample = Sample.find_by(project_id: proj, name: sample_name)
+    unless sample
+      errors << "No sample found named #{sample_name} in #{proj_name}"
+      return errors
+    end
+
+    # Add or update Metadata items
+    row.each do |key, value|
+      if !key || !value || key == 'sample_name' || key == 'project_name'
+        next
+      end
+    end
+
+    new_details = {}
+    new_details['sample_notes'] = sampl.sample_notes || ''
+    row.each do |key, value|
+      if !key || !value || key == 'sample_name' || key == 'project_name'
+        next
+      end
+      if Sample::METADATA_FIELDS.include?(key.to_sym)
+        new_details[key] = value
+      else # Otherwise throw in notes
+        new_details['sample_notes'] << format("\n- %s: %s", key, value)
+      end
+    end
+    new_details['sample_notes'].strip!
+    sampl.update_attributes!(new_details)
   end
 end
