@@ -1,6 +1,5 @@
 import React from "react";
-import d3, { event as currentEvent } from "d3";
-import symlog from "./symlog";
+import d3 from "d3";
 
 class ScatterPlot extends React.Component {
   componentDidMount() {
@@ -145,7 +144,6 @@ class ScatterPlot extends React.Component {
     let leastSquares = this.leastSquares();
     let slope = leastSquares[0];
     let intercept = leastSquares[1];
-    let rSquare = leastSquares[2];
 
     let x1 = Math.max((this.yMinMax[0] - intercept) / slope, this.xMinMax[0]);
 

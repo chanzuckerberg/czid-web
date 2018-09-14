@@ -269,11 +269,13 @@ export default class PhyloTree {
       this.initialize();
     }
 
+    /*
     function curveEdge(d) {
       return `M${d.y},${d.x}C${d.parent.y + 100},${d.x} ${d.parent.y + 100},${
         d.parent.x
       } ${d.parent.y},${d.parent.x}`;
     }
+*/
 
     function rectEdge(d) {
       return `M${d.y} ${d.x} L${d.parent.y} ${d.x} L${d.parent.y} ${

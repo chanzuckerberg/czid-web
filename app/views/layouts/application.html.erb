@@ -2,22 +2,15 @@
 <html>
   <head>
     <title>IDseq</title>
-    <%= javascript_include_tag Analytics::TRACKING_SOURCE %>
-    <% if current_user && current_user.id %>
-      <script type="text/javascript">_satellite.setVar("USERID", <%= current_user.id %>); </script>
-    <% end %>
     <%= csrf_meta_tags %>
     <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
     <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
-		 <link rel="icon"
-				 type="image/png"
-         href="<%= image_url("logo-#{Rails.env}.png") %>"
+    <link rel="icon" type="image/png" href="<%= image_url("logo-#{Rails.env}.png") %>"/>
   </head>
 
   <body id="id-seq">
     <%= render "layouts/page_header" %>
     <%= yield %>
-    <script type="text/javascript">_satellite.pageBottom();</script>
   </body>
 </html>

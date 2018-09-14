@@ -299,7 +299,7 @@ class TreeStructure extends React.PureComponent {
         return d.target.id;
       });
 
-    let pathsEnter = paths
+    paths
       .enter()
       .append("path")
       .attr("class", "link")
@@ -311,7 +311,7 @@ class TreeStructure extends React.PureComponent {
         return linkScale(d.target.weight);
       });
 
-    let pathsExit = paths
+    paths
       .exit()
       .transition()
       .duration(this.duration)
@@ -321,7 +321,7 @@ class TreeStructure extends React.PureComponent {
       })
       .remove();
 
-    let pathsUpdate = paths
+    paths
       .transition()
       .duration(this.duration)
       .attr("d", d => {

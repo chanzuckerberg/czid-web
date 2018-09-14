@@ -1,3 +1,4 @@
+import d3 from "d3";
 import NumAbbreviate from "number-abbreviate";
 import ObjectHelper from "../../helpers/ObjectHelper";
 import React from "react";
