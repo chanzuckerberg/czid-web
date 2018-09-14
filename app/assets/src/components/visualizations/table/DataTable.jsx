@@ -9,36 +9,139 @@ class DataTable extends React.Component {
   constructor(props) {
     super(props);
 
+    this.originalData = this.prepareData(this.props.data);
+
     this.state = {
-      data: this.props.data,
-      selectedRows: new Set()
+      filter: "",
+      selectedRows: new Set(this.props.selectedRows || [])
     };
+
+    this.handleCheckBoxChange = this.handleCheckBoxChange.bind(this);
   }
 
   static getDerivedStateFromProps(props, state) {
-    console.log("DataTable::getDerivedStateFromProps", props, state);
-    if (props.data !== state.data) {
+    console.log(
+      "DataTable::getDerivedStateFromProps - raw filter",
+      props.filter
+    );
+    let newFilter = DataTable.prepareFilter(props.filter);
+    console.log(
+      "DataTable::getDerivedStateFromProps - processed filter",
+      newFilter,
+      state.filter
+    );
+    if (newFilter !== state.filter) {
       return {
-        data: props.data
+        filter: newFilter
       };
     }
     return null;
   }
 
-  handleCheckBoxChange(index, checked) {
-    console.log("DataTable::handleCheckBoxChange", index, checked);
-    // this.setState({
+  static prepareFilter(filter) {
+    if (filter === undefined || filter === null) {
+      return "";
+    } else {
+      return filter
+        .toString()
+        .trim()
+        .toLowerCase();
+    }
+  }
 
-    // })
-    // if (index < 0) {
-    //   this.props.onSelectedRowsChanged(this.state.data[index]);
-    // } else {
-    //   this.props.onSelectedRowsChanged(this.state.data);
-    // }
+  filterData(data) {
+    console.log("DataTable::filterData", data, this.state.filter);
+    if (this.state.filter) {
+      const filters = this.state.filter.split(/ +/);
+      console.log("DataTable::filter", filters);
+      return data.filter(row =>
+        filters.every(filter => this.filterRow(row, filter))
+      );
+    }
+    return data;
+  }
+
+  filterRow(row, filter) {
+    for (let column in row) {
+      if (row.hasOwnProperty(column) && !column.startsWith("__")) {
+        let value =
+          row[column] !== undefined &&
+          row[column] !== null &&
+          row[column].toString().toLowerCase();
+        if (value && value.indexOf(filter) !== -1) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  prepareData() {
+    let data = this.props.data.slice();
+    for (let i = 0; i < data.length; i++) {
+      data[i].__originalIndex = i;
+    }
+    return data;
+  }
+
+  handleCheckBoxChange(rowIndex, checked) {
+    console.log("DataTable::handleCheckBoxChange", rowIndex, checked);
+    if (checked === undefined) {
+      console.log("DataTable::handleCheckBoxChange - no action!");
+      return;
+    }
+
+    let stateUpdate = {};
+    if (rowIndex < 0) {
+      if (checked) {
+        let allRows = new Set();
+        for (let i = 0; i < this.state.data.length; i++) {
+          allRows.add(this.state.data[i].__originalIndex);
+        }
+        stateUpdate = { selectedRows: allRows };
+      } else {
+        stateUpdate = { selectedRows: new Set() };
+      }
+    } else {
+      if (checked) {
+        stateUpdate = prevState => {
+          prevState.selectedRows.add(rowIndex);
+          return { selectedRows: prevState.selectedRows };
+        };
+      } else {
+        stateUpdate = prevState => {
+          prevState.selectedRows.delete(rowIndex);
+          return { selectedRows: prevState.selectedRows };
+        };
+      }
+    }
+
+    this.setState(stateUpdate, () =>
+      this.props.onSelectedRowsChanged(this.state.selectedRows)
+    );
   }
 
   render() {
-    console.log("DataTable::getDerivedStateFromProps", this.props);
+    console.log("DataTable::render - original", this.originalData);
+    const filteredData = this.filterData(this.originalData);
+    console.log("DataTable::render - filtered", filteredData);
+    const allChecked = filteredData.every(row =>
+      this.state.selectedRows.has(row.__originalIndex)
+    );
+
+    console.log("DataTable::render - allChecked", allChecked);
+
+    console.log(
+      "DataTable::render - selectedRows type",
+      typeof this.state.selectedRows,
+      this.state.selectedRows.has(0)
+    );
+    console.log(
+      "DataTable::render - all checkbox",
+      filteredData.length,
+      filteredData.size === filteredData.length,
+      filteredData.length
+    );
     return (
       <table className="idseq-ui data-table">
         <thead>
@@ -46,10 +149,7 @@ class DataTable extends React.Component {
             {this.props.onSelectedRowsChanged && (
               <th className="data-table__header column-reserved-selectable">
                 <Checkbox
-                  checked={
-                    this.state.selectedRows.length &&
-                    this.state.selectedRows.size === this.state.data.length
-                  }
+                  checked={allChecked}
                   onChange={this.handleCheckBoxChange}
                   value={-1}
                 />
@@ -63,21 +163,21 @@ class DataTable extends React.Component {
           </tr>
         </thead>
         <tbody>
-          {this.state.data.map((row, row_idx) => (
-            <tr key={row_idx}>
+          {filteredData.map(row => (
+            <tr key={row.__originalIndex}>
               {this.props.onSelectedRowsChanged && (
                 <td className="data-table__data column-reserved-selectable">
                   <Checkbox
-                    checked={this.state.selectedRows.has(row_idx)}
+                    checked={this.state.selectedRows.has(row.__originalIndex)}
                     onChange={this.handleCheckBoxChange}
-                    value={row_idx}
+                    value={row.__originalIndex}
                   />
                 </td>
               )}
-              {this.props.columns.map((column, col_idx) => (
+              {this.props.columns.map((column, colIdx) => (
                 <td
                   className={`data-table__data column-${column}`}
-                  key={col_idx}
+                  key={colIdx}
                 >
                   {row[column]}
                 </td>

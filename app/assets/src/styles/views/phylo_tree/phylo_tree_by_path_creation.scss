@@ -48,7 +48,7 @@
     }
 
     &__table {
-      height: 500px;
+      height: 300px;
       margin-bottom: 20px;
     }
   }
@@ -57,6 +57,18 @@
     &__table {
       height: 300px;
       margin-bottom: 20px;
+    }
+
+    &__searchbar {
+      &__container {
+        float: left;
+      }
+
+      &:after {
+        content: "";
+        display: table;
+        clear: both;
+      }
     }
   }
 

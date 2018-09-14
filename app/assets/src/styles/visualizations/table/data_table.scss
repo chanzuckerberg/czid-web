@@ -19,7 +19,8 @@
 
   tbody {
     display: block;
-    max-height: 280px;
+    // max-height: calc(100% - 50px);
+    max-height: 250px;
     overflow-y: scroll;
 
     td {

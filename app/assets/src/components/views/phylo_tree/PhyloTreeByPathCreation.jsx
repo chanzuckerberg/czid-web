@@ -15,12 +15,14 @@ class PhyloTreeByPathCreation extends React.Component {
       skipListTrees: false,
       phyloTreesLoaded: false,
       phyloTrees: [],
+
+      samplesLoaded: false,
       projectSamples: [],
+      selectedProjectSamples: new Set(),
+
       otherSamples: [],
-      selectedSamples: {
-        project: [],
-        other: []
-      }
+      selectedOtherSamples: new Set(),
+      otherSamplesFilter: ""
     };
 
     this.phyloTreeHeaders = {
@@ -50,18 +52,18 @@ class PhyloTreeByPathCreation extends React.Component {
     };
 
     this.taxonName = null;
+    this.inputTimeout = null;
+    this.inputDelay = 500;
 
     this.loadNewTreeContext = this.loadNewTreeContext.bind(this);
     this.handleNewTreeContextResponse = this.handleNewTreeContextResponse.bind(
       this
     );
-
-    console.log(
-      "PhyloTreeByPathCreation::constructor",
-      this.props,
-      this.props.taxonId,
-      this.props.projectId
+    this.handleChangedProjectSamples = this.handleChangedProjectSamples.bind(
+      this
     );
+    this.handleChangedOtherSamples = this.handleChangedOtherSamples.bind(this);
+    this.handleFilterChange = this.handleFilterChange.bind(this);
   }
 
   componentDidMount() {
@@ -146,7 +148,8 @@ class PhyloTreeByPathCreation extends React.Component {
       );
       this.setState({
         projectSamples: parsedTables.projectSamples,
-        otherSamples: parsedTables.otherSamples
+        otherSamples: parsedTables.otherSamples,
+        samplesLoaded: true
       });
     }
   }
@@ -187,9 +190,20 @@ class PhyloTreeByPathCreation extends React.Component {
     this.setState({ defaultPage });
   }
 
-  handleChangedProjectSamples(selectedProjectSamples) {}
+  handleChangedProjectSamples(selectedProjectSamples) {
+    this.setState({ selectedProjectSamples });
+  }
 
-  handleChangedOtherSamples(selectedOtherSamples) {}
+  handleChangedOtherSamples(selectedOtherSamples) {
+    this.setState({ selectedOtherSamples });
+  }
+
+  handleFilterChange(_, input) {
+    clearTimeout(this.inputTimeout);
+    this.inputTimeout = setTimeout(() => {
+      this.setState({ otherSamplesFilter: input.value });
+    }, this.inputDelay);
+  }
 
   getPages() {
     console.log(
@@ -210,11 +224,13 @@ class PhyloTreeByPathCreation extends React.Component {
         >
           <div className="wizard__page-1__subtitle">{this.taxonName}</div>
           <div className="wizard__page-1__table">
-            <DataTable
-              headers={this.phyloTreeHeaders}
-              columns={["name", "user", "last_update", "view"]}
-              data={this.state.phyloTrees}
-            />
+            {this.state.phyloTreesLoaded && (
+              <DataTable
+                headers={this.phyloTreeHeaders}
+                columns={["name", "user", "last_update", "view"]}
+                data={this.state.phyloTrees}
+              />
+            )}
           </div>
           <div className="wizard__page-1__action">
             <Wizard.Action action="continue">+ Create new tree</Wizard.Action>
@@ -238,12 +254,15 @@ class PhyloTreeByPathCreation extends React.Component {
           <Input placeholder="Name of the Tree" />
         </div>
         <div className="wizard__page-2__table">
-          <DataTable
-            headers={this.projectSamplesHeaders}
-            columns={["name", "host", "tissue", "location", "date", "reads"]}
-            data={this.state.projectSamples}
-            onSelectedRowsChanged={this.handleChangedProjectSamples}
-          />
+          {this.state.samplesLoaded && (
+            <DataTable
+              headers={this.projectSamplesHeaders}
+              columns={["name", "host", "tissue", "location", "date", "reads"]}
+              data={this.state.projectSamples}
+              selectedRows={this.state.selectedProjectSamples}
+              onSelectedRowsChanged={this.handleChangedProjectSamples}
+            />
+          )}
         </div>
       </Wizard.Page>,
       <Wizard.Page
@@ -253,35 +272,40 @@ class PhyloTreeByPathCreation extends React.Component {
         }`}
       >
         <div className="wizard__page-3__searchbar">
-          <div className="wizard__page-3__searchbar_container">
-            <Input placeholder="Name of the Tree" />
+          <div className="wizard__page-3__searchbar__container">
+            <Input placeholder="Search" onChange={this.handleFilterChange} />
           </div>
-          <div className="wizard__page-three__searchbar_container">
-            {this.state.selectedSamples.project.length} Project Samples
+          <div className="wizard__page-3__searchbar__container">
+            {this.state.selectedProjectSamples.size} Project Samples
           </div>
-          <div className="wizard__page-3__searchbar_container">
-            {this.state.selectedSamples.other.length} IDSeq Samples
+          <div className="wizard__page-3__searchbar__container">
+            {this.state.selectedOtherSamples.size} IDSeq Samples
           </div>
-          <div className="wizard__page-3__searchbar_container">
-            {this.state.selectedSamples.project.length +
-              this.state.selectedSamples.other.length}{" "}
+          <div className="wizard__page-3__searchbar__container">
+            {this.state.selectedProjectSamples.size +
+              this.state.selectedOtherSamples.size}{" "}
             Total Samples
           </div>
         </div>
         <div className="wizard__page-3__table">
-          <DataTable
-            headers={this.otherSamplesHeaders}
-            columns={[
-              "name",
-              "project",
-              "host",
-              "tissue",
-              "location",
-              "date",
-              "reads"
-            ]}
-            data={this.state.otherSamples}
-          />
+          {this.state.samplesLoaded && (
+            <DataTable
+              headers={this.otherSamplesHeaders}
+              columns={[
+                "name",
+                "project",
+                "host",
+                "tissue",
+                "location",
+                "date",
+                "reads"
+              ]}
+              data={this.state.otherSamples}
+              selectedRows={this.state.selectedOtherSamples}
+              onSelectedRowsChanged={this.handleChangedOtherSamples}
+              filter={this.state.otherSamplesFilter}
+            />
+          )}
         </div>
       </Wizard.Page>
     );
