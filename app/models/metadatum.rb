@@ -1,7 +1,7 @@
 require 'csv'
 
 class Metadatum < ApplicationRecord
-  include PipelineOutputsHelper
+  Client = Aws::S3::Client.new
 
   # ActiveRecord related
   belongs_to :sample
@@ -113,14 +113,9 @@ class Metadatum < ApplicationRecord
   end
 
   # Load bulk metadata from a CSV file from S3
-  def self.load_csv_from_s3(path)
+  def self.bulk_load_from_s3_csv(path)
     errors = []
-    csv_data = get_s3_file(path)
-    # Remove BOM if present (file likely comes from Excel)
-    csv_data = csv_data.delete("\uFEFF")
-    csv_data = CSV.parse(csv_data, headers: true)
-
-    # Load CSV file row-by-row
+    csv_data = get_s3_csv(path)
     csv_data.each_with_index do |row, index|
       begin
         errors += load_csv_single_sample_row(row, index)
@@ -132,10 +127,28 @@ class Metadatum < ApplicationRecord
 
     # Handle errors
     unless errors.empty?
-      msg = errors.join(". ")
+      msg = errors.join(".\n")
       Rails.logger.error(msg)
       return errors
     end
+  end
+
+  # Load CSV file from S3
+  def self.get_s3_csv(path)
+    parts = path.split("/", 4)
+    bucket = parts[2]
+    key = parts[3]
+    begin
+      resp = Client.get_object(bucket: bucket, key: key)
+      csv_data = resp.body.read
+    rescue => err
+      raise "Error in loading S3 file. #{err.message}"
+    end
+
+    # Remove BOM if present (file likely comes from Excel)
+    csv_data = csv_data.delete("\uFEFF")
+    csv_data = CSV.parse(csv_data, headers: true)
+    csv_data
   end
 
   # Load metadata from a single CSV row corresponding to one sample
@@ -167,11 +180,11 @@ class Metadatum < ApplicationRecord
   def self.load_csv_project(row, index)
     proj_name = row['study_id'] || row['project_name']
     unless proj_name
-      raise ArgumentError("No project name found in row #{index + 1}")
+      raise ArgumentError, "No project name found in row #{index + 1}"
     end
     proj = Project.find_by(name: proj_name)
     unless proj
-      raise ArgumentError("No project found named #{proj_name}")
+      raise ArgumentError, "No project found named #{proj_name}"
     end
     proj
   end
@@ -180,11 +193,11 @@ class Metadatum < ApplicationRecord
   def self.load_csv_sample(row, index, proj)
     sample_name = row['sample_name']
     unless sample_name
-      raise ArgumentError("No sample name found in row #{index + 1}")
+      raise ArgumentError, "No sample name found in row #{index + 1}"
     end
     sample = Sample.find_by(project: proj, name: sample_name)
     unless sample
-      raise ArgumentError("No sample found named #{sample_name} in #{proj.name}")
+      raise ArgumentError, "No sample found named #{sample_name} in #{proj.name}"
     end
     sample
   end

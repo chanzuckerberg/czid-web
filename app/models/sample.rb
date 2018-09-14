@@ -485,7 +485,7 @@ class Sample < ApplicationRecord
 
   # Add or update metadatum entry on this sample
   def metadatum_add_or_update(key, val)
-    m = metadata.find_by(key.to_s)
+    m = metadata.find_by(key: key.to_s)
     unless m
       # Create the entry
       m = Metadatum.new
