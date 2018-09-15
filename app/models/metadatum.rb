@@ -34,7 +34,7 @@ class Metadatum < ApplicationRecord
     discharge_type: STRING_TYPE,
     immunocomp: STRING_TYPE,
     other_infections: STRING_TYPE,
-    comorbitity: STRING_TYPE,
+    comorbidity: STRING_TYPE,
     known_organism: STRING_TYPE,
     infection_class: STRING_TYPE,
     detection_method: STRING_TYPE,
@@ -55,6 +55,21 @@ class Metadatum < ApplicationRecord
     infection_class: ["Definite", "No Infection", "Suspected", "Unknown", "Water Control"],
     library_prep: ["NEB Ultra II FS DNA", "NEB RNA Ultra II", "NEB Ultra II Directional RNA", "NEB Utra II DNA", "Nextera DNA", "Other"],
     sequencer: %w[MiSeq NextSeq HiSeq NovaSeq Other]
+  }.freeze
+
+  # Mapping from alternative name to our name. Used at upload time.
+  KEY_ALT_NAMES = {
+    sample_unique_id: "unique_id",
+    sample_collection_date: "collection_date",
+    sample_collection_location: "collection_location",
+    :"rna/dna_input(ng)" => "rna_dna_input",
+    :"rna/dna_input (ng)" => "rna_dna_input",
+    :"rna/dna_input" => "rna_dna_input",
+    :"rna/dna input" => "rna_dna_input",
+    :"rna/dna input (ng)" => "rna_dna_input",
+    antibiotics_administered: "antibiotic_administered",
+    :"known_organism(s)" => "known_organism",
+    :known_organisms => "known_organism"
   }.freeze
 
   # Custom validator called on save or update. Writes to the *_validated_value column.
@@ -160,16 +175,20 @@ class Metadatum < ApplicationRecord
     sample = load_csv_sample(row, index, proj)
 
     # Add or update Metadata items
-    done_keys = %w[study_id project_name sample_name]
+    done_keys = [:study_id, :project_name, :sample_name]
     row.each do |key, value|
-      if !key || !value || done_keys.include?(key)
-        next
+      next unless key && value
+      key = key.to_s.strip.to_sym
+      next if done_keys.include?(key)
+
+      if KEY_ALT_NAMES.include?(key)
+        key = KEY_ALT_NAMES[key]
       end
       begin
         sample.metadatum_add_or_update(key, value)
       rescue => err
         # Consolidate all the metadatum errors
-        errors << "#{sample.name}: #{key}: #{value}: #{err.message}"
+        errors << "[#{sample.name}] (#{key}, #{value}): #{err.message}"
       end
     end
 
@@ -180,7 +199,7 @@ class Metadatum < ApplicationRecord
   def self.load_csv_project(row, index)
     proj_name = row['study_id'] || row['project_name']
     unless proj_name
-      raise ArgumentError, "No project name found in row #{index + 1}"
+      raise ArgumentError, "No project name found in row #{index + 2}"
     end
     proj = Project.find_by(name: proj_name)
     unless proj
@@ -193,7 +212,7 @@ class Metadatum < ApplicationRecord
   def self.load_csv_sample(row, index, proj)
     sample_name = row['sample_name']
     unless sample_name
-      raise ArgumentError, "No sample name found in row #{index + 1}"
+      raise ArgumentError, "No sample name found in row #{index + 2}"
     end
     sample = Sample.find_by(project: proj, name: sample_name)
     unless sample
