@@ -6,16 +6,17 @@ class Checkbox extends React.Component {
     super(props);
 
     this.state = {
-      isChecked: this.props.checked
+      isChecked: false
     };
 
     this.handleClick = this.handleClick.bind(this);
   }
 
   static getDerivedStateFromProps(props, state) {
-    if (props.checked !== state.isChecked) {
+    if (props.checked !== state.oldIsChecked) {
       return {
-        isChecked: props.checked
+        isChecked: props.checked,
+        oldIsChecked: props.checked
       };
     }
     return null;
@@ -44,9 +45,8 @@ class Checkbox extends React.Component {
     const { isChecked } = this.state;
 
     return (
-      <div className="checkbox" onClick={this.handleClick}>
+      <div className="idseq-ui input checkbox" onClick={this.handleClick}>
         <input
-          className="idseq-ui input test"
           type="checkbox"
           value={value}
           checked={isChecked}

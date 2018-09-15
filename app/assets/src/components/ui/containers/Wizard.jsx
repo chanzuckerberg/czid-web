@@ -76,9 +76,6 @@ class Wizard extends React.Component {
       >
         <div className="wizard">
           <div className="wizard__header">
-            <div className="wizard__header__title">
-              {currentPage.props.title || this.props.title}
-            </div>
             {this.showPageInfo && (
               <div className="wizard__header__page">
                 {this.state.currentPage >= this.skipPageInfoNPages
@@ -89,6 +86,9 @@ class Wizard extends React.Component {
                   : "\u00A0"}
               </div>
             )}
+            <div className="wizard__header__title">
+              {currentPage.props.title || this.props.title}
+            </div>
           </div>
           {currentPage}
           {!currentPage.props.skipDefaultButtons && (

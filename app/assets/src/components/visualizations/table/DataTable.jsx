@@ -95,8 +95,8 @@ class DataTable extends React.Component {
     if (rowIndex < 0) {
       if (checked) {
         let allRows = new Set();
-        for (let i = 0; i < this.state.data.length; i++) {
-          allRows.add(this.state.data[i].__originalIndex);
+        for (let i = 0; i < this.originalData.length; i++) {
+          allRows.add(this.originalData[i].__originalIndex);
         }
         stateUpdate = { selectedRows: allRows };
       } else {

@@ -37,7 +37,13 @@
   }
 
   &__nav {
+    align-items: center;
+    display: flex;
+    justify-content: center;
     margin-top: 20px;
-    align: center;
+
+    button:not(:last-child) {
+      margin-right: 20px;
+    }
   }
 }
