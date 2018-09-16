@@ -16,12 +16,10 @@ class PhyloTreeByPathCreationModal extends React.Component {
   }
 
   handleOpen() {
-    console.log("handling open");
     this.setState({ open: true });
   }
 
   handleClose() {
-    console.log("handling close");
     this.setState({ open: false });
   }
 
@@ -42,5 +40,9 @@ class PhyloTreeByPathCreationModal extends React.Component {
     );
   }
 }
+
+PhyloTreeByPathCreationModal.propTypes = {
+  trigger: PropTypes.node
+};
 
 export default PhyloTreeByPathCreationModal;

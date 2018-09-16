@@ -23,19 +23,9 @@ class Checkbox extends React.Component {
   }
 
   handleClick() {
-    console.log(
-      "Checkbox::handleClick",
-      this.props,
-      this.state,
-      !this.state.isChecked
-    );
     const { value, onChange } = this.props;
 
     this.setState({ isChecked: !this.state.isChecked }, () => {
-      console.log(
-        "Checkbox::handleClick - before on change",
-        this.state.isChecked
-      );
       onChange(value, this.state.isChecked);
     });
   }

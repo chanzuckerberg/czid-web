@@ -6,6 +6,7 @@ import axios from "axios";
 import DataTable from "../../visualizations/table/DataTable";
 import Moment from "react-moment";
 
+const MinNumberOfSamples = 4;
 class PhyloTreeByPathCreation extends React.Component {
   constructor(props) {
     super(props);
@@ -52,6 +53,9 @@ class PhyloTreeByPathCreation extends React.Component {
     };
 
     this.taxonName = null;
+    this.treeName = "";
+    this.dagBranch = "";
+
     this.inputTimeout = null;
     this.inputDelay = 500;
 
@@ -80,12 +84,13 @@ class PhyloTreeByPathCreation extends React.Component {
       })
       .then(response => this.handlePhyloTreeResponse(response))
       .catch(error => {
-        console.log("Error loading existing phylo trees: ", error);
+        // TODO: properly handle error
+        // eslint-disable-next-line no-console
+        console.error("Error loading existing phylo trees: ", error);
       });
   }
 
   loadNewTreeContext() {
-    console.log(this.props);
     axios
       .get("/phylo_trees/new.json", {
         params: {
@@ -95,28 +100,20 @@ class PhyloTreeByPathCreation extends React.Component {
       })
       .then(response => this.handleNewTreeContextResponse(response))
       .catch(error => {
-        console.log("Error loading new phylo tree context: ", error);
+        // TODO: properly handle error
+        // eslint-disable-next-line no-console
+        console.error("Error loading new phylo tree context: ", error);
       });
   }
 
   handlePhyloTreeResponse(response) {
-    console.log(
-      "PhyloTreeByPathCreation::handlePhyloTreeResponse - data",
-      response.data
-    );
     let phyloTrees = response.data.phyloTrees;
     if (!phyloTrees || !Array.isArray(phyloTrees) || phyloTrees.length === 0) {
-      console.log(
-        "PhyloTreeByPathCreation::handlePhyloTreeResponse - skipping"
-      );
       this.setState({
         skipListTrees: true,
         phyloTreesLoaded: true
       });
     } else {
-      console.log(
-        "PhyloTreeByPathCreation::handlePhyloTreeResponse - load the data"
-      );
       this.taxonName = phyloTrees[0].tax_name;
       this.setState({
         phyloTrees: this.parsePhyloTreeData(response.data.phyloTrees),
@@ -126,26 +123,17 @@ class PhyloTreeByPathCreation extends React.Component {
   }
 
   handleNewTreeContextResponse(response) {
-    console.log(
-      "PhyloTreeByPathCreation::handleNewTreeContextResponse - new tree context",
-      response.data
-    );
     let samplesData = response.data.samples;
     if (
       !samplesData ||
       !Array.isArray(samplesData) ||
       samplesData.length === 0
     ) {
-      console.error("Process error on samples data");
+      // TODO: properly handle error
+      // eslint-disable-next-line no-console
+      console.error("Error loading samples data");
     } else {
-      console.log(
-        "PhyloTreeByPathCreation::handleNewTreeContextResponse - settng state"
-      );
       let parsedTables = this.parseProjectSamplesData(samplesData);
-      console.log(
-        "PhyloTreeByPathCreation::handleNewTreeContextResponse - parsedTables",
-        parsedTables
-      );
       this.setState({
         projectSamples: parsedTables.projectSamples,
         otherSamples: parsedTables.otherSamples,
@@ -159,7 +147,7 @@ class PhyloTreeByPathCreation extends React.Component {
       name: row.name,
       user: row.user.name,
       last_update: <Moment fromNow date={row.updated_at} />,
-      view: <a href={`/phylo_trees/index?taxId=${row.taxId}`}>View</a>
+      view: <a href={`/phylo_trees/index?treeId=${row.id}`}>View</a>
     }));
   }
 
@@ -205,13 +193,57 @@ class PhyloTreeByPathCreation extends React.Component {
     }, this.inputDelay);
   }
 
-  getPages() {
-    console.log(
-      "PhyloTreeByPathCreation::getPages",
-      this.state.phyloTrees,
-      this.state.skipListTrees
-    );
+  handleNameChange(_, input) {
+    this.treeName = input.value.trim();
+  }
 
+  handleDagBranch(_, input) {
+    this.dagBranch = input.value.trim();
+  }
+
+  handleCreation() {
+    let errors = [];
+
+    let totalSelectedSamples =
+      this.state.selectedProjectSamples + this.state.selectedOtherSamples;
+    if (totalSelectedSamples < MinNumberOfSamples) {
+      errors.push(`Please select at least ${MinNumberOfSamples} samples.`);
+    }
+
+    if (this.treeName.length == 0) {
+      errors.push("Please choose a name for the tree.");
+    }
+
+    if (errors.length == 0) {
+      let pipelineRunIds = [];
+      this.state.selectedProjectSamples.forEach(rowIndex => {
+        this.projectSamples[rowIndex].pipeline_run_id;
+      });
+
+      axios
+        .post("/phylo_trees/create", {
+          name: this.newTreeName,
+          dagBranch: this.dagBranch,
+          projectId: this.props.projectId,
+          taxId: this.props.taxonId,
+          taxName: this.taxonName,
+          pipelineRunIds: pipelineRunIds,
+          authenticityToken: this.props.csrf
+        })
+        .then(response => {
+          let phyloTreeId = response.data.phylo_tree_id;
+          if (phyloTreeId) {
+            location.href = `/phylo_trees/index?treeId=${phyloTreeId}`;
+          } else {
+            // TODO: properly handle error
+            // eslint-disable-next-line no-console
+            console.error("Error creating tree");
+          }
+        });
+    }
+  }
+
+  getPages() {
     let pages = [];
     if (!this.state.skipListTrees) {
       pages.push(
@@ -238,10 +270,6 @@ class PhyloTreeByPathCreation extends React.Component {
         </Wizard.Page>
       );
     }
-    console.log(
-      "PhyloTreeByPathCreation::getPages - pushing with ",
-      this.state.projectSamples
-    );
     pages.push(
       <Wizard.Page
         key="wizard__page_2"
@@ -250,8 +278,19 @@ class PhyloTreeByPathCreation extends React.Component {
       >
         <div className="wizard__page-2__subtitle">{this.taxonName}</div>
         <div className="wizard__page-2__form">
-          <div className="wizard__page-2__form__label">Name</div>
-          <Input placeholder="Name of the Tree" />
+          <div>
+            <div className="wizard__page-2__form__label-name">Name</div>
+            <Input placeholder="Tree Name" onChange={this.handleNameChange} />
+          </div>
+          {this.props.admin === 1 && (
+            <div>
+              <div className="wizard__page-2__form__label-branch">Branch</div>
+              <Input
+                placeholder="Branch Name"
+                onChange={this.handleBranchChange}
+              />
+            </div>
+          )}
         </div>
         <div className="wizard__page-2__table">
           {this.state.samplesLoaded && (
@@ -315,18 +354,6 @@ class PhyloTreeByPathCreation extends React.Component {
 
   render() {
     if (this.state.phyloTreesLoaded) {
-      console.log(
-        "PhyloTreeByPathCreation::render - phylo trees",
-        this.state.phyloTrees
-      );
-      console.log(
-        "PhyloTreeByPathCreation::render - project samples",
-        this.state.projectSamples
-      );
-      console.log(
-        "PhyloTreeByPathCreation::render - other samples",
-        this.state.otherSamples
-      );
       return (
         <Wizard
           skipPageInfoNPages={this.state.skipListTrees ? 0 : 1}
@@ -340,10 +367,17 @@ class PhyloTreeByPathCreation extends React.Component {
         </Wizard>
       );
     } else {
-      console.log("PhyloTreeByPathCreation::render - phylo trees not loaded");
       return <div>Loading Phylo Trees...</div>;
     }
   }
 }
+
+PhyloTreeByPathCreation.propTypes = {
+  admin: PropTypes.admin,
+  csrf: PropTypes.csrf,
+  onComplete: PropTypes.func,
+  projectId: PropTypes.projectId,
+  taxonId: PropTypes.number
+};
 
 export default PhyloTreeByPathCreation;

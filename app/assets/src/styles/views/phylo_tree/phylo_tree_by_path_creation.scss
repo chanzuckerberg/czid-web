@@ -64,7 +64,12 @@
       align-items: center;
       margin-bottom: 20px;
 
-      &__label {
+      div:not(:last-child) {
+        margin-right: 20px;
+      }
+
+      &__label-name,
+      &__label-branch {
         font-weight: 700;
         float: left;
         margin-right: 20px;

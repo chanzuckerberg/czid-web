@@ -20,16 +20,7 @@ class DataTable extends React.Component {
   }
 
   static getDerivedStateFromProps(props, state) {
-    console.log(
-      "DataTable::getDerivedStateFromProps - raw filter",
-      props.filter
-    );
     let newFilter = DataTable.prepareFilter(props.filter);
-    console.log(
-      "DataTable::getDerivedStateFromProps - processed filter",
-      newFilter,
-      state.filter
-    );
     if (newFilter !== state.filter) {
       return {
         filter: newFilter
@@ -50,10 +41,8 @@ class DataTable extends React.Component {
   }
 
   filterData(data) {
-    console.log("DataTable::filterData", data, this.state.filter);
     if (this.state.filter) {
       const filters = this.state.filter.split(/ +/);
-      console.log("DataTable::filter", filters);
       return data.filter(row =>
         filters.every(filter => this.filterRow(row, filter))
       );
@@ -85,9 +74,7 @@ class DataTable extends React.Component {
   }
 
   handleCheckBoxChange(rowIndex, checked) {
-    console.log("DataTable::handleCheckBoxChange", rowIndex, checked);
     if (checked === undefined) {
-      console.log("DataTable::handleCheckBoxChange - no action!");
       return;
     }
 
@@ -122,26 +109,11 @@ class DataTable extends React.Component {
   }
 
   render() {
-    console.log("DataTable::render - original", this.originalData);
     const filteredData = this.filterData(this.originalData);
-    console.log("DataTable::render - filtered", filteredData);
     const allChecked = filteredData.every(row =>
       this.state.selectedRows.has(row.__originalIndex)
     );
 
-    console.log("DataTable::render - allChecked", allChecked);
-
-    console.log(
-      "DataTable::render - selectedRows type",
-      typeof this.state.selectedRows,
-      this.state.selectedRows.has(0)
-    );
-    console.log(
-      "DataTable::render - all checkbox",
-      filteredData.length,
-      filteredData.size === filteredData.length,
-      filteredData.length
-    );
     return (
       <table className="idseq-ui data-table">
         <thead>
@@ -190,16 +162,12 @@ class DataTable extends React.Component {
   }
 }
 
-// sub-components?
-// TableHeader
-// TableBody
-// L TableRow
-// TableFooter
-
 DataTable.propTypes = {
   columns: PropTypes.array,
   data: PropTypes.array,
-  headers: PropTypes.object
+  headers: PropTypes.object,
+  onSelectedRowsChanged: PropTypes.func,
+  selectedRows: PropTypes.arrayOf(PropTypes.number)
 };
 
 export default DataTable;

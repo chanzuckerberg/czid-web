@@ -30,7 +30,6 @@ class Wizard extends React.Component {
       },
       this.props.labels
     );
-    console.log("Wizard::constructor - labels", this.props.labels, this.labels);
   }
 
   static getDerivedStateFromProps(newProps, prevState) {
@@ -56,7 +55,6 @@ class Wizard extends React.Component {
   }
 
   handleFinishClick() {
-    console.log(this.props);
     this.props.onComplete();
   }
 
@@ -79,7 +77,6 @@ class Wizard extends React.Component {
         1} / ${this.props.children.length - this.skipPageInfoNPages}`;
     }
 
-    console.log("Wizard::render rendering", this.props.children, currentPage);
     return (
       <WizardContext.Provider
         value={{ currentPage: this.state.currentPage, actions: wizardActions }}
@@ -119,33 +116,52 @@ class Wizard extends React.Component {
   }
 }
 
+Wizard.propTypes = {
+  children: PropTypes.oneOfType([
+    PropTypes.shape({
+      type: Wizard.Page
+    }),
+    PropTypes.arrayOf(
+      PropTypes.shape({
+        type: Wizard.Page
+      })
+    )
+  ]).isRequired,
+  labels: PropTypes.objectOf(PropTypes.string),
+  onComplete: PropTypes.func,
+  showPageInfo: PropTypes.bool,
+  skipPageInfoNPages: PropTypes.bool,
+  title: PropTypes.string
+};
+
 class Page extends React.Component {
   constructor(props) {
     super(props);
     this.state = {};
-    console.log("Wizard.Page::constructor");
   }
 
   componentDidMount() {
     if (this.props.onLoad) {
-      console.log("Wizard.Page::constructor onLoad");
       this.props.onLoad();
     }
   }
 
   render() {
-    console.log("Wizard.Page::render children", this.props.children);
     return (
-      <div
-        className={`wizard__page${
-          this.props.small ? " wizard__page--small" : ""
-        }`}
-      >
+      <div className={`wizard__page$`}>
         {React.Children.toArray(this.props.children)}
       </div>
     );
   }
 }
+
+Page.propTypes = {
+  children: PropTypes.oneOfType([
+    PropTypes.PropTypes.node,
+    PropTypes.arrayOf(PropTypes.node)
+  ]).isRequired,
+  onLoad: PropTypes.func
+};
 
 Wizard.Page = Page;
 
@@ -181,18 +197,5 @@ Action.propTypes = {
 };
 
 Wizard.Action = Action;
-
-Wizard.propTypes = {
-  // children: PropTypes.oneOfType([
-  //   PropTypes.shape({
-  //     type: Wizard.Page
-  //   }),
-  //   PropTypes.arrayOf(
-  //     PropTypes.shape({
-  //       type: Wizard.Page
-  //     })
-  //   )
-  // ]).isRequired
-};
 
 export default Wizard;
