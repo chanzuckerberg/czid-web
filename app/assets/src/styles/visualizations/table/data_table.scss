@@ -8,6 +8,12 @@
     display: table;
     width: calc(100% - 10px);
     border-bottom: 2px solid $lightest-grey;
+
+    th {
+      line-height: normal;
+      padding: 0;
+      height: 40px;
+    }
   }
 
   thead tr,
@@ -19,13 +25,14 @@
 
   tbody {
     display: block;
-    // max-height: calc(100% - 50px);
-    max-height: 250px;
     overflow-y: scroll;
 
     td {
       border-bottom: 1px solid $lightest-grey;
       word-wrap: break-word;
+      line-height: normal;
+      padding: 0;
+      height: 40px;
     }
 
     &::-webkit-scrollbar-track {

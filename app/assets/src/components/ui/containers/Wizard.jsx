@@ -69,6 +69,16 @@ class Wizard extends React.Component {
       finish: this.handleFinishClick
     };
 
+    let pageInfo = null;
+    if (
+      this.showPageInfo &&
+      this.state.currentPage >= this.skipPageInfoNPages
+    ) {
+      pageInfo = `${this.state.currentPage -
+        this.skipPageInfoNPages +
+        1} / ${this.props.children.length - this.skipPageInfoNPages}`;
+    }
+
     console.log("Wizard::render rendering", this.props.children, currentPage);
     return (
       <WizardContext.Provider
@@ -76,16 +86,7 @@ class Wizard extends React.Component {
       >
         <div className="wizard">
           <div className="wizard__header">
-            {this.showPageInfo && (
-              <div className="wizard__header__page">
-                {this.state.currentPage >= this.skipPageInfoNPages
-                  ? `${this.state.currentPage -
-                      this.skipPageInfoNPages +
-                      1} / ${this.props.children.length -
-                      this.skipPageInfoNPages}`
-                  : "\u00A0"}
-              </div>
-            )}
+            {pageInfo && <div className="wizard__header__page">{pageInfo}</div>}
             <div className="wizard__header__title">
               {currentPage.props.title || this.props.title}
             </div>

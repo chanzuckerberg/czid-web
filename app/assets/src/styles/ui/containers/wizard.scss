@@ -17,22 +17,16 @@
     width: 100%;
 
     &__title {
-      float: left;
       font-size: 20px;
       font-weight: 700;
-      line-height: 40px;
+      line-height: 30px;
+      text-transform: capitalize;
       vertical-align: middle;
     }
 
     &__page {
       color: $medium-grey;
-      float: right;
-    }
-
-    &:after {
-      content: "";
-      display: table;
-      clear: both;
+      margin-bottom: 10px;
     }
   }
 

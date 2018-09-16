@@ -5,10 +5,48 @@
   &__page-2,
   &__page-3 {
     &__subtitle {
-      height: 30px;
-      font-weight: 700;
       color: $dark-grey;
+      font-weight: 700;
+      height: 16px;
+      line-height: 16px;
+      margin-bottom: 20px;
       text-transform: capitalize;
+      vertical-align: middle;
+    }
+
+    &__table {
+      max-height: 300px;
+      margin-bottom: 20px;
+
+      tbody {
+        max-height: 260px;
+      }
+
+      // custom style for data tables
+      .data-table {
+        // applies to header and data
+        .column-name {
+          width: 250px;
+          text-align: left;
+        }
+
+        &__header {
+          text-align: center;
+        }
+
+        &__data {
+          text-align: center;
+
+          &.column-name {
+            font-weight: 700;
+          }
+
+          &.column-view {
+            color: $primary-light;
+            font-weight: 700;
+          }
+        }
+      }
     }
   }
 
@@ -17,11 +55,6 @@
       color: $primary-light;
       font-weight: 700;
     }
-
-    &__table {
-      max-height: 300px;
-      margin-bottom: 20px;
-    }
   }
 
   &__page-2 {
@@ -29,6 +62,7 @@
       height: 50px;
       display: flex;
       align-items: center;
+      margin-bottom: 20px;
 
       &__label {
         font-weight: 700;
@@ -49,19 +83,26 @@
 
     &__table {
       height: 300px;
-      margin-bottom: 20px;
     }
   }
 
   &__page-3 {
-    &__table {
-      height: 300px;
-      margin-bottom: 20px;
-    }
+    padding-top: 10px;
 
     &__searchbar {
+      height: 50px;
+      margin-bottom: 20px;
+
       &__container {
         float: left;
+        font-weight: 700;
+        height: 50px;
+        line-height: 50px;
+        vertical-align: middle;
+
+        &:not(:first-child) {
+          margin-left: 20px;
+        }
       }
 
       &:after {
@@ -70,30 +111,9 @@
         clear: both;
       }
     }
-  }
 
-  // custom style for data tables
-  .data-table {
-    &__header {
-      text-align: center;
-
-      &.column-name {
-        text-align: left;
-      }
-    }
-
-    &__data {
-      text-align: center;
-
-      &.column-name {
-        font-weight: 700;
-        text-align: left;
-      }
-
-      &.column-view {
-        color: $primary-light;
-        font-weight: 700;
-      }
+    &__table {
+      height: 300px;
     }
   }
 }

@@ -48,7 +48,7 @@ class PhyloTreeByPathCreation extends React.Component {
       tissue: "Tissue",
       location: "Location",
       date: "Date",
-      reads: "Read Count (NT | NR)"
+      reads: "Read Count\n(NT | NR)"
     };
 
     this.taxonName = null;
@@ -245,7 +245,7 @@ class PhyloTreeByPathCreation extends React.Component {
     pages.push(
       <Wizard.Page
         key="wizard__page_2"
-        title="Create phylogenetic tree and samples from project"
+        title="Create phylogenetic tree and select samples from project"
         onLoad={this.loadNewTreeContext}
       >
         <div className="wizard__page-2__subtitle">{this.taxonName}</div>
@@ -271,6 +271,7 @@ class PhyloTreeByPathCreation extends React.Component {
           this.taxonName
         }`}
       >
+        <div className="wizard__page-3__subtitle" />
         <div className="wizard__page-3__searchbar">
           <div className="wizard__page-3__searchbar__container">
             <Input placeholder="Search" onChange={this.handleFilterChange} />

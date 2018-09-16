@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
 import React from "react";
 import { Modal as SemanticModal } from "semantic-ui-react";
+import RemoveIcon from "../icons/RemoveIcon";
 
 class Modal extends React.Component {
   constructor(props) {
@@ -13,6 +14,11 @@ class Modal extends React.Component {
         {this.props.title && (
           <SemanticModal.Header>{this.props.title}</SemanticModal.Header>
         )}
+        {this.props.onClose && (
+          <div className="close-icon" onClick={this.props.onClose}>
+            <RemoveIcon />
+          </div>
+        )}
         <SemanticModal.Content>{this.props.children}</SemanticModal.Content>
       </SemanticModal>
     );
@@ -24,6 +30,7 @@ Modal.propTypes = {
     PropTypes.arrayOf(PropTypes.node),
     PropTypes.node
   ]).isRequired,
+  onClose: PropTypes.func,
   title: PropTypes.string,
   trigger: PropTypes.node.isRequired
 };
