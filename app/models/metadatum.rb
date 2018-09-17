@@ -113,10 +113,9 @@ class Metadatum < ApplicationRecord
 
   # Set value based on data type
   def edit_value(val)
-    d_type = data_type
-    if d_type == "string"
+    if data_type == "string"
       self.text_raw_value = val
-    elsif d_type == "number"
+    elsif data_type == "number"
       self.number_raw_value = val
     end
     # Note: *_validated_value field is set in the set_validated_values
@@ -148,7 +147,7 @@ class Metadatum < ApplicationRecord
     end
   end
 
-  # Load CSV file from S3
+  # Load CSV file from S3. Raise RuntimeError on download fail.
   def self.get_s3_csv(path)
     parts = path.split("/", 4)
     bucket = parts[2]
@@ -178,6 +177,7 @@ class Metadatum < ApplicationRecord
     done_keys = [:study_id, :project_name, :sample_name]
     row.each do |key, value|
       next unless key && value
+      # Strip whitespace and ensure symbol
       key = key.to_s.strip.to_sym
       next if done_keys.include?(key)
 
