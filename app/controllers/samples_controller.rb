@@ -653,14 +653,16 @@ class SamplesController < ApplicationController
   end
 
   def sample_params
-    params.require(:sample).permit(:name, :project_name, :project_id, :status, :s3_preload_result_path,
-                                   :s3_star_index_path, :s3_bowtie2_index_path,
-                                   :host_genome_id, :host_genome_name, :alignment_config_name,
-                                   :sample_memory, :sample_location, :sample_date, :sample_tissue,
-                                   :sample_template, :sample_library, :sample_sequencer,
-                                   :sample_notes, :job_queue, :search, :subsample, :pipeline_branch,
-                                   :sample_input_pg, :sample_batch, :sample_diagnosis, :sample_organism, :sample_detection, :client,
-                                   input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts])
+    permitted_params = [:name, :project_name, :project_id, :status, :s3_preload_result_path,
+                        :s3_star_index_path, :s3_bowtie2_index_path,
+                        :host_genome_id, :host_genome_name, :alignment_config_name,
+                        :sample_memory, :sample_location, :sample_date, :sample_tissue,
+                        :sample_template, :sample_library, :sample_sequencer,
+                        :sample_notes, :job_queue, :search, :subsample,
+                        :sample_input_pg, :sample_batch, :sample_diagnosis, :sample_organism, :sample_detection, :client,
+                        input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts]]
+    permitted_params << :pipeline_branch if current_user.admin?
+    params.require(:sample).permit(*permitted_params)
   end
 
   def sort_by(samples, dir = nil)
