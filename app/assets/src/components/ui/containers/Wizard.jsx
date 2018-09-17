@@ -48,8 +48,18 @@ class Wizard extends React.Component {
     }
   }
 
-  handleContinueClick() {
-    if (this.state.currentPage < this.props.children.length - 1) {
+  handleContinueClick(currentPage) {
+    let onContinue = this.props.children[this.state.currentPage].props
+      .onContinue;
+    let result = true;
+    if (onContinue) {
+      result = onContinue();
+    }
+
+    if (
+      result === true &&
+      this.state.currentPage < this.props.children.length - 1
+    ) {
       this.setState({ currentPage: this.state.currentPage + 1 });
     }
   }

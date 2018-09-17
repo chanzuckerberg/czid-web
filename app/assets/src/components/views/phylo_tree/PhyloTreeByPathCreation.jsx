@@ -23,7 +23,10 @@ class PhyloTreeByPathCreation extends React.Component {
 
       otherSamples: [],
       selectedOtherSamples: new Set(),
-      otherSamplesFilter: ""
+      otherSamplesFilter: "",
+
+      showErrors: false,
+      treeName: ""
     };
 
     this.phyloTreeHeaders = {
@@ -53,12 +56,12 @@ class PhyloTreeByPathCreation extends React.Component {
     };
 
     this.taxonName = null;
-    this.treeName = "";
     this.dagBranch = "";
 
     this.inputTimeout = null;
     this.inputDelay = 500;
 
+    this.canContinue = this.canContinue.bind(this);
     this.handleBranchChange = this.handleBranchChange.bind(this);
     this.handleChangedProjectSamples = this.handleChangedProjectSamples.bind(
       this
@@ -69,6 +72,7 @@ class PhyloTreeByPathCreation extends React.Component {
     this.handleNewTreeContextResponse = this.handleNewTreeContextResponse.bind(
       this
     );
+    this.isTreeNameValid = this.isTreeNameValid.bind(this);
     this.loadNewTreeContext = this.loadNewTreeContext.bind(this);
   }
 
@@ -196,7 +200,7 @@ class PhyloTreeByPathCreation extends React.Component {
   }
 
   handleNameChange(_, input) {
-    this.treeName = input.value.trim();
+    this.setState({ treeName: input.value.trim() });
   }
 
   handleBranchChange(_, input) {
@@ -212,7 +216,7 @@ class PhyloTreeByPathCreation extends React.Component {
       errors.push(`Please select at least ${MinNumberOfSamples} samples.`);
     }
 
-    if (this.treeName.length == 0) {
+    if (this.state.treeName.length == 0) {
       errors.push("Please choose a name for the tree.");
     }
 
@@ -243,6 +247,18 @@ class PhyloTreeByPathCreation extends React.Component {
           }
         });
     }
+  }
+
+  isTreeNameValid() {
+    return this.state.treeName.length > 0;
+  }
+
+  canContinue() {
+    if (this.isTreeNameValid()) {
+      return true;
+    }
+    this.setState({ showErrors: true });
+    return false;
   }
 
   getPages() {
@@ -277,12 +293,19 @@ class PhyloTreeByPathCreation extends React.Component {
         key="wizard__page_2"
         title="Create phylogenetic tree and select samples from project"
         onLoad={this.loadNewTreeContext}
+        onContinue={this.canContinue}
       >
         <div className="wizard__page-2__subtitle">{this.taxonName}</div>
         <div className="wizard__page-2__form">
           <div>
             <div className="wizard__page-2__form__label-name">Name</div>
-            <Input placeholder="Tree Name" onChange={this.handleNameChange} />
+            <Input
+              className={
+                this.state.showErrors && !this.isTreeNameValid() ? "error" : ""
+              }
+              placeholder="Tree Name"
+              onChange={this.handleNameChange}
+            />
           </div>
           {this.props.admin === 1 && (
             <div>

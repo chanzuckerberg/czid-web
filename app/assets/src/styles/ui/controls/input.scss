@@ -14,4 +14,10 @@
       box-shadow: none;
     }
   }
+
+  &.error {
+    input[type="text"] {
+      border: 1px solid red;
+    }
+  }
 }

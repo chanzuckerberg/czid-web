@@ -7,7 +7,9 @@ class Input extends React.Component {
   }
 
   render() {
-    return <SemanticInput className="idseq-ui" {...this.props} />;
+    let { className, ...props } = this.props;
+    className = "idseq-ui " + className;
+    return <SemanticInput className={className} {...props} />;
   }
 }
 
