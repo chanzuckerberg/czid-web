@@ -84,10 +84,15 @@ class MultipleDropdown extends React.Component {
   }
 }
 
+MultipleDropdown.defaultProps = {
+  value: []
+};
+
 MultipleDropdown.propTypes = {
   label: PropTypes.string,
   onChange: PropTypes.func.isRequired,
-  options: PropTypes.arrayOf(PropTypes.object)
+  options: PropTypes.arrayOf(PropTypes.object),
+  value: PropTypes.array
 };
 
 export default MultipleDropdown;

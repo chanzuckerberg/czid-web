@@ -242,6 +242,10 @@ const ThresholdFilterDropdownLabel = props => {
   );
 };
 
+ThresholdFilterDropdown.defaultProps = {
+  thresholds: []
+};
+
 ThresholdFilterDropdownLabel.propType = forbidExtraProps({
   disabled: PropTypes.bool,
   label: PropTypes.string,
