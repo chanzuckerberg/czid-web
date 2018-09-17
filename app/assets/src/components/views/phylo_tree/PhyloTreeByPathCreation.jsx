@@ -59,15 +59,17 @@ class PhyloTreeByPathCreation extends React.Component {
     this.inputTimeout = null;
     this.inputDelay = 500;
 
-    this.loadNewTreeContext = this.loadNewTreeContext.bind(this);
-    this.handleNewTreeContextResponse = this.handleNewTreeContextResponse.bind(
-      this
-    );
+    this.handleBranchChange = this.handleBranchChange.bind(this);
     this.handleChangedProjectSamples = this.handleChangedProjectSamples.bind(
       this
     );
     this.handleChangedOtherSamples = this.handleChangedOtherSamples.bind(this);
     this.handleFilterChange = this.handleFilterChange.bind(this);
+    this.handleNameChange = this.handleNameChange.bind(this);
+    this.handleNewTreeContextResponse = this.handleNewTreeContextResponse.bind(
+      this
+    );
+    this.loadNewTreeContext = this.loadNewTreeContext.bind(this);
   }
 
   componentDidMount() {
@@ -197,7 +199,7 @@ class PhyloTreeByPathCreation extends React.Component {
     this.treeName = input.value.trim();
   }
 
-  handleDagBranch(_, input) {
+  handleBranchChange(_, input) {
     this.dagBranch = input.value.trim();
   }
 
@@ -285,10 +287,7 @@ class PhyloTreeByPathCreation extends React.Component {
           {this.props.admin === 1 && (
             <div>
               <div className="wizard__page-2__form__label-branch">Branch</div>
-              <Input
-                placeholder="Branch Name"
-                onChange={this.handleBranchChange}
-              />
+              <Input placeholder="master" onChange={this.handleBranchChange} />
             </div>
           )}
         </div>
@@ -373,10 +372,10 @@ class PhyloTreeByPathCreation extends React.Component {
 }
 
 PhyloTreeByPathCreation.propTypes = {
-  admin: PropTypes.admin,
-  csrf: PropTypes.csrf,
+  admin: PropTypes.number,
+  csrf: PropTypes.string.isRequired,
   onComplete: PropTypes.func,
-  projectId: PropTypes.projectId,
+  projectId: PropTypes.number,
   taxonId: PropTypes.number
 };
 

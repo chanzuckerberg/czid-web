@@ -59,13 +59,18 @@
 
   &__page-2 {
     &__form {
-      height: 50px;
-      display: flex;
-      align-items: center;
       margin-bottom: 20px;
+      height: 50px;
 
-      div:not(:last-child) {
-        margin-right: 20px;
+      div {
+        float: left;
+        height: 50px;
+        display: flex;
+        align-items: center;
+
+        &:not(:last-child) {
+          margin-right: 20px;
+        }
       }
 
       &__label-name,

@@ -130,7 +130,7 @@ Wizard.propTypes = {
   labels: PropTypes.objectOf(PropTypes.string),
   onComplete: PropTypes.func,
   showPageInfo: PropTypes.bool,
-  skipPageInfoNPages: PropTypes.bool,
+  skipPageInfoNPages: PropTypes.number,
   title: PropTypes.string
 };
 

@@ -3,9 +3,7 @@ import React from "react";
 import Checkbox from "../../ui/controls/Checkbox";
 
 class DataTable extends React.Component {
-  // Table should be able to get data through:
-  // - passed JSON object (To Be Implemented)
-  // - async fetcher function
+  // TODO: async get data function
   constructor(props) {
     super(props);
 
@@ -110,9 +108,11 @@ class DataTable extends React.Component {
 
   render() {
     const filteredData = this.filterData(this.originalData);
-    const allChecked = filteredData.every(row =>
-      this.state.selectedRows.has(row.__originalIndex)
-    );
+    const allChecked =
+      filteredData.length > 0 &&
+      filteredData.every(row =>
+        this.state.selectedRows.has(row.__originalIndex)
+      );
 
     return (
       <table className="idseq-ui data-table">
@@ -167,7 +167,11 @@ DataTable.propTypes = {
   data: PropTypes.array,
   headers: PropTypes.object,
   onSelectedRowsChanged: PropTypes.func,
-  selectedRows: PropTypes.arrayOf(PropTypes.number)
+  selectedRows: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.number),
+    // allow Set = TODO: replace by custom function
+    PropTypes.object
+  ])
 };
 
 export default DataTable;

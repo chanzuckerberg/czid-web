@@ -908,17 +908,14 @@ class PipelineSampleReport extends React.Component {
     )
       phyloTreeDot = (
         <PhyloTreeByPathCreationModal
+          admin={parseInt(this.admin)}
+          csrf={this.csrf}
           trigger={
             <i className="fa fa-code-fork action-dot" aria-hidden="true" />
           }
           taxonId={taxInfo.tax_id}
           projectId={this.projectId}
         />
-        // <i
-        //   onClick={() => this.gotoTreeLink(taxInfo.tax_id)}
-        //   className="fa fa-code-fork action-dot"
-        //   aria-hidden="true"
-        // />
       );
     return (
       <span className="link-tag">
