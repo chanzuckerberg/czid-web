@@ -31,7 +31,7 @@ class Checkbox extends React.Component {
   }
 
   render() {
-    const { value } = this.props;
+    const { value, label } = this.props;
     const { isChecked } = this.state;
 
     return (
@@ -42,6 +42,8 @@ class Checkbox extends React.Component {
           checked={isChecked}
           readOnly={true}
         />
+        <span className="checkmark" />
+        <span className="label">{label}</span>
       </div>
     );
   }
@@ -53,6 +55,7 @@ Checkbox.defaultProps = {
 
 Checkbox.propTypes = {
   checked: PropTypes.bool,
+  label: PropTypes.string,
   onChange: PropTypes.func.isRequired,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired
 };

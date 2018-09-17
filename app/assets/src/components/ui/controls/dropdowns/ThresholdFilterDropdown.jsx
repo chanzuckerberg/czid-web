@@ -19,6 +19,16 @@ class ThresholdFilterDropdown extends React.Component {
     };
   }
 
+  static getDerivedStateFromProps(props, state) {
+    let newThresholds = props.thresholds.filter(
+      ThresholdFilterDropdown.isThresholdValid
+    );
+    if (newThresholds !== state.thresholds) {
+      return { thresholds: newThresholds };
+    }
+    return null;
+  }
+
   handleThresholdRemove(thresholdIdx) {
     var newThresholds = [...this.state.thresholds];
     newThresholds.splice(thresholdIdx, 1);
@@ -31,7 +41,7 @@ class ThresholdFilterDropdown extends React.Component {
     this.setState({ thresholds: newThresholds });
   }
 
-  isThresholdValid(threshold) {
+  static isThresholdValid(threshold) {
     return (
       threshold.metric.length > 0 &&
       threshold.operator.length > 0 &&
@@ -135,14 +145,11 @@ class ThresholdFilterDropdown extends React.Component {
       />
     );
   }
-
-  componentWillReceiveProps(nextProps) {
-    let newThresholds = nextProps.thresholds.filter(this.isThresholdValid);
-    if (newThresholds !== this.state.thresholds) {
-      this.setState({ thresholds: newThresholds });
-    }
-  }
 }
+
+ThresholdFilterDropdown.defaultProps = {
+  thresholds: []
+};
 
 ThresholdFilterDropdown.propTypes = forbidExtraProps({
   disabled: PropTypes.bool,

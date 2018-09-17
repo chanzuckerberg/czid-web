@@ -1,41 +1,62 @@
 @import "../../themes/colors";
 
-.idseq-ui.input input[type="checkbox"] {
-  opacity: 1;
-  position: static;
-
-  -webkit-appearance: none;
-  background-color: $white;
-  border: 1px solid $light-grey;
-  border-radius: 2px;
-  padding: 8px;
-  display: inline-block;
+.idseq-ui.input.checkbox {
+  display: flex;
   position: relative;
-  vertical-align: middle;
-  line-height: 14px;
+  padding: 0px 0px 0px 26px;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  height: 28px;
+  align-items: center;
 
-  &:checked {
-    background-color: $primary-light;
-    border: 1px solid $primary-light;
-    color: $white;
-  }
-
-  &:checked:after {
-    content: "\2713";
-    font-size: 14px;
-    font-weight: 100;
+  input[type="checkbox"] {
     position: absolute;
-    top: 0px;
-    left: 3px;
-    color: $white;
+    opacity: 0;
+    cursor: pointer;
   }
 
   .checkmark {
     position: absolute;
-    top: 0;
-    left: 0;
-    height: 25px;
-    width: 25px;
-    background-color: #eee;
+    top: 6px;
+    left: 6px;
+    height: 16px;
+    width: 16px;
+    border: 1px solid $medium-grey;
+    border-radius: 2px;
+
+    &:after {
+      content: "";
+      position: absolute;
+      display: none;
+
+      left: 4px;
+      top: 1px;
+      width: 6px;
+      height: 9px;
+      border: solid $white;
+      border-width: 0 1px 1px 0;
+      -webkit-transform: rotate(40deg);
+      -ms-transform: rotate(40deg);
+      transform: rotate(40deg);
+    }
+  }
+
+  &:hover {
+    background-color: $lightest-grey;
+  }
+
+  & input:checked ~ .checkmark {
+    background-color: $primary-light;
+
+    &:after {
+      display: block;
+    }
+  }
+
+  .label {
+    line-height: 18px;
   }
 }
