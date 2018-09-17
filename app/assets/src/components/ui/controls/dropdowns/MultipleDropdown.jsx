@@ -25,6 +25,12 @@ class MultipleDropdown extends React.Component {
     this.passedOnChange && this.passedOnChange(e, value);
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.value !== this.state.value) {
+      this.setState({ value: nextProps.value });
+    }
+  }
+
   renderMenuItems() {
     let ret = [];
     let checkedOptions = this.props.value || this.state.value;
