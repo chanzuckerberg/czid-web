@@ -5,6 +5,7 @@ import Wizard from "../../ui/containers/Wizard";
 import axios from "axios";
 import DataTable from "../../visualizations/table/DataTable";
 import Moment from "react-moment";
+import PhyloTreeChecks from "./PhyloTreeChecks";
 
 const MinNumberOfSamples = 4;
 class PhyloTreeByPathCreation extends React.Component {
@@ -25,7 +26,8 @@ class PhyloTreeByPathCreation extends React.Component {
       selectedOtherSamples: new Set(),
       otherSamplesFilter: "",
 
-      showErrors: false,
+      showErrorName: false,
+      showErrorSamples: false,
       treeName: ""
     };
 
@@ -67,6 +69,7 @@ class PhyloTreeByPathCreation extends React.Component {
       this
     );
     this.handleChangedOtherSamples = this.handleChangedOtherSamples.bind(this);
+    this.handleComplete = this.handleComplete.bind(this);
     this.handleFilterChange = this.handleFilterChange.bind(this);
     this.handleNameChange = this.handleNameChange.bind(this);
     this.handleNewTreeContextResponse = this.handleNewTreeContextResponse.bind(
@@ -162,19 +165,29 @@ class PhyloTreeByPathCreation extends React.Component {
     let otherSamples = [];
     for (let i = 0; i < samples.length; i++) {
       const row = samples[i];
-      let entry = {
-        name: row.name,
-        host: "-",
-        tissue: "-",
-        location: "-",
-        date: "-",
-        reads: `${(row.taxid_reads || {}).NT} | ${(row.taxid_reads || {}).NR}`
-      };
-      if (row.project_id === this.props.projectId) {
-        projectSamples.push(entry);
-      } else {
-        entry.project = row.project_name;
-        otherSamples.push(entry);
+      if (
+        PhyloTreeChecks.passesCreateCondition(
+          (row.taxid_reads || {}).NT,
+          (row.taxid_reads || {}).NR
+        )
+      ) {
+        let entry = {
+          name: row.name,
+          host: "-",
+          tissue: "-",
+          location: "-",
+          date: "-",
+          reads: `${(row.taxid_reads || {}).NT} | ${
+            (row.taxid_reads || {}).NR
+          }`,
+          pipelineRunId: row.pipeline_run_id
+        };
+        if (row.project_id === this.props.projectId) {
+          projectSamples.push(entry);
+        } else {
+          entry.project = row.project_name;
+          otherSamples.push(entry);
+        }
       }
     }
     return { projectSamples, otherSamples };
@@ -208,54 +221,51 @@ class PhyloTreeByPathCreation extends React.Component {
   }
 
   handleCreation() {
-    let errors = [];
-
-    let totalSelectedSamples =
-      this.state.selectedProjectSamples + this.state.selectedOtherSamples;
-    if (totalSelectedSamples < MinNumberOfSamples) {
-      errors.push(`Please select at least ${MinNumberOfSamples} samples.`);
-    }
-
-    if (this.state.treeName.length == 0) {
-      errors.push("Please choose a name for the tree.");
-    }
-
-    if (errors.length == 0) {
-      let pipelineRunIds = [];
-      this.state.selectedProjectSamples.forEach(rowIndex => {
-        this.projectSamples[rowIndex].pipeline_run_id;
+    if (!this.isNumberOfSamplesValid()) {
+      this.setState({
+        showErrorSamples: true
       });
-
-      axios
-        .post("/phylo_trees/create", {
-          name: this.newTreeName,
-          dag_branch: this.dagBranch,
-          project_id: this.props.projectId,
-          taxid: this.props.taxonId,
-          tax_name: this.taxonName,
-          pipeline_run_ids: pipelineRunIds,
-          authenticity_token: this.props.csrf
-        })
-        .then(response => {
-          let phyloTreeId = response.data.phylo_tree_id;
-          if (phyloTreeId) {
-            location.href = `/phylo_trees/index?treeId=${phyloTreeId}`;
-          } else {
-            // TODO: properly handle error
-            // eslint-disable-next-line no-console
-            console.error("Error creating tree");
-          }
-        });
+      return false;
     }
 
-    return errors;
+    let pipelineRunIds = [];
+    this.state.selectedProjectSamples.forEach(rowIndex => {
+      pipelineRunIds.push(this.state.projectSamples[rowIndex].pipelineRunId);
+    });
+    this.state.selectedOtherSamples.forEach(rowIndex => {
+      pipelineRunIds.push(this.state.otherSamples[rowIndex].pipelineRunId);
+    });
+
+    axios
+      .post("/phylo_trees/create", {
+        name: this.state.treeName,
+        dag_branch: this.dagBranch,
+        project_id: this.props.projectId,
+        taxid: this.props.taxonId,
+        tax_name: this.taxonName,
+        pipeline_run_ids: pipelineRunIds,
+        authenticity_token: this.props.csrf
+      })
+      .then(response => {
+        let phyloTreeId = response.data.phylo_tree_id;
+        if (phyloTreeId) {
+          location.href = `/phylo_trees/index?treeId=${phyloTreeId}`;
+        } else {
+          // TODO: properly handle error
+          // eslint-disable-next-line no-console
+          console.error("Error creating tree");
+        }
+      })
+      .catch(error => {
+        // TODO: properly handle error
+        // eslint-disable-next-line no-console
+        console.error("Exception creating tree: ", error);
+      });
+    return true;
   }
 
   handleComplete() {
-    // check if there are enough samples
-    this.handleCreation();
-
-    if (this.props.onComplete) {
+    if (this.handleCreation() && this.props.onComplete) {
       this.props.onComplete();
     }
   }
@@ -264,12 +274,35 @@ class PhyloTreeByPathCreation extends React.Component {
     return this.state.treeName.length > 0;
   }
 
+  isNumberOfSamplesValid() {
+    return (
+      this.state.selectedProjectSamples.size +
+        this.state.selectedOtherSamples.size >=
+      MinNumberOfSamples
+    );
+  }
+
   canContinue() {
     if (this.isTreeNameValid()) {
       return true;
     }
-    this.setState({ showErrors: true });
+    this.setState({ showErrorName: true });
     return false;
+  }
+
+  getTotalPageRendering() {
+    let totalSelectedSamples =
+      this.state.selectedProjectSamples.size +
+      this.state.selectedOtherSamples.size;
+    if (this.state.showErrorSamples && !this.isNumberOfSamplesValid()) {
+      return (
+        <span className="wizard__error">
+          {totalSelectedSamples} Total Samples (min number is{" "}
+          {MinNumberOfSamples})
+        </span>
+      );
+    }
+    return `${totalSelectedSamples} Total Samples`;
   }
 
   getPages() {
@@ -302,7 +335,7 @@ class PhyloTreeByPathCreation extends React.Component {
     pages.push(
       <Wizard.Page
         key="wizard__page_2"
-        title="Create phylogenetic tree and select samples from project"
+        title="Create phylogenetic tree and select samples from the project"
         onLoad={this.loadNewTreeContext}
         onContinue={this.canContinue}
       >
@@ -312,7 +345,9 @@ class PhyloTreeByPathCreation extends React.Component {
             <div className="wizard__page-2__form__label-name">Name</div>
             <Input
               className={
-                this.state.showErrors && !this.isTreeNameValid() ? "error" : ""
+                this.state.showErrorName && !this.isTreeNameValid()
+                  ? "error"
+                  : ""
               }
               placeholder="Tree Name"
               onChange={this.handleNameChange}
@@ -355,9 +390,7 @@ class PhyloTreeByPathCreation extends React.Component {
             {this.state.selectedOtherSamples.size} IDSeq Samples
           </div>
           <div className="wizard__page-3__searchbar__container">
-            {this.state.selectedProjectSamples.size +
-              this.state.selectedOtherSamples.size}{" "}
-            Total Samples
+            {this.getTotalPageRendering()}
           </div>
         </div>
         <div className="wizard__page-3__table">

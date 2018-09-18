@@ -13,6 +13,8 @@ class PhyloTreeListView extends React.Component {
     super(props);
 
     let urlParams = this.parseUrlParams();
+    this.resetUrl();
+
     this.phyloTreeMap = new Map(props.phyloTrees.map(tree => [tree.id, tree]));
 
     this.state = {
@@ -20,6 +22,11 @@ class PhyloTreeListView extends React.Component {
     };
 
     this.handleTreeChange = this.handleTreeChange.bind(this);
+  }
+
+  resetUrl() {
+    // remove parameters from url
+    window.history.replaceState({}, document.title, location.pathname);
   }
 
   parseUrlParams() {
