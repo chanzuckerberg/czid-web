@@ -239,11 +239,11 @@ class PhyloTreeByPathCreation extends React.Component {
     axios
       .post("/phylo_trees/create", {
         name: this.state.treeName,
-        dag_branch: this.dagBranch,
-        project_id: this.props.projectId,
-        taxid: this.props.taxonId,
-        tax_name: this.taxonName,
-        pipeline_run_ids: pipelineRunIds,
+        dagBranch: this.dagBranch,
+        projectId: this.props.projectId,
+        taxId: this.props.taxonId,
+        taxName: this.taxonName,
+        pipelineRunIds: pipelineRunIds,
         authenticity_token: this.props.csrf
       })
       .then(response => {

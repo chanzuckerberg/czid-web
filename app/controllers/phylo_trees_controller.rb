@@ -28,7 +28,6 @@ class PhyloTreesController < ApplicationController
   before_action :check_access
 
   def index
-    Rails.logger.debug("Index - params: #{params}")
     @project = []
     @phylo_trees = current_power.phylo_trees
     @taxon = {}
@@ -135,13 +134,13 @@ class PhyloTreesController < ApplicationController
   end
 
   def create
-    @project = current_power.updatable_projects.find(params[:project_id])
-    pipeline_run_ids = params[:pipeline_run_ids].map(&:to_i)
+    @project = current_power.updatable_projects.find(params[:projectId])
+    pipeline_run_ids = params[:pipelineRunIds].map(&:to_i)
 
     name = params[:name]
-    taxid = params[:taxid].to_i
-    tax_name = params[:tax_name]
-    dag_branch = params[:dag_branch] || "master"
+    taxid = params[:taxId].to_i
+    tax_name = params[:taxName]
+    dag_branch = params[:dagBranch] || "master"
 
     tax_level = TaxonLineage.where(taxid: taxid).last.tax_level
 
