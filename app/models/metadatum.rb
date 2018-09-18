@@ -128,22 +128,53 @@ class Metadatum < ApplicationRecord
 
   # Load bulk metadata from a CSV file from S3
   def self.bulk_load_from_s3_csv(path)
-    errors = []
     csv_data = get_s3_csv(path)
+    to_create, errors = bulk_load_prepare(csv_data)
+    errors += bulk_load_import(to_create)
+    bulk_log_errors(errors)
+  end
+
+  # Construct objects to create without saving.
+  def self.bulk_load_prepare(csv_data)
+    to_create = []
+    errors = []
     csv_data.each_with_index do |row, index|
       begin
-        errors += load_csv_single_sample_row(row, index)
+        to_create += load_csv_single_sample_row(row, index)
       rescue => err
-        # Catch other errors
+        # Catch ArgumentError for proj and sample, other errors
         errors << err.message
       end
     end
+    [to_create, errors]
+  end
 
-    # Handle errors
+  # Create the object instances with activerecord-import. Still uses the
+  # validations.
+  def self.bulk_load_import(to_create)
+    errors = []
+    begin
+      # The unique key is on sample and metadata.key, so the value fields will
+      # be updated if the key exists.
+      update_keys = [:text_raw_value, :text_validated_value, :number_raw_value, :number_validated_value]
+      results = Metadatum.import to_create, on_duplicate_key_update: update_keys
+      results.failed_instances.each do |model|
+        # Show the errors from ActiveRecord
+        msg = model.errors.full_messages[0]
+        errors << "#{model.key}: #{msg}"
+      end
+    rescue => err
+      # Record other errors
+      errors << err.message
+    end
+    errors
+  end
+
+  def self.bulk_log_errors(errors)
     unless errors.empty?
       msg = errors.join(".\n")
       Rails.logger.error(msg)
-      return errors
+      errors
     end
   end
 
@@ -165,10 +196,11 @@ class Metadatum < ApplicationRecord
     csv_data
   end
 
-  # Load metadata from a single CSV row corresponding to one sample
+  # Load metadata from a single CSV row corresponding to one sample.
+  # Return the Metadatum to create without saving.
   def self.load_csv_single_sample_row(row, index)
     # Setup
-    errors = []
+    to_create = []
     row = row.to_h
     proj = load_csv_project(row, index)
     sample = load_csv_sample(row, index, proj)
@@ -180,19 +212,14 @@ class Metadatum < ApplicationRecord
       # Strip whitespace and ensure symbol
       key = key.to_s.strip.to_sym
       next if done_keys.include?(key)
-
+      # Translate alternative names
       if KEY_ALT_NAMES.include?(key)
         key = KEY_ALT_NAMES[key]
       end
-      begin
-        sample.metadatum_add_or_update(key, value)
-      rescue => err
-        # Consolidate all the metadatum errors
-        errors << "[#{sample.name}] (#{key}, #{value}): #{err.message}"
-      end
+      to_create << new_without_save(sample, key, value)
     end
 
-    errors
+    to_create
   end
 
   # Get the project for the CSV row
@@ -219,5 +246,21 @@ class Metadatum < ApplicationRecord
       raise ArgumentError, "No sample found named #{sample_name} in #{proj.name}"
     end
     sample
+  end
+
+  # Make a new Metadatum instance without saving/creating.
+  def self.new_without_save(sample, key, value)
+    key = key.to_sym
+    m = Metadatum.new
+    m.key = key
+    m.data_type = KEY_TO_TYPE[key]
+    if KEY_TO_TYPE[key] == STRING_TYPE
+      m.text_raw_value = value
+    elsif KEY_TO_TYPE[key] == NUMBER_TYPE
+      m.number_raw_value = value
+    end
+    # *_validated_value field is set in the set_validated_values validator.
+    m.sample = sample
+    m
   end
 end
