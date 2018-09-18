@@ -1,7 +1,8 @@
 {
   "output_dir_s3": "<%= @attribute_dict[:phylo_tree_output_s3_path] %>",
   "targets": {
-    "phylo_tree_out": ["phylo_tree.newick", "ncbi_metadata"]
+    "phylo_tree_out": ["<%= @attribute_dict[:newick_basename] %>",
+                       "<%= @attribute_dict[:ncbi_metadata_basename] %>"]
   },
   "steps": [
     {

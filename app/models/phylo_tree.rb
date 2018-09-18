@@ -109,6 +109,8 @@ class PhyloTree < ApplicationRecord
     # Generate DAG
     attribute_dict = {
       phylo_tree_output_s3_path: phylo_tree_output_s3_path,
+      newick_basename: File.basename(s3_outputs["newick"]),
+      ncbi_metadata_basename: File.basename(s3_outputs["ncbi_metadata"]),
       taxid: taxid,
       reference_taxids: reference_taxids,
       superkingdom_name: superkingdom_name,
