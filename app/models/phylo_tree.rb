@@ -38,6 +38,7 @@ class PhyloTree < ApplicationRecord
     required_outputs.each do |ro|
       temp_files_by_output[ro] = Tempfile.new
       download_status = Open3.capture3("aws", "s3", "cp", s3_outputs[ro], temp_files_by_output[ro].path.to_s)[2]
+      temp_files_by_output[ro].open
       self[ro] = temp_files_by_output[ro].read if download_status.success?
     end
     self.status = STATUS_READY if required_outputs.all? { |ro| self[ro].present? }
