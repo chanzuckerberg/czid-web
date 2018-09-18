@@ -40,9 +40,9 @@ class PhyloTreeByPathCreation extends React.Component {
 
     this.projectSamplesHeaders = {
       name: "Name",
-      host: "Host",
-      tissue: "Tissue",
-      location: "Location",
+      // host: "Host",
+      // tissue: "Tissue",
+      // location: "Location",
       date: "Date",
       reads: "Read Count"
     };
@@ -50,9 +50,9 @@ class PhyloTreeByPathCreation extends React.Component {
     this.otherSamplesHeaders = {
       name: "Name",
       project: "Project",
-      host: "Host",
-      tissue: "Tissue",
-      location: "Location",
+      // host: "Host",
+      // tissue: "Tissue",
+      // location: "Location",
       date: "Date",
       reads: "Read Count\n(NT | NR)"
     };
@@ -307,6 +307,24 @@ class PhyloTreeByPathCreation extends React.Component {
 
   getPages() {
     let pages = [];
+    const projectSamplesColumns = [
+      "name",
+      // "host",
+      // "tissue",
+      // "location",
+      "date",
+      "reads"
+    ];
+    const otherSamplesColumns = [
+      "name",
+      "project",
+      // "host",
+      // "tissue",
+      // "location",
+      "date",
+      "reads"
+    ];
+
     if (!this.state.skipListTrees) {
       pages.push(
         <Wizard.Page
@@ -364,7 +382,7 @@ class PhyloTreeByPathCreation extends React.Component {
           {this.state.samplesLoaded && (
             <DataTable
               headers={this.projectSamplesHeaders}
-              columns={["name", "host", "tissue", "location", "date", "reads"]}
+              columns={projectSamplesColumns}
               data={this.state.projectSamples}
               selectedRows={this.state.selectedProjectSamples}
               onSelectedRowsChanged={this.handleChangedProjectSamples}
@@ -397,15 +415,7 @@ class PhyloTreeByPathCreation extends React.Component {
           {this.state.samplesLoaded && (
             <DataTable
               headers={this.otherSamplesHeaders}
-              columns={[
-                "name",
-                "project",
-                "host",
-                "tissue",
-                "location",
-                "date",
-                "reads"
-              ]}
+              columns={otherSamplesColumns}
               data={this.state.otherSamples}
               selectedRows={this.state.selectedOtherSamples}
               onSelectedRowsChanged={this.handleChangedOtherSamples}
