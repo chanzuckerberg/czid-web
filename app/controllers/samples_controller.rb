@@ -438,8 +438,8 @@ class SamplesController < ApplicationController
     min_version = Gem::Version.new('0.5.0')
     unless client && (client == "web" || Gem::Version.new(client) >= min_version)
       render json: {
-          message: "Outdated command line client. Please run `pip install --upgrade git+https://github.com/chanzuckerberg/idseq-cli.git ` or with sudo + pip2/pip3 depending on your setup.",
-          status: :upgrade_required
+        message: "Outdated command line client. Please run `pip install --upgrade git+https://github.com/chanzuckerberg/idseq-cli.git ` or with sudo + pip2/pip3 depending on your setup.",
+        status: :upgrade_required
       }
       return
     end
