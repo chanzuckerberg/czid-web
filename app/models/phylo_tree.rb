@@ -18,6 +18,7 @@ class PhyloTree < ApplicationRecord
   def s3_outputs
     {
       "newick" => "#{versioned_output_s3_path}/phylo_tree.newick",
+      "ncbi_metadata" => "#{versioned_output_s3_path}/ncbi_metadata.json",
       "SNP_annotations" => "#{versioned_output_s3_path}/ksnp3_outputs/SNPs_all_annotated"
     }
   end
@@ -32,16 +33,21 @@ class PhyloTree < ApplicationRecord
     return if dag_version.blank?
 
     # Retrieve output:
-    file = Tempfile.new
-    _cmd_stdout, _cmd_stderr, cmd_status = Open3.capture3("aws", "s3", "cp", s3_outputs["newick"], file.path.to_s)
-    if cmd_status.success?
-      file.open
-      self.newick = file.read
-      self.status = newick.present? ? STATUS_READY : STATUS_FAILED
-      save
+    required_outputs = %w[newick ncbi_metadata]
+    temp_files_by_output = {}
+    required_outputs.each do |ro|
+      temp_files_by_output[ro] = Tempfile.new
+      download_status = Open3.capture3("aws", "s3", "cp", s3_outputs[ro], temp_files_by_output[ro].path.to_s)[2]
+      self[ro] = temp_files_by_output[ro].read if download_status.success?
     end
-    file.close
-    file.unlink
+    self.status = STATUS_READY if required_outputs.all? { |ro| self[ro].present? }
+    save
+
+    # Clean up:
+    temp_files_by_output.values.each do |tf|
+      tf.close
+      tf.unlink
+    end
   end
 
   def monitor_job(throttle = true)
