@@ -157,8 +157,12 @@ class Sample < ApplicationRecord
   end
 
   def end_path(key, n = 1)
+    output = []
     parts = key.split('/')
-    n == 2 ? "#{parts[-2]}/#{parts[-1]}" : parts[-1]
+    (1..n).each do |k|
+      output.unshift(parts[-k])
+    end
+    output.join("/")
   end
 
   def list_outputs(s3_path, display_prefix = 1)
