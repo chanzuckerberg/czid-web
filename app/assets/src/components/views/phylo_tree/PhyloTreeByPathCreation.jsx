@@ -247,6 +247,17 @@ class PhyloTreeByPathCreation extends React.Component {
           }
         });
     }
+
+    return errors;
+  }
+
+  handleComplete() {
+    // check if there are enough samples
+    this.handleCreation();
+
+    if (this.props.onComplete) {
+      this.props.onComplete();
+    }
   }
 
   isTreeNameValid() {
@@ -379,10 +390,10 @@ class PhyloTreeByPathCreation extends React.Component {
       return (
         <Wizard
           skipPageInfoNPages={this.state.skipListTrees ? 0 : 1}
-          onComplete={this.props.onComplete}
+          onComplete={this.handleComplete}
           defaultPage={this.state.defaultPage}
           labels={{
-            finish: "Create Table"
+            finish: "Create Tree"
           }}
         >
           {this.getPages()}
