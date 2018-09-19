@@ -139,6 +139,7 @@ ActiveRecord::Schema.define(version: 20_180_918_172_623) do
     t.integer "sample_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index %w[key sample_id], name: "index_metadata_on_key_and_sample_id", unique: true
     t.index ["sample_id"], name: "index_metadata_on_sample_id"
   end
 
