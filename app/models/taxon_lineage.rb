@@ -145,7 +145,6 @@ class TaxonLineage < ApplicationRecord
         end
       end
       tax['pathogenTags'] = pathogen_tags.to_a
-      Rails.logger.info("#{tax['name']}, #{tax['pathogenTags']}")
     end
 
     tax_map

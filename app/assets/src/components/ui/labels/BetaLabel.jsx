@@ -1,12 +1,14 @@
-import { Label as BaseLabel } from "semantic-ui-react";
+import Label from "./Label";
 import React from "react";
 
-const BetaLabel = () => {
-  return (
-    <BaseLabel color="purple" size="mini" floating>
-      beta
-    </BaseLabel>
-  );
+const PathogenLabel = ({ type }) => {
+  let type2text = {
+    category_A: "priority A pathogen",
+    category_B: "priority B pathogen",
+    category_C: "priority C pathogen"
+  };
+  let text = type2text[type];
+  return <Label text={text} color="red" size="medium" />;
 };
 
-export default BetaLabel;
+export default PathogenLabel;
