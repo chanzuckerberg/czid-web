@@ -295,7 +295,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
   test 'joe can create phylo_tree to joe_project from public samples' do
     post "/phylo_trees/create", params: { name: 'new_phylo_tree', projectId: projects(:joe_project).id,
                                           taxId: 1, pipelineRunIds: [pipeline_runs(:public_project_sampleA_run).id,
-                                                                       pipeline_runs(:public_project_sampleB_run).id],
+                                                                     pipeline_runs(:public_project_sampleB_run).id],
                                           tax_name: 'some species' }
     assert_equal "ok", JSON.parse(@response.body)['status']
   end
@@ -303,7 +303,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
   test 'joe can create phylo_tree to joe_project from samples in joe_project' do
     post "/phylo_trees/create", params: { name: 'new_phylo_tree', projectId: projects(:joe_project).id,
                                           taxId: 1, pipelineRunIds: [pipeline_runs(:joe_project_sampleA_run).id,
-                                                                       pipeline_runs(:joe_project_sampleB_run).id],
+                                                                     pipeline_runs(:joe_project_sampleB_run).id],
                                           tax_name: 'some species' }
     assert_equal "ok", JSON.parse(@response.body)['status']
   end
@@ -312,7 +312,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     assert_raises(ActiveRecord::RecordNotFound) do
       post "/phylo_trees/create", params: { name: 'new_phylo_tree', projectId: projects(:public_project).id,
                                             taxId: 1, pipelineRunIds: [pipeline_runs(:joe_project_sampleA_run).id,
-                                                                         pipeline_runs(:joe_project_sampleB_run).id],
+                                                                       pipeline_runs(:joe_project_sampleB_run).id],
                                             taxName: 'some species' }
     end
   end
