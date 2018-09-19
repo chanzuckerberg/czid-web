@@ -17,6 +17,12 @@ import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDrop
 import BetaLabel from "./ui/labels/BetaLabel";
 import PhyloTreeInputs from "./views/phylo_tree/PhyloTreeInputs.jsx";
 
+const PATHOGEN_CATEGORY_DISPLAY_NAMES = {
+  category_A: "priority A pathogen",
+  category_B: "priority B pathogen",
+  category_C: "priority C pathogen"
+};
+
 class PipelineSampleReport extends React.Component {
   constructor(props) {
     super(props);
@@ -880,7 +886,7 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
-  displayTags(taxInfo, reportDetails) {
+  displayHoverActions(taxInfo, reportDetails) {
     let tax_level_str = "";
     let ncbiDot, fastaDot, alignmentVizDot, phyloTreeDot;
     if (taxInfo.tax_level == 1) tax_level_str = "species";
@@ -1023,26 +1029,37 @@ class PipelineSampleReport extends React.Component {
       tax_name = <span>{tax_scientific_name}</span>;
     }
 
-    let foo = <i>{tax_name}</i>;
+    let taxonNameDisplay = <i>{tax_name}</i>;
 
     if (tax_info.tax_id > 0) {
       if (report_details.taxon_fasta_flag) {
-        foo = (
+        taxonNameDisplay = (
           <span>
             <a>{tax_name}</a>
           </span>
         );
       } else {
-        foo = <span>{tax_name}</span>;
+        taxonNameDisplay = <span>{tax_name}</span>;
       }
     }
+    let secondaryTaxonDisplay = (
+      <span>
+        {tax_info.pathogenTags.map(tag => {
+          return (
+            <Label size="medium">{PATHOGEN_CATEGORY_DISPLAY_NAMES[tag]}</Label>
+          );
+        })}
+        {this.displayHoverActions(tax_info, report_details)}
+      </span>
+    );
+    let taxonDescription;
     if (tax_info.tax_level == 1) {
       // indent species rows
-      foo = (
+      taxonDescription = (
         <div className="hover-wrapper">
           <div className="species-name">
-            {foo}
-            {this.displayTags(tax_info, report_details)}
+            {taxonNameDisplay}
+            {secondaryTaxonDisplay}
           </div>
         </div>
       );
@@ -1053,21 +1070,21 @@ class PipelineSampleReport extends React.Component {
       const collapseExpand = (
         <CollapseExpand tax_info={tax_info} parent={this} />
       );
-      foo = (
+      taxonDescription = (
         <div className="hover-wrapper">
           <div className="genus-name">
             {" "}
-            {collapseExpand} {foo}
+            {collapseExpand} {taxonNameDisplay}
           </div>
           <i className="count-info">
             ({tax_info.species_count}{" "}
             {PipelineSampleReport.category_to_adjective(category_name)} species)
           </i>
-          {this.displayTags(tax_info, report_details)}
+          {secondaryTaxonDisplay}
         </div>
       );
     }
-    return foo;
+    return taxonDescription;
   }
 
   render_number(

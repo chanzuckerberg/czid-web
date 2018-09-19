@@ -144,8 +144,8 @@ class TaxonLineage < ApplicationRecord
           pathogen_tags.add(category) if pathogen_list.include?(tax['lineage'][col])
         end
       end
-      tax['pathogen-tags'] = pathogen_tags.to_a
-      Rails.logger.info("#{tax['name']}, #{tax['pathogen-tags']}")
+      tax['pathogenTags'] = pathogen_tags.to_a
+      Rails.logger.info("#{tax['name']}, #{tax['pathogenTags']}")
     end
 
     tax_map
