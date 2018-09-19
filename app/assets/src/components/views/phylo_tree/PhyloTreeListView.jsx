@@ -18,10 +18,17 @@ class PhyloTreeListView extends React.Component {
     this.phyloTreeMap = new Map(props.phyloTrees.map(tree => [tree.id, tree]));
 
     this.state = {
-      selectedPhyloTreeId: urlParams.treeId || (props.phyloTrees || [])[0].id
+      selectedPhyloTreeId: this.getDefaultSelectedTreeId(
+        urlParams,
+        props.phyloTrees
+      )
     };
 
     this.handleTreeChange = this.handleTreeChange.bind(this);
+  }
+
+  getDefaultSelectedTreeId(urlParams, phyloTrees = []) {
+    return urlParams.treeId || (phyloTrees[0] || {}).id;
   }
 
   resetUrl() {

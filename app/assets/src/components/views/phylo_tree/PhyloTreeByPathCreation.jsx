@@ -116,14 +116,15 @@ class PhyloTreeByPathCreation extends React.Component {
   }
 
   handlePhyloTreeResponse(response) {
-    let phyloTrees = response.data.phyloTrees;
+    const data = response.data;
+    let phyloTrees = data.phyloTrees;
+    this.taxonName = (data.taxon || {}).name;
     if (!phyloTrees || !Array.isArray(phyloTrees) || phyloTrees.length === 0) {
       this.setState({
         skipListTrees: true,
         phyloTreesLoaded: true
       });
     } else {
-      this.taxonName = phyloTrees[0].tax_name;
       this.setState({
         phyloTrees: this.parsePhyloTreeData(response.data.phyloTrees),
         phyloTreesLoaded: true
