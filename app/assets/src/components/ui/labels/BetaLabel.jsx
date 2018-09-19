@@ -1,14 +1,8 @@
 import Label from "./Label";
 import React from "react";
 
-const PathogenLabel = ({ type }) => {
-  let type2text = {
-    category_A: "priority A pathogen",
-    category_B: "priority B pathogen",
-    category_C: "priority C pathogen"
-  };
-  let text = type2text[type];
-  return <Label text={text} color="red" size="medium" />;
+const BetaLabel = () => {
+  return <Label text="beta" color="purple" size="mini" floating />;
 };
 
-export default PathogenLabel;
+export default BetaLabel;

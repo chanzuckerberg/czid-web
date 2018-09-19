@@ -15,13 +15,8 @@ import OurDropdown from "./ui/controls/dropdowns/Dropdown";
 import MultipleDropdown from "./ui/controls/dropdowns/MultipleDropdown";
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
 import BetaLabel from "./ui/labels/BetaLabel";
+import PathogenLabel from "./ui/labels/PathogenLabel";
 import PhyloTreeInputs from "./views/phylo_tree/PhyloTreeInputs.jsx";
-
-const PATHOGEN_CATEGORY_DISPLAY_NAMES = {
-  category_A: "priority A pathogen",
-  category_B: "priority B pathogen",
-  category_C: "priority C pathogen"
-};
 
 class PipelineSampleReport extends React.Component {
   constructor(props) {
@@ -1045,9 +1040,7 @@ class PipelineSampleReport extends React.Component {
     let secondaryTaxonDisplay = (
       <span>
         {tax_info.pathogenTags.map(tag => {
-          return (
-            <Label size="medium">{PATHOGEN_CATEGORY_DISPLAY_NAMES[tag]}</Label>
-          );
+          return <PathogenLabel type={tag} />;
         })}
         {this.displayHoverActions(tax_info, report_details)}
       </span>
