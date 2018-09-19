@@ -34,6 +34,45 @@ class TaxonLineage < ApplicationRecord
   PHAGE_FAMILIES_TAXIDS = [10_472, 10_474, 10_477, 10_656, 10_659, 10_662, 10_699, 10_744, 10_841, 10_860,
                            10_877, 11_989, 157_897, 292_638, 324_686, 423_358, 573_053, 1_232_737].freeze
 
+  # From https://www.niaid.nih.gov/research/emerging-infectious-diseases-pathogens
+  PRIORITY_PATHOGENS = {
+    "category_A" => [
+      "Bacillus anthracis", "Clostridium botulinum", "Yersinia pestis",
+      "orthopoxvirus", "Variola virus", "parapoxvirus", "yatapoxvirus", "molluscipoxvirus",
+      "Francisella tularensis",
+      "Arenavirus", "Argentinian mammarenavirus", "Machupo mammarenavirus", "Guanarito mammarenavirus",
+      "Chapare mammarenavirus", "Lassa mammarenavirus", "Lujo mammarenavirus",
+      "Bunyavirales", "Hantaviridae",
+      "Flavivirus", "Dengue virus",
+      "Filoviridae", "Ebolavirus", "Marburgvirus"
+    ],
+    "category_B" => [
+      "Burkholderia pseudomallei", "Coxiella burnetii", "Brucella", "Burkholderia mallei",
+      "Chlaydia psittaci", "Ricinus communis", "Clostridium perfringens", "Staphylococcus aureus",
+      "Rickettsia prowazekii", "Escherichia coli", "Vibrio cholerae", "Vibrio parahaemolyticus", "Vibrio vulnificus",
+      "Shigella", "Salmonella", "Listeria monocytogenes", "Campylobacter jejuni", "Yersinia enterocolitica",
+      "Caliciviridae", "Hepatovirus A", "Cryptosporidium parvum", "Cyclospora cayetanensis", "Giardia lamblia",
+      "Entamoeba histolytica", "Toxoplasma gondii", "Naegleria fowleri", "Balamuthia mandrillaris", "Microsporidia",
+      "West Nile virus", "California encephalitis orthobunyavirus", "Venezuelan equine encephalitis virus",
+      "Eastern equine encephalitis virus", "Western equine encephalitis virus", "Japanese encephalitis virus",
+      "Saint Louis encephalitis virus", "Yellow fever virus", "Chikungunya virus", "Zika virus"
+    ],
+    "category_C" => [
+      "Nipah henipavirus", "Hendra henipavirus", "Severe fever with thrombocytopenia virus", "Heartland virus",
+      "Omsk hemorrhagic fever virus", "Kyasanur Forest disease virus", "Tick-borne encephalitis virus",
+      "Powassan virus", "Mycobacterium tuberculosis",
+      "unidentified influenza virus", "Influenza A virus", "Influenza B virus", "Influenza C virus",
+      "Rickettsia", "Rabies lyssavirus", "prion", "Coccidioides",
+      "Severe acute respiratory syndrome-related coronavirus", "Middle East respiratory syndrome-related coronavirus",
+      "Acanthamoeba", "Anaplasma phagocytophilum", "Australian bat lyssavirus", "Babesia",
+      "Bartonella henselae", "Human polyomavirus 1", "Bordetella pertussis", "Borrelia mayonii",
+      "Borrelia miyamotoi", "Ehrlichia", "Anaplasma", "Enterovirus D", "Enterovirus A",
+      "Hepacivirus C", "Orthohepevirus A", "Human betaherpesvirus 6", "Human gammaherpesvirus 8",
+      "Human polyomavirus 2", "Leptospira", "Mucorales", "Mucor", "Rhizopus", "Absidia", "Cunninghamella",
+      "Enterovirus C", "Measles morbillivirus", "Streptococcus sp. 'group A'"
+    ]
+  }.freeze
+
   def tax_level
     TaxonCount::LEVEL_2_NAME.keys.sort.each do |level_int|
       level_str = TaxonCount::LEVEL_2_NAME[level_int]
@@ -97,6 +136,16 @@ class TaxonLineage < ApplicationRecord
       # Set the name
       name = level_name(tax['tax_level']) + "_name"
       tax['lineage'][name] = tax['name']
+
+      # Tag pathogens
+      pathogen_tags = Set[]
+      column_names.select { |cn| cn.include?("_name") }.each do |col|
+        PRIORITY_PATHOGENS.each do |category, pathogen_list|
+          pathogen_tags.add(category) if pathogen_list.include?(tax['lineage'][col])
+        end
+      end
+      tax['pathogen-tags'] = pathogen_tags.to_a
+      Rails.logger.info("#{tax['name']}, #{tax['pathogen-tags']}")
     end
 
     tax_map
