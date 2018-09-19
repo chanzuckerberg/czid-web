@@ -140,7 +140,11 @@ class PhyloTreesController < ApplicationController
     name = params[:name]
     taxid = params[:taxId].to_i
     tax_name = params[:taxName]
-    dag_branch = params[:dagBranch] || "master"
+    dag_branch = if current_user.admin?
+                   params[:dagBranch] || "master"
+                 else
+                   "master"
+                 end
 
     tax_level = TaxonLineage.where(taxid: taxid).last.tax_level
 
