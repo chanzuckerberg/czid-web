@@ -1,0 +1,23 @@
+@import "../../themes/colors";
+
+.idseq-ui.input {
+  input[type="text"] {
+    height: 40px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    border: 1px solid $light-grey;
+
+    &:focus {
+      border: 1px solid $primary-light;
+      -webkit-box-shadow: none;
+      -moz-box-shadow: none;
+      box-shadow: none;
+    }
+  }
+
+  &.error {
+    input[type="text"] {
+      border: 1px solid red;
+    }
+  }
+}

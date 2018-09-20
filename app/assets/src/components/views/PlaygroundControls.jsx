@@ -9,6 +9,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import SecondaryButton from "../ui/controls/buttons/SecondaryButton";
 import Slider from "../ui/controls/Slider";
+import Checkbox from "../ui/controls/Checkbox";
 
 class PlaygroundControls extends React.Component {
   constructor(props) {
@@ -239,6 +240,25 @@ class PlaygroundControls extends React.Component {
                 min={0}
                 max={100}
                 value={20}
+              />
+            ]}
+          />
+          <ComponentCard
+            title="Checkbox"
+            width={4}
+            components={[
+              <Checkbox
+                key={0}
+                label="Checkbox"
+                onChange={() => this.setState({ event: "Checkbox:Change" })}
+                value={0}
+                checked={true}
+              />,
+              <Checkbox
+                key={1}
+                label="Checkbox"
+                onChange={() => this.setState({ event: "Checkbox:Change" })}
+                value={1}
               />
             ]}
           />

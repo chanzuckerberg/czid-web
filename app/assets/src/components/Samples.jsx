@@ -232,6 +232,8 @@ class Samples extends React.Component {
         outDuration: 0
       });
     });
+
+    console.log("constructor", this.state.selectedProjectId);
   }
 
   initializeTooltip() {
@@ -884,11 +886,12 @@ class Samples extends React.Component {
       });
   }
 
-  gotoTreeList(e) {
+  gotoTreeList() {
+    console.log("gotoTreeList", this.state.selectedProjectId);
     let tree_index_url = "/phylo_trees/index";
     let project_id = parseInt(this.state.selectedProjectId);
     if (project_id) {
-      tree_index_url += `?project_id=${project_id}`;
+      tree_index_url += `?projectId=${project_id}`;
     }
     window.open(tree_index_url, "_blank noopener hide_referrer");
   }

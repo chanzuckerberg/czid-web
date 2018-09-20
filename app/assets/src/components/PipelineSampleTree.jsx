@@ -3,6 +3,8 @@ import d3, { event as currentEvent } from "d3";
 import Dropdown from "./ui/controls/dropdowns/Dropdown";
 import numberWithCommas from "../helpers/strings";
 
+const NAME_TYPE_COMMON_NAME = "Common name";
+
 class PipelineSampleTree extends React.PureComponent {
   constructor(props) {
     super(props);
@@ -16,13 +18,14 @@ class PipelineSampleTree extends React.PureComponent {
   }
 
   makeTree() {
-    let make_node = function(id, name, level) {
+    let make_node = function(id, name, level, is_common_name) {
       let data = {};
       for (let dataType of this.dataTypes) {
         data[dataType] = 0;
       }
       return {
         name: name,
+        is_common_name: is_common_name,
         level: level,
         children: [],
         data: data,
@@ -35,7 +38,7 @@ class PipelineSampleTree extends React.PureComponent {
     let rows = this.props.taxons;
     let nodes_by_id = {};
 
-    let root = make_node(-12345, "", "");
+    let root = make_node(-12345, "", "", false);
     let tree = root;
 
     let order = [
@@ -78,13 +81,15 @@ class PipelineSampleTree extends React.PureComponent {
       for (let j = 0; j < order.length; j += 1) {
         let level = order[j],
           taxon_id = row.lineage[level + "_taxid"],
+          is_common_name = false,
           name;
 
-        if (this.props.nameType == "Common name") {
-          name = row.lineage[level + "_common_name"];
-        }
-
-        if (!name) {
+        if (
+          this.props.nameType == NAME_TYPE_COMMON_NAME &&
+          (name = row.lineage[level + "_common_name"])
+        ) {
+          is_common_name = true;
+        } else {
           name = row.lineage[level + "_name"];
         }
 
@@ -93,7 +98,7 @@ class PipelineSampleTree extends React.PureComponent {
         }
 
         if (!nodes_by_id[taxon_id]) {
-          let node = make_node(taxon_id, name, level);
+          let node = make_node(taxon_id, name, level, is_common_name);
           tree.children.push(node);
           nodes_by_id[taxon_id] = node;
         }
@@ -179,6 +184,7 @@ class PipelineSampleTree extends React.PureComponent {
         {this.renderWeightDataTypeChooser()}
         <TreeStructure
           tree={tree}
+          nameType={this.props.nameType}
           getTooltip={this._getTooltip}
           onNodeTextClicked={this._nodeTextClicked}
         />
@@ -422,7 +428,15 @@ class TreeStructure extends React.PureComponent {
       return circleScale(d.weight);
     });
 
-    nodeUpdate.select("text").style("fill-opacity", 1);
+    nodeUpdate
+      .select("text")
+      .style("fill-opacity", 1)
+      .style("fill", function(d) {
+        if (props.nameType === NAME_TYPE_COMMON_NAME && !d.is_common_name) {
+          return "#a0a0a0";
+        }
+        return "#000000";
+      });
 
     nodes.forEach(function(d) {
       d.x0 = d.x;
