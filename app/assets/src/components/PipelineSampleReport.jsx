@@ -165,6 +165,7 @@ class PipelineSampleReport extends React.Component {
     this.handleThresholdFiltersChange = this.handleThresholdFiltersChange.bind(
       this
     );
+    this.handleViewClicked = this.handleViewClicked.bind(this);
 
     this.renderMore = this.renderMore.bind(this);
     this.resetAllFilters = this.resetAllFilters.bind(this);
@@ -838,6 +839,10 @@ class PipelineSampleReport extends React.Component {
     });
   }
 
+  handleViewClicked(_, data) {
+    this.setState({ view: data.name });
+  }
+
   // path to NCBI
   gotoNCBI(e) {
     const taxId = e.target.getAttribute("data-tax-id");
@@ -1402,6 +1407,7 @@ class PipelineSampleReport extends React.Component {
         categories_filter_tag_list={categories_filter_tag_list}
         subcats_filter_tag_list={subcats_filter_tag_list}
         view={this.state.view}
+        onViewClicked={this.handleViewClicked}
         parent={this}
       />
     );
@@ -1711,11 +1717,10 @@ class RenderMarkup extends React.Component {
     this.state = {
       view: this.props.view || "table"
     };
-    this._onViewClicked = this.onViewClicked.bind(this);
     this._nodeTextClicked = this.nodeTextClicked.bind(this);
   }
 
-  UNSAFE_componentWillReceiveProps(newProps) {
+  componentWillReceiveProps(newProps) {
     if (newProps.view && this.state.view != newProps.view) {
       this.setState({ view: newProps.view });
     }
@@ -1723,10 +1728,6 @@ class RenderMarkup extends React.Component {
 
   nodeTextClicked(d) {
     this.props.parent.scrollToTaxon(d.id);
-  }
-
-  onViewClicked(e, f) {
-    this.setState({ view: f.name });
   }
 
   renderMenu() {
@@ -1737,7 +1738,7 @@ class RenderMarkup extends React.Component {
             <Menu.Item
               name="table"
               active={this.state.view == "table"}
-              onClick={this._onViewClicked}
+              onClick={this.props.onViewClicked}
             >
               <Icon name="table" />
             </Menu.Item>
@@ -1751,7 +1752,7 @@ class RenderMarkup extends React.Component {
             <Menu.Item
               name="tree"
               active={this.state.view == "tree"}
-              onClick={this._onViewClicked}
+              onClick={this.props.onViewClicked}
             >
               <Icon name="fork" />
             </Menu.Item>

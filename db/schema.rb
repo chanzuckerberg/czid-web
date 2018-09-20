@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_180_917_202_727) do
+ActiveRecord::Schema.define(version: 20_180_918_172_623) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -139,6 +139,7 @@ ActiveRecord::Schema.define(version: 20_180_917_202_727) do
     t.integer "sample_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index %w[key sample_id], name: "index_metadata_on_key_and_sample_id", unique: true
     t.index ["sample_id"], name: "index_metadata_on_sample_id"
   end
 
@@ -170,6 +171,7 @@ ActiveRecord::Schema.define(version: 20_180_917_202_727) do
     t.datetime "updated_at", null: false
     t.string "name"
     t.string "dag_branch"
+    t.text "ncbi_metadata"
     t.index ["name"], name: "index_phylo_trees_on_name", unique: true
     t.index %w[project_id taxid], name: "index_phylo_trees_on_project_id_and_taxid"
     t.index ["user_id"], name: "index_phylo_trees_on_user_id"
