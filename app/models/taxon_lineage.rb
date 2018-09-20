@@ -123,6 +123,7 @@ class TaxonLineage < ApplicationRecord
     # Make a new hash with 'species_taxid', 'genus_taxid', etc.
     missing_vals = Hash[MISSING_LINEAGE_ID.map { |k, v| [k.to_s + "_taxid", v] }]
 
+    pathogen_tag_summary = {}
     tax_map.each do |tax|
       # Grab the appropriate lineage info by the first positive tax level
       lineage_id = most_specific_positive_id(tax)
@@ -148,10 +149,13 @@ class TaxonLineage < ApplicationRecord
           pathogen_tags |= [category] if pathogen_list.include?(tax['lineage'][col])
         end
       end
-      tax['pathogenTags'] = pathogen_tags[0] # first element is highest-priority element (see PRIORITY_PATHOGENS documentation)
+      best_tag = pathogen_tags[0] # first element is highest-priority element (see PRIORITY_PATHOGENS documentation)
+      tax['pathogenTags'] = best_tag
+      Rails.logger.info("#{best_tag}, #{pathogen_tag_summary[best_tag]}")
+      pathogen_tag_summary[best_tag] = (pathogen_tag_summary[best_tag] || 0) + 1 if best_tag
     end
 
-    tax_map
+    [tax_map, pathogen_tag_summary]
   end
 
   def self.most_specific_positive_id(tax)

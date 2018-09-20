@@ -16,6 +16,7 @@ import MultipleDropdown from "./ui/controls/dropdowns/MultipleDropdown";
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
 import BetaLabel from "./ui/labels/BetaLabel";
 import PathogenLabel from "./ui/labels/PathogenLabel";
+import PathogenSummary from "./ui/labels/PathogenSummary";
 import PhyloTreeInputs from "./views/phylo_tree/PhyloTreeInputs.jsx";
 
 class PipelineSampleReport extends React.Component {
@@ -99,6 +100,7 @@ class PipelineSampleReport extends React.Component {
     // Starting state is default values which are to be set later.
     this.state = {
       taxonomy_details: [],
+      pathogenTagSummary: {},
       backgroundId: defaultBackgroundId,
       backgroundName: "",
       search_taxon_id: 0,
@@ -246,12 +248,12 @@ class PipelineSampleReport extends React.Component {
         }
       }
       this.genus_map = genus_map;
-
       this.setState(
         {
           rows_passing_filters: res.data.taxonomy_details[0],
           rows_total: res.data.taxonomy_details[1],
           taxonomy_details: res.data.taxonomy_details[2],
+          pathogenTagSummary: res.data.pathogenTagSummary,
           backgroundId: res.data.background_info.id,
           backgroundName: res.data.background_info.name
         },
@@ -1797,13 +1799,15 @@ class RenderMarkup extends React.Component {
       subcats_filter_tag_list,
       parent
     } = this.props;
-
     return (
       <div>
         <div id="reports" className="reports-screen tab-screen col s12">
           <div className="tab-screen-content">
             <div className="row reports-container">
               <div className="col s12 reports-section">
+                <PathogenSummary
+                  pathogenTagSummary={parent.state.pathogenTagSummary}
+                />
                 <div className="reports-count">
                   <div className="report-top-filters">
                     <div className="filter-lists">

@@ -281,7 +281,7 @@ class SamplesController < ApplicationController
 
     # Fill lineage details into report info
     tax_map = @report_info[:taxonomy_details][2]
-    @report_info[:taxonomy_details][2] = TaxonLineage.fill_lineage_details(tax_map, pipeline_run_id)
+    @report_info[:taxonomy_details][2], @report_info[:pathogenTagSummary] = TaxonLineage.fill_lineage_details(tax_map, pipeline_run_id)
 
     render json: JSON.dump(@report_info)
   end
