@@ -138,13 +138,24 @@ export default class PhyloTree {
   updateHighlights() {
     this.root.descendants().forEach(n => (n.data.highlight = false));
 
+    this.root.leaves()[0].data.highlightColor = 1;
+    this.root.leaves()[1].data.highlightColor = 2;
+
     this.root.leaves().forEach(leaf => {
+      if (leaf.data.highlightColor) {
+        leaf.ancestors().forEach(ancestor => {
+          ancestor.data.highlightColor = leaf.data.highlightColor;
+        });
+      }
+
       if (this._highlighted.has(leaf.data.id)) {
         leaf.ancestors().forEach(ancestor => {
           ancestor.data.highlight = true;
         });
       }
     });
+
+    console.log(this);
   }
 
   clickHandler(clickCallback, dblClickCallback, delay = 250) {
@@ -395,6 +406,13 @@ export default class PhyloTree {
     node.classed("highlight", function(d) {
       return d.data.highlight;
     });
+
+    // Apply the highlight-color-? class based on data.highlightColor
+    for (let i = 0; i < 5; i++) {
+      node.classed(`highlight-color-${i}`, function(d) {
+        return d.data.highlightColor === i;
+      });
+    }
 
     node
       .select("text")

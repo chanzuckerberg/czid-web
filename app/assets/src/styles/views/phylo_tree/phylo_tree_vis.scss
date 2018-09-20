@@ -20,6 +20,26 @@
     fill: $primary-light;
   }
 
+  .node.highlight-color-0 circle {
+    fill: red;
+  }
+
+  .node.highlight-color-1 circle {
+    fill: rebeccapurple;
+  }
+
+  .node.highlight-color-2 circle {
+    fill: green;
+  }
+
+  .node.highlight-color-3 circle {
+    fill: orange;
+  }
+
+  .node.highlight-color-4 circle {
+    fill: yellow;
+  }
+
   .node text {
     font-size: 14px;
   }
