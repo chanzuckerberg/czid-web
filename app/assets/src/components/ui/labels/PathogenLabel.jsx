@@ -8,9 +8,14 @@ const PathogenLabel = ({ type }) => {
     category_C: "priority C pathogen"
   };
   let text = type2text[type];
-  return (
-    <Label text={text} color="red" size="medium" className="pathogen-label" />
-  );
+  console.log(type);
+  if (type) {
+    return (
+      <Label text={text} color="red" size="medium" className="pathogen-label" />
+    );
+  } else {
+    return null;
+  }
 };
 
 export default PathogenLabel;

@@ -1039,9 +1039,7 @@ class PipelineSampleReport extends React.Component {
     }
     let secondaryTaxonDisplay = (
       <span>
-        {tax_info.pathogenTags.map(tag => {
-          return <PathogenLabel type={tag} />;
-        })}
+        <PathogenLabel type={tax_info.pathogenTags} />
         {this.displayHoverActions(tax_info, report_details)}
       </span>
     );
