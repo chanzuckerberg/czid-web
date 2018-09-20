@@ -11,6 +11,7 @@ class ResultMonitorLoader
       pr.send(PipelineRun::LOADERS_BY_OUTPUT[output])
       output_state.update(state: PipelineRun::STATUS_LOADED)
     rescue
+      sleep(Time.now.to_i % 30) # wait for up to 30 seconds. mark as error and restart
       output_state.update(state: PipelineRun::STATUS_LOADING_ERROR)
       LogUtil.log_err_and_airbrake("SampleFailedEvent: Pipeline Run #{pr.id} failed loading #{output}")
       raise
