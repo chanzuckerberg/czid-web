@@ -35,42 +35,65 @@ class TaxonLineage < ApplicationRecord
                            10_877, 11_989, 157_897, 292_638, 324_686, 423_358, 573_053, 1_232_737].freeze
 
   # From https://www.niaid.nih.gov/research/emerging-infectious-diseases-pathogens
+  # Accessed 9/18/2018.
+  # Names can change or be moved to new taxids. To make the pathogen list as future-proof as possible,
+  # we looked up the taxids for the names given on the NIAID site and keep track of the pathogens by
+  # both name and taxid (union of two sets).
   PRIORITY_PATHOGENS = {
-    "category_A" => [
-      "Bacillus anthracis", "Clostridium botulinum", "Yersinia pestis",
-      "orthopoxvirus", "Variola virus", "parapoxvirus", "yatapoxvirus", "molluscipoxvirus",
-      "Francisella tularensis",
-      "Arenavirus", "Argentinian mammarenavirus", "Machupo mammarenavirus", "Guanarito mammarenavirus",
-      "Chapare mammarenavirus", "Lassa mammarenavirus", "Lujo mammarenavirus",
-      "Bunyavirales", "Hantaviridae",
-      "Flavivirus", "Dengue virus",
-      "Filoviridae", "Ebolavirus", "Marburgvirus"
-    ],
-    "category_B" => [
-      "Burkholderia pseudomallei", "Coxiella burnetii", "Brucella", "Burkholderia mallei",
-      "Chlaydia psittaci", "Ricinus communis", "Clostridium perfringens", "Staphylococcus aureus",
-      "Rickettsia prowazekii", "Escherichia coli", "Vibrio cholerae", "Vibrio parahaemolyticus", "Vibrio vulnificus",
-      "Shigella", "Salmonella", "Listeria monocytogenes", "Campylobacter jejuni", "Yersinia enterocolitica",
-      "Caliciviridae", "Hepatovirus A", "Cryptosporidium parvum", "Cyclospora cayetanensis", "Giardia lamblia",
-      "Entamoeba histolytica", "Toxoplasma gondii", "Naegleria fowleri", "Balamuthia mandrillaris", "Microsporidia",
-      "West Nile virus", "California encephalitis orthobunyavirus", "Venezuelan equine encephalitis virus",
-      "Eastern equine encephalitis virus", "Western equine encephalitis virus", "Japanese encephalitis virus",
-      "Saint Louis encephalitis virus", "Yellow fever virus", "Chikungunya virus", "Zika virus"
-    ],
-    "category_C" => [
-      "Nipah henipavirus", "Hendra henipavirus", "Severe fever with thrombocytopenia virus", "Heartland virus",
-      "Omsk hemorrhagic fever virus", "Kyasanur Forest disease virus", "Tick-borne encephalitis virus",
-      "Powassan virus", "Mycobacterium tuberculosis",
-      "unidentified influenza virus", "Influenza A virus", "Influenza B virus", "Influenza C virus",
-      "Rickettsia", "Rabies lyssavirus", "prion", "Coccidioides",
-      "Severe acute respiratory syndrome-related coronavirus", "Middle East respiratory syndrome-related coronavirus",
-      "Acanthamoeba", "Anaplasma phagocytophilum", "Australian bat lyssavirus", "Babesia",
-      "Bartonella henselae", "Human polyomavirus 1", "Bordetella pertussis", "Borrelia mayonii",
-      "Borrelia miyamotoi", "Ehrlichia", "Anaplasma", "Enterovirus D", "Enterovirus A",
-      "Hepacivirus C", "Orthohepevirus A", "Human betaherpesvirus 6", "Human gammaherpesvirus 8",
-      "Human polyomavirus 2", "Leptospira", "Mucorales", "Mucor", "Rhizopus", "Absidia", "Cunninghamella",
-      "Enterovirus C", "Measles morbillivirus", "Streptococcus sp. 'group A'"
-    ]
+    "category_A" => {
+      "names" => [
+        "Bacillus anthracis", "Clostridium botulinum", "Yersinia pestis",
+        "orthopoxvirus", "Variola virus", "parapoxvirus", "yatapoxvirus", "molluscipoxvirus",
+        "Francisella tularensis",
+        "Arenavirus", "Argentinian mammarenavirus", "Machupo mammarenavirus", "Guanarito mammarenavirus",
+        "Chapare mammarenavirus", "Lassa mammarenavirus", "Lujo mammarenavirus",
+        "Bunyavirales", "Hantaviridae",
+        "Flavivirus", "Dengue virus",
+        "Filoviridae", "Ebolavirus", "Marburgvirus"
+      ],
+      "taxids" => [
+        1392, 1491, 632, 10_242, 10_255, 10_257, 10_282, 10_278, 263, 11_618, 2_169_991, 11_628, 45_219, 499_556, 11_620, 649_188,
+        1_980_410, 1_980_413, 11_051, 12_637, 11_266, 186_536, 186_537
+      ]
+    },
+    "category_B" => {
+      "names" => [
+        "Burkholderia pseudomallei", "Coxiella burnetii", "Brucella", "Burkholderia mallei",
+        "Chlamydia psittaci", "Ricinus communis", "Clostridium perfringens", "Staphylococcus aureus",
+        "Rickettsia prowazekii", "Escherichia coli", "Vibrio cholerae", "Vibrio parahaemolyticus", "Vibrio vulnificus",
+        "Shigella", "Salmonella", "Listeria monocytogenes", "Campylobacter jejuni", "Yersinia enterocolitica",
+        "Caliciviridae", "Hepatovirus A", "Cryptosporidium parvum", "Cyclospora cayetanensis", "Giardia lamblia",
+        "Entamoeba histolytica", "Toxoplasma gondii", "Naegleria fowleri", "Balamuthia mandrillaris", "Microsporidia",
+        "West Nile virus", "California encephalitis orthobunyavirus", "Venezuelan equine encephalitis virus",
+        "Eastern equine encephalitis virus", "Western equine encephalitis virus", "Japanese encephalitis virus",
+        "Saint Louis encephalitis virus", "Yellow fever virus", "Chikungunya virus", "Zika virus"
+      ],
+      "taxids" => [
+        28_450, 777, 234, 13_373, 83_554, 3988, 1502, 1280, 782, 562, 666, 670, 672, 620, 590, 1639, 197, 630, 11_974, 12_092,
+        5807, 88_456, 5741, 5759, 5811, 5763, 66_527, 6029, 11_082, 1_933_264, 11_036, 11_021, 11_039, 11_072, 11_080, 11_089, 37_124, 64_320
+      ]
+    },
+    "category_C" => {
+      "names" => [
+        "Nipah henipavirus", "Hendra henipavirus", "Severe fever with thrombocytopenia virus", "Heartland virus",
+        "Omsk hemorrhagic fever virus", "Kyasanur Forest disease virus", "Tick-borne encephalitis virus",
+        "Powassan virus", "Mycobacterium tuberculosis",
+        "unidentified influenza virus", "Influenza A virus", "Influenza B virus", "Influenza C virus",
+        "Rickettsia", "Rabies lyssavirus", "prion", "Coccidioides",
+        "Severe acute respiratory syndrome-related coronavirus", "Middle East respiratory syndrome-related coronavirus",
+        "Acanthamoeba", "Anaplasma phagocytophilum", "Australian bat lyssavirus", "Babesia",
+        "Bartonella henselae", "Human polyomavirus 1", "Bordetella pertussis", "Borrelia mayonii",
+        "Borrelia miyamotoi", "Ehrlichia", "Anaplasma", "Enterovirus D", "Enterovirus A",
+        "Hepacivirus C", "Orthohepevirus A", "Human betaherpesvirus 6", "Human gammaherpesvirus 8",
+        "Human polyomavirus 2", "Leptospira", "Mucorales", "Mucor", "Rhizopus", "Absidia", "Cunninghamella",
+        "Enterovirus C", "Measles morbillivirus", "Streptococcus sp. 'group A'"
+      ],
+      "taxids" => [
+        121_791, 63_330, 1_003_835, 1_216_928, 12_542, 33_743, 11_084, 11_083, 1773, 11_309, 11_320, 11_520, 11_552, 780,
+        11_292, 36_469, 5500, 694_009, 1_335_626, 5754, 948, 90_961, 5864, 38_323, 1_891_762, 520, 1_674_146, 47_466, 943,
+        768, 138_951, 138_948, 11_103, 1_678_143, 10_368, 37_296, 1_891_763, 171, 4827, 4830, 4842, 4828, 4852, 138_950, 11_234, 36_470
+      ]
+    }
   }.freeze
 
   def tax_level
