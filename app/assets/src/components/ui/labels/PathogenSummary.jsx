@@ -14,7 +14,7 @@ const PathogenSummary = ({ pathogenTagSummary }) => {
 
   if (Object.keys(pathogenTagSummary).length > 0) {
     return (
-      <div className="ui message orange idseq-ui pathogen-summary">
+      <div className="ui message yellow idseq-ui pathogen-summary">
         NIAID emerging pathogens: {tag_counts}
       </div>
     );
