@@ -6,7 +6,7 @@ import React from "react";
 const Label = ({ className, color, size, floating, text }) => {
   return (
     <BaseLabel
-      className="idseq-ui {className}"
+      className={`idseq-ui ${className}`}
       color={color}
       size={size}
       floating={floating}
