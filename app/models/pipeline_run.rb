@@ -473,6 +473,8 @@ class PipelineRun < ApplicationRecord
   def monitor_results
     return if results_finalized?
 
+    compiling_stats_failed = false
+
     # Get pipeline_version, which determines S3 locations of output files.
     # If pipeline version is not present, we cannot load results yet.
     update_pipeline_version(self, :pipeline_version, pipeline_version_file)
@@ -484,11 +486,19 @@ class PipelineRun < ApplicationRecord
     end
 
     # Update job stats:
-    load_stats_file
+    begin
+      # TODO:  Make this less expensive while jobs are running, perhaps by doing it only sometimes, then again at end.
+      # TODO:  S3 is a middleman between these two functions;  load_stats shouldn't wait for S3
+      compile_stats_file
+      load_stats_file
+    rescue
+      # TODO: Log this exception
+      compiling_stats_failed = true
+    end
 
     # Check if run is complete:
     if all_output_states_terminal?
-      if all_output_states_loaded?
+      if all_output_states_loaded? && !compiling_stats_failed
         update(results_finalized: FINALIZED_SUCCESS)
         handle_success
       else
@@ -546,7 +556,6 @@ class PipelineRun < ApplicationRecord
       self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
       self.job_status += "|#{STATUS_READY}" if report_ready?
     end
-    compile_stats_file
     save
   end
 
@@ -641,6 +650,8 @@ class PipelineRun < ApplicationRecord
     unless status.exitstatus.zero?
       Rails.logger.warn("Failed to write compiled stats file: #{stderr}")
     end
+
+    save
   end
 
   def local_json_path
