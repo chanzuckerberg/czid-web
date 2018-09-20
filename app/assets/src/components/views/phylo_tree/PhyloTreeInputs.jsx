@@ -1,6 +1,6 @@
 import axios from "axios";
 import React from "react";
-import { Input, Checkbox, Accordion, Menu } from "semantic-ui-react";
+import { Input, Accordion, Menu } from "semantic-ui-react";
 import PrimaryButton from "../../ui/controls/buttons/PrimaryButton";
 
 const MIN_READS = 100;

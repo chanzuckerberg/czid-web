@@ -54,6 +54,8 @@ class Sample < ApplicationRecord
   has_and_belongs_to_many :backgrounds, through: :pipeline_runs
   has_many :input_files, dependent: :destroy
   accepts_nested_attributes_for :input_files
+  has_many :metadata
+
   validate :input_files_checks
   after_create :initiate_input_file_upload
   validates :name, uniqueness: { scope: :project_id }
@@ -479,5 +481,19 @@ class Sample < ApplicationRecord
     pr.alignment_config = AlignmentConfig.find_by(name: alignment_config_name) if alignment_config_name
     pr.alignment_config ||= AlignmentConfig.find_by(name: AlignmentConfig::DEFAULT_NAME)
     pr.save
+  end
+
+  # Add or update metadatum entry on this sample
+  def metadatum_add_or_update(key, val)
+    m = metadata.find_by(key: key.to_s)
+    unless m
+      # Create the entry
+      m = Metadatum.new
+      m.key = key
+      m.data_type = Metadatum::KEY_TO_TYPE[key.to_sym]
+      m.sample = self
+    end
+    m.edit_value(val)
+    m.save!
   end
 end

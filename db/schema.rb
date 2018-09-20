@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_180_911_202_026) do
+ActiveRecord::Schema.define(version: 20_180_918_172_623) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -129,6 +129,20 @@ ActiveRecord::Schema.define(version: 20_180_911_202_026) do
     t.index ["task"], name: "index_job_stats_on_task"
   end
 
+  create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "key", null: false
+    t.integer "data_type", limit: 1, null: false
+    t.string "text_raw_value"
+    t.string "text_validated_value"
+    t.float "number_raw_value", limit: 24
+    t.float "number_validated_value", limit: 24
+    t.integer "sample_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index %w[key sample_id], name: "index_metadata_on_key_and_sample_id", unique: true
+    t.index ["sample_id"], name: "index_metadata_on_sample_id"
+  end
+
   create_table "output_states", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string "output"
     t.string "state"
@@ -157,6 +171,7 @@ ActiveRecord::Schema.define(version: 20_180_911_202_026) do
     t.datetime "updated_at", null: false
     t.string "name"
     t.string "dag_branch"
+    t.text "ncbi_metadata"
     t.index ["name"], name: "index_phylo_trees_on_name", unique: true
     t.index %w[project_id taxid], name: "index_phylo_trees_on_project_id_and_taxid"
     t.index ["user_id"], name: "index_phylo_trees_on_user_id"
@@ -249,7 +264,7 @@ ActiveRecord::Schema.define(version: 20_180_911_202_026) do
     t.datetime "updated_at", null: false
     t.integer "public_access", limit: 1
     t.integer "days_to_keep_sample_private", default: 365, null: false
-    t.integer "background_flag", limit: 1, default: 1
+    t.integer "background_flag", limit: 1, default: 0
     t.index ["name"], name: "index_projects_on_name", unique: true
   end
 

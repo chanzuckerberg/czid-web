@@ -781,7 +781,6 @@ class Samples extends React.Component {
 
   viewSample(id, e) {
     e.preventDefault();
-    // _satellite.track('viewsample')
 
     window.open(`/samples/${id}`);
   }
@@ -1834,7 +1833,7 @@ class BackgroundModal extends React.Component {
         <Modal.Content className="modal-content">
           <div>
             A collection is a group of samples. You can use this collection as a
-            background model to be selected on a sample report page. It'll
+            background model to be selected on a sample report page. It{"'"}ll
             update the calculated z-score to indicate how much the the sample
             deviates from the norm for that collection.
           </div>

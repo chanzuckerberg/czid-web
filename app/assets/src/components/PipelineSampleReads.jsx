@@ -864,7 +864,8 @@ class PipelineSampleReads extends React.Component {
                 <a href={`/?project_id=${this.projectInfo.id}`}>
                   {this.projectInfo.name + " "}
                 </a>
-                > {sample_dropdown}
+                {">"}
+                {sample_dropdown}
                 {this.sampleInfo.status === "created" || !this.reportPresent
                   ? delete_sample_button
                   : null}

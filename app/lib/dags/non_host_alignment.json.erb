@@ -101,6 +101,9 @@
         "lineage_db": "<%= @attribute_dict[:lineage_db] %>",
         "accession2taxid_db": "<%= @attribute_dict[:accession2taxid_db] %>",
         "loc_db": "<%= @attribute_dict[:nt_loc_db] %>"
+        <% if @attribute_dict[:skip_dedeuterostome_filter] == 0 %>
+          ,"deuterostome_db": "<%= @attribute_dict[:deuterostome_db] %>"
+        <% end %>
       },
       "additional_attributes": {
         "db": "<%= @attribute_dict[:nt_db] %>",
@@ -116,6 +119,9 @@
         "lineage_db": "<%= @attribute_dict[:lineage_db] %>",
         "accession2taxid_db": "<%= @attribute_dict[:accession2taxid_db] %>",
         "loc_db": "<%= @attribute_dict[:nr_loc_db] %>"
+        <% if @attribute_dict[:skip_dedeuterostome_filter] == 0 %>
+          ,"deuterostome_db": "<%= @attribute_dict[:deuterostome_db] %>"
+        <% end %>
       },
       "additional_attributes": {
         "db": "<%= @attribute_dict[:nr_db] %>",
@@ -131,7 +137,7 @@
       "additional_attributes": {}
     },
     {
-      "in": ["host_filter_out", "refined_gsnap_out", "refined_rapsearch2_out"],
+      "in": ["host_filter_out", "gsnap_out", "rapsearch2_out"],
       "out": "annotated_out",
       "class": "PipelineStepGenerateAnnotatedFasta",
       "module": "idseq_dag.steps.generate_annotated_fasta",

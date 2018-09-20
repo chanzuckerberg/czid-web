@@ -15,8 +15,12 @@ class PhyloTree < ApplicationRecord
     where(status: STATUS_IN_PROGRESS)
   end
 
-  def newick_s3_path
-    "#{phylo_tree_output_s3_path}/#{dag_version}/phylo_tree.newick"
+  def s3_outputs
+    {
+      "newick" => "#{versioned_output_s3_path}/phylo_tree.newick",
+      "ncbi_metadata" => "#{versioned_output_s3_path}/ncbi_metadata.json",
+      "SNP_annotations" => "#{versioned_output_s3_path}/ksnp3_outputs/SNPs_all_annotated"
+    }
   end
 
   def dag_version_file
@@ -29,16 +33,22 @@ class PhyloTree < ApplicationRecord
     return if dag_version.blank?
 
     # Retrieve output:
-    file = Tempfile.new
-    _stdout, _stderr, status = Open3.capture3("aws", "s3", "cp", newick_s3_path, file.path.to_s)
-    if status.exitstatus.zero?
-      file.open
-      self.newick = file.read
-      self.status = newick.present? ? STATUS_READY : STATUS_FAILED
-      save
+    required_outputs = %w[newick ncbi_metadata]
+    temp_files_by_output = {}
+    required_outputs.each do |ro|
+      temp_files_by_output[ro] = Tempfile.new
+      download_status = Open3.capture3("aws", "s3", "cp", s3_outputs[ro], temp_files_by_output[ro].path.to_s)[2]
+      temp_files_by_output[ro].open
+      self[ro] = temp_files_by_output[ro].read if download_status.success?
     end
-    file.close
-    file.unlink
+    self.status = STATUS_READY if required_outputs.all? { |ro| self[ro].present? }
+    save
+
+    # Clean up:
+    temp_files_by_output.values.each do |tf|
+      tf.close
+      tf.unlink
+    end
   end
 
   def monitor_job(throttle = true)
@@ -61,12 +71,29 @@ class PhyloTree < ApplicationRecord
     #     'NR': [first_byte, last_byte, source_s3_file, sample_id, align_viz_s3_file]
     #   },
     #   pipeline_run_id_2: ... }
-    taxon_byteranges = TaxonByterange.where(pipeline_run_id: pipeline_runs.pluck(:id)).where(taxid: taxid)
+    pipeline_run_ids = pipeline_runs.pluck(:id)
+    taxon_byteranges = TaxonByterange.where(pipeline_run_id: pipeline_run_ids).where(taxid: taxid)
     taxon_byteranges_hash = {}
     taxon_byteranges.each do |tbr|
       taxon_byteranges_hash[tbr.pipeline_run_id] ||= {}
       taxon_byteranges_hash[tbr.pipeline_run_id][tbr.hit_type] = [tbr.first_byte, tbr.last_byte]
     end
+    # If the tree is for genus level or higher, get the top species underneath (these species will have genbank records pulled in idseq-dag)
+    if tax_level > TaxonCount::TAX_LEVEL_SPECIES
+      level_str = (TaxonCount::LEVEL_2_NAME[tax_level]).to_s
+      taxid_column = "#{level_str}_taxid"
+      species_counts = TaxonCount.where(pipeline_run_id: pipeline_run_ids).where("#{taxid_column} = ?", taxid).where(tax_level: TaxonCount::TAX_LEVEL_SPECIES)
+      species_counts = species_counts.order('pipeline_run_id, count DESC')
+      top_taxid_by_run_id = {}
+      species_counts.each do |sc|
+        top_taxid_by_run_id[sc.pipeline_run_id] ||= sc.tax_id
+      end
+      reference_taxids = top_taxid_by_run_id.values
+    else
+      reference_taxids = [taxid]
+    end
+    # Retrieve superkigdom name for idseq-dag
+    superkingdom_name = TaxonLineage.where(taxid: taxid).last.superkingdom_name
     # Get fasta paths and alignment viz paths for each pipeline_run
     align_viz_files = {}
     pipeline_runs.each do |pr|
@@ -82,7 +109,11 @@ class PhyloTree < ApplicationRecord
     # Generate DAG
     attribute_dict = {
       phylo_tree_output_s3_path: phylo_tree_output_s3_path,
+      newick_basename: File.basename(s3_outputs["newick"]),
+      ncbi_metadata_basename: File.basename(s3_outputs["ncbi_metadata"]),
       taxid: taxid,
+      reference_taxids: reference_taxids,
+      superkingdom_name: superkingdom_name,
       taxon_byteranges: taxon_byteranges_hash,
       align_viz_files: align_viz_files,
       nt_db: alignment_config.s3_nt_db_path,
@@ -98,6 +129,10 @@ class PhyloTree < ApplicationRecord
 
   def phylo_tree_output_s3_path
     "s3://#{SAMPLES_BUCKET_NAME}/phylo_trees/#{id}"
+  end
+
+  def versioned_output_s3_path
+    "#{phylo_tree_output_s3_path}/#{dag_version}"
   end
 
   def prepare_dag(dag_name, attribute_dict)
@@ -126,9 +161,10 @@ class PhyloTree < ApplicationRecord
 
   def self.sample_details_by_tree_id
     query_results = ActiveRecord::Base.connection.select_all("
-      select phylo_tree_id, pipeline_run_id, sample_id, samples.*
-      from phylo_trees_pipeline_runs, pipeline_runs, samples
-      where phylo_trees_pipeline_runs.pipeline_run_id = pipeline_runs.id and
+      select phylo_tree_id, pipeline_run_id, ncbi_metadata, sample_id, samples.*
+      from phylo_trees, phylo_trees_pipeline_runs, pipeline_runs, samples
+      where phylo_trees.id = phylo_trees_pipeline_runs.phylo_tree_id and
+            phylo_trees_pipeline_runs.pipeline_run_id = pipeline_runs.id and
             pipeline_runs.sample_id = samples.id
       order by phylo_tree_id
     ").to_a
@@ -139,6 +175,14 @@ class PhyloTree < ApplicationRecord
       tree_node_name = pipeline_run_id.to_s
       indexed_results[tree_id] ||= {}
       indexed_results[tree_id][tree_node_name] = entry
+    end
+    # Add NCBI metadata
+    query_results.index_by { |entry| entry["phylo_tree_id"] }.each do |tree_id, tree_data|
+      ncbi_metadata = JSON.parse(tree_data["ncbi_metadata"] || "{}")
+      ncbi_metadata.each do |node_id, node_metadata|
+        node_metadata["name"] ||= node_metadata["accession"]
+        indexed_results[tree_id][node_id] = node_metadata
+      end
     end
     indexed_results
   end

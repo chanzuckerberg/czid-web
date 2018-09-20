@@ -17,7 +17,7 @@ class PhyloTreesController < ApplicationController
   # have read access to all those samples.
   ########################################
 
-  READ_ACTIONS = [:show].freeze
+  READ_ACTIONS = [:show, :download_snps].freeze
   EDIT_ACTIONS = [:retry].freeze
   OTHER_ACTIONS = [:new, :create, :index].freeze
 
@@ -97,6 +97,18 @@ class PhyloTreesController < ApplicationController
     end
   end
 
+  def download_snps
+    snp_file = Tempfile.new
+    s3_file = @phylo_tree.s3_outputs["SNP_annotations"]
+    cmd_status = Open3.capture3("aws", "s3", "cp", s3_file, snp_file.path)[2]
+    unless cmd_status.success?
+      snp_file.write("Not yet available.")
+      snp_file.close
+      LogUtil.log_err_and_airbrake("downloading #{s3_file} failed")
+    end
+    send_file snp_file.path, filename: "#{@phylo_tree.name.downcase.gsub(/\W/, '-')}__SNP-annotations.txt"
+  end
+
   def create
     @project = current_power.updatable_projects.find(params[:project_id])
     pipeline_run_ids = params[:pipeline_run_ids].map(&:to_i)
@@ -104,7 +116,11 @@ class PhyloTreesController < ApplicationController
     name = params[:name]
     taxid = params[:taxid].to_i
     tax_name = params[:tax_name]
-    dag_branch = params[:dag_branch] || "master"
+    dag_branch = if current_user.admin?
+                   params[:dag_branch] || "master"
+                 else
+                   "master"
+                 end
 
     tax_level = TaxonLineage.where(taxid: taxid).last.tax_level
 

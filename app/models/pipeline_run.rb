@@ -436,7 +436,7 @@ class PipelineRun < ApplicationRecord
     # ]
     output = output_state.output
     state = output_state.state
-    return unless state == STATUS_UNKNOWN
+    return unless [STATUS_UNKNOWN, STATUS_LOADING_ERROR].include?(state)
     if output_ready?(output)
       output_state.update(state: STATUS_LOADING_QUEUED)
       Resque.enqueue(ResultMonitorLoader, id, output)
@@ -463,7 +463,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def all_output_states_terminal?
-    output_states.pluck(:state).all? { |s| [STATUS_LOADED, STATUS_FAILED, STATUS_LOADING_ERROR].include?(s) }
+    output_states.pluck(:state).all? { |s| [STATUS_LOADED, STATUS_FAILED].include?(s) }
   end
 
   def all_output_states_loaded?
