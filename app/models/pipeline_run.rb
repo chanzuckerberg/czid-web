@@ -449,7 +449,8 @@ class PipelineRun < ApplicationRecord
   def handle_success
     # Check if this was the last run in a project and act accordingly:
     if sample.project.results_complete?
-      notify_users
+      # Ony send the project success email on the first pipeline run
+      notify_users if sample.pipeline_runs.count == 1
       sample.project.create_or_update_project_background if sample.project.background_flag == 1
     end
   end
