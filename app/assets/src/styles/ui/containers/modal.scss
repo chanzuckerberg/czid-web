@@ -1,0 +1,26 @@
+@import "../../themes/colors";
+
+.idseq-ui.modal {
+  left: auto;
+  right: auto;
+
+  .content {
+    width: 900px;
+  }
+
+  .close-icon {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    cursor: pointer;
+
+    .icon.remove {
+      height: 16px;
+      width: 16px;
+
+      path {
+        fill: $medium-grey;
+      }
+    }
+  }
+}
