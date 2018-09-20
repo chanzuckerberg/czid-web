@@ -78,14 +78,15 @@ class DataTable extends React.Component {
 
     let stateUpdate = {};
     if (rowIndex < 0) {
-      if (checked) {
-        let allRows = new Set();
-        for (let i = 0; i < this.originalData.length; i++) {
-          allRows.add(this.originalData[i].__originalIndex);
+      let allRows = this.state.selectedRows || new Set();
+      let filteredData = this.filterData(this.originalData);
+      for (let i = 0; i < filteredData.length; i++) {
+        if (checked) {
+          allRows.add(filteredData[i].__originalIndex);
+        } else {
+          allRows.delete(filteredData[i].__originalIndex);
         }
         stateUpdate = { selectedRows: allRows };
-      } else {
-        stateUpdate = { selectedRows: new Set() };
       }
     } else {
       if (checked) {
