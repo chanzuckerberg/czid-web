@@ -57,7 +57,7 @@ class PhyloTree < ApplicationRecord
     return if throttle && rand >= 0.1 # if throttling, do time-consuming aegea checks only 10% of the time
     job_status, self.job_log_id, _job_hash, self.job_description = job_info(job_id, id)
     if job_status == PipelineRunStage::STATUS_FAILED ||
-       (job_status == "SUCCEEDED" && !Open3.capture3("aws", "s3", "ls", newick_s3_path)[2].exitstatus.zero?)
+       (job_status == "SUCCEEDED" && !Open3.capture3("aws", "s3", "ls", s3_outputs["newick"])[2].success?)
       self.status = STATUS_FAILED
       save
     end
