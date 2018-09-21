@@ -1,0 +1,29 @@
+@import "../../themes/colors";
+
+.idseq-ui.modal {
+  left: auto;
+  right: auto;
+
+  .content {
+    // take 10px for a possible vertical scrol bar
+    // otherwise it will trigger an horizontal scroll bar
+    width: 890px;
+    margin: auto;
+  }
+
+  .close-icon {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    cursor: pointer;
+
+    .icon.remove {
+      height: 16px;
+      width: 16px;
+
+      path {
+        fill: $medium-grey;
+      }
+    }
+  }
+}

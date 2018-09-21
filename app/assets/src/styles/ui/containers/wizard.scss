@@ -1,0 +1,46 @@
+@import "../../themes/colors.scss";
+
+.wizard {
+  font-size: 12px;
+
+  // TODO: overrides home.scss, remove after refactoring
+  table thead {
+    th,
+    td {
+      font-size: 12px;
+    }
+  }
+
+  &__header {
+    display: block;
+    margin-bottom: 10px;
+    width: 100%;
+
+    &__title {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 30px;
+      vertical-align: middle;
+    }
+
+    &__page {
+      color: $medium-grey;
+      margin-bottom: 10px;
+    }
+  }
+
+  &__nav {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+
+    button:not(:last-child) {
+      margin-right: 20px;
+    }
+  }
+
+  &__action {
+    cursor: pointer;
+  }
+}

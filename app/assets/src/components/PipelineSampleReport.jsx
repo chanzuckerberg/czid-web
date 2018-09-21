@@ -15,7 +15,8 @@ import OurDropdown from "./ui/controls/dropdowns/Dropdown";
 import MultipleDropdown from "./ui/controls/dropdowns/MultipleDropdown";
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
 import BetaLabel from "./ui/labels/BetaLabel";
-import PhyloTreeInputs from "./views/phylo_tree/PhyloTreeInputs.jsx";
+import PhyloTreeByPathCreationModal from "./views/phylo_tree/PhyloTreeByPathCreationModal";
+import PhyloTreeChecks from "./views/phylo_tree/PhyloTreeChecks";
 
 class PipelineSampleReport extends React.Component {
   constructor(props) {
@@ -127,7 +128,8 @@ class PipelineSampleReport extends React.Component {
       countType: "NT",
       readSpecificity: cachedReadSpecificity
         ? parseInt(cachedReadSpecificity)
-        : 0
+        : 0,
+      phyloTreeModalOpen: true
     };
 
     this.expandAll = false;
@@ -925,16 +927,17 @@ class PipelineSampleReport extends React.Component {
     if (
       this.allowPhyloTree &&
       taxInfo.tax_id > 0 &&
-      PhyloTreeInputs.passesCreateCondition({
-        NT: taxInfo.NT.r,
-        NR: taxInfo.NR.r
-      })
+      PhyloTreeChecks.passesCreateCondition(taxInfo.NT.r, taxInfo.NR.r)
     )
       phyloTreeDot = (
-        <i
-          onClick={() => this.gotoTreeLink(taxInfo.tax_id)}
-          className="fa fa-code-fork action-dot"
-          aria-hidden="true"
+        <PhyloTreeByPathCreationModal
+          admin={parseInt(this.admin)}
+          csrf={this.csrf}
+          trigger={
+            <i className="fa fa-code-fork action-dot" aria-hidden="true" />
+          }
+          taxonId={taxInfo.tax_id}
+          projectId={this.projectId}
         />
       );
     return (
