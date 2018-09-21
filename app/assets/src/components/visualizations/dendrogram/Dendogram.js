@@ -2,6 +2,7 @@ import { cluster as d3Cluster, hierarchy } from "d3-hierarchy";
 import "d3-transition";
 import { timeout } from "d3-timer";
 import { select, event as currentEvent } from "d3-selection";
+import { Colormap } from "../../utils/colormaps/Colormap";
 
 export default class Dendogram {
   constructor(container, tree, options) {
@@ -138,24 +139,40 @@ export default class Dendogram {
   updateHighlights() {
     this.root.descendants().forEach(n => (n.data.highlight = false));
 
-    this.root.leaves()[0].data.highlightColor = 1;
-    this.root.leaves()[1].data.highlightColor = 2;
-
     this.root.leaves().forEach(leaf => {
-      if (leaf.data.highlightColor) {
-        leaf.ancestors().forEach(ancestor => {
-          ancestor.data.highlightColor = leaf.data.highlightColor;
-        });
-      }
-
       if (this._highlighted.has(leaf.data.id)) {
         leaf.ancestors().forEach(ancestor => {
           ancestor.data.highlight = true;
         });
       }
     });
+  }
 
-    console.log("my dendogram.js state is: ", this.state);
+  updateColorGroup() {
+    if (!this.options.colorGroupAttribute) {
+      return;
+    }
+
+    let attrName = this.options.colorGroupAttribute;
+    let attrValToColorNum = {};
+    let leaves = this.root.leaves();
+    let colors = Colormap.getNScale("viridis", 10).reverse();
+    let curColor = 0;
+
+    leaves.forEach(leaf => {
+      if (attrName in leaf.data) {
+        let attrVal = leaf.data[attrName];
+        if (attrVal in attrValToColorNum) {
+          // Value has been assigned a color already
+          leaf.data.color = attrValToColorNum[attrVal];
+        } else {
+          // New value and new color
+          leaf.data.color = colors[curColor];
+          attrValToColorNum[attrVal] = colors[curColor];
+          curColor++;
+        }
+      }
+    });
   }
 
   clickHandler(clickCallback, dblClickCallback, delay = 250) {
@@ -356,6 +373,7 @@ export default class Dendogram {
     let maxDistance = this.computeDistanceToRoot(this.root);
     this.createScale(-30, 0, this.minTreeSize.width, maxDistance);
     this.updateHighlights();
+    this.updateColorGroup();
     this.adjustXPositions();
     this.adjustYPositions(maxDistance);
 
@@ -406,13 +424,6 @@ export default class Dendogram {
     node.classed("highlight", function(d) {
       return d.data.highlight;
     });
-
-    // Apply the highlight-color-? class based on data.highlightColor
-    for (let i = 0; i < 5; i++) {
-      node.classed(`highlight-color-${i}`, function(d) {
-        return d.data.highlightColor === i;
-      });
-    }
 
     node
       .select("text")
@@ -487,5 +498,12 @@ export default class Dendogram {
       .text(function(d) {
         return d.children ? "" : d.data.name.split("__")[0];
       });
+
+    // Apply colors to the nodes from data.color
+    this.g.selectAll(".node").each(function(node) {
+      if (node.data && node.data.color) {
+        select(this).style("fill", node.data.color);
+      }
+    });
   }
 }

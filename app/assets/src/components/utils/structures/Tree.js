@@ -5,38 +5,20 @@ export default class Tree {
     this.root = root;
 
     if (nodeData) {
-      console.log("node data:");
-      console.log(nodeData);
       let nodes = this.bfs();
       for (let i = 0; i < nodes.length; i++) {
         let node = nodes[i];
-        console.log("node id: ", node.id);
-        console.log("node name:");
-        console.log(node.name);
-        console.log(typeof node.name);
         if (nodeData[node.name]) {
-          console.log("this node:");
-          console.log(node);
-          console.log("node data for this one:");
-          console.log(nodeData[node.name]);
           node = Object.assign(node, nodeData[node.name]);
         }
-        node.test = "hi";
-        console.log("node:");
-        console.log(node);
       }
     }
-
-    console.log("foobar hi");
-    console.log(this);
   }
 
   static fromNewickString(newickString, ...props) {
     if (!newickString) {
       return null;
     }
-    console.log("NEWICK:");
-    console.log(newickString);
     let parser = new NewickParser(newickString);
     parser.parse();
     return new Tree(parser.root, ...props);

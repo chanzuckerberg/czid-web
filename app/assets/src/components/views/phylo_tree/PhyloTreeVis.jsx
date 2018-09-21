@@ -15,7 +15,6 @@ class PhyloTreeVis extends React.Component {
   }
 
   static getDerivedStateFromProps(props, state) {
-    console.log("these props are: ", props.nodeData);
     if (props.newick !== state.newick || props.nodeData !== state.nodeData) {
       return {
         newick: props.newick,
@@ -25,7 +24,9 @@ class PhyloTreeVis extends React.Component {
   }
 
   componentDidMount() {
-    this.treeVis = new Dendogram(this.treeContainer);
+    this.treeVis = new Dendogram(this.treeContainer, null, {
+      colorGroupAttribute: "project_id"
+    });
     this.treeVis.setTree(
       Tree.fromNewickString(this.props.newick, this.props.nodeData)
     );
