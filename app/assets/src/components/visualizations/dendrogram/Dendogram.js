@@ -43,6 +43,9 @@ export default class Dendogram {
     };
 
     this._highlighted = new Set();
+    // Attribute value to color number. Up here so that rerooting doesn't
+    // change colors.
+    this._attrValToColorNum = {};
 
     // timeout to differentiate click from double click
     this._clickTimeout = null;
@@ -148,28 +151,29 @@ export default class Dendogram {
     });
   }
 
-  updateColorGroup() {
+  updateColors() {
     if (!this.options.colorGroupAttribute) {
       return;
     }
 
     let attrName = this.options.colorGroupAttribute;
-    let attrValToColorNum = {};
     let leaves = this.root.leaves();
-    let colors = Colormap.getNScale("viridis", 10).reverse();
+    let maxColors = 10;
+    let colors = Colormap.getNScale("viridis", maxColors).reverse();
     let curColor = 0;
 
     leaves.forEach(leaf => {
       if (attrName in leaf.data) {
         let attrVal = leaf.data[attrName];
-        if (attrVal in attrValToColorNum) {
+        if (attrVal in this._attrValToColorNum) {
           // Value has been assigned a color already
-          leaf.data.color = attrValToColorNum[attrVal];
+          leaf.data.color = this._attrValToColorNum[attrVal];
         } else {
           // New value and new color
           leaf.data.color = colors[curColor];
-          attrValToColorNum[attrVal] = colors[curColor];
-          curColor++;
+          this._attrValToColorNum[attrVal] = colors[curColor];
+          // Just stay at the last color if at max colors
+          if (curColor < maxColors) curColor++;
         }
       }
     });
@@ -373,7 +377,7 @@ export default class Dendogram {
     let maxDistance = this.computeDistanceToRoot(this.root);
     this.createScale(-30, 0, this.minTreeSize.width, maxDistance);
     this.updateHighlights();
-    this.updateColorGroup();
+    this.updateColors();
     this.adjustXPositions();
     this.adjustYPositions(maxDistance);
 
