@@ -24,11 +24,6 @@ export default class PhyloTree {
       height: 500
     };
 
-    this.treeSize = {
-      width: this.minTreeSize.width,
-      height: this.minTreeSize.height
-    };
-
     // margin top
     this.margins = {
       // includes legend
@@ -60,11 +55,11 @@ export default class PhyloTree {
       .append("svg")
       .attr(
         "width",
-        this.treeSize.width + this.margins.left + this.margins.right
+        this.minTreeSize.width + this.margins.left + this.margins.right
       )
       .attr(
         "height",
-        this.treeSize.height + this.margins.top + this.margins.bottom
+        this.minTreeSize.height + this.margins.top + this.margins.bottom
       );
 
     this.g = this.svg
@@ -192,6 +187,12 @@ export default class PhyloTree {
       node.x = (node.x - xMin) * finalTreeHeight / xRange;
     });
     this.adjustHeight(finalTreeHeight);
+  }
+
+  adjustYPositions(maxDistance) {
+    this.root.each(node => {
+      node.y = this.minTreeSize.width * node.distanceToRoot / maxDistance;
+    });
   }
 
   createScale(x, y, width, distance) {
@@ -336,19 +337,16 @@ export default class PhyloTree {
     }
 
     let cluster = d3Cluster()
-      .size([this.treeSize.height, this.treeSize.width])
+      .size([this.minTreeSize.height, this.minTreeSize.width])
       .nodeSize([this.nodeSize.height, this.nodeSize.width]);
 
     cluster(this.root);
 
     let maxDistance = this.computeDistanceToRoot(this.root);
-    this.createScale(-30, 0, this.treeSize.width, maxDistance);
+    this.createScale(-30, 0, this.minTreeSize.width, maxDistance);
     this.updateHighlights();
     this.adjustXPositions();
-
-    this.root.each(node => {
-      node.y = this.treeSize.width * node.distanceToRoot / maxDistance;
-    });
+    this.adjustYPositions(maxDistance);
 
     let link = this.g
       .selectAll(".link")
