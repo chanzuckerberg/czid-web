@@ -4,17 +4,47 @@ import { timeout } from "d3-timer";
 import { select, event as currentEvent } from "d3-selection";
 
 export default class PhyloTree {
-  constructor(container, tree) {
+  constructor(container, tree, options) {
     this.svg = null;
+    this.g = null;
     this.container = container;
     this.tree = null;
     this.root = null;
 
-    // size
-    this.width = 800;
-    this.height = 600;
-    this.innerLabelWidth = 150;
-    this.outerLabelWidth = 150;
+    this.options = Object.assign(
+      {
+        curvedEdges: false
+      },
+      options || {}
+    );
+
+    // sizes
+    this.minTreeSize = {
+      width: 600,
+      height: 500
+    };
+
+    this.treeSize = {
+      width: this.minTreeSize.width,
+      height: this.minTreeSize.height
+    };
+
+    // margin top
+    this.margins = {
+      // includes legend
+      top: 60,
+      // includes second half of nodes
+      bottom: 20,
+      // includes root label on the left of the node
+      left: 150,
+      // includes leaf nodes labels
+      right: 150
+    };
+
+    this.nodeSize = {
+      width: 1,
+      height: 16
+    };
 
     this._highlighted = new Set();
 
@@ -28,10 +58,21 @@ export default class PhyloTree {
   initialize() {
     this.svg = select(this.container)
       .append("svg")
-      .attr("width", this.width)
-      .attr("height", this.height)
+      .attr(
+        "width",
+        this.treeSize.width + this.margins.left + this.margins.right
+      )
+      .attr(
+        "height",
+        this.treeSize.height + this.margins.top + this.margins.bottom
+      );
+
+    this.g = this.svg
       .append("g")
-      .attr("transform", `translate(${this.innerLabelWidth}, 60)`);
+      .attr(
+        "transform",
+        `translate(${this.margins.left}, ${this.margins.top})`
+      );
 
     this.tooltipDiv = select("body")
       .append("div")
@@ -39,9 +80,18 @@ export default class PhyloTree {
       .style("opacity", 0);
   }
 
+  adjustHeight(treeHeight) {
+    this.svg.attr(
+      "height",
+      Math.max(treeHeight, this.minTreeSize.height) +
+        this.margins.top +
+        this.margins.bottom
+    );
+  }
+
   setTree(tree) {
-    if (this.svg) {
-      this.svg.selectAll("*").remove();
+    if (this.g) {
+      this.g.selectAll("*").remove();
     }
 
     if (this._clickTimeout) {
@@ -102,51 +152,6 @@ export default class PhyloTree {
     });
   }
 
-  rerootTree(nodeToRoot) {
-    // TODO: move this to operate on the original tree
-    let ancestors = nodeToRoot.ancestors();
-
-    while (ancestors.length > 2) {
-      let nodeToMove = ancestors.pop();
-      // remove the next ancestor from children
-      let previousAncestor = ancestors[ancestors.length - 1];
-      this.detachFromParent(previousAncestor);
-
-      // set node's new distance, descendants depth and depth
-      nodeToMove.data.distance = previousAncestor.data.distance;
-      nodeToMove.parent = previousAncestor;
-      previousAncestor.children.push(nodeToMove);
-    }
-
-    this.root = ancestors.pop();
-    this.root.data.distance = 0;
-    this.root.depth = 0;
-    this.root.parent = null;
-
-    this.root.children.forEach(node => {
-      node.data.distance += nodeToRoot.data.distance;
-    });
-    nodeToRoot.data.distance = 0;
-
-    // reset depths
-    this.root.eachBefore(node => {
-      if (node.parent) {
-        node.depth += node.parent.depth + 1;
-      }
-    });
-
-    // reset Height
-    this.root.eachAfter(node => {
-      if (node.children && node.children.length > 0) {
-        node.height =
-          node.children.reduce((acc, child) => Math.max(child.height, acc), 0) +
-          1;
-      }
-    });
-
-    this.update();
-  }
-
   clickHandler(clickCallback, dblClickCallback, delay = 250) {
     if (this._clickTimeout) {
       this._clickTimeout.stop();
@@ -166,6 +171,27 @@ export default class PhyloTree {
     } else {
       return `${multiplier}E${power}`;
     }
+  }
+
+  adjustXPositions() {
+    let xMin = this.root.x;
+    let xMax = this.root.x;
+    this.root.each(node => {
+      if (node.x < xMin) {
+        xMin = node.x;
+      }
+      if (node.x > xMax) {
+        xMax = node.x;
+      }
+    });
+    const xRange = xMax - xMin;
+    let finalTreeHeight =
+      xRange < this.minTreeSize.height ? this.minTreeSize.height : xRange;
+
+    this.root.each(node => {
+      node.x = (node.x - xMin) * finalTreeHeight / xRange;
+    });
+    this.adjustHeight(finalTreeHeight);
   }
 
   createScale(x, y, width, distance) {
@@ -201,10 +227,10 @@ export default class PhyloTree {
     }
     const tickElements = createTicks(0, width, scaleSize / 2, multiplier);
 
-    let scale = this.svg.select(".scale");
+    let scale = this.g.select(".scale");
 
     if (scale.empty()) {
-      scale = this.svg
+      scale = this.g
         .append("g")
         .attr("transform", `translate(${y},${x})`)
         .attr("class", "scale");
@@ -265,17 +291,30 @@ export default class PhyloTree {
       return;
     }
 
-    if (!this.svg) {
+    if (!this.g) {
       this.initialize();
     }
 
-    /*
     function curveEdge(d) {
-      return `M${d.y},${d.x}C${d.parent.y + 100},${d.x} ${d.parent.y + 100},${
+      return (
+        "M" +
+        d.y +
+        "," +
+        d.x +
+        "C" +
+        (d.y + d.parent.y) / 2 +
+        "," +
+        d.x +
+        " " +
+        (d.y + d.parent.y) / 2 +
+        "," +
+        d.parent.x +
+        " " +
+        d.parent.y +
+        "," +
         d.parent.x
-      } ${d.parent.y},${d.parent.x}`;
+      );
     }
-*/
 
     function rectEdge(d) {
       return `M${d.y} ${d.x} L${d.parent.y} ${d.x} L${d.parent.y} ${
@@ -296,22 +335,22 @@ export default class PhyloTree {
       return null;
     }
 
-    let cluster = d3Cluster().size([500, 500]);
+    let cluster = d3Cluster()
+      .size([this.treeSize.height, this.treeSize.width])
+      .nodeSize([this.nodeSize.height, this.nodeSize.width]);
 
     cluster(this.root);
 
     let maxDistance = this.computeDistanceToRoot(this.root);
-
-    this.createScale(-30, 0, this.width - this.outerLabelWidth, maxDistance);
-
+    this.createScale(-30, 0, this.treeSize.width, maxDistance);
     this.updateHighlights();
+    this.adjustXPositions();
 
     this.root.each(node => {
-      node.y =
-        (this.width - this.outerLabelWidth) * node.distanceToRoot / maxDistance;
+      node.y = this.treeSize.width * node.distanceToRoot / maxDistance;
     });
 
-    let link = this.svg
+    let link = this.g
       .selectAll(".link")
       .data(this.root.descendants().slice(1), linkId);
 
@@ -325,7 +364,7 @@ export default class PhyloTree {
       .enter()
       .append("path")
       .attr("class", "link")
-      .attr("d", rectEdge);
+      .attr("d", this.options.curvedEdges ? curveEdge : rectEdge);
 
     link.classed("highlight", function(d) {
       return d.data.highlight && d.parent.data.highlight;
@@ -334,13 +373,11 @@ export default class PhyloTree {
     link
       .transition()
       .duration(500)
-      .attr("d", rectEdge);
+      .attr("d", this.options.curvedEdges ? curveEdge : rectEdge);
 
-    this.svg.selectAll(".link.highlight").raise();
+    this.g.selectAll(".link.highlight").raise();
 
-    let node = this.svg
-      .selectAll(".node")
-      .data(this.root.descendants(), nodeId);
+    let node = this.g.selectAll(".node").data(this.root.descendants(), nodeId);
 
     node
       .exit()
