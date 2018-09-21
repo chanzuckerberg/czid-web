@@ -5,7 +5,10 @@
   right: auto;
 
   .content {
-    width: 900px;
+    // take 10px for a possible vertical scrol bar
+    // otherwise it will trigger an horizontal scroll bar
+    width: 890px;
+    margin: auto;
   }
 
   .close-icon {
