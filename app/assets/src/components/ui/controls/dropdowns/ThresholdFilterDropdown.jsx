@@ -23,10 +23,40 @@ class ThresholdFilterDropdown extends React.Component {
     let newThresholds = props.thresholds.filter(
       ThresholdFilterDropdown.isThresholdValid
     );
-    if (newThresholds !== state.thresholds) {
-      return { thresholds: newThresholds };
+    if (
+      !ThresholdFilterDropdown.areThresholdsFiltersEqual(
+        newThresholds,
+        state.oldThresholds
+      )
+    ) {
+      return {
+        thresholds: newThresholds,
+        oldThresholds: newThresholds
+      };
     }
     return null;
+  }
+
+  static areThresholdsFiltersEqual(tfs1, tfs2) {
+    // this functions assumes that lists with the sames thresholds in different order are different
+    if (typeof tfs1 !== typeof tfs2) return false;
+    tfs1 = tfs1 || [];
+    tfs2 = tfs2 || [];
+    if (tfs1.length != tfs2.length || typeof tfs1 !== typeof tfs2) {
+      return false;
+    }
+    for (let i = 0; i < tfs1.length; i++) {
+      let tf1 = tfs1[i];
+      let tf2 = tfs2[i];
+      if (
+        tf1.metric !== tf2.metric ||
+        tf1.operator !== tf2.operator ||
+        tf1.value !== tf2.value
+      ) {
+        return false;
+      }
+    }
+    return true;
   }
 
   handleThresholdRemove(thresholdIdx) {
@@ -74,7 +104,9 @@ class ThresholdFilterDropdown extends React.Component {
 
   handleClose() {
     this.setState({ popupIsOpen: false });
-    let newThresholds = this.state.thresholds.filter(this.isThresholdValid);
+    let newThresholds = this.state.thresholds.filter(
+      ThresholdFilterDropdown.isThresholdValid
+    );
     this.setState({ thresholds: newThresholds });
     this.props.onApply(newThresholds);
   }
