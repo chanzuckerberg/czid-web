@@ -3,7 +3,7 @@ import "d3-transition";
 import { timeout } from "d3-timer";
 import { select, event as currentEvent } from "d3-selection";
 
-export default class PhyloTree {
+export default class Dendogram {
   constructor(container, tree, options) {
     this.svg = null;
     this.g = null;
@@ -155,7 +155,7 @@ export default class PhyloTree {
       }
     });
 
-    console.log(this);
+    console.log("my dendogram.js state is: ", this.state);
   }
 
   clickHandler(clickCallback, dblClickCallback, delay = 250) {

@@ -15,6 +15,7 @@ class PhyloTreeVis extends React.Component {
   }
 
   static getDerivedStateFromProps(props, state) {
+    console.log("these props are: ", props.nodeData);
     if (props.newick !== state.newick || props.nodeData !== state.nodeData) {
       return {
         newick: props.newick,
