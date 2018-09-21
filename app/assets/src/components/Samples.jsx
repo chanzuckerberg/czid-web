@@ -403,8 +403,8 @@ class Samples extends React.Component {
     return urlParams.get(param);
   }
 
-  updateProjectUserState(email_array) {
-    this.setState({ project_users: email_array });
+  updateProjectUserState(user_array) {
+    this.setState({ project_users: user_array });
   }
 
   fetchProjectUsers(id) {
@@ -412,9 +412,9 @@ class Samples extends React.Component {
       this.updateProjectUserState([]);
     } else {
       axios
-        .get(`/projects/${id}/all_emails.json`)
+        .get(`/projects/${id}/all_users.json`)
         .then(res => {
-          this.updateProjectUserState(res.data.emails);
+          this.updateProjectUserState(res.data.users);
         })
         .catch(() => {
           this.updateProjectUserState([]);
@@ -472,36 +472,39 @@ class Samples extends React.Component {
     });
   }
 
-  updateUserDisplay(email_to_add) {
-    let new_project_users = this.state.project_users;
-    if (!new_project_users.includes(email_to_add)) {
-      new_project_users.push(email_to_add);
+  updateUserDisplay(name_to_add, email_to_add) {
+    let project_emails = this.state.project_users.map(user => user.email);
+    if (!project_emails.includes(email_to_add)) {
+      let new_project_users = this.state.project_users;
+      new_project_users.push({ name: name_to_add, email: email_to_add });
       this.setState({ project_users: new_project_users });
     }
   }
 
-  handleAddUser(email_to_add) {
+  handleAddUser(name_to_add, email_to_add) {
     let project_id = this.state.selectedProjectId;
     const isValidEmail = StringHelper.validateEmail(email_to_add);
-    if (isValidEmail) {
+    const isValidName = StringHelper.validateName(name_to_add);
+    if (isValidEmail && isValidName) {
       this.setState({
         project_add_email_validation: null,
         invite_status: "sending"
       });
       axios
         .put(`/projects/${project_id}/add_user`, {
+          user_name_to_add: name_to_add,
           user_email_to_add: email_to_add,
           authenticity_token: this.csrf
         })
         .then(() => {
-          this.updateUserDisplay(email_to_add);
+          this.updateUserDisplay(name_to_add, email_to_add);
           this.setState({
             invite_status: "sent"
           });
         });
     } else {
       this.setState({
-        project_add_email_validation: "Invalid email address, try again?"
+        project_add_email_validation: "Invalid name or email address"
       });
     }
   }
@@ -1875,7 +1878,7 @@ class BackgroundModal extends React.Component {
 class AddUserModal extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { modalOpen: false, email: "" };
+    this.state = { modalOpen: false, name: "", email: "" };
     this.handleOpen = this.handleOpen.bind(this);
     this.handleClose = this.handleClose.bind(this);
     this.handleChange = this.handleChange.bind(this);
@@ -1891,11 +1894,15 @@ class AddUserModal extends React.Component {
   handleClose() {
     this.setState({ modalOpen: false, email: "" });
   }
-  handleChange(e, { name, value }) {
-    this.setState({ email: value });
+  handleChange(e, { id, value }) {
+    if (id == "add_user_to_project_name") {
+      this.setState({ name: value });
+    } else if (id == "add_user_to_project_email") {
+      this.setState({ email: value });
+    }
   }
   handleSubmit() {
-    this.props.parent.handleAddUser(this.state.email);
+    this.props.parent.handleAddUser(this.state.name, this.state.email);
   }
 
   render() {
@@ -1910,20 +1917,19 @@ class AddUserModal extends React.Component {
           Project Members and Access Control
         </Modal.Header>
         <Modal.Content className="modal-content">
-          <div className="project_modal_title">
-            {this.props.state.project ? this.props.state.project.name : null}
-          </div>
           <div className="project_modal_visibility">
-            {this.props.state.project ? (
-              this.props.state.project.public_access ? (
-                <span>
-                  <i className="tiny material-icons">lock_open</i>
-                  <span className="label">Public Project</span>
-                </span>
-              ) : (
-                <span>
+            {this.props.state.project.public_access ? (
+              <span>
+                <i className="tiny material-icons">lock_open</i>
+                <span className="label">Public Project</span>
+              </span>
+            ) : (
+              <span>
+                <div>
                   <i className="tiny material-icons">lock</i>
                   <span className="label">Private Project</span>
+                </div>
+                <div>
                   <a
                     href="#"
                     onClick={() =>
@@ -1933,11 +1939,14 @@ class AddUserModal extends React.Component {
                       )
                     }
                   >
-                    Make project public
+                    Make public
                   </a>
-                </span>
-              )
-            ) : null}
+                </div>
+              </span>
+            )}
+          </div>
+          <div className="project_modal_title">
+            {this.props.state.project ? this.props.state.project.name : null}
           </div>
           <AddUserModalMemberArea state={this.props.state} parent={this} />
           <input
@@ -2243,17 +2252,40 @@ function SampleDetailedColumns({
 function AddUserModalMemberArea({ state, parent }) {
   return (
     <div>
+      <div className="members_list">
+        <div className="list_title">
+          <i className="tiny material-icons">person_add</i> Project Members
+        </div>
+        <ul>
+          {state.project_users.length > 0 ? (
+            state.project_users.map(user => {
+              return (
+                <li key={user.email}>
+                  {user.name} ({user.email})
+                </li>
+              );
+            })
+          ) : (
+            <li key="None">None</li>
+          )}
+        </ul>
+      </div>
       <div className="add_member row">
         <Form onSubmit={parent.handleSubmit}>
-          <Form.Field>
+          <Form.Group>
             <Form.Input
-              placeholder="Add project members by email"
-              className="validate col s12 browser-default"
-              id="add_user_to_project"
+              placeholder="Name"
+              id="add_user_to_project_name"
+              type="text"
+              onChange={parent.handleChange}
+            />
+            <Form.Input
+              placeholder="Email"
+              id="add_user_to_project_email"
               type="email"
               onChange={parent.handleChange}
             />
-          </Form.Field>
+          </Form.Group>
           <PrimaryButton type="submit" text="Add member" />
         </Form>
         <div className="error-message">
@@ -2268,23 +2300,9 @@ function AddUserModalMemberArea({ state, parent }) {
         {state.invite_status === "sent" ? (
           <div className="status-message status teal-text text-darken-2">
             <i className="fa fa-smile-o fa-fw" />
-            Yay! User has been added
+            User has been added
           </div>
         ) : null}
-      </div>
-      <div className="members_list">
-        <div className="list_title">
-          <i className="tiny material-icons">person_add</i> Project Members
-        </div>
-        <ul>
-          {state.project_users.length > 0 ? (
-            state.project_users.map(email => {
-              return <li key={email}>{email}</li>;
-            })
-          ) : (
-            <li key="None">None</li>
-          )}
-        </ul>
       </div>
     </div>
   );

@@ -1276,7 +1276,8 @@ input[type="button"] {
   background-color: rgba(0, 0, 0, 0.5);
 }
 
-#add_user_to_project {
+#add_user_to_project_name,
+#add_user_to_project_email {
   height: 15px !important;
 }
 
@@ -1298,6 +1299,11 @@ input[type="button"] {
     margin-bottom: 10px;
   }
   .project_modal_visibility {
+    float: right;
+    div {
+      float: right;
+      clear: both;
+    }
     i.material-icons {
       font-size: $font-size-base;
       position: relative;
