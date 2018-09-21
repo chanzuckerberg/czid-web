@@ -17,7 +17,7 @@ class StringHelper {
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
   static validateName(name) {
-    const NameRegex = /^[a-zA-Z ]+$/;
+    const NameRegex = /^[a-zA-Z -]+$/;
     return NameRegex.test(name);
   }
 }
