@@ -24,12 +24,10 @@ class PhyloTreeVis extends React.Component {
   }
 
   componentDidMount() {
-    this.treeVis = new Dendogram(this.treeContainer, null, {
+    let tre = Tree.fromNewickString(this.props.newick, this.props.nodeData);
+    this.treeVis = new Dendogram(this.treeContainer, tre, {
       colorGroupAttribute: "project_id"
     });
-    this.treeVis.setTree(
-      Tree.fromNewickString(this.props.newick, this.props.nodeData)
-    );
     this.treeVis.update();
   }
 

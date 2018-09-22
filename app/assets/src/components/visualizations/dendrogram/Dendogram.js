@@ -158,7 +158,7 @@ export default class Dendogram {
 
     let attrName = this.options.colorGroupAttribute;
     let leaves = this.root.leaves();
-    let maxColors = 10;
+    let maxColors = 20;
     let colors = Colormap.getNScale("viridis", maxColors).reverse();
     let curColor = 0;
 
@@ -177,6 +177,48 @@ export default class Dendogram {
         }
       }
     });
+
+    function colorThisNode(head, attrValToColorNum) {
+      if (!head.data) return;
+      let colorResult;
+
+      if (!head.children || head.children.length === 0) {
+        // Leaf node, no children
+        if (attrName in head.data) {
+          // Get color based on the desired attribute
+          let attrVal = head.data[attrName];
+          if (attrVal in attrValToColorNum) {
+            // Value has been assigned a color already
+            colorResult = attrValToColorNum[attrVal];
+          } else {
+            // New value and new color
+            colorResult = colors[curColor];
+            attrValToColorNum[attrVal] = colorResult;
+            // Just stay at the last color if at max colors
+            if (curColor < maxColors) curColor++;
+          }
+        }
+      } else {
+        // Not a leaf node, get the colors of the children
+        for (let child of head.children) {
+          let childColor = colorThisNode(child, attrValToColorNum);
+          if (childColor) {
+            if (!colorResult) {
+              colorResult = childColor;
+            } else if (childColor !== colorResult) {
+              // Stop if this node's children have different colors
+              return;
+            }
+          }
+        }
+      }
+
+      // Set this node's color
+      head.data.color = colorResult;
+      return colorResult;
+    }
+
+    colorThisNode(this.root, this._attrValToColorNum);
   }
 
   clickHandler(clickCallback, dblClickCallback, delay = 250) {
@@ -385,6 +427,8 @@ export default class Dendogram {
       .selectAll(".link")
       .data(this.root.descendants().slice(1), linkId);
 
+    console.log("top level link thing: ", link);
+
     link
       .exit()
       .transition(500)
@@ -398,6 +442,7 @@ export default class Dendogram {
       .attr("d", this.options.curvedEdges ? curveEdge : rectEdge);
 
     link.classed("highlight", function(d) {
+      console.log("d here is: ", d);
       return d.data.highlight && d.parent.data.highlight;
     });
 
@@ -504,10 +549,12 @@ export default class Dendogram {
       });
 
     // Apply colors to the nodes from data.color
-    this.g.selectAll(".node").each(function(node) {
-      if (node.data && node.data.color) {
-        select(this).style("fill", node.data.color);
-      }
+    this.g.selectAll(".node").style("fill", function(node) {
+      return node.data.color;
+    });
+
+    this.g.selectAll(".link").style("stroke", function(d) {
+      return d.data.color;
     });
   }
 }
