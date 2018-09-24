@@ -133,10 +133,10 @@ class MultipleNestedDropdown extends React.Component {
       this.setState(
         prevState => {
           if (prevState.selectedSuboptions[optionValue]) {
-            let selectedSuboptions = optionClicked.suboptions
-              .map(suboption => suboption.value)
-              .filter(value => value != suboptionValue);
-            prevState.selectedSuboptions[optionValue] = selectedSuboptions;
+            let suboptions = prevState.selectedSuboptions[optionValue].filter(
+              value => value != suboptionValue
+            );
+            prevState.selectedSuboptions[optionValue] = suboptions;
           }
           return { selectedSuboptions: prevState.selectedSuboptions };
         },
