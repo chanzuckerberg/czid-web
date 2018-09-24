@@ -14,7 +14,8 @@ export default class Dendogram {
 
     this.options = Object.assign(
       {
-        curvedEdges: false
+        curvedEdges: false,
+        absentColor: "#000000" // Color for absent attribute info
       },
       options || {}
     );
@@ -164,15 +165,14 @@ export default class Dendogram {
         allVals.add(n.data[attrName]);
       }
     });
-    console.log("all vals: ", allVals);
 
     let colors = Colormap.getNScale("viridis", allVals.size);
     // Define a color for if the value is absent from the node
-    let absentColor = "#000000";
+    let absent = this.options.absentColor || "#000000";
 
     function colorThisNode(head, attrValToColor) {
-      if (!head.data) return absentColor;
-      let colorResult = absentColor;
+      if (!head.data) return absent;
+      let colorResult = absent;
 
       if (!head.children || head.children.length === 0) {
         // Leaf node, no children
@@ -208,29 +208,26 @@ export default class Dendogram {
     }
 
     colorThisNode(this.root, this._attrValToColor);
+  }
 
-    // Generate legend
-    function upperCase(str) {
-      return str.toUpperCase();
-    }
-
-    this._attrValToColor["Other"] = absentColor;
+  updateLegend() {
+    // Generate legend for coloring by attribute name
+    let other = this.options.colorGroupMissingName || "Other";
+    this._attrValToColor[other] = this.options.absentColor || "#000000";
     let legend = this.g.select(".legend");
-    console.log("legend: ", legend);
-    let legendTitle = attrName.replace(/_/g, " ") + ":";
-    var firstLetterRx = /(^|\s)[a-z]/g;
-    legendTitle = legendTitle.replace(firstLetterRx, upperCase);
     if (legend.empty()) {
-      // Add group
       legend = this.g.append("g").attr("class", "legend");
-
       let x = 900;
       let y = 50;
+
+      // Set legend title
+      let legendTitle = (this.options.colorGroupLegendTitle || "Legend") + ":";
       legend
         .append("text")
         .attr("x", x)
         .attr("y", y - 20)
         .text(legendTitle);
+
       for (const attrVal in this._attrValToColor) {
         // Add color box
         let color = this._attrValToColor[attrVal];
@@ -453,6 +450,7 @@ export default class Dendogram {
     this.createScale(-30, 0, this.minTreeSize.width, maxDistance);
     this.updateHighlights();
     this.updateColors();
+    this.updateLegend();
     this.adjustXPositions();
     this.adjustYPositions(maxDistance);
 
