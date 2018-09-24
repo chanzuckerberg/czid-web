@@ -10,7 +10,7 @@ import React from "react";
 import SecondaryButton from "../ui/controls/buttons/SecondaryButton";
 import Slider from "../ui/controls/Slider";
 import Checkbox from "../ui/controls/Checkbox";
-import MultipleTreeDropdown from "../ui/controls/dropdowns/MultipleTreeDropdown";
+import MultipleNestedDropdown from "../ui/controls/dropdowns/MultipleNestedDropdown";
 
 class PlaygroundControls extends React.Component {
   constructor(props) {
@@ -274,13 +274,12 @@ class PlaygroundControls extends React.Component {
             title="Multiple Tree Dropdown"
             width={4}
             components={[
-              <MultipleTreeDropdown
+              <MultipleNestedDropdown
                 key={0}
                 fluid
                 options={this.dropdownOptions}
                 label="Options: "
                 onChange={(a, b) => {
-                  console.log(a, b);
                   this.setState({ event: "MultipleDropdown:Change" });
                 }}
               />

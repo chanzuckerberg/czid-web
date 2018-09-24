@@ -12,7 +12,7 @@ import Dropdown from "./ui/controls/dropdowns/Dropdown";
 import ErrorBoundary from "./ErrorBoundary";
 import Heatmap from "./visualizations/Heatmap";
 import HeatmapLegend from "./visualizations/HeatmapLegend";
-import MultipleTreeDropdown from "./ui/controls/dropdowns/MultipleTreeDropdown";
+import MultipleTreeDropdown from "./ui/controls/dropdowns/MultipleNestedDropdown";
 import PrimaryButton from "./ui/controls/buttons/PrimaryButton";
 import PropTypes from "prop-types";
 import Slider from "./ui/controls/Slider";
@@ -37,8 +37,6 @@ class SamplesHeatmap extends React.Component {
         { text: "Specific Only", value: 1 }
       ]
     };
-
-    console.log("props", this.props);
 
     this.state = {
       availableOptions: {
@@ -133,9 +131,9 @@ class SamplesHeatmap extends React.Component {
     if (typeof urlParams.categories === "string") {
       urlParams.categories = urlParams.categories.split(",");
     }
-    console.log("TODO: add threshold filters");
-    console.log("TODO: add subcategories filter");
-    console.log("TODO: add read specificity filter");
+    // TODO: add threshold filters
+    // TODO: add subcategories filter
+    // TODO: add read specificity filter
     return urlParams;
   }
 

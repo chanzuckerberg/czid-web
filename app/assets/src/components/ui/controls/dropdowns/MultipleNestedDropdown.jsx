@@ -4,13 +4,15 @@ import PropTypes from "prop-types";
 import ArrayUtils from "../../../utils/ArrayUtils";
 import React from "react";
 
-class MultipleTreeDropdown extends React.Component {
+class MultipleNestedDropdown extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
       selectedOptions: this.props.selectedOptions || [],
-      selectedSuboptions: this.props.selectedSuboptions || {}
+      selectedSuboptions: this.props.selectedSuboptions || {},
+      oldSelectedOptions: [],
+      oldSelectedSuboptions: {}
     };
 
     this.suboptionsToOptionMap = {};
@@ -27,7 +29,7 @@ class MultipleTreeDropdown extends React.Component {
   static getDerivedStateFromProps(props, state) {
     let newState = null;
     if (
-      props.selectedOptions !== state.oldSelectedOptions &&
+      props.selectedOptions !== state.oldSelectedOptions ||
       !ArrayUtils.equal(props.selectedOptions, state.oldSelectedOptions)
     ) {
       newState = Object.assign(
@@ -40,8 +42,8 @@ class MultipleTreeDropdown extends React.Component {
     }
 
     if (
-      props.selectedSuboptions !== state.oldSelectedSuboptions &&
-      !MultipleTreeDropdown.areSuboptionsEqual(
+      props.selectedSuboptions !== state.oldSelectedSuboptions ||
+      !MultipleNestedDropdown.areSuboptionsEqual(
         props.selectedSuboptions,
         state.oldSelectedSuboptions
       )
@@ -56,10 +58,9 @@ class MultipleTreeDropdown extends React.Component {
   }
 
   static areSuboptionsEqual(suboptions1, suboptions2) {
-    let keys1 = suboptions1.keys();
-    let keys2 = suboptions2.keys();
-    if (keys1.length !== keys2.length) return false;
-    for (let key in keys1) {
+    if (!suboptions1 || !suboptions2) return suboptions1 === suboptions2;
+    if (Object.keys(suboptions1) !== Object.keys(suboptions2)) return false;
+    for (let key in suboptions1) {
       if (!suboptions2.hasOwnProperty(key)) return false;
       if (!ArrayUtils.equal(suboptions1[key], suboptions2[key])) return false;
     }
@@ -231,7 +232,7 @@ class MultipleTreeDropdown extends React.Component {
     return (
       <BaseDropdown
         floating
-        className="idseq-ui multiple-tree"
+        className="idseq-ui multiple-nested"
         {...props}
         options={undefined}
         value={undefined}
@@ -243,7 +244,12 @@ class MultipleTreeDropdown extends React.Component {
   }
 }
 
-MultipleTreeDropdown.propTypes = {
+MultipleNestedDropdown.defaultProps = {
+  selectedOptions: [],
+  selectedSuboptions: {}
+};
+
+MultipleNestedDropdown.propTypes = {
   label: PropTypes.string,
   onChange: PropTypes.func,
   options: PropTypes.array,
@@ -251,4 +257,4 @@ MultipleTreeDropdown.propTypes = {
   selectedSuboptions: PropTypes.object
 };
 
-export default MultipleTreeDropdown;
+export default MultipleNestedDropdown;
