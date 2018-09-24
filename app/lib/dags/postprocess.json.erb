@@ -23,7 +23,49 @@
       "taxid_locations_family_nr.json",
       "taxid_locations_combined.json"
     ],
-    "alignment_viz_out": ["align_viz.summary"]
+    "alignment_viz_out": ["align_viz.summary"],
+    "host_filter_out": [
+      <% if @host_genome == "human" %>
+        "gsnap_filter_1.fa"
+        <% if @attribute_dict[:input_file_count] > 1 %>
+          , "gsnap_filter_2.fa"
+          , "gsnap_filter_merged.fa"
+        <% end %>
+     <% else %>
+        "subsampled_1.fa"
+        <% if @attribute_dict[:input_file_count] > 1 %>
+          , "subsampled_2.fa"
+          , "subsampled_merged.fa"
+        <% end %>
+     <% end %>
+    ],
+    "gsnap_out": [
+      "gsnap.m8",
+      "gsnap.deduped.m8",
+      "gsnap.hitsummary.tab",
+      "gsnap_counts.json"
+    ],
+    "refined_gsnap_out": [
+      "reclassify/gsnap.blast.m8",
+      "reclassify/gsnap.reassigned.m8",
+      "reclassify/gsnap_refined.hitsummary.tab",
+      "reclassify/gsnap_refined_counts.json",
+      "reclassify/gsnap_genus_accession_list.tab"
+    ],
+    "rapsearch2_out": [
+      "rapsearch2.m8",
+      "rapsearch2.deduped.m8",
+      "rapsearch2.hitsummary.tab",
+      "rapsearch2_counts.json"
+    ],
+    "refined_rapsearch2_out": [
+      "reclassify/rapsearch2.blast.m8",
+      "reclassify/rapsearch2.reassigned.m8",
+      "reclassify/rapsearch2_refined.hitsummary.tab",
+      "reclassify/rapsearch2_refined_counts.json",
+      "reclassify/rapsearch2_genus_accession_list.tab"
+    ],
+    "refined_taxon_count_out": ["reclassify/refined_taxon_counts.json"]
   },
   "steps": [
     {
@@ -34,6 +76,50 @@
       "additional_files": {
         "lineage_db":  "<%= @attribute_dict[:lineage_db] %>"
       },
+      "additional_attributes": {}
+    },
+    {
+      "in": ["gsnap_out", "host_filter_out"],
+      "out": "refined_gsnap_out",
+      "class": "PipelineStepReclassifyReads",
+      "module": "idseq_dag.steps.reclassify_reads", 
+      "additional_files": { 
+        "lineage_db": "<%= @attribute_dict[:lineage_db] %>",
+        "accession2taxid_db": "<%= @attribute_dict[:accession2taxid_db] %>",
+        "loc_db": "<%= @attribute_dict[:nt_loc_db] %>"
+        <% if @attribute_dict[:skip_dedeuterostome_filter] == 0 %>
+          ,"deuterostome_db": "<%= @attribute_dict[:deuterostome_db] %>"
+        <% end %>
+      },
+      "additional_attributes": {
+        "db": "<%= @attribute_dict[:nt_db] %>",
+        "db_type": "nt"
+      }
+    },
+    {
+      "in": ["rapsearch2_out", "host_filter_out"],
+      "out": "refined_rapsearch2_out",
+      "class": "PipelineStepReclassifyReads",
+      "module": "idseq_dag.steps.reclassify_reads", 
+      "additional_files": { 
+        "lineage_db": "<%= @attribute_dict[:lineage_db] %>",
+        "accession2taxid_db": "<%= @attribute_dict[:accession2taxid_db] %>",
+        "loc_db": "<%= @attribute_dict[:nr_loc_db] %>"
+        <% if @attribute_dict[:skip_dedeuterostome_filter] == 0 %>
+          ,"deuterostome_db": "<%= @attribute_dict[:deuterostome_db] %>"
+        <% end %>
+      },
+      "additional_attributes": {
+        "db": "<%= @attribute_dict[:nr_db] %>",
+        "db_type": "nr"
+      }
+    },
+    {
+      "in": ["refined_gsnap_out", "refined_rapsearch2_out"],
+      "out": "refined_taxon_count_out",
+      "class": "PipelineStepCombineTaxonCounts",
+      "module": "idseq_dag.steps.combine_taxon_counts",
+      "additional_files": {},
       "additional_attributes": {}
     },
     {
@@ -63,6 +149,15 @@
 
     },
     "gsnap_m8": {
+      "s3_dir": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/results/<%= @attribute_dict[:pipeline_version] %>"
+    },
+    "host_filter_out": {
+      "s3_dir": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/results/<%= @attribute_dict[:pipeline_version] %>"
+    },
+    "gsnap_out": {
+      "s3_dir": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/results/<%= @attribute_dict[:pipeline_version] %>"
+    },
+    "rapsearch2_out": {
       "s3_dir": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/results/<%= @attribute_dict[:pipeline_version] %>"
     }
   }

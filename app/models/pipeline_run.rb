@@ -178,7 +178,7 @@ class PipelineRun < ApplicationRecord
 
   def create_output_states
     # First, determine which outputs we need:
-    target_outputs = %w[ercc_counts taxon_counts taxon_byteranges amr_counts]
+    target_outputs = %w[ercc_counts taxon_counts taxon_byteranges amr_counts refined_taxon_counts]
 
     # Then, generate output_states
     output_state_entries = []
