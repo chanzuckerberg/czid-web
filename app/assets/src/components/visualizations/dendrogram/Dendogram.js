@@ -150,6 +150,8 @@ export default class Dendogram {
   }
 
   updateColors() {
+    // Color clusters of the nodes based on the color group attribute.
+    // Color a node if all its children have the same color.
     if (!this.options.colorGroupAttribute) {
       return;
     }
