@@ -158,8 +158,10 @@ export default class Dendogram {
 
     let attrName = this.options.colorGroupAttribute;
     let leaves = this.root.leaves();
-    let maxColors = 20;
+    let maxColors = 10;
     let colors = Colormap.getNScale("viridis", maxColors).reverse();
+    // Define a color for if the value is absent from the node
+    let absentColor = "#000000";
     let curColor = 0;
 
     leaves.forEach(leaf => {
@@ -180,7 +182,7 @@ export default class Dendogram {
 
     function colorThisNode(head, attrValToColorNum) {
       if (!head.data) return;
-      let colorResult;
+      let colorResult = absentColor;
 
       if (!head.children || head.children.length === 0) {
         // Leaf node, no children
@@ -207,7 +209,8 @@ export default class Dendogram {
               colorResult = childColor;
             } else if (childColor !== colorResult) {
               // Stop if this node's children have different colors
-              return;
+              colorResult = absentColor;
+              break;
             }
           }
         }
@@ -549,8 +552,8 @@ export default class Dendogram {
       });
 
     // Apply colors to the nodes from data.color
-    this.g.selectAll(".node").style("fill", function(node) {
-      return node.data.color;
+    this.g.selectAll(".node").style("fill", function(d) {
+      return d.data.color;
     });
 
     this.g.selectAll(".link").style("stroke", function(d) {
