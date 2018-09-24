@@ -10,7 +10,7 @@ const Label = ({ className, color, size, floating, text, onClick }) => {
       color={color}
       size={size}
       floating={floating}
-      onClick
+      onClick={onClick}
     >
       {text}
     </BaseLabel>

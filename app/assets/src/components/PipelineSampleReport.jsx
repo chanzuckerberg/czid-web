@@ -100,6 +100,7 @@ class PipelineSampleReport extends React.Component {
     // Starting state is default values which are to be set later.
     this.state = {
       taxonomy_details: [],
+      topScoringTaxa: [],
       pathogenTagSummary: {},
       backgroundId: defaultBackgroundId,
       backgroundName: "",
@@ -253,6 +254,7 @@ class PipelineSampleReport extends React.Component {
           rows_passing_filters: res.data.taxonomy_details[0],
           rows_total: res.data.taxonomy_details[1],
           taxonomy_details: res.data.taxonomy_details[2],
+          topScoringTaxa: res.data.topScoringTaxa,
           pathogenTagSummary: res.data.pathogenTagSummary,
           backgroundId: res.data.background_info.id,
           backgroundName: res.data.background_info.name
@@ -1789,6 +1791,7 @@ class RenderMarkup extends React.Component {
             <div className="row reports-container">
               <div className="col s12 reports-section">
                 <PathogenSummary
+                  topScoringTaxa={parent.state.topScoringTaxa}
                   pathogenTagSummary={parent.state.pathogenTagSummary}
                 />
                 <div className="reports-count">

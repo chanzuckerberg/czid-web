@@ -169,6 +169,31 @@ module ReportHelper
     data
   end
 
+  def label_top_scoring_taxa!(tax_map)
+    # Rule:
+    #   top 3 hits by NT.aggregatescore that satisfy:
+    #   NT.zscore > 1 AND
+    #   NR.zscore > 1 AND
+    #   NT.rpm > 1 AND
+    #   NR.rpm > 1 AND
+    #   tax_id > 0
+    # Current implementation assumes tax_map is already sorted by aggregate score.
+    # This assumption is valid because of the current value of DEFAULT_SORT_PARAM.
+    # All user-triggered sorting is implemented in the JSX frontend, so won't affect sorting of tax_map
+    # (despite some unused relics of code that accepted sort_by as a param in samples_controller).
+    top_taxa = []
+    i = 0
+    while top_taxa.length < 3
+      tax = tax_map[i]
+      if tax["tax_id"] > 0 && tax["NT"]["zscore"] > 1 && tax["NR"]["zscore"] > 1 && tax["NT"]["rpm"] > 1 && tax["NR"]["rpm"] > 1
+        tax["topScoring"] = 1
+        top_taxa << tax
+      end
+      i += 1
+    end
+    top_taxa
+  end
+
   def taxon_confirmation_map(sample_id, user_id)
     taxon_confirmations = TaxonConfirmation.where(sample_id: sample_id)
     confirmed = taxon_confirmations.where(strength: TaxonConfirmation::CONFIRMED)
