@@ -684,13 +684,13 @@ class PipelineSampleReport extends React.Component {
     newIncludedSubcategories
   ) {
     let includedSubcategories = [];
-    newIncludedCategories.forEach(category => {
+    for (let category in newIncludedSubcategories) {
       if (newIncludedSubcategories.hasOwnProperty(category)) {
         includedSubcategories = includedSubcategories.concat(
           newIncludedSubcategories[category]
         );
       }
-    });
+    }
 
     this.setState(
       {
