@@ -150,7 +150,7 @@ class TaxonLineage < ApplicationRecord
         end
       end
       best_tag = pathogen_tags[0] # first element is highest-priority element (see PRIORITY_PATHOGENS documentation)
-      tax['pathogenTags'] = best_tag
+      tax['pathogenTag'] = best_tag
       Rails.logger.info("#{best_tag}, #{pathogen_tag_summary[best_tag]}")
       pathogen_tag_summary[best_tag] = (pathogen_tag_summary[best_tag] || 0) + 1 if best_tag
     end

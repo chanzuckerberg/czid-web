@@ -7,7 +7,15 @@ const PathogenSummary = ({ pathogenTagSummary }) => {
   let tag_counts = (
     <span>
       {categories.map(cat => {
-        return <PathogenLabel type={cat} number={pathogenTagSummary[cat]} />;
+        return (
+          <PathogenLabel
+            number={pathogenTagSummary[cat]}
+            type={cat}
+            onClick={() => {
+              onTagClick(cat);
+            }}
+          />
+        );
       })}
     </span>
   );

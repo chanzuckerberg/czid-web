@@ -3,13 +3,14 @@ import { forbidExtraProps } from "airbnb-prop-types";
 import PropTypes from "prop-types";
 import React from "react";
 
-const Label = ({ className, color, size, floating, text }) => {
+const Label = ({ className, color, size, floating, text, onClick }) => {
   return (
     <BaseLabel
       className={`idseq-ui ${className}`}
       color={color}
       size={size}
       floating={floating}
+      onClick
     >
       {text}
     </BaseLabel>
@@ -21,7 +22,8 @@ Label.propTypes = forbidExtraProps({
   color: PropTypes.string,
   size: PropTypes.string,
   floating: PropTypes.bool,
-  text: PropTypes.string
+  text: PropTypes.string,
+  onClick: PropTypes.func
 });
 
 export default Label;
