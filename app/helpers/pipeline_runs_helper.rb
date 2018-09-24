@@ -38,7 +38,7 @@ module PipelineRunsHelper
         job_log_id = job_hash['container']['logStreamName']
       end
     else
-      LogUtil.log_err_and_airbrake("Error for update job status for pipeline run #{run_id} with error #{stderr}")
+      LogUtil.log_err_and_airbrake("Error for update job status for record #{run_id} with error #{stderr}")
       job_status = PipelineRunStage::STATUS_ERROR # transient error, job is still "in progress"
       job_status = PipelineRunStage::STATUS_FAILED if stderr =~ /IndexError/ # job no longer exists
     end
