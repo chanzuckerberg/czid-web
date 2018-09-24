@@ -7,7 +7,7 @@ class PhyloTreesController < ApplicationController
   # 1. index/show permissions are based on viewability of all the samples
   #    that make up the tree.
   # 2. create/edit permissions are based on
-  #    a. viewability of all the samles
+  #    a. viewability of all the samples
   #    b. the project the tree belongs to
   #       (if 2 users belong to the same project, they are considered
   #        collaborators and so they can both create/edit trees for the project).

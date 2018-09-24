@@ -43,9 +43,6 @@ export default class Dendogram {
     };
 
     this._highlighted = new Set();
-    // Attribute value to color number. Up here so that rerooting doesn't
-    // change colors.
-    this._attrValToColorNum = {};
 
     // timeout to differentiate click from double click
     this._clickTimeout = null;
@@ -157,31 +154,24 @@ export default class Dendogram {
     }
 
     let attrName = this.options.colorGroupAttribute;
-    let leaves = this.root.leaves();
-    let maxColors = 10;
-    let colors = Colormap.getNScale("viridis", maxColors).reverse();
-    // Define a color for if the value is absent from the node
-    let absentColor = "#000000";
-    let curColor = 0;
+    // Attribute value to color number
+    this._attrValToColor = {};
 
-    leaves.forEach(leaf => {
-      if (attrName in leaf.data) {
-        let attrVal = leaf.data[attrName];
-        if (attrVal in this._attrValToColorNum) {
-          // Value has been assigned a color already
-          leaf.data.color = this._attrValToColorNum[attrVal];
-        } else {
-          // New value and new color
-          leaf.data.color = colors[curColor];
-          this._attrValToColorNum[attrVal] = colors[curColor];
-          // Just stay at the last color if at max colors
-          if (curColor < maxColors) curColor++;
-        }
+    // Get number of attribute values
+    let allVals = new Set();
+    this.root.leaves().forEach(n => {
+      if (n.data && n.data[attrName]) {
+        allVals.add(n.data[attrName]);
       }
     });
+    console.log("all vals: ", allVals);
 
-    function colorThisNode(head, attrValToColorNum) {
-      if (!head.data) return;
+    let colors = Colormap.getNScale("viridis", allVals.size);
+    // Define a color for if the value is absent from the node
+    let absentColor = "#000000";
+
+    function colorThisNode(head, attrValToColor) {
+      if (!head.data) return absentColor;
       let colorResult = absentColor;
 
       if (!head.children || head.children.length === 0) {
@@ -189,30 +179,26 @@ export default class Dendogram {
         if (attrName in head.data) {
           // Get color based on the desired attribute
           let attrVal = head.data[attrName];
-          if (attrVal in attrValToColorNum) {
+          if (attrVal in attrValToColor) {
             // Value has been assigned a color already
-            colorResult = attrValToColorNum[attrVal];
+            colorResult = attrValToColor[attrVal];
           } else {
             // New value and new color
-            colorResult = colors[curColor];
-            attrValToColorNum[attrVal] = colorResult;
-            // Just stay at the last color if at max colors
-            if (curColor < maxColors) curColor++;
+            colorResult = colors.pop();
+            attrValToColor[attrVal] = colorResult;
           }
         }
       } else {
         // Not a leaf node, get the colors of the children
+        let childrenColors = new Set();
         for (let child of head.children) {
-          let childColor = colorThisNode(child, attrValToColorNum);
-          if (childColor) {
-            if (!colorResult) {
-              colorResult = childColor;
-            } else if (childColor !== colorResult) {
-              // Stop if this node's children have different colors
-              colorResult = absentColor;
-              break;
-            }
-          }
+          // Want to call all the children to get every node/link colored
+          let c = colorThisNode(child, attrValToColor);
+          childrenColors.add(c);
+        }
+        if (childrenColors.size === 1) {
+          // Set colorResult if all the children are the same
+          colorResult = childrenColors.values().next().value;
         }
       }
 
@@ -221,7 +207,51 @@ export default class Dendogram {
       return colorResult;
     }
 
-    colorThisNode(this.root, this._attrValToColorNum);
+    colorThisNode(this.root, this._attrValToColor);
+
+    // Generate legend
+    function upperCase(str) {
+      return str.toUpperCase();
+    }
+
+    this._attrValToColor["Other"] = absentColor;
+    let legend = this.g.select(".legend");
+    console.log("legend: ", legend);
+    let legendTitle = attrName.replace(/_/g, " ") + ":";
+    var firstLetterRx = /(^|\s)[a-z]/g;
+    legendTitle = legendTitle.replace(firstLetterRx, upperCase);
+    if (legend.empty()) {
+      // Add group
+      legend = this.g.append("g").attr("class", "legend");
+
+      let x = 900;
+      let y = 50;
+      legend
+        .append("text")
+        .attr("x", x)
+        .attr("y", y - 20)
+        .text(legendTitle);
+      for (const attrVal in this._attrValToColor) {
+        // Add color box
+        let color = this._attrValToColor[attrVal];
+        legend
+          .append("rect")
+          .attr("x", x)
+          .attr("y", y)
+          .attr("width", 10)
+          .attr("height", 10)
+          .style("fill", color);
+
+        // Add text label
+        legend
+          .append("text")
+          .attr("x", x + 30)
+          .attr("y", y + 10)
+          .text(attrVal);
+
+        y += 30;
+      }
+    }
   }
 
   clickHandler(clickCallback, dblClickCallback, delay = 250) {
@@ -430,8 +460,6 @@ export default class Dendogram {
       .selectAll(".link")
       .data(this.root.descendants().slice(1), linkId);
 
-    console.log("top level link thing: ", link);
-
     link
       .exit()
       .transition(500)
@@ -445,7 +473,6 @@ export default class Dendogram {
       .attr("d", this.options.curvedEdges ? curveEdge : rectEdge);
 
     link.classed("highlight", function(d) {
-      console.log("d here is: ", d);
       return d.data.highlight && d.parent.data.highlight;
     });
 
