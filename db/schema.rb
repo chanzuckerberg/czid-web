@@ -10,7 +10,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_180_913_180_552) do
+ActiveRecord::Schema.define(version: 20180913180552) do
+
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -34,7 +35,7 @@ ActiveRecord::Schema.define(version: 20_180_913_180_552) do
     t.string "drug_family"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index %w[pipeline_run_id allele], name: "index_amr_counts_on_pipeline_run_id_and_allele", unique: true
+    t.index ["pipeline_run_id", "allele"], name: "index_amr_counts_on_pipeline_run_id_and_allele", unique: true
   end
 
   create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -67,7 +68,7 @@ ActiveRecord::Schema.define(version: 20_180_913_180_552) do
   create_table "backgrounds_pipeline_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "background_id"
     t.bigint "pipeline_run_id"
-    t.index %w[background_id pipeline_run_id], name: "index_bg_pr_id", unique: true
+    t.index ["background_id", "pipeline_run_id"], name: "index_bg_pr_id", unique: true
   end
 
   create_table "backgrounds_samples", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -83,7 +84,7 @@ ActiveRecord::Schema.define(version: 20_180_913_180_552) do
     t.integer "count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index %w[pipeline_run_id name], name: "index_ercc_counts_on_pipeline_run_id_and_name", unique: true
+    t.index ["pipeline_run_id", "name"], name: "index_ercc_counts_on_pipeline_run_id_and_name", unique: true
   end
 
   create_table "favorite_projects", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -149,7 +150,7 @@ ActiveRecord::Schema.define(version: 20_180_913_180_552) do
     t.bigint "pipeline_run_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index %w[pipeline_run_id output], name: "index_output_states_on_pipeline_run_id_and_output", unique: true
+    t.index ["pipeline_run_id", "output"], name: "index_output_states_on_pipeline_run_id_and_output", unique: true
   end
 
   create_table "phylo_trees", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
@@ -173,14 +174,14 @@ ActiveRecord::Schema.define(version: 20_180_913_180_552) do
     t.string "dag_branch"
     t.text "ncbi_metadata"
     t.index ["name"], name: "index_phylo_trees_on_name", unique: true
-    t.index %w[project_id taxid], name: "index_phylo_trees_on_project_id_and_taxid"
+    t.index ["project_id", "taxid"], name: "index_phylo_trees_on_project_id_and_taxid"
     t.index ["user_id"], name: "index_phylo_trees_on_user_id"
   end
 
   create_table "phylo_trees_pipeline_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.bigint "phylo_tree_id"
     t.bigint "pipeline_run_id"
-    t.index %w[phylo_tree_id pipeline_run_id], name: "index_pt_pr_id", unique: true
+    t.index ["phylo_tree_id", "pipeline_run_id"], name: "index_pt_pr_id", unique: true
   end
 
   create_table "pipeline_outputs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -217,7 +218,7 @@ ActiveRecord::Schema.define(version: 20_180_913_180_552) do
     t.string "name"
     t.text "failed_jobs"
     t.text "dag_json"
-    t.index %w[pipeline_run_id step_number], name: "index_pipeline_run_stages_on_pipeline_run_id_and_step_number"
+    t.index ["pipeline_run_id", "step_number"], name: "index_pipeline_run_stages_on_pipeline_run_id_and_step_number"
     t.index ["pipeline_run_id"], name: "index_pipeline_run_stages_on_pipeline_run_id"
   end
 
@@ -303,7 +304,7 @@ ActiveRecord::Schema.define(version: 20_180_913_180_552) do
     t.string "sample_organism"
     t.string "sample_detection"
     t.string "alignment_config_name"
-    t.index %w[project_id name], name: "index_samples_name_project_id", unique: true
+    t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
     t.index ["user_id"], name: "index_samples_on_user_id"
   end
 
@@ -317,10 +318,10 @@ ActiveRecord::Schema.define(version: 20_180_913_180_552) do
     t.string "hit_type"
     t.integer "tax_level"
     t.bigint "pipeline_run_id"
-    t.index %w[pipeline_output_id tax_level hit_type taxid], name: "index_taxon_byteranges_on_details", unique: true
+    t.index ["pipeline_output_id", "tax_level", "hit_type", "taxid"], name: "index_taxon_byteranges_on_details", unique: true
     t.index ["pipeline_output_id"], name: "index_taxon_byteranges_on_pipeline_output_id"
-    t.index %w[pipeline_run_id tax_level hit_type taxid], name: "index_taxon_byteranges_pr", unique: true
-    t.index %w[taxid hit_type], name: "index_taxon_byteranges_on_taxid_and_hit_type"
+    t.index ["pipeline_run_id", "tax_level", "hit_type", "taxid"], name: "index_taxon_byteranges_pr", unique: true
+    t.index ["taxid", "hit_type"], name: "index_taxon_byteranges_on_taxid_and_hit_type"
   end
 
   create_table "taxon_categories", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -348,7 +349,7 @@ ActiveRecord::Schema.define(version: 20_180_913_180_552) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "name"
-    t.index %w[sample_id strength taxid], name: "index_taxon_confirmations_on_sample_id_and_strength_and_taxid"
+    t.index ["sample_id", "strength", "taxid"], name: "index_taxon_confirmations_on_sample_id_and_strength_and_taxid"
   end
 
   create_table "taxon_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -373,11 +374,11 @@ ActiveRecord::Schema.define(version: 20_180_913_180_552) do
     t.string "common_name"
     t.integer "family_taxid", default: -300, null: false
     t.integer "is_phage", limit: 1, default: 0, null: false
-    t.index %w[pipeline_output_id tax_id count_type], name: "new_index_taxon_counts", unique: true
-    t.index %w[pipeline_output_id tax_level count_type tax_id], name: "index_taxon_counts", unique: true
+    t.index ["pipeline_output_id", "tax_id", "count_type"], name: "new_index_taxon_counts", unique: true
+    t.index ["pipeline_output_id", "tax_level", "count_type", "tax_id"], name: "index_taxon_counts", unique: true
     t.index ["pipeline_output_id"], name: "index_taxon_counts_on_pipeline_output_id"
-    t.index %w[pipeline_run_id tax_id count_type], name: "taxon_counts_pr_index", unique: true
-    t.index %w[pipeline_run_id tax_level count_type tax_id], name: "taxon_counts_pr_index2", unique: true
+    t.index ["pipeline_run_id", "tax_id", "count_type"], name: "taxon_counts_pr_index", unique: true
+    t.index ["pipeline_run_id", "tax_level", "count_type", "tax_id"], name: "taxon_counts_pr_index2", unique: true
   end
 
   create_table "taxon_lineage_names", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -431,9 +432,9 @@ ActiveRecord::Schema.define(version: 20_180_913_180_552) do
     t.index ["phylum_taxid"], name: "index_taxon_lineages_on_phylum_taxid"
     t.index ["species_taxid"], name: "index_taxon_lineages_on_species_taxid"
     t.index ["superkingdom_taxid"], name: "index_taxon_lineages_on_superkingdom_taxid"
-    t.index %w[taxid ended_at], name: "index_taxon_lineages_on_taxid_and_end", unique: true
-    t.index %w[taxid started_at ended_at], name: "index_taxon_lineages_on_taxid_and_started_at_and_ended_at"
-    t.index %w[taxid started_at], name: "index_taxon_lineages_on_taxid_and_start", unique: true
+    t.index ["taxid", "ended_at"], name: "index_taxon_lineages_on_taxid_and_end", unique: true
+    t.index ["taxid", "started_at", "ended_at"], name: "index_taxon_lineages_on_taxid_and_started_at_and_ended_at"
+    t.index ["taxid", "started_at"], name: "index_taxon_lineages_on_taxid_and_start", unique: true
   end
 
   create_table "taxon_names", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -465,7 +466,7 @@ ActiveRecord::Schema.define(version: 20_180_913_180_552) do
     t.float "stdev", limit: 24
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index %w[background_id count_type tax_level tax_id], name: "index_taxon_summaries_detailed", unique: true
+    t.index ["background_id", "count_type", "tax_level", "tax_id"], name: "index_taxon_summaries_detailed", unique: true
     t.index ["background_id"], name: "index_taxon_summaries_on_background_id"
   end
 
@@ -490,4 +491,5 @@ ActiveRecord::Schema.define(version: 20_180_913_180_552) do
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
+
 end
