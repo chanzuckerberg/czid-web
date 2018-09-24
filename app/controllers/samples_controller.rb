@@ -219,6 +219,9 @@ class SamplesController < ApplicationController
     @heatmap_data = {
       taxonLevels: %w[Genus Species],
       categories: ReportHelper::ALL_CATEGORIES.pluck('name'),
+      subcategories: {
+        Viruses: ["Phage"]
+      },
       metrics: [
         "NT.aggregatescore",
         "NT.rpm",
@@ -600,6 +603,7 @@ class SamplesController < ApplicationController
     taxon_ids = taxon_ids.compact
     categories = params[:categories]
     threshold_filters = (params[:thresholdFilters] || {}).map { |filter| JSON.parse(filter) }
+    include_phage = params[:phage] == "0"
     read_specificity = params[:readSpecificity] ? params[:readSpecificity].to_i == 1 : false
 
     # TODO: should fail if field is not well formatted and return proper error to client
@@ -610,7 +614,8 @@ class SamplesController < ApplicationController
 
     first_sample = samples.first
     background_id = params[:background] ? params[:background].to_i : check_background_id(first_sample)
-    taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, threshold_filters, read_specificity).pluck("tax_id") if taxon_ids.empty?
+    Rails.logger.debug("params = #{params}")
+    taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, threshold_filters, include_phage, read_specificity).pluck("tax_id") if taxon_ids.empty?
 
     return {} if taxon_ids.empty?
 

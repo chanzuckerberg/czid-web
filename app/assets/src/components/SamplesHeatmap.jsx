@@ -12,7 +12,7 @@ import Dropdown from "./ui/controls/dropdowns/Dropdown";
 import ErrorBoundary from "./ErrorBoundary";
 import Heatmap from "./visualizations/Heatmap";
 import HeatmapLegend from "./visualizations/HeatmapLegend";
-import MultipleDropdown from "./ui/controls/dropdowns/MultipleDropdown";
+import MultipleTreeDropdown from "./ui/controls/dropdowns/MultipleTreeDropdown";
 import PrimaryButton from "./ui/controls/buttons/PrimaryButton";
 import PropTypes from "prop-types";
 import Slider from "./ui/controls/Slider";
@@ -21,6 +21,8 @@ import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDrop
 import { Colormap } from "./utils/colormaps/Colormap";
 
 class SamplesHeatmap extends React.Component {
+  // TODO: do not make another request if values did not change
+
   constructor(props) {
     super(props);
 
@@ -36,11 +38,14 @@ class SamplesHeatmap extends React.Component {
       ]
     };
 
+    console.log("props", this.props);
+
     this.state = {
       availableOptions: {
         // Server side options
         metrics: this.props.metrics,
-        categories: this.props.categories,
+        categories: this.props.categories || [],
+        subcategories: this.props.subcategories || {},
         backgrounds: this.props.backgrounds,
         taxonLevels: this.props.taxonLevels.map(function(
           taxonLevelName,
@@ -59,6 +64,7 @@ class SamplesHeatmap extends React.Component {
       selectedOptions: {
         metric: this.urlParams.metric || this.props.metrics[0],
         categories: this.urlParams.categories || [],
+        subcategories: this.urlParams.subcategories || {},
         background:
           this.urlParams.background || this.props.backgrounds[0].value,
         species: parseInt(this.urlParams.species) || 1,
@@ -73,6 +79,8 @@ class SamplesHeatmap extends React.Component {
       sampleIds: this.urlParams.sampleIds || this.props.sampleIds,
       taxonIds: this.urlParams.taxonIds || this.props.taxonIds || []
     };
+
+    this.lastRequestToken = null;
 
     this.explicitApply = this.props.explicitApply || false;
     this.optionsChanged = false;
@@ -125,6 +133,9 @@ class SamplesHeatmap extends React.Component {
     if (typeof urlParams.categories === "string") {
       urlParams.categories = urlParams.categories.split(",");
     }
+    console.log("TODO: add threshold filters");
+    console.log("TODO: add subcategories filter");
+    console.log("TODO: add read specificity filter");
     return urlParams;
   }
 
@@ -165,6 +176,11 @@ class SamplesHeatmap extends React.Component {
   fetchDataFromServer() {
     this.setState({ loading: true });
 
+    if (this.lastRequestToken)
+      this.lastRequestToken.cancel("Parameters changed");
+
+    this.lastRequestToken = axios.CancelToken.source();
+
     axios
       .get("/samples/samples_taxons.json", {
         params: {
@@ -172,11 +188,13 @@ class SamplesHeatmap extends React.Component {
           taxonIds: this.state.taxonIds,
           species: this.state.selectedOptions.species,
           categories: this.state.selectedOptions.categories,
+          subcategories: this.state.selectedOptions.subcategories,
           sortBy: this.metricToSortField(this.state.selectedOptions.metric),
           thresholdFilters: this.state.selectedOptions.thresholdFilters,
           taxonsPerSample: this.state.selectedOptions.taxonsPerSample,
           readSpecificity: this.state.selectedOptions.readSpecificity
-        }
+        },
+        cancelToken: this.lastRequestToken.token
       })
       .then(response => {
         let taxons = this.extractTaxons(response.data);
@@ -186,6 +204,9 @@ class SamplesHeatmap extends React.Component {
           taxons: taxons,
           loading: false
         });
+      })
+      .catch(thrown => {
+        // TODO: process error if not cancelled request by client: if (!axios.isCancel(thrown) {
       });
   }
 
@@ -603,27 +624,32 @@ class SamplesHeatmap extends React.Component {
     copy(shareableUrl);
   }
 
-  onCategoryChange(_, newCategories) {
+  onCategoryChange(categories, subcategories) {
     this.optionsChanged = true;
     this.setSelectedOptionsState(
-      { categories: newCategories },
+      { categories, subcategories },
       this.explicitApply ? undefined : this.updateHeatmap
     );
   }
 
   renderCategoryFilter() {
-    let options = this.state.availableOptions.categories.map(function(
-      category
-    ) {
-      return { text: category, value: category };
+    let options = this.state.availableOptions.categories.map(category => {
+      let option = { text: category, value: category };
+      let subcategories = this.state.availableOptions.subcategories[category];
+      if (Array.isArray(subcategories)) {
+        option.suboptions = subcategories.map(subcategory => {
+          return { text: subcategory, value: subcategory };
+        });
+      }
+      return option;
     });
 
     return (
-      <MultipleDropdown
+      <MultipleTreeDropdown
         fluid
         options={options}
         onChange={this.onCategoryChange}
-        value={this.state.selectedOptions.categories.slice()}
+        selectedOptions={this.state.selectedOptions.categories}
         label="Taxon Categories:"
         disabled={!this.state.data}
       />
@@ -794,6 +820,7 @@ SamplesHeatmap.propTypes = {
   explicitApply: PropTypes.bool,
   metrics: PropTypes.array,
   sampleIds: PropTypes.array,
+  subcategories: PropTypes.object,
   taxonIds: PropTypes.array,
   taxonLevels: PropTypes.array,
   thresholdFilters: PropTypes.object
