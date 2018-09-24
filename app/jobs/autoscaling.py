@@ -225,7 +225,9 @@ def count_running_batch_jobs():
 
 
 def autoscaling_update(my_num_jobs, my_environment="development"):
-    if my_environment not in MULTICONTAINER_ENVIRONMENTS:
+    if my_environment in MULTICONTAINER_ENVIRONMENTS:
+        asg_env = my_environment
+    else:
         # Distinguish different developers' environments based on hostname
         hostname = (
             os.environ.get("HOSTNAME") or
@@ -234,10 +236,11 @@ def autoscaling_update(my_num_jobs, my_environment="development"):
         )
         # sha hexdigest is used to sanitize the hostname so it's safe for tags
         my_environment += "_" + hashlib.sha224(hostname).hexdigest()[:10]
+        asg_env = 'staging'
     asg_json = aws_command("aws autoscaling describe-auto-scaling-groups")
     asg_list = json.loads(asg_json).get('AutoScalingGroups', [])
-    gsnap_asg = find_asg(asg_list, "gsnapl-asg-prod")
-    rapsearch2_asg = find_asg(asg_list, "rapsearch2-asg-prod")
+    gsnap_asg = find_asg(asg_list, "gsnapl-asg-" + asg-env)
+    rapsearch2_asg = find_asg(asg_list, "rapsearch2-asg-" + asg-env)
     if DEBUG:
         print json.dumps(gsnap_asg, indent=2)
         print json.dumps(rapsearch2_asg, indent=2)
