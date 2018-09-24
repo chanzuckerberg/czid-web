@@ -454,13 +454,14 @@ module ReportHelper
     true
   end
 
-  def top_taxons_details(samples, background_id, num_results, sort_by_key, species_selected, categories, threshold_filters = {}, read_specificity = false)
+  def top_taxons_details(samples, background_id, num_results, sort_by_key, species_selected, categories, threshold_filters = {}, read_specificity = false, include_phage = true)
     # return top taxons
     results_by_pr = fetch_top_taxons(samples, background_id, categories, read_specificity)
     sort_by = decode_sort_by(sort_by_key)
     count_type = sort_by[:count_type]
     metric = sort_by[:metric]
     candidate_taxons = {}
+    Rails.logger.debug("include_phage = #{include_phage}")
     results_by_pr.each do |_pr_id, res|
       pr = res["pr"]
       taxon_counts = res["taxon_counts"]
@@ -476,7 +477,9 @@ module ReportHelper
 
       compute_aggregate_scores_v2!(rows)
       rows = rows.select do |row|
-        row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD && check_custom_filters(row, threshold_filters)
+        Rails.logger.debug("row = #{row}")
+
+        row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD && (include_phage || row["is_phage"].zero?) && check_custom_filters(row, threshold_filters)
       end
 
       rows.sort_by! { |tax_info| ((tax_info[count_type] || {})[metric] || 0.0) * -1.0 }
