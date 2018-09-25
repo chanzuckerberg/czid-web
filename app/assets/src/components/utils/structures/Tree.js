@@ -9,7 +9,7 @@ export default class Tree {
       for (let i = 0; i < nodes.length; i++) {
         let node = nodes[i];
         if (nodeData[node.name]) {
-          node = Object.assign(node, nodeData[node.name]);
+          Object.assign(node, nodeData[node.name]);
         }
       }
     }

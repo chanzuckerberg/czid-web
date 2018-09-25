@@ -14,8 +14,7 @@ export default class Dendogram {
 
     this.options = Object.assign(
       {
-        curvedEdges: false,
-        absentColor: "#000000" // Color for absent attribute info
+        curvedEdges: false
       },
       options || {}
     );
@@ -98,6 +97,8 @@ export default class Dendogram {
     this._highlighted.clear();
     this.tree = tree;
     this.root = tree ? hierarchy(this.tree.root) : null;
+
+    this.updateColors();
   }
 
   computeDistanceToRoot(node, offset = 0) {
@@ -168,11 +169,18 @@ export default class Dendogram {
       }
     });
 
-    let colors = Colormap.getNScale("viridis", allVals.size);
-    // Define a color for if the value is absent from the node
-    let absent = this.options.absentColor || "#000000";
+    console.log("all vals: ", allVals);
 
-    function colorThisNode(head, attrValToColor) {
+    let colors = Colormap.getNScale(
+      this.options.colormapName,
+      allVals.size + 1
+    );
+    // Get the absent color from the front and pop from the end
+    let absent = colors[0];
+    this.options.absentColor = absent;
+
+    function colorNode(head, attrValToColor) {
+      // Color the nodes based on the attribute values
       if (!head.data) return absent;
       let colorResult = absent;
 
@@ -195,7 +203,7 @@ export default class Dendogram {
         let childrenColors = new Set();
         for (let child of head.children) {
           // Want to call all the children to get every node/link colored
-          let c = colorThisNode(child, attrValToColor);
+          let c = colorNode(child, attrValToColor);
           childrenColors.add(c);
         }
         if (childrenColors.size === 1) {
@@ -209,43 +217,44 @@ export default class Dendogram {
       return colorResult;
     }
 
-    colorThisNode(this.root, this._attrValToColor);
+    colorNode(this.root, this._attrValToColor);
   }
 
   updateLegend() {
     // Generate legend for coloring by attribute name
+    if (!this.options.colorGroupAttribute) return;
+
     let other = this.options.colorGroupMissingName || "Other";
-    this._attrValToColor[other] = this.options.absentColor || "#000000";
+    this._attrValToColor[other] = this.options.absentColor;
     let legend = this.g.select(".legend");
     if (legend.empty()) {
       legend = this.g.append("g").attr("class", "legend");
-      let x = 900;
-      let y = 50;
+      let x = this.options.legendX;
+      let y = this.options.legendY;
 
       // Set legend title
       let legendTitle = (this.options.colorGroupLegendTitle || "Legend") + ":";
       legend
         .append("text")
-        .attr("x", x)
-        .attr("y", y - 20)
+        .attr("x", x - 5)
+        .attr("y", y - 25)
+        .attr("class", "title")
         .text(legendTitle);
 
       for (const attrVal in this._attrValToColor) {
-        // Add color box
+        // Add color circle
         let color = this._attrValToColor[attrVal];
         legend
-          .append("rect")
-          .attr("x", x)
-          .attr("y", y)
-          .attr("width", 10)
-          .attr("height", 10)
+          .append("circle")
+          .attr("r", 5)
+          .attr("transform", `translate(${x}, ${y})`)
           .style("fill", color);
 
         // Add text label
         legend
           .append("text")
-          .attr("x", x + 30)
-          .attr("y", y + 10)
+          .attr("x", x + 15)
+          .attr("y", y + 5)
           .text(attrVal);
 
         y += 30;
@@ -451,7 +460,6 @@ export default class Dendogram {
     let maxDistance = this.computeDistanceToRoot(this.root);
     this.createScale(-30, 0, this.minTreeSize.width, maxDistance);
     this.updateHighlights();
-    this.updateColors();
     this.updateLegend();
     this.adjustXPositions();
     this.adjustYPositions(maxDistance);
@@ -563,7 +571,7 @@ export default class Dendogram {
       });
 
     nodeEnter.append("circle").attr("r", function(node) {
-      return node.children ? 3 : 7;
+      return node.children ? 3 : 5;
     });
 
     nodeEnter
@@ -578,13 +586,19 @@ export default class Dendogram {
         return d.children ? "" : d.data.name.split("__")[0];
       });
 
-    // Apply colors to the nodes from data.color
-    this.g.selectAll(".node").style("fill", function(d) {
-      return d.data.color;
-    });
+    if (this.options.colorGroupAttribute) {
+      // Apply colors to the nodes from data.color
+      this.g.selectAll(".node").style("fill", function(d) {
+        return d.data.color;
+      });
 
-    this.g.selectAll(".link").style("stroke", function(d) {
-      return d.data.color;
-    });
+      this.g.selectAll(".link").style("stroke", function(d) {
+        return d.data.color;
+      });
+    } else {
+      // Color all the nodes light grey. Default not in CSS because that would
+      // override D3 styling.
+      this.g.selectAll(".node").style("fill", "#cccccc");
+    }
   }
 }

@@ -12,10 +12,11 @@
   }
 
   .node circle {
-    opacity: 0.8;
+    opacity: 1;
   }
 
   .node text {
+    fill: $black;
     font-size: 14px;
   }
 
@@ -29,7 +30,7 @@
 
   .link {
     fill: none;
-    stroke: $black;
+    stroke: $light-grey;
     stroke-width: 2px;
   }
 
@@ -54,6 +55,12 @@
       fill: none;
       stroke: $light-grey;
       stroke-width: 2px;
+    }
+  }
+
+  .legend {
+    .title {
+      font-weight: bold;
     }
   }
 }

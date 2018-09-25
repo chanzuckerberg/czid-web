@@ -24,12 +24,15 @@ class PhyloTreeVis extends React.Component {
   }
 
   componentDidMount() {
-    let tre = Tree.fromNewickString(this.props.newick, this.props.nodeData);
-    this.treeVis = new Dendogram(this.treeContainer, tre, {
+    let tree = Tree.fromNewickString(this.props.newick, this.props.nodeData);
+    this.treeVis = new Dendogram(this.treeContainer, tree, {
+      colormapName: "viridis",
       colorGroupAttribute: "project_name",
       colorGroupLegendTitle: "Project Name",
       // Name for the legend when the attribute is missing / other
-      colorGroupMissingName: "External Sources"
+      colorGroupMissingName: "External Sources",
+      legendX: 900,
+      legendY: 50
     });
     this.treeVis.update();
   }
