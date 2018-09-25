@@ -1,6 +1,6 @@
 import React from "react";
 import PathogenLabel from "../../ui/labels/PathogenLabel";
-import InsightIcon from "../../ui/icons/InsightIcon";
+import ReportInsightIcon from "./ReportInsightIcon";
 
 const PathogenSummary = ({ topScoringTaxa }) => {
   let topScoringDisplay, pathogenDisplay;
@@ -40,7 +40,7 @@ const PathogenSummary = ({ topScoringTaxa }) => {
   if (topScoringDisplay || pathogenDisplay) {
     return (
       <div className="ui message white idseq-ui pathogen-summary">
-        <InsightIcon className="summary-icon" />
+        <ReportInsightIcon className="summary-icon" />
         {topScoringDisplay}
         {pathogenDisplay}
       </div>
