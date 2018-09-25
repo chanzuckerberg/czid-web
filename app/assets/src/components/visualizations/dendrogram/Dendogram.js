@@ -158,53 +158,48 @@ export default class Dendogram {
     }
 
     let attrName = this.options.colorGroupAttribute;
-    // Attribute value to color number
-    this._attrValToColor = {};
 
-    // Get number of attribute values
+    // Set up all attribute values. Colors end up looking like:
+    // Uncolored (grey) | Real values.. | Absent attribute color (e.g. for External Sources)
     let allVals = new Set();
     this.root.leaves().forEach(n => {
       if (n.data && n.data[attrName]) {
         allVals.add(n.data[attrName]);
       }
     });
+    allVals = Array.from(allVals);
+    allVals = ["Uncolored"]
+      .concat(allVals)
+      .concat(this.options.colorGroupAbsentName);
+    this.allColorAttributeValues = allVals;
 
-    console.log("all vals: ", allVals);
+    // Set up colors array
+    this.colors = Colormap.getNScale(this.options.colormapName, allVals.length);
+    this.colors = ["#cccccc"].concat(this.colors);
+    let missingName = this.options.colorGroupAbsentName;
 
-    let colors = Colormap.getNScale(
-      this.options.colormapName,
-      allVals.size + 1
-    );
-    // Get the absent color from the front and pop from the end
-    let absent = colors[0];
-    this.options.absentColor = absent;
-
-    function colorNode(head, attrValToColor) {
+    function colorNode(head) {
       // Color the nodes based on the attribute values
-      if (!head.data) return absent;
-      let colorResult = absent;
+      if (!head.data) return 0;
+      let colorResult = 0;
 
       if (!head.children || head.children.length === 0) {
         // Leaf node, no children
+        let attrVal;
         if (attrName in head.data) {
           // Get color based on the desired attribute
-          let attrVal = head.data[attrName];
-          if (attrVal in attrValToColor) {
-            // Value has been assigned a color already
-            colorResult = attrValToColor[attrVal];
-          } else {
-            // New value and new color
-            colorResult = colors.pop();
-            attrValToColor[attrVal] = colorResult;
-          }
+          attrVal = head.data[attrName];
+        } else {
+          // Comes from an external source
+          attrVal = missingName;
         }
+        colorResult = allVals.indexOf(attrVal);
       } else {
         // Not a leaf node, get the colors of the children
         let childrenColors = new Set();
         for (let child of head.children) {
           // Want to call all the children to get every node/link colored
-          let c = colorNode(child, attrValToColor);
-          childrenColors.add(c);
+          childrenColors.add(colorNode(child));
         }
         if (childrenColors.size === 1) {
           // Set colorResult if all the children are the same
@@ -213,19 +208,17 @@ export default class Dendogram {
       }
 
       // Set this node's color
-      head.data.color = colorResult;
+      head.data.colorIndex = colorResult;
       return colorResult;
     }
 
-    colorNode(this.root, this._attrValToColor);
+    colorNode(this.root);
   }
 
   updateLegend() {
     // Generate legend for coloring by attribute name
     if (!this.options.colorGroupAttribute) return;
 
-    let other = this.options.colorGroupMissingName || "Other";
-    this._attrValToColor[other] = this.options.absentColor;
     let legend = this.g.select(".legend");
     if (legend.empty()) {
       legend = this.g.append("g").attr("class", "legend");
@@ -241,9 +234,12 @@ export default class Dendogram {
         .attr("class", "title")
         .text(legendTitle);
 
-      for (const attrVal in this._attrValToColor) {
+      for (const [i, attrVal] of this.allColorAttributeValues.entries()) {
+        // First of values and colors is the placeholder for 'Uncolored'
+        if (i === 0) continue;
+
         // Add color circle
-        let color = this._attrValToColor[attrVal];
+        let color = this.colors[i];
         legend
           .append("circle")
           .attr("r", 5)
@@ -587,13 +583,14 @@ export default class Dendogram {
       });
 
     if (this.options.colorGroupAttribute) {
-      // Apply colors to the nodes from data.color
+      // Apply colors to the nodes from data.colorIndex
+      let colors = this.colors;
       this.g.selectAll(".node").style("fill", function(d) {
-        return d.data.color;
+        return colors[d.data.colorIndex];
       });
 
       this.g.selectAll(".link").style("stroke", function(d) {
-        return d.data.color;
+        return colors[d.data.colorIndex];
       });
     } else {
       // Color all the nodes light grey. Default not in CSS because that would
