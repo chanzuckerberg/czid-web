@@ -28,7 +28,11 @@ const CATEGORIES = {
 const PathogenLabel = ({ type }) => {
   if (type) {
     let label = (
-      <a href={CATEGORIES[type]["url"]} target="_blank">
+      <a
+        href={CATEGORIES[type]["url"]}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
         <Label
           text={CATEGORIES[type]["text"]}
           color={CATEGORIES[type]["color"]}
