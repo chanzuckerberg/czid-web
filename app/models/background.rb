@@ -6,6 +6,7 @@ class Background < ApplicationRecord
   validate :validate_size
   validates :name, presence: true, uniqueness: true
   after_save :submit_store_summary_job
+  attr_accessor :just_updated
 
   DEFAULT_BACKGROUND_MODEL_NAME = "default".freeze
   TAXON_SUMMARY_CHUNK_SIZE = 100
@@ -19,34 +20,64 @@ class Background < ApplicationRecord
   end
 
   def summarize
-    results = TaxonCount.connection.select_all("
+    rows = TaxonCount.connection.select_all("
       SELECT
         tax_id,
         count_type,
         tax_level,
         @adjusted_total_reads := (total_reads - IFNULL(total_ercc_reads, 0)) * IFNULL(fraction_subsampled, 1.0),
-        sum((1.0*1e6*count)/@adjusted_total_reads) AS sum_rpm,
-        sum((1.0*1e6*count*1e6*count)/(@adjusted_total_reads*@adjusted_total_reads)) AS sum_rpm2
+        (1.0*1e6*count)/@adjusted_total_reads as rpm,
+        (1.0*1e6*count*1e6*count)/(@adjusted_total_reads*@adjusted_total_reads) AS rpm2
       FROM `taxon_counts`
       INNER JOIN `pipeline_runs` ON
         `pipeline_runs`.`id` = `taxon_counts`.`pipeline_run_id`
       WHERE (pipeline_run_id in (select pipeline_run_id from backgrounds_pipeline_runs where background_id = #{id}))
-      GROUP BY tax_id, count_type, tax_level
-    ").to_hash
+      ORDER BY tax_id, count_type, tax_level
+    ").to_a
     n = pipeline_runs.count
     date = DateTime.now.in_time_zone
-    results.each do |h|
-      h[:background_id] = id
-      h[:created_at] = date
-      h[:updated_at] = date
-      h[:mean] = (h["sum_rpm"] || 0.0) / n.to_f
-      h[:stdev] = compute_stdev(h["sum_rpm"] || 0.0, h["sum_rpm2"] || 0.0, n)
+    key = ""
+    res = {}
+    results = []
+    rows.each do |row|
+      current_key = [row["tax_id"], row["count_type"], row["tax_level"]].join('-')
+      if current_key != key
+        if res[:tax_id]
+          # add the res to results
+          results << summarize_taxon(res, n, date)
+        end
+        # reset the results
+        res = { tax_id: row["tax_id"], count_type: row["count_type"],
+                tax_level: row["tax_level"], sum_rpm: 0.0, sum_rpm2: 0.0, rpm_list: [] }
+        key = current_key
+      end
+      # increment
+      res[:sum_rpm] += row["rpm"]
+      res[:sum_rpm2] += row["rpm2"]
+      res[:rpm_list] << row["rpm"].round(3)
     end
+    # addd the last results
+    results << summarize_taxon(res, n, date)
+
     results
   end
 
+  def summarize_taxon(res, n, date)
+    res[:background_id] = id
+    res[:created_at] = date
+    res[:updated_at] = date
+    res[:mean] = (res[:sum_rpm]) / n.to_f
+    res[:stdev] = compute_stdev(res[:sum_rpm], res[:sum_rpm2], n)
+
+    # add zeroes to the rpm_list for no presence to complete the list
+    res[:rpm_list] << 0.0 while res[:rpm_list].size < n
+    res[:rpm_list] = res[:rpm_list].to_json
+
+    res
+  end
+
   def submit_store_summary_job
-    Resque.enqueue(ComputeBackground, id)
+    Resque.enqueue(ComputeBackground, id) unless just_updated
   end
 
   def store_summary
@@ -54,7 +85,7 @@ class Background < ApplicationRecord
       ActiveRecord::Base.connection.execute <<-SQL
       DELETE FROM taxon_summaries WHERE background_id = #{id}
       SQL
-      data = summarize.map { |h| h.slice('tax_id', 'count_type', 'tax_level', :background_id, :created_at, :updated_at, :mean, :stdev) }
+      data = summarize.map { |h| h.slice(:tax_id, :count_type, :tax_level, :background_id, :created_at, :updated_at, :mean, :stdev, :rpm_list) }
       data_chunks = data.in_groups_of(TAXON_SUMMARY_CHUNK_SIZE, false)
       data_chunks.each do |chunk|
         columns = chunk.first.keys
@@ -68,6 +99,7 @@ class Background < ApplicationRecord
         SQL
       end
     end
+    self.just_updated = true # to not trigger another background computation job
     update(ready: 1) # background will be displayed on report page
   end
 
