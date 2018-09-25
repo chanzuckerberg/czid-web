@@ -32,7 +32,7 @@ class PhyloTreeVis extends React.Component {
       colorGroupLegendTitle: "Project Name",
       // Name for the legend when the attribute is missing / other
       colorGroupAbsentName: "NCBI References",
-      legendX: 900,
+      legendX: 880,
       legendY: 50
     });
     this.treeVis.update();

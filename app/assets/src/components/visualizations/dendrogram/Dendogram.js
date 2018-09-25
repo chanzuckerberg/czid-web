@@ -229,12 +229,14 @@ export default class Dendogram {
       let legendTitle = (this.options.colorGroupLegendTitle || "Legend") + ":";
       legend
         .append("text")
-        .attr("x", x - 5)
-        .attr("y", y - 25)
+        .attr("x", x)
+        .attr("y", y)
         .attr("class", "title")
         .text(legendTitle);
 
-      for (let i = 1; i < this.allColorAttributeValues.length; i++) {
+      x += 5;
+      y += 25;
+      for (let i = 1; i < this.allColorAttributeValues.length; i++, y += 30) {
         // First of values and colors is the placeholder for 'Uncolored'
 
         // Add color circle
@@ -251,8 +253,6 @@ export default class Dendogram {
           .attr("x", x + 15)
           .attr("y", y + 5)
           .text(this.allColorAttributeValues[i]);
-
-        y += 30;
       }
     }
   }
