@@ -453,11 +453,11 @@ export default class Dendogram {
     cluster(this.root);
 
     let maxDistance = this.computeDistanceToRoot(this.root);
-    this.createScale(-30, 0, this.minTreeSize.width, maxDistance);
     this.updateHighlights();
     this.updateLegend();
     this.adjustXPositions();
     this.adjustYPositions(maxDistance);
+    this.createScale(-30, 0, this.minTreeSize.width, maxDistance);
 
     let link = this.g
       .selectAll(".link")
