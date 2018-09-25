@@ -175,7 +175,7 @@ export default class Dendogram {
 
     // Set up colors array
     this.colors = Colormap.getNScale(this.options.colormapName, allVals.length);
-    this.colors = ["#cccccc"].concat(this.colors);
+    this.colors = [this.options.defaultColor].concat(this.colors);
     let absentName = this.options.colorGroupAbsentName;
 
     function colorNode(head) {
@@ -594,7 +594,7 @@ export default class Dendogram {
     } else {
       // Color all the nodes light grey. Default not in CSS because that would
       // override D3 styling.
-      this.g.selectAll(".node").style("fill", "#cccccc");
+      this.g.selectAll(".node").style("fill", this.options.defaultColor);
     }
   }
 }
