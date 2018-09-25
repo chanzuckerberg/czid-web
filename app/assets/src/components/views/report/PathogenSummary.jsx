@@ -1,6 +1,7 @@
 import React from "react";
 import InsightMessage from "../../layout/InsightMessage";
 import PathogenLabel from "../../ui/labels/PathogenLabel";
+import BetaLabel from "../../ui/labels/BetaLabel";
 import ReportInsightIcon from "./ReportInsightIcon";
 
 const PathogenSummary = ({ topScoringTaxa }) => {
@@ -44,6 +45,7 @@ const PathogenSummary = ({ topScoringTaxa }) => {
         <ReportInsightIcon className="summary-icon" />
         {topScoringDisplay}
         {pathogenDisplay}
+        <BetaLabel />
       </div>
     );
     return <InsightMessage content={insightContent} />;
