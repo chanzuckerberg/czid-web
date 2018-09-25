@@ -341,12 +341,12 @@ input[type="number"] {
     animation-name: highlight-animation;
     animation-duration: 2s;
   }
-  .fa {
+  .fa :not(.ui.icon) {
     margin-left: 2px;
     margin-right: 5px;
     font-size: $font-size-h4;
     width: 10px;
-    .action &:hover {
+    &:hover {
       color: #444242;
     }
     -webkit-user-select: none; /* Chrome all / Safari all */
