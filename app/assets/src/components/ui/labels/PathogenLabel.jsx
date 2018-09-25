@@ -3,14 +3,18 @@ import React from "react";
 
 const PathogenLabel = ({ type }) => {
   let categoryLabels = {
-    categoryA: "pathogenic | A",
-    categoryB: "pathogenic | B",
-    categoryC: "pathogenic | C"
+    categoryA: { text: "pathogenic | A", color: "red" },
+    categoryB: { text: "pathogenic | B", color: "orange" },
+    categoryC: { text: "pathogenic | C", color: "yellow" }
   };
-  let text = categoryLabels[type];
   if (type) {
     return (
-      <Label text={text} color="red" size="medium" className="pathogen-label" />
+      <Label
+        text={categoryLabels[type]["text"]}
+        color={categoryLabels[type]["color"]}
+        size="medium"
+        className="pathogen-label"
+      />
     );
   } else {
     return null;
