@@ -279,13 +279,12 @@ class SamplesController < ApplicationController
 
     @report_info = external_report_info(pipeline_run_id, background_id, params)
 
-    # Fill lineage details into report info
-    tax_map = @report_info[:taxonomy_details][2]
-    tax_map, @report_info[:pathogenTagSummary] = TaxonLineage.fill_lineage_details(tax_map, pipeline_run_id)
-    @report_info[:taxonomy_details][2] = tax_map
+    # Fill lineage details into report info.
+    # @report_info[:taxonomy_details][2] is the array of taxon rows (which are hashes with keys like tax_id, name, NT, etc)
+    @report_info[:taxonomy_details][2] = TaxonLineage.fill_lineage_details(@report_info[:taxonomy_details][2], pipeline_run_id)
 
     # Label top-scoring hits for the executive summary
-    @report_info[:topScoringTaxa] = label_top_scoring_taxa!(tax_map)
+    @report_info[:topScoringTaxa] = label_top_scoring_taxa!(@report_info[:taxonomy_details][2])
 
     render json: JSON.dump(@report_info)
   end
