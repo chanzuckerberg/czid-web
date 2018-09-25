@@ -22,11 +22,11 @@ class Checkbox extends React.Component {
     return null;
   }
 
-  handleClick() {
+  handleClick(event) {
     const { value, onChange } = this.props;
 
     this.setState({ isChecked: !this.state.isChecked }, () => {
-      onChange(value, this.state.isChecked);
+      onChange(value, this.state.isChecked, event);
     });
   }
 

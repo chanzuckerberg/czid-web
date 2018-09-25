@@ -3,7 +3,7 @@
 .idseq-ui.input.checkbox {
   display: flex;
   position: relative;
-  padding: 0px 0px 0px 26px;
+  padding: 0px 0px 0px 30px;
   cursor: pointer;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -43,10 +43,6 @@
       -ms-transform: rotate(40deg);
       transform: rotate(40deg);
     }
-  }
-
-  &:hover {
-    background-color: $lightest-grey;
   }
 
   & input:checked ~ .checkmark {

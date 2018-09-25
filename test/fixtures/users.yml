@@ -3,16 +3,16 @@
 one:
   email: email@example.com
   encrypted_password: <%= Devise::Encryptor.digest(User, "password") %>
-  name: User 1
+  name: User One
   role: 1
 
 two:
   email: email2@example.com
   encrypted_password: <%= Devise::Encryptor.digest(User, "password2") %>
-  name: User 2
+  name: User Two
 
 joe:
   email: joe@gmail.com
   encrypted_password: <%= Devise::Encryptor.digest(User, "passwordjoe") %>
-  name: User 3
+  name: User Three
 
