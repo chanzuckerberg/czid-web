@@ -200,7 +200,7 @@ class SamplesController < ApplicationController
   def top_taxons
     sample_ids = params[:sample_ids].split(",").map(&:to_i) || []
 
-    num_results = params[:n] ? params[:n].to_i : ReportHelper::MAX_NUM_TAXONS
+    num_results = params[:n] ? params[:n].to_i : SamplesController::DEFAULT_MAX_NUM_TAXONS
     sort_by = params[:sort_by] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
 
     samples = current_power.samples.where(id: sample_ids)
@@ -208,7 +208,7 @@ class SamplesController < ApplicationController
     if samples.first
       first_sample = samples.first
       background_id = check_background_id(first_sample)
-      @top_taxons = top_taxons_details(samples, background_id, num_results, sort_by, species_selected)
+      @top_taxons = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, {}, {}, false, false)
       render json: @top_taxons
     else
       render json: {}

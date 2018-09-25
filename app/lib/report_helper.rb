@@ -251,16 +251,25 @@ module ReportHelper
     ").to_hash
   end
 
-  def fetch_top_taxons(samples, background_id, categories, read_specificity = false)
+  def fetch_top_taxons(samples, background_id, categories, read_specificity = false, include_phage = false)
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
 
     categories_clause = ""
     if categories.present?
       categories_clause = " AND taxon_counts.superkingdom_taxid IN (#{categories.map { |category| CATEGORIES_TAXID_BY_NAME[category] }.compact.join(',')})"
+    elsif include_phage
+      categories_clause = " AND taxon_counts.superkingdom_taxid = #{CATEGORIES_TAXID_BY_NAME["Viruses"]}"
     end
+
     read_specificity_clause = ""
     if read_specificity
       read_specificity_clause = " AND taxon_counts.tax_id > 0"
+    end
+
+    if !include_phage && categories.present?
+      phage_clause = " AND taxon_counts.is_phage != 1"
+    elsif include_phage && !categories.present?
+      phage_clause = " AND taxon_counts.is_phage = 1"
     end
 
     query = "
@@ -298,6 +307,7 @@ module ReportHelper
       AND taxon_counts.count_type IN ('NT', 'NR')
       #{categories_clause}
       #{read_specificity_clause}
+      #{phage_clause}
      "
     sql_results = TaxonCount.connection.select_all(query).to_hash
 
@@ -454,14 +464,14 @@ module ReportHelper
     true
   end
 
-  def top_taxons_details(samples, background_id, num_results, sort_by_key, species_selected, categories, threshold_filters = {}, read_specificity = false, include_phage = true)
+  def top_taxons_details(samples, background_id, num_results, sort_by_key, species_selected, categories, threshold_filters = {}, read_specificity = false, include_phage = false)
     # return top taxons
-    results_by_pr = fetch_top_taxons(samples, background_id, categories, read_specificity)
+    results_by_pr = fetch_top_taxons(samples, background_id, categories, read_specificity, include_phage)
+
     sort_by = decode_sort_by(sort_by_key)
     count_type = sort_by[:count_type]
     metric = sort_by[:metric]
     candidate_taxons = {}
-    Rails.logger.debug("include_phage = #{include_phage}")
     results_by_pr.each do |_pr_id, res|
       pr = res["pr"]
       taxon_counts = res["taxon_counts"]
@@ -477,7 +487,7 @@ module ReportHelper
 
       compute_aggregate_scores_v2!(rows)
       rows = rows.select do |row|
-        row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD && (include_phage || categories.blank? || row["is_phage"].zero?) && check_custom_filters(row, threshold_filters)
+        row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD && check_custom_filters(row, threshold_filters)
       end
 
       rows.sort_by! { |tax_info| ((tax_info[count_type] || {})[metric] || 0.0) * -1.0 }
