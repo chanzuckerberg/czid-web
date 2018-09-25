@@ -191,8 +191,8 @@ class Sample < ApplicationRecord
       file_list = list_outputs(pr.output_s3_path_with_version)
       file_list += list_outputs(sample_output_s3_path)
       file_list += list_outputs(pr.postprocess_output_s3_path + '/' + RECLASSIFY_DIR)
-      file_list += list_outputs(pr.output_s3_path_with_version + '/' + ASSEMBLED_NT_DIR, 3, nil)
-      file_list += list_outputs(pr.output_s3_path_with_version + '/' + ASSEMBLED_NR_DIR, 3, nil)
+      file_list += list_outputs(pr.postprocess_output_s3_path + '/' + ASSEMBLED_NT_DIR, 3, nil)
+      file_list += list_outputs(pr.postprocess_output_s3_path + '/' + ASSEMBLED_NR_DIR, 3, nil)
     else
       stage1_files = list_outputs(pr.host_filter_output_s3_path)
       stage2_files = list_outputs(pr.alignment_output_s3_path, 2)
