@@ -8,13 +8,16 @@ const NAME_TYPE_COMMON_NAME = "Common name";
 class PipelineSampleTree extends React.PureComponent {
   constructor(props) {
     super(props);
-    this._getTooltip = this.getTooltip.bind(this);
+
+    // TODO: this should actually be a metric in the selection bar above
     this.dataTypes = ["NT.r", "NT.rpm", "NT.aggregatescore", "NR.r", "NR.rpm"];
     this.state = {
       dataType: this.dataTypes[0]
     };
-    this._updateDataType = this.updateDataType.bind(this);
-    this._nodeTextClicked = this.nodeTextClicked.bind(this);
+
+    this.getTooltip = this.getTooltip.bind(this);
+    this.updateDataType = this.updateDataType.bind(this);
+    this.nodeTextClicked = this.nodeTextClicked.bind(this);
   }
 
   makeTree() {
@@ -171,7 +174,7 @@ class PipelineSampleTree extends React.PureComponent {
       <Dropdown
         className={"data-type-chooser"}
         options={options}
-        onChange={this._updateDataType}
+        onChange={this.updateDataType}
         value={this.state.dataType}
         label="Data Type:"
       />
@@ -185,8 +188,8 @@ class PipelineSampleTree extends React.PureComponent {
         <TreeStructure
           tree={tree}
           nameType={this.props.nameType}
-          getTooltip={this._getTooltip}
-          onNodeTextClicked={this._nodeTextClicked}
+          getTooltip={this.getTooltip}
+          onNodeTextClicked={this.nodeTextClicked}
         />
       </div>
     );
