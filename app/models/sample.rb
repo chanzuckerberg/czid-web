@@ -25,7 +25,7 @@ class Sample < ApplicationRecord
   LOG_BASENAME = 'log.txt'.freeze
 
   LOCAL_INPUT_PART_PATH = '/app/tmp/input_parts'.freeze
-
+  RECLASSIFY_DIR = 'reclassify'.freeze
   ASSEMBLED_NT_DIR = 'assembled_nt'.freeze
   ASSEMBLED_NR_DIR = 'assembled_nr'.freeze
 
@@ -190,6 +190,7 @@ class Sample < ApplicationRecord
     if pr.pipeline_version.to_f >= 2.0
       file_list = list_outputs(pr.output_s3_path_with_version)
       file_list += list_outputs(sample_output_s3_path)
+      file_list += list_outputs(pr.postprocess_output_s3_path + '/' + RECLASSIFY_DIR)
       file_list += list_outputs(pr.output_s3_path_with_version + '/' + ASSEMBLED_NT_DIR, 3, nil)
       file_list += list_outputs(pr.output_s3_path_with_version + '/' + ASSEMBLED_NR_DIR, 3, nil)
     else
