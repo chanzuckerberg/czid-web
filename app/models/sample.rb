@@ -34,10 +34,10 @@ class Sample < ApplicationRecord
   DEFAULT_MEMORY_IN_MB = 120_000 # sorry, hacky
   HOST_FILTERING_MEMORY_IN_MB = 240_000
 
-  DEFAULT_QUEUE = 'idseq'.freeze
+  DEFAULT_QUEUE = (Rails.env == 'prod' ? 'idseq-prod-lomem' : 'idseq-staging-lomem').freeze
   DEFAULT_VCPUS = 16
 
-  DEFAULT_QUEUE_HIMEM = 'idseq_himem'.freeze
+  DEFAULT_QUEUE_HIMEM = (Rails.env == 'prod' ? 'idseq-prod-himem' : 'idseq-staging-himem').freeze
   DEFAULT_VCPUS_HIMEM = 32
 
   # These zombies keep coming back, so we now expressly fail submissions to them.
