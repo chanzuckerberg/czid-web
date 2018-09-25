@@ -1,4 +1,5 @@
 import React from "react";
+import InsightMessage from "../../layout/InsightMessage";
 import PathogenLabel from "../../ui/labels/PathogenLabel";
 import ReportInsightIcon from "./ReportInsightIcon";
 
@@ -38,13 +39,14 @@ const PathogenSummary = ({ topScoringTaxa }) => {
   }
 
   if (topScoringDisplay || pathogenDisplay) {
-    return (
-      <div className="ui message white idseq-ui pathogen-summary">
+    let insightContent = (
+      <div className="pathogen-summary">
         <ReportInsightIcon className="summary-icon" />
         {topScoringDisplay}
         {pathogenDisplay}
       </div>
     );
+    return <InsightMessage content={insightContent} />;
   } else {
     return null;
   }
