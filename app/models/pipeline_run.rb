@@ -576,9 +576,8 @@ class PipelineRun < ApplicationRecord
 
   def compile_stats_file
     res_folder = output_s3_path_with_version
-    stdout, stderr, status = Open3.capture3("aws s3 ls #{res_folder}/ | grep count$")
+    stdout, _stderr, status = Open3.capture3("aws s3 ls #{res_folder}/ | grep count$")
     unless status.exitstatus.zero?
-      Rails.logger.info("No .count files found: #{stderr}")
       return
     end
 
