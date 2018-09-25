@@ -461,6 +461,7 @@ module ReportHelper
     count_type = sort_by[:count_type]
     metric = sort_by[:metric]
     candidate_taxons = {}
+    Rails.logger.debug("include_phage = #{include_phage}")
     results_by_pr.each do |_pr_id, res|
       pr = res["pr"]
       taxon_counts = res["taxon_counts"]
