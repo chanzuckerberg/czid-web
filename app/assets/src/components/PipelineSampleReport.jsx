@@ -32,6 +32,8 @@ class PipelineSampleReport extends React.Component {
     this.allowPhyloTree =
       props.can_edit &&
       (this.admin == 1 || this.allowedFeatures.indexOf("phylo_trees") >= 0);
+    this.allowPathogenSummary =
+      this.admin == 1 || this.allowedFeatures.indexOf("pathogen_summary") >= 0;
     this.report_ts = props.report_ts;
     this.sample_id = props.sample_id;
     this.projectId = props.projectId;
@@ -1821,10 +1823,12 @@ class RenderMarkup extends React.Component {
           <div className="tab-screen-content">
             <div className="row reports-container">
               <div className="col s12 reports-section">
-                <PathogenSummary
-                  topScoringTaxa={parent.state.topScoringTaxa}
-                  pathogenTagSummary={parent.state.pathogenTagSummary}
-                />
+                {parent.allowPathogenSummary ? (
+                  <PathogenSummary
+                    topScoringTaxa={parent.state.topScoringTaxa}
+                    pathogenTagSummary={parent.state.pathogenTagSummary}
+                  />
+                ) : null}
                 <div className="reports-count">
                   <div className="report-top-filters">
                     <div className="filter-lists">
