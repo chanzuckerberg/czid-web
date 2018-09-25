@@ -18,7 +18,7 @@ import BetaLabel from "./ui/labels/BetaLabel";
 import PathogenLabel from "./ui/labels/PathogenLabel";
 import PathogenSummary from "./views/report/PathogenSummary";
 import PhyloTreeInputs from "./views/phylo_tree/PhyloTreeInputs.jsx";
-import InsightIcon from "./ui/icons/InsightIcon";
+import ReportInsightIcon from "./views/report/ReportInsightIcon";
 
 class PipelineSampleReport extends React.Component {
   constructor(props) {
@@ -1101,7 +1101,7 @@ class PipelineSampleReport extends React.Component {
         : null;
     const ntCountLabel = isAggregate ? (
       <div className={`active ${this.switchClassName("NT", ntCount)}`}>
-        {ntCountStr} {showInsight ? <InsightIcon /> : null}
+        {ntCountStr} {showInsight ? <ReportInsightIcon /> : null}
       </div>
     ) : (
       <div className={`${this.switchClassName("NT", ntCount)}`}>

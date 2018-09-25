@@ -3,5 +3,7 @@
   &:first-child {
     margin-left: 10px;
   }
-  font-variant: small-caps;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: lighter;
 }

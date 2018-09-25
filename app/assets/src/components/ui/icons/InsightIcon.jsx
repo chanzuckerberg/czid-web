@@ -1,7 +1,8 @@
+import BasicPopup from "../../BasicPopup";
 import React from "react";
 
-const InsightIcon = () => {
-  return (
+const InsightIcon = ({ tooltip }) => {
+  let icon = (
     <span className="ui icon insight-icon">
       <span className="fa-stack fa-lg">
         <i className="fa fa-circle fa-stack-2x" />
@@ -9,6 +10,7 @@ const InsightIcon = () => {
       </span>
     </span>
   );
+  return <BasicPopup trigger={icon} content={tooltip} />;
 };
 
 export default InsightIcon;

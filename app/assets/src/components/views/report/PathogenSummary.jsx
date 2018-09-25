@@ -9,9 +9,11 @@ const PathogenSummary = ({ topScoringTaxa }) => {
     topScoringDisplay = (
       <div className="top-scoring">
         <div className="header">Top Scoring</div>
-        {topScoringTaxa.map(tax => {
-          return <div>{tax.name}</div>;
-        })}
+        <ul>
+          {topScoringTaxa.map(tax => {
+            return <li>{tax.name}</li>;
+          })}
+        </ul>
       </div>
     );
   }
@@ -21,14 +23,16 @@ const PathogenSummary = ({ topScoringTaxa }) => {
     pathogenDisplay = (
       <div className="top-pathogens">
         <div className="header">Pathogenic Agents</div>
-        {topPathogens.map(tax => {
-          return (
-            <div>
-              <span>{tax.name}</span>
-              <PathogenLabel type={tax.pathogenTag} />
-            </div>
-          );
-        })}
+        <ul>
+          {topPathogens.map(tax => {
+            return (
+              <li>
+                <span>{tax.name}</span>
+                <PathogenLabel type={tax.pathogenTag} />
+              </li>
+            );
+          })}
+        </ul>
       </div>
     );
   }
