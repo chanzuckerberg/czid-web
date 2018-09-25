@@ -477,9 +477,7 @@ module ReportHelper
 
       compute_aggregate_scores_v2!(rows)
       rows = rows.select do |row|
-        Rails.logger.debug("row = #{row}")
-
-        row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD && (include_phage || row["is_phage"].zero?) && check_custom_filters(row, threshold_filters)
+        row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD && (include_phage || categories.blank? || row["is_phage"].zero?) && check_custom_filters(row, threshold_filters)
       end
 
       rows.sort_by! { |tax_info| ((tax_info[count_type] || {})[metric] || 0.0) * -1.0 }
