@@ -204,6 +204,9 @@ module ReportHelper
     pipeline_run = PipelineRun.find(pipeline_run_id)
     adjusted_total_reads = (pipeline_run.total_reads - pipeline_run.total_ercc_reads.to_i) * pipeline_run.subsample_fraction
     raw_non_host_reads = pipeline_run.adjusted_remaining_reads.to_f * pipeline_run.subsample_fraction
+    # only turned on refined with the right pipeline version and output
+    refined_output = pipeline_run.output_states.find_by(output: "refined_taxon_counts")
+    refined = false unless pipeline_run.pipeline_version.to_f >= 3.0 && refined_output && refined_output.state == PipelineRun::STATUS_LOADED
 
     count_types = refined ? "('NT+','NR+')" : "('NT','NR')"
 
@@ -911,7 +914,7 @@ module ReportHelper
   def taxonomy_details(pipeline_run_id, background_id, params)
     # Fetch and clean data.
     t0 = wall_clock_ms
-    refined = params[:refined] ? true : false
+    refined = params[:refined].to_i == 1 ? true : false
     taxon_counts = fetch_taxon_counts(pipeline_run_id, background_id, refined)
     tax_2d = taxon_counts_cleanup(taxon_counts)
     t1 = wall_clock_ms
