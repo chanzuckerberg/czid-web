@@ -8,9 +8,7 @@ const PathogenSummary = ({ topScoringTaxa }) => {
   if (topScoringTaxa.length > 0) {
     topScoringDisplay = (
       <div className="top-scoring">
-        <div className="header">
-          <InsightIcon />Top Scoring
-        </div>
+        <div className="header">Top Scoring</div>
         {topScoringTaxa.map(tax => {
           return <div>{tax.name}</div>;
         })}
@@ -26,7 +24,7 @@ const PathogenSummary = ({ topScoringTaxa }) => {
         {topPathogens.map(tax => {
           return (
             <div>
-              {tax.name}
+              <span>{tax.name}</span>
               <PathogenLabel type={tax.pathogenTag} />
             </div>
           );
@@ -37,7 +35,8 @@ const PathogenSummary = ({ topScoringTaxa }) => {
 
   if (topScoringDisplay || pathogenDisplay) {
     return (
-      <div className="ui message yellow idseq-ui pathogen-summary">
+      <div className="ui message white idseq-ui pathogen-summary">
+        <InsightIcon className="summary-icon" />
         {topScoringDisplay}
         {pathogenDisplay}
       </div>

@@ -1,8 +1,13 @@
 .idseq-ui.pathogen-summary {
+  display: flex;
+  .summary-icon {
+    order: 0;
+  }
   .top-scoring {
-    float: left;
-    width: 30%;
+    order: 1;
+    width: 25%;
   }
   .top-pathogens {
+    order: 2;
   }
 }

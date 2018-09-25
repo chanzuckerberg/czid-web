@@ -1045,7 +1045,6 @@ class PipelineSampleReport extends React.Component {
     let secondaryTaxonDisplay = (
       <span>
         <PathogenLabel type={tax_info.pathogenTag} />
-        {tax_info.topScoring ? <InsightIcon /> : null}
         {this.displayHoverActions(tax_info, report_details)}
       </span>
     );
@@ -1089,7 +1088,8 @@ class PipelineSampleReport extends React.Component {
     nrCount,
     num_decimals,
     isAggregate = false,
-    visible_flag = true
+    visible_flag = true,
+    showInsight = false
   ) {
     if (!visible_flag) {
       return null;
@@ -1101,6 +1101,7 @@ class PipelineSampleReport extends React.Component {
         : null;
     const ntCountLabel = isAggregate ? (
       <div className={`active ${this.switchClassName("NT", ntCount)}`}>
+        {showInsight ? <InsightIcon /> : null}
         {ntCountStr}
       </div>
     ) : (
@@ -1176,20 +1177,23 @@ class PipelineSampleReport extends React.Component {
     let highlighted =
       this.state.highlight_taxon == tax_info.tax_id ? "highlighted" : "";
     let taxon_status = "";
-    if (confirmed_taxids.indexOf(tax_info.tax_id) >= 0)
+    if (confirmed_taxids.indexOf(tax_info.tax_id) >= 0) {
       taxon_status = "confirmed";
-    else if (watched_taxids.indexOf(tax_info.tax_id) >= 0)
+    } else if (watched_taxids.indexOf(tax_info.tax_id) >= 0) {
       taxon_status = "watched";
+    }
+    let top_scoring_status = tax_info.topScoring == 1 ? "top-scoring-row" : "";
+    let emphasis_class = `${taxon_status} ${highlighted} ${top_scoring_status}`;
 
     if (tax_info.tax_level == 2) {
       if (tax_info.tax_id < 0) {
         return `report-row-genus ${
           tax_info.genus_taxid
-        } fake-genus ${taxon_status} ${highlighted}`;
+        } fake-genus ${emphasis_class}`;
       }
       return `report-row-genus ${
         tax_info.genus_taxid
-      } real-genus ${taxon_status} ${highlighted}`;
+      } real-genus ${emphasis_class}`;
     }
 
     let initial_visibility = "hidden";
@@ -1199,14 +1203,15 @@ class PipelineSampleReport extends React.Component {
     ) {
       initial_visibility = "";
     }
+    emphasis_class = `${initial_visibility} ${emphasis_class}`;
     if (tax_info.genus_taxid < 0) {
       return `report-row-species ${
         tax_info.genus_taxid
-      } fake-genus ${initial_visibility} ${taxon_status} ${highlighted}`;
+      } fake-genus ${emphasis_class}`;
     }
     return `report-row-species ${
       tax_info.genus_taxid
-    } real-genus ${initial_visibility} ${taxon_status} ${highlighted}`;
+    } real-genus ${emphasis_class}`;
   }
 
   expandGenusClick(e) {
@@ -1488,7 +1493,14 @@ function DetailCells({ parent }) {
       )}
     >
       <td>{parent.render_name(tax_info, parent.report_details)}</td>
-      {parent.render_number(tax_info.NT.aggregatescore, null, 0, true)}
+      {parent.render_number(
+        tax_info.NT.aggregatescore,
+        null,
+        0,
+        true,
+        undefined,
+        tax_info.topScoring == 1
+      )}
       {parent.render_number(tax_info.NT.zscore, tax_info.NR.zscore, 1)}
       {parent.render_number(tax_info.NT.rpm, tax_info.NR.rpm, 1)}
       {parent.render_number(tax_info.NT.r, tax_info.NR.r, 0)}
