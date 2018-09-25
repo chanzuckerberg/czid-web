@@ -1366,26 +1366,53 @@ class PipelineSampleReport extends React.Component {
 
     const advanced_filter_tag_list = this.state.activeThresholds.map(
       (threshold, i) => (
-        <AdvancedFilterTag threshold={threshold} key={i} i={i} parent={this} />
+        <AdvancedFilterTagList
+          threshold={threshold}
+          key={i}
+          i={i}
+          parent={this}
+        />
       )
     );
 
-    const filter_tag_list = (
-      <div className="filter-tags-list">
-        {advanced_filter_tag_list}
-        <SubsetTagList
-          includedSubsets={this.state.includedCategories.concat(
-            this.state.includedSubcategories
-          )}
-          removeSubsetFunction={this.handleRemoveCategory}
-        />
-      </div>
+    const categories_filter_tag_list = this.state.includedCategories.map(
+      (category, i) => {
+        return (
+          <Label className="label-tags" size="tiny" key={`category_tag_${i}`}>
+            {category}
+            <Icon
+              name="close"
+              onClick={e => {
+                this.handleRemoveCategory(category);
+              }}
+            />
+          </Label>
+        );
+      }
+    );
+
+    const subcats_filter_tag_list = this.state.includedSubcategories.map(
+      (subcat, i) => {
+        return (
+          <Label className="label-tags" size="tiny" key={`subcat_tag_${i}`}>
+            {subcat}
+            <Icon
+              name="close"
+              onClick={e => {
+                this.handleRemoveCategory(subcat);
+              }}
+            />
+          </Label>
+        );
+      }
     );
 
     return (
       <RenderMarkup
         filter_row_stats={filter_row_stats}
-        filter_tag_list={filter_tag_list}
+        advanced_filter_tag_list={advanced_filter_tag_list}
+        categories_filter_tag_list={categories_filter_tag_list}
+        subcats_filter_tag_list={subcats_filter_tag_list}
         view={this.state.view}
         parent={this}
       />
@@ -1421,7 +1448,7 @@ function CollapseExpand({ tax_info, parent }) {
   );
 }
 
-function AdvancedFilterTag({ threshold, i, parent }) {
+function AdvancedFilterTagList({ threshold, i, parent }) {
   if (ThresholdMap.isThresholdValid(threshold)) {
     return (
       <Label
@@ -1442,22 +1469,6 @@ function AdvancedFilterTag({ threshold, i, parent }) {
   } else {
     return null;
   }
-}
-
-function SubsetTagList({ includedSubsets, removeSubsetFunction }) {
-  return includedSubsets.map((subset, i) => {
-    return (
-      <Label className="label-tags" size="tiny" key={`subset_tag_${i}`}>
-        {subset}
-        <Icon
-          name="close"
-          onClick={() => {
-            removeSubsetFunction(subset);
-          }}
-        />
-      </Label>
-    );
-  });
 }
 
 function DetailCells({ parent }) {
@@ -1783,7 +1794,14 @@ class RenderMarkup extends React.Component {
   }
 
   render() {
-    const { filter_row_stats, filter_tag_list, parent } = this.props;
+    const {
+      filter_row_stats,
+      advanced_filter_tag_list,
+      categories_filter_tag_list,
+      subcats_filter_tag_list,
+      parent
+    } = this.props;
+
     return (
       <div>
         <div id="reports" className="reports-screen tab-screen col s12">
@@ -1825,7 +1843,10 @@ class RenderMarkup extends React.Component {
                     </div>
                   </div>
                   {this.renderMenu()}
-                  {filter_tag_list}
+                  <div className="filter-tags-list">
+                    {advanced_filter_tag_list} {categories_filter_tag_list}{" "}
+                    {subcats_filter_tag_list}
+                  </div>
                   {filter_row_stats}
                 </div>
                 {this.state.view == "table" && (
