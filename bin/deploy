@@ -2,11 +2,15 @@
 
 require 'rubygems'
 require 'bundler/setup'
-require 'aws-sdk-ecs'
 require 'pp'
+
+def system!(cmd, err = nil)
+  system(cmd) || abort("\n== Command #{cmd} failed ==\n\n#{err}\n\n====")
+end
 
 env = ARGV.shift
 image = ARGV.shift
+cluster = env  # Yes, the cluster name is exactly env, no prefix/postfix
 
 if !env || !image
   puts 'Usage: ./bin/deploy ENV IMAGE_TAG'
@@ -19,133 +23,6 @@ if image == 'latest'
 end
 
 puts "deploying #{image} to #{env}"
-
-RAILS_SERVICE = "idseq-#{env}-web".freeze
-RESQUE_WORKER_SERVICE = "idseq-#{env}-resque".freeze
-RESQUE_PIPELINE_MONITOR_SERVICE = "idseq-#{env}-resque-pipeline-monitor".freeze
-RESQUE_RESULT_MONITOR_SERVICE = "idseq-#{env}-resque-result-monitor".freeze
-REPO = 'chanzuckerberg/idseq-web'.freeze
-REGION = 'us-west-2'.freeze
-LOG_GROUP = "ecs-logs-#{env}".freeze
-TASK_NAME = 'rails'.freeze
-CONTAINER_NAME = 'rails'.freeze
-
-client = Aws::ECS::Client.new
-
-def log_url(region, log_group, task_name, container_name, task_id)
-  "https://#{region}.console.aws.amazon.com/cloudwatch/home?region=#{region}#logEventViewer:group=#{log_group};stream=#{task_name}/#{container_name}/#{task_id}"
-end
-
-def service_url(region, cluster, service)
-  "https://#{region}.console.aws.amazon.com/ecs/home?region=#{region}#/clusters/#{cluster}/services/#{service}/details"
-end
-
-def get_service_and_task(client, cluster, service)
-  resp = client.describe_services(cluster: cluster, services: [service])
-  service = resp.services.first
-
-  resp2 = client.describe_task_definition(task_definition: service.task_definition)
-  task_def = resp2.task_definition
-
-  [service, task_def]
-end
-
-def register_task_def(client, task_def)
-  resp = client.register_task_definition(task_def)
-
-  resp.task_definition
-end
-
-def run_task(client, cluster, service, task_revision, container, command)
-  overrides = {
-    container_overrides: [
-      {
-        name: container,
-        command: command
-      }
-    ]
-  }
-  resp = client.run_task(cluster: cluster,
-                         task_definition: "#{service}:#{task_revision}",
-                         overrides: overrides)
-
-  task = resp.tasks[0]
-  if resp.failures.length > 1
-    raise "run_task failed. failures: #{resp.failures.map{|f| f.reason}. join ', '}"
-  end
-
-  migrate_task_arn = task.task_arn
-  task_id = migrate_task_arn.split(':').last.split('/').last
-
-  puts "  logs -> #{log_url(REGION, LOG_GROUP, TASK_NAME, CONTAINER_NAME, task_id)}"
-
-  loop do
-    resp2 = client.describe_tasks(cluster: cluster, tasks: [migrate_task_arn])
-    sleep 5
-
-    print "migration task: #{resp2.tasks[0].last_status}\r"
-    if resp2.tasks[0].last_status == 'STOPPED'
-      puts
-      if resp2.tasks[0].containers[0].exit_code.zero?
-        puts 'migration(s) successful'
-        break
-      else
-        puts 'migration(s) failed, see logs'
-        exit
-      end
-    end
-  end
-end
-
-def update_service(client, cluster, service, task_def)
-  client.update_service(cluster: cluster, service: service, task_definition: task_def)
-
-  loop do
-    resp = client.describe_services(cluster: cluster, services: [service])
-
-    puts '=' * 80
-    serv = resp.services[0]
-
-    puts "desired: #{serv.desired_count} running: #{serv.running_count} pending #{serv.pending_count}"
-    puts "deployments:\t task_definition\tdesired\trunning\tpending"
-    serv.deployments.each do |deployment|
-      puts "\t\t#{deployment.task_definition.split('/').last}\t#{deployment.desired_count}\t#{deployment.running_count}\t#{deployment.pending_count}"
-    end
-    puts 'events'
-    serv.events[(0..5)].each do |event|
-      puts "#{printf('%4d', (Time.now - event.created_at).to_i)} seconds ago:\t#{event.message}"
-    end
-
-    print "  service info -> #{service_url(REGION, cluster, service)}\n"
-
-    break if serv.deployments.count == 1
-    sleep 5
-  end
-end
-
-def deploy(client, cluster, service, repo, image, run_migrations = false)
-  _, task_def = get_service_and_task(client, cluster, service)
-  puts "current task is revision #{task_def.revision}"
-  task_def = task_def.to_h
-
-  %i[task_definition_arn revision status requires_attributes compatibilities].each do |k|
-    task_def.delete(k)
-  end
-
-  task_def[:container_definitions][0][:image] = "#{repo}:#{image}"
-
-  new_task = register_task_def(client, task_def)
-
-  puts "created new task definition #{new_task.revision}"
-
-  if run_migrations
-    puts 'running migrations'
-    run_task(client, cluster, service, new_task.revision, 'rails', ['rails', 'db:migrate'])
-  end
-
-  update_service(client, cluster, service, "#{service}:#{new_task.revision}")
-  puts "#{service} deployment probably complete, but this tool is pretty rudimentary so check for yourself"
-end
 
 def notify_slack(env, image, stage)
   slack_hook = ENV["SLACK_HOOK"]
@@ -164,12 +41,18 @@ end
 
 notify_slack(env, image, "start")
 begin
-  deploy(client, env, RAILS_SERVICE, REPO, image, true)
-  deploy(client, env, RESQUE_WORKER_SERVICE, REPO, image, false)
-  deploy(client, env, RESQUE_PIPELINE_MONITOR_SERVICE, REPO, image, false)
-  deploy(client, env, RESQUE_RESULT_MONITOR_SERVICE, REPO, image, false)
+  system!("curl -L https://github.com/chanzuckerberg/czecs/releases/download/v0.1.0-rc1/czecs_0.1.0-rc1_linux_amd64.tar.gz | tar xz -C /tmp czecs")
+  task_definition_arn = `/tmp/czecs register --quiet --set tag=#{image} $#{cluster} idseq-#{env}-web czecs.json`
+  puts 'running migrations'
+  system!("/tmp/czecs task --set taskDefinitionArn=#{task_definition_arn} --set cluster=#{cluster} czecs-task-migrate.json"
+  system!("/tmp/czecs update --task-definition-arn #{task_definition_arn} --cluster #{cluster} idseq-#{env}-web czecs.json")
+  system!("/tmp/czecs update --set tag=#{image} #{cluster} --set name=resque --set rake_command=resque:workers idseq-#{env}-resque czecs.json")
+  system!("/tmp/czecs update --set tag=#{image} #{cluster} --set name=resque-pipeline-monitor --set rake_command=pipeline_monitor idseq-#{env}-resque-pipeline-monitor czecs.json")
+  system!("/tmp/czecs update --set tag=#{image} #{cluster} --set name=resque-result-monitor--set rake_command=result_monitor idseq-#{env}-resque-result-monitor czecs.json")
   notify_slack(env, image, "end")
 rescue => e
   notify_slack(env, image, "failure")
   raise e
+ensure
+  system!("rm -f /tmp/czecs")
 end
