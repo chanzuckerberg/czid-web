@@ -1,26 +1,32 @@
 import React from "react";
 import PathogenLabel from "./PathogenLabel";
 
-const PathogenSummary = ({ topScoringTaxa, pathogenTagSummary }) => {
+const PathogenSummary = ({ topScoringTaxa }) => {
   let topScoringDisplay, pathogenDisplay;
 
   if (topScoringTaxa.length > 0) {
     topScoringDisplay = (
-      <div>
-        Top scoring:
-        {topScoringTaxa.map(tax => tax.name).join(", ")}
+      <div className="top-scoring">
+        <div>Top Scoring</div>
+        {topScoringTaxa.map(tax => {
+          return <div>{tax.name}</div>;
+        })}
       </div>
     );
   }
 
-  if (Object.keys(pathogenTagSummary).length > 0) {
-    let categories = Object.keys(pathogenTagSummary);
-    categories.sort();
+  let topPathogens = topScoringTaxa.filter(tax => tax.pathogenTag);
+  if (topPathogens.length > 0) {
     pathogenDisplay = (
-      <div>
-        NIAID emerging pathogens:{" "}
-        {categories.map(cat => {
-          return <PathogenLabel number={pathogenTagSummary[cat]} type={cat} />;
+      <div className="top-pathogens">
+        <div>Pathogenic Agents</div>
+        {topPathogens.map(tax => {
+          return (
+            <div>
+              {tax.name}
+              <PathogenLabel type={tax.pathogenTag} />
+            </div>
+          );
         })}
       </div>
     );

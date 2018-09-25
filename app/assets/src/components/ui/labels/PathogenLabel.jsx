@@ -3,9 +3,9 @@ import React from "react";
 
 const PathogenLabel = ({ type, number }) => {
   let type2text = {
-    category_A: "priority A pathogen",
-    category_B: "priority B pathogen",
-    category_C: "priority C pathogen"
+    categoryA: "pathogenic | A",
+    categoryB: "pathogenic | B",
+    categoryC: "pathogenic | C"
   };
   let text = type2text[type];
   if (number) {

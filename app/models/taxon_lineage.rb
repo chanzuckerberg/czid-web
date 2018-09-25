@@ -40,7 +40,8 @@ class TaxonLineage < ApplicationRecord
   # category_A and category_C, for example, we will keep only category_A.
   # (When iterating over the hash key order is guaranteed to be the same as insertion order.)
   PRIORITY_PATHOGENS = {
-    "category_A" => [
+    "categoryA" => [
+      "Klebsiella", "Homo sapiens", # TEST -- REMOVE THIS!!!
       "Bacillus anthracis", "Clostridium botulinum", "Yersinia pestis",
       "orthopoxvirus", "Variola virus", "parapoxvirus", "yatapoxvirus", "molluscipoxvirus",
       "Francisella tularensis",
@@ -50,7 +51,7 @@ class TaxonLineage < ApplicationRecord
       "Flavivirus", "Dengue virus",
       "Filoviridae", "Ebolavirus", "Marburgvirus"
     ],
-    "category_B" => [
+    "categoryB" => [
       "Burkholderia pseudomallei", "Coxiella burnetii", "Brucella", "Burkholderia mallei",
       "Chlaydia psittaci", "Ricinus communis", "Clostridium perfringens", "Staphylococcus aureus",
       "Rickettsia prowazekii", "Escherichia coli", "Vibrio cholerae", "Vibrio parahaemolyticus", "Vibrio vulnificus",
@@ -61,7 +62,7 @@ class TaxonLineage < ApplicationRecord
       "Eastern equine encephalitis virus", "Western equine encephalitis virus", "Japanese encephalitis virus",
       "Saint Louis encephalitis virus", "Yellow fever virus", "Chikungunya virus", "Zika virus"
     ],
-    "category_C" => [
+    "categoryC" => [
       "Nipah henipavirus", "Hendra henipavirus", "Severe fever with thrombocytopenia virus", "Heartland virus",
       "Omsk hemorrhagic fever virus", "Kyasanur Forest disease virus", "Tick-borne encephalitis virus",
       "Powassan virus", "Mycobacterium tuberculosis",
