@@ -186,7 +186,7 @@ export default class Dendogram {
       if (!head.children || head.children.length === 0) {
         // Leaf node, no children
         let attrVal;
-        if (attrName in head.data) {
+        if (head.data.hasOwnProperty(attrName)) {
           // Get color based on the desired attribute
           attrVal = head.data[attrName];
         } else {
