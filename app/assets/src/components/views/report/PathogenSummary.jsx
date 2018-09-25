@@ -1,5 +1,5 @@
 import React from "react";
-import PathogenLabel from "./PathogenLabel";
+import PathogenLabel from "../../ui/labels/PathogenLabel";
 
 const PathogenSummary = ({ topScoringTaxa }) => {
   let topScoringDisplay, pathogenDisplay;

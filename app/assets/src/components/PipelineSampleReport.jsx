@@ -16,7 +16,7 @@ import MultipleDropdown from "./ui/controls/dropdowns/MultipleDropdown";
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
 import BetaLabel from "./ui/labels/BetaLabel";
 import PathogenLabel from "./ui/labels/PathogenLabel";
-import PathogenSummary from "./ui/labels/PathogenSummary";
+import PathogenSummary from "./views/report/PathogenSummary";
 import PhyloTreeInputs from "./views/phylo_tree/PhyloTreeInputs.jsx";
 
 class PipelineSampleReport extends React.Component {
