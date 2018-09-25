@@ -1,5 +1,6 @@
 import React from "react";
 import PathogenLabel from "../../ui/labels/PathogenLabel";
+import InsightIcon from "../../ui/icons/InsightIcon";
 
 const PathogenSummary = ({ topScoringTaxa }) => {
   let topScoringDisplay, pathogenDisplay;
@@ -7,7 +8,8 @@ const PathogenSummary = ({ topScoringTaxa }) => {
   if (topScoringTaxa.length > 0) {
     topScoringDisplay = (
       <div className="top-scoring">
-        <div>Top Scoring</div>
+        <InsightIcon />
+        <div className="header">Top Scoring</div>
         {topScoringTaxa.map(tax => {
           return <div>{tax.name}</div>;
         })}
@@ -19,7 +21,7 @@ const PathogenSummary = ({ topScoringTaxa }) => {
   if (topPathogens.length > 0) {
     pathogenDisplay = (
       <div className="top-pathogens">
-        <div>Pathogenic Agents</div>
+        <div className="header">Pathogenic Agents</div>
         {topPathogens.map(tax => {
           return (
             <div>

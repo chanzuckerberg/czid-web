@@ -18,6 +18,7 @@ import BetaLabel from "./ui/labels/BetaLabel";
 import PathogenLabel from "./ui/labels/PathogenLabel";
 import PathogenSummary from "./views/report/PathogenSummary";
 import PhyloTreeInputs from "./views/phylo_tree/PhyloTreeInputs.jsx";
+import InsightIcon from "./ui/icons/InsightIcon";
 
 class PipelineSampleReport extends React.Component {
   constructor(props) {
@@ -1044,6 +1045,7 @@ class PipelineSampleReport extends React.Component {
     let secondaryTaxonDisplay = (
       <span>
         <PathogenLabel type={tax_info.pathogenTag} />
+        {tax_info.topScoring ? <InsightIcon /> : null}
         {this.displayHoverActions(tax_info, report_details)}
       </span>
     );
