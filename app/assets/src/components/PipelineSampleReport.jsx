@@ -899,7 +899,7 @@ class PipelineSampleReport extends React.Component {
         <i
           data-tax-id={taxInfo.tax_id}
           onClick={this.gotoNCBI}
-          className="fa fa-link action-dot"
+          className="fa action fa-link action-dot"
           aria-hidden="true"
         />
       );
@@ -909,7 +909,7 @@ class PipelineSampleReport extends React.Component {
           data-tax-level={taxInfo.tax_level}
           data-tax-id={taxInfo.tax_id}
           onClick={this.downloadFastaUrl}
-          className="fa fa-download action-dot"
+          className="fa action fa-download action-dot"
           aria-hidden="true"
         />
       );
@@ -919,7 +919,7 @@ class PipelineSampleReport extends React.Component {
           data-tax-level={tax_level_str}
           data-tax-id={taxInfo.tax_id}
           onClick={this.gotoAlignmentVizLink}
-          className="fa fa-bars action-dot"
+          className="fa action fa-bars action-dot"
           aria-hidden="true"
         />
       );
@@ -934,7 +934,7 @@ class PipelineSampleReport extends React.Component {
       phyloTreeDot = (
         <i
           onClick={() => this.gotoTreeLink(taxInfo.tax_id)}
-          className="fa fa-code-fork action-dot"
+          className="fa action fa-code-fork action-dot"
           aria-hidden="true"
         />
       );
@@ -965,7 +965,7 @@ class PipelineSampleReport extends React.Component {
         data-tax-name={taxInfo.name}
         data-confirmation-strength="watched"
         onClick={this.props.toggleHighlightTaxon}
-        className="fa fa-eye action-dot"
+        className="fa action fa-eye action-dot"
         aria-hidden="true"
       />
     );
@@ -975,7 +975,7 @@ class PipelineSampleReport extends React.Component {
         data-tax-name={taxInfo.name}
         data-confirmation-strength="confirmed"
         onClick={this.props.toggleHighlightTaxon}
-        className="fa fa-check action-dot"
+        className="fa action fa-check action-dot"
         aria-hidden="true"
       />
     );

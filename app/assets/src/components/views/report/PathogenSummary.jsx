@@ -8,8 +8,9 @@ const PathogenSummary = ({ topScoringTaxa }) => {
   if (topScoringTaxa.length > 0) {
     topScoringDisplay = (
       <div className="top-scoring">
-        <InsightIcon />
-        <div className="header">Top Scoring</div>
+        <div className="header">
+          <InsightIcon />Top Scoring
+        </div>
         {topScoringTaxa.map(tax => {
           return <div>{tax.name}</div>;
         })}
