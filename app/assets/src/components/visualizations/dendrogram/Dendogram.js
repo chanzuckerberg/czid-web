@@ -176,11 +176,11 @@ export default class Dendogram {
     // Set up colors array
     this.colors = Colormap.getNScale(this.options.colormapName, allVals.length);
     this.colors = ["#cccccc"].concat(this.colors);
-    let missingName = this.options.colorGroupAbsentName;
+    let absentName = this.options.colorGroupAbsentName;
 
     function colorNode(head) {
       // Color the nodes based on the attribute values
-      if (!head.data) return 0;
+      if (!head.data) return 0; // 0 for uncolored default
       let colorResult = 0;
 
       if (!head.children || head.children.length === 0) {
@@ -191,7 +191,7 @@ export default class Dendogram {
           attrVal = head.data[attrName];
         } else {
           // Comes from an external source
-          attrVal = missingName;
+          attrVal = absentName;
         }
         colorResult = allVals.indexOf(attrVal);
       } else {
@@ -234,9 +234,8 @@ export default class Dendogram {
         .attr("class", "title")
         .text(legendTitle);
 
-      for (const [i, attrVal] of this.allColorAttributeValues.entries()) {
+      for (let i = 1; i < this.allColorAttributeValues.length; i++) {
         // First of values and colors is the placeholder for 'Uncolored'
-        if (i === 0) continue;
 
         // Add color circle
         let color = this.colors[i];
@@ -251,7 +250,7 @@ export default class Dendogram {
           .append("text")
           .attr("x", x + 15)
           .attr("y", y + 5)
-          .text(attrVal);
+          .text(this.allColorAttributeValues[i]);
 
         y += 30;
       }
