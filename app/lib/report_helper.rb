@@ -258,7 +258,7 @@ module ReportHelper
     if categories.present?
       categories_clause = " AND taxon_counts.superkingdom_taxid IN (#{categories.map { |category| CATEGORIES_TAXID_BY_NAME[category] }.compact.join(',')})"
     elsif include_phage
-      categories_clause = " AND taxon_counts.superkingdom_taxid = #{CATEGORIES_TAXID_BY_NAME["Viruses"]}"
+      categories_clause = " AND taxon_counts.superkingdom_taxid = #{CATEGORIES_TAXID_BY_NAME['Viruses']}"
     end
 
     read_specificity_clause = ""
@@ -268,7 +268,7 @@ module ReportHelper
 
     if !include_phage && categories.present?
       phage_clause = " AND taxon_counts.is_phage != 1"
-    elsif include_phage && !categories.present?
+    elsif include_phage && categories.blank?
       phage_clause = " AND taxon_counts.is_phage = 1"
     end
 
