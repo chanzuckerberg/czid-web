@@ -345,7 +345,10 @@ input[type="number"] {
     animation-name: highlight-animation;
     animation-duration: 2s;
   }
-  .fa :not(.ui.icon) {
+  .fa.fa-chevron-up {
+    margin-right: 5px;
+  }
+  .fa :not(insight-icon) {
     margin-left: 2px;
     margin-right: 5px;
     font-size: $font-size-h4;
