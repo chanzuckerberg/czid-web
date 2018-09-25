@@ -1101,8 +1101,7 @@ class PipelineSampleReport extends React.Component {
         : null;
     const ntCountLabel = isAggregate ? (
       <div className={`active ${this.switchClassName("NT", ntCount)}`}>
-        {showInsight ? <InsightIcon /> : null}
-        {ntCountStr}
+        {ntCountStr} {showInsight ? <InsightIcon /> : null}
       </div>
     ) : (
       <div className={`${this.switchClassName("NT", ntCount)}`}>

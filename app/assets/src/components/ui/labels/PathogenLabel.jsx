@@ -3,9 +3,9 @@ import React from "react";
 
 const PathogenLabel = ({ type }) => {
   let categoryLabels = {
-    categoryA: { text: "pathogenic | A", color: "red" },
-    categoryB: { text: "pathogenic | B", color: "orange" },
-    categoryC: { text: "pathogenic | C", color: "yellow" }
+    categoryA: { text: "pathogenic | a", color: "red" },
+    categoryB: { text: "pathogenic | b", color: "orange" },
+    categoryC: { text: "pathogenic | c", color: "yellow" }
   };
   if (type) {
     return (
