@@ -158,25 +158,36 @@ export default class Dendogram {
     }
 
     let attrName = this.options.colorGroupAttribute;
+    let absentName = this.options.colorGroupAbsentName;
 
     // Set up all attribute values. Colors end up looking like:
-    // Uncolored (grey) | Real values.. | Absent attribute color (e.g. for External Sources)
+    // Uncolored (grey) | Absent attribute color (e.g. for NCBI References) + Actual seen values..
     let allVals = new Set();
     this.root.leaves().forEach(n => {
-      if (n.data && n.data[attrName]) {
-        allVals.add(n.data[attrName]);
+      if (n.data) {
+        if (n.data.hasOwnProperty(attrName)) {
+          allVals.add(n.data[attrName]);
+        } else {
+          allVals.add(absentName);
+        }
       }
     });
     allVals = Array.from(allVals);
-    allVals = ["Uncolored"]
-      .concat(allVals)
-      .concat(this.options.colorGroupAbsentName);
+
+    // Just leave everything the uncolored color if there is only the absent
+    // value
+    this.skipColoring = false;
+    if (allVals.length === 1 && allVals[0] === absentName) {
+      this.skipColoring = true;
+      return;
+    }
+
+    allVals = ["Uncolored"].concat(allVals);
     this.allColorAttributeValues = allVals;
 
     // Set up colors array
     this.colors = Colormap.getNScale(this.options.colormapName, allVals.length);
     this.colors = [this.options.defaultColor].concat(this.colors);
-    let absentName = this.options.colorGroupAbsentName;
 
     function colorNode(head) {
       // Color the nodes based on the attribute values
@@ -190,7 +201,7 @@ export default class Dendogram {
           // Get color based on the desired attribute
           attrVal = head.data[attrName];
         } else {
-          // Comes from an external source
+          // Leaf node but missing the attribute
           attrVal = absentName;
         }
         colorResult = allVals.indexOf(attrVal);
@@ -217,8 +228,11 @@ export default class Dendogram {
 
   updateLegend() {
     // Generate legend for coloring by attribute name
-    if (!this.options.colorGroupAttribute) return;
+    if (!this.options.colorGroupAttribute || this.skipColoring) {
+      return;
+    }
 
+    let allVals = this.allColorAttributeValues;
     let legend = this.g.select(".legend");
     if (legend.empty()) {
       legend = this.g.append("g").attr("class", "legend");
@@ -236,7 +250,7 @@ export default class Dendogram {
 
       x += 5;
       y += 25;
-      for (let i = 1; i < this.allColorAttributeValues.length; i++, y += 30) {
+      for (let i = 1; i < allVals.length; i++, y += 30) {
         // First of values and colors is the placeholder for 'Uncolored'
 
         // Add color circle
@@ -252,7 +266,7 @@ export default class Dendogram {
           .append("text")
           .attr("x", x + 15)
           .attr("y", y + 5)
-          .text(this.allColorAttributeValues[i]);
+          .text(allVals[i]);
       }
     }
   }
@@ -581,7 +595,7 @@ export default class Dendogram {
         return d.children ? "" : d.data.name.split("__")[0];
       });
 
-    if (this.options.colorGroupAttribute) {
+    if (this.options.colorGroupAttribute && !this.skipColoring) {
       // Apply colors to the nodes from data.colorIndex
       let colors = this.colors;
       this.g.selectAll(".node").style("fill", function(d) {
