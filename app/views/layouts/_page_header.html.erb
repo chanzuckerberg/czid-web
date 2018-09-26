@@ -12,7 +12,13 @@
     <% end %>
   <% else %>
     <%= javascript_tag do %>
-      react_component('Header', { userSignedIn: false }, 'page_header')
+      react_component(
+        'Header', {
+          userSignedIn: false,
+          showLoginButton: <%= true %>
+        },
+        'page_header'
+      )
     <% end %>
   <% end %>
 </div>

@@ -50,6 +50,10 @@ class Header extends React.Component {
   }
 
   render() {
+    if (!this.userSignedIn) {
+      return null;
+    }
+
     return (
       <div className="header-row row">
         <div className="page-loading">
@@ -64,7 +68,6 @@ class Header extends React.Component {
               <div href="/" className="left brand-details">
                 <a href="/">
                   <div className="row">
-                    <div className="col s1 logo" />
                     <span className="col s1 logo-label">IDseq</span>
                   </div>
                 </a>
@@ -74,21 +77,18 @@ class Header extends React.Component {
                 className="right profile-header-dropdown"
               >
                 <Dropdown.Menu>
-                  {this.userSignedIn &&
-                    this.demoUser !== 1 && [
-                      <Dropdown.Item
-                        text="New Sample"
-                        key="1"
-                        onClick={this.gotoPage.bind(this, "/samples/new")}
-                      />,
-                      <Dropdown.Item
-                        text="New Sample (Command Line)"
-                        key="2"
-                        onClick={() =>
-                          this.openNewTab("/cli_user_instructions")
-                        }
-                      />
-                    ]}
+                  {this.demoUser !== 1 && [
+                    <Dropdown.Item
+                      text="New Sample"
+                      key="1"
+                      onClick={this.gotoPage.bind(this, "/samples/new")}
+                    />,
+                    <Dropdown.Item
+                      text="New Sample (Command Line)"
+                      key="2"
+                      onClick={() => this.openNewTab("/cli_user_instructions")}
+                    />
+                  ]}
                   {this.userDetails &&
                     this.userDetails.admin && (
                       <Dropdown.Item
