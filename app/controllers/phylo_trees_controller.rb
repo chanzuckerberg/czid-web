@@ -186,6 +186,7 @@ class PhyloTreesController < ApplicationController
         samples.project_id,
         samples.sample_tissue,
         samples.sample_location,
+        samples.created_at,
         host_genomes.name as host,
         projects.name as project_name,
         pipeline_runs.id as pipeline_run_id
@@ -196,6 +197,8 @@ class PhyloTreesController < ApplicationController
         samples.project_id = projects.id and
         host_genomes.id = samples.host_genome_id
     ").to_a
+
+    Rails.logger.info(samples_projects)
 
     # Also add:
     # - number of reads matching the specified taxid.

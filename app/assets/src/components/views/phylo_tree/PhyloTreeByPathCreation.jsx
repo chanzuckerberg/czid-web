@@ -177,7 +177,7 @@ class PhyloTreeByPathCreation extends React.Component {
           host: row.host,
           tissue: row.sample_tissue,
           location: row.sample_location,
-          date: row.created_at,
+          date: <Moment fromNow date={row.created_at} />,
           reads: `${(row.taxid_reads || {}).NT} | ${
             (row.taxid_reads || {}).NR
           }`,
