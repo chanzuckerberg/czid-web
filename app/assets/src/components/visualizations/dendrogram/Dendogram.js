@@ -160,23 +160,33 @@ export default class Dendogram {
     let attrName = this.options.colorGroupAttribute;
 
     // Set up all attribute values. Colors end up looking like:
-    // Uncolored (grey) | Real values.. | Absent attribute color (e.g. for External Sources)
+    // Uncolored (grey) | Absent attribute color (e.g. for NCBI References) | Real values..
     let allVals = new Set();
     this.root.leaves().forEach(n => {
-      if (n.data && n.data[attrName]) {
-        allVals.add(n.data[attrName]);
+      if (n.data) {
+        if (n.data.hasOwnProperty(attrName)) {
+          allVals.add(n.data[attrName]);
+        } else {
+          allVals.add(this.options.colorGroupAbsentName);
+        }
       }
     });
     allVals = Array.from(allVals);
-    allVals = ["Uncolored"]
-      .concat(allVals)
-      .concat(this.options.colorGroupAbsentName);
+
+    // Just leave everything the uncolored color if there are no real values
+    let absentName;
+    if (allVals.length === 1) {
+      absentName = "Uncolored";
+    } else {
+      absentName = this.options.colorGroupAbsentName;
+    }
+
+    allVals = ["Uncolored"].concat(allVals);
     this.allColorAttributeValues = allVals;
 
     // Set up colors array
     this.colors = Colormap.getNScale(this.options.colormapName, allVals.length);
     this.colors = [this.options.defaultColor].concat(this.colors);
-    let absentName = this.options.colorGroupAbsentName;
 
     function colorNode(head) {
       // Color the nodes based on the attribute values
@@ -217,7 +227,14 @@ export default class Dendogram {
 
   updateLegend() {
     // Generate legend for coloring by attribute name
-    if (!this.options.colorGroupAttribute) return;
+    let allVals = this.allColorAttributeValues;
+    if (
+      !this.options.colorGroupAttribute ||
+      allVals[allVals.length - 1] === this.options.colorGroupAbsentName
+    ) {
+      // Skip if no attribute to color by or the last value was just the absent value
+      return;
+    }
 
     let legend = this.g.select(".legend");
     if (legend.empty()) {
@@ -236,7 +253,7 @@ export default class Dendogram {
 
       x += 5;
       y += 25;
-      for (let i = 1; i < this.allColorAttributeValues.length; i++, y += 30) {
+      for (let i = 1; i < allVals.length; i++, y += 30) {
         // First of values and colors is the placeholder for 'Uncolored'
 
         // Add color circle
@@ -252,7 +269,7 @@ export default class Dendogram {
           .append("text")
           .attr("x", x + 15)
           .attr("y", y + 5)
-          .text(this.allColorAttributeValues[i]);
+          .text(allVals[i]);
       }
     }
   }
