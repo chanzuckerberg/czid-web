@@ -158,6 +158,7 @@ export default class Dendogram {
     }
 
     let attrName = this.options.colorGroupAttribute;
+    let absentName = this.options.colorGroupAbsentName;
 
     // Set up all attribute values. Colors end up looking like:
     // Uncolored (grey) | Absent attribute color (e.g. for NCBI References) | Real values..
@@ -167,18 +168,16 @@ export default class Dendogram {
         if (n.data.hasOwnProperty(attrName)) {
           allVals.add(n.data[attrName]);
         } else {
-          allVals.add(this.options.colorGroupAbsentName);
+          allVals.add(absentName);
         }
       }
     });
     allVals = Array.from(allVals);
 
-    // Just leave everything the uncolored color if there are no real values
-    let absentName;
-    if (allVals.length === 1) {
+    // Just leave everything the uncolored color if there is only the absent
+    // value
+    if (allVals.length === 1 && allVals[0] === absentName) {
       absentName = "Uncolored";
-    } else {
-      absentName = this.options.colorGroupAbsentName;
     }
 
     allVals = ["Uncolored"].concat(allVals);
@@ -228,11 +227,10 @@ export default class Dendogram {
   updateLegend() {
     // Generate legend for coloring by attribute name
     let allVals = this.allColorAttributeValues;
-    if (
-      !this.options.colorGroupAttribute ||
-      allVals[allVals.length - 1] === this.options.colorGroupAbsentName
-    ) {
-      // Skip if no attribute to color by or the last value was just the absent value
+    // No real values if it looks like [Uncolored, Absent]
+    let noRealValues =
+      allVals.length === 2 && allVals[1] === this.options.colorGroupAbsentName;
+    if (!this.options.colorGroupAttribute || noRealValues) {
       return;
     }
 
