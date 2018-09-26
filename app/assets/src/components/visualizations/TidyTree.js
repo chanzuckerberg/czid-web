@@ -1,6 +1,6 @@
 import { select } from "d3-selection";
 
-export default class Tree {
+export default class TidyTree {
   constructor(container, data, options) {
     this.container = container;
     this.data = data;

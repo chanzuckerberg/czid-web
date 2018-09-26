@@ -17,6 +17,7 @@ import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDrop
 import BetaLabel from "./ui/labels/BetaLabel";
 import PhyloTreeByPathCreationModal from "./views/phylo_tree/PhyloTreeByPathCreationModal";
 import PhyloTreeChecks from "./views/phylo_tree/PhyloTreeChecks";
+import TaxonTreeVis from "./views/TaxonTreeVis";
 
 class PipelineSampleReport extends React.Component {
   constructor(props) {
@@ -1722,7 +1723,7 @@ class RenderMarkup extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      view: this.props.view || "table"
+      view: this.props.view || "tree"
     };
     this._nodeTextClicked = this.nodeTextClicked.bind(this);
   }
@@ -1779,8 +1780,16 @@ class RenderMarkup extends React.Component {
     if (!(parent.state.selected_taxons.length && this.state.view == "tree")) {
       return;
     }
+    // return (
+    //   <PipelineSampleTree
+    //     taxons={parent.state.selected_taxons}
+    //     sample={parent.report_details.sample_info}
+    //     nameType={parent.state.name_type}
+    //     onNodeTextClicked={this._nodeTextClicked}
+    //   />
+    // );
     return (
-      <PipelineSampleTree
+      <TaxonTreeVis
         taxons={parent.state.selected_taxons}
         sample={parent.report_details.sample_info}
         nameType={parent.state.name_type}
