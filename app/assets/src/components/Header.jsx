@@ -14,9 +14,6 @@ class Header extends React.Component {
     this.signOut = this.signOut.bind(this);
     this.userAuthToken = props.userAuthToken;
     this.host_genome_names = props.host_genome_names;
-    $(document).ready(() => {
-      $(".modal").modal();
-    });
   }
 
   componentDidMount() {

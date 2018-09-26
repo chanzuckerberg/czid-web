@@ -228,13 +228,7 @@ class Samples extends React.Component {
 
     $(document).ready(function() {
       $("select").material_select();
-      $(".modal").modal({
-        inDuration: 0,
-        outDuration: 0
-      });
     });
-
-    console.log("constructor", this.state.selectedProjectId);
   }
 
   initializeTooltip() {
@@ -891,7 +885,6 @@ class Samples extends React.Component {
   }
 
   gotoTreeList() {
-    console.log("gotoTreeList", this.state.selectedProjectId);
     let tree_index_url = "/phylo_trees/index";
     let project_id = parseInt(this.state.selectedProjectId);
     if (project_id) {
