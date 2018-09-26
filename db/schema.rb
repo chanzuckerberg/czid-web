@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_180_918_172_623) do
+ActiveRecord::Schema.define(version: 20_180_926_221_632) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -25,7 +25,7 @@ ActiveRecord::Schema.define(version: 20_180_918_172_623) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "amr_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "amr_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string "gene"
     t.string "allele"
     t.float "coverage", limit: 24
@@ -129,7 +129,7 @@ ActiveRecord::Schema.define(version: 20_180_918_172_623) do
     t.index ["task"], name: "index_job_stats_on_task"
   end
 
-  create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "key", null: false
     t.integer "data_type", limit: 1, null: false
     t.string "text_raw_value"
@@ -469,6 +469,16 @@ ActiveRecord::Schema.define(version: 20_180_918_172_623) do
     t.text "rpm_list"
     t.index %w[background_id count_type tax_level tax_id], name: "index_taxon_summaries_detailed", unique: true
     t.index ["background_id"], name: "index_taxon_summaries_on_background_id"
+  end
+
+  create_table "ui_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.float "min_nt_z", limit: 24
+    t.float "min_nr_z", limit: 24
+    t.integer "min_nt_rpm"
+    t.integer "min_nr_rpm"
+    t.integer "top_n"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
