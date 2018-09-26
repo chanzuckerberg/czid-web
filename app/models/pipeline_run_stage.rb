@@ -196,7 +196,7 @@ class PipelineRunStage < ApplicationRecord
       nr_db: alignment_config.s3_nr_db_path,
       nr_loc_db: alignment_config.s3_nr_loc_db_path
     }
-    key_s3_params = "--key-path-s3 s3://idseq-secrets/idseq-prod.pem"
+    key_s3_params = format("--key-path-s3 s3://idseq-secrets/idseq-%s.pem", (Rails.env == 'prod' ? 'prod' : 'staging')) # TODO: This is hacky
     dag_commands = prepare_dag("non_host_alignment", attribute_dict, key_s3_params)
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
     # Run it

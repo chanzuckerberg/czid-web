@@ -2,6 +2,7 @@ import React from "react";
 import Divider from "../../layout/Divider";
 import Dropdown from "../../ui/controls/dropdowns/Dropdown";
 import FilterRow from "../../layout/FilterRow";
+import QueryString from "query-string";
 import PhyloTreeVis from "./PhyloTreeVis";
 import PropTypes from "prop-types";
 import ViewHeader from "../../layout/ViewHeader";
@@ -11,14 +12,36 @@ class PhyloTreeListView extends React.Component {
   constructor(props) {
     super(props);
 
+    let urlParams = this.parseUrlParams();
+    this.resetUrl();
+
     this.phyloTreeMap = new Map(props.phyloTrees.map(tree => [tree.id, tree]));
 
     this.state = {
-      selectedPhyloTreeId:
-        props.phyloTrees && props.phyloTrees[0] ? props.phyloTrees[0].id : null
+      selectedPhyloTreeId: this.getDefaultSelectedTreeId(
+        urlParams,
+        props.phyloTrees
+      )
     };
 
     this.handleTreeChange = this.handleTreeChange.bind(this);
+  }
+
+  getDefaultSelectedTreeId(urlParams, phyloTrees = []) {
+    return urlParams.treeId || (phyloTrees[0] || {}).id;
+  }
+
+  resetUrl() {
+    // remove parameters from url
+    window.history.replaceState({}, document.title, location.pathname);
+  }
+
+  parseUrlParams() {
+    let urlParams = QueryString.parse(location.search, {
+      arrayFormat: "bracket"
+    });
+    urlParams.treeId = parseInt(urlParams.treeId);
+    return urlParams;
   }
 
   handleTreeChange(_, newPhyloTreeId) {

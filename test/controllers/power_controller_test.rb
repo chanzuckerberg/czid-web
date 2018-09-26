@@ -286,34 +286,34 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
 
   test 'joe cannot create phylo_tree from pipeline_runs he cannot view' do
     entrypoint_taxon_count = taxon_counts(:three)
-    post "/phylo_trees/create", params: { name: 'new_phylo_tree', project_id: projects(:joe_project).id,
-                                          taxid: entrypoint_taxon_count.tax_id, pipeline_run_ids: [pipeline_runs(:three).id, pipeline_runs(:four).id],
-                                          tax_name: entrypoint_taxon_count.name }
+    post "/phylo_trees/create", params: { name: 'new_phylo_tree', projectId: projects(:joe_project).id,
+                                          taxId: entrypoint_taxon_count.tax_id, pipelineRunIds: [pipeline_runs(:three).id, pipeline_runs(:four).id],
+                                          taxName: entrypoint_taxon_count.name }
     assert_equal "unauthorized", JSON.parse(@response.body)['status']
   end
 
   test 'joe can create phylo_tree to joe_project from public samples' do
-    post "/phylo_trees/create", params: { name: 'new_phylo_tree', project_id: projects(:joe_project).id,
-                                          taxid: 1, pipeline_run_ids: [pipeline_runs(:public_project_sampleA_run).id,
-                                                                       pipeline_runs(:public_project_sampleB_run).id],
+    post "/phylo_trees/create", params: { name: 'new_phylo_tree', projectId: projects(:joe_project).id,
+                                          taxId: 1, pipelineRunIds: [pipeline_runs(:public_project_sampleA_run).id,
+                                                                     pipeline_runs(:public_project_sampleB_run).id],
                                           tax_name: 'some species' }
     assert_equal "ok", JSON.parse(@response.body)['status']
   end
 
   test 'joe can create phylo_tree to joe_project from samples in joe_project' do
-    post "/phylo_trees/create", params: { name: 'new_phylo_tree', project_id: projects(:joe_project).id,
-                                          taxid: 1, pipeline_run_ids: [pipeline_runs(:joe_project_sampleA_run).id,
-                                                                       pipeline_runs(:joe_project_sampleB_run).id],
+    post "/phylo_trees/create", params: { name: 'new_phylo_tree', projectId: projects(:joe_project).id,
+                                          taxId: 1, pipelineRunIds: [pipeline_runs(:joe_project_sampleA_run).id,
+                                                                     pipeline_runs(:joe_project_sampleB_run).id],
                                           tax_name: 'some species' }
     assert_equal "ok", JSON.parse(@response.body)['status']
   end
 
   test 'joe cannot create phylo_tree to public_project' do
     assert_raises(ActiveRecord::RecordNotFound) do
-      post "/phylo_trees/create", params: { name: 'new_phylo_tree', project_id: projects(:public_project).id,
-                                            taxid: 1, pipeline_run_ids: [pipeline_runs(:joe_project_sampleA_run).id,
-                                                                         pipeline_runs(:joe_project_sampleB_run).id],
-                                            tax_name: 'some species' }
+      post "/phylo_trees/create", params: { name: 'new_phylo_tree', projectId: projects(:public_project).id,
+                                            taxId: 1, pipelineRunIds: [pipeline_runs(:joe_project_sampleA_run).id,
+                                                                       pipeline_runs(:joe_project_sampleB_run).id],
+                                            taxName: 'some species' }
     end
   end
 end

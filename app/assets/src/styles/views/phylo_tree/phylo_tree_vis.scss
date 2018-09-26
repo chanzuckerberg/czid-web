@@ -1,8 +1,9 @@
 @import "../../themes/colors";
 
 .phylo-tree-vis {
+  padding: 20px;
+
   svg {
-    padding: 20px;
     width: 100%;
   }
 
@@ -11,24 +12,16 @@
   }
 
   .node circle {
-    fill: $light-grey;
-    opacity: 0.8;
-  }
-
-  .node.highlight circle {
-    fill: $primary-light;
+    opacity: 1;
   }
 
   .node text {
+    fill: $black;
     font-size: 14px;
   }
 
   .node.highlight text {
     font-weight: 700;
-  }
-
-  .node-internal circle {
-    fill: #ccc;
   }
 
   .node-internal text {
@@ -42,7 +35,7 @@
   }
 
   .link.highlight {
-    stroke: $primary-light;
+    stroke-width: 4px;
   }
 
   form {
@@ -62,6 +55,12 @@
       fill: none;
       stroke: $light-grey;
       stroke-width: 2px;
+    }
+  }
+
+  .legend {
+    .title {
+      font-weight: bold;
     }
   }
 }

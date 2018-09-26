@@ -12,13 +12,14 @@ import PipelineSampleTree from "./PipelineSampleTree";
 import Nanobar from "nanobar";
 import BasicPopup from "./BasicPopup";
 import OurDropdown from "./ui/controls/dropdowns/Dropdown";
-import MultipleDropdown from "./ui/controls/dropdowns/MultipleDropdown";
+import MultipleNestedDropdown from "./ui/controls/dropdowns/MultipleNestedDropdown";
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
 import BetaLabel from "./ui/labels/BetaLabel";
 import PathogenLabel from "./ui/labels/PathogenLabel";
 import PathogenSummary from "./views/report/PathogenSummary";
-import PhyloTreeInputs from "./views/phylo_tree/PhyloTreeInputs.jsx";
 import ReportInsightIcon from "./views/report/ReportInsightIcon";
+import PhyloTreeByPathCreationModal from "./views/phylo_tree/PhyloTreeByPathCreationModal";
+import PhyloTreeChecks from "./views/phylo_tree/PhyloTreeChecks";
 
 class PipelineSampleReport extends React.Component {
   constructor(props) {
@@ -74,8 +75,8 @@ class PipelineSampleReport extends React.Component {
       { text: "NR %id", value: "NR_percentidentity" },
       { text: "R log(1/e)", value: "NR_neglogevalue" }
     ];
-    this.category_child_parent = { Phage: "Viruses" };
-    this.category_parent_child = { Viruses: ["Phage"] };
+    this.categoryChildParent = { Phage: "Viruses" };
+    this.categoryParentChild = { Viruses: ["Phage"] };
     this.genus_map = {};
 
     this.INVALID_CALL_BASE_TAXID = -1e8;
@@ -124,7 +125,7 @@ class PipelineSampleReport extends React.Component {
         : [],
       includedSubcategories: cachedIncludedSubcategories
         ? JSON.parse(cachedIncludedSubcategories).filter(category => {
-            return category in this.category_child_parent;
+            return category in this.categoryChildParent;
           })
         : [],
       name_type: cached_name_type ? cached_name_type : "Scientific Name",
@@ -134,7 +135,8 @@ class PipelineSampleReport extends React.Component {
       countType: "NT",
       readSpecificity: cachedReadSpecificity
         ? parseInt(cachedReadSpecificity)
-        : 0
+        : 0,
+      phyloTreeModalOpen: true
     };
 
     this.expandAll = false;
@@ -172,6 +174,7 @@ class PipelineSampleReport extends React.Component {
     this.handleThresholdFiltersChange = this.handleThresholdFiltersChange.bind(
       this
     );
+    this.handleViewClicked = this.handleViewClicked.bind(this);
 
     this.renderMore = this.renderMore.bind(this);
     this.resetAllFilters = this.resetAllFilters.bind(this);
@@ -182,7 +185,7 @@ class PipelineSampleReport extends React.Component {
     this.initializeTooltip();
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     // Fill in URL parameters for usability and specifying data to fetch.
     this.fillUrlParams();
     // Fetch the actual report data via axios calls to fill in the page.
@@ -358,8 +361,8 @@ class PipelineSampleReport extends React.Component {
     if (includedCategories.length > 0 || includedSubcategories.length > 0) {
       // prepare some variables used by isTaxonIncluded
       const excludedSubcategories = [];
-      Object.keys(this.category_child_parent).forEach(subcat => {
-        const parent = this.category_child_parent[subcat];
+      Object.keys(this.categoryChildParent).forEach(subcat => {
+        const parent = this.categoryChildParent[subcat];
         if (
           includedCategories.includes(parent) &&
           includedSubcategories.indexOf(subcat) < 0
@@ -684,46 +687,29 @@ class PipelineSampleReport extends React.Component {
     };
   }
 
-  handleIncludedCategoriesChange(_, newIncludedCategories) {
-    // filter out categories from subcategory list
-    let includedSubcategories = newIncludedCategories.filter(category => {
-      return category in this.category_child_parent;
-    });
-
-    const allCategorySet = new Set(
-      this.all_categories.map(categoryOption => {
-        return categoryOption.name;
-      })
-    );
-
-    // filter out subcategories from the category list
-    let includedCategories = newIncludedCategories.filter(category => {
-      return (
-        !(category in this.category_child_parent) &&
-        allCategorySet.has(category)
-      );
-    });
-
-    // add all subcategories of a category if the parent category is being added
-    Object.keys(this.category_child_parent).forEach(subcat => {
-      const parent = this.category_child_parent[subcat];
-      if (
-        includedCategories.includes(parent) &&
-        !this.state.includedCategories.includes(parent)
-      ) {
-        if (includedSubcategories.indexOf(subcat) < 0) {
-          includedSubcategories.push(subcat);
-        }
+  handleIncludedCategoriesChange(
+    newIncludedCategories,
+    newIncludedSubcategories
+  ) {
+    let includedSubcategories = [];
+    for (let category in newIncludedSubcategories) {
+      if (newIncludedSubcategories.hasOwnProperty(category)) {
+        includedSubcategories = includedSubcategories.concat(
+          newIncludedSubcategories[category]
+        );
       }
-    });
+    }
 
     this.setState(
       {
-        includedCategories,
+        includedCategories: newIncludedCategories,
         includedSubcategories
       },
       () => {
-        Cookies.set("includedCategories", JSON.stringify(includedCategories));
+        Cookies.set(
+          "includedCategories",
+          JSON.stringify(newIncludedCategories)
+        );
         Cookies.set(
           "includedSubcategories",
           JSON.stringify(includedSubcategories)
@@ -739,13 +725,22 @@ class PipelineSampleReport extends React.Component {
         return category != categoryToRemove;
       }
     );
-    newIncludedCategories = newIncludedCategories.concat(
-      this.state.includedSubcategories.filter(subcategory => {
-        return subcategory != categoryToRemove;
-      })
+    this.handleIncludedCategoriesChange(
+      newIncludedCategories,
+      this.state.includedSubcategories
     );
+  }
 
-    this.handleIncludedCategoriesChange(this, newIncludedCategories);
+  handleRemoveSubcategory(subcategoryToRemove) {
+    let newIncludedSubcategories = this.state.includedSubcategories.filter(
+      subcategory => {
+        return subcategory != subcategoryToRemove;
+      }
+    );
+    this.handleIncludedCategoriesChange(
+      this.state.includedCategories,
+      newIncludedSubcategories
+    );
   }
 
   sortResults() {
@@ -846,6 +841,10 @@ class PipelineSampleReport extends React.Component {
     });
   }
 
+  handleViewClicked(_, data) {
+    this.setState({ view: data.name });
+  }
+
   // path to NCBI
   gotoNCBI(e) {
     const taxId = e.target.getAttribute("data-tax-id");
@@ -928,16 +927,17 @@ class PipelineSampleReport extends React.Component {
     if (
       this.allowPhyloTree &&
       taxInfo.tax_id > 0 &&
-      PhyloTreeInputs.passesCreateCondition({
-        NT: taxInfo.NT.r,
-        NR: taxInfo.NR.r
-      })
+      PhyloTreeChecks.passesCreateCondition(taxInfo.NT.r, taxInfo.NR.r)
     )
       phyloTreeDot = (
-        <i
-          onClick={() => this.gotoTreeLink(taxInfo.tax_id)}
-          className="fa fa-code-fork action-dot"
-          aria-hidden="true"
+        <PhyloTreeByPathCreationModal
+          admin={parseInt(this.admin)}
+          csrf={this.csrf}
+          trigger={
+            <i className="fa fa-code-fork action-dot" aria-hidden="true" />
+          }
+          taxonId={taxInfo.tax_id}
+          projectId={this.projectId}
         />
       );
     return (
@@ -1407,7 +1407,7 @@ class PipelineSampleReport extends React.Component {
             <Icon
               name="close"
               onClick={e => {
-                this.handleRemoveCategory(subcat);
+                this.handleRemoveSubcategory(subcat);
               }}
             />
           </Label>
@@ -1422,6 +1422,7 @@ class PipelineSampleReport extends React.Component {
         categories_filter_tag_list={categories_filter_tag_list}
         subcats_filter_tag_list={subcats_filter_tag_list}
         view={this.state.view}
+        onViewClicked={this.handleViewClicked}
         parent={this}
       />
     );
@@ -1626,20 +1627,32 @@ function CategoryFilter({ parent }) {
   parent.all_categories.forEach(category => {
     options.push({ text: category.name, value: category.name });
 
-    (parent.category_parent_child[category.name] || []).forEach(subcategory => {
-      options.push({
-        text: `${category.name} - ${subcategory}`,
+    let suboptions = [];
+    (parent.categoryParentChild[category.name] || []).forEach(subcategory => {
+      suboptions.push({
+        text: subcategory,
         value: subcategory
       });
     });
+    if (suboptions.length > 0) {
+      options[options.length - 1].suboptions = suboptions;
+    }
+  });
+
+  let selectedSuboptions = {};
+  parent.state.includedSubcategories.forEach(subcategory => {
+    let category = parent.categoryChildParent[subcategory];
+    if (!selectedSuboptions[category]) {
+      selectedSuboptions[category] = [];
+    }
+    selectedSuboptions[category].push(subcategory);
   });
 
   return (
-    <MultipleDropdown
+    <MultipleNestedDropdown
       options={options}
-      value={parent.state.includedCategories.concat(
-        parent.state.includedSubcategories
-      )}
+      selectedOptions={parent.state.includedCategories}
+      selectedSuboptions={selectedSuboptions}
       label="Categories: "
       onChange={parent.handleIncludedCategoriesChange}
     />
@@ -1738,11 +1751,10 @@ class RenderMarkup extends React.Component {
     this.state = {
       view: this.props.view || "table"
     };
-    this._onViewClicked = this.onViewClicked.bind(this);
     this._nodeTextClicked = this.nodeTextClicked.bind(this);
   }
 
-  UNSAFE_componentWillReceiveProps(newProps) {
+  componentWillReceiveProps(newProps) {
     if (newProps.view && this.state.view != newProps.view) {
       this.setState({ view: newProps.view });
     }
@@ -1750,10 +1762,6 @@ class RenderMarkup extends React.Component {
 
   nodeTextClicked(d) {
     this.props.parent.scrollToTaxon(d.id);
-  }
-
-  onViewClicked(e, f) {
-    this.setState({ view: f.name });
   }
 
   renderMenu() {
@@ -1764,7 +1772,7 @@ class RenderMarkup extends React.Component {
             <Menu.Item
               name="table"
               active={this.state.view == "table"}
-              onClick={this._onViewClicked}
+              onClick={this.props.onViewClicked}
             >
               <Icon name="table" />
             </Menu.Item>
@@ -1778,7 +1786,7 @@ class RenderMarkup extends React.Component {
             <Menu.Item
               name="tree"
               active={this.state.view == "tree"}
-              onClick={this._onViewClicked}
+              onClick={this.props.onViewClicked}
             >
               <Icon name="fork" />
             </Menu.Item>

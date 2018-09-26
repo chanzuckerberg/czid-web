@@ -8,30 +8,40 @@ class PhyloTreeVis extends React.Component {
     super(props);
 
     this.state = {
-      newick: props.newick,
-      tree: Tree.fromNewickString(props.newick, props.nodeData)
+      newick: props.newick
     };
 
     this.treeVis = null;
   }
 
-  componentWillReceiveProps(newProps) {
-    if (newProps.newick !== this.props.newick) {
-      this.setState({
-        newick: newProps.newick,
-        tree: Tree.fromNewickString(newProps.newick, newProps.nodeData)
-      });
+  static getDerivedStateFromProps(props, state) {
+    if (props.newick !== state.newick || props.nodeData !== state.nodeData) {
+      return {
+        newick: props.newick,
+        props: props.nodeData
+      };
     }
   }
 
   componentDidMount() {
-    this.treeVis = new Dendogram(this.treeContainer);
-    this.treeVis.setTree(this.state.tree);
+    let tree = Tree.fromNewickString(this.props.newick, this.props.nodeData);
+    this.treeVis = new Dendogram(this.treeContainer, tree, {
+      defaultColor: "#cccccc",
+      colormapName: "viridis",
+      colorGroupAttribute: "project_name",
+      colorGroupLegendTitle: "Project Name",
+      // Name for the legend when the attribute is missing / other
+      colorGroupAbsentName: "NCBI References",
+      legendX: 880,
+      legendY: 50
+    });
     this.treeVis.update();
   }
 
   componentDidUpdate() {
-    this.treeVis.setTree(this.state.tree);
+    this.treeVis.setTree(
+      Tree.fromNewickString(this.props.newick, this.props.nodeData)
+    );
     this.treeVis.update();
   }
 
@@ -47,7 +57,7 @@ class PhyloTreeVis extends React.Component {
   }
 }
 
-PhyloTreeVis.propType = {
+PhyloTreeVis.propTypes = {
   newick: PropTypes.string,
   nodeData: PropTypes.object
 };

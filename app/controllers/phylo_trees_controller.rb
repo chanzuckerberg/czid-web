@@ -7,7 +7,7 @@ class PhyloTreesController < ApplicationController
   # 1. index/show permissions are based on viewability of all the samples
   #    that make up the tree.
   # 2. create/edit permissions are based on
-  #    a. viewability of all the samles
+  #    a. viewability of all the samples
   #    b. the project the tree belongs to
   #       (if 2 users belong to the same project, they are considered
   #        collaborators and so they can both create/edit trees for the project).
@@ -32,8 +32,8 @@ class PhyloTreesController < ApplicationController
     @phylo_trees = current_power.phylo_trees
     @taxon = {}
 
-    taxid = params[:taxid]
-    project_id = params[:project_id]
+    taxid = params[:taxId]
+    project_id = params[:projectId]
 
     # Restrict to specified project
     if project_id
@@ -49,17 +49,29 @@ class PhyloTreesController < ApplicationController
                  name: taxon_lineage.name }
     end
 
+    @phylo_trees = @phylo_trees.as_json(include: { user: { only: [:id, :name] } })
+
     # Augment tree data with sample attributes and number of pipeline_runs
-    @phylo_trees = @phylo_trees.as_json
     @phylo_trees.each do |pt|
       sample_details = PhyloTree.sample_details_by_tree_id[pt["id"]]
       pt["sampleDetailsByNodeName"] = sample_details
     end
+
+    respond_to do |format|
+      format.html
+      format.json do
+        render json: {
+          project: @project,
+          taxon: @taxon,
+          phyloTrees: @phylo_trees
+        }
+      end
+    end
   end
 
   def new
-    taxid = params[:taxid].to_i
-    project_id = params[:project_id].to_i
+    taxid = params[:taxId].to_i
+    project_id = params[:projectId].to_i
 
     @project = current_power.updatable_projects.find(project_id)
 
@@ -75,6 +87,18 @@ class PhyloTreesController < ApplicationController
     taxon_lineage = TaxonLineage.where(taxid: taxid).last
     @taxon = { taxid: taxid,
                name: taxon_lineage.name }
+
+    respond_to do |format|
+      format.html
+      format.json do
+        render json: {
+          project: @project,
+          taxon: @taxon,
+          samples: @samples,
+          csrf: form_authenticity_token
+        }
+      end
+    end
   end
 
   def show
@@ -110,14 +134,14 @@ class PhyloTreesController < ApplicationController
   end
 
   def create
-    @project = current_power.updatable_projects.find(params[:project_id])
-    pipeline_run_ids = params[:pipeline_run_ids].map(&:to_i)
+    @project = current_power.updatable_projects.find(params[:projectId])
+    pipeline_run_ids = params[:pipelineRunIds].map(&:to_i)
 
     name = params[:name]
-    taxid = params[:taxid].to_i
-    tax_name = params[:tax_name]
+    taxid = params[:taxId].to_i
+    tax_name = params[:taxName]
     dag_branch = if current_user.admin?
-                   params[:dag_branch] || "master"
+                   params[:dagBranch] || "master"
                  else
                    "master"
                  end

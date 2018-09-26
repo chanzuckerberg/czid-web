@@ -9,6 +9,8 @@ import PropTypes from "prop-types";
 import React from "react";
 import SecondaryButton from "../ui/controls/buttons/SecondaryButton";
 import Slider from "../ui/controls/Slider";
+import Checkbox from "../ui/controls/Checkbox";
+import MultipleNestedDropdown from "../ui/controls/dropdowns/MultipleNestedDropdown";
 
 class PlaygroundControls extends React.Component {
   constructor(props) {
@@ -16,7 +18,14 @@ class PlaygroundControls extends React.Component {
     this.thresholdOptions = this.props.thresholdFilters;
     this.dropdownOptions = [
       { text: "Option 1", value: 0 },
-      { text: "option 2", value: 1 },
+      {
+        text: "option 2",
+        value: 1,
+        suboptions: [
+          { text: "suboption a", value: "a" },
+          { text: "suboption b", value: "b" }
+        ]
+      },
       { text: "Option 3", value: 2 }
     ];
 
@@ -239,6 +248,40 @@ class PlaygroundControls extends React.Component {
                 min={0}
                 max={100}
                 value={20}
+              />
+            ]}
+          />
+          <ComponentCard
+            title="Checkbox"
+            width={4}
+            components={[
+              <Checkbox
+                key={0}
+                label="Checkbox"
+                onChange={() => this.setState({ event: "Checkbox:Change" })}
+                value={0}
+                checked={true}
+              />,
+              <Checkbox
+                key={1}
+                label="Checkbox"
+                onChange={() => this.setState({ event: "Checkbox:Change" })}
+                value={1}
+              />
+            ]}
+          />
+          <ComponentCard
+            title="Multiple Tree Dropdown"
+            width={4}
+            components={[
+              <MultipleNestedDropdown
+                key={0}
+                fluid
+                options={this.dropdownOptions}
+                label="Options: "
+                onChange={(a, b) => {
+                  this.setState({ event: "MultipleDropdown:Change" });
+                }}
               />
             ]}
           />

@@ -63,7 +63,7 @@
         "chunks_in_flight": 32,
         "chunk_size": 15000,
         "max_concurrent": 2,
-        "environment": "prod"
+        "environment": "<%= Rails.env == 'prod' ? 'prod' : 'staging' %>"
         <% if @attribute_dict[:index_dir_suffix] %>
           ,"index_dir_suffix": "<%= @attribute_dict[:index_dir_suffix] %>"
         <% end %>
@@ -86,7 +86,7 @@
         "chunks_in_flight": 32,
         "chunk_size": 10000,
         "max_concurrent": 6,
-        "environment": "prod"
+        "environment": "<%= Rails.env == 'prod' ? 'prod' : 'staging' %>"
         <% if @attribute_dict[:index_dir_suffix] %>
           ,"index_dir_suffix": "<%= @attribute_dict[:index_dir_suffix] %>"
         <% end %>
@@ -101,6 +101,9 @@
         "lineage_db": "<%= @attribute_dict[:lineage_db] %>",
         "accession2taxid_db": "<%= @attribute_dict[:accession2taxid_db] %>",
         "loc_db": "<%= @attribute_dict[:nt_loc_db] %>"
+        <% if @attribute_dict[:skip_dedeuterostome_filter] == 0 %>
+          ,"deuterostome_db": "<%= @attribute_dict[:deuterostome_db] %>"
+        <% end %>
       },
       "additional_attributes": {
         "db": "<%= @attribute_dict[:nt_db] %>",
@@ -116,6 +119,9 @@
         "lineage_db": "<%= @attribute_dict[:lineage_db] %>",
         "accession2taxid_db": "<%= @attribute_dict[:accession2taxid_db] %>",
         "loc_db": "<%= @attribute_dict[:nr_loc_db] %>"
+        <% if @attribute_dict[:skip_dedeuterostome_filter] == 0 %>
+          ,"deuterostome_db": "<%= @attribute_dict[:deuterostome_db] %>"
+        <% end %>
       },
       "additional_attributes": {
         "db": "<%= @attribute_dict[:nr_db] %>",

@@ -12,7 +12,7 @@ class ProjectsController < ApplicationController
   ##########################################
 
   READ_ACTIONS = [:show, :add_favorite, :remove_favorite, :make_host_gene_counts, :host_gene_counts_status, :send_host_gene_counts, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv, :visuals].freeze
-  EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_emails, :update_project_visibility].freeze
+  EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_users, :update_project_visibility].freeze
   OTHER_ACTIONS = [:create, :new, :index, :send_project_csv].freeze
 
   power :projects, map: { EDIT_ACTIONS => :updatable_projects }, as: :projects_scope
@@ -203,8 +203,8 @@ class ProjectsController < ApplicationController
     end
   end
 
-  def all_emails
-    render json: { emails: @project.users.map(&:email) }
+  def all_users
+    render json: { users: @project.users.map { |user| { name: user[:name], email: user[:email] } } }
   end
 
   def add_user
@@ -212,7 +212,7 @@ class ProjectsController < ApplicationController
     if @user
       UserMailer.added_to_projects_email(@user.id, shared_project_email_arguments).deliver_now unless @project.user_ids.include? @user.id
     else
-      create_new_user_random_password(params[:user_email_to_add])
+      create_new_user_random_password(params[:user_name_to_add], params[:user_email_to_add])
     end
     @project.user_ids |= [@user.id]
   end
@@ -220,8 +220,8 @@ class ProjectsController < ApplicationController
   private
 
   # Use callbacks to share common setup or constraints between actions.
-  def create_new_user_random_password(email)
-    user_params_with_password = { email: email, name: email }
+  def create_new_user_random_password(name, email)
+    user_params_with_password = { email: email, name: name }
     random_password = SecureRandom.hex(10)
     user_params_with_password[:password] = random_password
     user_params_with_password[:password_confirmation] = random_password

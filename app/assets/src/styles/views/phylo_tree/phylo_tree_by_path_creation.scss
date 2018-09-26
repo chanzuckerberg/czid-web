@@ -1,0 +1,133 @@
+@import "../../themes/colors";
+
+.wizard {
+  &__page-1,
+  &__page-2,
+  &__page-3 {
+    &__subtitle {
+      color: $dark-grey;
+      font-weight: 700;
+      height: 16px;
+      line-height: 16px;
+      margin-bottom: 20px;
+      text-transform: capitalize;
+      vertical-align: middle;
+    }
+
+    &__table {
+      max-height: 300px;
+      margin-bottom: 20px;
+
+      tbody {
+        max-height: 260px;
+      }
+
+      // custom style for data tables
+      .data-table {
+        // applies to header and data
+        .column-name {
+          width: 350px;
+          text-align: left;
+        }
+
+        &__header {
+          text-align: center;
+        }
+
+        &__data {
+          text-align: center;
+
+          &.column-name {
+            font-weight: 700;
+          }
+
+          &.column-view {
+            color: $primary-light;
+            font-weight: 700;
+          }
+        }
+      }
+    }
+  }
+
+  &__page-1 {
+    &__action {
+      color: $primary-light;
+      font-weight: 700;
+    }
+  }
+
+  &__page-2 {
+    &__form {
+      margin-bottom: 20px;
+      height: 50px;
+
+      div {
+        float: left;
+        height: 50px;
+        display: flex;
+        align-items: center;
+
+        &:not(:last-child) {
+          margin-right: 20px;
+        }
+      }
+
+      &__label-name,
+      &__label-branch {
+        font-weight: 700;
+        float: left;
+        margin-right: 20px;
+      }
+
+      input {
+        float: left;
+      }
+
+      &:after {
+        content: "";
+        display: table;
+        clear: both;
+      }
+    }
+
+    &__table {
+      height: 300px;
+    }
+  }
+
+  &__page-3 {
+    padding-top: 10px;
+
+    &__searchbar {
+      height: 50px;
+      margin-bottom: 20px;
+
+      &__container {
+        float: left;
+        font-weight: 700;
+        height: 50px;
+        line-height: 50px;
+        vertical-align: middle;
+
+        &:not(:first-child) {
+          margin-left: 20px;
+        }
+      }
+
+      &:after {
+        content: "";
+        display: table;
+        clear: both;
+      }
+    }
+
+    &__table {
+      height: 300px;
+    }
+  }
+
+  &__error {
+    color: red;
+  }
+}

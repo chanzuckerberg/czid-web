@@ -1,0 +1,115 @@
+@import "../../../themes/colors";
+
+// TODO: Redundant with other dropdowns - will refactor
+.idseq-ui.dropdown.multiple-nested {
+  border: 1px solid $light-grey;
+  border-radius: 19px;
+  color: $black;
+  letter-spacing: 0.4px;
+  height: 38px;
+  line-height: 24px;
+  padding: 6px 16px;
+  position: relative;
+  font-family: $font-family-default;
+  font-size: 13px;
+  font-weight: 400;
+  font-style: normal;
+  font-stretch: normal;
+
+  .item {
+    font-family: $font-family-default;
+    font-size: 13px;
+    font-weight: 400;
+    font-style: normal;
+    font-stretch: normal;
+    padding: 6px 10px !important;
+  }
+
+  .label-container {
+    margin-right: 10px;
+  }
+
+  .label-container-title {
+    float: left;
+    font-weight: 600;
+    vertical-align: middle;
+    margin-right: 10px;
+  }
+
+  .label-container-count.ui.label {
+    line-height: 12px;
+    height: 24px;
+    border-radius: 12px;
+    background-color: $off-white;
+    color: $primary-light;
+    float: right;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  i.icon {
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    right: 10px;
+    top: 5px;
+    line-height: 24px;
+    pointer-events: none;
+    font-size: 20px;
+    &:before {
+      font-family: FontAwesome;
+      content: "\f107";
+    }
+  }
+
+  &.active {
+    border: 1px solid $primary-light;
+    border-radius: 19px;
+  }
+
+  &.disabled {
+    border: 1px solid $medium-grey;
+    color: $medium-grey;
+
+    .ui.label {
+      color: $medium-grey;
+    }
+  }
+
+  .idseq-ui.input[type="checkbox"].checkbox {
+    &:hover {
+      background-color: transparent;
+    }
+  }
+  // input[type="checkbox"] {
+  //   opacity: 1;
+  //   position: static;
+  //   margin-right: 0.5em;
+
+  //   -webkit-appearance: none;
+  //   background-color: $white;
+  //   border: 1px solid $medium-grey;
+  //   border-radius: 2px;
+  //   padding: 8px;
+  //   display: inline-block;
+  //   position: relative;
+  //   top: 0.3em;
+
+  //   &:checked {
+  //     background-color: $primary-light;
+  //     border: 1px solid $primary-light;
+  //     color: $white;
+  //   }
+
+  //   &:checked:after {
+  //     content: "\2713";
+  //     font-size: 14px;
+  //     font-weight: 100;
+  //     position: absolute;
+  //     top: 0px;
+  //     left: 3px;
+  //     color: $white;
+  //   }
+  // }
+}

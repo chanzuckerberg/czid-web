@@ -18,6 +18,7 @@ class PhyloTree < ApplicationRecord
   def s3_outputs
     {
       "newick" => "#{versioned_output_s3_path}/phylo_tree.newick",
+      "ncbi_metadata" => "#{versioned_output_s3_path}/ncbi_metadata.json",
       "SNP_annotations" => "#{versioned_output_s3_path}/ksnp3_outputs/SNPs_all_annotated"
     }
   end
@@ -32,16 +33,22 @@ class PhyloTree < ApplicationRecord
     return if dag_version.blank?
 
     # Retrieve output:
-    file = Tempfile.new
-    _cmd_stdout, _cmd_stderr, cmd_status = Open3.capture3("aws", "s3", "cp", s3_outputs["newick"], file.path.to_s)
-    if cmd_status.success?
-      file.open
-      self.newick = file.read
-      self.status = newick.present? ? STATUS_READY : STATUS_FAILED
-      save
+    required_outputs = %w[newick ncbi_metadata]
+    temp_files_by_output = {}
+    required_outputs.each do |ro|
+      temp_files_by_output[ro] = Tempfile.new
+      download_status = Open3.capture3("aws", "s3", "cp", s3_outputs[ro], temp_files_by_output[ro].path.to_s)[2]
+      temp_files_by_output[ro].open
+      self[ro] = temp_files_by_output[ro].read if download_status.success?
     end
-    file.close
-    file.unlink
+    self.status = STATUS_READY if required_outputs.all? { |ro| self[ro].present? }
+    save
+
+    # Clean up:
+    temp_files_by_output.values.each do |tf|
+      tf.close
+      tf.unlink
+    end
   end
 
   def monitor_job(throttle = true)
@@ -50,7 +57,7 @@ class PhyloTree < ApplicationRecord
     return if throttle && rand >= 0.1 # if throttling, do time-consuming aegea checks only 10% of the time
     job_status, self.job_log_id, _job_hash, self.job_description = job_info(job_id, id)
     if job_status == PipelineRunStage::STATUS_FAILED ||
-       (job_status == "SUCCEEDED" && !Open3.capture3("aws", "s3", "ls", newick_s3_path)[2].exitstatus.zero?)
+       (job_status == "SUCCEEDED" && !Open3.capture3("aws", "s3", "ls", s3_outputs["newick"])[2].success?)
       self.status = STATUS_FAILED
       save
     end
@@ -102,6 +109,8 @@ class PhyloTree < ApplicationRecord
     # Generate DAG
     attribute_dict = {
       phylo_tree_output_s3_path: phylo_tree_output_s3_path,
+      newick_basename: File.basename(s3_outputs["newick"]),
+      ncbi_metadata_basename: File.basename(s3_outputs["ncbi_metadata"]),
       taxid: taxid,
       reference_taxids: reference_taxids,
       superkingdom_name: superkingdom_name,
@@ -152,9 +161,11 @@ class PhyloTree < ApplicationRecord
 
   def self.sample_details_by_tree_id
     query_results = ActiveRecord::Base.connection.select_all("
-      select phylo_tree_id, pipeline_run_id, sample_id, samples.*
-      from phylo_trees_pipeline_runs, pipeline_runs, samples
-      where phylo_trees_pipeline_runs.pipeline_run_id = pipeline_runs.id and
+      select phylo_tree_id, pipeline_run_id, ncbi_metadata, sample_id, samples.*, projects.name as project_name
+      from phylo_trees, phylo_trees_pipeline_runs, pipeline_runs, samples
+      inner join projects on samples.project_id = projects.id
+      where phylo_trees.id = phylo_trees_pipeline_runs.phylo_tree_id and
+            phylo_trees_pipeline_runs.pipeline_run_id = pipeline_runs.id and
             pipeline_runs.sample_id = samples.id
       order by phylo_tree_id
     ").to_a
@@ -165,6 +176,14 @@ class PhyloTree < ApplicationRecord
       tree_node_name = pipeline_run_id.to_s
       indexed_results[tree_id] ||= {}
       indexed_results[tree_id][tree_node_name] = entry
+    end
+    # Add NCBI metadata
+    query_results.index_by { |entry| entry["phylo_tree_id"] }.each do |tree_id, tree_data|
+      ncbi_metadata = JSON.parse(tree_data["ncbi_metadata"] || "{}")
+      ncbi_metadata.each do |node_id, node_metadata|
+        node_metadata["name"] ||= node_metadata["accession"]
+        indexed_results[tree_id][node_id] = node_metadata
+      end
     end
     indexed_results
   end
