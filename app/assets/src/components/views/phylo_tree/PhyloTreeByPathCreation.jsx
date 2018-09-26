@@ -26,6 +26,8 @@ class PhyloTreeByPathCreation extends React.Component {
       selectedOtherSamples: new Set(),
       otherSamplesFilter: "",
 
+      taxonList: [],
+
       showErrorName: false,
       showErrorSamples: false,
       treeName: ""
@@ -75,8 +77,12 @@ class PhyloTreeByPathCreation extends React.Component {
     this.handleNewTreeContextResponse = this.handleNewTreeContextResponse.bind(
       this
     );
+    this.handleTaxonSearchContextResponse = this.handleTaxonSearchContextResponse.bind(
+      this
+    );
     this.isTreeNameValid = this.isTreeNameValid.bind(this);
     this.loadNewTreeContext = this.loadNewTreeContext.bind(this);
+    this.loadTaxonSearchContext = this.loadTaxonSearchContext.bind(this);
   }
 
   componentDidMount() {
@@ -115,6 +121,17 @@ class PhyloTreeByPathCreation extends React.Component {
       });
   }
 
+  loadTaxonSearchContext() {
+    axios
+      .get("/phylo_trees/choose_taxon.json")
+      .then(response => this.handleTaxonSearchContextResponse(response))
+      .catch(error => {
+        // TODO: properly handle error
+        // eslint-disable-next-line no-console
+        console.error("Error loading taxon search context: ", error);
+      });
+  }
+
   handlePhyloTreeResponse(response) {
     const data = response.data;
     let phyloTrees = data.phyloTrees;
@@ -150,6 +167,12 @@ class PhyloTreeByPathCreation extends React.Component {
         samplesLoaded: true
       });
     }
+  }
+
+  handleTaxonSearchContextResponse(response) {
+    this.setState({
+      taxonList: response.data
+    });
   }
 
   parsePhyloTreeData(phyloTreeData) {
@@ -326,32 +349,31 @@ class PhyloTreeByPathCreation extends React.Component {
       "reads"
     ];
 
-    if (!this.state.skipListTrees) {
-      pages.push(
-        <Wizard.Page
-          key="page_1"
-          className="wizard__page-1"
-          skipDefaultButtons={true}
-          title="Phylogenetic Trees"
-          small
-        >
-          <div className="wizard__page-1__subtitle">{this.taxonName}</div>
-          <div className="wizard__page-1__table">
-            {this.state.phyloTreesLoaded && (
-              <DataTable
-                headers={this.phyloTreeHeaders}
-                columns={["name", "user", "last_update", "view"]}
-                data={this.state.phyloTrees}
-              />
-            )}
-          </div>
-          <div className="wizard__page-1__action">
-            <Wizard.Action action="continue">+ Create new tree</Wizard.Action>
-          </div>
-        </Wizard.Page>
-      );
-    }
-    pages.push(
+    let pageListTrees = (
+      <Wizard.Page
+        key="page_1"
+        className="wizard__page-1"
+        skipDefaultButtons={true}
+        title="Phylogenetic Trees"
+        small
+      >
+        <div className="wizard__page-1__subtitle">{this.taxonName}</div>
+        <div className="wizard__page-1__table">
+          {this.state.phyloTreesLoaded && (
+            <DataTable
+              headers={this.phyloTreeHeaders}
+              columns={["name", "user", "last_update", "view"]}
+              data={this.state.phyloTrees}
+            />
+          )}
+        </div>
+        <div className="wizard__page-1__action">
+          <Wizard.Action action="continue">+ Create new tree</Wizard.Action>
+        </div>
+      </Wizard.Page>
+    );
+
+    let pageNameAndProjectSamples = (
       <Wizard.Page
         key="wizard__page_2"
         title="Create phylogenetic tree and select samples from the project"
@@ -390,7 +412,10 @@ class PhyloTreeByPathCreation extends React.Component {
             />
           )}
         </div>
-      </Wizard.Page>,
+      </Wizard.Page>
+    );
+
+    let pageAddIdseqSamples = (
       <Wizard.Page
         key="wizard__page_3"
         title={`Would you like additional samples from IDSeq that contain ${
@@ -426,6 +451,56 @@ class PhyloTreeByPathCreation extends React.Component {
         </div>
       </Wizard.Page>
     );
+
+    let pageSelectTaxonAndProject = (
+      <Wizard.Page
+        key="wizard__page_2"
+        title="Select organism and project"
+        onLoad={this.loadTaxonSearchContext}
+      >
+        <div className="wizard__page-2__subtitle">{this.taxonName}</div>
+        <div className="wizard__page-2__form">
+          <div>
+            <div className="wizard__page-2__form__label-name">Name</div>
+            <Input
+              className={
+                this.state.showErrorName && !this.isTreeNameValid()
+                  ? "error"
+                  : ""
+              }
+              placeholder="Tree Name"
+              onChange={this.handleNameChange}
+            />
+          </div>
+          {this.props.admin === 1 && (
+            <div>
+              <div className="wizard__page-2__form__label-branch">Branch</div>
+              <Input placeholder="master" onChange={this.handleBranchChange} />
+            </div>
+          )}
+        </div>
+        <div className="wizard__page-2__table">
+          {this.state.samplesLoaded && (
+            <DataTable
+              headers={this.projectSamplesHeaders}
+              columns={projectSamplesColumns}
+              data={this.state.projectSamples}
+              selectedRows={this.state.selectedProjectSamples}
+              onSelectedRowsChanged={this.handleChangedProjectSamples}
+            />
+          )}
+        </div>
+      </Wizard.Page>
+    );
+
+    if (!this.state.skipListTrees) {
+      pages.push(pageListTrees);
+    }
+    if (this.props.taxonId && this.props.projectId) {
+      pages.push(pageNameAndProjectSamples, pageAddIdseqSamples);
+    } else {
+      pages.push(pageSelectTaxonAndProject);
+    }
     return pages;
   }
 

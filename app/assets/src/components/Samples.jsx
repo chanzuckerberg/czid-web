@@ -17,6 +17,7 @@ import DownloadButtonDropdown from "./ui/controls/dropdowns/DownloadButtonDropdo
 import PrimaryButton from "./ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "./ui/controls/buttons/SecondaryButton";
 import MultipleDropdown from "./ui/controls/dropdowns/MultipleDropdown";
+import PhyloTreeByPathCreationModal from "./views/phylo_tree/PhyloTreeByPathCreationModal";
 
 class Samples extends React.Component {
   constructor(props, context) {
@@ -2050,9 +2051,16 @@ function ProjectInfoHeading({
         {state.selectedProjectId ? project_menu : null}
         {table_download_dropdown}
         {parent.allowPhyloTree ? (
-          <div className="button-container">
-            <PhylogenyButton onClick={parent.gotoTreeList} />
-          </div>
+          <PhyloTreeByPathCreationModal
+            admin={parseInt(parent.admin)}
+            csrf={parent.csrf}
+            trigger={
+              <div className="button-container">
+                <PhylogenyButton />
+              </div>
+            }
+            projectId={state.selectedProjectId}
+          />
         ) : null}
         {compare_button}
         <BackgroundModal parent={parent} />
