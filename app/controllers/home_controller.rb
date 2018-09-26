@@ -12,7 +12,7 @@ class HomeController < ApplicationController
       # Call secure home#index path if authenticated
       redirect_to home_path
     else
-      render 'landing', locals: { show_login_button: true }
+      render 'landing'
     end
   end
 
