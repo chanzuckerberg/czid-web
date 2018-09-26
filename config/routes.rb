@@ -60,6 +60,7 @@ Rails.application.routes.draw do
   post 'phylo_trees/create', to: 'phylo_trees#create'
   post 'phylo_trees/retry', to: 'phylo_trees#retry'
   get 'phylo_trees/:id/download_snps', to: 'phylo_trees#download_snps'
+  get 'phylo_trees/choose_taxon', to: 'phylo_trees#choose_taxon'
 
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
