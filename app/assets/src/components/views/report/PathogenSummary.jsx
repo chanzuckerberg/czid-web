@@ -1,5 +1,5 @@
 import React from "react";
-import InsightMessage from "../../layout/InsightMessage";
+import InsightMessage from "../../ui/containers/InsightMessage";
 import PathogenLabel from "../../ui/labels/PathogenLabel";
 import BetaLabel from "../../ui/labels/BetaLabel";
 import ReportInsightIcon from "./ReportInsightIcon";
