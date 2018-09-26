@@ -198,8 +198,6 @@ class PhyloTreesController < ApplicationController
         host_genomes.id = samples.host_genome_id
     ").to_a
 
-    Rails.logger.info(samples_projects)
-
     # Also add:
     # - number of reads matching the specified taxid.
     # Do not include the query on taxon_counts in the previous query above using a join,
