@@ -1,8 +1,20 @@
 require 'will_paginate/array'
+
 class HomeController < ApplicationController
   include SamplesHelper
-  before_action :login_required
-  power :projects
+  before_action :login_required, except: [:landing]
+  skip_before_action :authenticate_user!, only: [:landing]
+  power :projects, except: [:landing]
+
+  # Public unsecured landing page
+  def landing
+    if current_user
+      # Call secure home#index path if authenticated
+      redirect_to home_path
+    else
+      render 'landing'
+    end
+  end
 
   def index
     @favorite_projects = current_user.favorites
