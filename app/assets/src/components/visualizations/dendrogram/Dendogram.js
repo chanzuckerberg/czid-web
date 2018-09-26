@@ -161,7 +161,7 @@ export default class Dendogram {
     let absentName = this.options.colorGroupAbsentName;
 
     // Set up all attribute values. Colors end up looking like:
-    // Uncolored (grey) | Absent attribute color (e.g. for NCBI References) + Real values..
+    // Uncolored (grey) | Absent attribute color (e.g. for NCBI References) + Actual seen values..
     let allVals = new Set();
     this.root.leaves().forEach(n => {
       if (n.data) {
@@ -176,8 +176,10 @@ export default class Dendogram {
 
     // Just leave everything the uncolored color if there is only the absent
     // value
+    this.skipColoring = false;
     if (allVals.length === 1 && allVals[0] === absentName) {
-      absentName = "Uncolored";
+      this.skipColoring = true;
+      return;
     }
 
     allVals = ["Uncolored"].concat(allVals);
@@ -199,7 +201,7 @@ export default class Dendogram {
           // Get color based on the desired attribute
           attrVal = head.data[attrName];
         } else {
-          // Comes from an external source
+          // Leaf node but missing the attribute
           attrVal = absentName;
         }
         colorResult = allVals.indexOf(attrVal);
@@ -226,14 +228,11 @@ export default class Dendogram {
 
   updateLegend() {
     // Generate legend for coloring by attribute name
-    let allVals = this.allColorAttributeValues;
-    // No real values if it looks like [Uncolored, Absent]
-    let noRealValues =
-      allVals.length === 2 && allVals[1] === this.options.colorGroupAbsentName;
-    if (!this.options.colorGroupAttribute || noRealValues) {
+    if (!this.options.colorGroupAttribute || this.skipColoring) {
       return;
     }
 
+    let allVals = this.allColorAttributeValues;
     let legend = this.g.select(".legend");
     if (legend.empty()) {
       legend = this.g.append("g").attr("class", "legend");
@@ -596,7 +595,7 @@ export default class Dendogram {
         return d.children ? "" : d.data.name.split("__")[0];
       });
 
-    if (this.options.colorGroupAttribute) {
+    if (this.options.colorGroupAttribute && !this.skipColoring) {
       // Apply colors to the nodes from data.colorIndex
       let colors = this.colors;
       this.g.selectAll(".node").style("fill", function(d) {
