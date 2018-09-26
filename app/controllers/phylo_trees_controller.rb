@@ -7,7 +7,7 @@ class PhyloTreesController < ApplicationController
   # 1. index/show permissions are based on viewability of all the samples
   #    that make up the tree.
   # 2. create/edit permissions are based on
-  #    a. viewability of all the samles
+  #    a. viewability of all the samples
   #    b. the project the tree belongs to
   #       (if 2 users belong to the same project, they are considered
   #        collaborators and so they can both create/edit trees for the project).
@@ -184,13 +184,18 @@ class PhyloTreesController < ApplicationController
       select
         samples.name,
         samples.project_id,
+        samples.sample_tissue,
+        samples.sample_location,
+        samples.created_at,
+        host_genomes.name as host,
         projects.name as project_name,
         pipeline_runs.id as pipeline_run_id
-      from pipeline_runs, projects, samples
+      from pipeline_runs, projects, samples, host_genomes
       where
         pipeline_runs.id in (#{pipeline_run_ids.join(',')}) and
         pipeline_runs.sample_id = samples.id and
-        samples.project_id = projects.id
+        samples.project_id = projects.id and
+        host_genomes.id = samples.host_genome_id
     ").to_a
 
     # Also add:

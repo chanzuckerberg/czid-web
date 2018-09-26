@@ -200,7 +200,7 @@ class SamplesController < ApplicationController
   def top_taxons
     sample_ids = params[:sample_ids].split(",").map(&:to_i) || []
 
-    num_results = params[:n] ? params[:n].to_i : ReportHelper::MAX_NUM_TAXONS
+    num_results = params[:n] ? params[:n].to_i : SamplesController::DEFAULT_MAX_NUM_TAXONS
     sort_by = params[:sort_by] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
 
     samples = current_power.samples.where(id: sample_ids)
@@ -208,7 +208,7 @@ class SamplesController < ApplicationController
     if samples.first
       first_sample = samples.first
       background_id = check_background_id(first_sample)
-      @top_taxons = top_taxons_details(samples, background_id, num_results, sort_by, species_selected)
+      @top_taxons = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, {}, {}, false, false)
       render json: @top_taxons
     else
       render json: {}
@@ -282,9 +282,12 @@ class SamplesController < ApplicationController
 
     @report_info = external_report_info(pipeline_run_id, background_id, params)
 
-    # Fill lineage details into report info
-    tax_map = @report_info[:taxonomy_details][2]
-    @report_info[:taxonomy_details][2] = TaxonLineage.fill_lineage_details(tax_map, pipeline_run_id)
+    # Fill lineage details into report info.
+    # @report_info[:taxonomy_details][2] is the array of taxon rows (which are hashes with keys like tax_id, name, NT, etc)
+    @report_info[:taxonomy_details][2] = TaxonLineage.fill_lineage_details(@report_info[:taxonomy_details][2], pipeline_run_id)
+
+    # Label top-scoring hits for the executive summary
+    @report_info[:topScoringTaxa] = label_top_scoring_taxa!(@report_info[:taxonomy_details][2])
 
     render json: JSON.dump(@report_info)
   end
@@ -603,7 +606,7 @@ class SamplesController < ApplicationController
     taxon_ids = taxon_ids.compact
     categories = params[:categories]
     threshold_filters = (params[:thresholdFilters] || {}).map { |filter| JSON.parse(filter) }
-    include_phage = params[:phage] == "0"
+    include_phage = (JSON.parse(params[:subcategories]) || {}).fetch("Viruses", []).include?("Phage")
     read_specificity = params[:readSpecificity] ? params[:readSpecificity].to_i == 1 : false
 
     # TODO: should fail if field is not well formatted and return proper error to client
@@ -614,8 +617,7 @@ class SamplesController < ApplicationController
 
     first_sample = samples.first
     background_id = params[:background] ? params[:background].to_i : check_background_id(first_sample)
-    Rails.logger.debug("params = #{params}")
-    taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, threshold_filters, include_phage, read_specificity).pluck("tax_id") if taxon_ids.empty?
+    taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, threshold_filters, read_specificity, include_phage).pluck("tax_id") if taxon_ids.empty?
 
     return {} if taxon_ids.empty?
 

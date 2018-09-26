@@ -40,9 +40,9 @@ class PhyloTreeByPathCreation extends React.Component {
 
     this.projectSamplesHeaders = {
       name: "Name",
-      // host: "Host",
-      // tissue: "Tissue",
-      // location: "Location",
+      host: "Host",
+      tissue: "Tissue",
+      location: "Location",
       date: "Date",
       reads: "Read Count"
     };
@@ -50,9 +50,9 @@ class PhyloTreeByPathCreation extends React.Component {
     this.otherSamplesHeaders = {
       name: "Name",
       project: "Project",
-      // host: "Host",
-      // tissue: "Tissue",
-      // location: "Location",
+      host: "Host",
+      tissue: "Tissue",
+      location: "Location",
       date: "Date",
       reads: "Read Count\n(NT | NR)"
     };
@@ -174,10 +174,10 @@ class PhyloTreeByPathCreation extends React.Component {
       ) {
         let entry = {
           name: row.name,
-          host: "-",
-          tissue: "-",
-          location: "-",
-          date: "-",
+          host: row.host,
+          tissue: row.sample_tissue,
+          location: row.sample_location,
+          date: <Moment fromNow date={row.created_at} />,
           reads: `${(row.taxid_reads || {}).NT} | ${
             (row.taxid_reads || {}).NR
           }`,
@@ -310,18 +310,18 @@ class PhyloTreeByPathCreation extends React.Component {
     let pages = [];
     const projectSamplesColumns = [
       "name",
-      // "host",
-      // "tissue",
-      // "location",
+      "host",
+      "tissue",
+      "location",
       "date",
       "reads"
     ];
     const otherSamplesColumns = [
       "name",
       "project",
-      // "host",
-      // "tissue",
-      // "location",
+      "host",
+      "tissue",
+      "location",
       "date",
       "reads"
     ];
@@ -393,7 +393,7 @@ class PhyloTreeByPathCreation extends React.Component {
       </Wizard.Page>,
       <Wizard.Page
         key="wizard__page_3"
-        title={`Would you like to additional samples from IDSeq that contain ${
+        title={`Would you like additional samples from IDSeq that contain ${
           this.taxonName
         }`}
       >

@@ -254,6 +254,16 @@ input[type="number"] {
 
 .report-row-genus {
   background: #f7f7f7;
+  border-left: 5px solid white;
+}
+
+.report-row-species {
+  border-left: 5px solid white;
+}
+
+.top-scoring-row {
+  border-left: 5px solid $brand-blue;
+  background-color: $transparent-brand-blue;
 }
 
 .confirmed {
@@ -341,7 +351,17 @@ input[type="number"] {
     animation-name: highlight-animation;
     animation-duration: 2s;
   }
-  .fa {
+  .fa.fa-chevron-up,
+  .fa.fa-angle-right,
+  .fa.fa-angle-down {
+    margin-left: 2px;
+    margin-right: 5px;
+  }
+  .fa.fa-angle-right,
+  .fa.fa-angle-down {
+    font-size: $font-size-h4;
+  }
+  .fa :not(insight-icon) {
     margin-left: 2px;
     margin-right: 5px;
     font-size: $font-size-h4;
@@ -923,4 +943,9 @@ label {
       margin: 0;
     }
   }
+}
+
+.ui.icon.insight-icon {
+  color: $brand-blue !important;
+  font-size: 8pt !important;
 }

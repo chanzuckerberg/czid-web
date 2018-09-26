@@ -57,13 +57,13 @@ services:
       - TRAVIS_TAG
       - TRAVIS
     volumes:
-      - ~/.aws:/root/.aws:ro
+      - ~/.aws:/root/.aws
   web:
     build: .
     image: chanzuckerberg/idseq-web:compose
     volumes:
       - .:/app
-      - ~/.aws:/root/.aws:ro
+      - ~/.aws:/root/.aws
     command: bash -c "rm -f tmp/pids/server.pid && rails server -b 0.0.0.0 -p 3000"
     ports:
       - "3000:3000"
@@ -111,7 +111,7 @@ services:
     build: .
     volumes:
       - .:/app
-      - ~/.aws:/root/.aws:ro
+      - ~/.aws:/root/.aws
     depends_on:
       - db
       - redis
@@ -154,7 +154,7 @@ services:
     build: .
     volumes:
       - .:/app
-      - ~/.aws:/root/.aws:ro
+      - ~/.aws:/root/.aws
     depends_on:
       - db
       - redis
@@ -194,7 +194,7 @@ services:
     build: .
     volumes:
       - .:/app
-      - ~/.aws:/root/.aws:ro
+      - ~/.aws:/root/.aws
     depends_on:
       - db
       - redis

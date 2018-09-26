@@ -49,7 +49,7 @@
         "chunks_in_flight": 32,
         "chunk_size": 15000,
         "max_concurrent": 2,
-        "environment": "prod"
+        "environment": "<%= Rails.env == 'prod' ? 'prod' : 'staging' %>"
         <% if @attribute_dict[:index_dir_suffix] %>
           ,"index_dir_suffix": "<%= @attribute_dict[:index_dir_suffix] %>"
         <% end %>
@@ -72,7 +72,7 @@
         "chunks_in_flight": 32,
         "chunk_size": 10000,
         "max_concurrent": 6,
-        "environment": "prod"
+        "environment": "<%= Rails.env == 'prod' ? 'prod' : 'staging' %>"
         <% if @attribute_dict[:index_dir_suffix] %>
           ,"index_dir_suffix": "<%= @attribute_dict[:index_dir_suffix] %>"
         <% end %>

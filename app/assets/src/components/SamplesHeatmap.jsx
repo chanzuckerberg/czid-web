@@ -719,7 +719,7 @@ class SamplesHeatmap extends React.Component {
       <Dropdown
         fluid
         options={this.availableOptions.specificityOptions}
-        value={this.state.readSpecificity}
+        value={this.state.selectedOptions.readSpecificity}
         label="Read Specificity: "
         onChange={this.onSpecificityChange}
       />
