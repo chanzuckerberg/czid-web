@@ -33,8 +33,7 @@ class PipelineSampleReport extends React.Component {
     this.allowPhyloTree =
       props.can_edit &&
       (this.admin == 1 || this.allowedFeatures.indexOf("phylo_trees") >= 0);
-    this.allowPathogenSummary =
-      this.admin == 1 || this.allowedFeatures.indexOf("pathogen_summary") >= 0;
+    this.allowPathogenSummary = false;
     this.report_ts = props.report_ts;
     this.sample_id = props.sample_id;
     this.projectId = props.projectId;
@@ -1103,7 +1102,7 @@ class PipelineSampleReport extends React.Component {
         : null;
     const ntCountLabel = isAggregate ? (
       <div className={`active ${this.switchClassName("NT", ntCount)}`}>
-        {ntCountStr} {showInsight ? <ReportInsightIcon /> : null}
+        {showInsight ? <ReportInsightIcon /> : null} {ntCountStr}
       </div>
     ) : (
       <div className={`${this.switchClassName("NT", ntCount)}`}>
