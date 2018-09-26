@@ -161,7 +161,7 @@ export default class Dendogram {
     let absentName = this.options.colorGroupAbsentName;
 
     // Set up all attribute values. Colors end up looking like:
-    // Uncolored (grey) | Absent attribute color (e.g. for NCBI References) | Real values..
+    // Uncolored (grey) | Absent attribute color (e.g. for NCBI References) + Real values..
     let allVals = new Set();
     this.root.leaves().forEach(n => {
       if (n.data) {
