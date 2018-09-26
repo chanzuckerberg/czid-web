@@ -169,6 +169,38 @@ module ReportHelper
     data
   end
 
+  def label_top_scoring_taxa!(tax_map, n = 3, min_z = 1, min_rpm = 1)
+    # Rule:
+    #   top n hits that satisfy:
+    #     NT.zscore > min_z AND
+    #     NR.zscore > min_z AND
+    #     NT.rpm > min_rpm AND
+    #     NR.rpm > min_rpm AND
+    #     tax_id > 0
+    #   Besides labeling taxa as "top-scoring" in-place, the function also returns a list
+    #   of top-scoring taxa for the "executive summary" at the top of a report.
+    #   In the interest of space, we do not list a genus if one of its species is already included.
+    top_taxa = []
+    i = 0
+    genus_included = false
+    tax_map.each do |tax|
+      break if top_taxa.length >= n && tax["tax_level"] == TaxonCount::TAX_LEVEL_GENUS
+      if tax["tax_id"] > 0 && tax["NT"]["zscore"] > min_z && tax["NR"]["zscore"] > min_z && tax["NT"]["rpm"] > min_rpm && tax["NR"]["rpm"] > min_rpm
+        if tax["tax_level"] == TaxonCount::TAX_LEVEL_SPECIES && genus_included
+          top_taxa.pop
+          genus_included = false
+        end
+        if top_taxa.length < n
+          tax["topScoring"] = 1
+          top_taxa << tax
+          genus_included = true if tax["tax_level"] == TaxonCount::TAX_LEVEL_GENUS
+        end
+      end
+      i += 1
+    end
+    top_taxa
+  end
+
   def taxon_confirmation_map(sample_id, user_id)
     taxon_confirmations = TaxonConfirmation.where(sample_id: sample_id)
     confirmed = taxon_confirmations.where(strength: TaxonConfirmation::CONFIRMED)
