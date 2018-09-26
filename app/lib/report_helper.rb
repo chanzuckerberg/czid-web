@@ -169,7 +169,7 @@ module ReportHelper
     data
   end
 
-  def label_top_scoring_taxa!(tax_map, n = 3, min_z = 1, min_rpm = 1)
+  def label_top_scoring_taxa!(tax_map)
     # Rule:
     #   top n hits that satisfy:
     #     NT.zscore > min_z AND
@@ -183,9 +183,15 @@ module ReportHelper
     top_taxa = []
     i = 0
     genus_included = false
+    ui_config = UiConfig.last
+    min_nt_z = ui_config.min_nt_z || 1
+    min_nr_z = ui_config.min_nr_z || 1
+    min_nt_rpm = ui_config.min_nt_rpm || 1
+    min_nr_rpm = ui_config.min_nr_rpm || 1
+    n = ui_config.top_n || 3
     tax_map.each do |tax|
       break if top_taxa.length >= n && tax["tax_level"] == TaxonCount::TAX_LEVEL_GENUS
-      if tax["tax_id"] > 0 && tax["NT"]["zscore"] > min_z && tax["NR"]["zscore"] > min_z && tax["NT"]["rpm"] > min_rpm && tax["NR"]["rpm"] > min_rpm
+      if tax["tax_id"] > 0 && tax["NT"]["zscore"] > min_nt_z && tax["NR"]["zscore"] > min_nr_z && tax["NT"]["rpm"] > min_nt_rpm && tax["NR"]["rpm"] > min_nr_rpm
         if tax["tax_level"] == TaxonCount::TAX_LEVEL_SPECIES && genus_included
           top_taxa.pop
           genus_included = false
