@@ -108,86 +108,103 @@ class Login extends React.Component {
   }
 
   renderLogin() {
+    let header = (
+      <div className="header-row row">
+        <div className="site-header col s12">
+          <div className="left brand-details">
+            <a href="/">
+              <div className="row">
+                <span className="col s1 logo-label">IDseq</span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+
     return (
-      <div className="login-form">
-        <div className="row">
-          <form
-            ref="form"
-            className="new_user"
-            id="new_user"
-            onSubmit={this.handleSubmit}
-          >
-            <div className="row title">
-              <p className="col s6 signup">Login</p>
-            </div>
-            <div className="mail">
-              <p>
-                To request access to the IDseq platform, please email us<span
-                  onClick={this.sendMail}
-                >
-                  {" "}
-                  here.
-                </span>
-              </p>
-            </div>
-            {this.state.success ? (
-              <div className="success-info">
-                <i className="fa fa-success" />
-                <span>{this.state.successMessage}</span>
-              </div>
-            ) : null}
-            {this.state.showFailedLogin ? (
-              <div className="error-info">
-                <i className="fa fa-error" />
-                <span>{this.state.errorMessage}</span>
-              </div>
-            ) : null}
-            <div className="row content-wrapper">
-              <div className="input-field">
-                <i className="sample fa fa-envelope" aria-hidden="true" />
-                <input
-                  ref="email"
-                  type="email"
-                  className=""
-                  onFocus={this.clearError}
-                />
-                <label htmlFor="user_email">Email</label>
-              </div>
-              <div className="input-field">
-                <i className="sample fa fa-key" aria-hidden="true" />
-                <input
-                  ref="password"
-                  type="password"
-                  className=""
-                  onFocus={this.clearError}
-                />
-                <label htmlFor="user_password">Password</label>
-              </div>
-              <div className="">
-                <input
-                  ref="remember_me"
-                  type="checkbox"
-                  name="switch"
-                  className="filled-in"
-                  id="remember_me"
-                  onChange={this.toggleCheckBox}
-                  value={this.state.isChecked ? 1 : 0}
-                />
-                <label htmlFor="remember_me">Remember me</label>
-              </div>
-              <div>
-                <br />
-                <a href="/users/password/new">Forgot password?</a>
-              </div>
-            </div>
-            <input className="hidden" type="submit" />
-            <div
-              onClick={this.handleSubmit}
-              className="center-align login-wrapper"
+      <div>
+        {header}
+        <div className="login-form">
+          <div className="row">
+            <form
+              ref="form"
+              className="new_user"
+              id="new_user"
+              onSubmit={this.handleSubmit}
             >
-              Login
-            </div>
-          </form>
+              <div className="row title">
+                <p className="col s6 signup">Login</p>
+              </div>
+              <div className="mail">
+                <p>
+                  To request access to the IDseq platform, please email us<span
+                    onClick={this.sendMail}
+                  >
+                    {" "}
+                    here.
+                  </span>
+                </p>
+              </div>
+              {this.state.success ? (
+                <div className="success-info">
+                  <i className="fa fa-success" />
+                  <span>{this.state.successMessage}</span>
+                </div>
+              ) : null}
+              {this.state.showFailedLogin ? (
+                <div className="error-info">
+                  <i className="fa fa-error" />
+                  <span>{this.state.errorMessage}</span>
+                </div>
+              ) : null}
+              <div className="row content-wrapper">
+                <div className="input-field">
+                  <i className="sample fa fa-envelope" aria-hidden="true" />
+                  <input
+                    ref="email"
+                    type="email"
+                    className=""
+                    onFocus={this.clearError}
+                  />
+                  <label htmlFor="user_email">Email</label>
+                </div>
+                <div className="input-field">
+                  <i className="sample fa fa-key" aria-hidden="true" />
+                  <input
+                    ref="password"
+                    type="password"
+                    className=""
+                    onFocus={this.clearError}
+                  />
+                  <label htmlFor="user_password">Password</label>
+                </div>
+                <div className="">
+                  <input
+                    ref="remember_me"
+                    type="checkbox"
+                    name="switch"
+                    className="filled-in"
+                    id="remember_me"
+                    onChange={this.toggleCheckBox}
+                    value={this.state.isChecked ? 1 : 0}
+                  />
+                  <label htmlFor="remember_me">Remember me</label>
+                </div>
+                <div>
+                  <br />
+                  <a href="/users/password/new">Forgot password?</a>
+                </div>
+              </div>
+              <input className="hidden" type="submit" />
+              <div
+                onClick={this.handleSubmit}
+                className="center-align login-wrapper"
+              >
+                Login
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     );
