@@ -37,43 +37,43 @@ class Background < ApplicationRecord
     n = pipeline_runs.count
     date = DateTime.now.in_time_zone
     key = ""
-    res = {}
-    results = []
+    taxon_result = {}
+    result_list = []
     rows.each do |row|
       current_key = [row["tax_id"], row["count_type"], row["tax_level"]].join('-')
       if current_key != key
-        if res[:tax_id]
-          # add the res to results
-          results << summarize_taxon(res, n, date)
+        if taxon_result[:tax_id] # empty for first row
+          # add the taxon_result to result_list
+          result_list << summarize_taxon(taxon_result, n, date)
         end
         # reset the results
-        res = { tax_id: row["tax_id"], count_type: row["count_type"],
-                tax_level: row["tax_level"], sum_rpm: 0.0, sum_rpm2: 0.0, rpm_list: [] }
+        taxon_result = { tax_id: row["tax_id"], count_type: row["count_type"],
+                         tax_level: row["tax_level"], sum_rpm: 0.0, sum_rpm2: 0.0, rpm_list: [] }
         key = current_key
       end
       # increment
-      res[:sum_rpm] += row["rpm"]
-      res[:sum_rpm2] += row["rpm2"]
-      res[:rpm_list] << row["rpm"].round(3)
+      taxon_result[:sum_rpm] += row["rpm"]
+      taxon_result[:sum_rpm2] += row["rpm2"]
+      taxon_result[:rpm_list] << row["rpm"].round(3)
     end
-    # addd the last results
-    results << summarize_taxon(res, n, date)
+    # addd the last result
+    result_list << summarize_taxon(taxon_result, n, date)
 
-    results
+    result_list
   end
 
-  def summarize_taxon(res, n, date)
-    res[:background_id] = id
-    res[:created_at] = date
-    res[:updated_at] = date
-    res[:mean] = (res[:sum_rpm]) / n.to_f
-    res[:stdev] = compute_stdev(res[:sum_rpm], res[:sum_rpm2], n)
+  def summarize_taxon(taxon_result, n, date)
+    taxon_result[:background_id] = id
+    taxon_result[:created_at] = date
+    taxon_result[:updated_at] = date
+    taxon_result[:mean] = (taxon_result[:sum_rpm]) / n.to_f
+    taxon_result[:stdev] = compute_stdev(taxon_result[:sum_rpm], taxon_result[:sum_rpm2], n)
 
     # add zeroes to the rpm_list for no presence to complete the list
-    res[:rpm_list] << 0.0 while res[:rpm_list].size < n
-    res[:rpm_list] = res[:rpm_list].to_json
+    taxon_result[:rpm_list] << 0.0 while taxon_result[:rpm_list].size < n
+    taxon_result[:rpm_list] = taxon_result[:rpm_list].to_json
 
-    res
+    taxon_result
   end
 
   def submit_store_summary_job
