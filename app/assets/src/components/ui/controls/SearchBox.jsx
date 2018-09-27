@@ -46,6 +46,7 @@ class SearchBox extends React.Component {
 
     return (
       <Search
+        className="idseq-ui input search"
         loading={isLoading}
         onSearchChange={_.debounce(this.handleSearchChange, 500, {
           leading: true
