@@ -2059,7 +2059,7 @@ function ProjectInfoHeading({
                 <PhylogenyButton />
               </div>
             }
-            projectId={state.selectedProjectId}
+            projectId={parseInt(state.selectedProjectId)}
           />
         ) : null}
         {compare_button}

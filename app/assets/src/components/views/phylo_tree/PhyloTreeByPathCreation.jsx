@@ -29,7 +29,14 @@ class PhyloTreeByPathCreation extends React.Component {
 
       taxaLoaded: false,
       taxonList: [],
-      selectedTaxonName: "",
+      taxonName: null,
+
+      projectsLoaded: false,
+      projectList: [],
+      projectName: "",
+
+      taxonId: this.props.taxonId,
+      projectId: this.props.projectId,
 
       showErrorName: false,
       showErrorSamples: false,
@@ -62,7 +69,8 @@ class PhyloTreeByPathCreation extends React.Component {
       reads: "Read Count\n(NT | NR)"
     };
 
-    this.taxonName = null;
+    this.skipSelectProjectAndTaxon = this.props.projectId && this.props.taxonId;
+
     this.dagBranch = "";
 
     this.inputTimeout = null;
@@ -83,10 +91,16 @@ class PhyloTreeByPathCreation extends React.Component {
     this.handleTaxonSearchContextResponse = this.handleTaxonSearchContextResponse.bind(
       this
     );
+    this.handleProjectSearchContextResponse = this.handleProjectSearchContextResponse.bind(
+      this
+    );
+    this.handleSelectProject = this.handleSelectProject.bind(this);
     this.handleSelectTaxon = this.handleSelectTaxon.bind(this);
     this.isTreeNameValid = this.isTreeNameValid.bind(this);
     this.loadNewTreeContext = this.loadNewTreeContext.bind(this);
-    this.loadTaxonSearchContext = this.loadTaxonSearchContext.bind(this);
+    this.loadProjectAndTaxonSearchContext = this.loadProjectAndTaxonSearchContext.bind(
+      this
+    );
   }
 
   componentDidMount() {
@@ -97,8 +111,8 @@ class PhyloTreeByPathCreation extends React.Component {
     axios
       .get("/phylo_trees/index.json", {
         params: {
-          taxId: this.props.taxonId,
-          projectId: this.props.projectId
+          taxId: this.state.taxonId,
+          projectId: this.state.projectId
         }
       })
       .then(response => this.handlePhyloTreeResponse(response))
@@ -113,8 +127,8 @@ class PhyloTreeByPathCreation extends React.Component {
     axios
       .get("/phylo_trees/new.json", {
         params: {
-          taxId: this.props.taxonId,
-          projectId: this.props.projectId
+          taxId: this.state.taxonId,
+          projectId: this.state.projectId
         }
       })
       .then(response => this.handleNewTreeContextResponse(response))
@@ -125,9 +139,18 @@ class PhyloTreeByPathCreation extends React.Component {
       });
   }
 
-  loadTaxonSearchContext() {
+  loadProjectAndTaxonSearchContext() {
     axios
-      .get("/phylo_trees/choose_taxon.json")
+      .get("/choose_project.json")
+      .then(response => this.handleProjectSearchContextResponse(response))
+      .catch(error => {
+        // TODO: properly handle error
+        // eslint-disable-next-line no-console
+        console.error("Error loading project search context: ", error);
+      });
+
+    axios
+      .get("/choose_taxon.json")
       .then(response => this.handleTaxonSearchContextResponse(response))
       .catch(error => {
         // TODO: properly handle error
@@ -139,7 +162,6 @@ class PhyloTreeByPathCreation extends React.Component {
   handlePhyloTreeResponse(response) {
     const data = response.data;
     let phyloTrees = data.phyloTrees;
-    this.taxonName = (data.taxon || {}).name;
     if (!phyloTrees || !Array.isArray(phyloTrees) || phyloTrees.length === 0) {
       this.setState({
         skipListTrees: true,
@@ -148,7 +170,8 @@ class PhyloTreeByPathCreation extends React.Component {
     } else {
       this.setState({
         phyloTrees: this.parsePhyloTreeData(response.data.phyloTrees),
-        phyloTreesLoaded: true
+        phyloTreesLoaded: true,
+        taxonName: (data.taxon || {}).name
       });
     }
   }
@@ -173,6 +196,13 @@ class PhyloTreeByPathCreation extends React.Component {
     }
   }
 
+  handleProjectSearchContextResponse(response) {
+    this.setState({
+      projectList: response.data,
+      projectsLoaded: true
+    });
+  }
+
   handleTaxonSearchContextResponse(response) {
     this.setState({
       taxonList: response.data,
@@ -180,10 +210,17 @@ class PhyloTreeByPathCreation extends React.Component {
     });
   }
 
+  handleSelectProject(e, { result }) {
+    this.setState({
+      projectId: result.project_id,
+      projectName: result.title
+    });
+  }
+
   handleSelectTaxon(e, { result }) {
     this.setState({
-      selectedTaxId: result.taxid,
-      selectedTaxonName: result.title
+      taxonId: result.taxid,
+      taxonName: result.title
     });
   }
 
@@ -276,9 +313,9 @@ class PhyloTreeByPathCreation extends React.Component {
       .post("/phylo_trees/create", {
         name: this.state.treeName,
         dagBranch: this.dagBranch,
-        projectId: this.props.projectId,
-        taxId: this.props.taxonId,
-        taxName: this.taxonName,
+        projectId: this.state.projectId,
+        taxId: this.state.taxonId,
+        taxName: this.state.taxonName,
         pipelineRunIds: pipelineRunIds,
         authenticity_token: this.props.csrf
       })
@@ -369,7 +406,7 @@ class PhyloTreeByPathCreation extends React.Component {
         title="Phylogenetic Trees"
         small
       >
-        <div className="wizard__page-1__subtitle">{this.taxonName}</div>
+        <div className="wizard__page-1__subtitle">{this.state.taxonName}</div>
         <div className="wizard__page-1__table">
           {this.state.phyloTreesLoaded && (
             <DataTable
@@ -392,7 +429,7 @@ class PhyloTreeByPathCreation extends React.Component {
         onLoad={this.loadNewTreeContext}
         onContinue={this.canContinue}
       >
-        <div className="wizard__page-2__subtitle">{this.taxonName}</div>
+        <div className="wizard__page-2__subtitle">{this.state.taxonName}</div>
         <div className="wizard__page-2__form">
           <div>
             <div className="wizard__page-2__form__label-name">Name</div>
@@ -431,7 +468,7 @@ class PhyloTreeByPathCreation extends React.Component {
       <Wizard.Page
         key="wizard__page_3"
         title={`Would you like additional samples from IDSeq that contain ${
-          this.taxonName
+          this.state.taxonName
         }`}
       >
         <div className="wizard__page-3__subtitle" />
@@ -466,37 +503,25 @@ class PhyloTreeByPathCreation extends React.Component {
 
     let pageSelectTaxonAndProject = (
       <Wizard.Page
-        key="wizard__page_2"
+        key="wizard__page_1"
         title="Select organism and project"
-        onLoad={this.loadTaxonSearchContext}
+        onLoad={this.loadProjectAndTaxonSearchContext}
       >
-        <div className="wizard__page-2__subtitle" />
-        <div className="wizard__page-2__form">
-          <div>
-            <div className="wizard__page-2__form__label-name">Name</div>
-            <Input
-              className={
-                this.state.showErrorName && !this.isTreeNameValid()
-                  ? "error"
-                  : ""
-              }
-              placeholder="Tree Name"
-              onChange={this.handleNameChange}
-            />
-          </div>
-          <div>
-            <div className="wizard__page-2__form__label-name">Project</div>
-            <Input placeholder="Project" />
-          </div>
-          {this.props.admin === 1 && (
+        <div className="wizard__page-1__subtitle" />
+        <div className="wizard__page-1__searchbar">
+          <div className="wizard__page-1__form__label-name">Project</div>
+          {this.state.projectsLoaded && (
             <div>
-              <div className="wizard__page-2__form__label-branch">Branch</div>
-              <Input placeholder="master" onChange={this.handleBranchChange} />
+              <SearchBox
+                source={this.state.projectList}
+                onResultSelect={this.handleSelectProject}
+              />
+              <span>{this.state.projectName}</span>
             </div>
           )}
         </div>
-        <div className="wizard__page-2__searchbar">
-          <div className="wizard__page-2__form__label-name">
+        <div className="wizard__page-1__searchbar">
+          <div className="wizard__page-1__form__label-name">
             Organism (genus)
           </div>
           {this.state.taxaLoaded ? (
@@ -505,7 +530,7 @@ class PhyloTreeByPathCreation extends React.Component {
                 source={this.state.taxonList}
                 onResultSelect={this.handleSelectTaxon}
               />
-              <span>{this.state.selectedTaxonName}</span>
+              <span>{this.state.taxonName}</span>
             </div>
           ) : (
             <div>Loading organism list...</div>
@@ -517,19 +542,20 @@ class PhyloTreeByPathCreation extends React.Component {
     if (!this.state.skipListTrees) {
       pages.push(pageListTrees);
     }
-    if (this.props.taxonId && this.props.projectId) {
-      pages.push(pageNameAndProjectSamples, pageAddIdseqSamples);
-    } else {
+    if (!this.skipSelectProjectAndTaxon) {
       pages.push(pageSelectTaxonAndProject);
     }
+    pages.push(pageNameAndProjectSamples, pageAddIdseqSamples);
     return pages;
   }
 
   render() {
     if (this.state.phyloTreesLoaded) {
+      let NPagesToSkip =
+        (this.state.skipListTrees | 0) + (this.skipSelectProjectAndTaxon | 0);
       return (
         <Wizard
-          skipPageInfoNPages={this.state.skipListTrees ? 0 : 1}
+          skipPageInfoNPages={NPagesToSkip}
           onComplete={this.handleComplete}
           defaultPage={this.state.defaultPage}
           labels={{
