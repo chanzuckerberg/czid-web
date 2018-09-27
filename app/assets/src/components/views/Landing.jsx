@@ -120,11 +120,34 @@ class Landing extends React.Component {
       </div>
     );
 
+    const footer = (
+      <div className="footer">
+        <div className="footer-links">
+          <a href="mailto:accounts@idseq.net">Contact</a>
+          <a
+            href="https://s3-us-west-2.amazonaws.com/idseq-database/Terms.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Terms
+          </a>
+          <a
+            href="https://s3-us-west-2.amazonaws.com/idseq-database/Privacy.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Privacy
+          </a>
+        </div>
+      </div>
+    );
+
     return (
       <div>
         {header}
         {firstBlock}
         {partners}
+        {footer}
       </div>
     );
   }

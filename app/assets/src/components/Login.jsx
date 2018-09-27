@@ -102,8 +102,7 @@ class Login extends React.Component {
   }
 
   sendMail() {
-    var link =
-      "mailto:regger@chanzuckerberg.com?Subject=Request%20IDseq%20Access";
+    var link = "mailto:accounts@idseq.net?Subject=Request%20IDseq%20Access";
     window.location.href = link;
   }
 

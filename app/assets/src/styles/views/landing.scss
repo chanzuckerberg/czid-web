@@ -117,3 +117,19 @@
     }
   }
 }
+
+.footer {
+  width: 30rem;
+  margin: 7rem auto 2rem auto;
+  text-align: center;
+
+  .footer-links {
+    margin-left: -1rem;
+
+    a {
+      margin: 2rem;
+      font-size: 0.8rem;
+      color: $medium-grey !important;
+    }
+  }
+}

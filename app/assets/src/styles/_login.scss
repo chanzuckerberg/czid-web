@@ -1,3 +1,4 @@
+@import "themes/colors";
 $break-large: 1460px;
 
 .login-form {
@@ -56,7 +57,7 @@ $break-large: 1460px;
     }
   }
   .login-wrapper {
-    background-color: #4e72d5;
+    background-color: $primary-light;
     padding: 15px;
     border-bottom-right-radius: 10px;
     border-bottom-left-radius: 10px;
