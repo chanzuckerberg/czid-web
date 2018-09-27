@@ -376,8 +376,7 @@ class PhyloTreeByPathCreation extends React.Component {
     return `${totalSelectedSamples} Total Samples`;
   }
 
-  getPages() {
-    let pages = [];
+  page(action) {
     const projectSamplesColumns = [
       "name",
       "host",
@@ -395,162 +394,175 @@ class PhyloTreeByPathCreation extends React.Component {
       "date",
       "reads"
     ];
-
-    let pageListTrees = (
-      <Wizard.Page
-        key="page_1"
-        className="wizard__page-1"
-        skipDefaultButtons={true}
-        title="Phylogenetic Trees"
-        small
-      >
-        <div className="wizard__page-1__subtitle">{this.state.taxonName}</div>
-        <div className="wizard__page-1__table">
-          {this.state.phyloTreesLoaded && (
-            <DataTable
-              headers={this.phyloTreeHeaders}
-              columns={["name", "user", "last_update", "view"]}
-              data={this.state.phyloTrees}
-            />
-          )}
-        </div>
-        <div className="wizard__page-1__action">
-          <Wizard.Action action="continue">+ Create new tree</Wizard.Action>
-        </div>
-      </Wizard.Page>
-    );
-
-    let pageNameAndProjectSamples = (
-      <Wizard.Page
-        key="wizard__page_2"
-        title="Create phylogenetic tree and select samples from the project"
-        onLoad={this.loadNewTreeContext}
-        onContinue={this.canContinue}
-      >
-        <div className="wizard__page-2__subtitle">{this.state.taxonName}</div>
-        <div className="wizard__page-2__form">
-          <div>
-            <div className="wizard__page-2__form__label-name">Name</div>
-            <Input
-              className={
-                this.state.showErrorName && !this.isTreeNameValid()
-                  ? "error"
-                  : ""
-              }
-              placeholder="Tree Name"
-              onChange={this.handleNameChange}
-            />
+    let options = {
+      listTrees: (
+        <Wizard.Page
+          key="page_1"
+          className="wizard__page-1"
+          skipDefaultButtons={true}
+          title="Phylogenetic Trees"
+          small
+        >
+          <div className="wizard__page-1__subtitle">{this.state.taxonName}</div>
+          <div className="wizard__page-1__table">
+            {this.state.phyloTreesLoaded && (
+              <DataTable
+                headers={this.phyloTreeHeaders}
+                columns={["name", "user", "last_update", "view"]}
+                data={this.state.phyloTrees}
+              />
+            )}
           </div>
-          {this.props.admin === 1 && (
-            <div>
-              <div className="wizard__page-2__form__label-branch">Branch</div>
-              <Input placeholder="master" onChange={this.handleBranchChange} />
+          <div className="wizard__page-1__action">
+            <Wizard.Action action="continue">+ Create new tree</Wizard.Action>
+          </div>
+        </Wizard.Page>
+      ),
+      selectTaxonAndProject: (
+        <Wizard.Page
+          key="wizard__page_2"
+          title="Select organism and project"
+          onLoad={this.loadProjectAndTaxonSearchContext}
+        >
+          <div className="wizard__page-2__subtitle" />
+          <div className="wizard__page-2__searchbar">
+            <div className="wizard__page-2__searchbar__container">Project</div>
+            <div className="wizard__page-2__searchbar__container">
+              {this.state.projectsLoaded ? (
+                <SearchBox
+                  source={this.state.projectList}
+                  onResultSelect={this.handleSelectProject}
+                />
+              ) : (
+                <div>Loading projects...</div>
+              )}
             </div>
-          )}
-        </div>
-        <div className="wizard__page-2__table">
-          {this.state.samplesLoaded && this.state.projectSamples.length > 0 ? (
-            <DataTable
-              headers={this.projectSamplesHeaders}
-              columns={projectSamplesColumns}
-              data={this.state.projectSamples}
-              selectedRows={this.state.selectedProjectSamples}
-              onSelectedRowsChanged={this.handleChangedProjectSamples}
-            />
-          ) : this.state.samplesLoaded &&
-          this.state.projectSamples.length == 0 ? (
-            <div>No samples containing {this.state.taxonName} available</div>
-          ) : (
-            <div>Loading samples...</div>
-          )}
-        </div>
-      </Wizard.Page>
-    );
+          </div>
+          <div className="wizard__page-2__searchbar">
+            <div className="wizard__page-2__searchbar__container">
+              Organism (genus)
+            </div>
+            <div className="wizard__page-2__searchbar__container">
+              {this.state.taxaLoaded ? (
+                <SearchBox
+                  source={this.state.taxonList}
+                  onResultSelect={this.handleSelectTaxon}
+                />
+              ) : (
+                <div>Loading organism list...</div>
+              )}
+            </div>
+          </div>
+        </Wizard.Page>
+      ),
+      selectNameAndProjectSamples: (
+        <Wizard.Page
+          key="wizard__page_3"
+          title="Create phylogenetic tree and select samples from the project"
+          onLoad={this.loadNewTreeContext}
+          onContinue={this.canContinue}
+        >
+          <div className="wizard__page-3__subtitle">{this.state.taxonName}</div>
+          <div className="wizard__page-3__form">
+            <div>
+              <div className="wizard__page-3__form__label-name">Name</div>
+              <Input
+                className={
+                  this.state.showErrorName && !this.isTreeNameValid()
+                    ? "error"
+                    : ""
+                }
+                placeholder="Tree Name"
+                onChange={this.handleNameChange}
+              />
+            </div>
+            {this.props.admin === 1 && (
+              <div>
+                <div className="wizard__page-3__form__label-branch">Branch</div>
+                <Input
+                  placeholder="master"
+                  onChange={this.handleBranchChange}
+                />
+              </div>
+            )}
+          </div>
+          <div className="wizard__page-3__table">
+            {this.state.samplesLoaded &&
+            this.state.projectSamples.length > 0 ? (
+              <DataTable
+                headers={this.projectSamplesHeaders}
+                columns={projectSamplesColumns}
+                data={this.state.projectSamples}
+                selectedRows={this.state.selectedProjectSamples}
+                onSelectedRowsChanged={this.handleChangedProjectSamples}
+              />
+            ) : this.state.samplesLoaded &&
+            this.state.projectSamples.length == 0 ? (
+              <div>No samples containing {this.state.taxonName} available</div>
+            ) : (
+              <div>Loading samples...</div>
+            )}
+          </div>
+        </Wizard.Page>
+      ),
+      addIdseqSamples: (
+        <Wizard.Page
+          key="wizard__page_4"
+          title={`Would you like additional samples from IDSeq that contain ${
+            this.state.taxonName
+          }?`}
+        >
+          <div className="wizard__page-4__subtitle" />
+          <div className="wizard__page-4__searchbar">
+            <div className="wizard__page-4__searchbar__container">
+              <Input placeholder="Search" onChange={this.handleFilterChange} />
+            </div>
+            <div className="wizard__page-4__searchbar__container">
+              {this.state.selectedProjectSamples.size} Project Samples
+            </div>
+            <div className="wizard__page-4__searchbar__container">
+              {this.state.selectedOtherSamples.size} IDSeq Samples
+            </div>
+            <div className="wizard__page-4__searchbar__container">
+              {this.getTotalPageRendering()}
+            </div>
+          </div>
+          <div className="wizard__page-4__table">
+            {this.state.samplesLoaded && this.state.otherSamples.length > 0 ? (
+              <DataTable
+                headers={this.otherSamplesHeaders}
+                columns={otherSamplesColumns}
+                data={this.state.otherSamples}
+                selectedRows={this.state.selectedOtherSamples}
+                onSelectedRowsChanged={this.handleChangedOtherSamples}
+                filter={this.state.otherSamplesFilter}
+              />
+            ) : this.state.samplesLoaded &&
+            this.state.otherSamples.length == 0 ? (
+              <div>No samples containing {this.state.taxonName} available</div>
+            ) : (
+              <div>Loading samples...</div>
+            )}
+          </div>
+        </Wizard.Page>
+      )
+    };
+    return options[action];
+  }
 
-    let pageAddIdseqSamples = (
-      <Wizard.Page
-        key="wizard__page_3"
-        title={`Would you like additional samples from IDSeq that contain ${
-          this.state.taxonName
-        }?`}
-      >
-        <div className="wizard__page-3__subtitle" />
-        <div className="wizard__page-3__searchbar">
-          <div className="wizard__page-3__searchbar__container">
-            <Input placeholder="Search" onChange={this.handleFilterChange} />
-          </div>
-          <div className="wizard__page-3__searchbar__container">
-            {this.state.selectedProjectSamples.size} Project Samples
-          </div>
-          <div className="wizard__page-3__searchbar__container">
-            {this.state.selectedOtherSamples.size} IDSeq Samples
-          </div>
-          <div className="wizard__page-3__searchbar__container">
-            {this.getTotalPageRendering()}
-          </div>
-        </div>
-        <div className="wizard__page-3__table">
-          {this.state.samplesLoaded && this.state.otherSamples.length > 0 ? (
-            <DataTable
-              headers={this.otherSamplesHeaders}
-              columns={otherSamplesColumns}
-              data={this.state.otherSamples}
-              selectedRows={this.state.selectedOtherSamples}
-              onSelectedRowsChanged={this.handleChangedOtherSamples}
-              filter={this.state.otherSamplesFilter}
-            />
-          ) : this.state.samplesLoaded &&
-          this.state.otherSamples.length == 0 ? (
-            <div>No samples containing {this.state.taxonName} available</div>
-          ) : (
-            <div>Loading samples...</div>
-          )}
-        </div>
-      </Wizard.Page>
-    );
-
-    let pageSelectTaxonAndProject = (
-      <Wizard.Page
-        key="wizard__page_1"
-        title="Select organism and project"
-        onLoad={this.loadProjectAndTaxonSearchContext}
-      >
-        <div className="wizard__page-1__subtitle" />
-        <div className="wizard__page-1__searchbar">
-          <div className="wizard__page-1__form__label-name">Project</div>
-          {this.state.projectsLoaded ? (
-            <SearchBox
-              source={this.state.projectList}
-              onResultSelect={this.handleSelectProject}
-            />
-          ) : (
-            <div>Loading projects...</div>
-          )}
-        </div>
-        <div className="wizard__page-1__searchbar">
-          <div className="wizard__page-1__form__label-name">
-            Organism (genus)
-          </div>
-          {this.state.taxaLoaded ? (
-            <SearchBox
-              source={this.state.taxonList}
-              onResultSelect={this.handleSelectTaxon}
-            />
-          ) : (
-            <div>Loading organism list...</div>
-          )}
-        </div>
-      </Wizard.Page>
-    );
-
+  getPages() {
+    let chosenPages = [];
     if (!this.state.skipListTrees) {
-      pages.push(pageListTrees);
+      chosenPages.push(this.page("listTrees"));
     }
     if (!this.skipSelectProjectAndTaxon) {
-      pages.push(pageSelectTaxonAndProject);
+      chosenPages.push(this.page("selectTaxonAndProject"));
     }
-    pages.push(pageNameAndProjectSamples, pageAddIdseqSamples);
-    return pages;
+    chosenPages.push(
+      this.page("selectNameAndProjectSamples"),
+      this.page("addIdseqSamples")
+    );
+    return chosenPages;
   }
 
   render() {
