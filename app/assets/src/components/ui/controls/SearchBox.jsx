@@ -6,9 +6,11 @@ class SearchBox extends Component {
     super(props);
 
     this.source = this.props.source;
+    this.onResultSelect = this.props.onResultSelect;
 
     this.resetComponent = this.resetComponent.bind(this);
     this.handleSearchChange = this.handleSearchChange.bind(this);
+    this.handleResultSelect = this.handleResultSelect.bind(this);
   }
 
   componentWillMount() {
@@ -17,6 +19,11 @@ class SearchBox extends Component {
 
   resetComponent() {
     this.setState({ isLoading: false, results: [], value: "" });
+  }
+
+  handleResultSelect(e, { result }) {
+    this.setState({ value: result.title });
+    this.onResultSelect(e, { result });
   }
 
   handleSearchChange(e, { value }) {

@@ -2021,6 +2021,22 @@ function ProjectInfoHeading({
   state,
   canEditProject
 }) {
+  let phyloProps = {
+    admin: parseInt(parent.admin),
+    csrf: parent.csrf,
+    trigger: (
+      <div className="button-container">
+        <PhylogenyButton />
+      </div>
+    )
+  };
+  if (state.selectedProjectId) {
+    phyloProps["projectId"] = parseInt(state.selectedProjectId);
+  }
+  let phyloTreeModal = parent.allowPhyloTree ? (
+    <PhyloTreeByPathCreationModal {...phyloProps} />
+  ) : null;
+
   return (
     <div className="row download-section">
       <div className="col s5 wrapper">
@@ -2050,18 +2066,7 @@ function ProjectInfoHeading({
       <div className="col s7 download-section-btns">
         {state.selectedProjectId ? project_menu : null}
         {table_download_dropdown}
-        {parent.allowPhyloTree ? (
-          <PhyloTreeByPathCreationModal
-            admin={parseInt(parent.admin)}
-            csrf={parent.csrf}
-            trigger={
-              <div className="button-container">
-                <PhylogenyButton />
-              </div>
-            }
-            projectId={parseInt(state.selectedProjectId)}
-          />
-        ) : null}
+        {phyloTreeModal}
         {compare_button}
         <BackgroundModal parent={parent} />
         {state.selectedProjectId &&
