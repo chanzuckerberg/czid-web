@@ -389,6 +389,7 @@ ActiveRecord::Schema.define(version: 20_180_927_213_907) do
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["taxid"], name: "index_taxon_descriptions_on_taxid", unique: true
   end
 
   create_table "taxon_lineage_names", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|

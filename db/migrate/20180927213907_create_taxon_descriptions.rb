@@ -8,5 +8,6 @@ class CreateTaxonDescriptions < ActiveRecord::Migration[5.1]
       t.text :description
       t.timestamps
     end
+    add_index :taxon_descriptions, :taxid, unique: true
   end
 end

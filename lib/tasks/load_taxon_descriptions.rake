@@ -10,9 +10,6 @@ task :load_taxon_descriptions, [:taxon_desc_s3_path] => :environment do |_t, arg
   values_list = []
   date = DateTime.now.in_time_zone
   ActiveRecord::Base.transaction do
-    ActiveRecord::Base.connection.execute <<-SQL
-    DELETE FROM taxon_descriptions
-    SQL
     json_dict.each do |taxid, data| 
       datum = [taxid.to_i, data['pageid'].to_i, 
                data['description'].force_encoding('iso-8859-1'), 
