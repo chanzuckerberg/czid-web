@@ -2,12 +2,13 @@ require 'will_paginate/array'
 
 class HomeController < ApplicationController
   include SamplesHelper
-  before_action :login_required, except: [:landing]
-  skip_before_action :authenticate_user!, only: [:landing]
-  power :projects, except: [:landing]
+  before_action :login_required, except: [:landing, :sign_up]
+  skip_before_action :authenticate_user!, :verify_authenticity_token, only: [:landing, :sign_up]
+  power :projects, except: [:landing, :sign_up]
 
   # Public unsecured landing page
   def landing
+    Rails.logger.info("hello there")
     if current_user
       # Call secure home#index path if authenticated
       redirect_to home_path
@@ -47,5 +48,16 @@ class HomeController < ApplicationController
     render json: {
       status: 'ok'
     }
+  end
+
+  def sign_up
+    Rails.logger.info("these are the params " + home_params.to_s)
+    mail(to: "accounts@idseq.net", subject: "New sign up from landing page", subject: )
+  end
+
+  private
+
+  def home_params
+    params.require(:signUp).permit(:firstName, :lastName, :email, :institution, :usage)
   end
 end

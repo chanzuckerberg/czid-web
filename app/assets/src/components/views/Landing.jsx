@@ -1,11 +1,50 @@
 import React from "react";
+import axios from "axios";
 import { Form, Input, TextArea, Grid, Image } from "semantic-ui-react";
 import TransparentButton from "../ui/controls/buttons/TransparentButton";
 import PrimaryButton from "../ui/controls/buttons/PrimaryButton";
 
 class Landing extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      firstName: "",
+      lastName: "",
+      email: "",
+      institution: "",
+      usage: ""
+    };
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  handleChange(_, { id, value }) {
+    this.setState({ [id]: value });
+  }
+
+  handleSubmit() {
+    console.log("cur state: ", this.state);
+
+    axios
+      .post("sign_up", {
+        signUp: {
+          firstName: this.state.firstName,
+          lastName: this.state.lastName,
+          email: this.state.email,
+          institution: this.state.institution,
+          usage: this.state.usage
+        }
+      })
+      .then(response => {
+        console.log("got response: ", response);
+      })
+      .catch(error => {
+        console.log("error: ", error);
+      });
+  }
+
   render() {
-    const link = () => (location.href = "/users/sign_in");
+    const signInLink = () => (location.href = "/users/sign_in");
     const header = (
       <div className="header-row row">
         <div className="site-header col s12">
@@ -13,7 +52,7 @@ class Landing extends React.Component {
             <span className="col s1 logo-label">IDseq</span>
           </div>
           <div className="sign-in">
-            <TransparentButton text="Sign In" onClick={link} />
+            <TransparentButton text="Sign In" onClick={signInLink} />
           </div>
         </div>
       </div>
@@ -54,6 +93,7 @@ class Landing extends React.Component {
         How would you use IDseq? <span className="optional">Optional</span>
       </label>
     );
+
     const interestForm = (
       <div className="account-form">
         <div className="form-header">
@@ -62,17 +102,39 @@ class Landing extends React.Component {
             Already have an account? <a href="/users/sign_in">Sign in.</a>
           </div>
         </div>
-        <Form>
+        <Form onSubmit={this.handleSubmit}>
           <Form.Group widths={2}>
-            <Form.Field control={Input} label="First Name" />
-            <Form.Field control={Input} label="Last Name" />
+            <Form.Field
+              control={Input}
+              label="First Name"
+              id="firstName"
+              onChange={this.handleChange}
+            />
+            <Form.Field
+              control={Input}
+              label="Last Name"
+              id="lastName"
+              onChange={this.handleChange}
+            />
           </Form.Group>
-          <Form.Field control={Input} label="Email" />
+          <Form.Field
+            control={Input}
+            label="Email"
+            id="email"
+            onChange={this.handleChange}
+          />
           <Form.Field
             control={Input}
             label="Affiliated Institution or Company"
+            id="institution"
+            onChange={this.handleChange}
           />
-          <Form.Field control={TextArea} label={usageLabel} />
+          <Form.Field
+            control={TextArea}
+            label={usageLabel}
+            onChange={this.handleChange}
+            id="usage"
+          />
           <div className="submit-button">
             <PrimaryButton text="Submit" />
           </div>
