@@ -29,6 +29,7 @@ class PhyloTreeByPathCreation extends React.Component {
 
       taxaLoaded: false,
       taxonList: [],
+      selectedTaxonName: "",
 
       showErrorName: false,
       showErrorSamples: false,
@@ -82,6 +83,7 @@ class PhyloTreeByPathCreation extends React.Component {
     this.handleTaxonSearchContextResponse = this.handleTaxonSearchContextResponse.bind(
       this
     );
+    this.handleSelectTaxon = this.handleSelectTaxon.bind(this);
     this.isTreeNameValid = this.isTreeNameValid.bind(this);
     this.loadNewTreeContext = this.loadNewTreeContext.bind(this);
     this.loadTaxonSearchContext = this.loadTaxonSearchContext.bind(this);
@@ -175,6 +177,13 @@ class PhyloTreeByPathCreation extends React.Component {
     this.setState({
       taxonList: response.data,
       taxaLoaded: true
+    });
+  }
+
+  handleSelectTaxon(e, { result }) {
+    this.setState({
+      selectedTaxId: result.taxid,
+      selectedTaxonName: result.title
     });
   }
 
@@ -475,6 +484,10 @@ class PhyloTreeByPathCreation extends React.Component {
               onChange={this.handleNameChange}
             />
           </div>
+          <div>
+            <div className="wizard__page-2__form__label-name">Project</div>
+            <Input placeholder="Project" />
+          </div>
           {this.props.admin === 1 && (
             <div>
               <div className="wizard__page-2__form__label-branch">Branch</div>
@@ -482,9 +495,21 @@ class PhyloTreeByPathCreation extends React.Component {
             </div>
           )}
         </div>
-        <div className="wizard__page-2__table">
-          {this.state.taxaLoaded && <SearchBox source={this.state.taxonList} />}{" "}
-          // TODO: if not loaded, yet show <div>Loading taxa...</div>
+        <div className="wizard__page-2__searchbar">
+          <div className="wizard__page-2__form__label-name">
+            Organism (genus)
+          </div>
+          {this.state.taxaLoaded ? (
+            <div>
+              <SearchBox
+                source={this.state.taxonList}
+                onResultSelect={this.handleSelectTaxon}
+              />
+              <span>{this.state.selectedTaxonName}</span>
+            </div>
+          ) : (
+            <div>Loading organism list...</div>
+          )}
         </div>
       </Wizard.Page>
     );

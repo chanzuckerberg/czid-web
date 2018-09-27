@@ -72,10 +72,10 @@ class PhyloTreesController < ApplicationController
   def choose_taxon
     current_lineages = TaxonLineage.where(ended_at: TaxonLineage.maximum("ended_at"))
     genera = current_lineages.where("genus_taxid > 0").where.not(genus_name: "")
-    unique_genera = genera.select(:genus_taxid, :genus_name).distinct.order(:genus_name)
-    taxon_search = unique_genera.map do |record|
-      { "title" => record.genus_name,
-        "description" => record.genus_taxid.to_s,
+    unique_genera = genera.select(:genus_taxid, :genus_name).distinct.index_by(&:genus_name) # index_by makes sure it's unique on genus_name alone
+    taxon_search = unique_genera.map do |genus_name, record|
+      { "title" => genus_name,
+        "description" => "Taxonomy ID: #{record.genus_taxid}",
         "taxid" => record.genus_taxid }
     end
     render json: JSON.dump(taxon_search)

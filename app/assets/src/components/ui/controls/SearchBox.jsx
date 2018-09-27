@@ -8,7 +8,6 @@ class SearchBox extends Component {
     this.source = this.props.source;
 
     this.resetComponent = this.resetComponent.bind(this);
-    this.handleResultSelect = this.handleResultSelect.bind(this);
     this.handleSearchChange = this.handleSearchChange.bind(this);
   }
 
@@ -18,10 +17,6 @@ class SearchBox extends Component {
 
   resetComponent() {
     this.setState({ isLoading: false, results: [], value: "" });
-  }
-
-  handleResultSelect(e, { result }) {
-    this.setState({ value: result.title });
   }
 
   handleSearchChange(e, { value }) {
@@ -46,7 +41,6 @@ class SearchBox extends Component {
     return (
       <Search
         loading={isLoading}
-        onResultSelect={this.handleResultSelect}
         onSearchChange={_.debounce(this.handleSearchChange, 500, {
           leading: true
         })}
