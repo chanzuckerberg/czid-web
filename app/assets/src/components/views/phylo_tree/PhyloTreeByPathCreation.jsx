@@ -33,7 +33,6 @@ class PhyloTreeByPathCreation extends React.Component {
 
       projectsLoaded: false,
       projectList: [],
-      projectName: "",
 
       taxonId: this.props.taxonId,
       projectId: this.props.projectId,
@@ -178,14 +177,14 @@ class PhyloTreeByPathCreation extends React.Component {
 
   handleNewTreeContextResponse(response) {
     let samplesData = response.data.samples;
-    if (
-      !samplesData ||
-      !Array.isArray(samplesData) ||
-      samplesData.length === 0
-    ) {
+    if (!samplesData || !Array.isArray(samplesData)) {
       // TODO: properly handle error
       // eslint-disable-next-line no-console
       console.error("Error loading samples data");
+    } else if (samplesData.length === 0) {
+      this.setState({
+        samplesLoaded: true
+      });
     } else {
       let parsedTables = this.parseProjectSamplesData(samplesData);
       this.setState({
@@ -212,8 +211,7 @@ class PhyloTreeByPathCreation extends React.Component {
 
   handleSelectProject(e, { result }) {
     this.setState({
-      projectId: result.project_id,
-      projectName: result.title
+      projectId: result.project_id
     });
   }
 
@@ -451,7 +449,7 @@ class PhyloTreeByPathCreation extends React.Component {
           )}
         </div>
         <div className="wizard__page-2__table">
-          {this.state.samplesLoaded && (
+          {this.state.samplesLoaded && this.state.projectSamples.length > 0 ? (
             <DataTable
               headers={this.projectSamplesHeaders}
               columns={projectSamplesColumns}
@@ -459,6 +457,11 @@ class PhyloTreeByPathCreation extends React.Component {
               selectedRows={this.state.selectedProjectSamples}
               onSelectedRowsChanged={this.handleChangedProjectSamples}
             />
+          ) : this.state.samplesLoaded &&
+          this.state.projectSamples.length == 0 ? (
+            <div>No samples containing {this.state.taxonName} available</div>
+          ) : (
+            <div>Loading samples...</div>
           )}
         </div>
       </Wizard.Page>
@@ -487,7 +490,7 @@ class PhyloTreeByPathCreation extends React.Component {
           </div>
         </div>
         <div className="wizard__page-3__table">
-          {this.state.samplesLoaded && (
+          {this.state.samplesLoaded && this.state.otherSamples.length > 0 ? (
             <DataTable
               headers={this.otherSamplesHeaders}
               columns={otherSamplesColumns}
@@ -496,6 +499,11 @@ class PhyloTreeByPathCreation extends React.Component {
               onSelectedRowsChanged={this.handleChangedOtherSamples}
               filter={this.state.otherSamplesFilter}
             />
+          ) : this.state.samplesLoaded &&
+          this.state.otherSamples.length == 0 ? (
+            <div>No samples containing {this.state.taxonName} available</div>
+          ) : (
+            <div>Loading samples...</div>
           )}
         </div>
       </Wizard.Page>
@@ -510,14 +518,13 @@ class PhyloTreeByPathCreation extends React.Component {
         <div className="wizard__page-1__subtitle" />
         <div className="wizard__page-1__searchbar">
           <div className="wizard__page-1__form__label-name">Project</div>
-          {this.state.projectsLoaded && (
-            <div>
-              <SearchBox
-                source={this.state.projectList}
-                onResultSelect={this.handleSelectProject}
-              />
-              <span>{this.state.projectName}</span>
-            </div>
+          {this.state.projectsLoaded ? (
+            <SearchBox
+              source={this.state.projectList}
+              onResultSelect={this.handleSelectProject}
+            />
+          ) : (
+            <div>Loading projects...</div>
           )}
         </div>
         <div className="wizard__page-1__searchbar">
@@ -525,13 +532,10 @@ class PhyloTreeByPathCreation extends React.Component {
             Organism (genus)
           </div>
           {this.state.taxaLoaded ? (
-            <div>
-              <SearchBox
-                source={this.state.taxonList}
-                onResultSelect={this.handleSelectTaxon}
-              />
-              <span>{this.state.taxonName}</span>
-            </div>
+            <SearchBox
+              source={this.state.taxonList}
+              onResultSelect={this.handleSelectTaxon}
+            />
           ) : (
             <div>Loading organism list...</div>
           )}
