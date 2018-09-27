@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Form, Input, TextArea, Grid } from "semantic-ui-react";
+import { Form, Input, TextArea, Grid, Image } from "semantic-ui-react";
 import TransparentButton from "../ui/controls/buttons/TransparentButton";
 import PrimaryButton from "../ui/controls/buttons/PrimaryButton";
 
@@ -49,7 +49,12 @@ class Landing extends React.Component {
       </div>
     );
 
-    const accountForm = (
+    const usageLabel = (
+      <label>
+        How would you use IDseq? <span className="optional">Optional</span>
+      </label>
+    );
+    const interestForm = (
       <div className="account-form">
         <div className="form-header">
           <div className="form-title">Learn more about IDseq</div>
@@ -67,7 +72,7 @@ class Landing extends React.Component {
             control={Input}
             label="Affiliated Institution or Company"
           />
-          <Form.Field control={TextArea} label="How would you use IDseq?" />
+          <Form.Field control={TextArea} label={usageLabel} />
           <div className="submit-button">
             <PrimaryButton text="Submit" />
           </div>
@@ -82,7 +87,35 @@ class Landing extends React.Component {
             {topTitle}
             {actionCards}
           </Grid.Column>
-          <Grid.Column width={7}>{accountForm}</Grid.Column>
+          <Grid.Column width={7}>{interestForm}</Grid.Column>
+        </Grid>
+      </div>
+    );
+
+    const partners = (
+      <div className="partners-block">
+        <div className="partner-title">IN PARTNERSHIP WITH</div>
+        <Grid columns={2} className="partner-logos">
+          <Grid.Column>
+            <Image
+              className="first-logo"
+              src="/assets/logo-czi.jpg"
+              as="a"
+              href="https://www.chanzuckerberg.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+            />
+          </Grid.Column>
+          <Grid.Column>
+            <Image
+              className="second-logo"
+              src="/assets/logo-biohub.jpg"
+              as="a"
+              href="https://www.czbiohub.org/"
+              target="_blank"
+              rel="noopener noreferrer"
+            />
+          </Grid.Column>
         </Grid>
       </div>
     );
@@ -91,6 +124,7 @@ class Landing extends React.Component {
       <div>
         {header}
         {firstBlock}
+        {partners}
       </div>
     );
   }

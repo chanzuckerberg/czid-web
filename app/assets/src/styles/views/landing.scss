@@ -7,9 +7,7 @@
 }
 
 .first-block {
-  margin-top: 5rem;
-  margin-left: 5rem;
-  margin-right: 5rem;
+  margin: 5rem;
 
   .top-title {
     font-size: 2.3rem;
@@ -72,6 +70,13 @@
         textarea {
           min-height: 6rem;
         }
+
+        .optional {
+          color: $light-grey;
+          font-weight: normal;
+          font-size: 0.8rem;
+          margin-left: 0.5rem;
+        }
       }
 
       .submit-button {
@@ -82,6 +87,33 @@
           width: 9rem;
         }
       }
+    }
+  }
+}
+
+.partners-block {
+  width: 30rem;
+  margin: 10rem auto 5rem auto;
+
+  .partner-title {
+    text-align: center;
+    letter-spacing: 0.07rem;
+    font-weight: 600;
+    color: $medium-grey;
+    font-size: 0.8rem;
+  }
+
+  .partner-logos {
+    margin-top: 1rem;
+
+    .first-logo {
+      width: 8rem;
+      margin-left: 4.2rem;
+    }
+
+    .second-logo {
+      width: 11rem;
+      margin-top: 0.3rem;
     }
   }
 }
