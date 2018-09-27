@@ -1,9 +1,17 @@
 import React, { Component } from "react";
 import { Search, Grid, Header, Segment } from "semantic-ui-react";
 
-const source = [{ taxid: 1, name: "GenusOne" }, { taxid: 2, name: "GenusTwo" }];
-
 class SearchBox extends Component {
+  constructor(props) {
+    super(props);
+
+    this.source = this.props.source;
+
+    this.resetComponent = this.resetComponent.bind(this);
+    this.handleResultSelect = this.handleResultSelect.bind(this);
+    this.handleSearchChange = this.handleSearchChange.bind(this);
+  }
+
   componentWillMount() {
     this.resetComponent();
   }
@@ -27,7 +35,7 @@ class SearchBox extends Component {
 
       this.setState({
         isLoading: false,
-        results: _.filter(source, isMatch)
+        results: _.filter(this.source, isMatch)
       });
     }, 300);
   }
@@ -36,32 +44,16 @@ class SearchBox extends Component {
     const { isLoading, value, results } = this.state;
 
     return (
-      <Grid>
-        <Grid.Column width={6}>
-          <Search
-            loading={isLoading}
-            onResultSelect={this.handleResultSelect}
-            onSearchChange={_.debounce(this.handleSearchChange, 500, {
-              leading: true
-            })}
-            results={results}
-            value={value}
-            {...this.props}
-          />
-        </Grid.Column>
-        <Grid.Column width={10}>
-          <Segment>
-            <Header>State</Header>
-            <pre style={{ overflowX: "auto" }}>
-              {JSON.stringify(this.state, null, 2)}
-            </pre>
-            <Header>Options</Header>
-            <pre style={{ overflowX: "auto" }}>
-              {JSON.stringify(source, null, 2)}
-            </pre>
-          </Segment>
-        </Grid.Column>
-      </Grid>
+      <Search
+        loading={isLoading}
+        onResultSelect={this.handleResultSelect}
+        onSearchChange={_.debounce(this.handleSearchChange, 500, {
+          leading: true
+        })}
+        results={results}
+        value={value}
+        {...this.props}
+      />
     );
   }
 }

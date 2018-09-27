@@ -6,6 +6,7 @@ import axios from "axios";
 import DataTable from "../../visualizations/table/DataTable";
 import Moment from "react-moment";
 import PhyloTreeChecks from "./PhyloTreeChecks";
+import SearchBox from "../../ui/controls/SearchBox";
 
 const MinNumberOfSamples = 4;
 class PhyloTreeByPathCreation extends React.Component {
@@ -26,6 +27,7 @@ class PhyloTreeByPathCreation extends React.Component {
       selectedOtherSamples: new Set(),
       otherSamplesFilter: "",
 
+      taxaLoaded: false,
       taxonList: [],
 
       showErrorName: false,
@@ -171,7 +173,8 @@ class PhyloTreeByPathCreation extends React.Component {
 
   handleTaxonSearchContextResponse(response) {
     this.setState({
-      taxonList: response.data
+      taxonList: response.data,
+      taxaLoaded: true
     });
   }
 
@@ -458,7 +461,7 @@ class PhyloTreeByPathCreation extends React.Component {
         title="Select organism and project"
         onLoad={this.loadTaxonSearchContext}
       >
-        <div className="wizard__page-2__subtitle">{this.taxonName}</div>
+        <div className="wizard__page-2__subtitle" />
         <div className="wizard__page-2__form">
           <div>
             <div className="wizard__page-2__form__label-name">Name</div>
@@ -480,15 +483,8 @@ class PhyloTreeByPathCreation extends React.Component {
           )}
         </div>
         <div className="wizard__page-2__table">
-          {this.state.samplesLoaded && (
-            <DataTable
-              headers={this.projectSamplesHeaders}
-              columns={projectSamplesColumns}
-              data={this.state.projectSamples}
-              selectedRows={this.state.selectedProjectSamples}
-              onSelectedRowsChanged={this.handleChangedProjectSamples}
-            />
-          )}
+          {this.state.taxaLoaded && <SearchBox source={this.state.taxonList} />}{" "}
+          // TODO: if not loaded, yet show <div>Loading taxa...</div>
         </div>
       </Wizard.Page>
     );
