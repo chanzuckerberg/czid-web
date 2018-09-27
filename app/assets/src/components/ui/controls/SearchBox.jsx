@@ -1,7 +1,7 @@
-import React, { Component } from "react";
-import { Search, Grid, Header, Segment } from "semantic-ui-react";
+import React from "react";
+import { Search } from "semantic-ui-react";
 
-class SearchBox extends Component {
+class SearchBox extends React.Component {
   constructor(props) {
     super(props);
 
