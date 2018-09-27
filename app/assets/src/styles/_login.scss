@@ -5,7 +5,7 @@ $break-large: 1460px;
   margin: 0 auto;
   box-shadow: 1px 2px 5px 2px #eaeaea;
   margin-top: 150px;
-  border-radius: 20px;
+  border-radius: 10px;
   label {
     -webkit-transform: none !important;
     transform: none !important;
@@ -58,8 +58,8 @@ $break-large: 1460px;
   .login-wrapper {
     background-color: #4e72d5;
     padding: 15px;
-    border-bottom-right-radius: 20px;
-    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
     color: #fff;
     font-size: 20px;
     cursor: pointer;

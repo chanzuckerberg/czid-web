@@ -1,3 +1,5 @@
+@import "../themes/colors";
+
 .sign-in {
   float: right;
   margin-top: 0.4rem;
@@ -5,11 +7,81 @@
 }
 
 .first-block {
-  //margin-top: 5rem;
-  //margin-left: 5rem;
-}
+  margin-top: 5rem;
+  margin-left: 5rem;
+  margin-right: 5rem;
 
-.top-title {
-  font-size: 3rem;
-  line-height: 3rem;
+  .top-title {
+    font-size: 2.3rem;
+    line-height: 3.2rem;
+    font-weight: 600;
+    margin-right: 2.2rem;
+    max-width: 70rem;
+  }
+
+  .action-cards {
+    margin-top: 5rem;
+    margin-bottom: 5rem;
+
+    .action-card {
+      margin-top: 3rem;
+
+      .card-title {
+        font-size: 1.75rem;
+        font-weight: 600;
+      }
+      .card-description {
+        font-size: 1.1rem;
+        margin-top: 1.2rem;
+      }
+    }
+  }
+
+  .account-form {
+    box-shadow: 0.1rem 0.2rem 0.6rem 0.2rem $lightest-grey;
+    border-radius: 0.6rem;
+    border: 0.1rem solid $lightest-grey;
+
+    .form-header {
+      margin: 2rem 2rem 1rem 2rem;
+
+      .form-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+
+      .form-description {
+        margin-top: 0.7rem;
+      }
+
+      a {
+        color: $primary-medium !important;
+      }
+    }
+
+    .form {
+      margin: 0 2rem 2rem 2rem;
+
+      .field {
+        margin-top: 1.5rem;
+
+        input {
+          max-height: 1.5rem;
+        }
+
+        textarea {
+          min-height: 6rem;
+        }
+      }
+
+      .submit-button {
+        margin: 2rem auto auto auto;
+        width: 9rem;
+
+        .button {
+          width: 9rem;
+        }
+      }
+    }
+  }
 }
