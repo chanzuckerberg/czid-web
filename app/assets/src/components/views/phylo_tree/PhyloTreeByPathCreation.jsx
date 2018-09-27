@@ -255,7 +255,7 @@ class PhyloTreeByPathCreation extends React.Component {
           }`,
           pipelineRunId: row.pipeline_run_id
         };
-        if (row.project_id === this.props.projectId) {
+        if (row.project_id === this.state.projectId) {
           projectSamples.push(entry);
         } else {
           entry.project = row.project_name;
@@ -469,7 +469,7 @@ class PhyloTreeByPathCreation extends React.Component {
         key="wizard__page_3"
         title={`Would you like additional samples from IDSeq that contain ${
           this.state.taxonName
-        }`}
+        }?`}
       >
         <div className="wizard__page-3__subtitle" />
         <div className="wizard__page-3__searchbar">

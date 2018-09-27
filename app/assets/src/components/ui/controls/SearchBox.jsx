@@ -6,7 +6,6 @@ class SearchBox extends Component {
     super(props);
 
     this.source = this.props.source;
-    this.onResultSelect = this.props.onResultSelect;
 
     this.resetComponent = this.resetComponent.bind(this);
     this.handleSearchChange = this.handleSearchChange.bind(this);
@@ -23,7 +22,7 @@ class SearchBox extends Component {
 
   handleResultSelect(e, { result }) {
     this.setState({ value: result.title });
-    this.onResultSelect(e, { result });
+    this.props.onResultSelect(e, { result });
   }
 
   handleSearchChange(e, { value }) {
@@ -53,7 +52,7 @@ class SearchBox extends Component {
         })}
         results={results}
         value={value}
-        {...this.props}
+        onResultSelect={this.handleResultSelect}
       />
     );
   }
