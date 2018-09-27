@@ -384,6 +384,8 @@ ActiveRecord::Schema.define(version: 20_180_927_213_907) do
   create_table "taxon_descriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.integer "taxid", null: false
     t.bigint "wikipedia_id"
+    t.string "title"
+    t.text "summary"
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
