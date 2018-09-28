@@ -184,13 +184,18 @@ class PhyloTreesController < ApplicationController
       select
         samples.name,
         samples.project_id,
+        samples.sample_tissue,
+        samples.sample_location,
+        samples.created_at,
+        host_genomes.name as host,
         projects.name as project_name,
         pipeline_runs.id as pipeline_run_id
-      from pipeline_runs, projects, samples
+      from pipeline_runs, projects, samples, host_genomes
       where
         pipeline_runs.id in (#{pipeline_run_ids.join(',')}) and
         pipeline_runs.sample_id = samples.id and
-        samples.project_id = projects.id
+        samples.project_id = projects.id and
+        host_genomes.id = samples.host_genome_id
     ").to_a
 
     # Also add:

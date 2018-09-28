@@ -34,6 +34,49 @@ class TaxonLineage < ApplicationRecord
   PHAGE_FAMILIES_TAXIDS = [10_472, 10_474, 10_477, 10_656, 10_659, 10_662, 10_699, 10_744, 10_841, 10_860,
                            10_877, 11_989, 157_897, 292_638, 324_686, 423_358, 573_053, 1_232_737].freeze
 
+  # From https://www.niaid.nih.gov/research/emerging-infectious-diseases-pathogens
+  # Accessed 9/18/2018.
+  # Categories are listed in order of priority (A, B, C). So if a taxon is included by the rules of both
+  # category_A and category_C, for example, we will keep only category_A.
+  # (When iterating over the hash key order is guaranteed to be the same as insertion order.)
+  PRIORITY_PATHOGENS = {
+    "categoryA" => [
+      "Bacillus anthracis", "Clostridium botulinum", "Yersinia pestis",
+      "orthopoxvirus", "Variola virus", "parapoxvirus", "yatapoxvirus", "molluscipoxvirus",
+      "Francisella tularensis",
+      "Arenavirus", "Argentinian mammarenavirus", "Machupo mammarenavirus", "Guanarito mammarenavirus",
+      "Chapare mammarenavirus", "Lassa mammarenavirus", "Lujo mammarenavirus",
+      "Bunyavirales", "Hantaviridae",
+      "Flavivirus", "Dengue virus",
+      "Filoviridae", "Ebolavirus", "Marburgvirus"
+    ],
+    "categoryB" => [
+      "Burkholderia pseudomallei", "Coxiella burnetii", "Brucella", "Burkholderia mallei",
+      "Chlaydia psittaci", "Ricinus communis", "Clostridium perfringens", "Staphylococcus aureus",
+      "Rickettsia prowazekii", "Escherichia coli", "Vibrio cholerae", "Vibrio parahaemolyticus", "Vibrio vulnificus",
+      "Shigella", "Salmonella", "Listeria monocytogenes", "Campylobacter jejuni", "Yersinia enterocolitica",
+      "Caliciviridae", "Hepatovirus A", "Cryptosporidium parvum", "Cyclospora cayetanensis", "Giardia lamblia",
+      "Entamoeba histolytica", "Toxoplasma gondii", "Naegleria fowleri", "Balamuthia mandrillaris", "Microsporidia",
+      "West Nile virus", "California encephalitis orthobunyavirus", "Venezuelan equine encephalitis virus",
+      "Eastern equine encephalitis virus", "Western equine encephalitis virus", "Japanese encephalitis virus",
+      "Saint Louis encephalitis virus", "Yellow fever virus", "Chikungunya virus", "Zika virus"
+    ],
+    "categoryC" => [
+      "Nipah henipavirus", "Hendra henipavirus", "Severe fever with thrombocytopenia virus", "Heartland virus",
+      "Omsk hemorrhagic fever virus", "Kyasanur Forest disease virus", "Tick-borne encephalitis virus",
+      "Powassan virus", "Mycobacterium tuberculosis",
+      "unidentified influenza virus", "Influenza A virus", "Influenza B virus", "Influenza C virus",
+      "Rickettsia", "Rabies lyssavirus", "prion", "Coccidioides",
+      "Severe acute respiratory syndrome-related coronavirus", "Middle East respiratory syndrome-related coronavirus",
+      "Acanthamoeba", "Anaplasma phagocytophilum", "Australian bat lyssavirus", "Babesia",
+      "Bartonella henselae", "Human polyomavirus 1", "Bordetella pertussis", "Borrelia mayonii",
+      "Borrelia miyamotoi", "Ehrlichia", "Anaplasma", "Enterovirus D", "Enterovirus A",
+      "Hepacivirus C", "Orthohepevirus A", "Human betaherpesvirus 6", "Human gammaherpesvirus 8",
+      "Human polyomavirus 2", "Leptospira", "Mucorales", "Mucor", "Rhizopus", "Absidia", "Cunninghamella",
+      "Enterovirus C", "Measles morbillivirus", "Streptococcus sp. 'group A'"
+    ]
+  }.freeze
+
   def tax_level
     TaxonCount::LEVEL_2_NAME.keys.sort.each do |level_int|
       level_str = TaxonCount::LEVEL_2_NAME[level_int]
@@ -97,6 +140,16 @@ class TaxonLineage < ApplicationRecord
       # Set the name
       name = level_name(tax['tax_level']) + "_name"
       tax['lineage'][name] = tax['name']
+
+      # Tag pathogens
+      pathogen_tags = []
+      PRIORITY_PATHOGENS.each do |category, pathogen_list|
+        column_names.select { |cn| cn.include?("_name") }.each do |col|
+          pathogen_tags |= [category] if pathogen_list.include?(tax['lineage'][col])
+        end
+      end
+      best_tag = pathogen_tags[0] # first element is highest-priority element (see PRIORITY_PATHOGENS documentation)
+      tax['pathogenTag'] = best_tag
     end
 
     tax_map

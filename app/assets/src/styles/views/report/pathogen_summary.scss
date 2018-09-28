@@ -1,0 +1,17 @@
+.pathogen-summary {
+  display: flex;
+  .summary-icon {
+    order: 0;
+  }
+  .top-scoring {
+    order: 1;
+    width: 25%;
+    margin-left: 20px;
+  }
+  .top-pathogens {
+    order: 2;
+  }
+  ul li {
+    height: 30px;
+  }
+}
