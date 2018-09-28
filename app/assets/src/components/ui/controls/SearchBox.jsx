@@ -1,6 +1,9 @@
 import React from "react";
 import { Search } from "semantic-ui-react";
 
+const delayCheckMatch = 300;
+const waitHandleSearchChange = 500;
+
 class SearchBox extends React.Component {
   constructor(props) {
     super(props);
@@ -33,24 +36,26 @@ class SearchBox extends React.Component {
 
       const re = new RegExp(_.escapeRegExp(this.state.value), "i");
       const isMatch = result => re.test(result.title);
-
       this.setState({
         isLoading: false,
-        results: _.filter(this.source, isMatch)
+        results: this.source.filter(isMatch)
       });
-    }, 300);
+    }, delayCheckMatch);
   }
 
   render() {
     const { isLoading, value, results } = this.state;
-
     return (
       <Search
         className="idseq-ui input search"
         loading={isLoading}
-        onSearchChange={_.debounce(this.handleSearchChange, 500, {
-          leading: true
-        })}
+        onSearchChange={_.debounce(
+          this.handleSearchChange,
+          waitHandleSearchChange,
+          {
+            leading: true
+          }
+        )}
         results={results}
         value={value}
         onResultSelect={this.handleResultSelect}

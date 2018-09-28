@@ -567,11 +567,11 @@ class PhyloTreeByPathCreation extends React.Component {
 
   render() {
     if (this.state.phyloTreesLoaded) {
-      let NPagesToSkip =
+      let nPagesToSkip =
         (this.state.skipListTrees | 0) + (this.skipSelectProjectAndTaxon | 0);
       return (
         <Wizard
-          skipPageInfoNPages={NPagesToSkip}
+          skipPageInfoNPages={nPagesToSkip}
           onComplete={this.handleComplete}
           defaultPage={this.state.defaultPage}
           labels={{
