@@ -12,9 +12,9 @@ task :load_taxon_descriptions, [:taxon_desc_s3_path] => :environment do |_t, arg
   ActiveRecord::Base.transaction do
     json_dict.each do |taxid, data|
       datum = [taxid.to_i, data['pageid'].to_i,
-               data['description'].force_encoding('iso-8859-1'),
-               (data['title'] || '').force_encoding('iso-8859-1'),
-               (data['summary'] || '').force_encoding('iso-8859-1'),
+               data['description'].encode(Encoding.find('ASCII'), invalid: :replace, undef: :replace),
+               (data['title'] || '').encode(Encoding.find('ASCII'), invalid: :replace, undef: :replace),
+               (data['summary'] || '').encode(Encoding.find('ASCII'), invalid: :replace, undef: :replace),
                date, date].map { |v| ActiveRecord::Base.connection.quote(v) }
       values_list << datum
       if values_list.size >= LOAD_CHUNK_SIZE
