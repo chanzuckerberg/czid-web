@@ -51,8 +51,19 @@ class HomeController < ApplicationController
   end
 
   def sign_up
-    Rails.logger.info("these are the params " + home_params.to_s)
-    mail(to: "accounts@idseq.net", subject: "New sign up from landing page", subject: )
+    body = ""
+    home_params.each do |k, v|
+      body += "#{k}: #{v}\n"
+    end
+    Rails.logger.info("New sign up:\n#{body}")
+    mail(to: "jsheu@chanzuckerberg.com", subject: "New sign up from landing page", body: body)
+    render json: {
+      status: :ok
+    }
+  rescue
+    render json: {
+      status: :internal_server_error
+    }
   end
 
   private
