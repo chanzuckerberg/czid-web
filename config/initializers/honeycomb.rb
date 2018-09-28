@@ -13,5 +13,7 @@ if ENV["IDSEQ_HONEYCOMB_WRITE_KEY"] && ENV["IDSEQ_HONEYCOMB_DATA_SET"] && ENV["I
     end
   end
 else
-  conf.client = NullClient.new
+  HoneycombRails.configure do |conf|
+    conf.client = NullClient.new
+  end
 end
