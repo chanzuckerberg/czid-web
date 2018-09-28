@@ -75,7 +75,7 @@ class PhyloTreeVis extends React.Component {
   handleNodeClick(node) {
     if (node.data.accession) {
       let url = `https://www.ncbi.nlm.nih.gov/nuccore/${node.data.accession}`;
-      window.open(url, "_blank");
+      window.open(url, "_blank", "noopener", "noreferrer");
     } else if (node.data.id) {
       location.href = `/samples/${node.data.id}`;
     }
