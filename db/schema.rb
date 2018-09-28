@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_180_918_172_623) do
+ActiveRecord::Schema.define(version: 20_180_927_213_907) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -381,6 +381,17 @@ ActiveRecord::Schema.define(version: 20_180_918_172_623) do
     t.index %w[pipeline_run_id tax_level count_type tax_id], name: "taxon_counts_pr_index2", unique: true
   end
 
+  create_table "taxon_descriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "taxid", null: false
+    t.bigint "wikipedia_id"
+    t.string "title"
+    t.text "summary"
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["taxid"], name: "index_taxon_descriptions_on_taxid", unique: true
+  end
+
   create_table "taxon_lineage_names", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.integer "taxid"
     t.string "superkingdom_name"
@@ -469,6 +480,16 @@ ActiveRecord::Schema.define(version: 20_180_918_172_623) do
     t.text "rpm_list"
     t.index %w[background_id count_type tax_level tax_id], name: "index_taxon_summaries_detailed", unique: true
     t.index ["background_id"], name: "index_taxon_summaries_on_background_id"
+  end
+
+  create_table "ui_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.float "min_nt_z", limit: 24
+    t.float "min_nr_z", limit: 24
+    t.integer "min_nt_rpm"
+    t.integer "min_nr_rpm"
+    t.integer "top_n"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
