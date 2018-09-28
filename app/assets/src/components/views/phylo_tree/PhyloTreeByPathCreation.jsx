@@ -7,6 +7,7 @@ import DataTable from "../../visualizations/table/DataTable";
 import Moment from "react-moment";
 import PhyloTreeChecks from "./PhyloTreeChecks";
 import SearchBox from "../../ui/controls/SearchBox";
+import LoadingSpinner from "../../ui/icons/LoadingSpinner";
 
 const MinNumberOfSamples = 4;
 class PhyloTreeByPathCreation extends React.Component {
@@ -434,7 +435,7 @@ class PhyloTreeByPathCreation extends React.Component {
                   onResultSelect={this.handleSelectProject}
                 />
               ) : (
-                <div>Loading projects...</div>
+                <LoadingSpinner />
               )}
             </div>
           </div>
@@ -449,7 +450,7 @@ class PhyloTreeByPathCreation extends React.Component {
                   onResultSelect={this.handleSelectTaxon}
                 />
               ) : (
-                <div>Loading organism list...</div>
+                <LoadingSpinner />
               )}
             </div>
           </div>
@@ -500,7 +501,7 @@ class PhyloTreeByPathCreation extends React.Component {
             this.state.projectSamples.length == 0 ? (
               <div>No samples containing {this.state.taxonName} available</div>
             ) : (
-              <div>Loading samples...</div>
+              <LoadingSpinner />
             )}
           </div>
         </Wizard.Page>
@@ -541,7 +542,7 @@ class PhyloTreeByPathCreation extends React.Component {
             this.state.otherSamples.length == 0 ? (
               <div>No samples containing {this.state.taxonName} available</div>
             ) : (
-              <div>Loading samples...</div>
+              <LoadingSpinner />
             )}
           </div>
         </Wizard.Page>
@@ -582,7 +583,7 @@ class PhyloTreeByPathCreation extends React.Component {
         </Wizard>
       );
     } else {
-      return <div>Loading Phylo Trees...</div>;
+      return <LoadingSpinner />;
     }
   }
 }
