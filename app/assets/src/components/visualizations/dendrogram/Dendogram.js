@@ -14,7 +14,18 @@ export default class Dendogram {
 
     this.options = Object.assign(
       {
-        curvedEdges: false
+        curvedEdges: false,
+        defaultColor: "#cccccc",
+        colormapName: "viridis",
+        colorGroupAttribute: null,
+        colorGroupLegendTitle: null,
+        colorGroupAbsentName: null,
+        legendX: 880,
+        legendY: 50,
+        onNodeTextClick: null,
+        onNodeClick: null,
+        onNodeHover: null,
+        tooltipContainer: null
       },
       options || {}
     );
@@ -28,7 +39,7 @@ export default class Dendogram {
     // margin top
     this.margins = {
       // includes legend
-      top: 60,
+      top: 80,
       // includes second half of nodes
       bottom: 20,
       // includes root label on the left of the node
@@ -70,10 +81,7 @@ export default class Dendogram {
         `translate(${this.margins.left}, ${this.margins.top})`
       );
 
-    this.tooltipDiv = select("body")
-      .append("div")
-      .attr("class", "dendogram__tooltip")
-      .style("opacity", 0);
+    this.tooltipContainer = select(this.options.tooltipContainer);
   }
 
   adjustHeight(treeHeight) {
@@ -541,47 +549,41 @@ export default class Dendogram {
       })
       .attr("transform", function(node) {
         return `translate(${node.y},${node.x})`;
+      });
+
+    if (!this.tooltipContainer.empty()) {
+      nodeEnter
+        .on("mouseenter", node => {
+          if (!node.children) {
+            this.options.onNodeHover && this.options.onNodeHover(node);
+            this.tooltipContainer.classed("visible", true);
+          }
+        })
+        .on("mousemove", node => {
+          if (!node.children) {
+            this.tooltipContainer
+              .style("left", currentEvent.pageX + 20 + "px")
+              .style("top", currentEvent.pageY + 20 + "px");
+          }
+        })
+        .on("mouseleave", () => {
+          if (!node.children) {
+            this.tooltipContainer.classed("visible", false);
+          }
+        });
+    }
+
+    nodeEnter
+      .append("circle")
+      .attr("r", function(node) {
+        return node.children ? 3 : 5;
       })
       .on("click", node => {
         this.clickHandler(
           () => this.markAsHighlight(node),
           () => this.rerootOriginalTree(node)
         );
-      })
-      .on("mouseover", node => {
-        if (!node.children) {
-          let md = node.data.name.split("__");
-          md.shift();
-
-          if (md.length > 0) {
-            this.tooltipDiv.html(md.join(" / "));
-
-            this.tooltipDiv
-              .transition()
-              .duration(200)
-              .style("opacity", 0.9);
-          }
-        }
-      })
-      .on("mousemove", node => {
-        if (!node.children) {
-          this.tooltipDiv
-            .style("left", currentEvent.pageX + 20 + "px")
-            .style("top", currentEvent.pageY + 20 + "px");
-        }
-      })
-      .on("mouseout", () => {
-        if (!node.children) {
-          this.tooltipDiv
-            .transition()
-            .duration(500)
-            .style("opacity", 0);
-        }
       });
-
-    nodeEnter.append("circle").attr("r", function(node) {
-      return node.children ? 3 : 5;
-    });
 
     nodeEnter
       .append("text")
@@ -593,7 +595,11 @@ export default class Dendogram {
       })
       .text(function(d) {
         return d.children ? "" : d.data.name.split("__")[0];
-      });
+      })
+      .on(
+        "click",
+        d => this.options.onNodeTextClick && this.options.onNodeTextClick(d)
+      );
 
     if (this.options.colorGroupAttribute && !this.skipColoring) {
       // Apply colors to the nodes from data.colorIndex
