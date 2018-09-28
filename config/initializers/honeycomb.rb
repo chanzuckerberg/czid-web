@@ -1,3 +1,4 @@
+require 'libhoney'
 
 if ENV["IDSEQ_HONEYCOMB_WRITE_KEY"] && ENV["IDSEQ_HONEYCOMB_DATA_SET"] && ENV["IDSEQ_HONEYCOMB_DB_DATA_SET"]
   HoneycombRails.configure do |conf|
@@ -12,5 +13,9 @@ if ENV["IDSEQ_HONEYCOMB_WRITE_KEY"] && ENV["IDSEQ_HONEYCOMB_DATA_SET"] && ENV["I
         1
       end
     end
+  end
+else
+  HoneycombRails.configure do |conf|
+    conf.client = Libhoney::NullClient.new
   end
 end
