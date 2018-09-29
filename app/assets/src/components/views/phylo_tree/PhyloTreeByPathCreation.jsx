@@ -454,9 +454,7 @@ class PhyloTreeByPathCreation extends React.Component {
             </div>
           </div>
           <div className="wizard__page-2__searchbar">
-            <div className="wizard__page-2__searchbar__container">
-              Organism (genus)
-            </div>
+            <div className="wizard__page-2__searchbar__container">Organism</div>
             <div className="wizard__page-2__searchbar__container">
               {this.state.taxaLoaded ? (
                 <SearchBox
