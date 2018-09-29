@@ -1,6 +1,6 @@
 {
-  "Family": "{{ .Values.project }}-{{ .Values.env }}-{{ .Values.name }}",
-  "ContainerDefinitions": [
+  "family": "{{ .Values.project }}-{{ .Values.env }}-{{ .Values.name }}",
+  "containerDefinitions": [
     {
       "name": "idseq-{{ .Values.name }}",
       "image": "chanzuckerberg/idseq-web:{{ .Values.tag }}",
@@ -56,12 +56,12 @@
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "idseq-ecs-logs-{{ .Values.env }}",
+          "awslogs-group": "ecs-logs-{{ .Values.env }}",
           "awslogs-region": "{{ .Values.region }}",
           "awslogs-stream-prefix": "idseq-{{ .Values.name }}"
         }
       }
     }
   ],
-  "TaskRoleArn": "{{ .Values.project }}-{{ .Values.env }}-{{ .Values.name }}"
+  "taskRoleArn": "{{ .Values.project }}-{{ .Values.env }}-{{ .Values.name }}"
 }
