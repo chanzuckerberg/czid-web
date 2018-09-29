@@ -22,25 +22,11 @@
       "gsnap.hitsummary.tab",
       "gsnap_counts.json"
     ],
-    "refined_gsnap_out": [
-      "gsnap.blast.m8",
-      "gsnap.reassigned.m8",
-      "gsnap_refined.hitsummary.tab",
-      "gsnap_refined_counts.json",
-      "gsnap_genus_accession_list.tab"
-    ],
     "rapsearch2_out": [
       "rapsearch2.m8",
       "rapsearch2.deduped.m8",
       "rapsearch2.hitsummary.tab",
       "rapsearch2_counts.json"
-    ],
-    "refined_rapsearch2_out": [
-      "rapsearch2.blast.m8",
-      "rapsearch2.reassigned.m8",
-      "rapsearch2_refined.hitsummary.tab",
-      "rapsearch2_refined_counts.json",
-      "rapsearch2_genus_accession_list.tab"
     ],
     "taxon_count_out": ["taxon_counts.json"],
     "annotated_out": ["annotated_merged.fa", "unidentified.fa"]
@@ -63,7 +49,7 @@
         "chunks_in_flight": 32,
         "chunk_size": 15000,
         "max_concurrent": 2,
-        "environment": "prod"
+        "environment": "<%= Rails.env == 'prod' ? 'prod' : 'staging' %>"
         <% if @attribute_dict[:index_dir_suffix] %>
           ,"index_dir_suffix": "<%= @attribute_dict[:index_dir_suffix] %>"
         <% end %>
@@ -86,50 +72,14 @@
         "chunks_in_flight": 32,
         "chunk_size": 10000,
         "max_concurrent": 6,
-        "environment": "prod"
+        "environment": "<%= Rails.env == 'prod' ? 'prod' : 'staging' %>"
         <% if @attribute_dict[:index_dir_suffix] %>
           ,"index_dir_suffix": "<%= @attribute_dict[:index_dir_suffix] %>"
         <% end %>
       }
     },
     {
-      "in": ["gsnap_out", "host_filter_out"],
-      "out": "refined_gsnap_out",
-      "class": "PipelineStepReclassifyReads",
-      "module": "idseq_dag.steps.reclassify_reads", 
-      "additional_files": { 
-        "lineage_db": "<%= @attribute_dict[:lineage_db] %>",
-        "accession2taxid_db": "<%= @attribute_dict[:accession2taxid_db] %>",
-        "loc_db": "<%= @attribute_dict[:nt_loc_db] %>"
-        <% if @attribute_dict[:skip_dedeuterostome_filter] == 0 %>
-          ,"deuterostome_db": "<%= @attribute_dict[:deuterostome_db] %>"
-        <% end %>
-      },
-      "additional_attributes": {
-        "db": "<%= @attribute_dict[:nt_db] %>",
-        "db_type": "nt"
-      }
-    },
-    {
-      "in": ["rapsearch2_out", "host_filter_out"],
-      "out": "refined_rapsearch2_out",
-      "class": "PipelineStepReclassifyReads",
-      "module": "idseq_dag.steps.reclassify_reads", 
-      "additional_files": { 
-        "lineage_db": "<%= @attribute_dict[:lineage_db] %>",
-        "accession2taxid_db": "<%= @attribute_dict[:accession2taxid_db] %>",
-        "loc_db": "<%= @attribute_dict[:nr_loc_db] %>"
-        <% if @attribute_dict[:skip_dedeuterostome_filter] == 0 %>
-          ,"deuterostome_db": "<%= @attribute_dict[:deuterostome_db] %>"
-        <% end %>
-      },
-      "additional_attributes": {
-        "db": "<%= @attribute_dict[:nr_db] %>",
-        "db_type": "nr"
-      }
-    },
-    {
-      "in": ["refined_gsnap_out", "refined_rapsearch2_out"],
+      "in": ["gsnap_out", "rapsearch2_out"],
       "out": "taxon_count_out",
       "class": "PipelineStepCombineTaxonCounts",
       "module": "idseq_dag.steps.combine_taxon_counts",

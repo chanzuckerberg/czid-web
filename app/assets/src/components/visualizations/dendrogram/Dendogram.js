@@ -2,8 +2,9 @@ import { cluster as d3Cluster, hierarchy } from "d3-hierarchy";
 import "d3-transition";
 import { timeout } from "d3-timer";
 import { select, event as currentEvent } from "d3-selection";
+import { Colormap } from "../../utils/colormaps/Colormap";
 
-export default class PhyloTree {
+export default class Dendogram {
   constructor(container, tree, options) {
     this.svg = null;
     this.g = null;
@@ -96,6 +97,8 @@ export default class PhyloTree {
     this._highlighted.clear();
     this.tree = tree;
     this.root = tree ? hierarchy(this.tree.root) : null;
+
+    this.updateColors();
   }
 
   computeDistanceToRoot(node, offset = 0) {
@@ -145,6 +148,127 @@ export default class PhyloTree {
         });
       }
     });
+  }
+
+  updateColors() {
+    // Color clusters of the nodes based on the color group attribute.
+    // Color a node if all its children have the same color.
+    if (!this.options.colorGroupAttribute) {
+      return;
+    }
+
+    let attrName = this.options.colorGroupAttribute;
+    let absentName = this.options.colorGroupAbsentName;
+
+    // Set up all attribute values. Colors end up looking like:
+    // Uncolored (grey) | Absent attribute color (e.g. for NCBI References) + Actual seen values..
+    let allVals = new Set();
+    this.root.leaves().forEach(n => {
+      if (n.data) {
+        if (n.data.hasOwnProperty(attrName)) {
+          allVals.add(n.data[attrName]);
+        } else {
+          allVals.add(absentName);
+        }
+      }
+    });
+    allVals = Array.from(allVals);
+
+    // Just leave everything the uncolored color if there is only the absent
+    // value
+    this.skipColoring = false;
+    if (allVals.length === 1 && allVals[0] === absentName) {
+      this.skipColoring = true;
+      return;
+    }
+
+    allVals = ["Uncolored"].concat(allVals);
+    this.allColorAttributeValues = allVals;
+
+    // Set up colors array
+    this.colors = Colormap.getNScale(this.options.colormapName, allVals.length);
+    this.colors = [this.options.defaultColor].concat(this.colors);
+
+    function colorNode(head) {
+      // Color the nodes based on the attribute values
+      if (!head.data) return 0; // 0 for uncolored default
+      let colorResult = 0;
+
+      if (!head.children || head.children.length === 0) {
+        // Leaf node, no children
+        let attrVal;
+        if (head.data.hasOwnProperty(attrName)) {
+          // Get color based on the desired attribute
+          attrVal = head.data[attrName];
+        } else {
+          // Leaf node but missing the attribute
+          attrVal = absentName;
+        }
+        colorResult = allVals.indexOf(attrVal);
+      } else {
+        // Not a leaf node, get the colors of the children
+        let childrenColors = new Set();
+        for (let child of head.children) {
+          // Want to call all the children to get every node/link colored
+          childrenColors.add(colorNode(child));
+        }
+        if (childrenColors.size === 1) {
+          // Set colorResult if all the children are the same
+          colorResult = childrenColors.values().next().value;
+        }
+      }
+
+      // Set this node's color
+      head.data.colorIndex = colorResult;
+      return colorResult;
+    }
+
+    colorNode(this.root);
+  }
+
+  updateLegend() {
+    // Generate legend for coloring by attribute name
+    if (!this.options.colorGroupAttribute || this.skipColoring) {
+      return;
+    }
+
+    let allVals = this.allColorAttributeValues;
+    let legend = this.g.select(".legend");
+    if (legend.empty()) {
+      legend = this.g.append("g").attr("class", "legend");
+      let x = this.options.legendX;
+      let y = this.options.legendY;
+
+      // Set legend title
+      let legendTitle = (this.options.colorGroupLegendTitle || "Legend") + ":";
+      legend
+        .append("text")
+        .attr("x", x)
+        .attr("y", y)
+        .attr("class", "title")
+        .text(legendTitle);
+
+      x += 5;
+      y += 25;
+      for (let i = 1; i < allVals.length; i++, y += 30) {
+        // First of values and colors is the placeholder for 'Uncolored'
+
+        // Add color circle
+        let color = this.colors[i];
+        legend
+          .append("circle")
+          .attr("r", 5)
+          .attr("transform", `translate(${x}, ${y})`)
+          .style("fill", color);
+
+        // Add text label
+        legend
+          .append("text")
+          .attr("x", x + 15)
+          .attr("y", y + 5)
+          .text(allVals[i]);
+      }
+    }
   }
 
   clickHandler(clickCallback, dblClickCallback, delay = 250) {
@@ -343,10 +467,11 @@ export default class PhyloTree {
     cluster(this.root);
 
     let maxDistance = this.computeDistanceToRoot(this.root);
-    this.createScale(-30, 0, this.minTreeSize.width, maxDistance);
     this.updateHighlights();
+    this.updateLegend();
     this.adjustXPositions();
     this.adjustYPositions(maxDistance);
+    this.createScale(-30, 0, this.minTreeSize.width, maxDistance);
 
     let link = this.g
       .selectAll(".link")
@@ -455,7 +580,7 @@ export default class PhyloTree {
       });
 
     nodeEnter.append("circle").attr("r", function(node) {
-      return node.children ? 3 : 7;
+      return node.children ? 3 : 5;
     });
 
     nodeEnter
@@ -469,5 +594,21 @@ export default class PhyloTree {
       .text(function(d) {
         return d.children ? "" : d.data.name.split("__")[0];
       });
+
+    if (this.options.colorGroupAttribute && !this.skipColoring) {
+      // Apply colors to the nodes from data.colorIndex
+      let colors = this.colors;
+      this.g.selectAll(".node").style("fill", function(d) {
+        return colors[d.data.colorIndex];
+      });
+
+      this.g.selectAll(".link").style("stroke", function(d) {
+        return colors[d.data.colorIndex];
+      });
+    } else {
+      // Color all the nodes light grey. Default not in CSS because that would
+      // override D3 styling.
+      this.g.selectAll(".node").style("fill", this.options.defaultColor);
+    }
   }
 }

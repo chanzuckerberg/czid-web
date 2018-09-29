@@ -36,6 +36,9 @@
 @import "styles/ui/controls/input";
 @import "styles/ui/controls/slider";
 
+// labels
+@import "styles/ui/labels/pathogen_label";
+
 // ui/containers
 @import "styles/ui/containers/modal";
 @import "styles/ui/containers/wizard";
@@ -43,6 +46,7 @@
 // views
 @import "styles/views/playground_controls";
 @import "styles/views/phylo_tree/phylo_tree_by_path_creation";
+@import "styles/views/report/pathogen_summary";
 @import "styles/views/phylo_tree/phylo_tree_list_view";
 @import "styles/views/phylo_tree/phylo_tree_vis";
 @import "styles/views/taxon_tree_vis";

@@ -15,6 +15,9 @@ import OurDropdown from "./ui/controls/dropdowns/Dropdown";
 import MultipleNestedDropdown from "./ui/controls/dropdowns/MultipleNestedDropdown";
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
 import BetaLabel from "./ui/labels/BetaLabel";
+import PathogenLabel from "./ui/labels/PathogenLabel";
+import PathogenSummary from "./views/report/PathogenSummary";
+import ReportInsightIcon from "./views/report/ReportInsightIcon";
 import PhyloTreeByPathCreationModal from "./views/phylo_tree/PhyloTreeByPathCreationModal";
 import PhyloTreeChecks from "./views/phylo_tree/PhyloTreeChecks";
 import TaxonTreeVis from "./views/TaxonTreeVis";
@@ -31,6 +34,7 @@ class PipelineSampleReport extends React.Component {
     this.allowPhyloTree =
       props.can_edit &&
       (this.admin == 1 || this.allowedFeatures.indexOf("phylo_trees") >= 0);
+    this.allowPathogenSummary = false;
     this.report_ts = props.report_ts;
     this.sample_id = props.sample_id;
     this.projectId = props.projectId;
@@ -113,6 +117,8 @@ class PipelineSampleReport extends React.Component {
     // Starting state is default values which are to be set later.
     this.state = {
       taxonomy_details: [],
+      topScoringTaxa: [],
+      pathogenTagSummary: {},
       backgroundId: defaultBackgroundId,
       backgroundName: "",
       search_taxon_id: 0,
@@ -264,12 +270,13 @@ class PipelineSampleReport extends React.Component {
         }
       }
       this.genus_map = genus_map;
-
       this.setState(
         {
           rows_passing_filters: res.data.taxonomy_details[0],
           rows_total: res.data.taxonomy_details[1],
           taxonomy_details: res.data.taxonomy_details[2],
+          topScoringTaxa: res.data.topScoringTaxa,
+          pathogenTagSummary: res.data.pathogenTagSummary,
           backgroundId: res.data.background_info.id,
           backgroundName: res.data.background_info.name
         },
@@ -900,7 +907,7 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
-  displayTags(taxInfo, reportDetails) {
+  displayHoverActions(taxInfo, reportDetails) {
     let tax_level_str = "";
     let ncbiDot, fastaDot, alignmentVizDot, phyloTreeDot;
     if (taxInfo.tax_level == 1) tax_level_str = "species";
@@ -1044,26 +1051,33 @@ class PipelineSampleReport extends React.Component {
       tax_name = <span>{tax_scientific_name}</span>;
     }
 
-    let foo = <i>{tax_name}</i>;
+    let taxonNameDisplay = <i>{tax_name}</i>;
 
     if (tax_info.tax_id > 0) {
       if (report_details.taxon_fasta_flag) {
-        foo = (
+        taxonNameDisplay = (
           <span>
             <a>{tax_name}</a>
           </span>
         );
       } else {
-        foo = <span>{tax_name}</span>;
+        taxonNameDisplay = <span>{tax_name}</span>;
       }
     }
+    let secondaryTaxonDisplay = (
+      <span>
+        <PathogenLabel type={tax_info.pathogenTag} />
+        {this.displayHoverActions(tax_info, report_details)}
+      </span>
+    );
+    let taxonDescription;
     if (tax_info.tax_level == 1) {
       // indent species rows
-      foo = (
+      taxonDescription = (
         <div className="hover-wrapper">
           <div className="species-name">
-            {foo}
-            {this.displayTags(tax_info, report_details)}
+            {taxonNameDisplay}
+            {secondaryTaxonDisplay}
           </div>
         </div>
       );
@@ -1074,21 +1088,21 @@ class PipelineSampleReport extends React.Component {
       const collapseExpand = (
         <CollapseExpand tax_info={tax_info} parent={this} />
       );
-      foo = (
+      taxonDescription = (
         <div className="hover-wrapper">
           <div className="genus-name">
             {" "}
-            {collapseExpand} {foo}
+            {collapseExpand} {taxonNameDisplay}
           </div>
           <i className="count-info">
             ({tax_info.species_count}{" "}
             {PipelineSampleReport.category_to_adjective(category_name)} species)
           </i>
-          {this.displayTags(tax_info, report_details)}
+          {secondaryTaxonDisplay}
         </div>
       );
     }
-    return foo;
+    return taxonDescription;
   }
 
   render_number(
@@ -1096,7 +1110,8 @@ class PipelineSampleReport extends React.Component {
     nrCount,
     num_decimals,
     isAggregate = false,
-    visible_flag = true
+    visible_flag = true,
+    showInsight = false
   ) {
     if (!visible_flag) {
       return null;
@@ -1108,7 +1123,7 @@ class PipelineSampleReport extends React.Component {
         : null;
     const ntCountLabel = isAggregate ? (
       <div className={`active ${this.switchClassName("NT", ntCount)}`}>
-        {ntCountStr}
+        {showInsight ? <ReportInsightIcon /> : null} {ntCountStr}
       </div>
     ) : (
       <div className={`${this.switchClassName("NT", ntCount)}`}>
@@ -1183,20 +1198,23 @@ class PipelineSampleReport extends React.Component {
     let highlighted =
       this.state.highlight_taxon == tax_info.tax_id ? "highlighted" : "";
     let taxon_status = "";
-    if (confirmed_taxids.indexOf(tax_info.tax_id) >= 0)
+    if (confirmed_taxids.indexOf(tax_info.tax_id) >= 0) {
       taxon_status = "confirmed";
-    else if (watched_taxids.indexOf(tax_info.tax_id) >= 0)
+    } else if (watched_taxids.indexOf(tax_info.tax_id) >= 0) {
       taxon_status = "watched";
+    }
+    let top_scoring_status = tax_info.topScoring == 1 ? "top-scoring-row" : "";
+    let emphasis_class = `${taxon_status} ${highlighted} ${top_scoring_status}`;
 
     if (tax_info.tax_level == 2) {
       if (tax_info.tax_id < 0) {
         return `report-row-genus ${
           tax_info.genus_taxid
-        } fake-genus ${taxon_status} ${highlighted}`;
+        } fake-genus ${emphasis_class}`;
       }
       return `report-row-genus ${
         tax_info.genus_taxid
-      } real-genus ${taxon_status} ${highlighted}`;
+      } real-genus ${emphasis_class}`;
     }
 
     let initial_visibility = "hidden";
@@ -1206,14 +1224,15 @@ class PipelineSampleReport extends React.Component {
     ) {
       initial_visibility = "";
     }
+    emphasis_class = `${initial_visibility} ${emphasis_class}`;
     if (tax_info.genus_taxid < 0) {
       return `report-row-species ${
         tax_info.genus_taxid
-      } fake-genus ${initial_visibility} ${taxon_status} ${highlighted}`;
+      } fake-genus ${emphasis_class}`;
     }
     return `report-row-species ${
       tax_info.genus_taxid
-    } real-genus ${initial_visibility} ${taxon_status} ${highlighted}`;
+    } real-genus ${emphasis_class}`;
   }
 
   expandGenusClick(e) {
@@ -1496,7 +1515,14 @@ function DetailCells({ parent }) {
       )}
     >
       <td>{parent.render_name(tax_info, parent.report_details)}</td>
-      {parent.render_number(tax_info.NT.aggregatescore, null, 0, true)}
+      {parent.render_number(
+        tax_info.NT.aggregatescore,
+        null,
+        0,
+        true,
+        undefined,
+        tax_info.topScoring == 1
+      )}
       {parent.render_number(tax_info.NT.zscore, tax_info.NR.zscore, 1)}
       {parent.render_number(tax_info.NT.rpm, tax_info.NR.rpm, 1)}
       {parent.render_number(tax_info.NT.r, tax_info.NR.r, 0)}
@@ -1846,6 +1872,12 @@ class RenderMarkup extends React.Component {
           <div className="tab-screen-content">
             <div className="row reports-container">
               <div className="col s12 reports-section">
+                {parent.allowPathogenSummary ? (
+                  <PathogenSummary
+                    topScoringTaxa={parent.state.topScoringTaxa}
+                    pathogenTagSummary={parent.state.pathogenTagSummary}
+                  />
+                ) : null}
                 <div className="reports-count">
                   <div className="report-top-filters">
                     <div className="filter-lists">

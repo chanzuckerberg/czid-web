@@ -169,6 +169,44 @@ module ReportHelper
     data
   end
 
+  def label_top_scoring_taxa!(tax_map)
+    # Rule:
+    #   top n hits that satisfy:
+    #     NT.zscore > min_z AND
+    #     NR.zscore > min_z AND
+    #     NT.rpm > min_rpm AND
+    #     NR.rpm > min_rpm AND
+    #     tax_id > 0
+    #   Besides labeling taxa as "top-scoring" in-place, the function also returns a list
+    #   of top-scoring taxa for the "executive summary" at the top of a report.
+    #   In the interest of space, we do not list a genus if one of its species is already included.
+    top_taxa = []
+    i = 0
+    genus_included = false
+    ui_config = UiConfig.last
+    min_nt_z = ui_config.min_nt_z || 1
+    min_nr_z = ui_config.min_nr_z || 1
+    min_nt_rpm = ui_config.min_nt_rpm || 1
+    min_nr_rpm = ui_config.min_nr_rpm || 1
+    n = ui_config.top_n || 3
+    tax_map.each do |tax|
+      break if top_taxa.length >= n && tax["tax_level"] == TaxonCount::TAX_LEVEL_GENUS
+      if tax["tax_id"] > 0 && tax["NT"]["zscore"] > min_nt_z && tax["NR"]["zscore"] > min_nr_z && tax["NT"]["rpm"] > min_nt_rpm && tax["NR"]["rpm"] > min_nr_rpm
+        if tax["tax_level"] == TaxonCount::TAX_LEVEL_SPECIES && genus_included
+          top_taxa.pop
+          genus_included = false
+        end
+        if top_taxa.length < n
+          tax["topScoring"] = 1
+          top_taxa << tax
+          genus_included = true if tax["tax_level"] == TaxonCount::TAX_LEVEL_GENUS
+        end
+      end
+      i += 1
+    end
+    top_taxa
+  end
+
   def taxon_confirmation_map(sample_id, user_id)
     taxon_confirmations = TaxonConfirmation.where(sample_id: sample_id)
     confirmed = taxon_confirmations.where(strength: TaxonConfirmation::CONFIRMED)
@@ -200,17 +238,22 @@ module ReportHelper
     ALL_CATEGORIES
   end
 
-  def fetch_taxon_counts(pipeline_run_id, background_id)
+  def fetch_taxon_counts(pipeline_run_id, background_id, refined = false)
     pipeline_run = PipelineRun.find(pipeline_run_id)
     adjusted_total_reads = (pipeline_run.total_reads - pipeline_run.total_ercc_reads.to_i) * pipeline_run.subsample_fraction
     raw_non_host_reads = pipeline_run.adjusted_remaining_reads.to_f * pipeline_run.subsample_fraction
+    # only turned on refined with the right pipeline version and output
+    refined_output = pipeline_run.output_states.find_by(output: "refined_taxon_counts")
+    refined = false unless pipeline_run.pipeline_version.to_f >= 3.0 && refined_output && refined_output.state == PipelineRun::STATUS_LOADED
+
+    count_types = refined ? "('NT+','NR+')" : "('NT','NR')"
 
     # NOTE:  If you add more columns to be fetched here, you really should add them to PROPERTIES_OF_TAXID above
     # otherwise they will not survive cleaning.
     TaxonCount.connection.select_all("
       SELECT
         taxon_counts.tax_id              AS  tax_id,
-        taxon_counts.count_type          AS  count_type,
+        SUBSTR(taxon_counts.count_type, 1, 2)          AS  count_type,
         taxon_counts.tax_level           AS  tax_level,
 
         taxon_counts.genus_taxid         AS  genus_taxid,
@@ -247,20 +290,29 @@ module ReportHelper
       WHERE
         pipeline_run_id = #{pipeline_run_id.to_i} AND
         taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID} AND
-        taxon_counts.count_type IN ('NT', 'NR')
+        taxon_counts.count_type IN #{count_types}
     ").to_hash
   end
 
-  def fetch_top_taxons(samples, background_id, categories, read_specificity = false)
+  def fetch_top_taxons(samples, background_id, categories, read_specificity = false, include_phage = false)
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
 
     categories_clause = ""
     if categories.present?
       categories_clause = " AND taxon_counts.superkingdom_taxid IN (#{categories.map { |category| CATEGORIES_TAXID_BY_NAME[category] }.compact.join(',')})"
+    elsif include_phage
+      categories_clause = " AND taxon_counts.superkingdom_taxid = #{CATEGORIES_TAXID_BY_NAME['Viruses']}"
     end
+
     read_specificity_clause = ""
     if read_specificity
       read_specificity_clause = " AND taxon_counts.tax_id > 0"
+    end
+
+    if !include_phage && categories.present?
+      phage_clause = " AND taxon_counts.is_phage != 1"
+    elsif include_phage && categories.blank?
+      phage_clause = " AND taxon_counts.is_phage = 1"
     end
 
     query = "
@@ -298,6 +350,7 @@ module ReportHelper
       AND taxon_counts.count_type IN ('NT', 'NR')
       #{categories_clause}
       #{read_specificity_clause}
+      #{phage_clause}
      "
     sql_results = TaxonCount.connection.select_all(query).to_hash
 
@@ -454,14 +507,14 @@ module ReportHelper
     true
   end
 
-  def top_taxons_details(samples, background_id, num_results, sort_by_key, species_selected, categories, threshold_filters = {}, read_specificity = false, include_phage = true)
+  def top_taxons_details(samples, background_id, num_results, sort_by_key, species_selected, categories, threshold_filters = {}, read_specificity = false, include_phage = false)
     # return top taxons
-    results_by_pr = fetch_top_taxons(samples, background_id, categories, read_specificity)
+    results_by_pr = fetch_top_taxons(samples, background_id, categories, read_specificity, include_phage)
+
     sort_by = decode_sort_by(sort_by_key)
     count_type = sort_by[:count_type]
     metric = sort_by[:metric]
     candidate_taxons = {}
-    Rails.logger.debug("include_phage = #{include_phage}")
     results_by_pr.each do |_pr_id, res|
       pr = res["pr"]
       taxon_counts = res["taxon_counts"]
@@ -477,9 +530,7 @@ module ReportHelper
 
       compute_aggregate_scores_v2!(rows)
       rows = rows.select do |row|
-        Rails.logger.debug("row = #{row}")
-
-        row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD && (include_phage || row["is_phage"].zero?) && check_custom_filters(row, threshold_filters)
+        row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD && check_custom_filters(row, threshold_filters)
       end
 
       rows.sort_by! { |tax_info| ((tax_info[count_type] || {})[metric] || 0.0) * -1.0 }
@@ -909,7 +960,8 @@ module ReportHelper
   def taxonomy_details(pipeline_run_id, background_id, params)
     # Fetch and clean data.
     t0 = wall_clock_ms
-    taxon_counts = fetch_taxon_counts(pipeline_run_id, background_id)
+    refined = params[:refined].to_i == 1 ? true : false
+    taxon_counts = fetch_taxon_counts(pipeline_run_id, background_id, refined)
     tax_2d = taxon_counts_cleanup(taxon_counts)
     t1 = wall_clock_ms
 

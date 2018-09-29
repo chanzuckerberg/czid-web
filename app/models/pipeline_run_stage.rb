@@ -186,7 +186,7 @@ class PipelineRunStage < ApplicationRecord
     attribute_dict = {
       input_file_count: sample.input_files.count,
       skip_dedeuterostome_filter: sample.skip_deutero_filter_flag,
-      pipeline_version: pipeline_run.pipeline_version || pipeline_run.fetch_pipeline_run_version,
+      pipeline_version: pipeline_run.pipeline_version || pipeline_run.fetch_pipeline_version,
       index_dir_suffix: alignment_config.index_dir_suffix,
       lineage_db: alignment_config.s3_lineage_path,
       accession2taxid_db: alignment_config.s3_accession2taxid_path,
@@ -196,7 +196,7 @@ class PipelineRunStage < ApplicationRecord
       nr_db: alignment_config.s3_nr_db_path,
       nr_loc_db: alignment_config.s3_nr_loc_db_path
     }
-    key_s3_params = "--key-path-s3 s3://idseq-secrets/idseq-prod.pem"
+    key_s3_params = format("--key-path-s3 s3://idseq-secrets/idseq-%s.pem", (Rails.env == 'prod' ? 'prod' : 'staging')) # TODO: This is hacky
     dag_commands = prepare_dag("non_host_alignment", attribute_dict, key_s3_params)
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
     # Run it
@@ -205,12 +205,20 @@ class PipelineRunStage < ApplicationRecord
 
   def postprocess_command
     # Upload DAG to S3
+    sample = pipeline_run.sample
     alignment_config = pipeline_run.alignment_config
     attribute_dict = {
-      pipeline_version: pipeline_run.pipeline_version || pipeline_run.fetch_pipeline_run_version,
+      input_file_count: sample.input_files.count,
+      skip_dedeuterostome_filter: sample.skip_deutero_filter_flag,
+      pipeline_version: pipeline_run.pipeline_version || pipeline_run.fetch_pipeline_version,
+      index_dir_suffix: alignment_config.index_dir_suffix,
       lineage_db: alignment_config.s3_lineage_path,
+      accession2taxid_db: alignment_config.s3_accession2taxid_path,
+      deuterostome_db: alignment_config.s3_deuterostome_db_path,
       nt_db: alignment_config.s3_nt_db_path,
-      nt_loc_db: alignment_config.s3_nt_loc_db_path
+      nt_loc_db: alignment_config.s3_nt_loc_db_path,
+      nr_db: alignment_config.s3_nr_db_path,
+      nr_loc_db: alignment_config.s3_nr_loc_db_path
     }
     dag_commands = prepare_dag("postprocess", attribute_dict)
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")

@@ -1,12 +1,8 @@
-import { Label as BaseLabel } from "semantic-ui-react";
+import Label from "./Label";
 import React from "react";
 
 const BetaLabel = () => {
-  return (
-    <BaseLabel color="purple" size="mini" floating>
-      beta
-    </BaseLabel>
-  );
+  return <Label text="beta" color="purple" size="mini" floating />;
 };
 
 export default BetaLabel;

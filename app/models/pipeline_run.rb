@@ -33,6 +33,7 @@ class PipelineRun < ApplicationRecord
   AMR_DRUG_SUMMARY_RESULTS = 'amr_summary_results.csv'.freeze
   AMR_FULL_RESULTS_NAME = 'amr_processed_results.csv'.freeze
   TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined.json'.freeze
+  REFINED_TAXON_COUNTS_JSON_NAME = 'reclassify/refined_taxon_counts.json'.freeze
   ASSEMBLY_STATUSFILE = 'job-complete'.freeze
   LOCAL_JSON_PATH = '/app/tmp/results_json'.freeze
   LOCAL_AMR_FULL_RESULTS_PATH = '/app/tmp/amr_full_results'.freeze
@@ -84,6 +85,7 @@ class PipelineRun < ApplicationRecord
 
   LOADERS_BY_OUTPUT = { "ercc_counts" => "db_load_ercc_counts",
                         "taxon_counts" => "db_load_taxon_counts",
+                        "refined_taxon_counts" => "db_load_refined_taxon_counts",
                         "taxon_byteranges" => "db_load_byteranges",
                         "amr_counts" => "db_load_amr_counts" }.freeze
   # Note: reads_before_priceseqfilter, reads_after_priceseqfilter, reads_after_cdhitdup
@@ -178,7 +180,7 @@ class PipelineRun < ApplicationRecord
 
   def create_output_states
     # First, determine which outputs we need:
-    target_outputs = %w[ercc_counts taxon_counts taxon_byteranges amr_counts]
+    target_outputs = %w[ercc_counts taxon_counts refined_taxon_counts taxon_byteranges amr_counts]
 
     # Then, generate output_states
     output_state_entries = []
@@ -328,13 +330,7 @@ class PipelineRun < ApplicationRecord
     false
   end
 
-  def db_load_taxon_counts
-    output_json_s3_path = "#{alignment_output_s3_path}/#{taxon_counts_json_name}"
-    downloaded_json_path = PipelineRun.download_file_with_retries(output_json_s3_path,
-                                                                  local_json_path, 3)
-    LogUtil.log_err_and_airbrake("PipelineRun #{id} failed taxon_counts download") unless downloaded_json_path
-    return unless downloaded_json_path
-
+  def load_taxons(downloaded_json_path, refined = false)
     json_dict = JSON.parse(File.read(downloaded_json_path))
     pipeline_output_dict = json_dict['pipeline_output']
     pipeline_output_dict.slice!('taxon_counts_attributes')
@@ -359,6 +355,7 @@ class PipelineRun < ApplicationRecord
     taxon_counts_attributes_filtered.each do |tcnt|
       tcnt["created_at"] = current_time
       tcnt["updated_at"] = current_time
+      tcnt["count_type"] += "+" if refined
     end
     update(taxon_counts_attributes: taxon_counts_attributes_filtered)
 
@@ -377,6 +374,24 @@ class PipelineRun < ApplicationRecord
 
     # rm the json
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_json_path}")
+  end
+
+  def db_load_taxon_counts
+    output_json_s3_path = "#{alignment_output_s3_path}/#{taxon_counts_json_name}"
+    downloaded_json_path = PipelineRun.download_file_with_retries(output_json_s3_path,
+                                                                  local_json_path, 3)
+    LogUtil.log_err_and_airbrake("PipelineRun #{id} failed taxon_counts download") unless downloaded_json_path
+    return unless downloaded_json_path
+    load_taxons(downloaded_json_path, false)
+  end
+
+  def db_load_refined_taxon_counts
+    output_json_s3_path = "#{postprocess_output_s3_path}/#{REFINED_TAXON_COUNTS_JSON_NAME}"
+    downloaded_json_path = PipelineRun.download_file_with_retries(output_json_s3_path,
+                                                                  local_json_path, 3)
+    LogUtil.log_err_and_airbrake("PipelineRun #{id} failed refined_taxon_counts download") unless downloaded_json_path
+    return unless downloaded_json_path
+    load_taxons(downloaded_json_path, true)
   end
 
   def db_load_byteranges
@@ -576,9 +591,8 @@ class PipelineRun < ApplicationRecord
 
   def compile_stats_file
     res_folder = output_s3_path_with_version
-    stdout, stderr, status = Open3.capture3("aws s3 ls #{res_folder}/ | grep count$")
+    stdout, _stderr, status = Open3.capture3("aws s3 ls #{res_folder}/ | grep count$")
     unless status.exitstatus.zero?
-      Rails.logger.info("No .count files found: #{stderr}")
       return
     end
 
