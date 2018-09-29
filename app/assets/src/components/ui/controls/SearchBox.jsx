@@ -1,5 +1,6 @@
 import React from "react";
 import { Search } from "semantic-ui-react";
+import { escapeRegExp, debounce } from "lodash";
 
 const delayCheckMatch = 1000;
 const waitHandleSearchChange = 500;
@@ -34,7 +35,7 @@ class SearchBox extends React.Component {
     setTimeout(() => {
       if (this.state.value.length < 1) return this.resetComponent();
 
-      const re = new RegExp(_.escapeRegExp(this.state.value), "i");
+      const re = new RegExp(escapeRegExp(this.state.value), "i");
       const isMatch = result => re.test(result.title);
       this.setState({
         isLoading: false,
@@ -49,7 +50,7 @@ class SearchBox extends React.Component {
       <Search
         className="idseq-ui input search"
         loading={isLoading}
-        onSearchChange={_.debounce(
+        onSearchChange={debounce(
           this.handleSearchChange,
           waitHandleSearchChange,
           {
