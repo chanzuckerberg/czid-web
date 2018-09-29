@@ -55,9 +55,22 @@ class PipelineSampleReport extends React.Component {
 
     const cached_name_type = Cookies.get("name_type");
     const cachedReadSpecificity = Cookies.get("readSpecificity");
+    const cachedTreeMetric = Cookies.get("treeMetric");
+
     const savedThresholdFilters = ThresholdMap.getSavedThresholdFilters();
 
     this.showConcordance = false;
+
+    this.treeMetrics = [
+      { text: "Aggregate Score", value: "aggregatescore" },
+      { text: "NT r (total reads)", value: "nt_r" },
+      { text: "NT rPM", value: "nt_rpm" },
+      { text: "NT Z Score", value: "nt_zscore" },
+      { text: "NR r (total reads)", value: "nr_r" },
+      { text: "NR rPM", value: "nr_rpm" },
+      { text: "NR Z Score", value: "nr_zscore" }
+    ];
+
     this.allThresholds = [
       { text: "Score", value: "NT_aggregatescore" },
       { text: "NT Z Score", value: "NT_zscore" },
@@ -130,6 +143,7 @@ class PipelineSampleReport extends React.Component {
       readSpecificity: cachedReadSpecificity
         ? parseInt(cachedReadSpecificity)
         : 0,
+      treeMetric: cachedTreeMetric || this.treeMetrics[0].value,
       phyloTreeModalOpen: true
     };
 
@@ -168,6 +182,7 @@ class PipelineSampleReport extends React.Component {
     this.handleThresholdFiltersChange = this.handleThresholdFiltersChange.bind(
       this
     );
+    this.handleTreeMetricChange = this.handleTreeMetricChange.bind(this);
     this.handleViewClicked = this.handleViewClicked.bind(this);
 
     this.renderMore = this.renderMore.bind(this);
@@ -834,6 +849,11 @@ class PipelineSampleReport extends React.Component {
     });
   }
 
+  handleTreeMetricChange(_, data) {
+    Cookies.set("treeMetric", data.value);
+    this.setState({ treeMetric: data.value });
+  }
+
   handleViewClicked(_, data) {
     this.setState({ view: data.name });
   }
@@ -1462,7 +1482,7 @@ function AdvancedFilterTagList({ threshold, i, parent }) {
 }
 
 function DetailCells({ parent }) {
-  return parent.state.selected_taxons_top.map((tax_info, i) => (
+  return parent.state.selected_taxons_top.map(tax_info => (
     <tr
       key={tax_info.tax_id}
       id={`taxon-${tax_info.tax_id}`}
@@ -1719,6 +1739,17 @@ function SpecificityFilter({ parent }) {
   );
 }
 
+function MetricPicker({ parent }) {
+  return (
+    <OurDropdown
+      options={parent.treeMetrics}
+      value={parent.state.treeMetric}
+      label="Tree Metric: "
+      onChange={parent.handleTreeMetricChange}
+    />
+  );
+}
+
 class RenderMarkup extends React.Component {
   constructor(props) {
     super(props);
@@ -1780,21 +1811,23 @@ class RenderMarkup extends React.Component {
     if (!(parent.state.selected_taxons.length && this.state.view == "tree")) {
       return;
     }
-    // return (
-    //   <PipelineSampleTree
-    //     taxons={parent.state.selected_taxons}
-    //     sample={parent.report_details.sample_info}
-    //     nameType={parent.state.name_type}
-    //     onNodeTextClicked={this._nodeTextClicked}
-    //   />
-    // );
     return (
-      <TaxonTreeVis
-        taxons={parent.state.selected_taxons}
-        sample={parent.report_details.sample_info}
-        nameType={parent.state.name_type}
-        onNodeTextClicked={this._nodeTextClicked}
-      />
+      <div>
+        <TaxonTreeVis
+          taxons={parent.state.selected_taxons}
+          topTaxons={parent.state.selected_taxons_top}
+          sample={parent.report_details.sample_info}
+          metric={parent.state.treeMetric}
+          nameType={parent.state.name_type}
+          onNodeTextClicked={this._nodeTextClicked}
+        />
+        {/* <PipelineSampleTree
+          taxons={parent.state.selected_taxons}
+          sample={parent.report_details.sample_info}
+          nameType={parent.state.name_type}
+          onNodeTextClicked={this._nodeTextClicked}
+        /> */}
+      </div>
     );
   }
 
@@ -1841,6 +1874,11 @@ class RenderMarkup extends React.Component {
                       <div className="filter-lists-element">
                         <SpecificityFilter parent={parent} />
                       </div>
+                      {this.state.view == "tree" && (
+                        <div className="filter-lists-element">
+                          <MetricPicker parent={parent} />
+                        </div>
+                      )}
                     </div>
                   </div>
                   {this.renderMenu()}

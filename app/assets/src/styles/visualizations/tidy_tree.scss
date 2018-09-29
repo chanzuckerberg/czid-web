@@ -1,0 +1,61 @@
+@import "../themes/colors";
+
+.tidy-tree {
+  .node {
+    circle {
+      stroke: $primary-light;
+      stroke-width: 2px;
+      fill: white;
+
+      &:hover {
+        cursor: pointer;
+        fill: $primary-lightest;
+      }
+    }
+
+    text {
+      font-size: 8px;
+
+      &.name-missing {
+        fill: $medium-grey;
+      }
+
+      &:hover {
+        cursor: pointer;
+        fill: $primary-light;
+      }
+    }
+
+    &__internal {
+      &--collapsed {
+        circle {
+          fill: $primary-light;
+
+          &:hover {
+            fill: $primary-lighter;
+          }
+        }
+
+        path.cross {
+          stroke-width: 2px;
+          stroke: white;
+        }
+      }
+    }
+
+    &__leaf {
+    }
+
+    &__collapsed {
+      fill: $primary-light;
+
+      path.cross {
+      }
+    }
+  }
+
+  .link {
+    fill: none;
+    stroke: $medium-grey;
+  }
+}
