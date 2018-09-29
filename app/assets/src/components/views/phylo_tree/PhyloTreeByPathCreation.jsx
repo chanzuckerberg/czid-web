@@ -212,14 +212,28 @@ class PhyloTreeByPathCreation extends React.Component {
 
   handleSelectProject(e, { result }) {
     this.setState({
-      projectId: result.project_id
+      projectId: result.project_id,
+      // Reset sample lists (in case user went back and changed project selection after they had been loaded)
+      samplesLoaded: false,
+      projectSamples: [],
+      selectedProjectSamples: new Set(),
+      otherSamples: [],
+      selectedOtherSamples: new Set(),
+      otherSamplesFilter: ""
     });
   }
 
   handleSelectTaxon(e, { result }) {
     this.setState({
       taxonId: result.taxid,
-      taxonName: result.title
+      taxonName: result.title,
+      // Reset sample lists (in case user went back and changed taxon selection after they had been loaded)
+      samplesLoaded: false,
+      projectSamples: [],
+      selectedProjectSamples: new Set(),
+      otherSamples: [],
+      selectedOtherSamples: new Set(),
+      otherSamplesFilter: ""
     });
   }
 
