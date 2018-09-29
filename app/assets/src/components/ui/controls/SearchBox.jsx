@@ -1,7 +1,7 @@
 import React from "react";
 import { Search } from "semantic-ui-react";
 
-const delayCheckMatch = 300;
+const delayCheckMatch = 1000;
 const waitHandleSearchChange = 500;
 
 class SearchBox extends React.Component {
