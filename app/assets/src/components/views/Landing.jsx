@@ -3,6 +3,7 @@ import axios from "axios";
 import { Form, Input, TextArea, Grid, Image } from "semantic-ui-react";
 import TransparentButton from "../ui/controls/buttons/TransparentButton";
 import PrimaryButton from "../ui/controls/buttons/PrimaryButton";
+import IconComponent from "../IconComponent";
 
 class Landing extends React.Component {
   constructor(props) {
@@ -68,21 +69,30 @@ class Landing extends React.Component {
     const actionCards = (
       <div className="action-cards">
         <div className="action-card">
-          <div className="card-title">Discover</div>
-          <div className="card-description">
-            Identify the pathogen landscape
+          {IconComponent.discover("#3867fa")}
+          <div className="card-text">
+            <div className="card-title">Discover</div>
+            <div className="card-description">
+              Identify the pathogen landscape
+            </div>
           </div>
         </div>
         <div className="action-card">
-          <div className="card-title">Detect</div>
-          <div className="card-description">
-            Monitor and review potential outbreaks
+          {IconComponent.detect("#3867fa")}
+          <div className="card-text">
+            <div className="card-title">Detect</div>
+            <div className="card-description">
+              Monitor and review potential outbreaks
+            </div>
           </div>
         </div>
         <div className="action-card">
-          <div className="card-title">Decipher</div>
-          <div className="card-description">
-            Find potential infecting organisms in large datasets
+          {IconComponent.decipher("#3867fa")}
+          <div className="card-text">
+            <div className="card-title">Decipher</div>
+            <div className="card-description">
+              Find potential infecting organisms in large datasets
+            </div>
           </div>
         </div>
       </div>

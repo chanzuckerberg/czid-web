@@ -18,16 +18,28 @@
   }
 
   .action-cards {
-    margin-top: 5rem;
-    margin-bottom: 5rem;
+    margin: 5rem 0 5rem 2rem;
 
     .action-card {
       margin-top: 3rem;
+
+      svg {
+        height: 7rem;
+        display: inline;
+      }
+
+      .card-text {
+        display: inline-block;
+        margin-top: 1rem;
+        margin-left: 3rem;
+        vertical-align: top;
+      }
 
       .card-title {
         font-size: 1.75rem;
         font-weight: 600;
       }
+
       .card-description {
         font-size: 1.1rem;
         margin-top: 1.2rem;
