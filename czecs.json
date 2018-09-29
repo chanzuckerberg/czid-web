@@ -1,0 +1,57 @@
+{
+  "family": "{{ .Values.project }}-{{ .Values.env }}-{{ .Values.name }}",
+  "containerDefinitions": [
+    {
+      "name": "rails",
+      "image": "chanzuckerberg/idseq-web:{{ .Values.tag }}",
+      "cpu": 2048,
+      "memoryReservation": 7168,
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 3000,
+          "hostPort": 0
+        }
+      ],
+      "environment": [
+        {
+          "name": "RAILS_ENV",
+          "value": "{{ .Values.env }}"
+        },
+        {
+          "name": "ENVIRONMENT",
+          "value": "{{ .Values.env }}"
+        },
+        {
+          "name": "RAILS_LOG_TO_STDOUT",
+          "value": "yes"
+        },
+        {
+          "name": "AWS_REGION",
+          "value": "{{ .Values.region }}"
+        },
+        {
+          "name": "AWS_DEFAULT_REGION",
+          "value": "{{ .Values.region }}"
+        },
+        {
+          "name": "IDSEQ_HONEYCOMB_DATA_SET",
+          "value": "idseq-web-{{ .Values.env }}"
+        },
+        {
+          "name": "IDSEQ_HONEYCOMB_DB_DATA_SET",
+          "value": "idseq-database-{{ .Values.env }}"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "ecs-logs-{{ .Values.env }}",
+          "awslogs-region": "{{ .Values.region }}",
+          "awslogs-stream-prefix": "rails"
+        }
+      }
+    }
+  ],
+  "taskRoleArn": "{{ .Values.project }}-web-{{ .Values.env }}"
+}
