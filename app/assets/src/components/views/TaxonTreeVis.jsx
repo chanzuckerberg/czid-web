@@ -1,6 +1,7 @@
 import React from "react";
 // import PropTypes from "prop-types";
 import TidyTree from "../visualizations/TidyTree";
+import PathogenLabel from "../ui/labels/PathogenLabel";
 
 const TaxonLevels = [
   "species",
@@ -22,7 +23,7 @@ class TaxonTreeVis extends React.Component {
 
     this.nameType = this.props.nameType;
     this.metric = this.props.metric || "aggregatescore";
-    this.taxons = this.props.taxons;
+    this.taxa = this.props.taxa;
 
     this.tree = null;
     this.treeVis = null;
@@ -41,20 +42,23 @@ class TaxonTreeVis extends React.Component {
     };
 
     this.onNodeHover = this.onNodeHover.bind(this);
-    this.fillData = this.fillData.bind(this);
+    this.fillNodeValues = this.fillNodeValues.bind(this);
+    this.renderTooltip = this.renderTooltip.bind(this);
 
-    console.log(this.props);
+    console.log("Taxa: ", this.props.taxa);
+    console.log("Pathogens: ", this.props.taxa.filter(t => t.pathogenTag));
+    console.log("Top Taxa: ", this.props.topTaxa);
   }
 
   componentDidMount() {
     this.treeVis = new TidyTree(
       this.treeContainer,
-      this.createTree(this.taxons),
+      this.createTree(this.taxa),
       {
         attribute: this.metric,
         useCommonName: this.isCommonNameActive(),
         onNodeHover: this.onNodeHover,
-        onCreatedTree: this.fillData,
+        onCreatedTree: this.fillNodeValues,
         tooltipContainer: this.treeTooltip
       }
     );
@@ -62,7 +66,6 @@ class TaxonTreeVis extends React.Component {
   }
 
   componentDidUpdate() {
-    console.log("name type", this.props.nameType);
     let options = {};
     if (this.nameType != this.props.nameType) {
       this.nameType = this.props.nameType;
@@ -74,19 +77,14 @@ class TaxonTreeVis extends React.Component {
       options.attribute = this.props.metric;
     }
 
-    let needUpdate = false;
     if (Object.keys(options).length) {
       this.treeVis.setOptions(options);
-      needUpdate = true;
     }
 
-    if (this.taxons != this.props.taxons) {
-      this.taxons = this.props.taxons;
-      this.treeVis.setTree(this.createTree(this.props.taxons));
-      needUpdate = true;
+    if (this.taxa != this.props.taxa) {
+      this.taxa = this.props.taxa;
+      this.treeVis.setTree(this.createTree(this.props.taxa));
     }
-
-    needUpdate && this.treeVis.update();
   }
 
   static createNode() {
@@ -111,8 +109,36 @@ class TaxonTreeVis extends React.Component {
     return this.nameType.toLowerCase() == "common name";
   }
 
-  fillData(root) {
+  fillNodeValues(root) {
+    // cleaning up spurious nodes without children with data
+    root.leaves().forEach(leaf => {
+      if (!leaf.children && !leaf.data.values) {
+        // delete node that has no children or values
+        let ancestors = leaf.ancestors();
+        for (let i = 1; i < ancestors.length; i++) {
+          let ancestor = ancestors[i];
+          ancestor.children = ancestor.children.filter(
+            child => child.id !== ancestors[i - 1].id
+          );
+          if (ancestor.children && ancestor.children.length > 0) {
+            // stop if ancestor still has children
+            break;
+          }
+        }
+      }
+    });
+
+    let topTaxaIds = new Set(
+      this.props.topTaxa.map(taxon => taxon.tax_id.toString())
+    );
     root.eachAfter(node => {
+      if (topTaxaIds.has(node.id)) {
+        node.data.highlight = true;
+        node.ancestors().forEach(ancestor => {
+          ancestor.data.highlight = true;
+        });
+      }
+
       for (let metric in this.metrics) {
         node.data.values || (node.data.values = {});
         if (
@@ -120,11 +146,64 @@ class TaxonTreeVis extends React.Component {
           !node.data.values.hasOwnProperty(metric)
         ) {
           node.data.values[metric] = this.metrics[metric].agg(
-            node.children.map(child => child.data.values[metric] || 0)
+            node.children
+              .filter(child => child.data.values[metric])
+              .map(child => child.data.values[metric])
           );
         }
       }
     });
+  }
+
+  createTree(taxa) {
+    // this function assumes that genus are always seen first
+    let nodes = [{ id: "_" }];
+
+    let seenNodes = new Set();
+    taxa.forEach(taxon => {
+      let parentId = nodes[0].id;
+      for (let i = TaxonLevels.length - 1; i >= taxon.tax_level; i--) {
+        let nodeId = taxon.lineage[`${TaxonLevels[i]}_taxid`];
+        if (!seenNodes.has(nodeId)) {
+          nodes.push({
+            id: nodeId,
+            parentId: parentId,
+            scientificName:
+              taxon.lineage[`${TaxonLevels[i]}_name`] ||
+              `Uncategorized ${this.capitalize(TaxonLevels[i])}`,
+            lineageRank: TaxonLevels[i]
+          });
+          seenNodes.add(nodeId);
+        }
+        parentId = nodeId;
+      }
+
+      let nodeId = taxon.tax_id;
+      nodes.push({
+        id: nodeId,
+        commonName: taxon.common_name,
+        scientificName:
+          taxon.tax_id > 0
+            ? taxon.name
+            : `Uncategorized ${this.capitalize(
+                TaxonLevels[taxon.tax_level - 1]
+              )}`,
+        lineageRank: TaxonLevels[taxon.tax_level - 1],
+        parentId: parentId,
+        values: {
+          aggregatescore: taxon.NT.aggregatescore,
+          nt_r: taxon.NT.r,
+          nt_rpm: parseFloat(taxon.NT.rpm),
+          nt_zscore: taxon.NT.zscore,
+          nr_r: taxon.NR.r,
+          nr_rpm: parseFloat(taxon.NR.rpm),
+          nr_zscore: taxon.NR.zscore
+        }
+      });
+      seenNodes.add(nodeId);
+    });
+
+    return nodes;
   }
 
   renderTooltip() {
@@ -140,7 +219,7 @@ class TaxonTreeVis extends React.Component {
           <li
             key={`tt_${metric}`}
             className={`taxon_tooltip__row ${
-              this.state.metric == metric ? "taxon_tooltip__row--active" : ""
+              this.props.metric == metric ? "taxon_tooltip__row--active" : ""
             }`}
           >
             <div className="taxon_tooltip__row__label">
@@ -172,62 +251,15 @@ class TaxonTreeVis extends React.Component {
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
-  createTree(taxons) {
-    const parseId = (id, defaultId) => (id > 0 ? id : defaultId);
-
-    let nodes = [{ id: "_" }];
-
-    let seenNodes = new Set();
-    taxons.forEach(taxon => {
-      let parentId = nodes[0].id;
-      for (let i = TaxonLevels.length - 1; i >= taxon.tax_level; i--) {
-        let nodeId = parseId(
-          taxon.lineage[`${TaxonLevels[i]}_taxid`],
-          `${parentId}_`
-        );
-        if (!seenNodes.has(nodeId)) {
-          nodes.push({
-            id: nodeId,
-            parentId: parentId,
-            scientificName:
-              taxon.lineage[`${TaxonLevels[i]}_name`] ||
-              `Uncategorized ${this.capitalize(TaxonLevels[i])}`,
-            lineageRank: TaxonLevels[i]
-          });
-          seenNodes.add(nodeId);
-        }
-        parentId = nodeId;
-      }
-
-      let nodeId = parseId(
-        taxon.tax_id,
-        `_${TaxonLevels[taxon.tax_level - 1]}`
-      );
-      nodes.push({
-        id: nodeId,
-        commonName: taxon.common_name,
-        scientificName:
-          taxon.tax_id > 0
-            ? taxon.name
-            : `Uncategorized ${this.capitalize(
-                TaxonLevels[taxon.tax_level - 1]
-              )}`,
-        lineageRank: TaxonLevels[taxon.tax_level - 1],
-        parentId: parentId,
-        values: {
-          aggregatescore: taxon.NT.aggregatescore,
-          nt_r: taxon.NT.r,
-          nt_rpm: parseFloat(taxon.NT.rpm),
-          nt_zscore: taxon.NT.zscore,
-          nr_r: taxon.NR.r,
-          nr_rpm: parseFloat(taxon.NR.rpm),
-          nr_zscore: taxon.NR.zscore
-        }
-      });
-      seenNodes.add(nodeId);
-    });
-
-    return nodes;
+  renderPathogenLabels() {
+    return this.taxa.filter(taxon => taxon.pathogenTag).map(taxon => (
+      <div
+        className={`node-overlay node-overlay__${taxon.tax_id}`}
+        key={`label-${taxon.tax_id}`}
+      >
+        <PathogenLabel type={taxon.pathogenTag} />
+      </div>
+    ));
   }
 
   render() {
@@ -238,7 +270,9 @@ class TaxonTreeVis extends React.Component {
           ref={container => {
             this.treeContainer = container;
           }}
-        />
+        >
+          <div className="pathogen-labels">{this.renderPathogenLabels()}</div>
+        </div>
         <div
           className="taxon-tree-vis__tooltip"
           ref={tooltip => {

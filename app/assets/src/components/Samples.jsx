@@ -232,8 +232,6 @@ class Samples extends React.Component {
         outDuration: 0
       });
     });
-
-    console.log("constructor", this.state.selectedProjectId);
   }
 
   initializeTooltip() {

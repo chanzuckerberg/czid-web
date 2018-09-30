@@ -1066,7 +1066,7 @@ class PipelineSampleReport extends React.Component {
     }
     let secondaryTaxonDisplay = (
       <span>
-        <PathogenLabel type={tax_info.pathogenTag} />
+        {tax_info.pathogenTag && <PathogenLabel type={tax_info.pathogenTag} />}
         {this.displayHoverActions(tax_info, report_details)}
       </span>
     );
@@ -1840,8 +1840,8 @@ class RenderMarkup extends React.Component {
     return (
       <div>
         <TaxonTreeVis
-          taxons={parent.state.selected_taxons}
-          topTaxons={parent.state.selected_taxons_top}
+          taxa={parent.state.selected_taxons}
+          topTaxa={parent.state.topScoringTaxa}
           sample={parent.report_details.sample_info}
           metric={parent.state.treeMetric}
           nameType={parent.state.name_type}

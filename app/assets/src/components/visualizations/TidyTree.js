@@ -1,26 +1,27 @@
-import { stratify, tree as d3Tree, hierarchy } from "d3-hierarchy";
+import { stratify, tree as d3Tree } from "d3-hierarchy";
 import { select, event as currentEvent } from "d3-selection";
 import { scaleLinear } from "d3-scale";
 
 export default class TidyTree {
   constructor(container, nodes, options) {
-    this.container = container;
+    this.container = select(container);
     this.svg = null;
     this.pathContainer = null;
     this.nodeContainer = null;
 
     this.options = Object.assign(
       {
+        addOverlays: true,
+        attribute: "aggregatescore",
         leafNodeHeight: 35,
         minWidth: 1000,
         minHeight: 300,
-        useCommonName: false,
         transitionDuration: 500,
-        attribute: "aggregatescore",
         onNodeHover: null,
         onCreatedTree: null,
         tooltipContainer: null,
-        collapseThreshold: 0.4
+        collapseThreshold: 0.4,
+        useCommonName: false
       },
       options || {}
     );
@@ -38,7 +39,7 @@ export default class TidyTree {
   }
 
   initialize() {
-    this.svg = select(this.container)
+    this.svg = this.container
       .append("svg")
       .attr("class", "tidy-tree")
       .attr("width", this.options.width)
@@ -62,10 +63,12 @@ export default class TidyTree {
   }
 
   setOptions(options) {
-    console.log("set options", options);
     Object.assign(this.options, options);
 
     if (options.attribute) {
+      console.log("attribute changed");
+    }
+    if (options.attribute || options.collapseThreshold) {
       this.sortAndScaleTree();
     }
 
@@ -73,22 +76,26 @@ export default class TidyTree {
   }
 
   setTree(nodes) {
+    console.log("nodes", nodes);
     let stratifier = stratify()
       .id(node => node.id)
       .parentId(node => node.parentId);
 
     this.root = stratifier(nodes);
+    console.log("root", this.root);
     this.options.onCreatedTree && this.options.onCreatedTree(this.root);
     this.sortAndScaleTree();
+
+    this.update();
   }
 
   sortAndScaleTree() {
+    console.log("resort tree - attribute", this.options.attribute);
     this.root.sort(
       (a, b) =>
         b.data.values[this.options.attribute] -
         a.data.values[this.options.attribute]
     );
-    // .sum(node => (node.values || {})[this.options.attribute] || 0)
 
     this.range = [
       Math.min(
@@ -130,6 +137,66 @@ export default class TidyTree {
             ${target.y} ${target.x}`;
   }
 
+  getNodeBoxRefSvg(d, node) {
+    let bbox = node.getBBox();
+    let y = d.y + this.margins.left;
+    let x = d.x + this.margins.top;
+    return { x, y, width: bbox.width, height: bbox.height };
+  }
+
+  hasChildren(d) {
+    return !!(d.children || d.collapsedChildren);
+  }
+
+  hasVisibleChildren(d) {
+    return !!d.children;
+  }
+
+  wrap(textSelection, width) {
+    textSelection.each((d, idx, textNodes) => {
+      let text = select(textNodes[idx]);
+      let words = text.text().split(/\s+/);
+      let word,
+        line = [],
+        lineNumber = 1,
+        textHeight = parseFloat(text.style("font-size")),
+        lineHeight = textHeight * 1.1,
+        x = text.attr("x"),
+        tspan = text
+          .text(null)
+          .append("tspan")
+          .attr("x", x);
+
+      if (words.length == 1) {
+        tspan.text(words[0]);
+      } else {
+        while ((word = words.pop())) {
+          line.push(word);
+          tspan.text(line.join(" "));
+          if (tspan.node().getComputedTextLength() > width) {
+            line.pop();
+            tspan.text(line.join(" "));
+            line = [word];
+            tspan = text
+              .append("tspan")
+              .attr("x", x)
+              .attr("dy", `${-lineHeight}px`)
+              .text(word);
+            lineNumber++;
+          }
+        }
+      }
+
+      if (!this.hasVisibleChildren(d)) {
+        text.attr(
+          "dy",
+          `${(textHeight + (lineNumber - 1) * lineHeight - 3) / 2}px`
+        );
+        // TODO: hacky 1.5 px added to dy
+      }
+    });
+  }
+
   update(source) {
     if (!this.svg) {
       this.initialize();
@@ -142,8 +209,10 @@ export default class TidyTree {
       this.options.leafNodeHeight * this.root.leaves().length
     );
 
+    // if (!this.root.x0) {
     this.root.x0 = height / 2;
     this.root.y0 = 0;
+    // }
 
     this.svg
       .transition()
@@ -151,7 +220,6 @@ export default class TidyTree {
       .attr("width", width + this.margins.left + this.margins.right)
       .attr("height", height + this.margins.top + this.margins.bottom);
 
-    // console.log(hierarchy(this.root, d => d.children));
     d3Tree().size([height, width])(this.root);
 
     source = source || this.root;
@@ -159,7 +227,7 @@ export default class TidyTree {
     // compute scales for nodes
     let nodeScale = scaleLinear()
       .domain(this.range)
-      .range([2, 20]);
+      .range([4, 20]);
     let linkScale = scaleLinear()
       .domain(this.range)
       .range([1, 20]);
@@ -167,46 +235,53 @@ export default class TidyTree {
       .domain(this.range)
       .range([8, 12]);
 
-    let links = this.pathContainer
+    let link = this.pathContainer
       .selectAll(".link")
       .data(this.root.links(), d => {
         return d.target.id;
       });
 
     // Enter - Links
-    links
+    let linkEnter = link
       .enter()
       .append("path")
-      .attr("class", "link")
+      .attr(
+        "class",
+        d => `link ${d.target.data.highlight ? "highlighted" : ""}`
+      )
       .attr("d", () => {
         let startPoint = { x: source.x0, y: source.y0 };
         return this.curvedPath(startPoint, startPoint);
       });
 
     // Update - Links
-    let linksUpdate = this.pathContainer
-      .selectAll("path")
+    let linkUpdate = linkEnter.merge(link);
+    linkUpdate
       .transition()
       .duration(this.options.transitionDuration)
+      .attr(
+        "class",
+        d => `link ${d.target.data.highlight ? "highlighted" : ""}`
+      )
       .attr("d", d => this.curvedPath(d.source, d.target))
       .attr("stroke-width", d => {
         return linkScale(d.target.data.values[this.options.attribute]);
       });
 
     // Exit - Links
-    links
+    link
       .exit()
       .transition()
       .duration(this.options.transitionDuration)
       .attr("d", this.curvedPath(source, source))
       .remove();
 
-    let nodes = this.nodeContainer
+    let node = this.nodeContainer
       .selectAll("g.node")
       .data(this.root.descendants(), d => d.id);
 
     // Enter - Nodes
-    let nodesEnter = nodes
+    let nodeEnter = node
       .enter()
       .append("g")
       .attr("class", "node")
@@ -216,51 +291,27 @@ export default class TidyTree {
         return `translate(${y},${x})`;
       });
 
-    let clickableNode = nodesEnter
+    let clickableNode = nodeEnter
       .append("g")
       .on("click", d => this.toggleCollapseNode(d));
 
     clickableNode.append("circle").attr("r", 0);
 
     clickableNode
-      .filter(d => d.children || d.collapsedChildren)
+      .filter(d => this.hasChildren(d))
       .append("path")
       .attr("class", "cross")
       .attr("d", "M0,0");
 
-    nodesEnter
+    let textEnter = nodeEnter
       .append("text")
-      .attr(
-        "dy",
-        d =>
-          d.children ? -4 - nodeScale(d.data.values[this.options.attribute]) : 0
-      )
-      .attr(
-        "x",
-        d =>
-          d.children ? 0 : 4 + nodeScale(d.data.values[this.options.attribute])
-      )
-      .style("text-anchor", d => (d.children ? "middle" : "start"))
-      .style("alignment-baseline", d => (d.children ? "baseline" : "middle"))
-      .style("font-size", d => fontScale(d.data.values[this.options.attribute]))
       .style("fill-opacity", 0)
-      .attr("class", d => {
-        console.log(d, this.options.useCommonName, !d.data.commonName);
-        return this.options.useCommonName && !d.data.commonName
-          ? "name-missing"
-          : null;
-      })
-      .text(
-        d =>
-          (this.options.useCommonName ? d.data.commonName : null) ||
-          d.data.scientificName
-      )
       .on("click", this.options.onNodeLabelClick);
 
     if (this.tooltipContainer) {
-      nodesEnter
-        .on("mouseover", node => {
-          this.options.onNodeHover && this.options.onNodeHover(node);
+      nodeEnter
+        .on("mouseenter", d => {
+          this.options.onNodeHover && this.options.onNodeHover(d);
           this.tooltipContainer.classed("visible", true);
         })
         .on("mousemove", node => {
@@ -268,53 +319,92 @@ export default class TidyTree {
             .style("left", currentEvent.pageX + 20 + "px")
             .style("top", currentEvent.pageY + 20 + "px");
         })
-        .on("mouseout", () => {
+        .on("mouseleave", () => {
           this.tooltipContainer.classed("visible", false);
         });
     }
 
+    // overlays
+    if (this.options.addOverlays) {
+      nodeEnter.each((d, index, nodeList) => {
+        let overlay = this.container.select(`.node-overlay__${d.id}`);
+        let text = select(nodeList[index]).select("text");
+        let fontSize = fontScale(d.data.values[this.options.attribute]);
+        let nodeBox = this.getNodeBoxRefSvg(d, text.node());
+        overlay
+          .style("opacity", 1)
+          .style("position", "absolute")
+          .style(
+            "left",
+            `${nodeBox.y + (this.hasVisibleChildren(d) ? -55 : -15)}px`
+          )
+          .style(
+            "top",
+            `${nodeBox.x + (this.hasVisibleChildren(d) ? -40 : 6)}px`
+          )
+          .select("div.pathogen-label")
+          .style("font-size", `${fontSize}px`);
+      });
+    }
+
+    let nodeUpdate = node.merge(nodeEnter);
     // Update - Nodes
-    let nodeUpdate = this.nodeContainer
-      .selectAll("g.node")
+    nodeUpdate
       .transition()
       .duration(this.options.transitionDuration)
       .attr("class", d => {
         let classes =
           "node " +
-          (d.children || d.collapsedChildren
-            ? " node__internal"
-            : " node__leaf") +
+          `node-${d.id}` +
+          (this.hasChildren(d) ? " node__internal" : " node__leaf") +
           (d.collapsedChildren ? "--collapsed" : "");
         return classes;
       })
-      .attr("transform", function(d) {
-        return "translate(" + d.y + "," + d.x + ")";
-      });
+      .attr("transform", d => "translate(" + d.y + "," + d.x + ")");
 
-    nodeUpdate
-      .selectAll("text")
+    let textUpdate = textEnter.merge(node.select("text"));
+
+    textUpdate
+      .text(d => {
+        console.log(d.data.scientificName);
+        return (
+          (this.options.useCommonName ? d.data.commonName : null) ||
+          d.data.scientificName
+        );
+      })
+      .style(
+        "text-anchor",
+        d => (this.hasVisibleChildren(d) ? "middle" : "start")
+      )
+      .style(
+        "alignment-baseline",
+        d => (this.hasVisibleChildren(d) ? "baseline" : "middle")
+      )
+      .style("font-size", d => fontScale(d.data.values[this.options.attribute]))
+      .attr(
+        "dy",
+        d =>
+          this.hasVisibleChildren(d)
+            ? -4 - nodeScale(d.data.values[this.options.attribute])
+            : 0
+      )
+      .attr(
+        "x",
+        d =>
+          this.hasVisibleChildren(d)
+            ? 0
+            : 4 + nodeScale(d.data.values[this.options.attribute])
+      )
+      .call(this.wrap.bind(this), 110);
+
+    textUpdate
+      .transition()
+      .duration(this.options.transitionDuration)
       .attr("class", d => {
         return this.options.useCommonName && !d.data.commonName
           ? "name-missing"
           : null;
       })
-      .text(
-        d =>
-          (this.options.useCommonName ? d.data.commonName : null) ||
-          d.data.scientificName
-      )
-      .attr(
-        "dy",
-        d =>
-          d.children ? -4 - nodeScale(d.data.values[this.options.attribute]) : 0
-      )
-      .attr(
-        "x",
-        d =>
-          d.children ? 0 : 4 + nodeScale(d.data.values[this.options.attribute])
-      )
-      .style("text-anchor", d => (d.children ? "middle" : "start"))
-      .style("alignment-baseline", d => (d.children ? "baseline" : "middle"))
       .style("fill-opacity", 1);
 
     nodeUpdate
@@ -327,21 +417,50 @@ export default class TidyTree {
       return `M${-r},0 L${r},0 M0,${-r} L0,${r}`;
     });
 
+    // overlays
+    if (this.options.addOverlays) {
+      nodeUpdate.each((d, index, nodeList) => {
+        let overlay = this.container.select(`.node-overlay__${d.id}`);
+        let text = select(nodeList[index]).select("text");
+        let fontSize = fontScale(d.data.values[this.options.attribute]);
+        let nodeBox = this.getNodeBoxRefSvg(d, text.node());
+        overlay
+          .transition()
+          .duration(this.options.transitionDuration)
+          .style("position", "absolute")
+          .style(
+            "left",
+            `${nodeBox.y + (this.hasVisibleChildren(d) ? -55 : -15)}px`
+          )
+          .style(
+            "top",
+            `${nodeBox.x + (this.hasVisibleChildren(d) ? -40 : 6)}px`
+          )
+          .select("div.pathogen-label")
+          .style("font-size", `${fontSize}px`);
+      });
+    }
+
     // Exit - Nodes
-    let nodesExit = nodes
+    let nodeExit = node
       .exit()
       .transition()
       .duration(this.options.transitionDuration)
       .attr("transform", d => {
         return "translate(" + source.y + "," + source.x + ")";
-        // return "translate(" + (source.y - this.margins.left) + "," + (source.x - this.margins.top) + ")";
       })
       .remove();
 
-    nodesExit.select("circle").attr("r", 1e-6);
-    nodesExit.select("text").style("fill-opacity", 1e-6);
+    // overlays
+    nodeExit.each(d => {
+      let overlay = this.container.select(`.node-overlay__${d.id}`);
+      overlay
+        .transition()
+        .duration(this.options.transitionDuration)
+        .style("opacity", 0);
+    });
+
+    nodeExit.select("circle").attr("r", 1e-6);
+    nodeExit.select("text").style("fill-opacity", 1e-6);
   }
 }
-
-// TODO: scale links
-// TODO: links transition -> thickness

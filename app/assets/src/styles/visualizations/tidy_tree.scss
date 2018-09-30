@@ -57,5 +57,9 @@
   .link {
     fill: none;
     stroke: $medium-grey;
+
+    &.highlighted {
+      stroke: $primary-light;
+    }
   }
 }

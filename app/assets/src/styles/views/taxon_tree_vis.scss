@@ -1,6 +1,17 @@
 @import "../themes/colors";
 
 .taxon-tree-vis {
+  &__container {
+    position: relative;
+
+    .node-overlay {
+      opacity: 0;
+      position: absolute;
+      left: 20px;
+      top: 20px;
+    }
+  }
+
   &__tooltip {
     background-color: $white;
     border: 1px solid $light-grey;
