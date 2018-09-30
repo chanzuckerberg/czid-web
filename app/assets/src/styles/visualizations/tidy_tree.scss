@@ -26,6 +26,7 @@
       }
     }
 
+    &__leaf,
     &__internal {
       &--collapsed {
         circle {
@@ -44,12 +45,14 @@
     }
 
     &__leaf {
-    }
+      &--collapsed {
+        circle {
+          fill: $primary-light;
 
-    &__collapsed {
-      fill: $primary-light;
-
-      path.cross {
+          &:hover {
+            fill: $primary-lighter;
+          }
+        }
       }
     }
   }

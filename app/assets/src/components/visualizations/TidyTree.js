@@ -21,7 +21,8 @@ export default class TidyTree {
         onCreatedTree: null,
         tooltipContainer: null,
         collapseThreshold: 0.4,
-        useCommonName: false
+        useCommonName: false,
+        minNonCollapsableChildren: 2
       },
       options || {}
     );
@@ -65,9 +66,6 @@ export default class TidyTree {
   setOptions(options) {
     Object.assign(this.options, options);
 
-    if (options.attribute) {
-      console.log("attribute changed");
-    }
     if (options.attribute || options.collapseThreshold) {
       this.sortAndScaleTree();
     }
@@ -76,13 +74,11 @@ export default class TidyTree {
   }
 
   setTree(nodes) {
-    console.log("nodes", nodes);
     let stratifier = stratify()
       .id(node => node.id)
       .parentId(node => node.parentId);
 
     this.root = stratifier(nodes);
-    console.log("root", this.root);
     this.options.onCreatedTree && this.options.onCreatedTree(this.root);
     this.sortAndScaleTree();
 
@@ -90,7 +86,6 @@ export default class TidyTree {
   }
 
   sortAndScaleTree() {
-    console.log("resort tree - attribute", this.options.attribute);
     this.root.sort(
       (a, b) =>
         b.data.values[this.options.attribute] -
@@ -114,20 +109,89 @@ export default class TidyTree {
       ) {
         d.collapsedChildren = d.children;
         d.children = null;
+      } else if (d.children) {
+        d.collapsedChildren = d.children.filter(
+          child =>
+            !child.data.highlight &&
+            collapsedScale(child.data.values[this.options.attribute]) <
+              this.options.collapseThreshold
+        );
+        if (d.collapsedChildren < this.options.minNonCollapsableChildren) {
+          d.collapsedChildren = null;
+        } else {
+          d.children = d.children.filter(
+            child =>
+              child.data.highlight ||
+              collapsedScale(child.data.values[this.options.attribute]) >=
+                this.options.collapseThreshold
+          );
+          d.children.length || (d.children = null);
+
+          if (this.hasVisibleChildren(d) && this.hasHiddenChildren(d)) {
+            d.children.push({
+              id: `other-${d.id}`,
+              depth: d.depth + 1,
+              height: 0,
+              parent: d,
+              isAggregated: true,
+              data: {
+                commonName: `(${d.collapsedChildren.length})`,
+                highlight: d.collapsedChildren.some(
+                  child => child.data.highlight
+                ),
+                scientificName: `(${d.collapsedChildren.length})`,
+                lineageRank: d.collapsedChildren[0].data.lineageRank,
+                values: d.collapsedChildren[0].data.values
+              }
+            });
+          }
+        }
       }
     });
   }
 
   toggleCollapseNode(node) {
-    var temp = node.children;
-    node.children = node.collapsedChildren;
-    node.collapsedChildren = temp;
-    this.update(
-      Object.assign(node, {
-        x0: node.x,
-        y0: node.y
-      })
-    );
+    if (
+      this.hasAllChildrenCollapsed(node) ||
+      this.hasAllChildrenVisible(node)
+    ) {
+      var temp = node.children;
+      node.children = node.collapsedChildren;
+      node.collapsedChildren = temp;
+
+      if (!node.collapsedChildren) {
+        node.collapsedChildren = node.hiddenChildren;
+        node.hiddenChildren = null;
+      }
+
+      this.update(
+        Object.assign(node, {
+          x0: node.x,
+          y0: node.y
+        })
+      );
+    } else if (this.hasHiddenChildren(node)) {
+      node.hiddenChildren = node.collapsedChildren;
+      node.collapsedChildren = node.children;
+      node.children = null;
+      this.update(
+        Object.assign(node, {
+          x0: node.x,
+          y0: node.y
+        })
+      );
+    } else if (node.isAggregated) {
+      let parent = node.parent;
+      parent.children.pop();
+      parent.children = parent.children.concat(parent.collapsedChildren);
+      parent.collapsedChildren = null;
+      this.update(
+        Object.assign(parent, {
+          x0: node.x,
+          y0: node.y
+        })
+      );
+    }
   }
 
   curvedPath(source, target) {
@@ -144,8 +208,20 @@ export default class TidyTree {
     return { x, y, width: bbox.width, height: bbox.height };
   }
 
+  hasAllChildrenCollapsed(d) {
+    return !!(!d.children && d.collapsedChildren);
+  }
+
+  hasAllChildrenVisible(d) {
+    return !!(d.children && !d.collapsedChildren);
+  }
+
   hasChildren(d) {
     return !!(d.children || d.collapsedChildren);
+  }
+
+  hasHiddenChildren(d) {
+    return !!d.collapsedChildren;
   }
 
   hasVisibleChildren(d) {
@@ -188,11 +264,11 @@ export default class TidyTree {
       }
 
       if (!this.hasVisibleChildren(d)) {
+        // TODO: figure out how to align: hacky 1.5px added to dy
         text.attr(
           "dy",
           `${(textHeight + (lineNumber - 1) * lineHeight - 3) / 2}px`
         );
-        // TODO: hacky 1.5 px added to dy
       }
     });
   }
@@ -257,6 +333,7 @@ export default class TidyTree {
     // Update - Links
     let linkUpdate = linkEnter.merge(link);
     linkUpdate
+      .lower()
       .transition()
       .duration(this.options.transitionDuration)
       .attr(
@@ -298,7 +375,9 @@ export default class TidyTree {
     clickableNode.append("circle").attr("r", 0);
 
     clickableNode
-      .filter(d => this.hasChildren(d))
+      .filter(d => {
+        return this.hasChildren(d) || d.isAggregated;
+      })
       .append("path")
       .attr("class", "cross")
       .attr("d", "M0,0");
@@ -348,6 +427,7 @@ export default class TidyTree {
     }
 
     let nodeUpdate = node.merge(nodeEnter);
+
     // Update - Nodes
     nodeUpdate
       .transition()
@@ -357,7 +437,9 @@ export default class TidyTree {
           "node " +
           `node-${d.id}` +
           (this.hasChildren(d) ? " node__internal" : " node__leaf") +
-          (d.collapsedChildren ? "--collapsed" : "");
+          (this.hasAllChildrenCollapsed(d) || d.isAggregated
+            ? "--collapsed"
+            : "");
         return classes;
       })
       .attr("transform", d => "translate(" + d.y + "," + d.x + ")");
@@ -366,7 +448,6 @@ export default class TidyTree {
 
     textUpdate
       .text(d => {
-        console.log(d.data.scientificName);
         return (
           (this.options.useCommonName ? d.data.commonName : null) ||
           d.data.scientificName

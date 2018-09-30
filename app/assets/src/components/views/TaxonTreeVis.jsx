@@ -1,5 +1,5 @@
 import React from "react";
-// import PropTypes from "prop-types";
+import PropTypes from "prop-types";
 import TidyTree from "../visualizations/TidyTree";
 import PathogenLabel from "../ui/labels/PathogenLabel";
 
@@ -44,10 +44,6 @@ class TaxonTreeVis extends React.Component {
     this.onNodeHover = this.onNodeHover.bind(this);
     this.fillNodeValues = this.fillNodeValues.bind(this);
     this.renderTooltip = this.renderTooltip.bind(this);
-
-    console.log("Taxa: ", this.props.taxa);
-    console.log("Pathogens: ", this.props.taxa.filter(t => t.pathogenTag));
-    console.log("Top Taxa: ", this.props.topTaxa);
   }
 
   componentDidMount() {
@@ -208,7 +204,6 @@ class TaxonTreeVis extends React.Component {
 
   renderTooltip() {
     let node = this.state.nodeHover;
-
     if (!node) {
       return null;
     }
@@ -232,13 +227,18 @@ class TaxonTreeVis extends React.Component {
         );
       }
     }
+
+    let name =
+      (this.isCommonNameActive() && node.data.commonName) ||
+      node.data.scientificName;
+    if (node.isAggregated) {
+      name = `${node.parent.collapsedChildren.length} Taxa`;
+    }
+
     return (
       <div className="taxon_tooltip">
         <div className="taxon_tooltip__title">{node.data.lineageRank}</div>
-        <div className="taxon_tooltip__name">
-          {(this.isCommonNameActive() && node.data.commonName) ||
-            node.data.scientificName}
-        </div>
+        <div className="taxon_tooltip__name">{name}</div>
         <div className="taxon_tooltip__title">Data</div>
         <div className="taxon_tooltip__data">
           <ul>{rows}</ul>
@@ -286,6 +286,11 @@ class TaxonTreeVis extends React.Component {
   }
 }
 
-TaxonTreeVis.propTypes = {};
+TaxonTreeVis.propTypes = {
+  metric: PropTypes.string,
+  nameType: PropTypes.string,
+  taxa: PropTypes.array,
+  topTaxa: PropTypes.array
+};
 
 export default TaxonTreeVis;

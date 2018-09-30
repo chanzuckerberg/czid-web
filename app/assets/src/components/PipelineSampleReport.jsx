@@ -8,7 +8,6 @@ import { Label, Menu, Icon, Popup } from "semantic-ui-react";
 import numberWithCommas from "../helpers/strings";
 import StringHelper from "../helpers/StringHelper";
 import ThresholdMap from "./utils/ThresholdMap";
-import PipelineSampleTree from "./PipelineSampleTree";
 import Nanobar from "nanobar";
 import BasicPopup from "./BasicPopup";
 import OurDropdown from "./ui/controls/dropdowns/Dropdown";
@@ -1847,12 +1846,6 @@ class RenderMarkup extends React.Component {
           nameType={parent.state.name_type}
           onNodeTextClicked={this._nodeTextClicked}
         />
-        {/* <PipelineSampleTree
-          taxons={parent.state.selected_taxons}
-          sample={parent.report_details.sample_info}
-          nameType={parent.state.name_type}
-          onNodeTextClicked={this._nodeTextClicked}
-        /> */}
       </div>
     );
   }
