@@ -60,5 +60,5 @@
       }
     }
   ],
-  "taskRoleArn": "{{ .Values.project }}-{{ .Values.env }}-{{ .Values.name }}"
+  "taskRoleArn": "{{ .Values.project }}-web-{{ .Values.env }}"
 }
