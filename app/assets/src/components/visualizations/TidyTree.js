@@ -22,7 +22,9 @@ export default class TidyTree {
         tooltipContainer: null,
         collapseThreshold: 0.4,
         useCommonName: false,
-        minNonCollapsableChildren: 2
+        minNonCollapsableChildren: 2,
+        smallerFont: 8,
+        largerFont: 12
       },
       options || {}
     );
@@ -309,7 +311,7 @@ export default class TidyTree {
       .range([1, 20]);
     let fontScale = scaleLinear()
       .domain(this.range)
-      .range([8, 12]);
+      .range([this.options.smallerFont, this.options.largerFont]);
 
     let link = this.pathContainer
       .selectAll(".link")
@@ -403,29 +405,6 @@ export default class TidyTree {
         });
     }
 
-    // overlays
-    if (this.options.addOverlays) {
-      nodeEnter.each((d, index, nodeList) => {
-        let overlay = this.container.select(`.node-overlay__${d.id}`);
-        let text = select(nodeList[index]).select("text");
-        let fontSize = fontScale(d.data.values[this.options.attribute]);
-        let nodeBox = this.getNodeBoxRefSvg(d, text.node());
-        overlay
-          .style("opacity", 1)
-          .style("position", "absolute")
-          .style(
-            "left",
-            `${nodeBox.y + (this.hasVisibleChildren(d) ? -55 : -15)}px`
-          )
-          .style(
-            "top",
-            `${nodeBox.x + (this.hasVisibleChildren(d) ? -40 : 6)}px`
-          )
-          .select("div.pathogen-label")
-          .style("font-size", `${fontSize}px`);
-      });
-    }
-
     let nodeUpdate = node.merge(nodeEnter);
 
     // Update - Nodes
@@ -500,25 +479,50 @@ export default class TidyTree {
 
     // overlays
     if (this.options.addOverlays) {
+      console.log("update overlays");
       nodeUpdate.each((d, index, nodeList) => {
         let overlay = this.container.select(`.node-overlay__${d.id}`);
-        let text = select(nodeList[index]).select("text");
-        let fontSize = fontScale(d.data.values[this.options.attribute]);
-        let nodeBox = this.getNodeBoxRefSvg(d, text.node());
-        overlay
-          .transition()
-          .duration(this.options.transitionDuration)
-          .style("position", "absolute")
-          .style(
-            "left",
-            `${nodeBox.y + (this.hasVisibleChildren(d) ? -55 : -15)}px`
-          )
-          .style(
-            "top",
-            `${nodeBox.x + (this.hasVisibleChildren(d) ? -40 : 6)}px`
-          )
-          .select("div.pathogen-label")
-          .style("font-size", `${fontSize}px`);
+        if (!overlay.empty()) {
+          console.log("update", d.id);
+          let text = select(nodeList[index]).select("text");
+          let nodeBox = this.getNodeBoxRefSvg(d, text.node());
+
+          let y = this.hasVisibleChildren(d)
+            ? nodeBox.y - nodeBox.width / 2 - 20
+            : nodeBox.y +
+              nodeScale(d.data.values[this.options.attribute]) +
+              nodeBox.width;
+
+          let x = this.hasVisibleChildren(d)
+            ? nodeBox.x -
+              nodeScale(d.data.values[this.options.attribute]) -
+              nodeBox.height -
+              20
+            : nodeBox.x -
+              nodeScale(d.data.values[this.options.attribute]) +
+              nodeBox.height -
+              20;
+
+          // this.svg.append("rect")
+          //   // .attr("x", nodeBox.y + nodeScale(d.data.values[this.options.attribute]))
+          //   // .attr("y", nodeBox.x - nodeScale(d.data.values[this.options.attribute]))
+          //   .attr("x", y)
+          //   .attr("y", x)
+          //   .attr("width", nodeBox.width)
+          //   .attr("height", nodeBox.height)
+          //   .style("fill", "#A00")
+          //   .style("opacity", ".3");
+
+          overlay
+            .transition()
+            .duration(this.options.transitionDuration)
+            .style("opacity", 1)
+            .style("position", "absolute")
+            .style("left", `${y}px`)
+            .style("top", `${x}px`)
+            .select("div.pathogen-label")
+            .style("font-size", `${this.options.smallerFont}px`);
+        }
       });
     }
 
