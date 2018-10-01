@@ -1051,6 +1051,10 @@ class PipelineSampleReport extends React.Component {
       taxonNameDisplay = (
         <TaxonModal
           taxonId={tax_info.tax_id}
+          parentTaxonId={
+            tax_info.tax_level === 1 ? tax_info.genus_taxid : undefined
+          }
+          background={parent.state.backgroundId}
           taxonName={taxonName}
           trigger={taxonNameDisplay}
         />
