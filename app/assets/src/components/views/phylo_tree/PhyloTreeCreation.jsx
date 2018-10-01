@@ -10,7 +10,7 @@ import SearchBox from "../../ui/controls/SearchBox";
 import LoadingSpinner from "../../ui/icons/LoadingSpinner";
 
 const MinNumberOfSamples = 4;
-class PhyloTreeByPathCreation extends React.Component {
+class PhyloTreeCreation extends React.Component {
   constructor(props) {
     super(props);
 
@@ -600,7 +600,7 @@ class PhyloTreeByPathCreation extends React.Component {
   }
 }
 
-PhyloTreeByPathCreation.propTypes = {
+PhyloTreeCreation.propTypes = {
   admin: PropTypes.number,
   csrf: PropTypes.string.isRequired,
   onComplete: PropTypes.func,
@@ -608,4 +608,4 @@ PhyloTreeByPathCreation.propTypes = {
   taxonId: PropTypes.number
 };
 
-export default PhyloTreeByPathCreation;
+export default PhyloTreeCreation;

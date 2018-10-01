@@ -17,7 +17,7 @@ import DownloadButtonDropdown from "./ui/controls/dropdowns/DownloadButtonDropdo
 import PrimaryButton from "./ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "./ui/controls/buttons/SecondaryButton";
 import MultipleDropdown from "./ui/controls/dropdowns/MultipleDropdown";
-import PhyloTreeByPathCreationModal from "./views/phylo_tree/PhyloTreeByPathCreationModal";
+import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
 
 class Samples extends React.Component {
   constructor(props, context) {
@@ -2034,7 +2034,7 @@ function ProjectInfoHeading({
     phyloProps["projectId"] = parseInt(state.selectedProjectId);
   }
   let phyloTreeModal = parent.allowPhyloTree ? (
-    <PhyloTreeByPathCreationModal {...phyloProps} />
+    <PhyloTreeCreationModal {...phyloProps} />
   ) : null;
 
   return (

@@ -32,6 +32,9 @@ ActiveRecord::Schema.define(version: 20_180_928_175_742) do
     t.float "depth", limit: 24
     t.bigint "pipeline_run_id"
     t.string "drug_family"
+    t.integer "level"
+    t.float "drug_gene_coverage", limit: 24
+    t.float "drug_gene_depth", limit: 24
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index %w[pipeline_run_id allele], name: "index_amr_counts_on_pipeline_run_id_and_allele", unique: true
@@ -129,7 +132,7 @@ ActiveRecord::Schema.define(version: 20_180_928_175_742) do
     t.index ["task"], name: "index_job_stats_on_task"
   end
 
-  create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string "key", null: false
     t.integer "data_type", limit: 1, null: false
     t.string "text_raw_value"
@@ -385,8 +388,8 @@ ActiveRecord::Schema.define(version: 20_180_928_175_742) do
     t.integer "taxid", null: false
     t.bigint "wikipedia_id"
     t.string "title"
-    t.text "summary"
-    t.text "description"
+    t.text "summary", limit: 16_777_215
+    t.text "description", limit: 16_777_215
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["taxid"], name: "index_taxon_descriptions_on_taxid", unique: true
@@ -482,7 +485,7 @@ ActiveRecord::Schema.define(version: 20_180_928_175_742) do
     t.index ["background_id"], name: "index_taxon_summaries_on_background_id"
   end
 
-  create_table "ui_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "ui_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.float "min_nt_z", limit: 24
     t.float "min_nr_z", limit: 24
     t.integer "min_nt_rpm"

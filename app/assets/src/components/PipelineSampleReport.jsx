@@ -18,7 +18,7 @@ import BetaLabel from "./ui/labels/BetaLabel";
 import PathogenLabel from "./ui/labels/PathogenLabel";
 import PathogenSummary from "./views/report/PathogenSummary";
 import ReportInsightIcon from "./views/report/ReportInsightIcon";
-import PhyloTreeByPathCreationModal from "./views/phylo_tree/PhyloTreeByPathCreationModal";
+import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
 import PhyloTreeChecks from "./views/phylo_tree/PhyloTreeChecks";
 
 class PipelineSampleReport extends React.Component {
@@ -929,7 +929,7 @@ class PipelineSampleReport extends React.Component {
       PhyloTreeChecks.passesCreateCondition(taxInfo.NT.r, taxInfo.NR.r)
     )
       phyloTreeDot = (
-        <PhyloTreeByPathCreationModal
+        <PhyloTreeCreationModal
           admin={parseInt(this.admin)}
           csrf={this.csrf}
           trigger={
