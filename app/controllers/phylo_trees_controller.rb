@@ -19,7 +19,7 @@ class PhyloTreesController < ApplicationController
 
   READ_ACTIONS = [:show, :download_snps].freeze
   EDIT_ACTIONS = [:retry].freeze
-  OTHER_ACTIONS = [:new, :create, :index].freeze
+  OTHER_ACTIONS = [:new, :create, :index, :choose_taxon].freeze
 
   power :phylo_trees, map: { EDIT_ACTIONS => :updatable_phylo_trees }, as: :phylo_trees_scope
 
@@ -67,6 +67,18 @@ class PhyloTreesController < ApplicationController
         }
       end
     end
+  end
+
+  def choose_taxon
+    max_ended_at = TaxonLineage.column_defaults["ended_at"] # infinitely far in the future
+    lineages = TaxonLineage.where("genus_taxid > 0").where.not(genus_name: "").where("ended_at = ?", max_ended_at)
+    lineages = lineages.select(:genus_taxid, :genus_name).distinct.order(:genus_name).index_by(&:genus_name) # index_by makes sure it's unique on genus_name alone
+    taxon_search = lineages.map do |genus_name, record|
+      { "title" => genus_name,
+        "description" => "Taxonomy ID: #{record.genus_taxid}",
+        "taxid" => record.genus_taxid }
+    end
+    render json: JSON.dump(taxon_search)
   end
 
   def new
