@@ -53,6 +53,7 @@ Rails.application.routes.draw do
     put :add_user, on: :member
   end
   get 'projects/:id/csv', to: 'projects#send_project_csv'
+  get 'choose_project', to: 'projects#choose_project'
 
   get 'phylo_trees/index', to: 'phylo_trees#index'
   get 'phylo_trees/show', to: 'phylo_trees#show'
@@ -60,6 +61,7 @@ Rails.application.routes.draw do
   post 'phylo_trees/create', to: 'phylo_trees#create'
   post 'phylo_trees/retry', to: 'phylo_trees#retry'
   get 'phylo_trees/:id/download_snps', to: 'phylo_trees#download_snps'
+  get 'choose_taxon', to: 'phylo_trees#choose_taxon'
 
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
