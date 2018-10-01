@@ -1,9 +1,9 @@
 import Modal from "../../ui/containers/Modal";
-import PhyloTreeByPathCreation from "./PhyloTreeByPathCreation";
+import PhyloTreeCreation from "./PhyloTreeCreation";
 import PropTypes from "prop-types";
 import React from "react";
 
-class PhyloTreeByPathCreationModal extends React.Component {
+class PhyloTreeCreationModal extends React.Component {
   constructor(props) {
     super(props);
 
@@ -30,7 +30,7 @@ class PhyloTreeByPathCreationModal extends React.Component {
         open={this.state.open}
         onClose={this.handleClose}
       >
-        <PhyloTreeByPathCreation
+        <PhyloTreeCreation
           onComplete={() => {
             this.setState({ open: false });
           }}
@@ -41,8 +41,8 @@ class PhyloTreeByPathCreationModal extends React.Component {
   }
 }
 
-PhyloTreeByPathCreationModal.propTypes = {
+PhyloTreeCreationModal.propTypes = {
   trigger: PropTypes.node
 };
 
-export default PhyloTreeByPathCreationModal;
+export default PhyloTreeCreationModal;

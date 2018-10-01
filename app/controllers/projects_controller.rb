@@ -13,7 +13,7 @@ class ProjectsController < ApplicationController
 
   READ_ACTIONS = [:show, :add_favorite, :remove_favorite, :make_host_gene_counts, :host_gene_counts_status, :send_host_gene_counts, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv, :visuals].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_users, :update_project_visibility].freeze
-  OTHER_ACTIONS = [:create, :new, :index, :send_project_csv].freeze
+  OTHER_ACTIONS = [:create, :new, :index, :send_project_csv, :choose_project].freeze
 
   power :projects, map: { EDIT_ACTIONS => :updatable_projects }, as: :projects_scope
 
@@ -29,6 +29,15 @@ class ProjectsController < ApplicationController
   # GET /projects.json
   def index
     @projects = current_power.projects
+  end
+
+  def choose_project
+    project_search = current_power.updatable_projects.index_by(&:name).map do |name, record|
+      { "title" => name,
+        "description" => "",
+        "project_id" => record.id }
+    end
+    render json: JSON.dump(project_search)
   end
 
   # GET /projects/1
