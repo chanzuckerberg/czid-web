@@ -1,7 +1,9 @@
 require 'resque/server'
 
 Rails.application.routes.draw do
-  resources :backgrounds
+  resources :backgrounds do
+    get :show_taxon_dist, on: :member
+  end
   devise_for :users, controllers: {
     sessions: 'sessions',
     registrations: 'registrations'
@@ -36,6 +38,7 @@ Rails.application.routes.draw do
   get 'samples/:id/alignment_viz/:taxon_info', to: 'samples#show_taxid_alignment_viz'
   get 'cli_user_instructions', to: 'samples#cli_user_instructions'
   get 'select', to: 'home#index'
+  get 'taxon_descriptions', to: 'home#taxon_descriptions'
   post '/feedback', to: 'home#feedback'
   get 'terms' => redirect("https://s3-us-west-2.amazonaws.com/idseq-database/Terms.pdf")
 

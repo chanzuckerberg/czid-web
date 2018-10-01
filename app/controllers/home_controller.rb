@@ -14,6 +14,17 @@ class HomeController < ApplicationController
     render 'home'
   end
 
+  def taxon_descriptions
+    # Get taxon descriptions for a list of taxids seperated by ','
+    # Example: http://localhost:3000/taxon_descriptions?taxon_list=561,562,570,573
+    taxon_list = params[:taxon_list].split(",").map(&:to_i)
+    output = {}
+    TaxonDescription.where(taxid: taxon_list).each do |taxon|
+      output[taxon[:taxid]] = taxon.slice(:taxid, :title, :summary, :wiki_url)
+    end
+    render json: output
+  end
+
   def sort_by(samples, dir = nil)
     default_dir = 'newest'
     dir ||= default_dir
