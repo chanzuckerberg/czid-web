@@ -11,10 +11,11 @@ RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources
 
 RUN curl -sL https://deb.nodesource.com/setup_9.x | bash -
 RUN apt-get update && apt-get install -y nodejs yarn
-RUN pip install --upgrade pip
-RUN pip install --upgrade pyOpenSSL
-RUN pip install --upgrade setuptools
-RUN pip install --upgrade aegea
+RUN pip install --upgrade pip pyOpenSSL setuptools aegea
+
+# Install chamber, for pulling secrets into the container.
+ADD https://github.com/segmentio/chamber/releases/download/v2.2.0/chamber-v2.2.0-linux-amd64 /bin/chamber
+RUN chmod +x /bin/chamber
 
 # Configure the main working directory. This is the base
 # directory used in any further RUN, COPY, and ENTRYPOINT
@@ -46,8 +47,8 @@ ENV GIT_VERSION ${GIT_COMMIT}
 EXPOSE 3000
 
 # Configure an entry point, so we don't need to specify
-# "bundle exec" for each of our commands.
-ENTRYPOINT ["bundle", "exec"]
+# "bundle exec" or "chamber" for each of our commands.
+ENTRYPOINT ["bin/entrypoint.sh"]
 
 # The main command to run when the container starts. Also
 # tell the Rails dev server to bind to all interfaces by
