@@ -3,6 +3,7 @@ import Tree from "../../utils/structures/Tree";
 import Dendogram from "../../visualizations/dendrogram/Dendogram";
 import PropTypes from "prop-types";
 import DataTooltip from "../../ui/containers/DataTooltip";
+import Moment from "react-moment";
 
 class PhyloTreeVis extends React.Component {
   constructor(props) {
@@ -21,13 +22,23 @@ class PhyloTreeVis extends React.Component {
     this.sampleFields = [
       { name: "project_name", label: "Project" },
       { name: "sample_location", label: "Location" },
-      { name: "created_at", label: "Upload Date" },
+      {
+        name: "created_at",
+        label: "Upload Date",
+        parser: val => {
+          return <Moment fromNow date={val} />;
+        }
+      },
       { name: "sample_date", label: "Collection Date" },
       { name: "sample_tissue", label: "Tissue" },
       { name: "sample_template", label: "Template" },
       { name: "sample_library", label: "Library" },
       { name: "sample_sequencer", label: "Sequencer" },
       { name: "sample_unique_id", label: "Unique ID" },
+      { name: "sample_input_pg", label: "Input PG" },
+      { name: "sample_batch", label: "Batch" },
+      { name: "sample_diagnosis", label: "Diagnosis" },
+      { name: "sample_detection", label: "Detection" },
       { name: "sample_notes", label: "Notes" }
     ];
     this.ncbiFields = [
@@ -81,6 +92,19 @@ class PhyloTreeVis extends React.Component {
     }
   }
 
+  getFieldValue(field) {
+    let value = this.state.hoveredNode.data[field.name];
+    if (value && field.parser) {
+      try {
+        value = field.parser(value);
+      } catch (err) {
+        // TODO: handle error
+        console.error(err);
+      }
+    }
+    return value || "-";
+  }
+
   getTooltipData() {
     let fields = this.state.hoveredNode.data.accession
       ? this.ncbiFields
@@ -103,10 +127,7 @@ class PhyloTreeVis extends React.Component {
       { name: topSectionName, data: topSectionData },
       {
         name: "Metadata",
-        data: fields.map(f => [
-          f.label,
-          this.state.hoveredNode.data[f.name] || "-"
-        ])
+        data: fields.map(f => [f.label, this.getFieldValue(f) || "-"])
       }
     ];
   }
