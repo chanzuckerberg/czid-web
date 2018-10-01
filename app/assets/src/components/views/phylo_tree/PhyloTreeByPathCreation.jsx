@@ -80,6 +80,7 @@ class PhyloTreeByPathCreation extends React.Component {
   }
 
   componentDidMount() {
+    console.log("load phylo trees");
     this.loadPhylotrees();
   }
 
