@@ -8,7 +8,6 @@ class HomeController < ApplicationController
 
   # Public unsecured landing page
   def landing
-    Rails.logger.info("hello there")
     if current_user
       # Call secure home#index path if authenticated
       redirect_to home_path
@@ -51,16 +50,24 @@ class HomeController < ApplicationController
   end
 
   def sign_up
+    # Send sign up email with filled out information
+    required = [:firstName, :lastName, :email, :institution]
+    unless required.all? { |r| home_params.key?(r.to_s) && home_params[r].present? }
+      render json: {}, status: :not_acceptable
+      return
+    end
+
     body = ""
     home_params.each do |k, v|
       body += "#{k}: #{v}\n"
     end
     Rails.logger.info("New sign up:\n#{body}")
-    mail(to: "jsheu@chanzuckerberg.com", subject: "New sign up from landing page", body: body)
+    UserMailer.landing_sign_up_email(body)
     render json: {
       status: :ok
     }
-  rescue
+  rescue => e
+    Rails.logger.warn("Sign up error: #{e}")
     render json: {
       status: :internal_server_error
     }

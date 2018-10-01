@@ -1,9 +1,18 @@
 import React from "react";
 import axios from "axios";
-import { Form, Input, TextArea, Grid, Image } from "semantic-ui-react";
+import {
+  Form,
+  Input,
+  TextArea,
+  Grid,
+  Image,
+  Message,
+  Divider
+} from "semantic-ui-react";
 import TransparentButton from "../ui/controls/buttons/TransparentButton";
 import PrimaryButton from "../ui/controls/buttons/PrimaryButton";
 import IconComponent from "../IconComponent";
+import StringHelper from "../../helpers/StringHelper";
 
 class Landing extends React.Component {
   constructor(props) {
@@ -13,7 +22,8 @@ class Landing extends React.Component {
       lastName: "",
       email: "",
       institution: "",
-      usage: ""
+      usage: "",
+      submitMessage: ""
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -24,7 +34,10 @@ class Landing extends React.Component {
   }
 
   handleSubmit() {
-    console.log("cur state: ", this.state);
+    if (!StringHelper.validateEmail(this.state.email)) {
+      this.setState({ submitMessage: "Email is invalid." });
+      return;
+    }
 
     axios
       .post("sign_up", {
@@ -36,11 +49,21 @@ class Landing extends React.Component {
           usage: this.state.usage
         }
       })
-      .then(response => {
-        console.log("got response: ", response);
+      .then(() => {
+        this.setState({
+          firstName: "",
+          lastName: "",
+          email: "",
+          institution: "",
+          usage: "",
+          submitMessage: "Form completed. Thanks for your interest!"
+        });
       })
-      .catch(error => {
-        console.log("error: ", error);
+      .catch(() => {
+        this.setState({
+          submitMessage:
+            "There was an error submitting the form. Please check required fields and try again."
+        });
       });
   }
 
@@ -104,6 +127,11 @@ class Landing extends React.Component {
       </label>
     );
 
+    let submitMessageBanner;
+    if (this.state.submitMessage) {
+      submitMessageBanner = <Message content={this.state.submitMessage} />;
+    }
+
     const interestForm = (
       <div className="account-form">
         <div className="form-header">
@@ -118,12 +146,14 @@ class Landing extends React.Component {
               control={Input}
               label="First Name"
               id="firstName"
+              value={this.state.firstName}
               onChange={this.handleChange}
             />
             <Form.Field
               control={Input}
               label="Last Name"
               id="lastName"
+              value={this.state.lastName}
               onChange={this.handleChange}
             />
           </Form.Group>
@@ -131,20 +161,24 @@ class Landing extends React.Component {
             control={Input}
             label="Email"
             id="email"
+            value={this.state.email}
             onChange={this.handleChange}
           />
           <Form.Field
             control={Input}
             label="Affiliated Institution or Company"
             id="institution"
+            value={this.state.institution}
             onChange={this.handleChange}
           />
           <Form.Field
             control={TextArea}
             label={usageLabel}
+            value={this.state.usage}
             onChange={this.handleChange}
             id="usage"
           />
+          {submitMessageBanner}
           <div className="submit-button">
             <PrimaryButton text="Submit" />
           </div>
@@ -218,6 +252,7 @@ class Landing extends React.Component {
       <div>
         {header}
         {firstBlock}
+        <Divider />
         {partners}
         {footer}
       </div>
