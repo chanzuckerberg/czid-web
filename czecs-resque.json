@@ -7,10 +7,7 @@
       "cpu": 1024,
       "memoryReservation": 3072,
       "essential": true,
-      "command": [
-        "rake",
-        "{{ .Values.rake_command }}"
-      ],
+      "command": ["rake", "{{ .Values.rake_command }}"],
       "environment": [
         {
           "name": "RAILS_ENV",

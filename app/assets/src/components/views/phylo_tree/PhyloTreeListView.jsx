@@ -28,7 +28,11 @@ class PhyloTreeListView extends React.Component {
   }
 
   getDefaultSelectedTreeId(urlParams, phyloTrees = []) {
-    return urlParams.treeId || (phyloTrees[0] || {}).id;
+    return (
+      urlParams.treeId ||
+      parseInt(window.sessionStorage.getItem("treeId")) ||
+      (phyloTrees[0] || {}).id
+    );
   }
 
   resetUrl() {
@@ -45,6 +49,7 @@ class PhyloTreeListView extends React.Component {
   }
 
   handleTreeChange(_, newPhyloTreeId) {
+    window.sessionStorage.setItem("treeId", newPhyloTreeId.value);
     this.setState({
       selectedPhyloTreeId: newPhyloTreeId.value
     });
