@@ -2030,8 +2030,9 @@ function ProjectInfoHeading({
       </div>
     )
   };
-  if (state.selectedProjectId) {
-    phyloProps["projectId"] = parseInt(state.selectedProjectId);
+  if (proj) {
+    phyloProps["projectId"] = proj.id;
+    phyloProps["projectName"] = proj.name;
   }
   let phyloTreeModal = parent.allowPhyloTree ? (
     <PhyloTreeCreationModal {...phyloProps} />
