@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_180_927_213_907) do
+ActiveRecord::Schema.define(version: 20_180_928_175_742) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -25,13 +25,16 @@ ActiveRecord::Schema.define(version: 20_180_927_213_907) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "amr_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "amr_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string "gene"
     t.string "allele"
     t.float "coverage", limit: 24
     t.float "depth", limit: 24
     t.bigint "pipeline_run_id"
     t.string "drug_family"
+    t.integer "level"
+    t.float "drug_gene_coverage", limit: 24
+    t.float "drug_gene_depth", limit: 24
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index %w[pipeline_run_id allele], name: "index_amr_counts_on_pipeline_run_id_and_allele", unique: true
@@ -129,7 +132,7 @@ ActiveRecord::Schema.define(version: 20_180_927_213_907) do
     t.index ["task"], name: "index_job_stats_on_task"
   end
 
-  create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string "key", null: false
     t.integer "data_type", limit: 1, null: false
     t.string "text_raw_value"
@@ -381,12 +384,12 @@ ActiveRecord::Schema.define(version: 20_180_927_213_907) do
     t.index %w[pipeline_run_id tax_level count_type tax_id], name: "taxon_counts_pr_index2", unique: true
   end
 
-  create_table "taxon_descriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "taxon_descriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "taxid", null: false
     t.bigint "wikipedia_id"
     t.string "title"
-    t.text "summary"
-    t.text "description"
+    t.text "summary", limit: 16_777_215
+    t.text "description", limit: 16_777_215
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["taxid"], name: "index_taxon_descriptions_on_taxid", unique: true
@@ -438,7 +441,7 @@ ActiveRecord::Schema.define(version: 20_180_927_213_907) do
     t.string "kingdom_common_name", default: "", null: false
     t.index ["class_taxid"], name: "index_taxon_lineages_on_class_taxid"
     t.index ["family_taxid"], name: "index_taxon_lineages_on_family_taxid"
-    t.index ["genus_taxid"], name: "index_taxon_lineages_on_genus_taxid"
+    t.index %w[genus_taxid genus_name], name: "index_taxon_lineages_on_genus_taxid_and_genus_name"
     t.index ["order_taxid"], name: "index_taxon_lineages_on_order_taxid"
     t.index ["phylum_taxid"], name: "index_taxon_lineages_on_phylum_taxid"
     t.index ["species_taxid"], name: "index_taxon_lineages_on_species_taxid"
@@ -482,7 +485,7 @@ ActiveRecord::Schema.define(version: 20_180_927_213_907) do
     t.index ["background_id"], name: "index_taxon_summaries_on_background_id"
   end
 
-  create_table "ui_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "ui_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.float "min_nt_z", limit: 24
     t.float "min_nr_z", limit: 24
     t.integer "min_nt_rpm"

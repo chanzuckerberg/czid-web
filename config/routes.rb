@@ -1,7 +1,9 @@
 require 'resque/server'
 
 Rails.application.routes.draw do
-  resources :backgrounds
+  resources :backgrounds do
+    get :show_taxon_dist, on: :member
+  end
   devise_for :users, controllers: {
     sessions: 'sessions',
     registrations: 'registrations'
@@ -36,6 +38,7 @@ Rails.application.routes.draw do
   get 'samples/:id/alignment_viz/:taxon_info', to: 'samples#show_taxid_alignment_viz'
   get 'cli_user_instructions', to: 'samples#cli_user_instructions'
   get 'select', to: 'home#index'
+  get 'taxon_descriptions', to: 'home#taxon_descriptions'
   post '/feedback', to: 'home#feedback'
   get 'terms' => redirect("https://s3-us-west-2.amazonaws.com/idseq-database/Terms.pdf")
 
@@ -53,6 +56,7 @@ Rails.application.routes.draw do
     put :add_user, on: :member
   end
   get 'projects/:id/csv', to: 'projects#send_project_csv'
+  get 'choose_project', to: 'projects#choose_project'
 
   get 'phylo_trees/index', to: 'phylo_trees#index'
   get 'phylo_trees/show', to: 'phylo_trees#show'
@@ -60,6 +64,7 @@ Rails.application.routes.draw do
   post 'phylo_trees/create', to: 'phylo_trees#create'
   post 'phylo_trees/retry', to: 'phylo_trees#retry'
   get 'phylo_trees/:id/download_snps', to: 'phylo_trees#download_snps'
+  get 'choose_taxon', to: 'phylo_trees#choose_taxon'
 
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
