@@ -495,7 +495,9 @@ class PhyloTreeCreation extends React.Component {
       selectNameAndProjectSamples: (
         <Wizard.Page
           key="wizard__page_3"
-          title="Create phylogenetic tree and select samples from the project"
+          title={`Create phylogenetic tree and select samples from project ${
+            this.state.projectName
+          }`}
           onLoad={this.loadNewTreeContext}
           onContinue={this.canContinueWithTreeName}
         >

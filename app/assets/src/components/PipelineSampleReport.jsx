@@ -37,6 +37,7 @@ class PipelineSampleReport extends React.Component {
     this.report_ts = props.report_ts;
     this.sample_id = props.sample_id;
     this.projectId = props.projectId;
+    this.projectName = props.projectName;
     this.gitVersion = props.git_version;
     this.canSeeAlignViz = props.can_see_align_viz;
     this.can_edit = props.can_edit;
@@ -936,7 +937,9 @@ class PipelineSampleReport extends React.Component {
             <i className="fa fa-code-fork action-dot" aria-hidden="true" />
           }
           taxonId={taxInfo.tax_id}
+          taxonName={taxInfo.name}
           projectId={this.projectId}
+          projectName={this.projectName}
         />
       );
     return (
