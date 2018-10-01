@@ -20,6 +20,7 @@ import PathogenSummary from "./views/report/PathogenSummary";
 import ReportInsightIcon from "./views/report/ReportInsightIcon";
 import PhyloTreeByPathCreationModal from "./views/phylo_tree/PhyloTreeByPathCreationModal";
 import PhyloTreeChecks from "./views/phylo_tree/PhyloTreeChecks";
+import TaxonModal from "./views/report/TaxonModal";
 
 class PipelineSampleReport extends React.Component {
   constructor(props) {
@@ -1017,31 +1018,43 @@ class PipelineSampleReport extends React.Component {
   render_name(tax_info, report_details) {
     let tax_scientific_name = tax_info["name"];
     let tax_common_name = tax_info["common_name"];
-    let tax_name;
+    let taxonName;
+    let taxonNameDisplay;
 
     if (this.state.name_type.toLowerCase() == "common name") {
-      if (!tax_common_name || tax_common_name.trim() == "")
-        tax_name = <span className="count-info">{tax_scientific_name}</span>;
-      else
-        tax_name = (
-          <span>{StringHelper.capitalizeFirstLetter(tax_common_name)}</span>
+      if (!tax_common_name || tax_common_name.trim() == "") {
+        taxonName = tax_scientific_name;
+        taxonNameDisplay = <span className="count-info">{taxonName}</span>;
+      } else {
+        taxonName = tax_common_name;
+        taxonNameDisplay = (
+          <span>{StringHelper.capitalizeFirstLetter(taxonName)}</span>
         );
+      }
     } else {
-      tax_name = <span>{tax_scientific_name}</span>;
+      taxonName = tax_scientific_name;
+      taxonNameDisplay = <span>{tax_scientific_name}</span>;
     }
 
-    let taxonNameDisplay = <i>{tax_name}</i>;
+    taxonNameDisplay = <i>{taxonNameDisplay}</i>;
 
     if (tax_info.tax_id > 0) {
       if (report_details.taxon_fasta_flag) {
         taxonNameDisplay = (
           <span>
-            <a>{tax_name}</a>
+            <a>{taxonNameDisplay}</a>
           </span>
         );
       } else {
-        taxonNameDisplay = <span>{tax_name}</span>;
+        taxonNameDisplay = <span>{taxonNameDisplay}</span>;
       }
+      taxonNameDisplay = (
+        <TaxonModal
+          taxonId={tax_info.tax_id}
+          taxonName={taxonName}
+          trigger={taxonNameDisplay}
+        />
+      );
     }
     let secondaryTaxonDisplay = (
       <span>
