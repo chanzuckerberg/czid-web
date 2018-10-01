@@ -3,8 +3,8 @@ class BackgroundsController < ApplicationController
   before_action :login_required
   before_action :authenticate_user!
   before_action :no_demo_user
-  before_action :admin_required, except: :create
-  before_action :set_background, only: [:show, :edit, :update, :destroy]
+  before_action :admin_required, except: [:create, :show_taxon_dist]
+  before_action :set_background, only: [:show, :edit, :update, :destroy, :show_taxon_dist]
 
   # GET /backgrounds
   # GET /backgrounds.json
@@ -15,6 +15,17 @@ class BackgroundsController < ApplicationController
   # GET /backgrounds/1
   # GET /backgrounds/1.json
   def show
+  end
+
+  def show_taxon_dist
+    # Output count_type => rpm information for specified taxid
+    # Example: /backgrounds/4/show_taxon_dist?taxid=570
+    taxid = params[:taxid].to_i
+    ts = TaxonSummary.where(background_id: @background.id, tax_id: taxid)
+    output = {}
+    ts.each { |t| output[t[:count_type]] = t.slice(:tax_level, :mean, :stdev, :rpm_list) }
+
+    render json: output
   end
 
   # GET /backgrounds/new
