@@ -60,8 +60,7 @@ class PhyloTreeListView extends React.Component {
     switch (tree) {
       case 0:
       case 3:
-        statusMessage =
-          "Phylogenetic computation in progress. Please check back later.";
+        statusMessage = "Computation in progress. Please check back later!";
         break;
       case 2:
         statusMessage = "Tree creation failed!";
