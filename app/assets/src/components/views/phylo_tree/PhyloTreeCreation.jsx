@@ -38,6 +38,7 @@ class PhyloTreeCreation extends React.Component {
       taxonName: this.props.taxonName,
       projectId: this.props.projectId,
       projectName: this.props.projectName,
+      showErrorTaxonAndProject: false,
 
       showErrorName: false,
       showErrorSamples: false,
@@ -77,7 +78,11 @@ class PhyloTreeCreation extends React.Component {
     this.inputTimeout = null;
     this.inputDelay = 500;
 
-    this.canContinue = this.canContinue.bind(this);
+    this.canContinueWithTreeName = this.canContinueWithTreeName.bind(this);
+    this.canContinueWithTaxonAndProject = this.canContinueWithTaxonAndProject.bind(
+      this
+    );
+
     this.handleBranchChange = this.handleBranchChange.bind(this);
     this.handleChangedProjectSamples = this.handleChangedProjectSamples.bind(
       this
@@ -370,7 +375,16 @@ class PhyloTreeCreation extends React.Component {
     );
   }
 
-  canContinue() {
+  canContinueWithTaxonAndProject() {
+    if (this.state.taxonId && this.state.projectId) {
+      this.setState({ showErrorTaxonAndProject: false }); // remove any pre-existing error message
+      return true;
+    }
+    this.setState({ showErrorTaxonAndProject: true });
+    return false;
+  }
+
+  canContinueWithTreeName() {
     if (this.isTreeNameValid()) {
       return true;
     }
@@ -440,6 +454,7 @@ class PhyloTreeCreation extends React.Component {
           key="wizard__page_2"
           title="Select organism and project"
           onLoad={this.loadProjectAndTaxonSearchContext}
+          onContinue={this.canContinueWithTaxonAndProject}
         >
           <div className="wizard__page-2__subtitle" />
           <div className="wizard__page-2__searchbar">
@@ -470,6 +485,11 @@ class PhyloTreeCreation extends React.Component {
               )}
             </div>
           </div>
+          <div>
+            {this.state.showErrorTaxonAndProject
+              ? "Please select a project and organism"
+              : null}
+          </div>
         </Wizard.Page>
       ),
       selectNameAndProjectSamples: (
@@ -477,7 +497,7 @@ class PhyloTreeCreation extends React.Component {
           key="wizard__page_3"
           title="Create phylogenetic tree and select samples from the project"
           onLoad={this.loadNewTreeContext}
-          onContinue={this.canContinue}
+          onContinue={this.canContinueWithTreeName}
         >
           <div className="wizard__page-3__subtitle">{this.state.taxonName}</div>
           <div className="wizard__page-3__form">
