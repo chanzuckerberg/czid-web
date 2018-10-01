@@ -2,12 +2,12 @@ import React from "react";
 import { Search } from "semantic-ui-react";
 import { escapeRegExp, debounce } from "lodash";
 
-const delayCheckMatch = 1000;
-const waitHandleSearchChange = 500;
-
 class SearchBox extends React.Component {
   constructor(props) {
     super(props);
+
+    this.delayCheckMatch = 1000;
+    this.waitHandleSearchChange = 500;
 
     this.source = this.props.source;
 
@@ -44,7 +44,7 @@ class SearchBox extends React.Component {
         isLoading: false,
         results: this.source.filter(isMatch)
       });
-    }, delayCheckMatch);
+    }, this.delayCheckMatch);
   }
 
   render() {
@@ -55,7 +55,7 @@ class SearchBox extends React.Component {
         loading={isLoading}
         onSearchChange={debounce(
           this.handleSearchChange,
-          waitHandleSearchChange,
+          this.waitHandleSearchChange,
           {
             leading: true
           }

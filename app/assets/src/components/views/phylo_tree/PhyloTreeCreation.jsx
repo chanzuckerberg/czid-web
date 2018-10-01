@@ -9,10 +9,11 @@ import PhyloTreeChecks from "./PhyloTreeChecks";
 import SearchBox from "../../ui/controls/SearchBox";
 import LoadingSpinner from "../../ui/icons/LoadingSpinner";
 
-const MinNumberOfSamples = 4;
 class PhyloTreeCreation extends React.Component {
   constructor(props) {
     super(props);
+
+    this.minNumberOfSamples = 4;
 
     this.state = {
       defaultPage: 0,
@@ -371,7 +372,7 @@ class PhyloTreeCreation extends React.Component {
     return (
       this.state.selectedProjectSamples.size +
         this.state.selectedOtherSamples.size >=
-      MinNumberOfSamples
+      this.minNumberOfSamples
     );
   }
 
@@ -400,7 +401,7 @@ class PhyloTreeCreation extends React.Component {
       return (
         <span className="wizard__error">
           {totalSelectedSamples} Total Samples (min number is{" "}
-          {MinNumberOfSamples})
+          {this.minNumberOfSamples})
         </span>
       );
     }
