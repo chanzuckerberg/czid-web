@@ -14,14 +14,14 @@ class SearchBox extends React.Component {
     this.resetComponent = this.resetComponent.bind(this);
     this.handleSearchChange = this.handleSearchChange.bind(this);
     this.handleResultSelect = this.handleResultSelect.bind(this);
-  }
 
-  componentWillMount() {
-    this.resetComponent();
+    this.blankState = { isLoading: false, results: [], value: "" };
+
+    this.state = this.blankState;
   }
 
   resetComponent() {
-    this.setState({ isLoading: false, results: [], value: "" });
+    this.setState(this.blankState);
   }
 
   handleResultSelect(e, { result }) {
