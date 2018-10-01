@@ -30,13 +30,14 @@ class PhyloTreeCreation extends React.Component {
 
       taxaLoaded: false,
       taxonList: [],
-      taxonName: null,
 
       projectsLoaded: false,
       projectList: [],
 
       taxonId: this.props.taxonId,
+      taxonName: this.props.taxonName,
       projectId: this.props.projectId,
+      projectName: this.props.projectName,
 
       showErrorName: false,
       showErrorSamples: false,
@@ -213,6 +214,7 @@ class PhyloTreeCreation extends React.Component {
   handleSelectProject(e, { result }) {
     this.setState({
       projectId: result.project_id,
+      projectName: result.title,
       // Reset sample lists (in case user went back and changed project selection after they had been loaded)
       samplesLoaded: false,
       projectSamples: [],
@@ -447,6 +449,7 @@ class PhyloTreeCreation extends React.Component {
                 <SearchBox
                   source={this.state.projectList}
                   onResultSelect={this.handleSelectProject}
+                  initialValue={this.state.projectName}
                 />
               ) : (
                 <LoadingSpinner />
@@ -460,6 +463,7 @@ class PhyloTreeCreation extends React.Component {
                 <SearchBox
                   source={this.state.taxonList}
                   onResultSelect={this.handleSelectTaxon}
+                  initialValue={this.state.taxonName}
                 />
               ) : (
                 <LoadingSpinner />
@@ -580,11 +584,9 @@ class PhyloTreeCreation extends React.Component {
 
   render() {
     if (this.state.phyloTreesLoaded) {
-      let nPagesToSkip =
-        (this.state.skipListTrees | 0) + (this.skipSelectProjectAndTaxon | 0);
       return (
         <Wizard
-          skipPageInfoNPages={nPagesToSkip}
+          skipPageInfoNPages={this.state.skipListTrees ? 0 : 1}
           onComplete={this.handleComplete}
           defaultPage={this.state.defaultPage}
           labels={{

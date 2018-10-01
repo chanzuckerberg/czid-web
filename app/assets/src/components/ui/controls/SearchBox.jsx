@@ -16,8 +16,11 @@ class SearchBox extends React.Component {
     this.handleResultSelect = this.handleResultSelect.bind(this);
 
     this.blankState = { isLoading: false, results: [], value: "" };
-
-    this.state = this.blankState;
+    this.state = {
+      isLoading: false,
+      results: [],
+      value: this.props.initialValue
+    };
   }
 
   resetComponent() {
