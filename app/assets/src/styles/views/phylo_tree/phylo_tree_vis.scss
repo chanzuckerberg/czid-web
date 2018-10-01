@@ -1,75 +1,81 @@
 @import "../../themes/colors";
 
 .phylo-tree-vis {
-  padding: 20px;
+  &__tree-container {
+    padding: 20px;
 
-  svg {
-    width: 100%;
-  }
+    svg {
+      width: 100%;
+    }
 
-  .node {
-    cursor: pointer;
-  }
+    .node {
+      cursor: pointer;
+    }
 
-  .node circle {
-    opacity: 1;
-  }
+    .node circle {
+      opacity: 1;
+    }
 
-  .node text {
-    fill: $black;
-    font-size: 14px;
-  }
+    .node text {
+      fill: $black;
+      font-size: 14px;
+    }
 
-  .node.highlight text {
-    font-weight: 700;
-  }
+    .node.highlight text {
+      font-weight: 700;
+    }
 
-  .node-internal text {
-    text-shadow: 0 1px 0 #fff, 0 -1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff;
-  }
+    .node-internal text {
+      text-shadow: 0 1px 0 #fff, 0 -1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff;
+    }
 
-  .link {
-    fill: none;
-    stroke: $light-grey;
-    stroke-width: 2px;
-  }
-
-  .link.highlight {
-    stroke-width: 4px;
-  }
-
-  form {
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    position: absolute;
-    left: 10px;
-    top: 10px;
-  }
-
-  label {
-    display: block;
-  }
-
-  .scale {
-    .scale-line,
-    .scale-tick path {
+    .link {
       fill: none;
       stroke: $light-grey;
       stroke-width: 2px;
     }
-  }
 
-  .legend {
-    .title {
-      font-weight: bold;
+    .link.highlight {
+      stroke-width: 4px;
+    }
+
+    form {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      position: absolute;
+      left: 10px;
+      top: 10px;
+    }
+
+    label {
+      display: block;
+    }
+
+    .scale {
+      .scale-line,
+      .scale-tick path {
+        fill: none;
+        stroke: $light-grey;
+        stroke-width: 2px;
+      }
+    }
+
+    .legend {
+      .title {
+        font-weight: bold;
+      }
     }
   }
-}
 
-.dendogram__tooltip {
-  position: absolute;
-  padding: 10px;
-  font-size: 12px;
-  background-color: white;
-  border: 1px solid $medium-grey;
-  pointer-events: none;
+  &__tooltip-container {
+    position: absolute;
+    display: none;
+
+    &.visible {
+      display: block;
+    }
+
+    .data-tooltip__label {
+      min-width: 100px;
+    }
+  }
 }

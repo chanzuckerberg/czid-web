@@ -1,0 +1,12 @@
+{
+  "cluster": "{{ .Values.cluster }}",
+  "overrides": {
+    "containerOverrides": [
+      {
+        "name": "rails",
+        "command": ["rails", "db:migrate"]
+      }
+    ]
+  },
+  "taskDefinition": "{{ .Values.taskDefinitionArn }}"
+}
