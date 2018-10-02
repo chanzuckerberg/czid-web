@@ -10,7 +10,6 @@ class Login extends React.Component {
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
     this.clearError = this.clearError.bind(this);
     this.gotoPage = this.gotoPage.bind(this);
-    this.sendMail = this.sendMail.bind(this);
     this.state = {
       isChecked: false,
       success: false,
@@ -99,11 +98,6 @@ class Login extends React.Component {
       isChecked: checkboxValue
     });
     this.state.isChecked = !this.state.isChecked;
-  }
-
-  sendMail() {
-    var link = "mailto:accounts@idseq.net?Subject=Request%20IDseq%20Access";
-    window.location.href = link;
   }
 
   renderLogin() {

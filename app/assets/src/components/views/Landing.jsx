@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import axios from "axios";
 import {
   Form,
@@ -230,10 +231,11 @@ class Landing extends React.Component {
       </div>
     );
 
+    const mailto = "mailto:" + this.props.contactEmail;
     const footer = (
       <div className="footer">
         <div className="footer-links">
-          <a href="mailto:accounts@idseq.net">Contact</a>
+          <a href={mailto}>Contact</a>
           <a
             href="https://s3-us-west-2.amazonaws.com/idseq-database/Terms.pdf"
             target="_blank"
@@ -263,5 +265,9 @@ class Landing extends React.Component {
     );
   }
 }
+
+Landing.propTypes = {
+  contactEmail: PropTypes.string.isRequired
+};
 
 export default Landing;

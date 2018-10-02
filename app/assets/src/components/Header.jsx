@@ -45,7 +45,7 @@ class Header extends React.Component {
   }
 
   sendMail() {
-    const link = "mailto:regger@chanzuckerberg.com?Subject=Report%20Feedback";
+    const link = `mailto:${this.props.contactEmail}?Subject=Report%20Feedback`;
     window.location.href = link;
   }
 
