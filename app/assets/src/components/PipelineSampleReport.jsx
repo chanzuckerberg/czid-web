@@ -1018,7 +1018,7 @@ class PipelineSampleReport extends React.Component {
     return category_lowercase;
   }
 
-  render_name(tax_info, report_details) {
+  render_name(tax_info, report_details, parent) {
     let tax_scientific_name = tax_info["name"];
     let tax_common_name = tax_info["common_name"];
     let taxonName;
@@ -1054,10 +1054,17 @@ class PipelineSampleReport extends React.Component {
       taxonNameDisplay = (
         <TaxonModal
           taxonId={tax_info.tax_id}
+          taxonValues={{
+            NT: tax_info.NT,
+            NR: tax_info.NR
+          }}
           parentTaxonId={
             tax_info.tax_level === 1 ? tax_info.genus_taxid : undefined
           }
-          background={parent.state.backgroundId}
+          background={{
+            name: parent.state.backgroundName,
+            id: parent.state.backgroundId
+          }}
           taxonName={taxonName}
           trigger={taxonNameDisplay}
         />
@@ -1513,7 +1520,7 @@ function DetailCells({ parent }) {
         parent.props.watched_taxids
       )}
     >
-      <td>{parent.render_name(tax_info, parent.report_details)}</td>
+      <td>{parent.render_name(tax_info, parent.report_details, parent)}</td>
       {parent.render_number(
         tax_info.NT.aggregatescore,
         null,

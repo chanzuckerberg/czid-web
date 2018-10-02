@@ -11,87 +11,78 @@ class TaxonModal extends React.Component {
     this.state = {
       open: false,
       firstOpen: true,
-
       background: this.props.background,
+      refreshBackgroundData: false,
       taxonDescription: "",
       taxonParentName: "",
-      taxonParentDescription: ""
+      taxonParentDescription: "",
+      wikiUrl: null
     };
 
-    this.taxonId = this.props.taxonId;
     this.histogram = null;
-
-    this.handleOpen = this.handleOpen.bind(this);
+    this.loadedBackground = this.handleOpen = this.handleOpen.bind(this);
     this.handleClose = () => this.setState({ open: false });
+    this.linkTo = this.linkTo.bind(this);
   }
 
   static getDerivedStateFromProps(props, state) {
-    if (props.background != state.background) {
+    if (props.background.id != state.background.id) {
       return {
         background: props.background,
-        refreshBackgroundData: true
+        firstOpen: true
       };
     }
     return null;
   }
 
-  componentDidUpdate() {
-    if (this.refreshBackgroundData) {
-      this.refreshBackgroundData = false;
+  handleOpen() {
+    if (this.state.firstOpen) {
+      this.loadTaxonInfo();
       this.loadBackgroundInfo();
     }
-  }
-
-  handleOpen() {
-    if (!this.firstOpen) {
-      this.loadTaxonInfo();
-    }
-    this.firstOpen = false;
-    this.setState({ open: true });
+    this.setState({
+      firstOpen: false,
+      open: true
+    });
   }
 
   loadTaxonInfo() {
-    let extraTaxons = this.parentTaxonId ? `,${this.parentTaxonId}` : "";
-    Axios.get(`/taxon_descriptions?taxon_list=${this.taxonId}${extraTaxons}`, {
+    let taxonList = [this.props.taxonId];
+    if (this.props.parentTaxonId) {
+      taxonList.push(this.props.parentTaxonId);
+    }
+    Axios.get(`/taxon_descriptions.json?taxon_list=${taxonList.join(",")}`, {
       params: {
         taxon: this.props.taxonId
       }
     })
       .then(response => {
-        console.log(response);
-        this.setState({
-          taxonDescription: response.data.description,
-          taxonParentName: "Fake genus parent",
-          taxonParentDescription: response.data.parentDescription
-        });
+        let newState = {
+          taxonDescription: response.data[this.props.taxonId].summary,
+          wikiUrl: response.data[this.props.taxonId].wiki_url
+        };
+        if (this.props.parentTaxonId) {
+          Object.assign(newState, {
+            taxonParentName: response.data[this.props.parentTaxonId].title,
+            taxonParentDescription:
+              response.data[this.props.parentTaxonId].summary
+          });
+        }
+        this.setState(newState);
       })
       .catch(error => {
-        // // TODO: properly handle error
-        // // eslint-disable-next-line no-console
+        // TODO: properly handle error
+        // eslint-disable-next-line no-console
         console.error("Error loading taxon information: ", error);
-        // let taxonDescription = `This is a sample description for
-        //             test purposes to be replaced by proper information once backend
-        //             part is implements.
-        //             This sentence should appear in a new line.
-        //             This one too.
-        //             I guess this already long enough of a description for test
-        //             purposes.`;
-        // let taxonParentName = "Fake genus parent";
-        // let taxonParentDescription = `This is the same as the normal
-        //             description but for a potential parent of the taxon being
-        //             visualized.`;
-        // this.setState({
-        //   taxonDescription,
-        //   taxonParentName,
-        //   taxonParentDescription
-        // });
       });
   }
 
   loadBackgroundInfo() {
+    this.sestate.refreshBackgroundData = false;
+
     Axios.get(
-      `/backgrounds/${this.state.background}/show_taxon_dist?taxid=${
-        this.state.taxonId
+      `/backgrounds/${this.state.background.id}/show_taxon_dist.json?taxid=${
+        this.props.taxonId
       }`,
       {
         params: {
@@ -100,15 +91,56 @@ class TaxonModal extends React.Component {
       }
     )
       .then(response => {
-        console.log(response);
-        this.histogram = new Histogram(this.histogramContainer, response.data);
+        let data = [response.data.NT.rpm_list, response.data.NR.rpm_list];
+        this.histogram = new Histogram(this.histogramContainer, data, {
+          seriesNames: ["NT", "NR"],
+          labelX: "rpm",
+          labelY: "count",
+          refValues: [
+            {
+              name: "sample",
+              values: [
+                this.props.taxonValues.NT.rpm,
+                this.props.taxonValues.NR.rpm
+              ]
+            }
+          ]
+        });
         this.histogram.update();
       })
       .catch(error => {
         // TODO: properly handle error
-        // // eslint-disable-next-line no-console
-        console.error("Unable to retrieve backdroung info");
+        // eslint-disable-next-line no-console
+        console.error("Unable to retrieve background info", error);
       });
+  }
+
+  linkTo(source) {
+    let url = null;
+    switch (source) {
+      case "ncbi":
+        url = `https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${
+          this.props.taxonId
+        }`;
+        break;
+      case "google":
+        url = `http://www.google.com/search?q=${this.props.taxonName}`;
+        break;
+      case "pubmed":
+        url = `https://www.ncbi.nlm.nih.gov/pubmed/?term=${
+          this.props.taxonName
+        }`;
+        break;
+      case "wikipedia":
+        url = this.state.wikiUrl;
+        break;
+      default:
+        break;
+    }
+
+    if (url) {
+      window.open(url, "_blank", "noopener", "noreferrer");
+    }
   }
 
   render() {
@@ -125,19 +157,23 @@ class TaxonModal extends React.Component {
             {this.state.taxonDescription && (
               <div>
                 <div className="taxon-info__subtitle">Description</div>
-                <div>{this.state.taxonDescription}</div>
+                <div className="taxon-info__text">
+                  {this.state.taxonDescription}
+                </div>
               </div>
             )}
             {this.state.taxonParentName && (
               <div>
                 <div className="taxon-info__subtitle">
-                  Genus: {this.state.parentName}
+                  Genus: {this.state.taxonParentName}
                 </div>
-                <div>{this.state.taxonParentDescription}</div>
+                <div className="taxon-info__text">
+                  {this.state.taxonParentDescription}
+                </div>
               </div>
             )}
             <div className="taxon-info__subtitle">
-              Distribution in Project Samples
+              Reference Background: {this.state.background.name}
             </div>
             <div
               className="taxon-info__histogram"
@@ -145,6 +181,39 @@ class TaxonModal extends React.Component {
                 this.histogramContainer = histogramContainer;
               }}
             />
+            <div className="taxon-info__subtitle">Links</div>
+            <div className="taxon-info__links-section">
+              <ul className="taxon-info__links-list">
+                <li
+                  className="taxon-info__link"
+                  onClick={() => this.linkTo("ncbi")}
+                >
+                  NBCI
+                </li>
+                <li
+                  className="taxon-info__link"
+                  onClick={() => this.linkTo("google")}
+                >
+                  Google
+                </li>
+              </ul>
+              <ul className="taxon-info__links-list">
+                {this.state.wikiUrl && (
+                  <li
+                    className="taxon-info__link"
+                    onClick={() => this.linkTo("wikipedia")}
+                  >
+                    Wikipedia
+                  </li>
+                )}
+                <li
+                  className="taxon-info__link"
+                  onClick={() => this.linkTo("pubmed")}
+                >
+                  Pubmed
+                </li>
+              </ul>
+            </div>
           </div>
         )}
       </Modal>
@@ -153,7 +222,11 @@ class TaxonModal extends React.Component {
 }
 
 TaxonModal.propTypes = {
+  background: PropTypes.object,
+  parentTaxonId: PropTypes.number,
+  taxonId: PropTypes.number,
   taxonName: PropTypes.string,
+  taxonValues: PropTypes.object,
   trigger: PropTypes.node
 };
 
