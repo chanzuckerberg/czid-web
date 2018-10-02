@@ -11,8 +11,10 @@ import {
 } from "semantic-ui-react";
 import TransparentButton from "../ui/controls/buttons/TransparentButton";
 import PrimaryButton from "../ui/controls/buttons/PrimaryButton";
-import IconComponent from "../IconComponent";
 import StringHelper from "../../helpers/StringHelper";
+import DiscoverIcon from "../ui/icons/DiscoverIcon";
+import DetectIcon from "../ui/icons/DetectIcon";
+import DecipherIcon from "../ui/icons/DecipherIcon";
 
 class Landing extends React.Component {
   constructor(props) {
@@ -92,7 +94,7 @@ class Landing extends React.Component {
     const actionCards = (
       <div className="action-cards">
         <div className="action-card">
-          {IconComponent.discover("#3867fa")}
+          <DiscoverIcon />
           <div className="card-text">
             <div className="card-title">Discover</div>
             <div className="card-description">
@@ -101,7 +103,7 @@ class Landing extends React.Component {
           </div>
         </div>
         <div className="action-card">
-          {IconComponent.detect("#3867fa")}
+          <DetectIcon />
           <div className="card-text">
             <div className="card-title">Detect</div>
             <div className="card-description">
@@ -111,7 +113,7 @@ class Landing extends React.Component {
         </div>
         <div className="action-card">
           <span className="icon-decipher">
-            {IconComponent.decipher("#3867fa")}
+            <DecipherIcon />
           </span>
           <div className="decipher-card-text">
             <div className="card-title">Decipher</div>
