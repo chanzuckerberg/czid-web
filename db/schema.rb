@@ -10,8 +10,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_180_928_175_742) do
-  create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+ActiveRecord::Schema.define(version: 20_181_002_212_546) do
+  create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string "name"
     t.string "index_dir_suffix"
     t.text "s3_nt_db_path"
@@ -57,14 +57,7 @@ ActiveRecord::Schema.define(version: 20_180_928_175_742) do
     t.index ["name"], name: "index_backgrounds_on_name", unique: true
   end
 
-  create_table "backgrounds_pipeline_outputs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.bigint "background_id"
-    t.bigint "pipeline_output_id"
-    t.index ["background_id"], name: "index_backgrounds_pipeline_outputs_on_background_id"
-    t.index ["pipeline_output_id"], name: "index_backgrounds_pipeline_outputs_on_pipeline_output_id"
-  end
-
-  create_table "backgrounds_pipeline_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "backgrounds_pipeline_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.bigint "background_id"
     t.bigint "pipeline_run_id"
     t.index ["background_id", "pipeline_run_id"], name: "index_bg_pr_id", unique: true
@@ -77,7 +70,7 @@ ActiveRecord::Schema.define(version: 20_180_928_175_742) do
     t.index ["sample_id"], name: "index_backgrounds_samples_on_sample_id"
   end
 
-  create_table "ercc_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "ercc_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.bigint "pipeline_run_id"
     t.string "name"
     t.integer "count"
@@ -120,11 +113,9 @@ ActiveRecord::Schema.define(version: 20_180_928_175_742) do
     t.string "task"
     t.integer "reads_before"
     t.integer "reads_after"
-    t.bigint "pipeline_output_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "pipeline_run_id"
-    t.index ["pipeline_output_id"], name: "index_job_stats_on_pipeline_output_id"
     t.index ["pipeline_run_id"], name: "index_job_stats_on_pipeline_run_id"
     t.index ["task"], name: "index_job_stats_on_task"
   end
@@ -143,7 +134,7 @@ ActiveRecord::Schema.define(version: 20_180_928_175_742) do
     t.index ["sample_id"], name: "index_metadata_on_sample_id"
   end
 
-  create_table "output_states", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "output_states", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string "output"
     t.string "state"
     t.bigint "pipeline_run_id"
@@ -152,7 +143,7 @@ ActiveRecord::Schema.define(version: 20_180_928_175_742) do
     t.index ["pipeline_run_id", "output"], name: "index_output_states_on_pipeline_run_id_and_output", unique: true
   end
 
-  create_table "phylo_trees", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "phylo_trees", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.integer "taxid"
     t.integer "tax_level"
     t.string "tax_name"
@@ -177,22 +168,10 @@ ActiveRecord::Schema.define(version: 20_180_928_175_742) do
     t.index ["user_id"], name: "index_phylo_trees_on_user_id"
   end
 
-  create_table "phylo_trees_pipeline_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "phylo_trees_pipeline_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.bigint "phylo_tree_id"
     t.bigint "pipeline_run_id"
     t.index ["phylo_tree_id", "pipeline_run_id"], name: "index_pt_pr_id", unique: true
-  end
-
-  create_table "pipeline_outputs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.bigint "sample_id", null: false
-    t.bigint "total_reads", null: false
-    t.bigint "remaining_reads", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.bigint "pipeline_run_id"
-    t.bigint "unmapped_reads"
-    t.index ["pipeline_run_id"], name: "index_pipeline_outputs_on_pipeline_run_id", unique: true
-    t.index ["sample_id"], name: "index_pipeline_outputs_on_sample_id"
   end
 
   create_table "pipeline_run_stages", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -230,7 +209,6 @@ ActiveRecord::Schema.define(version: 20_180_928_175_742) do
     t.bigint "sample_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "pipeline_output_id"
     t.string "job_status"
     t.text "job_description"
     t.string "job_log_id"
@@ -249,16 +227,16 @@ ActiveRecord::Schema.define(version: 20_180_928_175_742) do
     t.string "pipeline_commit"
     t.text "assembled_taxids"
     t.bigint "truncated"
+    t.text "result_status"
     t.integer "results_finalized"
     t.bigint "alignment_config_id"
     t.integer "alert_sent", default: 0
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
-    t.index ["pipeline_output_id"], name: "index_pipeline_runs_on_pipeline_output_id", unique: true
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
   end
 
   create_table "projects", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name"
+    t.string "name", collation: "latin1_swedish_ci"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "public_access", limit: 1
@@ -275,7 +253,7 @@ ActiveRecord::Schema.define(version: 20_180_928_175_742) do
   end
 
   create_table "samples", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name"
+    t.string "name", collation: "latin1_swedish_ci"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "project_id"
@@ -311,15 +289,13 @@ ActiveRecord::Schema.define(version: 20_180_928_175_742) do
     t.integer "taxid"
     t.bigint "first_byte"
     t.bigint "last_byte"
-    t.bigint "pipeline_output_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "hit_type"
     t.integer "tax_level"
     t.bigint "pipeline_run_id"
-    t.index ["pipeline_output_id", "tax_level", "hit_type", "taxid"], name: "index_taxon_byteranges_on_details", unique: true
-    t.index ["pipeline_output_id"], name: "index_taxon_byteranges_on_pipeline_output_id"
     t.index ["pipeline_run_id", "tax_level", "hit_type", "taxid"], name: "index_taxon_byteranges_pr", unique: true
+    t.index ["tax_level", "hit_type", "taxid"], name: "index_taxon_byteranges_on_details", unique: true
     t.index ["taxid", "hit_type"], name: "index_taxon_byteranges_on_taxid_and_hit_type"
   end
 
@@ -340,7 +316,7 @@ ActiveRecord::Schema.define(version: 20_180_928_175_742) do
     t.index ["taxid"], name: "index_taxon_child_parents_on_taxid", unique: true
   end
 
-  create_table "taxon_confirmations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "taxon_confirmations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.integer "taxid"
     t.integer "sample_id"
     t.integer "user_id"
@@ -352,13 +328,12 @@ ActiveRecord::Schema.define(version: 20_180_928_175_742) do
   end
 
   create_table "taxon_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.bigint "pipeline_output_id"
     t.integer "tax_id"
     t.integer "tax_level"
     t.integer "count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "name"
+    t.string "name", collation: "latin1_swedish_ci"
     t.string "count_type"
     t.float "percent_identity", limit: 24
     t.float "alignment_length", limit: 24
@@ -373,9 +348,6 @@ ActiveRecord::Schema.define(version: 20_180_928_175_742) do
     t.string "common_name"
     t.integer "family_taxid", default: -300, null: false
     t.integer "is_phage", limit: 1, default: 0, null: false
-    t.index ["pipeline_output_id", "tax_id", "count_type"], name: "new_index_taxon_counts", unique: true
-    t.index ["pipeline_output_id", "tax_level", "count_type", "tax_id"], name: "index_taxon_counts", unique: true
-    t.index ["pipeline_output_id"], name: "index_taxon_counts_on_pipeline_output_id"
     t.index ["pipeline_run_id", "tax_id", "count_type"], name: "taxon_counts_pr_index", unique: true
     t.index ["pipeline_run_id", "tax_level", "count_type", "tax_id"], name: "taxon_counts_pr_index2", unique: true
   end
@@ -456,7 +428,7 @@ ActiveRecord::Schema.define(version: 20_180_928_175_742) do
     t.index ["taxid"], name: "index_taxon_names_on_taxid", unique: true
   end
 
-  create_table "taxon_scoring_models", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "taxon_scoring_models", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string "name"
     t.text "model_json"
     t.datetime "created_at", null: false
@@ -492,20 +464,20 @@ ActiveRecord::Schema.define(version: 20_180_928_175_742) do
   end
 
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "email", default: "", null: false
-    t.string "name"
+    t.string "email", default: "", null: false, collation: "latin1_swedish_ci"
+    t.string "name", collation: "latin1_swedish_ci"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "encrypted_password", default: "", null: false
-    t.string "reset_password_token"
+    t.string "encrypted_password", default: "", null: false, collation: "latin1_swedish_ci"
+    t.string "reset_password_token", collation: "latin1_swedish_ci"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
     t.integer "sign_in_count", default: 0, null: false
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
-    t.string "current_sign_in_ip"
-    t.string "last_sign_in_ip"
-    t.string "authentication_token", limit: 30
+    t.string "current_sign_in_ip", collation: "latin1_swedish_ci"
+    t.string "last_sign_in_ip", collation: "latin1_swedish_ci"
+    t.string "authentication_token", limit: 30, collation: "latin1_swedish_ci"
     t.integer "role"
     t.text "allowed_features"
     t.index ["authentication_token"], name: "index_users_on_authentication_token", unique: true
