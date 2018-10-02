@@ -1,0 +1,44 @@
+@import "../../themes/colors";
+
+.taxon-info {
+  &__modal {
+    padding: 0 40px;
+  }
+
+  &__text {
+    line-height: 24px;
+  }
+
+  &__histogram {
+    width: 80%;
+    height: 240px;
+    margin: 0 auto;
+  }
+
+  &__subtitle {
+    padding-top: 25px;
+    padding-bottom: 10px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  &__links-section {
+    &:after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+  }
+
+  &__links-list {
+    min-width: 200px;
+    float: left;
+    list-style: none;
+  }
+
+  &__link {
+    color: $primary-light;
+    line-height: 30px;
+    cursor: pointer;
+  }
+}

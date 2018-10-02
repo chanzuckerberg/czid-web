@@ -19,6 +19,7 @@ import PathogenSummary from "./views/report/PathogenSummary";
 import ReportInsightIcon from "./views/report/ReportInsightIcon";
 import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
 import PhyloTreeChecks from "./views/phylo_tree/PhyloTreeChecks";
+import TaxonModal from "./views/report/TaxonModal";
 import TaxonTreeVis from "./views/TaxonTreeVis";
 
 class PipelineSampleReport extends React.Component {
@@ -1035,34 +1036,57 @@ class PipelineSampleReport extends React.Component {
     return category_lowercase;
   }
 
-  render_name(tax_info, report_details) {
+  render_name(tax_info, report_details, parent) {
     let tax_scientific_name = tax_info["name"];
     let tax_common_name = tax_info["common_name"];
-    let tax_name;
+    let taxonName;
+    let taxonNameDisplay;
 
     if (this.state.name_type.toLowerCase() == "common name") {
-      if (!tax_common_name || tax_common_name.trim() == "")
-        tax_name = <span className="count-info">{tax_scientific_name}</span>;
-      else
-        tax_name = (
-          <span>{StringHelper.capitalizeFirstLetter(tax_common_name)}</span>
+      if (!tax_common_name || tax_common_name.trim() == "") {
+        taxonName = tax_scientific_name;
+        taxonNameDisplay = <span className="count-info">{taxonName}</span>;
+      } else {
+        taxonName = tax_common_name;
+        taxonNameDisplay = (
+          <span>{StringHelper.capitalizeFirstLetter(taxonName)}</span>
         );
+      }
     } else {
-      tax_name = <span>{tax_scientific_name}</span>;
+      taxonName = tax_scientific_name;
+      taxonNameDisplay = <span>{tax_scientific_name}</span>;
     }
 
-    let taxonNameDisplay = <i>{tax_name}</i>;
+    taxonNameDisplay = <i>{taxonNameDisplay}</i>;
 
     if (tax_info.tax_id > 0) {
       if (report_details.taxon_fasta_flag) {
         taxonNameDisplay = (
           <span>
-            <a>{tax_name}</a>
+            <a>{taxonNameDisplay}</a>
           </span>
         );
       } else {
-        taxonNameDisplay = <span>{tax_name}</span>;
+        taxonNameDisplay = <span>{taxonNameDisplay}</span>;
       }
+      taxonNameDisplay = (
+        <TaxonModal
+          taxonId={tax_info.tax_id}
+          taxonValues={{
+            NT: tax_info.NT,
+            NR: tax_info.NR
+          }}
+          parentTaxonId={
+            tax_info.tax_level === 1 ? tax_info.genus_taxid : undefined
+          }
+          background={{
+            name: parent.state.backgroundName,
+            id: parent.state.backgroundId
+          }}
+          taxonName={taxonName}
+          trigger={taxonNameDisplay}
+        />
+      );
     }
     let secondaryTaxonDisplay = (
       <span>
@@ -1514,7 +1538,7 @@ function DetailCells({ parent }) {
         parent.props.watched_taxids
       )}
     >
-      <td>{parent.render_name(tax_info, parent.report_details)}</td>
+      <td>{parent.render_name(tax_info, parent.report_details, parent)}</td>
       {parent.render_number(
         tax_info.NT.aggregatescore,
         null,
