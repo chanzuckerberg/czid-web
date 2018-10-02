@@ -2011,13 +2011,7 @@ function ProjectInfoHeading({
       </div>
     )
   };
-  if (proj && canEditProject(proj.id)) {
-    phyloProps["projectId"] = proj.id;
-    phyloProps["projectName"] = proj.name;
-  }
-  let phyloTreeModal = (
-    <PhyloTreeCreationModal {...phyloProps} />
-  );
+  let phyloTreeModal = <PhyloTreeCreationModal {...phyloProps} />;
 
   return (
     <div className="row download-section">
