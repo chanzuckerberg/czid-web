@@ -25,13 +25,16 @@ ActiveRecord::Schema.define(version: 20_180_928_175_742) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "amr_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "amr_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string "gene"
     t.string "allele"
     t.float "coverage", limit: 24
     t.float "depth", limit: 24
     t.bigint "pipeline_run_id"
     t.string "drug_family"
+    t.integer "level"
+    t.float "drug_gene_coverage", limit: 24
+    t.float "drug_gene_depth", limit: 24
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["pipeline_run_id", "allele"], name: "index_amr_counts_on_pipeline_run_id_and_allele", unique: true
