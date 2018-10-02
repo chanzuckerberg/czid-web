@@ -414,6 +414,8 @@ class PipelineRun < ApplicationRecord
       "#{expt_output_s3_path}/#{AMR_FULL_RESULTS_NAME}"
     when "taxon_counts"
       "#{alignment_output_s3_path}/#{taxon_counts_json_name}"
+    when "refined_taxon_counts"
+      "#{postprocess_output_s3_path}/#{REFINED_TAXON_COUNTS_JSON_NAME}"
     when "taxon_byteranges"
       "#{postprocess_output_s3_path}/#{TAXID_BYTERANGE_JSON_NAME}"
     end
