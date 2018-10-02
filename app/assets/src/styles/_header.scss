@@ -103,21 +103,20 @@ a {
   position: relative;
   top: 2px;
 }
+
 .brand-details {
   .logo {
     padding: 6px;
-    margin: 8px;
     height: 25px;
     border: 11px solid #3867fa;
     border-radius: 50%;
-    margin-left: 8px;
+    margin: 8px;
   }
 
   .logo-label {
-    padding: 16px 0px !important;
+    padding: 16px 0 0 10px !important;
     font-size: $font-size-h4;
     font-weight: $font-weight-semibold;
-    padding: 11px 0;
     color: #ffffff;
   }
 
@@ -144,9 +143,10 @@ a {
 
 .profile-header-dropdown {
   border: none !important;
-  margin-top: 0.75em;
+  margin-top: 1rem;
+  margin-right: 0.5rem;
   .text {
-    font-size: 1em !important;
+    font-size: 1rem !important;
   }
 }
 
