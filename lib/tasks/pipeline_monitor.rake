@@ -113,7 +113,7 @@ task "pipeline_monitor", [:duration] => :environment do |_t, args|
   cloud_env = ["prod", "staging"].include?(Rails.env)
   checks_per_minute = cloud_env ? 4.0 : 1.0
   # make sure the system is not overwhelmed under any cirmustances
-  wait_before_respawn = 5
+  wait_before_respawn = cloud_env ? 5 : 30
   additional_wait_after_failure = 25
 
   # don't show all the SQL debug info in the logs, and throttle data sent to Honeycomb
