@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_181_002_212_546) do
+ActiveRecord::Schema.define(version: 20_181_002_215_809) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -84,6 +84,8 @@ ActiveRecord::Schema.define(version: 20_181_002_212_546) do
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["project_id"], name: "index_favorite_projects_on_project_id"
+    t.index ["user_id"], name: "index_favorite_projects_on_user_id"
   end
 
   create_table "host_genomes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -130,8 +132,7 @@ ActiveRecord::Schema.define(version: 20_181_002_212_546) do
     t.integer "sample_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["key", "sample_id"], name: "index_metadata_on_key_and_sample_id", unique: true
-    t.index ["sample_id"], name: "index_metadata_on_sample_id"
+    t.index ["sample_id", "key"], name: "index_metadata_on_sample_id_and_key", unique: true
   end
 
   create_table "output_states", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
@@ -197,7 +198,6 @@ ActiveRecord::Schema.define(version: 20_181_002_212_546) do
     t.text "failed_jobs"
     t.text "dag_json"
     t.index ["pipeline_run_id", "step_number"], name: "index_pipeline_run_stages_on_pipeline_run_id_and_step_number"
-    t.index ["pipeline_run_id"], name: "index_pipeline_run_stages_on_pipeline_run_id"
   end
 
   create_table "pipeline_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -294,26 +294,7 @@ ActiveRecord::Schema.define(version: 20_181_002_212_546) do
     t.string "hit_type"
     t.integer "tax_level"
     t.bigint "pipeline_run_id"
-    t.index ["pipeline_run_id", "tax_level", "hit_type", "taxid"], name: "index_taxon_byteranges_pr", unique: true
-    t.index ["tax_level", "hit_type", "taxid"], name: "index_taxon_byteranges_on_details", unique: true
-    t.index ["taxid", "hit_type"], name: "index_taxon_byteranges_on_taxid_and_hit_type"
-  end
-
-  create_table "taxon_categories", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.integer "taxid"
-    t.string "category"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["taxid"], name: "index_taxon_categories_on_taxid", unique: true
-  end
-
-  create_table "taxon_child_parents", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.integer "taxid"
-    t.integer "parent_taxid"
-    t.string "rank"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["taxid"], name: "index_taxon_child_parents_on_taxid", unique: true
+    t.index ["pipeline_run_id", "taxid", "hit_type", "tax_level"], name: "index_pr_tax_ht_level_tb", unique: true
   end
 
   create_table "taxon_confirmations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
@@ -348,8 +329,7 @@ ActiveRecord::Schema.define(version: 20_181_002_212_546) do
     t.string "common_name"
     t.integer "family_taxid", default: -300, null: false
     t.integer "is_phage", limit: 1, default: 0, null: false
-    t.index ["pipeline_run_id", "tax_id", "count_type"], name: "taxon_counts_pr_index", unique: true
-    t.index ["pipeline_run_id", "tax_level", "count_type", "tax_id"], name: "taxon_counts_pr_index2", unique: true
+    t.index ["pipeline_run_id", "tax_id", "count_type", "tax_level"], name: "index_pr_tax_hit_level_tc", unique: true
   end
 
   create_table "taxon_descriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -361,20 +341,6 @@ ActiveRecord::Schema.define(version: 20_181_002_212_546) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["taxid"], name: "index_taxon_descriptions_on_taxid", unique: true
-  end
-
-  create_table "taxon_lineage_names", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.integer "taxid"
-    t.string "superkingdom_name"
-    t.string "phylum_name"
-    t.string "class_name"
-    t.string "order_name"
-    t.string "family_name"
-    t.string "genus_name"
-    t.string "species_name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["taxid"], name: "index_taxon_lineage_names_on_taxid", unique: true
   end
 
   create_table "taxon_lineages", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -419,15 +385,6 @@ ActiveRecord::Schema.define(version: 20_181_002_212_546) do
     t.index ["taxid", "started_at"], name: "index_taxon_lineages_on_taxid_and_start", unique: true
   end
 
-  create_table "taxon_names", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.integer "taxid", null: false
-    t.string "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "common_name"
-    t.index ["taxid"], name: "index_taxon_names_on_taxid", unique: true
-  end
-
   create_table "taxon_scoring_models", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string "name"
     t.text "model_json"
@@ -449,8 +406,7 @@ ActiveRecord::Schema.define(version: 20_181_002_212_546) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.text "rpm_list"
-    t.index ["background_id", "count_type", "tax_level", "tax_id"], name: "index_taxon_summaries_detailed", unique: true
-    t.index ["background_id"], name: "index_taxon_summaries_on_background_id"
+    t.index ["background_id", "tax_id", "count_type", "tax_level"], name: "index_bg_tax_ct_level", unique: true
   end
 
   create_table "ui_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
