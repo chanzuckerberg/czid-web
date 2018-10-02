@@ -29,14 +29,14 @@ class PhyloTreeVis extends React.Component {
           return <Moment fromNow date={val} />;
         }
       },
-      { name: "sample_date", label: "Collection Date" },
-      { name: "sample_tissue", label: "Tissue" },
-      { name: "sample_template", label: "Template" },
-      { name: "sample_library", label: "Library" },
+      { name: "sample_date", label: "Collection date" },
+      { name: "sample_tissue", label: "Tissue type" },
+      { name: "sample_template", label: "Nucleotide type" },
+      { name: "sample_library", label: "Library prep" },
       { name: "sample_sequencer", label: "Sequencer" },
       { name: "sample_unique_id", label: "Unique ID" },
-      { name: "sample_input_pg", label: "Input PG" },
-      { name: "sample_batch", label: "Batch" },
+      { name: "sample_input_pg", label: "RNA/DNA input (pg)" },
+      { name: "sample_batch", label: "Batch (#)" },
       { name: "sample_diagnosis", label: "Diagnosis" },
       { name: "sample_detection", label: "Detection" },
       { name: "sample_notes", label: "Notes" }
