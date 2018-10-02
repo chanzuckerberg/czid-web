@@ -10,7 +10,8 @@ const Button = ({
   label,
   primary,
   secondary,
-  text
+  text,
+  className
 }) => {
   let content = text;
   if (icon || label) {
@@ -22,9 +23,13 @@ const Button = ({
       </div>
     );
   }
+  let cname = "idseq-ui";
+  if (className) {
+    cname = `${cname} ${className}`;
+  }
   return (
     <BaseButton
-      className="idseq-ui"
+      className={cname}
       primary={primary}
       secondary={secondary}
       disabled={disabled}
@@ -42,7 +47,8 @@ Button.propTypes = forbidExtraProps({
   onClick: PropTypes.func,
   text: PropTypes.string,
   primary: PropTypes.bool,
-  secondary: PropTypes.bool
+  secondary: PropTypes.bool,
+  className: PropTypes.string
 });
 
 export default Button;

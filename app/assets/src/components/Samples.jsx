@@ -17,6 +17,7 @@ import DownloadButtonDropdown from "./ui/controls/dropdowns/DownloadButtonDropdo
 import PrimaryButton from "./ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "./ui/controls/buttons/SecondaryButton";
 import MultipleDropdown from "./ui/controls/dropdowns/MultipleDropdown";
+import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
 
 class Samples extends React.Component {
   constructor(props, context) {
@@ -227,10 +228,6 @@ class Samples extends React.Component {
 
     $(document).ready(function() {
       $("select").material_select();
-      $(".modal").modal({
-        inDuration: 0,
-        outDuration: 0
-      });
     });
   }
 
@@ -888,7 +885,6 @@ class Samples extends React.Component {
   }
 
   gotoTreeList() {
-    console.log("gotoTreeList", this.state.selectedProjectId);
     let tree_index_url = "/phylo_trees/index";
     let project_id = parseInt(this.state.selectedProjectId);
     if (project_id) {
@@ -2018,6 +2014,23 @@ function ProjectInfoHeading({
   state,
   canEditProject
 }) {
+  let phyloProps = {
+    admin: parseInt(parent.admin),
+    csrf: parent.csrf,
+    trigger: (
+      <div className="button-container">
+        <PhylogenyButton />
+      </div>
+    )
+  };
+  if (proj) {
+    phyloProps["projectId"] = proj.id;
+    phyloProps["projectName"] = proj.name;
+  }
+  let phyloTreeModal = parent.allowPhyloTree ? (
+    <PhyloTreeCreationModal {...phyloProps} />
+  ) : null;
+
   return (
     <div className="row download-section">
       <div className="col s5 wrapper">
@@ -2047,11 +2060,7 @@ function ProjectInfoHeading({
       <div className="col s7 download-section-btns">
         {state.selectedProjectId ? project_menu : null}
         {table_download_dropdown}
-        {parent.allowPhyloTree ? (
-          <div className="button-container">
-            <PhylogenyButton onClick={parent.gotoTreeList} />
-          </div>
-        ) : null}
+        {phyloTreeModal}
         {compare_button}
         <BackgroundModal parent={parent} />
         {state.selectedProjectId &&

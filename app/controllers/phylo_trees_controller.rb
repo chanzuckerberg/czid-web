@@ -19,7 +19,7 @@ class PhyloTreesController < ApplicationController
 
   READ_ACTIONS = [:show, :download_snps].freeze
   EDIT_ACTIONS = [:retry].freeze
-  OTHER_ACTIONS = [:new, :create, :index].freeze
+  OTHER_ACTIONS = [:new, :create, :index, :choose_taxon].freeze
 
   power :phylo_trees, map: { EDIT_ACTIONS => :updatable_phylo_trees }, as: :phylo_trees_scope
 
@@ -67,6 +67,15 @@ class PhyloTreesController < ApplicationController
         }
       end
     end
+  end
+
+  def choose_taxon
+    taxon_list = if defined?(TAXON_SEARCH_LIST) && !TAXON_SEARCH_LIST.empty?
+                   TAXON_SEARCH_LIST
+                 else
+                   TaxonLineage.taxon_search_list
+                 end
+    render json: taxon_list
   end
 
   def new

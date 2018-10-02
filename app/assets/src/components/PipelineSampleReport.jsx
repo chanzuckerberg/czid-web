@@ -17,7 +17,7 @@ import BetaLabel from "./ui/labels/BetaLabel";
 import PathogenLabel from "./ui/labels/PathogenLabel";
 import PathogenSummary from "./views/report/PathogenSummary";
 import ReportInsightIcon from "./views/report/ReportInsightIcon";
-import PhyloTreeByPathCreationModal from "./views/phylo_tree/PhyloTreeByPathCreationModal";
+import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
 import PhyloTreeChecks from "./views/phylo_tree/PhyloTreeChecks";
 import TaxonTreeVis from "./views/TaxonTreeVis";
 
@@ -37,6 +37,7 @@ class PipelineSampleReport extends React.Component {
     this.report_ts = props.report_ts;
     this.sample_id = props.sample_id;
     this.projectId = props.projectId;
+    this.projectName = props.projectName;
     this.gitVersion = props.git_version;
     this.canSeeAlignViz = props.can_see_align_viz;
     this.can_edit = props.can_edit;
@@ -949,14 +950,16 @@ class PipelineSampleReport extends React.Component {
       PhyloTreeChecks.passesCreateCondition(taxInfo.NT.r, taxInfo.NR.r)
     )
       phyloTreeDot = (
-        <PhyloTreeByPathCreationModal
+        <PhyloTreeCreationModal
           admin={parseInt(this.admin)}
           csrf={this.csrf}
           trigger={
             <i className="fa fa-code-fork action-dot" aria-hidden="true" />
           }
           taxonId={taxInfo.tax_id}
+          taxonName={taxInfo.name}
           projectId={this.projectId}
+          projectName={this.projectName}
         />
       );
     return (

@@ -1,8 +1,20 @@
 require 'will_paginate/array'
+
 class HomeController < ApplicationController
   include SamplesHelper
-  before_action :login_required
-  power :projects
+  before_action :login_required, except: [:landing, :sign_up]
+  skip_before_action :authenticate_user!, :verify_authenticity_token, only: [:landing, :sign_up]
+  power :projects, except: [:landing, :sign_up]
+
+  # Public unsecured landing page
+  def landing
+    if current_user
+      # Call secure home#index path if authenticated
+      redirect_to home_path
+    else
+      render 'landing'
+    end
+  end
 
   def index
     @favorite_projects = current_user.favorites
@@ -12,6 +24,17 @@ class HomeController < ApplicationController
     @user_is_admin = current_user.role == 1 ? 1 : 0
     @background_models = current_power.backgrounds
     render 'home'
+  end
+
+  def taxon_descriptions
+    # Get taxon descriptions for a list of taxids seperated by ','
+    # Example: http://localhost:3000/taxon_descriptions?taxon_list=561,562,570,573
+    taxon_list = params[:taxon_list].split(",").map(&:to_i)
+    output = {}
+    TaxonDescription.where(taxid: taxon_list).each do |taxon|
+      output[taxon[:taxid]] = taxon.slice(:taxid, :title, :summary, :wiki_url)
+    end
+    render json: output
   end
 
   def sort_by(samples, dir = nil)
@@ -24,5 +47,35 @@ class HomeController < ApplicationController
     render json: {
       status: 'ok'
     }
+  end
+
+  def sign_up
+    # Send sign up email with filled out information
+    required = [:firstName, :lastName, :email, :institution]
+    unless required.all? { |r| home_params.key?(r.to_s) && home_params[r].present? }
+      render json: {}, status: :not_acceptable
+      return
+    end
+
+    body = ""
+    home_params.each do |k, v|
+      body += "#{k}: #{v}\n"
+    end
+    Rails.logger.info("New sign up:\n#{body}")
+    UserMailer.landing_sign_up_email(body)
+    render json: {
+      status: :ok
+    }
+  rescue => e
+    Rails.logger.warn("Sign up error: #{e}")
+    render json: {
+      status: :internal_server_error
+    }
+  end
+
+  private
+
+  def home_params
+    params.require(:signUp).permit(:firstName, :lastName, :email, :institution, :usage)
   end
 end

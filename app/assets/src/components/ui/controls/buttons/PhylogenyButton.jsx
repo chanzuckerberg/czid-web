@@ -6,7 +6,7 @@ import React from "react";
 const PhylogenyButton = ({ disabled, onClick }) => {
   return (
     <PrimaryButton
-      text="View Phylogenies"
+      text="Phylogeny"
       label={<BetaLabel />}
       disabled={disabled}
       onClick={onClick}

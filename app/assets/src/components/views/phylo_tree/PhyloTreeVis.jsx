@@ -2,25 +2,49 @@ import React from "react";
 import Tree from "../../utils/structures/Tree";
 import Dendogram from "../../visualizations/dendrogram/Dendogram";
 import PropTypes from "prop-types";
+import DataTooltip from "../../ui/containers/DataTooltip";
+import Moment from "react-moment";
 
 class PhyloTreeVis extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      newick: props.newick
+      hoveredNode: null
     };
 
-    this.treeVis = null;
-  }
+    (this.newick = props.newick),
+      (this.nodeData = props.nodeData),
+      (this.treeVis = null);
 
-  static getDerivedStateFromProps(props, state) {
-    if (props.newick !== state.newick || props.nodeData !== state.nodeData) {
-      return {
-        newick: props.newick,
-        props: props.nodeData
-      };
-    }
+    this.handleNodeHover = this.handleNodeHover.bind(this);
+
+    this.sampleFields = [
+      { name: "project_name", label: "Project" },
+      { name: "sample_location", label: "Location" },
+      {
+        name: "created_at",
+        label: "Upload Date",
+        parser: val => {
+          return <Moment fromNow date={val} />;
+        }
+      },
+      { name: "sample_date", label: "Collection Date" },
+      { name: "sample_tissue", label: "Tissue" },
+      { name: "sample_template", label: "Template" },
+      { name: "sample_library", label: "Library" },
+      { name: "sample_sequencer", label: "Sequencer" },
+      { name: "sample_unique_id", label: "Unique ID" },
+      { name: "sample_input_pg", label: "Input PG" },
+      { name: "sample_batch", label: "Batch" },
+      { name: "sample_diagnosis", label: "Diagnosis" },
+      { name: "sample_detection", label: "Detection" },
+      { name: "sample_notes", label: "Notes" }
+    ];
+    this.ncbiFields = [
+      { name: "country", label: "Country" },
+      { name: "collection_date", label: "Collection Date" }
+    ];
   }
 
   componentDidMount() {
@@ -33,26 +57,93 @@ class PhyloTreeVis extends React.Component {
       // Name for the legend when the attribute is missing / other
       colorGroupAbsentName: "NCBI References",
       legendX: 880,
-      legendY: 50
+      legendY: 50,
+      tooltipContainer: this.tooltipContainer,
+      onNodeTextClick: this.handleNodeClick,
+      onNodeHover: this.handleNodeHover
     });
     this.treeVis.update();
   }
 
   componentDidUpdate() {
-    this.treeVis.setTree(
-      Tree.fromNewickString(this.props.newick, this.props.nodeData)
-    );
-    this.treeVis.update();
+    if (
+      this.props.newick != this.newick ||
+      this.props.nodeData != this.nodeData
+    ) {
+      this.newick = this.props.newick;
+      this.nodeData = this.props.nodeData;
+      this.treeVis.setTree(
+        Tree.fromNewickString(this.props.newick, this.props.nodeData)
+      );
+      this.treeVis.update();
+    }
+  }
+
+  handleNodeHover(node) {
+    this.setState({ hoveredNode: node });
+  }
+
+  handleNodeClick(node) {
+    if (node.data.accession) {
+      let url = `https://www.ncbi.nlm.nih.gov/nuccore/${node.data.accession}`;
+      window.open(url, "_blank", "noopener", "noreferrer");
+    } else if (node.data.id) {
+      location.href = `/samples/${node.data.id}`;
+    }
+  }
+
+  getFieldValue(field) {
+    let value = this.state.hoveredNode.data[field.name];
+    if (value && field.parser) {
+      try {
+        value = field.parser(value);
+      } catch (err) {
+        // TODO: handle error
+        console.error(err);
+      }
+    }
+    return value || "-";
+  }
+
+  getTooltipData() {
+    let fields = this.state.hoveredNode.data.accession
+      ? this.ncbiFields
+      : this.sampleFields;
+
+    let sectionName = null;
+    if (this.state.hoveredNode.data.accession) {
+      sectionName = "NCBI Reference";
+    } else {
+      sectionName = "Sample";
+    }
+    return [
+      {
+        name: sectionName,
+        data: fields.map(f => [f.label, this.getFieldValue(f) || "-"])
+      }
+    ];
   }
 
   render() {
     return (
-      <div
-        className="phylo-tree-vis"
-        ref={container => {
-          this.treeContainer = container;
-        }}
-      />
+      <div className="phylo-tree-vis">
+        <div
+          className="phylo-tree-vis__tree-container"
+          ref={container => {
+            this.treeContainer = container;
+          }}
+        />
+        <div
+          className="phylo-tree-vis__tooltip-container"
+          ref={tooltip => {
+            this.tooltipContainer = tooltip;
+          }}
+        >
+          {this.state.hoveredNode && (
+            <DataTooltip data={this.getTooltipData()} />
+          )}
+        </div>
+      </div>
     );
   }
 }
