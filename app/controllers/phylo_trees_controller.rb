@@ -70,7 +70,12 @@ class PhyloTreesController < ApplicationController
   end
 
   def choose_taxon
-    render json: TAXON_SEARCH_LIST
+    taxon_list = if defined? TAXON_SEARCH_LIST
+                   TAXON_SEARCH_LIST
+                 else
+                   TaxonLineage.taxon_search_list
+                 end
+    render json: taxon_list
   end
 
   def new

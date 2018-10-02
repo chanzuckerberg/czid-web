@@ -90,17 +90,18 @@ class TaxonLineage < ApplicationRecord
     self["#{level_str}_name"]
   end
 
-  def self.taxon_search_list(tax_level_str)
+  def self.taxon_search_list(tax_level_str = "genus")
     taxid_column = "#{tax_level_str}_taxid"
     name_column = "#{tax_level_str}_name"
     max_ended_at = TaxonLineage.column_defaults["ended_at"] # currently valid
     lineages = TaxonLineage.where("#{taxid_column} > 0").where.not("#{name_column} = ''").where("ended_at = ?", max_ended_at)
     lineages = lineages.select(taxid_column, name_column).distinct.order(name_column).index_by { |record| record[name_column] } # index_by makes sure it's unique on name by itself
-    lineages.map do |name, record|
+    taxon_list = lineages.map do |name, record|
       { "title" => name,
         "description" => "Taxonomy ID: #{record[taxid_column]}",
         "taxid" => record[taxid_column] }
     end
+    JSON.dump(taxon_list)
   end
 
   def self.get_genus_info(genus_tax_id)
