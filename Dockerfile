@@ -11,7 +11,10 @@ RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources
 
 RUN curl -sL https://deb.nodesource.com/setup_9.x | bash -
 RUN apt-get update && apt-get install -y nodejs yarn
-RUN pip install --upgrade pip pyOpenSSL setuptools aegea
+RUN pip install --upgrade pip 
+RUN pip install --upgrade setuptools
+RUN pip install --upgrade pyOpenSSL
+RUN pip install --upgrade aegea
 
 # Install chamber, for pulling secrets into the container.
 ADD https://github.com/segmentio/chamber/releases/download/v2.2.0/chamber-v2.2.0-linux-amd64 /bin/chamber

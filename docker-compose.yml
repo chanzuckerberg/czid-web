@@ -6,6 +6,7 @@ services:
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=1
       - MYSQL_DATABASE=idseq_development
+    command: ['--character-set-server=utf8', '--collation-server=utf8_unicode_ci']
   redis:
     image: redis:3.0.5
     container_name: redis
