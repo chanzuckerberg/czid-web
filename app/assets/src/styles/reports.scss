@@ -736,7 +736,7 @@ tr:hover {
 }
 
 .hover-wrapper {
-  cursor: text;
+  cursor: pointer;
   &:hover {
     .link-tag {
       visibility: visible;
