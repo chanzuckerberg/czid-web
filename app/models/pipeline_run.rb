@@ -493,8 +493,9 @@ class PipelineRun < ApplicationRecord
 
     # Get pipeline_version, which determines S3 locations of output files.
     # If pipeline version is not present, we cannot load results yet.
+    # Except, if the pipeline run is finalized, we have to (this is a failure case).
     update_pipeline_version(self, :pipeline_version, pipeline_version_file)
-    return if pipeline_version.blank?
+    return if pipeline_version.blank? && !finalized
 
     # Load any new outputs that have become available:
     output_states.each do |o|
