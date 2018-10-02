@@ -62,7 +62,7 @@ class HomeController < ApplicationController
       body += "#{k}: #{v}\n"
     end
     Rails.logger.info("New sign up:\n#{body}")
-    UserMailer.landing_sign_up_email(body)
+    UserMailer.landing_sign_up_email(body).deliver_now
     render json: {
       status: :ok
     }
