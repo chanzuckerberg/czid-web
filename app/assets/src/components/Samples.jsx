@@ -29,8 +29,6 @@ class Samples extends React.Component {
     this.csrf = props.csrf;
     this.admin = props.admin;
     this.allowedFeatures = props.allowedFeatures;
-    this.allowPhyloTree =
-      this.admin || this.allowedFeatures.indexOf("phylo_trees") >= 0;
     this.favoriteProjects = props.favorites || [];
     this.allProjects = props.projects || [];
     this.pageSize = props.pageSize || 30;
@@ -2013,13 +2011,13 @@ function ProjectInfoHeading({
       </div>
     )
   };
-  if (proj) {
+  if (proj && canEditProject(proj.id)) {
     phyloProps["projectId"] = proj.id;
     phyloProps["projectName"] = proj.name;
   }
-  let phyloTreeModal = parent.allowPhyloTree ? (
+  let phyloTreeModal = (
     <PhyloTreeCreationModal {...phyloProps} />
-  ) : null;
+  );
 
   return (
     <div className="row download-section">
