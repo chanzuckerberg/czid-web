@@ -16,22 +16,21 @@
   }
 
   &:hover {
-    background-color: $white;
-    border: 1px solid $white;
-    opacity: 0.7;
-    color: $black;
+    background: $primary-light;
+    border: 1px solid $primary-medium;
+    color: $white;
   }
 
   &:active {
-    background-color: $light-grey;
-    border: 1px solid $light-grey;
-    color: $black;
+    border: 1px solid $primary-medium;
+    background-color: $primary-medium;
+    color: $white;
   }
 
   &:focus {
-    background-color: $light-grey;
-    border: 1px solid $light-grey;
-    color: $black;
+    border: 1px solid $primary-medium;
+    background-color: $primary-medium;
+    color: $white;
   }
 
   &:disabled {
