@@ -40,8 +40,8 @@ Rails.application.routes.draw do
   get 'select', to: 'home#index'
   get 'home', to: 'home#index'
   get 'taxon_descriptions', to: 'home#taxon_descriptions'
-  post '/feedback', to: 'home#feedback'
-  post '/sign_up', to: 'home#sign_up'
+  post 'feedback', to: 'home#feedback'
+  post 'sign_up', to: 'home#sign_up'
   get 'terms' => redirect("https://s3-us-west-2.amazonaws.com/idseq-database/Terms.pdf")
 
   resources :projects do
