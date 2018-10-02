@@ -206,21 +206,21 @@ class Landing extends React.Component {
       </div>
     );
 
-    const bulletinLink = () => (location.href = "/");
-    const bulletinBanner = (
-      <div className="bulletin-banner">
-        <Container>
-          <div className="bulletin-title">Lorem Ipsum Dolor Sit Amet</div>
-          <div className="bulletin-description">
-            Sed condimentum lobortis diam, nec tincidunt erat maximus sit amet.
-            Curabitur semper mi interdum purus vehicula, congue semper mauris
-            tristique. Phasellus id cursus magna, dignissim tempor enim. In in
-            scelerisque eros.
-          </div>
-          <TransparentButton text="Learn More" onClick={bulletinLink} />
-        </Container>
-      </div>
-    );
+    // const bulletinLink = () => (location.href = "/");
+    // const bulletinBanner = (
+    //   <div className="bulletin-banner">
+    //     <Container>
+    //       <div className="bulletin-title">Lorem Ipsum Dolor Sit Amet</div>
+    //       <div className="bulletin-description">
+    //         Sed condimentum lobortis diam, nec tincidunt erat maximus sit amet.
+    //         Curabitur semper mi interdum purus vehicula, congue semper mauris
+    //         tristique. Phasellus id cursus magna, dignissim tempor enim. In in
+    //         scelerisque eros.
+    //       </div>
+    //       <TransparentButton text="Learn More" onClick={bulletinLink} />
+    //     </Container>
+    //   </div>
+    // );
 
     const partners = (
       <div className="partners-block">
