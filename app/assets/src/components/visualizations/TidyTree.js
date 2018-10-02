@@ -104,7 +104,7 @@ export default class TidyTree {
     let collapsedScale = scaleLinear()
       .domain(this.range)
       .range([0, 1]);
-    this.root.each(d => {
+    this.root.eachAfter(d => {
       if (
         collapsedScale(d.data.values[this.options.attribute]) <
         this.options.collapseThreshold
@@ -478,12 +478,12 @@ export default class TidyTree {
     });
 
     // overlays
+    // TODO: overlays can be brittle and will be hard to scale if
+    // we ever add features like zoom
     if (this.options.addOverlays) {
-      console.log("update overlays");
       nodeUpdate.each((d, index, nodeList) => {
         let overlay = this.container.select(`.node-overlay__${d.id}`);
         if (!overlay.empty()) {
-          console.log("update", d.id);
           let text = select(nodeList[index]).select("text");
           let nodeBox = this.getNodeBoxRefSvg(d, text.node());
 
@@ -502,16 +502,6 @@ export default class TidyTree {
               nodeScale(d.data.values[this.options.attribute]) +
               nodeBox.height -
               20;
-
-          // this.svg.append("rect")
-          //   // .attr("x", nodeBox.y + nodeScale(d.data.values[this.options.attribute]))
-          //   // .attr("y", nodeBox.x - nodeScale(d.data.values[this.options.attribute]))
-          //   .attr("x", y)
-          //   .attr("y", x)
-          //   .attr("width", nodeBox.width)
-          //   .attr("height", nodeBox.height)
-          //   .style("fill", "#A00")
-          //   .style("opacity", ".3");
 
           overlay
             .transition()
