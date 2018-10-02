@@ -29,8 +29,6 @@ class Samples extends React.Component {
     this.csrf = props.csrf;
     this.admin = props.admin;
     this.allowedFeatures = props.allowedFeatures;
-    this.allowPhyloTree =
-      this.admin || this.allowedFeatures.indexOf("phylo_trees") >= 0;
     this.favoriteProjects = props.favorites || [];
     this.allProjects = props.projects || [];
     this.pageSize = props.pageSize || 30;
@@ -228,13 +226,7 @@ class Samples extends React.Component {
 
     $(document).ready(function() {
       $("select").material_select();
-      $(".modal").modal({
-        inDuration: 0,
-        outDuration: 0
-      });
     });
-
-    console.log("constructor", this.state.selectedProjectId);
   }
 
   initializeTooltip() {
@@ -891,7 +883,6 @@ class Samples extends React.Component {
   }
 
   gotoTreeList() {
-    console.log("gotoTreeList", this.state.selectedProjectId);
     let tree_index_url = "/phylo_trees/index";
     let project_id = parseInt(this.state.selectedProjectId);
     if (project_id) {
@@ -2030,13 +2021,13 @@ function ProjectInfoHeading({
       </div>
     )
   };
-  if (proj) {
+  if (proj && canEditProject(proj.id)) {
     phyloProps["projectId"] = proj.id;
     phyloProps["projectName"] = proj.name;
   }
-  let phyloTreeModal = parent.allowPhyloTree ? (
+  let phyloTreeModal = (
     <PhyloTreeCreationModal {...phyloProps} />
-  ) : null;
+  );
 
   return (
     <div className="row download-section">

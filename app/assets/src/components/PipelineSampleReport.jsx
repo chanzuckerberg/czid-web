@@ -31,9 +31,7 @@ class PipelineSampleReport extends React.Component {
     });
     this.admin = props.admin;
     this.allowedFeatures = props.allowedFeatures;
-    this.allowPhyloTree =
-      props.can_edit &&
-      (this.admin == 1 || this.allowedFeatures.indexOf("phylo_trees") >= 0);
+    this.allowPhyloTree = props.can_edit;
     this.allowPathogenSummary = false;
     this.report_ts = props.report_ts;
     this.sample_id = props.sample_id;
