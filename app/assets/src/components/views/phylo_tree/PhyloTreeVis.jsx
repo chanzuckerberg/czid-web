@@ -110,23 +110,15 @@ class PhyloTreeVis extends React.Component {
       ? this.ncbiFields
       : this.sampleFields;
 
-    let topSectionName = null;
-    let topSectionData = null;
-    if (this.state.hoveredNode.data.project_name) {
-      topSectionName = "Sample";
-      topSectionData = [
-        ["Project", this.state.hoveredNode.data.project_name || "-"]
-      ];
+    let sectionName = null;
+    if (this.state.hoveredNode.data.accession) {
+      sectionName = "NCBI Reference";
     } else {
-      topSectionName = "NCBI Reference";
-      topSectionData = [
-        ["Accession", this.state.hoveredNode.data.accession || "-"]
-      ];
+      sectionName = "Sample";
     }
     return [
-      { name: topSectionName, data: topSectionData },
       {
-        name: "Metadata",
+        name: sectionName,
         data: fields.map(f => [f.label, this.getFieldValue(f) || "-"])
       }
     ];
