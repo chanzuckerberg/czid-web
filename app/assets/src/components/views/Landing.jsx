@@ -8,6 +8,7 @@ import {
   Grid,
   Image,
   Message,
+  Container,
   Divider
 } from "semantic-ui-react";
 import TransparentButton from "../ui/controls/buttons/TransparentButton";
@@ -93,37 +94,39 @@ class Landing extends React.Component {
     );
 
     const actionCards = (
-      <div className="action-cards">
-        <div className="action-card">
-          <DiscoverIcon />
-          <div className="card-text">
-            <div className="card-title">Discover</div>
-            <div className="card-description">
-              Identify the pathogen landscape
+      <Container>
+        <div className="action-cards">
+          <div className="action-card">
+            <DiscoverIcon />
+            <div className="card-text">
+              <div className="card-title">Discover</div>
+              <div className="card-description">
+                Identify the pathogen landscape
+              </div>
+            </div>
+          </div>
+          <div className="action-card">
+            <DetectIcon />
+            <div className="card-text">
+              <div className="card-title">Detect</div>
+              <div className="card-description">
+                Monitor and review potential outbreaks
+              </div>
+            </div>
+          </div>
+          <div className="action-card">
+            <span className="icon-decipher">
+              <DecipherIcon />
+            </span>
+            <div className="decipher-card-text">
+              <div className="card-title">Decipher</div>
+              <div className="card-description">
+                Find potential infecting organisms in large datasets
+              </div>
             </div>
           </div>
         </div>
-        <div className="action-card">
-          <DetectIcon />
-          <div className="card-text">
-            <div className="card-title">Detect</div>
-            <div className="card-description">
-              Monitor and review potential outbreaks
-            </div>
-          </div>
-        </div>
-        <div className="action-card">
-          <span className="icon-decipher">
-            <DecipherIcon />
-          </span>
-          <div className="decipher-card-text">
-            <div className="card-title">Decipher</div>
-            <div className="card-description">
-              Find potential infecting organisms in large datasets
-            </div>
-          </div>
-        </div>
-      </div>
+      </Container>
     );
 
     const usageLabel = (
@@ -193,13 +196,29 @@ class Landing extends React.Component {
 
     const firstBlock = (
       <div className="row first-block">
-        <Grid stackable columns={2}>
+        <Grid container stackable columns={2}>
           <Grid.Column width={9}>
             {topTitle}
             {actionCards}
           </Grid.Column>
           <Grid.Column width={7}>{interestForm}</Grid.Column>
         </Grid>
+      </div>
+    );
+
+    const bulletinLink = () => (location.href = "/");
+    const bulletinBanner = (
+      <div className="bulletin-banner">
+        <Container>
+          <div className="bulletin-title">Lorem Ipsum Dolor Sit Amet</div>
+          <div className="bulletin-description">
+            Sed condimentum lobortis diam, nec tincidunt erat maximus sit amet.
+            Curabitur semper mi interdum purus vehicula, congue semper mauris
+            tristique. Phasellus id cursus magna, dignissim tempor enim. In in
+            scelerisque eros.
+          </div>
+          <TransparentButton text="Learn More" onClick={bulletinLink} />
+        </Container>
       </div>
     );
 
@@ -259,6 +278,7 @@ class Landing extends React.Component {
         {header}
         {firstBlock}
         <Divider />
+        {/*{bulletinBanner}*/}
         {partners}
         {footer}
       </div>

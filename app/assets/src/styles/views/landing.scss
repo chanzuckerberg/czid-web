@@ -7,7 +7,8 @@
 }
 
 .first-block {
-  margin: 5rem;
+  margin-top: 5rem;
+  margin-bottom: 5rem;
 
   .top-title {
     font-size: 2.3rem;
@@ -19,7 +20,8 @@
   }
 
   .action-cards {
-    margin: 5rem 0 5rem 2rem;
+    margin-top: 5rem;
+    margin-left: 2rem;
 
     .action-card {
       margin-top: 3rem;
@@ -137,6 +139,41 @@
   border-top: 0.05rem solid $off-white;
 }
 
+.bulletin-banner {
+  background: $primary-light;
+  color: $white;
+  text-align: center;
+
+  .bulletin-title {
+    font-size: 1.7rem;
+    padding-top: 3rem;
+    letter-spacing: 0.07rem;
+  }
+
+  .bulletin-description {
+    margin-top: 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 100;
+    letter-spacing: 0.05rem;
+    line-height: 1.7rem;
+  }
+
+  .button.transparent-btn {
+    margin-top: 2rem;
+    margin-bottom: 3rem;
+    height: 2.5rem;
+    width: 9rem;
+
+    &:hover,
+    &:active,
+    &:focus {
+      background: $white;
+      border: 1px solid $white;
+      color: $black;
+    }
+  }
+}
+
 .partners-block {
   width: 30rem;
   margin: 5rem auto 5rem auto;
@@ -151,15 +188,17 @@
 
   .partner-logos {
     margin-top: 1rem;
+    margin-right: 2rem;
 
     .first-logo {
       width: 8rem;
-      margin-left: 4.2rem;
+      margin-left: 4.6rem;
     }
 
     .second-logo {
       width: 11rem;
       margin-top: 0.3rem;
+      margin-left: 0.7rem;
     }
   }
 }
@@ -170,8 +209,6 @@
   text-align: center;
 
   .footer-links {
-    margin-left: -1rem;
-
     a {
       margin: 2rem;
       font-size: 0.8rem;

@@ -21,12 +21,7 @@
     color: $white;
   }
 
-  &:active {
-    border: 1px solid $primary-medium;
-    background-color: $primary-medium;
-    color: $white;
-  }
-
+  &:active,
   &:focus {
     border: 1px solid $primary-medium;
     background-color: $primary-medium;
