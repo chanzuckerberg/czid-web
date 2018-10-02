@@ -137,7 +137,7 @@ class Login extends React.Component {
               </div>
               <div className="mail">
                 <p>
-                  To request access to the IDseq platform, sign up here<span
+                  To request access to the IDseq platform, sign up<span
                     onClick={() => this.gotoPage("/")}
                   >
                     {" "}

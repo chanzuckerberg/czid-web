@@ -13,6 +13,7 @@
     font-size: 2.3rem;
     line-height: 3.2rem;
     font-weight: 600;
+    margin-top: 2rem;
     margin-right: 2.2rem;
     max-width: 70rem;
   }
@@ -24,14 +25,21 @@
       margin-top: 3rem;
 
       svg {
-        height: 6rem;
+        height: 6.5rem;
         display: inline;
       }
 
       .card-text {
         display: inline-block;
-        margin-top: 0.5rem;
-        margin-left: 3rem;
+        margin-top: 0.7rem;
+        margin-left: 2.4rem;
+        vertical-align: top;
+      }
+
+      .decipher-card-text {
+        display: inline-block;
+        margin-top: 0.7rem;
+        margin-left: 1.7rem;
         vertical-align: top;
       }
 
@@ -42,7 +50,20 @@
 
       .card-description {
         font-size: 1.1rem;
-        margin-top: 1.2rem;
+        margin-top: 1.1rem;
+        word-wrap: break-word;
+      }
+
+      .icon-decipher {
+        width: 6.5rem;
+        height: 6rem;
+
+        svg {
+          margin-left: 0.6rem;
+          margin-top: 0.6rem;
+          height: 5rem;
+          display: inline;
+        }
       }
     }
   }
@@ -65,7 +86,7 @@
       }
 
       a {
-        color: $primary-medium !important;
+        color: $primary-light !important;
       }
     }
 
@@ -79,8 +100,16 @@
           max-height: 1.5rem;
         }
 
+        input:focus {
+          border-color: $primary-light;
+        }
+
         textarea {
-          min-height: 6rem;
+          min-height: 10rem;
+        }
+
+        textarea:focus {
+          border-color: $primary-light;
         }
 
         .optional {
@@ -101,6 +130,10 @@
       }
     }
   }
+}
+
+.ui.divider:not(.vertical):not(.horizontal) {
+  border-top: 0.05rem solid $off-white;
 }
 
 .partners-block {

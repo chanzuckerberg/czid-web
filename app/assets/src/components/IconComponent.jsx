@@ -580,7 +580,7 @@ class IconComponent extends React.Component {
       <svg
         fill={color}
         xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 48 60"
+        viewBox="0 0 64 60"
         x="0px"
         y="0px"
       >

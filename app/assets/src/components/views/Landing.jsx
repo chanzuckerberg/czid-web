@@ -110,8 +110,10 @@ class Landing extends React.Component {
           </div>
         </div>
         <div className="action-card">
-          {IconComponent.decipher("#3867fa")}
-          <div className="card-text">
+          <span className="icon-decipher">
+            {IconComponent.decipher("#3867fa")}
+          </span>
+          <div className="decipher-card-text">
             <div className="card-title">Decipher</div>
             <div className="card-description">
               Find potential infecting organisms in large datasets

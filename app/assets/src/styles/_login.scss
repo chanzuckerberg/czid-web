@@ -4,7 +4,7 @@ $break-large: 1460px;
 .login-form {
   width: 30%;
   margin: 0 auto;
-  box-shadow: 1px 2px 5px 2px #eaeaea;
+  box-shadow: 0.1rem 0.2rem 0.6rem 0.2rem $lightest-grey;
   margin-top: 150px;
   border-radius: 10px;
   label {
@@ -42,7 +42,7 @@ $break-large: 1460px;
       font-size: 14px;
     }
     span {
-      color: #4a91cc;
+      color: $primary-light;
       cursor: pointer;
       &:hover {
         color: #3867fa;
@@ -54,6 +54,10 @@ $break-large: 1460px;
     .sample {
       float: right;
       padding-top: 20px;
+    }
+
+    input:focus {
+      border-bottom-color: $primary-light !important;
     }
   }
   .login-wrapper {
