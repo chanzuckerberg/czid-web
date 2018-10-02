@@ -23,11 +23,11 @@ class BackgroundsController < ApplicationController
     taxid = params[:taxid].to_i
     ts = TaxonSummary.where(background_id: @background.id, tax_id: taxid)
     output = {}
-    ts.each { |t| 
-      fields = t.slice(:tax_level, :mean, :stdev, :rpm_list) 
+    ts.each do |t|
+      fields = t.slice(:tax_level, :mean, :stdev, :rpm_list)
       fields[:rpm_list] = JSON.parse(fields[:rpm_list])
       output[t[:count_type]] = fields
-    }
+    end
 
     render json: output
   end
