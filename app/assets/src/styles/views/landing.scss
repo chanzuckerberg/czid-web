@@ -1,0 +1,181 @@
+@import "../themes/colors";
+
+.sign-in {
+  float: right;
+  margin-top: 0.4rem;
+  margin-right: 0.75rem;
+}
+
+.first-block {
+  margin: 5rem;
+
+  .top-title {
+    font-size: 2.3rem;
+    line-height: 3.2rem;
+    font-weight: 600;
+    margin-top: 2rem;
+    margin-right: 2.2rem;
+    max-width: 70rem;
+  }
+
+  .action-cards {
+    margin: 5rem 0 5rem 2rem;
+
+    .action-card {
+      margin-top: 3rem;
+
+      svg {
+        height: 6.5rem;
+        display: inline;
+        fill: $primary-light;
+      }
+
+      .card-text {
+        display: inline-block;
+        margin-top: 0.7rem;
+        margin-left: 2.4rem;
+        vertical-align: top;
+      }
+
+      .decipher-card-text {
+        display: inline-block;
+        margin-top: 0.7rem;
+        margin-left: 1.7rem;
+        vertical-align: top;
+      }
+
+      .card-title {
+        font-size: 1.75rem;
+        font-weight: 600;
+      }
+
+      .card-description {
+        font-size: 1.1rem;
+        margin-top: 1.1rem;
+        word-wrap: break-word;
+      }
+
+      .icon-decipher {
+        width: 6.5rem;
+        height: 6rem;
+
+        svg {
+          margin-left: 0.6rem;
+          margin-top: 0.6rem;
+          height: 5rem;
+          display: inline;
+        }
+      }
+    }
+  }
+
+  .account-form {
+    box-shadow: 0.1rem 0.2rem 0.6rem 0.2rem $lightest-grey;
+    border-radius: 0.6rem;
+    border: 0.1rem solid $lightest-grey;
+
+    .form-header {
+      margin: 2rem 2rem 1rem 2rem;
+
+      .form-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+
+      .form-description {
+        margin-top: 0.7rem;
+      }
+
+      a {
+        color: $primary-light !important;
+      }
+    }
+
+    .form {
+      margin: 0 2rem 2rem 2rem;
+
+      .field {
+        margin-top: 1.5rem;
+
+        input {
+          max-height: 1.5rem;
+        }
+
+        input:focus {
+          border-color: $primary-light;
+        }
+
+        textarea {
+          min-height: 10rem;
+        }
+
+        textarea:focus {
+          border-color: $primary-light;
+        }
+
+        .optional {
+          color: $light-grey;
+          font-weight: normal;
+          font-size: 0.8rem;
+          margin-left: 0.5rem;
+        }
+      }
+
+      .submit-button {
+        margin: 2rem auto auto auto;
+        width: 9rem;
+
+        .button {
+          width: 9rem;
+        }
+      }
+    }
+  }
+}
+
+.ui.divider:not(.vertical):not(.horizontal) {
+  border-top: 0.05rem solid $off-white;
+}
+
+.partners-block {
+  width: 30rem;
+  margin: 5rem auto 5rem auto;
+
+  .partner-title {
+    text-align: center;
+    letter-spacing: 0.07rem;
+    font-weight: 600;
+    color: $medium-grey;
+    font-size: 0.8rem;
+  }
+
+  .partner-logos {
+    margin-top: 1rem;
+
+    .first-logo {
+      width: 8rem;
+      margin-left: 4.2rem;
+    }
+
+    .second-logo {
+      width: 11rem;
+      margin-top: 0.3rem;
+    }
+  }
+}
+
+.footer {
+  width: 30rem;
+  margin: 7rem auto 2rem auto;
+  text-align: center;
+
+  .footer-links {
+    margin-left: -1rem;
+
+    a {
+      margin: 2rem;
+      font-size: 0.8rem;
+      color: $medium-grey !important;
+    }
+  }
+}

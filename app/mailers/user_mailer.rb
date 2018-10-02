@@ -17,4 +17,9 @@ class UserMailer < ApplicationMailer
   rescue
     LogUtil.log_err_and_airbrake("project_complete_email(#{email_arguments}) failed")
   end
+
+  def landing_sign_up_email(body)
+    account_email = "accounts@idseq.net"
+    mail(to: account_email, subject: "New sign up from landing page", body: body)
+  end
 end
