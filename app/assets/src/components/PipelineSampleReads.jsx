@@ -86,7 +86,7 @@ class PipelineSampleReads extends React.Component {
       "sample_organism",
       "sample_detection"
     ];
-    this.sampleFieldNames = new Map(
+    this.sampleFieldProperties = new Map(
       SAMPLE_FIELDS.map(item => [item.name, item])
     );
     this.sampleFieldRenderMethods = {
@@ -970,7 +970,9 @@ class PipelineSampleReads extends React.Component {
                             </div>
                           </div>
                           {this.sampleFieldsColumn1.map(field => {
-                            let properties = this.sampleFieldNames.get(field);
+                            let properties = this.sampleFieldProperties.get(
+                              field
+                            );
                             let renderMethod = this.sampleFieldRenderMethods[
                               field
                             ];
@@ -983,7 +985,9 @@ class PipelineSampleReads extends React.Component {
                         </div>
                         <div className="col s6">
                           {this.sampleFieldsColumn2.map(field => {
-                            let properties = this.sampleFieldNames.get(field);
+                            let properties = this.sampleFieldProperties.get(
+                              field
+                            );
                             let renderMethod = this.sampleFieldRenderMethods[
                               field
                             ];
@@ -997,28 +1001,30 @@ class PipelineSampleReads extends React.Component {
                       </div>
                       <div className="row">
                         {this.render_metadata_textfield_wide(
-                          this.sampleFieldNames.get("name").label,
+                          this.sampleFieldProperties.get("name").label,
                           this.sampleInfo,
                           "name",
                           this.TYPE_PROMPT,
                           this.can_edit
                         )}
                         {this.render_metadata_textfield_wide(
-                          this.sampleFieldNames.get("confirmed_names").label,
+                          this.sampleFieldProperties.get("confirmed_names")
+                            .label,
                           this.state,
                           "confirmed_names",
                           "None",
                           false
                         )}
                         {this.render_metadata_textfield_wide(
-                          this.sampleFieldNames.get("sample_notes").label,
+                          this.sampleFieldProperties.get("sample_notes").label,
                           this.sampleInfo,
                           "sample_notes",
                           this.TYPE_PROMPT,
                           this.can_edit
                         )}
                         {this.render_metadata_textfield_wide(
-                          this.sampleFieldNames.get("sample_diagnosis").label,
+                          this.sampleFieldProperties.get("sample_diagnosis")
+                            .label,
                           this.sampleInfo,
                           "sample_diagnosis",
                           this.TYPE_PROMPT,
