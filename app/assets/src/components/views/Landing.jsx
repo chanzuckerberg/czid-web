@@ -89,7 +89,7 @@ class Landing extends React.Component {
     const topTitle = (
       <div className="top-title">
         IDseq is an unbiased global software platform that helps scientists
-        identify pathogens in metagenomic data.
+        identify pathogens in metagenomic sequencing data.
       </div>
     );
 
