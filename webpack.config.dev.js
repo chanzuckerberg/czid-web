@@ -22,13 +22,29 @@ const config = {
     rules: [
       {
         test: /.js$/,
-        exclude: path.resolve(__dirname, "node_modules/"),
-        loader: "babel-loader"
+        // exclude: path.resolve(__dirname, "node_modules/"),
+        loader: "babel-loader",
+        query: {
+          presets: ["react", "env"],
+          plugins: [
+            "transform-object-rest-spread",
+            "babel-plugin-transform-es2015-arrow-functions",
+            "babel-plugin-transform-class-properties"
+          ]
+        }
       },
       {
         test: /.jsx$/,
-        exclude: path.resolve(__dirname, "node_modules/"),
-        loader: "babel-loader"
+        // exclude: path.resolve(__dirname, "node_modules/"),
+        loader: "babel-loader",
+        query: {
+          presets: ["react", "env"],
+          plugins: [
+            "transform-object-rest-spread",
+            "babel-plugin-transform-es2015-arrow-functions",
+            "babel-plugin-transform-class-properties"
+          ]
+        }
       },
       {
         // sass / scss loader for webpack
