@@ -12,6 +12,7 @@ class HomeController < ApplicationController
       # Call secure home#index path if authenticated
       redirect_to home_path
     else
+      @preview = true if landing_params[:preview]
       render 'landing'
     end
   end
@@ -62,7 +63,7 @@ class HomeController < ApplicationController
       body += "#{k}: #{v}\n"
     end
     Rails.logger.info("New sign up:\n#{body}")
-    UserMailer.landing_sign_up_email(body)
+    UserMailer.landing_sign_up_email(body).deliver_now
     render json: {
       status: :ok
     }
@@ -77,5 +78,9 @@ class HomeController < ApplicationController
 
   def home_params
     params.require(:signUp).permit(:firstName, :lastName, :email, :institution, :usage)
+  end
+
+  def landing_params
+    params.permit(:preview)
   end
 end
