@@ -52,7 +52,6 @@ class SamplesHeatmap extends React.Component {
         ) {
           return { text: taxonLevelName, value: index };
         }),
-        thresholdFilters: this.props.thresholdFilters,
         // Client side options
         scales: [["Log", symlog], ["Lin", d3.scale.linear]],
         taxonsPerSample: {
@@ -520,7 +519,6 @@ class SamplesHeatmap extends React.Component {
   renderAdvancedFilterPicker() {
     return (
       <ThresholdFilterDropdown
-        options={this.state.availableOptions.thresholdFilters}
         thresholds={this.state.selectedOptions.thresholdFilters}
         onApply={this.onThresholdFilterApply}
         disabled={!this.state.data}

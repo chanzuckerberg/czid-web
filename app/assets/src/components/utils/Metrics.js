@@ -18,3 +18,17 @@ for (var m in metric_names) {
   metric_names_augmented[m.replace(".", "_")] = metric_names[m];
 }
 export const METRIC_NAMES = metric_names_augmented;
+
+export const THRESHOLD_METRICS = [
+  "NT_aggregatescore",
+  "NT_zscore",
+  "NT_rpm",
+  "NT_r",
+  "NT_percentidentity",
+  "NT_neglogevalue",
+  "NR_zscore",
+  "NR_r",
+  "NR_rpm",
+  "NR_percentidentity",
+  "NR_neglogevalue"
+];

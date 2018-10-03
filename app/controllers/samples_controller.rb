@@ -234,23 +234,7 @@ class SamplesController < ApplicationController
       ],
       backgrounds: current_power.backgrounds.map do |background|
         { name: background.name, value: background.id }
-      end,
-      thresholdFilters: {
-        targets: [
-          "NT_aggregatescore",
-          "NT_zscore",
-          "NT_rpm",
-          "NT_r",
-          "NT_percentidentity",
-          "NT_neglogevalue",
-          "NR_zscore",
-          "NR_r",
-          "NR_rpm",
-          "NR_percentidentity",
-          "NR_neglogevalue"
-        ],
-        operators: [">=", "<="]
-      }
+      end
     }
   end
 

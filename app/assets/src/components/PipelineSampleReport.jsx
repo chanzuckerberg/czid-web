@@ -75,19 +75,6 @@ class PipelineSampleReport extends React.Component {
       { text: "NR Z Score", value: "nr_zscore" }
     ];
 
-    this.allThresholds = [
-      "NT_aggregatescore",
-      "NT_zscore",
-      "NT_rpm",
-      "NT_r",
-      "NT_percentidentity",
-      "NT_neglogevalue",
-      "NR_zscore",
-      "NR_r",
-      "NR_rpm",
-      "NR_percentidentity",
-      "NR_neglogevalue"
-    ];
     this.categoryChildParent = { Phage: "Viruses" };
     this.categoryParentChild = { Viruses: ["Phage"] };
     this.genus_map = {};
@@ -95,7 +82,7 @@ class PipelineSampleReport extends React.Component {
     this.INVALID_CALL_BASE_TAXID = -1e8;
 
     this.defaultThreshold = {
-      metric: this.allThresholds[0],
+      metric: "NT_aggregatescore",
       operator: ">=",
       value: ""
     };
@@ -1907,10 +1894,6 @@ class RenderMarkup extends React.Component {
                       </div>
                       <div className="filter-lists-element">
                         <ThresholdFilterDropdown
-                          options={{
-                            targets: parent.allThresholds,
-                            operators: [">=", "<="]
-                          }}
                           thresholds={parent.state.activeThresholds}
                           onApply={parent.handleThresholdFiltersChange}
                         />
