@@ -290,7 +290,8 @@ module ReportHelper
       WHERE
         pipeline_run_id = #{pipeline_run_id.to_i} AND
         taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID} AND
-        taxon_counts.count_type IN #{count_types}
+        taxon_counts.count_type IN #{count_types} AND
+        taxon_counts.tax_level < #{TaxonCount::TAX_LEVEL_FAMILY}
     ").to_hash
   end
 
@@ -766,10 +767,6 @@ module ReportHelper
     taxon_counts_2d
   end
 
-  def remove_family_level_counts!(taxon_counts_2d)
-    taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] != TaxonCount::TAX_LEVEL_FAMILY }
-  end
-
   def only_species_level_counts!(taxon_counts_2d)
     taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES }
   end
@@ -973,9 +970,6 @@ module ReportHelper
     tax_2d.each do |tid, _|
       unfiltered_ids << tid if tid > 0
     end
-
-    # Remove family level rows because the reports only display species/genus
-    remove_family_level_counts!(tax_2d)
 
     # Add tax_info into output rows.
     rows = []
