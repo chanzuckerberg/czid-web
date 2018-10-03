@@ -1,16 +1,16 @@
 {
   "family": "{{ .Values.project }}-{{ .Values.env }}-{{ .Values.name }}",
+  "cpu": "2048",
+  "memory": "7168",
   "containerDefinitions": [
     {
       "name": "rails",
       "image": "chanzuckerberg/idseq-web:{{ .Values.tag }}",
-      "cpu": 2048,
-      "memoryReservation": 7168,
       "essential": true,
       "portMappings": [
         {
           "containerPort": 3000,
-          "hostPort": 0
+          "hostPort": 3000
         }
       ],
       "environment": [
@@ -53,5 +53,10 @@
       }
     }
   ],
-  "taskRoleArn": "{{ .Values.project }}-web-{{ .Values.env }}"
+  "taskRoleArn": "{{ .Values.project }}-{{ .Values.env }}-{{ .Values.name }}",
+  "executionRoleArn": "{{ .Values.project }}-{{ .Values.env }}-{{ .Values.name }}-execution-role",
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "networkMode": "awsvpc"
 }

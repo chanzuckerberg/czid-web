@@ -1,13 +1,16 @@
 {
   "family": "{{ .Values.project }}-{{ .Values.env }}-{{ .Values.name }}",
+  "cpu": "1024",
+  "memoryReservation": "3072",
   "containerDefinitions": [
     {
       "name": "idseq-{{ .Values.name }}",
       "image": "chanzuckerberg/idseq-web:{{ .Values.tag }}",
-      "cpu": 1024,
-      "memoryReservation": 3072,
       "essential": true,
-      "command": ["rake", "{{ .Values.rake_command }}"],
+      "command": [
+        "rake",
+        "{{ .Values.rake_command }}"
+      ],
       "environment": [
         {
           "name": "RAILS_ENV",
@@ -60,5 +63,10 @@
       }
     }
   ],
-  "taskRoleArn": "{{ .Values.project }}-web-{{ .Values.env }}"
+  "taskRoleArn": "{{ .Values.project }}-{{ .Values.env }}-web",
+  "executionRoleArn": "{{ .Values.project }}-{{ .Values.env }}-{{ .Values.name }}-execution-role",
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "networkMode": "awsvpc"
 }
