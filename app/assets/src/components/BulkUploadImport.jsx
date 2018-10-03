@@ -301,7 +301,7 @@ class BulkUploadImport extends React.Component {
           that.setState({
             submitting: false
           });
-          that.gotoPage(`/?project_id=${that.state.projectId}`);
+          that.gotoPage(`/home?project_id=${that.state.projectId}`);
         }, 2000);
       })
       .catch(error => {
