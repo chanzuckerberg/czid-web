@@ -290,7 +290,8 @@ module ReportHelper
       WHERE
         pipeline_run_id = #{pipeline_run_id.to_i} AND
         taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID} AND
-        taxon_counts.count_type IN #{count_types}
+        taxon_counts.count_type IN #{count_types} AND
+        taxon_counts.tax_level < 3
     ").to_hash
   end
 
@@ -740,8 +741,10 @@ module ReportHelper
     missing_genera = Set.new
     taxids_with_missing_genera = Set.new
     taxon_counts_2d.each do |tax_id, tax_info|
+      Rails.logger.debug("[tax_id=#{tax_id}] genus_taxid=#{tax_info['genus_taxid']} ---- tax_info: #{tax_info}")
       genus_taxid = tax_info['genus_taxid']
       unless taxon_counts_2d[genus_taxid]
+        Rails.logger.debug("\tFake for [tax_id=#{tax_id}]")
         taxids_with_missing_genera.add(tax_id)
         missing_genera.add(genus_taxid)
         fake_genera << fake_genus!(tax_info)
