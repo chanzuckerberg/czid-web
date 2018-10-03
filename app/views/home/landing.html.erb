@@ -4,7 +4,10 @@
   <%= javascript_tag do %>
     react_component(
       'Landing',
-      { contactEmail: "accounts@idseq.net" },
+      {
+        contactEmail: "accounts@idseq.net",
+        preview: '<%= @preview %>'
+      },
       'landing_page'
       );
   <% end %>
