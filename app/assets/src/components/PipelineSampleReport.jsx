@@ -21,6 +21,7 @@ import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
 import PhyloTreeChecks from "./views/phylo_tree/PhyloTreeChecks";
 import TaxonModal from "./views/report/TaxonModal";
 import TaxonTreeVis from "./views/TaxonTreeVis";
+import { METRIC_NAMES } from "./utils/Metrics";
 
 class PipelineSampleReport extends React.Component {
   constructor(props) {
@@ -75,17 +76,17 @@ class PipelineSampleReport extends React.Component {
     ];
 
     this.allThresholds = [
-      { text: "Score", value: "NT_aggregatescore" },
-      { text: "NT Z Score", value: "NT_zscore" },
-      { text: "NT rPM", value: "NT_rpm" },
-      { text: "NT r (total reads)", value: "NT_r" },
-      { text: "NT %id", value: "NT_percentidentity" },
-      { text: "NT log(1/e)", value: "NT_neglogevalue" },
-      { text: "NR Z Score", value: "NR_zscore" },
-      { text: "NR r (total reads)", value: "NR_r" },
-      { text: "NR rPM", value: "NR_rpm" },
-      { text: "NR %id", value: "NR_percentidentity" },
-      { text: "R log(1/e)", value: "NR_neglogevalue" }
+      "NT_aggregatescore",
+      "NT_zscore",
+      "NT_rpm",
+      "NT_r",
+      "NT_percentidentity",
+      "NT_neglogevalue",
+      "NR_zscore",
+      "NR_r",
+      "NR_rpm",
+      "NR_percentidentity",
+      "NR_neglogevalue"
     ];
     this.categoryChildParent = { Phage: "Viruses" };
     this.categoryParentChild = { Viruses: ["Phage"] };
@@ -93,15 +94,8 @@ class PipelineSampleReport extends React.Component {
 
     this.INVALID_CALL_BASE_TAXID = -1e8;
 
-    this.thresholdTextByValue = this.allThresholds.reduce(
-      (metrics, threshold) => {
-        metrics[threshold.value] = threshold.text;
-        return metrics;
-      },
-      {}
-    );
     this.defaultThreshold = {
-      metric: this.allThresholds[0]["value"],
+      metric: this.allThresholds[0],
       operator: ">=",
       value: ""
     };
@@ -1509,8 +1503,8 @@ function AdvancedFilterTagList({ threshold, i, parent }) {
         size="tiny"
         key={`advanced_filter_tag_${i}`}
       >
-        {parent.thresholdTextByValue[threshold["metric"]]}{" "}
-        {threshold["operator"]} {threshold["value"]}
+        {METRIC_NAMES[threshold["metric"]]} {threshold["operator"]}{" "}
+        {threshold["value"]}
         <Icon
           name="close"
           onClick={() => {
