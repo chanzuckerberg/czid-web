@@ -228,7 +228,6 @@ class SamplesController < ApplicationController
         "NT.r",
         "NT.zscore",
         "NT.maxzscore",
-        "NR.aggregatescore",
         "NR.rpm",
         "NR.r",
         "NR.zscore",
