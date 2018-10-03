@@ -10,7 +10,6 @@ class TaxonModal extends React.Component {
 
     this.state = {
       open: false,
-      firstOpen: true,
       background: this.props.background,
       showHistogram: false,
       taxonDescription: "",
@@ -24,25 +23,10 @@ class TaxonModal extends React.Component {
     this.linkTo = this.linkTo.bind(this);
   }
 
-  static getDerivedStateFromProps(props, state) {
-    if (props.background.id != state.background.id) {
-      return {
-        background: props.background,
-        firstOpen: true
-      };
-    }
-    return null;
-  }
-
   handleOpen() {
-    if (this.state.firstOpen) {
-      this.loadTaxonInfo();
-      this.loadBackgroundInfo();
-    }
-    this.setState({
-      firstOpen: false,
-      open: true
-    });
+    this.loadTaxonInfo();
+    this.loadBackgroundInfo();
+    this.setState({ open: true });
   }
 
   loadTaxonInfo() {
@@ -59,22 +43,18 @@ class TaxonModal extends React.Component {
         let taxonInfo = response.data[this.props.taxonId];
         let parentTaxonInfo =
           this.props.parentTaxonId && response.data[this.props.parentTaxonId];
-        let newState = {};
         if (taxonInfo) {
-          newState = {
+          this.setState({
             taxonDescription: response.data[this.props.taxonId].summary || "",
             wikiUrl: response.data[this.props.taxonId].wiki_url || ""
-          };
+          });
         }
         if (parentTaxonInfo) {
-          Object.assign(newState, {
+          this.setState({
             taxonParentName: response.data[this.props.parentTaxonId].title,
             taxonParentDescription:
               response.data[this.props.parentTaxonId].summary
           });
-        }
-        if (Object.keys(newState).length) {
-          this.setState(newState);
         }
       })
       .catch(error => {
@@ -85,7 +65,7 @@ class TaxonModal extends React.Component {
   }
 
   loadBackgroundInfo() {
-    this.histogram && this.histogram.clear();
+    this.histogram = null;
     Axios.get(
       `/backgrounds/${this.state.background.id}/show_taxon_dist.json?taxid=${
         this.props.taxonId
