@@ -1034,8 +1034,6 @@ class PipelineSampleReport extends React.Component {
       taxonNameDisplay = <span>{tax_scientific_name}</span>;
     }
 
-    taxonNameDisplay = <i>{taxonNameDisplay}</i>;
-
     if (tax_info.tax_id > 0) {
       if (report_details.taxon_fasta_flag) {
         taxonNameDisplay = (
@@ -1064,6 +1062,8 @@ class PipelineSampleReport extends React.Component {
           trigger={taxonNameDisplay}
         />
       );
+    } else {
+      taxonNameDisplay = <i>{taxonNameDisplay}</i>;
     }
     let secondaryTaxonDisplay = (
       <span>

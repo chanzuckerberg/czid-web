@@ -741,7 +741,7 @@ module ReportHelper
     taxids_with_missing_genera = Set.new
     taxon_counts_2d.each do |tax_id, tax_info|
       genus_taxid = tax_info['genus_taxid']
-      unless taxon_counts_2d[genus_taxid]
+      unless taxon_counts_2d[genus_taxid] || tax_info['tax_level'] != TaxonCount::TAX_LEVEL_SPECIES
         taxids_with_missing_genera.add(tax_id)
         missing_genera.add(genus_taxid)
         fake_genera << fake_genus!(tax_info)
