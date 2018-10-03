@@ -291,7 +291,7 @@ module ReportHelper
         pipeline_run_id = #{pipeline_run_id.to_i} AND
         taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID} AND
         taxon_counts.count_type IN #{count_types} AND
-        taxon_counts.tax_level < 3
+        taxon_counts.tax_level < #{TaxonCount::TAX_LEVEL_FAMILY}
     ").to_hash
   end
 
@@ -741,10 +741,8 @@ module ReportHelper
     missing_genera = Set.new
     taxids_with_missing_genera = Set.new
     taxon_counts_2d.each do |tax_id, tax_info|
-      Rails.logger.debug("[tax_id=#{tax_id}] genus_taxid=#{tax_info['genus_taxid']} ---- tax_info: #{tax_info}")
       genus_taxid = tax_info['genus_taxid']
       unless taxon_counts_2d[genus_taxid]
-        Rails.logger.debug("\tFake for [tax_id=#{tax_id}]")
         taxids_with_missing_genera.add(tax_id)
         missing_genera.add(genus_taxid)
         fake_genera << fake_genus!(tax_info)
@@ -767,10 +765,6 @@ module ReportHelper
       genus_info['species_count'] += 1
     end
     taxon_counts_2d
-  end
-
-  def remove_family_level_counts!(taxon_counts_2d)
-    taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] != TaxonCount::TAX_LEVEL_FAMILY }
   end
 
   def only_species_level_counts!(taxon_counts_2d)
@@ -976,9 +970,6 @@ module ReportHelper
     tax_2d.each do |tid, _|
       unfiltered_ids << tid if tid > 0
     end
-
-    # Remove family level rows because the reports only display species/genus
-    remove_family_level_counts!(tax_2d)
 
     # Add tax_info into output rows.
     rows = []
