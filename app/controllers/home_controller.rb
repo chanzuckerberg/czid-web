@@ -12,6 +12,7 @@ class HomeController < ApplicationController
       # Call secure home#index path if authenticated
       redirect_to home_path
     else
+      @preview = true if landing_params[:preview]
       render 'landing'
     end
   end
@@ -77,5 +78,9 @@ class HomeController < ApplicationController
 
   def home_params
     params.require(:signUp).permit(:firstName, :lastName, :email, :institution, :usage)
+  end
+
+  def landing_params
+    params.permit(:preview)
   end
 end

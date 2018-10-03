@@ -8,9 +8,9 @@ import {
   Grid,
   Image,
   Message,
-  Container,
   Divider
 } from "semantic-ui-react";
+import Container from "../ui/containers/Container";
 import TransparentButton from "../ui/controls/buttons/TransparentButton";
 import PrimaryButton from "../ui/controls/buttons/PrimaryButton";
 import StringHelper from "../../helpers/StringHelper";
@@ -206,21 +206,26 @@ class Landing extends React.Component {
       </div>
     );
 
-    // const bulletinLink = () => (location.href = "/");
-    // const bulletinBanner = (
-    //   <div className="bulletin-banner">
-    //     <Container>
-    //       <div className="bulletin-title">Lorem Ipsum Dolor Sit Amet</div>
-    //       <div className="bulletin-description">
-    //         Sed condimentum lobortis diam, nec tincidunt erat maximus sit amet.
-    //         Curabitur semper mi interdum purus vehicula, congue semper mauris
-    //         tristique. Phasellus id cursus magna, dignissim tempor enim. In in
-    //         scelerisque eros.
-    //       </div>
-    //       <TransparentButton text="Learn More" onClick={bulletinLink} />
-    //     </Container>
-    //   </div>
-    // );
+    const bulletinLink = () => (location.href = "/");
+    let bulletinBanner;
+    if (this.props.preview) {
+      bulletinBanner = (
+        <div className="bulletin-banner">
+          <Container>
+            <div className="bulletin-title">Lorem Ipsum Dolor Sit Amet</div>
+            <div className="bulletin-description">
+              Sed condimentum lobortis diam, nec tincidunt erat maximus sit
+              amet. Curabitur semper mi interdum purus vehicula, congue semper
+              mauris tristique. Phasellus id cursus magna, dignissim tempor
+              enim. In in scelerisque eros.
+            </div>
+            <TransparentButton text="Learn More" onClick={bulletinLink} />
+          </Container>
+        </div>
+      );
+    } else {
+      bulletinBanner = <Divider />;
+    }
 
     const partners = (
       <div className="partners-block">
@@ -277,8 +282,7 @@ class Landing extends React.Component {
       <div>
         {header}
         {firstBlock}
-        <Divider />
-        {/*{bulletinBanner}*/}
+        {bulletinBanner}
         {partners}
         {footer}
       </div>
@@ -287,7 +291,8 @@ class Landing extends React.Component {
 }
 
 Landing.propTypes = {
-  contactEmail: PropTypes.string.isRequired
+  contactEmail: PropTypes.string.isRequired,
+  preview: PropTypes.string
 };
 
 export default Landing;
