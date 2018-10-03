@@ -19,6 +19,7 @@ import Slider from "./ui/controls/Slider";
 import TaxonTooltip from "./TaxonTooltip";
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
 import { Colormap } from "./utils/colormaps/Colormap";
+import { METRIC_NAMES } from "./utils/Metrics";
 
 class SamplesHeatmap extends React.Component {
   // TODO: do not make another request if values did not change
@@ -493,7 +494,7 @@ class SamplesHeatmap extends React.Component {
 
   renderMetricPicker() {
     let options = this.state.availableOptions.metrics.map(function(metric) {
-      return { text: metric, value: metric };
+      return { text: METRIC_NAMES[metric], value: metric };
     });
 
     return (

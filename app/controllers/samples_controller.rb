@@ -223,32 +223,31 @@ class SamplesController < ApplicationController
         Viruses: ["Phage"]
       },
       metrics: [
+        "NT.r", # first entry will be default selection
         "NT.aggregatescore",
         "NT.rpm",
-        "NT.r",
         "NT.zscore",
         "NT.maxzscore",
         "NR.rpm",
         "NR.r",
-        "NR.zscore",
-        "NR.maxzscore"
+        "NR.zscore"
       ],
       backgrounds: current_power.backgrounds.map do |background|
         { name: background.name, value: background.id }
       end,
       thresholdFilters: {
         targets: [
-          { text: "Aggregate Score", value: "NT_aggregatescore" },
-          { text: "NT Z Score", value: "NT_zscore" },
-          { text: "NT rPM", value: "NT_rpm" },
-          { text: "NT r (total reads)", value: "NT_r" },
-          { text: "NT %id", value: "NT_percentidentity" },
-          { text: "NT log(1/e)", value: "NT_neglogevalue" },
-          { text: "NR Z Score", value: "NR_zscore" },
-          { text: "NR r (total reads)", value: "NR_r" },
-          { text: "NR rPM", value: "NR_rpm" },
-          { text: "NR %id", value: "NR_percentidentity" },
-          { text: "R log(1/e)", value: "NR_neglogevalue" }
+          "NT_aggregatescore",
+          "NT_zscore",
+          "NT_rpm",
+          "NT_r",
+          "NT_percentidentity",
+          "NT_neglogevalue",
+          "NR_zscore",
+          "NR_r",
+          "NR_rpm",
+          "NR_percentidentity",
+          "NR_neglogevalue"
         ],
         operators: [">=", "<="]
       }

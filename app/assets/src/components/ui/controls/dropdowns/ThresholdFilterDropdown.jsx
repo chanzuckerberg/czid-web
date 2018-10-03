@@ -3,13 +3,17 @@ import { forbidExtraProps } from "airbnb-prop-types";
 import PrimaryButton from "../buttons/PrimaryButton";
 import PropTypes from "prop-types";
 import RemoveIcon from "../../icons/RemoveIcon";
+import { METRIC_NAMES } from "../../../utils/Metrics";
 import React from "react";
 
 class ThresholdFilterDropdown extends React.Component {
   constructor(props) {
     super(props);
 
-    this.metrics = (this.props.options || {}).targets || [];
+    let targets = (this.props.options || {}).targets || [];
+    this.metrics = targets.map(metric => {
+      return { text: METRIC_NAMES[metric], value: metric };
+    });
     this.operators = (this.props.options || {}).operators || [];
     this.label = this.props.label || "Threshold Filters:";
 
