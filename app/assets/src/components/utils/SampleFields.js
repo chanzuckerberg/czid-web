@@ -1,3 +1,6 @@
+import React from "react";
+import Moment from "react-moment";
+
 export const SAMPLE_FIELDS = [
   { name: "name", label: "Name" },
   { name: "project_name", label: "Project" },

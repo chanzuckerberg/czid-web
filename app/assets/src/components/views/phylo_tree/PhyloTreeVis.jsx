@@ -4,7 +4,6 @@ import Dendogram from "../../visualizations/dendrogram/Dendogram";
 import PropTypes from "prop-types";
 import DataTooltip from "../../ui/containers/DataTooltip";
 import { SAMPLE_FIELDS } from "../../utils/SampleFields";
-import Moment from "react-moment";
 
 class PhyloTreeVis extends React.Component {
   constructor(props) {
