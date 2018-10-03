@@ -1069,7 +1069,8 @@ input[type="button"] {
     transform: unset !important;
     margin-left: 15.3em !important;
     width: 86.666667% !important;
-    .content-wrapper {
+    .row.content-wrapper {
+      margin-right: 1rem;
       .divider {
         height: 3px;
         border: solid 4px #f8f8f8;
