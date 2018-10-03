@@ -1,8 +1,9 @@
-<div id='forgot_password_page' ></div>
-<%= javascript_tag do %>
-  react_component('ForgotPassword', {
-    errors: `<%= devise_error_messages! %>`,
-    endpoint: '<%=  password_path(resource) %>',
-    emailLabel: 'user[email]',
-    csrf: '<%= form_authenticity_token %>'  }, 'forgot_password_page');
-<% end %>
+<div id='forgot_password_page' >
+  <%= javascript_tag do %>
+    react_component('ForgotPassword', {
+      errors: `<%= devise_error_messages! %>`,
+      endpoint: '<%=  password_path(resource) %>',
+      emailLabel: 'user[email]',
+      csrf: '<%= form_authenticity_token %>'  }, 'forgot_password_page');
+  <% end %>
+</div>
