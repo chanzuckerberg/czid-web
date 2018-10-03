@@ -1941,16 +1941,6 @@ class AddUserModal extends React.Component {
             {this.props.state.project ? this.props.state.project.name : null}
           </div>
           <AddUserModalMemberArea state={this.props.state} parent={this} />
-          <input
-            type="checkbox"
-            id="background_flag"
-            onChange={this.props.parent.toggleBackgroundFlag}
-            className="filled-in checkbox"
-            checked={this.props.state.project.background_flag}
-          />
-          <label htmlFor="background_flag">
-            Expose project-specific background
-          </label>
         </Modal.Content>
         <Modal.Actions>
           <PrimaryButton text="Close" onClick={this.handleClose} />
@@ -2021,13 +2011,7 @@ function ProjectInfoHeading({
       </div>
     )
   };
-  if (proj && canEditProject(proj.id)) {
-    phyloProps["projectId"] = proj.id;
-    phyloProps["projectName"] = proj.name;
-  }
-  let phyloTreeModal = (
-    <PhyloTreeCreationModal {...phyloProps} />
-  );
+  let phyloTreeModal = <PhyloTreeCreationModal {...phyloProps} />;
 
   return (
     <div className="row download-section">
