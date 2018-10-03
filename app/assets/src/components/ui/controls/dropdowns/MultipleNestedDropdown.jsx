@@ -217,7 +217,7 @@ class MultipleNestedDropdown extends React.Component {
     return (
       <div className="label-container">
         <div className="label-container-title">{this.props.label}</div>
-        {numberOfSelectedOptions.length > 0 && (
+        {numberOfSelectedOptions && (
           <Label className="label-container-count">
             {numberOfSelectedOptions}
           </Label>
