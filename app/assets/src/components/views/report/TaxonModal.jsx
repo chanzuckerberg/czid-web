@@ -10,40 +10,23 @@ class TaxonModal extends React.Component {
 
     this.state = {
       open: false,
-      firstOpen: true,
       background: this.props.background,
-      refreshBackgroundData: false,
+      showHistogram: false,
       taxonDescription: "",
       taxonParentName: "",
       taxonParentDescription: "",
       wikiUrl: null
     };
 
-    this.histogram = null;
     this.loadedBackground = this.handleOpen = this.handleOpen.bind(this);
     this.handleClose = () => this.setState({ open: false });
     this.linkTo = this.linkTo.bind(this);
   }
 
-  static getDerivedStateFromProps(props, state) {
-    if (props.background.id != state.background.id) {
-      return {
-        background: props.background,
-        firstOpen: true
-      };
-    }
-    return null;
-  }
-
   handleOpen() {
-    if (this.state.firstOpen) {
-      this.loadTaxonInfo();
-      this.loadBackgroundInfo();
-    }
-    this.setState({
-      firstOpen: false,
-      open: true
-    });
+    this.loadTaxonInfo();
+    this.loadBackgroundInfo();
+    this.setState({ open: true });
   }
 
   loadTaxonInfo() {
@@ -57,18 +40,22 @@ class TaxonModal extends React.Component {
       }
     })
       .then(response => {
-        let newState = {
-          taxonDescription: response.data[this.props.taxonId].summary,
-          wikiUrl: response.data[this.props.taxonId].wiki_url
-        };
-        if (this.props.parentTaxonId) {
-          Object.assign(newState, {
+        let taxonInfo = response.data[this.props.taxonId];
+        let parentTaxonInfo =
+          this.props.parentTaxonId && response.data[this.props.parentTaxonId];
+        if (taxonInfo) {
+          this.setState({
+            taxonDescription: response.data[this.props.taxonId].summary || "",
+            wikiUrl: response.data[this.props.taxonId].wiki_url || ""
+          });
+        }
+        if (parentTaxonInfo) {
+          this.setState({
             taxonParentName: response.data[this.props.parentTaxonId].title,
             taxonParentDescription:
               response.data[this.props.parentTaxonId].summary
           });
         }
-        this.setState(newState);
       })
       .catch(error => {
         // TODO: properly handle error
@@ -78,8 +65,7 @@ class TaxonModal extends React.Component {
   }
 
   loadBackgroundInfo() {
-    this.sestate.refreshBackgroundData = false;
-
+    this.histogram = null;
     Axios.get(
       `/backgrounds/${this.state.background.id}/show_taxon_dist.json?taxid=${
         this.props.taxonId
@@ -91,22 +77,32 @@ class TaxonModal extends React.Component {
       }
     )
       .then(response => {
-        let data = [response.data.NT.rpm_list, response.data.NR.rpm_list];
-        this.histogram = new Histogram(this.histogramContainer, data, {
-          seriesNames: ["NT", "NR"],
-          labelX: "rpm",
-          labelY: "count",
-          refValues: [
-            {
-              name: "sample",
-              values: [
-                this.props.taxonValues.NT.rpm,
-                this.props.taxonValues.NR.rpm
-              ]
-            }
-          ]
-        });
-        this.histogram.update();
+        let data = response.data;
+        if (
+          Object.keys(data).length &&
+          (data.NT || {}).rpm_list &&
+          (data.NR || []).rpm_list
+        ) {
+          let rpmSeries = [data.NT.rpm_list, data.NR.rpm_list];
+          this.setState({
+            showHistogram: true
+          });
+          this.histogram = new Histogram(this.histogramContainer, rpmSeries, {
+            seriesNames: ["NT", "NR"],
+            labelX: "rpm",
+            labelY: "count",
+            refValues: [
+              {
+                name: "sample",
+                values: [
+                  this.props.taxonValues.NT.rpm,
+                  this.props.taxonValues.NR.rpm
+                ]
+              }
+            ]
+          });
+          this.histogram.update();
+        }
       })
       .catch(error => {
         // TODO: properly handle error
@@ -172,15 +168,19 @@ class TaxonModal extends React.Component {
                 </div>
               </div>
             )}
-            <div className="taxon-info__subtitle">
-              Reference Background: {this.state.background.name}
-            </div>
-            <div
-              className="taxon-info__histogram"
-              ref={histogramContainer => {
-                this.histogramContainer = histogramContainer;
-              }}
-            />
+            {this.state.showHistogram && (
+              <div>
+                <div className="taxon-info__subtitle">
+                  Reference Background: {this.state.background.name}
+                </div>
+                <div
+                  className="taxon-info__histogram"
+                  ref={histogramContainer => {
+                    this.histogramContainer = histogramContainer;
+                  }}
+                />
+              </div>
+            )}
             <div className="taxon-info__subtitle">Links</div>
             <div className="taxon-info__links-section">
               <ul className="taxon-info__links-list">
