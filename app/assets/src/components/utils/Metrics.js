@@ -1,4 +1,4 @@
-let metric_names = {
+const metric_names = {
   "NT.aggregatescore": "Score",
   "NT.rpm": "NT rPM",
   "NT.r": "NT r (reads)",
@@ -12,11 +12,14 @@ let metric_names = {
   "NR.percentidentity": "NR %id",
   "NR.neglogevalue": "NR log(1/e)"
 };
-let metric_names_augmented = {};
+const metric_names_augmented = {};
 for (var m in metric_names) {
   metric_names_augmented[m] = metric_names[m];
   metric_names_augmented[m.replace(".", "_")] = metric_names[m];
+  metric_names_augmented[m.replace(".", "_").toLowerCase()] = metric_names[m];
 }
+metric_names_augmented["aggregatescore"] =
+  metric_names_augmented["NT.aggregatescore"];
 export const METRIC_NAMES = metric_names_augmented;
 
 export const THRESHOLD_METRICS = [
@@ -32,3 +35,20 @@ export const THRESHOLD_METRICS = [
   "NR_percentidentity",
   "NR_neglogevalue"
 ];
+
+export const TREE_METRICS = [
+  "aggregatescore",
+  "nt_r",
+  "nt_rpm",
+  "nt_zscore",
+  "nr_r",
+  "nr_rpm",
+  "nr_zscore"
+];
+
+export function MetricTextAndValue(desiredMetrics) {
+  let result = desiredMetrics.map(metric => {
+    return { text: METRIC_NAMES[metric], value: metric };
+  });
+  return result;
+}

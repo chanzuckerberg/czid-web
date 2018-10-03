@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import TidyTree from "../visualizations/TidyTree";
 import PathogenLabel from "../ui/labels/PathogenLabel";
+import { METRIC_NAMES } from "../utils/Metrics";
 
 const TaxonLevels = [
   "species",
@@ -30,15 +31,33 @@ class TaxonTreeVis extends React.Component {
 
     this.metrics = {
       aggregatescore: {
-        label: "Aggregate Score",
+        label: METRIC_NAMES["aggregatescore"],
         agg: arr => Math.max(...arr)
       },
-      nt_r: { label: "NT r", agg: arr => arr.reduce((a, b) => a + b, 0) },
-      nt_rpm: { label: "NT rpm", agg: arr => arr.reduce((a, b) => a + b, 0) },
-      nt_zscore: { label: "NT Z-Score", agg: arr => Math.max(...arr) },
-      nr_r: { label: "NR r", agg: arr => arr.reduce((a, b) => a + b, 0) },
-      nr_rpm: { label: "NR rpm", agg: arr => arr.reduce((a, b) => a + b, 0) },
-      nr_zscore: { label: "NR Z-Score", agg: arr => Math.max(...arr) }
+      nt_r: {
+        label: METRIC_NAMES["nt_r"],
+        agg: arr => arr.reduce((a, b) => a + b, 0)
+      },
+      nt_rpm: {
+        label: METRIC_NAMES["nt_rpm"],
+        agg: arr => arr.reduce((a, b) => a + b, 0)
+      },
+      nt_zscore: {
+        label: METRIC_NAMES["nt_zscore"],
+        agg: arr => Math.max(...arr)
+      },
+      nr_r: {
+        label: METRIC_NAMES["nr_r"],
+        agg: arr => arr.reduce((a, b) => a + b, 0)
+      },
+      nr_rpm: {
+        label: METRIC_NAMES["nr_rpm"],
+        agg: arr => arr.reduce((a, b) => a + b, 0)
+      },
+      nr_zscore: {
+        label: METRIC_NAMES["nr_zscore"],
+        agg: arr => Math.max(...arr)
+      }
     };
 
     this.onNodeHover = this.onNodeHover.bind(this);

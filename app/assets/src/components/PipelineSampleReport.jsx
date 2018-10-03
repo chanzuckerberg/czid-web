@@ -21,7 +21,11 @@ import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
 import PhyloTreeChecks from "./views/phylo_tree/PhyloTreeChecks";
 import TaxonModal from "./views/report/TaxonModal";
 import TaxonTreeVis from "./views/TaxonTreeVis";
-import { METRIC_NAMES } from "./utils/Metrics";
+import {
+  METRIC_NAMES,
+  TREE_METRICS,
+  MetricTextAndValue
+} from "./utils/Metrics";
 
 class PipelineSampleReport extends React.Component {
   constructor(props) {
@@ -65,15 +69,7 @@ class PipelineSampleReport extends React.Component {
 
     this.showConcordance = false;
 
-    this.treeMetrics = [
-      { text: "Aggregate Score", value: "aggregatescore" },
-      { text: "NT r (total reads)", value: "nt_r" },
-      { text: "NT rPM", value: "nt_rpm" },
-      { text: "NT Z Score", value: "nt_zscore" },
-      { text: "NR r (total reads)", value: "nr_r" },
-      { text: "NR rPM", value: "nr_rpm" },
-      { text: "NR Z Score", value: "nr_zscore" }
-    ];
+    this.treeMetrics = MetricTextAndValue(TREE_METRICS);
 
     this.categoryChildParent = { Phage: "Viruses" };
     this.categoryParentChild = { Viruses: ["Phage"] };
@@ -1770,7 +1766,7 @@ function SpecificityFilter({ parent }) {
   );
 }
 
-function MetricPicker({ parent }) {
+function TreeMetricPicker({ parent }) {
   return (
     <OurDropdown
       options={parent.treeMetrics}
@@ -1903,7 +1899,7 @@ class RenderMarkup extends React.Component {
                       </div>
                       {this.state.view == "tree" && (
                         <div className="filter-lists-element">
-                          <MetricPicker parent={parent} />
+                          <TreeMetricPicker parent={parent} />
                         </div>
                       )}
                     </div>
