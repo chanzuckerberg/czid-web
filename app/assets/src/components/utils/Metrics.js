@@ -1,4 +1,4 @@
-const metric_names = {
+const metricNames = {
   "NT.aggregatescore": "Score",
   "NT.rpm": "NT rPM",
   "NT.r": "NT r (reads)",
@@ -12,15 +12,15 @@ const metric_names = {
   "NR.percentidentity": "NR %id",
   "NR.neglogevalue": "NR log(1/e)"
 };
-const metric_names_augmented = {};
-for (var m in metric_names) {
-  metric_names_augmented[m] = metric_names[m];
-  metric_names_augmented[m.replace(".", "_")] = metric_names[m];
-  metric_names_augmented[m.replace(".", "_").toLowerCase()] = metric_names[m];
+const metricNamesAugmented = {};
+for (var m in metricNames) {
+  metricNamesAugmented[m] = metricNames[m];
+  metricNamesAugmented[m.replace(".", "_")] = metricNames[m];
+  metricNamesAugmented[m.replace(".", "_").toLowerCase()] = metricNames[m];
 }
-metric_names_augmented["aggregatescore"] =
-  metric_names_augmented["NT.aggregatescore"];
-export const METRIC_NAMES = metric_names_augmented;
+metricNamesAugmented["aggregatescore"] =
+  metricNamesAugmented["NT.aggregatescore"];
+export const METRIC_NAMES = metricNamesAugmented;
 
 export const THRESHOLD_METRICS = [
   "NT_aggregatescore",

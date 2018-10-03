@@ -31,31 +31,24 @@ class TaxonTreeVis extends React.Component {
 
     this.metrics = {
       aggregatescore: {
-        label: METRIC_NAMES["aggregatescore"],
         agg: arr => Math.max(...arr)
       },
       nt_r: {
-        label: METRIC_NAMES["nt_r"],
         agg: arr => arr.reduce((a, b) => a + b, 0)
       },
       nt_rpm: {
-        label: METRIC_NAMES["nt_rpm"],
         agg: arr => arr.reduce((a, b) => a + b, 0)
       },
       nt_zscore: {
-        label: METRIC_NAMES["nt_zscore"],
         agg: arr => Math.max(...arr)
       },
       nr_r: {
-        label: METRIC_NAMES["nr_r"],
         agg: arr => arr.reduce((a, b) => a + b, 0)
       },
       nr_rpm: {
-        label: METRIC_NAMES["nr_rpm"],
         agg: arr => arr.reduce((a, b) => a + b, 0)
       },
       nr_zscore: {
-        label: METRIC_NAMES["nr_zscore"],
         agg: arr => Math.max(...arr)
       }
     };
@@ -237,7 +230,7 @@ class TaxonTreeVis extends React.Component {
             }`}
           >
             <div className="taxon_tooltip__row__label">
-              {this.metrics[metric].label}:
+              {METRIC_NAMES[metric]}:
             </div>
             <div className="taxon_tooltip__row__value">
               {Math.round(node.data.values[metric]).toLocaleString()}

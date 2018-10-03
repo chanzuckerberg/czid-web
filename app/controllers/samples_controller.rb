@@ -223,9 +223,9 @@ class SamplesController < ApplicationController
         Viruses: ["Phage"]
       },
       metrics: [
-        "NT.r",
         "NT.aggregatescore",
         "NT.rpm",
+        "NT.r",
         "NT.zscore",
         "NT.maxzscore",
         "NR.rpm",
