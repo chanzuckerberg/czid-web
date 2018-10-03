@@ -60,7 +60,7 @@ class SamplesHeatmap extends React.Component {
         }
       },
       selectedOptions: {
-        metric: this.urlParams.metric || this.props.metrics[0],
+        metric: this.urlParams.metric || "NT.r",
         categories: this.urlParams.categories || [],
         subcategories: this.urlParams.subcategories || {},
         background:

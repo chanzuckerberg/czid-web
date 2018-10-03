@@ -223,7 +223,7 @@ class SamplesController < ApplicationController
         Viruses: ["Phage"]
       },
       metrics: [
-        "NT.r", # first entry will be default selection
+        "NT.r",
         "NT.aggregatescore",
         "NT.rpm",
         "NT.zscore",
