@@ -174,10 +174,11 @@ class TaxonTreeVis extends React.Component {
         parentId = nodeId;
       }
 
-      let nodeId = taxon.tax_id;
+      let nodeId =
+        taxon.tax_id > 0 ? taxon.tax_id : `${parentId}_${taxon.tax_id}`;
       nodes.push({
         id: nodeId,
-        taxId: nodeId,
+        taxId: taxon.tax_id,
         commonName: taxon.common_name,
         scientificName:
           taxon.tax_id > 0
