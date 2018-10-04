@@ -1,4 +1,5 @@
 @import "variables";
+@import "themes/colors";
 /* TODO: refactor stylesheet into scss */
 
 .background-button-section {
@@ -673,23 +674,23 @@ $break-large: 1070px;
               }
               .time {
                 .duration-label {
-                  color: $subdued-color;
+                  color: $medium-grey;
                   margin-left: 5px;
                   font-size: 12px;
                 }
                 .fa {
-                  color: $subdued-color;
+                  color: $medium-grey;
                 }
               }
               &.data-label {
                 text-align: left;
                 .percent {
-                  color: $subdued-grey;
+                  color: $medium-grey;
                 }
               }
             }
             &.author {
-              color: $subdued-grey;
+              color: $medium-grey;
               font-size: 11px;
             }
             &.sample-name {
@@ -712,7 +713,7 @@ $break-large: 1070px;
               margin-right: 5px;
             }
             .upload-date {
-              color: $subdued-grey;
+              color: $medium-grey;
               font-size: 11px;
             }
           }
