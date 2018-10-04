@@ -88,7 +88,6 @@ export default class TidyTree {
   }
 
   resetTree() {
-    let i = 0;
     this.root.eachBefore(d => {
       if (d.children || d.collapsedChildren || d.hiddenChildren) {
         d.children = (d.children || [])
