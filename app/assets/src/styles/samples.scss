@@ -870,11 +870,13 @@ $break-large: 1070px;
       top: -1.2em;
       height: 38px;
       &::placeholder {
-        color: #cccccc;
+        color: $medium-grey;
+        font-family: $font-family-default;
       }
       &:focus {
         border-bottom-color: $light-gray3;
         box-shadow: 0 1px 0 0 $light-gray3;
+        border: 1px solid $primary-light;
       }
     }
 
