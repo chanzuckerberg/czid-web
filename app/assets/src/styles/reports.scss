@@ -2,6 +2,7 @@
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
 @import "variables";
+@import "themes/colors";
 
 // removing the arrows
 input[type="number"]::-webkit-outer-spin-button,
@@ -552,6 +553,17 @@ input[type="number"] {
       &:-moz-placeholder,
       &::placeholder {
         color: #bac7cf;
+      }
+    }
+    input {
+      &::placeholder {
+        color: $medium-grey;
+        font-family: $font-family-default;
+      }
+      &:focus {
+        border-bottom-color: $light-grey !important;
+        box-shadow: 0 1px 0 0 $light-grey !important;
+        border: 1px solid $primary-light !important;
       }
     }
   }
