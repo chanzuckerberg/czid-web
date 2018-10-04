@@ -29,28 +29,14 @@ class TaxonTreeVis extends React.Component {
     this.tree = null;
     this.treeVis = null;
 
-    this.metrics = {
-      aggregatescore: {
-        agg: arr => Math.max(...arr)
-      },
-      nt_r: {
-        agg: arr => arr.reduce((a, b) => a + b, 0)
-      },
-      nt_rpm: {
-        agg: arr => arr.reduce((a, b) => a + b, 0)
-      },
-      nt_zscore: {
-        agg: arr => Math.max(...arr)
-      },
-      nr_r: {
-        agg: arr => arr.reduce((a, b) => a + b, 0)
-      },
-      nr_rpm: {
-        agg: arr => arr.reduce((a, b) => a + b, 0)
-      },
-      nr_zscore: {
-        agg: arr => Math.max(...arr)
-      }
+    this.metrics = { // metrics and their aggregation functions
+      aggregatescore: arr => Math.max(...arr),
+      nt_r: arr => arr.reduce((a, b) => a + b, 0),
+      nt_rpm: arr => arr.reduce((a, b) => a + b, 0),
+      nt_zscore: arr => Math.max(...arr),
+      nr_r: arr => arr.reduce((a, b) => a + b, 0),
+      nr_rpm: arr => arr.reduce((a, b) => a + b, 0),
+      nr_zscore: arr => Math.max(...arr)
     };
 
     this.onNodeHover = this.onNodeHover.bind(this);
@@ -153,7 +139,7 @@ class TaxonTreeVis extends React.Component {
           this.metrics.hasOwnProperty(metric) &&
           !node.data.values.hasOwnProperty(metric)
         ) {
-          node.data.values[metric] = this.metrics[metric].agg(
+          node.data.values[metric] = this.metrics[metric](
             node.children
               .filter(child => child.data.values[metric])
               .map(child => child.data.values[metric])
