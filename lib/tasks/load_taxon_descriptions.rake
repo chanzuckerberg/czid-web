@@ -9,13 +9,14 @@ task :load_taxon_descriptions, [:taxon_desc_s3_path] => :environment do |_t, arg
   json_dict = JSON.parse(File.read(downloaded_json_path))
   values_list = []
   date = DateTime.now.in_time_zone
+  ec = Encoding::Converter.new(Encoding.find('ISO-8859-1'), Encoding.find('UTF-8'))
   ActiveRecord::Base.transaction do
     json_dict.each do |taxid, data|
+      description = ec.convert(data['description'])
+      title = ec.convert(data['title'] || '')
+      summary = ec.convert(data['summary'] || '')
       datum = [taxid.to_i, data['pageid'].to_i,
-               data['description'].encode(Encoding.find('ASCII'), invalid: :replace, undef: :replace),
-               (data['title'] || '').encode(Encoding.find('ASCII'), invalid: :replace, undef: :replace),
-               (data['summary'] || '').encode(Encoding.find('ASCII'), invalid: :replace, undef: :replace),
-               date, date].map { |v| ActiveRecord::Base.connection.quote(v) }
+               description, title, summary, date, date].map { |v| ActiveRecord::Base.connection.quote(v) }
       values_list << datum
       if values_list.size >= LOAD_CHUNK_SIZE
         ActiveRecord::Base.connection.execute <<-SQL
