@@ -19,6 +19,7 @@ import Slider from "./ui/controls/Slider";
 import TaxonTooltip from "./TaxonTooltip";
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
 import { Colormap } from "./utils/colormaps/Colormap";
+import { METRIC_NAMES } from "./utils/Metrics";
 
 class SamplesHeatmap extends React.Component {
   // TODO: do not make another request if values did not change
@@ -51,7 +52,6 @@ class SamplesHeatmap extends React.Component {
         ) {
           return { text: taxonLevelName, value: index };
         }),
-        thresholdFilters: this.props.thresholdFilters,
         // Client side options
         scales: [["Log", symlog], ["Lin", d3.scale.linear]],
         taxonsPerSample: {
@@ -60,7 +60,7 @@ class SamplesHeatmap extends React.Component {
         }
       },
       selectedOptions: {
-        metric: this.urlParams.metric || this.props.metrics[0],
+        metric: this.urlParams.metric || "NT.r",
         categories: this.urlParams.categories || [],
         subcategories: this.urlParams.subcategories || {},
         background:
@@ -493,7 +493,7 @@ class SamplesHeatmap extends React.Component {
 
   renderMetricPicker() {
     let options = this.state.availableOptions.metrics.map(function(metric) {
-      return { text: metric, value: metric };
+      return { text: METRIC_NAMES[metric], value: metric };
     });
 
     return (
@@ -519,7 +519,6 @@ class SamplesHeatmap extends React.Component {
   renderAdvancedFilterPicker() {
     return (
       <ThresholdFilterDropdown
-        options={this.state.availableOptions.thresholdFilters}
         thresholds={this.state.selectedOptions.thresholdFilters}
         onApply={this.onThresholdFilterApply}
         disabled={!this.state.data}

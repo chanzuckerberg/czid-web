@@ -21,6 +21,11 @@ import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
 import PhyloTreeChecks from "./views/phylo_tree/PhyloTreeChecks";
 import TaxonModal from "./views/report/TaxonModal";
 import TaxonTreeVis from "./views/TaxonTreeVis";
+import {
+  METRIC_NAMES,
+  TREE_METRICS,
+  MetricTextAndValue
+} from "./utils/Metrics";
 
 class PipelineSampleReport extends React.Component {
   constructor(props) {
@@ -64,44 +69,16 @@ class PipelineSampleReport extends React.Component {
 
     this.showConcordance = false;
 
-    this.treeMetrics = [
-      { text: "Aggregate Score", value: "aggregatescore" },
-      { text: "NT r (total reads)", value: "nt_r" },
-      { text: "NT rPM", value: "nt_rpm" },
-      { text: "NT Z Score", value: "nt_zscore" },
-      { text: "NR r (total reads)", value: "nr_r" },
-      { text: "NR rPM", value: "nr_rpm" },
-      { text: "NR Z Score", value: "nr_zscore" }
-    ];
+    this.treeMetrics = MetricTextAndValue(TREE_METRICS);
 
-    this.allThresholds = [
-      { text: "Score", value: "NT_aggregatescore" },
-      { text: "NT Z Score", value: "NT_zscore" },
-      { text: "NT rPM", value: "NT_rpm" },
-      { text: "NT r (total reads)", value: "NT_r" },
-      { text: "NT %id", value: "NT_percentidentity" },
-      { text: "NT log(1/e)", value: "NT_neglogevalue" },
-      { text: "NR Z Score", value: "NR_zscore" },
-      { text: "NR r (total reads)", value: "NR_r" },
-      { text: "NR rPM", value: "NR_rpm" },
-      { text: "NR %id", value: "NR_percentidentity" },
-      { text: "R log(1/e)", value: "NR_neglogevalue" }
-    ];
     this.categoryChildParent = { Phage: "Viruses" };
     this.categoryParentChild = { Viruses: ["Phage"] };
     this.genus_map = {};
 
     this.INVALID_CALL_BASE_TAXID = -1e8;
 
-    this.thresholdTextByValue = this.allThresholds.reduce(
-      (metrics, threshold) => {
-        metrics[threshold.value] = threshold.text;
-        return metrics;
-      },
-      {}
-    );
     this.defaultThreshold = {
-      metric: this.allThresholds[0]["value"],
+      metric: "NT_aggregatescore",
       operator: ">=",
       value: ""
     };
@@ -1509,8 +1486,8 @@ function AdvancedFilterTagList({ threshold, i, parent }) {
         size="tiny"
         key={`advanced_filter_tag_${i}`}
       >
-        {parent.thresholdTextByValue[threshold["metric"]]}{" "}
-        {threshold["operator"]} {threshold["value"]}
+        {METRIC_NAMES[threshold["metric"]]} {threshold["operator"]}{" "}
+        {threshold["value"]}
         <Icon
           name="close"
           onClick={() => {
@@ -1789,7 +1766,7 @@ function SpecificityFilter({ parent }) {
   );
 }
 
-function MetricPicker({ parent }) {
+function TreeMetricPicker({ parent }) {
   return (
     <OurDropdown
       options={parent.treeMetrics}
@@ -1913,10 +1890,6 @@ class RenderMarkup extends React.Component {
                       </div>
                       <div className="filter-lists-element">
                         <ThresholdFilterDropdown
-                          options={{
-                            targets: parent.allThresholds,
-                            operators: [">=", "<="]
-                          }}
                           thresholds={parent.state.activeThresholds}
                           onApply={parent.handleThresholdFiltersChange}
                         />
@@ -1926,7 +1899,7 @@ class RenderMarkup extends React.Component {
                       </div>
                       {this.state.view == "tree" && (
                         <div className="filter-lists-element">
-                          <MetricPicker parent={parent} />
+                          <TreeMetricPicker parent={parent} />
                         </div>
                       )}
                     </div>

@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import TidyTree from "../visualizations/TidyTree";
 import PathogenLabel from "../ui/labels/PathogenLabel";
+import { METRIC_NAMES } from "../utils/Metrics";
 
 const TaxonLevels = [
   "species",
@@ -28,17 +29,14 @@ class TaxonTreeVis extends React.Component {
     this.tree = null;
     this.treeVis = null;
 
-    this.metrics = {
-      aggregatescore: {
-        label: "Aggregate Score",
-        agg: arr => Math.max(...arr)
-      },
-      nt_r: { label: "NT r", agg: arr => arr.reduce((a, b) => a + b, 0) },
-      nt_rpm: { label: "NT rpm", agg: arr => arr.reduce((a, b) => a + b, 0) },
-      nt_zscore: { label: "NT Z-Score", agg: arr => Math.max(...arr) },
-      nr_r: { label: "NR r", agg: arr => arr.reduce((a, b) => a + b, 0) },
-      nr_rpm: { label: "NR rpm", agg: arr => arr.reduce((a, b) => a + b, 0) },
-      nr_zscore: { label: "NR Z-Score", agg: arr => Math.max(...arr) }
+    this.metrics = { // metrics and their aggregation functions
+      aggregatescore: arr => Math.max(...arr),
+      nt_r: arr => arr.reduce((a, b) => a + b, 0),
+      nt_rpm: arr => arr.reduce((a, b) => a + b, 0),
+      nt_zscore: arr => Math.max(...arr),
+      nr_r: arr => arr.reduce((a, b) => a + b, 0),
+      nr_rpm: arr => arr.reduce((a, b) => a + b, 0),
+      nr_zscore: arr => Math.max(...arr)
     };
 
     this.onNodeHover = this.onNodeHover.bind(this);
@@ -141,7 +139,7 @@ class TaxonTreeVis extends React.Component {
           this.metrics.hasOwnProperty(metric) &&
           !node.data.values.hasOwnProperty(metric)
         ) {
-          node.data.values[metric] = this.metrics[metric].agg(
+          node.data.values[metric] = this.metrics[metric](
             node.children
               .filter(child => child.data.values[metric])
               .map(child => child.data.values[metric])
@@ -218,7 +216,7 @@ class TaxonTreeVis extends React.Component {
             }`}
           >
             <div className="taxon_tooltip__row__label">
-              {this.metrics[metric].label}:
+              {METRIC_NAMES[metric]}:
             </div>
             <div className="taxon_tooltip__row__value">
               {Math.round(node.data.values[metric]).toLocaleString()}
