@@ -696,7 +696,7 @@ class SamplesHeatmap extends React.Component {
   renderTaxonsPerSampleSlider() {
     return (
       <Slider
-        label="Taxons per Sample: "
+        label="Taxa per Sample: "
         min={this.state.availableOptions.taxonsPerSample.min}
         max={this.state.availableOptions.taxonsPerSample.max}
         value={this.state.selectedOptions.taxonsPerSample}

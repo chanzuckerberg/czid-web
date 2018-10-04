@@ -143,7 +143,7 @@ class PipelineSampleReads extends React.Component {
         data: { authenticity_token: this.csrf }
       })
       .then(() => {
-        location.href = `/?project_id=${this.projectInfo.id}`;
+        location.href = `/home?project_id=${this.projectInfo.id}`;
       })
       .catch(err => {});
   }
@@ -899,7 +899,7 @@ class PipelineSampleReads extends React.Component {
             </div>
             <div className="row">
               <div className="sub-title col s10">
-                <a href={`/?project_id=${this.projectInfo.id}`}>
+                <a href={`/home?project_id=${this.projectInfo.id}`}>
                   {this.projectInfo.name + " "}
                 </a>
                 {">"}

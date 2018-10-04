@@ -8,7 +8,6 @@ import { Label, Menu, Icon, Popup } from "semantic-ui-react";
 import numberWithCommas from "../helpers/strings";
 import StringHelper from "../helpers/StringHelper";
 import ThresholdMap from "./utils/ThresholdMap";
-import PipelineSampleTree from "./PipelineSampleTree";
 import Nanobar from "nanobar";
 import BasicPopup from "./BasicPopup";
 import OurDropdown from "./ui/controls/dropdowns/Dropdown";
@@ -20,6 +19,8 @@ import PathogenSummary from "./views/report/PathogenSummary";
 import ReportInsightIcon from "./views/report/ReportInsightIcon";
 import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
 import PhyloTreeChecks from "./views/phylo_tree/PhyloTreeChecks";
+import TaxonModal from "./views/report/TaxonModal";
+import TaxonTreeVis from "./views/TaxonTreeVis";
 
 class PipelineSampleReport extends React.Component {
   constructor(props) {
@@ -30,9 +31,7 @@ class PipelineSampleReport extends React.Component {
     });
     this.admin = props.admin;
     this.allowedFeatures = props.allowedFeatures;
-    this.allowPhyloTree =
-      props.can_edit &&
-      (this.admin == 1 || this.allowedFeatures.indexOf("phylo_trees") >= 0);
+    this.allowPhyloTree = props.can_edit;
     this.allowPathogenSummary = false;
     this.report_ts = props.report_ts;
     this.sample_id = props.sample_id;
@@ -59,9 +58,22 @@ class PipelineSampleReport extends React.Component {
 
     const cached_name_type = Cookies.get("name_type");
     const cachedReadSpecificity = Cookies.get("readSpecificity");
+    const cachedTreeMetric = Cookies.get("treeMetric");
+
     const savedThresholdFilters = ThresholdMap.getSavedThresholdFilters();
 
     this.showConcordance = false;
+
+    this.treeMetrics = [
+      { text: "Aggregate Score", value: "aggregatescore" },
+      { text: "NT r (total reads)", value: "nt_r" },
+      { text: "NT rPM", value: "nt_rpm" },
+      { text: "NT Z Score", value: "nt_zscore" },
+      { text: "NR r (total reads)", value: "nr_r" },
+      { text: "NR rPM", value: "nr_rpm" },
+      { text: "NR Z Score", value: "nr_zscore" }
+    ];
+
     this.allThresholds = [
       { text: "Score", value: "NT_aggregatescore" },
       { text: "NT Z Score", value: "NT_zscore" },
@@ -136,6 +148,7 @@ class PipelineSampleReport extends React.Component {
       readSpecificity: cachedReadSpecificity
         ? parseInt(cachedReadSpecificity)
         : 0,
+      treeMetric: cachedTreeMetric || this.treeMetrics[0].value,
       phyloTreeModalOpen: true
     };
 
@@ -174,6 +187,7 @@ class PipelineSampleReport extends React.Component {
     this.handleThresholdFiltersChange = this.handleThresholdFiltersChange.bind(
       this
     );
+    this.handleTreeMetricChange = this.handleTreeMetricChange.bind(this);
     this.handleViewClicked = this.handleViewClicked.bind(this);
 
     this.renderMore = this.renderMore.bind(this);
@@ -841,6 +855,11 @@ class PipelineSampleReport extends React.Component {
     });
   }
 
+  handleTreeMetricChange(_, data) {
+    Cookies.set("treeMetric", data.value);
+    this.setState({ treeMetric: data.value });
+  }
+
   handleViewClicked(_, data) {
     this.setState({ view: data.name });
   }
@@ -1017,38 +1036,61 @@ class PipelineSampleReport extends React.Component {
     return category_lowercase;
   }
 
-  render_name(tax_info, report_details) {
+  render_name(tax_info, report_details, parent) {
     let tax_scientific_name = tax_info["name"];
     let tax_common_name = tax_info["common_name"];
-    let tax_name;
+    let taxonName;
+    let taxonNameDisplay;
 
     if (this.state.name_type.toLowerCase() == "common name") {
-      if (!tax_common_name || tax_common_name.trim() == "")
-        tax_name = <span className="count-info">{tax_scientific_name}</span>;
-      else
-        tax_name = (
-          <span>{StringHelper.capitalizeFirstLetter(tax_common_name)}</span>
+      if (!tax_common_name || tax_common_name.trim() == "") {
+        taxonName = tax_scientific_name;
+        taxonNameDisplay = <span className="count-info">{taxonName}</span>;
+      } else {
+        taxonName = tax_common_name;
+        taxonNameDisplay = (
+          <span>{StringHelper.capitalizeFirstLetter(taxonName)}</span>
         );
+      }
     } else {
-      tax_name = <span>{tax_scientific_name}</span>;
+      taxonName = tax_scientific_name;
+      taxonNameDisplay = <span>{tax_scientific_name}</span>;
     }
-
-    let taxonNameDisplay = <i>{tax_name}</i>;
 
     if (tax_info.tax_id > 0) {
       if (report_details.taxon_fasta_flag) {
         taxonNameDisplay = (
           <span>
-            <a>{tax_name}</a>
+            <a>{taxonNameDisplay}</a>
           </span>
         );
       } else {
-        taxonNameDisplay = <span>{tax_name}</span>;
+        taxonNameDisplay = <span>{taxonNameDisplay}</span>;
       }
+      taxonNameDisplay = (
+        <TaxonModal
+          taxonId={tax_info.tax_id}
+          taxonValues={{
+            NT: tax_info.NT,
+            NR: tax_info.NR
+          }}
+          parentTaxonId={
+            tax_info.tax_level === 1 ? tax_info.genus_taxid : undefined
+          }
+          background={{
+            name: parent.state.backgroundName,
+            id: parent.state.backgroundId
+          }}
+          taxonName={taxonName}
+          trigger={taxonNameDisplay}
+        />
+      );
+    } else {
+      taxonNameDisplay = <i>{taxonNameDisplay}</i>;
     }
     let secondaryTaxonDisplay = (
       <span>
-        <PathogenLabel type={tax_info.pathogenTag} />
+        {tax_info.pathogenTag && <PathogenLabel type={tax_info.pathogenTag} />}
         {this.displayHoverActions(tax_info, report_details)}
       </span>
     );
@@ -1483,7 +1525,7 @@ function AdvancedFilterTagList({ threshold, i, parent }) {
 }
 
 function DetailCells({ parent }) {
-  return parent.state.selected_taxons_top.map((tax_info, i) => (
+  return parent.state.selected_taxons_top.map(tax_info => (
     <tr
       key={tax_info.tax_id}
       id={`taxon-${tax_info.tax_id}`}
@@ -1496,7 +1538,7 @@ function DetailCells({ parent }) {
         parent.props.watched_taxids
       )}
     >
-      <td>{parent.render_name(tax_info, parent.report_details)}</td>
+      <td>{parent.render_name(tax_info, parent.report_details, parent)}</td>
       {parent.render_number(
         tax_info.NT.aggregatescore,
         null,
@@ -1747,6 +1789,17 @@ function SpecificityFilter({ parent }) {
   );
 }
 
+function MetricPicker({ parent }) {
+  return (
+    <OurDropdown
+      options={parent.treeMetrics}
+      value={parent.state.treeMetric}
+      label="Tree Metric: "
+      onChange={parent.handleTreeMetricChange}
+    />
+  );
+}
+
 class RenderMarkup extends React.Component {
   constructor(props) {
     super(props);
@@ -1809,12 +1862,16 @@ class RenderMarkup extends React.Component {
       return;
     }
     return (
-      <PipelineSampleTree
-        taxons={parent.state.selected_taxons}
-        sample={parent.report_details.sample_info}
-        nameType={parent.state.name_type}
-        onNodeTextClicked={this._nodeTextClicked}
-      />
+      <div>
+        <TaxonTreeVis
+          taxa={parent.state.selected_taxons}
+          topTaxa={parent.state.topScoringTaxa}
+          sample={parent.report_details.sample_info}
+          metric={parent.state.treeMetric}
+          nameType={parent.state.name_type}
+          onNodeTextClicked={this._nodeTextClicked}
+        />
+      </div>
     );
   }
 
@@ -1867,6 +1924,11 @@ class RenderMarkup extends React.Component {
                       <div className="filter-lists-element">
                         <SpecificityFilter parent={parent} />
                       </div>
+                      {this.state.view == "tree" && (
+                        <div className="filter-lists-element">
+                          <MetricPicker parent={parent} />
+                        </div>
+                      )}
                     </div>
                   </div>
                   {this.renderMenu()}

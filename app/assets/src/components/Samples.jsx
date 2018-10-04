@@ -29,8 +29,6 @@ class Samples extends React.Component {
     this.csrf = props.csrf;
     this.admin = props.admin;
     this.allowedFeatures = props.allowedFeatures;
-    this.allowPhyloTree =
-      this.admin || this.allowedFeatures.indexOf("phylo_trees") >= 0;
     this.favoriteProjects = props.favorites || [];
     this.allProjects = props.projects || [];
     this.pageSize = props.pageSize || 30;
@@ -1943,16 +1941,6 @@ class AddUserModal extends React.Component {
             {this.props.state.project ? this.props.state.project.name : null}
           </div>
           <AddUserModalMemberArea state={this.props.state} parent={this} />
-          <input
-            type="checkbox"
-            id="background_flag"
-            onChange={this.props.parent.toggleBackgroundFlag}
-            className="filled-in checkbox"
-            checked={this.props.state.project.background_flag}
-          />
-          <label htmlFor="background_flag">
-            Expose project-specific background
-          </label>
         </Modal.Content>
         <Modal.Actions>
           <PrimaryButton text="Close" onClick={this.handleClose} />
@@ -2023,13 +2011,7 @@ function ProjectInfoHeading({
       </div>
     )
   };
-  if (proj) {
-    phyloProps["projectId"] = proj.id;
-    phyloProps["projectName"] = proj.name;
-  }
-  let phyloTreeModal = parent.allowPhyloTree ? (
-    <PhyloTreeCreationModal {...phyloProps} />
-  ) : null;
+  let phyloTreeModal = <PhyloTreeCreationModal {...phyloProps} />;
 
   return (
     <div className="row download-section">
