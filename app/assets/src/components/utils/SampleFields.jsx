@@ -1,17 +1,7 @@
-import React from "react";
-import Moment from "react-moment";
-
 export const SAMPLE_FIELDS = [
   { name: "name", label: "Name" },
   { name: "project_name", label: "Project" },
   { name: "sample_location", label: "Location" },
-  {
-    name: "created_at",
-    label: "Upload Date",
-    parser: val => {
-      return <Moment fromNow date={val} />;
-    }
-  },
   { name: "sample_date", label: "Collection date" },
   { name: "sample_tissue", label: "Tissue type" },
   { name: "sample_template", label: "Nucleotide type" },

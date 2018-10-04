@@ -973,9 +973,7 @@ class PipelineSampleReads extends React.Component {
                             let properties = this.sampleFieldProperties.get(
                               field
                             );
-                            let renderMethod = this.sampleFieldRenderMethods[
-                              field
-                            ];
+                            let renderMethod = this.sampleFieldRenderMethods[field];
                             return renderMethod(
                               properties.label,
                               properties.name,
@@ -988,9 +986,7 @@ class PipelineSampleReads extends React.Component {
                             let properties = this.sampleFieldProperties.get(
                               field
                             );
-                            let renderMethod = this.sampleFieldRenderMethods[
-                              field
-                            ];
+                            let renderMethod = this.sampleFieldRenderMethods[field];
                             return renderMethod(
                               properties.label,
                               properties.name,
