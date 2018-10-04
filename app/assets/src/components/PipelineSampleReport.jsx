@@ -68,10 +68,8 @@ class PipelineSampleReport extends React.Component {
       { text: "Aggregate Score", value: "aggregatescore" },
       { text: "NT r (total reads)", value: "nt_r" },
       { text: "NT rPM", value: "nt_rpm" },
-      { text: "NT Z Score", value: "nt_zscore" },
       { text: "NR r (total reads)", value: "nr_r" },
-      { text: "NR rPM", value: "nr_rpm" },
-      { text: "NR Z Score", value: "nr_zscore" }
+      { text: "NR rPM", value: "nr_rpm" }
     ];
 
     this.allThresholds = [
@@ -1057,8 +1055,6 @@ class PipelineSampleReport extends React.Component {
       taxonNameDisplay = <span>{tax_scientific_name}</span>;
     }
 
-    taxonNameDisplay = <i>{taxonNameDisplay}</i>;
-
     if (tax_info.tax_id > 0) {
       if (report_details.taxon_fasta_flag) {
         taxonNameDisplay = (
@@ -1087,6 +1083,8 @@ class PipelineSampleReport extends React.Component {
           trigger={taxonNameDisplay}
         />
       );
+    } else {
+      taxonNameDisplay = <i>{taxonNameDisplay}</i>;
     }
     let secondaryTaxonDisplay = (
       <span>

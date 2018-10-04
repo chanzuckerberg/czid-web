@@ -3,6 +3,7 @@ import Tree from "../../utils/structures/Tree";
 import Dendogram from "../../visualizations/dendrogram/Dendogram";
 import PropTypes from "prop-types";
 import DataTooltip from "../../ui/containers/DataTooltip";
+import { SAMPLE_FIELDS } from "../../utils/SampleFields";
 import Moment from "react-moment";
 
 class PhyloTreeVis extends React.Component {
@@ -19,28 +20,14 @@ class PhyloTreeVis extends React.Component {
 
     this.handleNodeHover = this.handleNodeHover.bind(this);
 
-    this.sampleFields = [
-      { name: "project_name", label: "Project" },
-      { name: "sample_location", label: "Location" },
-      {
-        name: "created_at",
-        label: "Upload Date",
-        parser: val => {
-          return <Moment fromNow date={val} />;
-        }
-      },
-      { name: "sample_date", label: "Collection Date" },
-      { name: "sample_tissue", label: "Tissue" },
-      { name: "sample_template", label: "Template" },
-      { name: "sample_library", label: "Library" },
-      { name: "sample_sequencer", label: "Sequencer" },
-      { name: "sample_unique_id", label: "Unique ID" },
-      { name: "sample_input_pg", label: "Input PG" },
-      { name: "sample_batch", label: "Batch" },
-      { name: "sample_diagnosis", label: "Diagnosis" },
-      { name: "sample_detection", label: "Detection" },
-      { name: "sample_notes", label: "Notes" }
-    ];
+    this.sampleFields = SAMPLE_FIELDS;
+    this.sampleFields.splice(2, 0, {
+      name: "created_at",
+      label: "Upload Date",
+      parser: val => {
+        return <Moment fromNow date={val} />;
+      }
+    });
     this.ncbiFields = [
       { name: "country", label: "Country" },
       { name: "collection_date", label: "Collection Date" }

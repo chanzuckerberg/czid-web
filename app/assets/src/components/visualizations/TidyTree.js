@@ -87,7 +87,23 @@ export default class TidyTree {
     this.update();
   }
 
+  resetTree() {
+    this.root.eachBefore(d => {
+      if (d.children || d.collapsedChildren || d.hiddenChildren) {
+        d.children = (d.children || [])
+          .concat(d.collapsedChildren || [])
+          .concat(d.hiddenChildren || []);
+        d.children = d.children.filter(child => !child.isAggregated);
+        d.collapsedChildren = null;
+        d.hiddenChildren = null;
+      }
+      d.isAggregated = false;
+    });
+  }
+
   sortAndScaleTree() {
+    this.resetTree();
+
     this.root.sort(
       (a, b) =>
         b.data.values[this.options.attribute] -
@@ -118,7 +134,9 @@ export default class TidyTree {
             collapsedScale(child.data.values[this.options.attribute]) <
               this.options.collapseThreshold
         );
-        if (d.collapsedChildren < this.options.minNonCollapsableChildren) {
+        if (
+          d.collapsedChildren.length < this.options.minNonCollapsableChildren
+        ) {
           d.collapsedChildren = null;
         } else {
           d.children = d.children.filter(
@@ -165,7 +183,6 @@ export default class TidyTree {
         node.collapsedChildren = node.hiddenChildren;
         node.hiddenChildren = null;
       }
-
       this.update(
         Object.assign(node, {
           x0: node.x,
@@ -370,9 +387,7 @@ export default class TidyTree {
         return `translate(${y},${x})`;
       });
 
-    let clickableNode = nodeEnter
-      .append("g")
-      .on("click", d => this.toggleCollapseNode(d));
+    let clickableNode = nodeEnter.append("g").attr("class", "clickable");
 
     clickableNode.append("circle").attr("r", 0);
 
@@ -466,6 +481,10 @@ export default class TidyTree {
           : null;
       })
       .style("fill-opacity", 1);
+
+    nodeUpdate
+      .select(".clickable")
+      .on("click", d => this.toggleCollapseNode(d));
 
     nodeUpdate
       .select("circle")

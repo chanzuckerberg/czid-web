@@ -11,10 +11,12 @@ import ERCCScatterPlot from "./ERCCScatterPlot";
 import PipelineSampleReport from "./PipelineSampleReport";
 import AMRView from "./AMRView";
 import BasicPopup from "./BasicPopup";
+import { SAMPLE_FIELDS } from "./utils/SampleFields";
 
 class PipelineSampleReads extends React.Component {
   constructor(props) {
     super(props);
+
     this.admin = props.admin;
     this.allowedFeatures = props.allowedFeatures;
     this.amr = props.amr;
@@ -66,6 +68,41 @@ class PipelineSampleReads extends React.Component {
       sample_template: this.NUCLEOTIDE_TYPES
     };
     this.DROPDOWN_METADATA_FIELDS = Object.keys(this.DROPDOWN_OPTIONS);
+    this.render_metadata_textfield = this.render_metadata_textfield.bind(this);
+    this.render_metadata_dropdown = this.render_metadata_dropdown.bind(this);
+
+    this.sampleFieldsColumn1 = [
+      "sample_location",
+      "sample_tissue",
+      "sample_template",
+      "sample_unique_id",
+      "sample_date"
+    ];
+    this.sampleFieldsColumn2 = [
+      "sample_library",
+      "sample_sequencer",
+      "sample_input_pg",
+      "sample_batch",
+      "sample_organism",
+      "sample_detection"
+    ];
+    this.sampleFieldProperties = new Map(
+      SAMPLE_FIELDS.map(item => [item.name, item])
+    );
+    this.sampleFieldRenderMethods = {
+      sample_location: this.render_metadata_textfield,
+      sample_date: this.render_metadata_textfield,
+      sample_tissue: this.render_metadata_dropdown,
+      sample_template: this.render_metadata_dropdown,
+      sample_library: this.render_metadata_textfield,
+      sample_sequencer: this.render_metadata_textfield,
+      sample_unique_id: this.render_metadata_textfield,
+      sample_input_pg: this.render_metadata_textfield,
+      sample_batch: this.render_metadata_textfield,
+      sample_organism: this.render_metadata_textfield,
+      sample_detection: this.render_metadata_textfield
+    };
+
     this.handleDropdownChange = this.handleDropdownChange.bind(this);
     this.deleteSample = this.deleteSample.bind(this);
     this.toggleHighlightTaxon = this.toggleHighlightTaxon.bind(this);
@@ -106,7 +143,7 @@ class PipelineSampleReads extends React.Component {
         data: { authenticity_token: this.csrf }
       })
       .then(() => {
-        location.href = `/?project_id=${this.projectInfo.id}`;
+        location.href = `/home?project_id=${this.projectInfo.id}`;
       })
       .catch(err => {});
   }
@@ -862,7 +899,7 @@ class PipelineSampleReads extends React.Component {
             </div>
             <div className="row">
               <div className="sub-title col s10">
-                <a href={`/?project_id=${this.projectInfo.id}`}>
+                <a href={`/home?project_id=${this.projectInfo.id}`}>
                   {this.projectInfo.name + " "}
                 </a>
                 {">"}
@@ -932,82 +969,58 @@ class PipelineSampleReads extends React.Component {
                                 .fromNow()}
                             </div>
                           </div>
-                          {this.render_metadata_textfield(
-                            "Location",
-                            "sample_location"
-                          )}
-                          {this.render_metadata_dropdown(
-                            "Tissue type",
-                            "sample_tissue"
-                          )}
-                          {this.render_metadata_dropdown(
-                            "Nucleotide type",
-                            "sample_template"
-                          )}
-                          {this.render_metadata_textfield(
-                            "Unique ID",
-                            "sample_unique_id"
-                          )}
-                          {this.render_metadata_textfield(
-                            "Sample collection date",
-                            "sample_date"
-                          )}
+                          {this.sampleFieldsColumn1.map(field => {
+                            let properties = this.sampleFieldProperties.get(
+                              field
+                            );
+                            let renderMethod = this.sampleFieldRenderMethods[field];
+                            return renderMethod(
+                              properties.label,
+                              properties.name,
+                              properties.description
+                            );
+                          })}
                         </div>
                         <div className="col s6">
-                          {this.render_metadata_textfield(
-                            "Library prep",
-                            "sample_library",
-                            "Type of library preparation protocol (e.g. Nextera)"
-                          )}
-                          {this.render_metadata_textfield(
-                            "Sequencer",
-                            "sample_sequencer",
-                            "e.g. Illumina NovaSeq"
-                          )}
-                          {this.render_metadata_numfield(
-                            "RNA/DNA input (pg)",
-                            "sample_input_pg"
-                          )}
-                          {this.render_metadata_numfield(
-                            "Batch (#)",
-                            "sample_batch"
-                          )}
-                          {this.render_metadata_textfield(
-                            "Known organisms",
-                            "sample_organism",
-                            "Known hits that may or may not have been in this report"
-                          )}
-                          {this.render_metadata_textfield(
-                            "Detection method",
-                            "sample_detection",
-                            "Method for detecting known organisms"
-                          )}
+                          {this.sampleFieldsColumn2.map(field => {
+                            let properties = this.sampleFieldProperties.get(
+                              field
+                            );
+                            let renderMethod = this.sampleFieldRenderMethods[field];
+                            return renderMethod(
+                              properties.label,
+                              properties.name,
+                              properties.description
+                            );
+                          })}
                         </div>
                       </div>
                       <div className="row">
                         {this.render_metadata_textfield_wide(
-                          "Name",
+                          this.sampleFieldProperties.get("name").label,
                           this.sampleInfo,
                           "name",
                           this.TYPE_PROMPT,
                           this.can_edit
                         )}
                         {this.render_metadata_textfield_wide(
-                          "Manually confirmed hits (from Report tab)",
+                          this.sampleFieldProperties.get("confirmed_names")
+                            .label,
                           this.state,
                           "confirmed_names",
                           "None",
                           false
                         )}
                         {this.render_metadata_textfield_wide(
-                          "Notes",
+                          this.sampleFieldProperties.get("sample_notes").label,
                           this.sampleInfo,
                           "sample_notes",
                           this.TYPE_PROMPT,
                           this.can_edit
                         )}
                         {this.render_metadata_textfield_wide(
-                          "Clinical diagnosis",
+                          this.sampleFieldProperties.get("sample_diagnosis")
+                            .label,
                           this.sampleInfo,
                           "sample_diagnosis",
                           this.TYPE_PROMPT,
