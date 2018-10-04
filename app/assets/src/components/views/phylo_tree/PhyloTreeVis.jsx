@@ -21,7 +21,7 @@ class PhyloTreeVis extends React.Component {
     this.handleNodeHover = this.handleNodeHover.bind(this);
 
     this.sampleFields = SAMPLE_FIELDS;
-    this.sampleFields.push({
+    this.sampleFields.splice(2, 0, {
       name: "created_at",
       label: "Upload Date",
       parser: val => {
