@@ -35,10 +35,8 @@ class TaxonTreeVis extends React.Component {
       },
       nt_r: { label: "NT r", agg: arr => arr.reduce((a, b) => a + b, 0) },
       nt_rpm: { label: "NT rpm", agg: arr => arr.reduce((a, b) => a + b, 0) },
-      nt_zscore: { label: "NT Z-Score", agg: arr => Math.max(...arr) },
       nr_r: { label: "NR r", agg: arr => arr.reduce((a, b) => a + b, 0) },
-      nr_rpm: { label: "NR rpm", agg: arr => arr.reduce((a, b) => a + b, 0) },
-      nr_zscore: { label: "NR Z-Score", agg: arr => Math.max(...arr) }
+      nr_rpm: { label: "NR rpm", agg: arr => arr.reduce((a, b) => a + b, 0) }
     };
 
     this.onNodeHover = this.onNodeHover.bind(this);
@@ -159,10 +157,12 @@ class TaxonTreeVis extends React.Component {
     taxa.forEach(taxon => {
       let parentId = nodes[0].id;
       for (let i = TaxonLevels.length - 1; i >= taxon.tax_level; i--) {
-        let nodeId = taxon.lineage[`${TaxonLevels[i]}_taxid`];
+        let taxId = taxon.lineage[`${TaxonLevels[i]}_taxid`];
+        let nodeId = taxId > 0 ? taxId : `${parentId}_${taxId}`;
         if (!seenNodes.has(nodeId)) {
           nodes.push({
             id: nodeId,
+            taxId: taxId,
             parentId: parentId,
             scientificName:
               taxon.lineage[`${TaxonLevels[i]}_name`] ||
@@ -174,9 +174,11 @@ class TaxonTreeVis extends React.Component {
         parentId = nodeId;
       }
 
-      let nodeId = taxon.tax_id;
+      let nodeId =
+        taxon.tax_id > 0 ? taxon.tax_id : `${parentId}_${taxon.tax_id}`;
       nodes.push({
         id: nodeId,
+        taxId: taxon.tax_id,
         commonName: taxon.common_name,
         scientificName:
           taxon.tax_id > 0
@@ -198,7 +200,6 @@ class TaxonTreeVis extends React.Component {
       });
       seenNodes.add(nodeId);
     });
-
     return nodes;
   }
 
