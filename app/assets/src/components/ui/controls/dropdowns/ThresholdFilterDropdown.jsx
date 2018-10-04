@@ -4,7 +4,6 @@ import PrimaryButton from "../buttons/PrimaryButton";
 import PropTypes from "prop-types";
 import RemoveIcon from "../../icons/RemoveIcon";
 import {
-  METRIC_NAMES,
   THRESHOLD_METRICS,
   MetricTextAndValue
 } from "../../../utils/Metrics";
