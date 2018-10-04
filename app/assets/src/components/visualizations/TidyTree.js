@@ -93,7 +93,6 @@ export default class TidyTree {
         d.children = (d.children || [])
           .concat(d.collapsedChildren || [])
           .concat(d.hiddenChildren || []);
-        let a = d.children.length;
         d.children = d.children.filter(child => !child.isAggregated);
         d.collapsedChildren = null;
         d.hiddenChildren = null;
