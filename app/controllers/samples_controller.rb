@@ -223,16 +223,13 @@ class SamplesController < ApplicationController
         Viruses: ["Phage"]
       },
       metrics: [
-        "NT.aggregatescore",
-        "NT.rpm",
-        "NT.r",
-        "NT.zscore",
-        "NT.maxzscore",
-        "NR.aggregatescore",
-        "NR.rpm",
-        "NR.r",
-        "NR.zscore",
-        "NR.maxzscore"
+        { text: "Aggregate Score", value: "NT.aggregatescore" },
+        { text: "NT Z Score", value: "NT.zscore" },
+        { text: "NT rPM", value: "NT.rpm" },
+        { text: "NT r (total reads)", value: "NT.r" },
+        { text: "NR Z Score", value: "NR.zscore" },
+        { text: "NR r (total reads)", value: "NR.r" },
+        { text: "NR rPM", value: "NR.rpm" }
       ],
       backgrounds: current_power.backgrounds.map do |background|
         { name: background.name, value: background.id }
@@ -605,7 +602,11 @@ class SamplesController < ApplicationController
     end
     taxon_ids = taxon_ids.compact
     categories = params[:categories]
-    threshold_filters = (params[:thresholdFilters] || {}).map { |filter| JSON.parse(filter) }
+    threshold_filters = if params[:thresholdFilters].kind_of?(Array)
+      (params[:thresholdFilters] || {}).map { |filter| JSON.parse(filter) }
+    else
+      JSON.parse(params[:thresholdFilters])
+    end
     include_phage = (JSON.parse(params[:subcategories]) || {}).fetch("Viruses", []).include?("Phage")
     read_specificity = params[:readSpecificity] ? params[:readSpecificity].to_i == 1 : false
 

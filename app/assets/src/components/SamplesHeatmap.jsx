@@ -60,7 +60,7 @@ class SamplesHeatmap extends React.Component {
         }
       },
       selectedOptions: {
-        metric: this.urlParams.metric || this.props.metrics[0],
+        metric: this.urlParams.metric || (this.props.metrics[0] || {}).value,
         categories: this.urlParams.categories || [],
         subcategories: this.urlParams.subcategories || {},
         background:
@@ -88,9 +88,9 @@ class SamplesHeatmap extends React.Component {
 
     this.dataGetters = {};
     this.dataAccessorKeys = {};
-    for (var metric of this.state.availableOptions.metrics) {
-      this.dataGetters[metric] = this.makeDataGetter(metric);
-      this.dataAccessorKeys[metric] = metric.split(".");
+    for (let metric of this.state.availableOptions.metrics) {
+      this.dataGetters[metric.value] = this.makeDataGetter(metric.value);
+      this.dataAccessorKeys[metric.value] = metric.value.split(".");
     }
 
     this.getColumnLabel = this.getColumnLabel.bind(this);
@@ -140,15 +140,24 @@ class SamplesHeatmap extends React.Component {
     return urlParams;
   }
 
-  downloadCurrentViewDataURL() {
+  prepareParams() {
     let params = this.getUrlParams();
+
+    // Parameters stored as objects
+    params.thresholdFilters = JSON.stringify(params.thresholdFilters);
+    params.subcategories = JSON.stringify(params.subcategories);
+
+    return queryString.stringify(params, { arrayFormat: "bracket" });
+  }
+
+  downloadCurrentViewDataURL() {
     let url = new URL("/samples/download_heatmap", window.origin);
-    let downloadableUrl = [
-      url.toString(),
-      "?",
-      queryString.stringify(params, { arrayFormat: "bracket" })
-    ].join("");
-    return downloadableUrl;
+    return `${url.toString()}?${this.prepareParams()}`;
+  }
+
+  onShareClick() {
+    let url = new URL(location.pathname, window.origin);
+    copy(`${url.toString()}?${this.prepareParams()}`);
   }
 
   getDataProperty(data, property) {
@@ -181,7 +190,6 @@ class SamplesHeatmap extends React.Component {
       this.lastRequestToken.cancel("Parameters changed");
 
     this.lastRequestToken = axios.CancelToken.source();
-
     axios
       .get("/samples/samples_taxons.json", {
         params: {
@@ -495,14 +503,10 @@ class SamplesHeatmap extends React.Component {
   }
 
   renderMetricPicker() {
-    let options = this.state.availableOptions.metrics.map(function(metric) {
-      return { text: metric, value: metric };
-    });
-
     return (
       <Dropdown
         fluid
-        options={options}
+        options={this.state.availableOptions.metrics}
         onChange={this.onMetricChange}
         value={this.state.selectedOptions.metric}
         label="Metric:"
@@ -612,22 +616,6 @@ class SamplesHeatmap extends React.Component {
       },
       this.state.selectedOptions
     );
-  }
-
-  onShareClick() {
-    let params = this.getUrlParams();
-    let url = new URL(location.pathname, window.origin);
-
-    // Parameters stored as objects
-    params.thresholdFilters = JSON.stringify(params.thresholdFilters);
-    params.subcategories = JSON.stringify(params.subcategories);
-
-    let shareableUrl = [
-      url.toString(),
-      "?",
-      queryString.stringify(params, { arrayFormat: "bracket" })
-    ].join("");
-    copy(shareableUrl);
   }
 
   onCategoryChange(categories, subcategories) {
