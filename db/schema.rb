@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_181_002_215_809) do
+ActiveRecord::Schema.define(version: 20_181_005_164_930) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -25,7 +25,7 @@ ActiveRecord::Schema.define(version: 20_181_002_215_809) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "amr_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
+  create_table "amr_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "gene"
     t.string "allele"
     t.float "coverage", limit: 24
@@ -298,6 +298,7 @@ ActiveRecord::Schema.define(version: 20_181_002_215_809) do
     t.integer "tax_level"
     t.bigint "pipeline_run_id"
     t.index ["pipeline_run_id", "taxid", "hit_type", "tax_level"], name: "index_pr_tax_ht_level_tb", unique: true
+    t.index ["taxid"], name: "index_taxon_byteranges_on_taxid"
   end
 
   create_table "taxon_confirmations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -443,5 +444,4 @@ ActiveRecord::Schema.define(version: 20_181_002_215_809) do
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
-
 end
