@@ -4,6 +4,7 @@
   &__tree-container {
     padding: 20px;
     margin-bottom: 30rem;
+    overflow: auto;
 
     .node {
       cursor: pointer;
