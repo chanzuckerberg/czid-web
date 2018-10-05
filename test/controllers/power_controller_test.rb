@@ -264,13 +264,24 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
 
   # phylo_trees
   test 'joe can see joe_phylo_tree' do
-    get "/phylo_trees/show?id=#{phylo_trees(:joe_phylo_tree).id}"
-    assert_response :success
+    pt = phylo_trees(:joe_phylo_tree)
+    get "/phylo_trees/index.json?taxId=#{pt.taxid}&projectId=#{pt.project_id}"
+    is_tree_in_response = JSON.parse(@response.body)['phyloTrees'].select { |tree| tree['id'] == pt.id }.count == 1
+    assert_equal is_tree_in_response, true
   end
 
   test 'joe can see public_phylo_tree' do
-    get "/phylo_trees/show?id=#{phylo_trees(:public_phylo_tree).id}"
-    assert_response :success
+    pt = phylo_trees(:public_phylo_tree)
+    get "/phylo_trees/index.json?taxId=#{pt.taxid}&projectId=#{pt.project_id}"
+    is_tree_in_response = JSON.parse(@response.body)['phyloTrees'].select { |tree| tree['id'] == pt.id }.count == 1
+    assert_equal is_tree_in_response, true
+  end
+
+  test 'joe cannot see private phylo_tree one' do
+    pt = phylo_trees(:one)
+    assert_raises(ActiveRecord::RecordNotFound) do
+      get "/phylo_trees/index.json?taxId=#{pt.taxid}&projectId=#{pt.project_id}"
+    end
   end
 
   test 'joe cannot retry public_phylo_tree' do

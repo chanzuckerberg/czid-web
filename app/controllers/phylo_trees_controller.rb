@@ -105,15 +105,6 @@ class PhyloTreesController < ApplicationController
     end
   end
 
-  def show
-    # DEPRECATED
-    @project = current_power.projects.find(@phylo_tree.project_id)
-    @samples = sample_details_json(@phylo_tree.pipeline_run_ids, @phylo_tree.taxid)
-    @phylo_tree_augmented = @phylo_tree.as_json(include: :pipeline_runs)
-    # The preceding line is extremely slow. If use of the show actionn is restored, it should be rewritten.
-    @can_edit = current_power.updatable_phylo_tree?(@phylo_tree)
-  end
-
   def retry
     if @phylo_tree.status == PhyloTree::STATUS_FAILED
       @phylo_tree.update(status: PhyloTree::STATUS_INITIALIZED,
