@@ -578,6 +578,12 @@ class PipelineRun < ApplicationRecord
     save
   end
 
+  def job_status_display
+    return "Pipeline Initializizng" unless self.job_status
+    stage = self.job_status.to_s.split("-")[0].split(".")[1]
+    stage ? "Running #{stage}" : self.job_status
+  end
+
   def check_and_log_long_run
     # Check for long-running pipeline runs and log/alert if needed:
     if alert_sent.zero?
