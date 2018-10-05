@@ -92,7 +92,7 @@ class PhyloTreeListView extends React.Component {
               onClick={() => {
                 location.href = `/phylo_trees/${currentTree.id}/download_snps`;
               }}
-              disabled={currentTree.snp_annotations == null}
+              disabled={!currentTree.snp_annotations}
             />
           </ViewHeader>
         </div>
