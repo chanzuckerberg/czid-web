@@ -1,4 +1,6 @@
 class PhyloTreesController < ApplicationController
+  include PipelineRunsHelper
+
   before_action :authenticate_user!
   before_action :no_demo_user, only: :create
 
@@ -118,10 +120,8 @@ class PhyloTreesController < ApplicationController
 
   def download_snps
     snp_file = Tempfile.new
-    s3_file = @phylo_tree.s3_outputs["SNP_annotations"]
-    cmd_status = Open3.capture3("aws", "s3", "cp", s3_file, snp_file.path)[2]
-    unless cmd_status.success?
-      snp_file.write("Not yet available.")
+    s3_file = @phylo_tree.snp_annotations
+    unless s3_file && download_to_filename?(s3_file, snp_file.path)
       snp_file.close
       LogUtil.log_err_and_airbrake("downloading #{s3_file} failed")
     end
