@@ -182,12 +182,11 @@ class ProjectSelection extends React.Component {
       return 0;
     };
 
-    let favProjects = this.state.formattedFavProjectList.sort(sortLogic);
-    if (this.state.showLessFavorites) favProjects = favProjects.slice(0, 4);
+    const favProjects = this.state.formattedFavProjectList.sort(sortLogic);
 
-    var fav_section = <div />;
+    let favSection = <div />;
     if (favProjects.length) {
-      fav_section = (
+      favSection = (
         <div className="row fav-row">
           <div className="title fav-title">Favorite Projects</div>
           <div className="fav-projects-wrapper projects-wrapper">
@@ -201,11 +200,6 @@ class ProjectSelection extends React.Component {
                 />
               );
             })}
-            {this.state.formattedFavProjectList.length > 4 ? (
-              <div className="more" onClick={this.toggleDisplayFavProjects}>
-                {this.state.showLessFavorites ? "Show More..." : "Show Less..."}
-              </div>
-            ) : null}
           </div>
         </div>
       );
@@ -297,7 +291,7 @@ class ProjectSelection extends React.Component {
               </div>
             </div>
           </div>
-          {fav_section}
+          {favSection}
           {all_projects_section}
         </div>
       </div>

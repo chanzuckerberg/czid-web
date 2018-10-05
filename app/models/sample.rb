@@ -384,6 +384,12 @@ class Sample < ApplicationRecord
     end
   end
 
+  def destroy
+    TaxonByterange.where(pipeline_run_id: pipeline_run_ids).delete_all
+    TaxonCount.where(pipeline_run_id: pipeline_run_ids).delete_all
+    super
+  end
+
   def self.viewable(user)
     if user.admin?
       all
