@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_181_002_215_809) do
+ActiveRecord::Schema.define(version: 20_181_004_180_225) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -167,6 +167,7 @@ ActiveRecord::Schema.define(version: 20_181_002_215_809) do
     t.string "name"
     t.string "dag_branch"
     t.text "ncbi_metadata"
+    t.string "snp_annotations"
     t.index ["name"], name: "index_phylo_trees_on_name", unique: true
     t.index ["project_id", "taxid"], name: "index_phylo_trees_on_project_id_and_taxid"
     t.index ["user_id"], name: "index_phylo_trees_on_user_id"
@@ -360,22 +361,22 @@ ActiveRecord::Schema.define(version: 20_181_002_215_809) do
     t.string "superkingdom_name", default: "", null: false
     t.string "phylum_name"
     t.string "class_name", default: "", null: false
-    t.string "order_name"
-    t.string "family_name"
-    t.string "genus_name"
-    t.string "species_name"
-    t.string "superkingdom_common_name"
-    t.string "phylum_common_name"
-    t.string "class_common_name"
-    t.string "order_common_name"
-    t.string "family_common_name"
-    t.string "genus_common_name"
-    t.string "species_common_name"
+    t.string "order_name", default: "", null: false
+    t.string "family_name", default: "", null: false
+    t.string "genus_name", default: "", null: false
+    t.string "species_name", default: "", null: false
+    t.string "superkingdom_common_name", default: "", null: false
+    t.string "phylum_common_name", default: "", null: false
+    t.string "class_common_name", default: "", null: false
+    t.string "order_common_name", default: "", null: false
+    t.string "family_common_name", default: "", null: false
+    t.string "genus_common_name", default: "", null: false
+    t.string "species_common_name", default: "", null: false
     t.datetime "started_at", default: "2000-01-01 00:00:00", null: false
     t.datetime "ended_at", default: "3000-01-01 00:00:00", null: false
     t.integer "kingdom_taxid", default: -650, null: false
     t.string "kingdom_name"
-    t.string "kingdom_common_name"
+    t.string "kingdom_common_name", default: "", null: false
     t.index ["class_taxid"], name: "index_taxon_lineages_on_class_taxid"
     t.index ["family_taxid"], name: "index_taxon_lineages_on_family_taxid"
     t.index ["genus_taxid", "genus_name"], name: "index_taxon_lineages_on_genus_taxid_and_genus_name"
