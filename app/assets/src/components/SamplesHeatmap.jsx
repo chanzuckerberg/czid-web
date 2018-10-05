@@ -12,7 +12,7 @@ import Dropdown from "./ui/controls/dropdowns/Dropdown";
 import ErrorBoundary from "./ErrorBoundary";
 import Heatmap from "./visualizations/Heatmap";
 import HeatmapLegend from "./visualizations/HeatmapLegend";
-import MultipleTreeDropdown from "./ui/controls/dropdowns/MultipleNestedDropdown";
+import MultipleNestedDropdown from "./ui/controls/dropdowns/MultipleNestedDropdown";
 import PrimaryButton from "./ui/controls/buttons/PrimaryButton";
 import PropTypes from "prop-types";
 import Slider from "./ui/controls/Slider";
@@ -131,9 +131,14 @@ class SamplesHeatmap extends React.Component {
     if (typeof urlParams.categories === "string") {
       urlParams.categories = urlParams.categories.split(",");
     }
-    // TODO: add threshold filters
-    // TODO: add subcategories filter
-    // TODO: add read specificity filter
+    if (typeof urlParams.subcategories === "string") {
+      console.log(urlParams.subcategories);
+      urlParams.subcategories = JSON.parse(urlParams.subcategories);
+      console.log(urlParams.subcategories);
+    }
+    if (typeof urlParams.thresholdFilters === "string") {
+      urlParams.thresholdFilters = JSON.parse(urlParams.thresholdFilters);
+    }
     return urlParams;
   }
 
@@ -614,6 +619,11 @@ class SamplesHeatmap extends React.Component {
   onShareClick() {
     let params = this.getUrlParams();
     let url = new URL(location.pathname, window.origin);
+
+    // Parameters stored as objects
+    params.thresholdFilters = JSON.stringify(params.thresholdFilters);
+    params.subcategories = JSON.stringify(params.subcategories);
+
     let shareableUrl = [
       url.toString(),
       "?",
@@ -643,11 +653,12 @@ class SamplesHeatmap extends React.Component {
     });
 
     return (
-      <MultipleTreeDropdown
+      <MultipleNestedDropdown
         fluid
         options={options}
         onChange={this.onCategoryChange}
         selectedOptions={this.state.selectedOptions.categories}
+        selectedSuboptions={this.state.selectedOptions.subcategories}
         label="Taxon Categories:"
         disabled={!this.state.data}
       />
