@@ -14,13 +14,13 @@ ActiveRecord::Schema.define(version: 20_181_004_180_225) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
-    t.text "s3_nt_db_path", limit: 16_777_215
-    t.text "s3_nt_loc_db_path", limit: 16_777_215
-    t.text "s3_nr_db_path", limit: 16_777_215
-    t.text "s3_nr_loc_db_path", limit: 16_777_215
-    t.text "s3_lineage_path", limit: 16_777_215
-    t.text "s3_accession2taxid_path", limit: 16_777_215
-    t.text "s3_deuterostome_db_path", limit: 16_777_215
+    t.text "s3_nt_db_path"
+    t.text "s3_nt_loc_db_path"
+    t.text "s3_nr_db_path"
+    t.text "s3_nr_loc_db_path"
+    t.text "s3_lineage_path"
+    t.text "s3_accession2taxid_path"
+    t.text "s3_deuterostome_db_path"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -92,7 +92,7 @@ ActiveRecord::Schema.define(version: 20_181_004_180_225) do
   end
 
   create_table "host_genomes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name", null: false
+    t.string "name"
     t.text "s3_star_index_path"
     t.text "s3_bowtie2_index_path"
     t.bigint "default_background_id"
@@ -108,7 +108,7 @@ ActiveRecord::Schema.define(version: 20_181_004_180_225) do
     t.bigint "sample_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "source_type", null: false
+    t.string "source_type"
     t.text "source"
     t.text "parts"
     t.index ["sample_id"], name: "index_input_files_on_sample_id"
@@ -126,7 +126,7 @@ ActiveRecord::Schema.define(version: 20_181_004_180_225) do
   end
 
   create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "key", null: false
+    t.string "key", null: false, collation: "latin1_swedish_ci"
     t.integer "data_type", limit: 1, null: false
     t.string "text_raw_value"
     t.string "text_validated_value"
@@ -153,20 +153,20 @@ ActiveRecord::Schema.define(version: 20_181_004_180_225) do
     t.string "tax_name"
     t.bigint "user_id"
     t.bigint "project_id"
-    t.text "newick", limit: 16_777_215
+    t.text "newick"
     t.integer "status", default: 0
     t.string "dag_version"
-    t.text "dag_json", limit: 16_777_215
-    t.text "command_stdout", limit: 16_777_215
-    t.text "command_stderr", limit: 16_777_215
+    t.text "dag_json"
+    t.text "command_stdout"
+    t.text "command_stderr"
     t.string "job_id"
     t.string "job_log_id"
-    t.text "job_description", limit: 16_777_215
+    t.text "job_description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "name"
     t.string "dag_branch"
-    t.text "ncbi_metadata", limit: 16_777_215
+    t.text "ncbi_metadata"
     t.string "snp_annotations"
     t.index ["name"], name: "index_phylo_trees_on_name", unique: true
     t.index ["project_id", "taxid"], name: "index_phylo_trees_on_project_id_and_taxid"
@@ -336,12 +336,12 @@ ActiveRecord::Schema.define(version: 20_181_004_180_225) do
     t.index ["pipeline_run_id", "tax_id", "count_type", "tax_level"], name: "index_pr_tax_hit_level_tc", unique: true
   end
 
-  create_table "taxon_descriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "taxon_descriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci" do |t|
     t.integer "taxid", null: false
     t.bigint "wikipedia_id"
-    t.string "title"
-    t.text "summary", limit: 16_777_215
-    t.text "description", limit: 16_777_215
+    t.string "title", collation: "utf8mb4_general_ci"
+    t.text "summary", collation: "utf8mb4_general_ci"
+    t.text "description", collation: "utf8mb4_general_ci"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["taxid"], name: "index_taxon_descriptions_on_taxid", unique: true
@@ -358,25 +358,25 @@ ActiveRecord::Schema.define(version: 20_181_004_180_225) do
     t.integer "species_taxid", default: -100, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "superkingdom_name", default: "", null: false
-    t.string "phylum_name", default: "", null: false
-    t.string "class_name", default: "", null: false
-    t.string "order_name", default: "", null: false
-    t.string "family_name", default: "", null: false
-    t.string "genus_name", default: "", null: false
-    t.string "species_name", default: "", null: false
-    t.string "superkingdom_common_name", default: "", null: false
-    t.string "phylum_common_name", default: "", null: false
-    t.string "class_common_name", default: "", null: false
-    t.string "order_common_name", default: "", null: false
-    t.string "family_common_name", default: "", null: false
-    t.string "genus_common_name", default: "", null: false
-    t.string "species_common_name", default: "", null: false
+    t.string "superkingdom_name"
+    t.string "phylum_name"
+    t.string "class_name"
+    t.string "order_name"
+    t.string "family_name"
+    t.string "genus_name"
+    t.string "species_name"
+    t.string "superkingdom_common_name"
+    t.string "phylum_common_name"
+    t.string "class_common_name"
+    t.string "order_common_name"
+    t.string "family_common_name"
+    t.string "genus_common_name"
+    t.string "species_common_name"
     t.datetime "started_at", default: "2000-01-01 00:00:00", null: false
     t.datetime "ended_at", default: "3000-01-01 00:00:00", null: false
     t.integer "kingdom_taxid", default: -650, null: false
-    t.string "kingdom_name", default: "", null: false
-    t.string "kingdom_common_name", default: "", null: false
+    t.string "kingdom_name"
+    t.string "kingdom_common_name"
     t.index ["class_taxid"], name: "index_taxon_lineages_on_class_taxid"
     t.index ["family_taxid"], name: "index_taxon_lineages_on_family_taxid"
     t.index ["genus_taxid", "genus_name"], name: "index_taxon_lineages_on_genus_taxid_and_genus_name"
@@ -391,7 +391,7 @@ ActiveRecord::Schema.define(version: 20_181_004_180_225) do
 
   create_table "taxon_scoring_models", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
-    t.text "model_json", limit: 16_777_215
+    t.text "model_json"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "model_type"
