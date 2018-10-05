@@ -1,4 +1,6 @@
 class PhyloTreesController < ApplicationController
+  include PipelineRunsHelper
+
   before_action :authenticate_user!
   before_action :no_demo_user, only: :create
 
@@ -70,12 +72,7 @@ class PhyloTreesController < ApplicationController
   end
 
   def choose_taxon
-    taxon_list = if defined?(TAXON_SEARCH_LIST) && !TAXON_SEARCH_LIST.empty?
-                   TAXON_SEARCH_LIST
-                 else
-                   TaxonLineage.taxon_search_list
-                 end
-    render json: taxon_list
+    render json: File.read("/app/app/lib/taxon_search_list.json")
   end
 
   def new
@@ -110,15 +107,6 @@ class PhyloTreesController < ApplicationController
     end
   end
 
-  def show
-    # DEPRECATED
-    @project = current_power.projects.find(@phylo_tree.project_id)
-    @samples = sample_details_json(@phylo_tree.pipeline_run_ids, @phylo_tree.taxid)
-    @phylo_tree_augmented = @phylo_tree.as_json(include: :pipeline_runs)
-    # The preceding line is extremely slow. If use of the show actionn is restored, it should be rewritten.
-    @can_edit = current_power.updatable_phylo_tree?(@phylo_tree)
-  end
-
   def retry
     if @phylo_tree.status == PhyloTree::STATUS_FAILED
       @phylo_tree.update(status: PhyloTree::STATUS_INITIALIZED,
@@ -132,10 +120,8 @@ class PhyloTreesController < ApplicationController
 
   def download_snps
     snp_file = Tempfile.new
-    s3_file = @phylo_tree.s3_outputs["SNP_annotations"]
-    cmd_status = Open3.capture3("aws", "s3", "cp", s3_file, snp_file.path)[2]
-    unless cmd_status.success?
-      snp_file.write("Not yet available.")
+    s3_file = @phylo_tree.snp_annotations
+    unless s3_file && download_to_filename?(s3_file, snp_file.path)
       snp_file.close
       LogUtil.log_err_and_airbrake("downloading #{s3_file} failed")
     end

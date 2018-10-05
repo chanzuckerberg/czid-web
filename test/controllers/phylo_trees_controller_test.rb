@@ -14,7 +14,7 @@ class PhyloTreesControllerTest < ActionDispatch::IntegrationTest
 
   test 'should get new' do
     taxid = 1
-    get "/phylo_trees/new?taxId=#{taxid}&projectId=#{@project.id}"
+    get "/phylo_trees/new.json?taxId=#{taxid}&projectId=#{@project.id}"
     assert_response :success
   end
 
@@ -29,7 +29,9 @@ class PhyloTreesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'should show phylo_tree' do
-    get "/phylo_trees/show?id=#{phylo_trees(:one).id}"
-    assert_response :success
+    pt = phylo_trees(:one)
+    get "/phylo_trees/index.json?taxId=#{pt.taxid}&projectId=#{pt.project_id}"
+    is_tree_in_response = JSON.parse(@response.body)['phyloTrees'].select { |tree| tree['id'] == pt.id }.count == 1
+    assert_equal is_tree_in_response, true
   end
 end

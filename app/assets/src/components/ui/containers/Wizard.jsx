@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
 import React from "react";
 import PrimaryButton from "../controls/buttons/PrimaryButton";
+import SecondaryButton from "../controls/buttons/SecondaryButton";
 
 const WizardContext = React.createContext({
   currentPage: 0,
@@ -101,7 +102,7 @@ class Wizard extends React.Component {
           {currentPage}
           {!currentPage.props.skipDefaultButtons && (
             <div className="wizard__nav">
-              <PrimaryButton
+              <SecondaryButton
                 text={this.labels.back}
                 disabled={this.state.currentPage <= 0}
                 onClick={this.handleBackClick}
