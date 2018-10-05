@@ -747,6 +747,10 @@ tr:hover {
   }
 }
 
+tr:not(.report-header):hover {
+  background-color: #f8f9fe;
+}
+
 .hover-wrapper {
   cursor: pointer;
   &:hover {

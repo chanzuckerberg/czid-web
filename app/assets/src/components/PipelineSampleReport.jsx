@@ -1575,7 +1575,7 @@ function ReportTableHeader({ parent }) {
     <div className="reports-main">
       <table id="report-table" className="bordered report-table">
         <thead>
-          <tr>
+          <tr className="report-header">
             <th>
               <span className={`table-arrow ""`}>
                 <i className="fa fa-angle-right" onClick={parent.expandTable} />

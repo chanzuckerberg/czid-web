@@ -146,4 +146,10 @@ class Project < ApplicationRecord
                 .group("project_id")
                 .pluck(:project_id))
   end
+
+  def destroy
+    samples = Sample.find(sample_ids)
+    samples.each(&:destroy)
+    super
+  end
 end
