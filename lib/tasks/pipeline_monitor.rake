@@ -1,6 +1,9 @@
 # Jos to check the status of pipeline runs
 require 'English'
 
+IDSEQ_BENCH_CONFIG = "s3://idseq-bench/config.json"
+BENCHMARK_UPDATE_MIN_FREQUENCY = 600
+
 class CheckPipelineRuns
   @sleep_quantum = 5.0
 
@@ -70,12 +73,91 @@ class CheckPipelineRuns
     autoscaling_state
   end
 
+  def self.create_sample_for_benchmark(s3path)
+    metadata = JSON.parse(`aws s3 cp #{s3path}/metadata.json -`)
+  end
+
+  def self.benchmark_update(t_now)
+    Rails.logger.info("Benchmark update.")
+    config = JSON.parse(`aws s3 cp #{IDSEQ_BENCH_CONFIG} -`)
+    # example config.json
+    # {
+    #   "active_benchmarks": {
+    #     "s3://idseq-bench/1": {
+    #       "project_name": "IDSeq Bench",
+    #       "frequency_hours": 24,
+    #       "environments": ["prod", "staging"]
+    #     },
+    #     "s3://idseq-bench/2": {
+    #       "project_name": "IDSeq Bench",
+    #       "frequency_hours": 168,
+    #       "environments": ["prod"]
+    #     }
+    #   }
+    # }
+    config["active_benchmarks"].each do |s3path, bm_props|
+      unless bm_props["environments"].include?(Rails.env)
+        Rails.logger.info("Benchmark does not apply to #{Rails.env} environment: #{s3path}")
+        next
+      end
+      bm_proj = Project.find_by_name(bm_props["project_name"])
+      unless bm_proj
+        Rails.logger.info("Benchmark requires non-existent project #{bm_props["project_name"]}: #{s3path}")
+        next
+      end
+      frequency_seconds = bm_props["frequency_hours"] * 3600
+      unless frequency_seconds >= 3600
+        Rails.logger.info("Benchmark frequency under 1 hour: #{s3path}")
+        next
+      end
+      sql_query = "
+        SELECT
+          id,
+          project_id,
+          unix_timestamp(created_at) as unixtime_of_creation
+        FROM samples
+        WHERE
+          project_id = #{bm_proj.id} AND
+          created_at > from_unixtime(#{t_now - frequency_seconds})
+      "
+      sql_results = Sample.connection.select_all(sql_query).to_hash
+      unless sql_results.empty?
+        most_recent_submission = sql_results.pluck("unixtime_of_creation").max
+        hours_since_last_run = Integer((t_now - most_recent_submission)/360) / 10.0
+        Rails.logger.info("Benchmark last ran #{hours_since_last_run} hours ago: #{s3path}")
+        next
+      end
+      Rails.logger.info("Benchmark last ran over #{bm_props["frequency_hours"]} hours ago, or never before: #{s3path}")
+      begin
+        self.create_sample_for_benchmark(s3path)
+      rescue => exception
+        LogUtil.log_err_and_airbrake("Failed to create sample for benchmark #{s3path}")
+        LogUtil.log_backtrace(exception)
+      end
+    end
+  end
+
+  def self.benchmark_update_safely_and_not_too_often(benchmark_state, t_now)
+    # Do not check faster than every 10 minutes
+    unless benchmark_state && t_now - benchmark_state[:t_last] < BENCHMARK_UPDATE_MIN_FREQUENCY
+      benchmark_state = {:t_last => t_now}
+      begin
+        self.benchmark_update(t_now)
+      rescue => exception
+        LogUtil.log_err_and_airbrake("Failed to update benchmarks")
+        LogUtil.log_backtrace(exception)
+      end
+    end
+    benchmark_state
+  end
+
   def self.run(duration, min_refresh_interval)
     Rails.logger.info("Checking the active pipeline runs every #{min_refresh_interval} seconds over the next #{duration / 60} minutes.")
     t_now = Time.now.to_f # unixtime
     # Will try to return as soon as duration seconds have elapsed, but not any sooner.
     t_end = t_now + duration
     autoscaling_state = nil
+    benchmark_state = nil
     # The duration of the longest update so far.
     max_work_duration = 0
     iter_count = 0
@@ -84,6 +166,7 @@ class CheckPipelineRuns
       t_iter_start = t_now
       update_jobs(iter_count != 1)
       autoscaling_state = autoscaling_update(autoscaling_state, t_now)
+      benchmark_state = benchmark_update_safely_and_not_too_often(benchmark_state, t_now)
       t_now = Time.now.to_f
       max_work_duration = [t_now - t_iter_start, max_work_duration].max
       t_iter_end = [t_now, t_iter_start + min_refresh_interval].max
