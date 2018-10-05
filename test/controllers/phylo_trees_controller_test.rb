@@ -12,12 +12,6 @@ class PhyloTreesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test 'should get new' do
-    taxid = 1
-    get "/phylo_trees/new?taxId=#{taxid}&projectId=#{@project.id}"
-    assert_response :success
-  end
-
   test 'should create phylo_tree' do
     entrypoint_taxon_count = taxon_counts(:three)
     assert_difference('PhyloTree.count') do
@@ -26,10 +20,5 @@ class PhyloTreesControllerTest < ActionDispatch::IntegrationTest
                                             taxName: entrypoint_taxon_count.name }
     end
     assert_equal "ok", JSON.parse(@response.body)['status']
-  end
-
-  test 'should show phylo_tree' do
-    get "/phylo_trees/show?id=#{phylo_trees(:one).id}"
-    assert_response :success
   end
 end
