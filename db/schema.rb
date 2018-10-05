@@ -92,7 +92,7 @@ ActiveRecord::Schema.define(version: 20_181_004_180_225) do
   end
 
   create_table "host_genomes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name"
+    t.string "name", null: false
     t.text "s3_star_index_path"
     t.text "s3_bowtie2_index_path"
     t.bigint "default_background_id"
@@ -359,7 +359,7 @@ ActiveRecord::Schema.define(version: 20_181_004_180_225) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "superkingdom_name", default: "", null: false
-    t.string "phylum_name"
+    t.string "phylum_name", default: "", null: false
     t.string "class_name", default: "", null: false
     t.string "order_name", default: "", null: false
     t.string "family_name", default: "", null: false
@@ -375,7 +375,7 @@ ActiveRecord::Schema.define(version: 20_181_004_180_225) do
     t.datetime "started_at", default: "2000-01-01 00:00:00", null: false
     t.datetime "ended_at", default: "3000-01-01 00:00:00", null: false
     t.integer "kingdom_taxid", default: -650, null: false
-    t.string "kingdom_name"
+    t.string "kingdom_name", default: "", null: false
     t.string "kingdom_common_name", default: "", null: false
     t.index ["class_taxid"], name: "index_taxon_lineages_on_class_taxid"
     t.index ["family_taxid"], name: "index_taxon_lineages_on_family_taxid"
