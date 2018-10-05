@@ -816,6 +816,13 @@ class PipelineRun < ApplicationRecord
       WHERE pipeline_run_id=#{id} AND
             family_taxid IN (#{phage_families})
     ")
+    phage_taxids = TaxonLineage::PHAGE_TAXIDS.join(",")
+    TaxonCount.connection.execute("
+      UPDATE taxon_counts
+      SET is_phage = 1
+      WHERE pipeline_run_id=#{id} AND
+            tax_id IN (#{phage_taxids})
+    ")
   end
 
   def subsampled_reads

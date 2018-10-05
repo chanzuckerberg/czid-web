@@ -299,6 +299,7 @@ ActiveRecord::Schema.define(version: 20_181_004_180_225) do
     t.integer "tax_level"
     t.bigint "pipeline_run_id"
     t.index ["pipeline_run_id", "taxid", "hit_type", "tax_level"], name: "index_pr_tax_ht_level_tb", unique: true
+    t.index ["taxid"], name: "index_taxon_byteranges_on_taxid"
   end
 
   create_table "taxon_confirmations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
