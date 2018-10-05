@@ -584,11 +584,11 @@ class SamplesController < ApplicationController
     end
     taxon_ids = taxon_ids.compact
     categories = params[:categories]
-    threshold_filters = if params[:thresholdFilters].kind_of?(Array)
-      (params[:thresholdFilters] || {}).map { |filter| JSON.parse(filter) }
-    else
-      JSON.parse(params[:thresholdFilters])
-    end
+    threshold_filters = if params[:thresholdFilters].is_a?(Array)
+                          (params[:thresholdFilters] || {}).map { |filter| JSON.parse(filter) }
+                        else
+                          JSON.parse(params[:thresholdFilters])
+                        end
     include_phage = (JSON.parse(params[:subcategories]) || {}).fetch("Viruses", []).include?("Phage")
     read_specificity = params[:readSpecificity] ? params[:readSpecificity].to_i == 1 : false
 
