@@ -276,7 +276,7 @@ module SamplesHelper
   end
 
   def top_pipeline_runs_multiget(sample_ids)
-    top_pipeline_runs = PipelineRun.where("id in (select x.id from (select max(id) from pipeline_runs where
+    top_pipeline_runs = PipelineRun.where("id in (select x.id from (select max(id) as id from pipeline_runs where
                   sample_id in (#{sample_ids.join(',')}) group by sample_id) as x)")
     top_pipeline_run_by_sample_id = {}
     top_pipeline_runs.each do |pr|
