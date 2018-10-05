@@ -233,7 +233,8 @@ class TaxonTreeVis extends React.Component {
       (this.isCommonNameActive() && node.data.commonName) ||
       node.data.scientificName;
     if (node.isAggregated) {
-      name = `${node.parent.collapsedChildren.length} Taxa`;
+      // TODO: fix bug (not able to consistently reproduce) - currently just avoid crash
+      name = `${(node.parent.collapsedChildren || 0).length} Taxa`;
     }
 
     return (
