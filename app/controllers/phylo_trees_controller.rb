@@ -70,12 +70,7 @@ class PhyloTreesController < ApplicationController
   end
 
   def choose_taxon
-    taxon_list = if defined?(TAXON_SEARCH_LIST) && !TAXON_SEARCH_LIST.empty?
-                   TAXON_SEARCH_LIST
-                 else
-                   TaxonLineage.taxon_search_list
-                 end
-    render json: taxon_list
+    render json: File.read("/app/app/lib/taxon_search_list.json")
   end
 
   def new
