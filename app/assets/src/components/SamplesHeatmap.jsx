@@ -132,9 +132,7 @@ class SamplesHeatmap extends React.Component {
       urlParams.categories = urlParams.categories.split(",");
     }
     if (typeof urlParams.subcategories === "string") {
-      console.log(urlParams.subcategories);
       urlParams.subcategories = JSON.parse(urlParams.subcategories);
-      console.log(urlParams.subcategories);
     }
     if (typeof urlParams.thresholdFilters === "string") {
       urlParams.thresholdFilters = JSON.parse(urlParams.thresholdFilters);
