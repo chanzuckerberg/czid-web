@@ -32,6 +32,13 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  # Rails method for adding to logging
+  def append_info_to_payload(payload)
+    super
+    payload[:remote_ip] = request.remote_ip
+    payload[:user_id] = current_user.try(:id) if current_user
+  end
+
   protected
 
   def assert_access
