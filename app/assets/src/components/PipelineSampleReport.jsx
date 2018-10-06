@@ -32,7 +32,6 @@ class PipelineSampleReport extends React.Component {
     this.admin = props.admin;
     this.allowedFeatures = props.allowedFeatures;
     this.allowPhyloTree = props.can_edit;
-    this.allowPathogenSummary = false;
     this.report_ts = props.report_ts;
     this.sample_id = props.sample_id;
     this.projectId = props.projectId;
@@ -114,8 +113,8 @@ class PipelineSampleReport extends React.Component {
     // Starting state is default values which are to be set later.
     this.state = {
       taxonomy_details: [],
+      generaContainingTags: [],
       topScoringTaxa: [],
-      pathogenTagSummary: {},
       backgroundId: defaultBackgroundId,
       backgroundName: "",
       search_taxon_id: 0,
@@ -153,6 +152,7 @@ class PipelineSampleReport extends React.Component {
     this.expandAll = false;
     this.expandedGenera = [];
     this.thresholded_taxons = [];
+    this.row_class = this.row_class.bind(this);
 
     this.anyFilterSet = this.anyFilterSet.bind(this);
     this.applyFilters = this.applyFilters.bind(this);
@@ -267,13 +267,19 @@ class PipelineSampleReport extends React.Component {
         }
       }
       this.genus_map = genus_map;
+      let generaContainingTags = [];
+      for (let taxInfo of res.data.taxonomy_details[2]) {
+        if (taxInfo.pathogenTag && taxInfo.tax_level == 1) {
+          generaContainingTags.push(taxInfo.genus_taxid);
+        }
+      }
       this.setState(
         {
           rows_passing_filters: res.data.taxonomy_details[0],
           rows_total: res.data.taxonomy_details[1],
           taxonomy_details: res.data.taxonomy_details[2],
+          generaContainingTags: generaContainingTags,
           topScoringTaxa: res.data.topScoringTaxa,
-          pathogenTagSummary: res.data.pathogenTagSummary,
           backgroundId: res.data.background_info.id,
           backgroundName: res.data.background_info.name
         },
@@ -1242,7 +1248,8 @@ class PipelineSampleReport extends React.Component {
     let initial_visibility = "hidden";
     if (
       (this.expandAll && tax_info.genus_taxid > 0) ||
-      this.expandedGenera.indexOf(tax_info.genus_taxid.toString()) >= 0
+      this.expandedGenera.indexOf(tax_info.genus_taxid.toString()) >= 0 ||
+      this.state.generaContainingTags.indexOf(tax_info.genus_taxid) >= 0
     ) {
       initial_visibility = "";
     }
@@ -1473,12 +1480,14 @@ class PipelineSampleReport extends React.Component {
 
 function CollapseExpand({ tax_info, parent }) {
   const fake_or_real = tax_info.genus_taxid < 0 ? "fake-genus" : "real-genus";
+  const isExpandedInitially =
+    parent.state.generaContainingTags.indexOf(tax_info.genus_taxid) >= 0;
   return (
     <span>
       <span
         className={`report-arrow-down report-arrow ${
           tax_info.tax_id
-        } ${fake_or_real} ${"hidden"}`}
+        } ${fake_or_real} ${isExpandedInitially ? "" : "hidden"}`}
       >
         <i
           className={`fa fa-angle-down ${tax_info.tax_id}`}
@@ -1488,7 +1497,7 @@ function CollapseExpand({ tax_info, parent }) {
       <span
         className={`report-arrow-right report-arrow ${
           tax_info.tax_id
-        } ${fake_or_real} ${""}`}
+        } ${fake_or_real} ${isExpandedInitially ? "hidden" : ""}`}
       >
         <i
           className={`fa fa-angle-right ${tax_info.tax_id}`}
@@ -1888,12 +1897,6 @@ class RenderMarkup extends React.Component {
           <div className="tab-screen-content">
             <div className="row reports-container">
               <div className="col s12 reports-section">
-                {parent.allowPathogenSummary ? (
-                  <PathogenSummary
-                    topScoringTaxa={parent.state.topScoringTaxa}
-                    pathogenTagSummary={parent.state.pathogenTagSummary}
-                  />
-                ) : null}
                 <div className="reports-count">
                   <div className="report-top-filters">
                     <div className="filter-lists">
