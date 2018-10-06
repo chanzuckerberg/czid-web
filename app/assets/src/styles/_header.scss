@@ -126,26 +126,22 @@ a {
   }
 }
 
-.profile-header-menu {
+.profile-header-menu.menu {
   float: right;
   margin-top: 1rem;
   margin-right: 0.5rem;
+  background-color: rgba(0, 0, 0, 0);
+  min-height: 0;
+  box-shadow: none;
+  border: none;
   .text {
     font-family: Open Sans, Helvetica Neue, Arial, Helvetica, sans-serif;
     font-size: 1rem;
   }
   color: $medium-grey;
-}
-
-.profile-header-menu.menu {
-  background-color: rgba(0, 0, 0, 0);
-  min-height: 0;
-  box-shadow: none;
-  border: none;
-}
-
-.profile-header-menu:hover {
-  color: $light-grey;
+  &:hover {
+    color: $light-grey;
+  }
 }
 
 .profile-dropdown {
