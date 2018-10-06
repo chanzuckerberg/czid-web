@@ -15,7 +15,6 @@ import MultipleNestedDropdown from "./ui/controls/dropdowns/MultipleNestedDropdo
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
 import BetaLabel from "./ui/labels/BetaLabel";
 import PathogenLabel from "./ui/labels/PathogenLabel";
-import PathogenSummary from "./views/report/PathogenSummary";
 import ReportInsightIcon from "./views/report/ReportInsightIcon";
 import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
 import PhyloTreeChecks from "./views/phylo_tree/PhyloTreeChecks";
