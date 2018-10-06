@@ -20,7 +20,7 @@ class ResultsFolder extends React.Component {
 
   render() {
     return (
-      <div className="results">
+      <div className="results-folder">
         <div className="header">
           <span className="title">
             <span className="back" onClick={this.gotoPath.bind(this, "/")}>
