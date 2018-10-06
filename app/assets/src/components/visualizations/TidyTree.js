@@ -255,7 +255,7 @@ export default class TidyTree {
         line = [],
         lineNumber = 1,
         textHeight = parseFloat(text.style("font-size")),
-        lineHeight = textHeight * 1.1,
+        lineHeight = textHeight * 1.2,
         x = text.attr("x"),
         tspan = text
           .text(null)
@@ -266,10 +266,10 @@ export default class TidyTree {
         tspan.text(words[0]);
       } else {
         while ((word = words.pop())) {
-          line.push(word);
+          line.unshift(word);
           tspan.text(line.join(" "));
           if (tspan.node().getComputedTextLength() > width) {
-            line.pop();
+            line.shift();
             tspan.text(line.join(" "));
             line = [word];
             tspan = text
@@ -460,7 +460,7 @@ export default class TidyTree {
         "dy",
         d =>
           this.hasVisibleChildren(d)
-            ? -4 - nodeScale(d.data.values[this.options.attribute])
+            ? -4 - 1.3 * nodeScale(d.data.values[this.options.attribute])
             : 0
       )
       .attr(
@@ -468,7 +468,7 @@ export default class TidyTree {
         d =>
           this.hasVisibleChildren(d)
             ? 0
-            : 4 + nodeScale(d.data.values[this.options.attribute])
+            : 4 + 1.3 * nodeScale(d.data.values[this.options.attribute])
       )
       .call(this.wrap.bind(this), 110);
 

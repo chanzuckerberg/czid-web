@@ -98,6 +98,8 @@ Rails.application.configure do
   config.lograge.custom_options = lambda do |event|
     { time: event.time,
       ddsource: ["ruby"],
+      remote_ip: event.payload[:remote_ip],
+      user_id: event.payload[:user_id],
       params: event.payload[:params].reject { |k| %w[controller action].include? k } }
   end
   config.colorize_logging = false

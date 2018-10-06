@@ -10,4 +10,4 @@ A collaborative open project of [Chan Zuckerberg Initiative](https://www.chanzuc
 
 This repository contains the frontend portal code. You can find the pipeline engine at [chanzuckerberg/idseq-dag](https://github.com/chanzuckerberg/idseq-dag). Our command line interface is at [chanzuckerberg/idseq-cli](https://github.com/chanzuckerberg/idseq-cli).
 
-Check out our [user wiki](https://github.com/chanzuckerberg/idseq-dag/wiki) for getting started as a user. Check out our [dev wiki](https://github.com/chanzuckerberg/idseq-dag/wiki/Developer-info) to get started as a developer.
+Check out our [user wiki](https://github.com/chanzuckerberg/idseq-web/wiki) for getting started as a user. Check out our [dev wiki](https://github.com/chanzuckerberg/idseq-web/wiki/Developer-info) to get started as a developer.
