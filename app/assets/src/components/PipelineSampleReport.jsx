@@ -112,7 +112,7 @@ class PipelineSampleReport extends React.Component {
     // Starting state is default values which are to be set later.
     this.state = {
       taxonomy_details: [],
-      generaContainingTags: [],
+      generaContainingTags: new Set(),
       topScoringTaxa: [],
       backgroundId: defaultBackgroundId,
       backgroundName: "",
@@ -249,6 +249,22 @@ class PipelineSampleReport extends React.Component {
       });
   }
 
+  listGeneraContainingTags(taxInfoArray) {
+    // Return genus taxids that contain species with pathogen tags hidden within them.
+    // Those will be automatically expanded in the report table, so that the pathogenic species are visible.
+    // Do not include genera that are tagged as pathogenic themselves, since there is no need to expand those.
+    let generaContainingTags = new Set();
+    let genusHasTag;
+    for (let taxInfo of taxInfoArray) {
+      if (taxInfo.tax_level == 2) {
+        genusHasTag = !!taxInfo.pathogenTag;
+      } else if (!genusHasTag) {
+        generaContainingTags.add(taxInfo.genus_taxid);
+      }
+    }
+    return generaContainingTags;
+  }
+
   // fetchReportData loads the actual report information with another call to
   // the API endpoint.
   fetchReportData() {
@@ -266,18 +282,14 @@ class PipelineSampleReport extends React.Component {
         }
       }
       this.genus_map = genus_map;
-      let generaContainingTags = [];
-      for (let taxInfo of res.data.taxonomy_details[2]) {
-        if (taxInfo.pathogenTag && taxInfo.tax_level == 1) {
-          generaContainingTags.push(taxInfo.genus_taxid);
-        }
-      }
       this.setState(
         {
           rows_passing_filters: res.data.taxonomy_details[0],
           rows_total: res.data.taxonomy_details[1],
           taxonomy_details: res.data.taxonomy_details[2],
-          generaContainingTags: generaContainingTags,
+          generaContainingTags: this.listGeneraContainingTags(
+            res.data.taxonomy_details[2]
+          ),
           topScoringTaxa: res.data.topScoringTaxa,
           backgroundId: res.data.background_info.id,
           backgroundName: res.data.background_info.name
@@ -1248,7 +1260,7 @@ class PipelineSampleReport extends React.Component {
     if (
       (this.expandAll && tax_info.genus_taxid > 0) ||
       this.expandedGenera.indexOf(tax_info.genus_taxid.toString()) >= 0 ||
-      this.state.generaContainingTags.indexOf(tax_info.genus_taxid) >= 0
+      this.state.generaContainingTags.has(tax_info.genus_taxid)
     ) {
       initial_visibility = "";
     }
@@ -1479,8 +1491,9 @@ class PipelineSampleReport extends React.Component {
 
 function CollapseExpand({ tax_info, parent }) {
   const fake_or_real = tax_info.genus_taxid < 0 ? "fake-genus" : "real-genus";
-  const isExpandedInitially =
-    parent.state.generaContainingTags.indexOf(tax_info.genus_taxid) >= 0;
+  const isExpandedInitially = parent.state.generaContainingTags.has(
+    tax_info.genus_taxid
+  );
   return (
     <span>
       <span
