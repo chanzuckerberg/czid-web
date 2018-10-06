@@ -258,7 +258,7 @@ class PipelineSampleReport extends React.Component {
     for (let taxInfo of taxInfoArray) {
       if (taxInfo.tax_level == 2) {
         genusHasTag = !!taxInfo.pathogenTag;
-      } else if (!genusHasTag) {
+      } else if (taxInfo.pathogenTag && !genusHasTag) {
         generaContainingTags.add(taxInfo.genus_taxid);
       }
     }
