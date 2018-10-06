@@ -1,7 +1,7 @@
 import React from "react";
 import $ from "jquery";
 import axios from "axios";
-import { Dropdown } from "semantic-ui-react";
+import { Menu, Dropdown } from "semantic-ui-react";
 
 class Header extends React.Component {
   constructor(props, context) {
@@ -72,54 +72,57 @@ class Header extends React.Component {
                   </div>
                 </a>
               </div>
-              <Dropdown
-                text={this.userDetails.email}
-                className="right profile-header-dropdown"
-              >
-                <Dropdown.Menu>
-                  {this.demoUser !== 1 && [
-                    <Dropdown.Item
-                      text="New Sample"
-                      key="1"
-                      onClick={this.gotoPage.bind(this, "/samples/new")}
-                    />,
-                    <Dropdown.Item
-                      text="New Sample (Command Line)"
-                      key="2"
-                      onClick={() => this.openNewTab("/cli_user_instructions")}
-                    />
-                  ]}
-                  {this.userDetails &&
-                    this.userDetails.admin && (
+              <Menu className="profile-header-menu">
+                <Menu.Menu position="right">
+                  <Dropdown text={this.userDetails.name}>
+                    <Dropdown.Menu>
+                      {this.demoUser !== 1 && [
+                        <Dropdown.Item
+                          text="New Sample"
+                          key="1"
+                          onClick={this.gotoPage.bind(this, "/samples/new")}
+                        />,
+                        <Dropdown.Item
+                          text="New Sample (Command Line)"
+                          key="2"
+                          onClick={() =>
+                            this.openNewTab("/cli_user_instructions")
+                          }
+                        />
+                      ]}
+                      {this.userDetails &&
+                        this.userDetails.admin && (
+                          <Dropdown.Item
+                            text="Create User"
+                            onClick={this.gotoPage.bind(this, "/users/new")}
+                          />
+                        )}
                       <Dropdown.Item
-                        text="Create User"
-                        onClick={this.gotoPage.bind(this, "/users/new")}
+                        text="Report Feedback"
+                        onClick={this.sendMail}
                       />
-                    )}
-                  <Dropdown.Item
-                    text="Report Feedback"
-                    onClick={this.sendMail}
-                  />
-                  <Dropdown.Item
-                    text="Terms of Use"
-                    onClick={() =>
-                      this.openNewTab(
-                        "https://s3-us-west-2.amazonaws.com/idseq-database/Terms.pdf"
-                      )
-                    }
-                  />
-                  <Dropdown.Item
-                    text="Privacy Policy"
-                    onClick={() =>
-                      this.openNewTab(
-                        "https://s3-us-west-2.amazonaws.com/idseq-database/Privacy.pdf"
-                      )
-                    }
-                  />
-                  <Dropdown.Divider />
-                  <Dropdown.Item text="Logout" onClick={this.signOut} />
-                </Dropdown.Menu>
-              </Dropdown>
+                      <Dropdown.Item
+                        text="Terms of Use"
+                        onClick={() =>
+                          this.openNewTab(
+                            "https://s3-us-west-2.amazonaws.com/idseq-database/Terms.pdf"
+                          )
+                        }
+                      />
+                      <Dropdown.Item
+                        text="Privacy Policy"
+                        onClick={() =>
+                          this.openNewTab(
+                            "https://s3-us-west-2.amazonaws.com/idseq-database/Privacy.pdf"
+                          )
+                        }
+                      />
+                      <Dropdown.Divider />
+                      <Dropdown.Item text="Logout" onClick={this.signOut} />
+                    </Dropdown.Menu>
+                  </Dropdown>
+                </Menu.Menu>
+              </Menu>
             </div>
           </div>
         </div>
