@@ -47,7 +47,8 @@ class PhyloTreeVis extends React.Component {
       legendY: 50,
       tooltipContainer: this.tooltipContainer,
       onNodeTextClick: this.handleNodeClick,
-      onNodeHover: this.handleNodeHover
+      onNodeHover: this.handleNodeHover,
+      scaleLabel: "Relative units"
     });
     this.treeVis.update();
   }
