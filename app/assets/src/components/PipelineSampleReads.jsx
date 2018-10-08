@@ -69,6 +69,7 @@ class PipelineSampleReads extends React.Component {
     };
     this.DROPDOWN_METADATA_FIELDS = Object.keys(this.DROPDOWN_OPTIONS);
     this.render_metadata_textfield = this.render_metadata_textfield.bind(this);
+    this.render_metadata_numfield = this.render_metadata_numfield.bind(this);
     this.render_metadata_dropdown = this.render_metadata_dropdown.bind(this);
 
     this.sampleFieldsColumn1 = [
