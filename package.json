@@ -66,6 +66,7 @@
     "d3-shape": "^1.2.2",
     "d3-timer": "^1.0.7",
     "d3-transition": "^1.1.1",
+    "fast-deep-equal": "^2.0.1",
     "font-awesome": "^4.7.0",
     "jquery": "^3.2.1",
     "js-cookie": "^2.2.0",
