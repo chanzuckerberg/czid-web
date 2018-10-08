@@ -29,7 +29,7 @@
     "no-unreachable": "warn",
     "react/boolean-prop-naming": "warn",
     "standard/object-curly-even-spacing": "warn",
-
+    "standard/computed-property-even-spacing": "warn",
     "react/no-deprecated": "warn",
     "react/no-unescaped-entities": "warn",
     "react/no-find-dom-node": "warn",
