@@ -139,7 +139,8 @@ module SamplesHelper
                            host_genome_id: host_genome_id,
                            status: 'created' }
     s3_path.chomp!('/')
-    s3_output, _stderr, status = Open3.capture3("aws", "s3", "ls", "#{s3_path}/")
+    s3_bucket = 's3://' + s3_path.sub('s3://', '').split('/')[0]
+    s3_output, _stderr, status = Open3.capture3("aws", "s3", "ls", "--recursive", "#{s3_path}/")
     return unless status.exitstatus.zero?
     s3_output.chomp!
     entries = s3_output.split("\n").reject { |line| line.include? "Undetermined" }
@@ -157,11 +158,11 @@ module SamplesHelper
         next
       end
       source = matched[0]
-      name = matched[1]
+      name = matched[1].split('/')[-1]
       samples[name] ||= default_attributes.clone
       samples[name][:input_files_attributes] ||= []
-      samples[name][:input_files_attributes][read_idx] = { name: source,
-                                                           source: "#{s3_path}/#{source}",
+      samples[name][:input_files_attributes][read_idx] = { name: source.split('/')[-1],
+                                                           source: "#{s3_bucket}/#{source}",
                                                            source_type: InputFile::SOURCE_TYPE_S3 }
     end
 

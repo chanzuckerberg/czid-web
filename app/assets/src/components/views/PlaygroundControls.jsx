@@ -19,7 +19,7 @@ class PlaygroundControls extends React.Component {
     this.dropdownOptions = [
       { text: "Option 1", value: 0 },
       {
-        text: "option 2",
+        text: "Option 2",
         value: 1,
         suboptions: [
           { text: "suboption a", value: "a" },

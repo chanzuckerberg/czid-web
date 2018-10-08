@@ -158,7 +158,6 @@ class PipelineSampleReport extends React.Component {
     this.computeThresholdedTaxons = this.computeThresholdedTaxons.bind(this);
     this.collapseGenus = this.collapseGenus.bind(this);
     this.collapseTable = this.collapseTable.bind(this);
-    this.gotoTreeLink = this.gotoTreeLink.bind(this);
     this.displayHighlightTags = this.displayHighlightTags.bind(this);
     this.downloadFastaUrl = this.downloadFastaUrl.bind(this);
     this.expandGenusClick = this.expandGenusClick.bind(this);
@@ -888,7 +887,7 @@ class PipelineSampleReport extends React.Component {
     }
     num = num.toString();
     const ncbiLink = `https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${num}`;
-    window.open(ncbiLink, "_blank", "noopener", "hide_referrer");
+    window.open(ncbiLink, "hide_referrer");
   }
 
   // download Fasta
@@ -907,17 +906,7 @@ class PipelineSampleReport extends React.Component {
     window.open(
       `/samples/${
         this.sample_id
-      }/alignment_viz/nt_${taxLevel}_${taxId}?pipeline_version=${pipeline_version}`,
-      "_blank",
-      "noopener",
-      "hide_referrer"
-    );
-  }
-
-  gotoTreeLink(taxid) {
-    window.open(
-      `/phylo_trees/index?taxid=${taxid}&project_id=${this.projectId}`,
-      "_blank noopener hide_referrer"
+      }/alignment_viz/nt_${taxLevel}_${taxId}?pipeline_version=${pipeline_version}`
     );
   }
 
