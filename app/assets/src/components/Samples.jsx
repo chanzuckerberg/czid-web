@@ -69,7 +69,6 @@ class Samples extends React.Component {
     this.deleteProject = this.deleteProject.bind(this);
     this.toggleBackgroundFlag = this.toggleBackgroundFlag.bind(this);
     this.getBackgroundIdByName = this.getBackgroundIdByName.bind(this);
-    this.gotoTreeList = this.gotoTreeList.bind(this);
     this.state = {
       invite_status: null,
       background_creation_response: {},
@@ -780,7 +779,7 @@ class Samples extends React.Component {
   viewSample(id, e) {
     e.preventDefault();
 
-    window.open(`/samples/${id}`);
+    window.open(`/samples/${id}`, "_self");
   }
 
   renderEmptyTable() {
@@ -857,7 +856,10 @@ class Samples extends React.Component {
 
   compareSamples() {
     if (this.state.selectedSampleIds.length) {
-      window.open(`/samples/heatmap?sampleIds=${this.state.selectedSampleIds}`);
+      window.open(
+        `/samples/heatmap?sampleIds=${this.state.selectedSampleIds}`,
+        "_self"
+      );
     }
   }
 
@@ -880,15 +882,6 @@ class Samples extends React.Component {
           background_creation_response: { message: "Something went wrong." }
         });
       });
-  }
-
-  gotoTreeList() {
-    let tree_index_url = "/phylo_trees/index";
-    let project_id = parseInt(this.state.selectedProjectId);
-    if (project_id) {
-      tree_index_url += `?projectId=${project_id}`;
-    }
-    window.open(tree_index_url, "_blank noopener hide_referrer");
   }
 
   clearAllFilters() {
