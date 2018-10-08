@@ -744,6 +744,12 @@ tr:hover {
     .link-tag {
       visibility: visible;
     }
+
+    a {
+      span {
+        color: $primary-light;
+      }
+    }
   }
 }
 
