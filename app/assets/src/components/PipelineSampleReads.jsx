@@ -97,8 +97,8 @@ class PipelineSampleReads extends React.Component {
       sample_library: this.render_metadata_textfield,
       sample_sequencer: this.render_metadata_textfield,
       sample_unique_id: this.render_metadata_textfield,
-      sample_input_pg: this.render_metadata_textfield,
-      sample_batch: this.render_metadata_textfield,
+      sample_input_pg: this.render_metadata_numfield,
+      sample_batch: this.render_metadata_numfield,
       sample_organism: this.render_metadata_textfield,
       sample_detection: this.render_metadata_textfield
     };
