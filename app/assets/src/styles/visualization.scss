@@ -54,6 +54,16 @@
     border-width: 1px 0;
     background: #fff;
     margin: 0;
+
+    .s2 {
+      width: auto;
+      min-width: 15%;
+    }
+
+    .s3 {
+      width: auto;
+      min-width: 20%;
+    }
   }
   .visualization-content {
     margin-top: 2em;
@@ -98,6 +108,8 @@
 }
 .heatmap {
   overflow: auto;
+  margin-bottom: 10rem;
+
   .node circle {
     fill: #fff;
     stroke: steelblue;

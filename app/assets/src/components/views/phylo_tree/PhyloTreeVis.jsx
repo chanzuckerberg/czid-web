@@ -39,7 +39,8 @@ class PhyloTreeVis extends React.Component {
       legendY: 50,
       tooltipContainer: this.tooltipContainer,
       onNodeTextClick: this.handleNodeClick,
-      onNodeHover: this.handleNodeHover
+      onNodeHover: this.handleNodeHover,
+      scaleLabel: "Relative distance"
     });
     this.treeVis.update();
   }
@@ -77,8 +78,9 @@ class PhyloTreeVis extends React.Component {
       try {
         value = field.parser(value);
       } catch (err) {
-        // TODO: handle error
-        console.error(err);
+        // TODO: handle error properly
+        // eslint-disable-next-line no-console
+        console.error(`Error parsing: ${field.name}`);
       }
     }
     return value || "-";

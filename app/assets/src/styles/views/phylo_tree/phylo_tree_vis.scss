@@ -3,10 +3,8 @@
 .phylo-tree-vis {
   &__tree-container {
     padding: 20px;
-
-    svg {
-      width: 100%;
-    }
+    margin-bottom: 30rem;
+    overflow: auto;
 
     .node {
       cursor: pointer;
