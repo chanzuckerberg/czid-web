@@ -151,7 +151,7 @@ class PipelineSampleReport extends React.Component {
     this.expandAll = false;
     this.expandedGenera = [];
     this.thresholded_taxons = [];
-    this.row_class = this.row_class.bind(this);
+    this.rowClass = this.rowClass.bind(this);
 
     this.anyFilterSet = this.anyFilterSet.bind(this);
     this.applyFilters = this.applyFilters.bind(this);
@@ -1222,7 +1222,7 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
-  row_class(tax_info, confirmed_taxids, watched_taxids) {
+  rowClass(tax_info, confirmed_taxids, watched_taxids) {
     let highlighted =
       this.state.highlight_taxon == tax_info.tax_id ? "highlighted" : "";
     let taxon_status = "";
@@ -1540,7 +1540,7 @@ function DetailCells({ parent }) {
       ref={elm => {
         parent.taxon_row_refs[tax_info.tax_id] = elm;
       }}
-      className={parent.row_class(
+      className={parent.rowClass(
         tax_info,
         parent.props.confirmed_taxids,
         parent.props.watched_taxids
