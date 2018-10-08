@@ -536,7 +536,7 @@ class PipelineSampleReads extends React.Component {
     let d_report = null;
     let waitingSpinner = (
       <div>
-        Sample Waiting ...
+        Sample {this.pipelineStatus} ...
         <p>
           <i className="fa fa-spinner fa-spin fa-3x" />
         </p>
@@ -973,7 +973,9 @@ class PipelineSampleReads extends React.Component {
                             let properties = this.sampleFieldProperties.get(
                               field
                             );
-                            let renderMethod = this.sampleFieldRenderMethods[field];
+                            let renderMethod = this.sampleFieldRenderMethods[
+                              field
+                            ];
                             return renderMethod(
                               properties.label,
                               properties.name,
@@ -986,7 +988,9 @@ class PipelineSampleReads extends React.Component {
                             let properties = this.sampleFieldProperties.get(
                               field
                             );
-                            let renderMethod = this.sampleFieldRenderMethods[field];
+                            let renderMethod = this.sampleFieldRenderMethods[
+                              field
+                            ];
                             return renderMethod(
                               properties.label,
                               properties.name,
