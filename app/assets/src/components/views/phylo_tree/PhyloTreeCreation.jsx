@@ -248,7 +248,7 @@ class PhyloTreeCreation extends React.Component {
   parsePhyloTreeData(phyloTreeData) {
     return phyloTreeData.map(row => ({
       name: row.name,
-      user: row.user.name,
+      user: (row.user || {}).name,
       last_update: <Moment fromNow date={row.updated_at} />,
       view: <a href={`/phylo_trees/index?treeId=${row.id}`}>View</a>
     }));

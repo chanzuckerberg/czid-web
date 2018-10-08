@@ -185,6 +185,15 @@ class PhyloTree < ApplicationRecord
     save
   end
 
+  def self.users_by_tree_id
+    ActiveRecord::Base.connection.select_all("
+      select phylo_trees.id as phylo_tree_id, users.id, users.name
+      from phylo_trees, users
+      where phylo_trees.user_id = users.id
+      order by phylo_tree_id
+    ").index_by { |entry| entry["phylo_tree_id"] }
+  end
+
   def self.sample_details_by_tree_id
     query_results = ActiveRecord::Base.connection.select_all("
       select phylo_tree_id, pipeline_run_id, ncbi_metadata, sample_id, samples.*, projects.name as project_name
