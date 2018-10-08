@@ -69,6 +69,7 @@ class PipelineSampleReads extends React.Component {
     };
     this.DROPDOWN_METADATA_FIELDS = Object.keys(this.DROPDOWN_OPTIONS);
     this.render_metadata_textfield = this.render_metadata_textfield.bind(this);
+    this.render_metadata_numfield = this.render_metadata_numfield.bind(this);
     this.render_metadata_dropdown = this.render_metadata_dropdown.bind(this);
 
     this.sampleFieldsColumn1 = [
@@ -97,8 +98,8 @@ class PipelineSampleReads extends React.Component {
       sample_library: this.render_metadata_textfield,
       sample_sequencer: this.render_metadata_textfield,
       sample_unique_id: this.render_metadata_textfield,
-      sample_input_pg: this.render_metadata_textfield,
-      sample_batch: this.render_metadata_textfield,
+      sample_input_pg: this.render_metadata_numfield,
+      sample_batch: this.render_metadata_numfield,
       sample_organism: this.render_metadata_textfield,
       sample_detection: this.render_metadata_textfield
     };
