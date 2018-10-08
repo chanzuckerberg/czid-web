@@ -19,6 +19,7 @@ import Slider from "./ui/controls/Slider";
 import TaxonTooltip from "./TaxonTooltip";
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
 import { Colormap } from "./utils/colormaps/Colormap";
+const deepEqual = require("fast-deep-equal");
 
 class SamplesHeatmap extends React.Component {
   // TODO: do not make another request if values did not change
@@ -516,6 +517,10 @@ class SamplesHeatmap extends React.Component {
   }
 
   onThresholdFilterApply(filters) {
+    if (deepEqual(filters, this.state.selectedOptions.thresholdFilters)) {
+      return;
+    }
+
     this.optionsChanged = true;
     this.setSelectedOptionsState(
       { thresholdFilters: filters },
@@ -704,6 +709,10 @@ class SamplesHeatmap extends React.Component {
   }
 
   onSpecificityChange(_, specificity) {
+    if (specificity.value === this.state.selectedOptions.readSpecificity) {
+      return;
+    }
+
     this.optionsChanged = true;
     this.setSelectedOptionsState(
       { readSpecificity: specificity.value },

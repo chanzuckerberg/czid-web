@@ -6,6 +6,10 @@
     margin-bottom: 30rem;
     overflow: auto;
 
+    svg {
+      width: 100%;
+    }
+
     .node {
       cursor: pointer;
     }
