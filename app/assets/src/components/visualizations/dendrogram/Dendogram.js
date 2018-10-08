@@ -25,7 +25,8 @@ export default class Dendogram {
         onNodeTextClick: null,
         onNodeClick: null,
         onNodeHover: null,
-        tooltipContainer: null
+        tooltipContainer: null,
+        scaleLabel: null
       },
       options || {}
     );
@@ -38,8 +39,8 @@ export default class Dendogram {
 
     // margin top
     this.margins = {
-      // includes legend
-      top: 80,
+      // includes scale legend
+      top: 140,
       // includes second half of nodes
       bottom: 20,
       // includes root label on the left of the node
@@ -417,6 +418,14 @@ export default class Dendogram {
       .transition(500)
       .style("opacity", 0)
       .remove();
+
+    // Set scale label
+    scale
+      .append("text")
+      .attr("x", x + 78)
+      .attr("y", y - 30)
+      .attr("class", "title")
+      .text(this.options.scaleLabel);
   }
 
   update() {
@@ -479,7 +488,7 @@ export default class Dendogram {
     this.updateLegend();
     this.adjustXPositions();
     this.adjustYPositions(maxDistance);
-    this.createScale(-30, 0, this.minTreeSize.width, maxDistance);
+    this.createScale(-80, 0, this.minTreeSize.width, maxDistance);
 
     let link = this.g
       .selectAll(".link")

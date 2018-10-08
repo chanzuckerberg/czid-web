@@ -3,6 +3,8 @@
 .taxon-tree-vis {
   &__container {
     position: relative;
+    margin-bottom: 15rem;
+    overflow: auto;
 
     .node-overlay {
       opacity: 0;
