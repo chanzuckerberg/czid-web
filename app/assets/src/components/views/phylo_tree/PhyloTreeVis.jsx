@@ -3,8 +3,7 @@ import Tree from "../../utils/structures/Tree";
 import Dendogram from "../../visualizations/dendrogram/Dendogram";
 import PropTypes from "prop-types";
 import DataTooltip from "../../ui/containers/DataTooltip";
-import { SAMPLE_FIELDS } from "../../utils/SampleFields";
-import Moment from "react-moment";
+import { SAMPLE_FIELDS, DateParser } from "../../utils/SampleFields";
 
 class PhyloTreeVis extends React.Component {
   constructor(props) {
@@ -20,14 +19,7 @@ class PhyloTreeVis extends React.Component {
 
     this.handleNodeHover = this.handleNodeHover.bind(this);
 
-    this.sampleFields = SAMPLE_FIELDS.slice();
-    this.sampleFields.splice(2, 0, {
-      name: "created_at",
-      label: "Upload Date",
-      parser: val => {
-        return <Moment fromNow date={val} />;
-      }
-    });
+    this.sampleFields = SAMPLE_FIELDS;
     this.ncbiFields = [
       { name: "country", label: "Country" },
       { name: "collection_date", label: "Collection Date" }
