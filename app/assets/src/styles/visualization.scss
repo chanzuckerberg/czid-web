@@ -98,6 +98,8 @@
 }
 .heatmap {
   overflow: auto;
+  margin-bottom: 10rem;
+
   .node circle {
     fill: #fff;
     stroke: steelblue;
