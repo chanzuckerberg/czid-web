@@ -233,7 +233,11 @@ class PipelineSampleReads extends React.Component {
 
   render_metadata_textfield(label, field, popupContent) {
     let display_value = this.TYPE_PROMPT;
-    if (this.sampleInfo[field] && this.sampleInfo[field].trim() !== "")
+    if (
+      this.sampleInfo[field] &&
+      typeof this.sampleInfo[field] === "string" &&
+      this.sampleInfo[field].trim() !== ""
+    )
       display_value = this.sampleInfo[field];
     let labelElem = <div className="col s6 label">{label}</div>;
     if (popupContent)
@@ -973,7 +977,9 @@ class PipelineSampleReads extends React.Component {
                             let properties = this.sampleFieldProperties.get(
                               field
                             );
-                            let renderMethod = this.sampleFieldRenderMethods[field];
+                            let renderMethod = this.sampleFieldRenderMethods[
+                              field
+                            ];
                             return renderMethod(
                               properties.label,
                               properties.name,
@@ -986,7 +992,9 @@ class PipelineSampleReads extends React.Component {
                             let properties = this.sampleFieldProperties.get(
                               field
                             );
-                            let renderMethod = this.sampleFieldRenderMethods[field];
+                            let renderMethod = this.sampleFieldRenderMethods[
+                              field
+                            ];
                             return renderMethod(
                               properties.label,
                               properties.name,
