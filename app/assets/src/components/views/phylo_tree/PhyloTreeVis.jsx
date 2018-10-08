@@ -86,8 +86,9 @@ class PhyloTreeVis extends React.Component {
       try {
         value = field.parser(value);
       } catch (err) {
-        // TODO: handle error
-        console.error(err);
+        // TODO: handle error properly
+        // eslint-disable-next-line no-console
+        console.error(`Error parsing: ${field.name}`);
       }
     }
     return value || "-";
