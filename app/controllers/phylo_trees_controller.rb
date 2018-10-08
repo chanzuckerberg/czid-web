@@ -53,10 +53,11 @@ class PhyloTreesController < ApplicationController
 
     @phylo_trees = @phylo_trees.as_json(include: { user: { only: [:id, :name] } })
 
-    # Augment tree data with sample attributes and number of pipeline_runs
+    # Augment tree data with sample attributes, number of pipeline_runs, user name
     @phylo_trees.each do |pt|
       sample_details = PhyloTree.sample_details_by_tree_id[pt["id"]]
       pt["sampleDetailsByNodeName"] = sample_details
+      pt["user"] = PhyloTree.users_by_tree_id[pt["id"]]
     end
 
     respond_to do |format|
