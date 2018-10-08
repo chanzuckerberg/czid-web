@@ -13,9 +13,8 @@ class TaxonTooltip extends React.Component {
     }
 
     let valueMap = [
-      //["Agg Score", "NT.aggregatescore"], // Not showing aggregate score on tool tip. Ask YF
       ["Max Z", "NT.maxzscore"],
-      null,
+      ["Agg Score", "NT.aggregatescore"],
       ["NT RPM", "NT.rpm"],
       ["NR RPM", "NR.rpm"],
       ["NT R", "NT.r"],

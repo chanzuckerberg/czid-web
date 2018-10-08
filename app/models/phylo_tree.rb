@@ -82,11 +82,12 @@ class PhyloTree < ApplicationRecord
     # Also, populate job_log_id.
     return if throttle && rand >= 0.1 # if throttling, do time-consuming aegea checks only 10% of the time
     job_status, self.job_log_id, _job_hash, self.job_description = job_info(job_id, id)
+    required_outputs = select_outputs("required")
     if job_status == PipelineRunStage::STATUS_FAILED ||
-       (job_status == "SUCCEEDED" && !Open3.capture3("aws", "s3", "ls", s3_outputs["newick"]["s3_path"])[2].success?)
+       (job_status == "SUCCEEDED" && !required_outputs.all? { |ro| exists_in_s3?(s3_outputs[ro]["s3_path"]) })
       self.status = STATUS_FAILED
-      save
     end
+    save
   end
 
   def job_command
@@ -183,6 +184,15 @@ class PhyloTree < ApplicationRecord
       self.status = STATUS_FAILED
     end
     save
+  end
+
+  def self.users_by_tree_id
+    ActiveRecord::Base.connection.select_all("
+      select phylo_trees.id as phylo_tree_id, users.id, users.name
+      from phylo_trees, users
+      where phylo_trees.user_id = users.id
+      order by phylo_tree_id
+    ").index_by { |entry| entry["phylo_tree_id"] }
   end
 
   def self.sample_details_by_tree_id
