@@ -337,9 +337,9 @@ class PipelineRun < ApplicationRecord
 
     # check if there's any record loaded into taxon_counts. If so, skip
     check_count_type = refined ? 'NT+' : 'NT'
-    records = TaxonCount.where(pipeline_run_id: id)
-                        .where(count_type: check_count_type).count
-    return if records > 0
+    loaded_records = TaxonCount.where(pipeline_run_id: id)
+                               .where(count_type: check_count_type).count
+    return if loaded_records > 0
 
     # TODO: remove the following. deprecated.
     # version_s3_path = "#{alignment_output_s3_path}/#{VERSION_JSON_NAME}"
