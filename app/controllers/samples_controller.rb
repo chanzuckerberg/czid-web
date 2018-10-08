@@ -17,7 +17,7 @@ class SamplesController < ApplicationController
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder, :show_taxid_alignment, :show_taxid_alignment_viz].freeze
   EDIT_ACTIONS = [:edit, :add_taxon_confirmation, :remove_taxon_confirmation, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata].freeze
 
-  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :top_taxons, :heatmap, :download_heatmap, :cli_user_instructions].freeze
+  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :heatmap, :download_heatmap, :cli_user_instructions].freeze
 
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload]
   acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload], fallback: :devise
@@ -163,7 +163,7 @@ class SamplesController < ApplicationController
     @pipeline_versions = @sample.pipeline_versions
 
     @pipeline_run_display = curate_pipeline_run_display(@pipeline_run)
-    @sample_status = @pipeline_run ? @pipeline_run.job_status : nil
+    @sample_status = @pipeline_run ? @pipeline_run.job_status_display : 'Uploading'
     pipeline_run_id = @pipeline_run ? @pipeline_run.id : nil
     job_stats_hash = job_stats_get(pipeline_run_id)
     @summary_stats = job_stats_hash.present? ? get_summary_stats(job_stats_hash, @pipeline_run) : nil
@@ -197,24 +197,6 @@ class SamplesController < ApplicationController
     end
   end
 
-  def top_taxons
-    sample_ids = params[:sample_ids].split(",").map(&:to_i) || []
-
-    num_results = params[:n] ? params[:n].to_i : SamplesController::DEFAULT_MAX_NUM_TAXONS
-    sort_by = params[:sort_by] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
-
-    samples = current_power.samples.where(id: sample_ids)
-    species_selected = params[:species] == "1"
-    if samples.first
-      first_sample = samples.first
-      background_id = check_background_id(first_sample)
-      @top_taxons = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, {}, {}, false, false)
-      render json: @top_taxons
-    else
-      render json: {}
-    end
-  end
-
   def heatmap
     @heatmap_data = {
       taxonLevels: %w[Genus Species],
@@ -223,16 +205,13 @@ class SamplesController < ApplicationController
         Viruses: ["Phage"]
       },
       metrics: [
-        "NT.aggregatescore",
-        "NT.rpm",
-        "NT.r",
-        "NT.zscore",
-        "NT.maxzscore",
-        "NR.aggregatescore",
-        "NR.rpm",
-        "NR.r",
-        "NR.zscore",
-        "NR.maxzscore"
+        { text: "Aggregate Score", value: "NT.aggregatescore" },
+        { text: "NT Z Score", value: "NT.zscore" },
+        { text: "NT rPM", value: "NT.rpm" },
+        { text: "NT r (total reads)", value: "NT.r" },
+        { text: "NR Z Score", value: "NR.zscore" },
+        { text: "NR r (total reads)", value: "NR.r" },
+        { text: "NR rPM", value: "NR.rpm" }
       ],
       backgrounds: current_power.backgrounds.map do |background|
         { name: background.name, value: background.id }
@@ -605,7 +584,11 @@ class SamplesController < ApplicationController
     end
     taxon_ids = taxon_ids.compact
     categories = params[:categories]
-    threshold_filters = (params[:thresholdFilters] || {}).map { |filter| JSON.parse(filter) }
+    threshold_filters = if params[:thresholdFilters].is_a?(Array)
+                          (params[:thresholdFilters] || []).map { |filter| JSON.parse(filter || "{}") }
+                        else
+                          JSON.parse(params[:thresholdFilters] || "[]")
+                        end
     include_phage = (JSON.parse(params[:subcategories]) || {}).fetch("Viruses", []).include?("Phage")
     read_specificity = params[:readSpecificity] ? params[:readSpecificity].to_i == 1 : false
 

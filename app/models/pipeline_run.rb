@@ -414,6 +414,8 @@ class PipelineRun < ApplicationRecord
       "#{expt_output_s3_path}/#{AMR_FULL_RESULTS_NAME}"
     when "taxon_counts"
       "#{alignment_output_s3_path}/#{taxon_counts_json_name}"
+    when "refined_taxon_counts"
+      "#{postprocess_output_s3_path}/#{REFINED_TAXON_COUNTS_JSON_NAME}"
     when "taxon_byteranges"
       "#{postprocess_output_s3_path}/#{TAXID_BYTERANGE_JSON_NAME}"
     end
@@ -493,8 +495,9 @@ class PipelineRun < ApplicationRecord
 
     # Get pipeline_version, which determines S3 locations of output files.
     # If pipeline version is not present, we cannot load results yet.
+    # Except, if the pipeline run is finalized, we have to (this is a failure case).
     update_pipeline_version(self, :pipeline_version, pipeline_version_file)
-    return if pipeline_version.blank?
+    return if pipeline_version.blank? && !finalized
 
     # Load any new outputs that have become available:
     output_states.each do |o|
@@ -573,6 +576,12 @@ class PipelineRun < ApplicationRecord
       self.job_status += "|#{STATUS_READY}" if report_ready?
     end
     save
+  end
+
+  def job_status_display
+    return "Pipeline Initializizng" unless self.job_status
+    stage = self.job_status.to_s.split("-")[0].split(".")[1]
+    stage ? "Running #{stage}" : self.job_status
   end
 
   def check_and_log_long_run
@@ -812,6 +821,13 @@ class PipelineRun < ApplicationRecord
       SET is_phage = 1
       WHERE pipeline_run_id=#{id} AND
             family_taxid IN (#{phage_families})
+    ")
+    phage_taxids = TaxonLineage::PHAGE_TAXIDS.join(",")
+    TaxonCount.connection.execute("
+      UPDATE taxon_counts
+      SET is_phage = 1
+      WHERE pipeline_run_id=#{id} AND
+            tax_id IN (#{phage_taxids})
     ")
   end
 

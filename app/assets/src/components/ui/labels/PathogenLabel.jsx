@@ -26,25 +26,20 @@ const CATEGORIES = {
 };
 
 const PathogenLabel = ({ type }) => {
-  if (type) {
-    let label = (
-      <a
-        href={CATEGORIES[type]["url"]}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <Label
-          text={CATEGORIES[type]["text"]}
-          color={CATEGORIES[type]["color"]}
-          size="medium"
-          className="pathogen-label"
-        />
-      </a>
-    );
-    return <BasicPopup trigger={label} content={CATEGORIES[type]["tooltip"]} />;
-  } else {
+  if (!CATEGORIES.hasOwnProperty(type)) {
     return null;
   }
+  let label = (
+    <a href={CATEGORIES[type]["url"]} target="_blank" rel="noopener noreferrer">
+      <Label
+        text={CATEGORIES[type]["text"]}
+        color={CATEGORIES[type]["color"]}
+        size="medium"
+        className="pathogen-label"
+      />
+    </a>
+  );
+  return <BasicPopup trigger={label} content={CATEGORIES[type]["tooltip"]} />;
 };
 
 export default PathogenLabel;

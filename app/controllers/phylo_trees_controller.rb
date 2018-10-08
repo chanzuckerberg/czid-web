@@ -1,4 +1,6 @@
 class PhyloTreesController < ApplicationController
+  include PipelineRunsHelper
+
   before_action :authenticate_user!
   before_action :no_demo_user, only: :create
 
@@ -70,15 +72,7 @@ class PhyloTreesController < ApplicationController
   end
 
   def choose_taxon
-    max_ended_at = TaxonLineage.column_defaults["ended_at"] # infinitely far in the future
-    lineages = TaxonLineage.where("genus_taxid > 0").where.not(genus_name: "").where("ended_at = ?", max_ended_at)
-    lineages = lineages.select(:genus_taxid, :genus_name).distinct.order(:genus_name).index_by(&:genus_name) # index_by makes sure it's unique on genus_name alone
-    taxon_search = lineages.map do |genus_name, record|
-      { "title" => genus_name,
-        "description" => "Taxonomy ID: #{record.genus_taxid}",
-        "taxid" => record.genus_taxid }
-    end
-    render json: JSON.dump(taxon_search)
+    render json: File.read("/app/app/lib/taxon_search_list.json")
   end
 
   def new
@@ -113,15 +107,6 @@ class PhyloTreesController < ApplicationController
     end
   end
 
-  def show
-    # DEPRECATED
-    @project = current_power.projects.find(@phylo_tree.project_id)
-    @samples = sample_details_json(@phylo_tree.pipeline_run_ids, @phylo_tree.taxid)
-    @phylo_tree_augmented = @phylo_tree.as_json(include: :pipeline_runs)
-    # The preceding line is extremely slow. If use of the show actionn is restored, it should be rewritten.
-    @can_edit = current_power.updatable_phylo_tree?(@phylo_tree)
-  end
-
   def retry
     if @phylo_tree.status == PhyloTree::STATUS_FAILED
       @phylo_tree.update(status: PhyloTree::STATUS_INITIALIZED,
@@ -135,10 +120,8 @@ class PhyloTreesController < ApplicationController
 
   def download_snps
     snp_file = Tempfile.new
-    s3_file = @phylo_tree.s3_outputs["SNP_annotations"]
-    cmd_status = Open3.capture3("aws", "s3", "cp", s3_file, snp_file.path)[2]
-    unless cmd_status.success?
-      snp_file.write("Not yet available.")
+    s3_file = @phylo_tree.snp_annotations
+    unless s3_file && download_to_filename?(s3_file, snp_file.path)
       snp_file.close
       LogUtil.log_err_and_airbrake("downloading #{s3_file} failed")
     end

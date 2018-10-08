@@ -1,0 +1,76 @@
+@import "../themes/colors";
+
+.taxon-tree-vis {
+  &__container {
+    position: relative;
+
+    .node-overlay {
+      opacity: 0;
+      position: absolute;
+      left: 20px;
+      top: 20px;
+    }
+  }
+
+  &__tooltip {
+    background-color: $white;
+    border: 1px solid $light-grey;
+    border-radius: 5px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    display: none;
+    height: auto;
+    min-width: 200px;
+    padding: 10px;
+    pointer-events: none;
+    position: absolute;
+
+    &.visible {
+      display: block;
+    }
+
+    .taxon_tooltip {
+      font-size: 9pt;
+
+      &__row {
+        margin-bottom: 0;
+
+        &__label {
+          float: left;
+          padding: 0;
+        }
+
+        &__value {
+          float: right;
+          padding: 0;
+        }
+
+        &--active {
+          font-weight: 600;
+        }
+
+        &:after {
+          content: "";
+          display: table;
+          clear: both;
+        }
+      }
+
+      &__title {
+        text-transform: uppercase;
+        color: #888;
+        border-bottom: 1px solid #eee;
+        margin-bottom: 0.5em;
+      }
+
+      &__name {
+        margin-bottom: 1em;
+      }
+
+      &__data {
+        ul {
+          margin: 0;
+        }
+      }
+    }
+  }
+}

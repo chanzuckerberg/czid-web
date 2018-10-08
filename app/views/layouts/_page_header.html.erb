@@ -8,7 +8,9 @@
         demoUser: <%= current_user.demo_user? ? 1: 0 %>,
         host_genome_names: JSON.parse('<%= raw escape_json(HostGenome.all.map(&:name)) %>'),
         signoutEndpoint: '<%=destroy_user_session_path%>',
-        signInEndpoint: '<%=new_user_session_path%>' }, 'page_header')
+        signInEndpoint: '<%=new_user_session_path%>',
+        contactEmail: "accounts@idseq.net"
+      }, 'page_header')
     <% end %>
   <% else %>
     <%= javascript_tag do %>

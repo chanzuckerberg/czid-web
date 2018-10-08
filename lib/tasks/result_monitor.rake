@@ -34,10 +34,6 @@ class MonitorPipelineResults
     end
   end
 
-  def self.forced_update_interval
-    600
-  end
-
   def self.run(duration, min_refresh_interval)
     Rails.logger.info("Monitoring results for the active pipeline runs every #{min_refresh_interval} seconds over the next #{duration / 60} minutes.")
     t_now = Time.now.to_f # unixtime
@@ -76,9 +72,10 @@ task "result_monitor", [:duration] => :environment do |_t, args|
   # spawn a new finite duration process every 60 minutes
   respawn_interval = 60 * 60
   # rate-limit status updates
-  checks_per_minute = 4.0
+  cloud_env = ["prod", "staging"].include?(Rails.env)
+  checks_per_minute = cloud_env ? 4.0 : 0.2
   # make sure the system is not overwhelmed under any cirmustances
-  wait_before_respawn = 5
+  wait_before_respawn = cloud_env ? 5 : 30
   additional_wait_after_failure = 25
 
   # don't show all the SQL debug info in the logs, and throttle data sent to Honeycomb

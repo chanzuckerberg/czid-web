@@ -94,4 +94,13 @@ module PipelineRunsHelper
   def upload_version(s3_file)
     "idseq_dag --version | cut -f2 -d ' ' | aws s3 cp  - #{s3_file}"
   end
+
+  def download_to_filename?(s3_file, local_file)
+    # downloads file and returns whether it was successful
+    Open3.capture3("aws", "s3", "cp", s3_file, local_file)[2].success?
+  end
+
+  def exists_in_s3?(s3_path)
+    Open3.capture3("aws", "s3", "ls", s3_path)[2].success?
+  end
 end

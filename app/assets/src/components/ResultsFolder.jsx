@@ -20,7 +20,7 @@ class ResultsFolder extends React.Component {
 
   render() {
     return (
-      <div className="results">
+      <div className="results-folder">
         <div className="header">
           <span className="title">
             <span className="back" onClick={this.gotoPath.bind(this, "/")}>
@@ -31,7 +31,7 @@ class ResultsFolder extends React.Component {
               className="back"
               onClick={this.gotoPath.bind(
                 this,
-                `/?project_id=${this.filePath[1]}`
+                `/home?project_id=${this.filePath[1]}`
               )}
             >
               {this.projectName}
