@@ -159,7 +159,7 @@ class Page extends React.Component {
 
   render() {
     return (
-      <div className={`wizard__page$`}>
+      <div className={`wizard__page`}>
         {React.Children.toArray(this.props.children)}
       </div>
     );

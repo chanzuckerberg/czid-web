@@ -59,7 +59,7 @@ class PhyloTreeCreation extends React.Component {
       tissue: "Tissue",
       location: "Location",
       date: "Date",
-      reads: "Read Count"
+      reads: "Read Count\n(NT | NR)"
     };
 
     this.otherSamplesHeaders = {
@@ -83,7 +83,6 @@ class PhyloTreeCreation extends React.Component {
     this.canContinueWithTaxonAndProject = this.canContinueWithTaxonAndProject.bind(
       this
     );
-
     this.handleBranchChange = this.handleBranchChange.bind(this);
     this.handleChangedProjectSamples = this.handleChangedProjectSamples.bind(
       this
