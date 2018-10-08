@@ -23,9 +23,6 @@
   ],
   "rules": {
     "camelcase": "warn",
-    "no-console": "warn",
-    "no-extra-semi": "warn",
-    "no-mixed-spaces-and-tabs": "warn",
     "no-unreachable": "warn",
     "react/boolean-prop-naming": "warn",
     "standard/object-curly-even-spacing": "warn",
