@@ -3,7 +3,7 @@ import Tree from "../../utils/structures/Tree";
 import Dendogram from "../../visualizations/dendrogram/Dendogram";
 import PropTypes from "prop-types";
 import DataTooltip from "../../ui/containers/DataTooltip";
-import { SAMPLE_FIELDS, DateParser } from "../../utils/SampleFields";
+import { SAMPLE_FIELDS } from "../../utils/SampleFields";
 
 class PhyloTreeVis extends React.Component {
   constructor(props) {
