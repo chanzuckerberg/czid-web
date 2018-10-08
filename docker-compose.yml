@@ -15,8 +15,9 @@ services:
     volumes:
       - ./redis-data:/var/lib/redis/data
   webtest:
-    build: .
-    command: bash
+    image: chanzuckerberg/idseq-web:compose
+    volumes:
+      - ~/.aws:/root/.aws
     ports:
       - "8000:8000"
     depends_on:
@@ -26,9 +27,6 @@ services:
       - SAMPLES_BUCKET_NAME=idseq-samples-development
       - AIRBRAKE_PROJECT_ID
       - AIRBRAKE_PROJECT_KEY
-      - IDSEQ_HONEYCOMB_DB_DATA_SET
-      - IDSEQ_HONEYCOMB_DATA_SET
-      - IDSEQ_HONEYCOMB_WRITE_KEY
       - MAIL_GUN_API_KEY
       - CI
       - CONTINUOUS_INTEGRATION
@@ -57,15 +55,13 @@ services:
       - TRAVIS_SECURE_ENV_VARS
       - TRAVIS_TAG
       - TRAVIS
-    volumes:
-      - ~/.aws:/root/.aws
+    command: bash
   web:
     build: .
     image: chanzuckerberg/idseq-web:compose
     volumes:
       - .:/app
       - ~/.aws:/root/.aws
-    command: bash -c "rm -f tmp/pids/server.pid && rails server -b 0.0.0.0 -p 3000"
     ports:
       - "3000:3000"
     depends_on:
@@ -108,8 +104,9 @@ services:
       - TRAVIS_SECURE_ENV_VARS
       - TRAVIS_TAG
       - TRAVIS
+    command: bash -c "rm -f tmp/pids/server.pid && rails server -b 0.0.0.0 -p 3000"
   resque:
-    build: .
+    image: chanzuckerberg/idseq-web:compose
     volumes:
       - .:/app
       - ~/.aws:/root/.aws
@@ -120,9 +117,6 @@ services:
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
       - SAMPLES_BUCKET_NAME=idseq-samples-development
-      - IDSEQ_HONEYCOMB_DB_DATA_SET
-      - IDSEQ_HONEYCOMB_DATA_SET
-      - IDSEQ_HONEYCOMB_WRITE_KEY
       - CI
       - CONTINUOUS_INTEGRATION
       - RACK_ENV
@@ -152,7 +146,7 @@ services:
       - TRAVIS
     command: bundle exec "QUEUE=* COUNT=5 rake resque:workers"
   resque_result_monitor:
-    build: .
+    image: chanzuckerberg/idseq-web:compose
     volumes:
       - .:/app
       - ~/.aws:/root/.aws
@@ -192,7 +186,7 @@ services:
       - TRAVIS
     command: bundle exec "rake result_monitor"
   resque_pipeline_monitor:
-    build: .
+    image: chanzuckerberg/idseq-web:compose
     volumes:
       - .:/app
       - ~/.aws:/root/.aws
@@ -203,9 +197,6 @@ services:
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
       - SAMPLES_BUCKET_NAME=idseq-samples-development
-      - IDSEQ_HONEYCOMB_DB_DATA_SET
-      - IDSEQ_HONEYCOMB_DATA_SET
-      - IDSEQ_HONEYCOMB_WRITE_KEY
       - CI
       - CONTINUOUS_INTEGRATION
       - RACK_ENV
