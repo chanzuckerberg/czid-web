@@ -21,18 +21,32 @@ class CliUserInstructions extends React.Component {
             "(1) Install and configure the Amazon Web Services Command Line Interface (AWS CLI): "
           }
         </p>
+        <div>
+          For macOS users: We recommend trying the Homebrew package manager to
+          install <span className="code">awscli</span>. You can install by
+          running these commands:
+          <div className="code-bullet">
+            /usr/bin/ruby -e "$(curl -fsSL
+            https://raw.githubusercontent.com/Homebrew/install/master/install)"
+          </div>
+          <div className="code-bullet">brew install awscli</div>
+        </div>
         <p>
+          {`- Otherwise follow the AWS installation instructions `}
           <a
             href="https://docs.aws.amazon.com/cli/latest/userguide/installing.html"
             target="_blank"
             rel="noopener noreferrer"
             className="terms-link"
           >
-            Installation instructions here
+            here
           </a>
-          . Verify it works by running <span className="code">aws help</span>,
+          {`. `}
+        </p>
+        <p>
+          - Verify it works by running <span className="code">aws help</span>,
           which should display usage instructions. You do not need to set up AWS
-          credentials.
+          credentials unless you're using the bulk upload mode.
         </p>
         <p className="instruction-heading">(2) Install the IDseq CLI:</p>
         <div>
@@ -49,8 +63,9 @@ class CliUserInstructions extends React.Component {
             - Try running with <span className="code">pip2</span> or{" "}
             <span className="code">pip3</span> depending on your configuration.
             Try <span className="code">sudo pip</span> if you run into
-            permissions errors. You can use this same command in the future to
-            update the CLI if needed.
+            permissions errors (anything like OSError: [Errno 13] Permission
+            denied). You can use this same command in the future to update the
+            CLI if needed.
           </p>
         </div>
         <p />
