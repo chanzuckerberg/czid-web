@@ -17,6 +17,7 @@ class ProjectsController < ApplicationController
 
   power :projects, map: { EDIT_ACTIONS => :updatable_projects }, as: :projects_scope
 
+  before_action :admin_required, only: [:edit, :new]
   before_action :set_project, only: READ_ACTIONS + EDIT_ACTIONS
   before_action :assert_access, only: OTHER_ACTIONS
   before_action :check_access
