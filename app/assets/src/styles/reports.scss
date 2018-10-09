@@ -326,6 +326,24 @@ input[type="number"] {
     color: #d1d1d2 !important;
     font-weight: normal !important;
   }
+
+  tr:hover {
+    .hover-wrapper {
+      .link-tag {
+        visibility: visible;
+      }
+
+      a {
+        span {
+          color: $primary-light;
+        }
+      }
+    }
+  }
+
+  tr:not(.report-header):hover {
+    background-color: #f8f9fe;
+  }
 }
 
 .report-table .count-info {
@@ -746,18 +764,6 @@ input[type="number"] {
       margin: 50px auto;
     }
   }
-}
-
-tr:hover {
-  .hover-wrapper {
-    .link-tag {
-      visibility: visible;
-    }
-  }
-}
-
-tr:not(.report-header):hover {
-  background-color: #f8f9fe;
 }
 
 .hover-wrapper {

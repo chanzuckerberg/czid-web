@@ -1,3 +1,4 @@
+<% if current_user.admin? %>
 <p id="notice"><%= notice %></p>
 
 <p>
@@ -17,3 +18,4 @@
 <%= link_to 'See all projects', projects_path %> |
 <%= link_to 'Front portal', root_path %>
 </p>
+<% end %>

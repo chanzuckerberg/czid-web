@@ -909,6 +909,18 @@ class SampleUpload extends React.Component {
                     </div>
                   </div>
                 </div>
+                <div className="upload-notes">
+                  <div>
+                    - Please ensure that IDseq has permissions to read/list your
+                    S3 bucket or ask our team for help.
+                  </div>
+                  <div>
+                    - Also convert links like
+                    "https://s3-us-west-2.amazonaws.com/czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz"
+                    to the format
+                    "s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz"
+                  </div>
+                </div>
                 <div className="field">
                   <div className="row">
                     <div className="col no-padding s12">

@@ -111,6 +111,11 @@ class Background < ApplicationRecord
     Math.sqrt(x)
   end
 
+  def destroy
+    TaxonSummary.where(background_id: id).delete_all
+    super
+  end
+
   def self.viewable(user)
     if user.admin?
       all
