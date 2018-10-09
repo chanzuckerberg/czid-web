@@ -7,7 +7,7 @@ import DataTable from "../../visualizations/table/DataTable";
 import Moment from "react-moment";
 import PhyloTreeChecks from "./PhyloTreeChecks";
 import SearchBox from "../../ui/controls/SearchBox";
-import LoadingSpinner from "../../ui/icons/LoadingSpinner";
+import LoadingIcon from "../../ui/icons/LoadingIcon";
 
 class PhyloTreeCreation extends React.Component {
   constructor(props) {
@@ -468,7 +468,7 @@ class PhyloTreeCreation extends React.Component {
                   initialValue={this.state.projectName}
                 />
               ) : (
-                <LoadingSpinner />
+                <LoadingIcon />
               )}
             </div>
           </div>
@@ -482,7 +482,7 @@ class PhyloTreeCreation extends React.Component {
                   initialValue={this.state.taxonName}
                 />
               ) : (
-                <LoadingSpinner />
+                <LoadingIcon />
               )}
             </div>
           </div>
@@ -540,7 +540,7 @@ class PhyloTreeCreation extends React.Component {
             this.state.projectSamples.length == 0 ? (
               <div>No samples containing {this.state.taxonName} available</div>
             ) : (
-              <LoadingSpinner />
+              <LoadingIcon />
             )}
           </div>
         </Wizard.Page>
@@ -581,7 +581,7 @@ class PhyloTreeCreation extends React.Component {
             this.state.otherSamples.length == 0 ? (
               <div>No samples containing {this.state.taxonName} available</div>
             ) : (
-              <LoadingSpinner />
+              <LoadingIcon />
             )}
           </div>
         </Wizard.Page>
@@ -620,7 +620,7 @@ class PhyloTreeCreation extends React.Component {
         </Wizard>
       );
     } else {
-      return <LoadingSpinner />;
+      return <LoadingIcon />;
     }
   }
 }
