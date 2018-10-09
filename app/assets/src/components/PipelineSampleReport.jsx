@@ -21,6 +21,7 @@ import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
 import PhyloTreeChecks from "./views/phylo_tree/PhyloTreeChecks";
 import TaxonModal from "./views/report/TaxonModal";
 import TaxonTreeVis from "./views/TaxonTreeVis";
+import LoadingLabel from "./ui/labels/LoadingLabel";
 
 class PipelineSampleReport extends React.Component {
   constructor(props) {
@@ -253,6 +254,9 @@ class PipelineSampleReport extends React.Component {
   // the API endpoint.
   fetchReportData() {
     this.nanobar.go(30);
+    this.setState({
+      loading: true
+    });
     let params = `?${window.location.search.replace("?", "")}&report_ts=${
       this.report_ts
     }&version=${this.gitVersion}`;
@@ -268,6 +272,7 @@ class PipelineSampleReport extends React.Component {
       this.genus_map = genus_map;
       this.setState(
         {
+          loading: false,
           rows_passing_filters: res.data.taxonomy_details[0],
           rows_total: res.data.taxonomy_details[1],
           taxonomy_details: res.data.taxonomy_details[2],
@@ -1929,6 +1934,11 @@ class RenderMarkup extends React.Component {
                   <ReportTableHeader parent={parent} />
                 )}
                 {this.renderTree()}
+                {parent.state.loading && (
+                  <div className="loading-container">
+                    <LoadingLabel />
+                  </div>
+                )}
               </div>
             </div>
           </div>

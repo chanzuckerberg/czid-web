@@ -737,6 +737,15 @@ input[type="number"] {
       }
     }
   }
+
+  .loading-container {
+    width: 100%;
+    text-align: center;
+
+    .idseq-ui.label.loading {
+      margin: 50px auto;
+    }
+  }
 }
 
 tr:hover {
