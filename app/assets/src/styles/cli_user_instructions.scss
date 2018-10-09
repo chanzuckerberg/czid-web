@@ -1,4 +1,5 @@
 @import "variables";
+@import "themes/colors";
 
 .instruction-container {
   margin: 5%;
@@ -12,4 +13,13 @@
 
 .instruction-medium-margin-top {
   margin-top: 1rem;
+}
+
+.code-bullet {
+  width: fit-content;
+  background-color: $primary-lightest;
+  white-space: nowrap;
+  font-family: monospace;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
