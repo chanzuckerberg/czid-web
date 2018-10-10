@@ -18,16 +18,19 @@
     </div>
 
     <div class="terms">
-      By signing up for IDseq, you agree to our
+      By registering for IDseq, you agree to our
       <a href="https://s3-us-west-2.amazonaws.com/idseq-database/Terms.pdf" target="_blank" rel="noopener noreferrer" class="terms-link">
-        Terms of Service.
+        Terms
+      </a> and
+      <a href="https://s3-us-west-2.amazonaws.com/idseq-database/Privacy.pdf" target="_blank" rel="noopener noreferrer" class="terms-link">
+        Data Privacy Notice.
       </a>
     </div>
 
     <%= devise_error_messages! %>
 
     <div class="submit-btn">
-      <%= f.submit "Submit", class: "ui primary button idseq-ui" %>
+      <%= f.submit "Register", class: "ui primary button idseq-ui" %>
     </div>
   <% end %>
 </div>
