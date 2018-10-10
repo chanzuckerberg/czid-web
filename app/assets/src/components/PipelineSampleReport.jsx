@@ -15,7 +15,6 @@ import MultipleNestedDropdown from "./ui/controls/dropdowns/MultipleNestedDropdo
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
 import BetaLabel from "./ui/labels/BetaLabel";
 import PathogenLabel from "./ui/labels/PathogenLabel";
-import PathogenSummary from "./views/report/PathogenSummary";
 import ReportInsightIcon from "./views/report/ReportInsightIcon";
 import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
 import PhyloTreeChecks from "./views/phylo_tree/PhyloTreeChecks";
@@ -33,7 +32,6 @@ class PipelineSampleReport extends React.Component {
     this.admin = props.admin;
     this.allowedFeatures = props.allowedFeatures;
     this.allowPhyloTree = props.can_edit;
-    this.allowPathogenSummary = false;
     this.report_ts = props.report_ts;
     this.sample_id = props.sample_id;
     this.projectId = props.projectId;
@@ -115,8 +113,8 @@ class PipelineSampleReport extends React.Component {
     // Starting state is default values which are to be set later.
     this.state = {
       taxonomy_details: [],
+      generaContainingTags: new Set(),
       topScoringTaxa: [],
-      pathogenTagSummary: {},
       backgroundId: defaultBackgroundId,
       backgroundName: "",
       search_taxon_id: 0,
@@ -154,6 +152,7 @@ class PipelineSampleReport extends React.Component {
     this.expandAll = false;
     this.expandedGenera = [];
     this.thresholded_taxons = [];
+    this.rowClass = this.rowClass.bind(this);
 
     this.anyFilterSet = this.anyFilterSet.bind(this);
     this.applyFilters = this.applyFilters.bind(this);
@@ -250,6 +249,22 @@ class PipelineSampleReport extends React.Component {
       });
   }
 
+  listGeneraContainingTags(taxInfoArray) {
+    // Return genus taxids that contain species with pathogen tags hidden within them.
+    // Those will be automatically expanded in the report table, so that the pathogenic species are visible.
+    // Do not include genera that are tagged as pathogenic themselves, since there is no need to expand those.
+    let generaContainingTags = new Set();
+    let genusHasTag;
+    for (let taxInfo of taxInfoArray) {
+      if (taxInfo.tax_level == 2) {
+        genusHasTag = !!taxInfo.pathogenTag;
+      } else if (taxInfo.pathogenTag && !genusHasTag) {
+        generaContainingTags.add(taxInfo.genus_taxid);
+      }
+    }
+    return generaContainingTags;
+  }
+
   // fetchReportData loads the actual report information with another call to
   // the API endpoint.
   fetchReportData() {
@@ -276,8 +291,10 @@ class PipelineSampleReport extends React.Component {
           rows_passing_filters: res.data.taxonomy_details[0],
           rows_total: res.data.taxonomy_details[1],
           taxonomy_details: res.data.taxonomy_details[2],
+          generaContainingTags: this.listGeneraContainingTags(
+            res.data.taxonomy_details[2]
+          ),
           topScoringTaxa: res.data.topScoringTaxa,
-          pathogenTagSummary: res.data.pathogenTagSummary,
           backgroundId: res.data.background_info.id,
           backgroundName: res.data.background_info.name
         },
@@ -1210,7 +1227,7 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
-  row_class(tax_info, confirmed_taxids, watched_taxids) {
+  rowClass(tax_info, confirmed_taxids, watched_taxids) {
     let highlighted =
       this.state.highlight_taxon == tax_info.tax_id ? "highlighted" : "";
     let taxon_status = "";
@@ -1236,7 +1253,8 @@ class PipelineSampleReport extends React.Component {
     let initial_visibility = "hidden";
     if (
       (this.expandAll && tax_info.genus_taxid > 0) ||
-      this.expandedGenera.indexOf(tax_info.genus_taxid.toString()) >= 0
+      this.expandedGenera.indexOf(tax_info.genus_taxid.toString()) >= 0 ||
+      this.state.generaContainingTags.has(tax_info.genus_taxid)
     ) {
       initial_visibility = "";
     }
@@ -1467,12 +1485,15 @@ class PipelineSampleReport extends React.Component {
 
 function CollapseExpand({ tax_info, parent }) {
   const fake_or_real = tax_info.genus_taxid < 0 ? "fake-genus" : "real-genus";
+  const isExpandedInitially = parent.state.generaContainingTags.has(
+    tax_info.genus_taxid
+  );
   return (
     <span>
       <span
         className={`report-arrow-down report-arrow ${
           tax_info.tax_id
-        } ${fake_or_real} ${"hidden"}`}
+        } ${fake_or_real} ${isExpandedInitially ? "" : "hidden"}`}
       >
         <i
           className={`fa fa-angle-down ${tax_info.tax_id}`}
@@ -1482,7 +1503,7 @@ function CollapseExpand({ tax_info, parent }) {
       <span
         className={`report-arrow-right report-arrow ${
           tax_info.tax_id
-        } ${fake_or_real} ${""}`}
+        } ${fake_or_real} ${isExpandedInitially ? "hidden" : ""}`}
       >
         <i
           className={`fa fa-angle-right ${tax_info.tax_id}`}
@@ -1524,7 +1545,7 @@ function DetailCells({ parent }) {
       ref={elm => {
         parent.taxon_row_refs[tax_info.tax_id] = elm;
       }}
-      className={parent.row_class(
+      className={parent.rowClass(
         tax_info,
         parent.props.confirmed_taxids,
         parent.props.watched_taxids
@@ -1882,12 +1903,6 @@ class RenderMarkup extends React.Component {
           <div className="tab-screen-content">
             <div className="row reports-container">
               <div className="col s12 reports-section">
-                {parent.allowPathogenSummary ? (
-                  <PathogenSummary
-                    topScoringTaxa={parent.state.topScoringTaxa}
-                    pathogenTagSummary={parent.state.pathogenTagSummary}
-                  />
-                ) : null}
                 <div className="reports-count">
                   <div className="report-top-filters">
                     <div className="filter-lists">
