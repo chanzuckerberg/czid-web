@@ -31,7 +31,8 @@
     color: $white;
   }
 
-  &:disabled {
+  &:disabled,
+  &.disabled {
     border: 0;
     background-color: $light-grey;
     color: $medium-grey;
