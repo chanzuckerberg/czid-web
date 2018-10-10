@@ -1,7 +1,7 @@
 import React from "react";
 
-const LoadingSpinner = () => {
+const LoadingIcon = () => {
   return <i className="fa fa-spinner fa-pulse fa-fw" />;
 };
 
-export default LoadingSpinner;
+export default LoadingIcon;
