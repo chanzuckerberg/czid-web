@@ -132,7 +132,7 @@ class PhyloTreesController < ApplicationController
     @project = current_power.updatable_projects.find(params[:projectId])
     pipeline_run_ids = params[:pipelineRunIds].map(&:to_i)
 
-    name = params[:name]
+    name = sanitize(params[:name])
     taxid = params[:taxId].to_i
     tax_name = params[:taxName]
     dag_branch = if current_user.admin?
