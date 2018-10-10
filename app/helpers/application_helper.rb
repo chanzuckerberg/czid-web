@@ -5,7 +5,7 @@ require 'open3'
 module ApplicationHelper
   def sanitize(user_input_text)
     # accept alpanumeric characters only
-    user_input_text.gsub(/[^A-Za-z0-9]/, '-')
+    user_input_text.gsub(/[^A-Za-z0-9_\- ]/, '-')
   end
 
   def safe_s3_rm(s3_path)
