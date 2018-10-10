@@ -1,4 +1,5 @@
 class PhyloTreesController < ApplicationController
+  include AwsHelper
   include PipelineRunsHelper
 
   before_action :authenticate_user!

@@ -1,5 +1,5 @@
 class ProjectsController < ApplicationController
-  include ApplicationHelper
+  include AwsHelper
   include SamplesHelper
   include ReportHelper
   ########################################
