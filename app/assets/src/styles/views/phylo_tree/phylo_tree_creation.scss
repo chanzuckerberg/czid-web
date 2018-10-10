@@ -1,6 +1,10 @@
 @import "../../themes/colors";
 
 .wizard {
+  &__page {
+    min-height: 410px;
+  }
+
   &__page-1,
   &__page-2,
   &__page-3,
@@ -27,7 +31,7 @@
       .data-table {
         // applies to header and data
         .column-name {
-          width: 350px;
+          width: 250px;
           text-align: left;
         }
 
