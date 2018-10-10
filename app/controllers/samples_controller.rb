@@ -514,7 +514,9 @@ class SamplesController < ApplicationController
 
   # PUT /samples/:id/kickoff_pipeline
   def kickoff_pipeline
+    # This is admin-only and only used for reruns. Not to be confused with the kickoff_pipeline method of the Sample model.
     @sample.status = Sample::STATUS_RERUN
+    @sample.alignment_config_name = AlignmentConfig::DEFAULT_NAME # rerun with the most current alignment_config, because the old one is probably stale
     @sample.save
     respond_to do |format|
       if !@sample.pipeline_runs.empty?
@@ -527,7 +529,7 @@ class SamplesController < ApplicationController
     end
   end
 
-  # PUT /samples/:id/kickoff_pipeline
+  # PUT /samples/:id/retry_pipeline
   def retry_pipeline
     @sample.status = Sample::STATUS_RETRY_PR
     @sample.save
