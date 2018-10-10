@@ -123,7 +123,34 @@ class PlaygroundControls extends React.Component {
             ]}
           />
           <ComponentCard
-            title="Download Dropdown"
+            title="Secondary Button Dropdown"
+            width={3}
+            components={[
+              <ButtonDropdown
+                secondary
+                key={0}
+                fluid
+                options={this.dropdownOptions}
+                text="Download"
+                onClick={option =>
+                  this.setState({ event: "DropdownButton:Clicked", option })
+                }
+              />,
+              <ButtonDropdown
+                secondary
+                key={1}
+                fluid
+                disabled
+                options={this.dropdownOptions}
+                text="Download"
+                onClick={option =>
+                  this.setState({ event: "DropdownButton:Change", option })
+                }
+              />
+            ]}
+          />
+          <ComponentCard
+            title="Download Button"
             width={3}
             components={[
               <DownloadButton
