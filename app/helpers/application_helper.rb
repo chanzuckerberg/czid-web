@@ -3,6 +3,7 @@ require 'json'
 
 module ApplicationHelper
   def sanitize(user_input_text)
+    # Allow letters, numbers, underscores, dashes, and spaces
     user_input_text.gsub(/[^A-Za-z0-9_\- ]/, '-')
   end
 
