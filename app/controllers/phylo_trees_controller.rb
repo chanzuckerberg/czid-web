@@ -1,4 +1,5 @@
 class PhyloTreesController < ApplicationController
+  include ApplicationHelper
   include PipelineRunsHelper
 
   before_action :authenticate_user!
@@ -51,9 +52,8 @@ class PhyloTreesController < ApplicationController
                  name: taxon_lineage.name }
     end
 
-    @phylo_trees = @phylo_trees.as_json(include: { user: { only: [:id, :name] } })
-
     # Augment tree data with sample attributes, number of pipeline_runs and user name
+    @phylo_trees = @phylo_trees.as_json
     @phylo_trees.each do |pt|
       sample_details = PhyloTree.sample_details_by_tree_id[pt["id"]]
       pt["sampleDetailsByNodeName"] = sample_details
@@ -133,7 +133,7 @@ class PhyloTreesController < ApplicationController
     @project = current_power.updatable_projects.find(params[:projectId])
     pipeline_run_ids = params[:pipelineRunIds].map(&:to_i)
 
-    name = params[:name]
+    name = sanitize(params[:name])
     taxid = params[:taxId].to_i
     tax_name = params[:taxName]
     dag_branch = if current_user.admin?
