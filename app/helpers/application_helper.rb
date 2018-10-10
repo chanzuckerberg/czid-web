@@ -2,6 +2,11 @@ require 'csv'
 require 'json'
 
 module ApplicationHelper
+  def sanitize(user_input_text)
+    # accept alpanumeric characters only
+    user_input_text.downcase.gsub(/\W/, '-')
+  end
+
   def rds_host
     Rails.env == 'development' ? 'db' : '$RDS_ADDRESS'
   end
