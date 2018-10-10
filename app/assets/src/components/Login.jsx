@@ -107,10 +107,9 @@ class Login extends React.Component {
         <div className="site-header col s12">
           <div className="left brand-details">
             <a href="/">
-              <div className="row">
-                <LogoIcon className="col s1 logo" />
-                {/*<span className="col s1 logo-label">IDseq</span>*/}
-              </div>
+              <span className="logo-icon">
+                <LogoIcon />
+              </span>
             </a>
           </div>
         </div>

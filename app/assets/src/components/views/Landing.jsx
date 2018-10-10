@@ -17,6 +17,7 @@ import StringHelper from "../../helpers/StringHelper";
 import DiscoverIcon from "../ui/icons/DiscoverIcon";
 import DetectIcon from "../ui/icons/DetectIcon";
 import DecipherIcon from "../ui/icons/DecipherIcon";
+import LogoIcon from "../ui/icons/LogoIcon";
 
 class Landing extends React.Component {
   constructor(props) {
@@ -77,7 +78,11 @@ class Landing extends React.Component {
       <div className="header-row row">
         <div className="site-header col s12">
           <div className="left brand-details">
-            <span className="col s1 logo-label">IDseq</span>
+            <a href="/">
+              <span className="logo-icon">
+                <LogoIcon />
+              </span>
+            </a>
           </div>
           <div className="sign-in">
             <TransparentButton text="Sign In" onClick={signInLink} />
