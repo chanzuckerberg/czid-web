@@ -575,9 +575,9 @@ class SampleUpload extends React.Component {
         />
         <label htmlFor="consentChecked" className="checkbox">
           <span>
-            I agree that the data I am uploading to IDseq has been lawfully
-            collected and that I have all necessary consent and authorization to
-            upload it for the purposes outlined in {"IDseq's "}
+            {
+              "I agree that the data I am uploading to IDseq has been lawfully collected and that I have all the necessary consents, permissions, and authorizations needed to collect, share, and export data to IDseq as outlined in the "
+            }
           </span>
           <a
             href="https://s3-us-west-2.amazonaws.com/idseq-database/Terms.pdf"
@@ -585,7 +585,16 @@ class SampleUpload extends React.Component {
             rel="noopener noreferrer"
             className="terms-link"
           >
-            Terms of Use.
+            Terms
+          </a>
+          {" and "}
+          <a
+            href="https://s3-us-west-2.amazonaws.com/idseq-database/Privacy.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="terms-link"
+          >
+            Data Privacy Notice.
           </a>
         </label>
       </div>
