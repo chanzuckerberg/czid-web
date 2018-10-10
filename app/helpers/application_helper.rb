@@ -4,7 +4,7 @@ require 'json'
 module ApplicationHelper
   def sanitize(user_input_text)
     # accept alpanumeric characters only
-    user_input_text.downcase.gsub(/\W/, '-')
+    user_input_text.gsub(/[^A-Za-z0-9]/, '-')
   end
 
   def rds_host
