@@ -46,7 +46,9 @@ class ButtonDropdown extends React.Component {
   render() {
     return (
       <Dropdown
-        className="idseq-ui button"
+        className={`idseq-ui button-dropdown button ${
+          this.props.primary ? "primary" : "secondary"
+        }`}
         disabled={this.props.disabled}
         floating
         onMouseDown={this.handleMouseDown}

@@ -2,6 +2,7 @@ import CompareButton from "../ui/controls/buttons/CompareButton";
 import DownloadButton from "../ui/controls/buttons/DownloadButton";
 import Dropdown from "../ui/controls/dropdowns/Dropdown";
 import ButtonDropdown from "../ui/controls/dropdowns/ButtonDropdown";
+import DownloadButtonDropdown from "../ui/controls/dropdowns/DownloadButtonDropdown";
 import MultipleDropdown from "../ui/controls/dropdowns/MultipleDropdown";
 import ThresholdFilterDropdown from "../ui/controls/dropdowns/ThresholdFilterDropdown";
 import PrimaryButton from "../ui/controls/buttons/PrimaryButton";
@@ -123,7 +124,34 @@ class PlaygroundControls extends React.Component {
             ]}
           />
           <ComponentCard
-            title="Download Dropdown"
+            title="Secondary Button Dropdown"
+            width={3}
+            components={[
+              <ButtonDropdown
+                secondary
+                key={0}
+                fluid
+                options={this.dropdownOptions}
+                text="Download"
+                onClick={option =>
+                  this.setState({ event: "DropdownButton:Clicked", option })
+                }
+              />,
+              <ButtonDropdown
+                secondary
+                key={1}
+                fluid
+                disabled
+                options={this.dropdownOptions}
+                text="Download"
+                onClick={option =>
+                  this.setState({ event: "DropdownButton:Change", option })
+                }
+              />
+            ]}
+          />
+          <ComponentCard
+            title="Download Button"
             width={3}
             components={[
               <DownloadButton
@@ -136,6 +164,31 @@ class PlaygroundControls extends React.Component {
                 }
               />,
               <DownloadButton
+                key={1}
+                fluid
+                disabled
+                options={this.dropdownOptions}
+                text="Download"
+                onClick={option =>
+                  this.setState({ event: "DropdownButton:Clicked", option })
+                }
+              />
+            ]}
+          />
+          <ComponentCard
+            title="Download Dropdown Button"
+            width={3}
+            components={[
+              <DownloadButtonDropdown
+                key={0}
+                fluid
+                options={this.dropdownOptions}
+                text="Download"
+                onClick={option =>
+                  this.setState({ event: "DropdownButton:Clicked", option })
+                }
+              />,
+              <DownloadButtonDropdown
                 key={1}
                 fluid
                 disabled

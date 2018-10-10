@@ -29,7 +29,8 @@
     color: $white;
   }
 
-  &:disabled {
+  &:disabled,
+  &.disabled {
     border: 1px solid $medium-grey;
     background-color: $white;
     color: $medium-grey;

@@ -1,27 +1,9 @@
 @import "../../../themes/colors";
 
-.idseq-ui.ui.button.dropdown {
+.idseq-ui.ui.dropdown.button.button-dropdown {
   padding: 0;
-  border: 0;
-  background: transparent;
-  width: auto;
 
-  &.disabled {
-    padding: 0;
-    border: 0;
-    background: transparent;
-    width: auto;
-  }
-
-  &.focus {
-    padding: 0;
-    border: 0;
-    background: transparent;
-    width: auto;
-  }
-
-  &.active {
-    padding: 0;
+  button.button {
     border: 0;
     background: transparent;
     width: auto;
