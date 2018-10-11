@@ -761,12 +761,6 @@ class PipelineSampleReads extends React.Component {
     let download_section = (
       <div>
         <ResultButton
-          url={`/samples/${this.sampleInfo.id}/fastqs_folder`}
-          icon="fa-folder-open"
-          label="Source Data"
-          visible={this.can_edit}
-        />
-        <ResultButton
           url={`/samples/${this.sampleInfo.id}/nonhost_fasta`}
           icon="fa-cloud-download"
           label="Non-Host Reads"

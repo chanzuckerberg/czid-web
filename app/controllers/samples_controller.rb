@@ -14,7 +14,7 @@ class SamplesController < ApplicationController
   ##########################################
   skip_before_action :verify_authenticity_token, only: [:create, :update]
 
-  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :fastqs_folder, :show_taxid_alignment, :show_taxid_alignment_viz].freeze
+  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz].freeze
   EDIT_ACTIONS = [:edit, :add_taxon_confirmation, :remove_taxon_confirmation, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :heatmap, :download_heatmap, :cli_user_instructions].freeze
@@ -389,11 +389,11 @@ class SamplesController < ApplicationController
     render template: "samples/folder"
   end
 
-  def fastqs_folder
-    @file_list = current_power.updatable_samples.include?(@sample) ? @sample.fastqs_folder_files : []
-    @file_path = "#{@sample.sample_path}/fastqs/"
-    render template: "samples/folder"
-  end
+  # def fastqs_folder
+  #  @file_list = current_power.updatable_samples.include?(@sample) ? @sample.fastqs_folder_files : []
+  #  @file_path = "#{@sample.sample_path}/fastqs/"
+  #  render template: "samples/folder"
+  # end
 
   # GET /samples/new
   def new
