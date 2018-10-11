@@ -333,10 +333,8 @@ input[type="number"] {
         visibility: visible;
       }
 
-      a {
-        span {
-          color: $primary-light;
-        }
+      span.taxon-modal-link {
+        color: $primary-light;
       }
     }
   }
