@@ -1,6 +1,7 @@
 import React from "react";
 import { Search } from "semantic-ui-react";
 import { escapeRegExp, debounce } from "lodash";
+import PropTypes from "prop-types";
 
 class SearchBox extends React.Component {
   constructor(props) {
@@ -10,6 +11,7 @@ class SearchBox extends React.Component {
     this.waitHandleSearchChange = 500;
 
     this.source = this.props.source;
+    this.placeholder = this.props.placeholder;
 
     this.resetComponent = this.resetComponent.bind(this);
     this.handleSearchChange = this.handleSearchChange.bind(this);
@@ -62,10 +64,18 @@ class SearchBox extends React.Component {
         )}
         results={results}
         value={value}
+        placeholder={this.placeholder}
         onResultSelect={this.handleResultSelect}
       />
     );
   }
 }
+
+SearchBox.propTypes = {
+  source: PropTypes.array,
+  initialValue: PropTypes.string,
+  onResultSelect: PropTypes.func,
+  placeholder: PropTypes.string
+};
 
 export default SearchBox;
