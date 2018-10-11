@@ -480,7 +480,7 @@ class PhyloTreeCreation extends React.Component {
                   source={this.state.taxonList}
                   onResultSelect={this.handleSelectTaxon}
                   initialValue={this.state.taxonName}
-                  placeholder="Organism name"
+                  placeholder="Genus name"
                 />
               ) : (
                 <LoadingIcon />
