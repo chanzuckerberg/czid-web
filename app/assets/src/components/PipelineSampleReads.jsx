@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import moment from "moment";
 import $ from "jquery";
 import axios from "axios";
-import { Button, Divider, Dropdown } from "semantic-ui-react";
+import { Divider, Dropdown } from "semantic-ui-react";
 import DownloadButton from "./ui/controls/buttons/DownloadButton";
 import numberWithCommas from "../helpers/strings";
 import SubHeader from "./SubHeader";
@@ -12,6 +12,7 @@ import PipelineSampleReport from "./PipelineSampleReport";
 import AMRView from "./AMRView";
 import BasicPopup from "./BasicPopup";
 import { SAMPLE_FIELDS } from "./utils/SampleFields";
+import PrimaryButton from "./ui/controls/buttons/PrimaryButton";
 
 class PipelineSampleReads extends React.Component {
   constructor(props) {
@@ -799,7 +800,7 @@ class PipelineSampleReads extends React.Component {
           className="dropdown-button sample-select-dropdown"
           data-activates="sample-list"
         >
-          <span className="sample-name-label">{this.state.sample_name}</span>
+          <div className="sample-name-label">{this.state.sample_name}</div>
           <i className="fa fa-chevron-down right" />
 
           <ul
@@ -861,14 +862,8 @@ class PipelineSampleReads extends React.Component {
       </div>
     ) : null;
 
-    let delete_sample_button = (
-      <Button onClick={this.deleteSample} className="delete-button">
-        Delete sample
-      </Button>
-    );
-
-    let report_buttons;
-    if (this.reportPresent)
+    let report_buttons = null;
+    if (this.reportPresent) {
       report_buttons = (
         <div className="col no-padding s2 right-align">
           <div className="report-action-buttons">
@@ -876,6 +871,15 @@ class PipelineSampleReads extends React.Component {
           </div>
         </div>
       );
+    } else if (this.sampleInfo.status === "created" || !this.reportPresent) {
+      report_buttons = (
+        <div className="col no-padding s2 right-align">
+          <div className="report-action-buttons">
+            <PrimaryButton onClick={this.deleteSample} text="Delete Sample" />
+          </div>
+        </div>
+      );
+    }
 
     let show_amr = this.amr != null;
     let amr_tab = show_amr ? (
@@ -900,14 +904,13 @@ class PipelineSampleReads extends React.Component {
             </div>
             <div className="row">
               <div className="sub-title col s10">
-                <a href={`/home?project_id=${this.projectInfo.id}`}>
-                  {this.projectInfo.name + " "}
-                </a>
-                {">"}
-                {sample_dropdown}
-                {this.sampleInfo.status === "created" || !this.reportPresent
-                  ? delete_sample_button
-                  : null}
+                <div className="project-name">
+                  <a href={`/home?project_id=${this.projectInfo.id}`}>
+                    {this.projectInfo.name + " "}
+                  </a>
+                </div>
+                <div className="separator">{">"}</div>
+                <div className="sample-dropdown">{sample_dropdown}</div>
               </div>
               {report_buttons}
             </div>
