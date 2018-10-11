@@ -13,19 +13,22 @@
     }
   }
 
-  &:hover {
+  &:hover,
+  &.hover {
     border: 1px solid $primary-medium;
     background: $primary-medium;
     color: $white;
   }
 
-  &:active {
+  &:active,
+  &.active {
     border: 1px solid $primary-dark;
     background-color: $primary-dark;
     color: $white;
   }
 
-  &:focus {
+  &:focus,
+  &.focus {
     border: 1px solid $primary-dark;
     background-color: $primary-dark;
     color: $white;
