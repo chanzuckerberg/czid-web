@@ -467,6 +467,7 @@ class PhyloTreeCreation extends React.Component {
                   source={this.state.projectList}
                   onResultSelect={this.handleSelectProject}
                   initialValue={this.state.projectName}
+                  placeholder="Existing project name"
                 />
               ) : (
                 <LoadingIcon />
@@ -481,6 +482,7 @@ class PhyloTreeCreation extends React.Component {
                   source={this.state.taxonList}
                   onResultSelect={this.handleSelectTaxon}
                   initialValue={this.state.taxonName}
+                  placeholder="Genus name"
                 />
               ) : (
                 <LoadingIcon />
