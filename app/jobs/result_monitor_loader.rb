@@ -15,7 +15,7 @@ class ResultMonitorLoader
       # TODO: revisit this
       sleep(Time.now.to_i % 30)
       output_state.update(state: PipelineRun::STATUS_LOADING_ERROR)
-      LogUtil.log_err_and_airbrake("SampleFailedEvent: Pipeline Run #{pr.id} failed loading #{output}")
+      LogUtil.log_err_and_airbrake("SampleFailedEvent: Pipeline Run #{pr.id} for Sample #{pr.sample.id} failed loading #{output}")
       raise
     end
   end
