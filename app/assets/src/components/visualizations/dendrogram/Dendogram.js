@@ -21,7 +21,7 @@ export default class Dendogram {
         colorGroupLegendTitle: null,
         colorGroupAbsentName: null,
         legendX: 880,
-        legendY: 50,
+        legendY: 0,
         onNodeTextClick: null,
         onNodeClick: null,
         onNodeHover: null,
@@ -40,7 +40,7 @@ export default class Dendogram {
     // margin top
     this.margins = {
       // includes scale legend
-      top: 140,
+      top: 160,
       // includes second half of nodes
       bottom: 20,
       // includes root label on the left of the node
@@ -422,9 +422,9 @@ export default class Dendogram {
     // Set scale label
     scale
       .append("text")
+      .attr("class", "scale-label")
       .attr("x", x + 78)
       .attr("y", y - 30)
-      .attr("class", "title")
       .text(this.options.scaleLabel);
   }
 
