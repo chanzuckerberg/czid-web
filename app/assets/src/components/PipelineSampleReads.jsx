@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import moment from "moment";
 import $ from "jquery";
 import axios from "axios";
-import { Button, Divider, Dropdown } from "semantic-ui-react";
+import { Divider, Dropdown } from "semantic-ui-react";
 import DownloadButton from "./ui/controls/buttons/DownloadButton";
 import numberWithCommas from "../helpers/strings";
 import SubHeader from "./SubHeader";
