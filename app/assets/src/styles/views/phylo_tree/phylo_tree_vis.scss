@@ -63,7 +63,14 @@
     }
 
     .legend {
-      .title {
+      background-color: $white;
+
+      .legend-background {
+        fill: $white;
+        fill-opacity: 0.8;
+      }
+
+      .legend-title {
         font-weight: bold;
       }
     }
