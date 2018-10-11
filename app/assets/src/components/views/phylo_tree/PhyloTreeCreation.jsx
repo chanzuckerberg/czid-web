@@ -549,7 +549,7 @@ class PhyloTreeCreation extends React.Component {
       addIdseqSamples: (
         <Wizard.Page
           key="wizard__page_4"
-          title={`Would you like additional samples from IDSeq that contain ${
+          title={`Would you like additional samples from IDseq that contain ${
             this.state.taxonName
           }?`}
         >
@@ -562,7 +562,7 @@ class PhyloTreeCreation extends React.Component {
               {this.state.selectedProjectSamples.size} Project Samples
             </div>
             <div className="wizard__page-4__searchbar__container">
-              {this.state.selectedOtherSamples.size} IDSeq Samples
+              {this.state.selectedOtherSamples.size} IDseq Samples
             </div>
             <div className="wizard__page-4__searchbar__container">
               {this.getTotalPageRendering()}
