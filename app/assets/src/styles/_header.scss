@@ -213,10 +213,15 @@ a {
     flex-direction: row;
 
     .sample-name-label {
-      flex: auto;
+      flex: 0 1 auto;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+
+    .dropdown-button-arrow {
+      flex: 1 0 60px;
+      position: relative;
     }
 
     &:hover,
@@ -228,11 +233,14 @@ a {
       }
     }
     i {
-      visibility: hidden;
+      visibility: visible;
       font-size: 0.7em;
       font-weight: normal;
-      width: 20px;
-      margin: auto;
+      height: 19px;
+      margin: 0 0 0 20px;
+      position: absolute;
+      top: 50%;
+      transform: translate(0, -50%);
     }
 
     li {
