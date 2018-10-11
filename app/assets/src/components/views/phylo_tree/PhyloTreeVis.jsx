@@ -36,7 +36,7 @@ class PhyloTreeVis extends React.Component {
       // Name for the legend when the attribute is missing / other
       colorGroupAbsentName: "NCBI References",
       legendX: 880,
-      legendY: 50,
+      legendY: -150,
       tooltipContainer: this.tooltipContainer,
       onNodeTextClick: this.handleNodeClick,
       onNodeHover: this.handleNodeHover,
