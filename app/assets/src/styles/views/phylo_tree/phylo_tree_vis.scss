@@ -1,6 +1,8 @@
 @import "../../themes/colors";
 
 .phylo-tree-vis {
+  font-size: 13px;
+
   &__tree-container {
     padding: 20px;
     margin-bottom: 30rem;
@@ -20,7 +22,6 @@
 
     .node text {
       fill: $black;
-      font-size: 14px;
     }
 
     .node.highlight text {
@@ -62,7 +63,14 @@
     }
 
     .legend {
-      .title {
+      background-color: $white;
+
+      .legend-background {
+        fill: $white;
+        fill-opacity: 0.8;
+      }
+
+      .legend-title {
         font-weight: bold;
       }
     }
