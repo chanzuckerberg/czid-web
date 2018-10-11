@@ -52,7 +52,7 @@ export default class Dendogram {
 
     this.nodeSize = {
       width: 1,
-      height: 16
+      height: 25
     };
 
     this._highlighted = new Set();
@@ -641,6 +641,6 @@ export default class Dendogram {
     }
 
     // legend on top
-    this.legend.raise();
+    this.legend && this.legend.raise();
   }
 }
