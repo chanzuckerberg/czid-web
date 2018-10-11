@@ -2,6 +2,7 @@ import React from "react";
 import $ from "jquery";
 import axios from "axios";
 import { Menu, Dropdown } from "semantic-ui-react";
+import LogoIcon from "./ui/icons/LogoIcon";
 
 class Header extends React.Component {
   constructor(props, context) {
@@ -67,9 +68,9 @@ class Header extends React.Component {
             <div className="">
               <div href="/" className="left brand-details">
                 <a href="/">
-                  <div className="row">
-                    <span className="col s1 logo-label">IDseq</span>
-                  </div>
+                  <span className="logo-icon">
+                    <LogoIcon />
+                  </span>
                 </a>
               </div>
               <Menu className="profile-header-menu">

@@ -1,6 +1,7 @@
 import React from "react";
 import axios from "axios";
 import $ from "jquery";
+import LogoIcon from "./ui/icons/LogoIcon";
 
 class Login extends React.Component {
   constructor(props, context) {
@@ -106,9 +107,9 @@ class Login extends React.Component {
         <div className="site-header col s12">
           <div className="left brand-details">
             <a href="/">
-              <div className="row">
-                <span className="col s1 logo-label">IDseq</span>
-              </div>
+              <span className="logo-icon">
+                <LogoIcon />
+              </span>
             </a>
           </div>
         </div>
