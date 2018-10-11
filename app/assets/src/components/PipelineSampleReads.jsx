@@ -795,7 +795,9 @@ class PipelineSampleReads extends React.Component {
           data-activates="sample-list"
         >
           <div className="sample-name-label">{this.state.sample_name}</div>
-          <i className="fa fa-chevron-down right" />
+          <div className="dropdown-button-arrow">
+            <i className="fa fa-chevron-down" />
+          </div>
 
           <ul
             id="sample-list"
