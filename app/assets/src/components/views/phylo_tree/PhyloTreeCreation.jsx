@@ -14,6 +14,7 @@ class PhyloTreeCreation extends React.Component {
     super(props);
 
     this.minNumberOfSamples = 4;
+    this.maxNumberOfSamples = 100;
 
     this.state = {
       defaultPage: 0,
@@ -368,10 +369,11 @@ class PhyloTreeCreation extends React.Component {
   }
 
   isNumberOfSamplesValid() {
-    return (
+    let nSamples =
       this.state.selectedProjectSamples.size +
-        this.state.selectedOtherSamples.size >=
-      this.minNumberOfSamples
+      this.state.selectedOtherSamples.size;
+    return (
+      nSamples >= this.minNumberOfSamples && nSamples <= this.maxNumberOfSamples
     );
   }
 
@@ -399,8 +401,8 @@ class PhyloTreeCreation extends React.Component {
     if (this.state.showErrorSamples && !this.isNumberOfSamplesValid()) {
       return (
         <span className="wizard__error">
-          {totalSelectedSamples} Total Samples (min number is{" "}
-          {this.minNumberOfSamples})
+          {totalSelectedSamples} Total Samples (must be between{" "}
+          {this.minNumberOfSamples} and {this.maxNumberOfSamples})
         </span>
       );
     }
@@ -549,7 +551,7 @@ class PhyloTreeCreation extends React.Component {
       addIdseqSamples: (
         <Wizard.Page
           key="wizard__page_4"
-          title={`Would you like additional samples from IDSeq that contain ${
+          title={`Would you like additional samples from IDseq that contain ${
             this.state.taxonName
           }?`}
         >
@@ -562,7 +564,7 @@ class PhyloTreeCreation extends React.Component {
               {this.state.selectedProjectSamples.size} Project Samples
             </div>
             <div className="wizard__page-4__searchbar__container">
-              {this.state.selectedOtherSamples.size} IDSeq Samples
+              {this.state.selectedOtherSamples.size} IDseq Samples
             </div>
             <div className="wizard__page-4__searchbar__container">
               {this.getTotalPageRendering()}
