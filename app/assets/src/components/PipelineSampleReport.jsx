@@ -830,9 +830,15 @@ class PipelineSampleReport extends React.Component {
   }
 
   handleBackgroundModelChange(_, data) {
+    if (data.value === this.state.backgroundId) {
+      // Skip if no change
+      return;
+    }
+
     const backgroundName = data.options.find(function(option) {
       return option.text == data.value;
     });
+
     Cookies.set("background_name", backgroundName);
     this.setState(
       {
@@ -1760,7 +1766,7 @@ function BackgroundModelFilter({ parent }) {
   return (
     <OurDropdown
       options={backgroundOptions}
-      value={parent.state.backgroundId}
+      value={parseInt(parent.state.backgroundId)}
       disabled={disabled}
       label="Background: "
       onChange={parent.handleBackgroundModelChange}
