@@ -1052,12 +1052,14 @@ class PipelineSampleReport extends React.Component {
     if (tax_info.tax_id > 0) {
       if (report_details.taxon_fasta_flag) {
         taxonNameDisplay = (
-          <span>
+          <span className="taxon-modal-link">
             <a>{taxonNameDisplay}</a>
           </span>
         );
       } else {
-        taxonNameDisplay = <span>{taxonNameDisplay}</span>;
+        taxonNameDisplay = (
+          <span className="taxon-modal-link">{taxonNameDisplay}</span>
+        );
       }
       taxonNameDisplay = (
         <TaxonModal
