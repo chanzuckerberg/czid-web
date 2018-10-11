@@ -22,7 +22,6 @@ Rails.application.routes.draw do
     get :nonhost_fasta, on: :member
     get :unidentified_fasta, on: :member
     get :results_folder, on: :member
-    get :fastqs_folder, on: :member
     post :bulk_upload, on: :collection
     post :save_metadata, on: :member
     post :add_taxon_confirmation, on: :member
