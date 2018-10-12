@@ -121,8 +121,15 @@ class CheckPipelineRuns
     comment_separator = "\n"
     comment_separator = "" if existing_comment.blank?
     comment_separator = "" if bm_comment.blank?
-    metadata['COMMENT'] = (bm_comment || "") + comment_separator + (existing_comment || "")
-    metadata['ORIGIN'] = s3path
+    new_metadata = {}
+    # HACK: We want COMMENT and ORIGIN to appear at the top in the json dump, and this trick does it.
+    new_metadata['COMMENT'] = (bm_comment || "") + comment_separator + (existing_comment || "")
+    new_metadata['ORIGIN'] = s3path
+    metadata.each do |k, v|
+      next if k == "COMMENT"
+      next if k == "ORIGIN"
+      new_metadata[k] = v
+    end
     known_organisms = metadata['verified_contents'].pluck('genome').join(", ")
     bm_sample_params = {
       name: bm_sample_name,
@@ -134,7 +141,7 @@ class CheckPipelineRuns
       web_commit: web_commit,
       pipeline_commit: pipeline_commit,
       pipeline_branch: bm_pipeline_branch,
-      sample_notes: JSON.pretty_generate(metadata)
+      sample_notes: JSON.pretty_generate(new_metadata)
     }
     @bm_sample = Sample.new(bm_sample_params)
     # HACK: Not really sure why we have to manually set the status to STATUS_CREATED here,
