@@ -188,7 +188,7 @@ class TaxonModal extends React.Component {
                   className="taxon-info__link"
                   onClick={() => this.linkTo("ncbi")}
                 >
-                  NBCI
+                  NCBI
                 </li>
                 <li
                   className="taxon-info__link"
