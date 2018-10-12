@@ -40,7 +40,7 @@ Rails.application.routes.draw do
   get 'taxon_descriptions', to: 'home#taxon_descriptions'
   post 'feedback', to: 'home#feedback'
   post 'sign_up', to: 'home#sign_up'
-  get 'terms' => redirect("https://s3-us-west-2.amazonaws.com/idseq-database/Terms.pdf")
+  get 'terms' => redirect("https://s3-us-west-2.amazonaws.com/idseq-web-assets/Terms.pdf")
 
   resources :projects do
     get :make_project_reports_csv, on: :member
