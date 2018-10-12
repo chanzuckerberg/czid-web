@@ -106,7 +106,7 @@ class Header extends React.Component {
                         text="Terms of Use"
                         onClick={() =>
                           this.openNewTab(
-                            "https://s3-us-west-2.amazonaws.com/idseq-database/Terms.pdf"
+                            "https://s3-us-west-2.amazonaws.com/idseq-web-assets/Terms.pdf"
                           )
                         }
                       />
@@ -114,7 +114,7 @@ class Header extends React.Component {
                         text="Privacy Policy"
                         onClick={() =>
                           this.openNewTab(
-                            "https://s3-us-west-2.amazonaws.com/idseq-database/Privacy.pdf"
+                            "https://s3-us-west-2.amazonaws.com/idseq-web-assets/Privacy.pdf"
                           )
                         }
                       />
