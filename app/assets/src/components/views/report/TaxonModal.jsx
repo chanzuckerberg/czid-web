@@ -20,7 +20,7 @@ class TaxonModal extends React.Component {
     this.linkTo = this.linkTo.bind(this);
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.loadTaxonInfo();
     this.loadBackgroundInfo();
   }

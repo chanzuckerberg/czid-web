@@ -42,9 +42,9 @@ class TaxonTreeVis extends React.Component {
       nr_rpm: { label: "NR rpm", agg: arr => arr.reduce((a, b) => a + b, 0) }
     };
 
-    this.onNodeHover = this.onNodeHover.bind(this);
-    this.onNodeLabelClick = this.onNodeLabelClick.bind(this);
-    this.closeTaxonModal = this.closeTaxonModal.bind(this);
+    this.handleNodeHover = this.handleNodeHover.bind(this);
+    this.handleNodeLabelClick = this.handleNodeLabelClick.bind(this);
+    this.handleTaxonModalClose = this.handleTaxonModalClose.bind(this);
     this.fillNodeValues = this.fillNodeValues.bind(this);
     this.renderTooltip = this.renderTooltip.bind(this);
   }
@@ -56,8 +56,8 @@ class TaxonTreeVis extends React.Component {
       {
         attribute: this.metric,
         useCommonName: this.isCommonNameActive(),
-        onNodeHover: this.onNodeHover,
-        onNodeLabelClick: this.onNodeLabelClick,
+        onNodeHover: this.handleNodeHover,
+        onNodeLabelClick: this.handleNodeLabelClick,
         onCreatedTree: this.fillNodeValues,
         tooltipContainer: this.treeTooltip
       }
@@ -94,17 +94,17 @@ class TaxonTreeVis extends React.Component {
     };
   }
 
-  onNodeHover(node) {
+  handleNodeHover(node) {
     this.setState({ nodeHover: node });
   }
 
-  onNodeLabelClick(node) {
+  handleNodeLabelClick(node) {
     this.setState({
       taxonModalData: node.data.modalData || null
     });
   }
 
-  closeTaxonModal() {
+  handleTaxonModalClose() {
     this.setState({
       taxonModalData: null
     });
@@ -309,7 +309,7 @@ class TaxonTreeVis extends React.Component {
           id: this.props.backgroundId
         }}
         taxonName={taxonName}
-        handleClose={this.closeTaxonModal}
+        handleClose={this.handleTaxonModalClose}
       />
     );
   }
@@ -344,7 +344,7 @@ TaxonTreeVis.propTypes = {
   nameType: PropTypes.string,
   taxa: PropTypes.array,
   topTaxa: PropTypes.array,
-  backgroundId: PropTypes.string,
+  backgroundId: PropTypes.number,
   backgroundName: PropTypes.string
 };
 

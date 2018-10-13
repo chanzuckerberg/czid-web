@@ -1035,24 +1035,23 @@ class PipelineSampleReport extends React.Component {
   }
 
   render_name(tax_info, report_details, parent, openTaxonModal) {
-    let tax_common_name = tax_info["common_name"];
+    let taxCommonName = tax_info["common_name"];
     const taxonName = getTaxonName(tax_info, this.state.name_type);
-    let taxonNameDisplay;
 
-    if (this.state.name_type.toLowerCase() == "common name") {
-      if (!tax_common_name || tax_common_name.trim() == "") {
-        taxonNameDisplay = <span className="count-info">{taxonName}</span>;
-      } else {
-        taxonNameDisplay = <span>{taxonName}</span>;
-      }
-    } else {
-      taxonNameDisplay = <span>{taxonName}</span>;
-    }
+    const grayOut =
+      this.state.name_type.toLowerCase() == "common name" &&
+      (!taxCommonName || taxCommonName.trim() == "");
+    let taxonNameDisplay = (
+      <span className={grayOut ? "count-info" : ""}>{taxonName}</span>
+    );
 
     const openTaxonModalHandler = () =>
       openTaxonModal({
         taxInfo: tax_info,
-        parent,
+        backgroundData: {
+          name: parent.state.backgroundName,
+          id: parent.state.backgroundId
+        },
         taxonName
       });
 
@@ -1564,7 +1563,7 @@ function DetailCells({ parent, openTaxonModal }) {
   ));
 }
 
-class ReportTableHeader extends React.Component {
+class ReportTable extends React.Component {
   constructor(props) {
     super(props);
 
@@ -1580,7 +1579,7 @@ class ReportTableHeader extends React.Component {
     const { taxonModalData } = this.state;
     if (!taxonModalData) return;
 
-    const { taxInfo, parent, taxonName } = taxonModalData;
+    const { taxInfo, backgroundData, taxonName } = taxonModalData;
     return (
       <TaxonModal
         taxonId={taxInfo.tax_id}
@@ -1591,10 +1590,7 @@ class ReportTableHeader extends React.Component {
         parentTaxonId={
           taxInfo.tax_level === 1 ? taxInfo.genus_taxid : undefined
         }
-        background={{
-          name: parent.state.backgroundName,
-          id: parent.state.backgroundId
-        }}
+        background={backgroundData}
         taxonName={taxonName}
         handleClose={this.closeTaxonModal}
       />
@@ -1623,7 +1619,7 @@ class ReportTableHeader extends React.Component {
           <thead>
             <tr className="report-header">
               <th>
-                <span className={`table-arrow ""`}>
+                <span className="table-arrow">
                   <i
                     className="fa fa-angle-right"
                     onClick={parent.expandTable}
@@ -1988,9 +1984,7 @@ class RenderMarkup extends React.Component {
                   </div>
                   {filter_row_stats}
                 </div>
-                {this.state.view == "table" && (
-                  <ReportTableHeader parent={parent} />
-                )}
+                {this.state.view == "table" && <ReportTable parent={parent} />}
                 {this.renderTree()}
                 {parent.state.loading && (
                   <div className="loading-container">
