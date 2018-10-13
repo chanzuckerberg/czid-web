@@ -117,8 +117,10 @@ class PipelineSampleReport extends React.Component {
       taxonomy_details: [],
       topScoringTaxa: [],
       pathogenTagSummary: {},
-      backgroundId: defaultBackgroundId,
-      backgroundName: "",
+      backgroundData: {
+        id: defaultBackgroundId,
+        name: ""
+      },
       search_taxon_id: 0,
       searchKey: "",
       search_keys_in_sample: [],
@@ -278,8 +280,10 @@ class PipelineSampleReport extends React.Component {
           taxonomy_details: res.data.taxonomy_details[2],
           topScoringTaxa: res.data.topScoringTaxa,
           pathogenTagSummary: res.data.pathogenTagSummary,
-          backgroundId: res.data.background_info.id,
-          backgroundName: res.data.background_info.name
+          backgroundData: {
+            id: res.data.background_info.id,
+            name: res.data.background_info.name
+          }
         },
         () => {
           this.applyFilters(true);
@@ -830,7 +834,7 @@ class PipelineSampleReport extends React.Component {
   }
 
   handleBackgroundModelChange(_, data) {
-    if (data.value === this.state.backgroundId) {
+    if (data.value === this.state.backgroundData.id) {
       // Skip if no change
       return;
     }
@@ -842,8 +846,10 @@ class PipelineSampleReport extends React.Component {
     Cookies.set("background_name", backgroundName);
     this.setState(
       {
-        backgroundName,
-        backgroundId: data.value
+        backgroundData: {
+          name: backgroundName,
+          id: data.value
+        }
       },
       () => {
         this.props.refreshPage({ background_id: data.value });
@@ -1048,10 +1054,7 @@ class PipelineSampleReport extends React.Component {
     const openTaxonModalHandler = () =>
       openTaxonModal({
         taxInfo: tax_info,
-        backgroundData: {
-          name: parent.state.backgroundName,
-          id: parent.state.backgroundId
-        },
+        backgroundData: parent.state.backgroundData,
         taxonName
       });
 
@@ -1810,7 +1813,7 @@ function BackgroundModelFilter({ parent }) {
   return (
     <OurDropdown
       options={backgroundOptions}
-      value={parent.state.backgroundId}
+      value={parent.state.backgroundData.id}
       disabled={disabled}
       label="Background: "
       onChange={parent.handleBackgroundModelChange}
@@ -1914,8 +1917,7 @@ class RenderMarkup extends React.Component {
           metric={parent.state.treeMetric}
           nameType={parent.state.name_type}
           onNodeTextClicked={this._nodeTextClicked}
-          backgroundId={parent.state.backgroundId}
-          backgroundName={parent.state.backgroundName}
+          backgroundData={parent.state.backgroundData}
         />
       </div>
     );
