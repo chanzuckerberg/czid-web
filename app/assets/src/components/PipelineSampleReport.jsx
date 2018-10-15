@@ -2,7 +2,6 @@ import React from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import $ from "jquery";
-import Tipsy from "react-tipsy";
 import ReactAutocomplete from "react-autocomplete";
 import { Label, Menu, Icon, Popup } from "semantic-ui-react";
 import numberWithCommas from "../helpers/strings";
@@ -17,9 +16,9 @@ import BetaLabel from "./ui/labels/BetaLabel";
 import PathogenLabel from "./ui/labels/PathogenLabel";
 import PathogenSummary from "./views/report/PathogenSummary";
 import ReportInsightIcon from "./views/report/ReportInsightIcon";
+import ReportTable from "./views/report/ReportTable";
 import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
 import PhyloTreeChecks from "./views/phylo_tree/PhyloTreeChecks";
-import TaxonModal from "./views/report/TaxonModal";
 import TaxonTreeVis from "./views/TaxonTreeVis";
 import LoadingLabel from "./ui/labels/LoadingLabel";
 
@@ -1508,208 +1507,6 @@ function AdvancedFilterTagList({ threshold, i, parent }) {
     );
   } else {
     return null;
-  }
-}
-
-function DetailCells({ parent, openTaxonModal }) {
-  return parent.state.selected_taxons_top.map(tax_info => (
-    <tr
-      key={tax_info.tax_id}
-      id={`taxon-${tax_info.tax_id}`}
-      ref={elm => {
-        parent.taxon_row_refs[tax_info.tax_id] = elm;
-      }}
-      className={parent.row_class(
-        tax_info,
-        parent.props.confirmed_taxids,
-        parent.props.watched_taxids
-      )}
-    >
-      <td>
-        {parent.render_name(
-          tax_info,
-          parent.report_details,
-          parent,
-          openTaxonModal
-        )}
-      </td>
-      {parent.render_number(
-        tax_info.NT.aggregatescore,
-        null,
-        0,
-        true,
-        undefined,
-        tax_info.topScoring == 1
-      )}
-      {parent.render_number(tax_info.NT.zscore, tax_info.NR.zscore, 1)}
-      {parent.render_number(tax_info.NT.rpm, tax_info.NR.rpm, 1)}
-      {parent.render_number(tax_info.NT.r, tax_info.NR.r, 0)}
-      {parent.render_number(
-        tax_info.NT.percentidentity,
-        tax_info.NR.percentidentity,
-        1
-      )}
-      {parent.render_number(
-        tax_info.NT.neglogevalue,
-        tax_info.NR.neglogevalue,
-        0
-      )}
-      {parent.render_number(
-        tax_info.NT.percentconcordant,
-        tax_info.NR.percentconcordant,
-        1,
-        undefined,
-        parent.showConcordance
-      )}
-      <td>{parent.displayHighlightTags(tax_info)}</td>
-    </tr>
-  ));
-}
-
-class ReportTable extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      taxonModalData: null
-    };
-
-    this.openTaxonModal = this.openTaxonModal.bind(this);
-    this.closeTaxonModal = this.closeTaxonModal.bind(this);
-  }
-
-  renderTaxonModal() {
-    const { taxonModalData } = this.state;
-    if (!taxonModalData) return;
-
-    const { taxInfo, backgroundData, taxonName } = taxonModalData;
-    return (
-      <TaxonModal
-        taxonId={taxInfo.tax_id}
-        taxonValues={{
-          NT: taxInfo.NT,
-          NR: taxInfo.NR
-        }}
-        parentTaxonId={
-          taxInfo.tax_level === 1 ? taxInfo.genus_taxid : undefined
-        }
-        background={backgroundData}
-        taxonName={taxonName}
-        handleClose={this.closeTaxonModal}
-      />
-    );
-  }
-
-  openTaxonModal(taxonModalData) {
-    this.setState({
-      taxonModalData
-    });
-  }
-
-  closeTaxonModal() {
-    this.setState({
-      taxonModalData: null
-    });
-  }
-
-  render() {
-    const { parent } = this.props;
-
-    return (
-      <div className="reports-main">
-        {this.renderTaxonModal()}
-        <table id="report-table" className="bordered report-table">
-          <thead>
-            <tr className="report-header">
-              <th>
-                <span className="table-arrow">
-                  <i
-                    className="fa fa-angle-right"
-                    onClick={parent.expandTable}
-                  />
-                </span>
-                <span className="table-arrow hidden">
-                  <i
-                    className="fa fa-angle-down"
-                    onClick={parent.collapseTable}
-                  />
-                </span>
-                Taxonomy
-              </th>
-              {parent.render_column_header(
-                "Score",
-                `NT_aggregatescore`,
-                "Aggregate score: ( |genus.NT.Z| * species.NT.Z * species.NT.rPM ) + ( |genus.NR.Z| * species.NR.Z * species.NR.rPM )"
-              )}
-              {parent.render_column_header(
-                "Z",
-                `${parent.state.countType}_zscore`,
-                `Z-score relative to background model for alignments to NCBI NT/NR`
-              )}
-              {parent.render_column_header(
-                "rPM",
-                `${parent.state.countType}_rpm`,
-                `Number of reads aligning to the taxon in the NCBI NT/NR database per million total input reads`
-              )}
-              {parent.render_column_header(
-                "r",
-                `${parent.state.countType}_r`,
-                `Number of reads aligning to the taxon in the NCBI NT/NR database`
-              )}
-              {parent.render_column_header(
-                "%id",
-                `${parent.state.countType}_percentidentity`,
-                `Average percent-identity of alignments to NCBI NT/NR`
-              )}
-              {parent.render_column_header(
-                "log(1/E)",
-                `${parent.state.countType}_neglogevalue`,
-                `Average log-10-transformed expect value for alignments to NCBI NT/NR`
-              )}
-              {parent.render_column_header(
-                "%conc",
-                `${parent.state.countType}_percentconcordant`,
-                `Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NT/NR)`,
-                parent.showConcordance
-              )}
-              <th>
-                <Tipsy content="Switch count type" placement="top">
-                  <div className="sort-controls center left">
-                    <div
-                      className={
-                        parent.state.countType === "NT"
-                          ? "active column-switcher"
-                          : "column-switcher"
-                      }
-                      onClick={() => {
-                        parent.setState({ countType: "NT" });
-                      }}
-                    >
-                      NT
-                    </div>
-                    <div
-                      className={
-                        parent.state.countType === "NR"
-                          ? "active column-switcher"
-                          : "column-switcher"
-                      }
-                      onClick={() => {
-                        parent.setState({ countType: "NR" });
-                      }}
-                    >
-                      NR
-                    </div>
-                  </div>
-                </Tipsy>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <DetailCells parent={parent} openTaxonModal={this.openTaxonModal} />
-          </tbody>
-        </table>
-      </div>
-    );
   }
 }
 
