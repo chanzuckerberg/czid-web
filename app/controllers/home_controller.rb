@@ -1,4 +1,5 @@
-require 'will_paginate/array'
+require "will_paginate/array"
+require "base64"
 
 class HomeController < ApplicationController
   include SamplesHelper
@@ -12,8 +13,12 @@ class HomeController < ApplicationController
       # Call secure home#index path if authenticated
       redirect_to home_path
     else
-      @preview = true if landing_params[:preview]
-      render 'landing'
+      if Time.now.utc > DateTime.strptime("1539702000", "%s")
+        @bulletin_title = Base64.decode64("R3JhbmQgQ2hhbGxlbmdlcyBHcmFudCBSRlA=")
+        @bulletin_description = Base64.decode64("SW4gY29sbGFib3JhdGlvbiB3aXRoIHRoZSBHYXRlcyBGb3VuZGF0aW9uLCBDaGFuIFp1Y2tlcmJlcmcgSW5pdGlhdGl2ZSBhbmQgQ2hhbiBadWNrZXJiZXJnIEJpb2h1YiBoYXZlIGFubm91bmNlZCBhIEdyYW5kIENoYWxsZW5nZXMgR3JhbnQgdGhhdCB3aWxsIHVzZSBJRHNlcSB0byBidWlsZCBjYXBhY2l0eSBmb3IgbWV0YWdlbm9taWMgc2VxdWVuY2luZyBpbiBsYWJzIGFyb3VuZCB0aGUgd29ybGQu")
+        @bulletin_link = Base64.decode64("aHR0cHM6Ly9nY2doLmdyYW5kY2hhbGxlbmdlcy5vcmcvY2hhbGxlbmdlL2FwcGxpY2F0aW9uLW1ldGFnZW5vbWljLW5leHQtZ2VuZXJhdGlvbi1zZXF1ZW5jaW5nLWRldGVjdC1hbmQtaWRlbnRpZnktcGF0aG9nZW5zLXJvdW5kLTIy")
+      end
+      render "landing"
     end
   end
 
@@ -24,7 +29,7 @@ class HomeController < ApplicationController
     @host_genomes = HostGenome.all.reject { |hg| hg.name.downcase.include?("__test__") }
     @user_is_admin = current_user.role == 1 ? 1 : 0
     @background_models = current_power.backgrounds
-    render 'home'
+    render "home"
   end
 
   def taxon_descriptions
@@ -39,14 +44,14 @@ class HomeController < ApplicationController
   end
 
   def sort_by(samples, dir = nil)
-    default_dir = 'newest'
+    default_dir = "newest"
     dir ||= default_dir
-    dir == 'newest' ? samples.order(id: :desc) : samples.order(id: :asc)
+    dir == "newest" ? samples.order(id: :desc) : samples.order(id: :asc)
   end
 
   def feedback
     render json: {
-      status: 'ok'
+      status: "ok"
     }
   end
 
@@ -78,9 +83,5 @@ class HomeController < ApplicationController
 
   def home_params
     params.require(:signUp).permit(:firstName, :lastName, :email, :institution, :usage)
-  end
-
-  def landing_params
-    params.permit(:preview)
   end
 end

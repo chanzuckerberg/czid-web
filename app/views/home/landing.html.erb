@@ -3,12 +3,14 @@
 <div id="landing_page">
   <%= javascript_tag do %>
     react_component(
-      'Landing',
-      {
-        contactEmail: "accounts@idseq.net",
-        preview: '<%= @preview %>'
-      },
-      'landing_page'
-      );
+    'Landing',
+    {
+    contactEmail: "accounts@idseq.net",
+    bulletinTitle: '<%= @bulletin_title %>',
+    bulletinDescription: '<%= @bulletin_description %>',
+    bulletinLink: '<%= @bulletin_link %>'
+    },
+    'landing_page'
+    );
   <% end %>
 </div>
