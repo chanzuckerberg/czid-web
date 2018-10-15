@@ -2,11 +2,10 @@ import React from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import $ from "jquery";
-import Tipsy from "react-tipsy";
 import ReactAutocomplete from "react-autocomplete";
 import { Label, Menu, Icon, Popup } from "semantic-ui-react";
 import numberWithCommas from "../helpers/strings";
-import StringHelper from "../helpers/StringHelper";
+import { getTaxonName } from "../helpers/taxon";
 import ThresholdMap from "./utils/ThresholdMap";
 import Nanobar from "nanobar";
 import BasicPopup from "./BasicPopup";
@@ -17,9 +16,9 @@ import BetaLabel from "./ui/labels/BetaLabel";
 import PathogenLabel from "./ui/labels/PathogenLabel";
 import PathogenSummary from "./views/report/PathogenSummary";
 import ReportInsightIcon from "./views/report/ReportInsightIcon";
+import ReportTable from "./views/report/ReportTable";
 import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
 import PhyloTreeChecks from "./views/phylo_tree/PhyloTreeChecks";
-import TaxonModal from "./views/report/TaxonModal";
 import TaxonTreeVis from "./views/TaxonTreeVis";
 import LoadingLabel from "./ui/labels/LoadingLabel";
 
@@ -110,15 +109,17 @@ class PipelineSampleReport extends React.Component {
       ? savedThresholdFilters
       : [Object.assign({}, this.defaultThreshold)];
 
-    let defaultBackgroundId = this.fetchParams("background_id");
+    let defaultBackgroundId = parseInt(this.fetchParams("background_id"));
     // we should only keep dynamic data in the state
     // Starting state is default values which are to be set later.
     this.state = {
       taxonomy_details: [],
       topScoringTaxa: [],
       pathogenTagSummary: {},
-      backgroundId: defaultBackgroundId,
-      backgroundName: "",
+      backgroundData: {
+        id: defaultBackgroundId,
+        name: ""
+      },
       search_taxon_id: 0,
       searchKey: "",
       search_keys_in_sample: [],
@@ -278,8 +279,10 @@ class PipelineSampleReport extends React.Component {
           taxonomy_details: res.data.taxonomy_details[2],
           topScoringTaxa: res.data.topScoringTaxa,
           pathogenTagSummary: res.data.pathogenTagSummary,
-          backgroundId: res.data.background_info.id,
-          backgroundName: res.data.background_info.name
+          backgroundData: {
+            id: res.data.background_info.id,
+            name: res.data.background_info.name
+          }
         },
         () => {
           this.applyFilters(true);
@@ -830,14 +833,22 @@ class PipelineSampleReport extends React.Component {
   }
 
   handleBackgroundModelChange(_, data) {
+    if (data.value === this.state.backgroundData.id) {
+      // Skip if no change
+      return;
+    }
+
     const backgroundName = data.options.find(function(option) {
-      return option.text == data.value;
-    });
+      return option.value === data.value;
+    }).text;
+
     Cookies.set("background_name", backgroundName);
     this.setState(
       {
-        backgroundName,
-        backgroundId: data.value
+        backgroundData: {
+          name: backgroundName,
+          id: data.value
+        }
       },
       () => {
         this.props.refreshPage({ background_id: data.value });
@@ -1028,57 +1039,38 @@ class PipelineSampleReport extends React.Component {
     return category_lowercase;
   }
 
-  render_name(tax_info, report_details, parent) {
-    let tax_scientific_name = tax_info["name"];
-    let tax_common_name = tax_info["common_name"];
-    let taxonName;
-    let taxonNameDisplay;
+  render_name(tax_info, report_details, parent, openTaxonModal) {
+    let taxCommonName = tax_info["common_name"];
+    const taxonName = getTaxonName(tax_info, this.state.name_type);
 
-    if (this.state.name_type.toLowerCase() == "common name") {
-      if (!tax_common_name || tax_common_name.trim() == "") {
-        taxonName = tax_scientific_name;
-        taxonNameDisplay = <span className="count-info">{taxonName}</span>;
-      } else {
-        taxonName = tax_common_name;
-        taxonNameDisplay = (
-          <span>{StringHelper.capitalizeFirstLetter(taxonName)}</span>
-        );
-      }
-    } else {
-      taxonName = tax_scientific_name;
-      taxonNameDisplay = <span>{tax_scientific_name}</span>;
-    }
+    const grayOut =
+      this.state.name_type.toLowerCase() == "common name" &&
+      (!taxCommonName || taxCommonName.trim() == "");
+    let taxonNameDisplay = (
+      <span className={grayOut ? "count-info" : ""}>{taxonName}</span>
+    );
+
+    const openTaxonModalHandler = () =>
+      openTaxonModal({
+        taxInfo: tax_info,
+        backgroundData: parent.state.backgroundData,
+        taxonName
+      });
 
     if (tax_info.tax_id > 0) {
       if (report_details.taxon_fasta_flag) {
         taxonNameDisplay = (
-          <span className="taxon-modal-link">
+          <span className="taxon-modal-link" onClick={openTaxonModalHandler}>
             <a>{taxonNameDisplay}</a>
           </span>
         );
       } else {
         taxonNameDisplay = (
-          <span className="taxon-modal-link">{taxonNameDisplay}</span>
+          <span className="taxon-modal-link" onClick={openTaxonModalHandler}>
+            {taxonNameDisplay}
+          </span>
         );
       }
-      taxonNameDisplay = (
-        <TaxonModal
-          taxonId={tax_info.tax_id}
-          taxonValues={{
-            NT: tax_info.NT,
-            NR: tax_info.NR
-          }}
-          parentTaxonId={
-            tax_info.tax_level === 1 ? tax_info.genus_taxid : undefined
-          }
-          background={{
-            name: parent.state.backgroundName,
-            id: parent.state.backgroundId
-          }}
-          taxonName={taxonName}
-          trigger={taxonNameDisplay}
-        />
-      );
     } else {
       taxonNameDisplay = <i>{taxonNameDisplay}</i>;
     }
@@ -1518,148 +1510,6 @@ function AdvancedFilterTagList({ threshold, i, parent }) {
   }
 }
 
-function DetailCells({ parent }) {
-  return parent.state.selected_taxons_top.map(tax_info => (
-    <tr
-      key={tax_info.tax_id}
-      id={`taxon-${tax_info.tax_id}`}
-      ref={elm => {
-        parent.taxon_row_refs[tax_info.tax_id] = elm;
-      }}
-      className={parent.row_class(
-        tax_info,
-        parent.props.confirmed_taxids,
-        parent.props.watched_taxids
-      )}
-    >
-      <td>{parent.render_name(tax_info, parent.report_details, parent)}</td>
-      {parent.render_number(
-        tax_info.NT.aggregatescore,
-        null,
-        0,
-        true,
-        undefined,
-        tax_info.topScoring == 1
-      )}
-      {parent.render_number(tax_info.NT.zscore, tax_info.NR.zscore, 1)}
-      {parent.render_number(tax_info.NT.rpm, tax_info.NR.rpm, 1)}
-      {parent.render_number(tax_info.NT.r, tax_info.NR.r, 0)}
-      {parent.render_number(
-        tax_info.NT.percentidentity,
-        tax_info.NR.percentidentity,
-        1
-      )}
-      {parent.render_number(
-        tax_info.NT.neglogevalue,
-        tax_info.NR.neglogevalue,
-        0
-      )}
-      {parent.render_number(
-        tax_info.NT.percentconcordant,
-        tax_info.NR.percentconcordant,
-        1,
-        undefined,
-        parent.showConcordance
-      )}
-      <td>{parent.displayHighlightTags(tax_info)}</td>
-    </tr>
-  ));
-}
-
-function ReportTableHeader({ parent }) {
-  return (
-    <div className="reports-main">
-      <table id="report-table" className="bordered report-table">
-        <thead>
-          <tr className="report-header">
-            <th>
-              <span className={`table-arrow ""`}>
-                <i className="fa fa-angle-right" onClick={parent.expandTable} />
-              </span>
-              <span className="table-arrow hidden">
-                <i
-                  className="fa fa-angle-down"
-                  onClick={parent.collapseTable}
-                />
-              </span>
-              Taxonomy
-            </th>
-            {parent.render_column_header(
-              "Score",
-              `NT_aggregatescore`,
-              "Aggregate score: ( |genus.NT.Z| * species.NT.Z * species.NT.rPM ) + ( |genus.NR.Z| * species.NR.Z * species.NR.rPM )"
-            )}
-            {parent.render_column_header(
-              "Z",
-              `${parent.state.countType}_zscore`,
-              `Z-score relative to background model for alignments to NCBI NT/NR`
-            )}
-            {parent.render_column_header(
-              "rPM",
-              `${parent.state.countType}_rpm`,
-              `Number of reads aligning to the taxon in the NCBI NT/NR database per million total input reads`
-            )}
-            {parent.render_column_header(
-              "r",
-              `${parent.state.countType}_r`,
-              `Number of reads aligning to the taxon in the NCBI NT/NR database`
-            )}
-            {parent.render_column_header(
-              "%id",
-              `${parent.state.countType}_percentidentity`,
-              `Average percent-identity of alignments to NCBI NT/NR`
-            )}
-            {parent.render_column_header(
-              "log(1/E)",
-              `${parent.state.countType}_neglogevalue`,
-              `Average log-10-transformed expect value for alignments to NCBI NT/NR`
-            )}
-            {parent.render_column_header(
-              "%conc",
-              `${parent.state.countType}_percentconcordant`,
-              `Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NT/NR)`,
-              parent.showConcordance
-            )}
-            <th>
-              <Tipsy content="Switch count type" placement="top">
-                <div className="sort-controls center left">
-                  <div
-                    className={
-                      parent.state.countType === "NT"
-                        ? "active column-switcher"
-                        : "column-switcher"
-                    }
-                    onClick={() => {
-                      parent.setState({ countType: "NT" });
-                    }}
-                  >
-                    NT
-                  </div>
-                  <div
-                    className={
-                      parent.state.countType === "NR"
-                        ? "active column-switcher"
-                        : "column-switcher"
-                    }
-                    onClick={() => {
-                      parent.setState({ countType: "NR" });
-                    }}
-                  >
-                    NR
-                  </div>
-                </div>
-              </Tipsy>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <DetailCells parent={parent} />
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
 function CategoryFilter({ parent }) {
   let options = [];
   parent.all_categories.forEach(category => {
@@ -1760,7 +1610,7 @@ function BackgroundModelFilter({ parent }) {
   return (
     <OurDropdown
       options={backgroundOptions}
-      value={parent.state.backgroundId}
+      value={parent.state.backgroundData.id}
       disabled={disabled}
       label="Background: "
       onChange={parent.handleBackgroundModelChange}
@@ -1864,6 +1714,7 @@ class RenderMarkup extends React.Component {
           metric={parent.state.treeMetric}
           nameType={parent.state.name_type}
           onNodeTextClicked={this._nodeTextClicked}
+          backgroundData={parent.state.backgroundData}
         />
       </div>
     );
@@ -1932,9 +1783,7 @@ class RenderMarkup extends React.Component {
                   </div>
                   {filter_row_stats}
                 </div>
-                {this.state.view == "table" && (
-                  <ReportTableHeader parent={parent} />
-                )}
+                {this.state.view == "table" && <ReportTable parent={parent} />}
                 {this.renderTree()}
                 {parent.state.loading && (
                   <div className="loading-container">

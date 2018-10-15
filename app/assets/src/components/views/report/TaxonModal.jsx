@@ -9,7 +9,6 @@ class TaxonModal extends React.Component {
     super(props);
 
     this.state = {
-      open: false,
       background: this.props.background,
       showHistogram: false,
       taxonDescription: "",
@@ -18,15 +17,12 @@ class TaxonModal extends React.Component {
       wikiUrl: null
     };
 
-    this.loadedBackground = this.handleOpen = this.handleOpen.bind(this);
-    this.handleClose = () => this.setState({ open: false });
     this.linkTo = this.linkTo.bind(this);
   }
 
-  handleOpen() {
+  componentDidMount() {
     this.loadTaxonInfo();
     this.loadBackgroundInfo();
-    this.setState({ open: true });
   }
 
   loadTaxonInfo() {
@@ -140,82 +136,82 @@ class TaxonModal extends React.Component {
   }
 
   render() {
+    // The Modal component always expects a 'trigger', even though it doesn't make sense in our use case.
+    // <TaxonModal> is always open when rendered. To hide <TaxonModal>, we simply don't render it.
     return (
       <Modal
         title={this.props.taxonName}
-        trigger={<span onClick={this.handleOpen}>{this.props.trigger}</span>}
-        open={this.state.open}
-        onClose={this.handleClose}
+        trigger={<span />}
+        open
+        onClose={this.props.handleClose}
       >
-        {this.state.open && (
-          <div className="taxon-info">
-            <div className="taxon-info__label" />
-            {this.state.taxonDescription && (
-              <div>
-                <div className="taxon-info__subtitle">Description</div>
-                <div className="taxon-info__text">
-                  {this.state.taxonDescription}
-                </div>
+        <div className="taxon-info">
+          <div className="taxon-info__label" />
+          {this.state.taxonDescription && (
+            <div>
+              <div className="taxon-info__subtitle">Description</div>
+              <div className="taxon-info__text">
+                {this.state.taxonDescription}
               </div>
-            )}
-            {this.state.taxonParentName && (
-              <div>
-                <div className="taxon-info__subtitle">
-                  Genus: {this.state.taxonParentName}
-                </div>
-                <div className="taxon-info__text">
-                  {this.state.taxonParentDescription}
-                </div>
-              </div>
-            )}
-            {this.state.showHistogram && (
-              <div>
-                <div className="taxon-info__subtitle">
-                  Reference Background: {this.state.background.name}
-                </div>
-                <div
-                  className="taxon-info__histogram"
-                  ref={histogramContainer => {
-                    this.histogramContainer = histogramContainer;
-                  }}
-                />
-              </div>
-            )}
-            <div className="taxon-info__subtitle">Links</div>
-            <div className="taxon-info__links-section">
-              <ul className="taxon-info__links-list">
-                <li
-                  className="taxon-info__link"
-                  onClick={() => this.linkTo("ncbi")}
-                >
-                  NBCI
-                </li>
-                <li
-                  className="taxon-info__link"
-                  onClick={() => this.linkTo("google")}
-                >
-                  Google
-                </li>
-              </ul>
-              <ul className="taxon-info__links-list">
-                {this.state.wikiUrl && (
-                  <li
-                    className="taxon-info__link"
-                    onClick={() => this.linkTo("wikipedia")}
-                  >
-                    Wikipedia
-                  </li>
-                )}
-                <li
-                  className="taxon-info__link"
-                  onClick={() => this.linkTo("pubmed")}
-                >
-                  Pubmed
-                </li>
-              </ul>
             </div>
+          )}
+          {this.state.taxonParentName && (
+            <div>
+              <div className="taxon-info__subtitle">
+                Genus: {this.state.taxonParentName}
+              </div>
+              <div className="taxon-info__text">
+                {this.state.taxonParentDescription}
+              </div>
+            </div>
+          )}
+          {this.state.showHistogram && (
+            <div>
+              <div className="taxon-info__subtitle">
+                Reference Background: {this.state.background.name}
+              </div>
+              <div
+                className="taxon-info__histogram"
+                ref={histogramContainer => {
+                  this.histogramContainer = histogramContainer;
+                }}
+              />
+            </div>
+          )}
+          <div className="taxon-info__subtitle">Links</div>
+          <div className="taxon-info__links-section">
+            <ul className="taxon-info__links-list">
+              <li
+                className="taxon-info__link"
+                onClick={() => this.linkTo("ncbi")}
+              >
+                NCBI
+              </li>
+              <li
+                className="taxon-info__link"
+                onClick={() => this.linkTo("google")}
+              >
+                Google
+              </li>
+            </ul>
+            <ul className="taxon-info__links-list">
+              {this.state.wikiUrl && (
+                <li
+                  className="taxon-info__link"
+                  onClick={() => this.linkTo("wikipedia")}
+                >
+                  Wikipedia
+                </li>
+              )}
+              <li
+                className="taxon-info__link"
+                onClick={() => this.linkTo("pubmed")}
+              >
+                Pubmed
+              </li>
+            </ul>
           </div>
-        )}
+        </div>
       </Modal>
     );
   }
@@ -226,8 +222,7 @@ TaxonModal.propTypes = {
   parentTaxonId: PropTypes.number,
   taxonId: PropTypes.number,
   taxonName: PropTypes.string,
-  taxonValues: PropTypes.object,
-  trigger: PropTypes.node
+  taxonValues: PropTypes.object
 };
 
 export default TaxonModal;
