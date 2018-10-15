@@ -304,10 +304,7 @@ class TaxonTreeVis extends React.Component {
         parentTaxonId={
           taxInfo.tax_level === 1 ? taxInfo.genus_taxid : undefined
         }
-        background={{
-          name: this.props.backgroundName,
-          id: this.props.backgroundId
-        }}
+        background={this.props.backgroundData}
         taxonName={taxonName}
         handleClose={this.handleTaxonModalClose}
       />
@@ -344,8 +341,10 @@ TaxonTreeVis.propTypes = {
   nameType: PropTypes.string,
   taxa: PropTypes.array,
   topTaxa: PropTypes.array,
-  backgroundId: PropTypes.number,
-  backgroundName: PropTypes.string
+  backgroundData: PropTypes.shape({
+    id: PropTypes.number,
+    name: PropTypes.string
+  })
 };
 
 export default TaxonTreeVis;
