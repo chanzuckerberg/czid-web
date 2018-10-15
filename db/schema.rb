@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_181_004_180_225) do
+ActiveRecord::Schema.define(version: 20_181_011_230_229) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -285,6 +285,8 @@ ActiveRecord::Schema.define(version: 20_181_004_180_225) do
     t.string "sample_organism"
     t.string "sample_detection"
     t.string "alignment_config_name"
+    t.string "web_commit", default: ""
+    t.string "pipeline_commit", default: ""
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
     t.index ["user_id"], name: "index_samples_on_user_id"
   end
