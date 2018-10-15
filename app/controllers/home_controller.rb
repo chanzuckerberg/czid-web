@@ -16,7 +16,7 @@ class HomeController < ApplicationController
       if Time.now.utc > DateTime.strptime("1539702000", "%s")
         @bulletin_title = Base64.decode64("R3JhbmQgQ2hhbGxlbmdlcyBHcmFudCBSRlA=")
         @bulletin_description = Base64.decode64("SW4gY29sbGFib3JhdGlvbiB3aXRoIHRoZSBHYXRlcyBGb3VuZGF0aW9uLCBDaGFuIFp1Y2tlcmJlcmcgSW5pdGlhdGl2ZSBhbmQgQ2hhbiBadWNrZXJiZXJnIEJpb2h1YiBoYXZlIGFubm91bmNlZCBhIEdyYW5kIENoYWxsZW5nZXMgR3JhbnQgdGhhdCB3aWxsIHVzZSBJRHNlcSB0byBidWlsZCBjYXBhY2l0eSBmb3IgbWV0YWdlbm9taWMgc2VxdWVuY2luZyBpbiBsYWJzIGFyb3VuZCB0aGUgd29ybGQu")
-        @bulletin_link = Base64.decode64( "aHR0cHM6Ly9nY2doLmdyYW5kY2hhbGxlbmdlcy5vcmcvY2hhbGxlbmdlL2FwcGxpY2F0aW9uLW1ldGFnZW5vbWljLW5leHQtZ2VuZXJhdGlvbi1zZXF1ZW5jaW5nLWRldGVjdC1hbmQtaWRlbnRpZnktcGF0aG9nZW5zLXJvdW5kLTIy")
+        @bulletin_link = Base64.decode64("aHR0cHM6Ly9nY2doLmdyYW5kY2hhbGxlbmdlcy5vcmcvY2hhbGxlbmdlL2FwcGxpY2F0aW9uLW1ldGFnZW5vbWljLW5leHQtZ2VuZXJhdGlvbi1zZXF1ZW5jaW5nLWRldGVjdC1hbmQtaWRlbnRpZnktcGF0aG9nZW5zLXJvdW5kLTIy")
       end
       render "landing"
     end
@@ -51,7 +51,7 @@ class HomeController < ApplicationController
 
   def feedback
     render json: {
-      status: "ok",
+      status: "ok"
     }
   end
 
@@ -70,12 +70,12 @@ class HomeController < ApplicationController
     Rails.logger.info("New sign up:\n#{body}")
     UserMailer.landing_sign_up_email(body).deliver_now
     render json: {
-      status: :ok,
+      status: :ok
     }
   rescue => e
     Rails.logger.warn("Sign up error: #{e}")
     render json: {
-      status: :internal_server_error,
+      status: :internal_server_error
     }
   end
 
