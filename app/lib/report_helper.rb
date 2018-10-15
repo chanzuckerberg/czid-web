@@ -390,6 +390,7 @@ module ReportHelper
   def fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
     pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
     parent_ids = parent_ids.to_a
+    parent_ids_clause = parent_ids.empty? ? "" : " OR taxon_counts.tax_id in (#{parent_ids.join(',')}) "
 
     # Note: subsample_fraction is of type 'float' so adjusted_total_reads is too
     # Note: stdev is never 0
@@ -429,7 +430,7 @@ module ReportHelper
         taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID} AND
         taxon_counts.count_type IN ('NT', 'NR') AND
         (taxon_counts.tax_id IN (#{taxon_ids.join(',')})
-         OR taxon_counts.tax_id in (#{parent_ids.join(',')})
+         #{parent_ids_clause}
          OR taxon_counts.genus_taxid IN (#{taxon_ids.join(',')}))").to_hash
 
     # calculating rpm and zscore, organizing the results by pipeline_run_id
