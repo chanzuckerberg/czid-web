@@ -211,20 +211,22 @@ class Landing extends React.Component {
       </div>
     );
 
-    const bulletinLink = () => (location.href = "/");
     let bulletinBanner;
-    if (this.props.preview) {
+    if (this.props.bulletinTitle) {
       bulletinBanner = (
         <div className="bulletin-banner">
           <Container>
-            <div className="bulletin-title">Lorem Ipsum Dolor Sit Amet</div>
+            <div className="bulletin-title">{this.props.bulletinTitle}</div>
             <div className="bulletin-description">
-              Sed condimentum lobortis diam, nec tincidunt erat maximus sit
-              amet. Curabitur semper mi interdum purus vehicula, congue semper
-              mauris tristique. Phasellus id cursus magna, dignissim tempor
-              enim. In in scelerisque eros.
+              {this.props.bulletinDescription}
             </div>
-            <TransparentButton text="Learn More" onClick={bulletinLink} />
+            <a
+              href={this.props.bulletinLink}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <TransparentButton text="Learn More" />
+            </a>
           </Container>
         </div>
       );
@@ -297,7 +299,9 @@ class Landing extends React.Component {
 
 Landing.propTypes = {
   contactEmail: PropTypes.string.isRequired,
-  preview: PropTypes.string
+  bulletinTitle: PropTypes.string,
+  bulletinLink: PropTypes.string,
+  bulletinDescription: PropTypes.string
 };
 
 export default Landing;
