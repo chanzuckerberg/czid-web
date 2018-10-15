@@ -1,6 +1,6 @@
 import React from "react";
 
-function DetailCells({ parent, openTaxonModal }) {
+const DetailCells = ({ parent, openTaxonModal }) => {
   return parent.state.selected_taxons_top.map(taxInfo => (
     <tr
       key={taxInfo.tax_id}
@@ -53,6 +53,6 @@ function DetailCells({ parent, openTaxonModal }) {
       <td>{parent.displayHighlightTags(taxInfo)}</td>
     </tr>
   ));
-}
+};
 
 export default DetailCells;
