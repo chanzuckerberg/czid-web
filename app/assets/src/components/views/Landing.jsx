@@ -1,15 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import axios from "axios";
-import {
-  Form,
-  Input,
-  TextArea,
-  Grid,
-  Image,
-  Message,
-  Divider
-} from "semantic-ui-react";
+import { Form, Input, TextArea, Grid, Image, Message } from "semantic-ui-react";
 import Container from "../ui/containers/Container";
 import TransparentButton from "../ui/controls/buttons/TransparentButton";
 import PrimaryButton from "../ui/controls/buttons/PrimaryButton";
@@ -212,25 +204,20 @@ class Landing extends React.Component {
     );
 
     const bulletinLink = () => (location.href = "/");
-    let bulletinBanner;
-    if (this.props.preview) {
-      bulletinBanner = (
-        <div className="bulletin-banner">
-          <Container>
-            <div className="bulletin-title">Lorem Ipsum Dolor Sit Amet</div>
-            <div className="bulletin-description">
-              Sed condimentum lobortis diam, nec tincidunt erat maximus sit
-              amet. Curabitur semper mi interdum purus vehicula, congue semper
-              mauris tristique. Phasellus id cursus magna, dignissim tempor
-              enim. In in scelerisque eros.
-            </div>
-            <TransparentButton text="Learn More" onClick={bulletinLink} />
-          </Container>
-        </div>
-      );
-    } else {
-      bulletinBanner = <Divider />;
-    }
+    let bulletinBanner = (
+      <div className="bulletin-banner">
+        <Container>
+          <div className="bulletin-title">Grand Challenges Grant RFP</div>
+          <div className="bulletin-description">
+            In collaboration with the Gates Foundation, Chan Zuckerberg
+            Initiative and Chan Zuckerberg Biohub have announced a Grand
+            Challenges Grant that will use IDseq to build capacity for
+            metagenomic sequencing in labs around the world.
+          </div>
+          <TransparentButton text="Learn More" onClick={bulletinLink} />
+        </Container>
+      </div>
+    );
 
     const partners = (
       <div className="partners-block">
