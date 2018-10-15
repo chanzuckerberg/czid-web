@@ -1547,22 +1547,19 @@ function SampleNameInfo({ parent, dbSample, uploader }) {
       onClick={e => parent.viewSample(dbSample.id, e)}
       className="sample-name-info"
     >
-      <div className="card-label top-label">
-        <span className="upload-date">
-          Uploaded{" "}
-          {moment(dbSample.created_at)
-            .startOf("second")
-            .fromNow()}
-        </span>
-      </div>
       <div className="card-label center-label sample-name bold-label">
         {dbSample.name}
       </div>
       <div className="card-label author bottom-label">
+        <span className="upload-date">
+          {moment(dbSample.created_at)
+            .startOf("second")
+            .fromNow()}
+        </span>
         {!uploader || uploader === "" ? (
           ""
         ) : (
-          <span>Uploaded by: {uploader}</span>
+          <span>{` | ${uploader}`}</span>
         )}
       </div>
     </span>

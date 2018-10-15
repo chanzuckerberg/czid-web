@@ -632,7 +632,7 @@ $break-large: 1070px;
           [type="checkbox"].filled-in:not(:checked) + label:after,
           [type="checkbox"].filled-in:checked + label:after,
           [type="checkbox"].filled-in:checked + label:before {
-            top: 29px;
+            margin-top: 0.1rem;
           }
           .check {
             display: inline-block;
@@ -644,7 +644,6 @@ $break-large: 1070px;
         .sample-name-info {
           display: inline-block;
           line-height: 24px;
-          margin-top: -5px;
         }
         li {
           flex: 1;
@@ -683,6 +682,7 @@ $break-large: 1070px;
                 }
               }
               &.data-label {
+                margin-top: 0.15rem;
                 text-align: left;
                 .percent {
                   color: $medium-grey;
@@ -699,10 +699,6 @@ $break-large: 1070px;
               white-space: nowrap;
               overflow: hidden;
               margin-right: 20px;
-            }
-            &.column-title {
-              cursor: pointer;
-              text-align: left;
             }
             .project-name {
               background-color: #e7f5fe;
