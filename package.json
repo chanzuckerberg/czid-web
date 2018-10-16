@@ -10,7 +10,10 @@
     "setupTestFrameworkScriptFile": "./enzyme_config.js"
   },
   "lint-staged": {
-    "*.{js,jsx,json,css,scss}": ["prettier --write", "git add"],
+    "*.{js,jsx,json,css,scss}": [
+      "prettier --write",
+      "git add"
+    ],
     "*.rb": [
       "rubocop -R --auto-correct --config .rubocop_todo.yml --display-cop-names --display-style-guide",
       "git add"
