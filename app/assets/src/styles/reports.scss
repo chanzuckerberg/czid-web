@@ -253,28 +253,6 @@ input[type="number"] {
   color: $subdued-color;
 }
 
-.report-row-genus {
-  background: #f7f7f7;
-  border-left: 5px solid white;
-}
-
-.report-row-species {
-  border-left: 5px solid white;
-}
-
-.top-scoring-row {
-  border-left: 5px solid $brand-blue;
-  background-color: $transparent-brand-blue;
-}
-
-.confirmed {
-  color: #3cb371;
-}
-
-.watched {
-  color: #f4a460;
-}
-
 .reports-screen {
   background: #ffffff !important;
 }
@@ -364,10 +342,34 @@ input[type="number"] {
     font-size: $font-size-base;
     font-weight: $font-weight-semibold;
   }
+
   .highlighted {
     animation-name: highlight-animation;
     animation-duration: 2s;
   }
+
+  .report-row-genus {
+    background: #f7f7f7;
+    border-left: 5px solid white;
+  }
+
+  .report-row-species {
+    border-left: 5px solid white;
+  }
+
+  .top-scoring-row {
+    border-left: 5px solid $brand-blue;
+    background-color: $transparent-brand-blue;
+  }
+
+  .confirmed {
+    color: #3cb371;
+  }
+
+  .watched {
+    color: #f4a460;
+  }
+
   .fa.fa-chevron-up,
   .fa.fa-angle-right,
   .fa.fa-angle-down {

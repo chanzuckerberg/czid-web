@@ -1,3 +1,4 @@
+import cx from "classnames";
 import React from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -194,6 +195,7 @@ class PipelineSampleReport extends React.Component {
     this.setSortParams = this.setSortParams.bind(this);
     this.sortCompareFunction = this.sortCompareFunction.bind(this);
     this.sortResults = this.sortResults.bind(this);
+    this.isTaxonExpanded = this.isTaxonExpanded.bind(this);
 
     this.initializeTooltip();
   }
@@ -545,44 +547,6 @@ class PipelineSampleReport extends React.Component {
         return false;
       }
     });
-  }
-
-  scrollToTaxon(taxon_id) {
-    // Find the taxon
-    let taxon;
-    for (let ttaxon of this.state.selected_taxons) {
-      if (ttaxon.tax_id == taxon_id) {
-        taxon = ttaxon;
-        break;
-      }
-    }
-
-    if (!taxon) {
-      return;
-    }
-    // Make sure the taxon is rendered
-    if (this.state.selected_taxons_top.indexOf(taxon) == -1) {
-      this.renderMore();
-      this.setState({}, () => {
-        this.scrollToTaxon(taxon_id);
-      });
-    }
-
-    // set view to table and scoll into view
-    this.setState(
-      {
-        view: "table",
-        highlight_taxon: taxon.tax_id
-      },
-      () => {
-        if (taxon.tax_level == 1) {
-          this.expandGenus(taxon.genus_taxid);
-        }
-        this.taxon_row_refs[taxon.tax_id].scrollIntoView({
-          block: "center"
-        });
-      }
-    );
   }
 
   renderMore() {
@@ -1204,45 +1168,39 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
-  row_class(tax_info, confirmed_taxids, watched_taxids) {
-    let highlighted =
-      this.state.highlight_taxon == tax_info.tax_id ? "highlighted" : "";
-    let taxon_status = "";
-    if (confirmed_taxids.indexOf(tax_info.tax_id) >= 0) {
-      taxon_status = "confirmed";
-    } else if (watched_taxids.indexOf(tax_info.tax_id) >= 0) {
-      taxon_status = "watched";
-    }
-    let top_scoring_status = tax_info.topScoring == 1 ? "top-scoring-row" : "";
-    let emphasis_class = `${taxon_status} ${highlighted} ${top_scoring_status}`;
+  isTaxonExpanded(taxInfo) {
+    return (
+      (this.expandAll && taxInfo.genus_taxid > 0) ||
+      this.expandedGenera.indexOf(taxInfo.genus_taxid.toString()) >= 0
+    );
+  }
 
-    if (tax_info.tax_level == 2) {
-      if (tax_info.tax_id < 0) {
-        return `report-row-genus ${
-          tax_info.genus_taxid
-        } fake-genus ${emphasis_class}`;
-      }
-      return `report-row-genus ${
-        tax_info.genus_taxid
-      } real-genus ${emphasis_class}`;
+  getRowClass(taxInfo, confirmedTaxIds, watchedTaxIds) {
+    const topScoringRow = taxInfo.topScoring === 1;
+
+    let taxonStatusClass = "";
+    if (confirmedTaxIds.indexOf(taxInfo.tax_id) >= 0) {
+      taxonStatusClass = "confirmed";
+    } else if (watchedTaxIds.indexOf(taxInfo.tax_id) >= 0) {
+      taxonStatusClass = "watched";
     }
 
-    let initial_visibility = "hidden";
-    if (
-      (this.expandAll && tax_info.genus_taxid > 0) ||
-      this.expandedGenera.indexOf(tax_info.genus_taxid.toString()) >= 0
-    ) {
-      initial_visibility = "";
+    if (taxInfo.tax_level == 2) {
+      return cx(
+        "report-row-genus",
+        taxInfo.genus_taxid, // TODO(mark): remove non-styling-related class.
+        taxonStatusClass,
+        topScoringRow && "top-scoring-row"
+      );
     }
-    emphasis_class = `${initial_visibility} ${emphasis_class}`;
-    if (tax_info.genus_taxid < 0) {
-      return `report-row-species ${
-        tax_info.genus_taxid
-      } fake-genus ${emphasis_class}`;
-    }
-    return `report-row-species ${
-      tax_info.genus_taxid
-    } real-genus ${emphasis_class}`;
+
+    return cx(
+      "report-row-species",
+      taxInfo.genus_taxid, // TODO(mark): remove non-styling-related class.
+      !this.isTaxonExpanded(taxInfo) && "hidden",
+      taxonStatusClass,
+      topScoringRow && "top-scoring-row"
+    );
   }
 
   expandGenusClick(e) {
@@ -1650,17 +1608,12 @@ class RenderMarkup extends React.Component {
     this.state = {
       view: this.props.view || "table"
     };
-    this._nodeTextClicked = this.nodeTextClicked.bind(this);
   }
 
   componentWillReceiveProps(newProps) {
     if (newProps.view && this.state.view != newProps.view) {
       this.setState({ view: newProps.view });
     }
-  }
-
-  nodeTextClicked(d) {
-    this.props.parent.scrollToTaxon(d.id);
   }
 
   renderMenu() {
@@ -1713,7 +1666,6 @@ class RenderMarkup extends React.Component {
           sample={parent.report_details.sample_info}
           metric={parent.state.treeMetric}
           nameType={parent.state.name_type}
-          onNodeTextClicked={this._nodeTextClicked}
           backgroundData={parent.state.backgroundData}
         />
       </div>

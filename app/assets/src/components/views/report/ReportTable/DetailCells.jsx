@@ -8,7 +8,7 @@ const DetailCells = ({ parent, openTaxonModal }) => {
       ref={elm => {
         parent.taxon_row_refs[taxInfo.tax_id] = elm;
       }}
-      className={parent.row_class(
+      className={parent.getRowClass(
         taxInfo,
         parent.props.confirmed_taxids,
         parent.props.watched_taxids
