@@ -10,3 +10,15 @@ export const getTaxonName = (taxInfo, nameType) => {
     ? scientificName
     : StringHelper.capitalizeFirstLetter(commonName);
 };
+
+export const getGeneraContainingTags = taxInfoArray => {
+  // Map genus taxids to the number of species with pathogen tags contained within.
+  let generaContainingTags = {};
+  for (let taxInfo of taxInfoArray) {
+    if (taxInfo.tax_level == 1 && taxInfo.pathogenTag) {
+      generaContainingTags[taxInfo.genus_taxid] =
+        (generaContainingTags[taxInfo.genus_taxid] || 0) + 1;
+    }
+  }
+  return generaContainingTags;
+};

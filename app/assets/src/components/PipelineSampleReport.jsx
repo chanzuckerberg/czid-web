@@ -5,7 +5,7 @@ import $ from "jquery";
 import ReactAutocomplete from "react-autocomplete";
 import { Label, Menu, Icon, Popup } from "semantic-ui-react";
 import numberWithCommas from "../helpers/strings";
-import { getTaxonName } from "../helpers/taxon";
+import { getTaxonName, getGeneraContainingTags } from "../helpers/taxon";
 import ThresholdMap from "./utils/ThresholdMap";
 import Nanobar from "nanobar";
 import BasicPopup from "./BasicPopup";
@@ -1076,6 +1076,9 @@ class PipelineSampleReport extends React.Component {
     }
     let secondaryTaxonDisplay = (
       <span>
+        {generaContainingTags(tax_info.tax_id) && (
+          <PathogenCount number={generaContainingTags(tax_info.tax_id)} />
+        )}
         {tax_info.pathogenTag && <PathogenLabel type={tax_info.pathogenTag} />}
         {this.displayHoverActions(tax_info, report_details)}
       </span>
