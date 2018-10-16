@@ -194,6 +194,7 @@ class PipelineSampleReport extends React.Component {
     this.renderMore = this.renderMore.bind(this);
     this.renderName = this.renderName.bind(this);
     this.renderNumber = this.renderNumber.bind(this);
+    this.renderColumnHeader = this.renderColumnHeader.bind(this);
     this.resetAllFilters = this.resetAllFilters.bind(this);
     this.setSortParams = this.setSortParams.bind(this);
     this.sortCompareFunction = this.sortCompareFunction.bind(this);
@@ -1144,7 +1145,7 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
-  render_column_header(
+  renderColumnHeader(
     visible_metric,
     column_name,
     tooltip_message,
@@ -1738,7 +1739,26 @@ class RenderMarkup extends React.Component {
                   </div>
                   {filter_row_stats}
                 </div>
-                {this.state.view == "table" && <ReportTable parent={parent} />}
+                {this.state.view == "table" && (
+                  <ReportTable
+                    taxons={parent.state.selected_taxons_top}
+                    taxonRowRefs={parent.taxon_row_refs}
+                    confirmedTaxIds={parent.props.confirmed_taxids}
+                    watchedTaxIds={parent.props.watched_taxids}
+                    renderName={parent.renderName}
+                    renderNumber={parent.renderNumber}
+                    displayHighlightTags={parent.displayHighlightTags}
+                    showConcordance={parent.showConcordance}
+                    getRowClass={parent.getRowClass}
+                    reportDetails={parent.report_details}
+                    backgroundData={parent.state.backgroundData}
+                    expandTable={parent.expandTable}
+                    collapseTable={parent.collapseTable}
+                    renderColumnHeader={parent.renderColumnHeader}
+                    countType={parent.state.countType}
+                    setCountType={countType => parent.setState({ countType })}
+                  />
+                )}
                 {this.renderTree()}
                 {parent.state.loading && (
                   <div className="loading-container">

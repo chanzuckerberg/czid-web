@@ -1,11 +1,11 @@
 import React from "react";
 import Tipsy from "react-tipsy";
 
+import PropTypes from "../../../utils/propTypes";
 import TaxonModal from "../TaxonModal";
 
 import DetailCells from "./DetailCells";
 
-// TODO(mark): Refactor to remove parent prop.
 export default class ReportTable extends React.Component {
   constructor(props) {
     super(props);
@@ -53,7 +53,24 @@ export default class ReportTable extends React.Component {
   }
 
   render() {
-    const { parent } = this.props;
+    const {
+      taxons,
+      taxonRowRefs,
+      confirmedTaxIds,
+      watchedTaxIds,
+      renderName,
+      renderNumber,
+      renderColumnHeader,
+      displayHighlightTags,
+      showConcordance,
+      getRowClass,
+      reportDetails,
+      backgroundData,
+      expandTable,
+      collapseTable,
+      countType,
+      setCountType
+    } = this.props;
 
     return (
       <div className="reports-main">
@@ -63,79 +80,69 @@ export default class ReportTable extends React.Component {
             <tr className="report-header">
               <th>
                 <span className="table-arrow">
-                  <i
-                    className="fa fa-angle-right"
-                    onClick={parent.expandTable}
-                  />
+                  <i className="fa fa-angle-right" onClick={expandTable} />
                 </span>
                 <span className="table-arrow hidden">
-                  <i
-                    className="fa fa-angle-down"
-                    onClick={parent.collapseTable}
-                  />
+                  <i className="fa fa-angle-down" onClick={collapseTable} />
                 </span>
                 Taxonomy
               </th>
-              {parent.render_column_header(
+              {renderColumnHeader(
                 "Score",
                 `NT_aggregatescore`,
                 "Aggregate score: ( |genus.NT.Z| * species.NT.Z * species.NT.rPM ) + ( |genus.NR.Z| * species.NR.Z * species.NR.rPM )"
               )}
-              {parent.render_column_header(
+              {renderColumnHeader(
                 "Z",
-                `${parent.state.countType}_zscore`,
+                `${countType}_zscore`,
                 `Z-score relative to background model for alignments to NCBI NT/NR`
               )}
-              {parent.render_column_header(
+              {renderColumnHeader(
                 "rPM",
-                `${parent.state.countType}_rpm`,
+                `${countType}_rpm`,
                 `Number of reads aligning to the taxon in the NCBI NT/NR database per million total input reads`
               )}
-              {parent.render_column_header(
+              {renderColumnHeader(
                 "r",
-                `${parent.state.countType}_r`,
+                `${countType}_r`,
                 `Number of reads aligning to the taxon in the NCBI NT/NR database`
               )}
-              {parent.render_column_header(
+              {renderColumnHeader(
                 "%id",
-                `${parent.state.countType}_percentidentity`,
+                `${countType}_percentidentity`,
                 `Average percent-identity of alignments to NCBI NT/NR`
               )}
-              {parent.render_column_header(
+              {renderColumnHeader(
                 "log(1/E)",
-                `${parent.state.countType}_neglogevalue`,
+                `${countType}_neglogevalue`,
                 `Average log-10-transformed expect value for alignments to NCBI NT/NR`
               )}
-              {parent.render_column_header(
+              {renderColumnHeader(
                 "%conc",
-                `${parent.state.countType}_percentconcordant`,
+                `${countType}_percentconcordant`,
                 `Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NT/NR)`,
-                parent.showConcordance
+                showConcordance
               )}
               <th>
                 <Tipsy content="Switch count type" placement="top">
                   <div className="sort-controls center left">
                     <div
                       className={
-                        parent.state.countType === "NT"
+                        countType === "NT"
                           ? "active column-switcher"
                           : "column-switcher"
                       }
-                      onClick={() => {
-                        parent.setState({ countType: "NT" });
-                      }}
+                      onClick={() => setCountType("NT")}
                     >
                       NT
                     </div>
                     <div
                       className={
-                        parent.state.countType === "NR"
+                        countType === "NR"
                           ? "active column-switcher"
                           : "column-switcher"
                       }
-                      onClick={() => {
-                        parent.setState({ countType: "NR" });
-                      }}
+                      onClick={() => setCountType("NR")}
                     >
                       NR
                     </div>
@@ -146,18 +153,18 @@ export default class ReportTable extends React.Component {
           </thead>
           <tbody>
             <DetailCells
-              taxons={parent.state.selected_taxons_top}
-              taxonRowRefs={parent.taxon_row_refs}
-              confirmedTaxIds={parent.props.confirmed_taxids}
-              watchedTaxIds={parent.props.watched_taxids}
-              renderName={parent.renderName}
-              renderNumber={parent.renderNumber}
-              displayHighlightTags={parent.displayHighlightTags}
-              showConcordance={parent.showConcordance}
-              getRowClass={parent.getRowClass}
+              taxons={taxons}
+              taxonRowRefs={taxonRowRefs}
+              confirmedTaxIds={confirmedTaxIds}
+              watchedTaxIds={watchedTaxIds}
+              renderName={renderName}
+              renderNumber={renderNumber}
+              displayHighlightTags={displayHighlightTags}
+              showConcordance={showConcordance}
+              getRowClass={getRowClass}
               openTaxonModal={this.openTaxonModal}
-              reportDetails={parent.report_details}
-              backgroundData={parent.state.backgroundData}
+              reportDetails={reportDetails}
+              backgroundData={backgroundData}
             />
           </tbody>
         </table>
@@ -165,3 +172,22 @@ export default class ReportTable extends React.Component {
     );
   }
 }
+
+ReportTable.propTypes = {
+  taxons: PropTypes.arrayOf(PropTypes.Taxon).isRequired,
+  taxonRowRefs: PropTypes.objectOf(PropTypes.any).isRequired, // These are DOM elements.
+  confirmedTaxIds: PropTypes.arrayOf(PropTypes.string).isRequired,
+  watchedTaxIds: PropTypes.arrayOf(PropTypes.string).isRequired,
+  renderName: PropTypes.func.isRequired,
+  renderNumber: PropTypes.func.isRequired,
+  displayHighlightTags: PropTypes.func.isRequired,
+  showConcordance: PropTypes.bool.isRequired,
+  getRowClass: PropTypes.func.isRequired,
+  reportDetails: PropTypes.ReportDetails,
+  backgroundData: PropTypes.BackgroundData,
+  expandTable: PropTypes.func.isRequired,
+  collapseTable: PropTypes.func.isRequired,
+  renderColumnHeader: PropTypes.func.isRequired,
+  countType: PropTypes.string.isRequired,
+  setCountType: PropTypes.func.isRequired
+};
