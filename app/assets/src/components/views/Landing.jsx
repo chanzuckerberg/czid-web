@@ -203,7 +203,7 @@ class Landing extends React.Component {
       </div>
     );
 
-    let bulletinBanner = (
+    const bulletinBanner = (
       <div className="bulletin-banner">
         <Container>
           <div className="bulletin-title">Grand Challenges Grant RFP</div>
