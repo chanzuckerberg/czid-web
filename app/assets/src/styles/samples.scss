@@ -603,7 +603,7 @@ $break-large: 1070px;
 
   .sample-feed,
   .sample-feed-head {
-    border-bottom: 2px solid $lightest-grey;
+    border-bottom: 1px solid $light-grey;
     z-index: 10;
     .samples-card {
       padding: 2px 20px 2px 20px;
@@ -666,7 +666,7 @@ $break-large: 1070px;
             flex-grow: 2;
             margin-left: 0.8rem;
             &.table-header-name {
-              margin-left: -0.05rem;
+              margin-left: 0.2rem;
               margin-right: 0.8rem;
             }
           }
@@ -1115,7 +1115,7 @@ input[type="button"] {
     padding-left: 20px;
     .download-section {
       .proj-title-container {
-        margin-left: -0.6rem;
+        margin-left: -0.3rem;
       }
       .angle.down.icon {
         margin-left: 0.5rem;
