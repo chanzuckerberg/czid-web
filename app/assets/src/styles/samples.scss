@@ -603,7 +603,7 @@ $break-large: 1070px;
 
   .sample-feed,
   .sample-feed-head {
-    border-bottom: 2px solid #edf1f2;
+    border-bottom: 2px solid $lightest-grey;
     z-index: 10;
     .samples-card {
       padding: 2px 20px 2px 20px;
@@ -651,11 +651,17 @@ $break-large: 1070px;
           text-overflow: ellipsis;
           &:first-child {
             flex-grow: 2;
+            margin-left: 0.8rem;
+            &.table-header-name {
+              margin-left: -0.05rem;
+              margin-right: 0.8rem;
+            }
           }
           .card-label {
             &.top-label {
               color: #9fa9ba;
               font-size: 12px;
+              margin-top: 0.2rem;
               margin-bottom: 5px;
               .status {
                 span {
@@ -667,7 +673,7 @@ $break-large: 1070px;
               &.bold-label {
                 font-weight: 600;
               }
-              font-size: 13px;
+              font-size: 14px;
               .blank {
                 color: #b5b0b0;
               }
@@ -686,12 +692,16 @@ $break-large: 1070px;
                 text-align: left;
                 .percent {
                   color: $medium-grey;
+                  font-size: 12px;
                 }
+              }
+              &.data-label-percent {
+                margin-top: 0.3rem;
               }
             }
             &.author {
               color: $medium-grey;
-              font-size: 11px;
+              font-size: 12px;
             }
             &.sample-name {
               color: $body-color;
@@ -699,6 +709,10 @@ $break-large: 1070px;
               white-space: nowrap;
               overflow: hidden;
               margin-right: 20px;
+            }
+            &.column-title {
+              cursor: pointer;
+              text-align: left;
             }
             .project-name {
               background-color: #e7f5fe;
@@ -709,7 +723,6 @@ $break-large: 1070px;
             }
             .upload-date {
               color: $medium-grey;
-              font-size: 11px;
             }
           }
         }
@@ -795,9 +808,8 @@ $break-large: 1070px;
     display: inline-block;
     width: inherit;
     height: 50px;
-    margin: 20px 0 5px;
+    margin: 20px 0 5px 15px;
     border-radius: 3px;
-    padding-left: 6px;
     .wrapper {
       .metadata {
         border-radius: 40px;
@@ -1071,7 +1083,7 @@ input[type="button"] {
       margin-right: 1.5rem;
       .divider {
         height: 3px;
-        border: solid 4px #f8f8f8;
+        border: solid 4px $off-white;
       }
     }
 
@@ -1090,6 +1102,9 @@ input[type="button"] {
   .project-info {
     padding-left: 20px;
     .download-section {
+      .proj-title-container {
+        margin-left: -0.6rem;
+      }
       .angle.down.icon {
         margin-left: 0.5rem;
         margin-right: -0.3rem;
