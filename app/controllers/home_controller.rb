@@ -12,7 +12,17 @@ class HomeController < ApplicationController
       # Call secure home#index path if authenticated
       redirect_to home_path
     else
-      @preview = true if landing_params[:preview]
+      if landing_params[:show_bulletin]
+        @show_bulletin = true
+      else
+        # Tuesday, October 16, 2018 8:00:00 AM GMT-07:00 DST
+        start_time = DateTime.strptime("1539702000", "%s")
+        # Wednesday, December 5, 2018 11:30:00 AM GMT-08:00
+        end_time = DateTime.strptime("1544038200", "%s")
+        if start_time < Time.now.utc and Time.now.utc < end_time
+          @show_bulletin = true
+        end
+      end
       render 'landing'
     end
   end
@@ -81,6 +91,6 @@ class HomeController < ApplicationController
   end
 
   def landing_params
-    params.permit(:preview)
+    params.permit(:show_bulletin)
   end
 end
