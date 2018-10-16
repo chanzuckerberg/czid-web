@@ -169,6 +169,7 @@ class PipelineSampleReport extends React.Component {
     this.fillUrlParams = this.fillUrlParams.bind(this);
     this.flash = this.flash.bind(this);
     this.getBackgroundIdByName = this.getBackgroundIdByName.bind(this);
+    this.getRowClass = this.getRowClass.bind(this);
     this.gotoAlignmentVizLink = this.gotoAlignmentVizLink.bind(this);
 
     // control handlers
@@ -191,6 +192,8 @@ class PipelineSampleReport extends React.Component {
     this.handleViewClicked = this.handleViewClicked.bind(this);
 
     this.renderMore = this.renderMore.bind(this);
+    this.renderName = this.renderName.bind(this);
+    this.renderNumber = this.renderNumber.bind(this);
     this.resetAllFilters = this.resetAllFilters.bind(this);
     this.setSortParams = this.setSortParams.bind(this);
     this.sortCompareFunction = this.sortCompareFunction.bind(this);
@@ -1003,7 +1006,7 @@ class PipelineSampleReport extends React.Component {
     return category_lowercase;
   }
 
-  render_name(tax_info, report_details, parent, openTaxonModal) {
+  renderName(tax_info, report_details, backgroundData, openTaxonModal) {
     let taxCommonName = tax_info["common_name"];
     const taxonName = getTaxonName(tax_info, this.state.name_type);
 
@@ -1017,7 +1020,7 @@ class PipelineSampleReport extends React.Component {
     const openTaxonModalHandler = () =>
       openTaxonModal({
         taxInfo: tax_info,
-        backgroundData: parent.state.backgroundData,
+        backgroundData,
         taxonName
       });
 
@@ -1079,7 +1082,7 @@ class PipelineSampleReport extends React.Component {
     return taxonDescription;
   }
 
-  render_number(
+  renderNumber(
     ntCount,
     nrCount,
     num_decimals,

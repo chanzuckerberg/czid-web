@@ -145,7 +145,20 @@ export default class ReportTable extends React.Component {
             </tr>
           </thead>
           <tbody>
-            <DetailCells parent={parent} openTaxonModal={this.openTaxonModal} />
+            <DetailCells
+              taxons={parent.state.selected_taxons_top}
+              taxonRowRefs={parent.taxon_row_refs}
+              confirmedTaxIds={parent.props.confirmed_taxids}
+              watchedTaxIds={parent.props.watched_taxids}
+              renderName={parent.renderName}
+              renderNumber={parent.renderNumber}
+              displayHighlightTags={parent.displayHighlightTags}
+              showConcordance={parent.showConcordance}
+              getRowClass={parent.getRowClass}
+              openTaxonModal={this.openTaxonModal}
+              reportDetails={parent.report_details}
+              backgroundData={parent.state.backgroundData}
+            />
           </tbody>
         </table>
       </div>
