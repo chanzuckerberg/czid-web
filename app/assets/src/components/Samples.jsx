@@ -560,12 +560,10 @@ class Samples extends React.Component {
     runtime = Number(runtime);
     const h = Math.floor(runtime / 3600);
     const m = Math.floor((runtime % 3600) / 60);
-    const s = Math.floor((runtime % 3600) % 60);
 
     const hDisplay = h > 0 ? h + (h === 1 ? " hour, " : " hours, ") : "";
-    const mDisplay = m > 0 ? m + (m === 1 ? " minute, " : " minutes, ") : "";
-    const sDisplay = s > 0 ? s + (s === 1 ? " second" : " seconds") : "";
-    return hDisplay + mDisplay + sDisplay;
+    const mDisplay = m > 0 ? m + (m === 1 ? " minute" : " minutes") : "";
+    return hDisplay + mDisplay;
   }
 
   renderPipelineOutput(samples) {
@@ -1543,29 +1541,22 @@ function ColumnEntries({
 
 function SampleNameInfo({ parent, dbSample, uploader }) {
   return (
-    <span
+    <div
       onClick={e => parent.viewSample(dbSample.id, e)}
       className="sample-name-info"
     >
-      <div className="card-label top-label">
-        <span className="upload-date">
-          Uploaded{" "}
-          {moment(dbSample.created_at)
-            .startOf("second")
-            .fromNow()}
-        </span>
-      </div>
       <div className="card-label center-label sample-name bold-label">
         {dbSample.name}
       </div>
       <div className="card-label author bottom-label">
-        {!uploader || uploader === "" ? (
-          ""
-        ) : (
-          <span>Uploaded by: {uploader}</span>
-        )}
+        <span className="upload-date">
+          {moment(dbSample.created_at)
+            .startOf("second")
+            .fromNow()}
+        </span>
+        {!uploader || uploader === "" ? "" : <span>{` | ${uploader}`}</span>}
       </div>
-    </span>
+    </div>
   );
 }
 
@@ -2008,7 +1999,7 @@ function ProjectInfoHeading({
 
   return (
     <div className="row download-section">
-      <div className="col s5 wrapper">
+      <div className="col s5 wrapper proj-title-container">
         <div
           className={
             !proj ? "proj-title heading all-proj" : "heading proj-title"
@@ -2055,7 +2046,7 @@ function TableColumnHeaders({ sort, colMap, filterStatus, state, parent }) {
       <div className="samples-card white">
         <div className="flex-container">
           <ul className="flex-items">
-            <li>
+            <li className="table-header-name">
               <div className="card-label column-title center-label sample-name">
                 <div className="sort-able" onClick={parent.sortSamples}>
                   <span>Name</span>
@@ -2213,7 +2204,7 @@ function SampleDetailedColumns({
           <div className="card-label center center-label data-label bold-label">
             {data_values[column]}
           </div>
-          <div className="card-label center center-label data-label">
+          <div className="card-label center center-label data-label data-label-percent">
             {data_values["nonhost_reads_percent"]}
           </div>
         </li>
