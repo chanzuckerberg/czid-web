@@ -640,6 +640,19 @@ $break-large: 1070px;
           [type="checkbox"].filled-in:disabled:not(:checked) + label:after {
             background-color: #ccc;
           }
+
+          [type="checkbox"] + label {
+            width: 100%;
+
+            .sample-name-info {
+              width: 100%;
+
+              .sample-name {
+                width: 90%;
+                text-overflow: ellipsis;
+              }
+            }
+          }
         }
         .sample-name-info {
           display: inline-block;
@@ -708,7 +721,6 @@ $break-large: 1070px;
               font-size: 14px;
               white-space: nowrap;
               overflow: hidden;
-              margin-right: 20px;
             }
             &.column-title {
               cursor: pointer;

@@ -1541,7 +1541,7 @@ function ColumnEntries({
 
 function SampleNameInfo({ parent, dbSample, uploader }) {
   return (
-    <span
+    <div
       onClick={e => parent.viewSample(dbSample.id, e)}
       className="sample-name-info"
     >
@@ -1556,7 +1556,7 @@ function SampleNameInfo({ parent, dbSample, uploader }) {
         </span>
         {!uploader || uploader === "" ? "" : <span>{` | ${uploader}`}</span>}
       </div>
-    </span>
+    </div>
   );
 }
 
