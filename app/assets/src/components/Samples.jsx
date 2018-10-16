@@ -560,12 +560,10 @@ class Samples extends React.Component {
     runtime = Number(runtime);
     const h = Math.floor(runtime / 3600);
     const m = Math.floor((runtime % 3600) / 60);
-    const s = Math.floor((runtime % 3600) % 60);
 
     const hDisplay = h > 0 ? h + (h === 1 ? " hour, " : " hours, ") : "";
-    const mDisplay = m > 0 ? m + (m === 1 ? " minute, " : " minutes, ") : "";
-    const sDisplay = s > 0 ? s + (s === 1 ? " second" : " seconds") : "";
-    return hDisplay + mDisplay + sDisplay;
+    const mDisplay = m > 0 ? m + (m === 1 ? " minute" : " minutes") : "";
+    return hDisplay + mDisplay;
   }
 
   renderPipelineOutput(samples) {
@@ -1556,11 +1554,7 @@ function SampleNameInfo({ parent, dbSample, uploader }) {
             .startOf("second")
             .fromNow()}
         </span>
-        {!uploader || uploader === "" ? (
-          ""
-        ) : (
-          <span>{` | ${uploader}`}</span>
-        )}
+        {!uploader || uploader === "" ? "" : <span>{` | ${uploader}`}</span>}
       </div>
     </span>
   );
