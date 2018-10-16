@@ -211,7 +211,8 @@ class Landing extends React.Component {
             In collaboration with the Gates Foundation, Chan Zuckerberg
             Initiative and Chan Zuckerberg Biohub have announced a Grand
             Challenges Grant that will use IDseq to build capacity for
-            metagenomic sequencing in labs around the world.
+            metagenomic sequencing in labs around the world. Applications open
+            until December 5, 2018.
           </div>
           <a
             href="https://gcgh.grandchallenges.org/challenge/application-metagenomic-next-generation-sequencing-detect-and-identify-pathogens-round-22"
