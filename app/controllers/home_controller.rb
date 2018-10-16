@@ -19,7 +19,7 @@ class HomeController < ApplicationController
         start_time = DateTime.strptime("1539702000", "%s")
         # Wednesday, December 5, 2018 11:30:00 AM GMT-08:00
         end_time = DateTime.strptime("1544038200", "%s")
-        if start_time < Time.now.utc and Time.now.utc < end_time
+        if start_time < Time.now.utc && Time.now.utc < end_time
           @show_bulletin = true
         end
       end
