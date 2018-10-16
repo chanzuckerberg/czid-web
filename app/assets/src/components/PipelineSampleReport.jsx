@@ -15,6 +15,7 @@ import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDrop
 import BetaLabel from "./ui/labels/BetaLabel";
 import PathogenLabel from "./ui/labels/PathogenLabel";
 import PathogenSummary from "./views/report/PathogenSummary";
+import PathogenCount from "./views/report/PathogenCount";
 import ReportInsightIcon from "./views/report/ReportInsightIcon";
 import ReportTable from "./views/report/ReportTable";
 import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
@@ -277,6 +278,9 @@ class PipelineSampleReport extends React.Component {
           rows_passing_filters: res.data.taxonomy_details[0],
           rows_total: res.data.taxonomy_details[1],
           taxonomy_details: res.data.taxonomy_details[2],
+          generaContainingTags: getGeneraContainingTags(
+            res.data.taxonomy_details[2]
+          ),
           topScoringTaxa: res.data.topScoringTaxa,
           pathogenTagSummary: res.data.pathogenTagSummary,
           backgroundData: {
@@ -1076,8 +1080,10 @@ class PipelineSampleReport extends React.Component {
     }
     let secondaryTaxonDisplay = (
       <span>
-        {generaContainingTags(tax_info.tax_id) && (
-          <PathogenCount number={generaContainingTags(tax_info.tax_id)} />
+        {this.state.generaContainingTags[tax_info.tax_id] && (
+          <PathogenCount
+            tag2count={this.state.generaContainingTags[tax_info.tax_id]}
+          />
         )}
         {tax_info.pathogenTag && <PathogenLabel type={tax_info.pathogenTag} />}
         {this.displayHoverActions(tax_info, report_details)}

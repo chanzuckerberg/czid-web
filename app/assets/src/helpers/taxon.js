@@ -17,7 +17,10 @@ export const getGeneraContainingTags = taxInfoArray => {
   for (let taxInfo of taxInfoArray) {
     if (taxInfo.tax_level == 1 && taxInfo.pathogenTag) {
       generaContainingTags[taxInfo.genus_taxid] =
-        (generaContainingTags[taxInfo.genus_taxid] || 0) + 1;
+        generaContainingTags[taxInfo.genus_taxid] || {};
+      generaContainingTags[taxInfo.genus_taxid][taxInfo.pathogenTag] =
+        (generaContainingTags[taxInfo.genus_taxid][taxInfo.pathogenTag] || 0) +
+        1;
     }
   }
   return generaContainingTags;
