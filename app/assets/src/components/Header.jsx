@@ -105,16 +105,14 @@ class Header extends React.Component {
                       <Dropdown.Item
                         text="Terms of Use"
                         onClick={() =>
-                          this.openNewTab(
-                            "https://s3-us-west-2.amazonaws.com/idseq-database/Terms.pdf"
-                          )
+                          this.openNewTab("https://assets.idseq.net/Terms.pdf")
                         }
                       />
                       <Dropdown.Item
                         text="Privacy Policy"
                         onClick={() =>
                           this.openNewTab(
-                            "https://s3-us-west-2.amazonaws.com/idseq-database/Privacy.pdf"
+                            "https://assets.idseq.net/Privacy.pdf"
                           )
                         }
                       />
