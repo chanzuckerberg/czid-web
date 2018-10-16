@@ -1,0 +1,55 @@
+{
+  "README": [
+    "********************************************************************************",
+    " This file is under version control at idseq-web/config/idseq-bench-config.json ",
+    " It is consumed by pipeline_monitor.rake.                                       ",
+    "                                                                                ",
+    " You can test and deploy changes to it by running                               ",
+    "                                                                                ",
+    "    aws s3 cp idseq-bench-config.json s3://idseq-web/config.json                ",
+    "                                                                                ",
+    " This process allows changing webapp configuration without the cost             ",
+    " and disruption of a production push.                                           ",
+    "                                                                                ",
+    " The recommended process for deploying a new benchmark is as follows:           ",
+    "                                                                                ",
+    "    1. Branch idseq-bench, adjust to taste, commit all changes.                 ",
+    "                                                                                ",
+    "    2. aws s3 cp --recursive <idseq-bench-output> s3://idseq-bench/<number>     ",
+    "                                                                                ",
+    "    3. Deploy s3://idseq-bench/<number> by prepending to active_benchmarks.     ",
+    "                                                                                ",
+    "    4. After a day or two, move any older entries to retired_benchmarks.        ",
+    "                                                                                ",
+    "********************************************************************************"
+  ],
+  "defaults": {
+    "how_to_use_these_defaults":
+      "These properties may be overridden in each entry of active_benchmarks below.",
+    "project_name": "IDSeq Bench",
+    "user_email": "bdimitrov@chanzuckerberg.com",
+    "frequency_hours": 24,
+    "trigger_on_webapp_change": true,
+    "trigger_on_pipeline_change": true,
+    "pipeline_branch": "master",
+    "host": "Human",
+    "comment":
+      "No comment provided for this benchmark in s3://idseq-bench/config.json."
+  },
+  "active_benchmarks": {
+    "s3://idseq-bench/4": {
+      "comment":
+        "Comprehensive general benchmark built with idseq-bench.  Deployed 2018-10-11.",
+      "environments": ["prod", "staging"]
+    }
+  },
+  "retired_benchmarks": {
+    "s3://idseq-bench/3": {
+      "comment":
+        "A tiny pseudo-benchmark meant for exercising the job control logic.  Deployed 2018-10-11",
+      "environments": ["development"],
+      "project_name": "IDSeq Bench Development",
+      "frequency_hours": 1.0
+    }
+  }
+}
