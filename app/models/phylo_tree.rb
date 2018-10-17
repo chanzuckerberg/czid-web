@@ -31,6 +31,11 @@ class PhyloTree < ApplicationRecord
         "s3_path" => "#{versioned_output_s3_path}/ksnp3_outputs/SNPs_all_annotated",
         "required" => false,
         "remote" => true
+      },
+      "multiple_alignment" => {
+        "s3_path" => "#{versioned_output_s3_path}/ksnp3_outputs/SNPs_all_matrix.fasta",
+        "required" => false,
+        "remote" => true
       }
     }
   end
