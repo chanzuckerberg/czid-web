@@ -54,15 +54,9 @@ class ApplicationController < ActionController::Base
   private
 
   def check_browser
-    puts "before: " + request.user_agent
     user_agent = UserAgent.parse(request.user_agent)
-    puts "foobar 12:52pm"
-    puts user_agent
-    puts "browser: " + user_agent.browser
-    puts "version: " + user_agent.version
-    puts "platform: " + user_agent.platform
-    if user_agent.browser != "Internet Explorer"
-      render text: 'Sorry, IDseq does not currently support your browser. We recommend using Google Chrome v50+.'
+    if user_agent.browser == "Internet Explorer"
+      render layout: "unsupported_browser"
     end
   end
 end
