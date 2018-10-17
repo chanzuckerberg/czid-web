@@ -284,7 +284,10 @@ class ProjectSelection extends React.Component {
           <div className="col no-padding s12">
             <div className="projects-wrapper">
               <div
-                className="all-samples project-item"
+                className={
+                  "all-samples project-item " +
+                  (!this.state.selectedProjectId ? "highlight" : "")
+                }
                 onClick={this.handleProjectClick}
               >
                 <span className="project-label">All Samples</span>

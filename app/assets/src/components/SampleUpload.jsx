@@ -580,7 +580,7 @@ class SampleUpload extends React.Component {
             }
           </span>
           <a
-            href="https://s3-us-west-2.amazonaws.com/idseq-database/Terms.pdf"
+            href="https://assets.idseq.net/Terms.pdf"
             target="_blank"
             rel="noopener noreferrer"
             className="terms-link"
@@ -589,7 +589,7 @@ class SampleUpload extends React.Component {
           </a>
           {" and "}
           <a
-            href="https://s3-us-west-2.amazonaws.com/idseq-database/Privacy.pdf"
+            href="https://assets.idseq.net/Privacy.pdf"
             target="_blank"
             rel="noopener noreferrer"
             className="terms-link"
