@@ -15,7 +15,6 @@ import MultipleNestedDropdown from "./ui/controls/dropdowns/MultipleNestedDropdo
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
 import BetaLabel from "./ui/labels/BetaLabel";
 import PathogenLabel from "./ui/labels/PathogenLabel";
-import PathogenSummary from "./views/report/PathogenSummary";
 import ReportInsightIcon from "./views/report/ReportInsightIcon";
 import ReportTable from "./views/report/ReportTable";
 import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
@@ -33,7 +32,6 @@ class PipelineSampleReport extends React.Component {
     this.admin = props.admin;
     this.allowedFeatures = props.allowedFeatures;
     this.allowPhyloTree = props.can_edit;
-    this.allowPathogenSummary = false;
     this.report_ts = props.report_ts;
     this.sample_id = props.sample_id;
     this.projectId = props.projectId;
@@ -116,7 +114,6 @@ class PipelineSampleReport extends React.Component {
     this.state = {
       taxonomy_details: [],
       topScoringTaxa: [],
-      pathogenTagSummary: {},
       backgroundData: {
         id: defaultBackgroundId,
         name: ""
@@ -284,7 +281,6 @@ class PipelineSampleReport extends React.Component {
           rows_total: res.data.taxonomy_details[1],
           taxonomy_details: res.data.taxonomy_details[2],
           topScoringTaxa: res.data.topScoringTaxa,
-          pathogenTagSummary: res.data.pathogenTagSummary,
           backgroundData: {
             id: res.data.background_info.id,
             name: res.data.background_info.name
@@ -1691,12 +1687,6 @@ class RenderMarkup extends React.Component {
           <div className="tab-screen-content">
             <div className="row reports-container">
               <div className="col s12 reports-section">
-                {parent.allowPathogenSummary ? (
-                  <PathogenSummary
-                    topScoringTaxa={parent.state.topScoringTaxa}
-                    pathogenTagSummary={parent.state.pathogenTagSummary}
-                  />
-                ) : null}
                 <div className="reports-count">
                   <div className="report-top-filters">
                     <div className="filter-lists">
