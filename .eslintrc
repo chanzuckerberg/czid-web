@@ -6,15 +6,9 @@
     "es6": true,
     "mocha": true
   },
-  "parserOptions": {
-    "ecmaVersion": 6,
-    "sourceType": "module",
-    "ecmaFeatures": {
-      "jsx": true
-    }
-  },
+  "parser": "babel-eslint",
   "extends": [
-    "standard", 
+    "standard",
     "eslint:recommended",
     "plugin:react/recommended"
   ],
