@@ -7,12 +7,11 @@ class PhyloTreeDownload extends React.Component {
     super(props);
 
     this.tree = props.tree;
-
     this.allOptions = [
       { text: "Multiple alignment", value: "multiple_alignment" },
       { text: "SNP annotations", value: "snp_annotations" }
     ];
-    this.readyOptions = this.allOptions.filter(opt => !!tree[opt.value]);
+    this.readyOptions = this.allOptions.filter(opt => !!this.tree[opt.value]);
     this.download = this.download.bind(this);
   }
 

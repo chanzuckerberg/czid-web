@@ -87,7 +87,7 @@ class PhyloTreeListView extends React.Component {
       <div className="phylo-tree-list-view">
         <div className="phylo-tree-list-view__narrow-container">
           <ViewHeader title="Phylogenetic Trees">
-            <PhyloTreeDownload tree={currentTree} />
+            <PhyloTreeDownload tree={currentTree} key={currentTree.id} />
           </ViewHeader>
         </div>
         <Divider />
