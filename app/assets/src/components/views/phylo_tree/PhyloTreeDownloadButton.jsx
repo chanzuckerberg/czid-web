@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import DownloadButtonDropdown from "../../ui/controls/dropdowns/DownloadButtonDropdown";
 
-class PhyloTreeDownload extends React.Component {
+class PhyloTreeDownloadButton extends React.Component {
   constructor(props) {
     super(props);
 
@@ -33,8 +33,8 @@ class PhyloTreeDownload extends React.Component {
   }
 }
 
-PhyloTreeDownload.propTypes = {
+PhyloTreeDownloadButton.propTypes = {
   tree: PropTypes.object
 };
 
-export default PhyloTreeDownload;
+export default PhyloTreeDownloadButton;

@@ -4,7 +4,7 @@ import Dropdown from "../../ui/controls/dropdowns/Dropdown";
 import FilterRow from "../../layout/FilterRow";
 import QueryString from "query-string";
 import PhyloTreeVis from "./PhyloTreeVis";
-import PhyloTreeDownload from "./PhyloTreeDownload";
+import PhyloTreeDownloadButton from "./PhyloTreeDownloadButton";
 import PropTypes from "prop-types";
 import ViewHeader from "../../layout/ViewHeader";
 
@@ -87,7 +87,7 @@ class PhyloTreeListView extends React.Component {
       <div className="phylo-tree-list-view">
         <div className="phylo-tree-list-view__narrow-container">
           <ViewHeader title="Phylogenetic Trees">
-            <PhyloTreeDownload tree={currentTree} />
+            <PhyloTreeDownloadButton tree={currentTree} />
           </ViewHeader>
         </div>
         <Divider />
