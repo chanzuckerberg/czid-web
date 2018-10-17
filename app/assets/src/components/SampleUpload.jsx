@@ -5,6 +5,7 @@ import $ from "jquery";
 import Tipsy from "react-tipsy";
 import IconComponent from "./IconComponent";
 import ObjectHelper from "../helpers/ObjectHelper";
+import ReactDropzone from "react-dropzone";
 
 class SampleUpload extends React.Component {
   constructor(props, context) {
@@ -31,6 +32,7 @@ class SampleUpload extends React.Component {
     this.sample = props.selectedSample || "";
     this.userDetails = props.loggedin_user;
     this.updateSampleName = this.updateSampleName.bind(this);
+    this.onDrop = this.onDrop.bind(this);
     const selectedHostGenomeName =
       this.hostGenomes[0] && this.hostGenomes[0].name
         ? this.hostGenomes[0].name
@@ -574,6 +576,11 @@ class SampleUpload extends React.Component {
     }
   }
 
+  onDrop(acceptedFiles, rejectedFiles) {
+    console.log("accepted: ", acceptedFiles);
+    console.log("rejected: ", rejectedFiles);
+  }
+
   renderSampleForm(updateExistingSample = false) {
     const termsBlurb = (
       <div className="consent-blurb">
@@ -841,6 +848,11 @@ class SampleUpload extends React.Component {
                     </div>
                   </div>
                 </div>
+
+                <ReactDropzone onDrop={this.onDrop}>
+                  Drop your files here!
+                </ReactDropzone>
+
                 <div className="field">
                   <div className="row">
                     <div className="col no-padding s12">

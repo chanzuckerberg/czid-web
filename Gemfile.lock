@@ -633,6 +633,8 @@ GEM
     docile (1.1.5)
     domain_name (0.5.20170404)
       unf (>= 0.0.5, < 1.0.0)
+    dropzonejs-rails (0.8.2)
+      rails (> 3.1)
     edge_rider (0.3.2)
       activerecord
     erubi (1.7.1)
@@ -903,6 +905,7 @@ DEPENDENCIES
   consul (>= 0.13.1)
   coveralls
   devise (= 4.3.0)
+  dropzonejs-rails
   flamegraph
   health_check (>= 2.7.0)
   honeycomb-rails (= 0.4.1)
