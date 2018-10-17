@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_181_011_230_229) do
+ActiveRecord::Schema.define(version: 20_181_017_164_553) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -168,6 +168,7 @@ ActiveRecord::Schema.define(version: 20_181_011_230_229) do
     t.string "dag_branch"
     t.text "ncbi_metadata"
     t.string "snp_annotations"
+    t.string "multiple_alignment"
     t.index ["name"], name: "index_phylo_trees_on_name", unique: true
     t.index ["project_id", "taxid"], name: "index_phylo_trees_on_project_id_and_taxid"
     t.index ["user_id"], name: "index_phylo_trees_on_user_id"
