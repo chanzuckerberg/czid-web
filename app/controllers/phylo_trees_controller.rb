@@ -123,11 +123,13 @@ class PhyloTreesController < ApplicationController
     output = params[:output]
     local_file = Tempfile.new
     s3_file = @phylo_tree[output]
-    unless s3_file && download_to_filename?(s3_file, local_file.path)
+    if s3_file && download_to_filename?(s3_file, local_file.path)
+      send_file local_file.path, filename: "#{@phylo_tree.name.downcase.gsub(/\W/, '-')}__#{File.basename(s3_file)}"
+    else
       local_file.close
       LogUtil.log_err_and_airbrake("downloading #{s3_file} failed")
+      head :not_found
     end
-    send_file local_file.path, filename: "#{@phylo_tree.name.downcase.gsub(/\W/, '-')}__#{File.basename(s3_file)}"
   end
 
   def create
