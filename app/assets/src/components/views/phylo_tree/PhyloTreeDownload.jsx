@@ -6,24 +6,27 @@ class PhyloTreeDownload extends React.Component {
   constructor(props) {
     super(props);
 
-    this.tree = props.tree;
     this.allOptions = [
       { text: "Multiple alignment", value: "multiple_alignment" },
       { text: "SNP annotations", value: "snp_annotations" }
     ];
-    this.readyOptions = this.allOptions.filter(opt => !!this.tree[opt.value]);
     this.download = this.download.bind(this);
   }
 
   download(option) {
-    location.href = `/phylo_trees/${this.tree.id}/download?output=${option}`;
+    location.href = `/phylo_trees/${
+      this.props.tree.id
+    }/download?output=${option}`;
   }
 
   render() {
+    let readyOptions = this.allOptions.filter(
+      opt => !!this.props.tree[opt.value]
+    );
     return (
       <DownloadButtonDropdown
-        options={this.readyOptions}
-        disabled={this.readyOptions.length === 0}
+        options={readyOptions}
+        disabled={readyOptions.length === 0}
         onClick={this.download}
       />
     );
