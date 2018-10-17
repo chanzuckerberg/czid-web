@@ -12,7 +12,6 @@ class HomeController < ApplicationController
       # Call secure home#index path if authenticated
       redirect_to home_path
     else
-      @show_bulletin = false
       if landing_params[:show_bulletin]
         @show_bulletin = true
       else
